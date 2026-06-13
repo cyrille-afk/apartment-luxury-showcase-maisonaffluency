@@ -568,10 +568,21 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
       return;
     }
 
-    const userItem: TimelineItem = { kind: "msg", role: "user", content: text };
+    // Show the user bubble with text + a compact note for any attached files.
+    // (We don't render image previews in the timeline yet — keep the bubble
+    // simple. The model still receives the full image/PDF payload via
+    // messagesForApi below.)
+    const attachmentSuffix = hasFiles
+      ? `\n\n📎 ${attachments.map((a) => a.name).join(", ")}`
+      : "";
+    const displayText = (text || "(shared a file)") + attachmentSuffix;
+    const userItem: TimelineItem = { kind: "msg", role: "user", content: displayText };
     const nextTimeline = [...timeline, userItem];
     setTimeline(nextTimeline);
     setInput("");
+    // Snapshot + clear attachments now so the input chips disappear immediately.
+    const sendingAttachments = attachments;
+    setAttachments([]);
     setStreaming(true);
 
     // First user turn — fire invisible qualifier + lead capture (non-blocking).
