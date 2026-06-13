@@ -2308,6 +2308,22 @@ serve(async (req) => {
         Array.isArray(m.content) &&
         m.content.some((p: any) => p?.type === "image_url" || p?.type === "file"),
     );
+    const userConversationText = messages
+      .filter((m: any) => m?.role === "user")
+      .map((m: any) => extractText(m.content))
+      .join("\n")
+      .toLowerCase();
+    const stickyFactPatterns = [
+      /\b(dining(?: room)?|dining table|table)\b/,
+      /\b(12\s*(?:pax|people|persons?|seater|seats?)|twelve\s*(?:pax|people|persons?|seater|seats?)|seat(?:ing)?\s*(?:capacity\s*)?(?:for\s*)?(?:12|twelve))\b/,
+      /\b(elegant|refined|not too formal|relaxed|formal|casual|warm|cozy|cosy|earthy|sophisticated|entertain(?:ing)?)\b/,
+      /\b(wood|oak|walnut|timber|finish(?:es)?|marble|brass|bronze|stone)\b/,
+      /\b(london|belgravia|townhouse|house|apartment|villa|penthouse)\b/,
+      /\b(handmade|one[- ]of[- ]a[- ]kind|designer|brand|edition|open(?:ed)? to both|both)\b/,
+    ];
+    const stickyFactCount = stickyFactPatterns.filter((re) => re.test(userConversationText)).length;
+    const shouldActOnAccumulatedBrief = /\b(dining(?: room)?|dining table|table)\b/.test(userConversationText) && stickyFactCount >= 3;
+    const lacksUploadedRoomContext = !hasAttachments && !/\b(room plan|floor plan|layout|pdf|photo|image|drawing|elevation|attached|uploaded|paperclip|\d+(?:\.\d+)?\s*(?:m|metres?|meters?|ft|feet|sqm|sq\.?\s*m|square))\b/.test(userConversationText);
 
     // Ultra-fast deterministic path for one-word location follow-ups like
     // "London". These were going through the full RAG/planner/main-model
