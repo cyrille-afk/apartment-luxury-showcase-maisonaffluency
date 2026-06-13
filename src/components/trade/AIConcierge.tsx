@@ -565,7 +565,23 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
     // the model adapts tone/proposals (high-value city, intent) without
     // re-asking qualifying questions. Stored by concierge-capture above.
     const profileContext: ChatMessage[] = [];
-    if (!isFirstUserTurn) {
+    if (isFirstUserTurn) {
+      // Synchronous client-side qualifier so the FIRST reply already adapts
+      // to high-value signals (e.g. "townhouse in Belgravia") without waiting
+      // for the async concierge-capture round-trip.
+      const quick = quickClientProfile(text);
+      if (quick) {
+        const note = qualifierSystemNote({
+          name: null,
+          city: quick.city,
+          country: quick.country,
+          intent: quick.intent,
+          signals: quick.signals,
+          qualified_score: quick.qualified_score,
+        });
+        if (note) profileContext.push({ role: "user", content: note });
+      }
+    } else {
       try {
         const raw = sessionStorage.getItem("concierge:profile");
         if (raw) {
