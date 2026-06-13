@@ -147,7 +147,21 @@ async function callCloudflare(init: RequestInit, reason: string, primaryCtx: { s
     let charBudget = CF_CHAR_CAP;
     for (let i = nonSystem.length - 1; i >= 0; i--) {
       const m = nonSystem[i];
-      const raw = typeof m.content === "string" ? m.content : JSON.stringify(m.content ?? "");
+      // Llama 3.3 on Workers AI is text-only. Strip image_url / file parts
+      // and concatenate any text blocks — never JSON.stringify the array,
+      // that would dump base64 attachments into the prompt.
+      let raw: string;
+      if (typeof m.content === "string") {
+        raw = m.content;
+      } else if (Array.isArray(m.content)) {
+        const textParts = m.content
+          .filter((p: any) => p && p.type === "text" && typeof p.text === "string")
+          .map((p: any) => p.text);
+        const hadAttachment = m.content.some((p: any) => p && (p.type === "image_url" || p.type === "file"));
+        raw = textParts.join(" ") + (hadAttachment ? " [attachment omitted on text-only fallback]" : "");
+      } else {
+        raw = "";
+      }
       const c = raw.length > 8000 ? raw.slice(-8000) : raw;
       if (c.length > charBudget && kept.length > 0) break;
       kept.unshift({ role: m.role, content: c });
