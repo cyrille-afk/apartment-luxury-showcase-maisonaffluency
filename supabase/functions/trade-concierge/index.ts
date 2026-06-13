@@ -411,7 +411,7 @@ const TOOLS = [
     function: {
       name: "propose_tearsheet",
       description:
-        "Draft a NEW tearsheet (client board) for the trade user. Only call this when the user clearly asks to assemble, save, group, or share a NEW selection. If the user wants to add pieces to one of their existing tearsheets listed in USER'S EXISTING TEARSHEETS, call add_to_tearsheet instead. Always pick IDs strictly from CURATED PIECES — never invent IDs.",
+        "Draft a NEW tearsheet (client board) for the trade user. REQUIRED whenever the user asks to propose, suggest, recommend, curate, show, pull, reinterpret, or assemble a selection of pieces. If the user wants to add pieces to one of their existing tearsheets listed in USER'S EXISTING TEARSHEETS, call add_to_tearsheet instead. Always pick IDs strictly from CURATED PIECES — never invent IDs.",
       parameters: {
         type: "object",
         properties: {
@@ -2261,6 +2261,52 @@ async function hydratePickPreview(
     .filter(Boolean);
 }
 
+async function buildDeterministicTearsheetProposal(
+  supabase: ReturnType<typeof createClient>,
+  ragRows: any[],
+  brief: ExtractedBrief["brief"],
+): Promise<any | null> {
+  const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  const scoreRow = (r: any) => {
+    const hay = `${r?.title || ""} ${r?.category || ""} ${r?.subcategory || ""} ${r?.materials || ""}`.toLowerCase();
+    let score = Number(r?.similarity || 0);
+    if (/\bdining\b/.test(hay)) score += 3;
+    if (/\btable\b/.test(hay)) score += 2;
+    if (/\b(oak|walnut|wood|timber)\b/.test(hay)) score += 1;
+    return score;
+  };
+  const pickIds = Array.from(new Set((ragRows || [])
+    .filter((r: any) => r && typeof r.id === "string" && UUID_RE.test(r.id))
+    .sort((a: any, b: any) => scoreRow(b) - scoreRow(a))
+    .map((r: any) => r.id)
+  )).slice(0, 8);
+  if (pickIds.length < 2) return null;
+  const previewRaw = await hydratePickPreview(supabase, pickIds);
+  const validIds = new Set(previewRaw.map((p: any) => p?.id).filter(Boolean));
+  const finalIds = pickIds.filter((id) => validIds.has(id));
+  if (finalIds.length < 2) return null;
+  const rationaleMap: Record<string, { reason: string }> = {};
+  for (const p of previewRaw) {
+    if (!p?.id || !finalIds.includes(p.id)) continue;
+    const meta = [p.category, p.materials].filter(Boolean).join(" · ");
+    rationaleMap[p.id] = { reason: meta ? `Validated from the Curation for its ${meta}.` : "Validated from the Maison Affluency Curation for this brief." };
+  }
+  const preview = previewRaw
+    .filter((p: any) => finalIds.includes(p?.id))
+    .map((p: any) => ({ ...p, rationale: rationaleMap[p.id]?.reason || null }));
+  return {
+    tool: "propose_tearsheet",
+    tool_call_id: crypto.randomUUID(),
+    args: {
+      title: brief.room ? `${brief.room} first edit` : "Curated first edit",
+      pick_ids: finalIds,
+      note: "Validated directly against the Maison Affluency Curation.",
+      pick_rationales: rationaleMap,
+    },
+    preview,
+  };
+}
+
 /** Build per-line preview rows for a draft_quote / add_to_quote proposal. */
 async function hydrateQuotePreview(
   supabase: ReturnType<typeof createClient>,
@@ -2675,6 +2721,20 @@ serve(async (req) => {
     const toolChoice: any = forcePlannedTearsheet
       ? { type: "function", function: { name: "propose_tearsheet" } }
       : ((isExplicitQuoteIntent || stageForcesQuote) ? "required" : "auto");
+
+    if (forcePlannedTearsheet) {
+      const deterministicProposal = await buildDeterministicTearsheetProposal(
+        supabase,
+        Array.isArray((ragResult as any)?.rows) ? (ragResult as any).rows : [],
+        effectiveBrief.brief,
+      );
+      if (deterministicProposal) {
+        return sseProposalThenTextResponse(
+          deterministicProposal,
+          "Here's a first edit — would you like me to refine this selection against your client's intentions?",
+        );
+      }
+    }
 
     // Model router: Flash by default, Pro for complex multi-constraint briefs.
     const chosenModel = pickModel(lastUserMsg, includePieces);
@@ -3547,6 +3607,61 @@ serve(async (req) => {
           console.log(`[concierge backfill] synthesized propose_tearsheet (${pickIds.length} picks) from draft_quote`);
         };
 
+        const emitDeterministicTearsheetFallback = async (): Promise<boolean> => {
+          if (!forcePlannedTearsheet || stageForcesQuote) return false;
+          const hasTearsheet = Array.from(toolCallBuffers.values()).some((b) =>
+            b.name === "propose_tearsheet" || b.name === "add_to_tearsheet"
+          );
+          if (hasTearsheet) return false;
+          const rows = Array.isArray((ragResult as any)?.rows) ? (ragResult as any).rows : [];
+          const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+          const scoreRow = (r: any) => {
+            const hay = `${r?.title || ""} ${r?.category || ""} ${r?.subcategory || ""} ${r?.materials || ""}`.toLowerCase();
+            let score = Number(r?.similarity || 0);
+            if (/\bdining\b/.test(hay)) score += 3;
+            if (/\btable\b/.test(hay)) score += 2;
+            if (/\b(oak|walnut|wood|timber)\b/.test(hay)) score += 1;
+            return score;
+          };
+          const pickIds = Array.from(new Set(rows
+            .filter((r: any) => r && typeof r.id === "string" && UUID_RE.test(r.id))
+            .sort((a: any, b: any) => scoreRow(b) - scoreRow(a))
+            .map((r: any) => r.id)
+          )).slice(0, 8);
+          if (pickIds.length < 2) return false;
+          const previewRaw = await hydratePickPreview(supabase, pickIds);
+          const validIds = new Set(previewRaw.map((p: any) => p?.id).filter(Boolean));
+          const finalIds = pickIds.filter((id) => validIds.has(id));
+          if (finalIds.length < 2) return false;
+          const rationaleMap: Record<string, { reason: string }> = {};
+          for (const p of previewRaw) {
+            if (!p?.id || !finalIds.includes(p.id)) continue;
+            const meta = [p.category, p.materials].filter(Boolean).join(" · ");
+            rationaleMap[p.id] = { reason: meta ? `Validated from the Curation for its ${meta}.` : "Validated from the Maison Affluency Curation for this brief." };
+          }
+          const preview = previewRaw
+            .filter((p: any) => finalIds.includes(p?.id))
+            .map((p: any) => ({ ...p, rationale: rationaleMap[p.id]?.reason || null }));
+          const proposal = {
+            tool: "propose_tearsheet",
+            tool_call_id: crypto.randomUUID(),
+            args: {
+              title: effectiveBrief.brief.room ? `${effectiveBrief.brief.room} first edit` : "Curated first edit",
+              pick_ids: finalIds,
+              note: "Validated directly against the Maison Affluency Curation.",
+              pick_rationales: rationaleMap,
+            },
+            preview,
+          };
+          const maxIdx = Array.from(toolCallBuffers.keys()).reduce((m, i) => (i > m ? i : m), -1);
+          toolCallBuffers.set(maxIdx + 1, { id: proposal.tool_call_id, name: "propose_tearsheet", argsText: JSON.stringify(proposal.args) });
+          controller.enqueue(encoder.encode(`event: proposal\ndata: ${JSON.stringify(proposal)}\n\n`));
+          const closing = "Here's a first edit — would you like me to refine this selection against your client's intentions?";
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ choices: [{ delta: { content: closing } }] })}\n\n`));
+          console.log(`[concierge deterministic-fallback] emitted propose_tearsheet (${finalIds.length} picks)`);
+          return true;
+        };
+
         // ----- Inner orchestration loop (Step 4) -----
         // After the main stream finishes, if the upstream planner asked for a
         // chained `propose_tearsheet → draft_quote` but the model only emitted
@@ -3760,6 +3875,7 @@ serve(async (req) => {
         };
 
         let sawDone = false;
+        const shouldSuppressSelectionProse = forcePlannedTearsheet;
         // Some fallback models (notably Cloudflare Llama) do NOT emit native
         // `tool_calls`; they stringify the JSON envelope into `delta.content`.
         // If the very first content chunk looks like a tool-call envelope, we
@@ -3830,12 +3946,16 @@ serve(async (req) => {
                 }
                 // Inspect plain-text content for stringified tool-call envelopes
                 const contentDelta = typeof delta?.content === "string" ? delta.content : null;
-                if (contentDelta !== null) {
+                  if (contentDelta !== null) {
                   if (!suspectedToolCallText && suppressedTextBuf === "" && !forwardedAnyText) {
                     if (looksLikeToolEnvelopeStart(contentDelta) || looksLikeOpeningBrace(contentDelta)) {
                       suspectedToolCallText = true;
                     }
                   }
+                    if (shouldSuppressSelectionProse) {
+                      assistantTextBuf += contentDelta;
+                      continue; // selection turns must render validated cards, not prose product names
+                    }
                   if (suspectedToolCallText) {
                     suppressedTextBuf += contentDelta;
                     continue; // do not forward
@@ -3895,6 +4015,7 @@ serve(async (req) => {
           //     (tearsheet → quote) holds without buffering SSE writes.
           backfillTearsheetIfNeeded();
           await flushProposal();
+          await emitDeterministicTearsheetFallback();
           // (1b) Promise-without-delivery recovery: the model wrote prose like
           //      "here's a draft tearsheet…" but never emitted propose_tearsheet
           //      (and no quote/ffe either). Force a follow-up tool call so the
