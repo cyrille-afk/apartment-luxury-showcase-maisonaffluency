@@ -57,7 +57,7 @@ Deno.serve(async (req) => {
         .eq('id', board_id)
         .single()
 
-      if (!board || board.user_id !== user.id) {
+      if (!board || board.user_id !== user!.id) {
         return new Response(JSON.stringify({ error: 'Board not found' }), {
           status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         })
