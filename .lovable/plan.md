@@ -1,74 +1,111 @@
-# Elite Concierge: Greeting + Invisible Qualifier + Lead Capture
+# Worldwide Trade Billing — Dual-Mode Checkout
 
-## 1. New greeting (public + trade)
+Add one switch at the quote/order level — **billing mode** — without touching the MSRP table or the 3-tier discount ladder.
 
-Replace the current "Allow me to help you discover…" opener with the elite intake script, adapted per surface:
+## Model
 
-**Public (`/concierge` — new AI chat surface, see §2):**
-> "Welcome to the Gallery. I am your private concierge. I can instantly source exceptional artisan objects, calculate global white-glove shipping, and unlock private pricing. May I have your name and city?"
+| Mode | Default region | Buyer (card on file) | Charged amount | Ship to | Invoice shown | Designer compensation |
+|---|---|---|---|---|---|---|
+| `agent_commission` | EU, UK, Switzerland, MENA, APAC | End-client | **100% MSRP** + local tax + white-glove | End-client home | Maison Affluency, MSRP-visible | Tier % wired post-delivery |
+| `net_buy` | US, Canada, Mexico | Designer firm | **MSRP − tier discount** + freight only | Receiving warehouse | White-label, MSRP stripped | Margin kept at sale |
 
-**Trade (`AIConcierge.tsx`, Discover intent only):**
-> "Welcome back{, [first name]}. Your private concierge — I can source exceptional pieces, calculate global white-glove shipping, and apply your trade pricing in real time. To tailor results, what city is this project in?"
+Tier ladder unchanged (8% baseline → higher tiers). In `agent_commission` it becomes the **payout %**; in `net_buy` it becomes the **net discount**. Same number, different placement.
 
-Other intents (mood / tearsheet / quote / order / project) keep their existing greetings — they already have context, no intake needed.
+## Data changes
 
-## 2. Public concierge becomes a real AI chat
+New columns on `trade_quotes` (and mirrored on the resulting order):
 
-Today `/concierge` is just a prefilled contact form. Replace the body with the AI chat (reusing `AIConcierge.tsx` under the hood, public mode flag) so the elite greeting + qualifier actually run. The existing contact form stays as a fallback link ("Prefer email? Send a written brief →").
+- `billing_mode` enum: `agent_commission` | `net_buy` (NOT NULL, default by country)
+- `payer_type` enum: `end_client` | `designer_firm`
+- `payout_pct` numeric (mirrors tier % when agent mode, 0 in net mode)
+- `ship_to_kind` enum: `end_client` | `receiving_warehouse`
+- `end_client_billing` JSONB (name, email, billing address — only when agent mode)
+- `designer_payout_account_id` FK → new `studio_payout_accounts` table (IBAN/routing, encrypted at rest, US W-9 / EU VAT)
+- `resale_certificate_url` (gates `net_buy` for US studios — required by state)
 
-## 3. Invisible qualifier (intent tagging)
+New table `studio_payout_accounts` (one per studio, RLS scoped to studio members).
 
-After the user's first reply, a lightweight server-side extraction call (Lovable AI Gateway, `google/gemini-3-flash-preview`, JSON output) parses:
-- `name` (string, optional)
-- `city` (string, optional)
-- `country` (string, optional, inferred from city)
-- `intent` (one of: `sourcing`, `bespoke`, `project_ffe`, `general`)
-- `signals` (array: `high_value_location`, `named_designer`, `room_type:<x>`, `budget_hint`)
-- `qualified_score` (0–100, heuristic)
+No change to `trade_products`, `trade_product_pricing`, or `trade_tier_config`.
 
-High-value locations (hardcoded list: London Mayfair/Belgravia/Knightsbridge/Kensington/Chelsea, NYC UES/UWS/Tribeca/SoHo, Paris 7e/8e/16e, Monaco, Singapore Districts 9/10/11, Hong Kong Peak/Mid-Levels, Dubai Palm/Emirates Hills, LA Bel Air/Beverly Hills, Miami, Aspen) auto-flag `high_value_location`.
+## Default-by-country logic
 
-Result is stored in the session and injected as a system note for subsequent turns so the model can adapt tone/proposals without the user seeing the qualifier.
+Reuse the same country hook that drives default trade currency (memory: *Default Trade Currency by Country*).
 
-## 4. Lead capture (DB)
+```text
+US, CA, MX            → net_buy
+GB, EU27, CH, NO      → agent_commission
+AE, SA, QA, KW, BH    → agent_commission
+SG, HK, JP, AU, TH, ID, MY, VN, CN → agent_commission
+fallback              → agent_commission (safer: no resale-cert dependency)
+```
 
-New table `public.concierge_leads`:
-- `id`, `created_at`, `updated_at`
-- `surface` ('public' | 'trade')
-- `user_id` (nullable — anon public visitors have none)
-- `session_id` (text, client-generated UUID stored in sessionStorage)
-- `name`, `city`, `country` (text)
-- `first_message` (text)
-- `intent`, `signals` (jsonb), `qualified_score` (int)
-- `path` (text — where they started)
-- `user_agent`, `referrer`
-- RLS: anon INSERT allowed; SELECT admin-only
+Designer can flip the toggle on any individual quote.
 
-Inserted by a new edge function `concierge-lead-capture` (service role, validates payload, dedupes by session_id within 24h).
+## Checkout UI (new on `TradeQuoteCheckout`)
 
-## 5. Email notification to gallery inbox
+```text
+┌─ Verified Trade Checkout ────────────────────────────┐
+│                                                      │
+│  ◉ Bill my client / receive agent commission         │
+│      (Pays 100% MSRP. You receive 8% wired.)        │
+│      [End-client name] [Email] [Billing address]    │
+│                                                      │
+│  ○ Buy net at the trade price                        │
+│      (Pays 92% MSRP. You invoice the client.)       │
+│      [Receiving warehouse address]                   │
+│      [Resale certificate (US only) — Required]      │
+│                                                      │
+│  Payment: [Stripe card field]                        │
+└──────────────────────────────────────────────────────┘
+```
 
-Same edge function: after insert, if `qualified_score >= 60` or `high_value_location` is set, send a branded HTML email (Resend, existing infra) to the gallery inbox with name, city, intent, signals, first message, and a deep link to the lead row in admin.
+The radio defaults from country but the designer can switch with no friction. Switching recomputes the cart total live.
 
-## 6. Admin view
+## Invoice / PDF variants
 
-Minimal admin page `/trade/admin/concierge-leads` (admin role gate) listing leads with filters by surface / qualified_score / city. Reuses existing admin table styling.
+Two templates, picked from `billing_mode`:
 
-## Technical notes
+1. **Agent invoice** (`agent_commission`) — issued to end-client, Maison Affluency branding, full MSRP, line-item taxes. Designer receives a separate **Commission Statement** PDF showing units, MSRP, % and net wire.
+2. **Net invoice** (`net_buy`) — issued to designer firm, **white-label** (reuses existing white-label PDF rule from memory), MSRP stripped, only net + freight shown. No mention of Maison Affluency margin.
 
-- **Files touched**:
-  - `src/components/trade/conciergeGreeting.ts` — new opener strings for `discover` intent across all four tones; add `publicDiscover` variant.
-  - `src/components/trade/AIConcierge.tsx` — accept `surface: 'public' | 'trade'` prop; on first user message, fire qualifier + lead-capture; render greeting accordingly.
-  - `src/pages/ConciergePage.tsx` — replace ContactInquiry with `<AIConcierge surface="public" />` (keep contact form behind a collapsed "Prefer email?" link).
-  - New: `supabase/functions/concierge-lead-capture/index.ts`
-  - New: `supabase/functions/concierge-qualify/index.ts` (Gemini Flash JSON extract)
-  - New migration: `concierge_leads` table + RLS + grants
-  - New: `src/pages/TradeAdminConciergeLeads.tsx` + route
-- **No changes** to trade-concierge streaming endpoint, RAG, or tearsheet logic.
-- **Memory**: add `mem://features/elite-concierge-intake` documenting greeting script + qualifier rules.
+## Payments
 
-## Risk
+Two Stripe paths inside `create-payment`:
 
-- AIConcierge is 1,204 lines and central to trade UX. I will only add a `surface` prop + first-message hook, not refactor.
-- Qualifier call adds ~300ms to first turn; fired async, non-blocking on the streaming reply.
-- Public AI chat is anon — credits could be abused. Add per-session-id rate limit (10 messages / hour) in the streaming endpoint when `surface=public`.
+- `agent_commission` → Checkout session billed to end-client email, success triggers a queued **payout** record. Payouts settle on `order.delivered`. Phase 1 = manual wires from an admin queue; Phase 2 = Stripe Connect destination charges to `studio_payout_accounts`.
+- `net_buy` → Checkout session billed to designer email, no payout side-effect.
+
+Tax: `automatic_tax: { enabled: true }` in both modes (US state tax is the reason this exists, and EU VAT still needs calculation on agent mode).
+
+## Edge cases to lock down
+
+- **Tier doesn't double-apply.** In agent mode the discount is paid out, not deducted — pricing engine must read `billing_mode` before applying the discount.
+- **Mixed cart on one quote** isn't supported in v1 — billing mode is quote-level. If a designer wants both, they split into two quotes.
+- **US resale cert gating** — `net_buy` is hidden until the studio uploads a valid certificate; surfaces a clear "Upload resale certificate to unlock net pricing" CTA.
+- **Refunds** in agent mode must claw back the queued payout if it hasn't settled.
+- **FX** unchanged — manual price overrides still bypass FX (per existing memory).
+
+## Phasing
+
+**Phase 1 (ship first):**
+- Schema + RLS for new columns and `studio_payout_accounts`
+- Default-by-country toggle in checkout UI
+- Two invoice templates
+- Stripe Checkout split + manual payout admin queue
+- Resale-cert upload + gating
+
+**Phase 2:**
+- Stripe Connect onboarding for automated wires
+- W-9 / VAT capture flow
+- Commission statement emails
+
+## Out of scope
+- Multi-currency wires (Phase 2)
+- 1099/T5 tax reporting (Phase 2)
+- Subscription/retainer billing
+- Physical inventory / shipping management (still per quote, not stocked)
+
+## Open questions before build
+1. Stripe Connect now or manual wires for launch? (affects timeline by ~2 weeks)
+2. Confirm the tier ladder values to use as the payout % per tier (8% baseline today — same for net discount?)
+3. For US `net_buy`, do we require resale cert per state or accept a single multi-state cert (MTC/SST)?
