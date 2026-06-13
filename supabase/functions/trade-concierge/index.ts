@@ -3320,12 +3320,17 @@ serve(async (req) => {
         // structured tool call at stream end.
         let suspectedToolCallText = false;
         let suppressedTextBuf = "";
+        let forwardedAnyText = false;
         const looksLikeToolEnvelopeStart = (s: string) => {
           const t = s.trimStart();
           if (!t.startsWith("{")) return false;
           // Common Llama patterns we've observed
           return /^\{\s*"(type|name|function|parameters|arguments|tool|tool_call)"\s*:/.test(t);
         };
+        // First-chunk heuristic: if the assistant's very first content delta
+        // begins with `{`, treat it as a suspected stringified tool envelope
+        // even before we can see the key. Real prose almost never opens with `{`.
+        const looksLikeOpeningBrace = (s: string) => s.trimStart().startsWith("{");
         try {
           while (true) {
             const { done, value } = await reader.read();
