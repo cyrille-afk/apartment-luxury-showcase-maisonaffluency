@@ -877,7 +877,7 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
           {modalMode && (
             <div
               className={cn(
-                "fixed inset-0 z-[99] bg-foreground/40 backdrop-blur-sm print:hidden transition-[opacity,backdrop-filter] duration-300 ease-out",
+                "fixed inset-0 z-[9998] bg-foreground/40 backdrop-blur-sm print:hidden transition-[opacity,backdrop-filter] duration-300 ease-out",
                 welcomeClosing ? "animate-fade-out opacity-0 backdrop-blur-0" : "animate-fade-in"
               )}
               aria-hidden="true"
@@ -894,7 +894,7 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
                 : { width: PANEL_W }
           }
           className={cn(
-            "fixed z-[100] max-w-[calc(100vw-2rem)] flex flex-col rounded-2xl border shadow-2xl print:hidden overflow-hidden",
+            "fixed z-[10000] max-w-[calc(100vw-2rem)] flex flex-col rounded-2xl border shadow-2xl print:hidden overflow-hidden",
             modalMode
               ? cn(
                   "left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-cream border-jade/40 ring-1 ring-jade/30 shadow-[0_30px_80px_-20px_hsl(var(--foreground)/0.5)]",
@@ -950,7 +950,7 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
                   <div
                     role="dialog"
                     onPointerDown={(e) => e.stopPropagation()}
-                    className="absolute right-0 top-full mt-1 z-[110] w-64 rounded-lg border border-border bg-popover shadow-xl overflow-hidden p-3"
+                    className="absolute right-0 top-full mt-1 z-[10010] w-64 rounded-lg border border-border bg-popover shadow-xl overflow-hidden p-3"
                   >
                     <div className="font-display text-[10px] uppercase tracking-widest text-muted-foreground mb-2">
                       {copy.nameDialogTitle}
@@ -1027,7 +1027,7 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
                   <div
                     role="menu"
                     onPointerDown={(e) => e.stopPropagation()}
-                    className="absolute right-0 top-full mt-1 z-[110] w-60 rounded-lg border border-border bg-popover shadow-xl overflow-hidden"
+                    className="absolute right-0 top-full mt-1 z-[10010] w-60 rounded-lg border border-border bg-popover shadow-xl overflow-hidden"
                   >
                     <div className="px-3 py-2 border-b border-border/60 font-display text-[10px] uppercase tracking-widest text-muted-foreground">
                       {copy.tone}
@@ -1076,7 +1076,7 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
                   <div
                     role="menu"
                     onPointerDown={(e) => e.stopPropagation()}
-                    className="absolute right-0 top-full mt-1 z-[110] w-52 rounded-lg border border-border bg-popover shadow-xl overflow-hidden"
+                    className="absolute right-0 top-full mt-1 z-[10010] w-52 rounded-lg border border-border bg-popover shadow-xl overflow-hidden"
                   >
                     <div className="px-3 py-2 border-b border-border/60 font-display text-[10px] uppercase tracking-widest text-muted-foreground">
                       {copy.language}
