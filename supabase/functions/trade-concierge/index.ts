@@ -3539,9 +3539,9 @@ serve(async (req) => {
                 model: aiModel(modelFor("balanced")),
                 max_completion_tokens: CHAT_MAX_TOKENS,
                 messages: [
-                  { role: "system", content: systemPrompt },
+                  { role: "system", content: languageDirective + systemPrompt },
                   ...trimmedMessages,
-                  { role: "system", content: nudge },
+                  { role: "system", content: languageDirective + nudge },
                 ],
                 tools: TOOLS.filter((t: any) => t.function?.name === "propose_tearsheet"),
                 tool_choice: { type: "function", function: { name: "propose_tearsheet" } },
