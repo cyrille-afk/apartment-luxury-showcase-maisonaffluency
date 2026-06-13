@@ -70,7 +70,9 @@ interface Pin {
 
 // ───────── Page ──────────────────────────────────────────────────────────────
 const TradeVisualiser = () => {
-  const [photo, setPhoto] = useState<string | null>(null);
+  const [photo, setPhoto] = useState<string | null>(null); // original (object URL or data URL)
+  const [photoDataUrl, setPhotoDataUrl] = useState<string | null>(null); // base64 for API
+  const [renderedImage, setRenderedImage] = useState<string | null>(null);
   const [surface, setSurface] = useState<Surface>("walls");
   const [pins, setPins] = useState<Pin[]>([]);
   const [activePinId, setActivePinId] = useState<string | null>(null);
@@ -79,6 +81,7 @@ const TradeVisualiser = () => {
   const [loadingSwatches, setLoadingSwatches] = useState(false);
   const [rendering, setRendering] = useState(false);
   const [rendered, setRendered] = useState(false);
+  const [renderError, setRenderError] = useState<string | null>(null);
 
   const imgRef = useRef<HTMLDivElement | null>(null);
   const fileRef = useRef<HTMLInputElement | null>(null);
@@ -125,6 +128,12 @@ const TradeVisualiser = () => {
     setPins([]);
     setActivePinId(null);
     setRendered(false);
+    setRenderedImage(null);
+    setRenderError(null);
+    // also read as base64 for the API
+    const reader = new FileReader();
+    reader.onload = () => setPhotoDataUrl(typeof reader.result === "string" ? reader.result : null);
+    reader.readAsDataURL(f);
   };
 
   const onDrop = (e: React.DragEvent) => {
@@ -147,12 +156,14 @@ const TradeVisualiser = () => {
     setPins((p) => [...p, newPin]);
     setActivePinId(newPin.id);
     setRendered(false);
+    setRenderedImage(null);
   };
 
   const removePin = (id: string) => {
     setPins((p) => p.filter((x) => x.id !== id));
     if (activePinId === id) setActivePinId(null);
     setRendered(false);
+    setRenderedImage(null);
   };
 
   // ─── Apply a swatch to the active pin ────────────────────────────────────
@@ -160,18 +171,41 @@ const TradeVisualiser = () => {
     if (!activePinId) return;
     setPins((p) => p.map((pin) => (pin.id === activePinId ? { ...pin, swatch: sw } : pin)));
     setRendered(false);
+    setRenderedImage(null);
   }, [activePinId]);
 
-  // ─── Render (mocked) ─────────────────────────────────────────────────────
+  // ─── Render (live AI) ────────────────────────────────────────────────────
   const canRender = pins.some((p) => p.swatch);
-  const onRender = () => {
-    if (!canRender) return;
+  const onRender = async () => {
+    if (!canRender || !photoDataUrl) return;
     setRendering(true);
     setRendered(false);
-    setTimeout(() => {
-      setRendering(false);
+    setRenderError(null);
+    setRenderedImage(null);
+    try {
+      const payloadPins = pins
+        .filter((p) => p.swatch)
+        .map((p) => ({
+          surface: p.surface,
+          x: p.x,
+          y: p.y,
+          swatchUrl: p.swatch!.image_url,
+          swatchName: p.swatch!.product_name,
+          brandName: p.swatch!.brand_name,
+        }));
+      const { data, error } = await supabase.functions.invoke("visualiser-render", {
+        body: { roomImage: photoDataUrl, pins: payloadPins },
+      });
+      if (error) throw error;
+      if (!data?.image) throw new Error("No image returned");
+      setRenderedImage(data.image);
       setRendered(true);
-    }, 1600);
+    } catch (e: any) {
+      console.error(e);
+      setRenderError(e?.message || "Render failed");
+    } finally {
+      setRendering(false);
+    }
   };
 
   return (
@@ -262,9 +296,13 @@ const TradeVisualiser = () => {
                 className="relative w-full rounded-xl overflow-hidden border border-border bg-muted cursor-crosshair select-none"
                 style={{ aspectRatio: "16/10" }}
               >
-                <img src={photo} alt="Room" className="absolute inset-0 w-full h-full object-cover" />
+                <img
+                  src={rendered && renderedImage ? renderedImage : photo}
+                  alt="Room"
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
 
-                {/* Rendering overlay (mocked) */}
+                {/* Rendering overlay */}
                 {rendering && (
                   <div className="absolute inset-0 bg-foreground/40 backdrop-blur-sm flex items-center justify-center z-30">
                     <div className="bg-background/95 rounded-lg px-5 py-3 flex items-center gap-3 shadow-lg">
@@ -275,9 +313,9 @@ const TradeVisualiser = () => {
                 )}
 
                 {/* Rendered "after" badge */}
-                {rendered && !rendering && (
+                {rendered && renderedImage && !rendering && (
                   <div className="absolute top-3 left-3 z-20 bg-background/95 px-3 py-1.5 rounded-md text-[10px] uppercase tracking-[0.18em] font-body shadow">
-                    Rendered preview
+                    AI render · after
                   </div>
                 )}
 
@@ -353,9 +391,34 @@ const TradeVisualiser = () => {
                 </Button>
               </div>
 
+              {renderError && (
+                <p className="mt-3 font-body text-xs text-destructive">
+                  {renderError}
+                </p>
+              )}
+
+              {rendered && renderedImage && !rendering && (
+                <div className="mt-3 flex items-center gap-3">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => { setRendered(false); setRenderedImage(null); }}
+                  >
+                    Show original
+                  </Button>
+                  <a
+                    href={renderedImage}
+                    download="visualiser-render.png"
+                    className="text-xs font-body underline text-muted-foreground hover:text-foreground"
+                  >
+                    Download render
+                  </a>
+                </div>
+              )}
+
               <p className="mt-3 font-body text-[11px] text-muted-foreground italic">
-                Beta preview — the AI render engine ships next. Today, this builds the surface selection and
-                finish library; render output is a mocked overlay.
+                Beta — AI render powered by Lovable AI. The model preserves room geometry and swaps only the
+                marked surfaces with the selected catalogue finishes.
               </p>
             </div>
 
