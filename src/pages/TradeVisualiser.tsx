@@ -106,10 +106,8 @@ const TradeVisualiser = () => {
     const q = search.trim().toLowerCase();
     return allSwatches
       .filter((s) => {
-        const hay = `${s.product_name} ${s.subcategory || ""} ${s.materials || ""} ${s.category || ""}`;
-        const matchesSurface = sdef.keywords.test(hay) ||
-          (s.category && sdef.categories.includes(s.category) && sdef.keywords.test(hay));
-        if (!matchesSurface) return false;
+        const subcat = s.subcategory || "";
+        if (!sdef.subcatRe.test(subcat)) return false;
         if (!q) return true;
         return `${s.product_name} ${s.brand_name || ""}`.toLowerCase().includes(q);
       })
