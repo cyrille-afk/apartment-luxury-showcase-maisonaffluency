@@ -421,6 +421,7 @@ const App = () => {
                     <Route path="quotes/:quoteId" element={<TradeQuotes />} />
                     <Route path="documents" element={<TradeDocuments />} />
                     <Route path="showroom" element={<TradeShowroom />} />
+                    <Route path="visualiser" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeVisualiser /></Suspense>} />
                     <Route path="samples" element={<TradeSamples />} />
                     <Route path="journal" element={<TradeJournal />} />
                     <Route path="provenance" element={<TradeProvenance />} />
