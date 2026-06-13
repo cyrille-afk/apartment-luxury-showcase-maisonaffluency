@@ -299,7 +299,10 @@ async function callCloudflare(init: RequestInit, reason: string, primaryCtx: { s
  * fallback when the primary is rate-limited or out of quota.
  */
 async function chatFetch(init: RequestInit): Promise<Response> {
-  const backendName = USE_GEMINI_DIRECT ? "gemini" : "lovable-gateway";
+  const backend = selectChatBackend(init);
+  const backendName = backend === "gemini" ? "gemini" : "lovable-gateway";
+  const backendInit = initForChatBackend(init, backend);
+  const backendUrl = chatBackendUrl(backend);
 
   // 1) Circuit breaker short-circuit: route directly to Cloudflare when open
   const gate = breakerAllowsPrimary();
@@ -320,7 +323,7 @@ async function chatFetch(init: RequestInit): Promise<Response> {
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
-      primary = await fetch(CHAT_COMPLETIONS_URL, init);
+      primary = await fetch(backendUrl, backendInit);
     } catch (err) {
       lastError = err;
       console.error(
