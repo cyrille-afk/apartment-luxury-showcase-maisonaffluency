@@ -139,7 +139,7 @@ async function callCloudflare(init: RequestInit, reason: string, primaryCtx: { s
     const slimSystem = {
       role: "system",
       content:
-        "You are Felix, the Maison Affluency concierge fallback. The catalogue tools are temporarily unavailable. Reply briefly and warmly — acknowledge the user's last message specifically, then ask one or two refining questions (room, atmosphere, palette, budget, seating capacity) so we can curate properly next turn. Never invent product names, designers, or ids; never output JSON or tool envelopes.",
+        "You are Felix, the Maison Affluency concierge fallback. The catalogue tools are temporarily unavailable. Reply briefly and warmly, acknowledging the user's last message specifically. Never re-ask atmosphere, palette, material, room type, or seating capacity if already stated in the conversation. If spatial context is missing, invite the user to attach a room plan, photo, or PDF via the paperclip and send it here. Never invent product names, designers, or ids; never output JSON or tool envelopes.",
     };
     const original = Array.isArray(parsed.messages) ? parsed.messages : [];
     const nonSystem = original.filter((m: any) => m && m.role !== "system");
@@ -191,7 +191,11 @@ async function callCloudflare(init: RequestInit, reason: string, primaryCtx: { s
   console.warn(
     `[concierge] CLOUDFLARE_FALLBACK_RESULT status=${cfRes.status} ok=${cfRes.ok} requestId=${extractRequestId(cfRes)}`
   );
-  return cfRes;
+  return new Response(cfRes.body, {
+    status: cfRes.status,
+    statusText: cfRes.statusText,
+    headers: { ...Object.fromEntries(cfRes.headers.entries()), "x-concierge-fallback": "cloudflare" },
+  });
 }
 
 /**
@@ -763,9 +767,11 @@ Before composing any reply, re-read the ENTIRE conversation above and build a me
 
 NEVER ask about a sticky fact that has already been answered, even partially or implicitly. "Warm palette, wood, London townhouse, 12-seater" = atmosphere AND palette AND material AND capacity AND location ARE ALL ANSWERED. Asking "what atmosphere?" or "what seating capacity?" again is forbidden and breaks trust.
 
-When you have at least THREE sticky facts (typical minimum: room + capacity-or-scale + style-or-material), STOP qualifying and ACT — call \`propose_tearsheet\` with 4–8 catalog pieces that fit the brief. Do not ask a fourth question to delay acting; propose first, refine after. If a critical fact is genuinely missing, ask for AT MOST ONE thing, never a checklist, and only if it cannot be inferred.
+When you have at least THREE sticky facts (typical minimum: room + capacity-or-scale + style-or-material), STOP qualifying and ACT — call \`propose_tearsheet\` with 4–8 catalog pieces that fit the brief. Do not ask a fourth question to delay acting; propose first, refine after. If the only missing context is room dimensions, layout, or existing architecture, do NOT ask another prose checklist — say briefly that the first edit is ready, then invite the user to attach a room plan, reference photo, or PDF with the paperclip and send it here so you can refine the fit.
 
 When you do ask a question, you MUST first mirror back, in the user's own terms, the sticky facts they already stated, then ask ONLY for the genuinely-missing delta. The mirror is not optional — it proves you listened. Use the pattern: "You mentioned [paraphrase of what they said] — you didn't yet specify [the one missing nuance]?" Never ask a fresh open-ended question that ignores prior answers. Example: user said "12 pax, elegant but not too formal, earthy tones" → forbidden: "what atmosphere do you envision?"; correct: "You mentioned an elegant-but-relaxed dining for 12 in earthy tones — you didn't say whether it's primarily for entertaining or also for everyday family meals, which would steer the scale and durability."
+
+UPLOAD PROMPT RULE: Felix can receive images and PDFs in this chat. Whenever room size, layout, plan, elevation, or existing architecture would help, naturally offer: "If you have a room plan, reference photo, or PDF, attach it with the paperclip and send it here." Surface this in prose only; do not imply a separate upload workflow.
 
 ## USER SIGNALS (predictive personalization)
 Use these signals to anticipate the user's needs. Open with a relevant suggestion when natural ("Want me to add the new Pouénat sconce to your *Mayfair townhouse* board?"), bias your recommendations toward designers, materials and categories they have engaged with, and reference their active projects/tearsheets by name. NEVER expose raw IDs or internal data — only weave the insights into natural prose.
@@ -1933,6 +1939,19 @@ function sseTextResponse(text: string): Response {
   return new Response(stream, { headers: { ...corsHeaders, "Content-Type": "text/event-stream" } });
 }
 
+function sseProposalThenTextResponse(proposal: unknown, text: string): Response {
+  const encoder = new TextEncoder();
+  const stream = new ReadableStream({
+    start(controller) {
+      controller.enqueue(encoder.encode(`event: proposal\ndata: ${JSON.stringify(proposal)}\n\n`));
+      controller.enqueue(encoder.encode(`data: ${JSON.stringify({ choices: [{ delta: { content: text } }] })}\n\n`));
+      controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+      controller.close();
+    },
+  });
+  return new Response(stream, { headers: { ...corsHeaders, "Content-Type": "text/event-stream" } });
+}
+
 function titleTokens(value: string | null | undefined): string[] {
   return normalizeLoose(value).split(/\s+/).filter((t) => t.length > 2 && !GENERIC_PRODUCT_TOKENS.has(t));
 }
@@ -2306,6 +2325,22 @@ serve(async (req) => {
         Array.isArray(m.content) &&
         m.content.some((p: any) => p?.type === "image_url" || p?.type === "file"),
     );
+    const userConversationText = messages
+      .filter((m: any) => m?.role === "user")
+      .map((m: any) => extractText(m.content))
+      .join("\n")
+      .toLowerCase();
+    const stickyFactPatterns = [
+      /\b(dining(?: room)?|dining table|table)\b/,
+      /\b(12\s*(?:pax|people|persons?|seater|seats?)|twelve\s*(?:pax|people|persons?|seater|seats?)|seat(?:ing)?\s*(?:capacity\s*)?(?:for\s*)?(?:12|twelve))\b/,
+      /\b(elegant|refined|not too formal|relaxed|formal|casual|warm|cozy|cosy|earthy|sophisticated|entertain(?:ing)?)\b/,
+      /\b(wood|oak|walnut|timber|finish(?:es)?|marble|brass|bronze|stone)\b/,
+      /\b(london|belgravia|townhouse|house|apartment|villa|penthouse)\b/,
+      /\b(handmade|one[- ]of[- ]a[- ]kind|designer|brand|edition|open(?:ed)? to both|both)\b/,
+    ];
+    const stickyFactCount = stickyFactPatterns.filter((re) => re.test(userConversationText)).length;
+    const shouldActOnAccumulatedBrief = /\b(dining(?: room)?|dining table|table)\b/.test(userConversationText) && stickyFactCount >= 3;
+    const lacksUploadedRoomContext = !hasAttachments && !/\b(room plan|floor plan|layout|pdf|photo|image|drawing|elevation|attached|uploaded|paperclip|\d+(?:\.\d+)?\s*(?:m|metres?|meters?|ft|feet|sqm|sq\.?\s*m|square))\b/.test(userConversationText);
 
     // Ultra-fast deterministic path for one-word location follow-ups like
     // "London". These were going through the full RAG/planner/main-model
@@ -2370,14 +2405,36 @@ serve(async (req) => {
       loadProductCadAssets(supabase),
     ]);
 
+    const effectiveBrief: ExtractedBrief = shouldActOnAccumulatedBrief && !extractedBrief.plan.length
+      ? {
+          intent: "selection",
+          brief: {
+            ...extractedBrief.brief,
+            summary: extractedBrief.brief.summary || "Curate a dining table edit from the accumulated brief.",
+            room: extractedBrief.brief.room || "dining room",
+            style: extractedBrief.brief.style || (/(elegant|refined|not too formal|relaxed|warm|earthy|sophisticated)/.exec(userConversationText)?.[0] ?? null),
+            materials: extractedBrief.brief.materials.length ? extractedBrief.brief.materials : ["wood"].filter(() => /\b(wood|oak|walnut|timber)\b/.test(userConversationText)),
+            categories: extractedBrief.brief.categories.length ? extractedBrief.brief.categories : ["dining table"],
+            qty_hint: extractedBrief.brief.qty_hint || (/\b(12|twelve)\b/.test(userConversationText) ? 12 : null),
+          },
+          plan: ["propose_tearsheet"],
+        }
+      : extractedBrief;
+
+    if (shouldActOnAccumulatedBrief && breaker.state() === "open" && CLOUDFLARE_ENABLED) {
+      return sseTextResponse(
+        "You’ve already given me the essentials: a 12-seat dining table for a refined, elegant-but-not-too-formal Belgravia townhouse, with warm wood tones in oak or walnut. I’ll draft the first edit as soon as the catalogue tool is available; meanwhile, if you have a room plan, reference photo, or PDF, attach it with the paperclip and send it here so I can refine scale and placement.",
+      );
+    }
+
     // Fire-and-forget: learn from this turn's extracted brief so the next turn recalls it.
-    persistInferredMemory(supabase, userId, extractedBrief?.brief).catch(() => {});
+    persistInferredMemory(supabase, userId, effectiveBrief?.brief).catch(() => {});
     // Compose the signals block: live engagement signals first, then the persistent
     // studio memory layer so the model sees recurring defaults right next to current activity.
     const userSignalsBlock = userMemory ? `${userSignals}\n\n${userMemory}` : userSignals;
 
     // Decide final catalog mode: classifier wins, heuristic is the fallback. RAG replaces full load when it returned anything.
-    const includePieces = sentiment.needs_catalog || heuristicNeedsPieces;
+    const includePieces = sentiment.needs_catalog || heuristicNeedsPieces || effectiveBrief.plan.includes("propose_tearsheet");
     const useRag = includePieces && !!ragResult;
     const { designersList, piecesList: fullPiecesList, showroomBrands } = await loadCatalogContext(supabase, includePieces && !useRag);
     const piecesList = useRag ? (ragResult as { contextText: string }).contextText : fullPiecesList;
@@ -2405,16 +2462,18 @@ serve(async (req) => {
       }
     } catch { /* keep default */ }
     const sentimentDirective = buildSentimentDirective(sentiment);
-    const planDirective = buildPlanDirective(extractedBrief);
+    const planDirective = buildPlanDirective(effectiveBrief) + (lacksUploadedRoomContext && shouldActOnAccumulatedBrief
+      ? "\n\nAfter the tearsheet card, add one short sentence inviting the user to attach a room plan, reference photo, or PDF with the paperclip and send it here so Felix can refine dimensions and placement."
+      : "");
     const systemPrompt = buildSystemPrompt(
       designersList, piecesList, showroomBrands, userBoards, userSignalsBlock, sentimentDirective, projectContext, openQuotes, planDirective, cadDocuments, productCadAssets,
     );
     // The planner's intent + plan supersede the legacy regex when present. If the planner
     // flagged a quote-only turn, restrict the toolset to quote tools. If it flagged a
     // chained selection_and_quote, expose all tools so the model can emit both calls.
-    const plannerQuoteOnly = extractedBrief.intent === "quote" && extractedBrief.plan.every((t) => t === "draft_quote" || t === "add_to_quote");
+    const plannerQuoteOnly = effectiveBrief.intent === "quote" && effectiveBrief.plan.every((t) => t === "draft_quote" || t === "add_to_quote");
     const isExplicitQuoteIntent = plannerQuoteOnly
-      || (extractedBrief.plan.length === 0
+      || (effectiveBrief.plan.length === 0
         && /\b(quote|estimate|pricing|price breakdown|draft a quote|put together a quote|add .* to .*quote)\b/i.test(lastUserMsg));
 
     // ----- Stage-based tool gating -----
@@ -2458,7 +2517,10 @@ serve(async (req) => {
     // If the gate emptied the toolset (shouldn't happen in practice), fall back to all
     // tools rather than sending an empty `tools: []` array to the upstream gateway.
     const finalTools = availableTools.length > 0 ? availableTools : TOOLS;
-    const forceToolCall = isExplicitQuoteIntent || stageForcesQuote;
+    const forcePlannedTearsheet = effectiveBrief.plan.includes("propose_tearsheet") && !stageForcesQuote && !isExplicitQuoteIntent;
+    const toolChoice: any = forcePlannedTearsheet
+      ? { type: "function", function: { name: "propose_tearsheet" } }
+      : ((isExplicitQuoteIntent || stageForcesQuote) ? "required" : "auto");
 
     // Model router: Flash by default, Pro for complex multi-constraint briefs.
     const chosenModel = pickModel(lastUserMsg, includePieces);
@@ -2473,7 +2535,7 @@ serve(async (req) => {
         model: aiModel(chosenModel),
         messages: [{ role: "system", content: systemPrompt }, ...trimmedMessages],
         tools: finalTools,
-        tool_choice: forceToolCall ? "required" : "auto",
+        tool_choice: toolChoice,
         max_completion_tokens: chosenModel === modelFor("strong") ? CHAT_MAX_TOKENS_STRONG : CHAT_MAX_TOKENS,
         stream: true,
         stream_options: { include_usage: true },
@@ -2518,6 +2580,29 @@ serve(async (req) => {
 
     const stream = new ReadableStream({
       async start(controller) {
+        let streamClosed = false;
+        const rawEnqueue = controller.enqueue.bind(controller);
+        const rawClose = controller.close.bind(controller);
+        (controller as any).enqueue = (chunk: Uint8Array) => {
+          if (streamClosed) return;
+          try {
+            rawEnqueue(chunk);
+          } catch (e) {
+            streamClosed = true;
+            console.warn("[concierge] client stream closed before enqueue:", e instanceof Error ? e.message : e);
+          }
+        };
+        (controller as any).close = () => {
+          if (streamClosed) return;
+          try {
+            rawClose();
+          } catch (e) {
+            console.warn("[concierge] client stream already closed:", e instanceof Error ? e.message : e);
+          } finally {
+            streamClosed = true;
+          }
+        };
+
         // Emit escalation event up-front when the classifier flagged it.
         if (sentiment.escalate) {
           const payload = {
@@ -3267,8 +3352,8 @@ serve(async (req) => {
           // Stage gate: never synthesize a tearsheet when the user is on the Quote stage.
           if (stageForcesQuote) return;
           const wantsTearsheet =
-            extractedBrief.plan.includes("propose_tearsheet") ||
-            extractedBrief.plan.includes("add_to_tearsheet");
+            effectiveBrief.plan.includes("propose_tearsheet") ||
+            effectiveBrief.plan.includes("add_to_tearsheet");
           if (!wantsTearsheet) return;
           const buffers = Array.from(toolCallBuffers.entries());
           const hasTearsheet = buffers.some(([, b]) => b.name === "propose_tearsheet" || b.name === "add_to_tearsheet");
@@ -3286,8 +3371,8 @@ serve(async (req) => {
           if (pickIds.length === 0) return;
 
           // Derive a tearsheet title from the planner brief; fallback to a generic label.
-          const room = extractedBrief.brief.room;
-          const style = extractedBrief.brief.style;
+          const room = effectiveBrief.brief.room;
+          const style = effectiveBrief.brief.style;
           const titleBits = [style, room].filter((s) => typeof s === "string" && s.trim().length > 0);
           const title = titleBits.length
             ? `${titleBits.join(" ")} — selected pieces`
@@ -3315,8 +3400,8 @@ serve(async (req) => {
         // `draft_quote` using the SAME pick_ids. Emits a second `event: proposal`
         // so the client renders one combined plan (tearsheet card + quote card).
         const runChainIfNeeded = async () => {
-          if (!extractedBrief.plan.includes("draft_quote")) return;
-          if (!extractedBrief.plan.includes("propose_tearsheet") && !extractedBrief.plan.includes("add_to_tearsheet")) return;
+          if (!effectiveBrief.plan.includes("draft_quote")) return;
+          if (!effectiveBrief.plan.includes("propose_tearsheet") && !effectiveBrief.plan.includes("add_to_tearsheet")) return;
           const hasQuote = Array.from(toolCallBuffers.values()).some((tc) => tc.name === "draft_quote" || tc.name === "add_to_quote");
           if (hasQuote) return;
           let tearsheetPickIds: string[] | null = null;
@@ -3333,8 +3418,8 @@ serve(async (req) => {
           }
           if (!tearsheetPickIds || tearsheetPickIds.length === 0) return;
 
-          const qtyHint = extractedBrief.brief.qty_hint || 1;
-          const leadCeiling = extractedBrief.brief.lead_weeks_max || null;
+          const qtyHint = effectiveBrief.brief.qty_hint || 1;
+          const leadCeiling = effectiveBrief.brief.lead_weeks_max || null;
           const followupSystem = [
             "You are the Maison Affluency Trade Concierge follow-up step.",
             `The user's tearsheet pick_ids are: ${tearsheetPickIds.join(", ")}.`,
@@ -3422,8 +3507,8 @@ serve(async (req) => {
           );
           if (hasAnyDeliverable) return;
           const promisedByPlan =
-            extractedBrief.plan.includes("propose_tearsheet") ||
-            extractedBrief.plan.includes("add_to_tearsheet");
+            effectiveBrief.plan.includes("propose_tearsheet") ||
+            effectiveBrief.plan.includes("add_to_tearsheet");
           const promisedByText = TEARSHEET_PROMISE_RE.test(assistantTextBuf || "");
           if (!promisedByPlan && !promisedByText) return;
 
