@@ -2073,6 +2073,30 @@ function buildNoStrictTypologyReply(typology: RequestedTypology): string {
   return `You're right — I won't present adjacent pieces as a ${label}. I don't have enough true ${label}s matching this brief in the Maison Affluency Curation to draft a credible edit; would you like me to expand the search through the designers' own collections using our Axonometric Studio archives and tools?`;
 }
 
+async function fetchStrictTypologyCandidates(
+  supabase: ReturnType<typeof createClient>,
+  typology: RequestedTypology,
+): Promise<any[]> {
+  const term = typology === "dining_table" ? "dining" : "table";
+  const [pickRes, tradeRes] = await Promise.all([
+    supabase
+      .from("designer_curator_picks")
+      .select("id, title, materials, category, subcategory")
+      .or(`title.ilike.%${term}%,subcategory.ilike.%${term}%,category.ilike.%${term}%`)
+      .limit(160),
+    supabase
+      .from("trade_products")
+      .select("id, product_name, materials, category, subcategory")
+      .eq("is_active", true)
+      .or(`product_name.ilike.%${term}%,subcategory.ilike.%${term}%,category.ilike.%${term}%`)
+      .limit(160),
+  ]);
+  return [
+    ...(pickRes.data || []),
+    ...(tradeRes.data || []).map((r: any) => ({ ...r, title: r.product_name })),
+  ].filter((r: any) => rowMatchesRequestedTypology(r, typology));
+}
+
 const LOCATION_ONLY_FOLLOWUPS = new Set([
   "london", "new york", "los angeles", "miami", "paris", "milan", "rome", "geneva", "zurich",
   "monaco", "dubai", "abu dhabi", "doha", "riyadh", "jeddah", "hong kong", "singapore",
