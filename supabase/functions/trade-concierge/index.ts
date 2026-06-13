@@ -3383,13 +3383,16 @@ serve(async (req) => {
                 // Inspect plain-text content for stringified tool-call envelopes
                 const contentDelta = typeof delta?.content === "string" ? delta.content : null;
                 if (contentDelta !== null) {
-                  if (!suspectedToolCallText && suppressedTextBuf === "" && looksLikeToolEnvelopeStart(contentDelta)) {
-                    suspectedToolCallText = true;
+                  if (!suspectedToolCallText && suppressedTextBuf === "" && !forwardedAnyText) {
+                    if (looksLikeToolEnvelopeStart(contentDelta) || looksLikeOpeningBrace(contentDelta)) {
+                      suspectedToolCallText = true;
+                    }
                   }
                   if (suspectedToolCallText) {
                     suppressedTextBuf += contentDelta;
                     continue; // do not forward
                   }
+                  if (contentDelta.trim().length > 0) forwardedAnyText = true;
                 }
                 // Plain text delta — forward unchanged
                 controller.enqueue(encoder.encode(line + "\n"));
