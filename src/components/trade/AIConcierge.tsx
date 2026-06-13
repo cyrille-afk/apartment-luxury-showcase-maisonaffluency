@@ -1369,7 +1369,56 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
           </div>
 
           <div className="border-t border-border p-3">
+            {attachments.length > 0 && (
+              <div className="flex flex-wrap gap-2 mb-2">
+                {attachments.map((a) => (
+                  <div
+                    key={a.id}
+                    className="flex items-center gap-2 rounded-lg border border-border bg-muted/40 pl-1.5 pr-1 py-1 text-xs"
+                  >
+                    {a.kind === "image" && a.previewUrl ? (
+                      <img
+                        src={a.previewUrl}
+                        alt={a.name}
+                        className="h-7 w-7 rounded object-cover"
+                      />
+                    ) : (
+                      <div className="h-7 w-7 rounded bg-foreground/10 grid place-items-center">
+                        <FileText className="h-3.5 w-3.5 text-muted-foreground" />
+                      </div>
+                    )}
+                    <span className="font-body max-w-[140px] truncate text-foreground">{a.name}</span>
+                    <button
+                      type="button"
+                      onClick={() => removeAttachment(a.id)}
+                      className="rounded p-0.5 text-muted-foreground hover:text-foreground hover:bg-foreground/10"
+                      aria-label={`Remove ${a.name}`}
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
             <div className="flex items-end gap-2">
+              <input
+                ref={fileInputRef}
+                type="file"
+                multiple
+                accept="image/*,application/pdf,.pdf"
+                className="hidden"
+                onChange={(e) => handleFilesPicked(e.target.files)}
+              />
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={streaming || attachments.length >= MAX_ATTACHMENTS}
+                className="shrink-0 rounded-xl border border-border bg-muted/40 p-2 text-muted-foreground hover:text-foreground hover:bg-muted disabled:opacity-40 transition-colors"
+                aria-label="Attach room plan, image or PDF"
+                title="Attach a room plan, photo or PDF"
+              >
+                <Paperclip className="h-4 w-4" />
+              </button>
               <textarea
                 ref={inputRef}
                 value={input}
@@ -1382,7 +1431,7 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
               />
               <button
                 onClick={() => send()}
-                disabled={!input.trim() || streaming}
+                disabled={(!input.trim() && attachments.length === 0) || streaming}
                 className="shrink-0 rounded-xl bg-foreground text-background p-2 disabled:opacity-40 hover:opacity-90 transition-opacity"
                 aria-label="Send"
               >
