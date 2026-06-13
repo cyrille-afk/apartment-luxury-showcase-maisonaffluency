@@ -411,7 +411,7 @@ const TOOLS = [
     function: {
       name: "propose_tearsheet",
       description:
-        "Draft a NEW tearsheet (client board) for the trade user. Only call this when the user clearly asks to assemble, save, group, or share a NEW selection. If the user wants to add pieces to one of their existing tearsheets listed in USER'S EXISTING TEARSHEETS, call add_to_tearsheet instead. Always pick IDs strictly from CATALOG PIECES — never invent IDs.",
+        "Draft a NEW tearsheet (client board) for the trade user. Only call this when the user clearly asks to assemble, save, group, or share a NEW selection. If the user wants to add pieces to one of their existing tearsheets listed in USER'S EXISTING TEARSHEETS, call add_to_tearsheet instead. Always pick IDs strictly from CURATED PIECES — never invent IDs.",
       parameters: {
         type: "object",
         properties: {
@@ -421,7 +421,7 @@ const TOOLS = [
           },
           pick_ids: {
             type: "array",
-            description: "UUIDs of curator picks to include. Must come from CATALOG PIECES.",
+            description: "UUIDs of curator picks to include. Must come from CURATED PIECES.",
             items: { type: "string" },
             minItems: 1,
             maxItems: 24,
@@ -470,7 +470,7 @@ const TOOLS = [
           },
           pick_ids: {
             type: "array",
-            description: "UUIDs of curator picks to append. Must come from CATALOG PIECES.",
+            description: "UUIDs of curator picks to append. Must come from CURATED PIECES.",
             items: { type: "string" },
             minItems: 1,
             maxItems: 24,
@@ -509,7 +509,7 @@ const TOOLS = [
     function: {
       name: "draft_quote",
       description:
-        "Draft a NEW trade quote for the user with line items (qty, optional variant, optional lead time, optional per-line note). Only call when the user explicitly asks for a quote, estimate, pricing breakdown, or to 'put together a quote'. pick_ids in lines MUST come from CATALOG PIECES. Always bind to the ACTIVE PROJECT id when one is shown in the system prompt.",
+        "Draft a NEW trade quote for the user with line items (qty, optional variant, optional lead time, optional per-line note). Only call when the user explicitly asks for a quote, estimate, pricing breakdown, or to 'put together a quote'. pick_ids in lines MUST come from CURATED PIECES. Always bind to the ACTIVE PROJECT id when one is shown in the system prompt.",
       parameters: {
         type: "object",
         properties: {
@@ -523,7 +523,7 @@ const TOOLS = [
             items: {
               type: "object",
               properties: {
-                pick_id: { type: "string", description: "UUID from CATALOG PIECES." },
+                pick_id: { type: "string", description: "UUID from CURATED PIECES." },
                 qty: { type: "integer", minimum: 1, maximum: 99 },
                 variant: { type: "string", description: "Variant/finish label when the piece has size_variants." },
                 lead_weeks: { type: "integer", minimum: 1, maximum: 104 },
@@ -579,7 +579,7 @@ const TOOLS = [
     function: {
       name: "propose_ffe_rows",
       description:
-        "Draft a ROOM-BY-ROOM FF&E schedule bound to the ACTIVE PROJECT. Every row MUST carry a `room` label (e.g. 'Drawing Room', 'Primary Bedroom'). project_id is REQUIRED — if no active project is set, do NOT call this tool; ask the user which project to bind to first. pick_ids in rows MUST come from CATALOG PIECES. On approval the rows commit as room-tagged lines on a draft quote and populate the project's FF&E Schedule view.",
+        "Draft a ROOM-BY-ROOM FF&E schedule bound to the ACTIVE PROJECT. Every row MUST carry a `room` label (e.g. 'Drawing Room', 'Primary Bedroom'). project_id is REQUIRED — if no active project is set, do NOT call this tool; ask the user which project to bind to first. pick_ids in rows MUST come from CURATED PIECES. On approval the rows commit as room-tagged lines on a draft quote and populate the project's FF&E Schedule view.",
       parameters: {
         type: "object",
         properties: {
@@ -593,7 +593,7 @@ const TOOLS = [
             items: {
               type: "object",
               properties: {
-                pick_id: { type: "string", description: "UUID from CATALOG PIECES." },
+                pick_id: { type: "string", description: "UUID from CURATED PIECES." },
                 room: { type: "string", description: "Room label this row belongs to (e.g. 'Drawing Room', 'Dining Room', 'Primary Bedroom'). REQUIRED." },
                 qty: { type: "integer", minimum: 1, maximum: 99 },
                 variant: { type: "string", description: "Variant/finish label when the piece has size_variants." },
@@ -874,7 +874,7 @@ NO-NAMEDROPPING-IN-DISCOVERY RULE: While still qualifying (asking sticky-fact qu
 
 REFERENCE-PHOTO RULE (user uploads a photo of a specific piece, e.g. a table, sofa, chair, lamp, rug, etc.):
 1. First, describe in one short sentence what you see (typology, silhouette, material, era/style cue — e.g. "a classical mahogany twin-pedestal oval dining table, Art Deco lineage").
-2. Then scan the CATALOG PIECES below for the closest spiritual matches on typology + material + proportion + era. If you find 2+ plausible matches, call \`propose_tearsheet\` with those pieces and explain in one line WHY each was chosen against the reference (material echo, silhouette, scale).
+2. Then scan the CURATED PIECES below for the closest spiritual matches on typology + material + proportion + era. If you find 2+ plausible matches, call \`propose_tearsheet\` with those pieces and explain in one line WHY each was chosen against the reference (material echo, silhouette, scale).
 3. If the Maison Affluency Curation has nothing close, apologise briefly and sincerely ("I don't have a true twin to this piece in our current curated selection") and offer the client TWO explicit choices, as a question:
    (a) "Would you like me to expand my search through the designers' own collections — I can use our Axonometric Studio archives and tools to look for a closer match," OR
    (b) "or shall I propose a more contemporary reinterpretation from the Maison Affluency Curation? — and I'll explain why each piece honours the spirit of your reference (silhouette, materiality, or proportion)."
@@ -919,7 +919,7 @@ ANTI-RAMBLE RULE: Do NOT close with a fresh open-ended question ("could you tell
 Single-piece answers (the user asked about ONE specific piece) may stay as text. Anything that resembles a curated selection, a mood, a room, a project brief, "show me…", "what do you have in…", "suggest…", "pull together…" → call \`propose_tearsheet\` immediately.
 
 Rules for both tools:
-- pick_ids MUST be the exact UUIDs shown in square brackets next to each pick in CATALOG PIECES. Never invent IDs.
+- pick_ids MUST be the exact UUIDs shown in square brackets next to each pick in CURATED PIECES. Never invent IDs.
 - For \`add_to_tearsheet\`, board_id MUST be a UUID from USER'S EXISTING TEARSHEETS — never invent.
 - Aim for 4–12 pieces per proposal — enough to feel like a curated edit, not a single suggestion.
 - ALWAYS populate \`pick_rationales\` with a short one-sentence \`reason\` for every NEW pick (any id not in the previous KEPT list). When the pick is a REPLACEMENT for a removed item, you MUST also include a longer \`detail\` field — 2–4 editorial sentences expanding on the reason: how the piece converses with the rest of the selection (material, scale, silhouette, palette, designer language) and what it adds vs the item it replaces. Reasons must be specific — never generic ("a great fit").
@@ -947,7 +947,7 @@ Whenever the user asks whether a specific piece fits in a room, has enough clear
 CONVERSATIONAL SELECTION — the user can pick the room and product entirely in chat:
 1. If the user has more than one uploaded plan (see USER'S CAD PLANS), ask which plan; otherwise default to the only one.
 2. List the detected rooms of that plan (label + footprint in m) and ask which room to test. If they name a room ("the living room", "dining"), match it case-insensitively to a \`room_label\` from the plan.
-3. Ask which piece to check, or use the piece the user is currently discussing. If they describe it by name/designer rather than ID, resolve it against CATALOG PIECES below.
+3. Ask which piece to check, or use the piece the user is currently discussing. If they describe it by name/designer rather than ID, resolve it against CURATED PIECES below.
 4. Product CAD asset: after resolving \`product_id\`, inspect USER'S PRODUCT-ATTACHED CAD ASSETS. If that product has one or more assets, choose the matching variant when possible and include \`cad_asset_id\` in \`check_spatial_fit\`; prefer OBJ when multiple formats exist because it parses today. If the product only has DWG/FBX/SKP, still pass the \`cad_asset_id\`; the checker will record that the asset is attached but unsupported and fall back to declared dimensions until the converter ships. If the product has no attached CAD asset, say so explicitly before confirming and proceed only with declared dimensions.
 5. CONFIRMATION STEP (MANDATORY) — once you have a resolved plan + room + piece + product CAD asset status, do NOT call the tool yet. Reply with a single short confirmation message in this exact format, then stop and wait for the user:
 
@@ -968,11 +968,11 @@ CONVERSATIONAL SELECTION — the user can pick the room and product entirely in 
 6. EDIT HANDLING — when the user replies with any edit phrase (or just names a different room/piece/plan), do NOT run the tool. Apply the change, then VALIDATE each updated field before re-posting:
    - **cad_document_id** — MUST match a \`[cad_document_id: ...]\` in USER'S CAD PLANS. If the user names a plan that isn't there, reply: "I can't find a plan called '{X}'. Your uploaded plans are: {list of file_name + id}. Which one should I use?" and stop — do NOT post a new confirmation until they pick a valid one. ALSO: if the matched plan is tagged ⚠️ NOT READY (no rooms detected), refuse and reply: "'{file_name}' isn't parsed yet — no rooms detected. Pick a plan with detected rooms, or open /trade/spatial-fit to re-parse." Log this as \`failed_validation: "room_not_detected"\`, \`reason: "plan {id} parsed but contains no rooms"\`.
    - **room_label** — MUST case-insensitively match a room label of the currently selected plan. If not, reply: "'{X}' isn't a detected room on '{plan file_name}'. Detected rooms: {comma-separated labels with m footprints}. Which one?" and stop.
-   - **product_id** — MUST resolve to a UUID present in CATALOG PIECES (by id, or by name/designer match). If ambiguous (multiple matches), list the top 3 candidates with their ids and ask which; if zero matches, say so and ask for a different name. Do NOT post a new confirmation until exactly one piece is resolved. Then resolve the attached product CAD asset from USER'S PRODUCT-ATTACHED CAD ASSETS; if none exists and dimensions are missing, warn: "{title} has no attached CAD asset and no published dimensions — the fit-check will return 'unknown'. Want to pick a different piece, or run it anyway?" Only proceed if they confirm.
+   - **product_id** — MUST resolve to a UUID present in CURATED PIECES (by id, or by name/designer match). If ambiguous (multiple matches), list the top 3 candidates with their ids and ask which; if zero matches, say so and ask for a different name. Do NOT post a new confirmation until exactly one piece is resolved. Then resolve the attached product CAD asset from USER'S PRODUCT-ATTACHED CAD ASSETS; if none exists and dimensions are missing, warn: "{title} has no attached CAD asset and no published dimensions — the fit-check will return 'unknown'. Want to pick a different piece, or run it anyway?" Only proceed if they confirm.
    - **clearance_mm** — MUST be a positive integer between 0 and 3000 MILLIMETRES. Accept and convert common units: "50cm"/"50 cm" → 500, "0.6m"/"0.6 m" → 600, "2in"/"2 in"/"2\"" → 51 (round to nearest mm). Strip whitespace and unit suffix before validating. If unparseable, out of range, or zero/negative, ask for a value in mm and stop with \`failed_validation: "clearance_unparseable"\` or \`"clearance_out_of_range"\` as appropriate.
 
    Only once every changed field passes validation, re-post a fresh confirmation block with ALL fields (plan, room, piece, product CAD asset, clearance) updated. Repeat until the user replies "go"/"yes"/"run it"/"confirm". When the plan changes, also re-validate the previously selected room against the NEW plan's rooms — if it no longer matches, ask the user to pick a room from the new plan before re-posting.
-7. Only after an affirmative reply, call \`check_spatial_fit\` with the exact IDs from the most recent confirmation, including \`cad_asset_id\` when an attached product CAD asset exists. Re-validate the IDs against USER'S CAD PLANS, USER'S PRODUCT-ATTACHED CAD ASSETS and CATALOG PIECES one last time before the call; if anything no longer resolves, post a corrected confirmation instead of calling the tool. Never call the tool on the same turn as a confirmation or edit.
+7. Only after an affirmative reply, call \`check_spatial_fit\` with the exact IDs from the most recent confirmation, including \`cad_asset_id\` when an attached product CAD asset exists. Re-validate the IDs against USER'S CAD PLANS, USER'S PRODUCT-ATTACHED CAD ASSETS and CURATED PIECES one last time before the call; if anything no longer resolves, post a corrected confirmation instead of calling the tool. Never call the tool on the same turn as a confirmation or edit.
 
 7a. CANCEL / ABORT — if the user types "cancel", "stop", "never mind", "drop it", "forget it", or otherwise abandons the pending check, do NOT call \`check_spatial_fit\`. Reply with a single short line: "Cancelled — let me know when you'd like to try again." Then call \`log_spatial_fit_edit\` with \`field: "cancel"\`, \`outcome: "accepted"\`, \`requested_value\` = exactly what they typed, plus the pending plan/room/piece/clearance you were about to run. Do not re-post the confirmation block.
 
@@ -999,7 +999,7 @@ CONVERSATIONAL SELECTION — the user can pick the room and product entirely in 
 
 Required arguments:
 - \`cad_document_id\` — UUID of an UPLOADED floor plan from the USER'S CAD PLANS list below. If the user has none, do NOT call the tool — tell them to upload a DXF (or DWG/FBX/SKP) at /trade/spatial-fit first.
-- \`product_id\` — UUID of the trade product. Use the IDs from CATALOG PIECES or the piece the user is currently viewing. Never invent.
+- \`product_id\` — UUID of the trade product. Use the IDs from CURATED PIECES or the piece the user is currently viewing. Never invent.
 - \`cad_asset_id\` — UUID of the selected attached product CAD/3D asset from USER'S PRODUCT-ATTACHED CAD ASSETS. Pass it whenever available; do not ask the user to upload the product model as a floor plan.
 - \`room_label\` — optional; pass the room name the user picked (e.g. "LIVING", "DINING") so the checker uses the right space. Omit to default to the largest detected room.
 - \`clearance_mm\` — optional override; default 600mm. Tighten only when the user explicitly asks (e.g. "ignore clearance").
@@ -3666,7 +3666,7 @@ serve(async (req) => {
           try {
             const nudge = [
               "You just told the user you would draft a tearsheet, but you did NOT call the propose_tearsheet tool.",
-              "Call `propose_tearsheet` NOW with 4-8 pick_ids drawn ONLY from the CATALOG PIECES section of the system prompt (exact UUIDs in square brackets).",
+              "Call `propose_tearsheet` NOW with 4-8 pick_ids drawn ONLY from the CURATED PIECES section of the system prompt (exact UUIDs in square brackets).",
               "Include a short `title`, `pick_rationales` (one short reason per pick_id), and optional `note`.",
               "Do not output any prose — only the tool call.",
             ].join("\n");
