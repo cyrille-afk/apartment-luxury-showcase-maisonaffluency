@@ -264,7 +264,7 @@ export default function PayoutAccountsSection() {
             <Banknote className="h-5 w-5" /> Payout accounts
           </CardTitle>
           <p className="text-sm text-muted-foreground mt-1">
-            Where agent-mode commissions are wired after delivery. Stripe Connect handles bank verification and KYC.
+            Where agent-mode commissions are wired after delivery. Stripe Connect handles bank verification and KYC. Commissions in a different currency are auto-converted at the ECB daily rate (frankfurter.app) and locked on the delivery date — the wired amount is final.
           </p>
         </div>
         {isAdmin && (
@@ -293,8 +293,13 @@ export default function PayoutAccountsSection() {
                       <Badge variant={meta.variant} className="capitalize">{meta.label}</Badge>
                     </div>
                     <div className="text-xs text-muted-foreground">
-                      {a.account_holder_name} • {a.country_code} • {a.currency}
+                      {a.account_holder_name} • {a.country_code}
                       {a.bank_name && <> • {a.bank_name}</>}
+                    </div>
+                    <div className="mt-1 flex items-center gap-2 flex-wrap text-xs">
+                      <Badge variant="outline" className="gap-1 font-normal">
+                        Wires received in {a.currency}
+                      </Badge>
                     </div>
                     <div className="mt-1.5 flex items-center gap-2 flex-wrap text-xs">
                       {a.tax_form_kind ? (

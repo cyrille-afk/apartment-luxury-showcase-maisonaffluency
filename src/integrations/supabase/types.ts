@@ -2778,6 +2778,11 @@ export type Database = {
           admin_notes: string | null
           balance_due_at: string | null
           balance_paid_at: string | null
+          commission_fx_locked_at: string | null
+          commission_fx_rate: number | null
+          commission_fx_source: string | null
+          commission_payout_cents: number | null
+          commission_payout_currency: string | null
           commission_statement_sent_at: string | null
           created_at: string
           customs_cleared_at: string | null
@@ -2816,6 +2821,11 @@ export type Database = {
           admin_notes?: string | null
           balance_due_at?: string | null
           balance_paid_at?: string | null
+          commission_fx_locked_at?: string | null
+          commission_fx_rate?: number | null
+          commission_fx_source?: string | null
+          commission_payout_cents?: number | null
+          commission_payout_currency?: string | null
           commission_statement_sent_at?: string | null
           created_at?: string
           customs_cleared_at?: string | null
@@ -2854,6 +2864,11 @@ export type Database = {
           admin_notes?: string | null
           balance_due_at?: string | null
           balance_paid_at?: string | null
+          commission_fx_locked_at?: string | null
+          commission_fx_rate?: number | null
+          commission_fx_source?: string | null
+          commission_payout_cents?: number | null
+          commission_payout_currency?: string | null
           commission_statement_sent_at?: string | null
           created_at?: string
           customs_cleared_at?: string | null

@@ -25,6 +25,10 @@ interface CommissionStatementProps {
   commissionPct?: number
   commissionFormatted?: string
   payoutMethod?: string | null
+  payoutCurrency?: string | null
+  commissionPayoutFormatted?: string | null
+  fxRate?: number | null
+  fxSource?: string | null
   expectedWireOn?: string
   items?: LineItem[]
 }
@@ -40,9 +44,15 @@ const CommissionStatementEmail = ({
   commissionPct = 0,
   commissionFormatted = '—',
   payoutMethod,
+  payoutCurrency,
+  commissionPayoutFormatted,
+  fxRate,
+  fxSource,
   expectedWireOn,
   items = [],
-}: CommissionStatementProps) => (
+}: CommissionStatementProps) => {
+  const showFx = !!(payoutCurrency && payoutCurrency.toUpperCase() !== currency.toUpperCase() && fxRate && commissionPayoutFormatted)
+  return (
   <Html lang="en" dir="ltr">
     <Head />
     <Preview>Commission statement for order {quoteNumber} — {commissionFormatted} {currency}</Preview>
@@ -99,13 +109,29 @@ const CommissionStatementEmail = ({
                 <td style={grandLabel}>Commission due</td>
                 <td style={grandAmount}>{commissionFormatted} {currency}</td>
               </tr>
+              {showFx ? (
+                <>
+                  <tr>
+                    <td style={totalLabel}>FX rate ({currency} → {payoutCurrency})</td>
+                    <td style={totalAmount}>{Number(fxRate).toFixed(4)}</td>
+                  </tr>
+                  <tr>
+                    <td style={totalLabel}>Source</td>
+                    <td style={totalAmount}>{fxSource}</td>
+                  </tr>
+                  <tr>
+                    <td style={grandLabel}>Wired amount</td>
+                    <td style={grandAmount}>{commissionPayoutFormatted} {payoutCurrency}</td>
+                  </tr>
+                </>
+              ) : null}
             </tbody>
           </table>
         </Section>
 
         <Text style={text}>
           {payoutMethod
-            ? <>The wire will route to <strong>{payoutMethod}</strong>{expectedWireOn ? <>, expected to clear on <strong>{expectedWireOn}</strong></> : null}.</>
+            ? <>The wire will route to <strong>{payoutMethod}</strong>{expectedWireOn ? <>, expected to clear on <strong>{expectedWireOn}</strong></> : null}.{showFx ? <> The exchange rate above was locked on delivery; the wired amount is final and not subject to further FX adjustment.</> : null}</>
             : <>Add a verified payout account in your Studio settings to receive the wire.</>}
         </Text>
 
@@ -144,7 +170,8 @@ const CommissionStatementEmail = ({
       </Container>
     </Body>
   </Html>
-)
+  )
+}
 
 export const template = {
   component: CommissionStatementEmail,
@@ -162,6 +189,10 @@ export const template = {
     commissionPct: 15,
     commissionFormatted: '7,237.50',
     payoutMethod: 'Crédit Mutuel · EUR · ••4421',
+    payoutCurrency: 'EUR',
+    commissionPayoutFormatted: '6,732.20',
+    fxRate: 0.9302,
+    fxSource: 'frankfurter.app (ECB 2026-06-13)',
     expectedWireOn: '18 Jun 2026',
     items: [
       { name: 'Salvagni — Sesta low table', quantity: 1, msrpFormatted: '12,400.00' },
