@@ -3458,8 +3458,8 @@ serve(async (req) => {
           );
           if (hasAnyDeliverable) return;
           const promisedByPlan =
-            extractedBrief.plan.includes("propose_tearsheet") ||
-            extractedBrief.plan.includes("add_to_tearsheet");
+            effectiveBrief.plan.includes("propose_tearsheet") ||
+            effectiveBrief.plan.includes("add_to_tearsheet");
           const promisedByText = TEARSHEET_PROMISE_RE.test(assistantTextBuf || "");
           if (!promisedByPlan && !promisedByText) return;
 
