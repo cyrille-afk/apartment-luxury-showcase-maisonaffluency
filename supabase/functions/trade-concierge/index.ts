@@ -2221,6 +2221,14 @@ serve(async (req) => {
       );
     }
 
+    const lastUserMsg = [...messages].reverse().find((m: any) => m.role === "user")?.content || "";
+
+    // Ultra-fast deterministic path for one-word location follow-ups like
+    // "London". These were going through the full RAG/planner/main-model
+    // pipeline even though no catalog reasoning is needed.
+    const locationOnlyReply = buildLocationOnlyReply(lastUserMsg, messages);
+    if (locationOnlyReply) return sseTextResponse(locationOnlyReply);
+
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
@@ -2237,14 +2245,6 @@ serve(async (req) => {
         { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
-
-    const lastUserMsg = [...messages].reverse().find((m: any) => m.role === "user")?.content || "";
-
-    // Ultra-fast deterministic path for one-word location follow-ups like
-    // "London". These were going through the full RAG/planner/main-model
-    // pipeline even though no catalog reasoning is needed.
-    const locationOnlyReply = buildLocationOnlyReply(lastUserMsg, messages);
-    if (locationOnlyReply) return sseTextResponse(locationOnlyReply);
 
     // Trim history: keep only the last ~8 turns to control prompt size.
     const trimmedMessages = messages.slice(-8);
