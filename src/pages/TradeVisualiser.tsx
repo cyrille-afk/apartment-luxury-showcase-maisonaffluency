@@ -19,34 +19,30 @@ import { cn } from "@/lib/utils";
 // ───────── Surfaces ──────────────────────────────────────────────────────────
 type Surface = "walls" | "floors" | "upholstery" | "curtains";
 
-const SURFACES: { id: Surface; label: string; hint: string; keywords: RegExp; categories: string[] }[] = [
+const SURFACES: { id: Surface; label: string; hint: string; subcatRe: RegExp }[] = [
   {
     id: "walls",
     label: "Walls",
     hint: "Lacquer · plaster · wallcovering",
-    keywords: /lacquer|wallcover|wallpaper|plaster|panel|veneer|stone|marble|gesso|straw|parch|shagreen/i,
-    categories: ["Décor", "Decorative Objects"],
+    subcatRe: /wallcover|wallpaper|lacquer panel|plaster|panelling|boiserie/i,
   },
   {
     id: "floors",
     label: "Floors",
-    hint: "Rugs · carpets · stone",
-    keywords: /rug|carpet|kilim|dhurrie/i,
-    categories: ["Rugs"],
+    hint: "Rugs · carpets",
+    subcatRe: /rug|carpet|kilim|dhurrie/i,
   },
   {
     id: "upholstery",
     label: "Upholstery",
     hint: "Fabrics · leathers",
-    keywords: /fabric|textile|velvet|linen|silk|leather|mohair|bouclé|boucle|wool/i,
-    categories: ["Décor", "Seating"],
+    subcatRe: /fabric|textile|leather|upholstery/i,
   },
   {
     id: "curtains",
     label: "Curtains",
     hint: "Drapery · sheers",
-    keywords: /curtain|drape|sheer|voile|linen|silk/i,
-    categories: ["Décor"],
+    subcatRe: /curtain|drape|sheer|voile|drapery/i,
   },
 ];
 
