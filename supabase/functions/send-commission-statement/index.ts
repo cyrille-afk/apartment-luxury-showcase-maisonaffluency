@@ -85,7 +85,7 @@ Deno.serve(async (req) => {
   // 1. Load timeline (idempotency check)
   const { data: timeline, error: tErr } = await admin
     .from('order_timeline')
-    .select('id, quote_id, kanban_status, actual_delivery_at, commission_statement_sent_at')
+    .select('id, quote_id, kanban_status, actual_delivery_at, commission_statement_sent_at, commission_fx_rate, commission_payout_currency, commission_payout_cents, commission_fx_source, commission_fx_locked_at')
     .eq('quote_id', quoteId)
     .maybeSingle()
   if (tErr || !timeline) {
