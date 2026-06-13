@@ -1221,6 +1221,91 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     };
   };
 
+  const handleDownloadInvoice = async () => {
+    if (!billingMeta) {
+      toast({ title: "Loading billing details…", description: "Please retry in a moment.", variant: "destructive" });
+      return;
+    }
+    setInvoiceBusy(true);
+    try {
+      const base: QuotePdfArgs = await buildPdfArgs();
+      const isNet = billingMeta.billing_mode === "net_buy";
+      const mode: InvoiceMode = isNet ? "proforma_net_buy" : "tax_invoice";
+
+      // Resolve recipient: end-client (agent) or designer firm / studio (net).
+      let recipient: Parameters<typeof downloadInvoicePdf>[1]["recipient"];
+      if (!isNet) {
+        const ec = billingMeta.end_client_billing ?? {};
+        if (!ec.email && !ec.name) {
+          toast({ title: "End-client billing missing", description: "Capture the client's billing details on the quote before issuing a tax invoice.", variant: "destructive" });
+          setInvoiceBusy(false);
+          return;
+        }
+        recipient = {
+          company: ec.company ?? ec.name ?? null,
+          name: ec.name ?? null,
+          email: ec.email ?? null,
+          phone: ec.phone ?? null,
+          address: {
+            line1: ec.address1 ?? null,
+            line2: ec.address2 ?? null,
+            city: ec.city ?? null,
+            region: ec.state ?? null,
+            postalCode: ec.postal_code ?? null,
+            country: ec.country ?? null,
+          },
+        };
+      } else {
+        // Net-buy: pull designer firm from the user's studio.
+        let studio: { name?: string | null } | null = null;
+        if (billingMeta.studio_id) {
+          const { data } = await supabase.from("studios").select("name").eq("id", billingMeta.studio_id).maybeSingle();
+          studio = data as any;
+        }
+        recipient = {
+          company: studio?.name ?? clientCompany ?? null,
+          name: clientName ?? null,
+          email: clientApproval.email ?? null,
+          phone: null,
+          address: null,
+        };
+      }
+
+      // Look up the resale cert number for the FOR-RESALE stamp (net + US).
+      let resaleCertNumber: string | null = null;
+      if (isNet && billingMeta.resale_certificate_id) {
+        const { data } = await supabase
+          .from("studio_resale_certificates")
+          .select("certificate_number, state_code")
+          .eq("id", billingMeta.resale_certificate_id)
+          .maybeSingle();
+        if (data) {
+          resaleCertNumber = data.certificate_number
+            ? `${data.certificate_number} (${data.state_code})`
+            : `On file — ${data.state_code}`;
+        }
+      }
+
+      await downloadInvoicePdf(base, {
+        mode,
+        recipient,
+        resaleCertNumber,
+        netDiscountPct: isNet ? Number(billingMeta.net_discount_pct ?? 0) : 0,
+      });
+      toast({
+        title: isNet ? "Proforma downloaded" : "Tax invoice downloaded",
+        description: isNet
+          ? "Net-buy proforma saved. Issue your own client invoice on studio paper."
+          : "Tax invoice saved — addressed to the end client at full MSRP.",
+      });
+    } catch (err: any) {
+      toast({ title: "Invoice failed", description: err?.message || "Could not generate invoice.", variant: "destructive" });
+    } finally {
+      setInvoiceBusy(false);
+    }
+  };
+
+
   const handleDownloadPdf = async () => {
     try {
       const args = await buildPdfArgs();
