@@ -44,6 +44,22 @@ type QuoteBilling = {
   end_client_billing: any;
   designer_payout_account_id: string | null;
   resale_certificate_id: string | null;
+  managed_freight_quote_id: string | null;
+};
+
+type FreightQuote = {
+  id: string;
+  origin_city: string;
+  origin_country: string;
+  dest_city: string;
+  dest_country: string;
+  selected_carrier: string | null;
+  selected_mode: string | null;
+  total_cents: number;
+  currency: string;
+  status: string;
+  valid_until: string | null;
+  created_at: string;
 };
 
 type PayoutAccount = {
@@ -85,6 +101,7 @@ export default function BillingModeCard({
   const [tierPct, setTierPct] = useState(0.08); // default 8% baseline (commission == net discount until tier override)
   const [accounts, setAccounts] = useState<PayoutAccount[]>([]);
   const [certs, setCerts] = useState<ResaleCert[]>([]);
+  const [freightQuotes, setFreightQuotes] = useState<FreightQuote[]>([]);
 
   // End-client billing form state (mirrors JSONB)
   const [ecName, setEcName] = useState("");
@@ -101,7 +118,7 @@ export default function BillingModeCard({
     const qRes = await supabase
       .from("trade_quotes")
       .select(
-        "billing_mode, payer_type, commission_pct, net_discount_pct, end_client_billing, designer_payout_account_id, resale_certificate_id, ship_to_state",
+        "billing_mode, payer_type, commission_pct, net_discount_pct, end_client_billing, designer_payout_account_id, resale_certificate_id, managed_freight_quote_id, ship_to_state",
       )
       .eq("id", quoteId)
       .maybeSingle();
@@ -123,9 +140,21 @@ export default function BillingModeCard({
       .eq("studio_id", currentStudio.id);
     const rc: any = rcRes.data;
 
+    const fqRes = await supabase
+      .from("shipping_quotes")
+      .select(
+        "id, origin_city, origin_country, dest_city, dest_country, selected_carrier, selected_mode, total_cents, currency, status, valid_until, created_at",
+      )
+      .or(`quote_id.eq.${quoteId},quote_id.is.null`)
+      .neq("status", "cancelled")
+      .order("created_at", { ascending: false })
+      .limit(20);
+    const fq: any = fqRes.data;
+
     if (tier?.discount_pct != null) setTierPct(Number(tier.discount_pct));
     setAccounts((pa as PayoutAccount[]) ?? []);
     setCerts((rc as ResaleCert[]) ?? []);
+    setFreightQuotes((fq as FreightQuote[]) ?? []);
 
     if (q) {
       const b: QuoteBilling = {
@@ -136,6 +165,7 @@ export default function BillingModeCard({
         end_client_billing: q.end_client_billing ?? null,
         designer_payout_account_id: (q.designer_payout_account_id as string) ?? null,
         resale_certificate_id: (q.resale_certificate_id as string) ?? null,
+        managed_freight_quote_id: (q.managed_freight_quote_id as string) ?? null,
       };
       setBilling(b);
       const ec = (q.end_client_billing as any) ?? {};
@@ -174,6 +204,7 @@ export default function BillingModeCard({
       designer_payout_account_id:
         next.billing_mode === "agent_commission" ? next.designer_payout_account_id : null,
       resale_certificate_id: next.billing_mode === "net_buy" ? next.resale_certificate_id : null,
+      managed_freight_quote_id: next.billing_mode === "net_buy" ? next.managed_freight_quote_id : null,
     };
     const { error } = await supabase.from("trade_quotes").update(updates).eq("id", quoteId);
     setSaving(false);
@@ -400,15 +431,74 @@ export default function BillingModeCard({
             </p>
           )}
 
-          <div className="flex items-start gap-2 text-sm pt-2 border-t border-border">
-            <Truck className="h-4 w-4 text-muted-foreground mt-0.5" />
-            <div>
-              <div className="font-medium text-sm">Managed door-to-drayage freight included</div>
-              <p className="text-xs text-muted-foreground">
-                Customs brokerage and ocean freight to your receiving warehouse are handled by Maison Affluency. Freight is quoted live during the production window and reflected on the balance invoice.
-              </p>
+          {/* Managed freight — mandatory, locked at checkout */}
+          <div className="pt-3 border-t border-border space-y-2">
+            <div className="flex items-start gap-2">
+              <Truck className="h-4 w-4 text-muted-foreground mt-0.5" />
+              <div className="flex-1 min-w-0">
+                <div className="font-medium text-sm">Managed door-to-drayage freight (required)</div>
+                <p className="text-xs text-muted-foreground">
+                  Customs brokerage + ocean freight to your receiving warehouse, handled by Maison Affluency. Lock a freight estimate here — the figure is fixed when you pay the deposit.
+                </p>
+              </div>
             </div>
+
+            {(() => {
+              const matching = freightQuotes.filter(
+                (f) => (f.currency || "").toUpperCase() === (currency || "").toUpperCase(),
+              );
+              const locked = freightQuotes.find((f) => f.id === billing.managed_freight_quote_id);
+              return (
+                <>
+                  {matching.length === 0 ? (
+                    <p className="text-xs text-amber-700">
+                      No freight estimate in {currency.toUpperCase()} yet.{" "}
+                      <Link to={`/trade/shipping-estimator?quote=${quoteId}`} className="underline">
+                        Create one <ExternalLink className="inline h-3 w-3" />
+                      </Link>
+                    </p>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <Select
+                        value={billing.managed_freight_quote_id ?? ""}
+                        onValueChange={(v) => persist({ managed_freight_quote_id: v })}
+                        disabled={!isEditable || saving}
+                      >
+                        <SelectTrigger className="flex-1">
+                          <SelectValue placeholder="Select a managed freight quote to lock" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {matching.map((f) => (
+                            <SelectItem key={f.id} value={f.id}>
+                              {f.origin_city || f.origin_country} → {f.dest_city || f.dest_country} ·{" "}
+                              {f.selected_carrier || f.selected_mode || "freight"} ·{" "}
+                              {fmtCents(f.total_cents, f.currency)} {f.status === "estimate" ? "(est.)" : ""}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      {locked && <CheckCircle2 className="h-4 w-4 text-emerald-600" />}
+                    </div>
+                  )}
+                  {locked && (
+                    <p className="text-xs text-muted-foreground tabular-nums">
+                      Locked freight: <strong>{fmtCents(locked.total_cents, locked.currency)}</strong>
+                      {locked.valid_until ? ` · valid until ${new Date(locked.valid_until).toLocaleDateString()}` : ""}
+                    </p>
+                  )}
+                  {matching.length > 0 && (
+                    <p className="text-[11px] text-muted-foreground">
+                      Need a different lane?{" "}
+                      <Link to={`/trade/shipping-estimator?quote=${quoteId}`} className="underline">
+                        Create a new freight estimate <ExternalLink className="inline h-3 w-3" />
+                      </Link>
+                    </p>
+                  )}
+                </>
+              );
+            })()}
           </div>
+
 
           <p className="text-xs text-muted-foreground italic pt-2 border-t border-border">
             You invoice your end-client on your own studio paper. Maison Affluency never sees or generates the end-client invoice.

@@ -54,7 +54,7 @@ serve(async (req) => {
     const { quoteId, paymentType = "deposit", shippingCents = 0 } = await req.json();
     if (!quoteId) throw new Error("quoteId is required");
     if (!["deposit", "balance"].includes(paymentType)) throw new Error("Invalid paymentType");
-    const shippingCentsSafe = Math.max(0, Math.round(Number(shippingCents) || 0));
+    let shippingCentsSafe = Math.max(0, Math.round(Number(shippingCents) || 0));
 
     console.log("[create-quote-payment] User:", user.id, "Quote:", quoteId, "Type:", paymentType);
 
@@ -75,6 +75,33 @@ serve(async (req) => {
     }
 
     const billingMode: "agent_commission" | "net_buy" = quote.billing_mode || "agent_commission";
+
+    // Net-buy: managed freight is MANDATORY and locked from a saved shipping_quote.
+    // Server-side freight always wins over client-supplied numbers — this is the audit lock.
+    if (billingMode === "net_buy") {
+      if (!quote.managed_freight_quote_id) {
+        throw new Error(
+          "Managed freight quote required for net-buy checkout. Attach a freight estimate to this quote before paying.",
+        );
+      }
+      const { data: freight, error: fErr } = await supabaseClient
+        .from("shipping_quotes")
+        .select("id, total_cents, currency, status")
+        .eq("id", quote.managed_freight_quote_id)
+        .maybeSingle();
+      if (fErr || !freight) {
+        throw new Error("Locked managed freight quote not found");
+      }
+      if (freight.status === "cancelled" || freight.status === "expired") {
+        throw new Error(`Managed freight quote is ${freight.status} — re-quote before paying`);
+      }
+      if ((freight.currency || "").toUpperCase() !== (quote.currency || "").toUpperCase()) {
+        throw new Error(
+          `Freight quote currency (${freight.currency}) does not match order currency (${quote.currency}). Re-quote in ${quote.currency}.`,
+        );
+      }
+      shippingCentsSafe = Math.max(0, Math.round(Number(freight.total_cents) || 0));
+    }
 
     const { data: items } = await supabaseClient
       .from("trade_quote_items")
