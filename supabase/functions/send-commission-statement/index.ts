@@ -146,8 +146,9 @@ Deno.serve(async (req) => {
   const commissionPct = Number(quote.commission_pct ?? 0)
   const commissionCents = Math.round((subtotalCents * commissionPct) / 100)
 
-  // 4. Payout account (optional)
+  // 4. Payout account (optional) + multi-currency FX
   let payoutMethod: string | null = null
+  let payoutCurrency: string | null = null
   if (quote.designer_payout_account_id) {
     const { data: acct } = await admin
       .from('studio_payout_accounts')
@@ -157,6 +158,50 @@ Deno.serve(async (req) => {
     if (acct) {
       const masked = maskAccount(acct.iban ?? acct.ach_account_number)
       payoutMethod = [acct.bank_name, acct.currency, masked].filter(Boolean).join(' · ')
+      payoutCurrency = acct.currency ?? null
+    }
+  }
+
+  // FX: if quote currency differs from the payout account currency, fetch a
+  // locked daily ECB rate from frankfurter.app (no API key, ~99% uptime).
+  // Persist on order_timeline for audit and so a retry returns the same value.
+  const quoteCurrency = (quote.currency || 'USD').toUpperCase()
+  let fxRate = 1
+  let fxSource = 'none'
+  let payoutCurrencyOut = quoteCurrency
+  let commissionPayoutCents = commissionCents
+
+  if (payoutCurrency && payoutCurrency.toUpperCase() !== quoteCurrency) {
+    if (timeline.commission_fx_rate && timeline.commission_payout_cents != null) {
+      fxRate = Number(timeline.commission_fx_rate)
+      fxSource = timeline.commission_fx_source ?? 'cached'
+      payoutCurrencyOut = (timeline.commission_payout_currency ?? payoutCurrency).toUpperCase()
+      commissionPayoutCents = Number(timeline.commission_payout_cents)
+    } else {
+      try {
+        const fxResp = await fetch(
+          `https://api.frankfurter.app/latest?from=${quoteCurrency}&to=${payoutCurrency}`,
+        )
+        if (fxResp.ok) {
+          const fxJson = await fxResp.json() as { rates?: Record<string, number>; date?: string }
+          const r = fxJson?.rates?.[payoutCurrency.toUpperCase()]
+          if (typeof r === 'number' && r > 0) {
+            fxRate = r
+            fxSource = `frankfurter.app (ECB ${fxJson.date ?? ''})`.trim()
+            payoutCurrencyOut = payoutCurrency.toUpperCase()
+            commissionPayoutCents = Math.round(commissionCents * r)
+            await admin.from('order_timeline').update({
+              commission_fx_rate: fxRate,
+              commission_fx_source: fxSource,
+              commission_fx_locked_at: new Date().toISOString(),
+              commission_payout_currency: payoutCurrencyOut,
+              commission_payout_cents: commissionPayoutCents,
+            }).eq('id', timeline.id)
+          }
+        }
+      } catch (e) {
+        console.error('FX fetch failed; falling back to quote currency', e)
+      }
     }
   }
 
