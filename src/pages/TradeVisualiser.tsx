@@ -128,6 +128,12 @@ const TradeVisualiser = () => {
     setPins([]);
     setActivePinId(null);
     setRendered(false);
+    setRenderedImage(null);
+    setRenderError(null);
+    // also read as base64 for the API
+    const reader = new FileReader();
+    reader.onload = () => setPhotoDataUrl(typeof reader.result === "string" ? reader.result : null);
+    reader.readAsDataURL(f);
   };
 
   const onDrop = (e: React.DragEvent) => {
@@ -150,12 +156,14 @@ const TradeVisualiser = () => {
     setPins((p) => [...p, newPin]);
     setActivePinId(newPin.id);
     setRendered(false);
+    setRenderedImage(null);
   };
 
   const removePin = (id: string) => {
     setPins((p) => p.filter((x) => x.id !== id));
     if (activePinId === id) setActivePinId(null);
     setRendered(false);
+    setRenderedImage(null);
   };
 
   // ─── Apply a swatch to the active pin ────────────────────────────────────
@@ -163,18 +171,41 @@ const TradeVisualiser = () => {
     if (!activePinId) return;
     setPins((p) => p.map((pin) => (pin.id === activePinId ? { ...pin, swatch: sw } : pin)));
     setRendered(false);
+    setRenderedImage(null);
   }, [activePinId]);
 
-  // ─── Render (mocked) ─────────────────────────────────────────────────────
+  // ─── Render (live AI) ────────────────────────────────────────────────────
   const canRender = pins.some((p) => p.swatch);
-  const onRender = () => {
-    if (!canRender) return;
+  const onRender = async () => {
+    if (!canRender || !photoDataUrl) return;
     setRendering(true);
     setRendered(false);
-    setTimeout(() => {
-      setRendering(false);
+    setRenderError(null);
+    setRenderedImage(null);
+    try {
+      const payloadPins = pins
+        .filter((p) => p.swatch)
+        .map((p) => ({
+          surface: p.surface,
+          x: p.x,
+          y: p.y,
+          swatchUrl: p.swatch!.image_url,
+          swatchName: p.swatch!.product_name,
+          brandName: p.swatch!.brand_name,
+        }));
+      const { data, error } = await supabase.functions.invoke("visualiser-render", {
+        body: { roomImage: photoDataUrl, pins: payloadPins },
+      });
+      if (error) throw error;
+      if (!data?.image) throw new Error("No image returned");
+      setRenderedImage(data.image);
       setRendered(true);
-    }, 1600);
+    } catch (e: any) {
+      console.error(e);
+      setRenderError(e?.message || "Render failed");
+    } finally {
+      setRendering(false);
+    }
   };
 
   return (
