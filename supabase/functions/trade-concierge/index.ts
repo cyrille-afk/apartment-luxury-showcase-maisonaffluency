@@ -2546,7 +2546,7 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         model: aiModel(chosenModel),
-        messages: [{ role: "system", content: systemPrompt }, ...trimmedMessages],
+        messages: [{ role: "system", content: languageDirective + systemPrompt }, ...trimmedMessages],
         tools: finalTools,
         tool_choice: toolChoice,
         max_completion_tokens: chosenModel === modelFor("strong") ? CHAT_MAX_TOKENS_STRONG : CHAT_MAX_TOKENS,
