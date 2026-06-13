@@ -482,10 +482,14 @@ function drawHeader(
   doc.text("Curated furniture, lighting and objects for trade", textX, 72);
   doc.text("Affluency Etc Pte. Ltd. - Singapore", textX, 86);
 
-  // Right side: Quote ref + status
+  // Right side: doc title + ref
+  const title =
+    args.documentKind === "tax_invoice" ? "TAX INVOICE"
+    : args.documentKind === "proforma_net_buy" ? "PROFORMA INVOICE"
+    : "QUOTE";
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(20);
-  doc.text("QUOTE", pageW - M, 50, { align: "right" });
+  doc.setFontSize(title.length > 6 ? 16 : 20);
+  doc.text(title, pageW - M, 50, { align: "right" });
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
