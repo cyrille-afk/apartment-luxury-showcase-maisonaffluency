@@ -3760,6 +3760,7 @@ serve(async (req) => {
         };
 
         let sawDone = false;
+        const shouldSuppressSelectionProse = forcePlannedTearsheet;
         // Some fallback models (notably Cloudflare Llama) do NOT emit native
         // `tool_calls`; they stringify the JSON envelope into `delta.content`.
         // If the very first content chunk looks like a tool-call envelope, we
@@ -3830,12 +3831,16 @@ serve(async (req) => {
                 }
                 // Inspect plain-text content for stringified tool-call envelopes
                 const contentDelta = typeof delta?.content === "string" ? delta.content : null;
-                if (contentDelta !== null) {
+                  if (contentDelta !== null) {
                   if (!suspectedToolCallText && suppressedTextBuf === "" && !forwardedAnyText) {
                     if (looksLikeToolEnvelopeStart(contentDelta) || looksLikeOpeningBrace(contentDelta)) {
                       suspectedToolCallText = true;
                     }
                   }
+                    if (shouldSuppressSelectionProse) {
+                      assistantTextBuf += contentDelta;
+                      continue; // selection turns must render validated cards, not prose product names
+                    }
                   if (suspectedToolCallText) {
                     suppressedTextBuf += contentDelta;
                     continue; // do not forward
