@@ -95,7 +95,15 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
       { kind: "msg", role: "assistant", content: surface === "public" ? PUBLIC_GREETING : greetingForContext(stageFromPath(pathname), pathname, loadTone(), loadLang()).replace(/{concierge_name}/g, name) },
     ];
   });
-  const [input, setInput] = useState("");
+  const [input, setInput] = useState<string>(() => {
+    try { return sessionStorage.getItem("concierge:draft") || ""; } catch { return ""; }
+  });
+  useEffect(() => {
+    try {
+      if (input) sessionStorage.setItem("concierge:draft", input);
+      else sessionStorage.removeItem("concierge:draft");
+    } catch {}
+  }, [input]);
   const [streaming, setStreaming] = useState(false);
   const [stageOverride, setStageOverride] = useState<Stage | null>(null);
   const stage: Stage = stageOverride ?? stageFromPath(pathname);

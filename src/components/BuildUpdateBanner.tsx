@@ -76,8 +76,24 @@ export default function BuildUpdateBanner() {
       window.addEventListener("popstate", fireIfPathChanged);
     }
 
+    const hasUnsavedTyping = () => {
+      try {
+        const ae = document.activeElement as HTMLElement | null;
+        if (ae) {
+          const tag = ae.tagName;
+          if (tag === "TEXTAREA" || tag === "INPUT" || ae.isContentEditable) return true;
+        }
+        const fields = document.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>("textarea, input");
+        for (const f of Array.from(fields)) {
+          if ((f as HTMLInputElement).value && (f as HTMLInputElement).value.trim().length > 0) return true;
+        }
+      } catch {}
+      return false;
+    };
+
     const onNav = () => {
       if (!armed.current) return;
+      if (hasUnsavedTyping()) return;
       // Reload on next macrotask so the navigation commits first.
       setTimeout(hardReload, 0);
     };
