@@ -126,6 +126,21 @@ async function callCloudflare(init: RequestInit, reason: string, primaryCtx: { s
     const parsed = JSON.parse(String(init.body ?? "{}"));
     originalModel = parsed.model || "unknown";
     parsed.model = CLOUDFLARE_FALLBACK_MODEL;
+    // Llama 3.3 on Workers AI does not reliably honour "use exact UUIDs from
+    // CATALOG PIECES" — it hallucinates placeholder ids like "Catalog Piece 1"
+    // and emits invalid propose_tearsheet calls. Strip tools entirely on the
+    // fallback path so the model can ONLY produce a prose reply.
+    delete parsed.tools;
+    delete parsed.tool_choice;
+    delete parsed.response_format;
+    // Soft nudge: ask for a brief, conversational reply rather than a curated list.
+    if (Array.isArray(parsed.messages)) {
+      parsed.messages.unshift({
+        role: "system",
+        content:
+          "You are the concierge fallback. The catalogue tools are temporarily unavailable. Reply briefly and conversationally — ask one or two refining questions (room, atmosphere, palette, budget) so you can curate properly on the next turn. Never invent product names, designers, or ids; never output JSON or tool envelopes.",
+      });
+    }
     cfBodyStr = JSON.stringify(parsed);
   } catch (_) {
     cfBodyStr = String(init.body ?? "{}");
