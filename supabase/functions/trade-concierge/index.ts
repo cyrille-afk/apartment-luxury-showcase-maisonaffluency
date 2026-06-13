@@ -2376,7 +2376,7 @@ serve(async (req) => {
     // Ultra-fast deterministic path for one-word location follow-ups like
     // "London". These were going through the full RAG/planner/main-model
     // pipeline even though no catalog reasoning is needed.
-    const locationOnlyReply = buildLocationOnlyReply(lastUserMsg, messages);
+    const locationOnlyReply = buildLocationOnlyReply(lastUserMsg, messages, langCode);
     if (locationOnlyReply) return sseTextResponse(locationOnlyReply);
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
