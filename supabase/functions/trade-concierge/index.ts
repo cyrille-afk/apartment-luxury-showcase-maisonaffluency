@@ -2554,6 +2554,29 @@ serve(async (req) => {
 
     const stream = new ReadableStream({
       async start(controller) {
+        let streamClosed = false;
+        const rawEnqueue = controller.enqueue.bind(controller);
+        const rawClose = controller.close.bind(controller);
+        (controller as any).enqueue = (chunk: Uint8Array) => {
+          if (streamClosed) return;
+          try {
+            rawEnqueue(chunk);
+          } catch (e) {
+            streamClosed = true;
+            console.warn("[concierge] client stream closed before enqueue:", e instanceof Error ? e.message : e);
+          }
+        };
+        (controller as any).close = () => {
+          if (streamClosed) return;
+          try {
+            rawClose();
+          } catch (e) {
+            console.warn("[concierge] client stream already closed:", e instanceof Error ? e.message : e);
+          } finally {
+            streamClosed = true;
+          }
+        };
+
         // Emit escalation event up-front when the classifier flagged it.
         if (sentiment.escalate) {
           const payload = {
