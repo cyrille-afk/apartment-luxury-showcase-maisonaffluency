@@ -3101,7 +3101,16 @@ serve(async (req) => {
               console.error("Could not parse tool args:", tc.argsText, e);
               continue;
             }
-            const pickIds: string[] = Array.isArray(parsed.pick_ids) ? parsed.pick_ids : [];
+            const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+            const rawPickIds: string[] = Array.isArray(parsed.pick_ids) ? parsed.pick_ids : [];
+            const pickIds: string[] = rawPickIds.filter((x) => typeof x === "string" && UUID_RE.test(x));
+            if (pickIds.length === 0) {
+              console.warn(`[concierge] dropping ${tc.name} — no valid UUID pick_ids (got: ${JSON.stringify(rawPickIds).slice(0, 200)})`);
+              const fallback = "Forgive me — I caught myself reaching for placeholders rather than actual pieces. Tell me a little more about the room or the mood you have in mind, and I'll pull from the catalogue properly.";
+              const releaseFrame = { choices: [{ delta: { content: fallback } }] };
+              controller.enqueue(encoder.encode(`data: ${JSON.stringify(releaseFrame)}\n\n`));
+              continue;
+            }
             const rationaleMap: Record<string, { reason: string; detail?: string }> = {};
             if (Array.isArray(parsed.pick_rationales)) {
               for (const r of parsed.pick_rationales) {
