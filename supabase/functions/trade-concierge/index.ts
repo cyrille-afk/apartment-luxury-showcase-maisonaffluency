@@ -2033,6 +2033,83 @@ function normalizeLoose(value: string | null | undefined): string {
     .trim();
 }
 
+type RequestedTypology = "dining_table" | "table";
+
+function inferRequestedTypology(brief: ExtractedBrief["brief"], requestText: string): RequestedTypology | null {
+  const hay = normalizeLoose([
+    requestText,
+    brief.summary,
+    brief.room,
+    brief.style,
+    ...(brief.categories || []),
+  ].filter(Boolean).join(" "));
+  if (/\bdining\b/.test(hay) && /\btables?\b/.test(hay)) return "dining_table";
+  if (/\btables?\b/.test(hay)) return "table";
+  return null;
+}
+
+function rowMatchesRequestedTypology(row: any, typology: RequestedTypology | null): boolean {
+  if (!typology) return true;
+  const title = normalizeLoose(row?.title || row?.product_name);
+  const category = normalizeLoose(row?.category);
+  const subcategory = normalizeLoose(row?.subcategory);
+  const hay = `${title} ${category} ${subcategory}`;
+  const isLightingOrLamp = /\b(table\s+lights?|table\s+lamps?|lamp|lamps|lighting|sconce|sconces|chandelier|chandeliers)\b/.test(hay);
+  if (isLightingOrLamp) return false;
+  if (typology === "dining_table") {
+    return /\bdining\b/.test(hay) && /\btables?\b/.test(hay);
+  }
+  return /\btables?\b/.test(hay) && !/\b(sideboard|cabinet|bookshelf|bookcase|shelf|shelving)\b/.test(hay);
+}
+
+function dedupePreviewRows(previewRaw: any[], pickIds: string[]): { previewRaw: any[]; pickIds: string[] } {
+  const seen = new Set<string>();
+  const kept: any[] = [];
+  for (const p of previewRaw || []) {
+    const key = `${normalizeLoose(p?.designer_name)}::${normalizeLoose(p?.title)}`;
+    if (!key || seen.has(key)) continue;
+    seen.add(key);
+    kept.push(p);
+  }
+  const keptIds = new Set(kept.map((p: any) => p?.id).filter(Boolean));
+  return { previewRaw: kept, pickIds: pickIds.filter((id) => keptIds.has(id)) };
+}
+
+function typologyLabel(typology: RequestedTypology | null): string {
+  if (typology === "dining_table") return "dining table";
+  if (typology === "table") return "table";
+  return "piece";
+}
+
+function buildNoStrictTypologyReply(typology: RequestedTypology): string {
+  const label = typologyLabel(typology);
+  return `You're right — I won't present adjacent pieces as a ${label}. I don't have enough true ${label}s matching this brief in the Maison Affluency Curation to draft a credible edit; would you like me to expand the search through the designers' own collections using our Axonometric Studio archives and tools?`;
+}
+
+async function fetchStrictTypologyCandidates(
+  supabase: ReturnType<typeof createClient>,
+  typology: RequestedTypology,
+): Promise<any[]> {
+  const term = typology === "dining_table" ? "dining" : "table";
+  const [pickRes, tradeRes] = await Promise.all([
+    supabase
+      .from("designer_curator_picks")
+      .select("id, title, materials, category, subcategory")
+      .or(`title.ilike.%${term}%,subcategory.ilike.%${term}%,category.ilike.%${term}%`)
+      .limit(160),
+    supabase
+      .from("trade_products")
+      .select("id, product_name, materials, category, subcategory")
+      .eq("is_active", true)
+      .or(`product_name.ilike.%${term}%,subcategory.ilike.%${term}%,category.ilike.%${term}%`)
+      .limit(160),
+  ]);
+  return [
+    ...(pickRes.data || []),
+    ...(tradeRes.data || []).map((r: any) => ({ ...r, title: r.product_name })),
+  ].filter((r: any) => rowMatchesRequestedTypology(r, typology));
+}
+
 const LOCATION_ONLY_FOLLOWUPS = new Set([
   "london", "new york", "los angeles", "miami", "paris", "milan", "rome", "geneva", "zurich",
   "monaco", "dubai", "abu dhabi", "doha", "riyadh", "jeddah", "hong kong", "singapore",
@@ -2265,8 +2342,10 @@ async function buildDeterministicTearsheetProposal(
   supabase: ReturnType<typeof createClient>,
   ragRows: any[],
   brief: ExtractedBrief["brief"],
+  requestText: string,
 ): Promise<any | null> {
   const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  const requestedTypology = inferRequestedTypology(brief, requestText);
   const scoreRow = (r: any) => {
     const hay = `${r?.title || ""} ${r?.category || ""} ${r?.subcategory || ""} ${r?.materials || ""}`.toLowerCase();
     let score = Number(r?.similarity || 0);
@@ -2275,15 +2354,28 @@ async function buildDeterministicTearsheetProposal(
     if (/\b(oak|walnut|wood|timber)\b/.test(hay)) score += 1;
     return score;
   };
-  const pickIds = Array.from(new Set((ragRows || [])
+  let candidateRows = (ragRows || [])
     .filter((r: any) => r && typeof r.id === "string" && UUID_RE.test(r.id))
+    .filter((r: any) => rowMatchesRequestedTypology(r, requestedTypology))
+    .sort((a: any, b: any) => scoreRow(b) - scoreRow(a));
+  if (candidateRows.length < 2 && requestedTypology) {
+    candidateRows = (await fetchStrictTypologyCandidates(supabase, requestedTypology))
+      .filter((r: any) => r && typeof r.id === "string" && UUID_RE.test(r.id))
+      .sort((a: any, b: any) => scoreRow(b) - scoreRow(a));
+  }
+  const pickIds = Array.from(new Set(candidateRows
     .sort((a: any, b: any) => scoreRow(b) - scoreRow(a))
     .map((r: any) => r.id)
   )).slice(0, 8);
   if (pickIds.length < 2) return null;
-  const previewRaw = await hydratePickPreview(supabase, pickIds);
-  const validIds = new Set(previewRaw.map((p: any) => p?.id).filter(Boolean));
-  const finalIds = pickIds.filter((id) => validIds.has(id));
+  const hydratedRaw = await hydratePickPreview(supabase, pickIds);
+  const validIds = new Set(hydratedRaw.map((p: any) => p?.id).filter(Boolean));
+  const previewById = new Map(hydratedRaw.map((p: any) => [p?.id, p]).filter(([id]) => !!id));
+  const validPickIds = pickIds.filter((id) => validIds.has(id) && rowMatchesRequestedTypology(previewById.get(id), requestedTypology));
+  const { previewRaw, pickIds: finalIds } = dedupePreviewRows(
+    hydratedRaw.filter((p: any) => validPickIds.includes(p?.id)),
+    validPickIds,
+  );
   if (finalIds.length < 2) return null;
   const rationaleMap: Record<string, { reason: string }> = {};
   for (const p of previewRaw) {
@@ -2620,6 +2712,7 @@ serve(async (req) => {
           plan: ["propose_tearsheet"],
         }
       : extractedBrief;
+    const requestedTypology = inferRequestedTypology(effectiveBrief.brief, userConversationText);
 
     if (shouldActOnAccumulatedBrief && breaker.state() === "open" && CLOUDFLARE_ENABLED) {
       return sseTextResponse(
@@ -2727,6 +2820,7 @@ serve(async (req) => {
         supabase,
         Array.isArray((ragResult as any)?.rows) ? (ragResult as any).rows : [],
         effectiveBrief.brief,
+        userConversationText,
       );
       if (deterministicProposal) {
         return sseProposalThenTextResponse(
@@ -3486,7 +3580,7 @@ serve(async (req) => {
             }
             const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
             const rawPickIds: string[] = Array.isArray(parsed.pick_ids) ? parsed.pick_ids : [];
-            const pickIds: string[] = rawPickIds.filter((x) => typeof x === "string" && UUID_RE.test(x));
+            let pickIds: string[] = rawPickIds.filter((x) => typeof x === "string" && UUID_RE.test(x));
             if (pickIds.length === 0) {
               console.warn(`[concierge] dropping ${tc.name} — no valid UUID pick_ids (got: ${JSON.stringify(rawPickIds).slice(0, 200)})`);
               const fallback = "Forgive me — I caught myself reaching for placeholders rather than actual pieces. Tell me a little more about the room or the mood you have in mind, and I'll pull from the Maison Affluency Curation properly.";
@@ -3505,7 +3599,17 @@ serve(async (req) => {
                 }
               }
             }
-            const previewRaw = await hydratePickPreview(supabase, pickIds);
+            let previewRaw = await hydratePickPreview(supabase, pickIds);
+            if (requestedTypology) {
+              previewRaw = previewRaw.filter((p: any) => rowMatchesRequestedTypology(p, requestedTypology));
+              ({ previewRaw, pickIds } = dedupePreviewRows(previewRaw, pickIds));
+              if (pickIds.length < 2) {
+                console.warn(`[concierge] blocked ${tc.name} — insufficient true ${requestedTypology} picks after typology validation`);
+                const releaseFrame = { choices: [{ delta: { content: buildNoStrictTypologyReply(requestedTypology) } }] };
+                controller.enqueue(encoder.encode(`data: ${JSON.stringify(releaseFrame)}\n\n`));
+                continue;
+              }
+            }
             const preview = previewRaw.map((p: any) => {
               const r = p && rationaleMap[p.id];
               if (!r) return p;
@@ -3613,52 +3717,19 @@ serve(async (req) => {
             b.name === "propose_tearsheet" || b.name === "add_to_tearsheet"
           );
           if (hasTearsheet) return false;
-          const rows = Array.isArray((ragResult as any)?.rows) ? (ragResult as any).rows : [];
-          const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-          const scoreRow = (r: any) => {
-            const hay = `${r?.title || ""} ${r?.category || ""} ${r?.subcategory || ""} ${r?.materials || ""}`.toLowerCase();
-            let score = Number(r?.similarity || 0);
-            if (/\bdining\b/.test(hay)) score += 3;
-            if (/\btable\b/.test(hay)) score += 2;
-            if (/\b(oak|walnut|wood|timber)\b/.test(hay)) score += 1;
-            return score;
-          };
-          const pickIds = Array.from(new Set(rows
-            .filter((r: any) => r && typeof r.id === "string" && UUID_RE.test(r.id))
-            .sort((a: any, b: any) => scoreRow(b) - scoreRow(a))
-            .map((r: any) => r.id)
-          )).slice(0, 8);
-          if (pickIds.length < 2) return false;
-          const previewRaw = await hydratePickPreview(supabase, pickIds);
-          const validIds = new Set(previewRaw.map((p: any) => p?.id).filter(Boolean));
-          const finalIds = pickIds.filter((id) => validIds.has(id));
-          if (finalIds.length < 2) return false;
-          const rationaleMap: Record<string, { reason: string }> = {};
-          for (const p of previewRaw) {
-            if (!p?.id || !finalIds.includes(p.id)) continue;
-            const meta = [p.category, p.materials].filter(Boolean).join(" · ");
-            rationaleMap[p.id] = { reason: meta ? `Validated from the Curation for its ${meta}.` : "Validated from the Maison Affluency Curation for this brief." };
-          }
-          const preview = previewRaw
-            .filter((p: any) => finalIds.includes(p?.id))
-            .map((p: any) => ({ ...p, rationale: rationaleMap[p.id]?.reason || null }));
-          const proposal = {
-            tool: "propose_tearsheet",
-            tool_call_id: crypto.randomUUID(),
-            args: {
-              title: effectiveBrief.brief.room ? `${effectiveBrief.brief.room} first edit` : "Curated first edit",
-              pick_ids: finalIds,
-              note: "Validated directly against the Maison Affluency Curation.",
-              pick_rationales: rationaleMap,
-            },
-            preview,
-          };
+          const proposal = await buildDeterministicTearsheetProposal(
+            supabase,
+            Array.isArray((ragResult as any)?.rows) ? (ragResult as any).rows : [],
+            effectiveBrief.brief,
+            userConversationText,
+          );
+          if (!proposal) return false;
           const maxIdx = Array.from(toolCallBuffers.keys()).reduce((m, i) => (i > m ? i : m), -1);
           toolCallBuffers.set(maxIdx + 1, { id: proposal.tool_call_id, name: "propose_tearsheet", argsText: JSON.stringify(proposal.args) });
           controller.enqueue(encoder.encode(`event: proposal\ndata: ${JSON.stringify(proposal)}\n\n`));
           const closing = "Here's a first edit — would you like me to refine this selection against your client's intentions?";
           controller.enqueue(encoder.encode(`data: ${JSON.stringify({ choices: [{ delta: { content: closing } }] })}\n\n`));
-          console.log(`[concierge deterministic-fallback] emitted propose_tearsheet (${finalIds.length} picks)`);
+          console.log(`[concierge deterministic-fallback] emitted propose_tearsheet (${proposal.args?.pick_ids?.length || 0} picks)`);
           return true;
         };
 
@@ -3827,7 +3898,7 @@ serve(async (req) => {
             const parsed = JSON.parse(argsStr);
             const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
             const rawPickIds: string[] = Array.isArray(parsed.pick_ids) ? parsed.pick_ids : [];
-            const pickIds: string[] = rawPickIds.filter((x) => typeof x === "string" && UUID_RE.test(x)).slice(0, 16);
+            let pickIds: string[] = rawPickIds.filter((x) => typeof x === "string" && UUID_RE.test(x)).slice(0, 16);
             if (pickIds.length === 0) {
               console.warn("[concierge promise-recovery] no valid pick_ids returned");
               return;
@@ -3843,7 +3914,17 @@ serve(async (req) => {
                 }
               }
             }
-            const previewRaw = await hydratePickPreview(supabase, pickIds);
+            let previewRaw = await hydratePickPreview(supabase, pickIds);
+            if (requestedTypology) {
+              previewRaw = previewRaw.filter((p: any) => rowMatchesRequestedTypology(p, requestedTypology));
+              ({ previewRaw, pickIds } = dedupePreviewRows(previewRaw, pickIds));
+              if (pickIds.length < 2) {
+                console.warn(`[concierge promise-recovery] blocked — insufficient true ${requestedTypology} picks after typology validation`);
+                const releaseFrame = { choices: [{ delta: { content: buildNoStrictTypologyReply(requestedTypology) } }] };
+                controller.enqueue(encoder.encode(`data: ${JSON.stringify(releaseFrame)}\n\n`));
+                return;
+              }
+            }
             const preview = previewRaw.map((p: any) => {
               const r = p && rationaleMap[p.id];
               if (!r) return p;
