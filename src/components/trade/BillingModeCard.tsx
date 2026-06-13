@@ -117,7 +117,7 @@ export default function BillingModeCard({
     const qRes = await supabase
       .from("trade_quotes")
       .select(
-        "billing_mode, payer_type, commission_pct, net_discount_pct, end_client_billing, designer_payout_account_id, resale_certificate_id, ship_to_state",
+        "billing_mode, payer_type, commission_pct, net_discount_pct, end_client_billing, designer_payout_account_id, resale_certificate_id, managed_freight_quote_id, ship_to_state",
       )
       .eq("id", quoteId)
       .maybeSingle();
@@ -139,9 +139,21 @@ export default function BillingModeCard({
       .eq("studio_id", currentStudio.id);
     const rc: any = rcRes.data;
 
+    const fqRes = await supabase
+      .from("shipping_quotes")
+      .select(
+        "id, origin_city, origin_country, dest_city, dest_country, selected_carrier, selected_mode, total_cents, currency, status, valid_until, created_at",
+      )
+      .or(`quote_id.eq.${quoteId},quote_id.is.null`)
+      .neq("status", "cancelled")
+      .order("created_at", { ascending: false })
+      .limit(20);
+    const fq: any = fqRes.data;
+
     if (tier?.discount_pct != null) setTierPct(Number(tier.discount_pct));
     setAccounts((pa as PayoutAccount[]) ?? []);
     setCerts((rc as ResaleCert[]) ?? []);
+    setFreightQuotes((fq as FreightQuote[]) ?? []);
 
     if (q) {
       const b: QuoteBilling = {
@@ -152,6 +164,7 @@ export default function BillingModeCard({
         end_client_billing: q.end_client_billing ?? null,
         designer_payout_account_id: (q.designer_payout_account_id as string) ?? null,
         resale_certificate_id: (q.resale_certificate_id as string) ?? null,
+        managed_freight_quote_id: (q.managed_freight_quote_id as string) ?? null,
       };
       setBilling(b);
       const ec = (q.end_client_billing as any) ?? {};
