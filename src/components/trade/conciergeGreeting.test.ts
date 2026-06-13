@@ -59,18 +59,22 @@ describe("greetingForContext", () => {
     expect(greetingForContext("Discover", "/trade/dashboard")).toBe(DEFAULT_GREETING);
   });
 
-  it("uses consistent 'Allow me to help' phrasing across all stages", () => {
+  it("uses consistent 'Allow me to help' phrasing across all stages except Discover", () => {
     const samples: Array<[Stage, string]> = [
       ["Tearsheet", "/trade/mood-boards"],
       ["Tearsheet", "/trade/tearsheets/1"],
       ["Quote", "/trade/quotes/1"],
       ["Order", "/trade/orders/1"],
       ["Project", "/trade/projects/1"],
-      ["Discover", "/trade/dashboard"],
     ];
     for (const [stage, path] of samples) {
       expect(greetingForContext(stage, path)).toMatch(/^Allow me to help/);
     }
+  });
+
+  it("uses a Maison Affluency curation opener for Discover stage", () => {
+    const msg = greetingForContext("Discover", "/trade/dashboard");
+    expect(msg).toMatch(/^Welcome to Maison Affluency/);
   });
 
   it("composes correctly when stageFromPath feeds greetingForContext", () => {
@@ -150,7 +154,7 @@ describe("language selector", () => {
   it("falls back to English when lang missing entirely", () => {
     // @ts-expect-error invalid lang
     const msg = greetingForContext("Discover", "/trade", "luxury", "ja");
-    expect(msg).toMatch(/Allow me to help/);
+    expect(msg).toMatch(/Welcome to Maison Affluency/);
   });
 
   it("persists and reloads lang via localStorage", () => {

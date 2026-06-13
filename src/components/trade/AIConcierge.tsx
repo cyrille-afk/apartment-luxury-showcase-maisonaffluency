@@ -91,7 +91,7 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
       }
     } catch {}
     return [
-      { kind: "msg", role: "assistant", content: surface === "public" ? PUBLIC_GREETING : greetingForContext(stageFromPath(pathname), pathname, loadTone(), loadLang()) },
+      { kind: "msg", role: "assistant", content: surface === "public" ? PUBLIC_GREETING : greetingForContext(stageFromPath(pathname), pathname, loadTone(), loadLang()).replace(/{concierge_name}/g, name) },
     ];
   });
   const [input, setInput] = useState("");
@@ -243,7 +243,7 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
         return [next];
       }
       if (only.actions && only.actions.length > 0) return prev;
-      const next = surface === "public" ? PUBLIC_GREETING : greetingForContext(stageFromPath(pathname), pathname, tone, lang);
+      const next = surface === "public" ? PUBLIC_GREETING : greetingForContext(stageFromPath(pathname), pathname, tone, lang).replace(/{concierge_name}/g, name);
       if (only.content === next) return prev;
       return [{ kind: "msg", role: "assistant", content: next }];
     });
@@ -983,7 +983,7 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
                   setStreaming(false);
                   setInput("");
                   setStageOverride(null);
-                  setTimeline([{ kind: "msg", role: "assistant", content: surface === "public" ? PUBLIC_GREETING : greetingForContext(stageFromPath(pathname), pathname, tone, lang) }]);
+                  setTimeline([{ kind: "msg", role: "assistant", content: surface === "public" ? PUBLIC_GREETING : greetingForContext(stageFromPath(pathname), pathname, tone, lang).replace(/{concierge_name}/g, name) }]);
                 }}
                 className="text-muted-foreground hover:text-foreground transition-colors p-1 rounded-md hover:bg-muted"
                 aria-label="Start a new conversation"

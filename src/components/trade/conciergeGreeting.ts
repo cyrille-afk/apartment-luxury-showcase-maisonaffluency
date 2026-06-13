@@ -156,7 +156,7 @@ const EN: Record<Tone, ToneMap> = {
     quote: "Allow me to assist you in reviewing this quote. I can clarify trade pricing, lead times and deposits, and propose alternatives where appropriate.",
     order: "Allow me to assist you in following this order. I can outline production timelines, shipping milestones, and current status.",
     project: "Allow me to assist you in advancing this project. I can build tearsheets, draft quotes, or pull references against the brief.",
-    discover: "Welcome back. I am your private concierge — at your service to source exceptional artisan pieces, calculate global white-glove shipping, and apply your trade pricing in real time. To tailor my suggestions, may I know the city of the project?",
+    discover: "Welcome to Maison Affluency curation. I am {concierge_name}, your private concierge — at your service to source exceptional artisan pieces, calculate global white-glove shipping, unlock private pricing, and apply your trade pricing in real time. To tailor my suggestions, may I know the city of your project?",
   },
   luxury: {
     mood: "Allow me to help you fine-tune your mood board — suggesting complementary pieces grounded in what's already pinned (palette, scale, materiality) and explaining why each fits. Tell me the direction you'd like to push and I'll refine.",
@@ -164,7 +164,7 @@ const EN: Record<Tone, ToneMap> = {
     quote: "Allow me to help you refine this quote — clarifying trade pricing, lead times, and deposits, or proposing alternatives where it makes sense. Tell me what you'd like to review.",
     order: "Allow me to help you follow this order — production timelines, shipping milestones, and status updates. Tell me what you'd like to check.",
     project: "Allow me to help you advance this project — building tearsheets, drafting quotes, or pulling references against the brief. Tell me where you'd like to start.",
-    discover: "Welcome back — your private concierge. I can source exceptional pieces from our designers, calculate global white-glove shipping, and apply your trade pricing in real time. To tailor what I'm about to show you, may I know in what city your project is located?",
+    discover: "Welcome to Maison Affluency curation — I'm {concierge_name}, your private concierge. I can source exceptional pieces from our designers, calculate global white-glove shipping, unlock private pricing, and apply your trade pricing in real time. To tailor what I'm about to show you, may I know in what city your project is located?",
   },
   concise: {
     mood: "Mood board mode. I'll suggest complements based on palette, scale and materiality. Tell me the direction.",
@@ -172,7 +172,7 @@ const EN: Record<Tone, ToneMap> = {
     quote: "Quote mode. Pricing, lead times, deposits, alternatives. What to review?",
     order: "Order mode. Production, shipping, status. What to check?",
     project: "Project mode. Tearsheets, quotes, references. Where to start?",
-    discover: "Private concierge. I source pieces, price white-glove shipping, and apply trade pricing. What city is the project in?",
+    discover: "Welcome to Maison Affluency curation. I'm {concierge_name} — sourcing pieces, calculating white-glove shipping, unlocking private pricing, applying trade rates. What city is the project in?",
   },
   designer: {
     mood: "Let's tune this board. I'll riff on what's pinned — palette, scale, materiality — and flag pieces that work. Tell me the move (warmer, more sculptural, lighter…) and I'll pull options.",
@@ -180,7 +180,7 @@ const EN: Record<Tone, ToneMap> = {
     quote: "Let's work this quote. I can break down pricing, lead times and deposits, or propose swaps. What do you want to look at?",
     order: "Let's track this order. Production, shipping milestones, status — what do you need to know?",
     project: "Let's push this project forward. Tearsheets, quotes, references — where do we start?",
-    discover: "Your private concierge — pieces, white-glove shipping, trade pricing applied in real time. What city is the project in?",
+    discover: "Welcome to Maison Affluency curation. I'm {concierge_name} — your private concierge for pieces, white-glove shipping, private pricing, trade rates in real time. What city is the project in?",
   },
 };
 
