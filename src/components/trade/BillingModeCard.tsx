@@ -227,20 +227,23 @@ export default function BillingModeCard({
         {!isEditable && <Badge variant="outline">Locked — submitted</Badge>}
       </div>
 
-      <RadioGroup
-        value={mode}
-        onValueChange={(v) => isEditable && handleModeChange(v as BillingMode)}
-        disabled={!isEditable || saving}
-        className="grid md:grid-cols-2 gap-3"
-      >
+      <div className="grid md:grid-cols-2 gap-3">
         {/* AGENT COMMISSION */}
-        <label
-          className={`rounded-md border p-4 cursor-pointer transition-colors ${
+        <button
+          type="button"
+          onClick={() => isEditable && !saving && handleModeChange("agent_commission")}
+          disabled={!isEditable || saving}
+          className={`text-left rounded-md border p-4 transition-colors ${
             mode === "agent_commission" ? "border-foreground bg-muted/40" : "border-border hover:bg-muted/20"
           } ${!isEditable ? "cursor-not-allowed opacity-70" : ""}`}
         >
           <div className="flex items-start gap-3">
-            <RadioGroupItem value="agent_commission" id="bm-agent" className="mt-1" />
+            <span
+              className={`mt-1 inline-block h-4 w-4 rounded-full border-2 shrink-0 ${
+                mode === "agent_commission" ? "border-foreground bg-foreground" : "border-muted-foreground bg-background"
+              }`}
+              aria-hidden
+            />
             <div className="space-y-1 min-w-0 flex-1">
               <div className="font-medium text-sm flex items-center gap-2">
                 <User className="h-3.5 w-3.5" /> Bill my client — receive commission
@@ -254,16 +257,24 @@ export default function BillingModeCard({
               </p>
             </div>
           </div>
-        </label>
+        </button>
 
         {/* NET BUY */}
-        <label
-          className={`rounded-md border p-4 cursor-pointer transition-colors ${
+        <button
+          type="button"
+          onClick={() => isEditable && !saving && handleModeChange("net_buy")}
+          disabled={!isEditable || saving}
+          className={`text-left rounded-md border p-4 transition-colors ${
             mode === "net_buy" ? "border-foreground bg-muted/40" : "border-border hover:bg-muted/20"
           } ${!isEditable ? "cursor-not-allowed opacity-70" : ""}`}
         >
           <div className="flex items-start gap-3">
-            <RadioGroupItem value="net_buy" id="bm-net" className="mt-1" />
+            <span
+              className={`mt-1 inline-block h-4 w-4 rounded-full border-2 shrink-0 ${
+                mode === "net_buy" ? "border-foreground bg-foreground" : "border-muted-foreground bg-background"
+              }`}
+              aria-hidden
+            />
             <div className="space-y-1 min-w-0 flex-1">
               <div className="font-medium text-sm flex items-center gap-2">
                 <Building2 className="h-3.5 w-3.5" /> Buy net — I'll invoice my client
@@ -276,8 +287,8 @@ export default function BillingModeCard({
               </p>
             </div>
           </div>
-        </label>
-      </RadioGroup>
+        </button>
+      </div>
 
       {/* AGENT mode — end-client billing */}
       {mode === "agent_commission" && (
