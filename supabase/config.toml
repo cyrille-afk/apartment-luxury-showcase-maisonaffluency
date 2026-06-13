@@ -41,3 +41,5 @@ project_id = "dcrauiygaezoduwdjmsm"
     verify_jwt = false
   [functions.visualiser-render]
     verify_jwt = true
+  [functions.send-commission-statement]
+    verify_jwt = true
