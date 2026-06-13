@@ -3951,6 +3951,7 @@ serve(async (req) => {
           //     (tearsheet → quote) holds without buffering SSE writes.
           backfillTearsheetIfNeeded();
           await flushProposal();
+          await emitDeterministicTearsheetFallback();
           // (1b) Promise-without-delivery recovery: the model wrote prose like
           //      "here's a draft tearsheet…" but never emitted propose_tearsheet
           //      (and no quote/ffe either). Force a follow-up tool call so the
