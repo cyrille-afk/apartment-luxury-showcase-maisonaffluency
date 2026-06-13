@@ -514,7 +514,10 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
 
   const send = useCallback(async (overrideText?: string) => {
     const text = (overrideText ?? input).trim();
-    if (!text || streaming) return;
+    // Allow sending with attachments only (no text) — use a tiny default prompt.
+    const hasFiles = attachments.length > 0;
+    if (!text && !hasFiles) return;
+    if (streaming) return;
 
     // Special intercepts: client-side actions instead of model calls
     if (text === "__concierge:rename__") {
