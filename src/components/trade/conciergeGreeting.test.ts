@@ -154,7 +154,7 @@ describe("language selector", () => {
   it("falls back to English when lang missing entirely", () => {
     // @ts-expect-error invalid lang
     const msg = greetingForContext("Discover", "/trade", "luxury", "ja");
-    expect(msg).toMatch(/Allow me to help/);
+    expect(msg).toMatch(/Welcome to Maison Affluency/);
   });
 
   it("persists and reloads lang via localStorage", () => {
