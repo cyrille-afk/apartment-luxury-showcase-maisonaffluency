@@ -191,7 +191,11 @@ async function callCloudflare(init: RequestInit, reason: string, primaryCtx: { s
   console.warn(
     `[concierge] CLOUDFLARE_FALLBACK_RESULT status=${cfRes.status} ok=${cfRes.ok} requestId=${extractRequestId(cfRes)}`
   );
-  return cfRes;
+  return new Response(cfRes.body, {
+    status: cfRes.status,
+    statusText: cfRes.statusText,
+    headers: { ...Object.fromEntries(cfRes.headers.entries()), "x-concierge-fallback": "cloudflare" },
+  });
 }
 
 /**
