@@ -983,7 +983,7 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
                   setStreaming(false);
                   setInput("");
                   setStageOverride(null);
-                  setTimeline([{ kind: "msg", role: "assistant", content: surface === "public" ? PUBLIC_GREETING : greetingForContext(stageFromPath(pathname), pathname, tone, lang) }]);
+                  setTimeline([{ kind: "msg", role: "assistant", content: surface === "public" ? PUBLIC_GREETING : greetingForContext(stageFromPath(pathname), pathname, tone, lang).replace(/{concierge_name}/g, name) }]);
                 }}
                 className="text-muted-foreground hover:text-foreground transition-colors p-1 rounded-md hover:bg-muted"
                 aria-label="Start a new conversation"
