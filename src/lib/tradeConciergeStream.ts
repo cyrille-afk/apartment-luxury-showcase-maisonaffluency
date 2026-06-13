@@ -1,6 +1,24 @@
 import { supabase } from "@/integrations/supabase/client";
 
-export type ChatMessage = { role: "user" | "assistant"; content: string };
+export type ChatContentPart =
+  | { type: "text"; text: string }
+  | { type: "image_url"; image_url: { url: string } }
+  | { type: "file"; file: { filename: string; file_data: string } };
+
+export type ChatMessage = {
+  role: "user" | "assistant";
+  content: string | ChatContentPart[];
+};
+
+/** Extract plain text from a possibly-multimodal content payload. */
+export function chatMessageText(content: ChatMessage["content"]): string {
+  if (typeof content === "string") return content;
+  if (!Array.isArray(content)) return "";
+  return content
+    .filter((p): p is Extract<ChatContentPart, { type: "text" }> => p?.type === "text")
+    .map((p) => p.text)
+    .join(" ");
+}
 
 export type RationaleEntry = { reason: string; detail?: string | null };
 
