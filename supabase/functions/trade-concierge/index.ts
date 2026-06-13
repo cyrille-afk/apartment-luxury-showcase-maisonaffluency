@@ -1784,7 +1784,7 @@ async function extractBrief(apiKey: string, latestUserMessage: string): Promise<
   try {
     const result = await withSemanticCache(
       {
-        feature: "trade-concierge-planner",
+        feature: "trade-concierge-planner-v2",
         model: SENTIMENT_MODEL,
         apiKey,
         prompt: latestUserMessage.slice(0, 1800),
@@ -1811,12 +1811,13 @@ async function extractBrief(apiKey: string, latestUserMessage: string): Promise<
                   "- propose_ffe_rows — draft a ROOM-BY-ROOM FF&E schedule bound to the active project (every row has a `room` label)\n\n" +
                   "Plan rules:\n" +
                   "- chitchat / navigation / FAQ: empty plan.\n" +
+                  "- OPENING BRIEFS that merely state what the user is looking for (e.g. 'I'm looking for a statement dining table for my Belgravia townhouse', 'we need lighting for a Mayfair drawing room', 'searching for a sofa for a London penthouse'): EMPTY PLAN. The concierge MUST qualify (style, capacity/scale, materials, era, lead-time) before proposing. Do NOT emit propose_tearsheet on a discovery-style opener no matter how specific the typology.\n" +
                   "- EXPLANATORY follow-ups about pieces already discussed ('why the X?', 'tell me more about X', 'what is X?', 'how does it compare', 'what materials', 'lead time?', 'who designed it'): EMPTY PLAN — the downstream model must answer conversationally in prose. Do NOT re-propose tearsheets or quotes.\n" +
-                  "- 'show / suggest / curate / mood / room brief' without pricing intent: [propose_tearsheet] (or add_to_tearsheet if they reference an existing board).\n" +
+                  "- EXPLICIT selection verbs in THIS message ('propose', 'suggest', 'recommend', 'show me', 'pull together', 'curate', 'reinterpret', 'alternatives', 'options', 'first edit', 'draft a selection', 'what do you have in…'): [propose_tearsheet] (or add_to_tearsheet if they reference an existing board). Without one of these verbs, do NOT emit propose_tearsheet.\n" +
                   "- 'quote / estimate / pricing breakdown' on already-decided pieces: [draft_quote] (or add_to_quote).\n" +
                   "- 'FF&E schedule / multi-room brief / spec the whole apartment / drawing-room + dining + bedroom' bound to a project: [propose_ffe_rows].\n" +
                   "- BRIEF + QUOTE in the SAME turn (e.g. 'pull together a Mayfair drawing-room and quote me'): emit BOTH in order [propose_tearsheet, draft_quote] so the downstream loop chains them on the same picks.\n" +
-                  "Be conservative — only emit a tool if the user clearly intends that action this turn. When in doubt between 'reply in prose' and 'emit a tool', prefer empty plan.",
+                  "Be conservative — only emit a tool if the user CLEARLY intends that action in THIS message. Prior-turn context is NOT a license to act. When in doubt, prefer empty plan and let the downstream model ask one qualifying question.",
               },
               { role: "user", content: latestUserMessage.slice(0, 1500) },
             ],
@@ -1878,7 +1879,7 @@ async function extractBrief(apiKey: string, latestUserMessage: string): Promise<
       },
     );
     logAiUsage({
-      feature: "trade-concierge-planner",
+      feature: "trade-concierge-planner-v2",
       model: SENTIMENT_MODEL,
       usage: result.usage,
       cached: result.cached,
@@ -2697,7 +2698,19 @@ serve(async (req) => {
       loadProductCadAssets(supabase),
     ]);
 
-    const effectiveBrief: ExtractedBrief = shouldActOnAccumulatedBrief && !extractedBrief.plan.length
+    // Selection verbs must appear in the LATEST user message to authorize a
+    // tearsheet proposal. Otherwise the turn is treated as discovery — the
+    // model must ask clarifying questions instead of jumping straight to a
+    // curated edit. This prevents both (a) one-line opening briefs like
+    // "I'm looking for a statement dining table for my Belgravia townhouse"
+    // from auto-proposing, and (b) sticky-fact context from PRIOR turns or
+    // semantic-cache hits from leaking a stale "selection" plan into a new
+    // exploratory turn.
+    const lastUserMsgLower = lastUserMsg.toLowerCase();
+    const hasExplicitSelectionVerb = /\b(propose|suggest|recommend|show me|pull (?:together|me)|curate|reinterpret|alternatives?|options?|first edit|draft (?:a )?(?:tearsheet|edit|selection)|put together|assemble|i'?d like to see|let'?s see|what do you have)\b/.test(lastUserMsgLower);
+    const opensWithLookingFor = /^\s*(?:i(?:'m| am)?\s+(?:looking|searching|after|hunting|sourcing|in the market)|we(?:'re| are)?\s+(?:looking|searching|after))\b/.test(lastUserMsgLower);
+
+    let effectiveBrief: ExtractedBrief = shouldActOnAccumulatedBrief && !extractedBrief.plan.length && hasExplicitSelectionVerb
       ? {
           intent: "selection",
           brief: {
@@ -2712,6 +2725,19 @@ serve(async (req) => {
           plan: ["propose_tearsheet"],
         }
       : extractedBrief;
+
+    // DISCOVERY GATE — strip any auto-proposed tearsheet/quote plan when the
+    // latest user message is an opening brief without an explicit selection
+    // verb. Forces the concierge to ask clarifying questions on turn 1
+    // instead of inferring intent from an earlier conversation.
+    if (
+      !hasExplicitSelectionVerb &&
+      opensWithLookingFor &&
+      effectiveBrief.plan.some((t) => t === "propose_tearsheet" || t === "add_to_tearsheet" || t === "draft_quote")
+    ) {
+      console.log("[concierge discovery-gate] stripping plan — opening brief without selection verb", { lastUserMsg, originalPlan: effectiveBrief.plan });
+      effectiveBrief = { ...effectiveBrief, intent: "discovery", plan: [] };
+    }
     const requestedTypology = inferRequestedTypology(effectiveBrief.brief, userConversationText);
 
     if (shouldActOnAccumulatedBrief && breaker.state() === "open" && CLOUDFLARE_ENABLED) {
