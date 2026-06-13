@@ -74,7 +74,15 @@ interface Pin {
 const normalizeAssetKey = (url: string | null) => {
   if (!url?.trim()) return "";
   const clean = url.trim().split("?")[0];
-  return clean.replace(/\/upload\/(?:[^/]+\/)*(v\d+\/.*)$/i, "/upload/$1").toLowerCase();
+  const marker = "/image/upload/";
+  const markerIndex = clean.indexOf(marker);
+  if (markerIndex === -1) return clean.toLowerCase();
+  const prefix = clean.slice(0, markerIndex + marker.length);
+  const parts = clean.slice(markerIndex + marker.length).split("/").filter(Boolean);
+  while (parts.length > 1 && !/^v\d+$/i.test(parts[0]) && /(^|,)([a-z]_|ar_|q_auto|f_auto|c_|g_|w_|h_)/i.test(parts[0])) {
+    parts.shift();
+  }
+  return `${prefix}${parts.join("/")}`.toLowerCase();
 };
 
 const productLabelScore = (name: string | null | undefined) => {
