@@ -3646,13 +3646,17 @@ serve(async (req) => {
             let previewRaw = await hydratePickPreview(supabase, pickIds);
             if (requestedTypology) {
               previewRaw = previewRaw.filter((p: any) => rowMatchesRequestedTypology(p, requestedTypology));
-              ({ previewRaw, pickIds } = dedupePreviewRows(previewRaw, pickIds));
-              if (pickIds.length < 2) {
-                console.warn(`[concierge] blocked ${tc.name} — insufficient true ${requestedTypology} picks after typology validation`);
-                const releaseFrame = { choices: [{ delta: { content: buildNoStrictTypologyReply(requestedTypology) } }] };
-                controller.enqueue(encoder.encode(`data: ${JSON.stringify(releaseFrame)}\n\n`));
-                continue;
-              }
+            }
+            // Always dedupe — collapses scraper-injected variant noise
+            // (e.g. "Scala Dining Table" / "Scala 3Dining Table" /
+            // "Scala 300 Dining Table" sharing the same brand + image)
+            // regardless of whether a typology was inferred.
+            ({ previewRaw, pickIds } = dedupePreviewRows(previewRaw, pickIds));
+            if (requestedTypology && pickIds.length < 2) {
+              console.warn(`[concierge] blocked ${tc.name} — insufficient true ${requestedTypology} picks after typology validation`);
+              const releaseFrame = { choices: [{ delta: { content: buildNoStrictTypologyReply(requestedTypology) } }] };
+              controller.enqueue(encoder.encode(`data: ${JSON.stringify(releaseFrame)}\n\n`));
+              continue;
             }
             const preview = previewRaw.map((p: any) => {
               const r = p && rationaleMap[p.id];
