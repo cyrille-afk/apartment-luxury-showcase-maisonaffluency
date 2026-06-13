@@ -231,6 +231,26 @@ export async function buildQuotePdf(args: QuotePdfArgs): Promise<jsPDF> {
 
   let y = 168;
 
+  // FOR-RESALE notice (net_buy only) — small stamp under the header.
+  if (args.forResaleNotice) {
+    doc.setDrawColor(JADE[0], JADE[1], JADE[2]);
+    doc.setLineWidth(0.6);
+    doc.setFillColor(245, 248, 246);
+    doc.roundedRect(M, y - 4, contentW, 30, 4, 4, "FD");
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(8.5);
+    doc.setTextColor(JADE[0], JADE[1], JADE[2]);
+    doc.text("FOR RESALE — NOT FOR RESALE TO END CONSUMERS", M + 12, y + 9);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(7.5);
+    doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
+    const certLine = args.resaleCertNumber
+      ? `Sold to designer firm for resale. Resale certificate on file: ${args.resaleCertNumber}.`
+      : "Sold to designer firm for resale under verified resale certificate on file.";
+    doc.text(certLine, M + 12, y + 21);
+    y += 40;
+  }
+
   // ---- Company address block (left) + meta (right)
   y = drawCompanyAndMeta(doc, args, M, y, contentW);
 
