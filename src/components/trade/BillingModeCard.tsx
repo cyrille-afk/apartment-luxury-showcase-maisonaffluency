@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+// radio-group component not present; use styled buttons
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
@@ -97,29 +97,35 @@ export default function BillingModeCard({
   const load = useCallback(async () => {
     if (!currentStudio) return;
     setLoading(true);
-    const [{ data: q }, { data: tier }, { data: pa }, { data: rc }] = await Promise.all([
-      supabase
-        .from("trade_quotes")
-        .select(
-          "billing_mode, payer_type, commission_pct, net_discount_pct, end_client_billing, designer_payout_account_id, resale_certificate_id, ship_to_state",
-        )
-        .eq("id", quoteId)
-        .maybeSingle(),
-      supabase
-        .from("trade_tier_config")
-        .select("discount_pct")
-        .eq("studio_id", currentStudio.id)
-        .maybeSingle(),
-      supabase
-        .from("studio_payout_accounts")
-        .select("id, label, country_code, is_default, stripe_connect_status")
-        .eq("studio_id", currentStudio.id)
-        .order("is_default", { ascending: false }),
-      supabase
-        .from("studio_resale_certificates")
-        .select("id, state_code, verification_status, expires_on")
-        .eq("studio_id", currentStudio.id),
-    ]);
+
+    const qRes = await supabase
+      .from("trade_quotes")
+      .select(
+        "billing_mode, payer_type, commission_pct, net_discount_pct, end_client_billing, designer_payout_account_id, resale_certificate_id, ship_to_state",
+      )
+      .eq("id", quoteId)
+      .maybeSingle();
+    const q: any = qRes.data;
+
+    const tierRes = await supabase
+      .from("trade_tier_config")
+      .select("discount_pct")
+      .eq("studio_id", currentStudio.id)
+      .maybeSingle();
+    const tier: any = tierRes.data;
+
+    const paRes = await supabase
+      .from("studio_payout_accounts")
+      .select("id, label, country_code, is_default, stripe_connect_status")
+      .eq("studio_id", currentStudio.id)
+      .order("is_default", { ascending: false });
+    const pa: any = paRes.data;
+
+    const rcRes = await supabase
+      .from("studio_resale_certificates")
+      .select("id, state_code, verification_status, expires_on")
+      .eq("studio_id", currentStudio.id);
+    const rc: any = rcRes.data;
 
     if (tier?.discount_pct != null) setTierPct(Number(tier.discount_pct));
     setAccounts((pa as PayoutAccount[]) ?? []);
