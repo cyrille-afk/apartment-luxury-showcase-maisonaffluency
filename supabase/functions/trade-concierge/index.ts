@@ -3303,8 +3303,8 @@ serve(async (req) => {
           // Stage gate: never synthesize a tearsheet when the user is on the Quote stage.
           if (stageForcesQuote) return;
           const wantsTearsheet =
-            extractedBrief.plan.includes("propose_tearsheet") ||
-            extractedBrief.plan.includes("add_to_tearsheet");
+            effectiveBrief.plan.includes("propose_tearsheet") ||
+            effectiveBrief.plan.includes("add_to_tearsheet");
           if (!wantsTearsheet) return;
           const buffers = Array.from(toolCallBuffers.entries());
           const hasTearsheet = buffers.some(([, b]) => b.name === "propose_tearsheet" || b.name === "add_to_tearsheet");
@@ -3322,8 +3322,8 @@ serve(async (req) => {
           if (pickIds.length === 0) return;
 
           // Derive a tearsheet title from the planner brief; fallback to a generic label.
-          const room = extractedBrief.brief.room;
-          const style = extractedBrief.brief.style;
+          const room = effectiveBrief.brief.room;
+          const style = effectiveBrief.brief.style;
           const titleBits = [style, room].filter((s) => typeof s === "string" && s.trim().length > 0);
           const title = titleBits.length
             ? `${titleBits.join(" ")} — selected pieces`
@@ -3351,8 +3351,8 @@ serve(async (req) => {
         // `draft_quote` using the SAME pick_ids. Emits a second `event: proposal`
         // so the client renders one combined plan (tearsheet card + quote card).
         const runChainIfNeeded = async () => {
-          if (!extractedBrief.plan.includes("draft_quote")) return;
-          if (!extractedBrief.plan.includes("propose_tearsheet") && !extractedBrief.plan.includes("add_to_tearsheet")) return;
+          if (!effectiveBrief.plan.includes("draft_quote")) return;
+          if (!effectiveBrief.plan.includes("propose_tearsheet") && !effectiveBrief.plan.includes("add_to_tearsheet")) return;
           const hasQuote = Array.from(toolCallBuffers.values()).some((tc) => tc.name === "draft_quote" || tc.name === "add_to_quote");
           if (hasQuote) return;
           let tearsheetPickIds: string[] | null = null;
@@ -3369,8 +3369,8 @@ serve(async (req) => {
           }
           if (!tearsheetPickIds || tearsheetPickIds.length === 0) return;
 
-          const qtyHint = extractedBrief.brief.qty_hint || 1;
-          const leadCeiling = extractedBrief.brief.lead_weeks_max || null;
+          const qtyHint = effectiveBrief.brief.qty_hint || 1;
+          const leadCeiling = effectiveBrief.brief.lead_weeks_max || null;
           const followupSystem = [
             "You are the Maison Affluency Trade Concierge follow-up step.",
             `The user's tearsheet pick_ids are: ${tearsheetPickIds.join(", ")}.`,
