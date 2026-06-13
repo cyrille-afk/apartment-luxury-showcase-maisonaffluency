@@ -24,26 +24,27 @@ Deno.serve(async (req) => {
     const lovableApiKey = Deno.env.get('LOVABLE_API_KEY')!
     const supabase = createClient(supabaseUrl, serviceRoleKey)
 
+    const body = await req.json()
+    const { board_id, product_ids, source } = body
+
+    // Auth is only required when reading a user-owned board.
+    // For product_ids-only calls (dashboard strip), allow anonymous access
+    // since no user-scoped data is read or written.
+    let user: { id: string } | null = null
     const authHeader = req.headers.get('Authorization')
-    if (!authHeader) {
-      return new Response(JSON.stringify({ error: 'Missing auth' }), {
-        status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      })
+    if (authHeader) {
+      const token = authHeader.replace(/^Bearer\s+/i, '')
+      const anonClient = createClient(supabaseUrl, anonKey)
+      const { data: claimsData } = await anonClient.auth.getClaims(token)
+      const claims = claimsData?.claims as { sub?: string } | undefined
+      if (claims?.sub) user = { id: claims.sub }
     }
 
-    const token = authHeader.replace(/^Bearer\s+/i, '')
-    const anonClient = createClient(supabaseUrl, anonKey)
-    const { data: claimsData, error: authError } = await anonClient.auth.getClaims(token)
-    const claims = claimsData?.claims as { sub?: string } | undefined
-    const user = claims?.sub ? { id: claims.sub } : null
-    if (authError || !user) {
+    if (board_id && !user) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
         status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }
-
-    const body = await req.json()
-    const { board_id, product_ids, source } = body
 
     let boardTitle = 'Mood Board'
     let boardProductIds: string[] = []
