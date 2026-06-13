@@ -70,7 +70,9 @@ interface Pin {
 
 // ───────── Page ──────────────────────────────────────────────────────────────
 const TradeVisualiser = () => {
-  const [photo, setPhoto] = useState<string | null>(null);
+  const [photo, setPhoto] = useState<string | null>(null); // original (object URL or data URL)
+  const [photoDataUrl, setPhotoDataUrl] = useState<string | null>(null); // base64 for API
+  const [renderedImage, setRenderedImage] = useState<string | null>(null);
   const [surface, setSurface] = useState<Surface>("walls");
   const [pins, setPins] = useState<Pin[]>([]);
   const [activePinId, setActivePinId] = useState<string | null>(null);
@@ -79,6 +81,7 @@ const TradeVisualiser = () => {
   const [loadingSwatches, setLoadingSwatches] = useState(false);
   const [rendering, setRendering] = useState(false);
   const [rendered, setRendered] = useState(false);
+  const [renderError, setRenderError] = useState<string | null>(null);
 
   const imgRef = useRef<HTMLDivElement | null>(null);
   const fileRef = useRef<HTMLInputElement | null>(null);
