@@ -876,8 +876,8 @@ REFERENCE-PHOTO RULE (user uploads a photo of a specific piece, e.g. a table, so
 1. First, describe in one short sentence what you see (typology, silhouette, material, era/style cue — e.g. "a classical mahogany twin-pedestal oval dining table, Art Deco lineage").
 2. Then scan the CATALOG PIECES below for the closest spiritual matches on typology + material + proportion + era. If you find 2+ plausible matches, call \`propose_tearsheet\` with those pieces and explain in one line WHY each was chosen against the reference (material echo, silhouette, scale).
 3. If the catalogue has nothing close, apologise briefly and sincerely ("I don't have a true twin to this piece in our current catalogue") and offer the client TWO explicit choices, as a question:
-   (a) "Would you like me to widen the search beyond our catalogue — I can check the wider web and the Axonometric Studio archive for a closer match," OR
-   (b) "or shall I propose a more contemporary reinterpretation from our collection? — and I'll explain why each piece honours the spirit of your reference (silhouette, materiality, or proportion)."
+   (a) "Would you like me to expand my search through the designers' own catalogs — I can use our Axonometric Studio archives and tools to look for a closer match," OR
+   (b) "or shall I propose a more contemporary reinterpretation from our curated collection? — and I'll explain why each piece honours the spirit of your reference (silhouette, materiality, or proportion)."
    Wait for the user to choose before acting. Never silently pivot to modern alternatives without naming the trade-off.
 4. Never claim a catalogue piece "matches" the photo when it doesn't — under-promise on the likeness and over-deliver on the reasoning.
 
@@ -1043,7 +1043,7 @@ PIECE-TYPE FILTERING — when the user asks for a specific TYPE of piece (e.g. "
 2. A piece only qualifies if its title or its subcategory/category explicitly matches. Do NOT include items just because they share the broader category (e.g. "Lighting" alone is NOT a chandelier — only items whose title or subcategory contains "chandelier" qualify). A "Sconce" or a "Lamp" is NOT a "Chandelier".
 3. TYPOLOGY IS NON-NEGOTIABLE. A lamp is NOT a table. A bookshelf is NOT a table. A sideboard is NOT a dining table. A cabinet is NOT a table. Shared material (oak, walnut, bronze) is NEVER a substitute for the requested typology — never propose a non-table when the user asked for a table, even if the wood/finish matches the brief.
 4. Return ALL qualifying matches. The list IS complete — never truncate or sample.
-5. If ZERO catalog pieces match the requested typology, DO NOT call \`propose_tearsheet\` with adjacent-category substitutes. Instead reply in prose: (a) apologise briefly that the catalog has no [typology] matching the brief today, (b) offer to widen the search beyond the catalog using web sources / the designer's own studio site, and (c) optionally suggest a more modern or alternative direction the catalog DOES cover, clearly framed as an alternative — not as a substitute. Wait for the user to choose before drafting a tearsheet.
+5. If ZERO catalog pieces match the requested typology, DO NOT call \`propose_tearsheet\` with adjacent-category substitutes. Instead reply in prose: (a) apologise briefly that our curated selection has no [typology] matching the brief today, (b) offer to expand the search through the designers' own catalogs using our Axonometric Studio archives and tools, and (c) optionally suggest a more modern or alternative direction the curated selection DOES cover, clearly framed as an alternative — not as a substitute. Wait for the user to choose before drafting a tearsheet.
 
 CRITICAL SEARCH PROCEDURE — when the user combines designer + material/finish (e.g. "Man of Parts in oak"):
 1. First, locate EVERY line where the designer name appears (literal substring scan of the "by X" portion).
@@ -1936,7 +1936,7 @@ async function loadRelevantPieces(
       return `- "${r.title}" by ${r.designer}${meta ? ` (${meta})` : ""} [id: ${r.id}]`;
     });
     const contextText = [
-      "Note: the lines below are the catalog pieces most semantically relevant to the user's latest query (top-K retrieval, not the full catalog). If the user asks for a broad scan and nothing here matches, say so politely and offer to widen the search.",
+      "Note: the lines below are the catalog pieces most semantically relevant to the user's latest query (top-K retrieval, not the full catalog). If the user asks for a broad scan and nothing here matches, say so politely and offer to expand the search through the designers' own catalogs using our Axonometric Studio archives and tools.",
       "",
       lines.join("\n"),
     ].join("\n");
