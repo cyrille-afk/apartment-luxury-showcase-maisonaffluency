@@ -17,6 +17,7 @@ const coreItems = [
   { title: "Dashboard", url: "/trade", icon: LayoutDashboard, end: true },
   { title: "My Dashboard", url: "/trade/me", icon: UserCircle },
   { title: "Showroom", url: "/trade/showroom", icon: MapPin },
+  { title: "Visualiser", url: "/trade/visualiser", icon: Wand2 },
   { title: "Favorites", url: "/trade/favorites", icon: Heart },
   { title: "Projects", url: "/trade/projects", icon: FolderKanban },
   { title: "Project Folders", url: "/trade/boards", icon: FolderArchive },
