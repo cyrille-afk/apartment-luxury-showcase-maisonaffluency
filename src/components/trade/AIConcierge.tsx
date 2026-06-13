@@ -806,7 +806,7 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
     } catch {
       setStreaming(false);
     }
-  }, [input, streaming, timeline, stage, tone, lang, name, openLatestQuote]);
+  }, [input, attachments, streaming, timeline, stage, tone, lang, name, openLatestQuote]);
 
   const handleProposalResolved = (
     proposalIndex: number,
