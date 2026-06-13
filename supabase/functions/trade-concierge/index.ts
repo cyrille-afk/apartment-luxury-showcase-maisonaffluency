@@ -3881,7 +3881,7 @@ serve(async (req) => {
             const parsed = JSON.parse(argsStr);
             const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
             const rawPickIds: string[] = Array.isArray(parsed.pick_ids) ? parsed.pick_ids : [];
-            const pickIds: string[] = rawPickIds.filter((x) => typeof x === "string" && UUID_RE.test(x)).slice(0, 16);
+            let pickIds: string[] = rawPickIds.filter((x) => typeof x === "string" && UUID_RE.test(x)).slice(0, 16);
             if (pickIds.length === 0) {
               console.warn("[concierge promise-recovery] no valid pick_ids returned");
               return;
