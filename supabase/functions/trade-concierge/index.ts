@@ -3345,6 +3345,7 @@ serve(async (req) => {
         let suspectedToolCallText = false;
         let suppressedTextBuf = "";
         let forwardedAnyText = false;
+        let assistantTextBuf = "";
         const looksLikeToolEnvelopeStart = (s: string) => {
           const t = s.trimStart();
           if (!t.startsWith("{")) return false;
