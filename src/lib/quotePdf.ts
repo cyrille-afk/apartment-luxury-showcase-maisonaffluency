@@ -155,6 +155,12 @@ export interface QuotePdfArgs {
   ukDdpPage?: UkDdpPageArgs | null;
   /** Weighted deposit fraction (0..1). Defaults to 0.6. When 1, balance row is hidden. */
   depositPct?: number;
+  /** Document kind — drives the header title. Defaults to "quote". */
+  documentKind?: "quote" | "tax_invoice" | "proforma_net_buy";
+  /** Render a "FOR RESALE — NOT FOR RESALE TO END CONSUMERS" notice on page 1 (net_buy). */
+  forResaleNotice?: boolean;
+  /** Resale certificate reference shown in the meta block (net_buy, US). */
+  resaleCertNumber?: string | null;
 }
 
 
