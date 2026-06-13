@@ -153,28 +153,67 @@ export default function PayoutAccountsSection() {
   const handleCreate = async () => {
     if (!currentStudio || !user || !form.account_holder_name.trim()) return;
     setCreating(true);
-    const { error } = await supabase.from("studio_payout_accounts").insert({
-      studio_id: currentStudio.id,
-      created_by: user.id,
-      label: form.label.trim() || "Primary payout",
-      account_holder_name: form.account_holder_name.trim(),
-      country_code: form.country_code,
-      currency: form.currency,
-      iban: form.iban.trim() || null,
-      ach_routing_number: form.ach_routing_number.trim() || null,
-      ach_account_number: form.ach_account_number.trim() || null,
-      swift_bic: form.swift_bic.trim() || null,
-      bank_name: form.bank_name.trim() || null,
-      is_default: accounts.length === 0,
-    });
-    setCreating(false);
-    if (error) {
-      toast({ title: "Could not save", description: error.message, variant: "destructive" });
-      return;
+    try {
+      let taxDocPath: string | null = null;
+      if (form.tax_form_file) {
+        const ext = form.tax_form_file.name.split(".").pop() || "pdf";
+        taxDocPath = `${currentStudio.id}/tax-forms/${form.tax_form_kind}-${Date.now()}.${ext}`;
+        const { error: upErr } = await supabase.storage
+          .from("client-documents")
+          .upload(taxDocPath, form.tax_form_file, { contentType: form.tax_form_file.type, upsert: false });
+        if (upErr) throw upErr;
+      }
+
+      const { error } = await supabase.from("studio_payout_accounts").insert({
+        studio_id: currentStudio.id,
+        created_by: user.id,
+        label: form.label.trim() || "Primary payout",
+        account_holder_name: form.account_holder_name.trim(),
+        country_code: form.country_code,
+        currency: form.currency,
+        iban: form.iban.trim() || null,
+        ach_routing_number: form.ach_routing_number.trim() || null,
+        ach_account_number: form.ach_account_number.trim() || null,
+        swift_bic: form.swift_bic.trim() || null,
+        bank_name: form.bank_name.trim() || null,
+        tax_form_kind: form.tax_form_kind === "NONE" ? null : form.tax_form_kind,
+        tax_form_reference: form.tax_form_reference.trim() || null,
+        tax_form_document_path: taxDocPath,
+        is_default: accounts.length === 0,
+      });
+      if (error) throw error;
+
+      setCreateOpen(false);
+      setForm({
+        ...form,
+        account_holder_name: "", iban: "", ach_routing_number: "",
+        ach_account_number: "", swift_bic: "", bank_name: "",
+        tax_form_reference: "", tax_form_file: null,
+      });
+      fetchAccounts();
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      toast({ title: "Could not save", description: msg, variant: "destructive" });
+    } finally {
+      setCreating(false);
     }
-    setCreateOpen(false);
-    setForm({ ...form, account_holder_name: "", iban: "", ach_routing_number: "", ach_account_number: "", swift_bic: "", bank_name: "" });
-    fetchAccounts();
+  };
+
+  const handleViewTaxDoc = async (account: PayoutAccount) => {
+    if (!account.tax_form_document_path) return;
+    setTaxDocBusyId(account.id);
+    try {
+      const { data, error } = await supabase.storage
+        .from("client-documents")
+        .createSignedUrl(account.tax_form_document_path, 60);
+      if (error || !data?.signedUrl) throw error ?? new Error("No URL");
+      window.open(data.signedUrl, "_blank", "noopener,noreferrer");
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      toast({ title: "Could not open document", description: msg, variant: "destructive" });
+    } finally {
+      setTaxDocBusyId(null);
+    }
   };
 
   const handleConnect = async (accountId: string) => {
