@@ -296,9 +296,13 @@ const TradeVisualiser = () => {
                 className="relative w-full rounded-xl overflow-hidden border border-border bg-muted cursor-crosshair select-none"
                 style={{ aspectRatio: "16/10" }}
               >
-                <img src={photo} alt="Room" className="absolute inset-0 w-full h-full object-cover" />
+                <img
+                  src={rendered && renderedImage ? renderedImage : photo}
+                  alt="Room"
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
 
-                {/* Rendering overlay (mocked) */}
+                {/* Rendering overlay */}
                 {rendering && (
                   <div className="absolute inset-0 bg-foreground/40 backdrop-blur-sm flex items-center justify-center z-30">
                     <div className="bg-background/95 rounded-lg px-5 py-3 flex items-center gap-3 shadow-lg">
@@ -309,9 +313,9 @@ const TradeVisualiser = () => {
                 )}
 
                 {/* Rendered "after" badge */}
-                {rendered && !rendering && (
+                {rendered && renderedImage && !rendering && (
                   <div className="absolute top-3 left-3 z-20 bg-background/95 px-3 py-1.5 rounded-md text-[10px] uppercase tracking-[0.18em] font-body shadow">
-                    Rendered preview
+                    AI render · after
                   </div>
                 )}
 
