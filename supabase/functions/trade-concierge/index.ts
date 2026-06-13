@@ -2388,14 +2388,30 @@ serve(async (req) => {
       loadProductCadAssets(supabase),
     ]);
 
+    const effectiveBrief: ExtractedBrief = shouldActOnAccumulatedBrief && !extractedBrief.plan.length
+      ? {
+          intent: "selection",
+          brief: {
+            ...extractedBrief.brief,
+            summary: extractedBrief.brief.summary || "Curate a dining table edit from the accumulated brief.",
+            room: extractedBrief.brief.room || "dining room",
+            style: extractedBrief.brief.style || (/(elegant|refined|not too formal|relaxed|warm|earthy|sophisticated)/.exec(userConversationText)?.[0] ?? null),
+            materials: extractedBrief.brief.materials.length ? extractedBrief.brief.materials : ["wood"].filter(() => /\b(wood|oak|walnut|timber)\b/.test(userConversationText)),
+            categories: extractedBrief.brief.categories.length ? extractedBrief.brief.categories : ["dining table"],
+            qty_hint: extractedBrief.brief.qty_hint || (/\b(12|twelve)\b/.test(userConversationText) ? 12 : null),
+          },
+          plan: ["propose_tearsheet"],
+        }
+      : extractedBrief;
+
     // Fire-and-forget: learn from this turn's extracted brief so the next turn recalls it.
-    persistInferredMemory(supabase, userId, extractedBrief?.brief).catch(() => {});
+    persistInferredMemory(supabase, userId, effectiveBrief?.brief).catch(() => {});
     // Compose the signals block: live engagement signals first, then the persistent
     // studio memory layer so the model sees recurring defaults right next to current activity.
     const userSignalsBlock = userMemory ? `${userSignals}\n\n${userMemory}` : userSignals;
 
     // Decide final catalog mode: classifier wins, heuristic is the fallback. RAG replaces full load when it returned anything.
-    const includePieces = sentiment.needs_catalog || heuristicNeedsPieces;
+    const includePieces = sentiment.needs_catalog || heuristicNeedsPieces || effectiveBrief.plan.includes("propose_tearsheet");
     const useRag = includePieces && !!ragResult;
     const { designersList, piecesList: fullPiecesList, showroomBrands } = await loadCatalogContext(supabase, includePieces && !useRag);
     const piecesList = useRag ? (ragResult as { contextText: string }).contextText : fullPiecesList;
@@ -2423,16 +2439,18 @@ serve(async (req) => {
       }
     } catch { /* keep default */ }
     const sentimentDirective = buildSentimentDirective(sentiment);
-    const planDirective = buildPlanDirective(extractedBrief);
+    const planDirective = buildPlanDirective(effectiveBrief) + (lacksUploadedRoomContext && shouldActOnAccumulatedBrief
+      ? "\n\nAfter the tearsheet card, add one short sentence inviting the user to attach a room plan, reference photo, or PDF with the paperclip and send it here so Felix can refine dimensions and placement."
+      : "");
     const systemPrompt = buildSystemPrompt(
       designersList, piecesList, showroomBrands, userBoards, userSignalsBlock, sentimentDirective, projectContext, openQuotes, planDirective, cadDocuments, productCadAssets,
     );
     // The planner's intent + plan supersede the legacy regex when present. If the planner
     // flagged a quote-only turn, restrict the toolset to quote tools. If it flagged a
     // chained selection_and_quote, expose all tools so the model can emit both calls.
-    const plannerQuoteOnly = extractedBrief.intent === "quote" && extractedBrief.plan.every((t) => t === "draft_quote" || t === "add_to_quote");
+    const plannerQuoteOnly = effectiveBrief.intent === "quote" && effectiveBrief.plan.every((t) => t === "draft_quote" || t === "add_to_quote");
     const isExplicitQuoteIntent = plannerQuoteOnly
-      || (extractedBrief.plan.length === 0
+      || (effectiveBrief.plan.length === 0
         && /\b(quote|estimate|pricing|price breakdown|draft a quote|put together a quote|add .* to .*quote)\b/i.test(lastUserMsg));
 
     // ----- Stage-based tool gating -----
