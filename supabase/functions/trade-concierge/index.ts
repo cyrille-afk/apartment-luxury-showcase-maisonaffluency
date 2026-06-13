@@ -147,7 +147,21 @@ async function callCloudflare(init: RequestInit, reason: string, primaryCtx: { s
     let charBudget = CF_CHAR_CAP;
     for (let i = nonSystem.length - 1; i >= 0; i--) {
       const m = nonSystem[i];
-      const raw = typeof m.content === "string" ? m.content : JSON.stringify(m.content ?? "");
+      // Llama 3.3 on Workers AI is text-only. Strip image_url / file parts
+      // and concatenate any text blocks — never JSON.stringify the array,
+      // that would dump base64 attachments into the prompt.
+      let raw: string;
+      if (typeof m.content === "string") {
+        raw = m.content;
+      } else if (Array.isArray(m.content)) {
+        const textParts = m.content
+          .filter((p: any) => p && p.type === "text" && typeof p.text === "string")
+          .map((p: any) => p.text);
+        const hadAttachment = m.content.some((p: any) => p && (p.type === "image_url" || p.type === "file"));
+        raw = textParts.join(" ") + (hadAttachment ? " [attachment omitted on text-only fallback]" : "");
+      } else {
+        raw = "";
+      }
       const c = raw.length > 8000 ? raw.slice(-8000) : raw;
       if (c.length > charBudget && kept.length > 0) break;
       kept.unshift({ role: m.role, content: c });
@@ -2251,7 +2265,28 @@ serve(async (req) => {
       );
     }
 
-    const lastUserMsg = [...messages].reverse().find((m: any) => m.role === "user")?.content || "";
+    // Messages may be multimodal: content can be a string or an array of
+    // typed parts (text / image_url / file). For all heuristics below we
+    // need plain text — extract the concatenated text from the last user
+    // message, but leave the original message intact when we forward to the
+    // gateway so image/PDF parts reach the vision model.
+    const extractText = (content: any): string => {
+      if (typeof content === "string") return content;
+      if (!Array.isArray(content)) return "";
+      return content
+        .filter((p) => p && p.type === "text" && typeof p.text === "string")
+        .map((p) => p.text)
+        .join(" ");
+    };
+    const lastUserMsg = extractText(
+      [...messages].reverse().find((m: any) => m.role === "user")?.content,
+    );
+    const hasAttachments = [...messages].some(
+      (m: any) =>
+        m?.role === "user" &&
+        Array.isArray(m.content) &&
+        m.content.some((p: any) => p?.type === "image_url" || p?.type === "file"),
+    );
 
     // Ultra-fast deterministic path for one-word location follow-ups like
     // "London". These were going through the full RAG/planner/main-model

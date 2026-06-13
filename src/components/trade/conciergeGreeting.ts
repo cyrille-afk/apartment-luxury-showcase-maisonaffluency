@@ -453,5 +453,6 @@ export const toneSystemNote = (tone: Tone, lang: Lang = DEFAULT_LANG): string =>
     default:
       style = "[Style] Respond in an editorial, atelier voice — evocative yet specific. Avoid clichés and avoid emoji.";
   }
-  return `${langLine}\n${style}`;
+  const uploads = "[Uploads] The user can attach images or PDFs (room plans, elevations, mood references) via the paperclip beside the input. When dimensions, layout, scale, sightlines, adjacencies, atmosphere or fabric/material references would meaningfully refine your curation, invite them in prose — e.g. \"If you have a room plan or a reference photo, drop it here and I'll work from it.\" Keep the invitation brief and natural; never pester, and don't repeat it once a file has been shared.";
+  return `${langLine}\n${style}\n${uploads}`;
 };

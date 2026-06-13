@@ -1,9 +1,9 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
-import { X, Send, Loader2, Sparkles, Minus, GripHorizontal, RotateCcw, Maximize2, Minimize2, Palette, Check, Languages, Pencil } from "lucide-react";
+import { X, Send, Loader2, Sparkles, Minus, GripHorizontal, RotateCcw, Maximize2, Minimize2, Palette, Check, Languages, Pencil, Paperclip, FileText } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { streamConcierge, type ChatMessage, type TearsheetProposal, type QuoteProposal, type FfeProposal, type ConciergeProposal } from "@/lib/tradeConciergeStream";
+import { streamConcierge, type ChatMessage, type ChatContentPart, type TearsheetProposal, type QuoteProposal, type FfeProposal, type ConciergeProposal } from "@/lib/tradeConciergeStream";
 import { TearsheetProposalCard } from "@/components/trade/concierge/TearsheetProposalCard";
 import { QuoteProposalCard } from "@/components/trade/concierge/QuoteProposalCard";
 import { FfeProposalCard } from "@/components/trade/concierge/FfeProposalCard";
@@ -110,6 +110,74 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const abortRef = useRef<AbortController | null>(null);
+
+  // -------- Attachments (room plans, mood images, PDFs) --------
+  type StagedAttachment = {
+    id: string;
+    name: string;
+    mime: string;
+    kind: "image" | "pdf";
+    /** data URL (data:<mime>;base64,...) ready to send to the vision model */
+    dataUrl: string;
+    /** UI preview — same as dataUrl for images, undefined for PDFs */
+    previewUrl?: string;
+    size: number;
+  };
+  const MAX_ATTACHMENT_BYTES = 8 * 1024 * 1024; // 8 MB per file — base64 inflates ~33%
+  const MAX_ATTACHMENTS = 4;
+  const [attachments, setAttachments] = useState<StagedAttachment[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const readFileAsDataUrl = (file: File): Promise<string> =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result || ""));
+      reader.onerror = () => reject(reader.error);
+      reader.readAsDataURL(file);
+    });
+
+  const handleFilesPicked = useCallback(async (files: FileList | File[] | null) => {
+    if (!files) return;
+    const list = Array.from(files);
+    if (!list.length) return;
+    const accepted: StagedAttachment[] = [];
+    for (const f of list) {
+      if (attachments.length + accepted.length >= MAX_ATTACHMENTS) {
+        toast.error(`Maximum ${MAX_ATTACHMENTS} attachments per message.`);
+        break;
+      }
+      const isImage = f.type.startsWith("image/");
+      const isPdf = f.type === "application/pdf" || /\.pdf$/i.test(f.name);
+      if (!isImage && !isPdf) {
+        toast.error(`${f.name}: only images and PDFs are supported.`);
+        continue;
+      }
+      if (f.size > MAX_ATTACHMENT_BYTES) {
+        toast.error(`${f.name} is too large (max 8 MB).`);
+        continue;
+      }
+      try {
+        const dataUrl = await readFileAsDataUrl(f);
+        accepted.push({
+          id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+          name: f.name,
+          mime: f.type || (isPdf ? "application/pdf" : "image/jpeg"),
+          kind: isImage ? "image" : "pdf",
+          dataUrl,
+          previewUrl: isImage ? dataUrl : undefined,
+          size: f.size,
+        });
+      } catch {
+        toast.error(`Couldn't read ${f.name}.`);
+      }
+    }
+    if (accepted.length) setAttachments((prev) => [...prev, ...accepted]);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  }, [attachments.length]);
+
+  const removeAttachment = (id: string) =>
+    setAttachments((prev) => prev.filter((a) => a.id !== id));
+
 
   // Draggable position — persisted in localStorage. `null` = use default
   // bottom-right anchor; once user drags, we switch to absolute top/left.
@@ -446,7 +514,10 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
 
   const send = useCallback(async (overrideText?: string) => {
     const text = (overrideText ?? input).trim();
-    if (!text || streaming) return;
+    // Allow sending with attachments only (no text) — use a tiny default prompt.
+    const hasFiles = attachments.length > 0;
+    if (!text && !hasFiles) return;
+    if (streaming) return;
 
     // Special intercepts: client-side actions instead of model calls
     if (text === "__concierge:rename__") {
@@ -497,10 +568,21 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
       return;
     }
 
-    const userItem: TimelineItem = { kind: "msg", role: "user", content: text };
+    // Show the user bubble with text + a compact note for any attached files.
+    // (We don't render image previews in the timeline yet — keep the bubble
+    // simple. The model still receives the full image/PDF payload via
+    // messagesForApi below.)
+    const attachmentSuffix = hasFiles
+      ? `\n\n📎 ${attachments.map((a) => a.name).join(", ")}`
+      : "";
+    const displayText = (text || "(shared a file)") + attachmentSuffix;
+    const userItem: TimelineItem = { kind: "msg", role: "user", content: displayText };
     const nextTimeline = [...timeline, userItem];
     setTimeline(nextTimeline);
     setInput("");
+    // Snapshot + clear attachments now so the input chips disappear immediately.
+    const sendingAttachments = attachments;
+    setAttachments([]);
     setStreaming(true);
 
     // First user turn — fire invisible qualifier + lead capture (non-blocking).
@@ -607,15 +689,39 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
       } catch { /* ignore */ }
     }
 
+    // Build chat-completions messages. The current user turn becomes
+    // multimodal (text + image_url / file parts) when files are attached.
+    // Prior turns are kept text-only — we never carry image bytes forward
+    // because (a) tokens explode, (b) the model already "saw" them once.
+    const priorMsgs = nextTimeline
+      .slice(0, -1)
+      .filter((t): t is Extract<TimelineItem, { kind: "msg" }> => t.kind === "msg")
+      .map((t) => ({ role: t.role, content: t.content as string | ChatContentPart[] }));
+
+    let currentUserMsg: ChatMessage;
+    if (sendingAttachments.length > 0) {
+      const parts: ChatContentPart[] = [];
+      parts.push({ type: "text", text: text || "Please review the attached file(s) and tell me what details would help refine your curation." });
+      for (const a of sendingAttachments) {
+        if (a.kind === "image") {
+          parts.push({ type: "image_url", image_url: { url: a.dataUrl } });
+        } else {
+          parts.push({ type: "file", file: { filename: a.name, file_data: a.dataUrl } });
+        }
+      }
+      currentUserMsg = { role: "user", content: parts };
+    } else {
+      currentUserMsg = { role: "user", content: text };
+    }
+
     const messagesForApi: ChatMessage[] = [
       stageContext,
       toneContext,
       ...identityContext,
       ...profileContext,
       ...proposalContext,
-      ...nextTimeline
-        .filter((t): t is Extract<TimelineItem, { kind: "msg" }> => t.kind === "msg")
-        .map((t) => ({ role: t.role, content: t.content })),
+      ...priorMsgs,
+      currentUserMsg,
     ];
 
     let assistantSoFar = "";
@@ -700,7 +806,7 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
     } catch {
       setStreaming(false);
     }
-  }, [input, streaming, timeline, stage, tone, lang, name, openLatestQuote]);
+  }, [input, attachments, streaming, timeline, stage, tone, lang, name, openLatestQuote]);
 
   const handleProposalResolved = (
     proposalIndex: number,
@@ -1263,7 +1369,56 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
           </div>
 
           <div className="border-t border-border p-3">
+            {attachments.length > 0 && (
+              <div className="flex flex-wrap gap-2 mb-2">
+                {attachments.map((a) => (
+                  <div
+                    key={a.id}
+                    className="flex items-center gap-2 rounded-lg border border-border bg-muted/40 pl-1.5 pr-1 py-1 text-xs"
+                  >
+                    {a.kind === "image" && a.previewUrl ? (
+                      <img
+                        src={a.previewUrl}
+                        alt={a.name}
+                        className="h-7 w-7 rounded object-cover"
+                      />
+                    ) : (
+                      <div className="h-7 w-7 rounded bg-foreground/10 grid place-items-center">
+                        <FileText className="h-3.5 w-3.5 text-muted-foreground" />
+                      </div>
+                    )}
+                    <span className="font-body max-w-[140px] truncate text-foreground">{a.name}</span>
+                    <button
+                      type="button"
+                      onClick={() => removeAttachment(a.id)}
+                      className="rounded p-0.5 text-muted-foreground hover:text-foreground hover:bg-foreground/10"
+                      aria-label={`Remove ${a.name}`}
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
             <div className="flex items-end gap-2">
+              <input
+                ref={fileInputRef}
+                type="file"
+                multiple
+                accept="image/*,application/pdf,.pdf"
+                className="hidden"
+                onChange={(e) => handleFilesPicked(e.target.files)}
+              />
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={streaming || attachments.length >= MAX_ATTACHMENTS}
+                className="shrink-0 rounded-xl border border-border bg-muted/40 p-2 text-muted-foreground hover:text-foreground hover:bg-muted disabled:opacity-40 transition-colors"
+                aria-label="Attach room plan, image or PDF"
+                title="Attach a room plan, photo or PDF"
+              >
+                <Paperclip className="h-4 w-4" />
+              </button>
               <textarea
                 ref={inputRef}
                 value={input}
@@ -1276,7 +1431,7 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
               />
               <button
                 onClick={() => send()}
-                disabled={!input.trim() || streaming}
+                disabled={(!input.trim() && attachments.length === 0) || streaming}
                 className="shrink-0 rounded-xl bg-foreground text-background p-2 disabled:opacity-40 hover:opacity-90 transition-opacity"
                 aria-label="Send"
               >
