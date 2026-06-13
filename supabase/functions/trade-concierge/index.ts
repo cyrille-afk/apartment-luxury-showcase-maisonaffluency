@@ -58,7 +58,7 @@ function isRetryable(status: number): boolean {
   return status === 429 || status === 500 || status === 502 || status === 503 || status === 504;
 }
 
-const PRIMARY_MAX_RETRIES = Number(Deno.env.get("PRIMARY_MAX_RETRIES") ?? "3");
+const PRIMARY_MAX_RETRIES = Number(Deno.env.get("PRIMARY_MAX_RETRIES") ?? "2");
 const PRIMARY_BASE_DELAY_MS = Number(Deno.env.get("PRIMARY_BASE_DELAY_MS") ?? "500");
 const PRIMARY_MAX_DELAY_MS = Number(Deno.env.get("PRIMARY_MAX_DELAY_MS") ?? "8000");
 
