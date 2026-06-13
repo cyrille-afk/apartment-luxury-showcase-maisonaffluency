@@ -2771,6 +2771,7 @@ serve(async (req) => {
         supabase,
         Array.isArray((ragResult as any)?.rows) ? (ragResult as any).rows : [],
         effectiveBrief.brief,
+        userConversationText,
       );
       if (deterministicProposal) {
         return sseProposalThenTextResponse(
