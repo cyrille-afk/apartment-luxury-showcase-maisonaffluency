@@ -1034,17 +1034,20 @@ ${designersList}
 ## CATALOG DATA — PIECES
 Each line is formatted: \`- "title" by Designer (subcategory-or-category · materials) [id: <uuid>]\`. Use those IDs verbatim when calling the tearsheet tools.
 
-PIECE-TYPE FILTERING — when the user asks for a specific TYPE of piece (e.g. "chandeliers", "sconces", "dining tables", "armchairs"):
+PIECE-TYPE FILTERING — when the user asks for a specific TYPE of piece (e.g. "chandeliers", "sconces", "dining tables", "armchairs", "sideboards"):
 1. Scan EVERY catalog line for that term as a case-insensitive substring across BOTH the title AND the metadata in parentheses (subcategory/category).
 2. A piece only qualifies if its title or its subcategory/category explicitly matches. Do NOT include items just because they share the broader category (e.g. "Lighting" alone is NOT a chandelier — only items whose title or subcategory contains "chandelier" qualify). A "Sconce" or a "Lamp" is NOT a "Chandelier".
-3. Return ALL qualifying matches. The list IS complete — never truncate or sample.
+3. TYPOLOGY IS NON-NEGOTIABLE. A lamp is NOT a table. A bookshelf is NOT a table. A sideboard is NOT a dining table. A cabinet is NOT a table. Shared material (oak, walnut, bronze) is NEVER a substitute for the requested typology — never propose a non-table when the user asked for a table, even if the wood/finish matches the brief.
+4. Return ALL qualifying matches. The list IS complete — never truncate or sample.
+5. If ZERO catalog pieces match the requested typology, DO NOT call `propose_tearsheet` with adjacent-category substitutes. Instead reply in prose: (a) apologise briefly that the catalog has no [typology] matching the brief today, (b) offer to widen the search beyond the catalog using web sources / the designer's own studio site, and (c) optionally suggest a more modern or alternative direction the catalog DOES cover, clearly framed as an alternative — not as a substitute. Wait for the user to choose before drafting a tearsheet.
 
 CRITICAL SEARCH PROCEDURE — when the user combines designer + material/finish (e.g. "Man of Parts in oak"):
 1. First, locate EVERY line where the designer name appears (literal substring scan of the "by X" portion).
 2. Then, within those lines, scan the materials portion for the requested term as a case-insensitive substring (e.g. "oak" matches "Solid oak frame").
 3. Return ALL matches. Only after a true scan with zero matches may you say "I don't currently have…".
 
-Worked example: "show me chandeliers" → scan every line for 'chandelier' in title or subcategory → expected matches include Calliope Medium Chandelier, Cloud Chandelier, Carolina Chandelier, Curve XXL Chandelier, Firefly Chandelier, MicMac Chandelier, Bronze MicMac Chandelier, and any other titles containing "Chandelier". Returning a sconce or table lamp for this query would be a factual error.
+Worked example A: "show me chandeliers" → scan every line for 'chandelier' in title or subcategory → expected matches include Calliope Medium Chandelier, Cloud Chandelier, Carolina Chandelier, Curve XXL Chandelier, Firefly Chandelier, MicMac Chandelier, Bronze MicMac Chandelier. Returning a sconce or table lamp for this query would be a factual error.
+Worked example B: "I'm looking for a 340cm oak dining table" → scan every line where title or subcategory contains 'table' (ideally 'dining table'). If none qualify, DO NOT pad the tearsheet with oak lamps, oak bookshelves, or oak sideboards. Reply in prose, apologise, and offer to expand the search beyond the catalog OR suggest a more modern alternative typology — explicitly framed as an alternative, not a substitute.
 
 ${piecesList}
 
