@@ -60,6 +60,9 @@ import { useStudio } from "@/hooks/useStudio";
 const hasWelcomeActions = (actions: ConciergeQuickAction[] | undefined) =>
   !!actions?.some((action) => isOnboardingActionPrompt(action.prompt));
 
+const legacyAttachmentPlaceholderRe = /^\(shared a file\)/i;
+const attachmentFailureReplyRe = /(?:couldn['’]?t|could not|can['’]?t|cannot)\s+view|vision model is momentarily busy|received your attachment/i;
+
 
 export type ConciergeSurface = "trade" | "public";
 
@@ -89,7 +92,14 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
       const raw = sessionStorage.getItem("concierge:timeline");
       if (raw) {
         const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed as TimelineItem[];
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return (parsed as TimelineItem[]).filter((item) => {
+            if (item?.kind !== "msg") return true;
+            if (item.role === "user" && legacyAttachmentPlaceholderRe.test(item.content || "")) return false;
+            if (item.role === "assistant" && attachmentFailureReplyRe.test(item.content || "")) return false;
+            return true;
+          });
+        }
       }
     } catch {}
     return [
@@ -575,7 +585,7 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
       kind: a.kind,
       previewUrl: a.previewUrl,
     }));
-    const displayText = text || (hasFiles ? "" : "(shared a file)");
+    const displayText = text;
     const userItem: TimelineItem = {
       kind: "msg",
       role: "user",
@@ -701,6 +711,8 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
     const priorMsgs = nextTimeline
       .slice(0, -1)
       .filter((t): t is Extract<TimelineItem, { kind: "msg" }> => t.kind === "msg")
+      .filter((t) => !(t.role === "user" && legacyAttachmentPlaceholderRe.test(t.content || "")))
+      .filter((t) => !(t.role === "assistant" && attachmentFailureReplyRe.test(t.content || "")))
       .map((t) => ({ role: t.role, content: t.content as string | ChatContentPart[] }));
 
     let currentUserMsg: ChatMessage;
