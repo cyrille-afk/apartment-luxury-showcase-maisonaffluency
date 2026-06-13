@@ -119,7 +119,56 @@ const breakerRecordFailure = (wasProbe: boolean, reason: string) =>
   breaker.recordFailure(wasProbe, reason);
 
 
+function payloadHasAttachments(init: RequestInit): boolean {
+  try {
+    const parsed = JSON.parse(String(init.body ?? "{}"));
+    const msgs = Array.isArray(parsed.messages) ? parsed.messages : [];
+    return msgs.some((m: any) =>
+      m && m.role === "user" && Array.isArray(m.content) &&
+      m.content.some((p: any) => p && (p.type === "image_url" || p.type === "file"))
+    );
+  } catch { return false; }
+}
+
+function extractLangDirectiveFromInit(init: RequestInit): string {
+  try {
+    const parsed = JSON.parse(String(init.body ?? "{}"));
+    const sys = (Array.isArray(parsed.messages) ? parsed.messages : []).find((m: any) => m?.role === "system");
+    const txt = typeof sys?.content === "string" ? sys.content : "";
+    const m = txt.match(/REPLY LANGUAGE[\s\S]*?Reply entirely in ([A-Za-z ]+?)[\.,\n]/);
+    return m ? m[1].trim().toLowerCase() : "english";
+  } catch { return "english"; }
+}
+
+function visionBusySseResponse(init: RequestInit): Response {
+  const lang = extractLangDirectiveFromInit(init);
+  const msg = lang.startsWith("indo") || lang.startsWith("bahasa")
+    ? "Saya menerima lampiran Anda, namun sistem visi sedang sibuk sebentar. Bisakah Anda mengirim ulang foto dalam beberapa detik? Sementara itu, mohon konfirmasi dimensi ruangan dan kapasitas tempat duduk yang diinginkan."
+    : lang.startsWith("thai")
+    ? "ได้รับไฟล์แนบแล้วค่ะ แต่ระบบวิชั่นกำลังยุ่งชั่วคราว รบกวนส่งภาพอีกครั้งในอีกสองสามวินาที ระหว่างนี้ขอทราบขนาดห้องและจำนวนที่นั่งที่ต้องการได้ไหมคะ?"
+    : lang.startsWith("chinese") || lang.startsWith("中文")
+    ? "已收到您的附件,但视觉模型暂时繁忙。请几秒后重新发送照片。其间,可否先告知房间尺寸与就餐人数?"
+    : "I've received your attachment, but the vision model is momentarily busy — could you resend the photo in a few seconds? In the meantime, can you confirm the room dimensions and desired seating capacity?";
+  const encoder = new TextEncoder();
+  const stream = new ReadableStream({
+    start(controller) {
+      controller.enqueue(encoder.encode(`data: ${JSON.stringify({ choices: [{ delta: { content: msg } }] })}\n\n`));
+      controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+      controller.close();
+    },
+  });
+  return new Response(stream, { headers: { ...corsHeaders, "Content-Type": "text/event-stream", "x-concierge-fallback": "vision-busy" } });
+}
+
 async function callCloudflare(init: RequestInit, reason: string, primaryCtx: { status: number; requestId: string }): Promise<Response> {
+  // If the original request carried image/PDF parts, the text-only Llama
+  // fallback will (correctly) say "I can't view attachments" — which is
+  // confusing for the user. Return a graceful "vision busy, try again"
+  // SSE response instead.
+  if (payloadHasAttachments(init)) {
+    console.warn(`[concierge] VISION_BUSY_SHORTCIRCUIT reason=${reason} primaryStatus=${primaryCtx.status}`);
+    return visionBusySseResponse(init);
+  }
   let cfBodyStr: string;
   let originalModel = "unknown";
   try {
