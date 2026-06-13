@@ -2064,12 +2064,30 @@ function rowMatchesRequestedTypology(row: any, typology: RequestedTypology | nul
 }
 
 function dedupePreviewRows(previewRaw: any[], pickIds: string[]): { previewRaw: any[]; pickIds: string[] } {
-  const seen = new Set<string>();
+  const seenTitleKey = new Set<string>();
+  const seenImageKey = new Set<string>();
   const kept: any[] = [];
+  // Helper — collapse scraper-injected variant noise like "Scala Dining Table",
+  // "Scala 3Dining Table", "Scala 300 Dining Table" into one canonical key.
+  const stripVariantNoise = (s: string) =>
+    s.replace(/\b\d+\b/g, " ")        // drop standalone numbers (size codes)
+     .replace(/(\d)([a-z])/gi, "$1 $2") // split "3Dining" → "3 Dining"
+     .replace(/([a-z])(\d)/gi, "$1 $2")
+     .replace(/\s+/g, " ")
+     .trim();
   for (const p of previewRaw || []) {
-    const key = `${normalizeLoose(p?.designer_name)}::${normalizeLoose(p?.title)}`;
-    if (!key || seen.has(key)) continue;
-    seen.add(key);
+    const designerKey = normalizeLoose(p?.designer_name);
+    const rawTitleKey = normalizeLoose(p?.title);
+    const cleanTitleKey = normalizeLoose(stripVariantNoise(String(p?.title || "")));
+    const titleKey = `${designerKey}::${cleanTitleKey || rawTitleKey}`;
+    // Second guard: same brand + identical image_url ⇒ same product family
+    // even if the titles diverge ("Scala 30Dining Table" vs "Scala 300 Dining Table").
+    const imageKey = p?.image_url ? `${designerKey}::${String(p.image_url).split("?")[0]}` : "";
+    if (!titleKey) continue;
+    if (seenTitleKey.has(titleKey)) continue;
+    if (imageKey && seenImageKey.has(imageKey)) continue;
+    seenTitleKey.add(titleKey);
+    if (imageKey) seenImageKey.add(imageKey);
     kept.push(p);
   }
   const keptIds = new Set(kept.map((p: any) => p?.id).filter(Boolean));
