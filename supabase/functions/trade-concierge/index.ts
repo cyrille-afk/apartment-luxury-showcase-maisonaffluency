@@ -58,7 +58,7 @@ function isRetryable(status: number): boolean {
   return status === 429 || status === 500 || status === 502 || status === 503 || status === 504;
 }
 
-const PRIMARY_MAX_RETRIES = Number(Deno.env.get("PRIMARY_MAX_RETRIES") ?? "3");
+const PRIMARY_MAX_RETRIES = Number(Deno.env.get("PRIMARY_MAX_RETRIES") ?? "2");
 const PRIMARY_BASE_DELAY_MS = Number(Deno.env.get("PRIMARY_BASE_DELAY_MS") ?? "500");
 const PRIMARY_MAX_DELAY_MS = Number(Deno.env.get("PRIMARY_MAX_DELAY_MS") ?? "8000");
 
@@ -2203,14 +2203,22 @@ serve(async (req) => {
       .filter(Boolean) as string[];
     const heuristicNeedsPieces = needsFullCatalog(lastUserMsg, designerNames);
 
+    // Short follow-ups (≤4 words, no catalog keywords) skip the classifier +
+    // planner round-trips entirely — they were dominating latency on replies
+    // like "London", "yes", "go on". Defaults match each helper's own fallback.
+    const wordCount = lastUserMsg.trim().split(/\s+/).filter(Boolean).length;
+    const isShortFollowUp = wordCount <= 4 && !heuristicNeedsPieces;
+
     const mentionedProjectIdPromise = activeProjectId ? Promise.resolve(null) : resolveMentionedProjectId(supabase, userId, lastUserMsg);
     // Run sentiment + RAG retrieval in parallel with the rest. RAG is best-effort.
     const ragPromise = (heuristicNeedsPieces || lastUserMsg.length > 40)
       ? loadRelevantPieces(supabase, LOVABLE_API_KEY, lastUserMsg, userId, 40)
       : Promise.resolve(null);
     const [sentiment, extractedBrief, ragResult, userBoards, userSignals, userMemory, mentionedProjectId, openQuotes, discountRow, cadDocuments, productCadAssets] = await Promise.all([
-      classifySentiment(LOVABLE_API_KEY, lastUserMsg),
-      extractBrief(LOVABLE_API_KEY, lastUserMsg),
+      isShortFollowUp
+        ? Promise.resolve({ sentiment: "neutral", intent: "question", escalate: false, needs_catalog: false })
+        : classifySentiment(LOVABLE_API_KEY, lastUserMsg),
+      isShortFollowUp ? Promise.resolve(EMPTY_BRIEF) : extractBrief(LOVABLE_API_KEY, lastUserMsg),
       ragPromise,
       loadUserBoards(supabase, userId),
       loadUserSignals(supabase, userId),
