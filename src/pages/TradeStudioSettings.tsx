@@ -18,6 +18,8 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import PayoutAccountsSection from "@/components/trade/settings/PayoutAccountsSection";
+import ResaleCertificatesSection from "@/components/trade/settings/ResaleCertificatesSection";
 
 interface Member {
   id: string;
@@ -376,6 +378,12 @@ export default function TradeStudioSettings() {
           </CardContent>
         </Card>
       )}
+
+      {/* Payout accounts (Stripe Connect) — for agent-mode commissions */}
+      <PayoutAccountsSection />
+
+      {/* US resale certificates — gates net-buy checkout per ship-to state */}
+      <ResaleCertificatesSection />
 
       {/* Create new studio */}
       <Card>
