@@ -894,7 +894,7 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
                 : { width: PANEL_W }
           }
           className={cn(
-            "fixed z-[100] max-w-[calc(100vw-2rem)] flex flex-col rounded-2xl border shadow-2xl print:hidden overflow-hidden",
+            "fixed z-[10000] max-w-[calc(100vw-2rem)] flex flex-col rounded-2xl border shadow-2xl print:hidden overflow-hidden",
             modalMode
               ? cn(
                   "left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-cream border-jade/40 ring-1 ring-jade/30 shadow-[0_30px_80px_-20px_hsl(var(--foreground)/0.5)]",
