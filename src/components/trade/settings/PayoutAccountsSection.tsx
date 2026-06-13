@@ -425,6 +425,58 @@ export default function PayoutAccountsSection() {
                 <Input id="po-account" value={form.ach_account_number} onChange={(e) => setForm({ ...form, ach_account_number: e.target.value })} />
               </div>
             </div>
+
+            <div className="pt-4 mt-2 border-t space-y-3">
+              <div>
+                <Label className="flex items-center gap-2 text-sm font-medium">
+                  <FileText className="h-4 w-4" /> Tax form / VAT registration
+                </Label>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Required for US 1099 reporting and to display a correct VAT line on agent invoices. Stored privately and only accessible to your studio.
+                </p>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label>Form type</Label>
+                  <Select
+                    value={form.tax_form_kind}
+                    onValueChange={(v) => setForm({ ...form, tax_form_kind: v })}
+                  >
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {TAX_FORM_OPTIONS.map((o) => (
+                        <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="po-taxref">{selectedTaxOption.refLabel}</Label>
+                  <Input
+                    id="po-taxref"
+                    placeholder={selectedTaxOption.refPlaceholder}
+                    value={form.tax_form_reference}
+                    onChange={(e) => setForm({ ...form, tax_form_reference: e.target.value })}
+                  />
+                </div>
+              </div>
+              {form.tax_form_kind !== "NONE" && (
+                <div>
+                  <Label htmlFor="po-taxfile" className="flex items-center gap-2 cursor-pointer">
+                    <Upload className="h-4 w-4" /> Upload signed form (PDF, optional)
+                  </Label>
+                  <Input
+                    id="po-taxfile"
+                    type="file"
+                    accept="application/pdf,image/*"
+                    onChange={(e) => setForm({ ...form, tax_form_file: e.target.files?.[0] ?? null })}
+                  />
+                  {form.tax_form_file && (
+                    <p className="text-xs text-muted-foreground mt-1">{form.tax_form_file.name}</p>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setCreateOpen(false)}>Cancel</Button>
