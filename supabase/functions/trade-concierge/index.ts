@@ -2062,6 +2062,19 @@ function rowMatchesRequestedTypology(row: any, typology: RequestedTypology | nul
   return /\btables?\b/.test(hay) && !/\b(sideboard|cabinet|bookshelf|bookcase|shelf|shelving)\b/.test(hay);
 }
 
+function dedupePreviewRows(previewRaw: any[], pickIds: string[]): { previewRaw: any[]; pickIds: string[] } {
+  const seen = new Set<string>();
+  const kept: any[] = [];
+  for (const p of previewRaw || []) {
+    const key = `${normalizeLoose(p?.designer_name)}::${normalizeLoose(p?.title)}`;
+    if (!key || seen.has(key)) continue;
+    seen.add(key);
+    kept.push(p);
+  }
+  const keptIds = new Set(kept.map((p: any) => p?.id).filter(Boolean));
+  return { previewRaw: kept, pickIds: pickIds.filter((id) => keptIds.has(id)) };
+}
+
 function typologyLabel(typology: RequestedTypology | null): string {
   if (typology === "dining_table") return "dining table";
   if (typology === "table") return "table";
