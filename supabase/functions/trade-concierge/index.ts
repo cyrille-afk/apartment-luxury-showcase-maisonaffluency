@@ -1917,7 +1917,7 @@ const LOCATION_ONLY_FOLLOWUPS = new Set([
   "usa", "united states", "france", "italy", "switzerland", "uae", "singapore", "hong kong",
 ]);
 
-function buildLocationOnlyReply(latestUserMessage: string, history: any[]): string | null {
+function buildLocationOnlyReply(latestUserMessage: string, history: any[], langCode = "en"): string | null {
   const normalized = normalizeLoose(latestUserMessage);
   if (!LOCATION_ONLY_FOLLOWUPS.has(normalized)) return null;
   const display = latestUserMessage.trim().replace(/\s+/g, " ");
@@ -1928,11 +1928,20 @@ function buildLocationOnlyReply(latestUserMessage: string, history: any[]): stri
     .toLowerCase();
 
   if (/\b(ship|shipping|freight|delivery|deliver|landed|customs|vat|destination|route|white[- ]glove)\b/.test(recent)) {
+    if (langCode === "id") return `${display} — saya catat. Untuk saat ini, boleh ceritakan sedikit tentang proyeknya: apakah ini Georgian townhouse, penthouse mewah, atau mews house; brief utamanya; dan suasana yang ingin Anda bangun?`;
+    if (langCode === "th") return `${display} — รับทราบค่ะ ตอนนี้ขอรายละเอียดโครงการอีกเล็กน้อยได้ไหม: เป็น Georgian townhouse, เพนต์เฮาส์ลักชัวรี หรือ mews house; brief โดยรวม; และบรรยากาศที่ต้องการ?`;
+    if (langCode === "zh") return `${display} — 已记录。先请您简单补充项目本身：是乔治亚 townhouse、豪华顶层公寓，还是 mews house；整体 brief；以及您想营造的氛围？`;
     return `${display} — noted. For now, can you tell me a little about the project itself — is it a Georgian Townhouse, a luxury penthouse or a Mews House, your brief in general and the atmosphere you have in mind?`;
   }
   if (/\b(project|site|location|install|installation|client|address|city|where)\b/.test(recent)) {
+    if (langCode === "id") return `${display} — saya catat sebagai alamat proyek. Ceritakan tentang proyeknya: ruangnya, brief, dan atmosfer yang sedang Anda susun; setelah itu saya bisa mulai mengkurasi. Pengiriman kita bahas nanti, setelah pilihannya lebih jelas.`;
+    if (langCode === "th") return `${display} — รับทราบเป็นที่อยู่โครงการค่ะ เล่าเพิ่มเติมเกี่ยวกับโครงการได้เลย: ห้อง, brief และบรรยากาศที่คุณกำลังวางไว้ แล้วฉันจะเริ่มคัดสรรให้ ส่วนการจัดส่งค่อยดูเมื่อเลือกชิ้นงานแล้ว.`;
+    if (langCode === "zh") return `${display} — 已记录为项目地址。请告诉我项目本身：空间、brief，以及您正在塑造的氛围；我会据此开始策展。运输我们可以等作品确定后再处理。`;
     return `${display} — noted as the project address. Tell me about the project itself: the room, the brief, the atmosphere you're composing, and I'll begin curating accordingly. Shipping we'll address in good time, once the pieces are chosen.`;
   }
+  if (langCode === "id") return `${display} — saya catat. Boleh saya konfirmasi, ini alamat proyek atau hanya kota yang Anda maksud? Bagaimanapun, ceritakan sedikit tentang proyeknya — ruang, brief, dan mood — lalu kita lanjut dari sana.`;
+  if (langCode === "th") return `${display} — รับทราบค่ะ ขอถามยืนยันว่าเป็นที่อยู่โครงการ หรือเป็นเมืองที่คุณมีอยู่ในใจ? ไม่ว่าจะอย่างไร เล่าเพิ่มอีกนิดเกี่ยวกับโครงการ — ห้อง, brief และ mood — แล้วเราจะเดินต่อจากตรงนั้น.`;
+  if (langCode === "zh") return `${display} — 已记录。请问这是项目地址，还是您心中的城市？无论哪种，请简单说明项目——空间、brief 和 mood——我们就从那里开始。`;
   return `${display} — noted. May I ask whether that is the project address, or simply a city you have in mind? Either way, tell me a little about the project — the room, the brief, the mood — and we'll take it from there.`;
 }
 
@@ -2367,7 +2376,7 @@ serve(async (req) => {
     // Ultra-fast deterministic path for one-word location follow-ups like
     // "London". These were going through the full RAG/planner/main-model
     // pipeline even though no catalog reasoning is needed.
-    const locationOnlyReply = buildLocationOnlyReply(lastUserMsg, messages);
+    const locationOnlyReply = buildLocationOnlyReply(lastUserMsg, messages, langCode);
     if (locationOnlyReply) return sseTextResponse(locationOnlyReply);
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
