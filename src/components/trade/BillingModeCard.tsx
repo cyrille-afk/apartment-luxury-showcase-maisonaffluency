@@ -44,6 +44,22 @@ type QuoteBilling = {
   end_client_billing: any;
   designer_payout_account_id: string | null;
   resale_certificate_id: string | null;
+  managed_freight_quote_id: string | null;
+};
+
+type FreightQuote = {
+  id: string;
+  origin_city: string;
+  origin_country: string;
+  dest_city: string;
+  dest_country: string;
+  selected_carrier: string | null;
+  selected_mode: string | null;
+  total_cents: number;
+  currency: string;
+  status: string;
+  valid_until: string | null;
+  created_at: string;
 };
 
 type PayoutAccount = {
