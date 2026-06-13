@@ -90,7 +90,7 @@ const TradeVisualiser = () => {
     (async () => {
       const { data } = await supabase
         .from("trade_products")
-        .select("id, product_name, brand_name, image_url, category, subtitle")
+        .select("id, product_name, brand_name, image_url, category, subcategory, materials")
         .not("image_url", "is", null)
         .order("brand_name", { ascending: true })
         .limit(800);
@@ -107,7 +107,7 @@ const TradeVisualiser = () => {
     const q = search.trim().toLowerCase();
     return allSwatches
       .filter((s) => {
-        const hay = `${s.product_name} ${s.subtitle || ""} ${s.category || ""}`;
+        const hay = `${s.product_name} ${s.subcategory || ""} ${s.materials || ""} ${s.category || ""}`;
         const matchesSurface = sdef.keywords.test(hay) ||
           (s.category && sdef.categories.includes(s.category) && sdef.keywords.test(hay));
         if (!matchesSurface) return false;
