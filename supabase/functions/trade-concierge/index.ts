@@ -2113,10 +2113,10 @@ function buildOpeningBriefDiscoveryReply(latestUserMessage: string, langCode = "
   const piece = wantsDiningTable ? "a statement dining table" : "a statement piece";
   const place = [location, property].filter(Boolean).join(" ").trim();
   const mirror = place ? `${piece} for your ${place}` : piece;
-  if (langCode === "id") return `Anda menyebut ${mirror} — yang belum jelas adalah kapasitas dan arahnya: lebih formal-sculptural untuk entertaining, atau hangat dan residential untuk penggunaan sehari-hari?`;
-  if (langCode === "th") return `คุณกล่าวถึง ${mirror} — สิ่งที่ยังขาดคือจำนวนที่นั่งและทิศทาง: formal-sculptural สำหรับ entertaining หรืออบอุ่นแบบ residential สำหรับใช้ทุกวัน?`;
-  if (langCode === "zh") return `您提到需要${mirror}——还差一个关键判断：座位规模，以及方向是更正式、雕塑感、适合宴请，还是更温暖住宅化、适合日常使用？`;
-  return `You mentioned ${mirror} — you didn’t yet specify the seating scale or whether it should read more formal-sculptural for entertaining, or warmer and residential for everyday use?`;
+  if (langCode === "id") return `${mirror.charAt(0).toUpperCase() + mirror.slice(1)} — sebuah proyek yang menyenangkan. Sebelum saya menyusun seleksi, bolehkah saya bertanya tentang skala dan suasana yang Anda bayangkan — meja yang lebih formal dan sculptural untuk menjamu, atau sesuatu yang lebih hangat dan residential untuk penggunaan sehari-hari? Dan kira-kira berapa tamu yang ingin Anda akomodasi?`;
+  if (langCode === "th") return `${mirror.charAt(0).toUpperCase() + mirror.slice(1)} — ฟังดูเป็นโปรเจกต์ที่น่าตื่นเต้น ก่อนที่ฉันจะคัดสรรชิ้นงาน ขออนุญาตถามถึงบรรยากาศที่คุณต้องการ — เน้นความเป็นทางการและประติมากรรมสำหรับการรับรอง หรืออบอุ่นแบบ residential สำหรับใช้ในชีวิตประจำวัน? และต้องการรองรับผู้รับประทานกี่ท่านโดยประมาณ?`;
+  if (langCode === "zh") return `${mirror}——听起来是一个非常迷人的项目。在我为您甄选之前,可否请教您所设想的氛围:是更正式、富雕塑感、适合宴客的方向,还是更温暖、贴近日常的住宅气质?另外,理想中希望容纳多少位用餐者?`;
+  return `${mirror.charAt(0).toUpperCase() + mirror.slice(1)} — that sounds like a wonderful project. Before I curate a selection, may I ask about the atmosphere you have in mind — something more formal and sculptural for entertaining, or warmer and more residential for everyday use? And roughly how many diners would you like to seat?`;
 }
 
 async function fetchStrictTypologyCandidates(
