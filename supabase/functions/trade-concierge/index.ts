@@ -1850,12 +1850,12 @@ function buildLocationOnlyReply(latestUserMessage: string, history: any[]): stri
     .toLowerCase();
 
   if (/\b(ship|shipping|freight|delivery|deliver|landed|customs|vat|destination|route|white[- ]glove)\b/.test(recent)) {
-    return `${display} — understood. I’ll treat it as the delivery destination; tell me the piece or quote subtotal and I’ll price the lane.`;
+    return `${display} — a pleasure. I'll have the lane costed white-glove, door-to-door, with duties and insurance landed. Share the piece, or a quote subtotal, and I'll return a precise figure within the hour.`;
   }
   if (/\b(project|site|location|install|installation|client|address|city|where)\b/.test(recent)) {
-    return `${display} — understood. I’ll use it as the project location; what room or selection should Felix curate next?`;
+    return `${display} — noted as the project address. Tell me the room, the brief, or the atmosphere you're composing, and I'll curate accordingly.`;
   }
-  return `${display} — understood. Is that the project location, or the delivery destination for a quote?`;
+  return `${display} — noted. May I ask whether that is the project address, or the destination for delivery? Either way, I'll take care of it.`;
 }
 
 function sseTextResponse(text: string): Response {
