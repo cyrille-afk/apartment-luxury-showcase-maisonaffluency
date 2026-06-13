@@ -3549,6 +3549,10 @@ serve(async (req) => {
 
         const emitDeterministicTearsheetFallback = async (): Promise<boolean> => {
           if (!forcePlannedTearsheet || stageForcesQuote) return false;
+          const hasTearsheet = Array.from(toolCallBuffers.values()).some((b) =>
+            b.name === "propose_tearsheet" || b.name === "add_to_tearsheet"
+          );
+          if (hasTearsheet) return false;
           const rows = Array.isArray((ragResult as any)?.rows) ? (ragResult as any).rows : [];
           const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
           const scoreRow = (r: any) => {
