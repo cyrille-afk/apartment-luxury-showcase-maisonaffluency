@@ -2778,6 +2778,7 @@ export type Database = {
           admin_notes: string | null
           balance_due_at: string | null
           balance_paid_at: string | null
+          commission_statement_sent_at: string | null
           created_at: string
           customs_cleared_at: string | null
           customs_days: number
@@ -2815,6 +2816,7 @@ export type Database = {
           admin_notes?: string | null
           balance_due_at?: string | null
           balance_paid_at?: string | null
+          commission_statement_sent_at?: string | null
           created_at?: string
           customs_cleared_at?: string | null
           customs_days?: number
@@ -2852,6 +2854,7 @@ export type Database = {
           admin_notes?: string | null
           balance_due_at?: string | null
           balance_paid_at?: string | null
+          commission_statement_sent_at?: string | null
           created_at?: string
           customs_cleared_at?: string | null
           customs_days?: number
