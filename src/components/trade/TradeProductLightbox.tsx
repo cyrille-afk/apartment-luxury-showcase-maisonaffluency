@@ -520,7 +520,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                     disabledIndices={disabledBaseIdx}
                   />
                   <ExpandableSpec
-                    icon={specIcon("⬗")}
+                    icon={specIcon(((axes.topOptions.length > 0 && axes.topOptions.every(looksLikeDimension)) || ((product.top_axis_label || "").trim().toLowerCase() === "size")) ? "📐" : "⬗")}
                     text={withImperialPerLine(axes.topOptions.join("\n"))}
                     placeholder={getTopPlaceholder(product)}
                     emphasized
