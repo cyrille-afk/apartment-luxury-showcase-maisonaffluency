@@ -119,6 +119,8 @@ const TradeVisualiser = () => {
           .from("trade_products")
           .select("id, product_name, brand_name, image_url, category, subcategory, materials")
           .not("image_url", "is", null)
+          .neq("image_url", "")
+          .eq("is_active", true)
           .order("brand_name", { ascending: true })
           .range(from, from + pageSize - 1);
         if (error || !data || data.length === 0) break;
@@ -127,14 +129,19 @@ const TradeVisualiser = () => {
         from += pageSize;
       }
       if (cancelled) return;
-      // Dedupe by image_url — many products are variants sharing one photo.
-      const seen = new Set<string>();
-      const deduped = all.filter((s) => {
-        const key = s.image_url || `${s.brand_name}|${s.product_name}`;
-        if (seen.has(key)) return false;
-        seen.add(key);
-        return true;
-      });
+      // Dedupe by the real image asset — Cloudinary transforms can make the
+      // same file look like different URLs, and scraped variants often share it.
+      const byAsset = new Map<string, Swatch>();
+      for (const s of all) {
+        const assetKey = normalizeAssetKey(s.image_url) || `${s.brand_name}|${s.product_name}`;
+        const previous = byAsset.get(assetKey);
+        if (!previous || productLabelScore(s.product_name) > productLabelScore(previous.product_name)) {
+          byAsset.set(assetKey, s);
+        }
+      }
+      const deduped = Array.from(byAsset.values()).sort((a, b) =>
+        `${a.brand_name || ""} ${a.product_name}`.localeCompare(`${b.brand_name || ""} ${b.product_name}`)
+      );
       setAllSwatches(deduped);
       setLoadingSwatches(false);
     })();
@@ -149,8 +156,7 @@ const TradeVisualiser = () => {
         if (classifySwatchSurface(s) !== surface) return false;
         if (!q) return true;
         return `${s.product_name} ${s.brand_name || ""} ${s.category || ""} ${s.subcategory || ""}`.toLowerCase().includes(q);
-      })
-      .slice(0, 60);
+      });
   }, [allSwatches, surface, search]);
 
   // ─── Upload handling ─────────────────────────────────────────────────────
