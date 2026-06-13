@@ -2770,6 +2770,10 @@ serve(async (req) => {
       console.log("[concierge discovery-gate] stripping plan — opening brief without selection verb", { lastUserMsg, originalPlan: effectiveBrief.plan });
       effectiveBrief = { ...effectiveBrief, intent: "discovery", plan: [] };
     }
+    if (!hasExplicitSelectionVerb && opensWithLookingFor) {
+      console.log("[concierge discovery-gate] deterministic opening-brief reply", { lastUserMsg });
+      return sseTextResponse(buildOpeningBriefDiscoveryReply(lastUserMsg, langCode));
+    }
     const requestedTypology = inferRequestedTypology(effectiveBrief.brief, userConversationText);
 
     if (shouldActOnAccumulatedBrief && breaker.state() === "open" && CLOUDFLARE_ENABLED) {
