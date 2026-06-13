@@ -189,6 +189,10 @@ export const template = {
     commissionPct: 15,
     commissionFormatted: '7,237.50',
     payoutMethod: 'Crédit Mutuel · EUR · ••4421',
+    payoutCurrency: 'EUR',
+    commissionPayoutFormatted: '6,732.20',
+    fxRate: 0.9302,
+    fxSource: 'frankfurter.app (ECB 2026-06-13)',
     expectedWireOn: '18 Jun 2026',
     items: [
       { name: 'Salvagni — Sesta low table', quantity: 1, msrpFormatted: '12,400.00' },
