@@ -3669,52 +3669,19 @@ serve(async (req) => {
             b.name === "propose_tearsheet" || b.name === "add_to_tearsheet"
           );
           if (hasTearsheet) return false;
-          const rows = Array.isArray((ragResult as any)?.rows) ? (ragResult as any).rows : [];
-          const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-          const scoreRow = (r: any) => {
-            const hay = `${r?.title || ""} ${r?.category || ""} ${r?.subcategory || ""} ${r?.materials || ""}`.toLowerCase();
-            let score = Number(r?.similarity || 0);
-            if (/\bdining\b/.test(hay)) score += 3;
-            if (/\btable\b/.test(hay)) score += 2;
-            if (/\b(oak|walnut|wood|timber)\b/.test(hay)) score += 1;
-            return score;
-          };
-          const pickIds = Array.from(new Set(rows
-            .filter((r: any) => r && typeof r.id === "string" && UUID_RE.test(r.id))
-            .sort((a: any, b: any) => scoreRow(b) - scoreRow(a))
-            .map((r: any) => r.id)
-          )).slice(0, 8);
-          if (pickIds.length < 2) return false;
-          const previewRaw = await hydratePickPreview(supabase, pickIds);
-          const validIds = new Set(previewRaw.map((p: any) => p?.id).filter(Boolean));
-          const finalIds = pickIds.filter((id) => validIds.has(id));
-          if (finalIds.length < 2) return false;
-          const rationaleMap: Record<string, { reason: string }> = {};
-          for (const p of previewRaw) {
-            if (!p?.id || !finalIds.includes(p.id)) continue;
-            const meta = [p.category, p.materials].filter(Boolean).join(" · ");
-            rationaleMap[p.id] = { reason: meta ? `Validated from the Curation for its ${meta}.` : "Validated from the Maison Affluency Curation for this brief." };
-          }
-          const preview = previewRaw
-            .filter((p: any) => finalIds.includes(p?.id))
-            .map((p: any) => ({ ...p, rationale: rationaleMap[p.id]?.reason || null }));
-          const proposal = {
-            tool: "propose_tearsheet",
-            tool_call_id: crypto.randomUUID(),
-            args: {
-              title: effectiveBrief.brief.room ? `${effectiveBrief.brief.room} first edit` : "Curated first edit",
-              pick_ids: finalIds,
-              note: "Validated directly against the Maison Affluency Curation.",
-              pick_rationales: rationaleMap,
-            },
-            preview,
-          };
+          const proposal = await buildDeterministicTearsheetProposal(
+            supabase,
+            Array.isArray((ragResult as any)?.rows) ? (ragResult as any).rows : [],
+            effectiveBrief.brief,
+            userConversationText,
+          );
+          if (!proposal) return false;
           const maxIdx = Array.from(toolCallBuffers.keys()).reduce((m, i) => (i > m ? i : m), -1);
           toolCallBuffers.set(maxIdx + 1, { id: proposal.tool_call_id, name: "propose_tearsheet", argsText: JSON.stringify(proposal.args) });
           controller.enqueue(encoder.encode(`event: proposal\ndata: ${JSON.stringify(proposal)}\n\n`));
           const closing = "Here's a first edit — would you like me to refine this selection against your client's intentions?";
           controller.enqueue(encoder.encode(`data: ${JSON.stringify({ choices: [{ delta: { content: closing } }] })}\n\n`));
-          console.log(`[concierge deterministic-fallback] emitted propose_tearsheet (${finalIds.length} picks)`);
+          console.log(`[concierge deterministic-fallback] emitted propose_tearsheet (${proposal.args?.pick_ids?.length || 0} picks)`);
           return true;
         };
 
