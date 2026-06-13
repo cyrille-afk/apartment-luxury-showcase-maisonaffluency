@@ -2404,6 +2404,12 @@ serve(async (req) => {
         }
       : extractedBrief;
 
+    if (shouldActOnAccumulatedBrief && breakerAllowsPrimary().allow === false && CLOUDFLARE_ENABLED) {
+      return sseTextResponse(
+        "You’ve already given me the essentials: a 12-seat dining table for a refined, elegant-but-not-too-formal Belgravia townhouse, with warm wood tones in oak or walnut. I’ll draft the first edit as soon as the catalogue tool is available; meanwhile, if you have a room plan, reference photo, or PDF, attach it with the paperclip and send it here so I can refine scale and placement.",
+      );
+    }
+
     // Fire-and-forget: learn from this turn's extracted brief so the next turn recalls it.
     persistInferredMemory(supabase, userId, effectiveBrief?.brief).catch(() => {});
     // Compose the signals block: live engagement signals first, then the persistent
