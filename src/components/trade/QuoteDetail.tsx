@@ -474,6 +474,29 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     load();
   }, [quoteId, user, reloadKey]);
 
+  // Load dual-billing meta separately (additive — keeps the main loader untouched).
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from("trade_quotes")
+        .select("billing_mode, net_discount_pct, commission_pct, end_client_billing, resale_certificate_id, studio_id")
+        .eq("id", quoteId)
+        .maybeSingle();
+      if (cancelled || !data) return;
+      setBillingMeta({
+        billing_mode: (data.billing_mode as any) ?? "agent_commission",
+        net_discount_pct: data.net_discount_pct as number | null,
+        commission_pct: data.commission_pct as number | null,
+        end_client_billing: (data.end_client_billing as Record<string, string> | null) ?? null,
+        resale_certificate_id: data.resale_certificate_id as string | null,
+        studio_id: data.studio_id as string | null,
+      });
+    })();
+    return () => { cancelled = true; };
+  }, [quoteId, reloadKey]);
+
+
   // Fetch products for the in-quote "Add product" picker.
   useEffect(() => {
     let cancelled = false;
