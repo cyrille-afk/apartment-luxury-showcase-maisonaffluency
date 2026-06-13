@@ -170,7 +170,8 @@ const CommissionStatementEmail = ({
       </Container>
     </Body>
   </Html>
-)
+  )
+}
 
 export const template = {
   component: CommissionStatementEmail,
