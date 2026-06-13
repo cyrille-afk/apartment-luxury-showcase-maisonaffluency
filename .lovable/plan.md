@@ -103,13 +103,13 @@ Tax: `automatic_tax: { enabled: true }` in both modes.
 
 ## Phasing
 
-**Phase 1 (ship first) — schema done, app work next:**
+**Phase 1 — COMPLETE:**
 
-1. **Studio settings UI** — payout accounts (Stripe Connect Express onboarding) + per-state resale cert upload.
-2. **Checkout dual-mode UI** — radio + conditional fields + live recompute on `TradeQuoteCheckout`.
-3. **Managed freight integration** — wire the existing `shipping_quotes` table into the `net_buy` flow so freight is locked at checkout.
-4. **Stripe Connect + `create-payment` split** — destination charges for agent payouts; straight charge for net buys.
-5. **Two invoice templates** — agent (to end-client) and net commercial (to designer firm).
+1. ✅ **Studio settings UI** — payout accounts (Stripe Connect Express onboarding) + per-state resale cert upload.
+2. ✅ **Checkout dual-mode UI** — `BillingModeCard` with radio + conditional fields + live recompute on `TradeQuoteCheckout`.
+3. ✅ **Managed freight integration** — `managed_freight_quote_id` on `trade_quotes`; selector in `BillingModeCard`; `create-quote-payment` rejects net-buy without a locked freight quote and sources freight cents server-side from the locked `shipping_quotes` row.
+4. ✅ **Stripe Connect + `create-payment` split** — destination charges + `application_fee_amount` route the commission portion to the designer's Connect account in agent mode; straight platform charge in net mode.
+5. ✅ **Two invoice templates** — `tax_invoice` (agent, to end-client, full MSRP) and `proforma_net_buy` (designer firm, net prices baked in, "FOR RESALE" stamp with cert number) via `src/lib/invoicePdf.ts`.
 
 **Phase 2:**
 
