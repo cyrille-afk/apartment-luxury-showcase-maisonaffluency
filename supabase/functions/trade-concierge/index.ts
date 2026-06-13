@@ -136,9 +136,18 @@ async function callCloudflare(init: RequestInit, reason: string, primaryCtx: { s
     // the payload to a slim system note + the last few turns. Cap ~16k chars
     // (~4k tokens) to leave headroom for the completion.
     const CF_CHAR_CAP = 16000;
+    // Preserve the REPLY LANGUAGE directive from the upstream system prompt
+    // so the Cloudflare fallback honours the user's language picker even
+    // though we strip the long catalogue system prompt.
+    const firstSystem = (Array.isArray(parsed.messages) ? parsed.messages : [])
+      .find((m: any) => m && m.role === "system");
+    const firstSysText = typeof firstSystem?.content === "string" ? firstSystem.content : "";
+    const langBlockMatch = firstSysText.match(/## ABSOLUTE RULE — REPLY LANGUAGE[\s\S]*?(?=\n##|\n\n[A-Z]|$)/);
+    const langBlock = langBlockMatch ? langBlockMatch[0].trim() + "\n\n" : "";
     const slimSystem = {
       role: "system",
       content:
+        langBlock +
         "You are Felix, the Maison Affluency concierge fallback. The catalogue tools are temporarily unavailable. Reply briefly and warmly, acknowledging the user's last message specifically. Never re-ask atmosphere, palette, material, room type, or seating capacity if already stated in the conversation. If spatial context is missing, invite the user to attach a room plan, photo, or PDF via the paperclip and send it here. Never invent product names, designers, or ids; never output JSON or tool envelopes.",
     };
     const original = Array.isArray(parsed.messages) ? parsed.messages : [];
