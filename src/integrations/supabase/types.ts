@@ -5474,6 +5474,7 @@ export type Database = {
           landed_cost_cbm: number | null
           landed_cost_kg: number | null
           landed_cost_mode: string
+          managed_freight_quote_id: string | null
           net_discount_pct: number | null
           notes: string | null
           payer_type: Database["public"]["Enums"]["payer_type"]
@@ -5520,6 +5521,7 @@ export type Database = {
           landed_cost_cbm?: number | null
           landed_cost_kg?: number | null
           landed_cost_mode?: string
+          managed_freight_quote_id?: string | null
           net_discount_pct?: number | null
           notes?: string | null
           payer_type?: Database["public"]["Enums"]["payer_type"]
@@ -5566,6 +5568,7 @@ export type Database = {
           landed_cost_cbm?: number | null
           landed_cost_kg?: number | null
           landed_cost_mode?: string
+          managed_freight_quote_id?: string | null
           net_discount_pct?: number | null
           notes?: string | null
           payer_type?: Database["public"]["Enums"]["payer_type"]
@@ -5603,6 +5606,13 @@ export type Database = {
             columns: ["designer_payout_account_id"]
             isOneToOne: false
             referencedRelation: "studio_payout_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trade_quotes_managed_freight_quote_id_fkey"
+            columns: ["managed_freight_quote_id"]
+            isOneToOne: false
+            referencedRelation: "shipping_quotes"
             referencedColumns: ["id"]
           },
           {
