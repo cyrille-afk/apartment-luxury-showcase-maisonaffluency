@@ -29,6 +29,42 @@ function aiModel(m: string): string {
   return USE_GEMINI_DIRECT ? m.replace(/^google\//, "") : m;
 }
 
+type ChatBackend = "gemini" | "lovable-gateway";
+
+function ensureLovableModel(m: string): string {
+  return m.startsWith("google/") || m.startsWith("openai/") ? m : `google/${m}`;
+}
+
+function selectChatBackend(init: RequestInit): ChatBackend {
+  // Image/PDF turns go through Lovable AI instead of the direct Gemini key.
+  // The direct key is quota-limited and was causing uploaded photos to fall
+  // back to text-only handling before the vision model could read them.
+  if (payloadHasAttachments(init)) return "lovable-gateway";
+  return USE_GEMINI_DIRECT ? "gemini" : "lovable-gateway";
+}
+
+function chatBackendUrl(backend: ChatBackend): string {
+  return backend === "gemini" ? GEMINI_CHAT_URL : LOVABLE_CHAT_URL;
+}
+
+function initForChatBackend(init: RequestInit, backend: ChatBackend): RequestInit {
+  const lovableKey = Deno.env.get("LOVABLE_API_KEY") || "";
+  const headers = new Headers(init.headers);
+  headers.set("Authorization", `Bearer ${backend === "gemini" ? aiAuthKey(lovableKey) : lovableKey}`);
+  headers.set("Content-Type", "application/json");
+
+  let body = init.body;
+  try {
+    const parsed = JSON.parse(String(init.body ?? "{}"));
+    if (typeof parsed.model === "string") {
+      parsed.model = backend === "gemini" ? parsed.model.replace(/^google\//, "") : ensureLovableModel(parsed.model);
+    }
+    body = JSON.stringify(parsed);
+  } catch { /* keep original body */ }
+
+  return { ...init, headers, body };
+}
+
 // Cloudflare Workers AI fallback (10k free requests/day). Used when Gemini
 // returns a rate-limit / quota error.
 const CLOUDFLARE_ACCOUNT_ID = Deno.env.get("CLOUDFLARE_ACCOUNT_ID");
