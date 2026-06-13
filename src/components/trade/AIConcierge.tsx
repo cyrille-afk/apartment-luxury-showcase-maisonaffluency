@@ -111,6 +111,74 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const abortRef = useRef<AbortController | null>(null);
 
+  // -------- Attachments (room plans, mood images, PDFs) --------
+  type StagedAttachment = {
+    id: string;
+    name: string;
+    mime: string;
+    kind: "image" | "pdf";
+    /** data URL (data:<mime>;base64,...) ready to send to the vision model */
+    dataUrl: string;
+    /** UI preview — same as dataUrl for images, undefined for PDFs */
+    previewUrl?: string;
+    size: number;
+  };
+  const MAX_ATTACHMENT_BYTES = 8 * 1024 * 1024; // 8 MB per file — base64 inflates ~33%
+  const MAX_ATTACHMENTS = 4;
+  const [attachments, setAttachments] = useState<StagedAttachment[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const readFileAsDataUrl = (file: File): Promise<string> =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result || ""));
+      reader.onerror = () => reject(reader.error);
+      reader.readAsDataURL(file);
+    });
+
+  const handleFilesPicked = useCallback(async (files: FileList | File[] | null) => {
+    if (!files) return;
+    const list = Array.from(files);
+    if (!list.length) return;
+    const accepted: StagedAttachment[] = [];
+    for (const f of list) {
+      if (attachments.length + accepted.length >= MAX_ATTACHMENTS) {
+        toast.error(`Maximum ${MAX_ATTACHMENTS} attachments per message.`);
+        break;
+      }
+      const isImage = f.type.startsWith("image/");
+      const isPdf = f.type === "application/pdf" || /\.pdf$/i.test(f.name);
+      if (!isImage && !isPdf) {
+        toast.error(`${f.name}: only images and PDFs are supported.`);
+        continue;
+      }
+      if (f.size > MAX_ATTACHMENT_BYTES) {
+        toast.error(`${f.name} is too large (max 8 MB).`);
+        continue;
+      }
+      try {
+        const dataUrl = await readFileAsDataUrl(f);
+        accepted.push({
+          id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+          name: f.name,
+          mime: f.type || (isPdf ? "application/pdf" : "image/jpeg"),
+          kind: isImage ? "image" : "pdf",
+          dataUrl,
+          previewUrl: isImage ? dataUrl : undefined,
+          size: f.size,
+        });
+      } catch {
+        toast.error(`Couldn't read ${f.name}.`);
+      }
+    }
+    if (accepted.length) setAttachments((prev) => [...prev, ...accepted]);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  }, [attachments.length]);
+
+  const removeAttachment = (id: string) =>
+    setAttachments((prev) => prev.filter((a) => a.id !== id));
+
+
   // Draggable position — persisted in localStorage. `null` = use default
   // bottom-right anchor; once user drags, we switch to absolute top/left.
   const [expanded, setExpanded] = useState<boolean>(() => {
