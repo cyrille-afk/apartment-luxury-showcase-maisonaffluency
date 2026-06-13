@@ -2105,6 +2105,20 @@ function buildNoStrictTypologyReply(typology: RequestedTypology): string {
   return `You're right — I won't present adjacent pieces as a ${label}. I don't have enough true ${label}s matching this brief in the Maison Affluency Curation to draft a credible edit; would you like me to expand the search through the designers' own collections using our Axonometric Studio archives and tools?`;
 }
 
+function buildOpeningBriefDiscoveryReply(latestUserMessage: string, langCode = "en"): string {
+  const lower = (latestUserMessage || "").toLowerCase();
+  const wantsDiningTable = /\bdining\s+table\b/.test(lower);
+  const location = /\bbelgravia\b/.test(lower) ? "Belgravia" : (lower.match(/\b(mayfair|chelsea|knightsbridge|kensington|notting hill|marylebone)\b/)?.[1] || null);
+  const property = /\btownhouse\b/.test(lower) ? "townhouse" : (lower.match(/\b(penthouse|villa|apartment|house|mews)\b/)?.[1] || null);
+  const piece = wantsDiningTable ? "a statement dining table" : "a statement piece";
+  const place = [location, property].filter(Boolean).join(" ").trim();
+  const mirror = place ? `${piece} for your ${place}` : piece;
+  if (langCode === "id") return `Anda menyebut ${mirror} — yang belum jelas adalah kapasitas dan arahnya: lebih formal-sculptural untuk entertaining, atau hangat dan residential untuk penggunaan sehari-hari?`;
+  if (langCode === "th") return `คุณกล่าวถึง ${mirror} — สิ่งที่ยังขาดคือจำนวนที่นั่งและทิศทาง: formal-sculptural สำหรับ entertaining หรืออบอุ่นแบบ residential สำหรับใช้ทุกวัน?`;
+  if (langCode === "zh") return `您提到需要${mirror}——还差一个关键判断：座位规模，以及方向是更正式、雕塑感、适合宴请，还是更温暖住宅化、适合日常使用？`;
+  return `You mentioned ${mirror} — you didn’t yet specify the seating scale or whether it should read more formal-sculptural for entertaining, or warmer and residential for everyday use?`;
+}
+
 async function fetchStrictTypologyCandidates(
   supabase: ReturnType<typeof createClient>,
   typology: RequestedTypology,
