@@ -1850,7 +1850,7 @@ function buildLocationOnlyReply(latestUserMessage: string, history: any[]): stri
     .toLowerCase();
 
   if (/\b(ship|shipping|freight|delivery|deliver|landed|customs|vat|destination|route|white[- ]glove)\b/.test(recent)) {
-    return `${display} — noted. Once we have shaped the project together, selected the pieces and finalised your quote, I will personally arrange a white-glove lane, door-to-door, with duties and insurance landed. For now, tell me a little about the project — the room, the brief, the atmosphere you have in mind.`;
+    return `${display} — noted. For now, can you tell me a little about the project itself — is it a Georgian Townhouse, a luxury penthouse or a Mews House, your brief in general and the atmosphere you have in mind?`;
   }
   if (/\b(project|site|location|install|installation|client|address|city|where)\b/.test(recent)) {
     return `${display} — noted as the project address. Tell me about the project itself: the room, the brief, the atmosphere you're composing, and I'll begin curating accordingly. Shipping we'll address in good time, once the pieces are chosen.`;
