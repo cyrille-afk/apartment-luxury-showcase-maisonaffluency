@@ -115,7 +115,7 @@ Tax: `automatic_tax: { enabled: true }` in both modes.
 
 - ✅ **Commission statement emails on delivery** — `send-commission-statement` edge fn fires from the order-timeline kanban when status moves to `delivered`. Loads quote + items + payout account server-side, computes commission from `commission_pct`, invokes the `commission-statement` React-Email template via `send-transactional-email`. Idempotent via `order_timeline.commission_statement_sent_at`; silently no-ops for `net_buy`.
 - ✅ **W-9 / VAT capture in payout account form** — `PayoutAccountsSection` exposes `tax_form_kind` (W9 / W8BEN / W8BEN-E / VAT_ID / TAX_ID / NONE), `tax_form_reference` and optional signed-PDF upload to the private `client-documents` bucket under `{studio}/tax-forms/`. Form type auto-defaults from country (US→W9, EU/UK→VAT_ID, Asia/MENA→TAX_ID, CA/MX→W8BEN-E). Each row shows a tax-status badge and a 60s signed-URL "View document" link; missing tax form is flagged in amber.
-- Multi-currency wires
+- ✅ **Multi-currency wires** — when the quote currency differs from the linked payout account's currency, `send-commission-statement` fetches a daily ECB rate from `frankfurter.app` (no API key), converts the commission, and persists `commission_fx_rate`, `commission_fx_source`, `commission_payout_currency`, `commission_payout_cents`, `commission_fx_locked_at` on `order_timeline` so retries are stable. The statement email now shows the FX rate, source, and the wired amount in the designer's payout currency. Settings UI surfaces the wire currency per account.
 - 1099 / T5 reporting export
 
 ## Out of scope
