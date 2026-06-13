@@ -2341,9 +2341,16 @@ async function buildDeterministicTearsheetProposal(
     if (/\b(oak|walnut|wood|timber)\b/.test(hay)) score += 1;
     return score;
   };
-  const pickIds = Array.from(new Set((ragRows || [])
+  let candidateRows = (ragRows || [])
     .filter((r: any) => r && typeof r.id === "string" && UUID_RE.test(r.id))
     .filter((r: any) => rowMatchesRequestedTypology(r, requestedTypology))
+    .sort((a: any, b: any) => scoreRow(b) - scoreRow(a));
+  if (candidateRows.length < 2 && requestedTypology) {
+    candidateRows = (await fetchStrictTypologyCandidates(supabase, requestedTypology))
+      .filter((r: any) => r && typeof r.id === "string" && UUID_RE.test(r.id))
+      .sort((a: any, b: any) => scoreRow(b) - scoreRow(a));
+  }
+  const pickIds = Array.from(new Set(candidateRows
     .sort((a: any, b: any) => scoreRow(b) - scoreRow(a))
     .map((r: any) => r.id)
   )).slice(0, 8);
