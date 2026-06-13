@@ -126,21 +126,36 @@ async function callCloudflare(init: RequestInit, reason: string, primaryCtx: { s
     const parsed = JSON.parse(String(init.body ?? "{}"));
     originalModel = parsed.model || "unknown";
     parsed.model = CLOUDFLARE_FALLBACK_MODEL;
-    // Llama 3.3 on Workers AI does not reliably honour "use exact UUIDs from
-    // CATALOG PIECES" — it hallucinates placeholder ids like "Catalog Piece 1"
-    // and emits invalid propose_tearsheet calls. Strip tools entirely on the
-    // fallback path so the model can ONLY produce a prose reply.
     delete parsed.tools;
     delete parsed.tool_choice;
     delete parsed.response_format;
-    // Soft nudge: ask for a brief, conversational reply rather than a curated list.
-    if (Array.isArray(parsed.messages)) {
-      parsed.messages.unshift({
-        role: "system",
-        content:
-          "You are the concierge fallback. The catalogue tools are temporarily unavailable. Reply briefly and conversationally — ask one or two refining questions (room, atmosphere, palette, budget) so you can curate properly on the next turn. Never invent product names, designers, or ids; never output JSON or tool envelopes.",
-      });
+
+    // Workers AI Llama 3.3 has a HARD 24k-token context window. Our primary
+    // prompt (system + catalogue context + history) routinely exceeds that
+    // and returns 413. Tools are stripped anyway on this path, so collapse
+    // the payload to a slim system note + the last few turns. Cap ~16k chars
+    // (~4k tokens) to leave headroom for the completion.
+    const CF_CHAR_CAP = 16000;
+    const slimSystem = {
+      role: "system",
+      content:
+        "You are Felix, the Maison Affluency concierge fallback. The catalogue tools are temporarily unavailable. Reply briefly and warmly — acknowledge the user's last message specifically, then ask one or two refining questions (room, atmosphere, palette, budget, seating capacity) so we can curate properly next turn. Never invent product names, designers, or ids; never output JSON or tool envelopes.",
+    };
+    const original = Array.isArray(parsed.messages) ? parsed.messages : [];
+    const nonSystem = original.filter((m: any) => m && m.role !== "system");
+    const kept: any[] = [];
+    let charBudget = CF_CHAR_CAP;
+    for (let i = nonSystem.length - 1; i >= 0; i--) {
+      const m = nonSystem[i];
+      const raw = typeof m.content === "string" ? m.content : JSON.stringify(m.content ?? "");
+      const c = raw.length > 8000 ? raw.slice(-8000) : raw;
+      if (c.length > charBudget && kept.length > 0) break;
+      kept.unshift({ role: m.role, content: c });
+      charBudget -= c.length;
+      if (charBudget <= 0) break;
     }
+    parsed.messages = [slimSystem, ...kept];
+    parsed.max_tokens = Math.min(parsed.max_tokens ?? 800, 800);
     cfBodyStr = JSON.stringify(parsed);
   } catch (_) {
     cfBodyStr = String(init.body ?? "{}");
