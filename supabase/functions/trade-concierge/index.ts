@@ -1832,6 +1832,44 @@ function normalizeLoose(value: string | null | undefined): string {
     .trim();
 }
 
+const LOCATION_ONLY_FOLLOWUPS = new Set([
+  "london", "new york", "los angeles", "miami", "paris", "milan", "rome", "geneva", "zurich",
+  "monaco", "dubai", "abu dhabi", "doha", "riyadh", "jeddah", "hong kong", "singapore",
+  "sydney", "melbourne", "tokyo", "seoul", "toronto", "vancouver", "gb", "uk", "united kingdom",
+  "usa", "united states", "france", "italy", "switzerland", "uae", "singapore", "hong kong",
+]);
+
+function buildLocationOnlyReply(latestUserMessage: string, history: any[]): string | null {
+  const normalized = normalizeLoose(latestUserMessage);
+  if (!LOCATION_ONLY_FOLLOWUPS.has(normalized)) return null;
+  const display = latestUserMessage.trim().replace(/\s+/g, " ");
+  const recent = history
+    .slice(-6)
+    .map((m: any) => (typeof m?.content === "string" ? m.content : ""))
+    .join("\n")
+    .toLowerCase();
+
+  if (/\b(ship|shipping|freight|delivery|deliver|landed|customs|vat|destination|route|white[- ]glove)\b/.test(recent)) {
+    return `${display} — understood. I’ll treat it as the delivery destination; tell me the piece or quote subtotal and I’ll price the lane.`;
+  }
+  if (/\b(project|site|location|install|installation|client|address|city|where)\b/.test(recent)) {
+    return `${display} — understood. I’ll use it as the project location; what room or selection should Felix curate next?`;
+  }
+  return `${display} — understood. Is that the project location, or the delivery destination for a quote?`;
+}
+
+function sseTextResponse(text: string): Response {
+  const encoder = new TextEncoder();
+  const stream = new ReadableStream({
+    start(controller) {
+      controller.enqueue(encoder.encode(`data: ${JSON.stringify({ choices: [{ delta: { content: text } }] })}\n\n`));
+      controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+      controller.close();
+    },
+  });
+  return new Response(stream, { headers: { ...corsHeaders, "Content-Type": "text/event-stream" } });
+}
+
 function titleTokens(value: string | null | undefined): string[] {
   return normalizeLoose(value).split(/\s+/).filter((t) => t.length > 2 && !GENERIC_PRODUCT_TOKENS.has(t));
 }
@@ -2183,6 +2221,14 @@ serve(async (req) => {
       );
     }
 
+    const lastUserMsg = [...messages].reverse().find((m: any) => m.role === "user")?.content || "";
+
+    // Ultra-fast deterministic path for one-word location follow-ups like
+    // "London". These were going through the full RAG/planner/main-model
+    // pipeline even though no catalog reasoning is needed.
+    const locationOnlyReply = buildLocationOnlyReply(lastUserMsg, messages);
+    if (locationOnlyReply) return sseTextResponse(locationOnlyReply);
+
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
@@ -2199,8 +2245,6 @@ serve(async (req) => {
         { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
-
-    const lastUserMsg = [...messages].reverse().find((m: any) => m.role === "user")?.content || "";
 
     // Trim history: keep only the last ~8 turns to control prompt size.
     const trimmedMessages = messages.slice(-8);
