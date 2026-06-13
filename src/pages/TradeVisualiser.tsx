@@ -130,6 +130,8 @@ const TradeVisualiser = () => {
           .neq("image_url", "")
           .eq("is_active", true)
           .order("brand_name", { ascending: true })
+          .order("product_name", { ascending: true })
+          .order("id", { ascending: true })
           .range(from, from + pageSize - 1);
         if (error || !data || data.length === 0) break;
         all.push(...(data as Swatch[]));
