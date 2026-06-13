@@ -1,0 +1,2 @@
+REVOKE EXECUTE ON FUNCTION public.studio_has_resale_cert_for_state(uuid, text) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.studio_has_resale_cert_for_state(uuid, text) TO authenticated, service_role;

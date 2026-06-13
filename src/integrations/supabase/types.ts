@@ -4028,6 +4028,86 @@ export type Database = {
           },
         ]
       }
+      studio_payout_accounts: {
+        Row: {
+          account_holder_name: string
+          ach_account_number: string | null
+          ach_routing_number: string | null
+          bank_address: string | null
+          bank_name: string | null
+          country_code: string
+          created_at: string
+          created_by: string
+          currency: string
+          iban: string | null
+          id: string
+          is_default: boolean
+          label: string
+          stripe_connect_account_id: string | null
+          stripe_connect_status: string
+          studio_id: string
+          swift_bic: string | null
+          tax_form_document_path: string | null
+          tax_form_kind: string | null
+          tax_form_reference: string | null
+          updated_at: string
+        }
+        Insert: {
+          account_holder_name: string
+          ach_account_number?: string | null
+          ach_routing_number?: string | null
+          bank_address?: string | null
+          bank_name?: string | null
+          country_code: string
+          created_at?: string
+          created_by: string
+          currency: string
+          iban?: string | null
+          id?: string
+          is_default?: boolean
+          label: string
+          stripe_connect_account_id?: string | null
+          stripe_connect_status?: string
+          studio_id: string
+          swift_bic?: string | null
+          tax_form_document_path?: string | null
+          tax_form_kind?: string | null
+          tax_form_reference?: string | null
+          updated_at?: string
+        }
+        Update: {
+          account_holder_name?: string
+          ach_account_number?: string | null
+          ach_routing_number?: string | null
+          bank_address?: string | null
+          bank_name?: string | null
+          country_code?: string
+          created_at?: string
+          created_by?: string
+          currency?: string
+          iban?: string | null
+          id?: string
+          is_default?: boolean
+          label?: string
+          stripe_connect_account_id?: string | null
+          stripe_connect_status?: string
+          studio_id?: string
+          swift_bic?: string | null
+          tax_form_document_path?: string | null
+          tax_form_kind?: string | null
+          tax_form_reference?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "studio_payout_accounts_studio_id_fkey"
+            columns: ["studio_id"]
+            isOneToOne: false
+            referencedRelation: "studios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       studio_project_overrides: {
         Row: {
           created_at: string
@@ -4056,6 +4136,65 @@ export type Database = {
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      studio_resale_certificates: {
+        Row: {
+          certificate_number: string | null
+          created_at: string
+          document_path: string
+          expires_on: string | null
+          id: string
+          issued_on: string | null
+          rejected_reason: string | null
+          state_code: string
+          studio_id: string
+          updated_at: string
+          uploaded_by: string
+          verification_status: string
+          verified_at: string | null
+          verified_by: string | null
+        }
+        Insert: {
+          certificate_number?: string | null
+          created_at?: string
+          document_path: string
+          expires_on?: string | null
+          id?: string
+          issued_on?: string | null
+          rejected_reason?: string | null
+          state_code: string
+          studio_id: string
+          updated_at?: string
+          uploaded_by: string
+          verification_status?: string
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Update: {
+          certificate_number?: string | null
+          created_at?: string
+          document_path?: string
+          expires_on?: string | null
+          id?: string
+          issued_on?: string | null
+          rejected_reason?: string | null
+          state_code?: string
+          studio_id?: string
+          updated_at?: string
+          uploaded_by?: string
+          verification_status?: string
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "studio_resale_certificates_studio_id_fkey"
+            columns: ["studio_id"]
+            isOneToOne: false
+            referencedRelation: "studios"
             referencedColumns: ["id"]
           },
         ]
@@ -5122,12 +5261,16 @@ export type Database = {
       trade_quotes: {
         Row: {
           admin_notes: string | null
+          billing_mode: Database["public"]["Enums"]["billing_mode"]
           client_id: string | null
           client_name: string | null
+          commission_pct: number | null
           confirmed_at: string | null
           created_at: string
           credit_applied_cents: number
           currency: string
+          designer_payout_account_id: string | null
+          end_client_billing: Json | null
           id: string
           incoterm: string | null
           insurance_enabled: boolean
@@ -5138,8 +5281,11 @@ export type Database = {
           landed_cost_cbm: number | null
           landed_cost_kg: number | null
           landed_cost_mode: string
+          net_discount_pct: number | null
           notes: string | null
+          payer_type: Database["public"]["Enums"]["payer_type"]
           project_id: string | null
+          resale_certificate_id: string | null
           responded_at: string | null
           ship_to_address1: string | null
           ship_to_address2: string | null
@@ -5161,12 +5307,16 @@ export type Database = {
         }
         Insert: {
           admin_notes?: string | null
+          billing_mode?: Database["public"]["Enums"]["billing_mode"]
           client_id?: string | null
           client_name?: string | null
+          commission_pct?: number | null
           confirmed_at?: string | null
           created_at?: string
           credit_applied_cents?: number
           currency?: string
+          designer_payout_account_id?: string | null
+          end_client_billing?: Json | null
           id?: string
           incoterm?: string | null
           insurance_enabled?: boolean
@@ -5177,8 +5327,11 @@ export type Database = {
           landed_cost_cbm?: number | null
           landed_cost_kg?: number | null
           landed_cost_mode?: string
+          net_discount_pct?: number | null
           notes?: string | null
+          payer_type?: Database["public"]["Enums"]["payer_type"]
           project_id?: string | null
+          resale_certificate_id?: string | null
           responded_at?: string | null
           ship_to_address1?: string | null
           ship_to_address2?: string | null
@@ -5200,12 +5353,16 @@ export type Database = {
         }
         Update: {
           admin_notes?: string | null
+          billing_mode?: Database["public"]["Enums"]["billing_mode"]
           client_id?: string | null
           client_name?: string | null
+          commission_pct?: number | null
           confirmed_at?: string | null
           created_at?: string
           credit_applied_cents?: number
           currency?: string
+          designer_payout_account_id?: string | null
+          end_client_billing?: Json | null
           id?: string
           incoterm?: string | null
           insurance_enabled?: boolean
@@ -5216,8 +5373,11 @@ export type Database = {
           landed_cost_cbm?: number | null
           landed_cost_kg?: number | null
           landed_cost_mode?: string
+          net_discount_pct?: number | null
           notes?: string | null
+          payer_type?: Database["public"]["Enums"]["payer_type"]
           project_id?: string | null
+          resale_certificate_id?: string | null
           responded_at?: string | null
           ship_to_address1?: string | null
           ship_to_address2?: string | null
@@ -5246,10 +5406,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "trade_quotes_designer_payout_account_id_fkey"
+            columns: ["designer_payout_account_id"]
+            isOneToOne: false
+            referencedRelation: "studio_payout_accounts"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "trade_quotes_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trade_quotes_resale_certificate_id_fkey"
+            columns: ["resale_certificate_id"]
+            isOneToOne: false
+            referencedRelation: "studio_resale_certificates"
             referencedColumns: ["id"]
           },
           {
@@ -5929,6 +6103,10 @@ export type Database = {
       rotate_board_token: { Args: { _board_id: string }; Returns: string }
       sanitize_biography_citations: { Args: { input: string }; Returns: string }
       scan_sec_query: { Args: { _sql: string }; Returns: Json[] }
+      studio_has_resale_cert_for_state: {
+        Args: { _state: string; _studio_id: string }
+        Returns: boolean
+      }
       tier_discount_pct: {
         Args: { _tier: Database["public"]["Enums"]["trade_tier"] }
         Returns: number
@@ -5945,6 +6123,7 @@ export type Database = {
         | "in_progress"
         | "completed"
         | "cancelled"
+      billing_mode: "agent_commission" | "net_buy"
       client_document_storage: "link" | "upload"
       client_document_type:
         | "nda"
@@ -5960,6 +6139,7 @@ export type Database = {
         | "design_trend"
         | "project_showcase"
         | "international_editorial"
+      payer_type: "end_client" | "designer_firm"
       pipeline_status:
         | "idea"
         | "planning"
@@ -6112,6 +6292,7 @@ export const Constants = {
         "completed",
         "cancelled",
       ],
+      billing_mode: ["agent_commission", "net_buy"],
       client_document_storage: ["link", "upload"],
       client_document_type: [
         "nda",
@@ -6129,6 +6310,7 @@ export const Constants = {
         "project_showcase",
         "international_editorial",
       ],
+      payer_type: ["end_client", "designer_firm"],
       pipeline_status: [
         "idea",
         "planning",
