@@ -353,13 +353,6 @@ export type Database = {
             referencedRelation: "designer_curator_picks"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "board_recommendations_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: false
-            referencedRelation: "designer_curator_picks_public"
-            referencedColumns: ["id"]
-          },
         ]
       }
       brand_lead_times: {
@@ -1584,6 +1577,138 @@ export type Database = {
           },
         ]
       }
+      designer_curator_picks_public: {
+        Row: {
+          base_axis_label: string | null
+          category: string | null
+          created_at: string | null
+          currency: string | null
+          default_ship_mode: string | null
+          description: string | null
+          designer_id: string | null
+          dimensions: string | null
+          edition: string | null
+          edition_number: string | null
+          edition_signing: string | null
+          gallery_captions: Json | null
+          gallery_images: string[] | null
+          hover_image_url: string | null
+          id: string
+          image_url: string | null
+          is_hidden: boolean | null
+          lead_time: string | null
+          materials: string | null
+          materials_description: string | null
+          origin: string | null
+          pack_carton_count: number | null
+          pack_cbm: number | null
+          pack_weight_kg: number | null
+          pdf_filename: string | null
+          pdf_url: string | null
+          pdf_urls: Json | null
+          photo_credit: string | null
+          pickup_address: string | null
+          pickup_country: string | null
+          pickup_postcode: string | null
+          price_prefix: string | null
+          size_variants: Json | null
+          sort_order: number | null
+          subcategory: string | null
+          subtitle: string | null
+          tags: string[] | null
+          title: string | null
+          top_axis_label: string | null
+          variant_image_map: Json | null
+          variant_placeholder: string | null
+        }
+        Insert: {
+          base_axis_label?: string | null
+          category?: string | null
+          created_at?: string | null
+          currency?: string | null
+          default_ship_mode?: string | null
+          description?: string | null
+          designer_id?: string | null
+          dimensions?: string | null
+          edition?: string | null
+          edition_number?: string | null
+          edition_signing?: string | null
+          gallery_captions?: Json | null
+          gallery_images?: string[] | null
+          hover_image_url?: string | null
+          id: string
+          image_url?: string | null
+          is_hidden?: boolean | null
+          lead_time?: string | null
+          materials?: string | null
+          materials_description?: string | null
+          origin?: string | null
+          pack_carton_count?: number | null
+          pack_cbm?: number | null
+          pack_weight_kg?: number | null
+          pdf_filename?: string | null
+          pdf_url?: string | null
+          pdf_urls?: Json | null
+          photo_credit?: string | null
+          pickup_address?: string | null
+          pickup_country?: string | null
+          pickup_postcode?: string | null
+          price_prefix?: string | null
+          size_variants?: Json | null
+          sort_order?: number | null
+          subcategory?: string | null
+          subtitle?: string | null
+          tags?: string[] | null
+          title?: string | null
+          top_axis_label?: string | null
+          variant_image_map?: Json | null
+          variant_placeholder?: string | null
+        }
+        Update: {
+          base_axis_label?: string | null
+          category?: string | null
+          created_at?: string | null
+          currency?: string | null
+          default_ship_mode?: string | null
+          description?: string | null
+          designer_id?: string | null
+          dimensions?: string | null
+          edition?: string | null
+          edition_number?: string | null
+          edition_signing?: string | null
+          gallery_captions?: Json | null
+          gallery_images?: string[] | null
+          hover_image_url?: string | null
+          id?: string
+          image_url?: string | null
+          is_hidden?: boolean | null
+          lead_time?: string | null
+          materials?: string | null
+          materials_description?: string | null
+          origin?: string | null
+          pack_carton_count?: number | null
+          pack_cbm?: number | null
+          pack_weight_kg?: number | null
+          pdf_filename?: string | null
+          pdf_url?: string | null
+          pdf_urls?: Json | null
+          photo_credit?: string | null
+          pickup_address?: string | null
+          pickup_country?: string | null
+          pickup_postcode?: string | null
+          price_prefix?: string | null
+          size_variants?: Json | null
+          sort_order?: number | null
+          subcategory?: string | null
+          subtitle?: string | null
+          tags?: string[] | null
+          title?: string | null
+          top_axis_label?: string | null
+          variant_image_map?: Json | null
+          variant_placeholder?: string | null
+        }
+        Relationships: []
+      }
       designer_heritage_slides: {
         Row: {
           caption: string | null
@@ -2045,6 +2170,81 @@ export type Database = {
           tagline?: string | null
           team_size?: string | null
           updated_at?: string
+          website_url?: string | null
+        }
+        Relationships: []
+      }
+      featured_studios_public: {
+        Row: {
+          bio: string | null
+          country: string | null
+          created_at: string | null
+          disciplines: string[] | null
+          founded_year: number | null
+          gallery_images: string[] | null
+          hero_image_url: string | null
+          id: string
+          instagram_handle: string | null
+          is_featured: boolean | null
+          is_published: boolean | null
+          location: string | null
+          logo_url: string | null
+          name: string | null
+          notable_projects: string | null
+          project_types: string[] | null
+          slug: string | null
+          sort_order: number | null
+          tagline: string | null
+          team_size: string | null
+          updated_at: string | null
+          website_url: string | null
+        }
+        Insert: {
+          bio?: string | null
+          country?: string | null
+          created_at?: string | null
+          disciplines?: string[] | null
+          founded_year?: number | null
+          gallery_images?: string[] | null
+          hero_image_url?: string | null
+          id: string
+          instagram_handle?: string | null
+          is_featured?: boolean | null
+          is_published?: boolean | null
+          location?: string | null
+          logo_url?: string | null
+          name?: string | null
+          notable_projects?: string | null
+          project_types?: string[] | null
+          slug?: string | null
+          sort_order?: number | null
+          tagline?: string | null
+          team_size?: string | null
+          updated_at?: string | null
+          website_url?: string | null
+        }
+        Update: {
+          bio?: string | null
+          country?: string | null
+          created_at?: string | null
+          disciplines?: string[] | null
+          founded_year?: number | null
+          gallery_images?: string[] | null
+          hero_image_url?: string | null
+          id?: string
+          instagram_handle?: string | null
+          is_featured?: boolean | null
+          is_published?: boolean | null
+          location?: string | null
+          logo_url?: string | null
+          name?: string | null
+          notable_projects?: string | null
+          project_types?: string[] | null
+          slug?: string | null
+          sort_order?: number | null
+          tagline?: string | null
+          team_size?: string | null
+          updated_at?: string | null
           website_url?: string | null
         }
         Relationships: []
@@ -3991,13 +4191,6 @@ export type Database = {
             referencedRelation: "featured_studios"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "studio_lead_events_studio_id_fkey"
-            columns: ["studio_id"]
-            isOneToOne: false
-            referencedRelation: "featured_studios_public"
-            referencedColumns: ["id"]
-          },
         ]
       }
       studio_members: {
@@ -5008,13 +5201,6 @@ export type Database = {
             referencedRelation: "designer_curator_picks"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "trade_product_pricing_pick_id_fkey"
-            columns: ["pick_id"]
-            isOneToOne: true
-            referencedRelation: "designer_curator_picks_public"
-            referencedColumns: ["id"]
-          },
         ]
       }
       trade_products: {
@@ -5672,221 +5858,7 @@ export type Database = {
       }
     }
     Views: {
-      designer_curator_picks_public: {
-        Row: {
-          base_axis_label: string | null
-          category: string | null
-          created_at: string | null
-          currency: string | null
-          default_ship_mode: string | null
-          description: string | null
-          designer_id: string | null
-          dimensions: string | null
-          edition: string | null
-          edition_number: string | null
-          edition_signing: string | null
-          gallery_captions: Json | null
-          gallery_images: string[] | null
-          hover_image_url: string | null
-          id: string | null
-          image_url: string | null
-          is_hidden: boolean | null
-          lead_time: string | null
-          materials: string | null
-          materials_description: string | null
-          origin: string | null
-          pack_carton_count: number | null
-          pack_cbm: number | null
-          pack_weight_kg: number | null
-          pdf_filename: string | null
-          pdf_url: string | null
-          pdf_urls: Json | null
-          photo_credit: string | null
-          pickup_address: string | null
-          pickup_country: string | null
-          pickup_postcode: string | null
-          price_prefix: string | null
-          size_variants: Json | null
-          sort_order: number | null
-          subcategory: string | null
-          subtitle: string | null
-          tags: string[] | null
-          title: string | null
-          top_axis_label: string | null
-          variant_image_map: Json | null
-          variant_placeholder: string | null
-        }
-        Insert: {
-          base_axis_label?: string | null
-          category?: string | null
-          created_at?: string | null
-          currency?: string | null
-          default_ship_mode?: string | null
-          description?: string | null
-          designer_id?: string | null
-          dimensions?: string | null
-          edition?: string | null
-          edition_number?: string | null
-          edition_signing?: string | null
-          gallery_captions?: Json | null
-          gallery_images?: string[] | null
-          hover_image_url?: string | null
-          id?: string | null
-          image_url?: string | null
-          is_hidden?: boolean | null
-          lead_time?: string | null
-          materials?: string | null
-          materials_description?: string | null
-          origin?: string | null
-          pack_carton_count?: number | null
-          pack_cbm?: number | null
-          pack_weight_kg?: number | null
-          pdf_filename?: string | null
-          pdf_url?: string | null
-          pdf_urls?: Json | null
-          photo_credit?: string | null
-          pickup_address?: string | null
-          pickup_country?: string | null
-          pickup_postcode?: string | null
-          price_prefix?: string | null
-          size_variants?: Json | null
-          sort_order?: number | null
-          subcategory?: string | null
-          subtitle?: string | null
-          tags?: string[] | null
-          title?: string | null
-          top_axis_label?: string | null
-          variant_image_map?: Json | null
-          variant_placeholder?: string | null
-        }
-        Update: {
-          base_axis_label?: string | null
-          category?: string | null
-          created_at?: string | null
-          currency?: string | null
-          default_ship_mode?: string | null
-          description?: string | null
-          designer_id?: string | null
-          dimensions?: string | null
-          edition?: string | null
-          edition_number?: string | null
-          edition_signing?: string | null
-          gallery_captions?: Json | null
-          gallery_images?: string[] | null
-          hover_image_url?: string | null
-          id?: string | null
-          image_url?: string | null
-          is_hidden?: boolean | null
-          lead_time?: string | null
-          materials?: string | null
-          materials_description?: string | null
-          origin?: string | null
-          pack_carton_count?: number | null
-          pack_cbm?: number | null
-          pack_weight_kg?: number | null
-          pdf_filename?: string | null
-          pdf_url?: string | null
-          pdf_urls?: Json | null
-          photo_credit?: string | null
-          pickup_address?: string | null
-          pickup_country?: string | null
-          pickup_postcode?: string | null
-          price_prefix?: string | null
-          size_variants?: Json | null
-          sort_order?: number | null
-          subcategory?: string | null
-          subtitle?: string | null
-          tags?: string[] | null
-          title?: string | null
-          top_axis_label?: string | null
-          variant_image_map?: Json | null
-          variant_placeholder?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "designer_curator_picks_designer_id_fkey"
-            columns: ["designer_id"]
-            isOneToOne: false
-            referencedRelation: "designers"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      featured_studios_public: {
-        Row: {
-          bio: string | null
-          country: string | null
-          created_at: string | null
-          disciplines: string[] | null
-          founded_year: number | null
-          gallery_images: string[] | null
-          hero_image_url: string | null
-          id: string | null
-          instagram_handle: string | null
-          is_featured: boolean | null
-          is_published: boolean | null
-          location: string | null
-          logo_url: string | null
-          name: string | null
-          notable_projects: string | null
-          project_types: string[] | null
-          slug: string | null
-          sort_order: number | null
-          tagline: string | null
-          team_size: string | null
-          updated_at: string | null
-          website_url: string | null
-        }
-        Insert: {
-          bio?: string | null
-          country?: string | null
-          created_at?: string | null
-          disciplines?: string[] | null
-          founded_year?: number | null
-          gallery_images?: string[] | null
-          hero_image_url?: string | null
-          id?: string | null
-          instagram_handle?: string | null
-          is_featured?: boolean | null
-          is_published?: boolean | null
-          location?: string | null
-          logo_url?: string | null
-          name?: string | null
-          notable_projects?: string | null
-          project_types?: string[] | null
-          slug?: string | null
-          sort_order?: number | null
-          tagline?: string | null
-          team_size?: string | null
-          updated_at?: string | null
-          website_url?: string | null
-        }
-        Update: {
-          bio?: string | null
-          country?: string | null
-          created_at?: string | null
-          disciplines?: string[] | null
-          founded_year?: number | null
-          gallery_images?: string[] | null
-          hero_image_url?: string | null
-          id?: string | null
-          instagram_handle?: string | null
-          is_featured?: boolean | null
-          is_published?: boolean | null
-          location?: string | null
-          logo_url?: string | null
-          name?: string | null
-          notable_projects?: string | null
-          project_types?: string[] | null
-          slug?: string | null
-          sort_order?: number | null
-          tagline?: string | null
-          team_size?: string | null
-          updated_at?: string | null
-          website_url?: string | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
       add_board_comment_by_token: {
