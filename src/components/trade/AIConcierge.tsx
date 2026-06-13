@@ -877,7 +877,7 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
           {modalMode && (
             <div
               className={cn(
-                "fixed inset-0 z-[99] bg-foreground/40 backdrop-blur-sm print:hidden transition-[opacity,backdrop-filter] duration-300 ease-out",
+                "fixed inset-0 z-[9998] bg-foreground/40 backdrop-blur-sm print:hidden transition-[opacity,backdrop-filter] duration-300 ease-out",
                 welcomeClosing ? "animate-fade-out opacity-0 backdrop-blur-0" : "animate-fade-in"
               )}
               aria-hidden="true"
