@@ -107,12 +107,12 @@ export default function BillingModeCard({
       .maybeSingle();
     const q: any = qRes.data;
 
-    const tierRes = await supabase
+    const tierRes: any = await (supabase as any)
       .from("trade_tier_config")
       .select("discount_pct")
       .eq("studio_id", currentStudio.id)
       .maybeSingle();
-    const tier: any = tierRes.data;
+    const tier: any = tierRes?.data;
 
     const paRes = await supabase
       .from("studio_payout_accounts")
