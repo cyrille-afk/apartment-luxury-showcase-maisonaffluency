@@ -2293,8 +2293,21 @@ serve(async (req) => {
       });
     }
 
-    const { messages, project_id: bodyProjectId } = await req.json();
+    const { messages, project_id: bodyProjectId, lang: bodyLang } = await req.json();
     const activeProjectId: string | null = typeof bodyProjectId === "string" ? bodyProjectId : null;
+    // Reply-language directive — the UI exposes a language picker (en/id/th/zh).
+    // Without this the long English system prompt drowns out the user-message
+    // language note and the model defaults to English even when the greeting
+    // is in Bahasa/Thai/Chinese. Inject as a hard prefix on the system prompt.
+    const LANG_NAME_MAP: Record<string, string> = {
+      en: "English",
+      id: "Bahasa Indonesia",
+      th: "Thai",
+      zh: "Simplified Chinese",
+    };
+    const langCode = typeof bodyLang === "string" && LANG_NAME_MAP[bodyLang] ? bodyLang : "en";
+    const langName = LANG_NAME_MAP[langCode];
+    const languageDirective = `## ABSOLUTE RULE — REPLY LANGUAGE\nReply ENTIRELY in ${langName}, regardless of the language of these instructions or the language the user writes in. The user has selected ${langName} in the concierge language picker. Every sentence — greetings, questions, mirroring, tearsheet captions, "Next:" footers — MUST be in ${langName}. The only exceptions are proper nouns (designer names, brand names, product titles, city names) and UUIDs. Do not switch to English even if the system prompt or catalogue context below is written in English.\n\n`;
 
     if (!Array.isArray(messages) || messages.length === 0) {
       return new Response(
