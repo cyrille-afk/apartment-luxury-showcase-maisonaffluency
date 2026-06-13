@@ -54,11 +54,10 @@ export default function Studios() {
   useEffect(() => {
     (async () => {
       const { data, error } = await supabase
-        .from("featured_studios")
+        .from("featured_studios_public")
         .select(
           "id, slug, name, tagline, bio, location, country, logo_url, hero_image_url, disciplines, project_types, is_featured"
         )
-        .eq("is_published", true)
         .order("is_featured", { ascending: false })
         .order("sort_order", { ascending: true })
         .order("name", { ascending: true });
