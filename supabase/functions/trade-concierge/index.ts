@@ -2368,10 +2368,14 @@ async function buildDeterministicTearsheetProposal(
     .map((r: any) => r.id)
   )).slice(0, 8);
   if (pickIds.length < 2) return null;
-  const previewRaw = await hydratePickPreview(supabase, pickIds);
-  const validIds = new Set(previewRaw.map((p: any) => p?.id).filter(Boolean));
-  const previewById = new Map(previewRaw.map((p: any) => [p?.id, p]).filter(([id]) => !!id));
-  const finalIds = pickIds.filter((id) => validIds.has(id) && rowMatchesRequestedTypology(previewById.get(id), requestedTypology));
+  const hydratedRaw = await hydratePickPreview(supabase, pickIds);
+  const validIds = new Set(hydratedRaw.map((p: any) => p?.id).filter(Boolean));
+  const previewById = new Map(hydratedRaw.map((p: any) => [p?.id, p]).filter(([id]) => !!id));
+  const validPickIds = pickIds.filter((id) => validIds.has(id) && rowMatchesRequestedTypology(previewById.get(id), requestedTypology));
+  const { previewRaw, pickIds: finalIds } = dedupePreviewRows(
+    hydratedRaw.filter((p: any) => validPickIds.includes(p?.id)),
+    validPickIds,
+  );
   if (finalIds.length < 2) return null;
   const rationaleMap: Record<string, { reason: string }> = {};
   for (const p of previewRaw) {
