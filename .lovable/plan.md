@@ -111,9 +111,9 @@ Tax: `automatic_tax: { enabled: true }` in both modes.
 4. ✅ **Stripe Connect + `create-payment` split** — destination charges + `application_fee_amount` route the commission portion to the designer's Connect account in agent mode; straight platform charge in net mode.
 5. ✅ **Two invoice templates** — `tax_invoice` (agent, to end-client, full MSRP) and `proforma_net_buy` (designer firm, net prices baked in, "FOR RESALE" stamp with cert number) via `src/lib/invoicePdf.ts`.
 
-**Phase 2:**
+**Phase 2 — in progress:**
 
-- Commission statement emails on delivery
+- ✅ **Commission statement emails on delivery** — `send-commission-statement` edge fn fires from the order-timeline kanban when status moves to `delivered`. Loads quote + items + payout account server-side, computes commission from `commission_pct`, invokes the `commission-statement` React-Email template via `send-transactional-email`. Idempotent via `order_timeline.commission_statement_sent_at`; silently no-ops for `net_buy`.
 - W-9 / VAT capture surfaced in the payout account form
 - Multi-currency wires
 - 1099 / T5 reporting export
