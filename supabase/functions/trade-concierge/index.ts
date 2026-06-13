@@ -40,7 +40,17 @@ const CLOUDFLARE_CHAT_URL = CLOUDFLARE_ENABLED
 const CLOUDFLARE_FALLBACK_MODEL = "@cf/meta/llama-3.3-70b-instruct-fp8-fast";
 
 function shouldFallback(status: number): boolean {
-  return status === 429 || status === 402 || status === 403;
+  // 429/402/403: quota/auth. 500/502/503/504: upstream model overload/outage.
+  // After PRIMARY_MAX_RETRIES exhaustion on any of these, route to Cloudflare.
+  return (
+    status === 429 ||
+    status === 402 ||
+    status === 403 ||
+    status === 500 ||
+    status === 502 ||
+    status === 503 ||
+    status === 504
+  );
 }
 
 function isRetryable(status: number): boolean {
