@@ -1784,7 +1784,7 @@ async function extractBrief(apiKey: string, latestUserMessage: string): Promise<
   try {
     const result = await withSemanticCache(
       {
-        feature: "trade-concierge-planner",
+        feature: "trade-concierge-planner-v2",
         model: SENTIMENT_MODEL,
         apiKey,
         prompt: latestUserMessage.slice(0, 1800),
@@ -1879,7 +1879,7 @@ async function extractBrief(apiKey: string, latestUserMessage: string): Promise<
       },
     );
     logAiUsage({
-      feature: "trade-concierge-planner",
+      feature: "trade-concierge-planner-v2",
       model: SENTIMENT_MODEL,
       usage: result.usage,
       cached: result.cached,
