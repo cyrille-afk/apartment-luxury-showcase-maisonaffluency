@@ -296,6 +296,28 @@ export default function PayoutAccountsSection() {
                       {a.account_holder_name} • {a.country_code} • {a.currency}
                       {a.bank_name && <> • {a.bank_name}</>}
                     </div>
+                    <div className="mt-1.5 flex items-center gap-2 flex-wrap text-xs">
+                      {a.tax_form_kind ? (
+                        <Badge variant="outline" className="gap-1 font-normal">
+                          <FileText className="h-3 w-3" />
+                          {a.tax_form_kind.replace("_", " ")}
+                          {a.tax_form_reference ? ` • ${a.tax_form_reference}` : ""}
+                        </Badge>
+                      ) : (
+                        <Badge variant="secondary" className="gap-1 font-normal text-amber-700">
+                          <AlertTriangle className="h-3 w-3" /> Tax form missing
+                        </Badge>
+                      )}
+                      {a.tax_form_document_path && (
+                        <button
+                          onClick={() => handleViewTaxDoc(a)}
+                          disabled={taxDocBusyId === a.id}
+                          className="text-muted-foreground hover:text-foreground underline underline-offset-2"
+                        >
+                          {taxDocBusyId === a.id ? "Opening…" : "View document"}
+                        </button>
+                      )}
+                    </div>
                   </div>
                   {isAdmin && (
                     <div className="flex items-center gap-1 shrink-0">
@@ -357,7 +379,12 @@ export default function PayoutAccountsSection() {
                   value={form.country_code}
                   onValueChange={(v) => {
                     const c = COUNTRY_OPTIONS.find((c) => c.code === v);
-                    setForm({ ...form, country_code: v, currency: c?.currency ?? form.currency });
+                    setForm({
+                      ...form,
+                      country_code: v,
+                      currency: c?.currency ?? form.currency,
+                      tax_form_kind: defaultTaxKindForCountry(v),
+                    });
                   }}
                 >
                   <SelectTrigger><SelectValue /></SelectTrigger>
