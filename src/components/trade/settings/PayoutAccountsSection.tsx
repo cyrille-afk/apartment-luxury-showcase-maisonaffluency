@@ -266,6 +266,9 @@ export default function PayoutAccountsSection() {
           <p className="text-sm text-muted-foreground mt-1">
             Where agent-mode commissions are wired after delivery. Stripe Connect handles bank verification and KYC. Commissions in a different currency are auto-converted at the ECB daily rate (frankfurter.app) and locked on the delivery date — the wired amount is final.
           </p>
+          <a href="/trade/payouts" className="inline-flex items-center gap-1 text-xs text-foreground/80 hover:text-foreground underline-offset-4 hover:underline mt-2">
+            <FileText className="h-3 w-3" /> Year-end payout statement (CSV)
+          </a>
         </div>
         {isAdmin && (
           <Button size="sm" variant="outline" onClick={() => setCreateOpen(true)}>
