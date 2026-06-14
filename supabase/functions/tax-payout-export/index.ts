@@ -84,7 +84,7 @@ Deno.serve(async (req) => {
   // --- Fetch payouts ---
   const { data: rows, error } = await admin
     .from('order_timeline')
-    .select('studio_id, quote_id, client_name, project_name, commission_payout_cents, commission_payout_currency, commission_statement_sent_at, actual_delivery_at')
+    .select('studio_id, quote_id, commission_payout_cents, commission_payout_currency, commission_statement_sent_at, actual_delivery_at')
     .in('studio_id', studioIds)
     .gte('commission_statement_sent_at', yearStart)
     .lt('commission_statement_sent_at', yearEnd)
@@ -100,7 +100,7 @@ Deno.serve(async (req) => {
   // --- Quote refs for itemised lines ---
   const quoteIds = [...new Set((rows ?? []).map(r => r.quote_id).filter(Boolean))]
   const { data: quotes } = quoteIds.length
-    ? await admin.from('trade_quotes').select('id, quote_number, project_name, client_name').in('id', quoteIds)
+    ? await admin.from('trade_quotes').select('id, project_name, client_name').in('id', quoteIds)
     : { data: [] as any[] }
   const quoteMap = new Map<string, any>((quotes ?? []).map((q: any) => [q.id, q]))
 
