@@ -304,6 +304,16 @@ serve(async (req) => {
     } catch { /* anon */ }
   }
 
+  // Skip lead capture entirely for admins (internal testing should not generate leads/emails).
+  if (userId) {
+    const { data: isAdmin } = await supabase.rpc("has_role", { _user_id: userId, _role: "admin" });
+    if (isAdmin) {
+      return new Response(JSON.stringify({ ok: true, skipped: "admin" }), {
+        status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+  }
+
   // Dedupe: skip insert if we already captured this session in the last 24h.
   const { data: existing } = await supabase
     .from("concierge_leads")
