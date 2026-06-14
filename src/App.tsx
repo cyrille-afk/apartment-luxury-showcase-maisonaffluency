@@ -41,7 +41,7 @@ const TradeAiUsageDashboard = lazy(() => import("./pages/TradeAiUsageDashboard")
 const TradeRagDebug = lazy(() => import("./pages/TradeRagDebug"));
 const TradeAiUsagePrintCheck = lazy(() => import("./pages/TradeAiUsagePrintCheck"));
 const TradeAdminConciergeLeads = lazy(() => import("./pages/TradeAdminConciergeLeads"));
-const TradeAdminTaxExport = lazy(() => import("./pages/TradeAdminTaxExport"));
+const TradePayoutStatement = lazy(() => import("./pages/TradePayoutStatement"));
 
 const TradeDescriptionWriter = lazy(() => import("./pages/TradeDescriptionWriter"));
 const TradeRegisteredUsers = lazy(() => import("./pages/TradeRegisteredUsers"));
@@ -479,7 +479,7 @@ const App = () => {
                     <Route path="admin/og-pipeline" element={<TradeAdminOgPipeline />} />
                     <Route path="admin/onboarding" element={<TradeAdminOnboarding />} />
                     <Route path="admin/onboarding-funnel" element={<TradeAdminOnboardingFunnel />} />
-                    <Route path="admin/tax-export" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAdminTaxExport /></Suspense>} />
+                    <Route path="payouts" element={<Suspense fallback={<PageLoadingSkeleton />}><TradePayoutStatement /></Suspense>} />
                     
                     <Route path="admin/share-preview" element={<TradeAdminSharePreview />} />
                     <Route path="mood-boards" element={<TradeMoodBoards />} />

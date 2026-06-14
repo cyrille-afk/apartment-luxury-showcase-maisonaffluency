@@ -37,7 +37,7 @@ const commerceGroup: AdminCard[] = [
   { title: "Registered Users", description: "View all sign-ups, roles, and application status", url: "/trade/registered-users", icon: Users },
   { title: "Custom Requests", description: "Concierge inbox — reply to bespoke requests inline", url: "/trade/custom-requests", icon: Inbox },
   { title: "Client Directory", description: "Studio address book — companies, billing addresses, staff contacts, and attached documents (NDA, T&Cs, counterparty forms)", url: "/trade/clients", icon: Users },
-  { title: "1099 / T4A Year-End Export", description: "Aggregate annual commission payouts per studio — CSV for US 1099-NEC and Canadian T4A filings", url: "/trade/admin/tax-export", icon: ClipboardList },
+  
 ];
 
 const analyticsGroup: AdminCard[] = [
