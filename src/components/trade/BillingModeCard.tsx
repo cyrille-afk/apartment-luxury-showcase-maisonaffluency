@@ -127,8 +127,10 @@ export default function BillingModeCard({
       .maybeSingle();
     const q: any = qRes.data;
 
-    // Tier % default 8% per project memory; per-studio overrides can be added later.
-    const tier: any = null;
+    // Tier % comes from the user's assigned trade tier (useTradeDiscount → trade_tier_config).
+    const tier: any = { discount_pct: tierDiscountPct };
+
+
 
     const paRes = await supabase
       .from("studio_payout_accounts")
