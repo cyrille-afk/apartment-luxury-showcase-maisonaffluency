@@ -230,7 +230,7 @@ serve(async (req) => {
           .from("studio_members")
           .select("user_id")
           .eq("studio_id", studioId)
-          .eq("role", "admin");
+          .in("role", ["owner", "admin"]);
 
         const recipients = (admins ?? []).map((a: any) => a.user_id as string).filter(Boolean);
         if (recipients.length > 0) {
