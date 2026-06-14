@@ -174,12 +174,15 @@ serve(async (req) => {
       } else if (event.type === "account.updated") {
         const acct = event.data.object as Stripe.Account;
         // Sync our cached connect status whenever Stripe pushes a change.
-        const status =
-          acct.charges_enabled && acct.payouts_enabled
-            ? "verified"
+        // IMPORTANT: status values must match what stripe-connect-status writes
+        // and what PayoutAccountsSection STATUS_META maps:
+        //   active | pending | restricted | not_started
+        const status: "active" | "pending" | "restricted" =
+          acct.charges_enabled && acct.payouts_enabled && acct.details_submitted
+            ? "active"
             : acct.requirements?.disabled_reason
               ? "restricted"
-              : "onboarding";
+              : "pending";
 
         const { data: payout } = await supabase
           .from("studio_payout_accounts")
@@ -189,7 +192,8 @@ serve(async (req) => {
 
         if (payout) {
           studioId = payout.studio_id as string;
-          if (payout.stripe_connect_status !== status) {
+          const prev = payout.stripe_connect_status;
+          if (prev !== status) {
             await supabase
               .from("studio_payout_accounts")
               .update({ stripe_connect_status: status, updated_at: new Date().toISOString() })
@@ -206,7 +210,7 @@ serve(async (req) => {
             type = "payout_account_restricted";
             link = "/trade/studio/settings#payouts";
             metadata.requirements = acct.requirements ?? null;
-          } else if (status === "verified" && payout.stripe_connect_status !== "verified") {
+          } else if (status === "active" && prev !== "active") {
             title = "Payout account verified";
             message = "Your Stripe Connect account is ready to receive commissions.";
             type = "payout_account_verified";
@@ -226,7 +230,7 @@ serve(async (req) => {
           .from("studio_members")
           .select("user_id")
           .eq("studio_id", studioId)
-          .eq("role", "admin");
+          .in("role", ["owner", "admin"]);
 
         const recipients = (admins ?? []).map((a: any) => a.user_id as string).filter(Boolean);
         if (recipients.length > 0) {
