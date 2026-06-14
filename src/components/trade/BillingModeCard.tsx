@@ -179,7 +179,7 @@ export default function BillingModeCard({
       setEcAddress(ec.address ?? "");
     }
     setLoading(false);
-  }, [quoteId, shipToCountry, currentStudio]);
+  }, [quoteId, shipToCountry, currentStudio, tierDiscountPct]);
 
   useEffect(() => { load(); }, [load]);
 
