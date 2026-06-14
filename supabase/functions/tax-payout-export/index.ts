@@ -110,7 +110,7 @@ Deno.serve(async (req) => {
   // --- Build CSV: itemised lines + totals per currency ---
   const header = [
     'studio_name', 'payout_issued_on', 'delivered_on',
-    'quote_number', 'project', 'client',
+    'quote_id', 'project', 'client',
     'currency', 'commission_payout',
   ]
   const lines: string[] = [csvRow(header)]
@@ -127,9 +127,9 @@ Deno.serve(async (req) => {
       studio.name ?? '',
       (r.commission_statement_sent_at as string ?? '').slice(0, 10),
       (r.actual_delivery_at as string ?? '').slice(0, 10),
-      q.quote_number ?? '',
-      q.project_name ?? r.project_name ?? '',
-      q.client_name ?? r.client_name ?? '',
+      r.quote_id ?? '',
+      q.project_name ?? '',
+      q.client_name ?? '',
       cur,
       (cents / 100).toFixed(2),
     ]))
