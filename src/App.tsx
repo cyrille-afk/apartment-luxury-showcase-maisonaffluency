@@ -479,7 +479,7 @@ const App = () => {
                     <Route path="admin/og-pipeline" element={<TradeAdminOgPipeline />} />
                     <Route path="admin/onboarding" element={<TradeAdminOnboarding />} />
                     <Route path="admin/onboarding-funnel" element={<TradeAdminOnboardingFunnel />} />
-                    <Route path="admin/tax-export" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAdminTaxExport /></Suspense>} />
+                    <Route path="payouts" element={<Suspense fallback={<PageLoadingSkeleton />}><TradePayoutStatement /></Suspense>} />
                     
                     <Route path="admin/share-preview" element={<TradeAdminSharePreview />} />
                     <Route path="mood-boards" element={<TradeMoodBoards />} />
