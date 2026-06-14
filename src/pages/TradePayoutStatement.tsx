@@ -12,7 +12,7 @@ const yearOptions = Array.from({ length: 6 }, (_, i) => currentYear - i);
 
 const TradePayoutStatement = () => {
   const { user, loading } = useAuth();
-  const { studios, currentStudioId } = useStudio();
+  const { currentStudio } = useStudio();
   const { toast } = useToast();
   const [year, setYear] = useState<number>(currentYear - 1);
   const [busy, setBusy] = useState(false);
@@ -20,7 +20,8 @@ const TradePayoutStatement = () => {
   if (loading) return null;
   if (!user) return <Navigate to="/auth?next=/trade/payouts" replace />;
 
-  const studioName = studios.find((s) => s.id === currentStudioId)?.name ?? "your studio";
+  const studioName = currentStudio?.name ?? "your studio";
+  const currentStudioId = currentStudio?.id ?? null;
 
   const download = async () => {
     setBusy(true);
