@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useStudio } from "@/hooks/useStudio";
+import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -94,11 +95,13 @@ export default function BillingModeCard({
 }: Props) {
   const { currentStudio } = useStudio();
   const { toast } = useToast();
+  const { discountPct: tierDiscountPct } = useTradeDiscount();
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [billing, setBilling] = useState<QuoteBilling | null>(null);
-  const [tierPct, setTierPct] = useState(0.08); // default 8% baseline (commission == net discount until tier override)
+  // Sourced from the studio's assigned tier (silver/gold/platinum) via trade_tier_config.
+  const [tierPct, setTierPct] = useState(tierDiscountPct);
   const [accounts, setAccounts] = useState<PayoutAccount[]>([]);
   const [certs, setCerts] = useState<ResaleCert[]>([]);
   const [freightQuotes, setFreightQuotes] = useState<FreightQuote[]>([]);
@@ -124,8 +127,10 @@ export default function BillingModeCard({
       .maybeSingle();
     const q: any = qRes.data;
 
-    // Tier % default 8% per project memory; per-studio overrides can be added later.
-    const tier: any = null;
+    // Tier % comes from the user's assigned trade tier (useTradeDiscount → trade_tier_config).
+    const tier: any = { discount_pct: tierDiscountPct };
+
+
 
     const paRes = await supabase
       .from("studio_payout_accounts")
@@ -174,7 +179,7 @@ export default function BillingModeCard({
       setEcAddress(ec.address ?? "");
     }
     setLoading(false);
-  }, [quoteId, shipToCountry, currentStudio]);
+  }, [quoteId, shipToCountry, currentStudio, tierDiscountPct]);
 
   useEffect(() => { load(); }, [load]);
 
