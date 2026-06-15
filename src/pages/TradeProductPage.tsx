@@ -1379,6 +1379,8 @@ const TradeProductPage: React.FC = () => {
                         : undefined
                     }
                   />
+                  )}
+
                   {defaultPair && !isAtDefaultPair && (
                     <button
                       type="button"
