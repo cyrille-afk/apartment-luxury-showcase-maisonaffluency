@@ -108,6 +108,7 @@ export default function FabricSelector({ pickId, className, productTitle }: Fabr
 
   const renderTile = (f: Fabric) => {
     const isCom = f.id === "__com__";
+    const isCol = f.id === "__col__";
     const isSelected = selectedId === f.id;
     return (
       <div key={f.id} className="flex flex-col gap-2">
@@ -129,7 +130,7 @@ export default function FabricSelector({ pickId, className, productTitle }: Fabr
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center font-display text-xl tracking-widest text-foreground/85">
-              {isCom ? "COM" : "—"}
+              {isCom ? "COM" : isCol ? "COL" : "—"}
             </div>
           )}
           {f.image_url && (
