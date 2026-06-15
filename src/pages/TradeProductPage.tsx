@@ -1316,7 +1316,24 @@ const TradeProductPage: React.FC = () => {
                   productTitle={product.title}
                   includePricing
                   onHasFabricsChange={setHasLinkedFabrics}
+                  onWoodFinishesAvailable={setLinkedWoodFinishes}
                   onFabricChange={setSelectedFabric}
+                  onWoodFinishChange={(woodName) => {
+                    if (!woodName) return;
+                    // Match the swatch name to a Base axis value (case/space tolerant).
+                    const norm = (s: string) => s.trim().toLowerCase();
+                    const match = baseOptions.find((b) => norm(b) === norm(woodName))
+                      || baseOptions.find((b) => norm(b).startsWith(norm(woodName)))
+                      || woodName;
+                    setSelectedBase(match);
+                    // If the current Top is incompatible with the new Base, clear it.
+                    let nextTop = selectedTop;
+                    if (nextTop && !variantsList.some((x: any) => matchesDual(x, match, nextTop, selectedDualSize))) {
+                      setSelectedTop(null);
+                      nextTop = null;
+                    }
+                    handleMaterialChange(match, { base: match, top: nextTop, size: selectedDualSize });
+                  }}
                   onUpholsteryTierChange={(rawTier) => {
 
                     if (!rawTier) return;
