@@ -34,7 +34,14 @@ interface Pick {
   id: string;
   title: string | null;
   subtitle: string | null;
+  designer_id: string | null;
 }
+
+interface DesignerLite {
+  id: string;
+  slug: string | null;
+}
+
 
 interface ProductFabric {
   id: string;
