@@ -10,6 +10,8 @@ interface Fabric {
   image_url: string | null;
   category: string | null;
   supplier: string | null;
+  /** Upholstery price-tier label for this product (from product_fabrics.price_tier_label). */
+  price_tier_label?: string | null;
 }
 
 interface FabricSelectorProps {
@@ -18,6 +20,13 @@ interface FabricSelectorProps {
   className?: string;
   /** Optional product title shown in the zoom popup header. */
   productTitle?: string;
+  /**
+   * Fires when the user picks a fabric/leather swatch (or COM/COL tile).
+   * Receives the raw upholstery tier label (e.g. "ECART fabric", "Leather",
+   * "COM fabric"). The product page uses this to auto-select the matching
+   * row in the Size × Upholstery price matrix.
+   */
+  onUpholsteryTierChange?: (rawTier: string | null) => void;
 }
 
 const normalizeFabricCategory = (category: string | null | undefined) => {
