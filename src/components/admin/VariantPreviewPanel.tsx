@@ -97,7 +97,7 @@ export default function VariantPreviewPanel({
   };
   const basePh = getBasePlaceholder(placeholderInput);
   const topPh = getTopPlaceholder(placeholderInput);
-  const sizePlaceholder = "Select Your Size";
+  const sizePlaceholder = "Your Sofa Size";
   const materialPlaceholder = variantPlaceholder || "Select your finish";
 
   const showSizeDropdown = sizeOptions.length > 1;
