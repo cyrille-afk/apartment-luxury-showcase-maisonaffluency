@@ -95,13 +95,32 @@ export default function TradeAdminFabrics() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("designer_curator_picks")
-        .select("id, title, subtitle")
+        .select("id, title, subtitle, designer_id")
         .order("title");
       if (error) throw error;
       return (data as Pick[]) || [];
     },
     enabled: isAdmin,
   });
+
+  const { data: designersList = [] } = useQuery({
+    queryKey: ["admin-fabrics-designers"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("designers")
+        .select("id, slug");
+      if (error) throw error;
+      return (data as DesignerLite[]) || [];
+    },
+    enabled: isAdmin,
+  });
+
+  const designerSlugById = useMemo(() => {
+    const m = new Map<string, string | null>();
+    designersList.forEach((d) => m.set(d.id, d.slug));
+    return m;
+  }, [designersList]);
+
 
   const { data: links = [] } = useQuery({
     queryKey: ["admin-fabrics-links"],
