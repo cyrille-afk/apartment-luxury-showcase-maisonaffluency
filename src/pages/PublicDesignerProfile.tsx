@@ -1024,16 +1024,16 @@ const PublicDesignerProfile = () => {
 
 
                         {/* Product name — primary */}
-                        <h3 className="font-display text-[12px] md:text-xs tracking-wide leading-snug mt-1 line-clamp-2 min-h-[2.4em]">
+                        <h3 className="font-display text-[14px] md:text-sm tracking-wide leading-snug mt-2 line-clamp-2 min-h-[2.4em]">
                           {pick.title}
                         </h3>
 
                         {/* Subtitle, materials & dimensions hidden on grid — shown in lightbox detail view */}
 
                         {/* Price slot — consistent across all cards */}
-                        <div className="mt-1 md:mt-auto md:pt-1">
+                        <div className="mt-2">
                           <p className="font-body text-[10px] md:text-xs text-muted-foreground md:text-foreground tracking-wide">
-                            Price on request
+                            Price upon request
                           </p>
                         </div>
                       </div>
