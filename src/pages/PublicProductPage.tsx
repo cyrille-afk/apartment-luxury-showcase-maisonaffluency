@@ -28,6 +28,8 @@ import { buildProductBreadcrumbs } from "@/lib/productBreadcrumbs";
 import { getBasePlaceholder, getTopPlaceholder, getMaterialPlaceholder, formatVariantAxisLabel } from "@/lib/variantPlaceholders";
 import { computeVariantAxes, parseMaterialsFallback } from "@/lib/parseSizeVariants";
 import { isRugCategory, parseRugDims, looksLikeDimension } from "@/lib/rugPricing";
+import FabricSelector from "@/components/FabricSelector";
+import { isProductUpholstered } from "@/lib/upholstery";
 import RugSizeColourPicker, { type RugSelection } from "@/components/rug/RugSizeColourPicker";
 import { buildProductFinishMap, resolveFinishImageIndex, resolveVariantImageIndex, findVariantForImageIndex } from "@/lib/variantImageMap";
 import { resolveAutoDefaultPair } from "@/lib/variantAutoDefault";
@@ -83,6 +85,7 @@ interface ProductRow {
   top_axis_label: string | null;
   variant_image_map: Record<string, number> | null;
   gallery_captions?: Record<string, string> | null;
+  is_upholstered?: boolean | null;
 }
 
 function useProductBySlug(designerSlug: string | undefined, productSlug: string | undefined) {
@@ -99,7 +102,7 @@ function useProductBySlug(designerSlug: string | undefined, productSlug: string 
         .maybeSingle();
       if (!designer) return null;
 
-      const publicPickFields = "id, title, subtitle, image_url, hover_image_url, gallery_images, materials, materials_description, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, size_variants, variant_placeholder, base_axis_label, top_axis_label, variant_image_map, edition, edition_number, edition_signing, gallery_captions";
+      const publicPickFields = "id, title, subtitle, image_url, hover_image_url, gallery_images, materials, materials_description, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, size_variants, variant_placeholder, base_axis_label, top_axis_label, variant_image_map, edition, edition_number, edition_signing, gallery_captions, is_upholstered";
 
       const { data: picks } = await supabase
         .from("designer_curator_picks_public" as any)
@@ -942,6 +945,17 @@ const PublicProductPage: React.FC = () => {
                   galleryActiveIndex={galleryActiveIndex}
                   finishMap={productFinishMap}
                 />
+
+                {isProductUpholstered({
+                  category: product.category,
+                  subcategory: product.subcategory,
+                  title: product.title,
+                  is_upholstered: product.is_upholstered,
+                }) && (
+                  <FabricSelector pickId={product.id} />
+                )}
+
+
 
 
                 {(() => {
