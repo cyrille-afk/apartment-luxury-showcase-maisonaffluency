@@ -278,7 +278,7 @@ function useTradeProductBySlug(
 
       const { data: picks } = await supabase
         .from("designer_curator_picks")
-        .select("id, title, subtitle, image_url, hover_image_url, gallery_images, materials, materials_description, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, trade_price_cents, price_per_sqm_cents, currency, price_prefix, size_variants, variant_placeholder, base_axis_label, top_axis_label, variant_image_map, edition, edition_number, edition_signing, gallery_captions")
+        .select("id, title, subtitle, image_url, hover_image_url, gallery_images, materials, materials_description, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, trade_price_cents, price_per_sqm_cents, currency, price_prefix, size_variants, variant_placeholder, base_axis_label, top_axis_label, variant_image_map, edition, edition_number, edition_signing, gallery_captions, is_upholstered")
         .eq("designer_id", designer.id)
         .order("sort_order", { ascending: true });
 
