@@ -449,7 +449,36 @@ const VariantSelectors: React.FC<{
         />
       )}
 
-      {isProductUpholstered(product) && <FabricSelector pickId={product.id} productTitle={product.title} />}
+      {isProductUpholstered(product) && (
+        <FabricSelector
+          pickId={product.id}
+          productTitle={product.title}
+          onUpholsteryTierChange={(rawTier) => {
+            if (!rawTier) return;
+            // Match a top option whose value starts with the raw tier
+            // (e.g. raw "ECART fabric" → "ECART fabric (12 m)"). Prefer the
+            // option compatible with the currently selected size, otherwise
+            // fall back to the first match.
+            const candidates = topOptions.filter(
+              (t) => t === rawTier || t.toLowerCase().startsWith(rawTier.toLowerCase()),
+            );
+            if (candidates.length === 0) return;
+            const sized =
+              (selDualSize &&
+                candidates.find((t) =>
+                  variantsList.some((x: any) => matchesDual(x, null, t, selDualSize)),
+                )) ||
+              candidates[0];
+            setSelTop(sized);
+            let nextBase = selBase;
+            if (selDualSize && nextBase && !variantsList.some((x: any) => matchesDual(x, nextBase, sized, selDualSize))) {
+              setSelBase(null);
+              nextBase = null;
+            }
+            onMaterialChange?.(sized, { base: nextBase, top: sized, size: selDualSize });
+          }}
+        />
+      )}
 
       {/* Material / finish dropdown(s) */}
       {isDualAxis ? (

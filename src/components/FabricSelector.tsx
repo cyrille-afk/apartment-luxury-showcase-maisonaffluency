@@ -10,6 +10,8 @@ interface Fabric {
   image_url: string | null;
   category: string | null;
   supplier: string | null;
+  /** Upholstery price-tier label for this product (from product_fabrics.price_tier_label). */
+  price_tier_label?: string | null;
 }
 
 interface FabricSelectorProps {
@@ -18,6 +20,13 @@ interface FabricSelectorProps {
   className?: string;
   /** Optional product title shown in the zoom popup header. */
   productTitle?: string;
+  /**
+   * Fires when the user picks a fabric/leather swatch (or COM/COL tile).
+   * Receives the raw upholstery tier label (e.g. "ECART fabric", "Leather",
+   * "COM fabric"). The product page uses this to auto-select the matching
+   * row in the Size × Upholstery price matrix.
+   */
+  onUpholsteryTierChange?: (rawTier: string | null) => void;
 }
 
 const normalizeFabricCategory = (category: string | null | undefined) => {
@@ -34,7 +43,7 @@ const isFabricCategory = (fabric: Fabric) => normalizeFabricCategory(fabric.cate
  * (Trade + Public). Tiles are grouped by category (Upholstery, Wood, …)
  * with a COM ("Customer's Own Material") tile always offered.
  */
-export default function FabricSelector({ pickId, className, productTitle }: FabricSelectorProps) {
+export default function FabricSelector({ pickId, className, productTitle, onUpholsteryTierChange }: FabricSelectorProps) {
   const [open, setOpen] = useState(false);
   const [fabrics, setFabrics] = useState<Fabric[]>([]);
   const [selectedFabricId, setSelectedFabricId] = useState<string | null>(null);
@@ -50,12 +59,12 @@ export default function FabricSelector({ pickId, className, productTitle }: Fabr
     (async () => {
       const { data, error } = await supabase
         .from("product_fabrics")
-        .select("sort_order, fabric:fabrics(id, name, image_url, category, supplier, is_active)")
+        .select("sort_order, price_tier_label, fabric:fabrics(id, name, image_url, category, supplier, is_active)")
         .eq("pick_id", pickId)
         .order("sort_order", { ascending: true });
       if (cancelled || error) return;
       const list: Fabric[] = (data || [])
-        .map((row: any) => row.fabric)
+        .map((row: any) => row.fabric && { ...row.fabric, price_tier_label: row.price_tier_label ?? null })
         .filter((f: any) => f && f.is_active !== false)
         .map((f: any) => ({
           id: f.id,
@@ -63,6 +72,7 @@ export default function FabricSelector({ pickId, className, productTitle }: Fabr
           image_url: f.image_url,
           category: normalizeFabricCategory(f.category),
           supplier: f.supplier,
+          price_tier_label: f.price_tier_label ?? null,
         }));
       setFabrics(list);
     })();
@@ -91,6 +101,7 @@ export default function FabricSelector({ pickId, className, productTitle }: Fabr
     image_url: null,
     category: "Fabric & Leather",
     supplier: null,
+    price_tier_label: "COM fabric",
   };
   const colTile: Fabric = {
     id: "__col__",
@@ -98,6 +109,9 @@ export default function FabricSelector({ pickId, className, productTitle }: Fabr
     image_url: null,
     category: "Fabric & Leather",
     supplier: null,
+    // No dedicated COL tier on most pieces — Customer's Own Leather is priced
+    // at the standard Leather tier; the variant matrix already exposes that.
+    price_tier_label: "Leather",
   };
   // Inject COM + COL at the end of the Fabric & Leather group so customers see
   // their "own material" options alongside the curated swatches.
@@ -124,11 +138,17 @@ export default function FabricSelector({ pickId, className, productTitle }: Fabr
       ? selectedFabricId === f.id
       : selectedWoodId === f.id;
     const setSelected = isFabricGroup ? setSelectedFabricId : setSelectedWoodId;
+    const handlePick = () => {
+      setSelected(f.id);
+      // Only fabric/leather drives the upholstery price tier. Wood finishes
+      // are decorative and don't change the variant matrix on this product.
+      if (isFabricGroup) onUpholsteryTierChange?.(f.price_tier_label ?? null);
+    };
     return (
       <div key={f.id} className="flex flex-col gap-2">
         <button
           type="button"
-          onClick={() => setSelected(f.id)}
+          onClick={handlePick}
           className={cn(
             "relative aspect-square w-full overflow-hidden rounded-md bg-muted/30 ring-1 ring-border/60 transition",
             isSelected ? "ring-2 ring-foreground" : "hover:ring-foreground/40"
@@ -275,8 +295,12 @@ export default function FabricSelector({ pickId, className, productTitle }: Fabr
                   type="button"
                   onClick={() => {
                     const isFabric = isFabricCategory(zoomed);
-                    if (isFabric) setSelectedFabricId(zoomed.id);
-                    else setSelectedWoodId(zoomed.id);
+                    if (isFabric) {
+                      setSelectedFabricId(zoomed.id);
+                      onUpholsteryTierChange?.(zoomed.price_tier_label ?? null);
+                    } else {
+                      setSelectedWoodId(zoomed.id);
+                    }
                     setZoomed(null);
                   }}
                   className="px-4 py-2 bg-foreground text-background font-body text-[11px] tracking-[0.18em] uppercase hover:bg-foreground/90 transition"

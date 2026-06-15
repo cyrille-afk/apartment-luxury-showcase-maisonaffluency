@@ -1208,7 +1208,30 @@ const TradeProductPage: React.FC = () => {
               )}
 
               {isUpholsteredProduct && (
-                <FabricSelector pickId={product.id} productTitle={product.title} />
+                <FabricSelector
+                  pickId={product.id}
+                  productTitle={product.title}
+                  onUpholsteryTierChange={(rawTier) => {
+                    if (!rawTier) return;
+                    const candidates = topOptions.filter(
+                      (t) => t === rawTier || t.toLowerCase().startsWith(rawTier.toLowerCase()),
+                    );
+                    if (candidates.length === 0) return;
+                    const sized =
+                      (selectedDualSize &&
+                        candidates.find((t) =>
+                          variantsList.some((x: any) => matchesDual(x, null, t, selectedDualSize)),
+                        )) ||
+                      candidates[0];
+                    setSelectedTop(sized);
+                    let nextBase = selectedBase;
+                    if (selectedDualSize && nextBase && !variantsList.some((x: any) => matchesDual(x, nextBase, sized, selectedDualSize))) {
+                      setSelectedBase(null);
+                      nextBase = null;
+                    }
+                    handleMaterialChange(sized, { base: nextBase, top: sized, size: selectedDualSize });
+                  }}
+                />
               )}
 
               {/* Material dropdown — when variants encode (size × material), bind it to selectedSingleMaterial */}
