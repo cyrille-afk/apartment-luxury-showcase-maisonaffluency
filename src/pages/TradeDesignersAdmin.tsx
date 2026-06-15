@@ -1114,17 +1114,18 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
                     );
                   })}
                 </div>
-                <VariantPreviewPanel
-                  sizeVariants={pick.size_variants}
-                  variantPlaceholder={pick.variant_placeholder}
-                  dimensions={pick.dimensions}
-                  materials={pick.materials}
-                  currency={pick.currency}
-                  baseAxisLabel={pick.base_axis_label}
-                  topAxisLabel={pick.top_axis_label}
-                />
-                {FABRICS_PANEL_PILOT_PICK_IDS.has(pick.id) && (
-                  <ProductFabricsPanel pickId={pick.id} />
+                {FABRICS_PANEL_PILOT_PICK_IDS.has(pick.id) ? (
+                  <ProductFabricsPanel pickId={pick.id} currency={pick.currency} />
+                ) : (
+                  <VariantPreviewPanel
+                    sizeVariants={pick.size_variants}
+                    variantPlaceholder={pick.variant_placeholder}
+                    dimensions={pick.dimensions}
+                    materials={pick.materials}
+                    currency={pick.currency}
+                    baseAxisLabel={pick.base_axis_label}
+                    topAxisLabel={pick.top_axis_label}
+                  />
                 )}
                 <div>
                   <label className="text-[10px] text-muted-foreground">Description</label>
