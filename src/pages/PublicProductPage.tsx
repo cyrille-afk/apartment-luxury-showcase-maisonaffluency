@@ -322,6 +322,14 @@ const VariantSelectors: React.FC<{
   const topAxisIsDim = topAxisLabelRaw
     ? axisLabeledSize(topAxisLabelRaw)
     : (topOptions.length > 0 && topOptions.every(looksLikeDimension));
+  // When FabricSelector is rendered (upholstered products), it already exposes
+  // fabric/leather + wood-finish swatch pickers. Suppress any base/top variant
+  // dropdown whose axis label duplicates that selection (frame / wood / finish
+  // / feet / leg / base).
+  const isFinishAxis = (label: string) =>
+    /\b(frame|wood|finish|feet|foot|leg|base|legs)\b/i.test(label);
+  const suppressBaseAsFinish = isProductUpholstered(product) && !baseAxisIsDim && isFinishAxis(baseAxisLabelRaw);
+  const suppressTopAsFinish = isProductUpholstered(product) && !topAxisIsDim && isFinishAxis(topAxisLabelRaw);
 
   // Per-square-metre rug picker short-circuit: when the product is a rug and
   // its size_variants encode parseable dimensions (e.g. "300 × 400 cm"), show
