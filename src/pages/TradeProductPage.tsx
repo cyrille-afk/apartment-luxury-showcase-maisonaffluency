@@ -1067,10 +1067,6 @@ const TradeProductPage: React.FC = () => {
 
             {/* Materials & dimensions */}
             <div className="flex flex-col gap-2">
-              {isUpholsteredProduct && (
-                <FabricSelector pickId={product.id} />
-              )}
-
               {(() => {
                 const sqm = (product as any)?.price_per_sqm_cents as number | null | undefined;
                 const isRugSqm = isRugCategory(product.category) && !!sqm && sqm > 0 && (sizeVariants?.length || 0) > 0;
@@ -1190,6 +1186,31 @@ const TradeProductPage: React.FC = () => {
                 />
               )}
 
+              {!isRugSqmActive && isBaseOnly && baseAxisIsDim && (
+                <ExpandableSpec
+                  icon={specIcon("📐")}
+                  text={withImperialPerLine(baseOptions.join("\n"))}
+                  placeholder={getBasePlaceholder(product)}
+                  singleValueLabel={formatVariantAxisLabel(product.base_axis_label) || undefined}
+                  emphasized
+                  value={selectedBase != null ? Math.max(0, baseOptions.indexOf(selectedBase)) : null}
+                  onChange={(idx) => {
+                    if (idx < 0) {
+                      setSelectedBase(null);
+                      handleMaterialChange(null, { base: null, top: null, size: null });
+                      return;
+                    }
+                    const v = baseOptions[idx] ?? null;
+                    setSelectedBase(v);
+                    handleMaterialChange(v, { base: v, top: null, size: null });
+                  }}
+                />
+              )}
+
+              {isUpholsteredProduct && (
+                <FabricSelector pickId={product.id} />
+              )}
+
               {/* Material dropdown — when variants encode (size × material), bind it to selectedSingleMaterial */}
               {!isRugSqmActive && !isDualAxis && hasSingleAxisSplit && (
                 <ExpandableSpec
@@ -1224,7 +1245,7 @@ const TradeProductPage: React.FC = () => {
                   }
                 />
               )}
-              {!isRugSqmActive && isBaseOnly && (
+              {!isRugSqmActive && isBaseOnly && !baseAxisIsDim && (
                 <ExpandableSpec
                   icon={specIcon(baseAxisIsDim ? "📐" : "⬗")}
                   text={withImperialPerLine(baseOptions.join("\n"))}
