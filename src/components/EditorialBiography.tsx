@@ -675,11 +675,11 @@ function SplitImageBlock({
       transition={transition}
       className="shrink-0 w-full"
     >
-      <div className={`rounded-xl overflow-hidden bg-muted/10 ${isSmall ? "max-w-[240px] mx-auto md:mx-0" : ""}`}>
+      <div className={`rounded-xl overflow-hidden bg-muted/10 ${isSmall ? "max-w-[200px] mx-auto md:mx-0" : ""}`}>
         <img
           src={optimizeImageUrl(url)}
           alt={caption || `${designerName} — editorial`}
-          className={`w-full h-auto object-contain ${isSmall ? "" : "max-h-[420px]"}`}
+          className={`w-full h-auto object-contain ${isSmall ? "max-h-[180px]" : "max-h-[420px]"}`}
           loading="lazy"
         />
       </div>
