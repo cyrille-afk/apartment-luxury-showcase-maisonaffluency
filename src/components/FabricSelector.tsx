@@ -219,6 +219,9 @@ export default function FabricSelector({ pickId, className, productTitle, onUpho
             currency: f.currency || "EUR",
           });
         }
+      } else {
+        // Wood finish picked — drive the Frame axis on the price matrix.
+        onWoodFinishChange?.(f.name);
       }
     };
     const tierCaption = isFabricGroup && !isCom && !isCol && (f.tier || f.price_per_lm_cents)
