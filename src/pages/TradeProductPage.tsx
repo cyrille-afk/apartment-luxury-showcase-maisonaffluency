@@ -1343,7 +1343,9 @@ const TradeProductPage: React.FC = () => {
                         : undefined
                     }
                   />
+                  {!(hasLinkedFabrics && !topAxisIsDim) && (
                   <ExpandableSpec
+
                     icon={specIcon(topAxisIsDim ? "📐" : "⬗")}
                     text={withImperialPerLine(topOptions.join("\n"))}
                     placeholder={getTopPlaceholder(product)}
