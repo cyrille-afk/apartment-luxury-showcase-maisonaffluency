@@ -3,6 +3,7 @@ import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { Loader2, Upload, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 
 interface SourceUploadProps {
   /** Storage folder path */
@@ -31,6 +32,13 @@ const SourceUpload = ({ folder = "axonometric-sources", label = "Upload image or
   const [uploading, setUploading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+  const { user } = useAuth();
+
+  const getScopedFolder = () => {
+    if (folder !== "axonometric-sources" && folder !== "axonometric-submissions") return folder;
+    if (!user?.id) throw new Error("Please sign in before uploading files.");
+    return `${folder}/${user.id}`;
+  };
 
   // PDF page picker state
   const [pdfFile, setPdfFile] = useState<File | null>(null);
@@ -163,7 +171,7 @@ const SourceUpload = ({ folder = "axonometric-sources", label = "Upload image or
       );
       const { blob } = await renderPageForUpload(pdf, pageToUse);
 
-      const path = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.jpg`;
+      const path = `${getScopedFolder()}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.jpg`;
       const { error } = await supabase.storage.from("assets").upload(path, blob, { contentType: "image/jpeg" });
       if (error) throw error;
 
@@ -198,7 +206,7 @@ const SourceUpload = ({ folder = "axonometric-sources", label = "Upload image or
     setUploading(true);
     try {
       const ext = file.name.split(".").pop() || "jpg";
-      const path = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+      const path = `${getScopedFolder()}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
       const { error } = await supabase.storage.from("assets").upload(path, file, { contentType: file.type || "image/jpeg" });
       if (error) throw error;
 
