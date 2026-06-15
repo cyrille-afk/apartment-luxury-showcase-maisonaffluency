@@ -864,15 +864,40 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
             {/* More from this designer */}
             {relatedProducts.length > 0 && (
               <div className="pt-4 border-t border-border">
-                <p className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground mb-3">
-                  More from {designerDisplay}
-                </p>
-                <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
+                <div className="flex items-center justify-between mb-3">
+                  <p className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
+                    More from {designerDisplay}
+                  </p>
+                  {relatedProducts.length > 4 && (
+                    <div className="flex items-center gap-1">
+                      <button
+                        type="button"
+                        onClick={() => scrollRelated(-1)}
+                        aria-label="Scroll left"
+                        className="w-7 h-7 rounded-full border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-foreground/40 transition-colors"
+                      >
+                        <ChevronLeft className="w-4 h-4" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => scrollRelated(1)}
+                        aria-label="Scroll right"
+                        className="w-7 h-7 rounded-full border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-foreground/40 transition-colors"
+                      >
+                        <ChevronRight className="w-4 h-4" />
+                      </button>
+                    </div>
+                  )}
+                </div>
+                <div
+                  ref={relatedScrollRef}
+                  className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide snap-x snap-mandatory scroll-smooth"
+                >
                   {relatedProducts.map((rp) => (
                     <button
                       key={rp.id}
                       onClick={() => onSelectRelated?.(rp)}
-                      className="shrink-0 w-20 group"
+                      className="shrink-0 w-20 group snap-start"
                     >
                       <div className="aspect-square rounded-md overflow-hidden bg-muted/30 border border-border group-hover:border-foreground/30 transition-colors">
                         <img
