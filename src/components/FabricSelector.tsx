@@ -27,6 +27,13 @@ interface FabricSelectorProps {
    * row in the Size × Upholstery price matrix.
    */
   onUpholsteryTierChange?: (rawTier: string | null) => void;
+  /**
+   * Fires after the linked-fabric list is fetched. `true` when this product
+   * has one or more real linked fabric/leather swatches (excludes the
+   * synthetic COM/COL tiles). Product pages use this to hide the redundant
+   * upholstery-finish dropdown when the swatch picker covers the same axis.
+   */
+  onHasFabricsChange?: (has: boolean) => void;
 }
 
 const normalizeFabricCategory = (category: string | null | undefined) => {
@@ -43,7 +50,8 @@ const isFabricCategory = (fabric: Fabric) => normalizeFabricCategory(fabric.cate
  * (Trade + Public). Tiles are grouped by category (Upholstery, Wood, …)
  * with a COM ("Customer's Own Material") tile always offered.
  */
-export default function FabricSelector({ pickId, className, productTitle, onUpholsteryTierChange }: FabricSelectorProps) {
+export default function FabricSelector({ pickId, className, productTitle, onUpholsteryTierChange, onHasFabricsChange }: FabricSelectorProps) {
+
   const [open, setOpen] = useState(false);
   const [fabrics, setFabrics] = useState<Fabric[]>([]);
   const [selectedFabricId, setSelectedFabricId] = useState<string | null>(null);
