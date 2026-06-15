@@ -107,19 +107,19 @@ export default function FabricSelector({ pickId, className, productTitle, onUpho
       const query = includePricing
         ? (supabase as any)
             .from("product_fabrics")
-            .select("sort_order, price_tier_label, fabric:fabrics(id, name, image_url, category, supplier, is_active, price_per_lm_cents, tier, currency)")
+            .select("sort_order, price_tier_label, image_indices, fabric:fabrics(id, name, image_url, category, supplier, is_active, price_per_lm_cents, tier, currency)")
             .eq("pick_id", pickId)
             .order("sort_order", { ascending: true })
         : (supabase as any)
             .from("product_fabric_swatches_public")
-            .select("sort_order, price_tier_label, fabric_id, name, image_url, category, supplier, is_active")
+            .select("sort_order, price_tier_label, image_indices, fabric_id, name, image_url, category, supplier, is_active")
             .eq("pick_id", pickId)
             .order("sort_order", { ascending: true });
       const { data, error } = await query;
       if (cancelled || error) return;
       const list: Fabric[] = (data || [])
         .map((row: any) => includePricing
-          ? row.fabric && { ...row.fabric, price_tier_label: row.price_tier_label ?? null }
+          ? row.fabric && { ...row.fabric, price_tier_label: row.price_tier_label ?? null, image_indices: row.image_indices ?? null }
           : {
               id: row.fabric_id,
               name: row.name,
@@ -128,6 +128,7 @@ export default function FabricSelector({ pickId, className, productTitle, onUpho
               supplier: row.supplier,
               is_active: row.is_active,
               price_tier_label: row.price_tier_label ?? null,
+              image_indices: row.image_indices ?? null,
             })
         .filter((f: any) => f && f.is_active !== false)
         .map((f: any) => ({
@@ -140,6 +141,7 @@ export default function FabricSelector({ pickId, className, productTitle, onUpho
           price_per_lm_cents: f.price_per_lm_cents ?? null,
           tier: f.tier ?? null,
           currency: f.currency ?? "EUR",
+          image_indices: Array.isArray(f.image_indices) ? f.image_indices : null,
         }));
       setFabrics(list);
       onHasFabricsChange?.(list.some(isFabricCategory));
