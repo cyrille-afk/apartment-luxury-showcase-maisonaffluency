@@ -544,7 +544,7 @@ const VariantSelectors: React.FC<{
       {/* Material / finish dropdown(s) */}
       {isDualAxis ? (
         <>
-          {!baseAxisIsDim && (
+          {!baseAxisIsDim && !suppressBaseAsFinish && (
             <ExpandableSpec
               icon={specIcon("⬗")}
               text={withImperialPerLine(baseOptions.join("\n"))}
