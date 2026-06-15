@@ -309,7 +309,7 @@ export default function TradeAdminFabrics() {
               />
               <select
                 className="col-span-2 px-2 py-1.5 text-sm rounded border border-border bg-background"
-                value={newRow.category || "Upholstery"}
+                value={newRow.category || "Fabric & Leather"}
                 onChange={(e) => setNewRow((n) => ({ ...n, category: e.target.value }))}
               >
                 {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
