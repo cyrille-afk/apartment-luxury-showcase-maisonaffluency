@@ -3,7 +3,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Navigate, Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, Plus, Trash2, Save, X, Link2 } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, Save, X, Link2, ExternalLink, Settings2 } from "lucide-react";
 import { useState, useMemo } from "react";
 import { useToast } from "@/hooks/use-toast";
 import CloudUpload from "@/components/trade/CloudUpload";
@@ -687,15 +687,24 @@ export default function TradeAdminFabrics() {
                                         ? `/trade/products/${dSlug}/${productSlug}`
                                         : `/trade/products/${p.id}`;
                                       return (
-                                        <Link
+                                        <span
                                           key={p.id}
-                                          to={to}
-                                          className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded bg-muted/60 text-foreground hover:bg-muted"
+                                          className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded bg-muted/60 text-foreground"
                                           title={p.subtitle ? `${p.subtitle} — ${p.title}` : p.title || ""}
                                         >
-                                          <Link2 className="h-2.5 w-2.5 text-muted-foreground" />
-                                          <span className="truncate max-w-[120px]">{p.title || "(untitled)"}</span>
-                                        </Link>
+                                          <button
+                                            type="button"
+                                            onClick={() => { setLinkingId(f.id); setPickSearch(""); }}
+                                            className="inline-flex items-center gap-1 hover:underline"
+                                            title="Edit price tier & image range"
+                                          >
+                                            <Settings2 className="h-2.5 w-2.5 text-primary" />
+                                            <span className="truncate max-w-[120px]">{p.title || "(untitled)"}</span>
+                                          </button>
+                                          <Link to={to} className="ml-1 opacity-60 hover:opacity-100" title="Open product page" target="_blank" rel="noreferrer">
+                                            <ExternalLink className="h-2.5 w-2.5" />
+                                          </Link>
+                                        </span>
                                       );
                                     })}
 
@@ -721,7 +730,7 @@ export default function TradeAdminFabrics() {
                                       className="inline-flex items-center gap-1 text-[10px] text-primary hover:underline self-start mt-0.5"
                                       title="Manage linked products, price tier, and image range"
                                     >
-                                      <Link2 className="h-2.5 w-2.5" /> Manage ({linked.length})
+                                      <Settings2 className="h-2.5 w-2.5" /> Manage links & image ranges
                                     </button>
                                   )}
                                 </div>
