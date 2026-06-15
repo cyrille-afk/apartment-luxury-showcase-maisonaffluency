@@ -54,6 +54,14 @@ interface FabricSelectorProps {
    * upholstery-finish dropdown when the swatch picker covers the same axis.
    */
   onHasFabricsChange?: (has: boolean) => void;
+  /**
+   * Fires when the user picks a wood-finish swatch. Receives the swatch
+   * name (which must match the Frame axis value in size_variants) so the
+   * product page can drive the Base × Top price matrix in sync.
+   */
+  onWoodFinishChange?: (woodName: string | null) => void;
+  /** Fires with the list of linked wood-swatch names after fetch. */
+  onWoodFinishesAvailable?: (names: string[]) => void;
   /** Trade-only: include fabric price/tier fields for quote upcharge math. */
   includePricing?: boolean;
 }
@@ -72,7 +80,7 @@ const isFabricCategory = (fabric: Fabric) => normalizeFabricCategory(fabric.cate
  * (Trade + Public). Tiles are grouped by category (Upholstery, Wood, …)
  * with a COM ("Customer's Own Material") tile always offered.
  */
-export default function FabricSelector({ pickId, className, productTitle, onUpholsteryTierChange, onFabricChange, onHasFabricsChange, includePricing = false }: FabricSelectorProps) {
+export default function FabricSelector({ pickId, className, productTitle, onUpholsteryTierChange, onFabricChange, onHasFabricsChange, onWoodFinishChange, onWoodFinishesAvailable, includePricing = false }: FabricSelectorProps) {
 
   const [open, setOpen] = useState(false);
   const [fabrics, setFabrics] = useState<Fabric[]>([]);
@@ -127,6 +135,7 @@ export default function FabricSelector({ pickId, className, productTitle, onUpho
         }));
       setFabrics(list);
       onHasFabricsChange?.(list.some(isFabricCategory));
+      onWoodFinishesAvailable?.(list.filter((f) => !isFabricCategory(f)).map((f) => f.name));
     })();
     return () => {
       cancelled = true;
@@ -210,6 +219,9 @@ export default function FabricSelector({ pickId, className, productTitle, onUpho
             currency: f.currency || "EUR",
           });
         }
+      } else {
+        // Wood finish picked — drive the Frame axis on the price matrix.
+        onWoodFinishChange?.(f.name);
       }
     };
     const tierCaption = isFabricGroup && !isCom && !isCol && (f.tier || f.price_per_lm_cents)
@@ -392,6 +404,7 @@ export default function FabricSelector({ pickId, className, productTitle, onUpho
                       }
                     } else {
                       setSelectedWoodId(zoomed.id);
+                      onWoodFinishChange?.(zoomed.name);
                     }
                     setZoomed(null);
                   }}
