@@ -112,7 +112,7 @@ export default function TradeAdminFabrics() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("designer_curator_picks")
-        .select("id, title, subtitle, designer_id")
+        .select("id, title, subtitle, designer_id, size_variants")
         .order("title");
       if (error) throw error;
       return (data as Pick[]) || [];
