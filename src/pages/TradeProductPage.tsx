@@ -976,17 +976,9 @@ const TradeProductPage: React.FC = () => {
     let upcharge = 0;
     if (fabricUpchargeCentsRaw > 0) {
       const fromCcy = selectedFabric?.currency || pricing.currency;
-      if (fromCcy === pricing.currency) {
-        upcharge = fabricUpchargeCentsRaw;
-      } else {
-        // Convert fabric → product currency by going via the display rates.
-        // formatPriceConverted does the heavy lifting later; here we approximate
-        // by re-using the same fx table.
-        const r = fxRates as any;
-        const toBase = r?.[fromCcy] ? 1 / r[fromCcy] : 1; // → EUR
-        const fromBase = r?.[pricing.currency] ?? 1;       // EUR →
-        upcharge = Math.round(fabricUpchargeCentsRaw * toBase * fromBase);
-      }
+      upcharge = fromCcy === pricing.currency
+        ? fabricUpchargeCentsRaw
+        : convertCents(fabricUpchargeCentsRaw, fromCcy, pricing.currency as DisplayCurrency, fxRates);
     }
     const centsWithFabric = cents + upcharge;
     const formatted = formatPriceConverted(centsWithFabric, pricing.currency, displayCurrency, fxRates, pricing.price_unit || undefined);
