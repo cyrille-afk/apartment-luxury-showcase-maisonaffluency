@@ -1318,6 +1318,12 @@ const TradeProductPage: React.FC = () => {
                   onHasFabricsChange={setHasLinkedFabrics}
                   onWoodFinishesAvailable={setLinkedWoodFinishes}
                   onFabricChange={setSelectedFabric}
+                  onSwatchImagesChange={(indices) => {
+                    if (!indices || indices.length === 0) return;
+                    // image_indices are 1-based; gallery is 0-based.
+                    setGalleryActiveIndex(Math.max(0, indices[0] - 1));
+                    setGalleryJumpNonce((n) => n + 1);
+                  }}
                   onWoodFinishChange={(woodName) => {
                     if (!woodName) return;
                     // Match the swatch name to a Base axis value (case/space tolerant).
