@@ -54,6 +54,14 @@ interface FabricSelectorProps {
    * upholstery-finish dropdown when the swatch picker covers the same axis.
    */
   onHasFabricsChange?: (has: boolean) => void;
+  /**
+   * Fires when the user picks a wood-finish swatch. Receives the swatch
+   * name (which must match the Frame axis value in size_variants) so the
+   * product page can drive the Base × Top price matrix in sync.
+   */
+  onWoodFinishChange?: (woodName: string | null) => void;
+  /** Fires with the list of linked wood-swatch names after fetch. */
+  onWoodFinishesAvailable?: (names: string[]) => void;
   /** Trade-only: include fabric price/tier fields for quote upcharge math. */
   includePricing?: boolean;
 }
