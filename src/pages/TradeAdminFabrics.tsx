@@ -88,7 +88,7 @@ export default function TradeAdminFabrics() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("designer_curator_picks")
-        .select("id, title, brand_name")
+        .select("id, title, subtitle")
         .order("title");
       if (error) throw error;
       return (data as Pick[]) || [];
@@ -150,7 +150,7 @@ export default function TradeAdminFabrics() {
       .filter(
         (p) =>
           (p.title || "").toLowerCase().includes(q) ||
-          (p.brand_name || "").toLowerCase().includes(q),
+          (p.subtitle || "").toLowerCase().includes(q),
       )
       .slice(0, 50);
   }, [picks, pickSearch]);
@@ -565,7 +565,7 @@ export default function TradeAdminFabrics() {
                       <li key={p.id} className="flex items-center justify-between px-4 py-2.5 hover:bg-muted/30">
                         <div className="min-w-0">
                           <div className="text-sm text-foreground truncate">{p.title || "(untitled)"}</div>
-                          {p.brand_name && <div className="text-xs text-muted-foreground truncate">{p.brand_name}</div>}
+                          {p.subtitle && <div className="text-xs text-muted-foreground truncate">{p.subtitle}</div>}
                         </div>
                         <button
                           onClick={() => togglePickLink(linkingId, p.id, linked)}
