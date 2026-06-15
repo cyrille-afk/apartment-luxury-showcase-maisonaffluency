@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { ChevronDown, ZoomIn } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
+import SpecGlyph from "@/components/product/SpecGlyph";
 
 interface Fabric {
   id: string;
