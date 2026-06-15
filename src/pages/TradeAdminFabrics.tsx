@@ -113,6 +113,18 @@ export default function TradeAdminFabrics() {
     return m;
   }, [links]);
 
+  const linkedPicksByFabric = useMemo(() => {
+    const m = new Map<string, Pick[]>();
+    links.forEach((l) => {
+      const pick = picks.find((p) => p.id === l.pick_id);
+      if (!pick) return;
+      const arr = m.get(l.fabric_id) || [];
+      arr.push(pick);
+      m.set(l.fabric_id, arr);
+    });
+    return m;
+  }, [links, picks]);
+
   const linkedPickIds = useMemo(() => {
     if (!linkingId) return new Set<string>();
     return new Set(links.filter((l) => l.fabric_id === linkingId).map((l) => l.pick_id));
@@ -489,13 +501,42 @@ export default function TradeAdminFabrics() {
                             )}
                           </td>
                           <td className="px-3 py-2">
-                            <button
-                              onClick={() => { setLinkingId(f.id); setPickSearch(""); }}
-                              className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
-                              title="Link to products"
-                            >
-                              <Link2 className="h-3 w-3" /> {count}
-                            </button>
+                            {(() => {
+                              const linked = linkedPicksByFabric.get(f.id) || [];
+                              return (
+                                <div className="flex flex-col gap-1">
+                                  <div className="flex flex-wrap gap-1">
+                                    {linked.slice(0, 2).map((p) => (
+                                      <Link
+                                        key={p.id}
+                                        to={`/trade/products/${p.id}`}
+                                        className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded bg-muted/60 text-foreground hover:bg-muted"
+                                        title={p.subtitle ? `${p.subtitle} — ${p.title}` : p.title || ""}
+                                      >
+                                        <Link2 className="h-2.5 w-2.5 text-muted-foreground" />
+                                        <span className="truncate max-w-[120px]">{p.title || "(untitled)"}</span>
+                                      </Link>
+                                    ))}
+                                    {linked.length > 2 && (
+                                      <button
+                                        onClick={() => { setLinkingId(f.id); setPickSearch(""); }}
+                                        className="text-[10px] px-1.5 py-0.5 rounded bg-muted/40 text-muted-foreground hover:bg-muted"
+                                      >
+                                        +{linked.length - 2} more
+                                      </button>
+                                    )}
+                                  </div>
+                                  {linked.length === 0 && (
+                                    <button
+                                      onClick={() => { setLinkingId(f.id); setPickSearch(""); }}
+                                      className="inline-flex items-center gap-1 text-xs text-primary hover:underline self-start"
+                                    >
+                                      <Link2 className="h-3 w-3" /> Link
+                                    </button>
+                                  )}
+                                </div>
+                              );
+                            })()}
                           </td>
                           <td className="px-3 py-2 text-right">
                             <div className="flex items-center justify-end gap-1">
