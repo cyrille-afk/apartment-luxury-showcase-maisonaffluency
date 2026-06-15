@@ -48,6 +48,7 @@ interface Pick {
   title: string | null;
   subtitle: string | null;
   designer_id: string | null;
+  size_variants?: { label?: string; base?: string; top?: string; price_cents?: number }[] | null;
 }
 
 interface DesignerLite {
@@ -61,6 +62,7 @@ interface ProductFabric {
   pick_id: string;
   fabric_id: string;
   sort_order: number;
+  price_tier_label: string | null;
 }
 
 const blankDraft = (): Partial<Fabric> => ({
