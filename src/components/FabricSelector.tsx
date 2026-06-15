@@ -43,7 +43,7 @@ const isFabricCategory = (fabric: Fabric) => normalizeFabricCategory(fabric.cate
  * (Trade + Public). Tiles are grouped by category (Upholstery, Wood, …)
  * with a COM ("Customer's Own Material") tile always offered.
  */
-export default function FabricSelector({ pickId, className, productTitle }: FabricSelectorProps) {
+export default function FabricSelector({ pickId, className, productTitle, onUpholsteryTierChange }: FabricSelectorProps) {
   const [open, setOpen] = useState(false);
   const [fabrics, setFabrics] = useState<Fabric[]>([]);
   const [selectedFabricId, setSelectedFabricId] = useState<string | null>(null);
@@ -59,12 +59,12 @@ export default function FabricSelector({ pickId, className, productTitle }: Fabr
     (async () => {
       const { data, error } = await supabase
         .from("product_fabrics")
-        .select("sort_order, fabric:fabrics(id, name, image_url, category, supplier, is_active)")
+        .select("sort_order, price_tier_label, fabric:fabrics(id, name, image_url, category, supplier, is_active)")
         .eq("pick_id", pickId)
         .order("sort_order", { ascending: true });
       if (cancelled || error) return;
       const list: Fabric[] = (data || [])
-        .map((row: any) => row.fabric)
+        .map((row: any) => row.fabric && { ...row.fabric, price_tier_label: row.price_tier_label ?? null })
         .filter((f: any) => f && f.is_active !== false)
         .map((f: any) => ({
           id: f.id,
@@ -72,6 +72,7 @@ export default function FabricSelector({ pickId, className, productTitle }: Fabr
           image_url: f.image_url,
           category: normalizeFabricCategory(f.category),
           supplier: f.supplier,
+          price_tier_label: f.price_tier_label ?? null,
         }));
       setFabrics(list);
     })();
