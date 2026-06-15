@@ -16,6 +16,8 @@ interface FabricSelectorProps {
   /** designer_curator_picks.id — required to look up linked fabrics. */
   pickId: string | null | undefined;
   className?: string;
+  /** Optional product title shown in the zoom popup header. */
+  productTitle?: string;
 }
 
 /**
