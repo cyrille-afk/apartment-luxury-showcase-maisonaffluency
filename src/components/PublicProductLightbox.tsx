@@ -587,7 +587,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                       icon={specIcon("📐")}
                       text={withImperialPerLine(singleSplitSizes.join("\n"))}
                       emphasized
-                      placeholder="Select your size"
+                      placeholder="Select Your Size"
                       value={selectedSingleSizeIdx ?? null}
                       onChange={(idx) => setSelectedSingleSizeIdx(idx < 0 ? null : idx)}
                     />
@@ -605,7 +605,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                       icon={specIcon("📐")}
                       text={withImperialPerLine(dualSizeOptions.join("\n"))}
                       emphasized
-                      placeholder="Select your size"
+                      placeholder="Select Your Size"
                     />
                   );
                 }
@@ -620,7 +620,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                         icon={specIcon("📐")}
                         text={withImperialPerLine(labels.join("\n"))}
                         emphasized
-                        placeholder="Select your size"
+                        placeholder="Select Your Size"
                       />
                     );
                   }
