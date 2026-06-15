@@ -309,44 +309,56 @@ export default function FabricSelector({ pickId, className, productTitle }: Fabr
                 </div>
               )}
 
-              <div className="mt-5 pt-5 border-t border-border/60">
-                <p className="font-body text-[11px] tracking-[0.18em] uppercase text-muted-foreground mb-3">
-                  Select fabric &amp; finish
-                </p>
-                <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1">
-                  {[...fabrics, comTile].map((f) => {
-                    const isActive = zoomed.id === f.id;
-                    const isCom = f.id === "__com__";
-                    return (
-                      <button
-                        key={f.id}
-                        type="button"
-                        onClick={() => setZoomed(f)}
-                        className={cn(
-                          "shrink-0 w-16 h-16 rounded-md overflow-hidden bg-muted/30 ring-1 transition",
-                          isActive
-                            ? "ring-2 ring-foreground"
-                            : "ring-border/60 hover:ring-foreground/40"
-                        )}
-                        aria-label={`View ${f.name}`}
-                        title={f.name}
-                      >
-                        {f.image_url ? (
-                          <img
-                            src={f.image_url}
-                            alt={f.name}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center font-display text-[11px] tracking-widest text-foreground/80">
-                            {isCom ? "COM" : "—"}
-                          </div>
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
+              {(() => {
+                const zoomedIsFabric =
+                  zoomed.category === "Fabric & Leather" ||
+                  zoomed.category === "Upholstery" ||
+                  zoomed.category === "Leather" ||
+                  zoomed.id === "__com__" ||
+                  zoomed.id === "__col__";
+                const thumbs = zoomedIsFabric ? fabricTiles : woodTiles;
+                return (
+                  <div className="mt-5 pt-5 border-t border-border/60">
+                    <p className="font-body text-[11px] tracking-[0.18em] uppercase text-muted-foreground mb-3">
+                      {zoomedIsFabric ? "Select fabric & leather" : "Select wood finish"}
+                    </p>
+                    <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1">
+                      {thumbs.map((f) => {
+                        const isActive = zoomed.id === f.id;
+                        const isCom = f.id === "__com__";
+                        const isCol = f.id === "__col__";
+                        return (
+                          <button
+                            key={f.id}
+                            type="button"
+                            onClick={() => setZoomed(f)}
+                            className={cn(
+                              "shrink-0 w-16 h-16 rounded-md overflow-hidden bg-muted/30 ring-1 transition",
+                              isActive
+                                ? "ring-2 ring-foreground"
+                                : "ring-border/60 hover:ring-foreground/40"
+                            )}
+                            aria-label={`View ${f.name}`}
+                            title={f.name}
+                          >
+                            {f.image_url ? (
+                              <img
+                                src={f.image_url}
+                                alt={f.name}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center font-display text-[11px] tracking-widest text-foreground/80">
+                                {isCom ? "COM" : isCol ? "COL" : "—"}
+                              </div>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
           </div>
         </div>
