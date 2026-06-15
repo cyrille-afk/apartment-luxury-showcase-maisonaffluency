@@ -71,7 +71,7 @@ Deno.serve(async (req) => {
 
   if (sendError) {
     console.error('send error', sendError)
-    return new Response(JSON.stringify({ error: 'send_failed', detail: sendError.message }), {
+    return new Response(JSON.stringify({ error: 'send_failed' }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
