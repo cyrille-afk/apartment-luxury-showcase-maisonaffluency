@@ -522,30 +522,16 @@ const PublicDesignerProfile = () => {
     remainingBlocks.length > 0 &&
     isMediaBlock(remainingBlocks[0]) &&
     !isVideoBlock(remainingBlocks[0]);
-  // Shrink the intro image to "small" and drop its caption so its height
-  // roughly matches the single intro paragraph beside it (avoids the large
-  // blank space below the text in the collapsed preview before "View full
-  // profile"). The full image with caption still appears when the user
-  // expands the full profile, because we re-inject it into editorialBio.
-  const ensureSmallNoCaption = (mediaLine: string): string => {
-    const segs = mediaLine.split(/\s*\|\s*/).map((s) => s.trim());
-    const url = segs[0];
-    const keep = segs.slice(1).filter((s) =>
-      /^poster:/i.test(s) ||
-      /^(left|right)$/i.test(s) ||
-      /^small$/i.test(s) ||
-      /^\d{1,3}%$/.test(s)
-    );
-    const hasSize = keep.some((s) => /^small$/i.test(s) || /^\d{1,3}%$/.test(s));
-    if (!hasSize) keep.push("small");
-    return [url, ...keep].join(" | ");
-  };
-  const introEditorialBio = startsWithInlineImage
-    ? [ensureSmallNoCaption(remainingBlocks[0]), ...heroParagraphs].join("\n\n")
-    : "";
-  const editorialBlocks = startsWithInlineImage ? remainingBlocks.slice(1) : remainingBlocks;
+  // Collapsed preview shows ONLY the hero paragraph(s) — no image. This
+  // eliminates the large blank space that appeared when a tall image sat
+  // beside a short intro paragraph. The first inline image (with its full
+  // caption) is moved into editorialBio so it appears as the first element
+  // once the user clicks "View full profile".
+  const introEditorialBio = "";
+  const editorialBlocks = remainingBlocks;
   const editorialBio = editorialBlocks.join("\n\n");
-  const editorialStartImageIndex = startsWithInlineImage ? 1 : 0;
+  const editorialStartImageIndex = 0;
+  void startsWithInlineImage;
 
   const bioWordCount = (displayBiography || "").replace(/<[^>]+>/g, " ").replace(/https?:\S+/g, "").trim().split(/\s+/).filter(Boolean).length;
   const showThinContentFallback = bioWordCount < 60;
