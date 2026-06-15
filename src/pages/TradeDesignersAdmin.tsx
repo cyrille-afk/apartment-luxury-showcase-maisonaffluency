@@ -1123,6 +1123,9 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
                   baseAxisLabel={pick.base_axis_label}
                   topAxisLabel={pick.top_axis_label}
                 />
+                {FABRICS_PANEL_PILOT_PICK_IDS.has(pick.id) && (
+                  <ProductFabricsPanel pickId={pick.id} />
+                )}
                 <div>
                   <label className="text-[10px] text-muted-foreground">Description</label>
                   <Textarea value={pick.description || ""} onChange={(e) => updateField(pick.id, "description", e.target.value || null)} className="text-xs min-h-[60px]" />
