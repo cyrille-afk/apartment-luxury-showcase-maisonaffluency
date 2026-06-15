@@ -943,13 +943,17 @@ const PublicDesignerProfile = () => {
                         {(() => {
                           const tags: string[] = pick.tags || [];
                           // When a specific edition string exists, drop the generic "limited-edition" tag
-                          const filtered = pick.edition
+                          let filtered = pick.edition
                             ? tags.filter(t => !/^limited-edition$/i.test(t))
                             : tags;
+                          // Avoid duplicating "Re-edition" when the parent-brand badge already says so
+                          if (parentBrandName) {
+                            filtered = filtered.filter(t => !/re-?edition/i.test(t));
+                          }
                           const specialTags = filtered.filter((t) =>
                             /couture|edition|limited|re-edition|unique|modern scholar|unesco|good design award|genesis collection/i.test(t)
                           );
-                          if (pick.edition && !specialTags.some(t => t.toLowerCase() === pick.edition!.toLowerCase())) {
+                          if (pick.edition && !parentBrandName && !specialTags.some(t => t.toLowerCase() === pick.edition!.toLowerCase())) {
                             specialTags.unshift(pick.edition);
                           }
                           return specialTags.length > 0 ? (
@@ -965,6 +969,7 @@ const PublicDesignerProfile = () => {
                             </div>
                           ) : null;
                         })()}
+
                         {parentBrandName && (
                           <div className="absolute top-2 right-2">
                             <span className="inline-block px-2 py-0.5 text-[8px] md:text-[9px] uppercase tracking-wider font-body bg-white/85 text-foreground rounded-full border border-black/10 backdrop-blur-sm">
