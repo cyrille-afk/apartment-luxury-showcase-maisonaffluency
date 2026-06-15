@@ -1089,7 +1089,7 @@ const TradeProductPage: React.FC = () => {
                   text={withImperialPerLine(singleSizeOptions.join("\n"))}
                   secondaryText={null}
                   emphasized
-                  placeholder="Select your size"
+                  placeholder="Select Your Size"
                   value={selectedSingleSize != null ? Math.max(0, singleSizeOptions.indexOf(selectedSingleSize)) : null}
                   onChange={(idx) => {
                     const newSize = singleSizeOptions[idx] ?? null;
@@ -1146,7 +1146,7 @@ const TradeProductPage: React.FC = () => {
                     icon={specIcon("📐")}
                     text={withImperialPerLine(sizeText)}
                     emphasized
-                    placeholder={interactive ? "Select your size" : undefined}
+                    placeholder={interactive ? "Select Your Size" : undefined}
                     value={interactive ? selectedVariantIdx : undefined}
                     onChange={interactive ? setSelectedVariantIdx : undefined}
                   />
@@ -1159,7 +1159,7 @@ const TradeProductPage: React.FC = () => {
                   text={withImperialPerLine(dualSizeOptions.join("\n"))}
                   secondaryText={null}
                   emphasized
-                  placeholder="Select your size"
+                  placeholder="Select Your Size"
                   value={selectedDualSize != null ? Math.max(0, dualSizeOptions.indexOf(selectedDualSize)) : null}
                   onChange={(idx) => {
                     if (idx < 0) {
