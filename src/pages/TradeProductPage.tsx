@@ -123,13 +123,14 @@ interface ProductRow {
   variant_placeholder: string | null;
   base_axis_label: string | null;
   top_axis_label: string | null;
-  size_variants?: { label?: string; base?: string; top?: string; price_cents?: number }[] | null;
+  size_variants?: { label?: string; base?: string; top?: string; price_cents?: number; meters?: number }[] | null;
   variant_image_map: Record<string, number> | null;
   gallery_captions?: Record<string, string> | null;
   edition: string | null;
   edition_number: string | null;
   edition_signing: string | null;
   is_upholstered: boolean | null;
+  com_meters: number | null;
 }
 
 interface TradePricing {
