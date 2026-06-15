@@ -100,12 +100,13 @@ export default function FabricSelector({ pickId, className, productTitle }: Fabr
     if (!sortedGroupKeys.includes("Fabric & Leather")) sortedGroupKeys.unshift("Fabric & Leather");
   }
 
-  const selectedFabric =
-    selectedId === "__com__"
+  const selectedFabricItem =
+    selectedFabricId === "__com__"
       ? comTile
-      : selectedId === "__col__"
+      : selectedFabricId === "__col__"
       ? colTile
-      : fabrics.find((f) => f.id === selectedId) || null;
+      : fabrics.find((f) => f.id === selectedFabricId) || null;
+  const selectedWoodItem = fabrics.find((f) => f.id === selectedWoodId) || null;
 
   const renderTile = (f: Fabric) => {
     const isCom = f.id === "__com__";
