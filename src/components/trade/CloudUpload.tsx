@@ -3,6 +3,7 @@ import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { Upload, X, FileUp, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 
 interface CloudUploadProps {
   /** Storage folder path, e.g. "documents", "products", "journal" */
@@ -34,6 +35,7 @@ const CloudUpload = ({
   const [uploading, setUploading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const isImage = accept.includes("image");
   const isPdf = accept.includes("pdf");
@@ -54,10 +56,19 @@ const CloudUpload = ({
 
     setUploading(true);
     const urls: string[] = [];
+    const scopedFolder = folder === "axonometric-sources" || folder === "axonometric-submissions"
+      ? `${folder}/${user?.id}`
+      : folder;
+
+    if ((folder === "axonometric-sources" || folder === "axonometric-submissions") && !user?.id) {
+      toast({ title: "Sign in required", description: "Please sign in before uploading files.", variant: "destructive" });
+      setUploading(false);
+      return;
+    }
 
     for (const file of validFiles) {
       const ext = file.name.split(".").pop() || (isImage ? "jpg" : "pdf");
-      const path = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+      const path = `${scopedFolder}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
       const { error } = await supabase.storage.from("assets").upload(path, file, {
         contentType: file.type,
       });
