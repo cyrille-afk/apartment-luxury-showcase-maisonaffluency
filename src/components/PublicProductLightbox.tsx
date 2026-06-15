@@ -141,6 +141,12 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
   const [showHoverImage, setShowHoverImage] = useState(false);
   const [hoverImageLoaded, setHoverImageLoaded] = useState(false);
   const [variantPayload, setVariantPayload] = useState<Partial<PublicLightboxItem> | null>(null);
+  const relatedScrollRef = useRef<HTMLDivElement>(null);
+  const scrollRelated = (dir: 1 | -1) => {
+    const el = relatedScrollRef.current;
+    if (!el) return;
+    el.scrollBy({ left: dir * Math.max(160, el.clientWidth * 0.7), behavior: "smooth" });
+  };
 
   useEffect(() => {
     let cancelled = false;
