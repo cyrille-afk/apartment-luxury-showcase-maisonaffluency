@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { Layers, TreeDeciduous } from "lucide-react";
 
 type SpecGlyphProps = {
   symbol: string;
@@ -20,15 +21,22 @@ export default function SpecGlyph({ symbol, className }: SpecGlyphProps) {
     );
   }
 
-  if (symbol === "✦") {
+  if (symbol === "✦" || symbol === "fabric") {
     return (
       <span className={cn(baseClass, "text-gold")} aria-hidden="true">
-        <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor">
-          <path d="M12 2.75C13.45 7.55 16.45 10.55 21.25 12C16.45 13.45 13.45 16.45 12 21.25C10.55 16.45 7.55 13.45 2.75 12C7.55 10.55 10.55 7.55 12 2.75Z" />
-        </svg>
+        <Layers className="h-[18px] w-[18px]" strokeWidth={1.75} />
       </span>
     );
   }
+
+  if (symbol === "wood") {
+    return (
+      <span className={cn(baseClass, "text-gold")} aria-hidden="true">
+        <TreeDeciduous className="h-[18px] w-[18px]" strokeWidth={1.75} />
+      </span>
+    );
+  }
+
 
   return (
     <span className={cn(baseClass, "text-gold")} aria-hidden="true">

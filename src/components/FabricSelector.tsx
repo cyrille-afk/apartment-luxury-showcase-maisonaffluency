@@ -312,7 +312,7 @@ export default function FabricSelector({ pickId, className, productTitle, onUpho
         label: "Select Your Fabric / Leather",
         selectedName: selectedFabricItem?.name ?? null,
         tiles: fabricTiles,
-        glyph: "⬗",
+        glyph: "fabric",
         emptyNote:
           "Full fabric library coming soon. In the meantime, your atelier can be upholstered in COM (Customer's Own Fabric) — please request samples or pricing through your Maison Affluency concierge.",
       })}
@@ -323,7 +323,7 @@ export default function FabricSelector({ pickId, className, productTitle, onUpho
           label: "Select the Wood Finish of the Frame",
           selectedName: selectedWoodItem?.name ?? null,
           tiles: woodTiles,
-          glyph: "✦",
+          glyph: "wood",
         })}
 
       {zoomed && (
