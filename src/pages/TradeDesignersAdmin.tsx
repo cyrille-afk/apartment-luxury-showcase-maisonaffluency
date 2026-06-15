@@ -24,6 +24,12 @@ import DesignerCompletenessAudit from "@/components/admin/DesignerCompletenessAu
 import GalleryThumbnailsEditor from "@/components/admin/GalleryThumbnailsEditor";
 import SlugHealthBadge, { useSlugHealthMap } from "@/components/admin/SlugHealthBadge";
 import VariantPreviewPanel from "@/components/admin/VariantPreviewPanel";
+import ProductFabricsPanel from "@/components/admin/ProductFabricsPanel";
+
+// Pilot: surface inline Fabrics & Finishes editor only for these picks for now.
+const FABRICS_PANEL_PILOT_PICK_IDS = new Set<string>([
+  "0d33b077-dc1a-4aed-bc8e-86dd2884b2dd", // Jean-Michel Frank — Transat c. 1929
+]);
 import { variantImageKey } from "@/lib/variantImageMap";
 import BiographyPdfButton from "@/components/BiographyPdfButton";
 import { applyCuratorPickOrder, sortCuratorPicks } from "@/lib/curatorPickSort";
@@ -1117,6 +1123,9 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
                   baseAxisLabel={pick.base_axis_label}
                   topAxisLabel={pick.top_axis_label}
                 />
+                {FABRICS_PANEL_PILOT_PICK_IDS.has(pick.id) && (
+                  <ProductFabricsPanel pickId={pick.id} />
+                )}
                 <div>
                   <label className="text-[10px] text-muted-foreground">Description</label>
                   <Textarea value={pick.description || ""} onChange={(e) => updateField(pick.id, "description", e.target.value || null)} className="text-xs min-h-[60px]" />
