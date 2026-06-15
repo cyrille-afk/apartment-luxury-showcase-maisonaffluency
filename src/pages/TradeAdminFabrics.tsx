@@ -113,6 +113,18 @@ export default function TradeAdminFabrics() {
     return m;
   }, [links]);
 
+  const linkedPicksByFabric = useMemo(() => {
+    const m = new Map<string, Pick[]>();
+    links.forEach((l) => {
+      const pick = picks.find((p) => p.id === l.pick_id);
+      if (!pick) return;
+      const arr = m.get(l.fabric_id) || [];
+      arr.push(pick);
+      m.set(l.fabric_id, arr);
+    });
+    return m;
+  }, [links, picks]);
+
   const linkedPickIds = useMemo(() => {
     if (!linkingId) return new Set<string>();
     return new Set(links.filter((l) => l.fabric_id === linkingId).map((l) => l.pick_id));
