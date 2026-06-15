@@ -726,22 +726,52 @@ export default function TradeAdminFabrics() {
                 <ul className="divide-y divide-border">
                   {filteredPicks.map((p) => {
                     const linked = linkedPickIds.has(p.id);
+                    const link = linkByPickId.get(p.id);
+                    const tops = topOptionsByPickId.get(p.id) || [];
+                    const datalistId = `tops-${p.id}`;
                     return (
-                      <li key={p.id} className="flex items-center justify-between px-4 py-2.5 hover:bg-muted/30">
-                        <div className="min-w-0">
-                          <div className="text-sm text-foreground truncate">{p.title || "(untitled)"}</div>
-                          {p.subtitle && <div className="text-xs text-muted-foreground truncate">{p.subtitle}</div>}
+                      <li key={p.id} className="px-4 py-2.5 hover:bg-muted/30">
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="min-w-0 flex-1">
+                            <div className="text-sm text-foreground truncate">{p.title || "(untitled)"}</div>
+                            {p.subtitle && <div className="text-xs text-muted-foreground truncate">{p.subtitle}</div>}
+                          </div>
+                          <button
+                            onClick={() => togglePickLink(linkingId, p.id, linked)}
+                            className={`shrink-0 text-[10px] uppercase tracking-wider px-2.5 py-1 rounded border ${
+                              linked
+                                ? "border-primary bg-primary/10 text-primary"
+                                : "border-border text-muted-foreground hover:bg-muted"
+                            }`}
+                          >
+                            {linked ? "Linked" : "Link"}
+                          </button>
                         </div>
-                        <button
-                          onClick={() => togglePickLink(linkingId, p.id, linked)}
-                          className={`shrink-0 ml-3 text-[10px] uppercase tracking-wider px-2.5 py-1 rounded border ${
-                            linked
-                              ? "border-primary bg-primary/10 text-primary"
-                              : "border-border text-muted-foreground hover:bg-muted"
-                          }`}
-                        >
-                          {linked ? "Linked" : "Link"}
-                        </button>
+                        {linked && link && (
+                          <div className="mt-2 flex items-center gap-2">
+                            <label className="text-[10px] uppercase tracking-wider text-muted-foreground shrink-0">
+                              Price tier
+                            </label>
+                            <input
+                              type="text"
+                              list={tops.length ? datalistId : undefined}
+                              defaultValue={link.price_tier_label || ""}
+                              placeholder={tops[0] || "e.g. ECART fabric, Leather, Shearling"}
+                              onBlur={(e) => {
+                                const next = e.target.value.trim();
+                                if (next !== (link.price_tier_label || "")) {
+                                  setPickLinkLabel(link.id, next);
+                                }
+                              }}
+                              className="flex-1 px-2 py-1 text-xs rounded border border-border bg-background"
+                            />
+                            {tops.length > 0 && (
+                              <datalist id={datalistId}>
+                                {tops.map((t) => <option key={t} value={t} />)}
+                              </datalist>
+                            )}
+                          </div>
+                        )}
                       </li>
                     );
                   })}
