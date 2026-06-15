@@ -173,15 +173,15 @@ Deno.serve(async (req) => {
   const mode = typeof body.mode === "string" ? body.mode : "rescrape";
   const force = !!body.force;
   const triggerSource = typeof body.triggerSource === "string" ? body.triggerSource : "unknown";
-  let maxRescrapes = Math.max(1, Math.min(1000, body.maxRescrapes ?? DEFAULT_MAX));
+  let maxRescrapes = Math.max(1, Math.min(DEFAULT_MAX, body.maxRescrapes ?? DEFAULT_MAX));
 
   // ─────────────────────────────────────────────────────────────
   // Auth gate: privileged operations (force=true, inspect, rescrape-one,
-  // or maxRescrapes > 50) require either the CRON_SECRET header or an
+  // or maxRescrapes > PUBLIC_MAX) require either the CRON_SECRET header or an
   // authenticated admin user. Unauthenticated callers (the in-app build
   // watcher) can only trigger a default diff-rescrape with a small cap.
   // ─────────────────────────────────────────────────────────────
-  const PRIVILEGED_CAP = 50;
+  const PRIVILEGED_CAP = PUBLIC_MAX;
   const isPrivileged =
     force ||
     mode === "inspect" ||
@@ -228,7 +228,7 @@ Deno.serve(async (req) => {
     }
   } else {
     // Cap anonymous callers regardless of what they sent.
-    maxRescrapes = Math.min(maxRescrapes, PRIVILEGED_CAP);
+    maxRescrapes = Math.min(maxRescrapes, PUBLIC_MAX);
   }
 
   const supabase = createClient(
