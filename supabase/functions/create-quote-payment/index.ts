@@ -257,7 +257,7 @@ serve(async (req) => {
     });
   } catch (error: any) {
     console.error("Error in create-quote-payment:", error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ error: "An unexpected error occurred" }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,
     });
