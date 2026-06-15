@@ -80,9 +80,31 @@ export default function FabricSelector({ pickId, className, productTitle }: Fabr
     id: "__com__",
     name: "COM — Customer's Own Fabric",
     image_url: null,
-    category: "COM",
+    category: "Fabric & Leather",
     supplier: null,
   };
+  const colTile: Fabric = {
+    id: "__col__",
+    name: "COL — Customer's Own Leather",
+    image_url: null,
+    category: "Fabric & Leather",
+    supplier: null,
+  };
+  // Inject COM + COL at the end of the Fabric & Leather group so customers see
+  // their "own material" options alongside the curated swatches.
+  if (grouped["Fabric & Leather"]) {
+    grouped["Fabric & Leather"] = [...grouped["Fabric & Leather"], comTile, colTile];
+  } else {
+    grouped["Fabric & Leather"] = [comTile, colTile];
+    if (!sortedGroupKeys.includes("Fabric & Leather")) sortedGroupKeys.unshift("Fabric & Leather");
+  }
+
+  const selectedFabric =
+    selectedId === "__com__"
+      ? comTile
+      : selectedId === "__col__"
+      ? colTile
+      : fabrics.find((f) => f.id === selectedId) || null;
 
   const renderTile = (f: Fabric) => {
     const isCom = f.id === "__com__";
