@@ -306,7 +306,8 @@ Deno.serve(async (req) => {
           (imageContentType?.includes("image/") ?? false),
       });
     } catch (e: any) {
-      return jsonResp({ error: e?.message ?? String(e) }, 500);
+      console.error("post-deploy-rescrape inspect error", e);
+      return jsonResp({ error: "An unexpected error occurred" }, 500);
     }
   }
 
@@ -336,7 +337,8 @@ Deno.serve(async (req) => {
       });
       return jsonResp({ ok: true, url: fullUrl, result });
     } catch (e: any) {
-      return jsonResp({ error: e?.message ?? String(e) }, 500);
+      console.error("post-deploy-rescrape single rescrape error", e);
+      return jsonResp({ error: "An unexpected error occurred" }, 500);
     }
   }
 
@@ -430,6 +432,6 @@ Deno.serve(async (req) => {
       rescraped_count: 0,
       error: e?.message ?? String(e),
     });
-    return jsonResp({ error: e?.message ?? String(e) }, 500);
+    return jsonResp({ error: "An unexpected error occurred" }, 500);
   }
 });
