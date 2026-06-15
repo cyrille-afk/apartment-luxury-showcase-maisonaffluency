@@ -3,8 +3,8 @@
  *
  * Resolution order for Base / Top dropdowns:
  *   1. `variant_placeholder` (curator override) — applied to BOTH dropdowns when set.
- *   2. Axis-specific label → "Select your {label} choice"
- *      (e.g. "Plinth" → "Select your plinth choice")
+ *   2. Axis-specific label → "Select your {label} finish"
+ *      (e.g. "Plinth" → "Select your plinth finish")
  *   3. Generic per-axis default — Base: "Select your base finish",
  *                                 Top:  "Select your top finish".
  *      Both axes mirror each other for clarity ("base finish" / "top finish").
@@ -38,9 +38,14 @@ export function formatVariantAxisLabel(label: string | null | undefined): string
 
 function placeholderFromAxisLabel(label: string): string {
   const lower = formatVariantAxisLabel(label)!.toLowerCase();
+  if (lower === "size") return "Your Sofa Size";
   // Append "finish" unless the label already ends with a noun that wouldn't pair with "finish"
   const skipSuffix = /\b(finish|fabric|material|size|colour|color|leather)$/i.test(lower);
   return skipSuffix ? `Select your ${lower}` : `Select your ${lower} finish`;
+}
+
+function normalizePlaceholder(value: string): string {
+  return value.trim().toLowerCase() === "select your size" ? "Your Sofa Size" : value;
 }
 
 export function getBasePlaceholder(p: VariantPlaceholderInput): string {
@@ -52,7 +57,7 @@ export function getBasePlaceholder(p: VariantPlaceholderInput): string {
   if (axis) return placeholderFromAxisLabel(axis);
 
   const override = clean(p.variant_placeholder);
-  if (override) return override;
+  if (override) return normalizePlaceholder(override);
 
   return DEFAULT_BASE_PLACEHOLDER;
 }
@@ -62,7 +67,7 @@ export function getTopPlaceholder(p: VariantPlaceholderInput): string {
   if (axis) return placeholderFromAxisLabel(axis);
 
   const override = clean(p.variant_placeholder);
-  if (override) return override;
+  if (override) return normalizePlaceholder(override);
 
   return DEFAULT_TOP_PLACEHOLDER;
 }
@@ -70,5 +75,6 @@ export function getTopPlaceholder(p: VariantPlaceholderInput): string {
 
 /** Default placeholder for non-dual-axis material/size dropdowns. */
 export function getMaterialPlaceholder(p: VariantPlaceholderInput): string {
-  return clean(p.variant_placeholder) || DEFAULT_MATERIAL_PLACEHOLDER;
+  const override = clean(p.variant_placeholder);
+  return override ? normalizePlaceholder(override) : DEFAULT_MATERIAL_PLACEHOLDER;
 }
