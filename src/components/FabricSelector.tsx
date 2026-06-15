@@ -176,8 +176,29 @@ export default function FabricSelector({ pickId, className, productTitle, onUpho
       setSelected(f.id);
       // Only fabric/leather drives the upholstery price tier. Wood finishes
       // are decorative and don't change the variant matrix on this product.
-      if (isFabricGroup) onUpholsteryTierChange?.(f.price_tier_label ?? null);
+      if (isFabricGroup) {
+        onUpholsteryTierChange?.(f.price_tier_label ?? null);
+        // Emit pricing details so the product page can add the per-LM upcharge
+        // to the displayed total. COM/COL tiles have no per-LM price.
+        if (isCom || isCol) {
+          onFabricChange?.(null);
+        } else {
+          onFabricChange?.({
+            id: f.id,
+            name: f.name,
+            tier: f.tier ?? null,
+            price_per_lm_cents: f.price_per_lm_cents ?? null,
+            currency: f.currency || "EUR",
+          });
+        }
+      }
     };
+    const tierCaption = isFabricGroup && !isCom && !isCol && (f.tier || f.price_per_lm_cents)
+      ? [
+          f.tier ? `CAT ${f.tier}` : null,
+          f.price_per_lm_cents ? `€${(f.price_per_lm_cents / 100).toLocaleString()}/LM` : null,
+        ].filter(Boolean).join(" · ")
+      : null;
     return (
       <div key={f.id} className="flex flex-col gap-2">
         <button
@@ -217,6 +238,11 @@ export default function FabricSelector({ pickId, className, productTitle, onUpho
         <p className="font-body text-[12px] leading-snug text-foreground/85">
           {f.name}
         </p>
+        {tierCaption && (
+          <p className="font-body text-[10px] tracking-wider uppercase text-muted-foreground -mt-1">
+            {tierCaption}
+          </p>
+        )}
       </div>
     );
   };
