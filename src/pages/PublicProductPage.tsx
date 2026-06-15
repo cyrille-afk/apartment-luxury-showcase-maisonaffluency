@@ -1100,26 +1100,16 @@ const PublicProductPage: React.FC = () => {
                 <h2>About the {product.title}</h2>
                 <p>{product.description}</p>
               </div>
-              <p className="font-body text-sm text-muted-foreground">
-                <Link
-                  to={`/designers/${designer.slug}`}
-                  onClick={() => rememberProductBackRef(designer.slug, location.pathname + location.search)}
-                  className="underline underline-offset-2 hover:text-foreground transition-colors"
-                >
-                  More by {designerDisplay}
-                </Link>
-                {product.category && (
-                  <>
-                    {" · "}
-                    <Link
-                      to={categoryUrl(product.category, product.subcategory)}
-                      className="underline underline-offset-2 hover:text-foreground transition-colors"
-                    >
-                      Explore {product.subcategory || product.category}
-                    </Link>
-                  </>
-                )}
-              </p>
+              {product.category && (
+                <p className="font-body text-sm text-muted-foreground">
+                  <Link
+                    to={categoryUrl(product.category, product.subcategory)}
+                    className="underline underline-offset-2 hover:text-foreground transition-colors"
+                  >
+                    Explore {product.subcategory || product.category}
+                  </Link>
+                </p>
+              )}
             </section>
           )}
 
