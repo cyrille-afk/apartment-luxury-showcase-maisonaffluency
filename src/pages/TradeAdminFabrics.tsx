@@ -63,7 +63,51 @@ interface ProductFabric {
   fabric_id: string;
   sort_order: number;
   price_tier_label: string | null;
+  image_indices: number[] | null;
 }
+
+/**
+ * Parse a user-typed image range like "1-4, 6, 8-9" into a sorted, unique
+ * array of 1-based image indices. Returns null when the input is empty or
+ * has no valid indices (treated as "no mapping").
+ */
+const parseImageRange = (raw: string): number[] | null => {
+  if (!raw || !raw.trim()) return null;
+  const out = new Set<number>();
+  raw.split(/[,;]/).forEach((part) => {
+    const p = part.trim();
+    if (!p) return;
+    const m = p.match(/^(\d+)\s*-\s*(\d+)$/);
+    if (m) {
+      const a = parseInt(m[1], 10);
+      const b = parseInt(m[2], 10);
+      const [lo, hi] = a <= b ? [a, b] : [b, a];
+      for (let i = lo; i <= hi; i++) if (i > 0) out.add(i);
+    } else if (/^\d+$/.test(p)) {
+      const n = parseInt(p, 10);
+      if (n > 0) out.add(n);
+    }
+  });
+  const arr = Array.from(out).sort((a, b) => a - b);
+  return arr.length > 0 ? arr : null;
+};
+
+/** Serialize an int[] back into a compact "1-4, 6" string for display. */
+const formatImageRange = (arr: number[] | null | undefined): string => {
+  if (!arr || arr.length === 0) return "";
+  const sorted = [...arr].sort((a, b) => a - b);
+  const parts: string[] = [];
+  let start = sorted[0];
+  let prev = sorted[0];
+  for (let i = 1; i <= sorted.length; i++) {
+    const n = sorted[i];
+    if (n === prev + 1) { prev = n; continue; }
+    parts.push(start === prev ? `${start}` : `${start}-${prev}`);
+    start = n;
+    prev = n;
+  }
+  return parts.join(", ");
+};
 
 const blankDraft = (): Partial<Fabric> => ({
   name: "",
