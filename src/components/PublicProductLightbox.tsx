@@ -343,6 +343,13 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
   }
   const currentImageUrl = finishImageIdx != null ? galleryImages[finishImageIdx] : product.image_url;
   const imageSwappedByFinish = currentImageUrl !== product.image_url;
+  const isUpholsteredProduct = isProductUpholstered({
+    category: product.category,
+    subcategory: product.subcategory,
+    title: product.title,
+    product_name: product.title,
+    is_upholstered: product.is_upholstered,
+  });
 
   /* ── Linked product page URL (only when designer slug resolves) ───── */
   const productPageDesignerSlug = product.designer_slug || linkedDesigner?.slug;
@@ -560,6 +567,8 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
             </div>
 
             <div className="flex flex-col">
+              {isUpholsteredProduct && <FabricSelector pickId={product.id} />}
+
               {product.dimensions && looksLikeDimension(product.dimensions) && (
                 <ExpandableSpec
                   icon={specIcon("📐")}
