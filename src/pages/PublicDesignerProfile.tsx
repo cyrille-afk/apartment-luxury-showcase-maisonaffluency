@@ -522,16 +522,26 @@ const PublicDesignerProfile = () => {
     remainingBlocks.length > 0 &&
     isMediaBlock(remainingBlocks[0]) &&
     !isVideoBlock(remainingBlocks[0]);
-  // Shrink the intro image to "small" so its height matches the single intro
-  // paragraph beside it (avoids large blank space below the text in the
-  // collapsed preview before "View full profile").
-  const ensureSmallMarker = (mediaLine: string): string => {
-    const segs = mediaLine.split(/\s*\|\s*/);
-    const hasSize = segs.slice(1).some((s) => /^small$/i.test(s.trim()) || /^\d{1,3}%$/.test(s.trim()));
-    return hasSize ? mediaLine : `${mediaLine} | small`;
+  // Shrink the intro image to "small" and drop its caption so its height
+  // roughly matches the single intro paragraph beside it (avoids the large
+  // blank space below the text in the collapsed preview before "View full
+  // profile"). The full image with caption still appears when the user
+  // expands the full profile, because we re-inject it into editorialBio.
+  const ensureSmallNoCaption = (mediaLine: string): string => {
+    const segs = mediaLine.split(/\s*\|\s*/).map((s) => s.trim());
+    const url = segs[0];
+    const keep = segs.slice(1).filter((s) =>
+      /^poster:/i.test(s) ||
+      /^(left|right)$/i.test(s) ||
+      /^small$/i.test(s) ||
+      /^\d{1,3}%$/.test(s)
+    );
+    const hasSize = keep.some((s) => /^small$/i.test(s) || /^\d{1,3}%$/.test(s));
+    if (!hasSize) keep.push("small");
+    return [url, ...keep].join(" | ");
   };
   const introEditorialBio = startsWithInlineImage
-    ? [ensureSmallMarker(remainingBlocks[0]), ...heroParagraphs].join("\n\n")
+    ? [ensureSmallNoCaption(remainingBlocks[0]), ...heroParagraphs].join("\n\n")
     : "";
   const editorialBlocks = startsWithInlineImage ? remainingBlocks.slice(1) : remainingBlocks;
   const editorialBio = editorialBlocks.join("\n\n");
