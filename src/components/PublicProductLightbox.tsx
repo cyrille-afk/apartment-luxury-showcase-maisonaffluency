@@ -639,7 +639,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                   onChange={(idx) => setSelectedMaterialIdx(idx < 0 ? null : idx)}
                 />
               )}
-              {isUpholsteredProduct && <FabricSelector pickId={product.id} />}
+              {isUpholsteredProduct && <FabricSelector pickId={product.id} productTitle={product.title} />}
               {(() => {
                 if (isDualAxis) {
                   const topOptions = Array.from(new Set(sv.map((v) => (v.top || "").trim()).filter(Boolean)));
