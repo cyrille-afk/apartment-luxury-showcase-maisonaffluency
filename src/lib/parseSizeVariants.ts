@@ -16,7 +16,10 @@ export interface SizeVariant {
   base?: string;
   top?: string;
   price_cents?: number;
+  /** Optional fabric meters required for this specific size (overrides product-level com_meters). */
+  meters?: number;
 }
+
 
 export interface ParsedSingleAxis {
   size: string;
