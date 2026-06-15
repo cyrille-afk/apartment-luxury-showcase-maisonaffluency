@@ -474,6 +474,7 @@ const App = () => {
                     <Route path="admin/duplicates" element={<TradeAdminDuplicates />} />
                     <Route path="admin/sync-status" element={<TradeAdminSyncStatus />} />
                     <Route path="admin/brand-lead-times" element={<TradeAdminBrandLeadTimes />} />
+                    <Route path="admin/fabrics" element={<TradeAdminFabrics />} />
                     <Route path="admin/tiers" element={<TradeAdminTiers />} />
                     <Route path="admin/cad-assets" element={<TradeAdminCadAssets />} />
                     <Route path="admin/glb-models" element={<TradeAdminGlbModels />} />
