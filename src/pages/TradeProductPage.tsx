@@ -912,8 +912,17 @@ const TradeProductPage: React.FC = () => {
     ? dualSizeOptions.map((s, i) => (variantsList.some((v: any) => matchesDual(v, selectedBase, selectedTop, s)) ? -1 : i)).filter((i) => i >= 0)
     : [];
   const axisLabeledSize = (label?: string | null) => (label || "").trim().toLowerCase() === "size";
-  const baseAxisIsDim = (baseOptions.length > 0 && baseOptions.every(looksLikeDimension)) || axisLabeledSize((product as any).base_axis_label);
-  const topAxisIsDim = (topOptions.length > 0 && topOptions.every(looksLikeDimension)) || axisLabeledSize((product as any).top_axis_label);
+  // If an explicit axis label is provided, trust it. Only auto-detect from
+  // option strings when no label was set — otherwise things like
+  // "ECART fabric (6 m)" get misread as dimensions.
+  const baseAxisLabelRaw = ((product as any).base_axis_label || "").trim();
+  const topAxisLabelRaw = ((product as any).top_axis_label || "").trim();
+  const baseAxisIsDim = baseAxisLabelRaw
+    ? axisLabeledSize(baseAxisLabelRaw)
+    : (baseOptions.length > 0 && baseOptions.every(looksLikeDimension));
+  const topAxisIsDim = topAxisLabelRaw
+    ? axisLabeledSize(topAxisLabelRaw)
+    : (topOptions.length > 0 && topOptions.every(looksLikeDimension));
 
   const activeVariant = isDualAxis
     ? dualVariant
@@ -1087,6 +1096,10 @@ const TradeProductPage: React.FC = () => {
                   />
                 );
               })()}
+              {/* Dual-axis with fixed (non-variant) dimensions: render dims at the top */}
+              {!isRugSqmActive && isDualAxis && !baseAxisIsDim && !topAxisIsDim && !hasDualSize && product.dimensions && looksLikeDimension(product.dimensions) && (
+                <ExpandableSpec icon={specIcon("📐")} text={withImperialPerLine(product.dimensions)} />
+              )}
               {/* Single-axis split: dedicated size dropdown driven by unique sizes — shown FIRST */}
               {!isRugSqmActive && !isDualAxis && hasSingleAxisSplit && (
                 <ExpandableSpec
@@ -1438,7 +1451,7 @@ const TradeProductPage: React.FC = () => {
 
               {(() => {
                 const handcrafted = formatHandcrafted(product.origin, product.lead_time);
-                const showDims = !isRugSqmActive && product.dimensions && isDualAxis && !hasDualSize && looksLikeDimension(product.dimensions);
+                const showDims = !isRugSqmActive && product.dimensions && isDualAxis && !hasDualSize && (baseAxisIsDim || topAxisIsDim) && looksLikeDimension(product.dimensions);
                 if (!showDims && !handcrafted) return null;
                 const dimLines = showDims
                   ? withImperialPerLine(product.dimensions!).split("\n").map((l) => l.trim()).filter(Boolean)
