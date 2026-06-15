@@ -73,7 +73,7 @@ serve(async (req: Request) => {
     if (error) {
       console.error("Query error:", error);
       return new Response(
-        JSON.stringify({ error: error.message }),
+        JSON.stringify({ error: "An unexpected error occurred" }),
         { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } }
       );
     }
