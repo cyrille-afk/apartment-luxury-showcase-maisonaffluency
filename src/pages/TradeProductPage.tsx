@@ -906,6 +906,9 @@ const TradeProductPage: React.FC = () => {
   const disabledDualSizeIdx = isDualAxis && (selectedBase || selectedTop)
     ? dualSizeOptions.map((s, i) => (variantsList.some((v: any) => matchesDual(v, selectedBase, selectedTop, s)) ? -1 : i)).filter((i) => i >= 0)
     : [];
+  const axisLabeledSize = (label?: string | null) => (label || "").trim().toLowerCase() === "size";
+  const baseAxisIsDim = (baseOptions.length > 0 && baseOptions.every(looksLikeDimension)) || axisLabeledSize((product as any).base_axis_label);
+  const topAxisIsDim = (topOptions.length > 0 && topOptions.every(looksLikeDimension)) || axisLabeledSize((product as any).top_axis_label);
 
   const activeVariant = isDualAxis
     ? dualVariant
@@ -1223,7 +1226,7 @@ const TradeProductPage: React.FC = () => {
               )}
               {!isRugSqmActive && isBaseOnly && (
                 <ExpandableSpec
-                  icon={specIcon("⬗")}
+                  icon={specIcon(baseAxisIsDim ? "📐" : "⬗")}
                   text={withImperialPerLine(baseOptions.join("\n"))}
                   placeholder={getBasePlaceholder(product)}
                   singleValueLabel={formatVariantAxisLabel(product.base_axis_label) || undefined}
@@ -1258,7 +1261,7 @@ const TradeProductPage: React.FC = () => {
               {!isRugSqmActive && isDualAxis && (
                 <>
                   <ExpandableSpec
-                    icon={specIcon("⬗")}
+                    icon={specIcon(baseAxisIsDim ? "📐" : "⬗")}
                     text={withImperialPerLine(baseOptions.join("\n"))}
                     placeholder={getBasePlaceholder(product)}
                       singleValueLabel={formatVariantAxisLabel(product.base_axis_label) || undefined}
@@ -1290,7 +1293,7 @@ const TradeProductPage: React.FC = () => {
                     }
                   />
                   <ExpandableSpec
-                    icon={specIcon("⬗")}
+                    icon={specIcon(topAxisIsDim ? "📐" : "⬗")}
                     text={withImperialPerLine(topOptions.join("\n"))}
                     placeholder={getTopPlaceholder(product)}
                       singleValueLabel={formatVariantAxisLabel(product.top_axis_label) || undefined}
