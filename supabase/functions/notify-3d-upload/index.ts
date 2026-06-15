@@ -11,6 +11,24 @@ const ADMIN_EMAILS = [
   "gregoire@maisonaffluency.com",
 ];
 
+const escapeHtml = (text: string): string =>
+  text.replace(/[&<>"']/g, (char) =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[char] || char)
+  );
+
+const safePlain = (value: unknown, fallback = "") =>
+  String(value ?? fallback).replace(/[\r\n]+/g, " ").trim().slice(0, 200);
+
+const safeHttpsUrl = (value: unknown): string | null => {
+  if (typeof value !== "string") return null;
+  try {
+    const url = new URL(value.trim());
+    return url.protocol === "https:" ? url.toString() : null;
+  } catch {
+    return null;
+  }
+};
+
 serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -55,11 +73,18 @@ serve(async (req: Request) => {
       .eq("id", user.id)
       .single();
 
-    const userName = profile
+    const userName = safePlain(profile
       ? `${profile.first_name} ${profile.last_name}`.trim() || profile.email
-      : user.email || "A trade user";
-    const company = profile?.company || "";
-    const ext = fileType?.toUpperCase() || "3D";
+      : "A trade user", "A trade user");
+    const company = safePlain(profile?.company || "");
+    const projectTitle = safePlain(projectName || "");
+    const rawExt = safePlain(fileType, "3D").replace(/[^a-z0-9.+_-]/gi, "").slice(0, 20) || "3D";
+    const ext = rawExt.toUpperCase();
+    const safeUserName = escapeHtml(userName);
+    const safeCompany = escapeHtml(company);
+    const safeProjectTitle = escapeHtml(projectTitle);
+    const safeExt = escapeHtml(ext);
+    const safeFileUrl = safeHttpsUrl(fileUrl);
 
     // Find admin user IDs
     const { data: adminRoles } = await adminClient
@@ -75,7 +100,7 @@ serve(async (req: Request) => {
         user_id: adminId,
         type: "3d_file_upload",
         title: `New ${ext} file uploaded`,
-        message: `${userName}${company ? ` (${company})` : ""} uploaded a ${ext} file${projectName ? ` for project "${projectName}"` : ""}. Please process in 3ds Max.`,
+        message: `${userName}${company ? ` (${company})` : ""} uploaded a ${ext} file${projectTitle ? ` for project "${projectTitle}"` : ""}. Please process in 3ds Max.`,
         link: "/trade/axonometric-requests",
       }));
 
@@ -95,15 +120,15 @@ serve(async (req: Request) => {
             subject: `3D Studio: New ${ext} file uploaded by ${userName}`,
             html: `
                 <div style="font-family: Georgia, serif; max-width: 600px; margin: 0 auto; padding: 32px;">
-                  <h2 style="font-size: 18px; color: #1a1a1a; margin-bottom: 16px;">New ${ext} File Upload</h2>
+                  <h2 style="font-size: 18px; color: #1a1a1a; margin-bottom: 16px;">New ${safeExt} File Upload</h2>
                   <p style="font-size: 14px; color: #555; line-height: 1.6;">
-                    <strong>${userName}</strong>${company ? ` from <strong>${company}</strong>` : ""} has uploaded a <strong>.${fileType}</strong> file
-                    ${projectName ? ` for project <strong>"${projectName}"</strong>` : ""} in the 3D Studio.
+                    <strong>${safeUserName}</strong>${company ? ` from <strong>${safeCompany}</strong>` : ""} has uploaded a <strong>.${safeExt}</strong> file
+                    ${projectTitle ? ` for project <strong>"${safeProjectTitle}"</strong>` : ""} in the 3D Studio.
                   </p>
                   <p style="font-size: 14px; color: #555; line-height: 1.6;">
                     Please download and process this file in 3ds Max, then upload the rendered views back to the platform.
                   </p>
-                  ${fileUrl ? `<p style="font-size: 13px; color: #888; margin-top: 16px;"><a href="${fileUrl}" style="color: #b8860b;">Download file</a></p>` : ""}
+                  ${safeFileUrl ? `<p style="font-size: 13px; color: #888; margin-top: 16px;"><a href="${escapeHtml(safeFileUrl)}" style="color: #b8860b;">Download file</a></p>` : ""}
                   <hr style="border: none; border-top: 1px solid #e5e5e5; margin: 24px 0;" />
                   <p style="font-size: 12px; color: #999;">Maison Affluency · 3D Studio Notification</p>
                 </div>
@@ -125,7 +150,7 @@ serve(async (req: Request) => {
     });
   } catch (err) {
     console.error("notify-3d-upload error:", err);
-    return new Response(JSON.stringify({ error: String(err) }), {
+    return new Response(JSON.stringify({ error: "An unexpected error occurred" }), {
       status: 500,
       headers: { "Content-Type": "application/json", ...corsHeaders },
     });

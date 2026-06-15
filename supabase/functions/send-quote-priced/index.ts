@@ -63,6 +63,13 @@ const handler = async (req: Request): Promise<Response> => {
         headers: { "Content-Type": "application/json", ...corsHeaders },
       });
     }
+    const callerId = (claims.claims as { sub?: string } | undefined)?.sub;
+    if (!callerId || quote.user_id !== callerId) {
+      return new Response(JSON.stringify({ error: "Forbidden" }), {
+        status: 403,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
 
     const { data: requesterProfile } = await adminClient
       .from("profiles")
@@ -194,7 +201,7 @@ const handler = async (req: Request): Promise<Response> => {
     });
   } catch (err: any) {
     console.error("send-quote-priced error:", err);
-    return new Response(JSON.stringify({ error: err.message }), {
+    return new Response(JSON.stringify({ error: "An unexpected error occurred" }), {
       status: 500,
       headers: { "Content-Type": "application/json", ...corsHeaders },
     });
