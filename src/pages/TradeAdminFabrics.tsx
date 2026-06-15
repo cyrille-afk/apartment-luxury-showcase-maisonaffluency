@@ -275,6 +275,9 @@ export default function TradeAdminFabrics() {
       image_url: newRow.image_url?.trim() || null,
       sort_order: newRow.sort_order ?? 0,
       is_active: newRow.is_active ?? true,
+      tier: newRow.tier || null,
+      price_per_lm_cents: newRow.price_per_lm_cents ?? null,
+      currency: newRow.currency || "EUR",
     });
     if (error) {
       toast({ title: "Add failed", description: error.message, variant: "destructive" });
