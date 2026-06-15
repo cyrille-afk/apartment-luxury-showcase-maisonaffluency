@@ -1308,6 +1308,7 @@ const TradeProductPage: React.FC = () => {
                 <FabricSelector
                   pickId={product.id}
                   productTitle={product.title}
+                  includePricing
                   onHasFabricsChange={setHasLinkedFabrics}
                   onFabricChange={setSelectedFabric}
                   onUpholsteryTierChange={(rawTier) => {
