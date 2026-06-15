@@ -192,11 +192,6 @@ export default function TradeStudioSettings() {
       toast({ title: "Could not create studio", description: error?.message, variant: "destructive" });
       return;
     }
-    await supabase.from("studio_members").insert({
-      studio_id: data.id,
-      user_id: user.id,
-      role: "owner",
-    });
     setCreatingStudio(false);
     setNewStudioOpen(false);
     setNewStudioName("");
