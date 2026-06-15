@@ -164,70 +164,84 @@ export default function FabricSelector({ pickId, className, productTitle }: Fabr
     );
   };
 
-  return (
-    <div className={cn("border-t border-border/60", className)}>
+  const [openWood, setOpenWood] = useState(false);
+  const fabricTiles = grouped["Fabric & Leather"] || [];
+  const woodTiles = grouped["Wood"] || [];
+
+  const renderAccordion = (args: {
+    isOpen: boolean;
+    onToggle: () => void;
+    label: string;
+    selectedName: string | null;
+    tiles: Fabric[];
+    emptyNote?: string;
+    glyph: string;
+  }) => (
+    <div className="border-t border-border/60">
       <button
         type="button"
-        onClick={() => setOpen((v) => !v)}
-        aria-expanded={open}
+        onClick={args.onToggle}
+        aria-expanded={args.isOpen}
         className="w-full py-4 flex items-center gap-5 text-left border-b border-border/60"
       >
         <span className="shrink-0">
-          <SpecGlyph symbol="⬗" />
+          <SpecGlyph symbol={args.glyph} />
         </span>
         <span className="font-body text-sm tracking-wide text-muted-foreground flex-1">
-          Select Your Fabric/Leather and Wood Finish
+          {args.label}
         </span>
-        {(selectedFabricItem || selectedWoodItem) && (
+        {args.selectedName && (
           <span className="font-body text-sm text-foreground/85 truncate max-w-[55%] text-right">
-            {[
-              selectedFabricItem?.name,
-              selectedWoodItem?.name,
-            ]
-              .filter(Boolean)
-              .join(" + ")}
+            {args.selectedName}
           </span>
         )}
         <ChevronDown
           className={cn(
             "w-4 h-4 text-muted-foreground transition-transform shrink-0",
-            open && "rotate-180"
+            args.isOpen && "rotate-180"
           )}
           aria-hidden="true"
         />
       </button>
-
-      {open && (
-        <div className="pb-5 pt-4 space-y-6">
-          {sortedGroupKeys.length === 0 ? (
+      {args.isOpen && (
+        <div className="pb-5 pt-4">
+          {args.tiles.length > 0 ? (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4">
-              {renderTile(comTile)}
+              {args.tiles.map(renderTile)}
             </div>
           ) : (
-            <>
-              {sortedGroupKeys.map((key) => (
-                <div key={key}>
-                  <p className="font-body text-[11px] tracking-[0.18em] uppercase text-muted-foreground mb-3">
-                    {key}
-                  </p>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4">
-                    {grouped[key].map(renderTile)}
-                  </div>
-                </div>
-              ))}
-            </>
-          )}
-
-          {fabrics.length === 0 && (
-            <p className="font-body text-[12px] italic text-muted-foreground">
-              Full fabric library coming soon. In the meantime, your atelier
-              can be upholstered in COM (Customer's Own Fabric) — please
-              request samples or pricing through your Maison Affluency
-              concierge.
-            </p>
+            args.emptyNote && (
+              <p className="font-body text-[12px] italic text-muted-foreground">
+                {args.emptyNote}
+              </p>
+            )
           )}
         </div>
       )}
+    </div>
+  );
+
+  return (
+    <div className={className}>
+      {renderAccordion({
+        isOpen: open,
+        onToggle: () => setOpen((v) => !v),
+        label: "Select Your Fabric / Leather",
+        selectedName: selectedFabricItem?.name ?? null,
+        tiles: fabricTiles,
+        glyph: "⬗",
+        emptyNote:
+          "Full fabric library coming soon. In the meantime, your atelier can be upholstered in COM (Customer's Own Fabric) — please request samples or pricing through your Maison Affluency concierge.",
+      })}
+      {woodTiles.length > 0 &&
+        renderAccordion({
+          isOpen: openWood,
+          onToggle: () => setOpenWood((v) => !v),
+          label: "Select Your Wood Finish",
+          selectedName: selectedWoodItem?.name ?? null,
+          tiles: woodTiles,
+          glyph: "✦",
+        })}
 
       {zoomed && (
         <div
