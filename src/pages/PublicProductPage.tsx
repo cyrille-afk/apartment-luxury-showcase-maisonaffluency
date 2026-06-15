@@ -314,8 +314,14 @@ const VariantSelectors: React.FC<{
     ? dualSizeOptions.map((s, i) => (variantsList.some((v: any) => matchesDual(v, selBase, selTop, s)) ? -1 : i)).filter((i) => i >= 0)
     : [];
   const axisLabeledSize = (label?: string | null) => (label || "").trim().toLowerCase() === "size";
-  const baseAxisIsDim = (baseOptions.length > 0 && baseOptions.every(looksLikeDimension)) || axisLabeledSize(product.base_axis_label);
-  const topAxisIsDim = (topOptions.length > 0 && topOptions.every(looksLikeDimension)) || axisLabeledSize(product.top_axis_label);
+  const baseAxisLabelRaw = (product.base_axis_label || "").trim();
+  const topAxisLabelRaw = (product.top_axis_label || "").trim();
+  const baseAxisIsDim = baseAxisLabelRaw
+    ? axisLabeledSize(baseAxisLabelRaw)
+    : (baseOptions.length > 0 && baseOptions.every(looksLikeDimension));
+  const topAxisIsDim = topAxisLabelRaw
+    ? axisLabeledSize(topAxisLabelRaw)
+    : (topOptions.length > 0 && topOptions.every(looksLikeDimension));
 
   // Per-square-metre rug picker short-circuit: when the product is a rug and
   // its size_variants encode parseable dimensions (e.g. "300 × 400 cm"), show
