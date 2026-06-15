@@ -916,6 +916,7 @@ const TradeProductPage: React.FC = () => {
     : hasSingleAxisSplit
       ? singleAxisActive
       : (hasVariants && selectedVariantIdx != null ? sizeVariants![selectedVariantIdx] : null);
+  const isUpholsteredProduct = isProductUpholstered(product as any);
 
   // When the product has variants but the user hasn't picked one yet, fall back
   // to the cheapest *priced* variant so we can show "From €X" instead of "Price on request".
@@ -1063,6 +1064,10 @@ const TradeProductPage: React.FC = () => {
 
             {/* Materials & dimensions */}
             <div className="flex flex-col gap-2">
+              {isUpholsteredProduct && (
+                <FabricSelector pickId={product.id} />
+              )}
+
               {(() => {
                 const sqm = (product as any)?.price_per_sqm_cents as number | null | undefined;
                 const isRugSqm = isRugCategory(product.category) && !!sqm && sqm > 0 && (sizeVariants?.length || 0) > 0;
@@ -1337,14 +1342,6 @@ const TradeProductPage: React.FC = () => {
                   emphasized
                 />
               )}
-
-              {isProductUpholstered(product as any) && (
-                <FabricSelector pickId={product.id} />
-              )}
-
-
-
-
 
               {(() => {
                 const handcrafted = formatHandcrafted(product.origin, product.lead_time);
