@@ -439,6 +439,11 @@ const VariantSelectors: React.FC<{
         <ExpandableSpec icon={specIcon("📐")} text={withImperialPerLine(product.dimensions)} />
       )}
 
+      {/* Dual-axis with fixed (non-variant) dimensions: render dims at the top */}
+      {hasVariants && isDualAxis && !baseAxisIsDim && !topAxisIsDim && (dualSizeOptions?.length ?? 0) === 0 && product.dimensions && looksLikeDimension(product.dimensions) && (
+        <ExpandableSpec icon={specIcon("📐")} text={withImperialPerLine(product.dimensions)} />
+      )}
+
       {isBaseOnly && baseAxisIsDim && (
         <ExpandableSpec
           icon={specIcon("📐")}
