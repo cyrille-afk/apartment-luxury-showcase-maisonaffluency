@@ -454,6 +454,40 @@ const VariantSelectors: React.FC<{
         />
       )}
 
+      {isDualAxis && baseAxisIsDim && (
+        <ExpandableSpec
+          icon={specIcon("📐")}
+          text={withImperialPerLine(baseOptions.join("\n"))}
+          placeholder={getBasePlaceholder(product)}
+          singleValueLabel={formatVariantAxisLabel(product.base_axis_label) || undefined}
+          emphasized
+          value={selBase != null ? Math.max(0, baseOptions.indexOf(selBase)) : null}
+          onChange={(idx) => {
+            if (idx < 0) {
+              clearAllDualSelections();
+              return;
+            }
+            const v = baseOptions[idx] ?? null;
+            setSelBase(v);
+            let nextTop = selTop;
+            let nextSize = selDualSize;
+            if (v && nextTop && !variantsList.some((x: any) => matchesDual(x, v, nextTop, nextSize))) { setSelTop(null); nextTop = null; }
+            if (v && nextSize && !variantsList.some((x: any) => matchesDual(x, v, nextTop, nextSize))) { setSelDualSize(null); nextSize = null; }
+            if (v && !nextTop) {
+              const compatTops = topOptions.filter((t) => variantsList.some((x: any) => matchesDual(x, v, t, nextSize)));
+              if (compatTops.length === 1) { setSelTop(compatTops[0]); nextTop = compatTops[0]; }
+            }
+            onMaterialChange?.(v, { base: v, top: nextTop, size: nextSize });
+          }}
+          disabledIndices={disabledBaseIdx}
+          helperText={
+            disabledBaseIdx.length > 0 && (selTop || selDualSize)
+              ? `Some ${(getBasePlaceholder(product) || "base").toLowerCase().replace(/^select your /, "")} options aren't available with the current selection — greyed out.`
+              : undefined
+          }
+        />
+      )}
+
       {isProductUpholstered(product) && (
         <FabricSelector
           pickId={product.id}
@@ -491,37 +525,39 @@ const VariantSelectors: React.FC<{
       {/* Material / finish dropdown(s) */}
       {isDualAxis ? (
         <>
-          <ExpandableSpec
-            icon={specIcon(baseAxisIsDim ? "📐" : "⬗")}
-            text={withImperialPerLine(baseOptions.join("\n"))}
-            placeholder={getBasePlaceholder(product)}
-            singleValueLabel={formatVariantAxisLabel(product.base_axis_label) || undefined}
-            emphasized
-            value={selBase != null ? Math.max(0, baseOptions.indexOf(selBase)) : null}
-            onChange={(idx) => {
-              if (idx < 0) {
-                clearAllDualSelections();
-                return;
+          {!baseAxisIsDim && (
+            <ExpandableSpec
+              icon={specIcon("⬗")}
+              text={withImperialPerLine(baseOptions.join("\n"))}
+              placeholder={getBasePlaceholder(product)}
+              singleValueLabel={formatVariantAxisLabel(product.base_axis_label) || undefined}
+              emphasized
+              value={selBase != null ? Math.max(0, baseOptions.indexOf(selBase)) : null}
+              onChange={(idx) => {
+                if (idx < 0) {
+                  clearAllDualSelections();
+                  return;
+                }
+                const v = baseOptions[idx] ?? null;
+                setSelBase(v);
+                let nextTop = selTop;
+                let nextSize = selDualSize;
+                if (v && nextTop && !variantsList.some((x: any) => matchesDual(x, v, nextTop, nextSize))) { setSelTop(null); nextTop = null; }
+                if (v && nextSize && !variantsList.some((x: any) => matchesDual(x, v, nextTop, nextSize))) { setSelDualSize(null); nextSize = null; }
+                if (v && !nextTop) {
+                  const compatTops = topOptions.filter((t) => variantsList.some((x: any) => matchesDual(x, v, t, nextSize)));
+                  if (compatTops.length === 1) { setSelTop(compatTops[0]); nextTop = compatTops[0]; }
+                }
+                onMaterialChange?.(v, { base: v, top: nextTop, size: nextSize });
+              }}
+              disabledIndices={disabledBaseIdx}
+              helperText={
+                disabledBaseIdx.length > 0 && (selTop || selDualSize)
+                  ? `Some ${(getBasePlaceholder(product) || "base").toLowerCase().replace(/^select your /, "")} options aren't available with the current selection — greyed out.`
+                  : undefined
               }
-              const v = baseOptions[idx] ?? null;
-              setSelBase(v);
-              let nextTop = selTop;
-              let nextSize = selDualSize;
-              if (v && nextTop && !variantsList.some((x: any) => matchesDual(x, v, nextTop, nextSize))) { setSelTop(null); nextTop = null; }
-              if (v && nextSize && !variantsList.some((x: any) => matchesDual(x, v, nextTop, nextSize))) { setSelDualSize(null); nextSize = null; }
-              if (v && !nextTop) {
-                const compatTops = topOptions.filter((t) => variantsList.some((x: any) => matchesDual(x, v, t, nextSize)));
-                if (compatTops.length === 1) { setSelTop(compatTops[0]); nextTop = compatTops[0]; }
-              }
-              onMaterialChange?.(v, { base: v, top: nextTop, size: nextSize });
-            }}
-            disabledIndices={disabledBaseIdx}
-            helperText={
-              disabledBaseIdx.length > 0 && (selTop || selDualSize)
-                ? `Some ${(getBasePlaceholder(product) || "base").toLowerCase().replace(/^select your /, "")} options aren't available with the current selection — greyed out.`
-                : undefined
-            }
-          />
+            />
+          )}
           {!(hasLinkedFabrics && !topAxisIsDim) && (
           <ExpandableSpec
             icon={specIcon(topAxisIsDim ? "📐" : "⬗")}
