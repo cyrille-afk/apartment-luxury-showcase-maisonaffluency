@@ -135,6 +135,7 @@ export default function FabricSelector({ pickId, className, productTitle, onUpho
         }));
       setFabrics(list);
       onHasFabricsChange?.(list.some(isFabricCategory));
+      onWoodFinishesAvailable?.(list.filter((f) => !isFabricCategory(f)).map((f) => f.name));
     })();
     return () => {
       cancelled = true;
