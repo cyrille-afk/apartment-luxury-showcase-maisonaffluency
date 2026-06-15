@@ -18,6 +18,8 @@ interface Fabric {
   tier?: string | null;
   /** Currency of price_per_lm_cents. */
   currency?: string | null;
+  /** 1-based gallery image indices that depict this swatch on the linked product. */
+  image_indices?: number[] | null;
 }
 
 export interface SelectedFabricInfo {
@@ -64,6 +66,12 @@ interface FabricSelectorProps {
   onWoodFinishesAvailable?: (names: string[]) => void;
   /** Trade-only: include fabric price/tier fields for quote upcharge math. */
   includePricing?: boolean;
+  /**
+   * Fires when the user picks any swatch (fabric, leather, or wood) with
+   * mapped image indices. Receives the 1-based gallery indices the product
+   * page should jump the hero gallery to. Null clears the override.
+   */
+  onSwatchImagesChange?: (imageIndices: number[] | null) => void;
 }
 
 const normalizeFabricCategory = (category: string | null | undefined) => {
@@ -80,7 +88,7 @@ const isFabricCategory = (fabric: Fabric) => normalizeFabricCategory(fabric.cate
  * (Trade + Public). Tiles are grouped by category (Upholstery, Wood, …)
  * with a COM ("Customer's Own Material") tile always offered.
  */
-export default function FabricSelector({ pickId, className, productTitle, onUpholsteryTierChange, onFabricChange, onHasFabricsChange, onWoodFinishChange, onWoodFinishesAvailable, includePricing = false }: FabricSelectorProps) {
+export default function FabricSelector({ pickId, className, productTitle, onUpholsteryTierChange, onFabricChange, onHasFabricsChange, onWoodFinishChange, onWoodFinishesAvailable, includePricing = false, onSwatchImagesChange }: FabricSelectorProps) {
 
   const [open, setOpen] = useState(false);
   const [fabrics, setFabrics] = useState<Fabric[]>([]);
@@ -99,19 +107,19 @@ export default function FabricSelector({ pickId, className, productTitle, onUpho
       const query = includePricing
         ? (supabase as any)
             .from("product_fabrics")
-            .select("sort_order, price_tier_label, fabric:fabrics(id, name, image_url, category, supplier, is_active, price_per_lm_cents, tier, currency)")
+            .select("sort_order, price_tier_label, image_indices, fabric:fabrics(id, name, image_url, category, supplier, is_active, price_per_lm_cents, tier, currency)")
             .eq("pick_id", pickId)
             .order("sort_order", { ascending: true })
         : (supabase as any)
             .from("product_fabric_swatches_public")
-            .select("sort_order, price_tier_label, fabric_id, name, image_url, category, supplier, is_active")
+            .select("sort_order, price_tier_label, image_indices, fabric_id, name, image_url, category, supplier, is_active")
             .eq("pick_id", pickId)
             .order("sort_order", { ascending: true });
       const { data, error } = await query;
       if (cancelled || error) return;
       const list: Fabric[] = (data || [])
         .map((row: any) => includePricing
-          ? row.fabric && { ...row.fabric, price_tier_label: row.price_tier_label ?? null }
+          ? row.fabric && { ...row.fabric, price_tier_label: row.price_tier_label ?? null, image_indices: row.image_indices ?? null }
           : {
               id: row.fabric_id,
               name: row.name,
@@ -120,6 +128,7 @@ export default function FabricSelector({ pickId, className, productTitle, onUpho
               supplier: row.supplier,
               is_active: row.is_active,
               price_tier_label: row.price_tier_label ?? null,
+              image_indices: row.image_indices ?? null,
             })
         .filter((f: any) => f && f.is_active !== false)
         .map((f: any) => ({
@@ -132,6 +141,7 @@ export default function FabricSelector({ pickId, className, productTitle, onUpho
           price_per_lm_cents: f.price_per_lm_cents ?? null,
           tier: f.tier ?? null,
           currency: f.currency ?? "EUR",
+          image_indices: Array.isArray(f.image_indices) ? f.image_indices : null,
         }));
       setFabrics(list);
       onHasFabricsChange?.(list.some(isFabricCategory));
@@ -202,6 +212,9 @@ export default function FabricSelector({ pickId, className, productTitle, onUpho
     const setSelected = isFabricGroup ? setSelectedFabricId : setSelectedWoodId;
     const handlePick = () => {
       setSelected(f.id);
+      // Notify product page of mapped gallery images, regardless of group.
+      const indices = Array.isArray(f.image_indices) && f.image_indices.length > 0 ? f.image_indices : null;
+      onSwatchImagesChange?.(indices);
       // Only fabric/leather drives the upholstery price tier. Wood finishes
       // are decorative and don't change the variant matrix on this product.
       if (isFabricGroup) {
@@ -386,6 +399,8 @@ export default function FabricSelector({ pickId, className, productTitle, onUpho
                   type="button"
                   onClick={() => {
                     const isFabric = isFabricCategory(zoomed);
+                    const indices = Array.isArray(zoomed.image_indices) && zoomed.image_indices.length > 0 ? zoomed.image_indices : null;
+                    onSwatchImagesChange?.(indices);
                     if (isFabric) {
                       setSelectedFabricId(zoomed.id);
                       onUpholsteryTierChange?.(zoomed.price_tier_label ?? null);

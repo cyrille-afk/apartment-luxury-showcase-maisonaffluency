@@ -181,7 +181,8 @@ const VariantSelectors: React.FC<{
   onMaterialChange?: (label: string | null, opts?: { base?: string | null; top?: string | null; size?: string | null }) => void;
   galleryActiveIndex?: number;
   finishMap?: Record<string, number> | null;
-}> = ({ product, onMaterialChange, galleryActiveIndex, finishMap }) => {
+  onSwatchImagesChange?: (imageIndices: number[] | null) => void;
+}> = ({ product, onMaterialChange, galleryActiveIndex, finishMap, onSwatchImagesChange }) => {
   const axes = computeVariantAxes(product.size_variants);
   const {
     isDualAxis,
@@ -512,6 +513,7 @@ const VariantSelectors: React.FC<{
           pickId={product.id}
           productTitle={product.title}
           onHasFabricsChange={setHasLinkedFabrics}
+          onSwatchImagesChange={onSwatchImagesChange}
           onUpholsteryTierChange={(rawTier) => {
             if (!rawTier) return;
             // Match a top option whose value starts with the raw tier
@@ -1065,7 +1067,13 @@ const PublicProductPage: React.FC = () => {
                   onMaterialChange={handleMaterialChange}
                   galleryActiveIndex={galleryActiveIndex}
                   finishMap={productFinishMap}
+                  onSwatchImagesChange={(indices) => {
+                    if (!indices || indices.length === 0) return;
+                    setGalleryActiveIndex(Math.max(0, indices[0] - 1));
+                    setGalleryJumpNonce((n) => n + 1);
+                  }}
                 />
+
 
                 {(() => {
                   const handcrafted = formatHandcrafted(product.origin, product.lead_time);

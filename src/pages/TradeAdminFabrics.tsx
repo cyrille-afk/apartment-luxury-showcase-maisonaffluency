@@ -63,7 +63,51 @@ interface ProductFabric {
   fabric_id: string;
   sort_order: number;
   price_tier_label: string | null;
+  image_indices: number[] | null;
 }
+
+/**
+ * Parse a user-typed image range like "1-4, 6, 8-9" into a sorted, unique
+ * array of 1-based image indices. Returns null when the input is empty or
+ * has no valid indices (treated as "no mapping").
+ */
+const parseImageRange = (raw: string): number[] | null => {
+  if (!raw || !raw.trim()) return null;
+  const out = new Set<number>();
+  raw.split(/[,;]/).forEach((part) => {
+    const p = part.trim();
+    if (!p) return;
+    const m = p.match(/^(\d+)\s*-\s*(\d+)$/);
+    if (m) {
+      const a = parseInt(m[1], 10);
+      const b = parseInt(m[2], 10);
+      const [lo, hi] = a <= b ? [a, b] : [b, a];
+      for (let i = lo; i <= hi; i++) if (i > 0) out.add(i);
+    } else if (/^\d+$/.test(p)) {
+      const n = parseInt(p, 10);
+      if (n > 0) out.add(n);
+    }
+  });
+  const arr = Array.from(out).sort((a, b) => a - b);
+  return arr.length > 0 ? arr : null;
+};
+
+/** Serialize an int[] back into a compact "1-4, 6" string for display. */
+const formatImageRange = (arr: number[] | null | undefined): string => {
+  if (!arr || arr.length === 0) return "";
+  const sorted = [...arr].sort((a, b) => a - b);
+  const parts: string[] = [];
+  let start = sorted[0];
+  let prev = sorted[0];
+  for (let i = 1; i <= sorted.length; i++) {
+    const n = sorted[i];
+    if (n === prev + 1) { prev = n; continue; }
+    parts.push(start === prev ? `${start}` : `${start}-${prev}`);
+    start = n;
+    prev = n;
+  }
+  return parts.join(", ");
+};
 
 const blankDraft = (): Partial<Fabric> => ({
   name: "",
@@ -338,6 +382,19 @@ export default function TradeAdminFabrics() {
     const { error } = await supabase
       .from("product_fabrics")
       .update({ price_tier_label: label.trim() || null })
+      .eq("id", linkId);
+    if (error) {
+      toast({ title: "Save failed", description: error.message, variant: "destructive" });
+      return;
+    }
+    qc.invalidateQueries({ queryKey: ["admin-fabrics-links"] });
+  };
+
+  const setPickLinkImageRange = async (linkId: string, raw: string) => {
+    const indices = parseImageRange(raw);
+    const { error } = await (supabase as any)
+      .from("product_fabrics")
+      .update({ image_indices: indices })
       .eq("id", linkId);
     if (error) {
       toast({ title: "Save failed", description: error.message, variant: "destructive" });
@@ -770,6 +827,25 @@ export default function TradeAdminFabrics() {
                                 {tops.map((t) => <option key={t} value={t} />)}
                               </datalist>
                             )}
+                          </div>
+                        )}
+                        {linked && link && (
+                          <div className="mt-2 flex items-center gap-2">
+                            <label className="text-[10px] uppercase tracking-wider text-muted-foreground shrink-0">
+                              Image range
+                            </label>
+                            <input
+                              type="text"
+                              defaultValue={formatImageRange(link.image_indices)}
+                              placeholder="e.g. 1-4 or 1,2,5"
+                              onBlur={(e) => {
+                                const next = e.target.value.trim();
+                                const prev = formatImageRange(link.image_indices);
+                                if (next !== prev) setPickLinkImageRange(link.id, next);
+                              }}
+                              className="flex-1 px-2 py-1 text-xs rounded border border-border bg-background"
+                              title="1-based gallery image indices that depict this swatch on the product. Leave empty to skip."
+                            />
                           </div>
                         )}
                       </li>
