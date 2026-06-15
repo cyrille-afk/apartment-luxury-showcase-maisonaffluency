@@ -1001,12 +1001,16 @@ const TradeProductPage: React.FC = () => {
             </>
           )}
         </div>
-        {upcharge > 0 && selectedFabric && (
+        {selectedFabric && (
           <span className="font-body text-[11px] text-muted-foreground">
             Includes {selectedFabric.name}
             {selectedFabric.tier ? ` (CAT ${selectedFabric.tier})` : ""}
-            {" — "}
-            {formatPriceConverted(selectedFabric.price_per_lm_cents || 0, selectedFabric.currency, displayCurrency, fxRates)}/lm × {fabricMeters} m
+            {upcharge > 0 && (
+              <>
+                {" — "}
+                {formatPriceConverted(selectedFabric.price_per_lm_cents || 0, selectedFabric.currency, displayCurrency, fxRates)}/lm × {fabricMeters} m
+              </>
+            )}
           </span>
         )}
       </div>
