@@ -347,7 +347,7 @@ const VariantSelectors: React.FC<{
           text={withImperialPerLine(dualSizeOptions.join("\n"))}
           secondaryText={null}
           emphasized
-          placeholder="Select your size"
+          placeholder="Select Your Size"
           value={selDualSize != null ? Math.max(0, dualSizeOptions.indexOf(selDualSize)) : null}
           onChange={(idx) => {
             if (idx < 0) {
@@ -378,7 +378,7 @@ const VariantSelectors: React.FC<{
           text={withImperialPerLine(singleSizeOptions.join("\n"))}
           secondaryText={null}
           emphasized
-          placeholder="Select your size"
+          placeholder="Select Your Size"
           value={selSize != null ? Math.max(0, singleSizeOptions.indexOf(selSize)) : null}
           onChange={(idx) => {
             const s = singleSizeOptions[idx] ?? null;
@@ -407,7 +407,7 @@ const VariantSelectors: React.FC<{
             icon={specIcon("📐")}
             text={withImperialPerLine(labels.join("\n"))}
             emphasized
-            placeholder="Select your size"
+            placeholder="Select Your Size"
             value={selSize != null ? Math.max(0, labels.indexOf(selSize)) : null}
             onChange={(idx) => {
               const s = labels[idx] ?? null;

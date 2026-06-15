@@ -52,12 +52,27 @@ const toImperialLine = (line: string): string | null => {
     .split(/(\s+[·•]\s+|\s*;\s*)/)
     .map((part) => {
       if (!CM_RE.test(part)) return part;
-      const stripped = stripVariantPrefix(part)
+      // Preserve parenthetical suffixes verbatim (e.g. "(2 Seater)") — their
+      // digits are labels, not dimensions, and must not be cm→in converted.
+      const parens: string[] = [];
+      const masked = part.replace(/\([^)]*\)/g, (m) => {
+        parens.push(m);
+        return `\u0000${parens.length - 1}\u0000`;
+      });
+      let stripped = stripVariantPrefix(masked)
         .replace(CM_RE_G, "")
         .replace(/\d+(?:[.,]\d+)?/g, cmToInches)
         .replace(/\s+/g, " ")
         .trim();
-      return stripped ? `${stripped} in` : stripped;
+      stripped = stripped.replace(/\u0000(\d+)\u0000/g, (_, i) => ` ${parens[Number(i)]}`).replace(/\s+/g, " ").trim();
+      if (!stripped) return stripped;
+      // Place " in" before any trailing parenthetical label.
+      const tail = stripped.match(/\s*(\([^)]*\)\s*)+$/);
+      if (tail) {
+        const head = stripped.slice(0, stripped.length - tail[0].length).trim();
+        return `${head} in ${tail[0].trim()}`;
+      }
+      return `${stripped} in`;
     })
     .join("")
     .replace(/\s+/g, " ")
