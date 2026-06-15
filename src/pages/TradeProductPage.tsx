@@ -1216,7 +1216,9 @@ const TradeProductPage: React.FC = () => {
                 <FabricSelector
                   pickId={product.id}
                   productTitle={product.title}
+                  onHasFabricsChange={setHasLinkedFabrics}
                   onUpholsteryTierChange={(rawTier) => {
+
                     if (!rawTier) return;
                     const candidates = topOptions.filter(
                       (t) => t === rawTier || t.toLowerCase().startsWith(rawTier.toLowerCase()),
