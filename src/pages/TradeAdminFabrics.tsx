@@ -829,6 +829,25 @@ export default function TradeAdminFabrics() {
                             )}
                           </div>
                         )}
+                        {linked && link && (
+                          <div className="mt-2 flex items-center gap-2">
+                            <label className="text-[10px] uppercase tracking-wider text-muted-foreground shrink-0">
+                              Image range
+                            </label>
+                            <input
+                              type="text"
+                              defaultValue={formatImageRange(link.image_indices)}
+                              placeholder="e.g. 1-4 or 1,2,5"
+                              onBlur={(e) => {
+                                const next = e.target.value.trim();
+                                const prev = formatImageRange(link.image_indices);
+                                if (next !== prev) setPickLinkImageRange(link.id, next);
+                              }}
+                              className="flex-1 px-2 py-1 text-xs rounded border border-border bg-background"
+                              title="1-based gallery image indices that depict this swatch on the product. Leave empty to skip."
+                            />
+                          </div>
+                        )}
                       </li>
                     );
                   })}
