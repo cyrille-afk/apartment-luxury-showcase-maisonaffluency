@@ -377,6 +377,7 @@ function useTradeProductBySlug(
           origin: (product as any).origin || tradeProduct?.origin || null,
           description: (product as any).description || tradeProduct?.description || null,
           size_variants: (product as any).size_variants || null,
+          is_upholstered: (product as any).is_upholstered ?? null,
         },
         designer: {
           id: designer.id,
