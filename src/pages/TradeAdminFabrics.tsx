@@ -8,17 +8,17 @@ import { useState, useMemo } from "react";
 import { useToast } from "@/hooks/use-toast";
 import CloudUpload from "@/components/trade/CloudUpload";
 
-type FabricCategory = "Upholstery" | "Wood" | "Leather" | "Fabrics" | "Stone" | "Metal" | "Other";
+type FabricCategory = "Fabric & Leather" | "Wood" | "Fabrics" | "Stone" | "Metal" | "Other";
 
 const CATEGORIES: FabricCategory[] = [
-  "Upholstery",
+  "Fabric & Leather",
   "Wood",
-  "Leather",
   "Fabrics",
   "Stone",
   "Metal",
   "Other",
 ];
+
 
 interface Fabric {
   id: string;
@@ -46,7 +46,7 @@ interface ProductFabric {
 
 const blankDraft = (): Partial<Fabric> => ({
   name: "",
-  category: "Upholstery",
+  category: "Fabric & Leather",
   supplier: "",
   description: "",
   image_url: "",
@@ -309,7 +309,7 @@ export default function TradeAdminFabrics() {
               />
               <select
                 className="col-span-2 px-2 py-1.5 text-sm rounded border border-border bg-background"
-                value={newRow.category || "Upholstery"}
+                value={newRow.category || "Fabric & Leather"}
                 onChange={(e) => setNewRow((n) => ({ ...n, category: e.target.value }))}
               >
                 {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}

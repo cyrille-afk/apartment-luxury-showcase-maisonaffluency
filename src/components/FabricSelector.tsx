@@ -62,16 +62,19 @@ export default function FabricSelector({ pickId, className, productTitle }: Fabr
   }, [pickId]);
 
   const grouped = fabrics.reduce<Record<string, Fabric[]>>((acc, f) => {
-    const key = (f.category || "Fabrics").trim() || "Fabrics";
+    const raw = (f.category || "Fabrics").trim() || "Fabrics";
+    // Merge legacy "Upholstery" and "Leather" buckets into one group.
+    const key = raw === "Upholstery" || raw === "Leather" ? "Fabric & Leather" : raw;
     (acc[key] ||= []).push(f);
     return acc;
   }, {});
-  const groupOrder = ["Upholstery", "Wood", "Leather", "Fabrics"];
+  const groupOrder = ["Fabric & Leather", "Wood", "Fabrics"];
   const sortedGroupKeys = Object.keys(grouped).sort((a, b) => {
     const ai = groupOrder.indexOf(a);
     const bi = groupOrder.indexOf(b);
     return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi);
   });
+
 
   const comTile: Fabric = {
     id: "__com__",
