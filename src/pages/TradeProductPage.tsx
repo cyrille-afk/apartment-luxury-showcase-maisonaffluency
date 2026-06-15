@@ -380,6 +380,7 @@ function useTradeProductBySlug(
           description: (product as any).description || tradeProduct?.description || null,
           size_variants: (product as any).size_variants || null,
           is_upholstered: (product as any).is_upholstered ?? null,
+          com_meters: (product as any).com_meters ?? null,
         },
         designer: {
           id: designer.id,
