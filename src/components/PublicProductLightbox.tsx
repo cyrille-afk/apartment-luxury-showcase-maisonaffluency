@@ -639,7 +639,14 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                   onChange={(idx) => setSelectedMaterialIdx(idx < 0 ? null : idx)}
                 />
               )}
-              {isUpholsteredProduct && <FabricSelector pickId={product.id} productTitle={product.title} />}
+              {isUpholsteredProduct && (
+                <div className="border-t border-border/60 py-4 flex items-center gap-5">
+                  <span className="shrink-0"><SpecGlyph symbol="⬗" /></span>
+                  <span className="font-body text-sm text-muted-foreground">
+                    Fabric, Leather &amp; Wood Finish — refer to the full product page for details.
+                  </span>
+                </div>
+              )}
               {(() => {
                 if (isDualAxis) {
                   const topOptions = Array.from(new Set(sv.map((v) => (v.top || "").trim()).filter(Boolean)));
