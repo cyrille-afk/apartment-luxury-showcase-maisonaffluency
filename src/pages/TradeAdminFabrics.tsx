@@ -174,6 +174,26 @@ export default function TradeAdminFabrics() {
     return new Set(links.filter((l) => l.fabric_id === linkingId).map((l) => l.pick_id));
   }, [links, linkingId]);
 
+  const linkByPickId = useMemo(() => {
+    const m = new Map<string, ProductFabric>();
+    if (!linkingId) return m;
+    links.filter((l) => l.fabric_id === linkingId).forEach((l) => m.set(l.pick_id, l));
+    return m;
+  }, [links, linkingId]);
+
+  const topOptionsByPickId = useMemo(() => {
+    const m = new Map<string, string[]>();
+    picks.forEach((p) => {
+      const tops = new Set<string>();
+      (p.size_variants || []).forEach((v) => {
+        const t = (v.top || v.label || "").trim();
+        if (t) tops.add(t);
+      });
+      m.set(p.id, Array.from(tops));
+    });
+    return m;
+  }, [picks]);
+
   const filtered = useMemo(() => {
     let rows = fabrics;
     if (categoryFilter) rows = rows.filter((r) => (r.category || "") === categoryFilter);
