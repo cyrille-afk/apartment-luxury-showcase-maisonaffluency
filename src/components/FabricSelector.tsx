@@ -68,7 +68,7 @@ export default function FabricSelector({ pickId, className, productTitle }: Fabr
     (acc[key] ||= []).push(f);
     return acc;
   }, {});
-  const groupOrder = ["Fabric & Leather", "Wood", "Fabrics"];
+  const groupOrder = ["Fabric & Leather", "Wood"];
   const sortedGroupKeys = Object.keys(grouped).sort((a, b) => {
     const ai = groupOrder.indexOf(a);
     const bi = groupOrder.indexOf(b);
