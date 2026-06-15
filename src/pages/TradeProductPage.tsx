@@ -467,6 +467,7 @@ const TradeProductPage: React.FC = () => {
   // the redundant "Select your upholstery finish" dropdown, since the swatch
   // picker already drives the upholstery price tier.
   const [hasLinkedFabrics, setHasLinkedFabrics] = useState(false);
+  const [selectedFabric, setSelectedFabric] = useState<import("@/components/FabricSelector").SelectedFabricInfo | null>(null);
 
 
   useEffect(() => {
