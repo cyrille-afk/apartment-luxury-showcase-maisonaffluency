@@ -34,7 +34,7 @@ interface Fabric {
 interface Pick {
   id: string;
   title: string | null;
-  brand_name: string | null;
+  subtitle: string | null;
 }
 
 interface ProductFabric {
