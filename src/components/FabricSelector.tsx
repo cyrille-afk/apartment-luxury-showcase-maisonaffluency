@@ -320,7 +320,7 @@ export default function FabricSelector({ pickId, className, productTitle, onUpho
         renderAccordion({
           isOpen: openWood,
           onToggle: () => setOpenWood((v) => !v),
-          label: "Select Your Wood Finish",
+          label: "Select the Wood Finish of the Feet",
           selectedName: selectedWoodItem?.name ?? null,
           tiles: woodTiles,
           glyph: "✦",
@@ -410,7 +410,7 @@ export default function FabricSelector({ pickId, className, productTitle, onUpho
                 return (
                   <div className="mt-5 pt-5 border-t border-border/60">
                     <p className="font-body text-[11px] tracking-[0.18em] uppercase text-muted-foreground mb-3">
-                      {zoomedIsFabric ? "Select fabric & leather" : "Select wood finish"}
+                      {zoomedIsFabric ? "Select fabric & leather" : "Select the wood finish of the feet"}
                     </p>
                     <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1">
                       {thumbs.map((f) => {
