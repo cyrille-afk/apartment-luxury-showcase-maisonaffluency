@@ -8,12 +8,11 @@ import { useState, useMemo } from "react";
 import { useToast } from "@/hooks/use-toast";
 import CloudUpload from "@/components/trade/CloudUpload";
 
-type FabricCategory = "Fabric & Leather" | "Wood" | "Fabrics" | "Stone" | "Metal" | "Other";
+type FabricCategory = "Fabric & Leather" | "Wood" | "Stone" | "Metal" | "Other";
 
 const CATEGORIES: FabricCategory[] = [
   "Fabric & Leather",
   "Wood",
-  "Fabrics",
   "Stone",
   "Metal",
   "Other",
