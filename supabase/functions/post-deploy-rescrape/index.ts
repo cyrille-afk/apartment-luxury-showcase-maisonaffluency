@@ -430,7 +430,7 @@ Deno.serve(async (req) => {
       trigger_source: triggerSource,
       forced: force,
       rescraped_count: 0,
-      error: e?.message ?? String(e),
+      error: "internal_error",
     });
     return jsonResp({ error: "An unexpected error occurred" }, 500);
   }
