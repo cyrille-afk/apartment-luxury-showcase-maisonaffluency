@@ -946,6 +946,17 @@ const PublicProductPage: React.FC = () => {
                   finishMap={productFinishMap}
                 />
 
+                {isProductUpholstered({
+                  category: product.category,
+                  subcategory: product.subcategory,
+                  title: product.title,
+                  is_upholstered: product.is_upholstered,
+                }) && (
+                  <FabricSelector productId={product.id} />
+                )}
+
+
+
 
                 {(() => {
                   const handcrafted = formatHandcrafted(product.origin, product.lead_time);
