@@ -101,6 +101,7 @@ export default function FabricSelector({ pickId, className, productTitle, onUpho
     image_url: null,
     category: "Fabric & Leather",
     supplier: null,
+    price_tier_label: "COM fabric",
   };
   const colTile: Fabric = {
     id: "__col__",
@@ -108,6 +109,9 @@ export default function FabricSelector({ pickId, className, productTitle, onUpho
     image_url: null,
     category: "Fabric & Leather",
     supplier: null,
+    // No dedicated COL tier on most pieces — Customer's Own Leather is priced
+    // at the standard Leather tier; the variant matrix already exposes that.
+    price_tier_label: "Leather",
   };
   // Inject COM + COL at the end of the Fabric & Leather group so customers see
   // their "own material" options alongside the curated swatches.
