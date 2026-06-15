@@ -212,6 +212,9 @@ export default function FabricSelector({ pickId, className, productTitle, onUpho
     const setSelected = isFabricGroup ? setSelectedFabricId : setSelectedWoodId;
     const handlePick = () => {
       setSelected(f.id);
+      // Notify product page of mapped gallery images, regardless of group.
+      const indices = Array.isArray(f.image_indices) && f.image_indices.length > 0 ? f.image_indices : null;
+      onSwatchImagesChange?.(indices);
       // Only fabric/leather drives the upholstery price tier. Wood finishes
       // are decorative and don't change the variant matrix on this product.
       if (isFabricGroup) {
