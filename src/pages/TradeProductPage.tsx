@@ -1096,6 +1096,10 @@ const TradeProductPage: React.FC = () => {
                   />
                 );
               })()}
+              {/* Dual-axis with fixed (non-variant) dimensions: render dims at the top */}
+              {!isRugSqmActive && isDualAxis && !baseAxisIsDim && !topAxisIsDim && !hasDualSize && product.dimensions && looksLikeDimension(product.dimensions) && (
+                <ExpandableSpec icon={specIcon("📐")} text={withImperialPerLine(product.dimensions)} />
+              )}
               {/* Single-axis split: dedicated size dropdown driven by unique sizes — shown FIRST */}
               {!isRugSqmActive && !isDualAxis && hasSingleAxisSplit && (
                 <ExpandableSpec
