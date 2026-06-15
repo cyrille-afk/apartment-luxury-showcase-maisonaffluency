@@ -129,6 +129,7 @@ interface ProductRow {
   edition: string | null;
   edition_number: string | null;
   edition_signing: string | null;
+  is_upholstered: boolean | null;
 }
 
 interface TradePricing {
