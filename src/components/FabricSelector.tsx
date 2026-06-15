@@ -70,7 +70,7 @@ const isFabricCategory = (fabric: Fabric) => normalizeFabricCategory(fabric.cate
  * (Trade + Public). Tiles are grouped by category (Upholstery, Wood, …)
  * with a COM ("Customer's Own Material") tile always offered.
  */
-export default function FabricSelector({ pickId, className, productTitle, onUpholsteryTierChange, onHasFabricsChange }: FabricSelectorProps) {
+export default function FabricSelector({ pickId, className, productTitle, onUpholsteryTierChange, onFabricChange, onHasFabricsChange }: FabricSelectorProps) {
 
   const [open, setOpen] = useState(false);
   const [fabrics, setFabrics] = useState<Fabric[]>([]);
@@ -88,7 +88,7 @@ export default function FabricSelector({ pickId, className, productTitle, onUpho
     (async () => {
       const { data, error } = await supabase
         .from("product_fabrics")
-        .select("sort_order, price_tier_label, fabric:fabrics(id, name, image_url, category, supplier, is_active)")
+        .select("sort_order, price_tier_label, fabric:fabrics(id, name, image_url, category, supplier, is_active, price_per_lm_cents, tier, currency)")
         .eq("pick_id", pickId)
         .order("sort_order", { ascending: true });
       if (cancelled || error) return;
@@ -102,6 +102,9 @@ export default function FabricSelector({ pickId, className, productTitle, onUpho
           category: normalizeFabricCategory(f.category),
           supplier: f.supplier,
           price_tier_label: f.price_tier_label ?? null,
+          price_per_lm_cents: f.price_per_lm_cents ?? null,
+          tier: f.tier ?? null,
+          currency: f.currency ?? "EUR",
         }));
       setFabrics(list);
       onHasFabricsChange?.(list.some(isFabricCategory));
