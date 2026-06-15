@@ -66,6 +66,12 @@ interface FabricSelectorProps {
   onWoodFinishesAvailable?: (names: string[]) => void;
   /** Trade-only: include fabric price/tier fields for quote upcharge math. */
   includePricing?: boolean;
+  /**
+   * Fires when the user picks any swatch (fabric, leather, or wood) with
+   * mapped image indices. Receives the 1-based gallery indices the product
+   * page should jump the hero gallery to. Null clears the override.
+   */
+  onSwatchImagesChange?: (imageIndices: number[] | null) => void;
 }
 
 const normalizeFabricCategory = (category: string | null | undefined) => {
