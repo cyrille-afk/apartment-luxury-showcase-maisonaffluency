@@ -18,6 +18,8 @@ interface Fabric {
   tier?: string | null;
   /** Currency of price_per_lm_cents. */
   currency?: string | null;
+  /** 1-based gallery image indices that depict this swatch on the linked product. */
+  image_indices?: number[] | null;
 }
 
 export interface SelectedFabricInfo {
