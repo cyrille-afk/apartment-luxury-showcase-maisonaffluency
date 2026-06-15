@@ -42,6 +42,12 @@ interface FabricSelectorProps {
    */
   onUpholsteryTierChange?: (rawTier: string | null) => void;
   /**
+   * Fires when the user picks a fabric/leather swatch with pricing details
+   * (tier, per-LM price, currency). Used to compute the upholstery upcharge
+   * added on top of the frame variant price.
+   */
+  onFabricChange?: (fabric: SelectedFabricInfo | null) => void;
+  /**
    * Fires after the linked-fabric list is fetched. `true` when this product
    * has one or more real linked fabric/leather swatches (excludes the
    * synthetic COM/COL tiles). Product pages use this to hide the redundant
