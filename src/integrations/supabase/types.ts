@@ -3221,6 +3221,48 @@ export type Database = {
           },
         ]
       }
+      product_fabric_swatches_public: {
+        Row: {
+          category: string | null
+          created_at: string
+          fabric_id: string
+          image_url: string | null
+          is_active: boolean
+          name: string
+          pick_id: string
+          price_tier_label: string | null
+          sort_order: number | null
+          supplier: string | null
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          fabric_id: string
+          image_url?: string | null
+          is_active?: boolean
+          name: string
+          pick_id: string
+          price_tier_label?: string | null
+          sort_order?: number | null
+          supplier?: string | null
+          updated_at?: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          fabric_id?: string
+          image_url?: string | null
+          is_active?: boolean
+          name?: string
+          pick_id?: string
+          price_tier_label?: string | null
+          sort_order?: number | null
+          supplier?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       product_fabrics: {
         Row: {
           created_at: string

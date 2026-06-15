@@ -54,6 +54,8 @@ interface FabricSelectorProps {
    * upholstery-finish dropdown when the swatch picker covers the same axis.
    */
   onHasFabricsChange?: (has: boolean) => void;
+  /** Trade-only: include fabric price/tier fields for quote upcharge math. */
+  includePricing?: boolean;
 }
 
 const normalizeFabricCategory = (category: string | null | undefined) => {
@@ -70,7 +72,7 @@ const isFabricCategory = (fabric: Fabric) => normalizeFabricCategory(fabric.cate
  * (Trade + Public). Tiles are grouped by category (Upholstery, Wood, …)
  * with a COM ("Customer's Own Material") tile always offered.
  */
-export default function FabricSelector({ pickId, className, productTitle, onUpholsteryTierChange, onFabricChange, onHasFabricsChange }: FabricSelectorProps) {
+export default function FabricSelector({ pickId, className, productTitle, onUpholsteryTierChange, onFabricChange, onHasFabricsChange, includePricing = false }: FabricSelectorProps) {
 
   const [open, setOpen] = useState(false);
   const [fabrics, setFabrics] = useState<Fabric[]>([]);
@@ -86,14 +88,31 @@ export default function FabricSelector({ pickId, className, productTitle, onUpho
     }
     let cancelled = false;
     (async () => {
-      const { data, error } = await supabase
-        .from("product_fabrics")
-        .select("sort_order, price_tier_label, fabric:fabrics(id, name, image_url, category, supplier, is_active, price_per_lm_cents, tier, currency)")
-        .eq("pick_id", pickId)
-        .order("sort_order", { ascending: true });
+      const query = includePricing
+        ? (supabase as any)
+            .from("product_fabrics")
+            .select("sort_order, price_tier_label, fabric:fabrics(id, name, image_url, category, supplier, is_active, price_per_lm_cents, tier, currency)")
+            .eq("pick_id", pickId)
+            .order("sort_order", { ascending: true })
+        : (supabase as any)
+            .from("product_fabric_swatches_public")
+            .select("sort_order, price_tier_label, fabric_id, name, image_url, category, supplier, is_active")
+            .eq("pick_id", pickId)
+            .order("sort_order", { ascending: true });
+      const { data, error } = await query;
       if (cancelled || error) return;
       const list: Fabric[] = (data || [])
-        .map((row: any) => row.fabric && { ...row.fabric, price_tier_label: row.price_tier_label ?? null })
+        .map((row: any) => includePricing
+          ? row.fabric && { ...row.fabric, price_tier_label: row.price_tier_label ?? null }
+          : {
+              id: row.fabric_id,
+              name: row.name,
+              image_url: row.image_url,
+              category: row.category,
+              supplier: row.supplier,
+              is_active: row.is_active,
+              price_tier_label: row.price_tier_label ?? null,
+            })
         .filter((f: any) => f && f.is_active !== false)
         .map((f: any) => ({
           id: f.id,
@@ -112,7 +131,7 @@ export default function FabricSelector({ pickId, className, productTitle, onUpho
     return () => {
       cancelled = true;
     };
-  }, [pickId, onHasFabricsChange]);
+    }, [pickId, includePricing, onHasFabricsChange]);
 
 
   const grouped = fabrics.reduce<Record<string, Fabric[]>>((acc, f) => {

@@ -55,7 +55,8 @@ serve(async (req) => {
     .limit(2000);
 
   if (error) {
-    return new Response(JSON.stringify({ error: error.message }), {
+    console.error("security monitor query error:", error);
+    return new Response(JSON.stringify({ error: "An unexpected error occurred" }), {
       status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }

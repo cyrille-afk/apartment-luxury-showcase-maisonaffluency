@@ -71,6 +71,12 @@ const handler = async (req: Request): Promise<Response> => {
         headers: { "Content-Type": "application/json", ...corsHeaders },
       });
     }
+    if (quote.user_id !== user.id) {
+      return new Response(JSON.stringify({ error: "Forbidden" }), {
+        status: 403,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
 
     const quoteNumber = `QU-${quoteId.slice(0, 6).toUpperCase()}`;
     const userName = profile ? `${profile.first_name || ""} ${profile.last_name || ""}`.trim() : user.email;
@@ -209,7 +215,7 @@ const handler = async (req: Request): Promise<Response> => {
     });
   } catch (err) {
     console.error("Error:", err);
-    return new Response(JSON.stringify({ error: err.message }), {
+    return new Response(JSON.stringify({ error: "An unexpected error occurred" }), {
       status: 500,
       headers: { "Content-Type": "application/json", ...corsHeaders },
     });

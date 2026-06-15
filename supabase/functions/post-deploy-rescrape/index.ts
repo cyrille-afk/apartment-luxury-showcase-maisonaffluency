@@ -38,7 +38,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
+    "authorization, x-client-info, apikey, content-type, x-cron-secret",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
@@ -49,6 +49,7 @@ const SNAPSHOT_PUBLIC_URL =
   `${Deno.env.get("SUPABASE_URL")}/storage/v1/object/public/${SNAPSHOT_BUCKET}/${SNAPSHOT_PATH}`;
 const DEFAULT_MAX = 250;
 const FETCH_CONCURRENCY = 16;
+const PUBLIC_MAX = 25;
 
 type Snapshot = { buildId?: string; entries: Record<string, string> };
 
@@ -172,15 +173,15 @@ Deno.serve(async (req) => {
   const mode = typeof body.mode === "string" ? body.mode : "rescrape";
   const force = !!body.force;
   const triggerSource = typeof body.triggerSource === "string" ? body.triggerSource : "unknown";
-  let maxRescrapes = Math.max(1, Math.min(1000, body.maxRescrapes ?? DEFAULT_MAX));
+  let maxRescrapes = Math.max(1, Math.min(DEFAULT_MAX, body.maxRescrapes ?? DEFAULT_MAX));
 
   // ─────────────────────────────────────────────────────────────
   // Auth gate: privileged operations (force=true, inspect, rescrape-one,
-  // or maxRescrapes > 50) require either the CRON_SECRET header or an
+  // or maxRescrapes > PUBLIC_MAX) require either the CRON_SECRET header or an
   // authenticated admin user. Unauthenticated callers (the in-app build
   // watcher) can only trigger a default diff-rescrape with a small cap.
   // ─────────────────────────────────────────────────────────────
-  const PRIVILEGED_CAP = 50;
+  const PRIVILEGED_CAP = PUBLIC_MAX;
   const isPrivileged =
     force ||
     mode === "inspect" ||
@@ -227,7 +228,7 @@ Deno.serve(async (req) => {
     }
   } else {
     // Cap anonymous callers regardless of what they sent.
-    maxRescrapes = Math.min(maxRescrapes, PRIVILEGED_CAP);
+    maxRescrapes = Math.min(maxRescrapes, PUBLIC_MAX);
   }
 
   const supabase = createClient(
@@ -305,7 +306,8 @@ Deno.serve(async (req) => {
           (imageContentType?.includes("image/") ?? false),
       });
     } catch (e: any) {
-      return jsonResp({ error: e?.message ?? String(e) }, 500);
+      console.error("post-deploy-rescrape inspect error", e);
+      return jsonResp({ error: "An unexpected error occurred" }, 500);
     }
   }
 
@@ -335,7 +337,8 @@ Deno.serve(async (req) => {
       });
       return jsonResp({ ok: true, url: fullUrl, result });
     } catch (e: any) {
-      return jsonResp({ error: e?.message ?? String(e) }, 500);
+      console.error("post-deploy-rescrape single rescrape error", e);
+      return jsonResp({ error: "An unexpected error occurred" }, 500);
     }
   }
 
@@ -427,8 +430,8 @@ Deno.serve(async (req) => {
       trigger_source: triggerSource,
       forced: force,
       rescraped_count: 0,
-      error: e?.message ?? String(e),
+      error: "internal_error",
     });
-    return jsonResp({ error: e?.message ?? String(e) }, 500);
+    return jsonResp({ error: "An unexpected error occurred" }, 500);
   }
 });
