@@ -13,6 +13,8 @@ import { useAuthGate } from "@/hooks/useAuthGate";
 import AuthGateDialog from "@/components/AuthGateDialog";
 import ExpandableSpec from "@/components/ExpandableSpec";
 import FavoriteFolderPicker from "@/components/FavoriteFolderPicker";
+import FabricSelector from "@/components/FabricSelector";
+import { isProductUpholstered } from "@/lib/upholstery";
 
 import { getBasePlaceholder, getTopPlaceholder, formatVariantAxisLabel } from "@/lib/variantPlaceholders";
 import { formatDimensionsMultiline, formatImperialDimensions, withImperialPerLine } from "@/lib/formatDimensions";
@@ -61,6 +63,7 @@ export interface PublicLightboxItem {
   variant_image_map?: Record<string, number> | null;
   /** Per-image captions keyed by gallery_images index. */
   gallery_captions?: Record<string, string> | null;
+  is_upholstered?: boolean | null;
 }
 
 interface Props {
@@ -150,11 +153,12 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
       !propProduct.materials_description ||
       !propProduct.origin ||
       !propProduct.lead_time ||
-      !propProduct.dimensions;
+      !propProduct.dimensions ||
+      propProduct.is_upholstered === undefined;
     if (!needsHydration) return;
     supabase
       .from("designer_curator_picks_public" as any)
-      .select("size_variants, variant_placeholder, base_axis_label, top_axis_label, gallery_images, variant_image_map, materials_description, origin, lead_time, dimensions, gallery_captions")
+      .select("size_variants, variant_placeholder, base_axis_label, top_axis_label, gallery_images, variant_image_map, materials_description, origin, lead_time, dimensions, gallery_captions, is_upholstered")
       .eq("id", propProduct.id)
       .maybeSingle()
       .then(({ data }) => {
@@ -179,6 +183,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
       lead_time: propProduct.lead_time ?? variantPayload.lead_time ?? null,
       dimensions: propProduct.dimensions ?? variantPayload.dimensions ?? null,
       gallery_captions: propProduct.gallery_captions ?? variantPayload.gallery_captions ?? null,
+      is_upholstered: propProduct.is_upholstered ?? variantPayload.is_upholstered ?? null,
     };
   }, [propProduct, variantPayload]);
 
