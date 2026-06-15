@@ -61,6 +61,7 @@ export default function FabricSelector({ pickId, className, productTitle, onUpho
   useEffect(() => {
     if (!pickId) {
       setFabrics([]);
+      onHasFabricsChange?.(false);
       return;
     }
     let cancelled = false;
@@ -83,11 +84,13 @@ export default function FabricSelector({ pickId, className, productTitle, onUpho
           price_tier_label: f.price_tier_label ?? null,
         }));
       setFabrics(list);
+      onHasFabricsChange?.(list.some(isFabricCategory));
     })();
     return () => {
       cancelled = true;
     };
-  }, [pickId]);
+  }, [pickId, onHasFabricsChange]);
+
 
   const grouped = fabrics.reduce<Record<string, Fabric[]>>((acc, f) => {
     // Merge legacy/blank fabric buckets into Fabric & Leather; only explicit Wood stays Wood.
