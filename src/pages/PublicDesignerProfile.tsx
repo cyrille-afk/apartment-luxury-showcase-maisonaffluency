@@ -522,12 +522,16 @@ const PublicDesignerProfile = () => {
     remainingBlocks.length > 0 &&
     isMediaBlock(remainingBlocks[0]) &&
     !isVideoBlock(remainingBlocks[0]);
-  const introEditorialBio = startsWithInlineImage
-    ? [remainingBlocks[0], ...heroParagraphs].join("\n\n")
-    : "";
-  const editorialBlocks = startsWithInlineImage ? remainingBlocks.slice(1) : remainingBlocks;
+  // Collapsed preview shows ONLY the hero paragraph(s) — no image. This
+  // eliminates the large blank space that appeared when a tall image sat
+  // beside a short intro paragraph. The first inline image (with its full
+  // caption) is moved into editorialBio so it appears as the first element
+  // once the user clicks "View full profile".
+  const introEditorialBio = "";
+  const editorialBlocks = remainingBlocks;
   const editorialBio = editorialBlocks.join("\n\n");
-  const editorialStartImageIndex = startsWithInlineImage ? 1 : 0;
+  const editorialStartImageIndex = 0;
+  void startsWithInlineImage;
 
   const bioWordCount = (displayBiography || "").replace(/<[^>]+>/g, " ").replace(/https?:\S+/g, "").trim().split(/\s+/).filter(Boolean).length;
   const showThinContentFallback = bioWordCount < 60;

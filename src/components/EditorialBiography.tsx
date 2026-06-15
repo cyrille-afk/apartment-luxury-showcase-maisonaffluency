@@ -675,16 +675,16 @@ function SplitImageBlock({
       transition={transition}
       className="shrink-0 w-full"
     >
-      <div className={`rounded-xl overflow-hidden bg-muted/10 ${isSmall ? "max-w-[240px] mx-auto md:mx-0" : ""}`}>
+      <div className={`rounded-xl overflow-hidden bg-muted/10 ${isSmall ? "max-w-[200px] mx-auto md:mx-0" : ""}`}>
         <img
           src={optimizeImageUrl(url)}
           alt={caption || `${designerName} — editorial`}
-          className={`w-full h-auto object-contain ${isSmall ? "" : "max-h-[420px]"}`}
+          className={`w-full h-auto object-contain ${isSmall ? "max-h-[180px]" : "max-h-[420px]"}`}
           loading="lazy"
         />
       </div>
       {caption && (
-        <figcaption className={`mt-2 font-body text-[13px] tracking-wide text-muted-foreground italic text-center md:text-left ${isSmall ? "max-w-[240px] mx-auto md:mx-0" : ""}`}>
+        <figcaption className={`mt-2 font-body text-[13px] tracking-wide text-muted-foreground italic text-center md:text-left ${isSmall ? "max-w-[200px] mx-auto md:mx-0" : ""}`}>
           {caption}
         </figcaption>
       )}
@@ -711,7 +711,7 @@ function SplitImageBlock({
   const imageWidthClass = isSmall ? "md:w-[22%]" : isPercent ? "" : "md:w-[28%]";
 
   return (
-    <div className={`${index === 0 ? "mt-3 md:mt-4 mb-1 md:mb-2" : "mt-3 md:mt-5 mb-1 md:mb-2"} flex flex-col md:flex-row gap-3 md:gap-6 items-center`}>
+    <div className={`${index === 0 ? "mt-3 md:mt-4 mb-1 md:mb-2" : "mt-3 md:mt-5 mb-1 md:mb-2"} flex flex-col md:flex-row gap-3 md:gap-6 ${isSmall ? "items-start" : "items-center"}`}>
       {/* Mobile: image always first (order-1); Desktop: controlled by imageOnRight */}
       <div
         className={`shrink-0 w-full ${imageWidthClass} order-1 ${imageOnRight ? 'md:order-2' : 'md:order-1'}`}
