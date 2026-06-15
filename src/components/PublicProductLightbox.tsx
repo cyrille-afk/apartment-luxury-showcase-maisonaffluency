@@ -262,6 +262,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
   const galleryImages = (product.gallery_images || []).filter(Boolean);
   const sv = product.size_variants || [];
   const axes = computeVariantAxes(sv);
+  const axisLabeledSize = (label?: string | null) => (label || "").trim().toLowerCase() === "size";
   // True dual-axis only when BOTH base and top are populated. Base-only
   // products (e.g. Atelier Pendhapa "Mangala Coffee Table") behave as
   // single-axis on Base — see src/lib/parseSizeVariants.ts.
@@ -636,7 +637,6 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                   // axis as "Size" — so a multi-value base/top like
                   // "Scala 220 - W 220 x D 135 x H 76.5 cm" / "Scala 300 - …"
                   // still renders with 📐 instead of the default ⬗.
-                  const axisLabeledSize = (label?: string | null) => (label || "").trim().toLowerCase() === "size";
                   const baseIsDim = (baseOptions.length > 0 && baseOptions.every(looksLikeDimension)) || axisLabeledSize(product.base_axis_label);
                   const topIsDim = (topOptions.length > 0 && topOptions.every(looksLikeDimension)) || axisLabeledSize(product.top_axis_label);
 
@@ -676,8 +676,10 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                       }}
                     />
                   );
-                  // Finish/material axis always renders before dimensions axis.
+                  // Dimension axes always render before finish/material axes.
                   const ordered = baseIsDim && !topIsDim
+                    ? [baseNode, topNode]
+                    : topIsDim && !baseIsDim
                     ? [topNode, baseNode]
                     : [baseNode, topNode];
                   return <>{ordered}</>;
@@ -698,9 +700,13 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                       />
                     );
                   }
+                  const baseOnlyIsDim = axes.isBaseOnly && (
+                    (baseOnlyOptions.length > 0 && baseOnlyOptions.every(looksLikeDimension)) ||
+                    axisLabeledSize(product.base_axis_label)
+                  );
                   return (
                     <ExpandableSpec
-                      icon={specIcon("⬗")}
+                      icon={specIcon(baseOnlyIsDim ? "📐" : "⬗")}
                       text={materialOptions.join("\n")}
                       placeholder={hasAnyBase ? getBasePlaceholder(product) : "Select your finish"}
                       singleValueLabel={hasAnyBase ? (formatVariantAxisLabel(product.base_axis_label) || undefined) : undefined}
