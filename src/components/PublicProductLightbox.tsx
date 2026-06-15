@@ -555,6 +555,14 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
             </div>
 
             <div className="flex flex-col">
+              {product.dimensions && looksLikeDimension(product.dimensions) && (
+                <ExpandableSpec
+                  icon={specIcon("📐")}
+                  text={withImperialPerLine(product.dimensions)}
+                  emphasized
+                />
+              )}
+
               {(() => {
                 if (hasSingleAxisSplit && singleSplitSizes.length > 0) {
                   return (
