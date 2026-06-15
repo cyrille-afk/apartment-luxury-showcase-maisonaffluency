@@ -44,6 +44,8 @@ import { useTradeDisplayCurrency } from "@/hooks/useTradeDisplayCurrency";
 import { formatEditionLabel } from "@/lib/editionLabel";
 import PageLoadingSkeleton from "@/components/PageLoadingSkeleton";
 import ExpandableSpec from "@/components/ExpandableSpec";
+import FabricSelector from "@/components/FabricSelector";
+import { isProductUpholstered } from "@/lib/upholstery";
 import Breadcrumbs, { type Crumb } from "@/components/Breadcrumbs";
 import { getBasePlaceholder, getTopPlaceholder, formatVariantAxisLabel } from "@/lib/variantPlaceholders";
 import { formatDimensionsMultiline, formatImperialDimensions, withImperialPerLine } from "@/lib/formatDimensions";
@@ -127,6 +129,7 @@ interface ProductRow {
   edition: string | null;
   edition_number: string | null;
   edition_signing: string | null;
+  is_upholstered: boolean | null;
 }
 
 interface TradePricing {
@@ -190,7 +193,7 @@ function useTradeProductBySlug(
         if (designer) {
           const { data: picks } = await supabase
             .from("designer_curator_picks")
-            .select("id, title, subtitle, image_url, hover_image_url, gallery_images, materials, materials_description, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, trade_price_cents, price_per_sqm_cents, currency, price_prefix, size_variants, variant_placeholder, base_axis_label, top_axis_label, variant_image_map, edition, edition_number, edition_signing, gallery_captions")
+            .select("id, title, subtitle, image_url, hover_image_url, gallery_images, materials, materials_description, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, trade_price_cents, price_per_sqm_cents, currency, price_prefix, size_variants, variant_placeholder, base_axis_label, top_axis_label, variant_image_map, edition, edition_number, edition_signing, gallery_captions, is_upholstered")
             .eq("designer_id", (designer as any).id)
             .order("sort_order", { ascending: true });
           const tradeName = ((tradeProduct as any).product_name || "").trim().toLowerCase();
@@ -225,6 +228,7 @@ function useTradeProductBySlug(
           edition: curatorPick?.edition || null,
           edition_number: curatorPick?.edition_number || null,
           edition_signing: curatorPick?.edition_signing || null,
+          is_upholstered: (curatorPick as any)?.is_upholstered ?? (tradeProduct as any)?.is_upholstered ?? null,
         };
 
         const rawSizeVariants = applyRugPerSqmPricing(
@@ -274,7 +278,7 @@ function useTradeProductBySlug(
 
       const { data: picks } = await supabase
         .from("designer_curator_picks")
-        .select("id, title, subtitle, image_url, hover_image_url, gallery_images, materials, materials_description, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, trade_price_cents, price_per_sqm_cents, currency, price_prefix, size_variants, variant_placeholder, base_axis_label, top_axis_label, variant_image_map, edition, edition_number, edition_signing, gallery_captions")
+        .select("id, title, subtitle, image_url, hover_image_url, gallery_images, materials, materials_description, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, trade_price_cents, price_per_sqm_cents, currency, price_prefix, size_variants, variant_placeholder, base_axis_label, top_axis_label, variant_image_map, edition, edition_number, edition_signing, gallery_captions, is_upholstered")
         .eq("designer_id", designer.id)
         .order("sort_order", { ascending: true });
 
@@ -373,6 +377,7 @@ function useTradeProductBySlug(
           origin: (product as any).origin || tradeProduct?.origin || null,
           description: (product as any).description || tradeProduct?.description || null,
           size_variants: (product as any).size_variants || null,
+          is_upholstered: (product as any).is_upholstered ?? null,
         },
         designer: {
           id: designer.id,
@@ -1332,6 +1337,12 @@ const TradeProductPage: React.FC = () => {
                   emphasized
                 />
               )}
+
+              {isProductUpholstered(product as any) && (
+                <FabricSelector pickId={product.id} />
+              )}
+
+
 
 
 
