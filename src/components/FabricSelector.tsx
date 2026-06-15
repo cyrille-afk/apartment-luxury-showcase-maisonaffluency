@@ -295,8 +295,12 @@ export default function FabricSelector({ pickId, className, productTitle, onUpho
                   type="button"
                   onClick={() => {
                     const isFabric = isFabricCategory(zoomed);
-                    if (isFabric) setSelectedFabricId(zoomed.id);
-                    else setSelectedWoodId(zoomed.id);
+                    if (isFabric) {
+                      setSelectedFabricId(zoomed.id);
+                      onUpholsteryTierChange?.(zoomed.price_tier_label ?? null);
+                    } else {
+                      setSelectedWoodId(zoomed.id);
+                    }
                     setZoomed(null);
                   }}
                   className="px-4 py-2 bg-foreground text-background font-body text-[11px] tracking-[0.18em] uppercase hover:bg-foreground/90 transition"
