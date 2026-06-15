@@ -172,12 +172,69 @@ Deno.serve(async (req) => {
   const mode = typeof body.mode === "string" ? body.mode : "rescrape";
   const force = !!body.force;
   const triggerSource = typeof body.triggerSource === "string" ? body.triggerSource : "unknown";
-  const maxRescrapes = Math.max(1, Math.min(1000, body.maxRescrapes ?? DEFAULT_MAX));
+  let maxRescrapes = Math.max(1, Math.min(1000, body.maxRescrapes ?? DEFAULT_MAX));
+
+  // ─────────────────────────────────────────────────────────────
+  // Auth gate: privileged operations (force=true, inspect, rescrape-one,
+  // or maxRescrapes > 50) require either the CRON_SECRET header or an
+  // authenticated admin user. Unauthenticated callers (the in-app build
+  // watcher) can only trigger a default diff-rescrape with a small cap.
+  // ─────────────────────────────────────────────────────────────
+  const PRIVILEGED_CAP = 50;
+  const isPrivileged =
+    force ||
+    mode === "inspect" ||
+    mode === "rescrape-one" ||
+    (body.maxRescrapes != null && Number(body.maxRescrapes) > PRIVILEGED_CAP);
+
+  if (isPrivileged) {
+    const cronHeader = req.headers.get("x-cron-secret");
+    const cronSecret = Deno.env.get("CRON_SECRET");
+    let authorized = !!cronHeader && !!cronSecret && cronHeader === cronSecret;
+
+    if (!authorized) {
+      const authHeader = req.headers.get("Authorization") ?? "";
+      if (authHeader.startsWith("Bearer ")) {
+        try {
+          const userClient = createClient(
+            Deno.env.get("SUPABASE_URL")!,
+            Deno.env.get("SUPABASE_ANON_KEY")!,
+            { global: { headers: { Authorization: authHeader } } },
+          );
+          const token = authHeader.replace("Bearer ", "");
+          const { data: claimsData } = await userClient.auth.getClaims(token);
+          const userId = claimsData?.claims?.sub;
+          if (userId) {
+            const admin = createClient(
+              Deno.env.get("SUPABASE_URL")!,
+              Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+            );
+            const { data: roleRows } = await admin
+              .from("user_roles")
+              .select("role")
+              .eq("user_id", userId)
+              .in("role", ["admin", "super_admin"]);
+            if (roleRows && roleRows.length > 0) authorized = true;
+          }
+        } catch (e) {
+          console.error("auth check failed", e);
+        }
+      }
+    }
+
+    if (!authorized) {
+      return jsonResp({ error: "Unauthorized" }, 401);
+    }
+  } else {
+    // Cap anonymous callers regardless of what they sent.
+    maxRescrapes = Math.min(maxRescrapes, PRIVILEGED_CAP);
+  }
 
   const supabase = createClient(
     Deno.env.get("SUPABASE_URL")!,
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
   );
+
 
   const logRun = async (row: Record<string, unknown>) => {
     try {
