@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useLocation, useNavigate } from "react-router-dom";
-import { X, FileDown, Heart, Scale, ArrowRight } from "lucide-react";
+import { X, FileDown, Heart, Scale, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import LightboxDescriptionDropdown from "@/components/ui/LightboxDescriptionDropdown";
 import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 import SpecSheetButton, { type PdfEntry } from "@/components/trade/SpecSheetButton";
@@ -13,7 +13,7 @@ import { useAuthGate } from "@/hooks/useAuthGate";
 import AuthGateDialog from "@/components/AuthGateDialog";
 import ExpandableSpec from "@/components/ExpandableSpec";
 import FavoriteFolderPicker from "@/components/FavoriteFolderPicker";
-import FabricSelector from "@/components/FabricSelector";
+
 import { isProductUpholstered } from "@/lib/upholstery";
 
 import { getBasePlaceholder, getTopPlaceholder, formatVariantAxisLabel } from "@/lib/variantPlaceholders";
@@ -141,6 +141,12 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
   const [showHoverImage, setShowHoverImage] = useState(false);
   const [hoverImageLoaded, setHoverImageLoaded] = useState(false);
   const [variantPayload, setVariantPayload] = useState<Partial<PublicLightboxItem> | null>(null);
+  const relatedScrollRef = useRef<HTMLDivElement>(null);
+  const scrollRelated = (dir: 1 | -1) => {
+    const el = relatedScrollRef.current;
+    if (!el) return;
+    el.scrollBy({ left: dir * Math.max(160, el.clientWidth * 0.7), behavior: "smooth" });
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -639,7 +645,14 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                   onChange={(idx) => setSelectedMaterialIdx(idx < 0 ? null : idx)}
                 />
               )}
-              {isUpholsteredProduct && <FabricSelector pickId={product.id} productTitle={product.title} />}
+              {isUpholsteredProduct && (
+                <div className="border-t border-border/60 py-4 flex items-center gap-5">
+                  <span className="shrink-0"><SpecGlyph symbol="⬗" /></span>
+                  <span className="font-body text-sm text-muted-foreground">
+                    Fabric, Leather &amp; Wood Finish — refer to the full product page for details.
+                  </span>
+                </div>
+              )}
               {(() => {
                 if (isDualAxis) {
                   const topOptions = Array.from(new Set(sv.map((v) => (v.top || "").trim()).filter(Boolean)));
@@ -851,15 +864,40 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
             {/* More from this designer */}
             {relatedProducts.length > 0 && (
               <div className="pt-4 border-t border-border">
-                <p className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground mb-3">
-                  More from {designerDisplay}
-                </p>
-                <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
+                <div className="flex items-center justify-between mb-3">
+                  <p className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
+                    More from {designerDisplay}
+                  </p>
+                  {relatedProducts.length > 4 && (
+                    <div className="flex items-center gap-1">
+                      <button
+                        type="button"
+                        onClick={() => scrollRelated(-1)}
+                        aria-label="Scroll left"
+                        className="w-7 h-7 rounded-full border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-foreground/40 transition-colors"
+                      >
+                        <ChevronLeft className="w-4 h-4" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => scrollRelated(1)}
+                        aria-label="Scroll right"
+                        className="w-7 h-7 rounded-full border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-foreground/40 transition-colors"
+                      >
+                        <ChevronRight className="w-4 h-4" />
+                      </button>
+                    </div>
+                  )}
+                </div>
+                <div
+                  ref={relatedScrollRef}
+                  className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide snap-x snap-mandatory scroll-smooth"
+                >
                   {relatedProducts.map((rp) => (
                     <button
                       key={rp.id}
                       onClick={() => onSelectRelated?.(rp)}
-                      className="shrink-0 w-20 group"
+                      className="shrink-0 w-20 group snap-start"
                     >
                       <div className="aspect-square rounded-md overflow-hidden bg-muted/30 border border-border group-hover:border-foreground/30 transition-colors">
                         <img
