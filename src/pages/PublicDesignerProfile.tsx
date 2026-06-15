@@ -1007,7 +1007,16 @@ const PublicDesignerProfile = () => {
                           <span className="block font-body text-[9px] md:text-[10px] uppercase tracking-[0.15em] text-muted-foreground leading-tight line-clamp-1">
                             {designerLabel}
                           </span>
+                        ) : parentBrandName ? (
+                          <Link
+                            to={`/designers/${parentBrandSlug}`}
+                            onClick={(e) => e.stopPropagation()}
+                            className="block font-body text-[9px] md:text-[10px] uppercase tracking-[0.15em] text-muted-foreground hover:text-foreground transition-colors leading-tight line-clamp-1"
+                          >
+                            {parentBrandName}
+                          </Link>
                         ) : null}
+
 
                         {/* Product name — primary */}
                         <h3 className="font-display text-[12px] md:text-xs tracking-wide leading-snug mt-1 line-clamp-2 min-h-[2.4em]">
