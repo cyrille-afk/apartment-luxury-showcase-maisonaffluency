@@ -111,12 +111,21 @@ export default function FabricSelector({ pickId, className, productTitle }: Fabr
   const renderTile = (f: Fabric) => {
     const isCom = f.id === "__com__";
     const isCol = f.id === "__col__";
-    const isSelected = selectedId === f.id;
+    const isFabricGroup =
+      f.category === "Fabric & Leather" ||
+      f.category === "Upholstery" ||
+      f.category === "Leather" ||
+      f.id === "__com__" ||
+      f.id === "__col__";
+    const isSelected = isFabricGroup
+      ? selectedFabricId === f.id
+      : selectedWoodId === f.id;
+    const setSelected = isFabricGroup ? setSelectedFabricId : setSelectedWoodId;
     return (
       <div key={f.id} className="flex flex-col gap-2">
         <button
           type="button"
-          onClick={() => setSelectedId(f.id)}
+          onClick={() => setSelected(f.id)}
           className={cn(
             "relative aspect-square w-full overflow-hidden rounded-md bg-muted/30 ring-1 ring-border/60 transition",
             isSelected ? "ring-2 ring-foreground" : "hover:ring-foreground/40"
