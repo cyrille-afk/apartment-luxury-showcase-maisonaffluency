@@ -1338,6 +1338,12 @@ const TradeProductPage: React.FC = () => {
                 />
               )}
 
+              {isProductUpholstered(product as any) && (
+                <FabricSelector pickId={product.id} />
+              )}
+
+
+
 
 
               {(() => {
