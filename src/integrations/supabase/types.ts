@@ -1442,6 +1442,7 @@ export type Database = {
           id: string
           image_url: string
           is_hidden: boolean
+          is_upholstered: boolean | null
           lead_time: string | null
           materials: string | null
           materials_description: string | null
@@ -1491,6 +1492,7 @@ export type Database = {
           id?: string
           image_url?: string
           is_hidden?: boolean
+          is_upholstered?: boolean | null
           lead_time?: string | null
           materials?: string | null
           materials_description?: string | null
@@ -1540,6 +1542,7 @@ export type Database = {
           id?: string
           image_url?: string
           is_hidden?: boolean
+          is_upholstered?: boolean | null
           lead_time?: string | null
           materials?: string | null
           materials_description?: string | null
@@ -2024,6 +2027,45 @@ export type Database = {
           id?: string
           token?: string
           used_at?: string | null
+        }
+        Relationships: []
+      }
+      fabrics: {
+        Row: {
+          category: string | null
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string | null
+          is_active: boolean
+          name: string
+          sort_order: number
+          supplier: string | null
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          name: string
+          sort_order?: number
+          supplier?: string | null
+          updated_at?: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          name?: string
+          sort_order?: number
+          supplier?: string | null
+          updated_at?: string
         }
         Relationships: []
       }
@@ -3160,6 +3202,45 @@ export type Database = {
             columns: ["cad_asset_id"]
             isOneToOne: true
             referencedRelation: "trade_product_cad_assets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      product_fabrics: {
+        Row: {
+          created_at: string
+          fabric_id: string
+          id: string
+          pick_id: string
+          sort_order: number
+        }
+        Insert: {
+          created_at?: string
+          fabric_id: string
+          id?: string
+          pick_id: string
+          sort_order?: number
+        }
+        Update: {
+          created_at?: string
+          fabric_id?: string
+          id?: string
+          pick_id?: string
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_fabrics_fabric_id_fkey"
+            columns: ["fabric_id"]
+            isOneToOne: false
+            referencedRelation: "fabrics"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_fabrics_pick_id_fkey"
+            columns: ["pick_id"]
+            isOneToOne: false
+            referencedRelation: "designer_curator_picks"
             referencedColumns: ["id"]
           },
         ]
@@ -5240,6 +5321,7 @@ export type Database = {
           image_url: string | null
           is_active: boolean
           is_hidden: boolean
+          is_upholstered: boolean | null
           lead_time: string | null
           lead_weeks_max_override: number | null
           lead_weeks_min_override: number | null
@@ -5282,6 +5364,7 @@ export type Database = {
           image_url?: string | null
           is_active?: boolean
           is_hidden?: boolean
+          is_upholstered?: boolean | null
           lead_time?: string | null
           lead_weeks_max_override?: number | null
           lead_weeks_min_override?: number | null
@@ -5324,6 +5407,7 @@ export type Database = {
           image_url?: string | null
           is_active?: boolean
           is_hidden?: boolean
+          is_upholstered?: boolean | null
           lead_time?: string | null
           lead_weeks_max_override?: number | null
           lead_weeks_min_override?: number | null
