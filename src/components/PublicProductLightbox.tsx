@@ -13,7 +13,7 @@ import { useAuthGate } from "@/hooks/useAuthGate";
 import AuthGateDialog from "@/components/AuthGateDialog";
 import ExpandableSpec from "@/components/ExpandableSpec";
 import FavoriteFolderPicker from "@/components/FavoriteFolderPicker";
-import FabricSelector from "@/components/FabricSelector";
+
 import { isProductUpholstered } from "@/lib/upholstery";
 
 import { getBasePlaceholder, getTopPlaceholder, formatVariantAxisLabel } from "@/lib/variantPlaceholders";
