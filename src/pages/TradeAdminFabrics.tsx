@@ -71,6 +71,9 @@ const blankDraft = (): Partial<Fabric> => ({
   image_url: "",
   sort_order: 0,
   is_active: true,
+  tier: null,
+  price_per_lm_cents: null,
+  currency: "EUR",
 });
 
 export default function TradeAdminFabrics() {
