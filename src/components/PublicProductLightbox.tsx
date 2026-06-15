@@ -608,14 +608,8 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                     );
                   }
                 }
-                return product.dimensions && looksLikeDimension(product.dimensions) ? (
-                  <ExpandableSpec
-                    icon={specIcon("📐")}
-                    text={withImperialPerLine(product.dimensions)}
-                    emphasized
-                    placeholder="Select your size"
-                  />
-                ) : null;
+                return null;
+
               })()}
               {(() => {
                 if (isDualAxis) {
