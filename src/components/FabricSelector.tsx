@@ -80,12 +80,35 @@ export default function FabricSelector({ pickId, className, productTitle }: Fabr
     id: "__com__",
     name: "COM — Customer's Own Fabric",
     image_url: null,
-    category: "COM",
+    category: "Fabric & Leather",
     supplier: null,
   };
+  const colTile: Fabric = {
+    id: "__col__",
+    name: "COL — Customer's Own Leather",
+    image_url: null,
+    category: "Fabric & Leather",
+    supplier: null,
+  };
+  // Inject COM + COL at the end of the Fabric & Leather group so customers see
+  // their "own material" options alongside the curated swatches.
+  if (grouped["Fabric & Leather"]) {
+    grouped["Fabric & Leather"] = [...grouped["Fabric & Leather"], comTile, colTile];
+  } else {
+    grouped["Fabric & Leather"] = [comTile, colTile];
+    if (!sortedGroupKeys.includes("Fabric & Leather")) sortedGroupKeys.unshift("Fabric & Leather");
+  }
+
+  const selectedFabric =
+    selectedId === "__com__"
+      ? comTile
+      : selectedId === "__col__"
+      ? colTile
+      : fabrics.find((f) => f.id === selectedId) || null;
 
   const renderTile = (f: Fabric) => {
     const isCom = f.id === "__com__";
+    const isCol = f.id === "__col__";
     const isSelected = selectedId === f.id;
     return (
       <div key={f.id} className="flex flex-col gap-2">
@@ -107,7 +130,7 @@ export default function FabricSelector({ pickId, className, productTitle }: Fabr
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center font-display text-xl tracking-widest text-foreground/85">
-              {isCom ? "COM" : "—"}
+              {isCom ? "COM" : isCol ? "COL" : "—"}
             </div>
           )}
           {f.image_url && (
@@ -144,6 +167,11 @@ export default function FabricSelector({ pickId, className, productTitle }: Fabr
         <span className="font-body text-sm tracking-wide text-muted-foreground flex-1">
           Select Your Fabric/Leather and Wood Finish
         </span>
+        {selectedFabric && (
+          <span className="font-body text-sm text-foreground/85 truncate max-w-[55%] text-right">
+            {selectedFabric.name}
+          </span>
+        )}
         <ChevronDown
           className={cn(
             "w-4 h-4 text-muted-foreground transition-transform shrink-0",
@@ -171,14 +199,6 @@ export default function FabricSelector({ pickId, className, productTitle }: Fabr
                   </div>
                 </div>
               ))}
-              <div>
-                <p className="font-body text-[11px] tracking-[0.18em] uppercase text-muted-foreground mb-3">
-                  Customer's Own
-                </p>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4">
-                  {renderTile(comTile)}
-                </div>
-              </div>
             </>
           )}
 
