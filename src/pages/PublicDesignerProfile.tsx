@@ -866,6 +866,14 @@ const PublicDesignerProfile = () => {
                   const designerLabel = isGrouped && ap.designer_name && ap.designer_name !== designer.name ? ap.designer_name : undefined;
                   const designerSlug = isGrouped && ap.designer_slug ? ap.designer_slug : undefined;
                   const hasMultipleSizes = !!pick.dimensions && pick.dimensions.includes("\n");
+                  // Parent brand attribution (Ecart only for now): show on every child-designer card
+                  const showParentBrand =
+                    !designerLabel &&
+                    isChildDesigner &&
+                    (designer.founder || "").trim().toLowerCase() === "ecart";
+                  const parentBrandName = showParentBrand ? designer.founder! : undefined;
+                  const parentBrandSlug = showParentBrand ? (parentDesigner?.slug || "ecart") : undefined;
+
 
                   return (
                     <div
@@ -957,13 +965,21 @@ const PublicDesignerProfile = () => {
                             </div>
                           ) : null;
                         })()}
+                        {parentBrandName && (
+                          <div className="absolute top-2 right-2">
+                            <span className="inline-block px-2 py-0.5 text-[8px] md:text-[9px] uppercase tracking-wider font-body bg-white/85 text-foreground rounded-full border border-black/10 backdrop-blur-sm">
+                              Re-edition by {parentBrandName}
+                            </span>
+                          </div>
+                        )}
                         <div className="absolute bottom-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity">
                           <div className="p-1.5 bg-black/40 rounded-md text-white/90 backdrop-blur-sm">
                             <Maximize2 className="h-3 w-3" />
                           </div>
                         </div>
                         {/* Description overlay removed on curators' picks per design */}
-                        {(pick.pdf_url || (pick.pdf_urls && (pick.pdf_urls as any[]).length > 0)) && (
+                        {(pick.pdf_url || (pick.pdf_urls as any[] | null)?.length) && (
+
                           <div className="absolute bottom-2 right-2 hidden md:flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
                             <SpecSheetButton
                               pdfUrl={pick.pdf_url}
@@ -991,7 +1007,16 @@ const PublicDesignerProfile = () => {
                           <span className="block font-body text-[9px] md:text-[10px] uppercase tracking-[0.15em] text-muted-foreground leading-tight line-clamp-1">
                             {designerLabel}
                           </span>
+                        ) : parentBrandName ? (
+                          <Link
+                            to={`/designers/${parentBrandSlug}`}
+                            onClick={(e) => e.stopPropagation()}
+                            className="block font-body text-[9px] md:text-[10px] uppercase tracking-[0.15em] text-muted-foreground hover:text-foreground transition-colors leading-tight line-clamp-1"
+                          >
+                            {parentBrandName}
+                          </Link>
                         ) : null}
+
 
                         {/* Product name — primary */}
                         <h3 className="font-display text-[12px] md:text-xs tracking-wide leading-snug mt-1 line-clamp-2 min-h-[2.4em]">
