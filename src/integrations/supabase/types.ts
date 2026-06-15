@@ -1436,6 +1436,8 @@ export type Database = {
           embedded_at: string | null
           embedding: string | null
           embedding_source_hash: string | null
+          fabric_size_label_a: string | null
+          fabric_size_label_b: string | null
           gallery_captions: Json | null
           gallery_images: string[] | null
           hover_image_url: string | null
@@ -1487,6 +1489,8 @@ export type Database = {
           embedded_at?: string | null
           embedding?: string | null
           embedding_source_hash?: string | null
+          fabric_size_label_a?: string | null
+          fabric_size_label_b?: string | null
           gallery_captions?: Json | null
           gallery_images?: string[] | null
           hover_image_url?: string | null
@@ -1538,6 +1542,8 @@ export type Database = {
           embedded_at?: string | null
           embedding?: string | null
           embedding_source_hash?: string | null
+          fabric_size_label_a?: string | null
+          fabric_size_label_b?: string | null
           gallery_captions?: Json | null
           gallery_images?: string[] | null
           hover_image_url?: string | null
@@ -3273,6 +3279,8 @@ export type Database = {
           id: string
           image_indices: number[] | null
           pick_id: string
+          price_cents_a: number | null
+          price_cents_b: number | null
           price_tier_label: string | null
           sort_order: number
         }
@@ -3282,6 +3290,8 @@ export type Database = {
           id?: string
           image_indices?: number[] | null
           pick_id: string
+          price_cents_a?: number | null
+          price_cents_b?: number | null
           price_tier_label?: string | null
           sort_order?: number
         }
@@ -3291,6 +3301,8 @@ export type Database = {
           id?: string
           image_indices?: number[] | null
           pick_id?: string
+          price_cents_a?: number | null
+          price_cents_b?: number | null
           price_tier_label?: string | null
           sort_order?: number
         }
