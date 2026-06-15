@@ -129,19 +129,6 @@ Deno.serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
-  const { data: roles } = await supabase
-    .from("user_roles")
-    .select("role")
-    .eq("user_id", userId);
-  const allowed = roles?.some((r: any) =>
-    ["admin", "super_admin", "trade_user"].includes(r.role),
-  );
-  if (!allowed) {
-    return new Response(JSON.stringify({ error: "Forbidden" }), {
-      status: 403,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
-  }
 
   try {
     const { url, fallbackUrl } = await req.json();
@@ -209,8 +196,7 @@ Deno.serve(async (req) => {
     );
   } catch (error: unknown) {
     console.error("Proxy image error:", error);
-    const msg = error instanceof Error ? error.message : "Unknown error";
-    return new Response(JSON.stringify({ error: msg }), {
+    return new Response(JSON.stringify({ error: "An unexpected error occurred" }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
