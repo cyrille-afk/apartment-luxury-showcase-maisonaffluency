@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { ChevronDown, ZoomIn } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
+import SpecGlyph from "@/components/product/SpecGlyph";
 
 interface Fabric {
   id: string;
@@ -78,14 +79,17 @@ export default function FabricSelector({ pickId, className }: FabricSelectorProp
         type="button"
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
-        className="w-full py-4 flex items-center justify-between gap-3 text-left"
+        className="w-full py-4 flex items-center gap-5 text-left border-b border-border/60"
       >
-        <span className="font-body text-sm tracking-wide text-foreground">
+        <span className="shrink-0">
+          <SpecGlyph symbol="⬗" />
+        </span>
+        <span className="font-body text-sm tracking-wide text-foreground flex-1">
           Select Fabric Choice
         </span>
         <ChevronDown
           className={cn(
-            "w-4 h-4 text-muted-foreground transition-transform",
+            "w-4 h-4 text-muted-foreground transition-transform shrink-0",
             open && "rotate-180"
           )}
           aria-hidden="true"
