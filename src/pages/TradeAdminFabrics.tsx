@@ -29,7 +29,19 @@ interface Fabric {
   supplier: string | null;
   sort_order: number;
   is_active: boolean;
+  tier: "A" | "B" | "C" | "D" | "E" | null;
+  price_per_lm_cents: number | null;
+  currency: string | null;
 }
+
+const TIERS: Array<"A" | "B" | "C" | "D" | "E"> = ["A", "B", "C", "D", "E"];
+
+/** Format cents → "€150/lm" */
+const fmtLm = (cents: number | null | undefined, currency: string | null | undefined) => {
+  if (!cents) return null;
+  const sym = currency === "USD" ? "$" : currency === "GBP" ? "£" : "€";
+  return `${sym}${(cents / 100).toLocaleString(undefined, { maximumFractionDigits: 0 })}/lm`;
+};
 
 interface Pick {
   id: string;
