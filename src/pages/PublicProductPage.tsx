@@ -1067,7 +1067,13 @@ const PublicProductPage: React.FC = () => {
                   onMaterialChange={handleMaterialChange}
                   galleryActiveIndex={galleryActiveIndex}
                   finishMap={productFinishMap}
+                  onSwatchImagesChange={(indices) => {
+                    if (!indices || indices.length === 0) return;
+                    setGalleryActiveIndex(Math.max(0, indices[0] - 1));
+                    setGalleryJumpNonce((n) => n + 1);
+                  }}
                 />
+
 
                 {(() => {
                   const handcrafted = formatHandcrafted(product.origin, product.lead_time);
