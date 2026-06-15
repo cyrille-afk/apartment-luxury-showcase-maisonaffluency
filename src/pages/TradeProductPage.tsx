@@ -1212,6 +1212,40 @@ const TradeProductPage: React.FC = () => {
                 />
               )}
 
+              {!isRugSqmActive && isDualAxis && baseAxisIsDim && (
+                <ExpandableSpec
+                  icon={specIcon("📐")}
+                  text={withImperialPerLine(baseOptions.join("\n"))}
+                  placeholder={getBasePlaceholder(product)}
+                  singleValueLabel={formatVariantAxisLabel(product.base_axis_label) || undefined}
+                  emphasized
+                  value={selectedBase != null ? Math.max(0, baseOptions.indexOf(selectedBase)) : null}
+                  onChange={(idx) => {
+                    if (idx < 0) {
+                      clearAllDualSelections();
+                      return;
+                    }
+                    const v = baseOptions[idx] ?? null;
+                    setSelectedBase(v);
+                    let nextTop = selectedTop;
+                    let nextSize = selectedDualSize;
+                    if (v && nextTop && !variantsList.some((x: any) => matchesDual(x, v, nextTop, nextSize))) { setSelectedTop(null); nextTop = null; }
+                    if (v && nextSize && !variantsList.some((x: any) => matchesDual(x, v, nextTop, nextSize))) { setSelectedDualSize(null); nextSize = null; }
+                    if (v && !nextTop) {
+                      const compatTops = topOptions.filter((t) => variantsList.some((x: any) => matchesDual(x, v, t, nextSize)));
+                      if (compatTops.length === 1) { setSelectedTop(compatTops[0]); nextTop = compatTops[0]; }
+                    }
+                    handleMaterialChange(v, { base: v, top: nextTop, size: nextSize });
+                  }}
+                  disabledIndices={disabledBaseIdx}
+                  helperText={
+                    disabledBaseIdx.length > 0 && (selectedTop || selectedDualSize)
+                      ? `Some ${(getBasePlaceholder(product) || "base").toLowerCase().replace(/^select your /, "")} options aren't available with the current selection — greyed out.`
+                      : undefined
+                  }
+                />
+              )}
+
               {isUpholsteredProduct && (
                 <FabricSelector
                   pickId={product.id}
@@ -1311,38 +1345,39 @@ const TradeProductPage: React.FC = () => {
               {/* Dual-axis: Base × Top finish dropdowns */}
               {!isRugSqmActive && isDualAxis && (
                 <>
-                  <ExpandableSpec
-                    icon={specIcon(baseAxisIsDim ? "📐" : "⬗")}
-                    text={withImperialPerLine(baseOptions.join("\n"))}
-                    placeholder={getBasePlaceholder(product)}
+                  {!baseAxisIsDim && (
+                    <ExpandableSpec
+                      icon={specIcon("⬗")}
+                      text={withImperialPerLine(baseOptions.join("\n"))}
+                      placeholder={getBasePlaceholder(product)}
                       singleValueLabel={formatVariantAxisLabel(product.base_axis_label) || undefined}
-                    emphasized
-                    value={selectedBase != null ? Math.max(0, baseOptions.indexOf(selectedBase)) : null}
-                    onChange={(idx) => {
-                      if (idx < 0) {
-                        clearAllDualSelections();
-                        return;
+                      emphasized
+                      value={selectedBase != null ? Math.max(0, baseOptions.indexOf(selectedBase)) : null}
+                      onChange={(idx) => {
+                        if (idx < 0) {
+                          clearAllDualSelections();
+                          return;
+                        }
+                        const v = baseOptions[idx] ?? null;
+                        setSelectedBase(v);
+                        let nextTop = selectedTop;
+                        let nextSize = selectedDualSize;
+                        if (v && nextTop && !variantsList.some((x: any) => matchesDual(x, v, nextTop, nextSize))) { setSelectedTop(null); nextTop = null; }
+                        if (v && nextSize && !variantsList.some((x: any) => matchesDual(x, v, nextTop, nextSize))) { setSelectedDualSize(null); nextSize = null; }
+                        if (v && !nextTop) {
+                          const compatTops = topOptions.filter((t) => variantsList.some((x: any) => matchesDual(x, v, t, nextSize)));
+                          if (compatTops.length === 1) { setSelectedTop(compatTops[0]); nextTop = compatTops[0]; }
+                        }
+                        handleMaterialChange(v, { base: v, top: nextTop, size: nextSize });
+                      }}
+                      disabledIndices={disabledBaseIdx}
+                      helperText={
+                        disabledBaseIdx.length > 0 && (selectedTop || selectedDualSize)
+                          ? `Some ${(getBasePlaceholder(product) || "base").toLowerCase().replace(/^select your /, "")} options aren't available with the current selection — greyed out.`
+                          : undefined
                       }
-                      const v = baseOptions[idx] ?? null;
-                      setSelectedBase(v);
-                      let nextTop = selectedTop;
-                      let nextSize = selectedDualSize;
-                      if (v && nextTop && !variantsList.some((x: any) => matchesDual(x, v, nextTop, nextSize))) { setSelectedTop(null); nextTop = null; }
-                      if (v && nextSize && !variantsList.some((x: any) => matchesDual(x, v, nextTop, nextSize))) { setSelectedDualSize(null); nextSize = null; }
-                      // Auto-select the only viable top when base narrows it down to one
-                      if (v && !nextTop) {
-                        const compatTops = topOptions.filter((t) => variantsList.some((x: any) => matchesDual(x, v, t, nextSize)));
-                        if (compatTops.length === 1) { setSelectedTop(compatTops[0]); nextTop = compatTops[0]; }
-                      }
-                      handleMaterialChange(v, { base: v, top: nextTop, size: nextSize });
-                    }}
-                    disabledIndices={disabledBaseIdx}
-                    helperText={
-                      disabledBaseIdx.length > 0 && (selectedTop || selectedDualSize)
-                        ? `Some ${(getBasePlaceholder(product) || "base").toLowerCase().replace(/^select your /, "")} options aren't available with the current selection — greyed out.`
-                        : undefined
-                    }
-                  />
+                    />
+                  )}
                   {!(hasLinkedFabrics && !topAxisIsDim) && (
                   <ExpandableSpec
 
