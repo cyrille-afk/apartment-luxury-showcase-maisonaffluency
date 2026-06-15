@@ -1208,7 +1208,7 @@ const TradeProductPage: React.FC = () => {
               )}
 
               {isUpholsteredProduct && (
-                <FabricSelector pickId={product.id} />
+                <FabricSelector pickId={product.id} productTitle={product.title} />
               )}
 
               {/* Material dropdown — when variants encode (size × material), bind it to selectedSingleMaterial */}

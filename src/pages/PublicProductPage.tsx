@@ -449,7 +449,7 @@ const VariantSelectors: React.FC<{
         />
       )}
 
-      {isProductUpholstered(product) && <FabricSelector pickId={product.id} />}
+      {isProductUpholstered(product) && <FabricSelector pickId={product.id} productTitle={product.title} />}
 
       {/* Material / finish dropdown(s) */}
       {isDualAxis ? (
