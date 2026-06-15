@@ -3227,6 +3227,7 @@ export type Database = {
           fabric_id: string
           id: string
           pick_id: string
+          price_tier_label: string | null
           sort_order: number
         }
         Insert: {
@@ -3234,6 +3235,7 @@ export type Database = {
           fabric_id: string
           id?: string
           pick_id: string
+          price_tier_label?: string | null
           sort_order?: number
         }
         Update: {
@@ -3241,6 +3243,7 @@ export type Database = {
           fabric_id?: string
           id?: string
           pick_id?: string
+          price_tier_label?: string | null
           sort_order?: number
         }
         Relationships: [
