@@ -358,6 +358,19 @@ export default function FabricSelector({ pickId, className, productTitle, onUpho
                     if (isFabric) {
                       setSelectedFabricId(zoomed.id);
                       onUpholsteryTierChange?.(zoomed.price_tier_label ?? null);
+                      const isCom = zoomed.id === "__com__";
+                      const isCol = zoomed.id === "__col__";
+                      if (isCom || isCol) {
+                        onFabricChange?.(null);
+                      } else {
+                        onFabricChange?.({
+                          id: zoomed.id,
+                          name: zoomed.name,
+                          tier: zoomed.tier ?? null,
+                          price_per_lm_cents: zoomed.price_per_lm_cents ?? null,
+                          currency: zoomed.currency || "EUR",
+                        });
+                      }
                     } else {
                       setSelectedWoodId(zoomed.id);
                     }
