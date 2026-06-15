@@ -504,10 +504,45 @@ export default function TradeAdminFabrics() {
                                 >
                                   {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
                                 </select>
+                                <div className="flex items-center gap-1.5 pt-1">
+                                  <label className="text-[10px] uppercase tracking-wider text-muted-foreground">Tier</label>
+                                  <select
+                                    className="px-1.5 py-1 text-xs rounded border border-border bg-background"
+                                    value={editDraft.tier || ""}
+                                    onChange={(e) => setEditDraft((d) => ({ ...d, tier: (e.target.value || null) as any }))}
+                                  >
+                                    <option value="">—</option>
+                                    {TIERS.map((t) => <option key={t} value={t}>CAT {t}</option>)}
+                                  </select>
+                                  <select
+                                    className="px-1.5 py-1 text-xs rounded border border-border bg-background"
+                                    value={editDraft.currency || "EUR"}
+                                    onChange={(e) => setEditDraft((d) => ({ ...d, currency: e.target.value }))}
+                                  >
+                                    <option value="EUR">€</option>
+                                    <option value="USD">$</option>
+                                    <option value="GBP">£</option>
+                                  </select>
+                                  <input
+                                    type="number"
+                                    placeholder="/lm"
+                                    className="w-20 px-1.5 py-1 text-xs rounded border border-border bg-background"
+                                    value={editDraft.price_per_lm_cents != null ? editDraft.price_per_lm_cents / 100 : ""}
+                                    onChange={(e) => setEditDraft((d) => ({
+                                      ...d,
+                                      price_per_lm_cents: e.target.value ? Math.round(Number(e.target.value) * 100) : null,
+                                    }))}
+                                  />
+                                </div>
                               </div>
                             ) : (
                               <div>
                                 <div className="font-display text-sm text-foreground">{f.name}</div>
+                                {(f.tier || f.price_per_lm_cents) && (
+                                  <div className="text-[10px] uppercase tracking-wider text-primary/80 mt-0.5">
+                                    {f.tier ? `CAT ${f.tier}` : ""}{f.tier && f.price_per_lm_cents ? " · " : ""}{fmtLm(f.price_per_lm_cents, f.currency) || ""}
+                                  </div>
+                                )}
                                 {f.description && <div className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{f.description}</div>}
                               </div>
                             )}
