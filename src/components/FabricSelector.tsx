@@ -320,7 +320,7 @@ export default function FabricSelector({ pickId, className, productTitle, onUpho
         renderAccordion({
           isOpen: openWood,
           onToggle: () => setOpenWood((v) => !v),
-          label: "Select Your Wood Finish",
+          label: "Select the Wood Finish of the Feet",
           selectedName: selectedWoodItem?.name ?? null,
           tiles: woodTiles,
           glyph: "✦",
