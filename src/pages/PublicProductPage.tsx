@@ -337,7 +337,9 @@ const VariantSelectors: React.FC<{
 
   return (
     <>
-      {/* Size dropdown — shown FIRST so users pick dimensions before finishes */}
+      {isProductUpholstered(product) && <FabricSelector pickId={product.id} />}
+
+      {/* Size dropdown — shown before finishes */}
       {isDualAxis && dualSizeOptions.length > 0 ? (
         <ExpandableSpec
           icon={specIcon("📐")}
@@ -945,18 +947,6 @@ const PublicProductPage: React.FC = () => {
                   galleryActiveIndex={galleryActiveIndex}
                   finishMap={productFinishMap}
                 />
-
-                {isProductUpholstered({
-                  category: product.category,
-                  subcategory: product.subcategory,
-                  title: product.title,
-                  is_upholstered: product.is_upholstered,
-                }) && (
-                  <FabricSelector pickId={product.id} />
-                )}
-
-
-
 
                 {(() => {
                   const handcrafted = formatHandcrafted(product.origin, product.lead_time);
