@@ -399,6 +399,8 @@ export default function FabricSelector({ pickId, className, productTitle, onUpho
                   type="button"
                   onClick={() => {
                     const isFabric = isFabricCategory(zoomed);
+                    const indices = Array.isArray(zoomed.image_indices) && zoomed.image_indices.length > 0 ? zoomed.image_indices : null;
+                    onSwatchImagesChange?.(indices);
                     if (isFabric) {
                       setSelectedFabricId(zoomed.id);
                       onUpholsteryTierChange?.(zoomed.price_tier_label ?? null);
