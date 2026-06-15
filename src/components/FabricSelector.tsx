@@ -20,6 +20,15 @@ interface FabricSelectorProps {
   productTitle?: string;
 }
 
+const normalizeFabricCategory = (category: string | null | undefined) => {
+  const raw = (category || "").trim();
+  if (raw === "Wood") return "Wood";
+  if (raw === "Upholstery" || raw === "Leather" || raw === "Fabric & Leather") return "Fabric & Leather";
+  return "Fabric & Leather";
+};
+
+const isFabricCategory = (fabric: Fabric) => normalizeFabricCategory(fabric.category) === "Fabric & Leather";
+
 /**
  * Fabric / finish selector accordion shown on upholstered products
  * (Trade + Public). Tiles are grouped by category (Upholstery, Wood, …)
@@ -52,7 +61,7 @@ export default function FabricSelector({ pickId, className, productTitle }: Fabr
           id: f.id,
           name: f.name,
           image_url: f.image_url,
-          category: f.category,
+          category: normalizeFabricCategory(f.category),
           supplier: f.supplier,
         }));
       setFabrics(list);
@@ -63,9 +72,8 @@ export default function FabricSelector({ pickId, className, productTitle }: Fabr
   }, [pickId]);
 
   const grouped = fabrics.reduce<Record<string, Fabric[]>>((acc, f) => {
-    const raw = (f.category || "Fabrics").trim() || "Fabrics";
-    // Merge legacy "Upholstery" and "Leather" buckets into one group.
-    const key = raw === "Upholstery" || raw === "Leather" ? "Fabric & Leather" : raw;
+    // Merge legacy/blank fabric buckets into Fabric & Leather; only explicit Wood stays Wood.
+    const key = normalizeFabricCategory(f.category);
     (acc[key] ||= []).push(f);
     return acc;
   }, {});
@@ -111,12 +119,7 @@ export default function FabricSelector({ pickId, className, productTitle }: Fabr
   const renderTile = (f: Fabric) => {
     const isCom = f.id === "__com__";
     const isCol = f.id === "__col__";
-    const isFabricGroup =
-      f.category === "Fabric & Leather" ||
-      f.category === "Upholstery" ||
-      f.category === "Leather" ||
-      f.id === "__com__" ||
-      f.id === "__col__";
+    const isFabricGroup = isFabricCategory(f);
     const isSelected = isFabricGroup
       ? selectedFabricId === f.id
       : selectedWoodId === f.id;
@@ -271,12 +274,7 @@ export default function FabricSelector({ pickId, className, productTitle }: Fabr
                 <button
                   type="button"
                   onClick={() => {
-                    const isFabric =
-                      zoomed.category === "Fabric & Leather" ||
-                      zoomed.category === "Upholstery" ||
-                      zoomed.category === "Leather" ||
-                      zoomed.id === "__com__" ||
-                      zoomed.id === "__col__";
+                    const isFabric = isFabricCategory(zoomed);
                     if (isFabric) setSelectedFabricId(zoomed.id);
                     else setSelectedWoodId(zoomed.id);
                     setZoomed(null);
@@ -310,12 +308,7 @@ export default function FabricSelector({ pickId, className, productTitle }: Fabr
               )}
 
               {(() => {
-                const zoomedIsFabric =
-                  zoomed.category === "Fabric & Leather" ||
-                  zoomed.category === "Upholstery" ||
-                  zoomed.category === "Leather" ||
-                  zoomed.id === "__com__" ||
-                  zoomed.id === "__col__";
+                const zoomedIsFabric = isFabricCategory(zoomed);
                 const thumbs = zoomedIsFabric ? fabricTiles : woodTiles;
                 return (
                   <div className="mt-5 pt-5 border-t border-border/60">
