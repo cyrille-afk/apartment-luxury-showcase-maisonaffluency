@@ -513,6 +513,7 @@ const VariantSelectors: React.FC<{
           pickId={product.id}
           productTitle={product.title}
           onHasFabricsChange={setHasLinkedFabrics}
+          onSwatchImagesChange={onSwatchImagesChange}
           onUpholsteryTierChange={(rawTier) => {
             if (!rawTier) return;
             // Match a top option whose value starts with the raw tier
