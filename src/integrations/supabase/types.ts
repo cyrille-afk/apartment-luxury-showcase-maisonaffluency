@@ -3226,6 +3226,7 @@ export type Database = {
           category: string | null
           created_at: string
           fabric_id: string
+          image_indices: number[] | null
           image_url: string | null
           is_active: boolean
           name: string
@@ -3239,6 +3240,7 @@ export type Database = {
           category?: string | null
           created_at?: string
           fabric_id: string
+          image_indices?: number[] | null
           image_url?: string | null
           is_active?: boolean
           name: string
@@ -3252,6 +3254,7 @@ export type Database = {
           category?: string | null
           created_at?: string
           fabric_id?: string
+          image_indices?: number[] | null
           image_url?: string | null
           is_active?: boolean
           name?: string
@@ -3268,6 +3271,7 @@ export type Database = {
           created_at: string
           fabric_id: string
           id: string
+          image_indices: number[] | null
           pick_id: string
           price_tier_label: string | null
           sort_order: number
@@ -3276,6 +3280,7 @@ export type Database = {
           created_at?: string
           fabric_id: string
           id?: string
+          image_indices?: number[] | null
           pick_id: string
           price_tier_label?: string | null
           sort_order?: number
@@ -3284,6 +3289,7 @@ export type Database = {
           created_at?: string
           fabric_id?: string
           id?: string
+          image_indices?: number[] | null
           pick_id?: string
           price_tier_label?: string | null
           sort_order?: number
