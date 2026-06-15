@@ -12,6 +12,20 @@ interface Fabric {
   supplier: string | null;
   /** Upholstery price-tier label for this product (from product_fabrics.price_tier_label). */
   price_tier_label?: string | null;
+  /** Per-linear-meter price (in cents) for this fabric/leather. */
+  price_per_lm_cents?: number | null;
+  /** Fabric category tier (A–E). */
+  tier?: string | null;
+  /** Currency of price_per_lm_cents. */
+  currency?: string | null;
+}
+
+export interface SelectedFabricInfo {
+  id: string;
+  name: string;
+  tier: string | null;
+  price_per_lm_cents: number | null;
+  currency: string;
 }
 
 interface FabricSelectorProps {
