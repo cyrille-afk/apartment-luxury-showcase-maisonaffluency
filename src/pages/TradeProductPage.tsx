@@ -1437,7 +1437,7 @@ const TradeProductPage: React.FC = () => {
                       }
                     />
                   )}
-                  {!(hasLinkedFabrics && !topAxisIsDim) && (
+                  {!(hasLinkedFabrics && !topAxisIsDim) && !suppressTopAsFinish && (
                   <ExpandableSpec
 
                     icon={specIcon(topAxisIsDim ? "📐" : "⬗")}
