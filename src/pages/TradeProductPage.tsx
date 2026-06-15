@@ -938,6 +938,13 @@ const TradeProductPage: React.FC = () => {
       ? singleAxisActive
       : (hasVariants && selectedVariantIdx != null ? sizeVariants![selectedVariantIdx] : null);
   const isUpholsteredProduct = isProductUpholstered(product as any);
+  // When FabricSelector is shown (upholstered), it already exposes fabric
+  // + wood-finish swatches. Suppress duplicate base/top variant dropdowns
+  // whose axis label is a finish/frame/wood concept already covered there.
+  const isFinishAxisLabel = (label: string) =>
+    /\b(frame|wood|finish|feet|foot|leg|legs|base)\b/i.test(label);
+  const suppressBaseAsFinish = isUpholsteredProduct && !baseAxisIsDim && isFinishAxisLabel(baseAxisLabelRaw);
+  const suppressTopAsFinish = isUpholsteredProduct && !topAxisIsDim && isFinishAxisLabel(topAxisLabelRaw);
 
   // When the product has variants but the user hasn't picked one yet, fall back
   // to the cheapest *priced* variant so we can show "From €X" instead of "Price on request".
@@ -1361,7 +1368,7 @@ const TradeProductPage: React.FC = () => {
                   }
                 />
               )}
-              {!isRugSqmActive && isBaseOnly && !baseAxisIsDim && (
+              {!isRugSqmActive && isBaseOnly && !baseAxisIsDim && !suppressBaseAsFinish && (
                 <ExpandableSpec
                   icon={specIcon(baseAxisIsDim ? "📐" : "⬗")}
                   text={withImperialPerLine(baseOptions.join("\n"))}
@@ -1397,7 +1404,7 @@ const TradeProductPage: React.FC = () => {
               {/* Dual-axis: Base × Top finish dropdowns */}
               {!isRugSqmActive && isDualAxis && (
                 <>
-                  {!baseAxisIsDim && (
+                  {!baseAxisIsDim && !suppressBaseAsFinish && (
                     <ExpandableSpec
                       icon={specIcon("⬗")}
                       text={withImperialPerLine(baseOptions.join("\n"))}
@@ -1430,7 +1437,7 @@ const TradeProductPage: React.FC = () => {
                       }
                     />
                   )}
-                  {!(hasLinkedFabrics && !topAxisIsDim) && (
+                  {!(hasLinkedFabrics && !topAxisIsDim) && !suppressTopAsFinish && (
                   <ExpandableSpec
 
                     icon={specIcon(topAxisIsDim ? "📐" : "⬗")}
