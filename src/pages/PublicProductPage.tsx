@@ -623,7 +623,7 @@ const VariantSelectors: React.FC<{
             </p>
           )}
         </>
-      ) : isBaseOnly && !baseAxisIsDim ? (
+      ) : isBaseOnly && !baseAxisIsDim && !suppressBaseAsFinish ? (
         <ExpandableSpec
           icon={specIcon(baseAxisIsDim ? "📐" : "⬗")}
           text={withImperialPerLine(baseOptions.join("\n"))}
