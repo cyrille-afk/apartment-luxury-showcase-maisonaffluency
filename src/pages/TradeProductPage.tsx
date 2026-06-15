@@ -954,30 +954,68 @@ const TradeProductPage: React.FC = () => {
   const isFromPrice = hasVariants && !activeVariant && effectiveRrpCents != null;
 
 
+  // Per-meter fabric upcharge in the product's currency. We always charge the
+  // active variant's meters when present (e.g. 3.5 m for outdoor frames vs
+  // 6 m for indoor) and fall back to the pick-level com_meters default.
+  const fabricMeters =
+    (activeVariant && typeof (activeVariant as any).meters === "number" ? (activeVariant as any).meters : null)
+    ?? (product as any).com_meters
+    ?? null;
+  const fabricUpchargeCentsRaw =
+    selectedFabric?.price_per_lm_cents && fabricMeters
+      ? Math.round(selectedFabric.price_per_lm_cents * fabricMeters)
+      : 0;
+
   const renderPrice = () => {
     if (!pricing || !effectiveRrpCents) return null;
     const rrp = effectiveRrpCents;
     const trade = Math.round(rrp * (1 - TRADE_DISCOUNT));
     const cents = showTradePrice ? trade : rrp;
-    const formatted = formatPriceConverted(cents, pricing.currency, displayCurrency, fxRates, pricing.price_unit || undefined);
-    // Honour the catalog price_prefix (e.g. "From"), and add an implicit "From"
-    // when we're showing the minimum variant before the user selects a size.
+    // Add the fabric per-LM upcharge on top. The upcharge sits in the fabric's
+    // currency; convert to the product currency when they differ.
+    let upcharge = 0;
+    if (fabricUpchargeCentsRaw > 0) {
+      const fromCcy = selectedFabric?.currency || pricing.currency;
+      if (fromCcy === pricing.currency) {
+        upcharge = fabricUpchargeCentsRaw;
+      } else {
+        // Convert fabric → product currency by going via the display rates.
+        // formatPriceConverted does the heavy lifting later; here we approximate
+        // by re-using the same fx table.
+        const r = fxRates as any;
+        const toBase = r?.[fromCcy] ? 1 / r[fromCcy] : 1; // → EUR
+        const fromBase = r?.[pricing.currency] ?? 1;       // EUR →
+        upcharge = Math.round(fabricUpchargeCentsRaw * toBase * fromBase);
+      }
+    }
+    const centsWithFabric = cents + upcharge;
+    const formatted = formatPriceConverted(centsWithFabric, pricing.currency, displayCurrency, fxRates, pricing.price_unit || undefined);
     const explicitPrefix = pricing.price_prefix ? `${pricing.price_prefix} ` : "";
-    const prefix = explicitPrefix || (isFromPrice ? "From " : "");
+    const prefix = explicitPrefix || (isFromPrice && !selectedFabric ? "From " : "");
     return (
-      <div className="flex flex-wrap items-center gap-3">
-        <span className="font-display text-2xl text-accent font-semibold">
-          {prefix}{formatted}
-        </span>
-        {showTradePrice && (
-          <>
-            <span className="font-body text-sm text-muted-foreground line-through">
-              {prefix}{formatPriceConverted(rrp, pricing.currency, displayCurrency, fxRates, pricing.price_unit || undefined)}
-            </span>
-            <span className="font-body text-[10px] bg-accent/15 text-accent px-2 py-0.5 rounded-full uppercase tracking-wider" title={`${tierLabel} tier — ${discountLabel} trade discount`}>
-              {tierLabel} –{discountLabel}
-            </span>
-          </>
+      <div className="flex flex-col gap-1">
+        <div className="flex flex-wrap items-center gap-3">
+          <span className="font-display text-2xl text-accent font-semibold">
+            {prefix}{formatted}
+          </span>
+          {showTradePrice && (
+            <>
+              <span className="font-body text-sm text-muted-foreground line-through">
+                {prefix}{formatPriceConverted(rrp + upcharge, pricing.currency, displayCurrency, fxRates, pricing.price_unit || undefined)}
+              </span>
+              <span className="font-body text-[10px] bg-accent/15 text-accent px-2 py-0.5 rounded-full uppercase tracking-wider" title={`${tierLabel} tier — ${discountLabel} trade discount`}>
+                {tierLabel} –{discountLabel}
+              </span>
+            </>
+          )}
+        </div>
+        {upcharge > 0 && selectedFabric && (
+          <span className="font-body text-[11px] text-muted-foreground">
+            Includes {selectedFabric.name}
+            {selectedFabric.tier ? ` (CAT ${selectedFabric.tier})` : ""}
+            {" — "}
+            {formatPriceConverted(selectedFabric.price_per_lm_cents || 0, selectedFabric.currency, displayCurrency, fxRates)}/lm × {fabricMeters} m
+          </span>
         )}
       </div>
     );
