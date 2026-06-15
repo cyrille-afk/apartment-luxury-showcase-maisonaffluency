@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ChevronDown, ZoomIn } from "lucide-react";
+import { ChevronDown, ZoomIn, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import SpecGlyph from "@/components/product/SpecGlyph";
@@ -188,28 +188,84 @@ export default function FabricSelector({ pickId, className }: FabricSelectorProp
         </div>
       )}
 
-      {zoomed && zoomed.image_url && (
+      {zoomed && (
         <div
           onClick={() => setZoomed(null)}
           role="dialog"
           aria-modal="true"
-          className="fixed inset-0 z-[200] bg-background/85 backdrop-blur-sm flex items-center justify-center p-6"
+          className="fixed inset-0 z-[200] bg-background/90 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 overflow-y-auto"
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="max-w-[480px] w-full"
+            className="relative bg-background rounded-lg shadow-xl w-full max-w-[560px] max-h-[92vh] flex flex-col"
           >
-            <img
-              src={zoomed.image_url}
-              alt={zoomed.name}
-              className="w-full h-auto rounded-md shadow-lg"
-            />
-            <p className="mt-3 font-body text-sm text-center text-foreground">
-              {zoomed.name}
-              {zoomed.supplier && (
-                <span className="text-muted-foreground"> — {zoomed.supplier}</span>
+            <button
+              type="button"
+              onClick={() => setZoomed(null)}
+              aria-label="Close"
+              className="absolute top-3 right-3 z-10 w-9 h-9 rounded-full bg-background/90 ring-1 ring-border flex items-center justify-center text-foreground/80 hover:text-foreground"
+            >
+              <X className="w-4 h-4" />
+            </button>
+
+            <div className="p-5 sm:p-6 overflow-y-auto">
+              {zoomed.image_url ? (
+                <img
+                  src={zoomed.image_url}
+                  alt={zoomed.name}
+                  className="w-full h-auto rounded-md aspect-square object-cover"
+                />
+              ) : (
+                <div className="w-full aspect-square rounded-md bg-muted/40 flex items-center justify-center font-display text-4xl tracking-widest text-foreground/80">
+                  {zoomed.id === "__com__" ? "COM" : "—"}
+                </div>
               )}
-            </p>
+              <p className="mt-4 font-body text-sm text-center text-foreground">
+                {zoomed.name}
+                {zoomed.supplier && (
+                  <span className="text-muted-foreground"> — {zoomed.supplier}</span>
+                )}
+              </p>
+
+              <div className="mt-5 pt-5 border-t border-border/60">
+                <p className="font-body text-[11px] tracking-[0.18em] uppercase text-muted-foreground mb-3">
+                  Browse all
+                </p>
+                <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1">
+                  {[...fabrics, comTile].map((f) => {
+                    const isActive = zoomed.id === f.id;
+                    const isCom = f.id === "__com__";
+                    return (
+                      <button
+                        key={f.id}
+                        type="button"
+                        onClick={() => setZoomed(f)}
+                        className={cn(
+                          "shrink-0 w-16 h-16 rounded-md overflow-hidden bg-muted/30 ring-1 transition",
+                          isActive
+                            ? "ring-2 ring-foreground"
+                            : "ring-border/60 hover:ring-foreground/40"
+                        )}
+                        aria-label={`View ${f.name}`}
+                        title={f.name}
+                      >
+                        {f.image_url ? (
+                          <img
+                            src={f.image_url}
+                            alt={f.name}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center font-display text-[11px] tracking-widest text-foreground/80">
+                            {isCom ? "COM" : "—"}
+                          </div>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}
