@@ -708,12 +708,20 @@ export default function TradeAdminFabrics() {
                                       </button>
                                     )}
                                   </div>
-                                  {linked.length === 0 && (
+                                  {linked.length === 0 ? (
                                     <button
                                       onClick={() => { setLinkingId(f.id); setPickSearch(""); }}
                                       className="inline-flex items-center gap-1 text-xs text-primary hover:underline self-start"
                                     >
                                       <Link2 className="h-3 w-3" /> Link
+                                    </button>
+                                  ) : (
+                                    <button
+                                      onClick={() => { setLinkingId(f.id); setPickSearch(""); }}
+                                      className="inline-flex items-center gap-1 text-[10px] text-primary hover:underline self-start mt-0.5"
+                                      title="Manage linked products, price tier, and image range"
+                                    >
+                                      <Link2 className="h-2.5 w-2.5" /> Manage ({linked.length})
                                     </button>
                                   )}
                                 </div>
