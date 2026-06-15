@@ -952,7 +952,7 @@ const PublicProductPage: React.FC = () => {
                   title: product.title,
                   is_upholstered: product.is_upholstered,
                 }) && (
-                  <FabricSelector productId={product.id} />
+                  <FabricSelector pickId={product.id} />
                 )}
 
 
