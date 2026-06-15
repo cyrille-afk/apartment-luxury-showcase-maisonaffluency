@@ -308,6 +308,9 @@ const VariantSelectors: React.FC<{
   const disabledDualSizeIdx = isDualAxis && (selBase || selTop)
     ? dualSizeOptions.map((s, i) => (variantsList.some((v: any) => matchesDual(v, selBase, selTop, s)) ? -1 : i)).filter((i) => i >= 0)
     : [];
+  const axisLabeledSize = (label?: string | null) => (label || "").trim().toLowerCase() === "size";
+  const baseAxisIsDim = (baseOptions.length > 0 && baseOptions.every(looksLikeDimension)) || axisLabeledSize(product.base_axis_label);
+  const topAxisIsDim = (topOptions.length > 0 && topOptions.every(looksLikeDimension)) || axisLabeledSize(product.top_axis_label);
 
   // Per-square-metre rug picker short-circuit: when the product is a rug and
   // its size_variants encode parseable dimensions (e.g. "300 × 400 cm"), show
@@ -431,7 +434,7 @@ const VariantSelectors: React.FC<{
       {isDualAxis ? (
         <>
           <ExpandableSpec
-            icon={specIcon("⬗")}
+            icon={specIcon(baseAxisIsDim ? "📐" : "⬗")}
             text={withImperialPerLine(baseOptions.join("\n"))}
             placeholder={getBasePlaceholder(product)}
             singleValueLabel={formatVariantAxisLabel(product.base_axis_label) || undefined}
@@ -462,7 +465,7 @@ const VariantSelectors: React.FC<{
             }
           />
           <ExpandableSpec
-            icon={specIcon("⬗")}
+            icon={specIcon(topAxisIsDim ? "📐" : "⬗")}
             text={withImperialPerLine(topOptions.join("\n"))}
             placeholder={getTopPlaceholder(product)}
             singleValueLabel={formatVariantAxisLabel(product.top_axis_label) || undefined}
@@ -506,7 +509,7 @@ const VariantSelectors: React.FC<{
         </>
       ) : isBaseOnly ? (
         <ExpandableSpec
-          icon={specIcon("⬗")}
+          icon={specIcon(baseAxisIsDim ? "📐" : "⬗")}
           text={withImperialPerLine(baseOptions.join("\n"))}
           placeholder={getBasePlaceholder(product)}
           singleValueLabel={formatVariantAxisLabel(product.base_axis_label) || undefined}
