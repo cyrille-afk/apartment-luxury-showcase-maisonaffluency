@@ -12,6 +12,20 @@ interface Fabric {
   supplier: string | null;
   /** Upholstery price-tier label for this product (from product_fabrics.price_tier_label). */
   price_tier_label?: string | null;
+  /** Per-linear-meter price (in cents) for this fabric/leather. */
+  price_per_lm_cents?: number | null;
+  /** Fabric category tier (A–E). */
+  tier?: string | null;
+  /** Currency of price_per_lm_cents. */
+  currency?: string | null;
+}
+
+export interface SelectedFabricInfo {
+  id: string;
+  name: string;
+  tier: string | null;
+  price_per_lm_cents: number | null;
+  currency: string;
 }
 
 interface FabricSelectorProps {
@@ -27,6 +41,12 @@ interface FabricSelectorProps {
    * row in the Size × Upholstery price matrix.
    */
   onUpholsteryTierChange?: (rawTier: string | null) => void;
+  /**
+   * Fires when the user picks a fabric/leather swatch with pricing details
+   * (tier, per-LM price, currency). Used to compute the upholstery upcharge
+   * added on top of the frame variant price.
+   */
+  onFabricChange?: (fabric: SelectedFabricInfo | null) => void;
   /**
    * Fires after the linked-fabric list is fetched. `true` when this product
    * has one or more real linked fabric/leather swatches (excludes the
@@ -50,7 +70,7 @@ const isFabricCategory = (fabric: Fabric) => normalizeFabricCategory(fabric.cate
  * (Trade + Public). Tiles are grouped by category (Upholstery, Wood, …)
  * with a COM ("Customer's Own Material") tile always offered.
  */
-export default function FabricSelector({ pickId, className, productTitle, onUpholsteryTierChange, onHasFabricsChange }: FabricSelectorProps) {
+export default function FabricSelector({ pickId, className, productTitle, onUpholsteryTierChange, onFabricChange, onHasFabricsChange }: FabricSelectorProps) {
 
   const [open, setOpen] = useState(false);
   const [fabrics, setFabrics] = useState<Fabric[]>([]);
@@ -68,7 +88,7 @@ export default function FabricSelector({ pickId, className, productTitle, onUpho
     (async () => {
       const { data, error } = await supabase
         .from("product_fabrics")
-        .select("sort_order, price_tier_label, fabric:fabrics(id, name, image_url, category, supplier, is_active)")
+        .select("sort_order, price_tier_label, fabric:fabrics(id, name, image_url, category, supplier, is_active, price_per_lm_cents, tier, currency)")
         .eq("pick_id", pickId)
         .order("sort_order", { ascending: true });
       if (cancelled || error) return;
@@ -82,6 +102,9 @@ export default function FabricSelector({ pickId, className, productTitle, onUpho
           category: normalizeFabricCategory(f.category),
           supplier: f.supplier,
           price_tier_label: f.price_tier_label ?? null,
+          price_per_lm_cents: f.price_per_lm_cents ?? null,
+          tier: f.tier ?? null,
+          currency: f.currency ?? "EUR",
         }));
       setFabrics(list);
       onHasFabricsChange?.(list.some(isFabricCategory));
@@ -153,8 +176,29 @@ export default function FabricSelector({ pickId, className, productTitle, onUpho
       setSelected(f.id);
       // Only fabric/leather drives the upholstery price tier. Wood finishes
       // are decorative and don't change the variant matrix on this product.
-      if (isFabricGroup) onUpholsteryTierChange?.(f.price_tier_label ?? null);
+      if (isFabricGroup) {
+        onUpholsteryTierChange?.(f.price_tier_label ?? null);
+        // Emit pricing details so the product page can add the per-LM upcharge
+        // to the displayed total. COM/COL tiles have no per-LM price.
+        if (isCom || isCol) {
+          onFabricChange?.(null);
+        } else {
+          onFabricChange?.({
+            id: f.id,
+            name: f.name,
+            tier: f.tier ?? null,
+            price_per_lm_cents: f.price_per_lm_cents ?? null,
+            currency: f.currency || "EUR",
+          });
+        }
+      }
     };
+    const tierCaption = isFabricGroup && !isCom && !isCol && (f.tier || f.price_per_lm_cents)
+      ? [
+          f.tier ? `CAT ${f.tier}` : null,
+          f.price_per_lm_cents ? `€${(f.price_per_lm_cents / 100).toLocaleString()}/LM` : null,
+        ].filter(Boolean).join(" · ")
+      : null;
     return (
       <div key={f.id} className="flex flex-col gap-2">
         <button
@@ -194,6 +238,11 @@ export default function FabricSelector({ pickId, className, productTitle, onUpho
         <p className="font-body text-[12px] leading-snug text-foreground/85">
           {f.name}
         </p>
+        {tierCaption && (
+          <p className="font-body text-[10px] tracking-wider uppercase text-muted-foreground -mt-1">
+            {tierCaption}
+          </p>
+        )}
       </div>
     );
   };
@@ -309,6 +358,19 @@ export default function FabricSelector({ pickId, className, productTitle, onUpho
                     if (isFabric) {
                       setSelectedFabricId(zoomed.id);
                       onUpholsteryTierChange?.(zoomed.price_tier_label ?? null);
+                      const isCom = zoomed.id === "__com__";
+                      const isCol = zoomed.id === "__col__";
+                      if (isCom || isCol) {
+                        onFabricChange?.(null);
+                      } else {
+                        onFabricChange?.({
+                          id: zoomed.id,
+                          name: zoomed.name,
+                          tier: zoomed.tier ?? null,
+                          price_per_lm_cents: zoomed.price_per_lm_cents ?? null,
+                          currency: zoomed.currency || "EUR",
+                        });
+                      }
                     } else {
                       setSelectedWoodId(zoomed.id);
                     }

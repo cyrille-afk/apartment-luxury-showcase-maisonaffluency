@@ -39,7 +39,7 @@ import { normalizeCategoryContext } from "@/lib/categoryNormalization";
 import { buildProductBreadcrumbs } from "@/lib/productBreadcrumbs";
 import QuoteDrawer from "@/components/trade/QuoteDrawer";
 import CustomRequestModal from "@/components/trade/CustomRequestModal";
-import CurrencyToggle, { type DisplayCurrency, formatPriceConverted, useFxRates } from "@/components/trade/CurrencyToggle";
+import CurrencyToggle, { type DisplayCurrency, formatPriceConverted, useFxRates, convertCents } from "@/components/trade/CurrencyToggle";
 import { useTradeDisplayCurrency } from "@/hooks/useTradeDisplayCurrency";
 import { formatEditionLabel } from "@/lib/editionLabel";
 import PageLoadingSkeleton from "@/components/PageLoadingSkeleton";
@@ -123,13 +123,14 @@ interface ProductRow {
   variant_placeholder: string | null;
   base_axis_label: string | null;
   top_axis_label: string | null;
-  size_variants?: { label?: string; base?: string; top?: string; price_cents?: number }[] | null;
+  size_variants?: { label?: string; base?: string; top?: string; price_cents?: number; meters?: number }[] | null;
   variant_image_map: Record<string, number> | null;
   gallery_captions?: Record<string, string> | null;
   edition: string | null;
   edition_number: string | null;
   edition_signing: string | null;
   is_upholstered: boolean | null;
+  com_meters: number | null;
 }
 
 interface TradePricing {
@@ -193,7 +194,7 @@ function useTradeProductBySlug(
         if (designer) {
           const { data: picks } = await supabase
             .from("designer_curator_picks")
-            .select("id, title, subtitle, image_url, hover_image_url, gallery_images, materials, materials_description, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, trade_price_cents, price_per_sqm_cents, currency, price_prefix, size_variants, variant_placeholder, base_axis_label, top_axis_label, variant_image_map, edition, edition_number, edition_signing, gallery_captions, is_upholstered")
+            .select("id, title, subtitle, image_url, hover_image_url, gallery_images, materials, materials_description, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, trade_price_cents, price_per_sqm_cents, currency, price_prefix, size_variants, variant_placeholder, base_axis_label, top_axis_label, variant_image_map, edition, edition_number, edition_signing, gallery_captions, is_upholstered, com_meters")
             .eq("designer_id", (designer as any).id)
             .order("sort_order", { ascending: true });
           const tradeName = ((tradeProduct as any).product_name || "").trim().toLowerCase();
@@ -229,6 +230,7 @@ function useTradeProductBySlug(
           edition_number: curatorPick?.edition_number || null,
           edition_signing: curatorPick?.edition_signing || null,
           is_upholstered: (curatorPick as any)?.is_upholstered ?? (tradeProduct as any)?.is_upholstered ?? null,
+          com_meters: (curatorPick as any)?.com_meters ?? null,
         };
 
         const rawSizeVariants = applyRugPerSqmPricing(
@@ -278,7 +280,7 @@ function useTradeProductBySlug(
 
       const { data: picks } = await supabase
         .from("designer_curator_picks")
-        .select("id, title, subtitle, image_url, hover_image_url, gallery_images, materials, materials_description, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, trade_price_cents, price_per_sqm_cents, currency, price_prefix, size_variants, variant_placeholder, base_axis_label, top_axis_label, variant_image_map, edition, edition_number, edition_signing, gallery_captions, is_upholstered")
+        .select("id, title, subtitle, image_url, hover_image_url, gallery_images, materials, materials_description, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, trade_price_cents, price_per_sqm_cents, currency, price_prefix, size_variants, variant_placeholder, base_axis_label, top_axis_label, variant_image_map, edition, edition_number, edition_signing, gallery_captions, is_upholstered, com_meters")
         .eq("designer_id", designer.id)
         .order("sort_order", { ascending: true });
 
@@ -378,6 +380,7 @@ function useTradeProductBySlug(
           description: (product as any).description || tradeProduct?.description || null,
           size_variants: (product as any).size_variants || null,
           is_upholstered: (product as any).is_upholstered ?? null,
+          com_meters: (product as any).com_meters ?? null,
         },
         designer: {
           id: designer.id,
@@ -464,6 +467,7 @@ const TradeProductPage: React.FC = () => {
   // the redundant "Select your upholstery finish" dropdown, since the swatch
   // picker already drives the upholstery price tier.
   const [hasLinkedFabrics, setHasLinkedFabrics] = useState(false);
+  const [selectedFabric, setSelectedFabric] = useState<import("@/components/FabricSelector").SelectedFabricInfo | null>(null);
 
 
   useEffect(() => {
@@ -950,30 +954,60 @@ const TradeProductPage: React.FC = () => {
   const isFromPrice = hasVariants && !activeVariant && effectiveRrpCents != null;
 
 
+  // Per-meter fabric upcharge in the product's currency. We always charge the
+  // active variant's meters when present (e.g. 3.5 m for outdoor frames vs
+  // 6 m for indoor) and fall back to the pick-level com_meters default.
+  const fabricMeters =
+    (activeVariant && typeof (activeVariant as any).meters === "number" ? (activeVariant as any).meters : null)
+    ?? (product as any).com_meters
+    ?? null;
+  const fabricUpchargeCentsRaw =
+    selectedFabric?.price_per_lm_cents && fabricMeters
+      ? Math.round(selectedFabric.price_per_lm_cents * fabricMeters)
+      : 0;
+
   const renderPrice = () => {
     if (!pricing || !effectiveRrpCents) return null;
     const rrp = effectiveRrpCents;
     const trade = Math.round(rrp * (1 - TRADE_DISCOUNT));
     const cents = showTradePrice ? trade : rrp;
-    const formatted = formatPriceConverted(cents, pricing.currency, displayCurrency, fxRates, pricing.price_unit || undefined);
-    // Honour the catalog price_prefix (e.g. "From"), and add an implicit "From"
-    // when we're showing the minimum variant before the user selects a size.
+    // Add the fabric per-LM upcharge on top. The upcharge sits in the fabric's
+    // currency; convert to the product currency when they differ.
+    let upcharge = 0;
+    if (fabricUpchargeCentsRaw > 0) {
+      const fromCcy = selectedFabric?.currency || pricing.currency;
+      upcharge = fromCcy === pricing.currency
+        ? fabricUpchargeCentsRaw
+        : convertCents(fabricUpchargeCentsRaw, fromCcy, pricing.currency as DisplayCurrency, fxRates);
+    }
+    const centsWithFabric = cents + upcharge;
+    const formatted = formatPriceConverted(centsWithFabric, pricing.currency, displayCurrency, fxRates, pricing.price_unit || undefined);
     const explicitPrefix = pricing.price_prefix ? `${pricing.price_prefix} ` : "";
-    const prefix = explicitPrefix || (isFromPrice ? "From " : "");
+    const prefix = explicitPrefix || (isFromPrice && !selectedFabric ? "From " : "");
     return (
-      <div className="flex flex-wrap items-center gap-3">
-        <span className="font-display text-2xl text-accent font-semibold">
-          {prefix}{formatted}
-        </span>
-        {showTradePrice && (
-          <>
-            <span className="font-body text-sm text-muted-foreground line-through">
-              {prefix}{formatPriceConverted(rrp, pricing.currency, displayCurrency, fxRates, pricing.price_unit || undefined)}
-            </span>
-            <span className="font-body text-[10px] bg-accent/15 text-accent px-2 py-0.5 rounded-full uppercase tracking-wider" title={`${tierLabel} tier — ${discountLabel} trade discount`}>
-              {tierLabel} –{discountLabel}
-            </span>
-          </>
+      <div className="flex flex-col gap-1">
+        <div className="flex flex-wrap items-center gap-3">
+          <span className="font-display text-2xl text-accent font-semibold">
+            {prefix}{formatted}
+          </span>
+          {showTradePrice && (
+            <>
+              <span className="font-body text-sm text-muted-foreground line-through">
+                {prefix}{formatPriceConverted(rrp + upcharge, pricing.currency, displayCurrency, fxRates, pricing.price_unit || undefined)}
+              </span>
+              <span className="font-body text-[10px] bg-accent/15 text-accent px-2 py-0.5 rounded-full uppercase tracking-wider" title={`${tierLabel} tier — ${discountLabel} trade discount`}>
+                {tierLabel} –{discountLabel}
+              </span>
+            </>
+          )}
+        </div>
+        {upcharge > 0 && selectedFabric && (
+          <span className="font-body text-[11px] text-muted-foreground">
+            Includes {selectedFabric.name}
+            {selectedFabric.tier ? ` (CAT ${selectedFabric.tier})` : ""}
+            {" — "}
+            {formatPriceConverted(selectedFabric.price_per_lm_cents || 0, selectedFabric.currency, displayCurrency, fxRates)}/lm × {fabricMeters} m
+          </span>
         )}
       </div>
     );
@@ -1264,6 +1298,7 @@ const TradeProductPage: React.FC = () => {
                   pickId={product.id}
                   productTitle={product.title}
                   onHasFabricsChange={setHasLinkedFabrics}
+                  onFabricChange={setSelectedFabric}
                   onUpholsteryTierChange={(rawTier) => {
 
                     if (!rawTier) return;
