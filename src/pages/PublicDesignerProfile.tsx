@@ -957,7 +957,7 @@ const PublicDesignerProfile = () => {
                             specialTags.unshift(pick.edition);
                           }
                           return specialTags.length > 0 ? (
-                            <div className="absolute top-2 left-2 flex flex-wrap gap-1">
+                            <div className="absolute top-2 right-2 flex flex-wrap gap-1 justify-end">
                               {specialTags.map((tag, i) => (
                                 <span
                                   key={i}
@@ -1024,13 +1024,13 @@ const PublicDesignerProfile = () => {
 
 
                         {/* Product name — primary */}
-                        <h3 className="font-display text-[14px] md:text-sm tracking-wide leading-snug mt-2 line-clamp-2 min-h-[2.4em]">
+                        <h3 className="font-display text-[14px] md:text-sm tracking-wide leading-snug mt-2 line-clamp-2">
                           {pick.title}
                         </h3>
 
                         {/* Subtitle, materials & dimensions hidden on grid — shown in lightbox detail view */}
 
-                        {/* Price slot — consistent across all cards */}
+                        {/* Price slot — pushed to bottom so cards align across the row */}
                         <div className="mt-2">
                           <p className="font-body text-[10px] md:text-xs text-muted-foreground md:text-foreground tracking-wide">
                             Price upon request
