@@ -3255,6 +3255,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "product_fabrics_fabric_id_fkey"
+            columns: ["fabric_id"]
+            isOneToOne: false
+            referencedRelation: "fabrics_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "product_fabrics_pick_id_fkey"
             columns: ["pick_id"]
             isOneToOne: false
@@ -5575,6 +5582,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "trade_quote_items_fabric_id_fkey"
+            columns: ["fabric_id"]
+            isOneToOne: false
+            referencedRelation: "fabrics_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "trade_quote_items_product_id_fkey"
             columns: ["product_id"]
             isOneToOne: false
@@ -6007,7 +6021,42 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      fabrics_public: {
+        Row: {
+          category: string | null
+          created_at: string | null
+          id: string | null
+          image_url: string | null
+          is_active: boolean | null
+          name: string | null
+          sort_order: number | null
+          supplier: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string | null
+          id?: string | null
+          image_url?: string | null
+          is_active?: boolean | null
+          name?: string | null
+          sort_order?: number | null
+          supplier?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          category?: string | null
+          created_at?: string | null
+          id?: string | null
+          image_url?: string | null
+          is_active?: boolean | null
+          name?: string | null
+          sort_order?: number | null
+          supplier?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       add_board_comment_by_token: {
