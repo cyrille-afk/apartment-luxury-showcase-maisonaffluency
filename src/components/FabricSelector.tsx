@@ -199,14 +199,6 @@ export default function FabricSelector({ pickId, className, productTitle }: Fabr
                   </div>
                 </div>
               ))}
-              <div>
-                <p className="font-body text-[11px] tracking-[0.18em] uppercase text-muted-foreground mb-3">
-                  Customer's Own
-                </p>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4">
-                  {renderTile(comTile)}
-                </div>
-              </div>
             </>
           )}
 
