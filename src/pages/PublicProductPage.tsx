@@ -198,6 +198,11 @@ const VariantSelectors: React.FC<{
 
   const [selBase, setSelBase] = useState<string | null>(null);
   const [selTop, setSelTop] = useState<string | null>(null);
+  // True when this product has linked fabric/leather swatches — used to hide
+  // the redundant upholstery-finish dropdown (the swatch picker already
+  // drives the upholstery price tier).
+  const [hasLinkedFabrics, setHasLinkedFabrics] = useState(false);
+
   const [selDualSize, setSelDualSize] = useState<string | null>(null);
   const [selMat, setSelMat] = useState<string | null>(null);
   const [selSize, setSelSize] = useState<string | null>(null);
