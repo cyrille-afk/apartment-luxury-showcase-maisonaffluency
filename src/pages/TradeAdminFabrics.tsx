@@ -231,6 +231,9 @@ export default function TradeAdminFabrics() {
       image_url: editDraft.image_url?.trim() || null,
       sort_order: editDraft.sort_order ?? 0,
       is_active: editDraft.is_active ?? true,
+      tier: editDraft.tier || null,
+      price_per_lm_cents: editDraft.price_per_lm_cents ?? null,
+      currency: editDraft.currency || "EUR",
     };
     if (!patch.name) {
       toast({ title: "Name required", variant: "destructive" });
