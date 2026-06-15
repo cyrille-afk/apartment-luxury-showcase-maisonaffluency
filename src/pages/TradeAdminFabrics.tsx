@@ -46,7 +46,7 @@ interface ProductFabric {
 
 const blankDraft = (): Partial<Fabric> => ({
   name: "",
-  category: "Upholstery",
+  category: "Fabric & Leather",
   supplier: "",
   description: "",
   image_url: "",
