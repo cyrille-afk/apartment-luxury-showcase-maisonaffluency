@@ -106,15 +106,15 @@ const TradePresentationViewer = () => {
 
   // Realtime comments subscription
   useEffect(() => {
-    if (!id) return;
+    if (!id || !user?.id) return;
     const channel = supabase
-      .channel(`presentation-comments-${id}`)
+      .channel(`user:${user.id}-presentation-comments-${id}`, { config: { private: true } })
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "presentation_comments", filter: `presentation_id=eq.${id}` }, () => {
         queryClient.invalidateQueries({ queryKey: ["presentation-comments", id] });
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
-  }, [id, queryClient]);
+  }, [id, queryClient, user?.id]);
 
   // Auto-scroll comments
   useEffect(() => {
