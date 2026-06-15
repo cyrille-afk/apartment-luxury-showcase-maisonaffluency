@@ -765,6 +765,7 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
                 </div>
 
                 {/* Variant pricing — supports single-axis (Size) and dual-axis (Base × Top) */}
+                {!FABRICS_PANEL_PILOT_PICK_IDS.has(pick.id) && (
                 <div className="space-y-2 border border-dashed border-border rounded-md p-2.5">
                   <div className="flex items-center justify-between">
                     <label className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">
@@ -1114,6 +1115,7 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
                     );
                   })}
                 </div>
+                )}
                 {FABRICS_PANEL_PILOT_PICK_IDS.has(pick.id) ? (
                   <ProductFabricsPanel pickId={pick.id} currency={pick.currency} />
                 ) : (
