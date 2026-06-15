@@ -340,8 +340,6 @@ const VariantSelectors: React.FC<{
 
   return (
     <>
-      {isProductUpholstered(product) && <FabricSelector pickId={product.id} />}
-
       {/* Size dropdown — shown before finishes */}
       {isDualAxis && dualSizeOptions.length > 0 ? (
         <ExpandableSpec
@@ -430,6 +428,29 @@ const VariantSelectors: React.FC<{
         <ExpandableSpec icon={specIcon("📐")} text={withImperialPerLine(product.dimensions)} />
       )}
 
+      {isBaseOnly && baseAxisIsDim && (
+        <ExpandableSpec
+          icon={specIcon("📐")}
+          text={withImperialPerLine(baseOptions.join("\n"))}
+          placeholder={getBasePlaceholder(product)}
+          singleValueLabel={formatVariantAxisLabel(product.base_axis_label) || undefined}
+          emphasized
+          value={selBase != null ? Math.max(0, baseOptions.indexOf(selBase)) : null}
+          onChange={(idx) => {
+            if (idx < 0) {
+              setSelBase(null);
+              onMaterialChange?.(null, { base: null, top: null, size: null });
+              return;
+            }
+            const v = baseOptions[idx] ?? null;
+            setSelBase(v);
+            onMaterialChange?.(v, { base: v, top: null, size: null });
+          }}
+        />
+      )}
+
+      {isProductUpholstered(product) && <FabricSelector pickId={product.id} />}
+
       {/* Material / finish dropdown(s) */}
       {isDualAxis ? (
         <>
@@ -507,7 +528,7 @@ const VariantSelectors: React.FC<{
             </p>
           )}
         </>
-      ) : isBaseOnly ? (
+      ) : isBaseOnly && !baseAxisIsDim ? (
         <ExpandableSpec
           icon={specIcon(baseAxisIsDim ? "📐" : "⬗")}
           text={withImperialPerLine(baseOptions.join("\n"))}
