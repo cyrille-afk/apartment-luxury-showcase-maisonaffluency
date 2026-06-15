@@ -1368,7 +1368,7 @@ const TradeProductPage: React.FC = () => {
                   }
                 />
               )}
-              {!isRugSqmActive && isBaseOnly && !baseAxisIsDim && (
+              {!isRugSqmActive && isBaseOnly && !baseAxisIsDim && !suppressBaseAsFinish && (
                 <ExpandableSpec
                   icon={specIcon(baseAxisIsDim ? "📐" : "⬗")}
                   text={withImperialPerLine(baseOptions.join("\n"))}
