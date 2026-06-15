@@ -460,10 +460,17 @@ const VariantSelectors: React.FC<{
           productTitle={product.title}
           onUpholsteryTierChange={(rawTier) => {
             if (!rawTier) return;
+        <FabricSelector
+          pickId={product.id}
+          productTitle={product.title}
+          onHasFabricsChange={setHasLinkedFabrics}
+          onUpholsteryTierChange={(rawTier) => {
+            if (!rawTier) return;
             // Match a top option whose value starts with the raw tier
             // (e.g. raw "ECART fabric" → "ECART fabric (12 m)"). Prefer the
             // option compatible with the currently selected size, otherwise
             // fall back to the first match.
+
             const candidates = topOptions.filter(
               (t) => t === rawTier || t.toLowerCase().startsWith(rawTier.toLowerCase()),
             );
