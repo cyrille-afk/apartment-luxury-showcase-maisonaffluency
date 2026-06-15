@@ -178,9 +178,14 @@ export default function FabricSelector({ pickId, className, productTitle }: Fabr
         <span className="font-body text-sm tracking-wide text-muted-foreground flex-1">
           Select Your Fabric/Leather and Wood Finish
         </span>
-        {selectedFabric && (
+        {(selectedFabricItem || selectedWoodItem) && (
           <span className="font-body text-sm text-foreground/85 truncate max-w-[55%] text-right">
-            {selectedFabric.name}
+            {[
+              selectedFabricItem?.name,
+              selectedWoodItem?.name,
+            ]
+              .filter(Boolean)
+              .join(" + ")}
           </span>
         )}
         <ChevronDown
@@ -252,7 +257,14 @@ export default function FabricSelector({ pickId, className, productTitle }: Fabr
                 <button
                   type="button"
                   onClick={() => {
-                    setSelectedId(zoomed.id);
+                    const isFabric =
+                      zoomed.category === "Fabric & Leather" ||
+                      zoomed.category === "Upholstery" ||
+                      zoomed.category === "Leather" ||
+                      zoomed.id === "__com__" ||
+                      zoomed.id === "__col__";
+                    if (isFabric) setSelectedFabricId(zoomed.id);
+                    else setSelectedWoodId(zoomed.id);
                     setZoomed(null);
                   }}
                   className="px-4 py-2 bg-foreground text-background font-body text-[11px] tracking-[0.18em] uppercase hover:bg-foreground/90 transition"
