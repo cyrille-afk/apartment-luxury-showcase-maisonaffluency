@@ -25,7 +25,7 @@ const CURRENCY_OPTIONS = ["EUR", "USD", "GBP", "SGD", "CHF", "AED", "HKD", "AUD"
 type ProjectClientInfo = { client_id?: string | null; client_name?: string | null };
 
 function formatPrice(cents: number | null, currency: string | null): string {
-  if (cents == null || !currency) return "Price on Request";
+  if (cents == null || !currency) return "Price Upon Request";
   try {
     return new Intl.NumberFormat(undefined, {
       style: "currency",

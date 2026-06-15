@@ -20,7 +20,7 @@ interface Props {
 const TRADE_DISCOUNT_PCT = 8;
 
 function formatPrice(cents: number | null | undefined, currency: string | null | undefined): string {
-  if (cents == null || !currency) return "Price on Request";
+  if (cents == null || !currency) return "Price Upon Request";
   try {
     return new Intl.NumberFormat(undefined, {
       style: "currency",
