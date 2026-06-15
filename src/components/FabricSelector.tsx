@@ -404,6 +404,7 @@ export default function FabricSelector({ pickId, className, productTitle, onUpho
                       }
                     } else {
                       setSelectedWoodId(zoomed.id);
+                      onWoodFinishChange?.(zoomed.name);
                     }
                     setZoomed(null);
                   }}
