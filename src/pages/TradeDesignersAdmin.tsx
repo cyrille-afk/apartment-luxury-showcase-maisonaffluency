@@ -478,7 +478,32 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
                     <label className="text-[10px] text-muted-foreground">Signing Details</label>
                     <Input value={(pick as any).edition_signing || ""} onChange={(e) => updateField(pick.id, "edition_signing" as any, e.target.value || null)} className="text-xs" placeholder="e.g. Signed and dated by the artist" />
                   </div>
-                </div>
+                 </div>
+                 <div>
+                   <label className="text-[10px] text-muted-foreground">Upholstered (fabric selector)</label>
+                   <select
+                     value={
+                       (pick as any).is_upholstered === true
+                         ? "yes"
+                         : (pick as any).is_upholstered === false
+                         ? "no"
+                         : "auto"
+                     }
+                     onChange={(e) => {
+                       const v = e.target.value;
+                       updateField(
+                         pick.id,
+                         "is_upholstered" as any,
+                         v === "yes" ? true : v === "no" ? false : null,
+                       );
+                     }}
+                     className="w-full text-xs h-8 rounded-md border border-input bg-background px-2"
+                   >
+                     <option value="auto">Auto-detect by category</option>
+                     <option value="yes">Yes — show fabric selector</option>
+                     <option value="no">No — hide fabric selector</option>
+                   </select>
+                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   <div>
                     <label className="text-[10px] text-muted-foreground">Lead Time</label>
