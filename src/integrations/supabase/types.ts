@@ -6057,6 +6057,42 @@ export type Database = {
         }
         Relationships: []
       }
+      product_fabric_swatches_public: {
+        Row: {
+          category: string | null
+          fabric_id: string | null
+          image_url: string | null
+          is_active: boolean | null
+          name: string | null
+          pick_id: string | null
+          price_tier_label: string | null
+          sort_order: number | null
+          supplier: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_fabrics_fabric_id_fkey"
+            columns: ["fabric_id"]
+            isOneToOne: false
+            referencedRelation: "fabrics"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_fabrics_fabric_id_fkey"
+            columns: ["fabric_id"]
+            isOneToOne: false
+            referencedRelation: "fabrics_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_fabrics_pick_id_fkey"
+            columns: ["pick_id"]
+            isOneToOne: false
+            referencedRelation: "designer_curator_picks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       add_board_comment_by_token: {
