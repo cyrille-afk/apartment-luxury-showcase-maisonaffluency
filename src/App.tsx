@@ -66,6 +66,7 @@ const TradeAdminShippingSurcharges = lazy(() => import("./pages/TradeAdminShippi
 const TradeAdminTaxonomyAudit = lazy(() => import("./pages/TradeAdminTaxonomyAudit"));
 const TradeAdminSyncStatus = lazy(() => import("./pages/TradeAdminSyncStatus"));
 const TradeAdminBrandLeadTimes = lazy(() => import("./pages/TradeAdminBrandLeadTimes"));
+const TradeAdminFabrics = lazy(() => import("./pages/TradeAdminFabrics"));
 const TradeAdminTiers = lazy(() => import("./pages/TradeAdminTiers"));
 const TradeAdminCadAssets = lazy(() => import("./pages/TradeAdminCadAssets"));
 const TradeAdminGlbModels = lazy(() => import("./pages/TradeAdminGlbModels"));
