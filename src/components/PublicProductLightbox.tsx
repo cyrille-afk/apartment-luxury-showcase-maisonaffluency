@@ -645,14 +645,6 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                   onChange={(idx) => setSelectedMaterialIdx(idx < 0 ? null : idx)}
                 />
               )}
-              {isUpholsteredProduct && (
-                <div className="border-t border-border/60 py-4 flex items-center gap-5">
-                  <span className="shrink-0"><SpecGlyph symbol="⬗" /></span>
-                  <span className="font-body text-sm text-muted-foreground">
-                    Fabric, Leather &amp; Wood Finish — refer to the full product page for details.
-                  </span>
-                </div>
-              )}
               {(() => {
                 if (isDualAxis) {
                   const topOptions = Array.from(new Set(sv.map((v) => (v.top || "").trim()).filter(Boolean)));
@@ -705,13 +697,15 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                   );
                   // Dimension axes always render before finish/material axes.
                   const ordered = baseIsDim && !topIsDim
-                    ? [baseNode, topNode]
+                    ? [{ node: baseNode, isDimension: baseIsDim }, { node: topNode, isDimension: topIsDim }]
                     : topIsDim && !baseIsDim
-                    ? [topNode, baseNode]
-                    : [baseNode, topNode];
-                  return <>{ordered}</>;
+                    ? [{ node: topNode, isDimension: topIsDim }, { node: baseNode, isDimension: baseIsDim }]
+                    : [{ node: baseNode, isDimension: baseIsDim }, { node: topNode, isDimension: topIsDim }];
+                  if (isUpholsteredProduct) return <>{ordered.filter((item) => item.isDimension).map((item) => item.node)}</>;
+                  return <>{ordered.map((item) => item.node)}</>;
                 }
                 if (materialOptions.length > 0) {
+                  if (isUpholsteredProduct) return null;
                   // Single collapsed value that's actually a dimension string —
                   // render with 📐 + imperial as secondaryText (not inline) so
                   // the imperial parenthetical can't wrap mid-token.
@@ -748,6 +742,14 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                 }
                 return null;
               })()}
+              {isUpholsteredProduct && (
+                <div className="border-t border-border/60 py-4 flex items-center gap-5">
+                  <span className="shrink-0"><SpecGlyph symbol="⬗" /></span>
+                  <span className="font-body text-sm text-muted-foreground">
+                    Fabric, Leather &amp; Wood Finish — refer to the full product page for details.
+                  </span>
+                </div>
+              )}
               {product.materials_description && product.materials_description.trim() && (
                 <ExpandableSpec
                   icon={specIcon("⬗")}
