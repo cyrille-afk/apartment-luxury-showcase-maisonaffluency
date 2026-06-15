@@ -28,7 +28,8 @@ interface FabricSelectorProps {
 export default function FabricSelector({ pickId, className, productTitle }: FabricSelectorProps) {
   const [open, setOpen] = useState(false);
   const [fabrics, setFabrics] = useState<Fabric[]>([]);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [selectedFabricId, setSelectedFabricId] = useState<string | null>(null);
+  const [selectedWoodId, setSelectedWoodId] = useState<string | null>(null);
   const [zoomed, setZoomed] = useState<Fabric | null>(null);
 
   useEffect(() => {
