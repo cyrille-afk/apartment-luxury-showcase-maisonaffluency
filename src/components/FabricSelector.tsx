@@ -141,8 +141,8 @@ export default function FabricSelector({ pickId, className, productTitle }: Fabr
         <span className="shrink-0">
           <SpecGlyph symbol="⬗" />
         </span>
-        <span className="font-body text-sm tracking-wide text-foreground flex-1">
-          Select Fabric &amp; Finish
+        <span className="font-body text-sm tracking-wide text-muted-foreground flex-1">
+          Select Your Fabric/Leather and Wood Finish
         </span>
         <ChevronDown
           className={cn(
