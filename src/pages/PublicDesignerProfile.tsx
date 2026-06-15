@@ -522,8 +522,16 @@ const PublicDesignerProfile = () => {
     remainingBlocks.length > 0 &&
     isMediaBlock(remainingBlocks[0]) &&
     !isVideoBlock(remainingBlocks[0]);
+  // Shrink the intro image to "small" so its height matches the single intro
+  // paragraph beside it (avoids large blank space below the text in the
+  // collapsed preview before "View full profile").
+  const ensureSmallMarker = (mediaLine: string): string => {
+    const segs = mediaLine.split(/\s*\|\s*/);
+    const hasSize = segs.slice(1).some((s) => /^small$/i.test(s.trim()) || /^\d{1,3}%$/.test(s.trim()));
+    return hasSize ? mediaLine : `${mediaLine} | small`;
+  };
   const introEditorialBio = startsWithInlineImage
-    ? [remainingBlocks[0], ...heroParagraphs].join("\n\n")
+    ? [ensureSmallMarker(remainingBlocks[0]), ...heroParagraphs].join("\n\n")
     : "";
   const editorialBlocks = startsWithInlineImage ? remainingBlocks.slice(1) : remainingBlocks;
   const editorialBio = editorialBlocks.join("\n\n");
