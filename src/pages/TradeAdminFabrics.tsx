@@ -29,7 +29,19 @@ interface Fabric {
   supplier: string | null;
   sort_order: number;
   is_active: boolean;
+  tier: "A" | "B" | "C" | "D" | "E" | null;
+  price_per_lm_cents: number | null;
+  currency: string | null;
 }
+
+const TIERS: Array<"A" | "B" | "C" | "D" | "E"> = ["A", "B", "C", "D", "E"];
+
+/** Format cents → "€150/lm" */
+const fmtLm = (cents: number | null | undefined, currency: string | null | undefined) => {
+  if (!cents) return null;
+  const sym = currency === "USD" ? "$" : currency === "GBP" ? "£" : "€";
+  return `${sym}${(cents / 100).toLocaleString(undefined, { maximumFractionDigits: 0 })}/lm`;
+};
 
 interface Pick {
   id: string;
@@ -59,6 +71,9 @@ const blankDraft = (): Partial<Fabric> => ({
   image_url: "",
   sort_order: 0,
   is_active: true,
+  tier: null,
+  price_per_lm_cents: null,
+  currency: "EUR",
 });
 
 export default function TradeAdminFabrics() {
@@ -216,6 +231,9 @@ export default function TradeAdminFabrics() {
       image_url: editDraft.image_url?.trim() || null,
       sort_order: editDraft.sort_order ?? 0,
       is_active: editDraft.is_active ?? true,
+      tier: editDraft.tier || null,
+      price_per_lm_cents: editDraft.price_per_lm_cents ?? null,
+      currency: editDraft.currency || "EUR",
     };
     if (!patch.name) {
       toast({ title: "Name required", variant: "destructive" });
@@ -257,6 +275,9 @@ export default function TradeAdminFabrics() {
       image_url: newRow.image_url?.trim() || null,
       sort_order: newRow.sort_order ?? 0,
       is_active: newRow.is_active ?? true,
+      tier: newRow.tier || null,
+      price_per_lm_cents: newRow.price_per_lm_cents ?? null,
+      currency: newRow.currency || "EUR",
     });
     if (error) {
       toast({ title: "Add failed", description: error.message, variant: "destructive" });
@@ -483,10 +504,45 @@ export default function TradeAdminFabrics() {
                                 >
                                   {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
                                 </select>
+                                <div className="flex items-center gap-1.5 pt-1">
+                                  <label className="text-[10px] uppercase tracking-wider text-muted-foreground">Tier</label>
+                                  <select
+                                    className="px-1.5 py-1 text-xs rounded border border-border bg-background"
+                                    value={editDraft.tier || ""}
+                                    onChange={(e) => setEditDraft((d) => ({ ...d, tier: (e.target.value || null) as any }))}
+                                  >
+                                    <option value="">—</option>
+                                    {TIERS.map((t) => <option key={t} value={t}>CAT {t}</option>)}
+                                  </select>
+                                  <select
+                                    className="px-1.5 py-1 text-xs rounded border border-border bg-background"
+                                    value={editDraft.currency || "EUR"}
+                                    onChange={(e) => setEditDraft((d) => ({ ...d, currency: e.target.value }))}
+                                  >
+                                    <option value="EUR">€</option>
+                                    <option value="USD">$</option>
+                                    <option value="GBP">£</option>
+                                  </select>
+                                  <input
+                                    type="number"
+                                    placeholder="/lm"
+                                    className="w-20 px-1.5 py-1 text-xs rounded border border-border bg-background"
+                                    value={editDraft.price_per_lm_cents != null ? editDraft.price_per_lm_cents / 100 : ""}
+                                    onChange={(e) => setEditDraft((d) => ({
+                                      ...d,
+                                      price_per_lm_cents: e.target.value ? Math.round(Number(e.target.value) * 100) : null,
+                                    }))}
+                                  />
+                                </div>
                               </div>
                             ) : (
                               <div>
                                 <div className="font-display text-sm text-foreground">{f.name}</div>
+                                {(f.tier || f.price_per_lm_cents) && (
+                                  <div className="text-[10px] uppercase tracking-wider text-primary/80 mt-0.5">
+                                    {f.tier ? `CAT ${f.tier}` : ""}{f.tier && f.price_per_lm_cents ? " · " : ""}{fmtLm(f.price_per_lm_cents, f.currency) || ""}
+                                  </div>
+                                )}
                                 {f.description && <div className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{f.description}</div>}
                               </div>
                             )}

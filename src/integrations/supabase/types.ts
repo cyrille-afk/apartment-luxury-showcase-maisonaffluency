@@ -1423,6 +1423,7 @@ export type Database = {
         Row: {
           base_axis_label: string | null
           category: string | null
+          com_meters: number | null
           created_at: string
           currency: string
           default_ship_mode: string | null
@@ -1473,6 +1474,7 @@ export type Database = {
         Insert: {
           base_axis_label?: string | null
           category?: string | null
+          com_meters?: number | null
           created_at?: string
           currency?: string
           default_ship_mode?: string | null
@@ -1523,6 +1525,7 @@ export type Database = {
         Update: {
           base_axis_label?: string | null
           category?: string | null
+          com_meters?: number | null
           created_at?: string
           currency?: string
           default_ship_mode?: string | null
@@ -2037,37 +2040,46 @@ export type Database = {
         Row: {
           category: string | null
           created_at: string
+          currency: string
           description: string | null
           id: string
           image_url: string | null
           is_active: boolean
           name: string
+          price_per_lm_cents: number | null
           sort_order: number
           supplier: string | null
+          tier: string | null
           updated_at: string
         }
         Insert: {
           category?: string | null
           created_at?: string
+          currency?: string
           description?: string | null
           id?: string
           image_url?: string | null
           is_active?: boolean
           name: string
+          price_per_lm_cents?: number | null
           sort_order?: number
           supplier?: string | null
+          tier?: string | null
           updated_at?: string
         }
         Update: {
           category?: string | null
           created_at?: string
+          currency?: string
           description?: string | null
           id?: string
           image_url?: string | null
           is_active?: boolean
           name?: string
+          price_per_lm_cents?: number | null
           sort_order?: number
           supplier?: string | null
+          tier?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -5481,6 +5493,10 @@ export type Database = {
           cost_code: string | null
           created_at: string
           deposit_pct_override: number | null
+          fabric_currency: string | null
+          fabric_id: string | null
+          fabric_meters: number | null
+          fabric_upcharge_cents: number | null
           id: string
           internal_notes: string | null
           lead_time_weeks_override: number | null
@@ -5502,6 +5518,10 @@ export type Database = {
           cost_code?: string | null
           created_at?: string
           deposit_pct_override?: number | null
+          fabric_currency?: string | null
+          fabric_id?: string | null
+          fabric_meters?: number | null
+          fabric_upcharge_cents?: number | null
           id?: string
           internal_notes?: string | null
           lead_time_weeks_override?: number | null
@@ -5523,6 +5543,10 @@ export type Database = {
           cost_code?: string | null
           created_at?: string
           deposit_pct_override?: number | null
+          fabric_currency?: string | null
+          fabric_id?: string | null
+          fabric_meters?: number | null
+          fabric_upcharge_cents?: number | null
           id?: string
           internal_notes?: string | null
           lead_time_weeks_override?: number | null
@@ -5540,6 +5564,13 @@ export type Database = {
           variant_label?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "trade_quote_items_fabric_id_fkey"
+            columns: ["fabric_id"]
+            isOneToOne: false
+            referencedRelation: "fabrics"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "trade_quote_items_product_id_fkey"
             columns: ["product_id"]
