@@ -7,6 +7,7 @@ import { ArrowLeft, Plus, Trash2, Save, X, Link2 } from "lucide-react";
 import { useState, useMemo } from "react";
 import { useToast } from "@/hooks/use-toast";
 import CloudUpload from "@/components/trade/CloudUpload";
+import { slugify } from "@/lib/whatsapp-share";
 
 type FabricCategory = "Fabric & Leather" | "Wood" | "Stone" | "Metal" | "Other";
 
@@ -34,7 +35,14 @@ interface Pick {
   id: string;
   title: string | null;
   subtitle: string | null;
+  designer_id: string | null;
 }
+
+interface DesignerLite {
+  id: string;
+  slug: string | null;
+}
+
 
 interface ProductFabric {
   id: string;
@@ -87,13 +95,32 @@ export default function TradeAdminFabrics() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("designer_curator_picks")
-        .select("id, title, subtitle")
+        .select("id, title, subtitle, designer_id")
         .order("title");
       if (error) throw error;
       return (data as Pick[]) || [];
     },
     enabled: isAdmin,
   });
+
+  const { data: designersList = [] } = useQuery({
+    queryKey: ["admin-fabrics-designers"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("designers")
+        .select("id, slug");
+      if (error) throw error;
+      return (data as DesignerLite[]) || [];
+    },
+    enabled: isAdmin,
+  });
+
+  const designerSlugById = useMemo(() => {
+    const m = new Map<string, string | null>();
+    designersList.forEach((d) => m.set(d.id, d.slug));
+    return m;
+  }, [designersList]);
+
 
   const { data: links = [] } = useQuery({
     queryKey: ["admin-fabrics-links"],
@@ -506,17 +533,25 @@ export default function TradeAdminFabrics() {
                               return (
                                 <div className="flex flex-col gap-1">
                                   <div className="flex flex-wrap gap-1">
-                                    {linked.slice(0, 2).map((p) => (
-                                      <Link
-                                        key={p.id}
-                                        to={`/trade/products/${p.id}`}
-                                        className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded bg-muted/60 text-foreground hover:bg-muted"
-                                        title={p.subtitle ? `${p.subtitle} — ${p.title}` : p.title || ""}
-                                      >
-                                        <Link2 className="h-2.5 w-2.5 text-muted-foreground" />
-                                        <span className="truncate max-w-[120px]">{p.title || "(untitled)"}</span>
-                                      </Link>
-                                    ))}
+                                    {linked.slice(0, 2).map((p) => {
+                                      const dSlug = p.designer_id ? designerSlugById.get(p.designer_id) : null;
+                                      const productSlug = slugify(`${p.title || ""}${p.subtitle ? `-${p.subtitle}` : ""}`);
+                                      const to = dSlug && p.title
+                                        ? `/trade/products/${dSlug}/${productSlug}`
+                                        : `/trade/products/${p.id}`;
+                                      return (
+                                        <Link
+                                          key={p.id}
+                                          to={to}
+                                          className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded bg-muted/60 text-foreground hover:bg-muted"
+                                          title={p.subtitle ? `${p.subtitle} — ${p.title}` : p.title || ""}
+                                        >
+                                          <Link2 className="h-2.5 w-2.5 text-muted-foreground" />
+                                          <span className="truncate max-w-[120px]">{p.title || "(untitled)"}</span>
+                                        </Link>
+                                      );
+                                    })}
+
                                     {linked.length > 2 && (
                                       <button
                                         onClick={() => { setLinkingId(f.id); setPickSearch(""); }}
