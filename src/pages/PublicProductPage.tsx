@@ -83,6 +83,7 @@ interface ProductRow {
   top_axis_label: string | null;
   variant_image_map: Record<string, number> | null;
   gallery_captions?: Record<string, string> | null;
+  is_upholstered?: boolean | null;
 }
 
 function useProductBySlug(designerSlug: string | undefined, productSlug: string | undefined) {
