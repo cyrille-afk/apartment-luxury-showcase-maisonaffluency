@@ -128,7 +128,7 @@ export default function TradeDescriptionWriter() {
     queryFn: async () => {
       const { data } = await supabase
         .from("designer_curator_picks")
-        .select("id, title, description, designer_id, designers(display_name, name)")
+        .select("id, title, description, designer_id, designers(display_name, name, founder)")
         .order("title")
         .limit(2000);
       return (data || []) as any[];
@@ -153,16 +153,45 @@ export default function TradeDescriptionWriter() {
 
   const items = source === "curator_picks" ? curatorPicks : tradeProducts;
 
-  // Build designer/brand groups for bulk picker
+  // Build designer/brand groups for bulk picker.
+  // For curator_picks we also synthesise "parent brand" groups that aggregate
+  // every pick whose designer.founder == <parent name> (e.g. Ecart bundles
+  // Jean-Michel Frank + Paul László + …; Ozone bundles Michel Boyer + …).
   const designerGroups = useMemo(() => {
     const map = new Map<string, { name: string; items: any[] }>();
+    const parentMap = new Map<string, any[]>(); // founder -> picks
+
     for (const p of items) {
-      const name = source === "curator_picks"
-        ? (p.designers?.name || p.designers?.display_name || "Unknown")
-        : (p.brand_name || "Unknown");
+      let name: string;
+      let founder: string | null = null;
+      if (source === "curator_picks") {
+        name = p.designers?.name || p.designers?.display_name || "Unknown";
+        founder = (p.designers?.founder || "").trim() || null;
+      } else {
+        name = p.brand_name || "Unknown";
+      }
       if (!map.has(name)) map.set(name, { name, items: [] });
       map.get(name)!.items.push(p);
+
+      // Aggregate under parent brand when the designer has a different founder.
+      if (founder && founder.toLowerCase() !== name.toLowerCase()) {
+        if (!parentMap.has(founder)) parentMap.set(founder, []);
+        parentMap.get(founder)!.push(p);
+      }
     }
+
+    // Merge parent aggregates into the map (label them clearly).
+    for (const [founder, picks] of parentMap) {
+      // Include the parent's own picks if any
+      const ownGroup = map.get(founder);
+      const combined = ownGroup ? [...ownGroup.items, ...picks] : picks;
+      // Deduplicate by id
+      const seen = new Set<string>();
+      const deduped = combined.filter((x) => (seen.has(x.id) ? false : (seen.add(x.id), true)));
+      const label = `${founder} — all designers`;
+      map.set(label, { name: label, items: deduped });
+    }
+
     return Array.from(map.values()).sort((a, b) => a.name.localeCompare(b.name));
   }, [items, source]);
 
