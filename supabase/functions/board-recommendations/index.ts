@@ -431,7 +431,7 @@ Return a JSON object with a recommendations array:
     })
   } catch (error) {
     console.error('Board recommendations error:', error)
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ error: "An unexpected error occurred" }), {
       status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
   }

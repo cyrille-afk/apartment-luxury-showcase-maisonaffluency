@@ -37,7 +37,7 @@ Deno.serve(async (req) => {
 
   if (error) {
     console.error('rpc error', error)
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ error: "An unexpected error occurred" }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
@@ -71,7 +71,7 @@ Deno.serve(async (req) => {
 
   if (sendError) {
     console.error('send error', sendError)
-    return new Response(JSON.stringify({ error: 'send_failed', detail: sendError.message }), {
+    return new Response(JSON.stringify({ error: 'send_failed' }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
