@@ -28,7 +28,8 @@ interface FabricSelectorProps {
 export default function FabricSelector({ pickId, className, productTitle }: FabricSelectorProps) {
   const [open, setOpen] = useState(false);
   const [fabrics, setFabrics] = useState<Fabric[]>([]);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [selectedFabricId, setSelectedFabricId] = useState<string | null>(null);
+  const [selectedWoodId, setSelectedWoodId] = useState<string | null>(null);
   const [zoomed, setZoomed] = useState<Fabric | null>(null);
 
   useEffect(() => {
@@ -99,22 +100,32 @@ export default function FabricSelector({ pickId, className, productTitle }: Fabr
     if (!sortedGroupKeys.includes("Fabric & Leather")) sortedGroupKeys.unshift("Fabric & Leather");
   }
 
-  const selectedFabric =
-    selectedId === "__com__"
+  const selectedFabricItem =
+    selectedFabricId === "__com__"
       ? comTile
-      : selectedId === "__col__"
+      : selectedFabricId === "__col__"
       ? colTile
-      : fabrics.find((f) => f.id === selectedId) || null;
+      : fabrics.find((f) => f.id === selectedFabricId) || null;
+  const selectedWoodItem = fabrics.find((f) => f.id === selectedWoodId) || null;
 
   const renderTile = (f: Fabric) => {
     const isCom = f.id === "__com__";
     const isCol = f.id === "__col__";
-    const isSelected = selectedId === f.id;
+    const isFabricGroup =
+      f.category === "Fabric & Leather" ||
+      f.category === "Upholstery" ||
+      f.category === "Leather" ||
+      f.id === "__com__" ||
+      f.id === "__col__";
+    const isSelected = isFabricGroup
+      ? selectedFabricId === f.id
+      : selectedWoodId === f.id;
+    const setSelected = isFabricGroup ? setSelectedFabricId : setSelectedWoodId;
     return (
       <div key={f.id} className="flex flex-col gap-2">
         <button
           type="button"
-          onClick={() => setSelectedId(f.id)}
+          onClick={() => setSelected(f.id)}
           className={cn(
             "relative aspect-square w-full overflow-hidden rounded-md bg-muted/30 ring-1 ring-border/60 transition",
             isSelected ? "ring-2 ring-foreground" : "hover:ring-foreground/40"
@@ -167,9 +178,14 @@ export default function FabricSelector({ pickId, className, productTitle }: Fabr
         <span className="font-body text-sm tracking-wide text-muted-foreground flex-1">
           Select Your Fabric/Leather and Wood Finish
         </span>
-        {selectedFabric && (
+        {(selectedFabricItem || selectedWoodItem) && (
           <span className="font-body text-sm text-foreground/85 truncate max-w-[55%] text-right">
-            {selectedFabric.name}
+            {[
+              selectedFabricItem?.name,
+              selectedWoodItem?.name,
+            ]
+              .filter(Boolean)
+              .join(" + ")}
           </span>
         )}
         <ChevronDown
@@ -241,7 +257,14 @@ export default function FabricSelector({ pickId, className, productTitle }: Fabr
                 <button
                   type="button"
                   onClick={() => {
-                    setSelectedId(zoomed.id);
+                    const isFabric =
+                      zoomed.category === "Fabric & Leather" ||
+                      zoomed.category === "Upholstery" ||
+                      zoomed.category === "Leather" ||
+                      zoomed.id === "__com__" ||
+                      zoomed.id === "__col__";
+                    if (isFabric) setSelectedFabricId(zoomed.id);
+                    else setSelectedWoodId(zoomed.id);
                     setZoomed(null);
                   }}
                   className="px-4 py-2 bg-foreground text-background font-body text-[11px] tracking-[0.18em] uppercase hover:bg-foreground/90 transition"
