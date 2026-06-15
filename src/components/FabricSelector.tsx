@@ -201,14 +201,40 @@ export default function FabricSelector({ pickId, className, productTitle }: Fabr
             onClick={(e) => e.stopPropagation()}
             className="relative bg-background rounded-lg shadow-xl w-full max-w-[560px] max-h-[92vh] flex flex-col"
           >
-            <button
-              type="button"
-              onClick={() => setZoomed(null)}
-              aria-label="Close"
-              className="absolute top-3 right-3 z-10 w-9 h-9 rounded-full bg-background/90 ring-1 ring-border flex items-center justify-center text-foreground/80 hover:text-foreground"
-            >
-              <X className="w-4 h-4" />
-            </button>
+            {/* Header with title + confirm */}
+            <div className="flex items-start justify-between gap-3 p-5 sm:p-6 border-b border-border/60">
+              <div className="min-w-0">
+                {productTitle && (
+                  <p className="font-display text-base sm:text-lg text-foreground leading-tight truncate">
+                    {productTitle}
+                  </p>
+                )}
+                <p className="font-body text-xs text-muted-foreground mt-0.5 truncate">
+                  {zoomed.supplier ? `${zoomed.supplier} — ` : ""}
+                  {zoomed.name}
+                </p>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedId(zoomed.id);
+                    setZoomed(null);
+                  }}
+                  className="px-4 py-2 bg-foreground text-background font-body text-[11px] tracking-[0.18em] uppercase hover:bg-foreground/90 transition"
+                >
+                  Confirm choice
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setZoomed(null)}
+                  aria-label="Close"
+                  className="w-9 h-9 rounded-full bg-background ring-1 ring-border flex items-center justify-center text-foreground/80 hover:text-foreground"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
 
             <div className="p-5 sm:p-6 overflow-y-auto">
               {zoomed.image_url ? (
@@ -222,16 +248,10 @@ export default function FabricSelector({ pickId, className, productTitle }: Fabr
                   {zoomed.id === "__com__" ? "COM" : "—"}
                 </div>
               )}
-              <p className="mt-4 font-body text-sm text-center text-foreground">
-                {zoomed.name}
-                {zoomed.supplier && (
-                  <span className="text-muted-foreground"> — {zoomed.supplier}</span>
-                )}
-              </p>
 
               <div className="mt-5 pt-5 border-t border-border/60">
                 <p className="font-body text-[11px] tracking-[0.18em] uppercase text-muted-foreground mb-3">
-                  Browse all
+                  Select fabric &amp; finish
                 </p>
                 <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1">
                   {[...fabrics, comTile].map((f) => {
