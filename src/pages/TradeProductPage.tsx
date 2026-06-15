@@ -230,6 +230,7 @@ function useTradeProductBySlug(
           edition_number: curatorPick?.edition_number || null,
           edition_signing: curatorPick?.edition_signing || null,
           is_upholstered: (curatorPick as any)?.is_upholstered ?? (tradeProduct as any)?.is_upholstered ?? null,
+          com_meters: (curatorPick as any)?.com_meters ?? null,
         };
 
         const rawSizeVariants = applyRugPerSqmPricing(
