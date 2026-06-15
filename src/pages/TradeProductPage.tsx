@@ -906,6 +906,9 @@ const TradeProductPage: React.FC = () => {
   const disabledDualSizeIdx = isDualAxis && (selectedBase || selectedTop)
     ? dualSizeOptions.map((s, i) => (variantsList.some((v: any) => matchesDual(v, selectedBase, selectedTop, s)) ? -1 : i)).filter((i) => i >= 0)
     : [];
+  const axisLabeledSize = (label?: string | null) => (label || "").trim().toLowerCase() === "size";
+  const baseAxisIsDim = (baseOptions.length > 0 && baseOptions.every(looksLikeDimension)) || axisLabeledSize((product as any).base_axis_label);
+  const topAxisIsDim = (topOptions.length > 0 && topOptions.every(looksLikeDimension)) || axisLabeledSize((product as any).top_axis_label);
 
   const activeVariant = isDualAxis
     ? dualVariant
@@ -916,6 +919,7 @@ const TradeProductPage: React.FC = () => {
     : hasSingleAxisSplit
       ? singleAxisActive
       : (hasVariants && selectedVariantIdx != null ? sizeVariants![selectedVariantIdx] : null);
+  const isUpholsteredProduct = isProductUpholstered(product as any);
 
   // When the product has variants but the user hasn't picked one yet, fall back
   // to the cheapest *priced* variant so we can show "From €X" instead of "Price on request".
@@ -1182,6 +1186,31 @@ const TradeProductPage: React.FC = () => {
                 />
               )}
 
+              {!isRugSqmActive && isBaseOnly && baseAxisIsDim && (
+                <ExpandableSpec
+                  icon={specIcon("📐")}
+                  text={withImperialPerLine(baseOptions.join("\n"))}
+                  placeholder={getBasePlaceholder(product)}
+                  singleValueLabel={formatVariantAxisLabel(product.base_axis_label) || undefined}
+                  emphasized
+                  value={selectedBase != null ? Math.max(0, baseOptions.indexOf(selectedBase)) : null}
+                  onChange={(idx) => {
+                    if (idx < 0) {
+                      setSelectedBase(null);
+                      handleMaterialChange(null, { base: null, top: null, size: null });
+                      return;
+                    }
+                    const v = baseOptions[idx] ?? null;
+                    setSelectedBase(v);
+                    handleMaterialChange(v, { base: v, top: null, size: null });
+                  }}
+                />
+              )}
+
+              {isUpholsteredProduct && (
+                <FabricSelector pickId={product.id} />
+              )}
+
               {/* Material dropdown — when variants encode (size × material), bind it to selectedSingleMaterial */}
               {!isRugSqmActive && !isDualAxis && hasSingleAxisSplit && (
                 <ExpandableSpec
@@ -1216,9 +1245,9 @@ const TradeProductPage: React.FC = () => {
                   }
                 />
               )}
-              {!isRugSqmActive && isBaseOnly && (
+              {!isRugSqmActive && isBaseOnly && !baseAxisIsDim && (
                 <ExpandableSpec
-                  icon={specIcon("⬗")}
+                  icon={specIcon(baseAxisIsDim ? "📐" : "⬗")}
                   text={withImperialPerLine(baseOptions.join("\n"))}
                   placeholder={getBasePlaceholder(product)}
                   singleValueLabel={formatVariantAxisLabel(product.base_axis_label) || undefined}
@@ -1253,7 +1282,7 @@ const TradeProductPage: React.FC = () => {
               {!isRugSqmActive && isDualAxis && (
                 <>
                   <ExpandableSpec
-                    icon={specIcon("⬗")}
+                    icon={specIcon(baseAxisIsDim ? "📐" : "⬗")}
                     text={withImperialPerLine(baseOptions.join("\n"))}
                     placeholder={getBasePlaceholder(product)}
                       singleValueLabel={formatVariantAxisLabel(product.base_axis_label) || undefined}
@@ -1285,7 +1314,7 @@ const TradeProductPage: React.FC = () => {
                     }
                   />
                   <ExpandableSpec
-                    icon={specIcon("⬗")}
+                    icon={specIcon(topAxisIsDim ? "📐" : "⬗")}
                     text={withImperialPerLine(topOptions.join("\n"))}
                     placeholder={getTopPlaceholder(product)}
                       singleValueLabel={formatVariantAxisLabel(product.top_axis_label) || undefined}
@@ -1337,14 +1366,6 @@ const TradeProductPage: React.FC = () => {
                   emphasized
                 />
               )}
-
-              {isProductUpholstered(product as any) && (
-                <FabricSelector pickId={product.id} />
-              )}
-
-
-
-
 
               {(() => {
                 const handcrafted = formatHandcrafted(product.origin, product.lead_time);

@@ -308,6 +308,9 @@ const VariantSelectors: React.FC<{
   const disabledDualSizeIdx = isDualAxis && (selBase || selTop)
     ? dualSizeOptions.map((s, i) => (variantsList.some((v: any) => matchesDual(v, selBase, selTop, s)) ? -1 : i)).filter((i) => i >= 0)
     : [];
+  const axisLabeledSize = (label?: string | null) => (label || "").trim().toLowerCase() === "size";
+  const baseAxisIsDim = (baseOptions.length > 0 && baseOptions.every(looksLikeDimension)) || axisLabeledSize(product.base_axis_label);
+  const topAxisIsDim = (topOptions.length > 0 && topOptions.every(looksLikeDimension)) || axisLabeledSize(product.top_axis_label);
 
   // Per-square-metre rug picker short-circuit: when the product is a rug and
   // its size_variants encode parseable dimensions (e.g. "300 × 400 cm"), show
@@ -337,7 +340,7 @@ const VariantSelectors: React.FC<{
 
   return (
     <>
-      {/* Size dropdown — shown FIRST so users pick dimensions before finishes */}
+      {/* Size dropdown — shown before finishes */}
       {isDualAxis && dualSizeOptions.length > 0 ? (
         <ExpandableSpec
           icon={specIcon("📐")}
@@ -425,11 +428,34 @@ const VariantSelectors: React.FC<{
         <ExpandableSpec icon={specIcon("📐")} text={withImperialPerLine(product.dimensions)} />
       )}
 
+      {isBaseOnly && baseAxisIsDim && (
+        <ExpandableSpec
+          icon={specIcon("📐")}
+          text={withImperialPerLine(baseOptions.join("\n"))}
+          placeholder={getBasePlaceholder(product)}
+          singleValueLabel={formatVariantAxisLabel(product.base_axis_label) || undefined}
+          emphasized
+          value={selBase != null ? Math.max(0, baseOptions.indexOf(selBase)) : null}
+          onChange={(idx) => {
+            if (idx < 0) {
+              setSelBase(null);
+              onMaterialChange?.(null, { base: null, top: null, size: null });
+              return;
+            }
+            const v = baseOptions[idx] ?? null;
+            setSelBase(v);
+            onMaterialChange?.(v, { base: v, top: null, size: null });
+          }}
+        />
+      )}
+
+      {isProductUpholstered(product) && <FabricSelector pickId={product.id} />}
+
       {/* Material / finish dropdown(s) */}
       {isDualAxis ? (
         <>
           <ExpandableSpec
-            icon={specIcon("⬗")}
+            icon={specIcon(baseAxisIsDim ? "📐" : "⬗")}
             text={withImperialPerLine(baseOptions.join("\n"))}
             placeholder={getBasePlaceholder(product)}
             singleValueLabel={formatVariantAxisLabel(product.base_axis_label) || undefined}
@@ -460,7 +486,7 @@ const VariantSelectors: React.FC<{
             }
           />
           <ExpandableSpec
-            icon={specIcon("⬗")}
+            icon={specIcon(topAxisIsDim ? "📐" : "⬗")}
             text={withImperialPerLine(topOptions.join("\n"))}
             placeholder={getTopPlaceholder(product)}
             singleValueLabel={formatVariantAxisLabel(product.top_axis_label) || undefined}
@@ -502,9 +528,9 @@ const VariantSelectors: React.FC<{
             </p>
           )}
         </>
-      ) : isBaseOnly ? (
+      ) : isBaseOnly && !baseAxisIsDim ? (
         <ExpandableSpec
-          icon={specIcon("⬗")}
+          icon={specIcon(baseAxisIsDim ? "📐" : "⬗")}
           text={withImperialPerLine(baseOptions.join("\n"))}
           placeholder={getBasePlaceholder(product)}
           singleValueLabel={formatVariantAxisLabel(product.base_axis_label) || undefined}
@@ -945,18 +971,6 @@ const PublicProductPage: React.FC = () => {
                   galleryActiveIndex={galleryActiveIndex}
                   finishMap={productFinishMap}
                 />
-
-                {isProductUpholstered({
-                  category: product.category,
-                  subcategory: product.subcategory,
-                  title: product.title,
-                  is_upholstered: product.is_upholstered,
-                }) && (
-                  <FabricSelector pickId={product.id} />
-                )}
-
-
-
 
                 {(() => {
                   const handcrafted = formatHandcrafted(product.origin, product.lead_time);

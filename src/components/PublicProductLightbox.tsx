@@ -13,6 +13,8 @@ import { useAuthGate } from "@/hooks/useAuthGate";
 import AuthGateDialog from "@/components/AuthGateDialog";
 import ExpandableSpec from "@/components/ExpandableSpec";
 import FavoriteFolderPicker from "@/components/FavoriteFolderPicker";
+import FabricSelector from "@/components/FabricSelector";
+import { isProductUpholstered } from "@/lib/upholstery";
 
 import { getBasePlaceholder, getTopPlaceholder, formatVariantAxisLabel } from "@/lib/variantPlaceholders";
 import { formatDimensionsMultiline, formatImperialDimensions, withImperialPerLine } from "@/lib/formatDimensions";
@@ -61,6 +63,7 @@ export interface PublicLightboxItem {
   variant_image_map?: Record<string, number> | null;
   /** Per-image captions keyed by gallery_images index. */
   gallery_captions?: Record<string, string> | null;
+  is_upholstered?: boolean | null;
 }
 
 interface Props {
@@ -150,11 +153,12 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
       !propProduct.materials_description ||
       !propProduct.origin ||
       !propProduct.lead_time ||
-      !propProduct.dimensions;
+      !propProduct.dimensions ||
+      propProduct.is_upholstered === undefined;
     if (!needsHydration) return;
     supabase
       .from("designer_curator_picks_public" as any)
-      .select("size_variants, variant_placeholder, base_axis_label, top_axis_label, gallery_images, variant_image_map, materials_description, origin, lead_time, dimensions, gallery_captions")
+      .select("size_variants, variant_placeholder, base_axis_label, top_axis_label, gallery_images, variant_image_map, materials_description, origin, lead_time, dimensions, gallery_captions, is_upholstered")
       .eq("id", propProduct.id)
       .maybeSingle()
       .then(({ data }) => {
@@ -179,6 +183,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
       lead_time: propProduct.lead_time ?? variantPayload.lead_time ?? null,
       dimensions: propProduct.dimensions ?? variantPayload.dimensions ?? null,
       gallery_captions: propProduct.gallery_captions ?? variantPayload.gallery_captions ?? null,
+      is_upholstered: propProduct.is_upholstered ?? variantPayload.is_upholstered ?? null,
     };
   }, [propProduct, variantPayload]);
 
@@ -257,6 +262,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
   const galleryImages = (product.gallery_images || []).filter(Boolean);
   const sv = product.size_variants || [];
   const axes = computeVariantAxes(sv);
+  const axisLabeledSize = (label?: string | null) => (label || "").trim().toLowerCase() === "size";
   // True dual-axis only when BOTH base and top are populated. Base-only
   // products (e.g. Atelier Pendhapa "Mangala Coffee Table") behave as
   // single-axis on Base — see src/lib/parseSizeVariants.ts.
@@ -267,6 +273,10 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
   // For base-only products, surface the bases through the same dropdown the
   // single-axis material picker uses below.
   const baseOnlyOptions = !isDualAxis && axes.isBaseOnly ? axes.baseOptions : [];
+  const baseOnlyIsDim = axes.isBaseOnly && (
+    (baseOnlyOptions.length > 0 && baseOnlyOptions.every(looksLikeDimension)) ||
+    axisLabeledSize(product.base_axis_label)
+  );
   // When single-axis labels actually encode (size × material) we render TWO
   // dropdowns (material + size) mirroring TradeProductPage — the catalog
   // legend must always match the product sheet.
@@ -338,6 +348,13 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
   }
   const currentImageUrl = finishImageIdx != null ? galleryImages[finishImageIdx] : product.image_url;
   const imageSwappedByFinish = currentImageUrl !== product.image_url;
+  const isUpholsteredProduct = isProductUpholstered({
+    category: product.category,
+    subcategory: product.subcategory,
+    title: product.title,
+    product_name: product.title,
+    is_upholstered: product.is_upholstered,
+  });
 
   /* ── Linked product page URL (only when designer slug resolves) ───── */
   const productPageDesignerSlug = product.designer_slug || linkedDesigner?.slug;
@@ -611,6 +628,18 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                 return null;
 
               })()}
+              {baseOnlyIsDim && (
+                <ExpandableSpec
+                  icon={specIcon("📐")}
+                  text={withImperialPerLine(baseOnlyOptions.join("\n"))}
+                  placeholder={getBasePlaceholder(product)}
+                  singleValueLabel={formatVariantAxisLabel(product.base_axis_label) || undefined}
+                  emphasized
+                  value={selectedMaterialIdx ?? null}
+                  onChange={(idx) => setSelectedMaterialIdx(idx < 0 ? null : idx)}
+                />
+              )}
+              {isUpholsteredProduct && <FabricSelector pickId={product.id} />}
               {(() => {
                 if (isDualAxis) {
                   const topOptions = Array.from(new Set(sv.map((v) => (v.top || "").trim()).filter(Boolean)));
@@ -622,7 +651,6 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                   // axis as "Size" — so a multi-value base/top like
                   // "Scala 220 - W 220 x D 135 x H 76.5 cm" / "Scala 300 - …"
                   // still renders with 📐 instead of the default ⬗.
-                  const axisLabeledSize = (label?: string | null) => (label || "").trim().toLowerCase() === "size";
                   const baseIsDim = (baseOptions.length > 0 && baseOptions.every(looksLikeDimension)) || axisLabeledSize(product.base_axis_label);
                   const topIsDim = (topOptions.length > 0 && topOptions.every(looksLikeDimension)) || axisLabeledSize(product.top_axis_label);
 
@@ -662,8 +690,10 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                       }}
                     />
                   );
-                  // Finish/material axis always renders before dimensions axis.
+                  // Dimension axes always render before finish/material axes.
                   const ordered = baseIsDim && !topIsDim
+                    ? [baseNode, topNode]
+                    : topIsDim && !baseIsDim
                     ? [topNode, baseNode]
                     : [baseNode, topNode];
                   return <>{ordered}</>;
@@ -684,9 +714,10 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                       />
                     );
                   }
+                  if (baseOnlyIsDim) return null;
                   return (
                     <ExpandableSpec
-                      icon={specIcon("⬗")}
+                      icon={specIcon(baseOnlyIsDim ? "📐" : "⬗")}
                       text={materialOptions.join("\n")}
                       placeholder={hasAnyBase ? getBasePlaceholder(product) : "Select your finish"}
                       singleValueLabel={hasAnyBase ? (formatVariantAxisLabel(product.base_axis_label) || undefined) : undefined}
