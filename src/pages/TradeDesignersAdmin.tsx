@@ -1115,6 +1115,7 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
                     );
                   })}
                 </div>
+                )}
                 {FABRICS_PANEL_PILOT_PICK_IDS.has(pick.id) ? (
                   <ProductFabricsPanel pickId={pick.id} currency={pick.currency} />
                 ) : (
