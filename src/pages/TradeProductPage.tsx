@@ -1451,7 +1451,7 @@ const TradeProductPage: React.FC = () => {
 
               {(() => {
                 const handcrafted = formatHandcrafted(product.origin, product.lead_time);
-                const showDims = !isRugSqmActive && product.dimensions && isDualAxis && !hasDualSize && looksLikeDimension(product.dimensions);
+                const showDims = !isRugSqmActive && product.dimensions && isDualAxis && !hasDualSize && (baseAxisIsDim || topAxisIsDim) && looksLikeDimension(product.dimensions);
                 if (!showDims && !handcrafted) return null;
                 const dimLines = showDims
                   ? withImperialPerLine(product.dimensions!).split("\n").map((l) => l.trim()).filter(Boolean)
