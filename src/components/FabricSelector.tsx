@@ -138,11 +138,17 @@ export default function FabricSelector({ pickId, className, productTitle, onUpho
       ? selectedFabricId === f.id
       : selectedWoodId === f.id;
     const setSelected = isFabricGroup ? setSelectedFabricId : setSelectedWoodId;
+    const handlePick = () => {
+      setSelected(f.id);
+      // Only fabric/leather drives the upholstery price tier. Wood finishes
+      // are decorative and don't change the variant matrix on this product.
+      if (isFabricGroup) onUpholsteryTierChange?.(f.price_tier_label ?? null);
+    };
     return (
       <div key={f.id} className="flex flex-col gap-2">
         <button
           type="button"
-          onClick={() => setSelected(f.id)}
+          onClick={handlePick}
           className={cn(
             "relative aspect-square w-full overflow-hidden rounded-md bg-muted/30 ring-1 ring-border/60 transition",
             isSelected ? "ring-2 ring-foreground" : "hover:ring-foreground/40"
