@@ -944,7 +944,12 @@ const TradeProductPage: React.FC = () => {
   // whose axis label is a finish/frame/wood concept already covered there.
   const isFinishAxisLabel = (label: string) =>
     /\b(frame|wood|finish|feet|foot|leg|legs|base)\b/i.test(label);
-  const suppressBaseAsFinish = isUpholsteredProduct && !baseAxisIsDim && isFinishAxisLabel(baseAxisLabelRaw);
+  // Only suppress the Base dropdown when every base option is also offered as
+  // a wood swatch in FabricSelector — otherwise the user has no way to pick
+  // bases that lack a swatch (e.g. Walnut, Thermo-treated wood).
+  const allBasesHaveSwatches =
+    baseOptions.length > 0 && baseOptions.every((b) => linkedWoodFinishes.includes(b));
+  const suppressBaseAsFinish = isUpholsteredProduct && !baseAxisIsDim && isFinishAxisLabel(baseAxisLabelRaw) && allBasesHaveSwatches;
   const suppressTopAsFinish = isUpholsteredProduct && !topAxisIsDim && isFinishAxisLabel(topAxisLabelRaw);
 
   // When the product has variants but the user hasn't picked one yet, fall back
