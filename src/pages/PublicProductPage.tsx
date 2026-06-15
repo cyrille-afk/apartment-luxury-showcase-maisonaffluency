@@ -198,6 +198,11 @@ const VariantSelectors: React.FC<{
 
   const [selBase, setSelBase] = useState<string | null>(null);
   const [selTop, setSelTop] = useState<string | null>(null);
+  // True when this product has linked fabric/leather swatches — used to hide
+  // the redundant upholstery-finish dropdown (the swatch picker already
+  // drives the upholstery price tier).
+  const [hasLinkedFabrics, setHasLinkedFabrics] = useState(false);
+
   const [selDualSize, setSelDualSize] = useState<string | null>(null);
   const [selMat, setSelMat] = useState<string | null>(null);
   const [selSize, setSelSize] = useState<string | null>(null);
@@ -453,12 +458,15 @@ const VariantSelectors: React.FC<{
         <FabricSelector
           pickId={product.id}
           productTitle={product.title}
+          onHasFabricsChange={setHasLinkedFabrics}
           onUpholsteryTierChange={(rawTier) => {
             if (!rawTier) return;
             // Match a top option whose value starts with the raw tier
             // (e.g. raw "ECART fabric" → "ECART fabric (12 m)"). Prefer the
             // option compatible with the currently selected size, otherwise
             // fall back to the first match.
+
+
             const candidates = topOptions.filter(
               (t) => t === rawTier || t.toLowerCase().startsWith(rawTier.toLowerCase()),
             );
@@ -514,6 +522,7 @@ const VariantSelectors: React.FC<{
                 : undefined
             }
           />
+          {!(hasLinkedFabrics && !topAxisIsDim) && (
           <ExpandableSpec
             icon={specIcon(topAxisIsDim ? "📐" : "⬗")}
             text={withImperialPerLine(topOptions.join("\n"))}
@@ -548,6 +557,8 @@ const VariantSelectors: React.FC<{
                 : undefined
             }
           />
+          )}
+
           {/* Reset-to-default link intentionally omitted: defaultPair is only
               set when there is a single fixed pairing (1 base × 1 top), in
               which case there is nothing to reset to. */}

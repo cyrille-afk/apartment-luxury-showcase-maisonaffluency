@@ -460,6 +460,11 @@ const TradeProductPage: React.FC = () => {
   const [added, setAdded] = useState(false);
   const [customRequestOpen, setCustomRequestOpen] = useState(false);
   const [bioExpanded, setBioExpanded] = useState(false);
+  // True when this product has linked fabric/leather swatches — used to hide
+  // the redundant "Select your upholstery finish" dropdown, since the swatch
+  // picker already drives the upholstery price tier.
+  const [hasLinkedFabrics, setHasLinkedFabrics] = useState(false);
+
 
   useEffect(() => {
     if (!user) return;
@@ -1211,7 +1216,9 @@ const TradeProductPage: React.FC = () => {
                 <FabricSelector
                   pickId={product.id}
                   productTitle={product.title}
+                  onHasFabricsChange={setHasLinkedFabrics}
                   onUpholsteryTierChange={(rawTier) => {
+
                     if (!rawTier) return;
                     const candidates = topOptions.filter(
                       (t) => t === rawTier || t.toLowerCase().startsWith(rawTier.toLowerCase()),
@@ -1336,7 +1343,9 @@ const TradeProductPage: React.FC = () => {
                         : undefined
                     }
                   />
+                  {!(hasLinkedFabrics && !topAxisIsDim) && (
                   <ExpandableSpec
+
                     icon={specIcon(topAxisIsDim ? "📐" : "⬗")}
                     text={withImperialPerLine(topOptions.join("\n"))}
                     placeholder={getTopPlaceholder(product)}
@@ -1370,6 +1379,8 @@ const TradeProductPage: React.FC = () => {
                         : undefined
                     }
                   />
+                  )}
+
                   {defaultPair && !isAtDefaultPair && (
                     <button
                       type="button"
