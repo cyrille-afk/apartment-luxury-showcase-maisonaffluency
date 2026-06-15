@@ -684,7 +684,7 @@ function SplitImageBlock({
         />
       </div>
       {caption && (
-        <figcaption className={`mt-2 font-body text-[13px] tracking-wide text-muted-foreground italic text-center md:text-left ${isSmall ? "max-w-[240px] mx-auto md:mx-0" : ""}`}>
+        <figcaption className={`mt-2 font-body text-[13px] tracking-wide text-muted-foreground italic text-center md:text-left ${isSmall ? "max-w-[200px] mx-auto md:mx-0" : ""}`}>
           {caption}
         </figcaption>
       )}
