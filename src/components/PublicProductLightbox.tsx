@@ -273,6 +273,10 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
   // For base-only products, surface the bases through the same dropdown the
   // single-axis material picker uses below.
   const baseOnlyOptions = !isDualAxis && axes.isBaseOnly ? axes.baseOptions : [];
+  const baseOnlyIsDim = axes.isBaseOnly && (
+    (baseOnlyOptions.length > 0 && baseOnlyOptions.every(looksLikeDimension)) ||
+    axisLabeledSize(product.base_axis_label)
+  );
   // When single-axis labels actually encode (size × material) we render TWO
   // dropdowns (material + size) mirroring TradeProductPage — the catalog
   // legend must always match the product sheet.
@@ -568,8 +572,6 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
             </div>
 
             <div className="flex flex-col">
-              {isUpholsteredProduct && <FabricSelector pickId={product.id} />}
-
               {product.dimensions && looksLikeDimension(product.dimensions) && (
                 <ExpandableSpec
                   icon={specIcon("📐")}
@@ -626,6 +628,18 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                 return null;
 
               })()}
+              {baseOnlyIsDim && (
+                <ExpandableSpec
+                  icon={specIcon("📐")}
+                  text={withImperialPerLine(baseOnlyOptions.join("\n"))}
+                  placeholder={getBasePlaceholder(product)}
+                  singleValueLabel={formatVariantAxisLabel(product.base_axis_label) || undefined}
+                  emphasized
+                  value={selectedMaterialIdx ?? null}
+                  onChange={(idx) => setSelectedMaterialIdx(idx < 0 ? null : idx)}
+                />
+              )}
+              {isUpholsteredProduct && <FabricSelector pickId={product.id} />}
               {(() => {
                 if (isDualAxis) {
                   const topOptions = Array.from(new Set(sv.map((v) => (v.top || "").trim()).filter(Boolean)));
@@ -700,10 +714,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                       />
                     );
                   }
-                  const baseOnlyIsDim = axes.isBaseOnly && (
-                    (baseOnlyOptions.length > 0 && baseOnlyOptions.every(looksLikeDimension)) ||
-                    axisLabeledSize(product.base_axis_label)
-                  );
+                  if (baseOnlyIsDim) return null;
                   return (
                     <ExpandableSpec
                       icon={specIcon(baseOnlyIsDim ? "📐" : "⬗")}
