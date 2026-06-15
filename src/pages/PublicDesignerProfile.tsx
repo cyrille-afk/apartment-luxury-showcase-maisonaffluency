@@ -957,7 +957,7 @@ const PublicDesignerProfile = () => {
                             specialTags.unshift(pick.edition);
                           }
                           return specialTags.length > 0 ? (
-                            <div className="absolute top-2 left-2 flex flex-wrap gap-1">
+                            <div className="absolute top-2 right-2 flex flex-wrap gap-1 justify-end">
                               {specialTags.map((tag, i) => (
                                 <span
                                   key={i}
