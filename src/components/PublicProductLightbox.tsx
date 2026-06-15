@@ -792,7 +792,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                   href="/trade-program"
                   className="flex items-center justify-center gap-2 px-5 py-3 rounded-md font-body text-xs uppercase tracking-[0.12em] transition-all w-full bg-foreground text-background hover:bg-foreground/90"
                 >
-                  Price on Request
+                  Price Upon Request
                 </a>
               )}
               {productPageHref && (

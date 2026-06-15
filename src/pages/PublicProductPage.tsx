@@ -1002,12 +1002,12 @@ const PublicProductPage: React.FC = () => {
               </div>
 
 
-              {/* Primary CTA — Price on Request */}
+              {/* Primary CTA — Price Upon Request */}
               <Link
                 to="/trade-program"
                 className="mt-2 flex items-center justify-center gap-2 px-5 py-3.5 rounded-md font-body text-xs uppercase tracking-[0.12em] transition-all w-full bg-foreground text-background hover:bg-foreground/90"
               >
-                Price on Request
+                Price Upon Request
               </Link>
 
               {/* Secondary actions: Favorite / Pin / Spec Sheet */}

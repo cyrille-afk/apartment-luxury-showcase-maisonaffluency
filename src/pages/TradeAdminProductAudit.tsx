@@ -25,7 +25,7 @@ function slugify(s: string) {
 }
 
 function money(cents: number | null | undefined, currency = "EUR") {
-  if (!cents || cents <= 0) return "Price on Request";
+  if (!cents || cents <= 0) return "Price Upon Request";
   return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency,
@@ -145,7 +145,7 @@ function AuditPane({
                   {rrp ? <div className="text-xs text-muted-foreground">8% trade discount applied</div> : null}
                 </div>
               ) : (
-                <div className="mt-2 text-2xl font-light">Price on Request</div>
+                <div className="mt-2 text-2xl font-light">Price Upon Request</div>
               )}
             </div>
 
@@ -165,7 +165,7 @@ function AuditPane({
                     return (
                       <div key={`${variantLabel(v)}-${idx}`} className="flex items-start justify-between gap-3 border-b border-border px-3 py-2 last:border-0">
                         <span className="text-sm">{variantLabelWithImperial(v)}</span>
-                        <span className="shrink-0 text-sm text-muted-foreground">{isTrade ? money(cents, currency) : "Price on Request"}</span>
+                        <span className="shrink-0 text-sm text-muted-foreground">{isTrade ? money(cents, currency) : "Price Upon Request"}</span>
                       </div>
                     );
                   })}
@@ -312,7 +312,7 @@ export default function TradeAdminProductAudit() {
         <Card className="p-12 text-center text-muted-foreground">Product data not found.</Card>
       ) : (
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-          <AuditPane side="Public" tone="Public sees Price on Request + gated documents" product={detailQuery.data.pick} designer={detailQuery.data.designer} tradeProduct={detailQuery.data.tradeProduct} url={publicUrl} />
+          <AuditPane side="Public" tone="Public sees Price Upon Request + gated documents" product={detailQuery.data.pick} designer={detailQuery.data.designer} tradeProduct={detailQuery.data.tradeProduct} url={publicUrl} />
           <AuditPane side="Trade" tone="Trade sees RRP, 8% discount, specs, and documentation" product={detailQuery.data.pick} designer={detailQuery.data.designer} tradeProduct={detailQuery.data.tradeProduct} url={tradeUrl} />
         </div>
       )}

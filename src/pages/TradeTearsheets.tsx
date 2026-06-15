@@ -277,7 +277,7 @@ export default function TradeTearsheets() {
         ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]!));
     const priceStr = selectedProduct.trade_price_cents
       ? `${selectedProduct.currency === "USD" ? "$" : selectedProduct.currency === "GBP" ? "£" : selectedProduct.currency === "SGD" ? "S$" : "€"}${(selectedProduct.trade_price_cents / 100).toLocaleString()}`
-      : "Price on Request";
+      : "Price Upon Request";
     win.document.write(`
       <html><head><title>Tearsheet - ${esc(selectedProduct.product_name)}</title>
       <style>
@@ -347,7 +347,7 @@ export default function TradeTearsheets() {
                   ["Lead Time", selectedProduct.lead_time],
                   ["Trade Price", selectedProduct.trade_price_cents
                     ? `${selectedProduct.currency === "USD" ? "$" : selectedProduct.currency === "GBP" ? "£" : selectedProduct.currency === "SGD" ? "S$" : "€"}${(selectedProduct.trade_price_cents / 100).toLocaleString()}`
-                    : "Price on Request"],
+                    : "Price Upon Request"],
                 ] as const).map(([label, val]) => (
                   <div key={label}>
                     <p className="font-body text-[10px] uppercase tracking-wider text-muted-foreground">{label}</p>
