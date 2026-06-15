@@ -98,7 +98,8 @@ Deno.serve(async (req) => {
         if (dErr) throw dErr;
         deleted[folder] = { files: paths.length, status: "ok" };
       } catch (err: any) {
-        deleted[folder] = { files: 0, status: `error: ${err.message}` };
+        console.error("backup folder prune error:", err);
+        deleted[folder] = { files: 0, status: "error" };
       }
     }
 
