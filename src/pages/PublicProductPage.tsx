@@ -522,6 +522,7 @@ const VariantSelectors: React.FC<{
                 : undefined
             }
           />
+          {!(hasLinkedFabrics && !topAxisIsDim) && (
           <ExpandableSpec
             icon={specIcon(topAxisIsDim ? "📐" : "⬗")}
             text={withImperialPerLine(topOptions.join("\n"))}
@@ -556,6 +557,8 @@ const VariantSelectors: React.FC<{
                 : undefined
             }
           />
+          )}
+
           {/* Reset-to-default link intentionally omitted: defaultPair is only
               set when there is a single fixed pairing (1 base × 1 top), in
               which case there is nothing to reset to. */}
