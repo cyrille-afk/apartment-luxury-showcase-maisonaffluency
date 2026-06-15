@@ -390,6 +390,19 @@ export default function TradeAdminFabrics() {
     qc.invalidateQueries({ queryKey: ["admin-fabrics-links"] });
   };
 
+  const setPickLinkImageRange = async (linkId: string, raw: string) => {
+    const indices = parseImageRange(raw);
+    const { error } = await (supabase as any)
+      .from("product_fabrics")
+      .update({ image_indices: indices })
+      .eq("id", linkId);
+    if (error) {
+      toast({ title: "Save failed", description: error.message, variant: "destructive" });
+      return;
+    }
+    qc.invalidateQueries({ queryKey: ["admin-fabrics-links"] });
+  };
+
   return (
     <>
       <Helmet>
