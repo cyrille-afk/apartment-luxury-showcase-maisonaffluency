@@ -7,6 +7,7 @@ import { ArrowLeft, Plus, Trash2, Save, X, Link2 } from "lucide-react";
 import { useState, useMemo } from "react";
 import { useToast } from "@/hooks/use-toast";
 import CloudUpload from "@/components/trade/CloudUpload";
+import { slugify } from "@/lib/whatsapp-share";
 
 type FabricCategory = "Fabric & Leather" | "Wood" | "Stone" | "Metal" | "Other";
 
