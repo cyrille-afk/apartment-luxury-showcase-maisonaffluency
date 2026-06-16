@@ -40,6 +40,7 @@ interface QuoteItemWithProduct {
   product_id: string;
   quantity: number;
   unit_price_cents: number | null;
+  unit_price_currency: string | null;
   notes: string | null;
   po_number: string | null;
   cost_code: string | null;
@@ -348,12 +349,14 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   // Fetch exchange rates from frankfurter.app
   useEffect(() => {
     const fetchRates = async () => {
-      // Collect unique source currencies from items that differ from quote currency
+      // Collect unique source currencies from saved line prices/catalog prices.
       const sourceCurrencies = new Set<string>();
       items.forEach((item) => {
-        const prodCurrency = item.trade_products?.currency;
-        if (prodCurrency && prodCurrency !== currency) {
-          sourceCurrencies.add(prodCurrency);
+        const sourceCurrency = item.unit_price_cents != null
+          ? (item.unit_price_currency || currency)
+          : item.trade_products?.currency;
+        if (sourceCurrency && sourceCurrency !== currency) {
+          sourceCurrencies.add(sourceCurrency);
         }
       });
       if (sourceCurrencies.size === 0) { setFxRates({}); return; }
