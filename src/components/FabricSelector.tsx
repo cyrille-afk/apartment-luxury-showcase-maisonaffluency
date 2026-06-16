@@ -82,6 +82,11 @@ interface FabricSelectorProps {
    * page should jump the hero gallery to. Null clears the override.
    */
   onSwatchImagesChange?: (imageIndices: number[] | null) => void;
+  /**
+   * Per-product override for the wood-swatch accordion label.
+   * When omitted, falls back to "Select the Wood Finish of the Frame".
+   */
+  woodLabel?: string | null;
 }
 
 const normalizeFabricCategory = (category: string | null | undefined) => {
