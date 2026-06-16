@@ -83,6 +83,7 @@ interface ProductRow {
   variant_placeholder: string | null;
   base_axis_label: string | null;
   top_axis_label: string | null;
+  wood_label_override: string | null;
   variant_image_map: Record<string, number> | null;
   gallery_captions?: Record<string, string> | null;
   is_upholstered?: boolean | null;
