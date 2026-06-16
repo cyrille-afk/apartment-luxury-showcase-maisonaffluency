@@ -114,6 +114,25 @@ function pickToLightboxItem(
   };
 }
 
+const slugifyProductPart = (value: string | null | undefined) =>
+  (value || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/&/g, "and")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+
+const tradeProductPathForPick = (
+  pick: DesignerCuratorPick,
+  designerSlug: string | undefined,
+  fallbackDesignerName: string,
+) => {
+  const brandSlug = designerSlug || slugifyProductPart(fallbackDesignerName);
+  const productSlug = slugifyProductPart(`${pick.title}${pick.subtitle ? `-${pick.subtitle}` : ""}`);
+  return brandSlug && productSlug ? `/trade/products/${brandSlug}/${productSlug}` : `/trade/products/${pick.id}`;
+};
+
 const TradeAtelierProfile = () => {
   const { isTradeUser, isAdmin, user } = useAuth();
   const { slug } = useParams<{ slug: string }>();
