@@ -20,6 +20,10 @@ interface Fabric {
   currency?: string | null;
   /** 1-based gallery image indices that depict this swatch on the linked product. */
   image_indices?: number[] | null;
+  /** Wood-finish frame price override (product_fabrics.price_cents_a). */
+  frame_price_cents?: number | null;
+  /** Currency of frame_price_cents. */
+  frame_price_currency?: string | null;
 }
 
 export interface SelectedFabricInfo {
@@ -62,6 +66,12 @@ interface FabricSelectorProps {
    * product page can drive the Base × Top price matrix in sync.
    */
   onWoodFinishChange?: (woodName: string | null) => void;
+  /**
+   * Fires when the selected wood-finish swatch carries a frame-price override
+   * (product_fabrics.price_cents_a). The product page uses it as the RRP base
+   * and adds the fabric per-LM upcharge on top.
+   */
+  onWoodFinishPricingChange?: (info: { name: string; price_cents: number; currency: string } | null) => void;
   /** Fires with the list of linked wood-swatch names after fetch. */
   onWoodFinishesAvailable?: (names: string[]) => void;
   /** Trade-only: include fabric price/tier fields for quote upcharge math. */
@@ -88,7 +98,7 @@ const isFabricCategory = (fabric: Fabric) => normalizeFabricCategory(fabric.cate
  * (Trade + Public). Tiles are grouped by category (Upholstery, Wood, …)
  * with a COM ("Customer's Own Material") tile always offered.
  */
-export default function FabricSelector({ pickId, className, productTitle, onUpholsteryTierChange, onFabricChange, onHasFabricsChange, onWoodFinishChange, onWoodFinishesAvailable, includePricing = false, onSwatchImagesChange }: FabricSelectorProps) {
+export default function FabricSelector({ pickId, className, productTitle, onUpholsteryTierChange, onFabricChange, onHasFabricsChange, onWoodFinishChange, onWoodFinishPricingChange, onWoodFinishesAvailable, includePricing = false, onSwatchImagesChange }: FabricSelectorProps) {
 
   const [open, setOpen] = useState(false);
   const [fabrics, setFabrics] = useState<Fabric[]>([]);
@@ -107,7 +117,7 @@ export default function FabricSelector({ pickId, className, productTitle, onUpho
       const query = includePricing
         ? (supabase as any)
             .from("product_fabrics")
-            .select("sort_order, price_tier_label, image_indices, fabric:fabrics(id, name, image_url, category, supplier, is_active, price_per_lm_cents, tier, currency)")
+            .select("sort_order, price_tier_label, image_indices, price_cents_a, fabric:fabrics(id, name, image_url, category, supplier, is_active, price_per_lm_cents, tier, currency)")
             .eq("pick_id", pickId)
             .order("sort_order", { ascending: true })
         : (supabase as any)
@@ -119,7 +129,13 @@ export default function FabricSelector({ pickId, className, productTitle, onUpho
       if (cancelled || error) return;
       const list: Fabric[] = (data || [])
         .map((row: any) => includePricing
-          ? row.fabric && { ...row.fabric, price_tier_label: row.price_tier_label ?? null, image_indices: row.image_indices ?? null }
+          ? row.fabric && {
+              ...row.fabric,
+              price_tier_label: row.price_tier_label ?? null,
+              image_indices: row.image_indices ?? null,
+              frame_price_cents: row.price_cents_a ?? null,
+              frame_price_currency: row.fabric?.currency ?? "EUR",
+            }
           : {
               id: row.fabric_id,
               name: row.name,
@@ -142,6 +158,8 @@ export default function FabricSelector({ pickId, className, productTitle, onUpho
           tier: f.tier ?? null,
           currency: f.currency ?? "EUR",
           image_indices: Array.isArray(f.image_indices) ? f.image_indices : null,
+          frame_price_cents: f.frame_price_cents ?? null,
+          frame_price_currency: f.frame_price_currency ?? "EUR",
         }));
       setFabrics(list);
       onHasFabricsChange?.(list.some(isFabricCategory));
@@ -235,6 +253,17 @@ export default function FabricSelector({ pickId, className, productTitle, onUpho
       } else {
         // Wood finish picked — drive the Frame axis on the price matrix.
         onWoodFinishChange?.(f.name);
+        // Emit frame-price override so the product page can use it as the
+        // RRP base (fabric per-LM upcharge is added on top).
+        if (f.frame_price_cents && f.frame_price_cents > 0) {
+          onWoodFinishPricingChange?.({
+            name: f.name,
+            price_cents: f.frame_price_cents,
+            currency: f.frame_price_currency || "EUR",
+          });
+        } else {
+          onWoodFinishPricingChange?.(null);
+        }
       }
     };
     const tierCaption = isFabricGroup && !isCom && !isCol && (f.tier || f.price_per_lm_cents)
@@ -420,6 +449,15 @@ export default function FabricSelector({ pickId, className, productTitle, onUpho
                     } else {
                       setSelectedWoodId(zoomed.id);
                       onWoodFinishChange?.(zoomed.name);
+                      if (zoomed.frame_price_cents && zoomed.frame_price_cents > 0) {
+                        onWoodFinishPricingChange?.({
+                          name: zoomed.name,
+                          price_cents: zoomed.frame_price_cents,
+                          currency: zoomed.frame_price_currency || "EUR",
+                        });
+                      } else {
+                        onWoodFinishPricingChange?.(null);
+                      }
                     }
                     setZoomed(null);
                   }}
