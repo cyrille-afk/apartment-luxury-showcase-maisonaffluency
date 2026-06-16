@@ -29,6 +29,9 @@ interface ProductFabricRow {
   fabric: Fabric | null;
 }
 
+const EMPTY_PRODUCT_FABRIC_ROWS: ProductFabricRow[] = [];
+const EMPTY_FABRICS: Fabric[] = [];
+
 const parseRange = (raw: string): number[] | null => {
   if (!raw || !raw.trim()) return null;
   const out = new Set<number>();
@@ -139,7 +142,7 @@ export default function ProductFabricsPanel({
     qc.invalidateQueries({ queryKey: ["product-fabrics-pick-meta", pickId] });
   };
 
-  const { data: rows = [], isLoading } = useQuery({
+  const { data: rows = EMPTY_PRODUCT_FABRIC_ROWS, isLoading } = useQuery({
     queryKey: ["product-fabrics-panel", pickId],
     queryFn: async () => {
       const { data, error } = await (supabase as any)
@@ -152,7 +155,7 @@ export default function ProductFabricsPanel({
     },
   });
 
-  const { data: allFabrics = [] } = useQuery({
+  const { data: allFabrics = EMPTY_FABRICS } = useQuery({
     queryKey: ["all-fabrics-for-panel"],
     queryFn: async () => {
       const { data, error } = await supabase
