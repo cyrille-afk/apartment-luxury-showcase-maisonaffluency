@@ -14,8 +14,8 @@ jobs:
     # stock_status_override or lead_weeks_max_override changes (see
     # src/lib/__tests__/computeDepositPct.test.ts).
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
@@ -29,10 +29,10 @@ jobs:
       image: mcr.microsoft.com/playwright:v1.60.0-noble
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
       # Manual npm cache — actions/setup-node's cache doesn't apply inside a container job.
       - name: Cache npm
-        uses: actions/cache@v5
+        uses: actions/cache@v4
         with:
           path: |
             ~/.npm
@@ -54,7 +54,7 @@ jobs:
           DEBUG: pw:api
       - name: Upload Playwright report
         if: failure() || cancelled()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v4
         with:
           name: playwright-report
           path: |
@@ -72,8 +72,8 @@ jobs:
     # `continue-on-error` on the audit step keeps the pipeline green when
     # Lighthouse silently hangs — the report is still uploaded for inspection.
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
@@ -88,7 +88,7 @@ jobs:
         timeout-minutes: 15
       - name: Upload Lighthouse report
         if: failure() || cancelled()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v4
         with:
           name: lighthouse-report
           path: |
