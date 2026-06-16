@@ -54,6 +54,13 @@ const TradeGallery = () => {
   const [selectedCategory, setSelectedCategory] = useState(() => searchParams.get("category") || "all");
   const [selectedSubcategory, setSelectedSubcategory] = useState(() => searchParams.get("subcategory") || "all");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [density, setDensity] = useState<"comfortable" | "compact">(() => {
+    if (typeof window === "undefined") return "comfortable";
+    return (localStorage.getItem("trade:gridDensity") as "comfortable" | "compact") || "comfortable";
+  });
+  useEffect(() => {
+    if (typeof window !== "undefined") localStorage.setItem("trade:gridDensity", density);
+  }, [density]);
   const [displayCurrency, setDisplayCurrency] = useTradeDisplayCurrency();
   const { showTradePrice, setShowTradePrice } = useTradePriceMode();
   const { discountPct: TRADE_DISCOUNT, discountLabel, tierLabel } = useTradeDiscount();
