@@ -2159,9 +2159,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                         {groupItems.map((item) => {
                   const product = item.trade_products;
                   const rawUnitPrice = item.unit_price_cents ?? catalogSourcePriceCents(item) ?? null;
-                  // unit_price_cents is already in the quote currency (admin converts before saving)
-                  const prodCurrency = item.unit_price_cents != null ? currency : (product?.currency || currency);
-                  const unitPrice = convertCents(rawUnitPrice, prodCurrency, currency);
+                  const unitPrice = convertCents(rawUnitPrice, itemPriceCurrency(item, currency), currency);
                   const lineTotal = unitPrice ? unitPrice * item.quantity : null;
 
                   return (
