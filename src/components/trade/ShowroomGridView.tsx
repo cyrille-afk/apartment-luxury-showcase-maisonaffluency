@@ -719,7 +719,7 @@ const ShowroomGridView = ({
           <p className="font-body text-sm text-muted-foreground">No products match your search criteria.</p>
         </div>
       ) : viewMode === "grid" ? (
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+        <div className={gridClass}>
           {filtered.map((product) => {
             const isAdding = addingProductId === product.id;
             const isAdded = addedProductIds.has(product.id);
