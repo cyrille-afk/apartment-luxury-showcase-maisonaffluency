@@ -2180,7 +2180,19 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                           <p className="font-body text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5 truncate">
                             {product?.brand_name?.includes(' - ') ? product.brand_name.split(' - ')[0].trim() : product?.brand_name}
                           </p>
-                          {item.variant_label && <p className="font-body text-[10px] md:text-[11px] text-foreground/90 mt-1 break-words"><span className="text-muted-foreground">Finish:</span> {item.variant_label}</p>}
+                          {item.variant_label && (
+                            <p className="font-body text-[10px] md:text-[11px] text-foreground/90 mt-1 break-words flex items-center gap-1.5 flex-wrap">
+                              {(item as any).wood_fabric?.image_url && (
+                                <img
+                                  src={(item as any).wood_fabric.image_url}
+                                  alt={(item as any).wood_fabric?.name || "Finish"}
+                                  className="w-5 h-5 rounded object-cover ring-1 ring-border shrink-0"
+                                  loading="lazy"
+                                />
+                              )}
+                              <span><span className="text-muted-foreground">Finish:</span> {item.variant_label}</span>
+                            </p>
+                          )}
                           {((item as any).fabric?.name || (item as any).fabric_upcharge_cents) && (() => {
                             const f: any = (item as any).fabric;
                             const upcharge = (item as any).fabric_upcharge_cents as number | null;
@@ -2188,16 +2200,26 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                             const meters = (item as any).fabric_meters as number | null;
                             const sym = ccy === "EUR" ? "€" : ccy === "USD" ? "$" : ccy === "GBP" ? "£" : ccy === "SGD" ? "S$" : ccy + " ";
                             return (
-                              <p className="font-body text-[10px] md:text-[11px] text-foreground/90 mt-1 break-words">
-                                <span className="text-muted-foreground">Fabric:</span> {f?.name || "Selected"}
-                                {f?.tier ? ` · CAT ${f.tier}` : ""}
-                                {upcharge ? (
-                                  <>
-                                    {" — "}
-                                    <span className="text-primary font-medium">+{sym}{(upcharge / 100).toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
-                                    {meters ? <span className="text-muted-foreground"> ({meters} m)</span> : null}
-                                  </>
-                                ) : null}
+                              <p className="font-body text-[10px] md:text-[11px] text-foreground/90 mt-1 break-words flex items-center gap-1.5 flex-wrap">
+                                {f?.image_url && (
+                                  <img
+                                    src={f.image_url}
+                                    alt={f?.name || "Fabric"}
+                                    className="w-5 h-5 rounded object-cover ring-1 ring-border shrink-0"
+                                    loading="lazy"
+                                  />
+                                )}
+                                <span>
+                                  <span className="text-muted-foreground">Fabric:</span> {f?.name || "Selected"}
+                                  {f?.tier ? ` · CAT ${f.tier}` : ""}
+                                  {upcharge ? (
+                                    <>
+                                      {" — "}
+                                      <span className="text-primary font-medium">+{sym}{(upcharge / 100).toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
+                                      {meters ? <span className="text-muted-foreground"> ({meters} m)</span> : null}
+                                    </>
+                                  ) : null}
+                                </span>
                               </p>
                             );
                           })()}
