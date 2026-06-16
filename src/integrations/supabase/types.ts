@@ -5607,6 +5607,7 @@ export type Database = {
           ship_origin_country: string | null
           ship_weight_kg: number | null
           unit_price_cents: number | null
+          unit_price_currency: string | null
           variant_label: string | null
           wood_fabric_id: string | null
         }
@@ -5633,6 +5634,7 @@ export type Database = {
           ship_origin_country?: string | null
           ship_weight_kg?: number | null
           unit_price_cents?: number | null
+          unit_price_currency?: string | null
           variant_label?: string | null
           wood_fabric_id?: string | null
         }
@@ -5659,6 +5661,7 @@ export type Database = {
           ship_origin_country?: string | null
           ship_weight_kg?: number | null
           unit_price_cents?: number | null
+          unit_price_currency?: string | null
           variant_label?: string | null
           wood_fabric_id?: string | null
         }

@@ -490,9 +490,17 @@ const TradeProductPage: React.FC = () => {
     if (!user || !data) return;
     setAdding(true);
     try {
+      const { product, designer } = data;
       let quoteId = activeQuoteId;
       if (!quoteId) {
-        const { data: q, error } = await createActiveDraftQuote(user.id);
+        const quoteCurrencies = ["SGD", "USD", "EUR", "GBP"];
+        const productCurrency = data?.pricing?.currency || "EUR";
+        const initialCurrency = quoteCurrencies.includes(displayCurrency)
+          ? displayCurrency
+          : quoteCurrencies.includes(productCurrency)
+            ? productCurrency
+            : "EUR";
+        const { data: q, error } = await createActiveDraftQuote(user.id, { currency: initialCurrency });
         if (error || !q) {
           toast({ title: "Error creating quote", description: error?.message, variant: "destructive" });
           return;
@@ -501,8 +509,6 @@ const TradeProductPage: React.FC = () => {
         setActiveQuoteId(quoteId);
       }
 
-
-      const { product, designer } = data;
 
       // Build the chosen variant label (finish/size) from the current selection
       // so the quote line records exactly what the user picked.
@@ -586,6 +592,7 @@ const TradeProductPage: React.FC = () => {
           // Combined override unit price (wood + fabric upcharge), in quote currency.
           if (overrideUnitPriceCents != null) {
             patch.unit_price_cents = overrideUnitPriceCents;
+            patch.unit_price_currency = productCcy;
           } else if (selectedWoodPrice || selectedFabric) {
             // Base = wood swatch price, or catalog rrp, all in product currency.
             const woodInProd = selectedWoodPrice?.price_cents
@@ -617,6 +624,7 @@ const TradeProductPage: React.FC = () => {
                 ? totalProd
                 : (convertCents(totalProd, productCcy, quoteCcy, fxRates) ?? totalProd);
               patch.unit_price_cents = totalQuote;
+              patch.unit_price_currency = quoteCcy;
             }
           }
 
@@ -667,7 +675,7 @@ const TradeProductPage: React.FC = () => {
     } finally {
       setAdding(false);
     }
-  }, [user, data, activeQuoteId, toast, selectedBase, selectedTop, selectedDualSize, selectedSingleMaterial, selectedSingleSize, selectedVariantIdx, rugSelection, selectedFabric, selectedWoodPrice, fxRates]);
+  }, [user, data, activeQuoteId, toast, selectedBase, selectedTop, selectedDualSize, selectedSingleMaterial, selectedSingleSize, selectedVariantIdx, rugSelection, selectedFabric, selectedWoodPrice, fxRates, displayCurrency]);
 
   // Default the dual-axis pickers to the first base + its uniquely-compatible
   // top so users see a complete pairing on load (e.g. Pars Cocktail Table:

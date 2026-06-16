@@ -40,6 +40,7 @@ interface QuoteItemWithProduct {
   product_id: string;
   quantity: number;
   unit_price_cents: number | null;
+  unit_price_currency: string | null;
   notes: string | null;
   po_number: string | null;
   cost_code: string | null;
@@ -101,6 +102,12 @@ const catalogSourcePriceCents = (item: QuoteItemWithProduct) => {
   }
   return product.trade_price_cents;
 };
+
+const itemPriceCurrency = (item: QuoteItemWithProduct, quoteCurrency: string) => (
+  item.unit_price_cents != null
+    ? (item.unit_price_currency || quoteCurrency)
+    : (item.trade_products?.currency || quoteCurrency)
+);
 
 const QuotePdfPreviewPages = ({ blobUrl }: { blobUrl: string | null }) => {
   const hostRef = useRef<HTMLDivElement>(null);
@@ -348,12 +355,14 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   // Fetch exchange rates from frankfurter.app
   useEffect(() => {
     const fetchRates = async () => {
-      // Collect unique source currencies from items that differ from quote currency
+      // Collect unique source currencies from saved line prices/catalog prices.
       const sourceCurrencies = new Set<string>();
       items.forEach((item) => {
-        const prodCurrency = item.trade_products?.currency;
-        if (prodCurrency && prodCurrency !== currency) {
-          sourceCurrencies.add(prodCurrency);
+        const sourceCurrency = item.unit_price_cents != null
+          ? (item.unit_price_currency || currency)
+          : item.trade_products?.currency;
+        if (sourceCurrency && sourceCurrency !== currency) {
+          sourceCurrencies.add(sourceCurrency);
         }
       });
       if (sourceCurrencies.size === 0) { setFxRates({}); return; }
@@ -830,7 +839,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
       // 1) Fetch the full source row (no relations) + items
       const [srcRes, itemsRes] = await Promise.all([
         supabase.from("trade_quotes").select("*").eq("id", quoteId).single(),
-        supabase.from("trade_quote_items").select("product_id, quantity, unit_price_cents, notes, po_number, cost_code, lead_time_weeks_override, deposit_pct_override, variant_label, room, axonometric_image_url").eq("quote_id", quoteId),
+        supabase.from("trade_quote_items").select("product_id, quantity, unit_price_cents, unit_price_currency, notes, po_number, cost_code, lead_time_weeks_override, deposit_pct_override, variant_label, room, axonometric_image_url").eq("quote_id", quoteId),
       ]);
       if (srcRes.error || !srcRes.data) throw srcRes.error || new Error("Source quote not found");
       const src: any = srcRes.data;
@@ -930,9 +939,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
 
   const subtotalCents = items.reduce((sum, item) => {
     const rawPrice = item.unit_price_cents ?? catalogSourcePriceCents(item) ?? 0;
-    // If admin set unit_price_cents, it's already in the quote's currency — skip conversion
-    const prodCurrency = item.unit_price_cents != null ? currency : (item.trade_products?.currency || currency);
-    const converted = convertCents(rawPrice, prodCurrency, currency) ?? 0;
+    const converted = convertCents(rawPrice, itemPriceCurrency(item, currency), currency) ?? 0;
     return sum + converted * item.quantity;
   }, 0);
 
@@ -940,8 +947,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     const lines: QuotePdfLine[] = items.map((item) => {
       const product = item.trade_products;
       const rawUnit = item.unit_price_cents ?? catalogSourcePriceCents(item) ?? null;
-      const fromCur = item.unit_price_cents != null ? currency : (product?.currency || currency);
-      const unit = convertCents(rawUnit, fromCur, currency);
+      const unit = convertCents(rawUnit, itemPriceCurrency(item, currency), currency);
       return {
         productName: product?.product_name || "—",
         brandName: product?.brand_name || "",
@@ -1077,8 +1083,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
       depositPct: computeWeightedDepositPct(
         items.map((it) => {
           const rawPrice = it.unit_price_cents ?? catalogSourcePriceCents(it) ?? 0;
-          const fromCur = it.unit_price_cents != null ? currency : (it.trade_products?.currency || currency);
-          const lineCents = (convertCents(rawPrice, fromCur, currency) ?? 0) * it.quantity;
+          const lineCents = (convertCents(rawPrice, itemPriceCurrency(it, currency), currency) ?? 0) * it.quantity;
           const p = it.trade_products as any;
           return {
             lineCents,
@@ -1374,7 +1379,8 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   }, [currency]);
   const perLineRawLines = useMemo(() => items.map((it) => {
     const product = it.trade_products;
-    const lineCents = (it.unit_price_cents ?? catalogSourcePriceCents(it) ?? 0) * it.quantity;
+    const rawPrice = it.unit_price_cents ?? catalogSourcePriceCents(it) ?? 0;
+    const lineCents = (convertCents(rawPrice, itemPriceCurrency(it, currency), currency) ?? 0) * it.quantity;
     return {
       id: it.id,
       qty: it.quantity,
@@ -1488,8 +1494,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
       const lines: ProcurementLine[] = items.map((item, idx) => {
         const product = item.trade_products;
         const rawUnit = item.unit_price_cents ?? catalogSourcePriceCents(item) ?? null;
-        const fromCur = item.unit_price_cents != null ? currency : (product?.currency || currency);
-        const unitTrade = convertCents(rawUnit, fromCur, currency);
+        const unitTrade = convertCents(rawUnit, itemPriceCurrency(item, currency), currency);
         const unitRrp = convertCents(product?.rrp_price_cents ?? null, product?.currency || currency, currency);
         const lead = getLeadWeeksOverride(item.lead_time_weeks_override) ?? parseLeadWeeks(product?.lead_time || null);
         return {
@@ -2133,10 +2138,8 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                 return keys.map((roomKey) => {
                   const groupItems = groups.get(roomKey)!;
                   const groupSubtotal = groupItems.reduce((sum, it) => {
-                    const p = it.trade_products;
                     const raw = it.unit_price_cents ?? catalogSourcePriceCents(it) ?? null;
-                    const fc = it.unit_price_cents != null ? currency : (p?.currency || currency);
-                    const u = convertCents(raw, fc, currency);
+                    const u = convertCents(raw, itemPriceCurrency(it, currency), currency);
                     return sum + (u ? u * it.quantity : 0);
                   }, 0);
                   return (
@@ -2156,9 +2159,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                         {groupItems.map((item) => {
                   const product = item.trade_products;
                   const rawUnitPrice = item.unit_price_cents ?? catalogSourcePriceCents(item) ?? null;
-                  // unit_price_cents is already in the quote currency (admin converts before saving)
-                  const prodCurrency = item.unit_price_cents != null ? currency : (product?.currency || currency);
-                  const unitPrice = convertCents(rawUnitPrice, prodCurrency, currency);
+                  const unitPrice = convertCents(rawUnitPrice, itemPriceCurrency(item, currency), currency);
                   const lineTotal = unitPrice ? unitPrice * item.quantity : null;
 
                   return (
