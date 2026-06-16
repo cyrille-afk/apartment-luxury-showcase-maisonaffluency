@@ -44,7 +44,7 @@ const TradeGallery = () => {
   const { isPinned, togglePin, items: compareItems } = useCompare();
   const { isFavorited, toggleFavorite } = useFavorites();
   const { toast } = useToast();
-  const { allProducts, brands, categories, duplicateGroups } = useTradeProducts();
+  const { allProducts, brands, categories, duplicateGroups, isLoading: productsLoading } = useTradeProducts();
   const { ids: hiddenTradeProductIds } = useHiddenTradeProductIds();
   const [searchParams, setSearchParams] = useSearchParams();
 
