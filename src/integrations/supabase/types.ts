@@ -6306,6 +6306,23 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_client_contacts_safe: {
+        Args: { _client_id: string }
+        Returns: {
+          can_edit: boolean
+          client_id: string
+          created_at: string
+          email: string
+          first_name: string
+          id: string
+          is_primary: boolean
+          last_name: string
+          notes: string
+          phone: string
+          role_title: string
+          updated_at: string
+        }[]
+      }
       get_cron_jobs_summary: {
         Args: never
         Returns: {
