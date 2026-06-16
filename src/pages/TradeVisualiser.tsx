@@ -266,8 +266,9 @@ const TradeVisualiser = () => {
           x: p.x,
           y: p.y,
           swatchUrl: p.swatch!.image_url,
-          swatchName: p.swatch!.product_name,
-          brandName: p.swatch!.brand_name,
+          swatchName: p.swatch!.name,
+          brandName: p.swatch!.supplier,
+
         }));
       const { data, error } = await supabase.functions.invoke("visualiser-render", {
         body: { roomImage: photoDataUrl, pins: payloadPins },
