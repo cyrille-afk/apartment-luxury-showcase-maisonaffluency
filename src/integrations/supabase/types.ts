@@ -1472,6 +1472,7 @@ export type Database = {
           trade_price_cents: number | null
           variant_image_map: Json | null
           variant_placeholder: string | null
+          wood_label_override: string | null
         }
         Insert: {
           base_axis_label?: string | null
@@ -1525,6 +1526,7 @@ export type Database = {
           trade_price_cents?: number | null
           variant_image_map?: Json | null
           variant_placeholder?: string | null
+          wood_label_override?: string | null
         }
         Update: {
           base_axis_label?: string | null
@@ -1578,6 +1580,7 @@ export type Database = {
           trade_price_cents?: number | null
           variant_image_map?: Json | null
           variant_placeholder?: string | null
+          wood_label_override?: string | null
         }
         Relationships: [
           {
