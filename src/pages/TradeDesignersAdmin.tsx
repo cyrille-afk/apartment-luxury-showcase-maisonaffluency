@@ -1769,6 +1769,29 @@ const TradeDesignersAdmin = () => {
     refetchOnMount: false,
   });
 
+  const { data: pickSearchMap = {} } = useQuery({
+    queryKey: ["admin-pick-search-map"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("designer_curator_picks")
+        .select("designer_id, title, subtitle");
+      if (error) throw error;
+      return ((data || []) as { designer_id: string | null; title: string | null; subtitle: string | null }[]).reduce<Record<string, string>>(
+        (acc, row) => {
+          if (!row.designer_id) return acc;
+          acc[row.designer_id] = [acc[row.designer_id], row.title, row.subtitle].filter(Boolean).join(" ");
+          return acc;
+        },
+        {},
+      );
+    },
+    enabled: !!isAdmin,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 60 * 60 * 1000,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+  });
+
   const saveMutation = useMutation({
     mutationFn: async ({ id, updates }: { id: string; updates: Partial<DesignerRow> }) => {
       const payload = { ...updates, updated_at: new Date().toISOString() };
@@ -1812,14 +1835,15 @@ const TradeDesignersAdmin = () => {
         (d) =>
           d.name.toLowerCase().includes(q) ||
           (d.display_name?.toLowerCase().includes(q)) ||
-          d.specialty.toLowerCase().includes(q)
+          d.specialty.toLowerCase().includes(q) ||
+          (pickSearchMap[d.id]?.toLowerCase().includes(q) ?? false)
       );
     }
     if (activeLetter) {
       list = list.filter((d) => d.name[0]?.toUpperCase() === activeLetter);
     }
     return list;
-  }, [designers, search, activeLetter]);
+  }, [designers, search, activeLetter, pickSearchMap]);
 
   const letterCounts = useMemo(() => {
     const counts: Record<string, number> = {};
