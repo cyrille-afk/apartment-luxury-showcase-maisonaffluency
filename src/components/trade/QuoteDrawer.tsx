@@ -4,7 +4,6 @@ import { ShoppingCart, Trash2, Package, ArrowRight } from "lucide-react";
 import { DrawerItemSkeleton } from "@/components/trade/skeletons";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { supabase } from "@/integrations/supabase/client";
-import { convertCents, useFxRates, type DisplayCurrency } from "@/components/trade/CurrencyToggle";
 
 interface QuoteItem {
   id: string;
@@ -46,7 +45,6 @@ const formatPrice = (cents: number, currency: string) => {
 const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0 }: QuoteDrawerProps) => {
   const [items, setItems] = useState<QuoteItem[]>([]);
   const [loading, setLoading] = useState(false);
-  const fxRates = useFxRates();
 
   useEffect(() => {
     if (!open || !quoteId) return;
