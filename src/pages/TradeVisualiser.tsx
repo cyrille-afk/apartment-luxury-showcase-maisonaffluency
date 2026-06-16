@@ -194,7 +194,7 @@ const TradeVisualiser = () => {
   const swatches = useMemo(() => {
     const q = search.trim().toLowerCase();
     const matching = allSwatches.filter((s) => {
-      if (classifySwatchSurface(s) !== surface) return false;
+      if (!swatchMatchesSurface(s, surface)) return false;
       if (supplierFilter && (s.supplier || "").trim() !== supplierFilter) return false;
       if (!q) return true;
       return `${s.name} ${s.supplier || ""} ${s.category || ""}`.toLowerCase().includes(q);
