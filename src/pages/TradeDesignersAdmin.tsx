@@ -769,7 +769,19 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
                       />
                     </div>
                   </div>
+                  <div className="col-span-2 md:col-span-3">
+                    <label className="text-[10px] text-muted-foreground">
+                      Wood swatch picker label <span className="italic">(optional — overrides default "Select the Wood Finish of the Frame")</span>
+                    </label>
+                    <Input
+                      value={pick.wood_label_override || ""}
+                      onChange={(e) => updateField(pick.id, "wood_label_override", e.target.value || null)}
+                      placeholder='e.g. "Select the Wood Finish of the Base"'
+                      className="text-xs"
+                    />
+                  </div>
                 </div>
+
 
                 {/* Variant pricing — supports single-axis (Size) and dual-axis (Base × Top) */}
                 {!FABRICS_PANEL_PILOT_PICK_IDS.has(pick.id) && (
