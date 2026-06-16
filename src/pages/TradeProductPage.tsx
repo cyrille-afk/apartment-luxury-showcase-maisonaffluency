@@ -493,9 +493,13 @@ const TradeProductPage: React.FC = () => {
       const { product, designer } = data;
       let quoteId = activeQuoteId;
       if (!quoteId) {
-        const initialCurrency = displayCurrency === "original"
-          ? ((data?.pricing?.currency || "EUR") as DisplayCurrency)
-          : displayCurrency;
+        const quoteCurrencies = ["SGD", "USD", "EUR", "GBP"];
+        const productCurrency = data?.pricing?.currency || "EUR";
+        const initialCurrency = quoteCurrencies.includes(displayCurrency)
+          ? displayCurrency
+          : quoteCurrencies.includes(productCurrency)
+            ? productCurrency
+            : "EUR";
         const { data: q, error } = await createActiveDraftQuote(user.id, { currency: initialCurrency });
         if (error || !q) {
           toast({ title: "Error creating quote", description: error?.message, variant: "destructive" });
