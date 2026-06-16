@@ -29,7 +29,7 @@ import { normalizeBrandToParent } from "@/lib/brandNormalization";
 import AlphabetDesignerPicker from "@/components/trade/AlphabetDesignerPicker";
 import { useTradeDisplayCurrency } from "@/hooks/useTradeDisplayCurrency";
 import DuplicateProductsBanner from "@/components/dev/DuplicateProductsBanner";
-import { getActiveProjectId } from "@/lib/activeProjectId";
+import { createActiveDraftQuote, fetchScopedDraftQuotes, rememberActiveQuoteId } from "@/lib/activeProjectId";
 
 
 const slugifyForUrl = (s: string) =>
@@ -150,20 +150,11 @@ const TradeGallery = () => {
     refreshPrices();
   }, []);
 
-  // Fetch user's draft quotes — scoped to the active project filter.
+  // Fetch user's draft quotes — scoped to the active project or the current session quote.
   useEffect(() => {
     if (!user) return;
     const fetchDrafts = async () => {
-      const projectId = getActiveProjectId();
-      let q = supabase
-        .from("trade_quotes")
-        .select("id, created_at")
-        .eq("user_id", user.id)
-        .eq("status", "draft")
-        .order("created_at", { ascending: false });
-      q = projectId ? q.eq("project_id", projectId) : q.is("project_id", null);
-      const { data } = await q;
-      const drafts = (data as DraftQuote[]) || [];
+      const drafts = await fetchScopedDraftQuotes(user.id);
       setDraftQuotes(drafts);
       setActiveQuoteId(drafts.length > 0 ? drafts[0].id : null);
     };
@@ -173,11 +164,7 @@ const TradeGallery = () => {
   const handleCreateQuoteAndAdd = async (product: TradeProduct) => {
     if (!user) return;
     setAddingProductId(product.id);
-    const { data, error } = await supabase
-      .from("trade_quotes")
-      .insert({ user_id: user.id, status: "draft", project_id: getActiveProjectId() })
-      .select("id, created_at")
-      .single();
+    const { data, error } = await createActiveDraftQuote(user.id);
     if (error || !data) {
       toast({ title: "Error creating quote", description: error?.message, variant: "destructive" });
       setAddingProductId(null);
@@ -442,7 +429,10 @@ const TradeGallery = () => {
         {draftQuotes.length > 0 && (
           <select
             value={activeQuoteId || ""}
-            onChange={(e) => setActiveQuoteId(e.target.value)}
+            onChange={(e) => {
+              setActiveQuoteId(e.target.value);
+              rememberActiveQuoteId(e.target.value);
+            }}
             className="px-3 py-2 bg-background/10 border border-background/30 rounded-md font-body text-xs text-background focus:outline-none transition-colors"
           >
             {draftQuotes.map((q) => (

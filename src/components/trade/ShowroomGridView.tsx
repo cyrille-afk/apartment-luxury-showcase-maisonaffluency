@@ -24,6 +24,7 @@ import { useToast } from "@/hooks/use-toast";
 import { ProductCardSkeleton } from "@/components/trade/skeletons";
 import { useFavorites } from "@/hooks/useFavorites";
 import TradeFavoriteFolderPicker from "@/components/trade/TradeFavoriteFolderPicker";
+import { createActiveDraftQuote } from "@/lib/activeProjectId";
 
 import { normalizeBrandToParent } from "@/lib/brandNormalization";
 
@@ -545,11 +546,7 @@ const ShowroomGridView = ({
       await addProductToQuote(product, activeQuoteId);
     } else {
       setAddingProductId(product.id);
-      const { data, error } = await supabase
-        .from("trade_quotes")
-        .insert({ user_id: user.id, status: "draft" })
-        .select("id, created_at")
-        .single();
+      const { data, error } = await createActiveDraftQuote(user.id);
       if (error || !data) {
         toast({ title: "Error creating quote", description: error?.message, variant: "destructive" });
         setAddingProductId(null);

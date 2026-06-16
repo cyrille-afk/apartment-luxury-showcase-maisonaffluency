@@ -60,6 +60,7 @@ import { priceRugVariantFromLabel, isRugCategory, looksLikeDimension } from "@/l
 import RugSizeColourPicker, { type RugSelection } from "@/components/rug/RugSizeColourPicker";
 import SpecGlyph from "@/components/product/SpecGlyph";
 import { firstPublicVariantDimensionLabel } from "@/lib/productVariantSpecs";
+import { createActiveDraftQuote, fetchActiveDraftQuoteId } from "@/lib/activeProjectId";
 
 const specIcon = (symbol: string, className = "") => (
   <SpecGlyph symbol={symbol} className={className} />
@@ -474,29 +475,10 @@ const TradeProductPage: React.FC = () => {
   const [selectedWoodPrice, setSelectedWoodPrice] = useState<{ id: string; name: string; price_cents: number; currency: string; image_url: string | null } | null>(null);
 
 
-  // Read the active project filter (set in the Quotes / Showroom / Boards pages)
-  // so adding to quote scopes to the SAME project the user is currently working on.
-  // Without this, the product page would grab the most-recent draft regardless of
-  // project — leading items to land on an unrelated client's quote.
-  const getActiveProjectId = (): string | null => {
-    try { return sessionStorage.getItem("trade:lastProjectFilter"); } catch { return null; }
-  };
-
   useEffect(() => {
     if (!user) return;
     (async () => {
-      const projectId = getActiveProjectId();
-      let query = supabase
-        .from("trade_quotes")
-        .select("id, project_id")
-        .eq("user_id", user.id)
-        .eq("status", "draft")
-        .order("created_at", { ascending: false })
-        .limit(1);
-      query = projectId ? query.eq("project_id", projectId) : query.is("project_id", null);
-      const { data: drafts } = await query;
-      if (drafts && drafts.length > 0) setActiveQuoteId(drafts[0].id);
-      else setActiveQuoteId(null);
+      setActiveQuoteId(await fetchActiveDraftQuoteId(user.id));
     })();
   }, [user]);
 
@@ -510,12 +492,7 @@ const TradeProductPage: React.FC = () => {
     try {
       let quoteId = activeQuoteId;
       if (!quoteId) {
-        const projectId = getActiveProjectId();
-        const { data: q, error } = await supabase
-          .from("trade_quotes")
-          .insert({ user_id: user.id, status: "draft", project_id: projectId })
-          .select("id")
-          .single();
+        const { data: q, error } = await createActiveDraftQuote(user.id);
         if (error || !q) {
           toast({ title: "Error creating quote", description: error?.message, variant: "destructive" });
           return;

@@ -9,6 +9,7 @@ import QuoteRequestDialog from "./QuoteRequestDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { createActiveDraftQuote, fetchActiveDraftQuoteId } from "@/lib/activeProjectId";
 
 const CompareImage = ({ item }: { item: ReturnType<typeof useCompare>["items"][0] }) => {
   const { removeItem } = useCompare();
@@ -68,24 +69,12 @@ const CompareDrawer = () => {
     setAddingAll(true);
 
     try {
-      // Get or create a draft quote
       let quoteId: string;
-      const { data: drafts } = await supabase
-        .from("trade_quotes")
-        .select("id")
-        .eq("user_id", user.id)
-        .eq("status", "draft")
-        .order("created_at", { ascending: false })
-        .limit(1);
-
-      if (drafts && drafts.length > 0) {
-        quoteId = drafts[0].id;
+      const activeQuoteId = await fetchActiveDraftQuoteId(user.id);
+      if (activeQuoteId) {
+        quoteId = activeQuoteId;
       } else {
-        const { data: newQuote, error: createErr } = await supabase
-          .from("trade_quotes")
-          .insert({ user_id: user.id, status: "draft" })
-          .select("id")
-          .single();
+        const { data: newQuote, error: createErr } = await createActiveDraftQuote(user.id);
         if (createErr || !newQuote) throw new Error(createErr?.message || "Failed to create quote");
         quoteId = newQuote.id;
       }
@@ -251,21 +240,11 @@ const CompareDrawer = () => {
                               setAddingAll(true);
                               try {
                                 let quoteId: string;
-                                const { data: drafts } = await supabase
-                                  .from("trade_quotes")
-                                  .select("id")
-                                  .eq("user_id", user.id)
-                                  .eq("status", "draft")
-                                  .order("created_at", { ascending: false })
-                                  .limit(1);
-                                if (drafts && drafts.length > 0) {
-                                  quoteId = drafts[0].id;
+                                  const activeQuoteId = await fetchActiveDraftQuoteId(user.id);
+                                  if (activeQuoteId) {
+                                    quoteId = activeQuoteId;
                                 } else {
-                                  const { data: nq, error: ce } = await supabase
-                                    .from("trade_quotes")
-                                    .insert({ user_id: user.id, status: "draft" })
-                                    .select("id")
-                                    .single();
+                                    const { data: nq, error: ce } = await createActiveDraftQuote(user.id);
                                   if (ce || !nq) throw new Error(ce?.message || "Failed");
                                   quoteId = nq.id;
                                 }

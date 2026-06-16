@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Box, Plus, ExternalLink, Eye, Trash2, EyeOff, Sparkles } from "lucide-react";
 import { format } from "date-fns";
-import { getActiveProjectId } from "@/lib/activeProjectId";
+import { createActiveDraftQuote, fetchActiveDraftQuoteId } from "@/lib/activeProjectId";
 
 const ENGINE_OPTIONS = [
   { value: "corona", label: "Corona Renderer", price: "€280 (S$410) / view", desc: "Warm natural GI — ideal for residential interiors" },
@@ -58,20 +58,10 @@ const TradeAxonometricGallery = () => {
 
   // Get user's draft quote (scoped to active project) to attach renders
   const { data: draftQuote } = useQuery({
-    queryKey: ["draft-quote", user?.id, getActiveProjectId()],
+    queryKey: ["draft-quote", user?.id],
     queryFn: async () => {
-      const projectId = getActiveProjectId();
-      let q = supabase
-        .from("trade_quotes")
-        .select("id")
-        .eq("user_id", user!.id)
-        .eq("status", "draft")
-        .order("created_at", { ascending: false })
-        .limit(1);
-      q = projectId ? q.eq("project_id", projectId) : q.is("project_id", null);
-      const { data, error } = await q.maybeSingle();
-      if (error && error.code !== "PGRST116") throw error;
-      return data;
+      const id = await fetchActiveDraftQuoteId(user!.id);
+      return id ? { id } : null;
     },
     enabled: !!user,
   });
@@ -82,12 +72,8 @@ const TradeAxonometricGallery = () => {
     try {
       let quoteId = draftQuote?.id;
       if (!quoteId) {
-        const { data: newQuote, error: qErr } = await supabase
-          .from("trade_quotes")
-          .insert({ user_id: user.id, project_id: getActiveProjectId() })
-          .select("id")
-          .single();
-        if (qErr) throw qErr;
+        const { data: newQuote, error: qErr } = await createActiveDraftQuote(user.id);
+        if (qErr || !newQuote) throw qErr || new Error("Quote could not be created");
         quoteId = newQuote.id;
       }
 
@@ -152,12 +138,8 @@ const TradeAxonometricGallery = () => {
     try {
       let quoteId = draftQuote?.id;
       if (!quoteId) {
-        const { data: newQuote, error: qErr } = await supabase
-          .from("trade_quotes")
-          .insert({ user_id: user.id, project_id: getActiveProjectId() })
-          .select("id")
-          .single();
-        if (qErr) throw qErr;
+        const { data: newQuote, error: qErr } = await createActiveDraftQuote(user.id);
+        if (qErr || !newQuote) throw qErr || new Error("Quote could not be created");
         quoteId = newQuote.id;
       }
 
