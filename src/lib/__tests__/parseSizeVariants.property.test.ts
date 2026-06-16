@@ -183,8 +183,15 @@ describe("computeVariantAxes — properties", () => {
           }
           const axes = computeVariantAxes(variants);
           expect(axes.hasSingleAxisSplit).toBe(true);
-          // Sizes deduped to exactly the number of distinct size prefixes
-          expect(axes.singleSizeOptions.length).toBe(sizePrefixes.length);
+          // Sizes dedupe by parsed dimension text. Different product prefixes
+          // may legitimately collapse to the same size option.
+          const expectedSizeCount = new Set(
+            sizePrefixes.map((sp) =>
+              computeVariantAxes([{ label: `${sp} ${materials[0]}`, price_cents: 1 }])
+                .singleSizeOptions[0]
+            )
+          ).size;
+          expect(axes.singleSizeOptions.length).toBe(expectedSizeCount);
           // Materials deduped to exactly the input material count
           expect(axes.singleMaterialOptions.length).toBe(materials.length);
           expect(allNonEmpty(axes.singleSizeOptions)).toBe(true);

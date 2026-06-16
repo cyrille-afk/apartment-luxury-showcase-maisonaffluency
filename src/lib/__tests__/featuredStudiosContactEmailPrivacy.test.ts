@@ -2,9 +2,8 @@
  * Integration guard: `featured_studios.contact_email` MUST NEVER be readable
  * by the anonymous (unauthenticated) role through the Data API.
  *
- * Column-level GRANTs (migration 20260512115642) revoke anon's table-wide
- * SELECT on `featured_studios` and re-grant SELECT only on non-sensitive
- * columns. These tests hit the live Lovable Cloud (Supabase) REST endpoint
+ * Anon must use `featured_studios_public`, a safe projection table that
+ * excludes contact_email. These tests hit the live Lovable Cloud endpoint
  * with the project's anon key to prove the gate holds end-to-end.
  *
  * If these tests fail, anon has regained access to PII — fix the GRANTs
@@ -94,9 +93,9 @@ d("featured_studios — anon column-level access", () => {
     }
   });
 
-  it("allows SELECT of every documented public column", async () => {
+  it("allows SELECT of every documented public column through the safe public projection", async () => {
     const { data, error } = await anon
-      .from("featured_studios")
+      .from("featured_studios_public")
       .select(PUBLIC_COLUMNS.join(", "))
       .eq("is_published", true)
       .limit(1);
