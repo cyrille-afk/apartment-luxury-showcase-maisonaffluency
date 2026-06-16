@@ -2841,12 +2841,6 @@ export type Database = {
           admin_notes: string | null
           balance_due_at: string | null
           balance_paid_at: string | null
-          commission_fx_locked_at: string | null
-          commission_fx_rate: number | null
-          commission_fx_source: string | null
-          commission_payout_cents: number | null
-          commission_payout_currency: string | null
-          commission_statement_sent_at: string | null
           created_at: string
           customs_cleared_at: string | null
           customs_days: number
@@ -2884,12 +2878,6 @@ export type Database = {
           admin_notes?: string | null
           balance_due_at?: string | null
           balance_paid_at?: string | null
-          commission_fx_locked_at?: string | null
-          commission_fx_rate?: number | null
-          commission_fx_source?: string | null
-          commission_payout_cents?: number | null
-          commission_payout_currency?: string | null
-          commission_statement_sent_at?: string | null
           created_at?: string
           customs_cleared_at?: string | null
           customs_days?: number
@@ -2927,12 +2915,6 @@ export type Database = {
           admin_notes?: string | null
           balance_due_at?: string | null
           balance_paid_at?: string | null
-          commission_fx_locked_at?: string | null
-          commission_fx_rate?: number | null
-          commission_fx_source?: string | null
-          commission_payout_cents?: number | null
-          commission_payout_currency?: string | null
-          commission_statement_sent_at?: string | null
           created_at?: string
           customs_cleared_at?: string | null
           customs_days?: number
@@ -2985,6 +2967,50 @@ export type Database = {
             columns: ["studio_id"]
             isOneToOne: false
             referencedRelation: "studios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      order_timeline_commission: {
+        Row: {
+          commission_fx_locked_at: string | null
+          commission_fx_rate: number | null
+          commission_fx_source: string | null
+          commission_payout_cents: number | null
+          commission_payout_currency: string | null
+          commission_statement_sent_at: string | null
+          created_at: string
+          timeline_id: string
+          updated_at: string
+        }
+        Insert: {
+          commission_fx_locked_at?: string | null
+          commission_fx_rate?: number | null
+          commission_fx_source?: string | null
+          commission_payout_cents?: number | null
+          commission_payout_currency?: string | null
+          commission_statement_sent_at?: string | null
+          created_at?: string
+          timeline_id: string
+          updated_at?: string
+        }
+        Update: {
+          commission_fx_locked_at?: string | null
+          commission_fx_rate?: number | null
+          commission_fx_source?: string | null
+          commission_payout_cents?: number | null
+          commission_payout_currency?: string | null
+          commission_statement_sent_at?: string | null
+          created_at?: string
+          timeline_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_timeline_commission_timeline_id_fkey"
+            columns: ["timeline_id"]
+            isOneToOne: true
+            referencedRelation: "order_timeline"
             referencedColumns: ["id"]
           },
         ]
