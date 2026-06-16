@@ -1465,7 +1465,7 @@ const TradeProductPage: React.FC = () => {
                   }}
                 />
               )}
-              {!isRugSqmActive && !isDualAxis && !isBaseOnly && !hasSingleAxisSplit && product.materials && (() => {
+              {!isRugSqmActive && !isDualAxis && !isBaseOnly && !hasSingleAxisSplit && !hasLinkedFabrics && linkedWoodFinishes.length === 0 && product.materials && (() => {
                 const parsed = parseMaterialsFallback(product.materials);
                 return (
                   <ExpandableSpec
