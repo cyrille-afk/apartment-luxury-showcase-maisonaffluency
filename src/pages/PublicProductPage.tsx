@@ -513,6 +513,7 @@ const VariantSelectors: React.FC<{
         <FabricSelector
           pickId={product.id}
           productTitle={product.title}
+          woodLabel={(product as any).wood_label_override}
           onHasFabricsChange={setHasLinkedFabrics}
           onSwatchImagesChange={onSwatchImagesChange}
           onUpholsteryTierChange={(rawTier) => {
