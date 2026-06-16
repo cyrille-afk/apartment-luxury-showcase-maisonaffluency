@@ -64,10 +64,17 @@ export function isProductUpholstered(p: UpholsteryHints | null | undefined): boo
   if (!p) return false;
   if (p.is_upholstered === true) return true;
   if (p.is_upholstered === false) return false;
+  // Strong signal from materials: if the materials string is provided and
+  // mentions none of fabric/leather/upholstery, treat as NOT upholstered even
+  // when the category keyword would otherwise match (e.g. an "ottoman" made
+  // of "varnished solid ash & rattan").
+  const materials = (p.materials || "").trim();
+  if (materials) {
+    return matchesUpholsteryKeyword(materials);
+  }
   return (
     matchesUpholsteryKeyword(p.subcategory) ||
     matchesUpholsteryKeyword(p.category) ||
-    matchesUpholsteryKeyword(p.materials) ||
     matchesUpholsteryKeyword(p.title) ||
     matchesUpholsteryKeyword(p.product_name)
   );
