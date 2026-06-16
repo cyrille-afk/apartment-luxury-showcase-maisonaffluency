@@ -438,7 +438,7 @@ export default function FabricSelector({ pickId, className, productTitle, onUpho
 
   return (
     <div className={className}>
-      {renderAccordion({
+      {showUpholsterySection && renderAccordion({
         isOpen: open,
         onToggle: () => setOpen((v) => !v),
         label: "Select Your Fabric / Leather",
@@ -452,7 +452,7 @@ export default function FabricSelector({ pickId, className, productTitle, onUpho
         renderAccordion({
           isOpen: openWood,
           onToggle: () => setOpenWood((v) => !v),
-          label: (woodLabel && woodLabel.trim()) || "Select the Wood Finish of the Frame",
+          label: (woodLabel && woodLabel.trim()) || "Select the Finish of the Frame",
           selectedName: selectedWoodItem?.name ?? null,
           tiles: woodTiles,
           glyph: "wood",
