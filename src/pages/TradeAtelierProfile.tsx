@@ -352,7 +352,10 @@ const TradeAtelierProfile = () => {
 
         {/* Hero + About */}
         {(() => {
-          const isDesignerProfile = designer.founder && designer.founder !== designer.name;
+          // Mirror the public designer profile: always use the full-width hero
+          // + biography-below layout, regardless of whether the page is a
+          // founder/atelier or an individual designer under a brand.
+          const isDesignerProfile = false;
 
           return isDesignerProfile ? (
             <div className="flex flex-col gap-0">
