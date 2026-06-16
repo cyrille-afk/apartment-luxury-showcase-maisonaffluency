@@ -36,6 +36,7 @@ import { BoardProjectHistory } from "@/components/trade/concierge/BoardProjectHi
 import { CreateQuoteFromBoard } from "@/components/trade/concierge/CreateQuoteFromBoard";
 import { fillHotspotImages } from "@/lib/hotspotImageFallback";
 import { HotspotImageBadge } from "@/components/trade/HotspotImageBadge";
+import { rememberActiveQuoteId } from "@/lib/activeProjectId";
 
 interface Board {
   id: string;
@@ -365,7 +366,7 @@ const TradeBoardBuilder = () => {
     }
     const { data: quote, error } = await supabase
       .from("trade_quotes")
-      .insert({ user_id: user.id, status: "draft", client_name: board.client_name })
+      .insert({ user_id: user.id, status: "draft", client_name: board.client_name, project_id: board.project_id })
       .select("id")
       .single();
     if (error || !quote) {
@@ -384,6 +385,7 @@ const TradeBoardBuilder = () => {
     }));
     await supabase.from("trade_quote_items").insert(quoteItems);
     await supabase.from("client_boards").update({ status: "converted" }).eq("id", board.id);
+    rememberActiveQuoteId(quote.id, board.project_id);
     toast({ title: "Quote created", description: `${quoteItems.length} item${quoteItems.length === 1 ? "" : "s"} pre-filled (${approvedItems.length} unit${approvedItems.length === 1 ? "" : "s"})` });
     navigate(`/trade/quotes?quote=${quote.id}`);
   };
