@@ -16,6 +16,7 @@ const SURFACE_LABEL: Record<string, string> = {
   floors: "the floor (rug/carpet area)",
   upholstery: "the upholstered furniture (sofa/chair fabric)",
   curtains: "the curtains/drapery",
+  furniture: "the frame/finish of the single piece of furniture at the marked point (e.g. wood frame, metal legs, stone top, lacquered case)",
 };
 
 Deno.serve(async (req) => {
