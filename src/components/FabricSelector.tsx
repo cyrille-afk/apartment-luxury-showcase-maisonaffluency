@@ -281,15 +281,24 @@ export default function FabricSelector({ pickId, className, productTitle, onUpho
       ? colTile
       : fabrics.find((f) => f.id === selectedFabricId) || null;
   const selectedWoodItem = fabrics.find((f) => f.id === selectedWoodId) || null;
+  const selectedCoverItem = fabrics.find((f) => f.id === selectedCoverId) || null;
 
   const renderTile = (f: Fabric) => {
     const isCom = f.id === "__com__";
     const isCol = f.id === "__col__";
     const isFabricGroup = isFabricCategory(f);
+    const isCoverGroup = isCoverCategory(f);
     const isSelected = isFabricGroup
       ? selectedFabricId === f.id
+      : isCoverGroup
+      ? selectedCoverId === f.id
       : selectedWoodId === f.id;
-    const setSelected = isFabricGroup ? setSelectedFabricId : setSelectedWoodId;
+    const setSelected = isFabricGroup
+      ? setSelectedFabricId
+      : isCoverGroup
+      ? setSelectedCoverId
+      : setSelectedWoodId;
+
     const handlePick = () => {
       setSelected(f.id);
       const indices = Array.isArray(f.image_indices) && f.image_indices.length > 0 ? f.image_indices : null;
