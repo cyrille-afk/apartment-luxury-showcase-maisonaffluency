@@ -87,12 +87,21 @@ interface FabricSelectorProps {
    * When omitted, falls back to "Select the Wood Finish of the Frame".
    */
   woodLabel?: string | null;
+  /**
+   * When false, the upholstery (fabric/leather + COM/COL) accordion is hidden
+   * and only the wood/finish swatch picker is rendered. Used on non-upholstered
+   * products (e.g. wood/rattan benches) that still have linked frame finishes.
+   */
+  showUpholsterySection?: boolean;
 }
 
 const normalizeFabricCategory = (category: string | null | undefined) => {
-  const raw = (category || "").trim();
-  if (raw === "Wood") return "Wood";
-  if (raw === "Upholstery" || raw === "Leather" || raw === "Fabric & Leather") return "Fabric & Leather";
+  const raw = (category || "").trim().toLowerCase();
+  if (raw === "upholstery" || raw === "leather" || raw === "fabric" || raw === "fabric & leather") {
+    return "Fabric & Leather";
+  }
+  // Wood, Rattan, Cane, Wicker, Stone, Metal, Ceramic, Glass, etc. → frame finish group.
+  if (raw) return "Wood";
   return "Fabric & Leather";
 };
 
@@ -103,7 +112,7 @@ const isFabricCategory = (fabric: Fabric) => normalizeFabricCategory(fabric.cate
  * (Trade + Public). Tiles are grouped by category (Upholstery, Wood, …)
  * with a COM ("Customer's Own Material") tile always offered.
  */
-export default function FabricSelector({ pickId, className, productTitle, onUpholsteryTierChange, onFabricChange, onHasFabricsChange, onWoodFinishChange, onWoodFinishPricingChange, onWoodFinishesAvailable, includePricing = false, onSwatchImagesChange, woodLabel }: FabricSelectorProps) {
+export default function FabricSelector({ pickId, className, productTitle, onUpholsteryTierChange, onFabricChange, onHasFabricsChange, onWoodFinishChange, onWoodFinishPricingChange, onWoodFinishesAvailable, includePricing = false, onSwatchImagesChange, woodLabel, showUpholsterySection = true }: FabricSelectorProps) {
 
   const [open, setOpen] = useState(true);
   const [fabrics, setFabrics] = useState<Fabric[]>([]);
@@ -429,7 +438,7 @@ export default function FabricSelector({ pickId, className, productTitle, onUpho
 
   return (
     <div className={className}>
-      {renderAccordion({
+      {showUpholsterySection && renderAccordion({
         isOpen: open,
         onToggle: () => setOpen((v) => !v),
         label: "Select Your Fabric / Leather",
@@ -443,7 +452,7 @@ export default function FabricSelector({ pickId, className, productTitle, onUpho
         renderAccordion({
           isOpen: openWood,
           onToggle: () => setOpenWood((v) => !v),
-          label: (woodLabel && woodLabel.trim()) || "Select the Wood Finish of the Frame",
+          label: (woodLabel && woodLabel.trim()) || "Select the Finish of the Frame",
           selectedName: selectedWoodItem?.name ?? null,
           tiles: woodTiles,
           glyph: "wood",

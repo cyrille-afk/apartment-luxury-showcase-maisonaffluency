@@ -1415,12 +1415,12 @@ const TradeProductPage: React.FC = () => {
                 />
               )}
 
-              {isUpholsteredProduct && (
-                <FabricSelector
+              <FabricSelector
                   pickId={product.id}
                   productTitle={product.title}
                   woodLabel={(product as any).wood_label_override}
                   includePricing
+                  showUpholsterySection={isUpholsteredProduct}
                   onHasFabricsChange={setHasLinkedFabrics}
                   onWoodFinishesAvailable={setLinkedWoodFinishes}
                   onFabricChange={setSelectedFabric}
@@ -1477,7 +1477,7 @@ const TradeProductPage: React.FC = () => {
                     handleMaterialChange(sized, { base: nextBase, top: sized, size: selectedDualSize });
                   }}
                 />
-              )}
+
 
               {/* Material dropdown — when variants encode (size × material), bind it to selectedSingleMaterial */}
               {!isRugSqmActive && !isDualAxis && hasSingleAxisSplit && (
