@@ -410,7 +410,7 @@ const TradeAtelierProfile = () => {
                   initial={{ opacity: 0, y: 16 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ ...transition, delay: 0.15 }}
-                  className="flex-1 min-w-0 flex flex-col justify-center"
+                  className="flex-1 min-w-0 flex flex-col"
                 >
                   {designer.philosophy && (() => {
                     const clean = designer.philosophy.replace(/<[^>]+>/g, '').replace(/^[\s""\u201C\u201D«»]+|[\s""\u201C\u201D«»]+$/g, '').trim();
