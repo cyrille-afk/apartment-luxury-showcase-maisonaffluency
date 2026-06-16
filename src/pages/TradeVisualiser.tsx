@@ -425,7 +425,7 @@ const TradeVisualiser = () => {
                             <img src={p.swatch.image_url} alt="" className="w-6 h-6 object-cover rounded-l" />
                           )}
                           <span className="font-body text-[10px] text-foreground whitespace-nowrap max-w-[140px] truncate">
-                            {p.swatch.product_name}
+                            {p.swatch.name}
                           </span>
                           <button
                             onClick={(e) => { e.stopPropagation(); removePin(p.id); }}
