@@ -31,6 +31,10 @@ const FABRICS_PANEL_PILOT_PICK_IDS = new Set<string>([
   "0d33b077-dc1a-4aed-bc8e-86dd2884b2dd", // Jean-Michel Frank — Transat c. 1929
   "1547d5cf-ccf4-4ea5-b28a-40cedea1d6c2", // ECART — Wolf Armchair
   "fc3a68b1-65cd-4d6f-941c-b8a2451dd064", // ECART — Corbeille Sofa c. 1923
+  "9baeef6c-d0fa-4789-ac9d-2703209486dd", // Paul László — Carmelina Chair c. 1947
+  "b1534548-cba8-4df4-b6fb-616f802b7bd2", // Paul László — Rodeo Chair c. 1947
+  "d423e61c-baac-4e9e-af3d-f80b82b6726a", // Jean-Michel Frank — Croisillon Lamp (Wood) c. 1924
+  "99f811c1-8fa5-4dda-a926-a35de571c606", // Jean-Michel Frank — Croisillon Lamp (Brass) c. 1924
 ]);
 import { variantImageKey } from "@/lib/variantImageMap";
 import BiographyPdfButton from "@/components/BiographyPdfButton";
