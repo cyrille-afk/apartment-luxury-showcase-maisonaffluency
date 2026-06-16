@@ -1011,9 +1011,20 @@ const TradeProductPage: React.FC = () => {
   // Only suppress the Base dropdown when every base option is also offered as
   // a wood swatch in FabricSelector — otherwise the user has no way to pick
   // bases that lack a swatch (e.g. Walnut, Thermo-treated wood).
+  const normFinish = (s: string) => (s || "").trim().toLowerCase();
   const allBasesHaveSwatches =
-    baseOptions.length > 0 && baseOptions.every((b) => linkedWoodFinishes.includes(b));
-  const suppressBaseAsFinish = isUpholsteredProduct && !baseAxisIsDim && isFinishAxisLabel(baseAxisLabelRaw) && allBasesHaveSwatches;
+    baseOptions.length > 0 && baseOptions.every((b) => {
+      const nb = normFinish(b);
+      return linkedWoodFinishes.some((lw) => {
+        const nlw = normFinish(lw);
+        return nlw === nb || nlw.includes(nb) || nb.includes(nlw);
+      });
+    });
+  // When FabricSelector is present and exposes wood swatches, treat it as the
+  // single source for the frame-finish axis — suppress the duplicate base
+  // dropdown even if not every base option has a perfectly-matching swatch.
+  const hasWoodSwatches = linkedWoodFinishes.length > 0;
+  const suppressBaseAsFinish = isUpholsteredProduct && !baseAxisIsDim && isFinishAxisLabel(baseAxisLabelRaw) && (allBasesHaveSwatches || hasWoodSwatches);
   const suppressTopAsFinish = isUpholsteredProduct && !topAxisIsDim && isFinishAxisLabel(topAxisLabelRaw);
 
   // When the product has variants but the user hasn't picked one yet, fall back
@@ -1410,10 +1421,14 @@ const TradeProductPage: React.FC = () => {
                   }}
                   onWoodFinishChange={(woodName) => {
                     if (!woodName) return;
-                    // Match the swatch name to a Base axis value (case/space tolerant).
+                    // Match the swatch name to a Base axis value (case/space tolerant,
+                    // and tolerant of code prefixes like "ECRT-SY-20 — Black Lacquered Sycamore").
                     const norm = (s: string) => s.trim().toLowerCase();
-                    const match = baseOptions.find((b) => norm(b) === norm(woodName))
-                      || baseOptions.find((b) => norm(b).startsWith(norm(woodName)))
+                    const nw = norm(woodName);
+                    const match =
+                      baseOptions.find((b) => norm(b) === nw)
+                      || baseOptions.find((b) => nw.includes(norm(b)))
+                      || baseOptions.find((b) => norm(b).includes(nw))
                       || woodName;
                     setSelectedBase(match);
                     // If the current Top is incompatible with the new Base, clear it.
@@ -1427,8 +1442,12 @@ const TradeProductPage: React.FC = () => {
                   onUpholsteryTierChange={(rawTier) => {
 
                     if (!rawTier) return;
+                    const nt = rawTier.toLowerCase();
                     const candidates = topOptions.filter(
-                      (t) => t === rawTier || t.toLowerCase().startsWith(rawTier.toLowerCase()),
+                      (t) => {
+                        const lt = t.toLowerCase();
+                        return lt === nt || lt.startsWith(nt) || nt.startsWith(lt) || lt.includes(nt) || nt.includes(lt);
+                      },
                     );
                     if (candidates.length === 0) return;
                     const sized =
