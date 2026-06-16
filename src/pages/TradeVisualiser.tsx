@@ -17,7 +17,7 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
 // ───────── Surfaces ──────────────────────────────────────────────────────────
-type Surface = "walls" | "floors" | "upholstery" | "curtains";
+type Surface = "walls" | "floors" | "upholstery" | "curtains" | "furniture";
 
 const SURFACES: { id: Surface; label: string; hint: string }[] = [
   {
@@ -40,42 +40,61 @@ const SURFACES: { id: Surface; label: string; hint: string }[] = [
     label: "Curtains",
     hint: "Drapery · sheers",
   },
+  {
+    id: "furniture",
+    label: "Furniture finish",
+    hint: "Frame · wood · stone · metal · lacquer",
+  },
 ];
 
-const classifySwatchSurface = (s: Swatch): Surface | null => {
+const classifySwatchSurfaces = (s: Swatch): Surface[] => {
   const cat = (s.category || "").trim().toLowerCase();
   const text = `${s.category || ""} ${s.name || ""}`;
 
   // Name-driven overrides first (rugs / curtains / wallcoverings can live in
   // any category bucket in the fabrics library).
-  if (/\b(rugs?|carpets?|kilims?|dhurries?)\b/i.test(text)) return "floors";
-  if (/\b(curtains?|drapes?|drapery|sheers?|voiles?)\b/i.test(text)) return "curtains";
-  if (/\b(wallcovers?|wallcoverings?|wallpapers?|boiserie|panell?ing|wall panels?|lacquer panels?)\b/i.test(text)) return "walls";
+  if (/\b(rugs?|carpets?|kilims?|dhurries?)\b/i.test(text)) return ["floors"];
+  if (/\b(curtains?|drapes?|drapery|sheers?|voiles?)\b/i.test(text)) return ["curtains"];
+  if (/\b(wallcovers?|wallcoverings?|wallpapers?|boiserie|panell?ing|wall panels?)\b/i.test(text)) return ["walls"];
 
-  // Hard, solid finishes → wall surfaces (boiserie, lacquered panels, stone walls).
-  if (cat === "wood" || cat === "stone" || cat === "metal" || cat === "ceramic" || cat === "glass" || cat === "plaster") {
-    return "walls";
+  // Hard, solid finishes → both wall cladding AND furniture frames (boiserie
+  // panels, lacquered cabinet fronts, marble tops, brass legs).
+  if (cat === "wood" || cat === "stone" || cat === "metal" || cat === "ceramic" || cat === "glass" || cat === "plaster" || cat === "lacquer") {
+    return ["walls", "furniture"];
   }
 
-  // Soft / woven covers → upholstery.
+  // Soft covers — leather/rattan/cane/wicker can wrap upholstery OR frame
+  // elements (cane backs, leather-wrapped legs).
   if (
-    cat === "fabric" ||
-    cat === "fabrics" ||
     cat === "leather" ||
-    cat === "upholstery" ||
-    cat === "fabric & leather" ||
     cat === "rattan" ||
     cat === "cane" ||
     cat === "wicker" ||
     cat === "cover"
   ) {
-    return "upholstery";
+    return ["upholstery", "furniture"];
+  }
+
+  // Pure fabrics → upholstery only.
+  if (
+    cat === "fabric" ||
+    cat === "fabrics" ||
+    cat === "upholstery" ||
+    cat === "fabric & leather"
+  ) {
+    return ["upholstery"];
   }
 
   // Loose keyword fallback for legacy free-text categories.
-  if (/\b(fabrics?|textiles?|leathers?|upholstery)\b/i.test(text)) return "upholstery";
-  return null;
+  if (/\b(fabrics?|textiles?|leathers?|upholstery)\b/i.test(text)) return ["upholstery"];
+  return [];
 };
+
+const classifySwatchSurface = (s: Swatch): Surface | null =>
+  classifySwatchSurfaces(s)[0] ?? null;
+
+const swatchMatchesSurface = (s: Swatch, surface: Surface): boolean =>
+  classifySwatchSurfaces(s).includes(surface);
 
 interface Swatch {
   id: string;
