@@ -453,9 +453,11 @@ export default function FabricSelector({ pickId, className, productTitle, onUpho
                       onWoodFinishChange?.(zoomed.name);
                       if (zoomed.frame_price_cents && zoomed.frame_price_cents > 0) {
                         onWoodFinishPricingChange?.({
+                          id: zoomed.id,
                           name: zoomed.name,
                           price_cents: zoomed.frame_price_cents,
                           currency: zoomed.frame_price_currency || "EUR",
+                          image_url: zoomed.image_url ?? null,
                         });
                       } else {
                         onWoodFinishPricingChange?.(null);
