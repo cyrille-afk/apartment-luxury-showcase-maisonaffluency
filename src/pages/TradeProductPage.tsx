@@ -124,6 +124,7 @@ interface ProductRow {
   variant_placeholder: string | null;
   base_axis_label: string | null;
   top_axis_label: string | null;
+  wood_label_override: string | null;
   size_variants?: { label?: string; base?: string; top?: string; price_cents?: number; meters?: number }[] | null;
   variant_image_map: Record<string, number> | null;
   gallery_captions?: Record<string, string> | null;
@@ -195,7 +196,7 @@ function useTradeProductBySlug(
         if (designer) {
           const { data: picks } = await supabase
             .from("designer_curator_picks")
-            .select("id, title, subtitle, image_url, hover_image_url, gallery_images, materials, materials_description, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, trade_price_cents, price_per_sqm_cents, currency, price_prefix, size_variants, variant_placeholder, base_axis_label, top_axis_label, variant_image_map, edition, edition_number, edition_signing, gallery_captions, is_upholstered, com_meters")
+            .select("id, title, subtitle, image_url, hover_image_url, gallery_images, materials, materials_description, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, trade_price_cents, price_per_sqm_cents, currency, price_prefix, size_variants, variant_placeholder, base_axis_label, top_axis_label, wood_label_override, variant_image_map, edition, edition_number, edition_signing, gallery_captions, is_upholstered, com_meters")
             .eq("designer_id", (designer as any).id)
             .order("sort_order", { ascending: true });
           const tradeName = ((tradeProduct as any).product_name || "").trim().toLowerCase();
@@ -225,6 +226,7 @@ function useTradeProductBySlug(
           variant_placeholder: curatorPick?.variant_placeholder || null,
           base_axis_label: curatorPick?.base_axis_label || null,
           top_axis_label: curatorPick?.top_axis_label || null,
+          wood_label_override: (curatorPick as any)?.wood_label_override || null,
           size_variants: curatorPick?.size_variants || null,
           variant_image_map: curatorPick?.variant_image_map || null,
           edition: curatorPick?.edition || null,
@@ -281,7 +283,7 @@ function useTradeProductBySlug(
 
       const { data: picks } = await supabase
         .from("designer_curator_picks")
-        .select("id, title, subtitle, image_url, hover_image_url, gallery_images, materials, materials_description, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, trade_price_cents, price_per_sqm_cents, currency, price_prefix, size_variants, variant_placeholder, base_axis_label, top_axis_label, variant_image_map, edition, edition_number, edition_signing, gallery_captions, is_upholstered, com_meters")
+        .select("id, title, subtitle, image_url, hover_image_url, gallery_images, materials, materials_description, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, trade_price_cents, price_per_sqm_cents, currency, price_prefix, size_variants, variant_placeholder, base_axis_label, top_axis_label, wood_label_override, variant_image_map, edition, edition_number, edition_signing, gallery_captions, is_upholstered, com_meters")
         .eq("designer_id", designer.id)
         .order("sort_order", { ascending: true });
 
@@ -1417,6 +1419,7 @@ const TradeProductPage: React.FC = () => {
                 <FabricSelector
                   pickId={product.id}
                   productTitle={product.title}
+                  woodLabel={(product as any).wood_label_override}
                   includePricing
                   onHasFabricsChange={setHasLinkedFabrics}
                   onWoodFinishesAvailable={setLinkedWoodFinishes}

@@ -82,6 +82,11 @@ interface FabricSelectorProps {
    * page should jump the hero gallery to. Null clears the override.
    */
   onSwatchImagesChange?: (imageIndices: number[] | null) => void;
+  /**
+   * Per-product override for the wood-swatch accordion label.
+   * When omitted, falls back to "Select the Wood Finish of the Frame".
+   */
+  woodLabel?: string | null;
 }
 
 const normalizeFabricCategory = (category: string | null | undefined) => {
@@ -98,7 +103,7 @@ const isFabricCategory = (fabric: Fabric) => normalizeFabricCategory(fabric.cate
  * (Trade + Public). Tiles are grouped by category (Upholstery, Wood, …)
  * with a COM ("Customer's Own Material") tile always offered.
  */
-export default function FabricSelector({ pickId, className, productTitle, onUpholsteryTierChange, onFabricChange, onHasFabricsChange, onWoodFinishChange, onWoodFinishPricingChange, onWoodFinishesAvailable, includePricing = false, onSwatchImagesChange }: FabricSelectorProps) {
+export default function FabricSelector({ pickId, className, productTitle, onUpholsteryTierChange, onFabricChange, onHasFabricsChange, onWoodFinishChange, onWoodFinishPricingChange, onWoodFinishesAvailable, includePricing = false, onSwatchImagesChange, woodLabel }: FabricSelectorProps) {
 
   const [open, setOpen] = useState(false);
   const [fabrics, setFabrics] = useState<Fabric[]>([]);
@@ -404,7 +409,7 @@ export default function FabricSelector({ pickId, className, productTitle, onUpho
         renderAccordion({
           isOpen: openWood,
           onToggle: () => setOpenWood((v) => !v),
-          label: "Select the Wood Finish of the Frame",
+          label: (woodLabel && woodLabel.trim()) || "Select the Wood Finish of the Frame",
           selectedName: selectedWoodItem?.name ?? null,
           tiles: woodTiles,
           glyph: "wood",
