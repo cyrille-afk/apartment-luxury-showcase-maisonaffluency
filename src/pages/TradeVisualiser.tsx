@@ -43,25 +43,49 @@ const SURFACES: { id: Surface; label: string; hint: string }[] = [
 ];
 
 const classifySwatchSurface = (s: Swatch): Surface | null => {
-  const text = `${s.category || ""} ${s.subcategory || ""} ${s.product_name || ""}`;
+  const cat = (s.category || "").trim().toLowerCase();
+  const text = `${s.category || ""} ${s.name || ""}`;
 
+  // Name-driven overrides first (rugs / curtains / wallcoverings can live in
+  // any category bucket in the fabrics library).
   if (/\b(rugs?|carpets?|kilims?|dhurries?)\b/i.test(text)) return "floors";
   if (/\b(curtains?|drapes?|drapery|sheers?|voiles?)\b/i.test(text)) return "curtains";
-  if (/\b(wallcovers?|wallcoverings?|wallpapers?|plasters?|boiserie|panell?ing|wall panels?|lacquer panels?)\b/i.test(text)) return "walls";
-  if (/\b(fabrics?|textiles?|leathers?|upholstery)\b/i.test(text)) return "upholstery";
+  if (/\b(wallcovers?|wallcoverings?|wallpapers?|boiserie|panell?ing|wall panels?|lacquer panels?)\b/i.test(text)) return "walls";
 
+  // Hard, solid finishes → wall surfaces (boiserie, lacquered panels, stone walls).
+  if (cat === "wood" || cat === "stone" || cat === "metal" || cat === "ceramic" || cat === "glass" || cat === "plaster") {
+    return "walls";
+  }
+
+  // Soft / woven covers → upholstery.
+  if (
+    cat === "fabric" ||
+    cat === "fabrics" ||
+    cat === "leather" ||
+    cat === "upholstery" ||
+    cat === "fabric & leather" ||
+    cat === "rattan" ||
+    cat === "cane" ||
+    cat === "wicker" ||
+    cat === "cover"
+  ) {
+    return "upholstery";
+  }
+
+  // Loose keyword fallback for legacy free-text categories.
+  if (/\b(fabrics?|textiles?|leathers?|upholstery)\b/i.test(text)) return "upholstery";
   return null;
 };
 
 interface Swatch {
   id: string;
-  product_name: string;
-  brand_name: string | null;
+  name: string;
+  supplier: string | null;
   image_url: string | null;
   category: string | null;
-  subcategory: string | null;
-  materials: string | null;
+  tier: string | null;
 }
+
 
 interface Pin {
   id: string;
@@ -112,59 +136,63 @@ const TradeVisualiser = () => {
   const imgRef = useRef<HTMLDivElement | null>(null);
   const fileRef = useRef<HTMLInputElement | null>(null);
 
-  // ─── Load swatches once from trade_products ──────────────────────────────
+  // ─── Load swatches once from the curated fabrics & finishes library ─────
   useEffect(() => {
     let cancelled = false;
     setLoadingSwatches(true);
     (async () => {
-      // Paginate through all products — single query is capped at 1000.
-      const pageSize = 1000;
-      let from = 0;
-      const all: Swatch[] = [];
-      // hard safety cap
-      for (let i = 0; i < 10; i++) {
-        const { data, error } = await supabase
-          .from("trade_products")
-          .select("id, product_name, brand_name, image_url, category, subcategory, materials")
-          .not("image_url", "is", null)
-          .neq("image_url", "")
-          .eq("is_active", true)
-          .order("brand_name", { ascending: true })
-          .order("product_name", { ascending: true })
-          .order("id", { ascending: true })
-          .range(from, from + pageSize - 1);
-        if (error || !data || data.length === 0) break;
-        all.push(...(data as Swatch[]));
-        if (data.length < pageSize) break;
-        from += pageSize;
-      }
+      const { data, error } = await supabase
+        .from("fabrics")
+        .select("id, name, supplier, image_url, category, tier")
+        .eq("is_active", true)
+        .not("image_url", "is", null)
+        .neq("image_url", "")
+        .order("supplier", { ascending: true, nullsFirst: false })
+        .order("sort_order", { ascending: true })
+        .order("name", { ascending: true });
       if (cancelled) return;
-      setAllSwatches(all);
+      setAllSwatches(error || !data ? [] : (data as Swatch[]));
       setLoadingSwatches(false);
     })();
     return () => { cancelled = true; };
   }, []);
 
+  // ─── Supplier list for the active surface ────────────────────────────────
+  const [supplierFilter, setSupplierFilter] = useState<string | null>(null);
+  useEffect(() => { setSupplierFilter(null); }, [surface]);
+
+  const surfaceSuppliers = useMemo(() => {
+    const set = new Set<string>();
+    for (const s of allSwatches) {
+      if (classifySwatchSurface(s) === surface && s.supplier?.trim()) {
+        set.add(s.supplier.trim());
+      }
+    }
+    return Array.from(set).sort((a, b) => a.localeCompare(b));
+  }, [allSwatches, surface]);
+
   // ─── Filter swatches for the active surface ──────────────────────────────
   const swatches = useMemo(() => {
     const q = search.trim().toLowerCase();
     const matching = allSwatches.filter((s) => {
-        if (classifySwatchSurface(s) !== surface) return false;
-        if (!q) return true;
-        return `${s.product_name} ${s.brand_name || ""} ${s.category || ""} ${s.subcategory || ""}`.toLowerCase().includes(q);
-      });
+      if (classifySwatchSurface(s) !== surface) return false;
+      if (supplierFilter && (s.supplier || "").trim() !== supplierFilter) return false;
+      if (!q) return true;
+      return `${s.name} ${s.supplier || ""} ${s.category || ""}`.toLowerCase().includes(q);
+    });
     const byAsset = new Map<string, Swatch>();
     for (const s of matching) {
-      const assetKey = normalizeAssetKey(s.image_url) || `${s.brand_name}|${s.product_name}`;
+      const assetKey = normalizeAssetKey(s.image_url) || `${s.supplier}|${s.name}`;
       const previous = byAsset.get(assetKey);
-      if (!previous || productLabelScore(s.product_name) > productLabelScore(previous.product_name)) {
+      if (!previous || productLabelScore(s.name) > productLabelScore(previous.name)) {
         byAsset.set(assetKey, s);
       }
     }
     return Array.from(byAsset.values()).sort((a, b) =>
-      `${a.brand_name || ""} ${a.product_name}`.localeCompare(`${b.brand_name || ""} ${b.product_name}`)
+      `${a.supplier || ""} ${a.name}`.localeCompare(`${b.supplier || ""} ${b.name}`)
     );
-  }, [allSwatches, surface, search]);
+  }, [allSwatches, surface, search, supplierFilter]);
+
 
   // ─── Upload handling ─────────────────────────────────────────────────────
   const onFile = (f: File | null) => {
@@ -238,8 +266,9 @@ const TradeVisualiser = () => {
           x: p.x,
           y: p.y,
           swatchUrl: p.swatch!.image_url,
-          swatchName: p.swatch!.product_name,
-          brandName: p.swatch!.brand_name,
+          swatchName: p.swatch!.name,
+          brandName: p.swatch!.supplier,
+
         }));
       const { data, error } = await supabase.functions.invoke("visualiser-render", {
         body: { roomImage: photoDataUrl, pins: payloadPins },
@@ -396,7 +425,7 @@ const TradeVisualiser = () => {
                             <img src={p.swatch.image_url} alt="" className="w-6 h-6 object-cover rounded-l" />
                           )}
                           <span className="font-body text-[10px] text-foreground whitespace-nowrap max-w-[140px] truncate">
-                            {p.swatch.product_name}
+                            {p.swatch.name}
                           </span>
                           <button
                             onClick={(e) => { e.stopPropagation(); removePin(p.id); }}
@@ -488,6 +517,36 @@ const TradeVisualiser = () => {
                     className="pl-9 h-9 text-sm"
                   />
                 </div>
+                {surfaceSuppliers.length > 1 && (
+                  <div className="mt-3 flex flex-wrap gap-1.5">
+                    <button
+                      onClick={() => setSupplierFilter(null)}
+                      className={cn(
+                        "px-2 py-0.5 rounded-full text-[10px] uppercase tracking-wider border transition",
+                        supplierFilter === null
+                          ? "bg-foreground text-background border-foreground"
+                          : "border-border text-muted-foreground hover:text-foreground",
+                      )}
+                    >
+                      All
+                    </button>
+                    {surfaceSuppliers.map((sup) => (
+                      <button
+                        key={sup}
+                        onClick={() => setSupplierFilter(sup)}
+                        className={cn(
+                          "px-2 py-0.5 rounded-full text-[10px] uppercase tracking-wider border transition",
+                          supplierFilter === sup
+                            ? "bg-foreground text-background border-foreground"
+                            : "border-border text-muted-foreground hover:text-foreground",
+                        )}
+                      >
+                        {sup}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
                 {!activePinId && pins.length > 0 && (
                   <p className="mt-2 font-body text-[11px] text-muted-foreground">
                     Tap a pin on the photo to apply a finish.
@@ -523,7 +582,7 @@ const TradeVisualiser = () => {
                           {sw.image_url && (
                             <img
                               src={sw.image_url}
-                              alt={sw.product_name}
+                              alt={sw.name}
                               loading="lazy"
                               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                             />
@@ -531,12 +590,18 @@ const TradeVisualiser = () => {
                         </div>
                         <div className="px-2 py-1.5">
                           <div className="font-body text-[10px] uppercase tracking-wider text-muted-foreground truncate">
-                            {sw.brand_name}
+                            {sw.supplier || sw.category || "—"}
                           </div>
                           <div className="font-body text-xs text-foreground truncate">
-                            {sw.product_name}
+                            {sw.name}
                           </div>
+                          {sw.tier && (
+                            <div className="font-body text-[10px] tracking-wider uppercase text-muted-foreground mt-0.5">
+                              CAT {sw.tier}
+                            </div>
+                          )}
                         </div>
+
                       </button>
                     ))}
                   </div>
