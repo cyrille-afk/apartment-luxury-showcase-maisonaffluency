@@ -565,6 +565,17 @@ const TradeProductPage: React.FC = () => {
           if (variantLabel) patch.variant_label = variantLabel;
           if (overrideUnitPriceCents != null) patch.unit_price_cents = overrideUnitPriceCents;
 
+          // Persist the chosen fabric/leather so the quote line shows the
+          // upcharge label & price alongside the product.
+          if (selectedFabric?.id) {
+            patch.fabric_id = selectedFabric.id;
+            patch.fabric_meters = fabricMeters ?? null;
+            patch.fabric_upcharge_cents = fabricUpchargeCentsRaw > 0 ? fabricUpchargeCentsRaw : null;
+            patch.fabric_currency = selectedFabric.currency || null;
+          }
+
+
+
           // Read the line's resolved product, then read the product's packing
           // defaults. Only fill ship_* fields that are still NULL on the line.
           const { data: itemRow } = await supabase
