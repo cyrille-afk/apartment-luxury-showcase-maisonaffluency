@@ -319,6 +319,9 @@ export default function FabricSelector({ pickId, className, productTitle, onUpho
             currency: f.currency || "EUR",
           });
         }
+      } else if (isCoverGroup) {
+        // Cover (rattan/cane/wicker) is purely decorative — only update the
+        // hero image; do not drive the Frame variant matrix or pricing.
       } else {
         // Wood finish picked — drive the Frame axis on the price matrix.
         onWoodFinishChange?.(f.name);
@@ -336,6 +339,7 @@ export default function FabricSelector({ pickId, className, productTitle, onUpho
           onWoodFinishPricingChange?.(null);
         }
       }
+
       // Notify product page of mapped gallery images LAST so the swatch's
       // image jump wins over any gallery reset triggered by the tier/variant
       // sync above (e.g. handleMaterialChange's partial-pair fallback to
