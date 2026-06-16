@@ -151,11 +151,12 @@ export function useTradeProducts() {
   const staticProducts = useMemo(() => getAllTradeProducts(), []);
   const { ids: hiddenIds } = useHiddenTradeProductIds();
 
-  const { data: liveProducts = [] } = useQuery({
+  const { data: liveProducts = [], isLoading: liveLoading, isFetching: liveFetching } = useQuery({
     queryKey: ["trade-live-products"],
     queryFn: fetchLiveProducts,
     staleTime: 60_000,
   });
+
 
   const mergedProducts = useMemo(() => {
     const merged = new Map<string, TradeProduct>();
