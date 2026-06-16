@@ -53,6 +53,7 @@ export interface UpholsteryHints {
   is_upholstered?: boolean | null;
   category?: string | null;
   subcategory?: string | null;
+  materials?: string | null;
   title?: string | null;
   product_name?: string | null;
 }
@@ -64,6 +65,7 @@ export function isProductUpholstered(p: UpholsteryHints | null | undefined): boo
   return (
     matchesUpholsteryKeyword(p.subcategory) ||
     matchesUpholsteryKeyword(p.category) ||
+    matchesUpholsteryKeyword(p.materials) ||
     matchesUpholsteryKeyword(p.title) ||
     matchesUpholsteryKeyword(p.product_name)
   );
