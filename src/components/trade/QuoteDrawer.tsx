@@ -9,6 +9,12 @@ interface QuoteItem {
   id: string;
   quantity: number;
   unit_price_cents: number | null;
+  variant_label: string | null;
+  fabric_id: string | null;
+  fabric_meters: number | null;
+  fabric_upcharge_cents: number | null;
+  fabric_currency: string | null;
+  fabric?: { name: string; tier: string | null; price_per_lm_cents: number | null; currency: string | null } | null;
   product: {
     product_name: string;
     brand_name: string;
@@ -23,6 +29,7 @@ interface QuoteItem {
   /** Price converted to SGD */
   sgdPriceCents?: number | null;
 }
+
 
 interface QuoteDrawerProps {
   open: boolean;
