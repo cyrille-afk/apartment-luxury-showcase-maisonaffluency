@@ -20,6 +20,10 @@ interface Fabric {
   currency?: string | null;
   /** 1-based gallery image indices that depict this swatch on the linked product. */
   image_indices?: number[] | null;
+  /** Wood-finish frame price override (product_fabrics.price_cents_a). */
+  frame_price_cents?: number | null;
+  /** Currency of frame_price_cents. */
+  frame_price_currency?: string | null;
 }
 
 export interface SelectedFabricInfo {
