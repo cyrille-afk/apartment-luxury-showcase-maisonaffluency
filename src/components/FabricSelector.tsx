@@ -71,7 +71,7 @@ interface FabricSelectorProps {
    * (product_fabrics.price_cents_a). The product page uses it as the RRP base
    * and adds the fabric per-LM upcharge on top.
    */
-  onWoodFinishPricingChange?: (info: { name: string; price_cents: number; currency: string } | null) => void;
+  onWoodFinishPricingChange?: (info: { id: string; name: string; price_cents: number; currency: string; image_url: string | null } | null) => void;
   /** Fires with the list of linked wood-swatch names after fetch. */
   onWoodFinishesAvailable?: (names: string[]) => void;
   /** Trade-only: include fabric price/tier fields for quote upcharge math. */
@@ -257,9 +257,11 @@ export default function FabricSelector({ pickId, className, productTitle, onUpho
         // RRP base (fabric per-LM upcharge is added on top).
         if (f.frame_price_cents && f.frame_price_cents > 0) {
           onWoodFinishPricingChange?.({
+            id: f.id,
             name: f.name,
             price_cents: f.frame_price_cents,
             currency: f.frame_price_currency || "EUR",
+            image_url: f.image_url ?? null,
           });
         } else {
           onWoodFinishPricingChange?.(null);
@@ -451,9 +453,11 @@ export default function FabricSelector({ pickId, className, productTitle, onUpho
                       onWoodFinishChange?.(zoomed.name);
                       if (zoomed.frame_price_cents && zoomed.frame_price_cents > 0) {
                         onWoodFinishPricingChange?.({
+                          id: zoomed.id,
                           name: zoomed.name,
                           price_cents: zoomed.frame_price_cents,
                           currency: zoomed.frame_price_currency || "EUR",
+                          image_url: zoomed.image_url ?? null,
                         });
                       } else {
                         onWoodFinishPricingChange?.(null);

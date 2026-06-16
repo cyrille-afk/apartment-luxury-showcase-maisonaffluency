@@ -5608,6 +5608,7 @@ export type Database = {
           ship_weight_kg: number | null
           unit_price_cents: number | null
           variant_label: string | null
+          wood_fabric_id: string | null
         }
         Insert: {
           axonometric_image_url?: string | null
@@ -5633,6 +5634,7 @@ export type Database = {
           ship_weight_kg?: number | null
           unit_price_cents?: number | null
           variant_label?: string | null
+          wood_fabric_id?: string | null
         }
         Update: {
           axonometric_image_url?: string | null
@@ -5658,6 +5660,7 @@ export type Database = {
           ship_weight_kg?: number | null
           unit_price_cents?: number | null
           variant_label?: string | null
+          wood_fabric_id?: string | null
         }
         Relationships: [
           {
@@ -5686,6 +5689,20 @@ export type Database = {
             columns: ["quote_id"]
             isOneToOne: false
             referencedRelation: "trade_quotes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trade_quote_items_wood_fabric_id_fkey"
+            columns: ["wood_fabric_id"]
+            isOneToOne: false
+            referencedRelation: "fabrics"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trade_quote_items_wood_fabric_id_fkey"
+            columns: ["wood_fabric_id"]
+            isOneToOne: false
+            referencedRelation: "fabrics_public"
             referencedColumns: ["id"]
           },
         ]

@@ -471,7 +471,7 @@ const TradeProductPage: React.FC = () => {
   const [selectedFabric, setSelectedFabric] = useState<import("@/components/FabricSelector").SelectedFabricInfo | null>(null);
   // When a wood-finish swatch carries its own frame price (product_fabrics.price_cents_a),
   // we use it as the RRP base and add the fabric per-LM upcharge on top.
-  const [selectedWoodPrice, setSelectedWoodPrice] = useState<{ name: string; price_cents: number; currency: string } | null>(null);
+  const [selectedWoodPrice, setSelectedWoodPrice] = useState<{ id: string; name: string; price_cents: number; currency: string; image_url: string | null } | null>(null);
 
 
   useEffect(() => {
@@ -563,16 +563,20 @@ const TradeProductPage: React.FC = () => {
         if (itemId) {
           const patch: any = {};
           if (variantLabel) patch.variant_label = variantLabel;
-          if (overrideUnitPriceCents != null) patch.unit_price_cents = overrideUnitPriceCents;
 
-          // Persist the chosen fabric/leather so the quote line shows the
-          // upcharge label & price alongside the product.
+          // Compute the chosen line's unit price: wood-finish base (if picked)
+          // OR catalog RRP, PLUS the fabric per-LM upcharge. Both legs are
+          // normalised into the product currency, then converted into the
+          // quote currency so future FX moves don't shift this line.
+          const productCcy = ((data?.pricing?.currency || "EUR") as DisplayCurrency);
+          const activeV: any = (selectedVariantIdx != null && sv) ? sv[selectedVariantIdx] : null;
+          const metersForLine =
+            (activeV && typeof activeV.meters === "number" ? activeV.meters : null)
+            ?? (data?.product as any)?.com_meters
+            ?? null;
+
+          // Persist fabric metadata
           if (selectedFabric?.id) {
-            const activeV: any = (selectedVariantIdx != null && sv) ? sv[selectedVariantIdx] : null;
-            const metersForLine =
-              (activeV && typeof activeV.meters === "number" ? activeV.meters : null)
-              ?? (data?.product as any)?.com_meters
-              ?? null;
             const upchargeCents =
               selectedFabric.price_per_lm_cents && metersForLine
                 ? Math.round(selectedFabric.price_per_lm_cents * metersForLine)
@@ -581,6 +585,48 @@ const TradeProductPage: React.FC = () => {
             patch.fabric_meters = metersForLine;
             patch.fabric_upcharge_cents = upchargeCents;
             patch.fabric_currency = selectedFabric.currency || null;
+          }
+
+          // Persist wood-finish swatch reference for the thumbnail.
+          if (selectedWoodPrice?.id) {
+            patch.wood_fabric_id = selectedWoodPrice.id;
+          }
+
+          // Combined override unit price (wood + fabric upcharge), in quote currency.
+          if (overrideUnitPriceCents != null) {
+            patch.unit_price_cents = overrideUnitPriceCents;
+          } else if (selectedWoodPrice || selectedFabric) {
+            // Base = wood swatch price, or catalog rrp, all in product currency.
+            const woodInProd = selectedWoodPrice?.price_cents
+              ? (selectedWoodPrice.currency === productCcy
+                  ? selectedWoodPrice.price_cents
+                  : (convertCents(selectedWoodPrice.price_cents, selectedWoodPrice.currency, productCcy, fxRates) ?? 0))
+              : null;
+            const rrpProd = (data?.pricing?.rrp_price_cents ?? null) as number | null;
+            const baseProd = woodInProd ?? rrpProd;
+            // Fabric upcharge → product currency
+            let upchargeProd = 0;
+            if (selectedFabric?.price_per_lm_cents && metersForLine) {
+              const raw = Math.round(selectedFabric.price_per_lm_cents * metersForLine);
+              const ccy = selectedFabric.currency || productCcy;
+              upchargeProd = ccy === productCcy
+                ? raw
+                : (convertCents(raw, ccy, productCcy, fxRates) ?? 0);
+            }
+            if (baseProd != null) {
+              const totalProd = baseProd + upchargeProd;
+              // Resolve the quote currency, then convert.
+              const { data: qRow } = await supabase
+                .from("trade_quotes")
+                .select("currency")
+                .eq("id", quoteId)
+                .maybeSingle();
+              const quoteCcy = ((qRow?.currency || productCcy) as DisplayCurrency);
+              const totalQuote = productCcy === quoteCcy
+                ? totalProd
+                : (convertCents(totalProd, productCcy, quoteCcy, fxRates) ?? totalProd);
+              patch.unit_price_cents = totalQuote;
+            }
           }
 
 
@@ -630,7 +676,7 @@ const TradeProductPage: React.FC = () => {
     } finally {
       setAdding(false);
     }
-  }, [user, data, activeQuoteId, toast, selectedBase, selectedTop, selectedDualSize, selectedSingleMaterial, selectedSingleSize, selectedVariantIdx, rugSelection, selectedFabric, selectedWoodPrice]);
+  }, [user, data, activeQuoteId, toast, selectedBase, selectedTop, selectedDualSize, selectedSingleMaterial, selectedSingleSize, selectedVariantIdx, rugSelection, selectedFabric, selectedWoodPrice, fxRates]);
 
   // Default the dual-axis pickers to the first base + its uniquely-compatible
   // top so users see a complete pairing on load (e.g. Pars Cocktail Table:
