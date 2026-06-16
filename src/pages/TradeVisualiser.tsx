@@ -43,25 +43,49 @@ const SURFACES: { id: Surface; label: string; hint: string }[] = [
 ];
 
 const classifySwatchSurface = (s: Swatch): Surface | null => {
-  const text = `${s.category || ""} ${s.subcategory || ""} ${s.product_name || ""}`;
+  const cat = (s.category || "").trim().toLowerCase();
+  const text = `${s.category || ""} ${s.name || ""}`;
 
+  // Name-driven overrides first (rugs / curtains / wallcoverings can live in
+  // any category bucket in the fabrics library).
   if (/\b(rugs?|carpets?|kilims?|dhurries?)\b/i.test(text)) return "floors";
   if (/\b(curtains?|drapes?|drapery|sheers?|voiles?)\b/i.test(text)) return "curtains";
-  if (/\b(wallcovers?|wallcoverings?|wallpapers?|plasters?|boiserie|panell?ing|wall panels?|lacquer panels?)\b/i.test(text)) return "walls";
-  if (/\b(fabrics?|textiles?|leathers?|upholstery)\b/i.test(text)) return "upholstery";
+  if (/\b(wallcovers?|wallcoverings?|wallpapers?|boiserie|panell?ing|wall panels?|lacquer panels?)\b/i.test(text)) return "walls";
 
+  // Hard, solid finishes → wall surfaces (boiserie, lacquered panels, stone walls).
+  if (cat === "wood" || cat === "stone" || cat === "metal" || cat === "ceramic" || cat === "glass" || cat === "plaster") {
+    return "walls";
+  }
+
+  // Soft / woven covers → upholstery.
+  if (
+    cat === "fabric" ||
+    cat === "fabrics" ||
+    cat === "leather" ||
+    cat === "upholstery" ||
+    cat === "fabric & leather" ||
+    cat === "rattan" ||
+    cat === "cane" ||
+    cat === "wicker" ||
+    cat === "cover"
+  ) {
+    return "upholstery";
+  }
+
+  // Loose keyword fallback for legacy free-text categories.
+  if (/\b(fabrics?|textiles?|leathers?|upholstery)\b/i.test(text)) return "upholstery";
   return null;
 };
 
 interface Swatch {
   id: string;
-  product_name: string;
-  brand_name: string | null;
+  name: string;
+  supplier: string | null;
   image_url: string | null;
   category: string | null;
-  subcategory: string | null;
-  materials: string | null;
+  tier: string | null;
 }
+
 
 interface Pin {
   id: string;
