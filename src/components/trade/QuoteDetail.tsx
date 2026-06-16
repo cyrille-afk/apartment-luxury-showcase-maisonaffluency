@@ -2165,8 +2165,8 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                   return (
                     <div key={item.id} className="py-3 md:py-4 md:grid md:grid-cols-[minmax(0,1fr)_100px_120px_130px] md:gap-4 md:items-start">
                       <div className="flex gap-3 md:gap-4 min-w-0">
-                        <div className="shrink-0 flex flex-col gap-2">
-                          <div className="w-14 h-14 md:w-20 md:h-20 rounded bg-muted/30 overflow-hidden shrink-0">
+                        <div className="shrink-0 flex w-28 md:w-36 flex-col gap-2">
+                          <div className="w-28 h-28 md:w-36 md:h-36 rounded bg-muted/30 overflow-hidden shrink-0">
                             {product?.image_url ? (
                               <img src={product.image_url} alt={product.product_name} className="w-full h-full object-cover" loading="lazy" />
                             ) : (
@@ -2176,13 +2176,13 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                             )}
                           </div>
                           {/* Swatch thumbnails below main image */}
-                          <div className="flex gap-1.5">
+                          <div className="grid w-28 md:w-36 grid-cols-2 gap-2">
                             {(item as any).wood_fabric?.image_url && (
                               <div className="relative group">
                                 <img
                                   src={(item as any).wood_fabric.image_url}
                                   alt={(item as any).wood_fabric?.name || "Finish"}
-                                  className="w-8 h-8 md:w-10 md:h-10 rounded object-cover ring-1 ring-border"
+                                  className="w-full aspect-square rounded object-cover ring-1 ring-border"
                                   loading="lazy"
                                 />
                               </div>
@@ -2192,7 +2192,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                                 <img
                                   src={(item as any).fabric.image_url}
                                   alt={(item as any).fabric?.name || "Fabric"}
-                                  className="w-8 h-8 md:w-10 md:h-10 rounded object-cover ring-1 ring-border"
+                                  className="w-full aspect-square rounded object-cover ring-1 ring-border"
                                   loading="lazy"
                                 />
                               </div>
