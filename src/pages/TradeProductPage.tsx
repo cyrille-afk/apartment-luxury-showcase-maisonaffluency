@@ -1011,8 +1011,15 @@ const TradeProductPage: React.FC = () => {
   // Only suppress the Base dropdown when every base option is also offered as
   // a wood swatch in FabricSelector — otherwise the user has no way to pick
   // bases that lack a swatch (e.g. Walnut, Thermo-treated wood).
+  const normFinish = (s: string) => (s || "").trim().toLowerCase();
   const allBasesHaveSwatches =
-    baseOptions.length > 0 && baseOptions.every((b) => linkedWoodFinishes.includes(b));
+    baseOptions.length > 0 && baseOptions.every((b) => {
+      const nb = normFinish(b);
+      return linkedWoodFinishes.some((lw) => {
+        const nlw = normFinish(lw);
+        return nlw === nb || nlw.includes(nb) || nb.includes(nlw);
+      });
+    });
   const suppressBaseAsFinish = isUpholsteredProduct && !baseAxisIsDim && isFinishAxisLabel(baseAxisLabelRaw) && allBasesHaveSwatches;
   const suppressTopAsFinish = isUpholsteredProduct && !topAxisIsDim && isFinishAxisLabel(topAxisLabelRaw);
 
