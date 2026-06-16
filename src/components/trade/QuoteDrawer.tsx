@@ -9,6 +9,12 @@ interface QuoteItem {
   id: string;
   quantity: number;
   unit_price_cents: number | null;
+  variant_label: string | null;
+  fabric_id: string | null;
+  fabric_meters: number | null;
+  fabric_upcharge_cents: number | null;
+  fabric_currency: string | null;
+  fabric?: { name: string; tier: string | null; price_per_lm_cents: number | null; currency: string | null } | null;
   product: {
     product_name: string;
     brand_name: string;
@@ -23,6 +29,7 @@ interface QuoteItem {
   /** Price converted to SGD */
   sgdPriceCents?: number | null;
 }
+
 
 interface QuoteDrawerProps {
   open: boolean;
@@ -50,7 +57,7 @@ const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0 }: QuoteDrawe
       setLoading(true);
       const { data } = await supabase
         .from("trade_quote_items")
-        .select("id, quantity, unit_price_cents, product:trade_products(product_name, brand_name, image_url, trade_price_cents, rrp_price_cents, currency)")
+        .select("id, quantity, unit_price_cents, variant_label, fabric_id, fabric_meters, fabric_upcharge_cents, fabric_currency, fabric:fabrics(name, tier, price_per_lm_cents, currency), product:trade_products(product_name, brand_name, image_url, trade_price_cents, rrp_price_cents, currency)")
         .eq("quote_id", quoteId)
         .order("created_at", { ascending: false });
 
@@ -59,8 +66,15 @@ const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0 }: QuoteDrawe
           id: d.id,
           quantity: d.quantity,
           unit_price_cents: d.unit_price_cents,
+          variant_label: d.variant_label ?? null,
+          fabric_id: d.fabric_id ?? null,
+          fabric_meters: d.fabric_meters ?? null,
+          fabric_upcharge_cents: d.fabric_upcharge_cents ?? null,
+          fabric_currency: d.fabric_currency ?? null,
+          fabric: Array.isArray(d.fabric) ? d.fabric[0] : d.fabric,
           product: Array.isArray(d.product) ? d.product[0] : d.product,
         }));
+
 
         // For items without a price, try to find a priced record via fuzzy matching
         const needsPrice = mapped.filter((m) => m.product && !m.product.trade_price_cents && !m.product.rrp_price_cents);
@@ -227,6 +241,28 @@ const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0 }: QuoteDrawe
                   <p className="font-display text-xs text-foreground truncate">
                     {item.product?.product_name}
                   </p>
+                  {item.variant_label && (
+                    <p className="font-body text-[10px] text-foreground/80 mt-0.5 break-words">
+                      <span className="text-muted-foreground">Finish:</span> {item.variant_label}
+                    </p>
+                  )}
+                  {(item.fabric?.name || item.fabric_upcharge_cents) && (
+                    <p className="font-body text-[10px] text-foreground/80 mt-0.5 break-words">
+                      <span className="text-muted-foreground">Fabric:</span>{" "}
+                      {item.fabric?.name || "Selected"}
+                      {item.fabric?.tier ? ` · CAT ${item.fabric.tier}` : ""}
+                      {item.fabric_upcharge_cents ? (
+                        <>
+                          {" — "}
+                          <span className="text-primary font-medium">
+                            +{formatPrice(item.fabric_upcharge_cents, item.fabric_currency || item.fabric?.currency || "EUR")}
+                          </span>
+                          {item.fabric_meters ? <span className="text-muted-foreground"> ({item.fabric_meters} m)</span> : null}
+                        </>
+                      ) : null}
+                    </p>
+                  )}
+
                   <div className="flex items-center gap-2 mt-0.5">
                     <span className="font-body text-[10px] text-muted-foreground">
                       Qty: {item.quantity}

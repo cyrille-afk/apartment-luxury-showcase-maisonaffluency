@@ -521,8 +521,6 @@ const TradeProductPage: React.FC = () => {
       const buildDualLabel = (v: any): string =>
         [v?.base, v?.top, v?.size, v?.label].filter(Boolean).map((s: string) => String(s).trim()).join(" · ");
       if (rugSelection && rugSelection.sizeLabel) {
-        // Rug per-sqm selection wins — encodes custom dims + colour and a
-        // computed unit price that the standard variant lookup doesn't know about.
         variantLabel = [rugSelection.sizeLabel, rugSelection.colour].filter(Boolean).join(" · ");
         if (rugSelection.totalCents) overrideUnitPriceCents = rugSelection.totalCents;
       } else if (selectedBase || selectedTop) {
@@ -533,12 +531,17 @@ const TradeProductPage: React.FC = () => {
         const v = sv && sv[selectedVariantIdx];
         if (v?.label) variantLabel = String(v.label).trim();
       } else if (sv && sv.length === 1) {
-        // Single-variant product (e.g. Reda Amalou Lady Bug — one Base × Top
-        // combination). The user never opens the dropdown, but the finish
-        // should still be recorded on the quote line for clarity.
         const v = sv[0];
         variantLabel = buildDualLabel(v) || (v?.label ? String(v.label).trim() : null);
       }
+      // Fold the wood-finish swatch into the label so it appears on the quote.
+      if (selectedWoodPrice?.name) {
+        const wood = selectedWoodPrice.name.trim();
+        if (wood && !(variantLabel && variantLabel.toLowerCase().includes(wood.toLowerCase()))) {
+          variantLabel = variantLabel ? `${variantLabel} · ${wood}` : wood;
+        }
+      }
+
 
       const { data: itemId, error } = await supabase.rpc("add_gallery_product_to_quote", {
         _user_id: user.id,
@@ -561,6 +564,27 @@ const TradeProductPage: React.FC = () => {
           const patch: any = {};
           if (variantLabel) patch.variant_label = variantLabel;
           if (overrideUnitPriceCents != null) patch.unit_price_cents = overrideUnitPriceCents;
+
+          // Persist the chosen fabric/leather so the quote line shows the
+          // upcharge label & price alongside the product.
+          if (selectedFabric?.id) {
+            const activeV: any = (selectedVariantIdx != null && sv) ? sv[selectedVariantIdx] : null;
+            const metersForLine =
+              (activeV && typeof activeV.meters === "number" ? activeV.meters : null)
+              ?? (data?.product as any)?.com_meters
+              ?? null;
+            const upchargeCents =
+              selectedFabric.price_per_lm_cents && metersForLine
+                ? Math.round(selectedFabric.price_per_lm_cents * metersForLine)
+                : null;
+            patch.fabric_id = selectedFabric.id;
+            patch.fabric_meters = metersForLine;
+            patch.fabric_upcharge_cents = upchargeCents;
+            patch.fabric_currency = selectedFabric.currency || null;
+          }
+
+
+
 
           // Read the line's resolved product, then read the product's packing
           // defaults. Only fill ship_* fields that are still NULL on the line.
@@ -606,7 +630,7 @@ const TradeProductPage: React.FC = () => {
     } finally {
       setAdding(false);
     }
-  }, [user, data, activeQuoteId, toast, selectedBase, selectedTop, selectedDualSize, selectedSingleMaterial, selectedSingleSize, selectedVariantIdx, rugSelection]);
+  }, [user, data, activeQuoteId, toast, selectedBase, selectedTop, selectedDualSize, selectedSingleMaterial, selectedSingleSize, selectedVariantIdx, rugSelection, selectedFabric, selectedWoodPrice]);
 
   // Default the dual-axis pickers to the first base + its uniquely-compatible
   // top so users see a complete pairing on load (e.g. Pars Cocktail Table:
