@@ -6124,6 +6124,31 @@ export type Database = {
       }
     }
     Views: {
+      client_contacts_safe: {
+        Row: {
+          can_edit: boolean | null
+          client_id: string | null
+          created_at: string | null
+          email: string | null
+          first_name: string | null
+          id: string | null
+          is_primary: boolean | null
+          last_name: string | null
+          notes: string | null
+          phone: string | null
+          role_title: string | null
+          updated_at: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_contacts_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       fabrics_public: {
         Row: {
           category: string | null
