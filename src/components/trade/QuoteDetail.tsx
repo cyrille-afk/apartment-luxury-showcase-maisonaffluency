@@ -2163,7 +2163,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
 
                   return (
                     <div key={item.id} className="py-3 md:py-4 md:grid md:grid-cols-[minmax(0,1fr)_100px_120px_130px] md:gap-4 md:items-start">
-                      <div className="flex gap-3 md:gap-4 min-w-0">
+                      <div className="shrink-0 flex flex-col gap-2">
                         <div className="w-14 h-14 md:w-20 md:h-20 rounded bg-muted/30 overflow-hidden shrink-0">
                           {product?.image_url ? (
                             <img src={product.image_url} alt={product.product_name} className="w-full h-full object-cover" loading="lazy" />
@@ -2173,26 +2173,42 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                             </div>
                           )}
                         </div>
-                        <div className="min-w-0 flex-1">
-                          <h4 className="font-display text-xs md:text-sm text-foreground leading-tight break-words">
-                            {product?.product_name || "Unknown Product"}
-                          </h4>
-                          <p className="font-body text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5 truncate">
-                            {product?.brand_name?.includes(' - ') ? product.brand_name.split(' - ')[0].trim() : product?.brand_name}
-                          </p>
-                          {item.variant_label && (
-                            <p className="font-body text-[10px] md:text-[11px] text-foreground/90 mt-1 break-words flex items-center gap-1.5 flex-wrap">
-                              {(item as any).wood_fabric?.image_url && (
-                                <img
-                                  src={(item as any).wood_fabric.image_url}
-                                  alt={(item as any).wood_fabric?.name || "Finish"}
-                                  className="w-5 h-5 rounded object-cover ring-1 ring-border shrink-0"
-                                  loading="lazy"
-                                />
-                              )}
-                              <span><span className="text-muted-foreground">Finish:</span> {item.variant_label}</span>
-                            </p>
+                        {/* Swatch thumbnails below main image */}
+                        <div className="flex gap-1.5">
+                          {(item as any).wood_fabric?.image_url && (
+                            <div className="relative group">
+                              <img
+                                src={(item as any).wood_fabric.image_url}
+                                alt={(item as any).wood_fabric?.name || "Finish"}
+                                className="w-8 h-8 md:w-10 md:h-10 rounded object-cover ring-1 ring-border"
+                                loading="lazy"
+                              />
+                            </div>
                           )}
+                          {(item as any).fabric?.image_url && (
+                            <div className="relative group">
+                              <img
+                                src={(item as any).fabric.image_url}
+                                alt={(item as any).fabric?.name || "Fabric"}
+                                className="w-8 h-8 md:w-10 md:h-10 rounded object-cover ring-1 ring-border"
+                                loading="lazy"
+                              />
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <h4 className="font-display text-xs md:text-sm text-foreground leading-tight break-words">
+                          {product?.product_name || "Unknown Product"}
+                        </h4>
+                        <p className="font-body text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5 truncate">
+                          {product?.brand_name?.includes(' - ') ? product.brand_name.split(' - ')[0].trim() : product?.brand_name}
+                        </p>
+                        {item.variant_label && (
+                          <p className="font-body text-[10px] md:text-[11px] text-foreground/90 mt-1 break-words">
+                            <span className="text-muted-foreground">Finish:</span> {item.variant_label}
+                          </p>
+                        )}
                           {((item as any).fabric?.name || (item as any).fabric_upcharge_cents) && (() => {
                             const f: any = (item as any).fabric;
                             const upcharge = (item as any).fabric_upcharge_cents as number | null;
