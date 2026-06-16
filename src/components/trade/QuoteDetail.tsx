@@ -839,7 +839,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
       // 1) Fetch the full source row (no relations) + items
       const [srcRes, itemsRes] = await Promise.all([
         supabase.from("trade_quotes").select("*").eq("id", quoteId).single(),
-        supabase.from("trade_quote_items").select("product_id, quantity, unit_price_cents, notes, po_number, cost_code, lead_time_weeks_override, deposit_pct_override, variant_label, room, axonometric_image_url").eq("quote_id", quoteId),
+        supabase.from("trade_quote_items").select("product_id, quantity, unit_price_cents, unit_price_currency, notes, po_number, cost_code, lead_time_weeks_override, deposit_pct_override, variant_label, room, axonometric_image_url").eq("quote_id", quoteId),
       ]);
       if (srcRes.error || !srcRes.data) throw srcRes.error || new Error("Source quote not found");
       const src: any = srcRes.data;
