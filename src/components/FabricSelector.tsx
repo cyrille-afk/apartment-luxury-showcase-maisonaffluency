@@ -187,7 +187,7 @@ export default function FabricSelector({ pickId, className, productTitle, onUpho
         }));
       setFabrics(list);
       onHasFabricsChange?.(list.some(isFabricCategory));
-      onWoodFinishesAvailable?.(list.filter((f) => !isFabricCategory(f)).map((f) => f.name));
+      onWoodFinishesAvailable?.(list.filter(isWoodCategory).map((f) => f.name));
       const defaultFabric = list.find(isFabricCategory) || null;
       setSelectedFabricId(defaultFabric?.id ?? null);
       if (defaultFabric) {
@@ -203,7 +203,7 @@ export default function FabricSelector({ pickId, className, productTitle, onUpho
         onFabricChange?.(null);
       }
 
-      const defaultWood = list.find((f) => !isFabricCategory(f)) || null;
+      const defaultWood = list.find(isWoodCategory) || null;
       setSelectedWoodId(defaultWood?.id ?? null);
       if (defaultWood) {
         onWoodFinishChange?.(defaultWood.name);
@@ -222,6 +222,10 @@ export default function FabricSelector({ pickId, className, productTitle, onUpho
         onWoodFinishChange?.(null);
         onWoodFinishPricingChange?.(null);
       }
+
+      const defaultCover = list.find(isCoverCategory) || null;
+      setSelectedCoverId(defaultCover?.id ?? null);
+
     })();
     return () => {
       cancelled = true;
