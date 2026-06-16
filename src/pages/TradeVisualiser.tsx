@@ -136,59 +136,63 @@ const TradeVisualiser = () => {
   const imgRef = useRef<HTMLDivElement | null>(null);
   const fileRef = useRef<HTMLInputElement | null>(null);
 
-  // ─── Load swatches once from trade_products ──────────────────────────────
+  // ─── Load swatches once from the curated fabrics & finishes library ─────
   useEffect(() => {
     let cancelled = false;
     setLoadingSwatches(true);
     (async () => {
-      // Paginate through all products — single query is capped at 1000.
-      const pageSize = 1000;
-      let from = 0;
-      const all: Swatch[] = [];
-      // hard safety cap
-      for (let i = 0; i < 10; i++) {
-        const { data, error } = await supabase
-          .from("trade_products")
-          .select("id, product_name, brand_name, image_url, category, subcategory, materials")
-          .not("image_url", "is", null)
-          .neq("image_url", "")
-          .eq("is_active", true)
-          .order("brand_name", { ascending: true })
-          .order("product_name", { ascending: true })
-          .order("id", { ascending: true })
-          .range(from, from + pageSize - 1);
-        if (error || !data || data.length === 0) break;
-        all.push(...(data as Swatch[]));
-        if (data.length < pageSize) break;
-        from += pageSize;
-      }
+      const { data, error } = await supabase
+        .from("fabrics")
+        .select("id, name, supplier, image_url, category, tier")
+        .eq("is_active", true)
+        .not("image_url", "is", null)
+        .neq("image_url", "")
+        .order("supplier", { ascending: true, nullsFirst: false })
+        .order("sort_order", { ascending: true })
+        .order("name", { ascending: true });
       if (cancelled) return;
-      setAllSwatches(all);
+      setAllSwatches(error || !data ? [] : (data as Swatch[]));
       setLoadingSwatches(false);
     })();
     return () => { cancelled = true; };
   }, []);
 
+  // ─── Supplier list for the active surface ────────────────────────────────
+  const [supplierFilter, setSupplierFilter] = useState<string | null>(null);
+  useEffect(() => { setSupplierFilter(null); }, [surface]);
+
+  const surfaceSuppliers = useMemo(() => {
+    const set = new Set<string>();
+    for (const s of allSwatches) {
+      if (classifySwatchSurface(s) === surface && s.supplier?.trim()) {
+        set.add(s.supplier.trim());
+      }
+    }
+    return Array.from(set).sort((a, b) => a.localeCompare(b));
+  }, [allSwatches, surface]);
+
   // ─── Filter swatches for the active surface ──────────────────────────────
   const swatches = useMemo(() => {
     const q = search.trim().toLowerCase();
     const matching = allSwatches.filter((s) => {
-        if (classifySwatchSurface(s) !== surface) return false;
-        if (!q) return true;
-        return `${s.product_name} ${s.brand_name || ""} ${s.category || ""} ${s.subcategory || ""}`.toLowerCase().includes(q);
-      });
+      if (classifySwatchSurface(s) !== surface) return false;
+      if (supplierFilter && (s.supplier || "").trim() !== supplierFilter) return false;
+      if (!q) return true;
+      return `${s.name} ${s.supplier || ""} ${s.category || ""}`.toLowerCase().includes(q);
+    });
     const byAsset = new Map<string, Swatch>();
     for (const s of matching) {
-      const assetKey = normalizeAssetKey(s.image_url) || `${s.brand_name}|${s.product_name}`;
+      const assetKey = normalizeAssetKey(s.image_url) || `${s.supplier}|${s.name}`;
       const previous = byAsset.get(assetKey);
-      if (!previous || productLabelScore(s.product_name) > productLabelScore(previous.product_name)) {
+      if (!previous || productLabelScore(s.name) > productLabelScore(previous.name)) {
         byAsset.set(assetKey, s);
       }
     }
     return Array.from(byAsset.values()).sort((a, b) =>
-      `${a.brand_name || ""} ${a.product_name}`.localeCompare(`${b.brand_name || ""} ${b.product_name}`)
+      `${a.supplier || ""} ${a.name}`.localeCompare(`${b.supplier || ""} ${b.name}`)
     );
-  }, [allSwatches, surface, search]);
+  }, [allSwatches, surface, search, supplierFilter]);
+
 
   // ─── Upload handling ─────────────────────────────────────────────────────
   const onFile = (f: File | null) => {
