@@ -1,0 +1,1 @@
+UPDATE product_fabrics SET price_cents_a=1895000, price_cents_b=NULL, price_tier_label='ECART fabric (11 m)' WHERE pick_id='fc3a68b1-65cd-4d6f-941c-b8a2451dd064';
