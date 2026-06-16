@@ -230,9 +230,7 @@ export default function FabricSelector({ pickId, className, productTitle, onUpho
     const setSelected = isFabricGroup ? setSelectedFabricId : setSelectedWoodId;
     const handlePick = () => {
       setSelected(f.id);
-      // Notify product page of mapped gallery images, regardless of group.
       const indices = Array.isArray(f.image_indices) && f.image_indices.length > 0 ? f.image_indices : null;
-      onSwatchImagesChange?.(indices);
       // Only fabric/leather drives the upholstery price tier. Wood finishes
       // are decorative and don't change the variant matrix on this product.
       if (isFabricGroup) {
@@ -267,7 +265,18 @@ export default function FabricSelector({ pickId, className, productTitle, onUpho
           onWoodFinishPricingChange?.(null);
         }
       }
+      // Notify product page of mapped gallery images LAST so the swatch's
+      // image jump wins over any gallery reset triggered by the tier/variant
+      // sync above (e.g. handleMaterialChange's partial-pair fallback to
+      // index 0). Defer to the next tick to outrun the state updates queued
+      // by the upstream handlers.
+      if (indices) {
+        setTimeout(() => onSwatchImagesChange?.(indices), 0);
+      } else {
+        onSwatchImagesChange?.(null);
+      }
     };
+
     const tierCaption = isFabricGroup && !isCom && !isCol && (f.tier || f.price_per_lm_cents)
       ? [
           f.tier ? `CAT ${f.tier}` : null,
@@ -431,7 +440,11 @@ export default function FabricSelector({ pickId, className, productTitle, onUpho
                   onClick={() => {
                     const isFabric = isFabricCategory(zoomed);
                     const indices = Array.isArray(zoomed.image_indices) && zoomed.image_indices.length > 0 ? zoomed.image_indices : null;
-                    onSwatchImagesChange?.(indices);
+                    if (indices) {
+                      setTimeout(() => onSwatchImagesChange?.(indices), 0);
+                    } else {
+                      onSwatchImagesChange?.(null);
+                    }
                     if (isFabric) {
                       setSelectedFabricId(zoomed.id);
                       onUpholsteryTierChange?.(zoomed.price_tier_label ?? null);
