@@ -1086,10 +1086,11 @@ const TradeProductPage: React.FC = () => {
     }
     const centsWithFabric = cents + upcharge;
     const formatted = formatPriceConverted(centsWithFabric, pricing.currency, displayCurrency, fxRates, pricing.price_unit || undefined);
-    const explicitPrefix = pricing.price_prefix ? `${pricing.price_prefix} ` : "";
-    // "From" only when no concrete selection (no fabric AND no wood override)
-    // has been made yet.
+    // Once the user has made a concrete fabric or wood-frame selection, the
+    // price is fully resolved — never show "From" (whether it comes from the
+    // explicit curator prefix or the dual-axis fallback).
     const hasConcreteSelection = !!selectedFabric || !!selectedWoodPrice;
+    const explicitPrefix = pricing.price_prefix && !hasConcreteSelection ? `${pricing.price_prefix} ` : "";
     const prefix = explicitPrefix || (isFromPrice && !hasConcreteSelection ? "From " : "");
     return (
       <div className="flex flex-col gap-1">
