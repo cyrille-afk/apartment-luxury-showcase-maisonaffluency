@@ -549,8 +549,11 @@ export default function FabricSelector({ pickId, className, productTitle, onUpho
                           currency: zoomed.currency || "EUR",
                         });
                       }
+                    } else if (isCoverCategory(zoomed)) {
+                      setSelectedCoverId(zoomed.id);
                     } else {
                       setSelectedWoodId(zoomed.id);
+
                       onWoodFinishChange?.(zoomed.name);
                       if (zoomed.frame_price_cents && zoomed.frame_price_cents > 0) {
                         onWoodFinishPricingChange?.({
