@@ -552,7 +552,7 @@ const TradeVisualiser = () => {
                           {sw.image_url && (
                             <img
                               src={sw.image_url}
-                              alt={sw.product_name}
+                              alt={sw.name}
                               loading="lazy"
                               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                             />
@@ -560,12 +560,18 @@ const TradeVisualiser = () => {
                         </div>
                         <div className="px-2 py-1.5">
                           <div className="font-body text-[10px] uppercase tracking-wider text-muted-foreground truncate">
-                            {sw.brand_name}
+                            {sw.supplier || sw.category || "—"}
                           </div>
                           <div className="font-body text-xs text-foreground truncate">
-                            {sw.product_name}
+                            {sw.name}
                           </div>
+                          {sw.tier && (
+                            <div className="font-body text-[10px] tracking-wider uppercase text-muted-foreground mt-0.5">
+                              CAT {sw.tier}
+                            </div>
+                          )}
                         </div>
+
                       </button>
                     ))}
                   </div>
