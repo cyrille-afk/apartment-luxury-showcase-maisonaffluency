@@ -40,6 +40,8 @@ const UPHOLSTERY_KEYWORDS: string[] = [
   "fauteuil",
   "canape",
   "canapé",
+  "fabric",
+  "leather",
   "upholster",
 ];
 
