@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Box, Plus, ExternalLink, Eye, Trash2, EyeOff, Sparkles } from "lucide-react";
 import { format } from "date-fns";
+import { getActiveProjectId } from "@/lib/activeProjectId";
 
 const ENGINE_OPTIONS = [
   { value: "corona", label: "Corona Renderer", price: "€280 (S$410) / view", desc: "Warm natural GI — ideal for residential interiors" },

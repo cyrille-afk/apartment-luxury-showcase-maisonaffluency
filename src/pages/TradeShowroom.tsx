@@ -11,6 +11,7 @@ import Gallery from "@/components/Gallery";
 import ShowroomGridView from "@/components/trade/ShowroomGridView";
 import ProductImageSearch from "@/components/trade/ProductImageSearch";
 import { cn } from "@/lib/utils";
+import { getActiveProjectId } from "@/lib/activeProjectId";
 
 interface DraftQuote {
   id: string;

@@ -30,6 +30,7 @@ import { consumeProductBackRef } from "@/lib/designerBackRef";
 import type { DesignerCuratorPick } from "@/hooks/useDesigner";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
+import { getActiveProjectId } from "@/lib/activeProjectId";
 
 /** Replace a Cloudinary URL's width transform for responsive loading */
 function responsiveCloudinaryUrl(url: string, width: number): string {

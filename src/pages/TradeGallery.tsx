@@ -29,6 +29,7 @@ import { normalizeBrandToParent } from "@/lib/brandNormalization";
 import AlphabetDesignerPicker from "@/components/trade/AlphabetDesignerPicker";
 import { useTradeDisplayCurrency } from "@/hooks/useTradeDisplayCurrency";
 import DuplicateProductsBanner from "@/components/dev/DuplicateProductsBanner";
+import { getActiveProjectId } from "@/lib/activeProjectId";
 
 
 const slugifyForUrl = (s: string) =>
