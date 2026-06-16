@@ -66,6 +66,12 @@ interface FabricSelectorProps {
    * product page can drive the Base × Top price matrix in sync.
    */
   onWoodFinishChange?: (woodName: string | null) => void;
+  /**
+   * Fires when the selected wood-finish swatch carries a frame-price override
+   * (product_fabrics.price_cents_a). The product page uses it as the RRP base
+   * and adds the fabric per-LM upcharge on top.
+   */
+  onWoodFinishPricingChange?: (info: { name: string; price_cents: number; currency: string } | null) => void;
   /** Fires with the list of linked wood-swatch names after fetch. */
   onWoodFinishesAvailable?: (names: string[]) => void;
   /** Trade-only: include fabric price/tier fields for quote upcharge math. */
