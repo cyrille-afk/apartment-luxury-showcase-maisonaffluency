@@ -50,6 +50,7 @@ Deno.serve(async (req) => {
         `Apply it as a realistic ${p.surface === "floors" ? "rug/floor covering" :
           p.surface === "walls" ? "wall finish (paint/wallpaper/lacquer/plaster as appropriate)" :
           p.surface === "upholstery" ? "upholstery fabric on the seating in that area" :
+          p.surface === "furniture" ? "furniture finish applied ONLY to the frame/case/legs/top of the single piece of furniture at the marked point — do NOT touch its upholstery, cushions, or any adjacent objects, walls, floor, or drapery" :
           "curtain/drapery fabric"}, matching the room's existing perspective, scale, lighting, and shadows.`;
     }).join("\n");
 
