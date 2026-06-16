@@ -239,7 +239,7 @@ export default function FabricSelector({ pickId, className, productTitle, onUpho
     (acc[key] ||= []).push(f);
     return acc;
   }, {});
-  const groupOrder = ["Fabric & Leather", "Wood"];
+  const groupOrder = ["Fabric & Leather", "Wood", "Cover"];
   const sortedGroupKeys = Object.keys(grouped).sort((a, b) => {
     const ai = groupOrder.indexOf(a);
     const bi = groupOrder.indexOf(b);
