@@ -463,6 +463,26 @@ const TradeGallery = () => {
             <List className="h-4 w-4" />
           </button>
         </div>
+        {viewMode === "grid" && (
+          <div className="hidden md:flex items-center gap-1 border border-background/30 rounded-md p-0.5" title="Grid density">
+            <button
+              onClick={() => setDensity("comfortable")}
+              className={`p-1.5 rounded transition-colors ${density === "comfortable" ? "bg-background/20 text-background" : "text-background/50"}`}
+              aria-label="Comfortable grid"
+              title="3-up grid"
+            >
+              <LayoutGrid className="h-4 w-4" />
+            </button>
+            <button
+              onClick={() => setDensity("compact")}
+              className={`p-1.5 rounded transition-colors ${density === "compact" ? "bg-background/20 text-background" : "text-background/50"}`}
+              aria-label="Compact grid"
+              title="6-up grid"
+            >
+              <Grid2X2 className="h-4 w-4" />
+            </button>
+          </div>
+        )}
       </SectionHero>
 
       <DuplicateProductsBanner groups={duplicateGroups} />
