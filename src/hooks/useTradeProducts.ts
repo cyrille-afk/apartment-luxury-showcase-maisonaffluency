@@ -276,7 +276,7 @@ export function useTradeProducts() {
     return groups;
   }, [mergedProducts]);
 
-  return { allProducts, brands, categories, getSubcategories, duplicateGroups };
+  return { allProducts, brands, categories, getSubcategories, duplicateGroups, isLoading: liveLoading, isFetching: liveFetching };
 }
 
 export interface DuplicateGroup {
