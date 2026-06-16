@@ -19,6 +19,15 @@ const CATEGORIES: FabricCategory[] = [
   "Other",
 ];
 
+const normalizeAdminFabricCategory = (category: string | null | undefined): FabricCategory => {
+  const raw = (category || "").trim().toLowerCase();
+  if (["fabric", "fabrics", "upholstery", "leather", "fabric & leather", "fabric/leather"].includes(raw)) return "Fabric & Leather";
+  if (["wood", "woods", "timber"].includes(raw)) return "Wood";
+  if (raw === "stone") return "Stone";
+  if (raw === "metal") return "Metal";
+  return "Other";
+};
+
 
 interface Fabric {
   id: string;
@@ -240,7 +249,7 @@ export default function TradeAdminFabrics() {
 
   const filtered = useMemo(() => {
     let rows = fabrics;
-    if (categoryFilter) rows = rows.filter((r) => (r.category || "") === categoryFilter);
+    if (categoryFilter) rows = rows.filter((r) => normalizeAdminFabricCategory(r.category) === categoryFilter);
     if (search.trim()) {
       const q = search.toLowerCase();
       rows = rows.filter(
@@ -256,7 +265,7 @@ export default function TradeAdminFabrics() {
   const grouped = useMemo(() => {
     const g: Record<string, Fabric[]> = {};
     filtered.forEach((f) => {
-      const k = f.category || "Other";
+      const k = normalizeAdminFabricCategory(f.category);
       (g[k] = g[k] || []).push(f);
     });
     return g;
