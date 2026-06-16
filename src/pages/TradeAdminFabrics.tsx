@@ -401,7 +401,7 @@ export default function TradeAdminFabrics() {
 
   const setPickLinkImageRange = async (linkId: string, raw: string) => {
     const indices = parseImageRange(raw);
-    const { error } = await (supabase as any)
+    const { error } = await supabase
       .from("product_fabrics")
       .update({ image_indices: indices })
       .eq("id", linkId);
@@ -609,7 +609,7 @@ export default function TradeAdminFabrics() {
                                   <select
                                     className="px-1.5 py-1 text-xs rounded border border-border bg-background"
                                     value={editDraft.tier || ""}
-                                    onChange={(e) => setEditDraft((d) => ({ ...d, tier: (e.target.value || null) as any }))}
+                                    onChange={(e) => setEditDraft((d) => ({ ...d, tier: (e.target.value || null) as Fabric["tier"] }))}
                                   >
                                     <option value="">—</option>
                                     {TIERS.map((t) => <option key={t} value={t}>CAT {t}</option>)}
