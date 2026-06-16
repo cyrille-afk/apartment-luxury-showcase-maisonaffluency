@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Box, Plus, ExternalLink, Eye, Trash2, EyeOff, Sparkles } from "lucide-react";
 import { format } from "date-fns";
+import { getActiveProjectId } from "@/lib/activeProjectId";
 
 const ENGINE_OPTIONS = [
   { value: "corona", label: "Corona Renderer", price: "€280 (S$410) / view", desc: "Warm natural GI — ideal for residential interiors" },
@@ -55,18 +56,20 @@ const TradeAxonometricGallery = () => {
     enabled: !!user,
   });
 
-  // Get user's draft quote to attach renders
+  // Get user's draft quote (scoped to active project) to attach renders
   const { data: draftQuote } = useQuery({
-    queryKey: ["draft-quote", user?.id],
+    queryKey: ["draft-quote", user?.id, getActiveProjectId()],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const projectId = getActiveProjectId();
+      let q = supabase
         .from("trade_quotes")
         .select("id")
         .eq("user_id", user!.id)
         .eq("status", "draft")
         .order("created_at", { ascending: false })
-        .limit(1)
-        .single();
+        .limit(1);
+      q = projectId ? q.eq("project_id", projectId) : q.is("project_id", null);
+      const { data, error } = await q.maybeSingle();
       if (error && error.code !== "PGRST116") throw error;
       return data;
     },
@@ -81,12 +84,13 @@ const TradeAxonometricGallery = () => {
       if (!quoteId) {
         const { data: newQuote, error: qErr } = await supabase
           .from("trade_quotes")
-          .insert({ user_id: user.id })
+          .insert({ user_id: user.id, project_id: getActiveProjectId() })
           .select("id")
           .single();
         if (qErr) throw qErr;
         quoteId = newQuote.id;
       }
+
       const { error } = await supabase.rpc("add_gallery_product_to_quote", {
         _user_id: user.id,
         _quote_id: quoteId,
@@ -150,12 +154,13 @@ const TradeAxonometricGallery = () => {
       if (!quoteId) {
         const { data: newQuote, error: qErr } = await supabase
           .from("trade_quotes")
-          .insert({ user_id: user.id })
+          .insert({ user_id: user.id, project_id: getActiveProjectId() })
           .select("id")
           .single();
         if (qErr) throw qErr;
         quoteId = newQuote.id;
       }
+
       const engineLabel = ENGINE_OPTIONS.find(e => e.value === chosenEngine)?.label || chosenEngine;
       const { error } = await supabase.rpc("add_gallery_product_to_quote", {
         _user_id: user.id,

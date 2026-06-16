@@ -11,6 +11,7 @@ import Gallery from "@/components/Gallery";
 import ShowroomGridView from "@/components/trade/ShowroomGridView";
 import ProductImageSearch from "@/components/trade/ProductImageSearch";
 import { cn } from "@/lib/utils";
+import { getActiveProjectId } from "@/lib/activeProjectId";
 
 interface DraftQuote {
   id: string;
@@ -34,22 +35,27 @@ const TradeShowroom = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [drawerRefreshKey, setDrawerRefreshKey] = useState(0);
 
-  // Fetch draft quotes
+  // Fetch draft quotes — scoped to the active project filter so items never
+  // land in an unrelated project's draft quote.
   useEffect(() => {
     if (!user) return;
     const fetchDrafts = async () => {
-      const { data } = await supabase
+      const projectId = getActiveProjectId();
+      let q = supabase
         .from("trade_quotes")
         .select("id, created_at")
         .eq("user_id", user.id)
         .eq("status", "draft")
         .order("created_at", { ascending: false });
+      q = projectId ? q.eq("project_id", projectId) : q.is("project_id", null);
+      const { data } = await q;
       const drafts = (data as DraftQuote[]) || [];
       setDraftQuotes(drafts);
-      if (drafts.length > 0) setActiveQuoteId(drafts[0].id);
+      setActiveQuoteId(drafts.length > 0 ? drafts[0].id : null);
     };
     fetchDrafts();
   }, [user]);
+
 
   const addProductToQuote = useCallback(
     async (
@@ -103,9 +109,10 @@ const TradeShowroom = () => {
       } else {
         const { data, error } = await supabase
           .from("trade_quotes")
-          .insert({ user_id: user.id, status: "draft" })
+          .insert({ user_id: user.id, status: "draft", project_id: getActiveProjectId() })
           .select("id, created_at")
           .single();
+
         if (error || !data) {
           toast({ title: "Error creating quote", description: error?.message, variant: "destructive" });
           return;
