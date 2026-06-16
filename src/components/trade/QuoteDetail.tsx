@@ -2181,6 +2181,27 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                             {product?.brand_name?.includes(' - ') ? product.brand_name.split(' - ')[0].trim() : product?.brand_name}
                           </p>
                           {item.variant_label && <p className="font-body text-[10px] md:text-[11px] text-foreground/90 mt-1 break-words"><span className="text-muted-foreground">Finish:</span> {item.variant_label}</p>}
+                          {((item as any).fabric?.name || (item as any).fabric_upcharge_cents) && (() => {
+                            const f: any = (item as any).fabric;
+                            const upcharge = (item as any).fabric_upcharge_cents as number | null;
+                            const ccy = ((item as any).fabric_currency as string | null) || f?.currency || "EUR";
+                            const meters = (item as any).fabric_meters as number | null;
+                            const sym = ccy === "EUR" ? "€" : ccy === "USD" ? "$" : ccy === "GBP" ? "£" : ccy === "SGD" ? "S$" : ccy + " ";
+                            return (
+                              <p className="font-body text-[10px] md:text-[11px] text-foreground/90 mt-1 break-words">
+                                <span className="text-muted-foreground">Fabric:</span> {f?.name || "Selected"}
+                                {f?.tier ? ` · CAT ${f.tier}` : ""}
+                                {upcharge ? (
+                                  <>
+                                    {" — "}
+                                    <span className="text-primary font-medium">+{sym}{(upcharge / 100).toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
+                                    {meters ? <span className="text-muted-foreground"> ({meters} m)</span> : null}
+                                  </>
+                                ) : null}
+                              </p>
+                            );
+                          })()}
+
                           {product?.dimensions && !(item.variant_label && item.variant_label.toLowerCase().includes(String(product.dimensions).toLowerCase().slice(0, 8))) && <p className="font-body text-[10px] md:text-[11px] text-muted-foreground mt-1 break-words">{product.dimensions}</p>}
                           {!item.variant_label && product?.materials && <p className="font-body text-[10px] md:text-[11px] text-muted-foreground break-words">{product.materials}</p>}
                           {item.edition && <p className="font-body text-[10px] md:text-[11px] text-foreground/80 italic mt-0.5 break-words">Edition: {String(item.edition).replace(/^edition\s*[:\-—]?\s*/i, "").trim()}</p>}
