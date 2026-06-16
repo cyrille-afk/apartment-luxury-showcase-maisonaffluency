@@ -105,7 +105,7 @@ const isFabricCategory = (fabric: Fabric) => normalizeFabricCategory(fabric.cate
  */
 export default function FabricSelector({ pickId, className, productTitle, onUpholsteryTierChange, onFabricChange, onHasFabricsChange, onWoodFinishChange, onWoodFinishPricingChange, onWoodFinishesAvailable, includePricing = false, onSwatchImagesChange, woodLabel }: FabricSelectorProps) {
 
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(true);
   const [fabrics, setFabrics] = useState<Fabric[]>([]);
   const [selectedFabricId, setSelectedFabricId] = useState<string | null>(null);
   const [selectedWoodId, setSelectedWoodId] = useState<string | null>(null);
@@ -169,6 +169,40 @@ export default function FabricSelector({ pickId, className, productTitle, onUpho
       setFabrics(list);
       onHasFabricsChange?.(list.some(isFabricCategory));
       onWoodFinishesAvailable?.(list.filter((f) => !isFabricCategory(f)).map((f) => f.name));
+      const defaultFabric = list.find(isFabricCategory) || null;
+      setSelectedFabricId(defaultFabric?.id ?? null);
+      if (defaultFabric) {
+        onUpholsteryTierChange?.(defaultFabric.price_tier_label ?? null);
+        onFabricChange?.({
+          id: defaultFabric.id,
+          name: defaultFabric.name,
+          tier: defaultFabric.tier ?? null,
+          price_per_lm_cents: defaultFabric.price_per_lm_cents ?? null,
+          currency: defaultFabric.currency || "EUR",
+        });
+      } else {
+        onFabricChange?.(null);
+      }
+
+      const defaultWood = list.find((f) => !isFabricCategory(f)) || null;
+      setSelectedWoodId(defaultWood?.id ?? null);
+      if (defaultWood) {
+        onWoodFinishChange?.(defaultWood.name);
+        if (defaultWood.frame_price_cents && defaultWood.frame_price_cents > 0) {
+          onWoodFinishPricingChange?.({
+            id: defaultWood.id,
+            name: defaultWood.name,
+            price_cents: defaultWood.frame_price_cents,
+            currency: defaultWood.frame_price_currency || "EUR",
+            image_url: defaultWood.image_url ?? null,
+          });
+        } else {
+          onWoodFinishPricingChange?.(null);
+        }
+      } else {
+        onWoodFinishChange?.(null);
+        onWoodFinishPricingChange?.(null);
+      }
     })();
     return () => {
       cancelled = true;
@@ -336,7 +370,7 @@ export default function FabricSelector({ pickId, className, productTitle, onUpho
     );
   };
 
-  const [openWood, setOpenWood] = useState(false);
+  const [openWood, setOpenWood] = useState(true);
   const fabricTiles = grouped["Fabric & Leather"] || [];
   const woodTiles = grouped["Wood"] || [];
 
