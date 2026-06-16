@@ -227,14 +227,17 @@ const TradeAtelierProfile = () => {
   useEffect(() => {
     if (!user) return;
     const fetchDraft = async () => {
-      const { data } = await supabase
+      const projectId = getActiveProjectId();
+      let q = supabase
         .from("trade_quotes")
         .select("id")
         .eq("user_id", user.id)
         .eq("status", "draft")
         .order("created_at", { ascending: false })
         .limit(1);
-      if (data?.length) setActiveQuoteId(data[0].id);
+      q = projectId ? q.eq("project_id", projectId) : q.is("project_id", null);
+      const { data } = await q;
+      setActiveQuoteId(data?.length ? data[0].id : null);
     };
     fetchDraft();
   }, [user]);
@@ -247,7 +250,7 @@ const TradeAtelierProfile = () => {
     if (!quoteId) {
       const { data, error } = await supabase
         .from("trade_quotes")
-        .insert({ user_id: user.id, status: "draft" })
+        .insert({ user_id: user.id, status: "draft", project_id: getActiveProjectId() })
         .select("id")
         .single();
       if (error || !data) {
@@ -258,6 +261,7 @@ const TradeAtelierProfile = () => {
       quoteId = data.id;
       setActiveQuoteId(quoteId);
     }
+
 
     const { error } = await supabase.rpc("add_gallery_product_to_quote", {
       _user_id: user.id,

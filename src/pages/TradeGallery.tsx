@@ -149,19 +149,22 @@ const TradeGallery = () => {
     refreshPrices();
   }, []);
 
-  // Fetch user's draft quotes
+  // Fetch user's draft quotes — scoped to the active project filter.
   useEffect(() => {
     if (!user) return;
     const fetchDrafts = async () => {
-      const { data } = await supabase
+      const projectId = getActiveProjectId();
+      let q = supabase
         .from("trade_quotes")
         .select("id, created_at")
         .eq("user_id", user.id)
         .eq("status", "draft")
         .order("created_at", { ascending: false });
+      q = projectId ? q.eq("project_id", projectId) : q.is("project_id", null);
+      const { data } = await q;
       const drafts = (data as DraftQuote[]) || [];
       setDraftQuotes(drafts);
-      if (drafts.length > 0) setActiveQuoteId(drafts[0].id);
+      setActiveQuoteId(drafts.length > 0 ? drafts[0].id : null);
     };
     fetchDrafts();
   }, [user]);
@@ -171,7 +174,7 @@ const TradeGallery = () => {
     setAddingProductId(product.id);
     const { data, error } = await supabase
       .from("trade_quotes")
-      .insert({ user_id: user.id, status: "draft" })
+      .insert({ user_id: user.id, status: "draft", project_id: getActiveProjectId() })
       .select("id, created_at")
       .single();
     if (error || !data) {
@@ -184,6 +187,7 @@ const TradeGallery = () => {
     setActiveQuoteId(newQuote.id);
     await addProductToQuote(product, newQuote.id);
   };
+
 
   const addProductToQuote = async (product: TradeProduct, quoteId: string) => {
     if (!user) return;
