@@ -257,9 +257,11 @@ export default function FabricSelector({ pickId, className, productTitle, onUpho
         // RRP base (fabric per-LM upcharge is added on top).
         if (f.frame_price_cents && f.frame_price_cents > 0) {
           onWoodFinishPricingChange?.({
+            id: f.id,
             name: f.name,
             price_cents: f.frame_price_cents,
             currency: f.frame_price_currency || "EUR",
+            image_url: f.image_url ?? null,
           });
         } else {
           onWoodFinishPricingChange?.(null);
