@@ -10,6 +10,7 @@ import {
   Loader2, Wand2, Search, X, Download, ArrowLeft, RefreshCw, Send, Maximize2, Minimize2, Upload, RotateCw, RotateCcw, ZoomIn, ZoomOut, Move, MousePointer2, Crosshair, Trash2, Link, Save, Image, Layout, FolderOpen, FileText, Lock, Unlock, CheckCircle2, SplitSquareHorizontal, Undo2,
 } from "lucide-react";
 import BeforeAfterSplit from "./BeforeAfterSplit";
+import { createActiveDraftQuote } from "@/lib/activeProjectId";
 
 import {
   DropdownMenu,
@@ -618,16 +619,10 @@ export default function ProposalBuilder({
       // Create a single grouped quote for all options
       let quoteId: string | null = null;
       try {
-        const { data: quote, error: quoteError } = await supabase
-          .from("trade_quotes")
-          .insert({
-            user_id: user.id,
-            status: "draft",
-            notes: `Auto-generated from Proposal Builder — ${dateLabel}`,
-            client_name: "",
-          })
-          .select("id")
-          .single();
+        const { data: quote, error: quoteError } = await createActiveDraftQuote(user.id, {
+          notes: `Auto-generated from Proposal Builder — ${dateLabel}`,
+          client_name: "",
+        });
         if (!quoteError && quote) {
           quoteId = quote.id;
           for (const product of selectedProducts) {
