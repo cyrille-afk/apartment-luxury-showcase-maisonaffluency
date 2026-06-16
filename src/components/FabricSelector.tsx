@@ -71,7 +71,7 @@ interface FabricSelectorProps {
    * (product_fabrics.price_cents_a). The product page uses it as the RRP base
    * and adds the fabric per-LM upcharge on top.
    */
-  onWoodFinishPricingChange?: (info: { name: string; price_cents: number; currency: string } | null) => void;
+  onWoodFinishPricingChange?: (info: { id: string; name: string; price_cents: number; currency: string; image_url: string | null } | null) => void;
   /** Fires with the list of linked wood-swatch names after fetch. */
   onWoodFinishesAvailable?: (names: string[]) => void;
   /** Trade-only: include fabric price/tier fields for quote upcharge math. */
