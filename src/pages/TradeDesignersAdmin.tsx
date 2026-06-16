@@ -217,6 +217,7 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
     variant_placeholder: string | null;
     base_axis_label: string | null;
     top_axis_label: string | null;
+    wood_label_override: string | null;
     variant_image_map: Record<string, number> | null;
     pack_cbm: number | null;
     pack_weight_kg: number | null;
