@@ -126,7 +126,9 @@ export default function FabricSelector({ pickId, className, productTitle, onUpho
   const [fabrics, setFabrics] = useState<Fabric[]>([]);
   const [selectedFabricId, setSelectedFabricId] = useState<string | null>(null);
   const [selectedWoodId, setSelectedWoodId] = useState<string | null>(null);
+  const [selectedCoverId, setSelectedCoverId] = useState<string | null>(null);
   const [zoomed, setZoomed] = useState<Fabric | null>(null);
+
 
   useEffect(() => {
     if (!pickId) {
