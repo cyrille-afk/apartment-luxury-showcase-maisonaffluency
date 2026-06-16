@@ -1477,7 +1477,7 @@ const TradeProductPage: React.FC = () => {
                     handleMaterialChange(sized, { base: nextBase, top: sized, size: selectedDualSize });
                   }}
                 />
-              )}
+
 
               {/* Material dropdown — when variants encode (size × material), bind it to selectedSingleMaterial */}
               {!isRugSqmActive && !isDualAxis && hasSingleAxisSplit && (
