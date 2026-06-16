@@ -487,6 +487,16 @@ export default function FabricSelector({ pickId, className, productTitle, onUpho
           tiles: woodTiles,
           glyph: "wood",
         })}
+      {coverTiles.length > 0 &&
+        renderAccordion({
+          isOpen: openCover,
+          onToggle: () => setOpenCover((v) => !v),
+          label: "Select the Finish of the Cover",
+          selectedName: selectedCoverItem?.name ?? null,
+          tiles: coverTiles,
+          glyph: "fabric",
+        })}
+
 
       {zoomed && (
         <div
