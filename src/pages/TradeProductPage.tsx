@@ -1417,10 +1417,14 @@ const TradeProductPage: React.FC = () => {
                   }}
                   onWoodFinishChange={(woodName) => {
                     if (!woodName) return;
-                    // Match the swatch name to a Base axis value (case/space tolerant).
+                    // Match the swatch name to a Base axis value (case/space tolerant,
+                    // and tolerant of code prefixes like "ECRT-SY-20 — Black Lacquered Sycamore").
                     const norm = (s: string) => s.trim().toLowerCase();
-                    const match = baseOptions.find((b) => norm(b) === norm(woodName))
-                      || baseOptions.find((b) => norm(b).startsWith(norm(woodName)))
+                    const nw = norm(woodName);
+                    const match =
+                      baseOptions.find((b) => norm(b) === nw)
+                      || baseOptions.find((b) => nw.includes(norm(b)))
+                      || baseOptions.find((b) => norm(b).includes(nw))
                       || woodName;
                     setSelectedBase(match);
                     // If the current Top is incompatible with the new Base, clear it.
@@ -1434,8 +1438,12 @@ const TradeProductPage: React.FC = () => {
                   onUpholsteryTierChange={(rawTier) => {
 
                     if (!rawTier) return;
+                    const nt = rawTier.toLowerCase();
                     const candidates = topOptions.filter(
-                      (t) => t === rawTier || t.toLowerCase().startsWith(rawTier.toLowerCase()),
+                      (t) => {
+                        const lt = t.toLowerCase();
+                        return lt === nt || lt.startsWith(nt) || nt.startsWith(lt) || lt.includes(nt) || nt.includes(lt);
+                      },
                     );
                     if (candidates.length === 0) return;
                     const sized =
