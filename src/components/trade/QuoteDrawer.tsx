@@ -1,20 +1,24 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ShoppingCart, Trash2, Package, ArrowRight } from "lucide-react";
 import { DrawerItemSkeleton } from "@/components/trade/skeletons";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { supabase } from "@/integrations/supabase/client";
+import { convertCents, useFxRates, type DisplayCurrency } from "@/components/trade/CurrencyToggle";
 
 interface QuoteItem {
   id: string;
   quantity: number;
   unit_price_cents: number | null;
+  unit_price_currency: string | null;
   variant_label: string | null;
   fabric_id: string | null;
+  wood_fabric_id: string | null;
   fabric_meters: number | null;
   fabric_upcharge_cents: number | null;
   fabric_currency: string | null;
-  fabric?: { name: string; tier: string | null; price_per_lm_cents: number | null; currency: string | null } | null;
+  fabric?: { name: string; image_url: string | null; tier: string | null; price_per_lm_cents: number | null; currency: string | null } | null;
+  wood_fabric?: { name: string; image_url: string | null } | null;
   product: {
     product_name: string;
     brand_name: string;
@@ -23,11 +27,6 @@ interface QuoteItem {
     rrp_price_cents: number | null;
     currency: string;
   };
-  /** Original catalog price before conversion */
-  catalogPriceCents?: number | null;
-  catalogCurrency?: string;
-  /** Price converted to SGD */
-  sgdPriceCents?: number | null;
 }
 
 
@@ -47,9 +46,7 @@ const formatPrice = (cents: number, currency: string) => {
 const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0 }: QuoteDrawerProps) => {
   const [items, setItems] = useState<QuoteItem[]>([]);
   const [loading, setLoading] = useState(false);
-
-  // Cache exchange rates
-  const ratesRef = useRef<Record<string, number>>({});
+  const fxRates = useFxRates();
 
   useEffect(() => {
     if (!open || !quoteId) return;
@@ -57,7 +54,7 @@ const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0 }: QuoteDrawe
       setLoading(true);
       const { data } = await supabase
         .from("trade_quote_items")
-        .select("id, quantity, unit_price_cents, variant_label, fabric_id, fabric_meters, fabric_upcharge_cents, fabric_currency, fabric:fabrics!fabric_id(name, tier, price_per_lm_cents, currency), product:trade_products(product_name, brand_name, image_url, trade_price_cents, rrp_price_cents, currency)")
+        .select("id, quantity, unit_price_cents, unit_price_currency, variant_label, fabric_id, wood_fabric_id, fabric_meters, fabric_upcharge_cents, fabric_currency, fabric:fabrics!fabric_id(name, image_url, tier, price_per_lm_cents, currency), wood_fabric:fabrics!trade_quote_items_wood_fabric_id_fkey(name, image_url), product:trade_products(product_name, brand_name, image_url, trade_price_cents, rrp_price_cents, currency)")
         .eq("quote_id", quoteId)
         .order("created_at", { ascending: false });
 
@@ -66,12 +63,15 @@ const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0 }: QuoteDrawe
           id: d.id,
           quantity: d.quantity,
           unit_price_cents: d.unit_price_cents,
+          unit_price_currency: d.unit_price_currency ?? null,
           variant_label: d.variant_label ?? null,
           fabric_id: d.fabric_id ?? null,
+          wood_fabric_id: d.wood_fabric_id ?? null,
           fabric_meters: d.fabric_meters ?? null,
           fabric_upcharge_cents: d.fabric_upcharge_cents ?? null,
           fabric_currency: d.fabric_currency ?? null,
           fabric: Array.isArray(d.fabric) ? d.fabric[0] : d.fabric,
+          wood_fabric: Array.isArray(d.wood_fabric) ? d.wood_fabric[0] : d.wood_fabric,
           product: Array.isArray(d.product) ? d.product[0] : d.product,
         }));
 
