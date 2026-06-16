@@ -594,7 +594,7 @@ const ShowroomGridView = ({
 
   if (loading) {
     return (
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+        <div className={gridClass}>
           {Array.from({ length: 6 }).map((_, i) => (
             <ProductCardSkeleton key={i} />
           ))}
