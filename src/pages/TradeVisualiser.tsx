@@ -517,6 +517,36 @@ const TradeVisualiser = () => {
                     className="pl-9 h-9 text-sm"
                   />
                 </div>
+                {surfaceSuppliers.length > 1 && (
+                  <div className="mt-3 flex flex-wrap gap-1.5">
+                    <button
+                      onClick={() => setSupplierFilter(null)}
+                      className={cn(
+                        "px-2 py-0.5 rounded-full text-[10px] uppercase tracking-wider border transition",
+                        supplierFilter === null
+                          ? "bg-foreground text-background border-foreground"
+                          : "border-border text-muted-foreground hover:text-foreground",
+                      )}
+                    >
+                      All
+                    </button>
+                    {surfaceSuppliers.map((sup) => (
+                      <button
+                        key={sup}
+                        onClick={() => setSupplierFilter(sup)}
+                        className={cn(
+                          "px-2 py-0.5 rounded-full text-[10px] uppercase tracking-wider border transition",
+                          supplierFilter === sup
+                            ? "bg-foreground text-background border-foreground"
+                            : "border-border text-muted-foreground hover:text-foreground",
+                        )}
+                      >
+                        {sup}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
                 {!activePinId && pins.length > 0 && (
                   <p className="mt-2 font-body text-[11px] text-muted-foreground">
                     Tap a pin on the photo to apply a finish.
