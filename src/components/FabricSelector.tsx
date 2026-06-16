@@ -100,12 +100,20 @@ const normalizeFabricCategory = (category: string | null | undefined) => {
   if (raw === "upholstery" || raw === "leather" || raw === "fabric" || raw === "fabric & leather") {
     return "Fabric & Leather";
   }
-  // Wood, Rattan, Cane, Wicker, Stone, Metal, Ceramic, Glass, etc. → frame finish group.
+  // Woven natural covers (seat/back surface, not the frame) get their own group
+  // so the picker can label them "Cover" instead of "Frame".
+  if (raw === "rattan" || raw === "cane" || raw === "wicker" || raw === "cover") {
+    return "Cover";
+  }
+  // Wood, Stone, Metal, Ceramic, Glass, etc. → frame finish group.
   if (raw) return "Wood";
   return "Fabric & Leather";
 };
 
 const isFabricCategory = (fabric: Fabric) => normalizeFabricCategory(fabric.category) === "Fabric & Leather";
+const isCoverCategory = (fabric: Fabric) => normalizeFabricCategory(fabric.category) === "Cover";
+const isWoodCategory = (fabric: Fabric) => normalizeFabricCategory(fabric.category) === "Wood";
+
 
 /**
  * Fabric / finish selector accordion shown on upholstered products
@@ -118,7 +126,9 @@ export default function FabricSelector({ pickId, className, productTitle, onUpho
   const [fabrics, setFabrics] = useState<Fabric[]>([]);
   const [selectedFabricId, setSelectedFabricId] = useState<string | null>(null);
   const [selectedWoodId, setSelectedWoodId] = useState<string | null>(null);
+  const [selectedCoverId, setSelectedCoverId] = useState<string | null>(null);
   const [zoomed, setZoomed] = useState<Fabric | null>(null);
+
 
   useEffect(() => {
     if (!pickId) {
@@ -177,7 +187,7 @@ export default function FabricSelector({ pickId, className, productTitle, onUpho
         }));
       setFabrics(list);
       onHasFabricsChange?.(list.some(isFabricCategory));
-      onWoodFinishesAvailable?.(list.filter((f) => !isFabricCategory(f)).map((f) => f.name));
+      onWoodFinishesAvailable?.(list.filter(isWoodCategory).map((f) => f.name));
       const defaultFabric = list.find(isFabricCategory) || null;
       setSelectedFabricId(defaultFabric?.id ?? null);
       if (defaultFabric) {
@@ -193,7 +203,7 @@ export default function FabricSelector({ pickId, className, productTitle, onUpho
         onFabricChange?.(null);
       }
 
-      const defaultWood = list.find((f) => !isFabricCategory(f)) || null;
+      const defaultWood = list.find(isWoodCategory) || null;
       setSelectedWoodId(defaultWood?.id ?? null);
       if (defaultWood) {
         onWoodFinishChange?.(defaultWood.name);
@@ -212,6 +222,10 @@ export default function FabricSelector({ pickId, className, productTitle, onUpho
         onWoodFinishChange?.(null);
         onWoodFinishPricingChange?.(null);
       }
+
+      const defaultCover = list.find(isCoverCategory) || null;
+      setSelectedCoverId(defaultCover?.id ?? null);
+
     })();
     return () => {
       cancelled = true;
@@ -225,7 +239,7 @@ export default function FabricSelector({ pickId, className, productTitle, onUpho
     (acc[key] ||= []).push(f);
     return acc;
   }, {});
-  const groupOrder = ["Fabric & Leather", "Wood"];
+  const groupOrder = ["Fabric & Leather", "Wood", "Cover"];
   const sortedGroupKeys = Object.keys(grouped).sort((a, b) => {
     const ai = groupOrder.indexOf(a);
     const bi = groupOrder.indexOf(b);
@@ -267,15 +281,24 @@ export default function FabricSelector({ pickId, className, productTitle, onUpho
       ? colTile
       : fabrics.find((f) => f.id === selectedFabricId) || null;
   const selectedWoodItem = fabrics.find((f) => f.id === selectedWoodId) || null;
+  const selectedCoverItem = fabrics.find((f) => f.id === selectedCoverId) || null;
 
   const renderTile = (f: Fabric) => {
     const isCom = f.id === "__com__";
     const isCol = f.id === "__col__";
     const isFabricGroup = isFabricCategory(f);
+    const isCoverGroup = isCoverCategory(f);
     const isSelected = isFabricGroup
       ? selectedFabricId === f.id
+      : isCoverGroup
+      ? selectedCoverId === f.id
       : selectedWoodId === f.id;
-    const setSelected = isFabricGroup ? setSelectedFabricId : setSelectedWoodId;
+    const setSelected = isFabricGroup
+      ? setSelectedFabricId
+      : isCoverGroup
+      ? setSelectedCoverId
+      : setSelectedWoodId;
+
     const handlePick = () => {
       setSelected(f.id);
       const indices = Array.isArray(f.image_indices) && f.image_indices.length > 0 ? f.image_indices : null;
@@ -296,6 +319,9 @@ export default function FabricSelector({ pickId, className, productTitle, onUpho
             currency: f.currency || "EUR",
           });
         }
+      } else if (isCoverGroup) {
+        // Cover (rattan/cane/wicker) is purely decorative — only update the
+        // hero image; do not drive the Frame variant matrix or pricing.
       } else {
         // Wood finish picked — drive the Frame axis on the price matrix.
         onWoodFinishChange?.(f.name);
@@ -313,6 +339,7 @@ export default function FabricSelector({ pickId, className, productTitle, onUpho
           onWoodFinishPricingChange?.(null);
         }
       }
+
       // Notify product page of mapped gallery images LAST so the swatch's
       // image jump wins over any gallery reset triggered by the tier/variant
       // sync above (e.g. handleMaterialChange's partial-pair fallback to
@@ -380,8 +407,11 @@ export default function FabricSelector({ pickId, className, productTitle, onUpho
   };
 
   const [openWood, setOpenWood] = useState(true);
+  const [openCover, setOpenCover] = useState(true);
   const fabricTiles = grouped["Fabric & Leather"] || [];
   const woodTiles = grouped["Wood"] || [];
+  const coverTiles = grouped["Cover"] || [];
+
 
   const renderAccordion = (args: {
     isOpen: boolean;
@@ -457,6 +487,16 @@ export default function FabricSelector({ pickId, className, productTitle, onUpho
           tiles: woodTiles,
           glyph: "wood",
         })}
+      {coverTiles.length > 0 &&
+        renderAccordion({
+          isOpen: openCover,
+          onToggle: () => setOpenCover((v) => !v),
+          label: "Select the Finish of the Cover",
+          selectedName: selectedCoverItem?.name ?? null,
+          tiles: coverTiles,
+          glyph: "fabric",
+        })}
+
 
       {zoomed && (
         <div
@@ -509,8 +549,11 @@ export default function FabricSelector({ pickId, className, productTitle, onUpho
                           currency: zoomed.currency || "EUR",
                         });
                       }
+                    } else if (isCoverCategory(zoomed)) {
+                      setSelectedCoverId(zoomed.id);
                     } else {
                       setSelectedWoodId(zoomed.id);
+
                       onWoodFinishChange?.(zoomed.name);
                       if (zoomed.frame_price_cents && zoomed.frame_price_cents > 0) {
                         onWoodFinishPricingChange?.({
@@ -556,12 +599,19 @@ export default function FabricSelector({ pickId, className, productTitle, onUpho
 
               {(() => {
                 const zoomedIsFabric = isFabricCategory(zoomed);
-                const thumbs = zoomedIsFabric ? fabricTiles : woodTiles;
+                const zoomedIsCover = isCoverCategory(zoomed);
+                const thumbs = zoomedIsFabric ? fabricTiles : zoomedIsCover ? coverTiles : woodTiles;
+                const stripLabel = zoomedIsFabric
+                  ? "Select fabric & leather"
+                  : zoomedIsCover
+                  ? "Select the finish of the cover"
+                  : "Select the wood finish of the frame";
                 return (
                   <div className="mt-5 pt-5 border-t border-border/60">
                     <p className="font-body text-[11px] tracking-[0.18em] uppercase text-muted-foreground mb-3">
-                      {zoomedIsFabric ? "Select fabric & leather" : "Select the wood finish of the frame"}
+                      {stripLabel}
                     </p>
+
                     <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1">
                       {thumbs.map((f) => {
                         const isActive = zoomed.id === f.id;
