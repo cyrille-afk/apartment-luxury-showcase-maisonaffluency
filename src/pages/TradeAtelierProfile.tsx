@@ -30,7 +30,7 @@ import { consumeProductBackRef } from "@/lib/designerBackRef";
 import type { DesignerCuratorPick } from "@/hooks/useDesigner";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
-import { getActiveProjectId } from "@/lib/activeProjectId";
+import { createActiveDraftQuote, fetchActiveDraftQuoteId } from "@/lib/activeProjectId";
 
 /** Replace a Cloudinary URL's width transform for responsive loading */
 function responsiveCloudinaryUrl(url: string, width: number): string {
@@ -228,17 +228,7 @@ const TradeAtelierProfile = () => {
   useEffect(() => {
     if (!user) return;
     const fetchDraft = async () => {
-      const projectId = getActiveProjectId();
-      let q = supabase
-        .from("trade_quotes")
-        .select("id")
-        .eq("user_id", user.id)
-        .eq("status", "draft")
-        .order("created_at", { ascending: false })
-        .limit(1);
-      q = projectId ? q.eq("project_id", projectId) : q.is("project_id", null);
-      const { data } = await q;
-      setActiveQuoteId(data?.length ? data[0].id : null);
+      setActiveQuoteId(await fetchActiveDraftQuoteId(user.id));
     };
     fetchDraft();
   }, [user]);
@@ -249,11 +239,7 @@ const TradeAtelierProfile = () => {
 
     let quoteId = activeQuoteId;
     if (!quoteId) {
-      const { data, error } = await supabase
-        .from("trade_quotes")
-        .insert({ user_id: user.id, status: "draft", project_id: getActiveProjectId() })
-        .select("id")
-        .single();
+      const { data, error } = await createActiveDraftQuote(user.id);
       if (error || !data) {
         toast({ title: "Error creating quote", description: error?.message, variant: "destructive" });
         setAddingProductId(null);
