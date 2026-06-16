@@ -384,7 +384,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
       const [itemsRes, quoteRes, profileRes] = await Promise.all([
         supabase
           .from("trade_quote_items")
-          .select("*, trade_products(product_name, brand_name, trade_price_cents, rrp_price_cents, price_per_sqm_cents, price_unit, currency, image_url, dimensions, materials, lead_time, sku, origin, stock_status_override, lead_weeks_min_override, lead_weeks_max_override)")
+          .select("*, trade_products(product_name, brand_name, trade_price_cents, rrp_price_cents, price_per_sqm_cents, price_unit, currency, image_url, dimensions, materials, lead_time, sku, origin, stock_status_override, lead_weeks_min_override, lead_weeks_max_override), fabric:fabrics(name, tier, price_per_lm_cents, currency)")
           .eq("quote_id", quoteId)
           .order("created_at", { ascending: true }),
         supabase.from("trade_quotes").select("currency, client_name, client_id, admin_notes, project_id, insurance_enabled, insurance_tier, insurance_rate_bps, insurance_notes, issue_date, submitted_at, responded_at, confirmed_at, landed_cost_cbm, landed_cost_kg, landed_cost_mode, ship_to_same_as_bill, incoterm, ship_to_name, ship_to_attention, ship_to_address1, ship_to_address2, ship_to_city, ship_to_state, ship_to_postal_code, ship_to_country, ship_to_phone, ship_to_email, ship_to_notes").eq("id", quoteId).single(),
