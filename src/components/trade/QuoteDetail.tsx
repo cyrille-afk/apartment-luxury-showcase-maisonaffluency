@@ -103,6 +103,12 @@ const catalogSourcePriceCents = (item: QuoteItemWithProduct) => {
   return product.trade_price_cents;
 };
 
+const itemPriceCurrency = (item: QuoteItemWithProduct, quoteCurrency: string) => (
+  item.unit_price_cents != null
+    ? (item.unit_price_currency || quoteCurrency)
+    : (item.trade_products?.currency || quoteCurrency)
+);
+
 const QuotePdfPreviewPages = ({ blobUrl }: { blobUrl: string | null }) => {
   const hostRef = useRef<HTMLDivElement>(null);
   const renderTokenRef = useRef(0);
