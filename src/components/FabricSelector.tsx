@@ -407,8 +407,11 @@ export default function FabricSelector({ pickId, className, productTitle, onUpho
   };
 
   const [openWood, setOpenWood] = useState(true);
+  const [openCover, setOpenCover] = useState(true);
   const fabricTiles = grouped["Fabric & Leather"] || [];
   const woodTiles = grouped["Wood"] || [];
+  const coverTiles = grouped["Cover"] || [];
+
 
   const renderAccordion = (args: {
     isOpen: boolean;
