@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ShoppingCart, Trash2, Package, ArrowRight } from "lucide-react";
 import { DrawerItemSkeleton } from "@/components/trade/skeletons";
@@ -9,12 +9,15 @@ interface QuoteItem {
   id: string;
   quantity: number;
   unit_price_cents: number | null;
+  unit_price_currency: string | null;
   variant_label: string | null;
   fabric_id: string | null;
+  wood_fabric_id: string | null;
   fabric_meters: number | null;
   fabric_upcharge_cents: number | null;
   fabric_currency: string | null;
-  fabric?: { name: string; tier: string | null; price_per_lm_cents: number | null; currency: string | null } | null;
+  fabric?: { name: string; image_url: string | null; tier: string | null; price_per_lm_cents: number | null; currency: string | null } | null;
+  wood_fabric?: { name: string; image_url: string | null } | null;
   product: {
     product_name: string;
     brand_name: string;
@@ -23,11 +26,6 @@ interface QuoteItem {
     rrp_price_cents: number | null;
     currency: string;
   };
-  /** Original catalog price before conversion */
-  catalogPriceCents?: number | null;
-  catalogCurrency?: string;
-  /** Price converted to SGD */
-  sgdPriceCents?: number | null;
 }
 
 
@@ -48,16 +46,13 @@ const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0 }: QuoteDrawe
   const [items, setItems] = useState<QuoteItem[]>([]);
   const [loading, setLoading] = useState(false);
 
-  // Cache exchange rates
-  const ratesRef = useRef<Record<string, number>>({});
-
   useEffect(() => {
     if (!open || !quoteId) return;
     const fetchItems = async () => {
       setLoading(true);
       const { data } = await supabase
         .from("trade_quote_items")
-        .select("id, quantity, unit_price_cents, variant_label, fabric_id, fabric_meters, fabric_upcharge_cents, fabric_currency, fabric:fabrics!fabric_id(name, tier, price_per_lm_cents, currency), product:trade_products(product_name, brand_name, image_url, trade_price_cents, rrp_price_cents, currency)")
+        .select("id, quantity, unit_price_cents, unit_price_currency, variant_label, fabric_id, wood_fabric_id, fabric_meters, fabric_upcharge_cents, fabric_currency, fabric:fabrics!fabric_id(name, image_url, tier, price_per_lm_cents, currency), wood_fabric:fabrics!trade_quote_items_wood_fabric_id_fkey(name, image_url), product:trade_products(product_name, brand_name, image_url, trade_price_cents, rrp_price_cents, currency)")
         .eq("quote_id", quoteId)
         .order("created_at", { ascending: false });
 
@@ -66,12 +61,15 @@ const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0 }: QuoteDrawe
           id: d.id,
           quantity: d.quantity,
           unit_price_cents: d.unit_price_cents,
+          unit_price_currency: d.unit_price_currency ?? null,
           variant_label: d.variant_label ?? null,
           fabric_id: d.fabric_id ?? null,
+          wood_fabric_id: d.wood_fabric_id ?? null,
           fabric_meters: d.fabric_meters ?? null,
           fabric_upcharge_cents: d.fabric_upcharge_cents ?? null,
           fabric_currency: d.fabric_currency ?? null,
           fabric: Array.isArray(d.fabric) ? d.fabric[0] : d.fabric,
+          wood_fabric: Array.isArray(d.wood_fabric) ? d.wood_fabric[0] : d.wood_fabric,
           product: Array.isArray(d.product) ? d.product[0] : d.product,
         }));
 
@@ -146,40 +144,6 @@ const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0 }: QuoteDrawe
             }
           }
         }
-
-        // Convert non-SGD prices to SGD and store catalog reference
-        const currenciesToConvert = new Set<string>();
-        for (const item of mapped) {
-          const cents = item.product?.trade_price_cents ?? item.product?.rrp_price_cents;
-          if (cents && item.product.currency !== "SGD") {
-            currenciesToConvert.add(item.product.currency);
-          }
-        }
-
-        // Fetch exchange rates if needed
-        for (const src of currenciesToConvert) {
-          if (!ratesRef.current[src]) {
-            try {
-              const res = await fetch(`https://api.frankfurter.app/latest?from=${src}&to=SGD`);
-              const data = await res.json();
-              if (data.rates?.SGD) ratesRef.current[src] = data.rates.SGD;
-            } catch { /* fallback: no conversion */ }
-          }
-        }
-
-        // Apply conversion
-        for (const item of mapped) {
-          const cents = item.product?.trade_price_cents ?? item.product?.rrp_price_cents;
-          if (cents && item.product.currency !== "SGD") {
-            const rate = ratesRef.current[item.product.currency];
-            if (rate) {
-              item.catalogPriceCents = cents;
-              item.catalogCurrency = item.product.currency;
-              item.sgdPriceCents = Math.round(cents * rate);
-            }
-          }
-        }
-
         setItems(mapped);
       }
       setLoading(false);
@@ -224,21 +188,43 @@ const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0 }: QuoteDrawe
             </div>
           ) : (
             items.map((item) => (
-              <div key={item.id} className="flex items-center gap-3 p-2 rounded-lg border border-border hover:border-foreground/10 transition-colors">
-                <div className="w-12 h-12 rounded bg-muted/30 overflow-hidden shrink-0">
-                  {item.product?.image_url ? (
-                    <img src={item.product.image_url} alt={item.product.product_name} className="w-full h-full object-cover" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <Package className="h-3 w-3 text-muted-foreground/30" />
+              <div key={item.id} className="grid grid-cols-[88px_minmax(0,1fr)_32px] gap-4 p-4 rounded-lg border border-border hover:border-foreground/10 transition-colors">
+                <div className="flex flex-col gap-2 min-w-0">
+                  <div className="w-20 h-20 rounded bg-muted/30 overflow-hidden shrink-0">
+                    {item.product?.image_url ? (
+                      <img src={item.product.image_url} alt={item.product.product_name} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <Package className="h-4 w-4 text-muted-foreground/30" />
+                      </div>
+                    )}
+                  </div>
+                  {(item.wood_fabric?.image_url || item.fabric?.image_url) && (
+                    <div className="flex gap-2">
+                      {item.wood_fabric?.image_url && (
+                        <img
+                          src={item.wood_fabric.image_url}
+                          alt={item.wood_fabric.name || "Finish"}
+                          className="w-9 h-9 rounded object-cover ring-1 ring-border"
+                          loading="lazy"
+                        />
+                      )}
+                      {item.fabric?.image_url && (
+                        <img
+                          src={item.fabric.image_url}
+                          alt={item.fabric.name || "Fabric"}
+                          className="w-9 h-9 rounded object-cover ring-1 ring-border"
+                          loading="lazy"
+                        />
+                      )}
                     </div>
                   )}
                 </div>
-                <div className="flex-1 min-w-0">
+                <div className="min-w-0">
                   <p className="font-body text-[9px] text-muted-foreground uppercase tracking-wider">
                     {item.product?.brand_name?.includes(' - ') ? item.product.brand_name.split(' - ')[0].trim() : item.product?.brand_name}
                   </p>
-                  <p className="font-display text-xs text-foreground truncate">
+                  <p className="font-display text-sm text-foreground leading-tight break-words">
                     {item.product?.product_name}
                   </p>
                   {item.variant_label && (
@@ -268,28 +254,20 @@ const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0 }: QuoteDrawe
                       Qty: {item.quantity}
                     </span>
                     {(() => {
-                      const adminPriced = item.unit_price_cents != null;
-                      const displayCents = adminPriced
-                        ? item.unit_price_cents!
-                        : item.sgdPriceCents ?? item.product?.trade_price_cents ?? item.product?.rrp_price_cents;
-                      const displayCurrency = adminPriced ? "SGD" : (item.sgdPriceCents ? "SGD" : item.product?.currency);
-                      const showCatalogRef = adminPriced && item.product?.currency && item.product.currency !== "SGD" && item.product.trade_price_cents;
-                      const showFxRef = !adminPriced && item.catalogPriceCents && item.catalogCurrency;
+                      const displayCents = item.unit_price_cents ?? item.product?.trade_price_cents ?? item.product?.rrp_price_cents;
+                      const displayCurrency = item.unit_price_cents != null
+                        ? (item.unit_price_currency || item.product?.currency || "EUR")
+                        : (item.product?.currency || "EUR");
 
                       if (displayCents) {
                         return (
                           <div className="flex flex-col">
                             <span className="font-body text-[10px] text-primary font-medium">
-                              {formatPrice(displayCents, displayCurrency || "SGD")}
+                              {formatPrice(displayCents, displayCurrency || "EUR")}
                             </span>
-                            {showCatalogRef && (
+                            {item.product?.trade_price_cents && displayCents !== item.product.trade_price_cents && (
                               <span className="font-body text-[8px] text-muted-foreground/60">
-                                Catalog: {formatPrice(item.product.trade_price_cents!, item.product.currency)}
-                              </span>
-                            )}
-                            {showFxRef && (
-                              <span className="font-body text-[8px] text-muted-foreground/60">
-                                Catalog: {formatPrice(item.catalogPriceCents!, item.catalogCurrency!)}
+                                Catalog: {formatPrice(item.product.trade_price_cents, item.product.currency)}
                               </span>
                             )}
                           </div>
