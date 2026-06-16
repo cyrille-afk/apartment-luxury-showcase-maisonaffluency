@@ -1379,7 +1379,8 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   }, [currency]);
   const perLineRawLines = useMemo(() => items.map((it) => {
     const product = it.trade_products;
-    const lineCents = (it.unit_price_cents ?? catalogSourcePriceCents(it) ?? 0) * it.quantity;
+    const rawPrice = it.unit_price_cents ?? catalogSourcePriceCents(it) ?? 0;
+    const lineCents = (convertCents(rawPrice, itemPriceCurrency(it, currency), currency) ?? 0) * it.quantity;
     return {
       id: it.id,
       qty: it.quantity,
@@ -1493,8 +1494,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
       const lines: ProcurementLine[] = items.map((item, idx) => {
         const product = item.trade_products;
         const rawUnit = item.unit_price_cents ?? catalogSourcePriceCents(item) ?? null;
-        const fromCur = item.unit_price_cents != null ? currency : (product?.currency || currency);
-        const unitTrade = convertCents(rawUnit, fromCur, currency);
+        const unitTrade = convertCents(rawUnit, itemPriceCurrency(item, currency), currency);
         const unitRrp = convertCents(product?.rrp_price_cents ?? null, product?.currency || currency, currency);
         const lead = getLeadWeeksOverride(item.lead_time_weeks_override) ?? parseLeadWeeks(product?.lead_time || null);
         return {
@@ -2138,10 +2138,8 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                 return keys.map((roomKey) => {
                   const groupItems = groups.get(roomKey)!;
                   const groupSubtotal = groupItems.reduce((sum, it) => {
-                    const p = it.trade_products;
                     const raw = it.unit_price_cents ?? catalogSourcePriceCents(it) ?? null;
-                    const fc = it.unit_price_cents != null ? currency : (p?.currency || currency);
-                    const u = convertCents(raw, fc, currency);
+                    const u = convertCents(raw, itemPriceCurrency(it, currency), currency);
                     return sum + (u ? u * it.quantity : 0);
                   }, 0);
                   return (
