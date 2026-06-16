@@ -73,7 +73,7 @@ const TradeAxonometricGallery = () => {
       let quoteId = draftQuote?.id;
       if (!quoteId) {
         const { data: newQuote, error: qErr } = await createActiveDraftQuote(user.id);
-        if (qErr) throw qErr;
+        if (qErr || !newQuote) throw qErr || new Error("Quote could not be created");
         quoteId = newQuote.id;
       }
 
@@ -139,7 +139,7 @@ const TradeAxonometricGallery = () => {
       let quoteId = draftQuote?.id;
       if (!quoteId) {
         const { data: newQuote, error: qErr } = await createActiveDraftQuote(user.id);
-        if (qErr) throw qErr;
+        if (qErr || !newQuote) throw qErr || new Error("Quote could not be created");
         quoteId = newQuote.id;
       }
 
