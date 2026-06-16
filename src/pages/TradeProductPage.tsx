@@ -984,7 +984,15 @@ const TradeProductPage: React.FC = () => {
 
   const renderPrice = () => {
     if (!pricing || !effectiveRrpCents) return null;
-    const rrp = effectiveRrpCents;
+    // When a wood-finish swatch carries a frame-price override, it becomes
+    // the RRP base; otherwise fall back to the size_variants base.
+    let rrp = effectiveRrpCents;
+    if (selectedWoodPrice?.price_cents && selectedWoodPrice.price_cents > 0) {
+      const woodCents = selectedWoodPrice.currency === pricing.currency
+        ? selectedWoodPrice.price_cents
+        : convertCents(selectedWoodPrice.price_cents, selectedWoodPrice.currency, pricing.currency as DisplayCurrency, fxRates);
+      rrp = woodCents;
+    }
     const trade = Math.round(rrp * (1 - TRADE_DISCOUNT));
     const cents = showTradePrice ? trade : rrp;
     // Add the fabric per-LM upcharge on top. The upcharge sits in the fabric's
@@ -999,7 +1007,10 @@ const TradeProductPage: React.FC = () => {
     const centsWithFabric = cents + upcharge;
     const formatted = formatPriceConverted(centsWithFabric, pricing.currency, displayCurrency, fxRates, pricing.price_unit || undefined);
     const explicitPrefix = pricing.price_prefix ? `${pricing.price_prefix} ` : "";
-    const prefix = explicitPrefix || (isFromPrice && !selectedFabric ? "From " : "");
+    // "From" only when no concrete selection (no fabric AND no wood override)
+    // has been made yet.
+    const hasConcreteSelection = !!selectedFabric || !!selectedWoodPrice;
+    const prefix = explicitPrefix || (isFromPrice && !hasConcreteSelection ? "From " : "");
     return (
       <div className="flex flex-col gap-1">
         <div className="flex flex-wrap items-center gap-3">
@@ -1017,14 +1028,22 @@ const TradeProductPage: React.FC = () => {
             </>
           )}
         </div>
-        {selectedFabric && (
+        {(selectedWoodPrice || selectedFabric) && (
           <span className="font-body text-[11px] text-muted-foreground">
-            Includes {selectedFabric.name}
-            {selectedFabric.tier ? ` (CAT ${selectedFabric.tier})` : ""}
-            {upcharge > 0 && (
+            {selectedWoodPrice && (
+              <>Frame: {selectedWoodPrice.name}</>
+            )}
+            {selectedWoodPrice && selectedFabric && " · "}
+            {selectedFabric && (
               <>
-                {" — "}
-                {formatPriceConverted(selectedFabric.price_per_lm_cents || 0, selectedFabric.currency, displayCurrency, fxRates)}/lm × {fabricMeters} m
+                {selectedWoodPrice ? "" : "Includes "}{selectedFabric.name}
+                {selectedFabric.tier ? ` (CAT ${selectedFabric.tier})` : ""}
+                {upcharge > 0 && (
+                  <>
+                    {" — "}
+                    {formatPriceConverted(selectedFabric.price_per_lm_cents || 0, selectedFabric.currency, displayCurrency, fxRates)}/lm × {fabricMeters} m
+                  </>
+                )}
               </>
             )}
           </span>
