@@ -1419,6 +1419,7 @@ const TradeProductPage: React.FC = () => {
                 <FabricSelector
                   pickId={product.id}
                   productTitle={product.title}
+                  woodLabel={(product as any).wood_label_override}
                   includePricing
                   onHasFabricsChange={setHasLinkedFabrics}
                   onWoodFinishesAvailable={setLinkedWoodFinishes}
