@@ -158,6 +158,16 @@ const ShowroomGridView = ({
   const [selectedSubcategory, setSelectedSubcategory] = useState(searchParams.get("subcategory") || "all");
   const [selectedSection, setSelectedSection] = useState("all");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [density, setDensity] = useState<"comfortable" | "compact">(() => {
+    if (typeof window === "undefined") return "comfortable";
+    return (localStorage.getItem("trade:gridDensity") as "comfortable" | "compact") || "comfortable";
+  });
+  useEffect(() => {
+    if (typeof window !== "undefined") localStorage.setItem("trade:gridDensity", density);
+  }, [density]);
+  const gridClass = density === "compact"
+    ? "grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3"
+    : "grid grid-cols-2 md:grid-cols-3 gap-4";
   const [displayCurrency, setDisplayCurrency] = useTradeDisplayCurrency();
   const { showTradePrice, setShowTradePrice } = useTradePriceMode();
   const fxRates = useFxRates();
