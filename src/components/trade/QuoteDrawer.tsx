@@ -57,7 +57,7 @@ const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0 }: QuoteDrawe
       setLoading(true);
       const { data } = await supabase
         .from("trade_quote_items")
-        .select("id, quantity, unit_price_cents, product:trade_products(product_name, brand_name, image_url, trade_price_cents, rrp_price_cents, currency)")
+        .select("id, quantity, unit_price_cents, variant_label, fabric_id, fabric_meters, fabric_upcharge_cents, fabric_currency, fabric:fabrics(name, tier, price_per_lm_cents, currency), product:trade_products(product_name, brand_name, image_url, trade_price_cents, rrp_price_cents, currency)")
         .eq("quote_id", quoteId)
         .order("created_at", { ascending: false });
 
@@ -66,8 +66,15 @@ const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0 }: QuoteDrawe
           id: d.id,
           quantity: d.quantity,
           unit_price_cents: d.unit_price_cents,
+          variant_label: d.variant_label ?? null,
+          fabric_id: d.fabric_id ?? null,
+          fabric_meters: d.fabric_meters ?? null,
+          fabric_upcharge_cents: d.fabric_upcharge_cents ?? null,
+          fabric_currency: d.fabric_currency ?? null,
+          fabric: Array.isArray(d.fabric) ? d.fabric[0] : d.fabric,
           product: Array.isArray(d.product) ? d.product[0] : d.product,
         }));
+
 
         // For items without a price, try to find a priced record via fuzzy matching
         const needsPrice = mapped.filter((m) => m.product && !m.product.trade_price_cents && !m.product.rrp_price_cents);
