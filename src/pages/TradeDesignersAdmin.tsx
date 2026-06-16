@@ -29,6 +29,8 @@ import ProductFabricsPanel from "@/components/admin/ProductFabricsPanel";
 // Pilot: surface inline Fabrics & Finishes editor only for these picks for now.
 const FABRICS_PANEL_PILOT_PICK_IDS = new Set<string>([
   "0d33b077-dc1a-4aed-bc8e-86dd2884b2dd", // Jean-Michel Frank — Transat c. 1929
+  "1547d5cf-ccf4-4ea5-b28a-40cedea1d6c2", // ECART — Wolf Armchair
+  "fc3a68b1-65cd-4d6f-941c-b8a2451dd064", // ECART — Corbeille Sofa c. 1923
 ]);
 import { variantImageKey } from "@/lib/variantImageMap";
 import BiographyPdfButton from "@/components/BiographyPdfButton";
