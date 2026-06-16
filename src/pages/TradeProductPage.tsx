@@ -568,11 +568,21 @@ const TradeProductPage: React.FC = () => {
           // Persist the chosen fabric/leather so the quote line shows the
           // upcharge label & price alongside the product.
           if (selectedFabric?.id) {
+            const activeV: any = (selectedVariantIdx != null && sv) ? sv[selectedVariantIdx] : null;
+            const metersForLine =
+              (activeV && typeof activeV.meters === "number" ? activeV.meters : null)
+              ?? (data?.product as any)?.com_meters
+              ?? null;
+            const upchargeCents =
+              selectedFabric.price_per_lm_cents && metersForLine
+                ? Math.round(selectedFabric.price_per_lm_cents * metersForLine)
+                : null;
             patch.fabric_id = selectedFabric.id;
-            patch.fabric_meters = fabricMeters ?? null;
-            patch.fabric_upcharge_cents = fabricUpchargeCentsRaw > 0 ? fabricUpchargeCentsRaw : null;
+            patch.fabric_meters = metersForLine;
+            patch.fabric_upcharge_cents = upchargeCents;
             patch.fabric_currency = selectedFabric.currency || null;
           }
+
 
 
 
