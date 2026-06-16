@@ -471,7 +471,7 @@ const TradeProductPage: React.FC = () => {
   const [selectedFabric, setSelectedFabric] = useState<import("@/components/FabricSelector").SelectedFabricInfo | null>(null);
   // When a wood-finish swatch carries its own frame price (product_fabrics.price_cents_a),
   // we use it as the RRP base and add the fabric per-LM upcharge on top.
-  const [selectedWoodPrice, setSelectedWoodPrice] = useState<{ name: string; price_cents: number; currency: string } | null>(null);
+  const [selectedWoodPrice, setSelectedWoodPrice] = useState<{ id: string; name: string; price_cents: number; currency: string; image_url: string | null } | null>(null);
 
 
   useEffect(() => {
