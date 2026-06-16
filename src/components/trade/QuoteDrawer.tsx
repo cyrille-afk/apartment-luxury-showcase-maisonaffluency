@@ -241,6 +241,28 @@ const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0 }: QuoteDrawe
                   <p className="font-display text-xs text-foreground truncate">
                     {item.product?.product_name}
                   </p>
+                  {item.variant_label && (
+                    <p className="font-body text-[10px] text-foreground/80 mt-0.5 break-words">
+                      <span className="text-muted-foreground">Finish:</span> {item.variant_label}
+                    </p>
+                  )}
+                  {(item.fabric?.name || item.fabric_upcharge_cents) && (
+                    <p className="font-body text-[10px] text-foreground/80 mt-0.5 break-words">
+                      <span className="text-muted-foreground">Fabric:</span>{" "}
+                      {item.fabric?.name || "Selected"}
+                      {item.fabric?.tier ? ` · CAT ${item.fabric.tier}` : ""}
+                      {item.fabric_upcharge_cents ? (
+                        <>
+                          {" — "}
+                          <span className="text-primary font-medium">
+                            +{formatPrice(item.fabric_upcharge_cents, item.fabric_currency || item.fabric?.currency || "EUR")}
+                          </span>
+                          {item.fabric_meters ? <span className="text-muted-foreground"> ({item.fabric_meters} m)</span> : null}
+                        </>
+                      ) : null}
+                    </p>
+                  )}
+
                   <div className="flex items-center gap-2 mt-0.5">
                     <span className="font-body text-[10px] text-muted-foreground">
                       Qty: {item.quantity}
