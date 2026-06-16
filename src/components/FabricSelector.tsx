@@ -87,12 +87,21 @@ interface FabricSelectorProps {
    * When omitted, falls back to "Select the Wood Finish of the Frame".
    */
   woodLabel?: string | null;
+  /**
+   * When false, the upholstery (fabric/leather + COM/COL) accordion is hidden
+   * and only the wood/finish swatch picker is rendered. Used on non-upholstered
+   * products (e.g. wood/rattan benches) that still have linked frame finishes.
+   */
+  showUpholsterySection?: boolean;
 }
 
 const normalizeFabricCategory = (category: string | null | undefined) => {
-  const raw = (category || "").trim();
-  if (raw === "Wood") return "Wood";
-  if (raw === "Upholstery" || raw === "Leather" || raw === "Fabric & Leather") return "Fabric & Leather";
+  const raw = (category || "").trim().toLowerCase();
+  if (raw === "upholstery" || raw === "leather" || raw === "fabric" || raw === "fabric & leather") {
+    return "Fabric & Leather";
+  }
+  // Wood, Rattan, Cane, Wicker, Stone, Metal, Ceramic, Glass, etc. → frame finish group.
+  if (raw) return "Wood";
   return "Fabric & Leather";
 };
 
