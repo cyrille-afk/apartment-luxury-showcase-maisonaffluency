@@ -6124,31 +6124,6 @@ export type Database = {
       }
     }
     Views: {
-      client_contacts_safe: {
-        Row: {
-          can_edit: boolean | null
-          client_id: string | null
-          created_at: string | null
-          email: string | null
-          first_name: string | null
-          id: string | null
-          is_primary: boolean | null
-          last_name: string | null
-          notes: string | null
-          phone: string | null
-          role_title: string | null
-          updated_at: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "client_contacts_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       fabrics_public: {
         Row: {
           category: string | null
@@ -6329,6 +6304,23 @@ export type Database = {
           quote_lines: number
           source: string
           user_id: string
+        }[]
+      }
+      get_client_contacts_safe: {
+        Args: { _client_id: string }
+        Returns: {
+          can_edit: boolean
+          client_id: string
+          created_at: string
+          email: string
+          first_name: string
+          id: string
+          is_primary: boolean
+          last_name: string
+          notes: string
+          phone: string
+          role_title: string
+          updated_at: string
         }[]
       }
       get_cron_jobs_summary: {
