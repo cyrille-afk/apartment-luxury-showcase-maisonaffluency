@@ -183,7 +183,7 @@ const TradeVisualiser = () => {
   const surfaceSuppliers = useMemo(() => {
     const set = new Set<string>();
     for (const s of allSwatches) {
-      if (classifySwatchSurface(s) === surface && s.supplier?.trim()) {
+      if (swatchMatchesSurface(s, surface) && s.supplier?.trim()) {
         set.add(s.supplier.trim());
       }
     }
