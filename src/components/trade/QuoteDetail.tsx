@@ -939,9 +939,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
 
   const subtotalCents = items.reduce((sum, item) => {
     const rawPrice = item.unit_price_cents ?? catalogSourcePriceCents(item) ?? 0;
-    // If admin set unit_price_cents, it's already in the quote's currency — skip conversion
-    const prodCurrency = item.unit_price_cents != null ? currency : (item.trade_products?.currency || currency);
-    const converted = convertCents(rawPrice, prodCurrency, currency) ?? 0;
+    const converted = convertCents(rawPrice, itemPriceCurrency(item, currency), currency) ?? 0;
     return sum + converted * item.quantity;
   }, 0);
 
@@ -949,8 +947,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     const lines: QuotePdfLine[] = items.map((item) => {
       const product = item.trade_products;
       const rawUnit = item.unit_price_cents ?? catalogSourcePriceCents(item) ?? null;
-      const fromCur = item.unit_price_cents != null ? currency : (product?.currency || currency);
-      const unit = convertCents(rawUnit, fromCur, currency);
+      const unit = convertCents(rawUnit, itemPriceCurrency(item, currency), currency);
       return {
         productName: product?.product_name || "—",
         brandName: product?.brand_name || "",
@@ -1086,8 +1083,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
       depositPct: computeWeightedDepositPct(
         items.map((it) => {
           const rawPrice = it.unit_price_cents ?? catalogSourcePriceCents(it) ?? 0;
-          const fromCur = it.unit_price_cents != null ? currency : (it.trade_products?.currency || currency);
-          const lineCents = (convertCents(rawPrice, fromCur, currency) ?? 0) * it.quantity;
+          const lineCents = (convertCents(rawPrice, itemPriceCurrency(it, currency), currency) ?? 0) * it.quantity;
           const p = it.trade_products as any;
           return {
             lineCents,
