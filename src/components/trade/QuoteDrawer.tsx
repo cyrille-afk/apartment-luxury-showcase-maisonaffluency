@@ -263,7 +263,7 @@ const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0 }: QuoteDrawe
                         return (
                           <div className="flex flex-col">
                             <span className="font-body text-[10px] text-primary font-medium">
-                              {formatPrice(displayCents, displayCurrency || "SGD")}
+                              {formatPrice(displayCents, displayCurrency || "EUR")}
                             </span>
                             {item.product?.trade_price_cents && displayCents !== item.product.trade_price_cents && (
                               <span className="font-body text-[8px] text-muted-foreground/60">
