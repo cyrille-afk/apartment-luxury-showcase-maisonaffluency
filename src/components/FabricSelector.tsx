@@ -253,6 +253,17 @@ export default function FabricSelector({ pickId, className, productTitle, onUpho
       } else {
         // Wood finish picked — drive the Frame axis on the price matrix.
         onWoodFinishChange?.(f.name);
+        // Emit frame-price override so the product page can use it as the
+        // RRP base (fabric per-LM upcharge is added on top).
+        if (f.frame_price_cents && f.frame_price_cents > 0) {
+          onWoodFinishPricingChange?.({
+            name: f.name,
+            price_cents: f.frame_price_cents,
+            currency: f.frame_price_currency || "EUR",
+          });
+        } else {
+          onWoodFinishPricingChange?.(null);
+        }
       }
     };
     const tierCaption = isFabricGroup && !isCom && !isCol && (f.tier || f.price_per_lm_cents)
