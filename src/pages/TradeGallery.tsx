@@ -44,7 +44,7 @@ const TradeGallery = () => {
   const { isPinned, togglePin, items: compareItems } = useCompare();
   const { isFavorited, toggleFavorite } = useFavorites();
   const { toast } = useToast();
-  const { allProducts, brands, categories, duplicateGroups } = useTradeProducts();
+  const { allProducts, brands, categories, duplicateGroups, isLoading: productsLoading } = useTradeProducts();
   const { ids: hiddenTradeProductIds } = useHiddenTradeProductIds();
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -478,12 +478,22 @@ const TradeGallery = () => {
           />
         </div>
         <div className="flex gap-2 flex-wrap">
-          <AlphabetDesignerPicker
-            brands={brands}
-            value={selectedBrand}
-            onChange={handleBrandChange}
-            selectClassName={`${inputClass} flex-1 sm:flex-none text-[16px] sm:text-sm`}
-          />
+          {productsLoading ? (
+            <div
+              className={`${inputClass} flex-1 sm:flex-none text-[16px] sm:text-sm flex items-center text-muted-foreground/70 italic`}
+              aria-busy="true"
+            >
+              Loading designers…
+            </div>
+          ) : (
+            <AlphabetDesignerPicker
+              brands={brands}
+              value={selectedBrand}
+              onChange={handleBrandChange}
+              selectClassName={`${inputClass} flex-1 sm:flex-none text-[16px] sm:text-sm`}
+            />
+          )}
+
           <select
             value={selectedCategory}
             onChange={(e) => {
