@@ -100,12 +100,20 @@ const normalizeFabricCategory = (category: string | null | undefined) => {
   if (raw === "upholstery" || raw === "leather" || raw === "fabric" || raw === "fabric & leather") {
     return "Fabric & Leather";
   }
-  // Wood, Rattan, Cane, Wicker, Stone, Metal, Ceramic, Glass, etc. → frame finish group.
+  // Woven natural covers (seat/back surface, not the frame) get their own group
+  // so the picker can label them "Cover" instead of "Frame".
+  if (raw === "rattan" || raw === "cane" || raw === "wicker" || raw === "cover") {
+    return "Cover";
+  }
+  // Wood, Stone, Metal, Ceramic, Glass, etc. → frame finish group.
   if (raw) return "Wood";
   return "Fabric & Leather";
 };
 
 const isFabricCategory = (fabric: Fabric) => normalizeFabricCategory(fabric.category) === "Fabric & Leather";
+const isCoverCategory = (fabric: Fabric) => normalizeFabricCategory(fabric.category) === "Cover";
+const isWoodCategory = (fabric: Fabric) => normalizeFabricCategory(fabric.category) === "Wood";
+
 
 /**
  * Fabric / finish selector accordion shown on upholstered products
