@@ -607,11 +607,12 @@ const TradeAtelierProfile = () => {
                     const designerLabel = isGrouped && ap.designer_name && ap.designer_name !== designer.name
                       ? ap.designer_name : undefined;
                     const designerSlug = isGrouped && ap.designer_slug ? ap.designer_slug : undefined;
+                    const productPath = tradeProductPathForPick(pick, designerSlug || slug, designerLabel || designer.name);
                     return (
                     <div
                       key={pick.id}
                       className="group cursor-pointer flex flex-col"
-                      onClick={() => setLightboxProduct(pickToLightboxItem(pick, designerLabel || designer.name, displayCurrency, fxRates, showTradePrice, TRADE_DISCOUNT))}
+                      onClick={() => navigate(productPath)}
                     >
                       <div className="aspect-square md:aspect-[4/5] bg-muted/30 rounded-xl overflow-hidden mb-2 relative flex items-center justify-center">
                         {/* Tag badges — upper-left */}
@@ -661,9 +662,18 @@ const TradeAtelierProfile = () => {
                           );
                         })()}
                         <div className="absolute bottom-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <div className="p-1.5 bg-black/40 rounded-md text-white/90 backdrop-blur-sm">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setLightboxProduct(pickToLightboxItem(pick, designerLabel || designer.name, displayCurrency, fxRates, showTradePrice, TRADE_DISCOUNT));
+                            }}
+                            className="p-1.5 bg-black/40 rounded-md text-white/90 backdrop-blur-sm"
+                            aria-label={`Preview ${pick.title}`}
+                            title="Preview"
+                          >
                             <Maximize2 className="h-3 w-3" />
-                          </div>
+                          </button>
                         </div>
                         {/* Description overlay removed on curators' picks per design */}
                         <div className="absolute bottom-2 right-2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
