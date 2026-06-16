@@ -263,7 +263,7 @@ const TradeVisualiser = () => {
   const applySwatch = useCallback((sw: Swatch) => {
     if (!activePinId) return;
     const activePin = pins.find((pin) => pin.id === activePinId);
-    if (!activePin || classifySwatchSurface(sw) !== activePin.surface) return;
+    if (!activePin || !swatchMatchesSurface(sw, activePin.surface)) return;
     setPins((p) => p.map((pin) => (pin.id === activePinId ? { ...pin, swatch: sw } : pin)));
     setRendered(false);
     setRenderedImage(null);
