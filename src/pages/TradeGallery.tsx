@@ -7,7 +7,7 @@ import { useFavorites } from "@/hooks/useFavorites";
 import AddToProjectPopover from "@/components/trade/AddToProjectPopover";
 import TradeFavoriteFolderPicker from "@/components/trade/TradeFavoriteFolderPicker";
 
-import { Search, Grid3X3, List, FileDown, Package, ShoppingCart, Check, Scale } from "lucide-react";
+import { Search, Grid3X3, List, FileDown, Package, ShoppingCart, Check, Scale, LayoutGrid, Grid2X2 } from "lucide-react";
 import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 import { useCompare, type CompareItem } from "@/contexts/CompareContext";
 import { cn } from "@/lib/utils";
@@ -54,6 +54,13 @@ const TradeGallery = () => {
   const [selectedCategory, setSelectedCategory] = useState(() => searchParams.get("category") || "all");
   const [selectedSubcategory, setSelectedSubcategory] = useState(() => searchParams.get("subcategory") || "all");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [density, setDensity] = useState<"comfortable" | "compact">(() => {
+    if (typeof window === "undefined") return "comfortable";
+    return (localStorage.getItem("trade:gridDensity") as "comfortable" | "compact") || "comfortable";
+  });
+  useEffect(() => {
+    if (typeof window !== "undefined") localStorage.setItem("trade:gridDensity", density);
+  }, [density]);
   const [displayCurrency, setDisplayCurrency] = useTradeDisplayCurrency();
   const { showTradePrice, setShowTradePrice } = useTradePriceMode();
   const { discountPct: TRADE_DISCOUNT, discountLabel, tierLabel } = useTradeDiscount();
@@ -456,6 +463,26 @@ const TradeGallery = () => {
             <List className="h-4 w-4" />
           </button>
         </div>
+        {viewMode === "grid" && (
+          <div className="hidden md:flex items-center gap-1 border border-background/30 rounded-md p-0.5" title="Grid density">
+            <button
+              onClick={() => setDensity("comfortable")}
+              className={`p-1.5 rounded transition-colors ${density === "comfortable" ? "bg-background/20 text-background" : "text-background/50"}`}
+              aria-label="Comfortable grid"
+              title="3-up grid"
+            >
+              <LayoutGrid className="h-4 w-4" />
+            </button>
+            <button
+              onClick={() => setDensity("compact")}
+              className={`p-1.5 rounded transition-colors ${density === "compact" ? "bg-background/20 text-background" : "text-background/50"}`}
+              aria-label="Compact grid"
+              title="6-up grid"
+            >
+              <Grid2X2 className="h-4 w-4" />
+            </button>
+          </div>
+        )}
       </SectionHero>
 
       <DuplicateProductsBanner groups={duplicateGroups} />
@@ -534,7 +561,7 @@ const TradeGallery = () => {
           </p>
         </div>
       ) : viewMode === "grid" ? (
-        <div className={cn("grid gap-4", viewMode === "grid" ? "grid-cols-2 md:grid-cols-3" : "grid-cols-2 md:grid-cols-3 lg:grid-cols-4")}>
+        <div className={cn("grid gap-4", density === "compact" ? "grid-cols-2 md:grid-cols-4 lg:grid-cols-6" : "grid-cols-2 md:grid-cols-3")}>
           {filtered.map((product) => {
             const isAdding = addingProductId === product.id;
             const isAdded = addedProductIds.has(product.id);

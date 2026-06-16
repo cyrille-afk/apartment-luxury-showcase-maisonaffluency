@@ -5,7 +5,7 @@
 import { useState, useMemo, useEffect, useCallback, useRef } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
-import { Search, Grid3X3, List, ShoppingCart, Check, Package, FileDown, Scale, Upload, Loader2, Heart, Tag } from "lucide-react";
+import { Search, Grid3X3, List, ShoppingCart, Check, Package, FileDown, Scale, Upload, Loader2, Heart, Tag, LayoutGrid, Grid2X2 } from "lucide-react";
 import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 import { useCompare, type CompareItem } from "@/contexts/CompareContext";
 import { cn } from "@/lib/utils";
@@ -158,6 +158,16 @@ const ShowroomGridView = ({
   const [selectedSubcategory, setSelectedSubcategory] = useState(searchParams.get("subcategory") || "all");
   const [selectedSection, setSelectedSection] = useState("all");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [density, setDensity] = useState<"comfortable" | "compact">(() => {
+    if (typeof window === "undefined") return "comfortable";
+    return (localStorage.getItem("trade:gridDensity") as "comfortable" | "compact") || "comfortable";
+  });
+  useEffect(() => {
+    if (typeof window !== "undefined") localStorage.setItem("trade:gridDensity", density);
+  }, [density]);
+  const gridClass = density === "compact"
+    ? "grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3"
+    : "grid grid-cols-2 md:grid-cols-3 gap-4";
   const [displayCurrency, setDisplayCurrency] = useTradeDisplayCurrency();
   const { showTradePrice, setShowTradePrice } = useTradePriceMode();
   const fxRates = useFxRates();
@@ -584,7 +594,7 @@ const ShowroomGridView = ({
 
   if (loading) {
     return (
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+        <div className={gridClass}>
           {Array.from({ length: 6 }).map((_, i) => (
             <ProductCardSkeleton key={i} />
           ))}
@@ -614,6 +624,26 @@ const ShowroomGridView = ({
               <List className="h-4 w-4" />
             </button>
           </div>
+          {viewMode === "grid" && (
+            <div className="hidden md:flex items-center gap-1 border border-border rounded-md p-0.5" title="Grid density">
+              <button
+                onClick={() => setDensity("comfortable")}
+                className={`p-1.5 rounded transition-colors ${density === "comfortable" ? "bg-muted text-foreground" : "text-muted-foreground"}`}
+                title="3-up grid"
+                aria-label="Comfortable grid"
+              >
+                <LayoutGrid className="h-4 w-4" />
+              </button>
+              <button
+                onClick={() => setDensity("compact")}
+                className={`p-1.5 rounded transition-colors ${density === "compact" ? "bg-muted text-foreground" : "text-muted-foreground"}`}
+                title="6-up grid"
+                aria-label="Compact grid"
+              >
+                <Grid2X2 className="h-4 w-4" />
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -689,7 +719,7 @@ const ShowroomGridView = ({
           <p className="font-body text-sm text-muted-foreground">No products match your search criteria.</p>
         </div>
       ) : viewMode === "grid" ? (
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+        <div className={gridClass}>
           {filtered.map((product) => {
             const isAdding = addingProductId === product.id;
             const isAdded = addedProductIds.has(product.id);
