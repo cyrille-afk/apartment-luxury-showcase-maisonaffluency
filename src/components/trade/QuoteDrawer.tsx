@@ -146,40 +146,6 @@ const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0 }: QuoteDrawe
             }
           }
         }
-
-        // Convert non-SGD prices to SGD and store catalog reference
-        const currenciesToConvert = new Set<string>();
-        for (const item of mapped) {
-          const cents = item.product?.trade_price_cents ?? item.product?.rrp_price_cents;
-          if (cents && item.product.currency !== "SGD") {
-            currenciesToConvert.add(item.product.currency);
-          }
-        }
-
-        // Fetch exchange rates if needed
-        for (const src of currenciesToConvert) {
-          if (!ratesRef.current[src]) {
-            try {
-              const res = await fetch(`https://api.frankfurter.app/latest?from=${src}&to=SGD`);
-              const data = await res.json();
-              if (data.rates?.SGD) ratesRef.current[src] = data.rates.SGD;
-            } catch { /* fallback: no conversion */ }
-          }
-        }
-
-        // Apply conversion
-        for (const item of mapped) {
-          const cents = item.product?.trade_price_cents ?? item.product?.rrp_price_cents;
-          if (cents && item.product.currency !== "SGD") {
-            const rate = ratesRef.current[item.product.currency];
-            if (rate) {
-              item.catalogPriceCents = cents;
-              item.catalogCurrency = item.product.currency;
-              item.sgdPriceCents = Math.round(cents * rate);
-            }
-          }
-        }
-
         setItems(mapped);
       }
       setLoading(false);
