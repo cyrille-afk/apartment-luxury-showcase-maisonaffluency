@@ -117,7 +117,7 @@ export default function FabricSelector({ pickId, className, productTitle, onUpho
       const query = includePricing
         ? (supabase as any)
             .from("product_fabrics")
-            .select("sort_order, price_tier_label, image_indices, fabric:fabrics(id, name, image_url, category, supplier, is_active, price_per_lm_cents, tier, currency)")
+            .select("sort_order, price_tier_label, image_indices, price_cents_a, fabric:fabrics(id, name, image_url, category, supplier, is_active, price_per_lm_cents, tier, currency)")
             .eq("pick_id", pickId)
             .order("sort_order", { ascending: true })
         : (supabase as any)
@@ -129,7 +129,13 @@ export default function FabricSelector({ pickId, className, productTitle, onUpho
       if (cancelled || error) return;
       const list: Fabric[] = (data || [])
         .map((row: any) => includePricing
-          ? row.fabric && { ...row.fabric, price_tier_label: row.price_tier_label ?? null, image_indices: row.image_indices ?? null }
+          ? row.fabric && {
+              ...row.fabric,
+              price_tier_label: row.price_tier_label ?? null,
+              image_indices: row.image_indices ?? null,
+              frame_price_cents: row.price_cents_a ?? null,
+              frame_price_currency: row.fabric?.currency ?? "EUR",
+            }
           : {
               id: row.fabric_id,
               name: row.name,
@@ -152,6 +158,8 @@ export default function FabricSelector({ pickId, className, productTitle, onUpho
           tier: f.tier ?? null,
           currency: f.currency ?? "EUR",
           image_indices: Array.isArray(f.image_indices) ? f.image_indices : null,
+          frame_price_cents: f.frame_price_cents ?? null,
+          frame_price_currency: f.frame_price_currency ?? "EUR",
         }));
       setFabrics(list);
       onHasFabricsChange?.(list.some(isFabricCategory));
