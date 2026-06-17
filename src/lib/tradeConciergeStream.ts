@@ -110,7 +110,22 @@ export type FfeProposal = {
   preview: FfeLinePreview[];
 };
 
-export type ConciergeProposal = TearsheetProposal | QuoteProposal | FfeProposal;
+export type VisualizationBriefProposal = {
+  tool: "prepare_visualization_brief";
+  tool_call_id: string;
+  args: {
+    mode: "elevation_to_axo" | "section_to_axo" | "stylize" | "composite" | "3d_to_cad" | "cad_overlay";
+    style_preset: "Photorealistic" | "Watercolor" | "Minimal Line" | "Editorial Luxury" | "Scandinavian";
+    title: string | null;
+    room_label: string | null;
+    brief_notes: string;
+    pick_ids: string[];
+    source_image_url: string | null;
+  };
+  preview: PickPreview[];
+};
+
+export type ConciergeProposal = TearsheetProposal | QuoteProposal | FfeProposal | VisualizationBriefProposal;
 
 export type EscalationEvent = {
   sentiment: string;
