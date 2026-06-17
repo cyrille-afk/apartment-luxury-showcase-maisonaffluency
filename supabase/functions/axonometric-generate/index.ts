@@ -272,9 +272,9 @@ Every element visible in the section must appear at the EXACT same position, hei
 PHOTOREALISTIC MATERIALS: PBR stone veining, visible wood grain, fabric texture with creasing, distinct metal finishes.
 LIGHTING: Warm natural (3500-4500K) with soft shadows and ambient occlusion. Interior walls: light plaster — NEVER dark or thick.
 
-Style: ${defaultStyle}. The result must look like a professional Corona/V-Ray archviz output.`;
+Style: ${defaultStyle}. The result must look like a professional Corona/V-Ray archviz output.${NO_DRAFTING_FRAME}`;
     } else if (mode === "stylize") {
-      prompt = `Dramatically enhance this architectural 3D axonometric view to professional archviz portfolio quality. Apply physically-based material rendering: realistic marble/stone veining with depth, visible wood grain and plank variation, fabric textures with weave and natural creasing, distinct metal finishes. Add warm natural lighting (3500-4500K) with soft shadows featuring proper penumbra, ambient occlusion in all corners and junctions, and subtle atmospheric perspective. Keep the geometry and layout exactly the same but elevate every surface to photorealistic quality matching ${defaultStyle}.`;
+      prompt = `Dramatically enhance this architectural 3D axonometric view to professional archviz portfolio quality. Apply physically-based material rendering: realistic marble/stone veining with depth, visible wood grain and plank variation, fabric textures with weave and natural creasing, distinct metal finishes. Add warm natural lighting (3500-4500K) with soft shadows featuring proper penumbra, ambient occlusion in all corners and junctions, and subtle atmospheric perspective. Keep the geometry and layout exactly the same but elevate every surface to photorealistic quality matching ${defaultStyle}.${NO_DRAFTING_FRAME}`;
     } else if (mode === "composite") {
       prompt = `You are given a source architectural view and one or more product/furniture images to incorporate into it.
 
