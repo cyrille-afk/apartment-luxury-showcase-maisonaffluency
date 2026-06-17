@@ -44,7 +44,7 @@ import { useTradeDisplayCurrency } from "@/hooks/useTradeDisplayCurrency";
 import { formatEditionLabel } from "@/lib/editionLabel";
 import PageLoadingSkeleton from "@/components/PageLoadingSkeleton";
 import ExpandableSpec from "@/components/ExpandableSpec";
-import FabricSelector from "@/components/FabricSelector";
+import FinishSelector from "@/components/FinishSelector";
 import { isProductUpholstered } from "@/lib/upholstery";
 import Breadcrumbs, { type Crumb } from "@/components/Breadcrumbs";
 import { getBasePlaceholder, getTopPlaceholder, formatVariantAxisLabel } from "@/lib/variantPlaceholders";
@@ -471,7 +471,7 @@ const TradeProductPage: React.FC = () => {
   // picker already drives the upholstery price tier.
   const [hasLinkedFabrics, setHasLinkedFabrics] = useState(false);
   const [linkedWoodFinishes, setLinkedWoodFinishes] = useState<string[]>([]);
-  const [selectedFabric, setSelectedFabric] = useState<import("@/components/FabricSelector").SelectedFabricInfo | null>(null);
+  const [selectedFabric, setSelectedFabric] = useState<import("@/components/FinishSelector").SelectedFabricInfo | null>(null);
   // When a wood-finish swatch carries its own frame price (product_fabrics.price_cents_a),
   // we use it as the RRP base and add the fabric per-LM upcharge on top.
   const [selectedWoodPrice, setSelectedWoodPrice] = useState<{ id: string; name: string; price_cents: number; currency: string; image_url: string | null } | null>(null);
@@ -1013,13 +1013,13 @@ const TradeProductPage: React.FC = () => {
       ? singleAxisActive
       : (hasVariants && selectedVariantIdx != null ? sizeVariants![selectedVariantIdx] : null);
   const isUpholsteredProduct = isProductUpholstered(product as any);
-  // When FabricSelector is shown (upholstered), it already exposes fabric
+  // When FinishSelector is shown (upholstered), it already exposes fabric
   // + wood-finish swatches. Suppress duplicate base/top variant dropdowns
   // whose axis label is a finish/frame/wood concept already covered there.
   const isFinishAxisLabel = (label: string) =>
     /\b(frame|wood|finish|feet|foot|leg|legs|base)\b/i.test(label);
   // Only suppress the Base dropdown when every base option is also offered as
-  // a wood swatch in FabricSelector — otherwise the user has no way to pick
+  // a wood swatch in FinishSelector — otherwise the user has no way to pick
   // bases that lack a swatch (e.g. Walnut, Thermo-treated wood).
   const normFinish = (s: string) => (s || "").trim().toLowerCase();
   const allBasesHaveSwatches =
@@ -1030,7 +1030,7 @@ const TradeProductPage: React.FC = () => {
         return nlw === nb || nlw.includes(nb) || nb.includes(nlw);
       });
     });
-  // When FabricSelector is present and exposes wood swatches, treat it as the
+  // When FinishSelector is present and exposes wood swatches, treat it as the
   // single source for the frame-finish axis — suppress the duplicate base
   // dropdown even if not every base option has a perfectly-matching swatch.
   const hasWoodSwatches = linkedWoodFinishes.length > 0;
@@ -1415,7 +1415,7 @@ const TradeProductPage: React.FC = () => {
                 />
               )}
 
-              <FabricSelector
+              <FinishSelector
                   pickId={product.id}
                   productTitle={product.title}
                   woodLabel={(product as any).wood_label_override}

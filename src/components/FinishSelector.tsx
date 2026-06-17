@@ -34,7 +34,7 @@ export interface SelectedFabricInfo {
   currency: string;
 }
 
-interface FabricSelectorProps {
+interface FinishSelectorProps {
   /** designer_curator_picks.id — required to look up linked fabrics. */
   pickId: string | null | undefined;
   className?: string;
@@ -128,7 +128,7 @@ const isWoodCategory = (fabric: Fabric) => normalizeFabricCategory(fabric.catego
  * (Trade + Public). Tiles are grouped by category (Upholstery, Wood, …)
  * with a COM ("Customer's Own Material") tile always offered.
  */
-export default function FabricSelector({ pickId, className, productTitle, onUpholsteryTierChange, onFabricChange, onHasFabricsChange, onWoodFinishChange, onWoodFinishPricingChange, onWoodFinishesAvailable, includePricing = false, onSwatchImagesChange, woodLabel, showUpholsterySection = true, showWoodSection = true }: FabricSelectorProps) {
+export default function FinishSelector({ pickId, className, productTitle, onUpholsteryTierChange, onFabricChange, onHasFabricsChange, onWoodFinishChange, onWoodFinishPricingChange, onWoodFinishesAvailable, includePricing = false, onSwatchImagesChange, woodLabel, showUpholsterySection = true, showWoodSection = true }: FinishSelectorProps) {
 
   const [open, setOpen] = useState(false);
   const [fabrics, setFabrics] = useState<Fabric[]>([]);

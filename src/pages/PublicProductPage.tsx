@@ -28,7 +28,7 @@ import { buildProductBreadcrumbs } from "@/lib/productBreadcrumbs";
 import { getBasePlaceholder, getTopPlaceholder, getMaterialPlaceholder, formatVariantAxisLabel } from "@/lib/variantPlaceholders";
 import { computeVariantAxes, parseMaterialsFallback } from "@/lib/parseSizeVariants";
 import { isRugCategory, parseRugDims, looksLikeDimension } from "@/lib/rugPricing";
-import FabricSelector from "@/components/FabricSelector";
+import FinishSelector from "@/components/FinishSelector";
 import { isProductUpholstered } from "@/lib/upholstery";
 import RugSizeColourPicker, { type RugSelection } from "@/components/rug/RugSizeColourPicker";
 import { buildProductFinishMap, resolveFinishImageIndex, resolveVariantImageIndex, findVariantForImageIndex } from "@/lib/variantImageMap";
@@ -324,7 +324,7 @@ const VariantSelectors: React.FC<{
   const topAxisIsDim = topAxisLabelRaw
     ? axisLabeledSize(topAxisLabelRaw)
     : (topOptions.length > 0 && topOptions.every(looksLikeDimension));
-  // When FabricSelector is rendered (upholstered products), it already exposes
+  // When FinishSelector is rendered (upholstered products), it already exposes
   // fabric/leather + wood-finish swatch pickers. Suppress any base/top variant
   // dropdown whose axis label duplicates that selection (frame / wood / finish
   // / feet / leg / base).
@@ -509,7 +509,7 @@ const VariantSelectors: React.FC<{
         />
       )}
 
-      <FabricSelector
+      <FinishSelector
         pickId={product.id}
         productTitle={product.title}
         woodLabel={(product as any).wood_label_override}
@@ -684,7 +684,7 @@ const VariantSelectors: React.FC<{
       ) : null}
 
       {/* Materials description paragraph — shown AFTER all dropdowns, before Handcrafted.
-          Suppressed when FabricSelector already drives fabric + wood selections to
+          Suppressed when FinishSelector already drives fabric + wood selections to
           avoid restating "Varnished solid ash & fabric" type catch-all summaries. */}
       {product.materials_description?.trim() && !hasLinkedFabrics && !isProductUpholstered(product) && (
         <ExpandableSpec
