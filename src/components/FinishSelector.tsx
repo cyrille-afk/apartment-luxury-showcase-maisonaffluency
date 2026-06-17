@@ -26,7 +26,7 @@ interface Fabric {
   frame_price_currency?: string | null;
 }
 
-export interface SelectedFabricInfo {
+export interface SelectedFinishInfo {
   id: string;
   name: string;
   tier: string | null;
