@@ -66,16 +66,6 @@ Deno.serve(async (req) => {
       return `${i + 1}. Replace ${surfaceLabel} ${at} with the material shown in image ${i + 2} (${finish}). ` +
         `Apply it as a realistic ${application}, matching the room's existing perspective, scale, lighting, and shadows.`;
     }).join("\n");
-      const surface = SURFACE_LABEL[p.surface];
-      const at = `near (${Math.round(p.x * 100)}% from left, ${Math.round(p.y * 100)}% from top)`;
-      const finish = `${p.brandName ? p.brandName + " — " : ""}${p.swatchName}`;
-      return `${i + 1}. Replace ${surface} ${at} with the material shown in image ${i + 2} (${finish}). ` +
-        `Apply it as a realistic ${p.surface === "floors" ? "rug/floor covering" :
-          p.surface === "walls" ? "wall finish (paint/wallpaper/lacquer/plaster as appropriate)" :
-          p.surface === "upholstery" ? "upholstery fabric on the seating in that area" :
-          p.surface === "furniture" ? "furniture finish applied ONLY to the frame/case/legs/top of the single piece of furniture at the marked point — do NOT touch its upholstery, cushions, or any adjacent objects, walls, floor, or drapery" :
-          "curtain/drapery fabric"}, matching the room's existing perspective, scale, lighting, and shadows.`;
-    }).join("\n");
 
     const prompt =
       `You are a photorealistic interior renderer. Image 1 is a room photograph. ` +
