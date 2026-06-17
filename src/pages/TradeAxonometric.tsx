@@ -92,7 +92,11 @@ const ProductPicker = ({
           p.tags.some((t) => t.toLowerCase().includes(q))
       );
     }
-    return all.slice(0, 24);
+    // When a brand/category/subcategory filter is active, show all matches
+    // (scrollable container handles overflow). Only cap unfiltered keyword
+    // searches so the grid doesn't render the whole catalog.
+    const filtered = !!(category || subcategory || brand);
+    return filtered ? all : all.slice(0, 48);
   }, [allTradeProds, search, category, subcategory, brand]);
 
   if (products.length === 0) {
