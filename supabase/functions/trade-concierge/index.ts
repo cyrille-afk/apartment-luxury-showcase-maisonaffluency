@@ -1235,11 +1235,17 @@ async function loadCatalogContext(supabase: ReturnType<typeof createClient>, inc
   // Fetch the trade_products catalog so the assistant can SEE every active
   // piece (not just the curator subset). On the lightweight path we only
   // need brand names for the SHOWROOM BRANDS section.
+  // IMPORTANT: only surface trade_products that have an image_url. Junk/stub
+  // rows without a photo (truncated duplicates from scrapers, orphan variants)
+  // would otherwise compete with the real curator picks in the catalog the
+  // model sees, e.g. proposing an imageless "Lyric Desk" alongside the three
+  // good variants (Walnut / Oak / x Pierre Frey).
   const { data: tradeAll } = includePieces
     ? await supabase
         .from("trade_products")
         .select("id, product_name, brand_name, materials, category, subcategory, trade_price_cents, rrp_price_cents, currency, price_unit")
         .eq("is_active", true)
+        .not("image_url", "is", null)
         .order("brand_name", { ascending: true })
         .order("product_name", { ascending: true })
         .limit(2000)
@@ -1247,6 +1253,7 @@ async function loadCatalogContext(supabase: ReturnType<typeof createClient>, inc
         .from("trade_products")
         .select("brand_name")
         .eq("is_active", true)
+        .not("image_url", "is", null)
         .limit(2000);
 
   const { data: hotspotBrands } = await supabase
