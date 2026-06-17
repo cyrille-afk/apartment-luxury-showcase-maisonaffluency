@@ -58,6 +58,7 @@ import {
 } from "./conciergeGreeting";
 import { supabase } from "@/integrations/supabase/client";
 import { useStudio } from "@/hooks/useStudio";
+import { useAuth } from "@/hooks/useAuth";
 
 const hasWelcomeActions = (actions: ConciergeQuickAction[] | undefined) =>
   !!actions?.some((action) => isOnboardingActionPrompt(action.prompt));
