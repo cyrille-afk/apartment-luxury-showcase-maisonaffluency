@@ -41,17 +41,30 @@ Deno.serve(async (req) => {
       });
     }
 
+    const isSoftMaterial = (cat?: string, name?: string) => {
+      const t = `${cat || ""} ${name || ""}`.toLowerCase();
+      return /(fabric|leather|upholster|textile|velvet|linen|wool|cotton|silk|mohair|bouclé|boucle|hide|suede)/.test(t);
+    };
+
     // Build swap instructions. The room photo is image #1; each swatch follows in order.
     const instructions = validPins.map((p, i) => {
-      const surface = SURFACE_LABEL[p.surface];
+      const soft = isSoftMaterial(p.swatchCategory, p.swatchName);
+      const effectiveSurface = p.surface === "furniture" && soft ? "furniture-upholstery" : p.surface;
+      const surfaceLabel = effectiveSurface === "furniture-upholstery"
+        ? "the upholstered cushions/seat/back of the single piece of furniture at the marked point (leave its wood/metal frame and all surrounding objects untouched)"
+        : SURFACE_LABEL[p.surface];
       const at = `near (${Math.round(p.x * 100)}% from left, ${Math.round(p.y * 100)}% from top)`;
       const finish = `${p.brandName ? p.brandName + " — " : ""}${p.swatchName}`;
-      return `${i + 1}. Replace ${surface} ${at} with the material shown in image ${i + 2} (${finish}). ` +
-        `Apply it as a realistic ${p.surface === "floors" ? "rug/floor covering" :
-          p.surface === "walls" ? "wall finish (paint/wallpaper/lacquer/plaster as appropriate)" :
-          p.surface === "upholstery" ? "upholstery fabric on the seating in that area" :
-          p.surface === "furniture" ? "furniture finish applied ONLY to the frame/case/legs/top of the single piece of furniture at the marked point — do NOT touch its upholstery, cushions, or any adjacent objects, walls, floor, or drapery" :
-          "curtain/drapery fabric"}, matching the room's existing perspective, scale, lighting, and shadows.`;
+      const application =
+        effectiveSurface === "furniture-upholstery"
+          ? "upholstery fabric/leather wrap on the cushions, seat, and back of that single piece only — do NOT touch its frame, legs, or any adjacent objects, walls, floor, or drapery" :
+        p.surface === "floors" ? "rug/floor covering" :
+        p.surface === "walls" ? "wall finish (paint/wallpaper/lacquer/plaster as appropriate)" :
+        p.surface === "upholstery" ? "upholstery fabric on the seating in that area" :
+        p.surface === "furniture" ? "furniture finish applied ONLY to the frame/case/legs/top of the single piece of furniture at the marked point — do NOT touch its upholstery, cushions, or any adjacent objects, walls, floor, or drapery" :
+        "curtain/drapery fabric";
+      return `${i + 1}. Replace ${surfaceLabel} ${at} with the material shown in image ${i + 2} (${finish}). ` +
+        `Apply it as a realistic ${application}, matching the room's existing perspective, scale, lighting, and shadows.`;
     }).join("\n");
 
     const prompt =
