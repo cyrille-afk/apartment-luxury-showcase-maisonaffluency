@@ -209,6 +209,16 @@ serve(async (req) => {
     let prompt = "";
     const defaultStyle = buildStyle();
 
+    // Hard guard against the model hallucinating drafting-sheet artifacts
+    // (title blocks, sheet numbers, legends, scale bars, project codes, watermarks).
+    // Without this, Gemini auto-appends a fake title block with gibberish text
+    // because architectural drawings in its training set almost always have one.
+    const NO_DRAFTING_FRAME = `\n\nABSOLUTELY FORBIDDEN — NO TEXT OR DRAFTING FRAME:
+- Do NOT add a title block, drawing border, sheet number, project name, scale bar, north arrow, legend, key, or revision table.
+- Do NOT render any text, labels, room names, dimensions, annotations, watermarks, logos, or signatures anywhere in the image.
+- Do NOT add a paper background, drawing sheet edge, hole-punch marks, or any "architectural drawing sheet" framing.
+- Output ONLY the 3D render on a clean, neutral background. Any text or title block in the output is a TOTAL FAILURE.`;
+
     if (mode === "elevation_to_axo") {
       prompt = `RULE #1 — LAYOUT FIDELITY (THIS IS THE MOST IMPORTANT RULE — VIOLATING IT MEANS TOTAL FAILURE):
 You are given a 2D floor plan drawing. Your output MUST be an EXACT 3D extrusion of that drawing's layout. This means:
