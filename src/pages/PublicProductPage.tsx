@@ -514,6 +514,7 @@ const VariantSelectors: React.FC<{
         productTitle={product.title}
         woodLabel={(product as any).wood_label_override}
         showUpholsterySection={isProductUpholstered(product)}
+        showWoodSection={!(isDualAxis && !baseAxisIsDim)}
         onHasFabricsChange={setHasLinkedFabrics}
         onSwatchImagesChange={onSwatchImagesChange}
         onUpholsteryTierChange={(rawTier) => {
