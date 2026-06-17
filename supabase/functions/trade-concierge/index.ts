@@ -2269,6 +2269,21 @@ function sseProposalThenTextResponse(proposal: unknown, text: string): Response 
   return new Response(stream, { headers: { ...corsHeaders, "Content-Type": "text/event-stream" } });
 }
 
+function sseProposalsThenTextResponse(proposals: unknown[], text: string): Response {
+  const encoder = new TextEncoder();
+  const stream = new ReadableStream({
+    start(controller) {
+      for (const proposal of proposals) {
+        controller.enqueue(encoder.encode(`event: proposal\ndata: ${JSON.stringify(proposal)}\n\n`));
+      }
+      controller.enqueue(encoder.encode(`data: ${JSON.stringify({ choices: [{ delta: { content: text } }] })}\n\n`));
+      controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+      controller.close();
+    },
+  });
+  return new Response(stream, { headers: { ...corsHeaders, "Content-Type": "text/event-stream" } });
+}
+
 function titleTokens(value: string | null | undefined): string[] {
   return normalizeLoose(value).split(/\s+/).filter((t) => t.length > 2 && !GENERIC_PRODUCT_TOKENS.has(t));
 }
@@ -2495,6 +2510,35 @@ async function buildDeterministicTearsheetProposal(
       pick_rationales: rationaleMap,
     },
     preview,
+  };
+}
+
+function buildVisualizationBriefProposal(args: {
+  title?: string | null;
+  room?: string | null;
+  style?: string | null;
+  materials?: string[];
+  summary?: string | null;
+  requestText: string;
+  pickIds?: string[];
+  preview?: any[];
+}) {
+  const room = args.room || (/belgravia/i.test(args.requestText) ? "Belgravia drawing-room" : "Scene render");
+  const style = /editorial luxury/i.test(args.requestText) ? "Editorial Luxury" : (args.style || "Editorial Luxury");
+  const materials = args.materials?.length ? args.materials.join(", ") : "bronze, mohair and the requested material palette";
+  return {
+    tool: "prepare_visualization_brief",
+    tool_call_id: `synthetic-viz-${crypto.randomUUID()}`,
+    args: {
+      mode: "composite",
+      style_preset: "Editorial Luxury",
+      title: (args.title || `${room} render brief`).slice(0, 80),
+      room_label: room,
+      brief_notes: `${room}: ${args.summary || args.requestText} Render in ${style} with ${materials}; use the selected Maison Affluency pieces as overlay candidates with careful scale, sightlines and material fidelity.`.slice(0, 1200),
+      pick_ids: (args.pickIds || []).slice(0, 12),
+      source_image_url: null,
+    },
+    preview: (args.preview || []).slice(0, 12),
   };
 }
 
@@ -2874,6 +2918,34 @@ serve(async (req) => {
     const useRag = includePieces && !!ragResult;
     const { designersList, piecesList: fullPiecesList, showroomBrands } = await loadCatalogContext(supabase, includePieces && !useRag);
     const piecesList = useRag ? (ragResult as { contextText: string }).contextText : fullPiecesList;
+
+    if (hasVisualizationVerb) {
+      const tearsheetProposal = visualizationNeedsCatalogPicks
+        ? await buildDeterministicTearsheetProposal(
+            supabase,
+            Array.isArray((ragResult as any)?.rows) ? (ragResult as any).rows : [],
+            effectiveBrief.brief,
+            userConversationText,
+          )
+        : null;
+      const vizProposal = buildVisualizationBriefProposal({
+        title: tearsheetProposal?.args?.title || effectiveBrief.brief.summary || null,
+        room: effectiveBrief.brief.room,
+        style: effectiveBrief.brief.style,
+        materials: effectiveBrief.brief.materials,
+        summary: effectiveBrief.brief.summary,
+        requestText: lastUserMsg,
+        pickIds: Array.isArray(tearsheetProposal?.args?.pick_ids) ? tearsheetProposal.args.pick_ids : [],
+        preview: Array.isArray(tearsheetProposal?.preview) ? tearsheetProposal.preview : [],
+      });
+      const proposals = tearsheetProposal ? [tearsheetProposal, vizProposal] : [vizProposal];
+      return sseProposalsThenTextResponse(
+        proposals,
+        tearsheetProposal
+          ? "Here's a first edit and the render brief — tap Render Scene when you're ready to open the studio."
+          : "I've prepared the render brief — tap Render Scene when you're ready to open the studio.",
+      );
+    }
 
     // Fire-and-forget: persist a debug trace of what RAG retrieved for this turn.
     if (ragResult) {
