@@ -3959,6 +3959,45 @@ serve(async (req) => {
           return true;
         };
 
+        const backfillVisualizationBriefIfNeeded = () => {
+          if (!effectiveBrief.plan.includes("prepare_visualization_brief")) return;
+          const buffers = Array.from(toolCallBuffers.entries());
+          const hasVizBrief = buffers.some(([, b]) => b.name === "prepare_visualization_brief");
+          if (hasVizBrief) return;
+          const firstTearsheet = buffers.find(([, b]) => b.name === "propose_tearsheet" || b.name === "add_to_tearsheet");
+          let pickIds: string[] = [];
+          let title = effectiveBrief.brief.summary || "Render brief";
+          if (firstTearsheet) {
+            try {
+              const parsed = JSON.parse(firstTearsheet[1].argsText || "{}");
+              if (Array.isArray(parsed.pick_ids)) pickIds = parsed.pick_ids.filter((id: unknown) => typeof id === "string").slice(0, 12);
+              if (typeof parsed.title === "string" && parsed.title.trim()) title = parsed.title.trim();
+            } catch { /* keep planner-derived fallback */ }
+          }
+          const room = effectiveBrief.brief.room || (/belgravia/.test(lastUserMsgLower) ? "Belgravia drawing-room" : null);
+          const style = /editorial luxury/i.test(lastUserMsg) ? "Editorial Luxury" : (effectiveBrief.brief.style || "Editorial Luxury");
+          const materials = effectiveBrief.brief.materials.length ? effectiveBrief.brief.materials.join(", ") : "the requested palette and materials";
+          const briefNotes = [
+            room ? `${room}:` : "Scene:",
+            effectiveBrief.brief.summary || lastUserMsg,
+            `Render in ${style} with ${materials}; compose the selected Maison Affluency pieces as overlay candidates with careful scale, sightlines and material fidelity.`,
+          ].join(" ").slice(0, 1200);
+          const maxIdx = buffers.reduce((m, [i]) => (i > m ? i : m), -1);
+          toolCallBuffers.set(maxIdx + 1, {
+            id: `synthetic-viz-${crypto.randomUUID()}`,
+            name: "prepare_visualization_brief",
+            argsText: JSON.stringify({
+              mode: "composite",
+              style_preset: style === "Editorial Luxury" ? "Editorial Luxury" : "Editorial Luxury",
+              title: title.slice(0, 80),
+              room_label: room || effectiveBrief.brief.room || null,
+              brief_notes: briefNotes,
+              pick_ids: pickIds,
+            }),
+          });
+          console.log(`[concierge backfill] synthesized prepare_visualization_brief (${pickIds.length} picks)`);
+        };
+
         // ----- Inner orchestration loop (Step 4) -----
         // After the main stream finishes, if the upstream planner asked for a
         // chained `propose_tearsheet → draft_quote` but the model only emitted
