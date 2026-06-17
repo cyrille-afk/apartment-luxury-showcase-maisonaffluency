@@ -796,6 +796,10 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
         setTimeline((prev) => [...prev, { kind: "ffe_proposal", proposal }]);
         return;
       }
+      if (proposal.tool === "prepare_visualization_brief") {
+        setTimeline((prev) => [...prev, { kind: "viz_brief", proposal }]);
+        return;
+      }
       // Tearsheet proposal — compute which picks are NEW relative to the
       // previous proposal so the card can highlight rationales for replacements only.
       const prevIds = new Set(
