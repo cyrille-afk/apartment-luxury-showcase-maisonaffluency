@@ -37,13 +37,18 @@ export function formatVariantAxisLabel(label: string | null | undefined): string
 }
 
 function placeholderFromAxisLabel(label: string): string {
-  let lower = formatVariantAxisLabel(label)!.toLowerCase();
-  if (lower === "size") return "Select Your Size";
-  // Fix common DB truncations: "fini" → "finish"
-  lower = lower.replace(/\bfini\b/g, "finish");
-  // Append "finish" unless the label already ends with a noun that wouldn't pair with "finish"
-  const skipSuffix = /\b(finish|fabric|material|size|colour|color|leather|diffuser|shade|model|version|variant|option)$/i.test(lower);
-  return skipSuffix ? `Select your ${lower}` : `Select your ${lower} finish`;
+  let pretty = formatVariantAxisLabel(label)!;
+  // Fix common DB truncations: "fini" → "Finish"
+  pretty = pretty.replace(/\bfini\b/gi, "Finish");
+  if (pretty.toLowerCase() === "size") return "Select Your Size";
+  // Title-case each word so the placeholder matches the "Select Your X" convention
+  // used by the swatch picker (e.g. "Select Your Rod Finish", "Select Your Diffuser").
+  const titled = pretty
+    .split(/\s+/)
+    .map((w) => (w ? w[0].toUpperCase() + w.slice(1) : w))
+    .join(" ");
+  const skipSuffix = /\b(finish|fabric|material|size|colour|color|leather|diffuser|shade|model|version|variant|option)$/i.test(titled);
+  return skipSuffix ? `Select Your ${titled}` : `Select Your ${titled} Finish`;
 }
 
 function normalizePlaceholder(value: string): string {
