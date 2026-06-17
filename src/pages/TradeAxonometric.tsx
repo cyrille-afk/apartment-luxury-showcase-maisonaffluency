@@ -696,7 +696,7 @@ const TradeAxonometric = () => {
 
 
   const loadFromQueue = (req: any) => {
-    useFreshSourceImage(req.image_url, setSourceImage, setResult, setHistory, setLockedLayoutUrl);
+    resetWithFreshSourceImage(req.image_url, setSourceImage, setResult, setHistory, setLockedLayoutUrl);
     setActiveRequestId(req.id);
     setAdminNotes(req.admin_notes || "");
     const requestType = String(req.request_type || "").toLowerCase();
@@ -738,8 +738,7 @@ const TradeAxonometric = () => {
 
       toast({ title: "Request completed and result delivered" });
       setActiveRequestId(null);
-      setSourceImage(null);
-      setResult(null);
+      resetWithFreshSourceImage(null, setSourceImage, setResult, setHistory, setLockedLayoutUrl);
       setAdminNotes("");
       setShowQueue(true);
       queryClient.invalidateQueries({ queryKey: ["axonometric-requests-admin"] });
@@ -1062,7 +1061,7 @@ const TradeAxonometric = () => {
                         size="sm"
                         className="flex-1"
                         onClick={() => {
-                          useFreshSourceImage(draft.image_url, setSourceImage, setResult, setHistory, setLockedLayoutUrl);
+                          resetWithFreshSourceImage(draft.image_url, setSourceImage, setResult, setHistory, setLockedLayoutUrl);
                           setResult({ imageUrl: draft.image_url, storedUrl: draft.image_url, text: "", mode: "elevation_to_axo" });
                           setGalleryTitle(draft.title || "");
                           setGalleryDesc(draft.description || "");
