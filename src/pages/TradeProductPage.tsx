@@ -1443,6 +1443,39 @@ const TradeProductPage: React.FC = () => {
                         }
                       : undefined
                   }
+                  topLabel={
+                    product.top_axis_label
+                      ? `Select Your ${formatVariantAxisLabel(product.top_axis_label) || product.top_axis_label}`
+                      : null
+                  }
+                  topFilter={
+                    isDualAxis && !topAxisIsDim && topOptions.length > 0
+                      ? (name) => {
+                          const n = name.trim().toLowerCase();
+                          return topOptions.some((t) => {
+                            const nt = t.trim().toLowerCase();
+                            return nt === n || nt.includes(n) || n.includes(nt);
+                          });
+                        }
+                      : undefined
+                  }
+                  onTopFinishChange={(topName) => {
+                    if (!topName) return;
+                    const norm = (s: string) => s.trim().toLowerCase();
+                    const nw = norm(topName);
+                    const match =
+                      topOptions.find((t) => norm(t) === nw)
+                      || topOptions.find((t) => nw.includes(norm(t)))
+                      || topOptions.find((t) => norm(t).includes(nw))
+                      || topName;
+                    setSelectedTop(match);
+                    let nextBase = selectedBase;
+                    if (nextBase && !variantsList.some((x: any) => matchesDual(x, nextBase, match, selectedDualSize))) {
+                      setSelectedBase(null);
+                      nextBase = null;
+                    }
+                    handleMaterialChange(match, { base: nextBase, top: match, size: selectedDualSize });
+                  }}
                   includePricing
                   showUpholsterySection={isUpholsteredProduct}
                   showWoodSection
