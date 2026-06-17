@@ -444,9 +444,18 @@ export default function FinishSelector({ pickId, className, productTitle, onUpho
   };
 
   const [openWood, setOpenWood] = useState(false);
+  const [openTop, setOpenTop] = useState(false);
   const [openCover, setOpenCover] = useState(false);
   const fabricTiles = grouped["Fabric & Leather"] || [];
-  const woodTiles = (grouped["Wood"] || []).filter((f) => !woodFilter || woodFilter(f.name));
+  const allNonFabricTiles = grouped["Wood"] || [];
+  // Top-axis swatches first (e.g. diffuser), then base-axis swatches with the
+  // top swatches excluded so a single physical swatch doesn't appear in both
+  // groups when the filters overlap.
+  const topTiles = topFilter ? allNonFabricTiles.filter((f) => topFilter(f.name)) : [];
+  const topTileIds = new Set(topTiles.map((t) => t.id));
+  const woodTiles = allNonFabricTiles
+    .filter((f) => !topTileIds.has(f.id))
+    .filter((f) => !woodFilter || woodFilter(f.name));
   const coverTiles = grouped["Cover"] || [];
 
 
@@ -458,6 +467,7 @@ export default function FinishSelector({ pickId, className, productTitle, onUpho
     tiles: Fabric[];
     emptyNote?: string;
     glyph: string;
+    tileKind?: "fabric" | "cover" | "base" | "top";
   }) => (
     <div className="border-t border-border/60">
       <button
@@ -489,7 +499,7 @@ export default function FinishSelector({ pickId, className, productTitle, onUpho
         <div className="pb-5 pt-4">
           {args.tiles.length > 0 ? (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4">
-              {args.tiles.map(renderTile)}
+              {args.tiles.map((f) => renderTile(f, args.tileKind))}
             </div>
           ) : (
             args.emptyNote && (
