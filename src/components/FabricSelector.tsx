@@ -122,7 +122,7 @@ const isWoodCategory = (fabric: Fabric) => normalizeFabricCategory(fabric.catego
  */
 export default function FabricSelector({ pickId, className, productTitle, onUpholsteryTierChange, onFabricChange, onHasFabricsChange, onWoodFinishChange, onWoodFinishPricingChange, onWoodFinishesAvailable, includePricing = false, onSwatchImagesChange, woodLabel, showUpholsterySection = true }: FabricSelectorProps) {
 
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
   const [fabrics, setFabrics] = useState<Fabric[]>([]);
   const [selectedFabricId, setSelectedFabricId] = useState<string | null>(null);
   const [selectedWoodId, setSelectedWoodId] = useState<string | null>(null);
