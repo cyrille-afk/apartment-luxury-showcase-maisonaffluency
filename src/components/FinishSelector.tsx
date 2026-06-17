@@ -101,6 +101,14 @@ interface FinishSelectorProps {
    * duplicate the dropdown.
    */
   showWoodSection?: boolean;
+  /**
+   * Optional filter restricting which wood-bucket swatches are shown. Used
+   * by dual-axis products (e.g. pendant with "Rod Finish" × "Diffuser")
+   * so the rod-finish group doesn't accidentally pull in diffuser swatches
+   * like alabaster that also fall into the catch-all "Wood" bucket.
+   * Return true to keep the swatch.
+   */
+  woodFilter?: (swatchName: string) => boolean;
 }
 
 const normalizeFabricCategory = (category: string | null | undefined) => {
