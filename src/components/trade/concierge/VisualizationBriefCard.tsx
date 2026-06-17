@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { Sparkles, X, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/useAuth";
 import type { VisualizationBriefProposal } from "@/lib/tradeConciergeStream";
 
 export const VIZ_BRIEF_INCOMING_KEY = "maf:axonometric:incoming-brief";
