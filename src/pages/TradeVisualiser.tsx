@@ -75,18 +75,19 @@ const classifySwatchSurfaces = (s: Swatch): Surface[] => {
     return ["upholstery", "furniture"];
   }
 
-  // Pure fabrics → upholstery only.
+  // Pure fabrics → upholstery AND furniture (furniture finish includes
+  // upholstered seating fabric/leather wraps as well as frame finishes).
   if (
     cat === "fabric" ||
     cat === "fabrics" ||
     cat === "upholstery" ||
     cat === "fabric & leather"
   ) {
-    return ["upholstery"];
+    return ["upholstery", "furniture"];
   }
 
   // Loose keyword fallback for legacy free-text categories.
-  if (/\b(fabrics?|textiles?|leathers?|upholstery)\b/i.test(text)) return ["upholstery"];
+  if (/\b(fabrics?|textiles?|leathers?|upholstery)\b/i.test(text)) return ["upholstery", "furniture"];
   return [];
 };
 
@@ -137,6 +138,18 @@ const productLabelScore = (name: string | null | undefined) => {
   return score;
 };
 
+// Collapse supplier label variants (case, accents, " Paris"/" Editions" suffixes)
+// into one canonical key so chips don't show "ECART / Ecart / Écart" 3× over.
+const normalizeSupplierKey = (raw: string | null | undefined) => {
+  if (!raw) return "";
+  return raw
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // strip accents
+    .toLowerCase()
+    .replace(/\s+(paris|editions?|collection|atelier|studio)\b.*$/i, "")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+};
+
 // ───────── Page ──────────────────────────────────────────────────────────────
 const TradeVisualiser = () => {
   const [photo, setPhoto] = useState<string | null>(null); // original (object URL or data URL)
@@ -181,21 +194,32 @@ const TradeVisualiser = () => {
   useEffect(() => { setSupplierFilter(null); }, [surface]);
 
   const surfaceSuppliers = useMemo(() => {
-    const set = new Set<string>();
+    // Group variants of the same supplier (case/accent/" Paris" suffix) under
+    // one canonical display label — keep the longest pretty version as the label.
+    const groups = new Map<string, string>();
     for (const s of allSwatches) {
-      if (swatchMatchesSurface(s, surface) && s.supplier?.trim()) {
-        set.add(s.supplier.trim());
+      if (!swatchMatchesSurface(s, surface)) continue;
+      const raw = s.supplier?.trim();
+      if (!raw) continue;
+      const key = normalizeSupplierKey(raw);
+      if (!key) continue;
+      const existing = groups.get(key);
+      // Prefer the prettiest label: mixed case with accents over ALL CAPS / lowercase.
+      const isPretty = (v: string) => v !== v.toUpperCase() && v !== v.toLowerCase();
+      if (!existing || (isPretty(raw) && !isPretty(existing)) || raw.length > existing.length) {
+        groups.set(key, raw);
       }
     }
-    return Array.from(set).sort((a, b) => a.localeCompare(b));
+    return Array.from(groups.values()).sort((a, b) => a.localeCompare(b));
   }, [allSwatches, surface]);
 
   // ─── Filter swatches for the active surface ──────────────────────────────
   const swatches = useMemo(() => {
     const q = search.trim().toLowerCase();
+    const supplierKey = supplierFilter ? normalizeSupplierKey(supplierFilter) : null;
     const matching = allSwatches.filter((s) => {
       if (!swatchMatchesSurface(s, surface)) return false;
-      if (supplierFilter && (s.supplier || "").trim() !== supplierFilter) return false;
+      if (supplierKey && normalizeSupplierKey(s.supplier) !== supplierKey) return false;
       if (!q) return true;
       return `${s.name} ${s.supplier || ""} ${s.category || ""}`.toLowerCase().includes(q);
     });
