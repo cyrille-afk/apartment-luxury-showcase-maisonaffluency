@@ -2930,7 +2930,7 @@ serve(async (req) => {
     // of stage — shipping and spatial-fit questions can come up on any surface
     // and must always hit the live rate matrix / CAD parser.
     const allowedWithShipping = allowedNames
-      ? Array.from(new Set([...allowedNames, "estimate_shipping", "check_spatial_fit", "check_spatial_fit_batch"]))
+      ? Array.from(new Set([...allowedNames, "estimate_shipping", "check_spatial_fit", "check_spatial_fit_batch", "prepare_visualization_brief"]))
       : null;
     const availableTools = allowedWithShipping
       ? TOOLS.filter((tool: any) => allowedWithShipping.includes(tool.function?.name))
@@ -2938,7 +2938,17 @@ serve(async (req) => {
     // If the gate emptied the toolset (shouldn't happen in practice), fall back to all
     // tools rather than sending an empty `tools: []` array to the upstream gateway.
     const finalTools = availableTools.length > 0 ? availableTools : TOOLS;
-    const forcePlannedTearsheet = effectiveBrief.plan.includes("propose_tearsheet") && !stageForcesQuote && !isExplicitQuoteIntent;
+    // Only force-pin tool_choice to propose_tearsheet when the planner emitted a SOLO tearsheet plan.
+    // Chained plans (e.g. [propose_tearsheet, prepare_visualization_brief] or [propose_tearsheet, draft_quote])
+    // must stay on `auto` so the model can emit both tool calls in the same turn.
+    const planHasVizBrief = effectiveBrief.plan.includes("prepare_visualization_brief");
+    const planHasQuote = effectiveBrief.plan.includes("draft_quote") || effectiveBrief.plan.includes("add_to_quote");
+    const forcePlannedTearsheet =
+      effectiveBrief.plan.includes("propose_tearsheet") &&
+      !planHasVizBrief &&
+      !planHasQuote &&
+      !stageForcesQuote &&
+      !isExplicitQuoteIntent;
     const toolChoice: any = forcePlannedTearsheet
       ? { type: "function", function: { name: "propose_tearsheet" } }
       : ((isExplicitQuoteIntent || stageForcesQuote) ? "required" : "auto");
