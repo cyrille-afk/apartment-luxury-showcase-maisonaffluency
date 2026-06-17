@@ -56,6 +56,25 @@ const STYLE_PRESETS = [
   { value: "contemporary Scandinavian design with light wood, white walls, and soft daylight", label: "Scandinavian" },
 ];
 
+const AXONOMETRIC_DRAFT_KEY = "maf:axonometric-studio:draft:v2";
+
+const readSavedDraft = () => {
+  if (typeof window === "undefined") return null;
+  try {
+    return JSON.parse(localStorage.getItem(AXONOMETRIC_DRAFT_KEY) || "null");
+  } catch {
+    return null;
+  }
+};
+
+const clearSavedDraft = () => {
+  try {
+    localStorage.removeItem(AXONOMETRIC_DRAFT_KEY);
+  } catch {
+    // no-op
+  }
+};
+
 
 
 const ProductPicker = ({
@@ -191,47 +210,48 @@ const TradeAxonometric = () => {
   const { isAdmin } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const savedDraftRef = useRef<any>(readSavedDraft());
 
-  const [sourceImage, setSourceImage] = useState<string | null>(null);
-  const [mode, setMode] = useState<Mode>("elevation_to_axo");
-  const [style, setStyle] = useState(STYLE_PRESETS[0].value);
-  const [overlayImages, setOverlayImages] = useState<string[]>([]);
-  const [cadBlocks, setCadBlocks] = useState<string[]>([]);
-  const [technicalDrawingUrl, setTechnicalDrawingUrl] = useState<string | null>(null);
+  const [sourceImage, setSourceImage] = useState<string | null>(savedDraftRef.current?.sourceImage || null);
+  const [mode, setMode] = useState<Mode>(savedDraftRef.current?.mode || "elevation_to_axo");
+  const [style, setStyle] = useState(savedDraftRef.current?.style || STYLE_PRESETS[0].value);
+  const [overlayImages, setOverlayImages] = useState<string[]>(Array.isArray(savedDraftRef.current?.overlayImages) ? savedDraftRef.current.overlayImages : []);
+  const [cadBlocks, setCadBlocks] = useState<string[]>(Array.isArray(savedDraftRef.current?.cadBlocks) ? savedDraftRef.current.cadBlocks : []);
+  const [technicalDrawingUrl, setTechnicalDrawingUrl] = useState<string | null>(savedDraftRef.current?.technicalDrawingUrl || null);
   const [productSearch, setProductSearch] = useState("");
   const [cadProductSearch, setCadProductSearch] = useState("");
   const [compositeProductSearch, setCompositeProductSearch] = useState("");
   const [pickerCategory, setPickerCategory] = useState("");
   const [pickerSubcategory, setPickerSubcategory] = useState("");
   const [pickerBrand, setPickerBrand] = useState("");
-  const [selectedProduct, setSelectedProduct] = useState<SelectedProduct | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState<SelectedProduct | null>(savedDraftRef.current?.selectedProduct || null);
   const [generating, setGenerating] = useState(false);
-  const [result, setResult] = useState<GenerationResult | null>(null);
-  const [history, setHistory] = useState<GenerationResult[]>([]);
+  const [result, setResult] = useState<GenerationResult | null>(savedDraftRef.current?.result || null);
+  const [history, setHistory] = useState<GenerationResult[]>(Array.isArray(savedDraftRef.current?.history) ? savedDraftRef.current.history : []);
   const [historyIndex, setHistoryIndex] = useState(-1); // -1 = no history navigated
-  const [activeRequestId, setActiveRequestId] = useState<string | null>(null);
-  const [adminNotes, setAdminNotes] = useState("");
-  const [activeBrief, setActiveBrief] = useState<Record<string, string>>({});
+  const [activeRequestId, setActiveRequestId] = useState<string | null>(savedDraftRef.current?.activeRequestId || null);
+  const [adminNotes, setAdminNotes] = useState(savedDraftRef.current?.adminNotes || "");
+  const [activeBrief, setActiveBrief] = useState<Record<string, string>>(savedDraftRef.current?.activeBrief || {});
   const [showQueue, setShowQueue] = useState(true);
-  const [galleryTitle, setGalleryTitle] = useState("");
-  const [galleryDesc, setGalleryDesc] = useState("");
+  const [galleryTitle, setGalleryTitle] = useState(savedDraftRef.current?.galleryTitle || "");
+  const [galleryDesc, setGalleryDesc] = useState(savedDraftRef.current?.galleryDesc || "");
   const [savingToGallery, setSavingToGallery] = useState(false);
   const [showSceneEditor, setShowSceneEditor] = useState(false);
   const [showDrafts, setShowDrafts] = useState(false);
   const [show3dSubmit, setShow3dSubmit] = useState(false);
-  const [model3dUrl, setModel3dUrl] = useState<string | null>(null);
-  const [model3dProjectName, setModel3dProjectName] = useState("");
-  const [model3dNotes, setModel3dNotes] = useState("");
+  const [model3dUrl, setModel3dUrl] = useState<string | null>(savedDraftRef.current?.model3dUrl || null);
+  const [model3dProjectName, setModel3dProjectName] = useState(savedDraftRef.current?.model3dProjectName || "");
+  const [model3dNotes, setModel3dNotes] = useState(savedDraftRef.current?.model3dNotes || "");
   const [submitting3dModel, setSubmitting3dModel] = useState(false);
   const [showProposal, setShowProposal] = useState(false);
   const [emptyRoomUrl, setEmptyRoomUrl] = useState<string | null>(null);
   const [emptyRoomGenerating, setEmptyRoomGenerating] = useState(false);
   const [savingRefStyle, setSavingRefStyle] = useState(false);
   const [useLockedRefStyle, setUseLockedRefStyle] = useState(true);
-  const [qualityTier, setQualityTier] = useState<"draft" | "standard" | "premium">("standard");
-  const [preloadedFavoriteProductIds, setPreloadedFavoriteProductIds] = useState<string[]>([]);
-  const [lockedLayoutUrl, setLockedLayoutUrl] = useState<string | null>(null);
-  const [lightingStrength, setLightingStrength] = useState(80);
+  const [qualityTier, setQualityTier] = useState<"draft" | "standard" | "premium">(savedDraftRef.current?.qualityTier || "standard");
+  const [preloadedFavoriteProductIds, setPreloadedFavoriteProductIds] = useState<string[]>(Array.isArray(savedDraftRef.current?.preloadedFavoriteProductIds) ? savedDraftRef.current.preloadedFavoriteProductIds : []);
+  const [lockedLayoutUrl, setLockedLayoutUrl] = useState<string | null>(savedDraftRef.current?.lockedLayoutUrl || null);
+  const [lightingStrength, setLightingStrength] = useState(savedDraftRef.current?.lightingStrength || 80);
 
   // AI dialogue state
   const [aiPrompt, setAiPrompt] = useState("");
@@ -246,6 +266,7 @@ const TradeAxonometric = () => {
   const [aiTextureUploading, setAiTextureUploading] = useState(false);
   const [aiTexturePickerOpen, setAiTexturePickerOpen] = useState(false);
   const textureInputRef = useRef<HTMLInputElement>(null);
+  const draftRestoredRef = useRef(false);
 
   // Wallcovering products from platform catalog
   const { allProducts: allTradeProdsWall } = useTradeProducts();
@@ -256,10 +277,82 @@ const TradeAxonometric = () => {
   }, [allTradeProdsWall]);
 
   // CSS filter state
-  const [brightness, setBrightness] = useState(100);
-  const [contrast, setContrast] = useState(100);
-  const [saturation, setSaturation] = useState(100);
-  const [warmth, setWarmth] = useState(0);
+  const [brightness, setBrightness] = useState(savedDraftRef.current?.brightness || 100);
+  const [contrast, setContrast] = useState(savedDraftRef.current?.contrast || 100);
+  const [saturation, setSaturation] = useState(savedDraftRef.current?.saturation || 100);
+  const [warmth, setWarmth] = useState(savedDraftRef.current?.warmth || 0);
+
+  useEffect(() => {
+    const hasWork = !!(
+      sourceImage ||
+      result ||
+      activeRequestId ||
+      selectedProduct ||
+      overlayImages.length ||
+      technicalDrawingUrl ||
+      model3dUrl ||
+      model3dProjectName.trim() ||
+      model3dNotes.trim() ||
+      galleryTitle.trim() ||
+      galleryDesc.trim()
+    );
+
+    if (!hasWork) {
+      clearSavedDraft();
+      return;
+    }
+
+    try {
+      localStorage.setItem(AXONOMETRIC_DRAFT_KEY, JSON.stringify({
+        savedAt: Date.now(),
+        sourceImage,
+        mode,
+        style,
+        overlayImages,
+        cadBlocks,
+        technicalDrawingUrl,
+        selectedProduct,
+        result,
+        history: history.slice(0, 8),
+        activeRequestId,
+        adminNotes,
+        activeBrief,
+        galleryTitle,
+        galleryDesc,
+        model3dUrl,
+        model3dProjectName,
+        model3dNotes,
+        qualityTier,
+        preloadedFavoriteProductIds,
+        lockedLayoutUrl,
+        lightingStrength,
+        brightness,
+        contrast,
+        saturation,
+        warmth,
+      }));
+    } catch {
+      // If storage quota is full, keep the UI running rather than interrupting the render.
+    }
+  }, [sourceImage, mode, style, overlayImages, cadBlocks, technicalDrawingUrl, selectedProduct, result, history, activeRequestId, adminNotes, activeBrief, galleryTitle, galleryDesc, model3dUrl, model3dProjectName, model3dNotes, qualityTier, preloadedFavoriteProductIds, lockedLayoutUrl, lightingStrength, brightness, contrast, saturation, warmth]);
+
+  useEffect(() => {
+    if (draftRestoredRef.current) return;
+    draftRestoredRef.current = true;
+    if (savedDraftRef.current && (sourceImage || result || activeRequestId || model3dUrl || model3dProjectName)) {
+      toast({ title: "Axonometric work restored" });
+    }
+  }, [activeRequestId, model3dProjectName, model3dUrl, result, sourceImage, toast]);
+
+  useEffect(() => {
+    const handler = (event: BeforeUnloadEvent) => {
+      if (!generating && !sourceImage && !result && !activeRequestId) return;
+      event.preventDefault();
+      event.returnValue = "";
+    };
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, [activeRequestId, generating, result, sourceImage]);
 
   // Rate-limit cooldown timer + auto-retry queue
   const COOLDOWN_SECONDS = 45;

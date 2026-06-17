@@ -1,6 +1,18 @@
 import { useEffect, useRef } from "react";
 import { toast } from "sonner";
 
+const DO_NOT_INTERRUPT = [
+  "/trade/axonometric",
+  "/trade/visualiser",
+  "/trade/mood-board",
+  "/trade/floor-plan",
+  "/trade/tearsheet",
+  "/trade/presentations",
+];
+
+const isProtectedPath = (p = typeof window !== "undefined" ? window.location.pathname : "") =>
+  DO_NOT_INTERRUPT.some((r) => p === r || p.startsWith(r + "/"));
+
 function shouldSkipUpdateUi(): boolean {
   if (import.meta.env.DEV) return true;
   if (typeof window === "undefined") return true;
@@ -28,6 +40,7 @@ function shouldSkipUpdateUi(): boolean {
 }
 
 function hardReload() {
+  if (isProtectedPath()) return;
   try {
     window.location.replace(
       window.location.pathname + window.location.search + window.location.hash,
@@ -91,20 +104,6 @@ export default function BuildUpdateBanner() {
       return false;
     };
 
-    // Routes where an in-flight render/edit must NEVER be interrupted by an
-    // auto-reload, even if the user navigates within the app. The reload will
-    // happen on a later navigation once they've left these tools.
-    const DO_NOT_INTERRUPT = [
-      "/trade/axonometric",
-      "/trade/visualiser",
-      "/trade/mood-board",
-      "/trade/floor-plan",
-      "/trade/tearsheet",
-      "/trade/presentations",
-    ];
-    const isProtectedPath = (p: string) =>
-      DO_NOT_INTERRUPT.some((r) => p === r || p.startsWith(r + "/"));
-
     const onNav = () => {
       if (!armed.current) return;
       if (hasUnsavedTyping()) return;
@@ -119,6 +118,12 @@ export default function BuildUpdateBanner() {
       if (armed.current) return;
       armed.current = true;
 
+      window.addEventListener("app:spa-navigation", onNav);
+
+      // In creative tools, never surface a refresh action mid-work. The update
+      // remains armed and will load only after the user leaves the protected tool.
+      if (isProtectedPath()) return;
+
       // Discreet toast fallback (no centered black pill).
       toast("A new version is available", {
         description: "It will load on your next page change.",
@@ -128,8 +133,6 @@ export default function BuildUpdateBanner() {
           onClick: hardReload,
         },
       });
-
-      window.addEventListener("app:spa-navigation", onNav);
     };
 
     window.addEventListener("app:build-update-available", onAvailable);
