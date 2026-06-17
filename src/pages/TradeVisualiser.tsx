@@ -138,6 +138,18 @@ const productLabelScore = (name: string | null | undefined) => {
   return score;
 };
 
+// Collapse supplier label variants (case, accents, " Paris"/" Editions" suffixes)
+// into one canonical key so chips don't show "ECART / Ecart / Écart" 3× over.
+const normalizeSupplierKey = (raw: string | null | undefined) => {
+  if (!raw) return "";
+  return raw
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // strip accents
+    .toLowerCase()
+    .replace(/\s+(paris|editions?|collection|atelier|studio)\b.*$/i, "")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+};
+
 // ───────── Page ──────────────────────────────────────────────────────────────
 const TradeVisualiser = () => {
   const [photo, setPhoto] = useState<string | null>(null); // original (object URL or data URL)
