@@ -11,9 +11,23 @@
  */
 
 const POLL_INTERVAL_MS = 60_000;
+const DO_NOT_INTERRUPT = [
+  "/trade/axonometric",
+  "/trade/visualiser",
+  "/trade/mood-board",
+  "/trade/floor-plan",
+  "/trade/tearsheet",
+  "/trade/presentations",
+];
 
 let started = false;
 let currentBuildId: string | null = null;
+
+function isProtectedPath(): boolean {
+  if (typeof window === "undefined") return false;
+  const p = window.location.pathname;
+  return DO_NOT_INTERRUPT.some((r) => p === r || p.startsWith(r + "/"));
+}
 
 function shouldSkipBuildWatcher(): boolean {
   if (import.meta.env.DEV) return true;
@@ -109,6 +123,7 @@ export function startBuildVersionWatcher() {
   if (started) return;
   started = true;
   if (shouldSkipBuildWatcher()) return;
+  if (isProtectedPath()) return;
   currentBuildId = readMetaBuildId();
   // No build id stamped → likely dev server. Nothing to watch.
   if (!currentBuildId) return;
