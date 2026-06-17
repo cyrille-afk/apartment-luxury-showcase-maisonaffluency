@@ -277,10 +277,82 @@ const TradeAxonometric = () => {
   }, [allTradeProdsWall]);
 
   // CSS filter state
-  const [brightness, setBrightness] = useState(100);
-  const [contrast, setContrast] = useState(100);
-  const [saturation, setSaturation] = useState(100);
-  const [warmth, setWarmth] = useState(0);
+  const [brightness, setBrightness] = useState(savedDraftRef.current?.brightness || 100);
+  const [contrast, setContrast] = useState(savedDraftRef.current?.contrast || 100);
+  const [saturation, setSaturation] = useState(savedDraftRef.current?.saturation || 100);
+  const [warmth, setWarmth] = useState(savedDraftRef.current?.warmth || 0);
+
+  useEffect(() => {
+    const hasWork = !!(
+      sourceImage ||
+      result ||
+      activeRequestId ||
+      selectedProduct ||
+      overlayImages.length ||
+      technicalDrawingUrl ||
+      model3dUrl ||
+      model3dProjectName.trim() ||
+      model3dNotes.trim() ||
+      galleryTitle.trim() ||
+      galleryDesc.trim()
+    );
+
+    if (!hasWork) {
+      clearSavedDraft();
+      return;
+    }
+
+    try {
+      localStorage.setItem(AXONOMETRIC_DRAFT_KEY, JSON.stringify({
+        savedAt: Date.now(),
+        sourceImage,
+        mode,
+        style,
+        overlayImages,
+        cadBlocks,
+        technicalDrawingUrl,
+        selectedProduct,
+        result,
+        history: history.slice(0, 8),
+        activeRequestId,
+        adminNotes,
+        activeBrief,
+        galleryTitle,
+        galleryDesc,
+        model3dUrl,
+        model3dProjectName,
+        model3dNotes,
+        qualityTier,
+        preloadedFavoriteProductIds,
+        lockedLayoutUrl,
+        lightingStrength,
+        brightness,
+        contrast,
+        saturation,
+        warmth,
+      }));
+    } catch {
+      // If storage quota is full, keep the UI running rather than interrupting the render.
+    }
+  }, [sourceImage, mode, style, overlayImages, cadBlocks, technicalDrawingUrl, selectedProduct, result, history, activeRequestId, adminNotes, activeBrief, galleryTitle, galleryDesc, model3dUrl, model3dProjectName, model3dNotes, qualityTier, preloadedFavoriteProductIds, lockedLayoutUrl, lightingStrength, brightness, contrast, saturation, warmth]);
+
+  useEffect(() => {
+    if (draftRestoredRef.current) return;
+    draftRestoredRef.current = true;
+    if (savedDraftRef.current && (sourceImage || result || activeRequestId || model3dUrl || model3dProjectName)) {
+      toast({ title: "Axonometric work restored" });
+    }
+  }, [activeRequestId, model3dProjectName, model3dUrl, result, sourceImage, toast]);
+
+  useEffect(() => {
+    const handler = (event: BeforeUnloadEvent) => {
+      if (!generating && !sourceImage && !result && !activeRequestId) return;
+      event.preventDefault();
+      event.returnValue = "";
+    };
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, [activeRequestId, generating, result, sourceImage]);
 
   // Rate-limit cooldown timer + auto-retry queue
   const COOLDOWN_SECONDS = 45;
