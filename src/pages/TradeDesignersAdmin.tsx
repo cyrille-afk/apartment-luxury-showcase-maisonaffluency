@@ -786,7 +786,6 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
 
 
                 {/* Variant pricing — supports single-axis (Size) and dual-axis (Base × Top) */}
-                {false && (
                 <div className="space-y-2 border border-dashed border-border rounded-md p-2.5">
                   <div className="flex items-center justify-between">
                     <label className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">
@@ -1159,7 +1158,6 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
                     );
                   })}
                 </div>
-                )}
                 <ProductFabricsPanel pickId={pick.id} currency={pick.currency} />
 
                 <div>
