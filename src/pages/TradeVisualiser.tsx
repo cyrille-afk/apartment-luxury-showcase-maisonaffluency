@@ -8,12 +8,15 @@
  */
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { Helmet } from "react-helmet-async";
+import { useSearchParams } from "react-router-dom";
 import {
-  Upload, Sparkles, X, Loader2, Search, ImageIcon, MousePointerClick, Wand2,
+  Upload, Sparkles, X, Loader2, Search, ImageIcon, MousePointerClick, Wand2, Layers,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 // ───────── Surfaces ──────────────────────────────────────────────────────────
