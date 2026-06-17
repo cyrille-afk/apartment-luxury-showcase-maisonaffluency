@@ -1418,7 +1418,23 @@ const TradeProductPage: React.FC = () => {
               <FinishSelector
                   pickId={product.id}
                   productTitle={product.title}
-                  woodLabel={(product as any).wood_label_override}
+                  woodLabel={
+                    (product as any).wood_label_override
+                      || (product.base_axis_label
+                          ? `Select Your ${formatVariantAxisLabel(product.base_axis_label) || product.base_axis_label}`
+                          : null)
+                  }
+                  woodFilter={
+                    isDualAxis && baseOptions.length > 0
+                      ? (name) => {
+                          const n = name.trim().toLowerCase();
+                          return baseOptions.some((b) => {
+                            const nb = b.trim().toLowerCase();
+                            return nb === n || nb.includes(n) || n.includes(nb);
+                          });
+                        }
+                      : undefined
+                  }
                   includePricing
                   showUpholsterySection={isUpholsteredProduct}
                   showWoodSection
