@@ -75,6 +75,19 @@ const clearSavedDraft = () => {
   }
 };
 
+const useFreshSourceImage = (
+  url: string | null,
+  setSourceImage: (url: string | null) => void,
+  setResult: (result: GenerationResult | null) => void,
+  setHistory: (history: GenerationResult[]) => void,
+  setLockedLayoutUrl: (url: string | null) => void,
+) => {
+  setSourceImage(url);
+  setResult(null);
+  setHistory([]);
+  setLockedLayoutUrl(null);
+};
+
 
 
 const ProductPicker = ({
@@ -250,7 +263,7 @@ const TradeAxonometric = () => {
   const [useLockedRefStyle, setUseLockedRefStyle] = useState(true);
   const [qualityTier, setQualityTier] = useState<"draft" | "standard" | "premium">(savedDraftRef.current?.qualityTier || "standard");
   const [preloadedFavoriteProductIds, setPreloadedFavoriteProductIds] = useState<string[]>(Array.isArray(savedDraftRef.current?.preloadedFavoriteProductIds) ? savedDraftRef.current.preloadedFavoriteProductIds : []);
-  const [lockedLayoutUrl, setLockedLayoutUrl] = useState<string | null>(savedDraftRef.current?.lockedLayoutUrl || null);
+  const [lockedLayoutUrl, setLockedLayoutUrl] = useState<string | null>(null);
   const [lightingStrength, setLightingStrength] = useState(savedDraftRef.current?.lightingStrength || 80);
 
   // AI dialogue state
@@ -615,9 +628,6 @@ const TradeAxonometric = () => {
       }
 
       const refStyle = referenceStyles?.find((r) => r.mode === mode);
-      const activeRequest = activeRequestId
-        ? pendingRequests?.find((r: any) => r.id === activeRequestId)
-        : null;
       // Only use a layout reference when the user has explicitly locked one.
       // Previously we auto-fed the prior render back as a reference for elevation/section modes,
       // which caused old furniture to leak into fresh generations of an empty room.
@@ -629,7 +639,7 @@ const TradeAxonometric = () => {
         hasResult: !!result,
         resultStoredUrl: result?.storedUrl?.slice(0, 60),
         resultImageUrl: result?.imageUrl?.slice(0, 60),
-        activeRequestResultUrl: activeRequest?.result_image_url?.slice(0, 60),
+        restoredDraftLockIgnored: !!savedDraftRef.current?.lockedLayoutUrl,
         lockedLayoutReference: lockedLayoutReference?.slice(0, 60),
       });
 
@@ -665,21 +675,6 @@ const TradeAxonometric = () => {
       pushResult(gen);
       toast({ title: "Axonometric view generated" });
 
-      // Auto-save result_image_url to the request so regenerations have a layout anchor
-      if (activeRequestId && (data.storedUrl || data.imageUrl)) {
-        (supabase as any)
-          .from("axonometric_requests")
-          .update({
-            result_image_url: data.storedUrl || data.imageUrl,
-            updated_at: new Date().toISOString(),
-          })
-          .eq("id", activeRequestId)
-          .then(({ error }: any) => {
-            if (error) console.error("[axo-gen] Failed to auto-save result_image_url:", error);
-            else console.log("[axo-gen] Auto-saved result_image_url for layout lock");
-          });
-      }
-
       // Auto-generate empty room for Proposal Builder
       generateEmptyRoom(data.storedUrl || data.imageUrl);
     } catch (e: any) {
@@ -701,14 +696,13 @@ const TradeAxonometric = () => {
 
 
   const loadFromQueue = (req: any) => {
-    setSourceImage(req.image_url);
+    useFreshSourceImage(req.image_url, setSourceImage, setResult, setHistory, setLockedLayoutUrl);
     setActiveRequestId(req.id);
     setAdminNotes(req.admin_notes || "");
     const requestType = String(req.request_type || "").toLowerCase();
     const isSectionRequest = requestType.includes("section");
     setMode(isSectionRequest ? "section_to_axo" : "elevation_to_axo");
     setShowQueue(false);
-    setResult(null);
     // Pre-load attached favorite product IDs for proposal builder
     const linkedIds = Array.isArray(req.linked_favorite_product_ids) ? req.linked_favorite_product_ids : [];
     setPreloadedFavoriteProductIds(linkedIds);
