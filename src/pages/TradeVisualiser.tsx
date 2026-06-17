@@ -210,18 +210,39 @@ const TradeVisualiser = () => {
 
   const fetchAxoRequests = useCallback(async () => {
     setAxoLoading(true);
-    const { data, error } = await supabase
-      .from("axonometric_requests")
-      .select("id, project_name, result_image_url, request_type, linked_favorite_product_ids, updated_at")
-      .eq("status", "completed")
-      .not("result_image_url", "is", null)
-      .order("updated_at", { ascending: false });
+    const [reqRes, galRes] = await Promise.all([
+      supabase
+        .from("axonometric_requests")
+        .select("id, project_name, result_image_url, request_type, linked_favorite_product_ids, updated_at")
+        .eq("status", "completed")
+        .not("result_image_url", "is", null)
+        .order("updated_at", { ascending: false }),
+      (supabase as any)
+        .from("axonometric_gallery")
+        .select("id, title, project_name, image_url, request_id, created_at")
+        .order("created_at", { ascending: false }),
+    ]);
     setAxoLoading(false);
-    if (error) {
+    if (reqRes.error && galRes.error) {
       toast.error("Could not load Axonometric deliveries");
       return;
     }
-    setAxoRequests((data ?? []) as AxoRequest[]);
+    const requests = (reqRes.data ?? []) as AxoRequest[];
+    const seenRequestIds = new Set(requests.map((r) => r.id));
+    const galleryItems: AxoRequest[] = ((galRes.data ?? []) as any[])
+      .filter((g) => g.image_url && !(g.request_id && seenRequestIds.has(g.request_id)))
+      .map((g) => ({
+        id: g.request_id || `gallery-${g.id}`,
+        project_name: g.project_name || g.title || "Saved render",
+        result_image_url: g.image_url,
+        request_type: "gallery",
+        linked_favorite_product_ids: null,
+        updated_at: g.created_at,
+      }));
+    const merged = [...requests, ...galleryItems].sort(
+      (a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
+    );
+    setAxoRequests(merged);
   }, []);
 
   const importAxoDelivery = useCallback(async (req: AxoRequest) => {
