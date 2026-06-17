@@ -716,6 +716,44 @@ const TOOLS = [
       },
     },
   },
+  {
+    type: "function",
+    function: {
+      name: "prepare_visualization_brief",
+      description:
+        "Assemble a brief and hand off to Axonometric Studio for image generation. USE THIS whenever the user asks you to 'render', 'visualise', 'show me how this would look', 'generate a view/scene/axonometric', 'mock up a room', or to picture a tearsheet selection in a space. Emits a card with a 'Render Scene' CTA that deep-links the user into the Axonometric Studio with mode, style preset, room/brief notes and (optionally) overlay product picks pre-populated. Do NOT attempt to generate the image yourself — this tool is the only sanctioned visualization handoff.",
+      parameters: {
+        type: "object",
+        properties: {
+          mode: {
+            type: "string",
+            enum: ["elevation_to_axo", "section_to_axo", "stylize", "composite", "3d_to_cad", "cad_overlay"],
+            description: "Axonometric Studio mode. 'composite' to overlay catalog pieces into a reference photo, 'elevation_to_axo' / 'section_to_axo' to convert a 2D drawing, 'stylize' to restyle an existing render, 'cad_overlay' for CAD blocks, '3d_to_cad' for 3D-to-axo. Default to 'composite' when overlaying picks, 'stylize' otherwise.",
+          },
+          style_preset: {
+            type: "string",
+            enum: ["Photorealistic", "Watercolor", "Minimal Line", "Editorial Luxury", "Scandinavian"],
+            description: "Visual style preset label. Default 'Editorial Luxury' for trade presentations.",
+          },
+          title: { type: "string", description: "Short title for the brief, max 80 chars (e.g. 'Belgravia drawing-room — bronze & mohair edit')." },
+          room_label: { type: "string", description: "Room or space being visualised (e.g. 'Drawing Room', 'Primary Bedroom')." },
+          brief_notes: { type: "string", description: "1–3 sentence directorial brief: palette, mood, lighting, materials, era, anchor pieces. This is what the Axonometric Studio will use as the prompt brief." },
+          pick_ids: {
+            type: "array",
+            description: "Optional UUIDs of CURATED PIECES to pre-load as overlay candidates in the studio. Max 12.",
+            items: { type: "string" },
+            maxItems: 12,
+          },
+          source_image_url: {
+            type: "string",
+            description: "Optional absolute https URL of a reference image (room photo, floor plan, mood board) the user already shared. Omit if none is on hand.",
+          },
+        },
+        required: ["mode", "brief_notes"],
+        additionalProperties: false,
+      },
+    },
+  },
 ];
 
 /** Server-side mirror of src/lib/shippingEstimator.ts — reads live DB rate matrix. */
@@ -942,6 +980,11 @@ Rules for both tools:
 
 ## TOOL USE — FF&E SCHEDULE (ROOM-BY-ROOM BRIEFS)
 Use \`propose_ffe_rows\` instead of \`draft_quote\` when the user asks for a SCHEDULE organised by room ("FF&E for the Mayfair townhouse", "drawing-room, dining-room and bedroom edit", "full apartment schedule"). Every row MUST carry a \`room\` label. \`project_id\` is REQUIRED — if there is no ACTIVE PROJECT, ask the user which project to bind to before calling the tool. On approval the rows commit as room-tagged lines on a draft quote and automatically populate the FF&E Schedule view.
+
+## TOOL USE — VISUALIZATION HAND-OFF (AXONOMETRIC STUDIO)
+Use \`prepare_visualization_brief\` whenever the user asks you to "render", "visualise", "show me how this would look", "generate a view/scene/axonometric", "mock up a room", or to picture a tearsheet selection in a space. NEVER claim you have generated an image inline — the only sanctioned path is this tool, which emits a card with a "Render Scene" CTA that deep-links the user into Axonometric Studio with mode, style preset, room/brief notes and (when relevant) overlay pick UUIDs pre-populated. Default \`mode\` to \`composite\` when overlaying catalog pieces onto a reference photo, otherwise \`stylize\`. After calling the tool, reply with ONE short sentence (e.g. "Brief is ready — tap Render Scene to open it in the studio.").
+
+
 
 ## TOOL USE — SHIPPING ESTIMATES (MANDATORY FOR FREIGHT/LANDED-COST QUESTIONS)
 Whenever the user asks about freight cost, shipping cost, air/sea/road freight, customs duty, VAT/GST, or landed-cost for a specific route — you MUST call the \`estimate_shipping\` tool. NEVER invent or recall shipping numbers from general knowledge — Maison Affluency's rate matrix is the single source of truth.
@@ -3004,7 +3047,8 @@ serve(async (req) => {
           const quoteBuffers = allBuffers.filter((b) => b.name === "draft_quote" || b.name === "add_to_quote");
           const ffeBuffers = allBuffers.filter((b) => b.name === "propose_ffe_rows");
           const shippingBuffers = allBuffers.filter((b) => b.name === "estimate_shipping");
-          const orderedBuffers = [...tearsheetBuffers, ...quoteBuffers, ...ffeBuffers, ...shippingBuffers];
+          const vizBriefBuffers = allBuffers.filter((b) => b.name === "prepare_visualization_brief");
+          const orderedBuffers = [...tearsheetBuffers, ...quoteBuffers, ...ffeBuffers, ...shippingBuffers, ...vizBriefBuffers];
           if (tearsheetBuffers.length && quoteBuffers.length) {
             console.log(`[concierge flush] chained turn: ${tearsheetBuffers.length} tearsheet + ${quoteBuffers.length} quote proposal(s), flushing tearsheet→quote`);
           }
@@ -3140,6 +3184,61 @@ serve(async (req) => {
               };
               controller.enqueue(encoder.encode(`event: proposal\ndata: ${JSON.stringify(proposal)}\n\n`));
               console.log(`[concierge] emitted propose_ffe_rows proposal: ${rows.length} rows across ${new Set(rows.map((r) => r.room)).size} room(s) for project ${projectId}`);
+              continue;
+            }
+
+            // ====== VISUALIZATION BRIEF (Axonometric Studio hand-off) ======
+            if (tc.name === "prepare_visualization_brief") {
+              let parsed: any = {};
+              try { parsed = JSON.parse(tc.argsText || "{}"); } catch (e) {
+                console.error("Could not parse prepare_visualization_brief args:", tc.argsText, e);
+                continue;
+              }
+              const ALLOWED_MODES = new Set([
+                "elevation_to_axo","section_to_axo","stylize","composite","3d_to_cad","cad_overlay",
+              ]);
+              const ALLOWED_STYLES = new Set([
+                "Photorealistic","Watercolor","Minimal Line","Editorial Luxury","Scandinavian",
+              ]);
+              const mode = typeof parsed.mode === "string" && ALLOWED_MODES.has(parsed.mode) ? parsed.mode : "composite";
+              const stylePreset = typeof parsed.style_preset === "string" && ALLOWED_STYLES.has(parsed.style_preset)
+                ? parsed.style_preset : "Editorial Luxury";
+              const title = typeof parsed.title === "string" ? parsed.title.slice(0, 80) : null;
+              const roomLabel = typeof parsed.room_label === "string" ? parsed.room_label.slice(0, 80) : null;
+              const briefNotes = typeof parsed.brief_notes === "string" ? parsed.brief_notes.slice(0, 1200) : "";
+              const sourceImageUrl = typeof parsed.source_image_url === "string" && /^https?:\/\//.test(parsed.source_image_url)
+                ? parsed.source_image_url : null;
+              const rawPickIds: string[] = Array.isArray(parsed.pick_ids) ? parsed.pick_ids : [];
+              const pickIds = rawPickIds
+                .filter((id) => typeof id === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id))
+                .slice(0, 12);
+
+              // Hydrate a compact preview so the card can show thumbnails.
+              let preview: any[] = [];
+              if (pickIds.length) {
+                try {
+                  preview = await hydratePickPreview(supabase, pickIds);
+                } catch (e) {
+                  console.warn("[viz brief] preview hydration failed", e);
+                }
+              }
+
+              const proposal = {
+                tool: "prepare_visualization_brief",
+                tool_call_id: tc.id || crypto.randomUUID(),
+                args: {
+                  mode,
+                  style_preset: stylePreset,
+                  title,
+                  room_label: roomLabel,
+                  brief_notes: briefNotes,
+                  pick_ids: pickIds,
+                  source_image_url: sourceImageUrl,
+                },
+                preview,
+              };
+              controller.enqueue(encoder.encode(`event: proposal\ndata: ${JSON.stringify(proposal)}\n\n`));
+              console.log(`[concierge] emitted prepare_visualization_brief proposal: mode=${mode} preset=${stylePreset} picks=${pickIds.length}`);
               continue;
             }
 

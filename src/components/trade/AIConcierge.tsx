@@ -3,10 +3,11 @@ import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { X, Send, Loader2, Sparkles, Minus, GripHorizontal, RotateCcw, Maximize2, Minimize2, Palette, Check, Languages, Pencil, Paperclip, FileText } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { streamConcierge, type ChatMessage, type ChatContentPart, type TearsheetProposal, type QuoteProposal, type FfeProposal, type ConciergeProposal } from "@/lib/tradeConciergeStream";
+import { streamConcierge, type ChatMessage, type ChatContentPart, type TearsheetProposal, type QuoteProposal, type FfeProposal, type VisualizationBriefProposal, type ConciergeProposal } from "@/lib/tradeConciergeStream";
 import { TearsheetProposalCard } from "@/components/trade/concierge/TearsheetProposalCard";
 import { QuoteProposalCard } from "@/components/trade/concierge/QuoteProposalCard";
 import { FfeProposalCard } from "@/components/trade/concierge/FfeProposalCard";
+import { VisualizationBriefCard } from "@/components/trade/concierge/VisualizationBriefCard";
 import { EscalationCard } from "@/components/trade/concierge/EscalationCard";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
@@ -28,6 +29,7 @@ type TimelineItem =
   | { kind: "proposal"; proposal: TearsheetProposal; resolved?: "approved" | "discarded"; excluded?: string[]; newPickIds?: string[] }
   | { kind: "quote_proposal"; proposal: QuoteProposal; resolved?: "approved" | "discarded" }
   | { kind: "ffe_proposal"; proposal: FfeProposal; resolved?: "approved" | "discarded" }
+  | { kind: "viz_brief"; proposal: VisualizationBriefProposal; resolved?: "opened" | "discarded" }
   | { kind: "escalation"; sentiment: string; intent: string; excerpt: ChatMessage[]; resolved?: "requested" | "dismissed" };
 
 
@@ -794,6 +796,10 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
         setTimeline((prev) => [...prev, { kind: "ffe_proposal", proposal }]);
         return;
       }
+      if (proposal.tool === "prepare_visualization_brief") {
+        setTimeline((prev) => [...prev, { kind: "viz_brief", proposal }]);
+        return;
+      }
       // Tearsheet proposal — compute which picks are NEW relative to the
       // previous proposal so the card can highlight rationales for replacements only.
       const prevIds = new Set(
@@ -1392,6 +1398,28 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
                           outcome === "discarded"
                             ? "Got it — FF&E schedule discarded."
                             : `✓ FF&E schedule drafted — ${info?.added ?? 0} ${info?.added === 1 ? "row" : "rows"} across ${info?.rooms ?? 0} ${info?.rooms === 1 ? "room" : "rooms"}. Open the quote when you want to refine it.`;
+                        copy.push({ kind: "msg", role: "assistant", content: msg });
+                        return copy;
+                      });
+                    }}
+                  />
+                );
+              }
+              if (item.kind === "viz_brief") {
+                return (
+                  <VisualizationBriefCard
+                    key={i}
+                    proposal={item.proposal}
+                    resolved={item.resolved}
+                    onResolved={(outcome) => {
+                      setTimeline((prev) => {
+                        const copy = prev.slice();
+                        const t = copy[i];
+                        if (t?.kind === "viz_brief") copy[i] = { ...t, resolved: outcome };
+                        const msg =
+                          outcome === "discarded"
+                            ? "Got it — brief discarded."
+                            : "✓ Brief sent to Axonometric Studio. Hit Generate when you're ready.";
                         copy.push({ kind: "msg", role: "assistant", content: msg });
                         return copy;
                       });
