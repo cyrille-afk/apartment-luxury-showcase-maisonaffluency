@@ -1421,7 +1421,7 @@ const TradeProductPage: React.FC = () => {
                   woodLabel={(product as any).wood_label_override}
                   includePricing
                   showUpholsterySection={isUpholsteredProduct}
-                  showWoodSection={!(isDualAxis && !baseAxisIsDim)}
+                  showWoodSection
                   onHasFabricsChange={setHasLinkedFabrics}
                   onWoodFinishesAvailable={setLinkedWoodFinishes}
                   onFabricChange={setSelectedFabric}
