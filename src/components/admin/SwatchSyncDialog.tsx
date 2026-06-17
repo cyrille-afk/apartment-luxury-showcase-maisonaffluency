@@ -185,7 +185,6 @@ export default function SwatchSyncDialog({
               </div>
               {filtered.map((s) => (
                 <div key={s.id} className="flex items-center gap-2 py-0.5">
-                  {s.image_url ? null : null}
                   <span className="font-medium">{s.name}</span>
                   <span className="text-muted-foreground">— {s.category}{s.material_type ? ` · ${s.material_type}` : ""}</span>
                 </div>
