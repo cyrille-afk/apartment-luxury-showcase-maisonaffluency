@@ -2805,6 +2805,8 @@ serve(async (req) => {
     // semantic-cache hits from leaking a stale "selection" plan into a new
     // exploratory turn.
     const lastUserMsgLower = lastUserMsg.toLowerCase();
+    const hasVisualizationVerb = /\b(render|visualise|visualize|mock up|picture it|see it in situ|generate (?:a )?(?:view|scene|axonometric|render)|show me (?:how this would look|in (?:the )?(?:room|space))|image of the room|let me see the space)\b/.test(lastUserMsgLower);
+    const visualizationNeedsCatalogPicks = hasVisualizationVerb && /\b(overlay|picks?|pieces?|selection|tearsheet|catalog|bronze|mohair|velvet|leather|walnut|oak|brass|marble|stone|glass|silk|wool|linen|bouclé|drawing-room|drawing room|dining room|bedroom|salon|library)\b/.test(lastUserMsgLower);
     const hasExplicitSelectionVerb = /\b(propose|suggest|recommend|show me|pull (?:together|me)|curate|reinterpret|alternatives?|options?|first edit|draft (?:a )?(?:tearsheet|edit|selection)|put together|assemble|i'?d like to see|let'?s see|what do you have)\b/.test(lastUserMsgLower);
     const opensWithLookingFor = /^\s*(?:i(?:'m| am)?\s+(?:looking|searching|after|hunting|sourcing|in the market)|we(?:'re| are)?\s+(?:looking|searching|after))\b/.test(lastUserMsgLower);
 
@@ -2828,15 +2830,28 @@ serve(async (req) => {
     // latest user message is an opening brief without an explicit selection
     // verb. Forces the concierge to ask clarifying questions on turn 1
     // instead of inferring intent from an earlier conversation.
+    if (hasVisualizationVerb) {
+      const plan = effectiveBrief.plan.filter((t) => t !== "prepare_visualization_brief");
+      const wantsTearsheet = plan.includes("propose_tearsheet") || plan.includes("add_to_tearsheet");
+      effectiveBrief = {
+        ...effectiveBrief,
+        intent: wantsTearsheet || visualizationNeedsCatalogPicks ? "selection" : effectiveBrief.intent,
+        plan: visualizationNeedsCatalogPicks && !wantsTearsheet
+          ? ["propose_tearsheet", "prepare_visualization_brief"]
+          : [...plan, "prepare_visualization_brief"],
+      };
+    }
+
     if (
       !hasExplicitSelectionVerb &&
+      !hasVisualizationVerb &&
       opensWithLookingFor &&
       effectiveBrief.plan.some((t) => t === "propose_tearsheet" || t === "add_to_tearsheet" || t === "draft_quote")
     ) {
       console.log("[concierge discovery-gate] stripping plan — opening brief without selection verb", { lastUserMsg, originalPlan: effectiveBrief.plan });
       effectiveBrief = { ...effectiveBrief, intent: "discovery", plan: [] };
     }
-    if (!hasExplicitSelectionVerb && opensWithLookingFor) {
+    if (!hasExplicitSelectionVerb && !hasVisualizationVerb && opensWithLookingFor) {
       console.log("[concierge discovery-gate] deterministic opening-brief reply", { lastUserMsg });
       return sseTextResponse(buildOpeningBriefDiscoveryReply(lastUserMsg, langCode));
     }
