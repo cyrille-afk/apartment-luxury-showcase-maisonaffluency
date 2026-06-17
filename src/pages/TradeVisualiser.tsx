@@ -700,6 +700,10 @@ const TradeVisualiser = () => {
                           </button>
                         </div>
                       ) : null}
+                    </div>
+                  );
+                })}
+
 
                 {/* Empty hint */}
                 {pins.length === 0 && (
