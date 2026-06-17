@@ -19,9 +19,9 @@ export interface VariantPlaceholderInput {
   top_axis_label?: string | null;
 }
 
-const DEFAULT_BASE_PLACEHOLDER = "Select your base finish";
-const DEFAULT_TOP_PLACEHOLDER = "Select your top finish";
-const DEFAULT_MATERIAL_PLACEHOLDER = "Select your finish";
+const DEFAULT_BASE_PLACEHOLDER = "Select Your Base Finish";
+const DEFAULT_TOP_PLACEHOLDER = "Select Your Top Finish";
+const DEFAULT_MATERIAL_PLACEHOLDER = "Select Your Finish";
 
 /** Returns the input string trimmed, or null if empty/whitespace/nullish. */
 function clean(value: string | null | undefined): string | null {
