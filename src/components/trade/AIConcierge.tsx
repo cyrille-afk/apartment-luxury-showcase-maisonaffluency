@@ -58,6 +58,7 @@ import {
 } from "./conciergeGreeting";
 import { supabase } from "@/integrations/supabase/client";
 import { useStudio } from "@/hooks/useStudio";
+import { useAuth } from "@/hooks/useAuth";
 
 const hasWelcomeActions = (actions: ConciergeQuickAction[] | undefined) =>
   !!actions?.some((action) => isOnboardingActionPrompt(action.prompt));
@@ -80,6 +81,7 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const { currentStudio } = useStudio();
+  const { isAdmin } = useAuth();
   const isDashboard = pathname === "/trade";
   // Persist open/minimized/timeline in sessionStorage so the conversation
   // survives route changes (e.g. when Felix auto-navigates to a freshly
@@ -619,12 +621,12 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
       setTimeline((prev) => [
         ...prev,
         { kind: "msg", role: "user", content: text },
-        { kind: "msg", role: "assistant", content: "Opening Axonometric Studio with the brief loaded. If the page button is disabled, add a source image first." },
+        { kind: "msg", role: "assistant", content: isAdmin ? "Opening Axonometric Studio with the brief loaded. If the page button is disabled, add a source image first." : "Opening the 3D Studio request form with the brief prefilled — review the details and submit when ready." },
       ]);
       setInput("");
       setAttachments([]);
       window.dispatchEvent(new Event("maf:axonometric:brief-ready"));
-      navigate("/trade/axonometric");
+      navigate(isAdmin ? "/trade/axonometric" : "/trade/axonometric-requests");
       return;
     }
 

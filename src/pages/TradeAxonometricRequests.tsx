@@ -273,6 +273,49 @@ const TradeAxonometricRequests = () => {
     if (searchParams.get("favorites")) setShowForm(true);
   }, []);
 
+  // Concierge hand-off: prefill from a `prepare_visualization_brief` proposal
+  // dropped into sessionStorage by VisualizationBriefCard / AIConcierge.
+  // Mirrors the consumer in TradeAxonometric (admin Studio) so non-admin
+  // trade users get the same brief surfaced on the request-submission flow.
+  useEffect(() => {
+    const KEY = "maf:axonometric:incoming-brief";
+    const consume = () => {
+      let raw: string | null = null;
+      try { raw = sessionStorage.getItem(KEY); } catch { return; }
+      if (!raw) return;
+      try { sessionStorage.removeItem(KEY); } catch { /* ignore */ }
+      let brief: Record<string, unknown>;
+      try { brief = JSON.parse(raw); } catch { return; }
+      if (!brief || typeof brief !== "object") return;
+
+      if (typeof brief.title === "string" && brief.title.trim()) setProjectName(brief.title.trim().slice(0, 200));
+      if (typeof brief.brief_notes === "string" && brief.brief_notes.trim()) setNotes(brief.brief_notes.trim().slice(0, 900));
+      if (typeof brief.room_label === "string" && brief.room_label.trim()) {
+        const label = brief.room_label.trim();
+        const match = ROOM_TYPES.find((r) => r.toLowerCase() === label.toLowerCase());
+        setRoomType(match || label);
+      }
+      if (typeof brief.style_preset === "string" && brief.style_preset.trim()) {
+        const preset = brief.style_preset.trim();
+        const match = STYLE_DIRECTIONS.find((s) => s.toLowerCase() === preset.toLowerCase());
+        setStyleDirection(match || preset);
+      }
+      if (Array.isArray(brief.pick_ids)) {
+        const ids = brief.pick_ids.filter((id: unknown): id is string => typeof id === "string");
+        if (ids.length) setSelectedFavoriteIds(ids);
+      }
+      if (typeof brief.source_image_url === "string" && /^https?:\/\//.test(brief.source_image_url)) {
+        setImageUrl(brief.source_image_url);
+      }
+      setShowForm(true);
+      toast({ title: "Concierge brief loaded", description: "Review the prefilled brief, add a drawing and room dimensions, then submit." });
+    };
+    consume();
+    window.addEventListener("maf:axonometric:brief-ready", consume);
+    return () => window.removeEventListener("maf:axonometric:brief-ready", consume);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const { data: requests, refetch } = useQuery({
     queryKey: ["axonometric-requests", user?.id],
     queryFn: async () => {
