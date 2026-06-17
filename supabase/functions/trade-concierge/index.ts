@@ -716,6 +716,44 @@ const TOOLS = [
       },
     },
   },
+  {
+    type: "function",
+    function: {
+      name: "prepare_visualization_brief",
+      description:
+        "Assemble a brief and hand off to Axonometric Studio for image generation. USE THIS whenever the user asks you to 'render', 'visualise', 'show me how this would look', 'generate a view/scene/axonometric', 'mock up a room', or to picture a tearsheet selection in a space. Emits a card with a 'Render Scene' CTA that deep-links the user into the Axonometric Studio with mode, style preset, room/brief notes and (optionally) overlay product picks pre-populated. Do NOT attempt to generate the image yourself — this tool is the only sanctioned visualization handoff.",
+      parameters: {
+        type: "object",
+        properties: {
+          mode: {
+            type: "string",
+            enum: ["elevation_to_axo", "section_to_axo", "stylize", "composite", "3d_to_cad", "cad_overlay"],
+            description: "Axonometric Studio mode. 'composite' to overlay catalog pieces into a reference photo, 'elevation_to_axo' / 'section_to_axo' to convert a 2D drawing, 'stylize' to restyle an existing render, 'cad_overlay' for CAD blocks, '3d_to_cad' for 3D-to-axo. Default to 'composite' when overlaying picks, 'stylize' otherwise.",
+          },
+          style_preset: {
+            type: "string",
+            enum: ["Photorealistic", "Watercolor", "Minimal Line", "Editorial Luxury", "Scandinavian"],
+            description: "Visual style preset label. Default 'Editorial Luxury' for trade presentations.",
+          },
+          title: { type: "string", description: "Short title for the brief, max 80 chars (e.g. 'Belgravia drawing-room — bronze & mohair edit')." },
+          room_label: { type: "string", description: "Room or space being visualised (e.g. 'Drawing Room', 'Primary Bedroom')." },
+          brief_notes: { type: "string", description: "1–3 sentence directorial brief: palette, mood, lighting, materials, era, anchor pieces. This is what the Axonometric Studio will use as the prompt brief." },
+          pick_ids: {
+            type: "array",
+            description: "Optional UUIDs of CURATED PIECES to pre-load as overlay candidates in the studio. Max 12.",
+            items: { type: "string" },
+            maxItems: 12,
+          },
+          source_image_url: {
+            type: "string",
+            description: "Optional absolute https URL of a reference image (room photo, floor plan, mood board) the user already shared. Omit if none is on hand.",
+          },
+        },
+        required: ["mode", "brief_notes"],
+        additionalProperties: false,
+      },
+    },
+  },
 ];
 
 /** Server-side mirror of src/lib/shippingEstimator.ts — reads live DB rate matrix. */
