@@ -3965,6 +3965,7 @@ serve(async (req) => {
           const hasVizBrief = buffers.some(([, b]) => b.name === "prepare_visualization_brief");
           if (hasVizBrief) return;
           const firstTearsheet = buffers.find(([, b]) => b.name === "propose_tearsheet" || b.name === "add_to_tearsheet");
+          if (visualizationNeedsCatalogPicks && !firstTearsheet) return;
           let pickIds: string[] = [];
           let title = effectiveBrief.brief.summary || "Render brief";
           if (firstTearsheet) {
@@ -4117,7 +4118,8 @@ serve(async (req) => {
             b.name === "add_to_tearsheet" ||
             b.name === "draft_quote" ||
             b.name === "add_to_quote" ||
-            b.name === "propose_ffe_rows"
+            b.name === "propose_ffe_rows" ||
+            b.name === "prepare_visualization_brief"
           );
           if (hasAnyDeliverable) return;
           const promisedByPlan =
@@ -4333,7 +4335,7 @@ serve(async (req) => {
               const KNOWN = new Set([
                 "propose_tearsheet", "add_to_tearsheet", "draft_quote", "add_to_quote",
                 "propose_ffe_rows", "estimate_shipping", "check_spatial_fit",
-                "check_spatial_fit_batch", "log_spatial_fit_edit",
+                "check_spatial_fit_batch", "log_spatial_fit_edit", "prepare_visualization_brief",
               ]);
               if (typeof name === "string" && KNOWN.has(name)) {
                 const argsText = typeof params === "string" ? params : JSON.stringify(params);
