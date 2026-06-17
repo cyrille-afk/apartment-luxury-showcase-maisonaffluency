@@ -25,6 +25,7 @@ import GalleryThumbnailsEditor from "@/components/admin/GalleryThumbnailsEditor"
 import SlugHealthBadge, { useSlugHealthMap } from "@/components/admin/SlugHealthBadge";
 import VariantPreviewPanel from "@/components/admin/VariantPreviewPanel";
 import ProductFabricsPanel from "@/components/admin/ProductFabricsPanel";
+import SwatchSyncDialog from "@/components/admin/SwatchSyncDialog";
 
 // Pilot: surface inline Fabrics & Finishes editor only for these picks for now.
 const FABRICS_PANEL_PILOT_PICK_IDS = new Set<string>([
@@ -228,6 +229,7 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
     pickup_address: string | null;
   };
   const [picks, setPicks] = useState<Pick[]>([]);
+  const [syncPickId, setSyncPickId] = useState<string | null>(null);
   const [loaded, setLoaded] = useState(false);
   const expandedPickStorageKey = `designer_editor_expanded_pick_v1::${designerId}`;
   const [expandedPickId, setExpandedPickIdState] = useState<string | null>(() => {
@@ -916,8 +918,31 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
                       >
                         Auto-fill Image #
                       </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 text-[10px]"
+                        title="Pull Base axis options from Fabrics & Finishes library (matched by designer/brand name)"
+                        onClick={() => setSyncPickId(pick.id)}
+                      >
+                        Sync Base from Library
+                      </Button>
                     </div>
                   </div>
+                  <SwatchSyncDialog
+                    open={syncPickId === pick.id}
+                    onOpenChange={(v) => setSyncPickId(v ? pick.id : null)}
+                    designerName={designerName}
+                    currentVariants={pick.size_variants || []}
+                    currentBaseAxisLabel={pick.base_axis_label}
+                    onApply={(merged, nextBaseLabel) => {
+                      updateField(pick.id, "size_variants", merged as any);
+                      if (nextBaseLabel !== pick.base_axis_label) {
+                        updateField(pick.id, "base_axis_label", nextBaseLabel as any);
+                      }
+                      toast({ title: "Base axis synced", description: `${merged.length} variant row(s) generated.` });
+                    }}
+                  />
                   <p className="text-[10px] text-muted-foreground italic leading-snug">
                     For a single dropdown (size only), fill <em>Label</em> + <em>Price</em>. For two dropdowns (e.g. Base × Top finish), fill <em>Base</em> and <em>Top</em>; the product sheet will render two selectors and price by combination.
                   </p>
