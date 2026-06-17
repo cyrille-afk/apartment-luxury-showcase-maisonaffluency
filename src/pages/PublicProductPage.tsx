@@ -551,6 +551,38 @@ const VariantSelectors: React.FC<{
         />
       )}
 
+      {/* Dual-axis with a Model/Size base whose options carry dimensions —
+          render BEFORE the finish swatches with the dimensions icon. */}
+      {isDualAxis && !baseAxisIsDim && !suppressBaseAsFinish
+        && baseOptions.length > 0 && baseOptions.every(looksLikeDimension) && (
+        <ExpandableSpec
+          icon={specIcon("📐")}
+          text={withImperialPerLine(baseOptions.join("\n"))}
+          placeholder={getBasePlaceholder(product)}
+          singleValueLabel={formatVariantAxisLabel(product.base_axis_label) || undefined}
+          emphasized
+          value={selBase != null ? Math.max(0, baseOptions.indexOf(selBase)) : null}
+          onChange={(idx) => {
+            if (idx < 0) {
+              clearAllDualSelections();
+              return;
+            }
+            const v = baseOptions[idx] ?? null;
+            setSelBase(v);
+            let nextTop = selTop;
+            let nextSize = selDualSize;
+            if (v && nextTop && !variantsList.some((x: any) => matchesDual(x, v, nextTop, nextSize))) { setSelTop(null); nextTop = null; }
+            if (v && nextSize && !variantsList.some((x: any) => matchesDual(x, v, nextTop, nextSize))) { setSelDualSize(null); nextSize = null; }
+            if (v && !nextTop) {
+              const compatTops = topOptions.filter((t) => variantsList.some((x: any) => matchesDual(x, v, t, nextSize)));
+              if (compatTops.length === 1) { setSelTop(compatTops[0]); nextTop = compatTops[0]; }
+            }
+            onMaterialChange?.(v, { base: v, top: nextTop, size: nextSize });
+          }}
+          disabledIndices={disabledBaseIdx}
+        />
+      )}
+
       <FinishSelector
         pickId={product.id}
         productTitle={product.title}
