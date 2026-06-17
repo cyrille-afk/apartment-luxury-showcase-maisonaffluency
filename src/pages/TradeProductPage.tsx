@@ -1034,8 +1034,16 @@ const TradeProductPage: React.FC = () => {
   // single source for the frame-finish axis — suppress the duplicate base
   // dropdown even if not every base option has a perfectly-matching swatch.
   const hasWoodSwatches = linkedWoodFinishes.length > 0;
+  // Top-axis swatches are present when any linked finish matches a top option.
+  const topAxisHasSwatches = !topAxisIsDim && topOptions.length > 0 && topOptions.some((t) => {
+    const nt = normFinish(t);
+    return linkedWoodFinishes.some((lw) => {
+      const nlw = normFinish(lw);
+      return nlw === nt || nlw.includes(nt) || nt.includes(nlw);
+    });
+  });
   const suppressBaseAsFinish = !baseAxisIsDim && isFinishAxisLabel(baseAxisLabelRaw) && (allBasesHaveSwatches || hasWoodSwatches);
-  const suppressTopAsFinish = isUpholsteredProduct && !topAxisIsDim && isFinishAxisLabel(topAxisLabelRaw);
+  const suppressTopAsFinish = !topAxisIsDim && (topAxisHasSwatches || (isUpholsteredProduct && isFinishAxisLabel(topAxisLabelRaw)));
 
   // When the product has variants but the user hasn't picked one yet, fall back
   // to the cheapest *priced* variant so we can show "From €X" instead of "Price on request".
@@ -1435,6 +1443,39 @@ const TradeProductPage: React.FC = () => {
                         }
                       : undefined
                   }
+                  topLabel={
+                    product.top_axis_label
+                      ? `Select Your ${formatVariantAxisLabel(product.top_axis_label) || product.top_axis_label}`
+                      : null
+                  }
+                  topFilter={
+                    isDualAxis && !topAxisIsDim && topOptions.length > 0
+                      ? (name) => {
+                          const n = name.trim().toLowerCase();
+                          return topOptions.some((t) => {
+                            const nt = t.trim().toLowerCase();
+                            return nt === n || nt.includes(n) || n.includes(nt);
+                          });
+                        }
+                      : undefined
+                  }
+                  onTopFinishChange={(topName) => {
+                    if (!topName) return;
+                    const norm = (s: string) => s.trim().toLowerCase();
+                    const nw = norm(topName);
+                    const match =
+                      topOptions.find((t) => norm(t) === nw)
+                      || topOptions.find((t) => nw.includes(norm(t)))
+                      || topOptions.find((t) => norm(t).includes(nw))
+                      || topName;
+                    setSelectedTop(match);
+                    let nextBase = selectedBase;
+                    if (nextBase && !variantsList.some((x: any) => matchesDual(x, nextBase, match, selectedDualSize))) {
+                      setSelectedBase(null);
+                      nextBase = null;
+                    }
+                    handleMaterialChange(match, { base: nextBase, top: match, size: selectedDualSize });
+                  }}
                   includePricing
                   showUpholsterySection={isUpholsteredProduct}
                   showWoodSection

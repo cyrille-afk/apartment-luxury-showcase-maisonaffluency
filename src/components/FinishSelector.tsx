@@ -102,13 +102,24 @@ interface FinishSelectorProps {
    */
   showWoodSection?: boolean;
   /**
-   * Optional filter restricting which wood-bucket swatches are shown. Used
-   * by dual-axis products (e.g. pendant with "Rod Finish" × "Diffuser")
-   * so the rod-finish group doesn't accidentally pull in diffuser swatches
-   * like alabaster that also fall into the catch-all "Wood" bucket.
+   * Optional filter restricting which wood-bucket swatches are shown in the
+   * primary frame-finish group. Used by dual-axis products (e.g. pendant with
+   * "Rod Finish" × "Diffuser") so the rod-finish group doesn't accidentally
+   * pull in diffuser swatches like alabaster that also fall into the
+   * catch-all non-upholstery bucket.
    * Return true to keep the swatch.
    */
   woodFilter?: (swatchName: string) => boolean;
+  /**
+   * Optional second swatch group for the Top axis on dual-axis products
+   * (e.g. the diffuser on a pendant). When provided, swatches matching
+   * `topFilter` render in their own accordion below the base group.
+   */
+  topFilter?: (swatchName: string) => boolean;
+  /** Label for the top-axis swatch accordion (e.g. "Select Your Diffuser"). */
+  topLabel?: string | null;
+  /** Fires when the user picks a top-axis swatch. */
+  onTopFinishChange?: (name: string | null) => void;
 }
 
 const normalizeFabricCategory = (category: string | null | undefined) => {
@@ -136,12 +147,13 @@ const isWoodCategory = (fabric: Fabric) => normalizeFabricCategory(fabric.catego
  * (Trade + Public). Tiles are grouped by category (Upholstery, Wood, …)
  * with a COM ("Customer's Own Material") tile always offered.
  */
-export default function FinishSelector({ pickId, className, productTitle, onUpholsteryTierChange, onFabricChange, onHasFabricsChange, onWoodFinishChange, onWoodFinishPricingChange, onWoodFinishesAvailable, includePricing = false, onSwatchImagesChange, woodLabel, showUpholsterySection = true, showWoodSection = true, woodFilter }: FinishSelectorProps) {
+export default function FinishSelector({ pickId, className, productTitle, onUpholsteryTierChange, onFabricChange, onHasFabricsChange, onWoodFinishChange, onWoodFinishPricingChange, onWoodFinishesAvailable, includePricing = false, onSwatchImagesChange, woodLabel, showUpholsterySection = true, showWoodSection = true, woodFilter, topFilter, topLabel, onTopFinishChange }: FinishSelectorProps) {
 
   const [open, setOpen] = useState(false);
   const [fabrics, setFabrics] = useState<Fabric[]>([]);
   const [selectedFabricId, setSelectedFabricId] = useState<string | null>(null);
   const [selectedWoodId, setSelectedWoodId] = useState<string | null>(null);
+  const [selectedTopId, setSelectedTopId] = useState<string | null>(null);
   const [selectedCoverId, setSelectedCoverId] = useState<string | null>(null);
   const [zoomed, setZoomed] = useState<Fabric | null>(null);
 
@@ -297,22 +309,28 @@ export default function FinishSelector({ pickId, className, productTitle, onUpho
       ? colTile
       : fabrics.find((f) => f.id === selectedFabricId) || null;
   const selectedWoodItem = fabrics.find((f) => f.id === selectedWoodId) || null;
+  const selectedTopItem = fabrics.find((f) => f.id === selectedTopId) || null;
   const selectedCoverItem = fabrics.find((f) => f.id === selectedCoverId) || null;
 
-  const renderTile = (f: Fabric) => {
+  const renderTile = (f: Fabric, kindOverride?: "fabric" | "cover" | "base" | "top") => {
     const isCom = f.id === "__com__";
     const isCol = f.id === "__col__";
-    const isFabricGroup = isFabricCategory(f);
-    const isCoverGroup = isCoverCategory(f);
+    const isFabricGroup = kindOverride ? kindOverride === "fabric" : isFabricCategory(f);
+    const isCoverGroup = kindOverride ? kindOverride === "cover" : isCoverCategory(f);
+    const isTopGroup = kindOverride === "top";
     const isSelected = isFabricGroup
       ? selectedFabricId === f.id
       : isCoverGroup
       ? selectedCoverId === f.id
+      : isTopGroup
+      ? selectedTopId === f.id
       : selectedWoodId === f.id;
     const setSelected = isFabricGroup
       ? setSelectedFabricId
       : isCoverGroup
       ? setSelectedCoverId
+      : isTopGroup
+      ? setSelectedTopId
       : setSelectedWoodId;
 
     const handlePick = () => {
@@ -338,6 +356,9 @@ export default function FinishSelector({ pickId, className, productTitle, onUpho
       } else if (isCoverGroup) {
         // Cover (rattan/cane/wicker) is purely decorative — only update the
         // hero image; do not drive the Frame variant matrix or pricing.
+      } else if (isTopGroup) {
+        // Top-axis finish (e.g. diffuser on a pendant) — drive the Top axis.
+        onTopFinishChange?.(f.name);
       } else {
         // Wood finish picked — drive the Frame axis on the price matrix.
         onWoodFinishChange?.(f.name);
@@ -423,9 +444,18 @@ export default function FinishSelector({ pickId, className, productTitle, onUpho
   };
 
   const [openWood, setOpenWood] = useState(false);
+  const [openTop, setOpenTop] = useState(false);
   const [openCover, setOpenCover] = useState(false);
   const fabricTiles = grouped["Fabric & Leather"] || [];
-  const woodTiles = (grouped["Wood"] || []).filter((f) => !woodFilter || woodFilter(f.name));
+  const allNonFabricTiles = grouped["Wood"] || [];
+  // Top-axis swatches first (e.g. diffuser), then base-axis swatches with the
+  // top swatches excluded so a single physical swatch doesn't appear in both
+  // groups when the filters overlap.
+  const topTiles = topFilter ? allNonFabricTiles.filter((f) => topFilter(f.name)) : [];
+  const topTileIds = new Set(topTiles.map((t) => t.id));
+  const woodTiles = allNonFabricTiles
+    .filter((f) => !topTileIds.has(f.id))
+    .filter((f) => !woodFilter || woodFilter(f.name));
   const coverTiles = grouped["Cover"] || [];
 
 
@@ -437,6 +467,7 @@ export default function FinishSelector({ pickId, className, productTitle, onUpho
     tiles: Fabric[];
     emptyNote?: string;
     glyph: string;
+    tileKind?: "fabric" | "cover" | "base" | "top";
   }) => (
     <div className="border-t border-border/60">
       <button
@@ -468,7 +499,7 @@ export default function FinishSelector({ pickId, className, productTitle, onUpho
         <div className="pb-5 pt-4">
           {args.tiles.length > 0 ? (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4">
-              {args.tiles.map(renderTile)}
+              {args.tiles.map((f) => renderTile(f, args.tileKind))}
             </div>
           ) : (
             args.emptyNote && (
@@ -502,6 +533,17 @@ export default function FinishSelector({ pickId, className, productTitle, onUpho
           selectedName: selectedWoodItem?.name ?? null,
           tiles: woodTiles,
           glyph: "wood",
+          tileKind: "base",
+        })}
+      {showWoodSection && topTiles.length > 0 &&
+        renderAccordion({
+          isOpen: openTop,
+          onToggle: () => setOpenTop((v) => !v),
+          label: (topLabel && topLabel.trim()) || "Select the Finish",
+          selectedName: selectedTopItem?.name ?? null,
+          tiles: topTiles,
+          glyph: "wood",
+          tileKind: "top",
         })}
       {coverTiles.length > 0 &&
         renderAccordion({
