@@ -939,7 +939,7 @@ const TradeAxonometric = () => {
         >
           <div className="flex items-center gap-2">
             {activeRequestId && (
-              <Button variant="outline" size="sm" onClick={() => { setActiveRequestId(null); setSourceImage(null); setResult(null); setShowQueue(true); }}>
+              <Button variant="outline" size="sm" onClick={() => { setActiveRequestId(null); useFreshSourceImage(null, setSourceImage, setResult, setHistory, setLockedLayoutUrl); setShowQueue(true); }}>
                 <Inbox className="w-3.5 h-3.5 mr-1.5" />Back to Queue
               </Button>
             )}
@@ -1062,7 +1062,7 @@ const TradeAxonometric = () => {
                         size="sm"
                         className="flex-1"
                         onClick={() => {
-                          setSourceImage(draft.image_url);
+                          useFreshSourceImage(draft.image_url, setSourceImage, setResult, setHistory, setLockedLayoutUrl);
                           setResult({ imageUrl: draft.image_url, storedUrl: draft.image_url, text: "", mode: "elevation_to_axo" });
                           setGalleryTitle(draft.title || "");
                           setGalleryDesc(draft.description || "");
@@ -1139,7 +1139,7 @@ const TradeAxonometric = () => {
                       className="w-full rounded-md border border-border object-contain max-h-64"
                     />
                     <button
-                      onClick={() => { setSourceImage(null); setSelectedProduct(null); }}
+                      onClick={() => { useFreshSourceImage(null, setSourceImage, setResult, setHistory, setLockedLayoutUrl); setSelectedProduct(null); }}
                       className="absolute top-2 right-2 bg-background/80 backdrop-blur-sm text-foreground rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-opacity"
                     >
                       <RotateCcw className="w-3.5 h-3.5" />
@@ -1168,7 +1168,7 @@ const TradeAxonometric = () => {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  <SourceUpload onSourceReady={(url) => setSourceImage(url)} />
+                  <SourceUpload onSourceReady={(url) => useFreshSourceImage(url, setSourceImage, setResult, setHistory, setLockedLayoutUrl)} />
 
         {/* Submit 3D Model Panel */}
         {show3dSubmit && (
@@ -1498,7 +1498,7 @@ const TradeAxonometric = () => {
                   brand={pickerBrand || undefined}
                   onSelect={(product) => {
                     setSelectedProduct(product);
-                    setSourceImage(product.image_url);
+                    useFreshSourceImage(product.image_url, setSourceImage, setResult, setHistory, setLockedLayoutUrl);
                   }}
                   selectedProduct={selectedProduct}
                 />
