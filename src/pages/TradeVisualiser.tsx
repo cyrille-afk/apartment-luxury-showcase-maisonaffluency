@@ -201,6 +201,121 @@ const TradeVisualiser = () => {
   const [rendered, setRendered] = useState(initial.rendered ?? false);
   const [renderError, setRenderError] = useState<string | null>(null);
 
+  // Axonometric Studio deliveries (completed renders the user can reopen here)
+  const [axoOpen, setAxoOpen] = useState(false);
+  const [axoLoading, setAxoLoading] = useState(false);
+  const [axoRequests, setAxoRequests] = useState<AxoRequest[]>([]);
+  const [importingAxoId, setImportingAxoId] = useState<string | null>(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const fetchAxoRequests = useCallback(async () => {
+    setAxoLoading(true);
+    const { data, error } = await supabase
+      .from("axonometric_requests")
+      .select("id, project_name, result_image_url, request_type, linked_favorite_product_ids, updated_at")
+      .eq("status", "completed")
+      .not("result_image_url", "is", null)
+      .order("updated_at", { ascending: false });
+    setAxoLoading(false);
+    if (error) {
+      toast.error("Could not load Axonometric deliveries");
+      return;
+    }
+    setAxoRequests((data ?? []) as AxoRequest[]);
+  }, []);
+
+  const importAxoDelivery = useCallback(async (req: AxoRequest) => {
+    if (!req.result_image_url) return;
+    setImportingAxoId(req.id);
+    try {
+      // Fetch the render as a data URL so the AI render endpoint can re-use it.
+      const resp = await fetch(req.result_image_url, { mode: "cors" });
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      const blob = await resp.blob();
+      const dataUrl = await new Promise<string>((resolve, reject) => {
+        const r = new FileReader();
+        r.onload = () => resolve(typeof r.result === "string" ? r.result : "");
+        r.onerror = () => reject(r.error);
+        r.readAsDataURL(blob);
+      });
+
+      // Look up linked favourite products to seed pin labels.
+      const productIds = Array.isArray(req.linked_favorite_product_ids)
+        ? req.linked_favorite_product_ids.filter((x): x is string => typeof x === "string")
+        : [];
+      let products: { id: string; product_name: string | null; image_url: string | null; brand_name: string | null }[] = [];
+      if (productIds.length > 0) {
+        const { data: prods } = await supabase
+          .from("trade_products")
+          .select("id, product_name, image_url, brand_name")
+          .in("id", productIds);
+        products = prods ?? [];
+      }
+
+      // Distribute up to 8 hint pins evenly across the lower-middle of the image.
+      const seedPins: Pin[] = products.slice(0, 8).map((p, i, arr) => {
+        const n = arr.length;
+        const x = n === 1 ? 0.5 : 0.15 + (0.7 * i) / (n - 1);
+        const y = 0.55 + ((i % 2) * 0.15);
+        return {
+          id: `pin-axo-${req.id}-${i}-${Date.now()}`,
+          surface: "furniture" as Surface,
+          x,
+          y,
+          productHint: {
+            name: p.product_name || "Untitled product",
+            image_url: p.image_url,
+            brand: p.brand_name,
+          },
+        };
+      });
+
+      setPhoto(req.result_image_url);
+      setPhotoDataUrl(dataUrl);
+      setRenderedImage(null);
+      setRendered(false);
+      setRenderError(null);
+      setPins(seedPins);
+      setActivePinId(seedPins[0]?.id ?? null);
+      setAxoOpen(false);
+      toast.success(
+        seedPins.length > 0
+          ? `Loaded "${req.project_name || "Untitled"}" with ${seedPins.length} product hint${seedPins.length === 1 ? "" : "s"}`
+          : `Loaded "${req.project_name || "Untitled"}"`,
+      );
+    } catch (e) {
+      console.error(e);
+      toast.error("Could not import this render — the image may be unreachable.");
+    } finally {
+      setImportingAxoId(null);
+    }
+  }, []);
+
+  // Deep-link support: /trade/visualiser?fromAxo=<requestId>
+  useEffect(() => {
+    const id = searchParams.get("fromAxo");
+    if (!id) return;
+    // Strip the param so reloads / fresh navigation don't reimport
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      next.delete("fromAxo");
+      return next;
+    }, { replace: true });
+    (async () => {
+      const { data, error } = await supabase
+        .from("axonometric_requests")
+        .select("id, project_name, result_image_url, request_type, linked_favorite_product_ids, updated_at")
+        .eq("id", id)
+        .maybeSingle();
+      if (error || !data || !data.result_image_url) {
+        toast.error("That delivery is not ready yet.");
+        return;
+      }
+      await importAxoDelivery(data as AxoRequest);
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Persist session so an auto cache-bust reload (or accidental refresh)
   // keeps the uploaded photo, pins, and last render intact.
   // Never persist blob: URLs — they're invalidated on reload.
