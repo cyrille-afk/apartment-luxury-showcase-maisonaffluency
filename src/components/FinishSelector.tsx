@@ -260,7 +260,7 @@ export default function FinishSelector({ pickId, className, productTitle, onUpho
         }));
       setFabrics(list);
       onHasFabricsChange?.(list.some(isFabricCategory));
-      onWoodFinishesAvailable?.(list.filter(isWoodCategory).map((f) => f.name));
+      onWoodFinishesAvailable?.(list.filter(isFinishCategory).map((f) => f.name));
       const defaultFabric = list.find(isFabricCategory) || null;
       setSelectedFabricId(defaultFabric?.id ?? null);
       if (defaultFabric) {
@@ -300,7 +300,7 @@ export default function FinishSelector({ pickId, className, productTitle, onUpho
     (acc[key] ||= []).push(f);
     return acc;
   }, {});
-  const groupOrder = ["Fabric & Leather", "Wood", "Cover"];
+  const groupOrder = ["Fabric & Leather", "Wood", "Metal", "Glass", "Stone", "Ceramic", "Other", "Cover"];
   const sortedGroupKeys = Object.keys(grouped).sort((a, b) => {
     const ai = groupOrder.indexOf(a);
     const bi = groupOrder.indexOf(b);
@@ -480,7 +480,9 @@ export default function FinishSelector({ pickId, className, productTitle, onUpho
   const [openTop, setOpenTop] = useState(false);
   const [openCover, setOpenCover] = useState(false);
   const fabricTiles = grouped["Fabric & Leather"] || [];
-  const allNonFabricTiles = grouped["Wood"] || [];
+  const allNonFabricTiles = sortedGroupKeys
+    .filter((key) => key !== "Fabric & Leather" && key !== "Cover")
+    .flatMap((key) => grouped[key] || []);
   // Top-axis swatches first (e.g. diffuser), then base-axis swatches with the
   // top swatches excluded so a single physical swatch doesn't appear in both
   // groups when the filters overlap.
