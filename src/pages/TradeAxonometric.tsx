@@ -408,6 +408,28 @@ const TradeAxonometric = () => {
     return () => window.removeEventListener("beforeunload", handler);
   }, [activeRequestId, generating, result, sourceImage]);
 
+  // Admin gate: show message then redirect non-admins
+  useEffect(() => {
+    if (!isAdmin) {
+      const id = setTimeout(() => navigate("/trade", { replace: true }), 2500);
+      return () => clearTimeout(id);
+    }
+  }, [isAdmin, navigate]);
+
+  if (!isAdmin) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] px-6 text-center">
+        <Helmet>
+          <title>Admin Only — Maison Affluency</title>
+        </Helmet>
+        <h1 className="font-heading text-2xl text-foreground mb-3">Admin Only</h1>
+        <p className="font-body text-sm text-muted-foreground max-w-md">
+          The Axonometric Studio is restricted to admin users. You will be redirected to the Trade lounge shortly.
+        </p>
+      </div>
+    );
+  }
+
   // Rate-limit cooldown timer + auto-retry queue
   const COOLDOWN_SECONDS = 45;
   const [cooldownUntil, setCooldownUntil] = useState<number | null>(null);
