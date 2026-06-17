@@ -660,7 +660,7 @@ const TradeVisualiser = () => {
                       >
                         {sdef.label[0]}
                       </div>
-                      {p.swatch && (
+                      {p.swatch ? (
                         <div className="mt-1 bg-background/95 rounded shadow-md flex items-center gap-1.5 pr-2">
                           {p.swatch.image_url && (
                             <img src={p.swatch.image_url} alt="" className="w-6 h-6 object-cover rounded-l" />
@@ -676,10 +676,30 @@ const TradeVisualiser = () => {
                             <X className="h-3 w-3" />
                           </button>
                         </div>
-                      )}
-                    </div>
-                  );
-                })}
+                      ) : p.productHint ? (
+                        <div className="mt-1 bg-background/95 rounded shadow-md flex items-center gap-1.5 pr-2 border border-dashed border-foreground/30">
+                          {p.productHint.image_url && (
+                            <img src={p.productHint.image_url} alt="" className="w-6 h-6 object-cover rounded-l" />
+                          )}
+                          <div className="flex flex-col py-0.5">
+                            <span className="font-body text-[10px] text-foreground whitespace-nowrap max-w-[160px] truncate">
+                              {p.productHint.name}
+                            </span>
+                            {p.productHint.brand && (
+                              <span className="font-body text-[9px] uppercase tracking-wider text-muted-foreground whitespace-nowrap max-w-[160px] truncate">
+                                {p.productHint.brand}
+                              </span>
+                            )}
+                          </div>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); removePin(p.id); }}
+                            className="text-muted-foreground hover:text-foreground"
+                            aria-label="Remove pin"
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        </div>
+                      ) : null}
 
                 {/* Empty hint */}
                 {pins.length === 0 && (
