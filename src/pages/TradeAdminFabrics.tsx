@@ -9,22 +9,24 @@ import { useToast } from "@/hooks/use-toast";
 import CloudUpload from "@/components/trade/CloudUpload";
 import { slugify } from "@/lib/whatsapp-share";
 
-type FabricCategory = "Fabric & Leather" | "Wood" | "Stone" | "Metal" | "Other";
+type FabricCategory = "Fabric & Leather" | "Wood" | "Stone" | "Metal" | "Glass" | "Other";
 
 const CATEGORIES: FabricCategory[] = [
   "Fabric & Leather",
   "Wood",
   "Stone",
   "Metal",
+  "Glass",
   "Other",
 ];
 
 const normalizeAdminFabricCategory = (category: string | null | undefined): FabricCategory => {
   const raw = (category || "").trim().toLowerCase();
   if (["fabric", "fabrics", "upholstery", "leather", "fabric & leather", "fabric/leather"].includes(raw)) return "Fabric & Leather";
-  if (["wood", "woods", "timber"].includes(raw)) return "Wood";
+  if (["wood", "woods", "timber", "rattan", "cane", "wicker"].includes(raw)) return "Wood";
   if (raw === "stone") return "Stone";
   if (raw === "metal") return "Metal";
+  if (raw === "glass") return "Glass";
   return "Other";
 };
 
