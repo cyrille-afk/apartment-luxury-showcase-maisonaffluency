@@ -786,7 +786,7 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
 
 
                 {/* Variant pricing — supports single-axis (Size) and dual-axis (Base × Top) */}
-                {!FABRICS_PANEL_PILOT_PICK_IDS.has(pick.id) && (
+                {false && (
                 <div className="space-y-2 border border-dashed border-border rounded-md p-2.5">
                   <div className="flex items-center justify-between">
                     <label className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">
@@ -1160,19 +1160,8 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
                   })}
                 </div>
                 )}
-                {FABRICS_PANEL_PILOT_PICK_IDS.has(pick.id) ? (
-                  <ProductFabricsPanel pickId={pick.id} currency={pick.currency} />
-                ) : (
-                  <VariantPreviewPanel
-                    sizeVariants={pick.size_variants}
-                    variantPlaceholder={pick.variant_placeholder}
-                    dimensions={pick.dimensions}
-                    materials={pick.materials}
-                    currency={pick.currency}
-                    baseAxisLabel={pick.base_axis_label}
-                    topAxisLabel={pick.top_axis_label}
-                  />
-                )}
+                <ProductFabricsPanel pickId={pick.id} currency={pick.currency} />
+
                 <div>
                   <label className="text-[10px] text-muted-foreground">Description</label>
                   <Textarea value={pick.description || ""} onChange={(e) => updateField(pick.id, "description", e.target.value || null)} className="text-xs min-h-[60px]" />
