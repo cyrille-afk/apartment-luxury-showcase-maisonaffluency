@@ -357,6 +357,36 @@ const TradeAxonometric = () => {
     }
   }, [activeRequestId, model3dProjectName, model3dUrl, result, sourceImage, toast]);
 
+  // Concierge hand-off: prefill from a `prepare_visualization_brief` proposal
+  // dropped into sessionStorage by VisualizationBriefCard. Consume once on mount.
+  useEffect(() => {
+    let raw: string | null = null;
+    try { raw = sessionStorage.getItem("maf:axonometric:incoming-brief"); } catch { return; }
+    if (!raw) return;
+    try { sessionStorage.removeItem("maf:axonometric:incoming-brief"); } catch { /* ignore */ }
+    let brief: any;
+    try { brief = JSON.parse(raw); } catch { return; }
+    if (!brief || typeof brief !== "object") return;
+
+    if (typeof brief.mode === "string") setMode(brief.mode as Mode);
+    if (typeof brief.style_preset === "string") {
+      const preset = STYLE_PRESETS.find((s) => s.label === brief.style_preset);
+      if (preset) setStyle(preset.value);
+    }
+    const nextBrief: Record<string, string> = {};
+    if (typeof brief.brief_notes === "string" && brief.brief_notes.trim()) nextBrief.notes = brief.brief_notes.trim();
+    if (typeof brief.room_label === "string" && brief.room_label.trim()) nextBrief.room = brief.room_label.trim();
+    if (typeof brief.title === "string" && brief.title.trim()) nextBrief.title = brief.title.trim();
+    if (Object.keys(nextBrief).length) setActiveBrief((prev) => ({ ...prev, ...nextBrief }));
+    if (Array.isArray(brief.pick_ids) && brief.pick_ids.length) {
+      setPreloadedFavoriteProductIds(brief.pick_ids.filter((id: unknown) => typeof id === "string"));
+    }
+    if (typeof brief.source_image_url === "string" && /^https?:\/\//.test(brief.source_image_url)) {
+      setSourceImage(brief.source_image_url);
+    }
+    toast({ title: "Concierge brief loaded", description: "Mode, style and notes prefilled — review and Generate." });
+  }, [toast]);
+
   useEffect(() => {
     const handler = (event: BeforeUnloadEvent) => {
       if (!generating && !sourceImage && !result && !activeRequestId) return;
