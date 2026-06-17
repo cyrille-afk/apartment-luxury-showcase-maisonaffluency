@@ -1,0 +1,1 @@
+UPDATE designer_curator_picks SET is_upholstered = false WHERE title = 'Erato Pendant';
