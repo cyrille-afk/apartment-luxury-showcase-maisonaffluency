@@ -495,7 +495,7 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
                   </div>
                  </div>
                  <div>
-                   <label className="text-[10px] text-muted-foreground">Upholstered (fabric selector)</label>
+                   <label className="text-[10px] text-muted-foreground">Upholstered (finish selector)</label>
                    <select
                      value={
                        (pick as any).is_upholstered === true
@@ -515,8 +515,8 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
                      className="w-full text-xs h-8 rounded-md border border-input bg-background px-2"
                    >
                      <option value="auto">Auto-detect by category</option>
-                     <option value="yes">Yes — show fabric selector</option>
-                     <option value="no">No — hide fabric selector</option>
+                    <option value="yes">Yes — show finish selector</option>
+                    <option value="no">No — hide finish selector</option>
                    </select>
                  </div>
                 <div className="grid grid-cols-2 gap-2">
