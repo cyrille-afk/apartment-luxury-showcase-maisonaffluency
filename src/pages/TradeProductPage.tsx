@@ -471,7 +471,7 @@ const TradeProductPage: React.FC = () => {
   // picker already drives the upholstery price tier.
   const [hasLinkedFabrics, setHasLinkedFabrics] = useState(false);
   const [linkedWoodFinishes, setLinkedWoodFinishes] = useState<string[]>([]);
-  const [selectedFabric, setSelectedFabric] = useState<import("@/components/FinishSelector").SelectedFabricInfo | null>(null);
+  const [selectedFabric, setSelectedFabric] = useState<import("@/components/FinishSelector").SelectedFinishInfo | null>(null);
   // When a wood-finish swatch carries its own frame price (product_fabrics.price_cents_a),
   // we use it as the RRP base and add the fabric per-LM upcharge on top.
   const [selectedWoodPrice, setSelectedWoodPrice] = useState<{ id: string; name: string; price_cents: number; currency: string; image_url: string | null } | null>(null);
