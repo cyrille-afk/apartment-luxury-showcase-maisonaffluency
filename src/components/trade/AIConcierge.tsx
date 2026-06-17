@@ -621,7 +621,7 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
       setTimeline((prev) => [
         ...prev,
         { kind: "msg", role: "user", content: text },
-        { kind: "msg", role: "assistant", content: "Opening Axonometric Studio with the brief loaded. If the page button is disabled, add a source image first." },
+        { kind: "msg", role: "assistant", content: isAdmin ? "Opening Axonometric Studio with the brief loaded. If the page button is disabled, add a source image first." : "Opening the 3D Studio request form with the brief prefilled — review the details and submit when ready." },
       ]);
       setInput("");
       setAttachments([]);
