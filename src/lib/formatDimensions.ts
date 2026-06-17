@@ -117,7 +117,35 @@ export const withImperialPerLine = (raw: string | null | undefined): string => {
       ) {
         i++;
       }
-      const trimmedImp = impWords.slice(i).join(" ").trim();
+      let trimmedImp = impWords.slice(i).join(" ").trim();
+
+      // Strip trailing prose shared with the metric line so text like
+      // " - Stem height TBC on order" doesn't duplicate after the "|".
+      const impArr = trimmedImp.split(/\s+/);
+      const metricArr = t.split(/\s+/);
+      let impEnd = impArr.length;
+      while (impEnd > 0 && impArr[impEnd - 1] === "in") impEnd--;
+      let k = 0;
+      while (
+        k < impEnd &&
+        k < metricArr.length &&
+        impArr[impEnd - 1 - k] === metricArr[metricArr.length - 1 - k]
+      ) {
+        k++;
+      }
+      if (k > 0) {
+        const minKeep = impArr.findIndex((w) => /[\d"Ø⌀×x]/.test(w));
+        const keepCount = Math.max(minKeep >= 0 ? minKeep + 1 : 1, impEnd - k);
+        const stripped = impArr.slice(0, keepCount);
+        while (
+          stripped.length > 0 &&
+          /^[-–—,;:.]$/.test(stripped[stripped.length - 1])
+        ) {
+          stripped.pop();
+        }
+        trimmedImp = stripped.concat("in").join(" ").trim();
+      }
+
       return trimmedImp ? `${t} | ${trimmedImp}` : t;
     })
     .join("\n");
