@@ -802,6 +802,16 @@ const PublicDesignerProfile = () => {
                     <img src={heroImage} alt={name} className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: 'center 25%' }} loading="eager" />
                   )}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                  {/* Mobile share icon inside hero */}
+                  <div className="absolute top-3 right-3 z-20 md:hidden">
+                    <ShareMenu
+                      url={`https://www.maisonaffluency.com${buildDesignerBridgePath("og")}`}
+                      message={`${designer.name} — Maison Affluency: https://www.maisonaffluency.com${buildDesignerBridgePath("og")}`}
+                      className="flex items-center justify-center w-8 h-8 rounded-full bg-black/40 backdrop-blur-sm text-white/90 hover:bg-black/60 transition-colors"
+                      iconSize="w-4 h-4"
+                      showLabel={false}
+                    />
+                  </div>
                 </div>
 
                 <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8 flex items-end justify-between">
