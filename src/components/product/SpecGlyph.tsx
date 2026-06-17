@@ -47,10 +47,10 @@ export default function SpecGlyph({ symbol, className }: SpecGlyphProps) {
   }
 
   if (symbol === "stone") {
-    // BrickWall — masonry / stone slab / marble / alabaster / onyx
+    // Mountain — natural quarried rock / marble / alabaster / onyx
     return (
       <span className={cn(baseClass, "text-gold")} aria-hidden="true">
-        <BrickWall className="h-[17px] w-[17px]" strokeWidth={1.75} />
+        <Mountain className="h-[17px] w-[17px]" strokeWidth={1.75} />
       </span>
     );
   }
