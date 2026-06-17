@@ -146,7 +146,19 @@ export const withImperialPerLine = (raw: string | null | undefined): string => {
         trimmedImp = stripped.concat("in").join(" ").trim();
       }
 
-      return trimmedImp ? `${t} | ${trimmedImp}` : t;
+      if (!trimmedImp) return t;
+
+      // If the metric line has trailing prose AFTER the last cm cluster
+      // (e.g. "Ø 12 x H 24 cm - Stem height TBC on order"), move that prose
+      // to after the imperial conversion so the cm/in pair stays together:
+      //   "Ø 12 x H 24 cm | Ø 4.7 x H 9.4 in - Stem height TBC on order"
+      const lastCmMatch = t.match(/^(.*\bcm\b)(?!.*\bcm\b)(.*)$/i);
+      if (lastCmMatch) {
+        const head = lastCmMatch[1].trim();
+        const tail = lastCmMatch[2].trim().replace(/^[-–—,;:.]+\s*/, "").trim();
+        if (tail) return `${head} | ${trimmedImp} - ${tail}`;
+      }
+      return `${t} | ${trimmedImp}`;
     })
     .join("\n");
 };
