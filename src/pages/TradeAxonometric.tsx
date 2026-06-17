@@ -408,9 +408,22 @@ const TradeAxonometric = () => {
     return () => window.removeEventListener("beforeunload", handler);
   }, [activeRequestId, generating, result, sourceImage]);
 
-  // Admin gate: show message then redirect non-admins
+  // Admin gate: log unauthorized attempts + show message then redirect non-admins
   useEffect(() => {
     if (!isAdmin) {
+      // Fire-and-forget audit log; failures are non-fatal
+      supabase
+        .rpc("log_unauthorized_access", {
+          _route: "/trade/axonometric",
+          _details: {
+            timestamp: new Date().toISOString(),
+            user_agent: typeof navigator !== "undefined" ? navigator.userAgent : null,
+            referrer: typeof document !== "undefined" ? document.referrer || null : null,
+          },
+        })
+        .then(({ error }) => {
+          if (error) console.warn("[axonometric] audit log failed", error);
+        });
       const id = setTimeout(() => navigate("/trade", { replace: true }), 2500);
       return () => clearTimeout(id);
     }
