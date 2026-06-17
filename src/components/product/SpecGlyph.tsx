@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { Layers, TreeDeciduous } from "lucide-react";
+import { Layers, Sparkles, TreeDeciduous } from "lucide-react";
 
 type SpecGlyphProps = {
   symbol: string;
