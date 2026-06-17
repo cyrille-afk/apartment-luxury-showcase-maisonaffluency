@@ -347,7 +347,7 @@ const VariantSelectors: React.FC<{
       return nlw === nt || nlw.includes(nt) || nt.includes(nlw);
     });
   });
-  const suppressBaseAsFinish = !baseAxisIsDim && isFinishAxis(baseAxisLabelRaw) && (allBasesHaveSwatches || hasWoodSwatches);
+  const suppressBaseAsFinish = !baseAxisIsDim && (allBasesHaveSwatches || (hasWoodSwatches && isFinishAxis(baseAxisLabelRaw)));
   const suppressTopAsFinish = !topAxisIsDim && (topAxisHasSwatches || (isProductUpholstered(product) && isFinishAxis(topAxisLabelRaw)));
 
   // Per-square-metre rug picker short-circuit: when the product is a rug and
