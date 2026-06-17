@@ -16,7 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import {
   Plus, X, Clock, CheckCircle2, Loader2, Image as ImageIcon,
   GalleryHorizontalEnd, Pencil, Trash2, Heart, Box, Monitor, Sun,
-  Camera, FileType, ChevronDown, ChevronUp, Info,
+  Camera, FileType, ChevronDown, ChevronUp, Info, Wand2,
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { format } from "date-fns";
