@@ -57,6 +57,7 @@ const STYLE_PRESETS = [
 ];
 
 const AXONOMETRIC_DRAFT_KEY = "maf:axonometric-studio:draft:v2";
+const VIZ_BRIEF_INCOMING_KEY = "maf:axonometric:incoming-brief";
 
 const readSavedDraft = () => {
   if (typeof window === "undefined") return null;
@@ -374,17 +375,21 @@ const TradeAxonometric = () => {
       if (preset) setStyle(preset.value);
     }
     const nextBrief: Record<string, string> = {};
-    if (typeof brief.brief_notes === "string" && brief.brief_notes.trim()) nextBrief.notes = brief.brief_notes.trim();
-    if (typeof brief.room_label === "string" && brief.room_label.trim()) nextBrief.room = brief.room_label.trim();
+    if (typeof brief.brief_notes === "string" && brief.brief_notes.trim()) nextBrief.briefNotes = brief.brief_notes.trim();
+    if (typeof brief.room_label === "string" && brief.room_label.trim()) nextBrief.roomType = brief.room_label.trim();
+    if (typeof brief.style_preset === "string" && brief.style_preset.trim()) nextBrief.styleDirection = brief.style_preset.trim();
     if (typeof brief.title === "string" && brief.title.trim()) nextBrief.title = brief.title.trim();
     if (Object.keys(nextBrief).length) setActiveBrief((prev) => ({ ...prev, ...nextBrief }));
     if (Array.isArray(brief.pick_ids) && brief.pick_ids.length) {
       setPreloadedFavoriteProductIds(brief.pick_ids.filter((id: unknown) => typeof id === "string"));
     }
+    if (Array.isArray(brief.overlay_image_urls) && brief.overlay_image_urls.length) {
+      setOverlayImages(brief.overlay_image_urls.filter((url: unknown) => typeof url === "string" && /^https?:\/\//.test(url)).slice(0, 5));
+    }
     if (typeof brief.source_image_url === "string" && /^https?:\/\//.test(brief.source_image_url)) {
       setSourceImage(brief.source_image_url);
     }
-    toast({ title: "Concierge brief loaded", description: "Mode, style and notes prefilled — review and Generate." });
+    toast({ title: "Concierge brief loaded", description: "Brief and product overlays are ready. Add a source image if needed, then generate from this page." });
   }, [toast]);
 
   useEffect(() => {
