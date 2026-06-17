@@ -231,28 +231,16 @@ export default function FinishSelector({ pickId, className, productTitle, onUpho
         onFabricChange?.(null);
       }
 
-      const defaultWood = list.find(isWoodCategory) || null;
-      setSelectedWoodId(defaultWood?.id ?? null);
-      if (defaultWood) {
-        onWoodFinishChange?.(defaultWood.name);
-        if (defaultWood.frame_price_cents && defaultWood.frame_price_cents > 0) {
-          onWoodFinishPricingChange?.({
-            id: defaultWood.id,
-            name: defaultWood.name,
-            price_cents: defaultWood.frame_price_cents,
-            currency: defaultWood.frame_price_currency || "EUR",
-            image_url: defaultWood.image_url ?? null,
-          });
-        } else {
-          onWoodFinishPricingChange?.(null);
-        }
-      } else {
-        onWoodFinishChange?.(null);
-        onWoodFinishPricingChange?.(null);
-      }
+      // Do NOT auto-select a default wood/finish swatch — the dropdown should
+      // start empty so the user makes an intentional choice (the product's
+      // base price reflects an unselected state).
+      setSelectedWoodId(null);
+      onWoodFinishChange?.(null);
+      onWoodFinishPricingChange?.(null);
 
-      const defaultCover = list.find(isCoverCategory) || null;
-      setSelectedCoverId(defaultCover?.id ?? null);
+      setSelectedCoverId(null);
+
+
 
     })();
     return () => {
