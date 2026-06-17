@@ -3209,10 +3209,10 @@ serve(async (req) => {
                 .slice(0, 12);
 
               // Hydrate a compact preview so the card can show thumbnails.
-              let preview: PickPreview[] = [];
+              let preview: any[] = [];
               if (pickIds.length) {
                 try {
-                  preview = await fetchPickPreviews(supabase, pickIds);
+                  preview = await hydratePickPreview(supabase, pickIds);
                 } catch (e) {
                   console.warn("[viz brief] preview hydration failed", e);
                 }
