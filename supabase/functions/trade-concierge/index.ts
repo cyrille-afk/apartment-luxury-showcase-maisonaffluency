@@ -3085,6 +3085,17 @@ serve(async (req) => {
           const shippingBuffers = allBuffers.filter((b) => b.name === "estimate_shipping");
           const vizBriefBuffers = allBuffers.filter((b) => b.name === "prepare_visualization_brief");
           const orderedBuffers = [...tearsheetBuffers, ...quoteBuffers, ...ffeBuffers, ...shippingBuffers, ...vizBriefBuffers];
+          const firstTearsheetPicks = (() => {
+            for (const b of tearsheetBuffers) {
+              try {
+                const parsed = JSON.parse(b.argsText || "{}");
+                if (Array.isArray(parsed.pick_ids) && parsed.pick_ids.length > 0) {
+                  return parsed.pick_ids.filter((id: unknown) => typeof id === "string").slice(0, 12);
+                }
+              } catch { /* ignore malformed tool args */ }
+            }
+            return [] as string[];
+          })();
           if (tearsheetBuffers.length && quoteBuffers.length) {
             console.log(`[concierge flush] chained turn: ${tearsheetBuffers.length} tearsheet + ${quoteBuffers.length} quote proposal(s), flushing tearsheet→quote`);
           }
@@ -3244,7 +3255,9 @@ serve(async (req) => {
               const briefNotes = typeof parsed.brief_notes === "string" ? parsed.brief_notes.slice(0, 1200) : "";
               const sourceImageUrl = typeof parsed.source_image_url === "string" && /^https?:\/\//.test(parsed.source_image_url)
                 ? parsed.source_image_url : null;
-              const rawPickIds: string[] = Array.isArray(parsed.pick_ids) ? parsed.pick_ids : [];
+              const rawPickIds: string[] = Array.isArray(parsed.pick_ids) && parsed.pick_ids.length > 0
+                ? parsed.pick_ids
+                : firstTearsheetPicks;
               const pickIds = rawPickIds
                 .filter((id) => typeof id === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id))
                 .slice(0, 12);
