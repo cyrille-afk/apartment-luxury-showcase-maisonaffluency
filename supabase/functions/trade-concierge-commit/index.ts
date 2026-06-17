@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.4";
+import { canAttachClientToQuote } from "../_shared/tenantAccess.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -422,8 +423,7 @@ serve(async (req) => {
         // Validate the client belongs to a studio the caller is a member of.
         // Service-role client is used here (RLS bypassed) so this check is the
         // ONLY thing preventing a user from attaching another studio's client
-        // to their quote. Never short-circuit to true when studioId is null —
-        // resolve the client's studio_id and verify membership unconditionally.
+        // to their quote. Implemented via shared helper so it stays unit-tested.
         let validClientId: string | null = null;
         let validClientName: string = requestedClientName;
         if (requestedClientId) {
@@ -434,19 +434,13 @@ serve(async (req) => {
             .maybeSingle();
           const cliStudioId = (cli as any)?.studio_id as string | null | undefined;
           if (cli && cliStudioId) {
-            // If the quote already has a studio (from project), client must match it.
-            const studioMatch = studioId ? cliStudioId === studioId : true;
-            let isMember = false;
-            if (studioMatch) {
-              const { data: membership } = await supabase
-                .from("studio_members")
-                .select("user_id")
-                .eq("studio_id", cliStudioId)
-                .eq("user_id", userId)
-                .maybeSingle();
-              isMember = !!membership;
-            }
-            if (studioMatch && isMember) {
+            const allowed = await canAttachClientToQuote(
+              supabase as any,
+              userId,
+              { studio_id: cliStudioId },
+              studioId,
+            );
+            if (allowed) {
               validClientId = (cli as any).id;
               if (!validClientName) validClientName = (cli as any).name || "";
               if (!studioId) studioId = cliStudioId;
