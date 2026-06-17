@@ -116,6 +116,16 @@ interface Pin {
   x: number; // 0..1
   y: number;
   swatch?: Swatch;
+  productHint?: { name: string; image_url: string | null; brand: string | null };
+}
+
+interface AxoRequest {
+  id: string;
+  project_name: string;
+  result_image_url: string;
+  request_type: string | null;
+  linked_favorite_product_ids: string[] | null;
+  updated_at: string;
 }
 
 const normalizeAssetKey = (url: string | null) => {
