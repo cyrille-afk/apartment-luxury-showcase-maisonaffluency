@@ -91,9 +91,26 @@ export default function BuildUpdateBanner() {
       return false;
     };
 
+    // Routes where an in-flight render/edit must NEVER be interrupted by an
+    // auto-reload, even if the user navigates within the app. The reload will
+    // happen on a later navigation once they've left these tools.
+    const DO_NOT_INTERRUPT = [
+      "/trade/axonometric",
+      "/trade/visualiser",
+      "/trade/mood-board",
+      "/trade/floor-plan",
+      "/trade/tearsheet",
+      "/trade/presentations",
+    ];
+    const isProtectedPath = (p: string) =>
+      DO_NOT_INTERRUPT.some((r) => p === r || p.startsWith(r + "/"));
+
     const onNav = () => {
       if (!armed.current) return;
       if (hasUnsavedTyping()) return;
+      // Skip reload if the user is still inside a long-running creative tool
+      // (axonometric studio, visualiser, etc). We'll catch the next navigation.
+      if (isProtectedPath(window.location.pathname)) return;
       // Reload on next macrotask so the navigation commits first.
       setTimeout(hardReload, 0);
     };
