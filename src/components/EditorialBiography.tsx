@@ -308,6 +308,10 @@ const VIDEO_POSTER_FALLBACKS: Record<string, string> = {
     "/images/alex-proba-second-studio-poster.jpg",
   "https://www.youtube.com/watch?v=6o-b80DxkzE":
     "/images/alex-proba-second-studio-poster.jpg",
+  "https://www.youtube.com/watch?v=aXUsRNl_FqI":
+    "/images/valeria-nascimento-video-poster.jpg",
+  "https://youtu.be/aXUsRNl_FqI":
+    "/images/valeria-nascimento-video-poster.jpg",
 };
 
 function getPosterFallbackForVideo(url: string): string | undefined {
