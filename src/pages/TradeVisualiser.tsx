@@ -202,6 +202,7 @@ const TradeVisualiser = () => {
 
 
   const imgRef = useRef<HTMLDivElement | null>(null);
+  const [photoAspect, setPhotoAspect] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement | null>(null);
 
   // ─── Load swatches once from the curated fabrics & finishes library ─────
