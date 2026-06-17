@@ -1034,7 +1034,7 @@ const TradeProductPage: React.FC = () => {
   // single source for the frame-finish axis — suppress the duplicate base
   // dropdown even if not every base option has a perfectly-matching swatch.
   const hasWoodSwatches = linkedWoodFinishes.length > 0;
-  const suppressBaseAsFinish = isUpholsteredProduct && !baseAxisIsDim && isFinishAxisLabel(baseAxisLabelRaw) && (allBasesHaveSwatches || hasWoodSwatches);
+  const suppressBaseAsFinish = !baseAxisIsDim && isFinishAxisLabel(baseAxisLabelRaw) && (allBasesHaveSwatches || hasWoodSwatches);
   const suppressTopAsFinish = isUpholsteredProduct && !topAxisIsDim && isFinishAxisLabel(topAxisLabelRaw);
 
   // When the product has variants but the user hasn't picked one yet, fall back
