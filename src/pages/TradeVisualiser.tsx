@@ -587,6 +587,14 @@ const TradeVisualiser = () => {
                   </button>
                 ))}
                 <div className="ml-auto flex items-center gap-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => { setAxoOpen(true); fetchAxoRequests(); }}
+                    title="Load a render delivered by the Axonometric Studio"
+                  >
+                    <Layers className="h-4 w-4 mr-1" /> Axonometric deliveries
+                  </Button>
                   <Button variant="ghost" size="sm" onClick={() => { setPhoto(null); setPins([]); setRendered(false); }}>
                     <X className="h-4 w-4 mr-1" /> New photo
                   </Button>
