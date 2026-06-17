@@ -2416,12 +2416,67 @@ async function hydratePickPreview(
     return hotspotByName.get(nKey) || null;
   };
 
+  // ── Sibling-image fallback ──────────────────────────────────────────────
+  // Some product variants (e.g. "Lyric Desk" in a specific finish) live as
+  // their own row with no image_url, while sibling variants under the same
+  // brand ("Lyric Desk Walnut", "Lyric Desk x Pierre Frey") do carry photos.
+  // Borrow a sibling's image so the tearsheet card always renders a thumb.
+  const missingPicks = (picks || []).filter((p: any) => !p.image_url && p.title);
+  const missingTrades = (trades || []).filter((t: any) => !t.image_url && t.product_name);
+  const siblings: Array<{ name: string; brand: string; image_url: string }> = [];
+  const escapeOr = (s: string) => s.replace(/[,()%]/g, "").trim().slice(0, 40);
+  if (missingPicks.length || missingTrades.length) {
+    const titles = Array.from(new Set(
+      [...missingPicks.map((p: any) => p.title), ...missingTrades.map((t: any) => t.product_name)]
+        .map(escapeOr).filter(Boolean)
+    ));
+    if (titles.length) {
+      const tradeOr = titles.map((t) => `product_name.ilike.%${t}%`).join(",");
+      const pickOr = titles.map((t) => `title.ilike.%${t}%`).join(",");
+      const [{ data: tradeSibs }, { data: pickSibs }] = await Promise.all([
+        supabase.from("trade_products").select("product_name, brand_name, image_url").not("image_url", "is", null).or(tradeOr),
+        supabase.from("designer_curator_picks").select("title, image_url, designer_id").not("image_url", "is", null).or(pickOr),
+      ]);
+      (tradeSibs || []).forEach((s: any) => {
+        if (s.image_url) siblings.push({ name: s.product_name, brand: String(s.brand_name || ""), image_url: s.image_url });
+      });
+      const sibDesignerIds = Array.from(new Set((pickSibs || []).map((s: any) => s.designer_id).filter(Boolean)));
+      const { data: sibDesigners } = sibDesignerIds.length
+        ? await supabase.from("designers").select("id, name, display_name").in("id", sibDesignerIds)
+        : { data: [] as any[] };
+      const sibDmap = new Map<string, string>();
+      (sibDesigners || []).forEach((d: any) => sibDmap.set(d.id, d.display_name || d.name));
+      (pickSibs || []).forEach((s: any) => {
+        if (s.image_url) siblings.push({ name: s.title, brand: sibDmap.get(s.designer_id) || "", image_url: s.image_url });
+      });
+    }
+  }
+
+  const resolveSiblingImage = (productName: string, brand?: string | null): string | null => {
+    const nName = normName(productName);
+    if (!nName) return null;
+    const nBrand = normBrand(brand || "");
+    for (const s of siblings) {
+      const sName = normName(s.name);
+      if (!sName) continue;
+      const nameMatch = sName === nName || sName.startsWith(nName) || nName.startsWith(sName);
+      if (!nameMatch) continue;
+      if (!nBrand) return s.image_url;
+      const sBrand = normBrand(s.brand);
+      if (!sBrand) continue;
+      if (sBrand.includes(nBrand) || nBrand.includes(sBrand)) return s.image_url;
+    }
+    return null;
+  };
+
   return pickIds
     .map((id) => {
       const p = pickById.get(id);
       if (p) {
         const designer = dmap.get(p.designer_id) || null;
-        const fallback = !p.image_url ? resolveHotspotImage(p.title, designer) : null;
+        const fallback = !p.image_url
+          ? (resolveHotspotImage(p.title, designer) || resolveSiblingImage(p.title, designer))
+          : null;
         return {
           id: p.id,
           title: p.title,
@@ -2436,7 +2491,9 @@ async function hydratePickPreview(
       if (t) {
         const rawBrand = String(t.brand_name || "");
         const baseBrand = rawBrand.includes(" - ") ? rawBrand.split(" - ")[0].trim() : rawBrand.trim();
-        const fallback = !t.image_url ? resolveHotspotImage(t.product_name, baseBrand) : null;
+        const fallback = !t.image_url
+          ? (resolveHotspotImage(t.product_name, baseBrand) || resolveSiblingImage(t.product_name, baseBrand))
+          : null;
         return {
           id: t.id,
           title: t.product_name,
@@ -2451,6 +2508,7 @@ async function hydratePickPreview(
     })
     .filter(Boolean);
 }
+
 
 async function buildDeterministicTearsheetProposal(
   supabase: ReturnType<typeof createClient>,
