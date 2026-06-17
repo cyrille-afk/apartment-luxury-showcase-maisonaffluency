@@ -268,6 +268,19 @@ export default function TradeAdminFabrics() {
       const k = normalizeAdminFabricCategory(f.category);
       (g[k] = g[k] || []).push(f);
     });
+    // Within each category, sort by supplier (A→Z), then by name (A→Z).
+    const collator = new Intl.Collator("en", { sensitivity: "base", numeric: true });
+    Object.keys(g).forEach((k) => {
+      g[k].sort((a, b) => {
+        const sa = (a.supplier || "").trim();
+        const sb = (b.supplier || "").trim();
+        if (sa && !sb) return -1;
+        if (!sa && sb) return 1;
+        const s = collator.compare(sa, sb);
+        if (s !== 0) return s;
+        return collator.compare(a.name || "", b.name || "");
+      });
+    });
     return g;
   }, [filtered]);
 
