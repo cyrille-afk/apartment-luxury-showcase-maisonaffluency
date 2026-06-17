@@ -1,0 +1,2 @@
+UPDATE public.designers SET name = 'Robicara' WHERE name = 'Robicara - Francesco Caracciolo di Marano';
+UPDATE public.trade_products SET brand_name = 'Robicara' WHERE brand_name = 'Robicara - Francesco Caracciolo di Marano';
