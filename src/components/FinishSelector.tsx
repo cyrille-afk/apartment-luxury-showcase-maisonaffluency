@@ -52,7 +52,7 @@ interface FinishSelectorProps {
    * (tier, per-LM price, currency). Used to compute the upholstery upcharge
    * added on top of the frame variant price.
    */
-  onFabricChange?: (fabric: SelectedFabricInfo | null) => void;
+  onFabricChange?: (fabric: SelectedFinishInfo | null) => void;
   /**
    * Fires after the linked-fabric list is fetched. `true` when this product
    * has one or more real linked fabric/leather swatches (excludes the
