@@ -222,6 +222,7 @@ const CategoryFilterBar = ({
 
 const TradeAxonometric = () => {
   const { isAdmin } = useAuth();
+  const navigate = useNavigate();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const savedDraftRef = useRef<any>(readSavedDraft());
