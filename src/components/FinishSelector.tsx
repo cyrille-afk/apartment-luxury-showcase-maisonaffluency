@@ -101,6 +101,14 @@ interface FinishSelectorProps {
    * duplicate the dropdown.
    */
   showWoodSection?: boolean;
+  /**
+   * Optional filter restricting which wood-bucket swatches are shown. Used
+   * by dual-axis products (e.g. pendant with "Rod Finish" × "Diffuser")
+   * so the rod-finish group doesn't accidentally pull in diffuser swatches
+   * like alabaster that also fall into the catch-all "Wood" bucket.
+   * Return true to keep the swatch.
+   */
+  woodFilter?: (swatchName: string) => boolean;
 }
 
 const normalizeFabricCategory = (category: string | null | undefined) => {
@@ -128,7 +136,7 @@ const isWoodCategory = (fabric: Fabric) => normalizeFabricCategory(fabric.catego
  * (Trade + Public). Tiles are grouped by category (Upholstery, Wood, …)
  * with a COM ("Customer's Own Material") tile always offered.
  */
-export default function FinishSelector({ pickId, className, productTitle, onUpholsteryTierChange, onFabricChange, onHasFabricsChange, onWoodFinishChange, onWoodFinishPricingChange, onWoodFinishesAvailable, includePricing = false, onSwatchImagesChange, woodLabel, showUpholsterySection = true, showWoodSection = true }: FinishSelectorProps) {
+export default function FinishSelector({ pickId, className, productTitle, onUpholsteryTierChange, onFabricChange, onHasFabricsChange, onWoodFinishChange, onWoodFinishPricingChange, onWoodFinishesAvailable, includePricing = false, onSwatchImagesChange, woodLabel, showUpholsterySection = true, showWoodSection = true, woodFilter }: FinishSelectorProps) {
 
   const [open, setOpen] = useState(false);
   const [fabrics, setFabrics] = useState<Fabric[]>([]);
@@ -417,7 +425,7 @@ export default function FinishSelector({ pickId, className, productTitle, onUpho
   const [openWood, setOpenWood] = useState(false);
   const [openCover, setOpenCover] = useState(false);
   const fabricTiles = grouped["Fabric & Leather"] || [];
-  const woodTiles = grouped["Wood"] || [];
+  const woodTiles = (grouped["Wood"] || []).filter((f) => !woodFilter || woodFilter(f.name));
   const coverTiles = grouped["Cover"] || [];
 
 

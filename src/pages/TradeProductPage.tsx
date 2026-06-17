@@ -1034,7 +1034,7 @@ const TradeProductPage: React.FC = () => {
   // single source for the frame-finish axis — suppress the duplicate base
   // dropdown even if not every base option has a perfectly-matching swatch.
   const hasWoodSwatches = linkedWoodFinishes.length > 0;
-  const suppressBaseAsFinish = isUpholsteredProduct && !baseAxisIsDim && isFinishAxisLabel(baseAxisLabelRaw) && (allBasesHaveSwatches || hasWoodSwatches);
+  const suppressBaseAsFinish = !baseAxisIsDim && isFinishAxisLabel(baseAxisLabelRaw) && (allBasesHaveSwatches || hasWoodSwatches);
   const suppressTopAsFinish = isUpholsteredProduct && !topAxisIsDim && isFinishAxisLabel(topAxisLabelRaw);
 
   // When the product has variants but the user hasn't picked one yet, fall back
@@ -1418,7 +1418,23 @@ const TradeProductPage: React.FC = () => {
               <FinishSelector
                   pickId={product.id}
                   productTitle={product.title}
-                  woodLabel={(product as any).wood_label_override}
+                  woodLabel={
+                    (product as any).wood_label_override
+                      || (product.base_axis_label
+                          ? `Select Your ${formatVariantAxisLabel(product.base_axis_label) || product.base_axis_label}`
+                          : null)
+                  }
+                  woodFilter={
+                    isDualAxis && baseOptions.length > 0
+                      ? (name) => {
+                          const n = name.trim().toLowerCase();
+                          return baseOptions.some((b) => {
+                            const nb = b.trim().toLowerCase();
+                            return nb === n || nb.includes(n) || n.includes(nb);
+                          });
+                        }
+                      : undefined
+                  }
                   includePricing
                   showUpholsterySection={isUpholsteredProduct}
                   showWoodSection
