@@ -361,10 +361,11 @@ const TradeAxonometric = () => {
   // Concierge hand-off: prefill from a `prepare_visualization_brief` proposal
   // dropped into sessionStorage by VisualizationBriefCard. Consume once on mount.
   useEffect(() => {
+    const consumeIncomingBrief = () => {
     let raw: string | null = null;
-    try { raw = sessionStorage.getItem("maf:axonometric:incoming-brief"); } catch { return; }
+    try { raw = sessionStorage.getItem(VIZ_BRIEF_INCOMING_KEY); } catch { return; }
     if (!raw) return;
-    try { sessionStorage.removeItem("maf:axonometric:incoming-brief"); } catch { /* ignore */ }
+    try { sessionStorage.removeItem(VIZ_BRIEF_INCOMING_KEY); } catch { /* ignore */ }
     let brief: any;
     try { brief = JSON.parse(raw); } catch { return; }
     if (!brief || typeof brief !== "object") return;
@@ -390,6 +391,10 @@ const TradeAxonometric = () => {
       setSourceImage(brief.source_image_url);
     }
     toast({ title: "Concierge brief loaded", description: "Brief and product overlays are ready. Add a source image if needed, then generate from this page." });
+    };
+    consumeIncomingBrief();
+    window.addEventListener("maf:axonometric:brief-ready", consumeIncomingBrief);
+    return () => window.removeEventListener("maf:axonometric:brief-ready", consumeIncomingBrief);
   }, [toast]);
 
   useEffect(() => {
