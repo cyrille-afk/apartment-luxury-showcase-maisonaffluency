@@ -275,31 +275,51 @@ export default function TradeFloorPlan() {
 
   // ---------- Save / Load ----------
   const saveLayout = async () => {
-    if (!planUrl) { toast({ title: "Upload a floor plan first", variant: "destructive" }); return; }
-    const payload = {
-      name: layoutName,
-      layout: {
-        plan_url: planUrl.startsWith("blob:") ? null : planUrl,
-        plan_natural: planNaturalSize,
-        px_per_cm: pxPerCm,
-        items,
-      } as any,
-    };
-    if (savedLayoutId) {
-      const { error } = await supabase.from("trade_floor_plan_layouts").update(payload).eq("id", savedLayoutId);
-      if (error) return toast({ title: "Save failed", description: error.message, variant: "destructive" });
+    if (!planUrl || planUrl.startsWith("blob:")) {
+      toast({ title: "Plan still uploading", description: "Wait for the floor plan to finish uploading.", variant: "destructive" });
+      return;
+    }
+    const { data: auth } = await supabase.auth.getUser();
+    const user = auth.user;
+    if (!user) { toast({ title: "Not signed in", variant: "destructive" }); return; }
+
+    // Ensure a trade_floor_plans row exists (required FK)
+    let currentPlanId = planId;
+    if (!currentPlanId) {
+      const { data, error } = await supabase
+        .from("trade_floor_plans")
+        .insert({ user_id: user.id, name: layoutName, plan_image_url: planUrl } as any)
+        .select("id").single();
+      if (error) { toast({ title: "Save failed", description: error.message, variant: "destructive" }); return; }
+      currentPlanId = data.id as string;
+      setPlanId(currentPlanId);
     } else {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return toast({ title: "Not signed in", variant: "destructive" });
+      await supabase.from("trade_floor_plans").update({ name: layoutName, plan_image_url: planUrl } as any).eq("id", currentPlanId);
+    }
+
+    const layoutPayload = {
+      plan_natural: planNaturalSize,
+      px_per_cm: pxPerCm,
+      items,
+    };
+
+    if (savedLayoutId) {
+      const { error } = await supabase
+        .from("trade_floor_plan_layouts")
+        .update({ name: layoutName, layout: layoutPayload as any })
+        .eq("id", savedLayoutId);
+      if (error) { toast({ title: "Save failed", description: error.message, variant: "destructive" }); return; }
+    } else {
       const { data, error } = await supabase
         .from("trade_floor_plan_layouts")
-        .insert({ ...payload, user_id: user.id })
+        .insert({ user_id: user.id, plan_id: currentPlanId, name: layoutName, layout: layoutPayload as any } as any)
         .select("id").single();
-      if (error) return toast({ title: "Save failed", description: error.message, variant: "destructive" });
-      setSavedLayoutId(data.id);
+      if (error) { toast({ title: "Save failed", description: error.message, variant: "destructive" }); return; }
+      setSavedLayoutId(data.id as string);
     }
     toast({ title: "Layout saved" });
   };
+
 
   // ---------- Export PDF ----------
   const exporting = useRef(false);
