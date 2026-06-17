@@ -132,14 +132,18 @@ const normalizeFabricCategory = (category: string | null | undefined) => {
   if (raw === "rattan" || raw === "cane" || raw === "wicker" || raw === "cover") {
     return "Cover";
   }
-  // Wood, Stone, Metal, Ceramic, Glass, etc. → frame finish group.
-  if (raw) return "Wood";
+  if (raw === "metal") return "Metal";
+  if (raw === "glass") return "Glass";
+  if (raw === "stone" || raw === "marble" || raw === "alabaster" || raw === "onyx") return "Stone";
+  if (raw === "ceramic") return "Ceramic";
+  if (raw === "wood" || raw === "rattan finish" || raw === "tinted rattan") return "Wood";
+  if (raw) return "Other";
   return "Fabric & Leather";
 };
 
 const isFabricCategory = (fabric: Fabric) => normalizeFabricCategory(fabric.category) === "Fabric & Leather";
 const isCoverCategory = (fabric: Fabric) => normalizeFabricCategory(fabric.category) === "Cover";
-const isWoodCategory = (fabric: Fabric) => normalizeFabricCategory(fabric.category) === "Wood";
+const isFinishCategory = (fabric: Fabric) => !isFabricCategory(fabric) && !isCoverCategory(fabric);
 
 /**
  * Pick the row icon (left of the accordion label) for a frame-finish group.
@@ -157,6 +161,10 @@ const pickFinishGlyph = (
   const has = (k: string) => cats.some((c) => c === k);
   const every = (k: string) => cats.length > 0 && cats.every((c) => c === k);
   const lbl = (label || "").toLowerCase();
+
+  // Label is the UI truth: force the visible row icon from the visible row text.
+  if (/\bmetal\b|\brod\b|\bhardware\b/.test(lbl)) return "metal";
+  if (/\bglass\b|\bdiffuser\b|\bshade\b|\bglobe\b/.test(lbl)) return "glass";
 
   if (every("wood")) return "wood";
   if (every("metal")) return "metal";
