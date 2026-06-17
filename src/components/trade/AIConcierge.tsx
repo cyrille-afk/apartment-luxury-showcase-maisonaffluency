@@ -1405,6 +1405,28 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
                   />
                 );
               }
+              if (item.kind === "viz_brief") {
+                return (
+                  <VisualizationBriefCard
+                    key={i}
+                    proposal={item.proposal}
+                    resolved={item.resolved}
+                    onResolved={(outcome) => {
+                      setTimeline((prev) => {
+                        const copy = prev.slice();
+                        const t = copy[i];
+                        if (t?.kind === "viz_brief") copy[i] = { ...t, resolved: outcome };
+                        const msg =
+                          outcome === "discarded"
+                            ? "Got it — brief discarded."
+                            : "✓ Brief sent to Axonometric Studio. Hit Generate when you're ready.";
+                        copy.push({ kind: "msg", role: "assistant", content: msg });
+                        return copy;
+                      });
+                    }}
+                  />
+                );
+              }
               if (item.kind !== "proposal") return null;
               return (
                 <TearsheetProposalCard
