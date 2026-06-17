@@ -285,7 +285,7 @@ export default function ProductFabricsPanel({
       {rows.length > 0 && (
         <div className={`grid ${gridCols} gap-1.5 items-center text-[9px] uppercase tracking-wider text-muted-foreground/70 pt-1`}>
           <span></span>
-          <span>Fabric</span>
+          <span>Finish</span>
           <span>Price tier label</span>
           <span>{sym} {labelA || "Size A"}</span>
           <span>{sym} {labelB || "Size B"}</span>
