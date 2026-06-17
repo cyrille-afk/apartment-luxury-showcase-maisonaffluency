@@ -159,7 +159,7 @@ export const withImperialPerLine = (raw: string | null | undefined): string => {
         if (tail) return `${head} | ${trimmedImp} - ${tail}`;
       }
       return `${t} | ${trimmedImp}`;
-
+    })
     .join("\n");
 };
 
