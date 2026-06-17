@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { Gem, Hexagon, Layers, Sparkles, TreeDeciduous } from "lucide-react";
+import { BrickWall, Hexagon, Layers, Sparkles, TreeDeciduous } from "lucide-react";
 
 type SpecGlyphProps = {
   symbol: string;
@@ -47,10 +47,10 @@ export default function SpecGlyph({ symbol, className }: SpecGlyphProps) {
   }
 
   if (symbol === "stone") {
-    // Faceted gem — alabaster, marble, onyx
+    // BrickWall — masonry / stone slab / marble / alabaster / onyx
     return (
       <span className={cn(baseClass, "text-gold")} aria-hidden="true">
-        <Gem className="h-[17px] w-[17px]" strokeWidth={1.75} />
+        <BrickWall className="h-[17px] w-[17px]" strokeWidth={1.75} />
       </span>
     );
   }
