@@ -529,11 +529,78 @@ const VariantSelectors: React.FC<{
       <FinishSelector
         pickId={product.id}
         productTitle={product.title}
-        woodLabel={(product as any).wood_label_override}
+        woodLabel={
+          (product as any).wood_label_override
+            || (product.base_axis_label
+              ? `Select Your ${formatVariantAxisLabel(product.base_axis_label) || product.base_axis_label}`
+              : null)
+        }
+        woodFilter={
+          isDualAxis && baseOptions.length > 0
+            ? (name) => {
+                const n = name.trim().toLowerCase();
+                return baseOptions.some((b) => {
+                  const nb = b.trim().toLowerCase();
+                  return nb === n || nb.includes(n) || n.includes(nb);
+                });
+              }
+            : undefined
+        }
+        topLabel={
+          product.top_axis_label
+            ? `Select Your ${formatVariantAxisLabel(product.top_axis_label) || product.top_axis_label}`
+            : null
+        }
+        topFilter={
+          isDualAxis && !topAxisIsDim && topOptions.length > 0
+            ? (name) => {
+                const n = name.trim().toLowerCase();
+                return topOptions.some((t) => {
+                  const nt = t.trim().toLowerCase();
+                  return nt === n || nt.includes(n) || n.includes(nt);
+                });
+              }
+            : undefined
+        }
         showUpholsterySection={isProductUpholstered(product)}
-        showWoodSection={!(isDualAxis && !baseAxisIsDim)}
+        showWoodSection
         onHasFabricsChange={setHasLinkedFabrics}
+        onWoodFinishesAvailable={setLinkedWoodFinishes}
         onSwatchImagesChange={onSwatchImagesChange}
+        onWoodFinishChange={(woodName) => {
+          if (!woodName) return;
+          const norm = (s: string) => s.trim().toLowerCase();
+          const nw = norm(woodName);
+          const match =
+            baseOptions.find((b) => norm(b) === nw)
+            || baseOptions.find((b) => nw.includes(norm(b)))
+            || baseOptions.find((b) => norm(b).includes(nw))
+            || woodName;
+          setSelBase(match);
+          let nextTop = selTop;
+          if (nextTop && !variantsList.some((x: any) => matchesDual(x, match, nextTop, selDualSize))) {
+            setSelTop(null);
+            nextTop = null;
+          }
+          onMaterialChange?.(match, { base: match, top: nextTop, size: selDualSize });
+        }}
+        onTopFinishChange={(topName) => {
+          if (!topName) return;
+          const norm = (s: string) => s.trim().toLowerCase();
+          const nw = norm(topName);
+          const match =
+            topOptions.find((t) => norm(t) === nw)
+            || topOptions.find((t) => nw.includes(norm(t)))
+            || topOptions.find((t) => norm(t).includes(nw))
+            || topName;
+          setSelTop(match);
+          let nextBase = selBase;
+          if (nextBase && !variantsList.some((x: any) => matchesDual(x, nextBase, match, selDualSize))) {
+            setSelBase(null);
+            nextBase = null;
+          }
+          onMaterialChange?.(match, { base: nextBase, top: match, size: selDualSize });
+        }}
         onUpholsteryTierChange={(rawTier) => {
           if (!rawTier) return;
           const candidates = topOptions.filter(
