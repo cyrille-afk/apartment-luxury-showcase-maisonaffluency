@@ -249,7 +249,7 @@ PHOTOREALISTIC MATERIAL & LIGHTING:
 - GLASS: Subtle reflections, transparency, edge refractions.
 - LIGHTING: Warm natural light (3500-4500K) with soft penumbra shadows and ambient occlusion.
 
-Render from an elevated oblique angle (approximately 45° azimuth, 30° elevation) showing the full interior as an open cutaway. Style: ${defaultStyle}. The result must look like a professional Corona/V-Ray archviz output.`;
+Render from an elevated oblique angle (approximately 45° azimuth, 30° elevation) showing the full interior as an open cutaway. Style: ${defaultStyle}. The result must look like a professional Corona/V-Ray archviz output.${NO_DRAFTING_FRAME}`;
     } else if (mode === "section_to_axo") {
       prompt = `RULE #1 — LAYOUT FIDELITY (MOST IMPORTANT — VIOLATING IT MEANS TOTAL FAILURE):
 You are given a 2D architectural section drawing. Your output MUST faithfully reproduce the EXACT spatial arrangement shown:
