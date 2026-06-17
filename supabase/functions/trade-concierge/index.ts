@@ -2919,6 +2919,34 @@ serve(async (req) => {
     const { designersList, piecesList: fullPiecesList, showroomBrands } = await loadCatalogContext(supabase, includePieces && !useRag);
     const piecesList = useRag ? (ragResult as { contextText: string }).contextText : fullPiecesList;
 
+    if (hasVisualizationVerb) {
+      const tearsheetProposal = visualizationNeedsCatalogPicks
+        ? await buildDeterministicTearsheetProposal(
+            supabase,
+            Array.isArray((ragResult as any)?.rows) ? (ragResult as any).rows : [],
+            effectiveBrief.brief,
+            userConversationText,
+          )
+        : null;
+      const vizProposal = buildVisualizationBriefProposal({
+        title: tearsheetProposal?.args?.title || effectiveBrief.brief.summary || null,
+        room: effectiveBrief.brief.room,
+        style: effectiveBrief.brief.style,
+        materials: effectiveBrief.brief.materials,
+        summary: effectiveBrief.brief.summary,
+        requestText: lastUserMsg,
+        pickIds: Array.isArray(tearsheetProposal?.args?.pick_ids) ? tearsheetProposal.args.pick_ids : [],
+        preview: Array.isArray(tearsheetProposal?.preview) ? tearsheetProposal.preview : [],
+      });
+      const proposals = tearsheetProposal ? [tearsheetProposal, vizProposal] : [vizProposal];
+      return sseProposalsThenTextResponse(
+        proposals,
+        tearsheetProposal
+          ? "Here's a first edit and the render brief — tap Render Scene when you're ready to open the studio."
+          : "I've prepared the render brief — tap Render Scene when you're ready to open the studio.",
+      );
+    }
+
     // Fire-and-forget: persist a debug trace of what RAG retrieved for this turn.
     if (ragResult) {
       recordRagTrace(supabase, {
