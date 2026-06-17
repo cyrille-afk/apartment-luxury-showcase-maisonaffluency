@@ -93,6 +93,14 @@ interface FabricSelectorProps {
    * products (e.g. wood/rattan benches) that still have linked frame finishes.
    */
   showUpholsterySection?: boolean;
+  /**
+   * When false, the wood/stone/metal frame-finish swatch accordion is hidden.
+   * Used by product pages that already render an explicit Base × Top variant
+   * dropdown pair covering the same axis (e.g. a pendant with "Rod Finish" ×
+   * "Diffuser" dual-axis size_variants) — otherwise the swatch picker would
+   * duplicate the dropdown.
+   */
+  showWoodSection?: boolean;
 }
 
 const normalizeFabricCategory = (category: string | null | undefined) => {
