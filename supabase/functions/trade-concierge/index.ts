@@ -2805,6 +2805,8 @@ serve(async (req) => {
     // semantic-cache hits from leaking a stale "selection" plan into a new
     // exploratory turn.
     const lastUserMsgLower = lastUserMsg.toLowerCase();
+    const hasVisualizationVerb = /\b(render|visualise|visualize|mock up|picture it|see it in situ|generate (?:a )?(?:view|scene|axonometric|render)|show me (?:how this would look|in (?:the )?(?:room|space))|image of the room|let me see the space)\b/.test(lastUserMsgLower);
+    const visualizationNeedsCatalogPicks = hasVisualizationVerb && /\b(overlay|picks?|pieces?|selection|tearsheet|catalog|bronze|mohair|velvet|leather|walnut|oak|brass|marble|stone|glass|silk|wool|linen|bouclé|drawing-room|drawing room|dining room|bedroom|salon|library)\b/.test(lastUserMsgLower);
     const hasExplicitSelectionVerb = /\b(propose|suggest|recommend|show me|pull (?:together|me)|curate|reinterpret|alternatives?|options?|first edit|draft (?:a )?(?:tearsheet|edit|selection)|put together|assemble|i'?d like to see|let'?s see|what do you have)\b/.test(lastUserMsgLower);
     const opensWithLookingFor = /^\s*(?:i(?:'m| am)?\s+(?:looking|searching|after|hunting|sourcing|in the market)|we(?:'re| are)?\s+(?:looking|searching|after))\b/.test(lastUserMsgLower);
 
@@ -2828,15 +2830,28 @@ serve(async (req) => {
     // latest user message is an opening brief without an explicit selection
     // verb. Forces the concierge to ask clarifying questions on turn 1
     // instead of inferring intent from an earlier conversation.
+    if (hasVisualizationVerb) {
+      const plan = effectiveBrief.plan.filter((t) => t !== "prepare_visualization_brief");
+      const wantsTearsheet = plan.includes("propose_tearsheet") || plan.includes("add_to_tearsheet");
+      effectiveBrief = {
+        ...effectiveBrief,
+        intent: wantsTearsheet || visualizationNeedsCatalogPicks ? "selection" : effectiveBrief.intent,
+        plan: visualizationNeedsCatalogPicks && !wantsTearsheet
+          ? ["propose_tearsheet", "prepare_visualization_brief"]
+          : [...plan, "prepare_visualization_brief"],
+      };
+    }
+
     if (
       !hasExplicitSelectionVerb &&
+      !hasVisualizationVerb &&
       opensWithLookingFor &&
       effectiveBrief.plan.some((t) => t === "propose_tearsheet" || t === "add_to_tearsheet" || t === "draft_quote")
     ) {
       console.log("[concierge discovery-gate] stripping plan — opening brief without selection verb", { lastUserMsg, originalPlan: effectiveBrief.plan });
       effectiveBrief = { ...effectiveBrief, intent: "discovery", plan: [] };
     }
-    if (!hasExplicitSelectionVerb && opensWithLookingFor) {
+    if (!hasExplicitSelectionVerb && !hasVisualizationVerb && opensWithLookingFor) {
       console.log("[concierge discovery-gate] deterministic opening-brief reply", { lastUserMsg });
       return sseTextResponse(buildOpeningBriefDiscoveryReply(lastUserMsg, langCode));
     }
@@ -2855,7 +2870,7 @@ serve(async (req) => {
     const userSignalsBlock = userMemory ? `${userSignals}\n\n${userMemory}` : userSignals;
 
     // Decide final catalog mode: classifier wins, heuristic is the fallback. RAG replaces full load when it returned anything.
-    const includePieces = sentiment.needs_catalog || heuristicNeedsPieces || effectiveBrief.plan.includes("propose_tearsheet");
+    const includePieces = sentiment.needs_catalog || heuristicNeedsPieces || effectiveBrief.plan.includes("propose_tearsheet") || visualizationNeedsCatalogPicks;
     const useRag = includePieces && !!ragResult;
     const { designersList, piecesList: fullPiecesList, showroomBrands } = await loadCatalogContext(supabase, includePieces && !useRag);
     const piecesList = useRag ? (ragResult as { contextText: string }).contextText : fullPiecesList;
@@ -3070,6 +3085,17 @@ serve(async (req) => {
           const shippingBuffers = allBuffers.filter((b) => b.name === "estimate_shipping");
           const vizBriefBuffers = allBuffers.filter((b) => b.name === "prepare_visualization_brief");
           const orderedBuffers = [...tearsheetBuffers, ...quoteBuffers, ...ffeBuffers, ...shippingBuffers, ...vizBriefBuffers];
+          const firstTearsheetPicks = (() => {
+            for (const b of tearsheetBuffers) {
+              try {
+                const parsed = JSON.parse(b.argsText || "{}");
+                if (Array.isArray(parsed.pick_ids) && parsed.pick_ids.length > 0) {
+                  return parsed.pick_ids.filter((id: unknown) => typeof id === "string").slice(0, 12);
+                }
+              } catch { /* ignore malformed tool args */ }
+            }
+            return [] as string[];
+          })();
           if (tearsheetBuffers.length && quoteBuffers.length) {
             console.log(`[concierge flush] chained turn: ${tearsheetBuffers.length} tearsheet + ${quoteBuffers.length} quote proposal(s), flushing tearsheet→quote`);
           }
@@ -3229,7 +3255,9 @@ serve(async (req) => {
               const briefNotes = typeof parsed.brief_notes === "string" ? parsed.brief_notes.slice(0, 1200) : "";
               const sourceImageUrl = typeof parsed.source_image_url === "string" && /^https?:\/\//.test(parsed.source_image_url)
                 ? parsed.source_image_url : null;
-              const rawPickIds: string[] = Array.isArray(parsed.pick_ids) ? parsed.pick_ids : [];
+              const rawPickIds: string[] = Array.isArray(parsed.pick_ids) && parsed.pick_ids.length > 0
+                ? parsed.pick_ids
+                : firstTearsheetPicks;
               const pickIds = rawPickIds
                 .filter((id) => typeof id === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id))
                 .slice(0, 12);
@@ -3931,6 +3959,46 @@ serve(async (req) => {
           return true;
         };
 
+        const backfillVisualizationBriefIfNeeded = () => {
+          if (!effectiveBrief.plan.includes("prepare_visualization_brief")) return;
+          const buffers = Array.from(toolCallBuffers.entries());
+          const hasVizBrief = buffers.some(([, b]) => b.name === "prepare_visualization_brief");
+          if (hasVizBrief) return;
+          const firstTearsheet = buffers.find(([, b]) => b.name === "propose_tearsheet" || b.name === "add_to_tearsheet");
+          if (visualizationNeedsCatalogPicks && !firstTearsheet) return;
+          let pickIds: string[] = [];
+          let title = effectiveBrief.brief.summary || "Render brief";
+          if (firstTearsheet) {
+            try {
+              const parsed = JSON.parse(firstTearsheet[1].argsText || "{}");
+              if (Array.isArray(parsed.pick_ids)) pickIds = parsed.pick_ids.filter((id: unknown) => typeof id === "string").slice(0, 12);
+              if (typeof parsed.title === "string" && parsed.title.trim()) title = parsed.title.trim();
+            } catch { /* keep planner-derived fallback */ }
+          }
+          const room = effectiveBrief.brief.room || (/belgravia/.test(lastUserMsgLower) ? "Belgravia drawing-room" : null);
+          const style = /editorial luxury/i.test(lastUserMsg) ? "Editorial Luxury" : (effectiveBrief.brief.style || "Editorial Luxury");
+          const materials = effectiveBrief.brief.materials.length ? effectiveBrief.brief.materials.join(", ") : "the requested palette and materials";
+          const briefNotes = [
+            room ? `${room}:` : "Scene:",
+            effectiveBrief.brief.summary || lastUserMsg,
+            `Render in ${style} with ${materials}; compose the selected Maison Affluency pieces as overlay candidates with careful scale, sightlines and material fidelity.`,
+          ].join(" ").slice(0, 1200);
+          const maxIdx = buffers.reduce((m, [i]) => (i > m ? i : m), -1);
+          toolCallBuffers.set(maxIdx + 1, {
+            id: `synthetic-viz-${crypto.randomUUID()}`,
+            name: "prepare_visualization_brief",
+            argsText: JSON.stringify({
+              mode: "composite",
+              style_preset: style === "Editorial Luxury" ? "Editorial Luxury" : "Editorial Luxury",
+              title: title.slice(0, 80),
+              room_label: room || effectiveBrief.brief.room || null,
+              brief_notes: briefNotes,
+              pick_ids: pickIds,
+            }),
+          });
+          console.log(`[concierge backfill] synthesized prepare_visualization_brief (${pickIds.length} picks)`);
+        };
+
         // ----- Inner orchestration loop (Step 4) -----
         // After the main stream finishes, if the upstream planner asked for a
         // chained `propose_tearsheet → draft_quote` but the model only emitted
@@ -4050,7 +4118,8 @@ serve(async (req) => {
             b.name === "add_to_tearsheet" ||
             b.name === "draft_quote" ||
             b.name === "add_to_quote" ||
-            b.name === "propose_ffe_rows"
+            b.name === "propose_ffe_rows" ||
+            b.name === "prepare_visualization_brief"
           );
           if (hasAnyDeliverable) return;
           const promisedByPlan =
@@ -4148,6 +4217,32 @@ serve(async (req) => {
             });
             controller.enqueue(encoder.encode(`event: proposal\ndata: ${JSON.stringify(proposal)}\n\n`));
             console.log(`[concierge promise-recovery] emitted propose_tearsheet (${pickIds.length} picks)`);
+            if (effectiveBrief.plan.includes("prepare_visualization_brief")) {
+              const room = effectiveBrief.brief.room || (/belgravia/.test(lastUserMsgLower) ? "Belgravia drawing-room" : null);
+              const stylePreset = "Editorial Luxury";
+              const materials = effectiveBrief.brief.materials.length ? effectiveBrief.brief.materials.join(", ") : "the requested palette and materials";
+              const vizProposal = {
+                tool: "prepare_visualization_brief",
+                tool_call_id: `synthetic-viz-${crypto.randomUUID()}`,
+                args: {
+                  mode: "composite",
+                  style_preset: stylePreset,
+                  title: (typeof parsed.title === "string" && parsed.title.trim() ? parsed.title : "Render brief").slice(0, 80),
+                  room_label: room,
+                  brief_notes: `${room ? `${room}: ` : ""}${effectiveBrief.brief.summary || lastUserMsg} Render in ${stylePreset} with ${materials}; use the selected Maison Affluency pieces as overlay candidates with careful scale, sightlines and material fidelity.`.slice(0, 1200),
+                  pick_ids: pickIds.slice(0, 12),
+                  source_image_url: null,
+                },
+                preview: preview.slice(0, 12),
+              };
+              toolCallBuffers.set(maxIdx + 2, {
+                id: vizProposal.tool_call_id,
+                name: "prepare_visualization_brief",
+                argsText: JSON.stringify(vizProposal.args),
+              });
+              controller.enqueue(encoder.encode(`event: proposal\ndata: ${JSON.stringify(vizProposal)}\n\n`));
+              console.log(`[concierge promise-recovery] emitted prepare_visualization_brief (${pickIds.length} picks)`);
+            }
           } catch (e) {
             console.error("[concierge promise-recovery] failed:", e);
           }
@@ -4266,7 +4361,7 @@ serve(async (req) => {
               const KNOWN = new Set([
                 "propose_tearsheet", "add_to_tearsheet", "draft_quote", "add_to_quote",
                 "propose_ffe_rows", "estimate_shipping", "check_spatial_fit",
-                "check_spatial_fit_batch", "log_spatial_fit_edit",
+                "check_spatial_fit_batch", "log_spatial_fit_edit", "prepare_visualization_brief",
               ]);
               if (typeof name === "string" && KNOWN.has(name)) {
                 const argsText = typeof params === "string" ? params : JSON.stringify(params);
@@ -4293,6 +4388,7 @@ serve(async (req) => {
           //     the quote's pick_ids BEFORE flushProposal so deterministic ordering
           //     (tearsheet → quote) holds without buffering SSE writes.
           backfillTearsheetIfNeeded();
+          backfillVisualizationBriefIfNeeded();
           await flushProposal();
           await emitDeterministicTearsheetFallback();
           // (1b) Promise-without-delivery recovery: the model wrote prose like
