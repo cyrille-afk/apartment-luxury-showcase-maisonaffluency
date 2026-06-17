@@ -209,6 +209,16 @@ serve(async (req) => {
     let prompt = "";
     const defaultStyle = buildStyle();
 
+    // Hard guard against the model hallucinating drafting-sheet artifacts
+    // (title blocks, sheet numbers, legends, scale bars, project codes, watermarks).
+    // Without this, Gemini auto-appends a fake title block with gibberish text
+    // because architectural drawings in its training set almost always have one.
+    const NO_DRAFTING_FRAME = `\n\nABSOLUTELY FORBIDDEN — NO TEXT OR DRAFTING FRAME:
+- Do NOT add a title block, drawing border, sheet number, project name, scale bar, north arrow, legend, key, or revision table.
+- Do NOT render any text, labels, room names, dimensions, annotations, watermarks, logos, or signatures anywhere in the image.
+- Do NOT add a paper background, drawing sheet edge, hole-punch marks, or any "architectural drawing sheet" framing.
+- Output ONLY the 3D render on a clean, neutral background. Any text or title block in the output is a TOTAL FAILURE.`;
+
     if (mode === "elevation_to_axo") {
       prompt = `RULE #1 — LAYOUT FIDELITY (THIS IS THE MOST IMPORTANT RULE — VIOLATING IT MEANS TOTAL FAILURE):
 You are given a 2D floor plan drawing. Your output MUST be an EXACT 3D extrusion of that drawing's layout. This means:
@@ -239,7 +249,7 @@ PHOTOREALISTIC MATERIAL & LIGHTING:
 - GLASS: Subtle reflections, transparency, edge refractions.
 - LIGHTING: Warm natural light (3500-4500K) with soft penumbra shadows and ambient occlusion.
 
-Render from an elevated oblique angle (approximately 45° azimuth, 30° elevation) showing the full interior as an open cutaway. Style: ${defaultStyle}. The result must look like a professional Corona/V-Ray archviz output.`;
+Render from an elevated oblique angle (approximately 45° azimuth, 30° elevation) showing the full interior as an open cutaway. Style: ${defaultStyle}. The result must look like a professional Corona/V-Ray archviz output.${NO_DRAFTING_FRAME}`;
     } else if (mode === "section_to_axo") {
       prompt = `RULE #1 — LAYOUT FIDELITY (MOST IMPORTANT — VIOLATING IT MEANS TOTAL FAILURE):
 You are given a 2D architectural section drawing. Your output MUST faithfully reproduce the EXACT spatial arrangement shown:
@@ -262,9 +272,9 @@ Every element visible in the section must appear at the EXACT same position, hei
 PHOTOREALISTIC MATERIALS: PBR stone veining, visible wood grain, fabric texture with creasing, distinct metal finishes.
 LIGHTING: Warm natural (3500-4500K) with soft shadows and ambient occlusion. Interior walls: light plaster — NEVER dark or thick.
 
-Style: ${defaultStyle}. The result must look like a professional Corona/V-Ray archviz output.`;
+Style: ${defaultStyle}. The result must look like a professional Corona/V-Ray archviz output.${NO_DRAFTING_FRAME}`;
     } else if (mode === "stylize") {
-      prompt = `Dramatically enhance this architectural 3D axonometric view to professional archviz portfolio quality. Apply physically-based material rendering: realistic marble/stone veining with depth, visible wood grain and plank variation, fabric textures with weave and natural creasing, distinct metal finishes. Add warm natural lighting (3500-4500K) with soft shadows featuring proper penumbra, ambient occlusion in all corners and junctions, and subtle atmospheric perspective. Keep the geometry and layout exactly the same but elevate every surface to photorealistic quality matching ${defaultStyle}.`;
+      prompt = `Dramatically enhance this architectural 3D axonometric view to professional archviz portfolio quality. Apply physically-based material rendering: realistic marble/stone veining with depth, visible wood grain and plank variation, fabric textures with weave and natural creasing, distinct metal finishes. Add warm natural lighting (3500-4500K) with soft shadows featuring proper penumbra, ambient occlusion in all corners and junctions, and subtle atmospheric perspective. Keep the geometry and layout exactly the same but elevate every surface to photorealistic quality matching ${defaultStyle}.${NO_DRAFTING_FRAME}`;
     } else if (mode === "composite") {
       prompt = `You are given a source architectural view and one or more product/furniture images to incorporate into it.
 
