@@ -626,7 +626,7 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
       setInput("");
       setAttachments([]);
       window.dispatchEvent(new Event("maf:axonometric:brief-ready"));
-      navigate("/trade/axonometric");
+      navigate(isAdmin ? "/trade/axonometric" : "/trade/axonometric-requests");
       return;
     }
 
