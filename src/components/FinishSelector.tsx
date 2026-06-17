@@ -102,13 +102,24 @@ interface FinishSelectorProps {
    */
   showWoodSection?: boolean;
   /**
-   * Optional filter restricting which wood-bucket swatches are shown. Used
-   * by dual-axis products (e.g. pendant with "Rod Finish" × "Diffuser")
-   * so the rod-finish group doesn't accidentally pull in diffuser swatches
-   * like alabaster that also fall into the catch-all "Wood" bucket.
+   * Optional filter restricting which wood-bucket swatches are shown in the
+   * primary frame-finish group. Used by dual-axis products (e.g. pendant with
+   * "Rod Finish" × "Diffuser") so the rod-finish group doesn't accidentally
+   * pull in diffuser swatches like alabaster that also fall into the
+   * catch-all non-upholstery bucket.
    * Return true to keep the swatch.
    */
   woodFilter?: (swatchName: string) => boolean;
+  /**
+   * Optional second swatch group for the Top axis on dual-axis products
+   * (e.g. the diffuser on a pendant). When provided, swatches matching
+   * `topFilter` render in their own accordion below the base group.
+   */
+  topFilter?: (swatchName: string) => boolean;
+  /** Label for the top-axis swatch accordion (e.g. "Select Your Diffuser"). */
+  topLabel?: string | null;
+  /** Fires when the user picks a top-axis swatch. */
+  onTopFinishChange?: (name: string | null) => void;
 }
 
 const normalizeFabricCategory = (category: string | null | undefined) => {
