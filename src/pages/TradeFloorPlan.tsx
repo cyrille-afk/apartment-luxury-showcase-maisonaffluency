@@ -45,7 +45,9 @@ export default function TradeFloorPlan() {
   const { isAdmin } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { products } = useTradeProducts();
+  const { allProducts: products } = useTradeProducts();
+  const [planId, setPlanId] = useState<string | null>(null);
+  const [uploadingPlan, setUploadingPlan] = useState(false);
 
   // ---------- Admin gate + audit log ----------
   useEffect(() => {
@@ -100,15 +102,37 @@ export default function TradeFloorPlan() {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   // ---------- Plan upload ----------
-  const onPlanFile = useCallback((file: File) => {
-    const url = URL.createObjectURL(file);
-    setPlanUrl(url);
+  const onPlanFile = useCallback(async (file: File) => {
+    // Show a local preview immediately
+    const blobUrl = URL.createObjectURL(file);
+    setPlanUrl(blobUrl);
     setPxPerCm(null);
     setItems([]);
+    setPlanId(null);
+    setSavedLayoutId(null);
     const img = new window.Image();
     img.onload = () => setPlanNaturalSize({ w: img.naturalWidth, h: img.naturalHeight });
-    img.src = url;
-  }, []);
+    img.src = blobUrl;
+
+    // Upload to public assets bucket so Save / Export work across sessions
+    setUploadingPlan(true);
+    try {
+      const ext = (file.name.split(".").pop() || "png").toLowerCase();
+      const path = `floor-plans/${crypto.randomUUID()}.${ext}`;
+      const { error } = await supabase.storage.from("assets").upload(path, file, {
+        contentType: file.type || "image/png",
+        upsert: false,
+      });
+      if (error) throw error;
+      const { data } = supabase.storage.from("assets").getPublicUrl(path);
+      setPlanUrl(data.publicUrl);
+      URL.revokeObjectURL(blobUrl);
+    } catch (err: any) {
+      toast({ title: "Plan upload failed", description: err?.message ?? String(err), variant: "destructive" });
+    } finally {
+      setUploadingPlan(false);
+    }
+  }, [toast]);
 
   // ---------- Stage sizing ----------
   const stageMaxW = 900;
