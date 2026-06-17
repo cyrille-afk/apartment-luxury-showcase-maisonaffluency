@@ -56,6 +56,25 @@ const STYLE_PRESETS = [
   { value: "contemporary Scandinavian design with light wood, white walls, and soft daylight", label: "Scandinavian" },
 ];
 
+const AXONOMETRIC_DRAFT_KEY = "maf:axonometric-studio:draft:v2";
+
+const readSavedDraft = () => {
+  if (typeof window === "undefined") return null;
+  try {
+    return JSON.parse(localStorage.getItem(AXONOMETRIC_DRAFT_KEY) || "null");
+  } catch {
+    return null;
+  }
+};
+
+const clearSavedDraft = () => {
+  try {
+    localStorage.removeItem(AXONOMETRIC_DRAFT_KEY);
+  } catch {
+    // no-op
+  }
+};
+
 
 
 const ProductPicker = ({
@@ -246,6 +265,7 @@ const TradeAxonometric = () => {
   const [aiTextureUploading, setAiTextureUploading] = useState(false);
   const [aiTexturePickerOpen, setAiTexturePickerOpen] = useState(false);
   const textureInputRef = useRef<HTMLInputElement>(null);
+  const draftRestoredRef = useRef(false);
 
   // Wallcovering products from platform catalog
   const { allProducts: allTradeProdsWall } = useTradeProducts();
