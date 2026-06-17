@@ -2870,7 +2870,7 @@ serve(async (req) => {
     const userSignalsBlock = userMemory ? `${userSignals}\n\n${userMemory}` : userSignals;
 
     // Decide final catalog mode: classifier wins, heuristic is the fallback. RAG replaces full load when it returned anything.
-    const includePieces = sentiment.needs_catalog || heuristicNeedsPieces || effectiveBrief.plan.includes("propose_tearsheet");
+    const includePieces = sentiment.needs_catalog || heuristicNeedsPieces || effectiveBrief.plan.includes("propose_tearsheet") || visualizationNeedsCatalogPicks;
     const useRag = includePieces && !!ragResult;
     const { designersList, piecesList: fullPiecesList, showroomBrands } = await loadCatalogContext(supabase, includePieces && !useRag);
     const piecesList = useRag ? (ragResult as { contextText: string }).contextText : fullPiecesList;
