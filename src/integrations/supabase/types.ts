@@ -6415,6 +6415,10 @@ export type Database = {
         }
         Returns: string
       }
+      log_unauthorized_access: {
+        Args: { _details?: Json; _route: string }
+        Returns: undefined
+      }
       match_catalog: {
         Args: { match_count?: number; query_embedding: string }
         Returns: {
