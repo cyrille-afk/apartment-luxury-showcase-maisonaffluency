@@ -23,6 +23,7 @@ type Props = {
 
 export function VisualizationBriefCard({ proposal, resolved, onResolved }: Props) {
   const navigate = useNavigate();
+  const { isAdmin } = useAuth();
   const { args, preview } = proposal;
   const title = args.title || args.room_label || "Visualization brief";
 
@@ -40,7 +41,10 @@ export function VisualizationBriefCard({ proposal, resolved, onResolved }: Props
       /* sessionStorage full — degrade gracefully, studio still opens */
     }
     onResolved("opened");
-    navigate("/trade/axonometric");
+    // Admins go straight into the in-house Studio; trade users land on the
+    // request-submission flow with the brief prefilled (the Studio page is
+    // admin-only and would otherwise bounce them back to /trade).
+    navigate(isAdmin ? "/trade/axonometric" : "/trade/axonometric-requests");
   };
 
   return (
