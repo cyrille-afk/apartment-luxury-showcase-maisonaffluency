@@ -2269,6 +2269,21 @@ function sseProposalThenTextResponse(proposal: unknown, text: string): Response 
   return new Response(stream, { headers: { ...corsHeaders, "Content-Type": "text/event-stream" } });
 }
 
+function sseProposalsThenTextResponse(proposals: unknown[], text: string): Response {
+  const encoder = new TextEncoder();
+  const stream = new ReadableStream({
+    start(controller) {
+      for (const proposal of proposals) {
+        controller.enqueue(encoder.encode(`event: proposal\ndata: ${JSON.stringify(proposal)}\n\n`));
+      }
+      controller.enqueue(encoder.encode(`data: ${JSON.stringify({ choices: [{ delta: { content: text } }] })}\n\n`));
+      controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+      controller.close();
+    },
+  });
+  return new Response(stream, { headers: { ...corsHeaders, "Content-Type": "text/event-stream" } });
+}
+
 function titleTokens(value: string | null | undefined): string[] {
   return normalizeLoose(value).split(/\s+/).filter((t) => t.length > 2 && !GENERIC_PRODUCT_TOKENS.has(t));
 }
