@@ -526,6 +526,31 @@ const VariantSelectors: React.FC<{
         />
       )}
 
+      {/* Model-style base axis whose options carry dimensions (e.g. Bora Sconce
+          Uplight / Downlight) — render BEFORE the finish swatches and use the
+          dimensions icon since the value is fundamentally a size choice. */}
+      {isBaseOnly && !baseAxisIsDim && !suppressBaseAsFinish
+        && baseOptions.length > 0 && baseOptions.every(looksLikeDimension) && (
+        <ExpandableSpec
+          icon={specIcon("📐")}
+          text={withImperialPerLine(baseOptions.join("\n"))}
+          placeholder={getBasePlaceholder(product)}
+          singleValueLabel={formatVariantAxisLabel(product.base_axis_label) || undefined}
+          emphasized
+          value={selBase != null ? Math.max(0, baseOptions.indexOf(selBase)) : null}
+          onChange={(idx) => {
+            if (idx < 0) {
+              setSelBase(null);
+              onMaterialChange?.(null, { base: null, top: null, size: null });
+              return;
+            }
+            const v = baseOptions[idx] ?? null;
+            setSelBase(v);
+            onMaterialChange?.(v, { base: v, top: null, size: null });
+          }}
+        />
+      )}
+
       <FinishSelector
         pickId={product.id}
         productTitle={product.title}
