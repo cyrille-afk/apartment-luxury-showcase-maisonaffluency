@@ -667,7 +667,7 @@ const VariantSelectors: React.FC<{
               : undefined
           }
         />
-      ) : product.materials ? (
+      ) : product.materials && !hasLinkedFabrics && !isProductUpholstered(product) ? (
         (() => {
           const parsed = parseMaterialsFallback(product.materials);
           return (
@@ -682,8 +682,10 @@ const VariantSelectors: React.FC<{
         })()
       ) : null}
 
-      {/* Materials description paragraph — shown AFTER all dropdowns, before Handcrafted */}
-      {product.materials_description?.trim() && (
+      {/* Materials description paragraph — shown AFTER all dropdowns, before Handcrafted.
+          Suppressed when FabricSelector already drives fabric + wood selections to
+          avoid restating "Varnished solid ash & fabric" type catch-all summaries. */}
+      {product.materials_description?.trim() && !hasLinkedFabrics && !isProductUpholstered(product) && (
         <ExpandableSpec
           icon={specIcon("⬗")}
           text={product.materials_description.trim()}
