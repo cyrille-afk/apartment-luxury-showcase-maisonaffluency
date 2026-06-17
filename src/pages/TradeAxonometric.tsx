@@ -78,7 +78,7 @@ const ProductPicker = ({
     let all = allTradeProds.filter((p) => p.image_url);
     if (category) all = all.filter((p) => p.category === category);
     if (subcategory) all = all.filter((p) => p.subcategory === subcategory);
-    if (brand) all = all.filter((p) => p.brand_name === brand);
+    if (brand) all = all.filter((p) => p.brand_name === brand || (p as any).reedition_by === brand);
     // Keyword search
     if (search.trim()) {
       const q = search.toLowerCase();
