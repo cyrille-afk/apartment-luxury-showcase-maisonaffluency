@@ -37,6 +37,14 @@ export default function SpecGlyph({ symbol, className }: SpecGlyphProps) {
     );
   }
 
+  if (symbol === "finish") {
+    return (
+      <span className={cn(baseClass, "text-gold")} aria-hidden="true">
+        <Sparkles className="h-[17px] w-[17px]" strokeWidth={1.75} />
+      </span>
+    );
+  }
+
 
   return (
     <span className={cn(baseClass, "text-gold")} aria-hidden="true">
