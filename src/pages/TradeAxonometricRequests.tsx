@@ -720,13 +720,22 @@ const TradeAxonometricRequests = () => {
                   )}
                 </div>
                 {req.result_image_url && (
-                  <a href={req.result_image_url} target="_blank" rel="noopener noreferrer" className="shrink-0">
-                    <img
-                      src={req.result_image_url}
-                      alt="Result"
-                      className="w-24 h-24 object-cover rounded-md border border-foreground/20"
-                    />
-                  </a>
+                  <div className="shrink-0 flex flex-col items-end gap-1.5">
+                    <a href={req.result_image_url} target="_blank" rel="noopener noreferrer">
+                      <img
+                        src={req.result_image_url}
+                        alt="Result"
+                        className="w-24 h-24 object-cover rounded-md border border-foreground/20"
+                      />
+                    </a>
+                    <Link
+                      to={`/trade/visualiser?fromAxo=${req.id}`}
+                      className="inline-flex items-center gap-1 font-body text-[10px] uppercase tracking-wider text-foreground hover:underline"
+                      title="Open this render in the Visualiser to swap fabrics and finishes"
+                    >
+                      <Wand2 className="w-3 h-3" /> Open in Visualiser
+                    </Link>
+                  </div>
                 )}
               </div>
             );
