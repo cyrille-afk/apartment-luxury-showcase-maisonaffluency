@@ -471,7 +471,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                     <ExpandableSpec
                       icon={specIcon("📐")}
                       text={withImperialPerLine(axes.dualSizeOptions.join("\n"))}
-                      placeholder="Select Your Sofa Size"
+                      placeholder="Select Your Size"
                       emphasized
                       value={sizeIdx}
                       onChange={(idx) => {
@@ -566,7 +566,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                   <ExpandableSpec
                     icon={specIcon("📐")}
                     text={withImperialPerLine(axes.singleSizeOptions.join("\n"))}
-                    placeholder="Select Your Sofa Size"
+                    placeholder="Select Your Size"
                     emphasized
                     value={singleSplitSizeIdx}
                     onChange={(idx) => setSingleSplitSizeIdx(idx < 0 ? null : idx)}
@@ -596,7 +596,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                       icon={specIcon("📐")}
                       text={withImperialPerLine(product.dimensions)}
                       emphasized
-                      placeholder="Select Your Sofa Size"
+                      placeholder="Select Your Size"
                     />
                   )}
                   {product.materials && (
