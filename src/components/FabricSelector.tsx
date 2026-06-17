@@ -93,6 +93,14 @@ interface FabricSelectorProps {
    * products (e.g. wood/rattan benches) that still have linked frame finishes.
    */
   showUpholsterySection?: boolean;
+  /**
+   * When false, the wood/stone/metal frame-finish swatch accordion is hidden.
+   * Used by product pages that already render an explicit Base × Top variant
+   * dropdown pair covering the same axis (e.g. a pendant with "Rod Finish" ×
+   * "Diffuser" dual-axis size_variants) — otherwise the swatch picker would
+   * duplicate the dropdown.
+   */
+  showWoodSection?: boolean;
 }
 
 const normalizeFabricCategory = (category: string | null | undefined) => {
@@ -120,7 +128,7 @@ const isWoodCategory = (fabric: Fabric) => normalizeFabricCategory(fabric.catego
  * (Trade + Public). Tiles are grouped by category (Upholstery, Wood, …)
  * with a COM ("Customer's Own Material") tile always offered.
  */
-export default function FabricSelector({ pickId, className, productTitle, onUpholsteryTierChange, onFabricChange, onHasFabricsChange, onWoodFinishChange, onWoodFinishPricingChange, onWoodFinishesAvailable, includePricing = false, onSwatchImagesChange, woodLabel, showUpholsterySection = true }: FabricSelectorProps) {
+export default function FabricSelector({ pickId, className, productTitle, onUpholsteryTierChange, onFabricChange, onHasFabricsChange, onWoodFinishChange, onWoodFinishPricingChange, onWoodFinishesAvailable, includePricing = false, onSwatchImagesChange, woodLabel, showUpholsterySection = true, showWoodSection = true }: FabricSelectorProps) {
 
   const [open, setOpen] = useState(false);
   const [fabrics, setFabrics] = useState<Fabric[]>([]);
@@ -478,7 +486,7 @@ export default function FabricSelector({ pickId, className, productTitle, onUpho
         emptyNote:
           "Full fabric library coming soon. In the meantime, your atelier can be upholstered in COM (Customer's Own Fabric) — please request samples or pricing through your Maison Affluency concierge.",
       })}
-      {woodTiles.length > 0 &&
+      {showWoodSection && woodTiles.length > 0 &&
         renderAccordion({
           isOpen: openWood,
           onToggle: () => setOpenWood((v) => !v),
