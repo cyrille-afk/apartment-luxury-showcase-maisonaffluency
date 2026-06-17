@@ -7,7 +7,7 @@ import { streamConcierge, type ChatMessage, type ChatContentPart, type Tearsheet
 import { TearsheetProposalCard } from "@/components/trade/concierge/TearsheetProposalCard";
 import { QuoteProposalCard } from "@/components/trade/concierge/QuoteProposalCard";
 import { FfeProposalCard } from "@/components/trade/concierge/FfeProposalCard";
-import { VisualizationBriefCard } from "@/components/trade/concierge/VisualizationBriefCard";
+import { VisualizationBriefCard, VIZ_BRIEF_INCOMING_KEY } from "@/components/trade/concierge/VisualizationBriefCard";
 import { EscalationCard } from "@/components/trade/concierge/EscalationCard";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
@@ -596,6 +596,33 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
       setTimeline((prev) => [...prev, { kind: "msg", role: "user", content: text }]);
       setInput("");
       await openLatestQuote();
+      return;
+    }
+
+    const latestVisualizationBrief = [...timeline]
+      .reverse()
+      .find((t): t is Extract<TimelineItem, { kind: "viz_brief" }> => t.kind === "viz_brief" && t.resolved !== "discarded");
+    const isVisualizationGenerateFollowup = ["generate", "render", "render scene", "open studio", "axonometric"].includes(normalized);
+    if (latestVisualizationBrief && isVisualizationGenerateFollowup) {
+      try {
+        sessionStorage.setItem(
+          VIZ_BRIEF_INCOMING_KEY,
+          JSON.stringify({
+            ...latestVisualizationBrief.proposal.args,
+            overlay_image_urls: latestVisualizationBrief.proposal.preview.map((p) => p.image_url).filter(Boolean),
+            savedAt: Date.now(),
+          }),
+        );
+      } catch {}
+      setTimeline((prev) => [
+        ...prev,
+        { kind: "msg", role: "user", content: text },
+        { kind: "msg", role: "assistant", content: "Opening Axonometric Studio with the brief loaded. If the page button is disabled, add a source image first." },
+      ]);
+      setInput("");
+      setAttachments([]);
+      window.dispatchEvent(new Event("maf:axonometric:brief-ready"));
+      navigate("/trade/axonometric");
       return;
     }
 
@@ -1419,7 +1446,7 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
                         const msg =
                           outcome === "discarded"
                             ? "Got it — brief discarded."
-                            : "✓ Brief sent to Axonometric Studio. Hit Generate when you're ready.";
+                            : "✓ Brief loaded in Axonometric Studio. Use the page’s Generate Axonometric View button after adding a source image.";
                         copy.push({ kind: "msg", role: "assistant", content: msg });
                         return copy;
                       });

@@ -2583,7 +2583,10 @@ function buildVisualizationBriefProposal(args: {
 }) {
   const room = args.room || (/belgravia/i.test(args.requestText) ? "Belgravia drawing-room" : "Scene render");
   const style = /editorial luxury/i.test(args.requestText) ? "Editorial Luxury" : (args.style || "Editorial Luxury");
-  const materials = args.materials?.length ? args.materials.join(", ") : "bronze, mohair and the requested material palette";
+  const materials = args.materials?.length ? args.materials.join(", ") : "the material palette explicitly requested by the user";
+  const pieceInstruction = args.preview?.length
+    ? "Use only the attached Maison Affluency pieces as overlay candidates"
+    : "Do not invent product names; wait for source imagery or selected pieces if needed";
   return {
     tool: "prepare_visualization_brief",
     tool_call_id: `synthetic-viz-${crypto.randomUUID()}`,
@@ -2592,7 +2595,7 @@ function buildVisualizationBriefProposal(args: {
       style_preset: "Editorial Luxury",
       title: (args.title || `${room} render brief`).slice(0, 80),
       room_label: room,
-      brief_notes: `${room}: ${args.summary || args.requestText} Render in ${style} with ${materials}; use the selected Maison Affluency pieces as overlay candidates with careful scale, sightlines and material fidelity.`.slice(0, 1200),
+      brief_notes: `${room}: ${args.summary || args.requestText} Render in ${style} with ${materials}. ${pieceInstruction}; keep the brief grounded in the user's request with careful scale, sightlines and material fidelity.`.slice(0, 1200),
       pick_ids: (args.pickIds || []).slice(0, 12),
       source_image_url: null,
     },
