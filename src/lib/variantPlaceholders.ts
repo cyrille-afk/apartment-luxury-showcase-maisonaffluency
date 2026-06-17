@@ -37,8 +37,10 @@ export function formatVariantAxisLabel(label: string | null | undefined): string
 }
 
 function placeholderFromAxisLabel(label: string): string {
-  const lower = formatVariantAxisLabel(label)!.toLowerCase();
+  let lower = formatVariantAxisLabel(label)!.toLowerCase();
   if (lower === "size") return "Select Your Size";
+  // Fix common DB truncations: "fini" → "finish"
+  lower = lower.replace(/\bfini\b/g, "finish");
   // Append "finish" unless the label already ends with a noun that wouldn't pair with "finish"
   const skipSuffix = /\b(finish|fabric|material|size|colour|color|leather|diffuser|shade|model|version|variant|option)$/i.test(lower);
   return skipSuffix ? `Select your ${lower}` : `Select your ${lower} finish`;
