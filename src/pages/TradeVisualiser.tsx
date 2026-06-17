@@ -530,26 +530,37 @@ const TradeVisualiser = () => {
 
         {/* ─── Upload (no photo yet) ─── */}
         {!photo && (
-          <div
-            onClick={() => fileRef.current?.click()}
-            onDrop={onDrop}
-            onDragOver={(e) => e.preventDefault()}
-            className="border-2 border-dashed border-border rounded-xl p-16 text-center cursor-pointer hover:border-foreground/40 transition-colors"
-          >
-            <Upload className="h-10 w-10 mx-auto mb-4 text-muted-foreground" />
-            <p className="font-body text-sm text-foreground mb-1">
-              Drop a room photo here, or click to upload
-            </p>
-            <p className="font-body text-xs text-muted-foreground">
-              JPEG or PNG · client-side only, nothing is saved yet
-            </p>
-            <input
-              ref={fileRef}
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={(e) => onFile(e.target.files?.[0] ?? null)}
-            />
+          <div className="space-y-3">
+            <div
+              onClick={() => fileRef.current?.click()}
+              onDrop={onDrop}
+              onDragOver={(e) => e.preventDefault()}
+              className="border-2 border-dashed border-border rounded-xl p-16 text-center cursor-pointer hover:border-foreground/40 transition-colors"
+            >
+              <Upload className="h-10 w-10 mx-auto mb-4 text-muted-foreground" />
+              <p className="font-body text-sm text-foreground mb-1">
+                Drop a room photo here, or click to upload
+              </p>
+              <p className="font-body text-xs text-muted-foreground">
+                JPEG or PNG · client-side only, nothing is saved yet
+              </p>
+              <input
+                ref={fileRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => onFile(e.target.files?.[0] ?? null)}
+              />
+            </div>
+            <div className="flex items-center justify-center">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={(e) => { e.stopPropagation(); setAxoOpen(true); fetchAxoRequests(); }}
+              >
+                <Layers className="h-4 w-4 mr-2" /> Load from Axonometric Studio
+              </Button>
+            </div>
           </div>
         )}
 
