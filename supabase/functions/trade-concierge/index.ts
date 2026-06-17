@@ -1385,18 +1385,11 @@ async function loadProjectContext(
   // Tenant isolation: this function uses the service-role client (RLS bypassed),
   // so we MUST verify the caller has access to this project before returning its
   // name, client, location, or studio. Owner OR studio member is allowed.
-  const projUserId = (proj as any).user_id as string | null;
-  const projStudioId = (proj as any).studio_id as string | null;
-  let allowed = projUserId === userId;
-  if (!allowed && projStudioId) {
-    const { data: membership } = await supabase
-      .from("studio_members")
-      .select("user_id")
-      .eq("studio_id", projStudioId)
-      .eq("user_id", userId)
-      .maybeSingle();
-    allowed = !!membership;
-  }
+  // Implemented via shared helper so it stays unit-tested.
+  const allowed = await canAccessProject(supabase as any, userId, {
+    user_id: (proj as any).user_id ?? null,
+    studio_id: (proj as any).studio_id ?? null,
+  });
   if (!allowed) {
     return "(Active project id was provided but not found / not accessible. Treat as no project.)";
   }
