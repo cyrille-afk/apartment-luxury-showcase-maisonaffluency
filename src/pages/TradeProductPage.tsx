@@ -1423,6 +1423,31 @@ const TradeProductPage: React.FC = () => {
                 />
               )}
 
+              {/* Model-style base axis whose options carry dimensions (e.g. Bora Sconce
+                  Uplight / Downlight) — render BEFORE the finish swatches and use
+                  the dimensions icon since the value is fundamentally a size choice. */}
+              {!isRugSqmActive && isBaseOnly && !baseAxisIsDim && !suppressBaseAsFinish
+                && baseOptions.length > 0 && baseOptions.every(looksLikeDimension) && (
+                <ExpandableSpec
+                  icon={specIcon("📐")}
+                  text={withImperialPerLine(baseOptions.join("\n"))}
+                  placeholder={getBasePlaceholder(product)}
+                  singleValueLabel={formatVariantAxisLabel(product.base_axis_label) || undefined}
+                  emphasized
+                  value={selectedBase != null ? Math.max(0, baseOptions.indexOf(selectedBase)) : null}
+                  onChange={(idx) => {
+                    if (idx < 0) {
+                      setSelectedBase(null);
+                      handleMaterialChange(null, { base: null, top: null, size: null });
+                      return;
+                    }
+                    const v = baseOptions[idx] ?? null;
+                    setSelectedBase(v);
+                    handleMaterialChange(v, { base: v, top: null, size: null });
+                  }}
+                />
+              )}
+
               <FinishSelector
                   pickId={product.id}
                   productTitle={product.title}
@@ -1571,7 +1596,7 @@ const TradeProductPage: React.FC = () => {
                   }
                 />
               )}
-              {!isRugSqmActive && isBaseOnly && !baseAxisIsDim && !suppressBaseAsFinish && (
+              {!isRugSqmActive && isBaseOnly && !baseAxisIsDim && !suppressBaseAsFinish && !(baseOptions.length > 0 && baseOptions.every(looksLikeDimension)) && (
                 <ExpandableSpec
                   icon={specIcon(baseAxisIsDim ? "📐" : "⬗")}
                   text={withImperialPerLine(baseOptions.join("\n"))}

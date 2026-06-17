@@ -520,7 +520,7 @@ export default function FinishSelector({ pickId, className, productTitle, onUpho
           label: (woodLabel && woodLabel.trim()) || "Select the Finish of the Frame",
           selectedName: selectedWoodItem?.name ?? null,
           tiles: woodTiles,
-          glyph: "wood",
+          glyph: woodTiles.every((f) => (f.category || "").trim().toLowerCase() === "wood") ? "wood" : "finish",
           tileKind: "base",
         })}
       {showWoodSection && topTiles.length > 0 &&
@@ -530,7 +530,7 @@ export default function FinishSelector({ pickId, className, productTitle, onUpho
           label: (topLabel && topLabel.trim()) || "Select the Finish",
           selectedName: selectedTopItem?.name ?? null,
           tiles: topTiles,
-          glyph: "wood",
+          glyph: topTiles.every((f) => (f.category || "").trim().toLowerCase() === "wood") ? "wood" : "finish",
           tileKind: "top",
         })}
       {coverTiles.length > 0 &&

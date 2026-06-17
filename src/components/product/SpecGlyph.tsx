@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { Layers, TreeDeciduous } from "lucide-react";
+import { Layers, Sparkles, TreeDeciduous } from "lucide-react";
 
 type SpecGlyphProps = {
   symbol: string;
@@ -33,6 +33,14 @@ export default function SpecGlyph({ symbol, className }: SpecGlyphProps) {
     return (
       <span className={cn(baseClass, "text-gold")} aria-hidden="true">
         <TreeDeciduous className="h-[18px] w-[18px]" strokeWidth={1.75} />
+      </span>
+    );
+  }
+
+  if (symbol === "finish") {
+    return (
+      <span className={cn(baseClass, "text-gold")} aria-hidden="true">
+        <Sparkles className="h-[17px] w-[17px]" strokeWidth={1.75} />
       </span>
     );
   }
