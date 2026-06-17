@@ -1749,6 +1749,32 @@ const TradeAxonometric = () => {
                     onChange={handleTextureUpload}
                   />
 
+                  <div className="flex flex-wrap gap-1.5 px-3 pt-2">
+                    {[
+                      { label: "Move near window", prompt: "Move the chair next to the window, keep the same style and angle" },
+                      { label: "Move to corner", prompt: "Move the chair to the corner near the sofa" },
+                      { label: "Move away from bed", prompt: "Move the chair away from the bed, towards the centre of the room" },
+                      { label: "Remove it", prompt: "Remove the small chair next to the bed and fill the floor with matching marble" },
+                      { label: "Replace product", action: "picker" },
+                    ].map((chip) => (
+                      <button
+                        key={chip.label}
+                        onClick={() => {
+                          if (chip.action === "picker") {
+                            setAiProductPickerOpen(true);
+                            setAiTexturePickerOpen(false);
+                          } else {
+                            setAiPrompt(chip.prompt!);
+                          }
+                        }}
+                        disabled={aiSending || !!aiAttachedProduct || !!aiTextureUrl}
+                        className="font-body text-[10px] px-2 py-1 rounded-full border border-border text-muted-foreground hover:border-foreground/40 hover:text-foreground transition-colors disabled:opacity-30"
+                      >
+                        {chip.label}
+                      </button>
+                    ))}
+                  </div>
+
                   <div className="flex items-center gap-2 p-3">
                     <button
                       onClick={() => { setAiProductPickerOpen(!aiProductPickerOpen); setAiTexturePickerOpen(false); }}
