@@ -38,15 +38,15 @@ export function formatVariantAxisLabel(label: string | null | undefined): string
 
 function placeholderFromAxisLabel(label: string): string {
   const lower = formatVariantAxisLabel(label)!.toLowerCase();
-  if (lower === "size") return "Select Your Sofa Size";
+  if (lower === "size") return "Select Your Size";
   // Append "finish" unless the label already ends with a noun that wouldn't pair with "finish"
-  const skipSuffix = /\b(finish|fabric|material|size|colour|color|leather)$/i.test(lower);
+  const skipSuffix = /\b(finish|fabric|material|size|colour|color|leather|diffuser|shade|model|version|variant|option)$/i.test(lower);
   return skipSuffix ? `Select your ${lower}` : `Select your ${lower} finish`;
 }
 
 function normalizePlaceholder(value: string): string {
   const normalized = value.trim().toLowerCase();
-  return normalized === "select your size" || normalized === "your sofa size" ? "Select Your Sofa Size" : value;
+  return normalized === "select your size" || normalized === "your sofa size" || normalized === "select your sofa size" ? "Select Your Size" : value;
 }
 
 export function getBasePlaceholder(p: VariantPlaceholderInput): string {
