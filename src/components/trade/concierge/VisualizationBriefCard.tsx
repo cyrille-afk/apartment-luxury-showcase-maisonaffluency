@@ -29,7 +29,11 @@ export function VisualizationBriefCard({ proposal, resolved, onResolved }: Props
     try {
       sessionStorage.setItem(
         VIZ_BRIEF_INCOMING_KEY,
-        JSON.stringify({ ...args, savedAt: Date.now() }),
+        JSON.stringify({
+          ...args,
+          overlay_image_urls: preview.map((p) => p.image_url).filter(Boolean),
+          savedAt: Date.now(),
+        }),
       );
     } catch {
       /* sessionStorage full — degrade gracefully, studio still opens */

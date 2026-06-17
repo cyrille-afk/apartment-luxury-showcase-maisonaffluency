@@ -57,6 +57,7 @@ const STYLE_PRESETS = [
 ];
 
 const AXONOMETRIC_DRAFT_KEY = "maf:axonometric-studio:draft:v2";
+const VIZ_BRIEF_INCOMING_KEY = "maf:axonometric:incoming-brief";
 
 const readSavedDraft = () => {
   if (typeof window === "undefined") return null;
@@ -360,11 +361,12 @@ const TradeAxonometric = () => {
   // Concierge hand-off: prefill from a `prepare_visualization_brief` proposal
   // dropped into sessionStorage by VisualizationBriefCard. Consume once on mount.
   useEffect(() => {
+    const consumeIncomingBrief = () => {
     let raw: string | null = null;
-    try { raw = sessionStorage.getItem("maf:axonometric:incoming-brief"); } catch { return; }
+    try { raw = sessionStorage.getItem(VIZ_BRIEF_INCOMING_KEY); } catch { return; }
     if (!raw) return;
-    try { sessionStorage.removeItem("maf:axonometric:incoming-brief"); } catch { /* ignore */ }
-    let brief: any;
+    try { sessionStorage.removeItem(VIZ_BRIEF_INCOMING_KEY); } catch { /* ignore */ }
+    let brief: Record<string, unknown>;
     try { brief = JSON.parse(raw); } catch { return; }
     if (!brief || typeof brief !== "object") return;
 
@@ -374,17 +376,25 @@ const TradeAxonometric = () => {
       if (preset) setStyle(preset.value);
     }
     const nextBrief: Record<string, string> = {};
-    if (typeof brief.brief_notes === "string" && brief.brief_notes.trim()) nextBrief.notes = brief.brief_notes.trim();
-    if (typeof brief.room_label === "string" && brief.room_label.trim()) nextBrief.room = brief.room_label.trim();
+    if (typeof brief.brief_notes === "string" && brief.brief_notes.trim()) nextBrief.briefNotes = brief.brief_notes.trim();
+    if (typeof brief.room_label === "string" && brief.room_label.trim()) nextBrief.roomType = brief.room_label.trim();
+    if (typeof brief.style_preset === "string" && brief.style_preset.trim()) nextBrief.styleDirection = brief.style_preset.trim();
     if (typeof brief.title === "string" && brief.title.trim()) nextBrief.title = brief.title.trim();
     if (Object.keys(nextBrief).length) setActiveBrief((prev) => ({ ...prev, ...nextBrief }));
     if (Array.isArray(brief.pick_ids) && brief.pick_ids.length) {
       setPreloadedFavoriteProductIds(brief.pick_ids.filter((id: unknown) => typeof id === "string"));
     }
+    if (Array.isArray(brief.overlay_image_urls) && brief.overlay_image_urls.length) {
+      setOverlayImages(brief.overlay_image_urls.filter((url: unknown) => typeof url === "string" && /^https?:\/\//.test(url)).slice(0, 5));
+    }
     if (typeof brief.source_image_url === "string" && /^https?:\/\//.test(brief.source_image_url)) {
       setSourceImage(brief.source_image_url);
     }
-    toast({ title: "Concierge brief loaded", description: "Mode, style and notes prefilled — review and Generate." });
+    toast({ title: "Concierge brief loaded", description: "Brief and product overlays are ready. Add a source image if needed, then generate from this page." });
+    };
+    consumeIncomingBrief();
+    window.addEventListener("maf:axonometric:brief-ready", consumeIncomingBrief);
+    return () => window.removeEventListener("maf:axonometric:brief-ready", consumeIncomingBrief);
   }, [toast]);
 
   useEffect(() => {
@@ -1353,8 +1363,8 @@ const TradeAxonometric = () => {
               </div>
             </div>
 
-            {/* Active Creative Brief — shown when working from a queued request */}
-            {activeRequestId && Object.values(activeBrief).some(v => v && v !== "no_preference") && (
+            {/* Active Creative Brief — shown for queue requests or concierge handoffs */}
+            {Object.values(activeBrief).some(v => v && v !== "no_preference") && (
               <div className="border border-primary/30 bg-primary/5 rounded-lg p-4 space-y-2">
                 <h2 className="font-display text-xs text-primary uppercase tracking-wider">Creative Brief</h2>
                 <div className="flex flex-wrap gap-1.5">
