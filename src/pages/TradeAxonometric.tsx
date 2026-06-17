@@ -1404,9 +1404,21 @@ const TradeAxonometric = () => {
             {mode === "composite" && (
               <div className="border border-border rounded-lg p-5 space-y-4">
                 <h2 className="font-display text-sm text-foreground">Product Images to Overlay</h2>
+                <div className="flex gap-2 rounded-md border border-amber-400/40 bg-amber-50/60 dark:bg-amber-950/20 p-3">
+                  <span className="text-amber-600 dark:text-amber-400 text-base leading-none">⚠</span>
+                  <div className="space-y-1">
+                    <p className="font-body text-[11px] font-medium text-amber-900 dark:text-amber-200">
+                      Add Products expects a 3D axonometric source.
+                    </p>
+                    <p className="font-body text-[11px] text-amber-900/80 dark:text-amber-200/80 leading-relaxed">
+                      If your source is a 2D floor plan, elevation, or section, the model will try to honour the layout but exact placement can drift. For best results, first run <span className="font-medium">Elevation → 3D</span> (or <span className="font-medium">Section → 3D</span>), then use that generated 3D view as the source here. For surgical placement, use the mask flow to paint exactly where each product goes.
+                    </p>
+                  </div>
+                </div>
                 <p className="font-body text-xs text-muted-foreground">
                   Select up to 5 products from the platform to place into the axonometric view
                 </p>
+
 
                 {overlayImages.length < 5 && (
                   <div className="space-y-2">
