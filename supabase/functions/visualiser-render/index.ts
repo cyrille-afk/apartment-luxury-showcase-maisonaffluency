@@ -63,8 +63,10 @@ Deno.serve(async (req) => {
         p.surface === "upholstery" ? "upholstery fabric on the seating in that area" :
         p.surface === "furniture" ? "furniture finish applied ONLY to the frame/case/legs/top of the single piece of furniture at the marked point — do NOT touch its upholstery, cushions, or any adjacent objects, walls, floor, or drapery" :
         "curtain/drapery fabric";
-      return `${i + 1}. Replace ${surfaceLabel} ${at} with the material shown in image ${i + 2} (${finish}). ` +
-        `Apply it as a realistic ${application}, matching the room's existing perspective, scale, lighting, and shadows.`;
+      return `${i + 1}. You MUST replace ${surfaceLabel} ${at} with the EXACT material shown in image ${i + 2} (${finish}) — even if the existing surface already looks visually similar. ` +
+        `Reproduce the swatch's exact color, pattern, grain, and texture (e.g. visible cowhide spots/markings, fabric weave, wood grain) on the target surface. ` +
+        `Apply it as a realistic ${application}, matching the room's existing perspective, scale, lighting, and shadows. ` +
+        `Do not skip this swap.`;
     }).join("\n");
 
     const prompt =
