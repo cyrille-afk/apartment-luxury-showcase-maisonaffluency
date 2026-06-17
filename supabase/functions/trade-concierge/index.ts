@@ -2513,6 +2513,35 @@ async function buildDeterministicTearsheetProposal(
   };
 }
 
+function buildVisualizationBriefProposal(args: {
+  title?: string | null;
+  room?: string | null;
+  style?: string | null;
+  materials?: string[];
+  summary?: string | null;
+  requestText: string;
+  pickIds?: string[];
+  preview?: any[];
+}) {
+  const room = args.room || (/belgravia/i.test(args.requestText) ? "Belgravia drawing-room" : "Scene render");
+  const style = /editorial luxury/i.test(args.requestText) ? "Editorial Luxury" : (args.style || "Editorial Luxury");
+  const materials = args.materials?.length ? args.materials.join(", ") : "bronze, mohair and the requested material palette";
+  return {
+    tool: "prepare_visualization_brief",
+    tool_call_id: `synthetic-viz-${crypto.randomUUID()}`,
+    args: {
+      mode: "composite",
+      style_preset: "Editorial Luxury",
+      title: (args.title || `${room} render brief`).slice(0, 80),
+      room_label: room,
+      brief_notes: `${room}: ${args.summary || args.requestText} Render in ${style} with ${materials}; use the selected Maison Affluency pieces as overlay candidates with careful scale, sightlines and material fidelity.`.slice(0, 1200),
+      pick_ids: (args.pickIds || []).slice(0, 12),
+      source_image_url: null,
+    },
+    preview: (args.preview || []).slice(0, 12),
+  };
+}
+
 /** Build per-line preview rows for a draft_quote / add_to_quote proposal. */
 async function hydrateQuotePreview(
   supabase: ReturnType<typeof createClient>,
