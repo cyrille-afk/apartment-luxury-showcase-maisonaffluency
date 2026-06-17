@@ -419,7 +419,11 @@ serve(async (req) => {
           }
         }
 
-        // Validate the client belongs to the user's studio (defense-in-depth — UI also gates).
+        // Validate the client belongs to a studio the caller is a member of.
+        // Service-role client is used here (RLS bypassed) so this check is the
+        // ONLY thing preventing a user from attaching another studio's client
+        // to their quote. Never short-circuit to true when studioId is null —
+        // resolve the client's studio_id and verify membership unconditionally.
         let validClientId: string | null = null;
         let validClientName: string = requestedClientName;
         if (requestedClientId) {
@@ -428,14 +432,24 @@ serve(async (req) => {
             .select("id, name, studio_id")
             .eq("id", requestedClientId)
             .maybeSingle();
-          if (cli) {
-            // If we already have a studio from the project, require the client to be in it.
-            const okStudio = studioId ? (cli as any).studio_id === studioId : true;
-            if (okStudio) {
+          const cliStudioId = (cli as any)?.studio_id as string | null | undefined;
+          if (cli && cliStudioId) {
+            // If the quote already has a studio (from project), client must match it.
+            const studioMatch = studioId ? cliStudioId === studioId : true;
+            let isMember = false;
+            if (studioMatch) {
+              const { data: membership } = await supabase
+                .from("studio_members")
+                .select("user_id")
+                .eq("studio_id", cliStudioId)
+                .eq("user_id", userId)
+                .maybeSingle();
+              isMember = !!membership;
+            }
+            if (studioMatch && isMember) {
               validClientId = (cli as any).id;
               if (!validClientName) validClientName = (cli as any).name || "";
-              // If quote has no project (no studio yet), adopt the client's studio.
-              if (!studioId) studioId = (cli as any).studio_id || null;
+              if (!studioId) studioId = cliStudioId;
             }
           }
         }
