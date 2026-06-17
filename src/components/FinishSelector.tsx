@@ -141,6 +141,43 @@ const isFabricCategory = (fabric: Fabric) => normalizeFabricCategory(fabric.cate
 const isCoverCategory = (fabric: Fabric) => normalizeFabricCategory(fabric.category) === "Cover";
 const isWoodCategory = (fabric: Fabric) => normalizeFabricCategory(fabric.category) === "Wood";
 
+/**
+ * Pick the row icon (left of the accordion label) for a frame-finish group.
+ * Falls back to the label hint when category alone is ambiguous (e.g. a
+ * "Rod Finish" group that mixes metal patinas, or a "Diffuser" group that
+ * mixes alabaster + frosted glass).
+ */
+const pickFinishGlyph = (
+  tiles: Fabric[],
+  label?: string | null,
+): "wood" | "metal" | "stone" | "glass" | "finish" => {
+  const cats = tiles
+    .map((t) => (t.category || "").trim().toLowerCase())
+    .filter(Boolean);
+  const has = (k: string) => cats.some((c) => c === k);
+  const every = (k: string) => cats.length > 0 && cats.every((c) => c === k);
+  const lbl = (label || "").toLowerCase();
+
+  if (every("wood")) return "wood";
+  if (every("metal")) return "metal";
+  if (every("stone")) return "stone";
+  if (every("glass")) return "glass";
+
+  // Mixed tiles → bias by the accordion label first, then by majority.
+  if (/\brod\b|\bframe\b|\bbase\b|\bhardware\b/.test(lbl) && has("metal")) return "metal";
+  if (/\bdiffuser\b|\bshade\b|\bglobe\b|\bbulb\b/.test(lbl) && (has("glass") || has("stone"))) {
+    return has("glass") ? "glass" : "stone";
+  }
+
+  // Majority wins among recognised material categories.
+  const tally: Record<string, number> = {};
+  for (const c of cats) if (["wood", "metal", "stone", "glass"].includes(c)) tally[c] = (tally[c] || 0) + 1;
+  const top = Object.entries(tally).sort((a, b) => b[1] - a[1])[0]?.[0];
+  if (top === "wood" || top === "metal" || top === "stone" || top === "glass") return top;
+
+  return "finish";
+};
+
 
 /**
  * Fabric / finish selector accordion shown on upholstered products
