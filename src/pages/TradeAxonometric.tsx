@@ -1138,7 +1138,7 @@ const TradeAxonometric = () => {
                       className="w-full rounded-md border border-border object-contain max-h-64"
                     />
                     <button
-                      onClick={() => { useFreshSourceImage(null, setSourceImage, setResult, setHistory, setLockedLayoutUrl); setSelectedProduct(null); }}
+                      onClick={() => { resetWithFreshSourceImage(null, setSourceImage, setResult, setHistory, setLockedLayoutUrl); setSelectedProduct(null); }}
                       className="absolute top-2 right-2 bg-background/80 backdrop-blur-sm text-foreground rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-opacity"
                     >
                       <RotateCcw className="w-3.5 h-3.5" />
@@ -1167,7 +1167,7 @@ const TradeAxonometric = () => {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  <SourceUpload onSourceReady={(url) => useFreshSourceImage(url, setSourceImage, setResult, setHistory, setLockedLayoutUrl)} />
+                  <SourceUpload onSourceReady={(url) => resetWithFreshSourceImage(url, setSourceImage, setResult, setHistory, setLockedLayoutUrl)} />
 
         {/* Submit 3D Model Panel */}
         {show3dSubmit && (
@@ -1497,7 +1497,7 @@ const TradeAxonometric = () => {
                   brand={pickerBrand || undefined}
                   onSelect={(product) => {
                     setSelectedProduct(product);
-                    useFreshSourceImage(product.image_url, setSourceImage, setResult, setHistory, setLockedLayoutUrl);
+                    resetWithFreshSourceImage(product.image_url, setSourceImage, setResult, setHistory, setLockedLayoutUrl);
                   }}
                   selectedProduct={selectedProduct}
                 />
