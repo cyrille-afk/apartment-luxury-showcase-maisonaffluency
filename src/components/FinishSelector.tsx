@@ -533,6 +533,17 @@ export default function FinishSelector({ pickId, className, productTitle, onUpho
           selectedName: selectedWoodItem?.name ?? null,
           tiles: woodTiles,
           glyph: "wood",
+          tileKind: "base",
+        })}
+      {showWoodSection && topTiles.length > 0 &&
+        renderAccordion({
+          isOpen: openTop,
+          onToggle: () => setOpenTop((v) => !v),
+          label: (topLabel && topLabel.trim()) || "Select the Finish",
+          selectedName: selectedTopItem?.name ?? null,
+          tiles: topTiles,
+          glyph: "wood",
+          tileKind: "top",
         })}
       {coverTiles.length > 0 &&
         renderAccordion({
