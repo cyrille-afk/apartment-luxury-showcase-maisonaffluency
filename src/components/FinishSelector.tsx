@@ -132,14 +132,18 @@ const normalizeFabricCategory = (category: string | null | undefined) => {
   if (raw === "rattan" || raw === "cane" || raw === "wicker" || raw === "cover") {
     return "Cover";
   }
-  // Wood, Stone, Metal, Ceramic, Glass, etc. → frame finish group.
-  if (raw) return "Wood";
+  if (raw === "metal") return "Metal";
+  if (raw === "glass") return "Glass";
+  if (raw === "stone" || raw === "marble" || raw === "alabaster" || raw === "onyx") return "Stone";
+  if (raw === "ceramic") return "Ceramic";
+  if (raw === "wood" || raw === "rattan finish" || raw === "tinted rattan") return "Wood";
+  if (raw) return "Other";
   return "Fabric & Leather";
 };
 
 const isFabricCategory = (fabric: Fabric) => normalizeFabricCategory(fabric.category) === "Fabric & Leather";
 const isCoverCategory = (fabric: Fabric) => normalizeFabricCategory(fabric.category) === "Cover";
-const isWoodCategory = (fabric: Fabric) => normalizeFabricCategory(fabric.category) === "Wood";
+const isFinishCategory = (fabric: Fabric) => !isFabricCategory(fabric) && !isCoverCategory(fabric);
 
 /**
  * Pick the row icon (left of the accordion label) for a frame-finish group.
@@ -157,6 +161,10 @@ const pickFinishGlyph = (
   const has = (k: string) => cats.some((c) => c === k);
   const every = (k: string) => cats.length > 0 && cats.every((c) => c === k);
   const lbl = (label || "").toLowerCase();
+
+  // Label is the UI truth: force the visible row icon from the visible row text.
+  if (/\bmetal\b|\brod\b|\bhardware\b/.test(lbl)) return "metal";
+  if (/\bglass\b|\bdiffuser\b|\bshade\b|\bglobe\b/.test(lbl)) return "glass";
 
   if (every("wood")) return "wood";
   if (every("metal")) return "metal";
@@ -252,7 +260,7 @@ export default function FinishSelector({ pickId, className, productTitle, onUpho
         }));
       setFabrics(list);
       onHasFabricsChange?.(list.some(isFabricCategory));
-      onWoodFinishesAvailable?.(list.filter(isWoodCategory).map((f) => f.name));
+      onWoodFinishesAvailable?.(list.filter(isFinishCategory).map((f) => f.name));
       const defaultFabric = list.find(isFabricCategory) || null;
       setSelectedFabricId(defaultFabric?.id ?? null);
       if (defaultFabric) {
@@ -292,7 +300,7 @@ export default function FinishSelector({ pickId, className, productTitle, onUpho
     (acc[key] ||= []).push(f);
     return acc;
   }, {});
-  const groupOrder = ["Fabric & Leather", "Wood", "Cover"];
+  const groupOrder = ["Fabric & Leather", "Wood", "Metal", "Glass", "Stone", "Ceramic", "Other", "Cover"];
   const sortedGroupKeys = Object.keys(grouped).sort((a, b) => {
     const ai = groupOrder.indexOf(a);
     const bi = groupOrder.indexOf(b);
@@ -472,7 +480,9 @@ export default function FinishSelector({ pickId, className, productTitle, onUpho
   const [openTop, setOpenTop] = useState(false);
   const [openCover, setOpenCover] = useState(false);
   const fabricTiles = grouped["Fabric & Leather"] || [];
-  const allNonFabricTiles = grouped["Wood"] || [];
+  const allNonFabricTiles = sortedGroupKeys
+    .filter((key) => key !== "Fabric & Leather" && key !== "Cover")
+    .flatMap((key) => grouped[key] || []);
   // Top-axis swatches first (e.g. diffuser), then base-axis swatches with the
   // top swatches excluded so a single physical swatch doesn't appear in both
   // groups when the filters overlap.
