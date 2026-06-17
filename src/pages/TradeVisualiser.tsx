@@ -876,6 +876,74 @@ const TradeVisualiser = () => {
           </div>
         )}
       </div>
+
+      {/* ─── Axonometric Studio deliveries dialog ─── */}
+      <Dialog open={axoOpen} onOpenChange={setAxoOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="font-display text-base">Axonometric Studio deliveries</DialogTitle>
+            <DialogDescription className="font-body text-xs">
+              Reopen a completed render here to re-pin surfaces and swap fabrics, finishes or rugs.
+            </DialogDescription>
+          </DialogHeader>
+
+          {axoLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+            </div>
+          ) : axoRequests.length === 0 ? (
+            <div className="border border-dashed border-border rounded-lg py-10 text-center">
+              <Layers className="w-7 h-7 text-muted-foreground/40 mx-auto mb-2" />
+              <p className="font-body text-sm text-muted-foreground">
+                No completed deliveries yet. Submit a brief in the Axonometric Studio and the rendered result will appear here.
+              </p>
+            </div>
+          ) : (
+            <div className="max-h-[60vh] overflow-y-auto -mx-1 px-1 space-y-2">
+              {axoRequests.map((req) => {
+                const linkedCount = Array.isArray(req.linked_favorite_product_ids)
+                  ? req.linked_favorite_product_ids.length
+                  : 0;
+                const importing = importingAxoId === req.id;
+                return (
+                  <button
+                    key={req.id}
+                    onClick={() => importAxoDelivery(req)}
+                    disabled={!!importingAxoId}
+                    className="w-full text-left flex gap-3 p-3 rounded-lg border border-border hover:border-foreground/40 hover:bg-muted/30 transition-colors disabled:opacity-50"
+                  >
+                    <img
+                      src={req.result_image_url}
+                      alt=""
+                      className="w-24 h-24 object-cover rounded-md border border-border shrink-0"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <p className="font-display text-sm text-foreground truncate">
+                        {req.project_name || "Untitled"}
+                      </p>
+                      <p className="font-body text-[11px] text-muted-foreground capitalize">
+                        {(req.request_type || "elevation").replace("_", " ")} · delivered
+                      </p>
+                      {linkedCount > 0 && (
+                        <p className="font-body text-[11px] text-[hsl(var(--gold))] mt-1">
+                          {linkedCount} linked product{linkedCount === 1 ? "" : "s"} will pre-pin
+                        </p>
+                      )}
+                    </div>
+                    {importing ? (
+                      <Loader2 className="h-4 w-4 animate-spin text-muted-foreground self-center" />
+                    ) : (
+                      <span className="self-center font-body text-[10px] uppercase tracking-wider text-muted-foreground">
+                        Open
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </>
   );
 };
