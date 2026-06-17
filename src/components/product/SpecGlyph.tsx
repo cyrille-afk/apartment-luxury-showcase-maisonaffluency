@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { Layers, Sparkles, TreeDeciduous } from "lucide-react";
+import { Gem, Hexagon, Layers, Sparkles, TreeDeciduous } from "lucide-react";
 
 type SpecGlyphProps = {
   symbol: string;
@@ -33,6 +33,39 @@ export default function SpecGlyph({ symbol, className }: SpecGlyphProps) {
     return (
       <span className={cn(baseClass, "text-gold")} aria-hidden="true">
         <TreeDeciduous className="h-[18px] w-[18px]" strokeWidth={1.75} />
+      </span>
+    );
+  }
+
+  if (symbol === "metal") {
+    // Hexagon — industrial / forged metal hardware
+    return (
+      <span className={cn(baseClass, "text-gold")} aria-hidden="true">
+        <Hexagon className="h-[17px] w-[17px]" strokeWidth={1.75} />
+      </span>
+    );
+  }
+
+  if (symbol === "stone") {
+    // Faceted gem — alabaster, marble, onyx
+    return (
+      <span className={cn(baseClass, "text-gold")} aria-hidden="true">
+        <Gem className="h-[17px] w-[17px]" strokeWidth={1.75} />
+      </span>
+    );
+  }
+
+  if (symbol === "glass") {
+    // Custom rounded-flask/diffuser silhouette — reads as a glass diffuser
+    return (
+      <span className={cn(baseClass, "text-gold")} aria-hidden="true">
+        <svg viewBox="0 0 24 24" className="h-[17px] w-[17px]" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M9 3h6" />
+          <path d="M10 3v4.5" />
+          <path d="M14 3v4.5" />
+          <path d="M7 14a5 5 0 0 0 10 0c0-2.5-3-4-3-6.5h-4C10 10 7 11.5 7 14Z" />
+          <path d="M11 12.5c0 1 .8 1.8 1.8 1.8" opacity="0.6" />
+        </svg>
       </span>
     );
   }
