@@ -1670,7 +1670,7 @@ const TradeProductPage: React.FC = () => {
               {/* Dual-axis: Base × Top finish dropdowns */}
               {!isRugSqmActive && isDualAxis && (
                 <>
-                  {!baseAxisIsDim && !suppressBaseAsFinish && (
+                  {!baseAxisIsDim && !suppressBaseAsFinish && !(baseOptions.length > 0 && baseOptions.every(looksLikeDimension)) && (
                     <ExpandableSpec
                       icon={specIcon("⬗")}
                       text={withImperialPerLine(baseOptions.join("\n"))}
