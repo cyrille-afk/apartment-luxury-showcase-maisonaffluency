@@ -75,18 +75,19 @@ const classifySwatchSurfaces = (s: Swatch): Surface[] => {
     return ["upholstery", "furniture"];
   }
 
-  // Pure fabrics → upholstery only.
+  // Pure fabrics → upholstery AND furniture (furniture finish includes
+  // upholstered seating fabric/leather wraps as well as frame finishes).
   if (
     cat === "fabric" ||
     cat === "fabrics" ||
     cat === "upholstery" ||
     cat === "fabric & leather"
   ) {
-    return ["upholstery"];
+    return ["upholstery", "furniture"];
   }
 
   // Loose keyword fallback for legacy free-text categories.
-  if (/\b(fabrics?|textiles?|leathers?|upholstery)\b/i.test(text)) return ["upholstery"];
+  if (/\b(fabrics?|textiles?|leathers?|upholstery)\b/i.test(text)) return ["upholstery", "furniture"];
   return [];
 };
 
