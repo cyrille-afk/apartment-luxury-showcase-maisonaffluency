@@ -223,7 +223,9 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
     const onPending = () => {
       try {
         if (localStorage.getItem("ma:welcome-dismissed") === "1") return;
-      } catch {}
+      } catch {
+        // If storage is unavailable, still navigate so the user can continue manually.
+      }
       setWelcomePending(true);
     };
     const onDismissed = () => {

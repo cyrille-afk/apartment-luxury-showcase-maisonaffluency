@@ -366,7 +366,7 @@ const TradeAxonometric = () => {
     try { raw = sessionStorage.getItem(VIZ_BRIEF_INCOMING_KEY); } catch { return; }
     if (!raw) return;
     try { sessionStorage.removeItem(VIZ_BRIEF_INCOMING_KEY); } catch { /* ignore */ }
-    let brief: any;
+    let brief: Record<string, unknown>;
     try { brief = JSON.parse(raw); } catch { return; }
     if (!brief || typeof brief !== "object") return;
 
@@ -1363,8 +1363,8 @@ const TradeAxonometric = () => {
               </div>
             </div>
 
-            {/* Active Creative Brief — shown when working from a queued request */}
-            {activeRequestId && Object.values(activeBrief).some(v => v && v !== "no_preference") && (
+            {/* Active Creative Brief — shown for queue requests or concierge handoffs */}
+            {Object.values(activeBrief).some(v => v && v !== "no_preference") && (
               <div className="border border-primary/30 bg-primary/5 rounded-lg p-4 space-y-2">
                 <h2 className="font-display text-xs text-primary uppercase tracking-wider">Creative Brief</h2>
                 <div className="flex flex-wrap gap-1.5">
