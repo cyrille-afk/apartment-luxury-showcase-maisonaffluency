@@ -6,6 +6,7 @@ import { modelFor, tokenBudget } from "../_shared/aiModels.ts";
 import { embedQuery } from "../_shared/aiEmbeddings.ts";
 import { withSemanticCache } from "../_shared/aiCache.ts";
 import { coerceClearance, classifyResultFailure, countDimensionNumbers } from "../_shared/spatialFitValidation.ts";
+import { canAccessProject } from "../_shared/tenantAccess.ts";
 
 const SENTIMENT_MODEL = modelFor("cheap");
 const SENTIMENT_MAX_TOKENS = tokenBudget("classify");
