@@ -1192,6 +1192,7 @@ const PublicProductPage: React.FC = () => {
                       <ShareMenu
                         url={shareUrl}
                         message={`${product.title} by ${designerDisplay} — Maison Affluency: ${shareUrl}`}
+                        className="flex items-center justify-center w-9 h-9 rounded-full border border-border bg-background/80 backdrop-blur-sm text-foreground/80 hover:text-foreground hover:border-foreground/40 transition-colors"
                         iconSize="w-4 h-4"
                         showLabel={false}
                       />
