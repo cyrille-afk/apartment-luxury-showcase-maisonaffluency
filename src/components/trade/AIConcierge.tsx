@@ -80,6 +80,7 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const { currentStudio } = useStudio();
+  const { isAdmin } = useAuth();
   const isDashboard = pathname === "/trade";
   // Persist open/minimized/timeline in sessionStorage so the conversation
   // survives route changes (e.g. when Felix auto-navigates to a freshly
