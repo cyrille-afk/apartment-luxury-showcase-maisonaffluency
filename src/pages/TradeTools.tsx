@@ -4,7 +4,7 @@ import {
   Image, Users, FolderOpen, Layers, FileText, FileSpreadsheet, Scissors,
   Columns, Paintbrush, MessageCircle, CalendarClock, Package, Truck,
   CalendarDays, Wallet, RefreshCw, ArrowRightLeft, GraduationCap, Box, BookOpen,
-  Wand2, Map, Star, Search, X, Contact as ContactIcon,
+  Wand2, Map, Star, Search, X, Contact as ContactIcon, Ruler,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
