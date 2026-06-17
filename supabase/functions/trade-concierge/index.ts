@@ -1376,10 +1376,28 @@ async function loadProjectContext(
   }
   const { data: proj } = await supabase
     .from("projects")
-    .select("id, name, client_name, location, status, studio_id, studios:studio_id(name), clients:client_id(name)")
+    .select("id, name, client_name, location, status, studio_id, user_id, studios:studio_id(name), clients:client_id(name)")
     .eq("id", projectId)
     .maybeSingle();
   if (!proj) {
+    return "(Active project id was provided but not found / not accessible. Treat as no project.)";
+  }
+  // Tenant isolation: this function uses the service-role client (RLS bypassed),
+  // so we MUST verify the caller has access to this project before returning its
+  // name, client, location, or studio. Owner OR studio member is allowed.
+  const projUserId = (proj as any).user_id as string | null;
+  const projStudioId = (proj as any).studio_id as string | null;
+  let allowed = projUserId === userId;
+  if (!allowed && projStudioId) {
+    const { data: membership } = await supabase
+      .from("studio_members")
+      .select("user_id")
+      .eq("studio_id", projStudioId)
+      .eq("user_id", userId)
+      .maybeSingle();
+    allowed = !!membership;
+  }
+  if (!allowed) {
     return "(Active project id was provided but not found / not accessible. Treat as no project.)";
   }
   const studio = (proj as any).studios?.name || null;
