@@ -204,6 +204,7 @@ const VariantSelectors: React.FC<{
   // the redundant upholstery-finish dropdown (the swatch picker already
   // drives the upholstery price tier).
   const [hasLinkedFabrics, setHasLinkedFabrics] = useState(false);
+  const [linkedWoodFinishes, setLinkedWoodFinishes] = useState<string[]>([]);
 
   const [selDualSize, setSelDualSize] = useState<string | null>(null);
   const [selMat, setSelMat] = useState<string | null>(null);
@@ -330,8 +331,24 @@ const VariantSelectors: React.FC<{
   // / feet / leg / base).
   const isFinishAxis = (label: string) =>
     /\b(frame|wood|finish|feet|foot|leg|base|legs)\b/i.test(label);
-  const suppressBaseAsFinish = isProductUpholstered(product) && !baseAxisIsDim && isFinishAxis(baseAxisLabelRaw);
-  const suppressTopAsFinish = isProductUpholstered(product) && !topAxisIsDim && isFinishAxis(topAxisLabelRaw);
+  const normLinkedFinish = (s: string) => (s || "").trim().toLowerCase();
+  const hasWoodSwatches = linkedWoodFinishes.length > 0;
+  const allBasesHaveSwatches = baseOptions.length > 0 && baseOptions.every((b) => {
+    const nb = normLinkedFinish(b);
+    return linkedWoodFinishes.some((lw) => {
+      const nlw = normLinkedFinish(lw);
+      return nlw === nb || nlw.includes(nb) || nb.includes(nlw);
+    });
+  });
+  const topAxisHasSwatches = !topAxisIsDim && topOptions.length > 0 && topOptions.some((t) => {
+    const nt = normLinkedFinish(t);
+    return linkedWoodFinishes.some((lw) => {
+      const nlw = normLinkedFinish(lw);
+      return nlw === nt || nlw.includes(nt) || nt.includes(nlw);
+    });
+  });
+  const suppressBaseAsFinish = !baseAxisIsDim && isFinishAxis(baseAxisLabelRaw) && (allBasesHaveSwatches || hasWoodSwatches);
+  const suppressTopAsFinish = !topAxisIsDim && (topAxisHasSwatches || (isProductUpholstered(product) && isFinishAxis(topAxisLabelRaw)));
 
   // Per-square-metre rug picker short-circuit: when the product is a rug and
   // its size_variants encode parseable dimensions (e.g. "300 × 400 cm"), show
