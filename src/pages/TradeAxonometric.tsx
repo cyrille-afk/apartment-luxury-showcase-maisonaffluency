@@ -75,7 +75,7 @@ const clearSavedDraft = () => {
   }
 };
 
-const useFreshSourceImage = (
+const resetWithFreshSourceImage = (
   url: string | null,
   setSourceImage: (url: string | null) => void,
   setResult: (result: GenerationResult | null) => void,
@@ -939,7 +939,7 @@ const TradeAxonometric = () => {
         >
           <div className="flex items-center gap-2">
             {activeRequestId && (
-              <Button variant="outline" size="sm" onClick={() => { setActiveRequestId(null); useFreshSourceImage(null, setSourceImage, setResult, setHistory, setLockedLayoutUrl); setShowQueue(true); }}>
+              <Button variant="outline" size="sm" onClick={() => { setActiveRequestId(null); resetWithFreshSourceImage(null, setSourceImage, setResult, setHistory, setLockedLayoutUrl); setShowQueue(true); }}>
                 <Inbox className="w-3.5 h-3.5 mr-1.5" />Back to Queue
               </Button>
             )}
