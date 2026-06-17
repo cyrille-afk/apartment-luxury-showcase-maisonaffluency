@@ -618,11 +618,12 @@ const TradeAxonometric = () => {
       const activeRequest = activeRequestId
         ? pendingRequests?.find((r: any) => r.id === activeRequestId)
         : null;
+      // Only use a layout reference when the user has explicitly locked one.
+      // Previously we auto-fed the prior render back as a reference for elevation/section modes,
+      // which caused old furniture to leak into fresh generations of an empty room.
       const lockedLayoutReference = lockedLayoutUrl
         ? toAbsoluteUrl(lockedLayoutUrl)
-        : (mode === "elevation_to_axo" || mode === "section_to_axo")
-          ? toAbsoluteUrl(result?.storedUrl || result?.imageUrl || activeRequest?.result_image_url)
-          : null;
+        : null;
 
       console.log("[axo-gen] Layout lock debug:", {
         hasResult: !!result,
