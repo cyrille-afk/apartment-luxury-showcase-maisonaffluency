@@ -3042,7 +3042,8 @@ serve(async (req) => {
           const quoteBuffers = allBuffers.filter((b) => b.name === "draft_quote" || b.name === "add_to_quote");
           const ffeBuffers = allBuffers.filter((b) => b.name === "propose_ffe_rows");
           const shippingBuffers = allBuffers.filter((b) => b.name === "estimate_shipping");
-          const orderedBuffers = [...tearsheetBuffers, ...quoteBuffers, ...ffeBuffers, ...shippingBuffers];
+          const vizBriefBuffers = allBuffers.filter((b) => b.name === "prepare_visualization_brief");
+          const orderedBuffers = [...tearsheetBuffers, ...quoteBuffers, ...ffeBuffers, ...shippingBuffers, ...vizBriefBuffers];
           if (tearsheetBuffers.length && quoteBuffers.length) {
             console.log(`[concierge flush] chained turn: ${tearsheetBuffers.length} tearsheet + ${quoteBuffers.length} quote proposal(s), flushing tearsheet→quote`);
           }
