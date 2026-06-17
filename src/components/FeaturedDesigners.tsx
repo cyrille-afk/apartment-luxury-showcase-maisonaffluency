@@ -1232,7 +1232,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
   },
   {
     id: "garnier-linker",
-    name: "Garnier & Linker - Guillaume Garnier & Florent Linker",
+    name: "Garnier & Linker",
     mobileNameLines: ["Garnier & Linker", "G.Garnier & F.Linker"],
     specialty: "Lost-Wax Crystal & Sculptural Glass Objects",
     image: garnierLinkerImg,
