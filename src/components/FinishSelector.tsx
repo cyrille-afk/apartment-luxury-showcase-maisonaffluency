@@ -425,7 +425,7 @@ export default function FinishSelector({ pickId, className, productTitle, onUpho
   const [openWood, setOpenWood] = useState(false);
   const [openCover, setOpenCover] = useState(false);
   const fabricTiles = grouped["Fabric & Leather"] || [];
-  const woodTiles = grouped["Wood"] || [];
+  const woodTiles = (grouped["Wood"] || []).filter((f) => !woodFilter || woodFilter(f.name));
   const coverTiles = grouped["Cover"] || [];
 
 
