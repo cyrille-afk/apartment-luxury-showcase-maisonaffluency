@@ -649,8 +649,6 @@ const TradeAxonometric = () => {
     }
   };
 
-  if (!isAdmin) return <Navigate to="/trade" replace />;
-
   const generateEmptyRoom = async (imageUrl: string) => {
     setEmptyRoomGenerating(true);
     setEmptyRoomUrl(null);
