@@ -4217,6 +4217,32 @@ serve(async (req) => {
             });
             controller.enqueue(encoder.encode(`event: proposal\ndata: ${JSON.stringify(proposal)}\n\n`));
             console.log(`[concierge promise-recovery] emitted propose_tearsheet (${pickIds.length} picks)`);
+            if (effectiveBrief.plan.includes("prepare_visualization_brief")) {
+              const room = effectiveBrief.brief.room || (/belgravia/.test(lastUserMsgLower) ? "Belgravia drawing-room" : null);
+              const stylePreset = "Editorial Luxury";
+              const materials = effectiveBrief.brief.materials.length ? effectiveBrief.brief.materials.join(", ") : "the requested palette and materials";
+              const vizProposal = {
+                tool: "prepare_visualization_brief",
+                tool_call_id: `synthetic-viz-${crypto.randomUUID()}`,
+                args: {
+                  mode: "composite",
+                  style_preset: stylePreset,
+                  title: (typeof parsed.title === "string" && parsed.title.trim() ? parsed.title : "Render brief").slice(0, 80),
+                  room_label: room,
+                  brief_notes: `${room ? `${room}: ` : ""}${effectiveBrief.brief.summary || lastUserMsg} Render in ${stylePreset} with ${materials}; use the selected Maison Affluency pieces as overlay candidates with careful scale, sightlines and material fidelity.`.slice(0, 1200),
+                  pick_ids: pickIds.slice(0, 12),
+                  source_image_url: null,
+                },
+                preview: preview.slice(0, 12),
+              };
+              toolCallBuffers.set(maxIdx + 2, {
+                id: vizProposal.tool_call_id,
+                name: "prepare_visualization_brief",
+                argsText: JSON.stringify(vizProposal.args),
+              });
+              controller.enqueue(encoder.encode(`event: proposal\ndata: ${JSON.stringify(vizProposal)}\n\n`));
+              console.log(`[concierge promise-recovery] emitted prepare_visualization_brief (${pickIds.length} picks)`);
+            }
           } catch (e) {
             console.error("[concierge promise-recovery] failed:", e);
           }
