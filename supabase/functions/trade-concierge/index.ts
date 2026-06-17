@@ -3182,6 +3182,61 @@ serve(async (req) => {
               continue;
             }
 
+            // ====== VISUALIZATION BRIEF (Axonometric Studio hand-off) ======
+            if (tc.name === "prepare_visualization_brief") {
+              let parsed: any = {};
+              try { parsed = JSON.parse(tc.argsText || "{}"); } catch (e) {
+                console.error("Could not parse prepare_visualization_brief args:", tc.argsText, e);
+                continue;
+              }
+              const ALLOWED_MODES = new Set([
+                "elevation_to_axo","section_to_axo","stylize","composite","3d_to_cad","cad_overlay",
+              ]);
+              const ALLOWED_STYLES = new Set([
+                "Photorealistic","Watercolor","Minimal Line","Editorial Luxury","Scandinavian",
+              ]);
+              const mode = typeof parsed.mode === "string" && ALLOWED_MODES.has(parsed.mode) ? parsed.mode : "composite";
+              const stylePreset = typeof parsed.style_preset === "string" && ALLOWED_STYLES.has(parsed.style_preset)
+                ? parsed.style_preset : "Editorial Luxury";
+              const title = typeof parsed.title === "string" ? parsed.title.slice(0, 80) : null;
+              const roomLabel = typeof parsed.room_label === "string" ? parsed.room_label.slice(0, 80) : null;
+              const briefNotes = typeof parsed.brief_notes === "string" ? parsed.brief_notes.slice(0, 1200) : "";
+              const sourceImageUrl = typeof parsed.source_image_url === "string" && /^https?:\/\//.test(parsed.source_image_url)
+                ? parsed.source_image_url : null;
+              const rawPickIds: string[] = Array.isArray(parsed.pick_ids) ? parsed.pick_ids : [];
+              const pickIds = rawPickIds
+                .filter((id) => typeof id === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id))
+                .slice(0, 12);
+
+              // Hydrate a compact preview so the card can show thumbnails.
+              let preview: PickPreview[] = [];
+              if (pickIds.length) {
+                try {
+                  preview = await fetchPickPreviews(supabase, pickIds);
+                } catch (e) {
+                  console.warn("[viz brief] preview hydration failed", e);
+                }
+              }
+
+              const proposal = {
+                tool: "prepare_visualization_brief",
+                tool_call_id: tc.id || crypto.randomUUID(),
+                args: {
+                  mode,
+                  style_preset: stylePreset,
+                  title,
+                  room_label: roomLabel,
+                  brief_notes: briefNotes,
+                  pick_ids: pickIds,
+                  source_image_url: sourceImageUrl,
+                },
+                preview,
+              };
+              controller.enqueue(encoder.encode(`event: proposal\ndata: ${JSON.stringify(proposal)}\n\n`));
+              console.log(`[concierge] emitted prepare_visualization_brief proposal: mode=${mode} preset=${stylePreset} picks=${pickIds.length}`);
+              continue;
+            }
+
             // ====== SPATIAL FIT ======
             // Invokes the `cad-check-fit` edge function with the user's bearer
             // token so RLS sees the right identity, then narrates the verdict.
