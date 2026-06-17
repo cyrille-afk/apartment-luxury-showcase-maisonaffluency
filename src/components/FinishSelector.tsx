@@ -309,22 +309,28 @@ export default function FinishSelector({ pickId, className, productTitle, onUpho
       ? colTile
       : fabrics.find((f) => f.id === selectedFabricId) || null;
   const selectedWoodItem = fabrics.find((f) => f.id === selectedWoodId) || null;
+  const selectedTopItem = fabrics.find((f) => f.id === selectedTopId) || null;
   const selectedCoverItem = fabrics.find((f) => f.id === selectedCoverId) || null;
 
-  const renderTile = (f: Fabric) => {
+  const renderTile = (f: Fabric, kindOverride?: "fabric" | "cover" | "base" | "top") => {
     const isCom = f.id === "__com__";
     const isCol = f.id === "__col__";
-    const isFabricGroup = isFabricCategory(f);
-    const isCoverGroup = isCoverCategory(f);
+    const isFabricGroup = kindOverride ? kindOverride === "fabric" : isFabricCategory(f);
+    const isCoverGroup = kindOverride ? kindOverride === "cover" : isCoverCategory(f);
+    const isTopGroup = kindOverride === "top";
     const isSelected = isFabricGroup
       ? selectedFabricId === f.id
       : isCoverGroup
       ? selectedCoverId === f.id
+      : isTopGroup
+      ? selectedTopId === f.id
       : selectedWoodId === f.id;
     const setSelected = isFabricGroup
       ? setSelectedFabricId
       : isCoverGroup
       ? setSelectedCoverId
+      : isTopGroup
+      ? setSelectedTopId
       : setSelectedWoodId;
 
     const handlePick = () => {
