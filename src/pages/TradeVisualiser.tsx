@@ -450,11 +450,17 @@ const TradeVisualiser = () => {
                 ref={imgRef}
                 onClick={onPhotoClick}
                 className="relative w-full rounded-xl overflow-hidden border border-border bg-muted cursor-crosshair select-none"
-                style={{ aspectRatio: "16/10" }}
+                style={{ aspectRatio: photoAspect ?? "16/10" }}
               >
                 <img
                   src={rendered && renderedImage ? renderedImage : photo}
                   alt="Room"
+                  onLoad={(e) => {
+                    const el = e.currentTarget;
+                    if (el.naturalWidth && el.naturalHeight) {
+                      setPhotoAspect(`${el.naturalWidth} / ${el.naturalHeight}`);
+                    }
+                  }}
                   className="absolute inset-0 w-full h-full object-cover"
                 />
 
