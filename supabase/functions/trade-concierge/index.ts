@@ -4360,6 +4360,7 @@ serve(async (req) => {
           //     the quote's pick_ids BEFORE flushProposal so deterministic ordering
           //     (tearsheet → quote) holds without buffering SSE writes.
           backfillTearsheetIfNeeded();
+          backfillVisualizationBriefIfNeeded();
           await flushProposal();
           await emitDeterministicTearsheetFallback();
           // (1b) Promise-without-delivery recovery: the model wrote prose like
