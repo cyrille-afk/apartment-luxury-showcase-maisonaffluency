@@ -151,19 +151,55 @@ const normalizeSupplierKey = (raw: string | null | undefined) => {
 };
 
 // ───────── Page ──────────────────────────────────────────────────────────────
+const STORAGE_KEY = "trade-visualiser-session-v1";
+type PersistedSession = {
+  photo: string | null;
+  photoDataUrl: string | null;
+  renderedImage: string | null;
+  surface: Surface;
+  pins: Pin[];
+  rendered: boolean;
+};
+const loadPersisted = (): Partial<PersistedSession> => {
+  try {
+    const raw = sessionStorage.getItem(STORAGE_KEY);
+    if (!raw) return {};
+    return JSON.parse(raw) as Partial<PersistedSession>;
+  } catch { return {}; }
+};
+
 const TradeVisualiser = () => {
-  const [photo, setPhoto] = useState<string | null>(null); // original (object URL or data URL)
-  const [photoDataUrl, setPhotoDataUrl] = useState<string | null>(null); // base64 for API
-  const [renderedImage, setRenderedImage] = useState<string | null>(null);
-  const [surface, setSurface] = useState<Surface>("walls");
-  const [pins, setPins] = useState<Pin[]>([]);
+  const initial = loadPersisted();
+  const [photo, setPhoto] = useState<string | null>(initial.photo ?? null);
+  const [photoDataUrl, setPhotoDataUrl] = useState<string | null>(initial.photoDataUrl ?? null);
+  const [renderedImage, setRenderedImage] = useState<string | null>(initial.renderedImage ?? null);
+  const [surface, setSurface] = useState<Surface>(initial.surface ?? "walls");
+  const [pins, setPins] = useState<Pin[]>(initial.pins ?? []);
   const [activePinId, setActivePinId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [allSwatches, setAllSwatches] = useState<Swatch[]>([]);
   const [loadingSwatches, setLoadingSwatches] = useState(false);
   const [rendering, setRendering] = useState(false);
-  const [rendered, setRendered] = useState(false);
+  const [rendered, setRendered] = useState(initial.rendered ?? false);
   const [renderError, setRenderError] = useState<string | null>(null);
+
+  // Persist session so an auto cache-bust reload (or accidental refresh)
+  // keeps the uploaded photo, pins, and last render intact.
+  useEffect(() => {
+    try {
+      sessionStorage.setItem(STORAGE_KEY, JSON.stringify({
+        photo, photoDataUrl, renderedImage, surface, pins, rendered,
+      }));
+    } catch {
+      // sessionStorage quota (large data URLs) — drop the heaviest field first.
+      try {
+        sessionStorage.setItem(STORAGE_KEY, JSON.stringify({
+          photo: null, photoDataUrl, renderedImage: null, surface, pins, rendered: false,
+        }));
+      } catch { /* give up silently */ }
+    }
+  }, [photo, photoDataUrl, renderedImage, surface, pins, rendered]);
+
 
   const imgRef = useRef<HTMLDivElement | null>(null);
   const fileRef = useRef<HTMLInputElement | null>(null);
