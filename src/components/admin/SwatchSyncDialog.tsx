@@ -87,21 +87,29 @@ export default function SwatchSyncDialog({
     const topAxis = tops.length ? tops : [""];
     const sizeAxis = sizes.length ? sizes : [""];
 
-    const priceMap = new Map<string, { price_cents: number; row: VariantRow }>();
+    // Primary key: full (base,top,label). Fallback: (top,label) — preserves price
+    // when the Base axis is being replaced wholesale by swatch names.
+    const priceMap = new Map<string, number>();
+    const fallbackMap = new Map<string, number>();
     currentVariants.forEach((v) => {
-      priceMap.set(variantKey(v.base, v.top, v.label), { price_cents: v.price_cents || 0, row: v });
+      const p = v.price_cents || 0;
+      if (p <= 0) return;
+      priceMap.set(variantKey(v.base, v.top, v.label), p);
+      const fk = variantKey("", v.top, v.label);
+      if (!fallbackMap.has(fk)) fallbackMap.set(fk, p);
     });
 
     const out: VariantRow[] = [];
     for (const b of newBases) {
       for (const t of topAxis) {
         for (const l of sizeAxis) {
-          const found = priceMap.get(variantKey(b, t, l));
+          const exact = priceMap.get(variantKey(b, t, l));
+          const fb = fallbackMap.get(variantKey("", t, l));
           out.push({
             base: b,
             top: t || undefined,
             label: l || undefined,
-            price_cents: found?.price_cents || 0,
+            price_cents: exact ?? fb ?? 0,
           });
         }
       }
