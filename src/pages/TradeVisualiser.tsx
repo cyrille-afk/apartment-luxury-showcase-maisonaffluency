@@ -8,12 +8,15 @@
  */
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { Helmet } from "react-helmet-async";
+import { useSearchParams } from "react-router-dom";
 import {
-  Upload, Sparkles, X, Loader2, Search, ImageIcon, MousePointerClick, Wand2,
+  Upload, Sparkles, X, Loader2, Search, ImageIcon, MousePointerClick, Wand2, Layers,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 // ───────── Surfaces ──────────────────────────────────────────────────────────
@@ -113,6 +116,16 @@ interface Pin {
   x: number; // 0..1
   y: number;
   swatch?: Swatch;
+  productHint?: { name: string; image_url: string | null; brand: string | null };
+}
+
+interface AxoRequest {
+  id: string;
+  project_name: string;
+  result_image_url: string;
+  request_type: string | null;
+  linked_favorite_product_ids: string[] | null;
+  updated_at: string;
 }
 
 const normalizeAssetKey = (url: string | null) => {
@@ -187,6 +200,121 @@ const TradeVisualiser = () => {
   const [rendering, setRendering] = useState(false);
   const [rendered, setRendered] = useState(initial.rendered ?? false);
   const [renderError, setRenderError] = useState<string | null>(null);
+
+  // Axonometric Studio deliveries (completed renders the user can reopen here)
+  const [axoOpen, setAxoOpen] = useState(false);
+  const [axoLoading, setAxoLoading] = useState(false);
+  const [axoRequests, setAxoRequests] = useState<AxoRequest[]>([]);
+  const [importingAxoId, setImportingAxoId] = useState<string | null>(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const fetchAxoRequests = useCallback(async () => {
+    setAxoLoading(true);
+    const { data, error } = await supabase
+      .from("axonometric_requests")
+      .select("id, project_name, result_image_url, request_type, linked_favorite_product_ids, updated_at")
+      .eq("status", "completed")
+      .not("result_image_url", "is", null)
+      .order("updated_at", { ascending: false });
+    setAxoLoading(false);
+    if (error) {
+      toast.error("Could not load Axonometric deliveries");
+      return;
+    }
+    setAxoRequests((data ?? []) as AxoRequest[]);
+  }, []);
+
+  const importAxoDelivery = useCallback(async (req: AxoRequest) => {
+    if (!req.result_image_url) return;
+    setImportingAxoId(req.id);
+    try {
+      // Fetch the render as a data URL so the AI render endpoint can re-use it.
+      const resp = await fetch(req.result_image_url, { mode: "cors" });
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      const blob = await resp.blob();
+      const dataUrl = await new Promise<string>((resolve, reject) => {
+        const r = new FileReader();
+        r.onload = () => resolve(typeof r.result === "string" ? r.result : "");
+        r.onerror = () => reject(r.error);
+        r.readAsDataURL(blob);
+      });
+
+      // Look up linked favourite products to seed pin labels.
+      const productIds = Array.isArray(req.linked_favorite_product_ids)
+        ? req.linked_favorite_product_ids.filter((x): x is string => typeof x === "string")
+        : [];
+      let products: { id: string; product_name: string | null; image_url: string | null; brand_name: string | null }[] = [];
+      if (productIds.length > 0) {
+        const { data: prods } = await supabase
+          .from("trade_products")
+          .select("id, product_name, image_url, brand_name")
+          .in("id", productIds);
+        products = prods ?? [];
+      }
+
+      // Distribute up to 8 hint pins evenly across the lower-middle of the image.
+      const seedPins: Pin[] = products.slice(0, 8).map((p, i, arr) => {
+        const n = arr.length;
+        const x = n === 1 ? 0.5 : 0.15 + (0.7 * i) / (n - 1);
+        const y = 0.55 + ((i % 2) * 0.15);
+        return {
+          id: `pin-axo-${req.id}-${i}-${Date.now()}`,
+          surface: "furniture" as Surface,
+          x,
+          y,
+          productHint: {
+            name: p.product_name || "Untitled product",
+            image_url: p.image_url,
+            brand: p.brand_name,
+          },
+        };
+      });
+
+      setPhoto(req.result_image_url);
+      setPhotoDataUrl(dataUrl);
+      setRenderedImage(null);
+      setRendered(false);
+      setRenderError(null);
+      setPins(seedPins);
+      setActivePinId(seedPins[0]?.id ?? null);
+      setAxoOpen(false);
+      toast.success(
+        seedPins.length > 0
+          ? `Loaded "${req.project_name || "Untitled"}" with ${seedPins.length} product hint${seedPins.length === 1 ? "" : "s"}`
+          : `Loaded "${req.project_name || "Untitled"}"`,
+      );
+    } catch (e) {
+      console.error(e);
+      toast.error("Could not import this render — the image may be unreachable.");
+    } finally {
+      setImportingAxoId(null);
+    }
+  }, []);
+
+  // Deep-link support: /trade/visualiser?fromAxo=<requestId>
+  useEffect(() => {
+    const id = searchParams.get("fromAxo");
+    if (!id) return;
+    // Strip the param so reloads / fresh navigation don't reimport
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      next.delete("fromAxo");
+      return next;
+    }, { replace: true });
+    (async () => {
+      const { data, error } = await supabase
+        .from("axonometric_requests")
+        .select("id, project_name, result_image_url, request_type, linked_favorite_product_ids, updated_at")
+        .eq("id", id)
+        .maybeSingle();
+      if (error || !data || !data.result_image_url) {
+        toast.error("That delivery is not ready yet.");
+        return;
+      }
+      await importAxoDelivery(data as AxoRequest);
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Persist session so an auto cache-bust reload (or accidental refresh)
   // keeps the uploaded photo, pins, and last render intact.
@@ -402,26 +530,37 @@ const TradeVisualiser = () => {
 
         {/* ─── Upload (no photo yet) ─── */}
         {!photo && (
-          <div
-            onClick={() => fileRef.current?.click()}
-            onDrop={onDrop}
-            onDragOver={(e) => e.preventDefault()}
-            className="border-2 border-dashed border-border rounded-xl p-16 text-center cursor-pointer hover:border-foreground/40 transition-colors"
-          >
-            <Upload className="h-10 w-10 mx-auto mb-4 text-muted-foreground" />
-            <p className="font-body text-sm text-foreground mb-1">
-              Drop a room photo here, or click to upload
-            </p>
-            <p className="font-body text-xs text-muted-foreground">
-              JPEG or PNG · client-side only, nothing is saved yet
-            </p>
-            <input
-              ref={fileRef}
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={(e) => onFile(e.target.files?.[0] ?? null)}
-            />
+          <div className="space-y-3">
+            <div
+              onClick={() => fileRef.current?.click()}
+              onDrop={onDrop}
+              onDragOver={(e) => e.preventDefault()}
+              className="border-2 border-dashed border-border rounded-xl p-16 text-center cursor-pointer hover:border-foreground/40 transition-colors"
+            >
+              <Upload className="h-10 w-10 mx-auto mb-4 text-muted-foreground" />
+              <p className="font-body text-sm text-foreground mb-1">
+                Drop a room photo here, or click to upload
+              </p>
+              <p className="font-body text-xs text-muted-foreground">
+                JPEG or PNG · client-side only, nothing is saved yet
+              </p>
+              <input
+                ref={fileRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => onFile(e.target.files?.[0] ?? null)}
+              />
+            </div>
+            <div className="flex items-center justify-center">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={(e) => { e.stopPropagation(); setAxoOpen(true); fetchAxoRequests(); }}
+              >
+                <Layers className="h-4 w-4 mr-2" /> Load from Axonometric Studio
+              </Button>
+            </div>
           </div>
         )}
 
@@ -448,6 +587,14 @@ const TradeVisualiser = () => {
                   </button>
                 ))}
                 <div className="ml-auto flex items-center gap-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => { setAxoOpen(true); fetchAxoRequests(); }}
+                    title="Load a render delivered by the Axonometric Studio"
+                  >
+                    <Layers className="h-4 w-4 mr-1" /> Axonometric deliveries
+                  </Button>
                   <Button variant="ghost" size="sm" onClick={() => { setPhoto(null); setPins([]); setRendered(false); }}>
                     <X className="h-4 w-4 mr-1" /> New photo
                   </Button>
@@ -513,7 +660,7 @@ const TradeVisualiser = () => {
                       >
                         {sdef.label[0]}
                       </div>
-                      {p.swatch && (
+                      {p.swatch ? (
                         <div className="mt-1 bg-background/95 rounded shadow-md flex items-center gap-1.5 pr-2">
                           {p.swatch.image_url && (
                             <img src={p.swatch.image_url} alt="" className="w-6 h-6 object-cover rounded-l" />
@@ -529,10 +676,34 @@ const TradeVisualiser = () => {
                             <X className="h-3 w-3" />
                           </button>
                         </div>
-                      )}
+                      ) : p.productHint ? (
+                        <div className="mt-1 bg-background/95 rounded shadow-md flex items-center gap-1.5 pr-2 border border-dashed border-foreground/30">
+                          {p.productHint.image_url && (
+                            <img src={p.productHint.image_url} alt="" className="w-6 h-6 object-cover rounded-l" />
+                          )}
+                          <div className="flex flex-col py-0.5">
+                            <span className="font-body text-[10px] text-foreground whitespace-nowrap max-w-[160px] truncate">
+                              {p.productHint.name}
+                            </span>
+                            {p.productHint.brand && (
+                              <span className="font-body text-[9px] uppercase tracking-wider text-muted-foreground whitespace-nowrap max-w-[160px] truncate">
+                                {p.productHint.brand}
+                              </span>
+                            )}
+                          </div>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); removePin(p.id); }}
+                            className="text-muted-foreground hover:text-foreground"
+                            aria-label="Remove pin"
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        </div>
+                      ) : null}
                     </div>
                   );
                 })}
+
 
                 {/* Empty hint */}
                 {pins.length === 0 && (
@@ -705,6 +876,74 @@ const TradeVisualiser = () => {
           </div>
         )}
       </div>
+
+      {/* ─── Axonometric Studio deliveries dialog ─── */}
+      <Dialog open={axoOpen} onOpenChange={setAxoOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="font-display text-base">Axonometric Studio deliveries</DialogTitle>
+            <DialogDescription className="font-body text-xs">
+              Reopen a completed render here to re-pin surfaces and swap fabrics, finishes or rugs.
+            </DialogDescription>
+          </DialogHeader>
+
+          {axoLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+            </div>
+          ) : axoRequests.length === 0 ? (
+            <div className="border border-dashed border-border rounded-lg py-10 text-center">
+              <Layers className="w-7 h-7 text-muted-foreground/40 mx-auto mb-2" />
+              <p className="font-body text-sm text-muted-foreground">
+                No completed deliveries yet. Submit a brief in the Axonometric Studio and the rendered result will appear here.
+              </p>
+            </div>
+          ) : (
+            <div className="max-h-[60vh] overflow-y-auto -mx-1 px-1 space-y-2">
+              {axoRequests.map((req) => {
+                const linkedCount = Array.isArray(req.linked_favorite_product_ids)
+                  ? req.linked_favorite_product_ids.length
+                  : 0;
+                const importing = importingAxoId === req.id;
+                return (
+                  <button
+                    key={req.id}
+                    onClick={() => importAxoDelivery(req)}
+                    disabled={!!importingAxoId}
+                    className="w-full text-left flex gap-3 p-3 rounded-lg border border-border hover:border-foreground/40 hover:bg-muted/30 transition-colors disabled:opacity-50"
+                  >
+                    <img
+                      src={req.result_image_url}
+                      alt=""
+                      className="w-24 h-24 object-cover rounded-md border border-border shrink-0"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <p className="font-display text-sm text-foreground truncate">
+                        {req.project_name || "Untitled"}
+                      </p>
+                      <p className="font-body text-[11px] text-muted-foreground capitalize">
+                        {(req.request_type || "elevation").replace("_", " ")} · delivered
+                      </p>
+                      {linkedCount > 0 && (
+                        <p className="font-body text-[11px] text-[hsl(var(--gold))] mt-1">
+                          {linkedCount} linked product{linkedCount === 1 ? "" : "s"} will pre-pin
+                        </p>
+                      )}
+                    </div>
+                    {importing ? (
+                      <Loader2 className="h-4 w-4 animate-spin text-muted-foreground self-center" />
+                    ) : (
+                      <span className="self-center font-body text-[10px] uppercase tracking-wider text-muted-foreground">
+                        Open
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </>
   );
 };
