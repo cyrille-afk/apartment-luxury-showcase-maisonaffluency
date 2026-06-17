@@ -170,7 +170,12 @@ const loadPersisted = (): Partial<PersistedSession> => {
 
 const TradeVisualiser = () => {
   const initial = loadPersisted();
-  const [photo, setPhoto] = useState<string | null>(initial.photo ?? null);
+  // blob: URLs don't survive a page reload — fall back to the persisted data URL.
+  const initialPhoto =
+    initial.photo && !initial.photo.startsWith("blob:")
+      ? initial.photo
+      : initial.photoDataUrl ?? null;
+  const [photo, setPhoto] = useState<string | null>(initialPhoto);
   const [photoDataUrl, setPhotoDataUrl] = useState<string | null>(initial.photoDataUrl ?? null);
   const [renderedImage, setRenderedImage] = useState<string | null>(initial.renderedImage ?? null);
   const [surface, setSurface] = useState<Surface>(initial.surface ?? "walls");
@@ -185,10 +190,12 @@ const TradeVisualiser = () => {
 
   // Persist session so an auto cache-bust reload (or accidental refresh)
   // keeps the uploaded photo, pins, and last render intact.
+  // Never persist blob: URLs — they're invalidated on reload.
   useEffect(() => {
+    const persistablePhoto = photo && photo.startsWith("blob:") ? null : photo;
     try {
       sessionStorage.setItem(STORAGE_KEY, JSON.stringify({
-        photo, photoDataUrl, renderedImage, surface, pins, rendered,
+        photo: persistablePhoto, photoDataUrl, renderedImage, surface, pins, rendered,
       }));
     } catch {
       // sessionStorage quota (large data URLs) — drop the heaviest field first.
@@ -199,6 +206,7 @@ const TradeVisualiser = () => {
       } catch { /* give up silently */ }
     }
   }, [photo, photoDataUrl, renderedImage, surface, pins, rendered]);
+
 
 
   const imgRef = useRef<HTMLDivElement | null>(null);
