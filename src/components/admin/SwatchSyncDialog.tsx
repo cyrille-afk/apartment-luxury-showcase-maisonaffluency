@@ -46,8 +46,8 @@ export default function SwatchSyncDialog({
     if (!open) return;
     setLoading(true);
     supabase
-      .from("material_swatches")
-      .select("id,name,brand_name,category,material_type,finish")
+      .from("fabrics")
+      .select("id,name,supplier,category")
       .eq("is_active", true)
       .limit(1000)
       .then(({ data, error }) => {
@@ -55,8 +55,16 @@ export default function SwatchSyncDialog({
           console.error("[SwatchSync] load failed", error);
           setSwatches([]);
         } else {
-          const matched = (data || []).filter((s) => brandMatches(designerName, s.brand_name));
-          setSwatches(matched as Swatch[]);
+          const mapped: Swatch[] = (data || []).map((s: any) => ({
+            id: s.id,
+            name: s.name,
+            brand_name: s.supplier ?? null,
+            category: s.category ?? null,
+            material_type: s.category ?? null,
+            finish: null,
+          }));
+          const matched = mapped.filter((s) => brandMatches(designerName, s.brand_name));
+          setSwatches(matched);
         }
         setLoading(false);
       });
