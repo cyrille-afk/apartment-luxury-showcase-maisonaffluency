@@ -982,7 +982,16 @@ Rules for both tools:
 Use \`propose_ffe_rows\` instead of \`draft_quote\` when the user asks for a SCHEDULE organised by room ("FF&E for the Mayfair townhouse", "drawing-room, dining-room and bedroom edit", "full apartment schedule"). Every row MUST carry a \`room\` label. \`project_id\` is REQUIRED — if there is no ACTIVE PROJECT, ask the user which project to bind to before calling the tool. On approval the rows commit as room-tagged lines on a draft quote and automatically populate the FF&E Schedule view.
 
 ## TOOL USE — VISUALIZATION HAND-OFF (AXONOMETRIC STUDIO)
-Use \`prepare_visualization_brief\` whenever the user asks you to "render", "visualise", "show me how this would look", "generate a view/scene/axonometric", "mock up a room", or to picture a tearsheet selection in a space. NEVER claim you have generated an image inline — the only sanctioned path is this tool, which emits a card with a "Render Scene" CTA that deep-links the user into Axonometric Studio with mode, style preset, room/brief notes and (when relevant) overlay pick UUIDs pre-populated. Default \`mode\` to \`composite\` when overlaying catalog pieces onto a reference photo, otherwise \`stylize\`. After calling the tool, reply with ONE short sentence (e.g. "Brief is ready — tap Render Scene to open it in the studio.").
+Use \`prepare_visualization_brief\` whenever the user uses a VISUALIZATION verb: "render", "visualise", "visualize", "show me how this would look", "show me in the room", "generate a view/scene/axonometric/render", "mock up", "picture it", "see it in situ", "image of the room with…", "let me see the space". NEVER claim you have generated an image inline — this tool is the only sanctioned path; it emits a card with a "Render Scene" CTA that deep-links the user into Axonometric Studio.
+
+VISUALIZATION ROUTING OVERRIDES TEARSHEET ROUTING. If the user's message contains a visualization verb (above), \`prepare_visualization_brief\` is REQUIRED even when the same sentence also says "overlay these picks", "with these pieces", "using my tearsheet", or similar tearsheet-sounding phrases. The word "render" in particular ALWAYS routes here, never to \`propose_tearsheet\`. Do not interpret "overlay" as a request for a tearsheet — overlay is the compositing action the Axonometric Studio performs.
+
+CHAINED CASE — visualization verb + no prior tearsheet picks in this conversation: emit BOTH tools in the SAME turn, in this exact order — (1) \`propose_tearsheet\` with 4–8 catalog pieces that fit the room/style brief, then immediately (2) \`prepare_visualization_brief\` with mode=\`composite\`, the SAME pick_ids you just put in the tearsheet, and a brief_notes line summarising the directorial intent (palette, mood, lighting, materials). The user gets one tearsheet card + one Render Scene card.
+
+SOLO CASE — visualization verb + the user already has visible picks (e.g. they say "render this tearsheet", "show me these in a Belgravia drawing-room", or they reference a previously approved tearsheet): emit ONLY \`prepare_visualization_brief\` with the existing pick_ids. Do NOT redraft the tearsheet.
+
+Defaults: \`mode\` = \`composite\` when overlaying catalog pieces onto a reference photo (most common); \`stylize\` when restyling an existing render; \`elevation_to_axo\` / \`section_to_axo\` when the user uploaded a 2D drawing. \`style_preset\` defaults to "Editorial Luxury" for trade presentations unless the user specifies otherwise (e.g. "watercolour" → "Watercolor", "Scandi" → "Scandinavian", "line drawing" → "Minimal Line", "photoreal" → "Photorealistic"). Always populate \`brief_notes\` with the room + palette + mood + anchor materials in 1–3 sentences — that is the prompt the studio will use. After the tool call(s), reply with ONE short sentence (e.g. "Here's a first edit and a render brief — tap Render Scene when you're ready to open the studio.").
+
 
 
 
@@ -1811,7 +1820,7 @@ async function classifySentiment(
 // Semantic-cached on the latest user message so paraphrased briefs hit the
 // same plan without re-spending tokens.
 // =========================================================================
-type BriefPlanTool = "propose_tearsheet" | "add_to_tearsheet" | "draft_quote" | "add_to_quote" | "propose_ffe_rows";
+type BriefPlanTool = "propose_tearsheet" | "add_to_tearsheet" | "draft_quote" | "add_to_quote" | "propose_ffe_rows" | "prepare_visualization_brief";
 type ExtractedBrief = {
   intent: "chitchat" | "discovery" | "selection" | "quote" | "selection_and_quote" | "navigation";
   brief: {
@@ -1863,14 +1872,16 @@ async function extractBrief(apiKey: string, latestUserMessage: string): Promise<
                   "- add_to_tearsheet — append pieces to one of the user's existing tearsheets\n" +
                   "- draft_quote — pre-fill a NEW trade quote with line items\n" +
                   "- add_to_quote — append lines to one of the user's open draft quotes\n" +
-                  "- propose_ffe_rows — draft a ROOM-BY-ROOM FF&E schedule bound to the active project (every row has a `room` label)\n\n" +
+                  "- propose_ffe_rows — draft a ROOM-BY-ROOM FF&E schedule bound to the active project (every row has a `room` label)\n" +
+                  "- prepare_visualization_brief — hand off to the Axonometric Studio to render/visualise a room or selection (emits a 'Render Scene' card)\n\n" +
                   "Plan rules:\n" +
                   "- chitchat / navigation / FAQ: empty plan.\n" +
                   "- OPENING BRIEFS that merely state what the user is looking for (e.g. 'I'm looking for a statement dining table for my Belgravia townhouse', 'we need lighting for a Mayfair drawing room', 'searching for a sofa for a London penthouse'): EMPTY PLAN. The concierge MUST qualify (style, capacity/scale, materials, era, lead-time) before proposing. Do NOT emit propose_tearsheet on a discovery-style opener no matter how specific the typology.\n" +
                   "- EXPLANATORY follow-ups about pieces already discussed ('why the X?', 'tell me more about X', 'what is X?', 'how does it compare', 'what materials', 'lead time?', 'who designed it'): EMPTY PLAN — the downstream model must answer conversationally in prose. Do NOT re-propose tearsheets or quotes.\n" +
-                  "- EXPLICIT selection verbs in THIS message ('propose', 'suggest', 'recommend', 'show me', 'pull together', 'curate', 'reinterpret', 'alternatives', 'options', 'first edit', 'draft a selection', 'what do you have in…'): [propose_tearsheet] (or add_to_tearsheet if they reference an existing board). Without one of these verbs, do NOT emit propose_tearsheet.\n" +
+                  "- EXPLICIT selection verbs in THIS message ('propose', 'suggest', 'recommend', 'show me' [WITHOUT 'in the room/space'], 'pull together', 'curate', 'reinterpret', 'alternatives', 'options', 'first edit', 'draft a selection', 'what do you have in…'): [propose_tearsheet] (or add_to_tearsheet if they reference an existing board). Without one of these verbs, do NOT emit propose_tearsheet.\n" +
                   "- 'quote / estimate / pricing breakdown' on already-decided pieces: [draft_quote] (or add_to_quote).\n" +
                   "- 'FF&E schedule / multi-room brief / spec the whole apartment / drawing-room + dining + bedroom' bound to a project: [propose_ffe_rows].\n" +
+                  "- VISUALIZATION VERBS in THIS message ('render', 'visualise', 'visualize', 'show me how this would look', 'show me in the room/space', 'generate a view/scene/axonometric/render', 'mock up', 'picture it', 'see it in situ', 'image of the room with…'): emit [prepare_visualization_brief]. If the user has NOT yet seen any tearsheet picks in this conversation AND the visualization request implies overlaying catalog pieces ('with these pieces', 'overlay these picks', 'in bronze and mohair', or any palette/material/style description), CHAIN as [propose_tearsheet, prepare_visualization_brief] so the same picks are drafted and then handed to the studio. The word 'render' ALWAYS triggers prepare_visualization_brief, never tearsheet-only — even if the message also says 'overlay these picks'.\n" +
                   "- BRIEF + QUOTE in the SAME turn (e.g. 'pull together a Mayfair drawing-room and quote me'): emit BOTH in order [propose_tearsheet, draft_quote] so the downstream loop chains them on the same picks.\n" +
                   "Be conservative — only emit a tool if the user CLEARLY intends that action in THIS message. Prior-turn context is NOT a license to act. When in doubt, prefer empty plan and let the downstream model ask one qualifying question.",
               },
@@ -1897,7 +1908,7 @@ async function extractBrief(apiKey: string, latestUserMessage: string): Promise<
                       budget_band: { type: "string" },
                       plan: {
                         type: "array",
-                        items: { type: "string", enum: ["propose_tearsheet", "add_to_tearsheet", "draft_quote", "add_to_quote", "propose_ffe_rows"] },
+                        items: { type: "string", enum: ["propose_tearsheet", "add_to_tearsheet", "draft_quote", "add_to_quote", "propose_ffe_rows", "prepare_visualization_brief"] },
                         maxItems: 3,
                       },
                     },
@@ -1928,7 +1939,7 @@ async function extractBrief(apiKey: string, latestUserMessage: string): Promise<
             lead_weeks_max: typeof p.lead_weeks_max === "number" ? p.lead_weeks_max : null,
             budget_band: p.budget_band || null,
           },
-          plan: Array.isArray(p.plan) ? p.plan.filter((t: string) => ["propose_tearsheet", "add_to_tearsheet", "draft_quote", "add_to_quote", "propose_ffe_rows"].includes(t)) as BriefPlanTool[] : [],
+          plan: Array.isArray(p.plan) ? p.plan.filter((t: string) => ["propose_tearsheet", "add_to_tearsheet", "draft_quote", "add_to_quote", "propose_ffe_rows", "prepare_visualization_brief"].includes(t)) as BriefPlanTool[] : [],
         };
         return { value, usage: data?.usage };
       },
@@ -2919,7 +2930,7 @@ serve(async (req) => {
     // of stage — shipping and spatial-fit questions can come up on any surface
     // and must always hit the live rate matrix / CAD parser.
     const allowedWithShipping = allowedNames
-      ? Array.from(new Set([...allowedNames, "estimate_shipping", "check_spatial_fit", "check_spatial_fit_batch"]))
+      ? Array.from(new Set([...allowedNames, "estimate_shipping", "check_spatial_fit", "check_spatial_fit_batch", "prepare_visualization_brief"]))
       : null;
     const availableTools = allowedWithShipping
       ? TOOLS.filter((tool: any) => allowedWithShipping.includes(tool.function?.name))
@@ -2927,7 +2938,17 @@ serve(async (req) => {
     // If the gate emptied the toolset (shouldn't happen in practice), fall back to all
     // tools rather than sending an empty `tools: []` array to the upstream gateway.
     const finalTools = availableTools.length > 0 ? availableTools : TOOLS;
-    const forcePlannedTearsheet = effectiveBrief.plan.includes("propose_tearsheet") && !stageForcesQuote && !isExplicitQuoteIntent;
+    // Only force-pin tool_choice to propose_tearsheet when the planner emitted a SOLO tearsheet plan.
+    // Chained plans (e.g. [propose_tearsheet, prepare_visualization_brief] or [propose_tearsheet, draft_quote])
+    // must stay on `auto` so the model can emit both tool calls in the same turn.
+    const planHasVizBrief = effectiveBrief.plan.includes("prepare_visualization_brief");
+    const planHasQuote = effectiveBrief.plan.includes("draft_quote") || effectiveBrief.plan.includes("add_to_quote");
+    const forcePlannedTearsheet =
+      effectiveBrief.plan.includes("propose_tearsheet") &&
+      !planHasVizBrief &&
+      !planHasQuote &&
+      !stageForcesQuote &&
+      !isExplicitQuoteIntent;
     const toolChoice: any = forcePlannedTearsheet
       ? { type: "function", function: { name: "propose_tearsheet" } }
       : ((isExplicitQuoteIntent || stageForcesQuote) ? "required" : "auto");
