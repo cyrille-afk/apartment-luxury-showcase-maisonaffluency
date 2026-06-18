@@ -55,6 +55,7 @@ const TradeSettings = lazy(() => import("./pages/TradeSettings"));
 const TradeStudioSettings = lazy(() => import("./pages/TradeStudioSettings"));
 const TradeOrderTimeline = lazy(() => import("./pages/TradeOrderTimeline"));
 const TradeFFESchedule = lazy(() => import("./pages/TradeFFESchedule"));
+const TradeDeliveryTracker = lazy(() => import("./pages/TradeDeliveryTracker"));
 const TradeFFEExportTest = lazy(() => import("./pages/TradeFFEExportTest"));
 const TradeMaterialLibrary = lazy(() => import("./pages/TradeMaterialLibrary"));
 const TradeTearsheets = lazy(() => import("./pages/TradeTearsheets"));
