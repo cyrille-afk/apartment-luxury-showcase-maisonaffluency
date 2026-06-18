@@ -85,7 +85,7 @@ export default function TradeMoodBoards() {
       if (!idArr.length) return [];
 
       const [tradeRes, curatorRes] = await Promise.all([
-        supabase.from("trade_products").select("id, product_name, brand_name, image_url, category").in("id", idArr).not("image_url", "is", null),
+        supabase.from("trade_products").select("id, product_name, brand_name, image_url, category, source_pick_id").in("id", idArr).not("image_url", "is", null),
         supabase.from("designer_curator_picks").select("id, title, image_url, category, designer_id").in("id", idArr).not("image_url", "is", null),
       ]);
 
@@ -96,6 +96,13 @@ export default function TradeMoodBoards() {
         designerMap = new Map((designers || []).map((d: any) => [d.id, d.name]));
       }
 
+      // Dedupe: when a trade_products mirror points at a curator pick that is
+      // ALSO in this id set (quote item references both twins), drop the pick
+      // and keep the trade row — that's what FF&E/quotes/boards actually use.
+      const mirroredPickIds = new Set<string>(
+        (tradeRes.data || []).map((p: any) => p.source_pick_id).filter(Boolean),
+      );
+
       const byId = new Map<string, any>();
       (tradeRes.data || []).forEach((p: any) => byId.set(p.id, {
         id: p.id,
@@ -105,14 +112,17 @@ export default function TradeMoodBoards() {
         category: p.category,
         source: "trade",
       }));
-      (curatorRes.data || []).forEach((p: any) => byId.set(p.id, {
-        id: p.id,
-        product_name: p.title,
-        brand_name: designerMap.get(p.designer_id) || "Unknown",
-        image_url: p.image_url,
-        category: p.category || "",
-        source: "curator",
-      }));
+      (curatorRes.data || []).forEach((p: any) => {
+        if (mirroredPickIds.has(p.id)) return; // already represented by its trade twin
+        byId.set(p.id, {
+          id: p.id,
+          product_name: p.title,
+          brand_name: designerMap.get(p.designer_id) || "Unknown",
+          image_url: p.image_url,
+          category: p.category || "",
+          source: "curator",
+        });
+      });
 
       return idArr.map((id) => byId.get(id)).filter(Boolean);
     },
