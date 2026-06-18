@@ -69,6 +69,7 @@ const TradeSamples = () => {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [tearsheetUrl, setTearsheetUrl] = useState<string | null>(null);
+  const [productId, setProductId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Pre-fill from URL params (e.g. from curator picks "Request Sample" button)
@@ -77,11 +78,13 @@ const TradeSamples = () => {
     const brand = searchParams.get("brand");
     const image = searchParams.get("image");
     const tearsheet = searchParams.get("tearsheet");
+    const pid = searchParams.get("productId");
     if (product || brand) {
       if (product) setProductName(product);
       if (brand) setBrandName(brand);
       if (image) setImagePreview(image);
       if (tearsheet) setTearsheetUrl(tearsheet);
+      if (pid) setProductId(pid);
       setShowForm(true);
       // Clean URL params after reading
       setSearchParams({}, { replace: true });
@@ -114,7 +117,7 @@ const TradeSamples = () => {
   const resetForm = () => {
     setProductName(""); setBrandName(""); setClientName(""); setProjectName("");
     setAddress(""); setCity(""); setCountry("Singapore"); setReturnBy(undefined); setNotes("");
-    setImageFile(null); setImagePreview(null); setTearsheetUrl(null);
+    setImageFile(null); setImagePreview(null); setTearsheetUrl(null); setProductId(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -143,8 +146,9 @@ const TradeSamples = () => {
       imageUrl = imagePreview;
     }
 
-    const { error } = await supabase.from("trade_sample_requests").insert({
+    const { data: inserted, error } = await supabase.from("trade_sample_requests").insert({
       user_id: user.id,
+      product_id: productId,
       product_name: productName.trim(),
       brand_name: brandName.trim(),
       client_name: clientName.trim(),
@@ -156,12 +160,18 @@ const TradeSamples = () => {
       notes: notes.trim() || null,
       image_url: imageUrl,
       tearsheet_url: tearsheetUrl,
-    } as any);
+    } as any).select("id").single();
 
     setSubmitting(false);
     if (error) {
       toast.error("Failed to submit request");
       return;
+    }
+    // Fire-and-forget admin notification
+    if (inserted?.id) {
+      supabase.functions.invoke("notify-sample-request", {
+        body: { requestId: inserted.id },
+      }).catch((e) => console.error("notify-sample-request failed", e));
     }
     toast.success("Sample request submitted");
     resetForm();
