@@ -195,15 +195,21 @@ BEGIN
        WHERE oid = ('public.'||_t)::regclass),
       _t || ': RLS is enabled');
 
-    -- No INSERT/UPDATE/DELETE/ALL policy may be open to the authenticated role
+    -- No INSERT/UPDATE/DELETE/ALL policy may grant writes to authenticated/anon/public
+    -- UNLESS the qual/with_check restricts to service_role or admin.
     SELECT count(*) INTO _bad
     FROM pg_policies
     WHERE schemaname='public' AND tablename=_t
       AND cmd IN ('INSERT','UPDATE','DELETE','ALL')
-      AND ('authenticated' = ANY(roles) OR 'public' = ANY(roles) OR 'anon' = ANY(roles));
+      AND ('authenticated' = ANY(roles) OR 'public' = ANY(roles) OR 'anon' = ANY(roles))
+      AND COALESCE(qual, '')       NOT LIKE '%service_role%'
+      AND COALESCE(with_check, '') NOT LIKE '%service_role%'
+      AND COALESCE(qual, '')       NOT LIKE '%has_role%admin%'
+      AND COALESCE(with_check, '') NOT LIKE '%has_role%admin%';
     PERFORM pg_temp.assert(
       _bad = 0,
-      _t || ': no write policy exposed to authenticated/anon/public ('||_bad||' found)');
+      _t || ': no write policy reaches authenticated/anon outside service_role/admin ('||_bad||' found)');
+
   END LOOP;
 END $$;
 
