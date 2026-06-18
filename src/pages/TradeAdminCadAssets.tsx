@@ -164,6 +164,22 @@ const TradeAdminCadAssets = () => {
     loadAllAssets();
   };
 
+  const handleEditUrl = async (asset: CadAsset) => {
+    const next = window.prompt("New file URL:", asset.file_url);
+    if (!next || next.trim() === "" || next.trim() === asset.file_url) return;
+    const { error } = await supabase
+      .from("trade_product_cad_assets")
+      .update({ file_url: next.trim() })
+      .eq("id", asset.id);
+    if (error) {
+      toast({ title: "Update failed", description: error.message, variant: "destructive" });
+      return;
+    }
+    toast({ title: "File URL updated" });
+    if (productId) loadAssets(productId);
+    loadAllAssets();
+  };
+
   const handleDelete = async (asset: CadAsset) => {
     if (!confirm("Delete this CAD asset? This cannot be undone.")) return;
     const { error } = await supabase
