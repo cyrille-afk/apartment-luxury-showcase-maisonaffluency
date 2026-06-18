@@ -42,11 +42,11 @@ function loadDotEnv(path = ".env"): Record<string, string> {
 const envFile = loadDotEnv();
 const env = (k: string) => process.env[k] ?? envFile[k];
 
-const ADMIN_EMAIL = process.env.E2E_ADMIN_EMAIL;
-const ADMIN_PASSWORD = process.env.E2E_ADMIN_PASSWORD;
-const TEST_PRODUCT_ID = process.env.E2E_TEST_PRODUCT_ID;
-const SUPABASE_URL = process.env.VITE_SUPABASE_URL;
-const SUPABASE_KEY = process.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+const ADMIN_EMAIL = env("E2E_ADMIN_EMAIL");
+const ADMIN_PASSWORD = env("E2E_ADMIN_PASSWORD");
+const TEST_PRODUCT_ID = env("E2E_TEST_PRODUCT_ID");
+const SUPABASE_URL = env("VITE_SUPABASE_URL");
+const SUPABASE_KEY = env("VITE_SUPABASE_PUBLISHABLE_KEY");
 
 const haveCreds = Boolean(
   ADMIN_EMAIL && ADMIN_PASSWORD && TEST_PRODUCT_ID && SUPABASE_URL && SUPABASE_KEY,
