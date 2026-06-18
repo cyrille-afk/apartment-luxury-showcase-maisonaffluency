@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
+import { fillTradeProductImageFallbacks } from "@/lib/tradeProductImageFallback";
 
 interface Board {
   id: string;
@@ -78,7 +79,11 @@ const ClientBoardViewer = () => {
         .from("trade_products")
         .select("id, product_name, brand_name, image_url, materials, dimensions")
         .in("id", productIds);
-      const prodMap = new Map(prods?.map((p: any) => [p.id, p]) || []);
+      // Backfill missing hero images from the linked curator pick so
+      // client-facing boards never render blank cards (audit #7).
+      const prodList = (prods || []) as any[];
+      await fillTradeProductImageFallbacks(prodList);
+      const prodMap = new Map(prodList.map((p: any) => [p.id, p]));
       setItems(itemsData.map((i: any) => ({ ...i, product: prodMap.get(i.product_id) })));
     }
 

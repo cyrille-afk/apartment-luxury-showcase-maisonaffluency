@@ -2,6 +2,7 @@ import { Helmet } from "react-helmet-async";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { fillTradeProductImageFallbacks } from "@/lib/tradeProductImageFallback";
 import { useAuth } from "@/hooks/useAuth";
 import { useState, useRef, useMemo, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
@@ -157,8 +158,10 @@ export default function TradeTearsheets() {
           .from("trade_products")
           .select("id, product_name, brand_name, category, subcategory, image_url, dimensions, materials, description, lead_time, trade_price_cents, currency")
           .eq("is_active", true)
-          .not("image_url", "is", null)
-          .neq("image_url", "")
+          // Note: we no longer require image_url at the query level — missing
+          // hero images are backfilled from the linked curator pick below
+          // (audit #7) so priced mirrors aren't silently hidden from the
+          // tearsheet picker just because the mirror row lacks an image.
           .order("brand_name")
           .order("product_name"),
         supabase
@@ -166,6 +169,12 @@ export default function TradeTearsheets() {
           .select("name, founder")
           .not("founder", "is", null),
       ]);
+
+      // Backfill missing trade_products.image_url from the linked curator pick.
+      const tradeRows = (tradeRes.data || []) as any[];
+      await fillTradeProductImageFallbacks(tradeRows);
+      // Drop anything still without an image — tearsheets are visual.
+      const tradeWithImages = tradeRows.filter((p) => !!p.image_url);
 
       // Build a lookup: child designer name → parent brand
       const childToParent = new Map<string, string>();
@@ -210,7 +219,7 @@ export default function TradeTearsheets() {
       });
 
       // Add trade products that aren't already covered
-      (tradeRes.data || []).forEach((p: any) => {
+      tradeWithImages.forEach((p: any) => {
         // Resolve parent brand from child→parent map
         const resolvedParent = childToParent.get(p.brand_name.toLowerCase()) || p.brand_name;
         const key = `${resolvedParent.toLowerCase()}::${p.product_name.toLowerCase()}`;
