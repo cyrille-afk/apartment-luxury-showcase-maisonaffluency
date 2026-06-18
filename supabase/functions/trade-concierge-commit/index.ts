@@ -60,12 +60,18 @@ function titlesAreNearTwins(a: string, b: string): boolean {
   return shared.length > 0 && shared.length === shorter.length;
 }
 
+/**
+ * Resolve a trade_products row to its canonical sibling when the catalog holds
+ * near-twin entries for the same brand+title. CRITICAL: we never swap to a twin
+ * whose price, currency, or pricing unit would change what the buyer is charged
+ * — silent price swaps corrupt quotes and tearsheets (audit issue #6).
+ */
 async function findCanonicalTradeProduct(supabase: ReturnType<typeof createClient>, row: any) {
   const rowBrand = normalizeLoose(brandBase(row?.brand_name));
   if (!rowBrand || !row?.product_name) return row;
   const { data: candidates } = await supabase
     .from("trade_products")
-    .select("id, product_name, brand_name, trade_price_cents, rrp_price_cents, price_unit")
+    .select("id, product_name, brand_name, trade_price_cents, rrp_price_cents, price_unit, currency, source_pick_id")
     .eq("is_active", true)
     .limit(2000);
   const twins = (candidates || []).filter((c: any) =>
@@ -74,23 +80,29 @@ async function findCanonicalTradeProduct(supabase: ReturnType<typeof createClien
     titlesAreNearTwins(c.product_name, row.product_name)
   );
   if (!twins.length) return row;
-  const scored = twins
-    .map((c: any) => {
-      const cents = c.trade_price_cents ?? c.rrp_price_cents ?? null;
-      return {
-        row: c,
-        score:
-          (cents ? 1000 : 0) +
-          (c.price_unit !== "per_sqm" ? 100 : 0) +
-          Math.min(Number(cents || 0) / 100000, 50),
-      };
-    })
-    .sort((a, b) => b.score - a.score);
-  const currentCents = row.trade_price_cents ?? row.rrp_price_cents ?? null;
-  const best = scored[0];
-  if (!best) return row;
-  if (!currentCents || row.price_unit === "per_sqm" || best.score > 1000) return best.row;
-  return row;
+
+  const rowCents = row.trade_price_cents ?? row.rrp_price_cents ?? null;
+  const rowCurrency = (row.currency || "").toUpperCase();
+  const rowUnit = row.price_unit || null;
+
+  // Only consider twins whose pricing is functionally identical to the current row.
+  // A twin with a different price (or differing currency / unit) MUST NOT be substituted.
+  const priceCompatible = twins.filter((c: any) => {
+    const cCents = c.trade_price_cents ?? c.rrp_price_cents ?? null;
+    const cCurrency = (c.currency || "").toUpperCase();
+    const cUnit = c.price_unit || null;
+    if (cUnit !== rowUnit) return false;
+    if (rowCents == null && cCents == null) return true;
+    if (rowCents == null || cCents == null) return false; // never invent or drop a price
+    if (rowCurrency && cCurrency && rowCurrency !== cCurrency) return false;
+    return Number(rowCents) === Number(cCents);
+  });
+
+  if (!priceCompatible.length) return row;
+
+  // Prefer a twin that is properly linked to its curator pick (source_pick_id set).
+  const linked = priceCompatible.find((c: any) => c.source_pick_id);
+  return linked || priceCompatible[0];
 }
 
 function parseRugSqm(label: string | null | undefined): number | null {
