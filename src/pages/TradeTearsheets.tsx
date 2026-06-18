@@ -219,7 +219,7 @@ export default function TradeTearsheets() {
       });
 
       // Add trade products that aren't already covered
-      (tradeRes.data || []).forEach((p: any) => {
+      tradeWithImages.forEach((p: any) => {
         // Resolve parent brand from child→parent map
         const resolvedParent = childToParent.get(p.brand_name.toLowerCase()) || p.brand_name;
         const key = `${resolvedParent.toLowerCase()}::${p.product_name.toLowerCase()}`;
