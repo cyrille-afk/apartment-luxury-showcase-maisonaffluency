@@ -3310,10 +3310,11 @@ export type Database = {
           fabric_id: string
           id: string
           image_indices: number[] | null
-          pick_id: string
+          pick_id: string | null
           price_cents_a: number | null
           price_cents_b: number | null
           price_tier_label: string | null
+          product_label: string | null
           sort_order: number
         }
         Insert: {
@@ -3321,10 +3322,11 @@ export type Database = {
           fabric_id: string
           id?: string
           image_indices?: number[] | null
-          pick_id: string
+          pick_id?: string | null
           price_cents_a?: number | null
           price_cents_b?: number | null
           price_tier_label?: string | null
+          product_label?: string | null
           sort_order?: number
         }
         Update: {
@@ -3332,10 +3334,11 @@ export type Database = {
           fabric_id?: string
           id?: string
           image_indices?: number[] | null
-          pick_id?: string
+          pick_id?: string | null
           price_cents_a?: number | null
           price_cents_b?: number | null
           price_tier_label?: string | null
+          product_label?: string | null
           sort_order?: number
         }
         Relationships: [
