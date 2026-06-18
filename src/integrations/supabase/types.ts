@@ -5452,6 +5452,7 @@ export type Database = {
           pack_carton_count: number | null
           pack_cbm: number | null
           pack_weight_kg: number | null
+          pdf_urls: Json | null
           pickup_address: string | null
           pickup_country: string | null
           pickup_postcode: string | null
@@ -5502,6 +5503,7 @@ export type Database = {
           pack_carton_count?: number | null
           pack_cbm?: number | null
           pack_weight_kg?: number | null
+          pdf_urls?: Json | null
           pickup_address?: string | null
           pickup_country?: string | null
           pickup_postcode?: string | null
@@ -5552,6 +5554,7 @@ export type Database = {
           pack_carton_count?: number | null
           pack_cbm?: number | null
           pack_weight_kg?: number | null
+          pdf_urls?: Json | null
           pickup_address?: string | null
           pickup_country?: string | null
           pickup_postcode?: string | null
