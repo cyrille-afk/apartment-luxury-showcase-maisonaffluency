@@ -715,6 +715,8 @@ export default function TradeAdminFabrics() {
                           <td className="px-3 py-2">
                             {(() => {
                               const linked = linkedPicksByFabric.get(f.id) || [];
+                              const labelLinks = linkedLabelsByFabric.get(f.id) || [];
+                              const hasAny = linked.length + labelLinks.length > 0;
                               return (
                                 <div className="flex flex-col gap-1">
                                   <div className="flex flex-wrap gap-1">
@@ -754,8 +756,26 @@ export default function TradeAdminFabrics() {
                                         +{linked.length - 2} more
                                       </button>
                                     )}
+
+                                    {labelLinks.slice(0, 3).map((l) => (
+                                      <span
+                                        key={l.id}
+                                        className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded border border-dashed border-amber-500/50 bg-amber-500/5 text-amber-900 dark:text-amber-200 italic"
+                                        title={`Non-catalog (free-text): ${l.product_label}`}
+                                      >
+                                        <span className="truncate max-w-[140px]">{l.product_label}</span>
+                                      </span>
+                                    ))}
+                                    {labelLinks.length > 3 && (
+                                      <span
+                                        className="text-[10px] px-1.5 py-0.5 rounded border border-dashed border-amber-500/40 text-amber-700 dark:text-amber-300 italic"
+                                        title={labelLinks.slice(3).map((l) => l.product_label).join("\n")}
+                                      >
+                                        +{labelLinks.length - 3} more
+                                      </span>
+                                    )}
                                   </div>
-                                  {linked.length === 0 ? (
+                                  {!hasAny ? (
                                     <button
                                       onClick={() => { setLinkingId(f.id); setPickSearch(""); }}
                                       className="inline-flex items-center gap-1 text-xs text-primary hover:underline self-start"
