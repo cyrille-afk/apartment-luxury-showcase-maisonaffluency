@@ -2,6 +2,7 @@ import { Helmet } from "react-helmet-async";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { fillTradeProductImageFallbacks } from "@/lib/tradeProductImageFallback";
 import { useAuth } from "@/hooks/useAuth";
 import { useState, useRef, useMemo, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
