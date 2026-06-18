@@ -89,6 +89,8 @@ export interface ResolvedLine extends RawLine {
   mode: ShipmentMode;
   cbm: number;
   kg: number;
+  /** True when neither shipCbm nor shipWeightKg was provided on the line. */
+  missingPacking: boolean;
 }
 
 export interface PerOriginShipment {
@@ -102,6 +104,10 @@ export interface PerOriginShipment {
   shippingEurCents: number;
   dutyEurCents: number;
   vatEurCents: number;
+  /** True when the estimator could not price this shipment. */
+  unavailable: boolean;
+  /** Human-readable reason when `unavailable` is true. */
+  reason?: string;
 }
 
 export interface PerLineShippingResult {
