@@ -1,6 +1,6 @@
 import { Helmet } from "react-helmet-async";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Download, FileSpreadsheet, Loader2, Package, FolderKanban, X, Filter } from "lucide-react";
@@ -18,6 +18,7 @@ import {
 import { generateSpecPackageZip, downloadBlob, type SpecPackageProduct } from "@/lib/specPackage";
 
 interface FFEItem {
+  item_id: string;
   product_name: string;
   brand_name: string;
   category: string;
@@ -31,6 +32,7 @@ interface FFEItem {
   lead_time: string | null;
   quote_id: string;
   quote_ref: string;          // QU-XXXXXX
+  quote_created_at: string | null;
   client_name: string | null;
   project_id: string | null;
   project_name: string | null;
@@ -41,9 +43,50 @@ interface FFEItem {
   lead_time_weeks_override: number | null;
   deposit_pct_override: number | null;
   spec_sheet_url: string | null;
+  required_by_date: string | null;
+  kanban_status: string | null;
+  deposit_paid_at: string | null;
+  shipping_weeks: number | null;
+  estimated_delivery_at: string | null;
+  actual_delivery_at: string | null;
 }
 
 const QUOTE_REF = (id: string) => `QU-${id.slice(0, 6).toUpperCase()}`;
+
+const STAGE_LABEL: Record<string, string> = {
+  not_started: "Not started",
+  deposit_pending: "Deposit pending",
+  in_production: "In production",
+  ready_to_ship: "Ready to ship",
+  in_transit: "In transit",
+  customs: "Customs",
+  delivered: "Delivered",
+};
+
+function expectedReadyDate(it: FFEItem, leadWeeks: number | null): Date | null {
+  if (it.actual_delivery_at) return new Date(it.actual_delivery_at);
+  if (it.estimated_delivery_at) return new Date(it.estimated_delivery_at);
+  const anchor = it.deposit_paid_at || it.quote_created_at;
+  if (!anchor || leadWeeks == null) return null;
+  const d = new Date(anchor);
+  const totalWeeks = leadWeeks + (it.shipping_weeks || 0);
+  d.setDate(d.getDate() + totalWeeks * 7);
+  return d;
+}
+
+function fmtDate(d: Date | null): string {
+  if (!d || isNaN(d.getTime())) return "—";
+  return d.toLocaleDateString(undefined, { day: "2-digit", month: "short", year: "2-digit" });
+}
+
+function slackBadge(slackDays: number | null) {
+  if (slackDays == null) return <span className="text-muted-foreground">—</span>;
+  if (slackDays < 0)
+    return <span className="inline-flex items-center rounded-full bg-red-100 text-red-800 px-2 py-0.5 text-[10px] font-medium tabular-nums">{slackDays}d late</span>;
+  if (slackDays <= 14)
+    return <span className="inline-flex items-center rounded-full bg-amber-100 text-amber-800 px-2 py-0.5 text-[10px] font-medium tabular-nums">{slackDays}d slack</span>;
+  return <span className="inline-flex items-center rounded-full bg-emerald-100 text-emerald-800 px-2 py-0.5 text-[10px] font-medium tabular-nums">{slackDays}d slack</span>;
+}
 
 // Best-effort numeric weeks parsed from a free-text lead time. Returns the upper bound
 // of a range (e.g. "12-14 weeks" → 14, "18 to 20 weeks" → 20). Supports -, –, —, "to".
@@ -91,7 +134,7 @@ export default function TradeFFESchedule() {
     queryFn: async () => {
       let qq = supabase
         .from("trade_quotes")
-        .select("id, client_name, status, project_id, studio_id")
+        .select("id, client_name, status, project_id, studio_id, created_at")
         .eq("user_id", user!.id)
         .in("status", ["confirmed", "submitted", "responded", "priced", "deposit_paid", "paid"]);
       if (projectFilter) qq = qq.eq("project_id", projectFilter);
@@ -103,7 +146,7 @@ export default function TradeFFESchedule() {
       const { data: qItems } = await supabase
         .from("trade_quote_items")
         .select(
-          "product_id, quantity, unit_price_cents, quote_id, po_number, cost_code, lead_time_weeks_override, deposit_pct_override"
+          "id, product_id, quantity, unit_price_cents, quote_id, po_number, cost_code, lead_time_weeks_override, deposit_pct_override, required_by_date"
         )
         .in("quote_id", quoteIds);
 
@@ -119,16 +162,21 @@ export default function TradeFFESchedule() {
 
       const projectIds = [...new Set(quotes.map((q: any) => q.project_id).filter(Boolean))] as string[];
       const studioIds = [...new Set(quotes.map((q: any) => q.studio_id).filter(Boolean))] as string[];
-      const [{ data: projects }, { data: studios }] = await Promise.all([
+      const [{ data: projects }, { data: studios }, { data: timelines }] = await Promise.all([
         projectIds.length
           ? supabase.from("projects" as any).select("id, name").in("id", projectIds)
           : Promise.resolve({ data: [] as any[] }),
         studioIds.length
           ? supabase.from("studios" as any).select("id, name").in("id", studioIds)
           : Promise.resolve({ data: [] as any[] }),
+        supabase
+          .from("order_timeline" as any)
+          .select("quote_id, kanban_status, deposit_paid_at, shipping_weeks, estimated_delivery_at, actual_delivery_at")
+          .in("quote_id", quoteIds),
       ]);
       const projectMap = Object.fromEntries(((projects as any[]) || []).map((p: any) => [p.id, p.name]));
       const studioMap = Object.fromEntries(((studios as any[]) || []).map((s: any) => [s.id, s.name]));
+      const timelineMap = Object.fromEntries(((timelines as any[]) || []).map((t: any) => [t.quote_id, t]));
 
       const productMap = Object.fromEntries((products || []).map((p) => [p.id, p]));
       const quoteMap = Object.fromEntries(quotes.map((q) => [q.id, q]));
@@ -136,7 +184,9 @@ export default function TradeFFESchedule() {
       return qItems.map((item: any) => {
         const p = productMap[item.product_id];
         const q: any = quoteMap[item.quote_id];
+        const tl: any = timelineMap[item.quote_id] || {};
         return {
+          item_id: item.id,
           product_name: p?.product_name || "Unknown",
           brand_name: p?.brand_name || "",
           category: p?.category || "",
@@ -150,6 +200,7 @@ export default function TradeFFESchedule() {
           lead_time: p?.lead_time || null,
           quote_id: item.quote_id,
           quote_ref: QUOTE_REF(item.quote_id),
+          quote_created_at: q?.created_at || null,
           client_name: q?.client_name || null,
           project_id: q?.project_id || null,
           project_name: q?.project_id ? (projectMap[q.project_id] || null) : null,
@@ -160,11 +211,31 @@ export default function TradeFFESchedule() {
           lead_time_weeks_override: item.lead_time_weeks_override ?? null,
           deposit_pct_override: item.deposit_pct_override ?? null,
           spec_sheet_url: p?.spec_sheet_url ?? null,
+          required_by_date: item.required_by_date ?? null,
+          kanban_status: tl.kanban_status ?? null,
+          deposit_paid_at: tl.deposit_paid_at ?? null,
+          shipping_weeks: tl.shipping_weeks ?? null,
+          estimated_delivery_at: tl.estimated_delivery_at ?? null,
+          actual_delivery_at: tl.actual_delivery_at ?? null,
         } as FFEItem;
       });
     },
     enabled: !!user,
   });
+
+  const qc = useQueryClient();
+  const saveRequiredBy = async (itemId: string, date: string) => {
+    const { error } = await supabase
+      .from("trade_quote_items")
+      .update({ required_by_date: date || null })
+      .eq("id", itemId);
+    if (error) {
+      toast({ title: "Could not save", description: error.message, variant: "destructive" });
+      return;
+    }
+    qc.invalidateQueries({ queryKey: ["ffe-schedule"] });
+    qc.invalidateQueries({ queryKey: ["delivery-tracker"] });
+  };
 
   const filteredItems = useMemo(() => {
     return items.filter((item) => {
@@ -409,7 +480,7 @@ export default function TradeFFESchedule() {
               <table className="w-full text-left">
                 <thead>
                   <tr className="border-b border-border bg-muted/30">
-                    {["PO #", "Cost Code", "Item", "Brand", "Project", "Client", "Studio", "Qty", "Unit Trade", "Total", "Lead", "Quote"].map((h) => (
+                    {["PO #", "Cost Code", "Item", "Brand", "Project", "Client", "Studio", "Qty", "Unit Trade", "Total", "Lead", "Stage", "Expected ready", "Required by", "Slack", "Quote"].map((h) => (
                       <th key={h} className="px-4 py-3 font-body text-[10px] uppercase tracking-wider text-muted-foreground whitespace-nowrap">{h}</th>
                     ))}
                   </tr>
@@ -417,6 +488,11 @@ export default function TradeFFESchedule() {
                 <tbody>
                   {filteredItems.map((item, i) => {
                     const lead = leadOverride(item.lead_time_weeks_override) ?? parseLeadWeeks(item.lead_time);
+                    const expected = expectedReadyDate(item, lead);
+                    const requiredBy = item.required_by_date ? new Date(item.required_by_date) : null;
+                    const slackDays = expected && requiredBy
+                      ? Math.round((requiredBy.getTime() - expected.getTime()) / 86400000)
+                      : null;
                     return (
                       <tr key={i} className="border-b border-border/50 hover:bg-muted/20 transition-colors">
                         <td className="px-4 py-3 font-body text-xs text-muted-foreground tabular-nums">{item.po_number || <span className="italic text-muted-foreground/60">auto</span>}</td>
@@ -436,6 +512,20 @@ export default function TradeFFESchedule() {
                         <td className="px-4 py-3 font-body text-sm text-foreground">{item.unit_price_cents ? `€${(item.unit_price_cents / 100).toFixed(2)}` : "TBD"}</td>
                         <td className="px-4 py-3 font-body text-sm text-foreground font-medium">{item.unit_price_cents ? `€${((item.unit_price_cents * item.quantity) / 100).toFixed(2)}` : "TBD"}</td>
                         <td className="px-4 py-3 font-body text-xs text-muted-foreground">{lead === 0 ? <span className="text-emerald-700 font-medium">In stock</span> : lead != null ? `${lead} wks` : "—"}</td>
+                        <td className="px-4 py-3 font-body text-xs text-muted-foreground whitespace-nowrap">{STAGE_LABEL[item.kanban_status || ""] || (item.kanban_status ? item.kanban_status : "—")}</td>
+                        <td className="px-4 py-3 font-body text-xs text-muted-foreground whitespace-nowrap tabular-nums">{fmtDate(expected)}</td>
+                        <td className="px-4 py-3 font-body text-xs">
+                          <input
+                            type="date"
+                            defaultValue={item.required_by_date || ""}
+                            onBlur={(e) => {
+                              const v = e.target.value;
+                              if ((v || null) !== (item.required_by_date || null)) saveRequiredBy(item.item_id, v);
+                            }}
+                            className="rounded border border-border bg-background px-1.5 py-0.5 font-body text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+                          />
+                        </td>
+                        <td className="px-4 py-3 font-body text-xs whitespace-nowrap">{slackBadge(slackDays)}</td>
                         <td className="px-4 py-3 font-body text-xs">
                           <Link to={`/trade/quotes?id=${item.quote_id}`} className="text-foreground underline underline-offset-2 tabular-nums">
                             {item.quote_ref}
@@ -451,7 +541,7 @@ export default function TradeFFESchedule() {
                     <td className="px-4 py-3 font-display text-sm text-foreground font-semibold">
                       {totalValue > 0 ? `€${(totalValue / 100).toFixed(2)}` : "—"}
                     </td>
-                    <td colSpan={2} />
+                    <td colSpan={6} />
                   </tr>
                 </tfoot>
               </table>

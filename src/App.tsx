@@ -55,6 +55,7 @@ const TradeSettings = lazy(() => import("./pages/TradeSettings"));
 const TradeStudioSettings = lazy(() => import("./pages/TradeStudioSettings"));
 const TradeOrderTimeline = lazy(() => import("./pages/TradeOrderTimeline"));
 const TradeFFESchedule = lazy(() => import("./pages/TradeFFESchedule"));
+const TradeDeliveryTracker = lazy(() => import("./pages/TradeDeliveryTracker"));
 const TradeFFEExportTest = lazy(() => import("./pages/TradeFFEExportTest"));
 const TradeMaterialLibrary = lazy(() => import("./pages/TradeMaterialLibrary"));
 const TradeTearsheets = lazy(() => import("./pages/TradeTearsheets"));
@@ -464,6 +465,7 @@ const App = () => {
                     <Route path="client-profiles" element={<TradeClientProfiles />} />
                     <Route path="order-timeline" element={<TradeOrderTimeline />} />
                     <Route path="ffe-schedule" element={<TradeFFESchedule />} />
+                    <Route path="delivery-tracker" element={<TradeDeliveryTracker />} />
                     <Route path="ffe-export-test" element={<TradeFFEExportTest />} />
                     <Route path="materials" element={<TradeMaterialLibrary />} />
                     <Route path="tearsheets" element={<TradeTearsheets />} />

@@ -5607,6 +5607,7 @@ export type Database = {
           product_id: string
           quantity: number
           quote_id: string
+          required_by_date: string | null
           room: string | null
           ship_cbm: number | null
           ship_mode: string | null
@@ -5634,6 +5635,7 @@ export type Database = {
           product_id: string
           quantity?: number
           quote_id: string
+          required_by_date?: string | null
           room?: string | null
           ship_cbm?: number | null
           ship_mode?: string | null
@@ -5661,6 +5663,7 @@ export type Database = {
           product_id?: string
           quantity?: number
           quote_id?: string
+          required_by_date?: string | null
           room?: string | null
           ship_cbm?: number | null
           ship_mode?: string | null

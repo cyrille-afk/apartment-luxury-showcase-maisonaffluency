@@ -48,6 +48,7 @@ const ROUTE_TITLES: Record<string, string> = {
   "/trade/admin-dashboard": "Admin Dashboard",
   "/trade/order-timeline": "Order Timeline",
   "/trade/ffe-schedule": "FF&E Schedule",
+  "/trade/delivery-tracker": "Delivery Tracker",
   "/trade/materials": "Material Library",
   "/trade/tearsheets": "Tearsheet Builder",
   "/trade/annotations": "Markup & Annotation",
