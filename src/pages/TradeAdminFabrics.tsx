@@ -70,7 +70,8 @@ interface DesignerLite {
 
 interface ProductFabric {
   id: string;
-  pick_id: string;
+  pick_id: string | null;
+  product_label: string | null;
   fabric_id: string;
   sort_order: number;
   price_tier_label: string | null;
@@ -215,6 +216,7 @@ export default function TradeAdminFabrics() {
   const linkedPicksByFabric = useMemo(() => {
     const m = new Map<string, Pick[]>();
     links.forEach((l) => {
+      if (!l.pick_id) return;
       const pick = picks.find((p) => p.id === l.pick_id);
       if (!pick) return;
       const arr = m.get(l.fabric_id) || [];
@@ -223,6 +225,18 @@ export default function TradeAdminFabrics() {
     });
     return m;
   }, [links, picks]);
+
+  /** Free-text (non-catalog) product links grouped by fabric. */
+  const linkedLabelsByFabric = useMemo(() => {
+    const m = new Map<string, ProductFabric[]>();
+    links.forEach((l) => {
+      if (l.pick_id || !l.product_label) return;
+      const arr = m.get(l.fabric_id) || [];
+      arr.push(l);
+      m.set(l.fabric_id, arr);
+    });
+    return m;
+  }, [links]);
 
   const linkedPickIds = useMemo(() => {
     if (!linkingId) return new Set<string>();
