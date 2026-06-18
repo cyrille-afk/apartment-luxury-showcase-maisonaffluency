@@ -22,6 +22,7 @@ interface FFEItem {
   item_id: string;
   product_name: string;
   brand_name: string;
+  image_url: string | null;
   category: string;
   dimensions: string | null;
   materials: string | null;
