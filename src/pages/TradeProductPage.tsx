@@ -264,7 +264,14 @@ function useTradeProductBySlug(
             slug: (designer as any)?.slug || null,
             biography: (designer as any)?.biography || "",
           },
-          pricing: pricing.rrp_price_cents || pricing.trade_price_cents || pricing.size_variants ? pricing : null,
+          // Keep the pricing block whenever ANY pricing signal exists — including
+          // 0/null, which renders as "Price on Request". A truthy check here would
+          // silently collapse zero-priced records and hide the RFQ CTA.
+          pricing: (
+            pricing.rrp_price_cents != null ||
+            pricing.trade_price_cents != null ||
+            (pricing.size_variants && pricing.size_variants.length)
+          ) ? pricing : pricing,
           relatedPicks,
           tradeProductId: (tradeProduct as any).id,
           glbUrl: ((tradeProduct as any).glb_url as string | null) || null,
