@@ -241,6 +241,15 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   const [gstRate, setGstRate] = useState(9);
   const [editingGstRate, setEditingGstRate] = useState(false);
   const [payingStripe, setPayingStripe] = useState(false);
+  const [manualShipReq, setManualShipReq] = useState<null | {
+    item: QuoteItemWithProduct;
+    product: any;
+  }>(null);
+  const [manualShipName, setManualShipName] = useState("");
+  const [manualShipEmail, setManualShipEmail] = useState("");
+  const [manualShipCompany, setManualShipCompany] = useState("");
+  const [manualShipMessage, setManualShipMessage] = useState("");
+  const [manualShipSending, setManualShipSending] = useState(false);
   const [projectId, setProjectId] = useState<string | null>(null);
   const [projectName, setProjectName] = useState<string | null>(null);
   // Ship-to / Incoterm (separate from Bill-to/Client)
