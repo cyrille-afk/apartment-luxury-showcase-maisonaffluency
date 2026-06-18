@@ -35,6 +35,7 @@ import { ProjectPicker } from "@/components/trade/ProjectPicker";
 import { BoardProjectHistory } from "@/components/trade/concierge/BoardProjectHistory";
 import { CreateQuoteFromBoard } from "@/components/trade/concierge/CreateQuoteFromBoard";
 import { fillHotspotImages } from "@/lib/hotspotImageFallback";
+import { fillTradeProductImageFallbacks } from "@/lib/tradeProductImageFallback";
 import { HotspotImageBadge } from "@/components/trade/HotspotImageBadge";
 import { rememberActiveQuoteId } from "@/lib/activeProjectId";
 
