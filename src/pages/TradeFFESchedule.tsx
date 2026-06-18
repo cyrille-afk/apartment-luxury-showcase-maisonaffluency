@@ -299,7 +299,7 @@ export default function TradeFFESchedule() {
     }
   };
 
-  const totalValue = items.reduce((sum, i) => sum + (i.unit_price_cents || 0) * i.quantity, 0);
+  const totalValue = filteredItems.reduce((sum, i) => sum + (i.unit_price_cents || 0) * i.quantity, 0);
 
   return (
     <>
@@ -404,8 +404,8 @@ export default function TradeFFESchedule() {
                 <p className="font-body text-sm text-muted-foreground">No items match your filters.</p>
               </div>
             ) : (
-              <>
-                <div className="overflow-x-auto border border-border rounded-lg">
+                <>
+                  <div className="overflow-x-auto border border-border rounded-lg">
               <table className="w-full text-left">
                 <thead>
                   <tr className="border-b border-border bg-muted/30">
@@ -415,7 +415,7 @@ export default function TradeFFESchedule() {
                   </tr>
                 </thead>
                 <tbody>
-                  {items.map((item, i) => {
+                  {filteredItems.map((item, i) => {
                     const lead = leadOverride(item.lead_time_weeks_override) ?? parseLeadWeeks(item.lead_time);
                     return (
                       <tr key={i} className="border-b border-border/50 hover:bg-muted/20 transition-colors">
@@ -458,7 +458,9 @@ export default function TradeFFESchedule() {
             </div>
             <p className="font-body text-[11px] text-muted-foreground/70">
               PO numbers and cost codes can be edited per line on each quote. Empty PO numbers are auto-generated as <code>QU-XXXXXX-NNN</code> at export time.
-            </p>
+                </p>
+              </>
+            )}
           </>
         )}
       </div>
