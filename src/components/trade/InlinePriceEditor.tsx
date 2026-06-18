@@ -3,7 +3,7 @@ import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Check, X, Pencil, Loader2 } from "lucide-react";
-import { type DisplayCurrency, formatPriceConverted } from "@/components/trade/CurrencyToggle";
+import { type DisplayCurrency, formatPriceConverted, convertCents } from "@/components/trade/CurrencyToggle";
 
 interface InlinePriceEditorProps {
   productName: string;
@@ -74,8 +74,23 @@ export default function InlinePriceEditor({
     if (editing && inputRef.current) inputRef.current.focus();
   }, [editing]);
 
+  // Currency the user is TYPING in (matches the price they see on screen).
+  const inputCurrency: string =
+    displayCurrency === "original" ? currency : displayCurrency;
+
   const startEdit = () => {
-    setValue(currentPriceCents ? (currentPriceCents / 100).toString() : "");
+    // Seed the input with the value in the currency the user sees, not the
+    // stored (product) currency — otherwise editing "$1,200" of a EUR product
+    // pre-fills the EUR number, which is confusing and easy to overwrite wrong.
+    if (currentPriceCents) {
+      const shownCents =
+        inputCurrency === currency
+          ? currentPriceCents
+          : convertCents(currentPriceCents, currency, displayCurrency, fxRates);
+      setValue((shownCents / 100).toString());
+    } else {
+      setValue("");
+    }
     setEditing(true);
   };
 
@@ -87,8 +102,27 @@ export default function InlinePriceEditor({
       toast({ title: "Invalid price", variant: "destructive" });
       return;
     }
+
+    // Convert input cents BACK to the product's stored currency before writing.
+    // Without this, a USD-displayed EUR product silently saved the USD number
+    // into the EUR field — over- or under-charging on every quote/tearsheet.
+    const enteredCents = Math.round(num * 100);
+    let storedCents = enteredCents;
+    if (inputCurrency !== currency) {
+      const rateKey = `${inputCurrency}_${currency}`;
+      const rate = fxRates?.[rateKey];
+      if (!rate || !isFinite(rate) || rate <= 0) {
+        toast({
+          title: `No ${inputCurrency} → ${currency} rate available`,
+          description: `Switch the currency toggle to ${currency} (original) before editing this price.`,
+          variant: "destructive",
+        });
+        return;
+      }
+      storedCents = Math.round(enteredCents * rate);
+    }
+
     setSaving(true);
-    const cents = Math.round(num * 100);
 
     // Fetch all trade_products to do fuzzy matching (avoids duplicate records)
     const { data: allProducts } = await supabase
@@ -124,26 +158,38 @@ export default function InlinePriceEditor({
     }
 
     if (matchedId) {
-      await supabase.from("trade_products").update({ trade_price_cents: cents, currency }).eq("id", matchedId);
+      await supabase.from("trade_products").update({ trade_price_cents: storedCents, currency }).eq("id", matchedId);
     } else {
       await supabase.from("trade_products").insert({
         product_name: productName,
         brand_name: brandName || "Unknown",
-        trade_price_cents: cents,
+        trade_price_cents: storedCents,
         currency,
       });
     }
 
     setSaving(false);
     setEditing(false);
-    onPriceUpdated?.(cents, currency);
-    toast({ title: "Price updated" });
+    onPriceUpdated?.(storedCents, currency);
+    toast({
+      title: "Price updated",
+      description:
+        inputCurrency !== currency
+          ? `Saved as ${currency} ${(storedCents / 100).toFixed(2)} (converted from ${inputCurrency} ${num.toFixed(2)}).`
+          : undefined,
+    });
   };
 
   if (editing) {
     return (
       <div className="flex items-center justify-center gap-1 mt-1" onClick={(e) => e.stopPropagation()}>
-        <span className="font-body text-[10px] text-muted-foreground">{currency}</span>
+        <span
+          className="font-body text-[10px] text-muted-foreground"
+          title={inputCurrency !== currency ? `Will be saved as ${currency} using live FX` : undefined}
+        >
+          {inputCurrency}
+          {inputCurrency !== currency && <span className="ml-0.5 text-muted-foreground/60">→{currency}</span>}
+        </span>
         <input
           ref={inputRef}
           type="text"
