@@ -480,7 +480,7 @@ export default function TradeFFESchedule() {
               <table className="w-full text-left">
                 <thead>
                   <tr className="border-b border-border bg-muted/30">
-                    {["PO #", "Cost Code", "Item", "Brand", "Project", "Client", "Studio", "Qty", "Unit Trade", "Total", "Lead", "Quote"].map((h) => (
+                    {["PO #", "Cost Code", "Item", "Brand", "Project", "Client", "Studio", "Qty", "Unit Trade", "Total", "Lead", "Stage", "Expected ready", "Required by", "Slack", "Quote"].map((h) => (
                       <th key={h} className="px-4 py-3 font-body text-[10px] uppercase tracking-wider text-muted-foreground whitespace-nowrap">{h}</th>
                     ))}
                   </tr>
@@ -488,6 +488,11 @@ export default function TradeFFESchedule() {
                 <tbody>
                   {filteredItems.map((item, i) => {
                     const lead = leadOverride(item.lead_time_weeks_override) ?? parseLeadWeeks(item.lead_time);
+                    const expected = expectedReadyDate(item, lead);
+                    const requiredBy = item.required_by_date ? new Date(item.required_by_date) : null;
+                    const slackDays = expected && requiredBy
+                      ? Math.round((requiredBy.getTime() - expected.getTime()) / 86400000)
+                      : null;
                     return (
                       <tr key={i} className="border-b border-border/50 hover:bg-muted/20 transition-colors">
                         <td className="px-4 py-3 font-body text-xs text-muted-foreground tabular-nums">{item.po_number || <span className="italic text-muted-foreground/60">auto</span>}</td>
@@ -507,6 +512,20 @@ export default function TradeFFESchedule() {
                         <td className="px-4 py-3 font-body text-sm text-foreground">{item.unit_price_cents ? `€${(item.unit_price_cents / 100).toFixed(2)}` : "TBD"}</td>
                         <td className="px-4 py-3 font-body text-sm text-foreground font-medium">{item.unit_price_cents ? `€${((item.unit_price_cents * item.quantity) / 100).toFixed(2)}` : "TBD"}</td>
                         <td className="px-4 py-3 font-body text-xs text-muted-foreground">{lead === 0 ? <span className="text-emerald-700 font-medium">In stock</span> : lead != null ? `${lead} wks` : "—"}</td>
+                        <td className="px-4 py-3 font-body text-xs text-muted-foreground whitespace-nowrap">{STAGE_LABEL[item.kanban_status || ""] || (item.kanban_status ? item.kanban_status : "—")}</td>
+                        <td className="px-4 py-3 font-body text-xs text-muted-foreground whitespace-nowrap tabular-nums">{fmtDate(expected)}</td>
+                        <td className="px-4 py-3 font-body text-xs">
+                          <input
+                            type="date"
+                            defaultValue={item.required_by_date || ""}
+                            onBlur={(e) => {
+                              const v = e.target.value;
+                              if ((v || null) !== (item.required_by_date || null)) saveRequiredBy(item.item_id, v);
+                            }}
+                            className="rounded border border-border bg-background px-1.5 py-0.5 font-body text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+                          />
+                        </td>
+                        <td className="px-4 py-3 font-body text-xs whitespace-nowrap">{slackBadge(slackDays)}</td>
                         <td className="px-4 py-3 font-body text-xs">
                           <Link to={`/trade/quotes?id=${item.quote_id}`} className="text-foreground underline underline-offset-2 tabular-nums">
                             {item.quote_ref}
@@ -522,7 +541,7 @@ export default function TradeFFESchedule() {
                     <td className="px-4 py-3 font-display text-sm text-foreground font-semibold">
                       {totalValue > 0 ? `€${(totalValue / 100).toFixed(2)}` : "—"}
                     </td>
-                    <td colSpan={2} />
+                    <td colSpan={6} />
                   </tr>
                 </tfoot>
               </table>
