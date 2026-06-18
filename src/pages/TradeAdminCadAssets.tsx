@@ -558,7 +558,7 @@ const TradeAdminCadAssets = () => {
                       </p>
                       <ul className="divide-y divide-border/60 rounded-md border border-border/60 overflow-hidden">
                         {list.map((a) => (
-                          <li key={a.id} className="flex items-center gap-3 px-3 py-2 bg-background">
+                          <li key={a.id} data-testid={`cad-asset-row-${a.id}`} className="flex items-center gap-3 px-3 py-2 bg-background">
                             <span className="font-body text-xs text-foreground uppercase tracking-wider w-14 shrink-0">.{a.file_format}</span>
                             {a.version && (
                               <span className="font-body text-[10px] text-muted-foreground shrink-0">{a.version}</span>
@@ -567,6 +567,7 @@ const TradeAdminCadAssets = () => {
                               href={a.file_url}
                               target="_blank"
                               rel="noopener noreferrer"
+                              data-testid={`file-url-link-${a.id}`}
                               className="font-body text-[11px] text-muted-foreground truncate hover:text-foreground min-w-0 flex-1"
                             >
                               {a.file_url.split("/").pop()}
@@ -576,6 +577,7 @@ const TradeAdminCadAssets = () => {
                                 type="checkbox"
                                 checked={a.is_active}
                                 onChange={() => handleToggleActive(a)}
+                                data-testid={`active-toggle-${a.id}`}
                                 className="h-3 w-3 accent-primary"
                               />
                               <span className="font-body text-[10px] text-muted-foreground">Active</span>
