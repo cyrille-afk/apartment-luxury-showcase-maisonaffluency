@@ -3552,6 +3552,130 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Manual shipping quote request dialog */}
+      <Dialog open={!!manualShipReq} onOpenChange={(o) => { if (!o) setManualShipReq(null); }}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="font-display text-base">Request manual shipping quote</DialogTitle>
+          </DialogHeader>
+          {manualShipReq && (() => {
+            const it = manualShipReq.item;
+            const pr = manualShipReq.product;
+            const lineSummary = [
+              `Quote: ${quoteNumber}`,
+              `Product: ${pr?.product_name || "—"}`,
+              `Brand: ${pr?.brand_name || "—"}`,
+              `SKU: ${pr?.sku || "—"}`,
+              `Qty: ${it.quantity}`,
+              `Origin: ${pr?.origin || it.ship_origin_country || "—"}`,
+            ].join("\n");
+            const onSubmit = async () => {
+              if (!manualShipEmail.trim()) {
+                toast({ title: "Email required", description: "Please enter your email so we can reply.", variant: "destructive" });
+                return;
+              }
+              setManualShipSending(true);
+              try {
+                const { error } = await supabase.functions.invoke("send-transactional-email", {
+                  body: {
+                    templateName: "manual-shipping-quote-request",
+                    recipientEmail: "concierge@myaffluency.com",
+                    idempotencyKey: `manual-ship-${quoteNumber}-${it.id}-${Date.now()}`,
+                    replyTo: manualShipEmail.trim() || undefined,
+                    templateData: {
+                      quoteNumber,
+                      productName: pr?.product_name || "—",
+                      brandName: pr?.brand_name || "—",
+                      sku: pr?.sku || "—",
+                      quantity: it.quantity,
+                      origin: pr?.origin || it.ship_origin_country || "—",
+                      destination: shipTo?.country || "—",
+                      requesterName: manualShipName.trim() || "—",
+                      requesterEmail: manualShipEmail.trim(),
+                      requesterCompany: manualShipCompany.trim() || "—",
+                      message: manualShipMessage.trim(),
+                    },
+                  },
+                });
+                if (error) throw error;
+                toast({ title: "Request sent", description: "Our concierge will respond shortly." });
+                setManualShipReq(null);
+              } catch (e: any) {
+                toast({ title: "Could not send", description: e?.message || "Please try again.", variant: "destructive" });
+              } finally {
+                setManualShipSending(false);
+              }
+            };
+            return (
+              <div className="space-y-3">
+                <div className="rounded border border-border bg-muted/30 p-3">
+                  <div className="font-body text-[10px] uppercase tracking-widest text-muted-foreground mb-1">Line details</div>
+                  <pre className="font-body text-[11px] text-foreground whitespace-pre-wrap">{lineSummary}</pre>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <label className="flex flex-col gap-1">
+                    <span className="font-body text-[10px] uppercase tracking-widest text-muted-foreground">Your name</span>
+                    <input
+                      type="text"
+                      value={manualShipName}
+                      onChange={(e) => setManualShipName(e.target.value)}
+                      className="font-body text-[12px] border border-border rounded px-2 py-1.5 bg-background"
+                    />
+                  </label>
+                  <label className="flex flex-col gap-1">
+                    <span className="font-body text-[10px] uppercase tracking-widest text-muted-foreground">Firm / Studio</span>
+                    <input
+                      type="text"
+                      value={manualShipCompany}
+                      onChange={(e) => setManualShipCompany(e.target.value)}
+                      className="font-body text-[12px] border border-border rounded px-2 py-1.5 bg-background"
+                    />
+                  </label>
+                </div>
+                <label className="flex flex-col gap-1">
+                  <span className="font-body text-[10px] uppercase tracking-widest text-muted-foreground">Reply-to email *</span>
+                  <input
+                    type="email"
+                    required
+                    value={manualShipEmail}
+                    onChange={(e) => setManualShipEmail(e.target.value)}
+                    className="font-body text-[12px] border border-border rounded px-2 py-1.5 bg-background"
+                  />
+                </label>
+                <label className="flex flex-col gap-1">
+                  <span className="font-body text-[10px] uppercase tracking-widest text-muted-foreground">Message (optional)</span>
+                  <textarea
+                    value={manualShipMessage}
+                    onChange={(e) => setManualShipMessage(e.target.value)}
+                    rows={4}
+                    placeholder="Anything we should know (target delivery date, destination address, special handling)…"
+                    className="font-body text-[12px] border border-border rounded px-2 py-1.5 bg-background resize-y"
+                  />
+                </label>
+                <div className="flex items-center justify-end gap-2 pt-1">
+                  <button
+                    type="button"
+                    onClick={() => setManualShipReq(null)}
+                    className="font-body text-[11px] px-3 py-1.5 border border-border rounded hover:bg-muted"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={onSubmit}
+                    disabled={manualShipSending}
+                    className="font-body text-[11px] px-3 py-1.5 bg-foreground text-background rounded hover:opacity-90 disabled:opacity-50 inline-flex items-center gap-1.5"
+                  >
+                    {manualShipSending ? <Loader2 className="h-3 w-3 animate-spin" /> : <Send className="h-3 w-3" />}
+                    Send request
+                  </button>
+                </div>
+              </div>
+            );
+          })()}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
