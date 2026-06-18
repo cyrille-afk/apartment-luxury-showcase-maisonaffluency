@@ -4,7 +4,7 @@ import {
   Image, Users, FolderOpen, Layers, FileText, FileSpreadsheet, Scissors,
   Columns, Paintbrush, MessageCircle, CalendarClock, Package, Truck,
   CalendarDays, Wallet, RefreshCw, ArrowRightLeft, GraduationCap, Box, BookOpen,
-  Wand2, Map, Star, Search, X, Contact as ContactIcon, Ruler,
+  Wand2, Star, Search, X, Contact as ContactIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -30,7 +30,7 @@ const categories: ToolCategory[] = [
       { title: "Tearsheet Builder", description: "Create printable product specs", url: "/trade/tearsheets", icon: Scissors },
       { title: "Product Comparator", description: "Compare specs side by side", url: "/trade/comparator", icon: Columns },
       { title: "Mood Board", description: "Visual collage for client presentations", url: "/trade/mood-boards", icon: Paintbrush },
-      { title: "Floor Plan → FF&E", description: "Upload a plan, get an AI-suggested layout from the catalog", url: "/trade/floor-plan-ffe", icon: Map },
+      
       { title: "Markup & Annotation", description: "Annotate images and drawings", url: "/trade/annotations", icon: MessageCircle },
     ],
   },
@@ -54,7 +54,7 @@ const categories: ToolCategory[] = [
       { title: "Guides", description: "Studio playbooks for using the Trade Portal", url: "/trade/guides", icon: BookOpen },
       { title: "CPD & Education", description: "Webinars, workshops & CPD tracking", url: "/trade/cpd", icon: GraduationCap },
       { title: "3D Studio", description: "3ds Max + Corona/V-Ray rendering pipeline", url: "/trade/axonometric-requests", icon: Box },
-      { title: "Floor Plan Layout", description: "Drag furniture onto a plan, export a dimensioned PDF", url: "/trade/floor-plan", icon: Ruler },
+      
     ],
   },
 ];

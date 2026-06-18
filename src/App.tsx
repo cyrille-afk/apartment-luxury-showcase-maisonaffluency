@@ -84,7 +84,7 @@ const TradeCurrencyConverter = lazy(() => import("./pages/TradeCurrencyConverter
 const TradeCPD = lazy(() => import("./pages/TradeCPD"));
 const TradeComparator = lazy(() => import("./pages/TradeComparator"));
 const TradeTools = lazy(() => import("./pages/TradeTools"));
-const TradeFloorPlanFFE = lazy(() => import("./pages/TradeFloorPlanFFE"));
+
 const TradeShowroom = lazy(() => import("./pages/TradeShowroom"));
 const TradeVisualiser = lazy(() => import("./pages/TradeVisualiser"));
 const TradeSamples = lazy(() => import("./pages/TradeSamples"));
@@ -94,7 +94,7 @@ const TradeDocumentsAdmin = lazy(() => import("./pages/TradeDocumentsAdmin"));
 const TradeMediaLibrary = lazy(() => import("./pages/TradeMediaLibrary"));
 const TradeQuotesAdmin = lazy(() => import("./pages/TradeQuotesAdmin"));
 const TradeAxonometricRequests = lazy(() => import("./pages/TradeAxonometricRequests"));
-const TradeFloorPlan = lazy(() => import("./pages/TradeFloorPlan"));
+
 const TradeCustomRequests = lazy(() => import("./pages/TradeCustomRequests"));
 const TradeFairCalendar = lazy(() => import("./pages/TradeFairCalendar"));
 const TradeAxonometricGallery = lazy(() => import("./pages/TradeAxonometricGallery"));
@@ -434,7 +434,7 @@ const App = () => {
                     <Route path="axonometric" element={<TradeAxonometric />} />
                     <Route path="axonometric-requests" element={<TradeAxonometricRequests />} />
                     <Route path="axonometric-gallery" element={<TradeAxonometricGallery />} />
-                    <Route path="floor-plan" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeFloorPlan /></Suspense>} />
+                    
                     <Route path="presentations" element={<TradePresentations />} />
                     <Route path="presentations/:id" element={<TradePresentationBuilder />} />
                     <Route path="presentations/:id/view" element={<TradePresentationViewer />} />
@@ -495,7 +495,7 @@ const App = () => {
                     <Route path="cpd" element={<TradeCPD />} />
                     <Route path="comparator" element={<TradeComparator />} />
                     <Route path="tools" element={<TradeTools />} />
-                    <Route path="floor-plan-ffe" element={<TradeFloorPlanFFE />} />
+                    
                     <Route path="guides" element={<TradeGuides />} />
                     <Route path="guides/analytics" element={<TradeGuidesAnalytics />} />
                     <Route path="guides/:slug" element={<TradeGuideDetail />} />

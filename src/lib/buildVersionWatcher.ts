@@ -15,7 +15,7 @@ const DO_NOT_INTERRUPT = [
   "/trade/axonometric",
   "/trade/visualiser",
   "/trade/mood-board",
-  "/trade/floor-plan",
+  
   "/trade/tearsheet",
   "/trade/presentations",
 ];
