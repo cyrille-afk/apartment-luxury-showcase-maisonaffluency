@@ -183,7 +183,13 @@ export default function InlinePriceEditor({
   if (editing) {
     return (
       <div className="flex items-center justify-center gap-1 mt-1" onClick={(e) => e.stopPropagation()}>
-        <span className="font-body text-[10px] text-muted-foreground">{currency}</span>
+        <span
+          className="font-body text-[10px] text-muted-foreground"
+          title={inputCurrency !== currency ? `Will be saved as ${currency} using live FX` : undefined}
+        >
+          {inputCurrency}
+          {inputCurrency !== currency && <span className="ml-0.5 text-muted-foreground/60">→{currency}</span>}
+        </span>
         <input
           ref={inputRef}
           type="text"
