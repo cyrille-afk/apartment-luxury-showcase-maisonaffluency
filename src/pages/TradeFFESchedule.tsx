@@ -207,7 +207,7 @@ export default function TradeFFESchedule() {
     try {
       // Group by quote so PO auto-numbering is stable per quote
       const seqByQuote: Record<string, number> = {};
-      const lines: ProcurementLine[] = items.map((item) => {
+      const lines: ProcurementLine[] = filteredItems.map((item) => {
         seqByQuote[item.quote_id] = (seqByQuote[item.quote_id] || 0) + 1;
         const seq = seqByQuote[item.quote_id];
         const lead =
@@ -259,13 +259,13 @@ export default function TradeFFESchedule() {
 
   const [packaging, setPackaging] = useState(false);
   const handleSpecPackage = async () => {
-    if (!items.length) return;
+    if (!filteredItems.length) return;
     setPackaging(true);
     try {
       // Deduplicate by product_name+brand for cleaner ZIP
       const seen = new Set<string>();
       const products: SpecPackageProduct[] = [];
-      for (const it of items) {
+      for (const it of filteredItems) {
         const key = `${it.brand_name}|${it.product_name}`;
         if (seen.has(key)) continue;
         seen.add(key);
@@ -280,7 +280,7 @@ export default function TradeFFESchedule() {
           pdf_url: it.spec_sheet_url,
         });
       }
-      const projectName = items.find((i) => i.client_name)?.client_name || "Project";
+      const projectName = filteredItems.find((i) => i.client_name)?.client_name || "Project";
       const { blob, filename, missingPdfs } = await generateSpecPackageZip(products, {
         projectName,
         studioName: "Maison Affluency",
@@ -314,11 +314,11 @@ export default function TradeFFESchedule() {
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <Button onClick={handleSpecPackage} disabled={!items.length || packaging} variant="outline" size="sm">
+            <Button onClick={handleSpecPackage} disabled={!filteredItems.length || packaging} variant="outline" size="sm">
               {packaging ? <DotCircleLoader size="sm" className="mr-2" /> : <Package className="h-4 w-4 mr-2" />}
               Spec Package (.zip)
             </Button>
-            <Button onClick={handleExport} disabled={!items.length || exporting} variant="outline" size="sm">
+            <Button onClick={handleExport} disabled={!filteredItems.length || exporting} variant="outline" size="sm">
               {exporting ? <DotCircleLoader size="sm" className="mr-2" /> : <Download className="h-4 w-4 mr-2" />}
               Export Excel (.xlsx)
             </Button>
