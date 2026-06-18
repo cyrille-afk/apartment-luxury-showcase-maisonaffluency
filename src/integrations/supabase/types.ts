@@ -5983,6 +5983,7 @@ export type Database = {
           id: string
           image_url: string | null
           notes: string | null
+          product_id: string | null
           product_name: string
           project_name: string
           return_by: string | null
@@ -6003,6 +6004,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           notes?: string | null
+          product_id?: string | null
           product_name: string
           project_name?: string
           return_by?: string | null
@@ -6023,6 +6025,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           notes?: string | null
+          product_id?: string | null
           product_name?: string
           project_name?: string
           return_by?: string | null
@@ -6035,7 +6038,15 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "trade_sample_requests_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "trade_products"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       trade_tier_config: {
         Row: {
