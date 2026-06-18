@@ -354,7 +354,58 @@ export default function TradeFFESchedule() {
           </div>
         ) : (
           <>
-            <div className="overflow-x-auto border border-border rounded-lg">
+            <div className="flex flex-wrap items-center gap-3 rounded-md border border-border bg-muted/20 px-3 py-2">
+              <div className="flex items-center gap-1.5 text-muted-foreground">
+                <Filter className="h-3.5 w-3.5" />
+                <span className="font-body text-[11px] uppercase tracking-wider">Filter by</span>
+              </div>
+              <select
+                value={filterProjectId}
+                onChange={(e) => setFilterProjectId(e.target.value)}
+                className="rounded border border-border bg-background px-2 py-1 font-body text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+              >
+                <option value="">All Projects</option>
+                {projectOptions.map(([id, name]) => (
+                  <option key={id} value={id}>{name}</option>
+                ))}
+              </select>
+              <select
+                value={filterStudioId}
+                onChange={(e) => setFilterStudioId(e.target.value)}
+                className="rounded border border-border bg-background px-2 py-1 font-body text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+              >
+                <option value="">All Studios</option>
+                {studioOptions.map(([id, name]) => (
+                  <option key={id} value={id}>{name}</option>
+                ))}
+              </select>
+              <select
+                value={filterClient}
+                onChange={(e) => setFilterClient(e.target.value)}
+                className="rounded border border-border bg-background px-2 py-1 font-body text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+              >
+                <option value="">All Clients</option>
+                {clientOptions.map((name) => (
+                  <option key={name} value={name}>{name}</option>
+                ))}
+              </select>
+              {hasActiveFilters && (
+                <button
+                  onClick={clearFilters}
+                  className="inline-flex items-center gap-1 rounded-full border border-border bg-background hover:bg-muted/40 px-2 py-0.5 font-body text-[11px] text-muted-foreground"
+                >
+                  Clear <X className="h-3 w-3" />
+                </button>
+              )}
+            </div>
+
+            {filteredItems.length === 0 ? (
+              <div className="text-center py-12 border border-dashed border-border rounded-lg">
+                <p className="font-body text-sm text-muted-foreground">No items match your filters.</p>
+              </div>
+            ) : (
+              <>
+                <div className="overflow-x-auto border border-border rounded-lg">
               <table className="w-full text-left">
                 <thead>
                   <tr className="border-b border-border bg-muted/30">
