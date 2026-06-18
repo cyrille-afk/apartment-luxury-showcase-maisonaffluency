@@ -56,15 +56,13 @@ export default function SpecGlyph({ symbol, className }: SpecGlyphProps) {
   }
 
   if (symbol === "glass") {
-    // Custom rounded-flask/diffuser silhouette — reads as a glass diffuser
+    // Rounded panel with diagonal reflections — reads as glass / crystal / mirror
     return (
       <span className={cn(baseClass, "text-gold")} aria-hidden="true">
-        <svg viewBox="0 0 24 24" className="h-[17px] w-[17px]" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M9 3h6" />
-          <path d="M10 3v4.5" />
-          <path d="M14 3v4.5" />
-          <path d="M7 14a5 5 0 0 0 10 0c0-2.5-3-4-3-6.5h-4C10 10 7 11.5 7 14Z" />
-          <path d="M11 12.5c0 1 .8 1.8 1.8 1.8" opacity="0.6" />
+        <svg viewBox="0 0 24 24" className="h-[18px] w-[18px]" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="3.5" y="3.5" width="17" height="17" rx="2.5" />
+          <path d="M15 6l-6 12" opacity="0.45" />
+          <path d="M18 9l-3 6" opacity="0.25" />
         </svg>
       </span>
     );
