@@ -499,6 +499,18 @@ export default function TradeFFESchedule() {
                       : null;
                     return (
                       <tr key={i} className="border-b border-border/50 hover:bg-muted/20 transition-colors">
+                        <td className="px-2 py-2 w-12">
+                          {item.image_url ? (
+                            <img
+                              src={item.image_url}
+                              alt={item.product_name}
+                              loading="lazy"
+                              className="h-10 w-10 object-cover rounded border border-border/50 bg-muted/20"
+                            />
+                          ) : (
+                            <div className="h-10 w-10 rounded border border-dashed border-border/50 bg-muted/10" aria-hidden />
+                          )}
+                        </td>
                         <td className="px-4 py-3 font-body text-xs text-muted-foreground tabular-nums">{item.po_number || <span className="italic text-muted-foreground/60">auto</span>}</td>
                         <td className="px-4 py-3 font-body text-xs text-muted-foreground">{item.cost_code || "—"}</td>
                         <td className="px-4 py-3 font-body text-sm text-foreground">{item.product_name}</td>
