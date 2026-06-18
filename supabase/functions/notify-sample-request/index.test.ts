@@ -76,19 +76,27 @@ Deno.test({
 
       // 3. Verify email_send_log rows were enqueued for this request.
       //    Caller must be an admin for RLS to allow this read.
+      //    Filter on indexed columns (template_name + created_at) to avoid
+      //    a sequential scan on message_id LIKE.
       const messageIdPrefix = `sample-request-${requestId}`;
-      const { data: logRows, error: logErr } = await supabase
+      const { data: candidateRows, error: logErr } = await supabase
         .from("email_send_log")
-        .select("message_id, template_name, recipient_email, status, error_message")
-        .like("message_id", `${messageIdPrefix}%`);
+        .select("message_id, template_name, recipient_email, status, error_message, created_at")
+        .eq("template_name", "sample-request")
+        .gte("created_at", startedAt)
+        .order("created_at", { ascending: false })
+        .limit(50);
 
       assertEquals(logErr, null, `email_send_log read failed: ${logErr?.message}`);
+      const logRows = (candidateRows ?? []).filter((r) =>
+        typeof r.message_id === "string" && (r.message_id as string).startsWith(messageIdPrefix)
+      );
       assert(
-        (logRows?.length ?? 0) >= 1,
-        `expected at least one email_send_log row for ${messageIdPrefix}, got ${logRows?.length ?? 0}`,
+        logRows.length >= 1,
+        `expected at least one email_send_log row for ${messageIdPrefix}, got ${logRows.length}`,
       );
 
-      for (const row of logRows!) {
+      for (const row of logRows) {
         assertEquals(row.template_name, "sample-request");
         assert(
           ["pending", "sent"].includes(row.status as string),
