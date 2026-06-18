@@ -117,7 +117,7 @@ const TradeSamples = () => {
   const resetForm = () => {
     setProductName(""); setBrandName(""); setClientName(""); setProjectName("");
     setAddress(""); setCity(""); setCountry("Singapore"); setReturnBy(undefined); setNotes("");
-    setImageFile(null); setImagePreview(null); setTearsheetUrl(null);
+    setImageFile(null); setImagePreview(null); setTearsheetUrl(null); setProductId(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
