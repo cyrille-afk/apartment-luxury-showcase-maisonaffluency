@@ -355,9 +355,10 @@ const TradeAdminCadAssets = () => {
                         <td className="px-3 py-2 text-right whitespace-nowrap">
                           <button
                             type="button"
-                            onClick={() => setPreviewAsset(a)}
-                            className="p-1.5 rounded-md text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
-                            title="Preview"
+                            onClick={() => a.is_active && setPreviewAsset(a)}
+                            disabled={!a.is_active}
+                            className="p-1.5 rounded-md text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-muted-foreground"
+                            title={a.is_active ? "Preview" : "Preview unavailable — asset is inactive"}
                           >
                             <Eye className="h-3.5 w-3.5" />
                           </button>
