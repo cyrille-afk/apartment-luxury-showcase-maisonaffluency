@@ -294,6 +294,14 @@ const TradeAdminCadAssets = () => {
                 <tbody className="divide-y divide-border/60">
                   {allAssets
                     .filter((a) => {
+                      if (variantFilter) {
+                        const v = a.variant_label || "__default__";
+                        if (v !== variantFilter) return false;
+                      }
+                      if (versionFilter) {
+                        const v = a.version || "__none__";
+                        if (v !== versionFilter) return false;
+                      }
                       const q = globalFilter.trim().toLowerCase();
                       if (!q) return true;
                       return (
