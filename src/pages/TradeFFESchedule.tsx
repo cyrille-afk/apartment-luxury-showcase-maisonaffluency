@@ -484,8 +484,8 @@ export default function TradeFFESchedule() {
               <table className="w-full text-left">
                 <thead>
                   <tr className="border-b border-border bg-muted/30">
-                    {["PO #", "Cost Code", "Item", "Brand", "Project", "Client", "Studio", "Qty", "Unit Trade", "Total", "Lead", "Stage", "Expected ready", "Required by", "Slack", "Quote"].map((h) => (
-                      <th key={h} className="px-4 py-3 font-body text-[10px] uppercase tracking-wider text-muted-foreground whitespace-nowrap">{h}</th>
+                    {["", "PO #", "Cost Code", "Item", "Brand", "Project", "Client", "Studio", "Qty", "Unit Trade", "Total", "Lead", "Stage", "Expected ready", "Required by", "Slack", "Quote"].map((h, idx) => (
+                      <th key={idx} className="px-4 py-3 font-body text-[10px] uppercase tracking-wider text-muted-foreground whitespace-nowrap">{h}</th>
                     ))}
                   </tr>
                 </thead>
