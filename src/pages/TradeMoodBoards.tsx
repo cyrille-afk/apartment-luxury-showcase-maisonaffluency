@@ -222,7 +222,7 @@ export default function TradeMoodBoards() {
       const [{ data: trade }, { data: curator }] = await Promise.all([
         supabase
           .from("trade_products")
-          .select("id, product_name, brand_name, image_url, category")
+          .select("id, product_name, brand_name, image_url, category, source_pick_id")
           .eq("is_active", true)
           .not("image_url", "is", null)
           .order("brand_name"),
@@ -244,6 +244,11 @@ export default function TradeMoodBoards() {
         designerMap = new Map((designers || []).map((d) => [d.id, d.name]));
       }
 
+      // Picks that already have a trade mirror — drop them, the trade row wins.
+      const mirroredPickIds = new Set<string>(
+        (trade || []).map((p: any) => p.source_pick_id).filter(Boolean) as string[],
+      );
+
       const tradeItems = (trade || []).map((p) => ({
         id: p.id,
         product_name: p.product_name,
@@ -253,19 +258,22 @@ export default function TradeMoodBoards() {
         source: "trade" as const,
       }));
 
-      const curatorItems = (curator || []).map((p) => ({
-        id: p.id,
-        product_name: p.title,
-        brand_name: designerMap.get(p.designer_id) || "Unknown",
-        image_url: p.image_url,
-        category: p.category || "",
-        source: "curator" as const,
-      }));
+      const curatorItems = (curator || [])
+        .filter((p: any) => !mirroredPickIds.has(p.id))
+        .map((p) => ({
+          id: p.id,
+          product_name: p.title,
+          brand_name: designerMap.get(p.designer_id) || "Unknown",
+          image_url: p.image_url,
+          category: p.category || "",
+          source: "curator" as const,
+        }));
 
-      // Deduplicate by name+brand, preferring curator (richer data)
+      // Legacy fallback: any remaining title|brand collision (pre-source_pick_id
+      // rows) — prefer the trade entry since that's what tools join through.
       const seen = new Set<string>();
       const merged: Array<{ id: string; product_name: string; brand_name: string; image_url: string; category: string; source: "trade" | "curator" }> = [];
-      for (const item of [...curatorItems, ...tradeItems]) {
+      for (const item of [...tradeItems, ...curatorItems]) {
         const key = `${item.product_name?.toLowerCase()}|${item.brand_name?.toLowerCase()}`;
         if (seen.has(key)) continue;
         seen.add(key);
