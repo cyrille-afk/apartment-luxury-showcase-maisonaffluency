@@ -141,6 +141,7 @@ export default function TradeAdminFabrics() {
 
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<string>("");
+  const [productFilter, setProductFilter] = useState<"all" | "picks" | "labels">("all");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editDraft, setEditDraft] = useState<Partial<Fabric>>({});
   const [adding, setAdding] = useState(false);
@@ -477,6 +478,22 @@ export default function TradeAdminFabrics() {
                 <option key={c} value={c}>{c}</option>
               ))}
             </select>
+            <div className="flex items-center rounded-md border border-border bg-background overflow-hidden">
+              {(["all", "picks", "labels"] as const).map((key) => (
+                <button
+                  key={key}
+                  onClick={() => setProductFilter(key)}
+                  className={`px-2.5 py-1.5 text-[11px] font-body capitalize transition-colors ${
+                    productFilter === key
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                  title={key === "all" ? "Show all linked products" : key === "picks" ? "Only catalog picks" : "Only free-text labels"}
+                >
+                  {key === "all" ? "All" : key === "picks" ? "Picks" : "Labels"}
+                </button>
+              ))}
+            </div>
             <button
               onClick={() => setAdding(true)}
               className="inline-flex items-center gap-1 px-3 py-1.5 text-[11px] uppercase tracking-wider font-body rounded-md border border-primary/30 bg-primary/5 text-primary hover:bg-primary/10"
@@ -716,11 +733,15 @@ export default function TradeAdminFabrics() {
                             {(() => {
                               const linked = linkedPicksByFabric.get(f.id) || [];
                               const labelLinks = linkedLabelsByFabric.get(f.id) || [];
-                              const hasAny = linked.length + labelLinks.length > 0;
+                              const showPicks = productFilter !== "labels";
+                              const showLabels = productFilter !== "picks";
+                              const visiblePicks = showPicks ? linked : [];
+                              const visibleLabels = showLabels ? labelLinks : [];
+                              const hasAny = visiblePicks.length + visibleLabels.length > 0;
                               return (
                                 <div className="flex flex-col gap-1">
                                   <div className="flex flex-wrap gap-1">
-                                    {linked.slice(0, 2).map((p) => {
+                                    {visiblePicks.slice(0, 2).map((p) => {
                                       const dSlug = p.designer_id ? designerSlugById.get(p.designer_id) : null;
                                       const productSlug = slugify(`${p.title || ""}${p.subtitle ? `-${p.subtitle}` : ""}`);
                                       const to = dSlug && p.title
@@ -748,16 +769,16 @@ export default function TradeAdminFabrics() {
                                       );
                                     })}
 
-                                    {linked.length > 2 && (
+                                    {visiblePicks.length > 2 && (
                                       <button
                                         onClick={() => { setLinkingId(f.id); setPickSearch(""); }}
                                         className="text-[10px] px-1.5 py-0.5 rounded bg-muted/40 text-muted-foreground hover:bg-muted"
                                       >
-                                        +{linked.length - 2} more
+                                        +{visiblePicks.length - 2} more
                                       </button>
                                     )}
 
-                                    {labelLinks.slice(0, 3).map((l) => (
+                                    {visibleLabels.slice(0, 3).map((l) => (
                                       <span
                                         key={l.id}
                                         className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded border border-dashed border-amber-500/50 bg-amber-500/5 text-amber-900 dark:text-amber-200 italic"
@@ -766,12 +787,12 @@ export default function TradeAdminFabrics() {
                                         <span className="truncate max-w-[140px]">{l.product_label}</span>
                                       </span>
                                     ))}
-                                    {labelLinks.length > 3 && (
+                                    {visibleLabels.length > 3 && (
                                       <span
                                         className="text-[10px] px-1.5 py-0.5 rounded border border-dashed border-amber-500/40 text-amber-700 dark:text-amber-300 italic"
-                                        title={labelLinks.slice(3).map((l) => l.product_label).join("\n")}
+                                        title={visibleLabels.slice(3).map((l) => l.product_label).join("\n")}
                                       >
-                                        +{labelLinks.length - 3} more
+                                        +{visibleLabels.length - 3} more
                                       </span>
                                     )}
                                   </div>
