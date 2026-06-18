@@ -194,26 +194,9 @@ const TradeBoardBuilder = () => {
     const seen = new Set<string>();
     const unique = prods.filter(p => { if (seen.has(p.id)) return false; seen.add(p.id); return true; });
 
-    // Fill missing images from designer_curator_picks
-    const missingImg = unique.filter(p => !p.image_url);
-    if (missingImg.length > 0) {
-      const names = missingImg.map(p => p.product_name);
-      const { data: picks } = await supabase
-        .from("designer_curator_picks")
-        .select("title, image_url")
-        .in("title", names)
-        .not("image_url", "eq", "");
-      if (picks) {
-        const pickMap = new Map(picks.map((pk: any) => [pk.title, pk.image_url]));
-        unique.forEach(p => {
-          if (!p.image_url && pickMap.has(p.product_name)) {
-            p.image_url = pickMap.get(p.product_name) || null;
-          }
-        });
-      }
-    }
-
-    // Final fallback: gallery_hotspots (e.g. rugs whose only photo is a hotspot)
+    // Fill missing images from the linked curator pick (preferred — uses
+    // source_pick_id), then from gallery_hotspots as a final fallback.
+    await fillTradeProductImageFallbacks(unique);
     await fillHotspotImages(unique.filter(p => !p.image_url));
 
     setProducts(unique);
