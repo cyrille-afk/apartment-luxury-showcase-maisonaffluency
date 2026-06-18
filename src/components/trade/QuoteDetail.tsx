@@ -3582,7 +3582,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                     templateName: "manual-shipping-quote-request",
                     recipientEmail: "concierge@myaffluency.com",
                     idempotencyKey: `manual-ship-${quoteNumber}-${it.id}-${Date.now()}`,
-                    replyTo: manualShipEmail.trim() || undefined,
+                    
                     templateData: {
                       quoteNumber,
                       productName: pr?.product_name || "—",
