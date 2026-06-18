@@ -228,25 +228,28 @@ Deno.serve(async (req) => {
     const boardMaterials = boardItems.map(p => p.materials).filter(m => m !== 'not specified').join(', ')
     const boardCategories = boardItems.map(p => p.category).filter(Boolean).join(', ')
 
-    const systemPrompt = `You are a luxury interior design consultant curating items for a cohesive room scheme. You are selecting from a shortlist that has already been relevance-ranked for same-room pairing.
+    const systemPrompt = `You are a senior interior design consultant for an elite trade clientele, curating items for a cohesive room scheme. You are selecting from a shortlist that has already been relevance-ranked for same-room pairing.
 
 ## How to select (in priority order):
 
 1. DIRECT PAIRING — Choose items that directly pair with a specific board item in the same room. A dining table needs dining chairs, pendant lighting, a sideboard, a rug. A chair needs a side table, floor lamp, rug, or sofa context.
-
 2. SAME-ROOM COMPLETENESS — Fill in the room naturally. Do not select pieces that belong to a different room type.
-
 3. MATERIAL & FINISH HARMONY — Prioritize items sharing material families, tones, or finishes with the board.
-
 4. USE THE PRE-SCORE — If two options are close, trust the higher pre-score because the shortlist has already been screened for role and room fit.
-
 5. BRAND DIVERSITY — Spread recommendations across different brands/designers.
 
 ## What NOT to do:
-- Do NOT select random items with no direct pairing logic
-- Do NOT choose multiple extra tables unless they clearly complete the room
-- Do NOT ignore the fit notes or pre-scores
-- Every reason must mention the anchor board item or the room function it completes`
+- Do NOT select random items with no direct pairing logic.
+- Do NOT choose multiple extra tables unless they clearly complete the room.
+- Do NOT ignore the fit notes or pre-scores.
+
+## Reason-writing standard (CRITICAL — your reasons are read by professional interior designers):
+- Write 1-2 full sentences, 18-40 words, in the editorial voice of a design consultant — never casual, never childlike.
+- Name the specific anchor piece by its product name (e.g. "the Serge armchair") rather than a generic category, and explain the scheme logic: scale, silhouette, material dialogue, tonal register, or the functional gap it resolves.
+- Reference at least one concrete design lever: proportion, material/finish, tonal contrast, lighting layer, textural counterpoint, period coherence, or compositional balance.
+- Forbidden phrasings: "you need a lamp with the armchair", "goes well with", "matches nicely", "pairs with the X", "completes the look", "perfect for", "because". If your sentence could pass for a five-year-old's, rewrite it.
+- Acceptable example: "Anchors the seating group beside the Mario Bellini sofa, its bronzed stem echoing the table's patinated base while introducing a softer, ambient light layer at eye level."
+- Acceptable example: "Resolves the missing storage register opposite the dining table; the fumed oak carcass holds the same warm mid-tone, and the lower silhouette keeps the sightline to the artwork open."`
 
     const userPrompt = `## Board: "${boardTitle}"
 Items currently selected:
@@ -262,7 +265,7 @@ Categories present: ${boardCategories || 'mixed'}
 ${catalogList}
 
 Think step by step:
-1. Identify the strongest anchor item(s) on the board (refer to them by their [B#] tag).
+1. Identify the strongest anchor item(s) on the board (refer to them by their [B#] tag and by name in the reason).
 2. Choose items that directly pair to those anchors or complete the same room.
 3. Prefer higher pre-scores when options are otherwise similar.
 4. Select 8 items that would realistically sit in the same room.
@@ -270,7 +273,7 @@ Think step by step:
 For each pick, ALSO return up to 3 anchor board indices (the [B#] numbers) that drove the choice, in priority order.
 
 Return a JSON object with a recommendations array:
-{"recommendations": [{"index": number, "score": 1-100, "reason": "mention which board item it pairs with or what room gap it solves", "anchors": [0,2]}]}`
+{"recommendations": [{"index": number, "score": 1-100, "reason": "1-2 editorial sentences naming the anchor piece and the specific design lever (proportion, material, tonal register, lighting layer, etc.) — never childlike, never start with 'because' or 'pairs with'", "anchors": [0,2]}]}`
 
     const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',

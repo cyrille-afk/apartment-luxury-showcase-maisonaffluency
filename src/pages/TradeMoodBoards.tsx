@@ -8,6 +8,7 @@ import { useSearchParams } from "react-router-dom";
 import { Search, Loader2, Paintbrush, Plus, X, Heart, FolderOpen, LayoutGrid, Sparkles, RefreshCw } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 type PickerFilter = "all" | "favourites" | "board";
 
@@ -444,39 +445,46 @@ export default function TradeMoodBoards() {
                 ) : recError ? (
                   <p className="font-body text-xs text-muted-foreground">{recError}</p>
                 ) : (
-                  <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
-                    {recommendations.slice(0, 8).map((rec) => (
-                      <button
-                        key={rec.product_id}
-                        onClick={() => addRecToBoard(rec)}
-                        className="group w-44 shrink-0 text-left"
-                        title={rec.reason}
-                      >
-                        <div className="relative aspect-square rounded-lg overflow-hidden bg-muted mb-1.5 border border-border group-hover:border-primary/40 transition-colors">
-                          {rec.image_url ? (
-                            <img
-                              src={rec.image_url}
-                              alt={rec.title}
-                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                              loading="lazy"
-                            />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center text-muted-foreground text-[10px]">
-                              No image
-                            </div>
-                          )}
-                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
-                            <Plus className="h-5 w-5 text-white opacity-0 group-hover:opacity-100 transition-opacity drop-shadow-lg" />
-                          </div>
-                        </div>
-                        <p className="font-body text-xs text-foreground truncate">{rec.title}</p>
-                        <p className="font-body text-[11px] text-muted-foreground truncate">{rec.brand}</p>
-                        <p className="font-body text-[11px] text-primary/80 leading-snug mt-1 line-clamp-4">
-                          {rec.reason}
-                        </p>
-                      </button>
-                    ))}
-                  </div>
+                  <TooltipProvider delayDuration={120}>
+                    <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+                      {recommendations.slice(0, 8).map((rec) => (
+                        <Tooltip key={rec.product_id}>
+                          <TooltipTrigger asChild>
+                            <button
+                              onClick={() => addRecToBoard(rec)}
+                              className="group w-44 shrink-0 text-left"
+                            >
+                              <div className="relative aspect-square rounded-lg overflow-hidden bg-muted mb-1.5 border border-border group-hover:border-primary/40 transition-colors">
+                                {rec.image_url ? (
+                                  <img
+                                    src={rec.image_url}
+                                    alt={rec.title}
+                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                    loading="lazy"
+                                  />
+                                ) : (
+                                  <div className="w-full h-full flex items-center justify-center text-muted-foreground text-[10px]">
+                                    No image
+                                  </div>
+                                )}
+                                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                                  <Plus className="h-5 w-5 text-white opacity-0 group-hover:opacity-100 transition-opacity drop-shadow-lg" />
+                                </div>
+                              </div>
+                              <p className="font-body text-xs text-foreground truncate">{rec.title}</p>
+                              <p className="font-body text-[11px] text-muted-foreground truncate">{rec.brand}</p>
+                              <p className="font-body text-[11px] text-primary/80 leading-snug mt-1 line-clamp-4">
+                                {rec.reason}
+                              </p>
+                            </button>
+                          </TooltipTrigger>
+                          <TooltipContent side="top" align="center" className="max-w-xs text-xs leading-relaxed">
+                            {rec.reason}
+                          </TooltipContent>
+                        </Tooltip>
+                      ))}
+                    </div>
+                  </TooltipProvider>
                 )}
               </div>
             )}
