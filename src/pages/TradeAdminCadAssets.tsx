@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { Helmet } from "react-helmet-async";
 import { Navigate, Link } from "react-router-dom";
-import { ChevronLeft, Plus, Trash2, Loader2, Search, Save, FileBox, Eye, Download, X, ExternalLink, Copy } from "lucide-react";
+import { ChevronLeft, Plus, Trash2, Loader2, Search, Save, FileBox, Eye, Download, X, ExternalLink, Copy, Pencil } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -160,6 +160,22 @@ const TradeAdminCadAssets = () => {
       toast({ title: "Update failed", description: error.message, variant: "destructive" });
       return;
     }
+    if (productId) loadAssets(productId);
+    loadAllAssets();
+  };
+
+  const handleEditUrl = async (asset: CadAsset) => {
+    const next = window.prompt("New file URL:", asset.file_url);
+    if (!next || next.trim() === "" || next.trim() === asset.file_url) return;
+    const { error } = await supabase
+      .from("trade_product_cad_assets")
+      .update({ file_url: next.trim() })
+      .eq("id", asset.id);
+    if (error) {
+      toast({ title: "Update failed", description: error.message, variant: "destructive" });
+      return;
+    }
+    toast({ title: "File URL updated" });
     if (productId) loadAssets(productId);
     loadAllAssets();
   };
@@ -542,7 +558,7 @@ const TradeAdminCadAssets = () => {
                       </p>
                       <ul className="divide-y divide-border/60 rounded-md border border-border/60 overflow-hidden">
                         {list.map((a) => (
-                          <li key={a.id} className="flex items-center gap-3 px-3 py-2 bg-background">
+                          <li key={a.id} data-testid={`cad-asset-row-${a.id}`} className="flex items-center gap-3 px-3 py-2 bg-background">
                             <span className="font-body text-xs text-foreground uppercase tracking-wider w-14 shrink-0">.{a.file_format}</span>
                             {a.version && (
                               <span className="font-body text-[10px] text-muted-foreground shrink-0">{a.version}</span>
@@ -551,6 +567,7 @@ const TradeAdminCadAssets = () => {
                               href={a.file_url}
                               target="_blank"
                               rel="noopener noreferrer"
+                              data-testid={`file-url-link-${a.id}`}
                               className="font-body text-[11px] text-muted-foreground truncate hover:text-foreground min-w-0 flex-1"
                             >
                               {a.file_url.split("/").pop()}
@@ -560,10 +577,20 @@ const TradeAdminCadAssets = () => {
                                 type="checkbox"
                                 checked={a.is_active}
                                 onChange={() => handleToggleActive(a)}
+                                data-testid={`active-toggle-${a.id}`}
                                 className="h-3 w-3 accent-primary"
                               />
                               <span className="font-body text-[10px] text-muted-foreground">Active</span>
                             </label>
+                            <button
+                              type="button"
+                              onClick={() => handleEditUrl(a)}
+                              data-testid={`edit-url-${a.id}`}
+                              className="p-1.5 rounded-md text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors shrink-0"
+                              title="Edit file URL"
+                            >
+                              <Pencil className="h-3.5 w-3.5" />
+                            </button>
                             <button
                               type="button"
                               onClick={() => handleDelete(a)}
