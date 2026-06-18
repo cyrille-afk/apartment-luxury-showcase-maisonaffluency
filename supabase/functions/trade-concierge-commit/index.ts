@@ -175,7 +175,7 @@ async function resolvePickToTradeProduct(
   // back to the curator-pick → trade-product resolution path.
   const { data: directTrade } = await supabase
     .from("trade_products")
-    .select("id, product_name, brand_name, trade_price_cents, rrp_price_cents, price_unit")
+    .select("id, product_name, brand_name, trade_price_cents, rrp_price_cents, price_unit, currency, source_pick_id")
     .eq("id", pickId)
     .maybeSingle();
   if (directTrade?.id) {
@@ -203,7 +203,7 @@ async function resolvePickToTradeProduct(
   // 1. Exact match
   const { data: exact } = await supabase
     .from("trade_products")
-    .select("id, product_name, brand_name, trade_price_cents, rrp_price_cents, price_unit")
+    .select("id, product_name, brand_name, trade_price_cents, rrp_price_cents, price_unit, currency, source_pick_id")
     .eq("brand_name", brandName)
     .eq("product_name", pick.title)
     .limit(1)
