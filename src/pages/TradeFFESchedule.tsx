@@ -155,12 +155,13 @@ export default function TradeFFESchedule() {
       if (!qItems?.length) return [];
 
       const productIds = [...new Set(qItems.map((i) => i.product_id))];
-      const { data: products } = await supabase
+      const { data: productsRaw } = await supabase
         .from("trade_products")
         .select(
-          "id, product_name, brand_name, category, dimensions, materials, sku, lead_time, currency, rrp_price_cents, spec_sheet_url"
+          "id, product_name, brand_name, category, dimensions, materials, sku, lead_time, currency, rrp_price_cents, spec_sheet_url, image_url"
         )
         .in("id", productIds);
+      const products = await fillTradeProductImageFallbacks((productsRaw || []) as any[]);
 
       const projectIds = [...new Set(quotes.map((q: any) => q.project_id).filter(Boolean))] as string[];
       const studioIds = [...new Set(quotes.map((q: any) => q.studio_id).filter(Boolean))] as string[];
