@@ -553,7 +553,7 @@ export default function TradeFFESchedule() {
                 </tbody>
                 <tfoot>
                   <tr className="bg-muted/30">
-                    <td colSpan={9} className="px-4 py-3 font-body text-sm text-foreground font-medium text-right">Total</td>
+                    <td colSpan={10} className="px-4 py-3 font-body text-sm text-foreground font-medium text-right">Total</td>
                     <td className="px-4 py-3 font-display text-sm text-foreground font-semibold">
                       {totalValue > 0 ? `€${(totalValue / 100).toFixed(2)}` : "—"}
                     </td>
