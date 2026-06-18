@@ -59,6 +59,17 @@ export async function estimateShipping(input: EstimatorInput): Promise<ShippingB
     return EMPTY_BREAKDOWN(currency, "Origin and destination required");
   }
 
+  // Missing packing data → return "estimate unavailable" instead of fabricating
+  // a near-zero freight charge from cbm=0.01 and kg=0.
+  const hasVolume = Number(input.total_volume_cbm) > 0;
+  const hasWeight = Number(input.total_weight_kg) > 0;
+  if (!hasVolume && !hasWeight) {
+    return EMPTY_BREAKDOWN(
+      currency,
+      "Estimate unavailable — product weight and dimensions not on file. Contact us for a manual quote."
+    );
+  }
+
   // 1) Lanes matching origin/dest
   let lanesQuery = supabase
     .from("shipping_lanes")

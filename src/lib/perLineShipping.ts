@@ -89,6 +89,8 @@ export interface ResolvedLine extends RawLine {
   mode: ShipmentMode;
   cbm: number;
   kg: number;
+  /** True when neither shipCbm nor shipWeightKg was provided on the line. */
+  missingPacking: boolean;
 }
 
 export interface PerOriginShipment {
@@ -102,6 +104,10 @@ export interface PerOriginShipment {
   shippingEurCents: number;
   dutyEurCents: number;
   vatEurCents: number;
+  /** True when the estimator could not price this shipment. */
+  unavailable: boolean;
+  /** Human-readable reason when `unavailable` is true. */
+  reason?: string;
 }
 
 export interface PerLineShippingResult {
@@ -130,11 +136,21 @@ export const resolveLine = (
 ): ResolvedLine => {
   const origin = toIsoCountry(raw.shipOriginCountry ?? raw.productOrigin, "FR");
   const mode = isMode(raw.shipMode) ? raw.shipMode : defaultModeFor(destCountry);
-  const cbm = Math.max(0.01, Number(raw.shipCbm ?? DEFAULT_LINE_CBM) * Math.max(1, raw.qty));
-  const kg = raw.shipWeightKg != null && raw.shipWeightKg > 0
-    ? Number(raw.shipWeightKg) * Math.max(1, raw.qty)
-    : Math.round(cbm * KG_PER_CBM[mode]);
-  return { ...raw, origin, mode, cbm, kg };
+  const hasCbm = raw.shipCbm != null && Number(raw.shipCbm) > 0;
+  const hasKg = raw.shipWeightKg != null && Number(raw.shipWeightKg) > 0;
+  const missingPacking = !hasCbm && !hasKg;
+  // When packing data exists we keep the prior backfill behaviour.
+  // When both are missing we return zero so the estimator flags it as unavailable
+  // rather than silently pricing a 0.5 cbm fabrication.
+  const cbm = missingPacking
+    ? 0
+    : Math.max(0.01, Number(raw.shipCbm ?? DEFAULT_LINE_CBM) * Math.max(1, raw.qty));
+  const kg = missingPacking
+    ? 0
+    : hasKg
+      ? Number(raw.shipWeightKg) * Math.max(1, raw.qty)
+      : Math.round(cbm * KG_PER_CBM[mode]);
+  return { ...raw, origin, mode, cbm, kg, missingPacking };
 };
 
 export async function computePerLineShipments(
@@ -166,21 +182,30 @@ export async function computePerLineShipments(
     const declaredEurCents = Math.round(
       group.reduce((s, l) => s + l.lineCents, 0) * fxQuoteToEur
     );
+    const allMissing = group.every((l) => l.missingPacking);
     let breakdown: ShippingBreakdown | null = null;
-    try {
-      breakdown = await estimateShipping({
-        origin_country: origin,
-        dest_country: destCountry,
-        total_volume_cbm: totalCbm,
-        total_weight_kg: totalKg,
-        declared_value_cents: declaredEurCents,
-        currency: "EUR",
-        preferred_mode: mode,
-        category,
-      });
-    } catch {
-      breakdown = null;
+    if (!allMissing) {
+      try {
+        breakdown = await estimateShipping({
+          origin_country: origin,
+          dest_country: destCountry,
+          total_volume_cbm: totalCbm,
+          total_weight_kg: totalKg,
+          declared_value_cents: declaredEurCents,
+          currency: "EUR",
+          preferred_mode: mode,
+          category,
+        });
+      } catch {
+        breakdown = null;
+      }
     }
+    const unavailable = allMissing || !breakdown?.available;
+    const reason = allMissing
+      ? "Estimate unavailable — product weight and dimensions not on file."
+      : !breakdown?.available
+        ? breakdown?.reason
+        : undefined;
     const shippingEurCents = breakdown?.available
       ? (breakdown.freight_cents + breakdown.fuel_cents + breakdown.insurance_cents
           + breakdown.customs_cents + breakdown.handling_cents + breakdown.last_mile_cents)
@@ -193,6 +218,8 @@ export async function computePerLineShipments(
       shippingEurCents,
       dutyEurCents: breakdown?.duty_cents ?? 0,
       vatEurCents: breakdown?.vat_cents ?? 0,
+      unavailable,
+      reason,
     });
   }
 
