@@ -133,9 +133,11 @@ const TradeBoardBuilder = () => {
         .select("id, product_name, brand_name, image_url, materials, dimensions")
         .in("id", productIds);
 
-      // Fill missing image_url from gallery_hotspots (e.g. rugs whose only
-      // photo lives on a hotspot rather than the trade_products row).
+      // Fill missing image_url: first from the linked curator pick (the canonical
+      // source of hero imagery), then fall back to gallery_hotspots (rugs whose
+      // only photo lives on a hotspot rather than the trade_products row).
       const prodList = (prods || []) as any[];
+      await fillTradeProductImageFallbacks(prodList);
       const missing = prodList.filter((p) => !p.image_url);
       if (missing.length > 0) {
         await fillHotspotImages(missing);
