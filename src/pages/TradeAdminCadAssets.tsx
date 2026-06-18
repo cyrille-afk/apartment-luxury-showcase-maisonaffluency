@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { Helmet } from "react-helmet-async";
 import { Navigate, Link } from "react-router-dom";
-import { ChevronLeft, Plus, Trash2, Loader2, Search, Save, FileBox, Eye, Download, X, ExternalLink, Copy } from "lucide-react";
+import { ChevronLeft, Plus, Trash2, Loader2, Search, Save, FileBox, Eye, Download, X, ExternalLink, Copy, Pencil } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
