@@ -1162,7 +1162,7 @@ const TradeProductPage: React.FC = () => {
   };
 
   // Sample request deep-link to Procurement
-  const sampleRequestUrl = `/trade/samples?product=${encodeURIComponent(product.title)}&brand=${encodeURIComponent(designerDisplay)}`;
+  const sampleRequestUrl = `/trade/samples?product=${encodeURIComponent(product.title)}&brand=${encodeURIComponent(designerDisplay)}&productId=${encodeURIComponent(product.id)}`;
 
   return (
     <>
