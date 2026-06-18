@@ -837,6 +837,30 @@ serve(async (req) => {
     if (tool === "propose_tearsheet") {
       const title: string = (args.title || "Untitled tearsheet").toString().slice(0, 120);
 
+      // Duplicate-title guard: refuse if the user already owns a tearsheet
+      // with the same normalized title (case-insensitive, whitespace-collapsed).
+      const normalizedTitle = title.trim().replace(/\s+/g, " ").toLowerCase();
+      if (normalizedTitle) {
+        const { data: existingBoards } = await supabase
+          .from("client_boards")
+          .select("id, title, status")
+          .eq("user_id", userId);
+        const duplicate = (existingBoards || []).find((b: any) => {
+          const t = String(b.title || "").trim().replace(/\s+/g, " ").toLowerCase();
+          return t === normalizedTitle;
+        });
+        if (duplicate) {
+          return json(409, {
+            error: "A tearsheet with this title already exists",
+            duplicate: true,
+            board_id: duplicate.id,
+            board_title: duplicate.title,
+            url: `/trade/boards/${duplicate.id}`,
+            hint: "Use add_to_tearsheet with this board_id, or ask the user for a different title.",
+          });
+        }
+      }
+
       const { resolved, skipped } = await resolvePickIds(supabase, pickIds);
       if (resolved.length === 0) {
         return json(422, { error: "None of the picks could be resolved to a product", skipped });
