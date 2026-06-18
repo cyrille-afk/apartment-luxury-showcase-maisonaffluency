@@ -38,6 +38,7 @@ const categories: ToolCategory[] = [
     label: "Procurement",
     tools: [
       { title: "Order Timeline", description: "Track orders from deposit to delivery", url: "/trade/order-timeline", icon: CalendarClock },
+      { title: "Delivery Tracker", description: "Order stage vs deadline, by project", url: "/trade/delivery-tracker", icon: CalendarClock },
       { title: "Sample Requests", description: "Request and track material samples", url: "/trade/samples", icon: Package },
       { title: "Shipping Tracker", description: "Real-time delivery progress", url: "/trade/shipping-tracker", icon: Truck },
       { title: "Lead Time Calendar", description: "Production and shipping timelines", url: "/trade/lead-time-calendar", icon: CalendarDays },
