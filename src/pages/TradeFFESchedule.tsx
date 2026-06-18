@@ -202,7 +202,7 @@ export default function TradeFFESchedule() {
   };
 
   const handleExport = async () => {
-    if (!items.length) return;
+    if (!filteredItems.length) return;
     setExporting(true);
     try {
       // Group by quote so PO auto-numbering is stable per quote
