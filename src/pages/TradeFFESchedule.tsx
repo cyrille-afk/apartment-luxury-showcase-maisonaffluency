@@ -236,11 +236,11 @@ export default function TradeFFESchedule() {
       await downloadProcurementWorkbook({
         meta: {
           project_name: "FF&E Schedule",
-          client_name: items.find((i) => i.client_name)?.client_name || "—",
+          client_name: filteredItems.find((i) => i.client_name)?.client_name || "—",
           designer_studio: "—",
           address: "—",
           revision: "Rev 1",
-          quote_refs: [...new Set(items.map((i) => i.quote_ref))],
+          quote_refs: [...new Set(filteredItems.map((i) => i.quote_ref))],
         },
         lines,
         fileName: `ffe-schedule-${today}.xlsx`,
