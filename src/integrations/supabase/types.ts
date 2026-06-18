@@ -5424,6 +5424,7 @@ export type Database = {
       }
       trade_products: {
         Row: {
+          base_axis_label: string | null
           brand_name: string
           category: string
           created_at: string
@@ -5459,15 +5460,21 @@ export type Database = {
           price_unit: string
           product_name: string
           rrp_price_cents: number | null
+          size_variants: Json | null
           sku: string | null
           source_pick_id: string | null
           spec_sheet_url: string | null
           stock_status_override: string | null
           subcategory: string | null
+          top_axis_label: string | null
           trade_price_cents: number | null
           updated_at: string
+          variant_image_map: Json | null
+          variant_placeholder: string | null
+          wood_label_override: string | null
         }
         Insert: {
+          base_axis_label?: string | null
           brand_name: string
           category?: string
           created_at?: string
@@ -5503,15 +5510,21 @@ export type Database = {
           price_unit?: string
           product_name: string
           rrp_price_cents?: number | null
+          size_variants?: Json | null
           sku?: string | null
           source_pick_id?: string | null
           spec_sheet_url?: string | null
           stock_status_override?: string | null
           subcategory?: string | null
+          top_axis_label?: string | null
           trade_price_cents?: number | null
           updated_at?: string
+          variant_image_map?: Json | null
+          variant_placeholder?: string | null
+          wood_label_override?: string | null
         }
         Update: {
+          base_axis_label?: string | null
           brand_name?: string
           category?: string
           created_at?: string
@@ -5547,13 +5560,18 @@ export type Database = {
           price_unit?: string
           product_name?: string
           rrp_price_cents?: number | null
+          size_variants?: Json | null
           sku?: string | null
           source_pick_id?: string | null
           spec_sheet_url?: string | null
           stock_status_override?: string | null
           subcategory?: string | null
+          top_axis_label?: string | null
           trade_price_cents?: number | null
           updated_at?: string
+          variant_image_map?: Json | null
+          variant_placeholder?: string | null
+          wood_label_override?: string | null
         }
         Relationships: [
           {

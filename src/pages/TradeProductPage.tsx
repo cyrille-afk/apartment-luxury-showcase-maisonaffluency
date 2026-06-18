@@ -327,17 +327,28 @@ function useTradeProductBySlug(
         designer.name,
       ].filter(Boolean))) as string[];
 
-      // Pull trade pricing + extra images from trade_products
-      let tradeQuery = supabase
+      // Pull trade pricing + extra images from trade_products.
+      // PRIMARY join: source_pick_id (stable, set by the sync trigger).
+      // FALLBACK: legacy (brand,name) match for rows still un-linked.
+      const { data: byPick } = await supabase
         .from("trade_products")
         .select("id, image_url, gallery_images, trade_price_cents, rrp_price_cents, currency, price_unit, price_prefix, spec_sheet_url, dimensions, materials, lead_time, origin, description, glb_url")
-        .eq("product_name", (product as any).title)
+        .eq("source_pick_id", (product as any).id)
         .eq("is_active", true)
         .limit(1);
-      if (brandCandidates.length === 1) tradeQuery = tradeQuery.eq("brand_name", brandCandidates[0]);
-      else if (brandCandidates.length > 1) tradeQuery = tradeQuery.in("brand_name", brandCandidates);
-
-      const { data: tradeMatches } = await tradeQuery;
+      let tradeMatches = byPick;
+      if (!tradeMatches || tradeMatches.length === 0) {
+        let tradeQuery = supabase
+          .from("trade_products")
+          .select("id, image_url, gallery_images, trade_price_cents, rrp_price_cents, currency, price_unit, price_prefix, spec_sheet_url, dimensions, materials, lead_time, origin, description, glb_url")
+          .eq("product_name", (product as any).title)
+          .eq("is_active", true)
+          .limit(1);
+        if (brandCandidates.length === 1) tradeQuery = tradeQuery.eq("brand_name", brandCandidates[0]);
+        else if (brandCandidates.length > 1) tradeQuery = tradeQuery.in("brand_name", brandCandidates);
+        const { data: byBrand } = await tradeQuery;
+        tradeMatches = byBrand;
+      }
       const tradeProduct = tradeMatches?.[0] as any | undefined;
 
       const rawSizeVariants = applyRugPerSqmPricing(
