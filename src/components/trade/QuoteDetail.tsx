@@ -2640,8 +2640,27 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                         <div className="md:col-span-4 mt-1 flex items-center gap-1.5 text-amber-700/90 print:hidden">
                           <AlertTriangle className="w-3 h-3 shrink-0" />
                           <span className="font-body text-[10px]">
-                            Shipping estimate unavailable — product weight and dimensions not on file. Enter CBM and weight above, or contact us for a manual quote.
+                            Shipping estimate unavailable — product weight and dimensions not on file.
                           </span>
+                          <a
+                            href={`mailto:concierge@myaffluency.com?subject=${encodeURIComponent(`Manual shipping quote: ${product?.product_name || "Item"} (${quoteNumber})`)}&body=${encodeURIComponent(`Hi,
+
+I need a manual shipping quote for the following line because weight and dimensions are not on file.
+
+Quote: ${quoteNumber}
+Product: ${product?.product_name || "—"}
+Brand: ${product?.brand_name || "—"}
+SKU: ${product?.sku || "—"}
+Qty: ${item.quantity}
+Origin: ${product?.origin || item.ship_origin_country || "—"}
+
+Please advise.
+
+Thank you.`)}`}
+                            className="font-body text-[10px] underline underline-offset-2 hover:text-amber-800"
+                          >
+                            Request manual quote
+                          </a>
                         </div>
                       )}
                     </div>
