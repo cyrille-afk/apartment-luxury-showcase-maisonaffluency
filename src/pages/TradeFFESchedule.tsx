@@ -18,6 +18,7 @@ import {
 import { generateSpecPackageZip, downloadBlob, type SpecPackageProduct } from "@/lib/specPackage";
 
 interface FFEItem {
+  item_id: string;
   product_name: string;
   brand_name: string;
   category: string;
@@ -31,6 +32,7 @@ interface FFEItem {
   lead_time: string | null;
   quote_id: string;
   quote_ref: string;          // QU-XXXXXX
+  quote_created_at: string | null;
   client_name: string | null;
   project_id: string | null;
   project_name: string | null;
@@ -41,9 +43,50 @@ interface FFEItem {
   lead_time_weeks_override: number | null;
   deposit_pct_override: number | null;
   spec_sheet_url: string | null;
+  required_by_date: string | null;
+  kanban_status: string | null;
+  deposit_paid_at: string | null;
+  shipping_weeks: number | null;
+  estimated_delivery_at: string | null;
+  actual_delivery_at: string | null;
 }
 
 const QUOTE_REF = (id: string) => `QU-${id.slice(0, 6).toUpperCase()}`;
+
+const STAGE_LABEL: Record<string, string> = {
+  not_started: "Not started",
+  deposit_pending: "Deposit pending",
+  in_production: "In production",
+  ready_to_ship: "Ready to ship",
+  in_transit: "In transit",
+  customs: "Customs",
+  delivered: "Delivered",
+};
+
+function expectedReadyDate(it: FFEItem, leadWeeks: number | null): Date | null {
+  if (it.actual_delivery_at) return new Date(it.actual_delivery_at);
+  if (it.estimated_delivery_at) return new Date(it.estimated_delivery_at);
+  const anchor = it.deposit_paid_at || it.quote_created_at;
+  if (!anchor || leadWeeks == null) return null;
+  const d = new Date(anchor);
+  const totalWeeks = leadWeeks + (it.shipping_weeks || 0);
+  d.setDate(d.getDate() + totalWeeks * 7);
+  return d;
+}
+
+function fmtDate(d: Date | null): string {
+  if (!d || isNaN(d.getTime())) return "—";
+  return d.toLocaleDateString(undefined, { day: "2-digit", month: "short", year: "2-digit" });
+}
+
+function slackBadge(slackDays: number | null) {
+  if (slackDays == null) return <span className="text-muted-foreground">—</span>;
+  if (slackDays < 0)
+    return <span className="inline-flex items-center rounded-full bg-red-100 text-red-800 px-2 py-0.5 text-[10px] font-medium tabular-nums">{slackDays}d late</span>;
+  if (slackDays <= 14)
+    return <span className="inline-flex items-center rounded-full bg-amber-100 text-amber-800 px-2 py-0.5 text-[10px] font-medium tabular-nums">{slackDays}d slack</span>;
+  return <span className="inline-flex items-center rounded-full bg-emerald-100 text-emerald-800 px-2 py-0.5 text-[10px] font-medium tabular-nums">{slackDays}d slack</span>;
+}
 
 // Best-effort numeric weeks parsed from a free-text lead time. Returns the upper bound
 // of a range (e.g. "12-14 weeks" → 14, "18 to 20 weeks" → 20). Supports -, –, —, "to".
