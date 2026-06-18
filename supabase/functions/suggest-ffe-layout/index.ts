@@ -4,7 +4,9 @@ import { logAiUsage } from "../_shared/aiUsage.ts";
 import { modelFor, tokenBudget } from "../_shared/aiModels.ts";
 
 const FFE_MODEL = modelFor("strong");
-const FFE_MAX_TOKENS = tokenBudget("reasoning");
+// gemini-2.5-pro burns reasoning tokens before emitting the tool call.
+// With a 400-item catalog the 2048 default ran out → no tool_call → "AI returned no layout."
+const FFE_MAX_TOKENS = 8192;
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -37,7 +39,8 @@ async function loadCatalog() {
   const { data: picks } = await sb
     .from("designer_curator_picks")
     .select("id, title, subtitle, category, subcategory, materials, dimensions, image_url, designer_id")
-    .limit(400);
+    .eq("is_hidden", false)
+    .limit(180);
 
   const { data: designers } = await sb
     .from("designers")
@@ -260,13 +263,34 @@ Look at the floor plan image and propose an FF&E layout per room.`;
 
     const aiJson = await aiResp.json();
     logAiUsage({ feature: "suggest-ffe-layout", model: FFE_MODEL, usage: aiJson?.usage }).catch(() => {});
-    const toolCall = aiJson?.choices?.[0]?.message?.tool_calls?.[0];
-    if (!toolCall) {
-      return new Response(JSON.stringify({ error: "AI returned no layout." }), {
+    const choice = aiJson?.choices?.[0];
+    const toolCall = choice?.message?.tool_calls?.[0];
+    let parsed: any = null;
+    if (toolCall) {
+      try { parsed = JSON.parse(toolCall.function.arguments || "{}"); } catch { /* fallthrough */ }
+    }
+    // Fallback: some models occasionally emit JSON in message.content when tool_choice fails.
+    if (!parsed) {
+      const raw = (choice?.message?.content || "").toString();
+      const match = raw.match(/\{[\s\S]*"rooms"[\s\S]*\}/);
+      if (match) {
+        try { parsed = JSON.parse(match[0]); } catch { /* ignore */ }
+      }
+    }
+    if (!parsed?.rooms) {
+      const finish = choice?.finish_reason || "unknown";
+      console.error("suggest-ffe-layout: no tool_call", {
+        finish,
+        usage: aiJson?.usage,
+        snippet: (choice?.message?.content || "").toString().slice(0, 300),
+      });
+      const msg = finish === "length"
+        ? "The AI ran out of tokens before completing the layout. Try again with a simpler brief."
+        : "AI returned no layout. Please try again — if it persists, simplify the brief.";
+      return new Response(JSON.stringify({ error: msg, finish_reason: finish }), {
         status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-    const parsed = JSON.parse(toolCall.function.arguments || "{}");
 
     // Hydrate items with catalog details for the frontend
     const catalogById = new Map(catalog.map((c) => [c.id, c]));
