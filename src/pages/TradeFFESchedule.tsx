@@ -192,6 +192,7 @@ export default function TradeFFESchedule() {
           item_id: item.id,
           product_name: p?.product_name || "Unknown",
           brand_name: p?.brand_name || "",
+          image_url: (p as any)?.image_url || null,
           category: p?.category || "",
           dimensions: p?.dimensions || null,
           materials: p?.materials || null,
