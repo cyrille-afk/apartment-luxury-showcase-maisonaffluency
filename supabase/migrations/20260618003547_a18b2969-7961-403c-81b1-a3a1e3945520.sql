@@ -1,0 +1,1 @@
+ALTER TABLE public.trade_quote_items ADD COLUMN IF NOT EXISTS required_by_date date;
