@@ -134,7 +134,7 @@ export default function TradeFFESchedule() {
     queryFn: async () => {
       let qq = supabase
         .from("trade_quotes")
-        .select("id, client_name, status, project_id, studio_id")
+        .select("id, client_name, status, project_id, studio_id, created_at")
         .eq("user_id", user!.id)
         .in("status", ["confirmed", "submitted", "responded", "priced", "deposit_paid", "paid"]);
       if (projectFilter) qq = qq.eq("project_id", projectFilter);
@@ -146,7 +146,7 @@ export default function TradeFFESchedule() {
       const { data: qItems } = await supabase
         .from("trade_quote_items")
         .select(
-          "product_id, quantity, unit_price_cents, quote_id, po_number, cost_code, lead_time_weeks_override, deposit_pct_override"
+          "id, product_id, quantity, unit_price_cents, quote_id, po_number, cost_code, lead_time_weeks_override, deposit_pct_override, required_by_date"
         )
         .in("quote_id", quoteIds);
 
@@ -162,16 +162,21 @@ export default function TradeFFESchedule() {
 
       const projectIds = [...new Set(quotes.map((q: any) => q.project_id).filter(Boolean))] as string[];
       const studioIds = [...new Set(quotes.map((q: any) => q.studio_id).filter(Boolean))] as string[];
-      const [{ data: projects }, { data: studios }] = await Promise.all([
+      const [{ data: projects }, { data: studios }, { data: timelines }] = await Promise.all([
         projectIds.length
           ? supabase.from("projects" as any).select("id, name").in("id", projectIds)
           : Promise.resolve({ data: [] as any[] }),
         studioIds.length
           ? supabase.from("studios" as any).select("id, name").in("id", studioIds)
           : Promise.resolve({ data: [] as any[] }),
+        supabase
+          .from("order_timeline" as any)
+          .select("quote_id, kanban_status, deposit_paid_at, shipping_weeks, estimated_delivery_at, actual_delivery_at")
+          .in("quote_id", quoteIds),
       ]);
       const projectMap = Object.fromEntries(((projects as any[]) || []).map((p: any) => [p.id, p.name]));
       const studioMap = Object.fromEntries(((studios as any[]) || []).map((s: any) => [s.id, s.name]));
+      const timelineMap = Object.fromEntries(((timelines as any[]) || []).map((t: any) => [t.quote_id, t]));
 
       const productMap = Object.fromEntries((products || []).map((p) => [p.id, p]));
       const quoteMap = Object.fromEntries(quotes.map((q) => [q.id, q]));
@@ -179,7 +184,9 @@ export default function TradeFFESchedule() {
       return qItems.map((item: any) => {
         const p = productMap[item.product_id];
         const q: any = quoteMap[item.quote_id];
+        const tl: any = timelineMap[item.quote_id] || {};
         return {
+          item_id: item.id,
           product_name: p?.product_name || "Unknown",
           brand_name: p?.brand_name || "",
           category: p?.category || "",
@@ -193,6 +200,7 @@ export default function TradeFFESchedule() {
           lead_time: p?.lead_time || null,
           quote_id: item.quote_id,
           quote_ref: QUOTE_REF(item.quote_id),
+          quote_created_at: q?.created_at || null,
           client_name: q?.client_name || null,
           project_id: q?.project_id || null,
           project_name: q?.project_id ? (projectMap[q.project_id] || null) : null,
@@ -203,11 +211,31 @@ export default function TradeFFESchedule() {
           lead_time_weeks_override: item.lead_time_weeks_override ?? null,
           deposit_pct_override: item.deposit_pct_override ?? null,
           spec_sheet_url: p?.spec_sheet_url ?? null,
+          required_by_date: item.required_by_date ?? null,
+          kanban_status: tl.kanban_status ?? null,
+          deposit_paid_at: tl.deposit_paid_at ?? null,
+          shipping_weeks: tl.shipping_weeks ?? null,
+          estimated_delivery_at: tl.estimated_delivery_at ?? null,
+          actual_delivery_at: tl.actual_delivery_at ?? null,
         } as FFEItem;
       });
     },
     enabled: !!user,
   });
+
+  const qc = useQueryClient();
+  const saveRequiredBy = async (itemId: string, date: string) => {
+    const { error } = await supabase
+      .from("trade_quote_items")
+      .update({ required_by_date: date || null })
+      .eq("id", itemId);
+    if (error) {
+      toast({ title: "Could not save", description: error.message, variant: "destructive" });
+      return;
+    }
+    qc.invalidateQueries({ queryKey: ["ffe-schedule"] });
+    qc.invalidateQueries({ queryKey: ["delivery-tracker"] });
+  };
 
   const filteredItems = useMemo(() => {
     return items.filter((item) => {
