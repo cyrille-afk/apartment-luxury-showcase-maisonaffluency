@@ -85,7 +85,7 @@ export default function TradeMoodBoards() {
       if (!idArr.length) return [];
 
       const [tradeRes, curatorRes] = await Promise.all([
-        supabase.from("trade_products").select("id, product_name, brand_name, image_url, category").in("id", idArr).not("image_url", "is", null),
+        supabase.from("trade_products").select("id, product_name, brand_name, image_url, category, source_pick_id").in("id", idArr).not("image_url", "is", null),
         supabase.from("designer_curator_picks").select("id, title, image_url, category, designer_id").in("id", idArr).not("image_url", "is", null),
       ]);
 
@@ -96,6 +96,13 @@ export default function TradeMoodBoards() {
         designerMap = new Map((designers || []).map((d: any) => [d.id, d.name]));
       }
 
+      // Dedupe: when a trade_products mirror points at a curator pick that is
+      // ALSO in this id set (quote item references both twins), drop the pick
+      // and keep the trade row — that's what FF&E/quotes/boards actually use.
+      const mirroredPickIds = new Set<string>(
+        (tradeRes.data || []).map((p: any) => p.source_pick_id).filter(Boolean),
+      );
+
       const byId = new Map<string, any>();
       (tradeRes.data || []).forEach((p: any) => byId.set(p.id, {
         id: p.id,
@@ -105,14 +112,17 @@ export default function TradeMoodBoards() {
         category: p.category,
         source: "trade",
       }));
-      (curatorRes.data || []).forEach((p: any) => byId.set(p.id, {
-        id: p.id,
-        product_name: p.title,
-        brand_name: designerMap.get(p.designer_id) || "Unknown",
-        image_url: p.image_url,
-        category: p.category || "",
-        source: "curator",
-      }));
+      (curatorRes.data || []).forEach((p: any) => {
+        if (mirroredPickIds.has(p.id)) return; // already represented by its trade twin
+        byId.set(p.id, {
+          id: p.id,
+          product_name: p.title,
+          brand_name: designerMap.get(p.designer_id) || "Unknown",
+          image_url: p.image_url,
+          category: p.category || "",
+          source: "curator",
+        });
+      });
 
       return idArr.map((id) => byId.get(id)).filter(Boolean);
     },
@@ -212,7 +222,7 @@ export default function TradeMoodBoards() {
       const [{ data: trade }, { data: curator }] = await Promise.all([
         supabase
           .from("trade_products")
-          .select("id, product_name, brand_name, image_url, category")
+          .select("id, product_name, brand_name, image_url, category, source_pick_id")
           .eq("is_active", true)
           .not("image_url", "is", null)
           .order("brand_name"),
@@ -234,6 +244,11 @@ export default function TradeMoodBoards() {
         designerMap = new Map((designers || []).map((d) => [d.id, d.name]));
       }
 
+      // Picks that already have a trade mirror — drop them, the trade row wins.
+      const mirroredPickIds = new Set<string>(
+        (trade || []).map((p: any) => p.source_pick_id).filter(Boolean) as string[],
+      );
+
       const tradeItems = (trade || []).map((p) => ({
         id: p.id,
         product_name: p.product_name,
@@ -243,19 +258,22 @@ export default function TradeMoodBoards() {
         source: "trade" as const,
       }));
 
-      const curatorItems = (curator || []).map((p) => ({
-        id: p.id,
-        product_name: p.title,
-        brand_name: designerMap.get(p.designer_id) || "Unknown",
-        image_url: p.image_url,
-        category: p.category || "",
-        source: "curator" as const,
-      }));
+      const curatorItems = (curator || [])
+        .filter((p: any) => !mirroredPickIds.has(p.id))
+        .map((p) => ({
+          id: p.id,
+          product_name: p.title,
+          brand_name: designerMap.get(p.designer_id) || "Unknown",
+          image_url: p.image_url,
+          category: p.category || "",
+          source: "curator" as const,
+        }));
 
-      // Deduplicate by name+brand, preferring curator (richer data)
+      // Legacy fallback: any remaining title|brand collision (pre-source_pick_id
+      // rows) — prefer the trade entry since that's what tools join through.
       const seen = new Set<string>();
       const merged: Array<{ id: string; product_name: string; brand_name: string; image_url: string; category: string; source: "trade" | "curator" }> = [];
-      for (const item of [...curatorItems, ...tradeItems]) {
+      for (const item of [...tradeItems, ...curatorItems]) {
         const key = `${item.product_name?.toLowerCase()}|${item.brand_name?.toLowerCase()}`;
         if (seen.has(key)) continue;
         seen.add(key);
