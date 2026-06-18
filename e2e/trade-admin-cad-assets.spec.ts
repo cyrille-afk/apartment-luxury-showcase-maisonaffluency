@@ -24,7 +24,23 @@
 
 import { test, expect } from "@playwright/test";
 import { createClient } from "@supabase/supabase-js";
-import "dotenv/config";
+import { readFileSync } from "node:fs";
+
+// Lightweight .env loader — avoids adding a dotenv dep just for one test.
+function loadDotEnv(path = ".env"): Record<string, string> {
+  try {
+    const out: Record<string, string> = {};
+    for (const line of readFileSync(path, "utf8").split("\n")) {
+      const m = line.match(/^\s*([A-Z0-9_]+)\s*=\s*"?([^"\n#]*)"?\s*$/i);
+      if (m) out[m[1]] = m[2];
+    }
+    return out;
+  } catch {
+    return {};
+  }
+}
+const envFile = loadDotEnv();
+const env = (k: string) => process.env[k] ?? envFile[k];
 
 const ADMIN_EMAIL = process.env.E2E_ADMIN_EMAIL;
 const ADMIN_PASSWORD = process.env.E2E_ADMIN_PASSWORD;
