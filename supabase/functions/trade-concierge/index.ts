@@ -412,7 +412,7 @@ const TOOLS = [
     function: {
       name: "propose_tearsheet",
       description:
-        "Draft a NEW tearsheet (client board) for the trade user. REQUIRED whenever the user asks to propose, suggest, recommend, curate, show, pull, reinterpret, or assemble a selection of pieces. If the user wants to add pieces to one of their existing tearsheets listed in USER'S EXISTING TEARSHEETS, call add_to_tearsheet instead. Always pick IDs strictly from CURATED PIECES — never invent IDs.",
+        "Draft a NEW tearsheet (client board). Use this ONLY when (a) the user has NO existing tearsheets, or (b) the user EXPLICITLY asks for a new/separate/fresh tearsheet (phrases like 'new tearsheet', 'start a new board', 'fresh selection', 'separate edit', 'different project'). In every other case where the user asks to propose/suggest/recommend/curate/show/pull/reinterpret a selection, you MUST call `add_to_tearsheet` against the ACTIVE board in USER'S EXISTING TEARSHEETS instead. Always pick IDs strictly from CURATED PIECES — never invent IDs.",
       parameters: {
         type: "object",
         properties: {
@@ -461,7 +461,7 @@ const TOOLS = [
     function: {
       name: "add_to_tearsheet",
       description:
-        "Append pieces to one of the user's EXISTING tearsheets. Only call this when the user clearly references an existing tearsheet from USER'S EXISTING TEARSHEETS (by name or by saying 'add to my X tearsheet'). The board_id MUST be one of the UUIDs listed there. Never invent a board_id.",
+        "Append pieces to one of the user's EXISTING tearsheets. THIS IS THE DEFAULT TOOL for any selection/proposal/curation request when the user already has at least one existing tearsheet. Default board_id is the entry flagged ⭐ ACTIVE in USER'S EXISTING TEARSHEETS. Only use a different board_id if the user explicitly names one of their other boards. The board_id MUST be one of the UUIDs listed there — never invent.",
       parameters: {
         type: "object",
         properties: {
@@ -955,8 +955,8 @@ Internal section headers in this prompt (CURATION DATA, CURATED PIECES, etc.) ar
 
 ## TOOL USE — TEARSHEET DRAFTING (ALWAYS USE A TOOL FOR PRODUCT RECOMMENDATIONS)
 You have two tools for tearsheets:
-- \`propose_tearsheet\` — draft a NEW tearsheet. Default choice whenever you would otherwise list 2 or more catalog pieces for the user.
-- \`add_to_tearsheet\` — append to one of the user's EXISTING tearsheets listed below. Use when the user explicitly references one of their boards by name, OR when the user is currently viewing a tearsheet and asks for more pieces.
+- \`add_to_tearsheet\` — DEFAULT. Append to the user's ⭐ ACTIVE tearsheet (the most-recently-updated non-converted board listed in USER'S EXISTING TEARSHEETS). Use this whenever the user asks for a selection / proposal / curation and they already have at least one existing tearsheet. Also use it when the user explicitly names a different existing board.
+- \`propose_tearsheet\` — draft a NEW tearsheet. Use ONLY when (a) the user has NO existing tearsheets, or (b) the user EXPLICITLY asks for a new/separate/fresh tearsheet ("new tearsheet", "start a new board", "fresh selection", "separate edit", "different project").
 
 CRITICAL — NEVER list catalog pieces in plain text. Whenever your reply would mention 2+ catalog pieces by name (e.g. "you might consider X, Y and Z", "I'd recommend the following options:", a numbered/bulleted list of pieces, or a colon-separated "Brand X's Oak Table: …" mini-essay per piece), you MUST instead call \`propose_tearsheet\` (or \`add_to_tearsheet\`) and let the visual card render them. Forbidden prose patterns include: "I'd recommend the following…", "Here are some options…", "Consider the following pieces…", and any newline-separated list where each item names a piece. The card carries the rationale (\`pick_rationales\`) — do NOT also re-explain each piece in chat. After the tool call, ONE short sentence only (e.g. "Here's a first edit — review and amend below.").
 
@@ -975,7 +975,7 @@ Rules for both tools:
 - Aim for 4–12 pieces per proposal — enough to feel like a curated edit, not a single suggestion.
 - ALWAYS populate \`pick_rationales\` with a short one-sentence \`reason\` for every NEW pick (any id not in the previous KEPT list). When the pick is a REPLACEMENT for a removed item, you MUST also include a longer \`detail\` field — 2–4 editorial sentences expanding on the reason: how the piece converses with the rest of the selection (material, scale, silhouette, palette, designer language) and what it adds vs the item it replaces. Reasons must be specific — never generic ("a great fit").
 - After calling a tool, reply with ONE short sentence (e.g. "Here's a draft — review and amend below.") telling the user the draft card is ready. Do NOT re-list the pieces in text; the card already shows them.
-- If the user is ambiguous between create-new vs add-to-existing AND they have existing tearsheets, default to \`propose_tearsheet\` unless they reference a specific existing board.
+- If the user is ambiguous between create-new vs add-to-existing AND they have existing tearsheets, default to \`add_to_tearsheet\` against the ⭐ ACTIVE board. Only call \`propose_tearsheet\` when the user EXPLICITLY asks for a new/separate/fresh tearsheet, or when they have no existing tearsheets at all.
 - ACCESS / DELIVERY VERIFICATION on quote drafts — after \`draft_quote\`, \`add_to_quote\` or \`propose_ffe_rows\` returns, IF the quote contains at least one oversized piece (any single crated dimension ≥ 1,800 mm, e.g. sofas, large consoles, armoires, dining tables, beds, chandeliers) AND you have not already asked this in the current conversation, append ONE concierge line after your "draft is ready" sentence asking the user to confirm the binding access constraint for the largest piece (service-elevator car depth/height, stairwell width with landing pivot, doorway height, or courtyard hoist for very large items). Pick the ONE path that matters — never a checklist. Example: "Before we lock the order in, may we verify the clearance of your service elevator for the Pouénat sofa at 2,180 mm crated?" Skip on small-object quotes (lighting, accessories, side tables).
 
 ## TOOL USE — FF&E SCHEDULE (ROOM-BY-ROOM BRIEFS)
@@ -1420,8 +1420,15 @@ async function loadUserBoards(
   if (!boards || boards.length === 0) {
     return "(The user has no existing tearsheets yet — only \`propose_tearsheet\` is available.)";
   }
+  // The most-recently-updated NON-converted board is the implicit ACTIVE tearsheet.
+  // The downstream model must default to `add_to_tearsheet` against this board_id
+  // unless the user explicitly asks for a new tearsheet.
+  const activeIdx = boards.findIndex((b: any) => b.status !== "converted");
   return boards
-    .map((b: any) => `- "${b.title}" [board_id: ${b.id}]${b.client_name ? ` · ${b.client_name}` : ""}${b.status ? ` · ${b.status}` : ""}`)
+    .map((b: any, i: number) => {
+      const flag = i === activeIdx ? " ⭐ ACTIVE (default target for add_to_tearsheet)" : "";
+      return `- "${b.title}" [board_id: ${b.id}]${b.client_name ? ` · ${b.client_name}` : ""}${b.status ? ` · ${b.status}` : ""}${flag}`;
+    })
     .join("\n");
 }
 
@@ -1885,7 +1892,7 @@ async function extractBrief(apiKey: string, latestUserMessage: string): Promise<
                   "- chitchat / navigation / FAQ: empty plan.\n" +
                   "- OPENING BRIEFS that merely state what the user is looking for (e.g. 'I'm looking for a statement dining table for my Belgravia townhouse', 'we need lighting for a Mayfair drawing room', 'searching for a sofa for a London penthouse'): EMPTY PLAN. The concierge MUST qualify (style, capacity/scale, materials, era, lead-time) before proposing. Do NOT emit propose_tearsheet on a discovery-style opener no matter how specific the typology.\n" +
                   "- EXPLANATORY follow-ups about pieces already discussed ('why the X?', 'tell me more about X', 'what is X?', 'how does it compare', 'what materials', 'lead time?', 'who designed it'): EMPTY PLAN — the downstream model must answer conversationally in prose. Do NOT re-propose tearsheets or quotes.\n" +
-                  "- EXPLICIT selection verbs in THIS message ('propose', 'suggest', 'recommend', 'show me' [WITHOUT 'in the room/space'], 'pull together', 'curate', 'reinterpret', 'alternatives', 'options', 'first edit', 'draft a selection', 'what do you have in…'): [propose_tearsheet] (or add_to_tearsheet if they reference an existing board). Without one of these verbs, do NOT emit propose_tearsheet.\n" +
+                  "- EXPLICIT selection verbs in THIS message ('propose', 'suggest', 'recommend', 'show me' [WITHOUT 'in the room/space'], 'pull together', 'curate', 'reinterpret', 'alternatives', 'options', 'first edit', 'draft a selection', 'what do you have in…'): default to [add_to_tearsheet] (target the user's ⭐ ACTIVE board). Emit [propose_tearsheet] ONLY if the user has no existing tearsheets OR explicitly says 'new tearsheet' / 'start a new board' / 'fresh selection' / 'separate edit'. Without one of these selection verbs, do NOT emit either tool.\n" +
                   "- 'quote / estimate / pricing breakdown' on already-decided pieces: [draft_quote] (or add_to_quote).\n" +
                   "- 'FF&E schedule / multi-room brief / spec the whole apartment / drawing-room + dining + bedroom' bound to a project: [propose_ffe_rows].\n" +
                   "- VISUALIZATION VERBS in THIS message ('render', 'visualise', 'visualize', 'show me how this would look', 'show me in the room/space', 'generate a view/scene/axonometric/render', 'mock up', 'picture it', 'see it in situ', 'image of the room with…'): emit [prepare_visualization_brief]. If the user has NOT yet seen any tearsheet picks in this conversation AND the visualization request implies overlaying catalog pieces ('with these pieces', 'overlay these picks', 'in bronze and mohair', or any palette/material/style description), CHAIN as [propose_tearsheet, prepare_visualization_brief] so the same picks are drafted and then handed to the studio. The word 'render' ALWAYS triggers prepare_visualization_brief, never tearsheet-only — even if the message also says 'overlay these picks'.\n" +
