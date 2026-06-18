@@ -146,8 +146,9 @@ const TradeSamples = () => {
       imageUrl = imagePreview;
     }
 
-    const { error } = await supabase.from("trade_sample_requests").insert({
+    const { data: inserted, error } = await supabase.from("trade_sample_requests").insert({
       user_id: user.id,
+      product_id: productId,
       product_name: productName.trim(),
       brand_name: brandName.trim(),
       client_name: clientName.trim(),
@@ -159,12 +160,18 @@ const TradeSamples = () => {
       notes: notes.trim() || null,
       image_url: imageUrl,
       tearsheet_url: tearsheetUrl,
-    } as any);
+    } as any).select("id").single();
 
     setSubmitting(false);
     if (error) {
       toast.error("Failed to submit request");
       return;
+    }
+    // Fire-and-forget admin notification
+    if (inserted?.id) {
+      supabase.functions.invoke("notify-sample-request", {
+        body: { requestId: inserted.id },
+      }).catch((e) => console.error("notify-sample-request failed", e));
     }
     toast.success("Sample request submitted");
     resetForm();
