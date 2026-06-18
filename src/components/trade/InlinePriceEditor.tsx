@@ -3,7 +3,7 @@ import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Check, X, Pencil, Loader2 } from "lucide-react";
-import { type DisplayCurrency, formatPriceConverted } from "@/components/trade/CurrencyToggle";
+import { type DisplayCurrency, formatPriceConverted, convertCents } from "@/components/trade/CurrencyToggle";
 
 interface InlinePriceEditorProps {
   productName: string;
