@@ -3,9 +3,9 @@ import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Download, FileSpreadsheet, Loader2, Package, FolderKanban, X } from "lucide-react";
+import { Download, FileSpreadsheet, Loader2, Package, FolderKanban, X, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
 import { useProjectFilter } from "@/hooks/useProjectFilter";
@@ -66,6 +66,10 @@ export default function TradeFFESchedule() {
   const { projectFilter, clearProjectFilter } = useProjectFilter();
   const [projectName, setProjectName] = useState<string | null>(null);
 
+  const [filterProjectId, setFilterProjectId] = useState<string>("");
+  const [filterStudioId, setFilterStudioId] = useState<string>("");
+  const [filterClient, setFilterClient] = useState<string>("");
+
   useEffect(() => {
     if (!projectFilter) { setProjectName(null); return; }
     (async () => {
@@ -76,6 +80,10 @@ export default function TradeFFESchedule() {
         .maybeSingle();
       setProjectName((data as any)?.name || null);
     })();
+  }, [projectFilter]);
+
+  useEffect(() => {
+    if (projectFilter) setFilterProjectId(projectFilter);
   }, [projectFilter]);
 
   const { data: items = [], isLoading } = useQuery({
@@ -158,13 +166,48 @@ export default function TradeFFESchedule() {
     enabled: !!user,
   });
 
+  const filteredItems = useMemo(() => {
+    return items.filter((item) => {
+      if (filterProjectId && item.project_id !== filterProjectId) return false;
+      if (filterStudioId && item.studio_id !== filterStudioId) return false;
+      if (filterClient && item.client_name !== filterClient) return false;
+      return true;
+    });
+  }, [items, filterProjectId, filterStudioId, filterClient]);
+
+  const projectOptions = useMemo(() => {
+    const map = new Map<string, string>();
+    items.forEach((i) => { if (i.project_id && i.project_name) map.set(i.project_id, i.project_name); });
+    return Array.from(map.entries()).sort((a, b) => a[1].localeCompare(b[1]));
+  }, [items]);
+
+  const studioOptions = useMemo(() => {
+    const map = new Map<string, string>();
+    items.forEach((i) => { if (i.studio_id && i.studio_name) map.set(i.studio_id, i.studio_name); });
+    return Array.from(map.entries()).sort((a, b) => a[1].localeCompare(b[1]));
+  }, [items]);
+
+  const clientOptions = useMemo(() => {
+    const set = new Set<string>();
+    items.forEach((i) => { if (i.client_name) set.add(i.client_name); });
+    return Array.from(set).sort((a, b) => a.localeCompare(b));
+  }, [items]);
+
+  const hasActiveFilters = filterProjectId || filterStudioId || filterClient;
+  const clearFilters = () => {
+    setFilterProjectId("");
+    setFilterStudioId("");
+    setFilterClient("");
+    if (projectFilter) clearProjectFilter();
+  };
+
   const handleExport = async () => {
-    if (!items.length) return;
+    if (!filteredItems.length) return;
     setExporting(true);
     try {
       // Group by quote so PO auto-numbering is stable per quote
       const seqByQuote: Record<string, number> = {};
-      const lines: ProcurementLine[] = items.map((item) => {
+      const lines: ProcurementLine[] = filteredItems.map((item) => {
         seqByQuote[item.quote_id] = (seqByQuote[item.quote_id] || 0) + 1;
         const seq = seqByQuote[item.quote_id];
         const lead =
@@ -193,11 +236,11 @@ export default function TradeFFESchedule() {
       await downloadProcurementWorkbook({
         meta: {
           project_name: "FF&E Schedule",
-          client_name: items.find((i) => i.client_name)?.client_name || "—",
+          client_name: filteredItems.find((i) => i.client_name)?.client_name || "—",
           designer_studio: "—",
           address: "—",
           revision: "Rev 1",
-          quote_refs: [...new Set(items.map((i) => i.quote_ref))],
+          quote_refs: [...new Set(filteredItems.map((i) => i.quote_ref))],
         },
         lines,
         fileName: `ffe-schedule-${today}.xlsx`,
@@ -216,13 +259,13 @@ export default function TradeFFESchedule() {
 
   const [packaging, setPackaging] = useState(false);
   const handleSpecPackage = async () => {
-    if (!items.length) return;
+    if (!filteredItems.length) return;
     setPackaging(true);
     try {
       // Deduplicate by product_name+brand for cleaner ZIP
       const seen = new Set<string>();
       const products: SpecPackageProduct[] = [];
-      for (const it of items) {
+      for (const it of filteredItems) {
         const key = `${it.brand_name}|${it.product_name}`;
         if (seen.has(key)) continue;
         seen.add(key);
@@ -237,7 +280,7 @@ export default function TradeFFESchedule() {
           pdf_url: it.spec_sheet_url,
         });
       }
-      const projectName = items.find((i) => i.client_name)?.client_name || "Project";
+      const projectName = filteredItems.find((i) => i.client_name)?.client_name || "Project";
       const { blob, filename, missingPdfs } = await generateSpecPackageZip(products, {
         projectName,
         studioName: "Maison Affluency",
@@ -256,7 +299,7 @@ export default function TradeFFESchedule() {
     }
   };
 
-  const totalValue = items.reduce((sum, i) => sum + (i.unit_price_cents || 0) * i.quantity, 0);
+  const totalValue = filteredItems.reduce((sum, i) => sum + (i.unit_price_cents || 0) * i.quantity, 0);
 
   return (
     <>
@@ -271,11 +314,11 @@ export default function TradeFFESchedule() {
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <Button onClick={handleSpecPackage} disabled={!items.length || packaging} variant="outline" size="sm">
+            <Button onClick={handleSpecPackage} disabled={!filteredItems.length || packaging} variant="outline" size="sm">
               {packaging ? <DotCircleLoader size="sm" className="mr-2" /> : <Package className="h-4 w-4 mr-2" />}
               Spec Package (.zip)
             </Button>
-            <Button onClick={handleExport} disabled={!items.length || exporting} variant="outline" size="sm">
+            <Button onClick={handleExport} disabled={!filteredItems.length || exporting} variant="outline" size="sm">
               {exporting ? <DotCircleLoader size="sm" className="mr-2" /> : <Download className="h-4 w-4 mr-2" />}
               Export Excel (.xlsx)
             </Button>
@@ -311,7 +354,58 @@ export default function TradeFFESchedule() {
           </div>
         ) : (
           <>
-            <div className="overflow-x-auto border border-border rounded-lg">
+            <div className="flex flex-wrap items-center gap-3 rounded-md border border-border bg-muted/20 px-3 py-2">
+              <div className="flex items-center gap-1.5 text-muted-foreground">
+                <Filter className="h-3.5 w-3.5" />
+                <span className="font-body text-[11px] uppercase tracking-wider">Filter by</span>
+              </div>
+              <select
+                value={filterProjectId}
+                onChange={(e) => setFilterProjectId(e.target.value)}
+                className="rounded border border-border bg-background px-2 py-1 font-body text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+              >
+                <option value="">All Projects</option>
+                {projectOptions.map(([id, name]) => (
+                  <option key={id} value={id}>{name}</option>
+                ))}
+              </select>
+              <select
+                value={filterStudioId}
+                onChange={(e) => setFilterStudioId(e.target.value)}
+                className="rounded border border-border bg-background px-2 py-1 font-body text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+              >
+                <option value="">All Studios</option>
+                {studioOptions.map(([id, name]) => (
+                  <option key={id} value={id}>{name}</option>
+                ))}
+              </select>
+              <select
+                value={filterClient}
+                onChange={(e) => setFilterClient(e.target.value)}
+                className="rounded border border-border bg-background px-2 py-1 font-body text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+              >
+                <option value="">All Clients</option>
+                {clientOptions.map((name) => (
+                  <option key={name} value={name}>{name}</option>
+                ))}
+              </select>
+              {hasActiveFilters && (
+                <button
+                  onClick={clearFilters}
+                  className="inline-flex items-center gap-1 rounded-full border border-border bg-background hover:bg-muted/40 px-2 py-0.5 font-body text-[11px] text-muted-foreground"
+                >
+                  Clear <X className="h-3 w-3" />
+                </button>
+              )}
+            </div>
+
+            {filteredItems.length === 0 ? (
+              <div className="text-center py-12 border border-dashed border-border rounded-lg">
+                <p className="font-body text-sm text-muted-foreground">No items match your filters.</p>
+              </div>
+            ) : (
+                <>
+                  <div className="overflow-x-auto border border-border rounded-lg">
               <table className="w-full text-left">
                 <thead>
                   <tr className="border-b border-border bg-muted/30">
@@ -321,7 +415,7 @@ export default function TradeFFESchedule() {
                   </tr>
                 </thead>
                 <tbody>
-                  {items.map((item, i) => {
+                  {filteredItems.map((item, i) => {
                     const lead = leadOverride(item.lead_time_weeks_override) ?? parseLeadWeeks(item.lead_time);
                     return (
                       <tr key={i} className="border-b border-border/50 hover:bg-muted/20 transition-colors">
@@ -364,7 +458,9 @@ export default function TradeFFESchedule() {
             </div>
             <p className="font-body text-[11px] text-muted-foreground/70">
               PO numbers and cost codes can be edited per line on each quote. Empty PO numbers are auto-generated as <code>QU-XXXXXX-NNN</code> at export time.
-            </p>
+                </p>
+              </>
+            )}
           </>
         )}
       </div>
