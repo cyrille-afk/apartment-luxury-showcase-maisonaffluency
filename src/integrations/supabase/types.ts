@@ -5460,6 +5460,7 @@ export type Database = {
           product_name: string
           rrp_price_cents: number | null
           sku: string | null
+          source_pick_id: string | null
           spec_sheet_url: string | null
           stock_status_override: string | null
           subcategory: string | null
@@ -5503,6 +5504,7 @@ export type Database = {
           product_name: string
           rrp_price_cents?: number | null
           sku?: string | null
+          source_pick_id?: string | null
           spec_sheet_url?: string | null
           stock_status_override?: string | null
           subcategory?: string | null
@@ -5546,13 +5548,22 @@ export type Database = {
           product_name?: string
           rrp_price_cents?: number | null
           sku?: string | null
+          source_pick_id?: string | null
           spec_sheet_url?: string | null
           stock_status_override?: string | null
           subcategory?: string | null
           trade_price_cents?: number | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "trade_products_source_pick_id_fkey"
+            columns: ["source_pick_id"]
+            isOneToOne: false
+            referencedRelation: "designer_curator_picks"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       trade_quote_extras: {
         Row: {
