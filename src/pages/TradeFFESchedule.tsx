@@ -32,6 +32,10 @@ interface FFEItem {
   quote_id: string;
   quote_ref: string;          // QU-XXXXXX
   client_name: string | null;
+  project_id: string | null;
+  project_name: string | null;
+  studio_id: string | null;
+  studio_name: string | null;
   po_number: string | null;
   cost_code: string | null;
   lead_time_weeks_override: number | null;
@@ -79,7 +83,7 @@ export default function TradeFFESchedule() {
     queryFn: async () => {
       let qq = supabase
         .from("trade_quotes")
-        .select("id, client_name, status")
+        .select("id, client_name, status, project_id, studio_id")
         .eq("user_id", user!.id)
         .in("status", ["confirmed", "submitted", "responded", "priced", "deposit_paid", "paid"]);
       if (projectFilter) qq = qq.eq("project_id", projectFilter);
@@ -105,12 +109,25 @@ export default function TradeFFESchedule() {
         )
         .in("id", productIds);
 
+      const projectIds = [...new Set(quotes.map((q: any) => q.project_id).filter(Boolean))] as string[];
+      const studioIds = [...new Set(quotes.map((q: any) => q.studio_id).filter(Boolean))] as string[];
+      const [{ data: projects }, { data: studios }] = await Promise.all([
+        projectIds.length
+          ? supabase.from("projects" as any).select("id, name").in("id", projectIds)
+          : Promise.resolve({ data: [] as any[] }),
+        studioIds.length
+          ? supabase.from("studios" as any).select("id, name").in("id", studioIds)
+          : Promise.resolve({ data: [] as any[] }),
+      ]);
+      const projectMap = Object.fromEntries(((projects as any[]) || []).map((p: any) => [p.id, p.name]));
+      const studioMap = Object.fromEntries(((studios as any[]) || []).map((s: any) => [s.id, s.name]));
+
       const productMap = Object.fromEntries((products || []).map((p) => [p.id, p]));
       const quoteMap = Object.fromEntries(quotes.map((q) => [q.id, q]));
 
       return qItems.map((item: any) => {
         const p = productMap[item.product_id];
-        const q = quoteMap[item.quote_id];
+        const q: any = quoteMap[item.quote_id];
         return {
           product_name: p?.product_name || "Unknown",
           brand_name: p?.brand_name || "",
@@ -126,6 +143,10 @@ export default function TradeFFESchedule() {
           quote_id: item.quote_id,
           quote_ref: QUOTE_REF(item.quote_id),
           client_name: q?.client_name || null,
+          project_id: q?.project_id || null,
+          project_name: q?.project_id ? (projectMap[q.project_id] || null) : null,
+          studio_id: q?.studio_id || null,
+          studio_name: q?.studio_id ? (studioMap[q.studio_id] || null) : null,
           po_number: item.po_number ?? null,
           cost_code: item.cost_code ?? null,
           lead_time_weeks_override: item.lead_time_weeks_override ?? null,
@@ -294,8 +315,8 @@ export default function TradeFFESchedule() {
               <table className="w-full text-left">
                 <thead>
                   <tr className="border-b border-border bg-muted/30">
-                    {["PO #", "Cost Code", "Item", "Brand", "Qty", "Unit Trade", "Total", "Lead"].map((h) => (
-                      <th key={h} className="px-4 py-3 font-body text-[10px] uppercase tracking-wider text-muted-foreground">{h}</th>
+                    {["PO #", "Cost Code", "Item", "Brand", "Project", "Client", "Studio", "Qty", "Unit Trade", "Total", "Lead", "Quote"].map((h) => (
+                      <th key={h} className="px-4 py-3 font-body text-[10px] uppercase tracking-wider text-muted-foreground whitespace-nowrap">{h}</th>
                     ))}
                   </tr>
                 </thead>
@@ -308,21 +329,35 @@ export default function TradeFFESchedule() {
                         <td className="px-4 py-3 font-body text-xs text-muted-foreground">{item.cost_code || "—"}</td>
                         <td className="px-4 py-3 font-body text-sm text-foreground">{item.product_name}</td>
                         <td className="px-4 py-3 font-body text-sm text-muted-foreground">{item.brand_name}</td>
+                        <td className="px-4 py-3 font-body text-xs text-muted-foreground">
+                          {item.project_id ? (
+                            <Link to={`/trade/projects/${item.project_id}`} className="text-foreground underline underline-offset-2">
+                              {item.project_name || "—"}
+                            </Link>
+                          ) : "—"}
+                        </td>
+                        <td className="px-4 py-3 font-body text-xs text-muted-foreground">{item.client_name || "—"}</td>
+                        <td className="px-4 py-3 font-body text-xs text-muted-foreground">{item.studio_name || "—"}</td>
                         <td className="px-4 py-3 font-body text-sm text-foreground">{item.quantity}</td>
                         <td className="px-4 py-3 font-body text-sm text-foreground">{item.unit_price_cents ? `€${(item.unit_price_cents / 100).toFixed(2)}` : "TBD"}</td>
                         <td className="px-4 py-3 font-body text-sm text-foreground font-medium">{item.unit_price_cents ? `€${((item.unit_price_cents * item.quantity) / 100).toFixed(2)}` : "TBD"}</td>
                         <td className="px-4 py-3 font-body text-xs text-muted-foreground">{lead === 0 ? <span className="text-emerald-700 font-medium">In stock</span> : lead != null ? `${lead} wks` : "—"}</td>
+                        <td className="px-4 py-3 font-body text-xs">
+                          <Link to={`/trade/quotes?id=${item.quote_id}`} className="text-foreground underline underline-offset-2 tabular-nums">
+                            {item.quote_ref}
+                          </Link>
+                        </td>
                       </tr>
                     );
                   })}
                 </tbody>
                 <tfoot>
                   <tr className="bg-muted/30">
-                    <td colSpan={6} className="px-4 py-3 font-body text-sm text-foreground font-medium text-right">Total</td>
+                    <td colSpan={9} className="px-4 py-3 font-body text-sm text-foreground font-medium text-right">Total</td>
                     <td className="px-4 py-3 font-display text-sm text-foreground font-semibold">
                       {totalValue > 0 ? `€${(totalValue / 100).toFixed(2)}` : "—"}
                     </td>
-                    <td />
+                    <td colSpan={2} />
                   </tr>
                 </tfoot>
               </table>
