@@ -16,11 +16,13 @@ import {
   type ProcurementLine,
 } from "@/lib/procurementExcel";
 import { generateSpecPackageZip, downloadBlob, type SpecPackageProduct } from "@/lib/specPackage";
+import { fillTradeProductImageFallbacks } from "@/lib/tradeProductImageFallback";
 
 interface FFEItem {
   item_id: string;
   product_name: string;
   brand_name: string;
+  image_url: string | null;
   category: string;
   dimensions: string | null;
   materials: string | null;
@@ -153,12 +155,13 @@ export default function TradeFFESchedule() {
       if (!qItems?.length) return [];
 
       const productIds = [...new Set(qItems.map((i) => i.product_id))];
-      const { data: products } = await supabase
+      const { data: productsRaw } = await supabase
         .from("trade_products")
         .select(
-          "id, product_name, brand_name, category, dimensions, materials, sku, lead_time, currency, rrp_price_cents, spec_sheet_url"
+          "id, product_name, brand_name, category, dimensions, materials, sku, lead_time, currency, rrp_price_cents, spec_sheet_url, image_url"
         )
         .in("id", productIds);
+      const products = await fillTradeProductImageFallbacks((productsRaw || []) as any[]);
 
       const projectIds = [...new Set(quotes.map((q: any) => q.project_id).filter(Boolean))] as string[];
       const studioIds = [...new Set(quotes.map((q: any) => q.studio_id).filter(Boolean))] as string[];
@@ -189,6 +192,7 @@ export default function TradeFFESchedule() {
           item_id: item.id,
           product_name: p?.product_name || "Unknown",
           brand_name: p?.brand_name || "",
+          image_url: (p as any)?.image_url || null,
           category: p?.category || "",
           dimensions: p?.dimensions || null,
           materials: p?.materials || null,
@@ -480,8 +484,8 @@ export default function TradeFFESchedule() {
               <table className="w-full text-left">
                 <thead>
                   <tr className="border-b border-border bg-muted/30">
-                    {["PO #", "Cost Code", "Item", "Brand", "Project", "Client", "Studio", "Qty", "Unit Trade", "Total", "Lead", "Stage", "Expected ready", "Required by", "Slack", "Quote"].map((h) => (
-                      <th key={h} className="px-4 py-3 font-body text-[10px] uppercase tracking-wider text-muted-foreground whitespace-nowrap">{h}</th>
+                    {["", "PO #", "Cost Code", "Item", "Brand", "Project", "Client", "Studio", "Qty", "Unit Trade", "Total", "Lead", "Stage", "Expected ready", "Required by", "Slack", "Quote"].map((h, idx) => (
+                      <th key={idx} className="px-4 py-3 font-body text-[10px] uppercase tracking-wider text-muted-foreground whitespace-nowrap">{h}</th>
                     ))}
                   </tr>
                 </thead>
@@ -495,6 +499,18 @@ export default function TradeFFESchedule() {
                       : null;
                     return (
                       <tr key={i} className="border-b border-border/50 hover:bg-muted/20 transition-colors">
+                        <td className="px-2 py-2 w-12">
+                          {item.image_url ? (
+                            <img
+                              src={item.image_url}
+                              alt={item.product_name}
+                              loading="lazy"
+                              className="h-10 w-10 object-cover rounded border border-border/50 bg-muted/20"
+                            />
+                          ) : (
+                            <div className="h-10 w-10 rounded border border-dashed border-border/50 bg-muted/10" aria-hidden />
+                          )}
+                        </td>
                         <td className="px-4 py-3 font-body text-xs text-muted-foreground tabular-nums">{item.po_number || <span className="italic text-muted-foreground/60">auto</span>}</td>
                         <td className="px-4 py-3 font-body text-xs text-muted-foreground">{item.cost_code || "—"}</td>
                         <td className="px-4 py-3 font-body text-sm text-foreground">{item.product_name}</td>
@@ -537,7 +553,7 @@ export default function TradeFFESchedule() {
                 </tbody>
                 <tfoot>
                   <tr className="bg-muted/30">
-                    <td colSpan={9} className="px-4 py-3 font-body text-sm text-foreground font-medium text-right">Total</td>
+                    <td colSpan={10} className="px-4 py-3 font-body text-sm text-foreground font-medium text-right">Total</td>
                     <td className="px-4 py-3 font-display text-sm text-foreground font-semibold">
                       {totalValue > 0 ? `€${(totalValue / 100).toFixed(2)}` : "—"}
                     </td>
