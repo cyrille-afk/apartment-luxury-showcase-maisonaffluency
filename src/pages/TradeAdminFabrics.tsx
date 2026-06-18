@@ -478,6 +478,22 @@ export default function TradeAdminFabrics() {
                 <option key={c} value={c}>{c}</option>
               ))}
             </select>
+            <div className="flex items-center rounded-md border border-border bg-background overflow-hidden">
+              {(["all", "picks", "labels"] as const).map((key) => (
+                <button
+                  key={key}
+                  onClick={() => setProductFilter(key)}
+                  className={`px-2.5 py-1.5 text-[11px] font-body capitalize transition-colors ${
+                    productFilter === key
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                  title={key === "all" ? "Show all linked products" : key === "picks" ? "Only catalog picks" : "Only free-text labels"}
+                >
+                  {key === "all" ? "All" : key === "picks" ? "Picks" : "Labels"}
+                </button>
+              ))}
+            </div>
             <button
               onClick={() => setAdding(true)}
               className="inline-flex items-center gap-1 px-3 py-1.5 text-[11px] uppercase tracking-wider font-body rounded-md border border-primary/30 bg-primary/5 text-primary hover:bg-primary/10"
