@@ -166,6 +166,41 @@ export default function TradeFFESchedule() {
     enabled: !!user,
   });
 
+  const filteredItems = useMemo(() => {
+    return items.filter((item) => {
+      if (filterProjectId && item.project_id !== filterProjectId) return false;
+      if (filterStudioId && item.studio_id !== filterStudioId) return false;
+      if (filterClient && item.client_name !== filterClient) return false;
+      return true;
+    });
+  }, [items, filterProjectId, filterStudioId, filterClient]);
+
+  const projectOptions = useMemo(() => {
+    const map = new Map<string, string>();
+    items.forEach((i) => { if (i.project_id && i.project_name) map.set(i.project_id, i.project_name); });
+    return Array.from(map.entries()).sort((a, b) => a[1].localeCompare(b[1]));
+  }, [items]);
+
+  const studioOptions = useMemo(() => {
+    const map = new Map<string, string>();
+    items.forEach((i) => { if (i.studio_id && i.studio_name) map.set(i.studio_id, i.studio_name); });
+    return Array.from(map.entries()).sort((a, b) => a[1].localeCompare(b[1]));
+  }, [items]);
+
+  const clientOptions = useMemo(() => {
+    const set = new Set<string>();
+    items.forEach((i) => { if (i.client_name) set.add(i.client_name); });
+    return Array.from(set).sort((a, b) => a.localeCompare(b));
+  }, [items]);
+
+  const hasActiveFilters = filterProjectId || filterStudioId || filterClient;
+  const clearFilters = () => {
+    setFilterProjectId("");
+    setFilterStudioId("");
+    setFilterClient("");
+    if (projectFilter) clearProjectFilter();
+  };
+
   const handleExport = async () => {
     if (!items.length) return;
     setExporting(true);
