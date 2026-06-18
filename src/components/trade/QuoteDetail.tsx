@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Send, Trash2, Plus, Minus, Package, Printer, ChevronDown, CheckCircle, CreditCard, Loader2, Edit3, XCircle, FileSpreadsheet, Lock, FolderOpen, Layers, Eye, ExternalLink, Mail, History as HistoryIcon, Copy } from "lucide-react";
+import { ArrowLeft, Send, Trash2, Plus, Minus, Package, Printer, ChevronDown, CheckCircle, CreditCard, Loader2, Edit3, XCircle, FileSpreadsheet, Lock, FolderOpen, Layers, Eye, ExternalLink, Mail, History as HistoryIcon, Copy, AlertTriangle } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Link, useNavigate } from "react-router-dom";
 import { QuoteItemSkeleton } from "@/components/trade/skeletons";
@@ -2636,6 +2636,14 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                           />
                         </label>
                       </div>
+                      {item.ship_cbm == null && item.ship_weight_kg == null && (
+                        <div className="md:col-span-4 mt-1 flex items-center gap-1.5 text-amber-700/90 print:hidden">
+                          <AlertTriangle className="w-3 h-3 shrink-0" />
+                          <span className="font-body text-[10px]">
+                            Shipping estimate unavailable — product weight and dimensions not on file. Enter CBM and weight above, or contact us for a manual quote.
+                          </span>
+                        </div>
+                      )}
                     </div>
                   );
                         })}
