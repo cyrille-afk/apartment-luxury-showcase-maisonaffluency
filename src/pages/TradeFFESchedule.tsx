@@ -16,6 +16,7 @@ import {
   type ProcurementLine,
 } from "@/lib/procurementExcel";
 import { generateSpecPackageZip, downloadBlob, type SpecPackageProduct } from "@/lib/specPackage";
+import { fillTradeProductImageFallbacks } from "@/lib/tradeProductImageFallback";
 
 interface FFEItem {
   item_id: string;
