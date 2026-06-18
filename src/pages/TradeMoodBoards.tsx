@@ -449,7 +449,8 @@ export default function TradeMoodBoards() {
                       <button
                         key={rec.product_id}
                         onClick={() => addRecToBoard(rec)}
-                        className="group w-32 shrink-0 text-left"
+                        className="group w-44 shrink-0 text-left"
+                        title={rec.reason}
                       >
                         <div className="relative aspect-square rounded-lg overflow-hidden bg-muted mb-1.5 border border-border group-hover:border-primary/40 transition-colors">
                           {rec.image_url ? (
@@ -468,9 +469,9 @@ export default function TradeMoodBoards() {
                             <Plus className="h-5 w-5 text-white opacity-0 group-hover:opacity-100 transition-opacity drop-shadow-lg" />
                           </div>
                         </div>
-                        <p className="font-body text-[10px] text-foreground truncate">{rec.title}</p>
-                        <p className="font-body text-[9px] text-muted-foreground truncate">{rec.brand}</p>
-                        <p className="font-body text-[9px] text-primary/70 line-clamp-2 leading-tight mt-0.5">
+                        <p className="font-body text-xs text-foreground truncate">{rec.title}</p>
+                        <p className="font-body text-[11px] text-muted-foreground truncate">{rec.brand}</p>
+                        <p className="font-body text-[11px] text-primary/80 leading-snug mt-1 line-clamp-4">
                           {rec.reason}
                         </p>
                       </button>
