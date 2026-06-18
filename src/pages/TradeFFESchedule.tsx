@@ -66,6 +66,10 @@ export default function TradeFFESchedule() {
   const { projectFilter, clearProjectFilter } = useProjectFilter();
   const [projectName, setProjectName] = useState<string | null>(null);
 
+  const [filterProjectId, setFilterProjectId] = useState<string>("");
+  const [filterStudioId, setFilterStudioId] = useState<string>("");
+  const [filterClient, setFilterClient] = useState<string>("");
+
   useEffect(() => {
     if (!projectFilter) { setProjectName(null); return; }
     (async () => {
@@ -76,6 +80,10 @@ export default function TradeFFESchedule() {
         .maybeSingle();
       setProjectName((data as any)?.name || null);
     })();
+  }, [projectFilter]);
+
+  useEffect(() => {
+    if (projectFilter) setFilterProjectId(projectFilter);
   }, [projectFilter]);
 
   const { data: items = [], isLoading } = useQuery({
