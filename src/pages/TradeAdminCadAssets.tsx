@@ -380,7 +380,7 @@ const TradeAdminCadAssets = () => {
         </section>
 
         {/* Preview modal */}
-        <Dialog open={!!previewAsset} onOpenChange={(open) => !open && setPreviewAsset(null)}>
+        <Dialog open={!!previewAsset && !!previewAsset.is_active} onOpenChange={(open) => !open && setPreviewAsset(null)}>
           <DialogContent className="max-w-lg">
             {previewAsset && (
               <>
