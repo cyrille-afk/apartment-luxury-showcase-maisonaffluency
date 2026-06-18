@@ -69,6 +69,7 @@ const TradeSamples = () => {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [tearsheetUrl, setTearsheetUrl] = useState<string | null>(null);
+  const [productId, setProductId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Pre-fill from URL params (e.g. from curator picks "Request Sample" button)
@@ -77,11 +78,13 @@ const TradeSamples = () => {
     const brand = searchParams.get("brand");
     const image = searchParams.get("image");
     const tearsheet = searchParams.get("tearsheet");
+    const pid = searchParams.get("productId");
     if (product || brand) {
       if (product) setProductName(product);
       if (brand) setBrandName(brand);
       if (image) setImagePreview(image);
       if (tearsheet) setTearsheetUrl(tearsheet);
+      if (pid) setProductId(pid);
       setShowForm(true);
       // Clean URL params after reading
       setSearchParams({}, { replace: true });
