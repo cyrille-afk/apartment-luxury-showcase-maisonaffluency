@@ -582,6 +582,15 @@ const TradeAdminCadAssets = () => {
                             </label>
                             <button
                               type="button"
+                              onClick={() => handleEditUrl(a)}
+                              data-testid={`edit-url-${a.id}`}
+                              className="p-1.5 rounded-md text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors shrink-0"
+                              title="Edit file URL"
+                            >
+                              <Pencil className="h-3.5 w-3.5" />
+                            </button>
+                            <button
+                              type="button"
                               onClick={() => handleDelete(a)}
                               className="p-1.5 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors shrink-0"
                               title="Delete"
