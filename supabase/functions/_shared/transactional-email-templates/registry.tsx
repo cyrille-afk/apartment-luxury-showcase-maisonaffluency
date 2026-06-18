@@ -16,6 +16,7 @@ import { template as scrapeFailureAlert } from './scrape-failure-alert.tsx'
 import { template as inquiryConfirmation } from './inquiry-confirmation.tsx'
 import { template as inquiryNotification } from './inquiry-notification.tsx'
 import { template as commissionStatement } from './commission-statement.tsx'
+import { template as manualShippingQuoteRequest } from './manual-shipping-quote-request.tsx'
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'trade-approval': tradeApproval,
@@ -25,4 +26,5 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'inquiry-confirmation': inquiryConfirmation,
   'inquiry-notification': inquiryNotification,
   'commission-statement': commissionStatement,
+  'manual-shipping-quote-request': manualShippingQuoteRequest,
 }
