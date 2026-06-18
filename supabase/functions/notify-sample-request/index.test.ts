@@ -34,6 +34,7 @@ Deno.test({
     const { data: userData, error: userErr } = await supabase.auth.getUser(ACCESS_TOKEN!);
     assertEquals(userErr, null, `auth.getUser failed: ${userErr?.message}`);
     const userId = userData.user!.id;
+    const startedAt = new Date(Date.now() - 5_000).toISOString();
 
     // 1. Insert a sample request as the authenticated user.
     const { data: inserted, error: insertErr } = await supabase
