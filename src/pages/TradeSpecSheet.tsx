@@ -134,19 +134,32 @@ export default function TradeSpecSheet() {
 
       const { data: tp } = await supabase
         .from("trade_products")
-        .select("spec_sheet_url")
+        .select("spec_sheet_url, pdf_urls")
         .ilike("product_name", product)
-        .not("spec_sheet_url", "is", null)
         .limit(1)
         .maybeSingle();
 
+      const tpPdfList = (tp?.pdf_urls as { label?: string; url?: string }[] | null) ?? [];
+      const tpMatchedByIndex = Number.isInteger(sheetIndex) && sheetIndex !== null && sheetIndex >= 0
+        ? tpPdfList[sheetIndex] ?? null
+        : null;
+      const tpMatchedByLabel = normalizedRequestedLabel
+        ? tpPdfList.find((p) => normalizeSheetKey(p?.label) === normalizedRequestedLabel)
+        : null;
+      const tpResolvedUrl = tpMatchedByIndex?.url
+        || tpMatchedByLabel?.url
+        || tpPdfList[0]?.url
+        || tp?.spec_sheet_url
+        || null;
+
       if (!cancelled) {
-        if (tp?.spec_sheet_url) {
-          const signed = await getSignedSpecSheetUrl(tp.spec_sheet_url);
+        if (tpResolvedUrl) {
+          const signed = await getSignedSpecSheetUrl(tpResolvedUrl);
           setPdfUrl(signed);
         }
         setLoading(false);
       }
+
     };
 
     resolve();
