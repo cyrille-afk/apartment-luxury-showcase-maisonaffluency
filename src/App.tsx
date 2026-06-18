@@ -465,6 +465,7 @@ const App = () => {
                     <Route path="client-profiles" element={<TradeClientProfiles />} />
                     <Route path="order-timeline" element={<TradeOrderTimeline />} />
                     <Route path="ffe-schedule" element={<TradeFFESchedule />} />
+                    <Route path="delivery-tracker" element={<TradeDeliveryTracker />} />
                     <Route path="ffe-export-test" element={<TradeFFEExportTest />} />
                     <Route path="materials" element={<TradeMaterialLibrary />} />
                     <Route path="tearsheets" element={<TradeTearsheets />} />
