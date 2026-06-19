@@ -1,0 +1,3 @@
+ALTER TABLE public.designers ADD COLUMN IF NOT EXISTS trade_only boolean NOT NULL DEFAULT false;
+CREATE INDEX IF NOT EXISTS idx_designers_trade_only ON public.designers(trade_only) WHERE trade_only = true;
+COMMENT ON COLUMN public.designers.trade_only IS 'When true, the designer card is shown only inside the Trade Program (Trade Designers directory) and is hidden from every public-facing surface.';
