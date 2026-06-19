@@ -170,28 +170,21 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
     return { editionLookup: editions, pdfLookup: pdfs };
   }, [dbPicks]);
 
-  const fuzzyLookup = useCallback((productName: string, map: Map<string, string>): string | null => {
-    const key = normalizeName(productName);
-    const exact = map.get(key);
-    if (exact) return exact;
-    const tokens = tokenize(productName);
-    if (!tokens.length) return null;
-    for (const [k, v] of map) {
-      const eTokens = tokenize(k);
-      const overlap = tokens.filter(t => eTokens.includes(t)).length;
-      const shorter = Math.min(tokens.length, eTokens.length);
-      if (shorter > 0 && overlap / shorter > 0.5) return v;
-    }
-    return null;
+  // Exact normalized match only — fuzzy matching caused edition strings to
+  // bleed between unrelated products sharing generic tokens like
+  // "Coffee Table" or "Armchair". If a product isn't in curator picks,
+  // we simply don't render an edition line.
+  const exactLookup = useCallback((productName: string, map: Map<string, string>): string | null => {
+    return map.get(normalizeName(productName)) ?? null;
   }, []);
 
   const getHotspotEdition = useCallback((productName: string): string | null => {
-    return fuzzyLookup(productName, editionLookup);
-  }, [editionLookup, fuzzyLookup]);
+    return exactLookup(productName, editionLookup);
+  }, [editionLookup, exactLookup]);
 
   const getHotspotPdf = useCallback((productName: string): string | null => {
-    return fuzzyLookup(productName, pdfLookup);
-  }, [pdfLookup, fuzzyLookup]);
+    return exactLookup(productName, pdfLookup);
+  }, [pdfLookup, exactLookup]);
 
   useEffect(() => {
     if (!imageIdentifier) return;
