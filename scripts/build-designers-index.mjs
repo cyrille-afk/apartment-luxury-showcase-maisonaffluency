@@ -46,6 +46,7 @@ async function main() {
     .from("designers")
     .select("slug, name")
     .eq("is_published", true)
+    .eq("trade_only", false)
     .not("slug", "is", null)
     .order("name", { ascending: true })
     .range(0, 1499);
