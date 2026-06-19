@@ -27,14 +27,35 @@ export function brandTokens(name: string | null | undefined): Set<string> {
   );
 }
 
+// Designers whose materials live under a publisher/editor brand in the
+// fabrics/finishes library. Add lowercase designer-name → publisher brand.
+const DESIGNER_TO_PUBLISHER: Record<string, string[]> = {
+  "jean-michel frank": ["Ecart Paris"],
+  "eileen gray": ["Ecart Paris"],
+  "pierre chareau": ["Ecart Paris"],
+  "mariano fortuny": ["Ecart Paris"],
+  "paul laszlo": ["Ecart Paris"],
+  "andre sornay": ["Ecart Paris"],
+  "andré sornay": ["Ecart Paris"],
+  "felix aublet": ["Ecart Paris"],
+  "félix aublet": ["Ecart Paris"],
+};
+
 export function brandMatches(
   designerName: string | null | undefined,
   swatchBrandName: string | null | undefined,
 ): boolean {
   const a = brandTokens(designerName);
   const b = brandTokens(swatchBrandName);
-  if (a.size === 0 || b.size === 0) return false;
-  for (const t of a) if (b.has(t)) return true;
+  if (a.size && b.size) {
+    for (const t of a) if (b.has(t)) return true;
+  }
+  // Publisher fallback: designers re-edited by a single brand (e.g. Ecart).
+  const aliases = DESIGNER_TO_PUBLISHER[normalizeStr(designerName)] || [];
+  for (const alias of aliases) {
+    const ab = brandTokens(alias);
+    for (const t of ab) if (b.has(t)) return true;
+  }
   return false;
 }
 
