@@ -30,6 +30,7 @@ function useAllPublishedDesigners() {
         .from("designers")
         .select("slug, name")
         .eq("is_published", true)
+        .eq("trade_only", false)
         .order("name", { ascending: true })
         .range(0, 1499);
       if (error) throw error;
