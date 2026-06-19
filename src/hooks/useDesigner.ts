@@ -261,15 +261,16 @@ export function useGroupedDesignerPicks(designer: Designer | null | undefined, {
   });
 }
 
-/** Fetch all designers (for directory) */
-export function useAllDesigners() {
+/** Fetch all designers (for directory). Trade-only designers excluded by default. */
+export function useAllDesigners(
+  { includeTradeOnly = false }: { includeTradeOnly?: boolean } = {},
+) {
   return useQuery({
-    queryKey: ["designers-all"],
+    queryKey: ["designers-all", includeTradeOnly],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("designers")
-        .select("*")
-        .order("name", { ascending: true });
+      let q = supabase.from("designers").select("*").order("name", { ascending: true });
+      if (!includeTradeOnly) q = q.eq("trade_only", false);
+      const { data, error } = await q;
       if (error) throw error;
       return (data || []).filter((d) => !HIDDEN_DESIGNER_SLUGS.has(d.slug)).map((d) => ({
         ...d,
@@ -278,6 +279,7 @@ export function useAllDesigners() {
     },
   });
 }
+
 
 /** Fetch designers marked as "New In", ordered by new_in_order */
 export function useNewInDesigners() {
