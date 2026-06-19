@@ -1618,6 +1618,7 @@ interface DesignerRow {
   hero_image_url: string | null;
   source: string;
   is_published: boolean;
+  trade_only: boolean;
   biography_images: string[];
   links: Record<string, string> | null;
   instagram_handle: string | null;
