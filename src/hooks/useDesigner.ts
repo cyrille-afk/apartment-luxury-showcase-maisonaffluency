@@ -88,18 +88,20 @@ export interface DesignerCuratorPick {
   variant_image_map?: Record<string, number> | null;
 }
 
-/** Fetch a single designer by slug */
-export function useDesigner(slug: string | undefined) {
+/** Fetch a single designer by slug. Trade-only designers are excluded unless
+ *  `includeTradeOnly` is true (set this in Trade Program routes). */
+export function useDesigner(
+  slug: string | undefined,
+  { includeTradeOnly = false }: { includeTradeOnly?: boolean } = {},
+) {
   return useQuery({
-    queryKey: ["designer", slug],
+    queryKey: ["designer", slug, includeTradeOnly],
     queryFn: async () => {
       if (!slug) return null;
       if (HIDDEN_DESIGNER_SLUGS.has(slug)) return null;
-      const { data, error } = await supabase
-        .from("designers")
-        .select("*")
-        .eq("slug", slug)
-        .maybeSingle();
+      let q = supabase.from("designers").select("*").eq("slug", slug);
+      if (!includeTradeOnly) q = q.eq("trade_only", false);
+      const { data, error } = await q.maybeSingle();
       if (error) throw error;
       if (!data) return null;
       return {
@@ -111,18 +113,20 @@ export function useDesigner(slug: string | undefined) {
   });
 }
 
-/** Fetch a single designer by exact name */
-export function useDesignerByName(name: string | undefined) {
+/** Fetch a single designer by exact name. Trade-only designers are excluded
+ *  unless `includeTradeOnly` is true. */
+export function useDesignerByName(
+  name: string | undefined,
+  { includeTradeOnly = false }: { includeTradeOnly?: boolean } = {},
+) {
   return useQuery({
-    queryKey: ["designer-by-name", name],
+    queryKey: ["designer-by-name", name, includeTradeOnly],
     queryFn: async () => {
       if (!name) return null;
       if (name.trim().toLowerCase() === "gabriel hendifar") return null;
-      const { data, error } = await supabase
-        .from("designers")
-        .select("*")
-        .eq("name", name)
-        .maybeSingle();
+      let q = supabase.from("designers").select("*").eq("name", name);
+      if (!includeTradeOnly) q = q.eq("trade_only", false);
+      const { data, error } = await q.maybeSingle();
       if (error) throw error;
       if (!data) return null;
       return {
@@ -133,6 +137,7 @@ export function useDesignerByName(name: string | undefined) {
     enabled: !!name,
   });
 }
+
 
 /** Fetch curator picks for a designer */
 export function useDesignerPicks(designerId: string | undefined, { publicOnly = false }: { publicOnly?: boolean } = {}) {
@@ -256,15 +261,16 @@ export function useGroupedDesignerPicks(designer: Designer | null | undefined, {
   });
 }
 
-/** Fetch all designers (for directory) */
-export function useAllDesigners() {
+/** Fetch all designers (for directory). Trade-only designers excluded by default. */
+export function useAllDesigners(
+  { includeTradeOnly = false }: { includeTradeOnly?: boolean } = {},
+) {
   return useQuery({
-    queryKey: ["designers-all"],
+    queryKey: ["designers-all", includeTradeOnly],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("designers")
-        .select("*")
-        .order("name", { ascending: true });
+      let q = supabase.from("designers").select("*").order("name", { ascending: true });
+      if (!includeTradeOnly) q = q.eq("trade_only", false);
+      const { data, error } = await q;
       if (error) throw error;
       return (data || []).filter((d) => !HIDDEN_DESIGNER_SLUGS.has(d.slug)).map((d) => ({
         ...d,
@@ -273,6 +279,7 @@ export function useAllDesigners() {
     },
   });
 }
+
 
 /** Fetch designers marked as "New In", ordered by new_in_order */
 export function useNewInDesigners() {

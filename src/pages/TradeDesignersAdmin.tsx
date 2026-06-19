@@ -1618,6 +1618,7 @@ interface DesignerRow {
   hero_image_url: string | null;
   source: string;
   is_published: boolean;
+  trade_only: boolean;
   biography_images: string[];
   links: Record<string, string> | null;
   instagram_handle: string | null;
@@ -1741,7 +1742,7 @@ const TradeDesignersAdmin = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("designers")
-        .select("id, slug, name, display_name, specialty, biography, philosophy, notable_works, image_url, hero_image_url, source, is_published, biography_images, links, instagram_handle, instagram_handle_2")
+        .select("id, slug, name, display_name, specialty, biography, philosophy, notable_works, image_url, hero_image_url, source, is_published, trade_only, biography_images, links, instagram_handle, instagram_handle_2")
         .order("name", { ascending: true });
       if (error) throw error;
       return data as DesignerRow[];
@@ -2504,6 +2505,24 @@ const TradeDesignersAdmin = () => {
                             )}
                           </span>
                         </div>
+
+                        <div
+                          className="flex items-center gap-2 pl-3 border-l border-border/60"
+                          title="When ON, this designer appears only inside the Trade Program and is hidden from every public page."
+                        >
+                          <Switch
+                            checked={getField(d.id, "trade_only") as unknown as boolean}
+                            onCheckedChange={(checked) => setField(d.id, "trade_only", checked)}
+                          />
+                          <span className="text-xs text-muted-foreground">
+                            {getField(d.id, "trade_only") ? (
+                              <span className="flex items-center gap-1 text-primary">🔒 Trade-only</span>
+                            ) : (
+                              <span className="flex items-center gap-1">Public + Trade</span>
+                            )}
+                          </span>
+                        </div>
+
 
                         <div className="flex items-center gap-2 ml-auto">
                           {dirty && (

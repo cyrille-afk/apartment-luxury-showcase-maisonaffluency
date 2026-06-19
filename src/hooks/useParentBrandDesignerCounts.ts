@@ -17,7 +17,8 @@ export function useParentBrandDesignerCounts(parentNames: string[]) {
         .from("designers")
         .select("founder, name")
         .in("founder", parentNames)
-        .eq("is_published", true);
+        .eq("is_published", true)
+        .eq("trade_only", false);
       if (error) throw error;
       const counts: Record<string, number> = {};
       parentNames.forEach(n => { counts[n] = 0; });
@@ -47,7 +48,8 @@ export function useParentBrandDesignerCountsFiltered(parentNames: string[]) {
         .from("designers")
         .select("founder, name")
         .in("founder", parentNames)
-        .eq("is_published", true);
+        .eq("is_published", true)
+        .eq("trade_only", false);
       if (error) throw error;
       const counts: Record<string, number> = {};
       parentNames.forEach(n => { counts[n] = 0; });

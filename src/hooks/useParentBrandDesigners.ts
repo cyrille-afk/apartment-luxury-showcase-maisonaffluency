@@ -29,6 +29,7 @@ export function useParentBrandDesigners(parentName: string | null) {
         .eq("founder", parentName)
         .neq("name", parentName)
         .eq("is_published", true)
+        .eq("trade_only", false)
         .order("name");
       if (error) throw error;
       return (data || []).filter((d) => !HIDDEN_CHILD_DESIGNER_SLUGS.has(d.slug)).map((d) => {

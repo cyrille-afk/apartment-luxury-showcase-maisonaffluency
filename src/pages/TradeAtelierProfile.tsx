@@ -143,7 +143,7 @@ const TradeAtelierProfile = () => {
     [searchParams, slug]
   );
   const { toast } = useToast();
-  const { data: designer, isLoading } = useDesigner(slug);
+  const { data: designer, isLoading } = useDesigner(slug, { includeTradeOnly: true });
   const { isPinned, togglePin } = useCompare();
 
   useEffect(() => {

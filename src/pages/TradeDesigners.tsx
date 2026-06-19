@@ -114,7 +114,7 @@ const DesignerCard = ({ brand, navigate }: { brand: EnrichedDesigner; navigate: 
 const TradeDesigners = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { data: designers = [], isLoading } = useAllDesigners();
+  const { data: designers = [], isLoading } = useAllDesigners({ includeTradeOnly: true });
   const [search, setSearch] = useState("");
   const [activeFilters] = useState<string[]>([]);
   const initialBrand = searchParams.get("brand") || "all";
