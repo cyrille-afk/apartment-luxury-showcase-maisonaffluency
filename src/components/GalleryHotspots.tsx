@@ -12,7 +12,12 @@ import { motion, AnimatePresence } from "framer-motion";
 interface TradePrice { cents: number; currency: string; price_unit?: string; }
 
 const normalizeName = (s: string) =>
-  s.toLowerCase().replace(/['']/g, "'").replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim();
+  s.toLowerCase()
+    .replace(/['']/g, "'")
+    .replace(/\([^)]*\)/g, " ") // strip parenthetical suffixes like "(Edition of 12)"
+    .replace(/[^a-z0-9 ]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 
 const tokenize = (s: string) => normalizeName(s).split(" ").filter(t => t.length > 2);
 
