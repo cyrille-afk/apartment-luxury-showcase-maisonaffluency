@@ -2506,6 +2506,24 @@ const TradeDesignersAdmin = () => {
                           </span>
                         </div>
 
+                        <div
+                          className="flex items-center gap-2 pl-3 border-l border-border/60"
+                          title="When ON, this designer appears only inside the Trade Program and is hidden from every public page."
+                        >
+                          <Switch
+                            checked={getField(d.id, "trade_only") as unknown as boolean}
+                            onCheckedChange={(checked) => setField(d.id, "trade_only", checked)}
+                          />
+                          <span className="text-xs text-muted-foreground">
+                            {getField(d.id, "trade_only") ? (
+                              <span className="flex items-center gap-1 text-primary">🔒 Trade-only</span>
+                            ) : (
+                              <span className="flex items-center gap-1">Public + Trade</span>
+                            )}
+                          </span>
+                        </div>
+
+
                         <div className="flex items-center gap-2 ml-auto">
                           {dirty && (
                             <Button
