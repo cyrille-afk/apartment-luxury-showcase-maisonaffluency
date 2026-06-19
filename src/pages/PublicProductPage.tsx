@@ -100,6 +100,7 @@ function useProductBySlug(designerSlug: string | undefined, productSlug: string 
         .select("id, name, slug, display_name, biography")
         .eq("slug", designerSlug)
         .eq("is_published", true)
+        .eq("trade_only", false)
         .maybeSingle();
       if (!designer) return null;
 
