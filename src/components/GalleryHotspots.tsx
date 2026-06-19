@@ -475,8 +475,8 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
                             </p>
                           ) : null;
                         })()}
-                        {/* PDF spec sheet link */}
-                        {(() => {
+                        {/* PDF spec sheet link — trade only */}
+                        {onAddToQuote && (() => {
                           const pdfUrl = getHotspotPdf(hotspot.product_name);
                           return pdfUrl ? (
                             <a
