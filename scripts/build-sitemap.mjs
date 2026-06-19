@@ -91,6 +91,7 @@ async function loadDynamicRoutes() {
       .from("designers")
       .select("slug, updated_at")
       .eq("is_published", true)
+      .eq("trade_only", false)
       .not("slug", "is", null);
     if (error) throw error;
     for (const d of data ?? []) {
