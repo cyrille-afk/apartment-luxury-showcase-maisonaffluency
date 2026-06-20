@@ -66,6 +66,7 @@ interface Hotspot {
   link_url: string | null;
   materials?: string | null;
   dimensions?: string | null;
+  mapped_pick_id?: string | null;
 }
 
 interface HotspotProduct {
@@ -85,8 +86,10 @@ interface GalleryHotspotsProps {
   onAddToQuote?: (product: HotspotProduct) => void;
   /** Public: callback to open quote request dialog pre-filled */
   onRequestQuote?: (productName: string, designerName: string) => void;
-  /** Public: callback to open product lightbox for a matched curator's pick */
-  onViewProduct?: (productName: string, designerName: string, linkUrl?: string | null) => void;
+  /** Public: callback to open product lightbox for a matched curator's pick.
+   *  When `mappedPickId` is provided, the consumer should open that exact
+   *  catalog item and skip fuzzy matching. */
+  onViewProduct?: (productName: string, designerName: string, linkUrl?: string | null, mappedPickId?: string | null) => void;
   /** When set, only show hotspots matching this designer name */
   filterDesigner?: string | null;
 }
@@ -104,14 +107,35 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
   const [activeId, setActiveId] = useState<string | null>(null);
   const [editMode, setEditMode] = useState(false);
   const [pending, setPending] = useState<PendingHotspot | null>(null);
-  const [formData, setFormData] = useState({ product_name: "", designer_name: "", product_image_url: "", link_url: "" });
+  const [formData, setFormData] = useState({ product_name: "", designer_name: "", product_image_url: "", link_url: "", mapped_pick_id: "" });
   const [saving, setSaving] = useState(false);
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const didDragRef = useRef(false);
   const dragStartRef = useRef<{ x: number; y: number } | null>(null);
   const DRAG_THRESHOLD = 5; // pixels
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [editData, setEditData] = useState({ product_name: "", designer_name: "", product_image_url: "", link_url: "" });
+  const [editData, setEditData] = useState({ product_name: "", designer_name: "", product_image_url: "", link_url: "", mapped_pick_id: "" });
+  // Catalog picks for the manual override dropdown (admin only)
+  const [pickOptions, setPickOptions] = useState<Array<{ id: string; title: string; designer: string }>>([]);
+  useEffect(() => {
+    if (!editMode) return;
+    if (pickOptions.length > 0) return;
+    (async () => {
+      const [{ data: picks }, { data: designers }] = await Promise.all([
+        supabase.from("designer_curator_picks").select("id, title, designer_id").order("title"),
+        supabase.from("designers").select("id, name"),
+      ]);
+      if (!picks) return;
+      const dmap = new Map((designers || []).map((d: any) => [d.id, d.name as string]));
+      setPickOptions(
+        (picks as any[]).map((p) => ({
+          id: p.id,
+          title: p.title,
+          designer: dmap.get(p.designer_id) || "Unknown",
+        }))
+      );
+    })();
+  }, [editMode, pickOptions.length]);
 
   // ── Trade price lookup ──
   const [tradePrices, setTradePrices] = useState<{ name: string; cents: number; currency: string; price_unit?: string }[]>([]);
@@ -246,7 +270,7 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
     const x = ((e.clientX - rect.left) / rect.width) * 100;
     const y = ((e.clientY - rect.top) / rect.height) * 100;
     setPending({ x_percent: Math.round(x * 10) / 10, y_percent: Math.round(y * 10) / 10 });
-    setFormData({ product_name: "", designer_name: "", product_image_url: "", link_url: "" });
+    setFormData({ product_name: "", designer_name: "", product_image_url: "", link_url: "", mapped_pick_id: "" });
   }, [editMode]);
 
   const savePending = async () => {
@@ -262,6 +286,7 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
         designer_name: formData.designer_name.trim() || null,
         product_image_url: formData.product_image_url.trim() || null,
         link_url: formData.link_url.trim() || null,
+        mapped_pick_id: formData.mapped_pick_id || null,
       })
       .select()
       .single();
@@ -285,6 +310,7 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
       designer_name: hotspot.designer_name || "",
       product_image_url: hotspot.product_image_url || "",
       link_url: hotspot.link_url || "",
+      mapped_pick_id: hotspot.mapped_pick_id || "",
     });
   };
 
@@ -296,6 +322,7 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
       designer_name: editData.designer_name.trim() || null,
       product_image_url: editData.product_image_url.trim() || null,
       link_url: editData.link_url.trim() || null,
+      mapped_pick_id: editData.mapped_pick_id || null,
     };
     await supabase.from("gallery_hotspots").update(updates).eq("id", editingId);
     setHotspots(prev => prev.map(h => h.id === editingId ? { ...h, ...updates } : h));
@@ -437,6 +464,19 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
                         <input type="text" placeholder="Designer name" value={editData.designer_name} onChange={e => setEditData(d => ({ ...d, designer_name: e.target.value }))} className="w-full text-xs border border-primary/20 rounded px-2 py-1.5 font-body focus:outline-none focus:ring-1 focus:ring-primary/30" />
                         <input type="text" placeholder="Product image URL" value={editData.product_image_url} onChange={e => setEditData(d => ({ ...d, product_image_url: e.target.value }))} className="w-full text-xs border border-primary/20 rounded px-2 py-1.5 font-body focus:outline-none focus:ring-1 focus:ring-primary/30" />
                         <input type="text" placeholder="Link URL" value={editData.link_url} onChange={e => setEditData(d => ({ ...d, link_url: e.target.value }))} className="w-full text-xs border border-primary/20 rounded px-2 py-1.5 font-body focus:outline-none focus:ring-1 focus:ring-primary/30" />
+                        <div>
+                          <label className="block text-[10px] uppercase tracking-wide text-muted-foreground mb-1">Manual product mapping (overrides fuzzy match)</label>
+                          <select
+                            value={editData.mapped_pick_id}
+                            onChange={e => setEditData(d => ({ ...d, mapped_pick_id: e.target.value }))}
+                            className="w-full text-xs border border-primary/20 rounded px-2 py-1.5 font-body bg-white focus:outline-none focus:ring-1 focus:ring-primary/30"
+                          >
+                            <option value="">— Auto-match by name —</option>
+                            {pickOptions.map(p => (
+                              <option key={p.id} value={p.id}>{p.designer} — {p.title}</option>
+                            ))}
+                          </select>
+                        </div>
                       </div>
                       <div className="flex gap-2 mt-3">
                         <button onClick={saveEdit} disabled={!editData.product_name.trim() || saving} className="flex-1 flex items-center justify-center gap-1 text-xs font-body bg-primary text-primary-foreground rounded px-3 py-1.5 hover:bg-primary/90 disabled:opacity-50 transition-colors">
@@ -559,7 +599,7 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
                             className="flex items-center gap-1.5 mt-2.5 w-full text-xs font-body bg-foreground text-background rounded px-3 py-2 hover:bg-foreground/90 transition-colors justify-center"
                             onClick={(e) => {
                               e.stopPropagation();
-                              onViewProduct(hotspot.product_name, hotspot.designer_name || "", hotspot.link_url);
+                              onViewProduct(hotspot.product_name, hotspot.designer_name || "", hotspot.link_url, hotspot.mapped_pick_id);
                               setActiveId(null);
                             }}
                           >
@@ -651,6 +691,19 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
                 onChange={e => setFormData(f => ({ ...f, link_url: e.target.value }))}
                 className="w-full text-xs border border-primary/20 rounded px-2 py-1.5 font-body focus:outline-none focus:ring-1 focus:ring-primary/30"
               />
+              <div>
+                <label className="block text-[10px] uppercase tracking-wide text-muted-foreground mb-1">Manual product mapping (overrides fuzzy match)</label>
+                <select
+                  value={formData.mapped_pick_id}
+                  onChange={e => setFormData(f => ({ ...f, mapped_pick_id: e.target.value }))}
+                  className="w-full text-xs border border-primary/20 rounded px-2 py-1.5 font-body bg-white focus:outline-none focus:ring-1 focus:ring-primary/30"
+                >
+                  <option value="">— Auto-match by name —</option>
+                  {pickOptions.map(p => (
+                    <option key={p.id} value={p.id}>{p.designer} — {p.title}</option>
+                  ))}
+                </select>
+              </div>
             </div>
             <div className="flex gap-2 mt-3">
               <button

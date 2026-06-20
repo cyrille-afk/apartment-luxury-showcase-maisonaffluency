@@ -2368,6 +2368,7 @@ export type Database = {
           id: string
           image_identifier: string
           link_url: string | null
+          mapped_pick_id: string | null
           materials: string | null
           product_image_url: string | null
           product_name: string
@@ -2381,6 +2382,7 @@ export type Database = {
           id?: string
           image_identifier: string
           link_url?: string | null
+          mapped_pick_id?: string | null
           materials?: string | null
           product_image_url?: string | null
           product_name: string
@@ -2394,13 +2396,22 @@ export type Database = {
           id?: string
           image_identifier?: string
           link_url?: string | null
+          mapped_pick_id?: string | null
           materials?: string | null
           product_image_url?: string | null
           product_name?: string
           x_percent?: number
           y_percent?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "gallery_hotspots_mapped_pick_id_fkey"
+            columns: ["mapped_pick_id"]
+            isOneToOne: false
+            referencedRelation: "designer_curator_picks"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       guide_views: {
         Row: {
