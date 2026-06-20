@@ -174,11 +174,8 @@ const Index = ({ categoryMode = false }: IndexProps = {}) => {
     }
 
     // Wait for the hero image (LCP element) to finish loading before
-    // allowing lazy chunks to compete for bandwidth. The hero <img> now lives
-    // in the persistent .hero-skeleton block in index.html (outside #root).
-    const heroImg =
-      document.querySelector<HTMLImageElement>('.hero-skeleton img') ||
-      document.querySelector<HTMLImageElement>('#home img');
+    // allowing lazy chunks to compete for bandwidth.
+    const heroImg = document.querySelector<HTMLImageElement>('#home img');
     let cancelDeferredReveal: (() => void) | null = null;
     let timeoutId: number | null = null;
 

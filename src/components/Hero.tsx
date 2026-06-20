@@ -2,17 +2,31 @@ import { Link } from "react-router-dom";
 import { scrollToSection } from "@/lib/scrollToSection";
 import { trackCTA } from "@/lib/analytics";
 
-// The hero <img> is rendered statically in index.html (persistent across React
-// mounts) so it stays Chrome's LCP candidate. Don't render a duplicate <img>
-// here — the inline one is already visible underneath this section via
-// `position: absolute; z-index: 0` on `.hero-skeleton`.
+const HERO_IMAGE = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,c_fill,q_auto:eco,f_auto/v1781920000/AffluencySG_194-22.jpg_macpwj";
+const HERO_IMAGE_SRCSET = [
+  "https://res.cloudinary.com/dif1oamtj/image/upload/w_400,c_fill,q_auto:eco,f_auto/v1781920000/AffluencySG_194-22.jpg_macpwj 400w",
+  "https://res.cloudinary.com/dif1oamtj/image/upload/w_640,c_fill,q_auto:eco,f_auto/v1781920000/AffluencySG_194-22.jpg_macpwj 640w",
+  "https://res.cloudinary.com/dif1oamtj/image/upload/w_828,c_fill,q_auto:eco,f_auto/v1781920000/AffluencySG_194-22.jpg_macpwj 828w",
+  "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,c_fill,q_auto:eco,f_auto/v1781920000/AffluencySG_194-22.jpg_macpwj 1200w",
+].join(", ");
 
 const scrollToOverview = () => scrollToSection("overview");
 
 const Hero = () => {
   return (
     <section className="relative h-screen w-full overflow-hidden">
-      {/* Gradient overlay only — the hero image is the persistent inline skeleton in index.html */}
+      <img
+        src={HERO_IMAGE}
+        srcSet={HERO_IMAGE_SRCSET}
+        sizes="100vw"
+        width="1200"
+        height="800"
+        alt="Luxury living room with Asian-inspired murals and designer furniture"
+        className="absolute inset-0 h-full w-full object-cover object-[50%_40%] md:h-[120%] md:object-[50%_0%]"
+        loading="eager"
+        decoding="async"
+        {...({ fetchpriority: "high" } as any)}
+      />
       <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-black/10 via-transparent to-black/20" />
 
 
