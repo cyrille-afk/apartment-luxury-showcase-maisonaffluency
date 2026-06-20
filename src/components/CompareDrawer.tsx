@@ -1,10 +1,11 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
-import { X, Ruler, Layers, MessageSquareQuote, ShoppingCart, Trash2, Loader2 } from "lucide-react";
+import { X, Layers, MessageSquareQuote, ShoppingCart, Trash2, Loader2 } from "lucide-react";
 import { useCompare } from "@/contexts/CompareContext";
 import { useState } from "react";
 import { useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import SpecGlyph from "@/components/product/SpecGlyph";
 import QuoteRequestDialog from "./QuoteRequestDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -201,7 +202,7 @@ const CompareDrawer = () => {
                       {/* Dimensions */}
                       {item.pick.dimensions && (
                         <div className="flex gap-2 items-start">
-                          <Ruler size={14} className="text-[hsl(var(--gold))] mt-0.5 shrink-0" />
+                          <SpecGlyph symbol="📐" className="mt-0.5 text-[hsl(var(--gold))]" />
                           <p className="font-body text-sm text-white font-medium">
                             {item.pick.dimensions}
                           </p>
