@@ -473,6 +473,8 @@ const VariantSelectors: React.FC<{
           <ExpandableSpec icon={specIcon("📐")} text={withImperialPerLine(product.dimensions)} />
         ) : null;
       })()}
+      {/* No-variant fallback: dimensions must always appear BEFORE the materials/finish row
+          (regression guarded by src/lib/__tests__/productDimensionsConsistency.test.ts). */}
       {!hasVariants && product.dimensions && looksLikeDimension(product.dimensions) && (
         <ExpandableSpec icon={specIcon("📐")} text={withImperialPerLine(product.dimensions)} />
       )}
