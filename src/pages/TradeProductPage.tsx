@@ -493,6 +493,11 @@ const TradeProductPage: React.FC = () => {
   // When a wood-finish swatch carries its own frame price (product_fabrics.price_cents_a),
   // we use it as the RRP base and add the fabric per-LM upcharge on top.
   const [selectedWoodPrice, setSelectedWoodPrice] = useState<{ id: string; name: string; price_cents: number; currency: string; image_url: string | null } | null>(null);
+  // Names of currently-selected wood/top finish swatches that lack mapped
+  // gallery images — surfaced as a note on the quote line.
+  const [finishesMissingImages, setFinishesMissingImages] = useState<string[]>([]);
+
+
 
 
   useEffect(() => {
@@ -580,6 +585,14 @@ const TradeProductPage: React.FC = () => {
         if (itemId) {
           const patch: any = {};
           if (variantLabel) patch.variant_label = variantLabel;
+
+          // Flag finishes the user selected that have no mapped reference
+          // images so the concierge / designer doesn't assume a visual match.
+          if (finishesMissingImages.length > 0) {
+            const note = `Note: No reference image on file for selected finish${finishesMissingImages.length > 1 ? "es" : ""}: ${finishesMissingImages.join(", ")}. Concierge to confirm visuals before order.`;
+            patch.notes = note;
+          }
+
 
           // Compute the chosen line's unit price: wood-finish base (if picked)
           // OR catalog RRP, PLUS the fabric per-LM upcharge. Both legs are
@@ -695,7 +708,7 @@ const TradeProductPage: React.FC = () => {
     } finally {
       setAdding(false);
     }
-  }, [user, data, activeQuoteId, toast, selectedBase, selectedTop, selectedDualSize, selectedSingleMaterial, selectedSingleSize, selectedVariantIdx, rugSelection, selectedFabric, selectedWoodPrice, fxRates, displayCurrency]);
+  }, [user, data, activeQuoteId, toast, selectedBase, selectedTop, selectedDualSize, selectedSingleMaterial, selectedSingleSize, selectedVariantIdx, rugSelection, selectedFabric, selectedWoodPrice, fxRates, displayCurrency, finishesMissingImages]);
 
   // Default the dual-axis pickers to the first base + its uniquely-compatible
   // top so users see a complete pairing on load (e.g. Pars Cocktail Table:
@@ -1554,6 +1567,7 @@ const TradeProductPage: React.FC = () => {
                   showWoodSection
                   onHasFabricsChange={setHasLinkedFabrics}
                   onWoodFinishesAvailable={setLinkedWoodFinishes}
+                  onFinishesMissingImagesChange={setFinishesMissingImages}
                   onFabricChange={setSelectedFabric}
                   onWoodFinishPricingChange={setSelectedWoodPrice}
                   onSwatchImagesChange={(indices) => {
@@ -1858,6 +1872,14 @@ const TradeProductPage: React.FC = () => {
               )}
               {added ? "Added to Quote" : "Add to Quote"}
             </button>
+
+            {finishesMissingImages.length > 0 && (
+              <p className="font-body text-[11px] text-muted-foreground -mt-1 italic">
+                Heads up — no reference image on file for{" "}
+                <span className="text-foreground">{finishesMissingImages.join(", ")}</span>. A note
+                will be attached to the quote so our concierge can confirm visuals.
+              </p>
+            )}
 
             {/* Secondary actions: Favorite / Pin / Spec Sheet */}
             <div className="grid grid-cols-3 gap-2">

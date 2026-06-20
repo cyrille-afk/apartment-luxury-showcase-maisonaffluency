@@ -126,6 +126,13 @@ interface FinishSelectorProps {
   topLabel?: string | null;
   /** Fires when the user picks a top-axis swatch. */
   onTopFinishChange?: (name: string | null) => void;
+  /**
+   * Fires whenever the currently-selected wood/top finish swatches change.
+   * Receives the names of selected finishes that have NO mapped gallery
+   * images (`image_indices` empty). The product page surfaces these on the
+   * quote/bespoke message so designers know the visual was unmapped.
+   */
+  onFinishesMissingImagesChange?: (names: string[]) => void;
 }
 
 const normalizeFabricCategory = (category: string | null | undefined) => {
@@ -198,7 +205,7 @@ const pickFinishGlyph = (
  * (Trade + Public). Tiles are grouped by category (Upholstery, Wood, …)
  * with a COM ("Customer's Own Material") tile always offered.
  */
-export default function FinishSelector({ pickId, className, productTitle, onUpholsteryTierChange, onFabricChange, onHasFabricsChange, onWoodFinishChange, onWoodFinishPricingChange, onWoodFinishesAvailable, includePricing = false, onSwatchImagesChange, woodLabel, showUpholsterySection = true, showWoodSection = true, woodFilter, topFilter, topLabel, onTopFinishChange }: FinishSelectorProps) {
+export default function FinishSelector({ pickId, className, productTitle, onUpholsteryTierChange, onFabricChange, onHasFabricsChange, onWoodFinishChange, onWoodFinishPricingChange, onWoodFinishesAvailable, includePricing = false, onSwatchImagesChange, woodLabel, showUpholsterySection = true, showWoodSection = true, woodFilter, topFilter, topLabel, onTopFinishChange, onFinishesMissingImagesChange }: FinishSelectorProps) {
 
   const [open, setOpen] = useState(false);
   const [fabrics, setFabrics] = useState<Fabric[]>([]);
@@ -350,6 +357,20 @@ export default function FinishSelector({ pickId, className, productTitle, onUpho
   const selectedWoodItem = fabrics.find((f) => f.id === selectedWoodId) || null;
   const selectedTopItem = fabrics.find((f) => f.id === selectedTopId) || null;
   const selectedCoverItem = fabrics.find((f) => f.id === selectedCoverId) || null;
+
+  // Notify parent when the user has selected wood/top finishes that lack
+  // mapped gallery images, so quote/bespoke messages can flag them.
+  useEffect(() => {
+    if (!onFinishesMissingImagesChange) return;
+    const missing: string[] = [];
+    for (const item of [selectedWoodItem, selectedTopItem]) {
+      if (item && (!item.image_indices || item.image_indices.length === 0)) {
+        missing.push(item.name);
+      }
+    }
+    onFinishesMissingImagesChange(missing);
+  }, [selectedWoodItem?.id, selectedTopItem?.id, onFinishesMissingImagesChange]);
+
 
   const renderTile = (f: Fabric, kindOverride?: "fabric" | "cover" | "base" | "top") => {
     const isCom = f.id === "__com__";

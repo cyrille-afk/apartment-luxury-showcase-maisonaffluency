@@ -190,7 +190,8 @@ const VariantSelectors: React.FC<{
   galleryActiveIndex?: number;
   finishMap?: Record<string, number> | null;
   onSwatchImagesChange?: (imageIndices: number[] | null) => void;
-}> = ({ product, onMaterialChange, galleryActiveIndex, finishMap, onSwatchImagesChange }) => {
+  onFinishesMissingImagesChange?: (names: string[]) => void;
+}> = ({ product, onMaterialChange, galleryActiveIndex, finishMap, onSwatchImagesChange, onFinishesMissingImagesChange }) => {
   const axes = computeVariantAxes(product.size_variants);
   const {
     isDualAxis,
@@ -615,6 +616,7 @@ const VariantSelectors: React.FC<{
         onHasFabricsChange={setHasLinkedFabrics}
         onWoodFinishesAvailable={setLinkedWoodFinishes}
         onSwatchImagesChange={onSwatchImagesChange}
+        onFinishesMissingImagesChange={onFinishesMissingImagesChange}
         onWoodFinishChange={(woodName) => {
           if (!woodName) return;
           const norm = (s: string) => s.trim().toLowerCase();
@@ -861,6 +863,11 @@ const PublicProductPage: React.FC = () => {
   // Bumped on every parent-initiated jump so the gallery re-syncs even when the
   // numeric index is identical to the previous one (e.g. re-selecting the same finish).
   const [galleryJumpNonce, setGalleryJumpNonce] = useState(0);
+  // Currently-selected wood/top finish swatches that lack mapped images —
+  // appended to the bespoke concierge message so they aren't overlooked.
+  const [finishesMissingImages, setFinishesMissingImages] = useState<string[]>([]);
+
+
 
   useEffect(() => {
     window.scrollTo({ top: 0 });
@@ -1209,7 +1216,15 @@ const PublicProductPage: React.FC = () => {
                     setGalleryActiveIndex(Math.max(0, indices[0] - 1));
                     setGalleryJumpNonce((n) => n + 1);
                   }}
+                  onFinishesMissingImagesChange={setFinishesMissingImages}
                 />
+                {finishesMissingImages.length > 0 && (
+                  <p className="font-body text-[11px] text-muted-foreground italic mt-1">
+                    No reference image on file for{" "}
+                    <span className="text-foreground">{finishesMissingImages.join(", ")}</span>.
+                    We'll note this on your enquiry so our concierge can confirm visuals.
+                  </p>
+                )}
 
 
                 {(() => {
@@ -1315,7 +1330,7 @@ const PublicProductPage: React.FC = () => {
               <p className="font-body text-[11px] text-muted-foreground text-center mt-1">
                 Looking for a bespoke version?{" "}
                 <Link
-                  to={`/contact?subject=${encodeURIComponent(`Bespoke inquiry — ${product.title} by ${designerDisplay}`)}&message=${encodeURIComponent(`Hello, I'd like to inquire about a bespoke version of:\n\n• ${product.title}${product.subtitle ? ` (${product.subtitle})` : ""}\n• Designer: ${designerDisplay}\n• Page: https://www.maisonaffluency.com${location.pathname}\n\nPlease share customisation possibilities (materials, dimensions, finishes), lead time, and pricing.`)}#contact`}
+                  to={`/contact?subject=${encodeURIComponent(`Bespoke inquiry — ${product.title} by ${designerDisplay}`)}&message=${encodeURIComponent(`Hello, I'd like to inquire about a bespoke version of:\n\n• ${product.title}${product.subtitle ? ` (${product.subtitle})` : ""}\n• Designer: ${designerDisplay}\n• Page: https://www.maisonaffluency.com${location.pathname}\n${finishesMissingImages.length > 0 ? `\nNote: No reference image on file for the selected finish${finishesMissingImages.length > 1 ? "es" : ""}: ${finishesMissingImages.join(", ")}. Please share visuals before confirming.\n` : ""}\nPlease share customisation possibilities (materials, dimensions, finishes), lead time, and pricing.`)}#contact`}
                   className="underline underline-offset-2 hover:text-foreground transition-colors"
                 >
                   Contact our concierge →
