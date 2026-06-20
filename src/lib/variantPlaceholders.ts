@@ -36,11 +36,17 @@ export function formatVariantAxisLabel(label: string | null | undefined): string
   return axis.replace(/\buphostery\b/gi, "Upholstery");
 }
 
+export function isDimensionAxisLabel(label: string | null | undefined): boolean {
+  const axis = clean(label)?.toLowerCase();
+  if (!axis) return false;
+  return /^(size|sizes|dimension|dimensions|measurements?|diameter|height|width|depth|length)$/.test(axis);
+}
+
 function placeholderFromAxisLabel(label: string): string {
   let pretty = formatVariantAxisLabel(label)!;
   // Fix common DB truncations: "fini" → "Finish"
   pretty = pretty.replace(/\bfini\b/gi, "Finish");
-  if (pretty.toLowerCase() === "size") return "Select Your Size";
+  if (isDimensionAxisLabel(pretty)) return "Select Your Size";
   // Title-case each word so the placeholder matches the "Select Your X" convention
   // used by the swatch picker (e.g. "Select Your Rod Finish", "Select Your Diffuser").
   const titled = pretty

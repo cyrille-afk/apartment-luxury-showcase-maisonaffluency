@@ -5,7 +5,7 @@
  */
 import { useMemo, useState } from "react";
 import { Layers, Eye } from "lucide-react";
-import { getBasePlaceholder, getTopPlaceholder } from "@/lib/variantPlaceholders";
+import { getBasePlaceholder, getTopPlaceholder, isDimensionAxisLabel } from "@/lib/variantPlaceholders";
 import SpecGlyph from "@/components/product/SpecGlyph";
 
 export interface VariantPreviewProps {
@@ -122,7 +122,7 @@ export default function VariantPreviewPanel({
             <div className="grid grid-cols-2 gap-2">
               <label className="flex flex-col gap-1 text-[10px] text-muted-foreground">
                 <span className="flex items-center gap-1">
-                  {(baseAxisLabel || "").toLowerCase() === "size" ? <SpecGlyph symbol="📐" className="h-3 w-3" /> : <Layers className="h-3 w-3" />} {baseAxisLabel || "Base"}
+                  {isDimensionAxisLabel(baseAxisLabel) ? <SpecGlyph symbol="📐" className="h-3 w-3" /> : <Layers className="h-3 w-3" />} {baseAxisLabel || "Base"}
                 </span>
                 <select
                   className="rounded border bg-background px-2 py-1.5 text-xs"
@@ -146,7 +146,7 @@ export default function VariantPreviewPanel({
               </label>
               <label className="flex flex-col gap-1 text-[10px] text-muted-foreground">
                 <span className="flex items-center gap-1">
-                  {(topAxisLabel || "").toLowerCase() === "size" ? <SpecGlyph symbol="📐" className="h-3 w-3" /> : <Layers className="h-3 w-3" />} {topAxisLabel || "Top"}
+                  {isDimensionAxisLabel(topAxisLabel) ? <SpecGlyph symbol="📐" className="h-3 w-3" /> : <Layers className="h-3 w-3" />} {topAxisLabel || "Top"}
                 </span>
                 <select
                   className="rounded border bg-background px-2 py-1.5 text-xs"

@@ -14,7 +14,7 @@ import { formatHandcrafted } from "@/lib/formatHandcrafted";
 import { looksLikeDimension } from "@/lib/rugPricing";
 import { computeVariantAxes } from "@/lib/parseSizeVariants";
 import { buildProductFinishMap, resolveVariantImageIndex } from "@/lib/variantImageMap";
-import { getBasePlaceholder, getMaterialPlaceholder, getTopPlaceholder } from "@/lib/variantPlaceholders";
+import { getBasePlaceholder, getMaterialPlaceholder, getTopPlaceholder, isDimensionAxisLabel } from "@/lib/variantPlaceholders";
 import { cn } from "@/lib/utils";
 import { createPortal } from "react-dom";
 import { useState, useMemo, useEffect } from "react";
@@ -488,7 +488,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                     />
                   )}
                   <ExpandableSpec
-                    icon={specIcon(((axes.baseOptions.length > 0 && axes.baseOptions.every(looksLikeDimension)) || ((product.base_axis_label || "").trim().toLowerCase() === "size")) ? "📐" : "⬗")}
+                    icon={specIcon(((axes.baseOptions.length > 0 && axes.baseOptions.every(looksLikeDimension)) || isDimensionAxisLabel(product.base_axis_label)) ? "📐" : "⬗")}
                     text={withImperialPerLine(axes.baseOptions.join("\n"))}
                     placeholder={getBasePlaceholder(product)}
                     emphasized
@@ -520,7 +520,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                     disabledIndices={disabledBaseIdx}
                   />
                   <ExpandableSpec
-                    icon={specIcon(((axes.topOptions.length > 0 && axes.topOptions.every(looksLikeDimension)) || ((product.top_axis_label || "").trim().toLowerCase() === "size")) ? "📐" : "⬗")}
+                    icon={specIcon(((axes.topOptions.length > 0 && axes.topOptions.every(looksLikeDimension)) || isDimensionAxisLabel(product.top_axis_label)) ? "📐" : "⬗")}
                     text={withImperialPerLine(axes.topOptions.join("\n"))}
                     placeholder={getTopPlaceholder(product)}
                     emphasized

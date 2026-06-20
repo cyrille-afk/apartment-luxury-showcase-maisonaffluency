@@ -16,7 +16,7 @@ import FavoriteFolderPicker from "@/components/FavoriteFolderPicker";
 
 import { isProductUpholstered } from "@/lib/upholstery";
 
-import { getBasePlaceholder, getTopPlaceholder, formatVariantAxisLabel } from "@/lib/variantPlaceholders";
+import { getBasePlaceholder, getTopPlaceholder, formatVariantAxisLabel, isDimensionAxisLabel } from "@/lib/variantPlaceholders";
 import { formatDimensionsMultiline, formatImperialDimensions, withImperialPerLine } from "@/lib/formatDimensions";
 import { formatHandcrafted } from "@/lib/formatHandcrafted";
 import { looksLikeDimension } from "@/lib/rugPricing";
@@ -273,7 +273,6 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
   const galleryImages = (product.gallery_images || []).filter(Boolean);
   const sv = product.size_variants || [];
   const axes = computeVariantAxes(sv);
-  const axisLabeledSize = (label?: string | null) => (label || "").trim().toLowerCase() === "size";
   // True dual-axis only when BOTH base and top are populated. Base-only
   // products (e.g. Atelier Pendhapa "Mangala Coffee Table") behave as
   // single-axis on Base — see src/lib/parseSizeVariants.ts.
@@ -286,7 +285,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
   const baseOnlyOptions = !isDualAxis && axes.isBaseOnly ? axes.baseOptions : [];
   const baseOnlyIsDim = axes.isBaseOnly && (
     (baseOnlyOptions.length > 0 && baseOnlyOptions.every(looksLikeDimension)) ||
-    axisLabeledSize(product.base_axis_label)
+    isDimensionAxisLabel(product.base_axis_label)
   );
   // When single-axis labels actually encode (size × material) we render TWO
   // dropdowns (material + size) mirroring TradeProductPage — the catalog
@@ -656,11 +655,11 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                 // interacting with a half-wired picker here.
                 const sv = product.size_variants || [];
                 const isDualAxis = sv.length > 0 && sv.some((v) => v.base && v.base.trim()) && sv.some((v) => v.top && v.top.trim());
-                const baseIsDim = (baseOptions.length > 0 && baseOptions.every(looksLikeDimension)) || axisLabeledSize(product.base_axis_label);
+                const baseIsDim = (baseOptions.length > 0 && baseOptions.every(looksLikeDimension)) || isDimensionAxisLabel(product.base_axis_label);
                 const topOptions = isDualAxis
                   ? Array.from(new Set(sv.map((v) => (v.top || "").trim()).filter(Boolean)))
                   : [];
-                const topIsDim = (topOptions.length > 0 && topOptions.every(looksLikeDimension)) || axisLabeledSize(product.top_axis_label);
+                const topIsDim = (topOptions.length > 0 && topOptions.every(looksLikeDimension)) || isDimensionAxisLabel(product.top_axis_label);
 
                 const hasFinishAxis =
                   isUpholsteredProduct ||

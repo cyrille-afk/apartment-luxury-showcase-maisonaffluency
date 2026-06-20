@@ -25,7 +25,7 @@ import ExpandableSpec from "@/components/ExpandableSpec";
 import Breadcrumbs, { type Crumb } from "@/components/Breadcrumbs";
 import { categoryUrl } from "@/lib/categorySlugs";
 import { buildProductBreadcrumbs } from "@/lib/productBreadcrumbs";
-import { getBasePlaceholder, getTopPlaceholder, getMaterialPlaceholder, formatVariantAxisLabel } from "@/lib/variantPlaceholders";
+import { getBasePlaceholder, getTopPlaceholder, getMaterialPlaceholder, formatVariantAxisLabel, isDimensionAxisLabel } from "@/lib/variantPlaceholders";
 import { computeVariantAxes, parseMaterialsFallback } from "@/lib/parseSizeVariants";
 import { isRugCategory, parseRugDims, looksLikeDimension } from "@/lib/rugPricing";
 import FinishSelector from "@/components/FinishSelector";
@@ -324,14 +324,13 @@ const VariantSelectors: React.FC<{
   const disabledDualSizeIdx = isDualAxis && (selBase || selTop)
     ? dualSizeOptions.map((s, i) => (variantsList.some((v: any) => matchesDual(v, selBase, selTop, s)) ? -1 : i)).filter((i) => i >= 0)
     : [];
-  const axisLabeledSize = (label?: string | null) => (label || "").trim().toLowerCase() === "size";
   const baseAxisLabelRaw = (product.base_axis_label || "").trim();
   const topAxisLabelRaw = (product.top_axis_label || "").trim();
   const baseAxisIsDim = baseAxisLabelRaw
-    ? axisLabeledSize(baseAxisLabelRaw)
+    ? isDimensionAxisLabel(baseAxisLabelRaw)
     : (baseOptions.length > 0 && baseOptions.every(looksLikeDimension));
   const topAxisIsDim = topAxisLabelRaw
-    ? axisLabeledSize(topAxisLabelRaw)
+    ? isDimensionAxisLabel(topAxisLabelRaw)
     : (topOptions.length > 0 && topOptions.every(looksLikeDimension));
   // When FinishSelector is rendered (upholstered products), it already exposes
   // fabric/leather + wood-finish swatch pickers. Suppress any base/top variant
