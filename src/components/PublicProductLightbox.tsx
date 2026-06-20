@@ -209,6 +209,10 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
   // Single-axis split (variants encode "size — material" in one label).
   const [selectedSingleSizeIdx, setSelectedSingleSizeIdx] = useState<number | null>(null);
   const [selectedSingleMaterialIdx, setSelectedSingleMaterialIdx] = useState<number | null>(null);
+  // Lightbox-only: standalone Size picker for base-only/single-axis products
+  // whose labels read as dimensions (e.g. Niko Sofa). Lets users preview the
+  // chosen size without leaving for the full product page.
+  const [selectedSizeLabel, setSelectedSizeLabel] = useState<string | null>(null);
 
   useEffect(() => {
     setImageLoaded(false);
@@ -220,6 +224,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
     setSelectedMaterialIdx(null);
     setSelectedSingleSizeIdx(null);
     setSelectedSingleMaterialIdx(null);
+    setSelectedSizeLabel(null);
   }, [product?.id]);
 
   // Atomic clear for the dual-axis Base/Top dropdowns inside the lightbox.
@@ -579,15 +584,40 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
 
             <div className="flex flex-col">
               {(() => {
-                // Lightbox is a preview, not a configurator — render dimensions
-                // as a static list (no "Select Your Size" picker). Prefer the
-                // curated product.dimensions field; otherwise derive from
-                // size_variants so the lightbox always mirrors what the full
-                // product page lists at the top of its spec stack.
+                // Prefer a real Size dropdown when size_variants encode
+                // multiple distinct size labels. Falls back to a static list
+                // (curated dimensions or derived) otherwise.
+                const sv = product.size_variants || [];
+                const isDualAxis = sv.length > 0 && sv.some((v) => v.base && v.base.trim()) && sv.some((v) => v.top && v.top.trim());
+
+                // Build the candidate size-label list (single-axis / base-only).
+                let sizeLabels: string[] = [];
+                if (!isDualAxis && sv.length > 0) {
+                  sizeLabels = Array.from(
+                    new Set(sv.map((v) => (v.label || "").trim()).filter(Boolean))
+                  );
+                }
+                const dimCount = sizeLabels.filter(looksLikeDimension).length;
+                const showSizePicker = sizeLabels.length >= 2 && dimCount >= 2 && dimCount >= Math.ceil(sizeLabels.length / 2);
+
+                if (showSizePicker) {
+                  return (
+                    <ExpandableSpec
+                      icon={specIcon("📐")}
+                      text={withImperialPerLine(sizeLabels.join("\n"))}
+                      emphasized
+                      placeholder="Select Your Size"
+                      value={selectedSizeLabel != null ? Math.max(0, sizeLabels.indexOf(selectedSizeLabel)) : null}
+                      onChange={(idx) => {
+                        setSelectedSizeLabel(idx < 0 ? null : sizeLabels[idx] ?? null);
+                      }}
+                    />
+                  );
+                }
+
+                // Fallback: static dimension list (legacy preview behavior).
                 let dimText = (product.dimensions || "").trim();
                 if (!dimText) {
-                  const sv = product.size_variants || [];
-                  const isDualAxis = sv.length > 0 && sv.some((v) => v.base && v.base.trim()) && sv.some((v) => v.top && v.top.trim());
                   if (isDualAxis) {
                     const dualLabels = Array.from(new Set(sv.map((v) => (v.label || "").trim()).filter(Boolean))).filter(looksLikeDimension);
                     if (dualLabels.length > 0) dimText = dualLabels.join("\n");
@@ -596,7 +626,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                       if (baseDims.length > 0) dimText = baseDims.join("\n");
                     }
                   } else if (sv.length > 0) {
-                    const labels = Array.from(new Set(sv.map((v) => (v.label || "").trim()).filter(Boolean))).filter(looksLikeDimension);
+                    const labels = sizeLabels.filter(looksLikeDimension);
                     if (labels.length > 0) dimText = labels.join("\n");
                   }
                   if (!dimText && baseOnlyIsDim && baseOnlyOptions.length > 0) {
