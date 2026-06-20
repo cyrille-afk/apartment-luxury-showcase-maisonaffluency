@@ -41,6 +41,7 @@ const ROOM_SECTIONS = [
 
 interface SelectedProduct {
   id: string;
+  product_id?: string; // trade_products.id — used server-side to look up parsed CAD bbox geometry
   product_name: string;
   brand_name: string;
   image_url: string;
