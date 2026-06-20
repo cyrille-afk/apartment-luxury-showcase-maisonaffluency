@@ -373,13 +373,57 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
 
   if (!loaded) return null;
 
+  const PICKS_PAGE_SIZE = 12;
+  const [visiblePicksCount, setVisiblePicksCount] = useState(PICKS_PAGE_SIZE);
+  // Reset visible window when the designer changes or picks reload.
+  useEffect(() => {
+    setVisiblePicksCount(PICKS_PAGE_SIZE);
+  }, [designerId]);
+  // If the user restored an expanded pick that lives beyond the current
+  // window, widen the window so it actually renders.
+  useEffect(() => {
+    if (!expandedPickId) return;
+    const idx = picks.findIndex((p) => p.id === expandedPickId);
+    if (idx >= 0 && idx >= visiblePicksCount) {
+      const next = Math.ceil((idx + 1) / PICKS_PAGE_SIZE) * PICKS_PAGE_SIZE;
+      setVisiblePicksCount(next);
+    }
+  }, [expandedPickId, picks, visiblePicksCount]);
+
+  const picksSentinelRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    const node = picksSentinelRef.current;
+    if (!node) return;
+    if (visiblePicksCount >= picks.length) return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            setVisiblePicksCount((n) => Math.min(n + PICKS_PAGE_SIZE, picks.length));
+          }
+        }
+      },
+      { rootMargin: "400px 0px" },
+    );
+    io.observe(node);
+    return () => io.disconnect();
+  }, [visiblePicksCount, picks.length]);
+
+  const visiblePicks = picks.slice(0, visiblePicksCount);
+  const remainingPicks = Math.max(0, picks.length - visiblePicksCount);
+
   return (
     <div>
       <label className="block text-xs font-medium uppercase tracking-widest text-muted-foreground mb-1">
         Curators&apos; Picks ({picks.length})
+        {remainingPicks > 0 && (
+          <span className="ml-2 normal-case tracking-normal text-muted-foreground/70">
+            — showing {visiblePicks.length}
+          </span>
+        )}
       </label>
       <div className="mt-2 space-y-2">
-        {picks.map((pick) => (
+        {visiblePicks.map((pick) => (
           <div key={pick.id} data-pick-row-id={pick.id} className={`rounded-md border border-border/60 p-2 ${(pick as any).is_hidden ? "opacity-60" : ""}`}>
             <div className="flex items-center gap-2">
               {pick.image_url && (
@@ -1225,6 +1269,18 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
             )}
           </div>
         ))}
+        {remainingPicks > 0 && (
+          <div ref={picksSentinelRef} className="flex justify-center py-3">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-[11px] text-muted-foreground"
+              onClick={() => setVisiblePicksCount((n) => Math.min(n + PICKS_PAGE_SIZE, picks.length))}
+            >
+              Show {Math.min(PICKS_PAGE_SIZE, remainingPicks)} more ({remainingPicks} remaining)
+            </Button>
+          </div>
+        )}
       </div>
       <div className="mt-2 flex items-center gap-2 flex-wrap">
         <Button variant="outline" size="sm" onClick={handleAdd}>
