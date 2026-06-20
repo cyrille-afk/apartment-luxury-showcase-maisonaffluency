@@ -163,7 +163,7 @@ export default function ProposalBuilder({
     loadPreloaded();
   }, [preloadedProductIds]);
 
-  const addProduct = useCallback((product: { product_name: string; brand_name: string; image_url: string; dimensions?: string; materials?: string; isExternal?: boolean; pdf_url?: string; pdf_urls?: { label: string; url: string; filename?: string }[] }) => {
+  const addProduct = useCallback((product: { product_id?: string; product_name: string; brand_name: string; image_url: string; dimensions?: string; materials?: string; isExternal?: boolean; pdf_url?: string; pdf_urls?: { label: string; url: string; filename?: string }[] }) => {
     if (selectedProducts.length >= 10) {
       toast({ title: "Maximum 10 products per proposal", variant: "destructive" });
       return;
