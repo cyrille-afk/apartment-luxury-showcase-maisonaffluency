@@ -1269,6 +1269,18 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
             )}
           </div>
         ))}
+        {remainingPicks > 0 && (
+          <div ref={picksSentinelRef} className="flex justify-center py-3">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-[11px] text-muted-foreground"
+              onClick={() => setVisiblePicksCount((n) => Math.min(n + PICKS_PAGE_SIZE, picks.length))}
+            >
+              Show {Math.min(PICKS_PAGE_SIZE, remainingPicks)} more ({remainingPicks} remaining)
+            </Button>
+          </div>
+        )}
       </div>
       <div className="mt-2 flex items-center gap-2 flex-wrap">
         <Button variant="outline" size="sm" onClick={handleAdd}>
