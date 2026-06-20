@@ -873,6 +873,10 @@ const PublicProductPage: React.FC = () => {
 
   useEffect(() => {
     window.scrollTo({ top: 0 });
+    // Reset gallery to first image on product change — the route component is
+    // reused across slug changes, so a stale activeIndex from the previous
+    // product would persist (e.g. landing on picture 3).
+    setGalleryActiveIndex(undefined);
   }, [designerSlug, productSlug]);
 
   useEffect(() => {
