@@ -43,6 +43,20 @@ const OVERWRITE = args.has("--overwrite");
 const STRICT = args.has("--strict");
 
 /**
+ * Build a simple line-by-line diff of two strings for quick debugging.
+ */
+function diffStrings(labelA, a, labelB, b) {
+  const out = [`--- ${labelA}`, `+++ ${labelB}`];
+  if (a === b) {
+    out.push(`  ${a}`);
+  } else {
+    out.push(`- ${a}`);
+    out.push(`+ ${b}`);
+  }
+  return out.join("\n    ");
+}
+
+/**
  * Parse a generated bridge HTML and verify required tags are present and
  * internally consistent. Returns { ok, errors[] }.
  */
@@ -58,7 +72,6 @@ function validateBridge(html, expected) {
   else if (!title.includes(expected.designerEsc)) errors.push(`title missing designer "${expected.designer}"`);
   else if (!title.includes(expected.titleTextEsc)) errors.push(`title missing product "${expected.titleText}"`);
 
-
   const desc = m(/<meta\s+name="description"\s+content="([^"]*)"/i);
   if (!desc || !desc.trim()) errors.push("missing meta description");
   else if (desc.length > 320) errors.push(`description too long (${desc.length} chars)`);
@@ -69,12 +82,18 @@ function validateBridge(html, expected) {
 
   const canonical = m(/<link\s+rel="canonical"\s+href="([^"]+)"/i);
   if (!canonical) errors.push("missing canonical");
-  else if (canonical !== expected.canonical)
-    errors.push(`canonical mismatch: ${canonical} != ${expected.canonical}`);
+  else if (canonical !== expected.canonical) {
+    errors.push(
+      `canonical mismatch:\n    ${diffStrings("expected", expected.canonical, "actual", canonical)}`
+    );
+  }
 
   const ogUrl = m(/<meta\s+property="og:url"\s+content="([^"]+)"/i);
-  if (ogUrl !== expected.canonical)
-    errors.push(`og:url mismatch: ${ogUrl} != ${expected.canonical}`);
+  if (ogUrl !== expected.canonical) {
+    errors.push(
+      `og:url mismatch:\n    ${diffStrings("expected", expected.canonical, "actual", ogUrl ?? "(missing)")}`
+    );
+  }
 
   const ogImage = m(/<meta\s+property="og:image"\s+content="([^"]+)"/i);
   if (!ogImage) errors.push("missing og:image");
@@ -82,8 +101,11 @@ function validateBridge(html, expected) {
 
   const redirect = m(/window\.location\.replace\("([^"]+)"\)/);
   if (!redirect) errors.push("missing JS redirect");
-  else if (redirect !== expected.canonical)
-    errors.push(`redirect target mismatch: ${redirect} != ${expected.canonical}`);
+  else if (redirect !== expected.canonical) {
+    errors.push(
+      `redirect target mismatch:\n    ${diffStrings("expected", expected.canonical, "actual", redirect)}`
+    );
+  }
 
   return { ok: errors.length === 0, errors };
 }
