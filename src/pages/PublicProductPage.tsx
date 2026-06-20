@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import StickyFinishPreview from "@/components/product/StickyFinishPreview";
 import { useParams, useNavigate, Link, useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { Heart, Scale, ChevronLeft, ChevronRight, ChevronDown, ArrowLeft } from "lucide-react";
@@ -865,6 +866,7 @@ const PublicProductPage: React.FC = () => {
   const [relatedIndex, setRelatedIndex] = useState(0);
   const [bioExpanded, setBioExpanded] = useState(false);
   const [galleryActiveIndex, setGalleryActiveIndex] = useState<number | undefined>(undefined);
+  const finishSectionRef = useRef<HTMLDivElement>(null);
   // Bumped on every parent-initiated jump so the gallery re-syncs even when the
   // numeric index is identical to the previous one (e.g. re-selecting the same finish).
   const [galleryJumpNonce, setGalleryJumpNonce] = useState(0);
@@ -1223,7 +1225,7 @@ const PublicProductPage: React.FC = () => {
               </div>
 
               {/* Materials & dimensions with gold icons — shared parsing with TradeProductPage */}
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-2" ref={finishSectionRef}>
                 <VariantSelectors
                   product={product}
                   onMaterialChange={handleMaterialChange}
@@ -1235,6 +1237,11 @@ const PublicProductPage: React.FC = () => {
                     setGalleryJumpNonce((n) => n + 1);
                   }}
                   onFinishesMissingImagesChange={setFinishesMissingImages}
+                />
+                <StickyFinishPreview
+                  anchorRef={finishSectionRef}
+                  imageUrl={images[galleryActiveIndex ?? 0] || images[0] || null}
+                  alt={`${product.title} — selected finish preview`}
                 />
                 {finishesMissingImages.length > 0 && (
                   <p className="font-body text-[11px] text-muted-foreground italic mt-1">
