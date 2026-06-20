@@ -795,7 +795,7 @@ const VariantSelectors: React.FC<{
             onMaterialChange?.(v, { base: v, top: null, size: null });
           }}
         />
-      ) : hasSingleAxisSplit ? (
+      ) : hasSingleAxisSplit && !suppressSingleAsFinish ? (
         <ExpandableSpec
           icon={specIcon("⬗")}
           text={singleMaterialOptions.join("\n")}
