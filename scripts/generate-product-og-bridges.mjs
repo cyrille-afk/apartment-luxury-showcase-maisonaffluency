@@ -38,6 +38,54 @@ const ANON_KEY =
 const args = new Set(process.argv.slice(2));
 const APPLY = args.has("--apply");
 const OVERWRITE = args.has("--overwrite");
+// --strict makes any validation failure exit non-zero. Without it, validation
+// problems are reported but bad bridges are simply skipped (never written).
+const STRICT = args.has("--strict");
+
+/**
+ * Parse a generated bridge HTML and verify required tags are present and
+ * internally consistent. Returns { ok, errors[] }.
+ */
+function validateBridge(html, expected) {
+  const errors = [];
+  const m = (re) => {
+    const x = html.match(re);
+    return x ? x[1] : null;
+  };
+
+  const title = m(/<title>([^<]*)<\/title>/i);
+  if (!title || !title.trim()) errors.push("missing <title>");
+  else if (!title.includes(expected.designer)) errors.push(`title missing designer "${expected.designer}"`);
+  else if (!title.includes(expected.titleText)) errors.push(`title missing product "${expected.titleText}"`);
+
+  const desc = m(/<meta\s+name="description"\s+content="([^"]*)"/i);
+  if (!desc || !desc.trim()) errors.push("missing meta description");
+  else if (desc.length > 320) errors.push(`description too long (${desc.length} chars)`);
+
+  const robots = m(/<meta\s+name="robots"\s+content="([^"]*)"/i);
+  if (!robots || !/noindex/i.test(robots) || !/nofollow/i.test(robots))
+    errors.push("robots meta is not noindex,nofollow");
+
+  const canonical = m(/<link\s+rel="canonical"\s+href="([^"]+)"/i);
+  if (!canonical) errors.push("missing canonical");
+  else if (canonical !== expected.canonical)
+    errors.push(`canonical mismatch: ${canonical} != ${expected.canonical}`);
+
+  const ogUrl = m(/<meta\s+property="og:url"\s+content="([^"]+)"/i);
+  if (ogUrl !== expected.canonical)
+    errors.push(`og:url mismatch: ${ogUrl} != ${expected.canonical}`);
+
+  const ogImage = m(/<meta\s+property="og:image"\s+content="([^"]+)"/i);
+  if (!ogImage) errors.push("missing og:image");
+  else if (!/^https?:\/\//.test(ogImage)) errors.push(`og:image not absolute URL: ${ogImage}`);
+
+  const redirect = m(/window\.location\.replace\("([^"]+)"\)/);
+  if (!redirect) errors.push("missing JS redirect");
+  else if (redirect !== expected.canonical)
+    errors.push(`redirect target mismatch: ${redirect} != ${expected.canonical}`);
+
+  return { ok: errors.length === 0, errors };
+}
 
 // ── slugify: must match src/lib/whatsapp-share.ts exactly ─────────────────────
 const slugify = (s) =>
