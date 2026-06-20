@@ -551,6 +551,7 @@ export default function FinishSelector({ pickId, className, productTitle, onUpho
   const [openWood, setOpenWood] = useState(false);
   const [openTop, setOpenTop] = useState(false);
   const [openCover, setOpenCover] = useState(false);
+  const isMobile = useIsMobile();
   const fabricTiles = grouped["Fabric & Leather"] || [];
   const allNonFabricTiles = sortedGroupKeys
     .filter((key) => key !== "Fabric & Leather" && key !== "Cover")
@@ -564,6 +565,14 @@ export default function FinishSelector({ pickId, className, productTitle, onUpho
     .filter((f) => !topTileIds.has(f.id))
     .filter((f) => !woodFilter || woodFilter(f.name));
   const coverTiles = grouped["Cover"] || [];
+
+  // On mobile, hide finishes that have no mapped gallery images so the user
+  // only sees swatches they can preview in the hero gallery.
+  const hasPhoto = (f: Fabric) => Array.isArray(f.image_indices) && f.image_indices.length > 0;
+  const visibleFabricTiles = isMobile ? fabricTiles.filter(hasPhoto) : fabricTiles;
+  const visibleWoodTiles   = isMobile ? woodTiles.filter(hasPhoto)   : woodTiles;
+  const visibleTopTiles    = isMobile ? topTiles.filter(hasPhoto)    : topTiles;
+  const visibleCoverTiles  = isMobile ? coverTiles.filter(hasPhoto)  : coverTiles;
 
 
   const renderAccordion = (args: {
