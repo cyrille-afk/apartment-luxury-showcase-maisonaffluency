@@ -131,12 +131,21 @@ async function main() {
   const sb = createClient(SUPABASE_URL, ANON_KEY, { auth: { persistSession: false } });
 
   // designer_curator_picks_public is the anon-readable view (omits price fields).
-  const { data, error } = await sb
+  // The view has no PostgREST FK to designers, so fetch designers separately and join in JS.
+  const { data: picks, error } = await sb
     .from("designer_curator_picks_public")
-    .select(
-      "id, title, subtitle, description, image_url, gallery_images, is_hidden, designer:designers!inner(name, display_name)"
-    )
+    .select("id, designer_id, title, subtitle, description, image_url, gallery_images, is_hidden")
     .or("is_hidden.is.null,is_hidden.eq.false");
+  const { data: designers, error: dErr } = await sb
+    .from("designers")
+    .select("id, name, display_name");
+  if (dErr) {
+    console.error("Designer query failed:", dErr.message);
+    process.exit(1);
+  }
+  const designerById = new Map((designers ?? []).map((d) => [d.id, d]));
+  const data = (picks ?? []).map((p) => ({ ...p, designer: designerById.get(p.designer_id) }));
+
 
 
   if (error) {
