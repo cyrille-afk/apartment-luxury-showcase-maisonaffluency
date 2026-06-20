@@ -186,7 +186,7 @@ function useProductBySlug(designerSlug: string | undefined, productSlug: string 
 /* ------------------------------------------------------------------ */
 const VariantSelectors: React.FC<{
   product: any;
-  onMaterialChange?: (label: string | null, opts?: { base?: string | null; top?: string | null; size?: string | null }) => void;
+  onMaterialChange?: (label: string | null, opts?: { base?: string | null; top?: string | null; size?: string | null; fromSwatch?: boolean }) => void;
   galleryActiveIndex?: number;
   finishMap?: Record<string, number> | null;
   onSwatchImagesChange?: (imageIndices: number[] | null) => void;
