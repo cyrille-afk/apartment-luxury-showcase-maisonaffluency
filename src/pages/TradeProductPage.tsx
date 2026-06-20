@@ -509,6 +509,10 @@ const TradeProductPage: React.FC = () => {
 
   useEffect(() => {
     window.scrollTo({ top: 0 });
+    // Reset gallery to first image when navigating between products — the page
+    // component instance is reused across slug changes, so stale index from
+    // the previous product would otherwise persist (e.g. land on picture 3).
+    setGalleryActiveIndex(undefined);
   }, [designerSlug, productSlug]);
 
   const handleAddToQuote = useCallback(async () => {
