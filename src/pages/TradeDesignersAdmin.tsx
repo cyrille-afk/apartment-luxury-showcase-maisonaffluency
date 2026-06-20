@@ -412,8 +412,6 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
     queryClient.invalidateQueries({ queryKey: ["admin-public-picks-counts"] });
   };
 
-  if (!loaded) return null;
-
   const PICKS_PAGE_SIZE = 12;
   const [visiblePicksCount, setVisiblePicksCount] = useState(PICKS_PAGE_SIZE);
   // Reset visible window when the designer changes or picks reload.
@@ -450,8 +448,11 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
     return () => io.disconnect();
   }, [visiblePicksCount, picks.length]);
 
+  if (!loaded) return null;
+
   const visiblePicks = picks.slice(0, visiblePicksCount);
   const remainingPicks = Math.max(0, picks.length - visiblePicksCount);
+
 
   return (
     <div>
