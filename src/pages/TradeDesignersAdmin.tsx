@@ -328,7 +328,7 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
   // Debounced autosave: coalesce rapid keystrokes per (pick, field) into a
   // single UPDATE 600ms after the user stops typing. Cuts trigger-chain
   // pressure (audit log + mirror triggers) by ~10-20x on long text fields.
-  const pendingWritesRef = React.useRef<Map<string, { value: any; timer: number }>>(new Map());
+  const pendingWritesRef = useRef<Map<string, { value: any; timer: number }>>(new Map());
   const updateField = (id: string, field: string, value: any) => {
     setPicks((prev) => prev.map((p) => (p.id === id ? { ...p, [field]: value } : p)));
     const key = `${id}::${field}`;
