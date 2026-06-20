@@ -1873,6 +1873,14 @@ const TradeProductPage: React.FC = () => {
               {added ? "Added to Quote" : "Add to Quote"}
             </button>
 
+            {finishesMissingImages.length > 0 && (
+              <p className="font-body text-[11px] text-muted-foreground -mt-1 italic">
+                Heads up — no reference image on file for{" "}
+                <span className="text-foreground">{finishesMissingImages.join(", ")}</span>. A note
+                will be attached to the quote so our concierge can confirm visuals.
+              </p>
+            )}
+
             {/* Secondary actions: Favorite / Pin / Spec Sheet */}
             <div className="grid grid-cols-3 gap-2">
               <TradeFavoriteFolderPicker
