@@ -863,6 +863,11 @@ const PublicProductPage: React.FC = () => {
   // Bumped on every parent-initiated jump so the gallery re-syncs even when the
   // numeric index is identical to the previous one (e.g. re-selecting the same finish).
   const [galleryJumpNonce, setGalleryJumpNonce] = useState(0);
+  // Currently-selected wood/top finish swatches that lack mapped images —
+  // appended to the bespoke concierge message so they aren't overlooked.
+  const [finishesMissingImages, setFinishesMissingImages] = useState<string[]>([]);
+
+
 
   useEffect(() => {
     window.scrollTo({ top: 0 });
