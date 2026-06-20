@@ -630,7 +630,7 @@ const VariantSelectors: React.FC<{
             setSelTop(null);
             nextTop = null;
           }
-          onMaterialChange?.(match, { base: match, top: nextTop, size: selDualSize });
+          onMaterialChange?.(match, { base: match, top: nextTop, size: selDualSize, fromSwatch: true });
         }}
         onTopFinishChange={(topName) => {
           if (!topName) return;
