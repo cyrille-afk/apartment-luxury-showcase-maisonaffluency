@@ -1,43 +1,21 @@
 import { Link } from "react-router-dom";
-import { cloudinaryUrl } from "@/lib/cloudinary";
 import { scrollToSection } from "@/lib/scrollToSection";
 import { trackCTA } from "@/lib/analytics";
 
-// Use a single fallback src (smallest useful size); srcSet handles responsive selection
-const HERO_ID = "AffluencySG_194-22.jpg_macpwj";
-const heroImageFallback = cloudinaryUrl(HERO_ID, { width: 320, quality: "auto:eco", crop: "fill" });
-// Mobile widths use q_auto:eco (smaller file, faster LCP); desktop keeps q_auto:good
-const heroSrcSet = [
-  `${cloudinaryUrl(HERO_ID, { width: 320, quality: "auto:eco", crop: "fill" })} 320w`,
-  `${cloudinaryUrl(HERO_ID, { width: 400, quality: "auto:eco", crop: "fill" })} 400w`,
-  `${cloudinaryUrl(HERO_ID, { width: 600, quality: "auto:eco", crop: "fill" })} 600w`,
-  `${cloudinaryUrl(HERO_ID, { width: 828, quality: "auto:good", crop: "fill" })} 828w`,
-  `${cloudinaryUrl(HERO_ID, { width: 1200, quality: "auto:good", crop: "fill" })} 1200w`,
-  `${cloudinaryUrl(HERO_ID, { width: 1600, quality: "auto:good", crop: "fill" })} 1600w`,
-].join(", ");
+// The hero <img> is rendered statically in index.html (persistent across React
+// mounts) so it stays Chrome's LCP candidate. Don't render a duplicate <img>
+// here — the inline one is already visible underneath this section via
+// `position: absolute; z-index: 0` on `.hero-skeleton`.
 
 const scrollToOverview = () => scrollToSection("overview");
 
 const Hero = () => {
   return (
     <section className="relative h-screen w-full overflow-hidden">
-      {/* Static image — zero JS dependencies, fastest LCP */}
-      <div className="absolute inset-0">
-        <img
-          src={heroImageFallback}
-          srcSet={heroSrcSet}
-          sizes="100vw"
-          width={1920}
-          height={1080}
-          alt="Luxury living room with Asian-inspired murals and designer furniture"
-          className="h-full w-full object-cover object-[50%_30%] md:h-[120%] md:object-[50%_0%]"
-          loading="eager"
-          /* @ts-ignore — React 18 supports fetchPriority */
-          fetchPriority="high"
-          decoding="sync"
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/20" />
-      </div>
+      {/* Gradient overlay only — the hero image is the persistent inline skeleton in index.html */}
+      <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-black/10 via-transparent to-black/20" />
+
+
 
       {/* Text overlay — CSS-only animations, no framer-motion needed */}
       <div className="relative z-10 h-full px-4 pb-32 pt-[44%] md:px-32 md:pb-20 md:pt-[20%] lg:px-52 flex-col border rounded-none opacity-100 shadow-none flex items-start justify-start md:justify-start md:items-start">
