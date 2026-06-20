@@ -564,11 +564,21 @@ export default function FinishSelector({ pickId, className, productTitle, onUpho
         renderAccordion({
           isOpen: openWood,
           onToggle: () => setOpenWood((v) => !v),
-          label:
-            (woodLabel && woodLabel.trim()) ||
-            (productTitle && /\btable\b/i.test(productTitle)
-              ? "Select Your Table Finish"
-              : "Select the Finish of the Frame"),
+          label: (() => {
+            if (woodLabel && woodLabel.trim()) return woodLabel.trim();
+            const isTable = !!productTitle && /\btable\b/i.test(productTitle);
+            // Tables typically share a single marble/stone palette across the
+            // top AND the base — collapse the two pickers into one unified
+            // "Top & Base" label so the user sees one selection control.
+            const cats = woodTiles.map((t) => (t.category || "").trim().toLowerCase());
+            const allStone = cats.length > 0 && cats.every((c) => c === "stone");
+            const noSeparateTop = topTiles.length === 0;
+            if (isTable && allStone && noSeparateTop) {
+              return "Select Your Marble Finish (Top & Base)";
+            }
+            if (isTable) return "Select Your Table Finish";
+            return "Select the Finish of the Frame";
+          })(),
           selectedName: selectedWoodItem?.name ?? null,
           tiles: woodTiles,
           glyph: pickFinishGlyph(woodTiles, woodLabel),
