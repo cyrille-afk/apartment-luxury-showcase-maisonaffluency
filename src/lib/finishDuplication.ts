@@ -45,8 +45,16 @@ export interface SuppressFinishDuplicateInput {
 
 /**
  * Returns true when the parallel single-axis "Select Your Finish" dropdown
- * must be suppressed because every material it would show is already
- * exposed as a wood/stone swatch in `FinishSelector`.
+ * must be suppressed because the swatch picker in `FinishSelector` is
+ * already exposing the same material palette.
+ *
+ * Rule: as soon as ANY single-axis material option overlaps with a linked
+ * swatch (case-insensitive substring either way), the swatch picker is the
+ * canonical control and the text dropdown is redundant. We deliberately do
+ * not require every option to match — real catalogues frequently contain
+ * compound labels ("Travertino Rosso / Grey Saint Laurent / Picasso Green")
+ * and stray typos (e.g. variant "Kynos" vs swatch "Kyknos") that would
+ * otherwise leak the duplicate dropdown back into the UI.
  */
 export const shouldSuppressSingleAsFinish = ({
   hasSingleAxisSplit,
@@ -56,8 +64,9 @@ export const shouldSuppressSingleAsFinish = ({
   if (!hasSingleAxisSplit) return false;
   if (!linkedWoodFinishes.length) return false;
   if (!singleMaterialOptions.length) return false;
-  return everyOptionCoveredBySwatches(singleMaterialOptions, linkedWoodFinishes);
+  return someOptionCoveredBySwatches(singleMaterialOptions, linkedWoodFinishes);
 };
+
 
 export interface SuppressBaseTopInput {
   baseAxisIsDim: boolean;
