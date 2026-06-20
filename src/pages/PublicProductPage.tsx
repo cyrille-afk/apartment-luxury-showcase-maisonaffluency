@@ -1236,11 +1236,6 @@ const PublicProductPage: React.FC = () => {
                   }}
                   onFinishesMissingImagesChange={setFinishesMissingImages}
                 />
-                <StickyFinishPreview
-                  anchorRef={finishSectionRef}
-                  imageUrl={images[galleryActiveIndex ?? 0] || images[0] || null}
-                  alt={`${product.title} — selected finish preview`}
-                />
                 {finishesMissingImages.length > 0 && (
                   <p className="font-body text-[11px] text-muted-foreground italic mt-1">
                     No reference image on file for{" "}
