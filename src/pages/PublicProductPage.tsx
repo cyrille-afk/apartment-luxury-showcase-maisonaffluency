@@ -350,6 +350,18 @@ const VariantSelectors: React.FC<{
   });
   const suppressBaseAsFinish = !baseAxisIsDim && (allBasesHaveSwatches || (hasWoodSwatches && isFinishAxis(baseAxisLabelRaw)));
   const suppressTopAsFinish = !topAxisIsDim && (topAxisHasSwatches || (isProductUpholstered(product) && isFinishAxis(topAxisLabelRaw)));
+  // When the FinishSelector swatch picker already exposes every material in
+  // the single-axis "size + material" split (e.g. marble finishes attached as
+  // Stone swatches), suppress the parallel text dropdown so we don't render
+  // the same finish picker twice.
+  const allSingleMatsHaveSwatches = hasSingleAxisSplit && hasWoodSwatches && singleMaterialOptions.length > 0 && singleMaterialOptions.every((m) => {
+    const nm = normLinkedFinish(m);
+    return linkedWoodFinishes.some((lw) => {
+      const nlw = normLinkedFinish(lw);
+      return nlw === nm || nlw.includes(nm) || nm.includes(nlw);
+    });
+  });
+  const suppressSingleAsFinish = allSingleMatsHaveSwatches;
 
   // Per-square-metre rug picker short-circuit: when the product is a rug and
   // its size_variants encode parseable dimensions (e.g. "300 × 400 cm"), show
