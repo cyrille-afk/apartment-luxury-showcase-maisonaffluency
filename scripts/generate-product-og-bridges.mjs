@@ -239,11 +239,16 @@ async function main() {
     });
 
     // Always validate the in-memory HTML before deciding to write it.
+    // Designer/title get escaped before substring-matching against the
+    // generated HTML (which is also escaped — e.g. `&` → `&amp;`).
     const v = validateBridge(html, {
       canonical,
       designer: designerName,
+      designerEsc: esc(designerName),
       titleText: row.title,
+      titleTextEsc: esc(row.title),
     });
+
     if (!v.ok) {
       invalid++;
       validationFailures.push({ filename, errors: v.errors });
