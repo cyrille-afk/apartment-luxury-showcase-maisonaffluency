@@ -139,8 +139,39 @@ describe("finish dropdown de-duplication", () => {
           linkedWoodFinishes: ALINEA_MARBLES,
         }),
       ).toBe(false);
+  });
+
+  describe("normalization layer (Kynos ↔ Kyknos typo)", () => {
+    // Library spelling is "Kyknos"; variant spelling is "Kynos". The
+    // normalization layer must treat them as the same finish for both
+    // suppression and coverage helpers — otherwise the strict `every`
+    // path would leak the duplicate dropdown back into the UI.
+    const lib = [
+      "Bianco Statuarietto",
+      "Grafite",
+      "Kyknos",
+      "Picasso Green",
+      "Travertino Rosso",
+    ];
+
+    it("everyOptionCoveredBySwatches accepts Kynos via fuzzy match", () => {
+      expect(
+        everyOptionCoveredBySwatches(["Kynos", "Grafite", "Bianco"], lib),
+      ).toBe(true);
+    });
+
+    it("everyOptionCoveredBySwatches still rejects truly unrelated options", () => {
+      expect(
+        everyOptionCoveredBySwatches(["Kynos", "Mithril"], lib),
+      ).toBe(false);
+    });
+
+    it("someOptionCoveredBySwatches matches via fuzzy normalization", () => {
+      expect(someOptionCoveredBySwatches(["Mithril", "Kynos"], lib)).toBe(true);
+      expect(someOptionCoveredBySwatches(["Mithril", "Unobtanium"], lib)).toBe(false);
     });
   });
+
 
   describe("shouldSuppressBaseAsFinish", () => {
     const base = {
