@@ -11,6 +11,8 @@
  * swatches (e.g. Angelo M tables × Alinea marble palette).
  */
 
+import { normalizeFinishOption } from "./finishNormalization";
+
 const norm = (s: string) => (s || "").trim().toLowerCase();
 
 export const isFinishAxisLabel = (label: string) =>
@@ -24,18 +26,32 @@ export const swatchCoversOption = (option: string, swatch: string): boolean => {
   return a === b || a.includes(b) || b.includes(a);
 };
 
+/**
+ * Covers `option` against the library either by direct substring overlap
+ * (handled by `swatchCoversOption`) or by typo-tolerant normalization
+ * (e.g. variant "Kynos" ↔ library "Kyknos"). Used by every/some helpers
+ * so all suppression rules benefit from the same fuzzy matching layer.
+ */
+const isCoveredByLibrary = (option: string, library: string[]): boolean => {
+  if (library.some((s) => swatchCoversOption(option, s))) return true;
+  const normalized = normalizeFinishOption(option, library);
+  if (!normalized || normalized === option) return false;
+  return library.some((s) => swatchCoversOption(normalized, s));
+};
+
 export const everyOptionCoveredBySwatches = (
   options: string[],
   swatches: string[],
 ): boolean => {
   if (!options.length) return false;
-  return options.every((o) => swatches.some((s) => swatchCoversOption(o, s)));
+  return options.every((o) => isCoveredByLibrary(o, swatches));
 };
 
 export const someOptionCoveredBySwatches = (
   options: string[],
   swatches: string[],
-): boolean => options.some((o) => swatches.some((s) => swatchCoversOption(o, s)));
+): boolean => options.some((o) => isCoveredByLibrary(o, swatches));
+
 
 export interface SuppressFinishDuplicateInput {
   hasSingleAxisSplit: boolean;
