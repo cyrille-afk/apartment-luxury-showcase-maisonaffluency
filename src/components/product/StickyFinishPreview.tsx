@@ -54,7 +54,7 @@ const StickyFinishPreview = ({ anchorRef, imageUrl, alt }: StickyFinishPreviewPr
       aria-label="View selected finish in gallery"
       className={[
         "md:hidden fixed right-3 z-40",
-        "top-[calc(env(safe-area-inset-top,0px)+72px)]",
+        "top-[calc(env(safe-area-inset-top,0px)+120px)]",
         "h-20 w-20 rounded-lg overflow-hidden",
         "border border-border bg-background shadow-lg",
         "transition-transform duration-300",
