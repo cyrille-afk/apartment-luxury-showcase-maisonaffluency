@@ -1547,7 +1547,7 @@ const TradeProductPage: React.FC = () => {
                       setSelectedBase(null);
                       nextBase = null;
                     }
-                    handleMaterialChange(match, { base: nextBase, top: match, size: selectedDualSize });
+                    handleMaterialChange(match, { base: nextBase, top: match, size: selectedDualSize, fromSwatch: true });
                   }}
                   includePricing
                   showUpholsterySection={isUpholsteredProduct}
