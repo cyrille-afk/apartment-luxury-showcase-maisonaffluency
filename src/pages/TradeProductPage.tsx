@@ -1070,12 +1070,19 @@ const TradeProductPage: React.FC = () => {
     ? sizeVariants.map((v) => v.price_cents).filter((c) => typeof c === "number" && c > 0)
     : [];
   const minVariantCents = pricedVariantCents.length > 0 ? Math.min(...pricedVariantCents) : null;
+  // If the user has actively selected a Base/Top/Size in a dual-axis product
+  // but no priced variant matches that combination (e.g. a linked swatch like
+  // "Ceppo di Sicilia" that hasn't been quoted yet), do NOT fall back to the
+  // cheapest "From €X" — show "Price on request" instead so the UI matches
+  // the selection.
+  const dualSelectionMade = isDualAxis && !!(selectedBase || selectedTop || selectedDualSize);
+  const dualSelectionUnpriced = dualSelectionMade && (!dualVariant || !(typeof dualVariant.price_cents === "number" && dualVariant.price_cents > 0));
   const effectiveRrpCents = hasVariants
     ? (activeVariant
       ? (typeof activeVariant.price_cents === "number" && activeVariant.price_cents > 0 ? activeVariant.price_cents : null)
-      : minVariantCents)
+      : (dualSelectionUnpriced ? null : minVariantCents))
     : pricing?.rrp_price_cents ?? null;
-  const isFromPrice = hasVariants && !activeVariant && effectiveRrpCents != null;
+  const isFromPrice = hasVariants && !activeVariant && !dualSelectionUnpriced && effectiveRrpCents != null;
 
 
   // Per-meter fabric upcharge in the product's currency. We always charge the
@@ -1513,33 +1520,13 @@ const TradeProductPage: React.FC = () => {
                           ? `Select Your ${formatVariantAxisLabel(product.base_axis_label) || product.base_axis_label}`
                           : null)
                   }
-                  woodFilter={
-                    isDualAxis && baseOptions.length > 0
-                      ? (name) => {
-                          const n = name.trim().toLowerCase();
-                          return baseOptions.some((b) => {
-                            const nb = b.trim().toLowerCase();
-                            return nb === n || nb.includes(n) || n.includes(nb);
-                          });
-                        }
-                      : undefined
-                  }
+                  woodFilter={undefined}
                   topLabel={
                     product.top_axis_label
                       ? `Select Your ${formatVariantAxisLabel(product.top_axis_label) || product.top_axis_label}`
                       : null
                   }
-                  topFilter={
-                    isDualAxis && !topAxisIsDim && topOptions.length > 0
-                      ? (name) => {
-                          const n = name.trim().toLowerCase();
-                          return topOptions.some((t) => {
-                            const nt = t.trim().toLowerCase();
-                            return nt === n || nt.includes(n) || n.includes(nt);
-                          });
-                        }
-                      : undefined
-                  }
+                  topFilter={undefined}
                   onTopFinishChange={(topName) => {
                     if (!topName) return;
                     const norm = (s: string) => s.trim().toLowerCase();
