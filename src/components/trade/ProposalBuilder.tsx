@@ -144,6 +144,7 @@ export default function ProposalBuilder({
           .filter((p: any) => p.image_url)
           .map((p: any) => ({
             id: nextPinId(),
+            product_id: p.id,
             product_name: p.product_name,
             brand_name: p.brand_name,
             image_url: p.image_url,
