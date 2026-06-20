@@ -992,7 +992,7 @@ const PublicProductPage: React.FC = () => {
   // galleryActiveIndex declared earlier (must precede early returns to keep hooks order stable).
   const handleMaterialChange = (
     label: string | null,
-    opts?: { base?: string | null; top?: string | null; size?: string | null }
+    opts?: { base?: string | null; top?: string | null; size?: string | null; fromSwatch?: boolean }
   ) => {
     // Detect a "clear selection" call: no label and no axis values.
     const isClear =
