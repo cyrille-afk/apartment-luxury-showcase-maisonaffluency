@@ -578,13 +578,32 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
             </div>
 
             <div className="flex flex-col">
-              {product.dimensions && looksLikeDimension(product.dimensions) && (
-                <ExpandableSpec
-                  icon={specIcon("📐")}
-                  text={withImperialPerLine(product.dimensions)}
-                  emphasized
-                />
-              )}
+              {(() => {
+                // Suppress the standalone dimensions block when one of the
+                // size-variant renderers below will already surface the same
+                // dimension lines (avoids the duplicate "Select Your Size").
+                const svLocal = product.size_variants || [];
+                const dualHere = svLocal.length > 0 && svLocal.some((v) => v.base && v.base.trim()) && svLocal.some((v) => v.top && v.top.trim());
+                const dualDimOpts = dualHere
+                  ? Array.from(new Set(svLocal.map((v) => (v.label || "").trim()).filter(Boolean))).filter(looksLikeDimension)
+                  : [];
+                const singleDimLabels = !dualHere && svLocal.length > 1
+                  ? Array.from(new Set(svLocal.map((v) => (v.label || "").trim()).filter(Boolean))).filter(looksLikeDimension)
+                  : [];
+                const variantSelectorWillShowDims =
+                  (hasSingleAxisSplit && singleSplitSizes.length > 0) ||
+                  (dualHere && dualDimOpts.length > 0) ||
+                  singleDimLabels.length > 1;
+                if (variantSelectorWillShowDims) return null;
+                if (!product.dimensions || !looksLikeDimension(product.dimensions)) return null;
+                return (
+                  <ExpandableSpec
+                    icon={specIcon("📐")}
+                    text={withImperialPerLine(product.dimensions)}
+                    emphasized
+                  />
+                );
+              })()}
 
               {(() => {
                 if (hasSingleAxisSplit && singleSplitSizes.length > 0) {
