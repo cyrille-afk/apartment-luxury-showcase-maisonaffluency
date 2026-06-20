@@ -96,9 +96,17 @@ export default function ExpandableSpec({
   }
 
   const [internalIdx, setInternalIdx] = useState<number | null>(null);
-  // (open state removed — multi/no-placeholder now renders full paragraph)
+  const [open, setOpen] = useState(false);
+  const [activeIdx, setActiveIdx] = useState<number>(0);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const optionRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const selectedIdx = value !== undefined ? value : internalIdx;
   const showAutoHint = autoDetectedHint && didAutoSplit;
+
+  // Focus the active option when the listbox opens or active changes.
+  useEffect(() => {
+    if (open) optionRefs.current[activeIdx]?.focus();
+  }, [open, activeIdx]);
 
   if (lines.length === 0) return null;
 
