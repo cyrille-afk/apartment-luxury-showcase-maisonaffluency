@@ -845,7 +845,7 @@ const TradeProductPage: React.FC = () => {
   // matter which axis the user touches.
   const handleMaterialChange = (
     label: string | null,
-    opts?: { base?: string | null; top?: string | null; size?: string | null }
+    opts?: { base?: string | null; top?: string | null; size?: string | null; fromSwatch?: boolean }
   ) => {
     // Detect a "clear selection" call: no label and no axis values.
     const isClear =
