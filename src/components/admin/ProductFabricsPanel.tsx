@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
@@ -105,6 +105,7 @@ export default function ProductFabricsPanel({
   const [drafts, setDrafts] = useState<Record<string, Drafts>>({});
   const [adding, setAdding] = useState(false);
   const [search, setSearch] = useState("");
+  const rangeSaveTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
 
   // Product-level size labels
   const { data: pick } = useQuery({
@@ -209,6 +210,24 @@ export default function ProductFabricsPanel({
       return;
     }
     qc.invalidateQueries({ queryKey: ["product-fabrics-panel", pickId] });
+  };
+
+  const saveImageRange = async (rowId: string, range: string) => {
+    const { error } = await (supabase as any)
+      .from("product_fabrics")
+      .update({ image_indices: parseRange(range) })
+      .eq("id", rowId);
+    if (error) {
+      toast({ title: "Image range save failed", description: error.message, variant: "destructive" });
+    }
+  };
+
+  const queueImageRangeSave = (rowId: string, range: string) => {
+    if (rangeSaveTimers.current[rowId]) clearTimeout(rangeSaveTimers.current[rowId]);
+    rangeSaveTimers.current[rowId] = setTimeout(() => {
+      saveImageRange(rowId, range);
+      delete rangeSaveTimers.current[rowId];
+    }, 250);
   };
 
   const linkFabric = async (fabricId: string) => {
@@ -347,7 +366,11 @@ export default function ProductFabricsPanel({
             />
             <Input
               value={d.range}
-              onChange={(e) => setDrafts((s) => ({ ...s, [r.id]: { ...d, range: e.target.value } }))}
+              onChange={(e) => {
+                const nextRange = e.target.value;
+                setDrafts((s) => ({ ...s, [r.id]: { ...d, range: nextRange } }));
+                queueImageRangeSave(r.id, nextRange);
+              }}
               onBlur={() => dirty && saveRow(r.id)}
               placeholder="1-4"
               className="text-xs h-8"
