@@ -590,12 +590,18 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                 const sv = product.size_variants || [];
                 const isDualAxis = sv.length > 0 && sv.some((v) => v.base && v.base.trim()) && sv.some((v) => v.top && v.top.trim());
 
-                // Build the candidate size-label list (single-axis / base-only).
+                // Build the candidate size-label list. Works for single-axis,
+                // base-only AND dual-axis (e.g. Angelo M Side Table where
+                // each variant has size label + base/top finishes).
                 let sizeLabels: string[] = [];
-                if (!isDualAxis && sv.length > 0) {
+                if (sv.length > 0) {
                   sizeLabels = Array.from(
                     new Set(sv.map((v) => (v.label || "").trim()).filter(Boolean))
                   );
+                }
+                // Base-only fallback when explicit labels are absent.
+                if (sizeLabels.length < 2 && !isDualAxis && baseOnlyIsDim && baseOnlyOptions.length >= 2) {
+                  sizeLabels = baseOnlyOptions;
                 }
                 const dimCount = sizeLabels.filter(looksLikeDimension).length;
                 const showSizePicker = sizeLabels.length >= 2 && dimCount >= 2 && dimCount >= Math.ceil(sizeLabels.length / 2);
