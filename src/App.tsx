@@ -76,6 +76,7 @@ const TradeAdminOnboarding = lazy(() => import("./pages/TradeAdminOnboarding"));
 const TradeAdminOnboardingFunnel = lazy(() => import("./pages/TradeAdminOnboardingFunnel"));
 
 const TradeAdminSharePreview = lazy(() => import("./pages/TradeAdminSharePreview"));
+const TradeAdminHotspotMapping = lazy(() => import("./pages/TradeAdminHotspotMapping"));
 const TradeMoodBoards = lazy(() => import("./pages/TradeMoodBoards"));
 const TradeBudgetTracker = lazy(() => import("./pages/TradeBudgetTracker"));
 const TradeClients = lazy(() => import("./pages/TradeClients"));
