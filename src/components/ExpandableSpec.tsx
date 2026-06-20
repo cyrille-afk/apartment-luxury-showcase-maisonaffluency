@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { ChevronDown } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -96,9 +96,17 @@ export default function ExpandableSpec({
   }
 
   const [internalIdx, setInternalIdx] = useState<number | null>(null);
-  // (open state removed — multi/no-placeholder now renders full paragraph)
+  const [open, setOpen] = useState(false);
+  const [activeIdx, setActiveIdx] = useState<number>(0);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const optionRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const selectedIdx = value !== undefined ? value : internalIdx;
   const showAutoHint = autoDetectedHint && didAutoSplit;
+
+  // Focus the active option when the listbox opens or active changes.
+  useEffect(() => {
+    if (open) optionRefs.current[activeIdx]?.focus();
+  }, [open, activeIdx]);
 
   if (lines.length === 0) return null;
 
@@ -133,95 +141,160 @@ export default function ExpandableSpec({
   // Multi + placeholder → inline expanding picker that pushes rows below
   // downward (instead of overlaying them like a Radix/Native select).
   if (placeholder) {
-    const [open, setOpen] = useState(false);
     const hasSelection = selectedIdx != null && selectedIdx >= 0;
+    const firstEnabled = () => {
+      for (let i = 0; i < lines.length; i++) if (!disabledSet.has(i)) return i;
+      return 0;
+    };
+    const nextEnabled = (from: number, dir: 1 | -1) => {
+      const n = lines.length;
+      for (let step = 1; step <= n; step++) {
+        const i = (from + dir * step + n * step) % n;
+        if (!disabledSet.has(i)) return i;
+      }
+      return from;
+    };
+    const openList = (focusIdx?: number) => {
+      const start =
+        focusIdx ??
+        (hasSelection && !disabledSet.has(selectedIdx as number)
+          ? (selectedIdx as number)
+          : firstEnabled());
+      setActiveIdx(start);
+      setOpen(true);
+    };
+    const closeList = (returnFocus = true) => {
+      setOpen(false);
+      if (returnFocus) requestAnimationFrame(() => triggerRef.current?.focus());
+    };
     const pick = (i: number) => {
+      if (disabledSet.has(i)) return;
       setInternalIdx(i);
       if (onChange) onChange(i);
-      setOpen(false);
+      closeList();
     };
     const clear = () => {
       setInternalIdx(null);
       if (onChange) onChange(-1);
-      setOpen(false);
+      closeList();
+    };
+
+    const onTriggerKey = (e: React.KeyboardEvent<HTMLButtonElement>) => {
+      if (e.key === "ArrowDown" || e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        openList();
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        openList(nextEnabled(firstEnabled(), -1));
+      }
+    };
+    const onListKey = (e: React.KeyboardEvent<HTMLUListElement>) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        closeList();
+      } else if (e.key === "ArrowDown") {
+        e.preventDefault();
+        setActiveIdx((i) => nextEnabled(i, 1));
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        setActiveIdx((i) => nextEnabled(i, -1));
+      } else if (e.key === "Home") {
+        e.preventDefault();
+        setActiveIdx(firstEnabled());
+      } else if (e.key === "End") {
+        e.preventDefault();
+        setActiveIdx(nextEnabled(firstEnabled(), -1));
+      } else if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        pick(activeIdx);
+      } else if (e.key === "Tab") {
+        // Let Tab move focus naturally, but close the list so it doesn't trap.
+        closeList(false);
+      }
     };
 
     return (
-      <>
-        <div className="border-b border-border/60 first:border-t">
-          <button
-            type="button"
-            aria-expanded={open}
-            onClick={() => setOpen((o) => !o)}
+      <div className="border-b border-border/60 first:border-t">
+        <button
+          ref={triggerRef}
+          type="button"
+          aria-haspopup="listbox"
+          aria-expanded={open}
+          onClick={() => (open ? closeList(false) : openList())}
+          onKeyDown={onTriggerKey}
+          className={cn(
+            "flex items-center gap-5 w-full py-4 text-left",
+            "font-body text-sm",
+            "focus:outline-none focus-visible:ring-0",
+            "hover:text-foreground transition-colors",
+            !hasSelection
+              ? "text-muted-foreground"
+              : emphasized
+              ? "text-foreground font-medium"
+              : "text-foreground"
+          )}
+        >
+          <span className="shrink-0">{icon}</span>
+          <span className="flex-1 min-w-0 whitespace-normal break-words leading-relaxed">
+            {hasSelection ? lines[selectedIdx ?? 0] : placeholder}
+          </span>
+          <ChevronDown
             className={cn(
-              "flex items-center gap-5 w-full py-4 text-left",
-              "font-body text-sm",
-              "focus:outline-none focus-visible:ring-0",
-              "hover:text-foreground transition-colors",
-              !hasSelection
-                ? "text-muted-foreground"
-                : emphasized
-                ? "text-foreground font-medium"
-                : "text-foreground"
+              "h-4 w-4 shrink-0 text-muted-foreground/60 transition-transform",
+              open && "rotate-180"
             )}
+          />
+        </button>
+        {open && (
+          <ul
+            role="listbox"
+            tabIndex={-1}
+            onKeyDown={onListKey}
+            className="pb-3 pl-[44px] pr-2 flex flex-col focus:outline-none"
           >
-            <span className="shrink-0">{icon}</span>
-            <span className="flex-1 min-w-0 whitespace-normal break-words leading-relaxed">
-              {hasSelection ? lines[selectedIdx ?? 0] : placeholder}
-            </span>
-            <ChevronDown
-              className={cn(
-                "h-4 w-4 shrink-0 text-muted-foreground/60 transition-transform",
-                open && "rotate-180"
-              )}
-            />
-          </button>
-          {open && (
-            <ul
-              role="listbox"
-              className="pb-3 pl-[44px] pr-2 flex flex-col"
-            >
-              {hasSelection && (
-                <li>
+            {hasSelection && (
+              <li>
+                <button
+                  type="button"
+                  onClick={clear}
+                  className="w-full text-left font-body text-xs md:text-sm py-2 text-muted-foreground italic hover:text-foreground transition-colors"
+                >
+                  Clear selection
+                </button>
+              </li>
+            )}
+            {lines.map((line, i) => {
+              const isDisabled = disabledSet.has(i);
+              const isSelected = i === selectedIdx;
+              return (
+                <li key={i}>
                   <button
+                    ref={(el) => (optionRefs.current[i] = el)}
                     type="button"
-                    onClick={clear}
-                    className="w-full text-left font-body text-xs md:text-sm py-2 text-muted-foreground italic hover:text-foreground transition-colors"
+                    role="option"
+                    aria-selected={isSelected}
+                    aria-disabled={isDisabled}
+                    tabIndex={i === activeIdx ? 0 : -1}
+                    onClick={() => pick(i)}
+                    className={cn(
+                      "w-full text-left font-body text-xs md:text-sm py-2 leading-relaxed whitespace-normal transition-colors",
+                      "focus:outline-none focus-visible:bg-muted/40",
+                      isDisabled
+                        ? "line-through text-muted-foreground/50 cursor-not-allowed"
+                        : "hover:text-foreground",
+                      isSelected ? "text-foreground font-medium" : "text-muted-foreground"
+                    )}
                   >
-                    Clear selection
+                    {line}
                   </button>
                 </li>
-              )}
-              {lines.map((line, i) => {
-                const isDisabled = disabledSet.has(i);
-                const isSelected = i === selectedIdx;
-                return (
-                  <li key={i}>
-                    <button
-                      type="button"
-                      role="option"
-                      aria-selected={isSelected}
-                      disabled={isDisabled}
-                      onClick={() => !isDisabled && pick(i)}
-                      className={cn(
-                        "w-full text-left font-body text-xs md:text-sm py-2 leading-relaxed whitespace-normal transition-colors",
-                        isDisabled
-                          ? "line-through text-muted-foreground/50 cursor-not-allowed"
-                          : "hover:text-foreground",
-                        isSelected ? "text-foreground font-medium" : "text-muted-foreground"
-                      )}
-                    >
-                      {line}
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
-          )}
-        </div>
+              );
+            })}
+          </ul>
+        )}
         {showAutoHint && (
           <p
-            className="font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground/70 mt-1 pl-[26px]"
+            className="font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground/70 pb-3 pl-[44px]"
             role="note"
           >
             Finishes auto-detected — please confirm at quote
@@ -229,13 +302,13 @@ export default function ExpandableSpec({
         )}
         {helperText && (
           <p
-            className="font-body text-[10px] tracking-wide text-muted-foreground/80 mt-1 pl-[26px] italic"
+            className="font-body text-[10px] tracking-wide text-muted-foreground/80 pb-3 pl-[44px] italic"
             role="note"
           >
             {helperText}
           </p>
         )}
-      </>
+      </div>
     );
   }
 
