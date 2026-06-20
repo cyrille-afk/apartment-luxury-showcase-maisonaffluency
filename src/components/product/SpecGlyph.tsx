@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { Hexagon, Layers, Mountain, Sparkles, TreeDeciduous } from "lucide-react";
+import { Hexagon, Layers, Mountain, Ruler, Sparkles, TreeDeciduous } from "lucide-react";
 
 type SpecGlyphProps = {
   symbol: string;
