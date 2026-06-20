@@ -1,0 +1,1 @@
+UPDATE fabrics SET image_url = split_part(image_url,'?',1) || '?v=2' WHERE supplier='Apparatus';
