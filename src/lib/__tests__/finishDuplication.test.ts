@@ -139,9 +139,11 @@ describe("finish dropdown de-duplication", () => {
           linkedWoodFinishes: ALINEA_MARBLES,
         }),
       ).toBe(false);
+    });
   });
 
   describe("normalization layer (Kynos ↔ Kyknos typo)", () => {
+
     // Library spelling is "Kyknos"; variant spelling is "Kynos". The
     // normalization layer must treat them as the same finish for both
     // suppression and coverage helpers — otherwise the strict `every`
