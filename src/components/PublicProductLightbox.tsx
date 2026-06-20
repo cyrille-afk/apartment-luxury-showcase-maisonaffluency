@@ -579,203 +579,70 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
 
             <div className="flex flex-col">
               {(() => {
-                // Suppress the standalone dimensions block when one of the
-                // size-variant renderers below will already surface the same
-                // dimension lines (avoids the duplicate "Select Your Size").
-                const svLocal = product.size_variants || [];
-                const dualHere = svLocal.length > 0 && svLocal.some((v) => v.base && v.base.trim()) && svLocal.some((v) => v.top && v.top.trim());
-                const dualDimOpts = dualHere
-                  ? Array.from(new Set(svLocal.map((v) => (v.label || "").trim()).filter(Boolean))).filter(looksLikeDimension)
-                  : [];
-                const singleDimLabels = !dualHere && svLocal.length > 1
-                  ? Array.from(new Set(svLocal.map((v) => (v.label || "").trim()).filter(Boolean))).filter(looksLikeDimension)
-                  : [];
-                const variantSelectorWillShowDims =
-                  (hasSingleAxisSplit && singleSplitSizes.length > 0) ||
-                  (dualHere && dualDimOpts.length > 0) ||
-                  singleDimLabels.length > 1;
-                if (variantSelectorWillShowDims) return null;
-                if (!product.dimensions || !looksLikeDimension(product.dimensions)) return null;
+                // Lightbox is a preview, not a configurator — render dimensions
+                // as a static list (no "Select Your Size" picker). Prefer the
+                // curated product.dimensions field; otherwise derive from
+                // size_variants so the lightbox always mirrors what the full
+                // product page lists at the top of its spec stack.
+                let dimText = (product.dimensions || "").trim();
+                if (!dimText) {
+                  const sv = product.size_variants || [];
+                  const isDualAxis = sv.length > 0 && sv.some((v) => v.base && v.base.trim()) && sv.some((v) => v.top && v.top.trim());
+                  if (isDualAxis) {
+                    const dualLabels = Array.from(new Set(sv.map((v) => (v.label || "").trim()).filter(Boolean))).filter(looksLikeDimension);
+                    if (dualLabels.length > 0) dimText = dualLabels.join("\n");
+                    else {
+                      const baseDims = Array.from(new Set(sv.map((v) => (v.base || "").trim()).filter(Boolean))).filter(looksLikeDimension);
+                      if (baseDims.length > 0) dimText = baseDims.join("\n");
+                    }
+                  } else if (sv.length > 0) {
+                    const labels = Array.from(new Set(sv.map((v) => (v.label || "").trim()).filter(Boolean))).filter(looksLikeDimension);
+                    if (labels.length > 0) dimText = labels.join("\n");
+                  }
+                  if (!dimText && baseOnlyIsDim && baseOnlyOptions.length > 0) {
+                    dimText = baseOnlyOptions.join("\n");
+                  }
+                }
+                if (!dimText) return null;
                 return (
                   <ExpandableSpec
                     icon={specIcon("📐")}
-                    text={withImperialPerLine(product.dimensions)}
+                    text={withImperialPerLine(dimText)}
                     emphasized
                   />
                 );
               })()}
 
               {(() => {
-                if (hasSingleAxisSplit && singleSplitSizes.length > 0) {
-                  return (
-                    <ExpandableSpec
-                      icon={specIcon("📐")}
-                      text={withImperialPerLine(singleSplitSizes.join("\n"))}
-                      emphasized
-                      placeholder="Select Your Size"
-                      value={selectedSingleSizeIdx ?? null}
-                      onChange={(idx) => setSelectedSingleSizeIdx(idx < 0 ? null : idx)}
-                    />
-                  );
-                }
+                // Finish/material axis — always render as a static "refer to
+                // the full product page" line in the lightbox so users land on
+                // the configurator on the real product page instead of
+                // interacting with a half-wired picker here.
                 const sv = product.size_variants || [];
                 const isDualAxis = sv.length > 0 && sv.some((v) => v.base && v.base.trim()) && sv.some((v) => v.top && v.top.trim());
-                const dualSizeOptions = isDualAxis
-                  ? Array.from(new Set(sv.map((v) => (v.label || "").trim()).filter(Boolean))).filter(looksLikeDimension)
+                const baseIsDim = (baseOptions.length > 0 && baseOptions.every(looksLikeDimension)) || axisLabeledSize(product.base_axis_label);
+                const topOptions = isDualAxis
+                  ? Array.from(new Set(sv.map((v) => (v.top || "").trim()).filter(Boolean)))
                   : [];
-                if (isDualAxis && dualSizeOptions.length > 0) {
-                  const single = dualSizeOptions.length === 1;
-                  return (
-                    <ExpandableSpec
-                      icon={specIcon("📐")}
-                      text={withImperialPerLine(dualSizeOptions.join("\n"))}
-                      emphasized
-                      placeholder="Select Your Size"
-                    />
-                  );
-                }
-                // Single-axis variants (label + price only) — surface labels as size dropdown.
-                if (!isDualAxis && sv.length > 1) {
-                  const labels = Array.from(
-                    new Set(sv.map((v) => (v.label || "").trim()).filter(Boolean))
-                  ).filter(looksLikeDimension);
-                  if (labels.length > 1) {
-                    return (
-                      <ExpandableSpec
-                        icon={specIcon("📐")}
-                        text={withImperialPerLine(labels.join("\n"))}
-                        emphasized
-                        placeholder="Select Your Size"
-                      />
-                    );
-                  }
-                }
-                return null;
+                const topIsDim = (topOptions.length > 0 && topOptions.every(looksLikeDimension)) || axisLabeledSize(product.top_axis_label);
 
-              })()}
-              {baseOnlyIsDim && (
-                <ExpandableSpec
-                  icon={specIcon("📐")}
-                  text={withImperialPerLine(baseOnlyOptions.join("\n"))}
-                  placeholder={getBasePlaceholder(product)}
-                  singleValueLabel={formatVariantAxisLabel(product.base_axis_label) || undefined}
-                  emphasized
-                  value={selectedMaterialIdx ?? null}
-                  onChange={(idx) => setSelectedMaterialIdx(idx < 0 ? null : idx)}
-                />
-              )}
-              {(() => {
-                if (isDualAxis) {
-                  const topOptions = Array.from(new Set(sv.map((v) => (v.top || "").trim()).filter(Boolean)));
-                  // Detect which axis (if any) is actually carrying a dimension
-                  // string vs a finish/material — collapsed single-value axes
-                  // with dimensions should render with 📐 + imperial below.
-                  // Treat an axis as the "dimensions" axis whenever EVERY value
-                  // looks like a dimension string, OR the curator labelled the
-                  // axis as "Size" — so a multi-value base/top like
-                  // "Scala 220 - W 220 x D 135 x H 76.5 cm" / "Scala 300 - …"
-                  // still renders with 📐 instead of the default ⬗.
-                  const baseIsDim = (baseOptions.length > 0 && baseOptions.every(looksLikeDimension)) || axisLabeledSize(product.base_axis_label);
-                  const topIsDim = (topOptions.length > 0 && topOptions.every(looksLikeDimension)) || axisLabeledSize(product.top_axis_label);
+                const hasFinishAxis =
+                  isUpholsteredProduct ||
+                  (isDualAxis && (!baseIsDim || !topIsDim)) ||
+                  (!isDualAxis && materialOptions.length > 0 && !(materialOptions.length === 1 && looksLikeDimension(materialOptions[0]))) ||
+                  (!!product.materials_description && product.materials_description.trim().length > 0);
 
-                  const baseNode = (
-                    <ExpandableSpec
-                      key="base"
-                      icon={specIcon(baseIsDim ? "📐" : "⬗")}
-                      text={withImperialPerLine(baseOptions.join("\n"))}
-                      placeholder={getBasePlaceholder(product)}
-                      singleValueLabel={formatVariantAxisLabel(product.base_axis_label) || undefined}
-                      emphasized
-                      value={selectedBaseIdx ?? null}
-                      onChange={(idx) => {
-                        if (idx < 0) {
-                          clearAllDualSelections();
-                          return;
-                        }
-                        setSelectedBaseIdx(idx);
-                      }}
-                    />
-                  );
-                  const topNode = (
-                    <ExpandableSpec
-                      key="top"
-                      icon={specIcon(topIsDim ? "📐" : "⬗")}
-                      text={withImperialPerLine(topOptions.join("\n"))}
-                      placeholder={getTopPlaceholder(product)}
-                      singleValueLabel={formatVariantAxisLabel(product.top_axis_label) || undefined}
-                      emphasized
-                      value={selectedTopIdx ?? null}
-                      onChange={(idx) => {
-                        if (idx < 0) {
-                          clearAllDualSelections();
-                          return;
-                        }
-                        setSelectedTopIdx(idx);
-                      }}
-                    />
-                  );
-                  // Dimension axes always render before finish/material axes.
-                  const ordered = baseIsDim && !topIsDim
-                    ? [{ node: baseNode, isDimension: baseIsDim }, { node: topNode, isDimension: topIsDim }]
-                    : topIsDim && !baseIsDim
-                    ? [{ node: topNode, isDimension: topIsDim }, { node: baseNode, isDimension: baseIsDim }]
-                    : [{ node: baseNode, isDimension: baseIsDim }, { node: topNode, isDimension: topIsDim }];
-                  if (isUpholsteredProduct) return <>{ordered.filter((item) => item.isDimension).map((item) => item.node)}</>;
-                  return <>{ordered.map((item) => item.node)}</>;
-                }
-                if (materialOptions.length > 0) {
-                  if (isUpholsteredProduct) return null;
-                  // Single collapsed value that's actually a dimension string —
-                  // render with 📐 + imperial as secondaryText (not inline) so
-                  // the imperial parenthetical can't wrap mid-token.
-                  const onlyDim =
-                    materialOptions.length === 1 && looksLikeDimension(materialOptions[0]);
-                  if (onlyDim) {
-                    return (
-                      <ExpandableSpec
-                        icon={specIcon("📐")}
-                        text={withImperialPerLine(materialOptions[0])}
-                        emphasized
-                        singleValueLabel={hasAnyBase ? (formatVariantAxisLabel(product.base_axis_label) || undefined) : undefined}
-                      />
-                    );
-                  }
-                  if (baseOnlyIsDim) return null;
-                  return (
-                    <ExpandableSpec
-                      icon={specIcon(baseOnlyIsDim ? "📐" : "⬗")}
-                      text={materialOptions.join("\n")}
-                      placeholder={hasAnyBase ? getBasePlaceholder(product) : "Select your finish"}
-                      singleValueLabel={hasAnyBase ? (formatVariantAxisLabel(product.base_axis_label) || undefined) : undefined}
-                      autoSplit={!hasAnyBase && !hasSingleAxisSplit}
-                      value={hasSingleAxisSplit ? (selectedSingleMaterialIdx ?? null) : (selectedMaterialIdx ?? null)}
-                      onChange={(idx) => {
-                        if (hasSingleAxisSplit) {
-                          setSelectedSingleMaterialIdx(idx < 0 ? null : idx);
-                        } else {
-                          setSelectedMaterialIdx(idx < 0 ? null : idx);
-                        }
-                      }}
-                    />
-                  );
-                }
-                return null;
+                if (!hasFinishAxis) return null;
+                return (
+                  <div className="border-t border-border/60 py-4 flex items-center gap-5">
+                    <span className="shrink-0"><SpecGlyph symbol="⬗" /></span>
+                    <span className="font-body text-sm text-muted-foreground">
+                      Finish options — refer to the full product page for details.
+                    </span>
+                  </div>
+                );
               })()}
-              {isUpholsteredProduct && (
-                <div className="border-t border-border/60 py-4 flex items-center gap-5">
-                  <span className="shrink-0"><SpecGlyph symbol="⬗" /></span>
-                  <span className="font-body text-sm text-muted-foreground">
-                    Fabric, Leather &amp; Wood Finish — refer to the full product page for details.
-                  </span>
-                </div>
-              )}
-              {product.materials_description && product.materials_description.trim() && (
-                <ExpandableSpec
-                  icon={specIcon("⬗")}
-                  text={product.materials_description.trim()}
-                  emphasized
-                />
-              )}
+
               {(() => {
                 const handcrafted = formatHandcrafted(product.origin, product.lead_time);
                 if (!handcrafted) return null;
