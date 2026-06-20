@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { Upload, Loader2, FileBox, Ruler, AlertTriangle, CheckCircle2, XCircle, Info, Box } from "lucide-react";
+import { Upload, Loader2, FileBox, AlertTriangle, CheckCircle2, XCircle, Info, Box } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useStudio } from "@/hooks/useStudio";
@@ -358,7 +358,7 @@ export default function TradeSpatialFit() {
                         onClick={() => handleParseProductAsset(asset)}
                         disabled={parsingAssetId === asset.id}
                       >
-                        {parsingAssetId === asset.id ? <Loader2 className="h-3.5 w-3.5 mr-2 animate-spin" /> : <Ruler className="h-3.5 w-3.5 mr-2" />}
+                        {parsingAssetId === asset.id ? <Loader2 className="h-3.5 w-3.5 mr-2 animate-spin" /> : <FileBox className="h-3.5 w-3.5 mr-2" />}
                         Ingest
                       </Button>
                     </div>
@@ -409,7 +409,7 @@ export default function TradeSpatialFit() {
           <Card className="p-5 space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="font-display text-base flex items-center gap-2">
-                <Ruler className="h-4 w-4 text-primary" /> {activeDoc.file_name}
+                <FileBox className="h-4 w-4 text-primary" /> {activeDoc.file_name}
               </h2>
               {activeDoc.parsed_geometry?.bbox_mm && (
                 <p className="text-[11px] text-muted-foreground">
@@ -485,7 +485,7 @@ export default function TradeSpatialFit() {
                     {selectedCadAsset?.variant_label ? ` · ${selectedCadAsset.variant_label}` : ""}
                   </div>
                   <Button onClick={handleCheckFit} disabled={fitting || !productId}>
-                    {fitting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Ruler className="h-4 w-4 mr-2" />}
+                    {fitting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Box className="h-4 w-4 mr-2" />}
                     Check fit with selected product CAD
                   </Button>
                 </div>

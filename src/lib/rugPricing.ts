@@ -65,7 +65,7 @@ export function isRugCategory(category: string | null | undefined): boolean {
 
 /**
  * Heuristic: does this text look like an actual dimension/size value?
- * Used as a safety net to avoid rendering material/finish copy under a Ruler
+ * Used as a safety net to avoid rendering material/finish copy under the dimension
  * icon when the underlying `dimensions` field (or single size-variant label)
  * was filled with the wrong content.
  *

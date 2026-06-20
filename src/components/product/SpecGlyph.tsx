@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { Hexagon, Layers, Mountain, Ruler, Sparkles, TreeDeciduous } from "lucide-react";
+import { Hexagon, Layers, Mountain, Sparkles, TreeDeciduous } from "lucide-react";
 
 type SpecGlyphProps = {
   symbol: string;
@@ -12,7 +12,14 @@ export default function SpecGlyph({ symbol, className }: SpecGlyphProps) {
   if (symbol === "📐") {
     return (
       <span className={cn(baseClass, "text-gold")} aria-hidden="true">
-        <Ruler className="h-[18px] w-[18px]" strokeWidth={1.75} />
+        <svg viewBox="0 0 24 24" className="h-[18px] w-[18px]" fill="none" stroke="currentColor" strokeWidth="1.65" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M4.5 19.5h15L4.5 4.5v15Z" />
+          <path d="M8.25 15.75h3.4L8.25 12.35v3.4Z" />
+          <path d="M8 19.5v-2" />
+          <path d="M11 19.5v-1.4" />
+          <path d="M14 19.5v-2" />
+          <path d="M17 19.5v-1.4" />
+        </svg>
       </span>
     );
   }
