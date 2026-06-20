@@ -1026,8 +1026,13 @@ const PublicProductPage: React.FC = () => {
       // Do not resolve partial Base/Top state through a single-axis fallback;
       // wait for a complete pairing, otherwise clearing one axis can show the
       // wrong mapped finish image.
-      setGalleryActiveIndex(0);
-      setGalleryJumpNonce((n) => n + 1);
+      // Exception: when triggered by a swatch click, the FinishSelector owns
+      // the image jump (via image_indices). Skipping the snap here prevents
+      // swatches with an empty Image Range from getting stuck on picture 1.
+      if (!opts?.fromSwatch) {
+        setGalleryActiveIndex(0);
+        setGalleryJumpNonce((n) => n + 1);
+      }
       return;
     }
     // Prefer the composite Base|Top|Size key when present, then fall back to
