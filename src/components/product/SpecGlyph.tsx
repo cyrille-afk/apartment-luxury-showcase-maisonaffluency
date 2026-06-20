@@ -11,8 +11,8 @@ export default function SpecGlyph({ symbol, className }: SpecGlyphProps) {
 
   if (symbol === "📐") {
     return (
-      <span className={cn(baseClass, "text-[hsl(var(--spec-dimension-icon))]")} aria-hidden="true">
-        <Ruler className="h-[18px] w-[18px]" strokeWidth={1.75} />
+      <span className={cn(baseClass, "text-gold")} aria-hidden="true">
+        <Ruler size={18} strokeWidth={1.75} />
       </span>
     );
   }
