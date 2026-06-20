@@ -207,9 +207,7 @@ function isPreviewOrDev(): boolean {
   return isLovablePreview || isFramed;
 }
 
-// Sync a `data-home` attribute on <body> with the current route. The CSS in
-// index.html uses this to show/hide the persistent inline hero skeleton, which
-// must stay in the DOM on `/` (LCP candidate) but disappear on subpages.
+// Sync a `data-home` attribute on <body> with the current route for route-level CSS hooks.
 function HomeRouteSync() {
   const location = useLocation();
   useEffect(() => {
