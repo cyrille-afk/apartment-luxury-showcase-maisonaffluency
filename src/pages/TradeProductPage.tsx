@@ -1580,7 +1580,7 @@ const TradeProductPage: React.FC = () => {
                       setSelectedTop(null);
                       nextTop = null;
                     }
-                    handleMaterialChange(match, { base: match, top: nextTop, size: selectedDualSize });
+                    handleMaterialChange(match, { base: match, top: nextTop, size: selectedDualSize, fromSwatch: true });
                   }}
                   onUpholsteryTierChange={(rawTier) => {
 
