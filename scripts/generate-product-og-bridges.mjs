@@ -203,8 +203,10 @@ async function main() {
 
   let written = 0,
     skipped = 0,
-    overwritten = 0;
+    overwritten = 0,
+    invalid = 0;
   const noImage = [];
+  const validationFailures = [];
 
   for (const row of data ?? []) {
     const designerName = row.designer?.display_name || row.designer?.name;
@@ -235,6 +237,18 @@ async function main() {
       ogImage,
     });
 
+    // Always validate the in-memory HTML before deciding to write it.
+    const v = validateBridge(html, {
+      canonical,
+      designer: designerName,
+      titleText: row.title,
+    });
+    if (!v.ok) {
+      invalid++;
+      validationFailures.push({ filename, errors: v.errors });
+      continue; // skip writing — bad bridge would mislead crawlers
+    }
+
     if (APPLY) {
       writeFileSync(resolve(OUT_DIR, filename), html, "utf8");
     }
@@ -247,9 +261,21 @@ async function main() {
   console.log(`To write (new): ${written}`);
   console.log(`To overwrite:   ${overwritten}`);
   console.log(`Skipped existing: ${skipped}`);
+  console.log(`Validation failures (skipped): ${invalid}`);
   console.log(`Missing source image (used fallback): ${noImage.length}`);
+
+  if (validationFailures.length) {
+    console.log("\nValidation failure details (first 20):");
+    for (const f of validationFailures.slice(0, 20)) {
+      console.log(`  ${f.filename}`);
+      for (const e of f.errors) console.log(`    - ${e}`);
+    }
+  }
+
   if (!APPLY) console.log("\nDry run. Re-run with --apply to write files.");
+  if (invalid > 0 && STRICT) process.exit(2);
 }
+
 
 main().catch((e) => {
   console.error(e);
