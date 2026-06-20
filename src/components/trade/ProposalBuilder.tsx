@@ -323,6 +323,7 @@ export default function ProposalBuilder({
       if (!accessToken) throw new Error("Session expired. Please sign in again.");
 
       const placements = selectedProducts.map((p) => ({
+        product_id: p.product_id || null,
         product_name: p.product_name,
         brand_name: p.brand_name,
         image_url: toAbsoluteUrl(p.image_url),
