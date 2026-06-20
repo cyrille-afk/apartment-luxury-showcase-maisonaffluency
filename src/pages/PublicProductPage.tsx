@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate, Link, useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { Heart, Scale, ChevronLeft, ChevronRight, ChevronDown } from "lucide-react";
+import { Heart, Scale, ChevronLeft, ChevronRight, ChevronDown, ArrowLeft } from "lucide-react";
 import ShareMenu from "@/components/ShareMenu";
 import { buildPieceOgUrl } from "@/lib/whatsapp-share";
 import { cloudinaryUrl } from "@/lib/cloudinary";
@@ -1137,6 +1137,15 @@ const PublicProductPage: React.FC = () => {
         <Navigation borderless />
 
         <div className="pt-28 md:pt-[12rem] pb-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <button
+            type="button"
+            onClick={() => navigate(fromPath || fallbackGridPath)}
+            className="mb-4 inline-flex items-center gap-1.5 font-body text-[11px] uppercase tracking-[0.12em] text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <ArrowLeft className="h-3.5 w-3.5" /> Back
+
+          </button>
+
           <Breadcrumbs
             items={buildProductBreadcrumbs({
               root: { label: "Home", to: "/" },
