@@ -218,6 +218,7 @@ export default function ExpandableSpec({
         <button
           ref={triggerRef}
           type="button"
+          role="combobox"
           aria-haspopup="listbox"
           aria-expanded={open}
           onClick={() => (open ? closeList(false) : openList())}
