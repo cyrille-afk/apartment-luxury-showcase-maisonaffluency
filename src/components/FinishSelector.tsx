@@ -637,12 +637,12 @@ export default function FinishSelector({ pickId, className, productTitle, onUpho
         onToggle: () => setOpen((v) => !v),
         label: "Select Your Fabric / Leather",
         selectedName: selectedFabricItem?.name ?? null,
-        tiles: fabricTiles,
+        tiles: visibleFabricTiles,
         glyph: "fabric",
         emptyNote:
           "Full fabric library coming soon. In the meantime, your atelier can be upholstered in COM (Customer's Own Fabric) — please request samples or pricing through your Maison Affluency concierge.",
       })}
-      {showWoodSection && woodTiles.length > 0 &&
+      {showWoodSection && visibleWoodTiles.length > 0 &&
         renderAccordion({
           isOpen: openWood,
           onToggle: () => setOpenWood((v) => !v),
@@ -652,9 +652,9 @@ export default function FinishSelector({ pickId, className, productTitle, onUpho
             // Tables typically share a single marble/stone palette across the
             // top AND the base — collapse the two pickers into one unified
             // "Top & Base" label so the user sees one selection control.
-            const cats = woodTiles.map((t) => (t.category || "").trim().toLowerCase());
+            const cats = visibleWoodTiles.map((t) => (t.category || "").trim().toLowerCase());
             const allStone = cats.length > 0 && cats.every((c) => c === "stone");
-            const noSeparateTop = topTiles.length === 0;
+            const noSeparateTop = visibleTopTiles.length === 0;
             if (isTable && allStone && noSeparateTop) {
               return "Select Your Marble Finish (Top & Base)";
             }
@@ -663,27 +663,27 @@ export default function FinishSelector({ pickId, className, productTitle, onUpho
 
           })(),
           selectedName: selectedWoodItem?.name ?? null,
-          tiles: woodTiles,
-          glyph: pickFinishGlyph(woodTiles, woodLabel),
+          tiles: visibleWoodTiles,
+          glyph: pickFinishGlyph(visibleWoodTiles, woodLabel),
           tileKind: "base",
         })}
-      {showWoodSection && topTiles.length > 0 &&
+      {showWoodSection && visibleTopTiles.length > 0 &&
         renderAccordion({
           isOpen: openTop,
           onToggle: () => setOpenTop((v) => !v),
           label: (topLabel && topLabel.trim()) || "Select the Finish",
           selectedName: selectedTopItem?.name ?? null,
-          tiles: topTiles,
-          glyph: pickFinishGlyph(topTiles, topLabel),
+          tiles: visibleTopTiles,
+          glyph: pickFinishGlyph(visibleTopTiles, topLabel),
           tileKind: "top",
         })}
-      {coverTiles.length > 0 &&
+      {visibleCoverTiles.length > 0 &&
         renderAccordion({
           isOpen: openCover,
           onToggle: () => setOpenCover((v) => !v),
           label: "Select the Finish of the Cover",
           selectedName: selectedCoverItem?.name ?? null,
-          tiles: coverTiles,
+          tiles: visibleCoverTiles,
           glyph: "fabric",
         })}
 
