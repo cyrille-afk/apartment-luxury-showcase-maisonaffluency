@@ -335,39 +335,24 @@ const VariantSelectors: React.FC<{
   // When FinishSelector is rendered (upholstered products), it already exposes
   // fabric/leather + wood-finish swatch pickers. Suppress any base/top variant
   // dropdown whose axis label duplicates that selection (frame / wood / finish
-  // / feet / leg / base).
-  const isFinishAxis = (label: string) =>
-    /\b(frame|wood|finish|feet|foot|leg|base|legs)\b/i.test(label);
-  const normLinkedFinish = (s: string) => (s || "").trim().toLowerCase();
+  // / feet / leg / base). See `src/lib/finishDuplication.ts` for the pure
+  // helpers — guarded by `src/lib/__tests__/finishDuplication.test.ts`.
+  const isFinishAxis = isFinishAxisLabel;
   const hasWoodSwatches = linkedWoodFinishes.length > 0;
-  const allBasesHaveSwatches = baseOptions.length > 0 && baseOptions.every((b) => {
-    const nb = normLinkedFinish(b);
-    return linkedWoodFinishes.some((lw) => {
-      const nlw = normLinkedFinish(lw);
-      return nlw === nb || nlw.includes(nb) || nb.includes(nlw);
-    });
-  });
-  const topAxisHasSwatches = !topAxisIsDim && topOptions.length > 0 && topOptions.some((t) => {
-    const nt = normLinkedFinish(t);
-    return linkedWoodFinishes.some((lw) => {
-      const nlw = normLinkedFinish(lw);
-      return nlw === nt || nlw.includes(nt) || nt.includes(nlw);
-    });
-  });
+  const allBasesHaveSwatches = baseOptions.length > 0 && everyOptionCoveredBySwatches(baseOptions, linkedWoodFinishes);
+  const topAxisHasSwatches = !topAxisIsDim && topOptions.length > 0 && someOptionCoveredBySwatches(topOptions, linkedWoodFinishes);
   const suppressBaseAsFinish = !baseAxisIsDim && (allBasesHaveSwatches || (hasWoodSwatches && isFinishAxis(baseAxisLabelRaw)));
   const suppressTopAsFinish = !topAxisIsDim && (topAxisHasSwatches || (isProductUpholstered(product) && isFinishAxis(topAxisLabelRaw)));
   // When the FinishSelector swatch picker already exposes every material in
   // the single-axis "size + material" split (e.g. marble finishes attached as
   // Stone swatches), suppress the parallel text dropdown so we don't render
   // the same finish picker twice.
-  const allSingleMatsHaveSwatches = hasSingleAxisSplit && hasWoodSwatches && singleMaterialOptions.length > 0 && singleMaterialOptions.every((m) => {
-    const nm = normLinkedFinish(m);
-    return linkedWoodFinishes.some((lw) => {
-      const nlw = normLinkedFinish(lw);
-      return nlw === nm || nlw.includes(nm) || nm.includes(nlw);
-    });
+  const suppressSingleAsFinish = shouldSuppressSingleAsFinish({
+    hasSingleAxisSplit,
+    singleMaterialOptions,
+    linkedWoodFinishes,
   });
-  const suppressSingleAsFinish = allSingleMatsHaveSwatches;
+
 
   // Per-square-metre rug picker short-circuit: when the product is a rug and
   // its size_variants encode parseable dimensions (e.g. "300 × 400 cm"), show
