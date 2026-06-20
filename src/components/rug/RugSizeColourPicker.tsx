@@ -9,9 +9,10 @@
  * computed `totalCents` for the order line.
  */
 import { useEffect, useMemo, useState } from "react";
-import { Ruler, Palette } from "lucide-react";
+import { Palette } from "lucide-react";
 import { parseRugDims, dimsToSqm, computeRugPriceCents } from "@/lib/rugPricing";
 import { cn } from "@/lib/utils";
+import SpecGlyph from "@/components/product/SpecGlyph";
 import {
   Select,
   SelectContent,
@@ -186,7 +187,7 @@ export default function RugSizeColourPicker({
         <Select value={sizeKey} onValueChange={(v) => setSizeKey(v)}>
           <SelectTrigger className={rowTriggerClass}>
             <span className="flex items-center gap-2">
-              <Ruler size={16} className="text-[hsl(var(--gold))]" />
+              <SpecGlyph symbol="📐" />
               Select Your {sizeAxis}
             </span>
             <span className="flex items-center gap-3 text-sm text-muted-foreground">
