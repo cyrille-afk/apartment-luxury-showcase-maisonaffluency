@@ -273,7 +273,6 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
   const galleryImages = (product.gallery_images || []).filter(Boolean);
   const sv = product.size_variants || [];
   const axes = computeVariantAxes(sv);
-  const axisLabeledSize = (label?: string | null) => (label || "").trim().toLowerCase() === "size";
   // True dual-axis only when BOTH base and top are populated. Base-only
   // products (e.g. Atelier Pendhapa "Mangala Coffee Table") behave as
   // single-axis on Base — see src/lib/parseSizeVariants.ts.
@@ -286,7 +285,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
   const baseOnlyOptions = !isDualAxis && axes.isBaseOnly ? axes.baseOptions : [];
   const baseOnlyIsDim = axes.isBaseOnly && (
     (baseOnlyOptions.length > 0 && baseOnlyOptions.every(looksLikeDimension)) ||
-    axisLabeledSize(product.base_axis_label)
+    isDimensionAxisLabel(product.base_axis_label)
   );
   // When single-axis labels actually encode (size × material) we render TWO
   // dropdowns (material + size) mirroring TradeProductPage — the catalog
