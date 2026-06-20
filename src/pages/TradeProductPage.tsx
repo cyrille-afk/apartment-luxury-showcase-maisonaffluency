@@ -586,6 +586,14 @@ const TradeProductPage: React.FC = () => {
           const patch: any = {};
           if (variantLabel) patch.variant_label = variantLabel;
 
+          // Flag finishes the user selected that have no mapped reference
+          // images so the concierge / designer doesn't assume a visual match.
+          if (finishesMissingImages.length > 0) {
+            const note = `Note: No reference image on file for selected finish${finishesMissingImages.length > 1 ? "es" : ""}: ${finishesMissingImages.join(", ")}. Concierge to confirm visuals before order.`;
+            patch.notes = note;
+          }
+
+
           // Compute the chosen line's unit price: wood-finish base (if picked)
           // OR catalog RRP, PLUS the fabric per-LM upcharge. Both legs are
           // normalised into the product currency, then converted into the
