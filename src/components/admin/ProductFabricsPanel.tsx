@@ -213,7 +213,7 @@ export default function ProductFabricsPanel({
   };
 
   const saveImageRange = async (rowId: string, range: string) => {
-    const { error } = await (supabase as any)
+    const { error } = await supabase
       .from("product_fabrics")
       .update({ image_indices: parseRange(range) })
       .eq("id", rowId);
