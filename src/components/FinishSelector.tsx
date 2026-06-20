@@ -360,13 +360,17 @@ export default function FinishSelector({ pickId, className, productTitle, onUpho
     price_tier_label: "Leather",
   };
   // Inject COM + COL at the end of the Fabric & Leather group so customers see
-  // their "own material" options alongside the curated swatches.
-  if (grouped["Fabric & Leather"]) {
-    grouped["Fabric & Leather"] = [...grouped["Fabric & Leather"], comTile, colTile];
-  } else {
-    grouped["Fabric & Leather"] = [comTile, colTile];
-    if (!sortedGroupKeys.includes("Fabric & Leather")) sortedGroupKeys.unshift("Fabric & Leather");
+  // their "own material" options alongside the curated swatches — unless this
+  // product opts out (designer_curator_picks.allow_com_col = false).
+  if (allowComCol) {
+    if (grouped["Fabric & Leather"]) {
+      grouped["Fabric & Leather"] = [...grouped["Fabric & Leather"], comTile, colTile];
+    } else {
+      grouped["Fabric & Leather"] = [comTile, colTile];
+      if (!sortedGroupKeys.includes("Fabric & Leather")) sortedGroupKeys.unshift("Fabric & Leather");
+    }
   }
+
 
   const selectedFabricItem =
     selectedFabricId === "__com__"
