@@ -404,6 +404,19 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
 
   const updateField = (id: string, field: string, value: any) => {
     setPicks((prev) => prev.map((p) => (p.id === id ? { ...p, [field]: value } : p)));
+    if (field === "gallery_images") {
+      const key = `${id}::${field}`;
+      const existing = pendingWritesRef.current.get(key);
+      if (existing) {
+        window.clearTimeout(existing.timer);
+        pendingWritesRef.current.delete(key);
+      }
+      void supabase
+        .from("designer_curator_picks")
+        .update({ gallery_images: value } as any)
+        .eq("id", id);
+      return;
+    }
     const key = `${id}::${field}`;
     const existing = pendingWritesRef.current.get(key);
     if (existing) window.clearTimeout(existing.timer);
