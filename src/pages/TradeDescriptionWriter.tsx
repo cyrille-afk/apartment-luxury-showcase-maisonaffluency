@@ -8,6 +8,7 @@ import { ArrowLeft, Sparkles, Copy, Check, Save, RefreshCw, Layers, Square, Chec
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
 import AlphabetProductPicker, { type PickerItem } from "@/components/trade/AlphabetProductPicker";
+import AlphabetGroupPicker from "@/components/trade/AlphabetGroupPicker";
 
 type Tone = "editorial" | "technical" | "seo";
 type Source = "curator_picks" | "trade_products";
@@ -365,16 +366,13 @@ export default function TradeDescriptionWriter() {
               <label className="font-body text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
                 {source === "curator_picks" ? "Designer" : "Brand"}
               </label>
-              <select
+              <AlphabetGroupPicker
+                items={designerGroups.map((g) => ({ name: g.name, count: g.items.length }))}
                 value={bulkDesigner}
-                onChange={(e) => { setBulkDesigner(e.target.value); setBulkRows([]); }}
-                className="w-full rounded-md border border-border bg-background px-3 py-2 font-body text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20"
-              >
-                <option value="">Select {source === "curator_picks" ? "a designer" : "a brand"}…</option>
-                {designerGroups.map((g) => (
-                  <option key={g.name} value={g.name}>{g.name} ({g.items.length})</option>
-                ))}
-              </select>
+                onChange={(name) => { setBulkDesigner(name); setBulkRows([]); }}
+                placeholder={`Select ${source === "curator_picks" ? "a designer" : "a brand"}…`}
+              />
+
             </div>
           )}
 
