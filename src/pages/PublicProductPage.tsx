@@ -815,7 +815,7 @@ const VariantSelectors: React.FC<{
               : undefined
           }
         />
-      ) : product.materials && !hasLinkedFabrics && !isProductUpholstered(product) ? (
+      ) : product.materials && !hasLinkedFabrics && !isProductUpholstered(product) && linkedWoodFinishes.length === 0 ? (
         (() => {
           const parsed = parseMaterialsFallback(product.materials);
           return (
