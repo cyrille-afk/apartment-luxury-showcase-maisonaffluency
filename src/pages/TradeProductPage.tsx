@@ -1083,7 +1083,7 @@ const TradeProductPage: React.FC = () => {
     });
   });
   const suppressBaseAsFinish = !baseAxisIsDim && isFinishAxisLabel(baseAxisLabelRaw) && (allBasesHaveSwatches || hasWoodSwatches);
-  const suppressTopAsFinish = !topAxisIsDim && (topAxisHasSwatches || (isUpholsteredProduct && isFinishAxisLabel(topAxisLabelRaw)));
+  const suppressTopAsFinish = !topAxisIsDim && (topAxisHasSwatches || (isUpholsteredProduct && isFinishAxisLabel(topAxisLabelRaw)) || (hasWoodSwatches && isFinishAxisLabel(topAxisLabelRaw)));
 
   // When the product has variants but the user hasn't picked one yet, fall back
   // to the cheapest *priced* variant so we can show "From €X" instead of "Price on request".
