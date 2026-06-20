@@ -93,7 +93,7 @@ export const buildParentBrandOgUrl = (name: string) => {
 
 /**
  * Build the OG bridge URL for a curator pick.
- * Bridge files live at /collectibles/{designer}-{piece}-og.html and contain
+ * Bridge files live at /share/og/{designer}-{piece}-og.html and contain
  * baked OG tags + a client-side redirect to the canonical /designers/{brand}/{piece} page.
  * WhatsApp/iMessage/Slack scrape the bridge; real browsers get redirected to canonical.
  */
@@ -101,8 +101,9 @@ export const buildPieceOgUrl = (designerName: string, pieceTitle: string, pieceS
   const designerSlug = slugify(designerName);
   const fullPieceTitle = pieceSubtitle ? `${pieceTitle}-${pieceSubtitle}` : pieceTitle;
   const pieceSlug = slugify(fullPieceTitle);
-  return withOgCacheBust(`${SITE_URL}/collectibles/${designerSlug}-${pieceSlug}-og.html`);
+  return withOgCacheBust(`${SITE_URL}/share/og/${designerSlug}-${pieceSlug}-og.html`);
 };
+
 
 
 /**
