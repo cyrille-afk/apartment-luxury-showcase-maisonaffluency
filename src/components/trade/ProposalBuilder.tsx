@@ -41,6 +41,7 @@ const ROOM_SECTIONS = [
 
 interface SelectedProduct {
   id: string;
+  product_id?: string; // trade_products.id — used server-side to look up parsed CAD bbox geometry
   product_name: string;
   brand_name: string;
   image_url: string;
@@ -143,6 +144,7 @@ export default function ProposalBuilder({
           .filter((p: any) => p.image_url)
           .map((p: any) => ({
             id: nextPinId(),
+            product_id: p.id,
             product_name: p.product_name,
             brand_name: p.brand_name,
             image_url: p.image_url,
@@ -161,7 +163,7 @@ export default function ProposalBuilder({
     loadPreloaded();
   }, [preloadedProductIds]);
 
-  const addProduct = useCallback((product: { product_name: string; brand_name: string; image_url: string; dimensions?: string; materials?: string; isExternal?: boolean; pdf_url?: string; pdf_urls?: { label: string; url: string; filename?: string }[] }) => {
+  const addProduct = useCallback((product: { product_id?: string; product_name: string; brand_name: string; image_url: string; dimensions?: string; materials?: string; isExternal?: boolean; pdf_url?: string; pdf_urls?: { label: string; url: string; filename?: string }[] }) => {
     if (selectedProducts.length >= 10) {
       toast({ title: "Maximum 10 products per proposal", variant: "destructive" });
       return;
@@ -276,6 +278,7 @@ export default function ProposalBuilder({
       if (!accessToken) throw new Error("Session expired. Please sign in again.");
 
       const placements = selectedProducts.map((p) => ({
+        product_id: p.product_id || null,
         product_name: p.product_name,
         brand_name: p.brand_name,
         image_url: toAbsoluteUrl(p.image_url),
@@ -320,6 +323,7 @@ export default function ProposalBuilder({
       if (!accessToken) throw new Error("Session expired. Please sign in again.");
 
       const placements = selectedProducts.map((p) => ({
+        product_id: p.product_id || null,
         product_name: p.product_name,
         brand_name: p.brand_name,
         image_url: toAbsoluteUrl(p.image_url),
@@ -1611,6 +1615,7 @@ export default function ProposalBuilder({
                   onClick={() =>
                     p.image_url &&
                     addProduct({
+                      product_id: (p as any).trade_product_id ?? undefined,
                       product_name: p.product_name,
                       brand_name: p.brand_name,
                       image_url: p.image_url!,
