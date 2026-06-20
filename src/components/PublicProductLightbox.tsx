@@ -209,6 +209,10 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
   // Single-axis split (variants encode "size — material" in one label).
   const [selectedSingleSizeIdx, setSelectedSingleSizeIdx] = useState<number | null>(null);
   const [selectedSingleMaterialIdx, setSelectedSingleMaterialIdx] = useState<number | null>(null);
+  // Lightbox-only: standalone Size picker for base-only/single-axis products
+  // whose labels read as dimensions (e.g. Niko Sofa). Lets users preview the
+  // chosen size without leaving for the full product page.
+  const [selectedSizeLabel, setSelectedSizeLabel] = useState<string | null>(null);
 
   useEffect(() => {
     setImageLoaded(false);
@@ -220,6 +224,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
     setSelectedMaterialIdx(null);
     setSelectedSingleSizeIdx(null);
     setSelectedSingleMaterialIdx(null);
+    setSelectedSizeLabel(null);
   }, [product?.id]);
 
   // Atomic clear for the dual-axis Base/Top dropdowns inside the lightbox.
