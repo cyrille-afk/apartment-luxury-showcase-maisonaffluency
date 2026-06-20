@@ -5,7 +5,10 @@ import {
   shouldSuppressSingleAsFinish,
   shouldSuppressBaseAsFinish,
   shouldSuppressTopAsFinish,
+  everyOptionCoveredBySwatches,
+  someOptionCoveredBySwatches,
 } from "../finishDuplication";
+
 
 /**
  * UI regression guard: when the swatch picker already exposes every
