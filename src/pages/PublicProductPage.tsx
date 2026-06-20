@@ -1364,16 +1364,6 @@ const PublicProductPage: React.FC = () => {
                 <h2>About the {product.title}</h2>
                 <p>{product.description}</p>
               </div>
-              {product.category && (
-                <p className="font-body text-sm text-muted-foreground">
-                  <Link
-                    to={categoryUrl(product.category, product.subcategory)}
-                    className="underline underline-offset-2 hover:text-foreground transition-colors"
-                  >
-                    Explore {product.subcategory || product.category}
-                  </Link>
-                </p>
-              )}
             </section>
           )}
 
