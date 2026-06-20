@@ -845,7 +845,7 @@ const TradeProductPage: React.FC = () => {
   // matter which axis the user touches.
   const handleMaterialChange = (
     label: string | null,
-    opts?: { base?: string | null; top?: string | null; size?: string | null }
+    opts?: { base?: string | null; top?: string | null; size?: string | null; fromSwatch?: boolean }
   ) => {
     // Detect a "clear selection" call: no label and no axis values.
     const isClear =
@@ -879,8 +879,13 @@ const TradeProductPage: React.FC = () => {
       // Partial Base/Top selections must not fall back to a standalone finish
       // key (e.g. clearing Top while Base remains). A clear/partial state
       // should show the primary product image until a complete pairing is set.
-      setGalleryActiveIndex(0);
-      setGalleryJumpNonce((n) => n + 1);
+      // Exception: when the change was triggered by a swatch click, the
+      // FinishSelector is the source of truth for the image (via image_indices
+      // or, when empty, the current gallery image) — don't snap to picture 1.
+      if (!opts?.fromSwatch) {
+        setGalleryActiveIndex(0);
+        setGalleryJumpNonce((n) => n + 1);
+      }
       return;
     }
     const idx = effectiveOpts && (effectiveOpts.base || effectiveOpts.top || effectiveOpts.size)
@@ -1542,7 +1547,7 @@ const TradeProductPage: React.FC = () => {
                       setSelectedBase(null);
                       nextBase = null;
                     }
-                    handleMaterialChange(match, { base: nextBase, top: match, size: selectedDualSize });
+                    handleMaterialChange(match, { base: nextBase, top: match, size: selectedDualSize, fromSwatch: true });
                   }}
                   includePricing
                   showUpholsterySection={isUpholsteredProduct}
@@ -1575,7 +1580,7 @@ const TradeProductPage: React.FC = () => {
                       setSelectedTop(null);
                       nextTop = null;
                     }
-                    handleMaterialChange(match, { base: match, top: nextTop, size: selectedDualSize });
+                    handleMaterialChange(match, { base: match, top: nextTop, size: selectedDualSize, fromSwatch: true });
                   }}
                   onUpholsteryTierChange={(rawTier) => {
 

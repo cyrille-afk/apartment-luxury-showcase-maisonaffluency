@@ -186,7 +186,7 @@ function useProductBySlug(designerSlug: string | undefined, productSlug: string 
 /* ------------------------------------------------------------------ */
 const VariantSelectors: React.FC<{
   product: any;
-  onMaterialChange?: (label: string | null, opts?: { base?: string | null; top?: string | null; size?: string | null }) => void;
+  onMaterialChange?: (label: string | null, opts?: { base?: string | null; top?: string | null; size?: string | null; fromSwatch?: boolean }) => void;
   galleryActiveIndex?: number;
   finishMap?: Record<string, number> | null;
   onSwatchImagesChange?: (imageIndices: number[] | null) => void;
@@ -630,7 +630,7 @@ const VariantSelectors: React.FC<{
             setSelTop(null);
             nextTop = null;
           }
-          onMaterialChange?.(match, { base: match, top: nextTop, size: selDualSize });
+          onMaterialChange?.(match, { base: match, top: nextTop, size: selDualSize, fromSwatch: true });
         }}
         onTopFinishChange={(topName) => {
           if (!topName) return;
@@ -647,7 +647,7 @@ const VariantSelectors: React.FC<{
             setSelBase(null);
             nextBase = null;
           }
-          onMaterialChange?.(match, { base: nextBase, top: match, size: selDualSize });
+          onMaterialChange?.(match, { base: nextBase, top: match, size: selDualSize, fromSwatch: true });
         }}
         onUpholsteryTierChange={(rawTier) => {
           if (!rawTier) return;
@@ -992,7 +992,7 @@ const PublicProductPage: React.FC = () => {
   // galleryActiveIndex declared earlier (must precede early returns to keep hooks order stable).
   const handleMaterialChange = (
     label: string | null,
-    opts?: { base?: string | null; top?: string | null; size?: string | null }
+    opts?: { base?: string | null; top?: string | null; size?: string | null; fromSwatch?: boolean }
   ) => {
     // Detect a "clear selection" call: no label and no axis values.
     const isClear =
@@ -1026,8 +1026,13 @@ const PublicProductPage: React.FC = () => {
       // Do not resolve partial Base/Top state through a single-axis fallback;
       // wait for a complete pairing, otherwise clearing one axis can show the
       // wrong mapped finish image.
-      setGalleryActiveIndex(0);
-      setGalleryJumpNonce((n) => n + 1);
+      // Exception: when triggered by a swatch click, the FinishSelector owns
+      // the image jump (via image_indices). Skipping the snap here prevents
+      // swatches with an empty Image Range from getting stuck on picture 1.
+      if (!opts?.fromSwatch) {
+        setGalleryActiveIndex(0);
+        setGalleryJumpNonce((n) => n + 1);
+      }
       return;
     }
     // Prefer the composite Base|Top|Size key when present, then fall back to
