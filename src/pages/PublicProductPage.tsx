@@ -446,29 +446,6 @@ const VariantSelectors: React.FC<{
         />
       ) : hasVariants && !isDualAxis && singleAxisParsed.length > 1 && (() => {
         const labels = Array.from(new Set(singleAxisParsed.map((p) => p.size).filter(Boolean)));
-        return labels.length > 1 ? (
-          <ExpandableSpec
-            icon={specIcon("📐")}
-            text={withImperialPerLine(labels.join("\n"))}
-            emphasized
-            placeholder="Select Your Size"
-            value={selSize != null ? Math.max(0, labels.indexOf(selSize)) : null}
-            onChange={(idx) => {
-              const s = labels[idx] ?? null;
-              setSelSize(s);
-              const variant = s
-                ? singleAxisParsed.find((p) => p.size === s)?.variant
-                : null;
-              const fullLabel = variant?.label || s || null;
-              onMaterialChange?.(fullLabel, { size: fullLabel });
-            }}
-          />
-        ) : product.dimensions && looksLikeDimension(product.dimensions) ? (
-          <ExpandableSpec icon={specIcon("📐")} text={withImperialPerLine(product.dimensions)} />
-        ) : null;
-      })()}
-      {hasVariants && !isDualAxis && singleAxisParsed.length > 1 && (() => {
-        const labels = Array.from(new Set(singleAxisParsed.map((p) => p.size).filter(Boolean)));
         // Only render this as a "Size" dropdown when the labels actually look
         // like dimensions. Otherwise these are finish-style labels (e.g.
         // "Kynos", "Grafite") that belong in the FinishSelector below — not
