@@ -1,5 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
-import StickyFinishPreview from "@/components/product/StickyFinishPreview";
+import React, { useState, useEffect } from "react";
 import { useParams, useNavigate, Link, useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { Heart, Scale, ChevronLeft, ChevronRight, ChevronDown, ArrowLeft } from "lucide-react";
