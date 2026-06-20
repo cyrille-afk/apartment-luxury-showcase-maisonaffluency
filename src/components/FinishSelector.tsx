@@ -434,42 +434,62 @@ export default function FinishSelector({ pickId, className, productTitle, onUpho
           f.price_per_lm_cents ? `€${(f.price_per_lm_cents / 100).toLocaleString()}/LM` : null,
         ].filter(Boolean).join(" · ")
       : null;
+    const noImages = !f.image_indices || f.image_indices.length === 0;
+    const tileButton = (
+      <button
+        type="button"
+        onClick={handlePick}
+        className={cn(
+          "relative aspect-square w-full overflow-hidden rounded-md bg-muted/30 ring-1 ring-border/60 transition",
+          isSelected ? "ring-2 ring-foreground" : "hover:ring-foreground/40"
+        )}
+        aria-label={`Select ${f.name}`}
+      >
+        {f.image_url ? (
+          <img
+            src={f.image_url}
+            alt={f.name}
+            loading="lazy"
+            className={cn("w-full h-full object-cover", noImages && "opacity-60")}
+          />
+        ) : (
+          <div className={cn("w-full h-full flex items-center justify-center font-display text-xl tracking-widest text-foreground/85", noImages && "opacity-60")}>
+            {isCom ? "COM" : isCol ? "COL" : "—"}
+          </div>
+        )}
+        {f.image_url && (
+          <span
+            onClick={(e) => {
+              e.stopPropagation();
+              setZoomed(f);
+            }}
+            className="absolute top-1.5 right-1.5 w-7 h-7 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center text-foreground/70 hover:text-foreground"
+            aria-label={`Zoom ${f.name}`}
+          >
+            <ZoomIn className="w-3.5 h-3.5" />
+          </span>
+        )}
+        {noImages && (
+          <span className="absolute bottom-1.5 left-1.5 w-5 h-5 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center text-foreground/70">
+            <ImageOff className="w-3 h-3" />
+          </span>
+        )}
+      </button>
+    );
     return (
       <div key={f.id} className="flex flex-col gap-2">
-        <button
-          type="button"
-          onClick={handlePick}
-          className={cn(
-            "relative aspect-square w-full overflow-hidden rounded-md bg-muted/30 ring-1 ring-border/60 transition",
-            isSelected ? "ring-2 ring-foreground" : "hover:ring-foreground/40"
-          )}
-          aria-label={`Select ${f.name}`}
-        >
-          {f.image_url ? (
-            <img
-              src={f.image_url}
-              alt={f.name}
-              loading="lazy"
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center font-display text-xl tracking-widest text-foreground/85">
-              {isCom ? "COM" : isCol ? "COL" : "—"}
-            </div>
-          )}
-          {f.image_url && (
-            <span
-              onClick={(e) => {
-                e.stopPropagation();
-                setZoomed(f);
-              }}
-              className="absolute top-1.5 right-1.5 w-7 h-7 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center text-foreground/70 hover:text-foreground"
-              aria-label={`Zoom ${f.name}`}
-            >
-              <ZoomIn className="w-3.5 h-3.5" />
-            </span>
-          )}
-        </button>
+        {noImages ? (
+          <Tooltip delayDuration={150}>
+            <TooltipTrigger asChild>
+              {tileButton}
+            </TooltipTrigger>
+            <TooltipContent side="top" className="text-xs">
+              No image for this finish
+            </TooltipContent>
+          </Tooltip>
+        ) : (
+          tileButton
+        )}
         <p className="font-body text-[12px] leading-snug text-foreground/85">
           {f.name}
         </p>
