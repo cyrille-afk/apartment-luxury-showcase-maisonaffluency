@@ -598,7 +598,7 @@ const VariantSelectors: React.FC<{
         productTitle={product.title}
         woodLabel={
           (product as any).wood_label_override
-            || (product.base_axis_label
+            || (product.base_axis_label && !baseAxisIsDim
               ? `Select Your ${formatVariantAxisLabel(product.base_axis_label) || product.base_axis_label}`
               : null)
         }
