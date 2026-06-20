@@ -369,7 +369,39 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
   // Debounced autosave: coalesce rapid keystrokes per (pick, field) into a
   // single UPDATE 600ms after the user stops typing. Cuts trigger-chain
   // pressure (audit log + mirror triggers) by ~10-20x on long text fields.
-  const pendingWritesRef = useRef<Map<string, { value: any; timer: number }>>(new Map());
+  const pendingWritesRef = useRef<Map<string, { id: string; field: string; value: any; timer: number }>>(new Map());
+
+  const flushPendingWrites = useCallback(() => {
+    const entries = Array.from(pendingWritesRef.current.values());
+    pendingWritesRef.current.clear();
+    entries.forEach((entry) => {
+      window.clearTimeout(entry.timer);
+      void supabase
+        .from("designer_curator_picks")
+        .update({ [entry.field]: entry.value } as any)
+        .eq("id", entry.id);
+    });
+  }, []);
+
+  // Flush any pending debounced writes before the page unloads or loses focus,
+  // so a quick refresh after pasting (e.g. a gallery image URL) doesn't drop
+  // the change. `visibilitychange` covers tab switch + mobile background;
+  // `pagehide` is more reliable than `beforeunload` on iOS Safari.
+  useEffect(() => {
+    const onHide = () => flushPendingWrites();
+    const onVisibility = () => {
+      if (document.visibilityState === "hidden") flushPendingWrites();
+    };
+    window.addEventListener("pagehide", onHide);
+    window.addEventListener("beforeunload", onHide);
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      window.removeEventListener("pagehide", onHide);
+      window.removeEventListener("beforeunload", onHide);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, [flushPendingWrites]);
+
   const updateField = (id: string, field: string, value: any) => {
     setPicks((prev) => prev.map((p) => (p.id === id ? { ...p, [field]: value } : p)));
     const key = `${id}::${field}`;
@@ -383,7 +415,7 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
         .update({ [field]: entry?.value } as any)
         .eq("id", id);
     }, 600);
-    pendingWritesRef.current.set(key, { value, timer });
+    pendingWritesRef.current.set(key, { id, field, value, timer });
   };
 
   const applyFieldToAll = async (field: string, value: any) => {
