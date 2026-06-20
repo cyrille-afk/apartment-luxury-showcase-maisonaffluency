@@ -47,7 +47,7 @@ import ExpandableSpec from "@/components/ExpandableSpec";
 import FinishSelector from "@/components/FinishSelector";
 import { isProductUpholstered } from "@/lib/upholstery";
 import Breadcrumbs, { type Crumb } from "@/components/Breadcrumbs";
-import { getBasePlaceholder, getTopPlaceholder, formatVariantAxisLabel } from "@/lib/variantPlaceholders";
+import { getBasePlaceholder, getTopPlaceholder, formatVariantAxisLabel, isDimensionAxisLabel } from "@/lib/variantPlaceholders";
 import { formatDimensionsMultiline, formatImperialDimensions, withImperialPerLine } from "@/lib/formatDimensions";
 import { computeVariantAxes, parseMaterialsFallback } from "@/lib/parseSizeVariants";
 import { buildProductFinishMap, resolveFinishImageIndex, resolveVariantImageIndex, findVariantForImageIndex } from "@/lib/variantImageMap";
@@ -1030,17 +1030,16 @@ const TradeProductPage: React.FC = () => {
   const disabledDualSizeIdx = isDualAxis && (selectedBase || selectedTop)
     ? dualSizeOptions.map((s, i) => (variantsList.some((v: any) => matchesDual(v, selectedBase, selectedTop, s)) ? -1 : i)).filter((i) => i >= 0)
     : [];
-  const axisLabeledSize = (label?: string | null) => (label || "").trim().toLowerCase() === "size";
   // If an explicit axis label is provided, trust it. Only auto-detect from
   // option strings when no label was set — otherwise things like
   // "ECART fabric (6 m)" get misread as dimensions.
   const baseAxisLabelRaw = ((product as any).base_axis_label || "").trim();
   const topAxisLabelRaw = ((product as any).top_axis_label || "").trim();
   const baseAxisIsDim = baseAxisLabelRaw
-    ? axisLabeledSize(baseAxisLabelRaw)
+    ? isDimensionAxisLabel(baseAxisLabelRaw)
     : (baseOptions.length > 0 && baseOptions.every(looksLikeDimension));
   const topAxisIsDim = topAxisLabelRaw
-    ? axisLabeledSize(topAxisLabelRaw)
+    ? isDimensionAxisLabel(topAxisLabelRaw)
     : (topOptions.length > 0 && topOptions.every(looksLikeDimension));
 
   const activeVariant = isDualAxis
