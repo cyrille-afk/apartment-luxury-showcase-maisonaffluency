@@ -503,6 +503,7 @@ const App = () => {
                     <Route path="payouts" element={<Suspense fallback={<PageLoadingSkeleton />}><TradePayoutStatement /></Suspense>} />
                     
                     <Route path="admin/share-preview" element={<TradeAdminSharePreview />} />
+                    <Route path="admin/hotspot-mapping" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAdminHotspotMapping /></Suspense>} />
                     <Route path="mood-boards" element={<TradeMoodBoards />} />
                     <Route path="budget" element={<TradeBudgetTracker />} />
                     <Route path="clients" element={<TradeClients />} />
