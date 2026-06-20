@@ -1421,6 +1421,7 @@ export type Database = {
       }
       designer_curator_picks: {
         Row: {
+          allow_com_col: boolean
           base_axis_label: string | null
           category: string | null
           com_meters: number | null
@@ -1475,6 +1476,7 @@ export type Database = {
           wood_label_override: string | null
         }
         Insert: {
+          allow_com_col?: boolean
           base_axis_label?: string | null
           category?: string | null
           com_meters?: number | null
@@ -1529,6 +1531,7 @@ export type Database = {
           wood_label_override?: string | null
         }
         Update: {
+          allow_com_col?: boolean
           base_axis_label?: string | null
           category?: string | null
           com_meters?: number | null

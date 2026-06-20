@@ -1,0 +1,1 @@
+ALTER TABLE public.designer_curator_picks ADD COLUMN IF NOT EXISTS allow_com_col boolean NOT NULL DEFAULT true;
