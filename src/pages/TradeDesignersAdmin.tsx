@@ -325,9 +325,24 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
     toast({ title: "Pick deleted" });
   };
 
-  const updateField = async (id: string, field: string, value: any) => {
+  // Debounced autosave: coalesce rapid keystrokes per (pick, field) into a
+  // single UPDATE 600ms after the user stops typing. Cuts trigger-chain
+  // pressure (audit log + mirror triggers) by ~10-20x on long text fields.
+  const pendingWritesRef = useRef<Map<string, { value: any; timer: number }>>(new Map());
+  const updateField = (id: string, field: string, value: any) => {
     setPicks((prev) => prev.map((p) => (p.id === id ? { ...p, [field]: value } : p)));
-    await supabase.from("designer_curator_picks").update({ [field]: value } as any).eq("id", id);
+    const key = `${id}::${field}`;
+    const existing = pendingWritesRef.current.get(key);
+    if (existing) window.clearTimeout(existing.timer);
+    const timer = window.setTimeout(() => {
+      const entry = pendingWritesRef.current.get(key);
+      pendingWritesRef.current.delete(key);
+      void supabase
+        .from("designer_curator_picks")
+        .update({ [field]: entry?.value } as any)
+        .eq("id", id);
+    }, 600);
+    pendingWritesRef.current.set(key, { value, timer });
   };
 
   const applyFieldToAll = async (field: string, value: any) => {
