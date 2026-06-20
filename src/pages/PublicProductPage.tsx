@@ -352,6 +352,17 @@ const VariantSelectors: React.FC<{
     singleMaterialOptions,
     linkedWoodFinishes,
   });
+  if (typeof window !== "undefined" && (window as any).__DEBUG_FINISH__) {
+    // eslint-disable-next-line no-console
+    console.log("[finish-debug]", {
+      title: product?.title,
+      hasSingleAxisSplit,
+      singleMaterialOptions,
+      linkedWoodFinishes,
+      suppressSingleAsFinish,
+    });
+  }
+
 
 
   // Per-square-metre rug picker short-circuit: when the product is a rug and
