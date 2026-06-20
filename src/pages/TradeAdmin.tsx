@@ -19,7 +19,7 @@ import ScrapeProducts from "@/components/trade/ScrapeProducts";
 import InstagramFeedAdmin from "@/components/trade/InstagramFeedAdmin";
 import OgRescrapeAdmin from "@/components/trade/OgRescrapeAdmin";
 import { Link } from "react-router-dom";
-import { Instagram, FileBox, Sparkles, Inbox, FileSpreadsheet } from "lucide-react";
+import { Instagram, FileBox, Sparkles, Inbox, FileSpreadsheet, MapPin } from "lucide-react";
 
 interface Application {
   id: string;
