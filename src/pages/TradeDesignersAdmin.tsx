@@ -270,14 +270,55 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
   }, [loadPicks]);
 
   const didRestorePickScrollRef = useRef(false);
+  const scrollStorageKey = `designer_editor_scroll_v1::${designerId}`;
   useEffect(() => {
-    if (!loaded || didRestorePickScrollRef.current || !expandedPickId) return;
-    const el = document.querySelector(`[data-pick-row-id="${expandedPickId}"]`);
-    if (el) {
-      didRestorePickScrollRef.current = true;
-      requestAnimationFrame(() => el.scrollIntoView({ block: "center", behavior: "auto" }));
+    if (!loaded || didRestorePickScrollRef.current) return;
+    // Priority 1: if a pick is expanded, scroll it into view (existing behavior).
+    if (expandedPickId) {
+      const el = document.querySelector(`[data-pick-row-id="${expandedPickId}"]`);
+      if (el) {
+        didRestorePickScrollRef.current = true;
+        requestAnimationFrame(() => el.scrollIntoView({ block: "center", behavior: "auto" }));
+        return;
+      }
     }
-  }, [loaded, expandedPickId, picks.length]);
+    // Priority 2: restore the saved window scroll position for this designer.
+    let savedY: number | null = null;
+    try {
+      const raw = sessionStorage.getItem(scrollStorageKey);
+      if (raw) savedY = Number(raw);
+    } catch { /* ignore */ }
+    if (savedY != null && !Number.isNaN(savedY) && savedY > 0) {
+      didRestorePickScrollRef.current = true;
+      // Expand the rendered window so the document is tall enough for the
+      // saved scroll position; otherwise scrollTo clamps to the short page.
+      setVisiblePicksCount((n) => Math.max(n, picks.length));
+      requestAnimationFrame(() =>
+        requestAnimationFrame(() =>
+          window.scrollTo({ top: savedY!, behavior: "instant" as ScrollBehavior }),
+        ),
+      );
+    }
+  }, [loaded, expandedPickId, picks.length, scrollStorageKey]);
+
+  // Persist window scroll position per designer (throttled via rAF) so
+  // switching designers and coming back lands you where you left off.
+  useEffect(() => {
+    if (!loaded) return;
+    let frame = 0;
+    const onScroll = () => {
+      if (frame) return;
+      frame = window.requestAnimationFrame(() => {
+        frame = 0;
+        try { sessionStorage.setItem(scrollStorageKey, String(window.scrollY)); } catch { /* ignore */ }
+      });
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (frame) window.cancelAnimationFrame(frame);
+    };
+  }, [loaded, scrollStorageKey]);
 
   const handleAdd = async () => {
     const order = picks.length;
