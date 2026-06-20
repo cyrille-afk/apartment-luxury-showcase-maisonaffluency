@@ -55,8 +55,9 @@ function validateBridge(html, expected) {
 
   const title = m(/<title>([^<]*)<\/title>/i);
   if (!title || !title.trim()) errors.push("missing <title>");
-  else if (!title.includes(expected.designer)) errors.push(`title missing designer "${expected.designer}"`);
-  else if (!title.includes(expected.titleText)) errors.push(`title missing product "${expected.titleText}"`);
+  else if (!title.includes(expected.designerEsc)) errors.push(`title missing designer "${expected.designer}"`);
+  else if (!title.includes(expected.titleTextEsc)) errors.push(`title missing product "${expected.titleText}"`);
+
 
   const desc = m(/<meta\s+name="description"\s+content="([^"]*)"/i);
   if (!desc || !desc.trim()) errors.push("missing meta description");
