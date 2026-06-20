@@ -564,7 +564,11 @@ export default function FinishSelector({ pickId, className, productTitle, onUpho
         renderAccordion({
           isOpen: openWood,
           onToggle: () => setOpenWood((v) => !v),
-          label: (woodLabel && woodLabel.trim()) || "Select the Finish of the Frame",
+          label:
+            (woodLabel && woodLabel.trim()) ||
+            (productTitle && /\btable\b/i.test(productTitle)
+              ? "Select Your Table Finish"
+              : "Select the Finish of the Frame"),
           selectedName: selectedWoodItem?.name ?? null,
           tiles: woodTiles,
           glyph: pickFinishGlyph(woodTiles, woodLabel),
