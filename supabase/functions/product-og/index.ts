@@ -23,8 +23,9 @@ Deno.serve((req) => {
   const productSlug = sanitizeSlug(url.searchParams.get("product"));
 
   const target = designerSlug && productSlug
-    ? `${SITE_URL}/collectibles/${designerSlug}-${productSlug}-og.html`
+    ? `${SITE_URL}/share/og/${designerSlug}-${productSlug}-og.html`
     : `${SITE_URL}/collectibles-og.html`;
+
 
   return new Response(null, {
     status: 301,
