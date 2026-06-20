@@ -879,8 +879,13 @@ const TradeProductPage: React.FC = () => {
       // Partial Base/Top selections must not fall back to a standalone finish
       // key (e.g. clearing Top while Base remains). A clear/partial state
       // should show the primary product image until a complete pairing is set.
-      setGalleryActiveIndex(0);
-      setGalleryJumpNonce((n) => n + 1);
+      // Exception: when the change was triggered by a swatch click, the
+      // FinishSelector is the source of truth for the image (via image_indices
+      // or, when empty, the current gallery image) — don't snap to picture 1.
+      if (!opts?.fromSwatch) {
+        setGalleryActiveIndex(0);
+        setGalleryJumpNonce((n) => n + 1);
+      }
       return;
     }
     const idx = effectiveOpts && (effectiveOpts.base || effectiveOpts.top || effectiveOpts.size)
