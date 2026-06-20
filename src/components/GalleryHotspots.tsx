@@ -464,6 +464,19 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
                         <input type="text" placeholder="Designer name" value={editData.designer_name} onChange={e => setEditData(d => ({ ...d, designer_name: e.target.value }))} className="w-full text-xs border border-primary/20 rounded px-2 py-1.5 font-body focus:outline-none focus:ring-1 focus:ring-primary/30" />
                         <input type="text" placeholder="Product image URL" value={editData.product_image_url} onChange={e => setEditData(d => ({ ...d, product_image_url: e.target.value }))} className="w-full text-xs border border-primary/20 rounded px-2 py-1.5 font-body focus:outline-none focus:ring-1 focus:ring-primary/30" />
                         <input type="text" placeholder="Link URL" value={editData.link_url} onChange={e => setEditData(d => ({ ...d, link_url: e.target.value }))} className="w-full text-xs border border-primary/20 rounded px-2 py-1.5 font-body focus:outline-none focus:ring-1 focus:ring-primary/30" />
+                        <div>
+                          <label className="block text-[10px] uppercase tracking-wide text-muted-foreground mb-1">Manual product mapping (overrides fuzzy match)</label>
+                          <select
+                            value={editData.mapped_pick_id}
+                            onChange={e => setEditData(d => ({ ...d, mapped_pick_id: e.target.value }))}
+                            className="w-full text-xs border border-primary/20 rounded px-2 py-1.5 font-body bg-white focus:outline-none focus:ring-1 focus:ring-primary/30"
+                          >
+                            <option value="">— Auto-match by name —</option>
+                            {pickOptions.map(p => (
+                              <option key={p.id} value={p.id}>{p.designer} — {p.title}</option>
+                            ))}
+                          </select>
+                        </div>
                       </div>
                       <div className="flex gap-2 mt-3">
                         <button onClick={saveEdit} disabled={!editData.product_name.trim() || saving} className="flex-1 flex items-center justify-center gap-1 text-xs font-body bg-primary text-primary-foreground rounded px-3 py-1.5 hover:bg-primary/90 disabled:opacity-50 transition-colors">
