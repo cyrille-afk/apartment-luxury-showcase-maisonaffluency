@@ -34,7 +34,7 @@ const Hero = () => {
           loading="eager"
           /* @ts-ignore — React 18 supports fetchPriority */
           fetchPriority="high"
-          decoding="sync"
+          decoding="async"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/20" />
       </div>
