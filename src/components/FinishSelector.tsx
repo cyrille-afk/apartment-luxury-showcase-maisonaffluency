@@ -214,6 +214,26 @@ export default function FinishSelector({ pickId, className, productTitle, onUpho
   const [selectedTopId, setSelectedTopId] = useState<string | null>(null);
   const [selectedCoverId, setSelectedCoverId] = useState<string | null>(null);
   const [zoomed, setZoomed] = useState<Fabric | null>(null);
+  const [allowComCol, setAllowComCol] = useState<boolean>(true);
+
+  // Fetch the per-product "allow customer's own material" flag from the public
+  // mirror so we can suppress COM/COL tiles on products where they don't apply
+  // (e.g. Alinea Twin Upholstered — leather seat is supplier-supplied only).
+  useEffect(() => {
+    if (!pickId) { setAllowComCol(true); return; }
+    let cancelled = false;
+    (async () => {
+      const { data } = await (supabase as any)
+        .from("designer_curator_picks_public")
+        .select("allow_com_col")
+        .eq("id", pickId)
+        .maybeSingle();
+      if (cancelled) return;
+      setAllowComCol(data?.allow_com_col !== false);
+    })();
+    return () => { cancelled = true; };
+  }, [pickId]);
+
 
 
   useEffect(() => {
@@ -340,13 +360,17 @@ export default function FinishSelector({ pickId, className, productTitle, onUpho
     price_tier_label: "Leather",
   };
   // Inject COM + COL at the end of the Fabric & Leather group so customers see
-  // their "own material" options alongside the curated swatches.
-  if (grouped["Fabric & Leather"]) {
-    grouped["Fabric & Leather"] = [...grouped["Fabric & Leather"], comTile, colTile];
-  } else {
-    grouped["Fabric & Leather"] = [comTile, colTile];
-    if (!sortedGroupKeys.includes("Fabric & Leather")) sortedGroupKeys.unshift("Fabric & Leather");
+  // their "own material" options alongside the curated swatches — unless this
+  // product opts out (designer_curator_picks.allow_com_col = false).
+  if (allowComCol) {
+    if (grouped["Fabric & Leather"]) {
+      grouped["Fabric & Leather"] = [...grouped["Fabric & Leather"], comTile, colTile];
+    } else {
+      grouped["Fabric & Leather"] = [comTile, colTile];
+      if (!sortedGroupKeys.includes("Fabric & Leather")) sortedGroupKeys.unshift("Fabric & Leather");
+    }
   }
+
 
   const selectedFabricItem =
     selectedFabricId === "__com__"
