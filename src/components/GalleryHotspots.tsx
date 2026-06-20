@@ -66,6 +66,7 @@ interface Hotspot {
   link_url: string | null;
   materials?: string | null;
   dimensions?: string | null;
+  mapped_pick_id?: string | null;
 }
 
 interface HotspotProduct {
@@ -85,8 +86,10 @@ interface GalleryHotspotsProps {
   onAddToQuote?: (product: HotspotProduct) => void;
   /** Public: callback to open quote request dialog pre-filled */
   onRequestQuote?: (productName: string, designerName: string) => void;
-  /** Public: callback to open product lightbox for a matched curator's pick */
-  onViewProduct?: (productName: string, designerName: string, linkUrl?: string | null) => void;
+  /** Public: callback to open product lightbox for a matched curator's pick.
+   *  When `mappedPickId` is provided, the consumer should open that exact
+   *  catalog item and skip fuzzy matching. */
+  onViewProduct?: (productName: string, designerName: string, linkUrl?: string | null, mappedPickId?: string | null) => void;
   /** When set, only show hotspots matching this designer name */
   filterDesigner?: string | null;
 }
