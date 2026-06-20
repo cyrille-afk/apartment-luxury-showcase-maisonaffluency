@@ -107,14 +107,35 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
   const [activeId, setActiveId] = useState<string | null>(null);
   const [editMode, setEditMode] = useState(false);
   const [pending, setPending] = useState<PendingHotspot | null>(null);
-  const [formData, setFormData] = useState({ product_name: "", designer_name: "", product_image_url: "", link_url: "" });
+  const [formData, setFormData] = useState({ product_name: "", designer_name: "", product_image_url: "", link_url: "", mapped_pick_id: "" });
   const [saving, setSaving] = useState(false);
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const didDragRef = useRef(false);
   const dragStartRef = useRef<{ x: number; y: number } | null>(null);
   const DRAG_THRESHOLD = 5; // pixels
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [editData, setEditData] = useState({ product_name: "", designer_name: "", product_image_url: "", link_url: "" });
+  const [editData, setEditData] = useState({ product_name: "", designer_name: "", product_image_url: "", link_url: "", mapped_pick_id: "" });
+  // Catalog picks for the manual override dropdown (admin only)
+  const [pickOptions, setPickOptions] = useState<Array<{ id: string; title: string; designer: string }>>([]);
+  useEffect(() => {
+    if (!editMode) return;
+    if (pickOptions.length > 0) return;
+    (async () => {
+      const [{ data: picks }, { data: designers }] = await Promise.all([
+        supabase.from("designer_curator_picks").select("id, title, designer_id").order("title"),
+        supabase.from("designers").select("id, name"),
+      ]);
+      if (!picks) return;
+      const dmap = new Map((designers || []).map((d: any) => [d.id, d.name as string]));
+      setPickOptions(
+        (picks as any[]).map((p) => ({
+          id: p.id,
+          title: p.title,
+          designer: dmap.get(p.designer_id) || "Unknown",
+        }))
+      );
+    })();
+  }, [editMode, pickOptions.length]);
 
   // ── Trade price lookup ──
   const [tradePrices, setTradePrices] = useState<{ name: string; cents: number; currency: string; price_unit?: string }[]>([]);
