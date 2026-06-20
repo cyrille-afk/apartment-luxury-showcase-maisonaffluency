@@ -1223,7 +1223,7 @@ const PublicProductPage: React.FC = () => {
               </div>
 
               {/* Materials & dimensions with gold icons — shared parsing with TradeProductPage */}
-              <div className="flex flex-col gap-2" ref={finishSectionRef}>
+              <div className="flex flex-col gap-2">
                 <VariantSelectors
                   product={product}
                   onMaterialChange={handleMaterialChange}
