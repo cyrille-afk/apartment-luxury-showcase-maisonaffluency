@@ -1513,33 +1513,13 @@ const TradeProductPage: React.FC = () => {
                           ? `Select Your ${formatVariantAxisLabel(product.base_axis_label) || product.base_axis_label}`
                           : null)
                   }
-                  woodFilter={
-                    isDualAxis && baseOptions.length > 0
-                      ? (name) => {
-                          const n = name.trim().toLowerCase();
-                          return baseOptions.some((b) => {
-                            const nb = b.trim().toLowerCase();
-                            return nb === n || nb.includes(n) || n.includes(nb);
-                          });
-                        }
-                      : undefined
-                  }
+                  woodFilter={undefined}
                   topLabel={
                     product.top_axis_label
                       ? `Select Your ${formatVariantAxisLabel(product.top_axis_label) || product.top_axis_label}`
                       : null
                   }
-                  topFilter={
-                    isDualAxis && !topAxisIsDim && topOptions.length > 0
-                      ? (name) => {
-                          const n = name.trim().toLowerCase();
-                          return topOptions.some((t) => {
-                            const nt = t.trim().toLowerCase();
-                            return nt === n || nt.includes(n) || n.includes(nt);
-                          });
-                        }
-                      : undefined
-                  }
+                  topFilter={undefined}
                   onTopFinishChange={(topName) => {
                     if (!topName) return;
                     const norm = (s: string) => s.trim().toLowerCase();
