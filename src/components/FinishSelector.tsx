@@ -126,6 +126,13 @@ interface FinishSelectorProps {
   topLabel?: string | null;
   /** Fires when the user picks a top-axis swatch. */
   onTopFinishChange?: (name: string | null) => void;
+  /**
+   * Fires whenever the currently-selected wood/top finish swatches change.
+   * Receives the names of selected finishes that have NO mapped gallery
+   * images (`image_indices` empty). The product page surfaces these on the
+   * quote/bespoke message so designers know the visual was unmapped.
+   */
+  onFinishesMissingImagesChange?: (names: string[]) => void;
 }
 
 const normalizeFabricCategory = (category: string | null | undefined) => {
