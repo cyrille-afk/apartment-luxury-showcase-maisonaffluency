@@ -1216,7 +1216,15 @@ const PublicProductPage: React.FC = () => {
                     setGalleryActiveIndex(Math.max(0, indices[0] - 1));
                     setGalleryJumpNonce((n) => n + 1);
                   }}
+                  onFinishesMissingImagesChange={setFinishesMissingImages}
                 />
+                {finishesMissingImages.length > 0 && (
+                  <p className="font-body text-[11px] text-muted-foreground italic mt-1">
+                    No reference image on file for{" "}
+                    <span className="text-foreground">{finishesMissingImages.join(", ")}</span>.
+                    We'll note this on your enquiry so our concierge can confirm visuals.
+                  </p>
+                )}
 
 
                 {(() => {
