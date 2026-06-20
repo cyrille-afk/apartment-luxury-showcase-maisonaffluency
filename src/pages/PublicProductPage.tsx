@@ -190,7 +190,8 @@ const VariantSelectors: React.FC<{
   galleryActiveIndex?: number;
   finishMap?: Record<string, number> | null;
   onSwatchImagesChange?: (imageIndices: number[] | null) => void;
-}> = ({ product, onMaterialChange, galleryActiveIndex, finishMap, onSwatchImagesChange }) => {
+  onFinishesMissingImagesChange?: (names: string[]) => void;
+}> = ({ product, onMaterialChange, galleryActiveIndex, finishMap, onSwatchImagesChange, onFinishesMissingImagesChange }) => {
   const axes = computeVariantAxes(product.size_variants);
   const {
     isDualAxis,
