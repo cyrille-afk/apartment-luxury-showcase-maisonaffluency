@@ -290,7 +290,14 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
     } catch { /* ignore */ }
     if (savedY != null && !Number.isNaN(savedY) && savedY > 0) {
       didRestorePickScrollRef.current = true;
-      requestAnimationFrame(() => window.scrollTo({ top: savedY!, behavior: "instant" as ScrollBehavior }));
+      // Expand the rendered window so the document is tall enough for the
+      // saved scroll position; otherwise scrollTo clamps to the short page.
+      setVisiblePicksCount((n) => Math.max(n, picks.length));
+      requestAnimationFrame(() =>
+        requestAnimationFrame(() =>
+          window.scrollTo({ top: savedY!, behavior: "instant" as ScrollBehavior }),
+        ),
+      );
     }
   }, [loaded, expandedPickId, picks.length, scrollStorageKey]);
 
