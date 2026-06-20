@@ -124,7 +124,6 @@ export const withImperialPerLine = (raw: string | null | undefined): string => {
       const impArr = trimmedImp.split(/\s+/);
       const metricArr = t.split(/\s+/);
       let impEnd = impArr.length;
-      while (impEnd > 0 && impArr[impEnd - 1] === "in") impEnd--;
       let k = 0;
       while (
         k < impEnd &&
@@ -143,7 +142,7 @@ export const withImperialPerLine = (raw: string | null | undefined): string => {
         ) {
           stripped.pop();
         }
-        trimmedImp = stripped.concat("in").join(" ").trim();
+        trimmedImp = stripped.join(" ").trim();
       }
 
       if (!trimmedImp) return t;
