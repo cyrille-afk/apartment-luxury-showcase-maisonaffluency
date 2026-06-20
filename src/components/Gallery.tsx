@@ -515,7 +515,15 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
     return [...byKey.values()];
   }, [dbCuratorPicks]);
 
-  const handleHotspotViewProduct = useCallback((productName: string, designerName: string, linkUrl?: string | null) => {
+  const handleHotspotViewProduct = useCallback((productName: string, designerName: string, linkUrl?: string | null, mappedPickId?: string | null) => {
+    // Manual override — admin-picked exact catalog item wins over fuzzy matching.
+    if (mappedPickId) {
+      const forced = allCuratorPicks.find((p) => p.id === mappedPickId);
+      if (forced) {
+        setHotspotLightboxProduct(forced);
+        return;
+      }
+    }
     const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim();
     const normName = norm(productName);
     const normDesigner = norm(designerName);
