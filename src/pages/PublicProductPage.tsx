@@ -1330,7 +1330,7 @@ const PublicProductPage: React.FC = () => {
               <p className="font-body text-[11px] text-muted-foreground text-center mt-1">
                 Looking for a bespoke version?{" "}
                 <Link
-                  to={`/contact?subject=${encodeURIComponent(`Bespoke inquiry — ${product.title} by ${designerDisplay}`)}&message=${encodeURIComponent(`Hello, I'd like to inquire about a bespoke version of:\n\n• ${product.title}${product.subtitle ? ` (${product.subtitle})` : ""}\n• Designer: ${designerDisplay}\n• Page: https://www.maisonaffluency.com${location.pathname}\n\nPlease share customisation possibilities (materials, dimensions, finishes), lead time, and pricing.`)}#contact`}
+                  to={`/contact?subject=${encodeURIComponent(`Bespoke inquiry — ${product.title} by ${designerDisplay}`)}&message=${encodeURIComponent(`Hello, I'd like to inquire about a bespoke version of:\n\n• ${product.title}${product.subtitle ? ` (${product.subtitle})` : ""}\n• Designer: ${designerDisplay}\n• Page: https://www.maisonaffluency.com${location.pathname}\n${finishesMissingImages.length > 0 ? `\nNote: No reference image on file for the selected finish${finishesMissingImages.length > 1 ? "es" : ""}: ${finishesMissingImages.join(", ")}. Please share visuals before confirming.\n` : ""}\nPlease share customisation possibilities (materials, dimensions, finishes), lead time, and pricing.`)}#contact`}
                   className="underline underline-offset-2 hover:text-foreground transition-colors"
                 >
                   Contact our concierge →
