@@ -461,7 +461,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
       {
         image: leoAertsAngeloMDining,
         title: "Angelo M/SR Side Table",
-        subtitle: "Collection — Three Heights",
+        subtitle: "",
         category: "Tables",
         tags: ["Tables", "Side Table"],
         materials: "Natural stone • Solid American walnut",
