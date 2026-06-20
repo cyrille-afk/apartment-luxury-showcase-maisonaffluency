@@ -8,6 +8,7 @@ import { ArrowLeft, Sparkles, Copy, Check, Save, RefreshCw, Layers, Square, Chec
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
 import AlphabetProductPicker, { type PickerItem } from "@/components/trade/AlphabetProductPicker";
+import AlphabetGroupPicker from "@/components/trade/AlphabetGroupPicker";
 
 type Tone = "editorial" | "technical" | "seo";
 type Source = "curator_picks" | "trade_products";
