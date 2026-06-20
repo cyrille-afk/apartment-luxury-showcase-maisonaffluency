@@ -66,13 +66,13 @@ const toImperialLine = (line: string): string | null => {
         .trim();
       stripped = stripped.replace(/\u0000(\d+)\u0000/g, (_, i) => ` ${parens[Number(i)]}`).replace(/\s+/g, " ").trim();
       if (!stripped) return stripped;
-      // Place the inch mark before any trailing parenthetical label.
+      // Place the inch unit before any trailing parenthetical label.
       const tail = stripped.match(/\s*(\([^)]*\)\s*)+$/);
       if (tail) {
         const head = stripped.slice(0, stripped.length - tail[0].length).trim();
-        return `${head}" ${tail[0].trim()}`;
+        return `${head} in ${tail[0].trim()}`;
       }
-      return `${stripped}"`;
+      return `${stripped} in`;
     })
     .join("")
     .replace(/\s+/g, " ")
