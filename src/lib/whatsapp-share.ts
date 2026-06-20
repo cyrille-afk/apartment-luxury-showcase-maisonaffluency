@@ -92,16 +92,18 @@ export const buildParentBrandOgUrl = (name: string) => {
 };
 
 /**
- * Build the canonical product page URL for a curator pick.
- * Product routes are prerendered with their own OG tags; the old /collectibles/*-og.html
- * bridge path can fall back to the generic app shell on production and produce no preview.
+ * Build the OG bridge URL for a curator pick.
+ * Bridge files live at /collectibles/{designer}-{piece}-og.html and contain
+ * baked OG tags + a client-side redirect to the canonical /designers/{brand}/{piece} page.
+ * WhatsApp/iMessage/Slack scrape the bridge; real browsers get redirected to canonical.
  */
 export const buildPieceOgUrl = (designerName: string, pieceTitle: string, pieceSubtitle?: string | null) => {
   const designerSlug = slugify(designerName);
   const fullPieceTitle = pieceSubtitle ? `${pieceTitle}-${pieceSubtitle}` : pieceTitle;
   const pieceSlug = slugify(fullPieceTitle);
-  return `${SITE_URL}/designers/${designerSlug}/${pieceSlug}`;
+  return withOgCacheBust(`${SITE_URL}/collectibles/${designerSlug}-${pieceSlug}-og.html`);
 };
+
 
 /**
  * Build a deep-link URL for a specific designer/brand profile.
