@@ -446,7 +446,12 @@ const VariantSelectors: React.FC<{
         />
       ) : hasVariants && !isDualAxis && singleAxisParsed.length > 1 && (() => {
         const labels = Array.from(new Set(singleAxisParsed.map((p) => p.size).filter(Boolean)));
-        return labels.length > 1 ? (
+        // Only render this as a "Size" dropdown when the labels actually look
+        // like dimensions. Otherwise these are finish-style labels (e.g.
+        // "Kynos", "Grafite") that belong in the FinishSelector below — not
+        // in a misleading "Select Your Size" picker.
+        const labelsAreDims = labels.length > 0 && labels.every(looksLikeDimension);
+        return labels.length > 1 && labelsAreDims ? (
           <ExpandableSpec
             icon={specIcon("📐")}
             text={withImperialPerLine(labels.join("\n"))}
@@ -467,7 +472,6 @@ const VariantSelectors: React.FC<{
           <ExpandableSpec icon={specIcon("📐")} text={withImperialPerLine(product.dimensions)} />
         ) : null;
       })()}
-      {/* No-variant fallback: dimensions must always appear BEFORE the materials/finish row */}
       {!hasVariants && product.dimensions && looksLikeDimension(product.dimensions) && (
         <ExpandableSpec icon={specIcon("📐")} text={withImperialPerLine(product.dimensions)} />
       )}
@@ -594,7 +598,7 @@ const VariantSelectors: React.FC<{
         productTitle={product.title}
         woodLabel={
           (product as any).wood_label_override
-            || (product.base_axis_label
+            || (product.base_axis_label && !baseAxisIsDim
               ? `Select Your ${formatVariantAxisLabel(product.base_axis_label) || product.base_axis_label}`
               : null)
         }
