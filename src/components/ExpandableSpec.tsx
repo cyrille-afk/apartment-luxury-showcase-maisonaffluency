@@ -1,13 +1,8 @@
 import { useState, type ReactNode } from "react";
+import { ChevronDown } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { parseMaterialsFallback } from "@/lib/parseSizeVariants";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-} from "@/components/ui/select";
 
 interface ExpandableSpecProps {
   icon: ReactNode;
@@ -135,41 +130,34 @@ export default function ExpandableSpec({
     );
   }
 
-  // Multi + placeholder → real Select (borderless list row)
+  // Multi + placeholder → inline expanding picker that pushes rows below
+  // downward (instead of overlaying them like a Radix/Native select).
   if (placeholder) {
-    const NONE = "__none__";
-    const handleChange = (v: string) => {
-      if (v === "__clear__" || v === NONE) {
-        // Always reset internal state so the trigger visually clears back to
-        // the placeholder, even when a parent onChange is wired up.
-        setInternalIdx(null);
-        if (onChange) onChange(-1);
-        return;
-      }
-      const idx = parseInt(v, 10);
-      setInternalIdx(idx);
-      if (onChange) onChange(idx);
-    };
+    const [open, setOpen] = useState(false);
     const hasSelection = selectedIdx != null && selectedIdx >= 0;
-    // Keep <Select> controlled at all times. If we ever pass `undefined`,
-    // Radix flips to uncontrolled mode and the trigger keeps showing the
-    // previously chosen label — making the dropdown look out of sync with
-    // the gallery after "Clear selection". A sentinel "__none__" value keeps
-    // it controlled and lets <SelectValue> fall back to the placeholder.
-    const currentVal = hasSelection ? String(selectedIdx) : NONE;
+    const pick = (i: number) => {
+      setInternalIdx(i);
+      if (onChange) onChange(i);
+      setOpen(false);
+    };
+    const clear = () => {
+      setInternalIdx(null);
+      if (onChange) onChange(-1);
+      setOpen(false);
+    };
 
     return (
       <>
-        <Select value={currentVal} onValueChange={handleChange}>
-          <SelectTrigger
+        <div className="border-b border-border/60 first:border-t">
+          <button
+            type="button"
+            aria-expanded={open}
+            onClick={() => setOpen((o) => !o)}
             className={cn(
-              rowClasses,
-              "h-auto px-0 bg-transparent border-0 rounded-none shadow-none",
-              "border-b border-border/60 first:border-t",
-              "font-body text-sm text-left",
-              "focus:ring-0 focus:ring-offset-0 focus:outline-none",
+              "flex items-center gap-5 w-full py-4 text-left",
+              "font-body text-sm",
+              "focus:outline-none focus-visible:ring-0",
               "hover:text-foreground transition-colors",
-              "[&>svg]:text-muted-foreground/60 [&>svg]:shrink-0 [&>span]:line-clamp-none",
               !hasSelection
                 ? "text-muted-foreground"
                 : emphasized
@@ -181,34 +169,56 @@ export default function ExpandableSpec({
             <span className="flex-1 min-w-0 whitespace-normal break-words leading-relaxed">
               {hasSelection ? lines[selectedIdx ?? 0] : placeholder}
             </span>
-          </SelectTrigger>
-          <SelectContent className="z-[10050] bg-background border-border max-w-[min(92vw,42rem)]">
-            {hasSelection && (
-              <SelectItem
-                value="__clear__"
-                className="font-body text-xs md:text-sm cursor-pointer text-muted-foreground italic border-b border-border/60"
-              >
-                Clear selection
-              </SelectItem>
-            )}
-            {lines.map((line, i) => {
-              const isDisabled = disabledSet.has(i);
-              return (
-                <SelectItem
-                  key={i}
-                  value={String(i)}
-                  disabled={isDisabled}
-                  className={cn(
-                    "font-body text-xs md:text-sm cursor-pointer whitespace-normal leading-relaxed pr-4",
-                    isDisabled && "line-through text-muted-foreground/50 cursor-not-allowed"
-                  )}
-                >
-                  {line}
-                </SelectItem>
-              );
-            })}
-          </SelectContent>
-        </Select>
+            <ChevronDown
+              className={cn(
+                "h-4 w-4 shrink-0 text-muted-foreground/60 transition-transform",
+                open && "rotate-180"
+              )}
+            />
+          </button>
+          {open && (
+            <ul
+              role="listbox"
+              className="pb-3 pl-[44px] pr-2 flex flex-col"
+            >
+              {hasSelection && (
+                <li>
+                  <button
+                    type="button"
+                    onClick={clear}
+                    className="w-full text-left font-body text-xs md:text-sm py-2 text-muted-foreground italic hover:text-foreground transition-colors"
+                  >
+                    Clear selection
+                  </button>
+                </li>
+              )}
+              {lines.map((line, i) => {
+                const isDisabled = disabledSet.has(i);
+                const isSelected = i === selectedIdx;
+                return (
+                  <li key={i}>
+                    <button
+                      type="button"
+                      role="option"
+                      aria-selected={isSelected}
+                      disabled={isDisabled}
+                      onClick={() => !isDisabled && pick(i)}
+                      className={cn(
+                        "w-full text-left font-body text-xs md:text-sm py-2 leading-relaxed whitespace-normal transition-colors",
+                        isDisabled
+                          ? "line-through text-muted-foreground/50 cursor-not-allowed"
+                          : "hover:text-foreground",
+                        isSelected ? "text-foreground font-medium" : "text-muted-foreground"
+                      )}
+                    >
+                      {line}
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </div>
         {showAutoHint && (
           <p
             className="font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground/70 mt-1 pl-[26px]"
