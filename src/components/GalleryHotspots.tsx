@@ -270,7 +270,7 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
     const x = ((e.clientX - rect.left) / rect.width) * 100;
     const y = ((e.clientY - rect.top) / rect.height) * 100;
     setPending({ x_percent: Math.round(x * 10) / 10, y_percent: Math.round(y * 10) / 10 });
-    setFormData({ product_name: "", designer_name: "", product_image_url: "", link_url: "" });
+    setFormData({ product_name: "", designer_name: "", product_image_url: "", link_url: "", mapped_pick_id: "" });
   }, [editMode]);
 
   const savePending = async () => {
