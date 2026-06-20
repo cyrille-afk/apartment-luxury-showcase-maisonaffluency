@@ -309,6 +309,7 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
       designer_name: hotspot.designer_name || "",
       product_image_url: hotspot.product_image_url || "",
       link_url: hotspot.link_url || "",
+      mapped_pick_id: hotspot.mapped_pick_id || "",
     });
   };
 
@@ -320,6 +321,7 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
       designer_name: editData.designer_name.trim() || null,
       product_image_url: editData.product_image_url.trim() || null,
       link_url: editData.link_url.trim() || null,
+      mapped_pick_id: editData.mapped_pick_id || null,
     };
     await supabase.from("gallery_hotspots").update(updates).eq("id", editingId);
     setHotspots(prev => prev.map(h => h.id === editingId ? { ...h, ...updates } : h));
