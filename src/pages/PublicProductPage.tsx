@@ -354,6 +354,8 @@ const VariantSelectors: React.FC<{
   });
 
 
+
+
   // Per-square-metre rug picker short-circuit: when the product is a rug and
   // its size_variants encode parseable dimensions (e.g. "300 × 400 cm"), show
   // the dedicated picker (stock sizes + custom L × W + colour) instead of the
@@ -813,7 +815,7 @@ const VariantSelectors: React.FC<{
               : undefined
           }
         />
-      ) : product.materials && !hasLinkedFabrics && !isProductUpholstered(product) ? (
+      ) : product.materials && !hasLinkedFabrics && !isProductUpholstered(product) && linkedWoodFinishes.length === 0 ? (
         (() => {
           const parsed = parseMaterialsFallback(product.materials);
           return (

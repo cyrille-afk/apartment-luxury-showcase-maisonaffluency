@@ -70,15 +70,46 @@ describe("finish dropdown de-duplication", () => {
       ).toBe(true);
     });
 
-    it("keeps dropdown when at least one option has no swatch", () => {
+    it("still suppresses when one option has a typo (Kynos vs library Kyknos)", () => {
+      // Real Angelo M/R × Alinea bug: variant labels use "Kynos" but the
+      // designer swatch library is spelled "Kyknos". The dropdown still
+      // duplicates the swatch picker — suppress as long as the rest overlap.
       expect(
         shouldSuppressSingleAsFinish({
           hasSingleAxisSplit: true,
-          singleMaterialOptions: ["Kynos", "Unobtanium"],
+          singleMaterialOptions: [
+            "Kynos",
+            "Grafite",
+            "Travertino Rosso / Grey Saint Laurent / Picasso Green",
+            "Port Saint Laurent / Travertino Silver / Rosso Lepanto",
+            "Bianco Statuarietto",
+          ],
+          linkedWoodFinishes: [
+            "Bianco Statuarietto",
+            "Ceppo di Sicilia",
+            "Grafite",
+            "Grey Saint Laurent",
+            "Kyknos",
+            "Picasso Green",
+            "Port Saint Laurent",
+            "Rosso Lepanto",
+            "Travertino Rosso",
+            "Travertino Silver",
+          ],
+        }),
+      ).toBe(true);
+    });
+
+    it("keeps dropdown when NO option overlaps with any swatch", () => {
+      expect(
+        shouldSuppressSingleAsFinish({
+          hasSingleAxisSplit: true,
+          singleMaterialOptions: ["Unobtanium", "Mithril"],
           linkedWoodFinishes: ALINEA_MARBLES,
         }),
       ).toBe(false);
     });
+
 
     it("keeps dropdown when no swatches are linked", () => {
       expect(
