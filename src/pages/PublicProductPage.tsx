@@ -451,7 +451,11 @@ const VariantSelectors: React.FC<{
         // like dimensions. Otherwise these are finish-style labels (e.g.
         // "Kynos", "Grafite") that belong in the FinishSelector below — not
         // in a misleading "Select Your Size" picker.
-        const labelsAreDims = labels.length > 0 && labels.every(looksLikeDimension);
+        // Treat the list as size-like when most labels read as dimensions.
+        // Allows a "Bespoke" (or similar) entry to sit alongside real sizes
+        // without disqualifying the whole dropdown.
+        const dimCount = labels.filter(looksLikeDimension).length;
+        const labelsAreDims = dimCount >= 2 && dimCount >= Math.ceil(labels.length / 2);
         return labels.length > 1 && labelsAreDims ? (
           <ExpandableSpec
             icon={specIcon("📐")}
