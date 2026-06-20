@@ -358,6 +358,20 @@ export default function FinishSelector({ pickId, className, productTitle, onUpho
   const selectedTopItem = fabrics.find((f) => f.id === selectedTopId) || null;
   const selectedCoverItem = fabrics.find((f) => f.id === selectedCoverId) || null;
 
+  // Notify parent when the user has selected wood/top finishes that lack
+  // mapped gallery images, so quote/bespoke messages can flag them.
+  useEffect(() => {
+    if (!onFinishesMissingImagesChange) return;
+    const missing: string[] = [];
+    for (const item of [selectedWoodItem, selectedTopItem]) {
+      if (item && (!item.image_indices || item.image_indices.length === 0)) {
+        missing.push(item.name);
+      }
+    }
+    onFinishesMissingImagesChange(missing);
+  }, [selectedWoodItem?.id, selectedTopItem?.id, onFinishesMissingImagesChange]);
+
+
   const renderTile = (f: Fabric, kindOverride?: "fabric" | "cover" | "base" | "top") => {
     const isCom = f.id === "__com__";
     const isCol = f.id === "__col__";
