@@ -577,7 +577,8 @@ export default function FinishSelector({ pickId, className, productTitle, onUpho
               return "Select Your Marble Finish (Top & Base)";
             }
             if (isTable) return "Select Your Table Finish";
-            return "Select the Finish of the Frame";
+            return "Select Your Finish";
+
           })(),
           selectedName: selectedWoodItem?.name ?? null,
           tiles: woodTiles,
