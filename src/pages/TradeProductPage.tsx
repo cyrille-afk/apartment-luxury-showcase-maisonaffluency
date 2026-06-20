@@ -1070,12 +1070,19 @@ const TradeProductPage: React.FC = () => {
     ? sizeVariants.map((v) => v.price_cents).filter((c) => typeof c === "number" && c > 0)
     : [];
   const minVariantCents = pricedVariantCents.length > 0 ? Math.min(...pricedVariantCents) : null;
+  // If the user has actively selected a Base/Top/Size in a dual-axis product
+  // but no priced variant matches that combination (e.g. a linked swatch like
+  // "Ceppo di Sicilia" that hasn't been quoted yet), do NOT fall back to the
+  // cheapest "From €X" — show "Price on request" instead so the UI matches
+  // the selection.
+  const dualSelectionMade = isDualAxis && !!(selectedBase || selectedTop || selectedDualSize);
+  const dualSelectionUnpriced = dualSelectionMade && (!dualVariant || !(typeof dualVariant.price_cents === "number" && dualVariant.price_cents > 0));
   const effectiveRrpCents = hasVariants
     ? (activeVariant
       ? (typeof activeVariant.price_cents === "number" && activeVariant.price_cents > 0 ? activeVariant.price_cents : null)
-      : minVariantCents)
+      : (dualSelectionUnpriced ? null : minVariantCents))
     : pricing?.rrp_price_cents ?? null;
-  const isFromPrice = hasVariants && !activeVariant && effectiveRrpCents != null;
+  const isFromPrice = hasVariants && !activeVariant && !dualSelectionUnpriced && effectiveRrpCents != null;
 
 
   // Per-meter fabric upcharge in the product's currency. We always charge the
