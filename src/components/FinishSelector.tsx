@@ -789,5 +789,6 @@ export default function FinishSelector({ pickId, className, productTitle, onUpho
         </div>
       )}
     </div>
+    </TooltipProvider>
   );
 }
