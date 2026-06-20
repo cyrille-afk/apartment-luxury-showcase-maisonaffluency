@@ -460,8 +460,8 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
       // "Visible M & W Display Cabinet" curator pick (with full size variants & per-variant pricing).
       {
         image: leoAertsAngeloMDining,
-        title: "Angelo M Side Table Collection",
-        subtitle: "Three Heights",
+        title: "Angelo M/SR Side Table",
+        subtitle: "Collection — Three Heights",
         category: "Tables",
         tags: ["Tables", "Side Table"],
         materials: "Natural stone • Solid American walnut",
