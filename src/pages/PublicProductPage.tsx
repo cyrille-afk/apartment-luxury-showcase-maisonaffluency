@@ -616,6 +616,7 @@ const VariantSelectors: React.FC<{
         onHasFabricsChange={setHasLinkedFabrics}
         onWoodFinishesAvailable={setLinkedWoodFinishes}
         onSwatchImagesChange={onSwatchImagesChange}
+        onFinishesMissingImagesChange={onFinishesMissingImagesChange}
         onWoodFinishChange={(woodName) => {
           if (!woodName) return;
           const norm = (s: string) => s.trim().toLowerCase();
