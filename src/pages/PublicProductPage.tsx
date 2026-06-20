@@ -38,6 +38,12 @@ import { rememberProductBackRef } from "@/lib/designerBackRef";
 import { toOgImage } from "@/lib/ogImage";
 import SpecGlyph from "@/components/product/SpecGlyph";
 import FavoriteFolderPicker from "@/components/FavoriteFolderPicker";
+import {
+  isFinishAxisLabel,
+  everyOptionCoveredBySwatches,
+  someOptionCoveredBySwatches,
+  shouldSuppressSingleAsFinish,
+} from "@/lib/finishDuplication";
 
 
 /* ------------------------------------------------------------------ */
