@@ -343,7 +343,7 @@ const VariantSelectors: React.FC<{
   const allBasesHaveSwatches = baseOptions.length > 0 && everyOptionCoveredBySwatches(baseOptions, linkedWoodFinishes);
   const topAxisHasSwatches = !topAxisIsDim && topOptions.length > 0 && someOptionCoveredBySwatches(topOptions, linkedWoodFinishes);
   const suppressBaseAsFinish = !baseAxisIsDim && (allBasesHaveSwatches || (hasWoodSwatches && isFinishAxis(baseAxisLabelRaw)));
-  const suppressTopAsFinish = !topAxisIsDim && (topAxisHasSwatches || (isProductUpholstered(product) && isFinishAxis(topAxisLabelRaw)));
+  const suppressTopAsFinish = !topAxisIsDim && (topAxisHasSwatches || (isProductUpholstered(product) && isFinishAxis(topAxisLabelRaw)) || (hasWoodSwatches && isFinishAxis(topAxisLabelRaw)));
   // When the FinishSelector swatch picker already exposes every material in
   // the single-axis "size + material" split (e.g. marble finishes attached as
   // Stone swatches), suppress the parallel text dropdown so we don't render
