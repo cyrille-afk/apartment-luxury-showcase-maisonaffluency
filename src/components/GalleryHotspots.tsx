@@ -586,7 +586,7 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
                             className="flex items-center gap-1.5 mt-2.5 w-full text-xs font-body bg-foreground text-background rounded px-3 py-2 hover:bg-foreground/90 transition-colors justify-center"
                             onClick={(e) => {
                               e.stopPropagation();
-                              onViewProduct(hotspot.product_name, hotspot.designer_name || "", hotspot.link_url);
+                              onViewProduct(hotspot.product_name, hotspot.designer_name || "", hotspot.link_url, hotspot.mapped_pick_id);
                               setActiveId(null);
                             }}
                           >
