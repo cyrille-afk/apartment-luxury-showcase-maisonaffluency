@@ -604,7 +604,7 @@ export default function FinishSelector({ pickId, className, productTitle, onUpho
       {args.isOpen && (
         <div className="pb-5 pt-4">
           {args.tiles.length > 0 ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4">
+            <div className="grid grid-cols-5 sm:grid-cols-3 md:grid-cols-5 gap-2 sm:gap-3 md:gap-4">
               {args.tiles.map((f) => renderTile(f, args.tileKind))}
             </div>
           ) : (
