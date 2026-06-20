@@ -41,12 +41,14 @@ describe("dimensions render consistency", () => {
   });
 
   it("both surfaces render dimensions with the inline metric|imperial helper", () => {
-    for (const rel of [
-      "src/components/PublicProductLightbox.tsx",
-      "src/pages/PublicProductPage.tsx",
-    ]) {
-      const src = read(rel);
-      expect(src).toMatch(/withImperialPerLine\(product\.dimensions\)/);
-    }
+    // PublicProductPage renders the raw field directly.
+    expect(read("src/pages/PublicProductPage.tsx")).toMatch(
+      /withImperialPerLine\(product\.dimensions\)/,
+    );
+    // PublicProductLightbox derives a `dimText` (product.dimensions OR variant
+    // fallback) and then runs it through the same helper.
+    const lightbox = read("src/components/PublicProductLightbox.tsx");
+    expect(lightbox).toMatch(/let dimText = \(product\.dimensions \|\| ""\)\.trim\(\)/);
+    expect(lightbox).toMatch(/withImperialPerLine\(dimText\)/);
   });
 });
