@@ -575,7 +575,8 @@ export default function FinishSelector({ pickId, className, productTitle, onUpho
   );
 
   return (
-    <div className={className}>
+    <TooltipProvider>
+      <div className={className}>
       {showUpholsterySection && renderAccordion({
         isOpen: open,
         onToggle: () => setOpen((v) => !v),
