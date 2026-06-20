@@ -286,6 +286,7 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
         designer_name: formData.designer_name.trim() || null,
         product_image_url: formData.product_image_url.trim() || null,
         link_url: formData.link_url.trim() || null,
+        mapped_pick_id: formData.mapped_pick_id || null,
       })
       .select()
       .single();
