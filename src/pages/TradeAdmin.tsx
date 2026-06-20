@@ -19,7 +19,7 @@ import ScrapeProducts from "@/components/trade/ScrapeProducts";
 import InstagramFeedAdmin from "@/components/trade/InstagramFeedAdmin";
 import OgRescrapeAdmin from "@/components/trade/OgRescrapeAdmin";
 import { Link } from "react-router-dom";
-import { Instagram, FileBox, Sparkles, Inbox, FileSpreadsheet } from "lucide-react";
+import { Instagram, FileBox, Sparkles, Inbox, FileSpreadsheet, MapPin } from "lucide-react";
 
 interface Application {
   id: string;
@@ -202,6 +202,18 @@ function InstagramAuditCard() {
         <div className="flex-1">
           <span className="font-display text-sm text-foreground">3D Models (GLB)</span>
           <p className="font-body text-[10px] text-muted-foreground">Upload a .glb/.gltf to a product — auto-saves the URL and shows the interactive viewer on the trade page</p>
+        </div>
+      </Link>
+
+      {/* Hotspot → catalog bulk mapping */}
+      <Link
+        to="/trade/admin/hotspot-mapping"
+        className="flex items-center gap-2 px-4 py-3 rounded-lg border border-border hover:border-foreground/30 transition-all group"
+      >
+        <MapPin className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+        <div className="flex-1">
+          <span className="font-display text-sm text-foreground">Hotspot → Catalog Mapping</span>
+          <p className="font-body text-[10px] text-muted-foreground">Bulk-assign exact catalog picks to gallery hotspots and override the View Product fuzzy matcher</p>
         </div>
       </Link>
 
