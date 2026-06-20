@@ -38,6 +38,55 @@ const ANON_KEY =
 const args = new Set(process.argv.slice(2));
 const APPLY = args.has("--apply");
 const OVERWRITE = args.has("--overwrite");
+// --strict makes any validation failure exit non-zero. Without it, validation
+// problems are reported but bad bridges are simply skipped (never written).
+const STRICT = args.has("--strict");
+
+/**
+ * Parse a generated bridge HTML and verify required tags are present and
+ * internally consistent. Returns { ok, errors[] }.
+ */
+function validateBridge(html, expected) {
+  const errors = [];
+  const m = (re) => {
+    const x = html.match(re);
+    return x ? x[1] : null;
+  };
+
+  const title = m(/<title>([^<]*)<\/title>/i);
+  if (!title || !title.trim()) errors.push("missing <title>");
+  else if (!title.includes(expected.designerEsc)) errors.push(`title missing designer "${expected.designer}"`);
+  else if (!title.includes(expected.titleTextEsc)) errors.push(`title missing product "${expected.titleText}"`);
+
+
+  const desc = m(/<meta\s+name="description"\s+content="([^"]*)"/i);
+  if (!desc || !desc.trim()) errors.push("missing meta description");
+  else if (desc.length > 320) errors.push(`description too long (${desc.length} chars)`);
+
+  const robots = m(/<meta\s+name="robots"\s+content="([^"]*)"/i);
+  if (!robots || !/noindex/i.test(robots) || !/nofollow/i.test(robots))
+    errors.push("robots meta is not noindex,nofollow");
+
+  const canonical = m(/<link\s+rel="canonical"\s+href="([^"]+)"/i);
+  if (!canonical) errors.push("missing canonical");
+  else if (canonical !== expected.canonical)
+    errors.push(`canonical mismatch: ${canonical} != ${expected.canonical}`);
+
+  const ogUrl = m(/<meta\s+property="og:url"\s+content="([^"]+)"/i);
+  if (ogUrl !== expected.canonical)
+    errors.push(`og:url mismatch: ${ogUrl} != ${expected.canonical}`);
+
+  const ogImage = m(/<meta\s+property="og:image"\s+content="([^"]+)"/i);
+  if (!ogImage) errors.push("missing og:image");
+  else if (!/^https?:\/\//.test(ogImage)) errors.push(`og:image not absolute URL: ${ogImage}`);
+
+  const redirect = m(/window\.location\.replace\("([^"]+)"\)/);
+  if (!redirect) errors.push("missing JS redirect");
+  else if (redirect !== expected.canonical)
+    errors.push(`redirect target mismatch: ${redirect} != ${expected.canonical}`);
+
+  return { ok: errors.length === 0, errors };
+}
 
 // ── slugify: must match src/lib/whatsapp-share.ts exactly ─────────────────────
 const slugify = (s) =>
@@ -155,8 +204,10 @@ async function main() {
 
   let written = 0,
     skipped = 0,
-    overwritten = 0;
+    overwritten = 0,
+    invalid = 0;
   const noImage = [];
+  const validationFailures = [];
 
   for (const row of data ?? []) {
     const designerName = row.designer?.display_name || row.designer?.name;
@@ -187,6 +238,23 @@ async function main() {
       ogImage,
     });
 
+    // Always validate the in-memory HTML before deciding to write it.
+    // Designer/title get escaped before substring-matching against the
+    // generated HTML (which is also escaped — e.g. `&` → `&amp;`).
+    const v = validateBridge(html, {
+      canonical,
+      designer: designerName,
+      designerEsc: esc(designerName),
+      titleText: row.title,
+      titleTextEsc: esc(row.title),
+    });
+
+    if (!v.ok) {
+      invalid++;
+      validationFailures.push({ filename, errors: v.errors });
+      continue; // skip writing — bad bridge would mislead crawlers
+    }
+
     if (APPLY) {
       writeFileSync(resolve(OUT_DIR, filename), html, "utf8");
     }
@@ -199,9 +267,21 @@ async function main() {
   console.log(`To write (new): ${written}`);
   console.log(`To overwrite:   ${overwritten}`);
   console.log(`Skipped existing: ${skipped}`);
+  console.log(`Validation failures (skipped): ${invalid}`);
   console.log(`Missing source image (used fallback): ${noImage.length}`);
+
+  if (validationFailures.length) {
+    console.log("\nValidation failure details (first 20):");
+    for (const f of validationFailures.slice(0, 20)) {
+      console.log(`  ${f.filename}`);
+      for (const e of f.errors) console.log(`    - ${e}`);
+    }
+  }
+
   if (!APPLY) console.log("\nDry run. Re-run with --apply to write files.");
+  if (invalid > 0 && STRICT) process.exit(2);
 }
+
 
 main().catch((e) => {
   console.error(e);
