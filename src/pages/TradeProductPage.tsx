@@ -1567,6 +1567,7 @@ const TradeProductPage: React.FC = () => {
                   showWoodSection
                   onHasFabricsChange={setHasLinkedFabrics}
                   onWoodFinishesAvailable={setLinkedWoodFinishes}
+                  onFinishesMissingImagesChange={setFinishesMissingImages}
                   onFabricChange={setSelectedFabric}
                   onWoodFinishPricingChange={setSelectedWoodPrice}
                   onSwatchImagesChange={(indices) => {
