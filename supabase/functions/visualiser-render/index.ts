@@ -126,7 +126,7 @@ Deno.serve(async (req) => {
   } catch (e) {
     if (e instanceof Response) return e;
     console.error("[visualiser-render]", e);
-    return jsonError(e instanceof Error ? e.message : String(e), 500);
+    return jsonError("An internal error occurred", 500);
   }
 });
 
