@@ -37,14 +37,13 @@ const Hero = () => {
         />
         <img
           src={HERO_DESKTOP}
-          width="1200"
-          height="800"
           alt="Luxury living room with Asian-inspired murals and designer furniture"
           className="absolute inset-0 h-full w-full object-cover object-[50%_40%] md:h-[120%] md:object-[50%_0%]"
           loading="eager"
           decoding="async"
           {...({ fetchpriority: "high" } as any)}
         />
+
       </picture>
       <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-black/10 via-transparent to-black/20" />
 
