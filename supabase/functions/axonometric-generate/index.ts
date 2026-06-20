@@ -313,7 +313,49 @@ CRITICAL: Do not crop, rotate, or re-frame the scene relative to the source. The
       prompt = `You are an expert architectural visualization AI. You are given an interior/architectural render. Apply the following user instruction to this image.\n\nCRITICAL RULE: You MUST keep ALL other elements in the scene EXACTLY as they are. Only modify what is explicitly requested. Every piece of furniture, decoration, wall, floor, ceiling, plant, artwork, rug, lighting fixture, and architectural detail that is NOT mentioned in the instruction must remain completely unchanged and in its exact original position. The output should be identical to the input except for the specific change requested.\n\nInstruction: "${userPrompt}"\n\nStyle: ${defaultStyle}. Produce a single cohesive professional architectural rendering as output.`;
     } else if (mode === "clean_room") {
       prompt = `You are given a 3D axonometric architectural interior render. REMOVE ALL movable furniture, decorations, rugs, plants, artwork, and accessories from the scene. Keep ONLY the architectural shell: walls, floors, ceilings, windows, doors, built-in cabinetry, and fixed architectural elements. Fill the areas where furniture was removed with matching floor/wall textures so the room looks naturally empty and clean. The result should be a pristine, empty architectural space ready for new furniture placement.\n\nStyle: ${defaultStyle}.`;
-    } else if (mode === "proposal_render") {
+    }
+
+    // For proposal modes, override placement.dimensions with parsed CAD bbox when available.
+    // bbox_mm is the source of truth — exact W×D×Hcm beats the free-text dimensions field.
+    if ((mode === "proposal_render" || mode === "proposal_refine") && Array.isArray(placements) && placements.length > 0) {
+      const productIds = Array.from(new Set(
+        placements.map((p: any) => p?.product_id).filter((id: any) => typeof id === "string" && id.length > 0),
+      ));
+      if (productIds.length > 0) {
+        try {
+          const svc = createClient(supabaseUrl, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+          const { data: geomRows } = await svc
+            .from("product_cad_asset_geometry")
+            .select("product_id, bbox_mm, status, parsed_at")
+            .in("product_id", productIds)
+            .eq("status", "ready")
+            .order("parsed_at", { ascending: false });
+          const geomByProduct = new Map<string, { w: number; d: number; h: number }>();
+          for (const row of (geomRows || []) as any[]) {
+            if (geomByProduct.has(row.product_id)) continue; // keep newest
+            const bb = row.bbox_mm as { w?: number; d?: number; h?: number } | null;
+            if (!bb || !bb.w || !bb.d) continue;
+            geomByProduct.set(row.product_id, { w: bb.w, d: bb.d, h: bb.h || 0 });
+          }
+          for (const p of placements as any[]) {
+            const g = p?.product_id ? geomByProduct.get(p.product_id) : undefined;
+            if (!g) continue;
+            const wCm = Math.round(g.w / 10);
+            const dCm = Math.round(g.d / 10);
+            const hCm = g.h ? Math.round(g.h / 10) : 0;
+            const cadDim = hCm
+              ? `W${wCm} × D${dCm} × H${hCm} cm (from CAD)`
+              : `W${wCm} × D${dCm} cm (from CAD)`;
+            p.dimensions = cadDim;
+            p.cad_geometry_mm = g;
+          }
+        } catch (e) {
+          console.warn("[axonometric-generate] CAD geometry lookup failed:", e instanceof Error ? e.message : e);
+        }
+      }
+    }
+
+    if (mode === "proposal_render") {
       const hasMaterialOverrides = (placements || []).some((p: any) => p.material_override?.trim());
       const productList = (placements || [])
         .map((p: any, i: number) => {
