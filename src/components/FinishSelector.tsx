@@ -3,6 +3,7 @@ import { ChevronDown, ZoomIn, X, ImageOff } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import SpecGlyph from "@/components/product/SpecGlyph";
+import { useIsMobile } from "@/hooks/use-mobile";
 import {
   Tooltip,
   TooltipContent,
