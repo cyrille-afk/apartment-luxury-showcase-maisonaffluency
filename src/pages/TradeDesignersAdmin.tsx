@@ -201,6 +201,8 @@ function HeritageSlideManager({ designerId }: { designerId: string }) {
 }
 
 /** Inline Curator Picks manager for each designer */
+const IMMEDIATE_PICK_AUTOSAVE_FIELDS = new Set<string>(["title"]);
+
 function CuratorPicksManager({ designerId, designerName }: { designerId: string; designerName?: string }) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -371,17 +373,26 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
   // pressure (audit log + mirror triggers) by ~10-20x on long text fields.
   const pendingWritesRef = useRef<Map<string, { id: string; field: string; value: any; timer: number }>>(new Map());
 
+  const persistPickField = useCallback(async (id: string, field: string, value: any) => {
+    const { error } = await supabase
+      .from("designer_curator_picks")
+      .update({ [field]: value } as any)
+      .eq("id", id);
+
+    if (error) {
+      toast({ title: "Save failed", description: error.message, variant: "destructive" });
+      await loadPicks();
+    }
+  }, [loadPicks, toast]);
+
   const flushPendingWrites = useCallback(() => {
     const entries = Array.from(pendingWritesRef.current.values());
     pendingWritesRef.current.clear();
     entries.forEach((entry) => {
       window.clearTimeout(entry.timer);
-      void supabase
-        .from("designer_curator_picks")
-        .update({ [entry.field]: entry.value } as any)
-        .eq("id", entry.id);
+      void persistPickField(entry.id, entry.field, entry.value);
     });
-  }, []);
+  }, [persistPickField]);
 
   // Flush any pending debounced writes before the page unloads or loses focus,
   // so a quick refresh after pasting (e.g. a gallery image URL) doesn't drop
@@ -404,29 +415,21 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
 
   const updateField = (id: string, field: string, value: any) => {
     setPicks((prev) => prev.map((p) => (p.id === id ? { ...p, [field]: value } : p)));
-    if (field === "gallery_images") {
-      const key = `${id}::${field}`;
-      const existing = pendingWritesRef.current.get(key);
-      if (existing) {
-        window.clearTimeout(existing.timer);
-        pendingWritesRef.current.delete(key);
-      }
-      void supabase
-        .from("designer_curator_picks")
-        .update({ gallery_images: value } as any)
-        .eq("id", id);
-      return;
-    }
     const key = `${id}::${field}`;
     const existing = pendingWritesRef.current.get(key);
-    if (existing) window.clearTimeout(existing.timer);
+    if (existing) {
+      window.clearTimeout(existing.timer);
+      pendingWritesRef.current.delete(key);
+    }
+    if (field === "gallery_images" || IMMEDIATE_PICK_AUTOSAVE_FIELDS.has(field)) {
+      void persistPickField(id, field, value);
+      return;
+    }
     const timer = window.setTimeout(() => {
       const entry = pendingWritesRef.current.get(key);
+      if (!entry) return;
       pendingWritesRef.current.delete(key);
-      void supabase
-        .from("designer_curator_picks")
-        .update({ [field]: entry?.value } as any)
-        .eq("id", id);
+      void persistPickField(entry.id, entry.field, entry.value);
     }, 600);
     pendingWritesRef.current.set(key, { id, field, value, timer });
   };
