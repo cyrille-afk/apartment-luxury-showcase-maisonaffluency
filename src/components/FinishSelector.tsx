@@ -214,6 +214,26 @@ export default function FinishSelector({ pickId, className, productTitle, onUpho
   const [selectedTopId, setSelectedTopId] = useState<string | null>(null);
   const [selectedCoverId, setSelectedCoverId] = useState<string | null>(null);
   const [zoomed, setZoomed] = useState<Fabric | null>(null);
+  const [allowComCol, setAllowComCol] = useState<boolean>(true);
+
+  // Fetch the per-product "allow customer's own material" flag from the public
+  // mirror so we can suppress COM/COL tiles on products where they don't apply
+  // (e.g. Alinea Twin Upholstered — leather seat is supplier-supplied only).
+  useEffect(() => {
+    if (!pickId) { setAllowComCol(true); return; }
+    let cancelled = false;
+    (async () => {
+      const { data } = await (supabase as any)
+        .from("designer_curator_picks_public")
+        .select("allow_com_col")
+        .eq("id", pickId)
+        .maybeSingle();
+      if (cancelled) return;
+      setAllowComCol(data?.allow_com_col !== false);
+    })();
+    return () => { cancelled = true; };
+  }, [pickId]);
+
 
 
   useEffect(() => {
