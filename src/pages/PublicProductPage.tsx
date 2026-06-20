@@ -647,7 +647,7 @@ const VariantSelectors: React.FC<{
             setSelBase(null);
             nextBase = null;
           }
-          onMaterialChange?.(match, { base: nextBase, top: match, size: selDualSize });
+          onMaterialChange?.(match, { base: nextBase, top: match, size: selDualSize, fromSwatch: true });
         }}
         onUpholsteryTierChange={(rawTier) => {
           if (!rawTier) return;
