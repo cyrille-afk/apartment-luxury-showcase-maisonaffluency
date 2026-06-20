@@ -130,13 +130,14 @@ async function main() {
 
   const sb = createClient(SUPABASE_URL, ANON_KEY, { auth: { persistSession: false } });
 
-  // Pull all unhidden picks with the joined designer display name.
+  // designer_curator_picks_public is the anon-readable view (omits price fields).
   const { data, error } = await sb
-    .from("designer_curator_picks")
+    .from("designer_curator_picks_public")
     .select(
       "id, title, subtitle, description, image_url, gallery_images, is_hidden, designer:designers!inner(name, display_name)"
     )
     .or("is_hidden.is.null,is_hidden.eq.false");
+
 
   if (error) {
     console.error("Query failed:", error.message);
