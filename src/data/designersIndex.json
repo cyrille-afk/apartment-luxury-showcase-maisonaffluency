@@ -1,9 +1,5 @@
 [
   {
-    "slug": "achille-salvagni-atelier",
-    "name": "Achille Salvagni Atelier"
-  },
-  {
     "slug": "adrien-messie",
     "name": "Adrien Messié"
   },
@@ -36,10 +32,6 @@
     "name": "Andy Kerstens"
   },
   {
-    "slug": "angelo-lelii",
-    "name": "Angelo Lelii"
-  },
-  {
     "slug": "anthony-guerree",
     "name": "Anthony Guerrée"
   },
@@ -50,14 +42,6 @@
   {
     "slug": "arredoluce",
     "name": "Arredoluce"
-  },
-  {
-    "slug": "arthur-arbesser",
-    "name": "Arthur Arbesser"
-  },
-  {
-    "slug": "articolo-studios",
-    "name": "Articolo Studios"
   },
   {
     "slug": "bruno-de-maistre",
@@ -76,24 +60,8 @@
     "name": "Atelier Pendhapa"
   },
   {
-    "slug": "autoban",
-    "name": "Autoban"
-  },
-  {
     "slug": "based-upon",
     "name": "Based Upon"
-  },
-  {
-    "slug": "bec-brittain",
-    "name": "Bec Brittain"
-  },
-  {
-    "slug": "bethan-gray-cc-tapis",
-    "name": "Bethan Gray"
-  },
-  {
-    "slug": "bethan-laura-wood-cc-tapis",
-    "name": "Bethan Laura Wood"
   },
   {
     "slug": "bieke-casteleyn",
@@ -104,20 +72,8 @@
     "name": "Bina Baitel"
   },
   {
-    "slug": "bruno-moinard",
-    "name": "Bruno Moinard"
-  },
-  {
     "slug": "bruno-moinard-editions",
     "name": "Bruno Moinard Editions"
-  },
-  {
-    "slug": "caroline-scholl",
-    "name": "Caroline Scholl"
-  },
-  {
-    "slug": "cassina-cc-tapis",
-    "name": "Cassina"
   },
   {
     "slug": "cazes-conquet",
@@ -128,128 +84,36 @@
     "name": "CC-Tapis"
   },
   {
-    "slug": "celso-de-lemos",
-    "name": "Celso de Lemos"
-  },
-  {
-    "slug": "charles-kalpakian",
-    "name": "Charles Kalpakian"
-  },
-  {
-    "slug": "charles-antoine-chappuis-cc-tapis",
-    "name": "Charles-Antoine Chappuis"
-  },
-  {
-    "slug": "charlotte-perriand-cc-tapis",
-    "name": "Charlotte Perriand"
-  },
-  {
-    "slug": "chiara-andreatti-cc-tapis",
-    "name": "Chiara Andreatti"
-  },
-  {
-    "slug": "christophe-delcourt-cc-tapis",
-    "name": "Christophe Delcourt"
-  },
-  {
-    "slug": "christophe-delcourt",
-    "name": "Christophe Delcourt"
-  },
-  {
     "slug": "christopher-boots",
     "name": "Christopher Boots"
-  },
-  {
-    "slug": "claude-cartier-studio-cc-tapis",
-    "name": "Claude Cartier Studio"
-  },
-  {
-    "slug": "cluzel-pluchon",
-    "name": "Cluzel Pluchon"
   },
   {
     "slug": "collection-particuliere",
     "name": "Collection Particulière"
   },
   {
-    "slug": "cristian-mohaded",
-    "name": "Cristián Mohaded"
-  },
-  {
     "slug": "cristian-mohaded-cc-tapis",
     "name": "Cristián Mohaded"
-  },
-  {
-    "slug": "cristina-celestino-cc-tapis",
-    "name": "Cristina Celestino"
-  },
-  {
-    "slug": "cristoforo-trapani",
-    "name": "Cristoforo Trapani"
   },
   {
     "slug": "dagmar-london",
     "name": "Dagmar London"
   },
   {
-    "slug": "damien-langlois-meurinne",
-    "name": "Damien Langlois-Meurinne"
-  },
-  {
-    "slug": "dan-yeffet",
-    "name": "Dan Yeffet"
-  },
-  {
-    "slug": "david-nicolas",
-    "name": "David & Nicolas"
-  },
-  {
-    "slug": "david-nicolas-cc-tapis",
-    "name": "David/Nicolas"
-  },
-  {
     "slug": "de-la-espada",
     "name": "De La Espada"
-  },
-  {
-    "slug": "atelier-de-troupe-cc-tapis",
-    "name": "De Troupe"
   },
   {
     "slug": "delcourt-collection",
     "name": "Delcourt Collection"
   },
   {
-    "slug": "destroyers-builders-cc-tapis",
-    "name": "Destroyers Builders"
-  },
-  {
-    "slug": "didier-gomez",
-    "name": "Didier Gomez"
-  },
-  {
-    "slug": "doshi-levien-cc-tapis",
-    "name": "Doshi Levien"
-  },
-  {
-    "slug": "duccio-maria-gambi-cc-tapis",
-    "name": "Duccio Maria Gambi"
-  },
-  {
     "slug": "ecart",
     "name": "Ecart"
   },
   {
-    "slug": "edoardo-piermattei-cc-tapis",
-    "name": "Edoardo Piermattei"
-  },
-  {
     "slug": "eileen-gray",
     "name": "Eileen Gray"
-  },
-  {
-    "slug": "eligo-studio-cc-tapis",
-    "name": "Eligo Studio"
   },
   {
     "slug": "emmanuel-babled",
@@ -260,44 +124,12 @@
     "name": "Emmanuel Levet Stenne"
   },
   {
-    "slug": "emmanuelle-simon-theoreme",
-    "name": "Emmanuelle Simon"
-  },
-  {
     "slug": "entrelacs",
     "name": "Entrelacs"
   },
   {
-    "slug": "eny-lee-parker-cc-tapis",
-    "name": "Eny Lee Parker"
-  },
-  {
     "slug": "eric-schmitt-studio",
     "name": "Eric Schmitt Studio"
-  },
-  {
-    "slug": "exercice-studio",
-    "name": "Exercice"
-  },
-  {
-    "slug": "fabrice-ausset",
-    "name": "Fabrice Ausset"
-  },
-  {
-    "slug": "fabrice-juan",
-    "name": "Fabrice Juan"
-  },
-  {
-    "slug": "faye-toogood-cc-tapis",
-    "name": "Faye Toogood"
-  },
-  {
-    "slug": "federico-pepe-cc-tapis",
-    "name": "Federico Pepe"
-  },
-  {
-    "slug": "federico-peri",
-    "name": "Federico Peri"
   },
   {
     "slug": "felix-agostini",
@@ -308,60 +140,12 @@
     "name": "Félix Aublet"
   },
   {
-    "slug": "ferreol-babin",
-    "name": "Ferréol Babin"
-  },
-  {
-    "slug": "flavien-delbergue",
-    "name": "Flavien Delbergue"
-  },
-  {
     "slug": "forest-giaconia",
     "name": "Forest & Giaconia"
   },
   {
-    "slug": "formafantasma-cc-tapis",
-    "name": "Formafantasma"
-  },
-  {
-    "slug": "francesco-balzano-theoreme",
-    "name": "Francesco Balzano"
-  },
-  {
-    "slug": "francois-champsaur",
-    "name": "François Champsaur"
-  },
-  {
-    "slug": "fredie-jochimek",
-    "name": "Fredie Jochimek"
-  },
-  {
-    "slug": "gaelle-lauriot-prevost",
-    "name": "Gaëlle Lauriot-Prévost & Dominique Perrault"
-  },
-  {
-    "slug": "gaelle-lauriot-prevost-dominique-perrault-cc-tapis",
-    "name": "Gaëlle Lauriot-Prévost & Dominique Perrault"
-  },
-  {
     "slug": "garnier-linker",
     "name": "Garnier & Linker"
-  },
-  {
-    "slug": "garth-roberts-cc-tapis",
-    "name": "Garth Roberts"
-  },
-  {
-    "slug": "germans-ermics-cc-tapis",
-    "name": "Germans Ermičs"
-  },
-  {
-    "slug": "gilles-boissier",
-    "name": "Gilles & Boissier"
-  },
-  {
-    "slug": "giuseppe-di-costanzo-cc-tapis",
-    "name": "Giuseppe Di Costanzo"
   },
   {
     "slug": "glenn-sestig",
@@ -372,108 +156,24 @@
     "name": "Gounot & Jähnke"
   },
   {
-    "slug": "gucci-cc-tapis",
-    "name": "Gucci"
-  },
-  {
-    "slug": "haddou-dufourcq",
-    "name": "Haddou & Dufourcq"
-  },
-  {
-    "slug": "hall-haus",
-    "name": "Hall Haus"
-  },
-  {
     "slug": "hamrei",
     "name": "Hamrei"
-  },
-  {
-    "slug": "haymann-editions",
-    "name": "Haymann Editions"
-  },
-  {
-    "slug": "helene-paoli",
-    "name": "Hélène Paoli"
   },
   {
     "slug": "herve-van-der-straeten",
     "name": "Hervé van der Straeten"
   },
   {
-    "slug": "herzog-de-meuron",
-    "name": "Herzog & de Meuron"
-  },
-  {
-    "slug": "hilton-mcconnico",
-    "name": "Hilton McConnico"
-  },
-  {
-    "slug": "hom-le-xuan",
-    "name": "Hom Le Xuan"
-  },
-  {
-    "slug": "humbert-poyet",
-    "name": "Humbert & Poyet"
-  },
-  {
     "slug": "iksel",
     "name": "Iksel"
-  },
-  {
-    "slug": "india-mahdavi-cc-tapis",
-    "name": "India Mahdavi"
-  },
-  {
-    "slug": "ionna-vautrin",
-    "name": "Ionna Vautrin"
-  },
-  {
-    "slug": "isabelle-music",
-    "name": "Isabelle Music"
-  },
-  {
-    "slug": "isabelle-stanislas",
-    "name": "Isabelle Stanislas"
-  },
-  {
-    "slug": "ivan-colominas",
-    "name": "Ivan Colominas"
-  },
-  {
-    "slug": "jacob-hashimoto-studio",
-    "name": "Jacob Hashimoto Studio"
-  },
-  {
-    "slug": "jacopo-simonetti",
-    "name": "Jacopo Simonetti"
   },
   {
     "slug": "jan-kath",
     "name": "Jan Kath"
   },
   {
-    "slug": "jason-miller",
-    "name": "Jason Miller"
-  },
-  {
-    "slug": "jean-louis-deniot",
-    "name": "Jean-Louis Deniot"
-  },
-  {
-    "slug": "jean-marie-massaud-cc-tapis",
-    "name": "Jean-Marie Massaud"
-  },
-  {
     "slug": "jean-michel-frank",
     "name": "Jean-Michel Frank"
-  },
-  {
-    "slug": "jean-michel-wilmotte",
-    "name": "Jean-Michel Wilmotte"
-  },
-  {
-    "slug": "jean-pierre-tortil",
-    "name": "Jean-Pierre Tortil"
   },
   {
     "slug": "jeremy-maxwell-wintrebert",
@@ -484,44 +184,16 @@
     "name": "Jindrich Halabala"
   },
   {
-    "slug": "jonah-takagi",
-    "name": "Jonah Takagi"
-  },
-  {
-    "slug": "joris-poggioli",
-    "name": "Joris Poggioli"
-  },
-  {
     "slug": "joseph-dirand",
     "name": "Joseph Dirand"
-  },
-  {
-    "slug": "julien-scarbonchi",
-    "name": "Julien Scarbonchi"
-  },
-  {
-    "slug": "karen-chekerdjian",
-    "name": "Karen Chekerdjian"
-  },
-  {
-    "slug": "khaki-kroener",
-    "name": "Khaki Kroener"
   },
   {
     "slug": "kiko-lopez",
     "name": "Kiko Lopez"
   },
   {
-    "slug": "kwangho-lee-cc-tapis",
-    "name": "Kwangho Lee"
-  },
-  {
     "slug": "la-chance",
     "name": "La Chance"
-  },
-  {
-    "slug": "laurence-brabant",
-    "name": "Laurence Brabant"
   },
   {
     "slug": "laurent-maugoust-cecile-chenais",
@@ -540,40 +212,8 @@
     "name": "Leo Sentou"
   },
   {
-    "slug": "leonardo-talarico-cc-tapis",
-    "name": "Leonardo Talarico"
-  },
-  {
-    "slug": "lorenzo-zaccarin",
-    "name": "Lorenzo Zaccarin"
-  },
-  {
     "slug": "lost-profile-studio",
     "name": "Lost Profile Studio"
-  },
-  {
-    "slug": "luca-erba",
-    "name": "Luca Erba"
-  },
-  {
-    "slug": "luca-nichetto",
-    "name": "Luca Nichetto"
-  },
-  {
-    "slug": "lucie-koldova",
-    "name": "Lucie Koldova"
-  },
-  {
-    "slug": "luke-edward-hall-cc-tapis",
-    "name": "Luke Edward Hall"
-  },
-  {
-    "slug": "galante-lancman",
-    "name": "M. Galante & T. Lancman"
-  },
-  {
-    "slug": "maarten-de-ceulaer-cc-tapis",
-    "name": "Maarten De Ceulaer"
   },
   {
     "slug": "maarten-vrolijk",
@@ -584,14 +224,6 @@
     "name": "Made in Kira - Roman Frankel"
   },
   {
-    "slug": "mae-engelgeer-cc-tapis",
-    "name": "Mae Engelgeer"
-  },
-  {
-    "slug": "maison-matisse-cc-tapis",
-    "name": "Maison Matisse"
-  },
-  {
     "slug": "maison-wecraft",
     "name": "Maison WeCraft"
   },
@@ -600,112 +232,40 @@
     "name": "Man of Parts"
   },
   {
-    "slug": "manuel-aires-mateus",
-    "name": "Manuel Aires Mateus"
-  },
-  {
     "slug": "marcantonio-brandolini-dadda",
     "name": "Marcantonio Brandolini D'Adda"
-  },
-  {
-    "slug": "marco-de-vincenzo-cc-tapis",
-    "name": "Marco De Vincenzo"
   },
   {
     "slug": "mariano-fortuny",
     "name": "Mariano Fortuny"
   },
   {
-    "slug": "marlene-huissoud-cc-tapis",
-    "name": "Marléne Huissoud"
-  },
-  {
     "slug": "marta-sala-editions",
     "name": "Marta Sala Éditions"
-  },
-  {
-    "slug": "martin-masse",
-    "name": "Martin Massé"
-  },
-  {
-    "slug": "martino-gamper-cc-tapis",
-    "name": "Martino Gamper"
-  },
-  {
-    "slug": "maryna-dague-nathan-baraness",
-    "name": "Maryna Dague & Nathan Baraness"
-  },
-  {
-    "slug": "massimo-giorgetti-cc-tapis",
-    "name": "Massimo Giorgetti"
-  },
-  {
-    "slug": "mateo-garcia",
-    "name": "Matéo Garcia"
-  },
-  {
-    "slug": "matteo-cibic",
-    "name": "Matteo Cibic"
-  },
-  {
-    "slug": "matthew-hilton",
-    "name": "Matthew Hilton"
   },
   {
     "slug": "matthieu-gicquel",
     "name": "Matthieu Gicquel"
   },
   {
-    "slug": "mernoe",
-    "name": "Mernøe"
-  },
-  {
-    "slug": "michel-amar-studio",
-    "name": "Michel Amar Studio"
-  },
-  {
     "slug": "michel-boyer",
     "name": "Michel Boyer"
-  },
-  {
-    "slug": "michel-jouannet",
-    "name": "Michel Jouannet"
-  },
-  {
-    "slug": "michele-chiossi",
-    "name": "Michele Chiossi"
   },
   {
     "slug": "milan-pekar",
     "name": "Milan Pekař"
   },
   {
-    "slug": "milena-denis-polania",
-    "name": "Milena Denis Polania"
-  },
-  {
     "slug": "mmairo",
     "name": "MMairo"
-  },
-  {
-    "slug": "muller-van-severen-cc-tapis",
-    "name": "Muller Van Severen"
   },
   {
     "slug": "nathalie-ziegler",
     "name": "Nathalie Ziegler"
   },
   {
-    "slug": "neri-hu",
-    "name": "Neri & Hu"
-  },
-  {
     "slug": "nicolas-aubagnac",
     "name": "Nicolas Aubagnac"
-  },
-  {
-    "slug": "niko-koronis",
-    "name": "Niko Koronis"
   },
   {
     "slug": "noe-duchaufour-lawrance-standalone",
@@ -716,52 +276,16 @@
     "name": "Noom"
   },
   {
-    "slug": "note-design-studio",
-    "name": "Note Design Studio"
-  },
-  {
-    "slug": "oa-london",
-    "name": "OA London"
-  },
-  {
-    "slug": "objects-of-common-interest-cc-tapis",
-    "name": "Objects of Common Interest"
-  },
-  {
-    "slug": "odd-matter-cc-tapis",
-    "name": "Odd Matter"
-  },
-  {
     "slug": "okha",
     "name": "OKHA"
-  },
-  {
-    "slug": "okurayama-studio",
-    "name": "Okurayama Studio"
   },
   {
     "slug": "olivia-cognet",
     "name": "Olivia Cognet"
   },
   {
-    "slug": "olivier-gagnere",
-    "name": "Olivier Gagnère"
-  },
-  {
-    "slug": "ooumm",
-    "name": "oOumm"
-  },
-  {
-    "slug": "ornella-mei",
-    "name": "Ornella Mei"
-  },
-  {
     "slug": "osanna-visconti",
     "name": "Osanna Visconti"
-  },
-  {
-    "slug": "osvaldo-tenorio-man-of-parts",
-    "name": "Osvaldo Tenório"
   },
   {
     "slug": "overgaard-dyrman",
@@ -772,52 +296,12 @@
     "name": "Ozone"
   },
   {
-    "slug": "pam-cc-tapis",
-    "name": "P.A.M."
-  },
-  {
-    "slug": "parisotto-formenton-cc-tapis",
-    "name": "Parisotto + Formenton"
-  },
-  {
-    "slug": "parsa-editions",
-    "name": "Parsa Editions"
-  },
-  {
-    "slug": "patricia-urquiola-cc-tapis",
-    "name": "Patricia Urquiola"
-  },
-  {
-    "slug": "patrick-e-naggar",
-    "name": "Patrick E. Naggar"
-  },
-  {
-    "slug": "patrick-jouin",
-    "name": "Patrick Jouin"
-  },
-  {
-    "slug": "paul-cocksedge-studio",
-    "name": "Paul Cocksedge Studio"
-  },
-  {
     "slug": "paul-laszlo",
     "name": "Paul László"
   },
   {
-    "slug": "pauline-deltour",
-    "name": "Pauline Deltour"
-  },
-  {
     "slug": "peter-reed",
     "name": "Peter Reed 1861"
-  },
-  {
-    "slug": "philippe-malouin-cc-tapis",
-    "name": "Philippe Malouin"
-  },
-  {
-    "slug": "piero-manara",
-    "name": "Piero Manara"
   },
   {
     "slug": "pierre-augustin-rose",
@@ -832,140 +316,36 @@
     "name": "Pierre Chareau"
   },
   {
-    "slug": "pierre-favresse",
-    "name": "Pierre Favresse"
-  },
-  {
     "slug": "pierre-frey",
     "name": "Pierre Frey"
-  },
-  {
-    "slug": "pierre-paulin-ozone",
-    "name": "Pierre Paulin"
-  },
-  {
-    "slug": "pierre-yovanovitch",
-    "name": "Pierre Yovanovitch"
-  },
-  {
-    "slug": "pierre-yves-rochon",
-    "name": "Pierre-Yves Rochon"
-  },
-  {
-    "slug": "piet-hein-eek",
-    "name": "Piet Hein Eek"
-  },
-  {
-    "slug": "pinton-1867",
-    "name": "Pinton 1867"
   },
   {
     "slug": "poltrona-frau",
     "name": "Poltrona Frau"
   },
   {
-    "slug": "pool-studio",
-    "name": "Pool Studio"
-  },
-  {
     "slug": "pouenat",
     "name": "Pouenat"
-  },
-  {
-    "slug": "privatiselectionem",
-    "name": "Privatiselectionem"
-  },
-  {
-    "slug": "raphael-navot",
-    "name": "Raphael Navot"
   },
   {
     "slug": "reda-amalou",
     "name": "Reda Amalou"
   },
   {
-    "slug": "refractory-studio",
-    "name": "Refractory Studio"
-  },
-  {
-    "slug": "regis-botta",
-    "name": "Régis Botta"
-  },
-  {
-    "slug": "regular-company",
-    "name": "Regular Company"
-  },
-  {
-    "slug": "roberto-sironi-cc-tapis",
-    "name": "Roberto Sironi"
-  },
-  {
     "slug": "robicara",
     "name": "Robicara"
-  },
-  {
-    "slug": "rodolphe-parente",
-    "name": "Rodolphe Parente"
-  },
-  {
-    "slug": "rooms-studio-cc-tapis",
-    "name": "Rooms Studio"
-  },
-  {
-    "slug": "rop-van-mierlo-cc-tapis",
-    "name": "Rop van Mierlo"
   },
   {
     "slug": "rowin-atelier",
     "name": "RoWin' Atelier — Rochette Frederic & Winkler Hervé"
   },
   {
-    "slug": "sabine-marcelis-cc-tapis",
-    "name": "Sabine Marcelis"
-  },
-  {
-    "slug": "sacha-walckhoff",
-    "name": "Sacha Walckhoff"
-  },
-  {
     "slug": "saint-louis",
     "name": "Saint-Louis"
   },
   {
-    "slug": "sam-accoceberry",
-    "name": "Sam Accoceberry"
-  },
-  {
-    "slug": "sam-baron",
-    "name": "Sam Baron"
-  },
-  {
-    "slug": "scarlett-rouge-cc-tapis",
-    "name": "Scarlett Rouge"
-  },
-  {
-    "slug": "se-collections",
-    "name": "Sé Collections"
-  },
-  {
-    "slug": "sebastian-herkner-man-of-parts",
-    "name": "Sebastian Herkner"
-  },
-  {
     "slug": "serge-mouille",
     "name": "Serge Mouille"
-  },
-  {
-    "slug": "sergej-kirilov",
-    "name": "Sergej Kirilov"
-  },
-  {
-    "slug": "services-generaux",
-    "name": "Services Généraux"
-  },
-  {
-    "slug": "simon-cabrol",
-    "name": "Simon Cabrol"
   },
   {
     "slug": "sollen-design",
@@ -976,84 +356,12 @@
     "name": "Stéphane CG"
   },
   {
-    "slug": "stephane-parmentier",
-    "name": "Stéphane Parmentier"
-  },
-  {
-    "slug": "steven-holl-cc-tapis",
-    "name": "Steven Holl"
-  },
-  {
-    "slug": "studio-anansi",
-    "name": "Studio Anansi"
-  },
-  {
-    "slug": "studio-brichetziegler",
-    "name": "Studio BrichetZiegler"
-  },
-  {
-    "slug": "studio-evidens",
-    "name": "Studio Evidens ex Borella Art Design"
-  },
-  {
-    "slug": "studio-klass-cc-tapis",
-    "name": "Studio Klass"
-  },
-  {
-    "slug": "studio-parisien",
-    "name": "Studio Parisien"
-  },
-  {
-    "slug": "studio-piet-boon-cc-tapis",
-    "name": "Studio Piet Boon"
-  },
-  {
-    "slug": "studioformart",
-    "name": "Studioformart"
-  },
-  {
-    "slug": "studioilse",
-    "name": "Studioilse"
-  },
-  {
-    "slug": "studiopepe-cc-tapis",
-    "name": "Studiopepe"
-  },
-  {
-    "slug": "sunnei-cc-tapis",
-    "name": "SUNNEI"
-  },
-  {
-    "slug": "sybille-de-margerie",
-    "name": "Sybille de Margerie"
-  },
-  {
-    "slug": "taher-asad-bakhtiari-cc-tapis",
-    "name": "Taher Asad-Bakhtiari"
-  },
-  {
-    "slug": "takayokaya",
-    "name": "Takayokaya"
-  },
-  {
-    "slug": "theophile-de-bascher",
-    "name": "Théophile de Bascher"
-  },
-  {
     "slug": "theoreme-editions",
     "name": "Théorème Editions"
   },
   {
     "slug": "thierry-lemaire",
     "name": "Thierry Lemaire"
-  },
-  {
-    "slug": "thomas-boog",
-    "name": "Thomas Boog"
-  },
-  {
-    "slug": "toni-grilo",
-    "name": "Toni Grilo"
   },
   {
     "slug": "toulemonde-bochart",
@@ -1064,75 +372,11 @@
     "name": "Tristan Auer"
   },
   {
-    "slug": "univers-uchronia-cc-tapis",
-    "name": "Univers Uchronia"
-  },
-  {
-    "slug": "valeria-nascimento",
-    "name": "Valeria Nascimento"
-  },
-  {
-    "slug": "valerie-rostaing",
-    "name": "Valérie Rostaing"
-  },
-  {
-    "slug": "valerie-serin-lok",
-    "name": "Valérie Serin-Lok"
-  },
-  {
-    "slug": "venelin-kokalov",
-    "name": "Venelin Kokalov"
-  },
-  {
     "slug": "veronese",
     "name": "Veronese"
   },
   {
     "slug": "victoria-magniant",
     "name": "Victoria Magniant"
-  },
-  {
-    "slug": "victoria-wilmotte-theoreme",
-    "name": "Victoria Wilmotte"
-  },
-  {
-    "slug": "wegener-masquida",
-    "name": "Wegener & Masquida"
-  },
-  {
-    "slug": "wendy-andreu",
-    "name": "Wendy Andreu"
-  },
-  {
-    "slug": "yabu-pushelberg-cc-tapis",
-    "name": "Yabu Pushelberg"
-  },
-  {
-    "slug": "yabu-pushelberg",
-    "name": "Yabu Pushelberg"
-  },
-  {
-    "slug": "yabu-pushelberg-man-of-parts",
-    "name": "Yabu Pushelberg"
-  },
-  {
-    "slug": "yann-le-coadic",
-    "name": "Yann Le Coadic"
-  },
-  {
-    "slug": "yuri-himuro-cc-tapis",
-    "name": "Yuri Himuro"
-  },
-  {
-    "slug": "yves-taralon",
-    "name": "Yves Taralon"
-  },
-  {
-    "slug": "zanellato-bortotto-cc-tapis",
-    "name": "Zanellato/Bortotto"
-  },
-  {
-    "slug": "zaven-cc-tapis",
-    "name": "Zaven"
   }
 ]
