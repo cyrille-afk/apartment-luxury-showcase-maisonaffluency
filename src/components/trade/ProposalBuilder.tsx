@@ -1615,6 +1615,7 @@ export default function ProposalBuilder({
                   onClick={() =>
                     p.image_url &&
                     addProduct({
+                      product_id: (p as any).trade_product_id ?? undefined,
                       product_name: p.product_name,
                       brand_name: p.brand_name,
                       image_url: p.image_url!,
