@@ -24,7 +24,7 @@ const scrollToOverview = () => scrollToSection("overview");
 const Hero = () => {
   return (
     <section className="relative h-screen w-full overflow-hidden">
-      <picture style={{ display: "contents" }}>
+      <picture>
         <source
           media="(max-width: 767px)"
           srcSet={HERO_MOBILE_SRCSET}
