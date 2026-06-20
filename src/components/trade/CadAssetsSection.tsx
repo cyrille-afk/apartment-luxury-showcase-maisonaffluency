@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Box, Download, FileBox, Ruler } from "lucide-react";
+import { Box, Download, FileBox } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { trackEvent } from "@/lib/analytics";
@@ -113,7 +113,7 @@ export default function CadAssetsSection({ productId, productName }: Props) {
           to={`/trade/spatial-fit?product_id=${encodeURIComponent(productId)}${productName ? `&product_name=${encodeURIComponent(productName)}` : ""}`}
           className="ml-auto inline-flex items-center gap-1.5 rounded border border-border px-2 py-1 font-body text-[10px] uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:border-foreground/30 hover:text-foreground"
         >
-          <Ruler className="h-3 w-3" aria-hidden="true" />
+          <FileBox className="h-3 w-3" aria-hidden="true" />
           Spatial Fit
         </Link>
       </div>
