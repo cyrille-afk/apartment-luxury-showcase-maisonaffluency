@@ -3,15 +3,16 @@
  *
  * Inspired by lacollections.fr: a vertical list of featured designer
  * names overlays a full-bleed background image that cross-fades on hover.
- * Names route to /designers/:slug. Mobile falls back to a static,
- * auto-rotating intro so vertical swipes remain free for page scrolling.
+ * Names route to /designers/:slug. On desktop the whole hero responds to
+ * wheel/trackpad; on mobile only the names list claims vertical swipes so
+ * the rest of the hero remains free for page scrolling.
  */
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
-import { useIsMobile } from "@/hooks/use-mobile";
+
 
 
 interface FeaturedDesigner {
