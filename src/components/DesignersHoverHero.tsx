@@ -28,6 +28,7 @@ const FEATURED_SLUGS = [
   "delcourt-collection",
   "ecart",
   "emmanuel-babled",
+  "emmanuel-levet-stenne",
   "felix-agostini",
   "kerstens",
   "kiko-lopez",
