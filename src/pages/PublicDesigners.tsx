@@ -8,7 +8,7 @@ import { useState, useEffect } from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import DesignersDirectory from "@/components/DesignersDirectory";
-import DesignersHoverHero from "@/components/DesignersHoverHero";
+
 
 // ─── Back to Top Button ──────────────────────────────────────────────────────
 function BackToTopButton() {
