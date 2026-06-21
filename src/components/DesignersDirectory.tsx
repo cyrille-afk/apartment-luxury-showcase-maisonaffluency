@@ -1777,6 +1777,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
                   return (
                     <button
                       key={letter}
+                      data-azbar-letter={letter}
                       onClick={() => jumpToLetter(letter)}
                       className={`font-serif text-lg lg:text-xl leading-none transition-all duration-200 ${isActive ? "text-foreground hover:text-primary cursor-pointer" : "text-foreground/20 cursor-default"}`}
                     >
