@@ -93,7 +93,7 @@ export default function TradeAdminAxonometricCadQa() {
       .not("linked_favorite_product_ids", "is", null)
       .order("created_at", { ascending: false })
       .limit(100);
-    const filtered = (data || [])
+    const cleaned = (data || [])
       .map((r: any) => ({
         ...r,
         linked_favorite_product_ids: Array.isArray(r.linked_favorite_product_ids)
@@ -101,7 +101,27 @@ export default function TradeAdminAxonometricCadQa() {
           : [],
       }))
       .filter((r: RenderItem) => r.result_image_url && r.linked_favorite_product_ids.length > 0);
-    setRenders(filtered as RenderItem[]);
+    setRenders(cleaned as RenderItem[]);
+
+    // Hydrate product metadata for category + name filtering
+    const allIds = Array.from(new Set(cleaned.flatMap((r: RenderItem) => r.linked_favorite_product_ids)));
+    if (allIds.length > 0) {
+      const { data: prods } = await supabase
+        .from("trade_products")
+        .select("id,product_name,brand_name,category")
+        .in("id", allIds);
+      const map: Record<string, { product_name: string | null; brand_name: string | null; category: string | null }> = {};
+      for (const p of (prods || []) as any[]) {
+        map[p.id] = {
+          product_name: p.product_name ?? null,
+          brand_name: p.brand_name ?? null,
+          category: (p.category || "").trim() || null,
+        };
+      }
+      setProductMeta(map);
+    } else {
+      setProductMeta({});
+    }
     setRendersLoading(false);
   };
 
