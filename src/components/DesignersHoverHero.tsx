@@ -120,14 +120,14 @@ const DesignersHoverHero = () => {
                   "w-full h-full object-cover transition-transform duration-[6000ms] ease-out",
                   isActive ? "scale-100" : "scale-105"
                 )}
-                style={{ filter: "brightness(0.45) saturate(0.92)" }}
+                style={{ filter: "brightness(0.78) saturate(0.95)" }}
               />
             </div>
           );
         })}
         {/* Left-side vignette for legibility */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#0a0a0a] via-[#0a0a0a]/55 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a]/85 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#0a0a0a]/85 via-[#0a0a0a]/25 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a]/60 via-transparent to-transparent" />
       </div>
 
       {/* Content */}
@@ -157,7 +157,7 @@ const DesignersHoverHero = () => {
                       className={cn(
                         "group inline-flex items-baseline gap-3 md:gap-5",
                         "font-display font-light tracking-tight text-white",
-                        "text-3xl sm:text-5xl md:text-7xl lg:text-[5.5rem] leading-[1.05]",
+                        "text-xl sm:text-2xl md:text-4xl lg:text-5xl leading-[1.15]",
                         "transition-all duration-[600ms] ease-out",
                         "hover:translate-x-3 md:hover:translate-x-6",
                         isDimmed ? "opacity-30" : "opacity-100"
