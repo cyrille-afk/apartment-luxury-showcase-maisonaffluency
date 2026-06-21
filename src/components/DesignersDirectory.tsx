@@ -1146,6 +1146,7 @@ interface DesignersDirectoryProps {
   initialExpand?: string;
   showHeader?: boolean;
   showTradeCTA?: boolean;
+  showAlphabetBar?: boolean;
   /**
    * "designers" → filters narrow the alphabetical designer cards (no product grid).
    * "products"  → filters switch the view to a product grid (PickCard).
@@ -1159,6 +1160,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
   initialExpand,
   showHeader = true,
   showTradeCTA = true,
+  showAlphabetBar = true,
   mode = "designers",
 }) => {
   const location = useLocation();
