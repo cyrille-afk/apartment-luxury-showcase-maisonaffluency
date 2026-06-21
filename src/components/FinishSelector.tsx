@@ -632,7 +632,7 @@ export default function FinishSelector({ pickId, className, productTitle, onUpho
   return (
     <TooltipProvider>
       <div className={className}>
-      {showUpholsterySection && renderAccordion({
+      {(showUpholsterySection || visibleFabricTiles.length > 0) && renderAccordion({
         isOpen: open,
         onToggle: () => setOpen((v) => !v),
         label: "Select Your Fabric / Leather",
