@@ -69,7 +69,6 @@ function splitName(name: string): [string, string] {
 const DesignersHoverHero = () => {
   const { data: designers } = useFeaturedDesigners();
   const [activeSlug, setActiveSlug] = useState<string | null>(null);
-  const [isPaused, setIsPaused] = useState(false);
 
   // Pre-seed active on first render once data arrives so the hero is never
   // a void on entry — the first designer acts as default.
@@ -82,18 +81,57 @@ const DesignersHoverHero = () => {
   const items = designers ?? [];
   const hasItems = items.length > 0;
 
-  // Auto-cycle through designers like a carousel; pause on hover.
+  // Wheel/swipe navigation: scroll up/down moves through the list of names
+  // without scrolling the page. Touch swipes advance the same way.
   useEffect(() => {
-    if (!hasItems || isPaused) return;
-    const id = window.setInterval(() => {
+    if (!hasItems) return;
+    const section = document.getElementById("designers-hover-hero");
+    if (!section) return;
+
+    let wheelLock = false;
+    let touchStartY: number | null = null;
+
+    const advance = (dir: 1 | -1) => {
       setActiveSlug((current) => {
         const idx = items.findIndex((d) => d.slug === current);
-        const next = items[(idx + 1) % items.length];
-        return next?.slug ?? current;
+        const base = idx === -1 ? 0 : idx;
+        const nextIdx = (base + dir + items.length) % items.length;
+        return items[nextIdx].slug;
       });
-    }, 2800);
-    return () => window.clearInterval(id);
-  }, [hasItems, isPaused, items]);
+    };
+
+    const onWheel = (e: WheelEvent) => {
+      if (Math.abs(e.deltaY) < 8) return;
+      e.preventDefault();
+      if (wheelLock) return;
+      wheelLock = true;
+      advance(e.deltaY > 0 ? 1 : -1);
+      window.setTimeout(() => {
+        wheelLock = false;
+      }, 350);
+    };
+    const onTouchStart = (e: TouchEvent) => {
+      touchStartY = e.touches[0].clientY;
+    };
+    const onTouchMove = (e: TouchEvent) => {
+      if (touchStartY === null) return;
+      const dy = touchStartY - e.touches[0].clientY;
+      if (Math.abs(dy) > 40) {
+        e.preventDefault();
+        advance(dy > 0 ? 1 : -1);
+        touchStartY = e.touches[0].clientY;
+      }
+    };
+
+    section.addEventListener("wheel", onWheel, { passive: false });
+    section.addEventListener("touchstart", onTouchStart, { passive: true });
+    section.addEventListener("touchmove", onTouchMove, { passive: false });
+    return () => {
+      section.removeEventListener("wheel", onWheel);
+      section.removeEventListener("touchstart", onTouchStart);
+      section.removeEventListener("touchmove", onTouchMove);
+    };
+  }, [hasItems, items]);
 
   // Preload images so cross-fades are instant.
   const imageUrls = useMemo(
@@ -112,8 +150,9 @@ const DesignersHoverHero = () => {
 
   return (
     <section
+      id="designers-hover-hero"
       aria-label="Featured designers"
-      className="relative w-full min-h-[680px] py-16 md:py-20 bg-[#0a0a0a] text-foreground overflow-hidden"
+      className="relative w-full h-[88vh] min-h-[640px] bg-[#0a0a0a] text-foreground overflow-hidden"
     >
       {/* Background image stack — cross-fade between layers */}
       <div className="absolute inset-0 z-0 pointer-events-none">
@@ -149,14 +188,10 @@ const DesignersHoverHero = () => {
       </div>
 
       {/* Content */}
-      <div className="relative z-10 flex items-center px-6 sm:px-12 md:px-20 lg:px-28">
+      <div className="relative z-10 flex items-center h-full px-6 sm:px-12 md:px-20 lg:px-28">
         <div className="w-full max-w-xs sm:max-w-sm md:max-w-md">
           <nav aria-label="Featured designers shortcut list">
-            <ul
-              className="flex flex-col gap-0.5 text-center"
-              onMouseEnter={() => setIsPaused(true)}
-              onMouseLeave={() => setIsPaused(false)}
-            >
+            <ul className="flex flex-col gap-0.5 text-center">
               {items.map((d) => {
                 const [first, last] = splitName(d.name);
                 const isActive = d.slug === activeSlug;
