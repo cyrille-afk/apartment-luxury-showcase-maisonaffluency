@@ -134,8 +134,6 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
   const [activeMegaSub, setActiveMegaSub] = useState<string | null>(null);
   const megaMenuRef = useRef<HTMLDivElement>(null);
   const { doc: featuredDoc } = useFeaturedPublicDocument();
-  const magazineBadgeRef = useRef<HTMLDivElement>(null);
-  const magazineImpressionFiredRef = useRef(false);
 
   const resetMobilePanels = () => {
     setCategoryPanelOpen(false);
@@ -152,34 +150,6 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
     resetMobilePanels();
     setIsOpen(open);
   };
-
-  // Fire one impression event per session when the persistent magazine
-  // badge enters the viewport. Lets us measure the badge's reach against
-  // its click-through and download conversion rate.
-  useEffect(() => {
-    magazineImpressionFiredRef.current = false;
-  }, [featuredDoc?.id]);
-
-  useEffect(() => {
-    if (!featuredDoc || magazineImpressionFiredRef.current) return;
-    const node = magazineBadgeRef.current;
-    if (!node || typeof IntersectionObserver === "undefined") return;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (entry.isIntersecting && !magazineImpressionFiredRef.current) {
-            magazineImpressionFiredRef.current = true;
-            trackMagazine.badgeImpression(featuredDoc.id, featuredDoc.title, "nav_badge");
-            observer.disconnect();
-            break;
-          }
-        }
-      },
-      { threshold: 0.5 }
-    );
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, [featuredDoc]);
 
   useEffect(() => {
     // All page section IDs in order
@@ -809,24 +779,6 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                     {item.label}
                     <span className="w-1.5 h-1.5 rounded-full bg-[hsl(var(--gold))] animate-pulse" />
                   </button>
-                  {/* Persistent badge — always visible to test conversion lift */}
-                  <div ref={magazineBadgeRef} className={cn("absolute top-full left-1/2 -translate-x-1/2 mt-2 z-50 transition-opacity duration-150", megaMenuOpen && "opacity-0 pointer-events-none")}>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (featuredDoc) {
-                          trackMagazine.badgeClick(featuredDoc.id, featuredDoc.title, "nav_badge");
-                        }
-                        setMegaMenuOpen(false);
-                        navigate("/trade/landing");
-                      }}
-                      className="bg-foreground text-background px-3 py-1.5 rounded-md shadow-lg whitespace-nowrap text-left hover:bg-foreground/90 transition-colors cursor-pointer"
-                      aria-label={featuredDoc ? `Download ${featuredDoc.title} — free` : "Download featured catalogue"}
-                    >
-                      <p className="font-body text-[10px] uppercase tracking-wider">New: {featuredDoc?.title ?? "Featured Catalogue"}</p>
-                      <p className="font-body text-[9px] text-background/60">Free download</p>
-                    </button>
-                  </div>
                 </div>
               ))}
             </div>
