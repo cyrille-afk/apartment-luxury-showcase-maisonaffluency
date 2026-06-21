@@ -249,24 +249,24 @@ const DesignersHoverHero = () => {
       <div className="relative z-10 flex flex-col justify-center h-full px-6 sm:px-12 md:px-20 lg:px-28 pb-24">
         <div className="w-full max-w-xs sm:max-w-sm md:max-w-md">
           <nav aria-label="Featured designers shortcut list">
-            <ul className="flex flex-col gap-0.5 text-center">
+            <ul className="flex flex-col gap-0.5 text-left">
               {items.map((d) => {
                 const [first, last] = splitName(d.name);
                 const isActive = d.slug === activeSlug;
                 const isDimmed = activeSlug !== null && !isActive;
                 const childBrand = d.founder && d.founder !== d.name;
                 return (
-                  <li key={d.slug} className="text-center">
+                  <li key={d.slug} className="text-left">
                     <Link
                       to={`/designers/${d.slug}`}
                       onMouseEnter={() => setActiveSlug(d.slug)}
                       onFocus={() => setActiveSlug(d.slug)}
                       className={cn(
                         "inline-block",
-                        "font-display font-light tracking-tight text-white",
-                        "text-base sm:text-lg md:text-2xl lg:text-[28px] leading-[1.25]",
-                        "transition-opacity duration-[1200ms] ease-out",
-                        isDimmed ? "opacity-30" : "opacity-100"
+                        "font-display font-light tracking-tight",
+                        "text-sm sm:text-base md:text-2xl lg:text-[28px] leading-[1.25]",
+                        "transition-colors duration-[1200ms] ease-out",
+                        isDimmed ? "text-white/35" : "text-white/90"
                       )}
                     >
                       <span>
