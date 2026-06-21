@@ -115,19 +115,19 @@ const DesignersHoverHero = () => {
 
     let touchStartY: number | null = null;
     let touchStartX: number | null = null;
-    let touchStartTime = 0;
     let swiping = false;
+    let swipeHandled = false;
 
     const onTouchStart = (e: TouchEvent) => {
       const touch = e.touches[0];
       touchStartY = touch.clientY;
       touchStartX = touch.clientX;
-      touchStartTime = Date.now();
       swiping = false;
+      swipeHandled = false;
     };
 
     const onTouchMove = (e: TouchEvent) => {
-      if (touchStartY === null || touchStartX === null) return;
+      if (touchStartY === null || touchStartX === null || swipeHandled) return;
       const touch = e.touches[0];
       const dy = touchStartY - touch.clientY;
       const dx = touchStartX - touch.clientX;
@@ -136,9 +136,8 @@ const DesignersHoverHero = () => {
       if (Math.abs(dy) > SWIPE_THRESHOLD && Math.abs(dy) > Math.abs(dx)) {
         e.preventDefault();
         swiping = true;
+        swipeHandled = true;
         advance(dy > 0 ? 1 : -1);
-        touchStartY = touch.clientY;
-        touchStartX = touch.clientX;
       }
     };
 
@@ -151,6 +150,7 @@ const DesignersHoverHero = () => {
         e.preventDefault();
       }
       swiping = false;
+      swipeHandled = false;
       touchStartY = null;
       touchStartX = null;
     };
