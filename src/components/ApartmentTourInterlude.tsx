@@ -77,9 +77,6 @@ const ApartmentTourInterlude = ({ compact = false }: { compact?: boolean }) => {
           >
             {/* Title — above video on mobile, left side on desktop */}
             <div className="flex flex-col text-center md:text-left order-1 md:order-none md:hidden">
-              <p className="text-[10px] md:text-[11px] tracking-[0.3em] uppercase text-foreground mb-2 font-light font-body">
-                Maison Affluency · Singapore
-              </p>
               <p className="font-serif text-base md:text-lg text-foreground font-light tracking-wide" aria-hidden="true">
                 Tour Our Gallery
               </p>
@@ -91,9 +88,6 @@ const ApartmentTourInterlude = ({ compact = false }: { compact?: boolean }) => {
             {/* Text — compact, left side (desktop only for title; team section always here) */}
             <div className="flex-1 flex flex-col items-center md:items-start justify-center order-3 md:order-1">
               <div className="hidden md:block">
-                <p className="text-[10px] md:text-[11px] tracking-[0.3em] uppercase text-foreground mb-2 font-light font-body">
-                  Maison Affluency · Singapore
-                </p>
                 <h2 className="font-serif text-base md:text-lg text-foreground font-light tracking-wide">
                   Tour Our Gallery
                 </h2>
@@ -217,9 +211,6 @@ const ApartmentTourInterlude = ({ compact = false }: { compact?: boolean }) => {
         >
           {/* Header */}
           <div className="flex flex-col items-center text-center mb-6 md:mb-10">
-            <p className="text-[11px] md:text-[12px] tracking-[0.3em] uppercase text-muted-foreground/60 mb-3 font-light font-body">
-              Maison Affluency · Singapore
-            </p>
             <div className="flex items-center gap-2">
               <h2 className="font-serif text-xl md:text-3xl lg:text-4xl text-foreground font-light tracking-wide">
                 Tour Our Gallery
