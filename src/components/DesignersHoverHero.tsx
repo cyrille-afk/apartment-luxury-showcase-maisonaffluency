@@ -21,14 +21,19 @@ interface FeaturedDesigner {
 }
 
 const FEATURED_SLUGS = [
-  "andree-putman",
-  "jean-michel-frank",
   "alexander-lamont",
-  "apparatus-studio",
-  "paul-laszlo",
-  "eileen-gray",
-  "thierry-lemaire",
   "leo-aerts-alinea",
+  "apparatus-studio",
+  "christopher-boots",
+  "delcourt-collection",
+  "ecart",
+  "emmanuel-babled",
+  "felix-agostini",
+  "kerstens",
+  "kiko-lopez",
+  "pierre-bonnefille",
+  "ozone",
+  "thierry-lemaire",
 ];
 
 function useFeaturedDesigners() {
