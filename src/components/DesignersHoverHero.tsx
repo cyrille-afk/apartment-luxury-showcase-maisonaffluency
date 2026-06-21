@@ -191,7 +191,7 @@ const DesignersHoverHero = () => {
       section.removeEventListener("touchmove", onTouchMove);
       section.removeEventListener("touchend", onTouchEnd);
     };
-  }, [hasItems, items]);
+  }, [hasItems, items, isMobile]);
 
   // Preload images so cross-fades are instant.
   const imageUrls = useMemo(
@@ -212,10 +212,11 @@ const DesignersHoverHero = () => {
     <section
       id="designers-hover-hero"
       aria-label="Featured designers"
-      className="relative w-full h-[88vh] min-h-[640px] bg-[#0a0a0a] text-foreground overflow-hidden touch-pan-x overscroll-y-contain select-none"
+      className="relative w-full h-[88vh] min-h-[640px] bg-[#0a0a0a] text-foreground overflow-hidden overscroll-y-contain select-none"
     >
       {/* Background image stack — cross-fade between layers */}
       <div className="absolute inset-0 z-0 pointer-events-none">
+
         {items.map((d) => {
           const url = d.hero_image_url || d.image_url || "";
           const isActive = d.slug === activeSlug;
