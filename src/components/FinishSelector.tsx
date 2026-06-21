@@ -481,15 +481,23 @@ export default function FinishSelector({ pickId, className, productTitle, onUpho
         ].filter(Boolean).join(" · ")
       : null;
     const noImages = !f.image_indices || f.image_indices.length === 0;
+    const hoverPreview = () => {
+      if (isMobile) return;
+      const indices = Array.isArray(f.image_indices) && f.image_indices.length > 0 ? f.image_indices : null;
+      if (indices) onSwatchImagesChange?.(indices);
+    };
     const tileButton = (
       <button
         type="button"
         onClick={handlePick}
+        onMouseEnter={hoverPreview}
+        onFocus={hoverPreview}
         className={cn(
           "relative aspect-square w-full overflow-hidden rounded-md bg-muted/30 ring-1 ring-border/60 transition",
           isSelected ? "ring-2 ring-foreground" : "hover:ring-foreground/40"
         )}
         aria-label={`Select ${f.name}`}
+
       >
         {f.image_url ? (
           <img
