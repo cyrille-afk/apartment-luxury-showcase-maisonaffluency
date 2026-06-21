@@ -6,18 +6,23 @@
  *     into a product page (and across reloads). We persist it in localStorage
  *     and broadcast changes to other tabs / mounted instances via the standard
  *     `storage` event plus a custom in-tab event.
+ *   - A manual shipping destination (set via the header flag switcher) is also
+ *     persisted in localStorage. It overrides profile/IP/locale detection and
+ *     keeps the display currency synced to that country's currency across reloads.
  *
- * Default selection (only when the user hasn't manually picked a currency):
- *   1. profile.country  →  currency
- *   2. IP geolocation   →  currency  (cached in localStorage for 30 days)
- *   3. browser locale   →  currency
- *   4. fallback         →  "original"
+ * Default selection (only when the user hasn't manually picked a currency or destination):
+ *   1. manual shipping destination  →  currency
+ *   2. profile.country              →  currency
+ *   3. IP geolocation               →  currency  (cached in localStorage for 30 days)
+ *   4. browser locale               →  currency
+ *   5. fallback                     →  "original"
  *
  * Manual choice always wins. Once the user picks a currency in the toggle, we
  * mark it as manual and never overwrite it from country detection again.
  */
 import { useEffect, useState, useCallback } from "react";
 import type { DisplayCurrency } from "@/components/trade/CurrencyToggle";
+import { MANUAL_DEST_KEY } from "@/lib/shippingDestination";
 import { supabase } from "@/integrations/supabase/client";
 
 const STORAGE_KEY = "trade.displayCurrency";
@@ -93,9 +98,26 @@ const countryFromLocale = (): string | null => {
   return null;
 };
 
-/** Cached IP-geolocation country lookup (30-day cache). */
+const isManualDestination = (): boolean => {
+  if (typeof window === "undefined") return false;
+  try {
+    return window.localStorage.getItem(MANUAL_DEST_KEY) === "1";
+  } catch { return false; }
+};
+
+/** Cached IP-geolocation country lookup (30-day cache). Honours a manual
+ *  shipping-destination choice so the user’s selected country is never
+ *  overwritten by IP detection. */
 const fetchCountryFromIP = async (): Promise<string | null> => {
   if (typeof window === "undefined") return null;
+
+  // If the user explicitly picked a destination, always return that country.
+  if (isManualDestination()) {
+    try {
+      return window.localStorage.getItem(COUNTRY_CACHE_KEY);
+    } catch { /* ignore */ }
+  }
+
   try {
     const cached = window.localStorage.getItem(COUNTRY_CACHE_KEY);
     const ts = Number(window.localStorage.getItem(COUNTRY_CACHE_TS_KEY) || 0);
@@ -165,6 +187,16 @@ export function useTradeDisplayCurrency(): [DisplayCurrency, (next: DisplayCurre
     let cancelled = false;
 
     (async () => {
+      // 0) A manual shipping destination overrides every detection source.
+      if (isManualDestination()) {
+        const storedCountry = window.localStorage.getItem(COUNTRY_CACHE_KEY);
+        const fromDestination = currencyForCountry(storedCountry);
+        if (fromDestination && !cancelled) {
+          applyAuto(fromDestination);
+          return;
+        }
+      }
+
       // 1) profile.country
       try {
         const { data: { user } } = await supabase.auth.getUser();

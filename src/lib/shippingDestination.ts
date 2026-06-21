@@ -7,11 +7,11 @@
  *
  * Currency is NEVER chosen manually here — it is always derived from country.
  */
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 
 const COUNTRY_KEY = "trade.detectedCountry";            // shared with useTradeDisplayCurrency
 const COUNTRY_TS_KEY = "trade.detectedCountry.ts";
-const MANUAL_DEST_KEY = "trade.shippingDestination.manual";
+export const MANUAL_DEST_KEY = "trade.shippingDestination.manual";
 const CURRENCY_KEY = "trade.displayCurrency";
 const CURRENCY_EVENT = "trade-display-currency-change";
 const DEST_EVENT = "trade-shipping-destination-change";
@@ -69,6 +69,15 @@ export const getCurrentDestination = (): CountryEntry => {
   }
 };
 
+export const isManualDestination = (): boolean => {
+  if (typeof window === "undefined") return false;
+  try {
+    return window.localStorage.getItem(MANUAL_DEST_KEY) === "1";
+  } catch {
+    return false;
+  }
+};
+
 export const setDestination = (iso: string) => {
   const entry = findEntry(iso);
   if (!entry || typeof window === "undefined") return;
@@ -76,7 +85,7 @@ export const setDestination = (iso: string) => {
     window.localStorage.setItem(COUNTRY_KEY, entry.iso);
     window.localStorage.setItem(COUNTRY_TS_KEY, String(Date.now()));
     window.localStorage.setItem(MANUAL_DEST_KEY, "1");
-    // Sync display currency (auto, not flagged manual) so the toggle reflects it.
+    // Sync display currency (auto-derived from country) so the toggle reflects it.
     window.localStorage.setItem(CURRENCY_KEY, entry.currency);
     window.localStorage.removeItem("trade.displayCurrency.manual");
   } catch { /* ignore */ }
