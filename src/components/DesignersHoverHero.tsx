@@ -75,7 +75,7 @@ const LOCK_MS = 1200;
 const DesignersHoverHero = () => {
   const { data: designers } = useFeaturedDesigners();
   const [activeSlug, setActiveSlug] = useState<string | null>(null);
-  const isMobile = useIsMobile();
+  const navRef = useRef<HTMLElement>(null);
 
   // Pre-seed active on first render once data arrives so the hero is never
   // a void on entry — the first designer acts as default.
@@ -88,28 +88,13 @@ const DesignersHoverHero = () => {
   const items = designers ?? [];
   const hasItems = items.length > 0;
 
-  // Mobile: auto-rotate every 4.5 s so the hero stays alive without
-  // intercepting the vertical swipe gestures used to scroll the page.
+  // Wheel/swipe navigation: scroll up/down moves through the list of names.
+  // Attach listeners to the names nav only on mobile so swipes elsewhere
+  // (the background, the A–Z bar) still scroll the page.
   useEffect(() => {
-    if (!isMobile || !hasItems) return;
-    const interval = setInterval(() => {
-      setActiveSlug((current) => {
-        const idx = items.findIndex((d) => d.slug === current);
-        const base = idx === -1 ? 0 : idx;
-        return items[(base + 1) % items.length].slug;
-      });
-    }, 4500);
-    return () => clearInterval(interval);
-  }, [isMobile, hasItems, items]);
-
-  // Wheel/swipe navigation: scroll up/down moves through the list of names
-  // without scrolling the page. Touch swipes advance the same way.
-  // Disabled on mobile to keep vertical scroll free.
-  useEffect(() => {
-    if (!hasItems || isMobile) return;
-
-    const section = document.getElementById("designers-hover-hero");
-    if (!section) return;
+    if (!hasItems) return;
+    const nav = navRef.current;
+    if (!nav) return;
 
     const advance = (dir: 1 | -1) => {
       setActiveSlug((current) => {
@@ -181,17 +166,18 @@ const DesignersHoverHero = () => {
       touchStartX = null;
     };
 
-    section.addEventListener("wheel", onWheel, { passive: false });
-    section.addEventListener("touchstart", onTouchStart, { passive: true });
-    section.addEventListener("touchmove", onTouchMove, { passive: false });
-    section.addEventListener("touchend", onTouchEnd, { passive: false });
+    nav.addEventListener("wheel", onWheel, { passive: false });
+    nav.addEventListener("touchstart", onTouchStart, { passive: true });
+    nav.addEventListener("touchmove", onTouchMove, { passive: false });
+    nav.addEventListener("touchend", onTouchEnd, { passive: false });
     return () => {
-      section.removeEventListener("wheel", onWheel);
-      section.removeEventListener("touchstart", onTouchStart);
-      section.removeEventListener("touchmove", onTouchMove);
-      section.removeEventListener("touchend", onTouchEnd);
+      nav.removeEventListener("wheel", onWheel);
+      nav.removeEventListener("touchstart", onTouchStart);
+      nav.removeEventListener("touchmove", onTouchMove);
+      nav.removeEventListener("touchend", onTouchEnd);
     };
-  }, [hasItems, items, isMobile]);
+  }, [hasItems, items]);
+
 
   // Preload images so cross-fades are instant.
   const imageUrls = useMemo(
