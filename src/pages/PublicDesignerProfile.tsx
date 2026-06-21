@@ -888,13 +888,14 @@ const PublicDesignerProfile = () => {
                   const designerLabel = isGrouped && ap.designer_name && ap.designer_name !== designer.name ? ap.designer_name : undefined;
                   const designerSlug = isGrouped && ap.designer_slug ? ap.designer_slug : undefined;
                   const hasMultipleSizes = !!pick.dimensions && pick.dimensions.includes("\n");
-                  // Parent brand attribution (Ecart only for now): show on every child-designer card
+                  // Parent brand attribution: show on every child-designer card when a parent designer page exists
                   const showParentBrand =
                     !designerLabel &&
                     isChildDesigner &&
-                    (designer.founder || "").trim().toLowerCase() === "ecart";
+                    !!designer.founder &&
+                    !!parentDesigner?.slug;
                   const parentBrandName = showParentBrand ? designer.founder! : undefined;
-                  const parentBrandSlug = showParentBrand ? (parentDesigner?.slug || "ecart") : undefined;
+                  const parentBrandSlug = showParentBrand ? parentDesigner!.slug : undefined;
 
 
                   return (
