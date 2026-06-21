@@ -157,7 +157,7 @@ const DesignersHoverHero = () => {
                       className={cn(
                         "group inline-flex items-baseline gap-3 md:gap-5",
                         "font-display font-light tracking-tight text-white",
-                        "text-3xl sm:text-5xl md:text-7xl lg:text-[5.5rem] leading-[1.05]",
+                        "text-xl sm:text-2xl md:text-4xl lg:text-5xl leading-[1.15]",
                         "transition-all duration-[600ms] ease-out",
                         "hover:translate-x-3 md:hover:translate-x-6",
                         isDimmed ? "opacity-30" : "opacity-100"
