@@ -110,7 +110,7 @@ const DesignersHoverHero = () => {
       advance(e.deltaY > 0 ? 1 : -1);
       window.setTimeout(() => {
         wheelLock = false;
-      }, 1200);
+      }, 3200);
     };
 
     let touchStartY: number | null = null;
@@ -198,7 +198,7 @@ const DesignersHoverHero = () => {
               key={d.slug}
               aria-hidden="true"
               className={cn(
-"absolute inset-0 transition-opacity duration-[2200ms] ease-in-out",
+                "absolute inset-0 transition-opacity duration-[3500ms] ease-[cubic-bezier(0.4,0,0.2,1)]",
                 isActive ? "opacity-100" : "opacity-0"
               )}
             >
@@ -207,10 +207,7 @@ const DesignersHoverHero = () => {
                 alt=""
                 loading="eager"
                 decoding="async"
-                className={cn(
-                  "w-full h-full object-cover transition-transform duration-[6000ms] ease-out",
-                  isActive ? "scale-100" : "scale-105"
-                )}
+                className="w-full h-full object-cover"
                 style={{ filter: "brightness(0.78) saturate(0.95)" }}
               />
             </div>
