@@ -1782,10 +1782,9 @@ const TradeProductPage: React.FC = () => {
               )}
 
               {!isRugSqmActive && product.materials_description?.trim() && !hasLinkedFabrics && linkedWoodFinishes.length === 0 && (
-                <ExpandableSpec
+                <LegendDisclosure
                   icon={specIcon("⬗")}
                   text={product.materials_description.trim()}
-                  emphasized
                 />
               )}
 
