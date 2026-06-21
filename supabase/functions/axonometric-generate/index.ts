@@ -318,7 +318,8 @@ CRITICAL: Do not crop, rotate, or re-frame the scene relative to the source. The
     // For proposal modes, override placement.dimensions with parsed CAD bbox when available.
     // bbox_mm is the source of truth — exact W×D×Hcm beats the free-text dimensions field.
     // We also write one row per placement to `axonometric_cad_qa` so admins can flag drift.
-    if ((mode === "proposal_render" || mode === "proposal_refine") && Array.isArray(placements) && placements.length > 0) {
+    let qaRowsForResponse: any[] = [];
+    if ((mode === "proposal_render" || mode === "proposal_refine" || mode === "cad_dimension_overlay") && Array.isArray(placements) && placements.length > 0) {
       const productIds = Array.from(new Set(
         placements.map((p: any) => p?.product_id).filter((id: any) => typeof id === "string" && id.length > 0),
       ));
