@@ -222,6 +222,40 @@ export default function TradeAdminAxonometricCadQa() {
       .sort((a, b) => (a.product_name || "").localeCompare(b.product_name || ""));
   }, [renders, productMeta]);
 
+  // Search-filter the picker, but always keep already-selected ones visible (pinned to top)
+  const filteredPinnedOptions = useMemo(() => {
+    const q = pinnedQuery.trim().toLowerCase();
+    const base = q
+      ? allPinnedProductOptions.filter((p) => {
+          const hay = `${p.product_name || ""} ${p.brand_name || ""} ${p.category || ""}`.toLowerCase();
+          return hay.includes(q);
+        })
+      : allPinnedProductOptions;
+    const selected = base.filter((p) => pinnedProductIds.has(p.id));
+    const unselected = base.filter((p) => !pinnedProductIds.has(p.id));
+    return { combined: [...selected, ...unselected], selectedCount: selected.length, total: base.length };
+  }, [allPinnedProductOptions, pinnedQuery, pinnedProductIds]);
+
+  // Reset the lazy window whenever the underlying filtered list changes
+  useEffect(() => {
+    setPinnedVisibleCount(PINNED_PAGE_SIZE);
+    if (pinnedScrollRef.current) pinnedScrollRef.current.scrollTop = 0;
+  }, [pinnedQuery, allPinnedProductOptions.length]);
+
+  const visiblePinnedOptions = useMemo(
+    () => filteredPinnedOptions.combined.slice(0, pinnedVisibleCount),
+    [filteredPinnedOptions, pinnedVisibleCount]
+  );
+
+  const onPinnedScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const el = e.currentTarget;
+    if (el.scrollTop + el.clientHeight >= el.scrollHeight - 24) {
+      setPinnedVisibleCount((c) =>
+        c >= filteredPinnedOptions.combined.length ? c : c + PINNED_PAGE_SIZE
+      );
+    }
+  };
+
   const runBulkAudit = async () => {
     if (selectedIds.size === 0) return;
     setBulkRunning(true);
