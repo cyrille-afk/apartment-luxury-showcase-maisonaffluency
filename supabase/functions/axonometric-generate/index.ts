@@ -999,6 +999,7 @@ The final output must be indistinguishable from a professional Corona Renderer 1
         imageUrl: generatedImage,
         storedUrl: urlData.publicUrl,
         text: textResponse,
+        cadQa: qaRowsForResponse,
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
