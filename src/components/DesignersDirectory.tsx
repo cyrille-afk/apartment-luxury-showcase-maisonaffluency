@@ -1499,8 +1499,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
 
   const jumpToLetter = useCallback((letter: string) => {
     if (!activeLetters.has(letter)) return;
-    setForcedLetters((prev) => new Set(prev).add(letter));
-
+    setForcedLetters((prev) => (prev.has(letter) ? prev : new Set(prev).add(letter)));
 
     // Increment session so any in-flight settle loop from a previous tap aborts
     const session = ++jumpSessionRef.current;
@@ -1510,44 +1509,58 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
       if (!el) return null;
       const nav = document.querySelector("nav");
       const navHeight = nav?.getBoundingClientRect().height ?? 96;
-      // Account for the sticky filter/search bar that remains pinned beneath the nav
+      // Sum heights of currently-pinned filter/search bars (sticky offsetParent != null).
+      // Measured every frame so we follow live layout (re-renders, expansion, fonts loading).
       const stickyBars = Array.from(
         document.querySelectorAll<HTMLElement>("[data-sticky-filter-bar]")
-      ).filter((el) => el.offsetParent !== null);
-      const stickyHeight = stickyBars.reduce((sum, el) => sum + el.getBoundingClientRect().height, 0);
-      return Math.max(0, el.getBoundingClientRect().top + window.scrollY - navHeight - stickyHeight - 8);
+      ).filter((node) => node.offsetParent !== null);
+      const stickyHeight = stickyBars.reduce(
+        (sum, node) => sum + node.getBoundingClientRect().height,
+        0
+      );
+      return Math.max(
+        0,
+        el.getBoundingClientRect().top + window.scrollY - navHeight - stickyHeight - 8
+      );
     };
 
-    // Use window.scrollTo(x, y) for maximum mobile Safari compatibility
-    // (behavior: "instant" is not supported on older iOS versions)
-    const jumpTo = (y: number) => window.scrollTo(0, y);
+    // Jump instantly each frame to the freshly-measured target until the value
+    // is stable for several consecutive frames OR we exceed the deadline.
+    // This is rAF-driven (no setTimeout) so successive clicks interrupt cleanly
+    // via the session check on the very next frame.
+    const startedAt = performance.now();
+    const DEADLINE_MS = 700;
+    const STABLE_FRAMES = 4;
+    const TOLERANCE_PX = 1;
 
-    // Instant-jump to force content-visibility sections to render,
-    // then settle with correction passes.
-    const firstY = getY();
-    if (firstY === null) return;
-    jumpTo(firstY);
+    let prevY = getY();
+    if (prevY === null) return;
+    window.scrollTo(0, prevY);
+    let stableCount = 0;
 
-    let passes = 0;
-    let prevY = firstY;
-    const settle = () => {
-      // Abort if a newer tap has started
-      if (jumpSessionRef.current !== session) return;
-      const nextY = getY();
-      if (nextY === null) return;
-      const delta = Math.abs(nextY - prevY);
-      prevY = nextY;
-      if (delta > 2 && passes < 12) {
-        jumpTo(nextY);
-        passes++;
-        setTimeout(() => requestAnimationFrame(settle), 80);
-      } else {
-        // Final position
-        if (jumpSessionRef.current === session) {
-          jumpTo(nextY);
-        }
+    const tick = () => {
+      if (jumpSessionRef.current !== session) return; // newer click took over
+      const y = getY();
+      if (y === null) return;
+      const delta = Math.abs(y - prevY);
+      // Always keep the viewport pinned to the latest target so layout shifts
+      // (image loads, expansion animations) cannot leave us stranded.
+      if (Math.abs(window.scrollY - y) > TOLERANCE_PX) {
+        window.scrollTo(0, y);
       }
+      if (delta <= TOLERANCE_PX) stableCount += 1;
+      else stableCount = 0;
+      prevY = y;
+      if (stableCount >= STABLE_FRAMES) return;
+      if (performance.now() - startedAt > DEADLINE_MS) {
+        // Final pin and exit so we never loop forever
+        window.scrollTo(0, y);
+        return;
+      }
+      requestAnimationFrame(tick);
     };
+    requestAnimationFrame(tick);
+
     // Give AnimatePresence time to render on mobile before settling
     setTimeout(() => requestAnimationFrame(() => requestAnimationFrame(settle)), 120);
   }, [activeLetters]);
