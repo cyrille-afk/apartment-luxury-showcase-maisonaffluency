@@ -69,6 +69,7 @@ function splitName(name: string): [string, string] {
 const DesignersHoverHero = () => {
   const { data: designers } = useFeaturedDesigners();
   const [activeSlug, setActiveSlug] = useState<string | null>(null);
+  const [isPaused, setIsPaused] = useState(false);
 
   // Pre-seed active on first render once data arrives so the hero is never
   // a void on entry — the first designer acts as default.
@@ -80,6 +81,19 @@ const DesignersHoverHero = () => {
 
   const items = designers ?? [];
   const hasItems = items.length > 0;
+
+  // Auto-cycle through designers like a carousel; pause on hover.
+  useEffect(() => {
+    if (!hasItems || isPaused) return;
+    const id = window.setInterval(() => {
+      setActiveSlug((current) => {
+        const idx = items.findIndex((d) => d.slug === current);
+        const next = items[(idx + 1) % items.length];
+        return next?.slug ?? current;
+      });
+    }, 2800);
+    return () => window.clearInterval(id);
+  }, [hasItems, isPaused, items]);
 
   // Preload images so cross-fades are instant.
   const imageUrls = useMemo(
