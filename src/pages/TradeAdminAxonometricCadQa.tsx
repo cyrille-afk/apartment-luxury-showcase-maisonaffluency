@@ -402,17 +402,107 @@ export default function TradeAdminAxonometricCadQa() {
                 Pick saved proposal renders with pinned products. For each, the system regenerates a
                 transparent CAD-dimension overlay and records per-product QA rows.
               </p>
+              <div className="grid sm:grid-cols-2 gap-3 p-3 rounded border border-border bg-muted/20">
+                <div className="space-y-1">
+                  <label className="text-[11px] uppercase tracking-wide text-muted-foreground">Date range</label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="date"
+                      value={dateFrom}
+                      onChange={(e) => setDateFrom(e.target.value)}
+                      className="text-xs border border-input rounded px-2 py-1 bg-background flex-1"
+                    />
+                    <span className="text-muted-foreground">→</span>
+                    <input
+                      type="date"
+                      value={dateTo}
+                      onChange={(e) => setDateTo(e.target.value)}
+                      className="text-xs border border-input rounded px-2 py-1 bg-background flex-1"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[11px] uppercase tracking-wide text-muted-foreground">Product / brand search</label>
+                  <input
+                    type="text"
+                    value={productQuery}
+                    onChange={(e) => setProductQuery(e.target.value)}
+                    placeholder="Filter renders by product or brand name"
+                    className="text-xs border border-input rounded px-2 py-1 bg-background w-full"
+                  />
+                </div>
+                <div className="space-y-1 sm:col-span-2">
+                  <label className="text-[11px] uppercase tracking-wide text-muted-foreground">
+                    Category {categoryFilter.size > 0 && <span className="normal-case text-foreground">({categoryFilter.size} selected)</span>}
+                  </label>
+                  <div className="flex flex-wrap gap-1.5">
+                    {categoryOptions.length === 0 ? (
+                      <span className="text-muted-foreground">No categories — load renders first.</span>
+                    ) : categoryOptions.map((cat) => {
+                      const active = categoryFilter.has(cat);
+                      return (
+                        <button
+                          key={cat}
+                          type="button"
+                          onClick={() => toggleCategory(cat)}
+                          className={`text-[11px] px-2 py-0.5 rounded border ${active ? "bg-primary text-primary-foreground border-primary" : "bg-background border-input text-muted-foreground hover:text-foreground"}`}
+                        >
+                          {cat}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+                <div className="space-y-1 sm:col-span-2">
+                  <label className="text-[11px] uppercase tracking-wide text-muted-foreground">
+                    Pinned products {pinnedProductIds.size > 0 && <span className="normal-case text-foreground">({pinnedProductIds.size} selected)</span>}
+                  </label>
+                  <div className="max-h-32 overflow-y-auto border border-input rounded p-2 bg-background">
+                    {allPinnedProductOptions.length === 0 ? (
+                      <span className="text-muted-foreground">No pinned products — load renders first.</span>
+                    ) : allPinnedProductOptions.map((p) => {
+                      const active = pinnedProductIds.has(p.id);
+                      return (
+                        <label key={p.id} className="flex items-center gap-1.5 py-0.5 cursor-pointer hover:bg-muted/40 px-1 rounded">
+                          <Checkbox
+                            checked={active}
+                            onCheckedChange={(v) => {
+                              setPinnedProductIds((prev) => {
+                                const next = new Set(prev);
+                                if (v) next.add(p.id); else next.delete(p.id);
+                                return next;
+                              });
+                            }}
+                          />
+                          <span className="truncate">
+                            {p.product_name || "(unnamed)"}
+                            {p.brand_name && <span className="text-muted-foreground"> · {p.brand_name}</span>}
+                            {p.category && <span className="text-muted-foreground"> · {p.category}</span>}
+                          </span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+
               <div className="flex items-center gap-3 flex-wrap">
+                <span className="text-muted-foreground">
+                  Showing <span className="font-mono text-foreground">{filteredRenders.length}</span> of <span className="font-mono">{renders.length}</span> renders.
+                </span>
+                <Button variant="ghost" size="sm" onClick={clearFilters} disabled={bulkRunning}>
+                  Clear filters
+                </Button>
                 <Button variant="outline" size="sm" onClick={loadRenders} disabled={rendersLoading || bulkRunning}>
                   {rendersLoading ? "Loading…" : "Reload renders"}
                 </Button>
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => toggleAll(selectedIds.size !== renders.length)}
-                  disabled={renders.length === 0 || bulkRunning}
+                  onClick={() => toggleAll(selectedIds.size !== filteredRenders.length)}
+                  disabled={filteredRenders.length === 0 || bulkRunning}
                 >
-                  {selectedIds.size === renders.length && renders.length > 0 ? "Clear selection" : "Select all"}
+                  {selectedIds.size === filteredRenders.length && filteredRenders.length > 0 ? "Clear selection" : "Select all filtered"}
                 </Button>
                 <Button
                   size="sm"
