@@ -22,6 +22,7 @@ import { formatEditionLabel } from "@/lib/editionLabel";
 import { renderParagraph } from "@/components/EditorialBiography";
 import { formatDimensionsMultiline, formatImperialDimensions, withImperialPerLine } from "@/lib/formatDimensions";
 import ExpandableSpec from "@/components/ExpandableSpec";
+import LegendDisclosure from "@/components/LegendDisclosure";
 import Breadcrumbs, { type Crumb } from "@/components/Breadcrumbs";
 import { categoryUrl } from "@/lib/categorySlugs";
 import { buildProductBreadcrumbs } from "@/lib/productBreadcrumbs";
@@ -613,10 +614,9 @@ const VariantSelectors: React.FC<{
             Suppressed when FinishSelector already drives fabric + wood selections to
             avoid restating "Varnished solid ash & fabric" type catch-all summaries. */}
         {product.materials_description?.trim() && !hasLinkedFabrics && !isProductUpholstered(product) && (
-          <ExpandableSpec
+          <LegendDisclosure
             icon={specIcon("⬗")}
             text={product.materials_description.trim()}
-            emphasized
           />
         )}
       </div>
