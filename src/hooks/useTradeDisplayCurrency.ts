@@ -118,6 +118,13 @@ const fetchCountryFromIP = async (): Promise<string | null> => {
     } catch { /* ignore */ }
   }
 
+  // GDPR: silent IP geolocation + caching requires preference-cookie consent.
+  try {
+    if (window.localStorage.getItem("cookie_consent") !== "accepted") return null;
+  } catch { return null; }
+
+
+
   try {
     const cached = window.localStorage.getItem(COUNTRY_CACHE_KEY);
     const ts = Number(window.localStorage.getItem(COUNTRY_CACHE_TS_KEY) || 0);
