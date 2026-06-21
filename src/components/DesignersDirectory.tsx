@@ -1493,84 +1493,12 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
     return counts;
   }, [items]);
 
-  // Ref to cancel in-flight jump animations when a new letter is tapped
-  const jumpSessionRef = useRef(0);
-
-
   const jumpToLetter = useCallback((letter: string) => {
     if (!activeLetters.has(letter)) return;
     setForcedLetters((prev) => (prev.has(letter) ? prev : new Set(prev).add(letter)));
-
-    // Increment session so any in-flight settle loop from a previous tap aborts
-    const session = ++jumpSessionRef.current;
-
-    const getY = () => {
-      const el = getDesignersDirectoryAnchor(letter);
-      if (!el) return null;
-      const nav = document.querySelector("nav");
-      const navHeight = nav?.getBoundingClientRect().height ?? 96;
-      // Sum heights of currently-pinned filter/search bars (sticky offsetParent != null).
-      // Measured every frame so we follow live layout (re-renders, expansion, fonts loading).
-      const stickyBars = Array.from(
-        document.querySelectorAll<HTMLElement>("[data-sticky-filter-bar]")
-      ).filter((node) => node.offsetParent !== null);
-      const stickyHeight = stickyBars.reduce(
-        (sum, node) => sum + node.getBoundingClientRect().height,
-        0
-      );
-      return Math.max(
-        0,
-        el.getBoundingClientRect().top + window.scrollY - navHeight - stickyHeight - 8
-      );
-    };
-
-    // Settle by re-measuring every frame (rAF, no setTimeout) until the target
-    // is stable for several consecutive frames OR we exceed the deadline.
-    // Successive clicks interrupt cleanly via the session check on the next frame.
-    const DEADLINE_MS = 700;
-    const STABLE_FRAMES = 4;
-    const TOLERANCE_PX = 1;
-
-
-    const runSettle = () => {
-      const startedAt = performance.now();
-      let prev = getY();
-      if (prev === null) return;
-      window.scrollTo(0, prev);
-      let stableCount = 0;
-      const tick = () => {
-        if (jumpSessionRef.current !== session) return; // newer click took over
-        const y = getY();
-        if (y === null) return;
-        const delta = Math.abs(y - prev);
-        if (Math.abs(window.scrollY - y) > TOLERANCE_PX) {
-          window.scrollTo(0, y);
-        }
-        stableCount = delta <= TOLERANCE_PX ? stableCount + 1 : 0;
-        prev = y;
-        if (stableCount >= STABLE_FRAMES) return;
-        if (performance.now() - startedAt > DEADLINE_MS) {
-          window.scrollTo(0, y);
-          return;
-        }
-        requestAnimationFrame(tick);
-      };
-      requestAnimationFrame(tick);
-    };
-
-    runSettle();
-
-    // Re-run after AnimatePresence/content-visibility expands and after images
-    // load, in case the target shifted past the initial deadline.
-    setTimeout(() => {
-      if (jumpSessionRef.current !== session) return;
-      runSettle();
-    }, 220);
-    setTimeout(() => {
-      if (jumpSessionRef.current !== session) return;
-      runSettle();
-    }, 600);
+    jumpToDesignerLetter(letter);
   }, [activeLetters]);
+
 
 
 
