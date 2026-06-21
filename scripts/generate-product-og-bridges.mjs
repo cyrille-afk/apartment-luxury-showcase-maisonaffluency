@@ -209,7 +209,7 @@ async function main() {
     .or("is_hidden.is.null,is_hidden.eq.false");
   const { data: designers, error: dErr } = await sb
     .from("designers")
-    .select("id, name, display_name");
+    .select("id, name, display_name, slug");
   if (dErr) {
     console.error("Designer query failed:", dErr.message);
     process.exit(1);
