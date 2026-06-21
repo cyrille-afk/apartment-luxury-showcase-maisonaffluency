@@ -25,7 +25,7 @@ const FEATURED_SLUGS = [
   "jean-michel-frank",
   "alexander-lamont",
   "apparatus-studio",
-  "pierre-chareau",
+  "paul-laszlo",
   "eileen-gray",
   "thierry-lemaire",
   "leo-aerts-alinea",
