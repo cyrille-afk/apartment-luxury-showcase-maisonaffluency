@@ -200,6 +200,57 @@ export type Database = {
         }
         Relationships: []
       }
+      axonometric_cad_qa: {
+        Row: {
+          applied_dim_text: string | null
+          brand_name: string | null
+          created_at: string
+          delta_cm: Json | null
+          expected_bbox_mm: Json | null
+          expected_dim_text: string | null
+          id: string
+          mode: string
+          original_dim_text: string | null
+          product_id: string
+          product_name: string | null
+          status: string
+          tolerance_cm: number
+          user_id: string | null
+        }
+        Insert: {
+          applied_dim_text?: string | null
+          brand_name?: string | null
+          created_at?: string
+          delta_cm?: Json | null
+          expected_bbox_mm?: Json | null
+          expected_dim_text?: string | null
+          id?: string
+          mode: string
+          original_dim_text?: string | null
+          product_id: string
+          product_name?: string | null
+          status: string
+          tolerance_cm?: number
+          user_id?: string | null
+        }
+        Update: {
+          applied_dim_text?: string | null
+          brand_name?: string | null
+          created_at?: string
+          delta_cm?: Json | null
+          expected_bbox_mm?: Json | null
+          expected_dim_text?: string | null
+          id?: string
+          mode?: string
+          original_dim_text?: string | null
+          product_id?: string
+          product_name?: string | null
+          status?: string
+          tolerance_cm?: number
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       axonometric_gallery: {
         Row: {
           created_at: string
