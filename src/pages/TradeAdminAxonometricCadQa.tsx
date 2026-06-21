@@ -77,6 +77,7 @@ export default function TradeAdminAxonometricCadQa() {
   const [pinnedVisibleCount, setPinnedVisibleCount] = useState<number>(50);
   const PINNED_PAGE_SIZE = 50;
   const pinnedScrollRef = useRef<HTMLDivElement | null>(null);
+  const [showOnlySelectedPinned, setShowOnlySelectedPinned] = useState(false);
 
   const load = async () => {
     setLoading(true);
@@ -224,6 +225,7 @@ export default function TradeAdminAxonometricCadQa() {
 
   // Search-filter the picker. Selected items ALWAYS appear (pinned to top), even when
   // they don't match the current search query or weren't reached by pagination yet.
+  // When `showOnlySelectedPinned` is on, only selected items are shown.
   const filteredPinnedOptions = useMemo(() => {
     const q = pinnedQuery.trim().toLowerCase();
     const matches = q
@@ -235,14 +237,14 @@ export default function TradeAdminAxonometricCadQa() {
     // Always-visible selected block (sourced from full option set so search can't hide them)
     const selected = allPinnedProductOptions.filter((p) => pinnedProductIds.has(p.id));
     const selectedIdSet = new Set(selected.map((p) => p.id));
-    const unselected = matches.filter((p) => !selectedIdSet.has(p.id));
+    const unselected = showOnlySelectedPinned ? [] : matches.filter((p) => !selectedIdSet.has(p.id));
     return {
       combined: [...selected, ...unselected],
       selectedCount: selected.length,
       matchCount: matches.length,
       total: allPinnedProductOptions.length,
     };
-  }, [allPinnedProductOptions, pinnedQuery, pinnedProductIds]);
+  }, [allPinnedProductOptions, pinnedQuery, pinnedProductIds, showOnlySelectedPinned]);
 
   // Reset the lazy window whenever the underlying filtered list changes
   useEffect(() => {
@@ -503,9 +505,18 @@ export default function TradeAdminAxonometricCadQa() {
                   </div>
                 </div>
                 <div className="space-y-1 sm:col-span-2">
-                  <label className="text-[11px] uppercase tracking-wide text-muted-foreground">
-                    Pinned products {pinnedProductIds.size > 0 && <span className="normal-case text-foreground">({pinnedProductIds.size} selected)</span>}
-                  </label>
+                  <div className="flex items-center justify-between">
+                    <label className="text-[11px] uppercase tracking-wide text-muted-foreground">
+                      Pinned products {pinnedProductIds.size > 0 && <span className="normal-case text-foreground">({pinnedProductIds.size} selected)</span>}
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => setShowOnlySelectedPinned((v) => !v)}
+                      className={`text-[11px] px-2 py-0.5 rounded border ${showOnlySelectedPinned ? "bg-primary text-primary-foreground border-primary" : "bg-background border-input text-muted-foreground hover:text-foreground"}`}
+                    >
+                      {showOnlySelectedPinned ? "Showing selected only" : "Show all products"}
+                    </button>
+                  </div>
                   <input
                     type="search"
                     value={pinnedQuery}
