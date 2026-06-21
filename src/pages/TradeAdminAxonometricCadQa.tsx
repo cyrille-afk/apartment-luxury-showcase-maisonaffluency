@@ -222,18 +222,26 @@ export default function TradeAdminAxonometricCadQa() {
       .sort((a, b) => (a.product_name || "").localeCompare(b.product_name || ""));
   }, [renders, productMeta]);
 
-  // Search-filter the picker, but always keep already-selected ones visible (pinned to top)
+  // Search-filter the picker. Selected items ALWAYS appear (pinned to top), even when
+  // they don't match the current search query or weren't reached by pagination yet.
   const filteredPinnedOptions = useMemo(() => {
     const q = pinnedQuery.trim().toLowerCase();
-    const base = q
+    const matches = q
       ? allPinnedProductOptions.filter((p) => {
           const hay = `${p.product_name || ""} ${p.brand_name || ""} ${p.category || ""}`.toLowerCase();
           return hay.includes(q);
         })
       : allPinnedProductOptions;
-    const selected = base.filter((p) => pinnedProductIds.has(p.id));
-    const unselected = base.filter((p) => !pinnedProductIds.has(p.id));
-    return { combined: [...selected, ...unselected], selectedCount: selected.length, total: base.length };
+    // Always-visible selected block (sourced from full option set so search can't hide them)
+    const selected = allPinnedProductOptions.filter((p) => pinnedProductIds.has(p.id));
+    const selectedIdSet = new Set(selected.map((p) => p.id));
+    const unselected = matches.filter((p) => !selectedIdSet.has(p.id));
+    return {
+      combined: [...selected, ...unselected],
+      selectedCount: selected.length,
+      matchCount: matches.length,
+      total: allPinnedProductOptions.length,
+    };
   }, [allPinnedProductOptions, pinnedQuery, pinnedProductIds]);
 
   // Reset the lazy window whenever the underlying filtered list changes
