@@ -135,7 +135,7 @@ const DesignersHoverHero = () => {
         <div className="w-full max-w-6xl">
           <header className="mb-10 md:mb-14">
             <p className="text-[10px] tracking-[0.4em] uppercase text-white/40 mb-3 font-body">
-              Curated Selection
+              Curated Selection Of Designers
             </p>
             <h2 className="text-white/85 text-xs md:text-sm tracking-[0.32em] uppercase font-body font-light">
               The Designers
