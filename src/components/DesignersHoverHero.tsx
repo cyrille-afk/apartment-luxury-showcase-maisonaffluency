@@ -260,7 +260,7 @@ const DesignersHoverHero = () => {
                         {first}
                         {last && <span className="italic"> {last}</span>}
                         {childBrand && (
-                          <span className="text-white/75"> - {d.founder}</span>
+                          <span className="opacity-80"> - {d.founder}</span>
                         )}
                       </span>
                     </Link>
