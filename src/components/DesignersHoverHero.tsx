@@ -150,8 +150,9 @@ const DesignersHoverHero = () => {
 
   return (
     <section
+      id="designers-hover-hero"
       aria-label="Featured designers"
-      className="relative w-full min-h-[680px] py-16 md:py-20 bg-[#0a0a0a] text-foreground overflow-hidden"
+      className="relative w-full h-[88vh] min-h-[640px] bg-[#0a0a0a] text-foreground overflow-hidden"
     >
       {/* Background image stack — cross-fade between layers */}
       <div className="absolute inset-0 z-0 pointer-events-none">
@@ -187,14 +188,10 @@ const DesignersHoverHero = () => {
       </div>
 
       {/* Content */}
-      <div className="relative z-10 flex items-center px-6 sm:px-12 md:px-20 lg:px-28">
+      <div className="relative z-10 flex items-center h-full px-6 sm:px-12 md:px-20 lg:px-28">
         <div className="w-full max-w-xs sm:max-w-sm md:max-w-md">
           <nav aria-label="Featured designers shortcut list">
-            <ul
-              className="flex flex-col gap-0.5 text-center"
-              onMouseEnter={() => setIsPaused(true)}
-              onMouseLeave={() => setIsPaused(false)}
-            >
+            <ul className="flex flex-col gap-0.5 text-center">
               {items.map((d) => {
                 const [first, last] = splitName(d.name);
                 const isActive = d.slug === activeSlug;
