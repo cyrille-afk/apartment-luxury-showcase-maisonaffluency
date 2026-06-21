@@ -505,9 +505,18 @@ export default function TradeAdminAxonometricCadQa() {
                   </div>
                 </div>
                 <div className="space-y-1 sm:col-span-2">
-                  <label className="text-[11px] uppercase tracking-wide text-muted-foreground">
-                    Pinned products {pinnedProductIds.size > 0 && <span className="normal-case text-foreground">({pinnedProductIds.size} selected)</span>}
-                  </label>
+                  <div className="flex items-center justify-between">
+                    <label className="text-[11px] uppercase tracking-wide text-muted-foreground">
+                      Pinned products {pinnedProductIds.size > 0 && <span className="normal-case text-foreground">({pinnedProductIds.size} selected)</span>}
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => setShowOnlySelectedPinned((v) => !v)}
+                      className={`text-[11px] px-2 py-0.5 rounded border ${showOnlySelectedPinned ? "bg-primary text-primary-foreground border-primary" : "bg-background border-input text-muted-foreground hover:text-foreground"}`}
+                    >
+                      {showOnlySelectedPinned ? "Showing selected only" : "Show all products"}
+                    </button>
+                  </div>
                   <input
                     type="search"
                     value={pinnedQuery}
