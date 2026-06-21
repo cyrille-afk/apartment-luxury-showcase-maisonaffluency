@@ -68,7 +68,6 @@ function splitName(name: string): [string, string] {
 
 const SWIPE_THRESHOLD = 50;
 
-
 const DesignersHoverHero = () => {
   const { data: designers } = useFeaturedDesigners();
   const [activeSlug, setActiveSlug] = useState<string | null>(null);
