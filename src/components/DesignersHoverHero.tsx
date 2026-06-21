@@ -68,6 +68,8 @@ function splitName(name: string): [string, string] {
 }
 
 const SWIPE_THRESHOLD = 50;
+const IMAGE_TRANSITION_MS = 3500;
+const LOCK_MS = IMAGE_TRANSITION_MS + 400;
 
 const DesignersHoverHero = () => {
   const { data: designers } = useFeaturedDesigners();
@@ -100,17 +102,22 @@ const DesignersHoverHero = () => {
       });
     };
 
-    let wheelLock = false;
+    let transitionLock = false;
+    const lockTimeoutMs = Math.max(IMAGE_TRANSITION_MS, LOCK_MS);
+    const lock = () => {
+      transitionLock = true;
+    };
+    const unlock = () => {
+      transitionLock = false;
+    };
 
     const onWheel = (e: WheelEvent) => {
       if (Math.abs(e.deltaY) < 8) return;
       e.preventDefault();
-      if (wheelLock) return;
-      wheelLock = true;
+      if (transitionLock) return;
+      lock();
       advance(e.deltaY > 0 ? 1 : -1);
-      window.setTimeout(() => {
-        wheelLock = false;
-      }, 3200);
+      window.setTimeout(unlock, lockTimeoutMs);
     };
 
     let touchStartY: number | null = null;
@@ -127,7 +134,7 @@ const DesignersHoverHero = () => {
     };
 
     const onTouchMove = (e: TouchEvent) => {
-      if (touchStartY === null || touchStartX === null || swipeHandled) return;
+      if (touchStartY === null || touchStartX === null || swipeHandled || transitionLock) return;
       const touch = e.touches[0];
       const dy = touchStartY - touch.clientY;
       const dx = touchStartX - touch.clientX;
@@ -137,7 +144,9 @@ const DesignersHoverHero = () => {
         e.preventDefault();
         swiping = true;
         swipeHandled = true;
+        lock();
         advance(dy > 0 ? 1 : -1);
+        window.setTimeout(unlock, lockTimeoutMs);
       }
     };
 
