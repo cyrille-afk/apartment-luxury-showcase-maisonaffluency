@@ -72,6 +72,11 @@ export default function TradeAdminAxonometricCadQa() {
   const [categoryFilter, setCategoryFilter] = useState<Set<string>>(new Set());
   const [productQuery, setProductQuery] = useState<string>("");
   const [pinnedProductIds, setPinnedProductIds] = useState<Set<string>>(new Set());
+  // Pinned-product picker: search + lazy "load more" window (keeps DOM small for large catalogs)
+  const [pinnedQuery, setPinnedQuery] = useState<string>("");
+  const [pinnedVisibleCount, setPinnedVisibleCount] = useState<number>(50);
+  const PINNED_PAGE_SIZE = 50;
+  const pinnedScrollRef = useRef<HTMLDivElement | null>(null);
 
   const load = async () => {
     setLoading(true);
