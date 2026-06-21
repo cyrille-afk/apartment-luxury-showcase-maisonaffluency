@@ -183,6 +183,16 @@ export function useTradeDisplayCurrency(): [DisplayCurrency, (next: DisplayCurre
     let cancelled = false;
 
     (async () => {
+      // 0) A manual shipping destination overrides every detection source.
+      if (isManualDestination()) {
+        const storedCountry = window.localStorage.getItem(COUNTRY_CACHE_KEY);
+        const fromDestination = currencyForCountry(storedCountry);
+        if (fromDestination && !cancelled) {
+          applyAuto(fromDestination);
+          return;
+        }
+      }
+
       // 1) profile.country
       try {
         const { data: { user } } = await supabase.auth.getUser();
