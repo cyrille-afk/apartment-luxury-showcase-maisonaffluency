@@ -162,17 +162,16 @@ const DesignersHoverHero = () => {
                 const isActive = d.slug === activeSlug;
                 const isDimmed = activeSlug !== null && !isActive;
                 return (
-                  <li key={d.slug}>
+                  <li key={d.slug} className="text-center">
                     <Link
                       to={`/designers/${d.slug}`}
                       onMouseEnter={() => setActiveSlug(d.slug)}
                       onFocus={() => setActiveSlug(d.slug)}
                       className={cn(
-                        "group inline-flex items-baseline gap-3 md:gap-5",
+                        "inline-block",
                         "font-display font-light tracking-tight text-white",
                         "text-base sm:text-lg md:text-2xl lg:text-[28px] leading-[1.25]",
-                        "transition-all duration-[600ms] ease-out",
-                        "hover:translate-x-2 md:hover:translate-x-4",
+                        "transition-opacity duration-[600ms] ease-out",
                         isDimmed ? "opacity-30" : "opacity-100"
                       )}
                     >
