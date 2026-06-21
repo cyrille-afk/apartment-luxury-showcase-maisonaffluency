@@ -16,6 +16,7 @@ import { cn } from "@/lib/utils";
 interface FeaturedDesigner {
   slug: string;
   name: string;
+  founder: string | null;
   hero_image_url: string | null;
   image_url: string | null;
 }
