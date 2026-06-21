@@ -136,8 +136,56 @@ export default function TradeAdminAxonometricCadQa() {
 
   const filtered = tab === "all" ? rows : tab === "bulk" ? [] : rows.filter((r) => r.status === tab);
 
+  // Category options derived from the products actually linked to loaded renders.
+  const categoryOptions = useMemo(() => {
+    const set = new Set<string>();
+    for (const meta of Object.values(productMeta)) if (meta.category) set.add(meta.category);
+    return Array.from(set).sort();
+  }, [productMeta]);
+
+  // Apply filters to the renders list. A render passes if:
+  //   - created_at is within the date range (if set)
+  //   - AND at least one of its linked products matches the category filter (if any selected)
+  //   - AND at least one of its linked products matches the text query (if non-empty)
+  //   - AND if a "pinned product" set is active, the render must contain at least one of those product IDs
+  const filteredRenders = useMemo(() => {
+    const fromTs = dateFrom ? new Date(dateFrom + "T00:00:00").getTime() : -Infinity;
+    const toTs = dateTo ? new Date(dateTo + "T23:59:59").getTime() : Infinity;
+    const q = productQuery.trim().toLowerCase();
+    return renders.filter((r) => {
+      const t = new Date(r.created_at).getTime();
+      if (t < fromTs || t > toTs) return false;
+
+      if (pinnedProductIds.size > 0) {
+        if (!r.linked_favorite_product_ids.some((id) => pinnedProductIds.has(id))) return false;
+      }
+
+      if (categoryFilter.size > 0) {
+        const hasCat = r.linked_favorite_product_ids.some((id) => {
+          const c = productMeta[id]?.category;
+          return c ? categoryFilter.has(c) : false;
+        });
+        if (!hasCat) return false;
+      }
+
+      if (q) {
+        const hasMatch = r.linked_favorite_product_ids.some((id) => {
+          const m = productMeta[id];
+          if (!m) return false;
+          return (
+            (m.product_name && m.product_name.toLowerCase().includes(q)) ||
+            (m.brand_name && m.brand_name.toLowerCase().includes(q))
+          );
+        });
+        if (!hasMatch) return false;
+      }
+
+      return true;
+    });
+  }, [renders, productMeta, dateFrom, dateTo, categoryFilter, productQuery, pinnedProductIds]);
+
   const toggleAll = (checked: boolean) => {
-    setSelectedIds(checked ? new Set(renders.map((r) => r.id)) : new Set());
+    setSelectedIds(checked ? new Set(filteredRenders.map((r) => r.id)) : new Set());
   };
   const toggleOne = (id: string, checked: boolean) => {
     setSelectedIds((prev) => {
@@ -146,6 +194,28 @@ export default function TradeAdminAxonometricCadQa() {
       return next;
     });
   };
+  const toggleCategory = (cat: string) => {
+    setCategoryFilter((prev) => {
+      const next = new Set(prev);
+      if (next.has(cat)) next.delete(cat); else next.add(cat);
+      return next;
+    });
+  };
+  const clearFilters = () => {
+    setDateFrom("");
+    setDateTo("");
+    setCategoryFilter(new Set());
+    setProductQuery("");
+    setPinnedProductIds(new Set());
+  };
+  // Use the union of all pinned product IDs across renders as the picker source
+  const allPinnedProductOptions = useMemo(() => {
+    const ids = new Set<string>();
+    for (const r of renders) for (const id of r.linked_favorite_product_ids) ids.add(id);
+    return Array.from(ids)
+      .map((id) => ({ id, ...(productMeta[id] || { product_name: null, brand_name: null, category: null }) }))
+      .sort((a, b) => (a.product_name || "").localeCompare(b.product_name || ""));
+  }, [renders, productMeta]);
 
   const runBulkAudit = async () => {
     if (selectedIds.size === 0) return;
