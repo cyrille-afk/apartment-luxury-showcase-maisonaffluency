@@ -44,7 +44,7 @@ serve(async (req) => {
 
     const body = await req.json();
     const { imageUrl, mode, style, overlayImages, technicalDrawingUrl, maskDataUrl, placements, referenceImageUrl, refinementPrompt, styleReferenceUrl, skipStyleReference, markerHints, qualityTier, lightingStrength } = body;
-    // mode: "elevation_to_axo" | "section_to_axo" | "stylize" | "composite" | "3d_to_cad" | "cad_overlay" | "product_swap" | "scene_edit" | "freeform" | "turntable_angle"
+    // mode: "elevation_to_axo" | "section_to_axo" | "stylize" | "composite" | "3d_to_cad" | "cad_overlay" | "cad_dimension_overlay" | "product_swap" | "scene_edit" | "freeform" | "turntable_angle"
     const useDepthMap = body.useDepthMap !== false; // default ON
 
     if (!imageUrl) throw new Error("imageUrl is required");
@@ -318,7 +318,8 @@ CRITICAL: Do not crop, rotate, or re-frame the scene relative to the source. The
     // For proposal modes, override placement.dimensions with parsed CAD bbox when available.
     // bbox_mm is the source of truth — exact W×D×Hcm beats the free-text dimensions field.
     // We also write one row per placement to `axonometric_cad_qa` so admins can flag drift.
-    if ((mode === "proposal_render" || mode === "proposal_refine") && Array.isArray(placements) && placements.length > 0) {
+    let qaRowsForResponse: any[] = [];
+    if ((mode === "proposal_render" || mode === "proposal_refine" || mode === "cad_dimension_overlay") && Array.isArray(placements) && placements.length > 0) {
       const productIds = Array.from(new Set(
         placements.map((p: any) => p?.product_id).filter((id: any) => typeof id === "string" && id.length > 0),
       ));
@@ -417,6 +418,7 @@ CRITICAL: Do not crop, rotate, or re-frame the scene relative to the source. The
           }
 
           if (qaRows.length > 0) {
+            qaRowsForResponse = qaRows;
             // Best-effort: never block the render on QA logging.
             svc.from("axonometric_cad_qa").insert(qaRows).then(({ error }) => {
               if (error) console.warn("[axo cad qa] insert failed:", error.message);
@@ -428,7 +430,58 @@ CRITICAL: Do not crop, rotate, or re-frame the scene relative to the source. The
       }
     }
 
-    if (mode === "proposal_render") {
+    if (mode === "cad_dimension_overlay") {
+      if (!Array.isArray(placements) || placements.length === 0) {
+        throw new Error("cad_dimension_overlay requires at least one placement with product_id");
+      }
+      const overlayList = (placements || [])
+        .map((p: any, i: number) => {
+          const cad = p.cad_geometry_mm
+            ? `CAD W${Math.round(p.cad_geometry_mm.w / 10)}×D${Math.round(p.cad_geometry_mm.d / 10)}${p.cad_geometry_mm.h ? `×H${Math.round(p.cad_geometry_mm.h / 10)}` : ""}cm`
+            : "CAD unknown";
+          const orig = p.dimensions || "no applied dim";
+          return `${i + 1}. "${p.product_name}" — ${cad} | applied: ${orig}`;
+        })
+        .join("\n");
+
+      const mismatchSummary = qaRowsForResponse
+        .filter((r) => r.status === "mismatch")
+        .map((r) => {
+          const d = r.delta_cm || {};
+          const parts: string[] = [];
+          if (d.w != null) parts.push(`Δw=${d.w}cm`);
+          if (d.d != null) parts.push(`Δd=${d.d}cm`);
+          if (d.h != null) parts.push(`Δh=${d.h}cm`);
+          return `- ${r.product_name}: ${parts.join(", ") || "no applied dims"}`;
+        })
+        .join("\n");
+
+      prompt = `You are given ONE input image: a rendered 3D axonometric interior. Produce a TRANSPARENT PNG OVERLAY (same width × height, fully transparent background) that, when laid exactly on top of the input image, annotates each piece of furniture with its CAD-derived orthographic dimensions and visually highlights where the rendered scale appears to diverge from the CAD dimensions.
+
+OUTPUT REQUIREMENTS — NON-NEGOTIABLE:
+- The output MUST be a PNG with a FULLY TRANSPARENT background (alpha = 0 everywhere except the overlay marks). Do NOT redraw the room, furniture, walls, floor, lighting, shadows, or any pixels from the input. The overlay must be readable when composited on top of the original render.
+- The output canvas must have the EXACT same aspect ratio and framing as the input image so the overlay aligns 1:1.
+- Use crisp vector-style line work, not painterly strokes.
+
+WHAT TO DRAW (per product, in order listed below):
+1. A thin orthographic bounding-box silhouette tracing the W×D×H envelope of each product in the render, in the axonometric perspective of the input image (lines only, ~2px).
+2. A small dimension callout (sans-serif, ~14–18px, white text on a dark pill background for legibility) anchored to each product, reading exactly the CAD W×D×Hcm value provided below.
+3. Color-coding for each silhouette and callout:
+   - GREEN (#16a34a) when CAD and applied dimensions match (within tolerance).
+   - AMBER (#f59e0b) when CAD geometry is missing or unparsed.
+   - RED (#dc2626) when the rendered product clearly looks wrong-scale vs the CAD dimensions (mismatch). Add a small red "Δ" badge listing the per-axis delta in cm.
+4. A compact legend in the bottom-right corner (also on transparent background) with the three color states.
+
+PRODUCTS (numbered to match their visible position in the render — left-to-right, then top-to-bottom):
+${overlayList}
+
+${mismatchSummary ? `KNOWN MISMATCHES (highlight these in RED with the listed deltas):\n${mismatchSummary}` : "No pre-computed mismatches — judge from the visible geometry."}
+
+ABSOLUTE PROHIBITIONS:
+- Do NOT include any pixels of the original room, walls, floor, products, or shadows. Background must be transparent.
+- Do NOT add a title block, sheet border, scale bar, north arrow, or watermark.
+- Do NOT relabel products or invent dimensions — use the exact CAD values listed above.`;
+    } else if (mode === "proposal_render") {
       const hasMaterialOverrides = (placements || []).some((p: any) => p.material_override?.trim());
       const productList = (placements || [])
         .map((p: any, i: number) => {
@@ -584,7 +637,7 @@ Source render fidelity: preserve the exact materials, finishes, and palette of t
 
 Style: ${defaultStyle}. Quality must match a single Corona/V-Ray turntable batch.`;
     } else {
-      throw new Error("Invalid mode. Use: elevation_to_axo, section_to_axo, stylize, composite, 3d_to_cad, cad_overlay, product_swap, freeform, apply_texture, scene_edit, turntable_angle, multi_view");
+      throw new Error("Invalid mode. Use: elevation_to_axo, section_to_axo, stylize, composite, 3d_to_cad, cad_overlay, cad_dimension_overlay, product_swap, freeform, apply_texture, scene_edit, turntable_angle, multi_view");
     }
 
     if (referenceImageUrl && (mode === "elevation_to_axo" || mode === "section_to_axo")) {
@@ -934,7 +987,7 @@ The final output must be indistinguishable from a professional Corona Renderer 1
       console.error("Upload error:", uploadErr);
       // Still return the base64 image even if upload fails
       return new Response(
-        JSON.stringify({ imageUrl: generatedImage, storedUrl: null, text: textResponse }),
+        JSON.stringify({ imageUrl: generatedImage, storedUrl: null, text: textResponse, cadQa: qaRowsForResponse }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -946,6 +999,7 @@ The final output must be indistinguishable from a professional Corona Renderer 1
         imageUrl: generatedImage,
         storedUrl: urlData.publicUrl,
         text: textResponse,
+        cadQa: qaRowsForResponse,
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );

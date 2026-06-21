@@ -7,8 +7,9 @@ import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import {
-  Loader2, Wand2, Search, X, Download, ArrowLeft, RefreshCw, Send, Maximize2, Minimize2, Upload, RotateCw, RotateCcw, ZoomIn, ZoomOut, Move, MousePointer2, Crosshair, Trash2, Link, Save, Image, Layout, FolderOpen, FileText, Lock, Unlock, CheckCircle2, SplitSquareHorizontal, Undo2,
+  Loader2, Wand2, Search, X, Download, ArrowLeft, RefreshCw, Send, Maximize2, Minimize2, Upload, RotateCw, RotateCcw, ZoomIn, ZoomOut, Move, MousePointer2, Crosshair, Trash2, Link, Save, Image, Layout, FolderOpen, FileText, Lock, Unlock, CheckCircle2, SplitSquareHorizontal, Undo2, Ruler, Eye, EyeOff,
 } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import BeforeAfterSplit from "./BeforeAfterSplit";
 import { createActiveDraftQuote } from "@/lib/activeProjectId";
 
@@ -94,6 +95,13 @@ export default function ProposalBuilder({
   const [compareMode, setCompareMode] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [qualityTier, setQualityTier] = useState<"draft" | "standard" | "premium">("standard");
+
+  // CAD dimension audit overlay state
+  const [cadAuditing, setCadAuditing] = useState(false);
+  const [cadOverlayUrl, setCadOverlayUrl] = useState<string | null>(null);
+  const [cadQaRows, setCadQaRows] = useState<any[]>([]);
+  const [showCadOverlay, setShowCadOverlay] = useState(false);
+  const [cadOverlayVisible, setCadOverlayVisible] = useState(true);
 
   // External upload dialog state
   const [showExternalDialog, setShowExternalDialog] = useState(false);
@@ -387,6 +395,54 @@ export default function ProposalBuilder({
     } catch {
       // Fallback: open in new tab
       window.open(proposalResult, "_blank");
+    }
+  };
+
+  // Generate a transparent CAD-dimension overlay for the current proposal and
+  // surface a per-product QA breakdown so the admin can see exactly where the
+  // rendered scale drifts from the parsed CAD bbox.
+  const runCadAudit = async () => {
+    if (!proposalResult) return;
+    setCadAuditing(true);
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const accessToken = sessionData.session?.access_token;
+      if (!accessToken) throw new Error("Session expired. Please sign in again.");
+
+      const placements = selectedProducts.map((p) => ({
+        product_id: p.product_id || null,
+        product_name: p.product_name,
+        brand_name: p.brand_name,
+        image_url: toAbsoluteUrl(p.image_url),
+        dimensions: p.dimensions || null,
+      }));
+
+      const { data, error } = await supabase.functions.invoke("axonometric-generate", {
+        body: {
+          imageUrl: toAbsoluteUrl(proposalResult),
+          mode: "cad_dimension_overlay",
+          qualityTier,
+          placements,
+        },
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+
+      if (error) throw new Error(error.message);
+      if (data?.error) throw new Error(data.error);
+
+      setCadOverlayUrl(data.storedUrl || data.imageUrl);
+      setCadQaRows(Array.isArray(data.cadQa) ? data.cadQa : []);
+      setCadOverlayVisible(true);
+      setShowCadOverlay(true);
+      const mismatches = (data.cadQa || []).filter((r: any) => r.status === "mismatch").length;
+      toast({
+        title: "CAD scale audit ready",
+        description: mismatches > 0 ? `${mismatches} placement(s) diverge from CAD dimensions.` : "All placements match parsed CAD dimensions.",
+      });
+    } catch (e: any) {
+      toast({ title: "CAD audit failed", description: e?.message || "Unknown error", variant: "destructive" });
+    } finally {
+      setCadAuditing(false);
     }
   };
 
@@ -982,6 +1038,10 @@ export default function ProposalBuilder({
             <div className="w-px h-5 bg-border mx-1" />
             <Button variant="outline" size="sm" onClick={downloadProposal}>
               <Download className="w-3.5 h-3.5 mr-1.5" />Download
+            </Button>
+            <Button variant="outline" size="sm" onClick={runCadAudit} disabled={cadAuditing || !proposalResult}>
+              {cadAuditing ? <DotCircleLoader size="sm" className="w-3.5 h-3.5 mr-1.5" /> : <Ruler className="w-3.5 h-3.5 mr-1.5" />}
+              CAD Scale Audit
             </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -1642,6 +1702,95 @@ export default function ProposalBuilder({
           </div>
         )}
       </div>
+
+      <Dialog open={showCadOverlay} onOpenChange={setShowCadOverlay}>
+        <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Ruler className="w-4 h-4" /> CAD Scale Audit
+            </DialogTitle>
+            <DialogDescription>
+              Transparent orthographic overlay of CAD W×D×Hcm. Red marks placements that diverge from the parsed CAD bounding box.
+            </DialogDescription>
+          </DialogHeader>
+
+          {proposalResult && (
+            <div className="relative w-full bg-muted/30 border border-border rounded overflow-hidden">
+              <img src={proposalResult} alt="Proposal render" className="w-full block" />
+              {cadOverlayUrl && cadOverlayVisible && (
+                <img
+                  src={cadOverlayUrl}
+                  alt="CAD dimension overlay"
+                  className="absolute inset-0 w-full h-full object-contain pointer-events-none"
+                />
+              )}
+            </div>
+          )}
+
+          <div className="flex items-center justify-between gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCadOverlayVisible((v) => !v)}
+              disabled={!cadOverlayUrl}
+            >
+              {cadOverlayVisible ? <EyeOff className="w-3.5 h-3.5 mr-1.5" /> : <Eye className="w-3.5 h-3.5 mr-1.5" />}
+              {cadOverlayVisible ? "Hide overlay" : "Show overlay"}
+            </Button>
+            {cadOverlayUrl && (
+              <a
+                href={cadOverlayUrl}
+                download={`cad-overlay-${Date.now()}.png`}
+                className="text-xs underline text-muted-foreground hover:text-foreground"
+              >
+                Download overlay PNG
+              </a>
+            )}
+          </div>
+
+          <div className="border border-border rounded overflow-hidden">
+            <table className="w-full text-xs">
+              <thead className="bg-muted/40">
+                <tr>
+                  <th className="text-left px-2 py-1.5">Product</th>
+                  <th className="text-left px-2 py-1.5">Status</th>
+                  <th className="text-left px-2 py-1.5">CAD (cm)</th>
+                  <th className="text-left px-2 py-1.5">Applied</th>
+                  <th className="text-left px-2 py-1.5">Δ (cm)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {cadQaRows.length === 0 && (
+                  <tr><td colSpan={5} className="px-2 py-3 text-muted-foreground text-center">No CAD data for any placement.</td></tr>
+                )}
+                {cadQaRows.map((r, i) => {
+                  const color =
+                    r.status === "match" ? "text-emerald-600" :
+                    r.status === "mismatch" ? "text-red-600" :
+                    "text-amber-600";
+                  const d = r.delta_cm || {};
+                  const deltaText = [d.w, d.d, d.h]
+                    .map((v, idx) => v == null ? null : `${["W","D","H"][idx]}${v >= 0 ? "+" : ""}${v}`)
+                    .filter(Boolean)
+                    .join(" / ");
+                  return (
+                    <tr key={i} className="border-t border-border">
+                      <td className="px-2 py-1.5">
+                        <div className="font-medium">{r.product_name}</div>
+                        <div className="text-muted-foreground text-[10px]">{r.brand_name}</div>
+                      </td>
+                      <td className={`px-2 py-1.5 font-medium ${color}`}>{r.status}</td>
+                      <td className="px-2 py-1.5 text-muted-foreground">{r.expected_dim_text || "—"}</td>
+                      <td className="px-2 py-1.5 text-muted-foreground">{r.applied_dim_text || r.original_dim_text || "—"}</td>
+                      <td className={`px-2 py-1.5 ${r.status === "mismatch" ? "text-red-600 font-medium" : "text-muted-foreground"}`}>{deltaText || "—"}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
