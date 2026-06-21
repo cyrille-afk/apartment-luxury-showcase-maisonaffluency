@@ -273,18 +273,18 @@ const DesignersHoverHero = () => {
       </div>
 
       {/* Archives / Directory labels — bottom-left, above the A–Z bar */}
-      <div className="absolute bottom-24 left-6 sm:left-12 md:left-20 lg:left-28 z-10 flex items-center gap-10 text-white/40 border-t border-white/10 pt-6 max-w-md">
+      <div className="absolute bottom-24 left-6 sm:left-12 md:left-20 lg:left-28 z-10 flex items-center gap-10 text-white border-t border-white/20 pt-6 max-w-md">
         <div className="flex flex-col">
-          <span className="text-[9px] uppercase tracking-[0.3em] mb-1 font-body">
+          <span className="text-[9px] uppercase tracking-[0.3em] mb-1 font-body text-white">
             Archives
           </span>
-          <span className="text-xs font-body font-light">1920 — Today</span>
+          <span className="text-xs font-body font-light text-white/85">1920 — Today</span>
         </div>
         <div className="flex flex-col">
-          <span className="text-[9px] uppercase tracking-[0.3em] mb-1 font-body">
+          <span className="text-[9px] uppercase tracking-[0.3em] mb-1 font-body text-white">
             Directory
           </span>
-          <span className="text-xs font-body font-light italic">
+          <span className="text-xs font-body font-light italic text-white/85">
             Scroll to browse A–Z
           </span>
         </div>
