@@ -41,7 +41,7 @@ export default function TradeAdminAxonometricCadQa() {
       .select("*")
       .order("created_at", { ascending: false })
       .limit(500);
-    setRows((data || []) as QaRow[]);
+    setRows(((data || []) as unknown) as QaRow[]);
     setLoading(false);
   };
 
