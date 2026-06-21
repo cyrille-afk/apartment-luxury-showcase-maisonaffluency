@@ -242,6 +242,7 @@ const DesignersHoverHero = () => {
                 const [first, last] = splitName(d.name);
                 const isActive = d.slug === activeSlug;
                 const isDimmed = activeSlug !== null && !isActive;
+                const childBrand = d.founder && d.founder !== d.name;
                 return (
                   <li key={d.slug} className="text-center">
                     <Link
@@ -252,13 +253,16 @@ const DesignersHoverHero = () => {
                         "inline-block",
                         "font-display font-light tracking-tight text-white",
                         "text-base sm:text-lg md:text-2xl lg:text-[28px] leading-[1.25]",
-"transition-opacity duration-[1200ms] ease-out",
+                        "transition-opacity duration-[1200ms] ease-out",
                         isDimmed ? "opacity-30" : "opacity-100"
                       )}
                     >
                       <span>
                         {first}
                         {last && <span className="italic"> {last}</span>}
+                        {childBrand && (
+                          <span className="text-white/75"> - {d.founder}</span>
+                        )}
                       </span>
                     </Link>
                   </li>
