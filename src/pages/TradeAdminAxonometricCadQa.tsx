@@ -532,11 +532,11 @@ export default function TradeAdminAxonometricCadQa() {
           </Card>
 
           <div className="space-y-2">
-            {renders.length === 0 ? (
+            {filteredRenders.length === 0 ? (
               <Card><CardContent className="py-8 text-center text-muted-foreground text-sm">
-                {rendersLoading ? "Loading renders…" : "No saved renders with pinned products were found."}
+                {rendersLoading ? "Loading renders…" : renders.length === 0 ? "No saved renders with pinned products were found." : "No renders match the current filters."}
               </CardContent></Card>
-            ) : renders.map((r) => {
+            ) : filteredRenders.map((r) => {
               const result = results[r.id];
               const checked = selectedIds.has(r.id);
               return (
