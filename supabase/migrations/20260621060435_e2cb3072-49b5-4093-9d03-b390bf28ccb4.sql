@@ -1,0 +1,1 @@
+UPDATE designer_curator_picks SET wood_label_override = 'Select Your Armature and Shade Finish' WHERE title ILIKE '%Metronome%Reading%Floor%Lamp%';
