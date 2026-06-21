@@ -7,7 +7,7 @@
  *
  * Currency is NEVER chosen manually here — it is always derived from country.
  */
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 
 const COUNTRY_KEY = "trade.detectedCountry";            // shared with useTradeDisplayCurrency
 const COUNTRY_TS_KEY = "trade.detectedCountry.ts";
