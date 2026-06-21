@@ -62,6 +62,17 @@ export default function TradeAdminAxonometricCadQa() {
   const [bulkRunning, setBulkRunning] = useState(false);
   const [results, setResults] = useState<Record<string, RunResult>>({});
 
+  // Product lookup for the linked product IDs in the loaded renders.
+  // Keyed by product_id, used for category + name filtering.
+  const [productMeta, setProductMeta] = useState<Record<string, { product_name: string | null; brand_name: string | null; category: string | null }>>({});
+
+  // Filters
+  const [dateFrom, setDateFrom] = useState<string>("");
+  const [dateTo, setDateTo] = useState<string>("");
+  const [categoryFilter, setCategoryFilter] = useState<Set<string>>(new Set());
+  const [productQuery, setProductQuery] = useState<string>("");
+  const [pinnedProductIds, setPinnedProductIds] = useState<Set<string>>(new Set());
+
   const load = async () => {
     setLoading(true);
     const { data } = await supabase
@@ -82,7 +93,7 @@ export default function TradeAdminAxonometricCadQa() {
       .not("linked_favorite_product_ids", "is", null)
       .order("created_at", { ascending: false })
       .limit(100);
-    const filtered = (data || [])
+    const cleaned = (data || [])
       .map((r: any) => ({
         ...r,
         linked_favorite_product_ids: Array.isArray(r.linked_favorite_product_ids)
@@ -90,7 +101,27 @@ export default function TradeAdminAxonometricCadQa() {
           : [],
       }))
       .filter((r: RenderItem) => r.result_image_url && r.linked_favorite_product_ids.length > 0);
-    setRenders(filtered as RenderItem[]);
+    setRenders(cleaned as RenderItem[]);
+
+    // Hydrate product metadata for category + name filtering
+    const allIds = Array.from(new Set(cleaned.flatMap((r: RenderItem) => r.linked_favorite_product_ids)));
+    if (allIds.length > 0) {
+      const { data: prods } = await supabase
+        .from("trade_products")
+        .select("id,product_name,brand_name,category")
+        .in("id", allIds);
+      const map: Record<string, { product_name: string | null; brand_name: string | null; category: string | null }> = {};
+      for (const p of (prods || []) as any[]) {
+        map[p.id] = {
+          product_name: p.product_name ?? null,
+          brand_name: p.brand_name ?? null,
+          category: (p.category || "").trim() || null,
+        };
+      }
+      setProductMeta(map);
+    } else {
+      setProductMeta({});
+    }
     setRendersLoading(false);
   };
 
@@ -105,8 +136,56 @@ export default function TradeAdminAxonometricCadQa() {
 
   const filtered = tab === "all" ? rows : tab === "bulk" ? [] : rows.filter((r) => r.status === tab);
 
+  // Category options derived from the products actually linked to loaded renders.
+  const categoryOptions = useMemo(() => {
+    const set = new Set<string>();
+    for (const meta of Object.values(productMeta)) if (meta.category) set.add(meta.category);
+    return Array.from(set).sort();
+  }, [productMeta]);
+
+  // Apply filters to the renders list. A render passes if:
+  //   - created_at is within the date range (if set)
+  //   - AND at least one of its linked products matches the category filter (if any selected)
+  //   - AND at least one of its linked products matches the text query (if non-empty)
+  //   - AND if a "pinned product" set is active, the render must contain at least one of those product IDs
+  const filteredRenders = useMemo(() => {
+    const fromTs = dateFrom ? new Date(dateFrom + "T00:00:00").getTime() : -Infinity;
+    const toTs = dateTo ? new Date(dateTo + "T23:59:59").getTime() : Infinity;
+    const q = productQuery.trim().toLowerCase();
+    return renders.filter((r) => {
+      const t = new Date(r.created_at).getTime();
+      if (t < fromTs || t > toTs) return false;
+
+      if (pinnedProductIds.size > 0) {
+        if (!r.linked_favorite_product_ids.some((id) => pinnedProductIds.has(id))) return false;
+      }
+
+      if (categoryFilter.size > 0) {
+        const hasCat = r.linked_favorite_product_ids.some((id) => {
+          const c = productMeta[id]?.category;
+          return c ? categoryFilter.has(c) : false;
+        });
+        if (!hasCat) return false;
+      }
+
+      if (q) {
+        const hasMatch = r.linked_favorite_product_ids.some((id) => {
+          const m = productMeta[id];
+          if (!m) return false;
+          return (
+            (m.product_name && m.product_name.toLowerCase().includes(q)) ||
+            (m.brand_name && m.brand_name.toLowerCase().includes(q))
+          );
+        });
+        if (!hasMatch) return false;
+      }
+
+      return true;
+    });
+  }, [renders, productMeta, dateFrom, dateTo, categoryFilter, productQuery, pinnedProductIds]);
+
   const toggleAll = (checked: boolean) => {
-    setSelectedIds(checked ? new Set(renders.map((r) => r.id)) : new Set());
+    setSelectedIds(checked ? new Set(filteredRenders.map((r) => r.id)) : new Set());
   };
   const toggleOne = (id: string, checked: boolean) => {
     setSelectedIds((prev) => {
@@ -115,6 +194,28 @@ export default function TradeAdminAxonometricCadQa() {
       return next;
     });
   };
+  const toggleCategory = (cat: string) => {
+    setCategoryFilter((prev) => {
+      const next = new Set(prev);
+      if (next.has(cat)) next.delete(cat); else next.add(cat);
+      return next;
+    });
+  };
+  const clearFilters = () => {
+    setDateFrom("");
+    setDateTo("");
+    setCategoryFilter(new Set());
+    setProductQuery("");
+    setPinnedProductIds(new Set());
+  };
+  // Use the union of all pinned product IDs across renders as the picker source
+  const allPinnedProductOptions = useMemo(() => {
+    const ids = new Set<string>();
+    for (const r of renders) for (const id of r.linked_favorite_product_ids) ids.add(id);
+    return Array.from(ids)
+      .map((id) => ({ id, ...(productMeta[id] || { product_name: null, brand_name: null, category: null }) }))
+      .sort((a, b) => (a.product_name || "").localeCompare(b.product_name || ""));
+  }, [renders, productMeta]);
 
   const runBulkAudit = async () => {
     if (selectedIds.size === 0) return;
@@ -301,17 +402,107 @@ export default function TradeAdminAxonometricCadQa() {
                 Pick saved proposal renders with pinned products. For each, the system regenerates a
                 transparent CAD-dimension overlay and records per-product QA rows.
               </p>
+              <div className="grid sm:grid-cols-2 gap-3 p-3 rounded border border-border bg-muted/20">
+                <div className="space-y-1">
+                  <label className="text-[11px] uppercase tracking-wide text-muted-foreground">Date range</label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="date"
+                      value={dateFrom}
+                      onChange={(e) => setDateFrom(e.target.value)}
+                      className="text-xs border border-input rounded px-2 py-1 bg-background flex-1"
+                    />
+                    <span className="text-muted-foreground">→</span>
+                    <input
+                      type="date"
+                      value={dateTo}
+                      onChange={(e) => setDateTo(e.target.value)}
+                      className="text-xs border border-input rounded px-2 py-1 bg-background flex-1"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[11px] uppercase tracking-wide text-muted-foreground">Product / brand search</label>
+                  <input
+                    type="text"
+                    value={productQuery}
+                    onChange={(e) => setProductQuery(e.target.value)}
+                    placeholder="Filter renders by product or brand name"
+                    className="text-xs border border-input rounded px-2 py-1 bg-background w-full"
+                  />
+                </div>
+                <div className="space-y-1 sm:col-span-2">
+                  <label className="text-[11px] uppercase tracking-wide text-muted-foreground">
+                    Category {categoryFilter.size > 0 && <span className="normal-case text-foreground">({categoryFilter.size} selected)</span>}
+                  </label>
+                  <div className="flex flex-wrap gap-1.5">
+                    {categoryOptions.length === 0 ? (
+                      <span className="text-muted-foreground">No categories — load renders first.</span>
+                    ) : categoryOptions.map((cat) => {
+                      const active = categoryFilter.has(cat);
+                      return (
+                        <button
+                          key={cat}
+                          type="button"
+                          onClick={() => toggleCategory(cat)}
+                          className={`text-[11px] px-2 py-0.5 rounded border ${active ? "bg-primary text-primary-foreground border-primary" : "bg-background border-input text-muted-foreground hover:text-foreground"}`}
+                        >
+                          {cat}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+                <div className="space-y-1 sm:col-span-2">
+                  <label className="text-[11px] uppercase tracking-wide text-muted-foreground">
+                    Pinned products {pinnedProductIds.size > 0 && <span className="normal-case text-foreground">({pinnedProductIds.size} selected)</span>}
+                  </label>
+                  <div className="max-h-32 overflow-y-auto border border-input rounded p-2 bg-background">
+                    {allPinnedProductOptions.length === 0 ? (
+                      <span className="text-muted-foreground">No pinned products — load renders first.</span>
+                    ) : allPinnedProductOptions.map((p) => {
+                      const active = pinnedProductIds.has(p.id);
+                      return (
+                        <label key={p.id} className="flex items-center gap-1.5 py-0.5 cursor-pointer hover:bg-muted/40 px-1 rounded">
+                          <Checkbox
+                            checked={active}
+                            onCheckedChange={(v) => {
+                              setPinnedProductIds((prev) => {
+                                const next = new Set(prev);
+                                if (v) next.add(p.id); else next.delete(p.id);
+                                return next;
+                              });
+                            }}
+                          />
+                          <span className="truncate">
+                            {p.product_name || "(unnamed)"}
+                            {p.brand_name && <span className="text-muted-foreground"> · {p.brand_name}</span>}
+                            {p.category && <span className="text-muted-foreground"> · {p.category}</span>}
+                          </span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+
               <div className="flex items-center gap-3 flex-wrap">
+                <span className="text-muted-foreground">
+                  Showing <span className="font-mono text-foreground">{filteredRenders.length}</span> of <span className="font-mono">{renders.length}</span> renders.
+                </span>
+                <Button variant="ghost" size="sm" onClick={clearFilters} disabled={bulkRunning}>
+                  Clear filters
+                </Button>
                 <Button variant="outline" size="sm" onClick={loadRenders} disabled={rendersLoading || bulkRunning}>
                   {rendersLoading ? "Loading…" : "Reload renders"}
                 </Button>
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => toggleAll(selectedIds.size !== renders.length)}
-                  disabled={renders.length === 0 || bulkRunning}
+                  onClick={() => toggleAll(selectedIds.size !== filteredRenders.length)}
+                  disabled={filteredRenders.length === 0 || bulkRunning}
                 >
-                  {selectedIds.size === renders.length && renders.length > 0 ? "Clear selection" : "Select all"}
+                  {selectedIds.size === filteredRenders.length && filteredRenders.length > 0 ? "Clear selection" : "Select all filtered"}
                 </Button>
                 <Button
                   size="sm"
@@ -341,11 +532,11 @@ export default function TradeAdminAxonometricCadQa() {
           </Card>
 
           <div className="space-y-2">
-            {renders.length === 0 ? (
+            {filteredRenders.length === 0 ? (
               <Card><CardContent className="py-8 text-center text-muted-foreground text-sm">
-                {rendersLoading ? "Loading renders…" : "No saved renders with pinned products were found."}
+                {rendersLoading ? "Loading renders…" : renders.length === 0 ? "No saved renders with pinned products were found." : "No renders match the current filters."}
               </CardContent></Card>
-            ) : renders.map((r) => {
+            ) : filteredRenders.map((r) => {
               const result = results[r.id];
               const checked = selectedIds.has(r.id);
               return (
