@@ -1738,7 +1738,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
           )}
 
           {/* Desktop: A-Z jump bar — hidden when a category/subcategory filter is active */}
-          {!(selectedCategory || selectedSubcategory) && (
+          {showAlphabetBar && !(selectedCategory || selectedSubcategory) && (
             <div className="hidden md:block mb-6">
               <div className="h-px bg-border/60 mb-5" />
               <div
