@@ -1,0 +1,1 @@
+UPDATE public.designers SET name = 'Kerstens' WHERE slug = 'kerstens';

@@ -133,14 +133,7 @@ const DesignersHoverHero = () => {
       {/* Content */}
       <div className="relative z-10 h-full flex items-center px-6 sm:px-12 md:px-20 lg:px-28">
         <div className="w-full max-w-6xl">
-          <header className="mb-10 md:mb-14">
-            <p className="text-[10px] tracking-[0.4em] uppercase text-white/40 mb-3 font-body">
-              Curated Selection Of Designers
-            </p>
-            <h2 className="text-white/85 text-xs md:text-sm tracking-[0.32em] uppercase font-body font-light">
-              The Designers
-            </h2>
-          </header>
+          <div className="mb-10 md:mb-14" />
 
           <nav aria-label="Featured designers shortcut list">
             <ul className="flex flex-col gap-1 md:gap-2">
