@@ -66,6 +66,9 @@ function splitName(name: string): [string, string] {
   return [parts.join(" "), last];
 }
 
+const SWIPE_THRESHOLD = 50;
+const SWIPE_MAX_DURATION = 600;
+
 const DesignersHoverHero = () => {
   const { data: designers } = useFeaturedDesigners();
   const [activeSlug, setActiveSlug] = useState<string | null>(null);
@@ -81,6 +84,15 @@ const DesignersHoverHero = () => {
   const items = designers ?? [];
   const hasItems = items.length > 0;
 
+  const advance = (dir: 1 | -1) => {
+    setActiveSlug((current) => {
+      const idx = items.findIndex((d) => d.slug === current);
+      const base = idx === -1 ? 0 : idx;
+      const nextIdx = (base + dir + items.length) % items.length;
+      return items[nextIdx].slug;
+    });
+  };
+
   // Wheel/swipe navigation: scroll up/down moves through the list of names
   // without scrolling the page. Touch swipes advance the same way.
   useEffect(() => {
@@ -89,16 +101,6 @@ const DesignersHoverHero = () => {
     if (!section) return;
 
     let wheelLock = false;
-    let touchStartY: number | null = null;
-
-    const advance = (dir: 1 | -1) => {
-      setActiveSlug((current) => {
-        const idx = items.findIndex((d) => d.slug === current);
-        const base = idx === -1 ? 0 : idx;
-        const nextIdx = (base + dir + items.length) % items.length;
-        return items[nextIdx].slug;
-      });
-    };
 
     const onWheel = (e: WheelEvent) => {
       if (Math.abs(e.deltaY) < 8) return;
@@ -110,28 +112,60 @@ const DesignersHoverHero = () => {
         wheelLock = false;
       }, 350);
     };
+
+    let touchStartY: number | null = null;
+    let touchStartX: number | null = null;
+    let touchStartTime = 0;
+    let swiping = false;
+
     const onTouchStart = (e: TouchEvent) => {
-      touchStartY = e.touches[0].clientY;
+      const touch = e.touches[0];
+      touchStartY = touch.clientY;
+      touchStartX = touch.clientX;
+      touchStartTime = Date.now();
+      swiping = false;
     };
+
     const onTouchMove = (e: TouchEvent) => {
-      if (touchStartY === null) return;
-      const dy = touchStartY - e.touches[0].clientY;
-      if (Math.abs(dy) > 40) {
+      if (touchStartY === null || touchStartX === null) return;
+      const touch = e.touches[0];
+      const dy = touchStartY - touch.clientY;
+      const dx = touchStartX - touch.clientX;
+
+      // Only claim vertical swipes once they exceed the threshold.
+      if (Math.abs(dy) > SWIPE_THRESHOLD && Math.abs(dy) > Math.abs(dx)) {
         e.preventDefault();
+        swiping = true;
         advance(dy > 0 ? 1 : -1);
-        touchStartY = e.touches[0].clientY;
+        touchStartY = touch.clientY;
+        touchStartX = touch.clientX;
       }
+    };
+
+    const onTouchEnd = (e: TouchEvent) => {
+      if (!swiping) return;
+      // If this was a swipe, stop the event from becoming a click on a Link.
+      const target = e.target as HTMLElement;
+      const link = target.closest("a");
+      if (link) {
+        e.preventDefault();
+      }
+      swiping = false;
+      touchStartY = null;
+      touchStartX = null;
     };
 
     section.addEventListener("wheel", onWheel, { passive: false });
     section.addEventListener("touchstart", onTouchStart, { passive: true });
     section.addEventListener("touchmove", onTouchMove, { passive: false });
+    section.addEventListener("touchend", onTouchEnd, { passive: false });
     return () => {
       section.removeEventListener("wheel", onWheel);
       section.removeEventListener("touchstart", onTouchStart);
       section.removeEventListener("touchmove", onTouchMove);
+      section.removeEventListener("touchend", onTouchEnd);
     };
-  }, [hasItems, items]);
+  }, [hasItems, items, advance]);
 
   // Preload images so cross-fades are instant.
   const imageUrls = useMemo(
