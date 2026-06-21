@@ -613,10 +613,9 @@ const VariantSelectors: React.FC<{
             Suppressed when FinishSelector already drives fabric + wood selections to
             avoid restating "Varnished solid ash & fabric" type catch-all summaries. */}
         {product.materials_description?.trim() && !hasLinkedFabrics && !isProductUpholstered(product) && (
-          <ExpandableSpec
+          <LegendDisclosure
             icon={specIcon("⬗")}
             text={product.materials_description.trim()}
-            emphasized
           />
         )}
       </div>
