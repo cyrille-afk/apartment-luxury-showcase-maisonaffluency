@@ -44,7 +44,7 @@ serve(async (req) => {
 
     const body = await req.json();
     const { imageUrl, mode, style, overlayImages, technicalDrawingUrl, maskDataUrl, placements, referenceImageUrl, refinementPrompt, styleReferenceUrl, skipStyleReference, markerHints, qualityTier, lightingStrength } = body;
-    // mode: "elevation_to_axo" | "section_to_axo" | "stylize" | "composite" | "3d_to_cad" | "cad_overlay" | "product_swap" | "scene_edit" | "freeform" | "turntable_angle"
+    // mode: "elevation_to_axo" | "section_to_axo" | "stylize" | "composite" | "3d_to_cad" | "cad_overlay" | "cad_dimension_overlay" | "product_swap" | "scene_edit" | "freeform" | "turntable_angle"
     const useDepthMap = body.useDepthMap !== false; // default ON
 
     if (!imageUrl) throw new Error("imageUrl is required");
