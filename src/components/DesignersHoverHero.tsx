@@ -35,6 +35,8 @@ const FEATURED_SLUGS = [
   "pierre-bonnefille",
   "ozone",
   "thierry-lemaire",
+  "atelier-demichelis",
+  "hamrei",
 ];
 
 function useFeaturedDesigners() {
