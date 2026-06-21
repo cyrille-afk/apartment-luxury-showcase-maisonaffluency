@@ -150,9 +150,13 @@ const DesignersHoverHero = () => {
 
       {/* Content */}
       <div className="relative z-10 flex items-center px-6 sm:px-12 md:px-20 lg:px-28">
-        <div className="w-full max-w-6xl">
+        <div className="w-full max-w-xs sm:max-w-sm md:max-w-md">
           <nav aria-label="Featured designers shortcut list">
-            <ul className="flex flex-col gap-0.5">
+            <ul
+              className="flex flex-col gap-0.5 text-center"
+              onMouseEnter={() => setIsPaused(true)}
+              onMouseLeave={() => setIsPaused(false)}
+            >
               {items.map((d) => {
                 const [first, last] = splitName(d.name);
                 const isActive = d.slug === activeSlug;
