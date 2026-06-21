@@ -234,7 +234,11 @@ const DesignersHoverHero = () => {
       {/* Content */}
       <div className="relative z-10 flex flex-col justify-center h-full px-6 sm:px-12 md:px-20 lg:px-28 pb-24">
         <div className="w-full max-w-xs sm:max-w-sm md:max-w-md">
-          <nav aria-label="Featured designers shortcut list">
+          <nav
+            ref={navRef}
+            aria-label="Featured designers shortcut list"
+            className="inline-block"
+          >
             <ul className="flex flex-col gap-0.5 text-left">
               {items.map((d) => {
                 const [first, last] = splitName(d.name);
