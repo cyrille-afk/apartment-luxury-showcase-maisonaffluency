@@ -83,7 +83,7 @@ const PublicDesigners = () => {
         <div className="pt-20">
           {/* Visually-hidden H1 retained for SEO/a11y; hero + directory below provide visible headings */}
           <h1 className="sr-only">Designers &amp; Ateliers</h1>
-          <DesignersHoverHero />
+          
           <div className="pt-12 pb-20">
             <p className="text-center font-body text-base text-muted-foreground max-w-2xl mx-auto mb-10 px-4">
               A curation of designers and makers whose exceptional work defines Maison Affluency
