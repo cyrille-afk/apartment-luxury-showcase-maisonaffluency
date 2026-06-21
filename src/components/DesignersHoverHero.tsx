@@ -228,7 +228,7 @@ const DesignersHoverHero = () => {
 
       {/* Content */}
       <div className="relative z-10 flex flex-col justify-center h-full px-6 sm:px-12 md:px-20 lg:px-28">
-        <p className="absolute top-24 sm:top-28 md:top-32 lg:top-36 left-6 sm:left-12 md:left-20 lg:left-28 right-6 sm:right-12 md:right-20 lg:right-28 text-left font-display font-light tracking-tight text-white/40 text-xs sm:text-sm md:text-base lg:text-lg leading-[1.25] whitespace-nowrap">
+        <p className="absolute top-16 sm:top-20 md:top-24 lg:top-28 left-6 sm:left-12 md:left-20 lg:left-28 right-6 sm:right-12 md:right-20 lg:right-28 text-left font-display font-light tracking-tight text-white/40 text-xs sm:text-sm md:text-base lg:text-lg leading-[1.25] whitespace-nowrap">
           A curation of designers and makers whose exceptional work defines Maison Affluency. To name a few …
         </p>
         <div className="w-full max-w-xs sm:max-w-sm md:max-w-md">
