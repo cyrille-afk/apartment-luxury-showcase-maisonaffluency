@@ -176,7 +176,6 @@ const DesignersHoverHero = () => {
     };
   }, [hasItems, items]);
 
-
   // Preload images so cross-fades are instant.
   const imageUrls = useMemo(
     () => items.map((d) => d.hero_image_url || d.image_url || ""),
