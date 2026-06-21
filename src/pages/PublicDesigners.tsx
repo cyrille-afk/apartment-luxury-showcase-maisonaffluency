@@ -8,6 +8,7 @@ import { useState, useEffect } from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import DesignersDirectory from "@/components/DesignersDirectory";
+import DesignersHoverHero from "@/components/DesignersHoverHero";
 
 
 // ─── Back to Top Button ──────────────────────────────────────────────────────
@@ -85,10 +86,11 @@ const PublicDesigners = () => {
           <h1 className="sr-only">Designers &amp; Ateliers</h1>
           
           <div className="pt-12 pb-20">
-            <p className="text-center font-body text-base text-muted-foreground max-w-2xl mx-auto mb-10 px-4">
+            <p className="text-center font-body text-base text-muted-foreground max-w-2xl mx-auto mb-8 px-4">
               A curation of designers and makers whose exceptional work defines Maison Affluency
             </p>
-            <DesignersDirectory mode="designers" initialLetter={initialLetter} initialExpand={initialExpand} />
+            <DesignersHoverHero />
+            <DesignersDirectory mode="designers" initialLetter={initialLetter} initialExpand={initialExpand} showHeader={false} />
           </div>
         </div>
 
