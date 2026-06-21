@@ -381,11 +381,11 @@ const Index = ({ categoryMode = false }: IndexProps = {}) => {
       <Helmet>
         <title>Maison Affluency | Luxury Furniture &amp; Collectible Design</title>
         <meta name="description" content="Discover exceptional collectible furniture, bespoke interiors, and contemporary design by world-renowned designers and ateliers. Based in Singapore." />
-        <link rel="canonical" href="https://maisonaffluency.com" />
+        <link rel="canonical" href="https://www.maisonaffluency.com/" />
         <meta property="og:title" content="Maison Affluency — Curated Luxury Furniture &amp; Collectible Design" />
         <meta property="og:description" content="Discover exceptional collectible furniture, bespoke interiors, and contemporary design by world-renowned designers and ateliers. Based in Singapore." />
         <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://maisonaffluency.com" />
+        <meta property="og:url" content="https://www.maisonaffluency.com/" />
         <meta property="og:image" content="https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,h_630,c_fill,q_auto:best,f_jpg/v1772516480/WhatsApp_Image_2026-03-03_at_1.40.10_PM_cs23b7.jpg" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="Maison Affluency — Curated Luxury Furniture &amp; Collectible Design" />
