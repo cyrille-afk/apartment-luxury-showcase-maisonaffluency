@@ -1533,41 +1533,46 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
     const STABLE_FRAMES = 4;
     const TOLERANCE_PX = 1;
 
-    let prevY = getY();
-    if (prevY === null) return;
-    window.scrollTo(0, prevY);
-    let stableCount = 0;
-
-    const tick = () => {
-      if (jumpSessionRef.current !== session) return; // newer click took over
-      const y = getY();
-      if (y === null) return;
-      const delta = Math.abs(y - prevY);
-      // Always keep the viewport pinned to the latest target so layout shifts
-      // (image loads, expansion animations) cannot leave us stranded.
-      if (Math.abs(window.scrollY - y) > TOLERANCE_PX) {
-        window.scrollTo(0, y);
-      }
-      if (delta <= TOLERANCE_PX) stableCount += 1;
-      else stableCount = 0;
-      prevY = y;
-      if (stableCount >= STABLE_FRAMES) return;
-      if (performance.now() - startedAt > DEADLINE_MS) {
-        // Final pin and exit so we never loop forever
-        window.scrollTo(0, y);
-        return;
-      }
+    const runSettle = () => {
+      const startedAt = performance.now();
+      let prev = getY();
+      if (prev === null) return;
+      window.scrollTo(0, prev);
+      let stableCount = 0;
+      const tick = () => {
+        if (jumpSessionRef.current !== session) return; // newer click took over
+        const y = getY();
+        if (y === null) return;
+        const delta = Math.abs(y - prev);
+        if (Math.abs(window.scrollY - y) > TOLERANCE_PX) {
+          window.scrollTo(0, y);
+        }
+        stableCount = delta <= TOLERANCE_PX ? stableCount + 1 : 0;
+        prev = y;
+        if (stableCount >= STABLE_FRAMES) return;
+        if (performance.now() - startedAt > DEADLINE_MS) {
+          window.scrollTo(0, y);
+          return;
+        }
+        requestAnimationFrame(tick);
+      };
       requestAnimationFrame(tick);
     };
-    requestAnimationFrame(tick);
 
-    // Re-run a settle pass after AnimatePresence/content-visibility expands
-    // (mobile expansions can shift the target after the initial deadline).
+    runSettle();
+
+    // Re-run after AnimatePresence/content-visibility expands and after images
+    // load, in case the target shifted past the initial deadline.
     setTimeout(() => {
       if (jumpSessionRef.current !== session) return;
-      requestAnimationFrame(tick);
-    }, 180);
+      runSettle();
+    }, 220);
+    setTimeout(() => {
+      if (jumpSessionRef.current !== session) return;
+      runSettle();
+    }, 600);
   }, [activeLetters]);
+
 
 
 
