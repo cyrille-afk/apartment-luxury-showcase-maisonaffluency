@@ -113,8 +113,9 @@ const DesignersHoverHero = () => {
   return (
     <section
       aria-label="Featured designers"
-      className="relative w-full h-[88vh] min-h-[600px] bg-[#0a0a0a] text-foreground overflow-hidden"
-      onMouseLeave={() => setActiveSlug(items[0]?.slug ?? null)}
+      className="relative w-full min-h-[680px] py-16 md:py-20 bg-[#0a0a0a] text-foreground overflow-hidden"
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
     >
       {/* Background image stack — cross-fade between layers */}
       <div className="absolute inset-0 z-0 pointer-events-none">
