@@ -66,6 +66,8 @@ function splitName(name: string): [string, string] {
   return [parts.join(" "), last];
 }
 
+const SWIPE_THRESHOLD = 50;
+
 const DesignersHoverHero = () => {
   const { data: designers } = useFeaturedDesigners();
   const [activeSlug, setActiveSlug] = useState<string | null>(null);
@@ -88,9 +90,6 @@ const DesignersHoverHero = () => {
     const section = document.getElementById("designers-hover-hero");
     if (!section) return;
 
-    let wheelLock = false;
-    let touchStartY: number | null = null;
-
     const advance = (dir: 1 | -1) => {
       setActiveSlug((current) => {
         const idx = items.findIndex((d) => d.slug === current);
@@ -99,6 +98,8 @@ const DesignersHoverHero = () => {
         return items[nextIdx].slug;
       });
     };
+
+    let wheelLock = false;
 
     const onWheel = (e: WheelEvent) => {
       if (Math.abs(e.deltaY) < 8) return;
@@ -110,26 +111,58 @@ const DesignersHoverHero = () => {
         wheelLock = false;
       }, 350);
     };
+
+    let touchStartY: number | null = null;
+    let touchStartX: number | null = null;
+    let swiping = false;
+    let swipeHandled = false;
+
     const onTouchStart = (e: TouchEvent) => {
-      touchStartY = e.touches[0].clientY;
+      const touch = e.touches[0];
+      touchStartY = touch.clientY;
+      touchStartX = touch.clientX;
+      swiping = false;
+      swipeHandled = false;
     };
+
     const onTouchMove = (e: TouchEvent) => {
-      if (touchStartY === null) return;
-      const dy = touchStartY - e.touches[0].clientY;
-      if (Math.abs(dy) > 40) {
+      if (touchStartY === null || touchStartX === null || swipeHandled) return;
+      const touch = e.touches[0];
+      const dy = touchStartY - touch.clientY;
+      const dx = touchStartX - touch.clientX;
+
+      // Only claim vertical swipes once they exceed the threshold.
+      if (Math.abs(dy) > SWIPE_THRESHOLD && Math.abs(dy) > Math.abs(dx)) {
         e.preventDefault();
+        swiping = true;
+        swipeHandled = true;
         advance(dy > 0 ? 1 : -1);
-        touchStartY = e.touches[0].clientY;
       }
+    };
+
+    const onTouchEnd = (e: TouchEvent) => {
+      if (!swiping) return;
+      // If this was a swipe, stop the event from becoming a click on a Link.
+      const target = e.target as HTMLElement;
+      const link = target.closest("a");
+      if (link) {
+        e.preventDefault();
+      }
+      swiping = false;
+      swipeHandled = false;
+      touchStartY = null;
+      touchStartX = null;
     };
 
     section.addEventListener("wheel", onWheel, { passive: false });
     section.addEventListener("touchstart", onTouchStart, { passive: true });
     section.addEventListener("touchmove", onTouchMove, { passive: false });
+    section.addEventListener("touchend", onTouchEnd, { passive: false });
     return () => {
       section.removeEventListener("wheel", onWheel);
       section.removeEventListener("touchstart", onTouchStart);
       section.removeEventListener("touchmove", onTouchMove);
+      section.removeEventListener("touchend", onTouchEnd);
     };
   }, [hasItems, items]);
 
@@ -152,7 +185,7 @@ const DesignersHoverHero = () => {
     <section
       id="designers-hover-hero"
       aria-label="Featured designers"
-      className="relative w-full h-[88vh] min-h-[640px] bg-[#0a0a0a] text-foreground overflow-hidden"
+      className="relative w-full h-[88vh] min-h-[640px] bg-[#0a0a0a] text-foreground overflow-hidden touch-pan-x overscroll-y-contain select-none"
     >
       {/* Background image stack — cross-fade between layers */}
       <div className="absolute inset-0 z-0 pointer-events-none">
