@@ -109,7 +109,7 @@ const DesignersHoverHero = () => {
       advance(e.deltaY > 0 ? 1 : -1);
       window.setTimeout(() => {
         wheelLock = false;
-      }, 350);
+      }, 1200);
     };
 
     let touchStartY: number | null = null;
@@ -197,7 +197,7 @@ const DesignersHoverHero = () => {
               key={d.slug}
               aria-hidden="true"
               className={cn(
-                "absolute inset-0 transition-opacity duration-[1000ms] ease-in-out",
+"absolute inset-0 transition-opacity duration-[2200ms] ease-in-out",
                 isActive ? "opacity-100" : "opacity-0"
               )}
             >
@@ -239,7 +239,7 @@ const DesignersHoverHero = () => {
                         "inline-block",
                         "font-display font-light tracking-tight text-white",
                         "text-base sm:text-lg md:text-2xl lg:text-[28px] leading-[1.25]",
-                        "transition-opacity duration-[600ms] ease-out",
+"transition-opacity duration-[1200ms] ease-out",
                         isDimmed ? "opacity-30" : "opacity-100"
                       )}
                     >
