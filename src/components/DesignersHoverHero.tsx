@@ -228,12 +228,6 @@ const DesignersHoverHero = () => {
 
       {/* Content */}
       <div className="relative z-10 flex flex-col justify-center h-full px-6 sm:px-12 md:px-20 lg:px-28 pb-24">
-        <p className="absolute top-16 sm:top-20 md:top-24 lg:top-28 left-6 sm:left-12 md:left-20 lg:left-28 right-6 sm:right-12 md:right-20 lg:right-28 font-display font-light tracking-tight text-white/40 text-xs sm:text-sm md:text-base lg:text-lg leading-[1.25] text-center">
-          <span className="inline-block text-left">
-            <span className="block">A curation of designers and makers whose exceptional work</span>
-            <span className="block text-center">defines Maison Affluency.</span>
-          </span>
-        </p>
         <div className="w-full max-w-xs sm:max-w-sm md:max-w-md">
           <nav aria-label="Featured designers shortcut list">
             <ul className="flex flex-col gap-0.5 text-center">
@@ -269,25 +263,27 @@ const DesignersHoverHero = () => {
               })}
             </ul>
           </nav>
-
-          <div className="mt-12 md:mt-16 flex items-center gap-10 text-white/40 border-t border-white/10 pt-6 max-w-md">
-            <div className="flex flex-col">
-              <span className="text-[9px] uppercase tracking-[0.3em] mb-1 font-body">
-                Archives
-              </span>
-              <span className="text-xs font-body font-light">1920 — Today</span>
-            </div>
-            <div className="flex flex-col">
-              <span className="text-[9px] uppercase tracking-[0.3em] mb-1 font-body">
-                Directory
-              </span>
-              <span className="text-xs font-body font-light italic">
-                Scroll to browse A–Z
-              </span>
-            </div>
-          </div>
         </div>
       </div>
+
+      {/* Archives / Directory labels — bottom-left, above the A–Z bar */}
+      <div className="absolute bottom-24 left-6 sm:left-12 md:left-20 lg:left-28 z-10 flex items-center gap-10 text-white/40 border-t border-white/10 pt-6 max-w-md">
+        <div className="flex flex-col">
+          <span className="text-[9px] uppercase tracking-[0.3em] mb-1 font-body">
+            Archives
+          </span>
+          <span className="text-xs font-body font-light">1920 — Today</span>
+        </div>
+        <div className="flex flex-col">
+          <span className="text-[9px] uppercase tracking-[0.3em] mb-1 font-body">
+            Directory
+          </span>
+          <span className="text-xs font-body font-light italic">
+            Scroll to browse A–Z
+          </span>
+        </div>
+      </div>
+
 
       {/* Vertical wordmark */}
       <div className="hidden lg:flex absolute bottom-28 right-12 flex-col items-end gap-6 z-10 pointer-events-none">
