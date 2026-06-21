@@ -120,14 +120,14 @@ const DesignersHoverHero = () => {
                   "w-full h-full object-cover transition-transform duration-[6000ms] ease-out",
                   isActive ? "scale-100" : "scale-105"
                 )}
-                style={{ filter: "brightness(0.45) saturate(0.92)" }}
+                style={{ filter: "brightness(0.78) saturate(0.95)" }}
               />
             </div>
           );
         })}
         {/* Left-side vignette for legibility */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#0a0a0a] via-[#0a0a0a]/55 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a]/85 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#0a0a0a]/85 via-[#0a0a0a]/25 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a]/60 via-transparent to-transparent" />
       </div>
 
       {/* Content */}
