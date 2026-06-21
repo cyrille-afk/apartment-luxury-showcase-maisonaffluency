@@ -12,6 +12,7 @@ import DesignersHoverHero from "@/components/DesignersHoverHero";
 import { useAllDesigners } from "@/hooks/useDesigner";
 import { getDesignersDirectoryAnchorId } from "@/lib/designersDirectoryAnchors";
 import { scrollToSection } from "@/lib/scrollToSection";
+import { jumpToDesignerLetter } from "@/lib/jumpToDesignerLetter";
 
 
 // ─── Back to Top Button ──────────────────────────────────────────────────────
@@ -65,10 +66,11 @@ function HeroAlphabetBar() {
   const jumpToLetter = useCallback(
     (letter: string) => {
       if (!activeLetters.has(letter)) return;
-      scrollToSection(getDesignersDirectoryAnchorId(letter));
+      jumpToDesignerLetter(letter);
     },
     [activeLetters]
   );
+
 
   return (
     <div className="hidden md:block absolute bottom-0 left-0 right-0 z-20 pointer-events-none">

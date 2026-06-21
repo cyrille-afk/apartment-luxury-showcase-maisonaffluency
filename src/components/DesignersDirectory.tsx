@@ -27,6 +27,7 @@ import { GALLERY } from "@/constants/galleryIndex";
 import { scrollToSection } from "@/lib/scrollToSection";
 import { getDesignersDirectoryAnchor, getDesignersDirectoryAnchorId } from "@/lib/designersDirectoryAnchors";
 import { getDesignersDirectoryLayout } from "@/lib/designersDirectoryAnchors";
+import { jumpToDesignerLetter } from "@/lib/jumpToDesignerLetter";
 import { getCategoryHero } from "@/constants/categoryHeroes";
 import FavoriteFolderPicker from "@/components/FavoriteFolderPicker";
 
@@ -1493,64 +1494,14 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
     return counts;
   }, [items]);
 
-  // Ref to cancel in-flight jump animations when a new letter is tapped
-  const jumpSessionRef = useRef(0);
-
-
   const jumpToLetter = useCallback((letter: string) => {
     if (!activeLetters.has(letter)) return;
-    setForcedLetters((prev) => new Set(prev).add(letter));
-
-
-    // Increment session so any in-flight settle loop from a previous tap aborts
-    const session = ++jumpSessionRef.current;
-
-    const getY = () => {
-      const el = getDesignersDirectoryAnchor(letter);
-      if (!el) return null;
-      const nav = document.querySelector("nav");
-      const navHeight = nav?.getBoundingClientRect().height ?? 96;
-      // Account for the sticky filter/search bar that remains pinned beneath the nav
-      const stickyBars = Array.from(
-        document.querySelectorAll<HTMLElement>("[data-sticky-filter-bar]")
-      ).filter((el) => el.offsetParent !== null);
-      const stickyHeight = stickyBars.reduce((sum, el) => sum + el.getBoundingClientRect().height, 0);
-      return Math.max(0, el.getBoundingClientRect().top + window.scrollY - navHeight - stickyHeight - 8);
-    };
-
-    // Use window.scrollTo(x, y) for maximum mobile Safari compatibility
-    // (behavior: "instant" is not supported on older iOS versions)
-    const jumpTo = (y: number) => window.scrollTo(0, y);
-
-    // Instant-jump to force content-visibility sections to render,
-    // then settle with correction passes.
-    const firstY = getY();
-    if (firstY === null) return;
-    jumpTo(firstY);
-
-    let passes = 0;
-    let prevY = firstY;
-    const settle = () => {
-      // Abort if a newer tap has started
-      if (jumpSessionRef.current !== session) return;
-      const nextY = getY();
-      if (nextY === null) return;
-      const delta = Math.abs(nextY - prevY);
-      prevY = nextY;
-      if (delta > 2 && passes < 12) {
-        jumpTo(nextY);
-        passes++;
-        setTimeout(() => requestAnimationFrame(settle), 80);
-      } else {
-        // Final position
-        if (jumpSessionRef.current === session) {
-          jumpTo(nextY);
-        }
-      }
-    };
-    // Give AnimatePresence time to render on mobile before settling
-    setTimeout(() => requestAnimationFrame(() => requestAnimationFrame(settle)), 120);
+    setForcedLetters((prev) => (prev.has(letter) ? prev : new Set(prev).add(letter)));
+    jumpToDesignerLetter(letter);
   }, [activeLetters]);
+
+
+
 
 
   useEffect(() => {
@@ -1755,6 +1706,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
                   return (
                     <button
                       key={letter}
+                      data-azbar-letter={letter}
                       onClick={() => jumpToLetter(letter)}
                       className={`font-serif text-lg lg:text-xl leading-none transition-all duration-200 ${isActive ? "text-foreground hover:text-primary cursor-pointer" : "text-foreground/20 cursor-default"}`}
                     >
