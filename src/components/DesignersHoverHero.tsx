@@ -69,11 +69,12 @@ function splitName(name: string): [string, string] {
 
 const SWIPE_THRESHOLD = 50;
 const IMAGE_TRANSITION_MS = 3500;
-const LOCK_MS = IMAGE_TRANSITION_MS + 400;
+const LOCK_MS = 1200;
 
 const DesignersHoverHero = () => {
   const { data: designers } = useFeaturedDesigners();
   const [activeSlug, setActiveSlug] = useState<string | null>(null);
+  const isMobile = useIsMobile();
 
   // Pre-seed active on first render once data arrives so the hero is never
   // a void on entry — the first designer acts as default.
@@ -86,10 +87,26 @@ const DesignersHoverHero = () => {
   const items = designers ?? [];
   const hasItems = items.length > 0;
 
+  // Mobile: auto-rotate every 4.5 s so the hero stays alive without
+  // intercepting the vertical swipe gestures used to scroll the page.
+  useEffect(() => {
+    if (!isMobile || !hasItems) return;
+    const interval = setInterval(() => {
+      setActiveSlug((current) => {
+        const idx = items.findIndex((d) => d.slug === current);
+        const base = idx === -1 ? 0 : idx;
+        return items[(base + 1) % items.length].slug;
+      });
+    }, 4500);
+    return () => clearInterval(interval);
+  }, [isMobile, hasItems, items]);
+
   // Wheel/swipe navigation: scroll up/down moves through the list of names
   // without scrolling the page. Touch swipes advance the same way.
+  // Disabled on mobile to keep vertical scroll free.
   useEffect(() => {
-    if (!hasItems) return;
+    if (!hasItems || isMobile) return;
+
     const section = document.getElementById("designers-hover-hero");
     if (!section) return;
 
