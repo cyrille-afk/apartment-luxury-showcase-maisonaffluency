@@ -62,6 +62,17 @@ export default function TradeAdminAxonometricCadQa() {
   const [bulkRunning, setBulkRunning] = useState(false);
   const [results, setResults] = useState<Record<string, RunResult>>({});
 
+  // Product lookup for the linked product IDs in the loaded renders.
+  // Keyed by product_id, used for category + name filtering.
+  const [productMeta, setProductMeta] = useState<Record<string, { product_name: string | null; brand_name: string | null; category: string | null }>>({});
+
+  // Filters
+  const [dateFrom, setDateFrom] = useState<string>("");
+  const [dateTo, setDateTo] = useState<string>("");
+  const [categoryFilter, setCategoryFilter] = useState<Set<string>>(new Set());
+  const [productQuery, setProductQuery] = useState<string>("");
+  const [pinnedProductIds, setPinnedProductIds] = useState<Set<string>>(new Set());
+
   const load = async () => {
     setLoading(true);
     const { data } = await supabase
