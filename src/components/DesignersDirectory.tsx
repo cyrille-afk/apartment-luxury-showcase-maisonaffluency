@@ -27,6 +27,7 @@ import { GALLERY } from "@/constants/galleryIndex";
 import { scrollToSection } from "@/lib/scrollToSection";
 import { getDesignersDirectoryAnchor, getDesignersDirectoryAnchorId } from "@/lib/designersDirectoryAnchors";
 import { getDesignersDirectoryLayout } from "@/lib/designersDirectoryAnchors";
+import { jumpToDesignerLetter } from "@/lib/jumpToDesignerLetter";
 import { getCategoryHero } from "@/constants/categoryHeroes";
 import FavoriteFolderPicker from "@/components/FavoriteFolderPicker";
 
