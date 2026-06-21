@@ -252,7 +252,7 @@ async function main() {
       continue;
     }
 
-    const canonical = `${SITE}/designers/${designerSlug}/${pieceSlug}`;
+    const canonical = `${SITE}/designers/${designerUrlSlug}/${pieceSlug}`;
     const rawImg = pickImage(row);
     if (!rawImg) noImage.push(filename);
     const ogImage = toOgImage(rawImg);
