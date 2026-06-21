@@ -77,6 +77,7 @@ export default function TradeAdminAxonometricCadQa() {
   const [pinnedVisibleCount, setPinnedVisibleCount] = useState<number>(50);
   const PINNED_PAGE_SIZE = 50;
   const pinnedScrollRef = useRef<HTMLDivElement | null>(null);
+  const [showOnlySelectedPinned, setShowOnlySelectedPinned] = useState(false);
 
   const load = async () => {
     setLoading(true);
