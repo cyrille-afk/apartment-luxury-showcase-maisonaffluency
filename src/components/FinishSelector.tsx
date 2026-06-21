@@ -496,7 +496,7 @@ export default function FinishSelector({ pickId, className, productTitle, onUpho
             src={f.image_url}
             alt={f.name}
             loading="lazy"
-            className={cn("w-full h-full object-cover", noImages && "opacity-60")}
+            className="w-full h-full object-cover"
           />
         ) : (
           <div className={cn("w-full h-full flex items-center justify-center font-display text-xl tracking-widest text-foreground/85", noImages && "opacity-60")}>
