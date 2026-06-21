@@ -29,6 +29,7 @@ import AuthGateDialog from "@/components/AuthGateDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useFeaturedPublicDocument } from "@/hooks/useFeaturedPublicDocument";
 import FavoritesHoverPreview from "@/components/FavoritesHoverPreview";
+import ShippingDestinationSwitcher from "@/components/ShippingDestinationSwitcher";
 const logoIcon = cloudinaryUrl("affluency-logo-icon_mpchum", { width: 200, quality: "auto", crop: "fill" });
 
 const leftNavItems = [{
@@ -317,6 +318,12 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
               </div>
             </div>
 
+            {/* Flag — absolute right (mobile) */}
+            <div className="absolute right-2 bottom-4">
+              <ShippingDestinationSwitcher compact />
+            </div>
+
+
             <SheetContent side="left" className="w-full overflow-y-auto flex flex-col" aria-describedby={undefined}>
               <div className="sr-only">
                 <h2>Navigation Menu</h2>
@@ -591,7 +598,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
           {/* Top row: Trade Program | MAISON AFFLUENCY | Contact Us */}
           <div className="w-full grid grid-cols-[1fr_auto_1fr] items-start pt-5 pb-1">
             <div className="flex justify-start pt-1">
-              {/* Left column kept for grid balance */}
+              <ShippingDestinationSwitcher />
             </div>
             <div className="flex flex-col items-center">
               <button onClick={scrollToTop} className="group cursor-pointer whitespace-nowrap">
