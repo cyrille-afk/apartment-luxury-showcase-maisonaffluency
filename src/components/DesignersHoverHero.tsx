@@ -3,15 +3,16 @@
  *
  * Inspired by lacollections.fr: a vertical list of featured designer
  * names overlays a full-bleed background image that cross-fades on hover.
- * Names route to /designers/:slug. Mobile gracefully falls back to a
- * static intro (no hover) — the existing A–Z directory grid below covers
- * tap-driven browsing.
+ * Names route to /designers/:slug. Mobile falls back to a static,
+ * auto-rotating intro so vertical swipes remain free for page scrolling.
  */
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
+import { useIsMobile } from "@/hooks/use-mobile";
+
 
 interface FeaturedDesigner {
   slug: string;
