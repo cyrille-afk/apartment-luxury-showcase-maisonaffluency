@@ -95,6 +95,13 @@ export default function ProposalBuilder({
   const [expanded, setExpanded] = useState(false);
   const [qualityTier, setQualityTier] = useState<"draft" | "standard" | "premium">("standard");
 
+  // CAD dimension audit overlay state
+  const [cadAuditing, setCadAuditing] = useState(false);
+  const [cadOverlayUrl, setCadOverlayUrl] = useState<string | null>(null);
+  const [cadQaRows, setCadQaRows] = useState<any[]>([]);
+  const [showCadOverlay, setShowCadOverlay] = useState(false);
+  const [cadOverlayVisible, setCadOverlayVisible] = useState(true);
+
   // External upload dialog state
   const [showExternalDialog, setShowExternalDialog] = useState(false);
   const [externalName, setExternalName] = useState("");
