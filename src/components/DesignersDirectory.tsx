@@ -1510,7 +1510,12 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
       if (!el) return null;
       const nav = document.querySelector("nav");
       const navHeight = nav?.getBoundingClientRect().height ?? 96;
-      return Math.max(0, el.getBoundingClientRect().top + window.scrollY - navHeight - 8);
+      // Account for the sticky filter/search bar that remains pinned beneath the nav
+      const stickyBars = Array.from(
+        document.querySelectorAll<HTMLElement>("[data-sticky-filter-bar]")
+      ).filter((el) => el.offsetParent !== null);
+      const stickyHeight = stickyBars.reduce((sum, el) => sum + el.getBoundingClientRect().height, 0);
+      return Math.max(0, el.getBoundingClientRect().top + window.scrollY - navHeight - stickyHeight - 8);
     };
 
     // Use window.scrollTo(x, y) for maximum mobile Safari compatibility
@@ -1627,7 +1632,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
 
         <div className="relative">
           {/* Mobile: Search above, Filter below */}
-          <div className="flex flex-col items-start gap-2 mb-2 md:mb-6 md:hidden">
+          <div data-sticky-filter-bar className="sticky top-24 z-30 bg-background flex flex-col items-start gap-2 py-2 mb-2 md:mb-6 md:hidden">
             {mode !== "products" && (
               <div className="w-[70%] max-w-[16rem]">
                 <AlphabetDesignerPicker
@@ -1763,7 +1768,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
           )}
 
           {/* Desktop: Filter + Search row */}
-          <div className="hidden md:flex items-center gap-3 mb-6">
+          <div data-sticky-filter-bar className="hidden md:flex sticky top-24 z-30 bg-background py-3 items-center gap-3 mb-6">
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
               className="flex items-center gap-1.5 px-3 h-10 rounded border border-foreground text-foreground transition-colors relative"

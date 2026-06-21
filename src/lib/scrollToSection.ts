@@ -36,6 +36,11 @@ export function scrollToSection(id: string, behavior: ScrollBehavior = "smooth")
   const banner = document.querySelector("[data-featured-read-banner]");
   const navHeight = (nav?.getBoundingClientRect().height ?? 96)
     + (banner && window.getComputedStyle(banner).position === "fixed" ? banner.getBoundingClientRect().height : 0);
+  // Any sticky filter/search bar pinned beneath the nav (e.g. designers directory)
+  const stickyBars = Array.from(
+    document.querySelectorAll<HTMLElement>("[data-sticky-filter-bar]")
+  ).filter((el) => el.offsetParent !== null);
+  const stickyHeight = stickyBars.reduce((sum, el) => sum + el.getBoundingClientRect().height, 0);
   const isMobile = window.innerWidth < 768;
   const extraOffset: Record<string, number> = {
     "sociable-environment": isMobile ? 16 : 40,
@@ -58,7 +63,7 @@ export function scrollToSection(id: string, behavior: ScrollBehavior = "smooth")
     const el = document.getElementById(id);
     if (!el) return null;
     const extra = extraOffset[id] ?? 0;
-    const y = el.getBoundingClientRect().top + window.scrollY - navHeight - extra + 2;
+    const y = el.getBoundingClientRect().top + window.scrollY - navHeight - stickyHeight - extra + 2;
     return Math.max(0, y);
   };
 
