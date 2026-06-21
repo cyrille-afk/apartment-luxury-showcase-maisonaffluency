@@ -1702,6 +1702,95 @@ export default function ProposalBuilder({
           </div>
         )}
       </div>
+
+      <Dialog open={showCadOverlay} onOpenChange={setShowCadOverlay}>
+        <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Ruler className="w-4 h-4" /> CAD Scale Audit
+            </DialogTitle>
+            <DialogDescription>
+              Transparent orthographic overlay of CAD W×D×Hcm. Red marks placements that diverge from the parsed CAD bounding box.
+            </DialogDescription>
+          </DialogHeader>
+
+          {proposalResult && (
+            <div className="relative w-full bg-muted/30 border border-border rounded overflow-hidden">
+              <img src={proposalResult} alt="Proposal render" className="w-full block" />
+              {cadOverlayUrl && cadOverlayVisible && (
+                <img
+                  src={cadOverlayUrl}
+                  alt="CAD dimension overlay"
+                  className="absolute inset-0 w-full h-full object-contain pointer-events-none"
+                />
+              )}
+            </div>
+          )}
+
+          <div className="flex items-center justify-between gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCadOverlayVisible((v) => !v)}
+              disabled={!cadOverlayUrl}
+            >
+              {cadOverlayVisible ? <EyeOff className="w-3.5 h-3.5 mr-1.5" /> : <Eye className="w-3.5 h-3.5 mr-1.5" />}
+              {cadOverlayVisible ? "Hide overlay" : "Show overlay"}
+            </Button>
+            {cadOverlayUrl && (
+              <a
+                href={cadOverlayUrl}
+                download={`cad-overlay-${Date.now()}.png`}
+                className="text-xs underline text-muted-foreground hover:text-foreground"
+              >
+                Download overlay PNG
+              </a>
+            )}
+          </div>
+
+          <div className="border border-border rounded overflow-hidden">
+            <table className="w-full text-xs">
+              <thead className="bg-muted/40">
+                <tr>
+                  <th className="text-left px-2 py-1.5">Product</th>
+                  <th className="text-left px-2 py-1.5">Status</th>
+                  <th className="text-left px-2 py-1.5">CAD (cm)</th>
+                  <th className="text-left px-2 py-1.5">Applied</th>
+                  <th className="text-left px-2 py-1.5">Δ (cm)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {cadQaRows.length === 0 && (
+                  <tr><td colSpan={5} className="px-2 py-3 text-muted-foreground text-center">No CAD data for any placement.</td></tr>
+                )}
+                {cadQaRows.map((r, i) => {
+                  const color =
+                    r.status === "match" ? "text-emerald-600" :
+                    r.status === "mismatch" ? "text-red-600" :
+                    "text-amber-600";
+                  const d = r.delta_cm || {};
+                  const deltaText = [d.w, d.d, d.h]
+                    .map((v, idx) => v == null ? null : `${["W","D","H"][idx]}${v >= 0 ? "+" : ""}${v}`)
+                    .filter(Boolean)
+                    .join(" / ");
+                  return (
+                    <tr key={i} className="border-t border-border">
+                      <td className="px-2 py-1.5">
+                        <div className="font-medium">{r.product_name}</div>
+                        <div className="text-muted-foreground text-[10px]">{r.brand_name}</div>
+                      </td>
+                      <td className={`px-2 py-1.5 font-medium ${color}`}>{r.status}</td>
+                      <td className="px-2 py-1.5 text-muted-foreground">{r.expected_dim_text || "—"}</td>
+                      <td className="px-2 py-1.5 text-muted-foreground">{r.applied_dim_text || r.original_dim_text || "—"}</td>
+                      <td className={`px-2 py-1.5 ${r.status === "mismatch" ? "text-red-600 font-medium" : "text-muted-foreground"}`}>{deltaText || "—"}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
