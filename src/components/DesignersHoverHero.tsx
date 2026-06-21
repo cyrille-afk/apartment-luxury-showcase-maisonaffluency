@@ -3,16 +3,15 @@
  *
  * Inspired by lacollections.fr: a vertical list of featured designer
  * names overlays a full-bleed background image that cross-fades on hover.
- * Names route to /designers/:slug. Mobile falls back to a static,
- * auto-rotating intro so vertical swipes remain free for page scrolling.
+ * Names route to /designers/:slug. On desktop the whole hero responds to
+ * wheel/trackpad; on mobile only the names list claims vertical swipes so
+ * the rest of the hero remains free for page scrolling.
  */
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
-import { useIsMobile } from "@/hooks/use-mobile";
-
 
 interface FeaturedDesigner {
   slug: string;
@@ -74,7 +73,7 @@ const LOCK_MS = 1200;
 const DesignersHoverHero = () => {
   const { data: designers } = useFeaturedDesigners();
   const [activeSlug, setActiveSlug] = useState<string | null>(null);
-  const isMobile = useIsMobile();
+  const navRef = useRef<HTMLElement>(null);
 
   // Pre-seed active on first render once data arrives so the hero is never
   // a void on entry — the first designer acts as default.
@@ -87,28 +86,13 @@ const DesignersHoverHero = () => {
   const items = designers ?? [];
   const hasItems = items.length > 0;
 
-  // Mobile: auto-rotate every 4.5 s so the hero stays alive without
-  // intercepting the vertical swipe gestures used to scroll the page.
+  // Wheel/swipe navigation: scroll up/down moves through the list of names.
+  // Attach listeners to the names nav only on mobile so swipes elsewhere
+  // (the background, the A–Z bar) still scroll the page.
   useEffect(() => {
-    if (!isMobile || !hasItems) return;
-    const interval = setInterval(() => {
-      setActiveSlug((current) => {
-        const idx = items.findIndex((d) => d.slug === current);
-        const base = idx === -1 ? 0 : idx;
-        return items[(base + 1) % items.length].slug;
-      });
-    }, 4500);
-    return () => clearInterval(interval);
-  }, [isMobile, hasItems, items]);
-
-  // Wheel/swipe navigation: scroll up/down moves through the list of names
-  // without scrolling the page. Touch swipes advance the same way.
-  // Disabled on mobile to keep vertical scroll free.
-  useEffect(() => {
-    if (!hasItems || isMobile) return;
-
-    const section = document.getElementById("designers-hover-hero");
-    if (!section) return;
+    if (!hasItems) return;
+    const nav = navRef.current;
+    if (!nav) return;
 
     const advance = (dir: 1 | -1) => {
       setActiveSlug((current) => {
@@ -180,17 +164,17 @@ const DesignersHoverHero = () => {
       touchStartX = null;
     };
 
-    section.addEventListener("wheel", onWheel, { passive: false });
-    section.addEventListener("touchstart", onTouchStart, { passive: true });
-    section.addEventListener("touchmove", onTouchMove, { passive: false });
-    section.addEventListener("touchend", onTouchEnd, { passive: false });
+    nav.addEventListener("wheel", onWheel, { passive: false });
+    nav.addEventListener("touchstart", onTouchStart, { passive: true });
+    nav.addEventListener("touchmove", onTouchMove, { passive: false });
+    nav.addEventListener("touchend", onTouchEnd, { passive: false });
     return () => {
-      section.removeEventListener("wheel", onWheel);
-      section.removeEventListener("touchstart", onTouchStart);
-      section.removeEventListener("touchmove", onTouchMove);
-      section.removeEventListener("touchend", onTouchEnd);
+      nav.removeEventListener("wheel", onWheel);
+      nav.removeEventListener("touchstart", onTouchStart);
+      nav.removeEventListener("touchmove", onTouchMove);
+      nav.removeEventListener("touchend", onTouchEnd);
     };
-  }, [hasItems, items, isMobile]);
+  }, [hasItems, items]);
 
   // Preload images so cross-fades are instant.
   const imageUrls = useMemo(
@@ -247,7 +231,11 @@ const DesignersHoverHero = () => {
       {/* Content */}
       <div className="relative z-10 flex flex-col justify-center h-full px-6 sm:px-12 md:px-20 lg:px-28 pb-24">
         <div className="w-full max-w-xs sm:max-w-sm md:max-w-md">
-          <nav aria-label="Featured designers shortcut list">
+          <nav
+            ref={navRef}
+            aria-label="Featured designers shortcut list"
+            className="inline-block"
+          >
             <ul className="flex flex-col gap-0.5 text-left">
               {items.map((d) => {
                 const [first, last] = splitName(d.name);
