@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -72,6 +72,11 @@ export default function TradeAdminAxonometricCadQa() {
   const [categoryFilter, setCategoryFilter] = useState<Set<string>>(new Set());
   const [productQuery, setProductQuery] = useState<string>("");
   const [pinnedProductIds, setPinnedProductIds] = useState<Set<string>>(new Set());
+  // Pinned-product picker: search + lazy "load more" window (keeps DOM small for large catalogs)
+  const [pinnedQuery, setPinnedQuery] = useState<string>("");
+  const [pinnedVisibleCount, setPinnedVisibleCount] = useState<number>(50);
+  const PINNED_PAGE_SIZE = 50;
+  const pinnedScrollRef = useRef<HTMLDivElement | null>(null);
 
   const load = async () => {
     setLoading(true);
@@ -216,6 +221,40 @@ export default function TradeAdminAxonometricCadQa() {
       .map((id) => ({ id, ...(productMeta[id] || { product_name: null, brand_name: null, category: null }) }))
       .sort((a, b) => (a.product_name || "").localeCompare(b.product_name || ""));
   }, [renders, productMeta]);
+
+  // Search-filter the picker, but always keep already-selected ones visible (pinned to top)
+  const filteredPinnedOptions = useMemo(() => {
+    const q = pinnedQuery.trim().toLowerCase();
+    const base = q
+      ? allPinnedProductOptions.filter((p) => {
+          const hay = `${p.product_name || ""} ${p.brand_name || ""} ${p.category || ""}`.toLowerCase();
+          return hay.includes(q);
+        })
+      : allPinnedProductOptions;
+    const selected = base.filter((p) => pinnedProductIds.has(p.id));
+    const unselected = base.filter((p) => !pinnedProductIds.has(p.id));
+    return { combined: [...selected, ...unselected], selectedCount: selected.length, total: base.length };
+  }, [allPinnedProductOptions, pinnedQuery, pinnedProductIds]);
+
+  // Reset the lazy window whenever the underlying filtered list changes
+  useEffect(() => {
+    setPinnedVisibleCount(PINNED_PAGE_SIZE);
+    if (pinnedScrollRef.current) pinnedScrollRef.current.scrollTop = 0;
+  }, [pinnedQuery, allPinnedProductOptions.length]);
+
+  const visiblePinnedOptions = useMemo(
+    () => filteredPinnedOptions.combined.slice(0, pinnedVisibleCount),
+    [filteredPinnedOptions, pinnedVisibleCount]
+  );
+
+  const onPinnedScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const el = e.currentTarget;
+    if (el.scrollTop + el.clientHeight >= el.scrollHeight - 24) {
+      setPinnedVisibleCount((c) =>
+        c >= filteredPinnedOptions.combined.length ? c : c + PINNED_PAGE_SIZE
+      );
+    }
+  };
 
   const runBulkAudit = async () => {
     if (selectedIds.size === 0) return;
@@ -457,34 +496,77 @@ export default function TradeAdminAxonometricCadQa() {
                   <label className="text-[11px] uppercase tracking-wide text-muted-foreground">
                     Pinned products {pinnedProductIds.size > 0 && <span className="normal-case text-foreground">({pinnedProductIds.size} selected)</span>}
                   </label>
-                  <div className="max-h-32 overflow-y-auto border border-input rounded p-2 bg-background">
+                  <input
+                    type="search"
+                    value={pinnedQuery}
+                    onChange={(e) => setPinnedQuery(e.target.value)}
+                    placeholder="Search products, brands, categories…"
+                    className="w-full h-7 px-2 text-xs border border-input rounded bg-background"
+                  />
+                  <div
+                    ref={pinnedScrollRef}
+                    onScroll={onPinnedScroll}
+                    className="max-h-40 overflow-y-auto border border-input rounded p-2 bg-background"
+                  >
                     {allPinnedProductOptions.length === 0 ? (
                       <span className="text-muted-foreground">No pinned products — load renders first.</span>
-                    ) : allPinnedProductOptions.map((p) => {
-                      const active = pinnedProductIds.has(p.id);
-                      return (
-                        <label key={p.id} className="flex items-center gap-1.5 py-0.5 cursor-pointer hover:bg-muted/40 px-1 rounded">
-                          <Checkbox
-                            checked={active}
-                            onCheckedChange={(v) => {
-                              setPinnedProductIds((prev) => {
-                                const next = new Set(prev);
-                                if (v) next.add(p.id); else next.delete(p.id);
-                                return next;
-                              });
-                            }}
-                          />
-                          <span className="truncate">
-                            {p.product_name || "(unnamed)"}
-                            {p.brand_name && <span className="text-muted-foreground"> · {p.brand_name}</span>}
-                            {p.category && <span className="text-muted-foreground"> · {p.category}</span>}
-                          </span>
-                        </label>
-                      );
-                    })}
+                    ) : filteredPinnedOptions.combined.length === 0 ? (
+                      <span className="text-muted-foreground">No products match “{pinnedQuery}”.</span>
+                    ) : (
+                      <>
+                        {visiblePinnedOptions.map((p) => {
+                          const active = pinnedProductIds.has(p.id);
+                          return (
+                            <label key={p.id} className="flex items-center gap-1.5 py-0.5 cursor-pointer hover:bg-muted/40 px-1 rounded">
+                              <Checkbox
+                                checked={active}
+                                onCheckedChange={(v) => {
+                                  setPinnedProductIds((prev) => {
+                                    const next = new Set(prev);
+                                    if (v) next.add(p.id); else next.delete(p.id);
+                                    return next;
+                                  });
+                                }}
+                              />
+                              <span className="truncate">
+                                {p.product_name || "(unnamed)"}
+                                {p.brand_name && <span className="text-muted-foreground"> · {p.brand_name}</span>}
+                                {p.category && <span className="text-muted-foreground"> · {p.category}</span>}
+                              </span>
+                            </label>
+                          );
+                        })}
+                        {visiblePinnedOptions.length < filteredPinnedOptions.combined.length && (
+                          <button
+                            type="button"
+                            onClick={() => setPinnedVisibleCount((c) => c + PINNED_PAGE_SIZE)}
+                            className="mt-1 w-full text-[11px] text-muted-foreground hover:text-foreground py-1 border-t border-dashed"
+                          >
+                            Load more ({filteredPinnedOptions.combined.length - visiblePinnedOptions.length} remaining)
+                          </button>
+                        )}
+                      </>
+                    )}
+                  </div>
+                  <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+                    <span>
+                      Showing <span className="font-mono text-foreground">{visiblePinnedOptions.length}</span> of{" "}
+                      <span className="font-mono">{filteredPinnedOptions.combined.length}</span>
+                      {pinnedQuery ? " matches" : ` (${allPinnedProductOptions.length} total)`}
+                    </span>
+                    {pinnedProductIds.size > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => setPinnedProductIds(new Set())}
+                        className="hover:text-foreground"
+                      >
+                        Clear selection
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
+
 
               <div className="flex items-center gap-3 flex-wrap">
                 <span className="text-muted-foreground">
