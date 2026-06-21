@@ -85,6 +85,9 @@ const PublicDesigners = () => {
           <h1 className="sr-only">Designers &amp; Ateliers</h1>
           <DesignersHoverHero />
           <div className="pt-12 pb-20">
+            <p className="text-center font-body text-sm text-muted-foreground max-w-2xl mx-auto mb-10 px-4">
+              A curation of designers and makers whose exceptionel defines Maison Affluency
+            </p>
             <DesignersDirectory mode="designers" initialLetter={initialLetter} initialExpand={initialExpand} />
           </div>
         </div>
