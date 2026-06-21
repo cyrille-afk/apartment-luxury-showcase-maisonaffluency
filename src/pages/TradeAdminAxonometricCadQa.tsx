@@ -250,9 +250,11 @@ export default function TradeAdminAxonometricCadQa() {
     if (pinnedScrollRef.current) pinnedScrollRef.current.scrollTop = 0;
   }, [pinnedQuery, allPinnedProductOptions.length]);
 
+  // Ensure the visible window always covers all selected items (they sit at the top of `combined`).
+  const effectiveVisibleCount = Math.max(pinnedVisibleCount, filteredPinnedOptions.selectedCount);
   const visiblePinnedOptions = useMemo(
-    () => filteredPinnedOptions.combined.slice(0, pinnedVisibleCount),
-    [filteredPinnedOptions, pinnedVisibleCount]
+    () => filteredPinnedOptions.combined.slice(0, effectiveVisibleCount),
+    [filteredPinnedOptions, effectiveVisibleCount]
   );
 
   const onPinnedScroll = (e: React.UIEvent<HTMLDivElement>) => {
