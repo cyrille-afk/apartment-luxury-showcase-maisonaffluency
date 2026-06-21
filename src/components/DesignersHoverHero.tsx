@@ -165,7 +165,7 @@ const DesignersHoverHero = () => {
       section.removeEventListener("touchmove", onTouchMove);
       section.removeEventListener("touchend", onTouchEnd);
     };
-  }, [hasItems, items, advance]);
+  }, [hasItems, items]);
 
   // Preload images so cross-fades are instant.
   const imageUrls = useMemo(
