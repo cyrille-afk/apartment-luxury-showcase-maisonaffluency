@@ -102,4 +102,10 @@ const CookieConsent = () => {
   );
 };
 
+export const hasCookieConsent = (): boolean => {
+  if (typeof window === "undefined") return false;
+  try { return window.localStorage.getItem("cookie_consent") === "accepted"; }
+  catch { return false; }
+};
+
 export default CookieConsent;
