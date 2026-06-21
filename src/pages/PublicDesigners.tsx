@@ -71,7 +71,7 @@ function HeroAlphabetBar() {
   );
 
   return (
-    <div className="absolute bottom-0 left-0 right-0 z-20 pointer-events-none">
+    <div className="hidden md:block absolute bottom-0 left-0 right-0 z-20 pointer-events-none">
       <div className="pointer-events-auto border-t border-white/10 bg-gradient-to-t from-[#0a0a0a]/95 via-[#0a0a0a]/75 to-transparent backdrop-blur-[2px]">
         <div className="px-6 sm:px-12 md:px-20 lg:px-28 py-4 flex items-center justify-between">
           {LETTERS.map((letter) => {
