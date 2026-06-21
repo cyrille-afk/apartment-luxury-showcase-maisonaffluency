@@ -18,6 +18,7 @@
  */
 import { useEffect, useState, useCallback } from "react";
 import type { DisplayCurrency } from "@/components/trade/CurrencyToggle";
+import { MANUAL_DEST_KEY } from "@/lib/shippingDestination";
 import { supabase } from "@/integrations/supabase/client";
 
 const STORAGE_KEY = "trade.displayCurrency";
@@ -93,9 +94,26 @@ const countryFromLocale = (): string | null => {
   return null;
 };
 
-/** Cached IP-geolocation country lookup (30-day cache). */
+const isManualDestination = (): boolean => {
+  if (typeof window === "undefined") return false;
+  try {
+    return window.localStorage.getItem(MANUAL_DEST_KEY) === "1";
+  } catch { return false; }
+};
+
+/** Cached IP-geolocation country lookup (30-day cache). Honours a manual
+ *  shipping-destination choice so the user’s selected country is never
+ *  overwritten by IP detection. */
 const fetchCountryFromIP = async (): Promise<string | null> => {
   if (typeof window === "undefined") return null;
+
+  // If the user explicitly picked a destination, always return that country.
+  if (isManualDestination()) {
+    try {
+      return window.localStorage.getItem(COUNTRY_CACHE_KEY);
+    } catch { /* ignore */ }
+  }
+
   try {
     const cached = window.localStorage.getItem(COUNTRY_CACHE_KEY);
     const ts = Number(window.localStorage.getItem(COUNTRY_CACHE_TS_KEY) || 0);
