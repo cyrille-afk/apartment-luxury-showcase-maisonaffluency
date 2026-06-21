@@ -84,21 +84,21 @@ const DesignersHoverHero = () => {
   const items = designers ?? [];
   const hasItems = items.length > 0;
 
-  const advance = (dir: 1 | -1) => {
-    setActiveSlug((current) => {
-      const idx = items.findIndex((d) => d.slug === current);
-      const base = idx === -1 ? 0 : idx;
-      const nextIdx = (base + dir + items.length) % items.length;
-      return items[nextIdx].slug;
-    });
-  };
-
   // Wheel/swipe navigation: scroll up/down moves through the list of names
   // without scrolling the page. Touch swipes advance the same way.
   useEffect(() => {
     if (!hasItems) return;
     const section = document.getElementById("designers-hover-hero");
     if (!section) return;
+
+    const advance = (dir: 1 | -1) => {
+      setActiveSlug((current) => {
+        const idx = items.findIndex((d) => d.slug === current);
+        const base = idx === -1 ? 0 : idx;
+        const nextIdx = (base + dir + items.length) % items.length;
+        return items[nextIdx].slug;
+      });
+    };
 
     let wheelLock = false;
 
