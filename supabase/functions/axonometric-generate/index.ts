@@ -430,7 +430,58 @@ CRITICAL: Do not crop, rotate, or re-frame the scene relative to the source. The
       }
     }
 
-    if (mode === "proposal_render") {
+    if (mode === "cad_dimension_overlay") {
+      if (!Array.isArray(placements) || placements.length === 0) {
+        throw new Error("cad_dimension_overlay requires at least one placement with product_id");
+      }
+      const overlayList = (placements || [])
+        .map((p: any, i: number) => {
+          const cad = p.cad_geometry_mm
+            ? `CAD W${Math.round(p.cad_geometry_mm.w / 10)}×D${Math.round(p.cad_geometry_mm.d / 10)}${p.cad_geometry_mm.h ? `×H${Math.round(p.cad_geometry_mm.h / 10)}` : ""}cm`
+            : "CAD unknown";
+          const orig = p.dimensions || "no applied dim";
+          return `${i + 1}. "${p.product_name}" — ${cad} | applied: ${orig}`;
+        })
+        .join("\n");
+
+      const mismatchSummary = qaRowsForResponse
+        .filter((r) => r.status === "mismatch")
+        .map((r) => {
+          const d = r.delta_cm || {};
+          const parts: string[] = [];
+          if (d.w != null) parts.push(`Δw=${d.w}cm`);
+          if (d.d != null) parts.push(`Δd=${d.d}cm`);
+          if (d.h != null) parts.push(`Δh=${d.h}cm`);
+          return `- ${r.product_name}: ${parts.join(", ") || "no applied dims"}`;
+        })
+        .join("\n");
+
+      prompt = `You are given ONE input image: a rendered 3D axonometric interior. Produce a TRANSPARENT PNG OVERLAY (same width × height, fully transparent background) that, when laid exactly on top of the input image, annotates each piece of furniture with its CAD-derived orthographic dimensions and visually highlights where the rendered scale appears to diverge from the CAD dimensions.
+
+OUTPUT REQUIREMENTS — NON-NEGOTIABLE:
+- The output MUST be a PNG with a FULLY TRANSPARENT background (alpha = 0 everywhere except the overlay marks). Do NOT redraw the room, furniture, walls, floor, lighting, shadows, or any pixels from the input. The overlay must be readable when composited on top of the original render.
+- The output canvas must have the EXACT same aspect ratio and framing as the input image so the overlay aligns 1:1.
+- Use crisp vector-style line work, not painterly strokes.
+
+WHAT TO DRAW (per product, in order listed below):
+1. A thin orthographic bounding-box silhouette tracing the W×D×H envelope of each product in the render, in the axonometric perspective of the input image (lines only, ~2px).
+2. A small dimension callout (sans-serif, ~14–18px, white text on a dark pill background for legibility) anchored to each product, reading exactly the CAD W×D×Hcm value provided below.
+3. Color-coding for each silhouette and callout:
+   - GREEN (#16a34a) when CAD and applied dimensions match (within tolerance).
+   - AMBER (#f59e0b) when CAD geometry is missing or unparsed.
+   - RED (#dc2626) when the rendered product clearly looks wrong-scale vs the CAD dimensions (mismatch). Add a small red "Δ" badge listing the per-axis delta in cm.
+4. A compact legend in the bottom-right corner (also on transparent background) with the three color states.
+
+PRODUCTS (numbered to match their visible position in the render — left-to-right, then top-to-bottom):
+${overlayList}
+
+${mismatchSummary ? `KNOWN MISMATCHES (highlight these in RED with the listed deltas):\n${mismatchSummary}` : "No pre-computed mismatches — judge from the visible geometry."}
+
+ABSOLUTE PROHIBITIONS:
+- Do NOT include any pixels of the original room, walls, floor, products, or shadows. Background must be transparent.
+- Do NOT add a title block, sheet border, scale bar, north arrow, or watermark.
+- Do NOT relabel products or invent dimensions — use the exact CAD values listed above.`;
+    } else if (mode === "proposal_render") {
       const hasMaterialOverrides = (placements || []).some((p: any) => p.material_override?.trim());
       const productList = (placements || [])
         .map((p: any, i: number) => {
