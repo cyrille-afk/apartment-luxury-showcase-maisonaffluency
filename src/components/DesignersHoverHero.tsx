@@ -3,15 +3,16 @@
  *
  * Inspired by lacollections.fr: a vertical list of featured designer
  * names overlays a full-bleed background image that cross-fades on hover.
- * Names route to /designers/:slug. Mobile gracefully falls back to a
- * static intro (no hover) — the existing A–Z directory grid below covers
- * tap-driven browsing.
+ * Names route to /designers/:slug. Mobile falls back to a static,
+ * auto-rotating intro so vertical swipes remain free for page scrolling.
  */
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
+import { useIsMobile } from "@/hooks/use-mobile";
+
 
 interface FeaturedDesigner {
   slug: string;
@@ -68,11 +69,12 @@ function splitName(name: string): [string, string] {
 
 const SWIPE_THRESHOLD = 50;
 const IMAGE_TRANSITION_MS = 3500;
-const LOCK_MS = IMAGE_TRANSITION_MS + 400;
+const LOCK_MS = 1200;
 
 const DesignersHoverHero = () => {
   const { data: designers } = useFeaturedDesigners();
   const [activeSlug, setActiveSlug] = useState<string | null>(null);
+  const isMobile = useIsMobile();
 
   // Pre-seed active on first render once data arrives so the hero is never
   // a void on entry — the first designer acts as default.
@@ -85,10 +87,26 @@ const DesignersHoverHero = () => {
   const items = designers ?? [];
   const hasItems = items.length > 0;
 
+  // Mobile: auto-rotate every 4.5 s so the hero stays alive without
+  // intercepting the vertical swipe gestures used to scroll the page.
+  useEffect(() => {
+    if (!isMobile || !hasItems) return;
+    const interval = setInterval(() => {
+      setActiveSlug((current) => {
+        const idx = items.findIndex((d) => d.slug === current);
+        const base = idx === -1 ? 0 : idx;
+        return items[(base + 1) % items.length].slug;
+      });
+    }, 4500);
+    return () => clearInterval(interval);
+  }, [isMobile, hasItems, items]);
+
   // Wheel/swipe navigation: scroll up/down moves through the list of names
   // without scrolling the page. Touch swipes advance the same way.
+  // Disabled on mobile to keep vertical scroll free.
   useEffect(() => {
-    if (!hasItems) return;
+    if (!hasItems || isMobile) return;
+
     const section = document.getElementById("designers-hover-hero");
     if (!section) return;
 
@@ -102,7 +120,6 @@ const DesignersHoverHero = () => {
     };
 
     let transitionLock = false;
-    const lockTimeoutMs = Math.max(IMAGE_TRANSITION_MS, LOCK_MS);
     const lock = () => {
       transitionLock = true;
     };
@@ -116,7 +133,7 @@ const DesignersHoverHero = () => {
       if (transitionLock) return;
       lock();
       advance(e.deltaY > 0 ? 1 : -1);
-      window.setTimeout(unlock, lockTimeoutMs);
+      window.setTimeout(unlock, LOCK_MS);
     };
 
     let touchStartY: number | null = null;
@@ -145,7 +162,7 @@ const DesignersHoverHero = () => {
         swipeHandled = true;
         lock();
         advance(dy > 0 ? 1 : -1);
-        window.setTimeout(unlock, lockTimeoutMs);
+        window.setTimeout(unlock, LOCK_MS);
       }
     };
 
@@ -173,7 +190,7 @@ const DesignersHoverHero = () => {
       section.removeEventListener("touchmove", onTouchMove);
       section.removeEventListener("touchend", onTouchEnd);
     };
-  }, [hasItems, items]);
+  }, [hasItems, items, isMobile]);
 
   // Preload images so cross-fades are instant.
   const imageUrls = useMemo(
@@ -194,10 +211,11 @@ const DesignersHoverHero = () => {
     <section
       id="designers-hover-hero"
       aria-label="Featured designers"
-      className="relative w-full h-[88vh] min-h-[640px] bg-[#0a0a0a] text-foreground overflow-hidden touch-pan-x overscroll-y-contain select-none"
+      className="relative w-full h-[88vh] min-h-[640px] bg-[#0a0a0a] text-foreground overflow-hidden overscroll-y-contain select-none"
     >
       {/* Background image stack — cross-fade between layers */}
       <div className="absolute inset-0 z-0 pointer-events-none">
+
         {items.map((d) => {
           const url = d.hero_image_url || d.image_url || "";
           const isActive = d.slug === activeSlug;
@@ -230,24 +248,24 @@ const DesignersHoverHero = () => {
       <div className="relative z-10 flex flex-col justify-center h-full px-6 sm:px-12 md:px-20 lg:px-28 pb-24">
         <div className="w-full max-w-xs sm:max-w-sm md:max-w-md">
           <nav aria-label="Featured designers shortcut list">
-            <ul className="flex flex-col gap-0.5 text-center">
+            <ul className="flex flex-col gap-0.5 text-left">
               {items.map((d) => {
                 const [first, last] = splitName(d.name);
                 const isActive = d.slug === activeSlug;
                 const isDimmed = activeSlug !== null && !isActive;
                 const childBrand = d.founder && d.founder !== d.name;
                 return (
-                  <li key={d.slug} className="text-center">
+                  <li key={d.slug} className="text-left">
                     <Link
                       to={`/designers/${d.slug}`}
                       onMouseEnter={() => setActiveSlug(d.slug)}
                       onFocus={() => setActiveSlug(d.slug)}
                       className={cn(
                         "inline-block",
-                        "font-display font-light tracking-tight text-white",
-                        "text-base sm:text-lg md:text-2xl lg:text-[28px] leading-[1.25]",
-                        "transition-opacity duration-[1200ms] ease-out",
-                        isDimmed ? "opacity-30" : "opacity-100"
+                        "font-display font-light tracking-tight",
+                        "text-sm sm:text-base md:text-2xl lg:text-[28px] leading-[1.25]",
+                        "transition-colors duration-[1200ms] ease-out",
+                        isDimmed ? "text-white/35" : "text-white/90"
                       )}
                     >
                       <span>
