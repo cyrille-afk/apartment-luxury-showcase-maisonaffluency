@@ -161,9 +161,6 @@ const DesignersHoverHero = () => {
                         isDimmed ? "opacity-30" : "opacity-100"
                       )}
                     >
-                      <span className="hidden md:inline text-[10px] tracking-[0.3em] uppercase font-body text-white/30 self-center w-8">
-                        {String(items.indexOf(d) + 1).padStart(2, "0")}
-                      </span>
                       <span>
                         {first}
                         {last && <span className="italic"> {last}</span>}
