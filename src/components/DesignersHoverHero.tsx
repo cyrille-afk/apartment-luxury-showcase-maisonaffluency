@@ -69,6 +69,7 @@ function splitName(name: string): [string, string] {
 const DesignersHoverHero = () => {
   const { data: designers } = useFeaturedDesigners();
   const [activeSlug, setActiveSlug] = useState<string | null>(null);
+  const [isPaused, setIsPaused] = useState(false);
 
   // Pre-seed active on first render once data arrives so the hero is never
   // a void on entry — the first designer acts as default.
@@ -80,6 +81,19 @@ const DesignersHoverHero = () => {
 
   const items = designers ?? [];
   const hasItems = items.length > 0;
+
+  // Auto-cycle through designers like a carousel; pause on hover.
+  useEffect(() => {
+    if (!hasItems || isPaused) return;
+    const id = window.setInterval(() => {
+      setActiveSlug((current) => {
+        const idx = items.findIndex((d) => d.slug === current);
+        const next = items[(idx + 1) % items.length];
+        return next?.slug ?? current;
+      });
+    }, 2800);
+    return () => window.clearInterval(id);
+  }, [hasItems, isPaused, items]);
 
   // Preload images so cross-fades are instant.
   const imageUrls = useMemo(
@@ -99,8 +113,9 @@ const DesignersHoverHero = () => {
   return (
     <section
       aria-label="Featured designers"
-      className="relative w-full h-[88vh] min-h-[600px] bg-[#0a0a0a] text-foreground overflow-hidden"
-      onMouseLeave={() => setActiveSlug(items[0]?.slug ?? null)}
+      className="relative w-full min-h-[680px] py-16 md:py-20 bg-[#0a0a0a] text-foreground overflow-hidden"
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
     >
       {/* Background image stack — cross-fade between layers */}
       <div className="absolute inset-0 z-0 pointer-events-none">
@@ -136,12 +151,10 @@ const DesignersHoverHero = () => {
       </div>
 
       {/* Content */}
-      <div className="relative z-10 h-full flex items-center px-6 sm:px-12 md:px-20 lg:px-28">
+      <div className="relative z-10 flex items-center px-6 sm:px-12 md:px-20 lg:px-28">
         <div className="w-full max-w-6xl">
-          <div className="mb-10 md:mb-14" />
-
           <nav aria-label="Featured designers shortcut list">
-            <ul className="flex flex-col gap-1 md:gap-2">
+            <ul className="flex flex-col gap-0.5">
               {items.map((d) => {
                 const [first, last] = splitName(d.name);
                 const isActive = d.slug === activeSlug;
@@ -155,9 +168,9 @@ const DesignersHoverHero = () => {
                       className={cn(
                         "group inline-flex items-baseline gap-3 md:gap-5",
                         "font-display font-light tracking-tight text-white",
-                        "text-xl sm:text-2xl md:text-4xl lg:text-5xl leading-[1.15]",
+                        "text-base sm:text-lg md:text-2xl lg:text-[28px] leading-[1.25]",
                         "transition-all duration-[600ms] ease-out",
-                        "hover:translate-x-3 md:hover:translate-x-6",
+                        "hover:translate-x-2 md:hover:translate-x-4",
                         isDimmed ? "opacity-30" : "opacity-100"
                       )}
                     >
