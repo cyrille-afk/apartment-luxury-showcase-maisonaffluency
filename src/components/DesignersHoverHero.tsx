@@ -197,7 +197,7 @@ const DesignersHoverHero = () => {
               key={d.slug}
               aria-hidden="true"
               className={cn(
-                "absolute inset-0 transition-opacity duration-[1000ms] ease-in-out",
+"absolute inset-0 transition-opacity duration-[2200ms] ease-in-out",
                 isActive ? "opacity-100" : "opacity-0"
               )}
             >
