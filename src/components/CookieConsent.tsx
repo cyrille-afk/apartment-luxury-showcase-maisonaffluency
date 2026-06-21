@@ -75,8 +75,10 @@ const CookieConsent = () => {
             </button>
 
             <p className="text-sm text-muted-foreground leading-relaxed flex-1 font-serif pr-6 sm:pr-0">
-              We use cookies to analyse site performance and personalise your experience.
-              By accepting, you consent to analytics cookies.
+              We use cookies and local storage to remember your shipping country
+              and display currency, and to analyse site performance. By accepting,
+              you consent to preference and analytics cookies. Declining keeps
+              only what is strictly necessary for the site to function.
             </p>
 
             <div className="flex items-center gap-3 shrink-0">
@@ -98,6 +100,12 @@ const CookieConsent = () => {
       )}
     </AnimatePresence>
   );
+};
+
+export const hasCookieConsent = (): boolean => {
+  if (typeof window === "undefined") return false;
+  try { return window.localStorage.getItem("cookie_consent") === "accepted"; }
+  catch { return false; }
 };
 
 export default CookieConsent;
