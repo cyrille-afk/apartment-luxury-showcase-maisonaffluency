@@ -593,9 +593,17 @@ const TradeProductPage: React.FC = () => {
 
           // Flag finishes the user selected that have no mapped reference
           // images so the concierge / designer doesn't assume a visual match.
+          const noteParts: string[] = [];
           if (finishesMissingImages.length > 0) {
-            const note = `Note: No reference image on file for selected finish${finishesMissingImages.length > 1 ? "es" : ""}: ${finishesMissingImages.join(", ")}. Concierge to confirm visuals before order.`;
-            patch.notes = note;
+            noteParts.push(`Note: No reference image on file for selected finish${finishesMissingImages.length > 1 ? "es" : ""}: ${finishesMissingImages.join(", ")}. Concierge to confirm visuals before order.`);
+          }
+          // Carry the product legend (Technical Specs) onto the quote line so
+          // voltage / lamping / certifications follow the product into quoting.
+          if (product.materials_description?.trim()) {
+            noteParts.push(product.materials_description.trim());
+          }
+          if (noteParts.length > 0) {
+            patch.notes = noteParts.join("\n\n");
           }
 
 
