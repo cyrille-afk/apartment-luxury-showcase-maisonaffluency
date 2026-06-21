@@ -1039,6 +1039,10 @@ export default function ProposalBuilder({
             <Button variant="outline" size="sm" onClick={downloadProposal}>
               <Download className="w-3.5 h-3.5 mr-1.5" />Download
             </Button>
+            <Button variant="outline" size="sm" onClick={runCadAudit} disabled={cadAuditing || !proposalResult}>
+              {cadAuditing ? <DotCircleLoader size="sm" className="w-3.5 h-3.5 mr-1.5" /> : <Ruler className="w-3.5 h-3.5 mr-1.5" />}
+              CAD Scale Audit
+            </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="sm" disabled={saving || lockedIteration === null}>
