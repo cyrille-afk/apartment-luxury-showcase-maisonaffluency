@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo, useCallback } from "react";
 import { useSearchParams, Navigate } from "react-router-dom";
 import { categoryUrl } from "@/lib/categorySlugs";
 import { Helmet } from "react-helmet-async";
@@ -9,6 +9,9 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import DesignersDirectory from "@/components/DesignersDirectory";
 import DesignersHoverHero from "@/components/DesignersHoverHero";
+import { useAllDesigners } from "@/hooks/useDesigner";
+import { getDesignersDirectoryAnchorId } from "@/lib/designersDirectoryAnchors";
+import { scrollToSection } from "@/lib/scrollToSection";
 
 
 // ─── Back to Top Button ──────────────────────────────────────────────────────
@@ -38,6 +41,60 @@ function BackToTopButton() {
         </motion.button>
       )}
     </AnimatePresence>
+  );
+}
+
+// ─── A-Z Jump Bar (positioned at the bottom edge of the hero image) ─────────
+const LETTERS = [...("ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("")), "#"];
+
+function HeroAlphabetBar() {
+  const { data: designers = [] } = useAllDesigners();
+
+  const activeLetters = useMemo(() => {
+    const set = new Set<string>();
+    designers
+      .filter((d) => d.is_published)
+      .forEach((d) => {
+        const firstChar = d.name.normalize("NFD").replace(/[\u0300-\u036f]/g, "")[0];
+        const letter = firstChar?.toUpperCase() || "#";
+        set.add(letter);
+      });
+    return set;
+  }, [designers]);
+
+  const jumpToLetter = useCallback(
+    (letter: string) => {
+      if (!activeLetters.has(letter)) return;
+      scrollToSection(getDesignersDirectoryAnchorId(letter));
+    },
+    [activeLetters]
+  );
+
+  return (
+    <div className="absolute bottom-0 left-0 right-0 z-20 pointer-events-none">
+      <div className="pointer-events-auto border-t border-white/10 bg-gradient-to-t from-[#0a0a0a]/95 via-[#0a0a0a]/75 to-transparent backdrop-blur-[2px]">
+        <div className="px-6 sm:px-12 md:px-20 lg:px-28 py-4 flex items-center justify-between">
+          {LETTERS.map((letter) => {
+            const isActive = activeLetters.has(letter);
+            return (
+              <button
+                key={letter}
+                disabled={!isActive}
+                onClick={() => jumpToLetter(letter)}
+                className={`font-serif text-base md:text-lg lg:text-xl leading-none transition-colors duration-200 ${
+                  isActive
+                    ? "text-white/90 hover:text-white"
+                    : "text-white/25 cursor-default"
+                }`}
+                aria-label={isActive ? `Jump to designers starting with ${letter}` : undefined}
+              >
+                {letter}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -86,8 +143,11 @@ const PublicDesigners = () => {
           <h1 className="sr-only">Designers &amp; Ateliers</h1>
           
           <div className="pb-20">
-            <DesignersHoverHero />
-            <DesignersDirectory mode="designers" initialLetter={initialLetter} initialExpand={initialExpand} showHeader={false} />
+            <div className="relative">
+              <DesignersHoverHero />
+              <HeroAlphabetBar />
+            </div>
+            <DesignersDirectory mode="designers" initialLetter={initialLetter} initialExpand={initialExpand} showHeader={false} showAlphabetBar={false} />
           </div>
         </div>
 
