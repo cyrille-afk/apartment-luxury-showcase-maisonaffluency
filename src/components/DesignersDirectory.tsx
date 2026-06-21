@@ -1524,14 +1524,13 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
       );
     };
 
-    // Jump instantly each frame to the freshly-measured target until the value
+    // Settle by re-measuring every frame (rAF, no setTimeout) until the target
     // is stable for several consecutive frames OR we exceed the deadline.
-    // This is rAF-driven (no setTimeout) so successive clicks interrupt cleanly
-    // via the session check on the very next frame.
-    const startedAt = performance.now();
+    // Successive clicks interrupt cleanly via the session check on the next frame.
     const DEADLINE_MS = 700;
     const STABLE_FRAMES = 4;
     const TOLERANCE_PX = 1;
+
 
     const runSettle = () => {
       const startedAt = performance.now();
