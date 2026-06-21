@@ -290,7 +290,7 @@ const DesignersHoverHero = () => {
       </div>
 
       {/* Vertical wordmark */}
-      <div className="hidden lg:flex absolute bottom-12 right-12 flex-col items-end gap-6 z-10 pointer-events-none">
+      <div className="hidden lg:flex absolute bottom-28 right-12 flex-col items-end gap-6 z-10 pointer-events-none">
         <span
           className="text-[10px] uppercase tracking-[0.5em] text-white/25 font-body"
           style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}
