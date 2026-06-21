@@ -397,6 +397,54 @@ export default function ProposalBuilder({
     }
   };
 
+  // Generate a transparent CAD-dimension overlay for the current proposal and
+  // surface a per-product QA breakdown so the admin can see exactly where the
+  // rendered scale drifts from the parsed CAD bbox.
+  const runCadAudit = async () => {
+    if (!proposalResult) return;
+    setCadAuditing(true);
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const accessToken = sessionData.session?.access_token;
+      if (!accessToken) throw new Error("Session expired. Please sign in again.");
+
+      const placements = selectedProducts.map((p) => ({
+        product_id: p.product_id || null,
+        product_name: p.product_name,
+        brand_name: p.brand_name,
+        image_url: toAbsoluteUrl(p.image_url),
+        dimensions: p.dimensions || null,
+      }));
+
+      const { data, error } = await supabase.functions.invoke("axonometric-generate", {
+        body: {
+          imageUrl: toAbsoluteUrl(proposalResult),
+          mode: "cad_dimension_overlay",
+          qualityTier,
+          placements,
+        },
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+
+      if (error) throw new Error(error.message);
+      if (data?.error) throw new Error(data.error);
+
+      setCadOverlayUrl(data.storedUrl || data.imageUrl);
+      setCadQaRows(Array.isArray(data.cadQa) ? data.cadQa : []);
+      setCadOverlayVisible(true);
+      setShowCadOverlay(true);
+      const mismatches = (data.cadQa || []).filter((r: any) => r.status === "mismatch").length;
+      toast({
+        title: "CAD scale audit ready",
+        description: mismatches > 0 ? `${mismatches} placement(s) diverge from CAD dimensions.` : "All placements match parsed CAD dimensions.",
+      });
+    } catch (e: any) {
+      toast({ title: "CAD audit failed", description: e?.message || "Unknown error", variant: "destructive" });
+    } finally {
+      setCadAuditing(false);
+    }
+  };
+
   // Save proposal image to various destinations
   const saveToGallery = async () => {
     if (!proposalResult || !user) return;
