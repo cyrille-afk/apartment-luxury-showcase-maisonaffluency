@@ -317,6 +317,7 @@ CRITICAL: Do not crop, rotate, or re-frame the scene relative to the source. The
 
     // For proposal modes, override placement.dimensions with parsed CAD bbox when available.
     // bbox_mm is the source of truth — exact W×D×Hcm beats the free-text dimensions field.
+    // We also write one row per placement to `axonometric_cad_qa` so admins can flag drift.
     if ((mode === "proposal_render" || mode === "proposal_refine") && Array.isArray(placements) && placements.length > 0) {
       const productIds = Array.from(new Set(
         placements.map((p: any) => p?.product_id).filter((id: any) => typeof id === "string" && id.length > 0),
@@ -328,26 +329,98 @@ CRITICAL: Do not crop, rotate, or re-frame the scene relative to the source. The
             .from("product_cad_asset_geometry")
             .select("product_id, bbox_mm, status, parsed_at")
             .in("product_id", productIds)
-            .eq("status", "ready")
             .order("parsed_at", { ascending: false });
-          const geomByProduct = new Map<string, { w: number; d: number; h: number }>();
+          // Keep newest geometry row per product, regardless of status (so we can label cad_unparsed).
+          const latestByProduct = new Map<string, { bbox_mm: any; status: string }>();
           for (const row of (geomRows || []) as any[]) {
-            if (geomByProduct.has(row.product_id)) continue; // keep newest
-            const bb = row.bbox_mm as { w?: number; d?: number; h?: number } | null;
-            if (!bb || !bb.w || !bb.d) continue;
-            geomByProduct.set(row.product_id, { w: bb.w, d: bb.d, h: bb.h || 0 });
+            if (latestByProduct.has(row.product_id)) continue;
+            latestByProduct.set(row.product_id, { bbox_mm: row.bbox_mm, status: row.status });
           }
+
+          // --- CAD QA helpers (inline mirror of src/lib/axonometricCadQa.ts) ---
+          const parseDimText = (text: string | null | undefined): { w: number | null; d: number | null; h: number | null } | null => {
+            if (!text) return null;
+            const s = String(text).replace(/\s+/g, " ");
+            const isMm = /\bmm\b/i.test(s) && !/\bcm\b/i.test(s);
+            const grab = (letter: string) => {
+              const m = s.match(new RegExp(`${letter}\\s*([0-9]+(?:\\.[0-9]+)?)`, "i"));
+              if (!m) return null;
+              const n = parseFloat(m[1]);
+              return isFinite(n) ? (isMm ? n / 10 : n) : null;
+            };
+            const w = grab("W"), d = grab("D"), h = grab("H");
+            return (w == null && d == null && h == null) ? null : { w, d, h };
+          };
+          const TOLERANCE_CM = 1;
+
+          const qaRows: any[] = [];
           for (const p of placements as any[]) {
-            const g = p?.product_id ? geomByProduct.get(p.product_id) : undefined;
-            if (!g) continue;
-            const wCm = Math.round(g.w / 10);
-            const dCm = Math.round(g.d / 10);
-            const hCm = g.h ? Math.round(g.h / 10) : 0;
-            const cadDim = hCm
-              ? `W${wCm} × D${dCm} × H${hCm} cm (from CAD)`
-              : `W${wCm} × D${dCm} cm (from CAD)`;
-            p.dimensions = cadDim;
-            p.cad_geometry_mm = g;
+            if (!p?.product_id) continue;
+            const originalDim: string | null = p.dimensions || null;
+            const latest = latestByProduct.get(p.product_id);
+
+            let status: "match" | "mismatch" | "no_cad" | "cad_unparsed" = "no_cad";
+            let expected_bbox_mm: any = null;
+            let expected_dim_text: string | null = null;
+            let delta_cm: any = null;
+            let appliedDim: string | null = originalDim;
+
+            if (!latest) {
+              status = "no_cad";
+            } else if (latest.status !== "ready" || !latest.bbox_mm?.w || !latest.bbox_mm?.d) {
+              status = "cad_unparsed";
+              expected_bbox_mm = latest.bbox_mm ?? null;
+            } else {
+              const bb = latest.bbox_mm as { w: number; d: number; h?: number };
+              const wCm = Math.round(bb.w / 10);
+              const dCm = Math.round(bb.d / 10);
+              const hCm = bb.h ? Math.round(bb.h / 10) : 0;
+              expected_bbox_mm = { w: bb.w, d: bb.d, h: bb.h || 0 };
+              expected_dim_text = hCm
+                ? `W${wCm} × D${dCm} × H${hCm} cm (from CAD)`
+                : `W${wCm} × D${dCm} cm (from CAD)`;
+              // Inject CAD-exact dimensions into the prompt.
+              p.dimensions = expected_dim_text;
+              p.cad_geometry_mm = expected_bbox_mm;
+              appliedDim = expected_dim_text;
+
+              const applied = parseDimText(appliedDim);
+              if (!applied) {
+                status = "mismatch";
+                delta_cm = { w: null, d: null, h: null };
+              } else {
+                delta_cm = {
+                  w: applied.w != null ? applied.w - wCm : null,
+                  d: applied.d != null ? applied.d - dCm : null,
+                  h: applied.h != null && hCm ? applied.h - hCm : null,
+                };
+                const drift = (Object.values(delta_cm) as Array<number | null>)
+                  .some((v) => v != null && Math.abs(v) > TOLERANCE_CM);
+                status = drift ? "mismatch" : "match";
+              }
+            }
+
+            qaRows.push({
+              user_id: user.id,
+              mode,
+              product_id: p.product_id,
+              product_name: p.product_name ?? null,
+              brand_name: p.brand_name ?? null,
+              expected_bbox_mm,
+              expected_dim_text,
+              applied_dim_text: appliedDim,
+              original_dim_text: originalDim,
+              status,
+              delta_cm,
+              tolerance_cm: TOLERANCE_CM,
+            });
+          }
+
+          if (qaRows.length > 0) {
+            // Best-effort: never block the render on QA logging.
+            svc.from("axonometric_cad_qa").insert(qaRows).then(({ error }) => {
+              if (error) console.warn("[axo cad qa] insert failed:", error.message);
+            });
           }
         } catch (e) {
           console.warn("[axonometric-generate] CAD geometry lookup failed:", e instanceof Error ? e.message : e);
