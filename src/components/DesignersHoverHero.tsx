@@ -25,19 +25,19 @@ const FEATURED_SLUGS = [
   "alexander-lamont",
   "leo-aerts-alinea",
   "apparatus-studio",
+  "atelier-demichelis",
   "christopher-boots",
   "delcourt-collection",
   "ecart",
   "emmanuel-babled",
   "emmanuel-levet-stenne",
   "felix-agostini",
+  "hamrei",
   "kerstens",
   "kiko-lopez",
-  "pierre-bonnefille",
   "ozone",
+  "pierre-bonnefille",
   "thierry-lemaire",
-  "atelier-demichelis",
-  "hamrei",
 ];
 
 function useFeaturedDesigners() {
