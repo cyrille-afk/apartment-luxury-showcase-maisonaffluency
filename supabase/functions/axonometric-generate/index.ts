@@ -987,7 +987,7 @@ The final output must be indistinguishable from a professional Corona Renderer 1
       console.error("Upload error:", uploadErr);
       // Still return the base64 image even if upload fails
       return new Response(
-        JSON.stringify({ imageUrl: generatedImage, storedUrl: null, text: textResponse }),
+        JSON.stringify({ imageUrl: generatedImage, storedUrl: null, text: textResponse, cadQa: qaRowsForResponse }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
