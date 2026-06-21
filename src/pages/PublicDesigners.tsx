@@ -8,6 +8,7 @@ import { useState, useEffect } from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import DesignersDirectory from "@/components/DesignersDirectory";
+import DesignersHoverHero from "@/components/DesignersHoverHero";
 
 // ─── Back to Top Button ──────────────────────────────────────────────────────
 function BackToTopButton() {
@@ -79,10 +80,13 @@ const PublicDesigners = () => {
       <div className="min-h-screen bg-background text-foreground">
         <Navigation />
 
-        <div className="pt-28 pb-20">
-          {/* Visually-hidden H1 retained for SEO/a11y; hero card below provides the visible heading */}
+        <div className="pt-20">
+          {/* Visually-hidden H1 retained for SEO/a11y; hero + directory below provide visible headings */}
           <h1 className="sr-only">Designers &amp; Ateliers</h1>
-          <DesignersDirectory mode="designers" initialLetter={initialLetter} initialExpand={initialExpand} />
+          <DesignersHoverHero />
+          <div className="pt-12 pb-20">
+            <DesignersDirectory mode="designers" initialLetter={initialLetter} initialExpand={initialExpand} />
+          </div>
         </div>
 
         <Footer />
