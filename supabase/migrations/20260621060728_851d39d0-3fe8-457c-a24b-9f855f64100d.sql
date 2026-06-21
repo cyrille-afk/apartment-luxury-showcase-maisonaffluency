@@ -1,0 +1,1 @@
+UPDATE public.designer_curator_picks SET allow_com_col = false WHERE LOWER(title) LIKE '%metronome reading floor lamp%';
