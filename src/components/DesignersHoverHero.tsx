@@ -42,7 +42,7 @@ const FEATURED_SLUGS = [
 
 function useFeaturedDesigners() {
   return useQuery({
-    queryKey: ["designers-hero-featured", FEATURED_SLUGS],
+    queryKey: ["designers-hero-featured-v2", FEATURED_SLUGS],
     staleTime: 1000 * 60 * 30,
     queryFn: async () => {
       const { data, error } = await supabase
@@ -51,13 +51,9 @@ function useFeaturedDesigners() {
         .in("slug", FEATURED_SLUGS)
         .eq("is_published", true);
       if (error) throw error;
-      const order = new Map(FEATURED_SLUGS.map((s, i) => [s, i]));
       return ((data || []) as FeaturedDesigner[])
         .filter((d) => d.hero_image_url || d.image_url)
-        .sort(
-          (a, b) =>
-            (order.get(a.slug) ?? 99) - (order.get(b.slug) ?? 99)
-        );
+        .sort((a, b) => a.name.localeCompare(b.name, "en", { sensitivity: "base" }));
     },
   });
 }
@@ -232,7 +228,7 @@ const DesignersHoverHero = () => {
 
       {/* Content */}
       <div className="relative z-10 flex flex-col justify-center h-full px-6 sm:px-12 md:px-20 lg:px-28">
-        <p className="mb-2 text-center font-display font-light tracking-tight text-white text-base sm:text-lg md:text-2xl lg:text-[28px] leading-[1.25] whitespace-nowrap">
+        <p className="mb-2 w-full text-left font-display font-light tracking-tight text-white/40 text-xs sm:text-sm md:text-base lg:text-lg leading-[1.25] whitespace-nowrap">
           A curation of designers and makers whose exceptional work defines Maison Affluency
         </p>
         <div className="w-full max-w-xs sm:max-w-sm md:max-w-md">
