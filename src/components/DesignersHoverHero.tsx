@@ -47,7 +47,7 @@ function useFeaturedDesigners() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("designers")
-        .select("slug, name, hero_image_url, image_url")
+        .select("slug, name, founder, hero_image_url, image_url")
         .in("slug", FEATURED_SLUGS)
         .eq("is_published", true);
       if (error) throw error;
