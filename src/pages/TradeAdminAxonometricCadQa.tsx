@@ -562,7 +562,9 @@ export default function TradeAdminAxonometricCadQa() {
                     <span>
                       Showing <span className="font-mono text-foreground">{visiblePinnedOptions.length}</span> of{" "}
                       <span className="font-mono">{filteredPinnedOptions.combined.length}</span>
-                      {pinnedQuery ? " matches" : ` (${allPinnedProductOptions.length} total)`}
+                      {pinnedQuery
+                        ? ` (${filteredPinnedOptions.matchCount} match${filteredPinnedOptions.matchCount === 1 ? "" : "es"}${filteredPinnedOptions.selectedCount > 0 ? ` + ${filteredPinnedOptions.selectedCount} selected` : ""})`
+                        : ` of ${filteredPinnedOptions.total} total`}
                     </span>
                     {pinnedProductIds.size > 0 && (
                       <button
