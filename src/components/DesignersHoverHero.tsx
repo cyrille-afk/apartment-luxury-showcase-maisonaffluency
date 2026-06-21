@@ -162,7 +162,7 @@ const DesignersHoverHero = () => {
         swipeHandled = true;
         lock();
         advance(dy > 0 ? 1 : -1);
-        window.setTimeout(unlock, lockTimeoutMs);
+        window.setTimeout(unlock, LOCK_MS);
       }
     };
 
