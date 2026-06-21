@@ -1561,9 +1561,14 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
     };
     requestAnimationFrame(tick);
 
-    // Give AnimatePresence time to render on mobile before settling
-    setTimeout(() => requestAnimationFrame(() => requestAnimationFrame(settle)), 120);
+    // Re-run a settle pass after AnimatePresence/content-visibility expands
+    // (mobile expansions can shift the target after the initial deadline).
+    setTimeout(() => {
+      if (jumpSessionRef.current !== session) return;
+      requestAnimationFrame(tick);
+    }, 180);
   }, [activeLetters]);
+
 
 
   useEffect(() => {
