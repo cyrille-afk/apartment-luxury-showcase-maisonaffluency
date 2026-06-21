@@ -151,6 +151,7 @@ const Toaster = lazy(() => import("@/components/ui/toaster").then(m => ({ defaul
 const Sonner = lazy(() => import("@/components/ui/sonner").then(m => ({ default: m.Toaster })));
 const TooltipProvider = lazy(() => import("@/components/ui/tooltip").then(m => ({ default: m.TooltipProvider })));
 const TradeAdminDuplicates = lazy(() => import("./pages/TradeAdminDuplicates"));
+const TradeAdminAxonometricCadQa = lazy(() => import("./pages/TradeAdminAxonometricCadQa"));
 const CookieConsent = lazy(() => import("@/components/CookieConsent"));
 
 // Set to false to disable maintenance mode and show the real site
@@ -491,6 +492,7 @@ const App = () => {
                     <Route path="admin/shipping-surcharges" element={<TradeAdminShippingSurcharges />} />
                     <Route path="admin/taxonomy-audit" element={<TradeAdminTaxonomyAudit />} />
                     <Route path="admin/duplicates" element={<TradeAdminDuplicates />} />
+                    <Route path="admin/axonometric-cad-qa" element={<TradeAdminAxonometricCadQa />} />
                     <Route path="admin/sync-status" element={<TradeAdminSyncStatus />} />
                     <Route path="admin/brand-lead-times" element={<TradeAdminBrandLeadTimes />} />
                     <Route path="admin/fabrics" element={<TradeAdminFabrics />} />
