@@ -418,6 +418,7 @@ CRITICAL: Do not crop, rotate, or re-frame the scene relative to the source. The
           }
 
           if (qaRows.length > 0) {
+            qaRowsForResponse = qaRows;
             // Best-effort: never block the render on QA logging.
             svc.from("axonometric_cad_qa").insert(qaRows).then(({ error }) => {
               if (error) console.warn("[axo cad qa] insert failed:", error.message);
