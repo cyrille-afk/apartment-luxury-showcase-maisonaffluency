@@ -209,7 +209,7 @@ async function main() {
     .or("is_hidden.is.null,is_hidden.eq.false");
   const { data: designers, error: dErr } = await sb
     .from("designers")
-    .select("id, name, display_name");
+    .select("id, name, display_name, slug");
   if (dErr) {
     console.error("Designer query failed:", dErr.message);
     process.exit(1);
@@ -234,20 +234,25 @@ async function main() {
   for (const row of data ?? []) {
     const designerName = row.designer?.display_name || row.designer?.name;
     if (!designerName) continue;
-    const designerSlug = slugify(designerName);
+    // Use the designer's actual DB slug as the canonical URL segment — the
+    // app routes by designers.slug, NOT by slugify(name). slugify(name) is
+    // only used for the bridge FILENAME so duplicate brands with different
+    // slugs each get their own bridge file.
+    const designerUrlSlug = row.designer?.slug || slugify(designerName);
+    const designerFileSlug = slugify(designerName);
     const full = row.subtitle && String(row.subtitle).trim()
       ? `${row.title}-${row.subtitle}`
       : row.title;
     const pieceSlug = slugify(full);
-    if (!designerSlug || !pieceSlug) continue;
+    if (!designerUrlSlug || !designerFileSlug || !pieceSlug) continue;
 
-    const filename = `${designerSlug}-${pieceSlug}-og.html`;
+    const filename = `${designerFileSlug}-${pieceSlug}-og.html`;
     if (existing.has(filename) && !OVERWRITE) {
       skipped++;
       continue;
     }
 
-    const canonical = `${SITE}/designers/${designerSlug}/${pieceSlug}`;
+    const canonical = `${SITE}/designers/${designerUrlSlug}/${pieceSlug}`;
     const rawImg = pickImage(row);
     if (!rawImg) noImage.push(filename);
     const ogImage = toOgImage(rawImg);
