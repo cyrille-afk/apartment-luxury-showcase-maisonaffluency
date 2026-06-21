@@ -637,7 +637,7 @@ Source render fidelity: preserve the exact materials, finishes, and palette of t
 
 Style: ${defaultStyle}. Quality must match a single Corona/V-Ray turntable batch.`;
     } else {
-      throw new Error("Invalid mode. Use: elevation_to_axo, section_to_axo, stylize, composite, 3d_to_cad, cad_overlay, product_swap, freeform, apply_texture, scene_edit, turntable_angle, multi_view");
+      throw new Error("Invalid mode. Use: elevation_to_axo, section_to_axo, stylize, composite, 3d_to_cad, cad_overlay, cad_dimension_overlay, product_swap, freeform, apply_texture, scene_edit, turntable_angle, multi_view");
     }
 
     if (referenceImageUrl && (mode === "elevation_to_axo" || mode === "section_to_axo")) {
