@@ -239,7 +239,7 @@ const DesignersHoverHero = () => {
                         "inline-block",
                         "font-display font-light tracking-tight text-white",
                         "text-base sm:text-lg md:text-2xl lg:text-[28px] leading-[1.25]",
-                        "transition-opacity duration-[600ms] ease-out",
+"transition-opacity duration-[1200ms] ease-out",
                         isDimmed ? "opacity-30" : "opacity-100"
                       )}
                     >
