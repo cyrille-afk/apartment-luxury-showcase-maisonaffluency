@@ -142,6 +142,7 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
               <button
                 key={i}
                 onClick={() => goTo(i)}
+                onMouseEnter={() => goTo(i)}
                 className={cn(
                   "aspect-square rounded-md overflow-hidden border-2 transition-all shrink-0",
                   i === activeIndex
@@ -199,24 +200,8 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
               className="max-w-full max-h-full object-contain rounded-2xl"
             />
           </button>
-          {/* Desktop hover-to-navigate zones (Tadaima-style): pointer over a segment switches the active image. */}
-          {images.length > 1 && (
-            <div
-              className="hidden md:flex absolute inset-0 z-[5] pointer-events-none"
-              aria-hidden="true"
-            >
-              {images.map((_, i) => (
-                <div
-                  key={i}
-                  className="flex-1 h-full pointer-events-auto cursor-zoom-in"
-                  onMouseEnter={() => {
-                    if (i !== activeIndex) goTo(i);
-                  }}
-                  onClick={() => setZoomOpen(true)}
-                />
-              ))}
-            </div>
-          )}
+          {/* Hover-to-navigate now lives on the vertical thumbnail strip (see above). */}
+
           {/* Expand affordance */}
           <div className="absolute bottom-3 right-3 z-10 pointer-events-none">
             <div className="w-8 h-8 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
