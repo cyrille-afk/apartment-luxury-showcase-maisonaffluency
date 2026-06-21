@@ -6,12 +6,16 @@
  *     into a product page (and across reloads). We persist it in localStorage
  *     and broadcast changes to other tabs / mounted instances via the standard
  *     `storage` event plus a custom in-tab event.
+ *   - A manual shipping destination (set via the header flag switcher) is also
+ *     persisted in localStorage. It overrides profile/IP/locale detection and
+ *     keeps the display currency synced to that country's currency across reloads.
  *
- * Default selection (only when the user hasn't manually picked a currency):
- *   1. profile.country  →  currency
- *   2. IP geolocation   →  currency  (cached in localStorage for 30 days)
- *   3. browser locale   →  currency
- *   4. fallback         →  "original"
+ * Default selection (only when the user hasn't manually picked a currency or destination):
+ *   1. manual shipping destination  →  currency
+ *   2. profile.country              →  currency
+ *   3. IP geolocation               →  currency  (cached in localStorage for 30 days)
+ *   4. browser locale               →  currency
+ *   5. fallback                     →  "original"
  *
  * Manual choice always wins. Once the user picks a currency in the toggle, we
  * mark it as manual and never overwrite it from country detection again.
