@@ -120,7 +120,6 @@ const DesignersHoverHero = () => {
     };
 
     let transitionLock = false;
-    const lockTimeoutMs = Math.max(IMAGE_TRANSITION_MS, LOCK_MS);
     const lock = () => {
       transitionLock = true;
     };
@@ -134,7 +133,7 @@ const DesignersHoverHero = () => {
       if (transitionLock) return;
       lock();
       advance(e.deltaY > 0 ? 1 : -1);
-      window.setTimeout(unlock, lockTimeoutMs);
+      window.setTimeout(unlock, LOCK_MS);
     };
 
     let touchStartY: number | null = null;
