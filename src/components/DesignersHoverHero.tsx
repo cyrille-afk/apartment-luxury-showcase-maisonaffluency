@@ -114,8 +114,6 @@ const DesignersHoverHero = () => {
     <section
       aria-label="Featured designers"
       className="relative w-full min-h-[680px] py-16 md:py-20 bg-[#0a0a0a] text-foreground overflow-hidden"
-      onMouseEnter={() => setIsPaused(true)}
-      onMouseLeave={() => setIsPaused(false)}
     >
       {/* Background image stack — cross-fade between layers */}
       <div className="absolute inset-0 z-0 pointer-events-none">
@@ -152,25 +150,28 @@ const DesignersHoverHero = () => {
 
       {/* Content */}
       <div className="relative z-10 flex items-center px-6 sm:px-12 md:px-20 lg:px-28">
-        <div className="w-full max-w-6xl">
+        <div className="w-full max-w-xs sm:max-w-sm md:max-w-md">
           <nav aria-label="Featured designers shortcut list">
-            <ul className="flex flex-col gap-0.5">
+            <ul
+              className="flex flex-col gap-0.5 text-center"
+              onMouseEnter={() => setIsPaused(true)}
+              onMouseLeave={() => setIsPaused(false)}
+            >
               {items.map((d) => {
                 const [first, last] = splitName(d.name);
                 const isActive = d.slug === activeSlug;
                 const isDimmed = activeSlug !== null && !isActive;
                 return (
-                  <li key={d.slug}>
+                  <li key={d.slug} className="text-center">
                     <Link
                       to={`/designers/${d.slug}`}
                       onMouseEnter={() => setActiveSlug(d.slug)}
                       onFocus={() => setActiveSlug(d.slug)}
                       className={cn(
-                        "group inline-flex items-baseline gap-3 md:gap-5",
+                        "inline-block",
                         "font-display font-light tracking-tight text-white",
                         "text-base sm:text-lg md:text-2xl lg:text-[28px] leading-[1.25]",
-                        "transition-all duration-[600ms] ease-out",
-                        "hover:translate-x-2 md:hover:translate-x-4",
+                        "transition-opacity duration-[600ms] ease-out",
                         isDimmed ? "opacity-30" : "opacity-100"
                       )}
                     >
