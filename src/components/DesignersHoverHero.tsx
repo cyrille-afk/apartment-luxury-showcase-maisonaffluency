@@ -231,11 +231,11 @@ const DesignersHoverHero = () => {
       </div>
 
       {/* Content */}
-      <div className="relative z-10 flex items-center h-full px-6 sm:px-12 md:px-20 lg:px-28">
+      <div className="relative z-10 flex flex-col justify-center h-full px-6 sm:px-12 md:px-20 lg:px-28">
+        <p className="mb-2 font-display font-light tracking-tight text-white text-base sm:text-lg md:text-2xl lg:text-[28px] leading-[1.25] whitespace-nowrap">
+          A curation of designers and makers whose exceptional work defines Maison Affluency
+        </p>
         <div className="w-full max-w-xs sm:max-w-sm md:max-w-md">
-          <p className="mb-8 text-center font-body text-sm md:text-base leading-relaxed text-white/80">
-            A curation of designers and makers whose exceptional work defines Maison Affluency
-          </p>
           <nav aria-label="Featured designers shortcut list">
             <ul className="flex flex-col gap-0.5 text-center">
               {items.map((d) => {
