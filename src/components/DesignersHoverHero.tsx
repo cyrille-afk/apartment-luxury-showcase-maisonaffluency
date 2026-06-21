@@ -294,12 +294,12 @@ const DesignersHoverHero = () => {
       {/* Vertical wordmark */}
       <div className="hidden lg:flex absolute bottom-28 right-12 flex-col items-end gap-6 z-10 pointer-events-none">
         <span
-          className="text-[10px] uppercase tracking-[0.5em] text-white/25 font-body"
+          className="text-[10px] uppercase tracking-[0.5em] text-white/80 font-body"
           style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}
         >
           Maison Affluency
         </span>
-        <div className="w-px h-28 bg-gradient-to-b from-white/25 to-transparent" />
+        <div className="w-px h-28 bg-gradient-to-b from-white/70 to-transparent" />
       </div>
     </section>
   );
