@@ -110,7 +110,7 @@ const DesignersHoverHero = () => {
       advance(e.deltaY > 0 ? 1 : -1);
       window.setTimeout(() => {
         wheelLock = false;
-      }, 1200);
+      }, 3200);
     };
 
     let touchStartY: number | null = null;
