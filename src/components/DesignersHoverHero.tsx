@@ -13,6 +13,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { jumpToDesignerLetter } from "@/lib/jumpToDesignerLetter";
+import { useAllDesigners } from "@/hooks/useDesigner";
 
 interface FeaturedDesigner {
   slug: string;
