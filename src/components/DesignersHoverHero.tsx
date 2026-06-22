@@ -289,8 +289,8 @@ const DesignersHoverHero = () => {
         </div>
       </div>
 
-      {/* Archives / Directory labels — bottom-left, above the A–Z bar */}
-      <div className="absolute bottom-24 left-6 sm:left-12 md:left-20 lg:left-28 z-10 flex items-center gap-10 text-white border-t border-white/20 pt-6 max-w-md">
+      {/* Archives / Directory labels — lifted on mobile to clear iOS Safari chrome */}
+      <div className="absolute bottom-[calc(7rem+env(safe-area-inset-bottom))] md:bottom-24 left-6 sm:left-12 md:left-20 lg:left-28 z-10 flex items-center gap-10 text-white border-t border-white/20 pt-6 max-w-md">
         <div className="flex flex-col">
           <span className="text-[9px] uppercase tracking-[0.3em] mb-1 font-body text-white">
             Archives
@@ -299,7 +299,7 @@ const DesignersHoverHero = () => {
         </div>
         <div className="flex flex-col">
           <span className="text-[9px] uppercase tracking-[0.3em] mb-1 font-body text-white">
-            Directory
+            Directory{designerCount > 0 && <span className="ml-1 text-white/70 normal-case tracking-normal">({designerCount})</span>}
           </span>
           <Link
             to="/designers?letter=A"
