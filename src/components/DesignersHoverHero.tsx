@@ -75,6 +75,7 @@ const DesignersHoverHero = () => {
   const { data: designers } = useFeaturedDesigners();
   const [activeSlug, setActiveSlug] = useState<string | null>(null);
   const navRef = useRef<HTMLElement>(null);
+  const sectionRef = useRef<HTMLElement>(null);
 
   // Pre-seed active on first render once data arrives so the hero is never
   // a void on entry — the first designer acts as default.
@@ -87,10 +88,7 @@ const DesignersHoverHero = () => {
   const items = designers ?? [];
   const hasItems = items.length > 0;
 
-  // Desktop only: wheel over the names list advances through designers.
-  // On mobile we intentionally do NOT capture touch events so the user can
-  // freely swipe up/down anywhere on the hero (including over the image) to
-  // scroll the page. Browsing is done via the "Click to Browse A–Z" link.
+  // Desktop: wheel over the names list advances through designers.
   useEffect(() => {
     if (!hasItems) return;
     const nav = navRef.current;
@@ -123,6 +121,66 @@ const DesignersHoverHero = () => {
     nav.addEventListener("wheel", onWheel, { passive: false });
     return () => {
       nav.removeEventListener("wheel", onWheel);
+    };
+  }, [hasItems, items]);
+
+  // Mobile: capture vertical swipes on the hero section to advance through
+  // featured designers (with the corresponding background image cross-fading
+  // in) instead of scrolling the page. The directory below is only reached
+  // via the "Click to Browse A–Z" link, per editorial intent.
+  useEffect(() => {
+    if (!hasItems) return;
+    const section = sectionRef.current;
+    if (!section) return;
+    if (typeof window === "undefined") return;
+    const isMobile = window.matchMedia("(max-width: 767px)").matches;
+    if (!isMobile) return;
+
+    const advance = (dir: 1 | -1) => {
+      setActiveSlug((current) => {
+        const idx = items.findIndex((d) => d.slug === current);
+        const base = idx === -1 ? 0 : idx;
+        const nextIdx = Math.min(items.length - 1, Math.max(0, base + dir));
+        return items[nextIdx].slug;
+      });
+    };
+
+    let startY: number | null = null;
+    let accum = 0;
+    let lock = false;
+
+    const onStart = (e: TouchEvent) => {
+      startY = e.touches[0].clientY;
+      accum = 0;
+    };
+    const onMove = (e: TouchEvent) => {
+      if (startY === null) return;
+      const y = e.touches[0].clientY;
+      accum = startY - y;
+      if (e.cancelable) e.preventDefault();
+      if (lock) return;
+      if (Math.abs(accum) > SWIPE_THRESHOLD) {
+        lock = true;
+        advance(accum > 0 ? 1 : -1);
+        startY = y;
+        accum = 0;
+        window.setTimeout(() => {
+          lock = false;
+        }, 450);
+      }
+    };
+    const onEnd = () => {
+      startY = null;
+      accum = 0;
+    };
+
+    section.addEventListener("touchstart", onStart, { passive: true });
+    section.addEventListener("touchmove", onMove, { passive: false });
+    section.addEventListener("touchend", onEnd, { passive: true });
+    return () => {
+      section.removeEventListener("touchstart", onStart);
+      section.removeEventListener("touchmove", onMove);
+      section.removeEventListener("touchend", onEnd);
     };
   }, [hasItems, items]);
 
