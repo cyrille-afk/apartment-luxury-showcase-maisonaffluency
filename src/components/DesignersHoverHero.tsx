@@ -12,6 +12,7 @@ import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
+import { jumpToDesignerLetter } from "@/lib/jumpToDesignerLetter";
 
 interface FeaturedDesigner {
   slug: string;
@@ -86,13 +87,17 @@ const DesignersHoverHero = () => {
   const items = designers ?? [];
   const hasItems = items.length > 0;
 
-  // Wheel/swipe navigation: scroll up/down moves through the list of names.
-  // Attach listeners to the names nav only on mobile so swipes elsewhere
-  // (the background, the A–Z bar) still scroll the page.
+  // Desktop only: wheel over the names list advances through designers.
+  // On mobile we intentionally do NOT capture touch events so the user can
+  // freely swipe up/down anywhere on the hero (including over the image) to
+  // scroll the page. Browsing is done via the "Click to Browse A–Z" link.
   useEffect(() => {
     if (!hasItems) return;
     const nav = navRef.current;
     if (!nav) return;
+    if (typeof window === "undefined") return;
+    const isDesktop = window.matchMedia("(min-width: 768px)").matches;
+    if (!isDesktop) return;
 
     const advance = (dir: 1 | -1) => {
       setActiveSlug((current) => {
@@ -104,75 +109,20 @@ const DesignersHoverHero = () => {
     };
 
     let transitionLock = false;
-    const lock = () => {
-      transitionLock = true;
-    };
-    const unlock = () => {
-      transitionLock = false;
-    };
-
     const onWheel = (e: WheelEvent) => {
       if (Math.abs(e.deltaY) < 8) return;
       e.preventDefault();
       if (transitionLock) return;
-      lock();
+      transitionLock = true;
       advance(e.deltaY > 0 ? 1 : -1);
-      window.setTimeout(unlock, LOCK_MS);
-    };
-
-    let touchStartY: number | null = null;
-    let touchStartX: number | null = null;
-    let swiping = false;
-    let swipeHandled = false;
-
-    const onTouchStart = (e: TouchEvent) => {
-      const touch = e.touches[0];
-      touchStartY = touch.clientY;
-      touchStartX = touch.clientX;
-      swiping = false;
-      swipeHandled = false;
-    };
-
-    const onTouchMove = (e: TouchEvent) => {
-      if (touchStartY === null || touchStartX === null || swipeHandled || transitionLock) return;
-      const touch = e.touches[0];
-      const dy = touchStartY - touch.clientY;
-      const dx = touchStartX - touch.clientX;
-
-      // Only claim vertical swipes once they exceed the threshold.
-      if (Math.abs(dy) > SWIPE_THRESHOLD && Math.abs(dy) > Math.abs(dx)) {
-        e.preventDefault();
-        swiping = true;
-        swipeHandled = true;
-        lock();
-        advance(dy > 0 ? 1 : -1);
-        window.setTimeout(unlock, LOCK_MS);
-      }
-    };
-
-    const onTouchEnd = (e: TouchEvent) => {
-      if (!swiping) return;
-      // If this was a swipe, stop the event from becoming a click on a Link.
-      const target = e.target as HTMLElement;
-      const link = target.closest("a");
-      if (link) {
-        e.preventDefault();
-      }
-      swiping = false;
-      swipeHandled = false;
-      touchStartY = null;
-      touchStartX = null;
+      window.setTimeout(() => {
+        transitionLock = false;
+      }, LOCK_MS);
     };
 
     nav.addEventListener("wheel", onWheel, { passive: false });
-    nav.addEventListener("touchstart", onTouchStart, { passive: true });
-    nav.addEventListener("touchmove", onTouchMove, { passive: false });
-    nav.addEventListener("touchend", onTouchEnd, { passive: false });
     return () => {
       nav.removeEventListener("wheel", onWheel);
-      nav.removeEventListener("touchstart", onTouchStart);
-      nav.removeEventListener("touchmove", onTouchMove);
-      nav.removeEventListener("touchend", onTouchEnd);
     };
   }, [hasItems, items]);
 
@@ -195,7 +145,7 @@ const DesignersHoverHero = () => {
     <section
       id="designers-hover-hero"
       aria-label="Featured designers"
-      className="relative w-full h-[88vh] min-h-[640px] bg-[#0a0a0a] text-foreground overflow-hidden overscroll-y-contain select-none"
+      className="relative w-full h-[88vh] min-h-[640px] bg-[#0a0a0a] text-foreground overflow-hidden"
     >
       {/* Background image stack — cross-fade between layers */}
       <div className="absolute inset-0 z-0 pointer-events-none">
@@ -284,9 +234,16 @@ const DesignersHoverHero = () => {
           <span className="text-[9px] uppercase tracking-[0.3em] mb-1 font-body text-white">
             Directory
           </span>
-          <span className="text-xs font-body font-light italic text-white/85">
-            Scroll to browse A–Z
-          </span>
+          <Link
+            to="/designers?letter=A"
+            onClick={(e) => {
+              e.preventDefault();
+              jumpToDesignerLetter("A");
+            }}
+            className="text-xs font-body font-light italic text-white/85 hover:text-white underline-offset-4 hover:underline transition-colors"
+          >
+            Click to Browse A–Z
+          </Link>
         </div>
       </div>
 
