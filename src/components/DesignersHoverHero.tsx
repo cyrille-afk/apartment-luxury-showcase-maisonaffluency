@@ -234,9 +234,16 @@ const DesignersHoverHero = () => {
           <span className="text-[9px] uppercase tracking-[0.3em] mb-1 font-body text-white">
             Directory
           </span>
-          <span className="text-xs font-body font-light italic text-white/85">
-            Scroll to browse A–Z
-          </span>
+          <Link
+            to="/designers?letter=A"
+            onClick={(e) => {
+              e.preventDefault();
+              jumpToDesignerLetter("A");
+            }}
+            className="text-xs font-body font-light italic text-white/85 hover:text-white underline-offset-4 hover:underline transition-colors"
+          >
+            Click to Browse A–Z
+          </Link>
         </div>
       </div>
 
