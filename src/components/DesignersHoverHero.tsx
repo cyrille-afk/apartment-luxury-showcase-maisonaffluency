@@ -74,6 +74,11 @@ const LOCK_MS = 1200;
 
 const DesignersHoverHero = () => {
   const { data: designers } = useFeaturedDesigners();
+  const { data: allDesigners = [] } = useAllDesigners();
+  const designerCount = useMemo(
+    () => allDesigners.filter((d: any) => d.is_published).length,
+    [allDesigners]
+  );
   const [activeSlug, setActiveSlug] = useState<string | null>(null);
   const navRef = useRef<HTMLElement>(null);
   const sectionRef = useRef<HTMLElement>(null);
