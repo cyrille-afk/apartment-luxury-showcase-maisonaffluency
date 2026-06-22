@@ -392,9 +392,18 @@ const VariantSelectors: React.FC<{
           productTitle={product.title}
           woodLabel={
             (product as any).wood_label_override
-              || (product.base_axis_label && !baseAxisIsDim
-                ? `Select Your ${formatVariantAxisLabel(product.base_axis_label) || product.base_axis_label}`
-                : null)
+              || (
+                // When the base axis collapses to a single value (e.g. Cloud
+                // Chandelier base = "Mouth-Blown Frosted" only) but the top
+                // axis varies and has linked finish swatches, label the
+                // swatch picker with the TOP axis — otherwise the picker
+                // shows "Select Your Glass Spheres" over Chain Finish chips.
+                baseOptions.length <= 1 && topOptions.length > 1 && product.top_axis_label
+                  ? `Select Your ${formatVariantAxisLabel(product.top_axis_label) || product.top_axis_label}`
+                  : (product.base_axis_label && !baseAxisIsDim
+                    ? `Select Your ${formatVariantAxisLabel(product.base_axis_label) || product.base_axis_label}`
+                    : null)
+              )
           }
           woodFilter={undefined}
           topLabel={
