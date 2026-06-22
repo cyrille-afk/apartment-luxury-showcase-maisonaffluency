@@ -147,9 +147,11 @@ const DesignersHoverHero = () => {
       aria-label="Featured designers"
       className="relative w-full h-[88vh] min-h-[640px] bg-[#0a0a0a] text-foreground overflow-hidden"
     >
-      {/* Background image stack — cross-fade between layers */}
-      <div className="absolute inset-0 z-0 pointer-events-none">
-
+      {/* Background image stack — cross-fade between layers.
+          On mobile the stack is fixed to the viewport so the image stays
+          pinned while the user swipes the page; on desktop it stays
+          absolute to the hero section. */}
+      <div className="fixed md:absolute inset-0 z-0 pointer-events-none h-[88vh] md:h-auto">
         {items.map((d) => {
           const url = d.hero_image_url || d.image_url || "";
           const isActive = d.slug === activeSlug;
