@@ -145,7 +145,7 @@ const DesignersHoverHero = () => {
     <section
       id="designers-hover-hero"
       aria-label="Featured designers"
-      className="relative w-full h-[88vh] min-h-[640px] bg-[#0a0a0a] text-foreground overflow-hidden overscroll-y-contain select-none"
+      className="relative w-full h-[88vh] min-h-[640px] bg-[#0a0a0a] text-foreground overflow-hidden"
     >
       {/* Background image stack — cross-fade between layers */}
       <div className="absolute inset-0 z-0 pointer-events-none">
