@@ -318,8 +318,8 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
               </div>
             </div>
 
-            {/* Flag — absolute right (mobile) */}
-            <div className="absolute right-2 bottom-4">
+            {/* Flag — absolute right (mobile), vertically centered with burger */}
+            <div className="absolute right-2 bottom-[26px]">
               <ShippingDestinationSwitcher compact />
             </div>
 
