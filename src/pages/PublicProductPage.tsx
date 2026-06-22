@@ -405,13 +405,38 @@ const VariantSelectors: React.FC<{
                     : null)
               )
           }
-          woodFilter={undefined}
+          woodFilter={
+            // When both axes have multiple linked swatches (e.g. Standby Side
+            // Table: 3 Colourways × 2 Rod Finishes), restrict the base group
+            // to swatches whose name matches a baseOption value, so the
+            // colourway swatches don't bleed into the rod-finish picker.
+            baseOptions.length > 1 && topOptions.length > 1
+              ? (name: string) => {
+                  const n = name.trim().toLowerCase();
+                  return baseOptions.some((b) => {
+                    const bn = b.trim().toLowerCase();
+                    return n === bn || n.startsWith(bn) || bn.startsWith(n);
+                  });
+                }
+              : undefined
+          }
           topLabel={
             product.top_axis_label
               ? `Select Your ${formatVariantAxisLabel(product.top_axis_label) || product.top_axis_label}`
               : null
           }
-          topFilter={undefined}
+          topFilter={
+            baseOptions.length > 1 && topOptions.length > 1
+              ? (name: string) => {
+                  const norm = (s: string) => s.replace(/\[[^\]]*\]/g, "").trim().toLowerCase();
+                  const n = norm(name);
+                  return topOptions.some((t) => {
+                    const tn = norm(t);
+                    return n === tn || n.startsWith(tn) || tn.startsWith(n);
+                  });
+                }
+              : undefined
+          }
 
           showUpholsterySection={isProductUpholstered(product)}
           showWoodSection
