@@ -87,13 +87,17 @@ const DesignersHoverHero = () => {
   const items = designers ?? [];
   const hasItems = items.length > 0;
 
-  // Wheel/swipe navigation: scroll up/down moves through the list of names.
-  // Attach listeners to the names nav only on mobile so swipes elsewhere
-  // (the background, the A–Z bar) still scroll the page.
+  // Desktop only: wheel over the names list advances through designers.
+  // On mobile we intentionally do NOT capture touch events so the user can
+  // freely swipe up/down anywhere on the hero (including over the image) to
+  // scroll the page. Browsing is done via the "Click to Browse A–Z" link.
   useEffect(() => {
     if (!hasItems) return;
     const nav = navRef.current;
     if (!nav) return;
+    if (typeof window === "undefined") return;
+    const isDesktop = window.matchMedia("(min-width: 768px)").matches;
+    if (!isDesktop) return;
 
     const advance = (dir: 1 | -1) => {
       setActiveSlug((current) => {
@@ -105,75 +109,20 @@ const DesignersHoverHero = () => {
     };
 
     let transitionLock = false;
-    const lock = () => {
-      transitionLock = true;
-    };
-    const unlock = () => {
-      transitionLock = false;
-    };
-
     const onWheel = (e: WheelEvent) => {
       if (Math.abs(e.deltaY) < 8) return;
       e.preventDefault();
       if (transitionLock) return;
-      lock();
+      transitionLock = true;
       advance(e.deltaY > 0 ? 1 : -1);
-      window.setTimeout(unlock, LOCK_MS);
-    };
-
-    let touchStartY: number | null = null;
-    let touchStartX: number | null = null;
-    let swiping = false;
-    let swipeHandled = false;
-
-    const onTouchStart = (e: TouchEvent) => {
-      const touch = e.touches[0];
-      touchStartY = touch.clientY;
-      touchStartX = touch.clientX;
-      swiping = false;
-      swipeHandled = false;
-    };
-
-    const onTouchMove = (e: TouchEvent) => {
-      if (touchStartY === null || touchStartX === null || swipeHandled || transitionLock) return;
-      const touch = e.touches[0];
-      const dy = touchStartY - touch.clientY;
-      const dx = touchStartX - touch.clientX;
-
-      // Only claim vertical swipes once they exceed the threshold.
-      if (Math.abs(dy) > SWIPE_THRESHOLD && Math.abs(dy) > Math.abs(dx)) {
-        e.preventDefault();
-        swiping = true;
-        swipeHandled = true;
-        lock();
-        advance(dy > 0 ? 1 : -1);
-        window.setTimeout(unlock, LOCK_MS);
-      }
-    };
-
-    const onTouchEnd = (e: TouchEvent) => {
-      if (!swiping) return;
-      // If this was a swipe, stop the event from becoming a click on a Link.
-      const target = e.target as HTMLElement;
-      const link = target.closest("a");
-      if (link) {
-        e.preventDefault();
-      }
-      swiping = false;
-      swipeHandled = false;
-      touchStartY = null;
-      touchStartX = null;
+      window.setTimeout(() => {
+        transitionLock = false;
+      }, LOCK_MS);
     };
 
     nav.addEventListener("wheel", onWheel, { passive: false });
-    nav.addEventListener("touchstart", onTouchStart, { passive: true });
-    nav.addEventListener("touchmove", onTouchMove, { passive: false });
-    nav.addEventListener("touchend", onTouchEnd, { passive: false });
     return () => {
       nav.removeEventListener("wheel", onWheel);
-      nav.removeEventListener("touchstart", onTouchStart);
-      nav.removeEventListener("touchmove", onTouchMove);
-      nav.removeEventListener("touchend", onTouchEnd);
     };
   }, [hasItems, items]);
 
