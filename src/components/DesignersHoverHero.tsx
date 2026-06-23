@@ -190,63 +190,6 @@ const DesignersHoverHero = () => {
     };
   }, [hasItems, items]);
 
-  // Preload images so cross-fades are instant.
-  const imageUrls = useMemo(
-    () => items.map((d) => d.hero_image_url || d.image_url || ""),
-    [items]
-  );
-  useEffect(() => {
-    imageUrls.forEach((u) => {
-      if (!u) return;
-      const img = new Image();
-      img.src = u;
-    });
-  }, [imageUrls]);
-
-  if (!hasItems) return null;
-
-  return (
-    <section
-      ref={sectionRef}
-      id="designers-hover-hero"
-      aria-label="Featured designers"
-      className="relative w-full h-[88vh] min-h-[640px] bg-[#0a0a0a] text-foreground overflow-hidden touch-none md:touch-auto"
-    >
-      {/* Background image stack — cross-fade between layers.
-          On mobile the stack is fixed to the viewport so the image stays
-          pinned while the user swipes the page; on desktop it stays
-          absolute to the hero section. */}
-      <div className="fixed md:absolute inset-0 z-0 pointer-events-none h-[88vh] md:h-auto">
-
-        {items.map((d) => {
-          const url = d.hero_image_url || d.image_url || "";
-          const isActive = d.slug === activeSlug;
-          return (
-            <div
-              key={d.slug}
-              aria-hidden="true"
-              className={cn(
-                "absolute inset-0 transition-opacity duration-[3500ms] ease-[cubic-bezier(0.4,0,0.2,1)]",
-                isActive ? "opacity-100" : "opacity-0"
-              )}
-            >
-              <img
-                src={url}
-                alt=""
-                loading="eager"
-                decoding="async"
-                className="w-full h-full object-cover"
-                style={{ filter: "brightness(0.78) saturate(0.95)" }}
-              />
-            </div>
-          );
-        })}
-        {/* Left-side vignette for legibility */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#0a0a0a]/85 via-[#0a0a0a]/25 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a]/60 via-transparent to-transparent" />
-      </div>
-
-      {/* Content */}
       <div className="relative z-10 flex flex-col justify-center h-full px-6 sm:px-12 md:px-20 lg:px-28 pb-32 md:pb-24">
         <div className="w-full max-w-xs sm:max-w-sm md:max-w-md">
           <nav
