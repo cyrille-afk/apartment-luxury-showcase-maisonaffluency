@@ -19,7 +19,7 @@ const HERO_MOBILE_SRCSET = [
   .map(({ w, h }) => `${HERO_BASE}/w_${w},h_${h},c_fill,g_auto,q_auto:eco,f_auto/${HERO_ID} ${w}w`)
   .join(", ");
 
-const scrollToOverview = () => scrollToSection("overview");
+const scrollToOverview = () => scrollToSection("gallery");
 
 const Hero = () => {
   return (
@@ -85,18 +85,9 @@ const Hero = () => {
               <button
                 type="button"
                 onClick={() => { trackEvent("click_meet_designers", { event_category: "CTA", event_label: "HeroCTA" }); scrollToSection("meet-designers"); }}
-                className="group inline-flex items-center gap-3 md:gap-4 text-white text-xs md:text-sm font-body font-bold uppercase tracking-[0.2em] md:tracking-[0.25em] hero-fade-in-delayed-4 transition-opacity hover:opacity-80"
+                className="flex items-center gap-2 px-6 py-3 md:px-10 md:py-4 lg:px-12 lg:py-4.5 bg-white/20 hover:bg-white/30 md:backdrop-blur-2xl border border-white/40 hover:border-white/60 text-white text-sm md:text-lg font-body font-bold tracking-wide rounded-full transition-all duration-300 shadow-[0_6px_30px_rgba(0,0,0,0.3)] hover:shadow-[0_6px_40px_rgba(0,0,0,0.4)] hero-fade-in-delayed-4 [text-shadow:_0_1px_3px_rgba(0,0,0,0.3)]"
               >
                 Meet our Designers (95)
-                <svg
-                  viewBox="0 0 72 10"
-                  fill="none"
-                  className="w-14 md:w-20 h-2.5 text-current transition-transform duration-300 group-hover:translate-x-1"
-                  aria-hidden="true"
-                >
-                  <line x1="0" y1="5" x2="64" y2="5" stroke="currentColor" strokeWidth="1.5" />
-                  <polyline points="60,1 68,5 60,9" stroke="currentColor" strokeWidth="1.5" fill="none" />
-                </svg>
               </button>
             </div>
           </div>
