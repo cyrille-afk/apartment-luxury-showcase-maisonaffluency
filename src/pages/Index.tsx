@@ -132,6 +132,7 @@ const Index = ({ categoryMode = false }: IndexProps = {}) => {
   const [showScrollProgress, setShowScrollProgress] = useState(false);
   const [showBelowFoldSections, setShowBelowFoldSections] = useState(() => categoryMode || isDeepLink());
   const needsScrollRestore = useRef(false);
+  const skipNextScrollRestore = useRef(false);
   const mainRef = useRef<HTMLElement>(null);
 
   // Track scroll depth for GA4 engagement
@@ -230,6 +231,8 @@ const Index = ({ categoryMode = false }: IndexProps = {}) => {
 
   useEffect(() => {
     const revealBelowFold = () => {
+      skipNextScrollRestore.current = true;
+      sessionStorage.removeItem("__scroll_y");
       setShowNavigation(true);
       setShowScrollProgress(true);
       setShowBelowFoldSections(true);
@@ -241,6 +244,12 @@ const Index = ({ categoryMode = false }: IndexProps = {}) => {
   // On mount: restore exact scroll position OR scroll to section hash
   useEffect(() => {
     if (!showBelowFoldSections) return;
+
+    if (skipNextScrollRestore.current) {
+      skipNextScrollRestore.current = false;
+      sessionStorage.removeItem("__scroll_y");
+      return;
+    }
 
     const savedY = sessionStorage.getItem("__scroll_y");
     const sectionId = parseSectionHash(window.location.hash);

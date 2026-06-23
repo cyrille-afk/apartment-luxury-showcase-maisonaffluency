@@ -101,6 +101,12 @@ export function scrollToSection(id: string, behavior: ScrollBehavior = "smooth",
     // Use the ORIGINAL scroll position to decide if lead-in is warranted,
     // since the settle loop has already jumped us to the target.
     if (behavior === "smooth") {
+      const directScrollTargets = new Set(["gallery", "meet-designers", "contact"]);
+      if (directScrollTargets.has(id)) {
+        animateScroll(originY, nextTop, isMobile ? 900 : 1100);
+        return;
+      }
+
       const totalDistance = Math.abs(nextTop - originY);
       const MIN_DISTANCE_FOR_LEADIN = 800;
       if (totalDistance > MIN_DISTANCE_FOR_LEADIN) {
