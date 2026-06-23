@@ -30,7 +30,7 @@ function animateScroll(from: number, to: number, duration: number) {
   requestAnimationFrame(step);
 }
 
-export function scrollToSection(id: string, behavior: ScrollBehavior = "smooth") {
+export function scrollToSection(id: string, behavior: ScrollBehavior = "smooth", retryUntil = performance.now() + 2500) {
   // Measure actual fixed header height (nav + any fixed banners like Featured Read)
   const nav = document.querySelector("nav");
   const banner = document.querySelector("[data-featured-read-banner]");
@@ -68,7 +68,12 @@ export function scrollToSection(id: string, behavior: ScrollBehavior = "smooth")
   };
 
   const firstTop = getTargetTop();
-  if (firstTop === null) return;
+  if (firstTop === null) {
+    if (performance.now() < retryUntil) {
+      window.setTimeout(() => scrollToSection(id, behavior, retryUntil), 80);
+    }
+    return;
+  }
 
   // First jump near the target to force rendering of content-visibility sections.
   window.scrollTo({ top: firstTop, behavior: instant });
@@ -96,6 +101,24 @@ export function scrollToSection(id: string, behavior: ScrollBehavior = "smooth")
     // Use the ORIGINAL scroll position to decide if lead-in is warranted,
     // since the settle loop has already jumped us to the target.
     if (behavior === "smooth") {
+      const directScrollTargets = new Set(["gallery", "meet-designers", "contact"]);
+      if (directScrollTargets.has(id)) {
+        const duration = isMobile ? 900 : 1100;
+        animateScroll(originY, nextTop, duration);
+
+        let correctionPasses = 0;
+        const correctAfterLazyLayout = () => {
+          const correctedTop = getTargetTop();
+          if (correctedTop !== null && Math.abs(window.scrollY - correctedTop) > 4) {
+            window.scrollTo({ top: correctedTop, behavior: instant });
+          }
+          correctionPasses += 1;
+          if (correctionPasses < 20) window.setTimeout(correctAfterLazyLayout, 120);
+        };
+        window.setTimeout(correctAfterLazyLayout, duration + 80);
+        return;
+      }
+
       const totalDistance = Math.abs(nextTop - originY);
       const MIN_DISTANCE_FOR_LEADIN = 800;
       if (totalDistance > MIN_DISTANCE_FOR_LEADIN) {
