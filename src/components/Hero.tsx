@@ -19,7 +19,24 @@ const HERO_MOBILE_SRCSET = [
   .map(({ w, h }) => `${HERO_BASE}/w_${w},h_${h},c_fill,g_auto,q_auto:eco,f_auto/${HERO_ID} ${w}w`)
   .join(", ");
 
-const scrollToOverview = () => scrollToSection("gallery");
+const revealBelowFold = () => {
+  window.dispatchEvent(new CustomEvent("ma:reveal-below-fold"));
+};
+
+const scrollToOverview = () => {
+  revealBelowFold();
+  scrollToSection("gallery");
+};
+
+const scrollToMeetDesigners = () => {
+  revealBelowFold();
+  scrollToSection("meet-designers");
+};
+
+const scrollToContact = () => {
+  revealBelowFold();
+  scrollToSection("contact");
+};
 
 const Hero = () => {
   return (
@@ -81,7 +98,7 @@ const Hero = () => {
 
               <button
                 type="button"
-                onClick={() => { trackEvent("click_meet_designers", { event_category: "CTA", event_label: "HeroCTA" }); scrollToSection("meet-designers"); }}
+                onClick={() => { trackEvent("click_meet_designers", { event_category: "CTA", event_label: "HeroCTA" }); scrollToMeetDesigners(); }}
                 className="bg-transparent border-0 p-0 text-white text-sm md:text-lg font-body tracking-wide hover:opacity-80 transition-opacity hero-fade-in-delayed-4 [text-shadow:_0_1px_3px_rgba(0,0,0,0.45)]"
               >
                 Meet our Designers
@@ -97,7 +114,7 @@ const Hero = () => {
         style={{ bottom: "max(9.5rem, calc(env(safe-area-inset-bottom) + 9rem))", animationDelay: "1.2s" }}
       >
         <button
-          onClick={() => { trackCTA.bookAppointment("HeroCTA"); scrollToSection("contact"); }}
+          onClick={() => { trackCTA.bookAppointment("HeroCTA"); scrollToContact(); }}
           className="bg-transparent border-0 p-0 text-right text-white text-xs font-body font-bold tracking-wide transition-opacity hover:opacity-80 [text-shadow:_0_1px_3px_rgba(0,0,0,0.55)]"
         >
           Book a Viewing
@@ -116,7 +133,7 @@ const Hero = () => {
         style={{ right: "200px", animationDelay: "1.2s" }}
       >
         <button
-          onClick={() => { trackCTA.bookAppointment("HeroCTA"); scrollToSection("contact"); }}
+          onClick={() => { trackCTA.bookAppointment("HeroCTA"); scrollToContact(); }}
           className="bg-transparent border-0 p-0 text-white text-xs lg:text-sm font-body font-bold tracking-wide transition-opacity hover:opacity-80 [text-shadow:_0_1px_3px_rgba(0,0,0,0.55)]"
         >
           Book a Viewing

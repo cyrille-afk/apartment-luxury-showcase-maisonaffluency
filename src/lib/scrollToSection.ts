@@ -30,7 +30,7 @@ function animateScroll(from: number, to: number, duration: number) {
   requestAnimationFrame(step);
 }
 
-export function scrollToSection(id: string, behavior: ScrollBehavior = "smooth") {
+export function scrollToSection(id: string, behavior: ScrollBehavior = "smooth", retryUntil = performance.now() + 2500) {
   // Measure actual fixed header height (nav + any fixed banners like Featured Read)
   const nav = document.querySelector("nav");
   const banner = document.querySelector("[data-featured-read-banner]");
@@ -68,7 +68,12 @@ export function scrollToSection(id: string, behavior: ScrollBehavior = "smooth")
   };
 
   const firstTop = getTargetTop();
-  if (firstTop === null) return;
+  if (firstTop === null) {
+    if (performance.now() < retryUntil) {
+      window.setTimeout(() => scrollToSection(id, behavior, retryUntil), 80);
+    }
+    return;
+  }
 
   // First jump near the target to force rendering of content-visibility sections.
   window.scrollTo({ top: firstTop, behavior: instant });

@@ -228,6 +228,16 @@ const Index = ({ categoryMode = false }: IndexProps = {}) => {
     };
   }, []);
 
+  useEffect(() => {
+    const revealBelowFold = () => {
+      setShowNavigation(true);
+      setShowScrollProgress(true);
+      setShowBelowFoldSections(true);
+    };
+    window.addEventListener("ma:reveal-below-fold", revealBelowFold);
+    return () => window.removeEventListener("ma:reveal-below-fold", revealBelowFold);
+  }, []);
+
   // On mount: restore exact scroll position OR scroll to section hash
   useEffect(() => {
     if (!showBelowFoldSections) return;
