@@ -210,13 +210,14 @@ const DesignersHoverHero = () => {
       ref={sectionRef}
       id="designers-hover-hero"
       aria-label="Featured designers"
-      className="relative w-full h-[88vh] min-h-[640px] bg-[#0a0a0a] text-foreground overflow-hidden touch-none md:touch-auto"
+      className="relative w-full h-[78svh] md:h-[88vh] min-h-[560px] md:min-h-[640px] bg-[#0a0a0a] text-foreground overflow-hidden touch-none md:touch-auto"
     >
       {/* Background image stack — cross-fade between layers.
           On mobile the stack is fixed to the viewport so the image stays
           pinned while the user swipes the page; on desktop it stays
           absolute to the hero section. */}
-      <div className="fixed md:absolute inset-0 z-0 pointer-events-none h-[88vh] md:h-auto">
+      <div className="fixed md:absolute inset-0 z-0 pointer-events-none h-[78svh] md:h-auto">
+
         {items.map((d) => {
           const url = d.hero_image_url || d.image_url || "";
           const isActive = d.slug === activeSlug;
@@ -246,7 +247,7 @@ const DesignersHoverHero = () => {
       </div>
 
       {/* Content */}
-      <div className="relative z-10 flex flex-col justify-center h-full px-6 sm:px-12 md:px-20 lg:px-28 pb-24">
+      <div className="relative z-10 flex flex-col justify-start md:justify-center h-full px-6 sm:px-12 md:px-20 lg:px-28 pt-10 md:pt-0 pb-44 md:pb-24">
         <div className="w-full max-w-xs sm:max-w-sm md:max-w-md">
           <nav
             ref={navRef}
@@ -290,7 +291,7 @@ const DesignersHoverHero = () => {
       </div>
 
       {/* Archives / Directory labels — lifted on mobile to clear iOS Safari chrome */}
-      <div className="absolute bottom-[calc(7rem+env(safe-area-inset-bottom))] md:bottom-24 left-6 sm:left-12 md:left-20 lg:left-28 z-10 flex items-center gap-10 text-white border-t border-white/20 pt-6 max-w-md">
+      <div className="absolute bottom-[calc(1.25rem+env(safe-area-inset-bottom))] md:bottom-24 left-6 sm:left-12 md:left-20 lg:left-28 z-10 flex items-center gap-10 text-white border-t border-white/20 pt-6 max-w-md">
         <div className="flex flex-col">
           <span className="text-[9px] uppercase tracking-[0.3em] mb-1 font-body text-white">
             Archives
@@ -299,8 +300,9 @@ const DesignersHoverHero = () => {
         </div>
         <div className="flex flex-col">
           <span className="text-[9px] uppercase tracking-[0.3em] mb-1 font-body text-white">
-            Directory{designerCount > 0 && <span className="ml-1 text-white/70 normal-case tracking-normal">({designerCount})</span>}
+            Directory <span className="text-white/70 normal-case tracking-normal">({designerCount || 95})</span>
           </span>
+
           <Link
             to="/designers?letter=A"
             onClick={(e) => {
