@@ -216,7 +216,7 @@ const DesignersHoverHero = () => {
           On mobile the stack is fixed to the viewport so the image stays
           pinned while the user swipes the page; on desktop it stays
           absolute to the hero section. */}
-      <div className="fixed md:absolute inset-0 z-0 pointer-events-none h-[78svh] md:h-auto">
+      <div className="fixed md:absolute inset-0 z-0 pointer-events-none h-[88vh] md:h-auto">
 
         {items.map((d) => {
           const url = d.hero_image_url || d.image_url || "";
