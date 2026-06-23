@@ -64,6 +64,44 @@ jobs:
           retention-days: 14
           if-no-files-found: ignore
 
+  playwright-visual:
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.60.0-noble
+    timeout-minutes: 20
+    # Visual regression for landing CTAs / hero / designers section across mobile + desktop.
+    # Baselines live under e2e/visual/__screenshots__/. Refresh locally with `npm run test:visual:update`.
+    steps:
+      - uses: actions/checkout@v4
+      - name: Cache npm
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.npm
+            ~/.cache/ms-playwright
+          key: visual-playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: visual-playwright-${{ runner.os }}-
+      - run: npm ci --prefer-offline --no-audit --no-fund
+      - name: Ensure Chromium is installed
+        run: npx playwright install chromium
+      - name: Run visual regression suite
+        shell: bash
+        run: |
+          set -o pipefail
+          npm run test:visual 2>&1 | tee playwright-visual.log
+        timeout-minutes: 15
+      - name: Upload visual report
+        if: failure() || cancelled()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-visual-report
+          path: |
+            playwright-report
+            test-results
+            playwright-visual.log
+          retention-days: 14
+          if-no-files-found: ignore
+
   lighthouse-mobile:
     runs-on: ubuntu-latest
     timeout-minutes: 45

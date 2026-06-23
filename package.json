@@ -13,6 +13,8 @@
     "test:e2e:mobile-parallax": "playwright test e2e/parallax-interlude-mobile.spec.ts",
     "test:e2e:mobile-pwa": "playwright test e2e/mobile-pwa-a11y.spec.ts",
     "test:e2e:ios-zoom": "playwright test e2e/ios-focus-zoom.spec.ts",
+    "test:visual": "playwright test e2e/visual",
+    "test:visual:update": "playwright test e2e/visual --update-snapshots",
     "lighthouse:mobile": "node scripts/lighthouse-mobile.mjs",
     "audit:og": "python3 scripts/audit-og-bridges.py --warnings",
     "check:product-images": "python3 scripts/check-product-image-parity.py"

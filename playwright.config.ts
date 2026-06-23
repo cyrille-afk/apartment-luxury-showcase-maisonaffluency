@@ -22,13 +22,30 @@ export default defineConfig({
     screenshot: "only-on-failure",
     video: "retain-on-failure",
   },
+  // Pixel diff tolerance — small AA/font shifts shouldn't fail the build,
+  // real layout/CTA regressions will.
+  expect: {
+    toHaveScreenshot: { maxDiffPixelRatio: 0.02, animations: "disabled" },
+  },
   projects: [
     {
       name: "mobile-chrome",
       use: {
         ...devices["Pixel 5"],
+        viewport: { width: 390, height: 844 },
         launchOptions: {
           // CI hardening: avoid sandbox/GPU issues on GitHub Actions headless runners.
+          args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-gpu"],
+          ...(CHROMIUM_EXECUTABLE_PATH ? { executablePath: CHROMIUM_EXECUTABLE_PATH } : {}),
+        },
+      },
+    },
+    {
+      name: "desktop-chrome",
+      use: {
+        ...devices["Desktop Chrome"],
+        viewport: { width: 1280, height: 800 },
+        launchOptions: {
           args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-gpu"],
           ...(CHROMIUM_EXECUTABLE_PATH ? { executablePath: CHROMIUM_EXECUTABLE_PATH } : {}),
         },
