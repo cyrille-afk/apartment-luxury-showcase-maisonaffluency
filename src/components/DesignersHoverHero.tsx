@@ -210,7 +210,7 @@ const DesignersHoverHero = () => {
       ref={sectionRef}
       id="designers-hover-hero"
       aria-label="Featured designers"
-      className="relative w-full h-[78svh] md:h-[88vh] min-h-[560px] md:min-h-[640px] bg-[#0a0a0a] text-foreground overflow-hidden touch-none md:touch-auto"
+      className="relative w-full h-[88vh] min-h-[640px] bg-[#0a0a0a] text-foreground overflow-hidden touch-none md:touch-auto"
     >
       {/* Background image stack — cross-fade between layers.
           On mobile the stack is fixed to the viewport so the image stays
