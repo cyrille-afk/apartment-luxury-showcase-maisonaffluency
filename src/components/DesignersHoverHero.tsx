@@ -275,7 +275,7 @@ const DesignersHoverHero = () => {
       {/* Content */}
       <div
         className={cn(
-          "relative z-10 flex flex-col justify-center h-full px-6 sm:px-12 md:px-20 lg:px-28 pt-6 md:pt-8",
+          "relative z-10 flex flex-col justify-center h-full px-6 sm:px-12 md:px-20 lg:px-28 pt-6 md:pt-8 md:-translate-y-12",
           isStandalone ? "pb-44 md:pb-0" : "justify-end md:justify-center pb-44 md:pb-0"
         )}
       >
@@ -304,7 +304,7 @@ const DesignersHoverHero = () => {
                       className={cn(
                         "inline-block whitespace-nowrap",
                         "font-display font-light tracking-tight",
-                        "text-sm sm:text-base md:text-[22px] leading-[1.18]",
+                        "text-sm sm:text-base md:text-[20px] leading-[1.12]",
                         "transition-colors duration-[1200ms] ease-out",
                         isDimmed ? "text-white/35" : "text-white/95"
                       )}
