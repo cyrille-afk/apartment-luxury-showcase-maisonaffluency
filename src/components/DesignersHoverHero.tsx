@@ -302,7 +302,7 @@ const DesignersHoverHero = () => {
                       onMouseEnter={() => setActiveSlug(d.slug)}
                       onFocus={() => setActiveSlug(d.slug)}
                       className={cn(
-                        "inline-block",
+                        "inline-block whitespace-nowrap",
                         "font-display font-light tracking-tight",
                         "text-sm sm:text-base md:text-[22px] leading-[1.18]",
                         "transition-colors duration-[1200ms] ease-out",
@@ -323,15 +323,14 @@ const DesignersHoverHero = () => {
             </ul>
           </nav>
         </div>
-        {directoryLabels("hidden md:flex mt-12 items-center gap-10 text-white border-t border-white/20 pt-6 max-w-md")}
       </div>
 
       {/* Archives / Directory labels: browser mobile clears iOS chrome; PWA sits lower. */}
       {directoryLabels(cn(
-        "absolute md:hidden left-6 sm:left-12 z-10 flex items-center gap-10 text-white border-t border-white/20 pt-6 max-w-md",
+        "absolute left-6 sm:left-12 md:left-20 lg:left-28 z-10 flex items-center gap-10 text-white border-t border-white/20 pt-6 max-w-md",
         isStandalone
-          ? "bottom-[calc(5rem+env(safe-area-inset-bottom))]"
-          : "bottom-[calc(4rem+env(safe-area-inset-bottom))]"
+          ? "bottom-[calc(5rem+env(safe-area-inset-bottom))] md:bottom-14"
+          : "bottom-[calc(4rem+env(safe-area-inset-bottom))] md:bottom-14"
       ))}
 
 
