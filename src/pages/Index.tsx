@@ -34,6 +34,7 @@ const ContactInquiry = lazyRetry(() => import("@/components/ContactInquiry"));
 const Footer = lazyRetry(() => import("@/components/Footer"));
 const DesignersDirectory = lazyRetry(() => import("@/components/DesignersDirectory"));
 const Collectibles = lazyRetry(() => import("@/components/Collectibles"));
+const DesignersHoverHero = lazyRetry(() => import("@/components/DesignersHoverHero"));
 const ProductGrid = lazyRetry(() => import("@/components/ProductGrid"));
 
 // ExitIntentBanner is deferred — not even fetched until 5s after load to avoid
