@@ -449,12 +449,9 @@ const Index = ({ categoryMode = false }: IndexProps = {}) => {
             {!routeIsCategory && (
               <section id="meet-designers" aria-label="Meet our Designers" className="scroll-header-offset">
                 <div className="bg-[#0a0a0a] px-6 sm:px-12 md:px-20 lg:px-28 pt-16 md:pt-20 pb-6 md:pb-8">
-                  <p className="font-body text-[10px] uppercase tracking-[0.3em] text-white/60 mb-3">
+                  <p className="font-body text-[10px] uppercase tracking-[0.3em] text-white/60">
                     Meet our Designers
                   </p>
-                  <h2 className="font-display text-white text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-light tracking-tight">
-                    95 of the World's Most Iconic Designers &amp; Ateliers
-                  </h2>
                 </div>
                 <Suspense fallback={<SectionFallback />}>
                   <DesignersHoverHero />
