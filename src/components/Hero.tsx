@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { scrollToSection } from "@/lib/scrollToSection";
-import { trackCTA } from "@/lib/analytics";
+import { trackCTA, trackEvent } from "@/lib/analytics";
 
 const HERO_BASE = "https://res.cloudinary.com/dif1oamtj/image/upload";
 const HERO_ID = "v1781920000/AffluencySG_194-22.jpg_macpwj";
