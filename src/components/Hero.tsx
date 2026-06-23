@@ -19,7 +19,7 @@ const HERO_MOBILE_SRCSET = [
   .map(({ w, h }) => `${HERO_BASE}/w_${w},h_${h},c_fill,g_auto,q_auto:eco,f_auto/${HERO_ID} ${w}w`)
   .join(", ");
 
-const scrollToOverview = () => scrollToSection("overview");
+const scrollToOverview = () => scrollToSection("gallery");
 
 const Hero = () => {
   return (
