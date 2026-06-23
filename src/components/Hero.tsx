@@ -82,6 +82,22 @@ const Hero = () => {
                 Explore Our Curated Collection
               </button>
 
+              <button
+                type="button"
+                onClick={() => { trackEvent("click_meet_designers", { event_category: "CTA", event_label: "HeroCTA" }); scrollToSection("meet-designers"); }}
+                className="group inline-flex items-center gap-3 md:gap-4 text-white text-xs md:text-sm font-body font-bold uppercase tracking-[0.2em] md:tracking-[0.25em] hero-fade-in-delayed-4 transition-opacity hover:opacity-80"
+              >
+                Meet our Designers (95)
+                <svg
+                  viewBox="0 0 72 10"
+                  fill="none"
+                  className="w-14 md:w-20 h-2.5 text-current transition-transform duration-300 group-hover:translate-x-1"
+                  aria-hidden="true"
+                >
+                  <line x1="0" y1="5" x2="64" y2="5" stroke="currentColor" strokeWidth="1.5" />
+                  <polyline points="60,1 68,5 60,9" stroke="currentColor" strokeWidth="1.5" fill="none" />
+                </svg>
+              </button>
             </div>
           </div>
         </div>
