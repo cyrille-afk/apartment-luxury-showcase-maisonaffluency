@@ -212,6 +212,33 @@ const DesignersHoverHero = () => {
 
   if (!hasItems) return null;
 
+  const directoryLabels = (className: string) => (
+    <div className={className}>
+      <div className="flex flex-col">
+        <span className="text-[9px] uppercase tracking-[0.3em] mb-1 font-body text-white">
+          Archives
+        </span>
+        <span className="text-xs font-body font-light text-white/85">1920 — Today</span>
+      </div>
+      <div className="flex flex-col">
+        <span className="text-[9px] uppercase tracking-[0.3em] mb-1 font-body text-white">
+          Directory <span className="text-white/70 normal-case tracking-normal">({designerCount || 95})</span>
+        </span>
+
+        <Link
+          to="/designers?letter=A"
+          onClick={(e) => {
+            e.preventDefault();
+            jumpToDesignerLetter("A");
+          }}
+          className="text-xs font-body font-light italic text-white/85 hover:text-white underline-offset-4 hover:underline transition-colors"
+        >
+          Click to Browse A–Z
+        </Link>
+      </div>
+    </div>
+  );
+
   return (
     <section
       ref={sectionRef}
@@ -248,8 +275,8 @@ const DesignersHoverHero = () => {
       {/* Content */}
       <div
         className={cn(
-          "relative z-10 flex flex-col justify-center h-full px-6 sm:px-12 md:px-20 lg:px-28 pt-6 md:pt-8 md:pb-24",
-          isStandalone ? "pb-44" : "justify-end md:justify-center pb-44"
+          "relative z-10 flex flex-col justify-center h-full px-6 sm:px-12 md:px-20 lg:px-28 pt-6 md:pt-8",
+          isStandalone ? "pb-44 md:pb-0" : "justify-end md:justify-center pb-44 md:pb-0"
         )}
       >
 
@@ -277,7 +304,7 @@ const DesignersHoverHero = () => {
                       className={cn(
                         "inline-block",
                         "font-display font-light tracking-tight",
-                        "text-sm sm:text-base md:text-2xl lg:text-[28px] leading-[1.25]",
+                        "text-sm sm:text-base md:text-[22px] leading-[1.18]",
                         "transition-colors duration-[1200ms] ease-out",
                         isDimmed ? "text-white/35" : "text-white/95"
                       )}
@@ -296,40 +323,16 @@ const DesignersHoverHero = () => {
             </ul>
           </nav>
         </div>
+        {directoryLabels("hidden md:flex mt-12 items-center gap-10 text-white border-t border-white/20 pt-6 max-w-md")}
       </div>
 
       {/* Archives / Directory labels: browser mobile clears iOS chrome; PWA sits lower. */}
-      <div
-        className={cn(
-          "absolute md:bottom-24 left-6 sm:left-12 md:left-20 lg:left-28 z-10 flex items-center gap-10 text-white border-t border-white/20 pt-6 max-w-md",
-          isStandalone
-            ? "bottom-[calc(5rem+env(safe-area-inset-bottom))]"
-            : "bottom-[calc(4rem+env(safe-area-inset-bottom))]"
-        )}
-      >
-        <div className="flex flex-col">
-          <span className="text-[9px] uppercase tracking-[0.3em] mb-1 font-body text-white">
-            Archives
-          </span>
-          <span className="text-xs font-body font-light text-white/85">1920 — Today</span>
-        </div>
-        <div className="flex flex-col">
-          <span className="text-[9px] uppercase tracking-[0.3em] mb-1 font-body text-white">
-            Directory <span className="text-white/70 normal-case tracking-normal">({designerCount || 95})</span>
-          </span>
-
-          <Link
-            to="/designers?letter=A"
-            onClick={(e) => {
-              e.preventDefault();
-              jumpToDesignerLetter("A");
-            }}
-            className="text-xs font-body font-light italic text-white/85 hover:text-white underline-offset-4 hover:underline transition-colors"
-          >
-            Click to Browse A–Z
-          </Link>
-        </div>
-      </div>
+      {directoryLabels(cn(
+        "absolute md:hidden left-6 sm:left-12 z-10 flex items-center gap-10 text-white border-t border-white/20 pt-6 max-w-md",
+        isStandalone
+          ? "bottom-[calc(5rem+env(safe-area-inset-bottom))]"
+          : "bottom-[calc(4rem+env(safe-area-inset-bottom))]"
+      ))}
 
 
       {/* Vertical wordmark */}
