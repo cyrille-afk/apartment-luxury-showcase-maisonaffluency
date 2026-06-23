@@ -249,7 +249,7 @@ const DesignersHoverHero = () => {
       <div
         className={cn(
           "relative z-10 flex flex-col justify-center h-full px-6 sm:px-12 md:px-20 lg:px-28 pt-6 md:pt-8 md:pb-24",
-          isStandalone ? "pb-44" : "justify-end pb-48"
+          isStandalone ? "pb-44" : "justify-end pb-44"
         )}
       >
 
@@ -304,7 +304,7 @@ const DesignersHoverHero = () => {
           "absolute md:bottom-24 left-6 sm:left-12 md:left-20 lg:left-28 z-10 flex items-center gap-10 text-white border-t border-white/20 pt-6 max-w-md",
           isStandalone
             ? "bottom-[calc(5rem+env(safe-area-inset-bottom))]"
-            : "bottom-[calc(7rem+env(safe-area-inset-bottom))]"
+            : "bottom-[calc(4rem+env(safe-area-inset-bottom))]"
         )}
       >
         <div className="flex flex-col">
