@@ -439,18 +439,6 @@ const Index = ({ categoryMode = false }: IndexProps = {}) => {
                   </section>
                 </div>
 
-                {/* Interlude 1: After Curating Team → Before Designers (desktop only) */}
-                <div className="hidden md:block">
-                  <Suspense fallback={null}>
-                    <ParallaxInterlude
-                      imageUrl="https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto,f_auto/v1773373912/Screen_Shot_2026-03-13_at_11.51.17_AM_egvsuz.png"
-                      quote="Every piece of furniture tells a story — of the hands that shaped it, the material that gave it life, and the space it was destined to inhabit"
-                      attribution="The Maison Affluency Curation Philosophy"
-                      overlayOpacity={0}
-                      objectPosition="left center"
-                    />
-                  </Suspense>
-                </div>
               </>
             )}
 
@@ -461,12 +449,9 @@ const Index = ({ categoryMode = false }: IndexProps = {}) => {
             {!routeIsCategory && (
               <section id="meet-designers" aria-label="Meet our Designers" className="scroll-header-offset">
                 <div className="bg-[#0a0a0a] px-6 sm:px-12 md:px-20 lg:px-28 pt-16 md:pt-20 pb-6 md:pb-8">
-                  <p className="font-body text-[10px] uppercase tracking-[0.3em] text-white/60 mb-3">
+                  <p className="font-body text-[10px] uppercase tracking-[0.3em] text-white/60">
                     Meet our Designers
                   </p>
-                  <h2 className="font-display text-white text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-light tracking-tight">
-                    95 of the World's Most Iconic Designers &amp; Ateliers
-                  </h2>
                 </div>
                 <Suspense fallback={<SectionFallback />}>
                   <DesignersHoverHero />
