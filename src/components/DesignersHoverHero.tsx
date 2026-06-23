@@ -226,7 +226,10 @@ const DesignersHoverHero = () => {
       </div>
 
       {/* Content */}
-      <div className="relative z-10 flex flex-col justify-start h-full px-6 sm:px-12 md:px-20 lg:px-28 pt-6 md:pt-8 pb-32 md:pb-24">
+      <div className="relative z-10 flex flex-col justify-center h-full px-6 sm:px-12 md:px-20 lg:px-28 pt-6 md:pt-8 pb-32 md:pb-24">
+        <p className="mb-5 md:mb-8 font-body text-sm md:text-lg tracking-wide text-white/75">
+          Meet our Designers
+        </p>
         <div className="w-full max-w-xs sm:max-w-sm md:max-w-md">
           <nav
             ref={navRef}
