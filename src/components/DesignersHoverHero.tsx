@@ -199,8 +199,34 @@ const DesignersHoverHero = () => {
       aria-label="Featured designers"
       className="relative w-full h-[88vh] min-h-[640px] bg-[#0a0a0a] text-foreground overflow-hidden touch-none md:touch-auto"
     >
+      {/* Cross-fading background images */}
+      <div className="absolute inset-0 z-0">
+        {items.map((d) => {
+          const src = d.hero_image_url || d.image_url;
+          if (!src) return null;
+          const isActive = d.slug === activeSlug;
+          return (
+            <img
+              key={d.slug}
+              src={src}
+              alt=""
+              aria-hidden="true"
+              loading="lazy"
+              decoding="async"
+              className={cn(
+                "absolute inset-0 w-full h-full object-cover transition-opacity ease-out",
+                isActive ? "opacity-100" : "opacity-0"
+              )}
+              style={{ transitionDuration: `${IMAGE_TRANSITION_MS}ms` }}
+            />
+          );
+        })}
+        {/* Readability overlay */}
+        <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/45 to-black/20 md:from-black/70 md:via-black/35 md:to-transparent" />
+      </div>
+
       {/* Content */}
-      <div className="relative z-10 flex flex-col justify-center h-full px-6 sm:px-12 md:px-20 lg:px-28 pb-32 md:pb-24">
+      <div className="relative z-10 flex flex-col justify-start h-full px-6 sm:px-12 md:px-20 lg:px-28 pt-6 md:pt-8 pb-32 md:pb-24">
         <div className="w-full max-w-xs sm:max-w-sm md:max-w-md">
           <nav
             ref={navRef}
@@ -224,7 +250,7 @@ const DesignersHoverHero = () => {
                         "font-display font-light tracking-tight",
                         "text-sm sm:text-base md:text-2xl lg:text-[28px] leading-[1.25]",
                         "transition-colors duration-[1200ms] ease-out",
-                        isDimmed ? "text-white/35" : "text-white/90"
+                        isDimmed ? "text-white/35" : "text-white/95"
                       )}
                     >
                       <span>

@@ -74,10 +74,10 @@ const Hero = () => {
               <span className="md:hidden leading-relaxed text-justify">From Couture Furniture to Collectible Designs Items, Discover Emerging Talents and Design Masters In Our Gallery or Through the Best Ateliers and Designer Workshops We Partner&nbsp;With</span>
             </p>
 
-            <div className="mt-16 md:mt-24 flex flex-col items-start md:items-center gap-6">
+            <div className="mt-16 md:mt-24 flex flex-col items-start md:items-center gap-4">
               <button
                 onClick={scrollToOverview}
-                className="flex items-center gap-2 px-6 py-3 md:px-10 md:py-4 lg:px-12 lg:py-4.5 bg-white/20 hover:bg-white/30 md:backdrop-blur-2xl border border-white/40 hover:border-white/60 text-white text-sm md:text-lg font-body font-bold tracking-wide rounded-full transition-all duration-300 shadow-[0_6px_30px_rgba(0,0,0,0.3)] hover:shadow-[0_6px_40px_rgba(0,0,0,0.4)] hero-fade-in-delayed-4 [text-shadow:_0_1px_3px_rgba(0,0,0,0.3)]"
+                className="bg-transparent border-0 p-0 text-white text-sm md:text-lg font-body tracking-wide hover:opacity-80 transition-opacity hero-fade-in-delayed-4 [text-shadow:_0_1px_3px_rgba(0,0,0,0.45)]"
               >
                 Explore Our Curated Collection
               </button>
@@ -85,9 +85,9 @@ const Hero = () => {
               <button
                 type="button"
                 onClick={() => { trackEvent("click_meet_designers", { event_category: "CTA", event_label: "HeroCTA" }); scrollToSection("meet-designers"); }}
-                className="flex items-center gap-2 px-6 py-3 md:px-10 md:py-4 lg:px-12 lg:py-4.5 bg-white/20 hover:bg-white/30 md:backdrop-blur-2xl border border-white/40 hover:border-white/60 text-white text-sm md:text-lg font-body font-bold tracking-wide rounded-full transition-all duration-300 shadow-[0_6px_30px_rgba(0,0,0,0.3)] hover:shadow-[0_6px_40px_rgba(0,0,0,0.4)] hero-fade-in-delayed-4 [text-shadow:_0_1px_3px_rgba(0,0,0,0.3)]"
+                className="bg-transparent border-0 p-0 text-white text-sm md:text-lg font-body tracking-wide hover:opacity-80 transition-opacity hero-fade-in-delayed-4 [text-shadow:_0_1px_3px_rgba(0,0,0,0.45)]"
               >
-                Meet our Designers (95)
+                Meet our Designers
               </button>
             </div>
           </div>
