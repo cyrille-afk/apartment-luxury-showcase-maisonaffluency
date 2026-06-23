@@ -53,9 +53,6 @@ const Hero = () => {
       {/* Text overlay — CSS-only animations, no framer-motion needed */}
       <div className="relative z-10 h-full px-4 pb-32 pt-[44%] md:px-32 md:pb-20 md:pt-[20%] lg:px-52 flex-col border rounded-none opacity-100 shadow-none flex items-start justify-start md:justify-start md:items-start">
         <div className="max-w-4xl md:text-left hero-fade-in">
-          <p className="mb-3 uppercase tracking-[0.2em] md:tracking-[0.3em] text-cream/90 font-extrabold font-sans text-sm md:text-xl lg:text-2xl hero-fade-in-delayed-1">
-          </p>
-
           <h1 className="mb-8 md:mb-14 text-3xl leading-tight text-white md:text-4xl font-serif lg:text-5xl hero-fade-in-delayed-2">
             <button
               type="button"
@@ -66,15 +63,15 @@ const Hero = () => {
             </button>
           </h1>
 
-          <div className="inline-flex flex-col items-center md:items-end">
+          <div className="flex w-full max-w-3xl flex-col items-start">
             <p className="text-base leading-relaxed text-white text-left font-serif md:text-xl lg:text-2xl font-medium hero-fade-in-delayed-3">
               <span className="hidden md:inline">From Couture Furniture to Collectible Designs Items,
               <br /> Discover Emerging Talents and Design Masters In Our Gallery
               <br /> or Through the Best Ateliers and Designer Workshops We Partner&nbsp;With</span>
-              <span className="md:hidden leading-relaxed text-justify">From Couture Furniture to Collectible Designs Items, Discover Emerging Talents and Design Masters In Our Gallery or Through the Best Ateliers and Designer Workshops We Partner&nbsp;With</span>
+              <span className="md:hidden leading-relaxed text-left">From Couture Furniture to Collectible Designs Items, Discover Emerging Talents and Design Masters In Our Gallery or Through the Best Ateliers and Designer Workshops We Partner&nbsp;With</span>
             </p>
 
-            <div className="mt-16 md:mt-24 flex flex-col items-start md:items-center gap-4">
+            <div className="mt-8 md:mt-10 flex flex-col items-start gap-4">
               <button
                 onClick={scrollToOverview}
                 className="bg-transparent border-0 p-0 text-white text-sm md:text-lg font-body tracking-wide hover:opacity-80 transition-opacity hero-fade-in-delayed-4 [text-shadow:_0_1px_3px_rgba(0,0,0,0.45)]"
@@ -101,13 +98,13 @@ const Hero = () => {
       >
         <button
           onClick={() => { trackCTA.bookAppointment("HeroCTA"); scrollToSection("contact"); }}
-          className="flex items-center gap-2 px-4 py-2.5 bg-white/20 border border-white/30 hover:border-white/50 text-white text-xs font-body font-bold tracking-wide rounded-full transition-all duration-300 shadow-[0_4px_20px_rgba(0,0,0,0.15)]"
+          className="bg-transparent border-0 p-0 text-right text-white text-xs font-body font-bold tracking-wide transition-opacity hover:opacity-80 [text-shadow:_0_1px_3px_rgba(0,0,0,0.55)]"
         >
           Book a Viewing
         </button>
         <Link
           to="/trade-program"
-          className="flex items-center gap-2 px-4 py-2.5 bg-white/20 border border-white/30 hover:border-white/50 text-white text-xs font-body font-bold tracking-wide rounded-full transition-all duration-300 shadow-[0_4px_20px_rgba(0,0,0,0.15)]"
+          className="bg-transparent border-0 p-0 text-right text-white text-xs font-body font-bold tracking-wide transition-opacity hover:opacity-80 [text-shadow:_0_1px_3px_rgba(0,0,0,0.55)]"
         >
           Trade Program
         </Link>
@@ -120,13 +117,13 @@ const Hero = () => {
       >
         <button
           onClick={() => { trackCTA.bookAppointment("HeroCTA"); scrollToSection("contact"); }}
-          className="flex items-center gap-2 px-5 py-2.5 lg:px-6 lg:py-3 bg-white/10 hover:bg-white/20 backdrop-blur-xl border border-white/25 hover:border-white/45 text-white text-xs lg:text-sm font-body font-bold tracking-wide rounded-full transition-all duration-300 shadow-lg"
+          className="bg-transparent border-0 p-0 text-white text-xs lg:text-sm font-body font-bold tracking-wide transition-opacity hover:opacity-80 [text-shadow:_0_1px_3px_rgba(0,0,0,0.55)]"
         >
           Book a Viewing
         </button>
         <Link
           to="/trade-program"
-          className="flex items-center gap-2 px-5 py-2.5 lg:px-6 lg:py-3 bg-white/10 hover:bg-white/20 backdrop-blur-xl border border-white/25 hover:border-white/45 text-white text-xs lg:text-sm font-body font-bold tracking-wide rounded-full transition-all duration-300 shadow-lg"
+          className="bg-transparent border-0 p-0 text-white text-xs lg:text-sm font-body font-bold tracking-wide transition-opacity hover:opacity-80 [text-shadow:_0_1px_3px_rgba(0,0,0,0.55)]"
         >
           Trade Program
         </Link>
