@@ -291,7 +291,7 @@ const DesignersHoverHero = () => {
       </div>
 
       {/* Archives / Directory labels — lifted on mobile to clear iOS Safari chrome */}
-      <div className="absolute bottom-[calc(5rem+env(safe-area-inset-bottom))] md:bottom-24 left-6 sm:left-12 md:left-20 lg:left-28 z-10 flex items-center gap-10 text-white border-t border-white/20 pt-6 max-w-md">
+      <div className="absolute bottom-[calc(9rem+env(safe-area-inset-bottom))] md:bottom-24 left-6 sm:left-12 md:left-20 lg:left-28 z-10 flex items-center gap-10 text-white border-t border-white/20 pt-6 max-w-md">
         <div className="flex flex-col">
           <span className="text-[9px] uppercase tracking-[0.3em] mb-1 font-body text-white">
             Archives
