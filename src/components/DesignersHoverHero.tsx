@@ -190,6 +190,16 @@ const DesignersHoverHero = () => {
     };
   }, [hasItems, items]);
 
+  if (!hasItems) return null;
+
+  return (
+    <section
+      ref={sectionRef}
+      id="designers-hover-hero"
+      aria-label="Featured designers"
+      className="relative w-full h-[88vh] min-h-[640px] bg-[#0a0a0a] text-foreground overflow-hidden touch-none md:touch-auto"
+    >
+      {/* Content */}
       <div className="relative z-10 flex flex-col justify-center h-full px-6 sm:px-12 md:px-20 lg:px-28 pb-32 md:pb-24">
         <div className="w-full max-w-xs sm:max-w-sm md:max-w-md">
           <nav
