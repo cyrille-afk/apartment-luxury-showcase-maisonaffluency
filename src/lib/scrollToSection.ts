@@ -103,7 +103,19 @@ export function scrollToSection(id: string, behavior: ScrollBehavior = "smooth",
     if (behavior === "smooth") {
       const directScrollTargets = new Set(["gallery", "meet-designers", "contact"]);
       if (directScrollTargets.has(id)) {
-        animateScroll(originY, nextTop, isMobile ? 900 : 1100);
+        const duration = isMobile ? 900 : 1100;
+        animateScroll(originY, nextTop, duration);
+
+        let correctionPasses = 0;
+        const correctAfterLazyLayout = () => {
+          const correctedTop = getTargetTop();
+          if (correctedTop !== null && Math.abs(window.scrollY - correctedTop) > 4) {
+            window.scrollTo({ top: correctedTop, behavior: instant });
+          }
+          correctionPasses += 1;
+          if (correctionPasses < 20) window.setTimeout(correctAfterLazyLayout, 120);
+        };
+        window.setTimeout(correctAfterLazyLayout, duration + 80);
         return;
       }
 
