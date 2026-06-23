@@ -72,6 +72,16 @@ const SWIPE_THRESHOLD = 50;
 const IMAGE_TRANSITION_MS = 3500;
 const LOCK_MS = 1200;
 
+const isStandaloneDisplay = () => {
+  if (typeof window === "undefined") return false;
+  const params = new URLSearchParams(window.location.search);
+  return (
+    params.get("source") === "pwa" ||
+    window.matchMedia?.("(display-mode: standalone)").matches ||
+    (window.navigator as any).standalone === true
+  );
+};
+
 const DesignersHoverHero = () => {
   const { data: designers } = useFeaturedDesigners();
   const { data: allDesigners = [] } = useAllDesigners();
@@ -80,8 +90,18 @@ const DesignersHoverHero = () => {
     [allDesigners]
   );
   const [activeSlug, setActiveSlug] = useState<string | null>(null);
+  const [isStandalone, setIsStandalone] = useState(false);
   const navRef = useRef<HTMLElement>(null);
   const sectionRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const media = window.matchMedia?.("(display-mode: standalone)");
+    const update = () => setIsStandalone(isStandaloneDisplay());
+    update();
+    media?.addEventListener?.("change", update);
+    return () => media?.removeEventListener?.("change", update);
+  }, []);
 
   // Pre-seed active on first render once data arrives so the hero is never
   // a void on entry — the first designer acts as default.
@@ -272,8 +292,15 @@ const DesignersHoverHero = () => {
         </div>
       </div>
 
-      {/* Archives / Directory labels — lifted on mobile to clear iOS Safari chrome */}
-      <div className="absolute bottom-[calc(9rem+env(safe-area-inset-bottom))] md:bottom-24 left-6 sm:left-12 md:left-20 lg:left-28 z-10 flex items-center gap-10 text-white border-t border-white/20 pt-6 max-w-md">
+      {/* Archives / Directory labels: browser mobile clears iOS chrome; PWA sits lower. */}
+      <div
+        className={cn(
+          "absolute md:bottom-24 left-6 sm:left-12 md:left-20 lg:left-28 z-10 flex items-center gap-10 text-white border-t border-white/20 pt-6 max-w-md",
+          isStandalone
+            ? "bottom-[calc(5rem+env(safe-area-inset-bottom))]"
+            : "bottom-[calc(13rem+env(safe-area-inset-bottom))]"
+        )}
+      >
         <div className="flex flex-col">
           <span className="text-[9px] uppercase tracking-[0.3em] mb-1 font-body text-white">
             Archives

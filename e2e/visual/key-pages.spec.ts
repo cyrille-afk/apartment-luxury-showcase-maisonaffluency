@@ -25,6 +25,27 @@ test.describe("Designers index", () => {
     await page.waitForTimeout(500);
     expect(errors, "uncaught runtime errors on /designers").toHaveLength(0);
   });
+
+  test("mobile/PWA: hero directory sits above iOS chrome in browser and lower in standalone", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "mobile-chrome", "mobile-only layout guard");
+
+    const directoryLink = () => page.getByRole("link", { name: /click to browse a.?z/i }).first();
+    const measure = async (url: string) => {
+      await page.goto(url, { waitUntil: "domcontentloaded" });
+      await expect(directoryLink()).toBeVisible({ timeout: 15_000 });
+      return directoryLink().evaluate((el) => {
+        const rect = el.getBoundingClientRect();
+        return { top: rect.top, bottom: rect.bottom, bottomGap: window.innerHeight - rect.bottom };
+      });
+    };
+
+    const mobileBrowser = await measure("/designers");
+    const pwaStandalone = await measure("/designers?source=pwa");
+
+    expect(mobileBrowser.bottomGap, "browser mobile directory must clear iOS bottom navigation").toBeGreaterThan(150);
+    expect(pwaStandalone.top, "PWA directory should sit lower than browser mobile").toBeGreaterThan(mobileBrowser.top + 70);
+    expect(pwaStandalone.bottomGap, "PWA directory should still remain safely above the bottom edge").toBeGreaterThan(60);
+  });
 });
 
 test.describe("Sample public product page", () => {
