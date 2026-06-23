@@ -473,7 +473,6 @@ const Index = ({ categoryMode = false }: IndexProps = {}) => {
                 </Suspense>
               </section>
             )}
-            </Suspense>
             <section id="designers" className="scroll-header-offset">
               <Suspense fallback={<SectionFallback />}>
                 <DesignersDirectory mode="products" showTradeCTA={false} />
