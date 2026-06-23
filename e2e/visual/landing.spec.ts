@@ -52,6 +52,16 @@ test.describe("Landing page", () => {
     await page.getByRole("button", { name: /meet our designers/i }).click();
     const section = page.locator("#meet-designers");
     await expect(section).toBeInViewport({ timeout: 5_000 });
+
+    // Wait past the smooth-scroll + lazy section layout window. This catches
+    // regressions where the CTA briefly hits the target, then scroll-restore or
+    // lazy content above it pushes the target out of view.
+    await page.waitForTimeout(2_500);
+    await expect(section).toBeInViewport();
+
+    const top = await section.evaluate((el) => el.getBoundingClientRect().top);
+    expect(top, "designers section should settle below the fixed header").toBeGreaterThanOrEqual(80);
+    expect(top, "designers section should not settle far below the viewport").toBeLessThan(220);
   });
 
   test("visual: above-the-fold hero snapshot", async ({ page }, testInfo) => {
