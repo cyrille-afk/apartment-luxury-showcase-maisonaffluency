@@ -438,6 +438,7 @@ const VariantSelectors: React.FC<{
           onWoodFinishesAvailable={setLinkedWoodFinishes}
           onSwatchImagesChange={onSwatchImagesChange}
           onFinishesMissingImagesChange={onFinishesMissingImagesChange}
+          currentGalleryIndex={galleryActiveIndex ?? 0}
           onWoodFinishChange={(woodName) => {
             if (!woodName) return;
             const norm = (s: string) => s.trim().toLowerCase();
