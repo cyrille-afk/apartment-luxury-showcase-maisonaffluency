@@ -612,13 +612,13 @@ export default function FinishSelector({ pickId, className, productTitle, onUpho
     .filter((f) => !woodFilter || woodFilter(f.name));
   const coverTiles = grouped["Cover"] || [];
 
-  // On mobile, hide finishes that have no mapped gallery images so the user
-  // only sees swatches they can preview in the hero gallery.
-  const hasPhoto = (f: Fabric) => Array.isArray(f.image_indices) && f.image_indices.length > 0;
-  const visibleFabricTiles = isMobile ? fabricTiles.filter(hasPhoto) : fabricTiles;
-  const visibleWoodTiles   = isMobile ? woodTiles.filter(hasPhoto)   : woodTiles;
-  const visibleTopTiles    = isMobile ? topTiles.filter(hasPhoto)    : topTiles;
-  const visibleCoverTiles  = isMobile ? coverTiles.filter(hasPhoto)  : coverTiles;
+  // Show all linked finishes on every breakpoint — swatches without mapped
+  // gallery images still render (with the ImageOff badge) so users can pick
+  // them and request samples through the concierge.
+  const visibleFabricTiles = fabricTiles;
+  const visibleWoodTiles   = woodTiles;
+  const visibleTopTiles    = topTiles;
+  const visibleCoverTiles  = coverTiles;
 
 
   const renderAccordion = (args: {
