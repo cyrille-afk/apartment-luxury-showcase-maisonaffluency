@@ -13,7 +13,7 @@ const SCREENSHOTS: ScreenshotItem[] = [
     src: "/designers-hero-lock/mobile-iphone15pro.png",
     filename: "mobile-iphone15pro.png",
     deviceLabel: "Mobile — iPhone 15 Pro",
-    description: "393×852 viewport, Safari with toolbar",
+    description: "Real-device Safari capture with iOS browser navigation visible",
   },
   {
     src: "/designers-hero-lock/mobile-iphone-se.png",
@@ -25,7 +25,7 @@ const SCREENSHOTS: ScreenshotItem[] = [
     src: "/designers-hero-lock/pwa-iphone15pro.png",
     filename: "pwa-iphone15pro.png",
     deviceLabel: "PWA — iPhone 15 Pro",
-    description: "393×852 viewport, standalone display mode",
+    description: "Real-device PWA capture without Safari browser navigation",
   },
   {
     src: "/designers-hero-lock/desktop-1440.png",
@@ -35,7 +35,7 @@ const SCREENSHOTS: ScreenshotItem[] = [
   },
 ];
 
-const LOCK_VERSION = "2026-06-25-sefix";
+const LOCK_VERSION = "2026-06-25-real-device";
 
 export default function ScreenshotGallery() {
   const total = SCREENSHOTS.length;
