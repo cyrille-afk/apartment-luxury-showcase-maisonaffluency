@@ -505,7 +505,21 @@ export default function TradeAdminFabrics() {
                 <option key={c} value={c}>{c}</option>
               ))}
             </select>
+            <select
+              value={designerFilter}
+              onChange={(e) => setDesignerFilter(e.target.value)}
+              className="px-3 py-1.5 text-sm font-body rounded-md border border-border bg-background"
+            >
+              <option value="">All designers</option>
+              {designersList
+                .filter((d) => d.name || d.display_name)
+                .sort((a, b) => ((a.display_name || a.name || "").localeCompare(b.display_name || b.name || "", "en", { sensitivity: "base" })))
+                .map((d) => (
+                  <option key={d.id} value={d.id}>{d.display_name || d.name}</option>
+                ))}
+            </select>
             <div className="flex items-center rounded-md border border-border bg-background overflow-hidden">
+
               {(["all", "picks", "labels"] as const).map((key) => (
                 <button
                   key={key}
