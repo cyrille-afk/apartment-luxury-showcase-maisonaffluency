@@ -40,6 +40,7 @@ const FABRICS_PANEL_PILOT_PICK_IDS = new Set<string>([
 import { variantImageKey } from "@/lib/variantImageMap";
 import BiographyPdfButton from "@/components/BiographyPdfButton";
 import { applyCuratorPickOrder, sortCuratorPicks } from "@/lib/curatorPickSort";
+import { sanitizeBiographyCitations } from "@/lib/sanitizeBiographyCitations";
 
 const EditorialBiography = lazy(() => import("@/components/EditorialBiography"));
 
@@ -1906,7 +1907,10 @@ const TradeDesignersAdmin = () => {
         .select("id, slug, name, display_name, specialty, biography, philosophy, notable_works, image_url, hero_image_url, source, is_published, trade_only, biography_images, links, instagram_handle, instagram_handle_2")
         .order("name", { ascending: true });
       if (error) throw error;
-      return data as DesignerRow[];
+      return (data || []).map((row) => ({
+        ...row,
+        biography: sanitizeBiographyCitations(row.biography),
+      })) as DesignerRow[];
     },
     enabled: !!isAdmin,
     staleTime: 5 * 60 * 1000,

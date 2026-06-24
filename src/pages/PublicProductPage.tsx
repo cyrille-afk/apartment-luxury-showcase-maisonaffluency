@@ -39,6 +39,7 @@ import { rememberProductBackRef } from "@/lib/designerBackRef";
 import { toOgImage } from "@/lib/ogImage";
 import SpecGlyph from "@/components/product/SpecGlyph";
 import FavoriteFolderPicker from "@/components/FavoriteFolderPicker";
+import { sanitizeBiographyCitations } from "@/lib/sanitizeBiographyCitations";
 import {
   isFinishAxisLabel,
   everyOptionCoveredBySwatches,
@@ -1022,7 +1023,7 @@ const PublicProductPage: React.FC = () => {
 
   // Build brand summary from biography: strip media URLs (lines starting with http) and pipe-delimited captions.
   const brandSummary = (() => {
-    const bio = (designer as any).biography as string | undefined;
+    const bio = sanitizeBiographyCitations((designer as any).biography as string | undefined);
     if (!bio) return "";
     const cleaned = bio
       .split(/\n+/)

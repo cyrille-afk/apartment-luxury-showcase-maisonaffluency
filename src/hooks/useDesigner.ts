@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { resolveCuratorPickDescription } from "@/lib/curatorPickDescription";
 import { applyCuratorPickOrder, sortCuratorPicks } from "@/lib/curatorPickSort";
 import { formatEditionLabel } from "@/lib/editionLabel";
+import { sanitizeBiographyCitations } from "@/lib/sanitizeBiographyCitations";
 
 const HIDDEN_DESIGNER_SLUGS = new Set(["gabriel-hendifar"]);
 
@@ -106,6 +107,7 @@ export function useDesigner(
       if (!data) return null;
       return {
         ...data,
+        biography: sanitizeBiographyCitations(data.biography),
         links: (data.links as Designer["links"]) || [],
       } as Designer;
     },
@@ -131,6 +133,7 @@ export function useDesignerByName(
       if (!data) return null;
       return {
         ...data,
+        biography: sanitizeBiographyCitations(data.biography),
         links: (data.links as Designer["links"]) || [],
       } as Designer;
     },
