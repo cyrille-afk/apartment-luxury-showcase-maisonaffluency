@@ -1603,7 +1603,7 @@ const TradeProductPage: React.FC = () => {
                   }}
                   includePricing
                   showUpholsterySection={isUpholsteredProduct}
-                  showWoodSection={!isDualAxis}
+                  showWoodSection
                   onHasFabricsChange={setHasLinkedFabrics}
                   onWoodFinishesAvailable={setLinkedWoodFinishes}
                   onFinishesMissingImagesChange={setFinishesMissingImages}
@@ -1735,7 +1735,7 @@ const TradeProductPage: React.FC = () => {
                 <>
                   {/* Dual-axis: always render Base picker so both axes are visible.
                       ExpandableSpec collapses single-option lists to a labeled row. */}
-                  {!baseAxisIsDim && !(baseOptions.length > 0 && baseOptions.every(looksLikeDimension)) && (
+                  {!baseAxisIsDim && !suppressBaseAsFinish && !(baseOptions.length > 0 && baseOptions.every(looksLikeDimension)) && (
                     <ExpandableSpec
                       icon={specIcon("⬗")}
                       text={withImperialPerLine(baseOptions.join("\n"))}
@@ -1769,7 +1769,7 @@ const TradeProductPage: React.FC = () => {
                     />
                   )}
                   {/* Dual-axis: always render Top picker. */}
-                  {!(hasLinkedFabrics && !topAxisIsDim) && (
+                  {!suppressTopAsFinish && !(hasLinkedFabrics && !topAxisIsDim) && (
                   <ExpandableSpec
 
                     icon={specIcon(topAxisIsDim ? "📐" : "⬗")}
