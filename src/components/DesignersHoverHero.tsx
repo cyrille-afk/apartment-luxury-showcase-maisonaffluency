@@ -276,7 +276,7 @@ const DesignersHoverHero = () => {
       <div
         className={cn(
           "relative z-10 flex flex-col justify-center h-full px-6 sm:px-12 md:px-20 lg:px-28 pt-6 md:pt-8 md:-translate-y-12",
-          isStandalone ? "pb-44 md:pb-0" : "justify-end md:justify-center pb-72 md:pb-0"
+          isStandalone ? "pb-44 md:pb-0" : "justify-end md:justify-center pb-60 md:pb-0"
         )}
       >
 
@@ -330,7 +330,7 @@ const DesignersHoverHero = () => {
         "absolute left-6 sm:left-12 md:left-20 lg:left-28 z-10 flex items-center gap-10 text-white border-t border-white/20 pt-6 max-w-md",
         isStandalone
           ? "bottom-[calc(5rem+env(safe-area-inset-bottom))] md:bottom-14"
-          : "bottom-[calc(10rem+env(safe-area-inset-bottom))] md:bottom-24"
+          : "bottom-[calc(10rem+env(safe-area-inset-bottom))] md:bottom-20"
       ))}
 
 
