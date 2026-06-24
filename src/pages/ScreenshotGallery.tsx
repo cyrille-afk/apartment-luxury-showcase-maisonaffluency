@@ -35,7 +35,7 @@ const SCREENSHOTS: ScreenshotItem[] = [
   },
 ];
 
-const LOCK_VERSION = "2026-06-25-cookiefree";
+const LOCK_VERSION = "2026-06-25-prod";
 
 export default function ScreenshotGallery() {
   const total = SCREENSHOTS.length;
