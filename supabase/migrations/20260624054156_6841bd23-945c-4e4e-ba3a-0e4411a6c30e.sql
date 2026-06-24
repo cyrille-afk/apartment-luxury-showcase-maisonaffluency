@@ -1,0 +1,1 @@
+UPDATE public.designers SET image_url = 'https://res.cloudinary.com/dif1oamtj/image/upload/v1780130235/Screenshot_2026-05-30_at_4.36.30_PM_hb2vp6.png', updated_at = now() WHERE slug = 'adrien-messie';
