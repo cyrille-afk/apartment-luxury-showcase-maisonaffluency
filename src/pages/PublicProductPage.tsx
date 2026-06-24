@@ -45,6 +45,7 @@ import {
   everyOptionCoveredBySwatches,
   someOptionCoveredBySwatches,
   shouldSuppressSingleAsFinish,
+  makeSwatchAxisFilter,
 } from "@/lib/finishDuplication";
 
 
