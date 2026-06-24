@@ -535,22 +535,20 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts }
   return (
     <div
       id={`designer-card-${item.slug}`}
-      className="group block rounded-xl overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background cursor-pointer"
+      className="group block cursor-pointer"
     >
-      <div className="aspect-[3/4] bg-muted/20 overflow-hidden relative">
+      <div className="aspect-[3/4] bg-muted/20 overflow-hidden relative mb-5">
         {item.name === 'Apparatus' ? (
           <div className="w-full h-full bg-black" />
         ) : cardImageUrl ? (
-          <img src={cardImageUrl} alt={item.name} draggable={false} className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110 group-hover:brightness-[0.65]" loading="eager" decoding="async" />
+          <img src={cardImageUrl} alt={item.name} draggable={false} className="w-full h-full object-cover scale-105 group-hover:scale-100 transition-transform duration-[1100ms] ease-out" loading="eager" decoding="async" />
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-muted/10 group-hover:bg-muted/20 transition-colors">
             <span className="font-display text-3xl text-muted-foreground/20">{item.name.charAt(0)}</span>
           </div>
         )}
-        <div className="absolute inset-x-0 top-0 px-3 pr-10 pb-10 pt-2.5 bg-gradient-to-b from-black/60 via-black/25 to-transparent">
-          <p className={`font-display text-white tracking-wide leading-tight drop-shadow-sm ${displayName.length > 20 ? "text-[11px] md:text-xs" : "text-xs md:text-sm"}`}>{displayName}</p>
-          {parentLabel && <p className="font-body text-[10px] text-white/70 mt-0.5 tracking-wide">{parentLabel}</p>}
-        </div>
+        {/* Subtle bottom vignette for cinematic continuity with hero */}
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
         <Link
           to={`/designers/${item.slug}`}
           className="absolute inset-0 z-[5] cursor-pointer"
@@ -563,7 +561,7 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts }
                 {instagramLinks.map((igUrl, i) => {
                   const handle = '@' + igUrl.split('?')[0].replace(/\/+$/, '').split('/').pop();
                   return (
-                    <a key={i} href={igUrl} target="_blank" rel="noopener noreferrer" className="font-body text-[9px] text-white/50 hover:text-white tracking-wide transition-colors drop-shadow-sm" onClick={(e) => { e.stopPropagation(); e.preventDefault(); window.open(igUrl, '_blank', 'noopener,noreferrer'); }} aria-label={`${item.name} on Instagram`}>
+                    <a key={i} href={igUrl} target="_blank" rel="noopener noreferrer" className="font-body text-[9px] text-white/60 hover:text-white tracking-wide transition-colors drop-shadow-sm" onClick={(e) => { e.stopPropagation(); e.preventDefault(); window.open(igUrl, '_blank', 'noopener,noreferrer'); }} aria-label={`${item.name} on Instagram`}>
                       {handle}
                     </a>
                   );
@@ -653,6 +651,20 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts }
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-white/40 bg-white/10 backdrop-blur-sm text-white font-body text-[9px] uppercase tracking-[0.15em]">View Portrait</span>
         </div>
       </div>
+      {/* Editorial caption block — sits below the image like a monograph plate */}
+      <Link to={`/designers/${item.slug}`} className="block relative">
+        <div className="flex items-baseline justify-between gap-3 mb-1.5">
+          <h3 className="font-serif text-lg md:text-xl lg:text-[1.4rem] text-foreground leading-tight tracking-tight group-hover:translate-x-1 transition-transform duration-500 ease-out">
+            {displayName}
+          </h3>
+        </div>
+        <div className="flex items-center justify-between gap-3">
+          {parentLabel ? (
+            <p className="font-body text-[10px] uppercase tracking-[0.22em] text-muted-foreground/80 truncate">{parentLabel}</p>
+          ) : <span />}
+          <div className="h-px w-0 bg-foreground/30 group-hover:w-10 transition-all duration-700 ease-out flex-shrink-0" />
+        </div>
+      </Link>
     </div>
   );
 }
@@ -818,7 +830,8 @@ function LetterGroup({
                 initialExpand={initialExpand}
               />
             ) : (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-5">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-6 md:gap-x-10 gap-y-14 md:gap-y-20">
+
                 {designers.map((item) => {
                   const designerCount = parentDesignerCountByName[item.name] ?? 0;
                   const isParentBrand = item.founder === item.name && designerCount > 0;
