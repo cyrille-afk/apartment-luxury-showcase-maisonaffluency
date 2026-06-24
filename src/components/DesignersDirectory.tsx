@@ -372,7 +372,7 @@ function ParentSubGrid({ parentName, onClose, autoScroll }: { parentName: string
                   to={`/designers/${d.slug}`}
                   className="group/sub rounded-lg overflow-hidden border border-border hover:border-foreground/30 hover:shadow-lg transition-all"
                 >
-                  <div className="aspect-[3/4] relative bg-muted/10 overflow-hidden">
+                  <div className="aspect-[4/5] relative bg-muted/10 overflow-hidden">
                     {d.image ? (
                       <img src={d.image} alt={d.name} className="w-full h-full object-cover transition-transform duration-500 group-hover/sub:scale-110" loading="eager" decoding="async" />
                     ) : (
@@ -445,7 +445,7 @@ function ParentBrandCard({ item, isOpen, onToggle, designerCount, hasIgPosts }: 
 
   return (
     <div className="col-span-2 md:col-span-2">
-      <div className="group relative rounded-xl overflow-hidden border border-primary/40 ring-1 ring-primary/20 hover:border-primary/60 hover:shadow-xl transition-all duration-300 cursor-pointer aspect-[3/4] md:aspect-[11/7]">
+      <div className="group relative rounded-xl overflow-hidden border border-primary/40 ring-1 ring-primary/20 hover:border-primary/60 hover:shadow-xl transition-all duration-300 cursor-pointer aspect-[4/5]">
         {item.name === 'Apparatus' ? (
           <div className="absolute inset-0 bg-black" />
         ) : (
