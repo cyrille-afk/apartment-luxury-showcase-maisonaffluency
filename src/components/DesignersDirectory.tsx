@@ -652,19 +652,32 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts }
         </div>
       </div>
       {/* Editorial caption block — sits below the image like a monograph plate */}
-      <Link to={`/designers/${item.slug}`} className="block relative p-4 pt-3">
-        <div className="flex items-baseline justify-between gap-3 mb-1.5">
-          <h3 className="font-serif text-lg md:text-xl lg:text-[1.4rem] text-foreground leading-tight tracking-tight group-hover:translate-x-1 transition-transform duration-500 ease-out">
-            {displayName}
-          </h3>
-        </div>
-        <div className="flex items-center justify-between gap-3">
-          {parentLabel ? (
-            <p className="font-body text-[10px] uppercase tracking-[0.22em] text-muted-foreground/80 truncate">{parentLabel}</p>
-          ) : <span />}
-          <div className="h-px w-0 bg-foreground/30 group-hover:w-10 transition-all duration-700 ease-out flex-shrink-0" />
-        </div>
-      </Link>
+      {(() => {
+        const isAdrien = item.slug === 'adrien-messie';
+        return (
+          <Link
+            to={`/designers/${item.slug}`}
+            className={`block relative p-4 pt-3 ${isAdrien ? 'text-white' : ''}`}
+            style={isAdrien ? { background: 'linear-gradient(to bottom, #3a3a3c 0%, #2a2a2c 45%, #1a1a1c 55%, #050505 100%)', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)' } : undefined}
+          >
+            {isAdrien && (
+              <span aria-hidden className="pointer-events-none absolute left-0 right-0 top-[46%] h-px bg-black/80" />
+            )}
+            <div className="flex items-baseline justify-between gap-3 mb-1.5">
+              <h3 className={`font-serif text-lg md:text-xl lg:text-[1.4rem] leading-tight tracking-tight group-hover:translate-x-1 transition-transform duration-500 ease-out ${isAdrien ? 'text-white' : 'text-foreground'}`}>
+                {displayName}
+              </h3>
+            </div>
+            <div className="flex items-center justify-between gap-3">
+              {parentLabel ? (
+                <p className={`font-body text-[10px] uppercase tracking-[0.22em] truncate ${isAdrien ? 'text-white/55' : 'text-muted-foreground/80'}`}>{parentLabel}</p>
+              ) : <span />}
+              <div className={`h-px w-0 group-hover:w-10 transition-all duration-700 ease-out flex-shrink-0 ${isAdrien ? 'bg-white/40' : 'bg-foreground/30'}`} />
+            </div>
+          </Link>
+        );
+      })()}
+
     </div>
   );
 }
