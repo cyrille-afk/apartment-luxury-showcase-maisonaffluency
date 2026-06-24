@@ -276,7 +276,7 @@ const DesignersHoverHero = () => {
       <div
         className={cn(
           "relative z-10 flex flex-col justify-center h-full px-6 sm:px-12 md:px-20 lg:px-28 pt-6 md:pt-8 md:-translate-y-12",
-          isStandalone ? "pb-44 md:pb-0" : "justify-end md:justify-center pb-40 md:pb-0"
+          isStandalone ? "pb-44 md:pb-0" : "justify-end md:justify-center pb-64 md:pb-0"
         )}
       >
 
