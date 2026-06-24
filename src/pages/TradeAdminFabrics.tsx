@@ -620,10 +620,19 @@ export default function TradeAdminFabrics() {
         {isLoading ? (
           <div className="text-sm text-muted-foreground py-8 text-center">Loading…</div>
         ) : Object.keys(grouped).length === 0 ? (
-          <div className="text-sm text-muted-foreground py-12 text-center border border-dashed border-border rounded-lg">
-            {fabrics.length === 0 ? "No fabrics yet. Add your first swatch above." : "No fabrics match your filters."}
+          <div className="text-sm text-muted-foreground py-12 text-center border border-dashed border-border rounded-lg space-y-3">
+            <p>{fabrics.length === 0 ? "No fabrics yet. Add your first swatch above." : "No fabrics match your filters."}</p>
+            {(search || categoryFilter || designerFilter || productFilter !== "all") && (
+              <button
+                onClick={() => { setSearch(""); setCategoryFilter(""); setDesignerFilter(""); setProductFilter("all"); }}
+                className="px-3 py-1.5 text-xs rounded border border-border hover:bg-muted"
+              >
+                Clear filters
+              </button>
+            )}
           </div>
         ) : (
+
           CATEGORIES.filter((c) => grouped[c]?.length).map((cat) => (
             <section key={cat} className="space-y-2">
               <h2 className="font-body text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
