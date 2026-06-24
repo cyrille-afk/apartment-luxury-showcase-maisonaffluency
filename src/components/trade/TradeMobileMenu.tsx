@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import {
   ChevronRight, LogOut, Menu, X,
   LayoutDashboard, Heart, FolderArchive, FolderKanban, MapPin,
-  FileText, Settings, Shield, Wrench, UserCircle,
+  FileText, Settings, Shield, Wrench, UserCircle, Image,
 } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
