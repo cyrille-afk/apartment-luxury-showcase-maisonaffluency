@@ -288,9 +288,13 @@ const DesignersHoverHero = () => {
       <div
         className={cn(
           "absolute inset-x-0 top-0 z-10 pointer-events-none",
-          isStandalone ? "h-full" : "h-[100svh] md:h-full"
+          // Mobile browser: frame height = visible viewport minus the fixed
+          // header, so its bottom aligns with the iOS toolbar top (svh excludes
+          // the toolbar). Desktop/PWA: full section height.
+          isStandalone ? "h-full" : "h-[calc(100svh-var(--header-h))] md:h-full"
         )}
       >
+
         {/* Content */}
         <div
           className={cn(
