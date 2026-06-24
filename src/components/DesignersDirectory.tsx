@@ -538,9 +538,10 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts }
         )}
         {thumbs.length > 0 && (
           <div className="absolute top-3 right-3 z-20 flex flex-col items-end">
-            <span className="font-body text-[10px] uppercase tracking-[0.18em] text-white/90 drop-shadow-md font-medium">ON VIEW</span>
+            <span className="font-body text-[10px] uppercase tracking-[0.18em] text-white font-medium drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)]">ON VIEW</span>
           </div>
         )}
+
 
         <div className="pointer-events-none absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 px-3">
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-white/40 bg-white/10 backdrop-blur-sm text-white font-body text-[9px] uppercase tracking-[0.15em]">View Portrait</span>
