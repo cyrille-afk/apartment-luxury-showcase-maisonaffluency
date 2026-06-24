@@ -8,8 +8,10 @@
  * Rules:
  *   1. `[label](https://…)` markdown links → `label` (we never write media as
  *      markdown links; they always live on their own line).
- *   2. Bare URL lines whose host is NOT a known media host → removed.
- *   3. Standalone media URL lines (optionally followed by ` | caption | align`)
+ *   2. `[Source: …]` / `[Sources: …]` citation brackets → removed entirely
+ *      (with the preceding space, if any).
+ *   3. Bare URL lines whose host is NOT a known media host → removed.
+ *   4. Standalone media URL lines (optionally followed by ` | caption | align`)
  *      are preserved verbatim.
  *
  * Mirrors the Postgres function `public.sanitize_biography_citations`.
@@ -20,6 +22,7 @@ const MEDIA_HOST_RE =
   /(?:^|\.)(?:youtube\.com|youtu\.be|vimeo\.com|player\.vimeo\.com|res\.cloudinary\.com)$/i;
 
 const MARKDOWN_LINK_RE = /\[([^\]]+)\]\(https?:\/\/[^)]+\)/g;
+const SOURCE_BRACKET_RE = /\s*\[Sources?:[^\]]*\]/gi;
 const BARE_URL_LINE_RE = /^[ \t]*(https?:\/\/[^\s|]+)(\s*\|[^\n]*)?[ \t]*$/;
 
 const isMediaUrl = (url: string): boolean => {
@@ -36,6 +39,10 @@ export function sanitizeBiographyCitations(input: string | null | undefined): st
 
   // 1. Strip markdown links → keep the visible label only.
   let out = input.replace(MARKDOWN_LINK_RE, "$1");
+
+  // 2. Strip `[Source: …]` / `[Sources: …]` citation brackets entirely.
+  out = out.replace(SOURCE_BRACKET_RE, "");
+
 
   // 2. Walk line-by-line; drop bare non-media URL lines, keep media lines.
   out = out
