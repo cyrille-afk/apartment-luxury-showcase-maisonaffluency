@@ -444,8 +444,8 @@ function ParentBrandCard({ item, isOpen, onToggle, designerCount, hasIgPosts }: 
   };
 
   return (
-    <div className="self-start">
-      <div className="group relative rounded-xl overflow-hidden border border-primary/40 ring-1 ring-primary/20 hover:border-primary/60 hover:shadow-xl transition-all duration-300 cursor-pointer aspect-[4/5]">
+    <div className="self-start col-span-2">
+      <div className="group relative rounded-xl overflow-hidden border border-primary/40 ring-1 ring-primary/20 hover:border-primary/60 hover:shadow-xl transition-all duration-300 cursor-pointer aspect-[7/4]">
         {item.name === 'Apparatus' ? (
           <div className="absolute inset-0 bg-black" />
         ) : (
@@ -793,7 +793,11 @@ function LetterCarousel({ letter, designers, openParent, setOpenParent, parentDe
   }, []);
 
   const pages = useMemo(() => {
-    const getSlotCost = (_item: Designer) => 1;
+    const getSlotCost = (item: Designer) => {
+      const designerCount = parentDesignerCountByName[item.name] ?? 0;
+      const isParentBrand = item.founder === item.name && designerCount > 0;
+      return isParentBrand ? 2 : 1;
+    };
     const pool = [...designers];
     const builtPages: Designer[][] = [];
     while (pool.length > 0) {
