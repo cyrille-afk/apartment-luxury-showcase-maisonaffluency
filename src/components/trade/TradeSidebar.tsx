@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import {
   LayoutDashboard, LogOut, Shield, MapPin, Heart, FolderArchive, FolderKanban,
-  DollarSign, ClipboardList, Package, FileText, Settings, Wrench, UserCircle, Wand2,
+  DollarSign, ClipboardList, Package, FileText, Settings, Wrench, UserCircle, Wand2, Image,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useNavigate } from "react-router-dom";
@@ -156,6 +156,17 @@ export function TradeSidebar() {
                         <span className="absolute top-0 right-0 w-2 h-2 rounded-full bg-destructive" />
                       )}
                     </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <a
+                      href="/designers-hero-lock"
+                      className="flex items-start gap-3 px-3 py-2 rounded-md font-body text-sm text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-colors"
+                    >
+                      <Image className="h-4 w-4 shrink-0" />
+                      {!collapsed && <span>Locked Layout Gallery</span>}
+                    </a>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               </SidebarMenu>
