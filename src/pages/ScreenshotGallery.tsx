@@ -16,12 +16,6 @@ const SCREENSHOTS: ScreenshotItem[] = [
     description: "Real-device Safari capture with iOS browser navigation visible",
   },
   {
-    src: "/designers-hero-lock/mobile-iphone-se.png",
-    filename: "mobile-iphone-se.png",
-    deviceLabel: "Mobile — iPhone SE",
-    description: "375×667 viewport, Safari with toolbar",
-  },
-  {
     src: "/designers-hero-lock/pwa-iphone15pro-real-device.png",
     filename: "pwa-iphone15pro-real-device.png",
     deviceLabel: "PWA — iPhone 15 Pro",
@@ -58,9 +52,9 @@ export default function ScreenshotGallery() {
               Designers Hero — Locked Layout Reference
             </h1>
             <p className="font-body text-sm md:text-base text-white/60 max-w-2xl">
-              These four screenshots capture the user-approved state of the
-              DesignersHoverHero component across mobile, PWA and desktop
-              viewports. Do not modify the layout without explicit approval.
+              These screenshots capture verified locked references only. The
+              iPhone SE capture was removed because it was emulated and not a
+              valid real-device reference.
             </p>
           </header>
 
