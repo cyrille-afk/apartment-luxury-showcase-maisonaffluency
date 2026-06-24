@@ -4,6 +4,7 @@ import { Play, ChevronDown, Volume2, VolumeX } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useNavigate } from "react-router-dom";
 import { optimizeImageUrl } from "@/lib/cloudinary-optimize";
+import { sanitizeBiographyCitations } from "@/lib/sanitizeBiographyCitations";
 
 interface EditorialBiographyProps {
   biography: string;
@@ -128,8 +129,9 @@ function normalizeCloudinaryVideoUrl(url: string): string {
 
 /** Render inline HTML: <strong>, <a href="...">, and highlighted quoted text */
 export function renderParagraph(text: string): React.ReactNode[] {
+  const cleanedText = sanitizeBiographyCitations(text);
   // Check for multi-line content with a parenthetical translation on its own line
-  const lines = text.split(/\n/);
+  const lines = cleanedText.split(/\n/);
   if (lines.length > 1) {
     return lines.flatMap((line, li) => {
       const trimmed = line.trim();
@@ -144,7 +146,7 @@ export function renderParagraph(text: string): React.ReactNode[] {
       return li > 0 ? [<br key={`br-${li}`} />, ...nodes] : nodes;
     });
   }
-  return renderSingleLine(text);
+  return renderSingleLine(cleanedText);
 }
 
 /** Internal link component that uses React Router for same-app navigation */
@@ -914,7 +916,8 @@ export default function EditorialBiography({
   startImageIndex = 0,
 }: EditorialBiographyProps & { startImageIndex?: number }) {
   const isMobile = useIsMobile();
-  const blocks = biography
+  const cleanedBiography = sanitizeBiographyCitations(biography);
+  const blocks = cleanedBiography
     .split(/\n\n+/)
     .flatMap((p) => {
       const trimmed = p.trim();
