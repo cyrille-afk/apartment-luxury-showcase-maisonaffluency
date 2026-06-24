@@ -1,0 +1,1 @@
+UPDATE public.designers SET image_url = 'https://res.cloudinary.com/dif1oamtj/image/upload/v1782275778/Screen_Shot_2026-06-24_at_12.35.44_PM_yowbue.png' WHERE slug = 'victoria-magniant';
