@@ -134,6 +134,13 @@ interface FinishSelectorProps {
    * quote/bespoke message so designers know the visual was unmapped.
    */
   onFinishesMissingImagesChange?: (names: string[]) => void;
+  /**
+   * Currently-visible gallery image index (0-based). When provided, the
+   * fabric accordion auto-selects the swatch whose `image_indices` includes
+   * this image so the label always matches what the user sees in the hero
+   * gallery on page load.
+   */
+  currentGalleryIndex?: number;
 }
 
 const normalizeFabricCategory = (category: string | null | undefined) => {
