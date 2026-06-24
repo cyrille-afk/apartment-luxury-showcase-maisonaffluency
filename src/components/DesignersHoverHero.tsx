@@ -335,7 +335,7 @@ const DesignersHoverHero = () => {
       {directoryLabels(cn(
         "absolute left-6 sm:left-12 md:left-20 lg:left-28 z-10 flex items-center gap-10 text-white border-t border-white/20 pt-6 max-w-md",
         isStandalone
-          ? "bottom-[calc(8rem+env(safe-area-inset-bottom))] md:bottom-14"
+          ? "bottom-[calc(11rem+env(safe-area-inset-bottom))] md:bottom-14"
           : "bottom-[calc(11rem+env(safe-area-inset-bottom))] md:bottom-24"
       ))}
 
