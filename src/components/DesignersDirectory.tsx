@@ -37,37 +37,8 @@ import { cleanBrandLine, composeTitle } from "@/lib/curatorPickLegend";
 import { applyCuratorPickOrder, sortCuratorPicks } from "@/lib/curatorPickSort";
 import AlphabetDesignerPicker from "@/components/trade/AlphabetDesignerPicker";
 
-// ─── Reverse-map: extract Cloudinary public ID from URL → flat gallery index ─
-function extractCloudinaryId(url: string): string | null {
-  const withVersion = url.match(/\/v\d+\/(.+?)(?:\.\w+)?$/);
-  if (withVersion?.[1]) return withVersion[1];
-  const withoutVersion = url.match(/\/upload\/[^/]+\/(.+?)(?:\.\w+)?$/);
-  return withoutVersion?.[1] || null;
-}
-
-const normalizeCloudinaryId = (id: string) => id.replace(/\.(jpg|jpeg|png|webp|avif)$/i, "");
-const cloudinaryIdBasename = (id: string) => normalizeCloudinaryId(id).split("/").pop() || normalizeCloudinaryId(id);
-
-const THUMBNAIL_TO_GALLERY_INDEX: Map<string, number> = (() => {
-  const idToIndex = new Map<string, number>();
-  for (const [idx, thumbUrl] of Object.entries(GALLERY_THUMBNAILS)) {
-    const id = extractCloudinaryId(thumbUrl);
-    if (!id) continue;
-    const normalized = normalizeCloudinaryId(id);
-    idToIndex.set(normalized, Number(idx));
-    idToIndex.set(cloudinaryIdBasename(normalized), Number(idx));
-  }
-  return idToIndex;
-})();
-
-function resolveThumbToGalleryIndex(thumbUrl: string): number | null {
-  const id = extractCloudinaryId(thumbUrl);
-  if (!id) return null;
-  const normalized = normalizeCloudinaryId(id);
-  return THUMBNAIL_TO_GALLERY_INDEX.get(normalized) ?? THUMBNAIL_TO_GALLERY_INDEX.get(cloudinaryIdBasename(normalized)) ?? null;
-}
-
 const LETTERS = [...("ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("")), "#"];
+
 
 const normalizeDesignerKey = (value: string) =>
   value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/\s+/g, " ").trim();
