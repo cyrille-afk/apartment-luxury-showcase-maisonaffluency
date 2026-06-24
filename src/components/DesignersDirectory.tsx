@@ -580,82 +580,11 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts }
           </>
         )}
         {thumbs.length > 0 && (
-          <>
-            <div className={`absolute right-3 z-20 flex flex-col items-end gap-1.5 ${isLetterA ? 'top-3' : 'bottom-3'}`}>
-              <div className="flex flex-col items-center gap-1.5">
-                <span className="font-body text-[10px] uppercase tracking-[0.18em] text-white/90 drop-shadow-md font-medium">ON VIEW</span>
-                <div className="flex gap-1.5">
-                  {thumbs.slice(0, 2).map((src, i) => {
-                    const mappedGalleryIdx = resolveThumbToGalleryIndex(src);
-                    const resolvedGalleryIdx = mappedGalleryIdx ?? getPositionalFallbackIndex(i);
-                    return (
-                      <button
-                        type="button"
-                        key={i}
-                        onPointerDown={protectCardControl}
-                        onPointerMove={protectCardControl}
-                        onPointerUp={protectCardControl}
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          if (resolvedGalleryIdx !== null) {
-                            sessionStorage.setItem('openGalleryIndex', String(resolvedGalleryIdx));
-                            sessionStorage.setItem('gallerySourceId', `designer-card-${item.slug}`);
-                            sessionStorage.setItem('galleryFilterDesigner', item.name);
-                            sessionStorage.setItem('galleryOpenIntentAt', String(Date.now()));
-                            const galleryEl = document.getElementById('gallery');
-                            if (galleryEl) {
-                              galleryEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                              setTimeout(() => {
-                                window.dispatchEvent(new CustomEvent('openGalleryLightbox', {
-                                  detail: {
-                                    index: resolvedGalleryIdx,
-                                    sourceId: `designer-card-${item.slug}`,
-                                    filterDesigner: item.name,
-                                  },
-                                }));
-                              }, 600);
-                            } else {
-                              // Gallery isn't mounted on this route (e.g. /designers).
-                              // Remember where to return + which card to scroll back to.
-                              const here = `${window.location.pathname}${window.location.search}`;
-                              sessionStorage.setItem('galleryReturnUrl', here);
-                              sessionStorage.setItem('pendingDesignerScrollId', `designer-card-${item.slug}`);
-                              sessionStorage.setItem('pendingDesignerScrollLetter', (displayName || item.name).normalize("NFD").replace(/[\u0300-\u036f]/g, "").charAt(0).toUpperCase() || "#");
-                              navigate('/');
-                            }
-                          } else {
-                            const galleryEl = document.getElementById('gallery');
-                            if (galleryEl) {
-                              galleryEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                              toast({ title: `Viewing ${item.name} in gallery`, description: "Scroll to explore their featured pieces" });
-                            } else {
-                              navigate('/');
-                            }
-                          }
-                        }}
-                        className="relative w-14 h-14 md:w-16 md:h-16 rounded overflow-hidden border-2 border-white/90 shadow-md hover:border-primary/80 transition-colors cursor-pointer touch-manipulation"
-                      >
-                        <img src={src} alt="" draggable={false} className="w-full h-full object-cover" loading="lazy" />
-                        <span className="absolute top-0.5 left-0.5 flex items-center justify-center w-3 h-3 rounded-full bg-black/70 border border-primary/70 pointer-events-none">
-                          <Plus className="w-2 h-2 text-white" />
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-              {instagramLinks.length > 0 && instagramLinks.map((igUrl, i) => {
-                const handle = '@' + igUrl.split('?')[0].replace(/\/+$/, '').split('/').pop();
-                return (
-                  <a key={i} href={igUrl} target="_blank" rel="noopener noreferrer" className="font-body text-[8px] text-white/40 hover:text-white tracking-wide transition-colors drop-shadow-sm" onClick={(e) => { e.stopPropagation(); e.preventDefault(); window.open(igUrl, '_blank', 'noopener,noreferrer'); }} aria-label={`${item.name} on Instagram`}>
-                    {handle}
-                  </a>
-                );
-              })}
-            </div>
-          </>
+          <div className="absolute top-3 right-3 z-20 flex flex-col items-end">
+            <span className="font-body text-[10px] uppercase tracking-[0.18em] text-white/90 drop-shadow-md font-medium">ON VIEW</span>
+          </div>
         )}
+
         <div className="pointer-events-none absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 px-3">
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-white/40 bg-white/10 backdrop-blur-sm text-white font-body text-[9px] uppercase tracking-[0.15em]">View Portrait</span>
         </div>
