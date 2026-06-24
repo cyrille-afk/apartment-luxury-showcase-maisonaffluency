@@ -1603,7 +1603,7 @@ const TradeProductPage: React.FC = () => {
                   }}
                   includePricing
                   showUpholsterySection={isUpholsteredProduct}
-                  showWoodSection
+                  showWoodSection={!isDualAxis}
                   onHasFabricsChange={setHasLinkedFabrics}
                   onWoodFinishesAvailable={setLinkedWoodFinishes}
                   onFinishesMissingImagesChange={setFinishesMissingImages}
