@@ -65,7 +65,10 @@ interface Pick {
 interface DesignerLite {
   id: string;
   slug: string | null;
+  name: string | null;
+  display_name: string | null;
 }
+
 
 
 interface ProductFabric {
@@ -141,7 +144,9 @@ export default function TradeAdminFabrics() {
 
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<string>("");
+  const [designerFilter, setDesignerFilter] = useState<string>("");
   const [productFilter, setProductFilter] = useState<"all" | "picks" | "labels">("all");
+
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editDraft, setEditDraft] = useState<Partial<Fabric>>({});
   const [adding, setAdding] = useState(false);
