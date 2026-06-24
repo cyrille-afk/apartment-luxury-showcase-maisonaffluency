@@ -535,9 +535,9 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts }
   return (
     <div
       id={`designer-card-${item.slug}`}
-      className="group block cursor-pointer"
+      className="group block rounded-xl overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background cursor-pointer"
     >
-      <div className="aspect-[3/4] bg-muted/20 overflow-hidden relative mb-5">
+      <div className="aspect-[3/4] bg-muted/20 overflow-hidden relative">
         {item.name === 'Apparatus' ? (
           <div className="w-full h-full bg-black" />
         ) : cardImageUrl ? (
@@ -652,7 +652,7 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts }
         </div>
       </div>
       {/* Editorial caption block — sits below the image like a monograph plate */}
-      <Link to={`/designers/${item.slug}`} className="block relative">
+      <Link to={`/designers/${item.slug}`} className="block relative p-4 pt-3">
         <div className="flex items-baseline justify-between gap-3 mb-1.5">
           <h3 className="font-serif text-lg md:text-xl lg:text-[1.4rem] text-foreground leading-tight tracking-tight group-hover:translate-x-1 transition-transform duration-500 ease-out">
             {displayName}
