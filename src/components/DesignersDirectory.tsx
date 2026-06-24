@@ -793,7 +793,11 @@ function LetterCarousel({ letter, designers, openParent, setOpenParent, parentDe
   }, []);
 
   const pages = useMemo(() => {
-    const getSlotCost = (_item: Designer) => 1;
+    const getSlotCost = (item: Designer) => {
+      const designerCount = parentDesignerCountByName[item.name] ?? 0;
+      const isParentBrand = item.founder === item.name && designerCount > 0;
+      return isParentBrand ? 2 : 1;
+    };
     const pool = [...designers];
     const builtPages: Designer[][] = [];
     while (pool.length > 0) {
