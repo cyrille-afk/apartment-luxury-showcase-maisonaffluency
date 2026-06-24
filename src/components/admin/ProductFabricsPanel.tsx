@@ -411,7 +411,7 @@ export default function ProductFabricsPanel({
                   <div className="w-7 h-7 rounded border border-dashed border-border bg-muted" />
                 )}
                 <div className="text-xs leading-tight flex-1 min-w-0">
-                  <div className="truncate">{f.name}</div>
+                  <div className="truncate">{f.supplier ? `${f.supplier} — ${f.name}` : f.name}</div>
                   <div className="text-[10px] text-muted-foreground truncate">
                     {f.category}
                     {f.tier ? ` · CAT ${f.tier}` : ""}
