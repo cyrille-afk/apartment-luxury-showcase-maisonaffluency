@@ -1,6 +1,13 @@
 /**
  * Editorial hover hero for the public /designers directory.
  *
+ * 🔒 LOCKED LAYOUT — 2026-06-24
+ * Mobile (browser), PWA (standalone) and Desktop layouts are user-approved.
+ * Do NOT modify heights, paddings, line-heights, or the isStandalone branches
+ * (h-[100lvh], h-[calc(100svh-var(--header-h))], pb-44, justify-end, leading
+ * values, Directory bottom offsets) without explicit user approval.
+ * Reference screenshots: /mnt/documents/designers-hero-lock/*.png
+ *
  * Inspired by lacollections.fr: a vertical list of featured designer
  * names overlays a full-bleed background image that cross-fades on hover.
  * Names route to /designers/:slug. On desktop the whole hero responds to
