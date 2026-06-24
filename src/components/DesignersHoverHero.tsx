@@ -303,7 +303,7 @@ const DesignersHoverHero = () => {
               ? "justify-center pb-44 md:pb-0"
               : // Mobile browser: anchor list near the bottom of the svh frame
                 // but reserve room for the Directory row + iOS safe-area.
-                "justify-end pb-56 md:justify-center md:pb-0"
+                "justify-end pb-44 md:justify-center md:pb-0"
           )}
         >
 
@@ -316,14 +316,14 @@ const DesignersHoverHero = () => {
               aria-label="Featured designers shortcut list"
               className="inline-block"
             >
-              <ul className="flex flex-col gap-0.5 text-left">
+              <ul className="flex flex-col gap-0 text-left">
                 {items.map((d) => {
                   const [first, last] = splitName(d.name);
                   const isActive = d.slug === activeSlug;
                   const isDimmed = activeSlug !== null && !isActive;
                   const childBrand = d.founder && d.founder !== d.name;
                   return (
-                    <li key={d.slug} className="text-left">
+                    <li key={d.slug} className="text-left leading-[1.08] sm:leading-[1.12]">
                       <Link
                         to={`/designers/${d.slug}`}
                         onMouseEnter={() => setActiveSlug(d.slug)}
@@ -331,7 +331,7 @@ const DesignersHoverHero = () => {
                         className={cn(
                           "inline-block whitespace-nowrap",
                           "font-display font-light tracking-tight",
-                          "text-sm sm:text-base md:text-[20px] leading-[1.12]",
+                          "text-sm sm:text-base md:text-[20px] leading-[1.08] sm:leading-[1.12]",
                           "transition-colors duration-[1200ms] ease-out",
                           isDimmed ? "text-white/35" : "text-white/95"
                         )}
