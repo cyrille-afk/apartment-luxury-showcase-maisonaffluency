@@ -504,7 +504,10 @@ const VariantSelectors: React.FC<{
         {/* Material / finish dropdown(s) */}
         {isDualAxis ? (
           <>
-            {!baseAxisIsDim && !suppressBaseAsFinish && !(baseOptions.length > 0 && baseOptions.every(looksLikeDimension)) && (
+            {/* Dual-axis: always render Base picker so both axes are visible to the user.
+                ExpandableSpec auto-collapses to a "Base: <value>" plain row when there is
+                only one option, giving a locked single-option display without a dead dropdown. */}
+            {!baseAxisIsDim && !(baseOptions.length > 0 && baseOptions.every(looksLikeDimension)) && (
               <ExpandableSpec
                 icon={specIcon("⬗")}
                 text={withImperialPerLine(baseOptions.join("\n"))}
@@ -537,7 +540,9 @@ const VariantSelectors: React.FC<{
                 }
               />
             )}
-            {!(hasLinkedFabrics && !topAxisIsDim) && !suppressTopAsFinish && (
+            {/* Dual-axis: always render Top picker. Same rationale as Base above —
+                ExpandableSpec collapses to a single-value row when only one option exists. */}
+            {!(hasLinkedFabrics && !topAxisIsDim) && (
             <ExpandableSpec
               icon={specIcon(topAxisIsDim ? "📐" : "⬗")}
               text={withImperialPerLine(topOptions.join("\n"))}
