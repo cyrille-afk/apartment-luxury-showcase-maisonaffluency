@@ -499,7 +499,7 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts }
   return (
     <div
       id={`designer-card-${item.slug}`}
-      className={`group flex flex-col h-full rounded-xl overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background cursor-pointer ${isLetterA ? 'relative' : ''}`}
+      className={`group self-start flex flex-col rounded-xl overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background cursor-pointer ${isLetterA ? 'relative' : ''}`}
     >
 
       <div className="aspect-[4/5] bg-muted/20 overflow-hidden relative">
@@ -731,7 +731,7 @@ function LetterGroup({
                 initialExpand={initialExpand}
               />
             ) : (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-6 md:gap-x-10 gap-y-14 md:gap-y-20">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 items-start gap-x-6 md:gap-x-10 gap-y-14 md:gap-y-20">
 
                 {designers.map((item) => {
                   const designerCount = parentDesignerCountByName[item.name] ?? 0;
@@ -743,7 +743,7 @@ function LetterGroup({
                         <ParentBrandCard item={item} isOpen={isOpen} onToggle={() => setOpenParent(isOpen ? null : item.name)} designerCount={designerCount} hasIgPosts={designersWithIgPosts?.has(item.id)} />
                         <AnimatePresence>
                           {isOpen && (
-                            <div className="col-span-2 md:col-span-3 lg:col-span-5">
+                            <div className="col-span-2 md:col-span-3 lg:col-span-4">
                               <ParentSubGrid key={item.name} parentName={item.name} onClose={() => setOpenParent(null)} autoScroll={!!matchesExpand && item.name === initialExpand} />
                             </div>
                           )}
@@ -773,7 +773,7 @@ function LetterCarousel({ letter, designers, openParent, setOpenParent, parentDe
   const [isDragging, setIsDragging] = useState(false);
   const [slotsPerPage, setSlotsPerPage] = useState(() => {
     if (typeof window === "undefined") return 5;
-    if (window.innerWidth >= 1024) return 5;
+    if (window.innerWidth >= 1024) return 4;
     if (window.innerWidth >= 768) return 3;
     return 2;
   });
@@ -783,7 +783,7 @@ function LetterCarousel({ letter, designers, openParent, setOpenParent, parentDe
 
   useEffect(() => {
     const onResize = () => {
-      if (window.innerWidth >= 1024) setSlotsPerPage(5);
+      if (window.innerWidth >= 1024) setSlotsPerPage(4);
       else if (window.innerWidth >= 768) setSlotsPerPage(3);
       else setSlotsPerPage(2);
     };
@@ -897,7 +897,7 @@ function LetterCarousel({ letter, designers, openParent, setOpenParent, parentDe
           <div className="flex">
             {pages.map((page, pageIndex) => (
               <div key={`page-${pageIndex}`} className="flex-none w-full snap-start">
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-6 md:gap-x-10 gap-y-14 md:gap-y-20">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 items-start gap-x-6 md:gap-x-10 gap-y-14 md:gap-y-20">
                   {page.map((item) => {
                     const designerCount = parentDesignerCountByName[item.name] ?? 0;
                     const isParentBrand = item.founder === item.name && designerCount > 0;
