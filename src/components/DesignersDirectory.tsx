@@ -531,13 +531,16 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts }
   const protectCardControl = (e: React.SyntheticEvent<HTMLElement>) => {
     e.stopPropagation();
   };
+  const isAdrien = item.slug === 'adrien-messie';
+
 
   return (
     <div
       id={`designer-card-${item.slug}`}
-      className="group flex flex-col h-full rounded-xl overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background cursor-pointer"
+      className={`group flex flex-col h-full rounded-xl overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background cursor-pointer ${isAdrien ? 'relative' : ''}`}
     >
-      <div className="aspect-[3/4] bg-muted/20 overflow-hidden relative">
+
+      <div className={`bg-muted/20 overflow-hidden relative ${isAdrien ? 'flex-1' : 'aspect-[3/4]'}`}>
         {item.name === 'Apparatus' ? (
           <div className="w-full h-full bg-black" />
         ) : cardImageUrl ? (
@@ -547,8 +550,13 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts }
             <span className="font-display text-3xl text-muted-foreground/20">{item.name.charAt(0)}</span>
           </div>
         )}
-        {/* Subtle bottom vignette for cinematic continuity with hero */}
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
+        {!isAdrien && (
+          <>
+            {/* Subtle bottom vignette for cinematic continuity with hero */}
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
+          </>
+        )}
+
         <Link
           to={`/designers/${item.slug}`}
           className="absolute inset-0 z-[5] cursor-pointer"
@@ -652,31 +660,24 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts }
         </div>
       </div>
       {/* Editorial caption block — sits below the image like a monograph plate */}
-      {(() => {
-        const isAdrien = item.slug === 'adrien-messie';
-        return (
-          <Link
-            to={`/designers/${item.slug}`}
-            className={`block relative p-4 pt-3 flex-1 ${isAdrien ? 'text-white' : ''}`}
-            style={isAdrien ? { background: 'linear-gradient(to bottom, #5a5a5c 0%, #4a4a4c 45%, #3a3a3c 55%, #1f1f21 100%)', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06)' } : undefined}
-          >
-            {isAdrien && (
-              <span aria-hidden className="pointer-events-none absolute left-0 right-0 top-[46%] h-px bg-black/70" />
-            )}
-            <div className="flex items-baseline justify-between gap-3 mb-1.5">
-              <h3 className={`font-serif text-lg md:text-xl lg:text-[1.4rem] leading-tight tracking-tight group-hover:translate-x-1 transition-transform duration-500 ease-out ${isAdrien ? 'text-white' : 'text-foreground'}`}>
-                {displayName}
-              </h3>
-            </div>
-            <div className="flex items-center justify-between gap-3">
-              {parentLabel ? (
-                <p className={`font-body text-[10px] uppercase tracking-[0.22em] truncate ${isAdrien ? 'text-white/55' : 'text-muted-foreground/80'}`}>{parentLabel}</p>
-              ) : <span />}
-              <div className={`h-px w-0 group-hover:w-10 transition-all duration-700 ease-out flex-shrink-0 ${isAdrien ? 'bg-white/40' : 'bg-foreground/30'}`} />
-            </div>
-          </Link>
-        );
-      })()}
+      <Link
+        to={`/designers/${item.slug}`}
+        className={`${isAdrien ? 'absolute bottom-0 left-0 right-0 h-[40%] flex flex-col justify-end p-4 pb-5' : 'block relative p-4 pt-3 flex-1'} ${isAdrien ? 'text-white' : ''}`}
+        style={isAdrien ? { background: 'linear-gradient(to top, rgba(26,26,28,0.95) 0%, rgba(26,26,28,0.75) 45%, rgba(26,26,28,0) 100%)' } : undefined}
+      >
+        <div className={`flex items-baseline justify-between gap-3 ${isAdrien ? 'mb-0' : 'mb-1.5'}`}>
+          <h3 className={`font-serif text-lg md:text-xl lg:text-[1.4rem] leading-tight tracking-tight group-hover:translate-x-1 transition-transform duration-500 ease-out ${isAdrien ? 'text-white' : 'text-foreground'}`}>
+            {displayName}
+          </h3>
+        </div>
+        <div className="flex items-center justify-between gap-3">
+          {parentLabel ? (
+            <p className={`font-body text-[10px] uppercase tracking-[0.22em] truncate ${isAdrien ? 'text-white/55' : 'text-muted-foreground/80'}`}>{parentLabel}</p>
+          ) : <span />}
+          <div className={`h-px w-0 group-hover:w-10 transition-all duration-700 ease-out flex-shrink-0 ${isAdrien ? 'bg-white/40' : 'bg-foreground/30'}`} />
+        </div>
+      </Link>
+
 
     </div>
   );
