@@ -652,7 +652,7 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts }
         </div>
       </div>
       {/* Editorial caption block — sits below the image like a monograph plate */}
-      <Link to={`/designers/${item.slug}`} className="block relative">
+      <Link to={`/designers/${item.slug}`} className="block relative p-4 pt-3">
         <div className="flex items-baseline justify-between gap-3 mb-1.5">
           <h3 className="font-serif text-lg md:text-xl lg:text-[1.4rem] text-foreground leading-tight tracking-tight group-hover:translate-x-1 transition-transform duration-500 ease-out">
             {displayName}
