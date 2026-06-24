@@ -531,6 +531,8 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts }
   const protectCardControl = (e: React.SyntheticEvent<HTMLElement>) => {
     e.stopPropagation();
   };
+  const isAdrien = item.slug === 'adrien-messie';
+
 
   return (
     <div
