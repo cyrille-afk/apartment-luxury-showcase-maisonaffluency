@@ -492,9 +492,10 @@ export default function TradeAdminFabrics() {
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search name, supplier…"
+              placeholder="Search name, supplier, product, designer…"
               className="px-3 py-1.5 text-sm font-body rounded-md border border-border bg-background w-56"
             />
+
             <select
               value={categoryFilter}
               onChange={(e) => setCategoryFilter(e.target.value)}
