@@ -332,7 +332,9 @@ export default function ProductFabricsPanel({
               <div className="w-9 h-9 rounded border border-dashed border-border bg-muted" />
             )}
             <div className="text-xs leading-tight min-w-0">
-              <div className="font-medium truncate">{r.fabric?.name || "—"}</div>
+              <div className="font-medium truncate">
+                {r.fabric?.supplier ? `${r.fabric.supplier} — ${r.fabric.name}` : (r.fabric?.name || "—")}
+              </div>
               <div className="text-[10px] text-muted-foreground truncate">
                 {r.fabric?.category}
                 {r.fabric?.tier ? ` · CAT ${r.fabric.tier}` : ""}
