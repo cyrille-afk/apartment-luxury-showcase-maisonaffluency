@@ -40,6 +40,7 @@ const FEATURED_SLUGS = [
   "ozone",
   "pierre-bonnefille",
   "thierry-lemaire",
+  "victoria-magniant",
 ];
 
 function useFeaturedDesigners() {
