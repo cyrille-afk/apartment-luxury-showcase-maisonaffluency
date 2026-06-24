@@ -651,6 +651,20 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts }
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-white/40 bg-white/10 backdrop-blur-sm text-white font-body text-[9px] uppercase tracking-[0.15em]">View Portrait</span>
         </div>
       </div>
+      {/* Editorial caption block — sits below the image like a monograph plate */}
+      <Link to={`/designers/${item.slug}`} className="block relative">
+        <div className="flex items-baseline justify-between gap-3 mb-1.5">
+          <h3 className="font-serif text-lg md:text-xl lg:text-[1.4rem] text-foreground leading-tight tracking-tight group-hover:translate-x-1 transition-transform duration-500 ease-out">
+            {displayName}
+          </h3>
+        </div>
+        <div className="flex items-center justify-between gap-3">
+          {parentLabel ? (
+            <p className="font-body text-[10px] uppercase tracking-[0.22em] text-muted-foreground/80 truncate">{parentLabel}</p>
+          ) : <span />}
+          <div className="h-px w-0 bg-foreground/30 group-hover:w-10 transition-all duration-700 ease-out flex-shrink-0" />
+        </div>
+      </Link>
     </div>
   );
 }
