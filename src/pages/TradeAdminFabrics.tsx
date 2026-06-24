@@ -65,7 +65,10 @@ interface Pick {
 interface DesignerLite {
   id: string;
   slug: string | null;
+  name: string | null;
+  display_name: string | null;
 }
+
 
 
 interface ProductFabric {
@@ -141,7 +144,9 @@ export default function TradeAdminFabrics() {
 
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<string>("");
+  const [designerFilter, setDesignerFilter] = useState<string>("");
   const [productFilter, setProductFilter] = useState<"all" | "picks" | "labels">("all");
+
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editDraft, setEditDraft] = useState<Partial<Fabric>>({});
   const [adding, setAdding] = useState(false);
@@ -182,18 +187,26 @@ export default function TradeAdminFabrics() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("designers")
-        .select("id, slug");
+        .select("id, slug, name, display_name");
       if (error) throw error;
       return (data as DesignerLite[]) || [];
     },
     enabled: isAdmin,
   });
 
+
   const designerSlugById = useMemo(() => {
     const m = new Map<string, string | null>();
     designersList.forEach((d) => m.set(d.id, d.slug));
     return m;
   }, [designersList]);
+
+  const designerNameById = useMemo(() => {
+    const m = new Map<string, string | null>();
+    designersList.forEach((d) => m.set(d.id, d.display_name || d.name || null));
+    return m;
+  }, [designersList]);
+
 
 
   const { data: links = [] } = useQuery({
@@ -267,17 +280,31 @@ export default function TradeAdminFabrics() {
   const filtered = useMemo(() => {
     let rows = fabrics;
     if (categoryFilter) rows = rows.filter((r) => normalizeAdminFabricCategory(r.category) === categoryFilter);
+    if (designerFilter) {
+      rows = rows.filter((r) => {
+        const linked = linkedPicksByFabric.get(r.id) || [];
+        return linked.some((p) => p.designer_id === designerFilter);
+      });
+    }
     if (search.trim()) {
       const q = search.toLowerCase();
-      rows = rows.filter(
-        (r) =>
-          r.name.toLowerCase().includes(q) ||
-          (r.supplier || "").toLowerCase().includes(q) ||
-          (r.description || "").toLowerCase().includes(q),
-      );
+      rows = rows.filter((r) => {
+        if (r.name.toLowerCase().includes(q)) return true;
+        if ((r.supplier || "").toLowerCase().includes(q)) return true;
+        if ((r.description || "").toLowerCase().includes(q)) return true;
+        const linked = linkedPicksByFabric.get(r.id) || [];
+        return linked.some((p) => {
+          if ((p.title || "").toLowerCase().includes(q)) return true;
+          if ((p.subtitle || "").toLowerCase().includes(q)) return true;
+          const dName = designerNameById.get(p.designer_id || "") || "";
+          if (dName.toLowerCase().includes(q)) return true;
+          return false;
+        });
+      });
     }
     return rows;
-  }, [fabrics, search, categoryFilter]);
+  }, [fabrics, search, categoryFilter, designerFilter, linkedPicksByFabric, designerNameById]);
+
 
   const grouped = useMemo(() => {
     const g: Record<string, Fabric[]> = {};
@@ -465,9 +492,10 @@ export default function TradeAdminFabrics() {
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search name, supplier…"
+              placeholder="Search name, supplier, product, designer…"
               className="px-3 py-1.5 text-sm font-body rounded-md border border-border bg-background w-56"
             />
+
             <select
               value={categoryFilter}
               onChange={(e) => setCategoryFilter(e.target.value)}
@@ -478,7 +506,21 @@ export default function TradeAdminFabrics() {
                 <option key={c} value={c}>{c}</option>
               ))}
             </select>
+            <select
+              value={designerFilter}
+              onChange={(e) => setDesignerFilter(e.target.value)}
+              className="px-3 py-1.5 text-sm font-body rounded-md border border-border bg-background"
+            >
+              <option value="">All designers</option>
+              {designersList
+                .filter((d) => d.name || d.display_name)
+                .sort((a, b) => ((a.display_name || a.name || "").localeCompare(b.display_name || b.name || "", "en", { sensitivity: "base" })))
+                .map((d) => (
+                  <option key={d.id} value={d.id}>{d.display_name || d.name}</option>
+                ))}
+            </select>
             <div className="flex items-center rounded-md border border-border bg-background overflow-hidden">
+
               {(["all", "picks", "labels"] as const).map((key) => (
                 <button
                   key={key}
@@ -579,10 +621,19 @@ export default function TradeAdminFabrics() {
         {isLoading ? (
           <div className="text-sm text-muted-foreground py-8 text-center">Loading…</div>
         ) : Object.keys(grouped).length === 0 ? (
-          <div className="text-sm text-muted-foreground py-12 text-center border border-dashed border-border rounded-lg">
-            {fabrics.length === 0 ? "No fabrics yet. Add your first swatch above." : "No fabrics match your filters."}
+          <div className="text-sm text-muted-foreground py-12 text-center border border-dashed border-border rounded-lg space-y-3">
+            <p>{fabrics.length === 0 ? "No fabrics yet. Add your first swatch above." : "No fabrics match your filters."}</p>
+            {(search || categoryFilter || designerFilter || productFilter !== "all") && (
+              <button
+                onClick={() => { setSearch(""); setCategoryFilter(""); setDesignerFilter(""); setProductFilter("all"); }}
+                className="px-3 py-1.5 text-xs rounded border border-border hover:bg-muted"
+              >
+                Clear filters
+              </button>
+            )}
           </div>
         ) : (
+
           CATEGORIES.filter((c) => grouped[c]?.length).map((cat) => (
             <section key={cat} className="space-y-2">
               <h2 className="font-body text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
