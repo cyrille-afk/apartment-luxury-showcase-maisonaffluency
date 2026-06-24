@@ -11,12 +11,59 @@
  * swatches (e.g. Angelo M tables × Alinea marble palette).
  */
 
-import { normalizeFinishOption } from "./finishNormalization";
+import { normalizeFinishOption, normalizeFinishToken } from "./finishNormalization";
 
 const norm = (s: string) => (s || "").trim().toLowerCase();
 
 export const isFinishAxisLabel = (label: string) =>
   /\b(frame|wood|finish|feet|foot|leg|base|legs)\b/i.test(label || "");
+
+/**
+ * Build a swatch-name filter for one variant axis (Base or Top).
+ *
+ * Variant labels frequently bundle several finishes into one compound row
+ * because they share the same price tier — e.g.
+ *   "Travertino Rosso / Grey Saint Laurent / Picasso Green".
+ *
+ * The previous prefix-only matcher would keep "Travertino Rosso" (the
+ * compound label startsWith the swatch) but drop "Grey Saint Laurent" and
+ * "Picasso Green" because the compound label does not start with them.
+ * Result: half the swatches linked to the product silently disappeared
+ * from the picker (regression noticed on the Alinea Angelo M tables).
+ *
+ * The token-aware filter below splits compound labels on `/` and `,`,
+ * normalizes each piece, and accepts a swatch when its name matches any
+ * token (exact, substring either way, or fuzzy via Levenshtein — so
+ * "Kynos" ↔ "Kyknos" still passes).
+ */
+export const makeSwatchAxisFilter = (
+  axisOptions: string[],
+): ((name: string) => boolean) => {
+  const cleanup = (s: string) =>
+    (s || "").replace(/\[[^\]]*\]/g, "").trim().toLowerCase();
+  const tokens = new Set<string>();
+  for (const opt of axisOptions || []) {
+    for (const part of (opt || "").split(/\s*[/,]\s*/)) {
+      const t = cleanup(part);
+      if (t) tokens.add(t);
+    }
+  }
+  const tokenList = Array.from(tokens);
+  return (name: string) => {
+    const n = cleanup(name);
+    if (!n || tokenList.length === 0) return false;
+    for (const t of tokenList) {
+      if (n === t || n.startsWith(t) || t.startsWith(n) || n.includes(t) || t.includes(n)) {
+        return true;
+      }
+    }
+    // Fuzzy fallback for catalogue typos (e.g. swatch "Kyknos" vs variant
+    // token "Kynos"). normalizeFinishToken returns the library spelling
+    // when it finds a close match, otherwise the original token.
+    const normalized = normalizeFinishToken(n, tokenList);
+    return normalized !== n;
+  };
+};
 
 /** A swatch covers an option when their normalized labels overlap (either side substring match). */
 export const swatchCoversOption = (option: string, swatch: string): boolean => {
