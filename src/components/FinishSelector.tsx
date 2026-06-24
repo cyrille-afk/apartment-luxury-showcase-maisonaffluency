@@ -295,20 +295,17 @@ export default function FinishSelector({ pickId, className, productTitle, onUpho
       setFabrics(list);
       onHasFabricsChange?.(list.some(isFabricCategory));
       onWoodFinishesAvailable?.(list.filter(isFinishCategory).map((f) => f.name));
+      // Do NOT auto-select a default fabric swatch — the accordion label
+      // should start empty so the user makes an intentional choice and we
+      // don't mislead them with a name that doesn't match the gallery image.
+      // We still notify the parent of the baseline upholstery tier so the
+      // RRP math has a sensible default until the user picks a swatch.
       const defaultFabric = list.find(isFabricCategory) || null;
-      setSelectedFabricId(defaultFabric?.id ?? null);
+      setSelectedFabricId(null);
       if (defaultFabric) {
         onUpholsteryTierChange?.(defaultFabric.price_tier_label ?? null);
-        onFabricChange?.({
-          id: defaultFabric.id,
-          name: defaultFabric.name,
-          tier: defaultFabric.tier ?? null,
-          price_per_lm_cents: defaultFabric.price_per_lm_cents ?? null,
-          currency: defaultFabric.currency || "EUR",
-        });
-      } else {
-        onFabricChange?.(null);
       }
+      onFabricChange?.(null);
 
       // Do NOT auto-select a default wood/finish swatch — the dropdown should
       // start empty so the user makes an intentional choice (the product's
