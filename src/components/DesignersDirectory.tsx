@@ -535,7 +535,7 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts }
   return (
     <div
       id={`designer-card-${item.slug}`}
-      className="group block rounded-xl overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background cursor-pointer"
+      className="group flex flex-col h-full rounded-xl overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background cursor-pointer"
     >
       <div className="aspect-[3/4] bg-muted/20 overflow-hidden relative">
         {item.name === 'Apparatus' ? (
