@@ -1356,18 +1356,17 @@ const TradeProductPage: React.FC = () => {
               )}
               {/* Single-axis (no material split): show stripped size labels indexed by variant */}
               {!isRugSqmActive && product.dimensions && !isDualAxis && !isBaseOnly && !hasSingleAxisSplit && (() => {
+                // Preserve variant-name prefixes ("Concept 1: Ø 244 cm") and
+                // dedupe so repeated metal-finish rows collapse to one entry.
+                const seen = new Set<string>();
                 const variantSizeText = sizeVariants && sizeVariants.length > 0
                   ? sizeVariants
-                      .map((v) => {
-                        let label = (v.label || "").trim();
-                        const colonIdx = label.indexOf(":");
-                        if (colonIdx > -1 && colonIdx < 60) {
-                          label = label.slice(colonIdx + 1).trim();
-                        }
-                        const dimMatch = label.match(/^(.*?\b(?:cm|mm|in)\b)/i)
-                          || label.match(/^(.*?(?<![A-Za-z\/])[mM](?![A-Za-z\/]))/);
-                        if (dimMatch) label = dimMatch[1].trim();
-                        return label;
+                      .map((v) => (v.label || "").trim())
+                      .filter((label) => {
+                        if (!label) return false;
+                        if (seen.has(label)) return false;
+                        seen.add(label);
+                        return true;
                       })
                       .join("\n")
                   : null;
@@ -1379,11 +1378,17 @@ const TradeProductPage: React.FC = () => {
                   ? variantSizeText!
                   : formatDimensionsMultiline(product.dimensions);
                 if (!looksLikeDimension(sizeText)) return null;
+                // Render the imperial conversion inside parentheses after the
+                // metric value, e.g. "Concept 1: Ø 244 cm (Ø 96.1 in)".
+                const formatted = withImperialPerLine(sizeText)
+                  .split("\n")
+                  .map((line) => line.replace(/\s\|\s([^|]+?)(\s-\s.+)?$/, " ($1)$2"))
+                  .join("\n");
                 const interactive = variantsAreDimensional && hasVariants;
                 return (
                   <ExpandableSpec
                     icon={specIcon("📐")}
-                    text={withImperialPerLine(sizeText)}
+                    text={formatted}
                     emphasized
                     placeholder={interactive ? "Select Your Size" : undefined}
                     value={interactive ? selectedVariantIdx : undefined}
