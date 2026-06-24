@@ -105,6 +105,19 @@ export function TradeMobileMenu({ open, onOpenChange }: TradeMobileMenuProps) {
                 </span>
                 <ChevronRight className="h-4 w-4 text-muted-foreground/50" />
               </button>
+              <a
+                href="/designers-hero-lock"
+                className={cn(
+                  "font-body text-[15px] tracking-wide text-left transition-colors py-3 w-full flex items-center justify-between animate-fade-in opacity-0 text-muted-foreground hover:text-foreground"
+                )}
+                style={{ animationDelay: `${(coreItems.length + 2) * 50}ms`, animationFillMode: "forwards" }}
+              >
+                <span className="flex items-center gap-3">
+                  <Image className="h-4 w-4 shrink-0" />
+                  Locked Layout Gallery
+                </span>
+                <ChevronRight className="h-4 w-4 text-muted-foreground/50" />
+              </a>
             </>
           )}
 
