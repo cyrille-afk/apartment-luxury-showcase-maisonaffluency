@@ -433,7 +433,7 @@ const VariantSelectors: React.FC<{
 
 
           showUpholsterySection={isProductUpholstered(product)}
-          showWoodSection
+          showWoodSection={!isDualAxis}
           onHasFabricsChange={setHasLinkedFabrics}
           onWoodFinishesAvailable={setLinkedWoodFinishes}
           onSwatchImagesChange={onSwatchImagesChange}
