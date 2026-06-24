@@ -830,7 +830,8 @@ function LetterGroup({
                 initialExpand={initialExpand}
               />
             ) : (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-5">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-6 md:gap-x-10 gap-y-14 md:gap-y-20">
+
                 {designers.map((item) => {
                   const designerCount = parentDesignerCountByName[item.name] ?? 0;
                   const isParentBrand = item.founder === item.name && designerCount > 0;
