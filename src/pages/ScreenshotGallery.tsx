@@ -35,6 +35,8 @@ const SCREENSHOTS: ScreenshotItem[] = [
   },
 ];
 
+const LOCK_VERSION = "2026-06-25-cookiefree";
+
 export default function ScreenshotGallery() {
   const total = SCREENSHOTS.length;
   const today = useMemo(() => new Date().toISOString().split("T")[0], []);
@@ -73,7 +75,7 @@ export default function ScreenshotGallery() {
               >
                 <div className="relative overflow-hidden bg-[#050505]">
                   <img
-                    src={shot.src}
+                    src={`${shot.src}?v=${LOCK_VERSION}`}
                     alt={`${shot.deviceLabel} screenshot of the locked designers hero layout`}
                     loading={idx === 0 ? "eager" : "lazy"}
                     decoding="async"
