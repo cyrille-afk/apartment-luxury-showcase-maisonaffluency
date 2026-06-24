@@ -280,17 +280,31 @@ export default function TradeAdminFabrics() {
   const filtered = useMemo(() => {
     let rows = fabrics;
     if (categoryFilter) rows = rows.filter((r) => normalizeAdminFabricCategory(r.category) === categoryFilter);
+    if (designerFilter) {
+      rows = rows.filter((r) => {
+        const linked = linkedPicksByFabric.get(r.id) || [];
+        return linked.some((p) => p.designer_id === designerFilter);
+      });
+    }
     if (search.trim()) {
       const q = search.toLowerCase();
-      rows = rows.filter(
-        (r) =>
-          r.name.toLowerCase().includes(q) ||
-          (r.supplier || "").toLowerCase().includes(q) ||
-          (r.description || "").toLowerCase().includes(q),
-      );
+      rows = rows.filter((r) => {
+        if (r.name.toLowerCase().includes(q)) return true;
+        if ((r.supplier || "").toLowerCase().includes(q)) return true;
+        if ((r.description || "").toLowerCase().includes(q)) return true;
+        const linked = linkedPicksByFabric.get(r.id) || [];
+        return linked.some((p) => {
+          if ((p.title || "").toLowerCase().includes(q)) return true;
+          if ((p.subtitle || "").toLowerCase().includes(q)) return true;
+          const dName = designerNameById.get(p.designer_id || "") || "";
+          if (dName.toLowerCase().includes(q)) return true;
+          return false;
+        });
+      });
     }
     return rows;
-  }, [fabrics, search, categoryFilter]);
+  }, [fabrics, search, categoryFilter, designerFilter, linkedPicksByFabric, designerNameById]);
+
 
   const grouped = useMemo(() => {
     const g: Record<string, Fabric[]> = {};
