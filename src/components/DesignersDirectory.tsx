@@ -487,19 +487,8 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts }
     return fromDb;
   })();
   const instagramLink = instagramLinks[0];
-  const fallbackGalleryIndices = (() => {
-    for (const stem of designerKeyStems(item.name)) {
-      const hit = fallbackGalleryIndexByDesigner?.[stem];
-      if (hit && hit.length) return hit;
-    }
-    return [];
-  })();
-  const getPositionalFallbackIndex = (thumbPosition: number) => {
-    if (fallbackGalleryIndices.length === 0) return null;
-    return fallbackGalleryIndices[thumbPosition] ?? fallbackGalleryIndices[0] ?? null;
-  };
-
   const firstLetter = (displayName || item.name).normalize("NFD").replace(/[\u0300-\u036f]/g, "").charAt(0).toUpperCase();
+
   const isLetterA = firstLetter === 'A';
 
 
