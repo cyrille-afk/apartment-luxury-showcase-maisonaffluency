@@ -310,7 +310,7 @@ const DesignersHoverHero = () => {
               ? "justify-center pb-44 md:pb-0"
               : // Mobile browser: anchor list near the bottom of the svh frame
                 // but reserve room for the Directory row + iOS safe-area.
-                "justify-end pb-32 sm:pb-40 md:justify-center md:pb-0"
+                "justify-end pb-24 sm:pb-40 md:justify-center md:pb-0"
           )}
         >
 
