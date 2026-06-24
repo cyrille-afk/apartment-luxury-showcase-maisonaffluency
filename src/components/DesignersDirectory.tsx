@@ -445,7 +445,7 @@ function ParentBrandCard({ item, isOpen, onToggle, designerCount, hasIgPosts }: 
 
   return (
     <div className="self-start col-span-2">
-      <div className="group relative rounded-xl overflow-hidden border border-primary/40 ring-1 ring-primary/20 hover:border-primary/60 hover:shadow-xl transition-all duration-300 cursor-pointer aspect-[8/5]">
+      <div className="group relative rounded-xl overflow-hidden border border-primary/40 ring-1 ring-primary/20 hover:border-primary/60 hover:shadow-xl transition-all duration-300 cursor-pointer aspect-[7/4]">
         {item.name === 'Apparatus' ? (
           <div className="absolute inset-0 bg-black" />
         ) : (
