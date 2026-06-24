@@ -7,6 +7,14 @@ describe("sanitizeBiographyCitations", () => {
     expect(sanitizeBiographyCitations(input)).toBe("Her work with CC-Tapis is lyrical.");
   });
 
+  it("strips [Source: ...] and [Sources: ...] citation brackets", () => {
+    const input =
+      "She founded her studio in 2015 [Source: example.com/bio]. Profiled by Paris Match [Sources: parismatch.com; ideat.fr].";
+    expect(sanitizeBiographyCitations(input)).toBe(
+      "She founded her studio in 2015. Profiled by Paris Match.",
+    );
+  });
+
   it("removes bare non-media URL lines", () => {
     const input = "Intro paragraph.\nhttps://www.maisonaffluency.com/designers\nNext paragraph.";
     expect(sanitizeBiographyCitations(input)).toBe("Intro paragraph.\nNext paragraph.");
