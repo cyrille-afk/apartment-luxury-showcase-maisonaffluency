@@ -1,4 +1,5 @@
 import { jsPDF } from "jspdf";
+import { sanitizeBiographyCitations } from "@/lib/sanitizeBiographyCitations";
 
 /**
  * Generate a clean editorial PDF biography for a designer.
@@ -245,7 +246,7 @@ export function splitRichParagraphs(input: string): RichRun[][] {
 }
 
 function parseBiography(biography: string): ParsedBlock[] {
-  return biography
+  return sanitizeBiographyCitations(biography)
     .split(/\n\n+/)
     .map((p) => p.trim())
     .filter(Boolean)

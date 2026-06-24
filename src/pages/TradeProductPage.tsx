@@ -43,6 +43,7 @@ import CurrencyToggle, { type DisplayCurrency, formatPriceConverted, useFxRates,
 import { useTradeDisplayCurrency } from "@/hooks/useTradeDisplayCurrency";
 import { formatEditionLabel } from "@/lib/editionLabel";
 import PageLoadingSkeleton from "@/components/PageLoadingSkeleton";
+import { sanitizeBiographyCitations } from "@/lib/sanitizeBiographyCitations";
 import ExpandableSpec from "@/components/ExpandableSpec";
 import LegendDisclosure from "@/components/LegendDisclosure";
 import FinishSelector from "@/components/FinishSelector";
@@ -2026,7 +2027,7 @@ const TradeProductPage: React.FC = () => {
             : "From the Same Designer";
 
           // Build brand summary from designer biography (mirror PublicProductPage logic).
-          const bio = (designer as any).biography as string | undefined;
+          const bio = sanitizeBiographyCitations((designer as any).biography as string | undefined);
           let brandSummary = "";
           if (bio) {
             const cleaned = bio
