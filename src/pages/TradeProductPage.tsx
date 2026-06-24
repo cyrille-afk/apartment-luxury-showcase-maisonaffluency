@@ -1819,53 +1819,31 @@ const TradeProductPage: React.FC = () => {
 
               {(() => {
                 const handcrafted = formatHandcrafted(product.origin, product.lead_time);
-                const showDims = !isRugSqmActive && product.dimensions && isDualAxis && !hasDualSize && (baseAxisIsDim || topAxisIsDim) && looksLikeDimension(product.dimensions);
-                if (!showDims && !handcrafted) return null;
-                const dimLines = showDims
-                  ? withImperialPerLine(product.dimensions!).split("\n").map((l) => l.trim()).filter(Boolean)
-                  : [];
-                const [primaryDim, ...secondaryDims] = dimLines;
-                let originLine = handcrafted || "";
+                if (!handcrafted) return null;
+                let originLine = handcrafted;
                 let leadLine: string | null = null;
-                if (handcrafted) {
-                  const dotSplit = handcrafted.split(" · ");
-                  if (dotSplit.length === 2) {
-                    originLine = dotSplit[0];
-                    leadLine = dotSplit[1];
-                  } else {
-                    const m = handcrafted.match(/^(Handcrafted in .+?)\s+in\s+(.+)$/i);
-                    if (m) {
-                      originLine = m[1];
-                      leadLine = `Production lead time: ${m[2]}`;
-                    }
+                const dotSplit = handcrafted.split(" · ");
+                if (dotSplit.length === 2) {
+                  originLine = dotSplit[0];
+                  leadLine = dotSplit[1];
+                } else {
+                  const m = handcrafted.match(/^(Handcrafted in .+?)\s+in\s+(.+)$/i);
+                  if (m) {
+                    originLine = m[1];
+                    leadLine = `Production lead time: ${m[2]}`;
                   }
                 }
                 return (
-                  <div className="mt-2 flex flex-col">
-                    {showDims && (
-                      <div className="border-t border-border/60 py-4 flex items-start gap-5">
-                        {specIcon("📐", "mt-0.5")}
-                        <div className="font-body text-sm leading-relaxed text-muted-foreground font-normal">
-                          <div>{primaryDim}</div>
-                          {secondaryDims.length > 0 && (
-                            <div className="mt-0.5">{secondaryDims.join(" · ")}</div>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                    {handcrafted && (
-                      <div className="border-t border-b border-border/60 py-4 flex items-start gap-5">
-                        {specIcon("✦", "mt-0.5")}
-                        <div className="font-body text-sm leading-relaxed text-muted-foreground font-normal">
-                          <p>{originLine}</p>
-                          {leadLine && <p className="mt-0.5">{leadLine}</p>}
-                        </div>
-                      </div>
-                    )}
+                  <div className="mt-2 border-t border-b border-border/60 py-4 flex items-start gap-5">
+                    {specIcon("✦", "mt-0.5")}
+                    <div className="font-body text-sm leading-relaxed text-muted-foreground font-normal">
+                      <p>{originLine}</p>
+                      {leadLine && <p className="mt-0.5">{leadLine}</p>}
+                    </div>
                   </div>
                 );
-
               })()}
+
             </div>
 
             {/* Trade price + retail/trade toggle (size driven by selector above) */}
