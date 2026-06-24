@@ -493,7 +493,7 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts }
   const instagramLink = instagramLinks[0];
   const firstLetter = (displayName || item.name).normalize("NFD").replace(/[\u0300-\u036f]/g, "").charAt(0).toUpperCase();
 
-  const isLetterA = firstLetter === 'A';
+  const isLetterA = true; // bottom-anchored vignette applied to every designer card
 
 
   return (
@@ -539,11 +539,6 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts }
               </div>
             )}
           </>
-        )}
-        {thumbs.length > 0 && (
-          <div className="absolute top-3 right-3 z-20 flex flex-col items-end">
-            <span className="font-body text-[10px] uppercase tracking-[0.18em] text-white font-medium drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)]">ON VIEW</span>
-          </div>
         )}
 
 
