@@ -1706,7 +1706,9 @@ const TradeProductPage: React.FC = () => {
               {/* Dual-axis: Base × Top finish dropdowns */}
               {!isRugSqmActive && isDualAxis && (
                 <>
-                  {!baseAxisIsDim && !suppressBaseAsFinish && !(baseOptions.length > 0 && baseOptions.every(looksLikeDimension)) && (
+                  {/* Dual-axis: always render Base picker so both axes are visible.
+                      ExpandableSpec collapses single-option lists to a labeled row. */}
+                  {!baseAxisIsDim && !(baseOptions.length > 0 && baseOptions.every(looksLikeDimension)) && (
                     <ExpandableSpec
                       icon={specIcon("⬗")}
                       text={withImperialPerLine(baseOptions.join("\n"))}
@@ -1739,7 +1741,8 @@ const TradeProductPage: React.FC = () => {
                       }
                     />
                   )}
-                  {!(hasLinkedFabrics && !topAxisIsDim) && !suppressTopAsFinish && (
+                  {/* Dual-axis: always render Top picker. */}
+                  {!(hasLinkedFabrics && !topAxisIsDim) && (
                   <ExpandableSpec
 
                     icon={specIcon(topAxisIsDim ? "📐" : "⬗")}
