@@ -201,6 +201,13 @@ export default function TradeAdminFabrics() {
     return m;
   }, [designersList]);
 
+  const designerNameById = useMemo(() => {
+    const m = new Map<string, string | null>();
+    designersList.forEach((d) => m.set(d.id, d.display_name || d.name || null));
+    return m;
+  }, [designersList]);
+
+
 
   const { data: links = [] } = useQuery({
     queryKey: ["admin-fabrics-links"],
