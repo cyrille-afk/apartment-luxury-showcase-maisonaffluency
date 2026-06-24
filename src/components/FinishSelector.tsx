@@ -134,6 +134,13 @@ interface FinishSelectorProps {
    * quote/bespoke message so designers know the visual was unmapped.
    */
   onFinishesMissingImagesChange?: (names: string[]) => void;
+  /**
+   * Currently-visible gallery image index (0-based). When provided, the
+   * fabric accordion auto-selects the swatch whose `image_indices` includes
+   * this image so the label always matches what the user sees in the hero
+   * gallery on page load.
+   */
+  currentGalleryIndex?: number;
 }
 
 const normalizeFabricCategory = (category: string | null | undefined) => {
@@ -206,7 +213,7 @@ const pickFinishGlyph = (
  * (Trade + Public). Tiles are grouped by category (Upholstery, Wood, …)
  * with a COM ("Customer's Own Material") tile always offered.
  */
-export default function FinishSelector({ pickId, className, productTitle, onUpholsteryTierChange, onFabricChange, onHasFabricsChange, onWoodFinishChange, onWoodFinishPricingChange, onWoodFinishesAvailable, includePricing = false, onSwatchImagesChange, woodLabel, showUpholsterySection = true, showWoodSection = true, woodFilter, topFilter, topLabel, onTopFinishChange, onFinishesMissingImagesChange }: FinishSelectorProps) {
+export default function FinishSelector({ pickId, className, productTitle, onUpholsteryTierChange, onFabricChange, onHasFabricsChange, onWoodFinishChange, onWoodFinishPricingChange, onWoodFinishesAvailable, includePricing = false, onSwatchImagesChange, woodLabel, showUpholsterySection = true, showWoodSection = true, woodFilter, topFilter, topLabel, onTopFinishChange, onFinishesMissingImagesChange, currentGalleryIndex }: FinishSelectorProps) {
 
   const [open, setOpen] = useState(false);
   const [fabrics, setFabrics] = useState<Fabric[]>([]);
@@ -392,6 +399,33 @@ export default function FinishSelector({ pickId, className, productTitle, onUpho
     }
     onFinishesMissingImagesChange(missing);
   }, [selectedWoodItem?.id, selectedTopItem?.id, onFinishesMissingImagesChange]);
+
+  // Auto-select the fabric/leather swatch whose mapped image_indices include
+  // the image currently visible in the hero gallery. Keeps the accordion
+  // label honest on first paint (e.g. when the gallery opens on Belsuede-
+  // Deserto, the selector shows "Belsuede-Deserto" — not the first sort_order
+  // fabric). The user's own swatch clicks still win because they update both
+  // selectedFabricId and the gallery index in the same gesture.
+  useEffect(() => {
+    if (fabrics.length === 0) return;
+    if (currentGalleryIndex === undefined || currentGalleryIndex === null) return;
+    const oneBased = currentGalleryIndex + 1;
+    const match = fabrics.find(
+      (f) => isFabricCategory(f) && Array.isArray(f.image_indices) && f.image_indices.includes(oneBased),
+    );
+    if (!match) return;
+    if (selectedFabricId === match.id) return;
+    setSelectedFabricId(match.id);
+    onUpholsteryTierChange?.(match.price_tier_label ?? null);
+    onFabricChange?.({
+      id: match.id,
+      name: match.name,
+      tier: match.tier ?? null,
+      price_per_lm_cents: match.price_per_lm_cents ?? null,
+      currency: match.currency || "EUR",
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fabrics, currentGalleryIndex]);
 
 
   const renderTile = (f: Fabric, kindOverride?: "fabric" | "cover" | "base" | "top") => {

@@ -1544,6 +1544,7 @@ const TradeProductPage: React.FC = () => {
               <FinishSelector
                   pickId={product.id}
                   productTitle={product.title}
+                  currentGalleryIndex={galleryActiveIndex ?? 0}
                   woodLabel={
                     (product as any).wood_label_override
                       || (product.base_axis_label && !baseAxisIsDim
