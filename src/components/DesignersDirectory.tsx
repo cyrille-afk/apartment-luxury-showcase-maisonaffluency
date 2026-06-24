@@ -531,7 +531,7 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts }
   const protectCardControl = (e: React.SyntheticEvent<HTMLElement>) => {
     e.stopPropagation();
   };
-  const firstLetter = (displayName || item.name).normalize("NFD").replace(/[0300-036f]/g, "").charAt(0).toUpperCase();
+  const firstLetter = (displayName || item.name).normalize("NFD").replace(/[\u0300-\u036f]/g, "").charAt(0).toUpperCase();
   const isLetterA = firstLetter === 'A';
 
 
