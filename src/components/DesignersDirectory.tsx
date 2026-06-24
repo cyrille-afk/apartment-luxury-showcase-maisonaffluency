@@ -275,6 +275,10 @@ function useFullCuratorPicks(enabled: boolean) {
 
 /** Parse names into [displayName, parentLabel] for correct card rendering */
 function parseDesignerDisplayName(item: Designer): { displayName: string; parentLabel: string | null } {
+  if (item.slug === "kerstens") {
+    return { displayName: "Kerstens", parentLabel: null };
+  }
+
   // Independent designers also listed under a parent atelier (e.g. Fabrice Ausset)
   // should appear as standalone cards in the alpha listing with no parent label.
   const isIndependent = (item as any).is_independent === true;
