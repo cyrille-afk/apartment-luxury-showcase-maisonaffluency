@@ -249,7 +249,11 @@ const DesignersHoverHero = () => {
         "relative w-full bg-[#0a0a0a] text-foreground overflow-hidden touch-pan-y",
         isStandalone
           ? "h-[calc(100svh-var(--header-h)+6rem)] min-h-[680px] md:h-[88vh] md:min-h-[640px]"
-          : "h-[100lvh] min-h-[640px] md:h-[88vh]"
+          : // Background frame uses 100lvh so dark hero always covers Safari's
+            // toolbar-collapse zone (no white strip). Content frame inside is
+            // constrained to 100svh so the Directory clears the iOS toolbar
+            // when it is visible.
+            "h-[100lvh] min-h-[640px] md:h-[88vh]"
       )}
     >
       {/* Cross-fading background images */}
@@ -278,66 +282,82 @@ const DesignersHoverHero = () => {
         <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/45 to-black/20 md:from-black/70 md:via-black/35 md:to-transparent" />
       </div>
 
-      {/* Content */}
+      {/* Safe content frame — on mobile browser it tracks 100svh (toolbar-visible
+          viewport) so list + directory always sit above iOS bottom chrome.
+          PWA/desktop keep using the full section height. */}
       <div
         className={cn(
-          "relative z-10 flex flex-col justify-center h-full px-6 sm:px-12 md:px-20 lg:px-28 pt-6 md:pt-8 md:-translate-y-12",
-          isStandalone ? "pb-44 md:pb-0" : "justify-end md:justify-center pb-72 md:pb-0"
+          "absolute inset-x-0 top-0 z-10 pointer-events-none",
+          isStandalone ? "h-full" : "h-[100svh] md:h-full"
         )}
       >
+        {/* Content */}
+        <div
+          className={cn(
+            "relative flex flex-col h-full px-6 sm:px-12 md:px-20 lg:px-28 pt-6 md:pt-8 md:-translate-y-12 pointer-events-auto",
+            isStandalone
+              ? "justify-center pb-44 md:pb-0"
+              : // Mobile browser: anchor list near the bottom of the svh frame
+                // but reserve room for the Directory row + iOS safe-area.
+                "justify-end pb-56 md:justify-center md:pb-0"
+          )}
+        >
 
-        <p className="mb-5 md:mb-8 font-body text-sm md:text-lg tracking-wide text-white/75">
-          Meet our Designers
-        </p>
-        <div className="w-full max-w-xs sm:max-w-sm md:max-w-md">
-          <nav
-            ref={navRef}
-            aria-label="Featured designers shortcut list"
-            className="inline-block"
-          >
-            <ul className="flex flex-col gap-0.5 text-left">
-              {items.map((d) => {
-                const [first, last] = splitName(d.name);
-                const isActive = d.slug === activeSlug;
-                const isDimmed = activeSlug !== null && !isActive;
-                const childBrand = d.founder && d.founder !== d.name;
-                return (
-                  <li key={d.slug} className="text-left">
-                    <Link
-                      to={`/designers/${d.slug}`}
-                      onMouseEnter={() => setActiveSlug(d.slug)}
-                      onFocus={() => setActiveSlug(d.slug)}
-                      className={cn(
-                        "inline-block whitespace-nowrap",
-                        "font-display font-light tracking-tight",
-                        "text-sm sm:text-base md:text-[20px] leading-[1.12]",
-                        "transition-colors duration-[1200ms] ease-out",
-                        isDimmed ? "text-white/35" : "text-white/95"
-                      )}
-                    >
-                      <span>
-                        {first}
-                        {last && <span className="italic"> {last}</span>}
-                        {childBrand && (
-                          <span className="opacity-80"> - {d.founder}</span>
+          <p className="mb-5 md:mb-8 font-body text-sm md:text-lg tracking-wide text-white/75">
+            Meet our Designers
+          </p>
+          <div className="w-full max-w-xs sm:max-w-sm md:max-w-md">
+            <nav
+              ref={navRef}
+              aria-label="Featured designers shortcut list"
+              className="inline-block"
+            >
+              <ul className="flex flex-col gap-0.5 text-left">
+                {items.map((d) => {
+                  const [first, last] = splitName(d.name);
+                  const isActive = d.slug === activeSlug;
+                  const isDimmed = activeSlug !== null && !isActive;
+                  const childBrand = d.founder && d.founder !== d.name;
+                  return (
+                    <li key={d.slug} className="text-left">
+                      <Link
+                        to={`/designers/${d.slug}`}
+                        onMouseEnter={() => setActiveSlug(d.slug)}
+                        onFocus={() => setActiveSlug(d.slug)}
+                        className={cn(
+                          "inline-block whitespace-nowrap",
+                          "font-display font-light tracking-tight",
+                          "text-sm sm:text-base md:text-[20px] leading-[1.12]",
+                          "transition-colors duration-[1200ms] ease-out",
+                          isDimmed ? "text-white/35" : "text-white/95"
                         )}
-                      </span>
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
-          </nav>
+                      >
+                        <span>
+                          {first}
+                          {last && <span className="italic"> {last}</span>}
+                          {childBrand && (
+                            <span className="opacity-80"> - {d.founder}</span>
+                          )}
+                        </span>
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </nav>
+          </div>
         </div>
+
+        {/* Archives / Directory labels — pinned to the svh frame bottom so
+            they always clear Safari's bottom toolbar; in PWA they sit lower. */}
+        {directoryLabels(cn(
+          "absolute left-6 sm:left-12 md:left-20 lg:left-28 flex items-center gap-10 text-white border-t border-white/20 pt-6 max-w-md pointer-events-auto",
+          isStandalone
+            ? "bottom-[calc(6rem+env(safe-area-inset-bottom))] md:bottom-14"
+            : "bottom-[calc(1.25rem+env(safe-area-inset-bottom))] md:bottom-24"
+        ))}
       </div>
 
-      {/* Archives / Directory labels: browser mobile clears iOS chrome; PWA sits lower. */}
-      {directoryLabels(cn(
-        "absolute left-6 sm:left-12 md:left-20 lg:left-28 z-10 flex items-center gap-10 text-white border-t border-white/20 pt-6 max-w-md",
-        isStandalone
-          ? "bottom-[calc(6rem+env(safe-area-inset-bottom))] md:bottom-14"
-          : "bottom-[calc(11rem+env(safe-area-inset-bottom))] md:bottom-24"
-      ))}
 
 
       {/* Vertical wordmark */}
