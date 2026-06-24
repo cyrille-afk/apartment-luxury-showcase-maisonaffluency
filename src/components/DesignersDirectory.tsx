@@ -528,9 +528,6 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts }
     return fallbackGalleryIndices[thumbPosition] ?? fallbackGalleryIndices[0] ?? null;
   };
 
-  const protectCardControl = (e: React.SyntheticEvent<HTMLElement>) => {
-    e.stopPropagation();
-  };
   const firstLetter = (displayName || item.name).normalize("NFD").replace(/[\u0300-\u036f]/g, "").charAt(0).toUpperCase();
   const isLetterA = firstLetter === 'A';
 
