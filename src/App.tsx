@@ -144,6 +144,8 @@ const ContactPage = lazy(() => import("./pages/ContactPage"));
 const ConciergePage = lazy(() => import("./pages/ConciergePage"));
 const PublicProductPage = lazy(() => import("./pages/PublicProductPage"));
 const CategoryRoute = lazy(() => import("./pages/CategoryRoute"));
+const ScreenshotGallery = lazy(() => import("./pages/ScreenshotGallery"));
+
 
 
 // Defer heavy providers + toast UI — not needed for hero/LCP
