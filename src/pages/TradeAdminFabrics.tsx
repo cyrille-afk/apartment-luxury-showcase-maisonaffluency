@@ -187,12 +187,13 @@ export default function TradeAdminFabrics() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("designers")
-        .select("id, slug");
+        .select("id, slug, name, display_name");
       if (error) throw error;
       return (data as DesignerLite[]) || [];
     },
     enabled: isAdmin,
   });
+
 
   const designerSlugById = useMemo(() => {
     const m = new Map<string, string | null>();
