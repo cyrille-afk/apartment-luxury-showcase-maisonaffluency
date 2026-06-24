@@ -401,18 +401,11 @@ const VariantSelectors: React.FC<{
           woodFilter={
             // Dual-axis: restrict the wood/base swatch group to swatches whose
             // name matches a baseOption value so top-axis swatches don't bleed
-            // into the base picker (e.g. Madison Avenue: only "Aged Brass"
-            // belongs under the Base section, the two stone tops belong under
-            // the Top Finish section).
+            // into the base picker. Token-aware so compound rows like
+            // "Travertino Rosso / Grey Saint Laurent / Picasso Green" don't
+            // hide the middle/trailing swatches.
             isDualAxis && baseOptions.length >= 1
-              ? (name: string) => {
-                  const norm = (s: string) => s.replace(/\[[^\]]*\]/g, "").trim().toLowerCase();
-                  const n = norm(name);
-                  return baseOptions.some((b) => {
-                    const bn = norm(b);
-                    return n === bn || n.startsWith(bn) || bn.startsWith(n);
-                  });
-                }
+              ? makeSwatchAxisFilter(baseOptions)
               : undefined
           }
           topLabel={
@@ -422,14 +415,7 @@ const VariantSelectors: React.FC<{
           }
           topFilter={
             isDualAxis && topOptions.length >= 1
-              ? (name: string) => {
-                  const norm = (s: string) => s.replace(/\[[^\]]*\]/g, "").trim().toLowerCase();
-                  const n = norm(name);
-                  return topOptions.some((t) => {
-                    const tn = norm(t);
-                    return n === tn || n.startsWith(tn) || tn.startsWith(n);
-                  });
-                }
+              ? makeSwatchAxisFilter(topOptions)
               : undefined
           }
 
