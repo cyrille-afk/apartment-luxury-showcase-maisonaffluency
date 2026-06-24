@@ -1550,13 +1550,40 @@ const TradeProductPage: React.FC = () => {
                           ? `Select Your ${formatVariantAxisLabel(product.base_axis_label) || product.base_axis_label}`
                           : null)
                   }
-                  woodFilter={undefined}
+                  woodFilter={
+                    // Dual-axis: only show base swatches in the Base section
+                    // so top-axis swatches don't bleed in (e.g. Madison
+                    // Avenue: only "Aged Brass" under Base; the two stone
+                    // tops belong under the Top Finish section below).
+                    isDualAxis && baseOptions.length >= 1
+                      ? (name: string) => {
+                          const norm = (s: string) => s.replace(/\[[^\]]*\]/g, "").trim().toLowerCase();
+                          const n = norm(name);
+                          return baseOptions.some((b) => {
+                            const bn = norm(b);
+                            return n === bn || n.startsWith(bn) || bn.startsWith(n);
+                          });
+                        }
+                      : undefined
+                  }
                   topLabel={
                     product.top_axis_label
                       ? `Select Your ${formatVariantAxisLabel(product.top_axis_label) || product.top_axis_label}`
                       : null
                   }
-                  topFilter={undefined}
+                  topFilter={
+                    isDualAxis && topOptions.length >= 1
+                      ? (name: string) => {
+                          const norm = (s: string) => s.replace(/\[[^\]]*\]/g, "").trim().toLowerCase();
+                          const n = norm(name);
+                          return topOptions.some((t) => {
+                            const tn = norm(t);
+                            return n === tn || n.startsWith(tn) || tn.startsWith(n);
+                          });
+                        }
+                      : undefined
+                  }
+
                   onTopFinishChange={(topName) => {
                     if (!topName) return;
                     const norm = (s: string) => s.trim().toLowerCase();
