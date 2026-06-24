@@ -392,29 +392,22 @@ const VariantSelectors: React.FC<{
           productTitle={product.title}
           woodLabel={
             (product as any).wood_label_override
-              || (
-                // When the base axis collapses to a single value (e.g. Cloud
-                // Chandelier base = "Mouth-Blown Frosted" only) but the top
-                // axis varies and has linked finish swatches, label the
-                // swatch picker with the TOP axis — otherwise the picker
-                // shows "Select Your Glass Spheres" over Chain Finish chips.
-                baseOptions.length <= 1 && topOptions.length > 1 && product.top_axis_label
-                  ? `Select Your ${formatVariantAxisLabel(product.top_axis_label) || product.top_axis_label}`
-                  : (product.base_axis_label && !baseAxisIsDim
-                    ? `Select Your ${formatVariantAxisLabel(product.base_axis_label) || product.base_axis_label}`
-                    : null)
-              )
+              || (product.base_axis_label && !baseAxisIsDim
+                ? `Select Your ${formatVariantAxisLabel(product.base_axis_label) || product.base_axis_label}`
+                : null)
           }
           woodFilter={
-            // When both axes have multiple linked swatches (e.g. Standby Side
-            // Table: 3 Colourways × 2 Rod Finishes), restrict the base group
-            // to swatches whose name matches a baseOption value, so the
-            // colourway swatches don't bleed into the rod-finish picker.
-            baseOptions.length > 1 && topOptions.length > 1
+            // Dual-axis: restrict the wood/base swatch group to swatches whose
+            // name matches a baseOption value so top-axis swatches don't bleed
+            // into the base picker (e.g. Madison Avenue: only "Aged Brass"
+            // belongs under the Base section, the two stone tops belong under
+            // the Top Finish section).
+            isDualAxis && baseOptions.length >= 1
               ? (name: string) => {
-                  const n = name.trim().toLowerCase();
+                  const norm = (s: string) => s.replace(/\[[^\]]*\]/g, "").trim().toLowerCase();
+                  const n = norm(name);
                   return baseOptions.some((b) => {
-                    const bn = b.trim().toLowerCase();
+                    const bn = norm(b);
                     return n === bn || n.startsWith(bn) || bn.startsWith(n);
                   });
                 }
@@ -426,7 +419,7 @@ const VariantSelectors: React.FC<{
               : null
           }
           topFilter={
-            baseOptions.length > 1 && topOptions.length > 1
+            isDualAxis && topOptions.length >= 1
               ? (name: string) => {
                   const norm = (s: string) => s.replace(/\[[^\]]*\]/g, "").trim().toLowerCase();
                   const n = norm(name);
@@ -437,6 +430,7 @@ const VariantSelectors: React.FC<{
                 }
               : undefined
           }
+
 
           showUpholsterySection={isProductUpholstered(product)}
           showWoodSection
