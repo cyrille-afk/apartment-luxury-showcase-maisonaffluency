@@ -245,7 +245,12 @@ const DesignersHoverHero = () => {
       ref={sectionRef}
       id="designers-hover-hero"
       aria-label="Featured designers"
-      className="relative w-full h-[88vh] min-h-[640px] bg-[#0a0a0a] text-foreground overflow-hidden touch-pan-y"
+      className={cn(
+        "relative w-full bg-[#0a0a0a] text-foreground overflow-hidden touch-pan-y",
+        isStandalone
+          ? "h-[calc(100svh-var(--header-h)+6rem)] min-h-[680px] md:h-[88vh] md:min-h-[640px]"
+          : "h-[88vh] min-h-[640px]"
+      )}
     >
       {/* Cross-fading background images */}
       <div className="absolute inset-0 z-0">
@@ -330,8 +335,8 @@ const DesignersHoverHero = () => {
       {directoryLabels(cn(
         "absolute left-6 sm:left-12 md:left-20 lg:left-28 z-10 flex items-center gap-10 text-white border-t border-white/20 pt-6 max-w-md",
         isStandalone
-          ? "bottom-[calc(5rem+env(safe-area-inset-bottom))] md:bottom-14"
-          : "bottom-[calc(9rem+env(safe-area-inset-bottom))] md:bottom-24"
+          ? "bottom-[calc(11rem+env(safe-area-inset-bottom))] md:bottom-14"
+          : "bottom-[calc(11rem+env(safe-area-inset-bottom))] md:bottom-24"
       ))}
 
 
