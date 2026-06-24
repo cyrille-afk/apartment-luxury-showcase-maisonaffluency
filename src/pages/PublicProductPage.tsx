@@ -706,20 +706,31 @@ const VariantSelectors: React.FC<{
             }
           />
         ) : hasVariants && !isDualAxis && singleAxisParsed.length > 1 && (() => {
-          const labels = Array.from(new Set(singleAxisParsed.map((p) => p.size).filter(Boolean)));
+          // Use the raw variant labels (deduped) so naming prefixes like
+          // "Concept 1: Ø 244 cm" survive instead of being stripped to the
+          // bare dimension by parseSingleAxisLabel.
+          const seen = new Set<string>();
+          const labels: string[] = [];
+          for (const p of singleAxisParsed) {
+            const raw = (p.variant.label || "").trim();
+            if (!raw || seen.has(raw)) continue;
+            seen.add(raw);
+            labels.push(raw);
+          }
           // Only render this as a "Size" dropdown when the labels actually look
           // like dimensions. Otherwise these are finish-style labels (e.g.
           // "Kynos", "Grafite") that belong in the FinishSelector below — not
           // in a misleading "Select Your Size" picker.
-          // Treat the list as size-like when most labels read as dimensions.
-          // Allows a "Bespoke" (or similar) entry to sit alongside real sizes
-          // without disqualifying the whole dropdown.
           const dimCount = labels.filter(looksLikeDimension).length;
           const labelsAreDims = dimCount >= 2 && dimCount >= Math.ceil(labels.length / 2);
+          const formatted = withImperialPerLine(labels.join("\n"))
+            .split("\n")
+            .map((line) => line.replace(/\s\|\s([^|]+?)(\s-\s.+)?$/, " ($1)$2"))
+            .join("\n");
           return labels.length > 1 && labelsAreDims ? (
             <ExpandableSpec
               icon={specIcon("📐")}
-              text={withImperialPerLine(labels.join("\n"))}
+              text={formatted}
               emphasized
               placeholder="Select Your Size"
               value={selSize != null ? Math.max(0, labels.indexOf(selSize)) : null}
@@ -727,7 +738,7 @@ const VariantSelectors: React.FC<{
                 const s = labels[idx] ?? null;
                 setSelSize(s);
                 const variant = s
-                  ? singleAxisParsed.find((p) => p.size === s)?.variant
+                  ? singleAxisParsed.find((p) => (p.variant.label || "").trim() === s)?.variant
                   : null;
                 const fullLabel = variant?.label || s || null;
                 onMaterialChange?.(fullLabel, { size: fullLabel });
