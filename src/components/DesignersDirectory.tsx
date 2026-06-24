@@ -566,7 +566,7 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts }
         {thumbs.length === 0 && (
           <>
             {instagramLinks.length > 0 && (
-              <div className="absolute bottom-3 right-3 z-10 flex flex-col items-end gap-0.5">
+              <div className={`absolute right-3 z-10 flex flex-col items-end gap-0.5 ${isLetterA ? 'top-3' : 'bottom-3'}`}>
                 {instagramLinks.map((igUrl, i) => {
                   const handle = '@' + igUrl.split('?')[0].replace(/\/+$/, '').split('/').pop();
                   return (
@@ -581,7 +581,7 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts }
         )}
         {thumbs.length > 0 && (
           <>
-            <div className="absolute bottom-3 right-3 z-20 flex flex-col items-end gap-1.5">
+            <div className={`absolute right-3 z-20 flex flex-col items-end gap-1.5 ${isLetterA ? 'top-3' : 'bottom-3'}`}>
               <div className="flex flex-col items-center gap-1.5">
                 <span className="font-body text-[10px] uppercase tracking-[0.18em] text-white/90 drop-shadow-md font-medium">ON VIEW</span>
                 <div className="flex gap-1.5">
