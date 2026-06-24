@@ -290,8 +290,24 @@ Deno.serve(async (req) => {
       );
     }
 
+    // Only post/reel/tv URLs can be resolved — profile URLs have no single image.
+    if (!/instagram\.com\/(p|reel|reels|tv)\//i.test(url)) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error:
+            "Profile URLs aren't supported — paste a link to a specific post, reel, or TV video (e.g. instagram.com/p/…), or provide the image URL manually.",
+        }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        },
+      );
+    }
+
     const cleanUrl = normalizeInstagramUrl(url);
     console.log("Extracting image from:", cleanUrl);
+
 
     let resolution = await resolveMediaUrlViaGraph(cleanUrl);
     if (!resolution) {
