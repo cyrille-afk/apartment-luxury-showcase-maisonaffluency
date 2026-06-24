@@ -249,7 +249,7 @@ const DesignersHoverHero = () => {
         "relative w-full bg-[#0a0a0a] text-foreground overflow-hidden touch-pan-y",
         isStandalone
           ? "h-[calc(100svh-var(--header-h)+6rem)] min-h-[680px] md:h-[88vh] md:min-h-[640px]"
-          : "h-[88vh] min-h-[640px]"
+          : "h-[100lvh] min-h-[640px] md:h-[88vh]"
       )}
     >
       {/* Cross-fading background images */}
