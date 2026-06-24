@@ -657,11 +657,11 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts }
         return (
           <Link
             to={`/designers/${item.slug}`}
-            className={`block relative p-4 pt-3 ${isAdrien ? 'text-white' : ''}`}
-            style={isAdrien ? { background: 'linear-gradient(to bottom, #3a3a3c 0%, #2a2a2c 45%, #1a1a1c 55%, #050505 100%)', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)' } : undefined}
+            className={`block relative p-4 pt-3 flex-1 ${isAdrien ? 'text-white' : ''}`}
+            style={isAdrien ? { background: 'linear-gradient(to bottom, #5a5a5c 0%, #4a4a4c 45%, #3a3a3c 55%, #1f1f21 100%)', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06)' } : undefined}
           >
             {isAdrien && (
-              <span aria-hidden className="pointer-events-none absolute left-0 right-0 top-[46%] h-px bg-black/80" />
+              <span aria-hidden className="pointer-events-none absolute left-0 right-0 top-[46%] h-px bg-black/70" />
             )}
             <div className="flex items-baseline justify-between gap-3 mb-1.5">
               <h3 className={`font-serif text-lg md:text-xl lg:text-[1.4rem] leading-tight tracking-tight group-hover:translate-x-1 transition-transform duration-500 ease-out ${isAdrien ? 'text-white' : 'text-foreground'}`}>
