@@ -736,7 +736,7 @@ const VariantSelectors: React.FC<{
                 : undefined
             }
           />
-        ) : hasVariants && !isDualAxis && singleAxisParsed.length > 1 && (() => {
+        ) : hasVariants && !isDualAxis && !isBaseOnly && singleAxisParsed.length > 1 && (() => {
           // Use the raw variant labels (deduped) so naming prefixes like
           // "Concept 1: Ø 244 cm" survive instead of being stripped to the
           // bare dimension by parseSingleAxisLabel.
