@@ -1163,9 +1163,6 @@ const PublicProductPage: React.FC = () => {
           offers: {
             "@type": "Offer",
             availability: "https://schema.org/InStock",
-            priceCurrency: "EUR",
-            price: "0",
-            priceSpecification: { "@type": "PriceSpecification", priceCurrency: "EUR", price: "0", valueAddedTaxIncluded: false },
             url: canonical,
             seller: { "@type": "Organization", name: "Maison Affluency" },
           },
