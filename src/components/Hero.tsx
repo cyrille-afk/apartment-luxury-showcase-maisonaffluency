@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { scrollToSection } from "@/lib/scrollToSection";
 import { trackCTA, trackEvent } from "@/lib/analytics";
