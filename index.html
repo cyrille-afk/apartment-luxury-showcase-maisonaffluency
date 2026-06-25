@@ -195,7 +195,7 @@
         // crawlers that execute JS will still index the React-rendered content,
         // and the <noscript> block below remains for non-JS crawlers.
         var __css = document.createElement('style');
-        __css.textContent = '#seo-content{display:none !important;}';
+        __css.textContent = '#seo-content{display:none !important;}#static-hero{display:none !important;}';
         document.head.appendChild(__css);
       }
       setTimeout(function(){ document.documentElement.classList.add('css-ready'); }, 3000);
