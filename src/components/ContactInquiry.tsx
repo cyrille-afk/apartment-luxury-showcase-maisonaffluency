@@ -239,6 +239,8 @@ const ContactInquiry = () => {
           transition={{ duration: 0.8, delay: 0.2 }}
           className="space-y-6"
           onSubmit={handleSubmit}
+          onFocus={() => setInteracted(true)}
+          onPointerDown={() => setInteracted(true)}
         >
           <div className="grid gap-6 md:grid-cols-2">
             <div>
