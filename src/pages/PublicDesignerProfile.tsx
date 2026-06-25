@@ -724,8 +724,8 @@ const PublicDesignerProfile = () => {
       {(() => {
         const canonical = `https://maisonaffluency.com/designers/${designer.slug}`;
         const ogImg = toOgImage(designer.hero_image_url || designer.image_url || null);
-        const seoTitle = designerSeoTitle(name, designer.founder, isChildDesigner, designer.slug);
-        const desc = designerSeoDescription({ name, founder: designer.founder, specialty: designer.specialty, biography: designer.biography, isChildDesigner });
+        const seoTitle = designerSeoTitle(name, designer.founder, isChildDesigner, designer.slug, designer.specialty);
+        const desc = designerSeoDescription({ name, founder: designer.founder, specialty: designer.specialty, biography: designer.biography, isChildDesigner, slug: designer.slug });
         const personLd = {
           "@context": "https://schema.org",
           "@type": isParentBrand ? "Organization" : "Person",
