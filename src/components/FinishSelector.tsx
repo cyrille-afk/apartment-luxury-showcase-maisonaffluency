@@ -646,12 +646,22 @@ export default function FinishSelector({ pickId, className, productTitle, produc
         .flatMap((key) => grouped[key] || []);
   // Top-axis swatches first (e.g. diffuser), then base-axis swatches with the
   // top swatches excluded so a single physical swatch doesn't appear in both
-  // groups when the filters overlap.
+  // groups when the filters overlap. Any non-fabric swatch that matches
+  // NEITHER filter (e.g. Apparatus "Aged Brass" hardware or "Ash Wood"
+  // surfaces that aren't priced as their own variant row) falls through into
+  // the base/wood accordion so linked swatches are never silently dropped
+  // from the product page.
   const topTiles = topFilter ? allNonFabricTiles.filter((f) => topFilter(f.name)) : [];
   const topTileIds = new Set(topTiles.map((t) => t.id));
-  const woodTiles = allNonFabricTiles
-    .filter((f) => !topTileIds.has(f.id))
-    .filter((f) => !woodFilter || woodFilter(f.name));
+  const remainingNonFabric = allNonFabricTiles.filter((f) => !topTileIds.has(f.id));
+  const woodTiles = woodFilter
+    ? (() => {
+        const matched = remainingNonFabric.filter((f) => woodFilter(f.name));
+        const matchedIds = new Set(matched.map((t) => t.id));
+        const orphans = remainingNonFabric.filter((f) => !matchedIds.has(f.id));
+        return [...matched, ...orphans];
+      })()
+    : remainingNonFabric;
   const coverTiles = grouped["Cover"] || [];
 
   // Show all linked finishes on every breakpoint — swatches without mapped
