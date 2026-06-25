@@ -131,7 +131,7 @@ const CookieConsent = () => {
   }, []);
 
   const accept = () => {
-    localStorage.setItem("cookie_consent", "accepted");
+    writeConsent("accepted");
     setVisible(false);
     // Load GA4 immediately
     if (typeof (window as any).__loadGA4 === "function") {
@@ -140,10 +140,11 @@ const CookieConsent = () => {
   };
 
   const decline = () => {
-    localStorage.setItem("cookie_consent", "declined");
-    localStorage.setItem("ga_optout", "1");
+    writeConsent("declined");
+    try { localStorage.setItem("ga_optout", "1"); } catch { /* ignore */ }
     setVisible(false);
   };
+
 
   return (
     <AnimatePresence>
