@@ -23,13 +23,59 @@ const CookieConsent = () => {
     if (isStandaloneHomeLaunch) return;
 
     const consent = localStorage.getItem("cookie_consent");
-    if (!consent) {
-      // Delay well past the LCP measurement window so the banner can never
-      // be picked as the LCP candidate (it previously beat the hero at ~2s
-      // on throttled Lighthouse runs, sinking desktop LCP from 90 to 64).
-      const timer = setTimeout(() => setVisible(true), 8000);
-      return () => clearTimeout(timer);
+    if (consent) return;
+
+    // Never mount during the LCP measurement window — otherwise this banner
+    // (fixed, bottom-of-viewport <p>) can be picked as the LCP candidate and
+    // tank desktop LCP. Wait for the LCP entry to be reported, then for the
+    // page to be idle, then reveal. Fallback timers guarantee the banner
+    // eventually appears even if the observer / idle callback never fires.
+    let cancelled = false;
+    const timers: number[] = [];
+    const reveal = () => {
+      if (cancelled) return;
+      cancelled = true;
+      setVisible(true);
+    };
+    const afterLcp = () => {
+      if (cancelled) return;
+      const ric: typeof window.requestIdleCallback | undefined =
+        (window as any).requestIdleCallback;
+      if (ric) {
+        ric(reveal, { timeout: 2000 });
+      } else {
+        timers.push(window.setTimeout(reveal, 800));
+      }
+    };
+
+    let observer: PerformanceObserver | null = null;
+    try {
+      if (
+        typeof PerformanceObserver !== "undefined" &&
+        PerformanceObserver.supportedEntryTypes?.includes("largest-contentful-paint")
+      ) {
+        observer = new PerformanceObserver((list) => {
+          // Any LCP entry means the browser has a candidate other than us.
+          if (list.getEntries().length > 0) {
+            observer?.disconnect();
+            // Small grace period so LCP can settle on a later, larger candidate.
+            timers.push(window.setTimeout(afterLcp, 1200));
+          }
+        });
+        observer.observe({ type: "largest-contentful-paint", buffered: true });
+      }
+    } catch {
+      /* ignore */
     }
+
+    // Hard ceiling: even if LCP never reports (rare), show after 10s.
+    timers.push(window.setTimeout(afterLcp, 10000));
+
+    return () => {
+      cancelled = true;
+      observer?.disconnect();
+      timers.forEach(clearTimeout);
+    };
   }, []);
 
   useEffect(() => {
