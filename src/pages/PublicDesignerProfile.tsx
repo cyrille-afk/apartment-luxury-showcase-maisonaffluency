@@ -621,7 +621,7 @@ const PublicDesignerProfile = () => {
   const bioWordCount = (displayBiography || "").replace(/<[^>]+>/g, " ").replace(/https?:\S+/g, "").trim().split(/\s+/).filter(Boolean).length;
   const showThinContentFallback = bioWordCount < 60;
   const thinContentFallback = showThinContentFallback
-    ? buildThinContentFallback({ name: designer.name, founder: designer.founder, specialty: designer.specialty, isChildDesigner })
+    ? buildThinContentFallback({ name: designer.name, founder: designer.founder, specialty: designer.specialty, isChildDesigner, slug: designer.slug })
     : "";
 
   const biographySection = (displayBiography || thinContentFallback) ? (
