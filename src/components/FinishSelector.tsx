@@ -221,7 +221,7 @@ const pickFinishGlyph = (
  */
 export default function FinishSelector({ pickId, className, productTitle, onUpholsteryTierChange, onFabricChange, onHasFabricsChange, onWoodFinishChange, onWoodFinishPricingChange, onWoodFinishesAvailable, includePricing = false, onSwatchImagesChange, woodLabel, showUpholsterySection = true, showWoodSection = true, woodFilter, topFilter, topLabel, onTopFinishChange, onFinishesMissingImagesChange, currentGalleryIndex }: FinishSelectorProps) {
 
-  const isRugProduct = !!productTitle && /\brug\b/i.test(productTitle);
+  const isRugProduct = !!productTitle && /\brugs?\b/i.test(productTitle);
 
   const [open, setOpen] = useState(false);
   const [fabrics, setFabrics] = useState<Fabric[]>([]);
