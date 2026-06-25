@@ -34,7 +34,7 @@ type LcpEntry = PerformanceEntry & {
 
 const BUILD_ID =
   (typeof document !== "undefined" &&
-    document.querySelector('meta[name="build-id"]')?.getAttribute("content")) ||
+    document.querySelector('meta[name="app-build-id"]')?.getAttribute("content")) ||
   "unknown";
 
 const describeElement = (el: Element | null | undefined): string => {
