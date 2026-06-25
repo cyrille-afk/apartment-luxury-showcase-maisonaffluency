@@ -643,7 +643,7 @@ const VariantSelectors: React.FC<{
         {/* Materials description paragraph — shown AFTER all dropdowns, before Handcrafted.
             Suppressed when FinishSelector already drives fabric + wood selections to
             avoid restating "Varnished solid ash & fabric" type catch-all summaries. */}
-        {product.materials_description?.trim() && !hasLinkedFabrics && !isProductUpholstered(product) && (
+        {product.materials_description?.trim() && (isRugCategory(product.category) || (!hasLinkedFabrics && !isProductUpholstered(product))) && (
           <LegendDisclosure
             icon={specIcon("⬗")}
             text={product.materials_description.trim()}
