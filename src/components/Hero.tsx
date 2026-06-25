@@ -40,6 +40,11 @@ const scrollToContact = () => {
 };
 
 const Hero = () => {
+  // The pre-React static hero in index.html stays in place permanently —
+  // the React Hero <picture> below paints on top of it (#root has z-index:1,
+  // #static-hero is z-index:0). Letting the static one persist means Chrome
+  // gets a stable, loaded LCP candidate from the preloaded bytes regardless
+  // of when React boots on a throttled CPU.
   return (
     <section className="relative h-screen w-full overflow-hidden">
       <picture>
@@ -62,7 +67,7 @@ const Hero = () => {
           alt="Luxury living room with Asian-inspired murals and designer furniture"
           className="absolute inset-0 h-full w-full object-cover object-[50%_40%] md:h-[120%] md:object-[50%_0%]"
           loading="eager"
-          decoding="sync"
+          decoding="async"
           {...({ fetchpriority: "high" } as any)}
         />
 
