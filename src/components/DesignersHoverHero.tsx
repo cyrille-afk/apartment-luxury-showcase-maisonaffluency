@@ -314,7 +314,7 @@ const DesignersHoverHero = () => {
           )}
         >
 
-          <p className="mb-5 md:mb-8 font-body text-sm md:text-lg tracking-wide text-white/75">
+          <p id="meet-designers-headline" className="mb-5 md:mb-8 font-body text-sm md:text-lg tracking-wide text-white/75 scroll-header-offset">
             Meet our Designers
           </p>
           <div className="w-full max-w-xs sm:max-w-sm md:max-w-md">
