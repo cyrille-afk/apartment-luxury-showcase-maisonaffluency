@@ -2,7 +2,6 @@ import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import Index from "./pages/Index";
-import TradeAxonometric from "./pages/TradeAxonometric";
 import { CompareProvider } from "@/contexts/CompareContext";
 import { AuthProvider } from "@/hooks/useAuth";
 import { StudioProvider } from "@/hooks/useStudio";
@@ -58,6 +57,7 @@ const TradeFFESchedule = lazy(() => import("./pages/TradeFFESchedule"));
 const TradeDeliveryTracker = lazy(() => import("./pages/TradeDeliveryTracker"));
 const TradeFFEExportTest = lazy(() => import("./pages/TradeFFEExportTest"));
 const TradeMaterialLibrary = lazy(() => import("./pages/TradeMaterialLibrary"));
+const TradeAxonometric = lazy(() => import("./pages/TradeAxonometric"));
 const TradeTearsheets = lazy(() => import("./pages/TradeTearsheets"));
 const TradeAnnotations = lazy(() => import("./pages/TradeAnnotations"));
 const TradeShippingTracker = lazy(() => import("./pages/TradeShippingTracker"));
@@ -485,7 +485,7 @@ const App = () => {
                     <Route path="documents-admin" element={<TradeDocumentsAdmin />} />
                     <Route path="media" element={<TradeMediaLibrary />} />
                     <Route path="quotes-admin" element={<TradeQuotesAdmin />} />
-                    <Route path="axonometric" element={<TradeAxonometric />} />
+                    <Route path="axonometric" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAxonometric /></Suspense>} />
                     <Route path="axonometric-requests" element={<TradeAxonometricRequests />} />
                     <Route path="axonometric-gallery" element={<TradeAxonometricGallery />} />
                     
