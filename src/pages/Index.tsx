@@ -221,7 +221,7 @@ const Index = ({ categoryMode = false }: IndexProps = {}) => {
               setShowBelowFoldSections(true);
             }, 3000);
           }
-        }, 5000);
+        }, 15000);
       }
     };
 

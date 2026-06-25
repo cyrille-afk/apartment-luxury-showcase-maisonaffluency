@@ -361,6 +361,40 @@ const App = () => {
 
   useEffect(() => {
     const win = window as any;
+    const isHome = window.location.pathname === "/" || window.location.pathname === "";
+
+    if (isHome) {
+      let idleId: number | null = null;
+      let timeoutId: number | null = null;
+      let loadFallbackId: number | null = null;
+      let started = false;
+
+      const start = () => {
+        if (started) return;
+        started = true;
+        timeoutId = window.setTimeout(() => {
+          if (typeof win.requestIdleCallback === "function") {
+            idleId = win.requestIdleCallback(() => setShowDeferredUi(true), { timeout: 3000 });
+          } else {
+            setShowDeferredUi(true);
+          }
+        }, 12000);
+      };
+
+      if (document.readyState === "complete") {
+        start();
+      } else {
+        window.addEventListener("load", start, { once: true });
+        loadFallbackId = window.setTimeout(start, 12000);
+      }
+
+      return () => {
+        window.removeEventListener("load", start);
+        if (timeoutId) window.clearTimeout(timeoutId);
+        if (loadFallbackId) window.clearTimeout(loadFallbackId);
+        if (idleId !== null) win.cancelIdleCallback?.(idleId);
+      };
+    }
 
     if (typeof win.requestIdleCallback === "function") {
       const idleId = win.requestIdleCallback(() => setShowDeferredUi(true), { timeout: 1500 });
