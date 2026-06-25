@@ -35,6 +35,14 @@ const CookieConsent = () => {
     const reveal = () => {
       if (cancelled) return;
       cancelled = true;
+      // Stamp the mount time so RUM (src/lib/rum.ts) can report whether the
+      // banner was already visible when the browser finalised LCP.
+      try {
+        (window as unknown as { __cookieBannerMountedAt?: number }).__cookieBannerMountedAt =
+          performance.now();
+      } catch {
+        /* ignore */
+      }
       setVisible(true);
     };
     const afterLcp = () => {
