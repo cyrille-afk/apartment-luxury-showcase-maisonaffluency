@@ -784,6 +784,10 @@ const TradeVisualiser = () => {
                 Beta — AI render powered by Lovable AI. The model preserves room geometry and swaps only the
                 marked surfaces with the selected catalogue finishes.
               </p>
+
+              {rendered && renderedImage && !rendering && (
+                <VisualiserTearSheet pins={pins} renderedImage={renderedImage} />
+              )}
             </div>
 
             {/* Finish library */}
