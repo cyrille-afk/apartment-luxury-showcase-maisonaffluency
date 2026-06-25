@@ -18,7 +18,7 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { VisualiserTearSheet } from "@/components/trade/VisualiserTearSheet";
+
 
 // ───────── Surfaces ──────────────────────────────────────────────────────────
 type Surface = "walls" | "floors" | "upholstery" | "curtains" | "furniture";
@@ -785,9 +785,6 @@ const TradeVisualiser = () => {
                 marked surfaces with the selected catalogue finishes.
               </p>
 
-              {rendered && renderedImage && !rendering && (
-                <VisualiserTearSheet pins={pins} renderedImage={renderedImage} />
-              )}
             </div>
 
             {/* Finish library */}
