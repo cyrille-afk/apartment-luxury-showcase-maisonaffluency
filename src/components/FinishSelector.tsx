@@ -727,15 +727,6 @@ export default function FinishSelector({ pickId, className, productTitle, onUpho
     .filter(Boolean)
     .join(" / ");
 
-  const renderRugFinishAccordion = () => renderAccordion({
-    isOpen: open,
-    onToggle: () => setOpen((v) => !v),
-    label: "Select Your Rug Finish",
-    selectedName: selectedRugSummary || null,
-    tiles: [],
-    glyph: "fabric",
-  });
-
   return (
     <TooltipProvider>
       <div className={className}>
