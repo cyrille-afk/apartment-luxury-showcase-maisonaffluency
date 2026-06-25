@@ -45,8 +45,15 @@ const Hero = () => {
   // as the LCP candidate. The static copy overlay (#static-hero-copy) however
   // duplicates this section's <h1>, so we hide it as soon as React mounts.
   useEffect(() => {
-    const el = document.getElementById("static-hero-copy");
-    if (el) el.style.display = "none";
+    // Hide the static copy overlay (React's <h1> below replaces it).
+    const copy = document.getElementById("static-hero-copy");
+    if (copy) copy.style.display = "none";
+    // Force the static hero <picture> visible. The inline script in index.html
+    // appends a stylesheet that hides #static-hero on non-home first-loads to
+    // prevent a flash on subpages; after SPA-navigation back to /, that
+    // stylesheet persists and would otherwise leave the hero image blank.
+    const pic = document.getElementById("static-hero");
+    if (pic) pic.style.setProperty("display", "block", "important");
   }, []);
   return (
     <section className="relative h-screen w-full overflow-hidden">
