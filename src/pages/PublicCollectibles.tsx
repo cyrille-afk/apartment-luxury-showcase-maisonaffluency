@@ -1,12 +1,16 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { Helmet } from "react-helmet-async";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronUp } from "lucide-react";
 import { useState, useEffect } from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
-import Collectibles from "@/components/Collectibles";
+import Collectibles, { collectibleDesigners } from "@/components/Collectibles";
 import CollectiblesHoverHero from "@/components/CollectiblesHoverHero";
+
+const CANONICAL = "https://www.maisonaffluency.com/collectibles";
+const OG_IMAGE =
+  "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,h_630,c_fill,q_auto:best,f_jpg/v1774310625/20250822-designer-x-ai-gfx-test-09b_esclp8.jpg";
 
 function BackToTopButton() {
   const [visible, setVisible] = useState(false);
@@ -38,28 +42,68 @@ function BackToTopButton() {
 }
 
 const PublicCollectibles = () => {
+  const { title, description, itemListLd, collectionLd } = useMemo(() => {
+    const featured = collectibleDesigners
+      .filter((d) => d.id && d.curatorPicks?.[0]?.image)
+      .sort((a, b) => a.name.localeCompare(b.name, "en", { sensitivity: "base" }));
+
+    const ateliers = featured.slice(0, 4).map((d) => d.name).join(", ");
+    const titleStr = `Collectible Design — Sculptural Furniture, Rare Lighting & Objets d'Art | Maison Affluency`;
+    const descStr = ateliers
+      ? `Discover collectible design from ${ateliers} and more — sculptural furniture, rare lighting and limited-edition objets d'art curated for collectors and interior designers worldwide.`
+      : `Discover collectible design — sculptural furniture, rare lighting and limited-edition objets d'art curated for collectors and interior designers worldwide.`;
+
+    const itemList = {
+      "@context": "https://schema.org",
+      "@type": "ItemList",
+      name: "Collectible Design Pieces On View",
+      itemListElement: featured.slice(0, 20).map((d, i) => ({
+        "@type": "ListItem",
+        position: i + 1,
+        url: `https://www.maisonaffluency.com/designers/${d.id}`,
+        name: `${d.curatorPicks[0].title} — ${d.name}`,
+        image: d.curatorPicks[0].image,
+      })),
+    };
+
+    const collection = {
+      "@context": "https://schema.org",
+      "@type": "CollectionPage",
+      name: "Collectible Design On View",
+      description: descStr,
+      url: CANONICAL,
+      isPartOf: {
+        "@type": "WebSite",
+        name: "Maison Affluency",
+        url: "https://www.maisonaffluency.com",
+      },
+    };
+
+    return { title: titleStr, description: descStr, itemListLd: itemList, collectionLd: collection };
+  }, []);
+
   return (
     <>
       <Helmet>
-        <title>Collectible Design On View — Maison Affluency</title>
-        <meta
-          name="description"
-          content="Explore our curated selection of collectible design — sculptural furniture, rare lighting, and limited-edition objets d'art from world-renowned ateliers."
-        />
-        <link rel="canonical" href="https://maisonaffluency.com/collectibles" />
+        <title>{title}</title>
+        <meta name="description" content={description} />
+        <link rel="canonical" href={CANONICAL} />
         <meta property="og:type" content="website" />
         <meta property="og:locale" content="en_US" />
         <meta property="og:site_name" content="Maison Affluency" />
-        <meta property="og:url" content="https://maisonaffluency.com/collectibles" />
-        <meta property="og:title" content="Collectible Design On View — Maison Affluency" />
-        <meta property="og:description" content="Explore our curated selection of collectible design — sculptural furniture, rare lighting, and limited-edition objets d'art from world-renowned ateliers." />
-        <meta property="og:image" content="https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,h_630,c_fill,q_auto:best,f_jpg/v1774310625/20250822-designer-x-ai-gfx-test-09b_esclp8.jpg" />
+        <meta property="og:url" content={CANONICAL} />
+        <meta property="og:title" content={title} />
+        <meta property="og:description" content={description} />
+        <meta property="og:image" content={OG_IMAGE} />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
+        <meta property="og:image:alt" content="Collectible design pieces curated by Maison Affluency" />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="Collectible Design On View — Maison Affluency" />
-        <meta name="twitter:description" content="Explore our curated selection of collectible design — sculptural furniture, rare lighting, and limited-edition objets d'art from world-renowned ateliers." />
-        <meta name="twitter:image" content="https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,h_630,c_fill,q_auto:best,f_jpg/v1774310625/20250822-designer-x-ai-gfx-test-09b_esclp8.jpg" />
+        <meta name="twitter:title" content={title} />
+        <meta name="twitter:description" content={description} />
+        <meta name="twitter:image" content={OG_IMAGE} />
+        <script type="application/ld+json">{JSON.stringify(collectionLd)}</script>
+        <script type="application/ld+json">{JSON.stringify(itemListLd)}</script>
       </Helmet>
 
       <div className="min-h-screen bg-background text-foreground">
