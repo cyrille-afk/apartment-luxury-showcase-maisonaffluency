@@ -27,6 +27,7 @@ const AxonometricSceneEditor = lazy(() => import("@/components/trade/Axonometric
 
 const ProposalBuilder = lazy(() => import("@/components/trade/ProposalBuilder"));
 import { MultiViewTurntable } from "@/components/trade/MultiViewTurntable";
+import { AxonometricTearSheet } from "@/components/trade/AxonometricTearSheet";
 import { Input } from "@/components/ui/input";
 import { format } from "date-fns";
 
