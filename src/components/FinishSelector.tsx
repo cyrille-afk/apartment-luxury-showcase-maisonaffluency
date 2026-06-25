@@ -681,7 +681,9 @@ export default function FinishSelector({ pickId, className, productTitle, onUpho
       {(showUpholsterySection || fabrics.some(isFabricCategory)) && renderAccordion({
         isOpen: open,
         onToggle: () => setOpen((v) => !v),
-        label: "Select Your Fabric / Leather",
+        label: (!!productTitle && /\brug\b/i.test(productTitle))
+          ? "Select Your Rug Fabric"
+          : "Select Your Fabric / Leather",
         selectedName: selectedFabricItem?.name ?? null,
         tiles: visibleFabricTiles,
         glyph: "fabric",
