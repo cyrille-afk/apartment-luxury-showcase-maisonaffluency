@@ -5,8 +5,48 @@ import { X } from "lucide-react";
 /**
  * Minimal GDPR cookie consent banner.
  * Blocks GA4 until the user explicitly accepts.
- * Stores choice in localStorage as 'cookie_consent'.
+ * Persists choice in BOTH localStorage ('cookie_consent') and a 1-year
+ * first-party cookie ('cookie_consent') so the banner never remounts
+ * after accept/decline — even if localStorage is cleared.
  */
+const CONSENT_KEY = "cookie_consent";
+const CONSENT_MAX_AGE = 60 * 60 * 24 * 365; // 1 year
+
+const readConsentCookie = (): string | null => {
+  try {
+    const match = document.cookie.match(
+      new RegExp("(?:^|; )" + CONSENT_KEY + "=([^;]*)")
+    );
+    return match ? decodeURIComponent(match[1]) : null;
+  } catch {
+    return null;
+  }
+};
+
+const writeConsent = (value: "accepted" | "declined") => {
+  try { localStorage.setItem(CONSENT_KEY, value); } catch { /* ignore */ }
+  try {
+    const secure = window.location.protocol === "https:" ? "; Secure" : "";
+    document.cookie =
+      `${CONSENT_KEY}=${encodeURIComponent(value)}; Max-Age=${CONSENT_MAX_AGE}` +
+      `; Path=/; SameSite=Lax${secure}`;
+  } catch { /* ignore */ }
+};
+
+const readConsent = (): string | null => {
+  let v: string | null = null;
+  try { v = localStorage.getItem(CONSENT_KEY); } catch { /* ignore */ }
+  if (!v) v = readConsentCookie();
+  // Heal: if only one store has it, mirror to the other.
+  if (v === "accepted" || v === "declined") {
+    try {
+      if (localStorage.getItem(CONSENT_KEY) !== v) localStorage.setItem(CONSENT_KEY, v);
+    } catch { /* ignore */ }
+    if (readConsentCookie() !== v) writeConsent(v);
+  }
+  return v;
+};
+
 const CookieConsent = () => {
   const [visible, setVisible] = useState(false);
 
@@ -22,8 +62,9 @@ const CookieConsent = () => {
       );
     if (isStandaloneHomeLaunch) return;
 
-    const consent = localStorage.getItem("cookie_consent");
+    const consent = readConsent();
     if (consent) return;
+
 
     // Never mount during the LCP measurement window. Lighthouse keeps
     // updating LCP until the page reaches network idle, so it's not enough
@@ -90,7 +131,7 @@ const CookieConsent = () => {
   }, []);
 
   const accept = () => {
-    localStorage.setItem("cookie_consent", "accepted");
+    writeConsent("accepted");
     setVisible(false);
     // Load GA4 immediately
     if (typeof (window as any).__loadGA4 === "function") {
@@ -99,10 +140,11 @@ const CookieConsent = () => {
   };
 
   const decline = () => {
-    localStorage.setItem("cookie_consent", "declined");
-    localStorage.setItem("ga_optout", "1");
+    writeConsent("declined");
+    try { localStorage.setItem("ga_optout", "1"); } catch { /* ignore */ }
     setVisible(false);
   };
+
 
   return (
     <AnimatePresence>
@@ -154,8 +196,10 @@ const CookieConsent = () => {
 
 export const hasCookieConsent = (): boolean => {
   if (typeof window === "undefined") return false;
-  try { return window.localStorage.getItem("cookie_consent") === "accepted"; }
-  catch { return false; }
+  try { if (window.localStorage.getItem(CONSENT_KEY) === "accepted") return true; }
+  catch { /* ignore */ }
+  return readConsentCookie() === "accepted";
 };
+
 
 export default CookieConsent;
