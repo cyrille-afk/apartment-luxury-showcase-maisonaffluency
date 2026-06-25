@@ -81,6 +81,11 @@ pinStandaloneHomeLaunchToHero();
 // Poll /version.json and dispatch app:build-update-available on new deploys.
 startBuildVersionWatcher();
 
+// Real-user LCP monitoring — beacons to GA4 once the page is hidden or the
+// user first interacts. Slices by `cookie_banner_mounted_before_lcp` so we
+// can verify in production that the banner gating worked.
+initRum();
+
 // CSS is now loaded (import above is synchronous in the bundled output).
 // Reveal content by adding css-ready — this disables the FOUC guard in index.html.
 document.documentElement.classList.add("css-ready");
