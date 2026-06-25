@@ -1852,7 +1852,7 @@ const TradeProductPage: React.FC = () => {
                 </>
               )}
 
-              {!isRugSqmActive && product.materials_description?.trim() && !hasLinkedFabrics && linkedWoodFinishes.length === 0 && (
+              {!isRugSqmActive && product.materials_description?.trim() && (isRugCategory(product.category) || (!hasLinkedFabrics && linkedWoodFinishes.length === 0)) && (
                 <LegendDisclosure
                   icon={specIcon("⬗")}
                   text={product.materials_description.trim()}
