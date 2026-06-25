@@ -24,8 +24,10 @@ const CookieConsent = () => {
 
     const consent = localStorage.getItem("cookie_consent");
     if (!consent) {
-      // Small delay so it doesn't flash during hero load
-      const timer = setTimeout(() => setVisible(true), 2000);
+      // Delay well past the LCP measurement window so the banner can never
+      // be picked as the LCP candidate (it previously beat the hero at ~2s
+      // on throttled Lighthouse runs, sinking desktop LCP from 90 to 64).
+      const timer = setTimeout(() => setVisible(true), 8000);
       return () => clearTimeout(timer);
     }
   }, []);

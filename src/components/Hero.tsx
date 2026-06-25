@@ -4,10 +4,11 @@ import { trackCTA, trackEvent } from "@/lib/analytics";
 
 const HERO_BASE = "https://res.cloudinary.com/dif1oamtj/image/upload";
 const HERO_ID = "v1781920000/AffluencySG_194-22.jpg_macpwj";
-// Desktop / landscape variants
-const HERO_DESKTOP = `${HERO_BASE}/w_1200,c_fill,q_auto:eco,f_auto/${HERO_ID}`;
-const HERO_DESKTOP_SRCSET = [640, 828, 1200, 1600]
-  .map((w) => `${HERO_BASE}/w_${w},c_fill,q_auto:eco,f_auto/${HERO_ID} ${w}w`)
+// Desktop / landscape variants — q_auto:good (not eco) so the hero clears
+// Chrome's 0.05 bpp LCP threshold and is eligible as the LCP candidate.
+const HERO_DESKTOP = `${HERO_BASE}/w_1600,c_fill,q_auto:good,f_auto/${HERO_ID}`;
+const HERO_DESKTOP_SRCSET = [828, 1200, 1600, 1920, 2400]
+  .map((w) => `${HERO_BASE}/w_${w},c_fill,q_auto:good,f_auto/${HERO_ID} ${w}w`)
   .join(", ");
 // Mobile portrait variants — cropped to ~9:19.5 so object-cover doesn't shrink LCP score
 const HERO_MOBILE_SRCSET = [
@@ -16,7 +17,7 @@ const HERO_MOBILE_SRCSET = [
   { w: 780, h: 1688 }, // 2x for DPR 2/3
   { w: 1170, h: 2532 }, // 3x
 ]
-  .map(({ w, h }) => `${HERO_BASE}/w_${w},h_${h},c_fill,g_auto,q_auto:eco,f_auto/${HERO_ID} ${w}w`)
+  .map(({ w, h }) => `${HERO_BASE}/w_${w},h_${h},c_fill,g_auto,q_auto:good,f_auto/${HERO_ID} ${w}w`)
   .join(", ");
 
 const revealBelowFold = () => {
