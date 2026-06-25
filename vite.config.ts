@@ -42,9 +42,18 @@ function optimizeHtmlPlugin(buildId: string): Plugin {
         }
       );
       if (modulepreloads.length > 0) {
-        const hints = modulepreloads
-          .map(href => `<link rel="modulepreload" href="${href}">`)
-          .join('\n    ');
+        // Only modulepreload chunks required for first paint. Demote heavy
+        // vendor chunks that are only reached from lazy routes/components
+        // (motion, radix) to low-priority <link rel="prefetch"> so they
+        // don't compete with the hero image or block the main thread
+        // during boot. This is the single biggest mobile TBT win.
+        const DEFER = /(vendor-motion|vendor-radix)/;
+        const eager = modulepreloads.filter(h => !DEFER.test(h));
+        const deferred = modulepreloads.filter(h => DEFER.test(h));
+        const hints = [
+          ...eager.map(href => `<link rel="modulepreload" href="${href}">`),
+          ...deferred.map(href => `<link rel="prefetch" as="script" href="${href}">`),
+        ].join('\n    ');
         html = html.replace('<meta charset="UTF-8" />', `<meta charset="UTF-8" />\n    ${hints}`);
       }
 
