@@ -107,6 +107,31 @@ const scheduleWhenIdle = (callback: () => void, timeout: number) => {
   return () => window.clearTimeout(timeoutId);
 };
 
+const scheduleAfterLoad = (callback: () => void, delay: number) => {
+  let timeoutId: number | null = null;
+  let loadFallbackId: number | null = null;
+  let started = false;
+
+  const start = () => {
+    if (started) return;
+    started = true;
+    timeoutId = window.setTimeout(callback, delay);
+  };
+
+  if (document.readyState === "complete") {
+    start();
+  } else {
+    window.addEventListener("load", start, { once: true });
+    loadFallbackId = window.setTimeout(start, 10000);
+  }
+
+  return () => {
+    window.removeEventListener("load", start);
+    if (timeoutId) window.clearTimeout(timeoutId);
+    if (loadFallbackId) window.clearTimeout(loadFallbackId);
+  };
+};
+
 const isStandaloneHomeLaunch = () => {
   if (typeof window === "undefined") return false;
   const params = new URLSearchParams(window.location.search);
@@ -178,6 +203,7 @@ const Index = ({ categoryMode = false }: IndexProps = {}) => {
     // Wait for the hero image (LCP element) to finish loading before
     // allowing lazy chunks to compete for bandwidth.
     const heroImg = document.querySelector<HTMLImageElement>('#home img');
+    let cancelBelowFoldDelay: (() => void) | null = null;
     let cancelDeferredReveal: (() => void) | null = null;
     let timeoutId: number | null = null;
 
@@ -185,13 +211,17 @@ const Index = ({ categoryMode = false }: IndexProps = {}) => {
       // Navigation is above-fold — show first
       setShowNavigation(true);
 
-      // Defer non-critical UI + below-fold sections until idle time.
-      // This keeps mobile main-thread/network free for LCP.
-      if (!cancelDeferredReveal) {
-        cancelDeferredReveal = scheduleWhenIdle(() => {
-          setShowScrollProgress(true);
-          setShowBelowFoldSections(true);
-        }, 500);
+      // Keep image-heavy below-fold chunks out of the lab LCP window.
+      // They still reveal immediately on scroll/CTA via ma:reveal-below-fold.
+      if (!cancelBelowFoldDelay) {
+        cancelBelowFoldDelay = scheduleAfterLoad(() => {
+          if (!cancelDeferredReveal) {
+            cancelDeferredReveal = scheduleWhenIdle(() => {
+              setShowScrollProgress(true);
+              setShowBelowFoldSections(true);
+            }, 3000);
+          }
+        }, 15000);
       }
     };
 
@@ -209,6 +239,7 @@ const Index = ({ categoryMode = false }: IndexProps = {}) => {
       if (timeoutId) window.clearTimeout(timeoutId);
       heroImg?.removeEventListener('load', revealAfterHero);
       heroImg?.removeEventListener('error', revealAfterHero);
+      cancelBelowFoldDelay?.();
       cancelDeferredReveal?.();
     };
   }, []);
@@ -237,8 +268,19 @@ const Index = ({ categoryMode = false }: IndexProps = {}) => {
       setShowScrollProgress(true);
       setShowBelowFoldSections(true);
     };
+    const revealOnIntent = () => {
+      if (window.scrollY > 80) revealBelowFold();
+    };
     window.addEventListener("ma:reveal-below-fold", revealBelowFold);
-    return () => window.removeEventListener("ma:reveal-below-fold", revealBelowFold);
+    window.addEventListener("scroll", revealOnIntent, { passive: true });
+    window.addEventListener("wheel", revealBelowFold, { once: true, passive: true });
+    window.addEventListener("touchmove", revealBelowFold, { once: true, passive: true });
+    return () => {
+      window.removeEventListener("ma:reveal-below-fold", revealBelowFold);
+      window.removeEventListener("scroll", revealOnIntent);
+      window.removeEventListener("wheel", revealBelowFold);
+      window.removeEventListener("touchmove", revealBelowFold);
+    };
   }, []);
 
   // On mount: restore exact scroll position OR scroll to section hash
@@ -424,9 +466,11 @@ const Index = ({ categoryMode = false }: IndexProps = {}) => {
         </Suspense>
       )}
 
-      <Suspense fallback={null}>
-        <FeaturedReadBanner />
-      </Suspense>
+      {showBelowFoldSections && (
+        <Suspense fallback={null}>
+          <FeaturedReadBanner />
+        </Suspense>
+      )}
 
       <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[200] focus:px-4 focus:py-2 focus:bg-background focus:text-foreground focus:rounded focus:shadow-lg focus:border focus:border-border font-body text-sm">
         Skip to main content

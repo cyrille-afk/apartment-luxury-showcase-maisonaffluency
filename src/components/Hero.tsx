@@ -79,15 +79,9 @@ const Hero = () => {
 
       {/* Text overlay — CSS-only animations, no framer-motion needed */}
       <div className="relative z-10 h-full px-4 pb-32 pt-[44%] md:px-32 md:pb-20 md:pt-[20%] lg:px-52 flex-col border rounded-none opacity-100 shadow-none flex items-start justify-start md:justify-start md:items-start">
-        <div className="max-w-4xl md:text-left hero-fade-in">
-          <h1 className="mb-8 md:mb-14 text-3xl leading-tight text-white md:text-4xl font-serif lg:text-5xl hero-fade-in-delayed-2">
-            <button
-              type="button"
-              onClick={scrollToOverview}
-              className="text-left text-inherit font-inherit leading-inherit cursor-pointer hover:opacity-80 transition-opacity bg-transparent border-none p-0 m-0"
-            >
-              Discover The World's Best Interior Designers' Iconic Pieces
-            </button>
+        <div className="max-w-4xl md:text-left">
+          <h1 className="mb-8 md:mb-14 text-3xl leading-tight text-white md:text-4xl font-serif lg:text-5xl">
+            Discover The World's Best Interior Designers' Iconic Pieces
           </h1>
 
           <div className="flex w-full max-w-3xl flex-col items-start">

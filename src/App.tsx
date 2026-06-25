@@ -2,7 +2,6 @@ import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import Index from "./pages/Index";
-import TradeAxonometric from "./pages/TradeAxonometric";
 import { CompareProvider } from "@/contexts/CompareContext";
 import { AuthProvider } from "@/hooks/useAuth";
 import { StudioProvider } from "@/hooks/useStudio";
@@ -58,6 +57,7 @@ const TradeFFESchedule = lazy(() => import("./pages/TradeFFESchedule"));
 const TradeDeliveryTracker = lazy(() => import("./pages/TradeDeliveryTracker"));
 const TradeFFEExportTest = lazy(() => import("./pages/TradeFFEExportTest"));
 const TradeMaterialLibrary = lazy(() => import("./pages/TradeMaterialLibrary"));
+const TradeAxonometric = lazy(() => import("./pages/TradeAxonometric"));
 const TradeTearsheets = lazy(() => import("./pages/TradeTearsheets"));
 const TradeAnnotations = lazy(() => import("./pages/TradeAnnotations"));
 const TradeShippingTracker = lazy(() => import("./pages/TradeShippingTracker"));
@@ -361,6 +361,40 @@ const App = () => {
 
   useEffect(() => {
     const win = window as any;
+    const isHome = window.location.pathname === "/" || window.location.pathname === "";
+
+    if (isHome) {
+      let idleId: number | null = null;
+      let timeoutId: number | null = null;
+      let loadFallbackId: number | null = null;
+      let started = false;
+
+      const start = () => {
+        if (started) return;
+        started = true;
+        timeoutId = window.setTimeout(() => {
+          if (typeof win.requestIdleCallback === "function") {
+            idleId = win.requestIdleCallback(() => setShowDeferredUi(true), { timeout: 3000 });
+          } else {
+            setShowDeferredUi(true);
+          }
+        }, 12000);
+      };
+
+      if (document.readyState === "complete") {
+        start();
+      } else {
+        window.addEventListener("load", start, { once: true });
+        loadFallbackId = window.setTimeout(start, 12000);
+      }
+
+      return () => {
+        window.removeEventListener("load", start);
+        if (timeoutId) window.clearTimeout(timeoutId);
+        if (loadFallbackId) window.clearTimeout(loadFallbackId);
+        if (idleId !== null) win.cancelIdleCallback?.(idleId);
+      };
+    }
 
     if (typeof win.requestIdleCallback === "function") {
       const idleId = win.requestIdleCallback(() => setShowDeferredUi(true), { timeout: 1500 });
@@ -451,7 +485,7 @@ const App = () => {
                     <Route path="documents-admin" element={<TradeDocumentsAdmin />} />
                     <Route path="media" element={<TradeMediaLibrary />} />
                     <Route path="quotes-admin" element={<TradeQuotesAdmin />} />
-                    <Route path="axonometric" element={<TradeAxonometric />} />
+                    <Route path="axonometric" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAxonometric /></Suspense>} />
                     <Route path="axonometric-requests" element={<TradeAxonometricRequests />} />
                     <Route path="axonometric-gallery" element={<TradeAxonometricGallery />} />
                     

@@ -195,7 +195,7 @@
         // crawlers that execute JS will still index the React-rendered content,
         // and the <noscript> block below remains for non-JS crawlers.
         var __css = document.createElement('style');
-        __css.textContent = '#seo-content{display:none !important;}#static-hero{display:none !important;}';
+        __css.textContent = '#seo-content{display:none !important;}#static-hero{display:none !important;}#static-hero-copy{display:none !important;}';
         document.head.appendChild(__css);
       }
       setTimeout(function(){ document.documentElement.classList.add('css-ready'); }, 3000);
@@ -265,6 +265,19 @@
         style="width:100%;height:100%;object-fit:cover;object-position:50% 40%;"
       />
     </picture>
+    <div id="static-hero-copy" aria-hidden="true" style="position:fixed;inset:0;z-index:0;pointer-events:none;display:flex;align-items:flex-start;justify-content:flex-start;padding:20vh 13rem 8rem;color:#fff;font-family:'Playfair Display',Georgia,serif;">
+      <div style="max-width:56rem;">
+        <div style="font-size:clamp(2rem,3.6vw,3.25rem);line-height:1.08;margin:0 0 3.5rem;text-shadow:0 2px 12px rgba(0,0,0,.45);">
+          Discover The World's Best Interior Designers' Iconic Pieces
+        </div>
+      </div>
+    </div>
+    <style>
+      @media (max-width: 767px) {
+        #static-hero-copy { padding: 44vh 1rem 8rem !important; }
+        #static-hero-copy > div > div { font-size: 1.875rem !important; line-height: 1.2 !important; }
+      }
+    </style>
 
     <div id="root">
       <!-- SEO content: visible to crawlers during initial render, replaced when React mounts -->
