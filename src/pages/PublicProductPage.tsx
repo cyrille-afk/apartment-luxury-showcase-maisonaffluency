@@ -1163,9 +1163,6 @@ const PublicProductPage: React.FC = () => {
           offers: {
             "@type": "Offer",
             availability: "https://schema.org/InStock",
-            priceCurrency: "EUR",
-            price: "0",
-            priceSpecification: { "@type": "PriceSpecification", priceCurrency: "EUR", price: "0", valueAddedTaxIncluded: false },
             url: canonical,
             seller: { "@type": "Organization", name: "Maison Affluency" },
           },
@@ -1346,12 +1343,12 @@ const PublicProductPage: React.FC = () => {
               </div>
 
 
-              {/* Primary CTA — Price Upon Request */}
+              {/* Primary CTA — Price on Request */}
               <Link
-                to="/trade-program"
+                to={`/contact?subject=${encodeURIComponent(`Price on Request — ${product.title} by ${designerDisplay}`)}#contact`}
                 className="mt-2 flex items-center justify-center gap-2 px-5 py-3.5 rounded-md font-body text-xs uppercase tracking-[0.12em] transition-all w-full bg-foreground text-background hover:bg-foreground/90"
               >
-                Price Upon Request
+                Price on Request
               </Link>
 
               {/* Secondary actions: Favorite / Pin / Spec Sheet */}
