@@ -43,7 +43,17 @@ const scrollToOverview = () => {
 };
 
 const scrollToMeetDesigners = () => {
-  revealAndScrollTo("meet-designers");
+  revealBelowFold();
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      const el = document.getElementById("meet-designers-headline");
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+      } else {
+        scrollToSection("meet-designers");
+      }
+    });
+  });
 };
 
 const scrollToContact = () => {
