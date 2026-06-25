@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Trash2, ExternalLink } from "lucide-react";
+import { isRugCategory } from "@/lib/rugPricing";
 
 interface Fabric {
   id: string;
@@ -113,11 +114,11 @@ export default function ProductFabricsPanel({
     queryFn: async () => {
       const { data, error } = await (supabase as any)
         .from("designer_curator_picks")
-        .select("fabric_size_label_a, fabric_size_label_b")
+        .select("title, category, subcategory, fabric_size_label_a, fabric_size_label_b")
         .eq("id", pickId)
         .maybeSingle();
       if (error) throw error;
-      return data as { fabric_size_label_a: string | null; fabric_size_label_b: string | null } | null;
+      return data as { title: string | null; category: string | null; subcategory: string | null; fabric_size_label_a: string | null; fabric_size_label_b: string | null } | null;
     },
   });
 
@@ -253,6 +254,7 @@ export default function ProductFabricsPanel({
   };
 
   const sym = currencySymbol(currency);
+  const isRugPick = isRugCategory(pick?.category) || isRugCategory(pick?.subcategory) || /\brug\b/i.test(pick?.title || "");
   const labelsDirty =
     (labelA || "") !== (pick?.fabric_size_label_a || "") ||
     (labelB || "") !== (pick?.fabric_size_label_b || "");
@@ -264,16 +266,25 @@ export default function ProductFabricsPanel({
     <div className="space-y-2 border border-dashed border-border rounded-md p-2.5">
       <div className="flex items-center justify-between">
         <label className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">
-          Variants — Fabrics &amp; Finishes
+          {isRugPick ? "Variants — Rug Finishes & Metal Hardware" : "Variants — Fabrics & Finishes"}
         </label>
         <Button variant="ghost" size="sm" className="h-6 text-[10px]" onClick={() => setAdding((s) => !s)}>
-          {adding ? "Done" : "+ Link fabric"}
+          {adding ? "Done" : isRugPick ? "+ Link finish" : "+ Link fabric"}
         </Button>
       </div>
       <p className="text-[10px] text-muted-foreground italic leading-snug">
-        Each row is a variant. Set the two size labels (e.g. <code>6 m</code> / <code>3.5 m</code>), then
-        enter the price for each fabric in each size. Leave a price blank if not offered in that size.
-        <strong> Image range</strong> = which gallery photos show that fabric (e.g. <code>1-4</code>).
+        {isRugPick ? (
+          <>
+            Link rug-finish component swatches (wool/silk) and metal hardware finishes here.
+            <strong> Image range</strong> = which gallery photos show that finish (e.g. <code>1-4</code>).
+          </>
+        ) : (
+          <>
+            Each row is a variant. Set the two size labels (e.g. <code>6 m</code> / <code>3.5 m</code>), then
+            enter the price for each fabric in each size. Leave a price blank if not offered in that size.
+            <strong> Image range</strong> = which gallery photos show that fabric (e.g. <code>1-4</code>).
+          </>
+        )}
       </p>
 
       {/* Size labels */}
@@ -347,7 +358,7 @@ export default function ProductFabricsPanel({
               value={d.tier}
               onChange={(e) => setDrafts((s) => ({ ...s, [r.id]: { ...d, tier: e.target.value } }))}
               onBlur={() => dirty && saveRow(r.id)}
-              placeholder="e.g. ECART (own)"
+              placeholder={isRugPick ? "e.g. Wool / Silk" : "e.g. ECART (own)"}
               className="text-xs h-8"
             />
             <Input
@@ -395,7 +406,7 @@ export default function ProductFabricsPanel({
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search fabrics by name or supplier…"
+            placeholder={isRugPick ? "Search finishes by name or supplier…" : "Search fabrics by name or supplier…"}
             className="text-xs h-8"
           />
           <div className="max-h-60 overflow-y-auto space-y-1">
