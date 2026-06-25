@@ -41,6 +41,14 @@ const scrollToContact = () => {
 };
 
 const Hero = () => {
+  useEffect(() => {
+    // Hide the pre-React static hero now that the real Hero is mounted.
+    // The static element stays the LCP candidate (it painted first); we
+    // just take it out of the layer tree to avoid keeping its bitmap.
+    const el = document.getElementById("static-hero");
+    if (el) el.style.display = "none";
+  }, []);
+
   return (
     <section className="relative h-screen w-full overflow-hidden">
       <picture>
