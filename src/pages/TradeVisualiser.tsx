@@ -785,9 +785,6 @@ const TradeVisualiser = () => {
                 marked surfaces with the selected catalogue finishes.
               </p>
 
-              {rendered && renderedImage && !rendering && (
-                <VisualiserTearSheet pins={pins} renderedImage={renderedImage} />
-              )}
             </div>
 
             {/* Finish library */}
