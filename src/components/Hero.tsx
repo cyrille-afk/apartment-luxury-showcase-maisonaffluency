@@ -47,32 +47,13 @@ const Hero = () => {
   // of when React boots on a throttled CPU.
   return (
     <section className="relative h-screen w-full overflow-hidden">
-      <picture>
-        <source
-          media="(max-width: 767px)"
-          srcSet={HERO_MOBILE_SRCSET}
-          sizes="100vw"
-        />
-        <source
-          media="(min-width: 768px)"
-          srcSet={HERO_DESKTOP_SRCSET}
-          sizes="100vw"
-        />
-        <img
-          src={HERO_DESKTOP}
-          srcSet={HERO_DESKTOP_SRCSET}
-          sizes="100vw"
-          width={1200}
-          height={800}
-          alt="Luxury living room with Asian-inspired murals and designer furniture"
-          className="absolute inset-0 h-full w-full object-cover object-[50%_40%] md:h-[120%] md:object-[50%_0%]"
-          loading="eager"
-          decoding="async"
-          {...({ fetchpriority: "high" } as any)}
-        />
-
-      </picture>
+      {/* Hero image is rendered by the static <picture id="static-hero"> in
+          index.html (fixed, z-index:0, painted from the preloaded bytes
+          before React boots). We intentionally do NOT re-render the image
+          here — a second <picture> creates a duplicate LCP candidate and
+          extra decode work that pushes LCP later on throttled CPUs. */}
       <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-black/10 via-transparent to-black/20" />
+
 
 
 
