@@ -1768,6 +1768,14 @@ const TradeAxonometric = () => {
                   />
                 </div>
 
+                <AxonometricTearSheet
+                  renderedImage={result.storedUrl || result.imageUrl}
+                  sourceProduct={result.sourceProduct || selectedProduct}
+                  preloadedFavoriteProductIds={preloadedFavoriteProductIds}
+                  aiAttachedProduct={aiAttachedProduct}
+                />
+
+
                 {/* AI Dialogue Box */}
                 <div className="border border-border rounded-lg overflow-hidden">
                   <div className="px-4 py-2.5 bg-muted/30 border-b border-border flex items-center gap-2">
