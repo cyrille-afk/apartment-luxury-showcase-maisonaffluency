@@ -54,10 +54,14 @@ const Hero = () => {
         />
         <img
           src={HERO_DESKTOP}
+          srcSet={HERO_DESKTOP_SRCSET}
+          sizes="100vw"
+          width={1200}
+          height={800}
           alt="Luxury living room with Asian-inspired murals and designer furniture"
           className="absolute inset-0 h-full w-full object-cover object-[50%_40%] md:h-[120%] md:object-[50%_0%]"
           loading="eager"
-          decoding="async"
+          decoding="sync"
           {...({ fetchpriority: "high" } as any)}
         />
 
