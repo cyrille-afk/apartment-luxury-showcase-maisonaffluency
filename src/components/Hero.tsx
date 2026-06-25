@@ -42,11 +42,15 @@ const scrollToContact = () => {
 
 const Hero = () => {
   useEffect(() => {
-    // Hide the pre-React static hero now that the real Hero is mounted.
-    // The static element stays the LCP candidate (it painted first); we
-    // just take it out of the layer tree to avoid keeping its bitmap.
+    // Hide the pre-React static hero after LCP has had time to register it
+    // as the largest contentful paint. Removing too early (before the image
+    // bytes load) means LCP never picks the hero and falls back to the H1.
     const el = document.getElementById("static-hero");
-    if (el) el.style.display = "none";
+    if (!el) return;
+    const t = window.setTimeout(() => {
+      el.style.display = "none";
+    }, 4000);
+    return () => clearTimeout(t);
   }, []);
 
   return (
