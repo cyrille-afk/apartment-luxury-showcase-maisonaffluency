@@ -62,7 +62,7 @@ const Hero = () => {
           alt="Luxury living room with Asian-inspired murals and designer furniture"
           className="absolute inset-0 h-full w-full object-cover object-[50%_40%] md:h-[120%] md:object-[50%_0%]"
           loading="eager"
-          decoding="sync"
+          decoding="async"
           {...({ fetchpriority: "high" } as any)}
         />
 
