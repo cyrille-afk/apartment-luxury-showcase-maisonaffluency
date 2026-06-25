@@ -25,18 +25,19 @@ const CookieConsent = () => {
     const consent = localStorage.getItem("cookie_consent");
     if (consent) return;
 
-    // Never mount during the LCP measurement window — otherwise this banner
-    // (fixed, bottom-of-viewport <p>) can be picked as the LCP candidate and
-    // tank desktop LCP. Wait for the LCP entry to be reported, then for the
-    // page to be idle, then reveal. Fallback timers guarantee the banner
-    // eventually appears even if the observer / idle callback never fires.
+    // Never mount during the LCP measurement window. Lighthouse keeps
+    // updating LCP until the page reaches network idle, so it's not enough
+    // to wait for the first LCP entry — the hero image often finalises
+    // later and we must let it win. Strategy:
+    //   1. Wait for window 'load' (all sub-resources, incl. hero, decoded).
+    //   2. Then wait an additional idle/3s buffer so any late LCP candidate
+    //      has been recorded before we inject a fixed bottom <p>.
+    //   3. Hard ceiling of 12s in case 'load' never fires.
     let cancelled = false;
     const timers: number[] = [];
     const reveal = () => {
       if (cancelled) return;
       cancelled = true;
-      // Stamp the mount time so RUM (src/lib/rum.ts) can report whether the
-      // banner was already visible when the browser finalised LCP.
       try {
         (window as unknown as { __cookieBannerMountedAt?: number }).__cookieBannerMountedAt =
           performance.now();
@@ -45,46 +46,39 @@ const CookieConsent = () => {
       }
       setVisible(true);
     };
-    const afterLcp = () => {
+
+    const afterLoad = () => {
       if (cancelled) return;
       const ric: typeof window.requestIdleCallback | undefined =
         (window as any).requestIdleCallback;
       if (ric) {
-        ric(reveal, { timeout: 2000 });
+        ric(reveal, { timeout: 3000 });
       } else {
-        timers.push(window.setTimeout(reveal, 800));
+        timers.push(window.setTimeout(reveal, 3000));
       }
     };
 
-    let observer: PerformanceObserver | null = null;
-    try {
-      if (
-        typeof PerformanceObserver !== "undefined" &&
-        PerformanceObserver.supportedEntryTypes?.includes("largest-contentful-paint")
-      ) {
-        observer = new PerformanceObserver((list) => {
-          // Any LCP entry means the browser has a candidate other than us.
-          if (list.getEntries().length > 0) {
-            observer?.disconnect();
-            // Small grace period so LCP can settle on a later, larger candidate.
-            timers.push(window.setTimeout(afterLcp, 1200));
-          }
-        });
-        observer.observe({ type: "largest-contentful-paint", buffered: true });
-      }
-    } catch {
-      /* ignore */
+    const onLoad = () => {
+      // Extra 1.5s after load so any tail LCP entries settle.
+      timers.push(window.setTimeout(afterLoad, 1500));
+    };
+
+    if (document.readyState === "complete") {
+      onLoad();
+    } else {
+      window.addEventListener("load", onLoad, { once: true });
     }
 
-    // Hard ceiling: even if LCP never reports (rare), show after 10s.
-    timers.push(window.setTimeout(afterLcp, 10000));
+    // Hard ceiling: even if 'load' never fires, show after 12s.
+    timers.push(window.setTimeout(reveal, 12000));
 
     return () => {
       cancelled = true;
-      observer?.disconnect();
+      window.removeEventListener("load", onLoad);
       timers.forEach(clearTimeout);
     };
   }, []);
+
 
   useEffect(() => {
     const sync = () => {
