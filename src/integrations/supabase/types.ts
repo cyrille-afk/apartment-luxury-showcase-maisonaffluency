@@ -1870,6 +1870,7 @@ export type Database = {
         Row: {
           biography: string
           biography_images: string[] | null
+          collab_brands: string[]
           created_at: string
           display_name: string | null
           founder: string | null
@@ -1897,6 +1898,7 @@ export type Database = {
         Insert: {
           biography?: string
           biography_images?: string[] | null
+          collab_brands?: string[]
           created_at?: string
           display_name?: string | null
           founder?: string | null
@@ -1924,6 +1926,7 @@ export type Database = {
         Update: {
           biography?: string
           biography_images?: string[] | null
+          collab_brands?: string[]
           created_at?: string
           display_name?: string | null
           founder?: string | null

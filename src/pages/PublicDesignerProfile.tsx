@@ -313,8 +313,16 @@ function ProfileCollapsible({ children, shouldCollapse }: { children: React.Reac
   );
 }
 
+// Legacy slug → canonical slug 301-style redirects (in-app)
+const SLUG_ALIASES: Record<string, string> = {
+  "alex-proba-cc-tapis": "alex-proba",
+};
+
 const PublicDesignerProfile = () => {
   const { slug } = useParams<{ slug: string }>();
+  if (slug && SLUG_ALIASES[slug]) {
+    return <Navigate to={`/designers/${SLUG_ALIASES[slug]}`} replace />;
+  }
   const [searchParams] = useSearchParams();
   const highlightId = searchParams.get("highlight");
   const scrollToSection = searchParams.get("section");
@@ -904,6 +912,18 @@ const PublicDesignerProfile = () => {
                     <h1 className="font-display text-2xl md:text-4xl tracking-wide text-white drop-shadow-md">{name}</h1>
                     {designer.specialty && (
                       <p className="font-body text-sm md:text-base text-white/80 mt-1.5 font-medium tracking-wide">{designer.specialty}</p>
+                    )}
+                    {designer.collab_brands && designer.collab_brands.length > 0 && (
+                      <div className="mt-2 flex flex-wrap gap-1.5">
+                        {designer.collab_brands.map((brand) => (
+                          <span
+                            key={brand}
+                            className="inline-flex items-center px-2 py-0.5 rounded-full bg-white/15 backdrop-blur-sm text-white/90 font-body text-[10px] uppercase tracking-[0.15em]"
+                          >
+                            In collaboration with {brand}
+                          </span>
+                        ))}
+                      </div>
                     )}
                   </motion.div>
                   <button

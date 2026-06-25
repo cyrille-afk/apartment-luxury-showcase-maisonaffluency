@@ -55,6 +55,7 @@ export interface Designer {
   is_published: boolean;
   sort_order: number;
   new_in_order: number | null;
+  collab_brands: string[] | null;
 }
 
 export interface DesignerCuratorPick {
