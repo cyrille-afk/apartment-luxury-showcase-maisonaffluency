@@ -399,6 +399,7 @@ const VariantSelectors: React.FC<{
         <FinishSelector
           pickId={product.id}
           productTitle={product.title}
+          productCategory={product.category}
           woodLabel={
             (product as any).wood_label_override
               || (product.base_axis_label && !baseAxisIsDim

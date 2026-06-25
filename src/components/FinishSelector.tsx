@@ -47,6 +47,8 @@ interface FinishSelectorProps {
   className?: string;
   /** Optional product title shown in the zoom popup header. */
   productTitle?: string;
+  /** Optional product category used to apply rug-specific finish grouping. */
+  productCategory?: string | null;
   /**
    * Fires when the user picks a fabric/leather swatch (or COM/COL tile).
    * Receives the raw upholstery tier label (e.g. "ECART fabric", "Leather",
@@ -219,9 +221,14 @@ const pickFinishGlyph = (
  * (Trade + Public). Tiles are grouped by category (Upholstery, Wood, …)
  * with a COM ("Customer's Own Material") tile always offered.
  */
-export default function FinishSelector({ pickId, className, productTitle, onUpholsteryTierChange, onFabricChange, onHasFabricsChange, onWoodFinishChange, onWoodFinishPricingChange, onWoodFinishesAvailable, includePricing = false, onSwatchImagesChange, woodLabel, showUpholsterySection = true, showWoodSection = true, woodFilter, topFilter, topLabel, onTopFinishChange, onFinishesMissingImagesChange, currentGalleryIndex }: FinishSelectorProps) {
+export default function FinishSelector({ pickId, className, productTitle, productCategory, onUpholsteryTierChange, onFabricChange, onHasFabricsChange, onWoodFinishChange, onWoodFinishPricingChange, onWoodFinishesAvailable, includePricing = false, onSwatchImagesChange, woodLabel, showUpholsterySection = true, showWoodSection = true, woodFilter, topFilter, topLabel, onTopFinishChange, onFinishesMissingImagesChange, currentGalleryIndex }: FinishSelectorProps) {
 
-  const isRugProduct = !!productTitle && /\brugs?\b/i.test(productTitle);
+  const isRugProduct = /\brugs?\b/i.test(`${productTitle || ""} ${productCategory || ""}`);
+  const isRugComponentSwatch = (fabric: Pick<Fabric, "name" | "category">) => {
+    if (!isRugProduct) return false;
+    return normalizeFabricCategory(fabric.category) === "Rug Finish"
+      || /^\s*(wool|silk)\s*[—–-]/i.test(fabric.name || "");
+  };
 
   const [open, setOpen] = useState(false);
   const [fabrics, setFabrics] = useState<Fabric[]>([]);
@@ -309,8 +316,12 @@ export default function FinishSelector({ pickId, className, productTitle, onUpho
           frame_price_currency: f.frame_price_currency ?? "EUR",
         }));
       setFabrics(list);
-      onHasFabricsChange?.(list.some(isFabricCategory));
-      onWoodFinishesAvailable?.(list.filter(isFinishCategory).map((f) => f.name));
+      onHasFabricsChange?.(isRugProduct ? list.some(isRugComponentSwatch) : list.some(isFabricCategory));
+      onWoodFinishesAvailable?.(
+        list
+          .filter((f) => isRugProduct ? !isRugComponentSwatch(f) : isFinishCategory(f))
+          .map((f) => f.name),
+      );
       // Do NOT auto-select a default fabric swatch — the accordion label
       // should start empty so the user makes an intentional choice and we
       // don't mislead them with a name that doesn't match the gallery image.
@@ -626,11 +637,13 @@ export default function FinishSelector({ pickId, className, productTitle, onUpho
   const [openCover, setOpenCover] = useState(false);
   const isMobile = useIsMobile();
   const fabricTiles = isRugProduct
-    ? (grouped["Rug Finish"] || grouped["Fabric & Leather"] || [])
+    ? fabrics.filter(isRugComponentSwatch)
     : (grouped["Fabric & Leather"] || []);
-  const allNonFabricTiles = sortedGroupKeys
-    .filter((key) => key !== "Fabric & Leather" && key !== "Rug Finish" && key !== "Cover")
-    .flatMap((key) => grouped[key] || []);
+  const allNonFabricTiles = isRugProduct
+    ? fabrics.filter((f) => !isRugComponentSwatch(f) && !isCoverCategory(f))
+    : sortedGroupKeys
+        .filter((key) => key !== "Fabric & Leather" && key !== "Rug Finish" && key !== "Cover")
+        .flatMap((key) => grouped[key] || []);
   // Top-axis swatches first (e.g. diffuser), then base-axis swatches with the
   // top swatches excluded so a single physical swatch doesn't appear in both
   // groups when the filters overlap.
