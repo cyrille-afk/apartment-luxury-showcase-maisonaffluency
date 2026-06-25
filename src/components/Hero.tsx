@@ -25,19 +25,29 @@ const revealBelowFold = () => {
   window.dispatchEvent(new CustomEvent("ma:reveal-below-fold"));
 };
 
-const scrollToOverview = () => {
+const revealAndScrollTo = (sectionId: string) => {
   revealBelowFold();
-  scrollToSection("gallery");
+
+  // The reveal event mounts the fixed nav + below-fold sections. Wait for that
+  // commit before measuring offsets, otherwise CTA landings get hidden/truncated
+  // under the header on real devices.
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      scrollToSection(sectionId);
+    });
+  });
+};
+
+const scrollToOverview = () => {
+  revealAndScrollTo("gallery");
 };
 
 const scrollToMeetDesigners = () => {
-  revealBelowFold();
-  scrollToSection("meet-designers");
+  revealAndScrollTo("meet-designers");
 };
 
 const scrollToContact = () => {
-  revealBelowFold();
-  scrollToSection("contact");
+  revealAndScrollTo("contact");
 };
 
 const heroPrimaryCtaClass =
