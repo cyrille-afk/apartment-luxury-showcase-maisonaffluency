@@ -145,6 +145,9 @@ interface FinishSelectorProps {
 
 const normalizeFabricCategory = (category: string | null | undefined) => {
   const raw = (category || "").trim().toLowerCase();
+  if (raw === "rug finish" || raw === "rug finishes" || raw === "rug") {
+    return "Rug Finish";
+  }
   if (raw === "upholstery" || raw === "leather" || raw === "fabric" || raw === "fabric & leather") {
     return "Fabric & Leather";
   }
@@ -162,7 +165,10 @@ const normalizeFabricCategory = (category: string | null | undefined) => {
   return "Fabric & Leather";
 };
 
-const isFabricCategory = (fabric: Fabric) => normalizeFabricCategory(fabric.category) === "Fabric & Leather";
+const isFabricCategory = (fabric: Fabric) => {
+  const category = normalizeFabricCategory(fabric.category);
+  return category === "Fabric & Leather" || category === "Rug Finish";
+};
 const isCoverCategory = (fabric: Fabric) => normalizeFabricCategory(fabric.category) === "Cover";
 const isFinishCategory = (fabric: Fabric) => !isFabricCategory(fabric) && !isCoverCategory(fabric);
 
@@ -214,6 +220,8 @@ const pickFinishGlyph = (
  * with a COM ("Customer's Own Material") tile always offered.
  */
 export default function FinishSelector({ pickId, className, productTitle, onUpholsteryTierChange, onFabricChange, onHasFabricsChange, onWoodFinishChange, onWoodFinishPricingChange, onWoodFinishesAvailable, includePricing = false, onSwatchImagesChange, woodLabel, showUpholsterySection = true, showWoodSection = true, woodFilter, topFilter, topLabel, onTopFinishChange, onFinishesMissingImagesChange, currentGalleryIndex }: FinishSelectorProps) {
+
+  const isRugProduct = !!productTitle && /\brug\b/i.test(productTitle);
 
   const [open, setOpen] = useState(false);
   const [fabrics, setFabrics] = useState<Fabric[]>([]);
@@ -338,7 +346,7 @@ export default function FinishSelector({ pickId, className, productTitle, onUpho
     (acc[key] ||= []).push(f);
     return acc;
   }, {});
-  const groupOrder = ["Fabric & Leather", "Wood", "Metal", "Glass", "Stone", "Ceramic", "Other", "Cover"];
+  const groupOrder = ["Rug Finish", "Fabric & Leather", "Wood", "Metal", "Glass", "Stone", "Ceramic", "Other", "Cover"];
   const sortedGroupKeys = Object.keys(grouped).sort((a, b) => {
     const ai = groupOrder.indexOf(a);
     const bi = groupOrder.indexOf(b);
@@ -367,7 +375,7 @@ export default function FinishSelector({ pickId, className, productTitle, onUpho
   // Inject COM + COL at the end of the Fabric & Leather group so customers see
   // their "own material" options alongside the curated swatches — unless this
   // product opts out (designer_curator_picks.allow_com_col = false).
-  if (allowComCol) {
+  if (allowComCol && showUpholsterySection && !isRugProduct) {
     if (grouped["Fabric & Leather"]) {
       grouped["Fabric & Leather"] = [...grouped["Fabric & Leather"], comTile, colTile];
     } else {
@@ -598,7 +606,9 @@ export default function FinishSelector({ pickId, className, productTitle, onUpho
   const [openTop, setOpenTop] = useState(false);
   const [openCover, setOpenCover] = useState(false);
   const isMobile = useIsMobile();
-  const fabricTiles = grouped["Fabric & Leather"] || [];
+  const fabricTiles = isRugProduct
+    ? (grouped["Rug Finish"] || grouped["Fabric & Leather"] || [])
+    : (grouped["Fabric & Leather"] || []);
   const allNonFabricTiles = sortedGroupKeys
     .filter((key) => key !== "Fabric & Leather" && key !== "Cover")
     .flatMap((key) => grouped[key] || []);
@@ -681,8 +691,8 @@ export default function FinishSelector({ pickId, className, productTitle, onUpho
       {(showUpholsterySection || fabrics.some(isFabricCategory)) && renderAccordion({
         isOpen: open,
         onToggle: () => setOpen((v) => !v),
-        label: (!!productTitle && /\brug\b/i.test(productTitle))
-          ? "Select Your Rug Fabric"
+        label: isRugProduct
+          ? "Select Your Rug Finish"
           : "Select Your Fabric / Leather",
         selectedName: selectedFabricItem?.name ?? null,
         tiles: visibleFabricTiles,
