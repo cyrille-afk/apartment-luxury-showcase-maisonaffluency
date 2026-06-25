@@ -344,7 +344,7 @@ const ContactInquiry = () => {
           </div>
 
           <div className="flex flex-col items-center pt-4 gap-4">
-            <Turnstile onVerify={setTurnstileToken} onExpire={() => setTurnstileToken("")} />
+            {interacted && <Turnstile onVerify={setTurnstileToken} onExpire={() => setTurnstileToken("")} />}
             <Button
               type="submit"
               size="lg"
