@@ -70,15 +70,39 @@ const DESIGNER_TITLE_OVERRIDES: Record<string, string> = {
 };
 
 // Target Google's display bands: title 40-60 chars, description 140-160 chars.
+
+// Deterministic 0..n-1 index from a slug so each designer gets a stable
+// template choice without colliding with siblings.
+function slugIndex(slug: string | null | undefined, n: number): number {
+  if (!n) return 0;
+  const s = (slug || "").toLowerCase();
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
+  return ((h % n) + n) % n;
+}
+
+// Extract the leading product-category keyword from a free-text specialty
+// ("Lighting, lacquer, parchment" → "lighting"). Falls back to generic
+// "collectible design" when nothing usable is present.
+function categoryKeyword(specialty?: string | null): string {
+  const raw = (specialty || "").toLowerCase().replace(/[^a-z, &/-]+/g, " ").trim();
+  if (!raw) return "collectible design";
+  const first = raw.split(/[,/]| and /)[0].trim();
+  return first || "collectible design";
+}
+
 function designerSeoTitle(
   name: string,
   founder?: string | null,
   isChildDesigner?: boolean,
   slug?: string | null,
+  specialty?: string | null,
 ): string {
   if (slug && DESIGNER_TITLE_OVERRIDES[slug]) return DESIGNER_TITLE_OVERRIDES[slug];
   const cleanName = displayName(name);
   const cleanFounder = founder?.trim();
+  const kw = categoryKeyword(specialty);
+  const kwTitle = kw.replace(/\b\w/g, (c) => c.toUpperCase());
 
   // Extract slug tokens not already represented in name/founder so pages like
   // /designers/ozone-light don't collide with /designers/ozone.
@@ -105,12 +129,17 @@ function designerSeoTitle(
     !cleanName.toLowerCase().includes(cleanFounder.toLowerCase())
   ) {
     forCandidates.push(
+      `${displayedName} for ${cleanFounder} — ${kwTitle} | Maison Affluency`,
+      `${displayedName} ${kwTitle} for ${cleanFounder} | Maison Affluency`,
       `${displayedName} for ${cleanFounder} — Designer | Maison Affluency Singapore`,
       `${displayedName} for ${cleanFounder} — Maison Affluency Singapore`,
       `${displayedName} for ${cleanFounder} — Maison Affluency`,
     );
   }
   const soloCandidates: string[] = [
+    `${displayedName} — ${kwTitle} | Maison Affluency Singapore`,
+    `${displayedName} — Collectible ${kwTitle} | Maison Affluency`,
+    `${displayedName} ${kwTitle} & Collectible Design | Maison Affluency`,
     `${displayedName} — Collectible Designer | Maison Affluency Singapore`,
     `${displayedName} — Designer | Maison Affluency Singapore`,
     `${displayedName} — Designer | Maison Affluency`,
@@ -119,11 +148,12 @@ function designerSeoTitle(
   ];
 
   // Prefer disambiguating "for {founder}" titles when any fit the band; only
-  // fall back to solo titles when no for-candidate fits.
+  // fall back to solo titles when no for-candidate fits. Within the in-band
+  // set, vary the choice per-slug so siblings don't collapse to the same title.
   const pickInBand = (list: string[]) => {
     const inBand = list.filter((c) => c.length >= 40 && c.length <= 60);
-    if (inBand.length) return inBand.sort((a, b) => b.length - a.length)[0];
-    return null;
+    if (!inBand.length) return null;
+    return inBand[slugIndex(slug, inBand.length)];
   };
   const fromFor = pickInBand(forCandidates);
   if (fromFor) return fromFor;
@@ -135,7 +165,7 @@ function designerSeoTitle(
   return pool.sort((a, b) => Math.abs(50 - a.length) - Math.abs(50 - b.length))[0];
 }
 
-function designerSeoDescription(args: { name: string; founder?: string | null; specialty?: string | null; biography?: string | null; isChildDesigner?: boolean }) {
+function designerSeoDescription(args: { name: string; founder?: string | null; specialty?: string | null; biography?: string | null; isChildDesigner?: boolean; slug?: string | null }) {
   const cleanName = displayName(args.name);
   const cleanFounder = args.founder?.trim();
   const rawBio = args.biography ? args.biography.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim() : "";
@@ -158,18 +188,40 @@ function designerSeoDescription(args: { name: string; founder?: string | null; s
     return clamp160(usableBio);
   }
 
-  // Thin/missing bio → build a per-designer sentence that still varies
-  // by name, specialty and (when applicable) founder.
+  // Thin/missing bio → build a per-designer sentence that varies by name,
+  // specialty, founder and slug-derived template so siblings don't share
+  // descriptions verbatim.
   const specialty = args.specialty?.trim().replace(/\.$/, "");
-  const lead = usableBio
-    || (specialty
+  const kw = categoryKeyword(specialty);
+  const leadOptions = usableBio
+    ? [usableBio]
+    : specialty
       ? (args.isChildDesigner && cleanFounder
-        ? `${cleanName} designs ${specialty.toLowerCase()} for ${cleanFounder}.`
-        : `${cleanName} — ${specialty}.`)
-      : `${cleanName}.`);
-  const tail = args.isChildDesigner && cleanFounder
-    ? ` Collectible pieces curated by Maison Affluency, Singapore.`
-    : ` Collectible furniture, lighting and limited editions — Maison Affluency, Singapore.`;
+        ? [
+            `${cleanName} designs ${specialty.toLowerCase()} for ${cleanFounder}.`,
+            `${cleanName} — ${specialty} for ${cleanFounder}.`,
+            `${specialty} by ${cleanName} for ${cleanFounder}.`,
+          ]
+        : [
+            `${cleanName} — ${specialty}.`,
+            `${cleanName}: collectible ${kw} and limited editions.`,
+            `${specialty} by ${cleanName}.`,
+          ])
+      : [`${cleanName} — collectible ${kw}.`];
+  const lead = leadOptions[slugIndex(args.slug, leadOptions.length)];
+
+  const tailOptions = args.isChildDesigner && cleanFounder
+    ? [
+        ` Collectible pieces curated by Maison Affluency, Singapore.`,
+        ` Trade-priced pieces from ${cleanFounder}, presented by Maison Affluency Singapore.`,
+        ` Available to architects and designers via Maison Affluency Singapore.`,
+      ]
+    : [
+        ` Collectible furniture, lighting and limited editions — Maison Affluency, Singapore.`,
+        ` Curated by Maison Affluency Singapore for trade and private collectors worldwide.`,
+        ` Apartment-showroom and trade catalogue — Maison Affluency, Singapore.`,
+      ];
+  const tail = tailOptions[slugIndex(args.slug, tailOptions.length)];
   return clamp160(`${lead}${tail}`);
 }
 
@@ -181,18 +233,43 @@ function buildThinContentFallback(args: {
   founder?: string | null;
   specialty?: string | null;
   isChildDesigner?: boolean;
+  slug?: string | null;
 }): string {
   const cleanName = displayName(args.name);
   const cleanFounder = args.founder?.trim();
-  const specialty = args.specialty?.trim();
-  const lead = args.isChildDesigner && cleanFounder
-    ? `${cleanName} designs for ${cleanFounder}, a maison championed by Maison Affluency Singapore for its collectible vision.`
-    : `${cleanName} is featured by Maison Affluency Singapore for a body of work that resonates with our curatorial vision.`;
-  const middle = specialty
-    ? `Their practice spans ${specialty.toLowerCase().replace(/\.$/, "")}, conceived as collectible pieces for interiors that reward attention.`
-    : `Their practice favours collectible pieces — furniture, lighting and decorative objects conceived for interiors that reward attention.`;
-  const close = `Each work is selected for material integrity, authorship and the way it ages — qualities we present in person at the Maison Affluency apartment-showroom in Singapore and to trade clients worldwide.`;
-  return `${lead} ${middle} ${close}`;
+  const specialty = args.specialty?.trim().replace(/\.$/, "");
+  const kw = categoryKeyword(specialty);
+  const kwPlural = /s$/.test(kw) ? kw : `${kw} pieces`;
+
+  const leads = args.isChildDesigner && cleanFounder
+    ? [
+        `${cleanName} designs for ${cleanFounder}, a maison championed by Maison Affluency Singapore for its collectible vision.`,
+        `${cleanName} authors ${kwPlural} for ${cleanFounder} — a partnership Maison Affluency Singapore presents to interior architects and private collectors.`,
+        `Under ${cleanFounder}, ${cleanName} develops ${kw} that Maison Affluency Singapore curates for residential and hospitality projects in Asia and beyond.`,
+      ]
+    : [
+        `${cleanName} is featured by Maison Affluency Singapore for a body of work that resonates with our curatorial vision.`,
+        `${cleanName} produces collectible ${kw} that Maison Affluency Singapore offers to designers, architects and private clients worldwide.`,
+        `Maison Affluency Singapore represents ${cleanName}, whose ${kw} sits at the intersection of authorship, material research and slow craftsmanship.`,
+      ];
+  const middles = specialty
+    ? [
+        `Their practice spans ${specialty.toLowerCase()}, conceived as collectible pieces for interiors that reward attention.`,
+        `The studio's vocabulary — ${specialty.toLowerCase()} — is built around limited runs, considered materials and details that age beautifully.`,
+        `Each commission interprets ${specialty.toLowerCase()} as collectible design: small editions, signed work, and an unmistakable hand.`,
+      ]
+    : [
+        `Their practice favours collectible pieces — furniture, lighting and decorative objects conceived for interiors that reward attention.`,
+        `The studio works in limited editions across furniture, lighting and decorative objects, with material integrity at the centre of every commission.`,
+        `Work moves between furniture, lighting and decorative objects, each piece conceived as a collectible rather than a catalogue item.`,
+      ];
+  const closes = [
+    `Each work is selected for material integrity, authorship and the way it ages — qualities we present in person at the Maison Affluency apartment-showroom in Singapore and to trade clients worldwide.`,
+    `Maison Affluency offers trade pricing, lead times and full specification on request — meet the work in our Singapore apartment-showroom or via virtual presentation.`,
+    `Available to interior designers, architects and private collectors through Maison Affluency Singapore, with white-label documentation and worldwide delivery.`,
+  ];
+  const i = slugIndex(args.slug, 3);
+  return `${leads[i]} ${middles[i]} ${closes[i]}`;
 }
 
 function ProfileCollapsible({ children, shouldCollapse }: { children: React.ReactNode; shouldCollapse: boolean }) {
