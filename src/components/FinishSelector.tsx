@@ -610,7 +610,7 @@ export default function FinishSelector({ pickId, className, productTitle, onUpho
     ? (grouped["Rug Finish"] || grouped["Fabric & Leather"] || [])
     : (grouped["Fabric & Leather"] || []);
   const allNonFabricTiles = sortedGroupKeys
-    .filter((key) => key !== "Fabric & Leather" && key !== "Cover")
+    .filter((key) => key !== "Fabric & Leather" && key !== "Rug Finish" && key !== "Cover")
     .flatMap((key) => grouped[key] || []);
   // Top-axis swatches first (e.g. diffuser), then base-axis swatches with the
   // top swatches excluded so a single physical swatch doesn't appear in both
