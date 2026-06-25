@@ -101,12 +101,37 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     if (isHomepage) {
       const win = window as any;
-      if (typeof win.requestIdleCallback === "function") {
-        const id = win.requestIdleCallback(doImport, { timeout: 2000 });
-        return () => { cancelled = true; win.cancelIdleCallback?.(id); };
+      let idleId: number | null = null;
+      let timeoutId: number | null = null;
+      let loadFallbackId: number | null = null;
+      let started = false;
+
+      const start = () => {
+        if (started) return;
+        started = true;
+        timeoutId = window.setTimeout(() => {
+          if (typeof win.requestIdleCallback === "function") {
+            idleId = win.requestIdleCallback(doImport, { timeout: 3000 });
+          } else {
+            doImport();
+          }
+        }, 12000);
+      };
+
+      if (document.readyState === "complete") {
+        start();
+      } else {
+        window.addEventListener("load", start, { once: true });
+        loadFallbackId = window.setTimeout(start, 12000);
       }
-      const tid = setTimeout(doImport, 800);
-      return () => { cancelled = true; clearTimeout(tid); };
+
+      return () => {
+        cancelled = true;
+        window.removeEventListener("load", start);
+        if (timeoutId) window.clearTimeout(timeoutId);
+        if (loadFallbackId) window.clearTimeout(loadFallbackId);
+        if (idleId !== null) win.cancelIdleCallback?.(idleId);
+      };
     }
 
     // Non-homepage: import immediately
