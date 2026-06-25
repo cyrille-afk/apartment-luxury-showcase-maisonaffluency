@@ -229,6 +229,7 @@ export default function FinishSelector({ pickId, className, productTitle, onUpho
   const [selectedWoodId, setSelectedWoodId] = useState<string | null>(null);
   const [selectedTopId, setSelectedTopId] = useState<string | null>(null);
   const [selectedCoverId, setSelectedCoverId] = useState<string | null>(null);
+  const [selectedRugComponentIds, setSelectedRugComponentIds] = useState<Record<string, string>>({});
   const [zoomed, setZoomed] = useState<Fabric | null>(null);
   const [allowComCol, setAllowComCol] = useState<boolean>(true);
 
@@ -315,7 +316,7 @@ export default function FinishSelector({ pickId, className, productTitle, onUpho
       // don't mislead them with a name that doesn't match the gallery image.
       // We still notify the parent of the baseline upholstery tier so the
       // RRP math has a sensible default until the user picks a swatch.
-      const defaultFabric = list.find(isFabricCategory) || null;
+      const defaultFabric = isRugProduct ? null : list.find(isFabricCategory) || null;
       setSelectedFabricId(null);
       if (defaultFabric) {
         onUpholsteryTierChange?.(defaultFabric.price_tier_label ?? null);
@@ -330,6 +331,7 @@ export default function FinishSelector({ pickId, className, productTitle, onUpho
       onWoodFinishPricingChange?.(null);
 
       setSelectedCoverId(null);
+      setSelectedRugComponentIds({});
 
 
 
@@ -415,6 +417,7 @@ export default function FinishSelector({ pickId, className, productTitle, onUpho
   // fabric). The user's own swatch clicks still win because they update both
   // selectedFabricId and the gallery index in the same gesture.
   useEffect(() => {
+    if (isRugProduct) return;
     if (fabrics.length === 0) return;
     if (currentGalleryIndex === undefined || currentGalleryIndex === null) return;
     const oneBased = currentGalleryIndex + 1;
@@ -436,13 +439,21 @@ export default function FinishSelector({ pickId, className, productTitle, onUpho
   }, [fabrics, currentGalleryIndex]);
 
 
-  const renderTile = (f: Fabric, kindOverride?: "fabric" | "cover" | "base" | "top") => {
+  const getRugComponent = (name: string) => {
+    const m = (name || "").match(/^\s*([^—–-]+?)\s*[—–-]\s*/);
+    return (m?.[1] || "Rug component").trim();
+  };
+
+  const renderTile = (f: Fabric, kindOverride?: "fabric" | "cover" | "base" | "top" | "rug", rugComponent?: string) => {
     const isCom = f.id === "__com__";
     const isCol = f.id === "__col__";
+    const isRugGroup = kindOverride === "rug";
     const isFabricGroup = kindOverride ? kindOverride === "fabric" : isFabricCategory(f);
     const isCoverGroup = kindOverride ? kindOverride === "cover" : isCoverCategory(f);
     const isTopGroup = kindOverride === "top";
-    const isSelected = isFabricGroup
+    const isSelected = isRugGroup
+      ? selectedRugComponentIds[rugComponent || getRugComponent(f.name)] === f.id
+      : isFabricGroup
       ? selectedFabricId === f.id
       : isCoverGroup
       ? selectedCoverId === f.id
@@ -458,11 +469,19 @@ export default function FinishSelector({ pickId, className, productTitle, onUpho
       : setSelectedWoodId;
 
     const handlePick = () => {
-      setSelected(f.id);
+      if (isRugGroup) {
+        const component = rugComponent || getRugComponent(f.name);
+        setSelectedRugComponentIds((prev) => ({ ...prev, [component]: f.id }));
+      } else {
+        setSelected(f.id);
+      }
       const indices = Array.isArray(f.image_indices) && f.image_indices.length > 0 ? f.image_indices : null;
       // Only fabric/leather drives the upholstery price tier. Wood finishes
       // are decorative and don't change the variant matrix on this product.
-      if (isFabricGroup) {
+      if (isRugGroup) {
+        // Rug component swatches are visual finish choices, not upholstery
+        // fabric upcharges; keep quote pricing on the size + hardware matrix.
+      } else if (isFabricGroup) {
         onUpholsteryTierChange?.(f.price_tier_label ?? null);
         // Emit pricing details so the product page can add the per-LM upcharge
         // to the displayed total. COM/COL tiles have no per-LM price.
@@ -639,7 +658,7 @@ export default function FinishSelector({ pickId, className, productTitle, onUpho
     tiles: Fabric[];
     emptyNote?: string;
     glyph: string;
-    tileKind?: "fabric" | "cover" | "base" | "top";
+    tileKind?: "fabric" | "cover" | "base" | "top" | "rug";
   }) => (
     <div className="border-t border-border/60">
       <button
@@ -685,10 +704,79 @@ export default function FinishSelector({ pickId, className, productTitle, onUpho
     </div>
   );
 
+  const rugComponentGroups = (() => {
+    const groups = new Map<string, Fabric[]>();
+    for (const tile of visibleFabricTiles) {
+      const component = getRugComponent(tile.name);
+      groups.set(component, [...(groups.get(component) || []), tile]);
+    }
+    return Array.from(groups.entries()).sort(([a], [b]) => {
+      const order = ["wool", "silk"];
+      const ai = order.indexOf(a.toLowerCase());
+      const bi = order.indexOf(b.toLowerCase());
+      if (ai !== -1 || bi !== -1) return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi);
+      return a.localeCompare(b, undefined, { sensitivity: "base" });
+    });
+  })();
+
+  const selectedRugSummary = rugComponentGroups
+    .map(([component]) => {
+      const item = fabrics.find((f) => f.id === selectedRugComponentIds[component]);
+      return item ? `${component}: ${item.name.replace(/^\s*[^—–-]+?\s*[—–-]\s*/, "")}` : null;
+    })
+    .filter(Boolean)
+    .join(" / ");
+
+  const renderRugFinishAccordion = () => renderAccordion({
+    isOpen: open,
+    onToggle: () => setOpen((v) => !v),
+    label: "Select Your Rug Finish",
+    selectedName: selectedRugSummary || null,
+    tiles: [],
+    glyph: "fabric",
+  });
+
   return (
     <TooltipProvider>
       <div className={className}>
-      {(showUpholsterySection || fabrics.some(isFabricCategory)) && renderAccordion({
+      {isRugProduct && visibleFabricTiles.length > 0 ? (
+        <div className="border-t border-border/60">
+          <button
+            type="button"
+            onClick={() => setOpen((v) => !v)}
+            aria-expanded={open}
+            className="w-full py-4 flex items-center gap-5 text-left border-b border-border/60"
+          >
+            <span className="shrink-0"><SpecGlyph symbol="fabric" /></span>
+            <span className="font-body text-sm tracking-wide text-muted-foreground flex-1">
+              Select Your Rug Finish
+            </span>
+            {selectedRugSummary && (
+              <span className="font-body text-sm text-foreground/85 truncate max-w-[55%] text-right">
+                {selectedRugSummary}
+              </span>
+            )}
+            <ChevronDown
+              className={cn("w-4 h-4 text-muted-foreground transition-transform shrink-0", open && "rotate-180")}
+              aria-hidden="true"
+            />
+          </button>
+          {open && (
+            <div className="pb-5 pt-4 space-y-5">
+              {rugComponentGroups.map(([component, tiles]) => (
+                <div key={component} className="space-y-3">
+                  <p className="font-body text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
+                    {component}
+                  </p>
+                  <div className="grid grid-cols-5 sm:grid-cols-3 md:grid-cols-5 gap-2 sm:gap-3 md:gap-4">
+                    {tiles.map((f) => renderTile(f, "rug", component))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      ) : (showUpholsterySection || fabrics.some(isFabricCategory)) && renderAccordion({
         isOpen: open,
         onToggle: () => setOpen((v) => !v),
         label: isRugProduct
