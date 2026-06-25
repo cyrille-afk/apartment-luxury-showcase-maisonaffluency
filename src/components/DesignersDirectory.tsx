@@ -634,7 +634,7 @@ function MobileLetterRow({
             <div className="pb-5 pt-1">
               {/* Single-large-card horizontal swipe with peek */}
               <div className="overflow-x-auto snap-x snap-mandatory scrollbar-hide scroll-pl-4">
-                <div className="flex gap-3 pl-4 pr-8">
+                <div className="flex gap-4 pl-4 pr-8">
 
                   {designers.map((item) => {
                     const designerCount = parentDesignerCountByName[item.name] ?? 0;
@@ -709,7 +709,7 @@ function LetterGroup({
   const needsCarousel = designers.length > (isMobile ? 2 : 5);
 
   return (
-    <div id={anchorId} data-alpha-letter={letter} className="scroll-header-offset mb-6">
+    <div id={anchorId} data-alpha-letter={letter} className="scroll-header-offset mb-8 md:mb-10">
       <div ref={sentinelRef} />
       <div className="flex items-center gap-3 mb-4 px-1">
         <span className="font-serif text-2xl md:text-3xl text-foreground">{letter}</span>
@@ -731,7 +731,7 @@ function LetterGroup({
                 initialExpand={initialExpand}
               />
             ) : (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 items-start gap-x-6 md:gap-x-10 gap-y-14 md:gap-y-20">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 items-start gap-4 md:gap-6 lg:gap-8">
 
                 {designers.map((item) => {
                   const designerCount = parentDesignerCountByName[item.name] ?? 0;
@@ -898,7 +898,7 @@ function LetterCarousel({ letter, designers, openParent, setOpenParent, parentDe
           <div className="flex">
             {pages.map((page, pageIndex) => (
               <div key={`page-${pageIndex}`} className="flex-none w-full snap-start">
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 items-start gap-x-6 md:gap-x-10 gap-y-14 md:gap-y-20">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 items-start gap-4 md:gap-6 lg:gap-8">
                   {page.map((item) => {
                     const designerCount = parentDesignerCountByName[item.name] ?? 0;
                     const isParentBrand = item.founder === item.name && designerCount > 0;
@@ -1429,7 +1429,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
 
   return (
     <>
-    <div ref={sectionRef} className="relative pb-6 px-4 md:py-24 md:px-12 lg:px-20 bg-background scroll-header-offset">
+    <div ref={sectionRef} className="relative py-12 px-4 md:py-20 md:px-8 lg:py-24 lg:px-12 xl:px-20 bg-background scroll-header-offset">
 
 
 
@@ -1692,7 +1692,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
                     <p className="font-body text-sm text-muted-foreground">No pieces match this filter.</p>
                   </div>
                 ) : (
-                  <div className={`grid gap-4 md:gap-6 grid-cols-2 ${sidebarOpen ? 'md:grid-cols-3 lg:grid-cols-4' : 'md:grid-cols-3'}`}>
+                  <div className={`grid gap-4 md:gap-6 lg:gap-8 grid-cols-2 ${sidebarOpen ? 'md:grid-cols-3 lg:grid-cols-4' : 'md:grid-cols-3'}`}>
                     {filteredPicks.map((pick) => (
                       <PickCard key={pick.id} pick={pick} onFavorite={toggleFavorite} isFavorited={favIds.has(pick.id)} />
                     ))}
@@ -1743,7 +1743,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
                   <p className="font-body text-sm text-muted-foreground">No pieces match this filter.</p>
                 </div>
               ) : (
-                  <div data-category-results className="grid gap-4 grid-cols-2 scroll-header-offset">
+                  <div data-category-results className="grid gap-4 md:gap-6 lg:gap-8 grid-cols-2 scroll-header-offset">
                   {filteredPicks.map((pick) => (
                     <PickCard key={pick.id} pick={pick} onFavorite={toggleFavorite} isFavorited={favIds.has(pick.id)} />
                   ))}
