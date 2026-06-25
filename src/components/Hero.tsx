@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { useEffect } from "react";
 import { scrollToSection } from "@/lib/scrollToSection";
 import { trackCTA, trackEvent } from "@/lib/analytics";
 
@@ -40,11 +41,13 @@ const scrollToContact = () => {
 };
 
 const Hero = () => {
-  // The pre-React static hero in index.html stays in place permanently —
-  // the React Hero <picture> below paints on top of it (#root has z-index:1,
-  // #static-hero is z-index:0). Letting the static one persist means Chrome
-  // gets a stable, loaded LCP candidate from the preloaded bytes regardless
-  // of when React boots on a throttled CPU.
+  // The pre-React static hero <picture> in index.html stays in place permanently
+  // as the LCP candidate. The static copy overlay (#static-hero-copy) however
+  // duplicates this section's <h1>, so we hide it as soon as React mounts.
+  useEffect(() => {
+    const el = document.getElementById("static-hero-copy");
+    if (el) el.style.display = "none";
+  }, []);
   return (
     <section className="relative h-screen w-full overflow-hidden">
       {/* Hero image is rendered by the static <picture id="static-hero"> in
