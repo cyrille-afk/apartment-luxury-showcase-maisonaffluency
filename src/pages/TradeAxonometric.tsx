@@ -27,6 +27,7 @@ const AxonometricSceneEditor = lazy(() => import("@/components/trade/Axonometric
 
 const ProposalBuilder = lazy(() => import("@/components/trade/ProposalBuilder"));
 import { MultiViewTurntable } from "@/components/trade/MultiViewTurntable";
+import { AxonometricTearSheet } from "@/components/trade/AxonometricTearSheet";
 import { Input } from "@/components/ui/input";
 import { format } from "date-fns";
 
@@ -1766,6 +1767,14 @@ const TradeAxonometric = () => {
                     style={filterStyle}
                   />
                 </div>
+
+                <AxonometricTearSheet
+                  renderedImage={result.storedUrl || result.imageUrl}
+                  sourceProduct={result.sourceProduct || selectedProduct}
+                  preloadedFavoriteProductIds={preloadedFavoriteProductIds}
+                  aiAttachedProduct={aiAttachedProduct}
+                />
+
 
                 {/* AI Dialogue Box */}
                 <div className="border border-border rounded-lg overflow-hidden">
