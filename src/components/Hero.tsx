@@ -40,18 +40,11 @@ const scrollToContact = () => {
 };
 
 const Hero = () => {
-  useEffect(() => {
-    // Hide the pre-React static hero after LCP has had time to register it
-    // as the largest contentful paint. Removing too early (before the image
-    // bytes load) means LCP never picks the hero and falls back to the H1.
-    const el = document.getElementById("static-hero");
-    if (!el) return;
-    const t = window.setTimeout(() => {
-      el.style.display = "none";
-    }, 4000);
-    return () => clearTimeout(t);
-  }, []);
-
+  // The pre-React static hero in index.html stays in place permanently —
+  // the React Hero <picture> below paints on top of it (#root has z-index:1,
+  // #static-hero is z-index:0). Letting the static one persist means Chrome
+  // gets a stable, loaded LCP candidate from the preloaded bytes regardless
+  // of when React boots on a throttled CPU.
   return (
     <section className="relative h-screen w-full overflow-hidden">
       <picture>
