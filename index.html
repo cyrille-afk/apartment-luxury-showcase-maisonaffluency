@@ -282,8 +282,10 @@
     </style>
 
     <div id="root">
-      <!-- SEO content: visible to crawlers during initial render, replaced when React mounts -->
-      <div id="seo-content" style="max-width:960px;margin:0 auto;padding:40px 20px;font-family:'Lora',Georgia,serif;color:#222;line-height:1.6;position:relative;z-index:1;">
+      <!-- SEO content: indexable by crawlers but visually hidden (off-flow) so it
+           contributes ZERO layout to the user paint. Keeping it in normal flow
+           caused a large CLS on mobile when React mounted and replaced #root. -->
+      <div id="seo-content" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;">
         <h1 style="font-family:'Playfair Display',serif;font-size:2rem;margin-bottom:8px;">Maison Affluency — Curated Luxury Design &amp; Collectible Furniture</h1>
         <p>From Couture Furniture to Collectible Designs Items, Discover Emerging Talents and Design Masters In Our Gallery or Through the Best Ateliers and Designer Workshops We Partner With. Based in Singapore's District 9.</p>
 
