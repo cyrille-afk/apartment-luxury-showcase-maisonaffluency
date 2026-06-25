@@ -1,12 +1,16 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { Helmet } from "react-helmet-async";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronUp } from "lucide-react";
 import { useState, useEffect } from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
-import Collectibles from "@/components/Collectibles";
+import Collectibles, { collectibleDesigners } from "@/components/Collectibles";
 import CollectiblesHoverHero from "@/components/CollectiblesHoverHero";
+
+const CANONICAL = "https://www.maisonaffluency.com/collectibles";
+const OG_IMAGE =
+  "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,h_630,c_fill,q_auto:best,f_jpg/v1774310625/20250822-designer-x-ai-gfx-test-09b_esclp8.jpg";
 
 function BackToTopButton() {
   const [visible, setVisible] = useState(false);
