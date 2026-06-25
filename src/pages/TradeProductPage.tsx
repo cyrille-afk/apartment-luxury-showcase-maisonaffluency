@@ -1052,12 +1052,23 @@ const TradeProductPage: React.FC = () => {
   const topAxisIsDim = topAxisLabelRaw
     ? isDimensionAxisLabel(topAxisLabelRaw)
     : (topOptions.length > 0 && topOptions.every(looksLikeDimension));
+  const baseOnlySizeOptions = isBaseOnly
+    ? Array.from(new Set(
+        ((sizeVariants || []) as Array<{ label?: string | null }>)
+          .map((v) => (v.label || "").trim())
+          .filter(Boolean),
+      ))
+    : [];
+  const baseOnlyRequiresSize = isBaseOnly && !baseAxisIsDim && baseOnlySizeOptions.length > 1;
 
   const activeVariant = isDualAxis
     ? dualVariant
     : isBaseOnly
-      ? (hasVariants && selectedBase
-        ? sizeVariants!.find((v) => (v.base || "").trim() === selectedBase) ?? null
+      ? (hasVariants && selectedBase && (!baseOnlyRequiresSize || selectedDualSize)
+        ? sizeVariants!.find((v) =>
+            (v.base || "").trim() === selectedBase &&
+            (!baseOnlyRequiresSize || (v.label || "").trim() === selectedDualSize)
+          ) ?? null
         : null)
     : hasSingleAxisSplit
       ? singleAxisActive
@@ -1317,6 +1328,31 @@ const TradeProductPage: React.FC = () => {
                   />
                 );
               })()}
+              {!isRugSqmActive && isBaseOnly && !baseAxisIsDim && baseOnlySizeOptions.length > 1 && (
+                <ExpandableSpec
+                  icon={specIcon("📐")}
+                  text={withImperialPerLine(baseOnlySizeOptions.join("\n"))}
+                  secondaryText={null}
+                  emphasized
+                  placeholder="Select Your Size"
+                  value={selectedDualSize != null ? Math.max(0, baseOnlySizeOptions.indexOf(selectedDualSize)) : null}
+                  onChange={(idx) => {
+                    if (idx < 0) {
+                      setSelectedDualSize(null);
+                      handleMaterialChange(null, { base: selectedBase, top: null, size: null });
+                      return;
+                    }
+                    const s = baseOnlySizeOptions[idx] ?? null;
+                    setSelectedDualSize(s);
+                    let nextBase = selectedBase;
+                    if (s && nextBase && !variantsList.some((x: any) => matchesDual(x, nextBase, null, s))) {
+                      setSelectedBase(null);
+                      nextBase = null;
+                    }
+                    handleMaterialChange(s, { base: nextBase, top: null, size: s });
+                  }}
+                />
+              )}
               {/* Dual-axis with fixed (non-variant) dimensions: render dims at the top */}
               {!isRugSqmActive && isDualAxis && !baseAxisIsDim && !topAxisIsDim && !hasDualSize && product.dimensions && looksLikeDimension(product.dimensions) && (
                 <ExpandableSpec icon={specIcon("📐")} text={withImperialPerLine(product.dimensions)} />

@@ -335,6 +335,13 @@ const VariantSelectors: React.FC<{
   const topAxisIsDim = topAxisLabelRaw
     ? isDimensionAxisLabel(topAxisLabelRaw)
     : (topOptions.length > 0 && topOptions.every(looksLikeDimension));
+  const baseOnlySizeOptions = isBaseOnly
+    ? Array.from(new Set(
+        ((product.size_variants || []) as Array<{ label?: string | null }>)
+          .map((v) => (v.label || "").trim())
+          .filter(Boolean),
+      ))
+    : [];
   // When FinishSelector is rendered (upholstered products), it already exposes
   // fabric/leather + wood-finish swatch pickers. Suppress any base/top variant
   // dropdown whose axis label duplicates that selection (frame / wood / finish
@@ -646,7 +653,31 @@ const VariantSelectors: React.FC<{
       {/* Dimensions second on mobile, first on desktop */}
       <div className="order-2 md:order-1 flex flex-col gap-2">
         {/* Size dropdown — shown before finishes on desktop */}
-        {isDualAxis && dualSizeOptions.length > 0 ? (
+        {isBaseOnly && !baseAxisIsDim && baseOnlySizeOptions.length > 1 ? (
+          <ExpandableSpec
+            icon={specIcon("📐")}
+            text={withImperialPerLine(baseOnlySizeOptions.join("\n"))}
+            secondaryText={null}
+            emphasized
+            placeholder="Select Your Size"
+            value={selDualSize != null ? Math.max(0, baseOnlySizeOptions.indexOf(selDualSize)) : null}
+            onChange={(idx) => {
+              if (idx < 0) {
+                setSelDualSize(null);
+                onMaterialChange?.(null, { base: selBase, top: null, size: null });
+                return;
+              }
+              const s = baseOnlySizeOptions[idx] ?? null;
+              setSelDualSize(s);
+              let nextBase = selBase;
+              if (s && nextBase && !variantsList.some((x: any) => matchesDual(x, nextBase, null, s))) {
+                setSelBase(null);
+                nextBase = null;
+              }
+              onMaterialChange?.(s, { base: nextBase, top: null, size: s });
+            }}
+          />
+        ) : isDualAxis && dualSizeOptions.length > 0 ? (
           <ExpandableSpec
             icon={specIcon("📐")}
             text={withImperialPerLine(dualSizeOptions.join("\n"))}
