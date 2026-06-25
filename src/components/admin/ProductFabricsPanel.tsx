@@ -287,21 +287,23 @@ export default function ProductFabricsPanel({
         )}
       </p>
 
-      {/* Size labels */}
+      {/* Size labels / rug component labels */}
       <div className="flex items-center gap-2 pt-1">
-        <span className="text-[10px] uppercase tracking-wider text-muted-foreground/70 shrink-0">Sizes:</span>
+        <span className="text-[10px] uppercase tracking-wider text-muted-foreground/70 shrink-0">
+          {isRugPick ? "Components:" : "Sizes:"}
+        </span>
         <Input
           value={labelA}
           onChange={(e) => setLabelA(e.target.value)}
           onBlur={() => labelsDirty && saveLabels()}
-          placeholder="Size A (e.g. 6 m)"
+          placeholder={isRugPick ? "Component A (e.g. Wool)" : "Size A (e.g. 6 m)"}
           className="text-xs h-7 max-w-[140px]"
         />
         <Input
           value={labelB}
           onChange={(e) => setLabelB(e.target.value)}
           onBlur={() => labelsDirty && saveLabels()}
-          placeholder="Size B (e.g. 3.5 m) — optional"
+          placeholder={isRugPick ? "Component B (e.g. Silk) — optional" : "Size B (e.g. 3.5 m) — optional"}
           className="text-xs h-7 max-w-[180px]"
         />
       </div>
