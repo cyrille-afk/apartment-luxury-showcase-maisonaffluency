@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import Collectibles from "@/components/Collectibles";
+import CollectiblesHoverHero from "@/components/CollectiblesHoverHero";
 
 function BackToTopButton() {
   const [visible, setVisible] = useState(false);
@@ -65,9 +66,13 @@ const PublicCollectibles = () => {
         <Navigation />
         <h1 className="sr-only">Collectible Design On View</h1>
 
-        <div className="pt-28 pb-20">
-          <Collectibles />
+        <div className="pt-20">
+          <CollectiblesHoverHero />
+          <div id="collectibles-directory" className="pb-20 scroll-header-offset">
+            <Collectibles />
+          </div>
         </div>
+
 
         <Footer />
         <BackToTopButton />
