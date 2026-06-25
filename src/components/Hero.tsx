@@ -40,6 +40,12 @@ const scrollToContact = () => {
   scrollToSection("contact");
 };
 
+const heroPrimaryCtaClass =
+  "inline-flex min-h-11 items-center justify-center rounded-full border border-white/75 bg-white/15 px-6 py-3 text-center text-white text-sm md:text-base font-body font-semibold tracking-wide shadow-[0_8px_30px_rgba(0,0,0,0.22)] backdrop-blur-md transition-all hover:border-white hover:bg-white/25 focus:outline-none focus:ring-2 focus:ring-white/70 focus:ring-offset-2 focus:ring-offset-transparent hero-fade-in-delayed-4 [text-shadow:_0_1px_3px_rgba(0,0,0,0.45)]";
+
+const heroSecondaryCtaClass =
+  "inline-flex min-h-9 items-center justify-center rounded-full border border-white/70 bg-white/12 px-4 py-2 text-center text-white text-xs lg:text-sm font-body font-bold tracking-wide shadow-[0_8px_24px_rgba(0,0,0,0.2)] backdrop-blur-md transition-all hover:border-white hover:bg-white/22 focus:outline-none focus:ring-2 focus:ring-white/70 focus:ring-offset-2 focus:ring-offset-transparent [text-shadow:_0_1px_3px_rgba(0,0,0,0.55)]";
+
 const Hero = () => {
   // The pre-React static hero <picture> in index.html stays in place permanently
   // as the LCP candidate. The static copy overlay (#static-hero-copy) however
@@ -86,7 +92,7 @@ const Hero = () => {
             <div className="mt-8 md:mt-10 flex flex-col items-start gap-4">
               <button
                 onClick={scrollToOverview}
-                className="bg-transparent border-0 p-0 text-white text-sm md:text-lg font-body tracking-wide hover:opacity-80 transition-opacity hero-fade-in-delayed-4 [text-shadow:_0_1px_3px_rgba(0,0,0,0.45)]"
+                className={heroPrimaryCtaClass}
               >
                 Explore Our Curated Collection
               </button>
@@ -94,7 +100,7 @@ const Hero = () => {
               <button
                 type="button"
                 onClick={() => { trackEvent("click_meet_designers", { event_category: "CTA", event_label: "HeroCTA" }); scrollToMeetDesigners(); }}
-                className="bg-transparent border-0 p-0 text-white text-sm md:text-lg font-body tracking-wide hover:opacity-80 transition-opacity hero-fade-in-delayed-4 [text-shadow:_0_1px_3px_rgba(0,0,0,0.45)]"
+                className={heroPrimaryCtaClass}
               >
                 Meet our Designers
               </button>
@@ -110,13 +116,13 @@ const Hero = () => {
       >
         <button
           onClick={() => { trackCTA.bookAppointment("HeroCTA"); scrollToContact(); }}
-          className="bg-transparent border-0 p-0 text-right text-white text-xs font-body font-bold tracking-wide transition-opacity hover:opacity-80 [text-shadow:_0_1px_3px_rgba(0,0,0,0.55)]"
+          className={heroSecondaryCtaClass}
         >
           Book a Viewing
         </button>
         <Link
           to="/trade-program"
-          className="bg-transparent border-0 p-0 text-right text-white text-xs font-body font-bold tracking-wide transition-opacity hover:opacity-80 [text-shadow:_0_1px_3px_rgba(0,0,0,0.55)]"
+          className={heroSecondaryCtaClass}
         >
           Trade Program
         </Link>
@@ -129,13 +135,13 @@ const Hero = () => {
       >
         <button
           onClick={() => { trackCTA.bookAppointment("HeroCTA"); scrollToContact(); }}
-          className="bg-transparent border-0 p-0 text-white text-xs lg:text-sm font-body font-bold tracking-wide transition-opacity hover:opacity-80 [text-shadow:_0_1px_3px_rgba(0,0,0,0.55)]"
+          className={heroSecondaryCtaClass}
         >
           Book a Viewing
         </button>
         <Link
           to="/trade-program"
-          className="bg-transparent border-0 p-0 text-white text-xs lg:text-sm font-body font-bold tracking-wide transition-opacity hover:opacity-80 [text-shadow:_0_1px_3px_rgba(0,0,0,0.55)]"
+          className={heroSecondaryCtaClass}
         >
           Trade Program
         </Link>
