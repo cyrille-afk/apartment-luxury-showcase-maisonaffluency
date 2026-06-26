@@ -18,6 +18,7 @@
  */
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { Image } from "https://deno.land/x/imagescript@1.2.17/mod.ts";
+import { requireUser, rateLimit } from "../_shared/auth.ts";
 
 const SURFACE_LABEL: Record<string, string> = {
   walls: "the wall surface visible in this crop",
@@ -37,6 +38,25 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   try {
+    // Authenticate caller. `verify_jwt = true` only validates the JWT
+    // signature, which accepts the public anon key bundled in the client.
+    // Require a real signed-in user and rate-limit per user to prevent
+    // anyone from draining paid Gemini image-generation credits.
+    const auth = await requireUser(req, "visualiser-render");
+    if (!auth.ok) {
+      return new Response(JSON.stringify(auth.body), {
+        status: auth.status,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const rl = rateLimit(`visualiser:${auth.userId}`, 10, 60_000);
+    if (!rl.ok) {
+      return new Response(
+        JSON.stringify({ error: `Rate limit exceeded. Try again in ${rl.retryInSec}s.` }),
+        { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
 

@@ -27,9 +27,9 @@ Deno.serve(async (req) => {
     const body = await req.json()
     const { board_id, product_ids, source } = body
 
-    // Auth is only required when reading a user-owned board.
-    // For product_ids-only calls (dashboard strip), allow anonymous access
-    // since no user-scoped data is read or written.
+    // Require an authenticated caller for every code path. The previous
+    // anonymous `product_ids` path let anyone on the internet trigger paid
+    // Lovable AI inference and read service-role catalog data.
     let user: { id: string } | null = null
     const authHeader = req.headers.get('Authorization')
     if (authHeader) {
@@ -40,7 +40,7 @@ Deno.serve(async (req) => {
       if (claims?.sub) user = { id: claims.sub }
     }
 
-    if (board_id && !user) {
+    if (!user) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
         status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })

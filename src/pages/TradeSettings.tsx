@@ -71,22 +71,26 @@ const TradeSettings = () => {
     }
   }, [profile]);
 
-  // Fetch phone, country, and avatar separately
+  // `phone` is column-restricted on profiles for table SELECT (PII not exposed
+  // via the Data API). Load own phone via the `get_my_phone` SECURITY DEFINER
+  // RPC, and the remaining fields from the table.
   useEffect(() => {
     if (!user) return;
     supabase
       .from("profiles")
-      .select("phone, avatar_url, country, trade_tier_12mo_spend_cents")
+      .select("avatar_url, country, trade_tier_12mo_spend_cents")
       .eq("id", user.id)
       .single()
       .then(({ data }) => {
-        if (data?.phone) setForm((f) => ({ ...f, phone: data.phone }));
         if ((data as any)?.country) setForm((f) => ({ ...f, country: (data as any).country }));
         if ((data as any)?.avatar_url) setAvatarUrl((data as any).avatar_url);
         if ((data as any)?.trade_tier_12mo_spend_cents != null) {
           setSpendCents((data as any).trade_tier_12mo_spend_cents);
         }
       });
+    supabase.rpc("get_my_phone" as any).then(({ data }: any) => {
+      if (typeof data === "string" && data) setForm((f) => ({ ...f, phone: data }));
+    });
   }, [user]);
 
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
