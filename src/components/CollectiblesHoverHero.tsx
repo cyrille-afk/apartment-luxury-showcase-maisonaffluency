@@ -121,6 +121,7 @@ const CollectiblesHoverHero = () => {
     if (!window.matchMedia("(max-width: 767px)").matches) return;
 
     const advance = (dir: 1 | -1) => {
+      setHasInteracted(true);
       setActiveSlug((current) => {
         const idx = items.findIndex((d) => d.slug === current);
         const base = idx === -1 ? 0 : idx;
