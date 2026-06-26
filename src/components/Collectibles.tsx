@@ -23,6 +23,7 @@ import { cn } from "@/lib/utils";
 import { formatDesignerName } from "@/lib/nameFormat";
 import ProductCardDescriptionOverlay from "@/components/ui/ProductCardDescriptionOverlay";
 import LightboxDescriptionDropdown from "@/components/ui/LightboxDescriptionDropdown";
+import { useVisibleCollectibleDesigners } from "@/hooks/useCollectibleOverrides";
 import { resolveCuratorPickDescription } from "@/lib/curatorPickDescription";
 import { Input } from "@/components/ui/input";
 // Accordion removed — now using card grid layout
