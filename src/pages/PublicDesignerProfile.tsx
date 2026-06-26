@@ -625,19 +625,6 @@ const PublicDesignerProfile = () => {
   const editorialBio = editorialBlocks.join("\n\n");
   const editorialStartImageIndex = 0;
   void startsWithInlineImage;
-  if (typeof window !== "undefined" && designer?.slug === "alexander-lamont") {
-    // eslint-disable-next-line no-console
-    console.log("[LAMONT_DEBUG]", {
-      bioHasInlineMedia,
-      manualMediaLen: manualMedia.length,
-      mediaEntriesLen: mediaEntries.length,
-      mediaEntries,
-      bioBlocksLen: bioBlocks.length,
-      heroParagraphsLen: heroParagraphs.length,
-      remainingBlocksLen: remainingBlocks.length,
-      editorialBlocks,
-    });
-  }
 
   const bioWordCount = (displayBiography || "").replace(/<[^>]+>/g, " ").replace(/https?:\S+/g, "").trim().split(/\s+/).filter(Boolean).length;
   const showThinContentFallback = bioWordCount < 60;
