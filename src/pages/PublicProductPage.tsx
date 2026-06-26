@@ -30,6 +30,7 @@ import { getBasePlaceholder, getTopPlaceholder, getMaterialPlaceholder, formatVa
 import { computeVariantAxes, parseMaterialsFallback } from "@/lib/parseSizeVariants";
 import { isRugCategory, parseRugDims, looksLikeDimension } from "@/lib/rugPricing";
 import FinishSelector from "@/components/FinishSelector";
+import ActiveSwatchCaption from "@/components/product/ActiveSwatchCaption";
 import { isProductUpholstered } from "@/lib/upholstery";
 import RugSizeColourPicker, { type RugSelection } from "@/components/rug/RugSizeColourPicker";
 import { buildProductFinishMap, resolveFinishImageIndex, resolveVariantImageIndex, findVariantForImageIndex } from "@/lib/variantImageMap";
