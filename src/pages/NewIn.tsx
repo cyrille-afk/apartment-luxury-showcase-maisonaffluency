@@ -245,6 +245,7 @@ const NewIn = () => {
       </Helmet>
 
       <Navigation />
+      <main className="min-h-screen bg-background">
       <h1 className="sr-only">New In at Maison Affluency</h1>
 
       <div className="mt-[96px]">
@@ -289,6 +290,7 @@ const NewIn = () => {
       <Suspense fallback={null}>
         <Footer />
       </Suspense>
+      </main>
     </>
   );
 };
