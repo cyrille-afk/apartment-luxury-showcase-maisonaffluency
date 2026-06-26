@@ -159,10 +159,18 @@ Deno.serve(async (req) => {
   }
 
   const results: { url: string; ok: boolean; title?: string; error?: string }[] = [];
-  const BATCH = 5;
-  const DELAY = 300; // ms between batches to respect rate limits
+  const BATCH = 2;          // Meta caps per-app calls aggressively; keep concurrency low
+  const DELAY = 1500;       // ms between batches → ~1.3 req/s sustained
+  let rateLimited = false;
 
   for (let i = 0; i < urls.length; i += BATCH) {
+    if (rateLimited) {
+      // Short-circuit: once Meta says #4 limit reached, every further call also fails.
+      for (const url of urls.slice(i)) {
+        results.push({ url, ok: false, error: "Skipped — Meta app rate limit reached, retry in ~1h" });
+      }
+      break;
+    }
     const batch = urls.slice(i, i + BATCH);
     const promises = batch.map(async (url) => {
       try {
@@ -173,6 +181,10 @@ Deno.serve(async (req) => {
         const text = await resp.text();
         let data;
         try { data = JSON.parse(text); } catch { return { url, ok: false, error: `Non-JSON: ${text.slice(0, 300)}` }; }
+        if (data.error?.code === 4 || data.error?.code === 17 || data.error?.code === 32) {
+          rateLimited = true;
+          return { url, ok: false, error: data.error.message };
+        }
         if (data.og_object || data.title || data.id) {
           return { url, ok: true, title: data.og_object?.title || data.title || "" };
         }
@@ -187,6 +199,7 @@ Deno.serve(async (req) => {
       await new Promise((r) => setTimeout(r, DELAY));
     }
   }
+
 
   const success = results.filter((r) => r.ok).length;
   const failed = results.filter((r) => !r.ok).length;
