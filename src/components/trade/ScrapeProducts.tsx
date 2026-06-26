@@ -45,7 +45,7 @@ const ScrapeProducts = () => {
   };
 
   const updateConfigField = async (configId: string, field: string, value: any) => {
-    await supabase.from("scrape_configs").update({ [field]: value, updated_at: new Date().toISOString() }).eq("id", configId);
+    await supabase.from("scrape_configs").update({ [field]: value, updated_at: new Date().toISOString() } as any).eq("id", configId);
     setSavedConfigs((prev) => prev.map((c) => (c.id === configId ? { ...c, [field]: value } : c)));
     toast({ title: "Config updated" });
   };
