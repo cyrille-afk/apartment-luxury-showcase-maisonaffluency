@@ -58,7 +58,10 @@ const CollectiblesHoverHero = () => {
       );
   }, [visibleDesigners]);
 
-  const [activeSlug, setActiveSlug] = useState<string | null>(null);
+  const [activeSlug, setActiveSlug] = useState<string | null>(() =>
+    visibleDesigners.find((d) => d.id && d.curatorPicks?.[0]?.image)?.id ?? null
+  );
+  const [hasInteracted, setHasInteracted] = useState(false);
   const [isStandalone, setIsStandalone] = useState(false);
   const navRef = useRef<HTMLElement>(null);
   const sectionRef = useRef<HTMLElement>(null);
@@ -88,6 +91,7 @@ const CollectiblesHoverHero = () => {
     if (!window.matchMedia("(min-width: 768px)").matches) return;
 
     const advance = (dir: 1 | -1) => {
+      setHasInteracted(true);
       setActiveSlug((current) => {
         const idx = items.findIndex((d) => d.slug === current);
         const base = idx === -1 ? 0 : idx;
@@ -117,6 +121,7 @@ const CollectiblesHoverHero = () => {
     if (!window.matchMedia("(max-width: 767px)").matches) return;
 
     const advance = (dir: 1 | -1) => {
+      setHasInteracted(true);
       setActiveSlug((current) => {
         const idx = items.findIndex((d) => d.slug === current);
         const base = idx === -1 ? 0 : idx;
@@ -201,21 +206,24 @@ const CollectiblesHoverHero = () => {
     >
       {/* Cross-fading background images */}
       <div className="absolute inset-0 z-0">
-        {items.map((d) => {
+        {items.map((d, i) => {
           const isActive = d.slug === activeSlug;
+          const isFirst = i === 0;
           return (
             <img
               key={d.slug}
               src={d.image}
               alt=""
               aria-hidden="true"
-              loading="lazy"
-              decoding="async"
+              loading={isFirst ? "eager" : "lazy"}
+              decoding={isFirst ? "sync" : "async"}
+              fetchPriority={isFirst ? ("high" as any) : ("auto" as any)}
               className={cn(
-                "absolute inset-0 w-full h-full object-cover transition-opacity ease-out",
+                "absolute inset-0 w-full h-full object-cover",
+                hasInteracted ? "transition-opacity ease-out" : "",
                 isActive ? "opacity-100" : "opacity-0"
               )}
-              style={{ transitionDuration: `${IMAGE_TRANSITION_MS}ms` }}
+              style={hasInteracted ? { transitionDuration: `${IMAGE_TRANSITION_MS}ms` } : undefined}
             />
           );
         })}
@@ -260,8 +268,8 @@ const CollectiblesHoverHero = () => {
                     >
                       <Link
                         to={`/designers/${d.slug}`}
-                        onMouseEnter={() => setActiveSlug(d.slug)}
-                        onFocus={() => setActiveSlug(d.slug)}
+                        onMouseEnter={() => { setHasInteracted(true); setActiveSlug(d.slug); }}
+                        onFocus={() => { setHasInteracted(true); setActiveSlug(d.slug); }}
                         className={cn(
                           "inline-block whitespace-nowrap",
                           "font-display font-light tracking-tight",
