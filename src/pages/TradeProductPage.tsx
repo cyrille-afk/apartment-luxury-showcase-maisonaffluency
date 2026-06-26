@@ -1276,6 +1276,7 @@ const TradeProductPage: React.FC = () => {
                 ) : null
               }
             />
+            <ActiveSwatchCaption pickId={product.id} activeIndex={galleryActiveIndex ?? 0} />
           </div>
 
           <div className="relative flex flex-col gap-4">
