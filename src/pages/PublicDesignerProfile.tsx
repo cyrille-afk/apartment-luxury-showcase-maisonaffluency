@@ -1061,21 +1061,27 @@ const PublicDesignerProfile = () => {
                           </>
                         )}
                         {(() => {
-                          // "Editions houses" publish original designs (not re-editions).
-                          // For these, suppress the "Re-edition by [parent]" badge and let
-                          // the short EDITION tag speak for itself — matches Ecart's pattern.
-                          const EDITION_HOUSES = new Set(["Marta Sala Éditions"]);
-                          const isEditionParent = !!parentBrandName && EDITION_HOUSES.has(parentBrandName);
-                          const showParentBadge = !!parentBrandName && !isEditionParent;
+                          // "Editions houses" publish original designs commissioned by them
+                          // (not historic re-editions). Use "Edited by" wording with the
+                          // short abbreviation, e.g. "Edited by MSE".
+                          const EDITION_HOUSE_LABELS: Record<string, string> = {
+                            "Marta Sala Éditions": "Edited by MSE",
+                          };
+                          const editionHouseLabel = parentBrandName
+                            ? EDITION_HOUSE_LABELS[parentBrandName]
+                            : undefined;
+                          const showParentBadge = !!parentBrandName;
+                          const parentBadgeText = editionHouseLabel
+                            ?? (parentBrandName ? `Re-edition by ${parentBrandName}` : "");
 
                           const tags: string[] = pick.tags || [];
                           // When a specific edition string exists, drop the generic "limited-edition" tag
                           let filtered = pick.edition
                             ? tags.filter(t => !/^limited-edition$/i.test(t))
                             : tags;
-                          // Avoid duplicating "Re-edition" when the parent-brand badge already says so
+                          // Avoid duplicating edition tags when the parent-brand badge already covers it
                           if (showParentBadge) {
-                            filtered = filtered.filter(t => !/re-?edition/i.test(t));
+                            filtered = filtered.filter(t => !/re-?edition|^edition$/i.test(t));
                           }
                           const specialTags = filtered.filter((t) =>
                             /couture|edition|limited|re-edition|unique|modern scholar|unesco|good design award|genesis collection/i.test(t)
@@ -1100,7 +1106,7 @@ const PublicDesignerProfile = () => {
                               {showParentBadge && (
                                 <div className="absolute top-2 right-2">
                                   <span className="inline-block px-2 py-0.5 text-[8px] md:text-[9px] uppercase tracking-wider font-body bg-white/85 text-foreground rounded-full border border-black/10 backdrop-blur-sm">
-                                    Re-edition by {parentBrandName}
+                                    {parentBadgeText}
                                   </span>
                                 </div>
                               )}
