@@ -42,7 +42,7 @@ export async function prefillLineShippingFromCatalog(itemIds: string[]): Promise
       if (!item.ship_mode && prod.default_ship_mode) patch.ship_mode = prod.default_ship_mode;
       if (!item.ship_origin_country && prod.pickup_country) patch.ship_origin_country = prod.pickup_country;
       if (Object.keys(patch).length === 0) return;
-      await supabase.from("trade_quote_items").update(patch).eq("id", item.id);
+      await supabase.from("trade_quote_items").update(patch as any).eq("id", item.id);
     }),
   );
 }

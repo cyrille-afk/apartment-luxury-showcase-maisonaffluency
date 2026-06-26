@@ -1092,6 +1092,78 @@ export type Database = {
           },
         ]
       }
+      collectible_atelier_gallery: {
+        Row: {
+          caption: string | null
+          created_at: string
+          id: string
+          image_url: string
+          position: number
+          slug: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          caption?: string | null
+          created_at?: string
+          id?: string
+          image_url: string
+          position?: number
+          slug: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          caption?: string | null
+          created_at?: string
+          id?: string
+          image_url?: string
+          position?: number
+          slug?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
+      collectible_atelier_overrides: {
+        Row: {
+          created_at: string
+          founder: string | null
+          hero_image_url: string | null
+          instagram_url: string | null
+          name: string | null
+          slug: string
+          specialty: string | null
+          updated_at: string
+          updated_by: string | null
+          website_url: string | null
+        }
+        Insert: {
+          created_at?: string
+          founder?: string | null
+          hero_image_url?: string | null
+          instagram_url?: string | null
+          name?: string | null
+          slug: string
+          specialty?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          website_url?: string | null
+        }
+        Update: {
+          created_at?: string
+          founder?: string | null
+          hero_image_url?: string | null
+          instagram_url?: string | null
+          name?: string | null
+          slug?: string
+          specialty?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          website_url?: string | null
+        }
+        Relationships: []
+      }
       collectible_overrides: {
         Row: {
           slug: string
