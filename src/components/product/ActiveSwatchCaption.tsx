@@ -73,11 +73,11 @@ export default function ActiveSwatchCaption({
       ) : (
         <div className="w-10 h-10 rounded-full bg-muted shrink-0" />
       )}
-      <div>
+      <div className="min-w-0 text-center">
         <div className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
           Shown in
         </div>
-        <div className="font-body text-sm text-foreground">{match.name}</div>
+        <div className="font-body text-sm text-foreground truncate">{match.name}</div>
       </div>
     </div>
   );
