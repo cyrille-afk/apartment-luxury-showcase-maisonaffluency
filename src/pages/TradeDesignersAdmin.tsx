@@ -2255,6 +2255,14 @@ const TradeDesignersAdmin = () => {
               );
             })()}
             <Link
+              to="/trade/collectibles/admin"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-border text-xs font-body text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-all"
+              title="Toggle Collectible Design ateliers between Public and Trade Only"
+            >
+              <Gem className="h-3.5 w-3.5" />
+              Collectible Design
+            </Link>
+            <Link
               to="/trade/designers/instagram"
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-border text-xs font-body text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-all"
             >
