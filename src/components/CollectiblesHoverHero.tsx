@@ -10,6 +10,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { collectibleDesigners } from "@/components/Collectibles";
+import { useVisibleCollectibleDesigners } from "@/hooks/useCollectibleOverrides";
 
 interface FeaturedPiece {
   slug: string;          // designer slug for routing
