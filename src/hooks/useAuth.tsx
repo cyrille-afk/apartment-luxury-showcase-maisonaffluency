@@ -81,61 +81,48 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return true;
   }, []);
 
-  // Dynamically import Supabase client AFTER first paint
+  // Dynamically import Supabase client AFTER first paint.
+  // We used to defer 12s on the homepage to protect LCP, but that made hard
+  // refreshes look signed-out for 12 seconds. Now we kick the import on the
+  // next idle tick (or microtask fallback) so it runs right after paint
+  // without blocking the critical path.
   useEffect(() => {
     let cancelled = false;
 
-    // Use requestIdleCallback on homepage to avoid competing with hero LCP.
-    // On trade/journal routes, load immediately since auth is needed.
-    const isHomepage = window.location.pathname === "/" || window.location.pathname === "";
-    
     const doImport = () => {
       import("@/integrations/supabase/client").then(mod => {
-        if (!cancelled) {
-          setSbClient(mod.supabase);
-        }
+        if (!cancelled) setSbClient(mod.supabase);
       });
     };
 
-    if (isHomepage) {
-      const win = window as any;
-      let idleId: number | null = null;
-      let timeoutId: number | null = null;
-      let loadFallbackId: number | null = null;
-      let started = false;
+    const win = window as any;
+    let idleId: number | null = null;
+    let rafId: number | null = null;
 
-      const start = () => {
-        if (started) return;
-        started = true;
-        timeoutId = window.setTimeout(() => {
-          if (typeof win.requestIdleCallback === "function") {
-            idleId = win.requestIdleCallback(doImport, { timeout: 3000 });
-          } else {
-            doImport();
-          }
-        }, 12000);
-      };
-
-      if (document.readyState === "complete") {
-        start();
+    const schedule = () => {
+      if (typeof win.requestIdleCallback === "function") {
+        idleId = win.requestIdleCallback(doImport, { timeout: 500 });
       } else {
-        window.addEventListener("load", start, { once: true });
-        loadFallbackId = window.setTimeout(start, 12000);
+        rafId = window.requestAnimationFrame(() => doImport());
       }
+    };
 
-      return () => {
-        cancelled = true;
-        window.removeEventListener("load", start);
-        if (timeoutId) window.clearTimeout(timeoutId);
-        if (loadFallbackId) window.clearTimeout(loadFallbackId);
-        if (idleId !== null) win.cancelIdleCallback?.(idleId);
-      };
+    // Run after the first paint so we don't compete with hero LCP, but
+    // without an arbitrary multi-second delay.
+    if (document.readyState === "complete" || document.readyState === "interactive") {
+      schedule();
+    } else {
+      window.addEventListener("DOMContentLoaded", schedule, { once: true });
     }
 
-    // Non-homepage: import immediately
-    doImport();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+      window.removeEventListener("DOMContentLoaded", schedule);
+      if (idleId !== null) win.cancelIdleCallback?.(idleId);
+      if (rafId !== null) window.cancelAnimationFrame(rafId);
+    };
   }, []);
+
 
   // Once we have the supabase client, initialise auth
   useEffect(() => {
