@@ -650,7 +650,7 @@ const Collectibles = () => {
       }
       return categoryMatchLocal(pick.category, selectedCategory || undefined) || (pick.tags && pick.tags.some((t: string) => categoryMatchLocal(t, selectedCategory || undefined)));
     };
-    for (const designer of collectibleDesigners) {
+    for (const designer of visibleCollectibles) {
       designer.curatorPicks?.forEach((pick, idx) => {
         if (matchPick(pick)) {
           picks.push({ pick, designer, pickIndex: idx });
@@ -918,7 +918,7 @@ const Collectibles = () => {
                   const counts: Record<string, number> = {};
                   Object.entries(SUB_TAGS_LOCAL).forEach(([sub, tags]) => {
                     let total = 0;
-                    collectibleDesigners.forEach(d => {
+                    visibleCollectibles.forEach(d => {
                       d.curatorPicks?.forEach(pick => {
                         if (tags.some(tag =>
                           categoryMatchLocal(pick.subcategory, tag) || categoryMatchLocal(pick.subcategory, sub) ||
@@ -982,7 +982,7 @@ const Collectibles = () => {
               const counts: Record<string, number> = {};
               Object.entries(SUB_TAGS_DESK).forEach(([sub, tags]) => {
                 let total = 0;
-                collectibleDesigners.forEach(d => {
+                visibleCollectibles.forEach(d => {
                   d.curatorPicks?.forEach(pick => {
                     if (tags.some(tag =>
                       categoryMatchLocal(pick.subcategory, tag) || categoryMatchLocal(pick.subcategory, sub) ||
