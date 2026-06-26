@@ -92,8 +92,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const doImport = () => {
       import("@/integrations/supabase/client").then(mod => {
         if (!cancelled) {
-          (mod.supabase.auth as any).autoRefreshToken = false;
-          (mod.supabase.auth as any).stopAutoRefresh?.();
           setSbClient(mod.supabase);
         }
       });
@@ -151,9 +149,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const scheduleTokenRefresh = (sess: Session | null) => {
       if (refreshTimer) window.clearTimeout(refreshTimer);
       refreshTimer = null;
-      if (isPreviewOrDev()) return;
       if (!sess?.expires_at) return;
 
+      // Belt-and-suspenders: Supabase's own autoRefreshToken handles this,
+      // but we also schedule a manual refresh 2 minutes before expiry so
+      // a backgrounded tab can't get stuck on an expired access token.
       const refreshInMs = Math.max((sess.expires_at * 1000) - Date.now() - 120_000, 30_000);
       refreshTimer = window.setTimeout(() => {
         sbClient.auth.refreshSession().catch((error: unknown) => {
