@@ -6584,6 +6584,14 @@ export type Database = {
           quote_users: number
         }[]
       }
+      get_designer_for_upload: {
+        Args: { _slug: string }
+        Returns: {
+          id: string
+          name: string
+          slug: string
+        }[]
+      }
       get_my_phone: { Args: never; Returns: string }
       get_recent_scrape_failures: {
         Args: { since_minutes?: number }
