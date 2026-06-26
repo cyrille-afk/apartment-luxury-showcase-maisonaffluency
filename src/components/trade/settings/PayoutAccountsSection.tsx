@@ -118,14 +118,11 @@ export default function PayoutAccountsSection() {
     if (!currentStudio) return;
     setLoading(true);
     const { data, error } = await supabase
-      .from("studio_payout_accounts")
-      .select("*")
-      .eq("studio_id", currentStudio.id)
-      .order("is_default", { ascending: false })
-      .order("created_at");
+      .rpc("get_studio_payout_accounts", { _studio_id: currentStudio.id });
     if (!error && data) setAccounts(data as PayoutAccount[]);
     setLoading(false);
   }, [currentStudio]);
+
 
   useEffect(() => { fetchAccounts(); }, [fetchAccounts]);
 

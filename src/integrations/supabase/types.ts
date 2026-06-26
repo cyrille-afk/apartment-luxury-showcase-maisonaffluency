@@ -6594,6 +6594,30 @@ export type Database = {
           status_code: number
         }[]
       }
+      get_studio_payout_accounts: {
+        Args: { _studio_id: string }
+        Returns: {
+          account_holder_name: string
+          ach_account_number: string
+          ach_routing_number: string
+          bank_name: string
+          country_code: string
+          created_at: string
+          currency: string
+          iban: string
+          id: string
+          is_default: boolean
+          label: string
+          stripe_connect_account_id: string
+          stripe_connect_status: string
+          studio_id: string
+          swift_bic: string
+          tax_form_document_path: string
+          tax_form_kind: string
+          tax_form_reference: string
+          updated_at: string
+        }[]
+      }
       get_user_studio_ids: { Args: { _user_id: string }; Returns: string[] }
       has_role: {
         Args: {
