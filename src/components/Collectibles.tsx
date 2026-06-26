@@ -605,7 +605,7 @@ const Collectibles = () => {
   };
 
   const filteredDesigners = useMemo(() => {
-    let designers = collectibleDesigners;
+    let designers = visibleCollectibles;
     
     const normalizeSearch = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
     
