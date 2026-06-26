@@ -204,21 +204,24 @@ const CollectiblesHoverHero = () => {
     >
       {/* Cross-fading background images */}
       <div className="absolute inset-0 z-0">
-        {items.map((d) => {
+        {items.map((d, i) => {
           const isActive = d.slug === activeSlug;
+          const isFirst = i === 0;
           return (
             <img
               key={d.slug}
               src={d.image}
               alt=""
               aria-hidden="true"
-              loading="lazy"
-              decoding="async"
+              loading={isFirst ? "eager" : "lazy"}
+              decoding={isFirst ? "sync" : "async"}
+              fetchPriority={isFirst ? ("high" as any) : ("auto" as any)}
               className={cn(
-                "absolute inset-0 w-full h-full object-cover transition-opacity ease-out",
+                "absolute inset-0 w-full h-full object-cover",
+                hasInteracted ? "transition-opacity ease-out" : "",
                 isActive ? "opacity-100" : "opacity-0"
               )}
-              style={{ transitionDuration: `${IMAGE_TRANSITION_MS}ms` }}
+              style={hasInteracted ? { transitionDuration: `${IMAGE_TRANSITION_MS}ms` } : undefined}
             />
           );
         })}
