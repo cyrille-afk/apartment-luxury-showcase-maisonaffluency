@@ -23,6 +23,7 @@ import { cn } from "@/lib/utils";
 import { formatDesignerName } from "@/lib/nameFormat";
 import ProductCardDescriptionOverlay from "@/components/ui/ProductCardDescriptionOverlay";
 import LightboxDescriptionDropdown from "@/components/ui/LightboxDescriptionDropdown";
+import { useVisibleCollectibleDesigners } from "@/hooks/useCollectibleOverrides";
 import { resolveCuratorPickDescription } from "@/lib/curatorPickDescription";
 import { Input } from "@/components/ui/input";
 // Accordion removed — now using card grid layout
@@ -411,6 +412,7 @@ const resolveCollectiblePickDescription = (
 const Collectibles = () => {
   const navigate = useNavigate();
   const ref = useRef(null);
+  const visibleCollectibles = useVisibleCollectibleDesigners();
   const isInView = useInView(ref, { once: true, margin: "-100px" });
   const { isPinned, togglePin, items: compareItems } = useCompare();
   const { requireAuth, gateOpen, gateAction, closeGate } = useAuthGate();
@@ -603,7 +605,7 @@ const Collectibles = () => {
   };
 
   const filteredDesigners = useMemo(() => {
-    let designers = collectibleDesigners;
+    let designers = visibleCollectibles;
     
     const normalizeSearch = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
     
@@ -648,7 +650,7 @@ const Collectibles = () => {
       }
       return categoryMatchLocal(pick.category, selectedCategory || undefined) || (pick.tags && pick.tags.some((t: string) => categoryMatchLocal(t, selectedCategory || undefined)));
     };
-    for (const designer of collectibleDesigners) {
+    for (const designer of visibleCollectibles) {
       designer.curatorPicks?.forEach((pick, idx) => {
         if (matchPick(pick)) {
           picks.push({ pick, designer, pickIndex: idx });
@@ -916,7 +918,7 @@ const Collectibles = () => {
                   const counts: Record<string, number> = {};
                   Object.entries(SUB_TAGS_LOCAL).forEach(([sub, tags]) => {
                     let total = 0;
-                    collectibleDesigners.forEach(d => {
+                    visibleCollectibles.forEach(d => {
                       d.curatorPicks?.forEach(pick => {
                         if (tags.some(tag =>
                           categoryMatchLocal(pick.subcategory, tag) || categoryMatchLocal(pick.subcategory, sub) ||
@@ -980,7 +982,7 @@ const Collectibles = () => {
               const counts: Record<string, number> = {};
               Object.entries(SUB_TAGS_DESK).forEach(([sub, tags]) => {
                 let total = 0;
-                collectibleDesigners.forEach(d => {
+                visibleCollectibles.forEach(d => {
                   d.curatorPicks?.forEach(pick => {
                     if (tags.some(tag =>
                       categoryMatchLocal(pick.subcategory, tag) || categoryMatchLocal(pick.subcategory, sub) ||

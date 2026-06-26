@@ -1092,6 +1092,27 @@ export type Database = {
           },
         ]
       }
+      collectible_overrides: {
+        Row: {
+          slug: string
+          trade_only: boolean
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          slug: string
+          trade_only?: boolean
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          slug?: string
+          trade_only?: boolean
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       competitor_designers: {
         Row: {
           created_at: string

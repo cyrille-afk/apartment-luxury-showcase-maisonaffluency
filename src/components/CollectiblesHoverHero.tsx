@@ -10,6 +10,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { collectibleDesigners } from "@/components/Collectibles";
+import { useVisibleCollectibleDesigners } from "@/hooks/useCollectibleOverrides";
 
 interface FeaturedPiece {
   slug: string;          // designer slug for routing
@@ -42,8 +43,9 @@ function splitName(name: string): [string, string] {
 
 const CollectiblesHoverHero = () => {
   // Pick one signature piece per featured collectible designer/atelier.
+  const visibleDesigners = useVisibleCollectibleDesigners();
   const items: FeaturedPiece[] = useMemo(() => {
-    return collectibleDesigners
+    return visibleDesigners
       .filter((d) => d.id && d.curatorPicks?.[0]?.image)
       .map((d) => ({
         slug: d.id!,
@@ -54,7 +56,7 @@ const CollectiblesHoverHero = () => {
       .sort((a, b) =>
         a.designerName.localeCompare(b.designerName, "en", { sensitivity: "base" })
       );
-  }, []);
+  }, [visibleDesigners]);
 
   const [activeSlug, setActiveSlug] = useState<string | null>(null);
   const [isStandalone, setIsStandalone] = useState(false);

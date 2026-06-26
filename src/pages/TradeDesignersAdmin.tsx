@@ -9,7 +9,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Navigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
-import { Search, Save, ChevronDown, ChevronUp, ExternalLink, Eye, EyeOff, Plus, Trash2, GripVertical, BookOpen, Monitor, Smartphone, AlertTriangle, Instagram, Wand2, Loader2, X, FileDown, ArrowUp, ArrowDown, Copy } from "lucide-react";
+import { Search, Save, ChevronDown, ChevronUp, ExternalLink, Eye, EyeOff, Plus, Trash2, GripVertical, BookOpen, Monitor, Smartphone, AlertTriangle, Instagram, Wand2, Loader2, X, FileDown, ArrowUp, ArrowDown, Copy, Gem } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -2254,6 +2254,14 @@ const TradeDesignersAdmin = () => {
                 />
               );
             })()}
+            <Link
+              to="/trade/collectibles/admin"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-border text-xs font-body text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-all"
+              title="Toggle Collectible Design ateliers between Public and Trade Only"
+            >
+              <Gem className="h-3.5 w-3.5" />
+              Collectible Design
+            </Link>
             <Link
               to="/trade/designers/instagram"
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-border text-xs font-body text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-all"
