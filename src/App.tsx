@@ -117,6 +117,7 @@ const ClientBoardViewer = lazy(() => import("./pages/ClientBoardViewer"));
 const TradeInsights = lazy(() => import("./pages/TradeInsights"));
 const TradeDesigners = lazy(() => import("./pages/TradeDesigners"));
 const TradeDesignersAdmin = lazy(() => import("./pages/TradeDesignersAdmin"));
+const TradeCollectiblesAdmin = lazy(() => import("./pages/TradeCollectiblesAdmin"));
 const TradeAdminProductAudit = lazy(() => import("./pages/TradeAdminProductAudit"));
 const TradeInstagramAudit = lazy(() => import("./pages/TradeInstagramAudit"));
 const TradeAuditLog = lazy(() => import("./pages/TradeAuditLog"));
