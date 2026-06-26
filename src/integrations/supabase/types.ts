@@ -6602,6 +6602,10 @@ export type Database = {
           status_code: number
         }[]
       }
+      get_studio_contact_email: {
+        Args: { _studio_id: string }
+        Returns: string
+      }
       get_studio_payout_accounts: {
         Args: { _studio_id: string }
         Returns: {
