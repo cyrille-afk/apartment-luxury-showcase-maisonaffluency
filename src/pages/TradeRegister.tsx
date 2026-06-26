@@ -157,16 +157,18 @@ const TradeRegister = () => {
       let profile: Record<string, string> | null = null;
       const { data } = await supabase
         .from("profiles")
-        .select("first_name,last_name,company,phone,email")
+        .select("first_name,last_name,company,email")
         .eq("id", user.id)
         .maybeSingle();
       profile = (data as any) || null;
+      const { data: ownPhone } = await supabase.rpc("get_my_phone" as any);
+      const phoneFromRpc = typeof ownPhone === "string" ? ownPhone : "";
       setPrefill((p) => ({
         email: p.email || profile?.email || user.email || "",
         firstName: p.firstName || profile?.first_name || meta.first_name || "",
         lastName: p.lastName || profile?.last_name || meta.last_name || "",
         company: p.company || profile?.company || meta.company || meta.company_name || "",
-        phone: p.phone || profile?.phone || meta.phone || "",
+        phone: p.phone || phoneFromRpc || meta.phone || "",
       }));
     })();
   }, []);
