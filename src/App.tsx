@@ -217,8 +217,18 @@ function HomeRouteSync() {
   const location = useLocation();
   useEffect(() => {
     const isHome = location.pathname === "/" || location.pathname === "";
-    if (isHome) document.body.setAttribute("data-home", "");
-    else document.body.removeAttribute("data-home");
+    const staticHero = document.getElementById("static-hero");
+    const staticHeroCopy = document.getElementById("static-hero-copy");
+
+    if (isHome) {
+      document.body.setAttribute("data-home", "");
+      staticHero?.style.setProperty("display", "block", "important");
+      staticHeroCopy?.style.setProperty("display", "none", "important");
+    } else {
+      document.body.removeAttribute("data-home");
+      staticHero?.style.setProperty("display", "none", "important");
+      staticHeroCopy?.style.setProperty("display", "none", "important");
+    }
   }, [location.pathname]);
   return null;
 }
