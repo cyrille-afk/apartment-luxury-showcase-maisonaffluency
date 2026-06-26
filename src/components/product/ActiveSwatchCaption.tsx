@@ -62,7 +62,7 @@ export default function ActiveSwatchCaption({
   if (!match) return null;
 
   return (
-    <div className="mt-3 flex items-center gap-3 px-1">
+    <div className="mt-3 flex items-center justify-center gap-3 px-1 text-center">
       {match.image_url ? (
         <img
           src={match.image_url}
@@ -73,7 +73,7 @@ export default function ActiveSwatchCaption({
       ) : (
         <div className="w-10 h-10 rounded-full bg-muted shrink-0" />
       )}
-      <div className="min-w-0">
+      <div className="min-w-0 text-center">
         <div className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
           Shown in
         </div>
