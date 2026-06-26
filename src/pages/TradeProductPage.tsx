@@ -24,6 +24,7 @@ import { supabase } from "@/integrations/supabase/client";
 import ShareMenu from "@/components/ShareMenu";
 import { buildPieceOgUrl } from "@/lib/whatsapp-share";
 import ProductImageGallery from "@/components/product/ProductImageGallery";
+import ActiveSwatchCaption from "@/components/product/ActiveSwatchCaption";
 import SpecSheetButton, { type PdfEntry } from "@/components/trade/SpecSheetButton";
 import CadAssetsSection from "@/components/trade/CadAssetsSection";
 import Product3DViewer from "@/components/trade/Product3DViewer";
@@ -1276,6 +1277,7 @@ const TradeProductPage: React.FC = () => {
                 ) : null
               }
             />
+            <ActiveSwatchCaption pickId={product.id} activeIndex={galleryActiveIndex ?? 0} />
           </div>
 
           <div className="relative flex flex-col gap-4">
