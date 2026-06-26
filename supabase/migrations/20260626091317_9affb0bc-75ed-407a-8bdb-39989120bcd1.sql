@@ -1,0 +1,1 @@
+UPDATE public.designers SET founder=NULL, is_independent=true WHERE slug='sam-accoceberry';
