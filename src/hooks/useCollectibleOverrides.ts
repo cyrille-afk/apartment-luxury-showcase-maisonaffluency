@@ -44,14 +44,12 @@ export function useCollectibleTradeOnlySlugs(): Set<string> {
 }
 
 /** Filters `collectibleDesigners`, hiding trade-only entries for public viewers. */
-export function useVisibleCollectibleDesigners<T extends { id?: string; name: string }>(
-  list: readonly T[] = collectibleDesigners as any
-): T[] {
+export function useVisibleCollectibleDesigners(): typeof collectibleDesigners {
   const tradeOnly = useCollectibleTradeOnlySlugs();
   const { isTradeUser, isAdmin } = useAuth();
   const canSeeTradeOnly = isTradeUser || isAdmin;
-  if (canSeeTradeOnly || tradeOnly.size === 0) return list as T[];
-  return (list as T[]).filter((d) => {
+  if (canSeeTradeOnly || tradeOnly.size === 0) return collectibleDesigners;
+  return collectibleDesigners.filter((d) => {
     const key = d.id || d.name;
     return !tradeOnly.has(String(key));
   });
