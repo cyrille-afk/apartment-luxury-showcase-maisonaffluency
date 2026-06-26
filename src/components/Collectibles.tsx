@@ -412,6 +412,7 @@ const resolveCollectiblePickDescription = (
 const Collectibles = () => {
   const navigate = useNavigate();
   const ref = useRef(null);
+  const visibleCollectibles = useVisibleCollectibleDesigners();
   const isInView = useInView(ref, { once: true, margin: "-100px" });
   const { isPinned, togglePin, items: compareItems } = useCompare();
   const { requireAuth, gateOpen, gateAction, closeGate } = useAuthGate();
