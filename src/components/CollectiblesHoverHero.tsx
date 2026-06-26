@@ -266,8 +266,8 @@ const CollectiblesHoverHero = () => {
                     >
                       <Link
                         to={`/designers/${d.slug}`}
-                        onMouseEnter={() => setActiveSlug(d.slug)}
-                        onFocus={() => setActiveSlug(d.slug)}
+                        onMouseEnter={() => { setHasInteracted(true); setActiveSlug(d.slug); }}
+                        onFocus={() => { setHasInteracted(true); setActiveSlug(d.slug); }}
                         className={cn(
                           "inline-block whitespace-nowrap",
                           "font-display font-light tracking-tight",
