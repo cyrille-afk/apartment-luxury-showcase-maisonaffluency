@@ -589,8 +589,8 @@ const PublicDesignerProfile = () => {
       const heroTextCount = bioHasInlineMedia
         ? 1
         : isMobile
-          ? 1
-          : (isDesignerProfile ? 3 : 2);
+          ? Math.min(3, textBlocks.length)
+          : Math.min(3, textBlocks.length);
       heroParagraphs = textBlocks.slice(0, heroTextCount);
       // Preserve original order including inline media
       const heroSet = new Set(heroParagraphs);
