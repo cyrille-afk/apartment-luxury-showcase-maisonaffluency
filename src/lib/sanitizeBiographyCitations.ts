@@ -19,7 +19,7 @@
  */
 
 const MEDIA_HOST_RE =
-  /(?:^|\.)(?:youtube\.com|youtu\.be|vimeo\.com|player\.vimeo\.com|res\.cloudinary\.com)$/i;
+  /(?:^|\.)(?:youtube\.com|youtu\.be|vimeo\.com|player\.vimeo\.com|res\.cloudinary\.com|supabase\.co|supabase\.in)$/i;
 
 const MARKDOWN_LINK_RE = /\[([^\]]+)\]\(https?:\/\/[^)]+\)/g;
 const SOURCE_BRACKET_RE = /\s*\[Sources?:[^\]]*\]/gi;
