@@ -209,7 +209,7 @@ export default function CsvPriceImport({ onComplete }: { onComplete?: () => void
 
         const { error } = await supabase
           .from("trade_products")
-          .update(updateData)
+          .update(updateData as any)
           .eq("id", existing[0].id);
         if (error) skipped.push(`${row.product_name} (update failed)`);
         else matched++;
