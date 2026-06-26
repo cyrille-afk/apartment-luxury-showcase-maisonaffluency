@@ -158,54 +158,111 @@ Deno.serve(async (req) => {
     );
   }
 
-  const results: { url: string; ok: boolean; title?: string; error?: string }[] = [];
+  const results: { url: string; ok: boolean; title?: string; error?: string; retried?: number }[] = [];
   const BATCH = 2;          // Meta caps per-app calls aggressively; keep concurrency low
   const DELAY = 1500;       // ms between batches → ~1.3 req/s sustained
-  let rateLimited = false;
 
-  for (let i = 0; i < urls.length; i += BATCH) {
-    if (rateLimited) {
-      // Short-circuit: once Meta says #4 limit reached, every further call also fails.
-      for (const url of urls.slice(i)) {
-        results.push({ url, ok: false, error: "Skipped — Meta app rate limit reached, retry in ~1h" });
-      }
-      break;
+  // Backoff schedule when Meta returns (#4) Application request limit reached.
+  // Edge function wall budget is ~150s, so we cap total cooldown at ~120s and
+  // surface remaining urls + a resumeAt timestamp so the caller can resume.
+  const COOLDOWN_MS = [30_000, 60_000, 90_000];
+  const RATE_CODES = new Set([4, 17, 32, 613]);
+  const isRateLimit = (err: any) =>
+    err && (RATE_CODES.has(err.code) || /request limit reached|rate limit/i.test(err.message || ""));
+
+  const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+  const scrapeOne = async (url: string) => {
+    const resp = await fetch(
+      `https://graph.facebook.com/v19.0/?id=${encodeURIComponent(url)}&scrape=true&access_token=${token}`,
+      { method: "POST" }
+    );
+    const text = await resp.text();
+    let data: any;
+    try { data = JSON.parse(text); } catch { return { url, ok: false, error: `Non-JSON: ${text.slice(0, 300)}` } as const; }
+    if (isRateLimit(data.error)) {
+      return { url, ok: false, rateLimited: true, error: data.error.message } as const;
     }
+    if (data.og_object || data.title || data.id) {
+      return { url, ok: true, title: data.og_object?.title || data.title || "" } as const;
+    }
+    return { url, ok: false, error: data.error?.message || text.slice(0, 300) } as const;
+  };
+
+  let cooldownsUsed = 0;
+  let pausedMs = 0;
+  let resumeAt: string | null = null;
+  let remaining: string[] = [];
+
+  outer: for (let i = 0; i < urls.length; i += BATCH) {
     const batch = urls.slice(i, i + BATCH);
-    const promises = batch.map(async (url) => {
-      try {
-        const resp = await fetch(
-          `https://graph.facebook.com/v19.0/?id=${encodeURIComponent(url)}&scrape=true&access_token=${token}`,
-          { method: "POST" }
-        );
-        const text = await resp.text();
-        let data;
-        try { data = JSON.parse(text); } catch { return { url, ok: false, error: `Non-JSON: ${text.slice(0, 300)}` }; }
-        if (data.error?.code === 4 || data.error?.code === 17 || data.error?.code === 32) {
-          rateLimited = true;
-          return { url, ok: false, error: data.error.message };
-        }
-        if (data.og_object || data.title || data.id) {
-          return { url, ok: true, title: data.og_object?.title || data.title || "" };
-        }
-        return { url, ok: false, error: data.error?.message || text.slice(0, 300) };
-      } catch (e) {
-        return { url, ok: false, error: String(e) };
+    const batchResults = await Promise.all(batch.map(scrapeOne));
+
+    const hitLimit = batchResults.some((r: any) => r.rateLimited);
+
+    if (hitLimit) {
+      // Collect URLs in this batch that hit the limit — they must be retried.
+      const toRetry: string[] = batchResults.filter((r: any) => r.rateLimited).map((r: any) => r.url);
+      // Push the successes/non-rate failures from this batch.
+      for (const r of batchResults) {
+        if (!(r as any).rateLimited) results.push(r as any);
       }
-    });
-    const batchResults = await Promise.all(promises);
-    results.push(...batchResults);
+
+      // Try escalating cooldowns, then retry the failed URLs once each.
+      let recovered = false;
+      while (cooldownsUsed < COOLDOWN_MS.length && !recovered) {
+        const wait = COOLDOWN_MS[cooldownsUsed++];
+        pausedMs += wait;
+        await sleep(wait);
+        const retryResults = await Promise.all(toRetry.map(scrapeOne));
+        const stillLimited = retryResults.some((r: any) => r.rateLimited);
+        if (!stillLimited) {
+          for (const r of retryResults) results.push({ ...(r as any), retried: cooldownsUsed });
+          recovered = true;
+        } else if (cooldownsUsed >= COOLDOWN_MS.length) {
+          // Exhausted: keep the limited URLs in `remaining` for the caller to resume.
+          remaining = [
+            ...retryResults.filter((r: any) => r.rateLimited).map((r: any) => r.url),
+            ...urls.slice(i + BATCH),
+          ];
+          for (const r of retryResults) {
+            if ((r as any).rateLimited) {
+              results.push({ url: (r as any).url, ok: false, error: "Paused — Meta app rate limit; resume after window" });
+            } else {
+              results.push({ ...(r as any), retried: cooldownsUsed });
+            }
+          }
+          // Suggested resume in 1h (Meta app hourly window).
+          resumeAt = new Date(Date.now() + 60 * 60 * 1000).toISOString();
+          for (const url of urls.slice(i + BATCH)) {
+            results.push({ url, ok: false, error: "Skipped — paused after rate limit" });
+          }
+          break outer;
+        }
+      }
+    } else {
+      results.push(...(batchResults as any));
+    }
+
     if (i + BATCH < urls.length) {
-      await new Promise((r) => setTimeout(r, DELAY));
+      await sleep(DELAY);
     }
   }
-
 
   const success = results.filter((r) => r.ok).length;
   const failed = results.filter((r) => !r.ok).length;
 
   return new Response(
-    JSON.stringify({ success, failed, total: urls.length, results }),
+    JSON.stringify({
+      success,
+      failed,
+      total: urls.length,
+      pausedMs,
+      cooldownsUsed,
+      resumeAt,
+      remaining,
+      results,
+    }),
     { headers: { ...corsHeaders, "Content-Type": "application/json" } }
   );
 });
