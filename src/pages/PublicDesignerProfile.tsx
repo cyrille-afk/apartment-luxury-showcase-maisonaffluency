@@ -1061,42 +1061,52 @@ const PublicDesignerProfile = () => {
                           </>
                         )}
                         {(() => {
+                          // "Editions houses" publish original designs (not re-editions).
+                          // For these, suppress the "Re-edition by [parent]" badge and let
+                          // the short EDITION tag speak for itself — matches Ecart's pattern.
+                          const EDITION_HOUSES = new Set(["Marta Sala Éditions"]);
+                          const isEditionParent = !!parentBrandName && EDITION_HOUSES.has(parentBrandName);
+                          const showParentBadge = !!parentBrandName && !isEditionParent;
+
                           const tags: string[] = pick.tags || [];
                           // When a specific edition string exists, drop the generic "limited-edition" tag
                           let filtered = pick.edition
                             ? tags.filter(t => !/^limited-edition$/i.test(t))
                             : tags;
                           // Avoid duplicating "Re-edition" when the parent-brand badge already says so
-                          if (parentBrandName) {
+                          if (showParentBadge) {
                             filtered = filtered.filter(t => !/re-?edition/i.test(t));
                           }
                           const specialTags = filtered.filter((t) =>
                             /couture|edition|limited|re-edition|unique|modern scholar|unesco|good design award|genesis collection/i.test(t)
                           );
-                          if (pick.edition && !parentBrandName && !specialTags.some(t => t.toLowerCase() === pick.edition!.toLowerCase())) {
+                          if (pick.edition && !showParentBadge && !specialTags.some(t => t.toLowerCase() === pick.edition!.toLowerCase())) {
                             specialTags.unshift(pick.edition);
                           }
-                          return specialTags.length > 0 ? (
-                            <div className="absolute top-2 right-2 flex flex-wrap gap-1 justify-end">
-                              {specialTags.map((tag, i) => (
-                                <span
-                                  key={i}
-                                  className="inline-block px-2 py-0.5 text-[8px] md:text-[9px] uppercase tracking-wider font-body bg-black/50 text-white/90 rounded-full border border-black/20 backdrop-blur-sm"
-                                >
-                                  {tag}
-                                </span>
-                              ))}
-                            </div>
-                          ) : null;
+                          return (
+                            <>
+                              {specialTags.length > 0 && (
+                                <div className="absolute top-2 right-2 flex flex-wrap gap-1 justify-end">
+                                  {specialTags.map((tag, i) => (
+                                    <span
+                                      key={i}
+                                      className="inline-block px-2 py-0.5 text-[8px] md:text-[9px] uppercase tracking-wider font-body bg-black/50 text-white/90 rounded-full border border-black/20 backdrop-blur-sm"
+                                    >
+                                      {tag}
+                                    </span>
+                                  ))}
+                                </div>
+                              )}
+                              {showParentBadge && (
+                                <div className="absolute top-2 right-2">
+                                  <span className="inline-block px-2 py-0.5 text-[8px] md:text-[9px] uppercase tracking-wider font-body bg-white/85 text-foreground rounded-full border border-black/10 backdrop-blur-sm">
+                                    Re-edition by {parentBrandName}
+                                  </span>
+                                </div>
+                              )}
+                            </>
+                          );
                         })()}
-
-                        {parentBrandName && (
-                          <div className="absolute top-2 right-2">
-                            <span className="inline-block px-2 py-0.5 text-[8px] md:text-[9px] uppercase tracking-wider font-body bg-white/85 text-foreground rounded-full border border-black/10 backdrop-blur-sm">
-                              Re-edition by {parentBrandName}
-                            </span>
-                          </div>
-                        )}
                         <div className="absolute bottom-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity">
                           <div className="p-1.5 bg-black/40 rounded-md text-white/90 backdrop-blur-sm">
                             <Maximize2 className="h-3 w-3" />
