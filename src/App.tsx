@@ -504,6 +504,7 @@ const App = () => {
                     <Route path="magazine-analytics" element={<TradeMagazineAnalytics />} />
                     <Route path="designers" element={<TradeDesigners />} />
                     <Route path="designers/admin" element={<TradeDesignersAdmin />} />
+                    <Route path="collectibles/admin" element={<TradeCollectiblesAdmin />} />
                     <Route path="admin/purge-cache" element={<Suspense fallback={<PageLoadingSkeleton />}><TradePurgeCache /></Suspense>} />
                     <Route path="admin/product-audit" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAdminProductAudit /></Suspense>} />
                     <Route path="designers/instagram" element={<TradeInstagramAudit />} />
