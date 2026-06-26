@@ -18,6 +18,7 @@
  */
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { Image } from "https://deno.land/x/imagescript@1.2.17/mod.ts";
+import { requireUser, rateLimit } from "../_shared/auth.ts";
 
 const SURFACE_LABEL: Record<string, string> = {
   walls: "the wall surface visible in this crop",
