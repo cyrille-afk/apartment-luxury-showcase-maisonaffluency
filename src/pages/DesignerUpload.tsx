@@ -75,13 +75,9 @@ export default function DesignerUpload() {
         setLoading(false);
         return;
       }
-      const { data } = await supabase
-        .from("designers")
-        .select("id, name, slug");
+      const { data } = await supabase.rpc("get_designer_for_upload", { _slug: slug });
       if (cancelled) return;
-      const match = (data || []).find(
-        (d: any) => d.slug === slug || toSlug(d.name) === slug
-      );
+      const match = Array.isArray(data) ? data[0] : data;
       if (!match) {
         setNotFound(true);
       } else {
