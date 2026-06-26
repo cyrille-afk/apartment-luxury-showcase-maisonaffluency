@@ -636,8 +636,18 @@ ABSOLUTE CONSISTENCY RULES (any violation = total failure):
 Source render fidelity: preserve the exact materials, finishes, and palette of the source image — this is the locked appearance reference for every cell.
 
 Style: ${defaultStyle}. Quality must match a single Corona/V-Ray turntable batch.`;
-    } else {
-      throw new Error("Invalid mode. Use: elevation_to_axo, section_to_axo, stylize, composite, 3d_to_cad, cad_overlay, cad_dimension_overlay, product_swap, freeform, apply_texture, scene_edit, turntable_angle, multi_view");
+    } else if (![
+      "elevation_to_axo",
+      "section_to_axo",
+      "stylize",
+      "composite",
+      "3d_to_cad",
+      "cad_overlay",
+      "product_swap",
+      "freeform",
+      "clean_room",
+    ].includes(mode)) {
+      throw new Error("Invalid mode. Use: elevation_to_axo, section_to_axo, stylize, composite, 3d_to_cad, cad_overlay, cad_dimension_overlay, product_swap, freeform, clean_room, apply_texture, scene_edit, proposal_render, proposal_refine, multi_view");
     }
 
     if (referenceImageUrl && (mode === "elevation_to_axo" || mode === "section_to_axo")) {
