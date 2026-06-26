@@ -58,7 +58,10 @@ const CollectiblesHoverHero = () => {
       );
   }, [visibleDesigners]);
 
-  const [activeSlug, setActiveSlug] = useState<string | null>(null);
+  const [activeSlug, setActiveSlug] = useState<string | null>(() =>
+    visibleDesigners.find((d) => d.id && d.curatorPicks?.[0]?.image)?.id ?? null
+  );
+  const [hasInteracted, setHasInteracted] = useState(false);
   const [isStandalone, setIsStandalone] = useState(false);
   const navRef = useRef<HTMLElement>(null);
   const sectionRef = useRef<HTMLElement>(null);
