@@ -70,15 +70,13 @@ export default function StudioProfile() {
         setLoading(false);
         return;
       }
-      let merged: Studio = { ...(data as any), contact_email: null, owner_user_id: null };
-      // Authenticated users (trade members, admins, owners) can see contact_email.
+      let merged: Studio = { ...(data as any), contact_email: null, owner_user_id: (data as any).owner_user_id ?? null };
+      // Only owners/admins can resolve contact_email — enforced server-side via SECURITY DEFINER RPC.
       if (user) {
-        const { data: priv } = await supabase
-          .from("featured_studios")
-          .select("contact_email, owner_user_id")
-          .eq("id", (data as any).id)
-          .maybeSingle();
-        if (priv) merged = { ...merged, ...(priv as any) };
+        const { data: email } = await supabase.rpc("get_studio_contact_email", {
+          _studio_id: (data as any).id,
+        });
+        if (email) merged = { ...merged, contact_email: email as string };
       }
       setStudio(merged);
       logStudioEvent({ studioId: (data as any).id, eventType: "profile_view" });
