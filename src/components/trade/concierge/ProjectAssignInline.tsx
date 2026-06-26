@@ -73,7 +73,7 @@ export function ProjectAssignInline({ boardId, onResolved }: Props) {
 
     const { error } = await supabase
       .from("client_boards")
-      .update(updates)
+      .update(updates as any)
       .eq("id", boardId);
     setSaving(null);
     if (error) {
