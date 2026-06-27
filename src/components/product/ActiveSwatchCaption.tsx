@@ -58,26 +58,38 @@ export default function ActiveSwatchCaption({
 
   if (!swatches.length || activeIndex === undefined || activeIndex === null) return null;
   const oneBased = activeIndex + 1;
-  const match = swatches.find((s) => s.image_indices?.includes(oneBased));
-  if (!match) return null;
+  // Show every swatch whose image_indices include the visible gallery image —
+  // dual/triple-axis products (e.g. frame + upholstery) can have the same image
+  // tied to multiple finishes; render them together as "A + B".
+  const matches = swatches.filter((s) => s.image_indices?.includes(oneBased));
+  if (!matches.length) return null;
 
   return (
-    <div className="mt-3 flex items-center justify-center gap-3 px-1 text-center">
-      {match.image_url ? (
-        <img
-          src={match.image_url}
-          alt={match.name}
-          className="w-10 h-10 rounded-full object-cover border border-border shrink-0"
-          loading="lazy"
-        />
-      ) : (
-        <div className="w-10 h-10 rounded-full bg-muted shrink-0" />
-      )}
+    <div className="mt-3 flex items-center justify-center gap-3 px-1 text-center flex-wrap">
+      <div className="flex items-center gap-2 shrink-0">
+        {matches.map((m, i) => (
+          <div key={m.fabric_id} className="flex items-center gap-2">
+            {i > 0 && <span className="font-body text-sm text-muted-foreground">+</span>}
+            {m.image_url ? (
+              <img
+                src={m.image_url}
+                alt={m.name}
+                className="w-10 h-10 rounded-full object-cover border border-border shrink-0"
+                loading="lazy"
+              />
+            ) : (
+              <div className="w-10 h-10 rounded-full bg-muted shrink-0" />
+            )}
+          </div>
+        ))}
+      </div>
       <div className="min-w-0 text-center">
         <div className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
           Shown in
         </div>
-        <div className="font-body text-sm text-foreground truncate">{match.name}</div>
+        <div className="font-body text-sm text-foreground">
+          {matches.map((m) => m.name).join(" + ")}
+        </div>
       </div>
     </div>
   );
