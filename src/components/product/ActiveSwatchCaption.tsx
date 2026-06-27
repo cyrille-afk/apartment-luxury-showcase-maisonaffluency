@@ -66,6 +66,14 @@ export default function ActiveSwatchCaption({
 
   return (
     <div className="mt-3 flex items-center justify-center gap-3 px-1 text-center flex-wrap">
+      <div className="min-w-0 text-center">
+        <div className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
+          Shown in
+        </div>
+        <div className="font-body text-sm text-foreground">
+          {matches.map((m) => m.name).join(" + ")}
+        </div>
+      </div>
       <div className="flex items-center gap-2 shrink-0">
         {matches.map((m, i) => (
           <div key={m.fabric_id} className="flex items-center gap-2">
@@ -82,14 +90,6 @@ export default function ActiveSwatchCaption({
             )}
           </div>
         ))}
-      </div>
-      <div className="min-w-0 text-center">
-        <div className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
-          Shown in
-        </div>
-        <div className="font-body text-sm text-foreground">
-          {matches.map((m) => m.name).join(" + ")}
-        </div>
       </div>
     </div>
   );
