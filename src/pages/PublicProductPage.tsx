@@ -1215,15 +1215,17 @@ const PublicProductPage: React.FC = () => {
 
           </button>
 
-          <Breadcrumbs
-            items={buildProductBreadcrumbs({
-              root: { label: "Home", to: "/" },
-              category: product.category,
-              subcategory: product.subcategory,
-              title: product.title,
-            })}
-            className="mb-6"
-          />
+          <div className="hidden md:block">
+            <Breadcrumbs
+              items={buildProductBreadcrumbs({
+                root: { label: "Home", to: "/" },
+                category: product.category,
+                subcategory: product.subcategory,
+                title: product.title,
+              })}
+              className="mb-6"
+            />
+          </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16">
             <div className="relative">

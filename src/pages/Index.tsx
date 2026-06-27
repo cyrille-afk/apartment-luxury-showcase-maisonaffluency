@@ -40,7 +40,7 @@ const ProductGrid = lazyRetry(() => import("@/components/ProductGrid"));
 // ExitIntentBanner is deferred — not even fetched until 5s after load to avoid
 // competing for bandwidth with LCP-critical resources on mobile.
 const ExitIntentBanner = lazyRetry(() => import("@/components/ExitIntentBanner"));
-const StickyBottomNav = lazyRetry(() => import("@/components/StickyBottomNav"));
+
 const JournalTeaser = lazyRetry(() => import("@/components/JournalTeaser"));
 const InstagramFeed = lazyRetry(() => import("@/components/InstagramFeed"));
 const DesignerIndexLinks = lazyRetry(() => import("@/components/DesignerIndexLinks"));
@@ -588,11 +588,6 @@ const Index = ({ categoryMode = false }: IndexProps = {}) => {
         </Suspense>
       ) : null}
 
-      {showBelowFoldSections ? (
-        <Suspense fallback={null}>
-          <StickyBottomNav />
-        </Suspense>
-      ) : null}
 
       {showBanner && (
         <Suspense fallback={null}>
