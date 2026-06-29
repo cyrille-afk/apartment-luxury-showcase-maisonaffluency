@@ -273,6 +273,14 @@ function useFullCuratorPicks(enabled: boolean) {
   });
 }
 
+const HIDE_PARENT_LABEL_SLUGS = new Set<string>([
+  "adrien-messie",
+  "dagmar-london",
+  "felix-aublet",
+  "felix-agostini",
+  "gounot-jahnke",
+]);
+
 /** Parse names into [displayName, parentLabel] for correct card rendering */
 function parseDesignerDisplayName(item: Designer): { displayName: string; parentLabel: string | null } {
   if (item.slug === "kerstens") {
@@ -572,7 +580,7 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts }
         </div>
 
         <div className="flex items-center justify-between gap-3">
-          {parentLabel ? (
+          {parentLabel && !HIDE_PARENT_LABEL_SLUGS.has(item.slug) ? (
             <p className="font-body text-[10px] uppercase tracking-[0.22em] truncate text-muted-foreground/80">{parentLabel}</p>
           ) : <span />}
           <div className="h-px w-0 group-hover/link:w-10 transition-all duration-700 ease-out flex-shrink-0 bg-foreground/30" />
