@@ -1001,6 +1001,49 @@ const PublicDesignerProfile = () => {
                   const parentBrandSlug = showParentBrand ? parentDesigner!.slug : undefined;
 
 
+                  const targetDesignerSlug = designerSlug || designer.slug;
+                  const productSlug = slugifyProduct(
+                    pick.title + (pick.subtitle ? `-${pick.subtitle}` : "")
+                  );
+                  const productHref = `/designers/${targetDesignerSlug}/${productSlug}`;
+                  const handleCardClick = (e: React.MouseEvent) => {
+                    if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || (e as any).button === 1) {
+                      return;
+                    }
+                    if (isMobile) {
+                      // Mobile + PWA: let the Link navigate to the deep product URL.
+                      return;
+                    }
+                    // Desktop: intercept the deep link and open the lightbox instead.
+                    e.preventDefault();
+                    setLightboxItem({
+                      id: pick.id,
+                      title: pick.title,
+                      subtitle: pick.subtitle,
+                      image_url: pick.image_url,
+                      hover_image_url: pick.hover_image_url,
+                      brand_name: designerLabel || designer.name,
+                      materials: pick.materials,
+                      materials_description: (pick as any).materials_description ?? null,
+                      dimensions: pick.dimensions,
+                      lead_time: (pick as any).lead_time ?? null,
+                      origin: (pick as any).origin ?? null,
+                      description: pick.description,
+                      category: pick.category,
+                      subcategory: pick.subcategory,
+                      pdf_url: pick.pdf_url || ((pick.pdf_urls as any[] | null)?.[0]?.url ?? undefined),
+                      pdf_urls: pick.pdf_urls as PdfEntry[] | undefined,
+                      designer_slug: targetDesignerSlug,
+                      size_variants: (pick as any).size_variants ?? null,
+                      variant_placeholder: (pick as any).variant_placeholder ?? null,
+                      base_axis_label: (pick as any).base_axis_label ?? null,
+                      top_axis_label: (pick as any).top_axis_label ?? null,
+                      gallery_images: (pick as any).gallery_images ?? null,
+                      variant_image_map: (pick as any).variant_image_map ?? null,
+                      gallery_captions: (pick as any).gallery_captions ?? null,
+                    });
+                  };
+
                   return (
                     <div
                       key={pick.id}
@@ -1011,48 +1054,16 @@ const PublicDesignerProfile = () => {
                         }
                       }}
                       className={cn(
-                        "group flex flex-col cursor-pointer transition-all duration-700",
+                        "group flex flex-col transition-all duration-700",
                         highlightId === pick.id && "ring-2 ring-primary rounded-xl ring-offset-2 ring-offset-background animate-pulse"
                       )}
-                      onClick={() => {
-                        const targetDesignerSlug = designerSlug || designer.slug;
-                        if (isMobile) {
-                          // Mobile + PWA: skip the lightbox and route straight to the product page.
-                          const productSlug = slugifyProduct(
-                            pick.title + (pick.subtitle ? `-${pick.subtitle}` : "")
-                          );
-                          navigate(`/designers/${targetDesignerSlug}/${productSlug}`);
-                          return;
-                        }
-                        setLightboxItem({
-                          id: pick.id,
-                          title: pick.title,
-                          subtitle: pick.subtitle,
-                          image_url: pick.image_url,
-                          hover_image_url: pick.hover_image_url,
-                          brand_name: designerLabel || designer.name,
-                          materials: pick.materials,
-                          materials_description: (pick as any).materials_description ?? null,
-                          dimensions: pick.dimensions,
-                          lead_time: (pick as any).lead_time ?? null,
-                          origin: (pick as any).origin ?? null,
-                          description: pick.description,
-                          category: pick.category,
-                          subcategory: pick.subcategory,
-                          pdf_url: pick.pdf_url || ((pick.pdf_urls as any[] | null)?.[0]?.url ?? undefined),
-                          pdf_urls: pick.pdf_urls as PdfEntry[] | undefined,
-                          designer_slug: targetDesignerSlug,
-                          size_variants: (pick as any).size_variants ?? null,
-                          variant_placeholder: (pick as any).variant_placeholder ?? null,
-                          base_axis_label: (pick as any).base_axis_label ?? null,
-                          top_axis_label: (pick as any).top_axis_label ?? null,
-                          gallery_images: (pick as any).gallery_images ?? null,
-                          variant_image_map: (pick as any).variant_image_map ?? null,
-                          gallery_captions: (pick as any).gallery_captions ?? null,
-                        });
-                      }}
                     >
-                      <div className="aspect-square md:aspect-[4/5] bg-muted/30 rounded-xl overflow-hidden mb-2 md:mb-2 relative flex items-center justify-center">
+                      <Link
+                        to={productHref}
+                        onClick={handleCardClick}
+                        aria-label={`${pick.title}${pick.subtitle ? ` — ${pick.subtitle}` : ""}`}
+                        className="aspect-square md:aspect-[4/5] bg-muted/30 rounded-xl overflow-hidden mb-2 md:mb-2 relative flex items-center justify-center cursor-pointer"
+                      >
                         <img
                           src={responsiveCloudinaryUrl(pick.image_url, 600)}
                           srcSet={pickSrcSet(pick.image_url)}
@@ -1150,7 +1161,7 @@ const PublicDesignerProfile = () => {
                             />
                           </div>
                         )}
-                      </div>
+                      </Link>
 
                       {/* Editorial text block — quiet, uniform, line-clamped */}
                       <div className="flex flex-col flex-1 px-0.5 md:px-0 text-center">
@@ -1178,9 +1189,11 @@ const PublicDesignerProfile = () => {
                         ) : null}
 
 
-                        {/* Product name — primary */}
+                        {/* Product name — primary (deep link so the URL is shareable/copyable) */}
                         <h3 className="font-display text-[14px] md:text-sm tracking-wide leading-snug mt-2 line-clamp-2">
-                          {pick.title}
+                          <Link to={productHref} onClick={handleCardClick} className="hover:text-foreground/70 transition-colors">
+                            {pick.title}
+                          </Link>
                         </h3>
 
                         {/* Subtitle, materials & dimensions hidden on grid — shown in lightbox detail view */}
