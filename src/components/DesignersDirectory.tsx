@@ -600,20 +600,20 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts }
       {/* Editorial caption block — sits below the image like a monograph plate */}
       <Link
         to={`/designers/${item.slug}`}
-        className="block relative p-4 pt-3 flex-1 group/link"
+        className="block relative p-4 pt-3 flex-1 group/link bg-gradient-to-b from-black/75 via-black/85 to-black text-white"
       >
         <div className="flex items-baseline justify-between gap-3 mb-1.5 min-w-0">
-          <h3 className="font-serif text-sm md:text-base lg:text-[1.05rem] leading-tight tracking-tight text-foreground group-hover/link:translate-x-1 transition-transform duration-500 ease-out truncate">
+          <h3 className="font-serif text-sm md:text-base lg:text-[1.05rem] leading-tight tracking-tight text-white group-hover/link:text-white/90 group-hover/link:translate-x-1 transition-all duration-500 ease-out truncate">
             {displayName}
           </h3>
         </div>
 
         <div className="flex items-center justify-between gap-3">
           {parentLabel && !HIDE_PARENT_LABEL_SLUGS.has(item.slug) ? (
-            <p data-parent-label className="font-body text-[10px] uppercase tracking-[0.22em] truncate text-muted-foreground/80">{parentLabel}</p>
+            <p data-parent-label className="font-body text-[10px] uppercase tracking-[0.22em] truncate text-white/70">{parentLabel}</p>
           ) : <span />}
 
-          <div className="h-px w-0 group-hover/link:w-10 transition-all duration-700 ease-out flex-shrink-0 bg-foreground/30" />
+          <div className="h-px w-0 group-hover/link:w-10 transition-all duration-700 ease-out flex-shrink-0 bg-white/30" />
         </div>
       </Link>
 
