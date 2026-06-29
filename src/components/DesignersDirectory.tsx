@@ -426,52 +426,66 @@ function handleDesignerShare(e: React.MouseEvent, item: Designer, displayName: s
 
 // ─── Parent Brand Card ───────────────────────────────────────────────────────
 function ParentBrandCard({ item, isOpen, onToggle, designerCount, hasIgPosts }: { item: Designer; isOpen: boolean; onToggle: () => void; designerCount: number; hasIgPosts?: boolean }) {
+  const displayName = item.display_name || item.name;
+  const cardImageUrl = item.image_url || item.hero_image_url;
   const instagramLink = hasIgPosts ? undefined : (INSTAGRAM_LINKS[item.slug] || (item.links as any[])?.find((l: any) => l.type === "Instagram" || l.type === "instagram")?.url);
 
-  const handleShare = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    e.preventDefault();
-    const bridgeUrl = buildShareUrl(item.slug);
-    const text = `${item.display_name || item.name} — Maison Affluency`;
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-    if (isMobile) {
-      window.location.href = `https://wa.me/?text=${encodeURIComponent(`${text}\n${bridgeUrl}`)}`;
-    } else {
-      navigator.clipboard.writeText(`${text}: ${bridgeUrl}`);
-      import("sonner").then(({ toast }) => toast.success("Link copied"));
-    }
-    trackCTA.whatsapp(`Directory_Share_${item.name}`);
-  };
-
   return (
-    <div className="self-start col-span-2">
-      <div className="group relative rounded-xl overflow-hidden border border-primary/40 ring-1 ring-primary/20 hover:border-primary/60 hover:shadow-xl transition-all duration-300 cursor-pointer aspect-[8/5] sm:aspect-[7/4]">
+    <div className="group self-start flex flex-col rounded-xl overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background cursor-pointer">
+      <div className="aspect-[4/5] bg-muted/20 overflow-hidden relative">
         {item.name === 'Apparatus' ? (
-          <div className="absolute inset-0 bg-black" />
+          <div className="w-full h-full bg-black" />
+        ) : cardImageUrl ? (
+          <img src={cardImageUrl} alt={item.name} draggable={false} className="w-full h-full object-cover scale-105 group-hover:scale-100 transition-transform duration-[1100ms] ease-out" loading="eager" decoding="async" />
         ) : (
-          <>
-            {(item.hero_image_url || item.image_url) && (
-              <img src={item.hero_image_url || item.image_url} alt={item.name} loading="eager" decoding="async" aria-hidden="true" className="absolute inset-0 w-full h-full pointer-events-none select-none object-cover" />
-            )}
-            <div className={`absolute inset-0 transition-all duration-300 ${(item.hero_image_url || item.image_url) ? "bg-black/25 group-hover:bg-black/15" : "bg-card/80"}`} />
-            <div className="absolute top-3 left-3 w-14 h-14 md:w-16 md:h-16 bg-foreground flex items-center justify-center p-1.5 overflow-hidden z-10">
-              <span className="font-display text-[7px] md:text-[8px] text-background text-center leading-tight uppercase tracking-[0.12em]">{item.display_name || item.name}</span>
-            </div>
-          </>
+          <div className="w-full h-full flex items-center justify-center bg-muted/10 group-hover:bg-muted/20 transition-colors">
+            <span className="font-display text-3xl text-muted-foreground/20">{item.name.charAt(0)}</span>
+          </div>
         )}
+
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
+
+        <Link
+          to={`/designers/${item.slug}`}
+          className="absolute inset-0 z-[5] cursor-pointer"
+          aria-label={`View ${displayName} portrait`}
+        />
+
         {instagramLink && (
           <a href={instagramLink} target="_blank" rel="noopener noreferrer" className="absolute top-3 right-3 z-10 font-body text-[9px] text-white/60 hover:text-white tracking-wide transition-colors drop-shadow-sm" onClick={(e) => { e.stopPropagation(); e.preventDefault(); window.open(instagramLink, '_blank', 'noopener,noreferrer'); }} aria-label={`${item.name} on Instagram`}>
             @{instagramLink.split('?')[0].replace(/\/+$/, '').split('/').pop()}
           </a>
         )}
-        <button onClick={(e) => { e.stopPropagation(); e.preventDefault(); onToggle(); }} className="absolute bottom-3 right-3 z-10 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/15 backdrop-blur-sm border border-white/30 text-white hover:bg-white/25 transition-all">
-          <Layers className="h-3 w-3" />
-          <span className="font-body text-[9px] uppercase tracking-[0.12em]">Designers{designerCount > 0 ? ` (${designerCount})` : ""}</span>
-          <ChevronDown className={`h-3 w-3 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`} />
-        </button>
-        <Link to={`/designers/${item.slug}`} className="absolute inset-0 z-[6] flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-white/40 bg-white/10 backdrop-blur-sm text-white font-body text-[10px] uppercase tracking-[0.15em] hover:bg-white/20 transition-colors">View Profile</span>
-        </Link>
+
+        <div className="pointer-events-none absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 px-3">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-white/40 bg-white/10 backdrop-blur-sm text-white font-body text-[9px] uppercase tracking-[0.15em]">View Portrait</span>
+        </div>
+      </div>
+
+      {/* Editorial caption block — sits below the image like a monograph plate */}
+      <div className="block relative p-4 pt-3 flex-1 group/link">
+        <div className="flex items-center justify-between gap-3 mb-1.5 min-w-0">
+          <Link
+            to={`/designers/${item.slug}`}
+            className="font-serif text-sm md:text-base lg:text-[1.05rem] leading-tight tracking-tight text-foreground group-hover/link:translate-x-1 transition-transform duration-500 ease-out truncate"
+          >
+            {displayName}
+          </Link>
+          <button
+            onClick={(e) => { e.stopPropagation(); e.preventDefault(); onToggle(); }}
+            className="flex items-center gap-1 px-2 py-1 rounded-full border border-border bg-muted/40 hover:bg-muted text-foreground font-body text-[9px] uppercase tracking-[0.12em] flex-shrink-0 transition-colors"
+            aria-label={`Show ${designerCount} designers for ${displayName}`}
+          >
+            <Layers className="h-3 w-3" />
+            <span>Designers{designerCount > 0 ? ` (${designerCount})` : ""}</span>
+            <ChevronDown className={`h-3 w-3 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`} />
+          </button>
+        </div>
+
+        <div className="flex items-center justify-between gap-3">
+          <span />
+          <div className="h-px w-0 group-hover/link:w-10 transition-all duration-700 ease-out flex-shrink-0 bg-foreground/30" />
+        </div>
       </div>
     </div>
   );
@@ -744,7 +758,7 @@ function LetterGroup({
                         <ParentBrandCard item={item} isOpen={isOpen} onToggle={() => setOpenParent(isOpen ? null : item.name)} designerCount={designerCount} hasIgPosts={designersWithIgPosts?.has(item.id)} />
                         <AnimatePresence>
                           {isOpen && (
-                            <div className="col-span-2 md:col-span-3 lg:col-span-4">
+                            <div className="col-span-full">
                               <ParentSubGrid key={item.name} parentName={item.name} onClose={() => setOpenParent(null)} autoScroll={!!matchesExpand && item.name === initialExpand} />
                             </div>
                           )}
@@ -797,7 +811,7 @@ function LetterCarousel({ letter, designers, openParent, setOpenParent, parentDe
     const getSlotCost = (item: Designer) => {
       const designerCount = parentDesignerCountByName[item.name] ?? 0;
       const isParentBrand = item.founder === item.name && designerCount > 0;
-      return isParentBrand ? 2 : 1;
+      return isParentBrand ? 1 : 1;
     };
     const pool = [...designers];
     const builtPages: Designer[][] = [];
