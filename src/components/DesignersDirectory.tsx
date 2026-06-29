@@ -275,6 +275,9 @@ function useFullCuratorPicks(enabled: boolean) {
 
 const HIDE_PARENT_LABEL_SLUGS = new Set<string>([
   "adrien-messie",
+  "based-upon",
+  "cristian-mohaded",
+  "cristian-mohaded-cc-tapis",
   "dagmar-london",
   "eileen-gray",
   "felix-aublet",
@@ -288,10 +291,19 @@ const HIDE_PARENT_LABEL_SLUGS = new Set<string>([
   "kira",
   "laurent-maugoust-cecile-chenais",
   "lazzarini-pickering",
+  "luca-nichetto",
+  "manuel-aires-mateus",
+  "mariano-fortuny",
+  "matthew-hilton",
+  "neri-hu",
   "paul-laszlo",
   "pierre-chareau",
   "pierre-chareau-mcde",
   "rowin-atelier",
+  "sam-baron",
+  "studio-base-upon",
+  "tristan-auer",
+  "tristan-auer-veronese",
 ]);
 
 /** Parse names into [displayName, parentLabel] for correct card rendering */
