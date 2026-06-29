@@ -285,6 +285,12 @@ const HIDE_PARENT_LABEL_SLUGS = new Set<string>([
   "jan-kath",
   "jean-michel-frank",
   "joseph-dirand",
+  "laurent-maugoust",
+  "lazzarini-pickering",
+  "paul-laszlo",
+  "pierre-chareau",
+  "roman-frankel",
+  "rowin-atelier",
 ]);
 
 /** Parse names into [displayName, parentLabel] for correct card rendering */
