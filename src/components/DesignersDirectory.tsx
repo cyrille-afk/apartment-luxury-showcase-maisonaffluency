@@ -811,7 +811,7 @@ function LetterCarousel({ letter, designers, openParent, setOpenParent, parentDe
     const getSlotCost = (item: Designer) => {
       const designerCount = parentDesignerCountByName[item.name] ?? 0;
       const isParentBrand = item.founder === item.name && designerCount > 0;
-      return isParentBrand ? 2 : 1;
+      return isParentBrand ? 1 : 1;
     };
     const pool = [...designers];
     const builtPages: Designer[][] = [];
