@@ -29,6 +29,7 @@ const Gallery = lazyRetry(() => import("@/components/Gallery"));
 const ScrollProgress = lazyRetry(() => import("@/components/ScrollProgress"));
 const QuickJumpMenu = lazyRetry(() => import("@/components/QuickJumpMenu"));
 const Footer = lazyRetry(() => import("@/components/Footer"));
+const InstagramFeed = lazyRetry(() => import("@/components/InstagramFeed"));
 const ProductGrid = lazyRetry(() => import("@/components/ProductGrid"));
 const TradeFloatingCTA = lazy(() => import("@/components/TradeFloatingCTA"));
 const ApartmentTourInterlude = lazyRetry(() => import("@/components/ApartmentTourInterlude"));
