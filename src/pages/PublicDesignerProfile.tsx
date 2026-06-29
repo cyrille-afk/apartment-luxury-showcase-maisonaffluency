@@ -344,6 +344,7 @@ const PublicDesignerProfile = () => {
   const [lightboxItem, setLightboxItem] = useState<PublicLightboxItem | null>(null);
   const [shareCopied, setShareCopied] = useState(false);
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
   const picksSectionRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
