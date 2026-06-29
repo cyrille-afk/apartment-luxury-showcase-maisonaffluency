@@ -549,21 +549,21 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts }
       {/* Editorial caption block — sits below the image like a monograph plate */}
       <Link
         to={`/designers/${item.slug}`}
-        className={`${isLetterA ? 'absolute bottom-0 left-0 right-0 h-[40%] flex flex-col justify-end p-4 pb-5' : 'block relative p-4 pt-3 flex-1'} ${isLetterA ? 'text-white' : ''}`}
-        style={isLetterA ? { background: 'linear-gradient(to top, rgba(26,26,28,0.95) 0%, rgba(26,26,28,0.75) 45%, rgba(26,26,28,0) 100%)' } : undefined}
+        className="block relative p-4 pt-3 flex-1 group/link"
       >
-        <div className={`flex items-baseline justify-between gap-3 ${isLetterA ? 'mb-0' : 'mb-1.5'}`}>
-          <h3 className={`font-serif text-lg md:text-xl lg:text-[1.4rem] leading-tight tracking-tight group-hover:translate-x-1 transition-transform duration-500 ease-out ${isLetterA ? 'text-white' : 'text-foreground'}`}>
+        <div className="flex items-baseline justify-between gap-3 mb-1.5">
+          <h3 className="font-serif text-lg md:text-xl lg:text-[1.4rem] leading-tight tracking-tight text-foreground group-hover/link:translate-x-1 transition-transform duration-500 ease-out">
             {displayName}
           </h3>
         </div>
         <div className="flex items-center justify-between gap-3">
           {parentLabel ? (
-            <p className={`font-body text-[10px] uppercase tracking-[0.22em] truncate ${isLetterA ? 'text-white/55' : 'text-muted-foreground/80'}`}>{parentLabel}</p>
+            <p className="font-body text-[10px] uppercase tracking-[0.22em] truncate text-muted-foreground/80">{parentLabel}</p>
           ) : <span />}
-          <div className={`h-px w-0 group-hover:w-10 transition-all duration-700 ease-out flex-shrink-0 ${isLetterA ? 'bg-white/40' : 'bg-foreground/30'}`} />
+          <div className="h-px w-0 group-hover/link:w-10 transition-all duration-700 ease-out flex-shrink-0 bg-foreground/30" />
         </div>
       </Link>
+
 
 
     </div>
