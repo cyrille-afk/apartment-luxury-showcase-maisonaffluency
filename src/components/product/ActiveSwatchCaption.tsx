@@ -60,7 +60,7 @@ export default function ActiveSwatchCaption({
   const oneBased = activeIndex + 1;
   // Show every swatch whose image_indices include the visible gallery image —
   // dual/triple-axis products (e.g. frame + upholstery) can have the same image
-  // tied to multiple finishes; render them together as "A + B".
+  // tied to multiple finishes; render their names comma-separated and swatches inline.
   const matches = swatches.filter((s) => s.image_indices?.includes(oneBased));
   if (!matches.length) return null;
 
