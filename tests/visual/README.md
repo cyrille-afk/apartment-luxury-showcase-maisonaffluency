@@ -1,6 +1,13 @@
 # Visual Regression Snapshots
 
-Run from the project root with the dev server running on `http://localhost:8080`:
+First time on a new machine, install the Playwright Chromium binary:
+
+```bash
+npx playwright install chromium
+```
+
+Then run from the project root with the dev server running on `http://localhost:8080`:
+
 
 ```bash
 # First time (or after intentional UI changes): create/update the baseline
