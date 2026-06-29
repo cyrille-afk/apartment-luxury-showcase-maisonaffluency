@@ -508,13 +508,15 @@ function ParentBrandCard({ item, isOpen, onToggle, designerCount, hasIgPosts }: 
           </Link>
           <button
             onClick={(e) => { e.stopPropagation(); e.preventDefault(); onToggle(); }}
-            className="flex items-center gap-1 px-2 py-1 rounded-full border border-white/30 bg-white/10 hover:bg-white/20 text-white font-body text-[9px] uppercase tracking-[0.12em] flex-shrink-0 transition-colors"
+            className="flex items-center gap-1 px-2 py-1 rounded-full border border-white/30 bg-white/10 hover:bg-white/20 text-white font-body text-[9px] uppercase tracking-[0.12em] flex-shrink-0 transition-colors whitespace-nowrap"
             aria-label={`Show ${designerCount} designers for ${displayName}`}
           >
             <Layers className="h-3 w-3" />
-            <span>Designers{designerCount > 0 ? ` (${designerCount})` : ""}</span>
+            <span className="hidden xs:inline sm:inline">Designers{designerCount > 0 ? ` (${designerCount})` : ""}</span>
+            <span className="xs:hidden sm:hidden">{designerCount > 0 ? `(${designerCount})` : ""}</span>
             <ChevronDown className={`h-3 w-3 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`} />
           </button>
+
         </div>
 
         <div className="flex items-center justify-between gap-3">
