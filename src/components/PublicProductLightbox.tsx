@@ -508,8 +508,8 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
               ) : null;
             })()}
 
-            {/* Description overlay on image — mirrors Trade lightbox */}
-            <div className="absolute top-3 right-3 z-20">
+            {/* Description overlay on image — mobile only (desktop renders inline below) */}
+            <div className="md:hidden absolute top-3 right-3 z-20">
               <LightboxDescriptionDropdown description={product.description} />
             </div>
 
