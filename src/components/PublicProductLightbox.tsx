@@ -559,6 +559,16 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
             </div>
           </div>
 
+          {/* Desktop: description rendered directly under the image (SEO-friendly, fills empty space) */}
+          {product.description && product.description.trim().length > 0 && (
+            <div className="hidden md:block px-8 pb-8 pt-2">
+              <p className="font-body text-sm leading-relaxed text-foreground/80 whitespace-pre-wrap">
+                {product.description}
+              </p>
+            </div>
+          )}
+          </div>
+
           {/* Details */}
           <div className="flex-1 min-h-0 p-5 md:p-8 flex flex-col gap-3 md:gap-4 md:overflow-y-auto">
             <div>
