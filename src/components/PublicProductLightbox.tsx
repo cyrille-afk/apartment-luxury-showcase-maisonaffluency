@@ -445,9 +445,10 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
           {/* Scrollable mobile body */}
           <div className="flex-1 min-h-0 overflow-y-auto md:flex md:flex-row md:overflow-visible">
 
-          {/* Image */}
+          {/* Image + desktop description column */}
+          <div className="relative w-full md:w-1/2 shrink-0 bg-muted/30 md:flex md:flex-col md:min-h-[400px]">
           <div
-            className="relative w-full md:w-1/2 h-[42dvh] max-h-[340px] md:h-auto shrink-0 bg-muted/30 flex items-center justify-center p-2 md:p-8 md:min-h-[400px]"
+            className="relative w-full h-[42dvh] max-h-[340px] md:h-auto md:flex-1 shrink-0 flex items-center justify-center p-2 md:p-8"
             onMouseEnter={() => { if (canShowHoverImage) setShowHoverImage(true); }}
             onMouseLeave={() => setShowHoverImage(false)}
           >
