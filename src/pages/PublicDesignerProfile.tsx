@@ -1161,7 +1161,7 @@ const PublicDesignerProfile = () => {
                             />
                           </div>
                         )}
-                      </div>
+                      </Link>
 
                       {/* Editorial text block — quiet, uniform, line-clamped */}
                       <div className="flex flex-col flex-1 px-0.5 md:px-0 text-center">
