@@ -121,7 +121,7 @@ const Hero = () => {
 
               <button
                 type="button"
-                onClick={() => { trackEvent("click_meet_designers", { event_category: "CTA", event_label: "HeroCTA" }); scrollToMeetDesigners(); }}
+                onClick={() => { trackEvent("click_meet_designers", { event_category: "CTA", event_label: "HeroCTA" }); navigate("/designers"); }}
                 className={heroPrimaryCtaClass}
               >
                 Meet our Designers
