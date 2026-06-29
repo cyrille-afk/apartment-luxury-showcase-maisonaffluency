@@ -48,7 +48,7 @@ const InstagramFeed = () => {
               href={post.post_url}
               target="_blank"
               rel="noopener noreferrer"
-              className="group relative aspect-square overflow-hidden bg-muted"
+              className="group relative aspect-square overflow-hidden bg-muted rounded-sm"
             >
               <img
                 src={post.image_url!}
