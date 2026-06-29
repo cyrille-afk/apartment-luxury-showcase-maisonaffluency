@@ -156,6 +156,10 @@
     "name": "Hamrei"
   },
   {
+    "slug": "herzog-de-meuron",
+    "name": "Herzog & de Meuron"
+  },
+  {
     "slug": "iksel",
     "name": "Iksel"
   },
@@ -220,10 +224,6 @@
     "name": "Made in Kira - Roman Frankel"
   },
   {
-    "slug": "maison-charles",
-    "name": "Maison Charles"
-  },
-  {
     "slug": "maison-wecraft",
     "name": "Maison WeCraft"
   },
@@ -246,6 +246,10 @@
   {
     "slug": "matthieu-gicquel",
     "name": "Matthieu Gicquel"
+  },
+  {
+    "slug": "mernoe",
+    "name": "Mernøe"
   },
   {
     "slug": "michel-boyer",
@@ -342,6 +346,10 @@
   {
     "slug": "saint-louis",
     "name": "Saint-Louis"
+  },
+  {
+    "slug": "sam-accoceberry",
+    "name": "Sam Accoceberry"
   },
   {
     "slug": "serge-mouille",
