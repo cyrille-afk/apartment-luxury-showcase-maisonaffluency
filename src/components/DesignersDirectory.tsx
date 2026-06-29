@@ -498,7 +498,7 @@ function ParentBrandCard({ item, isOpen, onToggle, designerCount, hasIgPosts }: 
       </div>
 
       {/* Editorial caption block — sits below the image like a monograph plate */}
-      <div className="block relative p-4 pt-3 flex-1 group/link bg-gradient-to-b from-black/75 via-black/85 to-black text-white">
+      <div className="block relative p-4 pt-3 flex-1 group/link bg-gradient-to-b from-black/55 via-black/70 to-black/85 text-white">
         <div className="flex items-center justify-between gap-3 mb-1.5 min-w-0">
           <Link
             to={`/designers/${item.slug}`}
@@ -601,7 +601,7 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts }
       {/* Editorial caption block — sits below the image like a monograph plate */}
       <Link
         to={`/designers/${item.slug}`}
-        className="block relative p-4 pt-3 flex-1 group/link bg-gradient-to-b from-black/75 via-black/85 to-black text-white"
+        className="block relative p-4 pt-3 flex-1 group/link bg-gradient-to-b from-black/55 via-black/70 to-black/85 text-white"
       >
         <div className="flex items-baseline justify-between gap-3 mb-1.5 min-w-0">
           <h3 className="font-serif text-sm md:text-base lg:text-[1.05rem] leading-tight tracking-tight text-white group-hover/link:text-white/90 group-hover/link:translate-x-1 transition-all duration-500 ease-out truncate">
