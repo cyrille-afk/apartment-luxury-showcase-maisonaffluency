@@ -32,7 +32,7 @@ const Footer = lazyRetry(() => import("@/components/Footer"));
 const ProductGrid = lazyRetry(() => import("@/components/ProductGrid"));
 const TradeFloatingCTA = lazy(() => import("@/components/TradeFloatingCTA"));
 const ApartmentTourInterlude = lazyRetry(() => import("@/components/ApartmentTourInterlude"));
-const DesignerIndexLinks = lazyRetry(() => import("@/components/DesignerIndexLinks"));
+
 
 // ExitIntentBanner is deferred — not even fetched until 5s after load to avoid
 // competing for bandwidth with LCP-critical resources on mobile.
@@ -498,9 +498,6 @@ const Index = ({ categoryMode = false }: IndexProps = {}) => {
               </Suspense>
             )}
 
-            <Suspense fallback={null}>
-              <DesignerIndexLinks />
-            </Suspense>
             <Suspense fallback={null}>
               <Footer />
             </Suspense>
