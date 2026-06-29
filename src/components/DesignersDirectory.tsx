@@ -275,6 +275,7 @@ function useFullCuratorPicks(enabled: boolean) {
 
 const HIDE_PARENT_LABEL_SLUGS = new Set<string>([
   "adrien-messie",
+  "alex-proba",
   "based-upon",
   "cristian-mohaded",
   "cristian-mohaded-cc-tapis",
