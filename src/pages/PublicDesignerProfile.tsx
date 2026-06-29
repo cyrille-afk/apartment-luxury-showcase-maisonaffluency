@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, useRef } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
-import { useParams, Link, Navigate, useSearchParams } from "react-router-dom";
+import { useParams, Link, Navigate, useSearchParams, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Package, FileText, Maximize2, Share2, Check, ChevronDown } from "lucide-react";
@@ -40,6 +40,10 @@ function responsiveCloudinaryUrl(url: string, width: number): string {
   if (replaced !== url) return replaced;
   return url.replace("/upload/", `/upload/w_${width},c_fill,q_auto,f_auto/`);
 }
+
+/** Mirrors the slugifier used by PublicProductLightbox + PublicProductPage. */
+const slugifyProduct = (s: string) =>
+  s.toLowerCase().replace(/['']/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 
 function pickSrcSet(url: string): string {
   return [300, 400, 600, 800].map((w) => `${responsiveCloudinaryUrl(url, w)} ${w}w`).join(", ");
@@ -340,6 +344,7 @@ const PublicDesignerProfile = () => {
   const [lightboxItem, setLightboxItem] = useState<PublicLightboxItem | null>(null);
   const [shareCopied, setShareCopied] = useState(false);
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
   const picksSectionRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -1009,32 +1014,43 @@ const PublicDesignerProfile = () => {
                         "group flex flex-col cursor-pointer transition-all duration-700",
                         highlightId === pick.id && "ring-2 ring-primary rounded-xl ring-offset-2 ring-offset-background animate-pulse"
                       )}
-                      onClick={() => setLightboxItem({
-                        id: pick.id,
-                        title: pick.title,
-                        subtitle: pick.subtitle,
-                        image_url: pick.image_url,
-                        hover_image_url: pick.hover_image_url,
-                        brand_name: designerLabel || designer.name,
-                        materials: pick.materials,
-                        materials_description: (pick as any).materials_description ?? null,
-                        dimensions: pick.dimensions,
-                        lead_time: (pick as any).lead_time ?? null,
-                        origin: (pick as any).origin ?? null,
-                        description: pick.description,
-                        category: pick.category,
-                        subcategory: pick.subcategory,
-                        pdf_url: pick.pdf_url || ((pick.pdf_urls as any[] | null)?.[0]?.url ?? undefined),
-                        pdf_urls: pick.pdf_urls as PdfEntry[] | undefined,
-                        designer_slug: designerSlug || designer.slug,
-                        size_variants: (pick as any).size_variants ?? null,
-                        variant_placeholder: (pick as any).variant_placeholder ?? null,
-                        base_axis_label: (pick as any).base_axis_label ?? null,
-                        top_axis_label: (pick as any).top_axis_label ?? null,
-                        gallery_images: (pick as any).gallery_images ?? null,
-                        variant_image_map: (pick as any).variant_image_map ?? null,
-                        gallery_captions: (pick as any).gallery_captions ?? null,
-                      })}
+                      onClick={() => {
+                        const targetDesignerSlug = designerSlug || designer.slug;
+                        if (isMobile) {
+                          // Mobile + PWA: skip the lightbox and route straight to the product page.
+                          const productSlug = slugifyProduct(
+                            pick.title + (pick.subtitle ? `-${pick.subtitle}` : "")
+                          );
+                          navigate(`/designers/${targetDesignerSlug}/${productSlug}`);
+                          return;
+                        }
+                        setLightboxItem({
+                          id: pick.id,
+                          title: pick.title,
+                          subtitle: pick.subtitle,
+                          image_url: pick.image_url,
+                          hover_image_url: pick.hover_image_url,
+                          brand_name: designerLabel || designer.name,
+                          materials: pick.materials,
+                          materials_description: (pick as any).materials_description ?? null,
+                          dimensions: pick.dimensions,
+                          lead_time: (pick as any).lead_time ?? null,
+                          origin: (pick as any).origin ?? null,
+                          description: pick.description,
+                          category: pick.category,
+                          subcategory: pick.subcategory,
+                          pdf_url: pick.pdf_url || ((pick.pdf_urls as any[] | null)?.[0]?.url ?? undefined),
+                          pdf_urls: pick.pdf_urls as PdfEntry[] | undefined,
+                          designer_slug: targetDesignerSlug,
+                          size_variants: (pick as any).size_variants ?? null,
+                          variant_placeholder: (pick as any).variant_placeholder ?? null,
+                          base_axis_label: (pick as any).base_axis_label ?? null,
+                          top_axis_label: (pick as any).top_axis_label ?? null,
+                          gallery_images: (pick as any).gallery_images ?? null,
+                          variant_image_map: (pick as any).variant_image_map ?? null,
+                          gallery_captions: (pick as any).gallery_captions ?? null,
+                        });
+                      }}
                     >
                       <div className="aspect-square md:aspect-[4/5] bg-muted/30 rounded-xl overflow-hidden mb-2 md:mb-2 relative flex items-center justify-center">
                         <img
