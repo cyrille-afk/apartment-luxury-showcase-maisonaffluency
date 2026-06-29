@@ -202,17 +202,18 @@ const Index = ({ categoryMode = false }: IndexProps = {}) => {
       // Navigation is above-fold — show first
       setShowNavigation(true);
 
-      // Keep image-heavy below-fold chunks out of the lab LCP window.
-      // They still reveal immediately on scroll/CTA via ma:reveal-below-fold.
+      // Keep image-heavy below-fold chunks out of the lab LCP window, but do
+      // not leave the live homepage with only the hero mounted for long enough
+      // that gallery/Instagram/footer look missing on production.
       if (!cancelBelowFoldDelay) {
         cancelBelowFoldDelay = scheduleAfterLoad(() => {
           if (!cancelDeferredReveal) {
             cancelDeferredReveal = scheduleWhenIdle(() => {
               setShowScrollProgress(true);
               setShowBelowFoldSections(true);
-            }, 3000);
+            }, 1000);
           }
-        }, 15000);
+        }, 3000);
       }
     };
 
