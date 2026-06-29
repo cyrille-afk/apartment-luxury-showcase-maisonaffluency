@@ -277,6 +277,7 @@ const HIDE_PARENT_LABEL_SLUGS = new Set<string>([
   "adrien-messie",
   "based-upon",
   "cristian-mohaded",
+  "cristian-mohaded-cc-tapis",
   "dagmar-london",
   "eileen-gray",
   "felix-aublet",
