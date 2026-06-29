@@ -1469,7 +1469,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
 
   return (
     <>
-    <div ref={sectionRef} className="relative py-12 px-4 md:py-20 md:px-8 lg:py-24 lg:px-12 xl:px-20 bg-background scroll-header-offset">
+    <div ref={sectionRef} data-testid="designers-directory" className="relative py-12 px-4 md:py-20 md:px-8 lg:py-24 lg:px-12 xl:px-20 bg-background scroll-header-offset">
 
 
 
