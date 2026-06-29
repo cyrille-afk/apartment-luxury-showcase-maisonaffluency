@@ -758,7 +758,7 @@ function LetterGroup({
                         <ParentBrandCard item={item} isOpen={isOpen} onToggle={() => setOpenParent(isOpen ? null : item.name)} designerCount={designerCount} hasIgPosts={designersWithIgPosts?.has(item.id)} />
                         <AnimatePresence>
                           {isOpen && (
-                            <div className="col-span-2 md:col-span-3 lg:col-span-4">
+                            <div className="col-span-full">
                               <ParentSubGrid key={item.name} parentName={item.name} onClose={() => setOpenParent(null)} autoScroll={!!matchesExpand && item.name === initialExpand} />
                             </div>
                           )}
