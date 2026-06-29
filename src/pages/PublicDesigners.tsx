@@ -7,7 +7,6 @@ import { ChevronUp } from "lucide-react";
 import { useState, useEffect } from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
-import DesignerIndexLinks from "@/components/DesignerIndexLinks";
 import DesignersDirectory from "@/components/DesignersDirectory";
 import DesignersHoverHero from "@/components/DesignersHoverHero";
 import { useAllDesigners } from "@/hooks/useDesigner";
@@ -153,7 +152,7 @@ const PublicDesigners = () => {
             <DesignersDirectory mode="designers" initialLetter={initialLetter} initialExpand={initialExpand} showHeader={false} showAlphabetBar={false} />
           </div>
 
-          <DesignerIndexLinks />
+          
         </div>
 
         <Footer />
