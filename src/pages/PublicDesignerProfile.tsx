@@ -346,6 +346,37 @@ const PublicDesignerProfile = () => {
   const isMobile = useIsMobile();
   const navigate = useNavigate();
   const picksSectionRef = useRef<HTMLDivElement | null>(null);
+  const lightboxOpenRef = useRef(false);
+
+  // Desktop lightbox: push a history entry on open so browser Back closes
+  // the lightbox and keeps the user on the designer profile.
+  useEffect(() => {
+    const wasOpen = lightboxOpenRef.current;
+    const isOpen = !!lightboxItem;
+    lightboxOpenRef.current = isOpen;
+    if (!wasOpen && isOpen && !isMobile) {
+      window.history.pushState({ lbOpen: true }, "");
+    }
+  }, [lightboxItem, isMobile]);
+
+  useEffect(() => {
+    const onPop = (e: PopStateEvent) => {
+      if (lightboxOpenRef.current && !(e.state && (e.state as any).lbOpen)) {
+        lightboxOpenRef.current = false;
+        setLightboxItem(null);
+      }
+    };
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
+
+  const closeLightbox = () => {
+    if (window.history.state && (window.history.state as any).lbOpen) {
+      window.history.back();
+    } else {
+      setLightboxItem(null);
+    }
+  };
 
   useEffect(() => {
     // Prevent browser from restoring previous scroll position
@@ -1265,7 +1296,7 @@ const PublicDesignerProfile = () => {
           gallery_images: (p as any).gallery_images ?? null,
           variant_image_map: (p as any).variant_image_map ?? null,
         }))}
-        onClose={() => setLightboxItem(null)}
+        onClose={closeLightbox}
         onSelectRelated={(item) => setLightboxItem(item)}
       />
     </>
