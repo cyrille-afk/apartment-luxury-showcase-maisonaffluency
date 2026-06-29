@@ -41,6 +41,10 @@ function responsiveCloudinaryUrl(url: string, width: number): string {
   return url.replace("/upload/", `/upload/w_${width},c_fill,q_auto,f_auto/`);
 }
 
+/** Mirrors the slugifier used by PublicProductLightbox + PublicProductPage. */
+const slugifyProduct = (s: string) =>
+  s.toLowerCase().replace(/['']/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+
 function pickSrcSet(url: string): string {
   return [300, 400, 600, 800].map((w) => `${responsiveCloudinaryUrl(url, w)} ${w}w`).join(", ");
 }
