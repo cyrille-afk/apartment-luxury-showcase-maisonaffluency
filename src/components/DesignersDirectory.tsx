@@ -512,10 +512,10 @@ function ParentBrandCard({ item, isOpen, onToggle, designerCount, hasIgPosts }: 
             aria-label={`Show ${designerCount} designers for ${displayName}`}
           >
             <Layers className="h-3 w-3" />
-            <span className="hidden xs:inline sm:inline">Designers{designerCount > 0 ? ` (${designerCount})` : ""}</span>
-            <span className="xs:hidden sm:hidden">{designerCount > 0 ? `(${designerCount})` : ""}</span>
+            <span>Designers{designerCount > 0 ? ` (${designerCount})` : ""}</span>
             <ChevronDown className={`h-3 w-3 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`} />
           </button>
+
 
         </div>
 
