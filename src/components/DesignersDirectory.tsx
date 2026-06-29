@@ -694,7 +694,7 @@ function MobileLetterRow({
                     const designerCount = parentDesignerCountByName[item.name] ?? 0;
                     const isParentBrand = item.founder === item.name && designerCount > 0;
                     return (
-                      <div key={item.slug} className={cn("flex-none snap-start", isParentBrand ? "w-[156%] max-w-[640px]" : "w-[78%] max-w-[320px]")}>
+                      <div key={item.slug} className={cn("flex-none snap-start", isParentBrand ? "w-[92%] max-w-[420px]" : "w-[78%] max-w-[320px]")}>
                         {isParentBrand ? (
                           <ParentBrandCard
                             item={item}
