@@ -1066,6 +1066,8 @@ const PublicDesignerProfile = () => {
                           // short abbreviation, e.g. "Edited by MSE".
                           const EDITION_HOUSE_LABELS: Record<string, string> = {
                             "Marta Sala Éditions": "Edited by MSE",
+                            "Théorème Editions": "Edition by Théorème Editions",
+                            "Théorème Éditions": "Edition by Théorème Éditions",
                           };
                           const editionHouseLabel = parentBrandName
                             ? EDITION_HOUSE_LABELS[parentBrandName]
