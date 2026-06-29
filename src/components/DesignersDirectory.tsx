@@ -519,7 +519,7 @@ function ParentBrandCard({ item, isOpen, onToggle, designerCount, hasIgPosts }: 
 
         <div className="flex items-center justify-between gap-3">
           <span />
-          <div className="h-px w-0 group-hover/link:w-10 transition-all duration-700 ease-out flex-shrink-0 bg-white/30" />
+          <div className="h-px w-0 group-hover/link:w-10 transition-all duration-700 ease-out flex-shrink-0 bg-white" />
         </div>
       </div>
     </div>
@@ -614,7 +614,7 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts }
             <p data-parent-label className="font-body text-[10px] uppercase tracking-[0.22em] truncate text-white/70">{parentLabel}</p>
           ) : <span />}
 
-          <div className="h-px w-0 group-hover/link:w-10 transition-all duration-700 ease-out flex-shrink-0 bg-white/30" />
+          <div className="h-px w-0 group-hover/link:w-10 transition-all duration-700 ease-out flex-shrink-0 bg-white" />
         </div>
       </Link>
 
