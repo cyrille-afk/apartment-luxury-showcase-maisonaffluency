@@ -729,7 +729,10 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                 <button
                   type="button"
                   onClick={() => {
-                    onClose();
+                    // Navigate directly — do NOT call onClose() first.
+                    // onClose() triggers history.back() (async), which would
+                    // pop the entry pushed by navigate() and bounce the user
+                    // right back to the designer profile.
                     navigate(productPageHref, {
                       state: { from: location.pathname + location.search },
                     });
