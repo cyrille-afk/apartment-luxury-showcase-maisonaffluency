@@ -499,6 +499,12 @@ const Index = ({ categoryMode = false }: IndexProps = {}) => {
               </Suspense>
             )}
 
+            {!routeIsCategory && (
+              <Suspense fallback={null}>
+                <InstagramFeed />
+              </Suspense>
+            )}
+
             <Suspense fallback={null}>
               <Footer />
             </Suspense>
