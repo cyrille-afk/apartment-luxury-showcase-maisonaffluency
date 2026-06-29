@@ -534,8 +534,11 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts }
   return (
     <div
       id={`designer-card-${item.slug}`}
+      data-card-kind="designer"
+      data-designer-slug={item.slug}
       className={`group self-start flex flex-col rounded-xl overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background cursor-pointer ${isLetterA ? 'relative' : ''}`}
     >
+
 
       <div className="aspect-[4/5] bg-muted/20 overflow-hidden relative">
         {item.name === 'Apparatus' ? (
