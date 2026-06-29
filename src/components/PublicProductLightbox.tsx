@@ -562,14 +562,13 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
 
           {/* Desktop: description rendered directly under the image (SEO-friendly, fills empty space) */}
           {product.description && product.description.trim().length > 0 && (
-            <div className="hidden md:flex flex-col mt-auto px-8 pb-4 pt-5 gap-5">
+            <div className="hidden md:flex flex-col mt-auto px-8 pb-4 pt-5 gap-3">
+              <span className="self-start inline-flex px-3 py-1.5 rounded-md font-body text-[10px] uppercase tracking-[0.12em] bg-white text-foreground border border-border/40">
+                Creation
+              </span>
               <p className="font-body text-[13px] leading-[1.55] text-foreground/80 text-justify hyphens-auto whitespace-pre-wrap">
                 {product.description}
               </p>
-              {/* Always-open "Creation" pill, styled like the right CTA but white, aligned at the bottom */}
-              <div className="flex items-center justify-center w-full px-5 py-3 rounded-md font-body text-xs uppercase tracking-[0.12em] bg-white/95 text-foreground border border-border/40 shadow-sm">
-                Creation
-              </div>
             </div>
           )}
           </div>
