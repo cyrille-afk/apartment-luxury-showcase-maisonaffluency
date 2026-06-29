@@ -452,7 +452,7 @@ function ParentBrandCard({ item, isOpen, onToggle, designerCount, hasIgPosts }: 
   const instagramLink = hasIgPosts ? undefined : (INSTAGRAM_LINKS[item.slug] || (item.links as any[])?.find((l: any) => l.type === "Instagram" || l.type === "instagram")?.url);
 
   return (
-    <div className="col-span-2 group self-start flex flex-col rounded-xl overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background cursor-pointer">
+    <div data-card-kind="parent" data-designer-slug={item.slug} className="col-span-2 group self-start flex flex-col rounded-xl overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background cursor-pointer">
       <div className="aspect-[17/10] bg-muted/20 overflow-hidden relative">
         {item.name === 'Apparatus' ? (
           <div className="w-full h-full bg-black" />
@@ -534,8 +534,11 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts }
   return (
     <div
       id={`designer-card-${item.slug}`}
+      data-card-kind="designer"
+      data-designer-slug={item.slug}
       className={`group self-start flex flex-col rounded-xl overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background cursor-pointer ${isLetterA ? 'relative' : ''}`}
     >
+
 
       <div className="aspect-[4/5] bg-muted/20 overflow-hidden relative">
         {item.name === 'Apparatus' ? (
@@ -594,8 +597,9 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts }
 
         <div className="flex items-center justify-between gap-3">
           {parentLabel && !HIDE_PARENT_LABEL_SLUGS.has(item.slug) ? (
-            <p className="font-body text-[10px] uppercase tracking-[0.22em] truncate text-muted-foreground/80">{parentLabel}</p>
+            <p data-parent-label className="font-body text-[10px] uppercase tracking-[0.22em] truncate text-muted-foreground/80">{parentLabel}</p>
           ) : <span />}
+
           <div className="h-px w-0 group-hover/link:w-10 transition-all duration-700 ease-out flex-shrink-0 bg-foreground/30" />
         </div>
       </Link>
@@ -1465,7 +1469,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
 
   return (
     <>
-    <div ref={sectionRef} className="relative py-12 px-4 md:py-20 md:px-8 lg:py-24 lg:px-12 xl:px-20 bg-background scroll-header-offset">
+    <div ref={sectionRef} data-testid="designers-directory" className="relative py-12 px-4 md:py-20 md:px-8 lg:py-24 lg:px-12 xl:px-20 bg-background scroll-header-offset">
 
 
 
