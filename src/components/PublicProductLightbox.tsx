@@ -445,9 +445,10 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
           {/* Scrollable mobile body */}
           <div className="flex-1 min-h-0 overflow-y-auto md:flex md:flex-row md:overflow-visible">
 
-          {/* Image */}
+          {/* Image + desktop description column */}
+          <div className="relative w-full md:w-1/2 shrink-0 bg-muted/30 md:flex md:flex-col md:min-h-[400px]">
           <div
-            className="relative w-full md:w-1/2 h-[42dvh] max-h-[340px] md:h-auto shrink-0 bg-muted/30 flex items-center justify-center p-2 md:p-8 md:min-h-[400px]"
+            className="relative w-full h-[42dvh] max-h-[340px] md:h-auto md:flex-1 shrink-0 flex items-center justify-center p-2 md:p-8"
             onMouseEnter={() => { if (canShowHoverImage) setShowHoverImage(true); }}
             onMouseLeave={() => setShowHoverImage(false)}
           >
@@ -507,8 +508,8 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
               ) : null;
             })()}
 
-            {/* Description overlay on image — mirrors Trade lightbox */}
-            <div className="absolute top-3 right-3 z-20">
+            {/* Description overlay on image — mobile only (desktop renders inline below) */}
+            <div className="md:hidden absolute top-3 right-3 z-20">
               <LightboxDescriptionDropdown description={product.description} />
             </div>
 
@@ -556,6 +557,16 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                 />
               )}
             </div>
+          </div>
+
+          {/* Desktop: description rendered directly under the image (SEO-friendly, fills empty space) */}
+          {product.description && product.description.trim().length > 0 && (
+            <div className="hidden md:block px-8 pb-8 pt-2">
+              <p className="font-body text-sm leading-relaxed text-foreground/80 whitespace-pre-wrap">
+                {product.description}
+              </p>
+            </div>
+          )}
           </div>
 
           {/* Details */}
