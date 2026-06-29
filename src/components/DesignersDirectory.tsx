@@ -431,7 +431,7 @@ function ParentBrandCard({ item, isOpen, onToggle, designerCount, hasIgPosts }: 
   const instagramLink = hasIgPosts ? undefined : (INSTAGRAM_LINKS[item.slug] || (item.links as any[])?.find((l: any) => l.type === "Instagram" || l.type === "instagram")?.url);
 
   return (
-    <div className="group self-start flex flex-col rounded-xl overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background cursor-pointer">
+    <div className="col-span-2 group self-start flex flex-col rounded-xl overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background cursor-pointer">
       <div className="aspect-[4/5] bg-muted/20 overflow-hidden relative">
         {item.name === 'Apparatus' ? (
           <div className="w-full h-full bg-black" />
@@ -655,7 +655,7 @@ function MobileLetterRow({
                     const designerCount = parentDesignerCountByName[item.name] ?? 0;
                     const isParentBrand = item.founder === item.name && designerCount > 0;
                     return (
-                      <div key={item.slug} className="flex-none w-[78%] max-w-[320px] snap-start">
+                      <div key={item.slug} className={cn("flex-none snap-start", isParentBrand ? "w-[156%] max-w-[640px]" : "w-[78%] max-w-[320px]")}>
                         {isParentBrand ? (
                           <ParentBrandCard
                             item={item}
@@ -746,7 +746,7 @@ function LetterGroup({
                 initialExpand={initialExpand}
               />
             ) : (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 items-start gap-4 md:gap-6 lg:gap-8">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 grid-flow-dense items-start gap-4 md:gap-6 lg:gap-8">
 
                 {designers.map((item) => {
                   const designerCount = parentDesignerCountByName[item.name] ?? 0;
@@ -811,7 +811,7 @@ function LetterCarousel({ letter, designers, openParent, setOpenParent, parentDe
     const getSlotCost = (item: Designer) => {
       const designerCount = parentDesignerCountByName[item.name] ?? 0;
       const isParentBrand = item.founder === item.name && designerCount > 0;
-      return isParentBrand ? 1 : 1;
+      return isParentBrand ? 2 : 1;
     };
     const pool = [...designers];
     const builtPages: Designer[][] = [];
@@ -913,7 +913,7 @@ function LetterCarousel({ letter, designers, openParent, setOpenParent, parentDe
           <div className="flex">
             {pages.map((page, pageIndex) => (
               <div key={`page-${pageIndex}`} className="flex-none w-full snap-start">
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 items-start gap-4 md:gap-6 lg:gap-8">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 grid-flow-dense items-start gap-4 md:gap-6 lg:gap-8">
                   {page.map((item) => {
                     const designerCount = parentDesignerCountByName[item.name] ?? 0;
                     const isParentBrand = item.founder === item.name && designerCount > 0;
