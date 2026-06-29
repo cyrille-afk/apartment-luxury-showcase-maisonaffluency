@@ -56,6 +56,10 @@
     "name": "Atelier Pendhapa"
   },
   {
+    "slug": "autoban",
+    "name": "Autoban"
+  },
+  {
     "slug": "based-upon",
     "name": "Based Upon"
   },
@@ -168,6 +172,10 @@
     "name": "Jan Kath"
   },
   {
+    "slug": "jason-miller",
+    "name": "Jason Miller"
+  },
+  {
     "slug": "jean-michel-frank",
     "name": "Jean-Michel Frank"
   },
@@ -216,6 +224,10 @@
     "name": "Lost Profile Studio"
   },
   {
+    "slug": "luca-nichetto",
+    "name": "Luca Nichetto"
+  },
+  {
     "slug": "maarten-vrolijk",
     "name": "Maarten Vrolijk"
   },
@@ -232,6 +244,10 @@
     "name": "Man of Parts"
   },
   {
+    "slug": "manuel-aires-mateus",
+    "name": "Manuel Aires Mateus"
+  },
+  {
     "slug": "marcantonio-brandolini-dadda",
     "name": "Marcantonio Brandolini D'Adda"
   },
@@ -242,6 +258,10 @@
   {
     "slug": "marta-sala-editions",
     "name": "Marta Sala Éditions"
+  },
+  {
+    "slug": "matthew-hilton",
+    "name": "Matthew Hilton"
   },
   {
     "slug": "matthieu-gicquel",
@@ -266,6 +286,10 @@
   {
     "slug": "nathalie-ziegler",
     "name": "Nathalie Ziegler"
+  },
+  {
+    "slug": "neri-hu",
+    "name": "Neri & Hu"
   },
   {
     "slug": "nicolas-aubagnac",
@@ -352,6 +376,10 @@
     "name": "Sam Accoceberry"
   },
   {
+    "slug": "sam-baron",
+    "name": "Sam Baron"
+  },
+  {
     "slug": "serge-mouille",
     "name": "Serge Mouille"
   },
@@ -362,6 +390,10 @@
   {
     "slug": "stephane-cg",
     "name": "Stéphane CG"
+  },
+  {
+    "slug": "studioilse",
+    "name": "Studioilse"
   },
   {
     "slug": "theoreme-editions",

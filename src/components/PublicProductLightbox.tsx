@@ -513,14 +513,6 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
               <LightboxDescriptionDropdown description={product.description} />
             </div>
 
-            {/* Desktop: always-open "Creation" pill, top-left of the image */}
-            {product.description && product.description.trim().length > 0 && (
-              <div className="hidden md:block absolute top-3 left-3 z-20">
-                <span className="font-body text-[10px] uppercase tracking-[0.18em] text-foreground/80 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full border border-border/40 shadow-sm">
-                  Creation
-                </span>
-              </div>
-            )}
 
             {/* Mobile: secondary action icons */}
             <div className="md:hidden absolute bottom-3 left-3 z-10 flex gap-3.5">
@@ -570,7 +562,13 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
 
           {/* Desktop: description rendered directly under the image (SEO-friendly, fills empty space) */}
           {product.description && product.description.trim().length > 0 && (
-            <div className="hidden md:block px-8 pb-4 pt-1">
+            <div className="hidden md:block relative px-8 pb-4 pt-1">
+              {/* Always-open "Creation" pill, top-left of the text */}
+              <div className="mb-3">
+                <span className="inline-block font-body text-[10px] uppercase tracking-[0.18em] text-foreground/80 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full border border-border/40 shadow-sm">
+                  Creation
+                </span>
+              </div>
               <p className="font-body text-[13px] leading-[1.55] text-foreground/80 text-justify hyphens-auto whitespace-pre-wrap">
                 {product.description}
               </p>
