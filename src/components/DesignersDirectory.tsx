@@ -452,7 +452,7 @@ function ParentBrandCard({ item, isOpen, onToggle, designerCount, hasIgPosts }: 
   const instagramLink = hasIgPosts ? undefined : (INSTAGRAM_LINKS[item.slug] || (item.links as any[])?.find((l: any) => l.type === "Instagram" || l.type === "instagram")?.url);
 
   return (
-    <div className="col-span-2 group self-start flex flex-col rounded-xl overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background cursor-pointer">
+    <div data-card-kind="parent" data-designer-slug={item.slug} className="col-span-2 group self-start flex flex-col rounded-xl overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background cursor-pointer">
       <div className="aspect-[17/10] bg-muted/20 overflow-hidden relative">
         {item.name === 'Apparatus' ? (
           <div className="w-full h-full bg-black" />
