@@ -28,6 +28,7 @@ import { consumeProductBackRef } from "@/lib/designerBackRef";
 import { isChildBrandDesigner, isParentBrandDesigner } from "@/lib/designerHierarchy";
 import { toOgImage } from "@/lib/ogImage";
 import { sortCuratorPicks } from "@/lib/curatorPickSort";
+import FloatingScrollNav from "@/components/FloatingScrollNav";
 
 const transition = { duration: 0.6, ease: [0.16, 1, 0.3, 1] as const };
 const reveal = { ...transition, delay: 0.15 };
@@ -1205,6 +1206,8 @@ const PublicDesignerProfile = () => {
 
         <Footer />
       </div>
+
+      <FloatingScrollNav menuHref="/designers" />
 
       <PublicProductLightbox
         product={lightboxItem}
