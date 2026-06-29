@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { scrollToSection } from "@/lib/scrollToSection";
 import { trackCTA, trackEvent } from "@/lib/analytics";
 
