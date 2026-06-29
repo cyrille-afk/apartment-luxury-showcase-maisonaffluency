@@ -276,9 +276,15 @@ function useFullCuratorPicks(enabled: boolean) {
 const HIDE_PARENT_LABEL_SLUGS = new Set<string>([
   "adrien-messie",
   "dagmar-london",
+  "eileen-gray",
   "felix-aublet",
   "felix-agostini",
+  "glenn-sestig",
   "gounot-jahnke",
+  "herzog-de-meuron",
+  "jan-kath",
+  "jean-michel-frank",
+  "joseph-dirand",
 ]);
 
 /** Parse names into [displayName, parentLabel] for correct card rendering */
