@@ -152,6 +152,8 @@ const PublicDesigners = () => {
             </div>
             <DesignersDirectory mode="designers" initialLetter={initialLetter} initialExpand={initialExpand} showHeader={false} showAlphabetBar={false} />
           </div>
+
+          <DesignerIndexLinks />
         </div>
 
         <Footer />
