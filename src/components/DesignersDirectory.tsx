@@ -551,11 +551,12 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts }
         to={`/designers/${item.slug}`}
         className="block relative p-4 pt-3 flex-1 group/link"
       >
-        <div className="flex items-baseline justify-between gap-3 mb-1.5">
-          <h3 className="font-serif text-lg md:text-xl lg:text-[1.4rem] leading-tight tracking-tight text-foreground group-hover/link:translate-x-1 transition-transform duration-500 ease-out">
+        <div className="flex items-baseline justify-between gap-3 mb-1.5 min-w-0">
+          <h3 className="font-serif text-sm md:text-base lg:text-[1.05rem] leading-tight tracking-tight text-foreground group-hover/link:translate-x-1 transition-transform duration-500 ease-out truncate">
             {displayName}
           </h3>
         </div>
+
         <div className="flex items-center justify-between gap-3">
           {parentLabel ? (
             <p className="font-body text-[10px] uppercase tracking-[0.22em] truncate text-muted-foreground/80">{parentLabel}</p>
