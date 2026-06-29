@@ -488,90 +488,32 @@ const Index = ({ categoryMode = false }: IndexProps = {}) => {
         {showBelowFoldSections ? (
           <>
             {!routeIsCategory && (
-              <>
-                <div className="bg-white">
-                  <section id="overview" className="scroll-header-offset">
-                    <Suspense fallback={null}>
-                      <ApartmentTourInterlude compact />
-                    </Suspense>
-                  </section>
-                  <section id="gallery" className="scroll-header-offset">
-                    <Suspense fallback={<SectionFallback />}>
-                      <Gallery />
-                    </Suspense>
-                  </section>
-                </div>
-
-              </>
+              <div className="bg-white">
+                <section id="overview" className="scroll-header-offset">
+                  <Suspense fallback={null}>
+                    <ApartmentTourInterlude compact />
+                  </Suspense>
+                </section>
+                <section id="gallery" className="scroll-header-offset">
+                  <Suspense fallback={<SectionFallback />}>
+                    <Gallery />
+                  </Suspense>
+                </section>
+              </div>
             )}
 
-            <Suspense fallback={null}>
-              <ProductGrid sectionScope="designers" />
-            </Suspense>
-
-            {!routeIsCategory && (
-              <section id="meet-designers" aria-label="Meet our Designers" className="scroll-header-offset">
-                <Suspense fallback={<SectionFallback />}>
-                  <DesignersHoverHero />
-                </Suspense>
-              </section>
+            {routeIsCategory && (
+              <Suspense fallback={null}>
+                <ProductGrid sectionScope="designers" />
+              </Suspense>
             )}
+
             <section id="designers" className="scroll-header-offset">
               <Suspense fallback={<SectionFallback />}>
                 <DesignersDirectory mode="products" showTradeCTA={false} />
               </Suspense>
             </section>
 
-            {!routeIsCategory && (
-              <>
-                {/* Interlude 2: After Designers → Before Collectibles */}
-                <Suspense fallback={null}>
-                  <ParallaxInterlude
-                    imageUrl="https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto,f_auto/v1773372909/Screen_Shot_2026-03-13_at_11.34.42_AM_icbzuz.png"
-                    quote="Collectible design exists at the intersection of art and function — where rarity becomes a conversation and craftsmanship becomes legacy"
-                    attribution="On Collectible Design"
-                    overlayOpacity={0}
-                    reverse
-                  />
-                </Suspense>
-
-                <Suspense fallback={null}>
-                  <ProductGrid sectionScope="collectibles" />
-                </Suspense>
-                <section id="collectibles" className="scroll-header-offset" style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 1800px' }}>
-                  <Suspense fallback={<SectionFallback />}>
-                    <Collectibles />
-                  </Suspense>
-                </section>
-
-                {/* Interlude 3: After Collectibles → Before Ateliers */}
-                <Suspense fallback={null}>
-                  <ParallaxInterlude
-                    imageUrl="https://res.cloudinary.com/dif1oamtj/image/upload/w_1600,q_auto,f_auto/v1773374192/Screen_Shot_2026-03-13_at_11.55.51_AM_vbstnu.png"
-                    quote="An atelier is more than a workshop — it is a sanctuary where tradition meets innovation, and every detail is an act of devotion"
-                    attribution="The Atelier Experience"
-                    overlayOpacity={0}
-                  />
-                </Suspense>
-
-                <section id="details" className="scroll-header-offset" style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 800px' }}>
-                  <Suspense fallback={<SectionFallback />}>
-                    <DesignDetails />
-                  </Suspense>
-                </section>
-                <section id="contact" className="scroll-header-offset" style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 700px' }}>
-                  <Suspense fallback={<SectionFallback />}>
-                    <ContactInquiry />
-                  </Suspense>
-                </section>
-                <Suspense fallback={null}>
-                  <JournalTeaser />
-                </Suspense>
-                <Suspense fallback={null}>
-                  <InstagramFeed />
-                </Suspense>
-              </>
-            )}
             <Suspense fallback={null}>
               <DesignerIndexLinks />
             </Suspense>
