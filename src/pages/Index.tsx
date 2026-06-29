@@ -86,43 +86,6 @@ const SectionFallback = () => (
   </div>
 );
 
-const scheduleWhenIdle = (callback: () => void, timeout: number) => {
-  const win = window as any;
-
-  if (typeof win.requestIdleCallback === "function") {
-    const idleId = win.requestIdleCallback(callback, { timeout });
-    return () => win.cancelIdleCallback?.(idleId);
-  }
-
-  const timeoutId = window.setTimeout(callback, timeout);
-  return () => window.clearTimeout(timeoutId);
-};
-
-const scheduleAfterLoad = (callback: () => void, delay: number) => {
-  let timeoutId: number | null = null;
-  let loadFallbackId: number | null = null;
-  let started = false;
-
-  const start = () => {
-    if (started) return;
-    started = true;
-    timeoutId = window.setTimeout(callback, delay);
-  };
-
-  if (document.readyState === "complete") {
-    start();
-  } else {
-    window.addEventListener("load", start, { once: true });
-    loadFallbackId = window.setTimeout(start, 10000);
-  }
-
-  return () => {
-    window.removeEventListener("load", start);
-    if (timeoutId) window.clearTimeout(timeoutId);
-    if (loadFallbackId) window.clearTimeout(loadFallbackId);
-  };
-};
-
 const isStandaloneHomeLaunch = () => {
   if (typeof window === "undefined") return false;
   const params = new URLSearchParams(window.location.search);
@@ -144,9 +107,9 @@ type IndexProps = {
 const Index = ({ categoryMode = false }: IndexProps = {}) => {
   const routeIsCategory = categoryMode || isCategoryRoute();
   const [showBanner, setShowBanner] = useState(false);
-  const [showNavigation, setShowNavigation] = useState(false);
-  const [showScrollProgress, setShowScrollProgress] = useState(false);
-  const [showBelowFoldSections, setShowBelowFoldSections] = useState(() => categoryMode || isDeepLink());
+  const [showNavigation, setShowNavigation] = useState(true);
+  const [showScrollProgress, setShowScrollProgress] = useState(true);
+  const [showBelowFoldSections, setShowBelowFoldSections] = useState(true);
   const needsScrollRestore = useRef(false);
   const skipNextScrollRestore = useRef(false);
   const mainRef = useRef<HTMLElement>(null);
@@ -154,8 +117,9 @@ const Index = ({ categoryMode = false }: IndexProps = {}) => {
   // Track scroll depth for GA4 engagement
   useScrollDepthTracking();
 
-  // Stagger non-LCP content so hero image wins bandwidth on mobile.
-  // Deep-links and explicit section hashes from shared links should land fast.
+  // The homepage must render its below-fold sections deterministically on first
+  // load. Delaying these behind `load`/`requestIdleCallback` made production
+  // visits look as if Instagram/footer were missing on slower browsers.
   useEffect(() => {
     const sectionHash = parseSectionHash(window.location.hash);
     const hasExplicitSectionHash = !!sectionHash && sectionHash !== "home";
@@ -175,66 +139,16 @@ const Index = ({ categoryMode = false }: IndexProps = {}) => {
     if (hasExplicitSectionHash) {
       sessionStorage.removeItem("__scroll_y");
       needsScrollRestore.current = false;
-      setShowNavigation(true);
-      setShowScrollProgress(true);
-      setShowBelowFoldSections(true);
       return;
     }
 
-    // Deep-links and scroll restore both need sections immediately
+    // Deep-links and scroll restore both need sections immediately.
     const hasRestore = !isStandalone && Number(sessionStorage.getItem("__scroll_y") || 0) > 0;
-    if (routeIsCategory || isDeepLink() || hasRestore) {
-      needsScrollRestore.current = hasRestore;
-      setShowNavigation(true);
-      setShowScrollProgress(true);
-      setShowBelowFoldSections(true);
-      return;
-    }
-
-    // Wait for the hero image (LCP element) to finish loading before
-    // allowing lazy chunks to compete for bandwidth.
-    const heroImg = document.querySelector<HTMLImageElement>('#home img');
-    let cancelBelowFoldDelay: (() => void) | null = null;
-    let cancelDeferredReveal: (() => void) | null = null;
-    let timeoutId: number | null = null;
-
-    const revealAfterHero = () => {
-      // Navigation is above-fold — show first
-      setShowNavigation(true);
-
-      // Keep image-heavy below-fold chunks out of the lab LCP window, but do
-      // not leave the live homepage with only the hero mounted for long enough
-      // that gallery/Instagram/footer look missing on production.
-      if (!cancelBelowFoldDelay) {
-        cancelBelowFoldDelay = scheduleAfterLoad(() => {
-          if (!cancelDeferredReveal) {
-            cancelDeferredReveal = scheduleWhenIdle(() => {
-              setShowScrollProgress(true);
-              setShowBelowFoldSections(true);
-            }, 1000);
-          }
-        }, 3000);
-      }
-    };
-
-    if (heroImg?.complete) {
-      revealAfterHero();
-    } else if (heroImg) {
-      heroImg.addEventListener('load', revealAfterHero, { once: true });
-      timeoutId = window.setTimeout(revealAfterHero, 4000);
-      heroImg.addEventListener('error', revealAfterHero, { once: true });
-    } else {
-      revealAfterHero();
-    }
-
-    return () => {
-      if (timeoutId) window.clearTimeout(timeoutId);
-      heroImg?.removeEventListener('load', revealAfterHero);
-      heroImg?.removeEventListener('error', revealAfterHero);
-      cancelBelowFoldDelay?.();
-      cancelDeferredReveal?.();
-    };
-  }, []);
+    needsScrollRestore.current = hasRestore;
+    setShowNavigation(true);
+    setShowScrollProgress(true);
+    setShowBelowFoldSections(true);
+  }, [routeIsCategory]);
 
   // Persist scroll position to sessionStorage for refresh restoration
   useEffect(() => {
