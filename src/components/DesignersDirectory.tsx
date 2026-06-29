@@ -497,17 +497,17 @@ function ParentBrandCard({ item, isOpen, onToggle, designerCount, hasIgPosts }: 
       </div>
 
       {/* Editorial caption block — sits below the image like a monograph plate */}
-      <div className="block relative p-4 pt-3 flex-1 group/link">
+      <div className="block relative p-4 pt-3 flex-1 group/link bg-gradient-to-b from-black/75 via-black/85 to-black text-white">
         <div className="flex items-center justify-between gap-3 mb-1.5 min-w-0">
           <Link
             to={`/designers/${item.slug}`}
-            className="font-serif text-sm md:text-base lg:text-[1.05rem] leading-tight tracking-tight text-foreground group-hover/link:translate-x-1 transition-transform duration-500 ease-out truncate"
+            className="font-serif text-sm md:text-base lg:text-[1.05rem] leading-tight tracking-tight text-white group-hover/link:text-white/90 group-hover/link:translate-x-1 transition-all duration-500 ease-out truncate"
           >
             {displayName}
           </Link>
           <button
             onClick={(e) => { e.stopPropagation(); e.preventDefault(); onToggle(); }}
-            className="flex items-center gap-1 px-2 py-1 rounded-full border border-border bg-muted/40 hover:bg-muted text-foreground font-body text-[9px] uppercase tracking-[0.12em] flex-shrink-0 transition-colors"
+            className="flex items-center gap-1 px-2 py-1 rounded-full border border-white/30 bg-white/10 hover:bg-white/20 text-white font-body text-[9px] uppercase tracking-[0.12em] flex-shrink-0 transition-colors"
             aria-label={`Show ${designerCount} designers for ${displayName}`}
           >
             <Layers className="h-3 w-3" />
@@ -518,7 +518,7 @@ function ParentBrandCard({ item, isOpen, onToggle, designerCount, hasIgPosts }: 
 
         <div className="flex items-center justify-between gap-3">
           <span />
-          <div className="h-px w-0 group-hover/link:w-10 transition-all duration-700 ease-out flex-shrink-0 bg-foreground/30" />
+          <div className="h-px w-0 group-hover/link:w-10 transition-all duration-700 ease-out flex-shrink-0 bg-white/30" />
         </div>
       </div>
     </div>
