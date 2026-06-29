@@ -1296,7 +1296,7 @@ const PublicDesignerProfile = () => {
           gallery_images: (p as any).gallery_images ?? null,
           variant_image_map: (p as any).variant_image_map ?? null,
         }))}
-        onClose={() => setLightboxItem(null)}
+        onClose={closeLightbox}
         onSelectRelated={(item) => setLightboxItem(item)}
       />
     </>
