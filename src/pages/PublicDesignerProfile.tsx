@@ -1189,9 +1189,11 @@ const PublicDesignerProfile = () => {
                         ) : null}
 
 
-                        {/* Product name — primary */}
+                        {/* Product name — primary (deep link so the URL is shareable/copyable) */}
                         <h3 className="font-display text-[14px] md:text-sm tracking-wide leading-snug mt-2 line-clamp-2">
-                          {pick.title}
+                          <Link to={productHref} onClick={handleCardClick} className="hover:text-foreground/70 transition-colors">
+                            {pick.title}
+                          </Link>
                         </h3>
 
                         {/* Subtitle, materials & dimensions hidden on grid — shown in lightbox detail view */}
