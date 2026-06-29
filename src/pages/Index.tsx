@@ -27,28 +27,18 @@ const Navigation = lazyRetry(() => import("@/components/Navigation"));
 
 const Gallery = lazyRetry(() => import("@/components/Gallery"));
 const ScrollProgress = lazyRetry(() => import("@/components/ScrollProgress"));
-const CuratingTeam = lazyRetry(() => import("@/components/CuratingTeam"));
 const QuickJumpMenu = lazyRetry(() => import("@/components/QuickJumpMenu"));
-const DesignDetails = lazyRetry(() => import("@/components/DesignDetails"));
-const ContactInquiry = lazyRetry(() => import("@/components/ContactInquiry"));
 const Footer = lazyRetry(() => import("@/components/Footer"));
-const DesignersDirectory = lazyRetry(() => import("@/components/DesignersDirectory"));
-const Collectibles = lazyRetry(() => import("@/components/Collectibles"));
-const DesignersHoverHero = lazyRetry(() => import("@/components/DesignersHoverHero"));
 const ProductGrid = lazyRetry(() => import("@/components/ProductGrid"));
+const TradeFloatingCTA = lazy(() => import("@/components/TradeFloatingCTA"));
+const ApartmentTourInterlude = lazyRetry(() => import("@/components/ApartmentTourInterlude"));
+const DesignerIndexLinks = lazyRetry(() => import("@/components/DesignerIndexLinks"));
 
 // ExitIntentBanner is deferred — not even fetched until 5s after load to avoid
 // competing for bandwidth with LCP-critical resources on mobile.
 const ExitIntentBanner = lazyRetry(() => import("@/components/ExitIntentBanner"));
-
-const JournalTeaser = lazyRetry(() => import("@/components/JournalTeaser"));
-const InstagramFeed = lazyRetry(() => import("@/components/InstagramFeed"));
-const DesignerIndexLinks = lazyRetry(() => import("@/components/DesignerIndexLinks"));
 const CompareFab = lazyRetry(() => import("@/components/CompareFab"));
 const CompareDrawer = lazyRetry(() => import("@/components/CompareDrawer"));
-const TradeFloatingCTA = lazy(() => import("@/components/TradeFloatingCTA"));
-const ParallaxInterlude = lazy(() => import("@/components/ParallaxInterlude"));
-const ApartmentTourInterlude = lazyRetry(() => import("@/components/ApartmentTourInterlude"));
 
 /**
  * Parse deep-link hash: #designer/<id>, #collectible/<id>, #atelier/<slug>
@@ -63,7 +53,7 @@ function parseDeepLink(hash: string) {
  * Tracked section IDs for scroll-based hash updates.
  * Order matters — later sections win when multiple are visible.
  */
-const TRACKED_SECTIONS = ["home", "overview", "gallery", "curating-team", "designers", "collectibles", "brands", "details", "contact"] as const;
+const TRACKED_SECTIONS = ["home", "overview", "gallery"] as const;
 
 /**
  * Parse a simple section hash like #brands, #designers (not deep-links).
@@ -507,12 +497,6 @@ const Index = ({ categoryMode = false }: IndexProps = {}) => {
                 <ProductGrid sectionScope="designers" />
               </Suspense>
             )}
-
-            <section id="designers" className="scroll-header-offset">
-              <Suspense fallback={<SectionFallback />}>
-                <DesignersDirectory mode="products" showTradeCTA={false} />
-              </Suspense>
-            </section>
 
             <Suspense fallback={null}>
               <DesignerIndexLinks />
