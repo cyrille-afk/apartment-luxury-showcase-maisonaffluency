@@ -65,31 +65,28 @@ export default function ActiveSwatchCaption({
   if (!matches.length) return null;
 
   return (
-    <div className="mt-3 flex flex-col items-center gap-2 px-2 text-center">
-      <div className="text-center">
-        <div className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
-          Shown in
-        </div>
-        <div className="font-body text-sm text-foreground">
-          {matches.map((m) => m.name).join(", ")}
-        </div>
-      </div>
-      <div className="flex items-center gap-2">
-        {matches.map((m) => (
-          <div key={m.fabric_id} className="flex items-center">
+    <div className="mt-3 flex flex-wrap items-center justify-center gap-x-1.5 gap-y-1 px-2 text-center">
+      <span className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
+        Shown in
+      </span>
+      <span className="font-body text-sm text-foreground inline-flex flex-wrap items-center justify-center gap-x-1 gap-y-1">
+        {matches.map((m, i) => (
+          <span key={m.fabric_id} className="inline-flex items-center gap-1">
             {m.image_url ? (
               <img
                 src={m.image_url}
                 alt={m.name}
-                className="w-8 h-8 rounded-full object-cover border border-border"
+                className="w-5 h-5 rounded-full object-cover border border-border"
                 loading="lazy"
               />
             ) : (
-              <div className="w-8 h-8 rounded-full bg-muted" />
+              <div className="w-5 h-5 rounded-full bg-muted" />
             )}
-          </div>
+            <span>{m.name}</span>
+            {i < matches.length - 1 && <span className="text-muted-foreground">,</span>}
+          </span>
         ))}
-      </div>
+      </span>
     </div>
   );
 }
