@@ -467,7 +467,7 @@ function ParentBrandCard({ item, isOpen, onToggle, designerCount, hasIgPosts }: 
 
   return (
     <div data-card-kind="parent" data-designer-slug={item.slug} className="col-span-2 group self-start flex flex-col rounded-xl overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background cursor-pointer">
-      <div className="aspect-[17/10] bg-muted/20 overflow-hidden relative">
+      <div className="aspect-[5/4] md:aspect-[17/10] bg-muted/20 overflow-hidden relative">
         {item.name === 'Apparatus' ? (
           <div className="w-full h-full bg-black" />
         ) : cardImageUrl ? (
@@ -508,13 +508,15 @@ function ParentBrandCard({ item, isOpen, onToggle, designerCount, hasIgPosts }: 
           </Link>
           <button
             onClick={(e) => { e.stopPropagation(); e.preventDefault(); onToggle(); }}
-            className="flex items-center gap-1 px-2 py-1 rounded-full border border-white/30 bg-white/10 hover:bg-white/20 text-white font-body text-[9px] uppercase tracking-[0.12em] flex-shrink-0 transition-colors"
+            className="flex items-center gap-1 px-2 py-1 rounded-full border border-white/30 bg-white/10 hover:bg-white/20 text-white font-body text-[9px] uppercase tracking-[0.12em] flex-shrink-0 transition-colors whitespace-nowrap"
             aria-label={`Show ${designerCount} designers for ${displayName}`}
           >
             <Layers className="h-3 w-3" />
             <span>Designers{designerCount > 0 ? ` (${designerCount})` : ""}</span>
             <ChevronDown className={`h-3 w-3 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`} />
           </button>
+
+
         </div>
 
         <div className="flex items-center justify-between gap-3">
@@ -694,7 +696,7 @@ function MobileLetterRow({
                     const designerCount = parentDesignerCountByName[item.name] ?? 0;
                     const isParentBrand = item.founder === item.name && designerCount > 0;
                     return (
-                      <div key={item.slug} className={cn("flex-none snap-start", isParentBrand ? "w-[156%] max-w-[640px]" : "w-[78%] max-w-[320px]")}>
+                      <div key={item.slug} className={cn("flex-none snap-start", isParentBrand ? "w-[88vw] max-w-[420px]" : "w-[78%] max-w-[320px]")}>
                         {isParentBrand ? (
                           <ParentBrandCard
                             item={item}
