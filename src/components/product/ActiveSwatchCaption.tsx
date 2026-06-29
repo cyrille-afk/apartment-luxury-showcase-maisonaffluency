@@ -60,33 +60,32 @@ export default function ActiveSwatchCaption({
   const oneBased = activeIndex + 1;
   // Show every swatch whose image_indices include the visible gallery image —
   // dual/triple-axis products (e.g. frame + upholstery) can have the same image
-  // tied to multiple finishes; render them together as "A + B".
+  // tied to multiple finishes; render their names comma-separated and swatches inline.
   const matches = swatches.filter((s) => s.image_indices?.includes(oneBased));
   if (!matches.length) return null;
 
   return (
-    <div className="mt-3 flex items-center justify-center gap-3 px-1 text-center flex-wrap">
-      <div className="min-w-0 text-center">
+    <div className="mt-3 flex flex-col items-center gap-2 px-2 text-center">
+      <div className="text-center">
         <div className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
           Shown in
         </div>
         <div className="font-body text-sm text-foreground">
-          {matches.map((m) => m.name).join(" + ")}
+          {matches.map((m) => m.name).join(", ")}
         </div>
       </div>
-      <div className="flex items-center gap-2 shrink-0">
-        {matches.map((m, i) => (
-          <div key={m.fabric_id} className="flex items-center gap-2">
-            {i > 0 && <span className="font-body text-sm text-muted-foreground">+</span>}
+      <div className="flex items-center gap-2">
+        {matches.map((m) => (
+          <div key={m.fabric_id} className="flex items-center">
             {m.image_url ? (
               <img
                 src={m.image_url}
                 alt={m.name}
-                className="w-10 h-10 rounded-full object-cover border border-border shrink-0"
+                className="w-8 h-8 rounded-full object-cover border border-border"
                 loading="lazy"
               />
             ) : (
-              <div className="w-10 h-10 rounded-full bg-muted shrink-0" />
+              <div className="w-8 h-8 rounded-full bg-muted" />
             )}
           </div>
         ))}
