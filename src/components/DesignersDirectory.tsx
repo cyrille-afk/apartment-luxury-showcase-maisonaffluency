@@ -273,6 +273,14 @@ function useFullCuratorPicks(enabled: boolean) {
   });
 }
 
+const HIDE_PARENT_LABEL_SLUGS = new Set<string>([
+  "adrien-messie",
+  "dagmar-london",
+  "felix-aublet",
+  "felix-agostini",
+  "gounot-jahnke",
+]);
+
 /** Parse names into [displayName, parentLabel] for correct card rendering */
 function parseDesignerDisplayName(item: Designer): { displayName: string; parentLabel: string | null } {
   if (item.slug === "kerstens") {
