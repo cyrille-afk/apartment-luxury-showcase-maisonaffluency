@@ -559,6 +559,9 @@ export default function TradeDescriptionWriter() {
                       {row.status === "failed" && row.error && (
                         <p className="text-[11px] text-red-600/80 truncate">{row.error}</p>
                       )}
+                      {row.warning && (
+                        <p className="text-[11px] text-amber-600/80 truncate">{row.warning}</p>
+                      )}
                     </div>
                     <span className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground/80">
                       {row.status === "saved" && "Saved"}
