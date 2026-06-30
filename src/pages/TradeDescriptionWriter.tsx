@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, Sparkles, Copy, Check, Save, RefreshCw, Layers, Square, CheckCircle2, AlertCircle, Loader2, X } from "lucide-react";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
+import { cn } from "@/lib/utils";
 import AlphabetProductPicker, { type PickerItem } from "@/components/trade/AlphabetProductPicker";
 import AlphabetGroupPicker from "@/components/trade/AlphabetGroupPicker";
 
