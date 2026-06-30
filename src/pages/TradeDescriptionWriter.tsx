@@ -204,8 +204,10 @@ export default function TradeDescriptionWriter() {
 
   const generateMutation = useMutation({
     mutationFn: () => callDescriptionWriter(productId, source, tone),
-    onSuccess: (description) => {
+    onSuccess: ({ description, length, seoWarning }) => {
       setResult(description);
+      setResultLength(length);
+      setSeoWarning(seoWarning);
       toast.success("Description generated");
     },
     onError: (err: Error) => toast.error(err.message),
@@ -258,9 +260,9 @@ export default function TradeDescriptionWriter() {
       setBulkRows((rows) => rows.map((r, idx) => (idx === i ? { ...r, status: "generating" } : r)));
 
       try {
-        const description = await callDescriptionWriter(row.id, source, tone);
+        const { description, seoWarning } = await callDescriptionWriter(row.id, source, tone);
         await saveDescription(row.id, source, description);
-        setBulkRows((rows) => rows.map((r, idx) => (idx === i ? { ...r, status: "saved" } : r)));
+        setBulkRows((rows) => rows.map((r, idx) => (idx === i ? { ...r, status: seoWarning ? "saved" : "saved", error: seoWarning || undefined } : r)));
       } catch (err: any) {
         const msg = err?.message || "Failed";
         setBulkRows((rows) => rows.map((r, idx) => (idx === i ? { ...r, status: "failed", error: msg } : r)));
