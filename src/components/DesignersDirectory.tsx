@@ -1266,6 +1266,11 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
       }
       const pickCat = normalizeCategory(p.category || undefined, p.subcategory || undefined);
       if (pickCat === normCat) return true;
+      // Only fall back to tag-based matching when the pick has no resolvable
+      // category of its own. Otherwise generic tags like "Limited Edition"
+      // (which normalize to "Decorative Objects" → "Décor") would leak items
+      // from Seating/Tables/etc. into Décor.
+      if (pickCat) return false;
       return !!(p.tags && p.tags.some((t: string) => normalizeCategory(t) === normCat));
     });
   }, [selectedCategory, selectedSubcategory, fullPicks]);
