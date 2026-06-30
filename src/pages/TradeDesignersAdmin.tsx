@@ -2637,6 +2637,22 @@ const TradeDesignersAdmin = () => {
                         />
                       </div>
 
+                      <div>
+                        <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                          Parent Badge Override
+                        </label>
+                        <Input
+                          value={(editBuffer[d.id]?.parent_badge_label ?? d.parent_badge_label) || ""}
+                          onChange={(e) => setField(d.id, "parent_badge_label", e.target.value || null)}
+                          placeholder='e.g. "Edition by MSE" or "Re-edition by Ecart" (leave blank for default)'
+                          className="mt-1 text-sm"
+                        />
+                        <p className="text-[10px] text-muted-foreground mt-1">
+                          Overrides the auto-generated parent-brand badge shown on the public profile.
+                        </p>
+                      </div>
+
+
                       {/* Instagram Posts */}
                       <InstagramPostManager
                         designerId={d.id}
