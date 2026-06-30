@@ -1785,7 +1785,9 @@ interface DesignerRow {
   links: Record<string, string> | null;
   instagram_handle: string | null;
   instagram_handle_2: string | null;
+  parent_badge_label: string | null;
 }
+
 
 const DESIGNER_EDITOR_DRAFT_KEY = "ma-designer-editor-draft-v2";
 
