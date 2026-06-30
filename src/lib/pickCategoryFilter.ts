@@ -28,6 +28,10 @@ export function pickMatchesCategoryFilter(
       normalizeSubcategory(pick.subcategory || undefined) ||
       normalizeSubcategory(pick.category || undefined);
     if (pickSub === normSub) return true;
+    // Same guard as the category branch: don't let generic tags
+    // ("Limited Edition", "Sculpture", …) drag a Seating/Tables/Lighting
+    // pick into Décor → Decorative Objects via the tag fallback.
+    if (pickSub) return false;
     return !!(pick.tags && pick.tags.some((t) => normalizeSubcategory(t) === normSub));
   }
 
