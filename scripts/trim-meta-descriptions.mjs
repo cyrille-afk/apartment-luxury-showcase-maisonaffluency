@@ -37,13 +37,15 @@ function rewrite(html) {
       .replace(/&#39;/g, "'")
       .replace(/&lt;/g, "<")
       .replace(/&gt;/g, ">");
-    if (decoded.length <= MAX) return full;
-    const trimmed = trim(decoded);
-    const reencoded = trimmed
-      .replace(/&/g, "&amp;")
-      .replace(/"/g, "&quot;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;");
+    const encode = (s) =>
+      s.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    if (original.length <= MAX) return full;
+    let trimmed = trim(decoded);
+    let reencoded = encode(trimmed);
+    while (reencoded.length > MAX && trimmed.length > 20) {
+      trimmed = trim(trimmed.replace(/…$/, "").slice(0, trimmed.length - 10));
+      reencoded = encode(trimmed);
+    }
     changed = true;
     const newAttrs = attrs.replace(/\bcontent\s*=\s*"[^"]*"/i, `content="${reencoded}"`);
     return `<meta${newAttrs}>`;
