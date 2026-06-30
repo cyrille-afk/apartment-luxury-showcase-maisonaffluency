@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation, useNavigationType } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import Index from "./pages/Index";
 import { CompareProvider } from "@/contexts/CompareContext";
@@ -233,6 +233,28 @@ function HomeRouteSync() {
   return null;
 }
 
+// Scroll to top on PUSH/REPLACE navigations to a new pathname.
+// Skips back/forward (POP) so browser-restored scroll positions stay intact,
+// skips when the URL has a hash (anchor links handle their own scroll), and
+// skips when location.state.preserveScroll is set by the navigator.
+function ScrollToTopOnNavigate() {
+  const location = useLocation();
+  const navType = useNavigationType();
+  const prevPathRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    const prev = prevPathRef.current;
+    prevPathRef.current = location.pathname;
+    if (prev === location.pathname) return;
+    if (navType === "POP") return;
+    if (location.hash) return;
+    if ((location.state as { preserveScroll?: boolean } | null)?.preserveScroll) return;
+    window.scrollTo(0, 0);
+  }, [location.pathname, location.hash, location.state, navType]);
+
+  return null;
+}
+
 function PreviewViewContinuity() {
   const location = useLocation();
   const anchorIdRef = useRef<string | undefined>(undefined);
@@ -425,7 +447,9 @@ const App = () => {
           <QueryClientProvider client={queryClient}>
             <BrowserRouter>
               <HomeRouteSync />
+              <ScrollToTopOnNavigate />
               <PreviewViewContinuity />
+
 
               {MAINTENANCE_MODE ? (
                 <Routes>
