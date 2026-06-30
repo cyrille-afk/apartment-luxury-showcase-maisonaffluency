@@ -264,7 +264,8 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
         sessionStorage.removeItem('galleryOpenIntentAt');
       }
       closeMobileMenu();
-      navigate(href);
+      // Soften top-level menu transitions with an opt-in smooth scroll-to-top.
+      navigate(href, { state: { smoothScroll: true } });
       return;
     }
 
