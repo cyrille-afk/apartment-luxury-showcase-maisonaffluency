@@ -1,0 +1,1 @@
+ALTER TABLE public.designers ADD COLUMN IF NOT EXISTS parent_badge_label TEXT;

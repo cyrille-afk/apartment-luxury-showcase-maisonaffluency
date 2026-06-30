@@ -1785,7 +1785,9 @@ interface DesignerRow {
   links: Record<string, string> | null;
   instagram_handle: string | null;
   instagram_handle_2: string | null;
+  parent_badge_label: string | null;
 }
+
 
 const DESIGNER_EDITOR_DRAFT_KEY = "ma-designer-editor-draft-v2";
 
@@ -1904,7 +1906,7 @@ const TradeDesignersAdmin = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("designers")
-        .select("id, slug, name, display_name, specialty, biography, philosophy, notable_works, image_url, hero_image_url, source, is_published, trade_only, biography_images, links, instagram_handle, instagram_handle_2")
+        .select("id, slug, name, display_name, specialty, biography, philosophy, notable_works, image_url, hero_image_url, source, is_published, trade_only, biography_images, links, instagram_handle, instagram_handle_2, parent_badge_label")
         .order("name", { ascending: true });
       if (error) throw error;
       return (data || []).map((row) => ({
@@ -2634,6 +2636,22 @@ const TradeDesignersAdmin = () => {
                           className="mt-1 text-sm font-mono"
                         />
                       </div>
+
+                      <div>
+                        <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                          Parent Badge Override
+                        </label>
+                        <Input
+                          value={(editBuffer[d.id]?.parent_badge_label ?? d.parent_badge_label) || ""}
+                          onChange={(e) => setField(d.id, "parent_badge_label", e.target.value || null)}
+                          placeholder='e.g. "Edition by MSE" or "Re-edition by Ecart" (leave blank for default)'
+                          className="mt-1 text-sm"
+                        />
+                        <p className="text-[10px] text-muted-foreground mt-1">
+                          Overrides the auto-generated parent-brand badge shown on the public profile.
+                        </p>
+                      </div>
+
 
                       {/* Instagram Posts */}
                       <InstagramPostManager
