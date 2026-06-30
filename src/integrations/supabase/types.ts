@@ -1980,6 +1980,7 @@ export type Database = {
           name: string
           new_in_order: number | null
           notable_works: string
+          parent_badge_label: string | null
           philosophy: string
           slug: string
           sort_order: number
@@ -2008,6 +2009,7 @@ export type Database = {
           name: string
           new_in_order?: number | null
           notable_works?: string
+          parent_badge_label?: string | null
           philosophy?: string
           slug: string
           sort_order?: number
@@ -2036,6 +2038,7 @@ export type Database = {
           name?: string
           new_in_order?: number | null
           notable_works?: string
+          parent_badge_label?: string | null
           philosophy?: string
           slug?: string
           sort_order?: number
