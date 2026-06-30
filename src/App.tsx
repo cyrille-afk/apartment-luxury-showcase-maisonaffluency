@@ -447,7 +447,9 @@ const App = () => {
           <QueryClientProvider client={queryClient}>
             <BrowserRouter>
               <HomeRouteSync />
+              <ScrollToTopOnNavigate />
               <PreviewViewContinuity />
+
 
               {MAINTENANCE_MODE ? (
                 <Routes>
