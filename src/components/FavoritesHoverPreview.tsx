@@ -52,9 +52,23 @@ const FavoritesHoverPreview = ({ favCount, children }: Props) => {
         .select("id, title, subtitle, image_url")
         .in("id", ids);
       if (cancelled) return;
-      // Preserve recency order
       const byId = new Map((data || []).map((d: any) => [d.id, d]));
       const ordered = ids.map((id) => byId.get(id)).filter(Boolean) as RecentPick[];
+
+      // Self-heal: prune IDs that no longer resolve so the count matches reality.
+      try {
+        const raw = localStorage.getItem(LS_KEY);
+        const all: string[] = raw ? JSON.parse(raw) : [];
+        const resolvable = new Set((data || []).map((d: any) => d.id));
+        // Only prune IDs we actually queried this pass (the recent slice).
+        const queried = new Set(ids);
+        const pruned = all.filter((id) => !queried.has(id) || resolvable.has(id));
+        if (pruned.length !== all.length) {
+          localStorage.setItem(LS_KEY, JSON.stringify(pruned));
+          window.dispatchEvent(new Event("public_favorites_changed"));
+        }
+      } catch { /* ignore */ }
+
       setPicks(ordered);
       setLoading(false);
     })();
