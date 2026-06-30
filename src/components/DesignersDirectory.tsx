@@ -1035,13 +1035,20 @@ const PickCard = ({ pick, onFavorite, isFavorited }: { pick: PickItem; onFavorit
     >
 
       <div className="aspect-[4/5] bg-muted/20 overflow-hidden relative">
-        {pick.subtitle && /re-?edition$/i.test(pick.subtitle.trim()) && (
+        {pick.is_trade_only ? (
+          <div className="absolute top-3 left-3 z-20 pointer-events-none">
+            <span className="inline-block font-body text-[10px] uppercase tracking-[0.14em] text-background bg-foreground/85 backdrop-blur-sm rounded-full px-3 py-1 shadow-sm">
+              Trade Only
+            </span>
+          </div>
+        ) : pick.subtitle && /re-?edition$/i.test(pick.subtitle.trim()) && (
           <div className="absolute top-3 left-3 z-20 pointer-events-none">
             <span className="inline-block font-body text-[10px] uppercase tracking-[0.14em] text-background bg-foreground/75 backdrop-blur-sm rounded-full px-3 py-1 shadow-sm">
               {pick.subtitle}
             </span>
           </div>
         )}
+
         {pick.image_url ? (
           <>
             <img
