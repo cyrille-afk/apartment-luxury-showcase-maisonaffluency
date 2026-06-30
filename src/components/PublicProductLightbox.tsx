@@ -564,7 +564,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
           {product.description && product.description.trim().length > 0 && (
             <div className="hidden md:flex flex-col mt-auto px-8 pb-4 pt-5 gap-3">
               <div className="bg-muted/30 border border-border/50 rounded-xl p-5 shadow-sm">
-              <p className="font-body text-[13px] leading-[1.55] text-foreground/80 text-justify hyphens-auto whitespace-pre-wrap pb-[50px]">
+              <p className="font-body text-[13px] leading-[1.55] text-foreground/80 text-justify hyphens-auto whitespace-pre-wrap">
                 {product.description}
               </p>
               </div>
