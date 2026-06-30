@@ -244,6 +244,7 @@ export default function TradeDescriptionWriter() {
     if (bulkRows.length === 0) return;
     setBulkRunning(true);
     setCancelRequested(false);
+    setBulkRows((rows) => rows.map((r) => ({ ...r, warning: undefined })));
     let done = 0;
     const total = bulkRows.length;
     setBulkProgress({ done, total });
