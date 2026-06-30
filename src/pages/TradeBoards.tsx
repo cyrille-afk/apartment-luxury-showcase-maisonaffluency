@@ -71,7 +71,7 @@ const TradeBoards = () => {
     if (!user) return;
     let q = supabase
       .from("client_boards")
-      .select("*")
+      .select("id, user_id, studio_id, project_id, title, client_name, status, share_token, token_expires_at, token_rotated_at, studio_name, studio_logo_url, hide_maison_branding, created_at, updated_at")
       .order("updated_at", { ascending: false });
     // Scope to current studio so teammates see each other's boards.
     // Also include legacy boards created before a studio existed (studio_id NULL)
