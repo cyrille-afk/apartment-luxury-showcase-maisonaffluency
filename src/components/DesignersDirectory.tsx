@@ -688,7 +688,7 @@ function MobileLetterRow({
       >
         <ChevronRight className={`h-3.5 w-3.5 text-muted-foreground transition-transform duration-200 ${open ? "rotate-90" : ""}`} />
         <span className="font-serif text-xl text-foreground flex-1">{letter}</span>
-        <span className="font-body text-[11px] text-muted-foreground tracking-widest">{designers.length}</span>
+        <span className="font-body text-[11px] text-muted-foreground tracking-widest">{designers.reduce((sum, d) => sum + (d.founder === d.name && (parentDesignerCountByName[d.name] ?? 0) > 0 ? (parentDesignerCountByName[d.name] ?? 0) + 1 : 1), 0)}</span>
       </button>
       <AnimatePresence initial={false}>
         {open && (
