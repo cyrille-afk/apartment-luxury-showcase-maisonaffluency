@@ -688,7 +688,7 @@ function MobileLetterRow({
       >
         <ChevronRight className={`h-3.5 w-3.5 text-muted-foreground transition-transform duration-200 ${open ? "rotate-90" : ""}`} />
         <span className="font-serif text-xl text-foreground flex-1">{letter}</span>
-        <span className="font-body text-[11px] text-muted-foreground tracking-widest">{designers.length}</span>
+        <span className="font-body text-[11px] text-muted-foreground tracking-widest">{designers.reduce((sum, d) => sum + (d.founder === d.name && (parentDesignerCountByName[d.name] ?? 0) > 0 ? (parentDesignerCountByName[d.name] ?? 0) + 1 : 1), 0)}</span>
       </button>
       <AnimatePresence initial={false}>
         {open && (
@@ -782,7 +782,7 @@ function LetterGroup({
       <div className="flex items-center gap-3 mb-4 px-1">
         <span className="font-serif text-2xl md:text-3xl text-foreground">{letter}</span>
         <div className="flex-1 h-px bg-border/40" />
-        <span className="font-body text-[10px] text-muted-foreground/50 tracking-widest uppercase">{designers.length}</span>
+        <span className="font-body text-[10px] text-muted-foreground/50 tracking-widest uppercase">{designers.reduce((sum, d) => sum + (d.founder === d.name && (parentDesignerCountByName[d.name] ?? 0) > 0 ? (parentDesignerCountByName[d.name] ?? 0) + 1 : 1), 0)}</span>
       </div>
       <AnimatePresence>
         {isRevealed ? (
