@@ -262,11 +262,15 @@ function useFullCuratorPicks(enabled: boolean) {
       ]);
       if (!picks) return [];
       const designerMap = new Map((designers || []).map((d: any) => [d.id, { name: d.name, slug: d.slug }]));
-      return sortCuratorPicks(picks as any[]).map((p): PickItem => ({
+      // Drop picks whose designer is not publicly visible (trade_only or unpublished).
+      // Without this, the picks view leaks trade-only items that render with an "Unknown" brand label.
+      const visiblePicks = (picks as any[]).filter((p) => designerMap.has(p.designer_id));
+      return sortCuratorPicks(visiblePicks).map((p): PickItem => ({
         ...p,
         designer_name: designerMap.get(p.designer_id)?.name || "Unknown",
         designer_slug: designerMap.get(p.designer_id)?.slug || "",
       }));
+
     },
     enabled,
     staleTime: 5 * 60 * 1000,
