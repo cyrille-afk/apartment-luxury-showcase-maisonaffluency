@@ -336,6 +336,8 @@ export default function TradeDescriptionWriter() {
                 setSource(e.target.value as Source);
                 setProductId("");
                 setResult("");
+                setResultLength(0);
+                setSeoWarning(null);
                 setBulkDesigner("");
                 setBulkRows([]);
               }}
