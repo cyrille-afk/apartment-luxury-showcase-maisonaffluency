@@ -413,10 +413,14 @@ const VariantSelectors: React.FC<{
             // into the base picker. Token-aware so compound rows like
             // "Travertino Rosso / Grey Saint Laurent / Picasso Green" don't
             // hide the middle/trailing swatches.
-            isDualAxis && baseOptions.length >= 1
+            // Skip when the base axis is dimensions (size) — otherwise swatches
+            // not present in any variant row (e.g. Alinea "Ceppo di Sicilia")
+            // get orphaned into a second, near-empty "Table Finish" accordion.
+            isDualAxis && !baseAxisIsDim && baseOptions.length >= 1
               ? makeSwatchAxisFilter(baseOptions)
               : undefined
           }
+
           topLabel={
             product.top_axis_label
               ? `Select Your ${formatVariantAxisLabel(product.top_axis_label) || product.top_axis_label}`
