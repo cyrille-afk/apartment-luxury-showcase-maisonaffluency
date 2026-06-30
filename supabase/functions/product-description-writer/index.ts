@@ -407,6 +407,11 @@ RULES:
     }
 
     const description = cached.value.description;
+    const seoLengthViolation = tone === "seo" && description.length > MAX_SEO_DESCRIPTION_LENGTH;
+    if (seoLengthViolation) {
+      console.warn(`[product-description-writer] SEO description exceeds ${MAX_SEO_DESCRIPTION_LENGTH} chars: ${description.length} chars for product ${product_id}`);
+    }
+
     logAiUsage({
       feature: "product-description-writer",
       model: DESCRIPTION_MODEL,
@@ -421,7 +426,16 @@ RULES:
     });
 
     return new Response(
-      JSON.stringify({ description, tone, product_id, source }),
+      JSON.stringify({
+        description,
+        tone,
+        product_id,
+        source,
+        length: description.length,
+        seo_warning: seoLengthViolation
+          ? `SEO description is ${description.length} characters — exceeds the ${MAX_SEO_DESCRIPTION_LENGTH} character limit used by Google. Trim before saving.`
+          : null,
+      }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (e) {
