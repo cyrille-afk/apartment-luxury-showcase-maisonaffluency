@@ -1021,6 +1021,10 @@ const PickCard = ({ pick, onFavorite, isFavorited }: { pick: PickItem; onFavorit
     <button
       type="button"
       onClick={() => {
+        if (pick.is_trade_only) {
+          navigate("/trade-program");
+          return;
+        }
         if (pick.designer_slug) {
           navigate(`/designers/${pick.designer_slug}/${productSlug}`, {
             state: { from: window.location.pathname + window.location.search },
@@ -1029,6 +1033,7 @@ const PickCard = ({ pick, onFavorite, isFavorited }: { pick: PickItem; onFavorit
       }}
       className="group block w-full text-left rounded-xl overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background"
     >
+
       <div className="aspect-[4/5] bg-muted/20 overflow-hidden relative">
         {pick.subtitle && /re-?edition$/i.test(pick.subtitle.trim()) && (
           <div className="absolute top-3 left-3 z-20 pointer-events-none">
