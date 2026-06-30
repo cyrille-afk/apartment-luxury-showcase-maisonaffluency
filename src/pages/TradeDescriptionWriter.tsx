@@ -94,6 +94,8 @@ export default function TradeDescriptionWriter() {
   const [productId, setProductId] = useState("");
   const [tone, setTone] = useState<Tone>(persisted.tone ?? "editorial");
   const [result, setResult] = useState("");
+  const [resultLength, setResultLength] = useState(0);
+  const [seoWarning, setSeoWarning] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
   // Bulk state
