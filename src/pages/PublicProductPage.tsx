@@ -413,20 +413,29 @@ const VariantSelectors: React.FC<{
             // into the base picker. Token-aware so compound rows like
             // "Travertino Rosso / Grey Saint Laurent / Picasso Green" don't
             // hide the middle/trailing swatches.
-            isDualAxis && baseOptions.length >= 1
+            // Skip when the base axis is dimensions (size) — otherwise swatches
+            // not present in any variant row (e.g. Alinea "Ceppo di Sicilia")
+            // get orphaned into a second, near-empty "Table Finish" accordion.
+            isDualAxis && !baseAxisIsDim && baseOptions.length >= 1
               ? makeSwatchAxisFilter(baseOptions)
               : undefined
           }
+
           topLabel={
             product.top_axis_label
               ? `Select Your ${formatVariantAxisLabel(product.top_axis_label) || product.top_axis_label}`
               : null
           }
           topFilter={
-            isDualAxis && topOptions.length >= 1
+            // Same reasoning as woodFilter above: when the base axis is the
+            // size, there's only one finish axis — don't filter, otherwise
+            // any swatch not present in a variant row gets split off into a
+            // second accordion.
+            isDualAxis && !baseAxisIsDim && topOptions.length >= 1
               ? makeSwatchAxisFilter(topOptions)
               : undefined
           }
+
 
 
           showUpholsterySection={isProductUpholstered(product)}
