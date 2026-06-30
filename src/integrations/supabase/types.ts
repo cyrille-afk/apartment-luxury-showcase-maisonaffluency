@@ -6495,6 +6495,7 @@ export type Database = {
           title: string
         }[]
       }
+      get_board_client_email: { Args: { _board_id: string }; Returns: string }
       get_board_comments_by_token: {
         Args: { _token: string }
         Returns: {
