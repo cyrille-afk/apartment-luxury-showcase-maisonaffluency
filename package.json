@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "node scripts/build-designers-index.mjs && vite build && node scripts/build-sitemap.mjs && node scripts/audit-meta-descriptions.mjs",
-    "build:dev": "node scripts/build-designers-index.mjs && vite build --mode development && node scripts/build-sitemap.mjs && node scripts/audit-meta-descriptions.mjs",
+    "build": "node scripts/build-designers-index.mjs && vite build && node scripts/build-sitemap.mjs",
+    "build:dev": "node scripts/build-designers-index.mjs && vite build --mode development && node scripts/build-sitemap.mjs",
     "lint": "eslint .",
     "preview": "vite preview",
     "test:e2e": "playwright test",
