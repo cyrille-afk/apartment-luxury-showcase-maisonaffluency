@@ -248,8 +248,14 @@ function ScrollToTopOnNavigate() {
     if (prev === location.pathname) return;
     if (navType === "POP") return;
     if (location.hash) return;
-    if ((location.state as { preserveScroll?: boolean } | null)?.preserveScroll) return;
-    window.scrollTo(0, 0);
+    const state = location.state as { preserveScroll?: boolean; smoothScroll?: boolean } | null;
+    if (state?.preserveScroll) return;
+    // Opt-in smooth scroll: navigators (e.g. top menu links) can pass
+    // state={{ smoothScroll: true }} to soften the page transition. Respects
+    // prefers-reduced-motion.
+    const prefersReduced = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    const behavior: ScrollBehavior = state?.smoothScroll && !prefersReduced ? "smooth" : "instant";
+    window.scrollTo({ top: 0, left: 0, behavior });
   }, [location.pathname, location.hash, location.state, navType]);
 
   return null;
