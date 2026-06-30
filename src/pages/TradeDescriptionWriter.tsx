@@ -21,6 +21,7 @@ interface BulkRow {
   hasExisting: boolean;
   status: RowStatus;
   error?: string;
+  warning?: string;
 }
 
 const TONES: { value: Tone; label: string; desc: string }[] = [
@@ -262,7 +263,7 @@ export default function TradeDescriptionWriter() {
       try {
         const { description, seoWarning } = await callDescriptionWriter(row.id, source, tone);
         await saveDescription(row.id, source, description);
-        setBulkRows((rows) => rows.map((r, idx) => (idx === i ? { ...r, status: seoWarning ? "saved" : "saved", error: seoWarning || undefined } : r)));
+        setBulkRows((rows) => rows.map((r, idx) => (idx === i ? { ...r, status: "saved", warning: seoWarning || undefined } : r)));
       } catch (err: any) {
         const msg = err?.message || "Failed";
         setBulkRows((rows) => rows.map((r, idx) => (idx === i ? { ...r, status: "failed", error: msg } : r)));
