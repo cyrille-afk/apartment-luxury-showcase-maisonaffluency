@@ -1127,13 +1127,16 @@ const PublicDesignerProfile = () => {
                             "Marta Sala Éditions": "Edited by MSE",
                             "Théorème Editions": "Edition by Théorème Editions",
                             "Théorème Éditions": "Edition by Théorème Éditions",
+                            "Ecart Paris": "Re-edition by Ecart Paris",
+                            "Ecart": "Re-edition by Ecart",
                           };
                           const editionHouseLabel = parentBrandName
                             ? EDITION_HOUSE_LABELS[parentBrandName]
                             : undefined;
                           const showParentBadge = !!parentBrandName;
                           const parentBadgeText = editionHouseLabel
-                            ?? (parentBrandName ? `Re-edition by ${parentBrandName}` : "");
+                            ?? (parentBrandName ? `Edition by ${parentBrandName}` : "");
+
 
                           const tags: string[] = pick.tags || [];
                           // When a specific edition string exists, drop the generic "limited-edition" tag
