@@ -20,6 +20,7 @@ import { trackCTA } from "@/lib/analytics";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { CATEGORY_ORDER, SUBCATEGORY_MAP, normalizeCategory, normalizeSubcategory } from "@/lib/productTaxonomy";
+import { pickMatchesCategoryFilter } from "@/lib/pickCategoryFilter";
 import ProductCardDescriptionOverlay from "@/components/ui/ProductCardDescriptionOverlay";
 import { withOgCacheBust } from "@/lib/whatsapp-share";
 
@@ -1255,24 +1256,9 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
   const filteredPicks = useMemo<PickItem[] | null>(() => {
     if (mode !== "products") return null;
     if (!selectedCategory && !selectedSubcategory) return null;
-    
-    const normSub = selectedSubcategory ? normalizeSubcategory(selectedSubcategory) : null;
-    const normCat = selectedCategory ? normalizeCategory(selectedCategory) : null;
-    return fullPicks.filter((p) => {
-      if (selectedSubcategory) {
-        const pickSub = normalizeSubcategory(p.subcategory || undefined) || normalizeSubcategory(p.category || undefined);
-        if (pickSub === normSub) return true;
-        return !!(p.tags && p.tags.some((t: string) => normalizeSubcategory(t) === normSub));
-      }
-      const pickCat = normalizeCategory(p.category || undefined, p.subcategory || undefined);
-      if (pickCat === normCat) return true;
-      // Only fall back to tag-based matching when the pick has no resolvable
-      // category of its own. Otherwise generic tags like "Limited Edition"
-      // (which normalize to "Decorative Objects" → "Décor") would leak items
-      // from Seating/Tables/etc. into Décor.
-      if (pickCat) return false;
-      return !!(p.tags && p.tags.some((t: string) => normalizeCategory(t) === normCat));
-    });
+    return fullPicks.filter((p) =>
+      pickMatchesCategoryFilter(p, selectedCategory, selectedSubcategory),
+    );
   }, [selectedCategory, selectedSubcategory, fullPicks]);
 
   // (Product pages handle detail view — no lightbox needed here)
