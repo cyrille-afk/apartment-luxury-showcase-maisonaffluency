@@ -356,8 +356,11 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
       }
     }
   }
-  const currentImageUrl = finishImageIdx != null ? galleryImages[finishImageIdx] : product.image_url;
-  const imageSwappedByFinish = currentImageUrl !== product.image_url;
+  // Default to the first gallery image (matches the product page hero) rather
+  // than the curator-pick thumbnail, which is often a padded/portrait crop.
+  const defaultImageUrl = galleryImages[0] || product.image_url;
+  const currentImageUrl = finishImageIdx != null ? galleryImages[finishImageIdx] : defaultImageUrl;
+  const imageSwappedByFinish = currentImageUrl !== defaultImageUrl;
   const isUpholsteredProduct = isProductUpholstered({
     category: product.category,
     subcategory: product.subcategory,
