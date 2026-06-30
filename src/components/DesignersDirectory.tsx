@@ -1103,7 +1103,19 @@ const PickCard = ({ pick, onFavorite, isFavorited }: { pick: PickItem; onFavorit
       </div>
       {/* Info below the card */}
       <div className="px-3 py-3 text-center">
-        {(() => {
+        {pick.is_trade_only ? (
+          <>
+            <p className="font-body text-[10px] text-primary uppercase tracking-[0.12em] mb-0.5">
+              Reserved for the Trade
+            </p>
+            <p className="font-display text-sm tracking-wide leading-tight">
+              {pick.title}
+            </p>
+            <p className="font-body text-[11px] text-muted-foreground mt-1">
+              Brand details available to verified trade members.
+            </p>
+          </>
+        ) : (() => {
           const sub = pick.subtitle?.trim() || "";
           const isForPattern = / for /i.test(sub);
           const isYear = /^\d{4}$/.test(sub);
@@ -1131,6 +1143,7 @@ const PickCard = ({ pick, onFavorite, isFavorited }: { pick: PickItem; onFavorit
           Price on request
         </p>
       </div>
+
     </button>
   );
 };
