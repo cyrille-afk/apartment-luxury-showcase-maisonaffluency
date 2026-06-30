@@ -233,30 +233,42 @@ function HomeRouteSync() {
   return null;
 }
 
-// Scroll to top on PUSH/REPLACE navigations to a new pathname.
-// Skips back/forward (POP) so browser-restored scroll positions stay intact,
-// skips when the URL has a hash (anchor links handle their own scroll), and
-// skips when location.state.preserveScroll is set by the navigator.
+// Scroll to top on PUSH/REPLACE navigations. Smooth is now the default so it
+// triggers for every Link/navigate() call regardless of source (menu, logo,
+// footer, deep link, programmatic, fast/duplicate clicks). Skips when:
+//   - navigation is POP (back/forward) — browser restores prior scroll
+//   - URL has a hash — anchor scrolling handles itself
+//   - location.state.preserveScroll is set explicitly
+//   - location.state.smoothScroll === false (opt-out for instant jumps)
+//   - prefers-reduced-motion is enabled
 function ScrollToTopOnNavigate() {
   const location = useLocation();
   const navType = useNavigationType();
   const prevPathRef = useRef<string | null>(null);
+  const prevKeyRef = useRef<string | null>(null);
 
   useEffect(() => {
-    const prev = prevPathRef.current;
+    const prevPath = prevPathRef.current;
+    const prevKey = prevKeyRef.current;
     prevPathRef.current = location.pathname;
-    if (prev === location.pathname) return;
+    prevKeyRef.current = location.key;
+    // Allow duplicate-path navigations (fast clicks, re-navigation) to still
+    // scroll — only skip when the location key is identical (true no-op).
+    if (prevPath === location.pathname && prevKey === location.key) return;
     if (navType === "POP") return;
     if (location.hash) return;
     const state = location.state as { preserveScroll?: boolean; smoothScroll?: boolean } | null;
     if (state?.preserveScroll) return;
-    // Opt-in smooth scroll: navigators (e.g. top menu links) can pass
-    // state={{ smoothScroll: true }} to soften the page transition. Respects
-    // prefers-reduced-motion.
     const prefersReduced = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-    const behavior: ScrollBehavior = state?.smoothScroll && !prefersReduced ? "smooth" : "instant";
-    window.scrollTo({ top: 0, left: 0, behavior });
-  }, [location.pathname, location.hash, location.state, navType]);
+    const smooth = state?.smoothScroll !== false && !prefersReduced;
+    const behavior: ScrollBehavior = smooth ? "smooth" : "instant";
+    // Defer one frame so the new route mounts before we animate — prevents the
+    // browser from snapping mid-transition when React commits the new tree.
+    const raf = window.requestAnimationFrame(() => {
+      window.scrollTo({ top: 0, left: 0, behavior });
+    });
+    return () => window.cancelAnimationFrame(raf);
+  }, [location.pathname, location.hash, location.state, location.key, navType]);
 
   return null;
 }
