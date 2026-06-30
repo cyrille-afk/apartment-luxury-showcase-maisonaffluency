@@ -1,0 +1,8 @@
+UPDATE public.designers SET biography = $bio$Tristan Auer is a Paris-based interior architect and designer who trained at ESAG Paris before collaborating with Christian Liaigre and Philippe Starck on landmark international projects. In 2002 he founded his own agency, Wilson Associates Paris (later Izeu), going on to design the lobbies and suites of leading luxury hotels across Europe — from the Hôtel de Crillon's restoration on Place de la Concorde to Les Bains in Paris and Cotton House in Mallorca.
+
+Named Maison&Objet Designer of the Year in 2017, Auer has built a reputation for couture interiors that read as private worlds rather than decorative statements. His practice moves fluidly between palaces, private residences, yachts and bespoke automobiles — including a celebrated commission for Bentley — always anchored in a deep dialogue with the building's history and the client's personal narrative.
+
+His <a href="/designers/veronese">Veronese</a> furniture collection — produced by the prestigious French manufacturer of the same name — distils his signature aesthetic: architectural rigour, noble materials, and a quietly bold luxury. Working hand in hand with the Murano glass house's master artisans, Auer pairs hand-blown crystal with bronze, leather and richly grained timbers, treating each piece as a sculptural object designed to age with grace.
+
+Across every scale, Auer's work champions the savoir-faire of French and European ateliers — couturiers of leather, gilders, marqueteurs, glassblowers — and the conviction that true luxury lies in restraint, proportion and the intimate hand of the maker.$bio$
+WHERE slug IN ('tristan-auer','tristan-auer-veronese');
