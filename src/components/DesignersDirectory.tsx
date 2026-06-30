@@ -244,6 +244,8 @@ type PickItem = {
   pdf_urls?: any | null;
   designer_name?: string;
   designer_slug?: string;
+  is_trade_only?: boolean;
+
 };
 
 function useFullCuratorPicks(enabled: boolean) {
@@ -262,14 +264,19 @@ function useFullCuratorPicks(enabled: boolean) {
       ]);
       if (!picks) return [];
       const designerMap = new Map((designers || []).map((d: any) => [d.id, { name: d.name, slug: d.slug }]));
-      // Drop picks whose designer is not publicly visible (trade_only or unpublished).
-      // Without this, the picks view leaks trade-only items that render with an "Unknown" brand label.
-      const visiblePicks = (picks as any[]).filter((p) => designerMap.has(p.designer_id));
-      return sortCuratorPicks(visiblePicks).map((p): PickItem => ({
-        ...p,
-        designer_name: designerMap.get(p.designer_id)?.name || "Unknown",
-        designer_slug: designerMap.get(p.designer_id)?.slug || "",
-      }));
+      // Picks whose designer isn't in the public list belong to trade-only/unpublished
+      // designers. We keep them in the grid but mark them so the UI can render a
+      // "Trade Only" placeholder instead of broken brand info.
+      return sortCuratorPicks(picks as any[]).map((p): PickItem => {
+        const d = designerMap.get(p.designer_id);
+        return {
+          ...p,
+          designer_name: d?.name || "Trade Only",
+          designer_slug: d?.slug || "",
+          is_trade_only: !d,
+        };
+      });
+
 
     },
     enabled,
@@ -1014,6 +1021,10 @@ const PickCard = ({ pick, onFavorite, isFavorited }: { pick: PickItem; onFavorit
     <button
       type="button"
       onClick={() => {
+        if (pick.is_trade_only) {
+          navigate("/trade-program");
+          return;
+        }
         if (pick.designer_slug) {
           navigate(`/designers/${pick.designer_slug}/${productSlug}`, {
             state: { from: window.location.pathname + window.location.search },
@@ -1022,14 +1033,22 @@ const PickCard = ({ pick, onFavorite, isFavorited }: { pick: PickItem; onFavorit
       }}
       className="group block w-full text-left rounded-xl overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background"
     >
+
       <div className="aspect-[4/5] bg-muted/20 overflow-hidden relative">
-        {pick.subtitle && /re-?edition$/i.test(pick.subtitle.trim()) && (
+        {pick.is_trade_only ? (
+          <div className="absolute top-3 left-3 z-20 pointer-events-none">
+            <span className="inline-block font-body text-[10px] uppercase tracking-[0.14em] text-background bg-foreground/85 backdrop-blur-sm rounded-full px-3 py-1 shadow-sm">
+              Trade Only
+            </span>
+          </div>
+        ) : pick.subtitle && /re-?edition$/i.test(pick.subtitle.trim()) && (
           <div className="absolute top-3 left-3 z-20 pointer-events-none">
             <span className="inline-block font-body text-[10px] uppercase tracking-[0.14em] text-background bg-foreground/75 backdrop-blur-sm rounded-full px-3 py-1 shadow-sm">
               {pick.subtitle}
             </span>
           </div>
         )}
+
         {pick.image_url ? (
           <>
             <img
@@ -1084,7 +1103,19 @@ const PickCard = ({ pick, onFavorite, isFavorited }: { pick: PickItem; onFavorit
       </div>
       {/* Info below the card */}
       <div className="px-3 py-3 text-center">
-        {(() => {
+        {pick.is_trade_only ? (
+          <>
+            <p className="font-body text-[10px] text-primary uppercase tracking-[0.12em] mb-0.5">
+              Reserved for the Trade
+            </p>
+            <p className="font-display text-sm tracking-wide leading-tight">
+              {pick.title}
+            </p>
+            <p className="font-body text-[11px] text-muted-foreground mt-1">
+              Brand details available to verified trade members.
+            </p>
+          </>
+        ) : (() => {
           const sub = pick.subtitle?.trim() || "";
           const isForPattern = / for /i.test(sub);
           const isYear = /^\d{4}$/.test(sub);
@@ -1112,6 +1143,7 @@ const PickCard = ({ pick, onFavorite, isFavorited }: { pick: PickItem; onFavorit
           Price on request
         </p>
       </div>
+
     </button>
   );
 };
