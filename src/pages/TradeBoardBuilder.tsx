@@ -115,7 +115,7 @@ const TradeBoardBuilder = () => {
     if (!id) return;
     const { data: boardData } = await supabase
       .from("client_boards")
-      .select("*")
+      .select("id, user_id, studio_id, project_id, title, client_name, status, share_token, token_expires_at, token_rotated_at, studio_name, studio_logo_url, hide_maison_branding, created_at, updated_at")
       .eq("id", id)
       .single();
     if (boardData) setBoard(boardData as Board);
