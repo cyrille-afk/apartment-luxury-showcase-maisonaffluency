@@ -133,6 +133,8 @@ function resolveDesigner(args: {
   return { actualDesigner, cleanTitle, variantDescriptor, source, isCreativeDirectorCredit };
 }
 
+const MAX_SEO_DESCRIPTION_LENGTH = 160;
+
 const TONE_INSTRUCTIONS: Record<string, string> = {
   editorial: `Write in an evocative, editorial tone suited for a luxury design journal or Instagram caption. 
 Reference the designer's philosophy and creative vision. Use sensory language about materials and craftsmanship. 
@@ -146,7 +148,7 @@ Use clear, professional language. Keep it 1-2 short paragraphs followed by bulle
 Naturally incorporate the designer name, brand, material keywords, and category.
 Lead with one compelling sentence, then 1-2 short supporting sentences.
 
-STRICT LENGTH: 90-105 words TOTAL. Approximately 600-680 characters. Never exceed 110 words. This is a hard limit — count your words before responding and trim aggressively if over.
+STRICT LENGTH: maximum ${MAX_SEO_DESCRIPTION_LENGTH} characters including spaces. This is a hard limit — count your characters before responding and trim aggressively if over. Aim for 150-160 characters so the full description displays in Google search results without truncation.
 
 Output a SINGLE paragraph. No line breaks, no bullet points, no multiple paragraphs.
 
@@ -405,6 +407,11 @@ RULES:
     }
 
     const description = cached.value.description;
+    const seoLengthViolation = tone === "seo" && description.length > MAX_SEO_DESCRIPTION_LENGTH;
+    if (seoLengthViolation) {
+      console.warn(`[product-description-writer] SEO description exceeds ${MAX_SEO_DESCRIPTION_LENGTH} chars: ${description.length} chars for product ${product_id}`);
+    }
+
     logAiUsage({
       feature: "product-description-writer",
       model: DESCRIPTION_MODEL,
@@ -419,7 +426,16 @@ RULES:
     });
 
     return new Response(
-      JSON.stringify({ description, tone, product_id, source }),
+      JSON.stringify({
+        description,
+        tone,
+        product_id,
+        source,
+        length: description.length,
+        seo_warning: seoLengthViolation
+          ? `SEO description is ${description.length} characters — exceeds the ${MAX_SEO_DESCRIPTION_LENGTH} character limit used by Google. Trim before saving.`
+          : null,
+      }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (e) {

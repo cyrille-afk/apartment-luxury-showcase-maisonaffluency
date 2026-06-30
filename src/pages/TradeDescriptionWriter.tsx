@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, Sparkles, Copy, Check, Save, RefreshCw, Layers, Square, CheckCircle2, AlertCircle, Loader2, X } from "lucide-react";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
+import { cn } from "@/lib/utils";
 import AlphabetProductPicker, { type PickerItem } from "@/components/trade/AlphabetProductPicker";
 import AlphabetGroupPicker from "@/components/trade/AlphabetGroupPicker";
 
@@ -21,6 +22,7 @@ interface BulkRow {
   hasExisting: boolean;
   status: RowStatus;
   error?: string;
+  warning?: string;
 }
 
 const TONES: { value: Tone; label: string; desc: string }[] = [
@@ -29,7 +31,7 @@ const TONES: { value: Tone; label: string; desc: string }[] = [
   { value: "seo", label: "SEO", desc: "Keyword-rich copy for product pages" },
 ];
 
-async function callDescriptionWriter(productId: string, source: Source, tone: Tone): Promise<string> {
+async function callDescriptionWriter(productId: string, source: Source, tone: Tone): Promise<{ description: string; length: number; seoWarning: string | null }> {
   const { data: { session } } = await supabase.auth.getSession();
   const token = session?.access_token ?? import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
   const resp = await fetch(
@@ -49,7 +51,11 @@ async function callDescriptionWriter(productId: string, source: Source, tone: To
     throw new Error(body.error || `Error ${resp.status}`);
   }
   const data = await resp.json();
-  return data.description || "";
+  return {
+    description: data.description || "",
+    length: typeof data.length === "number" ? data.length : (data.description || "").length,
+    seoWarning: data.seo_warning || null,
+  };
 }
 
 async function saveDescription(productId: string, source: Source, description: string) {
@@ -90,6 +96,8 @@ export default function TradeDescriptionWriter() {
   const [productId, setProductId] = useState("");
   const [tone, setTone] = useState<Tone>(persisted.tone ?? "editorial");
   const [result, setResult] = useState("");
+  const [resultLength, setResultLength] = useState(0);
+  const [seoWarning, setSeoWarning] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
   // Bulk state
@@ -198,8 +206,10 @@ export default function TradeDescriptionWriter() {
 
   const generateMutation = useMutation({
     mutationFn: () => callDescriptionWriter(productId, source, tone),
-    onSuccess: (description) => {
+    onSuccess: ({ description, length, seoWarning }) => {
       setResult(description);
+      setResultLength(length);
+      setSeoWarning(seoWarning);
       toast.success("Description generated");
     },
     onError: (err: Error) => toast.error(err.message),
@@ -234,6 +244,7 @@ export default function TradeDescriptionWriter() {
     if (bulkRows.length === 0) return;
     setBulkRunning(true);
     setCancelRequested(false);
+    setBulkRows((rows) => rows.map((r) => ({ ...r, warning: undefined })));
     let done = 0;
     const total = bulkRows.length;
     setBulkProgress({ done, total });
@@ -252,9 +263,9 @@ export default function TradeDescriptionWriter() {
       setBulkRows((rows) => rows.map((r, idx) => (idx === i ? { ...r, status: "generating" } : r)));
 
       try {
-        const description = await callDescriptionWriter(row.id, source, tone);
+        const { description, seoWarning } = await callDescriptionWriter(row.id, source, tone);
         await saveDescription(row.id, source, description);
-        setBulkRows((rows) => rows.map((r, idx) => (idx === i ? { ...r, status: "saved" } : r)));
+        setBulkRows((rows) => rows.map((r, idx) => (idx === i ? { ...r, status: "saved", warning: seoWarning || undefined } : r)));
       } catch (err: any) {
         const msg = err?.message || "Failed";
         setBulkRows((rows) => rows.map((r, idx) => (idx === i ? { ...r, status: "failed", error: msg } : r)));
@@ -326,6 +337,8 @@ export default function TradeDescriptionWriter() {
                 setSource(e.target.value as Source);
                 setProductId("");
                 setResult("");
+                setResultLength(0);
+                setSeoWarning(null);
                 setBulkDesigner("");
                 setBulkRows([]);
               }}
@@ -355,7 +368,7 @@ export default function TradeDescriptionWriter() {
                   <AlphabetProductPicker
                     items={pickerItems}
                     value={productId}
-                    onChange={(id) => { setProductId(id); setResult(""); }}
+                    onChange={(id) => { setProductId(id); setResult(""); setResultLength(0); setSeoWarning(null); }}
                     placeholder="Select a product…"
                   />
                 );
@@ -382,7 +395,7 @@ export default function TradeDescriptionWriter() {
               {TONES.map((t) => (
                 <button
                   key={t.value}
-                  onClick={() => { setTone(t.value); setResult(""); }}
+                  onClick={() => { setTone(t.value); setResult(""); setResultLength(0); setSeoWarning(null); }}
                   title={t.desc}
                   className={`flex-1 rounded-md border px-2 py-2 font-body text-xs transition-colors ${
                     tone === t.value
@@ -412,9 +425,27 @@ export default function TradeDescriptionWriter() {
             {result && (
               <div className="space-y-3">
                 <div className="rounded-lg border border-border bg-card p-5 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className={cn(
+                      "font-body text-xs",
+                      resultLength > 160 ? "text-red-600 font-medium" : "text-muted-foreground"
+                    )}>
+                      {resultLength} / 160 characters
+                      {resultLength > 160 && " — exceeds Google display limit"}
+                    </span>
+                    {seoWarning && (
+                      <span className="flex items-center gap-1 text-xs font-medium text-amber-600">
+                        <AlertCircle className="h-3.5 w-3.5" /> {seoWarning}
+                      </span>
+                    )}
+                  </div>
                   <textarea
                     value={result}
-                    onChange={(e) => setResult(e.target.value)}
+                    onChange={(e) => {
+                      setResult(e.target.value);
+                      setResultLength(e.target.value.length);
+                      if (e.target.value.length <= 160) setSeoWarning(null);
+                    }}
                     rows={Math.min(20, Math.max(6, result.split("\n").length + 2))}
                     className="w-full resize-y rounded-md border border-border bg-background p-3 font-body text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20"
                     placeholder="Edit the generated description…"
@@ -528,6 +559,9 @@ export default function TradeDescriptionWriter() {
                       <p className="truncate text-foreground">{row.label}</p>
                       {row.status === "failed" && row.error && (
                         <p className="text-[11px] text-red-600/80 truncate">{row.error}</p>
+                      )}
+                      {row.warning && (
+                        <p className="text-[11px] text-amber-600/80 truncate">{row.warning}</p>
                       )}
                     </div>
                     <span className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground/80">

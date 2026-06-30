@@ -17,7 +17,8 @@
     "test:visual:update": "playwright test e2e/visual --update-snapshots",
     "lighthouse:mobile": "node scripts/lighthouse-mobile.mjs",
     "audit:og": "python3 scripts/audit-og-bridges.py --warnings",
-    "check:product-images": "python3 scripts/check-product-image-parity.py"
+    "check:product-images": "python3 scripts/check-product-image-parity.py",
+    "audit:meta-descriptions": "node scripts/audit-meta-descriptions.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
