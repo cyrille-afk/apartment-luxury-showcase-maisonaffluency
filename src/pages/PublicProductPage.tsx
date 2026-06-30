@@ -427,10 +427,15 @@ const VariantSelectors: React.FC<{
               : null
           }
           topFilter={
-            isDualAxis && topOptions.length >= 1
+            // Same reasoning as woodFilter above: when the base axis is the
+            // size, there's only one finish axis — don't filter, otherwise
+            // any swatch not present in a variant row gets split off into a
+            // second accordion.
+            isDualAxis && !baseAxisIsDim && topOptions.length >= 1
               ? makeSwatchAxisFilter(topOptions)
               : undefined
           }
+
 
 
           showUpholsterySection={isProductUpholstered(product)}
