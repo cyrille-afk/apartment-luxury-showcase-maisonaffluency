@@ -1130,12 +1130,15 @@ const PublicDesignerProfile = () => {
                             "Ecart Paris": "Re-edition by Ecart Paris",
                             "Ecart": "Re-edition by Ecart",
                           };
+                          const manualBadge = (designer as any).parent_badge_label?.trim();
                           const editionHouseLabel = parentBrandName
                             ? EDITION_HOUSE_LABELS[parentBrandName]
                             : undefined;
-                          const showParentBadge = !!parentBrandName;
-                          const parentBadgeText = editionHouseLabel
+                          const showParentBadge = !!manualBadge || !!parentBrandName;
+                          const parentBadgeText = manualBadge
+                            ?? editionHouseLabel
                             ?? (parentBrandName ? `Edition by ${parentBrandName}` : "");
+
 
 
                           const tags: string[] = pick.tags || [];
