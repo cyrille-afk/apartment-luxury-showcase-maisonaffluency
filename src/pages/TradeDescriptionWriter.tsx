@@ -367,7 +367,7 @@ export default function TradeDescriptionWriter() {
                   <AlphabetProductPicker
                     items={pickerItems}
                     value={productId}
-                    onChange={(id) => { setProductId(id); setResult(""); }}
+                    onChange={(id) => { setProductId(id); setResult(""); setResultLength(0); setSeoWarning(null); }}
                     placeholder="Select a product…"
                   />
                 );
@@ -394,7 +394,7 @@ export default function TradeDescriptionWriter() {
               {TONES.map((t) => (
                 <button
                   key={t.value}
-                  onClick={() => { setTone(t.value); setResult(""); }}
+                  onClick={() => { setTone(t.value); setResult(""); setResultLength(0); setSeoWarning(null); }}
                   title={t.desc}
                   className={`flex-1 rounded-md border px-2 py-2 font-body text-xs transition-colors ${
                     tone === t.value
