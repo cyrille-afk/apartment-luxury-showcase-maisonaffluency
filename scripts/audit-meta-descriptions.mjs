@@ -1,15 +1,13 @@
 #!/usr/bin/env node
-/**
- * Audit all rendered meta descriptions for length.
- * Google typically truncates snippets at ~155-160 characters, so any
- * description that exceeds 160 chars is flagged for review.
- *
- * Scans:
- *   - dist/**/*.html (post-build prerendered shells)
- *   - public/**/*.html (static bridge / OG pages)
- *
- * Runs as part of the build pipeline. Exits non-zero if violations are found.
- */
+// Audit all rendered meta descriptions for length.
+// Google typically truncates snippets at ~155-160 characters, so any
+// description that exceeds 160 chars is flagged for review.
+//
+// Scans:
+//   - dist/ (post-build prerendered shells)
+//   - public/ (static bridge and OG pages)
+//
+// Runs as part of the build pipeline. Exits non-zero if violations are found.
 import { readdir, readFile, stat } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
