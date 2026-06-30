@@ -421,9 +421,27 @@ export default function TradeDescriptionWriter() {
             {result && (
               <div className="space-y-3">
                 <div className="rounded-lg border border-border bg-card p-5 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className={cn(
+                      "font-body text-xs",
+                      resultLength > 160 ? "text-red-600 font-medium" : "text-muted-foreground"
+                    )}>
+                      {resultLength} / 160 characters
+                      {resultLength > 160 && " — exceeds Google display limit"}
+                    </span>
+                    {seoWarning && (
+                      <span className="flex items-center gap-1 text-xs font-medium text-amber-600">
+                        <AlertCircle className="h-3.5 w-3.5" /> {seoWarning}
+                      </span>
+                    )}
+                  </div>
                   <textarea
                     value={result}
-                    onChange={(e) => setResult(e.target.value)}
+                    onChange={(e) => {
+                      setResult(e.target.value);
+                      setResultLength(e.target.value.length);
+                      if (e.target.value.length <= 160) setSeoWarning(null);
+                    }}
                     rows={Math.min(20, Math.max(6, result.split("\n").length + 2))}
                     className="w-full resize-y rounded-md border border-border bg-background p-3 font-body text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20"
                     placeholder="Edit the generated description…"
