@@ -244,6 +244,8 @@ type PickItem = {
   pdf_urls?: any | null;
   designer_name?: string;
   designer_slug?: string;
+  is_trade_only?: boolean;
+
 };
 
 function useFullCuratorPicks(enabled: boolean) {
