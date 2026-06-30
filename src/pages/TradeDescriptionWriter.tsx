@@ -29,7 +29,7 @@ const TONES: { value: Tone; label: string; desc: string }[] = [
   { value: "seo", label: "SEO", desc: "Keyword-rich copy for product pages" },
 ];
 
-async function callDescriptionWriter(productId: string, source: Source, tone: Tone): Promise<string> {
+async function callDescriptionWriter(productId: string, source: Source, tone: Tone): Promise<{ description: string; length: number; seoWarning: string | null }> {
   const { data: { session } } = await supabase.auth.getSession();
   const token = session?.access_token ?? import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
   const resp = await fetch(
@@ -49,7 +49,11 @@ async function callDescriptionWriter(productId: string, source: Source, tone: To
     throw new Error(body.error || `Error ${resp.status}`);
   }
   const data = await resp.json();
-  return data.description || "";
+  return {
+    description: data.description || "",
+    length: typeof data.length === "number" ? data.length : (data.description || "").length,
+    seoWarning: data.seo_warning || null,
+  };
 }
 
 async function saveDescription(productId: string, source: Source, description: string) {
