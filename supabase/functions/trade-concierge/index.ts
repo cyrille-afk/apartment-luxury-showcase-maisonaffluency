@@ -2870,7 +2870,7 @@ serve(async (req) => {
     // "go ahead and build it", "approve — thanks"). Reject anything that
     // opens with a negation ("no", "not yet", "hold on", "wait").
     const CONFIRM_PHRASE_RE =
-      /^\s*(?:please\s+)?(yes|yep|yeah|yup|ya|sure|of\s*course|absolutely|definitely|certainly|correct|confirm(?:ed|s|ing)?|proceed|go\s*(?:ahead|for\s*it)?|do\s*it|build(?:\s*it)?|create(?:\s*it)?|make(?:\s*it)?|ship(?:\s*it)?|ok(?:ay)?|okey|approve[ds]?|approved|accept(?:ed)?|agreed?|sounds\s*good|looks\s*good|lgtm|let['’]?s\s*(?:go|do\s*(?:it|this))|👍|✅|🚀)\b/i;
+      /^\s*(?:please\s+)?(yes|yep|yeah|yup|ya|sure|of\s*course|absolutely|definitely|certainly|correct|confirm(?:ed|s|ing)?(?:\s+all(?:\s+remaining)?)?|approve[ds]?(?:\s+all(?:\s+remaining)?)?|keep\s+(?:all|the\s+rest|everything|remaining)|commit\s+(?:all|everything|remaining)|ship\s+(?:it|all|everything)|accept\s+all|all\s+(?:remaining|good|set)|proceed(?:\s+with\s+all)?|go\s*(?:ahead|for\s*it)?|do\s*it|build(?:\s*(?:it|all))?|create(?:\s*(?:it|all))?|make(?:\s*it)?|ok(?:ay)?|okey|accept(?:ed)?|agreed?|sounds\s*good|looks\s*good|lgtm|let['’]?s\s*(?:go|do\s*(?:it|this))|👍|✅|🚀)\b/i;
     const NEGATION_LEAD_RE =
       /^\s*(?:no+|nope|nah|not\s+yet|hold\s+on|wait|stop|cancel|abort|actually|instead|but|change|revise|amend|edit|remove|add)\b/i;
     const isConfirmationReply = (m: string) => {
