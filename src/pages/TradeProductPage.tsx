@@ -730,6 +730,29 @@ const TradeProductPage: React.FC = () => {
           // Persist wood-finish swatch reference for the thumbnail.
           if (selectedWoodPrice?.id) {
             patch.wood_fabric_id = selectedWoodPrice.id;
+          } else {
+            // Fallback: marble/stone/other variants aren't in the wood-price
+            // list, but they DO have a swatch row in product_fabric_swatches
+            // (used by ActiveSwatchCaption). Match by name so the quote drawer
+            // renders the correct swatch thumbnail (e.g. Angelo M/R table →
+            // "Bianco Statuarietto") just like it does for the chair's Walnut.
+            try {
+              const candidates = [
+                selectedBase, selectedTop, selectedSingleMaterial, variantLabel,
+              ].filter(Boolean).map((s: any) => String(s).toLowerCase());
+              if (candidates.length && (product as any)?.id) {
+                const { data: swRows } = await (supabase as any)
+                  .from("product_fabric_swatches_public")
+                  .select("fabric_id, name, is_active")
+                  .eq("pick_id", (product as any).id);
+                const match = (swRows || []).find((r: any) => {
+                  if (!r || r.is_active === false || !r.name) return false;
+                  const n = String(r.name).toLowerCase();
+                  return candidates.some((c) => c === n || c.includes(n) || n.includes(c));
+                });
+                if (match?.fabric_id) patch.wood_fabric_id = match.fabric_id;
+              }
+            } catch { /* non-blocking */ }
           }
           // Resolve the selected variant's price via the SHARED resolver used
           // by the caption. This guarantees the quote line reflects the finish/size
