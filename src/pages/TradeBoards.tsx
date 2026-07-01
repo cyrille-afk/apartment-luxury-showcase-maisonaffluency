@@ -271,7 +271,7 @@ const TradeBoards = () => {
                 </p>
                 <div className="flex items-center gap-2" onClick={e => e.stopPropagation()}>
                   {board.status !== "draft" && (
-                    <Button variant="ghost" size="sm" className="h-8 gap-1.5 text-xs" onClick={() => copyShareLink(board.share_token)}>
+                    <Button variant="ghost" size="sm" className="h-8 gap-1.5 text-xs" onClick={() => copyShareLink(board.id)}>
                       <Share2 className="h-3 w-3" /> Copy Link
                     </Button>
                   )}
