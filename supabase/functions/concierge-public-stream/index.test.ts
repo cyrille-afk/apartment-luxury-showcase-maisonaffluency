@@ -82,10 +82,10 @@ for (const prompt of QUERIES) {
       const { text } = await readConciergeStream(resp, { timeoutMs: 40_000 });
       assert(text.length > 0, `empty stream for prompt: ${prompt}`);
 
-      const leak = streamContainsAny(text, FORBIDDEN_LEAKS);
+      const leak = FORBIDDEN_LEAK_PATTERNS.find((p) => p.re.test(text));
       assert(
-        leak === null,
-        `public concierge leaked "${leak}" for prompt "${prompt}":\n${text.slice(0, 500)}`,
+        !leak,
+        `public concierge leaked "${leak?.name}" for prompt "${prompt}":\n${text.slice(0, 500)}`,
       );
     },
   });
