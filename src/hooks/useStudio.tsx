@@ -42,13 +42,13 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     typeof window !== "undefined" ? localStorage.getItem(STORAGE_KEY) : null
   );
 
-  const fetchStudios = useCallback(async () => {
+  const fetchStudios = useCallback(async (showLoading = true) => {
     if (!user) {
       setStudios([]);
       setLoading(false);
       return;
     }
-    setLoading(true);
+    if (showLoading) setLoading(true);
     const { data, error } = await supabase
       .from("studio_members")
       .select("role, studio:studios(id, name, slug, logo_url, billing_email, created_by)")
@@ -56,19 +56,35 @@ export function StudioProvider({ children }: { children: ReactNode }) {
 
     if (error || !data) {
       setStudios([]);
-      setLoading(false);
+      if (showLoading) setLoading(false);
       return;
     }
     const memberships: StudioMembership[] = data
       .filter((r: any) => r.studio)
       .map((r: any) => ({ ...r.studio, role: r.role as StudioRole }));
     setStudios(memberships);
-    setLoading(false);
+    if (showLoading) setLoading(false);
   }, [user]);
 
   useEffect(() => {
-    fetchStudios();
+    fetchStudios(true);
   }, [fetchStudios]);
+
+  // Background refresh when studio memberships change for this user
+  useEffect(() => {
+    if (!user) return;
+    const channel = supabase
+      .channel("studio-memberships-" + user.id)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "studio_members", filter: `user_id=eq.${user.id}` },
+        () => fetchStudios(false)
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user, fetchStudios]);
 
   // Pick a default if none stored or stored one not in list
   useEffect(() => {
@@ -99,7 +115,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     studios,
     currentStudio,
     setCurrentStudioId,
-    refresh: fetchStudios,
+    refresh: () => fetchStudios(false),
     isOwner: role === "owner",
     isAdmin: role === "owner" || role === "admin",
     canEdit: role === "owner" || role === "admin" || role === "editor",
