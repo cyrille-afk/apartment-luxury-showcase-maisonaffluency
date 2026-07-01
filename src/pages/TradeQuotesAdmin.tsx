@@ -52,6 +52,7 @@ interface AdminQuoteItem {
     image_url: string | null;
     dimensions: string | null;
     materials: string | null;
+    source_pick_id?: string | null;
   } | null;
 }
 
