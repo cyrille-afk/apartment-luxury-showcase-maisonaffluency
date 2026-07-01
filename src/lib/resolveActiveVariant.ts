@@ -63,7 +63,6 @@ export function resolveActiveVariant(
   }
 
   if (ctx.hasSingleAxisSplit && ctx.singleAxisParsed) {
-    if (!sel.selectedSingleSize && !sel.selectedSingleMaterial) return null;
     return (
       ctx.singleAxisParsed.find(
         (p) =>
@@ -72,6 +71,7 @@ export function resolveActiveVariant(
       )?.variant ?? null
     );
   }
+
 
   if (sel.selectedVariantIdx != null) return sv[sel.selectedVariantIdx] ?? null;
   return null;
