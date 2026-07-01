@@ -20,6 +20,7 @@ interface QuoteItem {
   fabric_currency: string | null;
   fabric?: { name: string; image_url: string | null; tier: string | null; price_per_lm_cents: number | null; currency: string | null } | null;
   wood_fabric?: { name: string; image_url: string | null } | null;
+  variant_swatches?: { name: string; image_url: string }[];
   product: {
     product_name: string;
     brand_name: string;
@@ -28,6 +29,7 @@ interface QuoteItem {
     rrp_price_cents: number | null;
     currency: string;
     source_pick_id?: string | null;
+    id?: string | null;
   };
 }
 
