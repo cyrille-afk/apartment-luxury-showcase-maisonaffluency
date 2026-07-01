@@ -1808,7 +1808,7 @@ const TradeProductPage: React.FC = () => {
 
 
                   onTopFinishChange={(topName) => {
-                    if (!topName) return;
+                    if (!topName) { setSelectedTopDisplay(null); return; }
                     const norm = (s: string) => s.trim().toLowerCase();
                     const nw = norm(topName);
                     const match =
@@ -1817,9 +1817,13 @@ const TradeProductPage: React.FC = () => {
                       || topOptions.find((t) => norm(t).includes(nw))
                       || topName;
                     setSelectedTop(match);
+                    // Preserve the user-clicked swatch name when the variant
+                    // groups several finishes under one slash-joined label.
+                    setSelectedTopDisplay(match !== topName && /\s\/\s/.test(match) ? topName.trim() : null);
                     let nextBase = selectedBase;
                     if (nextBase && !variantsList.some((x: any) => matchesDual(x, nextBase, match, selectedDualSize))) {
                       setSelectedBase(null);
+                      setSelectedBaseDisplay(null);
                       nextBase = null;
                     }
                     handleMaterialChange(match, { base: nextBase, top: match, size: selectedDualSize, fromSwatch: true });
