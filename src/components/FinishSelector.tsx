@@ -111,6 +111,13 @@ interface FinishSelectorProps {
    */
   showWoodSection?: boolean;
   /**
+   * When true, suppresses the base/wood swatch accordion entirely (and any
+   * orphan-swatch spillover into it) while keeping the top-axis accordion.
+   * Used when the Base axis is a physical dimension (Size) so only the
+   * Top-axis (Finish) swatch picker should render.
+   */
+  hideBaseAccordion?: boolean;
+  /**
    * Optional filter restricting which wood-bucket swatches are shown in the
    * primary frame-finish group. Used by dual-axis products (e.g. pendant with
    * "Rod Finish" × "Diffuser") so the rod-finish group doesn't accidentally
@@ -221,7 +228,7 @@ const pickFinishGlyph = (
  * (Trade + Public). Tiles are grouped by category (Upholstery, Wood, …)
  * with a COM ("Customer's Own Material") tile always offered.
  */
-export default function FinishSelector({ pickId, className, productTitle, productCategory, onUpholsteryTierChange, onFabricChange, onHasFabricsChange, onWoodFinishChange, onWoodFinishPricingChange, onWoodFinishesAvailable, includePricing = false, onSwatchImagesChange, woodLabel, showUpholsterySection = true, showWoodSection = true, woodFilter, topFilter, topLabel, onTopFinishChange, onFinishesMissingImagesChange, currentGalleryIndex }: FinishSelectorProps) {
+export default function FinishSelector({ pickId, className, productTitle, productCategory, onUpholsteryTierChange, onFabricChange, onHasFabricsChange, onWoodFinishChange, onWoodFinishPricingChange, onWoodFinishesAvailable, includePricing = false, onSwatchImagesChange, woodLabel, showUpholsterySection = true, showWoodSection = true, hideBaseAccordion = false, woodFilter, topFilter, topLabel, onTopFinishChange, onFinishesMissingImagesChange, currentGalleryIndex }: FinishSelectorProps) {
 
   const isRugProduct = /\brugs?\b/i.test(`${productTitle || ""} ${productCategory || ""}`);
   const isRugComponentSwatch = (fabric: Pick<Fabric, "name" | "category">) => {
@@ -651,14 +658,22 @@ export default function FinishSelector({ pickId, className, productTitle, produc
   // surfaces that aren't priced as their own variant row) falls through into
   // the base/wood accordion so linked swatches are never silently dropped
   // from the product page.
-  const topTiles = topFilter ? allNonFabricTiles.filter((f) => topFilter(f.name)) : [];
+  const topTilesRaw = topFilter ? allNonFabricTiles.filter((f) => topFilter(f.name)) : [];
+  const topTileIdsRaw = new Set(topTilesRaw.map((t) => t.id));
+  const remainingNonFabric = allNonFabricTiles.filter((f) => !topTileIdsRaw.has(f.id));
+  // When the base accordion is suppressed (e.g. dual-axis with Size as the
+  // Base axis), fold any swatch not matched by topFilter into the Top group
+  // so no linked finish is silently dropped from the picker.
+  const topTiles = hideBaseAccordion ? [...topTilesRaw, ...remainingNonFabric] : topTilesRaw;
   const topTileIds = new Set(topTiles.map((t) => t.id));
-  const remainingNonFabric = allNonFabricTiles.filter((f) => !topTileIds.has(f.id));
-  const woodTiles = woodFilter
+  const woodTiles = hideBaseAccordion
+    ? []
+    : woodFilter
     ? (() => {
-        const matched = remainingNonFabric.filter((f) => woodFilter(f.name));
+        const pool = allNonFabricTiles.filter((f) => !topTileIds.has(f.id));
+        const matched = pool.filter((f) => woodFilter(f.name));
         const matchedIds = new Set(matched.map((t) => t.id));
-        const orphans = remainingNonFabric.filter((f) => !matchedIds.has(f.id));
+        const orphans = pool.filter((f) => !matchedIds.has(f.id));
         return [...matched, ...orphans];
       })()
     : remainingNonFabric;
