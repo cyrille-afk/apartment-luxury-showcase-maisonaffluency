@@ -6,7 +6,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, RefreshCw, Download } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { ArrowLeft, RefreshCw, Download, Wand2 } from "lucide-react";
 
 type PickRow = {
   id: string;
