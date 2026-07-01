@@ -6390,6 +6390,7 @@ export type Database = {
       }
     }
     Functions: {
+      accept_studio_invite: { Args: { _invite_id: string }; Returns: Json }
       add_board_comment_by_token: {
         Args: {
           _author_name?: string
