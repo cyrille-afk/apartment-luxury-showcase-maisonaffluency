@@ -256,15 +256,28 @@ const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0 }: QuoteDrawe
                       </div>
                     )}
                   </div>
-                  {(item.wood_fabric?.image_url || item.fabric?.image_url) && (
-                    <div className="flex gap-2">
-                      {item.wood_fabric?.image_url && (
-                        <img
-                          src={item.wood_fabric.image_url}
-                          alt={item.wood_fabric.name || "Finish"}
-                          className="w-9 h-9 rounded object-cover ring-1 ring-border"
-                          loading="lazy"
-                        />
+                  {(item.variant_swatches?.length || item.wood_fabric?.image_url || item.fabric?.image_url) ? (
+                    <div className="flex flex-wrap gap-2">
+                      {item.variant_swatches && item.variant_swatches.length > 0 ? (
+                        item.variant_swatches.map((s) => (
+                          <img
+                            key={s.image_url}
+                            src={s.image_url}
+                            alt={s.name}
+                            title={s.name}
+                            className="w-9 h-9 rounded object-cover ring-1 ring-border"
+                            loading="lazy"
+                          />
+                        ))
+                      ) : (
+                        item.wood_fabric?.image_url && (
+                          <img
+                            src={item.wood_fabric.image_url}
+                            alt={item.wood_fabric.name || "Finish"}
+                            className="w-9 h-9 rounded object-cover ring-1 ring-border"
+                            loading="lazy"
+                          />
+                        )
                       )}
                       {item.fabric?.image_url && (
                         <img
@@ -275,7 +288,7 @@ const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0 }: QuoteDrawe
                         />
                       )}
                     </div>
-                  )}
+                  ) : null}
                 </div>
                 <div className="min-w-0">
                   <p className="font-body text-[9px] text-muted-foreground uppercase tracking-wider">
