@@ -917,7 +917,7 @@ const TradeProductPage: React.FC = () => {
     } finally {
       setAdding(false);
     }
-  }, [user, data, activeQuoteId, toast, selectedBase, selectedTop, selectedDualSize, selectedSingleMaterial, selectedSingleSize, selectedVariantIdx, rugSelection, selectedFabric, selectedWoodPrice, fxRates, displayCurrency, finishesMissingImages, activeVariantCents]);
+  }, [user, data, activeQuoteId, toast, selectedBase, selectedTop, selectedBaseDisplay, selectedTopDisplay, selectedDualSize, selectedSingleMaterial, selectedSingleSize, selectedVariantIdx, rugSelection, selectedFabric, selectedWoodPrice, fxRates, displayCurrency, finishesMissingImages, activeVariantCents]);
 
   // Default the dual-axis pickers to the first base + its uniquely-compatible
   // top so users see a complete pairing on load (e.g. Pars Cocktail Table:
