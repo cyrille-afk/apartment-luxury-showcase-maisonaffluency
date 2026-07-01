@@ -367,19 +367,20 @@ export default function TradePriceDriftAudit() {
                 <th className="text-right px-3 py-2">Pick price</th>
                 <th className="text-right px-3 py-2">Mirror price</th>
                 <th className="text-left px-3 py-2">Pick id</th>
+                <th className="text-right px-3 py-2">Action</th>
               </tr>
             </thead>
             <tbody>
               {busy && !rows && (
                 <tr>
-                  <td colSpan={6} className="px-3 py-6 text-center text-muted-foreground">
+                  <td colSpan={7} className="px-3 py-6 text-center text-muted-foreground">
                     Scanning…
                   </td>
                 </tr>
               )}
               {rows && filtered.length === 0 && !busy && (
                 <tr>
-                  <td colSpan={6} className="px-3 py-6 text-center text-muted-foreground">
+                  <td colSpan={7} className="px-3 py-6 text-center text-muted-foreground">
                     No mismatches. Every priced pick has a matching mirror row.
                   </td>
                 </tr>
@@ -415,6 +416,20 @@ export default function TradePriceDriftAudit() {
                   </td>
                   <td className="px-3 py-2 font-mono text-[11px] text-muted-foreground">
                     {r.pick_id.slice(0, 8)}…
+                  </td>
+                  <td className="px-3 py-2 text-right">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-7 px-2 text-xs"
+                      onClick={() => handleResync(r)}
+                      disabled={resyncing.has(r.pick_id) || resyncingAll}
+                    >
+                      <Wand2
+                        className={`w-3 h-3 mr-1 ${resyncing.has(r.pick_id) ? "animate-pulse" : ""}`}
+                      />
+                      {resyncing.has(r.pick_id) ? "Resyncing…" : "Resync"}
+                    </Button>
                   </td>
                 </tr>
               ))}
