@@ -6597,6 +6597,20 @@ export type Database = {
           slug: string
         }[]
       }
+      get_my_pending_invites: {
+        Args: never
+        Returns: {
+          created_at: string
+          expires_at: string
+          id: string
+          invited_by_name: string
+          is_accepted: boolean
+          is_expired: boolean
+          role: Database["public"]["Enums"]["studio_role"]
+          studio_id: string
+          studio_name: string
+        }[]
+      }
       get_my_phone: { Args: never; Returns: string }
       get_recent_scrape_failures: {
         Args: { since_minutes?: number }
