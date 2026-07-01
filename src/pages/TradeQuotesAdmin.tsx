@@ -289,13 +289,23 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
       if (src && src !== targetCcy) sources.add(src);
     });
     if (displayCcy === "gbp" && quoteCcy !== "GBP") sources.add(quoteCcy);
-    if (sources.size === 0) { setFxSource("identity"); return; }
+    if (sources.size === 0) { setFxSource("identity"); setFxPairs([]); return; }
     const pairs = Array.from(sources).map((src) => ({ src, tgt: targetCcy }));
-    // Warm the cache, then read back the definitive source per pair.
-    getFxRates(pairs).then(() => {
+    // Warm the cache, then read back the definitive source + rate per pair
+    // so the applied-rate chips next to the total match the visible numbers.
+    getFxRates(pairs).then((rates) => {
       setFxSource(summarizeFxSources(pairs.map((p) => getFxSource(p.src, p.tgt))));
+      setFxPairs(
+        pairs.map((p) => ({
+          src: p.src,
+          tgt: p.tgt,
+          rate: rates[`${p.src}_${p.tgt}`] ?? 1,
+          source: getFxSource(p.src, p.tgt),
+        })),
+      );
     });
   }, [displayCcy, quote?.currency, items]);
+
 
 
   useEffect(() => {
