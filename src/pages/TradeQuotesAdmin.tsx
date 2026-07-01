@@ -4,6 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { hydrateQuotePricesFromPicks } from "@/lib/hydrateQuotePricesFromPicks";
 import { getFxRates, getFxSource, summarizeFxSources, type FxSource } from "@/lib/fxRates";
 import { FxSourceBadge } from "@/components/trade/FxSourceBadge";
+import { FxAppliedRates, type FxAppliedPair } from "@/components/trade/FxAppliedRates";
+
 import { useAuth } from "@/hooks/useAuth";
 import { Navigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -262,6 +264,8 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
   /** Display the totals block in the quote currency or in GBP DDP landed cost. */
   const [displayCcy, setDisplayCcy] = useState<"quote" | "gbp">("quote");
   const [fxSource, setFxSource] = useState<FxSource>("identity");
+  const [fxPairs, setFxPairs] = useState<FxAppliedPair[]>([]);
+
   const [landedCostSettings, setLandedCostSettings] = useState<{ cbm: number; kg: number; mode: "road" | "courier" }>(() => ({
     cbm: DEFAULT_GBP_LANDED_CBM,
     kg: Math.round(DEFAULT_GBP_LANDED_CBM * GBP_LANDED_KG_PER_CBM.road),
@@ -285,13 +289,23 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
       if (src && src !== targetCcy) sources.add(src);
     });
     if (displayCcy === "gbp" && quoteCcy !== "GBP") sources.add(quoteCcy);
-    if (sources.size === 0) { setFxSource("identity"); return; }
+    if (sources.size === 0) { setFxSource("identity"); setFxPairs([]); return; }
     const pairs = Array.from(sources).map((src) => ({ src, tgt: targetCcy }));
-    // Warm the cache, then read back the definitive source per pair.
-    getFxRates(pairs).then(() => {
+    // Warm the cache, then read back the definitive source + rate per pair
+    // so the applied-rate chips next to the total match the visible numbers.
+    getFxRates(pairs).then((rates) => {
       setFxSource(summarizeFxSources(pairs.map((p) => getFxSource(p.src, p.tgt))));
+      setFxPairs(
+        pairs.map((p) => ({
+          src: p.src,
+          tgt: p.tgt,
+          rate: rates[`${p.src}_${p.tgt}`] ?? 1,
+          source: getFxSource(p.src, p.tgt),
+        })),
+      );
     });
   }, [displayCcy, quote?.currency, items]);
+
 
 
   useEffect(() => {
@@ -640,6 +654,8 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
                 {fxSource !== "identity" && <FxSourceBadge source={fxSource} />}
                 {quote?.notes && <span>· User notes: <span className="italic">"{quote.notes}"</span></span>}
               </p>
+              {fxPairs.length > 0 && <FxAppliedRates pairs={fxPairs} className="mt-1" />}
+
             </div>
             {quote && (() => {
               const config = statusConfig[quote.status] || statusConfig.draft;

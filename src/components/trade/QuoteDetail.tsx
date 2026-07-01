@@ -5,6 +5,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { hydrateQuotePricesFromPicks } from "@/lib/hydrateQuotePricesFromPicks";
 import { getFxRates, FALLBACK_RATES, getFxSource, summarizeFxSources, type FxSource } from "@/lib/fxRates";
 import { FxSourceBadge } from "@/components/trade/FxSourceBadge";
+import { FxAppliedRates } from "@/components/trade/FxAppliedRates";
+
 import { useAuth } from "@/hooks/useAuth";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { useToast } from "@/hooks/use-toast";
@@ -236,6 +238,8 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   const [currencyOpen, setCurrencyOpen] = useState(false);
   const [fxRates, setFxRates] = useState<Record<string, number>>({});
   const [fxSource, setFxSource] = useState<FxSource>("identity");
+  const [fxPairs, setFxPairs] = useState<Array<{ src: string; tgt: string; rate: number; source: FxSource }>>([]);
+
   const [tradeDiscount, setTradeDiscount] = useState(true);
   // GST defaults to ON only for SGD quotes; other currencies (EUR/USD/GBP) default OFF.
   // The user can still toggle it on manually if needed.
@@ -389,11 +393,20 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
       // Always include quote→target so the badge reflects the display
       // conversion itself even when every line is already in `currency`.
       if (displayCcy === "gbp" && currency !== "GBP") sourceCurrencies.add(currency);
-      if (sourceCurrencies.size === 0) { setFxRates({}); setFxSource("identity"); return; }
+      if (sourceCurrencies.size === 0) { setFxRates({}); setFxSource("identity"); setFxPairs([]); return; }
       const pairs = Array.from(sourceCurrencies).map((src) => ({ src, tgt: targetCcy }));
       const rates = await getFxRates(pairs);
       setFxRates(rates);
       setFxSource(summarizeFxSources(pairs.map((p) => getFxSource(p.src, p.tgt))));
+      setFxPairs(
+        pairs.map((p) => ({
+          src: p.src,
+          tgt: p.tgt,
+          rate: rates[`${p.src}_${p.tgt}`] ?? 1,
+          source: getFxSource(p.src, p.tgt),
+        })),
+      );
+
     };
     if (items.length > 0) fetchRates();
   }, [items, currency, displayCcy]);
@@ -2012,6 +2025,8 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
               </div>
               {fxSource !== "identity" && <FxSourceBadge source={fxSource} />}
             </div>
+            {fxPairs.length > 0 && <FxAppliedRates pairs={fxPairs} className="mt-1" />}
+
 
 
             <div className="flex items-center gap-4 flex-wrap">
