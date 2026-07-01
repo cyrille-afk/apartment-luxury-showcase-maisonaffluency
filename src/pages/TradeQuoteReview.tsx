@@ -34,6 +34,7 @@ interface ItemRow {
     rrp_price_cents: number | null;
     currency: string | null;
     image_url: string | null;
+    source_pick_id?: string | null;
   } | null;
 }
 
