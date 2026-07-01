@@ -3114,8 +3114,9 @@ serve(async (req) => {
     // <designer>'s pieces", "what do you have by <designer>". If a known
     // designer is mentioned AND the message signals catalog interest, treat
     // it as an enumeration request so we ship the full curator-pick set.
-    const softInterestRe = /\b(interested\s+in|tell\s+me\s+about|got\s+any|have\s+any|any\s+of|what\s+(?:do\s+you\s+have|about|have\s+you\s+got|('|’)s?\s+available)|do\s+you\s+(?:have|carry|stock)|browse|explore|see|look\s+at)\b/i;
-    const catalogNounRe = /\b(item|piece|product|work|object|design|collection|catalog(?:ue)?|range|edition|selection|offering|inventory|stuff|things)\b/i;
+    const softInterestRe = /\b(interested\s+in|interest(?:ed)?|curious\s+about|keen\s+on|into|tell\s+me\s+about|show\s+me|show\s+us|give\s+me|send\s+me|share|surface|pull\s+up|bring\s+up|open\s+up|got\s+any|have\s+any|any\s+of|what\s+(?:do\s+you\s+have|about|have\s+you\s+got|('|’)s?\s+available)|do\s+you\s+(?:have|carry|stock|offer)|browse|explore|see|view|look(?:ing)?\s+(?:at|for|into)|shopping\s+for|sourcing|source|considering|consider|would\s+like\s+(?:to\s+see|to\s+view)?|can\s+(?:i|we|you)\s+(?:see|view|get)|let\s+me\s+see|need|want(?:ed)?|recommend|propose|spec|specify|curate|pick)\b/i;
+    const catalogNounRe = /\b(item|piece|product|work|object|design|collection|catalog(?:ue)?|range|edition|selection|offering|inventory|stuff|things|option|pick|tear\s?sheet|line|portfolio|roster|list|roundup|round-up|overview|assortment|lineup|line-up)\b/i;
+
     const isEnumerationRequest =
       enumerationVerbRe.test(lastUserMsg || "") ||
       (mentionsKnownDesigner &&
