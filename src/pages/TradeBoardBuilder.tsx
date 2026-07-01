@@ -43,7 +43,7 @@ interface Board {
   id: string;
   title: string;
   client_name: string;
-  share_token: string;
+  share_token?: string;
   status: string;
   token_expires_at: string | null;
   token_rotated_at: string | null;
