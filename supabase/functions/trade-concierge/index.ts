@@ -3046,7 +3046,6 @@ serve(async (req) => {
     // all Alexander Lamont items" returns all 15, not whatever subset the
     // model happens to pick.
     const enumerationVerbRe = /\b(list (?:all|every|the)|show (?:all|me all|every)|(?:all|every) (?:item|piece|product|work)s? (?:by|from)|everything (?:by|from)|which .*(?:do you|are)|what .*(?:do you have|are available))\b/i;
-    console.log("[concierge shortcut probe]", { mentionsKnownDesigner, mentionedDesigners, enumMatch: enumerationVerbRe.test(lastUserMsg || ""), lastUserMsg });
     if (mentionsKnownDesigner && enumerationVerbRe.test(lastUserMsg || "")) {
       const { data: designerRows } = await supabase
         .from("designers")
