@@ -20,6 +20,7 @@ interface QuoteItem {
   fabric_currency: string | null;
   fabric?: { name: string; image_url: string | null; tier: string | null; price_per_lm_cents: number | null; currency: string | null } | null;
   wood_fabric?: { name: string; image_url: string | null } | null;
+  variant_swatches?: { name: string; image_url: string }[];
   product: {
     product_name: string;
     brand_name: string;
@@ -28,6 +29,7 @@ interface QuoteItem {
     rrp_price_cents: number | null;
     currency: string;
     source_pick_id?: string | null;
+    id?: string | null;
   };
 }
 
@@ -55,7 +57,7 @@ const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0 }: QuoteDrawe
       setLoading(true);
       const { data } = await supabase
         .from("trade_quote_items")
-        .select("id, image_url, quantity, unit_price_cents, unit_price_currency, variant_label, fabric_id, wood_fabric_id, fabric_meters, fabric_upcharge_cents, fabric_currency, fabric:fabrics!fabric_id(name, image_url, tier, price_per_lm_cents, currency), wood_fabric:fabrics!trade_quote_items_wood_fabric_id_fkey(name, image_url), product:trade_products(product_name, brand_name, image_url, trade_price_cents, rrp_price_cents, currency, source_pick_id)")
+        .select("id, image_url, quantity, unit_price_cents, unit_price_currency, variant_label, fabric_id, wood_fabric_id, fabric_meters, fabric_upcharge_cents, fabric_currency, fabric:fabrics!fabric_id(name, image_url, tier, price_per_lm_cents, currency), wood_fabric:fabrics!trade_quote_items_wood_fabric_id_fkey(name, image_url), product:trade_products(id, product_name, brand_name, image_url, trade_price_cents, rrp_price_cents, currency, source_pick_id)")
         .eq("quote_id", quoteId)
         .order("created_at", { ascending: false });
 
@@ -80,6 +82,53 @@ const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0 }: QuoteDrawe
         // Fallback: prefer freshest price from designer_curator_picks when the
         // mirror row is missing or stale.
         mapped = await hydrateQuotePricesFromPicks(mapped, "product");
+
+        // Multi-axis finish swatches: dual/triple-axis products (e.g. Angelo
+        // M/R table = Base · Top · Size all in stone) only get ONE swatch id
+        // saved on the row. Resolve every segment of `variant_label` against
+        // this product's swatch library so the drawer shows one thumbnail per
+        // selected finish instead of just the first fuzzy match.
+        const pickIds = Array.from(new Set(
+          mapped.map((m) => m.product?.source_pick_id).filter(Boolean) as string[]
+        ));
+        if (pickIds.length > 0) {
+          const { data: swRows } = await (supabase as any)
+            .from("product_fabric_swatches_public")
+            .select("pick_id, name, image_url, is_active")
+            .in("pick_id", pickIds);
+          const byPick = new Map<string, { name: string; image_url: string }[]>();
+          for (const r of (swRows || []) as any[]) {
+            if (!r || r.is_active === false || !r.image_url || !r.name) continue;
+            const list = byPick.get(r.pick_id) || [];
+            list.push({ name: String(r.name), image_url: String(r.image_url) });
+            byPick.set(r.pick_id, list);
+          }
+          const norm = (s: string) => s.toLowerCase().replace(/\s+/g, " ").trim();
+          for (const item of mapped) {
+            const pid = item.product?.source_pick_id;
+            if (!pid || !item.variant_label) continue;
+            const lib = byPick.get(pid);
+            if (!lib || lib.length === 0) continue;
+            const segments = item.variant_label
+              .split(/·|\//)
+              .map((s) => norm(s))
+              .filter(Boolean);
+            if (segments.length === 0) continue;
+            const seen = new Set<string>();
+            const matched: { name: string; image_url: string }[] = [];
+            for (const seg of segments) {
+              const hit = lib.find((s) => {
+                const n = norm(s.name);
+                return n === seg || seg.includes(n) || n.includes(seg);
+              });
+              if (hit && !seen.has(hit.image_url)) {
+                seen.add(hit.image_url);
+                matched.push(hit);
+              }
+            }
+            if (matched.length > 0) item.variant_swatches = matched;
+          }
+        }
 
 
         // For items without a price, try to find a priced record via fuzzy matching
@@ -207,15 +256,28 @@ const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0 }: QuoteDrawe
                       </div>
                     )}
                   </div>
-                  {(item.wood_fabric?.image_url || item.fabric?.image_url) && (
-                    <div className="flex gap-2">
-                      {item.wood_fabric?.image_url && (
-                        <img
-                          src={item.wood_fabric.image_url}
-                          alt={item.wood_fabric.name || "Finish"}
-                          className="w-9 h-9 rounded object-cover ring-1 ring-border"
-                          loading="lazy"
-                        />
+                  {(item.variant_swatches?.length || item.wood_fabric?.image_url || item.fabric?.image_url) ? (
+                    <div className="flex flex-wrap gap-2">
+                      {item.variant_swatches && item.variant_swatches.length > 0 ? (
+                        item.variant_swatches.map((s) => (
+                          <img
+                            key={s.image_url}
+                            src={s.image_url}
+                            alt={s.name}
+                            title={s.name}
+                            className="w-9 h-9 rounded object-cover ring-1 ring-border"
+                            loading="lazy"
+                          />
+                        ))
+                      ) : (
+                        item.wood_fabric?.image_url && (
+                          <img
+                            src={item.wood_fabric.image_url}
+                            alt={item.wood_fabric.name || "Finish"}
+                            className="w-9 h-9 rounded object-cover ring-1 ring-border"
+                            loading="lazy"
+                          />
+                        )
                       )}
                       {item.fabric?.image_url && (
                         <img
@@ -226,7 +288,7 @@ const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0 }: QuoteDrawe
                         />
                       )}
                     </div>
-                  )}
+                  ) : null}
                 </div>
                 <div className="min-w-0">
                   <p className="font-body text-[9px] text-muted-foreground uppercase tracking-wider">
