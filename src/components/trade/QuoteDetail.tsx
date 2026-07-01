@@ -978,30 +978,27 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
       const rawUnit = item.unit_price_cents ?? catalogSourcePriceCents(item) ?? null;
       const unit = convertCents(rawUnit, itemPriceCurrency(item, currency), currency);
 
-      // Fold the selected fabric (upholstery) and wood finish onto the PDF
-      // line — otherwise they render in the UI but silently disappear from
-      // the downloadable quote, which loses critical order context.
+      // Mirror the on-screen fabric + wood-finish rows onto dedicated PDF
+      // meta lines so they render right below the Finish (variant) label,
+      // instead of being folded into free-form Notes.
       const fabric: any = (item as any).fabric;
       const wood: any = (item as any).wood_fabric;
       const fabricCcy = ((item as any).fabric_currency as string | null) || fabric?.currency || "EUR";
       const fabricUpcharge = (item as any).fabric_upcharge_cents as number | null;
       const fabricMeters = (item as any).fabric_meters as number | null;
       const sym = fabricCcy === "EUR" ? "€" : fabricCcy === "USD" ? "$" : fabricCcy === "GBP" ? "£" : fabricCcy === "SGD" ? "S$" : `${fabricCcy} `;
-      const extraParts: string[] = [];
-      if (fabric?.name) {
-        let f = `Fabric: ${fabric.name}${fabric?.tier ? ` · CAT ${fabric.tier}` : ""}`;
+      let fabricLabel: string | null = null;
+      if (fabric?.name || fabricUpcharge) {
+        let f = `Fabric: ${fabric?.name || "Selected"}${fabric?.tier ? ` · CAT ${fabric.tier}` : ""}`;
         if (fabricUpcharge) {
           f += ` — +${sym}${Math.round(fabricUpcharge / 100).toLocaleString()}`;
           if (fabricMeters) f += ` (${fabricMeters} m)`;
         }
-        extraParts.push(f);
+        fabricLabel = f;
       }
-      if (wood?.name && !(item.variant_label && item.variant_label.toLowerCase().includes(String(wood.name).toLowerCase()))) {
-        extraParts.push(`Wood finish: ${wood.name}`);
-      }
-      const mergedNotes = [extraParts.length ? extraParts.join("\n") : null, item.notes ?? null]
-        .filter(Boolean)
-        .join("\n\n") || null;
+      const woodFinishLabel = wood?.name && !(item.variant_label && item.variant_label.toLowerCase().includes(String(wood.name).toLowerCase()))
+        ? `Wood finish: ${wood.name}`
+        : null;
 
       return {
         productName: product?.product_name || "—",
@@ -1010,8 +1007,10 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
         materials: product?.materials ?? null,
         edition: item.edition ?? null,
         variantLabel: item.variant_label ?? null,
+        fabricLabel,
+        woodFinishLabel,
         leadTime: product?.lead_time ?? null,
-        notes: mergedNotes,
+        notes: item.notes ?? null,
         quantity: item.quantity,
         unitPriceCents: unit,
         lineTotalCents: unit != null ? unit * item.quantity : null,

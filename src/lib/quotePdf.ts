@@ -34,6 +34,10 @@ export interface QuotePdfLine {
   materials?: string | null;
   edition?: string | null;
   variantLabel?: string | null;
+  /** Formatted upholstery fabric line (e.g. "Fabric: ADA 08 Naturel · CAT B — +€300 (3 m)"). Rendered on its own meta line under Finish. */
+  fabricLabel?: string | null;
+  /** Formatted wood finish line (e.g. "Wood finish: Walnut"). */
+  woodFinishLabel?: string | null;
   leadTime?: string | null;
   notes?: string | null;
   quantity: number;
@@ -853,6 +857,8 @@ function drawTable(
     const showMaterials = !line.variantLabel;
     const meta = [
       variantLabel,
+      line.fabricLabel ?? null,
+      line.woodFinishLabel ?? null,
       dimsAlreadyInVariant ? null : line.dimensions,
       showMaterials ? line.materials : null,
       editionLabel,
