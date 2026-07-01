@@ -2217,7 +2217,9 @@ function buildOpeningBriefDiscoveryReply(latestUserMessage: string, langCode = "
   const lower = (latestUserMessage || "").toLowerCase();
   const wantsDiningTable = /\bdining\s+table\b/.test(lower);
   const location = /\bbelgravia\b/.test(lower) ? "Belgravia" : (lower.match(/\b(mayfair|chelsea|knightsbridge|kensington|notting hill|marylebone)\b/)?.[1] || null);
-  const property = /\btownhouse\b/.test(lower) ? "townhouse" : (lower.match(/\b(penthouse|villa|apartment|house|mews)\b/)?.[1] || null);
+  const property = /\bgcb\b|\bgood class bungalow\b/.test(lower) ? "Good Class Bungalow"
+    : /\btownhouse\b/.test(lower) ? "townhouse"
+    : (lower.match(/\b(penthouse|villa|apartment|house|mews|shophouse|bungalow|condominium|condo|palazzo|brownstone|loft|yal[ıi]|riad|hacienda|hutong|machiya|altbau|greystone)\b/)?.[1] || null);
   const piece = wantsDiningTable ? "a statement dining table" : "a statement piece";
   const place = [location, property].filter(Boolean).join(" ").trim();
   const mirror = place ? `${piece} for your ${place}` : piece;
