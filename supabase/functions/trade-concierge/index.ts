@@ -2371,7 +2371,7 @@ function propertyExamplesForLocation(loc: string): string {
 function buildLocationOnlyReply(latestUserMessage: string, history: any[], langCode = "en"): string | null {
   const normalized = normalizeLoose(latestUserMessage);
   if (!LOCATION_ONLY_FOLLOWUPS.has(normalized)) return null;
-  const display = latestUserMessage.trim().replace(/\s+/g, " ");
+  const display = expandLocationAlias(latestUserMessage.trim().replace(/\s+/g, " "));
   const recent = history
     .slice(-6)
     .map((m: any) => (typeof m?.content === "string" ? m.content : ""))
