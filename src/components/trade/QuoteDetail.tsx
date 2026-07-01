@@ -357,17 +357,20 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   const convertCents = (cents: number | null, fromCurrency: string, toCurrency: string): number | null => {
     if (!cents) return null;
     if (fromCurrency === toCurrency) return cents;
-    // rate key e.g. "EUR_SGD"
     const key = `${fromCurrency}_${toCurrency}`;
-    const rate = fxRates[key];
-    if (!rate) return cents; // fallback: show unconverted
+    // Prefer live rates, fall back to the hardcoded table so a network
+    // outage never causes prices to render in the wrong currency.
+    const rate = fxRates[key] ?? FALLBACK_RATES[key];
+    if (!rate) return cents;
     return Math.round(cents * rate);
   };
 
-  // Fetch exchange rates from frankfurter.app
+  // Fetch exchange rates via the resilient helper (frankfurter → open.er-api
+  // → hardcoded fallback). Re-runs whenever the quote's currency or the set
+  // of source currencies changes, so switching the header currency actually
+  // reprices every line.
   useEffect(() => {
     const fetchRates = async () => {
-      // Collect unique source currencies from saved line prices/catalog prices.
       const sourceCurrencies = new Set<string>();
       items.forEach((item) => {
         const sourceCurrency = item.unit_price_cents != null
@@ -378,22 +381,10 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
         }
       });
       if (sourceCurrencies.size === 0) { setFxRates({}); return; }
-
-      const newRates: Record<string, number> = {};
-      await Promise.all(
-        Array.from(sourceCurrencies).map(async (src) => {
-          try {
-            const res = await fetch(`https://api.frankfurter.app/latest?from=${src}&to=${currency}`);
-            const data = await res.json();
-            if (data.rates?.[currency]) {
-              newRates[`${src}_${currency}`] = data.rates[currency];
-            }
-          } catch {
-            // silently fail — will show unconverted price
-          }
-        })
+      const rates = await getFxRates(
+        Array.from(sourceCurrencies).map((src) => ({ src, tgt: currency })),
       );
-      setFxRates(newRates);
+      setFxRates(rates);
     };
     if (items.length > 0) fetchRates();
   }, [items, currency]);
