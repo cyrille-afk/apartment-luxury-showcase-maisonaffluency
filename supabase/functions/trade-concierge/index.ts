@@ -2253,15 +2253,66 @@ async function fetchStrictTypologyCandidates(
   ].filter((r: any) => rowMatchesRequestedTypology(r, typology));
 }
 
+// Common city / country abbreviations mapped to canonical full names.
+// Keep keys lowercased and free of punctuation — matched via normalizeLoose.
+const LOCATION_ALIASES: Record<string, string> = {
+  sg: "Singapore", sgp: "Singapore",
+  hk: "Hong Kong", hkg: "Hong Kong",
+  bkk: "Bangkok",
+  jkt: "Jakarta", cgk: "Jakarta",
+  hcm: "Ho Chi Minh City", hcmc: "Ho Chi Minh City", saigon: "Ho Chi Minh City",
+  han: "Hanoi",
+  kl: "Kuala Lumpur", kul: "Kuala Lumpur",
+  mnl: "Manila",
+  tpe: "Taipei",
+  pvg: "Shanghai", sha: "Shanghai",
+  pek: "Beijing", bjs: "Beijing",
+  hnd: "Tokyo", nrt: "Tokyo", tyo: "Tokyo",
+  icn: "Seoul", sel: "Seoul",
+  del: "Delhi", bom: "Mumbai", blr: "Bengaluru", maa: "Chennai",
+  nyc: "New York", ny: "New York", jfk: "New York", manhattan: "New York",
+  la: "Los Angeles", lax: "Los Angeles",
+  sf: "San Francisco", sfo: "San Francisco",
+  dc: "Washington DC", "washington dc": "Washington DC",
+  mia: "Miami",
+  chi: "Chicago", ord: "Chicago",
+  yyz: "Toronto", yvr: "Vancouver",
+  dxb: "Dubai", auh: "Abu Dhabi", doh: "Doha", ruh: "Riyadh", jed: "Jeddah",
+  ldn: "London", lon: "London", lhr: "London",
+  cdg: "Paris", par: "Paris",
+  mxp: "Milan", lin: "Milan", mil: "Milan",
+  fco: "Rome",
+  bcn: "Barcelona", mad: "Madrid",
+  ber: "Berlin", muc: "Munich", fra: "Frankfurt", ham: "Hamburg",
+  ams: "Amsterdam", bru: "Brussels", vie: "Vienna", zrh: "Zurich", gva: "Geneva",
+  mc: "Monaco", mco: "Monaco",
+  syd: "Sydney", mel: "Melbourne",
+  gru: "São Paulo", gig: "Rio de Janeiro", mex: "Mexico City",
+  jnb: "Johannesburg", cpt: "Cape Town",
+  ist: "Istanbul", ath: "Athens",
+  uae: "United Arab Emirates", uk: "United Kingdom", gb: "United Kingdom",
+  usa: "United States", us: "United States",
+};
+
+function expandLocationAlias(raw: string): string {
+  const key = normalizeLoose(raw);
+  return LOCATION_ALIASES[key] || raw;
+}
+
 const LOCATION_ONLY_FOLLOWUPS = new Set([
   "london", "new york", "los angeles", "miami", "paris", "milan", "rome", "geneva", "zurich",
   "monaco", "dubai", "abu dhabi", "doha", "riyadh", "jeddah", "hong kong", "singapore",
   "sydney", "melbourne", "tokyo", "seoul", "toronto", "vancouver", "gb", "uk", "united kingdom",
-  "usa", "united states", "france", "italy", "switzerland", "uae", "singapore", "hong kong",
+  "usa", "united states", "france", "italy", "switzerland", "uae",
+  "bangkok", "jakarta", "ho chi minh city", "hanoi", "kuala lumpur", "manila", "taipei",
+  "shanghai", "beijing", "delhi", "mumbai", "bengaluru", "chennai", "washington dc",
+  "chicago", "san francisco", "sao paulo", "são paulo", "rio de janeiro", "mexico city",
+  "johannesburg", "cape town", "istanbul", "athens",
+  ...Object.keys(LOCATION_ALIASES),
 ]);
 
 function propertyExamplesForLocation(loc: string): string {
-  const l = loc.toLowerCase();
+  const l = expandLocationAlias(loc).toLowerCase();
   if (/singapore/.test(l)) return "a Good Class Bungalow, a Sentosa Cove waterfront villa, a shophouse conservation home or a sky-terrace condominium";
   if (/hong kong/.test(l)) return "a Peak villa, a Mid-Levels apartment, a harbour-front penthouse or a Repulse Bay house";
   if (/dubai/.test(l)) return "a Palm Jumeirah villa, an Emirates Hills mansion, a Downtown penthouse or a Dubai Hills estate";
