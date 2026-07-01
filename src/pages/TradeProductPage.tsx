@@ -698,26 +698,13 @@ const TradeProductPage: React.FC = () => {
           if (selectedWoodPrice?.id) {
             patch.wood_fabric_id = selectedWoodPrice.id;
           }
-          // Resolve the selected variant's price (single-axis, dual-axis, or
-          // base-only). This ensures the quote line reflects the finish/size
+          // Resolve the selected variant's price via the SHARED resolver used
+          // by the caption. This guarantees the quote line reflects the finish/size
           // the user actually picked (e.g. Travertino Rosso €14,263) rather
-          // than the RPC's default "starting" RRP (Kynos €12,116).
-          const resolveSelectedVariantCents = (): number | null => {
-            if (!sv || !sv.length) return null;
-            const norm = (s: any) => String(s || "").trim();
-            const priced = (v: any) =>
-              typeof v?.price_cents === "number" && v.price_cents > 0 ? (v.price_cents as number) : null;
-            if (selectedVariantIdx != null) return priced(sv[selectedVariantIdx]);
-            const matches = sv.filter((v: any) => {
-              if (selectedBase && norm(v.base) !== norm(selectedBase)) return false;
-              if (selectedTop && norm(v.top) !== norm(selectedTop)) return false;
-              if (selectedDualSize && norm(v.label) !== norm(selectedDualSize)) return false;
-              return !!(selectedBase || selectedTop || selectedDualSize);
-            });
-            const p = matches.map(priced).filter((c): c is number => c != null);
-            return p.length ? Math.min(...p) : null;
-          };
-          const selectedVariantCents = resolveSelectedVariantCents();
+          // than the RPC's default "starting" RRP (Kynos €12,116) — and stays
+          // in lock-step with the price shown above the "Add to Quote" button.
+          const selectedVariantCents = activeVariantCents;
+
 
           // Combined override unit price (wood + fabric upcharge), in quote currency.
           if (overrideUnitPriceCents != null) {
