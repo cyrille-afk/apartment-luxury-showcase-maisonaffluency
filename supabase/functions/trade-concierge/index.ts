@@ -2854,9 +2854,40 @@ serve(async (req) => {
         .map((p) => p.text)
         .join(" ");
     };
-    const lastUserMsg = extractText(
+    let lastUserMsg = extractText(
       [...messages].reverse().find((m: any) => m.role === "user")?.content,
     );
+
+    // ── Skip/exclude confirmation gate ────────────────────────────────────
+    // When the user asks us to skip items, we don't build the tearsheet
+    // right away — we first echo the skip/keep breakdown and wait for
+    // an explicit confirmation on the next turn. The prior assistant reply
+    // carries an invisible marker so we can detect the confirmation turn
+    // and rehydrate the original request.
+    const SKIP_CONFIRM_MARKER = "\u2063SKIP-CONFIRM\u2063"; // invisible sentinel
+    const isConfirmationReply = (m: string) =>
+      /^\s*(yes|yep|yeah|yup|sure|confirm(ed)?|proceed|go\s*ahead|do\s*it|build(\s*it)?|create(\s*it)?|approve[d]?|ok(ay)?|👍|✅)[\s.!]*$/i
+        .test((m || "").trim());
+    let isConfirmingSkip = false;
+    {
+      const reversed = [...messages].reverse();
+      const priorAssistantIdx = reversed.findIndex((m: any) => m.role === "assistant");
+      const priorAssistant = priorAssistantIdx >= 0 ? reversed[priorAssistantIdx] : null;
+      const priorAssistantText = extractText(priorAssistant?.content);
+      if (
+        priorAssistantText.includes(SKIP_CONFIRM_MARKER) &&
+        isConfirmationReply(lastUserMsg)
+      ) {
+        // Find the user message that came BEFORE the prior assistant reply.
+        const before = reversed.slice(priorAssistantIdx + 1);
+        const originalUser = before.find((m: any) => m.role === "user");
+        const originalText = extractText(originalUser?.content);
+        if (originalText) {
+          isConfirmingSkip = true;
+          lastUserMsg = originalText;
+        }
+      }
+    }
     const hasAttachments = [...messages].some(
       (m: any) =>
         m?.role === "user" &&
