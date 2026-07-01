@@ -496,6 +496,9 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
             </span>
             <Link
               to={result.url}
+              onClick={() => {
+                try { window.dispatchEvent(new Event("concierge:close")); } catch {}
+              }}
               className="flex items-center gap-1 font-body text-[11px] uppercase tracking-widest text-accent hover:underline"
             >
               Open
