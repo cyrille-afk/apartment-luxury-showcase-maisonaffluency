@@ -3092,6 +3092,61 @@ serve(async (req) => {
         .map((s) => s.n);
     };
 
+    // Parse in-chat "skip / exclude / omit / without / except / remove / drop /
+    // leave out / don't include" instructions from the user's latest message
+    // and return the set of pick IDs the user wants filtered out of the next
+    // proposal. Supports two reference styles:
+    //   (a) Ordinal indices — "skip 1, 3, 5 and 7" (1-based against the given
+    //       preview order, which mirrors what was just enumerated on-screen).
+    //   (b) Title fragments — "skip the Angelo dining table and the Scala
+    //       console" — matched against pick titles (>=4 char tokens, minus
+    //       stopwords). A single distinctive token is enough.
+    const EXCLUSION_STOPWORDS = new Set([
+      "the","and","from","with","that","this","them","those","these","item","items",
+      "piece","pieces","first","last","next","above","below","before","after","also",
+      "please","just","only","need","want","would","should","could","really","them",
+      "keep","include","exclude","except","skip","omit","without","remove","drop",
+      "leave","don","dont","doesnt","cant","cannot","dining","table","chair","chairs",
+      "lamp","lamps","sconce","sconces","console","mirror","cabinet","sofa","stool",
+      "stools","light","lights","lighting","seating","piece","pieces","object","objects",
+    ]);
+    const parseUserExclusions = (
+      userMsg: string,
+      previewRows: Array<{ id: string; title?: string | null }>,
+    ): Set<string> => {
+      const excluded = new Set<string>();
+      if (!userMsg || previewRows.length === 0) return excluded;
+      const lc = userMsg.toLowerCase();
+      const SKIP_RE = /(?:\bskip\b|\bexclud\w*|\bomit\b|\bwithout\b|\bexcept\b|\bremove\b|\bdrop\b|\bleave\s+out\b|\bdo\s?n['’]?t\s+include\b|\bno\s+need\s+for\b)([^.?!;\n]*)/gi;
+      const matches = Array.from(lc.matchAll(SKIP_RE));
+      if (matches.length === 0) return excluded;
+      const zone = matches.map((m) => m[1] || "").join(" ");
+      // Ordinal indices (1-based) referencing the just-enumerated list order.
+      const nums = Array.from(zone.matchAll(/#?\b(\d{1,2})(?:st|nd|rd|th)?\b/g))
+        .map((m) => parseInt(m[1], 10))
+        .filter((n) => Number.isFinite(n));
+      for (const n of nums) {
+        if (n >= 1 && n <= previewRows.length) {
+          const row = previewRows[n - 1];
+          if (row?.id) excluded.add(row.id);
+        }
+      }
+      // Title-token matching.
+      const tokens = Array.from(new Set(
+        zone.split(/[^a-zà-ÿ0-9]+/i).filter((t) => t.length >= 4 && !EXCLUSION_STOPWORDS.has(t)),
+      ));
+      if (tokens.length > 0) {
+        for (const row of previewRows) {
+          const title = String(row.title || "").toLowerCase();
+          if (!title) continue;
+          if (tokens.some((t) => title.includes(t))) excluded.add(row.id);
+        }
+      }
+      return excluded;
+    };
+
+
+
     if (mentionsKnownDesigner && isEnumerationRequest) {
       const { data: designerRows } = await supabase
         .from("designers")
