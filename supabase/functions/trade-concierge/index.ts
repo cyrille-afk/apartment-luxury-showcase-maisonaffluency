@@ -3227,6 +3227,15 @@ serve(async (req) => {
             `Your skip list would remove every ${designerLabel} piece — nothing left to propose. Send the message again with a shorter exclusion (or say "list all ${designerLabel}" for the full set).`,
           );
         }
+        // Confirmation gate: don't ship the tear sheet on the same turn the
+        // user asked us to skip items — show them the skip/keep breakdown
+        // and wait for a "confirm" reply.
+        if (excludedIds.size > 0 && !isConfirmingSkip) {
+          const skipped = previewRawAll.filter((p: any) => p?.id && excludedIds.has(p.id));
+          return sseTextResponse(
+            buildSkipConfirmationMessage(skipped, previewRaw, designerLabel),
+          );
+        }
         const rationaleMap: Record<string, { reason: string }> = {};
         for (const p of previewRaw) {
           if (!p?.id) continue;
