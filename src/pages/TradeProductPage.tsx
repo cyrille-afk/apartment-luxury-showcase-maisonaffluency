@@ -499,6 +499,7 @@ const TradeProductPage: React.FC = () => {
   // actually picked. Null means "no shrink override".
   const [selectedTopDisplay, setSelectedTopDisplay] = useState<string | null>(null);
   const [selectedBaseDisplay, setSelectedBaseDisplay] = useState<string | null>(null);
+  const [selectedSwatchGalleryIndices, setSelectedSwatchGalleryIndices] = useState<number[] | null>(null);
   const [selectedDualSize, setSelectedDualSize] = useState<string | null>(null);
   const [rugSelection, setRugSelection] = useState<RugSelection | null>(null);
   const [defaultPair, setDefaultPair] = useState<{ base: string; top: string } | null>(null);
