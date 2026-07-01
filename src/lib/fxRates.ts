@@ -135,14 +135,22 @@ export async function getFxRate(src: string, tgt: string): Promise<number> {
   const key = `${src}_${tgt}`;
 
   const cached = cache.get(key);
-  if (cached && Date.now() - cached.ts < CACHE_TTL) return cached.rate;
+  if (cached && Date.now() - cached.ts < CACHE_TTL) {
+    lastSources.set(key, cached.source);
+    return cached.rate;
+  }
 
-  const live =
-    (await fromFrankfurter(src, tgt)) ??
-    (await fromOpenErApi(src, tgt));
+  let source: FxSource = "hardcoded";
+  let live = await fromFrankfurter(src, tgt);
+  if (live != null) source = "frankfurter";
+  if (live == null) {
+    live = await fromOpenErApi(src, tgt);
+    if (live != null) source = "open-er-api";
+  }
 
   const rate = live ?? FALLBACK_RATES[key] ?? 1;
-  cache.set(key, { rate, ts: Date.now() });
+  cache.set(key, { rate, ts: Date.now(), source });
+  lastSources.set(key, source);
   return rate;
 }
 
