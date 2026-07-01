@@ -2865,9 +2865,20 @@ serve(async (req) => {
     // carries an invisible marker so we can detect the confirmation turn
     // and rehydrate the original request.
     const SKIP_CONFIRM_MARKER = "\u2063SKIP-CONFIRM\u2063"; // invisible sentinel
-    const isConfirmationReply = (m: string) =>
-      /^\s*(yes|yep|yeah|yup|sure|confirm(ed)?|proceed|go\s*ahead|do\s*it|build(\s*it)?|create(\s*it)?|approve[d]?|ok(ay)?|👍|✅)[\s.!]*$/i
-        .test((m || "").trim());
+    // Accept a broad set of affirmations, in short standalone replies OR
+    // as the leading intent of a slightly longer message ("yes please",
+    // "go ahead and build it", "approve — thanks"). Reject anything that
+    // opens with a negation ("no", "not yet", "hold on", "wait").
+    const CONFIRM_PHRASE_RE =
+      /^\s*(?:please\s+)?(yes|yep|yeah|yup|ya|sure|of\s*course|absolutely|definitely|certainly|correct|confirm(?:ed|s|ing)?|proceed|go\s*(?:ahead|for\s*it)?|do\s*it|build(?:\s*it)?|create(?:\s*it)?|make(?:\s*it)?|ship(?:\s*it)?|ok(?:ay)?|okey|approve[ds]?|approved|accept(?:ed)?|agreed?|sounds\s*good|looks\s*good|lgtm|let['’]?s\s*(?:go|do\s*(?:it|this))|👍|✅|🚀)\b/i;
+    const NEGATION_LEAD_RE =
+      /^\s*(?:no+|nope|nah|not\s+yet|hold\s+on|wait|stop|cancel|abort|actually|instead|but|change|revise|amend|edit|remove|add)\b/i;
+    const isConfirmationReply = (m: string) => {
+      const t = (m || "").trim();
+      if (!t) return false;
+      if (NEGATION_LEAD_RE.test(t)) return false;
+      return CONFIRM_PHRASE_RE.test(t);
+    };
     let isConfirmingSkip = false;
     {
       const reversed = [...messages].reverse();
