@@ -1398,9 +1398,15 @@ const TradeProductPage: React.FC = () => {
                 )}
               </>
             )}
-            {!selectedWoodPrice && !selectedFabric && (selectedTop || (isDualAxis && !baseAxisIsDim && selectedBase)) && (
-              <>Finish: {(selectedTopDisplay ?? selectedTop) || (selectedBaseDisplay ?? selectedBase)}</>
-            )}
+            {!selectedWoodPrice && !selectedFabric && (selectedTop || (isDualAxis && !baseAxisIsDim && selectedBase)) && (() => {
+              const shrinkCap = (resolved: string | null, display: string | null) =>
+                !resolved ? null
+                : display && /\s\/\s/.test(resolved) && resolved.toLowerCase().includes(display.toLowerCase())
+                  ? display
+                  : resolved;
+              const finishText = shrinkCap(selectedTop, selectedTopDisplay) || shrinkCap(selectedBase, selectedBaseDisplay);
+              return <>Finish: {finishText}</>;
+            })()}
           </span>
         )}
 
