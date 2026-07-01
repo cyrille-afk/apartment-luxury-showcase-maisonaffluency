@@ -1205,7 +1205,7 @@ const TradeProductPage: React.FC = () => {
             {selectedWoodPrice && selectedFabric && " · "}
             {selectedFabric && (
               <>
-                {selectedWoodPrice ? "" : "Includes "}{selectedFabric.name}
+                {selectedWoodPrice ? "Fabric: " : "Includes "}{selectedFabric.name}
                 {selectedFabric.tier ? ` (CAT ${selectedFabric.tier})` : ""}
                 {upcharge > 0 && (
                   <>
@@ -1217,6 +1217,7 @@ const TradeProductPage: React.FC = () => {
             )}
           </span>
         )}
+
       </div>
     );
   };
