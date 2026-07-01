@@ -905,7 +905,22 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
     const controller = new AbortController();
     abortRef.current = controller;
 
+    // Stall watchdog: if the stream produces no delta/proposal/escalation
+    // for STALL_MS, abort the request and surface a retry card so the user
+    // isn't left staring at a silent spinner (e.g. edge IDLE_TIMEOUT).
+    const armStall = () => {
+      clearStallTimer();
+      stallTimerRef.current = setTimeout(() => {
+        try { controller.abort(); } catch {}
+        setStreaming(false);
+        clearStallTimer();
+        pushRetry(text, "The concierge stopped responding.");
+      }, STALL_MS);
+    };
+    armStall();
+
     const upsertAssistant = (chunk: string) => {
+      armStall();
       assistantSoFar += chunk;
       setTimeline((prev) => {
         if (assistantStarted) {
@@ -924,6 +939,7 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
     };
 
     const handleProposal = (proposal: ConciergeProposal) => {
+      armStall();
       if (proposal.tool === "draft_quote" || proposal.tool === "add_to_quote") {
         setTimeline((prev) => [...prev, { kind: "quote_proposal", proposal }]);
         return;
@@ -958,13 +974,18 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
         onDelta: upsertAssistant,
         onProposal: handleProposal,
         onEscalation: (ev) => {
+          armStall();
           setTimeline((prev) => [
             ...prev,
             { kind: "escalation", sentiment: ev.sentiment, intent: ev.intent, excerpt: ev.excerpt },
           ]);
         },
-        onDone: () => setStreaming(false),
+        onDone: () => {
+          clearStallTimer();
+          setStreaming(false);
+        },
         onError: (msg) => {
+          clearStallTimer();
           if (msg.startsWith("RATE_LIMIT:")) {
             const retrySec = parseInt(msg.split(":")[1], 10);
             const mins = Math.ceil(retrySec / 60);
@@ -978,16 +999,26 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
               },
             ]);
           } else {
-            toast.error(msg);
+            // Surface a retry card instead of a fire-and-forget toast so the
+            // user has a one-click path back to a working turn.
+            const friendly = /IDLE_TIMEOUT|504|timeout/i.test(msg)
+              ? "The concierge timed out before answering."
+              : msg || "The concierge hit an error.";
+            pushRetry(text, friendly);
           }
           setStreaming(false);
         },
         signal: controller.signal,
       });
     } catch {
+      clearStallTimer();
       setStreaming(false);
+      // If the throw wasn't the user aborting, offer a retry.
+      if (!controller.signal.aborted) {
+        pushRetry(text, "The connection to the concierge dropped.");
+      }
     }
-  }, [input, attachments, streaming, timeline, stage, tone, lang, name, openLatestQuote, navigate]);
+  }, [input, attachments, streaming, timeline, stage, tone, lang, name, openLatestQuote, navigate, clearStallTimer, pushRetry]);
 
   const handleProposalResolved = (
     proposalIndex: number,
