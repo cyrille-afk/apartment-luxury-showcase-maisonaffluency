@@ -91,8 +91,12 @@ function shouldFallback(status: number): boolean {
 }
 
 function isRetryable(status: number): boolean {
-  // Transient errors worth retrying on the primary backend before falling back
-  return status === 429 || status === 500 || status === 502 || status === 503 || status === 504;
+  // Only retry on rate-limit (429). On upstream 5xx (model overload/outage),
+  // fail-fast to the Cloudflare fallback instead of burning ~30s of retries
+  // that leave the user staring at a "Loading" indicator — most 503s from
+  // Gemini during high-demand windows do not clear within our short backoff
+  // window anyway, and the fallback model is warm.
+  return status === 429;
 }
 
 const PRIMARY_MAX_RETRIES = Number(Deno.env.get("PRIMARY_MAX_RETRIES") ?? "2");
