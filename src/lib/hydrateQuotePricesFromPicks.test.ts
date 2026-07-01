@@ -3,7 +3,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 // Mock the supabase client before importing the module under test.
 const inMock = vi.fn();
 const selectMock = vi.fn(() => ({ in: inMock }));
-const fromMock = vi.fn(() => ({ select: selectMock }));
+const fromMock = vi.fn((_name: string) => ({ select: selectMock }));
 
 vi.mock("@/integrations/supabase/client", () => ({
   supabase: { from: (name: string) => fromMock(name) },
