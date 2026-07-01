@@ -130,7 +130,13 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
     pathname === "/trade/tearsheets" ||
     pathname === "/trade/mood-boards" ||
     (pathname === "/trade/quotes" && !new URLSearchParams(search).get("quote"));
+  // Only downgrade the stage to Discover on empty workflow list routes while
+  // the conversation is still pristine (no user turn yet). Once the user has
+  // started chatting, keep the stage stable so async artifact counts flipping
+  // mid-stream can't rewrite the greeting or drop in-flight messages.
+  const hasUserTurn = timeline.some((t) => t.kind === "msg" && t.role === "user");
   const noWorkflowArtifactsContext =
+    !hasUserTurn &&
     surface === "trade" &&
     (isWorkflowListRouteWithoutActiveArtifact || hasTradeArtifacts === false) &&
     (routeStage === "Tearsheet" || routeStage === "Quote");
