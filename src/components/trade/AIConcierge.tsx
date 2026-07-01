@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
-import { X, Send, Loader2, Sparkles, Minus, GripHorizontal, RotateCcw, Maximize2, Minimize2, Palette, Check, Languages, Pencil, Paperclip, FileText, Download } from "lucide-react";
+import { X, Send, Loader2, Sparkles, Minus, GripHorizontal, RotateCcw, Maximize2, Minimize2, Palette, Check, Languages, Pencil, Paperclip, FileText, Download, FileDown } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { streamConcierge, type ChatMessage, type ChatContentPart, type TearsheetProposal, type QuoteProposal, type FfeProposal, type VisualizationBriefProposal, type ConciergeProposal } from "@/lib/tradeConciergeStream";
@@ -1310,6 +1310,90 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
                 title="Download conversation for audit"
               >
                 <Download className="h-3.5 w-3.5" />
+              </button>
+              <button
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={async () => {
+                  try {
+                    const { jsPDF } = await import("jspdf");
+                    const ts = new Date();
+                    const pad = (n: number) => String(n).padStart(2, "0");
+                    const stamp = `${ts.getFullYear()}-${pad(ts.getMonth() + 1)}-${pad(ts.getDate())}_${pad(ts.getHours())}${pad(ts.getMinutes())}`;
+                    const doc = new jsPDF({ unit: "pt", format: "a4" });
+                    const pageW = doc.internal.pageSize.getWidth();
+                    const pageH = doc.internal.pageSize.getHeight();
+                    const margin = 48;
+                    const contentW = pageW - margin * 2;
+                    let y = margin;
+                    const ensureRoom = (h: number) => {
+                      if (y + h > pageH - margin) {
+                        doc.addPage();
+                        y = margin;
+                      }
+                    };
+                    const writeLines = (text: string, opts: { size?: number; bold?: boolean; color?: [number, number, number] } = {}) => {
+                      const size = opts.size ?? 10;
+                      doc.setFont("helvetica", opts.bold ? "bold" : "normal");
+                      doc.setFontSize(size);
+                      doc.setTextColor(...(opts.color ?? [30, 30, 30]));
+                      const lineH = size * 1.35;
+                      const wrapped = doc.splitTextToSize(text || " ", contentW);
+                      for (const line of wrapped) {
+                        ensureRoom(lineH);
+                        doc.text(line, margin, y);
+                        y += lineH;
+                      }
+                    };
+                    // Header
+                    writeLines("Concierge Workflow — Audit Report", { size: 16, bold: true });
+                    y += 4;
+                    writeLines(`Generated: ${ts.toLocaleString()}`, { size: 9, color: [110, 110, 110] });
+                    writeLines(`Route: ${pathname}`, { size: 9, color: [110, 110, 110] });
+                    writeLines(`Concierge: ${name} · Tone: ${tone} · Language: ${lang}`, { size: 9, color: [110, 110, 110] });
+                    y += 8;
+                    doc.setDrawColor(200);
+                    doc.line(margin, y, pageW - margin, y);
+                    y += 14;
+                    timeline.forEach((t: any, i: number) => {
+                      const heading =
+                        t.kind === "msg"
+                          ? `${i + 1}. ${t.role === "user" ? "User" : name}`
+                          : `${i + 1}. [${t.kind}]`;
+                      writeLines(heading, { size: 11, bold: true, color: [20, 20, 20] });
+                      y += 2;
+                      if (t.kind === "msg") {
+                        writeLines(t.content || "", { size: 10 });
+                        if (t.attachments?.length) {
+                          writeLines(
+                            `Attachments: ${t.attachments.map((a: any) => a.name || a.url || "file").join(", ")}`,
+                            { size: 9, color: [110, 110, 110] }
+                          );
+                        }
+                      } else {
+                        const json = JSON.stringify(t, null, 2);
+                        writeLines(json, { size: 8, color: [70, 70, 70] });
+                      }
+                      y += 10;
+                    });
+                    // Footer with page numbers
+                    const pageCount = doc.getNumberOfPages();
+                    for (let p = 1; p <= pageCount; p++) {
+                      doc.setPage(p);
+                      doc.setFont("helvetica", "normal");
+                      doc.setFontSize(8);
+                      doc.setTextColor(140);
+                      doc.text(`Maison Affluency · Concierge Audit · Page ${p} of ${pageCount}`, margin, pageH - 20);
+                    }
+                    doc.save(`concierge-workflow_${stamp}.pdf`);
+                  } catch (err) {
+                    console.error("[concierge] PDF download failed", err);
+                  }
+                }}
+                className="text-muted-foreground hover:text-foreground transition-colors p-1 rounded-md hover:bg-muted"
+                aria-label="Download conversation as PDF"
+                title="Download audit PDF"
+              >
+                <FileDown className="h-3.5 w-3.5" />
               </button>
               <button
                 onPointerDown={(e) => e.stopPropagation()}
