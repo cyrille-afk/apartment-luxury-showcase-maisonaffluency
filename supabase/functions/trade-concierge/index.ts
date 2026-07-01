@@ -3067,7 +3067,32 @@ serve(async (req) => {
     // all Alexander Lamont items" returns all 15, not whatever subset the
     // model happens to pick.
     const enumerationVerbRe = /\b(list (?:all|every|the)|show (?:all|me all|every)|(?:all|every) (?:item|piece|product|work)s? (?:by|from)|everything (?:by|from)|which .*(?:do you|are)|what .*(?:do you have|are available))\b/i;
-    if (mentionsKnownDesigner && enumerationVerbRe.test(lastUserMsg || "")) {
+    const isEnumerationRequest = enumerationVerbRe.test(lastUserMsg || "");
+
+    // Suggest nearest designer names by token overlap against the full known list.
+    const suggestNearestDesigners = (query: string, max = 5): string[] => {
+      const qTokens = String(query || "")
+        .toLowerCase()
+        .split(/[^a-zà-ÿ0-9]+/i)
+        .filter((t) => t && t.length >= 3 && !NAME_STOPWORDS.has(t));
+      if (qTokens.length === 0) return [];
+      const scored = designerNames.map((n) => {
+        const name = String(n).toLowerCase();
+        let score = 0;
+        for (const qt of qTokens) {
+          if (name.includes(qt)) score += 2;
+          else if (qt.length >= 4 && name.split(/[^a-zà-ÿ0-9]+/i).some((nt) => nt.startsWith(qt.slice(0, 4)))) score += 1;
+        }
+        return { n, score };
+      });
+      return scored
+        .filter((s) => s.score > 0)
+        .sort((a, b) => b.score - a.score)
+        .slice(0, max)
+        .map((s) => s.n);
+    };
+
+    if (mentionsKnownDesigner && isEnumerationRequest) {
       const { data: designerRows } = await supabase
         .from("designers")
         .select("id, name, display_name")
@@ -3118,6 +3143,29 @@ serve(async (req) => {
           `Here are all ${finalIds.length} ${designerLabel} pieces in the Maison Affluency Curation with trade pricing — tap any to open the tear sheet.`,
         );
       }
+
+      // Designer recognised but zero curator picks published for them.
+      const nearest = suggestNearestDesigners(designerLabel, 5).filter((n) => n !== designerLabel);
+      const suggestion = nearest.length
+        ? ` Closest names currently in the Curation: ${nearest.map((n) => `**${n}**`).join(", ")}.`
+        : "";
+      return sseTextResponse(
+        `I found **${designerLabel}** in the directory, but no curator picks are published for them yet — so I can't list any pieces. Two ways forward: (1) ask me about a specific typology (e.g. "seating", "lighting", "tables") and I'll surface the closest pieces from other ateliers; (2) try one of these adjacent names I do have priced picks for.${suggestion}`,
+      );
+    }
+
+    // Enumeration verb but no known designer matched — the model would otherwise
+    // return an empty answer. Explain why and offer the nearest names.
+    if (isEnumerationRequest && !mentionsKnownDesigner) {
+      const nearest = suggestNearestDesigners(lastUserMsg || "", 6);
+      if (nearest.length > 0) {
+        return sseTextResponse(
+          `I couldn't match a designer in your request to the Maison Affluency Curation, so I have nothing to list. Did you mean one of these? ${nearest.map((n) => `**${n}**`).join(", ")}. Reply with the exact name (e.g. "list all ${nearest[0]} pieces") and I'll pull the full set with trade pricing.`,
+        );
+      }
+      return sseTextResponse(
+        `I couldn't identify a designer in your request, so I have nothing to enumerate. Try the exact atelier name — e.g. "list all Alinea Design Objects pieces", "show every Pouénat item", or "what do you have by Alexander Lamont?". You can also ask by typology ("all consoles", "all sconces") and I'll propose a tear sheet across the Curation.`,
+      );
     }
 
 
