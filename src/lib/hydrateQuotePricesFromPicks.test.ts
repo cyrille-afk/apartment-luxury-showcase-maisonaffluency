@@ -6,7 +6,7 @@ const selectMock = vi.fn(() => ({ in: inMock }));
 const fromMock = vi.fn(() => ({ select: selectMock }));
 
 vi.mock("@/integrations/supabase/client", () => ({
-  supabase: { from: (...args: unknown[]) => fromMock(...args) },
+  supabase: { from: (name: string) => fromMock(name) },
 }));
 
 import { hydrateQuotePricesFromPicks } from "./hydrateQuotePricesFromPicks";
