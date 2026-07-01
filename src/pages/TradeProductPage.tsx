@@ -637,20 +637,40 @@ const TradeProductPage: React.FC = () => {
           if (selectedWoodPrice?.id) {
             patch.wood_fabric_id = selectedWoodPrice.id;
           }
+          // Resolve the selected variant's price (single-axis, dual-axis, or
+          // base-only). This ensures the quote line reflects the finish/size
+          // the user actually picked (e.g. Travertino Rosso €14,263) rather
+          // than the RPC's default "starting" RRP (Kynos €12,116).
+          const resolveSelectedVariantCents = (): number | null => {
+            if (!sv || !sv.length) return null;
+            const norm = (s: any) => String(s || "").trim();
+            const priced = (v: any) =>
+              typeof v?.price_cents === "number" && v.price_cents > 0 ? (v.price_cents as number) : null;
+            if (selectedVariantIdx != null) return priced(sv[selectedVariantIdx]);
+            const matches = sv.filter((v: any) => {
+              if (selectedBase && norm(v.base) !== norm(selectedBase)) return false;
+              if (selectedTop && norm(v.top) !== norm(selectedTop)) return false;
+              if (selectedDualSize && norm(v.label) !== norm(selectedDualSize)) return false;
+              return !!(selectedBase || selectedTop || selectedDualSize);
+            });
+            const p = matches.map(priced).filter((c): c is number => c != null);
+            return p.length ? Math.min(...p) : null;
+          };
+          const selectedVariantCents = resolveSelectedVariantCents();
 
           // Combined override unit price (wood + fabric upcharge), in quote currency.
           if (overrideUnitPriceCents != null) {
             patch.unit_price_cents = overrideUnitPriceCents;
             patch.unit_price_currency = productCcy;
-          } else if (selectedWoodPrice || selectedFabric) {
-            // Base = wood swatch price, or catalog rrp, all in product currency.
+          } else if (selectedWoodPrice || selectedFabric || selectedVariantCents != null) {
+            // Base price priority: wood swatch override > selected variant > catalog RRP.
             const woodInProd = selectedWoodPrice?.price_cents
               ? (selectedWoodPrice.currency === productCcy
                   ? selectedWoodPrice.price_cents
                   : (convertCents(selectedWoodPrice.price_cents, selectedWoodPrice.currency, productCcy, fxRates) ?? 0))
               : null;
             const rrpProd = (data?.pricing?.rrp_price_cents ?? null) as number | null;
-            const baseProd = woodInProd ?? rrpProd;
+            const baseProd = woodInProd ?? selectedVariantCents ?? rrpProd;
             // Fabric upcharge → product currency
             let upchargeProd = 0;
             if (selectedFabric?.price_per_lm_cents && metersForLine) {
@@ -676,6 +696,7 @@ const TradeProductPage: React.FC = () => {
               patch.unit_price_currency = quoteCcy;
             }
           }
+
 
 
 
