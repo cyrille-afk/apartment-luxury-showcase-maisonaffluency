@@ -1844,7 +1844,7 @@ const TradeProductPage: React.FC = () => {
                     setGalleryJumpNonce((n) => n + 1);
                   }}
                   onWoodFinishChange={(woodName) => {
-                    if (!woodName) return;
+                    if (!woodName) { setSelectedBaseDisplay(null); return; }
                     // Match the swatch name to a Base axis value (case/space tolerant,
                     // and tolerant of code prefixes like "ECRT-SY-20 — Black Lacquered Sycamore").
                     const norm = (s: string) => s.trim().toLowerCase();
@@ -1855,10 +1855,12 @@ const TradeProductPage: React.FC = () => {
                       || baseOptions.find((b) => norm(b).includes(nw))
                       || woodName;
                     setSelectedBase(match);
+                    setSelectedBaseDisplay(match !== woodName && /\s\/\s/.test(match) ? woodName.trim() : null);
                     // If the current Top is incompatible with the new Base, clear it.
                     let nextTop = selectedTop;
                     if (nextTop && !variantsList.some((x: any) => matchesDual(x, match, nextTop, selectedDualSize))) {
                       setSelectedTop(null);
+                      setSelectedTopDisplay(null);
                       nextTop = null;
                     }
                     handleMaterialChange(match, { base: match, top: nextTop, size: selectedDualSize, fromSwatch: true });
