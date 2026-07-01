@@ -69,10 +69,10 @@ for (const prompt of QUERIES) {
         return;
       }
 
-      assert(
-        resp.status === 200,
-        `expected 200, got ${resp.status}: ${await resp.text().catch(() => "")}`,
-      );
+      if (resp.status !== 200) {
+        const body = await resp.text().catch(() => "");
+        throw new Error(`expected 200, got ${resp.status}: ${body}`);
+      }
 
       const { text } = await readConciergeStream(resp, { timeoutMs: 40_000 });
       assert(text.length > 0, `empty stream for prompt: ${prompt}`);
