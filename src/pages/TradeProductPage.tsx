@@ -651,9 +651,17 @@ const TradeProductPage: React.FC = () => {
         // Prefer the user's actual clicked swatch label when the resolved
         // variant bundles multiple finishes under one row (e.g. "Port Saint
         // Laurent / Travertino Silver / Rosso Lepanto" as a single top).
-        const baseForLabel = selectedBaseDisplay ?? selectedBase;
-        const topForLabel = selectedTopDisplay ?? selectedTop;
+        const shrink = (resolved: string | null, display: string | null) => {
+          if (!resolved) return null;
+          if (!display) return resolved;
+          return /\s\/\s/.test(resolved) && resolved.toLowerCase().includes(display.toLowerCase())
+            ? display
+            : resolved;
+        };
+        const baseForLabel = shrink(selectedBase, selectedBaseDisplay);
+        const topForLabel = shrink(selectedTop, selectedTopDisplay);
         variantLabel = [baseForLabel, topForLabel, selectedDualSize].filter(Boolean).join(" · ");
+      
       } else if (selectedSingleMaterial || selectedSingleSize) {
         variantLabel = [selectedSingleSize, selectedSingleMaterial].filter(Boolean).join(" · ");
       } else if (selectedVariantIdx != null) {
