@@ -1,0 +1,1 @@
+UPDATE public.designer_curator_picks SET trade_price_cents = 1671400 WHERE id = 'e7f3e842-f874-45e3-86e8-ec638e54c70c' AND (trade_price_cents IS NULL OR trade_price_cents = 0);
