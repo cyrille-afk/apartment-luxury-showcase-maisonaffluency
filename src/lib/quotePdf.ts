@@ -928,7 +928,11 @@ function drawTable(
     doc.setFontSize(10);
     doc.setTextColor(FG[0], FG[1], FG[2]);
     doc.text(String(line.quantity), xQty + colQty / 2, y + 20, { align: "center" });
-    doc.text(fmtMoney(line.unitPriceCents, args.currency), xUnit + colUnit - 4, y + 20, { align: "right" });
+    {
+      const unitCcy = line.sourceCurrency || args.currency;
+      const unitCents = line.sourceUnitPriceCents ?? line.unitPriceCents;
+      doc.text(fmtMoney(unitCents, unitCcy), xUnit + colUnit - 4, y + 20, { align: "right" });
+    }
     doc.setFont("helvetica", "bold");
     doc.text(fmtMoney(line.lineTotalCents, args.currency), rowRight - 4, y + 20, { align: "right" });
 
