@@ -5,6 +5,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { hydrateQuotePricesFromPicks } from "@/lib/hydrateQuotePricesFromPicks";
 import { getFxRates, FALLBACK_RATES, getFxSource, summarizeFxSources, type FxSource } from "@/lib/fxRates";
 import { FxSourceBadge } from "@/components/trade/FxSourceBadge";
+import { FxAppliedRates } from "@/components/trade/FxAppliedRates";
+
 import { useAuth } from "@/hooks/useAuth";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { useToast } from "@/hooks/use-toast";
