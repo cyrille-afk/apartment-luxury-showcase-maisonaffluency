@@ -523,19 +523,19 @@ export default function FinishSelector({ pickId, className, productTitle, produc
       } else {
         // Wood finish picked — drive the Frame axis on the price matrix.
         onWoodFinishChange?.(f.name);
-        // Emit frame-price override so the product page can use it as the
-        // RRP base (fabric per-LM upcharge is added on top).
-        if (f.frame_price_cents && f.frame_price_cents > 0) {
-          onWoodFinishPricingChange?.({
-            id: f.id,
-            name: f.name,
-            price_cents: f.frame_price_cents,
-            currency: f.frame_price_currency || "EUR",
-            image_url: f.image_url ?? null,
-          });
-        } else {
-          onWoodFinishPricingChange?.(null);
-        }
+        // Emit the frame swatch selection so the product page can (a) show it
+        // in the price caption, (b) persist wood_fabric_id on the quote line
+        // (drives the swatch thumbnail), and (c) use frame_price_cents as the
+        // RRP base when present. When there is no price override, still emit
+        // the swatch with price_cents=0 so the selection is captured.
+        onWoodFinishPricingChange?.({
+          id: f.id,
+          name: f.name,
+          price_cents: (f.frame_price_cents && f.frame_price_cents > 0) ? f.frame_price_cents : 0,
+          currency: f.frame_price_currency || "EUR",
+          image_url: f.image_url ?? null,
+        });
+
       }
 
       // Notify product page of mapped gallery images LAST so the swatch's
