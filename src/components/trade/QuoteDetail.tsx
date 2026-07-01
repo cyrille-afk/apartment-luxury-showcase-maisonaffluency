@@ -2025,6 +2025,8 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
               </div>
               {fxSource !== "identity" && <FxSourceBadge source={fxSource} />}
             </div>
+            {fxPairs.length > 0 && <FxAppliedRates pairs={fxPairs} className="mt-1" />}
+
 
 
             <div className="flex items-center gap-4 flex-wrap">
