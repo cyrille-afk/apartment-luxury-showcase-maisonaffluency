@@ -115,6 +115,34 @@ export function ProjectAssignInline({ boardId, onResolved }: Props) {
     onResolved(projectId);
   };
 
+  const handleCreateAndAssign = async () => {
+    const name = newName.trim();
+    if (!name || !user) return;
+    setCreatingSaving(true);
+    const { data: proj, error } = await supabase
+      .from("projects" as any)
+      .insert({
+        user_id: user.id,
+        studio_id: currentStudio?.id ?? null,
+        name,
+        client_name: "",
+        location: "",
+        status: "active",
+      })
+      .select("id, name")
+      .single();
+    if (error || !proj) {
+      setCreatingSaving(false);
+      toast.error(`Could not create project: ${error?.message || "unknown error"}`);
+      return;
+    }
+    await refresh();
+    setCreatingSaving(false);
+    setCreating(false);
+    setNewName("");
+    await handlePick((proj as any).id, (proj as any).name);
+  };
+
   const handleSkip = async () => {
     // Audit trail: log the explicit skip so we know it wasn't just abandoned.
     const { data: sess } = await supabase.auth.getSession();
