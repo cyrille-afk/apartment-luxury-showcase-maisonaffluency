@@ -170,8 +170,13 @@ const TradeBoards = () => {
     }
   };
 
-  const copyShareLink = (token: string) => {
-    const url = `${window.location.origin}/board/${token}`;
+  const copyShareLink = async (boardId: string) => {
+    const { data, error } = await supabase.rpc("get_my_board_share_token", { _board_id: boardId });
+    if (error || !data) {
+      toast({ title: "Cannot copy link", description: "Only the board owner can copy the share link.", variant: "destructive" });
+      return;
+    }
+    const url = `${window.location.origin}/board/${data}`;
     navigator.clipboard.writeText(url);
     toast({ title: "Link copied", description: "Share this link with your client" });
   };
