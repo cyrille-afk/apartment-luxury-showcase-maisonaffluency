@@ -1015,6 +1015,11 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
         quantity: item.quantity,
         unitPriceCents: unit,
         lineTotalCents: unit != null ? unit * item.quantity : null,
+        // Preserve the source-currency unit price so the PDF can show the
+        // original catalogue figure (e.g. EUR) alongside the converted
+        // AMOUNT column when the display currency differs.
+        sourceUnitPriceCents: rawUnit,
+        sourceCurrency: itemPriceCurrency(item, currency),
         imageUrl: product?.image_url ?? null,
         shipOriginCountry: toIsoCountry(item.ship_origin_country ?? product?.origin ?? null, "FR"),
         shipMode: item.ship_mode || null,
