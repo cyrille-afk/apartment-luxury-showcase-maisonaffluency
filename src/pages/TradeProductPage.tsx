@@ -634,13 +634,41 @@ const TradeProductPage: React.FC = () => {
       }
 
 
+      // Resolve the finish-specific gallery photo so the quote thumbnail
+      // reflects the finish the user actually picked (Walnut vs Oak, etc.)
+      // instead of the product's default primary image.
+      const galleryImgs = (((data?.product as any)?.gallery_images || []).filter(Boolean)) as string[];
+      const heroList = galleryImgs.length > 0
+        ? galleryImgs
+        : ([product.image_url, (data?.product as any)?.hover_image_url].filter(Boolean) as string[]);
+      const finishMapForQuote = buildProductFinishMap((data?.product as any)?.variant_image_map);
+      const svForImage: any[] = sv || (product as any)?.size_variants || [];
+      const requiresPair = activeVariantContext.isDualAxis;
+      let resolvedImgIdx: number | undefined;
+      if (selectedBase || selectedTop || selectedDualSize) {
+        resolvedImgIdx = resolveVariantImageIndex(finishMapForQuote, {
+          base: selectedBase,
+          top: selectedTop,
+          size: selectedDualSize,
+          label: null,
+          variants: svForImage as any,
+          imageCount: heroList.length,
+          requireCompletePair: requiresPair,
+        });
+      }
+      if (resolvedImgIdx === undefined) {
+        const singleLabel = selectedSingleMaterial || selectedWoodPrice?.name || null;
+        resolvedImgIdx = resolveFinishImageIndex(finishMapForQuote, singleLabel, heroList.length);
+      }
+      const resolvedImageUrl = (resolvedImgIdx != null ? heroList[resolvedImgIdx] : null) || product.image_url || null;
+
       const { data: itemId, error } = await supabase.rpc("add_gallery_product_to_quote", {
         _user_id: user.id,
         _quote_id: quoteId,
         _product_name: product.title,
         _brand_name: designer.name,
         _category: product.category || "",
-        _image_url: product.image_url || null,
+        _image_url: resolvedImageUrl,
         _dimensions: product.dimensions || null,
         _materials: product.materials || null,
         _quantity: 1,
