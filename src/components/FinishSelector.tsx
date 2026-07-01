@@ -658,14 +658,22 @@ export default function FinishSelector({ pickId, className, productTitle, produc
   // surfaces that aren't priced as their own variant row) falls through into
   // the base/wood accordion so linked swatches are never silently dropped
   // from the product page.
-  const topTiles = topFilter ? allNonFabricTiles.filter((f) => topFilter(f.name)) : [];
+  const topTilesRaw = topFilter ? allNonFabricTiles.filter((f) => topFilter(f.name)) : [];
+  const topTileIdsRaw = new Set(topTilesRaw.map((t) => t.id));
+  const remainingNonFabric = allNonFabricTiles.filter((f) => !topTileIdsRaw.has(f.id));
+  // When the base accordion is suppressed (e.g. dual-axis with Size as the
+  // Base axis), fold any swatch not matched by topFilter into the Top group
+  // so no linked finish is silently dropped from the picker.
+  const topTiles = hideBaseAccordion ? [...topTilesRaw, ...remainingNonFabric] : topTilesRaw;
   const topTileIds = new Set(topTiles.map((t) => t.id));
-  const remainingNonFabric = allNonFabricTiles.filter((f) => !topTileIds.has(f.id));
-  const woodTiles = woodFilter
+  const woodTiles = hideBaseAccordion
+    ? []
+    : woodFilter
     ? (() => {
-        const matched = remainingNonFabric.filter((f) => woodFilter(f.name));
+        const pool = allNonFabricTiles.filter((f) => !topTileIds.has(f.id));
+        const matched = pool.filter((f) => woodFilter(f.name));
         const matchedIds = new Set(matched.map((t) => t.id));
-        const orphans = remainingNonFabric.filter((f) => !matchedIds.has(f.id));
+        const orphans = pool.filter((f) => !matchedIds.has(f.id));
         return [...matched, ...orphans];
       })()
     : remainingNonFabric;
