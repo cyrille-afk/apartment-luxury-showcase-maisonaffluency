@@ -2,6 +2,7 @@ import { useCallback, useState, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { hydrateQuotePricesFromPicks } from "@/lib/hydrateQuotePricesFromPicks";
+import { getFxRates } from "@/lib/fxRates";
 import { useAuth } from "@/hooks/useAuth";
 import { Navigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -392,23 +393,14 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
         if (c !== quoteCurrency) sourceCurrencies.add(c);
       });
 
-      // Fetch exchange rates if needed
-      const fxRates: Record<string, number> = {};
-      if (sourceCurrencies.size > 0) {
-        await Promise.all(
-          Array.from(sourceCurrencies).map(async (src) => {
-            try {
-              const res = await fetch(`https://api.frankfurter.app/latest?from=${src}&to=${quoteCurrency}`);
-              const data = await res.json();
-              if (data.rates?.[quoteCurrency]) {
-                fxRates[`${src}_${quoteCurrency}`] = data.rates[quoteCurrency];
-              }
-            } catch {
-              // silently fail
-            }
-          })
-        );
-      }
+      // Resolve FX via the shared helper (frankfurter → open.er-api → hardcoded
+      // fallback). Never leaves us with an empty rate table, so line prices
+      // always convert instead of silently displaying the source-currency number.
+      const fxRates = sourceCurrencies.size > 0
+        ? await getFxRates(
+            Array.from(sourceCurrencies).map((src) => ({ src, tgt: quoteCurrency })),
+          )
+        : {};
 
       // Init price inputs: existing unit_price_cents, or resolved catalog price (converted if needed)
       const prices: Record<string, string> = {};
