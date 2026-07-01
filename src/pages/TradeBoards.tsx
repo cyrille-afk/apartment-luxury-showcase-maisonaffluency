@@ -165,6 +165,7 @@ const TradeBoards = () => {
     const { error } = await supabase.from("client_boards").delete().eq("id", id);
     if (!error) {
       setBoards(prev => prev.filter(b => b.id !== id));
+      window.dispatchEvent(new Event("concierge:artifacts-changed"));
       toast({ title: "Board deleted" });
     }
   };

@@ -942,6 +942,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
 
   const handleDelete = async () => {
     await supabase.from("trade_quotes").delete().eq("id", quoteId);
+    window.dispatchEvent(new Event("concierge:artifacts-changed"));
     toast({ title: "Quote deleted" });
     onStatusChange();
   };
