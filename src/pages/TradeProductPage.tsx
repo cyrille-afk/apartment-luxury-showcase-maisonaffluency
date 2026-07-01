@@ -690,11 +690,26 @@ const TradeProductPage: React.FC = () => {
       const finishMapForQuote = buildProductFinishMap((data?.product as any)?.variant_image_map);
       const svForImage: any[] = sv || (product as any)?.size_variants || [];
       const requiresPair = activeVariantContext.isDualAxis;
+      // IMPORTANT: use the user's actually-clicked swatch label (not the
+      // slash-joined price-equivalence bundle) so both variant_image_map and
+      // filename fallback lookups target the specific finish the user chose.
+      // Otherwise a bundle like "Port Saint Laurent / Travertino Silver /
+      // Rosso Lepanto" would let the filename matcher accidentally pick the
+      // Travertino Silver gallery photo.
+      const shrinkForImage = (resolved: string | null, display: string | null) => {
+        if (!resolved) return null;
+        if (!display) return resolved;
+        return /\s\/\s/.test(resolved) && resolved.toLowerCase().includes(display.toLowerCase())
+          ? display
+          : resolved;
+      };
+      const baseForImage = shrinkForImage(selectedBase, selectedBaseDisplay);
+      const topForImage = shrinkForImage(selectedTop, selectedTopDisplay);
       let resolvedImgIdx: number | undefined;
-      if (selectedBase || selectedTop || selectedDualSize) {
+      if (baseForImage || topForImage || selectedDualSize) {
         resolvedImgIdx = resolveVariantImageIndex(finishMapForQuote, {
-          base: selectedBase,
-          top: selectedTop,
+          base: baseForImage,
+          top: topForImage,
           size: selectedDualSize,
           label: null,
           variants: svForImage as any,
@@ -710,14 +725,14 @@ const TradeProductPage: React.FC = () => {
         ? resolveGalleryImageByFinishFilename(heroList, [
             selectedWoodPrice?.name,
             selectedFabric?.name,
-            selectedBase,
-            selectedTop,
+            baseForImage,
+            topForImage,
             selectedSingleMaterial,
             selectedSingleSize,
-            variantLabel,
           ])
         : null;
       const resolvedImageUrl = (resolvedImgIdx != null ? heroList[resolvedImgIdx] : null) || filenameResolvedImageUrl || product.image_url || null;
+
 
       const { data: itemId, error } = await supabase.rpc("add_gallery_product_to_quote", {
         _user_id: user.id,
