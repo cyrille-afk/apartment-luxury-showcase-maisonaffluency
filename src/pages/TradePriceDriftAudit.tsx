@@ -311,6 +311,15 @@ export default function TradePriceDriftAudit() {
               <Download className="w-3.5 h-3.5 mr-1" />
               CSV
             </Button>
+            <Button
+              variant="default"
+              size="sm"
+              onClick={() => handleResyncAll(filtered)}
+              disabled={resyncingAll || busy || !filtered.length}
+            >
+              <Wand2 className={`w-3.5 h-3.5 mr-1 ${resyncingAll ? "animate-pulse" : ""}`} />
+              {resyncingAll ? "Resyncing…" : `Resync all (${filtered.length})`}
+            </Button>
           </div>
         </div>
 
