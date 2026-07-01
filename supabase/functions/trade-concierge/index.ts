@@ -4273,10 +4273,21 @@ serve(async (req) => {
             // Honour in-chat "skip / exclude / omit …" instructions from the
             // latest user message so the proposal card ships pre-filtered.
             const streamExcludedIds = parseUserExclusions(lastUserMsg || "", previewRaw);
+            let streamSkippedRows: any[] = [];
             if (streamExcludedIds.size > 0) {
+              streamSkippedRows = previewRaw.filter((p: any) => p?.id && streamExcludedIds.has(p.id));
               previewRaw = previewRaw.filter((p: any) => p?.id && !streamExcludedIds.has(p.id));
               pickIds = pickIds.filter((id: string) => !streamExcludedIds.has(id));
               console.log(`[concierge] applied user skip list — dropped ${streamExcludedIds.size} pick(s) from ${tc.name}`);
+            }
+            // Confirmation gate — hold the proposal until the user approves
+            // the skip list on the next turn.
+            if (streamExcludedIds.size > 0 && !isConfirmingSkip && pickIds.length > 0) {
+              const label = (parsed && typeof parsed.title === "string" && parsed.title.trim()) || "your";
+              const confirmMsg = buildSkipConfirmationMessage(streamSkippedRows, previewRaw, label);
+              const frame = { choices: [{ delta: { content: confirmMsg } }] };
+              controller.enqueue(encoder.encode(`data: ${JSON.stringify(frame)}\n\n`));
+              continue;
             }
             if (requestedTypology && pickIds.length < 2) {
               console.warn(`[concierge] blocked ${tc.name} — insufficient true ${requestedTypology} picks after typology validation`);
