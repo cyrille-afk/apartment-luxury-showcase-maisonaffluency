@@ -500,6 +500,7 @@ const TradeProductPage: React.FC = () => {
   const [selectedTopDisplay, setSelectedTopDisplay] = useState<string | null>(null);
   const [selectedBaseDisplay, setSelectedBaseDisplay] = useState<string | null>(null);
   const [selectedSwatchGalleryIndices, setSelectedSwatchGalleryIndices] = useState<number[] | null>(null);
+  const [selectedSwatchGalleryName, setSelectedSwatchGalleryName] = useState<string | null>(null);
   const [selectedDualSize, setSelectedDualSize] = useState<string | null>(null);
   const [rugSelection, setRugSelection] = useState<RugSelection | null>(null);
   const [defaultPair, setDefaultPair] = useState<{ base: string; top: string } | null>(null);
@@ -707,7 +708,19 @@ const TradeProductPage: React.FC = () => {
       const baseForImage = shrinkForImage(selectedBase, selectedBaseDisplay);
       const topForImage = shrinkForImage(selectedTop, selectedTopDisplay);
       let resolvedImgIdx: number | undefined;
-      if (selectedSwatchGalleryIndices?.length) {
+      const normImageLabel = (s: string | null | undefined) => (s || "").trim().toLowerCase();
+      const swatchImageStillMatchesSelection = selectedSwatchGalleryName
+        ? [
+            selectedWoodPrice?.name,
+            selectedFabric?.name,
+            selectedTopDisplay,
+            selectedBaseDisplay,
+            topForImage,
+            baseForImage,
+            selectedSingleMaterial,
+          ].some((label) => normImageLabel(label) === normImageLabel(selectedSwatchGalleryName))
+        : false;
+      if (selectedSwatchGalleryIndices?.length && swatchImageStillMatchesSelection) {
         const swatchIdx = Math.max(0, selectedSwatchGalleryIndices[0] - 1);
         if (swatchIdx >= 0 && swatchIdx < heroList.length) resolvedImgIdx = swatchIdx;
       }
@@ -1873,10 +1886,16 @@ const TradeProductPage: React.FC = () => {
                   onWoodFinishPricingChange={setSelectedWoodPrice}
                   onSwatchImagesChange={(indices, meta) => {
                     if (!indices || indices.length === 0) {
-                      if (meta?.committed) setSelectedSwatchGalleryIndices(null);
+                      if (meta?.committed) {
+                        setSelectedSwatchGalleryIndices(null);
+                        setSelectedSwatchGalleryName(null);
+                      }
                       return;
                     }
-                    if (meta?.committed) setSelectedSwatchGalleryIndices(indices);
+                    if (meta?.committed) {
+                      setSelectedSwatchGalleryIndices(indices);
+                      setSelectedSwatchGalleryName(meta.swatchName || null);
+                    }
                     // image_indices are 1-based; gallery is 0-based.
                     setGalleryActiveIndex(Math.max(0, indices[0] - 1));
                     setGalleryJumpNonce((n) => n + 1);
