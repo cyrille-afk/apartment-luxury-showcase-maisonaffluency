@@ -3039,6 +3039,69 @@ serve(async (req) => {
     );
     const piecesList = useRag ? (ragResult as { contextText: string }).contextText : fullPiecesList;
 
+    // Deterministic designer-enumeration shortcut: when the user asks to list
+    // / show / see everything by a specific named designer, bypass the LLM
+    // and emit a tearsheet proposal containing ALL of that designer's curator
+    // picks (up to the tool cap). This guarantees completeness — e.g. "list
+    // all Alexander Lamont items" returns all 15, not whatever subset the
+    // model happens to pick.
+    const enumerationVerbRe = /\b(list (?:all|every|the)|show (?:all|me all|every)|(?:all|every) (?:item|piece|product|work)s? (?:by|from)|everything (?:by|from)|which .*(?:do you|are)|what .*(?:do you have|are available))\b/i;
+    if (mentionsKnownDesigner && enumerationVerbRe.test(lastUserMsg || "")) {
+      const { data: designerRows } = await supabase
+        .from("designers")
+        .select("id, name, display_name")
+        .eq("is_published", true);
+      const targetLc = mentionedDesigners.map((n) => String(n).toLowerCase().trim());
+      const targetIds = (designerRows || [])
+        .filter((d: any) => {
+          const nm = String(d.name || "").toLowerCase().trim();
+          const dn = String(d.display_name || "").toLowerCase().trim();
+          return targetLc.some((f) => (nm && (nm === f || f.includes(nm))) || (dn && (dn === f || f.includes(dn))));
+        })
+        .map((d: any) => d.id);
+      const designerLabel =
+        (designerRows || []).find((d: any) => targetIds.includes(d.id))?.display_name
+        || (designerRows || []).find((d: any) => targetIds.includes(d.id))?.name
+        || mentionedDesigners[0];
+
+      if (targetIds.length) {
+        const { data: allPicks } = await supabase
+          .from("designer_curator_picks")
+          .select("id, title, category, materials")
+          .in("designer_id", targetIds)
+          .order("title", { ascending: true })
+          .limit(24);
+        const pickIds = (allPicks || []).map((p: any) => p.id);
+        if (pickIds.length >= 1) {
+          const previewRaw = await hydratePickPreview(supabase, pickIds);
+          const validIds = new Set(previewRaw.map((p: any) => p?.id).filter(Boolean));
+          const finalIds = pickIds.filter((id: string) => validIds.has(id));
+          const rationaleMap: Record<string, { reason: string }> = {};
+          for (const p of previewRaw) {
+            if (!p?.id) continue;
+            rationaleMap[p.id] = { reason: `Complete ${designerLabel} listing from the Maison Affluency Curation.` };
+          }
+          const preview = previewRaw.map((p: any) => ({ ...p, rationale: rationaleMap[p.id]?.reason || null }));
+          const proposal = {
+            tool: "propose_tearsheet",
+            tool_call_id: crypto.randomUUID(),
+            args: {
+              title: `${designerLabel} — full curation`,
+              pick_ids: finalIds,
+              note: `All ${finalIds.length} ${designerLabel} pieces currently in the Maison Affluency Curation, with trade pricing.`,
+              pick_rationales: rationaleMap,
+            },
+            preview,
+          };
+          return sseProposalThenTextResponse(
+            proposal,
+            `Here are all ${finalIds.length} ${designerLabel} pieces in the Maison Affluency Curation with trade pricing — tap any to open the tear sheet.`,
+          );
+        }
+      }
+    }
+
+
     if (hasVisualizationVerb) {
       const tearsheetProposal = visualizationNeedsCatalogPicks
         ? await buildDeterministicTearsheetProposal(
