@@ -373,23 +373,31 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   // reprices every line.
   useEffect(() => {
     const fetchRates = async () => {
+      // The FX target follows the display toggle: when the user flips to
+      // GBP DDP the badge must reflect the GBP rate source, not the quote
+      // currency's source.
+      const targetCcy = displayCcy === "gbp" ? "GBP" : currency;
       const sourceCurrencies = new Set<string>();
       items.forEach((item) => {
         const sourceCurrency = item.unit_price_cents != null
           ? (item.unit_price_currency || currency)
           : item.trade_products?.currency;
-        if (sourceCurrency && sourceCurrency !== currency) {
+        if (sourceCurrency && sourceCurrency !== targetCcy) {
           sourceCurrencies.add(sourceCurrency);
         }
       });
+      // Always include quote→target so the badge reflects the display
+      // conversion itself even when every line is already in `currency`.
+      if (displayCcy === "gbp" && currency !== "GBP") sourceCurrencies.add(currency);
       if (sourceCurrencies.size === 0) { setFxRates({}); setFxSource("identity"); return; }
-      const pairs = Array.from(sourceCurrencies).map((src) => ({ src, tgt: currency }));
+      const pairs = Array.from(sourceCurrencies).map((src) => ({ src, tgt: targetCcy }));
       const rates = await getFxRates(pairs);
       setFxRates(rates);
       setFxSource(summarizeFxSources(pairs.map((p) => getFxSource(p.src, p.tgt))));
     };
     if (items.length > 0) fetchRates();
-  }, [items, currency]);
+  }, [items, currency, displayCcy]);
+
 
   // Fetch items, currency, and profile
   useEffect(() => {

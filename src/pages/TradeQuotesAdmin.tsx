@@ -268,6 +268,32 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
     mode: "road",
   }));
 
+  // Recompute the FX source badge whenever the display currency toggle flips
+  // (quote currency ↔ GBP DDP). Without this the badge kept showing the source
+  // used for the quote-currency conversion even after the user switched to
+  // GBP, making the indicator lie about which provider produced the visible
+  // number.
+  useEffect(() => {
+    const quoteCcy = quote?.currency || "SGD";
+    const targetCcy = displayCcy === "gbp" ? "GBP" : quoteCcy;
+    const sources = new Set<string>();
+    items.forEach((item) => {
+      const src =
+        item.unit_price_cents != null
+          ? ((item as any).unit_price_currency || quoteCcy)
+          : (item.trade_products?.currency || quoteCcy);
+      if (src && src !== targetCcy) sources.add(src);
+    });
+    if (displayCcy === "gbp" && quoteCcy !== "GBP") sources.add(quoteCcy);
+    if (sources.size === 0) { setFxSource("identity"); return; }
+    const pairs = Array.from(sources).map((src) => ({ src, tgt: targetCcy }));
+    // Warm the cache, then read back the definitive source per pair.
+    getFxRates(pairs).then(() => {
+      setFxSource(summarizeFxSources(pairs.map((p) => getFxSource(p.src, p.tgt))));
+    });
+  }, [displayCcy, quote?.currency, items]);
+
+
   useEffect(() => {
     const load = async () => {
       setLoading(true);
