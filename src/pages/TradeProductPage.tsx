@@ -682,6 +682,11 @@ const TradeProductPage: React.FC = () => {
         if (itemId) {
           const patch: any = {};
           if (variantLabel) patch.variant_label = variantLabel;
+          // Ensure the finish-specific image sticks even when the RPC merged
+          // this line onto an existing quote row that had the default photo.
+          if (resolvedImgIdx != null && resolvedImageUrl && resolvedImageUrl !== product.image_url) {
+            patch.image_url = resolvedImageUrl;
+          }
 
           // Flag finishes the user selected that have no mapped reference
           // images so the concierge / designer doesn't assume a visual match.
