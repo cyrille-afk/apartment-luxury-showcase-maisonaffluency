@@ -90,3 +90,30 @@ export function resolveActiveVariantCents(
   const c = v?.price_cents;
   return typeof c === "number" && c > 0 ? c : null;
 }
+
+/**
+ * "From €X" cheapest-matching price for a dual-axis product where the user
+ * has picked only ONE axis (e.g. finish but not size, or size but not finish).
+ * Both the on-page price caption and the "Add to Quote" flow MUST read this
+ * so the quote line matches what the user saw. Returns null when no partial
+ * selection is made, when the product isn't dual-axis, or when no priced
+ * variant matches.
+ */
+export function resolvePartialDualMinCents(
+  sel: Pick<ActiveVariantSelection, "selectedBase" | "selectedTop" | "selectedDualSize">,
+  ctx: Pick<ActiveVariantContext, "sizeVariants" | "isDualAxis">,
+): number | null {
+  if (!ctx.isDualAxis || !ctx.sizeVariants || ctx.sizeVariants.length === 0) return null;
+  if (!sel.selectedBase && !sel.selectedTop && !sel.selectedDualSize) return null;
+  const matches = ctx.sizeVariants.filter(
+    (v: any) =>
+      (!sel.selectedBase || norm(v.base) === norm(sel.selectedBase)) &&
+      (!sel.selectedTop || norm(v.top) === norm(sel.selectedTop)) &&
+      (!sel.selectedDualSize || norm(v.label) === norm(sel.selectedDualSize)),
+  );
+  const priced = matches
+    .map((v: any) => v.price_cents)
+    .filter((c: any) => typeof c === "number" && c > 0) as number[];
+  return priced.length ? Math.min(...priced) : null;
+}
+
