@@ -28,7 +28,7 @@ interface Board {
   title: string;
   client_name: string;
   client_email: string | null;
-  share_token: string;
+  share_token?: string;
   status: string;
   created_at: string;
   updated_at: string;
@@ -71,7 +71,7 @@ const TradeBoards = () => {
     if (!user) return;
     let q = supabase
       .from("client_boards")
-      .select("id, user_id, studio_id, project_id, title, client_name, status, share_token, token_expires_at, token_rotated_at, studio_name, studio_logo_url, hide_maison_branding, created_at, updated_at")
+      .select("id, user_id, studio_id, project_id, title, client_name, status, token_expires_at, token_rotated_at, studio_name, studio_logo_url, hide_maison_branding, created_at, updated_at")
       .order("updated_at", { ascending: false });
     // Scope to current studio so teammates see each other's boards.
     // Also include legacy boards created before a studio existed (studio_id NULL)
@@ -170,8 +170,13 @@ const TradeBoards = () => {
     }
   };
 
-  const copyShareLink = (token: string) => {
-    const url = `${window.location.origin}/board/${token}`;
+  const copyShareLink = async (boardId: string) => {
+    const { data, error } = await supabase.rpc("get_my_board_share_token", { _board_id: boardId });
+    if (error || !data) {
+      toast({ title: "Cannot copy link", description: "Only the board owner can copy the share link.", variant: "destructive" });
+      return;
+    }
+    const url = `${window.location.origin}/board/${data}`;
     navigator.clipboard.writeText(url);
     toast({ title: "Link copied", description: "Share this link with your client" });
   };
@@ -266,7 +271,7 @@ const TradeBoards = () => {
                 </p>
                 <div className="flex items-center gap-2" onClick={e => e.stopPropagation()}>
                   {board.status !== "draft" && (
-                    <Button variant="ghost" size="sm" className="h-8 gap-1.5 text-xs" onClick={() => copyShareLink(board.share_token)}>
+                    <Button variant="ghost" size="sm" className="h-8 gap-1.5 text-xs" onClick={() => copyShareLink(board.id)}>
                       <Share2 className="h-3 w-3" /> Copy Link
                     </Button>
                   )}

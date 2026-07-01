@@ -43,7 +43,7 @@ interface Board {
   id: string;
   title: string;
   client_name: string;
-  share_token: string;
+  share_token?: string;
   status: string;
   token_expires_at: string | null;
   token_rotated_at: string | null;
@@ -115,7 +115,7 @@ const TradeBoardBuilder = () => {
     if (!id) return;
     const { data: boardData } = await supabase
       .from("client_boards")
-      .select("id, user_id, studio_id, project_id, title, client_name, status, share_token, token_expires_at, token_rotated_at, studio_name, studio_logo_url, hide_maison_branding, created_at, updated_at")
+      .select("id, user_id, studio_id, project_id, title, client_name, status, token_expires_at, token_rotated_at, studio_name, studio_logo_url, hide_maison_branding, created_at, updated_at")
       .eq("id", id)
       .single();
     if (boardData) setBoard(boardData as Board);
@@ -308,7 +308,12 @@ const TradeBoardBuilder = () => {
       await supabase.from("client_boards").update({ status: "shared" }).eq("id", board.id);
       setBoard({ ...board, status: "shared" });
     }
-    const url = `${window.location.origin}/board/${board.share_token}`;
+    const { data: token, error: tokenErr } = await supabase.rpc("get_my_board_share_token", { _board_id: board.id });
+    if (tokenErr || !token) {
+      toast({ title: "Cannot share", description: "Only the board owner can copy the share link.", variant: "destructive" });
+      return;
+    }
+    const url = `${window.location.origin}/board/${token}`;
     navigator.clipboard.writeText(url);
 
     if (wasDraft) {
