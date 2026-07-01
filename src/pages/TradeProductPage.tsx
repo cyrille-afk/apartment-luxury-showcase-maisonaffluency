@@ -61,6 +61,8 @@ import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
 import { rememberProductBackRef } from "@/lib/designerBackRef";
 import { priceRugVariantFromLabel, isRugCategory, looksLikeDimension } from "@/lib/rugPricing";
+import { resolveActiveVariant } from "@/lib/resolveActiveVariant";
+
 import RugSizeColourPicker, { type RugSelection } from "@/components/rug/RugSizeColourPicker";
 import SpecGlyph from "@/components/product/SpecGlyph";
 import { firstPublicVariantDimensionLabel } from "@/lib/productVariantSpecs";
@@ -519,6 +521,65 @@ const TradeProductPage: React.FC = () => {
     setGalleryActiveIndex(undefined);
   }, [designerSlug, productSlug]);
 
+  // ── Unified variant resolution ──
+  // Both the price caption AND handleAddToQuote (and any downstream renderer)
+  // MUST derive the "which variant is selected" from the same source, so a
+  // Travertino Rosso pick surfaces identically in the header, the quote card
+  // and the quote line unit price.
+  const sizeVariantsForResolve: any[] | null =
+    (data?.pricing?.size_variants as any[] | undefined) || null;
+  const activeVariantContext = React.useMemo(() => {
+    const axes = computeVariantAxes(sizeVariantsForResolve);
+    const baseAxisLabelRaw = (((data?.product as any)?.base_axis_label) || "").trim();
+    const baseAxisIsDim = baseAxisLabelRaw
+      ? isDimensionAxisLabel(baseAxisLabelRaw)
+      : (axes.baseOptions.length > 0 && axes.baseOptions.every(looksLikeDimension));
+    const baseOnlySizeOptions = axes.isBaseOnly
+      ? Array.from(new Set(
+          (sizeVariantsForResolve || []).map((v: any) => (v.label || "").trim()).filter(Boolean),
+        ))
+      : [];
+    const baseOnlyRequiresSize = axes.isBaseOnly && !baseAxisIsDim && baseOnlySizeOptions.length > 1;
+    const hasDualSize = axes.dualSizeOptions.length > 1;
+    return {
+      sizeVariants: sizeVariantsForResolve,
+      isDualAxis: axes.isDualAxis,
+      isBaseOnly: axes.isBaseOnly,
+      hasSingleAxisSplit: axes.hasSingleAxisSplit,
+      hasDualSize,
+      baseOnlyRequiresSize,
+      singleAxisParsed: axes.singleAxisParsed,
+    };
+  }, [sizeVariantsForResolve, (data?.product as any)?.base_axis_label]);
+
+  const activeVariant = React.useMemo(
+    () => resolveActiveVariant(
+      {
+        selectedVariantIdx,
+        selectedBase,
+        selectedTop,
+        selectedDualSize,
+        selectedSingleSize,
+        selectedSingleMaterial,
+      },
+      activeVariantContext,
+    ),
+    [
+      activeVariantContext,
+      selectedVariantIdx,
+      selectedBase,
+      selectedTop,
+      selectedDualSize,
+      selectedSingleSize,
+      selectedSingleMaterial,
+    ],
+  );
+  const activeVariantCents: number | null = (() => {
+    const c = activeVariant?.price_cents;
+    return typeof c === "number" && c > 0 ? c : null;
+  })();
+
+
   const handleAddToQuote = useCallback(async () => {
     if (!user || !data) return;
     setAdding(true);
@@ -637,26 +698,13 @@ const TradeProductPage: React.FC = () => {
           if (selectedWoodPrice?.id) {
             patch.wood_fabric_id = selectedWoodPrice.id;
           }
-          // Resolve the selected variant's price (single-axis, dual-axis, or
-          // base-only). This ensures the quote line reflects the finish/size
+          // Resolve the selected variant's price via the SHARED resolver used
+          // by the caption. This guarantees the quote line reflects the finish/size
           // the user actually picked (e.g. Travertino Rosso €14,263) rather
-          // than the RPC's default "starting" RRP (Kynos €12,116).
-          const resolveSelectedVariantCents = (): number | null => {
-            if (!sv || !sv.length) return null;
-            const norm = (s: any) => String(s || "").trim();
-            const priced = (v: any) =>
-              typeof v?.price_cents === "number" && v.price_cents > 0 ? (v.price_cents as number) : null;
-            if (selectedVariantIdx != null) return priced(sv[selectedVariantIdx]);
-            const matches = sv.filter((v: any) => {
-              if (selectedBase && norm(v.base) !== norm(selectedBase)) return false;
-              if (selectedTop && norm(v.top) !== norm(selectedTop)) return false;
-              if (selectedDualSize && norm(v.label) !== norm(selectedDualSize)) return false;
-              return !!(selectedBase || selectedTop || selectedDualSize);
-            });
-            const p = matches.map(priced).filter((c): c is number => c != null);
-            return p.length ? Math.min(...p) : null;
-          };
-          const selectedVariantCents = resolveSelectedVariantCents();
+          // than the RPC's default "starting" RRP (Kynos €12,116) — and stays
+          // in lock-step with the price shown above the "Add to Quote" button.
+          const selectedVariantCents = activeVariantCents;
+
 
           // Combined override unit price (wood + fabric upcharge), in quote currency.
           if (overrideUnitPriceCents != null) {
@@ -745,7 +793,7 @@ const TradeProductPage: React.FC = () => {
     } finally {
       setAdding(false);
     }
-  }, [user, data, activeQuoteId, toast, selectedBase, selectedTop, selectedDualSize, selectedSingleMaterial, selectedSingleSize, selectedVariantIdx, rugSelection, selectedFabric, selectedWoodPrice, fxRates, displayCurrency, finishesMissingImages]);
+  }, [user, data, activeQuoteId, toast, selectedBase, selectedTop, selectedDualSize, selectedSingleMaterial, selectedSingleSize, selectedVariantIdx, rugSelection, selectedFabric, selectedWoodPrice, fxRates, displayCurrency, finishesMissingImages, activeVariantCents]);
 
   // Default the dual-axis pickers to the first base + its uniquely-compatible
   // top so users see a complete pairing on load (e.g. Pars Cocktail Table:
@@ -1083,18 +1131,9 @@ const TradeProductPage: React.FC = () => {
     : [];
   const baseOnlyRequiresSize = isBaseOnly && !baseAxisIsDim && baseOnlySizeOptions.length > 1;
 
-  const activeVariant = isDualAxis
-    ? dualVariant
-    : isBaseOnly
-      ? (hasVariants && selectedBase && (!baseOnlyRequiresSize || selectedDualSize)
-        ? sizeVariants!.find((v) =>
-            (v.base || "").trim() === selectedBase &&
-            (!baseOnlyRequiresSize || (v.label || "").trim() === selectedDualSize)
-          ) ?? null
-        : null)
-    : hasSingleAxisSplit
-      ? singleAxisActive
-      : (hasVariants && selectedVariantIdx != null ? sizeVariants![selectedVariantIdx] : null);
+  // `activeVariant` is hoisted above `handleAddToQuote` (top of component) so
+  // both the caption and the quote flow read from the same resolver.
+
   const isUpholsteredProduct = isProductUpholstered(product as any);
   // When FinishSelector is shown (upholstered), it already exposes fabric
   // + wood-finish swatches. Suppress duplicate base/top variant dropdowns
