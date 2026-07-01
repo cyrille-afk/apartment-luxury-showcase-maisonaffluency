@@ -175,6 +175,65 @@ export default function TradePriceDriftAudit() {
     return c;
   }, [rows]);
 
+  /**
+   * Repair: touch the source pick's trade_price_cents/currency (rewrite the
+   * same value). This fires trg_sync_curator_pick_to_trade_product, which
+   * upserts the mirror row from the pick — one strategy for every kind.
+   */
+  const resyncPick = async (pickId: string, pickPrice: number | null, pickCurrency: string | null) => {
+    const { error } = await supabase
+      .from("designer_curator_picks")
+      .update({ trade_price_cents: pickPrice, currency: pickCurrency })
+      .eq("id", pickId);
+    if (error) throw error;
+  };
+
+  const handleResync = async (m: Mismatch) => {
+    setResyncing((s) => new Set(s).add(m.pick_id));
+    try {
+      await resyncPick(m.pick_id, m.pick_price, m.pick_currency);
+      setRows((prev) =>
+        prev ? prev.filter((r) => !(r.pick_id === m.pick_id && r.kind === m.kind)) : prev,
+      );
+      toast({ title: "Resynced", description: m.product_name ?? m.pick_id.slice(0, 8) });
+    } catch (e) {
+      toast({
+        title: "Resync failed",
+        description: (e as Error).message,
+        variant: "destructive",
+      });
+    } finally {
+      setResyncing((s) => {
+        const n = new Set(s);
+        n.delete(m.pick_id);
+        return n;
+      });
+    }
+  };
+
+  const handleResyncAll = async (targets: Mismatch[]) => {
+    if (!targets.length) return;
+    if (!window.confirm(`Resync mirror price for ${targets.length} pick(s)?`)) return;
+    setResyncingAll(true);
+    let ok = 0;
+    let fail = 0;
+    for (const m of targets) {
+      try {
+        await resyncPick(m.pick_id, m.pick_price, m.pick_currency);
+        ok += 1;
+      } catch {
+        fail += 1;
+      }
+    }
+    setResyncingAll(false);
+    toast({
+      title: `Resynced ${ok} pick(s)`,
+      description: fail ? `${fail} failed — rescanning.` : "Rescanning to confirm…",
+      variant: fail ? "destructive" : "default",
+    });
+    await load();
+  };
+
   const exportCsv = () => {
     const header = [
       "kind",
