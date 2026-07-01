@@ -3339,8 +3339,8 @@ serve(async (req) => {
           preview,
         };
         const closing = excludedIds.size > 0
-          ? `Here are ${finalIds.length} ${designerLabel} pieces (skipped ${excludedIds.size} per your request) — take a look at your project folders to open the tear sheet.`
-          : `Here are all ${finalIds.length} ${designerLabel} pieces in the Maison Affluency Curation with trade pricing — take a look at your project folders to open the tear sheet.`;
+          ? `Draft tear sheet with ${finalIds.length} ${designerLabel} pieces (skipped ${excludedIds.size} per your request). Review the list above and click **Approve & Create** to save it into a project folder — or **Discard** to cancel.`
+          : `Draft tear sheet with all ${finalIds.length} ${designerLabel} pieces in the Maison Affluency Curation, with trade pricing. Review the list above and click **Approve & Create** to save it into a project folder — or **Discard** to cancel.`;
         return sseProposalThenTextResponse(proposal, closing);
 
       }
