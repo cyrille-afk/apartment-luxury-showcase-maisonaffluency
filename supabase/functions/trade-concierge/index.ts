@@ -4220,12 +4220,26 @@ serve(async (req) => {
             // "Scala 300 Dining Table" sharing the same brand + image)
             // regardless of whether a typology was inferred.
             ({ previewRaw, pickIds } = dedupePreviewRows(previewRaw, pickIds));
+            // Honour in-chat "skip / exclude / omit …" instructions from the
+            // latest user message so the proposal card ships pre-filtered.
+            const streamExcludedIds = parseUserExclusions(lastUserMsg || "", previewRaw);
+            if (streamExcludedIds.size > 0) {
+              previewRaw = previewRaw.filter((p: any) => p?.id && !streamExcludedIds.has(p.id));
+              pickIds = pickIds.filter((id: string) => !streamExcludedIds.has(id));
+              console.log(`[concierge] applied user skip list — dropped ${streamExcludedIds.size} pick(s) from ${tc.name}`);
+            }
             if (requestedTypology && pickIds.length < 2) {
               console.warn(`[concierge] blocked ${tc.name} — insufficient true ${requestedTypology} picks after typology validation`);
               const releaseFrame = { choices: [{ delta: { content: buildNoStrictTypologyReply(requestedTypology) } }] };
               controller.enqueue(encoder.encode(`data: ${JSON.stringify(releaseFrame)}\n\n`));
               continue;
             }
+            if (pickIds.length === 0) {
+              const releaseFrame = { choices: [{ delta: { content: "Your skip list would remove every piece I was about to propose — nothing left to add. Send the request again with a shorter exclusion." } }] };
+              controller.enqueue(encoder.encode(`data: ${JSON.stringify(releaseFrame)}\n\n`));
+              continue;
+            }
+
             const preview = previewRaw.map((p: any) => {
               const r = p && rationaleMap[p.id];
               if (!r) return p;
