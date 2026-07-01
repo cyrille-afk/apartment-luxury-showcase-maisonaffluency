@@ -308,7 +308,12 @@ const TradeBoardBuilder = () => {
       await supabase.from("client_boards").update({ status: "shared" }).eq("id", board.id);
       setBoard({ ...board, status: "shared" });
     }
-    const url = `${window.location.origin}/board/${board.share_token}`;
+    const { data: token, error: tokenErr } = await supabase.rpc("get_my_board_share_token", { _board_id: board.id });
+    if (tokenErr || !token) {
+      toast({ title: "Cannot share", description: "Only the board owner can copy the share link.", variant: "destructive" });
+      return;
+    }
+    const url = `${window.location.origin}/board/${token}`;
     navigator.clipboard.writeText(url);
 
     if (wasDraft) {
