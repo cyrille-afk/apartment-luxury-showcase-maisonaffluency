@@ -1154,7 +1154,7 @@ function needsFullCatalog(text: string, designerNames: string[]): boolean {
   const t = (text || "").toLowerCase();
   if (!t) return false;
   // Product-recommendation verbs / discovery intents
-  if (/\b(show|find|pull|suggest|recommend|propose|curate|compose|draft|quote|tearsheet|add to|put together|in (oak|brass|bronze|marble|leather|mohair|velvet|stone|wood))\b/.test(t)) return true;
+  if (/\b(show|find|pull|suggest|recommend|propose|curate|compose|draft|quote|tearsheet|add to|put together|list (?:all|every|the)|which .*(?:do you|are)|everything (?:by|from)|in (oak|brass|bronze|marble|leather|mohair|velvet|stone|wood))\b/.test(t)) return true;
   // Category keywords
   if (/\b(chandelier|sconce|lamp|lighting|table|chair|sofa|armchair|console|cabinet|mirror|rug|carpet|desk|bed|stool|bench|sideboard|dining|coffee|side table|dressing|wall light|pendant|floor lamp|objet)\b/.test(t)) return true;
   // Designer name mention
