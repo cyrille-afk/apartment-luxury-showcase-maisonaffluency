@@ -59,7 +59,7 @@ const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0 }: QuoteDrawe
         .order("created_at", { ascending: false });
 
       if (data) {
-        const mapped: QuoteItem[] = (data as any[]).map((d) => ({
+        let mapped: QuoteItem[] = (data as any[]).map((d) => ({
           id: d.id,
           quantity: d.quantity,
           unit_price_cents: d.unit_price_cents,
@@ -74,6 +74,10 @@ const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0 }: QuoteDrawe
           wood_fabric: Array.isArray(d.wood_fabric) ? d.wood_fabric[0] : d.wood_fabric,
           product: Array.isArray(d.product) ? d.product[0] : d.product,
         }));
+
+        // Fallback: prefer freshest price from designer_curator_picks when the
+        // mirror row is missing or stale.
+        mapped = await hydrateQuotePricesFromPicks(mapped, "product");
 
 
         // For items without a price, try to find a priced record via fuzzy matching
