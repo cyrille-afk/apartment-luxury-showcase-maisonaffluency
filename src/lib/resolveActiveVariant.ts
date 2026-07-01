@@ -39,7 +39,6 @@ export function resolveActiveVariant(
   if (!sv || sv.length === 0) return null;
 
   if (ctx.isDualAxis) {
-    if (!sel.selectedBase && !sel.selectedTop) return null;
     return (
       sv.find(
         (v) =>
@@ -49,6 +48,7 @@ export function resolveActiveVariant(
       ) ?? null
     );
   }
+
 
   if (ctx.isBaseOnly) {
     if (!sel.selectedBase) return null;
