@@ -61,7 +61,7 @@ import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
 import { rememberProductBackRef } from "@/lib/designerBackRef";
 import { priceRugVariantFromLabel, isRugCategory, looksLikeDimension } from "@/lib/rugPricing";
-import { resolveActiveVariant } from "@/lib/resolveActiveVariant";
+import { resolveActiveVariant, resolvePartialDualMinCents } from "@/lib/resolveActiveVariant";
 
 import RugSizeColourPicker, { type RugSelection } from "@/components/rug/RugSizeColourPicker";
 import SpecGlyph from "@/components/product/SpecGlyph";
