@@ -3141,7 +3141,7 @@ serve(async (req) => {
     ): string => {
       const skipList = skipped.map((p, i) => `${i + 1}. ${p.title || "Untitled"}`).join("\n");
       const keepList = kept.map((p, i) => `${i + 1}. ${p.title || "Untitled"}`).join("\n");
-      return `${SKIP_CONFIRM_MARKER}Before I build the ${label} tear sheet, please confirm.\n\n**Skipping (${skipped.length}):**\n${skipList || "_(none)_"}\n\n**Keeping (${kept.length}):**\n${keepList || "_(none)_"}\n\nReply **"confirm"** (or "yes"/"proceed") to create the tear sheet, or reply with an amended skip list.`;
+      return `${SKIP_CONFIRM_MARKER}Before I build the ${label} tear sheet, please confirm.\n\n**Skipping (${skipped.length}):**\n${skipList || "_(none)_"}\n\n**Keeping (${kept.length}):**\n${keepList || "_(none)_"}\n\nReply **"confirm all remaining"** (or "yes" / "approve" / "go ahead") to create the tear sheet, or send an amended skip list.`;
     };
 
     // Parse in-chat "skip / exclude / omit / without / except / remove / drop /
