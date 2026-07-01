@@ -499,6 +499,8 @@ const TradeProductPage: React.FC = () => {
   // actually picked. Null means "no shrink override".
   const [selectedTopDisplay, setSelectedTopDisplay] = useState<string | null>(null);
   const [selectedBaseDisplay, setSelectedBaseDisplay] = useState<string | null>(null);
+  const [selectedSwatchGalleryIndices, setSelectedSwatchGalleryIndices] = useState<number[] | null>(null);
+  const [selectedSwatchGalleryName, setSelectedSwatchGalleryName] = useState<string | null>(null);
   const [selectedDualSize, setSelectedDualSize] = useState<string | null>(null);
   const [rugSelection, setRugSelection] = useState<RugSelection | null>(null);
   const [defaultPair, setDefaultPair] = useState<{ base: string; top: string } | null>(null);
@@ -706,8 +708,24 @@ const TradeProductPage: React.FC = () => {
       const baseForImage = shrinkForImage(selectedBase, selectedBaseDisplay);
       const topForImage = shrinkForImage(selectedTop, selectedTopDisplay);
       let resolvedImgIdx: number | undefined;
+      const normImageLabel = (s: string | null | undefined) => (s || "").trim().toLowerCase();
+      const swatchImageStillMatchesSelection = selectedSwatchGalleryName
+        ? [
+            selectedWoodPrice?.name,
+            selectedFabric?.name,
+            selectedTopDisplay,
+            selectedBaseDisplay,
+            topForImage,
+            baseForImage,
+            selectedSingleMaterial,
+          ].some((label) => normImageLabel(label) === normImageLabel(selectedSwatchGalleryName))
+        : false;
+      if (selectedSwatchGalleryIndices?.length && swatchImageStillMatchesSelection) {
+        const swatchIdx = Math.max(0, selectedSwatchGalleryIndices[0] - 1);
+        if (swatchIdx >= 0 && swatchIdx < heroList.length) resolvedImgIdx = swatchIdx;
+      }
       if (baseForImage || topForImage || selectedDualSize) {
-        resolvedImgIdx = resolveVariantImageIndex(finishMapForQuote, {
+        resolvedImgIdx ??= resolveVariantImageIndex(finishMapForQuote, {
           base: baseForImage,
           top: topForImage,
           size: selectedDualSize,
@@ -932,7 +950,7 @@ const TradeProductPage: React.FC = () => {
     } finally {
       setAdding(false);
     }
-  }, [user, data, activeQuoteId, toast, selectedBase, selectedTop, selectedBaseDisplay, selectedTopDisplay, selectedDualSize, selectedSingleMaterial, selectedSingleSize, selectedVariantIdx, rugSelection, selectedFabric, selectedWoodPrice, fxRates, displayCurrency, finishesMissingImages, activeVariantCents]);
+  }, [user, data, activeQuoteId, toast, selectedBase, selectedTop, selectedBaseDisplay, selectedTopDisplay, selectedSwatchGalleryIndices, selectedSwatchGalleryName, selectedDualSize, selectedSingleMaterial, selectedSingleSize, selectedVariantIdx, rugSelection, selectedFabric, selectedWoodPrice, fxRates, displayCurrency, finishesMissingImages, activeVariantCents]);
 
   // Default the dual-axis pickers to the first base + its uniquely-compatible
   // top so users see a complete pairing on load (e.g. Pars Cocktail Table:
@@ -1866,8 +1884,18 @@ const TradeProductPage: React.FC = () => {
                   onFinishesMissingImagesChange={setFinishesMissingImages}
                   onFabricChange={setSelectedFabric}
                   onWoodFinishPricingChange={setSelectedWoodPrice}
-                  onSwatchImagesChange={(indices) => {
-                    if (!indices || indices.length === 0) return;
+                  onSwatchImagesChange={(indices, meta) => {
+                    if (!indices || indices.length === 0) {
+                      if (meta?.committed) {
+                        setSelectedSwatchGalleryIndices(null);
+                        setSelectedSwatchGalleryName(null);
+                      }
+                      return;
+                    }
+                    if (meta?.committed) {
+                      setSelectedSwatchGalleryIndices(indices);
+                      setSelectedSwatchGalleryName(meta.swatchName || null);
+                    }
                     // image_indices are 1-based; gallery is 0-based.
                     setGalleryActiveIndex(Math.max(0, indices[0] - 1));
                     setGalleryJumpNonce((n) => n + 1);
