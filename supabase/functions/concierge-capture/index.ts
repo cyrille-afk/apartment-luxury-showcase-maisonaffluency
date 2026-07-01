@@ -140,7 +140,47 @@ const HIGH_VALUE_CITIES = new Set([
   "london", "new york", "nyc", "paris", "monaco", "hong kong", "dubai",
   "los angeles", "la", "miami", "aspen", "singapore", "geneva", "zurich",
   "milan", "rome", "tokyo", "seoul", "doha", "abu dhabi", "riyadh",
+  // Common airport / city acronyms — map to display via CITY_ACRONYM_EXPANSIONS
+  "sg", "hk", "bkk", "jkt", "hcm", "hcmc", "kl", "mnl", "tpe",
+  "sfo", "sf", "lax", "jfk", "dxb", "auh", "doh", "ruh", "cdg", "lhr", "ldn",
+  "syd", "mel", "ist", "ath", "bcn", "mad", "ber", "muc", "ams", "bru", "vie",
 ]);
+
+// Acronym → display name for signals/output.
+const CITY_ACRONYM_EXPANSIONS: Record<string, { city: string; country: string }> = {
+  sg: { city: "Singapore", country: "Singapore" },
+  hk: { city: "Hong Kong", country: "Hong Kong" },
+  bkk: { city: "Bangkok", country: "Thailand" },
+  jkt: { city: "Jakarta", country: "Indonesia" },
+  hcm: { city: "Ho Chi Minh City", country: "Vietnam" },
+  hcmc: { city: "Ho Chi Minh City", country: "Vietnam" },
+  kl: { city: "Kuala Lumpur", country: "Malaysia" },
+  mnl: { city: "Manila", country: "Philippines" },
+  tpe: { city: "Taipei", country: "Taiwan" },
+  sfo: { city: "San Francisco", country: "United States" },
+  sf: { city: "San Francisco", country: "United States" },
+  lax: { city: "Los Angeles", country: "United States" },
+  jfk: { city: "New York", country: "United States" },
+  nyc: { city: "New York", country: "United States" },
+  dxb: { city: "Dubai", country: "United Arab Emirates" },
+  auh: { city: "Abu Dhabi", country: "United Arab Emirates" },
+  doh: { city: "Doha", country: "Qatar" },
+  ruh: { city: "Riyadh", country: "Saudi Arabia" },
+  cdg: { city: "Paris", country: "France" },
+  lhr: { city: "London", country: "United Kingdom" },
+  ldn: { city: "London", country: "United Kingdom" },
+  syd: { city: "Sydney", country: "Australia" },
+  mel: { city: "Melbourne", country: "Australia" },
+  ist: { city: "Istanbul", country: "Türkiye" },
+  ath: { city: "Athens", country: "Greece" },
+  bcn: { city: "Barcelona", country: "Spain" },
+  mad: { city: "Madrid", country: "Spain" },
+  ber: { city: "Berlin", country: "Germany" },
+  muc: { city: "Munich", country: "Germany" },
+  ams: { city: "Amsterdam", country: "Netherlands" },
+  bru: { city: "Brussels", country: "Belgium" },
+  vie: { city: "Vienna", country: "Austria" },
+};
 
 type Qualified = {
   name: string | null;
