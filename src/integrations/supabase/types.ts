@@ -6601,6 +6601,7 @@ export type Database = {
           slug: string
         }[]
       }
+      get_my_board_share_token: { Args: { _board_id: string }; Returns: string }
       get_my_pending_invites: {
         Args: never
         Returns: {
