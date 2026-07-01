@@ -3025,12 +3025,21 @@ serve(async (req) => {
     // or empty results. Full catalog guarantees the model can see all of
     // that designer's rows and answer completeness questions correctly.
     const lastUserMsgLc = (lastUserMsg || "").toLowerCase();
-    const mentionsKnownDesigner = designerNames.some((n) => {
+    const mentionedDesigners: string[] = [];
+    for (const n of designerNames) {
       const name = String(n || "").toLowerCase().trim();
-      return name.length >= 4 && lastUserMsgLc.includes(name);
-    });
+      if (name.length >= 4 && lastUserMsgLc.includes(name)) mentionedDesigners.push(n);
+    }
+    const mentionsKnownDesigner = mentionedDesigners.length > 0;
+    // If the user names a specific designer, skip RAG (top-K may miss items)
+    // AND scope the catalog load to just those designers — no reason to ship
+    // the full 2000-row catalog when the question is about one designer.
     const useRag = includePieces && !!ragResult && !mentionsKnownDesigner;
-    const { designersList, piecesList: fullPiecesList, showroomBrands } = await loadCatalogContext(supabase, includePieces && !useRag);
+    const { designersList, piecesList: fullPiecesList, showroomBrands } = await loadCatalogContext(
+      supabase,
+      includePieces && !useRag,
+      mentionsKnownDesigner ? mentionedDesigners : undefined,
+    );
     const piecesList = useRag ? (ragResult as { contextText: string }).contextText : fullPiecesList;
 
     if (hasVisualizationVerb) {
