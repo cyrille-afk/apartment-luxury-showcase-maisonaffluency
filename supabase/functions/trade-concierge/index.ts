@@ -1204,7 +1204,11 @@ function pickModel(text: string, includePieces: boolean): string {
   return modelFor("balanced");
 }
 
-async function loadCatalogContext(supabase: ReturnType<typeof createClient>, includePieces: boolean) {
+async function loadCatalogContext(
+  supabase: ReturnType<typeof createClient>,
+  includePieces: boolean,
+  designerFilter?: string[],
+) {
   // Fetch published designers
   const { data: designers } = await supabase
     .from("designers")
@@ -1225,34 +1229,54 @@ async function loadCatalogContext(supabase: ReturnType<typeof createClient>, inc
     if (d.display_name) brandToDesigner.set(String(d.display_name).trim().toLowerCase(), display);
   });
 
-  // Fetch ALL curator picks (these own the canonical pick_ids used by the
-  // tearsheet tools). Skipped on the lightweight path.
-  const { data: picks } = includePieces
-    ? await supabase
-        .from("designer_curator_picks")
-        .select("id, title, materials, category, subcategory, designer_id, trade_price_cents, price_per_sqm_cents, currency, size_variants")
-        .order("designer_id", { ascending: true })
-        .order("title", { ascending: true })
-        .limit(2000)
-    : { data: [] as any[] };
+  // Resolve designer filter (if the user named specific designers) into
+  // concrete designer_ids + brand-name variants so we only load THEIR rows.
+  const filterLc = (designerFilter || [])
+    .map((n) => String(n || "").trim().toLowerCase())
+    .filter((n) => n.length >= 4);
+  const filteredDesignerIds: string[] = [];
+  const filteredBrandNames = new Set<string>();
+  if (filterLc.length) {
+    (designers || []).forEach((d: any) => {
+      const nm = String(d.name || "").trim().toLowerCase();
+      const dn = String(d.display_name || "").trim().toLowerCase();
+      if (filterLc.some((f) => (nm && (nm === f || f.includes(nm))) || (dn && (dn === f || f.includes(dn))))) {
+        filteredDesignerIds.push(d.id);
+        if (d.name) filteredBrandNames.add(d.name);
+        if (d.display_name) filteredBrandNames.add(d.display_name);
+      }
+    });
+  }
+  const useDesignerFilter = filterLc.length > 0 && (filteredDesignerIds.length > 0 || filteredBrandNames.size > 0);
 
-  // Fetch the trade_products catalog so the assistant can SEE every active
-  // piece (not just the curator subset). On the lightweight path we only
-  // need brand names for the SHOWROOM BRANDS section.
-  // IMPORTANT: only surface trade_products that have an image_url. Junk/stub
-  // rows without a photo (truncated duplicates from scrapers, orphan variants)
-  // would otherwise compete with the real curator picks in the catalog the
-  // model sees, e.g. proposing an imageless "Lyric Desk" alongside the three
-  // good variants (Walnut / Oak / x Pierre Frey).
+  // Fetch curator picks. If a designer filter is active, restrict to that
+  // designer's rows — no need to load the full catalog to answer a question
+  // scoped to a single named designer.
+  let picksQuery = supabase
+    .from("designer_curator_picks")
+    .select("id, title, materials, category, subcategory, designer_id, trade_price_cents, price_per_sqm_cents, currency, size_variants")
+    .order("designer_id", { ascending: true })
+    .order("title", { ascending: true })
+    .limit(2000);
+  if (useDesignerFilter && filteredDesignerIds.length) {
+    picksQuery = picksQuery.in("designer_id", filteredDesignerIds);
+  }
+  const { data: picks } = includePieces ? await picksQuery : { data: [] as any[] };
+
+  // Trade products — same designer-scoping when a filter is active.
+  let tradeQuery = supabase
+    .from("trade_products")
+    .select("id, product_name, brand_name, materials, category, subcategory, trade_price_cents, rrp_price_cents, currency, price_unit")
+    .eq("is_active", true)
+    .not("image_url", "is", null)
+    .order("brand_name", { ascending: true })
+    .order("product_name", { ascending: true })
+    .limit(2000);
+  if (useDesignerFilter && filteredBrandNames.size) {
+    tradeQuery = tradeQuery.in("brand_name", Array.from(filteredBrandNames));
+  }
   const { data: tradeAll } = includePieces
-    ? await supabase
-        .from("trade_products")
-        .select("id, product_name, brand_name, materials, category, subcategory, trade_price_cents, rrp_price_cents, currency, price_unit")
-        .eq("is_active", true)
-        .not("image_url", "is", null)
-        .order("brand_name", { ascending: true })
-        .order("product_name", { ascending: true })
-        .limit(2000)
+    ? await tradeQuery
     : await supabase
         .from("trade_products")
         .select("brand_name")
@@ -2994,19 +3018,25 @@ serve(async (req) => {
 
     // Decide final catalog mode: classifier wins, heuristic is the fallback. RAG replaces full load when it returned anything.
     const includePieces = sentiment.needs_catalog || heuristicNeedsPieces || effectiveBrief.plan.includes("propose_tearsheet") || visualizationNeedsCatalogPicks;
-    // If the user names a specific designer, always load the FULL catalog for
-    // that turn — top-K embedding retrieval will not reliably surface every
-    // one of that designer's pieces, so listing/enumeration queries like
-    // "list all the Alexander Lamont items" would otherwise return partial
-    // or empty results. Full catalog guarantees the model can see all of
-    // that designer's rows and answer completeness questions correctly.
+    // If the user names a specific designer, load ONLY that designer's rows
+    // (full for them, nothing else) — top-K RAG can miss items, and shipping
+    // the whole catalog is wasteful when the question is scoped to one name.
     const lastUserMsgLc = (lastUserMsg || "").toLowerCase();
-    const mentionsKnownDesigner = designerNames.some((n) => {
+    const mentionedDesigners: string[] = [];
+    for (const n of designerNames) {
       const name = String(n || "").toLowerCase().trim();
-      return name.length >= 4 && lastUserMsgLc.includes(name);
-    });
+      if (name.length >= 4 && lastUserMsgLc.includes(name)) mentionedDesigners.push(n);
+    }
+    const mentionsKnownDesigner = mentionedDesigners.length > 0;
+    // If the user names a specific designer, skip RAG (top-K may miss items)
+    // AND scope the catalog load to just those designers — no reason to ship
+    // the full 2000-row catalog when the question is about one designer.
     const useRag = includePieces && !!ragResult && !mentionsKnownDesigner;
-    const { designersList, piecesList: fullPiecesList, showroomBrands } = await loadCatalogContext(supabase, includePieces && !useRag);
+    const { designersList, piecesList: fullPiecesList, showroomBrands } = await loadCatalogContext(
+      supabase,
+      includePieces && !useRag,
+      mentionsKnownDesigner ? mentionedDesigners : undefined,
+    );
     const piecesList = useRag ? (ragResult as { contextText: string }).contextText : fullPiecesList;
 
     if (hasVisualizationVerb) {
