@@ -654,6 +654,8 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
                 {fxSource !== "identity" && <FxSourceBadge source={fxSource} />}
                 {quote?.notes && <span>· User notes: <span className="italic">"{quote.notes}"</span></span>}
               </p>
+              {fxPairs.length > 0 && <FxAppliedRates pairs={fxPairs} className="mt-1" />}
+
             </div>
             {quote && (() => {
               const config = statusConfig[quote.status] || statusConfig.draft;
