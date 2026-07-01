@@ -20,9 +20,14 @@ interface Props {
  * Updates client_boards.project_id directly (RLS allows owners).
  */
 export function ProjectAssignInline({ boardId, onResolved }: Props) {
-  const { projects, loading } = useProjects({ activeOnly: true });
+  const { projects, loading, refresh } = useProjects({ activeOnly: true });
+  const { user } = useAuth();
+  const { currentStudio } = useStudio();
   const [saving, setSaving] = useState<string | null>(null);
   const [done, setDone] = useState<{ projectName: string } | null>(null);
+  const [creating, setCreating] = useState(false);
+  const [newName, setNewName] = useState("");
+  const [creatingSaving, setCreatingSaving] = useState(false);
 
   // Show 6 most-recent projects inline; rest go in a select.
   const { quick, rest } = useMemo(() => {
