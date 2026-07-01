@@ -398,11 +398,13 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
       // Resolve FX via the shared helper (frankfurter → open.er-api → hardcoded
       // fallback). Never leaves us with an empty rate table, so line prices
       // always convert instead of silently displaying the source-currency number.
-      const fxRates = sourceCurrencies.size > 0
-        ? await getFxRates(
-            Array.from(sourceCurrencies).map((src) => ({ src, tgt: quoteCurrency })),
-          )
-        : {};
+      const fxPairs = Array.from(sourceCurrencies).map((src) => ({ src, tgt: quoteCurrency }));
+      const fxRates = fxPairs.length > 0 ? await getFxRates(fxPairs) : {};
+      setFxSource(
+        fxPairs.length === 0
+          ? "identity"
+          : summarizeFxSources(fxPairs.map((p) => getFxSource(p.src, p.tgt))),
+      );
 
       // Init price inputs: existing unit_price_cents, or resolved catalog price (converted if needed)
       const prices: Record<string, string> = {};
