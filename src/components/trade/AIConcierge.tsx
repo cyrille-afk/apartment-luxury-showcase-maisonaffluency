@@ -81,7 +81,7 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const { currentStudio } = useStudio();
-  const { isAdmin } = useAuth();
+  const { user, isAdmin } = useAuth();
   const isDashboard = pathname === "/trade";
   // Persist open/minimized/timeline in sessionStorage so the conversation
   // survives route changes (e.g. when Felix auto-navigates to a freshly
@@ -122,7 +122,21 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
   }, [input]);
   const [streaming, setStreaming] = useState(false);
   const [stageOverride, setStageOverride] = useState<Stage | null>(null);
-  const stage: Stage = stageOverride ?? stageFromPath(pathname);
+  const [hasTradeArtifacts, setHasTradeArtifacts] = useState<boolean | null>(null);
+  const [artifactRefreshKey, setArtifactRefreshKey] = useState(0);
+  const routeStage = stageFromPath(pathname);
+  const noWorkflowArtifactsContext =
+    surface === "trade" &&
+    hasTradeArtifacts === false &&
+    (routeStage === "Tearsheet" || routeStage === "Quote");
+  const contextualPath = noWorkflowArtifactsContext ? "/trade" : pathname;
+  const contextualRouteStage: Stage = noWorkflowArtifactsContext ? "Discover" : routeStage;
+  const stage: Stage = stageOverride ?? contextualRouteStage;
+  const currentGreeting = useCallback((targetLang: Lang = lang) => (
+    surface === "public"
+      ? PUBLIC_GREETING
+      : greetingForContext(stage, contextualPath, tone, targetLang).replace(/{concierge_name}/g, name)
+  ), [surface, stage, contextualPath, tone, lang, name]);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const abortRef = useRef<AbortController | null>(null);
@@ -324,6 +338,50 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
     });
   }, []);
 
+  // If the user deletes all project folders/tearsheets and quotes, the trade
+  // tools routes should no longer keep Felix in a stale tearsheet/quote mode.
+  useEffect(() => {
+    if (surface !== "trade") return;
+    let cancelled = false;
+    const refresh = async () => {
+      if (!user) {
+        if (!cancelled) setHasTradeArtifacts(false);
+        return;
+      }
+      const scope = <T extends { or: (filters: string) => T; eq: (column: string, value: string) => T }>(query: T) => {
+        if (currentStudio?.id) return query.or(`studio_id.eq.${currentStudio.id},and(studio_id.is.null,user_id.eq.${user.id})`);
+        return query.eq("user_id", user.id);
+      };
+      const [boardsRes, quotesRes] = await Promise.all([
+        scope(
+          supabase
+            .from("client_boards")
+            .select("id", { count: "exact", head: true }),
+        ),
+        scope(
+          supabase
+            .from("trade_quotes")
+            .select("id", { count: "exact", head: true })
+            .neq("status", "cancelled"),
+        ),
+      ]);
+      if (cancelled) return;
+      if (boardsRes.error || quotesRes.error) {
+        console.warn("[concierge] workflow artifact count failed", boardsRes.error || quotesRes.error);
+        setHasTradeArtifacts(null);
+        return;
+      }
+      setHasTradeArtifacts(((boardsRes.count || 0) + (quotesRes.count || 0)) > 0);
+    };
+    refresh();
+    const onArtifactsChanged = () => setArtifactRefreshKey((v) => v + 1);
+    window.addEventListener("concierge:artifacts-changed", onArtifactsChanged);
+    return () => {
+      cancelled = true;
+      window.removeEventListener("concierge:artifacts-changed", onArtifactsChanged);
+    };
+  }, [surface, user, currentStudio?.id, artifactRefreshKey]);
+
   // Keep panel inside viewport on resize
   useEffect(() => {
     if (!pos) return;
@@ -340,9 +398,7 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
       if (prev.length !== 1) return prev;
       const only = prev[0];
       if (only.kind !== "msg" || only.role !== "assistant") return prev;
-      const contextGreeting = surface === "public"
-        ? PUBLIC_GREETING
-        : greetingForContext(stageFromPath(pathname), pathname, tone, lang).replace(/{concierge_name}/g, name);
+      const contextGreeting = currentGreeting(lang);
       if (only.onboarding || hasWelcomeActions(only.actions)) {
         const sourceContent = only.sourceContent ?? only.content;
         const sourceActions = only.sourceActions ?? only.actions;
@@ -350,7 +406,7 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
         // (e.g. tearsheet greeting persisted from a prior page), swap it for
         // the greeting that matches the current route instead of just
         // re-localizing the stale one.
-        const cachedIntentGreeting = greetingForContext(stageFromPath(pathname), pathname, tone, "en").replace(/{concierge_name}/g, name);
+        const cachedIntentGreeting = currentGreeting("en");
         const staleIntent = sourceContent !== cachedIntentGreeting
           && sourceContent !== contextGreeting
           && !sourceActions?.length;
@@ -394,7 +450,7 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
         return prev;
       });
     }
-  }, [pathname, tone, lang, name]);
+  }, [pathname, tone, lang, name, currentGreeting]);
 
   // Reset any sticky stage override when the route changes
   useEffect(() => { setStageOverride(null); }, [pathname]);
@@ -1257,7 +1313,7 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
                   setStreaming(false);
                   setInput("");
                   setStageOverride(null);
-                  setTimeline([{ kind: "msg", role: "assistant", content: surface === "public" ? PUBLIC_GREETING : greetingForContext(stageFromPath(pathname), pathname, tone, lang).replace(/{concierge_name}/g, name) }]);
+                  setTimeline([{ kind: "msg", role: "assistant", content: currentGreeting(lang) }]);
                 }}
                 className="text-muted-foreground hover:text-foreground transition-colors p-1 rounded-md hover:bg-muted"
                 aria-label="Start a new conversation"
