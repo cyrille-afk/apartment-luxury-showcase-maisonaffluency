@@ -6,7 +6,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, RefreshCw, Download } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { ArrowLeft, RefreshCw, Download, Wand2 } from "lucide-react";
 
 type PickRow = {
   id: string;
@@ -49,11 +50,14 @@ const KIND_LABEL: Record<Mismatch["kind"], string> = {
 
 export default function TradePriceDriftAudit() {
   const { isAdmin, loading } = useAuth();
+  const { toast } = useToast();
   const [rows, setRows] = useState<Mismatch[] | null>(null);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [q, setQ] = useState("");
   const [kindFilter, setKindFilter] = useState<Mismatch["kind"] | "all">("all");
+  const [resyncing, setResyncing] = useState<Set<string>>(new Set());
+  const [resyncingAll, setResyncingAll] = useState(false);
 
   const load = async () => {
     setBusy(true);
@@ -171,6 +175,65 @@ export default function TradePriceDriftAudit() {
     return c;
   }, [rows]);
 
+  /**
+   * Repair: touch the source pick's trade_price_cents/currency (rewrite the
+   * same value). This fires trg_sync_curator_pick_to_trade_product, which
+   * upserts the mirror row from the pick — one strategy for every kind.
+   */
+  const resyncPick = async (pickId: string, pickPrice: number | null, pickCurrency: string | null) => {
+    const { error } = await supabase
+      .from("designer_curator_picks")
+      .update({ trade_price_cents: pickPrice, currency: pickCurrency })
+      .eq("id", pickId);
+    if (error) throw error;
+  };
+
+  const handleResync = async (m: Mismatch) => {
+    setResyncing((s) => new Set(s).add(m.pick_id));
+    try {
+      await resyncPick(m.pick_id, m.pick_price, m.pick_currency);
+      setRows((prev) =>
+        prev ? prev.filter((r) => !(r.pick_id === m.pick_id && r.kind === m.kind)) : prev,
+      );
+      toast({ title: "Resynced", description: m.product_name ?? m.pick_id.slice(0, 8) });
+    } catch (e) {
+      toast({
+        title: "Resync failed",
+        description: (e as Error).message,
+        variant: "destructive",
+      });
+    } finally {
+      setResyncing((s) => {
+        const n = new Set(s);
+        n.delete(m.pick_id);
+        return n;
+      });
+    }
+  };
+
+  const handleResyncAll = async (targets: Mismatch[]) => {
+    if (!targets.length) return;
+    if (!window.confirm(`Resync mirror price for ${targets.length} pick(s)?`)) return;
+    setResyncingAll(true);
+    let ok = 0;
+    let fail = 0;
+    for (const m of targets) {
+      try {
+        await resyncPick(m.pick_id, m.pick_price, m.pick_currency);
+        ok += 1;
+      } catch {
+        fail += 1;
+      }
+    }
+    setResyncingAll(false);
+    toast({
+      title: `Resynced ${ok} pick(s)`,
+      description: fail ? `${fail} failed — rescanning.` : "Rescanning to confirm…",
+      variant: fail ? "destructive" : "default",
+    });
+    await load();
+  };
+
   const exportCsv = () => {
     const header = [
       "kind",
@@ -248,6 +311,15 @@ export default function TradePriceDriftAudit() {
               <Download className="w-3.5 h-3.5 mr-1" />
               CSV
             </Button>
+            <Button
+              variant="default"
+              size="sm"
+              onClick={() => handleResyncAll(filtered)}
+              disabled={resyncingAll || busy || !filtered.length}
+            >
+              <Wand2 className={`w-3.5 h-3.5 mr-1 ${resyncingAll ? "animate-pulse" : ""}`} />
+              {resyncingAll ? "Resyncing…" : `Resync all (${filtered.length})`}
+            </Button>
           </div>
         </div>
 
@@ -295,19 +367,20 @@ export default function TradePriceDriftAudit() {
                 <th className="text-right px-3 py-2">Pick price</th>
                 <th className="text-right px-3 py-2">Mirror price</th>
                 <th className="text-left px-3 py-2">Pick id</th>
+                <th className="text-right px-3 py-2">Action</th>
               </tr>
             </thead>
             <tbody>
               {busy && !rows && (
                 <tr>
-                  <td colSpan={6} className="px-3 py-6 text-center text-muted-foreground">
+                  <td colSpan={7} className="px-3 py-6 text-center text-muted-foreground">
                     Scanning…
                   </td>
                 </tr>
               )}
               {rows && filtered.length === 0 && !busy && (
                 <tr>
-                  <td colSpan={6} className="px-3 py-6 text-center text-muted-foreground">
+                  <td colSpan={7} className="px-3 py-6 text-center text-muted-foreground">
                     No mismatches. Every priced pick has a matching mirror row.
                   </td>
                 </tr>
@@ -343,6 +416,20 @@ export default function TradePriceDriftAudit() {
                   </td>
                   <td className="px-3 py-2 font-mono text-[11px] text-muted-foreground">
                     {r.pick_id.slice(0, 8)}…
+                  </td>
+                  <td className="px-3 py-2 text-right">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-7 px-2 text-xs"
+                      onClick={() => handleResync(r)}
+                      disabled={resyncing.has(r.pick_id) || resyncingAll}
+                    >
+                      <Wand2
+                        className={`w-3 h-3 mr-1 ${resyncing.has(r.pick_id) ? "animate-pulse" : ""}`}
+                      />
+                      {resyncing.has(r.pick_id) ? "Resyncing…" : "Resync"}
+                    </Button>
                   </td>
                 </tr>
               ))}
