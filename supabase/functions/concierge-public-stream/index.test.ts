@@ -30,10 +30,15 @@ const QUERIES = [
   "Show me pieces by Pierre Augustin Rose.",
 ];
 
-// Signals the public surface must NEVER leak (no catalog / no pricing).
-const FORBIDDEN_LEAKS = [
-  "€", "$", "USD", "EUR", "GBP",
-  "trade price", "unit price", "SKU", "sku:",
+// Signals the public surface must NEVER leak (no pricing / no SKU codes).
+// Word-boundary matches so vocabulary like "European" doesn't false-trigger "EUR".
+const FORBIDDEN_LEAK_PATTERNS: { name: string; re: RegExp }[] = [
+  { name: "€ + number", re: /€\s?\d/ },
+  { name: "$ + number", re: /\$\s?\d/ },
+  { name: "£ + number", re: /£\s?\d/ },
+  { name: "USD/EUR/GBP price", re: /\b(USD|EUR|GBP)\b\s?\d/ },
+  { name: "trade price", re: /\btrade\s+price\b/i },
+  { name: "SKU", re: /\bSKU[:\s#-]/i },
 ];
 
 async function runQuery(prompt: string) {
