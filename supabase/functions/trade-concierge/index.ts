@@ -1204,7 +1204,11 @@ function pickModel(text: string, includePieces: boolean): string {
   return modelFor("balanced");
 }
 
-async function loadCatalogContext(supabase: ReturnType<typeof createClient>, includePieces: boolean) {
+async function loadCatalogContext(
+  supabase: ReturnType<typeof createClient>,
+  includePieces: boolean,
+  designerFilter?: string[],
+) {
   // Fetch published designers
   const { data: designers } = await supabase
     .from("designers")
@@ -1225,34 +1229,54 @@ async function loadCatalogContext(supabase: ReturnType<typeof createClient>, inc
     if (d.display_name) brandToDesigner.set(String(d.display_name).trim().toLowerCase(), display);
   });
 
-  // Fetch ALL curator picks (these own the canonical pick_ids used by the
-  // tearsheet tools). Skipped on the lightweight path.
-  const { data: picks } = includePieces
-    ? await supabase
-        .from("designer_curator_picks")
-        .select("id, title, materials, category, subcategory, designer_id, trade_price_cents, price_per_sqm_cents, currency, size_variants")
-        .order("designer_id", { ascending: true })
-        .order("title", { ascending: true })
-        .limit(2000)
-    : { data: [] as any[] };
+  // Resolve designer filter (if the user named specific designers) into
+  // concrete designer_ids + brand-name variants so we only load THEIR rows.
+  const filterLc = (designerFilter || [])
+    .map((n) => String(n || "").trim().toLowerCase())
+    .filter((n) => n.length >= 4);
+  const filteredDesignerIds: string[] = [];
+  const filteredBrandNames = new Set<string>();
+  if (filterLc.length) {
+    (designers || []).forEach((d: any) => {
+      const nm = String(d.name || "").trim().toLowerCase();
+      const dn = String(d.display_name || "").trim().toLowerCase();
+      if (filterLc.some((f) => (nm && (nm === f || f.includes(nm))) || (dn && (dn === f || f.includes(dn))))) {
+        filteredDesignerIds.push(d.id);
+        if (d.name) filteredBrandNames.add(d.name);
+        if (d.display_name) filteredBrandNames.add(d.display_name);
+      }
+    });
+  }
+  const useDesignerFilter = filterLc.length > 0 && (filteredDesignerIds.length > 0 || filteredBrandNames.size > 0);
 
-  // Fetch the trade_products catalog so the assistant can SEE every active
-  // piece (not just the curator subset). On the lightweight path we only
-  // need brand names for the SHOWROOM BRANDS section.
-  // IMPORTANT: only surface trade_products that have an image_url. Junk/stub
-  // rows without a photo (truncated duplicates from scrapers, orphan variants)
-  // would otherwise compete with the real curator picks in the catalog the
-  // model sees, e.g. proposing an imageless "Lyric Desk" alongside the three
-  // good variants (Walnut / Oak / x Pierre Frey).
+  // Fetch curator picks. If a designer filter is active, restrict to that
+  // designer's rows — no need to load the full catalog to answer a question
+  // scoped to a single named designer.
+  let picksQuery = supabase
+    .from("designer_curator_picks")
+    .select("id, title, materials, category, subcategory, designer_id, trade_price_cents, price_per_sqm_cents, currency, size_variants")
+    .order("designer_id", { ascending: true })
+    .order("title", { ascending: true })
+    .limit(2000);
+  if (useDesignerFilter && filteredDesignerIds.length) {
+    picksQuery = picksQuery.in("designer_id", filteredDesignerIds);
+  }
+  const { data: picks } = includePieces ? await picksQuery : { data: [] as any[] };
+
+  // Trade products — same designer-scoping when a filter is active.
+  let tradeQuery = supabase
+    .from("trade_products")
+    .select("id, product_name, brand_name, materials, category, subcategory, trade_price_cents, rrp_price_cents, currency, price_unit")
+    .eq("is_active", true)
+    .not("image_url", "is", null)
+    .order("brand_name", { ascending: true })
+    .order("product_name", { ascending: true })
+    .limit(2000);
+  if (useDesignerFilter && filteredBrandNames.size) {
+    tradeQuery = tradeQuery.in("brand_name", Array.from(filteredBrandNames));
+  }
   const { data: tradeAll } = includePieces
-    ? await supabase
-        .from("trade_products")
-        .select("id, product_name, brand_name, materials, category, subcategory, trade_price_cents, rrp_price_cents, currency, price_unit")
-        .eq("is_active", true)
-        .not("image_url", "is", null)
-        .order("brand_name", { ascending: true })
-        .order("product_name", { ascending: true })
-        .limit(2000)
+    ? await tradeQuery
     : await supabase
         .from("trade_products")
         .select("brand_name")
