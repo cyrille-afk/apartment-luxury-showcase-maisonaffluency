@@ -3022,10 +3022,31 @@ serve(async (req) => {
     // (full for them, nothing else) — top-K RAG can miss items, and shipping
     // the whole catalog is wasteful when the question is scoped to one name.
     const lastUserMsgLc = (lastUserMsg || "").toLowerCase();
+    // Generic stopwords that appear in many brand names — never treat these as
+    // designer mentions on their own ("design", "studio", "atelier", "objects", …).
+    const NAME_STOPWORDS = new Set([
+      "design", "designs", "designer", "designers", "studio", "studios",
+      "atelier", "ateliers", "editions", "edition", "objects", "collection",
+      "collections", "paris", "milano", "london", "and", "the", "by", "of",
+      "co", "company", "group", "maison", "house", "works",
+    ]);
     const mentionedDesigners: string[] = [];
     for (const n of designerNames) {
       const name = String(n || "").toLowerCase().trim();
-      if (name.length >= 4 && lastUserMsgLc.includes(name)) mentionedDesigners.push(n);
+      if (!name) continue;
+      // 1. Full-name substring (existing behavior)
+      if (name.length >= 4 && lastUserMsgLc.includes(name)) {
+        mentionedDesigners.push(n);
+        continue;
+      }
+      // 2. Distinctive-token match — "alinea" should match "Alinea Design Objects",
+      //    "pouénat" should match "Pouénat", etc. Any non-stopword token ≥5 chars
+      //    from the designer name that appears in the user message counts.
+      const tokens = name.split(/[^a-zà-ÿ0-9]+/i).filter(Boolean);
+      const distinctive = tokens.find(
+        (t) => t.length >= 5 && !NAME_STOPWORDS.has(t) && lastUserMsgLc.includes(t),
+      );
+      if (distinctive) mentionedDesigners.push(n);
     }
     const mentionsKnownDesigner = mentionedDesigners.length > 0;
     // If the user names a specific designer, skip RAG (top-K may miss items)
