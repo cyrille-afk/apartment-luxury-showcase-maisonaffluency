@@ -703,7 +703,28 @@ const TradeProductPage: React.FC = () => {
           // the user actually picked (e.g. Travertino Rosso €14,263) rather
           // than the RPC's default "starting" RRP (Kynos €12,116) — and stays
           // in lock-step with the price shown above the "Add to Quote" button.
-          const selectedVariantCents = activeVariantCents;
+          // Price resolution parity with the on-page caption: if the user
+          // picked only one axis of a dual-axis product (e.g. finish but not
+          // size), fall back to the cheapest priced variant that matches
+          // the partial selection — same value the "From €X" caption shows —
+          // instead of the RPC's default base RRP (Kynos €12,116).
+          let selectedVariantCents: number | null = activeVariantCents;
+          if (
+            selectedVariantCents == null &&
+            sv &&
+            (selectedBase || selectedTop || selectedDualSize)
+          ) {
+            const nrm = (s: any) => String(s ?? "").trim();
+            const matches = sv.filter((v: any) =>
+              (!selectedBase || nrm(v.base) === nrm(selectedBase)) &&
+              (!selectedTop || nrm(v.top) === nrm(selectedTop)) &&
+              (!selectedDualSize || nrm(v.label) === nrm(selectedDualSize))
+            );
+            const priced = matches
+              .map((v: any) => v.price_cents)
+              .filter((c: any) => typeof c === "number" && c > 0) as number[];
+            if (priced.length) selectedVariantCents = Math.min(...priced);
+          }
 
 
           // Combined override unit price (wood + fabric upcharge), in quote currency.
