@@ -90,7 +90,7 @@ interface FinishSelectorProps {
    * mapped image indices. Receives the 1-based gallery indices the product
    * page should jump the hero gallery to. Null clears the override.
    */
-  onSwatchImagesChange?: (imageIndices: number[] | null) => void;
+  onSwatchImagesChange?: (imageIndices: number[] | null, meta?: { committed?: boolean; swatchName?: string }) => void;
   /**
    * Per-product override for the wood-swatch accordion label.
    * When omitted, falls back to "Select the Wood Finish of the Frame".
@@ -544,9 +544,9 @@ export default function FinishSelector({ pickId, className, productTitle, produc
       // index 0). Defer to the next tick to outrun the state updates queued
       // by the upstream handlers.
       if (indices) {
-        setTimeout(() => onSwatchImagesChange?.(indices), 0);
+        setTimeout(() => onSwatchImagesChange?.(indices, { committed: true, swatchName: f.name }), 0);
       } else {
-        onSwatchImagesChange?.(null);
+        onSwatchImagesChange?.(null, { committed: true, swatchName: f.name });
       }
     };
 
@@ -560,7 +560,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     const hoverPreview = () => {
       if (isMobile) return;
       const indices = Array.isArray(f.image_indices) && f.image_indices.length > 0 ? f.image_indices : null;
-      if (indices) onSwatchImagesChange?.(indices);
+      if (indices) onSwatchImagesChange?.(indices, { committed: false, swatchName: f.name });
     };
     const tileButton = (
       <button
@@ -904,9 +904,9 @@ export default function FinishSelector({ pickId, className, productTitle, produc
                     const isFabric = isFabricCategory(zoomed);
                     const indices = Array.isArray(zoomed.image_indices) && zoomed.image_indices.length > 0 ? zoomed.image_indices : null;
                     if (indices) {
-                      setTimeout(() => onSwatchImagesChange?.(indices), 0);
+                      setTimeout(() => onSwatchImagesChange?.(indices, { committed: true, swatchName: zoomed.name }), 0);
                     } else {
-                      onSwatchImagesChange?.(null);
+                      onSwatchImagesChange?.(null, { committed: true, swatchName: zoomed.name });
                     }
                     if (isFabric) {
                       setSelectedFabricId(zoomed.id);
