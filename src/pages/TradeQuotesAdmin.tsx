@@ -609,9 +609,10 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
             <div>
               <h2 className="font-display text-xl text-foreground">QU-{quoteId.slice(0, 6).toUpperCase()}</h2>
               {quote?.client_name && <p className="font-display text-sm text-muted-foreground uppercase tracking-wider mt-1">{quote.client_name}</p>}
-              <p className="font-body text-xs text-muted-foreground mt-1">
-                Currency: {currencySymbol(currency)} {currency}
-                {quote?.notes && <> · User notes: <span className="italic">"{quote.notes}"</span></>}
+              <p className="font-body text-xs text-muted-foreground mt-1 flex items-center gap-2 flex-wrap">
+                <span>Currency: {currencySymbol(currency)} {currency}</span>
+                {fxSource !== "identity" && <FxSourceBadge source={fxSource} />}
+                {quote?.notes && <span>· User notes: <span className="italic">"{quote.notes}"</span></span>}
               </p>
             </div>
             {quote && (() => {
