@@ -109,6 +109,31 @@ function slugify(s: string) {
   return s.toLowerCase().replace(/['']/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 }
 
+function resolveGalleryImageByFinishFilename(heroList: string[], labels: Array<string | null | undefined>): string | null {
+  const cleanLabels = labels.filter(Boolean).map((s) => String(s));
+  const toTerms = (label: string) => label
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .split(" ")
+    .filter((term) => term.length >= 4 && !["finish", "fabric", "marble", "wood", "ashwood"].includes(term));
+
+  let best: { url: string; score: number; index: number } | null = null;
+  heroList.forEach((url, index) => {
+    const haystack = decodeURIComponent(url).toLowerCase().replace(/[^a-z0-9]+/g, " ");
+    let score = 0;
+    cleanLabels.forEach((label) => {
+      const terms = toTerms(label);
+      const hits = terms.filter((term) => haystack.includes(term)).length;
+      if (hits > 0) score = Math.max(score, hits * 10 + terms.join(" ").length);
+    });
+    if (score > 0 && (!best || score > best.score || (score === best.score && index < best.index))) {
+      best = { url, score, index };
+    }
+  });
+
+  return best?.url ?? null;
+}
+
 interface ProductRow {
   id: string;
   title: string;
@@ -660,7 +685,18 @@ const TradeProductPage: React.FC = () => {
         const singleLabel = selectedSingleMaterial || selectedWoodPrice?.name || null;
         resolvedImgIdx = resolveFinishImageIndex(finishMapForQuote, singleLabel, heroList.length);
       }
-      const resolvedImageUrl = (resolvedImgIdx != null ? heroList[resolvedImgIdx] : null) || product.image_url || null;
+      const filenameResolvedImageUrl = resolvedImgIdx == null
+        ? resolveGalleryImageByFinishFilename(heroList, [
+            selectedWoodPrice?.name,
+            selectedFabric?.name,
+            selectedBase,
+            selectedTop,
+            selectedSingleMaterial,
+            selectedSingleSize,
+            variantLabel,
+          ])
+        : null;
+      const resolvedImageUrl = (resolvedImgIdx != null ? heroList[resolvedImgIdx] : null) || filenameResolvedImageUrl || product.image_url || null;
 
       const { data: itemId, error } = await supabase.rpc("add_gallery_product_to_quote", {
         _user_id: user.id,
@@ -684,7 +720,7 @@ const TradeProductPage: React.FC = () => {
           if (variantLabel) patch.variant_label = variantLabel;
           // Ensure the finish-specific image sticks even when the RPC merged
           // this line onto an existing quote row that had the default photo.
-          if (resolvedImgIdx != null && resolvedImageUrl && resolvedImageUrl !== product.image_url) {
+          if (resolvedImageUrl && resolvedImageUrl !== product.image_url) {
             patch.image_url = resolvedImageUrl;
           }
 
