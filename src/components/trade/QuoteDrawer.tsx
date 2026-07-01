@@ -57,7 +57,7 @@ const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0 }: QuoteDrawe
       setLoading(true);
       const { data } = await supabase
         .from("trade_quote_items")
-        .select("id, image_url, quantity, unit_price_cents, unit_price_currency, variant_label, fabric_id, wood_fabric_id, fabric_meters, fabric_upcharge_cents, fabric_currency, fabric:fabrics!fabric_id(name, image_url, tier, price_per_lm_cents, currency), wood_fabric:fabrics!trade_quote_items_wood_fabric_id_fkey(name, image_url), product:trade_products(product_name, brand_name, image_url, trade_price_cents, rrp_price_cents, currency, source_pick_id)")
+        .select("id, image_url, quantity, unit_price_cents, unit_price_currency, variant_label, fabric_id, wood_fabric_id, fabric_meters, fabric_upcharge_cents, fabric_currency, fabric:fabrics!fabric_id(name, image_url, tier, price_per_lm_cents, currency), wood_fabric:fabrics!trade_quote_items_wood_fabric_id_fkey(name, image_url), product:trade_products(id, product_name, brand_name, image_url, trade_price_cents, rrp_price_cents, currency, source_pick_id)")
         .eq("quote_id", quoteId)
         .order("created_at", { ascending: false });
 
