@@ -280,7 +280,7 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
     items.forEach((item) => {
       const src =
         item.unit_price_cents != null
-          ? (item.unit_price_currency || quoteCcy)
+          ? ((item as any).unit_price_currency || quoteCcy)
           : (item.trade_products?.currency || quoteCcy);
       if (src && src !== targetCcy) sources.add(src);
     });
