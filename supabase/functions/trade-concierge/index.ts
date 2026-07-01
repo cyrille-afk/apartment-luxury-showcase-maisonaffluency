@@ -2854,9 +2854,40 @@ serve(async (req) => {
         .map((p) => p.text)
         .join(" ");
     };
-    const lastUserMsg = extractText(
+    let lastUserMsg = extractText(
       [...messages].reverse().find((m: any) => m.role === "user")?.content,
     );
+
+    // ── Skip/exclude confirmation gate ────────────────────────────────────
+    // When the user asks us to skip items, we don't build the tearsheet
+    // right away — we first echo the skip/keep breakdown and wait for
+    // an explicit confirmation on the next turn. The prior assistant reply
+    // carries an invisible marker so we can detect the confirmation turn
+    // and rehydrate the original request.
+    const SKIP_CONFIRM_MARKER = "\u2063SKIP-CONFIRM\u2063"; // invisible sentinel
+    const isConfirmationReply = (m: string) =>
+      /^\s*(yes|yep|yeah|yup|sure|confirm(ed)?|proceed|go\s*ahead|do\s*it|build(\s*it)?|create(\s*it)?|approve[d]?|ok(ay)?|👍|✅)[\s.!]*$/i
+        .test((m || "").trim());
+    let isConfirmingSkip = false;
+    {
+      const reversed = [...messages].reverse();
+      const priorAssistantIdx = reversed.findIndex((m: any) => m.role === "assistant");
+      const priorAssistant = priorAssistantIdx >= 0 ? reversed[priorAssistantIdx] : null;
+      const priorAssistantText = extractText(priorAssistant?.content);
+      if (
+        priorAssistantText.includes(SKIP_CONFIRM_MARKER) &&
+        isConfirmationReply(lastUserMsg)
+      ) {
+        // Find the user message that came BEFORE the prior assistant reply.
+        const before = reversed.slice(priorAssistantIdx + 1);
+        const originalUser = before.find((m: any) => m.role === "user");
+        const originalText = extractText(originalUser?.content);
+        if (originalText) {
+          isConfirmingSkip = true;
+          lastUserMsg = originalText;
+        }
+      }
+    }
     const hasAttachments = [...messages].some(
       (m: any) =>
         m?.role === "user" &&
@@ -3092,6 +3123,16 @@ serve(async (req) => {
         .map((s) => s.n);
     };
 
+    const buildSkipConfirmationMessage = (
+      skipped: Array<{ title?: string | null }>,
+      kept: Array<{ title?: string | null }>,
+      label: string,
+    ): string => {
+      const skipList = skipped.map((p, i) => `${i + 1}. ${p.title || "Untitled"}`).join("\n");
+      const keepList = kept.map((p, i) => `${i + 1}. ${p.title || "Untitled"}`).join("\n");
+      return `${SKIP_CONFIRM_MARKER}Before I build the ${label} tear sheet, please confirm.\n\n**Skipping (${skipped.length}):**\n${skipList || "_(none)_"}\n\n**Keeping (${kept.length}):**\n${keepList || "_(none)_"}\n\nReply **"confirm"** (or "yes"/"proceed") to create the tear sheet, or reply with an amended skip list.`;
+    };
+
     // Parse in-chat "skip / exclude / omit / without / except / remove / drop /
     // leave out / don't include" instructions from the user's latest message
     // and return the set of pick IDs the user wants filtered out of the next
@@ -3184,6 +3225,15 @@ serve(async (req) => {
         if (finalIds.length === 0) {
           return sseTextResponse(
             `Your skip list would remove every ${designerLabel} piece — nothing left to propose. Send the message again with a shorter exclusion (or say "list all ${designerLabel}" for the full set).`,
+          );
+        }
+        // Confirmation gate: don't ship the tear sheet on the same turn the
+        // user asked us to skip items — show them the skip/keep breakdown
+        // and wait for a "confirm" reply.
+        if (excludedIds.size > 0 && !isConfirmingSkip) {
+          const skipped = previewRawAll.filter((p: any) => p?.id && excludedIds.has(p.id));
+          return sseTextResponse(
+            buildSkipConfirmationMessage(skipped, previewRaw, designerLabel),
           );
         }
         const rationaleMap: Record<string, { reason: string }> = {};
@@ -4223,10 +4273,21 @@ serve(async (req) => {
             // Honour in-chat "skip / exclude / omit …" instructions from the
             // latest user message so the proposal card ships pre-filtered.
             const streamExcludedIds = parseUserExclusions(lastUserMsg || "", previewRaw);
+            let streamSkippedRows: any[] = [];
             if (streamExcludedIds.size > 0) {
+              streamSkippedRows = previewRaw.filter((p: any) => p?.id && streamExcludedIds.has(p.id));
               previewRaw = previewRaw.filter((p: any) => p?.id && !streamExcludedIds.has(p.id));
               pickIds = pickIds.filter((id: string) => !streamExcludedIds.has(id));
               console.log(`[concierge] applied user skip list — dropped ${streamExcludedIds.size} pick(s) from ${tc.name}`);
+            }
+            // Confirmation gate — hold the proposal until the user approves
+            // the skip list on the next turn.
+            if (streamExcludedIds.size > 0 && !isConfirmingSkip && pickIds.length > 0) {
+              const label = (parsed && typeof parsed.title === "string" && parsed.title.trim()) || "your";
+              const confirmMsg = buildSkipConfirmationMessage(streamSkippedRows, previewRaw, label);
+              const frame = { choices: [{ delta: { content: confirmMsg } }] };
+              controller.enqueue(encoder.encode(`data: ${JSON.stringify(frame)}\n\n`));
+              continue;
             }
             if (requestedTypology && pickIds.length < 2) {
               console.warn(`[concierge] blocked ${tc.name} — insufficient true ${requestedTypology} picks after typology validation`);
