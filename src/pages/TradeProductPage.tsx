@@ -1279,7 +1279,7 @@ const TradeProductPage: React.FC = () => {
             </>
           )}
         </div>
-        {(selectedWoodPrice || selectedFabric) && (
+        {(selectedWoodPrice || selectedFabric || (!selectedWoodPrice && !selectedFabric && (selectedTop || (isDualAxis && selectedBase && !baseAxisIsDim && !isFinishAxisLabel(baseAxisLabelRaw) ? false : selectedBase)))) && (
           <span className="font-body text-[11px] text-muted-foreground">
             {selectedWoodPrice && (
               <>Frame: {selectedWoodPrice.name}</>
@@ -1296,6 +1296,9 @@ const TradeProductPage: React.FC = () => {
                   </>
                 )}
               </>
+            )}
+            {!selectedWoodPrice && !selectedFabric && (selectedTop || (isDualAxis && !baseAxisIsDim && selectedBase)) && (
+              <>Finish: {selectedTop || selectedBase}</>
             )}
           </span>
         )}
