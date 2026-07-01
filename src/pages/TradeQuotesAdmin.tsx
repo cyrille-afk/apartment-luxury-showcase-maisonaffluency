@@ -271,12 +271,15 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
       const [itemsRes, quoteRes] = await Promise.all([
         supabase
           .from("trade_quote_items")
-          .select("*, trade_products(product_name, brand_name, trade_price_cents, price_per_sqm_cents, price_unit, currency, image_url, dimensions, materials)")
+          .select("*, trade_products(product_name, brand_name, trade_price_cents, price_per_sqm_cents, price_unit, currency, image_url, dimensions, materials, source_pick_id)")
           .eq("quote_id", quoteId)
           .order("created_at", { ascending: true }),
         supabase.from("trade_quotes").select("*").eq("id", quoteId).single(),
       ]);
-      const fetchedItems = (itemsRes.data as AdminQuoteItem[]) || [];
+      let fetchedItems = (itemsRes.data as AdminQuoteItem[]) || [];
+      // Fallback: prefer freshest price from designer_curator_picks when the
+      // mirror row is missing/stale (pick is the source of truth).
+      fetchedItems = await hydrateQuotePricesFromPicks(fetchedItems, "trade_products");
       setItems(fetchedItems);
       const q = quoteRes.data as AdminQuote | null;
       setQuote(q);
