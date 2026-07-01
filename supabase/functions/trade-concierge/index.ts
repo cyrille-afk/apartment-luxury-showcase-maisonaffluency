@@ -3018,12 +3018,9 @@ serve(async (req) => {
 
     // Decide final catalog mode: classifier wins, heuristic is the fallback. RAG replaces full load when it returned anything.
     const includePieces = sentiment.needs_catalog || heuristicNeedsPieces || effectiveBrief.plan.includes("propose_tearsheet") || visualizationNeedsCatalogPicks;
-    // If the user names a specific designer, always load the FULL catalog for
-    // that turn — top-K embedding retrieval will not reliably surface every
-    // one of that designer's pieces, so listing/enumeration queries like
-    // "list all the Alexander Lamont items" would otherwise return partial
-    // or empty results. Full catalog guarantees the model can see all of
-    // that designer's rows and answer completeness questions correctly.
+    // If the user names a specific designer, load ONLY that designer's rows
+    // (full for them, nothing else) — top-K RAG can miss items, and shipping
+    // the whole catalog is wasteful when the question is scoped to one name.
     const lastUserMsgLc = (lastUserMsg || "").toLowerCase();
     const mentionedDesigners: string[] = [];
     for (const n of designerNames) {
