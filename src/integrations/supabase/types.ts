@@ -5805,6 +5805,7 @@ export type Database = {
           fabric_meters: number | null
           fabric_upcharge_cents: number | null
           id: string
+          image_url: string | null
           internal_notes: string | null
           lead_time_weeks_override: number | null
           notes: string | null
@@ -5833,6 +5834,7 @@ export type Database = {
           fabric_meters?: number | null
           fabric_upcharge_cents?: number | null
           id?: string
+          image_url?: string | null
           internal_notes?: string | null
           lead_time_weeks_override?: number | null
           notes?: string | null
@@ -5861,6 +5863,7 @@ export type Database = {
           fabric_meters?: number | null
           fabric_upcharge_cents?: number | null
           id?: string
+          image_url?: string | null
           internal_notes?: string | null
           lead_time_weeks_override?: number | null
           notes?: string | null

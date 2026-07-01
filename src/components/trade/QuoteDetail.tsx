@@ -30,6 +30,7 @@ import { DEFAULT_GBP_LANDED_CBM, GBP_LANDED_KG_PER_CBM, useGbpLandedCost, fmtGbp
 import { usePerLineShipping } from "@/hooks/usePerLineShipping";
 import { toIsoCountry, computePerLineShipments } from "@/lib/perLineShipping";
 import { labelForMode } from "@/lib/shippingEstimator";
+import { buildProductFinishMap, resolveFinishImageIndex, resolveVariantImageIndex } from "@/lib/variantImageMap";
 
 import { PerOriginShippingRecap } from "@/components/trade/PerOriginShippingRecap";
 import { priceRugVariantFromLabel } from "@/lib/rugPricing";
@@ -115,6 +116,77 @@ const itemPriceCurrency = (item: QuoteItemWithProduct, quoteCurrency: string) =>
     ? (item.unit_price_currency || quoteCurrency)
     : (item.trade_products?.currency || quoteCurrency)
 );
+
+const resolveQuoteLineImageFromPick = (item: QuoteItemWithProduct, pick: any): string | null => {
+  if (item.image_url) return item.image_url;
+  const variantLabel = (item.variant_label || "").trim();
+  if (!variantLabel) return null;
+
+  const gallery = Array.isArray(pick?.gallery_images) ? pick.gallery_images.filter(Boolean) : [];
+  const heroList = gallery.length > 0
+    ? gallery
+    : [pick?.image_url, item.trade_products?.image_url].filter(Boolean);
+  if (!heroList.length) return null;
+
+  const finishMap = buildProductFinishMap(pick?.variant_image_map);
+  const variants = Array.isArray(pick?.size_variants) ? pick.size_variants : [];
+  const isDualAxis = variants.some((v: any) => String(v?.base || "").trim() && String(v?.top || "").trim());
+  const parts = variantLabel.split(/\s*(?:·|\/)\s*/).map((p) => p.trim()).filter(Boolean);
+
+  if (finishMap) {
+    let idx = resolveFinishImageIndex(finishMap, variantLabel, heroList.length);
+    if (idx === undefined && parts.length >= 2) {
+      idx = resolveVariantImageIndex(finishMap, {
+        base: parts[0],
+        top: parts[1],
+        size: parts.slice(2).join(" · ") || null,
+        label: variantLabel,
+        variants,
+        imageCount: heroList.length,
+        requireCompletePair: isDualAxis,
+      });
+    }
+    if (idx === undefined) {
+      for (const part of parts) {
+        idx = resolveFinishImageIndex(finishMap, part, heroList.length);
+        if (idx !== undefined) break;
+      }
+    }
+    if (idx !== undefined) return heroList[idx];
+  }
+
+  // Legacy fallback for rows where `variant_image_map` is empty: infer the
+  // finish image from descriptive gallery filenames (e.g. walnut / travertino
+  // silver / rosso). This keeps old Alinea quote rows from falling back to the
+  // primary product photo when the selected finish photo is clearly present.
+  const labels = [
+    (item as any).wood_fabric?.name,
+    (item as any).fabric?.name,
+    ...parts,
+    variantLabel,
+  ].filter(Boolean).map((s) => String(s));
+  const toTerms = (label: string) => label
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .split(" ")
+    .filter((term) => term.length >= 4 && !["finish", "fabric", "marble", "wood", "ashwood"].includes(term));
+
+  let best: { url: string; score: number } | null = null;
+  heroList.forEach((url: string, index: number) => {
+    const haystack = decodeURIComponent(url).toLowerCase().replace(/[^a-z0-9]+/g, " ");
+    let score = 0;
+    labels.forEach((label) => {
+      const terms = toTerms(label);
+      const hits = terms.filter((term) => haystack.includes(term)).length;
+      if (hits > 0) score = Math.max(score, hits * 10 + terms.join(" ").length);
+    });
+    if (score > 0 && (!best || score > best.score || (score === best.score && index < heroList.indexOf(best.url)))) {
+      best = { url, score };
+    }
+  });
+
+  return best?.url ?? null;
+};
 
 const QuotePdfPreviewPages = ({ blobUrl }: { blobUrl: string | null }) => {
   const hostRef = useRef<HTMLDivElement>(null);
@@ -445,23 +517,47 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
               .filter(Boolean) as string[]
           )
         );
-        if (titles.length > 0) {
-          const { data: picks } = await supabase
-            .from("designer_curator_picks")
-            .select("title, edition")
-            .in("title", titles);
+        const sourcePickIds = Array.from(
+          new Set(
+            loadedItems
+              .map((i) => i.trade_products?.source_pick_id)
+              .filter(Boolean) as string[]
+          )
+        );
+        if (titles.length > 0 || sourcePickIds.length > 0) {
+          const pickSelect = "id, title, edition, image_url, gallery_images, variant_image_map, size_variants";
+          const [byTitleRes, byIdRes] = await Promise.all([
+            titles.length > 0
+              ? supabase.from("designer_curator_picks").select(pickSelect).in("title", titles)
+              : Promise.resolve({ data: [] as any[] }),
+            sourcePickIds.length > 0
+              ? supabase.from("designer_curator_picks").select(pickSelect).in("id", sourcePickIds)
+              : Promise.resolve({ data: [] as any[] }),
+          ]);
+          const picks = [...((byTitleRes.data as any[]) || []), ...((byIdRes.data as any[]) || [])];
           if (picks && picks.length > 0) {
             const norm = (s: string) =>
               s.toLowerCase().replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim();
             const editionByTitle = new Map<string, string>();
-            for (const p of picks as Array<{ title: string; edition: string | null }>) {
+            const pickByTitle = new Map<string, any>();
+            const pickById = new Map<string, any>();
+            for (const p of picks as Array<{ id?: string; title: string; edition: string | null }>) {
+              if (p.id) pickById.set(p.id, p);
+              if (p.title) pickByTitle.set(norm(p.title), p);
               if (p.edition && p.title) editionByTitle.set(norm(p.title), p.edition);
             }
             loadedItems = loadedItems.map((it) => {
               const t = it.trade_products?.product_name;
               if (!t) return it;
-              const ed = editionByTitle.get(norm(t));
-              return ed ? { ...it, edition: ed } : it;
+              const key = norm(t);
+              const ed = editionByTitle.get(key);
+              const pick = (it.trade_products?.source_pick_id && pickById.get(it.trade_products.source_pick_id)) || pickByTitle.get(key);
+              const resolvedImage = resolveQuoteLineImageFromPick(it, pick);
+              return {
+                ...it,
+                ...(ed ? { edition: ed } : {}),
+                ...(resolvedImage ? { image_url: resolvedImage } : {}),
+              };
             });
           }
         }
@@ -869,7 +965,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
       // 1) Fetch the full source row (no relations) + items
       const [srcRes, itemsRes] = await Promise.all([
         supabase.from("trade_quotes").select("*").eq("id", quoteId).single(),
-        supabase.from("trade_quote_items").select("product_id, quantity, unit_price_cents, unit_price_currency, notes, po_number, cost_code, lead_time_weeks_override, deposit_pct_override, variant_label, room, axonometric_image_url").eq("quote_id", quoteId),
+        supabase.from("trade_quote_items").select("product_id, image_url, quantity, unit_price_cents, unit_price_currency, notes, po_number, cost_code, lead_time_weeks_override, deposit_pct_override, variant_label, room, fabric_id, wood_fabric_id, fabric_meters, fabric_upcharge_cents, fabric_currency, axonometric_image_url").eq("quote_id", quoteId),
       ]);
       if (srcRes.error || !srcRes.data) throw srcRes.error || new Error("Source quote not found");
       const src: any = srcRes.data;
@@ -1022,6 +1118,8 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
         sourceUnitPriceCents: rawUnit,
         sourceCurrency: itemPriceCurrency(item, currency),
         imageUrl: item.image_url ?? product?.image_url ?? null,
+        finishSwatchUrl: wood?.image_url ?? null,
+        fabricSwatchUrl: fabric?.image_url ?? null,
         shipOriginCountry: toIsoCountry(item.ship_origin_country ?? product?.origin ?? null, "FR"),
         shipMode: item.ship_mode || null,
         shipCbm: item.ship_cbm != null ? Number(item.ship_cbm) : null,

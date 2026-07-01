@@ -8,6 +8,7 @@ import { hydrateQuotePricesFromPicks } from "@/lib/hydrateQuotePricesFromPicks";
 
 interface QuoteItem {
   id: string;
+  image_url?: string | null;
   quantity: number;
   unit_price_cents: number | null;
   unit_price_currency: string | null;
@@ -54,13 +55,14 @@ const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0 }: QuoteDrawe
       setLoading(true);
       const { data } = await supabase
         .from("trade_quote_items")
-        .select("id, quantity, unit_price_cents, unit_price_currency, variant_label, fabric_id, wood_fabric_id, fabric_meters, fabric_upcharge_cents, fabric_currency, fabric:fabrics!fabric_id(name, image_url, tier, price_per_lm_cents, currency), wood_fabric:fabrics!trade_quote_items_wood_fabric_id_fkey(name, image_url), product:trade_products(product_name, brand_name, image_url, trade_price_cents, rrp_price_cents, currency, source_pick_id)")
+        .select("id, image_url, quantity, unit_price_cents, unit_price_currency, variant_label, fabric_id, wood_fabric_id, fabric_meters, fabric_upcharge_cents, fabric_currency, fabric:fabrics!fabric_id(name, image_url, tier, price_per_lm_cents, currency), wood_fabric:fabrics!trade_quote_items_wood_fabric_id_fkey(name, image_url), product:trade_products(product_name, brand_name, image_url, trade_price_cents, rrp_price_cents, currency, source_pick_id)")
         .eq("quote_id", quoteId)
         .order("created_at", { ascending: false });
 
       if (data) {
         let mapped: QuoteItem[] = (data as any[]).map((d) => ({
           id: d.id,
+          image_url: d.image_url ?? null,
           quantity: d.quantity,
           unit_price_cents: d.unit_price_cents,
           unit_price_currency: d.unit_price_currency ?? null,
@@ -197,8 +199,8 @@ const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0 }: QuoteDrawe
               <div key={item.id} className="grid grid-cols-[88px_minmax(0,1fr)_32px] gap-4 p-4 rounded-lg border border-border hover:border-foreground/10 transition-colors">
                 <div className="flex flex-col gap-2 min-w-0">
                   <div className="w-20 h-20 rounded bg-muted/30 overflow-hidden shrink-0">
-                    {item.product?.image_url ? (
-                      <img src={item.product.image_url} alt={item.product.product_name} className="w-full h-full object-cover" />
+                    {(item.image_url || item.product?.image_url) ? (
+                      <img src={item.image_url || item.product?.image_url || ""} alt={item.product?.product_name || "Quote item"} className="w-full h-full object-cover" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
                         <Package className="h-4 w-4 text-muted-foreground/30" />
