@@ -3108,8 +3108,18 @@ serve(async (req) => {
     // picks (up to the tool cap). This guarantees completeness — e.g. "list
     // all Alexander Lamont items" returns all 15, not whatever subset the
     // model happens to pick.
-    const enumerationVerbRe = /\b(list (?:all|every|the)|show (?:all|me all|every)|(?:all|every) (?:item|piece|product|work)s? (?:by|from)|everything (?:by|from)|which .*(?:do you|are)|what .*(?:do you have|are available))\b/i;
-    const isEnumerationRequest = enumerationVerbRe.test(lastUserMsg || "");
+    const enumerationVerbRe = /\b(list (?:all|every|the)|show (?:all|me all|every|me)|(?:all|every) (?:item|piece|product|work)s? (?:by|from)|everything (?:by|from)|which .*(?:do you|are)|what .*(?:do you have|are available))\b/i;
+    // Softer intent: "i'm interested in <designer> (items|pieces|work|...)",
+    // "any <designer> items?", "got any <designer>?", "tell me about
+    // <designer>'s pieces", "what do you have by <designer>". If a known
+    // designer is mentioned AND the message signals catalog interest, treat
+    // it as an enumeration request so we ship the full curator-pick set.
+    const softInterestRe = /\b(interested\s+in|tell\s+me\s+about|got\s+any|have\s+any|any\s+of|what\s+(?:do\s+you\s+have|about|have\s+you\s+got|('|’)s?\s+available)|do\s+you\s+(?:have|carry|stock)|browse|explore|see|look\s+at)\b/i;
+    const catalogNounRe = /\b(item|piece|product|work|object|design|collection|catalog(?:ue)?|range|edition|selection|offering|inventory|stuff|things)\b/i;
+    const isEnumerationRequest =
+      enumerationVerbRe.test(lastUserMsg || "") ||
+      (mentionsKnownDesigner &&
+        (softInterestRe.test(lastUserMsg || "") || catalogNounRe.test(lastUserMsg || "")));
 
     // Suggest nearest designer names by token overlap against the full known list.
     const suggestNearestDesigners = (query: string, max = 5): string[] => {
