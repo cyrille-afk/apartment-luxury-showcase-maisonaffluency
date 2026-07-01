@@ -28,7 +28,7 @@ interface Board {
   title: string;
   client_name: string;
   client_email: string | null;
-  share_token: string;
+  share_token?: string;
   status: string;
   created_at: string;
   updated_at: string;
