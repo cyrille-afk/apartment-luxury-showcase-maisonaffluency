@@ -3173,9 +3173,19 @@ serve(async (req) => {
         .limit(24);
       const pickIds = (allPicks || []).map((p: any) => p.id);
       if (pickIds.length >= 1) {
-        const previewRaw = await hydratePickPreview(supabase, pickIds);
-        const validIds = new Set(previewRaw.map((p: any) => p?.id).filter(Boolean));
-        const finalIds = pickIds.filter((id: string) => validIds.has(id));
+        const previewRawAll = await hydratePickPreview(supabase, pickIds);
+        const validIds = new Set(previewRawAll.map((p: any) => p?.id).filter(Boolean));
+        // Honour in-chat "skip / exclude / omit …" instructions so the
+        // proposal card is pre-filtered instead of shipping all 10 when the
+        // user asked us to leave some out.
+        const excludedIds = parseUserExclusions(lastUserMsg || "", previewRawAll);
+        const previewRaw = previewRawAll.filter((p: any) => p?.id && !excludedIds.has(p.id));
+        const finalIds = pickIds.filter((id: string) => validIds.has(id) && !excludedIds.has(id));
+        if (finalIds.length === 0) {
+          return sseTextResponse(
+            `Your skip list would remove every ${designerLabel} piece — nothing left to propose. Send the message again with a shorter exclusion (or say "list all ${designerLabel}" for the full set).`,
+          );
+        }
         const rationaleMap: Record<string, { reason: string }> = {};
         for (const p of previewRaw) {
           if (!p?.id) continue;
@@ -3188,15 +3198,18 @@ serve(async (req) => {
           args: {
             title: `${designerLabel} — full curation`,
             pick_ids: finalIds,
-            note: `All ${finalIds.length} ${designerLabel} pieces currently in the Maison Affluency Curation, with trade pricing.`,
+            note: excludedIds.size > 0
+              ? `${finalIds.length} of ${pickIds.length} ${designerLabel} pieces (skipped ${excludedIds.size} per your request), with trade pricing.`
+              : `All ${finalIds.length} ${designerLabel} pieces currently in the Maison Affluency Curation, with trade pricing.`,
             pick_rationales: rationaleMap,
           },
           preview,
         };
-        return sseProposalThenTextResponse(
-          proposal,
-          `Here are all ${finalIds.length} ${designerLabel} pieces in the Maison Affluency Curation with trade pricing — take a look at your project folders to open the tear sheet.`,
-        );
+        const closing = excludedIds.size > 0
+          ? `Here are ${finalIds.length} ${designerLabel} pieces (skipped ${excludedIds.size} per your request) — take a look at your project folders to open the tear sheet.`
+          : `Here are all ${finalIds.length} ${designerLabel} pieces in the Maison Affluency Curation with trade pricing — take a look at your project folders to open the tear sheet.`;
+        return sseProposalThenTextResponse(proposal, closing);
+
       }
 
       // Designer recognised but zero curator picks published for them.
