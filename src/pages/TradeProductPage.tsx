@@ -1391,7 +1391,7 @@ const TradeProductPage: React.FC = () => {
               </>
             )}
             {!selectedWoodPrice && !selectedFabric && (selectedTop || (isDualAxis && !baseAxisIsDim && selectedBase)) && (
-              <>Finish: {selectedTop || selectedBase}</>
+              <>Finish: {(selectedTopDisplay ?? selectedTop) || (selectedBaseDisplay ?? selectedBase)}</>
             )}
           </span>
         )}
