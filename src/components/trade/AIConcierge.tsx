@@ -340,9 +340,23 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
       if (prev.length !== 1) return prev;
       const only = prev[0];
       if (only.kind !== "msg" || only.role !== "assistant") return prev;
+      const contextGreeting = surface === "public"
+        ? PUBLIC_GREETING
+        : greetingForContext(stageFromPath(pathname), pathname, tone, lang).replace(/{concierge_name}/g, name);
       if (only.onboarding || hasWelcomeActions(only.actions)) {
         const sourceContent = only.sourceContent ?? only.content;
         const sourceActions = only.sourceActions ?? only.actions;
+        // If the cached onboarding greeting was for a different route/intent
+        // (e.g. tearsheet greeting persisted from a prior page), swap it for
+        // the greeting that matches the current route instead of just
+        // re-localizing the stale one.
+        const cachedIntentGreeting = greetingForContext(stageFromPath(pathname), pathname, tone, "en").replace(/{concierge_name}/g, name);
+        const staleIntent = sourceContent !== cachedIntentGreeting
+          && sourceContent !== contextGreeting
+          && !sourceActions?.length;
+        if (staleIntent) {
+          return [{ kind: "msg", role: "assistant", content: contextGreeting }];
+        }
         const next: TimelineItem = {
           ...only,
           onboarding: true,
@@ -355,9 +369,8 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
         return [next];
       }
       if (only.actions && only.actions.length > 0) return prev;
-      const next = surface === "public" ? PUBLIC_GREETING : greetingForContext(stageFromPath(pathname), pathname, tone, lang).replace(/{concierge_name}/g, name);
-      if (only.content === next) return prev;
-      return [{ kind: "msg", role: "assistant", content: next }];
+      if (only.content === contextGreeting) return prev;
+      return [{ kind: "msg", role: "assistant", content: contextGreeting }];
     });
     // If the welcome is a custom (non-templated) message and we don't yet have a
     // cached translation for the chosen language, fetch one in the background
