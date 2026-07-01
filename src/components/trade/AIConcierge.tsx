@@ -78,7 +78,7 @@ const sanitizeTimelineForAttachments = (items: TimelineItem[]) =>
 export type ConciergeSurface = "trade" | "public";
 
 export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface } = {}) {
-  const { pathname } = useLocation();
+  const { pathname, search } = useLocation();
   const navigate = useNavigate();
   const { currentStudio } = useStudio();
   const { user, isAdmin } = useAuth();
@@ -125,9 +125,14 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
   const [hasTradeArtifacts, setHasTradeArtifacts] = useState<boolean | null>(null);
   const [artifactRefreshKey, setArtifactRefreshKey] = useState(0);
   const routeStage = stageFromPath(pathname);
+  const isWorkflowListRouteWithoutActiveArtifact =
+    pathname === "/trade/boards" ||
+    pathname === "/trade/tearsheets" ||
+    pathname === "/trade/mood-boards" ||
+    (pathname === "/trade/quotes" && !new URLSearchParams(search).get("quote"));
   const noWorkflowArtifactsContext =
     surface === "trade" &&
-    hasTradeArtifacts === false &&
+    (isWorkflowListRouteWithoutActiveArtifact || hasTradeArtifacts === false) &&
     (routeStage === "Tearsheet" || routeStage === "Quote");
   const contextualPath = noWorkflowArtifactsContext ? "/trade" : pathname;
   const contextualRouteStage: Stage = noWorkflowArtifactsContext ? "Discover" : routeStage;
