@@ -10,8 +10,8 @@ import { ArrowLeft, RefreshCw, Download } from "lucide-react";
 
 type PickRow = {
   id: string;
-  designer_slug: string | null;
-  product_name: string | null;
+  designer_id: string | null;
+  title: string | null;
   trade_price_cents: number | null;
   currency: string | null;
 };
@@ -62,7 +62,7 @@ export default function TradePriceDriftAudit() {
       // Only picks that have a price are meaningful sources of truth.
       const { data: picks, error: pErr } = await supabase
         .from("designer_curator_picks")
-        .select("id, designer_slug, product_name, trade_price_cents, currency")
+        .select("id, designer_id, title, trade_price_cents, currency")
         .not("trade_price_cents", "is", null);
       if (pErr) throw pErr;
 
@@ -72,6 +72,20 @@ export default function TradePriceDriftAudit() {
         .not("source_pick_id", "is", null);
       if (prErr) throw prErr;
 
+      const designerIds = Array.from(
+        new Set(((picks ?? []) as PickRow[]).map((p) => p.designer_id).filter(Boolean) as string[]),
+      );
+      const slugByDesigner = new Map<string, string>();
+      if (designerIds.length) {
+        const { data: designers } = await supabase
+          .from("designers")
+          .select("id, slug")
+          .in("id", designerIds);
+        for (const d of (designers ?? []) as Array<{ id: string; slug: string | null }>) {
+          if (d.slug) slugByDesigner.set(d.id, d.slug);
+        }
+      }
+
       const mirrorByPick = new Map<string, ProductRow>();
       for (const p of (prods ?? []) as ProductRow[]) {
         if (p.source_pick_id) mirrorByPick.set(p.source_pick_id, p);
@@ -79,28 +93,24 @@ export default function TradePriceDriftAudit() {
 
       const out: Mismatch[] = [];
       for (const pk of (picks ?? []) as PickRow[]) {
+        const designer_slug = pk.designer_id ? slugByDesigner.get(pk.designer_id) ?? null : null;
+        const product_name = pk.title;
         const mirror = mirrorByPick.get(pk.id);
+        const base = {
+          pick_id: pk.id,
+          designer_slug,
+          product_name,
+          pick_price: pk.trade_price_cents,
+          pick_currency: pk.currency,
+        };
         if (!mirror) {
-          out.push({
-            pick_id: pk.id,
-            designer_slug: pk.designer_slug,
-            product_name: pk.product_name,
-            pick_price: pk.trade_price_cents,
-            product_price: null,
-            pick_currency: pk.currency,
-            product_currency: null,
-            kind: "missing_mirror",
-          });
+          out.push({ ...base, product_price: null, product_currency: null, kind: "missing_mirror" });
           continue;
         }
         if (mirror.trade_price_cents == null) {
           out.push({
-            pick_id: pk.id,
-            designer_slug: pk.designer_slug,
-            product_name: pk.product_name,
-            pick_price: pk.trade_price_cents,
+            ...base,
             product_price: null,
-            pick_currency: pk.currency,
             product_currency: mirror.currency,
             kind: "null_mirror_price",
           });
@@ -108,12 +118,8 @@ export default function TradePriceDriftAudit() {
         }
         if (mirror.trade_price_cents !== pk.trade_price_cents) {
           out.push({
-            pick_id: pk.id,
-            designer_slug: pk.designer_slug,
-            product_name: pk.product_name,
-            pick_price: pk.trade_price_cents,
+            ...base,
             product_price: mirror.trade_price_cents,
-            pick_currency: pk.currency,
             product_currency: mirror.currency,
             kind: "price_drift",
           });
@@ -121,20 +127,17 @@ export default function TradePriceDriftAudit() {
         }
         if ((pk.currency ?? null) !== (mirror.currency ?? null)) {
           out.push({
-            pick_id: pk.id,
-            designer_slug: pk.designer_slug,
-            product_name: pk.product_name,
-            pick_price: pk.trade_price_cents,
+            ...base,
             product_price: mirror.trade_price_cents,
-            pick_currency: pk.currency,
             product_currency: mirror.currency,
             kind: "currency_drift",
           });
         }
       }
-      out.sort((a, b) =>
-        (a.designer_slug ?? "").localeCompare(b.designer_slug ?? "") ||
-        (a.product_name ?? "").localeCompare(b.product_name ?? ""),
+      out.sort(
+        (a, b) =>
+          (a.designer_slug ?? "").localeCompare(b.designer_slug ?? "") ||
+          (a.product_name ?? "").localeCompare(b.product_name ?? ""),
       );
       setRows(out);
     } catch (e) {
