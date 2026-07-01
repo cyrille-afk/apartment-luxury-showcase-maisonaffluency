@@ -15,6 +15,7 @@
     "test:e2e:ios-zoom": "playwright test e2e/ios-focus-zoom.spec.ts",
     "test:visual": "playwright test e2e/visual",
     "test:visual:update": "playwright test e2e/visual --update-snapshots",
+    "test:concierge:e2e": "bash scripts/run-trade-concierge-e2e.sh",
     "lighthouse:mobile": "node scripts/lighthouse-mobile.mjs",
     "audit:og": "python3 scripts/audit-og-bridges.py --warnings",
     "check:product-images": "python3 scripts/check-product-image-parity.py",
