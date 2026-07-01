@@ -2258,6 +2258,22 @@ const LOCATION_ONLY_FOLLOWUPS = new Set([
   "usa", "united states", "france", "italy", "switzerland", "uae", "singapore", "hong kong",
 ]);
 
+function propertyExamplesForLocation(loc: string): string {
+  const l = loc.toLowerCase();
+  if (/singapore/.test(l)) return "a Good Class Bungalow, a Sentosa Cove waterfront villa, a shophouse conservation home or a sky-terrace condominium";
+  if (/hong kong/.test(l)) return "a Peak villa, a Mid-Levels apartment or a harbour-front penthouse";
+  if (/dubai|abu dhabi|doha|riyadh|jeddah|uae/.test(l)) return "a Palm Jumeirah villa, an Emirates Hills mansion or a Downtown penthouse";
+  if (/new york/.test(l)) return "a Manhattan penthouse, an Upper East Side townhouse or a Hamptons residence";
+  if (/los angeles|miami/.test(l)) return "a Beverly Hills estate, a Bel-Air villa or an oceanfront penthouse";
+  if (/paris/.test(l)) return "a Haussmannian apartment, a hôtel particulier or a Left Bank pied-à-terre";
+  if (/milan|rome|italy/.test(l)) return "a palazzo apartment, a country villa or a city pied-à-terre";
+  if (/monaco|geneva|zurich|switzerland/.test(l)) return "a lakefront villa, an alpine chalet or a city penthouse";
+  if (/tokyo|seoul/.test(l)) return "a low-rise machiya-style residence, a tower penthouse or a hillside villa";
+  if (/sydney|melbourne/.test(l)) return "a harbour-front residence, a heritage terrace or a coastal villa";
+  if (/london|belgravia|mayfair|chelsea|knightsbridge|kensington|notting hill|marylebone|gb|uk|united kingdom/.test(l)) return "a Georgian townhouse, a luxury penthouse or a mews house";
+  return "a townhouse, a penthouse, a villa or an apartment";
+}
+
 function buildLocationOnlyReply(latestUserMessage: string, history: any[], langCode = "en"): string | null {
   const normalized = normalizeLoose(latestUserMessage);
   if (!LOCATION_ONLY_FOLLOWUPS.has(normalized)) return null;
@@ -2268,12 +2284,14 @@ function buildLocationOnlyReply(latestUserMessage: string, history: any[], langC
     .join("\n")
     .toLowerCase();
 
+  const examples = propertyExamplesForLocation(display);
   if (/\b(ship|shipping|freight|delivery|deliver|landed|customs|vat|destination|route|white[- ]glove)\b/.test(recent)) {
-    if (langCode === "id") return `${display} — saya catat. Untuk saat ini, boleh ceritakan sedikit tentang proyeknya: apakah ini Georgian townhouse, penthouse mewah, atau mews house; brief utamanya; dan suasana yang ingin Anda bangun?`;
-    if (langCode === "th") return `${display} — รับทราบค่ะ ตอนนี้ขอรายละเอียดโครงการอีกเล็กน้อยได้ไหม: เป็น Georgian townhouse, เพนต์เฮาส์ลักชัวรี หรือ mews house; brief โดยรวม; และบรรยากาศที่ต้องการ?`;
-    if (langCode === "zh") return `${display} — 已记录。先请您简单补充项目本身：是乔治亚 townhouse、豪华顶层公寓，还是 mews house；整体 brief；以及您想营造的氛围？`;
-    return `${display} — noted. For now, can you tell me a little about the project itself — is it a Georgian Townhouse, a luxury penthouse or a Mews House, your brief in general and the atmosphere you have in mind?`;
+    if (langCode === "id") return `${display} — saya catat. Untuk saat ini, boleh ceritakan sedikit tentang proyeknya: apakah ini ${examples}; brief utamanya; dan suasana yang ingin Anda bangun?`;
+    if (langCode === "th") return `${display} — รับทราบค่ะ ตอนนี้ขอรายละเอียดโครงการอีกเล็กน้อยได้ไหม: เป็น ${examples}; brief โดยรวม; และบรรยากาศที่ต้องการ?`;
+    if (langCode === "zh") return `${display} — 已记录。先请您简单补充项目本身：是 ${examples}；整体 brief；以及您想营造的氛围？`;
+    return `${display} — noted. For now, can you tell me a little about the project itself — is it ${examples}, your brief in general, and the atmosphere you have in mind?`;
   }
+
   if (/\b(project|site|location|install|installation|client|address|city|where)\b/.test(recent)) {
     if (langCode === "id") return `${display} — saya catat sebagai alamat proyek. Ceritakan tentang proyeknya: ruangnya, brief, dan atmosfer yang sedang Anda susun; setelah itu saya bisa mulai mengkurasi. Pengiriman kita bahas nanti, setelah pilihannya lebih jelas.`;
     if (langCode === "th") return `${display} — รับทราบเป็นที่อยู่โครงการค่ะ เล่าเพิ่มเติมเกี่ยวกับโครงการได้เลย: ห้อง, brief และบรรยากาศที่คุณกำลังวางไว้ แล้วฉันจะเริ่มคัดสรรให้ ส่วนการจัดส่งค่อยดูเมื่อเลือกชิ้นงานแล้ว.`;
