@@ -7,24 +7,60 @@ import { Copy, Check, KeyRound } from "lucide-react";
  * Super-admin only: copy the current session's access token so it can be
  * exported as E2E_USER_ACCESS_TOKEN when running the /trade concierge
  * end-to-end tests locally. Read-only, never persisted anywhere.
+ *
+ * Auto-refresh: if the current JWT expires in under 5 minutes (or is
+ * already expired), we force `supabase.auth.refreshSession()` before
+ * copying so the caller always gets a comfortably-live token.
  */
+const REFRESH_THRESHOLD_SECONDS = 5 * 60;
+
+async function getFreshAccessToken(): Promise<{ token: string; expiresAt: number } | null> {
+  const { data, error } = await supabase.auth.getSession();
+  if (error) throw error;
+  let session = data.session;
+  if (!session) return null;
+
+  const nowSec = Math.floor(Date.now() / 1000);
+  const expiresAt = session.expires_at ?? 0;
+  const needsRefresh = !expiresAt || expiresAt - nowSec < REFRESH_THRESHOLD_SECONDS;
+
+  if (needsRefresh) {
+    const { data: refreshed, error: refreshError } = await supabase.auth.refreshSession();
+    if (refreshError) throw refreshError;
+    if (!refreshed.session) return null;
+    session = refreshed.session;
+  }
+
+  return {
+    token: session.access_token,
+    expiresAt: session.expires_at ?? 0,
+  };
+}
+
+function formatRemaining(expiresAt: number): string {
+  const secondsLeft = Math.max(0, expiresAt - Math.floor(Date.now() / 1000));
+  const mins = Math.floor(secondsLeft / 60);
+  const secs = secondsLeft % 60;
+  return `${mins}m ${secs}s`;
+}
+
 export function E2ETokenCopier() {
   const [copied, setCopied] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [lastCopiedAt, setLastCopiedAt] = useState<number | null>(null);
 
   const copyToken = async () => {
     setBusy(true);
     try {
-      const { data, error } = await supabase.auth.getSession();
-      if (error) throw error;
-      const token = data.session?.access_token;
-      if (!token) {
+      const fresh = await getFreshAccessToken();
+      if (!fresh) {
         toast.error("No active session — sign in first.");
         return;
       }
-      await navigator.clipboard.writeText(token);
+      await navigator.clipboard.writeText(fresh.token);
       setCopied(true);
-      toast.success("Access token copied. Paste as E2E_USER_ACCESS_TOKEN.");
+      setLastCopiedAt(fresh.expiresAt);
+      toast.success(`Token copied — valid for ${formatRemaining(fresh.expiresAt)}.`);
       setTimeout(() => setCopied(false), 2500);
     } catch (e: any) {
       toast.error(e?.message ?? "Failed to copy token");
@@ -34,17 +70,20 @@ export function E2ETokenCopier() {
   };
 
   const copyExport = async () => {
+    setBusy(true);
     try {
-      const { data } = await supabase.auth.getSession();
-      const token = data.session?.access_token;
-      if (!token) {
+      const fresh = await getFreshAccessToken();
+      if (!fresh) {
         toast.error("No active session — sign in first.");
         return;
       }
-      await navigator.clipboard.writeText(`export E2E_USER_ACCESS_TOKEN="${token}"`);
-      toast.success("Shell export copied. Paste into your terminal.");
+      await navigator.clipboard.writeText(`export E2E_USER_ACCESS_TOKEN="${fresh.token}"`);
+      setLastCopiedAt(fresh.expiresAt);
+      toast.success(`Shell export copied — valid for ${formatRemaining(fresh.expiresAt)}.`);
     } catch (e: any) {
       toast.error(e?.message ?? "Failed to copy");
+    } finally {
+      setBusy(false);
     }
   };
 
