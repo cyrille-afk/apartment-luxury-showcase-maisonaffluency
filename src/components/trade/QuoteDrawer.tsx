@@ -4,6 +4,7 @@ import { ShoppingCart, Trash2, Package, ArrowRight } from "lucide-react";
 import { DrawerItemSkeleton } from "@/components/trade/skeletons";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { supabase } from "@/integrations/supabase/client";
+import { hydrateQuotePricesFromPicks } from "@/lib/hydrateQuotePricesFromPicks";
 
 interface QuoteItem {
   id: string;
@@ -25,6 +26,7 @@ interface QuoteItem {
     trade_price_cents: number | null;
     rrp_price_cents: number | null;
     currency: string;
+    source_pick_id?: string | null;
   };
 }
 
@@ -52,12 +54,12 @@ const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0 }: QuoteDrawe
       setLoading(true);
       const { data } = await supabase
         .from("trade_quote_items")
-        .select("id, quantity, unit_price_cents, unit_price_currency, variant_label, fabric_id, wood_fabric_id, fabric_meters, fabric_upcharge_cents, fabric_currency, fabric:fabrics!fabric_id(name, image_url, tier, price_per_lm_cents, currency), wood_fabric:fabrics!trade_quote_items_wood_fabric_id_fkey(name, image_url), product:trade_products(product_name, brand_name, image_url, trade_price_cents, rrp_price_cents, currency)")
+        .select("id, quantity, unit_price_cents, unit_price_currency, variant_label, fabric_id, wood_fabric_id, fabric_meters, fabric_upcharge_cents, fabric_currency, fabric:fabrics!fabric_id(name, image_url, tier, price_per_lm_cents, currency), wood_fabric:fabrics!trade_quote_items_wood_fabric_id_fkey(name, image_url), product:trade_products(product_name, brand_name, image_url, trade_price_cents, rrp_price_cents, currency, source_pick_id)")
         .eq("quote_id", quoteId)
         .order("created_at", { ascending: false });
 
       if (data) {
-        const mapped: QuoteItem[] = (data as any[]).map((d) => ({
+        let mapped: QuoteItem[] = (data as any[]).map((d) => ({
           id: d.id,
           quantity: d.quantity,
           unit_price_cents: d.unit_price_cents,
@@ -72,6 +74,10 @@ const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0 }: QuoteDrawe
           wood_fabric: Array.isArray(d.wood_fabric) ? d.wood_fabric[0] : d.wood_fabric,
           product: Array.isArray(d.product) ? d.product[0] : d.product,
         }));
+
+        // Fallback: prefer freshest price from designer_curator_picks when the
+        // mirror row is missing or stale.
+        mapped = await hydrateQuotePricesFromPicks(mapped, "product");
 
 
         // For items without a price, try to find a priced record via fuzzy matching
