@@ -857,6 +857,8 @@ function drawTable(
     const showMaterials = !line.variantLabel;
     const meta = [
       variantLabel,
+      line.fabricLabel ?? null,
+      line.woodFinishLabel ?? null,
       dimsAlreadyInVariant ? null : line.dimensions,
       showMaterials ? line.materials : null,
       editionLabel,
