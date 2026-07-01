@@ -26,6 +26,7 @@ interface QuoteItem {
     trade_price_cents: number | null;
     rrp_price_cents: number | null;
     currency: string;
+    source_pick_id?: string | null;
   };
 }
 
