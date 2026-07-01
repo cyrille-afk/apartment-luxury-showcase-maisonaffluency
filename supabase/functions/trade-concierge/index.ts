@@ -3064,40 +3064,38 @@ serve(async (req) => {
         || (designerRows || []).find((d: any) => targetIds.includes(d.id))?.name
         || mentionedDesigners[0];
 
-      if (targetIds.length) {
-        const { data: allPicks } = await supabase
-          .from("designer_curator_picks")
-          .select("id, title, category, materials")
-          .in("designer_id", targetIds)
-          .order("title", { ascending: true })
-          .limit(24);
-        const pickIds = (allPicks || []).map((p: any) => p.id);
-        if (pickIds.length >= 1) {
-          const previewRaw = await hydratePickPreview(supabase, pickIds);
-          const validIds = new Set(previewRaw.map((p: any) => p?.id).filter(Boolean));
-          const finalIds = pickIds.filter((id: string) => validIds.has(id));
-          const rationaleMap: Record<string, { reason: string }> = {};
-          for (const p of previewRaw) {
-            if (!p?.id) continue;
-            rationaleMap[p.id] = { reason: `Complete ${designerLabel} listing from the Maison Affluency Curation.` };
-          }
-          const preview = previewRaw.map((p: any) => ({ ...p, rationale: rationaleMap[p.id]?.reason || null }));
-          const proposal = {
-            tool: "propose_tearsheet",
-            tool_call_id: crypto.randomUUID(),
-            args: {
-              title: `${designerLabel} — full curation`,
-              pick_ids: finalIds,
-              note: `All ${finalIds.length} ${designerLabel} pieces currently in the Maison Affluency Curation, with trade pricing.`,
-              pick_rationales: rationaleMap,
-            },
-            preview,
-          };
-          return sseProposalThenTextResponse(
-            proposal,
-            `Here are all ${finalIds.length} ${designerLabel} pieces in the Maison Affluency Curation with trade pricing — tap any to open the tear sheet.`,
-          );
+      const { data: allPicks } = await supabase
+        .from("designer_curator_picks")
+        .select("id, title, category, materials")
+        .in("designer_id", targetIds)
+        .order("title", { ascending: true })
+        .limit(24);
+      const pickIds = (allPicks || []).map((p: any) => p.id);
+      if (pickIds.length >= 1) {
+        const previewRaw = await hydratePickPreview(supabase, pickIds);
+        const validIds = new Set(previewRaw.map((p: any) => p?.id).filter(Boolean));
+        const finalIds = pickIds.filter((id: string) => validIds.has(id));
+        const rationaleMap: Record<string, { reason: string }> = {};
+        for (const p of previewRaw) {
+          if (!p?.id) continue;
+          rationaleMap[p.id] = { reason: `Complete ${designerLabel} listing from the Maison Affluency Curation.` };
         }
+        const preview = previewRaw.map((p: any) => ({ ...p, rationale: rationaleMap[p.id]?.reason || null }));
+        const proposal = {
+          tool: "propose_tearsheet",
+          tool_call_id: crypto.randomUUID(),
+          args: {
+            title: `${designerLabel} — full curation`,
+            pick_ids: finalIds,
+            note: `All ${finalIds.length} ${designerLabel} pieces currently in the Maison Affluency Curation, with trade pricing.`,
+            pick_rationales: rationaleMap,
+          },
+          preview,
+        };
+        return sseProposalThenTextResponse(
+          proposal,
+          `Here are all ${finalIds.length} ${designerLabel} pieces in the Maison Affluency Curation with trade pricing — tap any to open the tear sheet.`,
+        );
       }
     }
 
