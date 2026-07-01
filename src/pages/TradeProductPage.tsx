@@ -61,7 +61,7 @@ import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
 import { rememberProductBackRef } from "@/lib/designerBackRef";
 import { priceRugVariantFromLabel, isRugCategory, looksLikeDimension } from "@/lib/rugPricing";
-import { resolveActiveVariant } from "@/lib/resolveActiveVariant";
+import { resolveActiveVariant, resolvePartialDualMinCents } from "@/lib/resolveActiveVariant";
 
 import RugSizeColourPicker, { type RugSelection } from "@/components/rug/RugSizeColourPicker";
 import SpecGlyph from "@/components/product/SpecGlyph";
@@ -709,21 +709,11 @@ const TradeProductPage: React.FC = () => {
           // the partial selection — same value the "From €X" caption shows —
           // instead of the RPC's default base RRP (Kynos €12,116).
           let selectedVariantCents: number | null = activeVariantCents;
-          if (
-            selectedVariantCents == null &&
-            sv &&
-            (selectedBase || selectedTop || selectedDualSize)
-          ) {
-            const nrm = (s: any) => String(s ?? "").trim();
-            const matches = sv.filter((v: any) =>
-              (!selectedBase || nrm(v.base) === nrm(selectedBase)) &&
-              (!selectedTop || nrm(v.top) === nrm(selectedTop)) &&
-              (!selectedDualSize || nrm(v.label) === nrm(selectedDualSize))
+          if (selectedVariantCents == null && sv) {
+            selectedVariantCents = resolvePartialDualMinCents(
+              { selectedBase, selectedTop, selectedDualSize },
+              { sizeVariants: sv, isDualAxis: activeVariantContext.isDualAxis },
             );
-            const priced = matches
-              .map((v: any) => v.price_cents)
-              .filter((c: any) => typeof c === "number" && c > 0) as number[];
-            if (priced.length) selectedVariantCents = Math.min(...priced);
           }
 
 
@@ -1204,12 +1194,10 @@ const TradeProductPage: React.FC = () => {
   // Cheapest priced variant matching the user's partial dual-axis selection.
   // Lets us keep showing "From €X" once they pick just a Finish or just a Size,
   // instead of falling all the way back to "Price on request".
-  const partialDualMinCents = (() => {
-    if (!isDualAxis || !hasVariants || !dualSelectionMade) return null;
-    const matches = variantsList.filter((v: any) => matchesDual(v, selectedBase, selectedTop, selectedDualSize));
-    const priced = matches.map((v: any) => v.price_cents).filter((c: any) => typeof c === "number" && c > 0);
-    return priced.length > 0 ? Math.min(...priced) : null;
-  })();
+  const partialDualMinCents = resolvePartialDualMinCents(
+    { selectedBase, selectedTop, selectedDualSize },
+    { sizeVariants: variantsList, isDualAxis },
+  );
   const dualSelectionUnpriced = dualSelectionMade && (!dualVariant || !(typeof dualVariant.price_cents === "number" && dualVariant.price_cents > 0)) && partialDualMinCents == null;
   const effectiveRrpCents = hasVariants
     ? (activeVariant
