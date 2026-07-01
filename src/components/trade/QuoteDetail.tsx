@@ -43,7 +43,7 @@ interface QuoteItemWithProduct {
   id: string;
   quote_id: string;
   product_id: string;
-  image_url: string | null;
+  image_url?: string | null;
   quantity: number;
   unit_price_cents: number | null;
   unit_price_currency: string | null;
