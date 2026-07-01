@@ -2002,7 +2002,9 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                   </div>
                 )}
               </div>
+              {fxSource !== "identity" && <FxSourceBadge source={fxSource} />}
             </div>
+
 
             <div className="flex items-center gap-4 flex-wrap">
               <button
