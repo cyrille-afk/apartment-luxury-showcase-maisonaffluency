@@ -1194,12 +1194,10 @@ const TradeProductPage: React.FC = () => {
   // Cheapest priced variant matching the user's partial dual-axis selection.
   // Lets us keep showing "From €X" once they pick just a Finish or just a Size,
   // instead of falling all the way back to "Price on request".
-  const partialDualMinCents = (() => {
-    if (!isDualAxis || !hasVariants || !dualSelectionMade) return null;
-    const matches = variantsList.filter((v: any) => matchesDual(v, selectedBase, selectedTop, selectedDualSize));
-    const priced = matches.map((v: any) => v.price_cents).filter((c: any) => typeof c === "number" && c > 0);
-    return priced.length > 0 ? Math.min(...priced) : null;
-  })();
+  const partialDualMinCents = resolvePartialDualMinCents(
+    { selectedBase, selectedTop, selectedDualSize },
+    { sizeVariants: variantsList, isDualAxis },
+  );
   const dualSelectionUnpriced = dualSelectionMade && (!dualVariant || !(typeof dualVariant.price_cents === "number" && dualVariant.price_cents > 0)) && partialDualMinCents == null;
   const effectiveRrpCents = hasVariants
     ? (activeVariant
