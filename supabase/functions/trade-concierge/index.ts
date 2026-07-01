@@ -1154,7 +1154,7 @@ function needsFullCatalog(text: string, designerNames: string[]): boolean {
   const t = (text || "").toLowerCase();
   if (!t) return false;
   // Product-recommendation verbs / discovery intents
-  if (/\b(show|find|pull|suggest|recommend|propose|curate|compose|draft|quote|tearsheet|add to|put together|in (oak|brass|bronze|marble|leather|mohair|velvet|stone|wood))\b/.test(t)) return true;
+  if (/\b(show|find|pull|suggest|recommend|propose|curate|compose|draft|quote|tearsheet|add to|put together|list (?:all|every|the)|which .*(?:do you|are)|everything (?:by|from)|in (oak|brass|bronze|marble|leather|mohair|velvet|stone|wood))\b/.test(t)) return true;
   // Category keywords
   if (/\b(chandelier|sconce|lamp|lighting|table|chair|sofa|armchair|console|cabinet|mirror|rug|carpet|desk|bed|stool|bench|sideboard|dining|coffee|side table|dressing|wall light|pendant|floor lamp|objet)\b/.test(t)) return true;
   // Designer name mention
@@ -2930,7 +2930,7 @@ serve(async (req) => {
     const lastUserMsgLower = lastUserMsg.toLowerCase();
     const hasVisualizationVerb = /\b(render|visualise|visualize|mock up|picture it|see it in situ|generate (?:a )?(?:view|scene|axonometric|render)|show me (?:how this would look|in (?:the )?(?:room|space))|image of the room|let me see the space)\b/.test(lastUserMsgLower);
     const visualizationNeedsCatalogPicks = hasVisualizationVerb && /\b(overlay|picks?|pieces?|selection|tearsheet|catalog|bronze|mohair|velvet|leather|walnut|oak|brass|marble|stone|glass|silk|wool|linen|bouclé|drawing-room|drawing room|dining room|bedroom|salon|library)\b/.test(lastUserMsgLower);
-    const hasExplicitSelectionVerb = /\b(propose|suggest|recommend|show me|pull (?:together|me)|curate|reinterpret|alternatives?|options?|first edit|draft (?:a )?(?:tearsheet|edit|selection)|put together|assemble|i'?d like to see|let'?s see|what do you have)\b/.test(lastUserMsgLower);
+    const hasExplicitSelectionVerb = /\b(propose|suggest|recommend|show me|pull (?:together|me)|curate|reinterpret|alternatives?|options?|first edit|draft (?:a )?(?:tearsheet|edit|selection)|put together|assemble|i'?d like to see|let'?s see|what do you have|list (?:all|every|the)|which .*(?:do you|are)|everything (?:by|from))\b/.test(lastUserMsgLower);
     const opensWithLookingFor = /^\s*(?:i(?:'m| am)?\s+(?:looking|searching|after|hunting|sourcing|in the market)|we(?:'re| are)?\s+(?:looking|searching|after))\b/.test(lastUserMsgLower);
 
     let effectiveBrief: ExtractedBrief = shouldActOnAccumulatedBrief && !extractedBrief.plan.length && hasExplicitSelectionVerb
@@ -2994,7 +2994,18 @@ serve(async (req) => {
 
     // Decide final catalog mode: classifier wins, heuristic is the fallback. RAG replaces full load when it returned anything.
     const includePieces = sentiment.needs_catalog || heuristicNeedsPieces || effectiveBrief.plan.includes("propose_tearsheet") || visualizationNeedsCatalogPicks;
-    const useRag = includePieces && !!ragResult;
+    // If the user names a specific designer, always load the FULL catalog for
+    // that turn — top-K embedding retrieval will not reliably surface every
+    // one of that designer's pieces, so listing/enumeration queries like
+    // "list all the Alexander Lamont items" would otherwise return partial
+    // or empty results. Full catalog guarantees the model can see all of
+    // that designer's rows and answer completeness questions correctly.
+    const lastUserMsgLc = (lastUserMsg || "").toLowerCase();
+    const mentionsKnownDesigner = designerNames.some((n) => {
+      const name = String(n || "").toLowerCase().trim();
+      return name.length >= 4 && lastUserMsgLc.includes(name);
+    });
+    const useRag = includePieces && !!ragResult && !mentionsKnownDesigner;
     const { designersList, piecesList: fullPiecesList, showroomBrands } = await loadCatalogContext(supabase, includePieces && !useRag);
     const piecesList = useRag ? (ragResult as { contextText: string }).contextText : fullPiecesList;
 
