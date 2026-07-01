@@ -39,6 +39,12 @@ export interface QuotePdfLine {
   quantity: number;
   unitPriceCents: number | null;     // already in quote currency
   lineTotalCents: number | null;     // already in quote currency
+  /** Optional: unit price in the item's source currency (e.g. EUR catalog
+   *  price). When set, the PDF renders UNIT PRICE in the source currency
+   *  and keeps AMOUNT in the display currency so the trade user can audit
+   *  the FX conversion at a glance. */
+  sourceUnitPriceCents?: number | null;
+  sourceCurrency?: string | null;
   imageUrl?: string | null;          // optional product thumbnail
   shipOriginCountry?: string | null;
   shipMode?: string | null;
