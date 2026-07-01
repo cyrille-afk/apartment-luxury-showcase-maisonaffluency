@@ -139,13 +139,15 @@ const TradeQuoteReview = () => {
         supabase.from("trade_quotes").select("id, status, currency, notes, created_at, project_id").eq("id", quoteId).maybeSingle(),
         supabase
           .from("trade_quote_items")
-          .select("id, quantity, unit_price_cents, room, variant_label, product_id, trade_products(product_name, brand_name, trade_price_cents, rrp_price_cents, currency, image_url)")
+          .select("id, quantity, unit_price_cents, room, variant_label, product_id, trade_products(product_name, brand_name, trade_price_cents, rrp_price_cents, currency, image_url, source_pick_id)")
           .eq("quote_id", quoteId)
           .order("room", { ascending: true }),
       ]);
       if (cancelled) return;
       setQuote((q.data as QuoteRow) || null);
-      setItems((i.data as unknown as ItemRow[]) || []);
+      const rawItems = (i.data as unknown as ItemRow[]) || [];
+      const hydrated = await hydrateQuotePricesFromPicks(rawItems, "trade_products");
+      setItems(hydrated);
       setLoading(false);
     })();
     return () => {
