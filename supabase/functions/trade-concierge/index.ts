@@ -2994,7 +2994,18 @@ serve(async (req) => {
 
     // Decide final catalog mode: classifier wins, heuristic is the fallback. RAG replaces full load when it returned anything.
     const includePieces = sentiment.needs_catalog || heuristicNeedsPieces || effectiveBrief.plan.includes("propose_tearsheet") || visualizationNeedsCatalogPicks;
-    const useRag = includePieces && !!ragResult;
+    // If the user names a specific designer, always load the FULL catalog for
+    // that turn — top-K embedding retrieval will not reliably surface every
+    // one of that designer's pieces, so listing/enumeration queries like
+    // "list all the Alexander Lamont items" would otherwise return partial
+    // or empty results. Full catalog guarantees the model can see all of
+    // that designer's rows and answer completeness questions correctly.
+    const lastUserMsgLc = (lastUserMsg || "").toLowerCase();
+    const mentionsKnownDesigner = designerNames.some((n) => {
+      const name = String(n || "").toLowerCase().trim();
+      return name.length >= 4 && lastUserMsgLc.includes(name);
+    });
+    const useRag = includePieces && !!ragResult && !mentionsKnownDesigner;
     const { designersList, piecesList: fullPiecesList, showroomBrands } = await loadCatalogContext(supabase, includePieces && !useRag);
     const piecesList = useRag ? (ragResult as { contextText: string }).contextText : fullPiecesList;
 
