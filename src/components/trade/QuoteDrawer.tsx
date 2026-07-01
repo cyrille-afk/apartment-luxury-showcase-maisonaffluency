@@ -83,6 +83,53 @@ const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0 }: QuoteDrawe
         // mirror row is missing or stale.
         mapped = await hydrateQuotePricesFromPicks(mapped, "product");
 
+        // Multi-axis finish swatches: dual/triple-axis products (e.g. Angelo
+        // M/R table = Base · Top · Size all in stone) only get ONE swatch id
+        // saved on the row. Resolve every segment of `variant_label` against
+        // this product's swatch library so the drawer shows one thumbnail per
+        // selected finish instead of just the first fuzzy match.
+        const pickIds = Array.from(new Set(
+          mapped.map((m) => m.product?.source_pick_id).filter(Boolean) as string[]
+        ));
+        if (pickIds.length > 0) {
+          const { data: swRows } = await (supabase as any)
+            .from("product_fabric_swatches_public")
+            .select("pick_id, name, image_url, is_active")
+            .in("pick_id", pickIds);
+          const byPick = new Map<string, { name: string; image_url: string }[]>();
+          for (const r of (swRows || []) as any[]) {
+            if (!r || r.is_active === false || !r.image_url || !r.name) continue;
+            const list = byPick.get(r.pick_id) || [];
+            list.push({ name: String(r.name), image_url: String(r.image_url) });
+            byPick.set(r.pick_id, list);
+          }
+          const norm = (s: string) => s.toLowerCase().replace(/\s+/g, " ").trim();
+          for (const item of mapped) {
+            const pid = item.product?.source_pick_id;
+            if (!pid || !item.variant_label) continue;
+            const lib = byPick.get(pid);
+            if (!lib || lib.length === 0) continue;
+            const segments = item.variant_label
+              .split(/·|\//)
+              .map((s) => norm(s))
+              .filter(Boolean);
+            if (segments.length === 0) continue;
+            const seen = new Set<string>();
+            const matched: { name: string; image_url: string }[] = [];
+            for (const seg of segments) {
+              const hit = lib.find((s) => {
+                const n = norm(s.name);
+                return n === seg || seg.includes(n) || n.includes(seg);
+              });
+              if (hit && !seen.has(hit.image_url)) {
+                seen.add(hit.image_url);
+                matched.push(hit);
+              }
+            }
+            if (matched.length > 0) item.variant_swatches = matched;
+          }
+        }
+
 
         // For items without a price, try to find a priced record via fuzzy matching
         const needsPrice = mapped.filter((m) => m.product && !m.product.trade_price_cents && !m.product.rrp_price_cents);
