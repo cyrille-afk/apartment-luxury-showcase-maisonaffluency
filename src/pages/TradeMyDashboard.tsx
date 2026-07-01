@@ -184,9 +184,15 @@ export default function TradeMyDashboard() {
             </div>
           )}
         </header>
+        {!isImpersonating && (
+          <div className="mb-6">
+            <PendingInvitesBanner />
+          </div>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
           <div className="lg:col-span-2 space-y-8">
+
             {/* Favorites preview */}
             <section>
               <div className="flex items-center justify-between mb-4">
