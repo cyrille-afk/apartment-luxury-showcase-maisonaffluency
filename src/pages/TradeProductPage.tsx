@@ -1639,6 +1639,7 @@ const TradeProductPage: React.FC = () => {
                   includePricing
                   showUpholsterySection={isUpholsteredProduct}
                   showWoodSection
+                  hideBaseAccordion={isDualAxis && baseAxisIsDim}
                   onHasFabricsChange={setHasLinkedFabrics}
                   onWoodFinishesAvailable={setLinkedWoodFinishes}
                   onFinishesMissingImagesChange={setFinishesMissingImages}
