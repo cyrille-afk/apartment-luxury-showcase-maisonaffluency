@@ -152,6 +152,30 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const abortRef = useRef<AbortController | null>(null);
+  const stallTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const STALL_MS = 45_000; // no delta/proposal in 45s ⇒ treat stream as stalled
+
+  const clearStallTimer = useCallback(() => {
+    if (stallTimerRef.current) {
+      clearTimeout(stallTimerRef.current);
+      stallTimerRef.current = null;
+    }
+  }, []);
+
+  const pushRetry = useCallback((text: string, reason: string) => {
+    // Drop any orphaned empty assistant bubble so the retry card stands alone.
+    setTimeline((prev) => {
+      let copy = prev;
+      const last = prev[prev.length - 1];
+      if (last?.kind === "msg" && last.role === "assistant" && !last.content?.trim()) {
+        copy = prev.slice(0, -1);
+      }
+      // Never stack two retry cards in a row for the same text.
+      const tail = copy[copy.length - 1];
+      if (tail?.kind === "retry" && tail.text === text) return copy;
+      return [...copy, { kind: "retry", text, reason }];
+    });
+  }, []);
 
   // -------- Attachments (room plans, mood images, PDFs) --------
   type StagedAttachment = {
