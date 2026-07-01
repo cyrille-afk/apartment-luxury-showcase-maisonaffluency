@@ -50,11 +50,14 @@ const KIND_LABEL: Record<Mismatch["kind"], string> = {
 
 export default function TradePriceDriftAudit() {
   const { isAdmin, loading } = useAuth();
+  const { toast } = useToast();
   const [rows, setRows] = useState<Mismatch[] | null>(null);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [q, setQ] = useState("");
   const [kindFilter, setKindFilter] = useState<Mismatch["kind"] | "all">("all");
+  const [resyncing, setResyncing] = useState<Set<string>>(new Set());
+  const [resyncingAll, setResyncingAll] = useState(false);
 
   const load = async () => {
     setBusy(true);
