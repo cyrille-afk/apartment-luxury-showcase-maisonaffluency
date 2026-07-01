@@ -43,6 +43,7 @@ interface QuoteItemWithProduct {
   id: string;
   quote_id: string;
   product_id: string;
+  image_url: string | null;
   quantity: number;
   unit_price_cents: number | null;
   unit_price_currency: string | null;
@@ -1020,7 +1021,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
         // AMOUNT column when the display currency differs.
         sourceUnitPriceCents: rawUnit,
         sourceCurrency: itemPriceCurrency(item, currency),
-        imageUrl: product?.image_url ?? null,
+        imageUrl: item.image_url ?? product?.image_url ?? null,
         shipOriginCountry: toIsoCountry(item.ship_origin_country ?? product?.origin ?? null, "FR"),
         shipMode: item.ship_mode || null,
         shipCbm: item.ship_cbm != null ? Number(item.ship_cbm) : null,
@@ -2225,14 +2226,15 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                   const rawUnitPrice = item.unit_price_cents ?? catalogSourcePriceCents(item) ?? null;
                   const unitPrice = convertCents(rawUnitPrice, itemPriceCurrency(item, currency), currency);
                   const lineTotal = unitPrice ? unitPrice * item.quantity : null;
+                  const lineImageUrl = item.image_url ?? product?.image_url ?? null;
 
                   return (
                     <div key={item.id} className="py-3 md:py-4 md:grid md:grid-cols-[minmax(0,1fr)_100px_120px_130px] md:gap-4 md:items-start">
                       <div className="flex gap-3 md:gap-4 min-w-0">
                         <div className="shrink-0 flex w-28 md:w-36 flex-col gap-2">
                           <div className="w-28 h-28 md:w-36 md:h-36 rounded bg-muted/30 overflow-hidden shrink-0">
-                            {product?.image_url ? (
-                              <img src={product.image_url} alt={product.product_name} className="w-full h-full object-cover" loading="lazy" />
+                            {lineImageUrl ? (
+                              <img src={lineImageUrl} alt={product?.product_name || "Quote item"} className="w-full h-full object-cover" loading="lazy" />
                             ) : (
                               <div className="w-full h-full flex items-center justify-center">
                                 <Package className="h-4 w-4 md:h-5 md:w-5 text-muted-foreground/30" />
