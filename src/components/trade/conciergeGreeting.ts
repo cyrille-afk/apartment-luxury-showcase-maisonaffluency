@@ -390,7 +390,13 @@ export const quickClientProfile = (text: string): QuickProfile | null => {
     for (const c of HV_CITIES) {
       const re = new RegExp(`\\b${c.replace(/ /g, "\\s+")}\\b`, "i");
       if (re.test(text)) {
-        city = c.replace(/\b\w/g, (m) => m.toUpperCase());
+        const expanded = HV_CITY_EXPANSIONS[c];
+        if (expanded) {
+          city = expanded.city;
+          country = expanded.country;
+        } else {
+          city = c.replace(/\b\w/g, (m) => m.toUpperCase());
+        }
         if (!signals.includes("high_value_location")) signals.push("high_value_location");
         break;
       }
