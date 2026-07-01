@@ -491,6 +491,14 @@ const TradeProductPage: React.FC = () => {
   const [selectedVariantIdx, setSelectedVariantIdx] = useState<number | null>(null);
   const [selectedBase, setSelectedBase] = useState<string | null>(null);
   const [selectedTop, setSelectedTop] = useState<string | null>(null);
+  // User-clicked swatch label (e.g. "Port Saint Laurent") when the resolved
+  // variant.top / variant.base is a slash-joined bundle covering several
+  // equivalently-priced finishes ("Port Saint Laurent / Travertino Silver /
+  // Rosso Lepanto"). We keep the resolved variant for pricing, but the caption
+  // + quote line label + swatch chips should reflect ONLY the finish the user
+  // actually picked. Null means "no shrink override".
+  const [selectedTopDisplay, setSelectedTopDisplay] = useState<string | null>(null);
+  const [selectedBaseDisplay, setSelectedBaseDisplay] = useState<string | null>(null);
   const [selectedDualSize, setSelectedDualSize] = useState<string | null>(null);
   const [rugSelection, setRugSelection] = useState<RugSelection | null>(null);
   const [defaultPair, setDefaultPair] = useState<{ base: string; top: string } | null>(null);
