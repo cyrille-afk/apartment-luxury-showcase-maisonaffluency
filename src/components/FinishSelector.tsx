@@ -111,6 +111,13 @@ interface FinishSelectorProps {
    */
   showWoodSection?: boolean;
   /**
+   * When true, suppresses the base/wood swatch accordion entirely (and any
+   * orphan-swatch spillover into it) while keeping the top-axis accordion.
+   * Used when the Base axis is a physical dimension (Size) so only the
+   * Top-axis (Finish) swatch picker should render.
+   */
+  hideBaseAccordion?: boolean;
+  /**
    * Optional filter restricting which wood-bucket swatches are shown in the
    * primary frame-finish group. Used by dual-axis products (e.g. pendant with
    * "Rod Finish" × "Diffuser") so the rod-finish group doesn't accidentally
