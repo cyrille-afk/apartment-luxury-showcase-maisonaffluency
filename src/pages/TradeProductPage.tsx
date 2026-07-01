@@ -1144,18 +1144,9 @@ const TradeProductPage: React.FC = () => {
     : [];
   const baseOnlyRequiresSize = isBaseOnly && !baseAxisIsDim && baseOnlySizeOptions.length > 1;
 
-  const activeVariant = isDualAxis
-    ? dualVariant
-    : isBaseOnly
-      ? (hasVariants && selectedBase && (!baseOnlyRequiresSize || selectedDualSize)
-        ? sizeVariants!.find((v) =>
-            (v.base || "").trim() === selectedBase &&
-            (!baseOnlyRequiresSize || (v.label || "").trim() === selectedDualSize)
-          ) ?? null
-        : null)
-    : hasSingleAxisSplit
-      ? singleAxisActive
-      : (hasVariants && selectedVariantIdx != null ? sizeVariants![selectedVariantIdx] : null);
+  // `activeVariant` is hoisted above `handleAddToQuote` (top of component) so
+  // both the caption and the quote flow read from the same resolver.
+
   const isUpholsteredProduct = isProductUpholstered(product as any);
   // When FinishSelector is shown (upholstered), it already exposes fabric
   // + wood-finish swatches. Suppress duplicate base/top variant dropdowns
