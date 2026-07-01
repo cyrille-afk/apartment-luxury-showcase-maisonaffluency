@@ -648,7 +648,12 @@ const TradeProductPage: React.FC = () => {
         variantLabel = [rugSelection.sizeLabel, rugSelection.colour].filter(Boolean).join(" · ");
         if (rugSelection.totalCents) overrideUnitPriceCents = rugSelection.totalCents;
       } else if (selectedBase || selectedTop) {
-        variantLabel = [selectedBase, selectedTop, selectedDualSize].filter(Boolean).join(" · ");
+        // Prefer the user's actual clicked swatch label when the resolved
+        // variant bundles multiple finishes under one row (e.g. "Port Saint
+        // Laurent / Travertino Silver / Rosso Lepanto" as a single top).
+        const baseForLabel = selectedBaseDisplay ?? selectedBase;
+        const topForLabel = selectedTopDisplay ?? selectedTop;
+        variantLabel = [baseForLabel, topForLabel, selectedDualSize].filter(Boolean).join(" · ");
       } else if (selectedSingleMaterial || selectedSingleSize) {
         variantLabel = [selectedSingleSize, selectedSingleMaterial].filter(Boolean).join(" · ");
       } else if (selectedVariantIdx != null) {
