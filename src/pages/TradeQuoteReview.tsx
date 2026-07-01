@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
+import { hydrateQuotePricesFromPicks } from "@/lib/hydrateQuotePricesFromPicks";
 
 interface QuoteRow {
   id: string;
