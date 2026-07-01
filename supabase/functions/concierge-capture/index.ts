@@ -179,7 +179,10 @@ function heuristic(text: string): Qualified {
   const rooms = [
     "dining", "living", "bedroom", "study", "library", "entry", "foyer",
     "kitchen", "powder", "office", "townhouse", "penthouse", "villa",
-    "apartment", "yacht", "chalet",
+    "apartment", "yacht", "chalet", "good class bungalow", "gcb", "bungalow",
+    "shophouse", "condominium", "condo", "palazzo", "hôtel particulier",
+    "hotel particulier", "brownstone", "loft", "yali", "yalı", "riad",
+    "hacienda", "hutong", "machiya", "altbau", "greystone",
   ];
   for (const r of rooms) {
     if (new RegExp(`\\b${r}\\b`, "i").test(text)) {

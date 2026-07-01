@@ -311,7 +311,13 @@ const HV_CITIES = [
 const PROPERTY_TYPES = [
   "townhouse", "penthouse", "villa", "chalet", "yacht", "mews house",
   "georgian townhouse", "loft", "estate", "manor", "apartment",
+  "good class bungalow", "gcb", "bungalow", "shophouse", "condominium", "condo",
+  "hôtel particulier", "hotel particulier", "palazzo", "pied-à-terre", "pied a terre",
+  "haussmannian apartment", "brownstone", "co-op", "coop", "loft apartment",
+  "yalı", "yali", "riad", "hacienda", "finca", "dacha", "hutong", "machiya",
+  "altbau", "greystone", "prewar", "lane house", "canal house",
 ];
+
 
 const ROOM_TYPES = [
   "dining", "living", "drawing room", "bedroom", "study", "library",
