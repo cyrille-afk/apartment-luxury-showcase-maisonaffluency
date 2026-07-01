@@ -382,11 +382,11 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
           sourceCurrencies.add(sourceCurrency);
         }
       });
-      if (sourceCurrencies.size === 0) { setFxRates({}); return; }
-      const rates = await getFxRates(
-        Array.from(sourceCurrencies).map((src) => ({ src, tgt: currency })),
-      );
+      if (sourceCurrencies.size === 0) { setFxRates({}); setFxSource("identity"); return; }
+      const pairs = Array.from(sourceCurrencies).map((src) => ({ src, tgt: currency }));
+      const rates = await getFxRates(pairs);
       setFxRates(rates);
+      setFxSource(summarizeFxSources(pairs.map((p) => getFxSource(p.src, p.tgt))));
     };
     if (items.length > 0) fetchRates();
   }, [items, currency]);
