@@ -218,6 +218,16 @@ export default function TradeAdminDashboard() {
             </section>
           );
         })}
+        {isSuperAdmin && (
+          <section>
+            <h2 className="font-body text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-3">
+              Developer Tools
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <E2ETokenCopier />
+            </div>
+          </section>
+        )}
       </div>
     </>
   );
