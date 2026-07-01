@@ -491,6 +491,14 @@ const TradeProductPage: React.FC = () => {
   const [selectedVariantIdx, setSelectedVariantIdx] = useState<number | null>(null);
   const [selectedBase, setSelectedBase] = useState<string | null>(null);
   const [selectedTop, setSelectedTop] = useState<string | null>(null);
+  // User-clicked swatch label (e.g. "Port Saint Laurent") when the resolved
+  // variant.top / variant.base is a slash-joined bundle covering several
+  // equivalently-priced finishes ("Port Saint Laurent / Travertino Silver /
+  // Rosso Lepanto"). We keep the resolved variant for pricing, but the caption
+  // + quote line label + swatch chips should reflect ONLY the finish the user
+  // actually picked. Null means "no shrink override".
+  const [selectedTopDisplay, setSelectedTopDisplay] = useState<string | null>(null);
+  const [selectedBaseDisplay, setSelectedBaseDisplay] = useState<string | null>(null);
   const [selectedDualSize, setSelectedDualSize] = useState<string | null>(null);
   const [rugSelection, setRugSelection] = useState<RugSelection | null>(null);
   const [defaultPair, setDefaultPair] = useState<{ base: string; top: string } | null>(null);
@@ -640,7 +648,20 @@ const TradeProductPage: React.FC = () => {
         variantLabel = [rugSelection.sizeLabel, rugSelection.colour].filter(Boolean).join(" · ");
         if (rugSelection.totalCents) overrideUnitPriceCents = rugSelection.totalCents;
       } else if (selectedBase || selectedTop) {
-        variantLabel = [selectedBase, selectedTop, selectedDualSize].filter(Boolean).join(" · ");
+        // Prefer the user's actual clicked swatch label when the resolved
+        // variant bundles multiple finishes under one row (e.g. "Port Saint
+        // Laurent / Travertino Silver / Rosso Lepanto" as a single top).
+        const shrink = (resolved: string | null, display: string | null) => {
+          if (!resolved) return null;
+          if (!display) return resolved;
+          return /\s\/\s/.test(resolved) && resolved.toLowerCase().includes(display.toLowerCase())
+            ? display
+            : resolved;
+        };
+        const baseForLabel = shrink(selectedBase, selectedBaseDisplay);
+        const topForLabel = shrink(selectedTop, selectedTopDisplay);
+        variantLabel = [baseForLabel, topForLabel, selectedDualSize].filter(Boolean).join(" · ");
+      
       } else if (selectedSingleMaterial || selectedSingleSize) {
         variantLabel = [selectedSingleSize, selectedSingleMaterial].filter(Boolean).join(" · ");
       } else if (selectedVariantIdx != null) {
@@ -896,7 +917,7 @@ const TradeProductPage: React.FC = () => {
     } finally {
       setAdding(false);
     }
-  }, [user, data, activeQuoteId, toast, selectedBase, selectedTop, selectedDualSize, selectedSingleMaterial, selectedSingleSize, selectedVariantIdx, rugSelection, selectedFabric, selectedWoodPrice, fxRates, displayCurrency, finishesMissingImages, activeVariantCents]);
+  }, [user, data, activeQuoteId, toast, selectedBase, selectedTop, selectedBaseDisplay, selectedTopDisplay, selectedDualSize, selectedSingleMaterial, selectedSingleSize, selectedVariantIdx, rugSelection, selectedFabric, selectedWoodPrice, fxRates, displayCurrency, finishesMissingImages, activeVariantCents]);
 
   // Default the dual-axis pickers to the first base + its uniquely-compatible
   // top so users see a complete pairing on load (e.g. Pars Cocktail Table:
@@ -1377,9 +1398,15 @@ const TradeProductPage: React.FC = () => {
                 )}
               </>
             )}
-            {!selectedWoodPrice && !selectedFabric && (selectedTop || (isDualAxis && !baseAxisIsDim && selectedBase)) && (
-              <>Finish: {selectedTop || selectedBase}</>
-            )}
+            {!selectedWoodPrice && !selectedFabric && (selectedTop || (isDualAxis && !baseAxisIsDim && selectedBase)) && (() => {
+              const shrinkCap = (resolved: string | null, display: string | null) =>
+                !resolved ? null
+                : display && /\s\/\s/.test(resolved) && resolved.toLowerCase().includes(display.toLowerCase())
+                  ? display
+                  : resolved;
+              const finishText = shrinkCap(selectedTop, selectedTopDisplay) || shrinkCap(selectedBase, selectedBaseDisplay);
+              return <>Finish: {finishText}</>;
+            })()}
           </span>
         )}
 
@@ -1795,7 +1822,7 @@ const TradeProductPage: React.FC = () => {
 
 
                   onTopFinishChange={(topName) => {
-                    if (!topName) return;
+                    if (!topName) { setSelectedTopDisplay(null); return; }
                     const norm = (s: string) => s.trim().toLowerCase();
                     const nw = norm(topName);
                     const match =
@@ -1804,9 +1831,13 @@ const TradeProductPage: React.FC = () => {
                       || topOptions.find((t) => norm(t).includes(nw))
                       || topName;
                     setSelectedTop(match);
+                    // Preserve the user-clicked swatch name when the variant
+                    // groups several finishes under one slash-joined label.
+                    setSelectedTopDisplay(match !== topName && /\s\/\s/.test(match) ? topName.trim() : null);
                     let nextBase = selectedBase;
                     if (nextBase && !variantsList.some((x: any) => matchesDual(x, nextBase, match, selectedDualSize))) {
                       setSelectedBase(null);
+                      setSelectedBaseDisplay(null);
                       nextBase = null;
                     }
                     handleMaterialChange(match, { base: nextBase, top: match, size: selectedDualSize, fromSwatch: true });
@@ -1827,7 +1858,7 @@ const TradeProductPage: React.FC = () => {
                     setGalleryJumpNonce((n) => n + 1);
                   }}
                   onWoodFinishChange={(woodName) => {
-                    if (!woodName) return;
+                    if (!woodName) { setSelectedBaseDisplay(null); return; }
                     // Match the swatch name to a Base axis value (case/space tolerant,
                     // and tolerant of code prefixes like "ECRT-SY-20 — Black Lacquered Sycamore").
                     const norm = (s: string) => s.trim().toLowerCase();
@@ -1838,10 +1869,12 @@ const TradeProductPage: React.FC = () => {
                       || baseOptions.find((b) => norm(b).includes(nw))
                       || woodName;
                     setSelectedBase(match);
+                    setSelectedBaseDisplay(match !== woodName && /\s\/\s/.test(match) ? woodName.trim() : null);
                     // If the current Top is incompatible with the new Base, clear it.
                     let nextTop = selectedTop;
                     if (nextTop && !variantsList.some((x: any) => matchesDual(x, match, nextTop, selectedDualSize))) {
                       setSelectedTop(null);
+                      setSelectedTopDisplay(null);
                       nextTop = null;
                     }
                     handleMaterialChange(match, { base: match, top: nextTop, size: selectedDualSize, fromSwatch: true });
