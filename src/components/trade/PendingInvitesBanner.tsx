@@ -54,22 +54,16 @@ export function PendingInvitesBanner() {
   const handleAccept = async (inv: PendingInvite) => {
     if (!user || inv.is_expired) return;
     setAcceptingId(inv.id);
-    // Insert membership; existing trigger on studio_invites handles auto-join
-    // on sign-up, but for already-signed-in users we accept explicitly.
-    const { error: memberErr } = await supabase
-      .from("studio_members")
-      .insert({ studio_id: inv.studio_id, user_id: user.id, role: inv.role as any });
-    if (memberErr && !/(duplicate|unique)/i.test(memberErr.message)) {
-      toast({ title: "Could not join studio", description: memberErr.message, variant: "destructive" });
+    const { error } = await supabase.rpc("accept_studio_invite", { _invite_id: inv.id });
+    if (error) {
+      toast({ title: "Could not accept invitation", description: error.message, variant: "destructive" });
       setAcceptingId(null);
       return;
     }
-    // Mark invite accepted via SECURITY DEFINER RPC if available; else best-effort update
-    await supabase
-      .from("studio_invites")
-      .update({ accepted_at: new Date().toISOString(), accepted_by: user.id })
-      .eq("id", inv.id);
-    toast({ title: "Joined studio", description: `You're now a ${ROLE_LABEL[inv.role] ?? inv.role} of ${inv.studio_name ?? "the studio"}.` });
+    toast({
+      title: "Joined studio",
+      description: `You're now a ${ROLE_LABEL[inv.role] ?? inv.role} of ${inv.studio_name ?? "the studio"}.`,
+    });
     await refresh();
     setCurrentStudioId(inv.studio_id);
     setAcceptingId(null);
