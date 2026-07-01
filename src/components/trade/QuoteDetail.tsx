@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { supabase } from "@/integrations/supabase/client";
+import { hydrateQuotePricesFromPicks } from "@/lib/hydrateQuotePricesFromPicks";
 import { useAuth } from "@/hooks/useAuth";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { useToast } from "@/hooks/use-toast";
