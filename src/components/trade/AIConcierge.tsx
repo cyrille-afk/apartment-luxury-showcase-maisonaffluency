@@ -973,6 +973,12 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
               onClick={closeWelcomeModal}
             />
           )}
+          {!modalMode && !minimized && (
+            <div
+              className="fixed inset-0 z-[9997] backdrop-blur-sm bg-foreground/10 print:hidden animate-fade-in pointer-events-none"
+              aria-hidden="true"
+            />
+          )}
         <div
           data-concierge-panel
           style={
