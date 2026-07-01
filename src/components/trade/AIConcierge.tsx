@@ -1043,7 +1043,11 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
           content = `✓ Added ${info.added} ${info.added === 1 ? "piece" : "pieces"} to your tearsheet${trail}`;
         }
       } else {
-        content = `✓ Tearsheet created${trail}`;
+        {
+          const n = info?.added ?? 0;
+          const piecesLabel = n > 0 ? ` with ${n} ${n === 1 ? "piece" : "pieces"}` : "";
+          content = `✓ Tearsheet created${piecesLabel}${trail}`;
+        }
       }
       copy.push({ kind: "msg", role: "assistant", content });
       return copy;

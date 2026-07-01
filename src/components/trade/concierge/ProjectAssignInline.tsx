@@ -1,7 +1,9 @@
 import { useMemo, useState } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
-import { Loader2, Check, FolderPlus } from "lucide-react";
+import { Loader2, Check, FolderPlus, Plus } from "lucide-react";
 import { useProjects } from "@/hooks/useProjects";
+import { useAuth } from "@/hooks/useAuth";
+import { useStudio } from "@/hooks/useStudio";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -18,9 +20,14 @@ interface Props {
  * Updates client_boards.project_id directly (RLS allows owners).
  */
 export function ProjectAssignInline({ boardId, onResolved }: Props) {
-  const { projects, loading } = useProjects({ activeOnly: true });
+  const { projects, loading, refresh } = useProjects({ activeOnly: true });
+  const { user } = useAuth();
+  const { currentStudio } = useStudio();
   const [saving, setSaving] = useState<string | null>(null);
   const [done, setDone] = useState<{ projectName: string } | null>(null);
+  const [creating, setCreating] = useState(false);
+  const [newName, setNewName] = useState("");
+  const [creatingSaving, setCreatingSaving] = useState(false);
 
   // Show 6 most-recent projects inline; rest go in a select.
   const { quick, rest } = useMemo(() => {
@@ -108,6 +115,34 @@ export function ProjectAssignInline({ boardId, onResolved }: Props) {
     onResolved(projectId);
   };
 
+  const handleCreateAndAssign = async () => {
+    const name = newName.trim();
+    if (!name || !user) return;
+    setCreatingSaving(true);
+    const { data: proj, error } = await supabase
+      .from("projects" as any)
+      .insert({
+        user_id: user.id,
+        studio_id: currentStudio?.id ?? null,
+        name,
+        client_name: "",
+        location: "",
+        status: "active",
+      })
+      .select("id, name")
+      .single();
+    if (error || !proj) {
+      setCreatingSaving(false);
+      toast.error(`Could not create project: ${error?.message || "unknown error"}`);
+      return;
+    }
+    await refresh();
+    setCreatingSaving(false);
+    setCreating(false);
+    setNewName("");
+    await handlePick((proj as any).id, (proj as any).name);
+  };
+
   const handleSkip = async () => {
     // Audit trail: log the explicit skip so we know it wasn't just abandoned.
     const { data: sess } = await supabase.auth.getSession();
@@ -151,46 +186,92 @@ export function ProjectAssignInline({ boardId, onResolved }: Props) {
           <DotCircleLoader size="sm" />
           <span className="font-body text-[11px]">Loading your projects…</span>
         </div>
-      ) : quick.length === 0 ? (
-        <div className="flex items-center justify-between gap-2">
-          <span className="font-body text-[11px] text-muted-foreground">
-            No active projects yet.
-          </span>
-          <button
-            onClick={handleSkip}
-            className="font-body text-[11px] uppercase tracking-widest text-muted-foreground hover:text-foreground px-2 py-1"
-          >
-            Skip
-          </button>
-        </div>
       ) : (
         <>
-          <div className="flex flex-wrap gap-1.5 mb-2">
-            {quick.map((p) => (
+          {quick.length === 0 ? (
+            <p className="font-body text-[11px] text-muted-foreground mb-2">
+              No active projects yet — create one for this tearsheet.
+            </p>
+          ) : (
+            <div className="flex flex-wrap gap-1.5 mb-2">
+              {quick.map((p) => (
+                <button
+                  key={p.id}
+                  onClick={() => handlePick(p.id, p.name)}
+                  disabled={saving !== null || creatingSaving}
+                  className={cn(
+                    "rounded-full border border-border bg-background px-2.5 py-1 font-body text-[11px] text-foreground transition-colors",
+                    "hover:border-accent hover:text-accent disabled:opacity-50 disabled:cursor-not-allowed",
+                    saving === p.id && "border-accent text-accent",
+                  )}
+                >
+                  {saving === p.id ? (
+                    <DotCircleLoader size="sm" className="inline" />
+                  ) : (
+                    <>
+                      <span
+                        className="inline-block h-1.5 w-1.5 rounded-full mr-1.5 align-middle"
+                        style={{ backgroundColor: p.color }}
+                      />
+                      {p.name}
+                    </>
+                  )}
+                </button>
+              ))}
+              {!creating && (
+                <button
+                  onClick={() => setCreating(true)}
+                  disabled={saving !== null || creatingSaving}
+                  className="rounded-full border border-dashed border-accent/60 bg-background px-2.5 py-1 font-body text-[11px] text-accent hover:bg-accent/5 transition-colors inline-flex items-center gap-1 disabled:opacity-50"
+                >
+                  <Plus className="h-3 w-3" /> New project
+                </button>
+              )}
+            </div>
+          )}
+
+          {creating && (
+            <div className="flex items-center gap-1.5 mb-2">
+              <input
+                autoFocus
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") { e.preventDefault(); handleCreateAndAssign(); }
+                  if (e.key === "Escape") { setCreating(false); setNewName(""); }
+                }}
+                placeholder="Project name…"
+                disabled={creatingSaving}
+                className="flex-1 rounded-md border border-border bg-background px-2 py-1 font-body text-[11px] text-foreground focus:outline-none focus:ring-1 focus:ring-accent"
+              />
               <button
-                key={p.id}
-                onClick={() => handlePick(p.id, p.name)}
-                disabled={saving !== null}
-                className={cn(
-                  "rounded-full border border-border bg-background px-2.5 py-1 font-body text-[11px] text-foreground transition-colors",
-                  "hover:border-accent hover:text-accent disabled:opacity-50 disabled:cursor-not-allowed",
-                  saving === p.id && "border-accent text-accent",
-                )}
+                onClick={handleCreateAndAssign}
+                disabled={creatingSaving || !newName.trim()}
+                className="rounded-full bg-foreground text-background font-body text-[11px] uppercase tracking-widest px-2.5 py-1 hover:opacity-90 disabled:opacity-40 inline-flex items-center gap-1"
               >
-                {saving === p.id ? (
-                  <DotCircleLoader size="sm" className="inline" />
-                ) : (
-                  <>
-                    <span
-                      className="inline-block h-1.5 w-1.5 rounded-full mr-1.5 align-middle"
-                      style={{ backgroundColor: p.color }}
-                    />
-                    {p.name}
-                  </>
-                )}
+                {creatingSaving ? <DotCircleLoader size="sm" className="h-3 w-3" /> : <Plus className="h-3 w-3" />}
+                Create
               </button>
-            ))}
-          </div>
+              <button
+                onClick={() => { setCreating(false); setNewName(""); }}
+                disabled={creatingSaving}
+                className="font-body text-[11px] uppercase tracking-widest text-muted-foreground hover:text-foreground px-2 py-1"
+              >
+                Cancel
+              </button>
+            </div>
+          )}
+
+          {quick.length === 0 && !creating && (
+            <div className="flex flex-wrap gap-1.5 mb-2">
+              <button
+                onClick={() => setCreating(true)}
+                className="rounded-full border border-dashed border-accent/60 bg-background px-2.5 py-1 font-body text-[11px] text-accent hover:bg-accent/5 transition-colors inline-flex items-center gap-1"
+              >
+                <Plus className="h-3 w-3" /> New project
+              </button>
+            </div>
+          )}
 
           <div className="flex items-center justify-between gap-2">
             {rest.length > 0 ? (
@@ -201,7 +282,7 @@ export function ProjectAssignInline({ boardId, onResolved }: Props) {
                   const proj = rest.find((p) => p.id === id);
                   if (proj) handlePick(proj.id, proj.name);
                 }}
-                disabled={saving !== null}
+                disabled={saving !== null || creatingSaving}
                 defaultValue=""
                 className="flex-1 rounded-md border border-border bg-background px-2 py-1 font-body text-[11px] text-foreground focus:outline-none focus:ring-1 focus:ring-accent"
               >
@@ -215,7 +296,7 @@ export function ProjectAssignInline({ boardId, onResolved }: Props) {
             ) : <span />}
             <button
               onClick={handleSkip}
-              disabled={saving !== null}
+              disabled={saving !== null || creatingSaving}
               className="font-body text-[11px] uppercase tracking-widest text-muted-foreground hover:text-foreground px-2 py-1"
             >
               Skip
