@@ -1,7 +1,9 @@
 import { useMemo, useState } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
-import { Loader2, Check, FolderPlus } from "lucide-react";
+import { Loader2, Check, FolderPlus, Plus } from "lucide-react";
 import { useProjects } from "@/hooks/useProjects";
+import { useAuth } from "@/hooks/useAuth";
+import { useStudio } from "@/hooks/useStudio";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
