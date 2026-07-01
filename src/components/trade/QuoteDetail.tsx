@@ -3,7 +3,8 @@ import { cn } from "@/lib/utils";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { supabase } from "@/integrations/supabase/client";
 import { hydrateQuotePricesFromPicks } from "@/lib/hydrateQuotePricesFromPicks";
-import { getFxRates, FALLBACK_RATES } from "@/lib/fxRates";
+import { getFxRates, FALLBACK_RATES, getFxSource, summarizeFxSources, type FxSource } from "@/lib/fxRates";
+import { FxSourceBadge } from "@/components/trade/FxSourceBadge";
 import { useAuth } from "@/hooks/useAuth";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { useToast } from "@/hooks/use-toast";
@@ -234,6 +235,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   const [emailBody, setEmailBody] = useState("");
   const [currencyOpen, setCurrencyOpen] = useState(false);
   const [fxRates, setFxRates] = useState<Record<string, number>>({});
+  const [fxSource, setFxSource] = useState<FxSource>("identity");
   const [tradeDiscount, setTradeDiscount] = useState(true);
   // GST defaults to ON only for SGD quotes; other currencies (EUR/USD/GBP) default OFF.
   // The user can still toggle it on manually if needed.
@@ -380,11 +382,11 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
           sourceCurrencies.add(sourceCurrency);
         }
       });
-      if (sourceCurrencies.size === 0) { setFxRates({}); return; }
-      const rates = await getFxRates(
-        Array.from(sourceCurrencies).map((src) => ({ src, tgt: currency })),
-      );
+      if (sourceCurrencies.size === 0) { setFxRates({}); setFxSource("identity"); return; }
+      const pairs = Array.from(sourceCurrencies).map((src) => ({ src, tgt: currency }));
+      const rates = await getFxRates(pairs);
       setFxRates(rates);
+      setFxSource(summarizeFxSources(pairs.map((p) => getFxSource(p.src, p.tgt))));
     };
     if (items.length > 0) fetchRates();
   }, [items, currency]);
@@ -2000,7 +2002,9 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                   </div>
                 )}
               </div>
+              {fxSource !== "identity" && <FxSourceBadge source={fxSource} />}
             </div>
+
 
             <div className="flex items-center gap-4 flex-wrap">
               <button

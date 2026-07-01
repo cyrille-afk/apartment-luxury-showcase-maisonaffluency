@@ -53,9 +53,42 @@ export const FALLBACK_RATES: Record<string, number> = {
   CAD_CHF: 0.66, CAD_AED: 2.68, CAD_HKD: 5.71, CAD_AUD: 1.13, CAD_JPY: 113,
 };
 
-type CacheEntry = { rate: number; ts: number };
+export type FxSource = "identity" | "frankfurter" | "open-er-api" | "hardcoded" | "unknown";
+
+type CacheEntry = { rate: number; ts: number; source: FxSource };
 const CACHE_TTL = 10 * 60 * 1000; // 10 minutes
 const cache = new Map<string, CacheEntry>();
+const lastSources = new Map<string, FxSource>();
+
+export function getFxSource(src: string, tgt: string): FxSource {
+  if (src === tgt) return "identity";
+  return lastSources.get(`${src}_${tgt}`) ?? "unknown";
+}
+
+/** Reduce many pair sources to the lowest-fidelity one, so the UI can
+ *  transparently show "we had to fall back for at least one line". */
+export function summarizeFxSources(sources: FxSource[]): FxSource {
+  const rank: Record<FxSource, number> = {
+    "identity": 0,
+    "frankfurter": 1,
+    "open-er-api": 2,
+    "hardcoded": 3,
+    "unknown": 4,
+  };
+  let worst: FxSource = "identity";
+  for (const s of sources) if (rank[s] > rank[worst]) worst = s;
+  return worst;
+}
+
+export function describeFxSource(s: FxSource): { label: string; tone: "live" | "fallback" | "hardcoded" | "none"; detail: string } {
+  switch (s) {
+    case "identity":     return { label: "No conversion",     tone: "none",      detail: "Source and target currencies match — no FX applied." };
+    case "frankfurter":  return { label: "Live ECB rates",    tone: "live",      detail: "Rates fetched live from frankfurter.app (European Central Bank)." };
+    case "open-er-api":  return { label: "Live fallback",     tone: "fallback",  detail: "Primary provider unreachable — using open.er-api.com." };
+    case "hardcoded":    return { label: "Offline rates",     tone: "hardcoded", detail: "Both live providers unreachable — using the bundled reference table (approximate)." };
+    default:             return { label: "Rates pending",     tone: "none",      detail: "FX rates not resolved yet." };
+  }
+}
 
 const fetchWithTimeout = async (url: string, ms = 4000): Promise<Response> => {
   const controller = new AbortController();
@@ -102,14 +135,22 @@ export async function getFxRate(src: string, tgt: string): Promise<number> {
   const key = `${src}_${tgt}`;
 
   const cached = cache.get(key);
-  if (cached && Date.now() - cached.ts < CACHE_TTL) return cached.rate;
+  if (cached && Date.now() - cached.ts < CACHE_TTL) {
+    lastSources.set(key, cached.source);
+    return cached.rate;
+  }
 
-  const live =
-    (await fromFrankfurter(src, tgt)) ??
-    (await fromOpenErApi(src, tgt));
+  let source: FxSource = "hardcoded";
+  let live = await fromFrankfurter(src, tgt);
+  if (live != null) source = "frankfurter";
+  if (live == null) {
+    live = await fromOpenErApi(src, tgt);
+    if (live != null) source = "open-er-api";
+  }
 
   const rate = live ?? FALLBACK_RATES[key] ?? 1;
-  cache.set(key, { rate, ts: Date.now() });
+  cache.set(key, { rate, ts: Date.now(), source });
+  lastSources.set(key, source);
   return rate;
 }
 

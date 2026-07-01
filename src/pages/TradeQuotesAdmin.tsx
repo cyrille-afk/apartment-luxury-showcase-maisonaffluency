@@ -2,7 +2,8 @@ import { useCallback, useState, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { hydrateQuotePricesFromPicks } from "@/lib/hydrateQuotePricesFromPicks";
-import { getFxRates } from "@/lib/fxRates";
+import { getFxRates, getFxSource, summarizeFxSources, type FxSource } from "@/lib/fxRates";
+import { FxSourceBadge } from "@/components/trade/FxSourceBadge";
 import { useAuth } from "@/hooks/useAuth";
 import { Navigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -260,6 +261,7 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
   const [clientCountry, setClientCountry] = useState<string | null>(null);
   /** Display the totals block in the quote currency or in GBP DDP landed cost. */
   const [displayCcy, setDisplayCcy] = useState<"quote" | "gbp">("quote");
+  const [fxSource, setFxSource] = useState<FxSource>("identity");
   const [landedCostSettings, setLandedCostSettings] = useState<{ cbm: number; kg: number; mode: "road" | "courier" }>(() => ({
     cbm: DEFAULT_GBP_LANDED_CBM,
     kg: Math.round(DEFAULT_GBP_LANDED_CBM * GBP_LANDED_KG_PER_CBM.road),
@@ -396,11 +398,13 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
       // Resolve FX via the shared helper (frankfurter → open.er-api → hardcoded
       // fallback). Never leaves us with an empty rate table, so line prices
       // always convert instead of silently displaying the source-currency number.
-      const fxRates = sourceCurrencies.size > 0
-        ? await getFxRates(
-            Array.from(sourceCurrencies).map((src) => ({ src, tgt: quoteCurrency })),
-          )
-        : {};
+      const fxPairs = Array.from(sourceCurrencies).map((src) => ({ src, tgt: quoteCurrency }));
+      const fxRates = fxPairs.length > 0 ? await getFxRates(fxPairs) : {};
+      setFxSource(
+        fxPairs.length === 0
+          ? "identity"
+          : summarizeFxSources(fxPairs.map((p) => getFxSource(p.src, p.tgt))),
+      );
 
       // Init price inputs: existing unit_price_cents, or resolved catalog price (converted if needed)
       const prices: Record<string, string> = {};
@@ -605,9 +609,10 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
             <div>
               <h2 className="font-display text-xl text-foreground">QU-{quoteId.slice(0, 6).toUpperCase()}</h2>
               {quote?.client_name && <p className="font-display text-sm text-muted-foreground uppercase tracking-wider mt-1">{quote.client_name}</p>}
-              <p className="font-body text-xs text-muted-foreground mt-1">
-                Currency: {currencySymbol(currency)} {currency}
-                {quote?.notes && <> · User notes: <span className="italic">"{quote.notes}"</span></>}
+              <p className="font-body text-xs text-muted-foreground mt-1 flex items-center gap-2 flex-wrap">
+                <span>Currency: {currencySymbol(currency)} {currency}</span>
+                {fxSource !== "identity" && <FxSourceBadge source={fxSource} />}
+                {quote?.notes && <span>· User notes: <span className="italic">"{quote.notes}"</span></span>}
               </p>
             </div>
             {quote && (() => {
