@@ -3140,7 +3140,7 @@ serve(async (req) => {
         };
         return sseProposalThenTextResponse(
           proposal,
-          `Here are all ${finalIds.length} ${designerLabel} pieces in the Maison Affluency Curation with trade pricing — tap any to open the tear sheet.`,
+          `Here are all ${finalIds.length} ${designerLabel} pieces in the Maison Affluency Curation with trade pricing — take a look at your project folders to open the tear sheet.`,
         );
       }
 
