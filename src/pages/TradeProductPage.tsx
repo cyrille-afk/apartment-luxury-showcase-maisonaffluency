@@ -1198,9 +1198,10 @@ const TradeProductPage: React.FC = () => {
     // Once the user has made a concrete fabric or wood-frame selection, the
     // price is fully resolved — never show "From" (whether it comes from the
     // explicit curator prefix or the dual-axis fallback).
-    const hasConcreteSelection = !!selectedFabric || !!selectedWoodPrice;
+    const hasConcreteSelection = !!selectedFabric || !!selectedWoodPrice || !!activeVariant;
     const explicitPrefix = pricing.price_prefix && !hasConcreteSelection ? `${pricing.price_prefix} ` : "";
     const prefix = explicitPrefix || (isFromPrice && !hasConcreteSelection ? "From " : "");
+
     return (
       <div className="flex flex-col gap-1">
         <div className="flex flex-wrap items-center gap-3">
