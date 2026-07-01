@@ -348,7 +348,7 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
         if (!cancelled) setHasTradeArtifacts(false);
         return;
       }
-      const scope = <T extends { or: (filters: string) => T; eq: (column: string, value: string) => T }>(query: T) => {
+      const scope = (query: any) => {
         if (currentStudio?.id) return query.or(`studio_id.eq.${currentStudio.id},and(studio_id.is.null,user_id.eq.${user.id})`);
         return query.eq("user_id", user.id);
       };
