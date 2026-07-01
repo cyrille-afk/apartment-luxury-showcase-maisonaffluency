@@ -709,21 +709,11 @@ const TradeProductPage: React.FC = () => {
           // the partial selection — same value the "From €X" caption shows —
           // instead of the RPC's default base RRP (Kynos €12,116).
           let selectedVariantCents: number | null = activeVariantCents;
-          if (
-            selectedVariantCents == null &&
-            sv &&
-            (selectedBase || selectedTop || selectedDualSize)
-          ) {
-            const nrm = (s: any) => String(s ?? "").trim();
-            const matches = sv.filter((v: any) =>
-              (!selectedBase || nrm(v.base) === nrm(selectedBase)) &&
-              (!selectedTop || nrm(v.top) === nrm(selectedTop)) &&
-              (!selectedDualSize || nrm(v.label) === nrm(selectedDualSize))
+          if (selectedVariantCents == null && sv) {
+            selectedVariantCents = resolvePartialDualMinCents(
+              { selectedBase, selectedTop, selectedDualSize },
+              { sizeVariants: sv, isDualAxis: activeVariantContext.isDualAxis },
             );
-            const priced = matches
-              .map((v: any) => v.price_cents)
-              .filter((c: any) => typeof c === "number" && c > 0) as number[];
-            if (priced.length) selectedVariantCents = Math.min(...priced);
           }
 
 
