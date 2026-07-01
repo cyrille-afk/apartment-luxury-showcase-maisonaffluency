@@ -707,8 +707,12 @@ const TradeProductPage: React.FC = () => {
       const baseForImage = shrinkForImage(selectedBase, selectedBaseDisplay);
       const topForImage = shrinkForImage(selectedTop, selectedTopDisplay);
       let resolvedImgIdx: number | undefined;
+      if (selectedSwatchGalleryIndices?.length) {
+        const swatchIdx = Math.max(0, selectedSwatchGalleryIndices[0] - 1);
+        if (swatchIdx >= 0 && swatchIdx < heroList.length) resolvedImgIdx = swatchIdx;
+      }
       if (baseForImage || topForImage || selectedDualSize) {
-        resolvedImgIdx = resolveVariantImageIndex(finishMapForQuote, {
+        resolvedImgIdx ??= resolveVariantImageIndex(finishMapForQuote, {
           base: baseForImage,
           top: topForImage,
           size: selectedDualSize,
@@ -1867,8 +1871,12 @@ const TradeProductPage: React.FC = () => {
                   onFinishesMissingImagesChange={setFinishesMissingImages}
                   onFabricChange={setSelectedFabric}
                   onWoodFinishPricingChange={setSelectedWoodPrice}
-                  onSwatchImagesChange={(indices) => {
-                    if (!indices || indices.length === 0) return;
+                  onSwatchImagesChange={(indices, meta) => {
+                    if (!indices || indices.length === 0) {
+                      if (meta?.committed) setSelectedSwatchGalleryIndices(null);
+                      return;
+                    }
+                    if (meta?.committed) setSelectedSwatchGalleryIndices(indices);
                     // image_indices are 1-based; gallery is 0-based.
                     setGalleryActiveIndex(Math.max(0, indices[0] - 1));
                     setGalleryJumpNonce((n) => n + 1);
