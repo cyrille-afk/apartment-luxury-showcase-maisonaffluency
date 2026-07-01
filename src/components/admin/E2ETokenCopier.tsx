@@ -97,7 +97,8 @@ export function E2ETokenCopier() {
           <div className="font-display text-sm text-foreground">E2E Test Token</div>
           <p className="font-body text-[11px] text-muted-foreground mt-0.5">
             Copies your current session JWT so you can run the trade concierge
-            end-to-end tests without spelunking DevTools. Token expires ~1h.
+            end-to-end tests without spelunking DevTools. Auto-refreshes when
+            the token has under 5 minutes left.
           </p>
           <div className="flex flex-wrap gap-2 mt-3">
             <button
@@ -106,16 +107,23 @@ export function E2ETokenCopier() {
               className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border border-border bg-background text-[11px] font-body text-foreground hover:border-foreground/30 transition-colors disabled:opacity-50"
             >
               {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
-              {copied ? "Copied" : "Copy raw token"}
+              {busy ? "Refreshing…" : copied ? "Copied" : "Copy raw token"}
             </button>
             <button
               onClick={copyExport}
-              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border border-border bg-background text-[11px] font-body text-foreground hover:border-foreground/30 transition-colors"
+              disabled={busy}
+              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border border-border bg-background text-[11px] font-body text-foreground hover:border-foreground/30 transition-colors disabled:opacity-50"
             >
               <Copy className="h-3 w-3" />
-              Copy shell export
+              {busy ? "Refreshing…" : "Copy shell export"}
             </button>
           </div>
+          {lastCopiedAt && (
+            <p className="font-body text-[10px] text-muted-foreground mt-2">
+              Last copied token expires at{" "}
+              {new Date(lastCopiedAt * 1000).toLocaleTimeString()}.
+            </p>
+          )}
         </div>
       </div>
     </div>
