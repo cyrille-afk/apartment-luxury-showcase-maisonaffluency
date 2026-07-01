@@ -1205,6 +1205,54 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
               <button
                 onPointerDown={(e) => e.stopPropagation()}
                 onClick={() => {
+                  try {
+                    const ts = new Date();
+                    const pad = (n: number) => String(n).padStart(2, "0");
+                    const stamp = `${ts.getFullYear()}-${pad(ts.getMonth() + 1)}-${pad(ts.getDate())}_${pad(ts.getHours())}${pad(ts.getMinutes())}`;
+                    const lines: string[] = [];
+                    lines.push(`# Concierge Workflow — ${ts.toLocaleString()}`);
+                    lines.push(`Route: ${pathname}`);
+                    lines.push(`Concierge: ${name} · Tone: ${tone} · Language: ${lang}`);
+                    lines.push("");
+                    timeline.forEach((t, i) => {
+                      if (t.kind === "msg") {
+                        lines.push(`## ${i + 1}. ${t.role === "user" ? "User" : name}`);
+                        lines.push(t.content || "");
+                        if (t.attachments?.length) {
+                          lines.push("");
+                          lines.push(`_Attachments:_ ${t.attachments.map((a: any) => a.name || a.url || "file").join(", ")}`);
+                        }
+                      } else {
+                        lines.push(`## ${i + 1}. [${t.kind}]`);
+                        lines.push("```json");
+                        lines.push(JSON.stringify(t, null, 2));
+                        lines.push("```");
+                      }
+                      lines.push("");
+                    });
+                    const md = lines.join("\n");
+                    const blob = new Blob([md], { type: "text/markdown;charset=utf-8" });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement("a");
+                    a.href = url;
+                    a.download = `concierge-workflow_${stamp}.md`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    setTimeout(() => URL.revokeObjectURL(url), 1000);
+                  } catch (err) {
+                    console.error("[concierge] download failed", err);
+                  }
+                }}
+                className="text-muted-foreground hover:text-foreground transition-colors p-1 rounded-md hover:bg-muted"
+                aria-label="Download conversation"
+                title="Download conversation for audit"
+              >
+                <Download className="h-3.5 w-3.5" />
+              </button>
+              <button
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={() => {
                   abortRef.current?.abort();
                   setStreaming(false);
                   setInput("");
