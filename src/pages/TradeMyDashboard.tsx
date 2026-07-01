@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { FavoriteFoldersGrid } from "@/components/trade/FavoriteFoldersGrid";
+import { PendingInvitesBanner } from "@/components/trade/PendingInvitesBanner";
 import { FfeUnlockTile } from "@/components/trade/FfeUnlockTile";
 import { useTradeCredits } from "@/hooks/useTradeCredits";
 import { useToast } from "@/hooks/use-toast";
