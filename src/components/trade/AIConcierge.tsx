@@ -30,7 +30,8 @@ type TimelineItem =
   | { kind: "quote_proposal"; proposal: QuoteProposal; resolved?: "approved" | "discarded" }
   | { kind: "ffe_proposal"; proposal: FfeProposal; resolved?: "approved" | "discarded" }
   | { kind: "viz_brief"; proposal: VisualizationBriefProposal; resolved?: "opened" | "discarded" }
-  | { kind: "escalation"; sentiment: string; intent: string; excerpt: ChatMessage[]; resolved?: "requested" | "dismissed" };
+  | { kind: "escalation"; sentiment: string; intent: string; excerpt: ChatMessage[]; resolved?: "requested" | "dismissed" }
+  | { kind: "retry"; text: string; reason: string };
 
 
 import {
