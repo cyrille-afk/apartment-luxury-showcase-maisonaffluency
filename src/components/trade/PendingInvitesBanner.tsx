@@ -34,8 +34,9 @@ export function PendingInvitesBanner() {
   const [loading, setLoading] = useState(true);
   const [acceptingId, setAcceptingId] = useState<string | null>(null);
 
-  const load = async () => {
+  const load = async (showLoading = true) => {
     if (!user) return;
+    if (showLoading) setLoading(true);
     const { data, error } = await supabase.rpc("get_my_pending_invites");
     if (error) {
       console.warn("get_my_pending_invites failed", error);
@@ -47,9 +48,26 @@ export function PendingInvitesBanner() {
   };
 
   useEffect(() => {
-    load();
+    load(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
+
+  // Keep invites in sync if the underlying table changes (e.g. accepted elsewhere)
+  useEffect(() => {
+    if (!user?.email) return;
+    const channel = supabase
+      .channel("pending-invites-" + user.id)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "studio_invites", filter: `email=eq.${user.email}` },
+        () => load(false)
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id, user?.email]);
 
   const handleAccept = async (inv: PendingInvite) => {
     if (!user || inv.is_expired) return;
@@ -67,7 +85,7 @@ export function PendingInvitesBanner() {
     await refresh();
     setCurrentStudioId(inv.studio_id);
     setAcceptingId(null);
-    load();
+    await load(false);
   };
 
   if (loading || invites.length === 0) return null;
