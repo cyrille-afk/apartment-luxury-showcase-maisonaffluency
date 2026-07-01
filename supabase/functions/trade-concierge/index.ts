@@ -3092,6 +3092,61 @@ serve(async (req) => {
         .map((s) => s.n);
     };
 
+    // Parse in-chat "skip / exclude / omit / without / except / remove / drop /
+    // leave out / don't include" instructions from the user's latest message
+    // and return the set of pick IDs the user wants filtered out of the next
+    // proposal. Supports two reference styles:
+    //   (a) Ordinal indices — "skip 1, 3, 5 and 7" (1-based against the given
+    //       preview order, which mirrors what was just enumerated on-screen).
+    //   (b) Title fragments — "skip the Angelo dining table and the Scala
+    //       console" — matched against pick titles (>=4 char tokens, minus
+    //       stopwords). A single distinctive token is enough.
+    const EXCLUSION_STOPWORDS = new Set([
+      "the","and","from","with","that","this","them","those","these","item","items",
+      "piece","pieces","first","last","next","above","below","before","after","also",
+      "please","just","only","need","want","would","should","could","really","them",
+      "keep","include","exclude","except","skip","omit","without","remove","drop",
+      "leave","don","dont","doesnt","cant","cannot","dining","table","chair","chairs",
+      "lamp","lamps","sconce","sconces","console","mirror","cabinet","sofa","stool",
+      "stools","light","lights","lighting","seating","piece","pieces","object","objects",
+    ]);
+    const parseUserExclusions = (
+      userMsg: string,
+      previewRows: Array<{ id: string; title?: string | null }>,
+    ): Set<string> => {
+      const excluded = new Set<string>();
+      if (!userMsg || previewRows.length === 0) return excluded;
+      const lc = userMsg.toLowerCase();
+      const SKIP_RE = /(?:\bskip\b|\bexclud\w*|\bomit\b|\bwithout\b|\bexcept\b|\bremove\b|\bdrop\b|\bleave\s+out\b|\bdo\s?n['’]?t\s+include\b|\bno\s+need\s+for\b)([^.?!;\n]*)/gi;
+      const matches = Array.from(lc.matchAll(SKIP_RE));
+      if (matches.length === 0) return excluded;
+      const zone = matches.map((m) => m[1] || "").join(" ");
+      // Ordinal indices (1-based) referencing the just-enumerated list order.
+      const nums = Array.from(zone.matchAll(/#?\b(\d{1,2})(?:st|nd|rd|th)?\b/g))
+        .map((m) => parseInt(m[1], 10))
+        .filter((n) => Number.isFinite(n));
+      for (const n of nums) {
+        if (n >= 1 && n <= previewRows.length) {
+          const row = previewRows[n - 1];
+          if (row?.id) excluded.add(row.id);
+        }
+      }
+      // Title-token matching.
+      const tokens = Array.from(new Set(
+        zone.split(/[^a-zà-ÿ0-9]+/i).filter((t) => t.length >= 4 && !EXCLUSION_STOPWORDS.has(t)),
+      ));
+      if (tokens.length > 0) {
+        for (const row of previewRows) {
+          const title = String(row.title || "").toLowerCase();
+          if (!title) continue;
+          if (tokens.some((t) => title.includes(t))) excluded.add(row.id);
+        }
+      }
+      return excluded;
+    };
+
+
+
     if (mentionsKnownDesigner && isEnumerationRequest) {
       const { data: designerRows } = await supabase
         .from("designers")
@@ -3118,9 +3173,19 @@ serve(async (req) => {
         .limit(24);
       const pickIds = (allPicks || []).map((p: any) => p.id);
       if (pickIds.length >= 1) {
-        const previewRaw = await hydratePickPreview(supabase, pickIds);
-        const validIds = new Set(previewRaw.map((p: any) => p?.id).filter(Boolean));
-        const finalIds = pickIds.filter((id: string) => validIds.has(id));
+        const previewRawAll = await hydratePickPreview(supabase, pickIds);
+        const validIds = new Set(previewRawAll.map((p: any) => p?.id).filter(Boolean));
+        // Honour in-chat "skip / exclude / omit …" instructions so the
+        // proposal card is pre-filtered instead of shipping all 10 when the
+        // user asked us to leave some out.
+        const excludedIds = parseUserExclusions(lastUserMsg || "", previewRawAll);
+        const previewRaw = previewRawAll.filter((p: any) => p?.id && !excludedIds.has(p.id));
+        const finalIds = pickIds.filter((id: string) => validIds.has(id) && !excludedIds.has(id));
+        if (finalIds.length === 0) {
+          return sseTextResponse(
+            `Your skip list would remove every ${designerLabel} piece — nothing left to propose. Send the message again with a shorter exclusion (or say "list all ${designerLabel}" for the full set).`,
+          );
+        }
         const rationaleMap: Record<string, { reason: string }> = {};
         for (const p of previewRaw) {
           if (!p?.id) continue;
@@ -3133,15 +3198,18 @@ serve(async (req) => {
           args: {
             title: `${designerLabel} — full curation`,
             pick_ids: finalIds,
-            note: `All ${finalIds.length} ${designerLabel} pieces currently in the Maison Affluency Curation, with trade pricing.`,
+            note: excludedIds.size > 0
+              ? `${finalIds.length} of ${pickIds.length} ${designerLabel} pieces (skipped ${excludedIds.size} per your request), with trade pricing.`
+              : `All ${finalIds.length} ${designerLabel} pieces currently in the Maison Affluency Curation, with trade pricing.`,
             pick_rationales: rationaleMap,
           },
           preview,
         };
-        return sseProposalThenTextResponse(
-          proposal,
-          `Here are all ${finalIds.length} ${designerLabel} pieces in the Maison Affluency Curation with trade pricing — take a look at your project folders to open the tear sheet.`,
-        );
+        const closing = excludedIds.size > 0
+          ? `Here are ${finalIds.length} ${designerLabel} pieces (skipped ${excludedIds.size} per your request) — take a look at your project folders to open the tear sheet.`
+          : `Here are all ${finalIds.length} ${designerLabel} pieces in the Maison Affluency Curation with trade pricing — take a look at your project folders to open the tear sheet.`;
+        return sseProposalThenTextResponse(proposal, closing);
+
       }
 
       // Designer recognised but zero curator picks published for them.
@@ -4152,12 +4220,26 @@ serve(async (req) => {
             // "Scala 300 Dining Table" sharing the same brand + image)
             // regardless of whether a typology was inferred.
             ({ previewRaw, pickIds } = dedupePreviewRows(previewRaw, pickIds));
+            // Honour in-chat "skip / exclude / omit …" instructions from the
+            // latest user message so the proposal card ships pre-filtered.
+            const streamExcludedIds = parseUserExclusions(lastUserMsg || "", previewRaw);
+            if (streamExcludedIds.size > 0) {
+              previewRaw = previewRaw.filter((p: any) => p?.id && !streamExcludedIds.has(p.id));
+              pickIds = pickIds.filter((id: string) => !streamExcludedIds.has(id));
+              console.log(`[concierge] applied user skip list — dropped ${streamExcludedIds.size} pick(s) from ${tc.name}`);
+            }
             if (requestedTypology && pickIds.length < 2) {
               console.warn(`[concierge] blocked ${tc.name} — insufficient true ${requestedTypology} picks after typology validation`);
               const releaseFrame = { choices: [{ delta: { content: buildNoStrictTypologyReply(requestedTypology) } }] };
               controller.enqueue(encoder.encode(`data: ${JSON.stringify(releaseFrame)}\n\n`));
               continue;
             }
+            if (pickIds.length === 0) {
+              const releaseFrame = { choices: [{ delta: { content: "Your skip list would remove every piece I was about to propose — nothing left to add. Send the request again with a shorter exclusion." } }] };
+              controller.enqueue(encoder.encode(`data: ${JSON.stringify(releaseFrame)}\n\n`));
+              continue;
+            }
+
             const preview = previewRaw.map((p: any) => {
               const r = p && rationaleMap[p.id];
               if (!r) return p;
