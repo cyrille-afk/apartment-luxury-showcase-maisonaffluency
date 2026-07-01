@@ -30,7 +30,8 @@ type TimelineItem =
   | { kind: "quote_proposal"; proposal: QuoteProposal; resolved?: "approved" | "discarded" }
   | { kind: "ffe_proposal"; proposal: FfeProposal; resolved?: "approved" | "discarded" }
   | { kind: "viz_brief"; proposal: VisualizationBriefProposal; resolved?: "opened" | "discarded" }
-  | { kind: "escalation"; sentiment: string; intent: string; excerpt: ChatMessage[]; resolved?: "requested" | "dismissed" };
+  | { kind: "escalation"; sentiment: string; intent: string; excerpt: ChatMessage[]; resolved?: "requested" | "dismissed" }
+  | { kind: "retry"; text: string; reason: string };
 
 
 import {
@@ -151,6 +152,30 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const abortRef = useRef<AbortController | null>(null);
+  const stallTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const STALL_MS = 45_000; // no delta/proposal in 45s ⇒ treat stream as stalled
+
+  const clearStallTimer = useCallback(() => {
+    if (stallTimerRef.current) {
+      clearTimeout(stallTimerRef.current);
+      stallTimerRef.current = null;
+    }
+  }, []);
+
+  const pushRetry = useCallback((text: string, reason: string) => {
+    // Drop any orphaned empty assistant bubble so the retry card stands alone.
+    setTimeline((prev) => {
+      let copy = prev;
+      const last = prev[prev.length - 1];
+      if (last?.kind === "msg" && last.role === "assistant" && !last.content?.trim()) {
+        copy = prev.slice(0, -1);
+      }
+      // Never stack two retry cards in a row for the same text.
+      const tail = copy[copy.length - 1];
+      if (tail?.kind === "retry" && tail.text === text) return copy;
+      return [...copy, { kind: "retry", text, reason }];
+    });
+  }, []);
 
   // -------- Attachments (room plans, mood images, PDFs) --------
   type StagedAttachment = {
@@ -880,7 +905,22 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
     const controller = new AbortController();
     abortRef.current = controller;
 
+    // Stall watchdog: if the stream produces no delta/proposal/escalation
+    // for STALL_MS, abort the request and surface a retry card so the user
+    // isn't left staring at a silent spinner (e.g. edge IDLE_TIMEOUT).
+    const armStall = () => {
+      clearStallTimer();
+      stallTimerRef.current = setTimeout(() => {
+        try { controller.abort(); } catch {}
+        setStreaming(false);
+        clearStallTimer();
+        pushRetry(text, "The concierge stopped responding.");
+      }, STALL_MS);
+    };
+    armStall();
+
     const upsertAssistant = (chunk: string) => {
+      armStall();
       assistantSoFar += chunk;
       setTimeline((prev) => {
         if (assistantStarted) {
@@ -899,6 +939,7 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
     };
 
     const handleProposal = (proposal: ConciergeProposal) => {
+      armStall();
       if (proposal.tool === "draft_quote" || proposal.tool === "add_to_quote") {
         setTimeline((prev) => [...prev, { kind: "quote_proposal", proposal }]);
         return;
@@ -933,13 +974,18 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
         onDelta: upsertAssistant,
         onProposal: handleProposal,
         onEscalation: (ev) => {
+          armStall();
           setTimeline((prev) => [
             ...prev,
             { kind: "escalation", sentiment: ev.sentiment, intent: ev.intent, excerpt: ev.excerpt },
           ]);
         },
-        onDone: () => setStreaming(false),
+        onDone: () => {
+          clearStallTimer();
+          setStreaming(false);
+        },
         onError: (msg) => {
+          clearStallTimer();
           if (msg.startsWith("RATE_LIMIT:")) {
             const retrySec = parseInt(msg.split(":")[1], 10);
             const mins = Math.ceil(retrySec / 60);
@@ -953,16 +999,26 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
               },
             ]);
           } else {
-            toast.error(msg);
+            // Surface a retry card instead of a fire-and-forget toast so the
+            // user has a one-click path back to a working turn.
+            const friendly = /IDLE_TIMEOUT|504|timeout/i.test(msg)
+              ? "The concierge timed out before answering."
+              : msg || "The concierge hit an error.";
+            pushRetry(text, friendly);
           }
           setStreaming(false);
         },
         signal: controller.signal,
       });
     } catch {
+      clearStallTimer();
       setStreaming(false);
+      // If the throw wasn't the user aborting, offer a retry.
+      if (!controller.signal.aborted) {
+        pushRetry(text, "The connection to the concierge dropped.");
+      }
     }
-  }, [input, attachments, streaming, timeline, stage, tone, lang, name, openLatestQuote, navigate]);
+  }, [input, attachments, streaming, timeline, stage, tone, lang, name, openLatestQuote, navigate, clearStallTimer, pushRetry]);
 
   const handleProposalResolved = (
     proposalIndex: number,
@@ -1555,6 +1611,47 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
                         ))}
                       </div>
                     )}
+                  </div>
+                );
+              }
+              if (item.kind === "retry") {
+                return (
+                  <div
+                    key={i}
+                    className={cn(
+                      "self-start rounded-2xl border border-destructive/30 bg-destructive/5 px-4 py-3 font-body text-sm text-foreground",
+                      expanded ? "max-w-[92%]" : "max-w-[88%]",
+                    )}
+                    role="alert"
+                  >
+                    <div className="mb-2 leading-relaxed">
+                      <span className="font-medium">{item.reason}</span>{" "}
+                      <span className="text-muted-foreground">You can retry your last message.</span>
+                    </div>
+                    <div className="flex flex-wrap gap-1.5">
+                      <button
+                        type="button"
+                        disabled={streaming}
+                        onClick={() => {
+                          const retryText = item.text;
+                          // Drop this retry card before re-sending so a second failure
+                          // stacks cleanly instead of leaving stale cards behind.
+                          setTimeline((prev) => prev.filter((_, idx) => idx !== i));
+                          send(retryText);
+                        }}
+                        className="rounded-full border border-foreground bg-foreground px-4 py-1.5 text-[13px] text-background shadow-sm inline-flex items-center gap-1.5 hover:opacity-90 disabled:opacity-40"
+                      >
+                        <Sparkles className="h-3 w-3" />
+                        Try again
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setTimeline((prev) => prev.filter((_, idx) => idx !== i))}
+                        className="rounded-full border border-border bg-background px-3 py-1 font-body text-xs text-foreground hover:bg-accent/10 hover:border-accent/40"
+                      >
+                        Dismiss
+                      </button>
+                    </div>
                   </div>
                 );
               }
