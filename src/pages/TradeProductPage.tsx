@@ -519,6 +519,65 @@ const TradeProductPage: React.FC = () => {
     setGalleryActiveIndex(undefined);
   }, [designerSlug, productSlug]);
 
+  // ── Unified variant resolution ──
+  // Both the price caption AND handleAddToQuote (and any downstream renderer)
+  // MUST derive the "which variant is selected" from the same source, so a
+  // Travertino Rosso pick surfaces identically in the header, the quote card
+  // and the quote line unit price.
+  const sizeVariantsForResolve: any[] | null =
+    (data?.pricing?.size_variants as any[] | undefined) || null;
+  const activeVariantContext = React.useMemo(() => {
+    const axes = computeVariantAxes(sizeVariantsForResolve);
+    const baseAxisLabelRaw = (((data?.product as any)?.base_axis_label) || "").trim();
+    const baseAxisIsDim = baseAxisLabelRaw
+      ? isDimensionAxisLabel(baseAxisLabelRaw)
+      : (axes.baseOptions.length > 0 && axes.baseOptions.every(looksLikeDimension));
+    const baseOnlySizeOptions = axes.isBaseOnly
+      ? Array.from(new Set(
+          (sizeVariantsForResolve || []).map((v: any) => (v.label || "").trim()).filter(Boolean),
+        ))
+      : [];
+    const baseOnlyRequiresSize = axes.isBaseOnly && !baseAxisIsDim && baseOnlySizeOptions.length > 1;
+    const hasDualSize = axes.dualSizeOptions.length > 1;
+    return {
+      sizeVariants: sizeVariantsForResolve,
+      isDualAxis: axes.isDualAxis,
+      isBaseOnly: axes.isBaseOnly,
+      hasSingleAxisSplit: axes.hasSingleAxisSplit,
+      hasDualSize,
+      baseOnlyRequiresSize,
+      singleAxisParsed: axes.singleAxisParsed,
+    };
+  }, [sizeVariantsForResolve, (data?.product as any)?.base_axis_label]);
+
+  const activeVariant = React.useMemo(
+    () => resolveActiveVariant(
+      {
+        selectedVariantIdx,
+        selectedBase,
+        selectedTop,
+        selectedDualSize,
+        selectedSingleSize,
+        selectedSingleMaterial,
+      },
+      activeVariantContext,
+    ),
+    [
+      activeVariantContext,
+      selectedVariantIdx,
+      selectedBase,
+      selectedTop,
+      selectedDualSize,
+      selectedSingleSize,
+      selectedSingleMaterial,
+    ],
+  );
+  const activeVariantCents: number | null = (() => {
+    const c = activeVariant?.price_cents;
+    return typeof c === "number" && c > 0 ? c : null;
+  })();
+
+
   const handleAddToQuote = useCallback(async () => {
     if (!user || !data) return;
     setAdding(true);
