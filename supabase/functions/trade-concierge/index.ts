@@ -3064,17 +3064,15 @@ serve(async (req) => {
         || (designerRows || []).find((d: any) => targetIds.includes(d.id))?.name
         || mentionedDesigners[0];
 
-      const { data: allPicks, error: allPicksErr } = await supabase
+      const { data: allPicks } = await supabase
         .from("designer_curator_picks")
         .select("id, title, category, materials")
         .in("designer_id", targetIds)
         .order("title", { ascending: true })
         .limit(24);
-      console.log("[concierge shortcut fetch]", { targetIds, count: (allPicks || []).length, err: allPicksErr?.message });
       const pickIds = (allPicks || []).map((p: any) => p.id);
       if (pickIds.length >= 1) {
         const previewRaw = await hydratePickPreview(supabase, pickIds);
-        console.log("[concierge shortcut hydrate]", { pickIdsCount: pickIds.length, previewCount: previewRaw.length });
         const validIds = new Set(previewRaw.map((p: any) => p?.id).filter(Boolean));
         const finalIds = pickIds.filter((id: string) => validIds.has(id));
         const rationaleMap: Record<string, { reason: string }> = {};
