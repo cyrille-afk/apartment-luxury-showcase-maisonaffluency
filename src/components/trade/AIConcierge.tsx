@@ -1614,6 +1614,47 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
                   </div>
                 );
               }
+              if (item.kind === "retry") {
+                return (
+                  <div
+                    key={i}
+                    className={cn(
+                      "self-start rounded-2xl border border-destructive/30 bg-destructive/5 px-4 py-3 font-body text-sm text-foreground",
+                      expanded ? "max-w-[92%]" : "max-w-[88%]",
+                    )}
+                    role="alert"
+                  >
+                    <div className="mb-2 leading-relaxed">
+                      <span className="font-medium">{item.reason}</span>{" "}
+                      <span className="text-muted-foreground">You can retry your last message.</span>
+                    </div>
+                    <div className="flex flex-wrap gap-1.5">
+                      <button
+                        type="button"
+                        disabled={streaming}
+                        onClick={() => {
+                          const retryText = item.text;
+                          // Drop this retry card before re-sending so a second failure
+                          // stacks cleanly instead of leaving stale cards behind.
+                          setTimeline((prev) => prev.filter((_, idx) => idx !== i));
+                          send(retryText);
+                        }}
+                        className="rounded-full border border-foreground bg-foreground px-4 py-1.5 text-[13px] text-background shadow-sm inline-flex items-center gap-1.5 hover:opacity-90 disabled:opacity-40"
+                      >
+                        <Sparkles className="h-3 w-3" />
+                        Try again
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setTimeline((prev) => prev.filter((_, idx) => idx !== i))}
+                        className="rounded-full border border-border bg-background px-3 py-1 font-body text-xs text-foreground hover:bg-accent/10 hover:border-accent/40"
+                      >
+                        Dismiss
+                      </button>
+                    </div>
+                  </div>
+                );
+              }
               if (item.kind === "escalation") {
                 return (
                   <EscalationCard
