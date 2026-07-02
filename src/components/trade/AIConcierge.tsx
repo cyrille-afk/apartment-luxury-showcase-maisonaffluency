@@ -505,9 +505,15 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
     return () => document.removeEventListener("mousedown", onDoc);
   }, [toneMenuOpen, langMenuOpen]);
 
-  // auto-scroll
+  // auto-scroll — only when a new timeline entry is appended, not when an
+  // existing entry mutates in place (e.g. skipping/including a pick inside a
+  // proposal card). Otherwise the user gets yanked to the input every skip.
+  const lastTimelineLenRef = useRef(0);
   useEffect(() => {
-    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+    if (timeline.length > lastTimelineLenRef.current) {
+      scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+    }
+    lastTimelineLenRef.current = timeline.length;
   }, [timeline]);
 
   // focus input when opened
