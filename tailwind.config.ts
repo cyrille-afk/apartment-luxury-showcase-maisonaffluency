@@ -162,6 +162,15 @@ export default {
             transform: "scale(1.18)",
           },
         },
+        "ken-burns": {
+          "0%": { transform: "scale(1.05) translateY(0)" },
+          "100%": { transform: "scale(1.12) translateY(-2%)" },
+        },
+        "scroll-cue": {
+          "0%": { transform: "translateY(-100%)", opacity: "0" },
+          "50%": { opacity: "1" },
+          "100%": { transform: "translateY(200%)", opacity: "0" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.3s ease-out",
@@ -172,6 +181,8 @@ export default {
         "pulse-glow": "pulse-glow 10s ease-in-out infinite",
         "text-glow-pulse": "text-glow-pulse 16s ease-in-out infinite",
         "expand-hint": "expand-hint 1s ease-in-out 3",
+        "ken-burns": "ken-burns 20s ease-out forwards",
+        "scroll-cue": "scroll-cue 2.5s ease-in-out infinite",
       },
     },
   },
