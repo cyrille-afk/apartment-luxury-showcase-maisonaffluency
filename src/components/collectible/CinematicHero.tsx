@@ -161,7 +161,7 @@ export function CinematicHero({
       {/* Top-right share badge */}
       {onShare && (
         <motion.div
-          className="absolute top-8 right-8 z-20 md:top-12 md:right-12"
+          className="absolute top-24 right-8 z-20 md:top-28 md:right-12"
           style={{ opacity: contentOpacity }}
         >
           <button
