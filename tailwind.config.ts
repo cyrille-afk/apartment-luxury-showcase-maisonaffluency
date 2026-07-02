@@ -162,6 +162,16 @@ export default {
             transform: "scale(1.18)",
           },
         },
+        "ken-burns": {
+          "0%": { transform: "scale(1.05) translateY(0)" },
+          "100%": { transform: "scale(1.12) translateY(-2%)" },
+        },
+        "scroll-cue": {
+          "0%": { transform: "translateY(-100%)", opacity: "0" },
+          "50%": { opacity: "1" },
+          "100%": { transform: "translateY(200%)", opacity: "0" },
+        },
+      },
       },
       animation: {
         "accordion-down": "accordion-down 0.3s ease-out",
