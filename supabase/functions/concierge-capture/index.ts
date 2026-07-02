@@ -264,6 +264,33 @@ function heuristic(text: string): Qualified {
   return { name: null, city, country, intent, signals: Array.from(new Set(signals)), qualified_score: score };
 }
 
+// Exported for unit tests. Decides whether a lead is substantive enough to page
+// the concierge inbox. A bare one/two-word city echo (e.g. "Singapore", "NYC")
+// must never fire; real inquiries with room/property/budget/bespoke/project
+// signals — or a very high overall score — should.
+export function shouldNotifyLead(
+  firstMessage: string,
+  signals: string[],
+  qualifiedScore: number,
+): boolean {
+  const substantiveSignals = signals.filter((s) =>
+    s === "budget_hint" ||
+    s === "bespoke_intent" ||
+    s === "project_intent" ||
+    s === "statement_piece" ||
+    s.startsWith("room_type:") ||
+    s.startsWith("room:") ||
+    s.startsWith("property:")
+  );
+  const trimmed = (firstMessage ?? "").trim();
+  const wordCount = trimmed ? trimmed.split(/\s+/).length : 0;
+  const isCityEcho = wordCount <= 3 && substantiveSignals.length === 0;
+  if (isCityEcho) return false;
+  return substantiveSignals.length > 0 || qualifiedScore >= 80;
+}
+
+export { heuristic };
+
 async function aiEnrich(text: string, base: Qualified): Promise<Qualified> {
   if (!LOVABLE_API_KEY) return base;
   try {
