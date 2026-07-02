@@ -25,7 +25,7 @@ const CITY_ECHOES = [
   "London",
   "Paris",
   "Dubai",
-  "A GCB",
+  "A luxury home",
   "Mayfair",
   "Monaco",
 ];
