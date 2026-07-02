@@ -490,14 +490,10 @@ const PublicDesignerProfile = () => {
   const designerOgUrl = buildDesignerOgUrl(designer.name);
 
   // Collectible-design artists get the cinematic full-bleed hero treatment.
-  const isCollectibleDesigner = useMemo(
-    () =>
-      collectibleDesigners.some(
-        (cd) =>
-          (cd.id && (cd.id === designer.id || cd.id === designer.slug)) ||
-          cd.name.toLowerCase() === designer.name.toLowerCase()
-      ),
-    [designer.id, designer.slug, designer.name]
+  const isCollectibleDesigner = collectibleDesigners.some(
+    (cd) =>
+      (cd.id && (cd.id === designer.id || cd.id === designer.slug)) ||
+      cd.name.toLowerCase() === designer.name.toLowerCase()
   );
 
   const buildDesignerBridgePath = (_kind: "og" | "card") => {
