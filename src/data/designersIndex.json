@@ -168,6 +168,10 @@
     "name": "Iksel"
   },
   {
+    "slug": "jan-kath",
+    "name": "Jan Kath"
+  },
+  {
     "slug": "jason-miller",
     "name": "Jason Miller"
   },
@@ -232,6 +236,10 @@
     "name": "Made in Kira - Roman Frankel"
   },
   {
+    "slug": "maison-wecraft",
+    "name": "Maison WeCraft"
+  },
+  {
     "slug": "man-of-parts",
     "name": "Man of Parts"
   },
@@ -280,6 +288,10 @@
     "name": "Nathalie Ziegler"
   },
   {
+    "slug": "neri-hu",
+    "name": "Neri & Hu"
+  },
+  {
     "slug": "nicolas-aubagnac",
     "name": "Nicolas Aubagnac"
   },
@@ -316,6 +328,10 @@
     "name": "Paul László"
   },
   {
+    "slug": "peter-reed",
+    "name": "Peter Reed 1861"
+  },
+  {
     "slug": "pierre-augustin-rose",
     "name": "Pierre Augustin Rose"
   },
@@ -326,6 +342,10 @@
   {
     "slug": "pierre-chareau",
     "name": "Pierre Chareau"
+  },
+  {
+    "slug": "pierre-frey",
+    "name": "Pierre Frey"
   },
   {
     "slug": "poltrona-frau",
