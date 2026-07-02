@@ -110,7 +110,9 @@ const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0 }: QuoteDrawe
             if (!pid || !item.variant_label) continue;
             const lib = byPick.get(pid);
             if (!lib || lib.length === 0) continue;
-            const matched = findQuoteFinishSwatches(item.variant_label, lib);
+            const matched = findQuoteFinishSwatches(item.variant_label, lib)
+              .map((swatch) => ({ name: swatch.name, image_url: swatch.image_url || "" }))
+              .filter((swatch) => swatch.image_url);
             if (matched.length > 0) item.variant_swatches = matched;
           }
         }
