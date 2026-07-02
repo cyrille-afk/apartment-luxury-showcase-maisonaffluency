@@ -348,6 +348,7 @@ const PublicDesignerProfile = () => {
   const isMobile = useIsMobile();
   const navigate = useNavigate();
   const picksSectionRef = useRef<HTMLDivElement | null>(null);
+  const contentSectionRef = useRef<HTMLDivElement | null>(null);
   const lightboxOpenRef = useRef(false);
 
   // Desktop lightbox: push a history entry on open so browser Back closes
