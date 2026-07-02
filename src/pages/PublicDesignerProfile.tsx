@@ -23,7 +23,6 @@ import HeritageSlider from "@/components/HeritageSlider";
 import { useHeritageSlides } from "@/hooks/useHeritageSlides";
 import DesignerInstagramSection from "@/components/DesignerInstagramSection";
 import { useDesignerInstagramPosts } from "@/hooks/useDesignerInstagramPosts";
-import { optimizeImageUrl } from "@/lib/cloudinary-optimize";
 import { consumeProductBackRef } from "@/lib/designerBackRef";
 import { isChildBrandDesigner, isParentBrandDesigner } from "@/lib/designerHierarchy";
 import { toOgImage } from "@/lib/ogImage";
