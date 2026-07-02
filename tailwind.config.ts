@@ -172,7 +172,6 @@ export default {
           "100%": { transform: "translateY(200%)", opacity: "0" },
         },
       },
-      },
       animation: {
         "accordion-down": "accordion-down 0.3s ease-out",
         "accordion-up": "accordion-up 0.3s ease-out",
@@ -182,6 +181,8 @@ export default {
         "pulse-glow": "pulse-glow 10s ease-in-out infinite",
         "text-glow-pulse": "text-glow-pulse 16s ease-in-out infinite",
         "expand-hint": "expand-hint 1s ease-in-out 3",
+        "ken-burns": "ken-burns 20s ease-out forwards",
+        "scroll-cue": "scroll-cue 2.5s ease-in-out infinite",
       },
     },
   },
