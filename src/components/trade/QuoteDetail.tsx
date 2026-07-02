@@ -31,6 +31,7 @@ import { usePerLineShipping } from "@/hooks/usePerLineShipping";
 import { toIsoCountry, computePerLineShipments } from "@/lib/perLineShipping";
 import { labelForMode } from "@/lib/shippingEstimator";
 import { buildProductFinishMap, resolveFinishImageIndex, resolveVariantImageIndex } from "@/lib/variantImageMap";
+import { findQuoteFinishSwatches } from "@/lib/quoteFinishSwatches";
 
 import { PerOriginShippingRecap } from "@/components/trade/PerOriginShippingRecap";
 import { priceRugVariantFromLabel } from "@/lib/rugPricing";
@@ -78,6 +79,8 @@ interface QuoteItemWithProduct {
   } | null;
   /** Enriched at load time from designer_curator_picks (limited-edition / edition note). */
   edition?: string | null;
+  /** Resolved from the saved variant label so stale swatch IDs do not override the chosen finish. */
+  variant_swatches?: { name: string; image_url: string }[];
 }
 
 interface QuoteDetailProps {

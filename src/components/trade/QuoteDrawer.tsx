@@ -5,6 +5,7 @@ import { DrawerItemSkeleton } from "@/components/trade/skeletons";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { supabase } from "@/integrations/supabase/client";
 import { hydrateQuotePricesFromPicks } from "@/lib/hydrateQuotePricesFromPicks";
+import { findQuoteFinishSwatches } from "@/lib/quoteFinishSwatches";
 
 interface QuoteItem {
   id: string;
@@ -94,38 +95,22 @@ const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0 }: QuoteDrawe
         if (pickIds.length > 0) {
           const { data: swRows } = await (supabase as any)
             .from("product_fabric_swatches_public")
-            .select("pick_id, name, image_url, is_active")
-            .in("pick_id", pickIds);
-          const byPick = new Map<string, { name: string; image_url: string }[]>();
+            .select("pick_id, fabric_id, name, image_url, sort_order, is_active")
+            .in("pick_id", pickIds)
+            .order("sort_order", { ascending: true });
+          const byPick = new Map<string, { fabric_id?: string | null; name: string; image_url: string; sort_order?: number | null }[]>();
           for (const r of (swRows || []) as any[]) {
             if (!r || r.is_active === false || !r.image_url || !r.name) continue;
             const list = byPick.get(r.pick_id) || [];
-            list.push({ name: String(r.name), image_url: String(r.image_url) });
+            list.push({ fabric_id: r.fabric_id ?? null, name: String(r.name), image_url: String(r.image_url), sort_order: r.sort_order ?? null });
             byPick.set(r.pick_id, list);
           }
-          const norm = (s: string) => s.toLowerCase().replace(/\s+/g, " ").trim();
           for (const item of mapped) {
             const pid = item.product?.source_pick_id;
             if (!pid || !item.variant_label) continue;
             const lib = byPick.get(pid);
             if (!lib || lib.length === 0) continue;
-            const segments = item.variant_label
-              .split(/·|\//)
-              .map((s) => norm(s))
-              .filter(Boolean);
-            if (segments.length === 0) continue;
-            const seen = new Set<string>();
-            const matched: { name: string; image_url: string }[] = [];
-            for (const seg of segments) {
-              const hit = lib.find((s) => {
-                const n = norm(s.name);
-                return n === seg || seg.includes(n) || n.includes(seg);
-              });
-              if (hit && !seen.has(hit.image_url)) {
-                seen.add(hit.image_url);
-                matched.push(hit);
-              }
-            }
+            const matched = findQuoteFinishSwatches(item.variant_label, lib);
             if (matched.length > 0) item.variant_swatches = matched;
           }
         }
