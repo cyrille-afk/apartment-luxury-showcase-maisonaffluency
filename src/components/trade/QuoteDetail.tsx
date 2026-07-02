@@ -31,6 +31,7 @@ import { usePerLineShipping } from "@/hooks/usePerLineShipping";
 import { toIsoCountry, computePerLineShipments } from "@/lib/perLineShipping";
 import { labelForMode } from "@/lib/shippingEstimator";
 import { buildProductFinishMap, resolveFinishImageIndex, resolveVariantImageIndex } from "@/lib/variantImageMap";
+import { findQuoteFinishSwatches } from "@/lib/quoteFinishSwatches";
 
 import { PerOriginShippingRecap } from "@/components/trade/PerOriginShippingRecap";
 import { priceRugVariantFromLabel } from "@/lib/rugPricing";
@@ -78,6 +79,8 @@ interface QuoteItemWithProduct {
   } | null;
   /** Enriched at load time from designer_curator_picks (limited-edition / edition note). */
   edition?: string | null;
+  /** Resolved from the saved variant label so stale swatch IDs do not override the chosen finish. */
+  variant_swatches?: { name: string; image_url: string }[];
 }
 
 interface QuoteDetailProps {
@@ -507,6 +510,47 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
       // Per project rule, products with NULL trade_price_cents must show
       // "Price on Request" / TBD — fuzzy fallback caused wildly incorrect
       // prices (e.g. every "...Chandelier" inheriting an unrelated €47k price).
+
+      try {
+        const sourcePickIds = Array.from(
+          new Set(
+            loadedItems
+              .map((i) => i.trade_products?.source_pick_id)
+              .filter(Boolean) as string[]
+          )
+        );
+        if (sourcePickIds.length > 0) {
+          const { data: swRows } = await (supabase as any)
+            .from("product_fabric_swatches_public")
+            .select("pick_id, fabric_id, name, image_url, sort_order, is_active")
+            .in("pick_id", sourcePickIds)
+            .order("sort_order", { ascending: true });
+          const byPick = new Map<string, { fabric_id?: string | null; name: string; image_url: string; sort_order?: number | null }[]>();
+          for (const row of (swRows || []) as any[]) {
+            if (!row || row.is_active === false || !row.pick_id || !row.name || !row.image_url) continue;
+            const list = byPick.get(row.pick_id) || [];
+            list.push({ fabric_id: row.fabric_id ?? null, name: String(row.name), image_url: String(row.image_url), sort_order: row.sort_order ?? null });
+            byPick.set(row.pick_id, list);
+          }
+          loadedItems = loadedItems.map((item) => {
+            const pickId = item.trade_products?.source_pick_id;
+            const swatches = pickId
+              ? findQuoteFinishSwatches(item.variant_label, byPick.get(pickId) || [])
+                  .map((swatch) => ({ name: swatch.name, image_url: swatch.image_url || "" }))
+                  .filter((swatch) => swatch.image_url)
+              : [];
+            if (swatches.length === 0) return item;
+            const first = swatches[0];
+            return {
+              ...item,
+              variant_swatches: swatches,
+              wood_fabric: { ...((item as any).wood_fabric || {}), name: first.name, image_url: first.image_url },
+            } as QuoteItemWithProduct;
+          });
+        }
+      } catch {
+        /* non-fatal — swatches are visual metadata */
+      }
 
       // Enrich items with `edition` from designer_curator_picks (matched by title, normalized).
       try {
@@ -1081,6 +1125,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
       // instead of being folded into free-form Notes.
       const fabric: any = (item as any).fabric;
       const wood: any = (item as any).wood_fabric;
+      const variantSwatches = ((item as any).variant_swatches || []) as Array<{ name: string; image_url: string }>;
       const fabricCcy = ((item as any).fabric_currency as string | null) || fabric?.currency || "EUR";
       const fabricUpcharge = (item as any).fabric_upcharge_cents as number | null;
       const fabricMeters = (item as any).fabric_meters as number | null;
@@ -1118,7 +1163,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
         sourceUnitPriceCents: rawUnit,
         sourceCurrency: itemPriceCurrency(item, currency),
         imageUrl: item.image_url ?? product?.image_url ?? null,
-        finishSwatchUrl: wood?.image_url ?? null,
+        finishSwatchUrl: variantSwatches[0]?.image_url ?? wood?.image_url ?? null,
         fabricSwatchUrl: fabric?.image_url ?? null,
         shipOriginCountry: toIsoCountry(item.ship_origin_country ?? product?.origin ?? null, "FR"),
         shipMode: item.ship_mode || null,
@@ -2341,16 +2386,19 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                           </div>
                           {/* Swatch thumbnails below main image */}
                           <div className="grid w-28 md:w-36 grid-cols-2 gap-2">
-                            {(item as any).wood_fabric?.image_url && (
-                              <div className="relative group">
+                            {((item as any).variant_swatches?.length
+                              ? (item as any).variant_swatches
+                              : ((item as any).wood_fabric?.image_url ? [(item as any).wood_fabric] : [])
+                            ).map((swatch: any) => (
+                              <div className="relative group" key={swatch.image_url || swatch.name}>
                                 <img
-                                  src={(item as any).wood_fabric.image_url}
-                                  alt={(item as any).wood_fabric?.name || "Finish"}
+                                  src={swatch.image_url}
+                                  alt={swatch.name || "Finish"}
                                   className="w-full aspect-square rounded object-cover ring-1 ring-border"
                                   loading="lazy"
                                 />
                               </div>
-                            )}
+                            ))}
                             {(item as any).fabric?.image_url && (
                               <div className="relative group">
                                 <img

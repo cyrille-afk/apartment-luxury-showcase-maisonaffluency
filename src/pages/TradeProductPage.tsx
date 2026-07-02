@@ -62,6 +62,7 @@ import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
 import { rememberProductBackRef } from "@/lib/designerBackRef";
 import { priceRugVariantFromLabel, isRugCategory, looksLikeDimension } from "@/lib/rugPricing";
 import { resolveActiveVariant, resolvePartialDualMinCents } from "@/lib/resolveActiveVariant";
+import { findQuoteFinishSwatch } from "@/lib/quoteFinishSwatches";
 
 import RugSizeColourPicker, { type RugSelection } from "@/components/rug/RugSizeColourPicker";
 import SpecGlyph from "@/components/product/SpecGlyph";
@@ -828,18 +829,24 @@ const TradeProductPage: React.FC = () => {
             // "Bianco Statuarietto") just like it does for the chair's Walnut.
             try {
               const candidates = [
-                selectedBase, selectedTop, selectedSingleMaterial, variantLabel,
-              ].filter(Boolean).map((s: any) => String(s).toLowerCase());
+                selectedWoodPrice?.name,
+                selectedTopDisplay,
+                selectedBaseDisplay,
+                selectedSingleMaterial,
+                selectedTop,
+                selectedBase,
+                variantLabel,
+              ].filter(Boolean).map((s: any) => String(s));
               if (candidates.length && (product as any)?.id) {
                 const { data: swRows } = await (supabase as any)
                   .from("product_fabric_swatches_public")
-                  .select("fabric_id, name, is_active")
-                  .eq("pick_id", (product as any).id);
-                const match = (swRows || []).find((r: any) => {
-                  if (!r || r.is_active === false || !r.name) return false;
-                  const n = String(r.name).toLowerCase();
-                  return candidates.some((c) => c === n || c.includes(n) || n.includes(c));
-                });
+                  .select("fabric_id, name, image_url, sort_order, is_active")
+                  .eq("pick_id", (product as any).id)
+                  .order("sort_order", { ascending: true });
+                const match = findQuoteFinishSwatch(
+                  candidates,
+                  (swRows || []).filter((r: any) => r?.is_active !== false),
+                );
                 if (match?.fabric_id) patch.wood_fabric_id = match.fabric_id;
               }
             } catch { /* non-blocking */ }
