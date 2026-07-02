@@ -830,7 +830,34 @@ const PublicDesignerProfile = () => {
       <div className="min-h-screen bg-background text-foreground">
         <Navigation />
 
-        <div className="max-w-6xl mx-auto px-4 md:px-12 pt-32 md:pt-36 pb-20 space-y-1 md:space-y-1.5">
+        {isCollectibleDesigner && (
+          <CinematicHero
+            name={name}
+            specialty={designer.specialty}
+            heroImage={heroImage}
+            photoCredit={designer.hero_photo_credit}
+            shareCopied={shareCopied}
+            onShare={(e) => {
+              e.stopPropagation();
+              const url = `https://www.maisonaffluency.com${buildDesignerBridgePath("og")}`;
+              navigator.clipboard.writeText(url).then(() => {
+                setShareCopied(true);
+                setTimeout(() => setShareCopied(false), 2000);
+              });
+            }}
+            onScrollToArchive={() =>
+              contentSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
+            }
+          />
+        )}
+
+        <div
+          ref={contentSectionRef}
+          className={cn(
+            "max-w-6xl mx-auto px-4 md:px-12 pb-20 space-y-1 md:space-y-1.5",
+            isCollectibleDesigner ? "pt-8 md:pt-12" : "pt-32 md:pt-36"
+          )}
+        >
           <div className="flex items-center justify-between">
             {fromProduct ? (
               <Link
@@ -867,7 +894,9 @@ const PublicDesignerProfile = () => {
             )}
           </div>
 
-          {useChildHeroLayout ? (
+          {isCollectibleDesigner ? (
+            biographySection
+          ) : useChildHeroLayout ? (
             /* Designer profile: portrait hero, then the same editorial biography flow as the parent */
             <div className="flex flex-col gap-0">
               <motion.div
