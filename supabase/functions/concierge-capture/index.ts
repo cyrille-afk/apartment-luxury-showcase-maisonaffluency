@@ -411,9 +411,22 @@ serve(async (req) => {
     });
   }
 
-  // Notify when qualified.
-  const isHigh = enriched.signals.includes("high_value_location");
-  const shouldNotify = isHigh || enriched.qualified_score >= 60;
+  // Notify only when the lead shows real project intent — not a bare city echo.
+  const substantiveSignals = enriched.signals.filter((s) =>
+    s === "budget_hint" ||
+    s === "bespoke_intent" ||
+    s === "project_intent" ||
+    s === "statement_piece" ||
+    s.startsWith("room_type:") ||
+    s.startsWith("room:") ||
+    s.startsWith("property:")
+  );
+  const trimmedMsg = (body.first_message ?? "").trim();
+  const wordCount = trimmedMsg ? trimmedMsg.split(/\s+/).length : 0;
+  const isCityEcho = wordCount <= 3 && substantiveSignals.length === 0;
+  const shouldNotify =
+    !isCityEcho &&
+    (substantiveSignals.length > 0 || enriched.qualified_score >= 80);
   if (shouldNotify) {
     try {
       const subject = `Concierge lead — ${enriched.intent} — ${finalCity ?? "unknown city"} — score ${enriched.qualified_score}`;
