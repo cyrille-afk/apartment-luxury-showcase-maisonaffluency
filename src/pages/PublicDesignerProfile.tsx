@@ -489,6 +489,17 @@ const PublicDesignerProfile = () => {
   const heroImage = designer.hero_image_url || designer.image_url;
   const designerOgUrl = buildDesignerOgUrl(designer.name);
 
+  // Collectible-design artists get the cinematic full-bleed hero treatment.
+  const isCollectibleDesigner = useMemo(
+    () =>
+      collectibleDesigners.some(
+        (cd) =>
+          (cd.id && (cd.id === designer.id || cd.id === designer.slug)) ||
+          cd.name.toLowerCase() === designer.name.toLowerCase()
+      ),
+    [designer.id, designer.slug, designer.name]
+  );
+
   const buildDesignerBridgePath = (_kind: "og" | "card") => {
     // Extract path portion from the full URL for sharePageOnWhatsApp's directUrlPath
     return new URL(designerOgUrl).pathname;
