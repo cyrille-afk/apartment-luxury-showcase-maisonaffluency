@@ -6405,20 +6405,36 @@ export type Database = {
         }
         Returns: string
       }
-      add_gallery_product_to_quote: {
-        Args: {
-          _brand_name: string
-          _category?: string
-          _dimensions?: string
-          _image_url?: string
-          _materials?: string
-          _product_name: string
-          _quantity?: number
-          _quote_id: string
-          _user_id: string
-        }
-        Returns: string
-      }
+      add_gallery_product_to_quote:
+        | {
+            Args: {
+              _brand_name: string
+              _category?: string
+              _dimensions?: string
+              _image_url?: string
+              _materials?: string
+              _product_name: string
+              _quantity?: number
+              _quote_id: string
+              _user_id: string
+            }
+            Returns: string
+          }
+        | {
+            Args: {
+              _brand_name: string
+              _category?: string
+              _dimensions?: string
+              _image_url?: string
+              _materials?: string
+              _product_name: string
+              _quantity?: number
+              _quote_id: string
+              _user_id: string
+              _variant_label?: string
+            }
+            Returns: string
+          }
       admin_ai_usage_summary: {
         Args: { _from: string; _to: string }
         Returns: Json
