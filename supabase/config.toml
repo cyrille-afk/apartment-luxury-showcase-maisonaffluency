@@ -43,3 +43,5 @@ project_id = "dcrauiygaezoduwdjmsm"
     verify_jwt = true
   [functions.send-commission-statement]
     verify_jwt = true
+  [functions.trade-application-edit]
+    verify_jwt = false
