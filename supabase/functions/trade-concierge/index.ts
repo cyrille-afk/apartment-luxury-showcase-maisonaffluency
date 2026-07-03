@@ -5233,13 +5233,19 @@ serve(async (req) => {
                   apiKey: LOVABLE_API_KEY,
                 });
                 const finalProse = inspector.ok ? inspector.corrected_prose : proseText;
-                console.log(`[concierge inspector] ok=${inspector.ok} ms=${inspector.ms} corrections=${inspector.corrections.length}${inspector.reason ? ` reason=${inspector.reason}` : ""}`);
+                // Structured log — one JSON line per inspector run.
+                const inspectorReqId = (typeof crypto !== "undefined" && crypto.randomUUID)
+                  ? crypto.randomUUID()
+                  : `insp-${Date.now()}`;
+                logInspectorRun(buildInspectorLogRecord({
+                  requestId: inspectorReqId,
+                  originalProse: proseText,
+                  result: inspector,
+                  groundTruth: gt,
+                }));
                 if (inspector.corrections.length > 0) {
-                  for (const c of inspector.corrections) {
-                    console.log(`[concierge inspector] correction: "${c.original.slice(0, 120)}" -> "${c.replacement.slice(0, 120)}" (${c.reason})`);
-                  }
                   // Surface to the client so the UI can badge / log
-                  controller.enqueue(encoder.encode(`event: inspector\ndata: ${JSON.stringify({ ok: inspector.ok, corrections: inspector.corrections, ms: inspector.ms })}\n\n`));
+                  controller.enqueue(encoder.encode(`event: inspector\ndata: ${JSON.stringify({ ok: inspector.ok, corrections: inspector.corrections, ms: inspector.ms, request_id: inspectorReqId })}\n\n`));
                 }
                 // Flush the (possibly rewritten) prose as ONE synthetic delta.
                 if (finalProse) {
