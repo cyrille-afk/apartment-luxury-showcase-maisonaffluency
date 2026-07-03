@@ -1,0 +1,2 @@
+ALTER TABLE public.trade_applications ADD COLUMN IF NOT EXISTS verification_checklist_sent_at TIMESTAMP WITH TIME ZONE;
+ALTER TABLE public.trade_applications ADD COLUMN IF NOT EXISTS verification_checklist_sent_by UUID;
