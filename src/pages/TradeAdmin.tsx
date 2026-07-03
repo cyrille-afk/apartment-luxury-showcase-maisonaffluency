@@ -304,7 +304,17 @@ function InstagramAuditCard() {
   useEffect(() => {
     if (!isAdmin) return;
     fetchApplications();
-  }, [isAdmin, filter]);
+    if (user?.id) {
+      supabase
+        .from("profiles")
+        .select("first_name, last_name, email")
+        .eq("id", user.id)
+        .single()
+        .then(({ data }) => {
+          if (data) setAdminProfile(data as any);
+        });
+    }
+  }, [isAdmin, filter, user?.id]);
 
   const fetchApplications = async () => {
     setFetching(true);
