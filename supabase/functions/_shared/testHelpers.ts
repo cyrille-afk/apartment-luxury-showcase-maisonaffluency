@@ -9,8 +9,14 @@
 export async function readConciergeStream(
   resp: Response,
   opts: { timeoutMs?: number } = {},
-): Promise<{ text: string; proposals: unknown[]; escalations: unknown[] }> {
-  if (!resp.body) return { text: "", proposals: [], escalations: [] };
+): Promise<{
+  text: string;
+  proposals: unknown[];
+  escalations: unknown[];
+  requestIds: string[];
+  inspectorEvents: Array<{ ok?: boolean; corrections?: unknown[]; ms?: number; request_id?: string }>;
+}> {
+  if (!resp.body) return { text: "", proposals: [], escalations: [], requestIds: [], inspectorEvents: [] };
   const timeoutMs = opts.timeoutMs ?? 45_000;
   const reader = resp.body.getReader();
   const decoder = new TextDecoder();
@@ -18,6 +24,8 @@ export async function readConciergeStream(
   let text = "";
   const proposals: unknown[] = [];
   const escalations: unknown[] = [];
+  const requestIds: string[] = [];
+  const inspectorEvents: Array<{ ok?: boolean; corrections?: unknown[]; ms?: number; request_id?: string }> = [];
   let currentEvent: string | null = null;
   const started = Date.now();
 
@@ -25,12 +33,17 @@ export async function readConciergeStream(
     if (jsonStr === "[DONE]") return "done";
     try {
       const parsed = JSON.parse(jsonStr);
-      if (currentEvent === "proposal") {
-        proposals.push(parsed);
+      if (currentEvent === "proposal") { proposals.push(parsed); return; }
+      if (currentEvent === "escalation") { escalations.push(parsed); return; }
+      if (currentEvent === "request_id") {
+        // deno-lint-ignore no-explicit-any
+        const rid = (parsed as any)?.request_id;
+        if (typeof rid === "string") requestIds.push(rid);
         return;
       }
-      if (currentEvent === "escalation") {
-        escalations.push(parsed);
+      if (currentEvent === "inspector") {
+        // deno-lint-ignore no-explicit-any
+        inspectorEvents.push(parsed as any);
         return;
       }
       // deno-lint-ignore no-explicit-any
@@ -58,11 +71,11 @@ export async function readConciergeStream(
       if (!line.startsWith("data: ")) continue;
       if (handle(line.slice(6).trim()) === "done") {
         try { await reader.cancel(); } catch { /* ignore */ }
-        return { text, proposals, escalations };
+        return { text, proposals, escalations, requestIds, inspectorEvents };
       }
     }
   }
-  return { text, proposals, escalations };
+  return { text, proposals, escalations, requestIds, inspectorEvents };
 }
 
 /** Case-insensitive substring match on the accumulated stream text. */
