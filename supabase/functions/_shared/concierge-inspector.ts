@@ -209,6 +209,8 @@ export type InspectorLogRecord = {
   original_prose: string;
   corrected_prose: string;
   ground_truth: InspectorGroundTruth;
+  requirements?: RequirementsInput | null;
+  requirements_validation?: RequirementsValidation | null;
 };
 
 export function buildInspectorLogRecord(opts: {
