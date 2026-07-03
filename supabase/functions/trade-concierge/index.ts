@@ -4921,7 +4921,7 @@ serve(async (req) => {
                 },
                 preview,
               };
-              controller.enqueue(encoder.encode(`event: proposal\ndata: ${JSON.stringify(proposal)}\n\n`));
+              emitProposalWithRequirementsDiff(proposal, preview);
             }
           }
         };
