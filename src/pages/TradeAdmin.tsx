@@ -740,6 +740,26 @@ function InstagramAuditCard() {
                 if (!checklistPreview) return;
                 setSendingChecklist(true);
                 try {
+                  // Generate a fresh one-time edit token (14-day expiry) and persist it
+                  // so the recipient can update their existing application from the email.
+                  const editToken =
+                    (globalThis.crypto?.randomUUID?.() ?? "") +
+                    "-" +
+                    Math.random().toString(36).slice(2, 10);
+                  const editExpiresAt = new Date(
+                    Date.now() + 14 * 24 * 60 * 60 * 1000
+                  ).toISOString();
+                  const editUrl = `${window.location.origin}/trade/apply/complete/${editToken}`;
+
+                  const { error: tokenErr } = await supabase
+                    .from("trade_applications")
+                    .update({
+                      edit_token: editToken,
+                      edit_token_expires_at: editExpiresAt,
+                    })
+                    .eq("id", checklistPreview.app.id);
+                  if (tokenErr) throw tokenErr;
+
                   const { data, error } = await supabase.functions.invoke("send-transactional-email", {
                     body: {
                       templateName: "trade-verification-checklist",
@@ -748,6 +768,7 @@ function InstagramAuditCard() {
                       templateData: {
                         firstName: checklistPreview.firstName,
                         items: checklistPreview.items,
+                        editUrl,
                       },
                     },
                   });
@@ -782,7 +803,7 @@ function InstagramAuditCard() {
                   );
                   toast({
                     title: "Checklist sent",
-                    description: `Emailed ${checklistPreview.to}. Replies go to concierge@myaffluency.com.`,
+                    description: `Emailed ${checklistPreview.to} with a secure edit link. Replies go to concierge@myaffluency.com.`,
                   });
                   setChecklistPreview(null);
                 } catch (e: any) {
