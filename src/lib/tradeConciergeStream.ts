@@ -113,6 +113,7 @@ export type AddToQuoteProposal = {
     lines: QuoteLine[];
   };
   preview: QuoteLinePreview[];
+  requirements_validation?: RequirementsValidation;
 };
 
 export type TearsheetProposal = CreateTearsheetProposal | AddToTearsheetProposal;
