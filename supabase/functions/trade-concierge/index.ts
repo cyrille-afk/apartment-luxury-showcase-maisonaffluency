@@ -3992,6 +3992,72 @@ serve(async (req) => {
             console.log(`[concierge flush] chained turn: ${tearsheetBuffers.length} tearsheet + ${quoteBuffers.length} quote proposal(s), flushing tearsheet→quote`);
           }
           for (const tc of orderedBuffers) {
+            // ====== REQUIREMENTS (must precede card tools) ======
+            if (tc.name === "extract_requirements") {
+              let parsed: any = null;
+              try { parsed = JSON.parse(tc.argsText || "{}"); } catch (e) {
+                console.error("Could not parse extract_requirements args:", tc.argsText, e);
+                continue;
+              }
+              // Normalize + clamp to schema shape. Everything the Inspector
+              // Agent will diff against goes through this validator so a
+              // model that skimps on fields still produces a usable payload.
+              const slots: RequirementsSlot[] = Array.isArray(parsed.slots)
+                ? parsed.slots
+                    .filter((s: any) => s && typeof s.typology === "string")
+                    .slice(0, 12)
+                    .map((s: any) => ({
+                      typology: String(s.typology).trim().toLowerCase().replace(/\s+/g, "_").slice(0, 60),
+                      qty_min: Math.max(1, Math.min(999, Number.isFinite(Number(s.qty_min)) ? Number(s.qty_min) : 1)),
+                      qty_max: Math.max(1, Math.min(999, Number.isFinite(Number(s.qty_max)) ? Number(s.qty_max) : Number(s.qty_min) || 1)),
+                      ...(typeof s.notes === "string" && s.notes.trim() ? { notes: String(s.notes).slice(0, 240) } : {}),
+                    }))
+                : [];
+              const strArr = (v: any, cap = 8, len = 60): string[] =>
+                Array.isArray(v)
+                  ? v.filter((x: unknown) => typeof x === "string" && x.trim()).slice(0, cap).map((x: string) => x.slice(0, len))
+                  : [];
+              const payload: RequirementsPayload = {
+                slots,
+                style: strArr(parsed.style, 8, 80),
+                materials: strArr(parsed.materials, 8, 80),
+                brands: strArr(parsed.brands, 8, 80),
+                room: typeof parsed.room === "string" ? parsed.room.slice(0, 80) : "",
+                scale: typeof parsed.scale === "string" ? parsed.scale.slice(0, 80) : "",
+                era: typeof parsed.era === "string" ? parsed.era.slice(0, 80) : "",
+                notes: typeof parsed.notes === "string" ? parsed.notes.slice(0, 480) : "",
+              };
+              if (Number.isFinite(Number(parsed.budget_cents)) && Number(parsed.budget_cents) > 0) {
+                payload.budget_cents = Math.floor(Number(parsed.budget_cents));
+              }
+              if (typeof parsed.budget_currency === "string" && /^[A-Z]{3}$/.test(parsed.budget_currency)) {
+                payload.budget_currency = parsed.budget_currency;
+              }
+              capturedRequirements = payload;
+              // Structured log so a run's requirements can be joined to the
+              // Inspector log by request_id.
+              try {
+                console.log(JSON.stringify({
+                  tag: "concierge_requirements",
+                  request_id: requestId,
+                  ts: new Date().toISOString(),
+                  slot_count: payload.slots.length,
+                  typologies: payload.slots.map((s) => s.typology),
+                  total_qty_max: payload.slots.reduce((n, s) => n + s.qty_max, 0),
+                  room: payload.room || null,
+                  era: payload.era || null,
+                  brands: payload.brands,
+                  requirements: payload,
+                }));
+              } catch { /* ignore serialization */ }
+              // Emit to the client so the UI can render the parsed brief chip
+              // before the card streams in. Includes request_id for tracing.
+              controller.enqueue(encoder.encode(
+                `event: requirements\ndata: ${JSON.stringify({ request_id: requestId, requirements: payload })}\n\n`,
+              ));
+              continue;
+            }
+
             // ====== QUOTE TOOLS ======
             if (tc.name === "draft_quote" || tc.name === "add_to_quote") {
               let parsed: any = null;
