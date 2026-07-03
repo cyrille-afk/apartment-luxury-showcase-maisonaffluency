@@ -3893,6 +3893,10 @@ serve(async (req) => {
 
     // tool_calls arrive as fragments; key by index
     const toolCallBuffers = new Map<number, { id?: string; name?: string; argsText: string }>();
+    // Captured payload of `extract_requirements` for this turn. Populated when
+    // the model emits that tool call; consumed by the Inspector Agent to diff
+    // the assembled card against the user's declared slots/typologies/counts.
+    let capturedRequirements: RequirementsPayload | null = null;
     let buffer = "";
     let capturedUsage: { prompt_tokens?: number; completion_tokens?: number; total_tokens?: number } | null = null;
     const usageModel = chosenModel;
