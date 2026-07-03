@@ -368,16 +368,30 @@ serve(async (req) => {
     auth: { persistSession: false },
   });
 
-  // Identify trade users from their JWT (best-effort).
+  // Require an authenticated Maison Affluency member. The /concierge surface is
+  // members-only; enforce the same rule server-side so lead capture cannot be
+  // triggered by anonymous or spoofed clients.
   let userId: string | null = null;
   const authHeader = req.headers.get("Authorization") || "";
   const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
-  if (token) {
-    try {
-      const { data } = await supabase.auth.getClaims(token);
-      const sub = (data?.claims as { sub?: string } | null | undefined)?.sub;
-      if (sub) userId = sub;
-    } catch { /* anon */ }
+  if (!token) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+  try {
+    const { data, error } = await supabase.auth.getClaims(token);
+    const sub = (data?.claims as { sub?: string } | null | undefined)?.sub;
+    if (error || !sub) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    userId = sub;
+  } catch {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   }
 
   // Skip lead capture entirely for admins (internal testing should not generate leads/emails).
