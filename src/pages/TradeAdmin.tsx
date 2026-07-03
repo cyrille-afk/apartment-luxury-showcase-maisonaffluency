@@ -132,6 +132,59 @@ function computeSignals(app: Application): Signal[] {
   return signals;
 }
 
+/**
+ * Roll the per-signal breakdown up into a single "Professional status"
+ * verdict shown at the top of the card. The rules are intentionally
+ * conservative — admins are still expected to click through — but they let a
+ * reviewer triage a long queue at a glance:
+ *
+ *   verified  — corporate email matches website AND no warn signals.
+ *   pro       — at least one ok signal (cert details OR matching corp email)
+ *               AND no more than one warn signal.
+ *   review    — mixed / thin: 1–3 warn signals and nothing conclusive.
+ *   unverified— 4+ warn signals OR every signal is a warn (Julie's case).
+ */
+type ProStatus = "verified" | "pro" | "review" | "unverified";
+
+function classifyProStatus(signals: Signal[]): {
+  status: ProStatus;
+  label: string;
+  hint: string;
+} {
+  const warns = signals.filter((s) => s.kind === "warn");
+  const oks = signals.filter((s) => s.kind === "ok");
+  const emailMatchesWebsite = oks.some((s) => s.label.startsWith("Email matches "));
+  const hasCertDetails = oks.some((s) => s.label === "Cert details provided");
+
+  if (emailMatchesWebsite && warns.length === 0) {
+    return {
+      status: "verified",
+      label: "Verified Pro",
+      hint: "Corporate email matches company website and no red flags — safe to approve after a quick sanity check.",
+    };
+  }
+  if ((emailMatchesWebsite || hasCertDetails) && warns.length <= 1) {
+    return {
+      status: "pro",
+      label: "Likely Pro",
+      hint: "Strong professional signal present but one soft flag to confirm.",
+    };
+  }
+  if (warns.length >= 4 || (oks.length === 0 && warns.length > 0)) {
+    return {
+      status: "unverified",
+      label: "Unverified",
+      hint: "No professional signal on file — request website, portfolio, or credentials before approving.",
+    };
+  }
+  return {
+    status: "review",
+    label: "Needs Review",
+    hint: "Mixed signals — inspect the details below before approving or rejecting.",
+  };
+}
+
+
 interface Application {
   id: string;
   user_id: string;
@@ -405,12 +458,33 @@ function InstagramAuditCard() {
         <p className="font-body text-sm text-muted-foreground py-8 text-center">No {filter} applications.</p>
       ) : (
         <div className="space-y-4">
-          {applications.map((app) => (
+          {applications.map((app) => {
+            // Compute once per card so both the header pro-badge and the
+            // signals row below stay in sync.
+            const signals = computeSignals(app);
+            const pro = classifyProStatus(signals);
+            const proStyles: Record<ProStatus, string> = {
+              verified: "border-success/40 bg-success/10 text-success",
+              pro: "border-success/40 bg-success/5 text-success",
+              review: "border-warning/40 bg-warning/10 text-warning",
+              unverified: "border-destructive/40 bg-destructive/10 text-destructive",
+            };
+            const ProIcon = pro.status === "unverified" ? AlertTriangle : ShieldCheck;
+            return (
             <div key={app.id} className="border border-border rounded-lg p-5">
+
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-3 mb-1">
+                  <div className="flex items-center flex-wrap gap-2 mb-1">
                     <h3 className="font-display text-base text-foreground">{app.company_name}</h3>
+                    <span
+                      title={pro.hint}
+                      aria-label={`Professional status: ${pro.label}`}
+                      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-body uppercase tracking-wider border ${proStyles[pro.status]}`}
+                    >
+                      <ProIcon className="h-3 w-3" />
+                      {pro.label}
+                    </span>
                     <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-body uppercase tracking-wider ${
                       app.status === "pending" ? "bg-warning/10 text-warning" :
                       app.status === "approved" ? "bg-success/10 text-success" :
@@ -422,6 +496,7 @@ function InstagramAuditCard() {
                       {app.status}
                     </span>
                   </div>
+
                   {app.profiles && (
                     <p className="font-body text-xs text-muted-foreground mb-2">
                       {app.profiles.first_name} {app.profiles.last_name} · <a href={`mailto:${app.profiles.email}`} className="text-foreground hover:underline">{app.profiles.email}</a>
@@ -445,8 +520,8 @@ function InstagramAuditCard() {
                     <p className="font-body text-xs text-muted-foreground mt-2 italic">"{app.message}"</p>
                   )}
                   {(() => {
-                    const signals = computeSignals(app);
                     const warnCount = signals.filter((s) => s.kind === "warn").length;
+
                     return (
                       <div
                         className="mt-3 flex flex-wrap items-center gap-1.5"
@@ -502,7 +577,8 @@ function InstagramAuditCard() {
                 )}
               </div>
             </div>
-          ))}
+          );})}
+
         </div>
       )}
     </div>
