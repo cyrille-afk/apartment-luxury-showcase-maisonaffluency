@@ -1117,7 +1117,20 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
         },
         onError: (msg) => {
           clearStallTimer();
-          if (msg.startsWith("RATE_LIMIT:")) {
+          if (msg === "UNAUTHORIZED") {
+            toast.error("Access restricted", {
+              description: "The Concierge is available to Maison Affluency members only.",
+            });
+            setTimeline((prev) => [
+              ...prev,
+              {
+                kind: "msg",
+                role: "assistant",
+                content: "Access restricted — the Concierge is available to Maison Affluency members only.",
+              },
+            ]);
+          } else if (msg.startsWith("RATE_LIMIT:")) {
+
             const retrySec = parseInt(msg.split(":")[1], 10);
             const mins = Math.ceil(retrySec / 60);
             const timeText = mins < 1 ? `${retrySec} seconds` : `${mins} minute${mins === 1 ? "" : "s"}`;
