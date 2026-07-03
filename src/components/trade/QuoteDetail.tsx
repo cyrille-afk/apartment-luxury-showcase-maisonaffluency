@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { supabase } from "@/integrations/supabase/client";
 import { hydrateQuotePricesFromPicks } from "@/lib/hydrateQuotePricesFromPicks";
-import { getFxRates, FALLBACK_RATES, getFxSource, summarizeFxSources, type FxSource } from "@/lib/fxRates";
+import { getFxRates, FALLBACK_RATES, getFxSource, summarizeFxSources, describeFxSource, type FxSource } from "@/lib/fxRates";
 import { FxSourceBadge } from "@/components/trade/FxSourceBadge";
 import { FxAppliedRates } from "@/components/trade/FxAppliedRates";
 
@@ -315,6 +315,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   const [fxRates, setFxRates] = useState<Record<string, number>>({});
   const [fxSource, setFxSource] = useState<FxSource>("identity");
   const [fxPairs, setFxPairs] = useState<Array<{ src: string; tgt: string; rate: number; source: FxSource }>>([]);
+  const [fxAppliedAt, setFxAppliedAt] = useState<Date | null>(null);
 
   const [tradeDiscount, setTradeDiscount] = useState(true);
   // GST defaults to ON only for SGD quotes; other currencies (EUR/USD/GBP) default OFF.
@@ -478,7 +479,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
       // Always include quote→target so the badge reflects the display
       // conversion itself even when every line is already in `currency`.
       if (displayCcy === "gbp" && currency !== "GBP") sourceCurrencies.add(currency);
-      if (sourceCurrencies.size === 0) { setFxRates({}); setFxSource("identity"); setFxPairs([]); return; }
+      if (sourceCurrencies.size === 0) { setFxRates({}); setFxSource("identity"); setFxPairs([]); setFxAppliedAt(null); return; }
       const pairs = Array.from(sourceCurrencies).map((src) => ({ src, tgt: targetCcy }));
       const rates = await getFxRates(pairs);
       setFxRates(rates);
@@ -491,6 +492,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
           source: getFxSource(p.src, p.tgt),
         })),
       );
+      setFxAppliedAt(new Date());
 
     };
     if (items.length > 0) fetchRates();
@@ -3216,6 +3218,40 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                               {formatPriceRaw(total, currency) || "TBD"}
                             </span>
                           </div>
+
+                          {/* FX audit — mirrors the compliance note printed on the PDF */}
+                          {fxPairs.length > 0 && (
+                            <div className="mt-3 pt-2 border-t border-dashed border-border/60 space-y-1">
+                              <div className="flex items-center justify-between gap-2">
+                                <span className="font-body text-[10px] uppercase tracking-wider text-muted-foreground">
+                                  FX applied
+                                </span>
+                                {fxAppliedAt && (
+                                  <span className="font-body text-[10px] text-muted-foreground tabular-nums">
+                                    {fxAppliedAt.toLocaleString(undefined, {
+                                      year: "numeric", month: "short", day: "2-digit",
+                                      hour: "2-digit", minute: "2-digit", timeZoneName: "short",
+                                    })}
+                                  </span>
+                                )}
+                              </div>
+                              <ul className="space-y-0.5">
+                                {fxPairs.map((p) => (
+                                  <li
+                                    key={`${p.src}_${p.tgt}`}
+                                    className="flex items-center justify-between gap-2 font-mono text-[10px] text-muted-foreground"
+                                  >
+                                    <span>1 {p.src} = {p.rate.toLocaleString(undefined, { minimumFractionDigits: 4, maximumFractionDigits: 4 })} {p.tgt}</span>
+                                    <span className="italic">{describeFxSource(p.source).label}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                              <p className="font-body text-[9px] leading-snug text-muted-foreground/70 italic">
+                                Rates snapshot at time of viewing. Final invoice uses the rate on the invoice date.
+                              </p>
+                            </div>
+                          )}
+
 
                           {/* 60/40 deposit/balance breakdown — shown when priced or later */}
                           {(isPriced || isConfirmed) && total > 0 && (
