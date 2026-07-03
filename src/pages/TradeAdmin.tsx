@@ -19,7 +19,41 @@ import ScrapeProducts from "@/components/trade/ScrapeProducts";
 import InstagramFeedAdmin from "@/components/trade/InstagramFeedAdmin";
 import OgRescrapeAdmin from "@/components/trade/OgRescrapeAdmin";
 import { Link } from "react-router-dom";
-import { Instagram, FileBox, Sparkles, Inbox, FileSpreadsheet, MapPin, AlertTriangle, ShieldCheck } from "lucide-react";
+import { Instagram, FileBox, Sparkles, Inbox, FileSpreadsheet, MapPin, AlertTriangle, ShieldCheck, Mail } from "lucide-react";
+
+/**
+ * Build a mailto: link that sends the applicant a personalised checklist of
+ * what they need to add for us to verify them as a trade professional.
+ * The checklist items are derived from the warn signals surfaced on the card
+ * so reviewers can request exactly what's missing in one click.
+ */
+function buildChecklistMailto(app: Application, signals: Signal[]): string | null {
+  const email = app.profiles?.email;
+  if (!email) return null;
+  const firstName = app.profiles?.first_name || "there";
+  const items: string[] = [];
+  const warns = signals.filter((s) => s.kind === "warn");
+  for (const s of warns) {
+    if (s.label.startsWith("Personal email")) items.push("A corporate email address on your firm's domain (not gmail/yahoo/etc.).");
+    else if (s.label.startsWith("Email domain ≠")) items.push("An email address on the same domain as your company website, or a note explaining the mismatch.");
+    else if (s.label === "No company website") items.push("A link to your firm's website or an online portfolio (Instagram / Houzz / Behance are fine).");
+    else if (s.label === "Cert claimed, no details") items.push("The name of your certifying body and your membership / registration number (e.g. RIBA, ASID, BIID, NCIDQ).");
+    else if (s.label.startsWith("Generic title")) items.push("A specific job title describing your role (e.g. Interior Designer, Principal, Studio Director).");
+    else if (s.label === "No introduction message") items.push("A short description of your practice and the type of projects you work on.");
+  }
+  if (items.length === 0) {
+    items.push("A brief note confirming your role, your firm, and one or two recent projects so we can complete verification.");
+  }
+  const bulletList = items.map((i) => `  • ${i}`).join("\n");
+  const subject = "Maison Affluency — completing your trade verification";
+  const body =
+    `Hello ${firstName},\n\n` +
+    `Thank you for applying to Maison Affluency Trade. To finish verifying you as a professional, could you send us the following:\n\n` +
+    `${bulletList}\n\n` +
+    `Once we have this we can activate your trade access. Just reply to this email.\n\n` +
+    `With thanks,\nMaison Affluency Trade Team`;
+  return `mailto:${encodeURIComponent(email)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+}
 
 // Free-email domains that don't tell us anything about the applicant's firm.
 // A personal address on a trade application isn't disqualifying on its own,
@@ -559,6 +593,19 @@ function InstagramAuditCard() {
 
                 {app.status === "pending" && isSuperAdmin && (
                   <div className="flex gap-2 shrink-0">
+                    {(() => {
+                      const href = buildChecklistMailto(app, signals);
+                      return href ? (
+                        <a
+                          href={href}
+                          className="p-2 rounded-full border border-primary/30 text-primary hover:bg-primary/10 transition-colors"
+                          title="Send verification checklist to applicant"
+                          aria-label="Send verification checklist"
+                        >
+                          <Mail className="h-4 w-4" />
+                        </a>
+                      ) : null;
+                    })()}
                     <button
                       onClick={() => setConfirmDialog({ app, action: "approved" })}
                       className="p-2 rounded-full border border-success/30 text-success hover:bg-success/10 transition-colors"
