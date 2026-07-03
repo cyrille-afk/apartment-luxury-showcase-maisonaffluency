@@ -24,6 +24,17 @@ export const splitQuoteFinishLabel = (label: string | null | undefined): string[
 const bySortOrder = (a: QuoteFinishSwatch, b: QuoteFinishSwatch) =>
   (a.sort_order ?? 9999) - (b.sort_order ?? 9999) || a.name.localeCompare(b.name);
 
+const STOP_TOKENS = new Set([
+  "fabric", "cat", "cata", "cate", "categorie", "category",
+  "com", "col", "colour", "color", "leather", "velvet", "boucle", "linen",
+  "wool", "cotton", "silk", "ral", "code", "ref",
+]);
+
+const significantTokens = (value: string): string[] =>
+  normalizeFinishKey(value)
+    .split(" ")
+    .filter((tok) => tok.length >= 3 && !STOP_TOKENS.has(tok) && !/^\d+$/.test(tok));
+
 export const findQuoteFinishSwatch = (
   candidates: Array<string | null | undefined>,
   swatches: QuoteFinishSwatch[],
@@ -58,6 +69,27 @@ export const findQuoteFinishSwatch = (
     if (fuzzy) return fuzzy;
   }
 
+  // Token-overlap fallback: strip noise words ("Fabric Cat.", numeric codes)
+  // and match on significant tokens. Handles labels like "Fabric Cat. Perfect
+  // Match" ↔ swatch "Perfect Match 10944795".
+  for (const candidate of candidates) {
+    const candTokens = significantTokens(candidate || "");
+    if (candTokens.length === 0) continue;
+    const candSet = new Set(candTokens);
+
+    let best: { swatch: QuoteFinishSwatch; score: number } | null = null;
+    for (const swatch of ordered) {
+      const swTokens = significantTokens(swatch.name);
+      if (swTokens.length === 0) continue;
+      const overlap = swTokens.filter((t) => candSet.has(t)).length;
+      if (overlap === 0) continue;
+      const strong = overlap === swTokens.length || overlap >= 2;
+      if (!strong) continue;
+      if (!best || overlap > best.score) best = { swatch, score: overlap };
+    }
+    if (best) return best.swatch;
+  }
+
   return null;
 };
 
@@ -67,12 +99,33 @@ export const findQuoteFinishSwatches = (
 ): QuoteFinishSwatch[] => {
   const seen = new Set<string>();
   const matches: QuoteFinishSwatch[] = [];
+  const pushMatch = (match: QuoteFinishSwatch | null | undefined) => {
+    if (!match) return;
+    const key = match.fabric_id || match.id || match.image_url || match.name;
+    if (!key || seen.has(key)) return;
+    seen.add(key);
+    matches.push(match);
+  };
+
+  const ordered = [...swatches]
+    .filter((s) => s?.name && s.image_url)
+    .sort(bySortOrder);
+
   for (const part of splitQuoteFinishLabel(variantLabel)) {
-    const match = findQuoteFinishSwatch([part], swatches);
-    const key = match?.fabric_id || match?.id || match?.image_url || match?.name;
-    if (match && key && !seen.has(key)) {
-      seen.add(key);
-      matches.push(match);
+    // Try single best-match first (exact / fuzzy / token-overlap).
+    pushMatch(findQuoteFinishSwatch([part], swatches));
+
+    // Additionally surface every swatch that shares the part's significant
+    // tokens — e.g. "Fabric Cat. Perfect Match" reveals all colourways in
+    // the Perfect Match category, mirroring the curator lightbox behaviour.
+    const partTokens = significantTokens(part);
+    if (partTokens.length === 0) continue;
+    const partSet = new Set(partTokens);
+    for (const swatch of ordered) {
+      const swTokens = significantTokens(swatch.name);
+      if (swTokens.length === 0) continue;
+      const allCovered = swTokens.every((t) => partSet.has(t));
+      if (allCovered) pushMatch(swatch);
     }
   }
   return matches;
