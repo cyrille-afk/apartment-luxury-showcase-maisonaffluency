@@ -27,7 +27,13 @@ import { Instagram, FileBox, Sparkles, Inbox, FileSpreadsheet, MapPin, AlertTria
  * The checklist items are derived from the warn signals surfaced on the card
  * so reviewers can request exactly what's missing in one click.
  */
-function buildChecklistMailto(app: Application, signals: Signal[]): string | null {
+function buildChecklist(app: Application, signals: Signal[]): {
+  to: string;
+  firstName: string;
+  subject: string;
+  body: string;
+  items: string[];
+} | null {
   const email = app.profiles?.email;
   if (!email) return null;
   const firstName = app.profiles?.first_name || "there";
@@ -52,7 +58,11 @@ function buildChecklistMailto(app: Application, signals: Signal[]): string | nul
     `${bulletList}\n\n` +
     `Once we have this we can activate your trade access. Just reply to this email.\n\n` +
     `With thanks,\nMaison Affluency Trade Team`;
-  return `mailto:${encodeURIComponent(email)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  return { to: email, firstName, subject, body, items };
+}
+
+function checklistMailto(c: { to: string; subject: string; body: string }): string {
+  return `mailto:${encodeURIComponent(c.to)}?subject=${encodeURIComponent(c.subject)}&body=${encodeURIComponent(c.body)}`;
 }
 
 // Free-email domains that don't tell us anything about the applicant's firm.
