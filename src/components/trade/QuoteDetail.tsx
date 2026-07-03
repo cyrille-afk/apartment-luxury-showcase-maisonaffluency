@@ -536,14 +536,21 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
         if (sourcePickIds.length > 0) {
           const { data: swRows } = await (supabase as any)
             .from("product_fabric_swatches_public")
-            .select("pick_id, fabric_id, name, image_url, sort_order, is_active")
+            .select("pick_id, fabric_id, name, image_url, category, supplier, sort_order, is_active")
             .in("pick_id", sourcePickIds)
             .order("sort_order", { ascending: true });
-          const byPick = new Map<string, { fabric_id?: string | null; name: string; image_url: string; sort_order?: number | null }[]>();
+          const byPick = new Map<string, { fabric_id?: string | null; name: string; image_url: string; category?: string | null; supplier?: string | null; sort_order?: number | null }[]>();
           for (const row of (swRows || []) as any[]) {
             if (!row || row.is_active === false || !row.pick_id || !row.name || !row.image_url) continue;
             const list = byPick.get(row.pick_id) || [];
-            list.push({ fabric_id: row.fabric_id ?? null, name: String(row.name), image_url: String(row.image_url), sort_order: row.sort_order ?? null });
+            list.push({
+              fabric_id: row.fabric_id ?? null,
+              name: String(row.name),
+              image_url: String(row.image_url),
+              category: row.category ?? null,
+              supplier: row.supplier ?? null,
+              sort_order: row.sort_order ?? null,
+            });
             byPick.set(row.pick_id, list);
           }
           loadedItems = loadedItems.map((item) => {
@@ -710,14 +717,24 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
             ? (p.brand_name as string).split(" - ")[0].trim()
             : (p.brand_name as string),
         }));
-      const meta: Record<string, { variants: Array<{ label: string; price_cents: number | null }>; currency: string | null; pickId: string | null }> = {};
+      const meta: Record<string, { variants: Array<{ label: string; base: string | null; top: string | null; size: string | null; rawLabel: string | null; price_cents: number | null }>; currency: string | null; pickId: string | null }> = {};
       for (const p of data as any[]) {
         const raw = Array.isArray(p.size_variants) ? p.size_variants : [];
         const variants = raw
-          .map((v: any) => ({
-            label: [v?.base, v?.top, v?.size, v?.label].filter(Boolean).join(" · "),
-            price_cents: typeof v?.price_cents === "number" ? v.price_cents : null,
-          }))
+          .map((v: any) => {
+            const base = v?.base ? String(v.base).trim() : null;
+            const top = v?.top ? String(v.top).trim() : null;
+            const size = v?.size ? String(v.size).trim() : null;
+            const rawLabel = v?.label ? String(v.label).trim() : null;
+            return {
+              label: [base, top, size, rawLabel].filter(Boolean).join(" · "),
+              base,
+              top,
+              size,
+              rawLabel,
+              price_cents: typeof v?.price_cents === "number" ? v.price_cents : null,
+            };
+          })
           .filter((v: any) => v.label);
         if (variants.length > 0) {
           meta[p.id as string] = { variants, currency: (p.currency as string) || null, pickId: (p.source_pick_id as string) || null };
@@ -748,7 +765,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     (async () => {
       const { data } = await (supabase as any)
         .from("product_fabric_swatches_public")
-        .select("fabric_id, name, image_url, sort_order, is_active")
+        .select("fabric_id, name, image_url, category, supplier, sort_order, is_active")
         .eq("pick_id", pickId)
         .order("sort_order", { ascending: true });
       if (cancelled) return;
@@ -760,6 +777,8 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
           fabric_id: r.fabric_id ?? null,
           name: String(r.name),
           image_url: String(r.image_url),
+          category: r.category ?? null,
+          supplier: r.supplier ?? null,
           sort_order: r.sort_order ?? null,
         }));
       setPendingSwatchLib(lib);
