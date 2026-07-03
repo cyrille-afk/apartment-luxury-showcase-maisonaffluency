@@ -983,18 +983,46 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
       });
     };
 
+    // Map tool names → the pending kinds we swap them into. Tearsheet lives
+    // under the plain "proposal" kind; the others each have their own.
+    const swapPendingWithReal = (
+      prev: TimelineItem[],
+      toolCallId: string | null,
+      toolName: string,
+      real: TimelineItem,
+    ): TimelineItem[] => {
+      // Prefer exact tool_call_id match; fall back to the first pending item
+      // of the same tool name (streaming may emit tool_start without an id).
+      let matchIdx = -1;
+      if (toolCallId) {
+        matchIdx = prev.findIndex(
+          (t) => t.kind === "pending_proposal" && t.toolCallId === toolCallId,
+        );
+      }
+      if (matchIdx === -1) {
+        matchIdx = prev.findIndex(
+          (t) => t.kind === "pending_proposal" && t.tool === toolName,
+        );
+      }
+      if (matchIdx === -1) return [...prev, real];
+      const copy = prev.slice();
+      copy[matchIdx] = real;
+      return copy;
+    };
+
     const handleProposal = (proposal: ConciergeProposal) => {
       armStall();
+      const tcid = proposal.tool_call_id ?? null;
       if (proposal.tool === "draft_quote" || proposal.tool === "add_to_quote") {
-        setTimeline((prev) => [...prev, { kind: "quote_proposal", proposal }]);
+        setTimeline((prev) => swapPendingWithReal(prev, tcid, proposal.tool, { kind: "quote_proposal", proposal }));
         return;
       }
       if (proposal.tool === "propose_ffe_rows") {
-        setTimeline((prev) => [...prev, { kind: "ffe_proposal", proposal }]);
+        setTimeline((prev) => swapPendingWithReal(prev, tcid, proposal.tool, { kind: "ffe_proposal", proposal }));
         return;
       }
       if (proposal.tool === "prepare_visualization_brief") {
-        setTimeline((prev) => [...prev, { kind: "viz_brief", proposal }]);
+        setTimeline((prev) => swapPendingWithReal(prev, tcid, proposal.tool, { kind: "viz_brief", proposal }));
         return;
       }
       // Tearsheet proposal — compute which picks are NEW relative to the
@@ -1003,8 +1031,9 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
         lastProposal ? lastProposal.proposal.preview.map((p) => p.id) : [],
       );
       const newPickIds = proposal.preview.map((p) => p.id).filter((id) => !prevIds.has(id));
-      setTimeline((prev) => [...prev, { kind: "proposal", proposal, newPickIds }]);
+      setTimeline((prev) => swapPendingWithReal(prev, tcid, proposal.tool, { kind: "proposal", proposal, newPickIds }));
     };
+
 
     // Active project from cross-page session storage (set by useProjectFilter).
     let projectId: string | null = null;
