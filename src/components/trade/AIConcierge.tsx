@@ -1117,12 +1117,14 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
             pushRetry(text, friendly);
           }
           setStreaming(false);
+          setTimeline((prev) => prev.filter((t) => t.kind !== "pending_proposal"));
         },
         signal: controller.signal,
       });
     } catch {
       clearStallTimer();
       setStreaming(false);
+      setTimeline((prev) => prev.filter((t) => t.kind !== "pending_proposal"));
       // If the throw wasn't the user aborting, offer a retry.
       if (!controller.signal.aborted) {
         pushRetry(text, "The connection to the concierge dropped.");
