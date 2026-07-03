@@ -252,9 +252,11 @@ const TradeAdmin = () => {
   const [fetching, setFetching] = useState(true);
   const [filter, setFilter] = useState<"pending" | "approved" | "rejected" | "all">("pending");
   const [confirmDialog, setConfirmDialog] = useState<{ app: Application; action: "approved" | "rejected" } | null>(null);
+  const [sendingChecklist, setSendingChecklist] = useState(false);
   const [checklistPreview, setChecklistPreview] = useState<{
     app: Application;
     to: string;
+    firstName: string;
     subject: string;
     body: string;
     items: string[];
@@ -708,9 +710,11 @@ function InstagramAuditCard() {
             </div>
           )}
           <AlertDialogFooter>
-            <AlertDialogCancel className="font-body text-xs">Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              className="font-body text-xs"
+            <AlertDialogCancel className="font-body text-xs" disabled={sendingChecklist}>Cancel</AlertDialogCancel>
+            <button
+              type="button"
+              className="inline-flex h-9 items-center justify-center rounded-md border border-input bg-background px-3 font-body text-xs shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground disabled:pointer-events-none disabled:opacity-50"
+              disabled={sendingChecklist}
               onClick={() => {
                 if (checklistPreview) {
                   window.location.href = checklistMailto(checklistPreview);
@@ -719,7 +723,49 @@ function InstagramAuditCard() {
               }}
             >
               Open in mail client
-            </AlertDialogAction>
+            </button>
+            <button
+              type="button"
+              className="inline-flex h-9 items-center justify-center rounded-md bg-primary px-4 font-body text-xs text-primary-foreground shadow hover:bg-primary/90 disabled:pointer-events-none disabled:opacity-50"
+              disabled={sendingChecklist}
+              onClick={async () => {
+                if (!checklistPreview) return;
+                setSendingChecklist(true);
+                try {
+                  const { data, error } = await supabase.functions.invoke("send-transactional-email", {
+                    body: {
+                      templateName: "trade-verification-checklist",
+                      recipientEmail: checklistPreview.to,
+                      idempotencyKey: `trade-checklist-${checklistPreview.app.id}-${Date.now()}`,
+                      templateData: {
+                        firstName: checklistPreview.firstName,
+                        items: checklistPreview.items,
+                      },
+                    },
+                  });
+                  if (error) throw error;
+                  if (data && data.success === false) {
+                    throw new Error(data.reason || "Send failed");
+                  }
+                  toast({
+                    title: "Checklist sent",
+                    description: `Emailed ${checklistPreview.to}. Replies go to concierge@myaffluency.com.`,
+                  });
+                  setChecklistPreview(null);
+                } catch (e: any) {
+                  console.error("[send-checklist]", e);
+                  toast({
+                    title: "Send failed",
+                    description: e?.message || "Could not send the checklist. Try the mail client instead.",
+                    variant: "destructive",
+                  });
+                } finally {
+                  setSendingChecklist(false);
+                }
+              }}
+            >
+              {sendingChecklist ? "Sending…" : "Send now"}
+            </button>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
