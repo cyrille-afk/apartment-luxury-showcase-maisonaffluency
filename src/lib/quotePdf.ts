@@ -974,10 +974,25 @@ function drawTable(
     doc.setTextColor(FG[0], FG[1], FG[2]);
     doc.text(String(line.quantity), xQty + colQty / 2, y + 20, { align: "center" });
     {
-      // Always render the unit price in the quote's display currency so a
-      // single-currency quote stays single-currency. The source-currency
-      // audit figure is intentionally omitted from the customer PDF.
-      doc.text(fmtMoney(line.unitPriceCents, args.currency), xUnit + colUnit - 4, y + 20, { align: "right" });
+      // Dual-currency display: when the line's source currency differs from
+      // the quote currency, show the source-currency unit price (e.g.
+      // "EUR 1,155.00") so the trade user can audit the FX conversion at
+      // a glance. AMOUNT remains in the quote currency.
+      const srcCcy = (line.sourceCurrency || "").toUpperCase();
+      const showSource =
+        srcCcy &&
+        srcCcy !== args.currency.toUpperCase() &&
+        line.sourceUnitPriceCents != null;
+      if (showSource) {
+        doc.text(
+          fmtMoney(line.sourceUnitPriceCents!, srcCcy),
+          xUnit + colUnit - 4,
+          y + 20,
+          { align: "right" },
+        );
+      } else {
+        doc.text(fmtMoney(line.unitPriceCents, args.currency), xUnit + colUnit - 4, y + 20, { align: "right" });
+      }
     }
     doc.setFont("helvetica", "bold");
     doc.text(fmtMoney(line.lineTotalCents, args.currency), rowRight - 4, y + 20, { align: "right" });
