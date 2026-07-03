@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
-import { Check, X, ExternalLink, ClipboardList, Minus, Plus, FolderOpen } from "lucide-react";
+import { Check, X, ExternalLink, ClipboardList, Minus, Plus, FolderOpen, Repeat } from "lucide-react";
+import { buildSwapPrompt, sendConciergePrefill } from "@/lib/conciergePrefill";
 import { Link } from "react-router-dom";
 import { commitProposal, type FfeProposal } from "@/lib/tradeConciergeStream";
 import { supabase } from "@/integrations/supabase/client";
