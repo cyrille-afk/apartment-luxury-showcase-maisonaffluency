@@ -4154,7 +4154,7 @@ serve(async (req) => {
                   },
                   preview,
                 };
-                controller.enqueue(encoder.encode(`event: proposal\ndata: ${JSON.stringify(proposal)}\n\n`));
+                emitProposalWithRequirementsDiff(proposal, preview);
               } else {
                 const quoteId: string | null = typeof parsed.quote_id === "string" ? parsed.quote_id : null;
                 if (!quoteId) continue;
