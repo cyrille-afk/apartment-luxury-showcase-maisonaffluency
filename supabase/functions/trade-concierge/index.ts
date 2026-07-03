@@ -181,11 +181,21 @@ const CB_COOLDOWN_MS = Number(Deno.env.get("CB_COOLDOWN_MS") ?? "60000");
 //                        `event: proposal` we emit `event: proposal_blocked`
 //                        with the violations so the UI can show a refusal
 //                        and prompt the assistant to re-search.
-const REQUIREMENTS_ENFORCEMENT: "open" | "closed" =
-  (Deno.env.get("CONCIERGE_REQUIREMENTS_ENFORCEMENT") || "").toLowerCase() === "closed" ||
-  (Deno.env.get("CONCIERGE_REQUIREMENTS_STRICT") || "").toLowerCase() === "true"
-    ? "closed"
-    : "open";
+export function resolveRequirementsEnforcement(env: {
+  CONCIERGE_REQUIREMENTS_ENFORCEMENT?: string | null;
+  CONCIERGE_REQUIREMENTS_STRICT?: string | null;
+}): "open" | "closed" {
+  const explicit = (env.CONCIERGE_REQUIREMENTS_ENFORCEMENT || "").toLowerCase().trim();
+  if (explicit === "closed") return "closed";
+  if (explicit === "open") return "open";
+  const legacy = (env.CONCIERGE_REQUIREMENTS_STRICT || "").toLowerCase().trim();
+  if (legacy === "true" || legacy === "1" || legacy === "yes") return "closed";
+  return "open";
+}
+const REQUIREMENTS_ENFORCEMENT: "open" | "closed" = resolveRequirementsEnforcement({
+  CONCIERGE_REQUIREMENTS_ENFORCEMENT: Deno.env.get("CONCIERGE_REQUIREMENTS_ENFORCEMENT"),
+  CONCIERGE_REQUIREMENTS_STRICT: Deno.env.get("CONCIERGE_REQUIREMENTS_STRICT"),
+});
 console.log(`[concierge] requirements enforcement: ${REQUIREMENTS_ENFORCEMENT}`);
 
 const breaker = createBreaker({
