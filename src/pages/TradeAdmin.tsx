@@ -132,6 +132,59 @@ function computeSignals(app: Application): Signal[] {
   return signals;
 }
 
+/**
+ * Roll the per-signal breakdown up into a single "Professional status"
+ * verdict shown at the top of the card. The rules are intentionally
+ * conservative — admins are still expected to click through — but they let a
+ * reviewer triage a long queue at a glance:
+ *
+ *   verified  — corporate email matches website AND no warn signals.
+ *   pro       — at least one ok signal (cert details OR matching corp email)
+ *               AND no more than one warn signal.
+ *   review    — mixed / thin: 1–3 warn signals and nothing conclusive.
+ *   unverified— 4+ warn signals OR every signal is a warn (Julie's case).
+ */
+type ProStatus = "verified" | "pro" | "review" | "unverified";
+
+function classifyProStatus(signals: Signal[]): {
+  status: ProStatus;
+  label: string;
+  hint: string;
+} {
+  const warns = signals.filter((s) => s.kind === "warn");
+  const oks = signals.filter((s) => s.kind === "ok");
+  const emailMatchesWebsite = oks.some((s) => s.label.startsWith("Email matches "));
+  const hasCertDetails = oks.some((s) => s.label === "Cert details provided");
+
+  if (emailMatchesWebsite && warns.length === 0) {
+    return {
+      status: "verified",
+      label: "Verified Pro",
+      hint: "Corporate email matches company website and no red flags — safe to approve after a quick sanity check.",
+    };
+  }
+  if ((emailMatchesWebsite || hasCertDetails) && warns.length <= 1) {
+    return {
+      status: "pro",
+      label: "Likely Pro",
+      hint: "Strong professional signal present but one soft flag to confirm.",
+    };
+  }
+  if (warns.length >= 4 || (oks.length === 0 && warns.length > 0)) {
+    return {
+      status: "unverified",
+      label: "Unverified",
+      hint: "No professional signal on file — request website, portfolio, or credentials before approving.",
+    };
+  }
+  return {
+    status: "review",
+    label: "Needs Review",
+    hint: "Mixed signals — inspect the details below before approving or rejecting.",
+  };
+}
+
+
 interface Application {
   id: string;
   user_id: string;
