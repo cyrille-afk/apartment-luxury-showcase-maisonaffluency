@@ -3,7 +3,18 @@ export interface QuoteFinishSwatch {
   id?: string | null;
   name: string;
   image_url?: string | null;
+  category?: string | null;
+  supplier?: string | null;
   sort_order?: number | null;
+}
+
+export interface QuoteFinishVariant {
+  label?: string | null;
+  base?: string | null;
+  top?: string | null;
+  size?: string | null;
+  rawLabel?: string | null;
+  price_cents?: number | null;
 }
 
 const normalizeFinishKey = (value: string | null | undefined): string =>
@@ -34,6 +45,31 @@ const significantTokens = (value: string): string[] =>
   normalizeFinishKey(value)
     .split(" ")
     .filter((tok) => tok.length >= 3 && !STOP_TOKENS.has(tok) && !/^\d+$/.test(tok));
+
+const variantCandidates = (variant: string | QuoteFinishVariant | null | undefined): string[] => {
+  if (!variant) return [];
+  if (typeof variant === "string") return splitQuoteFinishLabel(variant);
+  const parts = [variant.base, variant.top, variant.rawLabel, variant.label].filter(Boolean) as string[];
+  return parts.flatMap((part) => splitQuoteFinishLabel(part));
+};
+
+const MATERIAL_CATEGORY_HINTS: Record<string, string[]> = {
+  Stone: ["stone", "marble", "travertine", "onyx", "limestone", "granite", "quartzite", "alabaster"],
+  Wood: ["wood", "oak", "walnut", "ash", "teak", "cedar", "mahogany", "ebony", "maple"],
+  Metal: ["metal", "brass", "bronze", "steel", "iron", "nickel", "chrome", "aluminum", "aluminium"],
+  Glass: ["glass", "crystal"],
+  Ceramic: ["ceramic", "raku", "porcelain", "terracotta"],
+  "Fabric & Leather": ["fabric", "leather", "velvet", "linen", "boucle", "wool", "cotton", "silk", "suede"],
+};
+
+const matchingMaterialCategories = (value: string): Set<string> => {
+  const tokens = new Set(normalizeFinishKey(value).split(" ").filter(Boolean));
+  const categories = new Set<string>();
+  for (const [category, hints] of Object.entries(MATERIAL_CATEGORY_HINTS)) {
+    if (hints.some((hint) => tokens.has(hint))) categories.add(category);
+  }
+  return categories;
+};
 
 export const findQuoteFinishSwatch = (
   candidates: Array<string | null | undefined>,
@@ -94,7 +130,7 @@ export const findQuoteFinishSwatch = (
 };
 
 export const findQuoteFinishSwatches = (
-  variantLabel: string | null | undefined,
+  variant: string | QuoteFinishVariant | null | undefined,
   swatches: QuoteFinishSwatch[],
 ): QuoteFinishSwatch[] => {
   const seen = new Set<string>();
@@ -111,7 +147,7 @@ export const findQuoteFinishSwatches = (
     .filter((s) => s?.name && s.image_url)
     .sort(bySortOrder);
 
-  for (const part of splitQuoteFinishLabel(variantLabel)) {
+  for (const part of variantCandidates(variant)) {
     // Try single best-match first (exact / fuzzy / token-overlap).
     pushMatch(findQuoteFinishSwatch([part], swatches));
 
@@ -126,6 +162,18 @@ export const findQuoteFinishSwatches = (
       if (swTokens.length === 0) continue;
       const allCovered = swTokens.every((t) => partSet.has(t));
       if (allCovered) pushMatch(swatch);
+    }
+
+    // Product pages show material swatches grouped by category. Variant labels
+    // often say "Marble 1/2" or "Oak" while the actual library contains named
+    // finishes such as "Marble Laguetta". When exact names are absent, fall
+    // back to the same material category rather than showing a false empty state.
+    const partCategories = matchingMaterialCategories(part);
+    if (partCategories.size > 0) {
+      for (const swatch of ordered) {
+        const swatchCategory = swatch.category?.trim();
+        if (swatchCategory && partCategories.has(swatchCategory)) pushMatch(swatch);
+      }
     }
   }
   return matches;
