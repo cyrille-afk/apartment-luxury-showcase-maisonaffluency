@@ -118,6 +118,45 @@ async function installConciergeStub(page: Page) {
         })}\n\n`,
         `data: [DONE]\n\n`,
       ],
+      // Same shape as `blocked_palette`, but the violation is a mixed-currency
+      // `budget_currency_mismatch` co-firing with `budget_over` — mirrors the
+      // Inspector's real fail-closed payload when the assembled tearsheet
+      // sums items priced in USD/GBP against an EUR budget. The client
+      // contract is identical to the other blocked paths: no `proposal` frame
+      // ever arrives, so the skeleton MUST clear on `onDone` and no card MUST
+      // ever mount.
+      blocked_currency: [
+        `event: request_id\ndata: ${JSON.stringify({ request_id: "pw-req" })}\n\n`,
+        `event: tool_start\ndata: ${JSON.stringify({
+          tool: "propose_tearsheet",
+          tool_call_id: "tc-pw",
+          index: 0,
+          request_id: "pw-req",
+        })}\n\n`,
+        { delayMs: 400 },
+        `event: proposal_blocked\ndata: ${JSON.stringify({
+          request_id: "pw-req",
+          tool: "propose_tearsheet",
+          tool_call_id: "tc-pw",
+          reason: "requirements_violation",
+          coverage: [],
+          violations: [
+            {
+              kind: "budget_currency_mismatch",
+              requested: "EUR",
+              found: ["GBP", "USD"],
+            },
+            {
+              kind: "budget_over",
+              requested_cents: 1_000_000,
+              total_cents: 1_400_000,
+              currency: "EUR",
+              over_by_cents: 400_000,
+            },
+          ],
+        })}\n\n`,
+        `data: [DONE]\n\n`,
+      ],
     };
 
     (window as any).fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
