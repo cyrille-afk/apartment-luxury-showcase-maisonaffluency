@@ -5413,6 +5413,20 @@ serve(async (req) => {
                     if (tc.function?.name) buf.name = tc.function.name;
                     if (typeof tc.function?.arguments === "string") buf.argsText += tc.function.arguments;
                     toolCallBuffers.set(idx, buf);
+                    // Emit an early `tool_start` frame the first time we see a
+                    // card-producing tool name for this index. The client renders
+                    // a skeleton card immediately while the model is still
+                    // streaming the tool arguments.
+                    if (buf.name && CARD_TOOL_NAMES.has(buf.name) && !toolStartEmittedIdx.has(idx)) {
+                      toolStartEmittedIdx.add(idx);
+                      const startFrame = {
+                        tool: buf.name,
+                        tool_call_id: buf.id ?? null,
+                        index: idx,
+                        request_id: requestId,
+                      };
+                      controller.enqueue(encoder.encode(`event: tool_start\ndata: ${JSON.stringify(startFrame)}\n\n`));
+                    }
                   }
                   // Don't forward raw tool_call deltas to the client; we emit a proposal event instead.
                   continue;
