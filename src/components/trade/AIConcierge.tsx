@@ -1889,6 +1889,9 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
                   />
                 );
               }
+              if (item.kind === "pending_proposal") {
+                return <PendingProposalSkeleton key={i} tool={item.tool} />;
+              }
               if (item.kind !== "proposal") return null;
               return (
                 <TearsheetProposalCard
