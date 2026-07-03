@@ -46,9 +46,20 @@ const TradeVerificationChecklistEmail = ({ firstName, items = [] }: Props) => (
             ))}
           </ul>
         )}
+        {editUrl && (
+          <Section style={{ textAlign: 'center' as const, margin: '28px 0' }}>
+            <Link href={editUrl} style={ctaButton}>
+              Complete your application
+            </Link>
+            <Text style={ctaHint}>
+              This secure link lets you update your details in your existing application —
+              no need to re-apply. It expires in 14 days.
+            </Text>
+          </Section>
+        )}
         <Text style={text}>
-          Once we have this we can activate your trade access. Please reply to
-          this email or write to{' '}
+          Once we have this we can activate your trade access. Prefer email? Just reply to
+          this message or write to{' '}
           <Link href={`mailto:${REPLY_TO}`} style={link}>{REPLY_TO}</Link>.
         </Text>
         <Text style={footer}>
