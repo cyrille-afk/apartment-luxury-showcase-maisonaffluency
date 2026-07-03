@@ -157,6 +157,7 @@ export type VisualizationBriefProposal = {
     source_image_url: string | null;
   };
   preview: PickPreview[];
+  requirements_validation?: RequirementsValidation;
 };
 
 export type ConciergeProposal = TearsheetProposal | QuoteProposal | FfeProposal | VisualizationBriefProposal;
