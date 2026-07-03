@@ -3926,6 +3926,18 @@ serve(async (req) => {
 
     // tool_calls arrive as fragments; key by index
     const toolCallBuffers = new Map<number, { id?: string; name?: string; argsText: string }>();
+    // Card-producing tools that should trigger an early `event: tool_start` frame
+    // so the client can render a skeleton card immediately, before the completed
+    // `event: proposal` frame arrives at end-of-turn.
+    const CARD_TOOL_NAMES = new Set([
+      "propose_tearsheet",
+      "add_to_tearsheet",
+      "draft_quote",
+      "add_to_quote",
+      "propose_ffe_rows",
+      "prepare_visualization_brief",
+    ]);
+    const toolStartEmittedIdx = new Set<number>();
     // Captured payload of `extract_requirements` for this turn. Populated when
     // the model emits that tool call; consumed by the Inspector Agent to diff
     // the assembled card against the user's declared slots/typologies/counts.
@@ -5401,6 +5413,20 @@ serve(async (req) => {
                     if (tc.function?.name) buf.name = tc.function.name;
                     if (typeof tc.function?.arguments === "string") buf.argsText += tc.function.arguments;
                     toolCallBuffers.set(idx, buf);
+                    // Emit an early `tool_start` frame the first time we see a
+                    // card-producing tool name for this index. The client renders
+                    // a skeleton card immediately while the model is still
+                    // streaming the tool arguments.
+                    if (buf.name && CARD_TOOL_NAMES.has(buf.name) && !toolStartEmittedIdx.has(idx)) {
+                      toolStartEmittedIdx.add(idx);
+                      const startFrame = {
+                        tool: buf.name,
+                        tool_call_id: buf.id ?? null,
+                        index: idx,
+                        request_id: requestId,
+                      };
+                      controller.enqueue(encoder.encode(`event: tool_start\ndata: ${JSON.stringify(startFrame)}\n\n`));
+                    }
                   }
                   // Don't forward raw tool_call deltas to the client; we emit a proposal event instead.
                   continue;

@@ -8,6 +8,7 @@ import { TearsheetProposalCard } from "@/components/trade/concierge/TearsheetPro
 import { QuoteProposalCard } from "@/components/trade/concierge/QuoteProposalCard";
 import { FfeProposalCard } from "@/components/trade/concierge/FfeProposalCard";
 import { VisualizationBriefCard, VIZ_BRIEF_INCOMING_KEY } from "@/components/trade/concierge/VisualizationBriefCard";
+import { PendingProposalSkeleton } from "@/components/trade/concierge/PendingProposalSkeleton";
 import { EscalationCard } from "@/components/trade/concierge/EscalationCard";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
@@ -24,12 +25,20 @@ import {
 export type ConciergeQuickAction = { label: string; prompt: string; primary?: boolean };
 
 export type TimelineAttachment = { name: string; kind: "image" | "pdf"; previewUrl?: string };
+type PendingProposalTool =
+  | "propose_tearsheet"
+  | "add_to_tearsheet"
+  | "draft_quote"
+  | "add_to_quote"
+  | "propose_ffe_rows"
+  | "prepare_visualization_brief";
 type TimelineItem =
   | { kind: "msg"; role: "user" | "assistant"; content: string; actions?: ConciergeQuickAction[]; onboarding?: boolean; sourceContent?: string; sourceActions?: ConciergeQuickAction[]; attachments?: TimelineAttachment[] }
   | { kind: "proposal"; proposal: TearsheetProposal; resolved?: "approved" | "discarded"; excluded?: string[]; newPickIds?: string[] }
   | { kind: "quote_proposal"; proposal: QuoteProposal; resolved?: "approved" | "discarded" }
   | { kind: "ffe_proposal"; proposal: FfeProposal; resolved?: "approved" | "discarded" }
   | { kind: "viz_brief"; proposal: VisualizationBriefProposal; resolved?: "opened" | "discarded" }
+  | { kind: "pending_proposal"; tool: PendingProposalTool; toolCallId: string | null; index: number }
   | { kind: "escalation"; sentiment: string; intent: string; excerpt: ChatMessage[]; resolved?: "requested" | "dismissed" }
   | { kind: "retry"; text: string; reason: string };
 
@@ -975,18 +984,46 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
       });
     };
 
+    // Map tool names → the pending kinds we swap them into. Tearsheet lives
+    // under the plain "proposal" kind; the others each have their own.
+    const swapPendingWithReal = (
+      prev: TimelineItem[],
+      toolCallId: string | null,
+      toolName: string,
+      real: TimelineItem,
+    ): TimelineItem[] => {
+      // Prefer exact tool_call_id match; fall back to the first pending item
+      // of the same tool name (streaming may emit tool_start without an id).
+      let matchIdx = -1;
+      if (toolCallId) {
+        matchIdx = prev.findIndex(
+          (t) => t.kind === "pending_proposal" && t.toolCallId === toolCallId,
+        );
+      }
+      if (matchIdx === -1) {
+        matchIdx = prev.findIndex(
+          (t) => t.kind === "pending_proposal" && t.tool === toolName,
+        );
+      }
+      if (matchIdx === -1) return [...prev, real];
+      const copy = prev.slice();
+      copy[matchIdx] = real;
+      return copy;
+    };
+
     const handleProposal = (proposal: ConciergeProposal) => {
       armStall();
+      const tcid = proposal.tool_call_id ?? null;
       if (proposal.tool === "draft_quote" || proposal.tool === "add_to_quote") {
-        setTimeline((prev) => [...prev, { kind: "quote_proposal", proposal }]);
+        setTimeline((prev) => swapPendingWithReal(prev, tcid, proposal.tool, { kind: "quote_proposal", proposal }));
         return;
       }
       if (proposal.tool === "propose_ffe_rows") {
-        setTimeline((prev) => [...prev, { kind: "ffe_proposal", proposal }]);
+        setTimeline((prev) => swapPendingWithReal(prev, tcid, proposal.tool, { kind: "ffe_proposal", proposal }));
         return;
       }
       if (proposal.tool === "prepare_visualization_brief") {
-        setTimeline((prev) => [...prev, { kind: "viz_brief", proposal }]);
+        setTimeline((prev) => swapPendingWithReal(prev, tcid, proposal.tool, { kind: "viz_brief", proposal }));
         return;
       }
       // Tearsheet proposal — compute which picks are NEW relative to the
@@ -995,8 +1032,9 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
         lastProposal ? lastProposal.proposal.preview.map((p) => p.id) : [],
       );
       const newPickIds = proposal.preview.map((p) => p.id).filter((id) => !prevIds.has(id));
-      setTimeline((prev) => [...prev, { kind: "proposal", proposal, newPickIds }]);
+      setTimeline((prev) => swapPendingWithReal(prev, tcid, proposal.tool, { kind: "proposal", proposal, newPickIds }));
     };
+
 
     // Active project from cross-page session storage (set by useProjectFilter).
     let projectId: string | null = null;
@@ -1010,6 +1048,31 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
         lang,
         onDelta: upsertAssistant,
         onProposal: handleProposal,
+        onToolStart: (ev) => {
+          armStall();
+          setTimeline((prev) => {
+            // Guard against duplicates if the server re-emits (defensive).
+            if (
+              prev.some(
+                (t) =>
+                  t.kind === "pending_proposal" &&
+                  ((ev.tool_call_id && t.toolCallId === ev.tool_call_id) ||
+                    (!ev.tool_call_id && t.tool === ev.tool && t.index === ev.index)),
+              )
+            ) {
+              return prev;
+            }
+            return [
+              ...prev,
+              {
+                kind: "pending_proposal",
+                tool: ev.tool,
+                toolCallId: ev.tool_call_id,
+                index: ev.index,
+              },
+            ];
+          });
+        },
         onRequestId: (rid) => {
           setLastRequestId(rid);
           setLastInspectorCount(0);
@@ -1028,6 +1091,9 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
         onDone: () => {
           clearStallTimer();
           setStreaming(false);
+          // Drop any skeleton placeholders that never resolved into a real
+          // proposal (e.g. Inspector fail-closed → `proposal_blocked`).
+          setTimeline((prev) => prev.filter((t) => t.kind !== "pending_proposal"));
         },
         onError: (msg) => {
           clearStallTimer();
@@ -1052,12 +1118,14 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
             pushRetry(text, friendly);
           }
           setStreaming(false);
+          setTimeline((prev) => prev.filter((t) => t.kind !== "pending_proposal"));
         },
         signal: controller.signal,
       });
     } catch {
       clearStallTimer();
       setStreaming(false);
+      setTimeline((prev) => prev.filter((t) => t.kind !== "pending_proposal"));
       // If the throw wasn't the user aborting, offer a retry.
       if (!controller.signal.aborted) {
         pushRetry(text, "The connection to the concierge dropped.");
@@ -1821,6 +1889,9 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
                     }}
                   />
                 );
+              }
+              if (item.kind === "pending_proposal") {
+                return <PendingProposalSkeleton key={i} tool={item.tool} />;
               }
               if (item.kind !== "proposal") return null;
               return (
