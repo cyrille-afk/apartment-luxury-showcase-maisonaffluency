@@ -187,3 +187,69 @@ export function buildInspectorGroundTruth(
   }
   return out;
 }
+
+// Build a single structured log record describing one Inspector run.
+// Emitted as one JSON line via console.log so it's greppable in edge logs
+// and joinable to a request via request_id.
+export type InspectorLogRecord = {
+  tag: "concierge_inspector";
+  request_id: string;
+  ts: string;
+  ok: boolean;
+  ms: number;
+  reason?: string;
+  card_types: string[];
+  card_totals: number[];
+  brand_counts: Record<string, number>;
+  prose_len: number;
+  corrected_len: number;
+  changed: boolean;
+  corrections_count: number;
+  corrections: Array<{ original: string; replacement: string; reason: string }>;
+  original_prose: string;
+  corrected_prose: string;
+  ground_truth: InspectorGroundTruth;
+};
+
+export function buildInspectorLogRecord(opts: {
+  requestId: string;
+  originalProse: string;
+  result: InspectorResult;
+  groundTruth: InspectorGroundTruth;
+}): InspectorLogRecord {
+  const { requestId, originalProse, result, groundTruth } = opts;
+  const aggregatedBrands: Record<string, number> = {};
+  for (const c of groundTruth.cards) {
+    for (const [k, v] of Object.entries(c.brand_counts || {})) {
+      aggregatedBrands[k] = (aggregatedBrands[k] || 0) + v;
+    }
+  }
+  const clip = (s: string, n: number) => (s.length > n ? s.slice(0, n) + "…" : s);
+  return {
+    tag: "concierge_inspector",
+    request_id: requestId,
+    ts: new Date().toISOString(),
+    ok: result.ok,
+    ms: result.ms,
+    reason: result.reason,
+    card_types: groundTruth.cards.map((c) => c.tool),
+    card_totals: groundTruth.cards.map((c) => c.total),
+    brand_counts: aggregatedBrands,
+    prose_len: originalProse.length,
+    corrected_len: result.corrected_prose.length,
+    changed: result.ok && result.corrected_prose.trim() !== originalProse.trim(),
+    corrections_count: result.corrections.length,
+    corrections: result.corrections,
+    original_prose: clip(originalProse, 4000),
+    corrected_prose: clip(result.corrected_prose, 4000),
+    ground_truth: groundTruth,
+  };
+}
+
+export function logInspectorRun(record: InspectorLogRecord): void {
+  try {
+    console.log(JSON.stringify(record));
+  } catch {
+    console.log(`[concierge_inspector] log-serialize-failed req=${record.request_id}`);
+  }
+}
