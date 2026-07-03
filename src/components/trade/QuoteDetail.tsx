@@ -695,7 +695,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     (async () => {
       const { data } = await supabase
         .from("trade_products")
-        .select("id, product_name, brand_name, size_variants, currency")
+        .select("id, product_name, brand_name, size_variants, currency, source_pick_id")
         .order("brand_name", { ascending: true })
         .order("product_name", { ascending: true })
         .limit(2000);
@@ -709,7 +709,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
             ? (p.brand_name as string).split(" - ")[0].trim()
             : (p.brand_name as string),
         }));
-      const meta: Record<string, { variants: Array<{ label: string; price_cents: number | null }>; currency: string | null }> = {};
+      const meta: Record<string, { variants: Array<{ label: string; price_cents: number | null }>; currency: string | null; pickId: string | null }> = {};
       for (const p of data as any[]) {
         const raw = Array.isArray(p.size_variants) ? p.size_variants : [];
         const variants = raw
@@ -719,7 +719,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
           }))
           .filter((v: any) => v.label);
         if (variants.length > 0) {
-          meta[p.id as string] = { variants, currency: (p.currency as string) || null };
+          meta[p.id as string] = { variants, currency: (p.currency as string) || null, pickId: (p.source_pick_id as string) || null };
         }
       }
       setProductOptions(opts);
