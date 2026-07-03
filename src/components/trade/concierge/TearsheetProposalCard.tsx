@@ -10,6 +10,7 @@ import { BoardPicker } from "@/components/trade/concierge/BoardPicker";
 import { ProjectAssignInline } from "@/components/trade/concierge/ProjectAssignInline";
 import { HotspotImageBadge } from "@/components/trade/HotspotImageBadge";
 import { buildSwapPrompt, sendConciergePrefill } from "@/lib/conciergePrefill";
+import { RequirementsBadge } from "@/components/trade/concierge/RequirementsBadge";
 
 type Status = "pending" | "committing" | "approved" | "discarded";
 type Mode = "create" | "append";
