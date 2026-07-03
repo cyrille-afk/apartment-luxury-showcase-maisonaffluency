@@ -3363,10 +3363,26 @@ serve(async (req) => {
       const requestedTypologies = TYPOLOGY_TERMS.filter((t) =>
         new RegExp(`\\b${t.replace(/ /g, "\\s+")}s?\\b`, "i").test(msgLcTypology),
       );
+      // Synonym expansion — some pieces are catalogued under an adjacent
+      // subcategory (e.g. an "Excess Chandelier" filed under "Ceiling Lights").
+      // When the user asks for a common typology, also accept its siblings.
+      const TYPOLOGY_SYNONYMS: Record<string, string[]> = {
+        chandelier: ["ceiling light", "ceiling lights", "pendant", "pendants", "lantern"],
+        pendant: ["ceiling light", "ceiling lights", "chandelier", "lantern"],
+        "ceiling light": ["chandelier", "pendant", "lantern"],
+        sconce: ["wall light", "wall lights", "wall lamp", "wall lamps", "applique"],
+        "wall light": ["sconce", "applique"],
+        "floor lamp": ["floor light"],
+        "table lamp": ["table light"],
+      };
       const filteredPicksByTypology = requestedTypologies.length
         ? (allPicks || []).filter((p: any) => {
             const hay = `${p.title || ""} ${p.subcategory || ""} ${p.category || ""}`.toLowerCase();
-            return requestedTypologies.some((t) => hay.includes(t));
+            return requestedTypologies.some((t) => {
+              if (hay.includes(t)) return true;
+              const syns = TYPOLOGY_SYNONYMS[t] || [];
+              return syns.some((s) => hay.includes(s));
+            });
           })
         : (allPicks || []);
       const pickIds = filteredPicksByTypology.map((p: any) => p.id);
