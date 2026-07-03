@@ -252,6 +252,7 @@ const TradeAdmin = () => {
   const [fetching, setFetching] = useState(true);
   const [filter, setFilter] = useState<"pending" | "approved" | "rejected" | "all">("pending");
   const [confirmDialog, setConfirmDialog] = useState<{ app: Application; action: "approved" | "rejected" } | null>(null);
+  const [sendingChecklist, setSendingChecklist] = useState(false);
   const [checklistPreview, setChecklistPreview] = useState<{
     app: Application;
     to: string;
