@@ -32,19 +32,58 @@ export type RationaleEntry = { reason: string; detail?: string | null };
 export type RequirementsValidation = {
   ok: boolean;
   brand_ok?: boolean;
+  budget_ok?: boolean;
+  palette_ok?: boolean;
   coverage?: Array<{
-    slot: string;
-    typology?: string | null;
-    required_qty?: number;
-    delivered_qty?: number;
-  }>;
-  violations?: Array<{
     slot?: string;
     typology?: string | null;
     required_qty?: number;
     delivered_qty?: number;
-    reason: string;
+    // legacy shape from the inspector: `qty_min` + `delivered`
+    qty_min?: number;
+    qty_max?: number;
+    delivered?: number;
   }>;
+  violations?: Array<{
+    kind?:
+      | "slot_undelivered"
+      | "slot_overdelivered"
+      | "brand_mismatch"
+      | "budget_over"
+      | "budget_currency_mismatch"
+      | "palette_mismatch"
+      | "no_slots";
+    slot?: string;
+    typology?: string | null;
+    required_qty?: number;
+    delivered_qty?: number;
+    reason?: string;
+    // budget fields
+    requested_cents?: number;
+    total_cents?: number;
+    currency?: string;
+    over_by_cents?: number;
+    // palette fields
+    requested?: string[];
+    found?: string[];
+    offending_ids?: string[];
+    offending_titles?: string[];
+  }>;
+  budget?: {
+    requested_cents: number;
+    currency: string;
+    priced_items: number;
+    unpriced_items: number;
+    total_cents: number;
+    over_by_cents: number;
+    ok: boolean;
+  } | null;
+  palette?: {
+    requested: string[];
+    ok: boolean;
+    matched_ids: string[];
+    offending_ids: string[];
+  } | null;
   total_items?: number;
   unmatched_ids?: string[];
   enforcement?: "open" | "closed";
