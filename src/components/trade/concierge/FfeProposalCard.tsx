@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { RequirementsBadge } from "@/components/trade/concierge/RequirementsBadge";
 
 type Status = "pending" | "committing" | "approved" | "discarded";
 
