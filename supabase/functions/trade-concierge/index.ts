@@ -415,6 +415,99 @@ const TOOLS = [
   {
     type: "function",
     function: {
+      name: "extract_requirements",
+      description:
+        "ALWAYS the FIRST tool call in any turn that also produces a card (propose_tearsheet, add_to_tearsheet, draft_quote, add_to_quote, propose_ffe_rows, prepare_visualization_brief). Emits the typed Requirements the rest of the turn will be validated against — typology per slot, quantities, style cues, budget, room, era. Emit even for single-piece requests (single-slot array). Do NOT emit when the turn is pure discovery/clarification with no card. The Inspector Agent diffs the assembled card against this object, so undercounting slots or omitting typologies will trigger corrections. Base every field on the LATEST user turn + sticky facts already gathered — do not invent budgets/rooms the user hasn't stated.",
+      parameters: {
+        type: "object",
+        properties: {
+          slots: {
+            type: "array",
+            description:
+              "One entry per distinct piece the user is asking for. Split by typology AND by role (e.g. a dining-set request produces slots for 'dining_table' + 'dining_chair' + optionally 'chandelier'/'sideboard'). Order matches the user's mental model (anchor pieces first). Min 1, max 12.",
+            minItems: 1,
+            maxItems: 12,
+            items: {
+              type: "object",
+              properties: {
+                typology: {
+                  type: "string",
+                  description:
+                    "Normalized furniture typology in snake_case: dining_table, dining_chair, armchair, sofa, coffee_table, side_table, console, sideboard, credenza, bed, nightstand, desk, bookcase, chandelier, pendant_light, floor_lamp, table_lamp, wall_sconce, rug, mirror, artwork, screen, bench, stool, ottoman, bar_cart, vanity, cabinet. Use the closest match if the user's wording is different (e.g. 'suspension' → pendant_light).",
+                },
+                qty_min: {
+                  type: "integer",
+                  description: "Minimum quantity for this slot. 1 unless the user specified a range or a set (e.g. 'chairs for 8' → 8).",
+                },
+                qty_max: {
+                  type: "integer",
+                  description: "Maximum quantity for this slot. Equal to qty_min unless the user gave a range (e.g. '4-6 chairs').",
+                },
+                notes: {
+                  type: "string",
+                  description: "Optional 1-line brief specific to THIS slot (e.g. 'round, seats 8, contrasting to the chairs'). Omit if none.",
+                },
+              },
+              required: ["typology", "qty_min", "qty_max"],
+              additionalProperties: false,
+            },
+          },
+          style: {
+            type: "array",
+            description:
+              "Short style/aesthetic descriptors the user actually used or clearly implied (e.g. ['mid-century', 'warm woods', 'brass accents']). Max 8. Empty array if the user gave none.",
+            items: { type: "string" },
+            maxItems: 8,
+          },
+          materials: {
+            type: "array",
+            description: "Preferred materials/finishes the user named (e.g. ['walnut', 'travertine', 'brass']). Empty array if none. Max 8.",
+            items: { type: "string" },
+            maxItems: 8,
+          },
+          brands: {
+            type: "array",
+            description:
+              "Specific ateliers, designers, or brands the user explicitly named to include (e.g. ['Saint-Louis', 'Alinea Design Objects']). Empty array if none. Do NOT infer brands the user didn't mention. Max 8.",
+            items: { type: "string" },
+            maxItems: 8,
+          },
+          budget_cents: {
+            type: "integer",
+            description: "Total project budget in cents, if the user stated one. Omit the field entirely otherwise.",
+          },
+          budget_currency: {
+            type: "string",
+            description: "ISO 4217 currency code for budget_cents (EUR/USD/GBP/CHF/AED/SGD/HKD/JPY). Omit if budget_cents omitted.",
+          },
+          room: {
+            type: "string",
+            description:
+              "Room or space the pieces are for (e.g. 'dining room', 'primary bedroom', 'library', 'entry'). Empty string if unspecified.",
+          },
+          scale: {
+            type: "string",
+            description:
+              "One short phrase for size/capacity when the user gave one ('seats 8', 'small pied-à-terre', 'double-height drawing room'). Empty string otherwise.",
+          },
+          era: {
+            type: "string",
+            description: "Period cue the user named ('mid-century', '1970s Italian', 'contemporary'). Empty string if unspecified.",
+          },
+          notes: {
+            type: "string",
+            description:
+              "Free-form 1-2 sentence summary of any qualitative constraints not captured above (lighting temperature, sustainability, wheelchair access, delivery deadline, etc.). Empty string if none.",
+          },
+        },
+        required: ["slots", "style", "materials", "brands", "room", "scale", "era", "notes"],
+        additionalProperties: false,
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
       name: "propose_tearsheet",
       description:
         "Draft a NEW tearsheet (client board). Use this ONLY when (a) the user has NO existing tearsheets, or (b) the user EXPLICITLY asks for a new/separate/fresh tearsheet (phrases like 'new tearsheet', 'start a new board', 'fresh selection', 'separate edit', 'different project'). In every other case where the user asks to propose/suggest/recommend/curate/show/pull/reinterpret a selection, you MUST call `add_to_tearsheet` against the ACTIVE board in USER'S EXISTING TEARSHEETS instead. Always pick IDs strictly from CURATED PIECES — never invent IDs.",
