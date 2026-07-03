@@ -169,6 +169,13 @@ export type QuoteLinePreview = {
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/trade-concierge`;
 const PUBLIC_CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/concierge-public-stream`;
 
+export type InspectorEvent = {
+  ok: boolean;
+  corrections: Array<{ original: string; replacement: string; reason: string }>;
+  ms: number;
+  request_id?: string;
+};
+
 export async function streamConcierge({
   messages,
   projectId,
@@ -177,6 +184,8 @@ export async function streamConcierge({
   onDelta,
   onProposal,
   onEscalation,
+  onRequestId,
+  onInspector,
   onDone,
   onError,
   signal,
@@ -191,6 +200,10 @@ export async function streamConcierge({
   onDelta: (text: string) => void;
   onProposal?: (proposal: ConciergeProposal) => void;
   onEscalation?: (event: EscalationEvent) => void;
+  /** Fires once at the start of the stream with the server-side trace id. */
+  onRequestId?: (requestId: string) => void;
+  /** Fires each time the Inspector Agent completes a card run. */
+  onInspector?: (event: InspectorEvent) => void;
   onDone: () => void;
   onError: (msg: string) => void;
   signal?: AbortSignal;
@@ -212,12 +225,20 @@ export async function streamConcierge({
   }
 
   const endpoint = surface === "public" ? PUBLIC_CHAT_URL : CHAT_URL;
+  // Mint a client-side trace id. The edge function honors `x-request-id`
+  // when present, so the same id appears in the SSE `event: request_id`
+  // frame, every `event: inspector` frame, and the server `concierge_inspector`
+  // log line. Displayed in the UI so the user can copy it while debugging.
+  const clientRequestId = (typeof crypto !== "undefined" && crypto.randomUUID)
+    ? crypto.randomUUID()
+    : `req-${Date.now()}-${Math.random().toString(36).slice(2)}`;
   const resp = await fetch(endpoint, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${bearer}`,
       apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string,
+      "x-request-id": clientRequestId,
       ...(surface === "public" ? { "x-concierge-surface": "public", "x-concierge-sid": publicSid ?? "" } : {}),
     },
     body: JSON.stringify({ messages, project_id: projectId ?? null, surface: surface ?? "trade", lang: lang ?? null }),
@@ -246,6 +267,13 @@ export async function streamConcierge({
   let streamDone = false;
   let currentEvent: string | null = null;
 
+  // Notify the caller immediately with the client-minted id so the UI can
+  // render the correlation chip even before the server's `event: request_id`
+  // frame arrives. The server will echo this exact value.
+  if (onRequestId) {
+    try { onRequestId(clientRequestId); } catch { /* ignore */ }
+  }
+
   const handleDataPayload = (jsonStr: string) => {
     if (jsonStr === "[DONE]") {
       streamDone = true;
@@ -253,6 +281,15 @@ export async function streamConcierge({
     }
     try {
       const parsed = JSON.parse(jsonStr);
+      if (currentEvent === "request_id") {
+        const rid = (parsed as { request_id?: string })?.request_id;
+        if (typeof rid === "string" && onRequestId) onRequestId(rid);
+        return;
+      }
+      if (currentEvent === "inspector") {
+        if (onInspector) onInspector(parsed as InspectorEvent);
+        return;
+      }
       if (currentEvent === "proposal") {
         if (onProposal) onProposal(parsed as ConciergeProposal);
         return;

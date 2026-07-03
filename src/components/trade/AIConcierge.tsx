@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
-import { X, Send, Loader2, Sparkles, Minus, GripHorizontal, RotateCcw, Maximize2, Minimize2, Palette, Check, Languages, Pencil, Paperclip, FileText, Download, FileDown } from "lucide-react";
+import { X, Send, Loader2, Sparkles, Minus, GripHorizontal, RotateCcw, Maximize2, Minimize2, Palette, Check, Languages, Pencil, Paperclip, FileText, Download, FileDown, Copy, ShieldCheck } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { streamConcierge, type ChatMessage, type ChatContentPart, type TearsheetProposal, type QuoteProposal, type FfeProposal, type VisualizationBriefProposal, type ConciergeProposal } from "@/lib/tradeConciergeStream";
@@ -122,6 +122,12 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
     } catch {}
   }, [input]);
   const [streaming, setStreaming] = useState(false);
+  // Correlation id for the currently-streaming (or most-recent) concierge
+  // turn. Displayed as a copyable chip above the input so we can join
+  // client-visible symptoms to server-side `concierge_inspector` log lines.
+  const [lastRequestId, setLastRequestId] = useState<string | null>(null);
+  const [lastInspectorCount, setLastInspectorCount] = useState<number>(0);
+  const [reqIdCopied, setReqIdCopied] = useState<boolean>(false);
   const [stageOverride, setStageOverride] = useState<Stage | null>(null);
   const [hasTradeArtifacts, setHasTradeArtifacts] = useState<boolean | null>(null);
   const [artifactRefreshKey, setArtifactRefreshKey] = useState(0);
@@ -986,6 +992,14 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
         lang,
         onDelta: upsertAssistant,
         onProposal: handleProposal,
+        onRequestId: (rid) => {
+          setLastRequestId(rid);
+          setLastInspectorCount(0);
+          setReqIdCopied(false);
+        },
+        onInspector: () => {
+          setLastInspectorCount((n) => n + 1);
+        },
         onEscalation: (ev) => {
           armStall();
           setTimeline((prev) => [
@@ -1821,6 +1835,39 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
           </div>
 
           <div className="border-t border-border p-3">
+            {/* Correlation-id chip — copy-to-clipboard trace id for the
+                current concierge turn. Matches the server's SSE `event: request_id`
+                and every `concierge_inspector` log line for this run. */}
+            {lastRequestId && (
+              <div className="mb-2 flex items-center gap-1.5 text-[10px] text-muted-foreground">
+                <button
+                  type="button"
+                  onClick={async () => {
+                    try {
+                      await navigator.clipboard.writeText(lastRequestId);
+                      setReqIdCopied(true);
+                      setTimeout(() => setReqIdCopied(false), 1400);
+                    } catch { /* ignore */ }
+                  }}
+                  className="inline-flex items-center gap-1 rounded-md border border-border bg-muted/40 px-1.5 py-0.5 font-mono hover:bg-muted transition-colors"
+                  title="Copy request_id — paste into server logs to trace this run"
+                  aria-label={`Copy request id ${lastRequestId}`}
+                >
+                  <span className="opacity-70">id</span>
+                  <span className="tabular-nums">{lastRequestId.slice(0, 8)}</span>
+                  {reqIdCopied ? <Check className="h-2.5 w-2.5 text-emerald-600" /> : <Copy className="h-2.5 w-2.5" />}
+                </button>
+                {lastInspectorCount > 0 && (
+                  <span
+                    className="inline-flex items-center gap-1 rounded-md border border-border bg-muted/40 px-1.5 py-0.5"
+                    title={`Inspector Agent ran ${lastInspectorCount} time${lastInspectorCount === 1 ? "" : "s"} this turn`}
+                  >
+                    <ShieldCheck className="h-2.5 w-2.5" />
+                    inspector×{lastInspectorCount}
+                  </span>
+                )}
+              </div>
+            )}
             {attachments.length > 0 && (
               <div className="flex flex-wrap gap-2 mb-2">
                 {attachments.map((a) => (
