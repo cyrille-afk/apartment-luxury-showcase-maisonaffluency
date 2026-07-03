@@ -617,6 +617,13 @@ function InstagramAuditCard() {
                   <p className="font-body text-[10px] text-muted-foreground/60 mt-2">
                     Applied {new Date(app.created_at).toLocaleDateString()}
                   </p>
+                  {app.verification_checklist_sent_at && (
+                    <p className="font-body text-[10px] text-success mt-1">
+                      Checklist sent
+                      {app.verification_checklist_sent_by_name ? ` by ${app.verification_checklist_sent_by_name}` : ""}
+                      {" "}{new Date(app.verification_checklist_sent_at).toLocaleDateString()}
+                    </p>
+                  )}
                 </div>
 
 
@@ -628,9 +635,13 @@ function InstagramAuditCard() {
                         <button
                           type="button"
                           onClick={() => setChecklistPreview({ app, ...c })}
-                          className="p-2 rounded-full border border-primary/30 text-primary hover:bg-primary/10 transition-colors"
-                          title="Preview verification checklist email"
-                          aria-label="Preview verification checklist"
+                          className={`p-2 rounded-full border transition-colors ${
+                            app.verification_checklist_sent_at
+                              ? "border-success/30 text-success hover:bg-success/10"
+                              : "border-primary/30 text-primary hover:bg-primary/10"
+                          }`}
+                          title={app.verification_checklist_sent_at ? "Resend verification checklist" : "Preview verification checklist email"}
+                          aria-label={app.verification_checklist_sent_at ? "Resend verification checklist" : "Preview verification checklist"}
                         >
                           <Mail className="h-4 w-4" />
                         </button>
