@@ -20,7 +20,7 @@ import { test, expect, type Page } from "@playwright/test";
  * and doesn't require auth, so it's the right entry point for this test.
  */
 
-type Scenario = "success" | "blocked" | "blocked_palette";
+type Scenario = "success" | "blocked" | "blocked_palette" | "blocked_currency";
 
 async function installConciergeStub(page: Page) {
   await page.addInitScript(() => {
@@ -29,6 +29,7 @@ async function installConciergeStub(page: Page) {
       | "success"
       | "blocked"
       | "blocked_palette"
+      | "blocked_currency"
       | null;
     if (!scenario) return;
 
@@ -36,7 +37,7 @@ async function installConciergeStub(page: Page) {
     const originalFetch = window.fetch.bind(window);
 
     const frames: Record<
-      "success" | "blocked" | "blocked_palette",
+      "success" | "blocked" | "blocked_palette" | "blocked_currency",
       Array<string | { delayMs: number }>
     > = {
       success: [
@@ -112,6 +113,45 @@ async function installConciergeStub(page: Page) {
               requested: ["oak", "brass"],
               offending_ids: ["p1", "p2"],
               offending_titles: ["Walnut lounge chair", "Marble console"],
+            },
+          ],
+        })}\n\n`,
+        `data: [DONE]\n\n`,
+      ],
+      // Same shape as `blocked_palette`, but the violation is a mixed-currency
+      // `budget_currency_mismatch` co-firing with `budget_over` — mirrors the
+      // Inspector's real fail-closed payload when the assembled tearsheet
+      // sums items priced in USD/GBP against an EUR budget. The client
+      // contract is identical to the other blocked paths: no `proposal` frame
+      // ever arrives, so the skeleton MUST clear on `onDone` and no card MUST
+      // ever mount.
+      blocked_currency: [
+        `event: request_id\ndata: ${JSON.stringify({ request_id: "pw-req" })}\n\n`,
+        `event: tool_start\ndata: ${JSON.stringify({
+          tool: "propose_tearsheet",
+          tool_call_id: "tc-pw",
+          index: 0,
+          request_id: "pw-req",
+        })}\n\n`,
+        { delayMs: 400 },
+        `event: proposal_blocked\ndata: ${JSON.stringify({
+          request_id: "pw-req",
+          tool: "propose_tearsheet",
+          tool_call_id: "tc-pw",
+          reason: "requirements_violation",
+          coverage: [],
+          violations: [
+            {
+              kind: "budget_currency_mismatch",
+              requested: "EUR",
+              found: ["GBP", "USD"],
+            },
+            {
+              kind: "budget_over",
+              requested_cents: 1_000_000,
+              total_cents: 1_400_000,
+              currency: "EUR",
+              over_by_cents: 400_000,
             },
           ],
         })}\n\n`,
@@ -242,6 +282,35 @@ test.describe("AI concierge — Generative UI skeleton", () => {
 
     // 4. And the requirements-ok badge from the success path must not render
     //    either — belt-and-braces against a stray render slipping through.
+    await expect(page.getByText(/Matches brief/i)).toHaveCount(0);
+  });
+
+  test("clears the skeleton and renders NO card when a mixed-currency budget_currency_mismatch blocks the proposal", async ({ page }) => {
+    await page.goto("/concierge?__pw_mock=blocked_currency");
+    await openConciergeAndSend(
+      page,
+      "propose a 10k EUR tearsheet for a Milan pied-à-terre",
+    );
+
+    // 1. Skeleton still appears — the tool call did start streaming before
+    //    the Inspector realised the assembled items are priced in mixed
+    //    non-EUR currencies.
+    const skeleton = page.getByRole("status", { name: /Curating a tearsheet/i });
+    await expect(skeleton).toBeVisible({ timeout: 5_000 });
+
+    // 2. `proposal_blocked` arrives with a `budget_currency_mismatch` (plus a
+    //    co-firing `budget_over`) and NO `proposal` frame ever follows. The
+    //    client must clear the pending placeholder on `onDone`.
+    await expect(skeleton).toHaveCount(0, { timeout: 5_000 });
+
+    // 3. Critical negative assertion — no tearsheet card was promoted from
+    //    the skeleton. Rendering an unconverted mixed-currency sum would be
+    //    a trust-breaking bug for the trade user, so this must never happen.
+    await expect(
+      page.getByText("✦ Concierge proposes a new tearsheet", { exact: false }),
+    ).toHaveCount(0);
+
+    // 4. And the requirements-ok badge from the success path must not render.
     await expect(page.getByText(/Matches brief/i)).toHaveCount(0);
   });
 });
