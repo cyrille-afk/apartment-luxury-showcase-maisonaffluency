@@ -763,6 +763,9 @@ const TradeProductPage: React.FC = () => {
         _dimensions: product.dimensions || null,
         _materials: product.materials || null,
         _quantity: 1,
+        // Merge key: same product + same variant merges qty; different variants
+        // (e.g. 10-Lights vs 20-Lights) stay as separate lines with their own price.
+        _variant_label: variantLabel,
       });
       if (error) {
         toast({ title: "Error", description: error.message, variant: "destructive" });
