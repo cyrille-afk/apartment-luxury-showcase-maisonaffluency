@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo, useRef } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
-import { Check, X, ExternalLink, Plus, FileText, Minus, FolderOpen, Coins } from "lucide-react";
+import { Check, X, ExternalLink, Plus, FileText, Minus, FolderOpen, Coins, Repeat } from "lucide-react";
+import { buildSwapPrompt, sendConciergePrefill } from "@/lib/conciergePrefill";
 import { Link } from "react-router-dom";
 import { commitProposal, type QuoteProposal } from "@/lib/tradeConciergeStream";
 import { supabase } from "@/integrations/supabase/client";
