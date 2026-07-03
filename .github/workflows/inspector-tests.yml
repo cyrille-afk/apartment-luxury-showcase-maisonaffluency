@@ -1,0 +1,55 @@
+name: Inspector Agent Tests
+
+# Runs the Inspector-agent regression suite (mixed-brand misattribution +
+# zero-match typology + fail-open contract) on every PR that touches the
+# concierge edge function or the shared Inspector module.
+#
+# The tests stub globalThis.fetch so they run fully offline — no LOVABLE_API_KEY
+# or Supabase credentials are needed in CI.
+
+on:
+  pull_request:
+    paths:
+      - "supabase/functions/_shared/concierge-inspector.ts"
+      - "supabase/functions/_shared/concierge-inspector_test.ts"
+      - "supabase/functions/trade-concierge/**"
+      - ".github/workflows/inspector-tests.yml"
+  push:
+    branches: [main]
+    paths:
+      - "supabase/functions/_shared/concierge-inspector.ts"
+      - "supabase/functions/_shared/concierge-inspector_test.ts"
+      - "supabase/functions/trade-concierge/**"
+
+jobs:
+  inspector-tests:
+    name: Deno test — Inspector regressions
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Cache Deno deps
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/deno
+          key: ${{ runner.os }}-deno-${{ hashFiles('supabase/functions/_shared/concierge-inspector*.ts') }}
+          restore-keys: |
+            ${{ runner.os }}-deno-
+
+      - name: Run Inspector tests
+        run: |
+          deno test \
+            --allow-net \
+            --allow-env \
+            --allow-read \
+            --no-check \
+            --filter "Inspector|buildInspectorGroundTruth" \
+            supabase/functions/_shared/concierge-inspector_test.ts
