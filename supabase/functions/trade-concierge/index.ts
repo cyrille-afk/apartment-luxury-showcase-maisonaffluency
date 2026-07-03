@@ -33,6 +33,29 @@ function aiModel(m: string): string {
 
 type ChatBackend = "gemini" | "lovable-gateway";
 
+// Emitted by the `extract_requirements` tool at the start of any turn that
+// also produces a card. Consumed by the client (as an SSE `event: requirements`
+// frame) and by the Inspector Agent (to diff assembled card contents against
+// the user's declared slots/typologies/counts).
+type RequirementsSlot = {
+  typology: string;
+  qty_min: number;
+  qty_max: number;
+  notes?: string;
+};
+type RequirementsPayload = {
+  slots: RequirementsSlot[];
+  style: string[];
+  materials: string[];
+  brands: string[];
+  budget_cents?: number;
+  budget_currency?: string;
+  room: string;
+  scale: string;
+  era: string;
+  notes: string;
+};
+
 function ensureLovableModel(m: string): string {
   return m.startsWith("google/") || m.startsWith("openai/") ? m : `google/${m}`;
 }
