@@ -14,6 +14,7 @@ export interface QuoteFinishVariant {
   top?: string | null;
   size?: string | null;
   rawLabel?: string | null;
+  price_cents?: number | null;
 }
 
 const normalizeFinishKey = (value: string | null | undefined): string =>
