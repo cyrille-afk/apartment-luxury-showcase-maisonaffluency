@@ -2916,6 +2916,11 @@ serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
+  // Single end-to-end trace id for this HTTP invocation. Honored from the
+  // client (x-request-id) when supplied, otherwise minted here. Propagated
+  // to the initial SSE `event: request_id` frame AND every Inspector log
+  // entry so a run can be traced client → edge → inspector.
+  const requestId = req.headers.get("x-request-id") || (crypto?.randomUUID?.() ?? `req-${Date.now()}`);
 
   try {
     const auth = await requireUser(req);
@@ -3816,6 +3821,10 @@ serve(async (req) => {
           }
         };
 
+        // Emit the trace id first so the client can correlate this stream
+        // with server-side Inspector logs (same request_id).
+        controller.enqueue(encoder.encode(`event: request_id\ndata: ${JSON.stringify({ request_id: requestId })}\n\n`));
+
         // Emit escalation event up-front when the classifier flagged it.
         if (sentiment.escalate) {
           const payload = {
@@ -3823,6 +3832,7 @@ serve(async (req) => {
             intent: sentiment.intent,
             user_id: userId,
             excerpt: messages.slice(-4),
+            request_id: requestId,
           };
           controller.enqueue(encoder.encode(`event: escalation\ndata: ${JSON.stringify(payload)}\n\n`));
         }
@@ -5233,19 +5243,18 @@ serve(async (req) => {
                   apiKey: LOVABLE_API_KEY,
                 });
                 const finalProse = inspector.ok ? inspector.corrected_prose : proseText;
-                // Structured log — one JSON line per inspector run.
-                const inspectorReqId = (typeof crypto !== "undefined" && crypto.randomUUID)
-                  ? crypto.randomUUID()
-                  : `insp-${Date.now()}`;
+                // Structured log — one JSON line per inspector run, tagged
+                // with the top-level request_id so it joins to the client
+                // `event: request_id` and `event: inspector` frames.
                 logInspectorRun(buildInspectorLogRecord({
-                  requestId: inspectorReqId,
+                  requestId,
                   originalProse: proseText,
                   result: inspector,
                   groundTruth: gt,
                 }));
                 if (inspector.corrections.length > 0) {
                   // Surface to the client so the UI can badge / log
-                  controller.enqueue(encoder.encode(`event: inspector\ndata: ${JSON.stringify({ ok: inspector.ok, corrections: inspector.corrections, ms: inspector.ms, request_id: inspectorReqId })}\n\n`));
+                  controller.enqueue(encoder.encode(`event: inspector\ndata: ${JSON.stringify({ ok: inspector.ok, corrections: inspector.corrections, ms: inspector.ms, request_id: requestId })}\n\n`));
                 }
                 // Flush the (possibly rewritten) prose as ONE synthetic delta.
                 if (finalProse) {
