@@ -5243,19 +5243,18 @@ serve(async (req) => {
                   apiKey: LOVABLE_API_KEY,
                 });
                 const finalProse = inspector.ok ? inspector.corrected_prose : proseText;
-                // Structured log — one JSON line per inspector run.
-                const inspectorReqId = (typeof crypto !== "undefined" && crypto.randomUUID)
-                  ? crypto.randomUUID()
-                  : `insp-${Date.now()}`;
+                // Structured log — one JSON line per inspector run, tagged
+                // with the top-level request_id so it joins to the client
+                // `event: request_id` and `event: inspector` frames.
                 logInspectorRun(buildInspectorLogRecord({
-                  requestId: inspectorReqId,
+                  requestId,
                   originalProse: proseText,
                   result: inspector,
                   groundTruth: gt,
                 }));
                 if (inspector.corrections.length > 0) {
                   // Surface to the client so the UI can badge / log
-                  controller.enqueue(encoder.encode(`event: inspector\ndata: ${JSON.stringify({ ok: inspector.ok, corrections: inspector.corrections, ms: inspector.ms, request_id: inspectorReqId })}\n\n`));
+                  controller.enqueue(encoder.encode(`event: inspector\ndata: ${JSON.stringify({ ok: inspector.ok, corrections: inspector.corrections, ms: inspector.ms, request_id: requestId })}\n\n`));
                 }
                 // Flush the (possibly rewritten) prose as ONE synthetic delta.
                 if (finalProse) {
