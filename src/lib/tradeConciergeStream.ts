@@ -169,6 +169,13 @@ export type QuoteLinePreview = {
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/trade-concierge`;
 const PUBLIC_CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/concierge-public-stream`;
 
+export type InspectorEvent = {
+  ok: boolean;
+  corrections: Array<{ original: string; replacement: string; reason: string }>;
+  ms: number;
+  request_id?: string;
+};
+
 export async function streamConcierge({
   messages,
   projectId,
@@ -177,6 +184,8 @@ export async function streamConcierge({
   onDelta,
   onProposal,
   onEscalation,
+  onRequestId,
+  onInspector,
   onDone,
   onError,
   signal,
@@ -191,6 +200,10 @@ export async function streamConcierge({
   onDelta: (text: string) => void;
   onProposal?: (proposal: ConciergeProposal) => void;
   onEscalation?: (event: EscalationEvent) => void;
+  /** Fires once at the start of the stream with the server-side trace id. */
+  onRequestId?: (requestId: string) => void;
+  /** Fires each time the Inspector Agent completes a card run. */
+  onInspector?: (event: InspectorEvent) => void;
   onDone: () => void;
   onError: (msg: string) => void;
   signal?: AbortSignal;
