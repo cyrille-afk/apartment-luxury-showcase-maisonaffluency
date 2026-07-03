@@ -17,15 +17,15 @@ const EDITABLE_FIELDS = [
 ] as const;
 
 const patchSchema = z.object({
-  company_name: z.string().trim().min(1).max(200).optional(),
-  company_website: z.string().trim().max(500).optional().or(z.literal("")),
-  job_title: z.string().trim().min(1).max(150).optional(),
-  city: z.string().trim().max(100).optional().or(z.literal("")),
-  country: z.string().trim().max(100).optional(),
-  is_certified_professional: z.boolean().optional(),
-  certification_details: z.string().trim().max(300).optional().or(z.literal("")),
-  message: z.string().trim().max(2000).optional().or(z.literal("")),
-});
+  company_name: z.string().trim().min(1).max(200).optional().nullable(),
+  company_website: z.string().trim().max(500).optional().nullable(),
+  job_title: z.string().trim().min(1).max(150).optional().nullable(),
+  city: z.string().trim().max(100).optional().nullable(),
+  country: z.string().trim().max(100).optional().nullable(),
+  is_certified_professional: z.boolean().optional().nullable(),
+  certification_details: z.string().trim().max(300).optional().nullable(),
+  message: z.string().trim().max(2000).optional().nullable(),
+}).passthrough();
 
 const bodySchema = z.object({
   action: z.enum(["get", "update"]),
