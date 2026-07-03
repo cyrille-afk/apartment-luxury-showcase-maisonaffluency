@@ -3926,6 +3926,18 @@ serve(async (req) => {
 
     // tool_calls arrive as fragments; key by index
     const toolCallBuffers = new Map<number, { id?: string; name?: string; argsText: string }>();
+    // Card-producing tools that should trigger an early `event: tool_start` frame
+    // so the client can render a skeleton card immediately, before the completed
+    // `event: proposal` frame arrives at end-of-turn.
+    const CARD_TOOL_NAMES = new Set([
+      "propose_tearsheet",
+      "add_to_tearsheet",
+      "draft_quote",
+      "add_to_quote",
+      "propose_ffe_rows",
+      "prepare_visualization_brief",
+    ]);
+    const toolStartEmittedIdx = new Set<number>();
     // Captured payload of `extract_requirements` for this turn. Populated when
     // the model emits that tool call; consumed by the Inspector Agent to diff
     // the assembled card against the user's declared slots/typologies/counts.
