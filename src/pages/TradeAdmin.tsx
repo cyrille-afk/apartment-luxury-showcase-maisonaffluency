@@ -22,10 +22,9 @@ import { Link } from "react-router-dom";
 import { Instagram, FileBox, Sparkles, Inbox, FileSpreadsheet, MapPin, AlertTriangle, ShieldCheck, Mail } from "lucide-react";
 
 /**
- * Build a mailto: link that sends the applicant a personalised checklist of
- * what they need to add for us to verify them as a trade professional.
- * The checklist items are derived from the warn signals surfaced on the card
- * so reviewers can request exactly what's missing in one click.
+ * Build a previewable verification checklist for the applicant. The items are
+ * derived from the warn signals surfaced on the card so reviewers can request
+ * exactly what's missing in one click and send it directly from the app.
  */
 function buildChecklist(app: Application, signals: Signal[]): {
   to: string;
@@ -61,9 +60,6 @@ function buildChecklist(app: Application, signals: Signal[]): {
   return { to: email, firstName, subject, body, items };
 }
 
-function checklistMailto(c: { to: string; subject: string; body: string }): string {
-  return `mailto:${encodeURIComponent(c.to)}?subject=${encodeURIComponent(c.subject)}&body=${encodeURIComponent(c.body)}`;
-}
 
 // Free-email domains that don't tell us anything about the applicant's firm.
 // A personal address on a trade application isn't disqualifying on its own,
