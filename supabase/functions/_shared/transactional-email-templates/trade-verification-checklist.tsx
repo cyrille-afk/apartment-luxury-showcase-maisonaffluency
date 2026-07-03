@@ -12,7 +12,10 @@ const REPLY_TO = "concierge@myaffluency.com"
 interface Props {
   firstName?: string
   items?: string[]
+  editUrl?: string
 }
+
+const TradeVerificationChecklistEmail = ({ firstName, items = [], editUrl }: Props) => (
 
 const TradeVerificationChecklistEmail = ({ firstName, items = [] }: Props) => (
   <Html lang="en" dir="ltr">
