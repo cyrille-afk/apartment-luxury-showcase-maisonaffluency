@@ -291,15 +291,7 @@ export async function buildQuotePdf(args: QuotePdfArgs): Promise<jsPDF> {
   //      even if all rates are identity, so the client sees a timestamped
   //      reference for any conversion applied to their unit prices.
   if (args.fxSnapshot && args.fxSnapshot.pairs.length > 0) {
-    const snap = args.fxSnapshot;
-    const stamp = snap.appliedAt.toLocaleString("en-GB", {
-      day: "numeric", month: "short", year: "numeric",
-      hour: "2-digit", minute: "2-digit", timeZoneName: "short",
-    });
-    const pairsTxt = snap.pairs
-      .map((p) => `${p.src.toUpperCase()}→${p.tgt.toUpperCase()} ${p.rate.toFixed(4)}${p.source ? ` (${p.source})` : ""}`)
-      .join(" · ");
-    const fxLine = `FX applied ${stamp} — ${pairsTxt}`;
+    const fxLine = formatFxSnapshotLine(args.fxSnapshot);
     y = ensureSpace(doc, y, 26, pageH);
     y += 10;
     doc.setFont("helvetica", "italic");
