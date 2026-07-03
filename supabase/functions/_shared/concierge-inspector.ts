@@ -449,6 +449,10 @@ export function validateRequirementsCoverage(
       ok: true,
       coverage: [],
       brand_ok: true,
+      budget_ok: true,
+      palette_ok: true,
+      budget: null,
+      palette: null,
       violations: requirements ? [{ kind: "no_slots" }] : [],
       total_items: totalItems,
       unmatched_ids: allItems.map((i) => i.id),
@@ -518,12 +522,97 @@ export function validateRequirementsCoverage(
     }
   }
 
+  // ---- Budget check (hard) ----------------------------------------------
+  let budget: BudgetCheck | null = null;
+  let budget_ok = true;
+  const reqBudget = Number(requirements.budget_cents) > 0 ? Math.floor(Number(requirements.budget_cents)) : 0;
+  const reqCurrency = (requirements.budget_currency || "").toUpperCase() || "EUR";
+  if (reqBudget > 0 && allItems.length > 0) {
+    const priced = allItems.filter((i) => typeof i.price_cents === "number" && (i.price_cents as number) > 0);
+    const unpriced = allItems.length - priced.length;
+    const foundCurrencies = Array.from(
+      new Set(priced.map((i) => (i.currency || "").toUpperCase()).filter(Boolean)),
+    );
+    // Currency-mismatch is a soft-info violation (still enforce numeric sum).
+    if (foundCurrencies.length && !foundCurrencies.every((c) => c === reqCurrency)) {
+      violations.push({ kind: "budget_currency_mismatch", requested: reqCurrency, found: foundCurrencies });
+    }
+    const total = priced.reduce((acc, i) => acc + Number(i.price_cents || 0), 0);
+    const over = total - reqBudget;
+    const ok = over <= 0;
+    budget = {
+      requested_cents: reqBudget,
+      currency: reqCurrency,
+      priced_items: priced.length,
+      unpriced_items: unpriced,
+      total_cents: total,
+      over_by_cents: Math.max(0, over),
+      ok,
+    };
+    if (!ok) {
+      budget_ok = false;
+      violations.push({
+        kind: "budget_over",
+        requested_cents: reqBudget,
+        total_cents: total,
+        currency: reqCurrency,
+        over_by_cents: over,
+      });
+    }
+  }
+
+  // ---- Palette / materials check (hard when materials specified) --------
+  let palette: PaletteCheck | null = null;
+  let palette_ok = true;
+  const requestedPalette = Array.from(
+    new Set(
+      (requirements.materials || [])
+        .concat(requirements.style || [])
+        .map((s) => normalizeText(s))
+        .filter((s) => s && s.length >= 3),
+    ),
+  );
+  if (requestedPalette.length > 0 && allItems.length > 0) {
+    const matched: string[] = [];
+    const offending: string[] = [];
+    const offendingTitles: string[] = [];
+    for (const it of allItems) {
+      const hay = itemText.get(it.id) || "";
+      const hit = requestedPalette.some((tok) => tok && hay.includes(tok));
+      if (hit) matched.push(it.id);
+      else {
+        offending.push(it.id);
+        if (offendingTitles.length < 8) offendingTitles.push(it.title || it.id);
+      }
+    }
+    const ok = offending.length === 0;
+    palette = {
+      requested: requestedPalette,
+      ok,
+      matched_ids: matched,
+      offending_ids: offending,
+    };
+    if (!ok) {
+      palette_ok = false;
+      violations.push({
+        kind: "palette_mismatch",
+        requested: requestedPalette,
+        offending_ids: offending,
+        offending_titles: offendingTitles,
+      });
+    }
+  }
+
   const unmatched = allItems.map((i) => i.id).filter((id) => !claimed.has(id));
 
   return {
     ok: violations.length === 0,
     coverage,
     brand_ok,
+    budget_ok,
+    palette_ok,
+    budget,
+    palette,
     violations,
     total_items: totalItems,
     unmatched_ids: unmatched,
