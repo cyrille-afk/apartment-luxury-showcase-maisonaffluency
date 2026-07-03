@@ -3479,9 +3479,11 @@ serve(async (req) => {
           if (p?.id && p?.designer_id) pickDesignerById.set(p.id, p.designer_id);
         }
         const rationaleMap: Record<string, { reason: string }> = {};
+        const brandCounts = new Map<string, number>();
         for (const p of previewRaw) {
           if (!p?.id) continue;
           const dName = designerNameById.get(pickDesignerById.get(p.id) || "") || designerLabel;
+          brandCounts.set(dName, (brandCounts.get(dName) || 0) + 1);
           rationaleMap[p.id] = { reason: `Complete ${dName} listing from the Maison Affluency Curation.` };
         }
         const preview = previewRaw.map((p: any) => ({ ...p, rationale: rationaleMap[p.id]?.reason || null }));
@@ -3505,6 +3507,18 @@ serve(async (req) => {
         const multiLabel = mentionedDesigners.length > 1
           ? mentionedDesigners.slice(0, 3).join(" + ")
           : designerLabel;
+        const brandCountSummary = [...brandCounts.entries()]
+          .sort(([a], [b]) => {
+            const ai = mentionedDesigners.findIndex((n) => normalizeLoose(n) === normalizeLoose(a));
+            const bi = mentionedDesigners.findIndex((n) => normalizeLoose(n) === normalizeLoose(b));
+            if (ai !== -1 || bi !== -1) return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
+            return a.localeCompare(b);
+          })
+          .map(([name, count]) => `${count} ${name}`)
+          .join(", ");
+        const countPhrase = brandCounts.size > 1
+          ? `${finalIds.length} pieces (${brandCountSummary})`
+          : `${finalIds.length} ${multiLabel} pieces`;
         const proposal = {
           tool: "propose_tearsheet",
           tool_call_id: crypto.randomUUID(),
@@ -3512,15 +3526,15 @@ serve(async (req) => {
             title: `${multiLabel} — curated edit`,
             pick_ids: finalIds,
             note: excludedIds.size > 0
-              ? `${finalIds.length} of ${pickIds.length} ${multiLabel} pieces (skipped ${excludedIds.size} per your request), with trade pricing.`
-              : `${finalIds.length} ${multiLabel} pieces from the Maison Affluency Curation, with trade pricing.`,
+              ? `${countPhrase} of ${pickIds.length} matched pieces (skipped ${excludedIds.size} per your request), with trade pricing.`
+              : `${countPhrase} from the Maison Affluency Curation, with trade pricing.`,
             pick_rationales: rationaleMap,
           },
           preview,
         };
         const closing = (excludedIds.size > 0
-          ? `Draft tear sheet with ${finalIds.length} ${multiLabel} pieces (skipped ${excludedIds.size} per your request). Review the list above and click **Approve & Create** to save it into a project folder — or **Discard** to cancel.`
-          : `Draft tear sheet with ${finalIds.length} ${multiLabel} pieces in the Maison Affluency Curation, with trade pricing. Review the list above and click **Approve & Create** to save it into a project folder — or **Discard** to cancel.`)
+          ? `Draft tear sheet with ${countPhrase} (skipped ${excludedIds.size} per your request). Review the list above and click **Approve & Create** to save it into a project folder — or **Discard** to cancel.`
+          : `Draft tear sheet with ${countPhrase} in the Maison Affluency Curation, with trade pricing. Review the list above and click **Approve & Create** to save it into a project folder — or **Discard** to cancel.`)
           + unmetSuffix;
         return sseProposalThenTextResponse(proposal, closing);
 
