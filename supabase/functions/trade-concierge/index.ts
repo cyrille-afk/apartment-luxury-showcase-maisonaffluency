@@ -33,6 +33,29 @@ function aiModel(m: string): string {
 
 type ChatBackend = "gemini" | "lovable-gateway";
 
+// Emitted by the `extract_requirements` tool at the start of any turn that
+// also produces a card. Consumed by the client (as an SSE `event: requirements`
+// frame) and by the Inspector Agent (to diff assembled card contents against
+// the user's declared slots/typologies/counts).
+type RequirementsSlot = {
+  typology: string;
+  qty_min: number;
+  qty_max: number;
+  notes?: string;
+};
+type RequirementsPayload = {
+  slots: RequirementsSlot[];
+  style: string[];
+  materials: string[];
+  brands: string[];
+  budget_cents?: number;
+  budget_currency?: string;
+  room: string;
+  scale: string;
+  era: string;
+  notes: string;
+};
+
 function ensureLovableModel(m: string): string {
   return m.startsWith("google/") || m.startsWith("openai/") ? m : `google/${m}`;
 }
@@ -412,6 +435,99 @@ const corsHeaders = {
 };
 
 const TOOLS = [
+  {
+    type: "function",
+    function: {
+      name: "extract_requirements",
+      description:
+        "ALWAYS the FIRST tool call in any turn that also produces a card (propose_tearsheet, add_to_tearsheet, draft_quote, add_to_quote, propose_ffe_rows, prepare_visualization_brief). Emits the typed Requirements the rest of the turn will be validated against — typology per slot, quantities, style cues, budget, room, era. Emit even for single-piece requests (single-slot array). Do NOT emit when the turn is pure discovery/clarification with no card. The Inspector Agent diffs the assembled card against this object, so undercounting slots or omitting typologies will trigger corrections. Base every field on the LATEST user turn + sticky facts already gathered — do not invent budgets/rooms the user hasn't stated.",
+      parameters: {
+        type: "object",
+        properties: {
+          slots: {
+            type: "array",
+            description:
+              "One entry per distinct piece the user is asking for. Split by typology AND by role (e.g. a dining-set request produces slots for 'dining_table' + 'dining_chair' + optionally 'chandelier'/'sideboard'). Order matches the user's mental model (anchor pieces first). Min 1, max 12.",
+            minItems: 1,
+            maxItems: 12,
+            items: {
+              type: "object",
+              properties: {
+                typology: {
+                  type: "string",
+                  description:
+                    "Normalized furniture typology in snake_case: dining_table, dining_chair, armchair, sofa, coffee_table, side_table, console, sideboard, credenza, bed, nightstand, desk, bookcase, chandelier, pendant_light, floor_lamp, table_lamp, wall_sconce, rug, mirror, artwork, screen, bench, stool, ottoman, bar_cart, vanity, cabinet. Use the closest match if the user's wording is different (e.g. 'suspension' → pendant_light).",
+                },
+                qty_min: {
+                  type: "integer",
+                  description: "Minimum quantity for this slot. 1 unless the user specified a range or a set (e.g. 'chairs for 8' → 8).",
+                },
+                qty_max: {
+                  type: "integer",
+                  description: "Maximum quantity for this slot. Equal to qty_min unless the user gave a range (e.g. '4-6 chairs').",
+                },
+                notes: {
+                  type: "string",
+                  description: "Optional 1-line brief specific to THIS slot (e.g. 'round, seats 8, contrasting to the chairs'). Omit if none.",
+                },
+              },
+              required: ["typology", "qty_min", "qty_max"],
+              additionalProperties: false,
+            },
+          },
+          style: {
+            type: "array",
+            description:
+              "Short style/aesthetic descriptors the user actually used or clearly implied (e.g. ['mid-century', 'warm woods', 'brass accents']). Max 8. Empty array if the user gave none.",
+            items: { type: "string" },
+            maxItems: 8,
+          },
+          materials: {
+            type: "array",
+            description: "Preferred materials/finishes the user named (e.g. ['walnut', 'travertine', 'brass']). Empty array if none. Max 8.",
+            items: { type: "string" },
+            maxItems: 8,
+          },
+          brands: {
+            type: "array",
+            description:
+              "Specific ateliers, designers, or brands the user explicitly named to include (e.g. ['Saint-Louis', 'Alinea Design Objects']). Empty array if none. Do NOT infer brands the user didn't mention. Max 8.",
+            items: { type: "string" },
+            maxItems: 8,
+          },
+          budget_cents: {
+            type: "integer",
+            description: "Total project budget in cents, if the user stated one. Omit the field entirely otherwise.",
+          },
+          budget_currency: {
+            type: "string",
+            description: "ISO 4217 currency code for budget_cents (EUR/USD/GBP/CHF/AED/SGD/HKD/JPY). Omit if budget_cents omitted.",
+          },
+          room: {
+            type: "string",
+            description:
+              "Room or space the pieces are for (e.g. 'dining room', 'primary bedroom', 'library', 'entry'). Empty string if unspecified.",
+          },
+          scale: {
+            type: "string",
+            description:
+              "One short phrase for size/capacity when the user gave one ('seats 8', 'small pied-à-terre', 'double-height drawing room'). Empty string otherwise.",
+          },
+          era: {
+            type: "string",
+            description: "Period cue the user named ('mid-century', '1970s Italian', 'contemporary'). Empty string if unspecified.",
+          },
+          notes: {
+            type: "string",
+            description:
+              "Free-form 1-2 sentence summary of any qualitative constraints not captured above (lighting temperature, sustainability, wheelchair access, delivery deadline, etc.). Empty string if none.",
+          },
+        },
+        required: ["slots", "style", "materials", "brands", "room", "scale", "era", "notes"],
+        additionalProperties: false,
+      },
+    },
+  },
   {
     type: "function",
     function: {
@@ -957,6 +1073,14 @@ In every user-facing message, NEVER use the words "catalog", "catalogue", "catal
 - "our curated selection" (in flowing prose)
 - "the Curation" (short reference)
 Internal section headers in this prompt (CURATION DATA, CURATED PIECES, etc.) are model-facing markers — never echo them in chat either. Rewrite any draft sentence that contains "catalog/catalogue" before sending.
+
+## TOOL USE — REQUIREMENTS FIRST (MANDATORY)
+Whenever the SAME turn will also emit a card tool (\`propose_tearsheet\`, \`add_to_tearsheet\`, \`draft_quote\`, \`add_to_quote\`, \`propose_ffe_rows\`, or \`prepare_visualization_brief\`), you MUST first call \`extract_requirements\` in that turn — before the card tool. The order is: (1) \`extract_requirements\`, (2) the card tool(s). Emit both in the same assistant message.
+
+- Base every field strictly on what the user has actually said (across the whole conversation, including the sticky facts already gathered). Do NOT invent budgets, rooms, eras, or brands the user has not mentioned — leave the corresponding fields empty ("" or [] as the schema requires).
+- \`slots\` must enumerate EVERY distinct typology the user asked for. A "dining set for 8" request is at LEAST two slots: {typology: "dining_table", qty_min: 1, qty_max: 1} + {typology: "dining_chair", qty_min: 8, qty_max: 8}. A "pair a chandelier with a table and chairs" request is three slots. Undercounting slots will cause the Inspector Agent to reject the card.
+- For single-piece answers, still emit \`extract_requirements\` with a one-item slots array — as long as you are ALSO calling a card tool this turn.
+- Do NOT call \`extract_requirements\` on pure-discovery turns (asking sticky-fact questions with no card). It is only paired with a card tool.
 
 ## TOOL USE — TEARSHEET DRAFTING (ALWAYS USE A TOOL FOR PRODUCT RECOMMENDATIONS)
 You have two tools for tearsheets:
@@ -3792,6 +3916,10 @@ serve(async (req) => {
 
     // tool_calls arrive as fragments; key by index
     const toolCallBuffers = new Map<number, { id?: string; name?: string; argsText: string }>();
+    // Captured payload of `extract_requirements` for this turn. Populated when
+    // the model emits that tool call; consumed by the Inspector Agent to diff
+    // the assembled card against the user's declared slots/typologies/counts.
+    let capturedRequirements: RequirementsPayload | null = null;
     let buffer = "";
     let capturedUsage: { prompt_tokens?: number; completion_tokens?: number; total_tokens?: number } | null = null;
     const usageModel = chosenModel;
@@ -3837,16 +3965,18 @@ serve(async (req) => {
           controller.enqueue(encoder.encode(`event: escalation\ndata: ${JSON.stringify(payload)}\n\n`));
         }
         const flushProposal = async () => {
-          // Deterministic ordering: tearsheets ALWAYS flush before quotes so a
-          // chained turn renders as [tearsheet card → quote card] regardless of
-          // the index the model chose for each tool call.
+          // Deterministic ordering: requirements FIRST (so the client can show
+          // the parsed brief immediately), then tearsheets, then quotes, etc.
+          // The Inspector Agent later diffs card contents against the emitted
+          // requirements payload from this same turn.
           const allBuffers = Array.from(toolCallBuffers.values());
+          const requirementsBuffers = allBuffers.filter((b) => b.name === "extract_requirements");
           const tearsheetBuffers = allBuffers.filter((b) => b.name === "propose_tearsheet" || b.name === "add_to_tearsheet");
           const quoteBuffers = allBuffers.filter((b) => b.name === "draft_quote" || b.name === "add_to_quote");
           const ffeBuffers = allBuffers.filter((b) => b.name === "propose_ffe_rows");
           const shippingBuffers = allBuffers.filter((b) => b.name === "estimate_shipping");
           const vizBriefBuffers = allBuffers.filter((b) => b.name === "prepare_visualization_brief");
-          const orderedBuffers = [...tearsheetBuffers, ...quoteBuffers, ...ffeBuffers, ...shippingBuffers, ...vizBriefBuffers];
+          const orderedBuffers = [...requirementsBuffers, ...tearsheetBuffers, ...quoteBuffers, ...ffeBuffers, ...shippingBuffers, ...vizBriefBuffers];
           const firstTearsheetPicks = (() => {
             for (const b of tearsheetBuffers) {
               try {
@@ -3862,6 +3992,72 @@ serve(async (req) => {
             console.log(`[concierge flush] chained turn: ${tearsheetBuffers.length} tearsheet + ${quoteBuffers.length} quote proposal(s), flushing tearsheet→quote`);
           }
           for (const tc of orderedBuffers) {
+            // ====== REQUIREMENTS (must precede card tools) ======
+            if (tc.name === "extract_requirements") {
+              let parsed: any = null;
+              try { parsed = JSON.parse(tc.argsText || "{}"); } catch (e) {
+                console.error("Could not parse extract_requirements args:", tc.argsText, e);
+                continue;
+              }
+              // Normalize + clamp to schema shape. Everything the Inspector
+              // Agent will diff against goes through this validator so a
+              // model that skimps on fields still produces a usable payload.
+              const slots: RequirementsSlot[] = Array.isArray(parsed.slots)
+                ? parsed.slots
+                    .filter((s: any) => s && typeof s.typology === "string")
+                    .slice(0, 12)
+                    .map((s: any) => ({
+                      typology: String(s.typology).trim().toLowerCase().replace(/\s+/g, "_").slice(0, 60),
+                      qty_min: Math.max(1, Math.min(999, Number.isFinite(Number(s.qty_min)) ? Number(s.qty_min) : 1)),
+                      qty_max: Math.max(1, Math.min(999, Number.isFinite(Number(s.qty_max)) ? Number(s.qty_max) : Number(s.qty_min) || 1)),
+                      ...(typeof s.notes === "string" && s.notes.trim() ? { notes: String(s.notes).slice(0, 240) } : {}),
+                    }))
+                : [];
+              const strArr = (v: any, cap = 8, len = 60): string[] =>
+                Array.isArray(v)
+                  ? v.filter((x: unknown) => typeof x === "string" && x.trim()).slice(0, cap).map((x: string) => x.slice(0, len))
+                  : [];
+              const payload: RequirementsPayload = {
+                slots,
+                style: strArr(parsed.style, 8, 80),
+                materials: strArr(parsed.materials, 8, 80),
+                brands: strArr(parsed.brands, 8, 80),
+                room: typeof parsed.room === "string" ? parsed.room.slice(0, 80) : "",
+                scale: typeof parsed.scale === "string" ? parsed.scale.slice(0, 80) : "",
+                era: typeof parsed.era === "string" ? parsed.era.slice(0, 80) : "",
+                notes: typeof parsed.notes === "string" ? parsed.notes.slice(0, 480) : "",
+              };
+              if (Number.isFinite(Number(parsed.budget_cents)) && Number(parsed.budget_cents) > 0) {
+                payload.budget_cents = Math.floor(Number(parsed.budget_cents));
+              }
+              if (typeof parsed.budget_currency === "string" && /^[A-Z]{3}$/.test(parsed.budget_currency)) {
+                payload.budget_currency = parsed.budget_currency;
+              }
+              capturedRequirements = payload;
+              // Structured log so a run's requirements can be joined to the
+              // Inspector log by request_id.
+              try {
+                console.log(JSON.stringify({
+                  tag: "concierge_requirements",
+                  request_id: requestId,
+                  ts: new Date().toISOString(),
+                  slot_count: payload.slots.length,
+                  typologies: payload.slots.map((s) => s.typology),
+                  total_qty_max: payload.slots.reduce((n, s) => n + s.qty_max, 0),
+                  room: payload.room || null,
+                  era: payload.era || null,
+                  brands: payload.brands,
+                  requirements: payload,
+                }));
+              } catch { /* ignore serialization */ }
+              // Emit to the client so the UI can render the parsed brief chip
+              // before the card streams in. Includes request_id for tracing.
+              controller.enqueue(encoder.encode(
+                `event: requirements\ndata: ${JSON.stringify({ request_id: requestId, requirements: payload })}\n\n`,
+              ));
+              continue;
+            }
+
             // ====== QUOTE TOOLS ======
             if (tc.name === "draft_quote" || tc.name === "add_to_quote") {
               let parsed: any = null;
