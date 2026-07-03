@@ -85,6 +85,38 @@ async function installConciergeStub(page: Page) {
         })}\n\n`,
         `data: [DONE]\n\n`,
       ],
+      // Same shape as `blocked`, but the violation is a `palette_mismatch`
+      // — the hard-constraint check the Inspector now runs when the requirements
+      // extractor captured a `materials` / `style` palette. The client-side
+      // contract is identical (no `proposal` frame → skeleton must clear on
+      // `onDone` and no card must ever render), so this scenario pins that the
+      // UI treats the palette failure the same way it treats slot shortfalls.
+      blocked_palette: [
+        `event: request_id\ndata: ${JSON.stringify({ request_id: "pw-req" })}\n\n`,
+        `event: tool_start\ndata: ${JSON.stringify({
+          tool: "propose_tearsheet",
+          tool_call_id: "tc-pw",
+          index: 0,
+          request_id: "pw-req",
+        })}\n\n`,
+        { delayMs: 400 },
+        `event: proposal_blocked\ndata: ${JSON.stringify({
+          request_id: "pw-req",
+          tool: "propose_tearsheet",
+          tool_call_id: "tc-pw",
+          reason: "requirements_violation",
+          coverage: [],
+          violations: [
+            {
+              kind: "palette_mismatch",
+              requested: ["oak", "brass"],
+              offending_ids: ["p1", "p2"],
+              offending_titles: ["Walnut lounge chair", "Marble console"],
+            },
+          ],
+        })}\n\n`,
+        `data: [DONE]\n\n`,
+      ],
     };
 
     (window as any).fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
