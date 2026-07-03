@@ -158,7 +158,25 @@ serve(async (req) => {
   // cannot be hit directly by anonymous or spoofed clients.
   const authHeader = req.headers.get("Authorization") || "";
   const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
+  const logUnauthorized = async (reason: string) => {
+    try {
+      await sb.from("security_audit_events").insert({
+        event_type: "concierge_unauthorized",
+        source: "concierge-public-stream",
+        ip: clientIp(req),
+        details: {
+          reason,
+          user_agent: req.headers.get("user-agent") || null,
+          referer: req.headers.get("referer") || null,
+          sid: (req.headers.get("x-concierge-sid") || "").slice(0, 128) || null,
+        },
+      });
+    } catch (e) {
+      console.warn("[concierge-public-stream] audit log failed", e);
+    }
+  };
   if (!token) {
+    await logUnauthorized("missing_token");
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
       status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
@@ -167,11 +185,13 @@ serve(async (req) => {
     const { data, error } = await sb.auth.getClaims(token);
     const sub = (data?.claims as { sub?: string } | null | undefined)?.sub;
     if (error || !sub) {
+      await logUnauthorized("invalid_claims");
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
   } catch {
+    await logUnauthorized("claims_exception");
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
       status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

@@ -374,7 +374,31 @@ serve(async (req) => {
   let userId: string | null = null;
   const authHeader = req.headers.get("Authorization") || "";
   const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
+  const ip =
+    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    req.headers.get("cf-connecting-ip") ||
+    null;
+  const logUnauthorized = async (reason: string) => {
+    try {
+      await supabase.from("security_audit_events").insert({
+        event_type: "concierge_unauthorized",
+        source: "concierge-capture",
+        ip,
+        details: {
+          reason,
+          user_agent: req.headers.get("user-agent") || null,
+          referer: req.headers.get("referer") || null,
+          surface: body.surface,
+          session_id: body.session_id,
+          path: body.path ?? null,
+        },
+      });
+    } catch (e) {
+      console.warn("[concierge-capture] audit log failed", e);
+    }
+  };
   if (!token) {
+    await logUnauthorized("missing_token");
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
       status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
@@ -383,12 +407,14 @@ serve(async (req) => {
     const { data, error } = await supabase.auth.getClaims(token);
     const sub = (data?.claims as { sub?: string } | null | undefined)?.sub;
     if (error || !sub) {
+      await logUnauthorized("invalid_claims");
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
     userId = sub;
   } catch {
+    await logUnauthorized("claims_exception");
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
       status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
