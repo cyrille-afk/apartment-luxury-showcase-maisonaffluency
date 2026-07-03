@@ -46,6 +46,30 @@ const ConciergePage: React.FC = () => {
   const designer = params.get("designer")?.trim() || "";
   const page = params.get("page")?.trim() || "";
 
+  // Access gate — accept via ?key=… or persisted session token.
+  const [granted, setGranted] = useState<boolean>(() => {
+    if (typeof window === "undefined") return false;
+    try {
+      return sessionStorage.getItem(ACCESS_STORAGE_KEY) === CONCIERGE_ACCESS_CODE;
+    } catch {
+      return false;
+    }
+  });
+  const [codeInput, setCodeInput] = useState("");
+  const [attempted, setAttempted] = useState(false);
+
+  useEffect(() => {
+    const urlKey = params.get("key")?.trim();
+    if (!granted && urlKey && urlKey === CONCIERGE_ACCESS_CODE) {
+      try { sessionStorage.setItem(ACCESS_STORAGE_KEY, CONCIERGE_ACCESS_CODE); } catch {}
+      setGranted(true);
+      // Strip the key from the URL bar.
+      const url = new URL(window.location.href);
+      url.searchParams.delete("key");
+      window.history.replaceState({}, "", url.toString());
+    }
+  }, [params, granted]);
+
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0 });
   }, []);
