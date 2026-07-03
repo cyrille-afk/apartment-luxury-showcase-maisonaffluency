@@ -705,6 +705,26 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
     if (!text && !hasFiles) return;
     if (streaming) return;
 
+    // Server-side concierge endpoints require an authenticated Maison Affluency
+    // member. Block the stream client-side too so the UI never fires a request
+    // that will 401.
+    if (!user) {
+      toast.error("Access restricted", {
+        description: "The Concierge is available to Maison Affluency members only.",
+      });
+      setTimeline((prev) => [
+        ...prev,
+        {
+          kind: "msg",
+          role: "assistant",
+          content: "Access restricted — the Concierge is available to Maison Affluency members only.",
+        },
+      ]);
+      return;
+    }
+
+
+
     // Special intercepts: client-side actions instead of model calls
     if (text === "__concierge:rename__") {
       setNameDraft(name === DEFAULT_NAME ? "" : name);
