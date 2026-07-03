@@ -260,6 +260,7 @@ const TradeAdmin = () => {
     body: string;
     items: string[];
   } | null>(null);
+  const [adminProfile, setAdminProfile] = useState<{ first_name: string; last_name: string; email: string } | null>(null);
 
 function InstagramAuditCard() {
   const { data: missingCount = 0 } = useQuery({
