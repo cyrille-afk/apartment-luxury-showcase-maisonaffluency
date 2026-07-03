@@ -265,6 +265,40 @@ const TradeAdmin = () => {
     items: string[];
   } | null>(null);
   const [adminProfile, setAdminProfile] = useState<{ first_name: string; last_name: string; email: string } | null>(null);
+  const [renderedHtml, setRenderedHtml] = useState<string | null>(null);
+  const [renderingHtml, setRenderingHtml] = useState(false);
+
+  // Render the actual React Email HTML (with the styled CTA button) whenever the
+  // preview dialog opens. Uses a sample edit URL — the real token is minted on Send.
+  useEffect(() => {
+    if (!checklistPreview) {
+      setRenderedHtml(null);
+      return;
+    }
+    let alive = true;
+    setRenderingHtml(true);
+    setRenderedHtml(null);
+    (async () => {
+      const { data, error } = await supabase.functions.invoke("render-email-preview", {
+        body: {
+          templateName: "trade-verification-checklist",
+          templateData: {
+            firstName: checklistPreview.firstName,
+            items: checklistPreview.items,
+            editUrl: `${window.location.origin}/trade/apply/complete/preview-token`,
+          },
+        },
+      });
+      if (!alive) return;
+      setRenderingHtml(false);
+      if (!error && (data as { html?: string })?.html) {
+        setRenderedHtml((data as { html: string }).html);
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, [checklistPreview]);
 
 function InstagramAuditCard() {
   const { data: missingCount = 0 } = useQuery({
@@ -736,10 +770,23 @@ function InstagramAuditCard() {
                 <span className="text-muted-foreground uppercase tracking-wider text-[10px]">Subject</span>
                 <span className="text-foreground">{checklistPreview.subject}</span>
               </div>
-              <div className="rounded border border-border bg-muted/30 p-3 max-h-[50vh] overflow-y-auto">
-                <pre className="whitespace-pre-wrap font-body text-xs text-foreground leading-relaxed">
+              <div className="rounded border border-border bg-white overflow-hidden">
+                {renderingHtml && (
+                  <div className="p-4 font-body text-xs text-muted-foreground">Rendering email…</div>
+                )}
+                {!renderingHtml && renderedHtml && (
+                  <iframe
+                    title="Checklist email preview"
+                    srcDoc={renderedHtml}
+                    className="w-full h-[55vh] border-0 bg-white"
+                    sandbox=""
+                  />
+                )}
+                {!renderingHtml && !renderedHtml && (
+                  <pre className="whitespace-pre-wrap font-body text-xs text-foreground leading-relaxed p-3 bg-muted/30 max-h-[50vh] overflow-y-auto">
 {checklistPreview.body}
-                </pre>
+                  </pre>
+                )}
               </div>
               <p className="text-[10px] text-muted-foreground/70">
                 {checklistPreview.items.length} item{checklistPreview.items.length === 1 ? "" : "s"} requested · applicant: {checklistPreview.app.company_name}
