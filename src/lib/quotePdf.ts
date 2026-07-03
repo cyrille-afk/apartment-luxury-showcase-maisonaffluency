@@ -173,6 +173,13 @@ export interface QuotePdfArgs {
   forResaleNotice?: boolean;
   /** Resale certificate reference shown in the meta block (net_buy, US). */
   resaleCertNumber?: string | null;
+  /** FX snapshot used to convert source-currency line prices into the quote
+   *  currency. When provided, the PDF renders a compliance line under the
+   *  totals block: "FX applied {date} — EUR→SGD 1.4762, USD→SGD 1.34". */
+  fxSnapshot?: {
+    appliedAt: Date;
+    pairs: Array<{ src: string; tgt: string; rate: number; source?: string | null }>;
+  } | null;
 }
 
 
@@ -279,6 +286,30 @@ export async function buildQuotePdf(args: QuotePdfArgs): Promise<jsPDF> {
   // ---- Totals block (right aligned)
   y = ensureSpace(doc, y, 220, pageH);
   y = drawTotals(doc, args, M, y, contentW);
+
+  // ---- FX audit line (compliance) — shown whenever a snapshot was passed,
+  //      even if all rates are identity, so the client sees a timestamped
+  //      reference for any conversion applied to their unit prices.
+  if (args.fxSnapshot && args.fxSnapshot.pairs.length > 0) {
+    const snap = args.fxSnapshot;
+    const stamp = snap.appliedAt.toLocaleString("en-GB", {
+      day: "numeric", month: "short", year: "numeric",
+      hour: "2-digit", minute: "2-digit", timeZoneName: "short",
+    });
+    const pairsTxt = snap.pairs
+      .map((p) => `${p.src.toUpperCase()}→${p.tgt.toUpperCase()} ${p.rate.toFixed(4)}${p.source ? ` (${p.source})` : ""}`)
+      .join(" · ");
+    const fxLine = `FX applied ${stamp} — ${pairsTxt}`;
+    y = ensureSpace(doc, y, 26, pageH);
+    y += 10;
+    doc.setFont("helvetica", "italic");
+    doc.setFontSize(7.5);
+    doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
+    const wrappedFx = doc.splitTextToSize(fxLine, contentW);
+    wrappedFx.forEach((ln: string) => { doc.text(ln, M, y); y += 10; });
+    doc.setTextColor(FG[0], FG[1], FG[2]);
+  }
+
 
   // ---- Trade Tiers ladder — separate card, explains the discount rate
   if (args.tradeDiscountApplied && args.tierBreakdown && args.tierBreakdown.length > 0) {
@@ -967,10 +998,25 @@ function drawTable(
     doc.setTextColor(FG[0], FG[1], FG[2]);
     doc.text(String(line.quantity), xQty + colQty / 2, y + 20, { align: "center" });
     {
-      // Always render the unit price in the quote's display currency so a
-      // single-currency quote stays single-currency. The source-currency
-      // audit figure is intentionally omitted from the customer PDF.
-      doc.text(fmtMoney(line.unitPriceCents, args.currency), xUnit + colUnit - 4, y + 20, { align: "right" });
+      // Dual-currency display: when the line's source currency differs from
+      // the quote currency, show the source-currency unit price (e.g.
+      // "EUR 1,155.00") so the trade user can audit the FX conversion at
+      // a glance. AMOUNT remains in the quote currency.
+      const srcCcy = (line.sourceCurrency || "").toUpperCase();
+      const showSource =
+        srcCcy &&
+        srcCcy !== args.currency.toUpperCase() &&
+        line.sourceUnitPriceCents != null;
+      if (showSource) {
+        doc.text(
+          fmtMoney(line.sourceUnitPriceCents!, srcCcy),
+          xUnit + colUnit - 4,
+          y + 20,
+          { align: "right" },
+        );
+      } else {
+        doc.text(fmtMoney(line.unitPriceCents, args.currency), xUnit + colUnit - 4, y + 20, { align: "right" });
+      }
     }
     doc.setFont("helvetica", "bold");
     doc.text(fmtMoney(line.lineTotalCents, args.currency), rowRight - 4, y + 20, { align: "right" });
