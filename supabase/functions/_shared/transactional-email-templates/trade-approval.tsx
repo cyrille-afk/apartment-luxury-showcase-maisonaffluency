@@ -55,7 +55,11 @@ const TradeApprovalEmail = ({ name, companyName }: TradeApprovalProps) => (
             />
             <BenefitRow
               title="Curated product library"
-              description="Access to European ateliers, collectible design, and material archives, with technical CAD / 3D downloads on eligible pieces."
+              description="Access to European, Japanese and American ateliers, collectible design, and material archives."
+            />
+            <BenefitRow
+              title="CAD &amp; 3D Files"
+              description="Trade-only technical downloads where the maker supplies them: DWG, DXF, 3DS, SKP, RFA, OBJ, FBX, STEP, IGES. Requires sign-in and appears only on eligible product pages."
             />
             <BenefitRow
               title="Samples & swatches"
