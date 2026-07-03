@@ -204,6 +204,7 @@ export async function streamConcierge({
   lang,
   onDelta,
   onProposal,
+  onToolStart,
   onEscalation,
   onRequestId,
   onInspector,
@@ -220,6 +221,12 @@ export async function streamConcierge({
   lang?: string | null;
   onDelta: (text: string) => void;
   onProposal?: (proposal: ConciergeProposal) => void;
+  /**
+   * Fires as soon as the model begins streaming a card-producing tool call,
+   * before the full `event: proposal` frame arrives. Use to render a
+   * skeleton placeholder card in the timeline.
+   */
+  onToolStart?: (event: ToolStartEvent) => void;
   onEscalation?: (event: EscalationEvent) => void;
   /** Fires once at the start of the stream with the server-side trace id. */
   onRequestId?: (requestId: string) => void;
