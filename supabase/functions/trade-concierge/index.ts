@@ -3184,21 +3184,42 @@ serve(async (req) => {
       "collections", "paris", "milano", "london", "and", "the", "by", "of",
       "co", "company", "group", "maison", "house", "works",
     ]);
+    const normalizedUserMsg = normalizeLoose(lastUserMsg || "");
+    const userMsgTokens = new Set(normalizedUserMsg.split(/\s+/).filter(Boolean));
+    const designerTokenFrequency = new Map<string, number>();
+    for (const n of designerNames) {
+      const nameTokens = Array.from(new Set(
+        normalizeLoose(String(n || "")).split(/\s+/).filter((t) => t.length >= 5 && !NAME_STOPWORDS.has(t)),
+      ));
+      for (const t of nameTokens) designerTokenFrequency.set(t, (designerTokenFrequency.get(t) || 0) + 1);
+    }
+    const phraseInUserMessage = (phrase: string) => {
+      const needle = normalizeLoose(phrase);
+      if (!needle) return false;
+      return (` ${normalizedUserMsg} `).includes(` ${needle} `);
+    };
     const mentionedDesigners: string[] = [];
     for (const n of designerNames) {
       const name = String(n || "").toLowerCase().trim();
       if (!name) continue;
-      // 1. Full-name substring (existing behavior)
-      if (name.length >= 4 && lastUserMsgLc.includes(name)) {
+      // 1. Full-name phrase match, normalized for punctuation/diacritics
+      //    so "Saint Louis" matches "Saint-Louis" without making the single
+      //    token "Louis" also match "Jean-Louis Deniot".
+      if (name.length >= 4 && phraseInUserMessage(name)) {
         mentionedDesigners.push(n);
         continue;
       }
       // 2. Distinctive-token match — "alinea" should match "Alinea Design Objects",
-      //    "pouénat" should match "Pouénat", etc. Any non-stopword token ≥5 chars
-      //    from the designer name that appears in the user message counts.
-      const tokens = name.split(/[^a-zà-ÿ0-9]+/i).filter(Boolean);
+      //    "pouénat" should match "Pouénat", etc. Match whole normalized
+      //    tokens only (not substrings: "interest" must not match "interested")
+      //    and ignore tokens shared by multiple designer names (e.g. "louis").
+      const tokens = normalizeLoose(name).split(/\s+/).filter(Boolean);
       const distinctive = tokens.find(
-        (t) => t.length >= 5 && !NAME_STOPWORDS.has(t) && lastUserMsgLc.includes(t),
+        (t) =>
+          t.length >= 5 &&
+          !NAME_STOPWORDS.has(t) &&
+          (designerTokenFrequency.get(t) || 0) === 1 &&
+          userMsgTokens.has(t),
       );
       if (distinctive) mentionedDesigners.push(n);
     }
@@ -3352,7 +3373,7 @@ serve(async (req) => {
       // this, "Saint-Louis chandelier" returned all 20 Saint-Louis pieces
       // (vases, lamps, etc.) instead of just chandeliers.
       const TYPOLOGY_TERMS = [
-        "chandelier","sconce","pendant","lantern",
+        "chandelier","sconce","pendant","lantern","lighting","light",
         "dining table","coffee table","side table","console","desk","table",
         "armchair","chair","stool","bench","sofa","banquette","daybed","bed",
         "cabinet","sideboard","credenza","commode","armoire","bookshelf","shelf",
@@ -3399,15 +3420,26 @@ serve(async (req) => {
       }
       const typologiesByDesigner = new Map<string, Set<string>>();
       for (const id of targetIds) typologiesByDesigner.set(id, new Set<string>());
+      let lastDesignerIdWithTypology: string | null = null;
       for (const frag of fragments) {
         const fragTypologies = detectTypologiesIn(frag);
         if (fragTypologies.length === 0) continue;
+        const matchedDesignerIds: string[] = [];
         for (const [id, tokens] of designerTokensById) {
           if (tokens.some((t) => frag.includes(t))) {
-            typologiesByDesigner.get(id)!.add("__bound__");
-            for (const t of fragTypologies) typologiesByDesigner.get(id)!.add(t);
+            matchedDesignerIds.push(id);
           }
         }
+        const idsToBind = matchedDesignerIds.length > 0
+          ? matchedDesignerIds
+          : lastDesignerIdWithTypology
+            ? [lastDesignerIdWithTypology]
+            : [];
+        for (const id of idsToBind) {
+          typologiesByDesigner.get(id)!.add("__bound__");
+          for (const t of fragTypologies) typologiesByDesigner.get(id)!.add(t);
+        }
+        if (matchedDesignerIds.length > 0) lastDesignerIdWithTypology = matchedDesignerIds[matchedDesignerIds.length - 1];
       }
       const matchesTypology = (pick: any, typologies: string[]): boolean => {
         if (typologies.length === 0) return true;
@@ -3479,9 +3511,11 @@ serve(async (req) => {
           if (p?.id && p?.designer_id) pickDesignerById.set(p.id, p.designer_id);
         }
         const rationaleMap: Record<string, { reason: string }> = {};
+        const brandCounts = new Map<string, number>();
         for (const p of previewRaw) {
           if (!p?.id) continue;
           const dName = designerNameById.get(pickDesignerById.get(p.id) || "") || designerLabel;
+          brandCounts.set(dName, (brandCounts.get(dName) || 0) + 1);
           rationaleMap[p.id] = { reason: `Complete ${dName} listing from the Maison Affluency Curation.` };
         }
         const preview = previewRaw.map((p: any) => ({ ...p, rationale: rationaleMap[p.id]?.reason || null }));
@@ -3505,6 +3539,18 @@ serve(async (req) => {
         const multiLabel = mentionedDesigners.length > 1
           ? mentionedDesigners.slice(0, 3).join(" + ")
           : designerLabel;
+        const brandCountSummary = [...brandCounts.entries()]
+          .sort(([a], [b]) => {
+            const ai = mentionedDesigners.findIndex((n) => normalizeLoose(n) === normalizeLoose(a));
+            const bi = mentionedDesigners.findIndex((n) => normalizeLoose(n) === normalizeLoose(b));
+            if (ai !== -1 || bi !== -1) return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
+            return a.localeCompare(b);
+          })
+          .map(([name, count]) => `${count} ${name}`)
+          .join(", ");
+        const countPhrase = brandCounts.size > 1
+          ? `${finalIds.length} pieces (${brandCountSummary})`
+          : `${finalIds.length} ${multiLabel} pieces`;
         const proposal = {
           tool: "propose_tearsheet",
           tool_call_id: crypto.randomUUID(),
@@ -3512,15 +3558,15 @@ serve(async (req) => {
             title: `${multiLabel} — curated edit`,
             pick_ids: finalIds,
             note: excludedIds.size > 0
-              ? `${finalIds.length} of ${pickIds.length} ${multiLabel} pieces (skipped ${excludedIds.size} per your request), with trade pricing.`
-              : `${finalIds.length} ${multiLabel} pieces from the Maison Affluency Curation, with trade pricing.`,
+              ? `${countPhrase} of ${pickIds.length} matched pieces (skipped ${excludedIds.size} per your request), with trade pricing.`
+              : `${countPhrase} from the Maison Affluency Curation, with trade pricing.`,
             pick_rationales: rationaleMap,
           },
           preview,
         };
         const closing = (excludedIds.size > 0
-          ? `Draft tear sheet with ${finalIds.length} ${multiLabel} pieces (skipped ${excludedIds.size} per your request). Review the list above and click **Approve & Create** to save it into a project folder — or **Discard** to cancel.`
-          : `Draft tear sheet with ${finalIds.length} ${multiLabel} pieces in the Maison Affluency Curation, with trade pricing. Review the list above and click **Approve & Create** to save it into a project folder — or **Discard** to cancel.`)
+          ? `Draft tear sheet with ${countPhrase} (skipped ${excludedIds.size} per your request). Review the list above and click **Approve & Create** to save it into a project folder — or **Discard** to cancel.`
+          : `Draft tear sheet with ${countPhrase} in the Maison Affluency Curation, with trade pricing. Review the list above and click **Approve & Create** to save it into a project folder — or **Discard** to cancel.`)
           + unmetSuffix;
         return sseProposalThenTextResponse(proposal, closing);
 
