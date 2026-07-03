@@ -5193,6 +5193,74 @@ serve(async (req) => {
           // (2) Reverse back-fill: tearsheet emitted but quote missing — forces a
           //     draft_quote follow-up and emits it after the tearsheet card.
           await runChainIfNeeded();
+
+          // ---- Inspector Agent (second-pass factual validator) ----
+          // Only runs when we buffered prose AND at least one card proposal
+          // was actually emitted this turn. Cheap fast model diff-checks the
+          // buffered prose against the DB rows behind the card(s) and rewrites
+          // any factual claim that contradicts them (wrong totals, wrong
+          // brand attribution, invented pieces). Fail-open: on error the
+          // original buffered prose is flushed unchanged.
+          if (shouldBufferProseForInspector) {
+            try {
+              const cardBufs = Array.from(toolCallBuffers.values()).filter((b) =>
+                b.name === "propose_tearsheet" || b.name === "add_to_tearsheet" ||
+                b.name === "draft_quote" || b.name === "add_to_quote"
+              );
+              const groundTruthCards: Array<{ tool: string; pickIds: string[]; previews: any[] }> = [];
+              for (const b of cardBufs) {
+                let parsed: any = null;
+                try { parsed = JSON.parse(b.argsText || "{}"); } catch { continue; }
+                let ids: string[] = [];
+                if (Array.isArray(parsed.pick_ids)) {
+                  ids = parsed.pick_ids.filter((x: unknown) => typeof x === "string");
+                } else if (Array.isArray(parsed.lines)) {
+                  ids = parsed.lines
+                    .map((l: any) => (l && typeof l.pick_id === "string" ? l.pick_id : null))
+                    .filter((x: string | null): x is string => !!x);
+                }
+                if (!ids.length) continue;
+                const previews = await hydratePickPreview(supabase, ids);
+                groundTruthCards.push({ tool: b.name || "unknown", pickIds: ids, previews });
+              }
+
+              const proseText = assistantTextBuf.trim();
+              if (groundTruthCards.length && proseText.length > 0) {
+                const gt = buildInspectorGroundTruth(groundTruthCards);
+                const inspector = await runInspectorPass({
+                  prose: proseText,
+                  groundTruth: gt,
+                  apiKey: LOVABLE_API_KEY,
+                });
+                const finalProse = inspector.ok ? inspector.corrected_prose : proseText;
+                console.log(`[concierge inspector] ok=${inspector.ok} ms=${inspector.ms} corrections=${inspector.corrections.length}${inspector.reason ? ` reason=${inspector.reason}` : ""}`);
+                if (inspector.corrections.length > 0) {
+                  for (const c of inspector.corrections) {
+                    console.log(`[concierge inspector] correction: "${c.original.slice(0, 120)}" -> "${c.replacement.slice(0, 120)}" (${c.reason})`);
+                  }
+                  // Surface to the client so the UI can badge / log
+                  controller.enqueue(encoder.encode(`event: inspector\ndata: ${JSON.stringify({ ok: inspector.ok, corrections: inspector.corrections, ms: inspector.ms })}\n\n`));
+                }
+                // Flush the (possibly rewritten) prose as ONE synthetic delta.
+                if (finalProse) {
+                  const frame = { choices: [{ delta: { content: finalProse } }] };
+                  controller.enqueue(encoder.encode(`data: ${JSON.stringify(frame)}\n\n`));
+                }
+              } else {
+                // No card actually emitted (or no prose) — release the
+                // buffered prose lines verbatim so the user still sees them.
+                for (const line of bufferedProseLines) {
+                  controller.enqueue(encoder.encode(line + "\n"));
+                }
+              }
+            } catch (inspErr) {
+              console.error("[concierge inspector] pass failed, releasing raw prose:", inspErr);
+              for (const line of bufferedProseLines) {
+                controller.enqueue(encoder.encode(line + "\n"));
+              }
+            }
+          }
+
           if (sawDone) controller.enqueue(encoder.encode("data: [DONE]\n\n"));
 
         } catch (e) {
