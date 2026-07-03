@@ -741,15 +741,19 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   useEffect(() => {
     let cancelled = false;
     setPendingSwatchLib([]);
+    setPendingSwatchLoading(false);
     const pickId = pendingVariants?.pickId;
     if (!pickId) return;
+    setPendingSwatchLoading(true);
     (async () => {
       const { data } = await (supabase as any)
         .from("product_fabric_swatches_public")
         .select("fabric_id, name, image_url, sort_order, is_active")
         .eq("pick_id", pickId)
         .order("sort_order", { ascending: true });
-      if (cancelled || !data) return;
+      if (cancelled) return;
+      setPendingSwatchLoading(false);
+      if (!data) return;
       const lib = (data as any[])
         .filter((r) => r && r.is_active !== false && r.image_url && r.name)
         .map((r) => ({
