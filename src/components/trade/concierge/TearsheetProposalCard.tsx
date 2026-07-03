@@ -433,13 +433,31 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
                         )}
                       </div>
                       {status === "pending" && (
-                        <button
-                          onClick={() => togglePick(p.id)}
-                          className="text-muted-foreground hover:text-foreground text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded border border-border self-center"
-                          aria-label={isExcluded ? "Include" : "Exclude"}
-                        >
-                          {isExcluded ? "Add" : "Skip"}
-                        </button>
+                        <div className="flex items-center gap-1 self-center shrink-0">
+                          <button
+                            type="button"
+                            onClick={() => sendConciergePrefill(buildSwapPrompt({
+                              pick_id: p.id,
+                              title: p.title,
+                              designer_name: p.designer_name,
+                              materials: p.materials,
+                              category: (p as any).category ?? null,
+                            }))}
+                            className="inline-flex items-center gap-1 text-muted-foreground hover:text-accent text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded border border-border transition-colors"
+                            aria-label={`Swap ${p.title || "this pick"} for a similar piece`}
+                            title="Swap for a similar piece (darker wood / warmer finish)"
+                          >
+                            <Repeat className="h-2.5 w-2.5" />
+                            Swap
+                          </button>
+                          <button
+                            onClick={() => togglePick(p.id)}
+                            className="text-muted-foreground hover:text-foreground text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded border border-border"
+                            aria-label={isExcluded ? "Include" : "Exclude"}
+                          >
+                            {isExcluded ? "Add" : "Skip"}
+                          </button>
+                        </div>
                       )}
                     </li>
                   );
