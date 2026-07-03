@@ -53,7 +53,10 @@ export function VisualizationBriefCard({ proposal, resolved, onResolved }: Props
       <div className="flex items-start gap-2">
         <Sparkles className="w-4 h-4 mt-0.5 text-primary shrink-0" />
         <div className="flex-1 min-w-0">
-          <div className="text-sm font-medium leading-tight">{title}</div>
+          <div className="flex items-center gap-2 flex-wrap">
+            <div className="text-sm font-medium leading-tight">{title}</div>
+            <RequirementsBadge validation={proposal.requirements_validation} />
+          </div>
           <div className="text-xs text-muted-foreground mt-0.5">
             {MODE_LABELS[args.mode]} · {args.style_preset}
             {args.room_label && args.title ? ` · ${args.room_label}` : ""}
