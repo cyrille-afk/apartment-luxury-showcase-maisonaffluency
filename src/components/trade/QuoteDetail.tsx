@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { supabase } from "@/integrations/supabase/client";
 import { hydrateQuotePricesFromPicks } from "@/lib/hydrateQuotePricesFromPicks";
-import { getFxRates, FALLBACK_RATES, getFxSource, summarizeFxSources, type FxSource } from "@/lib/fxRates";
+import { getFxRates, FALLBACK_RATES, getFxSource, summarizeFxSources, describeFxSource, type FxSource } from "@/lib/fxRates";
 import { FxSourceBadge } from "@/components/trade/FxSourceBadge";
 import { FxAppliedRates } from "@/components/trade/FxAppliedRates";
 
