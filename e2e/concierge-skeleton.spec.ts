@@ -29,6 +29,7 @@ async function installConciergeStub(page: Page) {
       | "success"
       | "blocked"
       | "blocked_palette"
+      | "blocked_currency"
       | null;
     if (!scenario) return;
 
@@ -36,7 +37,7 @@ async function installConciergeStub(page: Page) {
     const originalFetch = window.fetch.bind(window);
 
     const frames: Record<
-      "success" | "blocked" | "blocked_palette",
+      "success" | "blocked" | "blocked_palette" | "blocked_currency",
       Array<string | { delayMs: number }>
     > = {
       success: [
