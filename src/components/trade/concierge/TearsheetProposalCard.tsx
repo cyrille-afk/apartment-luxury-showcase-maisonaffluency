@@ -10,6 +10,7 @@ import { BoardPicker } from "@/components/trade/concierge/BoardPicker";
 import { ProjectAssignInline } from "@/components/trade/concierge/ProjectAssignInline";
 import { HotspotImageBadge } from "@/components/trade/HotspotImageBadge";
 import { buildSwapPrompt, sendConciergePrefill } from "@/lib/conciergePrefill";
+import { RequirementsBadge } from "@/components/trade/concierge/RequirementsBadge";
 
 type Status = "pending" | "committing" | "approved" | "discarded";
 type Mode = "create" | "append";
@@ -187,10 +188,11 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
 
   return (
     <div className="rounded-2xl border border-accent/40 bg-accent/[0.04] p-3.5 my-2 animate-fade-in">
-      <div className="mb-2">
+      <div className="mb-2 flex items-center justify-between gap-2">
         <span className="font-display text-[10px] uppercase tracking-widest text-accent">
           {headerLabel}
         </span>
+        <RequirementsBadge validation={proposal.requirements_validation} />
       </div>
 
       {/* Segmented control — always visible while pending so the user can redirect either way */}

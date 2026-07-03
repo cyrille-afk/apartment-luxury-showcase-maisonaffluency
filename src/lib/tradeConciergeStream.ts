@@ -22,6 +22,35 @@ export function chatMessageText(content: ChatMessage["content"]): string {
 
 export type RationaleEntry = { reason: string; detail?: string | null };
 
+/**
+ * Attached by the edge function to every card-producing proposal. Reports
+ * whether the assembled `pick_ids` cover the `capturedRequirements` slots
+ * extracted earlier in the same turn. Cards render this as a badge:
+ * "Matches brief" (ok) or "Does not satisfy brief" (violations), with a
+ * tooltip listing the per-slot shortfalls.
+ */
+export type RequirementsValidation = {
+  ok: boolean;
+  brand_ok?: boolean;
+  coverage?: Array<{
+    slot: string;
+    typology?: string | null;
+    required_qty?: number;
+    delivered_qty?: number;
+  }>;
+  violations?: Array<{
+    slot?: string;
+    typology?: string | null;
+    required_qty?: number;
+    delivered_qty?: number;
+    reason: string;
+  }>;
+  total_items?: number;
+  unmatched_ids?: string[];
+  enforcement?: "open" | "closed";
+};
+
+
 export type CreateTearsheetProposal = {
   tool: "propose_tearsheet";
   tool_call_id: string;
@@ -32,6 +61,7 @@ export type CreateTearsheetProposal = {
     pick_rationales?: Record<string, RationaleEntry>;
   };
   preview: PickPreview[];
+  requirements_validation?: RequirementsValidation;
 };
 
 export type AddToTearsheetProposal = {
@@ -45,6 +75,7 @@ export type AddToTearsheetProposal = {
     pick_rationales?: Record<string, RationaleEntry>;
   };
   preview: PickPreview[];
+  requirements_validation?: RequirementsValidation;
 };
 
 export type QuoteLine = {
@@ -69,6 +100,7 @@ export type DraftQuoteProposal = {
     lines: QuoteLine[];
   };
   preview: QuoteLinePreview[];
+  requirements_validation?: RequirementsValidation;
 };
 
 export type AddToQuoteProposal = {
@@ -81,6 +113,7 @@ export type AddToQuoteProposal = {
     lines: QuoteLine[];
   };
   preview: QuoteLinePreview[];
+  requirements_validation?: RequirementsValidation;
 };
 
 export type TearsheetProposal = CreateTearsheetProposal | AddToTearsheetProposal;
@@ -108,6 +141,7 @@ export type FfeProposal = {
     rows: FfeRow[];
   };
   preview: FfeLinePreview[];
+  requirements_validation?: RequirementsValidation;
 };
 
 export type VisualizationBriefProposal = {
@@ -123,6 +157,7 @@ export type VisualizationBriefProposal = {
     source_image_url: string | null;
   };
   preview: PickPreview[];
+  requirements_validation?: RequirementsValidation;
 };
 
 export type ConciergeProposal = TearsheetProposal | QuoteProposal | FfeProposal | VisualizationBriefProposal;

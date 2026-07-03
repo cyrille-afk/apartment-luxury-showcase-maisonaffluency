@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { RequirementsBadge } from "@/components/trade/concierge/RequirementsBadge";
 
 type Status = "pending" | "committing" | "approved" | "discarded";
 
@@ -168,11 +169,14 @@ export function FfeProposalCard({ proposal, onResolved }: Props) {
         <span className="font-display text-[10px] uppercase tracking-widest text-accent">
           ✦ Concierge proposes an FF&E schedule
         </span>
-        {displayCurrency && (
-          <span className="font-body text-[10px] uppercase tracking-widest text-muted-foreground">
-            {displayCurrency} · trade −{TRADE_DISCOUNT_PCT}%
-          </span>
-        )}
+        <div className="flex items-center gap-2 shrink-0">
+          <RequirementsBadge validation={proposal.requirements_validation} />
+          {displayCurrency && (
+            <span className="font-body text-[10px] uppercase tracking-widest text-muted-foreground">
+              {displayCurrency} · trade −{TRADE_DISCOUNT_PCT}%
+            </span>
+          )}
+        </div>
       </div>
 
       <div className="mb-2 flex items-center gap-1.5 text-foreground">
