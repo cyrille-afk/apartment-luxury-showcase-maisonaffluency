@@ -24,12 +24,20 @@ import {
 export type ConciergeQuickAction = { label: string; prompt: string; primary?: boolean };
 
 export type TimelineAttachment = { name: string; kind: "image" | "pdf"; previewUrl?: string };
+type PendingProposalTool =
+  | "propose_tearsheet"
+  | "add_to_tearsheet"
+  | "draft_quote"
+  | "add_to_quote"
+  | "propose_ffe_rows"
+  | "prepare_visualization_brief";
 type TimelineItem =
   | { kind: "msg"; role: "user" | "assistant"; content: string; actions?: ConciergeQuickAction[]; onboarding?: boolean; sourceContent?: string; sourceActions?: ConciergeQuickAction[]; attachments?: TimelineAttachment[] }
   | { kind: "proposal"; proposal: TearsheetProposal; resolved?: "approved" | "discarded"; excluded?: string[]; newPickIds?: string[] }
   | { kind: "quote_proposal"; proposal: QuoteProposal; resolved?: "approved" | "discarded" }
   | { kind: "ffe_proposal"; proposal: FfeProposal; resolved?: "approved" | "discarded" }
   | { kind: "viz_brief"; proposal: VisualizationBriefProposal; resolved?: "opened" | "discarded" }
+  | { kind: "pending_proposal"; tool: PendingProposalTool; toolCallId: string | null; index: number }
   | { kind: "escalation"; sentiment: string; intent: string; excerpt: ChatMessage[]; resolved?: "requested" | "dismissed" }
   | { kind: "retry"; text: string; reason: string };
 
