@@ -353,6 +353,15 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   const [pendingProductId, setPendingProductId] = useState<string>("");
   const [addingProduct, setAddingProduct] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
+  // Variant meta by product id — populated alongside productOptions so the
+  // picker can prompt for size/finish selection before insert. Without this
+  // step, adding e.g. Excess Chandelier silently defaults to the first row
+  // of the variant matrix (10 Lights / cheapest price).
+  const [variantsByProduct, setVariantsByProduct] = useState<
+    Record<string, { variants: Array<{ label: string; price_cents: number | null }>; currency: string | null }>
+  >({});
+  const [pendingVariantIdx, setPendingVariantIdx] = useState<number | null>(null);
+
   const [issueDate, setIssueDate] = useState<string | null>(null);
   const [landedCostSettings, setLandedCostSettings] = useState<{ cbm: number; kg: number; mode: "road" | "courier" }>(() => ({
     cbm: DEFAULT_GBP_LANDED_CBM,
