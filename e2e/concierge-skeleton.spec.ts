@@ -20,18 +20,25 @@ import { test, expect, type Page } from "@playwright/test";
  * and doesn't require auth, so it's the right entry point for this test.
  */
 
-type Scenario = "success" | "blocked";
+type Scenario = "success" | "blocked" | "blocked_palette";
 
 async function installConciergeStub(page: Page) {
   await page.addInitScript(() => {
     const url = new URL(window.location.href);
-    const scenario = url.searchParams.get("__pw_mock") as "success" | "blocked" | null;
+    const scenario = url.searchParams.get("__pw_mock") as
+      | "success"
+      | "blocked"
+      | "blocked_palette"
+      | null;
     if (!scenario) return;
 
     const enc = new TextEncoder();
     const originalFetch = window.fetch.bind(window);
 
-    const frames: Record<"success" | "blocked", Array<string | { delayMs: number }>> = {
+    const frames: Record<
+      "success" | "blocked" | "blocked_palette",
+      Array<string | { delayMs: number }>
+    > = {
       success: [
         `event: request_id\ndata: ${JSON.stringify({ request_id: "pw-req" })}\n\n`,
         `event: tool_start\ndata: ${JSON.stringify({
