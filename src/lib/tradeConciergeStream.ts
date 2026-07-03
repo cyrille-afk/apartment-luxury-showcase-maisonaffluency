@@ -322,6 +322,10 @@ export async function streamConcierge({
         if (onProposal) onProposal(parsed as ConciergeProposal);
         return;
       }
+      if (currentEvent === "tool_start") {
+        if (onToolStart) onToolStart(parsed as ToolStartEvent);
+        return;
+      }
       if (currentEvent === "escalation") {
         if (onEscalation) onEscalation(parsed as EscalationEvent);
         return;
