@@ -20,7 +20,7 @@ import { test, expect, type Page } from "@playwright/test";
  * and doesn't require auth, so it's the right entry point for this test.
  */
 
-type Scenario = "success" | "blocked" | "blocked_palette";
+type Scenario = "success" | "blocked" | "blocked_palette" | "blocked_currency";
 
 async function installConciergeStub(page: Page) {
   await page.addInitScript(() => {
