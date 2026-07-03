@@ -3342,10 +3342,10 @@ serve(async (req) => {
 
       const { data: allPicks } = await supabase
         .from("designer_curator_picks")
-        .select("id, title, category, subcategory, materials")
+        .select("id, title, category, subcategory, materials, designer_id")
         .in("designer_id", targetIds)
         .order("title", { ascending: true })
-        .limit(24);
+        .limit(48);
       // Typology filter — when the user names a piece type (e.g. "chandelier",
       // "sconce", "dining table"), restrict the enumeration to picks whose
       // title / subcategory / category actually contain that term. Without
@@ -3360,9 +3360,11 @@ serve(async (req) => {
         "floor lamp","table lamp","wall light","ceiling light","lamp",
       ];
       const msgLcTypology = String(lastUserMsg || "").toLowerCase();
-      const requestedTypologies = TYPOLOGY_TERMS.filter((t) =>
-        new RegExp(`\\b${t.replace(/ /g, "\\s+")}s?\\b`, "i").test(msgLcTypology),
-      );
+      const detectTypologiesIn = (text: string): string[] =>
+        TYPOLOGY_TERMS.filter((t) =>
+          new RegExp(`\\b${t.replace(/ /g, "\\s+")}s?\\b`, "i").test(text),
+        );
+      const requestedTypologies = detectTypologiesIn(msgLcTypology);
       // Synonym expansion — some pieces are catalogued under an adjacent
       // subcategory (e.g. an "Excess Chandelier" filed under "Ceiling Lights").
       // When the user asks for a common typology, also accept its siblings.
@@ -3375,24 +3377,65 @@ serve(async (req) => {
         "floor lamp": ["floor light"],
         "table lamp": ["table light"],
       };
-      const filteredPicksByTypology = requestedTypologies.length
-        ? (allPicks || []).filter((p: any) => {
-            const hay = `${p.title || ""} ${p.subcategory || ""} ${p.category || ""}`.toLowerCase();
-            return requestedTypologies.some((t) => {
-              if (hay.includes(t)) return true;
-              const syns = TYPOLOGY_SYNONYMS[t] || [];
-              return syns.some((s) => hay.includes(s));
-            });
-          })
-        : (allPicks || []);
+
+      // Per-designer typology binding. Split the message into fragments on
+      // connectives ("and", "with", "plus", commas, semicolons) so that
+      // typologies bind only to the designer named in the same fragment.
+      // Without this, "Saint-Louis chandelier with Alinea table and chairs"
+      // spilled the "table"/"chair" typology onto Saint-Louis picks and
+      // dragged in every Saint-Louis side table / table lamp.
+      const fragments = msgLcTypology
+        .split(/\s*(?:,|;|\band\b|\bwith\b|\bplus\b|\balong\s+with\b|\bas\s+well\s+as\b|&|\+)\s*/i)
+        .map((f) => f.trim())
+        .filter(Boolean);
+      const designerTokensById = new Map<string, string[]>();
+      for (const d of (designerRows || [])) {
+        if (!targetIds.includes(d.id)) continue;
+        const raw = `${d.name || ""} ${d.display_name || ""}`.toLowerCase();
+        const tokens = Array.from(new Set(
+          raw.split(/[^a-zà-ÿ0-9]+/i).filter((t) => t.length >= 4 && !NAME_STOPWORDS.has(t)),
+        ));
+        designerTokensById.set(d.id, tokens);
+      }
+      const typologiesByDesigner = new Map<string, Set<string>>();
+      for (const id of targetIds) typologiesByDesigner.set(id, new Set<string>());
+      for (const frag of fragments) {
+        const fragTypologies = detectTypologiesIn(frag);
+        if (fragTypologies.length === 0) continue;
+        for (const [id, tokens] of designerTokensById) {
+          if (tokens.some((t) => frag.includes(t))) {
+            typologiesByDesigner.get(id)!.add("__bound__");
+            for (const t of fragTypologies) typologiesByDesigner.get(id)!.add(t);
+          }
+        }
+      }
+      const matchesTypology = (pick: any, typologies: string[]): boolean => {
+        if (typologies.length === 0) return true;
+        const hay = `${pick.title || ""} ${pick.subcategory || ""} ${pick.category || ""}`.toLowerCase();
+        return typologies.some((t) => {
+          if (hay.includes(t)) return true;
+          const syns = TYPOLOGY_SYNONYMS[t] || [];
+          return syns.some((s) => hay.includes(s));
+        });
+      };
+      const filteredPicksByTypology = (allPicks || []).filter((p: any) => {
+        const bound = typologiesByDesigner.get(p.designer_id);
+        const boundList = bound && bound.has("__bound__")
+          ? [...bound].filter((t) => t !== "__bound__")
+          : requestedTypologies;
+        return matchesTypology(p, boundList);
+      });
       const pickIds = filteredPicksByTypology.map((p: any) => p.id);
       console.log("[concierge typology-filter]", JSON.stringify({
         designerLabel,
         targetDesignerIds: targetIds,
         userMsg: String(lastUserMsg || "").slice(0, 200),
+        fragments,
         requestedTypologies,
+        typologiesByDesigner: Object.fromEntries(
+          [...typologiesByDesigner.entries()].map(([k, v]) => [k, [...v].filter((t) => t !== "__bound__")]),
+        ),
         allPicksCount: (allPicks || []).length,
-        allPicks: (allPicks || []).map((p: any) => ({ id: p.id, title: p.title, subcategory: p.subcategory, category: p.category })),
         matchedPickIds: pickIds,
         matchedPickTitles: filteredPicksByTypology.map((p: any) => p.title),
       }));
@@ -3425,29 +3468,62 @@ serve(async (req) => {
             buildSkipConfirmationMessage(skipped, previewRaw, designerLabel),
           );
         }
+        const designerNameById = new Map<string, string>();
+        for (const d of (designerRows || [])) {
+          if (targetIds.includes(d.id)) {
+            designerNameById.set(d.id, d.display_name || d.name || designerLabel);
+          }
+        }
+        const pickDesignerById = new Map<string, string>();
+        for (const p of (allPicks || [])) {
+          if (p?.id && p?.designer_id) pickDesignerById.set(p.id, p.designer_id);
+        }
         const rationaleMap: Record<string, { reason: string }> = {};
         for (const p of previewRaw) {
           if (!p?.id) continue;
-          rationaleMap[p.id] = { reason: `Complete ${designerLabel} listing from the Maison Affluency Curation.` };
+          const dName = designerNameById.get(pickDesignerById.get(p.id) || "") || designerLabel;
+          rationaleMap[p.id] = { reason: `Complete ${dName} listing from the Maison Affluency Curation.` };
         }
         const preview = previewRaw.map((p: any) => ({ ...p, rationale: rationaleMap[p.id]?.reason || null }));
+        // Note designers whose requested typology returned nothing so the
+        // closing prose acknowledges what's missing (e.g. "Alinea chairs").
+        const unmetNotes: string[] = [];
+        for (const [dId, tSet] of typologiesByDesigner) {
+          if (!tSet.has("__bound__")) continue;
+          const boundList = [...tSet].filter((t) => t !== "__bound__");
+          const dName = designerNameById.get(dId) || "";
+          for (const t of boundList) {
+            const anyMatch = (allPicks || []).some((p: any) =>
+              p.designer_id === dId && matchesTypology(p, [t]),
+            );
+            if (!anyMatch) unmetNotes.push(`${dName} has no ${t}s in the current Curation`);
+          }
+        }
+        const unmetSuffix = unmetNotes.length
+          ? ` Note: ${unmetNotes.join("; ")}.`
+          : "";
+        const multiLabel = mentionedDesigners.length > 1
+          ? mentionedDesigners.slice(0, 3).join(" + ")
+          : designerLabel;
         const proposal = {
           tool: "propose_tearsheet",
           tool_call_id: crypto.randomUUID(),
           args: {
-            title: `${designerLabel} — full curation`,
+            title: `${multiLabel} — curated edit`,
             pick_ids: finalIds,
             note: excludedIds.size > 0
-              ? `${finalIds.length} of ${pickIds.length} ${designerLabel} pieces (skipped ${excludedIds.size} per your request), with trade pricing.`
-              : `All ${finalIds.length} ${designerLabel} pieces currently in the Maison Affluency Curation, with trade pricing.`,
+              ? `${finalIds.length} of ${pickIds.length} ${multiLabel} pieces (skipped ${excludedIds.size} per your request), with trade pricing.`
+              : `${finalIds.length} ${multiLabel} pieces from the Maison Affluency Curation, with trade pricing.`,
             pick_rationales: rationaleMap,
           },
           preview,
         };
-        const closing = excludedIds.size > 0
-          ? `Draft tear sheet with ${finalIds.length} ${designerLabel} pieces (skipped ${excludedIds.size} per your request). Review the list above and click **Approve & Create** to save it into a project folder — or **Discard** to cancel.`
-          : `Draft tear sheet with all ${finalIds.length} ${designerLabel} pieces in the Maison Affluency Curation, with trade pricing. Review the list above and click **Approve & Create** to save it into a project folder — or **Discard** to cancel.`;
+        const closing = (excludedIds.size > 0
+          ? `Draft tear sheet with ${finalIds.length} ${multiLabel} pieces (skipped ${excludedIds.size} per your request). Review the list above and click **Approve & Create** to save it into a project folder — or **Discard** to cancel.`
+          : `Draft tear sheet with ${finalIds.length} ${multiLabel} pieces in the Maison Affluency Curation, with trade pricing. Review the list above and click **Approve & Create** to save it into a project folder — or **Discard** to cancel.`)
+          + unmetSuffix;
         return sseProposalThenTextResponse(proposal, closing);
+
 
       }
 
