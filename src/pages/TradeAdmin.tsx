@@ -19,7 +19,118 @@ import ScrapeProducts from "@/components/trade/ScrapeProducts";
 import InstagramFeedAdmin from "@/components/trade/InstagramFeedAdmin";
 import OgRescrapeAdmin from "@/components/trade/OgRescrapeAdmin";
 import { Link } from "react-router-dom";
-import { Instagram, FileBox, Sparkles, Inbox, FileSpreadsheet, MapPin } from "lucide-react";
+import { Instagram, FileBox, Sparkles, Inbox, FileSpreadsheet, MapPin, AlertTriangle, ShieldCheck } from "lucide-react";
+
+// Free-email domains that don't tell us anything about the applicant's firm.
+// A personal address on a trade application isn't disqualifying on its own,
+// but combined with a missing website / generic job title it's the single
+// strongest "please look closer" signal for admin reviewers.
+const PERSONAL_EMAIL_DOMAINS = new Set([
+  "gmail.com", "yahoo.com", "hotmail.com", "outlook.com", "aol.com",
+  "icloud.com", "me.com", "mac.com", "live.com", "msn.com",
+  "protonmail.com", "proton.me", "gmx.com", "gmx.net", "yandex.com",
+  "mail.com", "zoho.com", "fastmail.com", "hey.com", "duck.com",
+]);
+
+// Job titles that carry no professional information — flag so the reviewer
+// can request clarification before approving.
+const GENERIC_TITLES = /^(employee|staff|worker|user|self|owner|manager|na|n\/a|-)$/i;
+
+function extractDomain(input: string | null | undefined): string | null {
+  if (!input) return null;
+  try {
+    const url = input.includes("://") ? input : `https://${input}`;
+    return new URL(url).hostname.replace(/^www\./, "").toLowerCase() || null;
+  } catch {
+    return null;
+  }
+}
+
+function emailDomain(email: string | null | undefined): string | null {
+  if (!email) return null;
+  const at = email.lastIndexOf("@");
+  if (at < 0) return null;
+  return email.slice(at + 1).trim().toLowerCase() || null;
+}
+
+type Signal = { kind: "ok" | "warn"; label: string; hint: string };
+
+/**
+ * Compute the pro-verification signals shown on each application card.
+ * `ok` badges are positive markers (corp email matches website, cert details
+ * provided, etc.). `warn` badges highlight what the reviewer must chase down
+ * before approving.
+ */
+function computeSignals(app: Application): Signal[] {
+  const signals: Signal[] = [];
+  const email = app.profiles?.email ?? null;
+  const eDomain = emailDomain(email);
+  const wDomain = extractDomain(app.company_website);
+
+  if (eDomain && PERSONAL_EMAIL_DOMAINS.has(eDomain)) {
+    signals.push({
+      kind: "warn",
+      label: `Personal email (${eDomain})`,
+      hint: "Applicant used a free-mail address rather than a company domain.",
+    });
+  } else if (eDomain && wDomain) {
+    // Corp email matches company website — the single strongest positive signal.
+    const matches = eDomain === wDomain || eDomain.endsWith(`.${wDomain}`) || wDomain.endsWith(`.${eDomain}`);
+    if (matches) {
+      signals.push({
+        kind: "ok",
+        label: `Email matches ${wDomain}`,
+        hint: "Corporate email domain matches the declared company website.",
+      });
+    } else {
+      signals.push({
+        kind: "warn",
+        label: `Email domain ≠ website (${eDomain} vs ${wDomain})`,
+        hint: "The email domain does not match the declared company website — verify manually.",
+      });
+    }
+  }
+
+  if (!app.company_website) {
+    signals.push({
+      kind: "warn",
+      label: "No company website",
+      hint: "No website was provided — nothing to verify the firm against.",
+    });
+  }
+
+  if (app.is_certified_professional && !app.certification_details) {
+    signals.push({
+      kind: "warn",
+      label: "Cert claimed, no details",
+      hint: "Applicant ticked \"certified professional\" but left the certification body/number blank.",
+    });
+  } else if (app.certification_details) {
+    signals.push({
+      kind: "ok",
+      label: "Cert details provided",
+      hint: app.certification_details,
+    });
+  }
+
+  if (GENERIC_TITLES.test(app.job_title.trim())) {
+    signals.push({
+      kind: "warn",
+      label: `Generic title: "${app.job_title}"`,
+      hint: "Job title is too generic to establish a professional role.",
+    });
+  }
+
+  if (!app.message || app.message.trim().length < 20) {
+    signals.push({
+      kind: "warn",
+      label: "No introduction message",
+      hint: "Applicant didn't describe their practice or projects.",
+    });
+  }
+
+  return signals;
+}
 
 interface Application {
   id: string;
@@ -333,10 +444,43 @@ function InstagramAuditCard() {
                   {app.message && (
                     <p className="font-body text-xs text-muted-foreground mt-2 italic">"{app.message}"</p>
                   )}
+                  {(() => {
+                    const signals = computeSignals(app);
+                    const warnCount = signals.filter((s) => s.kind === "warn").length;
+                    return (
+                      <div
+                        className="mt-3 flex flex-wrap items-center gap-1.5"
+                        aria-label={`Verification signals: ${warnCount} to review`}
+                      >
+                        <span className="font-body text-[10px] uppercase tracking-wider text-muted-foreground/70 mr-1">
+                          Signals
+                        </span>
+                        {signals.map((s, i) => (
+                          <span
+                            key={i}
+                            title={s.hint}
+                            className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 font-body text-[10px] ${
+                              s.kind === "warn"
+                                ? "border-warning/40 bg-warning/10 text-warning"
+                                : "border-success/40 bg-success/10 text-success"
+                            }`}
+                          >
+                            {s.kind === "warn" ? (
+                              <AlertTriangle className="h-3 w-3" />
+                            ) : (
+                              <ShieldCheck className="h-3 w-3" />
+                            )}
+                            {s.label}
+                          </span>
+                        ))}
+                      </div>
+                    );
+                  })()}
                   <p className="font-body text-[10px] text-muted-foreground/60 mt-2">
                     Applied {new Date(app.created_at).toLocaleDateString()}
                   </p>
                 </div>
+
 
                 {app.status === "pending" && isSuperAdmin && (
                   <div className="flex gap-2 shrink-0">
