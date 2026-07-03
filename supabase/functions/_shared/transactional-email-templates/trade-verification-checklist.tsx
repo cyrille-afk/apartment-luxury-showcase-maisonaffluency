@@ -101,6 +101,7 @@ export const template = {
       "A link to your firm's website or an online portfolio (Instagram / Houzz / Behance are fine).",
       "A specific job title describing your role (e.g. Interior Designer, Principal, Studio Director).",
     ],
+    editUrl: 'https://www.maisonaffluency.com/trade/apply/complete/example-token',
   },
 } satisfies TemplateEntry
 
@@ -116,3 +117,15 @@ const listItem = { marginBottom: '8px' }
 const link = { color: '#2f5148', textDecoration: 'underline' }
 const footer = { color: '#333333', lineHeight: '1.8', marginTop: '32px', fontSize: '15px' }
 const footerSmall = { color: '#888888', fontSize: '12px', lineHeight: '1.6', margin: '0' as const, fontFamily: "Georgia, 'Playfair Display', serif" }
+const ctaButton = {
+  backgroundColor: '#2f5148',
+  color: '#ffffff',
+  padding: '12px 28px',
+  borderRadius: '2px',
+  textDecoration: 'none',
+  fontFamily: "Georgia, 'Playfair Display', serif",
+  fontSize: '14px',
+  letterSpacing: '0.5px',
+  display: 'inline-block',
+}
+const ctaHint = { color: '#888888', fontSize: '12px', lineHeight: '1.6', marginTop: '12px', fontFamily: "Georgia, 'Playfair Display', serif" }
