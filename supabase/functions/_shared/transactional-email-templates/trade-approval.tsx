@@ -102,6 +102,8 @@ const logo = { margin: '0 auto' }
 const divider = { border: 'none', borderTop: '1px solid #e8e4de', margin: '0 0 24px' }
 const h1 = { color: '#1a1a1a', fontSize: '24px', marginBottom: '24px', fontFamily: "Georgia, 'Playfair Display', serif" }
 const text = { color: '#333333', lineHeight: '1.8', marginBottom: '20px', fontSize: '15px' }
+const list = { color: '#333333', lineHeight: '1.7', margin: '0 0 24px 20px', fontSize: '14px', paddingLeft: '20px' }
+const listItem = { marginBottom: '10px' }
 const buttonSection = { textAlign: 'center' as const, margin: '32px 0' }
 const button = {
   display: 'inline-block',
