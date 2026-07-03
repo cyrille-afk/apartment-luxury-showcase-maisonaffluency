@@ -364,6 +364,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   >({});
   const [pendingVariantIdx, setPendingVariantIdx] = useState<number | null>(null);
   const [pendingSwatchLib, setPendingSwatchLib] = useState<Array<{ fabric_id?: string | null; name: string; image_url: string; sort_order?: number | null }>>([]);
+  const [pendingSwatchLoading, setPendingSwatchLoading] = useState(false);
 
   const [issueDate, setIssueDate] = useState<string | null>(null);
   const [landedCostSettings, setLandedCostSettings] = useState<{ cbm: number; kg: number; mode: "road" | "courier" }>(() => ({
@@ -740,15 +741,19 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   useEffect(() => {
     let cancelled = false;
     setPendingSwatchLib([]);
+    setPendingSwatchLoading(false);
     const pickId = pendingVariants?.pickId;
     if (!pickId) return;
+    setPendingSwatchLoading(true);
     (async () => {
       const { data } = await (supabase as any)
         .from("product_fabric_swatches_public")
         .select("fabric_id, name, image_url, sort_order, is_active")
         .eq("pick_id", pickId)
         .order("sort_order", { ascending: true });
-      if (cancelled || !data) return;
+      if (cancelled) return;
+      setPendingSwatchLoading(false);
+      if (!data) return;
       const lib = (data as any[])
         .filter((r) => r && r.is_active !== false && r.image_url && r.name)
         .map((r) => ({
@@ -2422,7 +2427,16 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                         </option>
                       ))}
                     </select>
-                    {pendingVariantIdx !== null && pendingSwatchLib.length > 0 && (() => {
+                    {pendingVariantIdx !== null && (() => {
+                      if (pendingSwatchLoading) {
+                        return (
+                          <div className="mt-2 flex items-center gap-2 text-muted-foreground">
+                            <DotCircleLoader size="sm" />
+                            <span className="font-body text-[10px] italic">Loading swatches…</span>
+                          </div>
+                        );
+                      }
+                      if (pendingSwatchLib.length === 0) return null;
                       const label = pendingVariants!.variants[pendingVariantIdx]?.label || "";
                       const matched = findQuoteFinishSwatches(label, pendingSwatchLib);
                       return (
@@ -3064,7 +3078,16 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                         ))}
                       </select>
                       {/* Swatch preview for the selected variant — mirrors the curator lightbox affordance. */}
-                      {pendingVariantIdx !== null && pendingSwatchLib.length > 0 && (() => {
+                      {pendingVariantIdx !== null && (() => {
+                        if (pendingSwatchLoading) {
+                          return (
+                            <div className="mt-2 flex items-center gap-2 text-muted-foreground">
+                              <DotCircleLoader size="sm" />
+                              <span className="font-body text-[10px] italic">Loading swatches…</span>
+                            </div>
+                          );
+                        }
+                        if (pendingSwatchLib.length === 0) return null;
                         const label = pendingVariants!.variants[pendingVariantIdx]?.label || "";
                         const matched = findQuoteFinishSwatches(label, pendingSwatchLib);
                         return (
