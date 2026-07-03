@@ -611,16 +611,17 @@ function InstagramAuditCard() {
                 {app.status === "pending" && isSuperAdmin && (
                   <div className="flex gap-2 shrink-0">
                     {(() => {
-                      const href = buildChecklistMailto(app, signals);
-                      return href ? (
-                        <a
-                          href={href}
+                      const c = buildChecklist(app, signals);
+                      return c ? (
+                        <button
+                          type="button"
+                          onClick={() => setChecklistPreview({ app, ...c })}
                           className="p-2 rounded-full border border-primary/30 text-primary hover:bg-primary/10 transition-colors"
-                          title="Send verification checklist to applicant"
-                          aria-label="Send verification checklist"
+                          title="Preview verification checklist email"
+                          aria-label="Preview verification checklist"
                         >
                           <Mail className="h-4 w-4" />
-                        </a>
+                        </button>
                       ) : null;
                     })()}
                     <button
