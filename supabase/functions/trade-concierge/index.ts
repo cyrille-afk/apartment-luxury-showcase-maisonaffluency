@@ -3370,7 +3370,18 @@ serve(async (req) => {
           })
         : (allPicks || []);
       const pickIds = filteredPicksByTypology.map((p: any) => p.id);
+      console.log("[concierge typology-filter]", JSON.stringify({
+        designerLabel,
+        targetDesignerIds: targetIds,
+        userMsg: String(lastUserMsg || "").slice(0, 200),
+        requestedTypologies,
+        allPicksCount: (allPicks || []).length,
+        allPicks: (allPicks || []).map((p: any) => ({ id: p.id, title: p.title, subcategory: p.subcategory, category: p.category })),
+        matchedPickIds: pickIds,
+        matchedPickTitles: filteredPicksByTypology.map((p: any) => p.title),
+      }));
       if (requestedTypologies.length && pickIds.length === 0) {
+        console.log("[concierge typology-filter] no matches — returning fallback prompt");
         return sseTextResponse(
           `The Maison Affluency Curation has no ${requestedTypologies[0]} from **${designerLabel}** today. Want me to (a) surface adjacent ${designerLabel} pieces regardless of typology, or (b) look at ${requestedTypologies[0]}s from other ateliers we represent?`,
         );
