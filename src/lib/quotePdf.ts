@@ -19,6 +19,7 @@ import affluencyLogoUrl from "@/assets/affluency-quote-logo.jpg";
 import { optimizeImageUrl } from "@/lib/cloudinary-optimize";
 import { appendHkDapPage, type HkDapPageArgs } from "@/lib/hkDapPdf";
 import { appendUkDdpPage, type UkDdpPageArgs } from "@/lib/ukDdpPdf";
+import { formatFxSnapshotLine } from "@/lib/fxSnapshot";
 
 // Maison palette — matches studio-guide / UK DDP PDFs
 const JADE = [12, 49, 47] as const;        // #0C312F
