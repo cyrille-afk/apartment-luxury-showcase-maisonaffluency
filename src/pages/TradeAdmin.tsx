@@ -744,6 +744,31 @@ function InstagramAuditCard() {
                   if (data && data.success === false) {
                     throw new Error(data.reason || "Send failed");
                   }
+                  const sentAt = new Date().toISOString();
+                  const sentByName = adminProfile
+                    ? `${adminProfile.first_name || ""} ${adminProfile.last_name || ""}`.trim() || adminProfile.email
+                    : user?.email || "";
+                  const { error: updateError } = await supabase
+                    .from("trade_applications")
+                    .update({
+                      verification_checklist_sent_at: sentAt,
+                      verification_checklist_sent_by: user?.id,
+                      verification_checklist_sent_by_name: sentByName,
+                    })
+                    .eq("id", checklistPreview.app.id);
+                  if (updateError) throw updateError;
+                  setApplications((prev) =>
+                    prev.map((a) =>
+                      a.id === checklistPreview.app.id
+                        ? {
+                            ...a,
+                            verification_checklist_sent_at: sentAt,
+                            verification_checklist_sent_by: user?.id ?? null,
+                            verification_checklist_sent_by_name: sentByName || null,
+                          }
+                        : a
+                    )
+                  );
                   toast({
                     title: "Checklist sent",
                     description: `Emailed ${checklistPreview.to}. Replies go to concierge@myaffluency.com.`,
@@ -761,7 +786,7 @@ function InstagramAuditCard() {
                 }
               }}
             >
-              {sendingChecklist ? "Sending…" : "Send now"}
+              {sendingChecklist ? "Sending…" : checklistPreview?.app.verification_checklist_sent_at ? "Resend checklist" : "Send now"}
             </button>
           </AlertDialogFooter>
         </AlertDialogContent>
