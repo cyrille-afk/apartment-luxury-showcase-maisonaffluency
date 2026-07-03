@@ -43,6 +43,7 @@ User-agent: *
 Allow: /
 Disallow: /api/
 Disallow: /trade/admin
+Disallow: /concierge
 Disallow: /trade/media
 Disallow: /spec-sheets/
 Disallow: /*-og.html$
