@@ -209,8 +209,16 @@ export function computeVariantAxes(sv: SizeVariant[] | null | undefined): Varian
     return [...priced.map((x) => x.v), ...sortAlpha(unpriced)];
   };
 
+  // Only strip leading non-letter garbage when it is IMMEDIATELY followed by
+  // a letter (jammed patterns like "5Calacatta" → "Calacatta"). A leading
+  // number followed by whitespace ("10 Lights - Dia 100 x H 100 cm") is a
+  // legitimate prefix and must be preserved — otherwise dropdown labels lose
+  // "10/15/20 Lights", and variant lookup on the trade side fails to match
+  // the raw DB value (breaking pricing).
+  const stripJammedPrefix = (s: string) => s.replace(/^[^\p{L}\s]+(?=\p{L})/u, "").trim();
+
   const normKey = (s: string) =>
-    (s || "").replace(/^[^\p{L}]+/u, "").trim().toLocaleLowerCase();
+    stripJammedPrefix(s || "").toLocaleLowerCase();
 
   const minPriceForField = (field: "base" | "top" | "label") => (val: string) => {
     const key = normKey(val);
@@ -232,7 +240,7 @@ export function computeVariantAxes(sv: SizeVariant[] | null | undefined): Varian
     for (const raw of vals) {
       const v = raw.trim();
       if (!v) continue;
-      const cleaned = v.replace(/^[^\p{L}]+/u, "").trim();
+      const cleaned = stripJammedPrefix(v);
       const key = (cleaned || v).toLocaleLowerCase();
       const existing = map.get(key);
       if (!existing || cleaned.length < existing.length) {
@@ -242,6 +250,7 @@ export function computeVariantAxes(sv: SizeVariant[] | null | undefined): Varian
     const out = Array.from(map.values());
     return minPriceFor ? sortByMinPrice(out, minPriceFor) : sortAlpha(out);
   };
+
 
   const baseOptions = isDualAxis || isBaseOnly
     ? dedupeMaterialOptions(variants.map((v) => v.base || ""), minPriceForField("base"))
