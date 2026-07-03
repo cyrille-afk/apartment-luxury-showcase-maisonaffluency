@@ -2456,8 +2456,8 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                         );
                       }
                       if (pendingSwatchLib.length === 0) return null;
-                      const label = pendingVariants!.variants[pendingVariantIdx]?.label || "";
-                      const matched = findQuoteFinishSwatches(label, pendingSwatchLib);
+                      const variant = pendingVariants!.variants[pendingVariantIdx];
+                      const matched = findQuoteFinishSwatches(variant, pendingSwatchLib);
                       return (
                         <div className="mt-2">
                           {matched.length > 0 ? (
@@ -3107,8 +3107,8 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                           );
                         }
                         if (pendingSwatchLib.length === 0) return null;
-                        const label = pendingVariants!.variants[pendingVariantIdx]?.label || "";
-                        const matched = findQuoteFinishSwatches(label, pendingSwatchLib);
+                        const variant = pendingVariants!.variants[pendingVariantIdx];
+                        const matched = findQuoteFinishSwatches(variant, pendingSwatchLib);
                         return (
                           <div className="mt-2">
                             {matched.length > 0 ? (
