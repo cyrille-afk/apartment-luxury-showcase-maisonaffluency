@@ -99,12 +99,33 @@ export const findQuoteFinishSwatches = (
 ): QuoteFinishSwatch[] => {
   const seen = new Set<string>();
   const matches: QuoteFinishSwatch[] = [];
+  const pushMatch = (match: QuoteFinishSwatch | null | undefined) => {
+    if (!match) return;
+    const key = match.fabric_id || match.id || match.image_url || match.name;
+    if (!key || seen.has(key)) return;
+    seen.add(key);
+    matches.push(match);
+  };
+
+  const ordered = [...swatches]
+    .filter((s) => s?.name && s.image_url)
+    .sort(bySortOrder);
+
   for (const part of splitQuoteFinishLabel(variantLabel)) {
-    const match = findQuoteFinishSwatch([part], swatches);
-    const key = match?.fabric_id || match?.id || match?.image_url || match?.name;
-    if (match && key && !seen.has(key)) {
-      seen.add(key);
-      matches.push(match);
+    // Try single best-match first (exact / fuzzy / token-overlap).
+    pushMatch(findQuoteFinishSwatch([part], swatches));
+
+    // Additionally surface every swatch that shares the part's significant
+    // tokens — e.g. "Fabric Cat. Perfect Match" reveals all colourways in
+    // the Perfect Match category, mirroring the curator lightbox behaviour.
+    const partTokens = significantTokens(part);
+    if (partTokens.length === 0) continue;
+    const partSet = new Set(partTokens);
+    for (const swatch of ordered) {
+      const swTokens = significantTokens(swatch.name);
+      if (swTokens.length === 0) continue;
+      const allCovered = swTokens.every((t) => partSet.has(t));
+      if (allCovered) pushMatch(swatch);
     }
   }
   return matches;
