@@ -315,6 +315,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   const [fxRates, setFxRates] = useState<Record<string, number>>({});
   const [fxSource, setFxSource] = useState<FxSource>("identity");
   const [fxPairs, setFxPairs] = useState<Array<{ src: string; tgt: string; rate: number; source: FxSource }>>([]);
+  const [fxAppliedAt, setFxAppliedAt] = useState<Date | null>(null);
 
   const [tradeDiscount, setTradeDiscount] = useState(true);
   // GST defaults to ON only for SGD quotes; other currencies (EUR/USD/GBP) default OFF.
