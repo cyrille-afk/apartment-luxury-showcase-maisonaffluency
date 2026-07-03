@@ -3184,21 +3184,42 @@ serve(async (req) => {
       "collections", "paris", "milano", "london", "and", "the", "by", "of",
       "co", "company", "group", "maison", "house", "works",
     ]);
+    const normalizedUserMsg = normalizeLoose(lastUserMsg || "");
+    const userMsgTokens = new Set(normalizedUserMsg.split(/\s+/).filter(Boolean));
+    const designerTokenFrequency = new Map<string, number>();
+    for (const n of designerNames) {
+      const nameTokens = Array.from(new Set(
+        normalizeLoose(String(n || "")).split(/\s+/).filter((t) => t.length >= 5 && !NAME_STOPWORDS.has(t)),
+      ));
+      for (const t of nameTokens) designerTokenFrequency.set(t, (designerTokenFrequency.get(t) || 0) + 1);
+    }
+    const phraseInUserMessage = (phrase: string) => {
+      const needle = normalizeLoose(phrase);
+      if (!needle) return false;
+      return (` ${normalizedUserMsg} `).includes(` ${needle} `);
+    };
     const mentionedDesigners: string[] = [];
     for (const n of designerNames) {
       const name = String(n || "").toLowerCase().trim();
       if (!name) continue;
-      // 1. Full-name substring (existing behavior)
-      if (name.length >= 4 && lastUserMsgLc.includes(name)) {
+      // 1. Full-name phrase match, normalized for punctuation/diacritics
+      //    so "Saint Louis" matches "Saint-Louis" without making the single
+      //    token "Louis" also match "Jean-Louis Deniot".
+      if (name.length >= 4 && phraseInUserMessage(name)) {
         mentionedDesigners.push(n);
         continue;
       }
       // 2. Distinctive-token match — "alinea" should match "Alinea Design Objects",
-      //    "pouénat" should match "Pouénat", etc. Any non-stopword token ≥5 chars
-      //    from the designer name that appears in the user message counts.
-      const tokens = name.split(/[^a-zà-ÿ0-9]+/i).filter(Boolean);
+      //    "pouénat" should match "Pouénat", etc. Match whole normalized
+      //    tokens only (not substrings: "interest" must not match "interested")
+      //    and ignore tokens shared by multiple designer names (e.g. "louis").
+      const tokens = normalizeLoose(name).split(/\s+/).filter(Boolean);
       const distinctive = tokens.find(
-        (t) => t.length >= 5 && !NAME_STOPWORDS.has(t) && lastUserMsgLc.includes(t),
+        (t) =>
+          t.length >= 5 &&
+          !NAME_STOPWORDS.has(t) &&
+          (designerTokenFrequency.get(t) || 0) === 1 &&
+          userMsgTokens.has(t),
       );
       if (distinctive) mentionedDesigners.push(n);
     }
