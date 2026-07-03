@@ -4996,6 +4996,9 @@ export type Database = {
           reviewed_by: string | null
           status: Database["public"]["Enums"]["trade_application_status"]
           user_id: string
+          verification_checklist_sent_at: string | null
+          verification_checklist_sent_by: string | null
+          verification_checklist_sent_by_name: string | null
         }
         Insert: {
           certification_details?: string | null
@@ -5012,6 +5015,9 @@ export type Database = {
           reviewed_by?: string | null
           status?: Database["public"]["Enums"]["trade_application_status"]
           user_id: string
+          verification_checklist_sent_at?: string | null
+          verification_checklist_sent_by?: string | null
+          verification_checklist_sent_by_name?: string | null
         }
         Update: {
           certification_details?: string | null
@@ -5028,6 +5034,9 @@ export type Database = {
           reviewed_by?: string | null
           status?: Database["public"]["Enums"]["trade_application_status"]
           user_id?: string
+          verification_checklist_sent_at?: string | null
+          verification_checklist_sent_by?: string | null
+          verification_checklist_sent_by_name?: string | null
         }
         Relationships: []
       }

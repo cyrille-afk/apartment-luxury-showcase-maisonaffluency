@@ -238,6 +238,9 @@ interface Application {
   message: string | null;
   status: string;
   created_at: string;
+  verification_checklist_sent_at: string | null;
+  verification_checklist_sent_by: string | null;
+  verification_checklist_sent_by_name: string | null;
   profiles?: { first_name: string; last_name: string; email: string } | null;
 }
 
@@ -257,6 +260,7 @@ const TradeAdmin = () => {
     body: string;
     items: string[];
   } | null>(null);
+  const [adminProfile, setAdminProfile] = useState<{ first_name: string; last_name: string; email: string } | null>(null);
 
 function InstagramAuditCard() {
   const { data: missingCount = 0 } = useQuery({
@@ -300,7 +304,17 @@ function InstagramAuditCard() {
   useEffect(() => {
     if (!isAdmin) return;
     fetchApplications();
-  }, [isAdmin, filter]);
+    if (user?.id) {
+      supabase
+        .from("profiles")
+        .select("first_name, last_name, email")
+        .eq("id", user.id)
+        .single()
+        .then(({ data }) => {
+          if (data) setAdminProfile(data as any);
+        });
+    }
+  }, [isAdmin, filter, user?.id]);
 
   const fetchApplications = async () => {
     setFetching(true);
@@ -603,6 +617,13 @@ function InstagramAuditCard() {
                   <p className="font-body text-[10px] text-muted-foreground/60 mt-2">
                     Applied {new Date(app.created_at).toLocaleDateString()}
                   </p>
+                  {app.verification_checklist_sent_at && (
+                    <p className="font-body text-[10px] text-success mt-1">
+                      Checklist sent
+                      {app.verification_checklist_sent_by_name ? ` by ${app.verification_checklist_sent_by_name}` : ""}
+                      {" "}{new Date(app.verification_checklist_sent_at).toLocaleDateString()}
+                    </p>
+                  )}
                 </div>
 
 
@@ -614,9 +635,13 @@ function InstagramAuditCard() {
                         <button
                           type="button"
                           onClick={() => setChecklistPreview({ app, ...c })}
-                          className="p-2 rounded-full border border-primary/30 text-primary hover:bg-primary/10 transition-colors"
-                          title="Preview verification checklist email"
-                          aria-label="Preview verification checklist"
+                          className={`p-2 rounded-full border transition-colors ${
+                            app.verification_checklist_sent_at
+                              ? "border-success/30 text-success hover:bg-success/10"
+                              : "border-primary/30 text-primary hover:bg-primary/10"
+                          }`}
+                          title={app.verification_checklist_sent_at ? "Resend verification checklist" : "Preview verification checklist email"}
+                          aria-label={app.verification_checklist_sent_at ? "Resend verification checklist" : "Preview verification checklist"}
                         >
                           <Mail className="h-4 w-4" />
                         </button>
@@ -730,6 +755,31 @@ function InstagramAuditCard() {
                   if (data && data.success === false) {
                     throw new Error(data.reason || "Send failed");
                   }
+                  const sentAt = new Date().toISOString();
+                  const sentByName = adminProfile
+                    ? `${adminProfile.first_name || ""} ${adminProfile.last_name || ""}`.trim() || adminProfile.email
+                    : user?.email || "";
+                  const { error: updateError } = await supabase
+                    .from("trade_applications")
+                    .update({
+                      verification_checklist_sent_at: sentAt,
+                      verification_checklist_sent_by: user?.id,
+                      verification_checklist_sent_by_name: sentByName,
+                    })
+                    .eq("id", checklistPreview.app.id);
+                  if (updateError) throw updateError;
+                  setApplications((prev) =>
+                    prev.map((a) =>
+                      a.id === checklistPreview.app.id
+                        ? {
+                            ...a,
+                            verification_checklist_sent_at: sentAt,
+                            verification_checklist_sent_by: user?.id ?? null,
+                            verification_checklist_sent_by_name: sentByName || null,
+                          }
+                        : a
+                    )
+                  );
                   toast({
                     title: "Checklist sent",
                     description: `Emailed ${checklistPreview.to}. Replies go to concierge@myaffluency.com.`,
@@ -747,7 +797,7 @@ function InstagramAuditCard() {
                 }
               }}
             >
-              {sendingChecklist ? "Sending…" : "Send now"}
+              {sendingChecklist ? "Sending…" : checklistPreview?.app.verification_checklist_sent_at ? "Resend checklist" : "Send now"}
             </button>
           </AlertDialogFooter>
         </AlertDialogContent>
