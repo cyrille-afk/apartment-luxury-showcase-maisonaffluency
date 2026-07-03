@@ -5026,6 +5026,18 @@ serve(async (req) => {
 
         let sawDone = false;
         const shouldSuppressSelectionProse = forcePlannedTearsheet;
+        // Inspector gate: when the planner expects a card (tearsheet / quote /
+        // ffe / etc), buffer prose deltas instead of streaming live so the
+        // Inspector agent can diff-check against DB ground truth and rewrite
+        // any factual claim before the user sees it. Non-card chat turns keep
+        // live streaming — perceived latency wins.
+        const plannerExpectsCard = Array.isArray(effectiveBrief?.plan) && effectiveBrief.plan.some((t) =>
+          t === "propose_tearsheet" || t === "add_to_tearsheet" ||
+          t === "draft_quote" || t === "add_to_quote" ||
+          t === "propose_ffe_rows" || t === "estimate_shipping"
+        );
+        const shouldBufferProseForInspector = plannerExpectsCard && !shouldSuppressSelectionProse;
+        const bufferedProseLines: string[] = [];
         // Some fallback models (notably Cloudflare Llama) do NOT emit native
         // `tool_calls`; they stringify the JSON envelope into `delta.content`.
         // If the very first content chunk looks like a tool-call envelope, we
