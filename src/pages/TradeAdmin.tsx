@@ -458,8 +458,21 @@ function InstagramAuditCard() {
         <p className="font-body text-sm text-muted-foreground py-8 text-center">No {filter} applications.</p>
       ) : (
         <div className="space-y-4">
-          {applications.map((app) => (
+          {applications.map((app) => {
+            // Compute once per card so both the header pro-badge and the
+            // signals row below stay in sync.
+            const signals = computeSignals(app);
+            const pro = classifyProStatus(signals);
+            const proStyles: Record<ProStatus, string> = {
+              verified: "border-success/40 bg-success/10 text-success",
+              pro: "border-success/40 bg-success/5 text-success",
+              review: "border-warning/40 bg-warning/10 text-warning",
+              unverified: "border-destructive/40 bg-destructive/10 text-destructive",
+            };
+            const ProIcon = pro.status === "unverified" ? AlertTriangle : ShieldCheck;
+            return (
             <div key={app.id} className="border border-border rounded-lg p-5">
+
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-3 mb-1">
