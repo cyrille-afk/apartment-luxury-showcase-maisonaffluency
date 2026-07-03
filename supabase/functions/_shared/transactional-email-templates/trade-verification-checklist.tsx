@@ -16,8 +16,6 @@ interface Props {
 }
 
 const TradeVerificationChecklistEmail = ({ firstName, items = [], editUrl }: Props) => (
-
-const TradeVerificationChecklistEmail = ({ firstName, items = [] }: Props) => (
   <Html lang="en" dir="ltr">
     <Head />
     <Preview>Completing your Maison Affluency trade verification</Preview>
