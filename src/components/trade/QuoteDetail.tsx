@@ -32,7 +32,7 @@ import { usePerLineShipping } from "@/hooks/usePerLineShipping";
 import { toIsoCountry, computePerLineShipments } from "@/lib/perLineShipping";
 import { labelForMode } from "@/lib/shippingEstimator";
 import { buildProductFinishMap, resolveFinishImageIndex, resolveVariantImageIndex } from "@/lib/variantImageMap";
-import { findQuoteFinishSwatches } from "@/lib/quoteFinishSwatches";
+import { findQuoteFinishSwatches, type QuoteFinishSwatch, type QuoteFinishVariant } from "@/lib/quoteFinishSwatches";
 
 import { PerOriginShippingRecap } from "@/components/trade/PerOriginShippingRecap";
 import { priceRugVariantFromLabel } from "@/lib/rugPricing";
@@ -360,10 +360,10 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   // step, adding e.g. Excess Chandelier silently defaults to the first row
   // of the variant matrix (10 Lights / cheapest price).
   const [variantsByProduct, setVariantsByProduct] = useState<
-    Record<string, { variants: Array<{ label: string; price_cents: number | null }>; currency: string | null; pickId: string | null }>
+    Record<string, { variants: QuoteFinishVariant[]; currency: string | null; pickId: string | null }>
   >({});
   const [pendingVariantIdx, setPendingVariantIdx] = useState<number | null>(null);
-  const [pendingSwatchLib, setPendingSwatchLib] = useState<Array<{ fabric_id?: string | null; name: string; image_url: string; sort_order?: number | null }>>([]);
+  const [pendingSwatchLib, setPendingSwatchLib] = useState<QuoteFinishSwatch[]>([]);
   const [pendingSwatchLoading, setPendingSwatchLoading] = useState(false);
 
   const [issueDate, setIssueDate] = useState<string | null>(null);
