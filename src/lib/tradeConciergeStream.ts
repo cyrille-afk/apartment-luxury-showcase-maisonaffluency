@@ -141,6 +141,7 @@ export type FfeProposal = {
     rows: FfeRow[];
   };
   preview: FfeLinePreview[];
+  requirements_validation?: RequirementsValidation;
 };
 
 export type VisualizationBriefProposal = {
