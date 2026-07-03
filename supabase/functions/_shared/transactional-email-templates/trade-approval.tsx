@@ -114,6 +114,8 @@ const h1 = { color: '#1a1a1a', fontSize: '24px', marginBottom: '24px', fontFamil
 const text = { color: '#333333', lineHeight: '1.8', marginBottom: '20px', fontSize: '15px' }
 const list = { color: '#333333', lineHeight: '1.7', margin: '0 0 24px 20px', fontSize: '14px', paddingLeft: '20px' }
 const listItem = { marginBottom: '10px' }
+const nestedList = { color: '#333333', lineHeight: '1.7', margin: '8px 0 0 0', fontSize: '13px', paddingLeft: '18px', listStyleType: 'circle' as const }
+const nestedListItem = { marginBottom: '6px' }
 const buttonSection = { textAlign: 'center' as const, margin: '32px 0' }
 const button = {
   display: 'inline-block',
