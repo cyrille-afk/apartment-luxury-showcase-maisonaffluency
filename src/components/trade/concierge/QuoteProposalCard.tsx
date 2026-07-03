@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import ClientPicker, { type PickedClient } from "@/components/trade/ClientPicker";
 import { useProjects, type Project } from "@/hooks/useProjects";
 import { useFxRates, convertCents, getFxRatesFetchedAt } from "@/components/trade/CurrencyToggle";
+import { RequirementsBadge } from "@/components/trade/concierge/RequirementsBadge";
 
 type Status = "pending" | "committing" | "approved" | "discarded";
 
