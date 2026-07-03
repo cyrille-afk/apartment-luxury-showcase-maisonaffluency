@@ -740,12 +740,21 @@ function InstagramAuditCard() {
                 if (!checklistPreview) return;
                 setSendingChecklist(true);
                 try {
-                  // Generate a fresh one-time edit token (14-day expiry) and persist it
-                  // so the recipient can update their existing application from the email.
-                  const editToken =
-                    (globalThis.crypto?.randomUUID?.() ?? "") +
-                    "-" +
-                    Math.random().toString(36).slice(2, 10);
+                  // Generate a high-entropy one-time edit token. The raw token is only
+                  // sent by email; the DB stores only its SHA-256 hash so a DB read
+                  // cannot reveal the link.
+                  const rawBytes = new Uint8Array(32);
+                  crypto.getRandomValues(rawBytes);
+                  const editToken = Array.from(rawBytes)
+                    .map((b) => b.toString(16).padStart(2, "0"))
+                    .join("");
+                  const hashBuf = await crypto.subtle.digest(
+                    "SHA-256",
+                    new TextEncoder().encode(editToken)
+                  );
+                  const editTokenHash = Array.from(new Uint8Array(hashBuf))
+                    .map((b) => b.toString(16).padStart(2, "0"))
+                    .join("");
                   const editExpiresAt = new Date(
                     Date.now() + 14 * 24 * 60 * 60 * 1000
                   ).toISOString();
@@ -754,7 +763,7 @@ function InstagramAuditCard() {
                   const { error: tokenErr } = await supabase
                     .from("trade_applications")
                     .update({
-                      edit_token: editToken,
+                      edit_token_hash: editTokenHash,
                       edit_token_expires_at: editExpiresAt,
                     })
                     .eq("id", checklistPreview.app.id);
