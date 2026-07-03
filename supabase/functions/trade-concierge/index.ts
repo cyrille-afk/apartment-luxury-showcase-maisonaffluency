@@ -3342,11 +3342,39 @@ serve(async (req) => {
 
       const { data: allPicks } = await supabase
         .from("designer_curator_picks")
-        .select("id, title, category, materials")
+        .select("id, title, category, subcategory, materials")
         .in("designer_id", targetIds)
         .order("title", { ascending: true })
         .limit(24);
-      const pickIds = (allPicks || []).map((p: any) => p.id);
+      // Typology filter — when the user names a piece type (e.g. "chandelier",
+      // "sconce", "dining table"), restrict the enumeration to picks whose
+      // title / subcategory / category actually contain that term. Without
+      // this, "Saint-Louis chandelier" returned all 20 Saint-Louis pieces
+      // (vases, lamps, etc.) instead of just chandeliers.
+      const TYPOLOGY_TERMS = [
+        "chandelier","sconce","pendant","lantern",
+        "dining table","coffee table","side table","console","desk","table",
+        "armchair","chair","stool","bench","sofa","banquette","daybed","bed",
+        "cabinet","sideboard","credenza","commode","armoire","bookshelf","shelf",
+        "mirror","rug","carpet","tapestry","screen","vase","objet","tray","bowl",
+        "floor lamp","table lamp","wall light","ceiling light","lamp",
+      ];
+      const msgLcTypology = String(lastUserMsg || "").toLowerCase();
+      const requestedTypologies = TYPOLOGY_TERMS.filter((t) =>
+        new RegExp(`\\b${t.replace(/ /g, "\\s+")}s?\\b`, "i").test(msgLcTypology),
+      );
+      const filteredPicksByTypology = requestedTypologies.length
+        ? (allPicks || []).filter((p: any) => {
+            const hay = `${p.title || ""} ${p.subcategory || ""} ${p.category || ""}`.toLowerCase();
+            return requestedTypologies.some((t) => hay.includes(t));
+          })
+        : (allPicks || []);
+      const pickIds = filteredPicksByTypology.map((p: any) => p.id);
+      if (requestedTypologies.length && pickIds.length === 0) {
+        return sseTextResponse(
+          `The Maison Affluency Curation has no ${requestedTypologies[0]} from **${designerLabel}** today. Want me to (a) surface adjacent ${designerLabel} pieces regardless of typology, or (b) look at ${requestedTypologies[0]}s from other ateliers we represent?`,
+        );
+      }
       if (pickIds.length >= 1) {
         const previewRawAll = await hydratePickPreview(supabase, pickIds);
         const validIds = new Set(previewRawAll.map((p: any) => p?.id).filter(Boolean));

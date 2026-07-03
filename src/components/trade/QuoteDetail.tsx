@@ -353,6 +353,15 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   const [pendingProductId, setPendingProductId] = useState<string>("");
   const [addingProduct, setAddingProduct] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
+  // Variant meta by product id — populated alongside productOptions so the
+  // picker can prompt for size/finish selection before insert. Without this
+  // step, adding e.g. Excess Chandelier silently defaults to the first row
+  // of the variant matrix (10 Lights / cheapest price).
+  const [variantsByProduct, setVariantsByProduct] = useState<
+    Record<string, { variants: Array<{ label: string; price_cents: number | null }>; currency: string | null }>
+  >({});
+  const [pendingVariantIdx, setPendingVariantIdx] = useState<number | null>(null);
+
   const [issueDate, setIssueDate] = useState<string | null>(null);
   const [landedCostSettings, setLandedCostSettings] = useState<{ cbm: number; kg: number; mode: "road" | "courier" }>(() => ({
     cbm: DEFAULT_GBP_LANDED_CBM,
@@ -682,7 +691,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     (async () => {
       const { data } = await supabase
         .from("trade_products")
-        .select("id, product_name, brand_name")
+        .select("id, product_name, brand_name, size_variants, currency")
         .order("brand_name", { ascending: true })
         .order("product_name", { ascending: true })
         .limit(2000);
@@ -696,27 +705,70 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
             ? (p.brand_name as string).split(" - ")[0].trim()
             : (p.brand_name as string),
         }));
+      const meta: Record<string, { variants: Array<{ label: string; price_cents: number | null }>; currency: string | null }> = {};
+      for (const p of data as any[]) {
+        const raw = Array.isArray(p.size_variants) ? p.size_variants : [];
+        const variants = raw
+          .map((v: any) => ({
+            label: [v?.base, v?.top, v?.size, v?.label].filter(Boolean).join(" · "),
+            price_cents: typeof v?.price_cents === "number" ? v.price_cents : null,
+          }))
+          .filter((v: any) => v.label);
+        if (variants.length > 0) {
+          meta[p.id as string] = { variants, currency: (p.currency as string) || null };
+        }
+      }
       setProductOptions(opts);
+      setVariantsByProduct(meta);
     })();
     return () => { cancelled = true; };
   }, []);
 
+  // Reset the pending variant whenever the picked product changes.
+  useEffect(() => { setPendingVariantIdx(null); }, [pendingProductId]);
+
+  const pendingVariants = pendingProductId ? variantsByProduct[pendingProductId] : undefined;
+  const pendingNeedsVariant = !!pendingVariants && pendingVariants.variants.length > 1;
+
   const handleAddProduct = async (productId: string) => {
     if (!productId || addingProduct) return;
+    // Force variant selection when the product has a multi-row matrix — this
+    // prevents the "1st size / cheapest price" silent default that shipped
+    // wrong prices into quotes.
+    if (pendingNeedsVariant && pendingVariantIdx === null) {
+      toast({
+        title: "Choose a size / finish first",
+        description: "This piece has multiple variants — pick one so the correct price and specs load.",
+        variant: "destructive",
+      });
+      return;
+    }
     setAddingProduct(true);
     try {
-      const { error } = await supabase.from("trade_quote_items").insert({
+      const variantRow = pendingVariants && pendingVariantIdx !== null
+        ? pendingVariants.variants[pendingVariantIdx]
+        : null;
+      const insertPayload: any = {
         quote_id: quoteId,
         product_id: productId,
         quantity: 1,
-      } as any);
+      };
+      if (variantRow) {
+        insertPayload.variant_label = variantRow.label;
+        if (typeof variantRow.price_cents === "number" && variantRow.price_cents > 0) {
+          insertPayload.unit_price_cents = variantRow.price_cents;
+          if (pendingVariants?.currency) insertPayload.unit_price_currency = pendingVariants.currency;
+        }
+      }
+      const { error } = await supabase.from("trade_quote_items").insert(insertPayload);
       if (error) throw error;
       const picked = productOptions.find((p) => p.id === productId);
       toast({
         title: "Added to quote",
-        description: picked ? `${picked.label} — ${picked.group}` : undefined,
+        description: picked ? `${picked.label} — ${picked.group}${variantRow ? ` · ${variantRow.label}` : ""}` : undefined,
       });
       setPendingProductId("");
+      setPendingVariantIdx(null);
       setReloadKey((k) => k + 1);
     } catch (err: any) {
       toast({
@@ -728,6 +780,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
       setAddingProduct(false);
     }
   };
+
 
   // Fetch project name when projectId changes
   useEffect(() => {
@@ -2303,14 +2356,37 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                   <button
                     type="button"
                     onClick={() => handleAddProduct(pendingProductId)}
-                    disabled={!pendingProductId || addingProduct}
+                    disabled={!pendingProductId || addingProduct || (pendingNeedsVariant && pendingVariantIdx === null)}
                     className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-foreground text-background rounded-md font-body text-xs uppercase tracking-wider hover:bg-foreground/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
                   >
                     {addingProduct ? <DotCircleLoader size="sm" className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
                     Add
                   </button>
                 </div>
+                {pendingNeedsVariant && (
+                  <div className="mt-2 text-left">
+                    <label className="block font-body text-[10px] text-muted-foreground uppercase tracking-widest mb-1">
+                      Size / finish
+                    </label>
+                    <select
+                      value={pendingVariantIdx === null ? "" : String(pendingVariantIdx)}
+                      onChange={(e) => setPendingVariantIdx(e.target.value === "" ? null : Number(e.target.value))}
+                      className="w-full rounded-md border border-border bg-background px-3 py-2 font-body text-xs"
+                    >
+                      <option value="">Select a variant…</option>
+                      {pendingVariants!.variants.map((v, i) => (
+                        <option key={`${v.label}-${i}`} value={i}>
+                          {v.label}
+                          {typeof v.price_cents === "number" && v.price_cents > 0
+                            ? ` — ${(pendingVariants!.currency || currency)} ${(v.price_cents / 100).toLocaleString()}`
+                            : ""}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
               </div>
+
             </div>
           ) : (
             <>
@@ -2901,10 +2977,32 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                       placeholder={productOptions.length === 0 ? "Loading catalogue…" : "Pick a product (A → Designer → Item)"}
                     />
                   </div>
+                  {pendingNeedsVariant && (
+                    <div className="flex-1 min-w-0">
+                      <label className="block font-body text-[10px] text-muted-foreground uppercase tracking-widest mb-1">
+                        Size / finish
+                      </label>
+                      <select
+                        value={pendingVariantIdx === null ? "" : String(pendingVariantIdx)}
+                        onChange={(e) => setPendingVariantIdx(e.target.value === "" ? null : Number(e.target.value))}
+                        className="w-full rounded-md border border-border bg-background px-3 py-2 font-body text-xs"
+                      >
+                        <option value="">Select a variant…</option>
+                        {pendingVariants!.variants.map((v, i) => (
+                          <option key={`${v.label}-${i}`} value={i}>
+                            {v.label}
+                            {typeof v.price_cents === "number" && v.price_cents > 0
+                              ? ` — ${(pendingVariants!.currency || currency)} ${(v.price_cents / 100).toLocaleString()}`
+                              : ""}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
                   <button
                     type="button"
                     onClick={() => handleAddProduct(pendingProductId)}
-                    disabled={!pendingProductId || addingProduct}
+                    disabled={!pendingProductId || addingProduct || (pendingNeedsVariant && pendingVariantIdx === null)}
                     className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-foreground text-background rounded-md font-body text-xs uppercase tracking-wider hover:bg-foreground/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
                   >
                     {addingProduct ? <DotCircleLoader size="sm" className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
@@ -2913,8 +3011,10 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                 </div>
                 <p className="font-body text-[10px] text-muted-foreground/70 mt-1.5">
                   Forgot a piece? Add it here without leaving the quote — quantity, price and PO can be edited above.
+                  {pendingNeedsVariant && " This piece has multiple sizes/finishes — pick one so the correct price and specs load."}
                 </p>
               </div>
+
 
               {/* Insurance bundling */}
               <div className="border-t border-border mt-2 pt-4">
