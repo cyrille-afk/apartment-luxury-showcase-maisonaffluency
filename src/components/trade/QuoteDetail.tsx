@@ -2356,14 +2356,37 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                   <button
                     type="button"
                     onClick={() => handleAddProduct(pendingProductId)}
-                    disabled={!pendingProductId || addingProduct}
+                    disabled={!pendingProductId || addingProduct || (pendingNeedsVariant && pendingVariantIdx === null)}
                     className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-foreground text-background rounded-md font-body text-xs uppercase tracking-wider hover:bg-foreground/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
                   >
                     {addingProduct ? <DotCircleLoader size="sm" className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
                     Add
                   </button>
                 </div>
+                {pendingNeedsVariant && (
+                  <div className="mt-2 text-left">
+                    <label className="block font-body text-[10px] text-muted-foreground uppercase tracking-widest mb-1">
+                      Size / finish
+                    </label>
+                    <select
+                      value={pendingVariantIdx === null ? "" : String(pendingVariantIdx)}
+                      onChange={(e) => setPendingVariantIdx(e.target.value === "" ? null : Number(e.target.value))}
+                      className="w-full rounded-md border border-border bg-background px-3 py-2 font-body text-xs"
+                    >
+                      <option value="">Select a variant…</option>
+                      {pendingVariants!.variants.map((v, i) => (
+                        <option key={`${v.label}-${i}`} value={i}>
+                          {v.label}
+                          {typeof v.price_cents === "number" && v.price_cents > 0
+                            ? ` — ${(pendingVariants!.currency || currency)} ${(v.price_cents / 100).toLocaleString()}`
+                            : ""}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
               </div>
+
             </div>
           ) : (
             <>
