@@ -50,7 +50,17 @@ const TradeApprovalEmail = ({ name, companyName }: TradeApprovalProps) => (
           <li style={listItem}><strong>Project folders &amp; mood board studio</strong> — organise sourcing by project and build mood boards with AI assistance.</li>
           <li style={listItem}><strong>3D Studio</strong> — turn architectural drawings into furnished 3D visualisations to present to clients.</li>
           <li style={listItem}><strong>AI Concierge</strong> — an in-app assistant trained exclusively on our catalogue for instant recommendations.</li>
-          <li style={listItem}><strong>Trade payouts</strong> — commission or net-buy billing depending on your market, with Stripe Connect payouts where applicable.</li>
+          <li style={listItem}>
+            <strong>Trade payouts</strong> — choose how your studio gets paid on every quote:
+            <ul style={nestedList}>
+              <li style={nestedListItem}><strong>Agent commission</strong> (EU/Asia default): your client pays full MSRP and you receive a commission payout after delivery.</li>
+              <li style={nestedListItem}><strong>Net buy</strong> (US/CA/MX default): your firm pays MSRP minus your tier discount on a white-label invoice.</li>
+              <li style={nestedListItem}><strong>Country-aware defaults</strong> — US/Canada/Mexico default to net buy; the rest of the world defaults to agent commission.</li>
+              <li style={nestedListItem}><strong>Per-quote override</strong> — flip billing mode on any individual quote when the project calls for it.</li>
+              <li style={nestedListItem}><strong>Resale certificates</strong> — upload state-issued US resale certificates to unlock net-buy shipments to those states.</li>
+              <li style={nestedListItem}><strong>Stripe Connect</strong> — agent commissions paid directly to your linked studio payout account.</li>
+            </ul>
+          </li>
         </ul>
         <Section style={buttonSection}>
           <Button style={button} href="https://maisonaffluency.com/trade/login">
