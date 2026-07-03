@@ -568,7 +568,8 @@ function InstagramAuditCard() {
                 )}
               </div>
             </div>
-          ))}
+          );})}
+
         </div>
       )}
     </div>
