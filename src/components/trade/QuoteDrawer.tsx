@@ -322,7 +322,14 @@ const QuoteDrawer = ({ open, onOpenChange, quoteId, refreshKey = 0 }: QuoteDrawe
                             <span className="font-body text-[10px] text-primary font-medium">
                               {formatPrice(displayCents, displayCurrency || "EUR")}
                             </span>
-                            {item.product?.trade_price_cents && displayCents !== item.product.trade_price_cents && (
+                            {/* Only show "Catalog:" reference when it makes sense:
+                                 - no variant was picked (product-level trade_price is the true reference), AND
+                                 - the paid price is LOWER than catalog (real discount, not an upcharge from picking a pricier variant).
+                                 Once a variant is chosen, the product-level trade_price_cents
+                                 no longer corresponds to that variant, so the reference is misleading. */}
+                            {item.product?.trade_price_cents
+                              && !item.variant_label
+                              && displayCents < item.product.trade_price_cents && (
                               <span className="font-body text-[8px] text-muted-foreground/60">
                                 Catalog: {formatPrice(item.product.trade_price_cents, item.product.currency)}
                               </span>
