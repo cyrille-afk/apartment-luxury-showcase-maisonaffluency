@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo, useRef } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
-import { Check, X, ExternalLink, Plus, FileText, Minus, FolderOpen, Coins } from "lucide-react";
+import { Check, X, ExternalLink, Plus, FileText, Minus, FolderOpen, Coins, Repeat } from "lucide-react";
+import { buildSwapPrompt, sendConciergePrefill } from "@/lib/conciergePrefill";
 import { Link } from "react-router-dom";
 import { commitProposal, type QuoteProposal } from "@/lib/tradeConciergeStream";
 import { supabase } from "@/integrations/supabase/client";
@@ -510,6 +511,22 @@ export function QuoteProposalCard({ proposal, onResolved }: Props) {
                       <Plus className="h-3 w-3" />
                     </button>
                   </div>
+                  <button
+                    type="button"
+                    onClick={() => sendConciergePrefill(buildSwapPrompt({
+                      pick_id: l.pick_id,
+                      title: l.title,
+                      designer_name: l.designer_name,
+                      materials: (l as any).materials ?? null,
+                      category: (l as any).category ?? null,
+                    }))}
+                    className="inline-flex items-center gap-1 text-muted-foreground hover:text-accent text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded border border-border transition-colors"
+                    aria-label={`Swap ${l.title || "this line"} for a similar piece`}
+                    title="Swap for a similar piece (darker wood / warmer finish)"
+                  >
+                    <Repeat className="h-3 w-3" />
+                    Swap
+                  </button>
                   <button
                     onClick={() => toggleExclude(l.pick_id)}
                     className="text-muted-foreground hover:text-foreground text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded border border-border"
