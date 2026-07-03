@@ -705,6 +705,26 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
     if (!text && !hasFiles) return;
     if (streaming) return;
 
+    // Server-side concierge endpoints require an authenticated Maison Affluency
+    // member. Block the stream client-side too so the UI never fires a request
+    // that will 401.
+    if (!user) {
+      toast.error("Access restricted", {
+        description: "The Concierge is available to Maison Affluency members only.",
+      });
+      setTimeline((prev) => [
+        ...prev,
+        {
+          kind: "msg",
+          role: "assistant",
+          content: "Access restricted — the Concierge is available to Maison Affluency members only.",
+        },
+      ]);
+      return;
+    }
+
+
+
     // Special intercepts: client-side actions instead of model calls
     if (text === "__concierge:rename__") {
       setNameDraft(name === DEFAULT_NAME ? "" : name);
@@ -1097,7 +1117,20 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
         },
         onError: (msg) => {
           clearStallTimer();
-          if (msg.startsWith("RATE_LIMIT:")) {
+          if (msg === "UNAUTHORIZED") {
+            toast.error("Access restricted", {
+              description: "The Concierge is available to Maison Affluency members only.",
+            });
+            setTimeline((prev) => [
+              ...prev,
+              {
+                kind: "msg",
+                role: "assistant",
+                content: "Access restricted — the Concierge is available to Maison Affluency members only.",
+              },
+            ]);
+          } else if (msg.startsWith("RATE_LIMIT:")) {
+
             const retrySec = parseInt(msg.split(":")[1], 10);
             const mins = Math.ceil(retrySec / 60);
             const timeText = mins < 1 ? `${retrySec} seconds` : `${mins} minute${mins === 1 ? "" : "s"}`;
@@ -1131,7 +1164,7 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
         pushRetry(text, "The connection to the concierge dropped.");
       }
     }
-  }, [input, attachments, streaming, timeline, stage, tone, lang, name, openLatestQuote, navigate, clearStallTimer, pushRetry]);
+  }, [input, attachments, streaming, timeline, stage, tone, lang, name, openLatestQuote, navigate, clearStallTimer, pushRetry, user]);
 
   const handleProposalResolved = (
     proposalIndex: number,

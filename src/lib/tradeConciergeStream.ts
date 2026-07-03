@@ -350,6 +350,10 @@ export async function streamConcierge({
   if (!resp.ok) {
     let body: any;
     try { body = await resp.json(); } catch { body = { error: "Request failed" }; }
+    if (resp.status === 401 || resp.status === 403) {
+      onError("UNAUTHORIZED");
+      return;
+    }
     if (resp.status === 429 && body.retry_in != null) {
       onError(`RATE_LIMIT:${body.retry_in}`);
       return;
