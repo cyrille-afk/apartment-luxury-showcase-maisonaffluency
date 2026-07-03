@@ -176,6 +176,27 @@ export type InspectorEvent = {
   request_id?: string;
 };
 
+/**
+ * Emitted the first time the model starts streaming a card-producing tool
+ * call (`propose_tearsheet`, `add_to_tearsheet`, `draft_quote`,
+ * `add_to_quote`, `propose_ffe_rows`, `prepare_visualization_brief`),
+ * BEFORE the completed `event: proposal` frame arrives. The client uses this
+ * to render a skeleton card immediately so the architect sees the AI
+ * "thinking" instead of a blank pause.
+ */
+export type ToolStartEvent = {
+  tool:
+    | "propose_tearsheet"
+    | "add_to_tearsheet"
+    | "draft_quote"
+    | "add_to_quote"
+    | "propose_ffe_rows"
+    | "prepare_visualization_brief";
+  tool_call_id: string | null;
+  index: number;
+  request_id?: string;
+};
+
 export async function streamConcierge({
   messages,
   projectId,
