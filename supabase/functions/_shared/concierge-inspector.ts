@@ -21,6 +21,8 @@ export type InspectorGroundTruth = {
       designer: string | null;
       category: string | null;
       materials: string | null;
+      price_cents: number | null;
+      currency: string | null;
     }>;
   }>;
 };
