@@ -3373,7 +3373,7 @@ serve(async (req) => {
       // this, "Saint-Louis chandelier" returned all 20 Saint-Louis pieces
       // (vases, lamps, etc.) instead of just chandeliers.
       const TYPOLOGY_TERMS = [
-        "chandelier","sconce","pendant","lantern",
+        "chandelier","sconce","pendant","lantern","lighting","light",
         "dining table","coffee table","side table","console","desk","table",
         "armchair","chair","stool","bench","sofa","banquette","daybed","bed",
         "cabinet","sideboard","credenza","commode","armoire","bookshelf","shelf",
