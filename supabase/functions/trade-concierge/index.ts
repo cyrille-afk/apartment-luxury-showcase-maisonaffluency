@@ -3468,29 +3468,62 @@ serve(async (req) => {
             buildSkipConfirmationMessage(skipped, previewRaw, designerLabel),
           );
         }
+        const designerNameById = new Map<string, string>();
+        for (const d of (designerRows || [])) {
+          if (targetIds.includes(d.id)) {
+            designerNameById.set(d.id, d.display_name || d.name || designerLabel);
+          }
+        }
+        const pickDesignerById = new Map<string, string>();
+        for (const p of (allPicks || [])) {
+          if (p?.id && p?.designer_id) pickDesignerById.set(p.id, p.designer_id);
+        }
         const rationaleMap: Record<string, { reason: string }> = {};
         for (const p of previewRaw) {
           if (!p?.id) continue;
-          rationaleMap[p.id] = { reason: `Complete ${designerLabel} listing from the Maison Affluency Curation.` };
+          const dName = designerNameById.get(pickDesignerById.get(p.id) || "") || designerLabel;
+          rationaleMap[p.id] = { reason: `Complete ${dName} listing from the Maison Affluency Curation.` };
         }
         const preview = previewRaw.map((p: any) => ({ ...p, rationale: rationaleMap[p.id]?.reason || null }));
+        // Note designers whose requested typology returned nothing so the
+        // closing prose acknowledges what's missing (e.g. "Alinea chairs").
+        const unmetNotes: string[] = [];
+        for (const [dId, tSet] of typologiesByDesigner) {
+          if (!tSet.has("__bound__")) continue;
+          const boundList = [...tSet].filter((t) => t !== "__bound__");
+          const dName = designerNameById.get(dId) || "";
+          for (const t of boundList) {
+            const anyMatch = (allPicks || []).some((p: any) =>
+              p.designer_id === dId && matchesTypology(p, [t]),
+            );
+            if (!anyMatch) unmetNotes.push(`${dName} has no ${t}s in the current Curation`);
+          }
+        }
+        const unmetSuffix = unmetNotes.length
+          ? ` Note: ${unmetNotes.join("; ")}.`
+          : "";
+        const multiLabel = mentionedDesigners.length > 1
+          ? mentionedDesigners.slice(0, 3).join(" + ")
+          : designerLabel;
         const proposal = {
           tool: "propose_tearsheet",
           tool_call_id: crypto.randomUUID(),
           args: {
-            title: `${designerLabel} — full curation`,
+            title: `${multiLabel} — curated edit`,
             pick_ids: finalIds,
             note: excludedIds.size > 0
-              ? `${finalIds.length} of ${pickIds.length} ${designerLabel} pieces (skipped ${excludedIds.size} per your request), with trade pricing.`
-              : `All ${finalIds.length} ${designerLabel} pieces currently in the Maison Affluency Curation, with trade pricing.`,
+              ? `${finalIds.length} of ${pickIds.length} ${multiLabel} pieces (skipped ${excludedIds.size} per your request), with trade pricing.`
+              : `${finalIds.length} ${multiLabel} pieces from the Maison Affluency Curation, with trade pricing.`,
             pick_rationales: rationaleMap,
           },
           preview,
         };
-        const closing = excludedIds.size > 0
-          ? `Draft tear sheet with ${finalIds.length} ${designerLabel} pieces (skipped ${excludedIds.size} per your request). Review the list above and click **Approve & Create** to save it into a project folder — or **Discard** to cancel.`
-          : `Draft tear sheet with all ${finalIds.length} ${designerLabel} pieces in the Maison Affluency Curation, with trade pricing. Review the list above and click **Approve & Create** to save it into a project folder — or **Discard** to cancel.`;
+        const closing = (excludedIds.size > 0
+          ? `Draft tear sheet with ${finalIds.length} ${multiLabel} pieces (skipped ${excludedIds.size} per your request). Review the list above and click **Approve & Create** to save it into a project folder — or **Discard** to cancel.`
+          : `Draft tear sheet with ${finalIds.length} ${multiLabel} pieces in the Maison Affluency Curation, with trade pricing. Review the list above and click **Approve & Create** to save it into a project folder — or **Discard** to cancel.`)
+          + unmetSuffix;
         return sseProposalThenTextResponse(proposal, closing);
+
 
       }
 
