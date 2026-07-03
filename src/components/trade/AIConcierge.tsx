@@ -1090,6 +1090,9 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
         onDone: () => {
           clearStallTimer();
           setStreaming(false);
+          // Drop any skeleton placeholders that never resolved into a real
+          // proposal (e.g. Inspector fail-closed → `proposal_blocked`).
+          setTimeline((prev) => prev.filter((t) => t.kind !== "pending_proposal"));
         },
         onError: (msg) => {
           clearStallTimer();
