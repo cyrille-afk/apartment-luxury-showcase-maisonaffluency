@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link, useLocation, useSearchParams, Navigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -44,16 +44,22 @@ const ConciergePage: React.FC = () => {
   const page = params.get("page")?.trim() || "";
 
   // Auth gate — unauthenticated visitors are redirected to the landing page
-  // with an "access restricted" notice.
+  // with an "access restricted" notice. Latch `authorized` once we've seen a
+  // user so subsequent auth loading spikes (token refresh) don't unmount the
+  // concierge mid-stream and abort the in-flight SSE request.
   const { user, loading: authLoading } = useAuth();
+  const wasAuthorizedRef = useRef(false);
+  if (user) wasAuthorizedRef.current = true;
+  const authorized = wasAuthorizedRef.current;
 
   useEffect(() => {
-    if (!authLoading && !user) {
+    if (!authLoading && !user && !wasAuthorizedRef.current) {
       toast.error("Access restricted", {
         description: "The Concierge is available to Maison Affluency members only.",
       });
     }
   }, [authLoading, user]);
+
 
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0 });
@@ -95,14 +101,15 @@ const ConciergePage: React.FC = () => {
 
   const canonical = "https://maisonaffluency.com/concierge";
 
-  // While auth resolves, render nothing to avoid flashing content.
-  if (authLoading) return null;
+  // While the very first auth check resolves, render nothing.
+  if (authLoading && !authorized) return null;
 
-  // Unauthenticated → bounce to landing page. The toast is fired by the
-  // effect above so it survives the redirect.
-  if (!user) {
+  // Unauthenticated (and never was) → bounce to landing page. The toast is
+  // fired by the effect above so it survives the redirect.
+  if (!user && !authorized) {
     return <Navigate to="/" replace />;
   }
+
 
 
   return (
