@@ -36,8 +36,22 @@ const TradeApprovalEmail = ({ name, companyName }: TradeApprovalProps) => (
           {companyName ? <> for <strong>{companyName}</strong></> : ''} to the {SITE_NAME} Trade Program has been approved.
         </Text>
         <Text style={text}>
-          You now have full access to exclusive trade pricing, our curated product library, branded quote builder, and dedicated concierge support.
+          Your account is now active. Here is everything unlocked for your studio:
         </Text>
+        <ul style={list}>
+          <li style={listItem}><strong>Trade pricing &amp; bespoke quotations</strong> — trade discount applied across the catalogue, plus tailored quotes for larger scopes.</li>
+          <li style={listItem}><strong>Dedicated Client Advisor</strong> — a single point of contact for sourcing, lead times and logistics.</li>
+          <li style={listItem}><strong>Custom &amp; bespoke requests</strong> — commission modifications or entirely bespoke pieces directly with our ateliers and designers.</li>
+          <li style={listItem}><strong>Curated product library</strong> — access to European ateliers, collectible design and material archives, with technical CAD / 3D downloads on eligible pieces.</li>
+          <li style={listItem}><strong>Samples &amp; swatches</strong> — request finish and fabric samples shipped to your studio.</li>
+          <li style={listItem}><strong>Consolidated, fully insured shipping</strong> — worldwide DDP or DAP, with one landed quote covering freight, customs and duties.</li>
+          <li style={listItem}><strong>Branded quote &amp; tearsheet builder</strong> — export white-labelled PDFs and share tearsheets under your studio's identity.</li>
+          <li style={listItem}><strong>White-label client boards</strong> — private shareable boards for your clients under your logo and studio name.</li>
+          <li style={listItem}><strong>Project folders &amp; mood board studio</strong> — organise sourcing by project and build mood boards with AI assistance.</li>
+          <li style={listItem}><strong>3D Studio</strong> — turn architectural drawings into furnished 3D visualisations to present to clients.</li>
+          <li style={listItem}><strong>AI Concierge</strong> — an in-app assistant trained exclusively on our catalogue for instant recommendations.</li>
+          <li style={listItem}><strong>Trade payouts</strong> — commission or net-buy billing depending on your market, with Stripe Connect payouts where applicable.</li>
+        </ul>
         <Section style={buttonSection}>
           <Button style={button} href="https://maisonaffluency.com/trade/login">
             Access Your Trade Portal
@@ -88,6 +102,8 @@ const logo = { margin: '0 auto' }
 const divider = { border: 'none', borderTop: '1px solid #e8e4de', margin: '0 0 24px' }
 const h1 = { color: '#1a1a1a', fontSize: '24px', marginBottom: '24px', fontFamily: "Georgia, 'Playfair Display', serif" }
 const text = { color: '#333333', lineHeight: '1.8', marginBottom: '20px', fontSize: '15px' }
+const list = { color: '#333333', lineHeight: '1.7', margin: '0 0 24px 20px', fontSize: '14px', paddingLeft: '20px' }
+const listItem = { marginBottom: '10px' }
 const buttonSection = { textAlign: 'center' as const, margin: '32px 0' }
 const button = {
   display: 'inline-block',
