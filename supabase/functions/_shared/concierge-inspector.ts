@@ -307,6 +307,8 @@ export type RequirementsInput = {
   scale?: string;
   era?: string;
   notes?: string;
+  budget_cents?: number;
+  budget_currency?: string;
 };
 
 export type SlotCoverage = {
@@ -318,16 +320,40 @@ export type SlotCoverage = {
   satisfied: boolean;
 };
 
+export type BudgetCheck = {
+  requested_cents: number;
+  currency: string;
+  priced_items: number;
+  unpriced_items: number;
+  total_cents: number;
+  over_by_cents: number;
+  ok: boolean;
+};
+
+export type PaletteCheck = {
+  requested: string[];
+  ok: boolean;
+  matched_ids: string[];
+  offending_ids: string[];
+};
+
 export type RequirementsViolation =
   | { kind: "slot_undelivered"; typology: string; qty_min: number; delivered: number }
   | { kind: "slot_overdelivered"; typology: string; qty_max: number; delivered: number }
   | { kind: "brand_mismatch"; requested: string[]; found: string[] }
+  | { kind: "budget_over"; requested_cents: number; total_cents: number; currency: string; over_by_cents: number }
+  | { kind: "budget_currency_mismatch"; requested: string; found: string[] }
+  | { kind: "palette_mismatch"; requested: string[]; offending_ids: string[]; offending_titles: string[] }
   | { kind: "no_slots" };
 
 export type RequirementsValidation = {
   ok: boolean;
   coverage: SlotCoverage[];
   brand_ok: boolean;
+  budget_ok: boolean;
+  palette_ok: boolean;
+  budget: BudgetCheck | null;
+  palette: PaletteCheck | null;
   violations: RequirementsViolation[];
   total_items: number;
   unmatched_ids: string[];
