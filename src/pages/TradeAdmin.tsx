@@ -27,7 +27,13 @@ import { Instagram, FileBox, Sparkles, Inbox, FileSpreadsheet, MapPin, AlertTria
  * The checklist items are derived from the warn signals surfaced on the card
  * so reviewers can request exactly what's missing in one click.
  */
-function buildChecklistMailto(app: Application, signals: Signal[]): string | null {
+function buildChecklist(app: Application, signals: Signal[]): {
+  to: string;
+  firstName: string;
+  subject: string;
+  body: string;
+  items: string[];
+} | null {
   const email = app.profiles?.email;
   if (!email) return null;
   const firstName = app.profiles?.first_name || "there";
@@ -52,7 +58,11 @@ function buildChecklistMailto(app: Application, signals: Signal[]): string | nul
     `${bulletList}\n\n` +
     `Once we have this we can activate your trade access. Just reply to this email.\n\n` +
     `With thanks,\nMaison Affluency Trade Team`;
-  return `mailto:${encodeURIComponent(email)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  return { to: email, firstName, subject, body, items };
+}
+
+function checklistMailto(c: { to: string; subject: string; body: string }): string {
+  return `mailto:${encodeURIComponent(c.to)}?subject=${encodeURIComponent(c.subject)}&body=${encodeURIComponent(c.body)}`;
 }
 
 // Free-email domains that don't tell us anything about the applicant's firm.
@@ -242,6 +252,13 @@ const TradeAdmin = () => {
   const [fetching, setFetching] = useState(true);
   const [filter, setFilter] = useState<"pending" | "approved" | "rejected" | "all">("pending");
   const [confirmDialog, setConfirmDialog] = useState<{ app: Application; action: "approved" | "rejected" } | null>(null);
+  const [checklistPreview, setChecklistPreview] = useState<{
+    app: Application;
+    to: string;
+    subject: string;
+    body: string;
+    items: string[];
+  } | null>(null);
 
 function InstagramAuditCard() {
   const { data: missingCount = 0 } = useQuery({
@@ -594,16 +611,17 @@ function InstagramAuditCard() {
                 {app.status === "pending" && isSuperAdmin && (
                   <div className="flex gap-2 shrink-0">
                     {(() => {
-                      const href = buildChecklistMailto(app, signals);
-                      return href ? (
-                        <a
-                          href={href}
+                      const c = buildChecklist(app, signals);
+                      return c ? (
+                        <button
+                          type="button"
+                          onClick={() => setChecklistPreview({ app, ...c })}
                           className="p-2 rounded-full border border-primary/30 text-primary hover:bg-primary/10 transition-colors"
-                          title="Send verification checklist to applicant"
-                          aria-label="Send verification checklist"
+                          title="Preview verification checklist email"
+                          aria-label="Preview verification checklist"
                         >
                           <Mail className="h-4 w-4" />
-                        </a>
+                        </button>
                       ) : null;
                     })()}
                     <button
@@ -658,6 +676,49 @@ function InstagramAuditCard() {
               }}
             >
               {confirmDialog?.action === "approved" ? "Approve" : "Reject"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={!!checklistPreview} onOpenChange={(open) => !open && setChecklistPreview(null)}>
+        <AlertDialogContent className="max-w-2xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-display">Verification checklist preview</AlertDialogTitle>
+            <AlertDialogDescription className="font-body text-xs">
+              Review before opening in your mail client. You can still edit the message there before sending.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          {checklistPreview && (
+            <div className="space-y-3 font-body text-xs">
+              <div className="grid grid-cols-[64px_1fr] gap-x-3 gap-y-1">
+                <span className="text-muted-foreground uppercase tracking-wider text-[10px]">To</span>
+                <span className="text-foreground break-all">{checklistPreview.to}</span>
+                <span className="text-muted-foreground uppercase tracking-wider text-[10px]">Subject</span>
+                <span className="text-foreground">{checklistPreview.subject}</span>
+              </div>
+              <div className="rounded border border-border bg-muted/30 p-3 max-h-[50vh] overflow-y-auto">
+                <pre className="whitespace-pre-wrap font-body text-xs text-foreground leading-relaxed">
+{checklistPreview.body}
+                </pre>
+              </div>
+              <p className="text-[10px] text-muted-foreground/70">
+                {checklistPreview.items.length} item{checklistPreview.items.length === 1 ? "" : "s"} requested · applicant: {checklistPreview.app.company_name}
+              </p>
+            </div>
+          )}
+          <AlertDialogFooter>
+            <AlertDialogCancel className="font-body text-xs">Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="font-body text-xs"
+              onClick={() => {
+                if (checklistPreview) {
+                  window.location.href = checklistMailto(checklistPreview);
+                }
+                setChecklistPreview(null);
+              }}
+            >
+              Open in mail client
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
