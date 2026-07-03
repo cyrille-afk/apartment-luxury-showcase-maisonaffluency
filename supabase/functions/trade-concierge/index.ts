@@ -4245,7 +4245,7 @@ serve(async (req) => {
                 },
                 preview,
               };
-              controller.enqueue(encoder.encode(`event: proposal\ndata: ${JSON.stringify(proposal)}\n\n`));
+              emitProposalWithRequirementsDiff(proposal, preview);
               console.log(`[concierge] emitted propose_ffe_rows proposal: ${rows.length} rows across ${new Set(rows.map((r) => r.room)).size} room(s) for project ${projectId}`);
               continue;
             }
