@@ -680,6 +680,49 @@ function InstagramAuditCard() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <AlertDialog open={!!checklistPreview} onOpenChange={(open) => !open && setChecklistPreview(null)}>
+        <AlertDialogContent className="max-w-2xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-display">Verification checklist preview</AlertDialogTitle>
+            <AlertDialogDescription className="font-body text-xs">
+              Review before opening in your mail client. You can still edit the message there before sending.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          {checklistPreview && (
+            <div className="space-y-3 font-body text-xs">
+              <div className="grid grid-cols-[64px_1fr] gap-x-3 gap-y-1">
+                <span className="text-muted-foreground uppercase tracking-wider text-[10px]">To</span>
+                <span className="text-foreground break-all">{checklistPreview.to}</span>
+                <span className="text-muted-foreground uppercase tracking-wider text-[10px]">Subject</span>
+                <span className="text-foreground">{checklistPreview.subject}</span>
+              </div>
+              <div className="rounded border border-border bg-muted/30 p-3 max-h-[50vh] overflow-y-auto">
+                <pre className="whitespace-pre-wrap font-body text-xs text-foreground leading-relaxed">
+{checklistPreview.body}
+                </pre>
+              </div>
+              <p className="text-[10px] text-muted-foreground/70">
+                {checklistPreview.items.length} item{checklistPreview.items.length === 1 ? "" : "s"} requested · applicant: {checklistPreview.app.company_name}
+              </p>
+            </div>
+          )}
+          <AlertDialogFooter>
+            <AlertDialogCancel className="font-body text-xs">Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="font-body text-xs"
+              onClick={() => {
+                if (checklistPreview) {
+                  window.location.href = checklistMailto(checklistPreview);
+                }
+                setChecklistPreview(null);
+              }}
+            >
+              Open in mail client
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 };
