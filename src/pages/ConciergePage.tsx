@@ -44,16 +44,22 @@ const ConciergePage: React.FC = () => {
   const page = params.get("page")?.trim() || "";
 
   // Auth gate — unauthenticated visitors are redirected to the landing page
-  // with an "access restricted" notice.
+  // with an "access restricted" notice. Latch `authorized` once we've seen a
+  // user so subsequent auth loading spikes (token refresh) don't unmount the
+  // concierge mid-stream and abort the in-flight SSE request.
   const { user, loading: authLoading } = useAuth();
+  const wasAuthorizedRef = useRef(false);
+  if (user) wasAuthorizedRef.current = true;
+  const authorized = wasAuthorizedRef.current;
 
   useEffect(() => {
-    if (!authLoading && !user) {
+    if (!authLoading && !user && !wasAuthorizedRef.current) {
       toast.error("Access restricted", {
         description: "The Concierge is available to Maison Affluency members only.",
       });
     }
   }, [authLoading, user]);
+
 
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0 });
