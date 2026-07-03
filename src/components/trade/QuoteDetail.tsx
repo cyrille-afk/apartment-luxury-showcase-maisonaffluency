@@ -360,9 +360,10 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   // step, adding e.g. Excess Chandelier silently defaults to the first row
   // of the variant matrix (10 Lights / cheapest price).
   const [variantsByProduct, setVariantsByProduct] = useState<
-    Record<string, { variants: Array<{ label: string; price_cents: number | null }>; currency: string | null }>
+    Record<string, { variants: Array<{ label: string; price_cents: number | null }>; currency: string | null; pickId: string | null }>
   >({});
   const [pendingVariantIdx, setPendingVariantIdx] = useState<number | null>(null);
+  const [pendingSwatchLib, setPendingSwatchLib] = useState<Array<{ fabric_id?: string | null; name: string; image_url: string; sort_order?: number | null }>>([]);
 
   const [issueDate, setIssueDate] = useState<string | null>(null);
   const [landedCostSettings, setLandedCostSettings] = useState<{ cbm: number; kg: number; mode: "road" | "courier" }>(() => ({
@@ -694,7 +695,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     (async () => {
       const { data } = await supabase
         .from("trade_products")
-        .select("id, product_name, brand_name, size_variants, currency")
+        .select("id, product_name, brand_name, size_variants, currency, source_pick_id")
         .order("brand_name", { ascending: true })
         .order("product_name", { ascending: true })
         .limit(2000);
@@ -708,7 +709,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
             ? (p.brand_name as string).split(" - ")[0].trim()
             : (p.brand_name as string),
         }));
-      const meta: Record<string, { variants: Array<{ label: string; price_cents: number | null }>; currency: string | null }> = {};
+      const meta: Record<string, { variants: Array<{ label: string; price_cents: number | null }>; currency: string | null; pickId: string | null }> = {};
       for (const p of data as any[]) {
         const raw = Array.isArray(p.size_variants) ? p.size_variants : [];
         const variants = raw
@@ -718,7 +719,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
           }))
           .filter((v: any) => v.label);
         if (variants.length > 0) {
-          meta[p.id as string] = { variants, currency: (p.currency as string) || null };
+          meta[p.id as string] = { variants, currency: (p.currency as string) || null, pickId: (p.source_pick_id as string) || null };
         }
       }
       setProductOptions(opts);
@@ -732,6 +733,36 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
 
   const pendingVariants = pendingProductId ? variantsByProduct[pendingProductId] : undefined;
   const pendingNeedsVariant = !!pendingVariants && pendingVariants.variants.length > 1;
+
+  // Load the swatch library for the pending product so the "size / finish"
+  // picker can show a swatch thumbnail beside each variant — matching the
+  // visual affordance in the curator's pick lightbox.
+  useEffect(() => {
+    let cancelled = false;
+    setPendingSwatchLib([]);
+    const pickId = pendingVariants?.pickId;
+    if (!pickId) return;
+    (async () => {
+      const { data } = await (supabase as any)
+        .from("product_fabric_swatches_public")
+        .select("fabric_id, name, image_url, sort_order, is_active")
+        .eq("pick_id", pickId)
+        .order("sort_order", { ascending: true });
+      if (cancelled || !data) return;
+      const lib = (data as any[])
+        .filter((r) => r && r.is_active !== false && r.image_url && r.name)
+        .map((r) => ({
+          fabric_id: r.fabric_id ?? null,
+          name: String(r.name),
+          image_url: String(r.image_url),
+          sort_order: r.sort_order ?? null,
+        }));
+      setPendingSwatchLib(lib);
+    })();
+    return () => { cancelled = true; };
+  }, [pendingVariants?.pickId]);
+
+
 
   const handleAddProduct = async (productId: string) => {
     if (!productId || addingProduct) return;
@@ -2391,6 +2422,26 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                         </option>
                       ))}
                     </select>
+                    {pendingVariantIdx !== null && pendingSwatchLib.length > 0 && (() => {
+                      const label = pendingVariants!.variants[pendingVariantIdx]?.label || "";
+                      const matched = findQuoteFinishSwatches(label, pendingSwatchLib);
+                      if (!matched.length) return null;
+                      return (
+                        <div className="mt-2 flex flex-wrap items-center gap-2">
+                          {matched.map((s, si) => (
+                            <div key={`${s.name}-${si}`} className="flex items-center gap-1.5 rounded-full border border-border bg-background px-1.5 py-1">
+                              <img
+                                src={s.image_url}
+                                alt={s.name}
+                                className="h-6 w-6 rounded-full object-cover border border-border/60"
+                                loading="lazy"
+                              />
+                              <span className="font-body text-[10px] text-muted-foreground pr-1">{s.name}</span>
+                            </div>
+                          ))}
+                        </div>
+                      );
+                    })()}
                   </div>
                 )}
               </div>
@@ -3005,6 +3056,27 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                           </option>
                         ))}
                       </select>
+                      {/* Swatch preview for the selected variant — mirrors the curator lightbox affordance. */}
+                      {pendingVariantIdx !== null && pendingSwatchLib.length > 0 && (() => {
+                        const label = pendingVariants!.variants[pendingVariantIdx]?.label || "";
+                        const matched = findQuoteFinishSwatches(label, pendingSwatchLib);
+                        if (!matched.length) return null;
+                        return (
+                          <div className="mt-2 flex flex-wrap items-center gap-2">
+                            {matched.map((s, si) => (
+                              <div key={`${s.name}-${si}`} className="flex items-center gap-1.5 rounded-full border border-border bg-background px-1.5 py-1">
+                                <img
+                                  src={s.image_url}
+                                  alt={s.name}
+                                  className="h-6 w-6 rounded-full object-cover border border-border/60"
+                                  loading="lazy"
+                                />
+                                <span className="font-body text-[10px] text-muted-foreground pr-1">{s.name}</span>
+                              </div>
+                            ))}
+                          </div>
+                        );
+                      })()}
                     </div>
                   )}
                   <button
