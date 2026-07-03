@@ -122,6 +122,12 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
     } catch {}
   }, [input]);
   const [streaming, setStreaming] = useState(false);
+  // Correlation id for the currently-streaming (or most-recent) concierge
+  // turn. Displayed as a copyable chip above the input so we can join
+  // client-visible symptoms to server-side `concierge_inspector` log lines.
+  const [lastRequestId, setLastRequestId] = useState<string | null>(null);
+  const [lastInspectorCount, setLastInspectorCount] = useState<number>(0);
+  const [reqIdCopied, setReqIdCopied] = useState<boolean>(false);
   const [stageOverride, setStageOverride] = useState<Stage | null>(null);
   const [hasTradeArtifacts, setHasTradeArtifacts] = useState<boolean | null>(null);
   const [artifactRefreshKey, setArtifactRefreshKey] = useState(0);
