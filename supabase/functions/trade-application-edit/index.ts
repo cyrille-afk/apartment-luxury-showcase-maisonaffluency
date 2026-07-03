@@ -58,12 +58,18 @@ Deno.serve(async (req) => {
 
   const { action, token, patch } = parsed.data;
 
+  // Hash the incoming token and look up by hash — the raw token is never stored.
+  const hashBuf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(token));
+  const tokenHash = Array.from(new Uint8Array(hashBuf))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+
   const { data: app, error } = await admin
     .from("trade_applications")
     .select(
       "id, status, edit_token_expires_at, company_name, company_website, job_title, city, country, is_certified_professional, certification_details, message"
     )
-    .eq("edit_token", token)
+    .eq("edit_token_hash", tokenHash)
     .maybeSingle();
 
   if (error) return json(500, { error: "lookup_failed" });
