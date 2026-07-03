@@ -4908,7 +4908,7 @@ serve(async (req) => {
                 },
                 preview,
               };
-              controller.enqueue(encoder.encode(`event: proposal\ndata: ${JSON.stringify(proposal)}\n\n`));
+              emitProposalWithRequirementsDiff(proposal, preview);
             } else {
               const proposal = {
                 tool: "propose_tearsheet",
