@@ -75,6 +75,7 @@ export type AddToTearsheetProposal = {
     pick_rationales?: Record<string, RationaleEntry>;
   };
   preview: PickPreview[];
+  requirements_validation?: RequirementsValidation;
 };
 
 export type QuoteLine = {
