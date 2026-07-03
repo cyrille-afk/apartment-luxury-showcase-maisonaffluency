@@ -1164,7 +1164,7 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
         pushRetry(text, "The connection to the concierge dropped.");
       }
     }
-  }, [input, attachments, streaming, timeline, stage, tone, lang, name, openLatestQuote, navigate, clearStallTimer, pushRetry]);
+  }, [input, attachments, streaming, timeline, stage, tone, lang, name, openLatestQuote, navigate, clearStallTimer, pushRetry, user]);
 
   const handleProposalResolved = (
     proposalIndex: number,
