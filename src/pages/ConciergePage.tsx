@@ -43,29 +43,17 @@ const ConciergePage: React.FC = () => {
   const designer = params.get("designer")?.trim() || "";
   const page = params.get("page")?.trim() || "";
 
-  // Access gate — accept via ?key=… or persisted session token.
-  const [granted, setGranted] = useState<boolean>(() => {
-    if (typeof window === "undefined") return false;
-    try {
-      return sessionStorage.getItem(ACCESS_STORAGE_KEY) === CONCIERGE_ACCESS_CODE;
-    } catch {
-      return false;
-    }
-  });
-  const [codeInput, setCodeInput] = useState("");
-  const [attempted, setAttempted] = useState(false);
+  // Auth gate — unauthenticated visitors are redirected to the landing page
+  // with an "access restricted" notice.
+  const { user, loading: authLoading } = useAuth();
 
   useEffect(() => {
-    const urlKey = params.get("key")?.trim();
-    if (!granted && urlKey && urlKey === CONCIERGE_ACCESS_CODE) {
-      try { sessionStorage.setItem(ACCESS_STORAGE_KEY, CONCIERGE_ACCESS_CODE); } catch {}
-      setGranted(true);
-      // Strip the key from the URL bar.
-      const url = new URL(window.location.href);
-      url.searchParams.delete("key");
-      window.history.replaceState({}, "", url.toString());
+    if (!authLoading && !user) {
+      toast.error("Access restricted", {
+        description: "The Concierge is available to Maison Affluency members only.",
+      });
     }
-  }, [params, granted]);
+  }, [authLoading, user]);
 
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0 });
