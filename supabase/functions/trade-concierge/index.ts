@@ -2846,6 +2846,8 @@ async function hydratePickPreview(
           materials: p.materials,
           category: p.category,
           designer_name: designer,
+          price_cents: typeof p.trade_price_cents === "number" ? p.trade_price_cents : null,
+          currency: p.currency || null,
         };
       }
       const t = tradeById.get(id);
@@ -2863,6 +2865,13 @@ async function hydratePickPreview(
           materials: t.materials,
           category: t.category,
           designer_name: baseBrand || null,
+          price_cents:
+            typeof t.trade_price_cents === "number"
+              ? t.trade_price_cents
+              : typeof t.rrp_price_cents === "number"
+                ? t.rrp_price_cents
+                : null,
+          currency: t.currency || null,
         };
       }
       return null;
