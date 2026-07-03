@@ -2425,20 +2425,27 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                     {pendingVariantIdx !== null && pendingSwatchLib.length > 0 && (() => {
                       const label = pendingVariants!.variants[pendingVariantIdx]?.label || "";
                       const matched = findQuoteFinishSwatches(label, pendingSwatchLib);
-                      if (!matched.length) return null;
                       return (
-                        <div className="mt-2 flex flex-wrap items-center gap-2">
-                          {matched.map((s, si) => (
-                            <div key={`${s.name}-${si}`} className="flex items-center gap-1.5 rounded-full border border-border bg-background px-1.5 py-1">
-                              <img
-                                src={s.image_url}
-                                alt={s.name}
-                                className="h-6 w-6 rounded-full object-cover border border-border/60"
-                                loading="lazy"
-                              />
-                              <span className="font-body text-[10px] text-muted-foreground pr-1">{s.name}</span>
+                        <div className="mt-2">
+                          {matched.length > 0 ? (
+                            <div className="flex flex-wrap items-center gap-2">
+                              {matched.map((s, si) => (
+                                <div key={`${s.name}-${si}`} className="flex items-center gap-1.5 rounded-full border border-border bg-background px-1.5 py-1">
+                                  <img
+                                    src={s.image_url}
+                                    alt={s.name}
+                                    className="h-6 w-6 rounded-full object-cover border border-border/60"
+                                    loading="lazy"
+                                  />
+                                  <span className="font-body text-[10px] text-muted-foreground pr-1">{s.name}</span>
+                                </div>
+                              ))}
                             </div>
-                          ))}
+                          ) : (
+                            <p className="font-body text-[10px] text-muted-foreground/80 italic">
+                              No swatch thumbnails available for this finish.
+                            </p>
+                          )}
                         </div>
                       );
                     })()}
@@ -3060,20 +3067,27 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                       {pendingVariantIdx !== null && pendingSwatchLib.length > 0 && (() => {
                         const label = pendingVariants!.variants[pendingVariantIdx]?.label || "";
                         const matched = findQuoteFinishSwatches(label, pendingSwatchLib);
-                        if (!matched.length) return null;
                         return (
-                          <div className="mt-2 flex flex-wrap items-center gap-2">
-                            {matched.map((s, si) => (
-                              <div key={`${s.name}-${si}`} className="flex items-center gap-1.5 rounded-full border border-border bg-background px-1.5 py-1">
-                                <img
-                                  src={s.image_url}
-                                  alt={s.name}
-                                  className="h-6 w-6 rounded-full object-cover border border-border/60"
-                                  loading="lazy"
-                                />
-                                <span className="font-body text-[10px] text-muted-foreground pr-1">{s.name}</span>
+                          <div className="mt-2">
+                            {matched.length > 0 ? (
+                              <div className="flex flex-wrap items-center gap-2">
+                                {matched.map((s, si) => (
+                                  <div key={`${s.name}-${si}`} className="flex items-center gap-1.5 rounded-full border border-border bg-background px-1.5 py-1">
+                                    <img
+                                      src={s.image_url}
+                                      alt={s.name}
+                                      className="h-6 w-6 rounded-full object-cover border border-border/60"
+                                      loading="lazy"
+                                    />
+                                    <span className="font-body text-[10px] text-muted-foreground pr-1">{s.name}</span>
+                                  </div>
+                                ))}
                               </div>
-                            ))}
+                            ) : (
+                              <p className="font-body text-[10px] text-muted-foreground/80 italic">
+                                No swatch thumbnails available for this finish.
+                              </p>
+                            )}
                           </div>
                         );
                       })()}
