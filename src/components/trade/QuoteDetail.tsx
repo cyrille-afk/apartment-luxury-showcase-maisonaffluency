@@ -2977,10 +2977,32 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                       placeholder={productOptions.length === 0 ? "Loading catalogue…" : "Pick a product (A → Designer → Item)"}
                     />
                   </div>
+                  {pendingNeedsVariant && (
+                    <div className="flex-1 min-w-0">
+                      <label className="block font-body text-[10px] text-muted-foreground uppercase tracking-widest mb-1">
+                        Size / finish
+                      </label>
+                      <select
+                        value={pendingVariantIdx === null ? "" : String(pendingVariantIdx)}
+                        onChange={(e) => setPendingVariantIdx(e.target.value === "" ? null : Number(e.target.value))}
+                        className="w-full rounded-md border border-border bg-background px-3 py-2 font-body text-xs"
+                      >
+                        <option value="">Select a variant…</option>
+                        {pendingVariants!.variants.map((v, i) => (
+                          <option key={`${v.label}-${i}`} value={i}>
+                            {v.label}
+                            {typeof v.price_cents === "number" && v.price_cents > 0
+                              ? ` — ${(pendingVariants!.currency || currency)} ${(v.price_cents / 100).toLocaleString()}`
+                              : ""}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
                   <button
                     type="button"
                     onClick={() => handleAddProduct(pendingProductId)}
-                    disabled={!pendingProductId || addingProduct}
+                    disabled={!pendingProductId || addingProduct || (pendingNeedsVariant && pendingVariantIdx === null)}
                     className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-foreground text-background rounded-md font-body text-xs uppercase tracking-wider hover:bg-foreground/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
                   >
                     {addingProduct ? <DotCircleLoader size="sm" className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
@@ -2989,8 +3011,10 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                 </div>
                 <p className="font-body text-[10px] text-muted-foreground/70 mt-1.5">
                   Forgot a piece? Add it here without leaving the quote — quantity, price and PO can be edited above.
+                  {pendingNeedsVariant && " This piece has multiple sizes/finishes — pick one so the correct price and specs load."}
                 </p>
               </div>
+
 
               {/* Insurance bundling */}
               <div className="border-t border-border mt-2 pt-4">
