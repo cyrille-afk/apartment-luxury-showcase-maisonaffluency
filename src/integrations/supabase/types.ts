@@ -4988,6 +4988,8 @@ export type Database = {
           company_website: string | null
           country: string
           created_at: string
+          edit_completed_at: string | null
+          edit_completed_by_name: string | null
           edit_token_expires_at: string | null
           edit_token_hash: string | null
           id: string
@@ -5009,6 +5011,8 @@ export type Database = {
           company_website?: string | null
           country?: string
           created_at?: string
+          edit_completed_at?: string | null
+          edit_completed_by_name?: string | null
           edit_token_expires_at?: string | null
           edit_token_hash?: string | null
           id?: string
@@ -5030,6 +5034,8 @@ export type Database = {
           company_website?: string | null
           country?: string
           created_at?: string
+          edit_completed_at?: string | null
+          edit_completed_by_name?: string | null
           edit_token_expires_at?: string | null
           edit_token_hash?: string | null
           id?: string
