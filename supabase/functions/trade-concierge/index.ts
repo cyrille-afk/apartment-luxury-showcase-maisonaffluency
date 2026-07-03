@@ -4302,7 +4302,7 @@ serve(async (req) => {
                 },
                 preview,
               };
-              controller.enqueue(encoder.encode(`event: proposal\ndata: ${JSON.stringify(proposal)}\n\n`));
+              emitProposalWithRequirementsDiff(proposal, preview);
               console.log(`[concierge] emitted prepare_visualization_brief proposal: mode=${mode} preset=${stylePreset} picks=${pickIds.length}`);
               continue;
             }
