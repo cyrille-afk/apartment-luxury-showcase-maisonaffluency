@@ -734,6 +734,36 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   const pendingVariants = pendingProductId ? variantsByProduct[pendingProductId] : undefined;
   const pendingNeedsVariant = !!pendingVariants && pendingVariants.variants.length > 1;
 
+  // Load the swatch library for the pending product so the "size / finish"
+  // picker can show a swatch thumbnail beside each variant — matching the
+  // visual affordance in the curator's pick lightbox.
+  useEffect(() => {
+    let cancelled = false;
+    setPendingSwatchLib([]);
+    const pickId = pendingVariants?.pickId;
+    if (!pickId) return;
+    (async () => {
+      const { data } = await (supabase as any)
+        .from("product_fabric_swatches_public")
+        .select("fabric_id, name, image_url, sort_order, is_active")
+        .eq("pick_id", pickId)
+        .order("sort_order", { ascending: true });
+      if (cancelled || !data) return;
+      const lib = (data as any[])
+        .filter((r) => r && r.is_active !== false && r.image_url && r.name)
+        .map((r) => ({
+          fabric_id: r.fabric_id ?? null,
+          name: String(r.name),
+          image_url: String(r.image_url),
+          sort_order: r.sort_order ?? null,
+        }));
+      setPendingSwatchLib(lib);
+    })();
+    return () => { cancelled = true; };
+  }, [pendingVariants?.pickId]);
+
+
+
   const handleAddProduct = async (productId: string) => {
     if (!productId || addingProduct) return;
     // Force variant selection when the product has a multi-row matrix — this
