@@ -172,6 +172,16 @@ import { createBreaker } from "./_breaker.ts";
 const CB_FAILURE_THRESHOLD = Number(Deno.env.get("CB_FAILURE_THRESHOLD") ?? "3");
 const CB_COOLDOWN_MS = Number(Deno.env.get("CB_COOLDOWN_MS") ?? "60000");
 
+// Requirements-diff enforcement mode (see `_requirements_enforcement.ts` for
+// the precedence rules). "open" (default) surfaces violations without
+// blocking; "closed" swallows failing cards and emits `event: proposal_blocked`.
+import { resolveRequirementsEnforcement } from "./_requirements_enforcement.ts";
+const REQUIREMENTS_ENFORCEMENT: "open" | "closed" = resolveRequirementsEnforcement({
+  CONCIERGE_REQUIREMENTS_ENFORCEMENT: Deno.env.get("CONCIERGE_REQUIREMENTS_ENFORCEMENT"),
+  CONCIERGE_REQUIREMENTS_STRICT: Deno.env.get("CONCIERGE_REQUIREMENTS_STRICT"),
+});
+console.log(`[concierge] requirements enforcement: ${REQUIREMENTS_ENFORCEMENT}`);
+
 const breaker = createBreaker({
   threshold: CB_FAILURE_THRESHOLD,
   cooldownMs: CB_COOLDOWN_MS,
@@ -4001,6 +4011,7 @@ serve(async (req) => {
             proposal: Record<string, any>,
             previewRows: any[],
           ) => {
+            let validationFailed = false;
             try {
               const cardTool = String(proposal?.tool || "unknown");
               const gtOne = buildInspectorGroundTruth([
@@ -4014,14 +4025,17 @@ serve(async (req) => {
                 violations: v.violations,
                 total_items: v.total_items,
                 unmatched_ids: v.unmatched_ids,
+                enforcement: REQUIREMENTS_ENFORCEMENT,
               };
               if (!v.ok && capturedRequirements) {
+                validationFailed = true;
                 controller.enqueue(encoder.encode(
                   `event: requirements_validation\ndata: ${JSON.stringify({
                     request_id: requestId,
                     tool: cardTool,
                     tool_call_id: proposal?.tool_call_id || null,
                     ok: false,
+                    enforcement: REQUIREMENTS_ENFORCEMENT,
                     coverage: v.coverage,
                     violations: v.violations,
                     total_items: v.total_items,
@@ -4035,17 +4049,37 @@ serve(async (req) => {
                     tool: cardTool,
                     tool_call_id: proposal?.tool_call_id || null,
                     ok: false,
+                    enforcement: REQUIREMENTS_ENFORCEMENT,
                     violations: v.violations,
                     coverage: v.coverage,
                     total_items: v.total_items,
                     unmatched_ids: v.unmatched_ids,
                   }));
                 } catch { /* best-effort */ }
+
+                if (REQUIREMENTS_ENFORCEMENT === "closed") {
+                  // FAIL-CLOSED: swallow the card. Emit a `proposal_blocked`
+                  // frame so the UI can render a refusal + retry affordance.
+                  controller.enqueue(encoder.encode(
+                    `event: proposal_blocked\ndata: ${JSON.stringify({
+                      request_id: requestId,
+                      tool: cardTool,
+                      tool_call_id: proposal?.tool_call_id || null,
+                      reason: "requirements_violation",
+                      coverage: v.coverage,
+                      violations: v.violations,
+                    })}\n\n`,
+                  ));
+                  return;
+                }
               }
             } catch (e) {
-              // Fail-open: validator must never block a card emission.
-              console.warn("[concierge requirements-diff] failed, emitting card without validation:", e);
+              // Validator itself blew up — always fail-open regardless of
+              // enforcement mode. A broken validator must never take down
+              // real card emission.
+              console.warn("[concierge requirements-diff] validator threw, emitting card without validation:", e);
             }
+            void validationFailed;
             controller.enqueue(encoder.encode(`event: proposal\ndata: ${JSON.stringify(proposal)}\n\n`));
           };
 
