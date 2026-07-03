@@ -173,6 +173,13 @@ export interface QuotePdfArgs {
   forResaleNotice?: boolean;
   /** Resale certificate reference shown in the meta block (net_buy, US). */
   resaleCertNumber?: string | null;
+  /** FX snapshot used to convert source-currency line prices into the quote
+   *  currency. When provided, the PDF renders a compliance line under the
+   *  totals block: "FX applied {date} — EUR→SGD 1.4762, USD→SGD 1.34". */
+  fxSnapshot?: {
+    appliedAt: Date;
+    pairs: Array<{ src: string; tgt: string; rate: number; source?: string | null }>;
+  } | null;
 }
 
 
