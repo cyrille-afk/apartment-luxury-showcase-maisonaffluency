@@ -67,7 +67,7 @@ Deno.serve(async (req) => {
   const { data: app, error } = await admin
     .from("trade_applications")
     .select(
-      "id, status, edit_token_expires_at, company_name, company_website, job_title, city, country, is_certified_professional, certification_details, message"
+      "id, user_id, status, edit_token_expires_at, company_name, company_website, job_title, city, country, is_certified_professional, certification_details, message"
     )
     .eq("edit_token_hash", tokenHash)
     .maybeSingle();
@@ -82,7 +82,7 @@ Deno.serve(async (req) => {
   }
 
   if (action === "get") {
-    const { id: _id, edit_token_expires_at: _e, ...rest } = app as Record<string, unknown>;
+    const { id: _id, user_id: _u, edit_token_expires_at: _e, ...rest } = app as Record<string, unknown>;
     return json(200, { application: rest });
   }
 
@@ -94,6 +94,24 @@ Deno.serve(async (req) => {
   for (const key of EDITABLE_FIELDS) {
     if (key in patch) update[key] = (patch as Record<string, unknown>)[key];
   }
+
+  // Resolve the applicant's display name from their profile so admins see
+  // "Completed by [name]" on the card once they save.
+  let completedByName: string | null = null;
+  if (app.user_id) {
+    const { data: prof } = await admin
+      .from("profiles")
+      .select("first_name, last_name, email")
+      .eq("id", app.user_id)
+      .maybeSingle();
+    if (prof) {
+      const full = `${prof.first_name || ""} ${prof.last_name || ""}`.trim();
+      completedByName = full || prof.email || null;
+    }
+  }
+
+  update.edit_completed_at = new Date().toISOString();
+  update.edit_completed_by_name = completedByName;
 
   const { error: upErr } = await admin
     .from("trade_applications")

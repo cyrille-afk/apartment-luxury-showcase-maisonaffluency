@@ -241,6 +241,8 @@ interface Application {
   verification_checklist_sent_at: string | null;
   verification_checklist_sent_by: string | null;
   verification_checklist_sent_by_name: string | null;
+  edit_completed_at: string | null;
+  edit_completed_by_name: string | null;
   profiles?: { first_name: string; last_name: string; email: string } | null;
 }
 
@@ -622,6 +624,18 @@ function InstagramAuditCard() {
                       Checklist sent
                       {app.verification_checklist_sent_by_name ? ` by ${app.verification_checklist_sent_by_name}` : ""}
                       {" "}{new Date(app.verification_checklist_sent_at).toLocaleDateString()}
+                    </p>
+                  )}
+                  {app.edit_completed_at && (
+                    <p className="font-body text-[10px] text-primary mt-0.5">
+                      ✓ Completed
+                      {app.edit_completed_by_name ? ` by ${app.edit_completed_by_name}` : ""}
+                      {" on "}
+                      {new Date(app.edit_completed_at).toLocaleDateString(undefined, {
+                        year: "numeric",
+                        month: "short",
+                        day: "numeric",
+                      })}
                     </p>
                   )}
                 </div>
