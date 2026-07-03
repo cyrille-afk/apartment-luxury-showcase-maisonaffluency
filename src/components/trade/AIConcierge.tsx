@@ -1047,6 +1047,31 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
         lang,
         onDelta: upsertAssistant,
         onProposal: handleProposal,
+        onToolStart: (ev) => {
+          armStall();
+          setTimeline((prev) => {
+            // Guard against duplicates if the server re-emits (defensive).
+            if (
+              prev.some(
+                (t) =>
+                  t.kind === "pending_proposal" &&
+                  ((ev.tool_call_id && t.toolCallId === ev.tool_call_id) ||
+                    (!ev.tool_call_id && t.tool === ev.tool && t.index === ev.index)),
+              )
+            ) {
+              return prev;
+            }
+            return [
+              ...prev,
+              {
+                kind: "pending_proposal",
+                tool: ev.tool,
+                toolCallId: ev.tool_call_id,
+                index: ev.index,
+              },
+            ];
+          });
+        },
         onRequestId: (rid) => {
           setLastRequestId(rid);
           setLastInspectorCount(0);
