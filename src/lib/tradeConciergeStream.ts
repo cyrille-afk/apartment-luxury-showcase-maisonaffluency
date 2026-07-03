@@ -267,6 +267,13 @@ export async function streamConcierge({
   let streamDone = false;
   let currentEvent: string | null = null;
 
+  // Notify the caller immediately with the client-minted id so the UI can
+  // render the correlation chip even before the server's `event: request_id`
+  // frame arrives. The server will echo this exact value.
+  if (onRequestId) {
+    try { onRequestId(clientRequestId); } catch { /* ignore */ }
+  }
+
   const handleDataPayload = (jsonStr: string) => {
     if (jsonStr === "[DONE]") {
       streamDone = true;
@@ -274,6 +281,15 @@ export async function streamConcierge({
     }
     try {
       const parsed = JSON.parse(jsonStr);
+      if (currentEvent === "request_id") {
+        const rid = (parsed as { request_id?: string })?.request_id;
+        if (typeof rid === "string" && onRequestId) onRequestId(rid);
+        return;
+      }
+      if (currentEvent === "inspector") {
+        if (onInspector) onInspector(parsed as InspectorEvent);
+        return;
+      }
       if (currentEvent === "proposal") {
         if (onProposal) onProposal(parsed as ConciergeProposal);
         return;
