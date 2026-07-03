@@ -116,12 +116,22 @@ async function installConciergeStub(page: Page) {
 }
 
 async function openConciergeAndSend(page: Page, prompt: string) {
-  // The `/concierge` page auto-opens the panel ~600ms after mount. Wait for
-  // the composer textarea to become interactable before typing.
-  const textarea = page.locator('textarea').filter({ hasNot: page.locator('[aria-hidden="true"]') }).last();
-  await expect(textarea).toBeVisible({ timeout: 15_000 });
-  await textarea.fill(prompt);
-  await page.getByRole("button", { name: "Send", exact: true }).click();
+  // The `/concierge` page auto-opens the panel ~600ms after mount. If for any
+  // reason it hasn't opened yet, clicking the visible CTA also works — do
+  // both so the test isn't racy against the auto-open timeout.
+  const openCta = page.getByRole("button", { name: /Speak with the Concierge/i });
+  if (await openCta.isVisible().catch(() => false)) {
+    await openCta.click().catch(() => {});
+  }
+  // The Send button is the only reliable, unique concierge-composer marker
+  // (the page also contains a hidden ContactInquiry <textarea>, which would
+  // otherwise be matched by a plain `page.locator('textarea')`).
+  const send = page.getByRole("button", { name: "Send", exact: true });
+  await expect(send).toBeVisible({ timeout: 15_000 });
+  const composer = send.locator("xpath=preceding::textarea[1]");
+  await expect(composer).toBeVisible();
+  await composer.fill(prompt);
+  await send.click();
 }
 
 test.describe("AI concierge — Generative UI skeleton", () => {
