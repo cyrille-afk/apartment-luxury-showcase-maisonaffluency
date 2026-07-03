@@ -101,14 +101,15 @@ const ConciergePage: React.FC = () => {
 
   const canonical = "https://maisonaffluency.com/concierge";
 
-  // While auth resolves, render nothing to avoid flashing content.
-  if (authLoading) return null;
+  // While the very first auth check resolves, render nothing.
+  if (authLoading && !authorized) return null;
 
-  // Unauthenticated → bounce to landing page. The toast is fired by the
-  // effect above so it survives the redirect.
-  if (!user) {
+  // Unauthenticated (and never was) → bounce to landing page. The toast is
+  // fired by the effect above so it survives the redirect.
+  if (!user && !authorized) {
     return <Navigate to="/" replace />;
   }
+
 
 
   return (
