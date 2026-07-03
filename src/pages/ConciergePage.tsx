@@ -95,63 +95,15 @@ const ConciergePage: React.FC = () => {
 
   const canonical = "https://maisonaffluency.com/concierge";
 
-  if (!granted) {
-    const submit = (e: React.FormEvent) => {
-      e.preventDefault();
-      setAttempted(true);
-      if (codeInput.trim() === CONCIERGE_ACCESS_CODE) {
-        try { sessionStorage.setItem(ACCESS_STORAGE_KEY, CONCIERGE_ACCESS_CODE); } catch {}
-        setGranted(true);
-      }
-    };
-    return (
-      <>
-        <Helmet>
-          <title>Not Found · Maison Affluency</title>
-          <meta name="robots" content="noindex, nofollow" />
-        </Helmet>
-        <div className="min-h-screen bg-background text-foreground flex flex-col items-center justify-center px-6">
-          <div className="max-w-sm w-full text-center">
-            <p className="font-body text-[10px] uppercase tracking-[0.3em] text-[hsl(var(--gold))] mb-6">
-              Private
-            </p>
-            <h1 className="font-display text-2xl md:text-3xl leading-tight mb-3">
-              By invitation only
-            </h1>
-            <p className="font-body text-sm text-muted-foreground mb-8">
-              Enter your access code to continue.
-            </p>
-            <form onSubmit={submit} className="flex flex-col gap-3">
-              <input
-                type="password"
-                autoFocus
-                value={codeInput}
-                onChange={(e) => setCodeInput(e.target.value)}
-                placeholder="Access code"
-                className="w-full bg-card/60 border border-border/60 rounded-sm px-4 py-2.5 font-body text-sm text-foreground text-center tracking-widest focus:outline-none focus:border-[hsl(var(--gold))]"
-              />
-              <button
-                type="submit"
-                className="w-full rounded-full bg-foreground text-background px-5 py-2.5 font-body text-[11px] uppercase tracking-[0.2em] hover:opacity-90 transition-opacity"
-              >
-                Enter
-              </button>
-              {attempted && codeInput.trim() !== CONCIERGE_ACCESS_CODE && (
-                <p className="font-body text-xs text-red-500/80 mt-1">
-                  Invalid code.
-                </p>
-              )}
-            </form>
-            <p className="font-body text-[11px] text-muted-foreground mt-8">
-              <Link to="/contact" className="underline underline-offset-2 hover:text-foreground">
-                Request access
-              </Link>
-            </p>
-          </div>
-        </div>
-      </>
-    );
+  // While auth resolves, render nothing to avoid flashing content.
+  if (authLoading) return null;
+
+  // Unauthenticated → bounce to landing page. The toast is fired by the
+  // effect above so it survives the redirect.
+  if (!user) {
+    return <Navigate to="/" replace />;
   }
+
 
   return (
     <>
