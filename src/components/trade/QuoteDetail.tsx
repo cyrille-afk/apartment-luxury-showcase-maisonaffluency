@@ -3219,6 +3219,40 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                             </span>
                           </div>
 
+                          {/* FX audit — mirrors the compliance note printed on the PDF */}
+                          {fxPairs.length > 0 && (
+                            <div className="mt-3 pt-2 border-t border-dashed border-border/60 space-y-1">
+                              <div className="flex items-center justify-between gap-2">
+                                <span className="font-body text-[10px] uppercase tracking-wider text-muted-foreground">
+                                  FX applied
+                                </span>
+                                {fxAppliedAt && (
+                                  <span className="font-body text-[10px] text-muted-foreground tabular-nums">
+                                    {fxAppliedAt.toLocaleString(undefined, {
+                                      year: "numeric", month: "short", day: "2-digit",
+                                      hour: "2-digit", minute: "2-digit", timeZoneName: "short",
+                                    })}
+                                  </span>
+                                )}
+                              </div>
+                              <ul className="space-y-0.5">
+                                {fxPairs.map((p) => (
+                                  <li
+                                    key={`${p.src}_${p.tgt}`}
+                                    className="flex items-center justify-between gap-2 font-mono text-[10px] text-muted-foreground"
+                                  >
+                                    <span>1 {p.src} = {p.rate.toLocaleString(undefined, { minimumFractionDigits: 4, maximumFractionDigits: 4 })} {p.tgt}</span>
+                                    <span className="italic">{describeFxSource(p.source).label}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                              <p className="font-body text-[9px] leading-snug text-muted-foreground/70 italic">
+                                Rates snapshot at time of viewing. Final invoice uses the rate on the invoice date.
+                              </p>
+                            </div>
+                          )}
+
+
                           {/* 60/40 deposit/balance breakdown — shown when priced or later */}
                           {(isPriced || isConfirmed) && total > 0 && (
                             <div className="mt-3 pt-3 border-t border-dashed border-border space-y-1.5">
