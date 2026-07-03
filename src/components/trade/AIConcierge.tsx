@@ -1835,6 +1835,39 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
           </div>
 
           <div className="border-t border-border p-3">
+            {/* Correlation-id chip — copy-to-clipboard trace id for the
+                current concierge turn. Matches the server's SSE `event: request_id`
+                and every `concierge_inspector` log line for this run. */}
+            {lastRequestId && (
+              <div className="mb-2 flex items-center gap-1.5 text-[10px] text-muted-foreground">
+                <button
+                  type="button"
+                  onClick={async () => {
+                    try {
+                      await navigator.clipboard.writeText(lastRequestId);
+                      setReqIdCopied(true);
+                      setTimeout(() => setReqIdCopied(false), 1400);
+                    } catch { /* ignore */ }
+                  }}
+                  className="inline-flex items-center gap-1 rounded-md border border-border bg-muted/40 px-1.5 py-0.5 font-mono hover:bg-muted transition-colors"
+                  title="Copy request_id — paste into server logs to trace this run"
+                  aria-label={`Copy request id ${lastRequestId}`}
+                >
+                  <span className="opacity-70">id</span>
+                  <span className="tabular-nums">{lastRequestId.slice(0, 8)}</span>
+                  {reqIdCopied ? <Check className="h-2.5 w-2.5 text-emerald-600" /> : <Copy className="h-2.5 w-2.5" />}
+                </button>
+                {lastInspectorCount > 0 && (
+                  <span
+                    className="inline-flex items-center gap-1 rounded-md border border-border bg-muted/40 px-1.5 py-0.5"
+                    title={`Inspector Agent ran ${lastInspectorCount} time${lastInspectorCount === 1 ? "" : "s"} this turn`}
+                  >
+                    <ShieldCheck className="h-2.5 w-2.5" />
+                    inspector×{lastInspectorCount}
+                  </span>
+                )}
+              </div>
+            )}
             {attachments.length > 0 && (
               <div className="flex flex-wrap gap-2 mb-2">
                 {attachments.map((a) => (
