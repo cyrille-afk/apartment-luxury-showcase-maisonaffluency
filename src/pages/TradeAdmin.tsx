@@ -739,7 +739,7 @@ function InstagramAuditCard() {
                   console.error("[send-checklist]", e);
                   toast({
                     title: "Send failed",
-                    description: e?.message || "Could not send the checklist. Try the mail client instead.",
+                    description: e?.message || "Could not send the checklist. Please try again.",
                     variant: "destructive",
                   });
                 } finally {
