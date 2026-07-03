@@ -444,10 +444,43 @@ function InstagramAuditCard() {
                   {app.message && (
                     <p className="font-body text-xs text-muted-foreground mt-2 italic">"{app.message}"</p>
                   )}
+                  {(() => {
+                    const signals = computeSignals(app);
+                    const warnCount = signals.filter((s) => s.kind === "warn").length;
+                    return (
+                      <div
+                        className="mt-3 flex flex-wrap items-center gap-1.5"
+                        aria-label={`Verification signals: ${warnCount} to review`}
+                      >
+                        <span className="font-body text-[10px] uppercase tracking-wider text-muted-foreground/70 mr-1">
+                          Signals
+                        </span>
+                        {signals.map((s, i) => (
+                          <span
+                            key={i}
+                            title={s.hint}
+                            className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 font-body text-[10px] ${
+                              s.kind === "warn"
+                                ? "border-warning/40 bg-warning/10 text-warning"
+                                : "border-success/40 bg-success/10 text-success"
+                            }`}
+                          >
+                            {s.kind === "warn" ? (
+                              <AlertTriangle className="h-3 w-3" />
+                            ) : (
+                              <ShieldCheck className="h-3 w-3" />
+                            )}
+                            {s.label}
+                          </span>
+                        ))}
+                      </div>
+                    );
+                  })()}
                   <p className="font-body text-[10px] text-muted-foreground/60 mt-2">
                     Applied {new Date(app.created_at).toLocaleDateString()}
                   </p>
                 </div>
+
 
                 {app.status === "pending" && isSuperAdmin && (
                   <div className="flex gap-2 shrink-0">
