@@ -9,7 +9,13 @@
 export async function readConciergeStream(
   resp: Response,
   opts: { timeoutMs?: number } = {},
-): Promise<{ text: string; proposals: unknown[]; escalations: unknown[] }> {
+): Promise<{
+  text: string;
+  proposals: unknown[];
+  escalations: unknown[];
+  requestIds: string[];
+  inspectorEvents: Array<{ ok?: boolean; corrections?: unknown[]; ms?: number; request_id?: string }>;
+}> {
   if (!resp.body) return { text: "", proposals: [], escalations: [] };
   const timeoutMs = opts.timeoutMs ?? 45_000;
   const reader = resp.body.getReader();
