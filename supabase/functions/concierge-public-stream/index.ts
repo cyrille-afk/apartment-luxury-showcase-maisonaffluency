@@ -153,6 +153,30 @@ serve(async (req) => {
     });
   }
 
+  // Require an authenticated Maison Affluency member. The /concierge page is
+  // members-only client-side; enforce the same rule server-side so the endpoint
+  // cannot be hit directly by anonymous or spoofed clients.
+  const authHeader = req.headers.get("Authorization") || "";
+  const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
+  if (!token) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+  try {
+    const { data, error } = await sb.auth.getClaims(token);
+    const sub = (data?.claims as { sub?: string } | null | undefined)?.sub;
+    if (error || !sub) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+  } catch {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
   // Rate limit by IP (60/hr), by client-supplied session id (15/hr),
   // and a global cap (2000/hr across all visitors) so the bill stays bounded.
   const globalRl = await rateLimit("pub-global", 2000, 3600);
