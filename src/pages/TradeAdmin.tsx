@@ -520,8 +520,8 @@ function InstagramAuditCard() {
                     <p className="font-body text-xs text-muted-foreground mt-2 italic">"{app.message}"</p>
                   )}
                   {(() => {
-                    const signals = computeSignals(app);
                     const warnCount = signals.filter((s) => s.kind === "warn").length;
+
                     return (
                       <div
                         className="mt-3 flex flex-wrap items-center gap-1.5"
