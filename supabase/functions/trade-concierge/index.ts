@@ -3938,16 +3938,18 @@ serve(async (req) => {
           controller.enqueue(encoder.encode(`event: escalation\ndata: ${JSON.stringify(payload)}\n\n`));
         }
         const flushProposal = async () => {
-          // Deterministic ordering: tearsheets ALWAYS flush before quotes so a
-          // chained turn renders as [tearsheet card → quote card] regardless of
-          // the index the model chose for each tool call.
+          // Deterministic ordering: requirements FIRST (so the client can show
+          // the parsed brief immediately), then tearsheets, then quotes, etc.
+          // The Inspector Agent later diffs card contents against the emitted
+          // requirements payload from this same turn.
           const allBuffers = Array.from(toolCallBuffers.values());
+          const requirementsBuffers = allBuffers.filter((b) => b.name === "extract_requirements");
           const tearsheetBuffers = allBuffers.filter((b) => b.name === "propose_tearsheet" || b.name === "add_to_tearsheet");
           const quoteBuffers = allBuffers.filter((b) => b.name === "draft_quote" || b.name === "add_to_quote");
           const ffeBuffers = allBuffers.filter((b) => b.name === "propose_ffe_rows");
           const shippingBuffers = allBuffers.filter((b) => b.name === "estimate_shipping");
           const vizBriefBuffers = allBuffers.filter((b) => b.name === "prepare_visualization_brief");
-          const orderedBuffers = [...tearsheetBuffers, ...quoteBuffers, ...ffeBuffers, ...shippingBuffers, ...vizBriefBuffers];
+          const orderedBuffers = [...requirementsBuffers, ...tearsheetBuffers, ...quoteBuffers, ...ffeBuffers, ...shippingBuffers, ...vizBriefBuffers];
           const firstTearsheetPicks = (() => {
             for (const b of tearsheetBuffers) {
               try {
