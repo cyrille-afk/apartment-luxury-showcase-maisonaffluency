@@ -284,4 +284,33 @@ test.describe("AI concierge — Generative UI skeleton", () => {
     //    either — belt-and-braces against a stray render slipping through.
     await expect(page.getByText(/Matches brief/i)).toHaveCount(0);
   });
+
+  test("clears the skeleton and renders NO card when a mixed-currency budget_currency_mismatch blocks the proposal", async ({ page }) => {
+    await page.goto("/concierge?__pw_mock=blocked_currency");
+    await openConciergeAndSend(
+      page,
+      "propose a 10k EUR tearsheet for a Milan pied-à-terre",
+    );
+
+    // 1. Skeleton still appears — the tool call did start streaming before
+    //    the Inspector realised the assembled items are priced in mixed
+    //    non-EUR currencies.
+    const skeleton = page.getByRole("status", { name: /Curating a tearsheet/i });
+    await expect(skeleton).toBeVisible({ timeout: 5_000 });
+
+    // 2. `proposal_blocked` arrives with a `budget_currency_mismatch` (plus a
+    //    co-firing `budget_over`) and NO `proposal` frame ever follows. The
+    //    client must clear the pending placeholder on `onDone`.
+    await expect(skeleton).toHaveCount(0, { timeout: 5_000 });
+
+    // 3. Critical negative assertion — no tearsheet card was promoted from
+    //    the skeleton. Rendering an unconverted mixed-currency sum would be
+    //    a trust-breaking bug for the trade user, so this must never happen.
+    await expect(
+      page.getByText("✦ Concierge proposes a new tearsheet", { exact: false }),
+    ).toHaveCount(0);
+
+    // 4. And the requirements-ok badge from the success path must not render.
+    await expect(page.getByText(/Matches brief/i)).toHaveCount(0);
+  });
 });
