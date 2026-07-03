@@ -3078,7 +3078,16 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                         ))}
                       </select>
                       {/* Swatch preview for the selected variant — mirrors the curator lightbox affordance. */}
-                      {pendingVariantIdx !== null && pendingSwatchLib.length > 0 && (() => {
+                      {pendingVariantIdx !== null && (() => {
+                        if (pendingSwatchLoading) {
+                          return (
+                            <div className="mt-2 flex items-center gap-2 text-muted-foreground">
+                              <DotCircleLoader size="sm" />
+                              <span className="font-body text-[10px] italic">Loading swatches…</span>
+                            </div>
+                          );
+                        }
+                        if (pendingSwatchLib.length === 0) return null;
                         const label = pendingVariants!.variants[pendingVariantIdx]?.label || "";
                         const matched = findQuoteFinishSwatches(label, pendingSwatchLib);
                         return (
