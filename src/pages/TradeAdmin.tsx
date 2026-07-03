@@ -55,7 +55,9 @@ function buildChecklist(app: Application, signals: Signal[]): {
     `Hello ${firstName},\n\n` +
     `Thank you for applying to Maison Affluency Trade. To finish verifying you as a professional, could you send us the following:\n\n` +
     `${bulletList}\n\n` +
-    `Once we have this we can activate your trade access. Just reply to this email.\n\n` +
+    `[ Complete your application ]  ← secure one-time link, expires in 14 days\n` +
+    `(A unique URL is generated when you click Send — the recipient can update their existing application without re-applying.)\n\n` +
+    `Prefer email? Just reply to this message.\n\n` +
     `With thanks,\nMaison Affluency Trade Team`;
   return { to: email, firstName, subject, body, items };
 }
