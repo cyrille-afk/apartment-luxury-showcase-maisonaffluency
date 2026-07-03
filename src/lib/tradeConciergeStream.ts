@@ -100,6 +100,7 @@ export type DraftQuoteProposal = {
     lines: QuoteLine[];
   };
   preview: QuoteLinePreview[];
+  requirements_validation?: RequirementsValidation;
 };
 
 export type AddToQuoteProposal = {
