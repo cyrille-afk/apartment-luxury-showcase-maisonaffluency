@@ -992,6 +992,14 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
         lang,
         onDelta: upsertAssistant,
         onProposal: handleProposal,
+        onRequestId: (rid) => {
+          setLastRequestId(rid);
+          setLastInspectorCount(0);
+          setReqIdCopied(false);
+        },
+        onInspector: () => {
+          setLastInspectorCount((n) => n + 1);
+        },
         onEscalation: (ev) => {
           armStall();
           setTimeline((prev) => [
