@@ -22,10 +22,9 @@ import { Link } from "react-router-dom";
 import { Instagram, FileBox, Sparkles, Inbox, FileSpreadsheet, MapPin, AlertTriangle, ShieldCheck, Mail } from "lucide-react";
 
 /**
- * Build a mailto: link that sends the applicant a personalised checklist of
- * what they need to add for us to verify them as a trade professional.
- * The checklist items are derived from the warn signals surfaced on the card
- * so reviewers can request exactly what's missing in one click.
+ * Build a previewable verification checklist for the applicant. The items are
+ * derived from the warn signals surfaced on the card so reviewers can request
+ * exactly what's missing in one click and send it directly from the app.
  */
 function buildChecklist(app: Application, signals: Signal[]): {
   to: string;
@@ -61,9 +60,6 @@ function buildChecklist(app: Application, signals: Signal[]): {
   return { to: email, firstName, subject, body, items };
 }
 
-function checklistMailto(c: { to: string; subject: string; body: string }): string {
-  return `mailto:${encodeURIComponent(c.to)}?subject=${encodeURIComponent(c.subject)}&body=${encodeURIComponent(c.body)}`;
-}
 
 // Free-email domains that don't tell us anything about the applicant's firm.
 // A personal address on a trade application isn't disqualifying on its own,
@@ -688,7 +684,7 @@ function InstagramAuditCard() {
           <AlertDialogHeader>
             <AlertDialogTitle className="font-display">Verification checklist preview</AlertDialogTitle>
             <AlertDialogDescription className="font-body text-xs">
-              Review before opening in your mail client. You can still edit the message there before sending.
+              Review before sending. The checklist is delivered directly from the app.
             </AlertDialogDescription>
           </AlertDialogHeader>
           {checklistPreview && (
@@ -711,19 +707,6 @@ function InstagramAuditCard() {
           )}
           <AlertDialogFooter>
             <AlertDialogCancel className="font-body text-xs" disabled={sendingChecklist}>Cancel</AlertDialogCancel>
-            <button
-              type="button"
-              className="inline-flex h-9 items-center justify-center rounded-md border border-input bg-background px-3 font-body text-xs shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground disabled:pointer-events-none disabled:opacity-50"
-              disabled={sendingChecklist}
-              onClick={() => {
-                if (checklistPreview) {
-                  window.location.href = checklistMailto(checklistPreview);
-                }
-                setChecklistPreview(null);
-              }}
-            >
-              Open in mail client
-            </button>
             <button
               type="button"
               className="inline-flex h-9 items-center justify-center rounded-md bg-primary px-4 font-body text-xs text-primary-foreground shadow hover:bg-primary/90 disabled:pointer-events-none disabled:opacity-50"
@@ -756,7 +739,7 @@ function InstagramAuditCard() {
                   console.error("[send-checklist]", e);
                   toast({
                     title: "Send failed",
-                    description: e?.message || "Could not send the checklist. Try the mail client instead.",
+                    description: e?.message || "Could not send the checklist. Please try again.",
                     variant: "destructive",
                   });
                 } finally {
