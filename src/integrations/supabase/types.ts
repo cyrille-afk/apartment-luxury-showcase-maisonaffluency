@@ -4988,6 +4988,8 @@ export type Database = {
           company_website: string | null
           country: string
           created_at: string
+          edit_token: string | null
+          edit_token_expires_at: string | null
           id: string
           is_certified_professional: boolean
           job_title: string
@@ -5007,6 +5009,8 @@ export type Database = {
           company_website?: string | null
           country?: string
           created_at?: string
+          edit_token?: string | null
+          edit_token_expires_at?: string | null
           id?: string
           is_certified_professional?: boolean
           job_title?: string
@@ -5026,6 +5030,8 @@ export type Database = {
           company_website?: string | null
           country?: string
           created_at?: string
+          edit_token?: string | null
+          edit_token_expires_at?: string | null
           id?: string
           is_certified_professional?: boolean
           job_title?: string

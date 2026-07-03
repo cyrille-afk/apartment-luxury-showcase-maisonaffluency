@@ -1,0 +1,100 @@
+import { createClient } from "npm:@supabase/supabase-js@2";
+import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
+import { z } from "npm:zod@3.23.8";
+
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+
+const EDITABLE_FIELDS = [
+  "company_name",
+  "company_website",
+  "job_title",
+  "city",
+  "country",
+  "is_certified_professional",
+  "certification_details",
+  "message",
+] as const;
+
+const patchSchema = z.object({
+  company_name: z.string().trim().min(1).max(200).optional(),
+  company_website: z.string().trim().max(500).optional().or(z.literal("")),
+  job_title: z.string().trim().min(1).max(150).optional(),
+  city: z.string().trim().max(100).optional().or(z.literal("")),
+  country: z.string().trim().max(100).optional(),
+  is_certified_professional: z.boolean().optional(),
+  certification_details: z.string().trim().max(300).optional().or(z.literal("")),
+  message: z.string().trim().max(2000).optional().or(z.literal("")),
+});
+
+const bodySchema = z.object({
+  action: z.enum(["get", "update"]),
+  token: z.string().min(10).max(200),
+  patch: patchSchema.optional(),
+});
+
+const admin = createClient(SUPABASE_URL, SERVICE_ROLE, {
+  auth: { persistSession: false },
+});
+
+function json(status: number, body: unknown) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
+}
+
+Deno.serve(async (req) => {
+  if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+  if (req.method !== "POST") return json(405, { error: "method_not_allowed" });
+
+  let parsed;
+  try {
+    parsed = bodySchema.safeParse(await req.json());
+  } catch {
+    return json(400, { error: "invalid_json" });
+  }
+  if (!parsed.success) return json(400, { error: parsed.error.flatten() });
+
+  const { action, token, patch } = parsed.data;
+
+  const { data: app, error } = await admin
+    .from("trade_applications")
+    .select(
+      "id, status, edit_token_expires_at, company_name, company_website, job_title, city, country, is_certified_professional, certification_details, message"
+    )
+    .eq("edit_token", token)
+    .maybeSingle();
+
+  if (error) return json(500, { error: "lookup_failed" });
+  if (!app) return json(404, { error: "invalid_token" });
+  if (app.edit_token_expires_at && new Date(app.edit_token_expires_at) < new Date()) {
+    return json(410, { error: "expired" });
+  }
+  if (app.status === "approved" || app.status === "rejected") {
+    return json(409, { error: "already_reviewed", status: app.status });
+  }
+
+  if (action === "get") {
+    const { id: _id, edit_token_expires_at: _e, ...rest } = app as Record<string, unknown>;
+    return json(200, { application: rest });
+  }
+
+  if (!patch || Object.keys(patch).length === 0) {
+    return json(400, { error: "empty_patch" });
+  }
+
+  const update: Record<string, unknown> = {};
+  for (const key of EDITABLE_FIELDS) {
+    if (key in patch) update[key] = (patch as Record<string, unknown>)[key];
+  }
+
+  const { error: upErr } = await admin
+    .from("trade_applications")
+    .update(update)
+    .eq("id", app.id);
+
+  if (upErr) return json(500, { error: "update_failed", detail: upErr.message });
+
+  return json(200, { success: true });
+});
