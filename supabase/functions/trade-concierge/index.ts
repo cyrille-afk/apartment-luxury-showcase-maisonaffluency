@@ -5433,6 +5433,29 @@ serve(async (req) => {
               const proseText = assistantTextBuf.trim();
               if (groundTruthCards.length && proseText.length > 0) {
                 const gt = buildInspectorGroundTruth(groundTruthCards);
+                // Validate the assembled card against the extracted
+                // Requirements slots BEFORE running the LLM prose pass — this
+                // is a pure/deterministic check so we can surface undercount
+                // violations even if the inspector LLM times out.
+                const reqValidation = validateRequirementsCoverage(
+                  capturedRequirements as any,
+                  gt,
+                );
+                if (!reqValidation.ok) {
+                  controller.enqueue(encoder.encode(`event: requirements_validation\ndata: ${JSON.stringify({ request_id: requestId, ok: false, violations: reqValidation.violations, coverage: reqValidation.coverage })}\n\n`));
+                  try {
+                    console.log(JSON.stringify({
+                      tag: "concierge_requirements_validation",
+                      request_id: requestId,
+                      ts: new Date().toISOString(),
+                      ok: false,
+                      violations: reqValidation.violations,
+                      coverage: reqValidation.coverage,
+                      total_items: reqValidation.total_items,
+                      unmatched_ids: reqValidation.unmatched_ids,
+                    }));
+                  } catch { /* best-effort */ }
+                }
                 const inspector = await runInspectorPass({
                   prose: proseText,
                   groundTruth: gt,
@@ -5447,10 +5470,11 @@ serve(async (req) => {
                   originalProse: proseText,
                   result: inspector,
                   groundTruth: gt,
+                  requirements: capturedRequirements as any,
+                  requirementsValidation: reqValidation,
                 }));
-                if (inspector.corrections.length > 0) {
-                  // Surface to the client so the UI can badge / log
-                  controller.enqueue(encoder.encode(`event: inspector\ndata: ${JSON.stringify({ ok: inspector.ok, corrections: inspector.corrections, ms: inspector.ms, request_id: requestId })}\n\n`));
+                if (inspector.corrections.length > 0 || !reqValidation.ok) {
+                  controller.enqueue(encoder.encode(`event: inspector\ndata: ${JSON.stringify({ ok: inspector.ok && reqValidation.ok, corrections: inspector.corrections, ms: inspector.ms, request_id: requestId, requirements_ok: reqValidation.ok, slot_violations: reqValidation.violations })}\n\n`));
                 }
                 // Flush the (possibly rewritten) prose as ONE synthetic delta.
                 if (finalProse) {
