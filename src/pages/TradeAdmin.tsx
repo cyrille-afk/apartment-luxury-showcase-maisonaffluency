@@ -252,6 +252,13 @@ const TradeAdmin = () => {
   const [fetching, setFetching] = useState(true);
   const [filter, setFilter] = useState<"pending" | "approved" | "rejected" | "all">("pending");
   const [confirmDialog, setConfirmDialog] = useState<{ app: Application; action: "approved" | "rejected" } | null>(null);
+  const [checklistPreview, setChecklistPreview] = useState<{
+    app: Application;
+    to: string;
+    subject: string;
+    body: string;
+    items: string[];
+  } | null>(null);
 
 function InstagramAuditCard() {
   const { data: missingCount = 0 } = useQuery({
