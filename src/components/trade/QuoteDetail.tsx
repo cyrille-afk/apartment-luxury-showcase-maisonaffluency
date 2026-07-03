@@ -479,7 +479,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
       // Always include quote→target so the badge reflects the display
       // conversion itself even when every line is already in `currency`.
       if (displayCcy === "gbp" && currency !== "GBP") sourceCurrencies.add(currency);
-      if (sourceCurrencies.size === 0) { setFxRates({}); setFxSource("identity"); setFxPairs([]); return; }
+      if (sourceCurrencies.size === 0) { setFxRates({}); setFxSource("identity"); setFxPairs([]); setFxAppliedAt(null); return; }
       const pairs = Array.from(sourceCurrencies).map((src) => ({ src, tgt: targetCcy }));
       const rates = await getFxRates(pairs);
       setFxRates(rates);
@@ -492,6 +492,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
           source: getFxSource(p.src, p.tgt),
         })),
       );
+      setFxAppliedAt(new Date());
 
     };
     if (items.length > 0) fetchRates();
