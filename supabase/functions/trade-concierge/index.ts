@@ -3821,6 +3821,10 @@ serve(async (req) => {
           }
         };
 
+        // Emit the trace id first so the client can correlate this stream
+        // with server-side Inspector logs (same request_id).
+        controller.enqueue(encoder.encode(`event: request_id\ndata: ${JSON.stringify({ request_id: requestId })}\n\n`));
+
         // Emit escalation event up-front when the classifier flagged it.
         if (sentiment.escalate) {
           const payload = {
@@ -3828,6 +3832,7 @@ serve(async (req) => {
             intent: sentiment.intent,
             user_id: userId,
             excerpt: messages.slice(-4),
+            request_id: requestId,
           };
           controller.enqueue(encoder.encode(`event: escalation\ndata: ${JSON.stringify(payload)}\n\n`));
         }
