@@ -967,9 +967,10 @@ function drawTable(
     doc.setTextColor(FG[0], FG[1], FG[2]);
     doc.text(String(line.quantity), xQty + colQty / 2, y + 20, { align: "center" });
     {
-      const unitCcy = line.sourceCurrency || args.currency;
-      const unitCents = line.sourceUnitPriceCents ?? line.unitPriceCents;
-      doc.text(fmtMoney(unitCents, unitCcy), xUnit + colUnit - 4, y + 20, { align: "right" });
+      // Always render the unit price in the quote's display currency so a
+      // single-currency quote stays single-currency. The source-currency
+      // audit figure is intentionally omitted from the customer PDF.
+      doc.text(fmtMoney(line.unitPriceCents, args.currency), xUnit + colUnit - 4, y + 20, { align: "right" });
     }
     doc.setFont("helvetica", "bold");
     doc.text(fmtMoney(line.lineTotalCents, args.currency), rowRight - 4, y + 20, { align: "right" });
