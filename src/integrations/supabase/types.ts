@@ -6716,13 +6716,20 @@ export type Database = {
         Args: { match_count?: number; query_embedding: string }
         Returns: {
           category: string
+          currency: string
+          default_ship_mode: string
           designer: string
           id: string
+          lead_time: string
           materials: string
+          origin: string
+          price_prefix: string
           similarity: number
           source: string
+          stock_status: string
           subcategory: string
           title: string
+          trade_price_cents: number
         }[]
       }
       match_semantic_cache: {
