@@ -8,6 +8,7 @@ import { TearsheetProposalCard } from "@/components/trade/concierge/TearsheetPro
 import { QuoteProposalCard } from "@/components/trade/concierge/QuoteProposalCard";
 import { FfeProposalCard } from "@/components/trade/concierge/FfeProposalCard";
 import { VisualizationBriefCard, VIZ_BRIEF_INCOMING_KEY } from "@/components/trade/concierge/VisualizationBriefCard";
+import { PendingProposalSkeleton } from "@/components/trade/concierge/PendingProposalSkeleton";
 import { EscalationCard } from "@/components/trade/concierge/EscalationCard";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
