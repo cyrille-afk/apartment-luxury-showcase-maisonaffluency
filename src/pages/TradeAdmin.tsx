@@ -475,8 +475,16 @@ function InstagramAuditCard() {
 
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-3 mb-1">
+                  <div className="flex items-center flex-wrap gap-2 mb-1">
                     <h3 className="font-display text-base text-foreground">{app.company_name}</h3>
+                    <span
+                      title={pro.hint}
+                      aria-label={`Professional status: ${pro.label}`}
+                      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-body uppercase tracking-wider border ${proStyles[pro.status]}`}
+                    >
+                      <ProIcon className="h-3 w-3" />
+                      {pro.label}
+                    </span>
                     <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-body uppercase tracking-wider ${
                       app.status === "pending" ? "bg-warning/10 text-warning" :
                       app.status === "approved" ? "bg-success/10 text-success" :
@@ -488,6 +496,7 @@ function InstagramAuditCard() {
                       {app.status}
                     </span>
                   </div>
+
                   {app.profiles && (
                     <p className="font-body text-xs text-muted-foreground mb-2">
                       {app.profiles.first_name} {app.profiles.last_name} · <a href={`mailto:${app.profiles.email}`} className="text-foreground hover:underline">{app.profiles.email}</a>
