@@ -283,3 +283,154 @@ Deno.test("Inspector — clamps oversize corrections + preserves shape", async (
     }
   } finally { restoreFetch(); }
 });
+
+// ---------- structured log tests --------------------------------------
+//
+// Contract: for every Inspector run tied to a card (or set of cards), the
+// edge function emits EXACTLY ONE JSON log line tagged `concierge_inspector`
+// carrying the request_id, card types/totals, aggregated brand counts, and
+// both the original and (possibly rewritten) prose. These tests capture
+// console.log to assert that contract without touching the network.
+
+type CapturedLog = { text: string; parsed: any };
+
+function captureConsoleLog(): { logs: CapturedLog[]; restore: () => void } {
+  const logs: CapturedLog[] = [];
+  const original = console.log;
+  console.log = (...args: unknown[]) => {
+    const text = args.map((a) => (typeof a === "string" ? a : JSON.stringify(a))).join(" ");
+    let parsed: any = null;
+    try { parsed = JSON.parse(text); } catch { /* not JSON */ }
+    logs.push({ text, parsed });
+  };
+  return { logs, restore: () => { console.log = original; } };
+}
+
+Deno.test("structured log — exactly one concierge_inspector JSON line per run", async () => {
+  const stub = stubFetchWithReply({
+    corrected_prose: "Here's a first edit — 12 pieces (4 Saint-Louis, 8 Alinea Design Objects).",
+    corrections: [{
+      original: "13 pieces, all Saint-Louis",
+      replacement: "12 pieces (4 Saint-Louis, 8 Alinea Design Objects)",
+      reason: "Mixed set; totals and brand attribution were wrong.",
+    }],
+  });
+  const cap = captureConsoleLog();
+  try {
+    const gt = mixedBrandGT();
+    const original = "Here's a first edit — 13 pieces, all Saint-Louis.";
+    const result = await runInspectorPass({ prose: original, groundTruth: gt, apiKey: "k" });
+    logInspectorRun(buildInspectorLogRecord({
+      requestId: "req-abc-123",
+      originalProse: original,
+      result,
+      groundTruth: gt,
+    }));
+
+    const tagged = cap.logs.filter((l) => l.parsed?.tag === "concierge_inspector");
+    assertEquals(tagged.length, 1, `expected exactly 1 concierge_inspector log, got ${tagged.length}`);
+    const rec = tagged[0].parsed;
+
+    // Required fields
+    assertEquals(rec.tag, "concierge_inspector");
+    assertEquals(rec.request_id, "req-abc-123");
+    assertEquals(rec.ok, true);
+    assertEquals(rec.card_types, ["propose_tearsheet"]);
+    assertEquals(rec.card_totals, [12]);
+    assertEquals(rec.brand_counts["Saint-Louis"], 4);
+    assertEquals(rec.brand_counts["Alinea Design Objects"], 8);
+    assertEquals(rec.prose_len, original.length);
+    assertEquals(rec.corrections_count, 1);
+    assertEquals(rec.changed, true);
+    assertEquals(rec.original_prose, original);
+    assertStringIncludes(rec.corrected_prose, "Alinea");
+    assert(!/all Saint-?Louis/i.test(rec.corrected_prose));
+    assert(typeof rec.ts === "string" && rec.ts.length > 0);
+    assert(rec.ground_truth?.cards?.length === 1);
+    void stub;
+  } finally { cap.restore(); restoreFetch(); }
+});
+
+Deno.test("structured log — one line per card-type when multiple cards run", async () => {
+  const cap = captureConsoleLog();
+  try {
+    // Simulate two sequential card runs in the same request: a tearsheet AND
+    // a draft_quote. The edge handler calls logInspectorRun once per card.
+    const tearsheetGT = mixedBrandGT();
+    const quoteGT = alineaTablesOnlyGT();
+
+    stubFetchWithReply({
+      corrected_prose: "Tearsheet prose corrected.",
+      corrections: [{ original: "x", replacement: "y", reason: "r" }],
+    });
+    const r1 = await runInspectorPass({ prose: "Tearsheet prose original.", groundTruth: tearsheetGT, apiKey: "k" });
+    logInspectorRun(buildInspectorLogRecord({
+      requestId: "req-multi", originalProse: "Tearsheet prose original.", result: r1, groundTruth: tearsheetGT,
+    }));
+    restoreFetch();
+
+    stubFetchWithReply({ corrected_prose: "Quote prose unchanged.", corrections: [] });
+    const r2 = await runInspectorPass({ prose: "Quote prose unchanged.", groundTruth: quoteGT, apiKey: "k" });
+    logInspectorRun(buildInspectorLogRecord({
+      requestId: "req-multi", originalProse: "Quote prose unchanged.", result: r2,
+      groundTruth: { cards: [{ ...quoteGT.cards[0], tool: "draft_quote" }] },
+    }));
+
+    const tagged = cap.logs.filter((l) => l.parsed?.tag === "concierge_inspector");
+    assertEquals(tagged.length, 2, `expected 2 log lines (one per card), got ${tagged.length}`);
+    // All share the same request_id.
+    assertEquals(tagged[0].parsed.request_id, "req-multi");
+    assertEquals(tagged[1].parsed.request_id, "req-multi");
+    // Card types are distinct and preserved from ground truth.
+    assertEquals(tagged[0].parsed.card_types, ["propose_tearsheet"]);
+    assertEquals(tagged[1].parsed.card_types, ["draft_quote"]);
+    // First run changed prose; second didn't.
+    assertEquals(tagged[0].parsed.changed, true);
+    assertEquals(tagged[1].parsed.changed, false);
+    assertEquals(tagged[1].parsed.corrections_count, 0);
+  } finally { cap.restore(); restoreFetch(); }
+});
+
+Deno.test("structured log — fail-open run still emits one line with reason + changed=false", async () => {
+  stubFetchWithReply("http_500");
+  const cap = captureConsoleLog();
+  try {
+    const gt = mixedBrandGT();
+    const original = "Prose that would have been rewritten.";
+    const result = await runInspectorPass({ prose: original, groundTruth: gt, apiKey: "k" });
+    logInspectorRun(buildInspectorLogRecord({
+      requestId: "req-fail", originalProse: original, result, groundTruth: gt,
+    }));
+
+    const tagged = cap.logs.filter((l) => l.parsed?.tag === "concierge_inspector");
+    assertEquals(tagged.length, 1);
+    const rec = tagged[0].parsed;
+    assertEquals(rec.ok, false);
+    assertEquals(rec.reason, "http_500");
+    assertEquals(rec.changed, false);
+    assertEquals(rec.corrections_count, 0);
+    assertEquals(rec.original_prose, original);
+    assertEquals(rec.corrected_prose, original);
+  } finally { cap.restore(); restoreFetch(); }
+});
+
+Deno.test("structured log — original_prose and corrected_prose are truncated at 4000 chars", () => {
+  const cap = captureConsoleLog();
+  try {
+    const huge = "a".repeat(5000);
+    logInspectorRun(buildInspectorLogRecord({
+      requestId: "req-clip",
+      originalProse: huge,
+      result: { ok: true, corrected_prose: "b".repeat(5000), corrections: [], ms: 1 },
+      groundTruth: mixedBrandGT(),
+    }));
+    const rec = cap.logs.find((l) => l.parsed?.tag === "concierge_inspector")!.parsed;
+    // Clip helper adds an ellipsis when it truncates, so length is 4001.
+    assert(rec.original_prose.length <= 4001, `original_prose too long: ${rec.original_prose.length}`);
+    assert(rec.corrected_prose.length <= 4001, `corrected_prose too long: ${rec.corrected_prose.length}`);
+    assert(rec.original_prose.endsWith("…"));
+    assert(rec.corrected_prose.endsWith("…"));
+    // prose_len must reflect the ORIGINAL untruncated length.
+    assertEquals(rec.prose_len, 5000);
+  } finally { cap.restore(); }
+});
