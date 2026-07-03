@@ -3420,15 +3420,26 @@ serve(async (req) => {
       }
       const typologiesByDesigner = new Map<string, Set<string>>();
       for (const id of targetIds) typologiesByDesigner.set(id, new Set<string>());
+      let lastDesignerIdWithTypology: string | null = null;
       for (const frag of fragments) {
         const fragTypologies = detectTypologiesIn(frag);
         if (fragTypologies.length === 0) continue;
+        const matchedDesignerIds: string[] = [];
         for (const [id, tokens] of designerTokensById) {
           if (tokens.some((t) => frag.includes(t))) {
-            typologiesByDesigner.get(id)!.add("__bound__");
-            for (const t of fragTypologies) typologiesByDesigner.get(id)!.add(t);
+            matchedDesignerIds.push(id);
           }
         }
+        const idsToBind = matchedDesignerIds.length > 0
+          ? matchedDesignerIds
+          : lastDesignerIdWithTypology
+            ? [lastDesignerIdWithTypology]
+            : [];
+        for (const id of idsToBind) {
+          typologiesByDesigner.get(id)!.add("__bound__");
+          for (const t of fragTypologies) typologiesByDesigner.get(id)!.add(t);
+        }
+        if (matchedDesignerIds.length > 0) lastDesignerIdWithTypology = matchedDesignerIds[matchedDesignerIds.length - 1];
       }
       const matchesTypology = (pick: any, typologies: string[]): boolean => {
         if (typologies.length === 0) return true;
