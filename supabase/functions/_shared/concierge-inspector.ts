@@ -218,8 +218,10 @@ export function buildInspectorLogRecord(opts: {
   originalProse: string;
   result: InspectorResult;
   groundTruth: InspectorGroundTruth;
+  requirements?: RequirementsInput | null;
+  requirementsValidation?: RequirementsValidation | null;
 }): InspectorLogRecord {
-  const { requestId, originalProse, result, groundTruth } = opts;
+  const { requestId, originalProse, result, groundTruth, requirements, requirementsValidation } = opts;
   const aggregatedBrands: Record<string, number> = {};
   for (const c of groundTruth.cards) {
     for (const [k, v] of Object.entries(c.brand_counts || {})) {
@@ -227,13 +229,17 @@ export function buildInspectorLogRecord(opts: {
     }
   }
   const clip = (s: string, n: number) => (s.length > n ? s.slice(0, n) + "…" : s);
+  const reqOk = requirementsValidation ? requirementsValidation.ok : true;
+  const combinedReason = !reqOk
+    ? (result.reason ? `${result.reason};requirements_violation` : "requirements_violation")
+    : result.reason;
   return {
     tag: "concierge_inspector",
     request_id: requestId,
     ts: new Date().toISOString(),
-    ok: result.ok,
+    ok: result.ok && reqOk,
     ms: result.ms,
-    reason: result.reason,
+    reason: combinedReason,
     card_types: groundTruth.cards.map((c) => c.tool),
     card_totals: groundTruth.cards.map((c) => c.total),
     brand_counts: aggregatedBrands,
@@ -245,6 +251,8 @@ export function buildInspectorLogRecord(opts: {
     original_prose: clip(originalProse, 4000),
     corrected_prose: clip(result.corrected_prose, 4000),
     ground_truth: groundTruth,
+    requirements: requirements ?? null,
+    requirements_validation: requirementsValidation ?? null,
   };
 }
 
