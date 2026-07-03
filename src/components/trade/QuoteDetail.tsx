@@ -1377,7 +1377,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
       // Compliance snapshot: FX pairs actually applied to convert source-currency
       // line prices into the quote currency, timestamped at PDF build time.
       fxSnapshot: fxPairs.length > 0
-        ? { appliedAt: new Date(), pairs: fxPairs.map((p) => ({ src: p.src, tgt: p.tgt, rate: p.rate, source: (p as any).source ?? null })) }
+        ? { appliedAt: fxAppliedAt ?? new Date(), pairs: fxPairs.map((p) => ({ src: p.src, tgt: p.tgt, rate: p.rate, source: (p as any).source ?? null })) }
         : null,
       shipToSameAsBill,
       incoterm: incoterm || null,
