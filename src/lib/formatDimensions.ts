@@ -135,7 +135,12 @@ export const formatImperialDimensions = (raw: string | null | undefined): string
   if (!metric) return null;
   const converted = metric
     .split("\n")
-    .map((line) => toImperialLine(line.trim()))
+    .map((line) => {
+      const { dim, qual } = splitDimensionQualifier(line.trim());
+      const imp = toImperialLine(dim);
+      if (!imp) return null;
+      return qual ? `${imp} — ${qual}` : imp;
+    })
     .filter(Boolean) as string[];
   return converted.length ? converted.join("\n") : null;
 };
@@ -151,9 +156,14 @@ export const withImperialPerLine = (raw: string | null | undefined): string => {
   return metric
     .split("\n")
     .map((line) => {
-      const t = line.trim();
+      const rawLine = line.trim();
+      // Peel off any trailing " — <qualifier>" so imperial conversion runs
+      // ONLY on the dimension portion (otherwise the digits inside
+      // "10 Lights" would be cm→in converted).
+      const { dim: t, qual } = splitDimensionQualifier(rawLine);
       const imp = toImperialLine(t);
-      if (!imp) return t;
+      const suffix = qual ? ` — ${qual}` : "";
+      if (!imp) return rawLine;
       // Strip any leading label words shared with the metric line so the
       // imperial parenthetical doesn't repeat "Sofa Double Depth" etc.
       const metricWords = t.split(/\s+/);
@@ -195,7 +205,7 @@ export const withImperialPerLine = (raw: string | null | undefined): string => {
         trimmedImp = stripped.join(" ").trim();
       }
 
-      if (!trimmedImp) return t;
+      if (!trimmedImp) return `${t}${suffix}`;
 
       // If the metric line has trailing prose AFTER the last cm cluster
       // (e.g. "Ø 12 x H 24 cm - Stem height TBC on order"), move that prose
@@ -205,11 +215,13 @@ export const withImperialPerLine = (raw: string | null | undefined): string => {
       if (lastCmMatch) {
         const head = lastCmMatch[1].trim();
         const tail = lastCmMatch[2].trim().replace(/^[-–—,;:.]+\s*/, "").trim();
-        if (tail) return `${head} | ${trimmedImp} - ${tail}`;
+        if (tail) return `${head} | ${trimmedImp} - ${tail}${suffix}`;
       }
-      return `${t} | ${trimmedImp}`;
+      return `${t} | ${trimmedImp}${suffix}`;
     })
     .join("\n");
 };
+
+
 
 
