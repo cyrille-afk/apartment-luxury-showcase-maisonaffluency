@@ -6,22 +6,72 @@
  * that look like variant separators (i.e. when at least one comma is followed
  * by a label-style token such as "Name: ..." or another dimension cluster),
  * to avoid breaking single dimensions like "120 × 45 × 60 cm".
+ *
+ * Additional rule (site-wide): a label of the form `<qualifier><separator><dimensions>`
+ * — e.g. "10 Lights - Dia 100 x H 100 cm" or "Angelo M/R 130: Ø 130 × H 75 cm" —
+ * is reordered so the dimensions come first and the qualifier is appended after
+ * an em-dash, giving "Dia 100 x H 100 cm — 10 Lights". The imperial converter
+ * strips the trailing qualifier before converting and re-appends it at the very
+ * end so the final render reads:
+ *   "Dia 100 x H 100 cm | 39.4 x H 39.4 in — 10 Lights"
  */
+
+const DIM_UNIT_RE = /\b(?:cm|mm|in|inches?|")\b/i;
+
+/**
+ * If the line reads "<qualifier> - <dimensions>" (or ":" / en/em-dash separators)
+ * where only the right side carries units, reorder to "<dimensions> — <qualifier>".
+ * Idempotent — lines already in canonical form pass through unchanged.
+ */
+const reorderQualifierBeforeDims = (line: string): string => {
+  const t = line.trim();
+  if (!t) return t;
+  // Skip if already in canonical "<dims> — <qualifier>" shape.
+  if (/\s—\s/.test(t)) return t;
+  const m = t.match(/^(.+?)\s*[-–—:]\s+(.+)$/);
+  if (!m) return t;
+  const left = m[1].trim();
+  const right = m[2].trim();
+  const leftHasDim = DIM_UNIT_RE.test(left);
+  const rightHasDim = DIM_UNIT_RE.test(right);
+  if (leftHasDim || !rightHasDim) return t;
+  return `${right} — ${left}`;
+};
+
+/** Split a canonical line into `{ dim, qual }`; `qual` is empty when absent. */
+export const splitDimensionQualifier = (line: string): { dim: string; qual: string } => {
+  const idx = line.lastIndexOf(" — ");
+  if (idx < 0) return { dim: line, qual: "" };
+  const dim = line.slice(0, idx);
+  const qual = line.slice(idx + 3);
+  // The trailing chunk is only treated as a qualifier when it contains NO
+  // dimension unit (otherwise " — " is just prose inside the dims themselves).
+  if (DIM_UNIT_RE.test(qual)) return { dim: line, qual: "" };
+  return { dim, qual };
+};
+
 export const formatDimensionsMultiline = (raw: string | null | undefined): string => {
   if (!raw) return "";
   const trimmed = raw.trim();
+  const applyReorder = (s: string) =>
+    s
+      .split("\n")
+      .map((ln) => reorderQualifierBeforeDims(ln))
+      .join("\n");
+
   // Already has explicit newlines — respect them.
-  if (trimmed.includes("\n")) return trimmed;
+  if (trimmed.includes("\n")) return applyReorder(trimmed);
 
   // Detect "label: value" variant pattern (e.g. "Angelo M/R 130: Ø 130 × H 75 cm, Angelo M/R 160: ...",
   // or "Angelo M/O 210: L 210 × H 75 cm / Angelo M/O 250: ...").
   // Split on `, ` OR ` / ` when followed by another "label:" cluster.
   // Lookahead allows `/` inside the label (e.g. "M/R 160") but stops at the next `:` or `,`.
   const variantSplit = trimmed.split(/\s*(?:,|\/)\s+(?=[^,:]*?:\s)/);
-  if (variantSplit.length > 1) return variantSplit.join("\n");
+  if (variantSplit.length > 1) return applyReorder(variantSplit.join("\n"));
 
-  return trimmed;
+  return applyReorder(trimmed);
 };
+
 
 const cmToInches = (value: string): string => {
   const n = Number(value.replace(",", "."));
@@ -85,7 +135,12 @@ export const formatImperialDimensions = (raw: string | null | undefined): string
   if (!metric) return null;
   const converted = metric
     .split("\n")
-    .map((line) => toImperialLine(line.trim()))
+    .map((line) => {
+      const { dim, qual } = splitDimensionQualifier(line.trim());
+      const imp = toImperialLine(dim);
+      if (!imp) return null;
+      return qual ? `${imp} — ${qual}` : imp;
+    })
     .filter(Boolean) as string[];
   return converted.length ? converted.join("\n") : null;
 };
@@ -101,9 +156,14 @@ export const withImperialPerLine = (raw: string | null | undefined): string => {
   return metric
     .split("\n")
     .map((line) => {
-      const t = line.trim();
+      const rawLine = line.trim();
+      // Peel off any trailing " — <qualifier>" so imperial conversion runs
+      // ONLY on the dimension portion (otherwise the digits inside
+      // "10 Lights" would be cm→in converted).
+      const { dim: t, qual } = splitDimensionQualifier(rawLine);
       const imp = toImperialLine(t);
-      if (!imp) return t;
+      const suffix = qual ? ` — ${qual}` : "";
+      if (!imp) return rawLine;
       // Strip any leading label words shared with the metric line so the
       // imperial parenthetical doesn't repeat "Sofa Double Depth" etc.
       const metricWords = t.split(/\s+/);
@@ -145,7 +205,7 @@ export const withImperialPerLine = (raw: string | null | undefined): string => {
         trimmedImp = stripped.join(" ").trim();
       }
 
-      if (!trimmedImp) return t;
+      if (!trimmedImp) return `${t}${suffix}`;
 
       // If the metric line has trailing prose AFTER the last cm cluster
       // (e.g. "Ø 12 x H 24 cm - Stem height TBC on order"), move that prose
@@ -155,11 +215,13 @@ export const withImperialPerLine = (raw: string | null | undefined): string => {
       if (lastCmMatch) {
         const head = lastCmMatch[1].trim();
         const tail = lastCmMatch[2].trim().replace(/^[-–—,;:.]+\s*/, "").trim();
-        if (tail) return `${head} | ${trimmedImp} - ${tail}`;
+        if (tail) return `${head} | ${trimmedImp} - ${tail}${suffix}`;
       }
-      return `${t} | ${trimmedImp}`;
+      return `${t} | ${trimmedImp}${suffix}`;
     })
     .join("\n");
 };
+
+
 
 
