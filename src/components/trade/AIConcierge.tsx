@@ -573,6 +573,24 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
       }
       if (detail?.stage) setStageOverride(detail.stage);
       if (detail?.openPanel) setOpen(true);
+      // Prefill support — used by per-SKU "Swap" buttons on the concierge
+      // cards. We drop the text into the composer, focus it, and let the
+      // user edit/confirm before sending. Never auto-send.
+      if (typeof detail?.prefill === "string" && detail.prefill.trim().length > 0) {
+        setInput(detail.prefill);
+        setMinimized(false);
+        setOpen(true);
+        setTimeout(() => {
+          const el = inputRef.current;
+          if (el) {
+            el.focus();
+            // Move caret to end so the user can extend the prompt.
+            const len = el.value.length;
+            try { el.setSelectionRange(len, len); } catch { /* jsdom */ }
+            el.scrollIntoView({ block: "nearest", behavior: "smooth" });
+          }
+        }, 60);
+      }
     };
     window.addEventListener("concierge:stage", handler as EventListener);
     return () => window.removeEventListener("concierge:stage", handler as EventListener);
