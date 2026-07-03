@@ -1,10 +1,15 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link, useLocation, useSearchParams } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import ContactInquiry from "@/components/ContactInquiry";
 import { AIConcierge } from "@/components/trade/AIConcierge";
+
+// Lightweight access gate. Change this value to rotate the code.
+// Note: client-side only — deters casual/bot access, not a hard security boundary.
+const CONCIERGE_ACCESS_CODE = "MA-CONCIERGE-2026";
+const ACCESS_STORAGE_KEY = "ma_concierge_access";
 
 const PublicConciergeMount: React.FC = () => <AIConcierge surface="public" />;
 const AutoOpenConcierge: React.FC = () => {
