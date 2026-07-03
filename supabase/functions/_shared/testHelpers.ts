@@ -71,11 +71,11 @@ export async function readConciergeStream(
       if (!line.startsWith("data: ")) continue;
       if (handle(line.slice(6).trim()) === "done") {
         try { await reader.cancel(); } catch { /* ignore */ }
-        return { text, proposals, escalations };
+        return { text, proposals, escalations, requestIds, inspectorEvents };
       }
     }
   }
-  return { text, proposals, escalations };
+  return { text, proposals, escalations, requestIds, inspectorEvents };
 }
 
 /** Case-insensitive substring match on the accumulated stream text. */
