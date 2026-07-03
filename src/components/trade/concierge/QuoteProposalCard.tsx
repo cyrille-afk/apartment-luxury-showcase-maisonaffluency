@@ -364,12 +364,15 @@ export function QuoteProposalCard({ proposal, onResolved }: Props) {
         <span className="font-display text-[10px] uppercase tracking-widest text-accent">
           {headerLabel}
         </span>
-        {displayCurrency && (
-          <span className="font-body text-[10px] uppercase tracking-widest text-muted-foreground">
-            {displayCurrency}
-            {trade_discount_pct > 0 && ` · trade −${trade_discount_pct}%`}
-          </span>
-        )}
+        <div className="flex items-center gap-2 shrink-0">
+          <RequirementsBadge validation={proposal.requirements_validation} />
+          {displayCurrency && (
+            <span className="font-body text-[10px] uppercase tracking-widest text-muted-foreground">
+              {displayCurrency}
+              {trade_discount_pct > 0 && ` · trade −${trade_discount_pct}%`}
+            </span>
+          )}
+        </div>
       </div>
 
       {proposal.tool === "add_to_quote" && (
