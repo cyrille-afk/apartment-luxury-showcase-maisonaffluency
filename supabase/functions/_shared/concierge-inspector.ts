@@ -174,6 +174,15 @@ export function buildInspectorGroundTruth(
         designer: p.designer_name ? String(p.designer_name) : null,
         category: p.category ? String(p.category) : null,
         materials: p.materials ? String(p.materials) : null,
+        price_cents:
+          typeof p.price_cents === "number"
+            ? p.price_cents
+            : typeof p.trade_price_cents === "number"
+              ? p.trade_price_cents
+              : typeof p.unit_price_cents === "number"
+                ? p.unit_price_cents
+                : null,
+        currency: p.currency ? String(p.currency) : null,
       }));
     const brand_counts: Record<string, number> = {};
     for (const it of items) {
