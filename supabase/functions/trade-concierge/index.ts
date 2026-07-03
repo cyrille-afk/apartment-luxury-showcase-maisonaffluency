@@ -2194,12 +2194,84 @@ async function loadRelevantPieces(
       if (error) console.error("match_catalog rpc failed:", error.message);
       return null;
     }
+    const fmtLead = (r: any) => (r.lead_time ? String(r.lead_time).trim() : "");
+    const fmtStock = (r: any) => (r.stock_status ? String(r.stock_status).trim() : "");
+    const fmtShip = (r: any) =>
+      r.default_ship_mode
+        ? ({ sea_lcl: "sea (LCL)", sea_fcl: "sea (FCL)", air: "air", road: "road", courier: "courier" } as Record<string, string>)[
+            String(r.default_ship_mode)
+          ] || String(r.default_ship_mode)
+        : "";
+    const fmtPrice = (r: any) => {
+      if (!r.trade_price_cents || r.trade_price_cents <= 0) return "Price on Request";
+      const amt = Math.round(r.trade_price_cents / 100).toLocaleString("en-US");
+      const cur = r.currency || "EUR";
+      const px = r.price_prefix ? `${r.price_prefix} ` : "";
+      return `${px}${cur} ${amt}`;
+    };
+
     const lines = data.map((r: any) => {
       const meta = [r.subcategory || r.category, r.materials].filter(Boolean).join(" · ");
-      return `- "${r.title}" by ${r.designer}${meta ? ` (${meta})` : ""} [id: ${r.id}]`;
+      const facts = [
+        fmtLead(r) && `lead ${fmtLead(r)}`,
+        fmtStock(r) && `stock ${fmtStock(r)}`,
+        r.origin && `origin ${r.origin}`,
+        fmtShip(r) && `ships ${fmtShip(r)}`,
+        `price ${fmtPrice(r)}`,
+      ]
+        .filter(Boolean)
+        .join(" · ");
+      return `- "${r.title}" by ${r.designer}${meta ? ` (${meta})` : ""} — ${facts} [id: ${r.id}]`;
     });
+
+    // ---- Aggregate "collective" context so the model can reason across the set ----
+    const parseLeadWeeks = (s: string): [number, number] | null => {
+      if (!s) return null;
+      const m = String(s).toLowerCase().match(/(\d+)(?:\s*[–-]\s*(\d+))?\s*(week|wk|month|mo)/);
+      if (!m) return null;
+      const mult = m[3].startsWith("mo") ? 4 : 1;
+      const lo = parseInt(m[1], 10) * mult;
+      const hi = m[2] ? parseInt(m[2], 10) * mult : lo;
+      return [lo, hi];
+    };
+    const leadRanges = data.map((r: any) => parseLeadWeeks(r.lead_time || "")).filter(Boolean) as [number, number][];
+    const withLead = leadRanges.length;
+    const leadMin = withLead ? Math.min(...leadRanges.map((r) => r[0])) : null;
+    const leadMax = withLead ? Math.max(...leadRanges.map((r) => r[1])) : null;
+    const inStockCount = data.filter((r: any) => /in[\s_-]?stock|available|ready/i.test(String(r.stock_status || ""))).length;
+    const originCounts: Record<string, number> = {};
+    for (const r of data as any[]) if (r.origin) originCounts[r.origin] = (originCounts[r.origin] || 0) + 1;
+    const topOrigins = Object.entries(originCounts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3)
+      .map(([o, n]) => `${o} (${n})`)
+      .join(", ");
+    const materialCounts: Record<string, number> = {};
+    for (const r of data as any[]) {
+      const mats = String(r.materials || "")
+        .split(/[,;/·]+/)
+        .map((m: string) => m.trim().toLowerCase())
+        .filter(Boolean);
+      for (const m of mats) materialCounts[m] = (materialCounts[m] || 0) + 1;
+    }
+    const topMaterials = Object.entries(materialCounts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(([m, n]) => `${m} (${n})`)
+      .join(", ");
+
+    const summaryBits = [
+      `${data.length} pieces retrieved`,
+      withLead ? `lead-time range ${leadMin}–${leadMax} weeks (parsed from ${withLead}/${data.length} items)` : null,
+      inStockCount ? `${inStockCount} flagged in stock / ready` : null,
+      topOrigins ? `origins: ${topOrigins}` : null,
+      topMaterials ? `common materials: ${topMaterials}` : null,
+    ].filter(Boolean);
+
     const contextText = [
       "Note: the lines below are the catalog pieces most semantically relevant to the user's latest query (top-K retrieval, not the full catalog). If the user asks for a broad scan and nothing here matches, say so politely and offer to expand the search through the designers' own catalogs using our Axonometric Studio archives and tools.",
+      "",
+      `Collective context (reason across the whole set, not just individual items): ${summaryBits.join(" · ")}. Use this to make holistic statements when relevant (e.g. "all of these ship within 4 weeks", "the whole edit is European-made", "most pieces share an oak / brass palette"). Only assert a collective fact when it truly holds for every item you propose.`,
       "",
       lines.join("\n"),
     ].join("\n");
