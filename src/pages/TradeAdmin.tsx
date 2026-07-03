@@ -256,6 +256,7 @@ const TradeAdmin = () => {
   const [checklistPreview, setChecklistPreview] = useState<{
     app: Application;
     to: string;
+    firstName: string;
     subject: string;
     body: string;
     items: string[];
