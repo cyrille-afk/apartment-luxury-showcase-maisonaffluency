@@ -238,6 +238,9 @@ interface Application {
   message: string | null;
   status: string;
   created_at: string;
+  verification_checklist_sent_at: string | null;
+  verification_checklist_sent_by: string | null;
+  verification_checklist_sent_by_name: string | null;
   profiles?: { first_name: string; last_name: string; email: string } | null;
 }
 
