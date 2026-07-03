@@ -172,26 +172,10 @@ import { createBreaker } from "./_breaker.ts";
 const CB_FAILURE_THRESHOLD = Number(Deno.env.get("CB_FAILURE_THRESHOLD") ?? "3");
 const CB_COOLDOWN_MS = Number(Deno.env.get("CB_COOLDOWN_MS") ?? "60000");
 
-// Requirements-diff enforcement mode.
-//   "open"   (default) — cards emit even when the assembled set fails to
-//                        cover the extracted Requirements. The verdict is
-//                        surfaced on the proposal + a preceding
-//                        `event: requirements_validation` frame.
-//   "closed"          — cards that fail the diff are BLOCKED. Instead of
-//                        `event: proposal` we emit `event: proposal_blocked`
-//                        with the violations so the UI can show a refusal
-//                        and prompt the assistant to re-search.
-export function resolveRequirementsEnforcement(env: {
-  CONCIERGE_REQUIREMENTS_ENFORCEMENT?: string | null;
-  CONCIERGE_REQUIREMENTS_STRICT?: string | null;
-}): "open" | "closed" {
-  const explicit = (env.CONCIERGE_REQUIREMENTS_ENFORCEMENT || "").toLowerCase().trim();
-  if (explicit === "closed") return "closed";
-  if (explicit === "open") return "open";
-  const legacy = (env.CONCIERGE_REQUIREMENTS_STRICT || "").toLowerCase().trim();
-  if (legacy === "true" || legacy === "1" || legacy === "yes") return "closed";
-  return "open";
-}
+// Requirements-diff enforcement mode (see `_requirements_enforcement.ts` for
+// the precedence rules). "open" (default) surfaces violations without
+// blocking; "closed" swallows failing cards and emits `event: proposal_blocked`.
+import { resolveRequirementsEnforcement } from "./_requirements_enforcement.ts";
 const REQUIREMENTS_ENFORCEMENT: "open" | "closed" = resolveRequirementsEnforcement({
   CONCIERGE_REQUIREMENTS_ENFORCEMENT: Deno.env.get("CONCIERGE_REQUIREMENTS_ENFORCEMENT"),
   CONCIERGE_REQUIREMENTS_STRICT: Deno.env.get("CONCIERGE_REQUIREMENTS_STRICT"),
