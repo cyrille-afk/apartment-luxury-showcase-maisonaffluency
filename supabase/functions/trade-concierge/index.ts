@@ -3991,6 +3991,64 @@ serve(async (req) => {
           if (tearsheetBuffers.length && quoteBuffers.length) {
             console.log(`[concierge flush] chained turn: ${tearsheetBuffers.length} tearsheet + ${quoteBuffers.length} quote proposal(s), flushing tearsheet→quote`);
           }
+
+          // Per-card Requirements diff — run BEFORE each `event: proposal`
+          // frame is enqueued so the client card carries the validation
+          // verdict and, on failure, a preceding `event: requirements_validation`
+          // frame lets the UI badge the card as "does not satisfy brief" and
+          // the Inspector prose pass can react to the same shortfall.
+          const emitProposalWithRequirementsDiff = (
+            proposal: Record<string, any>,
+            previewRows: any[],
+          ) => {
+            try {
+              const cardTool = String(proposal?.tool || "unknown");
+              const gtOne = buildInspectorGroundTruth([
+                { tool: cardTool, pickIds: [], previews: Array.isArray(previewRows) ? previewRows : [] },
+              ]);
+              const v = validateRequirementsCoverage(capturedRequirements as any, gtOne);
+              proposal.requirements_validation = {
+                ok: v.ok,
+                brand_ok: v.brand_ok,
+                coverage: v.coverage,
+                violations: v.violations,
+                total_items: v.total_items,
+                unmatched_ids: v.unmatched_ids,
+              };
+              if (!v.ok && capturedRequirements) {
+                controller.enqueue(encoder.encode(
+                  `event: requirements_validation\ndata: ${JSON.stringify({
+                    request_id: requestId,
+                    tool: cardTool,
+                    tool_call_id: proposal?.tool_call_id || null,
+                    ok: false,
+                    coverage: v.coverage,
+                    violations: v.violations,
+                    total_items: v.total_items,
+                  })}\n\n`,
+                ));
+                try {
+                  console.log(JSON.stringify({
+                    tag: "concierge_requirements_validation",
+                    request_id: requestId,
+                    ts: new Date().toISOString(),
+                    tool: cardTool,
+                    tool_call_id: proposal?.tool_call_id || null,
+                    ok: false,
+                    violations: v.violations,
+                    coverage: v.coverage,
+                    total_items: v.total_items,
+                    unmatched_ids: v.unmatched_ids,
+                  }));
+                } catch { /* best-effort */ }
+              }
+            } catch (e) {
+              // Fail-open: validator must never block a card emission.
+              console.warn("[concierge requirements-diff] failed, emitting card without validation:", e);
+            }
+            controller.enqueue(encoder.encode(`event: proposal\ndata: ${JSON.stringify(proposal)}\n\n`));
+          };
+
           for (const tc of orderedBuffers) {
             // ====== REQUIREMENTS (must precede card tools) ======
             if (tc.name === "extract_requirements") {
