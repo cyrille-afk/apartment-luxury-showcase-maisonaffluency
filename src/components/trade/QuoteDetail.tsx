@@ -364,6 +364,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   >({});
   const [pendingVariantIdx, setPendingVariantIdx] = useState<number | null>(null);
   const [pendingSwatchLib, setPendingSwatchLib] = useState<Array<{ fabric_id?: string | null; name: string; image_url: string; sort_order?: number | null }>>([]);
+  const [pendingSwatchLoading, setPendingSwatchLoading] = useState(false);
 
   const [issueDate, setIssueDate] = useState<string | null>(null);
   const [landedCostSettings, setLandedCostSettings] = useState<{ cbm: number; kg: number; mode: "road" | "courier" }>(() => ({
