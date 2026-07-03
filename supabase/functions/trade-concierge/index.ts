@@ -2916,6 +2916,11 @@ serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
+  // Single end-to-end trace id for this HTTP invocation. Honored from the
+  // client (x-request-id) when supplied, otherwise minted here. Propagated
+  // to the initial SSE `event: request_id` frame AND every Inspector log
+  // entry so a run can be traced client → edge → inspector.
+  const requestId = req.headers.get("x-request-id") || (crypto?.randomUUID?.() ?? `req-${Date.now()}`);
 
   try {
     const auth = await requireUser(req);
