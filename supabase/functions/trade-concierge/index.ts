@@ -172,6 +172,22 @@ import { createBreaker } from "./_breaker.ts";
 const CB_FAILURE_THRESHOLD = Number(Deno.env.get("CB_FAILURE_THRESHOLD") ?? "3");
 const CB_COOLDOWN_MS = Number(Deno.env.get("CB_COOLDOWN_MS") ?? "60000");
 
+// Requirements-diff enforcement mode.
+//   "open"   (default) — cards emit even when the assembled set fails to
+//                        cover the extracted Requirements. The verdict is
+//                        surfaced on the proposal + a preceding
+//                        `event: requirements_validation` frame.
+//   "closed"          — cards that fail the diff are BLOCKED. Instead of
+//                        `event: proposal` we emit `event: proposal_blocked`
+//                        with the violations so the UI can show a refusal
+//                        and prompt the assistant to re-search.
+const REQUIREMENTS_ENFORCEMENT: "open" | "closed" =
+  (Deno.env.get("CONCIERGE_REQUIREMENTS_ENFORCEMENT") || "").toLowerCase() === "closed" ||
+  (Deno.env.get("CONCIERGE_REQUIREMENTS_STRICT") || "").toLowerCase() === "true"
+    ? "closed"
+    : "open";
+console.log(`[concierge] requirements enforcement: ${REQUIREMENTS_ENFORCEMENT}`);
+
 const breaker = createBreaker({
   threshold: CB_FAILURE_THRESHOLD,
   cooldownMs: CB_COOLDOWN_MS,
