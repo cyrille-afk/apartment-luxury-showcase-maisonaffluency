@@ -225,12 +225,20 @@ export async function streamConcierge({
   }
 
   const endpoint = surface === "public" ? PUBLIC_CHAT_URL : CHAT_URL;
+  // Mint a client-side trace id. The edge function honors `x-request-id`
+  // when present, so the same id appears in the SSE `event: request_id`
+  // frame, every `event: inspector` frame, and the server `concierge_inspector`
+  // log line. Displayed in the UI so the user can copy it while debugging.
+  const clientRequestId = (typeof crypto !== "undefined" && crypto.randomUUID)
+    ? crypto.randomUUID()
+    : `req-${Date.now()}-${Math.random().toString(36).slice(2)}`;
   const resp = await fetch(endpoint, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${bearer}`,
       apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string,
+      "x-request-id": clientRequestId,
       ...(surface === "public" ? { "x-concierge-surface": "public", "x-concierge-sid": publicSid ?? "" } : {}),
     },
     body: JSON.stringify({ messages, project_id: projectId ?? null, surface: surface ?? "trade", lang: lang ?? null }),
