@@ -9,7 +9,7 @@
 //   4. anything else / missing                   → open
 
 import { assertEquals } from "https://deno.land/std@0.224.0/assert/mod.ts";
-import { resolveRequirementsEnforcement } from "./index.ts";
+import { resolveRequirementsEnforcement } from "./_requirements_enforcement.ts";
 
 Deno.test("enforcement — defaults to 'open' when no env vars are set", () => {
   assertEquals(resolveRequirementsEnforcement({}), "open");
