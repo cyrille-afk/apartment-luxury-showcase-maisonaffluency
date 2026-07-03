@@ -5125,8 +5125,13 @@ serve(async (req) => {
                   if (contentDelta.trim().length > 0) forwardedAnyText = true;
                   assistantTextBuf += contentDelta;
                 }
-                // Plain text delta — forward unchanged
-                controller.enqueue(encoder.encode(line + "\n"));
+                // Plain text delta — buffer if the Inspector is going to
+                // validate a card, otherwise stream through unchanged.
+                if (shouldBufferProseForInspector && delta && typeof delta.content === "string") {
+                  bufferedProseLines.push(line);
+                } else {
+                  controller.enqueue(encoder.encode(line + "\n"));
+                }
               } catch {
                 // Forward unparseable lines as-is so the client can attempt recovery
                 controller.enqueue(encoder.encode(line + "\n"));
