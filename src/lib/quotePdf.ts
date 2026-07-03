@@ -863,7 +863,12 @@ function drawTable(
     // When the user picked a finish, it supersedes the generic catalogue
     // materials line (which is otherwise repetitive noise). Dimensions remain
     // visible unless they are already embedded in the variant label.
-    const dimsAlreadyInVariant = !!(line.variantLabel && line.dimensions &&
+    // When a finish/variant is chosen the customer has picked a specific size;
+    // the catalogue's multi-size dimensions string becomes noise. Suppress it
+    // whenever the variant label already carries dimensional tokens
+    // (cm / mm / × / Ø), regardless of whether the two strings share a prefix.
+    const variantHasDims = !!(line.variantLabel && /(\d\s*(cm|mm)\b|[×xX]\s*\d|Ø)/.test(line.variantLabel));
+    const dimsAlreadyInVariant = variantHasDims || !!(line.variantLabel && line.dimensions &&
       line.variantLabel.toLowerCase().includes(String(line.dimensions).toLowerCase().slice(0, 8)));
     const showMaterials = !line.variantLabel;
     const meta = [
@@ -962,9 +967,10 @@ function drawTable(
     doc.setTextColor(FG[0], FG[1], FG[2]);
     doc.text(String(line.quantity), xQty + colQty / 2, y + 20, { align: "center" });
     {
-      const unitCcy = line.sourceCurrency || args.currency;
-      const unitCents = line.sourceUnitPriceCents ?? line.unitPriceCents;
-      doc.text(fmtMoney(unitCents, unitCcy), xUnit + colUnit - 4, y + 20, { align: "right" });
+      // Always render the unit price in the quote's display currency so a
+      // single-currency quote stays single-currency. The source-currency
+      // audit figure is intentionally omitted from the customer PDF.
+      doc.text(fmtMoney(line.unitPriceCents, args.currency), xUnit + colUnit - 4, y + 20, { align: "right" });
     }
     doc.setFont("helvetica", "bold");
     doc.text(fmtMoney(line.lineTotalCents, args.currency), rowRight - 4, y + 20, { align: "right" });
