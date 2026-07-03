@@ -3,6 +3,7 @@ import { Sparkles, X, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import type { VisualizationBriefProposal } from "@/lib/tradeConciergeStream";
+import { RequirementsBadge } from "@/components/trade/concierge/RequirementsBadge";
 
 export const VIZ_BRIEF_INCOMING_KEY = "maf:axonometric:incoming-brief";
 
