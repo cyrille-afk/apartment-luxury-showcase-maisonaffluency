@@ -20,18 +20,25 @@ import { test, expect, type Page } from "@playwright/test";
  * and doesn't require auth, so it's the right entry point for this test.
  */
 
-type Scenario = "success" | "blocked";
+type Scenario = "success" | "blocked" | "blocked_palette";
 
 async function installConciergeStub(page: Page) {
   await page.addInitScript(() => {
     const url = new URL(window.location.href);
-    const scenario = url.searchParams.get("__pw_mock") as "success" | "blocked" | null;
+    const scenario = url.searchParams.get("__pw_mock") as
+      | "success"
+      | "blocked"
+      | "blocked_palette"
+      | null;
     if (!scenario) return;
 
     const enc = new TextEncoder();
     const originalFetch = window.fetch.bind(window);
 
-    const frames: Record<"success" | "blocked", Array<string | { delayMs: number }>> = {
+    const frames: Record<
+      "success" | "blocked" | "blocked_palette",
+      Array<string | { delayMs: number }>
+    > = {
       success: [
         `event: request_id\ndata: ${JSON.stringify({ request_id: "pw-req" })}\n\n`,
         `event: tool_start\ndata: ${JSON.stringify({
@@ -75,6 +82,38 @@ async function installConciergeStub(page: Page) {
           reason: "requirements_violation",
           coverage: [],
           violations: [{ slot: "seating", required_qty: 2, delivered_qty: 0, reason: "qty_shortfall" }],
+        })}\n\n`,
+        `data: [DONE]\n\n`,
+      ],
+      // Same shape as `blocked`, but the violation is a `palette_mismatch`
+      // — the hard-constraint check the Inspector now runs when the requirements
+      // extractor captured a `materials` / `style` palette. The client-side
+      // contract is identical (no `proposal` frame → skeleton must clear on
+      // `onDone` and no card must ever render), so this scenario pins that the
+      // UI treats the palette failure the same way it treats slot shortfalls.
+      blocked_palette: [
+        `event: request_id\ndata: ${JSON.stringify({ request_id: "pw-req" })}\n\n`,
+        `event: tool_start\ndata: ${JSON.stringify({
+          tool: "propose_tearsheet",
+          tool_call_id: "tc-pw",
+          index: 0,
+          request_id: "pw-req",
+        })}\n\n`,
+        { delayMs: 400 },
+        `event: proposal_blocked\ndata: ${JSON.stringify({
+          request_id: "pw-req",
+          tool: "propose_tearsheet",
+          tool_call_id: "tc-pw",
+          reason: "requirements_violation",
+          coverage: [],
+          violations: [
+            {
+              kind: "palette_mismatch",
+              requested: ["oak", "brass"],
+              offending_ids: ["p1", "p2"],
+              offending_titles: ["Walnut lounge chair", "Marble console"],
+            },
+          ],
         })}\n\n`,
         `data: [DONE]\n\n`,
       ],
@@ -176,5 +215,33 @@ test.describe("AI concierge — Generative UI skeleton", () => {
     await expect(
       page.getByText("✦ Concierge proposes a new tearsheet", { exact: false }),
     ).toHaveCount(0);
+  });
+
+  test("clears the skeleton and renders NO card when the palette hard-constraint blocks the proposal", async ({ page }) => {
+    await page.goto("/concierge?__pw_mock=blocked_palette");
+    await openConciergeAndSend(
+      page,
+      "propose a tearsheet in an oak and brass palette",
+    );
+
+    // 1. Skeleton still appears — the tool call did start streaming.
+    const skeleton = page.getByRole("status", { name: /Curating a tearsheet/i });
+    await expect(skeleton).toBeVisible({ timeout: 5_000 });
+
+    // 2. `proposal_blocked` arrives with a `palette_mismatch` violation and
+    //    NO `proposal` frame ever follows. The client must clear the pending
+    //    placeholder on `onDone`.
+    await expect(skeleton).toHaveCount(0, { timeout: 5_000 });
+
+    // 3. Critical negative assertion — no tearsheet card was promoted from the
+    //    skeleton. This is the whole point of fail-closed enforcement: the
+    //    user must NEVER see the off-palette proposal.
+    await expect(
+      page.getByText("✦ Concierge proposes a new tearsheet", { exact: false }),
+    ).toHaveCount(0);
+
+    // 4. And the requirements-ok badge from the success path must not render
+    //    either — belt-and-braces against a stray render slipping through.
+    await expect(page.getByText(/Matches brief/i)).toHaveCount(0);
   });
 });
