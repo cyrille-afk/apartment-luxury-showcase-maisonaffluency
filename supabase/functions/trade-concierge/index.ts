@@ -3455,7 +3455,7 @@ async function hydrateQuotePreview(
     if (!designer) return null;
     const candidates = (allTradeRows || []).filter((c: any) => {
       const brand = normalizeLoose(String(c.brand_name || "").split(" - ")[0]);
-      return brand === designer && titlesAreNearTwins(c.product_name, pick.title);
+      return brand === designer && titlesAreNearTwins(String(c.product_name || ""), String(pick.title || ""));
     });
     if (!candidates.length) return null;
     const best = candidates

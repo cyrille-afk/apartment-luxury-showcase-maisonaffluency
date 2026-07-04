@@ -25,9 +25,7 @@
 // continuation path that already exists in `src/lib/tradeConciergeStream`.
 
 // deno-lint-ignore-file no-explicit-any
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
-
-type SupaClient = ReturnType<typeof createClient>;
+type SupaClient = any;
 
 const encoder = new TextEncoder();
 
