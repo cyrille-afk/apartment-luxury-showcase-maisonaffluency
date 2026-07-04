@@ -2803,25 +2803,30 @@ function buildOpeningBriefDiscoveryReply(latestUserMessage: string, langCode = "
 async function fetchStrictTypologyCandidates(
   supabase: ConciergeDbClient,
   typology: RequestedTypology,
+  dimConstraints?: DimensionConstraints | null,
 ): Promise<any[]> {
   const term = typology === "dining_table" ? "dining" : "table";
   const [pickRes, tradeRes] = await Promise.all([
     supabase
       .from("designer_curator_picks")
-      .select("id, title, materials, category, subcategory, trade_price_cents, currency")
+      .select("id, title, materials, category, subcategory, dimensions, trade_price_cents, currency")
       .or(`title.ilike.%${term}%,subcategory.ilike.%${term}%,category.ilike.%${term}%`)
       .limit(160),
     supabase
       .from("trade_products")
-      .select("id, product_name, materials, category, subcategory, trade_price_cents, rrp_price_cents, currency")
+      .select("id, product_name, materials, category, subcategory, dimensions, trade_price_cents, rrp_price_cents, currency")
       .eq("is_active", true)
       .or(`product_name.ilike.%${term}%,subcategory.ilike.%${term}%,category.ilike.%${term}%`)
       .limit(160),
   ]);
-  return [
+  const typologyFiltered = [
     ...(pickRes.data || []),
     ...(tradeRes.data || []).map((r: any) => ({ ...r, title: r.product_name, trade_price_cents: r.trade_price_cents ?? r.rrp_price_cents ?? null })),
   ].filter((r: any) => rowMatchesRequestedTypology(r, typology));
+  if (!dimConstraints) return typologyFiltered;
+  const dimRes = filterRowsByDimensionConstraints(typologyFiltered, dimConstraints);
+  console.log(`[concierge strict-typology dim] typology=${typology} pre=${typologyFiltered.length} strict=${dimRes.strictKept.length} kept=${dimRes.kept.length} dropped=${dimRes.dropped} unknownDropped=${dimRes.unknownDropped} fellBack=${dimRes.fellBack} constraints=${JSON.stringify(dimConstraints)}`);
+  return dimRes.kept;
 }
 
 // Common city / country abbreviations mapped to canonical full names.
