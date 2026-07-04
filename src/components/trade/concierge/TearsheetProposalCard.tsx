@@ -136,6 +136,45 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
     sendConciergePrefill(prompt);
   };
 
+  const asItem = (p: (typeof visiblePicks)[number]): SwapPromptItem => ({
+    pick_id: p.id,
+    title: p.title,
+    designer_name: p.designer_name,
+    materials: p.materials,
+    category: (p as any).category ?? null,
+  });
+
+  // #2 — Live suggestion: ask the AI for ONE more piece that fills a gap in
+  // the current selection. Prefills the composer; the user confirms.
+  const handleSuggestOneMore = () => {
+    if (visiblePicks.length === 0) {
+      toast.error("Keep at least one piece so the AI knows what to harmonise with.");
+      return;
+    }
+    const prompt = buildSuggestOneMorePrompt(visiblePicks.map(asItem));
+    sendConciergePrefill(prompt);
+  };
+
+  // #3 — Critique & Explain: prose-only breakdown of how the architect's
+  // manual edits (skips, locks) shift the design vs the original proposal.
+  const handleCritiqueEdits = () => {
+    const skipped = uniquePreview.filter((p) => excluded.has(p.id));
+    const lockedItems = uniquePreview.filter((p) => locked.has(p.id) && !excluded.has(p.id));
+    const keptItems = uniquePreview.filter((p) => !excluded.has(p.id));
+    if (skipped.length === 0 && lockedItems.length === 0) {
+      toast.error("Skip or lock at least one piece so the critique has something to react to.");
+      return;
+    }
+    const prompt = buildCritiqueEditsPrompt(
+      uniquePreview.map(asItem),
+      keptItems.map(asItem),
+      skipped.map(asItem),
+      lockedItems.map(asItem),
+    );
+    sendConciergePrefill(prompt);
+  };
+
+
   const handleApprove = async () => {
     if (visiblePicks.length === 0) {
       toast.error("Select at least one piece to include.");
