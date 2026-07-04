@@ -213,7 +213,7 @@ RULES:
 - Rewrite the sentence to keep the useful qualifying question or atmosphere framing intact WITHOUT naming any specific brand or piece. Do NOT invent a replacement name. Do NOT say "I could suggest" or "for example" — just drop the namedrop and keep the rest of the sentence readable.
 - Do NOT add apologies, do NOT mention external archives ("Axonometric Studio", "designers' own collections"), do NOT self-correct in the prose ("actually, on second thought…").
 - Preserve tone, register, paragraph structure, questions, and any user-facing formatting. Keep the assistant's persona (Felix, the concierge).
-- The word "Maison Affluency" is always allowed. "Felix" is always allowed. Generic material / typology words (bronze, stone, oak, dining table, chandelier) are always allowed.
+- The word "Maison Affluency" is always allowed. "Felix" is always allowed. Generic material / typology / colour words are ALWAYS allowed and must NEVER be removed — this includes stone and marble varieties (Calacatta, Statuario, Nero Marquina, Portoro, Verde Alpi, Rosso Levanto, Belgian Bluestone, Grand Antique…), woods (walnut, oak, ebony, rosewood, teak…), metals (bronze, brass, patinated bronze, blackened steel…), textiles (velvet, mohair, boucle, linen, silk, shagreen, parchment…), finishes (crystal, glass, lacquer, cerused, gilt…), colours, and typologies (chandelier, dining table, console, sideboard, sofa, etc.). If the only capitalised span is a material qualifier followed by a material noun ("Nero Marquina marble", "Belgian bluestone"), leave it untouched.
 - If the prose is already clean, return it unchanged with an empty removed_names array.
 
 Output STRICT JSON only, no code fences:
@@ -246,6 +246,22 @@ export async function runDiscoveryProseGuard(opts: {
     "Let", "Would", "Could", "Should", "Once", "For", "With", "And", "But", "Or", "If",
     "Curation", "Discover", "Discovery", "Tearsheet", "Quote", "Showroom", "Gallery",
     "Belgravia", "Mayfair", "London", "Paris", "Milan", "Monaco", "New York",
+    // Materials, stones, woods, finishes, colours — descriptive, never brands.
+    "Marble", "Stone", "Onyx", "Granite", "Quartzite", "Limestone", "Travertine",
+    "Bluestone", "Sandstone", "Slate", "Basalt", "Terrazzo", "Alabaster",
+    "Calacatta", "Statuario", "Statuarietto", "Carrara", "Nero", "Marquina",
+    "Portoro", "Emperador", "Rosso", "Verde", "Alpi", "Levanto", "Breccia",
+    "Bardiglio", "Arabescato", "Paonazzo", "Onice", "Sahara", "Noir",
+    "Grand", "Antique", "Belgian", "Italian", "French", "Portuguese", "Spanish",
+    "Crystal", "Glass", "Bronze", "Brass", "Copper", "Steel", "Iron", "Pewter",
+    "Silver", "Gold", "Rose", "Gilt", "Patinated", "Blackened", "Polished", "Brushed",
+    "Walnut", "Oak", "Ash", "Elm", "Cherry", "Maple", "Mahogany", "Ebony", "Teak",
+    "Rosewood", "Sycamore", "Pine", "Beech", "Zebrano", "Wenge", "Palisander",
+    "Leather", "Velvet", "Mohair", "Linen", "Wool", "Silk", "Cotton", "Bouclé", "Boucle",
+    "Lacquer", "Shagreen", "Parchment", "Straw", "Rattan", "Cane", "Cerused",
+    "White", "Black", "Cream", "Ivory", "Beige", "Taupe", "Grey", "Gray", "Charcoal",
+    "Chandelier", "Table", "Chair", "Sofa", "Console", "Cabinet", "Sideboard",
+    "Dining", "Living", "Bedroom", "Salon", "Foyer", "Library", "Study",
   ]);
   const suspicious = capTokens.filter((t) => {
     // Drop if every whitespace-separated part is a stop word
@@ -343,6 +359,36 @@ const REDACTOR_STOP = new Set([
   "Curation", "Discover", "Discovery", "Tearsheet", "Quote", "Showroom", "Gallery",
   "Belgravia", "Mayfair", "London", "Paris", "Milan", "Monaco", "New", "York",
   "Alternatively", "Additionally", "Or", "As",
+  // Materials, stones, woods, finishes — these are descriptive, never brands.
+  // Capitalised marble / stone varieties frequently appear in atelier prose:
+  // "Calacatta", "Nero Marquina", "Statuario", "Belgian Bluestone", "Verde Alpi".
+  "Marble", "Stone", "Onyx", "Granite", "Quartzite", "Limestone", "Travertine",
+  "Bluestone", "Sandstone", "Slate", "Basalt", "Terrazzo", "Alabaster",
+  "Calacatta", "Statuario", "Statuarietto", "Carrara", "Nero", "Marquina",
+  "Portoro", "Emperador", "Rosso", "Verde", "Alpi", "Levanto", "Breccia",
+  "Bardiglio", "Arabescato", "Paonazzo", "Onice", "Onyx", "Sahara", "Noir",
+  "Grand", "Antique", "Belgian", "Italian", "French", "Portuguese", "Spanish",
+  "Crystal", "Glass", "Bronze", "Brass", "Copper", "Steel", "Iron", "Pewter",
+  "Silver", "Gold", "Rose", "Gilt", "Patinated", "Blackened", "Polished", "Brushed",
+  "Walnut", "Oak", "Ash", "Elm", "Cherry", "Maple", "Mahogany", "Ebony", "Teak",
+  "Rosewood", "Sycamore", "Pine", "Beech", "Zebrano", "Wenge", "Palisander",
+  "Leather", "Velvet", "Mohair", "Linen", "Wool", "Silk", "Cotton", "Bouclé", "Boucle",
+  "Lacquer", "Shagreen", "Parchment", "Straw", "Rattan", "Cane", "Cerused",
+  "White", "Black", "Cream", "Ivory", "Beige", "Taupe", "Grey", "Gray", "Charcoal",
+  "Chandelier", "Table", "Chair", "Sofa", "Console", "Cabinet", "Sideboard",
+  "Dining", "Living", "Bedroom", "Salon", "Foyer", "Library", "Study",
+]);
+
+// Material nouns that indicate the preceding capitalised span is a
+// stone / finish / textile qualifier ("Nero Marquina marble"), not a brand.
+const MATERIAL_NOUN_AFTER = new Set([
+  "marble", "stone", "onyx", "granite", "quartzite", "limestone", "travertine",
+  "bluestone", "sandstone", "slate", "basalt", "terrazzo", "alabaster",
+  "wood", "oak", "walnut", "ash", "elm", "cherry", "maple", "mahogany", "ebony", "teak",
+  "leather", "velvet", "mohair", "linen", "wool", "silk", "cotton", "bouclé", "boucle",
+  "bronze", "brass", "copper", "steel", "iron", "pewter", "silver", "gold",
+  "crystal", "glass", "lacquer", "shagreen", "parchment", "straw", "rattan", "cane",
+  "finish", "veneer", "inlay", "upholstery", "fabric",
 ]);
 
 export type DeterministicRedactionResult = {
@@ -391,12 +437,18 @@ export function deterministicRedact(opts: {
   // 2. Redact capitalised proper-noun spans (1–4 words) not in allowlists.
   //    We match spans like "Poliform", "B&B Italia", "Kelly Wearstler", "Fendi Casa".
   out = out.replace(
-    /\b[A-Z][A-Za-z&'’\-]{2,}(?:\s+[A-Z][A-Za-z&'’\-]{2,}){0,3}\b/g,
-    (span) => {
+    /\b[A-Z][A-Za-z&'’\-]{2,}(?:\s+[A-Z][A-Za-z&'’\-]{2,}){0,3}\b(\s+[a-z][a-zàâäéèêëîïôöùûüç]+)?/g,
+    (span, trailer) => {
+      // If the span is immediately followed by a material noun ("Nero
+      // Marquina marble", "Belgian bluestone", "Calacatta Viola quartzite"),
+      // treat it as a material qualifier, not a brand.
+      const trailWord = trailer ? String(trailer).trim().toLowerCase() : "";
+      const headSpan = trailer ? span.slice(0, span.length - trailer.length) : span;
+      if (trailWord && MATERIAL_NOUN_AFTER.has(trailWord)) return span;
       // Skip if every part is a common stop word
-      const parts = span.split(/\s+/);
+      const parts = headSpan.split(/\s+/);
       if (parts.every((p) => REDACTOR_STOP.has(p))) return span;
-      const key = span.toLowerCase();
+      const key = headSpan.toLowerCase();
       // Allowed if the span is a substring of any allowed designer (or vice versa)
       for (const d of designerSet) {
         if (d === key || d.includes(key) || key.includes(d)) return span;
@@ -407,8 +459,8 @@ export function deterministicRedact(opts: {
       for (const t of titleSet) {
         if (t === key || t.includes(key) || key.includes(t)) return span;
       }
-      removed.push(span);
-      return "[redacted]";
+      removed.push(headSpan);
+      return trailer ? `[redacted]${trailer}` : "[redacted]";
     },
   );
 

@@ -2161,7 +2161,7 @@ async function extractBrief(apiKey: string, latestUserMessage: string): Promise<
                       summary: { type: "string", description: "One-sentence restatement of what the user is asking for." },
                       room: { type: "string" },
                       style: { type: "string" },
-                      materials: { type: "array", items: { type: "string" } },
+                      materials: { type: "array", items: { type: "string" }, description: "Every material the user names, including alternatives. 'glass or crystal' → ['glass', 'crystal']. 'oak or walnut' → ['oak', 'walnut']. Never collapse alternatives into a single token." },
                       categories: { type: "array", items: { type: "string" } },
                       designers: { type: "array", items: { type: "string" } },
                       qty_hint: { type: "integer", minimum: 1, maximum: 99 },
