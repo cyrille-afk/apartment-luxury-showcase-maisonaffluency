@@ -8,6 +8,7 @@ import { withSemanticCache } from "../_shared/aiCache.ts";
 import { coerceClearance, classifyResultFailure, countDimensionNumbers } from "../_shared/spatialFitValidation.ts";
 import { canAccessProject } from "../_shared/tenantAccess.ts";
 import { runInspectorPass, buildInspectorGroundTruth, buildInspectorLogRecord, logInspectorRun, validateRequirementsCoverage } from "../_shared/concierge-inspector.ts";
+import { deriveHardConstraints, applyHardConstraints, type HardConstraints } from "../_shared/hardConstraints.ts";
 
 const SENTIMENT_MODEL = modelFor("cheap");
 const SENTIMENT_MAX_TOKENS = tokenBudget("classify");
