@@ -561,6 +561,13 @@ export async function streamConcierge({
       return;
     }
 
+    // CORS/preflight failures never recover on retry — the browser will
+    // reject the same headers every time. Surface immediately.
+    if (outcome.kind === "network_error" && outcome.message.startsWith("CORS_LIKELY:")) {
+      onError(outcome.message);
+      return;
+    }
+
     if (outcome.kind === "resume_expired") {
       // Server dropped the frames for this stream_id. Fall through to
       // partial-text continuation on the next attempt.
