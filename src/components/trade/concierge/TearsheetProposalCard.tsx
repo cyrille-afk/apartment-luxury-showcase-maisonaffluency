@@ -53,6 +53,20 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
   const excluded = excludedProp ?? excludedLocal;
   const [lockedLocal, setLockedLocal] = useState<Set<string>>(lockedProp ?? new Set());
   const locked = lockedProp ?? lockedLocal;
+
+  // Cascading re-alignment state — locally-applied swaps and additions.
+  // `swaps` maps old_pick_id → replacement preview (renders in-place, keeps order).
+  // `extraPicks` are new items appended after the original preview list.
+  const [swaps, setSwaps] = useState<Map<string, PickPreview>>(new Map());
+  const [extraPicks, setExtraPicks] = useState<PickPreview[]>([]);
+
+  // Structured Validate/Sync verdict — set by handleValidate, cleared by dismiss.
+  const [verdict, setVerdict] = useState<ValidationVerdict | null>(null);
+  const [verdictLoading, setVerdictLoading] = useState(false);
+  // Cascading re-alignment delta from realignUnlocked. Rendered as a diff panel.
+  const [delta, setDelta] = useState<RealignmentDelta | null>(null);
+  const [deltaLoading, setDeltaLoading] = useState(false);
+
   // Persist "Why this pick" expanded state per proposal in sessionStorage so
   // that switching views (panel collapse, route change, page refresh within
   // the same tab) preserves the reading context the user was building.
@@ -86,10 +100,17 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
 
   const isAppend = mode === "append";
   // Dedupe by id (the AI occasionally repeats an id) to avoid duplicate React keys.
-  const uniquePreview = (() => {
+  // Then apply local swaps (in-place replacement) and append extraPicks
+  // from any accepted cascading re-alignment.
+  const uniquePreview = useMemo(() => {
     const seen = new Set<string>();
-    return proposal.preview.filter((p) => (seen.has(p.id) ? false : (seen.add(p.id), true)));
-  })();
+    const base = proposal.preview.filter((p) => (seen.has(p.id) ? false : (seen.add(p.id), true)));
+    const swapped = base.map((p) => swaps.get(p.id) ?? p);
+    const swappedIds = new Set(swapped.map((p) => p.id));
+    const extras = extraPicks.filter((p) => !swappedIds.has(p.id));
+    return [...swapped, ...extras];
+  }, [proposal.preview, swaps, extraPicks]);
+
   const visiblePicks = uniquePreview.filter((p) => !excluded.has(p.id));
 
   const togglePick = (id: string) => {
