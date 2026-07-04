@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
-import { Loader2, Check, X, Pencil, ExternalLink, Plus, ChevronDown, Copy, Repeat } from "lucide-react";
+import { Loader2, Check, X, Pencil, ExternalLink, Plus, ChevronDown, Copy, Repeat, Lock, Unlock, RefreshCw } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { commitProposal, type TearsheetProposal } from "@/lib/tradeConciergeStream";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 import { BoardPicker } from "@/components/trade/concierge/BoardPicker";
 import { ProjectAssignInline } from "@/components/trade/concierge/ProjectAssignInline";
 import { HotspotImageBadge } from "@/components/trade/HotspotImageBadge";
-import { buildSwapPrompt, sendConciergePrefill } from "@/lib/conciergePrefill";
+import { buildSwapPrompt, buildRegenerateUnlockedPrompt, sendConciergePrefill } from "@/lib/conciergePrefill";
 import { RequirementsBadge } from "@/components/trade/concierge/RequirementsBadge";
 
 type Status = "pending" | "committing" | "approved" | "discarded";
@@ -21,11 +21,14 @@ interface Props {
   /** Lifted exclusion state so the parent can inject "kept vs removed" into the next chat turn. */
   excluded?: Set<string>;
   onExcludedChange?: (excluded: Set<string>) => void;
+  /** Lifted locked state — items the architect has frozen so re-generation preserves them verbatim. */
+  locked?: Set<string>;
+  onLockedChange?: (locked: Set<string>) => void;
   /** IDs that are NEW vs the previous proposal — rationale will be shown for these. */
   newPickIds?: string[];
 }
 
-export function TearsheetProposalCard({ proposal, onResolved, excluded: excludedProp, onExcludedChange, newPickIds }: Props) {
+export function TearsheetProposalCard({ proposal, onResolved, excluded: excludedProp, onExcludedChange, locked: lockedProp, onLockedChange, newPickIds }: Props) {
   const initialMode: Mode = proposal.tool === "add_to_tearsheet" ? "append" : "create";
   const [mode, setMode] = useState<Mode>(initialMode);
 
@@ -44,6 +47,8 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
 
   const [excludedLocal, setExcludedLocal] = useState<Set<string>>(excludedProp ?? new Set());
   const excluded = excludedProp ?? excludedLocal;
+  const [lockedLocal, setLockedLocal] = useState<Set<string>>(lockedProp ?? new Set());
+  const locked = lockedProp ?? lockedLocal;
   // Persist "Why this pick" expanded state per proposal in sessionStorage so
   // that switching views (panel collapse, route change, page refresh within
   // the same tab) preserves the reading context the user was building.
@@ -89,6 +94,46 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
     else next.add(id);
     setExcludedLocal(next);
     onExcludedChange?.(next);
+    // Skipping a locked item makes no sense — auto-unlock it.
+    if (locked.has(id)) {
+      const nextLocked = new Set(locked);
+      nextLocked.delete(id);
+      setLockedLocal(nextLocked);
+      onLockedChange?.(nextLocked);
+    }
+  };
+
+  const toggleLock = (id: string) => {
+    const next = new Set(locked);
+    if (next.has(id)) next.delete(id);
+    else next.add(id);
+    setLockedLocal(next);
+    onLockedChange?.(next);
+  };
+
+  const lockedVisible = visiblePicks.filter((p) => locked.has(p.id));
+  const unlockedVisibleCount = visiblePicks.length - lockedVisible.length;
+
+  const handleRegenerateUnlocked = () => {
+    if (lockedVisible.length === 0) {
+      toast.error("Lock at least one piece before re-generating the rest.");
+      return;
+    }
+    if (unlockedVisibleCount === 0) {
+      toast.error("Every included piece is locked — unlock at least one to re-generate.");
+      return;
+    }
+    const prompt = buildRegenerateUnlockedPrompt(
+      lockedVisible.map((p) => ({
+        pick_id: p.id,
+        title: p.title,
+        designer_name: p.designer_name,
+        materials: p.materials,
+        category: (p as any).category ?? null,
+      })),
+      unlockedVisibleCount,
+    );
+    sendConciergePrefill(prompt);
   };
 
   const handleApprove = async () => {
@@ -332,6 +377,7 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
               <ul className="space-y-1.5">
                 {items.map((p) => {
                   const isExcluded = excluded.has(p.id);
+                  const isLocked = locked.has(p.id) && !isExcluded;
                   const isNew = newPickIds ? newPickIds.includes(p.id) : false;
                   const fromArgs = proposal.args.pick_rationales?.[p.id];
                   const rationale = (p as any).rationale || fromArgs?.reason || null;
@@ -354,6 +400,7 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
                       className={cn(
                         "flex items-start gap-2.5 rounded-lg p-1.5 transition-opacity",
                         isExcluded && "opacity-40",
+                        isLocked && "bg-muted/40 opacity-70 ring-1 ring-accent/20",
                       )}
                     >
                       <div className="relative h-10 w-10 shrink-0">
@@ -363,13 +410,23 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
                           <div className="h-10 w-10 rounded bg-muted" />
                         )}
                         {p.image_from_hotspot && <HotspotImageBadge className="top-0 left-0 px-1 py-0 text-[8px]" />}
+                        {isLocked && (
+                          <div className="absolute -top-1 -right-1 rounded-full bg-accent text-accent-foreground p-0.5 shadow-sm" title="Locked — will not change on re-generate">
+                            <Lock className="h-2.5 w-2.5" />
+                          </div>
+                        )}
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-1.5">
                           <div className="font-body text-xs text-foreground truncate">{p.title}</div>
-                          {isNew && (
+                          {isNew && !isLocked && (
                             <span className="shrink-0 rounded-full bg-accent/15 text-accent font-body text-[8px] uppercase tracking-widest px-1.5 py-0.5">
                               New
+                            </span>
+                          )}
+                          {isLocked && (
+                            <span className="shrink-0 rounded-full bg-accent/20 text-accent font-body text-[8px] uppercase tracking-widest px-1.5 py-0.5">
+                              Locked
                             </span>
                           )}
                         </div>
@@ -438,6 +495,24 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
                         <div className="flex items-center gap-1 self-center shrink-0">
                           <button
                             type="button"
+                            onClick={() => toggleLock(p.id)}
+                            disabled={isExcluded}
+                            className={cn(
+                              "inline-flex items-center gap-1 text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded border transition-colors",
+                              isLocked
+                                ? "border-accent/50 bg-accent/15 text-accent hover:bg-accent/25"
+                                : "border-border text-muted-foreground hover:text-foreground",
+                              isExcluded && "opacity-40 cursor-not-allowed",
+                            )}
+                            aria-label={isLocked ? `Unlock ${p.title || "this pick"}` : `Lock ${p.title || "this pick"} so re-generation keeps it`}
+                            aria-pressed={isLocked}
+                            title={isLocked ? "Locked — re-generation will keep this piece" : "Lock this piece so re-generation keeps it"}
+                          >
+                            {isLocked ? <Lock className="h-2.5 w-2.5" /> : <Unlock className="h-2.5 w-2.5" />}
+                            {isLocked ? "Locked" : "Lock"}
+                          </button>
+                          <button
+                            type="button"
                             onClick={() => sendConciergePrefill(buildSwapPrompt({
                               pick_id: p.id,
                               title: p.title,
@@ -475,7 +550,24 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
 
       {/* Actions */}
       {status === "pending" && (
-        <div className="flex items-center justify-end gap-2">
+        <div className="flex flex-wrap items-center justify-end gap-2">
+          <button
+            type="button"
+            onClick={handleRegenerateUnlocked}
+            disabled={lockedVisible.length === 0 || unlockedVisibleCount === 0}
+            className="mr-auto inline-flex items-center gap-1.5 rounded-full border border-accent/40 bg-accent/[0.06] text-accent font-body text-[11px] uppercase tracking-widest px-3 py-1.5 hover:bg-accent/15 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            title={
+              lockedVisible.length === 0
+                ? "Lock at least one piece to re-generate the rest"
+                : unlockedVisibleCount === 0
+                ? "Every included piece is locked"
+                : `Re-generate ${unlockedVisibleCount} unlocked ${unlockedVisibleCount === 1 ? "piece" : "pieces"}, keep ${lockedVisible.length} locked`
+            }
+            aria-label="Re-generate unlocked pieces"
+          >
+            <RefreshCw className="h-3 w-3" />
+            Re-generate unlocked{lockedVisible.length > 0 ? ` (${unlockedVisibleCount})` : ""}
+          </button>
           <button
             onClick={handleDiscard}
             className="font-body text-[11px] uppercase tracking-widest text-muted-foreground hover:text-foreground px-2.5 py-1.5 transition-colors"

@@ -54,6 +54,28 @@ export function buildSwapPrompt(item: SwapPromptItem): string {
   ].join(" ");
 }
 
+// Regenerate every UNLOCKED pick in the current draft while keeping the
+// locked ones verbatim. `locked` should list every pick the user has
+// explicitly frozen (🔒). The model must return a new proposal that includes
+// those exact pick_ids plus fresh alternatives for the rest.
+export function buildRegenerateUnlockedPrompt(locked: SwapPromptItem[], unlockedCount: number): string {
+  const lockedLines = locked.map((it) => {
+    const sku = shortSku(it.pick_id);
+    const title = String(it.title || "piece").trim();
+    const designer = it.designer_name ? ` — ${it.designer_name}` : "";
+    return `  • "${title}"${designer} (SKU ${sku}) [id: ${it.pick_id}]`;
+  });
+  const lockedBlock = lockedLines.length ? lockedLines.join("\n") : "  (none)";
+  const replaceCount = Math.max(unlockedCount, 0);
+  const noun = replaceCount === 1 ? "piece" : "pieces";
+  return [
+    `Re-generate the unlocked ${noun} in the current tearsheet draft.`,
+    `\n\nLOCKED — retain verbatim in the new proposal (SAME pick_ids, do NOT alter or drop):\n${lockedBlock}`,
+    `\n\nReplace the remaining ${replaceCount} unlocked ${noun} with fresh alternatives that match the same brief, typology, scale, and role.`,
+    `\nReturn the updated selection using the SAME tool as the current draft with real pick_ids from CURATED PIECES only.`,
+  ].join("");
+}
+
 // Fire the prompt into the AIConcierge composer. Safe to call from any
 // concierge card. No-op in non-browser environments.
 export function sendConciergePrefill(prompt: string): void {

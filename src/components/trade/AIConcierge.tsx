@@ -34,7 +34,7 @@ type PendingProposalTool =
   | "prepare_visualization_brief";
 type TimelineItem =
   | { kind: "msg"; role: "user" | "assistant"; content: string; actions?: ConciergeQuickAction[]; onboarding?: boolean; sourceContent?: string; sourceActions?: ConciergeQuickAction[]; attachments?: TimelineAttachment[]; appliedConstraints?: AppliedConstraintsEvent }
-  | { kind: "proposal"; proposal: TearsheetProposal; resolved?: "approved" | "discarded"; excluded?: string[]; newPickIds?: string[] }
+  | { kind: "proposal"; proposal: TearsheetProposal; resolved?: "approved" | "discarded"; excluded?: string[]; locked?: string[]; newPickIds?: string[] }
   | { kind: "quote_proposal"; proposal: QuoteProposal; resolved?: "approved" | "discarded" }
   | { kind: "ffe_proposal"; proposal: FfeProposal; resolved?: "approved" | "discarded" }
   | { kind: "viz_brief"; proposal: VisualizationBriefProposal; resolved?: "opened" | "discarded" }
@@ -866,8 +866,10 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
     const proposalContext: ChatMessage[] = [];
     if (lastProposal && !isFreshOpeningBrief && referencesCurrentDraft) {
       const excludedSet = new Set(lastProposal.excluded || []);
+      const lockedSet = new Set(lastProposal.locked || []);
       const kept = lastProposal.proposal.preview.filter((p) => !excludedSet.has(p.id));
       const removed = lastProposal.proposal.preview.filter((p) => excludedSet.has(p.id));
+      const locked = lastProposal.proposal.preview.filter((p) => lockedSet.has(p.id) && !excludedSet.has(p.id));
       const fmt = (p: { id: string; title: string; designer_name: string | null }) =>
         `  - "${p.title}" by ${p.designer_name || "—"} [id: ${p.id}]`;
       const lines: string[] = [
@@ -875,6 +877,12 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
         `KEPT (must remain in the next proposal, with the SAME ids):`,
         kept.length ? kept.map(fmt).join("\n") : "  (none)",
       ];
+      if (locked.length) {
+        lines.push(
+          `LOCKED 🔒 (frozen by the architect — retain these EXACT pick_ids verbatim, do NOT substitute, do NOT alter):`,
+          locked.map(fmt).join("\n"),
+        );
+      }
       if (removed.length) {
         lines.push(
           `REMOVED by the user (do NOT bring these back unless the user explicitly re-requests them):`,
@@ -2061,6 +2069,7 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
                   key={i}
                   proposal={item.proposal}
                   excluded={new Set(item.excluded || [])}
+                  locked={new Set(item.locked || [])}
                   newPickIds={item.newPickIds}
                   onExcludedChange={(next) => {
                     setTimeline((prev) => {
@@ -2068,6 +2077,16 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
                       const t = copy[i];
                       if (t?.kind === "proposal") {
                         copy[i] = { ...t, excluded: Array.from(next) };
+                      }
+                      return copy;
+                    });
+                  }}
+                  onLockedChange={(next) => {
+                    setTimeline((prev) => {
+                      const copy = prev.slice();
+                      const t = copy[i];
+                      if (t?.kind === "proposal") {
+                        copy[i] = { ...t, locked: Array.from(next) };
                       }
                       return copy;
                     });
