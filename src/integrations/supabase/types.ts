@@ -1420,6 +1420,68 @@ export type Database = {
         }
         Relationships: []
       }
+      concierge_stream_frames: {
+        Row: {
+          chunk: string
+          created_at: string
+          seq: number
+          stream_id: string
+        }
+        Insert: {
+          chunk: string
+          created_at?: string
+          seq: number
+          stream_id: string
+        }
+        Update: {
+          chunk?: string
+          created_at?: string
+          seq?: number
+          stream_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "concierge_stream_frames_stream_id_fkey"
+            columns: ["stream_id"]
+            isOneToOne: false
+            referencedRelation: "concierge_stream_sessions"
+            referencedColumns: ["stream_id"]
+          },
+        ]
+      }
+      concierge_stream_sessions: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          request_id: string | null
+          status: string
+          stream_id: string
+          surface: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          request_id?: string | null
+          status?: string
+          stream_id: string
+          surface?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          request_id?: string | null
+          status?: string
+          stream_id?: string
+          surface?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       content_audit_log: {
         Row: {
           changed_by: string | null
@@ -6787,6 +6849,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      purge_stale_concierge_streams: { Args: never; Returns: undefined }
       read_email_batch: {
         Args: { batch_size: number; queue_name: string; vt: number }
         Returns: {

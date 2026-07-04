@@ -8,6 +8,7 @@ import { withSemanticCache } from "../_shared/aiCache.ts";
 import { coerceClearance, classifyResultFailure, countDimensionNumbers } from "../_shared/spatialFitValidation.ts";
 import { canAccessProject } from "../_shared/tenantAccess.ts";
 import { runInspectorPass, buildInspectorGroundTruth, buildInspectorLogRecord, logInspectorRun, validateRequirementsCoverage } from "../_shared/concierge-inspector.ts";
+import { installFramePersistence, serveResume } from "./_resume.ts";
 import { deriveHardConstraints, applyHardConstraints, filterRowsByHardConstraints, type HardConstraints } from "../_shared/hardConstraints.ts";
 
 const SENTIMENT_MODEL = modelFor("cheap");
@@ -3194,7 +3195,36 @@ serve(async (req) => {
       });
     }
 
-    const { messages, project_id: bodyProjectId, lang: bodyLang } = await req.json();
+    const { messages, project_id: bodyProjectId, lang: bodyLang, resume: resumeBody } = await req.json();
+
+    // ----- Resume-token short-circuit ------------------------------------
+    // A reconnecting client sends `{ resume: { stream_id, last_seq } }`.
+    // We stream persisted SSE frames with seq > last_seq from the DB and
+    // return before entering the normal (expensive) RAG/model pipeline.
+    // If the token is unknown/expired/not-owned we return 410 so the
+    // client can fall back to its partial-text continuation path.
+    if (resumeBody && typeof resumeBody === "object") {
+      const streamId = typeof (resumeBody as any).stream_id === "string" ? (resumeBody as any).stream_id : null;
+      const lastSeq = Number((resumeBody as any).last_seq ?? 0);
+      if (!streamId) {
+        return new Response(JSON.stringify({ error: "resume.stream_id is required" }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const supaResume = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+      const resp = await serveResume({
+        supabase: supaResume,
+        userId: auth.userId,
+        streamId,
+        lastSeq,
+        corsHeaders,
+      });
+      if (resp) return resp;
+      return new Response(JSON.stringify({ error: "resume token unknown or expired" }), {
+        status: 410, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const activeProjectId: string | null = typeof bodyProjectId === "string" ? bodyProjectId : null;
     // Reply-language directive — the UI exposes a language picker (en/id/th/zh).
     // Without this the long English system prompt drowns out the user-message
@@ -4142,7 +4172,21 @@ serve(async (req) => {
           }
         };
 
-        // Emit the trace id first so the client can correlate this stream
+        // Install resume-token persistence: wraps enqueue to (1) prefix
+        // each SSE frame with a `:seq=N` comment on the wire so the client
+        // can track its cursor, and (2) mirror every chunk into
+        // `concierge_stream_frames`. Emits `event: stream_start` as seq=1
+        // so the client receives the resume token before any other event.
+        const { streamId: resumeStreamId, finalize: finalizeResume } = installFramePersistence({
+          controller,
+          supabase,
+          userId,
+          requestId,
+          surface: "trade",
+        });
+        
+
+        // Emit the trace id so the client can correlate this stream
         // with server-side Inspector logs (same request_id).
         controller.enqueue(encoder.encode(`event: request_id\ndata: ${JSON.stringify({ request_id: requestId })}\n\n`));
 
@@ -5813,7 +5857,11 @@ serve(async (req) => {
 
         } catch (e) {
           console.error("stream interceptor error:", e);
+          try { await finalizeResume("error"); } catch { /* ignore */ }
         } finally {
+          // Mark the resume session complete so a late reconnect can drain
+          // the frames it missed and terminate cleanly.
+          try { await finalizeResume("complete"); } catch { /* ignore */ }
           // Persist token usage (best-effort; never blocks the stream close)
           if (capturedUsage) {
             const pt = Number(capturedUsage.prompt_tokens ?? 0);
