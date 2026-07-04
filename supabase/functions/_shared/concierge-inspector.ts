@@ -400,9 +400,11 @@ export function deterministicRedact(opts: {
       for (const d of designerSet) {
         if (d === key || d.includes(key) || key.includes(d)) return span;
       }
-      // Also allow if it's a substring of any allowed piece title
+      // Also allow if the span overlaps any allowed piece title in either
+      // direction (title-substring-of-span covers cases like "The Calliope
+      // Medium Chandelier" containing "Calliope Medium Chandelier").
       for (const t of titleSet) {
-        if (t.includes(key)) return span;
+        if (t === key || t.includes(key) || key.includes(t)) return span;
       }
       removed.push(span);
       return "[redacted]";
