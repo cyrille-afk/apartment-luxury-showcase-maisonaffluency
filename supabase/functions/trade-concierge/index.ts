@@ -3344,6 +3344,18 @@ async function buildDeterministicTearsheetProposal(
   const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
   const requestedTypology = inferRequestedTypology(brief, requestText);
   const dimConstraints = inferDimensionConstraints(requestText);
+  // Combine any inferred lead-time constraint with the brief's stored ceiling.
+  const inferredLead = inferLeadTimeConstraints(requestText);
+  const briefCeiling = typeof brief?.lead_weeks_max === "number" && brief.lead_weeks_max > 0 ? brief.lead_weeks_max : null;
+  let leadConstraints: LeadTimeConstraints | null = null;
+  if (inferredLead || briefCeiling != null) {
+    leadConstraints = { ...(inferredLead || {}) };
+    if (briefCeiling != null) {
+      leadConstraints.maxWeeks = leadConstraints.maxWeeks == null
+        ? briefCeiling
+        : Math.min(leadConstraints.maxWeeks, briefCeiling);
+    }
+  }
   const scoreRow = (r: any) => {
     const hay = `${r?.title || ""} ${r?.category || ""} ${r?.subcategory || ""} ${r?.materials || ""}`.toLowerCase();
     let score = Number(r?.similarity || 0);
@@ -3363,8 +3375,15 @@ async function buildDeterministicTearsheetProposal(
     console.log(`[concierge tearsheet dim] pre=${candidateRows.length} strict=${dimRes.strictKept.length} kept=${dimRes.kept.length} dropped=${dimRes.dropped} unknownDropped=${dimRes.unknownDropped} fellBack=${dimRes.fellBack} constraints=${JSON.stringify(dimConstraints)}`);
     candidateRows = dimRes.kept;
   }
+  // Hard lead-time ceiling — bounces made-to-order pieces that miss the deadline.
+  if (leadConstraints && candidateRows.length) {
+    const brandIdx = await getBrandLeadTimeIndex(supabase);
+    const leadRes = filterRowsByLeadTimeConstraints(candidateRows, leadConstraints, brandIdx);
+    console.log(`[concierge tearsheet lead] pre=${candidateRows.length} kept=${leadRes.kept.length} dropped=${leadRes.dropped} unknownDropped=${leadRes.unknownDropped} fellBack=${leadRes.fellBack} constraints=${JSON.stringify(leadConstraints)}`);
+    candidateRows = leadRes.kept;
+  }
   if (candidateRows.length < 2 && requestedTypology) {
-    candidateRows = (await fetchStrictTypologyCandidates(supabase, requestedTypology, dimConstraints))
+    candidateRows = (await fetchStrictTypologyCandidates(supabase, requestedTypology, dimConstraints, leadConstraints))
       .filter((r: any) => r && typeof r.id === "string" && UUID_RE.test(r.id))
       .sort((a: any, b: any) => scoreRow(b) - scoreRow(a));
   }
