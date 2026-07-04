@@ -2019,6 +2019,7 @@ async function classifySentiment(
           headers: { Authorization: `Bearer ${aiAuthKey(apiKey)}`, "Content-Type": "application/json" },
           body: JSON.stringify({
             model: aiModel(SENTIMENT_MODEL),
+            temperature: 0,
             max_completion_tokens: SENTIMENT_MAX_TOKENS,
             messages: [
               {
@@ -2321,6 +2322,7 @@ async function extractBrief(apiKey: string, latestUserMessage: string): Promise<
           headers: { Authorization: `Bearer ${aiAuthKey(apiKey)}`, "Content-Type": "application/json" },
           body: JSON.stringify({
             model: aiModel(SENTIMENT_MODEL),
+            temperature: 0,
             max_completion_tokens: 400,
             messages: [
               {
@@ -4590,6 +4592,7 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         model: aiModel(chosenModel),
+        temperature: 0,
         messages: [{ role: "system", content: languageDirective + systemPrompt }, ...trimmedMessages],
         tools: finalTools,
         tool_choice: toolChoice,
@@ -5389,6 +5392,7 @@ serve(async (req) => {
                   headers: { Authorization: `Bearer ${aiAuthKey(LOVABLE_API_KEY)}`, "Content-Type": "application/json" },
                   body: JSON.stringify({
                     model: aiModel(modelFor("balanced")),
+                    temperature: 0,
                     max_completion_tokens: CHAT_MAX_TOKENS,
                     messages: followupMessages,
                   }),
@@ -5502,6 +5506,7 @@ serve(async (req) => {
                   headers: { Authorization: `Bearer ${aiAuthKey(LOVABLE_API_KEY)}`, "Content-Type": "application/json" },
                   body: JSON.stringify({
                     model: aiModel(modelFor("balanced")),
+                    temperature: 0,
                     max_completion_tokens: CHAT_MAX_TOKENS,
                     messages: followupMessages,
                   }),
@@ -5583,6 +5588,7 @@ serve(async (req) => {
                   headers: { Authorization: `Bearer ${aiAuthKey(LOVABLE_API_KEY)}`, "Content-Type": "application/json" },
                   body: JSON.stringify({
                     model: aiModel(modelFor("balanced")),
+                    temperature: 0,
                     max_completion_tokens: CHAT_MAX_TOKENS,
                     messages: followupMessages,
                   }),
@@ -5902,6 +5908,7 @@ serve(async (req) => {
               headers: { Authorization: `Bearer ${aiAuthKey(LOVABLE_API_KEY)}`, "Content-Type": "application/json" },
               body: JSON.stringify({
                 model: aiModel(modelFor("balanced")),
+                temperature: 0,
                 max_completion_tokens: CHAT_MAX_TOKENS,
                 messages: [
                   { role: "system", content: followupSystem },
@@ -6019,6 +6026,7 @@ serve(async (req) => {
               headers: { Authorization: `Bearer ${aiAuthKey(LOVABLE_API_KEY)}`, "Content-Type": "application/json" },
               body: JSON.stringify({
                 model: aiModel(modelFor("balanced")),
+                temperature: 0,
                 max_completion_tokens: CHAT_MAX_TOKENS,
                 messages: [
                   { role: "system", content: languageDirective + systemPrompt },
