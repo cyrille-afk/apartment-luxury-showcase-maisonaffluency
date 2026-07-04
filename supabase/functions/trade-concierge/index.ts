@@ -3195,7 +3195,36 @@ serve(async (req) => {
       });
     }
 
-    const { messages, project_id: bodyProjectId, lang: bodyLang } = await req.json();
+    const { messages, project_id: bodyProjectId, lang: bodyLang, resume: resumeBody } = await req.json();
+
+    // ----- Resume-token short-circuit ------------------------------------
+    // A reconnecting client sends `{ resume: { stream_id, last_seq } }`.
+    // We stream persisted SSE frames with seq > last_seq from the DB and
+    // return before entering the normal (expensive) RAG/model pipeline.
+    // If the token is unknown/expired/not-owned we return 410 so the
+    // client can fall back to its partial-text continuation path.
+    if (resumeBody && typeof resumeBody === "object") {
+      const streamId = typeof (resumeBody as any).stream_id === "string" ? (resumeBody as any).stream_id : null;
+      const lastSeq = Number((resumeBody as any).last_seq ?? 0);
+      if (!streamId) {
+        return new Response(JSON.stringify({ error: "resume.stream_id is required" }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const supaResume = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+      const resp = await serveResume({
+        supabase: supaResume,
+        userId: auth.userId,
+        streamId,
+        lastSeq,
+        corsHeaders,
+      });
+      if (resp) return resp;
+      return new Response(JSON.stringify({ error: "resume token unknown or expired" }), {
+        status: 410, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const activeProjectId: string | null = typeof bodyProjectId === "string" ? bodyProjectId : null;
     // Reply-language directive — the UI exposes a language picker (en/id/th/zh).
     // Without this the long English system prompt drowns out the user-message
