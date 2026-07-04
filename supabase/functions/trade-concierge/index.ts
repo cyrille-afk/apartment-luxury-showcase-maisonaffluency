@@ -4184,7 +4184,7 @@ serve(async (req) => {
           requestId,
           surface: "trade",
         });
-        (globalThis as any).__conciergeResumeContext = { resumeStreamId, finalizeResume };
+        
 
         // Emit the trace id so the client can correlate this stream
         // with server-side Inspector logs (same request_id).
