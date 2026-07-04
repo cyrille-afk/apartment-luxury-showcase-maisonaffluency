@@ -2254,10 +2254,20 @@ async function extractBrief(apiKey: string, latestUserMessage: string): Promise<
 }
 
 function buildPlanDirective(extracted: ExtractedBrief): string {
+  const b = extracted.brief;
+  const anchorLine = b.anchor_role
+    ? `⚑ ANCHOR REQUEST — the user framed this as: "${b.anchor_role}"${b.anchor_typology ? ` (typology: ${b.anchor_typology})` : ""}${b.emphasis.length ? ` [emphasis: ${b.emphasis.join(", ")}]` : ""}. Treat this as a non-negotiable brief slot — reserve the marquee position in any card for this piece, keep the user's exact framing in the closing sentence, and do NOT dilute the request into generic prose about "a beautiful room". If no card is being proposed this turn, ask exactly ONE crisp qualifier that unblocks the anchor (typology, material, or scale) — never a laundry list.`
+    : null;
+
   if (!extracted.plan.length) {
+    if (anchorLine) {
+      return [
+        anchorLine,
+        "(No tool calls planned this turn — reply with ONE crisp qualifier for the anchor, then stop. Do not restate the brief back at the user; do not describe imaginary pieces.)",
+      ].join("\n");
+    }
     return "(No tool calls planned this turn — reply conversationally. Default tone applies.)";
   }
-  const b = extracted.brief;
   const parts: string[] = [];
   if (b.summary) parts.push(`- Summary: ${b.summary}`);
   if (b.room) parts.push(`- Room: ${b.room}`);
@@ -2277,12 +2287,13 @@ function buildPlanDirective(extracted: ExtractedBrief): string {
 
   return [
     `Intent: ${extracted.intent}`,
+    anchorLine || "",
     "Structured brief:",
     parts.length ? parts.join("\n") : "  (no extracted fields)",
     "",
     `Execution plan: ${planStr}`,
     tail,
-  ].join("\n");
+  ].filter(Boolean).join("\n");
 }
 
 /** Retrieve top-K relevant catalog pieces via pgvector instead of loading 2000 rows. */
