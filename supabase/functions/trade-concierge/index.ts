@@ -5475,6 +5475,23 @@ serve(async (req) => {
             userConversationText,
           );
           if (!proposal) return false;
+          const { validation } = validateProposalAgainstBrief(proposal, userConversationText, capturedRequirements);
+          if (!validation.ok) {
+            controller.enqueue(encoder.encode(
+              `event: proposal_blocked\ndata: ${JSON.stringify({
+                request_id: requestId,
+                tool: "propose_tearsheet",
+                tool_call_id: proposal.tool_call_id || null,
+                reason: "requirements_violation",
+                coverage: validation.coverage,
+                violations: validation.violations,
+                message: buildRequirementsBlockedMessage(validation.violations),
+              })}\n\n`,
+            ));
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ choices: [{ delta: { content: buildRequirementsBlockedMessage(validation.violations) } }] })}\n\n`));
+            console.warn(`[concierge deterministic-fallback] blocked proposal (${proposal.args?.pick_ids?.length || 0} picks) violations=${JSON.stringify(validation.violations)}`);
+            return true;
+          }
           const maxIdx = Array.from(toolCallBuffers.keys()).reduce((m, i) => (i > m ? i : m), -1);
           toolCallBuffers.set(maxIdx + 1, { id: proposal.tool_call_id, name: "propose_tearsheet", argsText: JSON.stringify(proposal.args) });
           controller.enqueue(encoder.encode(`event: proposal\ndata: ${JSON.stringify(proposal)}\n\n`));
