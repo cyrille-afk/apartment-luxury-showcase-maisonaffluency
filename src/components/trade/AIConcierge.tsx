@@ -403,16 +403,19 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
   }, [minimized]);
   useEffect(() => {
     try {
-      // Strip data-URL previewUrls before persisting — they can be multi-MB
-      // (large floor-plan PNGs) and blow sessionStorage's ~5MB quota, which
-      // would silently drop the whole timeline write. Thumbnails stay in
-      // memory for the current page; refresh loses them, full chat is kept.
-      const serializable = timeline.map((t) =>
-        t.kind === "msg" && t.attachments?.length
-          ? { ...t, attachments: t.attachments.map(({ previewUrl: _omit, ...rest }) => rest) }
-          : t,
-      );
-      sessionStorage.setItem("concierge:timeline", JSON.stringify(serializable));
+      // previewUrl is now a downscaled JPEG thumbnail (~<60KB), safe to persist.
+      // If serialization fails (quota), retry once with thumbnails stripped.
+      const payload = JSON.stringify(timeline);
+      try {
+        sessionStorage.setItem("concierge:timeline", payload);
+      } catch {
+        const stripped = timeline.map((t) =>
+          t.kind === "msg" && t.attachments?.length
+            ? { ...t, attachments: t.attachments.map(({ previewUrl: _omit, ...rest }) => rest) }
+            : t,
+        );
+        sessionStorage.setItem("concierge:timeline", JSON.stringify(stripped));
+      }
     } catch {}
   }, [timeline]);
   useEffect(() => {
