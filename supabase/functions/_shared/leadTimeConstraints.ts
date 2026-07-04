@@ -225,8 +225,11 @@ export function filterRowsByLeadTimeConstraints<T extends Record<string, any>>(
       continue;
     }
     if (constraints.inStockOnly && !parsed.isInStock) continue;
-    if (constraints.maxWeeks != null && parsed.minWeeks > constraints.maxWeeks) continue;
-    if (constraints.minWeeks != null && parsed.maxWeeks < constraints.minWeeks) continue;
+    // Strict range enforcement: the piece's worst-case bounds must fit inside
+    // the user's window. A brand default of "8–12 weeks" against a "≤ 10
+    // weeks" ceiling FAILS (upper 12 > 10) even though its lower bound fits.
+    if (constraints.maxWeeks != null && parsed.maxWeeks > constraints.maxWeeks) continue;
+    if (constraints.minWeeks != null && parsed.minWeeks < constraints.minWeeks) continue;
     strictKept.push(r);
   }
   const dropped = rows.length - strictKept.length;
