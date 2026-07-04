@@ -144,21 +144,41 @@ Deno.serve(async (req) => {
     // Build catalog from both sources, excluding board items
     const boardTitles = new Set(boardItems.map(p => p.name?.toLowerCase()))
 
-    const { data: catalog } = await supabase
+    // Hard-constraint pre-filter: explicit constraints (from caller) or
+    // material/color tokens auto-derived from the board. The AI never sees
+    // candidates that violate a listed color / material / category.
+    const hardConstraints = deriveHardConstraints(
+      boardItems.map((i) => ({ title: i.name, materials: i.materials, category: i.category })),
+      explicitConstraints,
+    )
+    console.log('Hard constraints applied:', JSON.stringify(hardConstraints))
+
+    let curatorQuery = supabase
       .from('designer_curator_picks')
       .select('id, title, subtitle, category, subcategory, materials, tags, designer_id')
       .limit(300)
+    curatorQuery = applyHardConstraints(curatorQuery as any, hardConstraints, {
+      text: ['title', 'subtitle', 'materials', 'category', 'subcategory'],
+      category: 'category',
+    })
+    const { data: catalog } = await curatorQuery
 
     const allDesignerIds = [...new Set((catalog || []).map((p: any) => p.designer_id))]
     const { data: allDesigners } = await supabase.from('designers').select('id, name').in('id', allDesignerIds)
     const designerMap = new Map((allDesigners || []).map((d: any) => [d.id, d.name]))
 
-    const { data: tradeCatalog } = await supabase
+    let tradeQuery = supabase
       .from('trade_products')
       .select('id, product_name, brand_name, category, subcategory, materials, dimensions')
       .eq('is_active', true)
       .not('image_url', 'is', null)
       .limit(300)
+    tradeQuery = applyHardConstraints(tradeQuery as any, hardConstraints, {
+      text: ['product_name', 'materials', 'category', 'subcategory'],
+      brand: 'brand_name',
+      category: 'category',
+    })
+    const { data: tradeCatalog } = await tradeQuery
 
     const availableCatalog = [
       ...(catalog || [])
