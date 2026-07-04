@@ -5713,14 +5713,17 @@ serve(async (req) => {
         // Inspector gate: when the planner expects a card (tearsheet / quote /
         // ffe / etc), buffer prose deltas instead of streaming live so the
         // Inspector agent can diff-check against DB ground truth and rewrite
-        // any factual claim before the user sees it. Non-card chat turns keep
-        // live streaming — perceived latency wins.
+        // any factual claim before the user sees it.
         const plannerExpectsCard = Array.isArray(effectiveBrief?.plan) && effectiveBrief.plan.some((t) =>
           t === "propose_tearsheet" || t === "add_to_tearsheet" ||
           t === "draft_quote" || t === "add_to_quote" ||
           t === "propose_ffe_rows" || t === "estimate_shipping"
         );
-        const shouldBufferProseForInspector = plannerExpectsCard && !shouldSuppressSelectionProse;
+        // Discovery-stage guard: ALSO buffer prose on turns with no expected
+        // card, so the Discovery Guard can scrub invented brand/piece names
+        // before the user sees them. Trust > streaming latency for a luxury
+        // concierge. Only bypass when we already fully suppress prose.
+        const shouldBufferProseForInspector = !shouldSuppressSelectionProse;
         const bufferedProseLines: string[] = [];
         // Some fallback models (notably Cloudflare Llama) do NOT emit native
         // `tool_calls`; they stringify the JSON envelope into `delta.content`.
