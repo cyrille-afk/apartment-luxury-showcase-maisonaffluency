@@ -213,7 +213,7 @@ RULES:
 - Rewrite the sentence to keep the useful qualifying question or atmosphere framing intact WITHOUT naming any specific brand or piece. Do NOT invent a replacement name. Do NOT say "I could suggest" or "for example" — just drop the namedrop and keep the rest of the sentence readable.
 - Do NOT add apologies, do NOT mention external archives ("Axonometric Studio", "designers' own collections"), do NOT self-correct in the prose ("actually, on second thought…").
 - Preserve tone, register, paragraph structure, questions, and any user-facing formatting. Keep the assistant's persona (Felix, the concierge).
-- The word "Maison Affluency" is always allowed. "Felix" is always allowed. Generic material / typology words (bronze, stone, oak, dining table, chandelier) are always allowed.
+- The word "Maison Affluency" is always allowed. "Felix" is always allowed. Generic material / typology / colour words are ALWAYS allowed and must NEVER be removed — this includes stone and marble varieties (Calacatta, Statuario, Nero Marquina, Portoro, Verde Alpi, Rosso Levanto, Belgian Bluestone, Grand Antique…), woods (walnut, oak, ebony, rosewood, teak…), metals (bronze, brass, patinated bronze, blackened steel…), textiles (velvet, mohair, boucle, linen, silk, shagreen, parchment…), finishes (crystal, glass, lacquer, cerused, gilt…), colours, and typologies (chandelier, dining table, console, sideboard, sofa, etc.). If the only capitalised span is a material qualifier followed by a material noun ("Nero Marquina marble", "Belgian bluestone"), leave it untouched.
 - If the prose is already clean, return it unchanged with an empty removed_names array.
 
 Output STRICT JSON only, no code fences:
