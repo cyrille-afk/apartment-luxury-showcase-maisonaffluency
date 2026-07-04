@@ -2746,6 +2746,37 @@ function sseProposalsThenTextResponse(proposals: unknown[], text: string): Respo
   return new Response(stream, { headers: { ...corsHeaders, "Content-Type": "text/event-stream" } });
 }
 
+function buildRequirementsBlockedMessage(violations: any[]): string {
+  const kinds = new Set((violations || []).map((v: any) => v?.kind).filter(Boolean));
+  if (kinds.has("budget_over")) {
+    return "I’m going to hold the tearsheet rather than show a draft that exceeds the budget. I need to reduce scope or broaden the pricing band before proposing real pieces.";
+  }
+  if (kinds.has("budget_unpriced")) {
+    return "I’m going to hold the tearsheet rather than imply the edit fits budget while one or more pieces are Price on Request. I need priced alternatives or approval to include POR pieces.";
+  }
+  if (kinds.has("capacity_unverified") || kinds.has("shape_unverified")) {
+    return "I’m going to hold the tearsheet rather than show pieces that don’t verify the stated shape or seating requirement. I need a confirmed matching table before proposing the edit.";
+  }
+  if (kinds.has("palette_mismatch")) {
+    return "I’m going to hold the tearsheet rather than show pieces that don’t match the stated material or finish constraints. I need to widen the palette or find closer matches.";
+  }
+  if (kinds.has("slot_undelivered")) {
+    return "I’m going to hold the tearsheet rather than show a draft that under-delivers the requested pieces. I need to broaden the typology or adjust the brief first.";
+  }
+  return "I’m going to hold the tearsheet rather than show a draft that does not satisfy the brief. I need to refine the constraints first.";
+}
+
+function validateProposalAgainstBrief(
+  proposal: any,
+  requestText: string,
+  explicitRequirements?: RequirementsPayload | null,
+) {
+  const requirements = mergeRequirementsWithText(explicitRequirements as any, requestText);
+  const previews = Array.isArray(proposal?.preview) ? proposal.preview : [];
+  const gt = buildInspectorGroundTruth([{ tool: String(proposal?.tool || "unknown"), pickIds: [], previews }]);
+  return { requirements, validation: validateRequirementsCoverage(requirements as any, gt) };
+}
+
 function titleTokens(value: string | null | undefined): string[] {
   return normalizeLoose(value).split(/\s+/).filter((t) => t.length > 2 && !GENERIC_PRODUCT_TOKENS.has(t));
 }
