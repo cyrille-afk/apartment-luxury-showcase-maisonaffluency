@@ -1065,7 +1065,38 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
         lastProposal ? lastProposal.proposal.preview.map((p) => p.id) : [],
       );
       const newPickIds = proposal.preview.map((p) => p.id).filter((id) => !prevIds.has(id));
-      setTimeline((prev) => swapPendingWithReal(prev, tcid, proposal.tool, { kind: "proposal", proposal, newPickIds }));
+
+      // Client-side merge (defense-in-depth): if the previous draft had
+      // LOCKED 🔒 pieces, guarantee they survive by splicing any that the
+      // model dropped back into the new preview in their original positions.
+      // This makes the lock contract enforced by the client, not just the
+      // system prompt — the model cannot silently mutate a locked pick.
+      let carriedLocked: string[] = [];
+      if (lastProposal) {
+        const lockedSet = new Set(lastProposal.locked || []);
+        const excludedSet = new Set(lastProposal.excluded || []);
+        const returnedIds = new Set(proposal.preview.map((p) => p.id));
+        const missingLocked = lastProposal.proposal.preview.filter(
+          (p) => lockedSet.has(p.id) && !excludedSet.has(p.id) && !returnedIds.has(p.id),
+        );
+        if (missingLocked.length > 0) {
+          const merged = [...proposal.preview];
+          for (const lp of missingLocked) {
+            const origIdx = lastProposal.proposal.preview.findIndex((x) => x.id === lp.id);
+            const insertAt = Math.min(Math.max(origIdx, 0), merged.length);
+            merged.splice(insertAt, 0, lp);
+          }
+          // Preserve discriminated-union narrowing by mutating `preview` in place
+          // rather than spreading (spread widens `tool` back to the full union).
+          (proposal as { preview: typeof merged }).preview = merged;
+        }
+        carriedLocked = lastProposal.proposal.preview
+          .filter((p) => lockedSet.has(p.id) && !excludedSet.has(p.id))
+          .map((p) => p.id)
+          .filter((id) => proposal.preview.some((p) => p.id === id));
+      }
+
+      setTimeline((prev) => swapPendingWithReal(prev, tcid, proposal.tool, { kind: "proposal", proposal, newPickIds, locked: carriedLocked }));
     };
 
 
