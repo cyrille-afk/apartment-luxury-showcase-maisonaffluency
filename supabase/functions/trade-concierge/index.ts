@@ -4129,7 +4129,8 @@ serve(async (req) => {
 
     if (hasExplicitSelectionVerb && requestedTypology && !mentionsKnownDesigner) {
       const budgetCeiling = inferBudgetCeilingCents(lastUserMsg || "");
-      const allTypeCandidates = await fetchStrictTypologyCandidates(supabase, requestedTypology);
+      const dimCeiling = inferDimensionConstraints(lastUserMsg || "");
+      const allTypeCandidates = await fetchStrictTypologyCandidates(supabase, requestedTypology, dimCeiling);
       const budgetedCandidates = budgetCeiling
         ? allTypeCandidates.filter((r: any) => Number(r?.trade_price_cents || 0) > 0 && Number(r.trade_price_cents) <= budgetCeiling.cents)
         : allTypeCandidates;
