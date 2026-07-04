@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
-import { Loader2, Check, X, Pencil, ExternalLink, Plus, ChevronDown, Copy, Repeat } from "lucide-react";
+import { Loader2, Check, X, Pencil, ExternalLink, Plus, ChevronDown, Copy, Repeat, Lock, Unlock, RefreshCw } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { commitProposal, type TearsheetProposal } from "@/lib/tradeConciergeStream";
 import { supabase } from "@/integrations/supabase/client";
