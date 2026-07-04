@@ -2106,13 +2106,26 @@ type ExtractedBrief = {
     qty_hint: number | null;
     lead_weeks_max: number | null;
     budget_band: string | null;
+    /**
+     * Anchor / centerpiece semantics preserved verbatim from the user's turn.
+     * The user's exact anchor phrasing ("show-stopping centerpiece", "statement
+     * chandelier", "hero piece", "anchor of the room") — never paraphrased and
+     * never collapsed into `style`. Downstream uses this to (a) route to a
+     * card tool instead of generic prose, (b) inject an unmistakable anchor
+     * directive into the plan, so the concierge never softens the request.
+     */
+    anchor_role: string | null;
+    /** Typology the anchor refers to (dining_table, chandelier, sofa, …), when nameable. */
+    anchor_typology: string | null;
+    /** Emphasis adjectives the user used (show-stopping, sculptural, dramatic, monumental). */
+    emphasis: string[];
   };
   plan: BriefPlanTool[];
 };
 
 const EMPTY_BRIEF: ExtractedBrief = {
   intent: "chitchat",
-  brief: { summary: "", room: null, style: null, materials: [], categories: [], designers: [], qty_hint: null, lead_weeks_max: null, budget_band: null },
+  brief: { summary: "", room: null, style: null, materials: [], categories: [], designers: [], qty_hint: null, lead_weeks_max: null, budget_band: null, anchor_role: null, anchor_typology: null, emphasis: [] },
   plan: [],
 };
 
@@ -2152,6 +2165,8 @@ async function extractBrief(apiKey: string, latestUserMessage: string): Promise<
                   "- OPENING BRIEFS that merely state what the user is looking for (e.g. 'I'm looking for a statement dining table for my Belgravia townhouse', 'we need lighting for a Mayfair drawing room', 'searching for a sofa for a London penthouse'): EMPTY PLAN. The concierge MUST qualify (style, capacity/scale, materials, era, lead-time) before proposing. Do NOT emit propose_tearsheet on a discovery-style opener no matter how specific the typology.\n" +
                   "- EXPLANATORY follow-ups about pieces already discussed ('why the X?', 'tell me more about X', 'what is X?', 'how does it compare', 'what materials', 'lead time?', 'who designed it'): EMPTY PLAN — the downstream model must answer conversationally in prose. Do NOT re-propose tearsheets or quotes.\n" +
                   "- EXPLICIT selection verbs in THIS message ('propose', 'suggest', 'recommend', 'show me' [WITHOUT 'in the room/space'], 'pull together', 'curate', 'reinterpret', 'alternatives', 'options', 'first edit', 'draft a selection', 'what do you have in…'): default to [add_to_tearsheet] (target the user's ⭐ ACTIVE board). Emit [propose_tearsheet] ONLY if the user has no existing tearsheets OR explicitly says 'new tearsheet' / 'start a new board' / 'fresh selection' / 'separate edit'. Without one of these selection verbs, do NOT emit either tool.\n" +
+                  "- ANCHOR / CENTERPIECE cues ('show-stopping', 'statement', 'centerpiece', 'hero piece', 'anchor', 'focal point', 'the piece that carries the room', 'sculptural moment', 'dramatic', 'monumental'): treat as a STRONG selection cue as soon as ANY typology is nameable in this turn OR present in the sticky context. In that case, emit [add_to_tearsheet] (or [propose_tearsheet] under the same rules as above) instead of falling back to empty plan — the concierge must NEVER answer an anchor request with generic prose. If no typology is nameable and no sticky typology exists, keep empty plan but ALWAYS populate `anchor_role` + `emphasis` so downstream asks a single crisp qualifier ('which typology should carry the room — dining table, chandelier, sofa?').\n" +
+                  "- ALWAYS populate `anchor_role` (verbatim user phrasing, e.g. 'show-stopping centerpiece'), `anchor_typology` (snake_case typology if nameable), and `emphasis` (adjectives like 'show-stopping', 'sculptural', 'dramatic', 'monumental') whenever the user uses any of the anchor cues above. Never paraphrase — copy the user's language.\n" +
                   "- 'quote / estimate / pricing breakdown' on already-decided pieces: [draft_quote] (or add_to_quote).\n" +
                   "- 'FF&E schedule / multi-room brief / spec the whole apartment / drawing-room + dining + bedroom' bound to a project: [propose_ffe_rows].\n" +
                   "- VISUALIZATION VERBS in THIS message ('render', 'visualise', 'visualize', 'show me how this would look', 'show me in the room/space', 'generate a view/scene/axonometric/render', 'mock up', 'picture it', 'see it in situ', 'image of the room with…'): emit [prepare_visualization_brief]. If the user has NOT yet seen any tearsheet picks in this conversation AND the visualization request implies overlaying catalog pieces ('with these pieces', 'overlay these picks', 'in bronze and mohair', or any palette/material/style description), CHAIN as [propose_tearsheet, prepare_visualization_brief] so the same picks are drafted and then handed to the studio. The word 'render' ALWAYS triggers prepare_visualization_brief, never tearsheet-only — even if the message also says 'overlay these picks'.\n" +
@@ -2179,6 +2194,9 @@ async function extractBrief(apiKey: string, latestUserMessage: string): Promise<
                       qty_hint: { type: "integer", minimum: 1, maximum: 99 },
                       lead_weeks_max: { type: "integer", minimum: 1, maximum: 104 },
                       budget_band: { type: "string" },
+                      anchor_role: { type: "string", description: "Verbatim user phrasing for the anchor / centerpiece / statement / hero piece (e.g. 'show-stopping centerpiece', 'statement chandelier', 'hero piece of the dining room'). NEVER paraphrase — copy the user's exact wording. Empty string if the user did NOT use anchor/centerpiece/statement/hero cues." },
+                      anchor_typology: { type: "string", description: "Normalized snake_case typology the anchor refers to (dining_table, chandelier, sofa, coffee_table, sideboard, bed, rug, mirror, artwork, chair, floor_lamp, table_lamp, credenza, cabinet, console). Empty string if not nameable in this turn." },
+                      emphasis: { type: "array", items: { type: "string" }, description: "Adjectives the user used to emphasise the piece (show-stopping, sculptural, dramatic, monumental, statement, hero, focal, anchor, imposing, grand, theatrical). Copy verbatim, lowercase. Max 6." },
                       plan: {
                         type: "array",
                         items: { type: "string", enum: ["propose_tearsheet", "add_to_tearsheet", "draft_quote", "add_to_quote", "propose_ffe_rows", "prepare_visualization_brief"] },
@@ -2211,6 +2229,9 @@ async function extractBrief(apiKey: string, latestUserMessage: string): Promise<
             qty_hint: typeof p.qty_hint === "number" ? p.qty_hint : null,
             lead_weeks_max: typeof p.lead_weeks_max === "number" ? p.lead_weeks_max : null,
             budget_band: p.budget_band || null,
+            anchor_role: (typeof p.anchor_role === "string" && p.anchor_role.trim()) ? p.anchor_role.trim().slice(0, 160) : null,
+            anchor_typology: (typeof p.anchor_typology === "string" && p.anchor_typology.trim()) ? p.anchor_typology.trim().toLowerCase().replace(/\s+/g, "_").slice(0, 40) : null,
+            emphasis: Array.isArray(p.emphasis) ? p.emphasis.filter((s: unknown): s is string => typeof s === "string" && !!s.trim()).map((s: string) => s.trim().toLowerCase().slice(0, 32)).slice(0, 6) : [],
           },
           plan: Array.isArray(p.plan) ? p.plan.filter((t: string) => ["propose_tearsheet", "add_to_tearsheet", "draft_quote", "add_to_quote", "propose_ffe_rows", "prepare_visualization_brief"].includes(t)) as BriefPlanTool[] : [],
         };
@@ -2233,10 +2254,20 @@ async function extractBrief(apiKey: string, latestUserMessage: string): Promise<
 }
 
 function buildPlanDirective(extracted: ExtractedBrief): string {
+  const b = extracted.brief;
+  const anchorLine = b.anchor_role
+    ? `⚑ ANCHOR REQUEST — the user framed this as: "${b.anchor_role}"${b.anchor_typology ? ` (typology: ${b.anchor_typology})` : ""}${b.emphasis.length ? ` [emphasis: ${b.emphasis.join(", ")}]` : ""}. Treat this as a non-negotiable brief slot — reserve the marquee position in any card for this piece, keep the user's exact framing in the closing sentence, and do NOT dilute the request into generic prose about "a beautiful room". If no card is being proposed this turn, ask exactly ONE crisp qualifier that unblocks the anchor (typology, material, or scale) — never a laundry list.`
+    : null;
+
   if (!extracted.plan.length) {
+    if (anchorLine) {
+      return [
+        anchorLine,
+        "(No tool calls planned this turn — reply with ONE crisp qualifier for the anchor, then stop. Do not restate the brief back at the user; do not describe imaginary pieces.)",
+      ].join("\n");
+    }
     return "(No tool calls planned this turn — reply conversationally. Default tone applies.)";
   }
-  const b = extracted.brief;
   const parts: string[] = [];
   if (b.summary) parts.push(`- Summary: ${b.summary}`);
   if (b.room) parts.push(`- Room: ${b.room}`);
@@ -2256,12 +2287,13 @@ function buildPlanDirective(extracted: ExtractedBrief): string {
 
   return [
     `Intent: ${extracted.intent}`,
+    anchorLine || "",
     "Structured brief:",
     parts.length ? parts.join("\n") : "  (no extracted fields)",
     "",
     `Execution plan: ${planStr}`,
     tail,
-  ].join("\n");
+  ].filter(Boolean).join("\n");
 }
 
 /** Retrieve top-K relevant catalog pieces via pgvector instead of loading 2000 rows. */
