@@ -2540,13 +2540,15 @@ async function loadRelevantPieces(
     // have enough survivors for the AI to reason over. Dimension constraints
     // are strict + can drop unknown-dim rows, so they widen the multiplier too.
     const dimConstraints: DimensionConstraints | null = inferDimensionConstraints(query);
+    const leadConstraints: LeadTimeConstraints | null = inferLeadTimeConstraints(query);
     const wantsConstraintFilter = !!hardConstraints && (
       (hardConstraints.materials?.length || 0) +
       (hardConstraints.colors?.length || 0) +
       (hardConstraints.categories?.length || 0) > 0
     );
     const wantsDimFilter = !!dimConstraints;
-    const matchCount = (wantsConstraintFilter || wantsDimFilter) ? Math.min(k * 4, 200) : k;
+    const wantsLeadFilter = !!leadConstraints;
+    const matchCount = (wantsConstraintFilter || wantsDimFilter || wantsLeadFilter) ? Math.min(k * 4, 200) : k;
     const { data: rawData, error } = await supabase.rpc("match_catalog", {
       query_embedding: vec as any,
       match_count: matchCount,
@@ -2567,6 +2569,14 @@ async function loadRelevantPieces(
       const dimRes = filterRowsByDimensionConstraints(filtered as any[], dimConstraints);
       console.log(`[concierge RAG dim] pre=${filtered.length} strict=${dimRes.strictKept.length} kept=${dimRes.kept.length} dropped=${dimRes.dropped} unknownDropped=${dimRes.unknownDropped} fellBack=${dimRes.fellBack} constraints=${JSON.stringify(dimConstraints)}`);
       filtered = dimRes.kept as any[];
+    }
+    // Hard lead-time ceiling / floor / in-stock-only — parsed from row.lead_time
+    // with brand_lead_times fallback for unresolved rows.
+    if (wantsLeadFilter) {
+      const brandIdx = await getBrandLeadTimeIndex(supabase);
+      const leadRes = filterRowsByLeadTimeConstraints(filtered as any[], leadConstraints!, brandIdx);
+      console.log(`[concierge RAG lead] pre=${filtered.length} kept=${leadRes.kept.length} dropped=${leadRes.dropped} unknownDropped=${leadRes.unknownDropped} fellBack=${leadRes.fellBack} constraints=${JSON.stringify(leadConstraints)}`);
+      filtered = leadRes.kept as any[];
     }
     const data = filtered.slice(0, k);
     if (data.length < 5) {
