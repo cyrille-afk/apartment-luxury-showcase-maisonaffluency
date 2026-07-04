@@ -3290,6 +3290,7 @@ async function buildDeterministicTearsheetProposal(
 ): Promise<any | null> {
   const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
   const requestedTypology = inferRequestedTypology(brief, requestText);
+  const dimConstraints = inferDimensionConstraints(requestText);
   const scoreRow = (r: any) => {
     const hay = `${r?.title || ""} ${r?.category || ""} ${r?.subcategory || ""} ${r?.materials || ""}`.toLowerCase();
     let score = Number(r?.similarity || 0);
@@ -3302,8 +3303,15 @@ async function buildDeterministicTearsheetProposal(
     .filter((r: any) => r && typeof r.id === "string" && UUID_RE.test(r.id))
     .filter((r: any) => rowMatchesRequestedTypology(r, requestedTypology))
     .sort((a: any, b: any) => scoreRow(b) - scoreRow(a));
+  // Apply hard dimension constraints to the RAG shortlist (rows carry
+  // `dimensions` from match_catalog). Unknown-dim rows drop in strict mode.
+  if (dimConstraints && candidateRows.length) {
+    const dimRes = filterRowsByDimensionConstraints(candidateRows, dimConstraints);
+    console.log(`[concierge tearsheet dim] pre=${candidateRows.length} strict=${dimRes.strictKept.length} kept=${dimRes.kept.length} dropped=${dimRes.dropped} unknownDropped=${dimRes.unknownDropped} fellBack=${dimRes.fellBack} constraints=${JSON.stringify(dimConstraints)}`);
+    candidateRows = dimRes.kept;
+  }
   if (candidateRows.length < 2 && requestedTypology) {
-    candidateRows = (await fetchStrictTypologyCandidates(supabase, requestedTypology))
+    candidateRows = (await fetchStrictTypologyCandidates(supabase, requestedTypology, dimConstraints))
       .filter((r: any) => r && typeof r.id === "string" && UUID_RE.test(r.id))
       .sort((a: any, b: any) => scoreRow(b) - scoreRow(a));
   }
