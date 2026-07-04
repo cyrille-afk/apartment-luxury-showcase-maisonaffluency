@@ -6019,11 +6019,13 @@ serve(async (req) => {
                   }
                 }
               } else {
-                // No card emitted this turn — run the Discovery Guard to
-                // strip any invented brand / piece names from the buffered
-                // prose (NO-NAMEDROPPING-IN-DISCOVERY enforcement).
+                // No card emitted this turn — run BOTH the Discovery Guard
+                // AND the Inspector Agent (with an empty ground truth + the
+                // curation allowlist) so pure discovery prose gets the same
+                // fact-checking rigor as card-bearing turns.
                 const proseTextForGuard = assistantTextBuf.trim();
                 if (proseTextForGuard.length > 0) {
+                  // Stage 1: Discovery Guard — strips obvious namedrops fast.
                   const guard = await runDiscoveryProseGuard({
                     prose: proseTextForGuard,
                     allowedDesigners,
@@ -6050,12 +6052,41 @@ serve(async (req) => {
                     controller.enqueue(encoder.encode(`event: discovery_guard\ndata: ${JSON.stringify({ removed: guard.removed_names, ms: guard.ms, request_id: requestId })}\n\n`));
                   }
                   if (!guard.ok) {
-                    // HARD FALLBACK — never release raw model prose when the
-                    // Discovery Guard fails.
+                    // HARD FALLBACK — guard failed; do not fall through to
+                    // the Inspector on unreviewed raw prose.
                     flushWithHardFallback(proseTextForGuard, "discovery_guard", guard.reason || "guard_failed");
-                  } else if (guard.corrected_prose) {
-                    const frame = { choices: [{ delta: { content: guard.corrected_prose } }] };
-                    controller.enqueue(encoder.encode(`data: ${JSON.stringify(frame)}\n\n`));
+                  } else {
+                    // Stage 2: Inspector Agent — second-pass factual audit
+                    // against the curation allowlist. Runs even without any
+                    // card GT because the allowlist supplies the scope of
+                    // permitted names.
+                    const guardOut = guard.corrected_prose;
+                    const inspectorDiscovery = await runInspectorPass({
+                      prose: guardOut,
+                      groundTruth: { cards: [] },
+                      apiKey: LOVABLE_API_KEY,
+                      allowedDesigners,
+                      allowedPieceTitles: allowedTitles,
+                    });
+                    logInspectorRun(buildInspectorLogRecord({
+                      requestId,
+                      originalProse: guardOut,
+                      result: inspectorDiscovery,
+                      groundTruth: { cards: [] },
+                      requirements: capturedRequirements as any,
+                      requirementsValidation: null,
+                    }));
+                    if (inspectorDiscovery.corrections.length > 0) {
+                      controller.enqueue(encoder.encode(`event: inspector\ndata: ${JSON.stringify({ ok: inspectorDiscovery.ok, corrections: inspectorDiscovery.corrections, ms: inspectorDiscovery.ms, request_id: requestId, discovery: true })}\n\n`));
+                    }
+                    if (!inspectorDiscovery.ok) {
+                      // Inspector failed on the guard-cleaned prose — hard
+                      // fallback rather than releasing the guard output raw.
+                      flushWithHardFallback(guardOut, "inspector_discovery", inspectorDiscovery.reason || "inspector_failed");
+                    } else if (inspectorDiscovery.corrected_prose) {
+                      const frame = { choices: [{ delta: { content: inspectorDiscovery.corrected_prose } }] };
+                      controller.enqueue(encoder.encode(`data: ${JSON.stringify(frame)}\n\n`));
+                    }
                   }
                 }
                 // else: no prose at all — nothing to release.
