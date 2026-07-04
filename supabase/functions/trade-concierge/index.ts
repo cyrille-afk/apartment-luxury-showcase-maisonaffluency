@@ -5631,7 +5631,7 @@ serve(async (req) => {
               },
               preview,
             };
-            controller.enqueue(encoder.encode(`event: proposal\ndata: ${JSON.stringify(proposal)}\n\n`));
+            emitProposalWithRequirementsDiff(proposal, preview);
             console.log(`[concierge chain] emitted draft_quote with ${lines.length} lines from tearsheet "${tearsheetTitle}"`);
           } catch (e) {
             console.error("chain draft_quote failed:", e);
@@ -5750,6 +5750,23 @@ serve(async (req) => {
               },
               preview,
             };
+            const { validation } = validateProposalAgainstBrief(proposal, userConversationText, capturedRequirements);
+            if (!validation.ok) {
+              controller.enqueue(encoder.encode(
+                `event: proposal_blocked\ndata: ${JSON.stringify({
+                  request_id: requestId,
+                  tool: "propose_tearsheet",
+                  tool_call_id: proposal.tool_call_id,
+                  reason: "requirements_violation",
+                  coverage: validation.coverage,
+                  violations: validation.violations,
+                  message: buildRequirementsBlockedMessage(validation.violations),
+                })}\n\n`,
+              ));
+              controller.enqueue(encoder.encode(`data: ${JSON.stringify({ choices: [{ delta: { content: buildRequirementsBlockedMessage(validation.violations) } }] })}\n\n`));
+              console.warn(`[concierge promise-recovery] blocked propose_tearsheet (${pickIds.length} picks) violations=${JSON.stringify(validation.violations)}`);
+              return;
+            }
             // Register the synthesized buffer so chained-quote recovery can see it.
             const maxIdx = Array.from(toolCallBuffers.keys()).reduce((m, i) => (i > m ? i : m), -1);
             toolCallBuffers.set(maxIdx + 1, {
