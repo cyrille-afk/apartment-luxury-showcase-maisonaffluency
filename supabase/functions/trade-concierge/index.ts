@@ -5902,6 +5902,51 @@ serve(async (req) => {
           // brand attribution, invented pieces). Fail-open: on error the
           // original buffered prose is flushed unchanged.
           if (shouldBufferProseForInspector) {
+            // Build the shared allowlist ONCE per turn — reused by the
+            // Inspector fallback redactor and the Discovery Guard.
+            const allowedDesigners = Array.isArray(designerNames) ? designerNames.slice(0, 400) : [];
+            const titleRe = /["“]([^"”\n]{2,120})["”]/g;
+            const allowedTitles: string[] = [];
+            {
+              let tm: RegExpExecArray | null;
+              const src = typeof piecesList === "string" ? piecesList : "";
+              while ((tm = titleRe.exec(src)) !== null) {
+                const t = tm[1].trim();
+                if (t) allowedTitles.push(t);
+                if (allowedTitles.length >= 800) break;
+              }
+            }
+
+            // Hard-fallback emitter: when a guardrail LLM fails, we NEVER
+            // release the raw model prose. We deterministically redact it;
+            // if redaction guts it, we replace with SAFE_FALLBACK_PROSE.
+            const flushWithHardFallback = (rawProse: string, tag: string, reason: string) => {
+              const red = deterministicRedact({
+                prose: rawProse,
+                allowedDesigners,
+                allowedPieceTitles: allowedTitles,
+              });
+              const finalProse = red.gutted || !red.redacted_prose ? SAFE_FALLBACK_PROSE : red.redacted_prose;
+              try {
+                console.log(JSON.stringify({
+                  tag: "concierge_hard_fallback",
+                  request_id: requestId,
+                  ts: new Date().toISOString(),
+                  source: tag,
+                  reason,
+                  chars_removed: red.chars_removed,
+                  removed_spans: red.removed_spans,
+                  gutted: red.gutted,
+                  used_safe_fallback: red.gutted || !red.redacted_prose,
+                  original_len: rawProse.length,
+                  final_len: finalProse.length,
+                }));
+              } catch { /* best-effort */ }
+              controller.enqueue(encoder.encode(`event: hard_fallback\ndata: ${JSON.stringify({ source: tag, reason, removed: red.removed_spans, safe_fallback: red.gutted || !red.redacted_prose, request_id: requestId })}\n\n`));
+              const frame = { choices: [{ delta: { content: finalProse } }] };
+              controller.enqueue(encoder.encode(`data: ${JSON.stringify(frame)}\n\n`));
+            };
+
             try {
               const cardBufs = Array.from(toolCallBuffers.values()).filter((b) =>
                 b.name === "propose_tearsheet" || b.name === "add_to_tearsheet" ||
@@ -5927,10 +5972,6 @@ serve(async (req) => {
               const proseText = assistantTextBuf.trim();
               if (groundTruthCards.length && proseText.length > 0) {
                 const gt = buildInspectorGroundTruth(groundTruthCards);
-                // Validate the assembled card against the extracted
-                // Requirements slots BEFORE running the LLM prose pass — this
-                // is a pure/deterministic check so we can surface undercount
-                // violations even if the inspector LLM times out.
                 const reqValidation = validateRequirementsCoverage(
                   capturedRequirements as any,
                   gt,
@@ -5955,10 +5996,6 @@ serve(async (req) => {
                   groundTruth: gt,
                   apiKey: LOVABLE_API_KEY,
                 });
-                const finalProse = inspector.ok ? inspector.corrected_prose : proseText;
-                // Structured log — one JSON line per inspector run, tagged
-                // with the top-level request_id so it joins to the client
-                // `event: request_id` and `event: inspector` frames.
                 logInspectorRun(buildInspectorLogRecord({
                   requestId,
                   originalProse: proseText,
@@ -5970,10 +6007,16 @@ serve(async (req) => {
                 if (inspector.corrections.length > 0 || !reqValidation.ok) {
                   controller.enqueue(encoder.encode(`event: inspector\ndata: ${JSON.stringify({ ok: inspector.ok && reqValidation.ok, corrections: inspector.corrections, ms: inspector.ms, request_id: requestId, requirements_ok: reqValidation.ok, slot_violations: reqValidation.violations })}\n\n`));
                 }
-                // Flush the (possibly rewritten) prose as ONE synthetic delta.
-                if (finalProse) {
-                  const frame = { choices: [{ delta: { content: finalProse } }] };
-                  controller.enqueue(encoder.encode(`data: ${JSON.stringify(frame)}\n\n`));
+                if (!inspector.ok) {
+                  // HARD FALLBACK — never release raw model prose when the
+                  // Inspector fails. Deterministic redaction + safe fallback.
+                  flushWithHardFallback(proseText, "inspector", inspector.reason || "inspector_failed");
+                } else {
+                  const finalProse = inspector.corrected_prose;
+                  if (finalProse) {
+                    const frame = { choices: [{ delta: { content: finalProse } }] };
+                    controller.enqueue(encoder.encode(`data: ${JSON.stringify(frame)}\n\n`));
+                  }
                 }
               } else {
                 // No card emitted this turn — run the Discovery Guard to
@@ -5981,27 +6024,12 @@ serve(async (req) => {
                 // prose (NO-NAMEDROPPING-IN-DISCOVERY enforcement).
                 const proseTextForGuard = assistantTextBuf.trim();
                 if (proseTextForGuard.length > 0) {
-                  // Build allowlists from the curation snapshot fed to the
-                  // model this turn. designerNames comes from the DB query;
-                  // piece titles are extracted from the piecesList markdown
-                  // (`- "Title" by Designer …`).
-                  const allowedDesigners = Array.isArray(designerNames) ? designerNames.slice(0, 400) : [];
-                  const titleRe = /["“]([^"”\n]{2,120})["”]/g;
-                  const allowedTitles: string[] = [];
-                  let tm: RegExpExecArray | null;
-                  const src = typeof piecesList === "string" ? piecesList : "";
-                  while ((tm = titleRe.exec(src)) !== null) {
-                    const t = tm[1].trim();
-                    if (t) allowedTitles.push(t);
-                    if (allowedTitles.length >= 800) break;
-                  }
                   const guard = await runDiscoveryProseGuard({
                     prose: proseTextForGuard,
                     allowedDesigners,
                     allowedPieceTitles: allowedTitles,
                     apiKey: LOVABLE_API_KEY,
                   });
-                  const finalProse = guard.ok ? guard.corrected_prose : proseTextForGuard;
                   try {
                     console.log(JSON.stringify({
                       tag: "concierge_discovery_guard",
@@ -6011,9 +6039,9 @@ serve(async (req) => {
                       ms: guard.ms,
                       reason: guard.reason,
                       removed_names: guard.removed_names,
-                      changed: guard.ok && finalProse.trim() !== proseTextForGuard.trim(),
+                      changed: guard.ok && guard.corrected_prose.trim() !== proseTextForGuard.trim(),
                       original_len: proseTextForGuard.length,
-                      corrected_len: finalProse.length,
+                      corrected_len: guard.corrected_prose.length,
                       allowed_designers_count: allowedDesigners.length,
                       allowed_titles_count: allowedTitles.length,
                     }));
@@ -6021,21 +6049,25 @@ serve(async (req) => {
                   if (guard.removed_names.length > 0) {
                     controller.enqueue(encoder.encode(`event: discovery_guard\ndata: ${JSON.stringify({ removed: guard.removed_names, ms: guard.ms, request_id: requestId })}\n\n`));
                   }
-                  if (finalProse) {
-                    const frame = { choices: [{ delta: { content: finalProse } }] };
+                  if (!guard.ok) {
+                    // HARD FALLBACK — never release raw model prose when the
+                    // Discovery Guard fails.
+                    flushWithHardFallback(proseTextForGuard, "discovery_guard", guard.reason || "guard_failed");
+                  } else if (guard.corrected_prose) {
+                    const frame = { choices: [{ delta: { content: guard.corrected_prose } }] };
                     controller.enqueue(encoder.encode(`data: ${JSON.stringify(frame)}\n\n`));
                   }
-                } else {
-                  // No prose at all — release whatever was buffered as-is.
-                  for (const line of bufferedProseLines) {
-                    controller.enqueue(encoder.encode(line + "\n"));
-                  }
                 }
+                // else: no prose at all — nothing to release.
               }
             } catch (inspErr) {
-              console.error("[concierge inspector] pass failed, releasing raw prose:", inspErr);
-              for (const line of bufferedProseLines) {
-                controller.enqueue(encoder.encode(line + "\n"));
+              // HARD FALLBACK — an exception in the guardrail pipeline must
+              // NEVER release raw model prose. Redact deterministically and
+              // swap in the safe fallback if the redaction guts the reply.
+              console.error("[concierge inspector] pass failed, applying hard fallback:", inspErr);
+              const rawProse = assistantTextBuf.trim();
+              if (rawProse) {
+                flushWithHardFallback(rawProse, "pipeline_exception", (inspErr as Error)?.message || "unknown");
               }
             }
           }
