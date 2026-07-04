@@ -610,6 +610,11 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
                             </span>
                           )}
                         </div>
+                        {verdict && (() => {
+                          const row = verdict.per_row.find((r) => r.pick_id === p.id);
+                          return row ? <div className="mt-1"><RowVerdictPill row={row} /></div> : null;
+                        })()}
+
                         {p.materials && (
                           <div className="font-body text-[10px] text-muted-foreground truncate">
                             {p.materials}
