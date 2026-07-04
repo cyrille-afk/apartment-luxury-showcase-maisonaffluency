@@ -218,12 +218,11 @@ export function parseDimensionsToMm(raw: string | null | undefined): ParsedRowDi
     const label = m[1].toLowerCase();
     const mm = toMm(m[2], unit);
     if (mm == null) continue;
-    if (label.startsWith("w")) out.widthMm = mm;
+    if (label === "dia" || label === "ø" || label.startsWith("diam")) out.diameterMm = mm;
+    else if (label.startsWith("w")) out.widthMm = mm;
     else if (label.startsWith("d")) out.depthMm = mm;
     else if (label.startsWith("h")) out.heightMm = mm;
     else if (label.startsWith("l")) out.lengthMm = mm;
-    else if (label === "dia" || label === "ø" || label.startsWith("diam")) out.diameterMm = mm;
-  }
   for (const m of raw.matchAll(seatDepthRe)) {
     const mm = toMm(m[1], sniffUnit(m[0]) ?? unit);
     if (mm != null) out.seatDepthMm = mm;
