@@ -371,6 +371,69 @@ export type QuickProfile = {
   qualified_score: number;
 };
 
+// Damerau-Levenshtein-ish distance (with adjacent-transposition support).
+// Small, dependency-free — sufficient for single- to double-character typos on
+// city names (Singqpore, Singapoore, Lodnon, Duabi, Moanco, Parris...).
+const editDistance = (a: string, b: string): number => {
+  const m = a.length, n = b.length;
+  if (m === 0) return n;
+  if (n === 0) return m;
+  const dp: number[][] = Array.from({ length: m + 1 }, () => new Array(n + 1).fill(0));
+  for (let i = 0; i <= m; i++) dp[i][0] = i;
+  for (let j = 0; j <= n; j++) dp[0][j] = j;
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+      dp[i][j] = Math.min(
+        dp[i - 1][j] + 1,
+        dp[i][j - 1] + 1,
+        dp[i - 1][j - 1] + cost,
+      );
+      if (i > 1 && j > 1 && a[i - 1] === b[j - 2] && a[i - 2] === b[j - 1]) {
+        dp[i][j] = Math.min(dp[i][j], dp[i - 2][j - 2] + 1);
+      }
+    }
+  }
+  return dp[m][n];
+};
+
+// Fuzzy-match a short user reply (typically one-to-three words like
+// "Singqpore" or "new yrok") against the known city list. Returns null when
+// the input is too long (looks like prose) or no city is within edit distance.
+export const fuzzyCityMatch = (
+  text: string,
+): { city: string; country: string | null } | null => {
+  const trimmed = text.trim();
+  if (!trimmed || trimmed.length > 40) return null;
+  // Split into up to 3 candidate n-grams; if the user wrote more than 4
+  // tokens it's a sentence, not a bare city answer.
+  const tokens = trimmed.toLowerCase().split(/\s+/).filter((t) => t.length >= 3);
+  if (!tokens.length || tokens.length > 4) return null;
+  const candidates: string[] = [];
+  for (let i = 0; i < tokens.length; i++) {
+    candidates.push(tokens[i]);
+    if (i + 1 < tokens.length) candidates.push(`${tokens[i]} ${tokens[i + 1]}`);
+    if (i + 2 < tokens.length) candidates.push(`${tokens[i]} ${tokens[i + 1]} ${tokens[i + 2]}`);
+  }
+  let best: { city: string; country: string | null; distance: number; matchLen: number } | null = null;
+  for (const cand of candidates) {
+    for (const c of HV_CITIES) {
+      // Skip 2-letter acronyms in fuzzy pass — too aggressive.
+      if (c.length < 4) continue;
+      const d = editDistance(cand, c);
+      // Allow 1 edit for short names, up to 2 for longer ones.
+      const tol = c.length >= 6 ? 2 : 1;
+      if (d <= tol && (!best || d < best.distance || (d === best.distance && c.length > best.matchLen))) {
+        const expanded = HV_CITY_EXPANSIONS[c];
+        best = expanded
+          ? { city: expanded.city, country: expanded.country, distance: d, matchLen: c.length }
+          : { city: c.replace(/\b\w/g, (m) => m.toUpperCase()), country: null, distance: d, matchLen: c.length };
+      }
+    }
+  }
+  return best ? { city: best.city, country: best.country } : null;
+};
+
 export const quickClientProfile = (text: string): QuickProfile | null => {
   if (!text || text.trim().length < 4) return null;
   const lc = text.toLowerCase();
@@ -400,6 +463,18 @@ export const quickClientProfile = (text: string): QuickProfile | null => {
         if (!signals.includes("high_value_location")) signals.push("high_value_location");
         break;
       }
+    }
+  }
+  // Fuzzy fallback: catches typos like "Singqpore" → Singapore when the user's
+  // input is a short standalone token. Only applied when no exact match was
+  // found and the text looks like a bare city answer (not a full sentence).
+  if (!city) {
+    const fuzzy = fuzzyCityMatch(text);
+    if (fuzzy) {
+      city = fuzzy.city;
+      country = fuzzy.country;
+      if (!signals.includes("high_value_location")) signals.push("high_value_location");
+      signals.push("fuzzy_city_match");
     }
   }
 
