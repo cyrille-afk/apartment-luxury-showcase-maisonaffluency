@@ -5976,10 +5976,60 @@ serve(async (req) => {
                   controller.enqueue(encoder.encode(`data: ${JSON.stringify(frame)}\n\n`));
                 }
               } else {
-                // No card actually emitted (or no prose) — release the
-                // buffered prose lines verbatim so the user still sees them.
-                for (const line of bufferedProseLines) {
-                  controller.enqueue(encoder.encode(line + "\n"));
+                // No card emitted this turn — run the Discovery Guard to
+                // strip any invented brand / piece names from the buffered
+                // prose (NO-NAMEDROPPING-IN-DISCOVERY enforcement).
+                const proseTextForGuard = assistantTextBuf.trim();
+                if (proseTextForGuard.length > 0) {
+                  // Build allowlists from the curation snapshot fed to the
+                  // model this turn. designerNames comes from the DB query;
+                  // piece titles are extracted from the piecesList markdown
+                  // (`- "Title" by Designer …`).
+                  const allowedDesigners = Array.isArray(designerNames) ? designerNames.slice(0, 400) : [];
+                  const titleRe = /["“]([^"”\n]{2,120})["”]/g;
+                  const allowedTitles: string[] = [];
+                  let tm: RegExpExecArray | null;
+                  const src = typeof piecesList === "string" ? piecesList : "";
+                  while ((tm = titleRe.exec(src)) !== null) {
+                    const t = tm[1].trim();
+                    if (t) allowedTitles.push(t);
+                    if (allowedTitles.length >= 800) break;
+                  }
+                  const guard = await runDiscoveryProseGuard({
+                    prose: proseTextForGuard,
+                    allowedDesigners,
+                    allowedPieceTitles: allowedTitles,
+                    apiKey: LOVABLE_API_KEY,
+                  });
+                  const finalProse = guard.ok ? guard.corrected_prose : proseTextForGuard;
+                  try {
+                    console.log(JSON.stringify({
+                      tag: "concierge_discovery_guard",
+                      request_id: requestId,
+                      ts: new Date().toISOString(),
+                      ok: guard.ok,
+                      ms: guard.ms,
+                      reason: guard.reason,
+                      removed_names: guard.removed_names,
+                      changed: guard.ok && finalProse.trim() !== proseTextForGuard.trim(),
+                      original_len: proseTextForGuard.length,
+                      corrected_len: finalProse.length,
+                      allowed_designers_count: allowedDesigners.length,
+                      allowed_titles_count: allowedTitles.length,
+                    }));
+                  } catch { /* best-effort */ }
+                  if (guard.removed_names.length > 0) {
+                    controller.enqueue(encoder.encode(`event: discovery_guard\ndata: ${JSON.stringify({ removed: guard.removed_names, ms: guard.ms, request_id: requestId })}\n\n`));
+                  }
+                  if (finalProse) {
+                    const frame = { choices: [{ delta: { content: finalProse } }] };
+                    controller.enqueue(encoder.encode(`data: ${JSON.stringify(frame)}\n\n`));
+                  }
+                } else {
+                  // No prose at all — release whatever was buffered as-is.
+                  for (const line of bufferedProseLines) {
+                    controller.enqueue(encoder.encode(line + "\n"));
+                  }
                 }
               }
             } catch (inspErr) {
