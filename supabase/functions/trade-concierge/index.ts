@@ -4437,17 +4437,22 @@ serve(async (req) => {
               const gtOne = buildInspectorGroundTruth([
                 { tool: cardTool, pickIds: [], previews: Array.isArray(previewRows) ? previewRows : [] },
               ]);
-              const v = validateRequirementsCoverage(capturedRequirements as any, gtOne);
+              const effectiveRequirements = mergeRequirementsWithText(capturedRequirements as any, userConversationText);
+              const v = validateRequirementsCoverage(effectiveRequirements as any, gtOne);
               proposal.requirements_validation = {
                 ok: v.ok,
                 brand_ok: v.brand_ok,
+                budget_ok: v.budget_ok,
+                palette_ok: v.palette_ok,
                 coverage: v.coverage,
                 violations: v.violations,
+                budget: v.budget,
+                palette: v.palette,
                 total_items: v.total_items,
                 unmatched_ids: v.unmatched_ids,
                 enforcement: REQUIREMENTS_ENFORCEMENT,
               };
-              if (!v.ok && capturedRequirements) {
+              if (!v.ok && effectiveRequirements) {
                 validationFailed = true;
                 controller.enqueue(encoder.encode(
                   `event: requirements_validation\ndata: ${JSON.stringify({
@@ -4458,6 +4463,8 @@ serve(async (req) => {
                     enforcement: REQUIREMENTS_ENFORCEMENT,
                     coverage: v.coverage,
                     violations: v.violations,
+                    budget: v.budget,
+                    palette: v.palette,
                     total_items: v.total_items,
                   })}\n\n`,
                 ));
@@ -4472,8 +4479,11 @@ serve(async (req) => {
                     enforcement: REQUIREMENTS_ENFORCEMENT,
                     violations: v.violations,
                     coverage: v.coverage,
+                    budget: v.budget,
+                    palette: v.palette,
                     total_items: v.total_items,
                     unmatched_ids: v.unmatched_ids,
+                    requirements: effectiveRequirements,
                   }));
                 } catch { /* best-effort */ }
 
@@ -4488,8 +4498,11 @@ serve(async (req) => {
                       reason: "requirements_violation",
                       coverage: v.coverage,
                       violations: v.violations,
+                      message: buildRequirementsBlockedMessage(v.violations),
                     })}\n\n`,
                   ));
+                  const frame = { choices: [{ delta: { content: buildRequirementsBlockedMessage(v.violations) } }] };
+                  controller.enqueue(encoder.encode(`data: ${JSON.stringify(frame)}\n\n`));
                   return;
                 }
               }
