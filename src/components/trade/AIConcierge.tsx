@@ -1106,6 +1106,21 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
         onInspector: () => {
           setLastInspectorCount((n) => n + 1);
         },
+        onAppliedConstraints: (ev) => {
+          turnConstraints = ev;
+          // If the assistant msg already exists, patch it so chips render
+          // even before the next delta arrives.
+          setTimeline((prev) => {
+            const idx = [...prev].reverse().findIndex((t) => t.kind === "msg" && t.role === "assistant");
+            if (idx === -1) return prev;
+            const realIdx = prev.length - 1 - idx;
+            const item = prev[realIdx];
+            if (item.kind !== "msg" || item.role !== "assistant") return prev;
+            const copy = prev.slice();
+            copy[realIdx] = { ...item, appliedConstraints: ev };
+            return copy;
+          });
+        },
         onEscalation: (ev) => {
           armStall();
           setTimeline((prev) => [
