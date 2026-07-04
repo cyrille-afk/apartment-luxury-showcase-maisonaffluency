@@ -3505,24 +3505,37 @@ serve(async (req) => {
       console.log("[concierge hard-constraints]", JSON.stringify(preRequestConstraints));
     }
     // Run sentiment + RAG retrieval in parallel with the rest. RAG is best-effort.
+    const timed = async <T,>(name: string, p: Promise<T>): Promise<T> => {
+      const s = performance.now();
+      try {
+        const v = await p;
+        mark(`bundle:${name}`, { ms: Math.round(performance.now() - s), ok: true });
+        return v;
+      } catch (e) {
+        mark(`bundle:${name}`, { ms: Math.round(performance.now() - s), ok: false, err: (e as Error)?.message });
+        throw e;
+      }
+    };
     const ragPromise = (heuristicNeedsPieces || lastUserMsg.length > 40)
       ? loadRelevantPieces(supabase, LOVABLE_API_KEY, lastUserMsg, userId, 40, hasAnyPreConstraint ? preRequestConstraints : undefined)
       : Promise.resolve(null);
+    const bundleT0 = performance.now();
     const [sentiment, extractedBrief, ragResult, userBoards, userSignals, userMemory, mentionedProjectId, openQuotes, discountRow, cadDocuments, productCadAssets] = await Promise.all([
       isShortFollowUp
         ? Promise.resolve({ sentiment: "neutral", intent: "question", escalate: false, needs_catalog: false })
-        : classifySentiment(LOVABLE_API_KEY, lastUserMsg),
-      isShortFollowUp ? Promise.resolve(EMPTY_BRIEF) : extractBrief(LOVABLE_API_KEY, lastUserMsg),
-      ragPromise,
-      loadUserBoards(supabase, userId),
-      loadUserSignals(supabase, userId),
-      loadUserMemory(supabase, userId),
-      mentionedProjectIdPromise,
-      loadOpenQuotes(supabase, userId),
-      supabase.from("profiles").select("trade_tier").eq("id", userId).maybeSingle(),
-      loadCadDocuments(supabase, userId),
-      loadProductCadAssets(supabase),
+        : timed("classifySentiment", classifySentiment(LOVABLE_API_KEY, lastUserMsg)),
+      isShortFollowUp ? Promise.resolve(EMPTY_BRIEF) : timed("extractBrief", extractBrief(LOVABLE_API_KEY, lastUserMsg)),
+      timed("rag", ragPromise),
+      timed("userBoards", loadUserBoards(supabase, userId)),
+      timed("userSignals", loadUserSignals(supabase, userId)),
+      timed("userMemory", loadUserMemory(supabase, userId)),
+      timed("mentionedProject", mentionedProjectIdPromise),
+      timed("openQuotes", loadOpenQuotes(supabase, userId)),
+      timed("tradeTier", supabase.from("profiles").select("trade_tier").eq("id", userId).maybeSingle()),
+      timed("cadDocuments", loadCadDocuments(supabase, userId)),
+      timed("productCadAssets", loadProductCadAssets(supabase)),
     ]);
+    mark("rag_bundle_all", { total_ms: Math.round(performance.now() - bundleT0) });
 
     // Selection verbs must appear in the LATEST user message to authorize a
     // tearsheet proposal. Otherwise the turn is treated as discovery — the
