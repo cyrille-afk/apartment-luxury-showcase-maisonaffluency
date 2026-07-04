@@ -1761,6 +1761,36 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
                       )}
                     </div>
                     )}
+                    {item.role === "assistant" && item.appliedConstraints && (
+                      (item.appliedConstraints.colors.length +
+                        item.appliedConstraints.materials.length +
+                        item.appliedConstraints.categories.length) > 0 && (
+                        <div
+                          className={cn(
+                            "flex flex-wrap items-center gap-1.5 text-[10px] font-body uppercase tracking-[0.14em] text-muted-foreground",
+                            expanded ? "max-w-[92%]" : "max-w-[88%]",
+                          )}
+                          title="Hard-constraint pre-filter applied to the Maison Affluency Curation for this turn"
+                        >
+                          <span className="text-muted-foreground/70">Filtered by:</span>
+                          {item.appliedConstraints.colors.map((c) => (
+                            <span key={`c-${c}`} className="inline-flex items-center rounded-full border border-border/80 bg-background/60 px-2 py-0.5">
+                              <span className="mr-1">◆</span>{c}
+                            </span>
+                          ))}
+                          {item.appliedConstraints.materials.map((m) => (
+                            <span key={`m-${m}`} className="inline-flex items-center rounded-full border border-border/80 bg-background/60 px-2 py-0.5">
+                              {m}
+                            </span>
+                          ))}
+                          {item.appliedConstraints.categories.map((cat) => (
+                            <span key={`cat-${cat}`} className="inline-flex items-center rounded-full border border-border/80 bg-background/60 px-2 py-0.5">
+                              {cat}
+                            </span>
+                          ))}
+                        </div>
+                      )
+                    )}
                     {item.role === "assistant" && item.actions && item.actions.length > 0 && (
                       <div className={cn("flex flex-wrap gap-1.5", expanded ? "max-w-[92%]" : "max-w-[88%]")}>
                         {item.actions.map((a, idx) => (
