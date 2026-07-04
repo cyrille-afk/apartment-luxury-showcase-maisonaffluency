@@ -1,16 +1,20 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { Loader2, Check, X, Pencil, ExternalLink, Plus, ChevronDown, Copy, Repeat, Lock, Unlock, RefreshCw, PlusCircle, MessageSquare, ShieldCheck } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import { commitProposal, type TearsheetProposal } from "@/lib/tradeConciergeStream";
+import { commitProposal, type TearsheetProposal, type PickPreview } from "@/lib/tradeConciergeStream";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { BoardPicker } from "@/components/trade/concierge/BoardPicker";
 import { ProjectAssignInline } from "@/components/trade/concierge/ProjectAssignInline";
 import { HotspotImageBadge } from "@/components/trade/HotspotImageBadge";
-import { buildSwapPrompt, buildRegenerateUnlockedPrompt, buildSuggestOneMorePrompt, buildCritiqueEditsPrompt, buildValidateDiffPrompt, sendConciergePrefill, type SwapPromptItem } from "@/lib/conciergePrefill";
+import { buildSwapPrompt, buildSuggestOneMorePrompt, buildCritiqueEditsPrompt, sendConciergePrefill, type SwapPromptItem } from "@/lib/conciergePrefill";
 import { RequirementsBadge } from "@/components/trade/concierge/RequirementsBadge";
+import { validateTearsheetEdits, realignUnlocked, type ValidationVerdict, type RealignmentDelta } from "@/lib/tearsheetSyncClient";
+import { ValidationBanner, RowVerdictPill } from "@/components/trade/concierge/ValidationSummary";
+import { RealignmentDiffPanel, type AppliedRealignment } from "@/components/trade/concierge/RealignmentDiffPanel";
+
 
 type Status = "pending" | "committing" | "approved" | "discarded";
 type Mode = "create" | "append";
