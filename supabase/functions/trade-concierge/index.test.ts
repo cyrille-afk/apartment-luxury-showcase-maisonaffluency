@@ -68,6 +68,46 @@ async function runQuery(prompt: string) {
   });
 }
 
+function proposalPickIds(stream: { proposals: unknown[] }): string[] {
+  const ids: string[] = [];
+  for (const proposal of stream.proposals) {
+    const pickIds = (proposal as { args?: { pick_ids?: unknown } })?.args?.pick_ids;
+    if (Array.isArray(pickIds)) ids.push(...pickIds.filter((id): id is string => typeof id === "string"));
+  }
+  return Array.from(new Set(ids));
+}
+
+async function fetchPickRowsByIds(ids: string[]) {
+  if (!ids.length) return [];
+  const sb = createClient(SUPABASE_URL, ANON_KEY, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+  const { data: picks, error: picksError } = await sb
+    .from("designer_curator_picks_public")
+    .select("id, title, category, subcategory, trade_price_cents, currency")
+    .in("id", ids);
+  if (picksError) throw new Error(`pick lookup failed: ${picksError.message}`);
+  return (picks ?? []).map((p) => ({ ...p, title: (p as { title?: string }).title, price_cents: (p as { trade_price_cents?: number | null }).trade_price_cents ?? null }));
+}
+
+function rowIsDiningTable(row: { title?: string | null; category?: string | null; subcategory?: string | null }): boolean {
+  const hay = `${row.title || ""} ${row.category || ""} ${row.subcategory || ""}`.toLowerCase();
+  return /\bdining\b/.test(hay) && /\btables?\b/.test(hay) && !/\b(lamp|lighting|sconce|chandelier|cabinet|sideboard|bookcase|shelf)\b/.test(hay);
+}
+
+const FORBIDDEN_RESPONSE_TERMS = [
+  "Axonometric Studio",
+  "designer's own archive",
+  "designers' own archive",
+  "external archive",
+  "The Invisible Collection",
+];
+
+function assertNoForbiddenTerms(text: string) {
+  const leaked = FORBIDDEN_RESPONSE_TERMS.filter((term) => text.toLowerCase().includes(term.toLowerCase()));
+  assert(leaked.length === 0, `response leaked forbidden terms ${JSON.stringify(leaked)}:\n${text}`);
+}
+
 for (const { designer, prompt } of DESIGNER_QUERIES) {
   Deno.test({
     name: `trade-concierge: "${prompt}" surfaces a real ${designer} catalog item`,
@@ -122,4 +162,50 @@ Deno.test("trade-concierge: rejects requests without Authorization", async () =>
   });
   const body = await res.text();
   assert(res.status === 401, `expected 401, got ${res.status}: ${body}`);
+});
+
+Deno.test({
+  name: "trade-concierge guardrail: typology + budget request does not require a designer and does not pad categories",
+  ignore: !ACCESS_TOKEN,
+  async fn() {
+    const resp = await runQuery("Show me 6 dining tables under $8k.");
+    if (resp.status !== 200) {
+      const body = await resp.text().catch(() => "");
+      throw new Error(`expected 200, got ${resp.status}: ${body}`);
+    }
+    const stream = await readConciergeStream(resp, { timeoutMs: 90_000 });
+    assertNoForbiddenTerms(stream.text);
+    assert(
+      !/couldn'?t identify a designer|nothing to enumerate|exact atelier name/i.test(stream.text),
+      `typology request incorrectly fell into designer-enumeration fallback:\n${stream.text}`,
+    );
+
+    const ids = proposalPickIds(stream);
+    assert(ids.length > 0, `expected at least one proposal card, got text only:\n${stream.text}`);
+    assert(ids.length <= 6, `must not pad beyond requested count; got ${ids.length} ids`);
+    const rows = await fetchPickRowsByIds(ids);
+    assert(rows.length === ids.length, `could not resolve all proposed ids: ${JSON.stringify(ids)}`);
+    for (const row of rows) {
+      assert(rowIsDiningTable(row), `non-dining-table proposed: ${JSON.stringify(row)}`);
+      assert(Number(row.price_cents || 0) > 0 && Number(row.price_cents) <= 800_000, `price exceeds $8k/8k-unit ceiling or is missing: ${JSON.stringify(row)}`);
+    }
+  },
+});
+
+Deno.test({
+  name: "trade-concierge guardrail: absent originals do not invent external archive access",
+  ignore: !ACCESS_TOKEN,
+  async fn() {
+    const resp = await runQuery("Any Charlotte Perriand originals?");
+    if (resp.status !== 200) {
+      const body = await resp.text().catch(() => "");
+      throw new Error(`expected 200, got ${resp.status}: ${body}`);
+    }
+    const stream = await readConciergeStream(resp, { timeoutMs: 90_000 });
+    assertNoForbiddenTerms(stream.text);
+    assert(
+      stream.proposals.length === 0 || !stream.text.toLowerCase().includes("charlotte perriand"),
+      `must not fabricate Perriand proposal/provenance:\n${stream.text}`,
+    );
+  },
 });

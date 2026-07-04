@@ -12,6 +12,8 @@ import { installFramePersistence, serveResume } from "./_resume.ts";
 import { deriveHardConstraints, applyHardConstraints, filterRowsByHardConstraints, type HardConstraints } from "../_shared/hardConstraints.ts";
 import { buildNoStrictTypologyReply, typologyLabel } from "./_no_strict_typology_reply.ts";
 
+type ConciergeDbClient = any;
+
 const SENTIMENT_MODEL = modelFor("cheap");
 const SENTIMENT_MAX_TOKENS = tokenBudget("classify");
 const CHAT_MAX_TOKENS = tokenBudget("chat");
@@ -965,7 +967,7 @@ const TOOLS = [
 
 /** Server-side mirror of src/lib/shippingEstimator.ts — reads live DB rate matrix. */
 async function runShippingEstimate(
-  supabase: ReturnType<typeof createClient>,
+  supabase: ConciergeDbClient,
   args: {
     origin_country: string;
     dest_country: string;
@@ -1002,7 +1004,7 @@ async function runShippingEstimate(
 
   let best: any = null;
   for (const lane of lanes) {
-    const laneKg = chargeableKgFor(lane.mode);
+    const laneKg = chargeableKgFor(String(lane.mode || ""));
     const candidates = (brackets || []).filter((b: any) =>
       b.lane_id === lane.id &&
       Number(b.min_volume_cbm) <= cbm && Number(b.max_volume_cbm) >= cbm &&
@@ -1384,7 +1386,7 @@ function needsFullCatalog(text: string, designerNames: string[]): boolean {
 
 /** Check daily token usage; returns true if user is over cap (and not admin). */
 async function isOverDailyCap(
-  supabase: ReturnType<typeof createClient>,
+  supabase: ConciergeDbClient,
   userId: string,
   capTokens = 200_000,
 ): Promise<boolean> {
@@ -1422,7 +1424,7 @@ function pickModel(text: string, includePieces: boolean): string {
 }
 
 async function loadCatalogContext(
-  supabase: ReturnType<typeof createClient>,
+  supabase: ConciergeDbClient,
   includePieces: boolean,
   designerFilter?: string[],
   hardConstraints?: HardConstraints,
@@ -1607,7 +1609,7 @@ async function loadCatalogContext(
 
 /** Recent CAD floor plans the user (or any of their studios) has uploaded. */
 async function loadCadDocuments(
-  supabase: ReturnType<typeof createClient>,
+  supabase: ConciergeDbClient,
   userId: string | null,
 ): Promise<string> {
   if (!userId) return "(No user session — Spatial Fit unavailable.)";
@@ -1644,7 +1646,7 @@ async function loadCadDocuments(
 
 /** Product-attached CAD/3D assets available to Spatial Fit. */
 async function loadProductCadAssets(
-  supabase: ReturnType<typeof createClient>,
+  supabase: ConciergeDbClient,
 ): Promise<string> {
   const { data } = await supabase
     .from("trade_product_cad_assets")
@@ -1666,7 +1668,7 @@ async function loadProductCadAssets(
 
 /** Load the signed-in user's existing tearsheets for tool grounding. */
 async function loadUserBoards(
-  supabase: ReturnType<typeof createClient>,
+  supabase: ConciergeDbClient,
   userId: string | null,
 ): Promise<string> {
   if (!userId) return "(No user session — only new tearsheets can be drafted.)";
@@ -1693,7 +1695,7 @@ async function loadUserBoards(
 
 /** Load the active project (name/client/currency/studio) + its studio's clients for grounding. */
 async function loadProjectContext(
-  supabase: ReturnType<typeof createClient>,
+  supabase: ConciergeDbClient,
   userId: string | null,
   projectId: string | null,
 ): Promise<string> {
@@ -1732,7 +1734,7 @@ async function loadProjectContext(
 
 /** Load the user's open (draft) quotes so `add_to_quote` has valid IDs to reference. */
 async function loadOpenQuotes(
-  supabase: ReturnType<typeof createClient>,
+  supabase: ConciergeDbClient,
   userId: string | null,
 ): Promise<string> {
   if (!userId) return "(No user session — only `draft_quote` is available.)";
@@ -1762,7 +1764,7 @@ async function loadOpenQuotes(
 }
 
 async function resolveMentionedProjectId(
-  supabase: ReturnType<typeof createClient>,
+  supabase: ConciergeDbClient,
   userId: string,
   text: string,
 ): Promise<string | null> {
@@ -1780,12 +1782,12 @@ async function resolveMentionedProjectId(
     const name = normalize(p.name);
     return name && (haystack.includes(name) || name.includes(haystack));
   });
-  return match?.id || null;
+  return typeof match?.id === "string" ? match.id : null;
 }
 
 /** Load predictive personalization signals for the signed-in user. */
 async function loadUserSignals(
-  supabase: ReturnType<typeof createClient>,
+  supabase: ConciergeDbClient,
   userId: string | null,
 ): Promise<string> {
   if (!userId) return "(No user session — generic guidance only.)";
@@ -1883,7 +1885,7 @@ async function loadUserSignals(
  * caller can decide whether to render a section.
  */
 async function loadUserMemory(
-  supabase: ReturnType<typeof createClient>,
+  supabase: ConciergeDbClient,
   userId: string | null,
 ): Promise<string> {
   if (!userId) return "";
@@ -1942,7 +1944,7 @@ function budgetBandToCents(band: string | null | undefined): { cents: number | n
  * out previously-learned values. Arrays are unioned with existing values.
  */
 async function persistInferredMemory(
-  supabase: ReturnType<typeof createClient>,
+  supabase: ConciergeDbClient,
   userId: string | null,
   brief: any,
 ): Promise<void> {
@@ -2486,7 +2488,7 @@ function buildPlanDirective(extracted: ExtractedBrief): string {
 /** Retrieve top-K relevant catalog pieces via pgvector instead of loading 2000 rows. */
 async function loadRelevantPieces(
 
-  supabase: ReturnType<typeof createClient>,
+  supabase: ConciergeDbClient,
   apiKey: string,
   query: string,
   userId: string | null,
@@ -2621,7 +2623,7 @@ async function loadRelevantPieces(
 }
 
 async function recordRagTrace(
-  supabase: ReturnType<typeof createClient>,
+  supabase: ConciergeDbClient,
   payload: {
     userId: string | null;
     query: string;
@@ -2688,6 +2690,21 @@ function normalizeLoose(value: string | null | undefined): string {
 }
 
 type RequestedTypology = "dining_table" | "table";
+
+function inferBudgetCeilingCents(requestText: string): { cents: number; label: string } | null {
+  const text = String(requestText || "");
+  if (!text.trim()) return null;
+  const budgetCue = /\b(?:under|below|less\s+than|up\s+to|max(?:imum)?|budget(?:\s+of)?|not\s+over|no\s+more\s+than)\b/i;
+  if (!budgetCue.test(text)) return null;
+  const match = text.match(/\b(?:under|below|less\s+than|up\s+to|max(?:imum)?|budget(?:\s+of)?|not\s+over|no\s+more\s+than)\b[^$€£\d]{0,24}(?:[$€£]\s*)?(\d+(?:[.,]\d+)?)(\s*(?:k|m|000))?\s*(?:usd|eur|gbp|dollars?|euros?|pounds?)?/i)
+    || text.match(/(?:[$€£]\s*)(\d+(?:[.,]\d+)?)(\s*(?:k|m|000))?\s*(?:usd|eur|gbp|dollars?|euros?|pounds?)?/i);
+  if (!match) return null;
+  const raw = Number(match[1].replace(",", "."));
+  if (!Number.isFinite(raw) || raw <= 0) return null;
+  const suffix = String(match[2] || "").trim().toLowerCase();
+  const units = suffix === "m" ? 1_000_000 : suffix === "k" ? 1_000 : suffix === "000" ? 1_000 : 1;
+  return { cents: Math.round(raw * units * 100), label: match[0].trim() };
+}
 
 function inferRequestedTypology(brief: ExtractedBrief["brief"], requestText: string): RequestedTypology | null {
   const hay = normalizeLoose([
@@ -2769,26 +2786,26 @@ function buildOpeningBriefDiscoveryReply(latestUserMessage: string, langCode = "
 }
 
 async function fetchStrictTypologyCandidates(
-  supabase: ReturnType<typeof createClient>,
+  supabase: ConciergeDbClient,
   typology: RequestedTypology,
 ): Promise<any[]> {
   const term = typology === "dining_table" ? "dining" : "table";
   const [pickRes, tradeRes] = await Promise.all([
     supabase
       .from("designer_curator_picks")
-      .select("id, title, materials, category, subcategory")
+      .select("id, title, materials, category, subcategory, trade_price_cents, currency")
       .or(`title.ilike.%${term}%,subcategory.ilike.%${term}%,category.ilike.%${term}%`)
       .limit(160),
     supabase
       .from("trade_products")
-      .select("id, product_name, materials, category, subcategory")
+      .select("id, product_name, materials, category, subcategory, trade_price_cents, rrp_price_cents, currency")
       .eq("is_active", true)
       .or(`product_name.ilike.%${term}%,subcategory.ilike.%${term}%,category.ilike.%${term}%`)
       .limit(160),
   ]);
   return [
     ...(pickRes.data || []),
-    ...(tradeRes.data || []).map((r: any) => ({ ...r, title: r.product_name })),
+    ...(tradeRes.data || []).map((r: any) => ({ ...r, title: r.product_name, trade_price_cents: r.trade_price_cents ?? r.rrp_price_cents ?? null })),
   ].filter((r: any) => rowMatchesRequestedTypology(r, typology));
 }
 
@@ -3077,7 +3094,7 @@ function resolveVariantPriceFromPick(row: any, variantLabelValue: string | null 
   return null;
 }
 async function hydratePickPreview(
-  supabase: ReturnType<typeof createClient>,
+  supabase: ConciergeDbClient,
   pickIds: string[],
 ) {
   if (!pickIds.length) return [];
@@ -3103,8 +3120,8 @@ async function hydratePickPreview(
   const dmap = new Map<string, string>();
   (designers || []).forEach((d: any) => dmap.set(d.id, d.display_name || d.name));
 
-  const pickById = new Map((picks || []).map((p: any) => [p.id, p]));
-  const tradeById = new Map((trades || []).map((t: any) => [t.id, t]));
+  const pickById = new Map<string, any>((picks || []).map((p: any) => [p.id, p] as [string, any]));
+  const tradeById = new Map<string, any>((trades || []).map((t: any) => [t.id, t] as [string, any]));
 
   // Build a fallback image map from gallery_hotspots so any product whose
   // main row lacks image_url (e.g. rugs like Giudecca, where the only photo
@@ -3246,7 +3263,7 @@ async function hydratePickPreview(
 
 
 async function buildDeterministicTearsheetProposal(
-  supabase: ReturnType<typeof createClient>,
+  supabase: ConciergeDbClient,
   ragRows: any[],
   brief: ExtractedBrief["brief"],
   requestText: string,
@@ -3277,7 +3294,11 @@ async function buildDeterministicTearsheetProposal(
   if (pickIds.length < 2) return null;
   const hydratedRaw = await hydratePickPreview(supabase, pickIds);
   const validIds = new Set(hydratedRaw.map((p: any) => p?.id).filter(Boolean));
-  const previewById = new Map(hydratedRaw.map((p: any) => [p?.id, p]).filter(([id]) => !!id));
+  const previewById = new Map<string, any>(
+    hydratedRaw
+      .map((p: any) => [p?.id, p] as [string | undefined, any])
+      .filter((entry): entry is [string, any] => typeof entry[0] === "string" && !!entry[0]),
+  );
   const validPickIds = pickIds.filter((id) => validIds.has(id) && rowMatchesRequestedTypology(previewById.get(id), requestedTypology));
   const { previewRaw, pickIds: finalIds } = dedupePreviewRows(
     hydratedRaw.filter((p: any) => validPickIds.includes(p?.id)),
@@ -3340,7 +3361,7 @@ function buildVisualizationBriefProposal(args: {
 
 /** Build per-line preview rows for a draft_quote / add_to_quote proposal. */
 async function hydrateQuotePreview(
-  supabase: ReturnType<typeof createClient>,
+  supabase: ConciergeDbClient,
   lines: Array<{ pick_id: string; qty: number; variant?: string | null; lead_weeks?: number | null; note?: string | null }>,
   fallbackCurrency: string | null,
   discountPct: number,
@@ -3400,7 +3421,7 @@ async function hydrateQuotePreview(
         cents: c.trade_price_cents ?? c.rrp_price_cents ?? null,
         score: ((c.trade_price_cents ?? c.rrp_price_cents) ? 1000 : 0) + (c.price_unit !== "per_sqm" ? 100 : 0),
       }))
-      .sort((a, b) => b.score - a.score)[0];
+      .sort((a: any, b: any) => b.score - a.score)[0];
     if (!best?.cents) return null;
     const currentCents = tradeRow.trade_price_cents ?? tradeRow.rrp_price_cents ?? null;
     if (!currentCents || tradeRow.price_unit === "per_sqm" || best.score > 1000) {
@@ -3434,7 +3455,7 @@ async function hydrateQuotePreview(
     if (!designer) return null;
     const candidates = (allTradeRows || []).filter((c: any) => {
       const brand = normalizeLoose(String(c.brand_name || "").split(" - ")[0]);
-      return brand === designer && titlesAreNearTwins(c.product_name, pick.title);
+      return brand === designer && titlesAreNearTwins(String(c.product_name || ""), String(pick.title || ""));
     });
     if (!candidates.length) return null;
     const best = candidates
@@ -3792,7 +3813,7 @@ serve(async (req) => {
       timed("userMemory", loadUserMemory(supabase, userId)),
       timed("mentionedProject", mentionedProjectIdPromise),
       timed("openQuotes", loadOpenQuotes(supabase, userId)),
-      timed("tradeTier", supabase.from("profiles").select("trade_tier").eq("id", userId).maybeSingle()),
+      timed("tradeTier", Promise.resolve(supabase.from("profiles").select("trade_tier").eq("id", userId).maybeSingle())),
       timed("cadDocuments", loadCadDocuments(supabase, userId)),
       timed("productCadAssets", loadProductCadAssets(supabase)),
     ]);
@@ -4078,6 +4099,72 @@ serve(async (req) => {
 
 
 
+    if (hasExplicitSelectionVerb && requestedTypology && !mentionsKnownDesigner) {
+      const budgetCeiling = inferBudgetCeilingCents(lastUserMsg || "");
+      const allTypeCandidates = await fetchStrictTypologyCandidates(supabase, requestedTypology);
+      const budgetedCandidates = budgetCeiling
+        ? allTypeCandidates.filter((r: any) => Number(r?.trade_price_cents || 0) > 0 && Number(r.trade_price_cents) <= budgetCeiling.cents)
+        : allTypeCandidates;
+      const candidateRows = budgetedCandidates
+        .sort((a: any, b: any) => {
+          const ap = Number(a?.trade_price_cents || Number.MAX_SAFE_INTEGER);
+          const bp = Number(b?.trade_price_cents || Number.MAX_SAFE_INTEGER);
+          return ap - bp || String(a?.title || "").localeCompare(String(b?.title || ""));
+        })
+        .slice(0, Math.min(8, Math.max(2, effectiveBrief.brief.qty_hint || 6)));
+
+      if (allTypeCandidates.length > 0 && candidateRows.length === 0 && budgetCeiling) {
+        return sseTextResponse(
+          `The Maison Affluency Curation has ${typologyLabel(requestedTypology)} pieces, but none with published trade pricing ${budgetCeiling.label}. Would you like me to relax the budget or show Price on Request options in that typology?`,
+        );
+      }
+
+      if (candidateRows.length >= 1) {
+        const candidateIds = Array.from(new Set(candidateRows.map((r: any) => r.id).filter(Boolean)));
+        const previewRawAll = await hydratePickPreview(supabase, candidateIds);
+        let previewRaw = previewRawAll.filter((p: any) => rowMatchesRequestedTypology(p, requestedTypology));
+        if (budgetCeiling) {
+          previewRaw = previewRaw.filter((p: any) => Number(p?.price_cents || 0) > 0 && Number(p.price_cents) <= budgetCeiling.cents);
+        }
+        const { previewRaw: dedupedPreview, pickIds: dedupedIds } = dedupePreviewRows(
+          previewRaw,
+          candidateIds.filter((id: string) => previewRaw.some((p: any) => p?.id === id)),
+        );
+        if (dedupedIds.length === 0) {
+          return sseTextResponse(buildNoStrictTypologyReply(requestedTypology));
+        }
+        const rationaleMap: Record<string, { reason: string }> = {};
+        for (const p of dedupedPreview) {
+          if (!p?.id) continue;
+          const price = typeof p.price_cents === "number" && p.currency
+            ? `${p.currency} ${Math.round(p.price_cents / 100).toLocaleString("en-US")}`
+            : "published trade details";
+          rationaleMap[p.id] = { reason: budgetCeiling ? `Matches the requested typology and budget (${price}, ${budgetCeiling.label}).` : "Matches the requested typology from the Maison Affluency Curation." };
+        }
+        const proposal = {
+          tool: "propose_tearsheet",
+          tool_call_id: crypto.randomUUID(),
+          args: {
+            title: budgetCeiling ? `${typologyLabel(requestedTypology)} ${budgetCeiling.label}` : `${typologyLabel(requestedTypology)} edit`,
+            pick_ids: dedupedIds,
+            note: budgetCeiling
+              ? `${dedupedIds.length} ${typologyLabel(requestedTypology)} match${dedupedIds.length === 1 ? "" : "es"} with published pricing ${budgetCeiling.label}.`
+              : `${dedupedIds.length} ${typologyLabel(requestedTypology)} match${dedupedIds.length === 1 ? "" : "es"} from the Maison Affluency Curation.`,
+            pick_rationales: rationaleMap,
+          },
+          preview: dedupedPreview.map((p: any) => ({ ...p, rationale: rationaleMap[p.id]?.reason || null })),
+        };
+        const requestedQty = effectiveBrief.brief.qty_hint || (lastUserMsg.match(/\b(\d{1,2})\b/) ? Number(lastUserMsg.match(/\b(\d{1,2})\b/)?.[1]) : null);
+        const quantityNote = requestedQty && requestedQty > dedupedIds.length
+          ? ` I found ${dedupedIds.length}, not ${requestedQty}, that truly match the typology${budgetCeiling ? ` with published pricing ${budgetCeiling.label}` : ""}; I did not pad with adjacent categories.`
+          : "";
+        return sseProposalThenTextResponse(
+          proposal,
+          `Here's the matching edit.${quantityNote} Review the list above and click **Approve & Create** to save it into a project folder — or **Discard** to cancel.`,
+        );
+      }
+    }
+
     if (mentionsKnownDesigner && isEnumerationRequest) {
       const { data: designerRows } = await supabase
         .from("designers")
@@ -4213,7 +4300,8 @@ serve(async (req) => {
         );
       }
       if (pickIds.length >= 1) {
-        const previewRawAll = await hydratePickPreview(supabase, pickIds);
+        const previewRawAll: Array<{ id: string; title?: string | null; [key: string]: any }> = ((await hydratePickPreview(supabase, pickIds)) as any[])
+          .filter((p: any): p is { id: string; title?: string | null; [key: string]: any } => p && typeof p.id === "string");
         const validIds = new Set(previewRawAll.map((p: any) => p?.id).filter(Boolean));
         // Honour in-chat "skip / exclude / omit …" instructions so the
         // proposal card is pre-filtered instead of shipping all 10 when the
@@ -5552,7 +5640,8 @@ serve(async (req) => {
                 }
               }
             }
-            let previewRaw = await hydratePickPreview(supabase, pickIds);
+            let previewRaw: Array<{ id: string; title?: string | null; [key: string]: any }> = ((await hydratePickPreview(supabase, pickIds)) as any[])
+              .filter((p: any): p is { id: string; title?: string | null; [key: string]: any } => p && typeof p.id === "string");
             if (requestedTypology) {
               previewRaw = previewRaw.filter((p: any) => rowMatchesRequestedTypology(p, requestedTypology));
             }
@@ -6064,7 +6153,7 @@ serve(async (req) => {
         const plannerExpectsCard = Array.isArray(effectiveBrief?.plan) && effectiveBrief.plan.some((t) =>
           t === "propose_tearsheet" || t === "add_to_tearsheet" ||
           t === "draft_quote" || t === "add_to_quote" ||
-          t === "propose_ffe_rows" || t === "estimate_shipping"
+          t === "propose_ffe_rows"
         );
         // Discovery-stage guard: ALSO buffer prose on turns with no expected
         // card, so the Discovery Guard can scrub invented brand/piece names
