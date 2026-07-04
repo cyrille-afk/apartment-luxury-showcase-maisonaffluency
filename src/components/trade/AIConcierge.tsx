@@ -1121,6 +1121,13 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
             return copy;
           });
         },
+        onReconnect: (ev) => {
+          armStall();
+          toast.message("Reconnecting to the concierge…", {
+            description: `Connection ${ev.reason === "stream_truncated" ? "dropped" : "hiccup"} — retrying (${ev.attempt}/${ev.maxAttempts}).`,
+            duration: Math.max(1500, ev.delayMs),
+          });
+        },
         onEscalation: (ev) => {
           armStall();
           setTimeline((prev) => [
