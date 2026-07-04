@@ -2417,7 +2417,21 @@ async function extractBrief(apiKey: string, latestUserMessage: string): Promise<
       promptHash: result.promptHash,
       tier: "cheap",
     }).catch(() => {});
-    return result.value;
+    // Material-fidelity repair — runs even on cache hits so freshly-added
+    // lexicon entries take effect immediately.
+    const brief = result.value;
+    try {
+      const { materials, repair } = reconcileMaterialsWithSource(brief.brief.materials, latestUserMessage);
+      if (repair.added.length || repair.replaced.length) {
+        console.log(
+          `[concierge] material_fidelity_repair added=${JSON.stringify(repair.added)} replaced=${JSON.stringify(repair.replaced)} original=${JSON.stringify(brief.brief.materials)} final=${JSON.stringify(materials)}`,
+        );
+        brief.brief = { ...brief.brief, materials };
+      }
+    } catch (e) {
+      console.error("material_fidelity_repair failed:", e);
+    }
+    return brief;
   } catch (e) {
     console.error("brief planner failed:", e);
     return EMPTY_BRIEF;
