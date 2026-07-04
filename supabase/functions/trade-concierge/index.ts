@@ -4145,7 +4145,7 @@ serve(async (req) => {
           tool: "propose_tearsheet",
           tool_call_id: crypto.randomUUID(),
           args: {
-            title: budgetCeiling ? `${typologyLabel(requestedTypology)} under ${budgetCeiling.label}` : `${typologyLabel(requestedTypology)} edit`,
+            title: budgetCeiling ? `${typologyLabel(requestedTypology)} ${budgetCeiling.label}` : `${typologyLabel(requestedTypology)} edit`,
             pick_ids: dedupedIds,
             note: budgetCeiling
               ? `${dedupedIds.length} ${typologyLabel(requestedTypology)} match${dedupedIds.length === 1 ? "" : "es"} with published pricing ${budgetCeiling.label}.`
