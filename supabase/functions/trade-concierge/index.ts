@@ -4129,6 +4129,28 @@ serve(async (req) => {
         // with server-side Inspector logs (same request_id).
         controller.enqueue(encoder.encode(`event: request_id\ndata: ${JSON.stringify({ request_id: requestId })}\n\n`));
 
+        // Surface hard-constraint pre-filters to the client so the UI can
+        // show chips like "Filtered by: forest green · oak" alongside the
+        // reply. Combines the RAG-side constraints (derived from the user
+        // message) and the SQL-side constraints (extendedBrief categories +
+        // materials). Emitted even when empty so the UI can clear stale chips.
+        const appliedConstraintsPayload = {
+          colors: [...new Set([
+            ...((preRequestConstraints.colors) || []),
+            ...((sqlLoadConstraints.colors) || []),
+          ])],
+          materials: [...new Set([
+            ...((preRequestConstraints.materials) || []),
+            ...((sqlLoadConstraints.materials) || []),
+          ])],
+          categories: [...new Set(((sqlLoadConstraints.categories) || []))],
+          applied_to: [
+            hasAnyPreConstraint ? "rag" : null,
+            (hasSqlConstraint && !mentionsKnownDesigner) ? "sql" : null,
+          ].filter(Boolean) as string[],
+        };
+        controller.enqueue(encoder.encode(`event: applied_constraints\ndata: ${JSON.stringify(appliedConstraintsPayload)}\n\n`));
+
         // Emit escalation event up-front when the classifier flagged it.
         if (sentiment.escalate) {
           const payload = {

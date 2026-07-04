@@ -251,6 +251,20 @@ export type InspectorEvent = {
 };
 
 /**
+ * Hard-constraint pre-filters actually applied to catalog retrieval for
+ * this turn (color/material/category tokens). Emitted once, near the start
+ * of the SSE stream. Empty arrays mean nothing was filtered — the UI should
+ * treat that as "no chips" rather than an error.
+ */
+export type AppliedConstraintsEvent = {
+  colors: string[];
+  materials: string[];
+  categories: string[];
+  /** Which catalog path(s) the filters were actually applied to. */
+  applied_to: Array<"rag" | "sql">;
+};
+
+/**
  * Emitted the first time the model starts streaming a card-producing tool
  * call (`propose_tearsheet`, `add_to_tearsheet`, `draft_quote`,
  * `add_to_quote`, `propose_ffe_rows`, `prepare_visualization_brief`),
@@ -282,6 +296,7 @@ export async function streamConcierge({
   onEscalation,
   onRequestId,
   onInspector,
+  onAppliedConstraints,
   onDone,
   onError,
   signal,
@@ -306,6 +321,8 @@ export async function streamConcierge({
   onRequestId?: (requestId: string) => void;
   /** Fires each time the Inspector Agent completes a card run. */
   onInspector?: (event: InspectorEvent) => void;
+  /** Fires once near the start with the hard-constraint pre-filters applied to catalog retrieval. */
+  onAppliedConstraints?: (event: AppliedConstraintsEvent) => void;
   onDone: () => void;
   onError: (msg: string) => void;
   signal?: AbortSignal;
@@ -394,6 +411,10 @@ export async function streamConcierge({
       }
       if (currentEvent === "inspector") {
         if (onInspector) onInspector(parsed as InspectorEvent);
+        return;
+      }
+      if (currentEvent === "applied_constraints") {
+        if (onAppliedConstraints) onAppliedConstraints(parsed as AppliedConstraintsEvent);
         return;
       }
       if (currentEvent === "proposal") {

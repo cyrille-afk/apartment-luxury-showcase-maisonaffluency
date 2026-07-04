@@ -3,7 +3,7 @@ import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { X, Send, Loader2, Sparkles, Minus, GripHorizontal, RotateCcw, Maximize2, Minimize2, Palette, Check, Languages, Pencil, Paperclip, FileText, Download, FileDown, Copy, ShieldCheck } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { streamConcierge, type ChatMessage, type ChatContentPart, type TearsheetProposal, type QuoteProposal, type FfeProposal, type VisualizationBriefProposal, type ConciergeProposal } from "@/lib/tradeConciergeStream";
+import { streamConcierge, type ChatMessage, type ChatContentPart, type TearsheetProposal, type QuoteProposal, type FfeProposal, type VisualizationBriefProposal, type ConciergeProposal, type AppliedConstraintsEvent } from "@/lib/tradeConciergeStream";
 import { TearsheetProposalCard } from "@/components/trade/concierge/TearsheetProposalCard";
 import { QuoteProposalCard } from "@/components/trade/concierge/QuoteProposalCard";
 import { FfeProposalCard } from "@/components/trade/concierge/FfeProposalCard";
@@ -33,7 +33,7 @@ type PendingProposalTool =
   | "propose_ffe_rows"
   | "prepare_visualization_brief";
 type TimelineItem =
-  | { kind: "msg"; role: "user" | "assistant"; content: string; actions?: ConciergeQuickAction[]; onboarding?: boolean; sourceContent?: string; sourceActions?: ConciergeQuickAction[]; attachments?: TimelineAttachment[] }
+  | { kind: "msg"; role: "user" | "assistant"; content: string; actions?: ConciergeQuickAction[]; onboarding?: boolean; sourceContent?: string; sourceActions?: ConciergeQuickAction[]; attachments?: TimelineAttachment[]; appliedConstraints?: AppliedConstraintsEvent }
   | { kind: "proposal"; proposal: TearsheetProposal; resolved?: "approved" | "discarded"; excluded?: string[]; newPickIds?: string[] }
   | { kind: "quote_proposal"; proposal: QuoteProposal; resolved?: "approved" | "discarded" }
   | { kind: "ffe_proposal"; proposal: FfeProposal; resolved?: "approved" | "discarded" }
@@ -985,6 +985,11 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
     };
     armStall();
 
+    // Track hard-constraint pre-filters applied to catalog retrieval for
+    // this turn. Emitted by the edge function once, near the start of the
+    // SSE stream. Attached to the assistant msg so the UI can show chips.
+    let turnConstraints: AppliedConstraintsEvent | null = null;
+
     const upsertAssistant = (chunk: string) => {
       armStall();
       assistantSoFar += chunk;
@@ -995,12 +1000,12 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
           const last = prev[idx];
           if (last?.kind === "msg" && last.role === "assistant") {
             const copy = prev.slice();
-            copy[idx] = { ...last, content: assistantSoFar };
+            copy[idx] = { ...last, content: assistantSoFar, appliedConstraints: turnConstraints ?? last.appliedConstraints };
             return copy;
           }
         }
         assistantStarted = true;
-        return [...prev, { kind: "msg", role: "assistant", content: assistantSoFar }];
+        return [...prev, { kind: "msg", role: "assistant", content: assistantSoFar, appliedConstraints: turnConstraints ?? undefined }];
       });
     };
 
@@ -1100,6 +1105,21 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
         },
         onInspector: () => {
           setLastInspectorCount((n) => n + 1);
+        },
+        onAppliedConstraints: (ev) => {
+          turnConstraints = ev;
+          // If the assistant msg already exists, patch it so chips render
+          // even before the next delta arrives.
+          setTimeline((prev) => {
+            const idx = [...prev].reverse().findIndex((t) => t.kind === "msg" && t.role === "assistant");
+            if (idx === -1) return prev;
+            const realIdx = prev.length - 1 - idx;
+            const item = prev[realIdx];
+            if (item.kind !== "msg" || item.role !== "assistant") return prev;
+            const copy = prev.slice();
+            copy[realIdx] = { ...item, appliedConstraints: ev };
+            return copy;
+          });
         },
         onEscalation: (ev) => {
           armStall();
@@ -1740,6 +1760,36 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
                         <span className="whitespace-pre-wrap">{item.content}</span>
                       )}
                     </div>
+                    )}
+                    {item.role === "assistant" && item.appliedConstraints && (
+                      (item.appliedConstraints.colors.length +
+                        item.appliedConstraints.materials.length +
+                        item.appliedConstraints.categories.length) > 0 && (
+                        <div
+                          className={cn(
+                            "flex flex-wrap items-center gap-1.5 text-[10px] font-body uppercase tracking-[0.14em] text-muted-foreground",
+                            expanded ? "max-w-[92%]" : "max-w-[88%]",
+                          )}
+                          title="Hard-constraint pre-filter applied to the Maison Affluency Curation for this turn"
+                        >
+                          <span className="text-muted-foreground/70">Filtered by:</span>
+                          {item.appliedConstraints.colors.map((c) => (
+                            <span key={`c-${c}`} className="inline-flex items-center rounded-full border border-border/80 bg-background/60 px-2 py-0.5">
+                              <span className="mr-1">◆</span>{c}
+                            </span>
+                          ))}
+                          {item.appliedConstraints.materials.map((m) => (
+                            <span key={`m-${m}`} className="inline-flex items-center rounded-full border border-border/80 bg-background/60 px-2 py-0.5">
+                              {m}
+                            </span>
+                          ))}
+                          {item.appliedConstraints.categories.map((cat) => (
+                            <span key={`cat-${cat}`} className="inline-flex items-center rounded-full border border-border/80 bg-background/60 px-2 py-0.5">
+                              {cat}
+                            </span>
+                          ))}
+                        </div>
+                      )
                     )}
                     {item.role === "assistant" && item.actions && item.actions.length > 0 && (
                       <div className={cn("flex flex-wrap gap-1.5", expanded ? "max-w-[92%]" : "max-w-[88%]")}>
