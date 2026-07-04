@@ -298,6 +298,31 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
   const [expanded, setExpanded] = useState<boolean>(() => {
     try { return localStorage.getItem("concierge:expanded") === "1"; } catch { return false; }
   });
+  // When the tearsheet card opens its Insights sidebar it needs the concierge
+  // panel to be at its wide 560px size so the sidebar sits alongside instead
+  // of overlapping. We temporarily force-expand without persisting, and
+  // restore the user's prior preference on close.
+  const [insightsForcedExpand, setInsightsForcedExpand] = useState(false);
+  const priorExpandedRef = useRef<boolean | null>(null);
+  useEffect(() => {
+    const onInsights = (e: Event) => {
+      const detail = (e as CustomEvent<{ open: boolean }>).detail;
+      if (!detail) return;
+      if (detail.open) {
+        if (!insightsForcedExpand) {
+          priorExpandedRef.current = expanded;
+          setInsightsForcedExpand(true);
+          setExpanded(true);
+        }
+      } else if (insightsForcedExpand) {
+        setInsightsForcedExpand(false);
+        if (priorExpandedRef.current !== null) setExpanded(priorExpandedRef.current);
+        priorExpandedRef.current = null;
+      }
+    };
+    window.addEventListener("maf:concierge:insights", onInsights as EventListener);
+    return () => window.removeEventListener("maf:concierge:insights", onInsights as EventListener);
+  }, [expanded, insightsForcedExpand]);
   const PANEL_W = expanded ? 560 : 380;
   const PANEL_H_OPEN = expanded ? 760 : 560;
   const PANEL_H_MIN = 52;

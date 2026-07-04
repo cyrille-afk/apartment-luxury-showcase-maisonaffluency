@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { Loader2, Check, X, Pencil, ExternalLink, Plus, ChevronDown, Copy, Repeat, Lock, Unlock, RefreshCw, PlusCircle, MessageSquare, ShieldCheck } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
@@ -14,6 +14,7 @@ import { RequirementsBadge } from "@/components/trade/concierge/RequirementsBadg
 import { validateTearsheetEdits, realignUnlocked, type ValidationVerdict, type RealignmentDelta } from "@/lib/tearsheetSyncClient";
 import { ValidationBanner, RowVerdictPill } from "@/components/trade/concierge/ValidationSummary";
 import { RealignmentDiffPanel, type AppliedRealignment } from "@/components/trade/concierge/RealignmentDiffPanel";
+import { TearsheetInsightsSidebar } from "@/components/trade/concierge/TearsheetInsightsSidebar";
 
 
 type Status = "pending" | "committing" | "approved" | "discarded";
@@ -112,6 +113,46 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
   }, [proposal.preview, swaps, extraPicks]);
 
   const visiblePicks = uniquePreview.filter((p) => !excluded.has(p.id));
+
+  // Lookup for the insights sidebar so it can render a pick's title/designer
+  // next to each validation row and delta entry.
+  const previewById = useMemo(() => new Map(uniquePreview.map((p) => [p.id, p])), [uniquePreview]);
+
+  // ── Insights sidebar coordination ──────────────────────────────────────
+  // Row refs for card→row scroll+flash triggered from the sidebar. Scroll
+  // uses `scrollIntoView({ block: "nearest" })` inside the card's own
+  // scroll container so the concierge chat viewport is not moved.
+  const rowRefs = useRef<Map<string, HTMLLIElement>>(new Map());
+  const [highlightedRowId, setHighlightedRowId] = useState<string | null>(null);
+  const highlightTimerRef = useRef<number | null>(null);
+
+  const focusRow = (pickId: string) => {
+    const node = rowRefs.current.get(pickId);
+    if (node) {
+      node.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+    setHighlightedRowId(pickId);
+    if (highlightTimerRef.current) window.clearTimeout(highlightTimerRef.current);
+    highlightTimerRef.current = window.setTimeout(() => setHighlightedRowId(null), 1600);
+  };
+
+  useEffect(() => () => {
+    if (highlightTimerRef.current) window.clearTimeout(highlightTimerRef.current);
+  }, []);
+
+  // Ask AIConcierge to widen its panel while insights are showing (so the
+  // sidebar and the pick list are visible together on desktop). Fires an
+  // idempotent open/close event; AIConcierge listens and toggles `expanded`.
+  const insightsOpen = verdictLoading || !!verdict || deltaLoading || !!delta;
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.dispatchEvent(new CustomEvent("maf:concierge:insights", { detail: { open: insightsOpen } }));
+    // On unmount, always signal closed so a stale value never lingers.
+    return () => {
+      window.dispatchEvent(new CustomEvent("maf:concierge:insights", { detail: { open: false } }));
+    };
+  }, [insightsOpen]);
+
 
   const togglePick = (id: string) => {
     const next = new Set(excluded);
@@ -462,33 +503,39 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
         <p className="font-body text-xs text-muted-foreground italic mb-2.5">"{proposal.args.note}"</p>
       )}
 
-      {/* Structured validation banner (Validate/Sync #A) */}
-      {verdictLoading && (
-        <div className="flex items-center gap-2 rounded-lg border border-border/60 bg-muted/30 px-2.5 py-2 mb-2.5">
-          <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
-          <span className="font-body text-[11px] text-muted-foreground">Validator reviewing your edits…</span>
-        </div>
-      )}
-      {verdict && !verdictLoading && (
-        <ValidationBanner verdict={verdict} onDismiss={() => setVerdict(null)} />
-      )}
+      {/*
+        Validate/Sync + cascading re-alignment.
+        Desktop (≥lg): rendered in the docked <TearsheetInsightsSidebar>
+        via portal (see end of component). Below lg the sidebar can't fit,
+        so we keep the inline banner + diff panel as a fallback.
+      */}
+      <div className="lg:hidden">
+        {verdictLoading && (
+          <div className="flex items-center gap-2 rounded-lg border border-border/60 bg-muted/30 px-2.5 py-2 mb-2.5">
+            <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
+            <span className="font-body text-[11px] text-muted-foreground">Validator reviewing your edits…</span>
+          </div>
+        )}
+        {verdict && !verdictLoading && (
+          <ValidationBanner verdict={verdict} onDismiss={() => setVerdict(null)} />
+        )}
+        {deltaLoading && (
+          <div className="flex items-center gap-2 rounded-lg border border-accent/40 bg-accent/[0.04] px-2.5 py-2 mb-2.5">
+            <Loader2 className="h-3 w-3 animate-spin text-accent" />
+            <span className="font-body text-[11px] text-accent">Re-aligner considering alternatives…</span>
+          </div>
+        )}
+        {delta && !deltaLoading && (
+          <RealignmentDiffPanel
+            delta={delta}
+            lockedItems={uniquePreview.filter((p) => locked.has(p.id) && !excluded.has(p.id))}
+            keptUnlockedItems={uniquePreview.filter((p) => !locked.has(p.id) && !excluded.has(p.id))}
+            onApply={handleApplyRealignment}
+            onDismiss={() => setDelta(null)}
+          />
+        )}
+      </div>
 
-      {/* Cascading re-alignment diff panel (Validate/Sync #B) */}
-      {deltaLoading && (
-        <div className="flex items-center gap-2 rounded-lg border border-accent/40 bg-accent/[0.04] px-2.5 py-2 mb-2.5">
-          <Loader2 className="h-3 w-3 animate-spin text-accent" />
-          <span className="font-body text-[11px] text-accent">Re-aligner considering alternatives…</span>
-        </div>
-      )}
-      {delta && !deltaLoading && (
-        <RealignmentDiffPanel
-          delta={delta}
-          lockedItems={uniquePreview.filter((p) => locked.has(p.id) && !excluded.has(p.id))}
-          keptUnlockedItems={uniquePreview.filter((p) => !locked.has(p.id) && !excluded.has(p.id))}
-          onApply={handleApplyRealignment}
-          onDismiss={() => setDelta(null)}
-        />
-      )}
 
 
       {/* Collapse all reasoning panels — only when something is currently expanded */}
@@ -577,10 +624,16 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
                   return (
                     <li
                       key={p.id}
+                      data-pick-id={p.id}
+                      ref={(el) => {
+                        if (el) rowRefs.current.set(p.id, el);
+                        else rowRefs.current.delete(p.id);
+                      }}
                       className={cn(
-                        "flex items-start gap-2.5 rounded-lg p-1.5 transition-opacity",
+                        "flex items-start gap-2.5 rounded-lg p-1.5 transition-all duration-300",
                         isExcluded && "opacity-40",
                         isLocked && "bg-muted/40 opacity-70 ring-1 ring-accent/20",
+                        highlightedRowId === p.id && "ring-2 ring-accent bg-accent/[0.06]",
                       )}
                     >
                       <div className="relative h-10 w-10 shrink-0">
@@ -870,6 +923,22 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
           <span className="font-body text-[11px]">Discarded</span>
         </div>
       )}
+
+      {/* Docked AI Insights sidebar (desktop only, portal-rendered). */}
+      <TearsheetInsightsSidebar
+        verdictLoading={verdictLoading}
+        verdict={verdict}
+        deltaLoading={deltaLoading}
+        delta={delta}
+        lockedItems={uniquePreview.filter((p) => locked.has(p.id) && !excluded.has(p.id))}
+        keptUnlockedItems={uniquePreview.filter((p) => !locked.has(p.id) && !excluded.has(p.id))}
+        previewById={previewById}
+        onDismissVerdict={() => setVerdict(null)}
+        onDismissDelta={() => setDelta(null)}
+        onApplyRealignment={handleApplyRealignment}
+        onFocusRow={focusRow}
+      />
     </div>
   );
 }
+
