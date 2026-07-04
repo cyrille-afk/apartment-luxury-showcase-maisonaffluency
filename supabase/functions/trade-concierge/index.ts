@@ -1423,6 +1423,13 @@ async function loadCatalogContext(
   if (useDesignerFilter && filteredBrandNames.size) {
     tradeQuery = tradeQuery.in("brand_name", Array.from(filteredBrandNames));
   }
+  if (hardConstraints) {
+    tradeQuery = applyHardConstraints(tradeQuery as any, hardConstraints, {
+      text: ["product_name", "materials", "category", "subcategory"],
+      brand: "brand_name",
+      category: "category",
+    }) as typeof tradeQuery;
+  }
   const { data: tradeAll } = includePieces
     ? await tradeQuery
     : await supabase
