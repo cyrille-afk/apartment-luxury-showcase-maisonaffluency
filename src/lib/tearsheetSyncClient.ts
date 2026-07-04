@@ -11,11 +11,12 @@ const BASE = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1`;
 
 export type SyncItem = {
   pick_id: string;
-  title: string;
+  title?: string;
   designer_name: string | null;
   materials: string | null;
   category: string | null;
 };
+
 
 export type ValidationRow = {
   pick_id: string;
