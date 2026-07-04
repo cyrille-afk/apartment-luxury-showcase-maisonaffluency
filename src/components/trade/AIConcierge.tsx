@@ -218,6 +218,37 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
       reader.readAsDataURL(file);
     });
 
+  // Build a small (max 480px, JPEG q=0.72) preview so it fits in sessionStorage
+  // and inline-renders in the transcript even after a reload. The full-res
+  // dataUrl is still what we ship to the vision model.
+  const buildThumbnailDataUrl = (dataUrl: string): Promise<string> =>
+    new Promise((resolve) => {
+      try {
+        const img = new Image();
+        img.onload = () => {
+          const MAX = 480;
+          const scale = Math.min(1, MAX / Math.max(img.width, img.height));
+          const w = Math.max(1, Math.round(img.width * scale));
+          const h = Math.max(1, Math.round(img.height * scale));
+          const canvas = document.createElement("canvas");
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext("2d");
+          if (!ctx) return resolve(dataUrl);
+          ctx.drawImage(img, 0, 0, w, h);
+          try {
+            resolve(canvas.toDataURL("image/jpeg", 0.72));
+          } catch {
+            resolve(dataUrl);
+          }
+        };
+        img.onerror = () => resolve(dataUrl);
+        img.src = dataUrl;
+      } catch {
+        resolve(dataUrl);
+      }
+    });
+
   const handleFilesPicked = useCallback(async (files: FileList | File[] | null) => {
     if (!files) return;
     const list = Array.from(files);
