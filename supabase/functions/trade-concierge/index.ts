@@ -5631,7 +5631,24 @@ serve(async (req) => {
               },
               preview,
             };
-            emitProposalWithRequirementsDiff(proposal, preview);
+            const { validation } = validateProposalAgainstBrief(proposal, userConversationText, capturedRequirements);
+            if (!validation.ok) {
+              controller.enqueue(encoder.encode(
+                `event: proposal_blocked\ndata: ${JSON.stringify({
+                  request_id: requestId,
+                  tool: "draft_quote",
+                  tool_call_id: proposal.tool_call_id,
+                  reason: "requirements_violation",
+                  coverage: validation.coverage,
+                  violations: validation.violations,
+                  message: buildRequirementsBlockedMessage(validation.violations),
+                })}\n\n`,
+              ));
+              controller.enqueue(encoder.encode(`data: ${JSON.stringify({ choices: [{ delta: { content: buildRequirementsBlockedMessage(validation.violations) } }] })}\n\n`));
+              console.warn(`[concierge chain] blocked draft_quote with ${lines.length} lines violations=${JSON.stringify(validation.violations)}`);
+              return;
+            }
+            controller.enqueue(encoder.encode(`event: proposal\ndata: ${JSON.stringify(proposal)}\n\n`));
             console.log(`[concierge chain] emitted draft_quote with ${lines.length} lines from tearsheet "${tearsheetTitle}"`);
           } catch (e) {
             console.error("chain draft_quote failed:", e);
