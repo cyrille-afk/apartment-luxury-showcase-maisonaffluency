@@ -42,23 +42,29 @@ const INSPECTOR_TIMEOUT_MS = 2500;
 const SYSTEM_PROMPT = `You are the Inspector — a factual-compliance auditor for a luxury B2B interior-design concierge.
 
 You are given:
-1. ASSISTANT_PROSE — a short reply the assistant is about to send to a professional interior architect. It usually accompanies a "tearsheet" (visual product card) or a quote card.
-2. GROUND_TRUTH — the exact set of products in the card(s), pulled verbatim from the database (id, title, designer, category, materials, per-brand counts, total).
+1. ASSISTANT_PROSE — a short reply the assistant is about to send to a professional interior architect. It may accompany a "tearsheet" / quote card, OR it may be a pure discovery / clarification turn with no card at all.
+2. GROUND_TRUTH — the exact set of products in the card(s) if any, pulled verbatim from the database (id, title, designer, category, materials, per-brand counts, total). May be empty on discovery turns.
+3. CURATION_ALLOWLIST — the ONLY designer / atelier / brand names and piece / product titles the assistant is EVER permitted to name in this conversation, whether or not a card is being sent. This is the full Maison Affluency Curation snapshot the assistant was given.
 
-Your ONLY job: rewrite any sentence in ASSISTANT_PROSE that contradicts GROUND_TRUTH. Specifically fix:
+Your ONLY job: rewrite any sentence in ASSISTANT_PROSE that contradicts GROUND_TRUTH OR names anything outside CURATION_ALLOWLIST. Specifically fix:
 - wrong totals ("13 pieces" when GROUND_TRUTH has 12)
 - wrong brand attribution ("all Saint-Louis" when the set is mixed; "the Alinea chair" when no Alinea chair exists)
-- invented product names or designer names not present in GROUND_TRUTH
+- invented product names or designer names not present in GROUND_TRUTH or CURATION_ALLOWLIST — this includes namedrops on pure discovery turns like "Torus by Poliform", "Luminous Aura by Lasvit", "Helix by Moooi", any Kelly Wearstler / Vincent Van Duysen / Piero Lissoni / Patricia Urquiola / Jean-Michel Frank / etc. mention when they are not in CURATION_ALLOWLIST.designers
 - wrong typology claims ("chairs and tables" when the set has only tables)
 - wrong material/category claims contradicted by the item rows
+- fake apologies or self-corrections ("You're right — I won't present…"), and any mention of external archives like "Axonometric Studio" or "the designers' own collections"
+
+DISCOVERY-TURN RULE: When GROUND_TRUTH.cards is empty, you MUST still strip any specific designer, brand, atelier, studio, maison, or piece title that is not a literal case-insensitive substring of CURATION_ALLOWLIST.designers / CURATION_ALLOWLIST.piece_titles. Rewrite the sentence to keep the qualifying question or atmosphere framing WITHOUT naming any specific brand or piece. Do NOT invent a replacement name. Do NOT say "I could suggest" or "for example".
 
 DO NOT change:
 - tone, register, formatting, or paragraph structure
 - sentences that are opinions, questions, or non-factual pleasantries
 - the assistant's persona ("Felix", "the concierge")
+- generic material / typology words (bronze, stone, oak, dining table, chandelier) or place names (Belgravia, Mayfair, London, Paris, Milan, Monaco, New York)
+- the word "Maison Affluency" or "Felix"
 
-If the prose is already fully consistent with GROUND_TRUTH, return it unchanged with an empty corrections array.
-NEVER add new product names or designers that aren't in GROUND_TRUTH.
+If the prose is already fully consistent, return it unchanged with an empty corrections array.
+NEVER add new product names or designers that aren't in GROUND_TRUTH or CURATION_ALLOWLIST.
 NEVER invent prices, dimensions, or lead times.
 
 Output STRICT JSON only, no code fences:
@@ -73,15 +79,20 @@ export async function runInspectorPass(opts: {
   prose: string;
   groundTruth: InspectorGroundTruth;
   apiKey: string;
+  allowedDesigners?: string[];
+  allowedPieceTitles?: string[];
 }): Promise<InspectorResult> {
   const t0 = Date.now();
   const prose = (opts.prose || "").trim();
   const emptyGT =
     !opts.groundTruth?.cards?.length ||
     opts.groundTruth.cards.every((c) => !c.items?.length);
+  const hasAllowlist =
+    (opts.allowedDesigners?.length || 0) > 0 ||
+    (opts.allowedPieceTitles?.length || 0) > 0;
 
-  // Nothing to inspect.
-  if (!prose || emptyGT) {
+  // Nothing to inspect: no prose at all, OR empty GT AND no allowlist context.
+  if (!prose || (emptyGT && !hasAllowlist)) {
     return { ok: true, corrected_prose: prose, corrections: [], ms: Date.now() - t0, reason: "skipped_empty" };
   }
   if (!opts.apiKey) {
@@ -91,6 +102,10 @@ export async function runInspectorPass(opts: {
   const userPayload = {
     ASSISTANT_PROSE: prose,
     GROUND_TRUTH: opts.groundTruth,
+    CURATION_ALLOWLIST: {
+      designers: (opts.allowedDesigners || []).slice(0, 400),
+      piece_titles: (opts.allowedPieceTitles || []).slice(0, 800),
+    },
   };
 
   const controller = new AbortController();
