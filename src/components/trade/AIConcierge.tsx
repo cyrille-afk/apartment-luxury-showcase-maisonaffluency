@@ -1169,6 +1169,18 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
                 content: `I'm afraid our concierge is currently at capacity. To ensure every visitor receives attentive service, we limit the number of messages per session. Please try again in ${timeText}, or contact us directly if your request is urgent.`,
               },
             ]);
+          } else if (msg.startsWith("CORS_LIKELY:")) {
+            // Format: CORS_LIKELY:<comma-headers>|<original error>
+            const payload = msg.slice("CORS_LIKELY:".length);
+            const [headersPart] = payload.split("|");
+            const suspects = headersPart.split(",").filter(Boolean);
+            toast.error("Connection blocked by browser (CORS)", {
+              description: suspects.length
+                ? `The request was rejected before it reached the concierge. Likely cause: header "${suspects[0]}"${suspects.length > 1 ? ` (or one of: ${suspects.slice(1).join(", ")})` : ""} isn't in the edge function's Access-Control-Allow-Headers list.`
+                : "The browser blocked the request before it reached the concierge.",
+              duration: 10000,
+            });
+            pushRetry(text, "The browser blocked the request to the concierge (CORS preflight).");
           } else {
             // Surface a retry card instead of a fire-and-forget toast so the
             // user has a one-click path back to a working turn.

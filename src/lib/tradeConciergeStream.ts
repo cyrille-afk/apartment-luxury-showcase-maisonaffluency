@@ -406,6 +406,13 @@ export async function streamConcierge({
       ? { resume: { stream_id: streamId, last_seq: lastSeq }, surface: surface ?? "trade" }
       : { messages: currentMessages, project_id: projectId ?? null, surface: surface ?? "trade", lang: lang ?? null };
 
+    // Track the custom (non-standard) headers we send so the client can name a
+    // suspect when a CORS preflight fails silently in the browser. Standard
+    // headers (Content-Type/Authorization/apikey) never trigger a preflight
+    // block on their own — a mismatch always comes from one of these.
+    const customHeaders: string[] = ["x-request-id"];
+    if (surface === "public") customHeaders.push("x-concierge-surface", "x-concierge-sid");
+
     let resp: Response;
     try {
       resp = await fetch(endpoint, {
@@ -422,7 +429,20 @@ export async function streamConcierge({
       });
     } catch (e) {
       if (signal?.aborted) return { kind: "hard_error", message: "aborted" };
-      return { kind: "network_error", message: e instanceof Error ? e.message : "fetch failed" };
+      // A TypeError with no Response object is the browser's tell for a failed
+      // CORS preflight (or a network layer refusal). Tag the outcome so the UI
+      // can surface a targeted toast naming the custom headers we sent, since
+      // those are the only realistic culprits for a preflight rejection.
+      const msg = e instanceof Error ? e.message : "fetch failed";
+      const isCorsLikely =
+        e instanceof TypeError && /failed to fetch|networkerror|load failed/i.test(msg);
+      if (isCorsLikely) {
+        return {
+          kind: "network_error",
+          message: `CORS_LIKELY:${customHeaders.join(",")}|${msg}`,
+        };
+      }
+      return { kind: "network_error", message: msg };
     }
 
     if (!resp.ok) {
@@ -537,6 +557,13 @@ export async function streamConcierge({
 
     if (outcome.kind === "hard_error") {
       if (outcome.message === "aborted") return;
+      onError(outcome.message);
+      return;
+    }
+
+    // CORS/preflight failures never recover on retry — the browser will
+    // reject the same headers every time. Surface immediately.
+    if (outcome.kind === "network_error" && outcome.message.startsWith("CORS_LIKELY:")) {
       onError(outcome.message);
       return;
     }
