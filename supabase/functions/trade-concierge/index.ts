@@ -4293,18 +4293,23 @@ serve(async (req) => {
             : "published trade details";
           rationaleMap[p.id] = { reason: budgetCeiling ? `Matches the requested typology and budget (${price}, ${budgetCeiling.label}).` : "Matches the requested typology from the Maison Affluency Curation." };
         }
+        const previewWithRationale = dedupedPreview.map((p: any) => ({ ...p, rationale: rationaleMap[p.id]?.reason || null }));
+        const specSheetBlock = renderSpecSheetBlock(previewWithRationale as any);
+        const specSheetRows = buildSpecSheetRows(previewWithRationale as any);
+        const baseNote = budgetCeiling
+          ? `${dedupedIds.length} ${typologyLabel(requestedTypology)} match${dedupedIds.length === 1 ? "" : "es"} with published pricing ${budgetCeiling.label}.`
+          : `${dedupedIds.length} ${typologyLabel(requestedTypology)} match${dedupedIds.length === 1 ? "" : "es"} from the Maison Affluency Curation.`;
         const proposal = {
           tool: "propose_tearsheet",
           tool_call_id: crypto.randomUUID(),
           args: {
             title: budgetCeiling ? `${typologyLabel(requestedTypology)} ${budgetCeiling.label}` : `${typologyLabel(requestedTypology)} edit`,
             pick_ids: dedupedIds,
-            note: budgetCeiling
-              ? `${dedupedIds.length} ${typologyLabel(requestedTypology)} match${dedupedIds.length === 1 ? "" : "es"} with published pricing ${budgetCeiling.label}.`
-              : `${dedupedIds.length} ${typologyLabel(requestedTypology)} match${dedupedIds.length === 1 ? "" : "es"} from the Maison Affluency Curation.`,
+            note: specSheetBlock ? `${baseNote}\n\n${specSheetBlock}` : baseNote,
             pick_rationales: rationaleMap,
+            spec_sheet: specSheetRows.length ? specSheetRows : undefined,
           },
-          preview: dedupedPreview.map((p: any) => ({ ...p, rationale: rationaleMap[p.id]?.reason || null })),
+          preview: previewWithRationale,
         };
         const requestedQty = effectiveBrief.brief.qty_hint || (lastUserMsg.match(/\b(\d{1,2})\b/) ? Number(lastUserMsg.match(/\b(\d{1,2})\b/)?.[1]) : null);
         const quantityNote = requestedQty && requestedQty > dedupedIds.length
