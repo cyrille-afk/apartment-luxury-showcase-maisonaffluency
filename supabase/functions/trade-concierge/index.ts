@@ -3506,10 +3506,26 @@ serve(async (req) => {
     // AND scope the catalog load to just those designers — no reason to ship
     // the full 2000-row catalog when the question is about one designer.
     const useRag = includePieces && !!ragResult && !mentionsKnownDesigner;
+    // Merge extractedBrief material/category signal into the SQL-load
+    // constraints so the bulk catalog path narrows even when the raw user
+    // message did not contain a keyword (the classifier already normalised it).
+    const sqlLoadConstraints: HardConstraints = {
+      materials: [
+        ...(preRequestConstraints.materials || []),
+        ...((effectiveBrief.brief.materials || []).map((m) => String(m).toLowerCase())),
+      ].filter(Boolean),
+      colors: preRequestConstraints.colors || [],
+      categories: (effectiveBrief.brief.categories || []).map((c) => String(c).toLowerCase()).filter(Boolean),
+    };
+    const hasSqlConstraint =
+      (sqlLoadConstraints.materials?.length || 0) +
+      (sqlLoadConstraints.colors?.length || 0) +
+      (sqlLoadConstraints.categories?.length || 0) > 0;
     const { designersList, piecesList: fullPiecesList, showroomBrands } = await loadCatalogContext(
       supabase,
       includePieces && !useRag,
       mentionsKnownDesigner ? mentionedDesigners : undefined,
+      hasSqlConstraint && !mentionsKnownDesigner ? sqlLoadConstraints : undefined,
     );
     const piecesList = useRag ? (ragResult as { contextText: string }).contextText : fullPiecesList;
 
