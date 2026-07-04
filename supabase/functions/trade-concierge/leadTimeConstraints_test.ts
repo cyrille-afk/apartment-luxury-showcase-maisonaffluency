@@ -113,3 +113,75 @@ Deno.test("filter: safety valve marks fellBack when <2 survive", () => {
   assertEquals(res.kept.length, 0);
   assert(res.fellBack);
 });
+
+// ----- Range parsing -----
+
+Deno.test("range: '4-6 weeks' -> min=4, max=6", () => {
+  const c = inferLeadTimeConstraints("we need it in 4-6 weeks");
+  assertEquals(c?.minWeeks, 4);
+  assertEquals(c?.maxWeeks, 6);
+});
+
+Deno.test("range: 'between 8 and 10 weeks' -> min=8, max=10", () => {
+  const c = inferLeadTimeConstraints("deliver between 8 and 10 weeks");
+  assertEquals(c?.minWeeks, 8);
+  assertEquals(c?.maxWeeks, 10);
+});
+
+Deno.test("range: '4 to 6 weeks' -> min=4, max=6", () => {
+  const c = inferLeadTimeConstraints("ships in 4 to 6 weeks");
+  assertEquals(c?.minWeeks, 4);
+  assertEquals(c?.maxWeeks, 6);
+});
+
+Deno.test("range: en-dash '4–6 weeks' -> min=4, max=6", () => {
+  const c = inferLeadTimeConstraints("lead time 4–6 weeks please");
+  assertEquals(c?.minWeeks, 4);
+  assertEquals(c?.maxWeeks, 6);
+});
+
+Deno.test("range: '2 to 3 months' -> min=8, max=12 (weeks)", () => {
+  const c = inferLeadTimeConstraints("between 2 and 3 months");
+  assertEquals(c?.minWeeks, 8);
+  assertEquals(c?.maxWeeks, 12);
+});
+
+Deno.test("range + separate ceiling: keeps tightest", () => {
+  const c = inferLeadTimeConstraints("4-8 weeks, but ideally under 6 weeks");
+  assertEquals(c?.maxWeeks, 6);
+  assertEquals(c?.minWeeks, 4);
+});
+
+// ----- Strict range enforcement against brand_lead_times -----
+
+Deno.test("filter strict: brand range 8-12 fails a '≤ 10 weeks' ceiling", () => {
+  const idx = buildBrandLeadTimeIndex([
+    { brand_name: "Late Atelier", default_lead_weeks_min: 8, default_lead_weeks_max: 12, default_stock_status: "made_to_order" },
+    { brand_name: "Fast Atelier", default_lead_weeks_min: 4, default_lead_weeks_max: 6, default_stock_status: "made_to_order" },
+  ]);
+  const rows = [
+    { id: "late", brand_name: "Late Atelier" },
+    { id: "fast", brand_name: "Fast Atelier" },
+  ];
+  const res = filterRowsByLeadTimeConstraints(rows, { maxWeeks: 10 }, idx);
+  assertEquals(res.kept.map((r) => r.id), ["fast"]);
+});
+
+Deno.test("filter strict: row '8-10 weeks' fails a '≤ 8 weeks' ceiling", () => {
+  const rows = [
+    { id: "a", lead_time: "6 weeks" },
+    { id: "b", lead_time: "8-10 weeks" },
+  ];
+  const res = filterRowsByLeadTimeConstraints(rows, { maxWeeks: 8 });
+  assertEquals(res.kept.map((r) => r.id), ["a"]);
+});
+
+Deno.test("filter strict: user range 4-6 enforces both bounds", () => {
+  const rows = [
+    { id: "tooEarly", lead_time: "in stock" },   // 0..0 → 0 < 4 → drop
+    { id: "fits",     lead_time: "5 weeks" },     // 5..5 → pass
+    { id: "tooLate",  lead_time: "8 weeks" },     // 8 > 6 → drop
+  ];
+  const res = filterRowsByLeadTimeConstraints(rows, { minWeeks: 4, maxWeeks: 6 });
+  assertEquals(res.kept.map((r) => r.id), ["fits"]);
+});
