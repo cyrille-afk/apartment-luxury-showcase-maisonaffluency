@@ -82,22 +82,12 @@ async function fetchPickRowsByIds(ids: string[]) {
   const sb = createClient(SUPABASE_URL, ANON_KEY, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
-  const [{ data: picks, error: picksError }, { data: trades, error: tradesError }] = await Promise.all([
-    sb
-      .from("designer_curator_picks_public")
-      .select("id, title, category, subcategory, trade_price_cents, currency")
-      .in("id", ids),
-    sb
-      .from("trade_products_public")
-      .select("id, product_name, category, subcategory, rrp_price_cents, trade_price_cents, currency")
-      .in("id", ids),
-  ]);
+  const { data: picks, error: picksError } = await sb
+    .from("designer_curator_picks_public")
+    .select("id, title, category, subcategory, trade_price_cents, currency")
+    .in("id", ids);
   if (picksError) throw new Error(`pick lookup failed: ${picksError.message}`);
-  if (tradesError) throw new Error(`trade lookup failed: ${tradesError.message}`);
-  return [
-    ...(picks ?? []).map((p) => ({ ...p, title: (p as { title?: string }).title, price_cents: (p as { trade_price_cents?: number | null }).trade_price_cents ?? null })),
-    ...(trades ?? []).map((t) => ({ ...t, title: (t as { product_name?: string }).product_name, price_cents: (t as { trade_price_cents?: number | null; rrp_price_cents?: number | null }).trade_price_cents ?? (t as { rrp_price_cents?: number | null }).rrp_price_cents ?? null })),
-  ];
+  return (picks ?? []).map((p) => ({ ...p, title: (p as { title?: string }).title, price_cents: (p as { trade_price_cents?: number | null }).trade_price_cents ?? null }));
 }
 
 function rowIsDiningTable(row: { title?: string | null; category?: string | null; subcategory?: string | null }): boolean {
