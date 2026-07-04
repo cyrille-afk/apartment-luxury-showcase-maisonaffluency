@@ -923,6 +923,22 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
           <span className="font-body text-[11px]">Discarded</span>
         </div>
       )}
+
+      {/* Docked AI Insights sidebar (desktop only, portal-rendered). */}
+      <TearsheetInsightsSidebar
+        verdictLoading={verdictLoading}
+        verdict={verdict}
+        deltaLoading={deltaLoading}
+        delta={delta}
+        lockedItems={uniquePreview.filter((p) => locked.has(p.id) && !excluded.has(p.id))}
+        keptUnlockedItems={uniquePreview.filter((p) => !locked.has(p.id) && !excluded.has(p.id))}
+        previewById={previewById}
+        onDismissVerdict={() => setVerdict(null)}
+        onDismissDelta={() => setDelta(null)}
+        onApplyRealignment={handleApplyRealignment}
+        onFocusRow={focusRow}
+      />
     </div>
   );
 }
+
