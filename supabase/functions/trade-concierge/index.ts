@@ -4172,7 +4172,21 @@ serve(async (req) => {
           }
         };
 
-        // Emit the trace id first so the client can correlate this stream
+        // Install resume-token persistence: wraps enqueue to (1) prefix
+        // each SSE frame with a `:seq=N` comment on the wire so the client
+        // can track its cursor, and (2) mirror every chunk into
+        // `concierge_stream_frames`. Emits `event: stream_start` as seq=1
+        // so the client receives the resume token before any other event.
+        const { streamId: resumeStreamId, finalize: finalizeResume } = installFramePersistence({
+          controller,
+          supabase,
+          userId,
+          requestId,
+          surface: "trade",
+        });
+        (globalThis as any).__conciergeResumeContext = { resumeStreamId, finalizeResume };
+
+        // Emit the trace id so the client can correlate this stream
         // with server-side Inspector logs (same request_id).
         controller.enqueue(encoder.encode(`event: request_id\ndata: ${JSON.stringify({ request_id: requestId })}\n\n`));
 
