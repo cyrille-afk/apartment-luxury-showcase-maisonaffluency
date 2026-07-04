@@ -94,6 +94,46 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
     else next.add(id);
     setExcludedLocal(next);
     onExcludedChange?.(next);
+    // Skipping a locked item makes no sense — auto-unlock it.
+    if (locked.has(id)) {
+      const nextLocked = new Set(locked);
+      nextLocked.delete(id);
+      setLockedLocal(nextLocked);
+      onLockedChange?.(nextLocked);
+    }
+  };
+
+  const toggleLock = (id: string) => {
+    const next = new Set(locked);
+    if (next.has(id)) next.delete(id);
+    else next.add(id);
+    setLockedLocal(next);
+    onLockedChange?.(next);
+  };
+
+  const lockedVisible = visiblePicks.filter((p) => locked.has(p.id));
+  const unlockedVisibleCount = visiblePicks.length - lockedVisible.length;
+
+  const handleRegenerateUnlocked = () => {
+    if (lockedVisible.length === 0) {
+      toast.error("Lock at least one piece before re-generating the rest.");
+      return;
+    }
+    if (unlockedVisibleCount === 0) {
+      toast.error("Every included piece is locked — unlock at least one to re-generate.");
+      return;
+    }
+    const prompt = buildRegenerateUnlockedPrompt(
+      lockedVisible.map((p) => ({
+        pick_id: p.id,
+        title: p.title,
+        designer_name: p.designer_name,
+        materials: p.materials,
+        category: (p as any).category ?? null,
+      })),
+      unlockedVisibleCount,
+    );
+    sendConciergePrefill(prompt);
   };
 
   const handleApprove = async () => {
