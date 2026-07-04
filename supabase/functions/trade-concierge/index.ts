@@ -4165,6 +4165,8 @@ serve(async (req) => {
             hasAnyPreConstraint ? "rag" : null,
             (hasSqlConstraint && !mentionsKnownDesigner) ? "sql" : null,
           ].filter(Boolean) as string[],
+          empty: constraintsMatchedZero,
+          empty_source: constraintsEmptySource,
         };
         controller.enqueue(encoder.encode(`event: applied_constraints\ndata: ${JSON.stringify(appliedConstraintsPayload)}\n\n`));
 
