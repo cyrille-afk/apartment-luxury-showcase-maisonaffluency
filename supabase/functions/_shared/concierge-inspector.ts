@@ -303,6 +303,118 @@ export async function runDiscoveryProseGuard(opts: {
   }
 }
 
+// ---------------------------------------------------------------------------
+// Deterministic fallback redactor
+// ---------------------------------------------------------------------------
+//
+// Used when the LLM-based Discovery Guard or Inspector fails to complete
+// (timeout, HTTP error, parse failure, no api key). Scans the prose for
+// suspicious capitalised multi-letter tokens and strips any span that is
+// NOT a case-insensitive substring of the allowlist. Also strips any
+// quoted title ("…" / “…”) not present in the piece-title allowlist.
+//
+// This is deterministic — no network — so it always completes even when
+// the guard LLM is down. If the redacted prose ends up substantially
+// gutted (e.g. more than 40% of characters removed, or under 40 chars
+// left), the caller should fall back to SAFE_FALLBACK_PROSE below.
+
+export const SAFE_FALLBACK_PROSE =
+  "Let me pause before naming anything — I want to make sure any piece I mention is actually in the Maison Affluency Curation. Could you tell me a bit more about the atmosphere, palette, and scale you have in mind, and I'll pull a curated first edit against real availability.";
+
+const REDACTOR_STOP = new Set([
+  "Maison", "Affluency", "Felix", "I", "The", "This", "That", "You", "Your", "We", "Our",
+  "Let", "Would", "Could", "Should", "Once", "For", "With", "And", "But", "Or", "If",
+  "Curation", "Discover", "Discovery", "Tearsheet", "Quote", "Showroom", "Gallery",
+  "Belgravia", "Mayfair", "London", "Paris", "Milan", "Monaco", "New", "York",
+  "Alternatively", "Additionally", "Or", "As",
+]);
+
+export type DeterministicRedactionResult = {
+  redacted_prose: string;
+  removed_spans: string[];
+  chars_removed: number;
+  gutted: boolean; // true when redaction removed too much to send safely
+};
+
+export function deterministicRedact(opts: {
+  prose: string;
+  allowedDesigners: string[];
+  allowedPieceTitles: string[];
+}): DeterministicRedactionResult {
+  const original = (opts.prose || "").trim();
+  if (!original) {
+    return { redacted_prose: "", removed_spans: [], chars_removed: 0, gutted: false };
+  }
+  const designerSet = new Set(
+    (opts.allowedDesigners || [])
+      .map((d) => (d || "").toLowerCase().trim())
+      .filter((d) => d.length >= 2),
+  );
+  const titleSet = new Set(
+    (opts.allowedPieceTitles || [])
+      .map((t) => (t || "").toLowerCase().trim())
+      .filter((t) => t.length >= 2),
+  );
+
+  const removed: string[] = [];
+  let out = original;
+
+  // 1. Redact quoted titles not in the allowlist.
+  out = out.replace(/(['"“‘])([^'"”‘’\n]{2,120})(['"”’])/g, (match, _o, inner) => {
+    const key = String(inner).toLowerCase().trim();
+    if (!key) return match;
+    // Allow if the quoted string appears as a substring of any allowed title,
+    // or any allowed title appears inside the quoted string.
+    for (const t of titleSet) {
+      if (t.includes(key) || key.includes(t)) return match;
+    }
+    removed.push(`"${inner}"`);
+    return "[redacted piece name]";
+  });
+
+  // 2. Redact capitalised proper-noun spans (1–4 words) not in allowlists.
+  //    We match spans like "Poliform", "B&B Italia", "Kelly Wearstler", "Fendi Casa".
+  out = out.replace(
+    /\b[A-Z][A-Za-z&'’\-]{2,}(?:\s+[A-Z][A-Za-z&'’\-]{2,}){0,3}\b/g,
+    (span) => {
+      // Skip if every part is a common stop word
+      const parts = span.split(/\s+/);
+      if (parts.every((p) => REDACTOR_STOP.has(p))) return span;
+      const key = span.toLowerCase();
+      // Allowed if the span is a substring of any allowed designer (or vice versa)
+      for (const d of designerSet) {
+        if (d === key || d.includes(key) || key.includes(d)) return span;
+      }
+      // Also allow if it's a substring of any allowed piece title
+      for (const t of titleSet) {
+        if (t.includes(key)) return span;
+      }
+      removed.push(span);
+      return "[redacted]";
+    },
+  );
+
+  // Tidy: collapse orphan "by [redacted]" fragments, repeated redaction tags,
+  // and dangling connectors so the sentence still reads.
+  out = out
+    .replace(/\bby\s+\[redacted\]/gi, "")
+    .replace(/\bfrom\s+\[redacted\]/gi, "")
+    .replace(/\[redacted piece name\]\s+by\s+\[redacted\]/gi, "[redacted]")
+    .replace(/(\[redacted\]\s*){2,}/g, "[redacted] ")
+    .replace(/\s+,/g, ",")
+    .replace(/\s{2,}/g, " ")
+    .replace(/\s+\./g, ".")
+    .trim();
+
+  const charsRemoved = Math.max(0, original.length - out.length);
+  const gutted =
+    out.length < 40 ||
+    charsRemoved / Math.max(1, original.length) > 0.4 ||
+    (out.match(/\[redacted[^\]]*\]/g) || []).length > 3;
+
+  return { redacted_prose: out, removed_spans: removed, chars_removed: charsRemoved, gutted };
+}
+
 // Build the compact ground-truth object from emitted tool-call buffers +
 // hydrated preview rows. Cheap and pure — no I/O.
 export function buildInspectorGroundTruth(
