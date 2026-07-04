@@ -1,16 +1,20 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { Loader2, Check, X, Pencil, ExternalLink, Plus, ChevronDown, Copy, Repeat, Lock, Unlock, RefreshCw, PlusCircle, MessageSquare, ShieldCheck } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import { commitProposal, type TearsheetProposal } from "@/lib/tradeConciergeStream";
+import { commitProposal, type TearsheetProposal, type PickPreview } from "@/lib/tradeConciergeStream";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { BoardPicker } from "@/components/trade/concierge/BoardPicker";
 import { ProjectAssignInline } from "@/components/trade/concierge/ProjectAssignInline";
 import { HotspotImageBadge } from "@/components/trade/HotspotImageBadge";
-import { buildSwapPrompt, buildRegenerateUnlockedPrompt, buildSuggestOneMorePrompt, buildCritiqueEditsPrompt, buildValidateDiffPrompt, sendConciergePrefill, type SwapPromptItem } from "@/lib/conciergePrefill";
+import { buildSwapPrompt, buildSuggestOneMorePrompt, buildCritiqueEditsPrompt, sendConciergePrefill, type SwapPromptItem } from "@/lib/conciergePrefill";
 import { RequirementsBadge } from "@/components/trade/concierge/RequirementsBadge";
+import { validateTearsheetEdits, realignUnlocked, type ValidationVerdict, type RealignmentDelta } from "@/lib/tearsheetSyncClient";
+import { ValidationBanner, RowVerdictPill } from "@/components/trade/concierge/ValidationSummary";
+import { RealignmentDiffPanel, type AppliedRealignment } from "@/components/trade/concierge/RealignmentDiffPanel";
+
 
 type Status = "pending" | "committing" | "approved" | "discarded";
 type Mode = "create" | "append";
@@ -49,6 +53,20 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
   const excluded = excludedProp ?? excludedLocal;
   const [lockedLocal, setLockedLocal] = useState<Set<string>>(lockedProp ?? new Set());
   const locked = lockedProp ?? lockedLocal;
+
+  // Cascading re-alignment state — locally-applied swaps and additions.
+  // `swaps` maps old_pick_id → replacement preview (renders in-place, keeps order).
+  // `extraPicks` are new items appended after the original preview list.
+  const [swaps, setSwaps] = useState<Map<string, PickPreview>>(new Map());
+  const [extraPicks, setExtraPicks] = useState<PickPreview[]>([]);
+
+  // Structured Validate/Sync verdict — set by handleValidate, cleared by dismiss.
+  const [verdict, setVerdict] = useState<ValidationVerdict | null>(null);
+  const [verdictLoading, setVerdictLoading] = useState(false);
+  // Cascading re-alignment delta from realignUnlocked. Rendered as a diff panel.
+  const [delta, setDelta] = useState<RealignmentDelta | null>(null);
+  const [deltaLoading, setDeltaLoading] = useState(false);
+
   // Persist "Why this pick" expanded state per proposal in sessionStorage so
   // that switching views (panel collapse, route change, page refresh within
   // the same tab) preserves the reading context the user was building.
@@ -82,10 +100,17 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
 
   const isAppend = mode === "append";
   // Dedupe by id (the AI occasionally repeats an id) to avoid duplicate React keys.
-  const uniquePreview = (() => {
+  // Then apply local swaps (in-place replacement) and append extraPicks
+  // from any accepted cascading re-alignment.
+  const uniquePreview = useMemo(() => {
     const seen = new Set<string>();
-    return proposal.preview.filter((p) => (seen.has(p.id) ? false : (seen.add(p.id), true)));
-  })();
+    const base = proposal.preview.filter((p) => (seen.has(p.id) ? false : (seen.add(p.id), true)));
+    const swapped = base.map((p) => swaps.get(p.id) ?? p);
+    const swappedIds = new Set(swapped.map((p) => p.id));
+    const extras = extraPicks.filter((p) => !swappedIds.has(p.id));
+    return [...swapped, ...extras];
+  }, [proposal.preview, swaps, extraPicks]);
+
   const visiblePicks = uniquePreview.filter((p) => !excluded.has(p.id));
 
   const togglePick = (id: string) => {
@@ -114,26 +139,43 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
   const lockedVisible = visiblePicks.filter((p) => locked.has(p.id));
   const unlockedVisibleCount = visiblePicks.length - lockedVisible.length;
 
-  const handleRegenerateUnlocked = () => {
+  // Cascading re-align (#1 — server-backed). Fetches a structured DELTA and
+  // renders a diff panel; user accepts per-line. Locked/excluded ids are
+  // guaranteed untouched (enforced server-side + verified client-side).
+  const handleRegenerateUnlocked = async () => {
     if (lockedVisible.length === 0) {
-      toast.error("Lock at least one piece before re-generating the rest.");
+      toast.error("Lock at least one piece before re-aligning the rest.");
       return;
     }
     if (unlockedVisibleCount === 0) {
-      toast.error("Every included piece is locked — unlock at least one to re-generate.");
+      toast.error("Every included piece is locked — unlock at least one to re-align.");
       return;
     }
-    const prompt = buildRegenerateUnlockedPrompt(
-      lockedVisible.map((p) => ({
-        pick_id: p.id,
-        title: p.title,
-        designer_name: p.designer_name,
-        materials: p.materials,
-        category: (p as any).category ?? null,
-      })),
-      unlockedVisibleCount,
-    );
-    sendConciergePrefill(prompt);
+    setDeltaLoading(true);
+    setDelta(null);
+    try {
+      const skippedItems = uniquePreview.filter((p) => excluded.has(p.id));
+      const lockedItems = uniquePreview.filter((p) => locked.has(p.id) && !excluded.has(p.id));
+      const unlockedKept = uniquePreview.filter((p) => !excluded.has(p.id) && !locked.has(p.id));
+      const d = await realignUnlocked({
+        title: title.trim() || initialTitle,
+        locked: lockedItems.map(asItem),
+        excluded: skippedItems.map(asItem),
+        unlocked: unlockedKept.map(asItem),
+      });
+      setDelta(d);
+      if (
+        d.replacements.length === 0 &&
+        d.additions.length === 0 &&
+        d.removals.length === 0
+      ) {
+        toast(d.summary || "No changes proposed.");
+      }
+    } catch (e) {
+      toast.error(`Re-align failed: ${(e as Error)?.message || "unknown"}`);
+    } finally {
+      setDeltaLoading(false);
+    }
   };
 
   const asItem = (p: (typeof visiblePicks)[number]): SwapPromptItem => ({
@@ -143,6 +185,42 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
     materials: p.materials,
     category: (p as any).category ?? null,
   });
+
+  // Apply an accepted re-alignment to the local card state.
+  // Locked ids are never touched (server drops them + we assert here again).
+  const handleApplyRealignment = (applied: AppliedRealignment) => {
+    // Belt-and-braces: strip any accidental locked-id targets before mutating.
+    const nextSwaps = new Map(swaps);
+    for (const [oldId, newP] of applied.replaceMap) {
+      if (locked.has(oldId)) continue; // never overwrite a locked anchor
+      nextSwaps.set(oldId, newP);
+    }
+    setSwaps(nextSwaps);
+
+    if (applied.toAdd.length > 0) {
+      const existingIds = new Set([
+        ...uniquePreview.map((p) => p.id),
+        ...extraPicks.map((p) => p.id),
+      ]);
+      const fresh = applied.toAdd.filter((p) => !existingIds.has(p.id));
+      if (fresh.length) setExtraPicks((prev) => [...prev, ...fresh]);
+    }
+
+    if (applied.toRemove.length > 0) {
+      const nextExcluded = new Set(excluded);
+      for (const id of applied.toRemove) {
+        if (!locked.has(id)) nextExcluded.add(id); // locked stays untouched
+      }
+      setExcludedLocal(nextExcluded);
+      onExcludedChange?.(nextExcluded);
+    }
+
+    const total =
+      applied.replaceMap.size + applied.toAdd.length + applied.toRemove.length;
+    toast.success(`Applied ${total} re-alignment${total === 1 ? "" : "s"}`);
+    setDelta(null);
+    setVerdict(null); // stale — recompute on next Validate click
+  };
 
   // #2 — Live suggestion: ask the AI for ONE more piece that fills a gap in
   // the current selection. Prefills the composer; the user confirms.
@@ -174,26 +252,38 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
     sendConciergePrefill(prompt);
   };
 
-  // #5 — Validate / Sync: batch-review pending manual edits as a diff.
+  // #5 — Validate / Sync: structured traffic-light verdict rendered in-card.
   // Only lit up while there are unverified changes (skip, lock, title rename).
   const titleChanged = !isAppend && title.trim() !== initialTitle.trim();
   const pendingChangesCount = excluded.size + locked.size + (titleChanged ? 1 : 0);
-  const handleValidate = () => {
+  const handleValidate = async () => {
     if (pendingChangesCount === 0) {
       toast.error("Make an edit first (skip, lock, or rename) and I'll run a validation pass.");
       return;
     }
-    const skipped = uniquePreview.filter((p) => excluded.has(p.id));
-    const lockedItems = uniquePreview.filter((p) => locked.has(p.id) && !excluded.has(p.id));
-    const keptCount = uniquePreview.length - excluded.size;
-    const prompt = buildValidateDiffPrompt({
-      skipped: skipped.map(asItem),
-      locked: lockedItems.map(asItem),
-      titleChange: titleChanged ? { from: initialTitle, to: title.trim() } : null,
-      keptCount,
-    });
-    sendConciergePrefill(prompt);
+    setVerdictLoading(true);
+    setVerdict(null);
+    try {
+      const skipped = uniquePreview.filter((p) => excluded.has(p.id));
+      const lockedItems = uniquePreview.filter((p) => locked.has(p.id) && !excluded.has(p.id));
+      const kept = uniquePreview.filter((p) => !excluded.has(p.id));
+      const v = await validateTearsheetEdits({
+        title: title.trim() || initialTitle,
+        original_note: proposal.args.note,
+        kept: kept.map(asItem),
+        skipped: skipped.map(asItem),
+        locked: lockedItems.map(asItem),
+        title_change: titleChanged ? { from: initialTitle, to: title.trim() } : null,
+      });
+      setVerdict(v);
+    } catch (e) {
+      toast.error(`Validation failed: ${(e as Error)?.message || "unknown"}`);
+    } finally {
+      setVerdictLoading(false);
+    }
   };
+
+
 
 
 
@@ -372,6 +462,35 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
         <p className="font-body text-xs text-muted-foreground italic mb-2.5">"{proposal.args.note}"</p>
       )}
 
+      {/* Structured validation banner (Validate/Sync #A) */}
+      {verdictLoading && (
+        <div className="flex items-center gap-2 rounded-lg border border-border/60 bg-muted/30 px-2.5 py-2 mb-2.5">
+          <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
+          <span className="font-body text-[11px] text-muted-foreground">Validator reviewing your edits…</span>
+        </div>
+      )}
+      {verdict && !verdictLoading && (
+        <ValidationBanner verdict={verdict} onDismiss={() => setVerdict(null)} />
+      )}
+
+      {/* Cascading re-alignment diff panel (Validate/Sync #B) */}
+      {deltaLoading && (
+        <div className="flex items-center gap-2 rounded-lg border border-accent/40 bg-accent/[0.04] px-2.5 py-2 mb-2.5">
+          <Loader2 className="h-3 w-3 animate-spin text-accent" />
+          <span className="font-body text-[11px] text-accent">Re-aligner considering alternatives…</span>
+        </div>
+      )}
+      {delta && !deltaLoading && (
+        <RealignmentDiffPanel
+          delta={delta}
+          lockedItems={uniquePreview.filter((p) => locked.has(p.id) && !excluded.has(p.id))}
+          keptUnlockedItems={uniquePreview.filter((p) => !locked.has(p.id) && !excluded.has(p.id))}
+          onApply={handleApplyRealignment}
+          onDismiss={() => setDelta(null)}
+        />
+      )}
+
+
       {/* Collapse all reasoning panels — only when something is currently expanded */}
       {expandedDetail.size > 0 && (
         <div className="flex justify-end mb-1.5">
@@ -491,6 +610,11 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
                             </span>
                           )}
                         </div>
+                        {verdict && (() => {
+                          const row = verdict.per_row.find((r) => r.pick_id === p.id);
+                          return row ? <div className="mt-1"><RowVerdictPill row={row} /></div> : null;
+                        })()}
+
                         {p.materials && (
                           <div className="font-body text-[10px] text-muted-foreground truncate">
                             {p.materials}
@@ -616,20 +740,21 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
             <button
               type="button"
               onClick={handleRegenerateUnlocked}
-              disabled={lockedVisible.length === 0 || unlockedVisibleCount === 0}
+              disabled={lockedVisible.length === 0 || unlockedVisibleCount === 0 || deltaLoading}
               className="inline-flex items-center gap-1.5 rounded-full border border-accent/40 bg-accent/[0.06] text-accent font-body text-[11px] uppercase tracking-widest px-3 py-1.5 hover:bg-accent/15 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
               title={
                 lockedVisible.length === 0
-                  ? "Lock at least one piece to re-generate the rest"
+                  ? "Lock at least one piece to re-align the rest"
                   : unlockedVisibleCount === 0
                   ? "Every included piece is locked"
-                  : `Re-generate ${unlockedVisibleCount} unlocked ${unlockedVisibleCount === 1 ? "piece" : "pieces"}, keep ${lockedVisible.length} locked`
+                  : `Re-align ${unlockedVisibleCount} unlocked ${unlockedVisibleCount === 1 ? "piece" : "pieces"}; ${lockedVisible.length} locked stay untouched`
               }
-              aria-label="Re-generate unlocked pieces"
+              aria-label="Re-align unlocked pieces"
             >
-              <RefreshCw className="h-3 w-3" />
-              Re-generate unlocked{lockedVisible.length > 0 ? ` (${unlockedVisibleCount})` : ""}
+              {deltaLoading ? <Loader2 className="h-3 w-3 animate-spin" /> : <RefreshCw className="h-3 w-3" />}
+              Re-align unlocked{lockedVisible.length > 0 ? ` (${unlockedVisibleCount})` : ""}
             </button>
+
             <button
               type="button"
               onClick={handleSuggestOneMore}
@@ -659,7 +784,7 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
             <button
               type="button"
               onClick={handleValidate}
-              disabled={pendingChangesCount === 0}
+              disabled={pendingChangesCount === 0 || verdictLoading}
               className={cn(
                 "inline-flex items-center gap-1.5 rounded-full font-body text-[11px] uppercase tracking-widest px-3 py-1.5 transition-colors",
                 pendingChangesCount > 0
@@ -673,9 +798,10 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
               }
               aria-label={`Validate ${pendingChangesCount} pending changes`}
             >
-              <ShieldCheck className="h-3 w-3" />
+              {verdictLoading ? <Loader2 className="h-3 w-3 animate-spin" /> : <ShieldCheck className="h-3 w-3" />}
               Validate changes{pendingChangesCount > 0 ? ` (${pendingChangesCount})` : ""}
             </button>
+
           </div>
           <button
             onClick={handleDiscard}
