@@ -656,6 +656,26 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
               <MessageSquare className="h-3 w-3" />
               Critique my edits
             </button>
+            <button
+              type="button"
+              onClick={handleValidate}
+              disabled={pendingChangesCount === 0}
+              className={cn(
+                "inline-flex items-center gap-1.5 rounded-full font-body text-[11px] uppercase tracking-widest px-3 py-1.5 transition-colors",
+                pendingChangesCount > 0
+                  ? "bg-accent text-accent-foreground border border-accent hover:opacity-90"
+                  : "border border-border text-muted-foreground/60 cursor-not-allowed",
+              )}
+              title={
+                pendingChangesCount === 0
+                  ? "No pending changes to validate — edit the draft first"
+                  : `Batch-review your ${pendingChangesCount} pending manual ${pendingChangesCount === 1 ? "change" : "changes"} against the brief`
+              }
+              aria-label={`Validate ${pendingChangesCount} pending changes`}
+            >
+              <ShieldCheck className="h-3 w-3" />
+              Validate changes{pendingChangesCount > 0 ? ` (${pendingChangesCount})` : ""}
+            </button>
           </div>
           <button
             onClick={handleDiscard}
