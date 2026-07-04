@@ -2061,6 +2061,7 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
                   key={i}
                   proposal={item.proposal}
                   excluded={new Set(item.excluded || [])}
+                  locked={new Set(item.locked || [])}
                   newPickIds={item.newPickIds}
                   onExcludedChange={(next) => {
                     setTimeline((prev) => {
@@ -2068,6 +2069,16 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
                       const t = copy[i];
                       if (t?.kind === "proposal") {
                         copy[i] = { ...t, excluded: Array.from(next) };
+                      }
+                      return copy;
+                    });
+                  }}
+                  onLockedChange={(next) => {
+                    setTimeline((prev) => {
+                      const copy = prev.slice();
+                      const t = copy[i];
+                      if (t?.kind === "proposal") {
+                        copy[i] = { ...t, locked: Array.from(next) };
                       }
                       return copy;
                     });
