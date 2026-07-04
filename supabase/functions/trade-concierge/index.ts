@@ -365,17 +365,29 @@ async function chatFetch(init: RequestInit): Promise<Response> {
   // When probing, skip retries — a single shot determines if primary recovered
   const maxRetries = isProbe ? 0 : PRIMARY_MAX_RETRIES;
 
+  // Primary fetch hard timeout: some upstream calls (esp. Gemini during
+  // demand spikes) have been observed to stall for 90–120s before returning
+  // headers. The client abandons the SSE stream long before that, leaving
+  // an orphaned request and a broken UX. Cap the primary at 45s and route
+  // to Cloudflare instead. This bounds the "first byte" window; the SSE body
+  // is not aborted by this signal because we clear the timer on response.
+  const PRIMARY_FIRST_BYTE_TIMEOUT_MS = 45_000;
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    const ac = new AbortController();
+    const timeoutId = setTimeout(() => ac.abort(new Error("primary-first-byte-timeout")), PRIMARY_FIRST_BYTE_TIMEOUT_MS);
     try {
-      primary = await fetch(backendUrl, backendInit);
+      primary = await fetch(backendUrl, { ...backendInit, signal: ac.signal });
+      clearTimeout(timeoutId);
     } catch (err) {
+      clearTimeout(timeoutId);
       lastError = err;
+      const isTimeout = (err as Error)?.message === "primary-first-byte-timeout" || (err as any)?.name === "AbortError";
       console.error(
-        `[concierge] PRIMARY_NETWORK_ERROR backend=${backendName} attempt=${attempt + 1}/${maxRetries + 1} probe=${isProbe} error=${String((err as Error)?.message ?? err)}`
+        `[concierge] PRIMARY_NETWORK_ERROR backend=${backendName} attempt=${attempt + 1}/${maxRetries + 1} probe=${isProbe} timeout=${isTimeout} error=${String((err as Error)?.message ?? err)}`
       );
       if (attempt < maxRetries) {
         const delay = backoffDelayMs(attempt, null);
-        console.warn(`[concierge] PRIMARY_RETRY backend=${backendName} attempt=${attempt + 1} delayMs=${delay} reason=network`);
+        console.warn(`[concierge] PRIMARY_RETRY backend=${backendName} attempt=${attempt + 1} delayMs=${delay} reason=${isTimeout ? "timeout" : "network"}`);
         await sleep(delay);
         continue;
       }
@@ -6062,6 +6074,40 @@ serve(async (req) => {
               const frame = { choices: [{ delta: { content: finalProse } }] };
               controller.enqueue(encoder.encode(`data: ${JSON.stringify(frame)}\n\n`));
             };
+
+            // Trivial-completion sanity net: some upstream models (or the
+            // Cloudflare Llama fallback with tools stripped) occasionally emit
+            // a single-token reply like `true` / `false` / `null` / `{}`.
+            // The guardrail pipeline would happily pass those through — they
+            // contain no designer names — so the user sees the literal word
+            // "true" as the assistant reply. Detect and swap for the safe
+            // discovery fallback before running any guard/inspector.
+            {
+              const trivial = assistantTextBuf.trim();
+              const looksTrivial =
+                trivial.length > 0 &&
+                trivial.length <= 8 &&
+                /^["'`]?(true|false|null|undefined|yes|no|ok|okay|\{\}|\[\]|""|'')["'`]?[.!?]?$/i.test(trivial);
+              const hasAnyCard = toolCallBuffers.size > 0;
+              if (looksTrivial && !hasAnyCard) {
+                try {
+                  console.log(JSON.stringify({
+                    tag: "concierge_trivial_completion",
+                    request_id: requestId,
+                    ts: new Date().toISOString(),
+                    raw: trivial,
+                    len: trivial.length,
+                  }));
+                } catch { /* best-effort */ }
+                controller.enqueue(encoder.encode(`event: hard_fallback\ndata: ${JSON.stringify({ source: "trivial_completion", reason: "single_token_reply", raw: trivial, request_id: requestId })}\n\n`));
+                const frame = { choices: [{ delta: { content: SAFE_FALLBACK_PROSE } }] };
+                controller.enqueue(encoder.encode(`data: ${JSON.stringify(frame)}\n\n`));
+                if (sawDone) controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+                try { await finalizeResume("complete"); } catch { /* ignore */ }
+                controller.close();
+                return;
+              }
+            }
 
             try {
               const cardBufs = Array.from(toolCallBuffers.values()).filter((b) =>
