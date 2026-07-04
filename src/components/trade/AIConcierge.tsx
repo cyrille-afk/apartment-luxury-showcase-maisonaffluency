@@ -218,6 +218,37 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
       reader.readAsDataURL(file);
     });
 
+  // Build a small (max 480px, JPEG q=0.72) preview so it fits in sessionStorage
+  // and inline-renders in the transcript even after a reload. The full-res
+  // dataUrl is still what we ship to the vision model.
+  const buildThumbnailDataUrl = (dataUrl: string): Promise<string> =>
+    new Promise((resolve) => {
+      try {
+        const img = new Image();
+        img.onload = () => {
+          const MAX = 480;
+          const scale = Math.min(1, MAX / Math.max(img.width, img.height));
+          const w = Math.max(1, Math.round(img.width * scale));
+          const h = Math.max(1, Math.round(img.height * scale));
+          const canvas = document.createElement("canvas");
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext("2d");
+          if (!ctx) return resolve(dataUrl);
+          ctx.drawImage(img, 0, 0, w, h);
+          try {
+            resolve(canvas.toDataURL("image/jpeg", 0.72));
+          } catch {
+            resolve(dataUrl);
+          }
+        };
+        img.onerror = () => resolve(dataUrl);
+        img.src = dataUrl;
+      } catch {
+        resolve(dataUrl);
+      }
+    });
+
   const handleFilesPicked = useCallback(async (files: FileList | File[] | null) => {
     if (!files) return;
     const list = Array.from(files);
@@ -240,13 +271,14 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
       }
       try {
         const dataUrl = await readFileAsDataUrl(f);
+        const previewUrl = isImage ? await buildThumbnailDataUrl(dataUrl) : undefined;
         accepted.push({
           id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
           name: f.name,
           mime: f.type || (isPdf ? "application/pdf" : "image/jpeg"),
           kind: isImage ? "image" : "pdf",
           dataUrl,
-          previewUrl: isImage ? dataUrl : undefined,
+          previewUrl,
           size: f.size,
         });
       } catch {
@@ -371,16 +403,19 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
   }, [minimized]);
   useEffect(() => {
     try {
-      // Strip data-URL previewUrls before persisting — they can be multi-MB
-      // (large floor-plan PNGs) and blow sessionStorage's ~5MB quota, which
-      // would silently drop the whole timeline write. Thumbnails stay in
-      // memory for the current page; refresh loses them, full chat is kept.
-      const serializable = timeline.map((t) =>
-        t.kind === "msg" && t.attachments?.length
-          ? { ...t, attachments: t.attachments.map(({ previewUrl: _omit, ...rest }) => rest) }
-          : t,
-      );
-      sessionStorage.setItem("concierge:timeline", JSON.stringify(serializable));
+      // previewUrl is now a downscaled JPEG thumbnail (~<60KB), safe to persist.
+      // If serialization fails (quota), retry once with thumbnails stripped.
+      const payload = JSON.stringify(timeline);
+      try {
+        sessionStorage.setItem("concierge:timeline", payload);
+      } catch {
+        const stripped = timeline.map((t) =>
+          t.kind === "msg" && t.attachments?.length
+            ? { ...t, attachments: t.attachments.map(({ previewUrl: _omit, ...rest }) => rest) }
+            : t,
+        );
+        sessionStorage.setItem("concierge:timeline", JSON.stringify(stripped));
+      }
     } catch {}
   }, [timeline]);
   useEffect(() => {

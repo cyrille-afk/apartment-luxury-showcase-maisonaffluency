@@ -2521,7 +2521,10 @@ function typologyLabel(typology: RequestedTypology | null): string {
 
 function buildNoStrictTypologyReply(typology: RequestedTypology): string {
   const label = typologyLabel(typology);
-  return `You're right — I won't present adjacent pieces as a ${label}. I don't have enough true ${label}s matching this brief in the Maison Affluency Curation to draft a credible edit; would you like me to expand the search through the designers' own collections using our Axonometric Studio archives and tools?`;
+  // Prepended blank lines so this release notice never glues onto whatever
+  // prose the model already streamed in the same turn (which read as a
+  // fabricated self-correction / apology).
+  return `\n\n_(A tearsheet draft was suppressed: fewer than 2 true ${label}s matched this brief in the curated selection. Ask me to broaden the typology or relax a constraint if you'd like me to try again.)_`;
 }
 
 function buildOpeningBriefDiscoveryReply(latestUserMessage: string, langCode = "en"): string {
