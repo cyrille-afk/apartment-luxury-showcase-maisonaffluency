@@ -251,6 +251,20 @@ export type InspectorEvent = {
 };
 
 /**
+ * Hard-constraint pre-filters actually applied to catalog retrieval for
+ * this turn (color/material/category tokens). Emitted once, near the start
+ * of the SSE stream. Empty arrays mean nothing was filtered — the UI should
+ * treat that as "no chips" rather than an error.
+ */
+export type AppliedConstraintsEvent = {
+  colors: string[];
+  materials: string[];
+  categories: string[];
+  /** Which catalog path(s) the filters were actually applied to. */
+  applied_to: Array<"rag" | "sql">;
+};
+
+/**
  * Emitted the first time the model starts streaming a card-producing tool
  * call (`propose_tearsheet`, `add_to_tearsheet`, `draft_quote`,
  * `add_to_quote`, `propose_ffe_rows`, `prepare_visualization_brief`),
