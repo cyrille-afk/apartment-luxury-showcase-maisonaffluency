@@ -5857,7 +5857,11 @@ serve(async (req) => {
 
         } catch (e) {
           console.error("stream interceptor error:", e);
+          try { await finalizeResume("error"); } catch { /* ignore */ }
         } finally {
+          // Mark the resume session complete so a late reconnect can drain
+          // the frames it missed and terminate cleanly.
+          try { await finalizeResume("complete"); } catch { /* ignore */ }
           // Persist token usage (best-effort; never blocks the stream close)
           if (capturedUsage) {
             const pt = Number(capturedUsage.prompt_tokens ?? 0);
