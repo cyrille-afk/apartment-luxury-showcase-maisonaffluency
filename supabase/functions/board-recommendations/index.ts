@@ -26,7 +26,9 @@ Deno.serve(async (req) => {
     const supabase = createClient(supabaseUrl, serviceRoleKey)
 
     const body = await req.json()
-    const { board_id, product_ids, source } = body
+    const { board_id, product_ids, source, constraints: explicitConstraints } = body as {
+      board_id?: string; product_ids?: string[]; source?: string; constraints?: HardConstraints
+    }
 
     // Require an authenticated caller for every code path. The previous
     // anonymous `product_ids` path let anyone on the internet trigger paid
