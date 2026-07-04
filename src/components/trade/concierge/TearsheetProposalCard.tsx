@@ -139,26 +139,43 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
   const lockedVisible = visiblePicks.filter((p) => locked.has(p.id));
   const unlockedVisibleCount = visiblePicks.length - lockedVisible.length;
 
-  const handleRegenerateUnlocked = () => {
+  // Cascading re-align (#1 — server-backed). Fetches a structured DELTA and
+  // renders a diff panel; user accepts per-line. Locked/excluded ids are
+  // guaranteed untouched (enforced server-side + verified client-side).
+  const handleRegenerateUnlocked = async () => {
     if (lockedVisible.length === 0) {
-      toast.error("Lock at least one piece before re-generating the rest.");
+      toast.error("Lock at least one piece before re-aligning the rest.");
       return;
     }
     if (unlockedVisibleCount === 0) {
-      toast.error("Every included piece is locked — unlock at least one to re-generate.");
+      toast.error("Every included piece is locked — unlock at least one to re-align.");
       return;
     }
-    const prompt = buildRegenerateUnlockedPrompt(
-      lockedVisible.map((p) => ({
-        pick_id: p.id,
-        title: p.title,
-        designer_name: p.designer_name,
-        materials: p.materials,
-        category: (p as any).category ?? null,
-      })),
-      unlockedVisibleCount,
-    );
-    sendConciergePrefill(prompt);
+    setDeltaLoading(true);
+    setDelta(null);
+    try {
+      const skippedItems = uniquePreview.filter((p) => excluded.has(p.id));
+      const lockedItems = uniquePreview.filter((p) => locked.has(p.id) && !excluded.has(p.id));
+      const unlockedKept = uniquePreview.filter((p) => !excluded.has(p.id) && !locked.has(p.id));
+      const d = await realignUnlocked({
+        title: title.trim() || initialTitle,
+        locked: lockedItems.map(asItem),
+        excluded: skippedItems.map(asItem),
+        unlocked: unlockedKept.map(asItem),
+      });
+      setDelta(d);
+      if (
+        d.replacements.length === 0 &&
+        d.additions.length === 0 &&
+        d.removals.length === 0
+      ) {
+        toast(d.summary || "No changes proposed.");
+      }
+    } catch (e) {
+      toast.error(`Re-align failed: ${(e as Error)?.message || "unknown"}`);
+    } finally {
+      setDeltaLoading(false);
+    }
   };
 
   const asItem = (p: (typeof visiblePicks)[number]): SwapPromptItem => ({
@@ -168,6 +185,42 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
     materials: p.materials,
     category: (p as any).category ?? null,
   });
+
+  // Apply an accepted re-alignment to the local card state.
+  // Locked ids are never touched (server drops them + we assert here again).
+  const handleApplyRealignment = (applied: AppliedRealignment) => {
+    // Belt-and-braces: strip any accidental locked-id targets before mutating.
+    const nextSwaps = new Map(swaps);
+    for (const [oldId, newP] of applied.replaceMap) {
+      if (locked.has(oldId)) continue; // never overwrite a locked anchor
+      nextSwaps.set(oldId, newP);
+    }
+    setSwaps(nextSwaps);
+
+    if (applied.toAdd.length > 0) {
+      const existingIds = new Set([
+        ...uniquePreview.map((p) => p.id),
+        ...extraPicks.map((p) => p.id),
+      ]);
+      const fresh = applied.toAdd.filter((p) => !existingIds.has(p.id));
+      if (fresh.length) setExtraPicks((prev) => [...prev, ...fresh]);
+    }
+
+    if (applied.toRemove.length > 0) {
+      const nextExcluded = new Set(excluded);
+      for (const id of applied.toRemove) {
+        if (!locked.has(id)) nextExcluded.add(id); // locked stays untouched
+      }
+      setExcludedLocal(nextExcluded);
+      onExcludedChange?.(nextExcluded);
+    }
+
+    const total =
+      applied.replaceMap.size + applied.toAdd.length + applied.toRemove.length;
+    toast.success(`Applied ${total} re-alignment${total === 1 ? "" : "s"}`);
+    setDelta(null);
+    setVerdict(null); // stale — recompute on next Validate click
+  };
 
   // #2 — Live suggestion: ask the AI for ONE more piece that fills a gap in
   // the current selection. Prefills the composer; the user confirms.
@@ -199,25 +252,37 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
     sendConciergePrefill(prompt);
   };
 
-  // #5 — Validate / Sync: batch-review pending manual edits as a diff.
+  // #5 — Validate / Sync: structured traffic-light verdict rendered in-card.
   // Only lit up while there are unverified changes (skip, lock, title rename).
   const titleChanged = !isAppend && title.trim() !== initialTitle.trim();
   const pendingChangesCount = excluded.size + locked.size + (titleChanged ? 1 : 0);
-  const handleValidate = () => {
+  const handleValidate = async () => {
     if (pendingChangesCount === 0) {
       toast.error("Make an edit first (skip, lock, or rename) and I'll run a validation pass.");
       return;
     }
-    const skipped = uniquePreview.filter((p) => excluded.has(p.id));
-    const lockedItems = uniquePreview.filter((p) => locked.has(p.id) && !excluded.has(p.id));
-    const keptCount = uniquePreview.length - excluded.size;
-    const prompt = buildValidateDiffPrompt({
-      skipped: skipped.map(asItem),
-      locked: lockedItems.map(asItem),
-      titleChange: titleChanged ? { from: initialTitle, to: title.trim() } : null,
-      keptCount,
-    });
-    sendConciergePrefill(prompt);
+    setVerdictLoading(true);
+    setVerdict(null);
+    try {
+      const skipped = uniquePreview.filter((p) => excluded.has(p.id));
+      const lockedItems = uniquePreview.filter((p) => locked.has(p.id) && !excluded.has(p.id));
+      const kept = uniquePreview.filter((p) => !excluded.has(p.id));
+      const v = await validateTearsheetEdits({
+        title: title.trim() || initialTitle,
+        original_note: proposal.args.note,
+        kept: kept.map(asItem),
+        skipped: skipped.map(asItem),
+        locked: lockedItems.map(asItem),
+        title_change: titleChanged ? { from: initialTitle, to: title.trim() } : null,
+      });
+      setVerdict(v);
+    } catch (e) {
+      toast.error(`Validation failed: ${(e as Error)?.message || "unknown"}`);
+    } finally {
+      setVerdictLoading(false);
+    }
+  };
+
   };
 
 
