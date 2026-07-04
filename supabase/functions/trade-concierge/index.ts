@@ -3300,6 +3300,9 @@ async function hydratePickPreview(
           category: p.category,
           dimensions: p.dimensions || null,
           designer_name: designer,
+          brand_name: designer,
+          lead_time: p.lead_time || null,
+          stock_status: p.stock_status || null,
           price_cents: typeof p.trade_price_cents === "number" ? p.trade_price_cents : null,
           currency: p.currency || null,
         };
