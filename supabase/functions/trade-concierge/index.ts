@@ -2229,6 +2229,9 @@ async function extractBrief(apiKey: string, latestUserMessage: string): Promise<
             qty_hint: typeof p.qty_hint === "number" ? p.qty_hint : null,
             lead_weeks_max: typeof p.lead_weeks_max === "number" ? p.lead_weeks_max : null,
             budget_band: p.budget_band || null,
+            anchor_role: (typeof p.anchor_role === "string" && p.anchor_role.trim()) ? p.anchor_role.trim().slice(0, 160) : null,
+            anchor_typology: (typeof p.anchor_typology === "string" && p.anchor_typology.trim()) ? p.anchor_typology.trim().toLowerCase().replace(/\s+/g, "_").slice(0, 40) : null,
+            emphasis: Array.isArray(p.emphasis) ? p.emphasis.filter((s: unknown): s is string => typeof s === "string" && !!s.trim()).map((s: string) => s.trim().toLowerCase().slice(0, 32)).slice(0, 6) : [],
           },
           plan: Array.isArray(p.plan) ? p.plan.filter((t: string) => ["propose_tearsheet", "add_to_tearsheet", "draft_quote", "add_to_quote", "propose_ffe_rows", "prepare_visualization_brief"].includes(t)) as BriefPlanTool[] : [],
         };
