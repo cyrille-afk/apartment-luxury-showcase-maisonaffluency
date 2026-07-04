@@ -2129,6 +2129,178 @@ const EMPTY_BRIEF: ExtractedBrief = {
   plan: [],
 };
 
+// ---------------------------------------------------------------------------
+// MATERIAL FIDELITY VALIDATOR
+// ---------------------------------------------------------------------------
+// The upstream planner LLM sometimes silently narrows the user's material
+// intent — most commonly by collapsing "glass or crystal" into ["glass"],
+// swapping crystal ↔ glass, or dropping a qualifier ("burl walnut" →
+// "walnut", "Nero Marquina marble" → "marble"). Every one of those changes
+// loses on-brand pieces from the downstream shortlist because the RAG /
+// hard-constraint filter tokenizes materials verbatim.
+//
+// This validator diffs the extracted `materials` array against the raw user
+// message and REPAIRS the extraction (never mutates the user's message):
+//   1. Explicit crystal/glass parity — if the user said "crystal" we
+//      guarantee "crystal" is in the array (and vice versa); if the user
+//      said both, both must survive.
+//   2. Named material tokens — any material from a curated lexicon that
+//      appears in the raw message must also appear (verbatim, lowercase)
+//      in the extracted list.
+//   3. Qualifier preservation — for compound tokens like "burl walnut",
+//      "patinated bronze", "Nero Marquina marble", the FULL span is
+//      re-inserted if the extraction only kept the base noun.
+//
+// Repairs are deterministic (regex-based) and logged so we can spot
+// planner regressions in `ai_usage_events`. Fail-open: on any error the
+// original extraction is returned unchanged.
+
+const MATERIAL_BASE_TOKENS: readonly string[] = [
+  // Stones
+  "marble", "onyx", "travertine", "limestone", "bluestone", "granite",
+  "quartzite", "slate", "alabaster", "rock crystal", "lapis",
+  // Named marbles / stones (qualifiers)
+  "nero marquina", "calacatta", "calacatta viola", "statuario", "carrara",
+  "verde alpi", "rosso levanto", "portoro", "arabescato", "breccia",
+  // Woods
+  "oak", "walnut", "mahogany", "rosewood", "ebony", "teak", "cherry",
+  "ash", "beech", "maple", "sycamore", "burl walnut", "burl", "olivewood",
+  "wenge", "zebrano", "palisander",
+  // Metals
+  "brass", "bronze", "patinated bronze", "blackened steel", "steel",
+  "iron", "copper", "nickel", "silver", "gold", "gilt", "gilded",
+  "polished chrome", "chrome", "aluminum", "aluminium",
+  // Glass / crystal — parity handled separately too
+  "glass", "crystal", "murano", "murano glass", "smoked glass",
+  "fluted glass", "reeded glass",
+  // Fabrics / finishes
+  "leather", "suede", "shagreen", "parchment", "lacquer", "gesso",
+  "raffia", "rattan", "wicker", "cane", "linen", "silk", "wool",
+  "mohair", "boucle", "bouclé", "velvet", "cashmere", "cotton",
+  "hemp", "jute", "sisal",
+  // Other
+  "porcelain", "ceramic", "terracotta", "concrete", "resin",
+];
+
+// Compound → base map so we can detect when only the base survived.
+// e.g. if extraction contains "walnut" but raw message contains "burl walnut",
+// we replace "walnut" with the full compound so the downstream matcher
+// scores burl-walnut pieces higher.
+const MATERIAL_COMPOUND_TO_BASE: Record<string, string> = {
+  "burl walnut": "walnut",
+  "patinated bronze": "bronze",
+  "blackened steel": "steel",
+  "polished chrome": "chrome",
+  "smoked glass": "glass",
+  "fluted glass": "glass",
+  "reeded glass": "glass",
+  "murano glass": "glass",
+  "rock crystal": "crystal",
+  "nero marquina": "marble",
+  "calacatta viola": "marble",
+  "calacatta": "marble",
+  "statuario": "marble",
+  "carrara": "marble",
+  "verde alpi": "marble",
+  "rosso levanto": "marble",
+  "portoro": "marble",
+  "arabescato": "marble",
+  "breccia": "marble",
+};
+
+// Word-boundary regex tuned to avoid matching inside larger words
+// (e.g. "cashmere" must not match "mere"). Uses \b at both ends of the
+// token pattern (spaces inside the token are literal).
+function containsToken(hay: string, token: string): boolean {
+  const escaped = token.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const re = new RegExp(`\\b${escaped}\\b`, "i");
+  return re.test(hay);
+}
+
+export interface MaterialFidelityRepair {
+  added: string[];              // tokens the planner missed
+  replaced: [string, string][]; // [droppedBase, restoredCompound]
+}
+
+export function reconcileMaterialsWithSource(
+  extractedMaterials: string[],
+  rawUserMessage: string,
+): { materials: string[]; repair: MaterialFidelityRepair } {
+  const repair: MaterialFidelityRepair = { added: [], replaced: [] };
+  if (!rawUserMessage || typeof rawUserMessage !== "string") {
+    return { materials: extractedMaterials, repair };
+  }
+  const raw = rawUserMessage.toLowerCase();
+  // Normalize working set to lowercase, dedup, preserve original order.
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const m of extractedMaterials) {
+    if (typeof m !== "string") continue;
+    const t = m.trim().toLowerCase();
+    if (!t || seen.has(t)) continue;
+    seen.add(t);
+    out.push(t);
+  }
+
+  // Pass 1 — compound restoration. If a compound appears in raw text and
+  // extraction contains only its base noun (but NOT the compound), swap
+  // the base for the compound so the downstream matcher gets the full
+  // qualifier.
+  for (const [compound, base] of Object.entries(MATERIAL_COMPOUND_TO_BASE)) {
+    if (!containsToken(raw, compound)) continue;
+    if (seen.has(compound)) continue;
+    const baseIdx = out.indexOf(base);
+    if (baseIdx >= 0) {
+      out[baseIdx] = compound;
+      seen.delete(base);
+      seen.add(compound);
+      repair.replaced.push([base, compound]);
+    } else {
+      // Compound was dropped entirely — add it.
+      out.push(compound);
+      seen.add(compound);
+      repair.added.push(compound);
+    }
+  }
+
+  // Pass 2 — bare token parity. Any base token the user actually named
+  // must survive in the array.
+  for (const token of MATERIAL_BASE_TOKENS) {
+    if (!containsToken(raw, token)) continue;
+    if (seen.has(token)) continue;
+    // Skip base if a compound-of-this-base is already present (covered).
+    const compoundCoversBase = Object.entries(MATERIAL_COMPOUND_TO_BASE)
+      .some(([c, b]) => b === token && seen.has(c));
+    if (compoundCoversBase) continue;
+    out.push(token);
+    seen.add(token);
+    repair.added.push(token);
+  }
+
+  // Pass 3 — explicit crystal/glass parity. If the user named BOTH
+  // ("glass or crystal", "crystal and glass"), both MUST survive; the
+  // planner has a documented history of dropping crystal.
+  const userSaidGlass = containsToken(raw, "glass");
+  const userSaidCrystal = containsToken(raw, "crystal");
+  const glassCovered = seen.has("glass") || Object.entries(MATERIAL_COMPOUND_TO_BASE).some(([c, b]) => b === "glass" && seen.has(c));
+  const crystalCovered = seen.has("crystal") || Object.entries(MATERIAL_COMPOUND_TO_BASE).some(([c, b]) => b === "crystal" && seen.has(c));
+  if (userSaidGlass && !glassCovered) {
+    out.push("glass");
+    seen.add("glass");
+    repair.added.push("glass");
+  }
+  if (userSaidCrystal && !crystalCovered) {
+    out.push("crystal");
+    seen.add("crystal");
+    repair.added.push("crystal");
+  }
+  // Deduplicate any accidental repair collisions.
+  const dedupAdded = Array.from(new Set(repair.added));
+  repair.added = dedupAdded;
+
+  return { materials: out.slice(0, 12), repair };
+}
+
 async function extractBrief(apiKey: string, latestUserMessage: string): Promise<ExtractedBrief> {
   if (!latestUserMessage || latestUserMessage.length < 4) return EMPTY_BRIEF;
   try {
@@ -2247,7 +2419,21 @@ async function extractBrief(apiKey: string, latestUserMessage: string): Promise<
       promptHash: result.promptHash,
       tier: "cheap",
     }).catch(() => {});
-    return result.value;
+    // Material-fidelity repair — runs even on cache hits so freshly-added
+    // lexicon entries take effect immediately.
+    const brief = result.value;
+    try {
+      const { materials, repair } = reconcileMaterialsWithSource(brief.brief.materials, latestUserMessage);
+      if (repair.added.length || repair.replaced.length) {
+        console.log(
+          `[concierge] material_fidelity_repair added=${JSON.stringify(repair.added)} replaced=${JSON.stringify(repair.replaced)} original=${JSON.stringify(brief.brief.materials)} final=${JSON.stringify(materials)}`,
+        );
+        brief.brief = { ...brief.brief, materials };
+      }
+    } catch (e) {
+      console.error("material_fidelity_repair failed:", e);
+    }
+    return brief;
   } catch (e) {
     console.error("brief planner failed:", e);
     return EMPTY_BRIEF;
