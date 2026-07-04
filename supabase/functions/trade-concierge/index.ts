@@ -2194,6 +2194,9 @@ async function extractBrief(apiKey: string, latestUserMessage: string): Promise<
                       qty_hint: { type: "integer", minimum: 1, maximum: 99 },
                       lead_weeks_max: { type: "integer", minimum: 1, maximum: 104 },
                       budget_band: { type: "string" },
+                      anchor_role: { type: "string", description: "Verbatim user phrasing for the anchor / centerpiece / statement / hero piece (e.g. 'show-stopping centerpiece', 'statement chandelier', 'hero piece of the dining room'). NEVER paraphrase — copy the user's exact wording. Empty string if the user did NOT use anchor/centerpiece/statement/hero cues." },
+                      anchor_typology: { type: "string", description: "Normalized snake_case typology the anchor refers to (dining_table, chandelier, sofa, coffee_table, sideboard, bed, rug, mirror, artwork, chair, floor_lamp, table_lamp, credenza, cabinet, console). Empty string if not nameable in this turn." },
+                      emphasis: { type: "array", items: { type: "string" }, description: "Adjectives the user used to emphasise the piece (show-stopping, sculptural, dramatic, monumental, statement, hero, focal, anchor, imposing, grand, theatrical). Copy verbatim, lowercase. Max 6." },
                       plan: {
                         type: "array",
                         items: { type: "string", enum: ["propose_tearsheet", "add_to_tearsheet", "draft_quote", "add_to_quote", "propose_ffe_rows", "prepare_visualization_brief"] },
