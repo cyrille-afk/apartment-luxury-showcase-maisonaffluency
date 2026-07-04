@@ -47,6 +47,8 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
 
   const [excludedLocal, setExcludedLocal] = useState<Set<string>>(excludedProp ?? new Set());
   const excluded = excludedProp ?? excludedLocal;
+  const [lockedLocal, setLockedLocal] = useState<Set<string>>(lockedProp ?? new Set());
+  const locked = lockedProp ?? lockedLocal;
   // Persist "Why this pick" expanded state per proposal in sessionStorage so
   // that switching views (panel collapse, route change, page refresh within
   // the same tab) preserves the reading context the user was building.
