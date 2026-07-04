@@ -4092,6 +4092,72 @@ serve(async (req) => {
 
 
 
+    if (hasExplicitSelectionVerb && requestedTypology && !mentionsKnownDesigner) {
+      const budgetCeiling = inferBudgetCeilingCents(lastUserMsg || "");
+      const allTypeCandidates = await fetchStrictTypologyCandidates(supabase, requestedTypology);
+      const budgetedCandidates = budgetCeiling
+        ? allTypeCandidates.filter((r: any) => Number(r?.trade_price_cents || 0) > 0 && Number(r.trade_price_cents) <= budgetCeiling.cents)
+        : allTypeCandidates;
+      const candidateRows = budgetedCandidates
+        .sort((a: any, b: any) => {
+          const ap = Number(a?.trade_price_cents || Number.MAX_SAFE_INTEGER);
+          const bp = Number(b?.trade_price_cents || Number.MAX_SAFE_INTEGER);
+          return ap - bp || String(a?.title || "").localeCompare(String(b?.title || ""));
+        })
+        .slice(0, Math.min(8, Math.max(2, effectiveBrief.brief.qty_hint || 6)));
+
+      if (allTypeCandidates.length > 0 && candidateRows.length === 0 && budgetCeiling) {
+        return sseTextResponse(
+          `The Maison Affluency Curation has ${typologyLabel(requestedTypology)} pieces, but none with published trade pricing ${budgetCeiling.label}. Would you like me to relax the budget or show Price on Request options in that typology?`,
+        );
+      }
+
+      if (candidateRows.length >= 1) {
+        const candidateIds = Array.from(new Set(candidateRows.map((r: any) => r.id).filter(Boolean)));
+        const previewRawAll = await hydratePickPreview(supabase, candidateIds);
+        let previewRaw = previewRawAll.filter((p: any) => rowMatchesRequestedTypology(p, requestedTypology));
+        if (budgetCeiling) {
+          previewRaw = previewRaw.filter((p: any) => Number(p?.price_cents || 0) > 0 && Number(p.price_cents) <= budgetCeiling.cents);
+        }
+        const { previewRaw: dedupedPreview, pickIds: dedupedIds } = dedupePreviewRows(
+          previewRaw,
+          candidateIds.filter((id: string) => previewRaw.some((p: any) => p?.id === id)),
+        );
+        if (dedupedIds.length === 0) {
+          return sseTextResponse(buildNoStrictTypologyReply(requestedTypology));
+        }
+        const rationaleMap: Record<string, { reason: string }> = {};
+        for (const p of dedupedPreview) {
+          if (!p?.id) continue;
+          const price = typeof p.price_cents === "number" && p.currency
+            ? `${p.currency} ${Math.round(p.price_cents / 100).toLocaleString("en-US")}`
+            : "published trade details";
+          rationaleMap[p.id] = { reason: budgetCeiling ? `Matches the requested typology and stays within ${budgetCeiling.label} (${price}).` : "Matches the requested typology from the Maison Affluency Curation." };
+        }
+        const proposal = {
+          tool: "propose_tearsheet",
+          tool_call_id: crypto.randomUUID(),
+          args: {
+            title: budgetCeiling ? `${typologyLabel(requestedTypology)} under ${budgetCeiling.label}` : `${typologyLabel(requestedTypology)} edit`,
+            pick_ids: dedupedIds,
+            note: budgetCeiling
+              ? `${dedupedIds.length} ${typologyLabel(requestedTypology)} match${dedupedIds.length === 1 ? "" : "es"} with published pricing ${budgetCeiling.label}.`
+              : `${dedupedIds.length} ${typologyLabel(requestedTypology)} match${dedupedIds.length === 1 ? "" : "es"} from the Maison Affluency Curation.`,
+            pick_rationales: rationaleMap,
+          },
+          preview: dedupedPreview.map((p: any) => ({ ...p, rationale: rationaleMap[p.id]?.reason || null })),
+        };
+        const requestedQty = effectiveBrief.brief.qty_hint || (lastUserMsg.match(/\b(\d{1,2})\b/) ? Number(lastUserMsg.match(/\b(\d{1,2})\b/)?.[1]) : null);
+        const quantityNote = requestedQty && requestedQty > dedupedIds.length
+          ? ` I found ${dedupedIds.length}, not ${requestedQty}, that truly match the typology${budgetCeiling ? ` and ${budgetCeiling.label}` : ""}; I did not pad with adjacent categories.`
+          : "";
+        return sseProposalThenTextResponse(
+          proposal,
+          `Here's the matching edit.${quantityNote} Review the list above and click **Approve & Create** to save it into a project folder — or **Discard** to cancel.`,
+        );
+      }
+    }
+
     if (mentionsKnownDesigner && isEnumerationRequest) {
       const { data: designerRows } = await supabase
         .from("designers")
