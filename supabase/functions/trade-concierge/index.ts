@@ -3243,6 +3243,50 @@ serve(async (req) => {
   const requestId = req.headers.get("x-request-id") || (crypto?.randomUUID?.() ?? `req-${Date.now()}`);
   logCorsInspection(req, "request", requestId);
 
+  // ── Per-request pre-LLM stage tracer ──────────────────────────────────
+  // Each `mark(stage, meta?)` records elapsed time since request start and
+  // delta since the previous mark. Flushed as a single JSON log line:
+  //  • right before the first LLM call (`phase: "pre_llm"`)
+  //  • on client abort (`phase: "aborted"`) — reveals which stage was live
+  //    when the frontend stall watchdog killed the stream
+  //  • on any thrown error (`phase: "error"`)
+  const traceT0 = performance.now();
+  let traceTPrev = traceT0;
+  const traceStages: Array<{ stage: string; at_ms: number; dt_ms: number; meta?: unknown }> = [];
+  const mark = (stage: string, meta?: unknown) => {
+    const now = performance.now();
+    traceStages.push({
+      stage,
+      at_ms: Math.round(now - traceT0),
+      dt_ms: Math.round(now - traceTPrev),
+      ...(meta !== undefined ? { meta } : {}),
+    });
+    traceTPrev = now;
+  };
+  let traceFlushed = false;
+  const flushTrace = (phase: "pre_llm" | "aborted" | "error", extra?: unknown) => {
+    if (traceFlushed) return;
+    traceFlushed = true;
+    try {
+      console.log(
+        `[concierge trace] ${JSON.stringify({
+          phase,
+          requestId,
+          total_ms: Math.round(performance.now() - traceT0),
+          stages: traceStages,
+          ...(extra !== undefined ? { extra } : {}),
+        })}`,
+      );
+    } catch { /* logging must never throw */ }
+  };
+  try {
+    req.signal?.addEventListener?.("abort", () => {
+      const last = traceStages[traceStages.length - 1]?.stage ?? "start";
+      flushTrace("aborted", { last_completed_stage: last });
+    });
+  } catch { /* signal may be unavailable in some runtimes */ }
+  mark("start");
+
   if (req.method !== "POST") {
     console.warn(`[concierge cors_block] ${JSON.stringify({ phase: "request", requestId, method: req.method, reason: "method_not_allowed_at_handler" })}`);
     return new Response(JSON.stringify({ error: "Method not allowed" }), {
