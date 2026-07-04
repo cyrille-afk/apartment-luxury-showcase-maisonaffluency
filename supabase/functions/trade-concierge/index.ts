@@ -3461,11 +3461,13 @@ serve(async (req) => {
 
     // Daily token cap (skip for admins). Soft block with friendly message.
     if (await isOverDailyCap(supabase, userId)) {
+      mark("daily_cap", { over: true });
       return new Response(
         JSON.stringify({ error: "You've reached today's concierge usage limit. Please come back tomorrow — or reach the team directly for urgent requests." }),
         { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
+    mark("daily_cap", { over: false });
 
     // Trim history: keep only the last ~8 turns to control prompt size.
     const trimmedMessages = messages.slice(-8);
@@ -3479,6 +3481,7 @@ serve(async (req) => {
       .flatMap((d: any) => [d.name, d.display_name])
       .filter(Boolean) as string[];
     const heuristicNeedsPieces = needsFullCatalog(lastUserMsg, designerNames);
+    mark("designers_query", { count: designerNames.length, needsPieces: heuristicNeedsPieces });
 
     // Short follow-ups (≤4 words, no catalog keywords) skip the classifier +
     // planner round-trips entirely — they were dominating latency on replies
