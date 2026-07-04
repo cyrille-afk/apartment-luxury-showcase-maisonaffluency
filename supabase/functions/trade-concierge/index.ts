@@ -10,6 +10,7 @@ import { canAccessProject } from "../_shared/tenantAccess.ts";
 import { runInspectorPass, buildInspectorGroundTruth, buildInspectorLogRecord, logInspectorRun, validateRequirementsCoverage, mergeRequirementsWithText, runDiscoveryProseGuard, deterministicRedact, SAFE_FALLBACK_PROSE } from "../_shared/concierge-inspector.ts";
 import { installFramePersistence, serveResume } from "./_resume.ts";
 import { deriveHardConstraints, applyHardConstraints, filterRowsByHardConstraints, type HardConstraints } from "../_shared/hardConstraints.ts";
+import { inferDimensionConstraints, filterRowsByDimensionConstraints, type DimensionConstraints } from "../_shared/dimensionConstraints.ts";
 import { buildNoStrictTypologyReply, typologyLabel } from "./_no_strict_typology_reply.ts";
 
 type ConciergeDbClient = any;
@@ -2507,13 +2508,16 @@ async function loadRelevantPieces(
       usage: { prompt_tokens: Math.ceil(query.length / 4), completion_tokens: 0, total_tokens: Math.ceil(query.length / 4) },
     }).catch(() => {});
     // Over-fetch when hard constraints will filter the shortlist, so we still
-    // have enough survivors for the AI to reason over.
+    // have enough survivors for the AI to reason over. Dimension constraints
+    // are strict + can drop unknown-dim rows, so they widen the multiplier too.
+    const dimConstraints: DimensionConstraints | null = inferDimensionConstraints(query);
     const wantsConstraintFilter = !!hardConstraints && (
       (hardConstraints.materials?.length || 0) +
       (hardConstraints.colors?.length || 0) +
       (hardConstraints.categories?.length || 0) > 0
     );
-    const matchCount = wantsConstraintFilter ? Math.min(k * 4, 200) : k;
+    const wantsDimFilter = !!dimConstraints;
+    const matchCount = (wantsConstraintFilter || wantsDimFilter) ? Math.min(k * 4, 200) : k;
     const { data: rawData, error } = await supabase.rpc("match_catalog", {
       query_embedding: vec as any,
       match_count: matchCount,
@@ -2525,13 +2529,22 @@ async function loadRelevantPieces(
     // Post-filter the pgvector shortlist with the same token dictionary the
     // SQL path uses, so hard constraints (color, material, category, brand
     // exclusion) apply identically whether we use vector or bulk SQL.
-    const data = wantsConstraintFilter
-      ? filterRowsByHardConstraints(rawData, hardConstraints!).slice(0, k)
-      : rawData.slice(0, k);
+    let filtered = wantsConstraintFilter
+      ? filterRowsByHardConstraints(rawData, hardConstraints!)
+      : rawData;
+    // Hard dimension constraints — deterministic mm parse; unknowns dropped in
+    // strict mode, safety-valve keeps them only if <2 survivors.
+    if (wantsDimFilter) {
+      const dimRes = filterRowsByDimensionConstraints(filtered as any[], dimConstraints);
+      console.log(`[concierge RAG dim] pre=${filtered.length} strict=${dimRes.strictKept.length} kept=${dimRes.kept.length} dropped=${dimRes.dropped} unknownDropped=${dimRes.unknownDropped} fellBack=${dimRes.fellBack} constraints=${JSON.stringify(dimConstraints)}`);
+      filtered = dimRes.kept as any[];
+    }
+    const data = filtered.slice(0, k);
     if (data.length < 5) {
       // Filter too strict — fall back to unfiltered top-K rather than blank.
       console.warn("[concierge RAG] hard constraints filtered <5 rows; falling back", {
         constraints: hardConstraints,
+        dimConstraints,
         preFilter: rawData.length,
       });
       return { contextText: "", rows: [] };
@@ -2790,25 +2803,30 @@ function buildOpeningBriefDiscoveryReply(latestUserMessage: string, langCode = "
 async function fetchStrictTypologyCandidates(
   supabase: ConciergeDbClient,
   typology: RequestedTypology,
+  dimConstraints?: DimensionConstraints | null,
 ): Promise<any[]> {
   const term = typology === "dining_table" ? "dining" : "table";
   const [pickRes, tradeRes] = await Promise.all([
     supabase
       .from("designer_curator_picks")
-      .select("id, title, materials, category, subcategory, trade_price_cents, currency")
+      .select("id, title, materials, category, subcategory, dimensions, trade_price_cents, currency")
       .or(`title.ilike.%${term}%,subcategory.ilike.%${term}%,category.ilike.%${term}%`)
       .limit(160),
     supabase
       .from("trade_products")
-      .select("id, product_name, materials, category, subcategory, trade_price_cents, rrp_price_cents, currency")
+      .select("id, product_name, materials, category, subcategory, dimensions, trade_price_cents, rrp_price_cents, currency")
       .eq("is_active", true)
       .or(`product_name.ilike.%${term}%,subcategory.ilike.%${term}%,category.ilike.%${term}%`)
       .limit(160),
   ]);
-  return [
+  const typologyFiltered = [
     ...(pickRes.data || []),
     ...(tradeRes.data || []).map((r: any) => ({ ...r, title: r.product_name, trade_price_cents: r.trade_price_cents ?? r.rrp_price_cents ?? null })),
   ].filter((r: any) => rowMatchesRequestedTypology(r, typology));
+  if (!dimConstraints) return typologyFiltered;
+  const dimRes = filterRowsByDimensionConstraints(typologyFiltered, dimConstraints);
+  console.log(`[concierge strict-typology dim] typology=${typology} pre=${typologyFiltered.length} strict=${dimRes.strictKept.length} kept=${dimRes.kept.length} dropped=${dimRes.dropped} unknownDropped=${dimRes.unknownDropped} fellBack=${dimRes.fellBack} constraints=${JSON.stringify(dimConstraints)}`);
+  return dimRes.kept;
 }
 
 // Common city / country abbreviations mapped to canonical full names.
@@ -3272,6 +3290,7 @@ async function buildDeterministicTearsheetProposal(
 ): Promise<any | null> {
   const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
   const requestedTypology = inferRequestedTypology(brief, requestText);
+  const dimConstraints = inferDimensionConstraints(requestText);
   const scoreRow = (r: any) => {
     const hay = `${r?.title || ""} ${r?.category || ""} ${r?.subcategory || ""} ${r?.materials || ""}`.toLowerCase();
     let score = Number(r?.similarity || 0);
@@ -3284,8 +3303,15 @@ async function buildDeterministicTearsheetProposal(
     .filter((r: any) => r && typeof r.id === "string" && UUID_RE.test(r.id))
     .filter((r: any) => rowMatchesRequestedTypology(r, requestedTypology))
     .sort((a: any, b: any) => scoreRow(b) - scoreRow(a));
+  // Apply hard dimension constraints to the RAG shortlist (rows carry
+  // `dimensions` from match_catalog). Unknown-dim rows drop in strict mode.
+  if (dimConstraints && candidateRows.length) {
+    const dimRes = filterRowsByDimensionConstraints(candidateRows, dimConstraints);
+    console.log(`[concierge tearsheet dim] pre=${candidateRows.length} strict=${dimRes.strictKept.length} kept=${dimRes.kept.length} dropped=${dimRes.dropped} unknownDropped=${dimRes.unknownDropped} fellBack=${dimRes.fellBack} constraints=${JSON.stringify(dimConstraints)}`);
+    candidateRows = dimRes.kept;
+  }
   if (candidateRows.length < 2 && requestedTypology) {
-    candidateRows = (await fetchStrictTypologyCandidates(supabase, requestedTypology))
+    candidateRows = (await fetchStrictTypologyCandidates(supabase, requestedTypology, dimConstraints))
       .filter((r: any) => r && typeof r.id === "string" && UUID_RE.test(r.id))
       .sort((a: any, b: any) => scoreRow(b) - scoreRow(a));
   }
@@ -4103,7 +4129,8 @@ serve(async (req) => {
 
     if (hasExplicitSelectionVerb && requestedTypology && !mentionsKnownDesigner) {
       const budgetCeiling = inferBudgetCeilingCents(lastUserMsg || "");
-      const allTypeCandidates = await fetchStrictTypologyCandidates(supabase, requestedTypology);
+      const dimCeiling = inferDimensionConstraints(lastUserMsg || "");
+      const allTypeCandidates = await fetchStrictTypologyCandidates(supabase, requestedTypology, dimCeiling);
       const budgetedCandidates = budgetCeiling
         ? allTypeCandidates.filter((r: any) => Number(r?.trade_price_cents || 0) > 0 && Number(r.trade_price_cents) <= budgetCeiling.cents)
         : allTypeCandidates;
