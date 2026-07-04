@@ -12,6 +12,8 @@ import { installFramePersistence, serveResume } from "./_resume.ts";
 import { deriveHardConstraints, applyHardConstraints, filterRowsByHardConstraints, type HardConstraints } from "../_shared/hardConstraints.ts";
 import { buildNoStrictTypologyReply, typologyLabel } from "./_no_strict_typology_reply.ts";
 
+type ConciergeDbClient = any;
+
 const SENTIMENT_MODEL = modelFor("cheap");
 const SENTIMENT_MAX_TOKENS = tokenBudget("classify");
 const CHAT_MAX_TOKENS = tokenBudget("chat");
@@ -965,7 +967,7 @@ const TOOLS = [
 
 /** Server-side mirror of src/lib/shippingEstimator.ts — reads live DB rate matrix. */
 async function runShippingEstimate(
-  supabase: ReturnType<typeof createClient>,
+  supabase: ConciergeDbClient,
   args: {
     origin_country: string;
     dest_country: string;
@@ -1384,7 +1386,7 @@ function needsFullCatalog(text: string, designerNames: string[]): boolean {
 
 /** Check daily token usage; returns true if user is over cap (and not admin). */
 async function isOverDailyCap(
-  supabase: ReturnType<typeof createClient>,
+  supabase: ConciergeDbClient,
   userId: string,
   capTokens = 200_000,
 ): Promise<boolean> {
@@ -1422,7 +1424,7 @@ function pickModel(text: string, includePieces: boolean): string {
 }
 
 async function loadCatalogContext(
-  supabase: ReturnType<typeof createClient>,
+  supabase: ConciergeDbClient,
   includePieces: boolean,
   designerFilter?: string[],
   hardConstraints?: HardConstraints,
@@ -1607,7 +1609,7 @@ async function loadCatalogContext(
 
 /** Recent CAD floor plans the user (or any of their studios) has uploaded. */
 async function loadCadDocuments(
-  supabase: ReturnType<typeof createClient>,
+  supabase: ConciergeDbClient,
   userId: string | null,
 ): Promise<string> {
   if (!userId) return "(No user session — Spatial Fit unavailable.)";
@@ -1644,7 +1646,7 @@ async function loadCadDocuments(
 
 /** Product-attached CAD/3D assets available to Spatial Fit. */
 async function loadProductCadAssets(
-  supabase: ReturnType<typeof createClient>,
+  supabase: ConciergeDbClient,
 ): Promise<string> {
   const { data } = await supabase
     .from("trade_product_cad_assets")
@@ -1666,7 +1668,7 @@ async function loadProductCadAssets(
 
 /** Load the signed-in user's existing tearsheets for tool grounding. */
 async function loadUserBoards(
-  supabase: ReturnType<typeof createClient>,
+  supabase: ConciergeDbClient,
   userId: string | null,
 ): Promise<string> {
   if (!userId) return "(No user session — only new tearsheets can be drafted.)";
@@ -1693,7 +1695,7 @@ async function loadUserBoards(
 
 /** Load the active project (name/client/currency/studio) + its studio's clients for grounding. */
 async function loadProjectContext(
-  supabase: ReturnType<typeof createClient>,
+  supabase: ConciergeDbClient,
   userId: string | null,
   projectId: string | null,
 ): Promise<string> {
@@ -1732,7 +1734,7 @@ async function loadProjectContext(
 
 /** Load the user's open (draft) quotes so `add_to_quote` has valid IDs to reference. */
 async function loadOpenQuotes(
-  supabase: ReturnType<typeof createClient>,
+  supabase: ConciergeDbClient,
   userId: string | null,
 ): Promise<string> {
   if (!userId) return "(No user session — only `draft_quote` is available.)";
@@ -1762,7 +1764,7 @@ async function loadOpenQuotes(
 }
 
 async function resolveMentionedProjectId(
-  supabase: ReturnType<typeof createClient>,
+  supabase: ConciergeDbClient,
   userId: string,
   text: string,
 ): Promise<string | null> {
@@ -1785,7 +1787,7 @@ async function resolveMentionedProjectId(
 
 /** Load predictive personalization signals for the signed-in user. */
 async function loadUserSignals(
-  supabase: ReturnType<typeof createClient>,
+  supabase: ConciergeDbClient,
   userId: string | null,
 ): Promise<string> {
   if (!userId) return "(No user session — generic guidance only.)";
@@ -1883,7 +1885,7 @@ async function loadUserSignals(
  * caller can decide whether to render a section.
  */
 async function loadUserMemory(
-  supabase: ReturnType<typeof createClient>,
+  supabase: ConciergeDbClient,
   userId: string | null,
 ): Promise<string> {
   if (!userId) return "";
@@ -1942,7 +1944,7 @@ function budgetBandToCents(band: string | null | undefined): { cents: number | n
  * out previously-learned values. Arrays are unioned with existing values.
  */
 async function persistInferredMemory(
-  supabase: ReturnType<typeof createClient>,
+  supabase: ConciergeDbClient,
   userId: string | null,
   brief: any,
 ): Promise<void> {
@@ -2486,7 +2488,7 @@ function buildPlanDirective(extracted: ExtractedBrief): string {
 /** Retrieve top-K relevant catalog pieces via pgvector instead of loading 2000 rows. */
 async function loadRelevantPieces(
 
-  supabase: ReturnType<typeof createClient>,
+  supabase: ConciergeDbClient,
   apiKey: string,
   query: string,
   userId: string | null,
@@ -2621,7 +2623,7 @@ async function loadRelevantPieces(
 }
 
 async function recordRagTrace(
-  supabase: ReturnType<typeof createClient>,
+  supabase: ConciergeDbClient,
   payload: {
     userId: string | null;
     query: string;
@@ -2784,7 +2786,7 @@ function buildOpeningBriefDiscoveryReply(latestUserMessage: string, langCode = "
 }
 
 async function fetchStrictTypologyCandidates(
-  supabase: ReturnType<typeof createClient>,
+  supabase: ConciergeDbClient,
   typology: RequestedTypology,
 ): Promise<any[]> {
   const term = typology === "dining_table" ? "dining" : "table";
@@ -3092,7 +3094,7 @@ function resolveVariantPriceFromPick(row: any, variantLabelValue: string | null 
   return null;
 }
 async function hydratePickPreview(
-  supabase: ReturnType<typeof createClient>,
+  supabase: ConciergeDbClient,
   pickIds: string[],
 ) {
   if (!pickIds.length) return [];
@@ -3261,7 +3263,7 @@ async function hydratePickPreview(
 
 
 async function buildDeterministicTearsheetProposal(
-  supabase: ReturnType<typeof createClient>,
+  supabase: ConciergeDbClient,
   ragRows: any[],
   brief: ExtractedBrief["brief"],
   requestText: string,
@@ -3359,7 +3361,7 @@ function buildVisualizationBriefProposal(args: {
 
 /** Build per-line preview rows for a draft_quote / add_to_quote proposal. */
 async function hydrateQuotePreview(
-  supabase: ReturnType<typeof createClient>,
+  supabase: ConciergeDbClient,
   lines: Array<{ pick_id: string; qty: number; variant?: string | null; lead_weeks?: number | null; note?: string | null }>,
   fallbackCurrency: string | null,
   discountPct: number,
