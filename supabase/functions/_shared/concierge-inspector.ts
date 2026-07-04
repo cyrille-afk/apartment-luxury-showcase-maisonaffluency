@@ -246,6 +246,22 @@ export async function runDiscoveryProseGuard(opts: {
     "Let", "Would", "Could", "Should", "Once", "For", "With", "And", "But", "Or", "If",
     "Curation", "Discover", "Discovery", "Tearsheet", "Quote", "Showroom", "Gallery",
     "Belgravia", "Mayfair", "London", "Paris", "Milan", "Monaco", "New York",
+    // Materials, stones, woods, finishes, colours — descriptive, never brands.
+    "Marble", "Stone", "Onyx", "Granite", "Quartzite", "Limestone", "Travertine",
+    "Bluestone", "Sandstone", "Slate", "Basalt", "Terrazzo", "Alabaster",
+    "Calacatta", "Statuario", "Statuarietto", "Carrara", "Nero", "Marquina",
+    "Portoro", "Emperador", "Rosso", "Verde", "Alpi", "Levanto", "Breccia",
+    "Bardiglio", "Arabescato", "Paonazzo", "Onice", "Sahara", "Noir",
+    "Grand", "Antique", "Belgian", "Italian", "French", "Portuguese", "Spanish",
+    "Crystal", "Glass", "Bronze", "Brass", "Copper", "Steel", "Iron", "Pewter",
+    "Silver", "Gold", "Rose", "Gilt", "Patinated", "Blackened", "Polished", "Brushed",
+    "Walnut", "Oak", "Ash", "Elm", "Cherry", "Maple", "Mahogany", "Ebony", "Teak",
+    "Rosewood", "Sycamore", "Pine", "Beech", "Zebrano", "Wenge", "Palisander",
+    "Leather", "Velvet", "Mohair", "Linen", "Wool", "Silk", "Cotton", "Bouclé", "Boucle",
+    "Lacquer", "Shagreen", "Parchment", "Straw", "Rattan", "Cane", "Cerused",
+    "White", "Black", "Cream", "Ivory", "Beige", "Taupe", "Grey", "Gray", "Charcoal",
+    "Chandelier", "Table", "Chair", "Sofa", "Console", "Cabinet", "Sideboard",
+    "Dining", "Living", "Bedroom", "Salon", "Foyer", "Library", "Study",
   ]);
   const suspicious = capTokens.filter((t) => {
     // Drop if every whitespace-separated part is a stop word
