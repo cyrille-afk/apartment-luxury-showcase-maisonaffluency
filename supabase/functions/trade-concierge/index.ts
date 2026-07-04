@@ -4233,6 +4233,7 @@ serve(async (req) => {
         stream_options: { include_usage: true },
       }),
     });
+    console.log(`[concierge trace] ${JSON.stringify({ phase: "llm_first_response", requestId, llm_ms: Math.round(performance.now() - llmT0), status: upstream.status })}`);
 
     if (!upstream.ok) {
       if (upstream.status === 429) {
