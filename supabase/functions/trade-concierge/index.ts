@@ -4592,6 +4592,7 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         model: aiModel(chosenModel),
+        temperature: 0,
         messages: [{ role: "system", content: languageDirective + systemPrompt }, ...trimmedMessages],
         tools: finalTools,
         tool_choice: toolChoice,
