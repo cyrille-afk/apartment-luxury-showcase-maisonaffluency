@@ -343,6 +343,36 @@ const REDACTOR_STOP = new Set([
   "Curation", "Discover", "Discovery", "Tearsheet", "Quote", "Showroom", "Gallery",
   "Belgravia", "Mayfair", "London", "Paris", "Milan", "Monaco", "New", "York",
   "Alternatively", "Additionally", "Or", "As",
+  // Materials, stones, woods, finishes — these are descriptive, never brands.
+  // Capitalised marble / stone varieties frequently appear in atelier prose:
+  // "Calacatta", "Nero Marquina", "Statuario", "Belgian Bluestone", "Verde Alpi".
+  "Marble", "Stone", "Onyx", "Granite", "Quartzite", "Limestone", "Travertine",
+  "Bluestone", "Sandstone", "Slate", "Basalt", "Terrazzo", "Alabaster",
+  "Calacatta", "Statuario", "Statuarietto", "Carrara", "Nero", "Marquina",
+  "Portoro", "Emperador", "Rosso", "Verde", "Alpi", "Levanto", "Breccia",
+  "Bardiglio", "Arabescato", "Paonazzo", "Onice", "Onyx", "Sahara", "Noir",
+  "Grand", "Antique", "Belgian", "Italian", "French", "Portuguese", "Spanish",
+  "Crystal", "Glass", "Bronze", "Brass", "Copper", "Steel", "Iron", "Pewter",
+  "Silver", "Gold", "Rose", "Gilt", "Patinated", "Blackened", "Polished", "Brushed",
+  "Walnut", "Oak", "Ash", "Elm", "Cherry", "Maple", "Mahogany", "Ebony", "Teak",
+  "Rosewood", "Sycamore", "Pine", "Beech", "Zebrano", "Wenge", "Palisander",
+  "Leather", "Velvet", "Mohair", "Linen", "Wool", "Silk", "Cotton", "Bouclé", "Boucle",
+  "Lacquer", "Shagreen", "Parchment", "Straw", "Rattan", "Cane", "Cerused",
+  "White", "Black", "Cream", "Ivory", "Beige", "Taupe", "Grey", "Gray", "Charcoal",
+  "Chandelier", "Table", "Chair", "Sofa", "Console", "Cabinet", "Sideboard",
+  "Dining", "Living", "Bedroom", "Salon", "Foyer", "Library", "Study",
+]);
+
+// Material nouns that indicate the preceding capitalised span is a
+// stone / finish / textile qualifier ("Nero Marquina marble"), not a brand.
+const MATERIAL_NOUN_AFTER = new Set([
+  "marble", "stone", "onyx", "granite", "quartzite", "limestone", "travertine",
+  "bluestone", "sandstone", "slate", "basalt", "terrazzo", "alabaster",
+  "wood", "oak", "walnut", "ash", "elm", "cherry", "maple", "mahogany", "ebony", "teak",
+  "leather", "velvet", "mohair", "linen", "wool", "silk", "cotton", "bouclé", "boucle",
+  "bronze", "brass", "copper", "steel", "iron", "pewter", "silver", "gold",
+  "crystal", "glass", "lacquer", "shagreen", "parchment", "straw", "rattan", "cane",
+  "finish", "veneer", "inlay", "upholstery", "fabric",
 ]);
 
 export type DeterministicRedactionResult = {
