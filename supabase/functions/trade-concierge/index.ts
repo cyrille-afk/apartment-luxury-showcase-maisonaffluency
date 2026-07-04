@@ -2019,6 +2019,7 @@ async function classifySentiment(
           headers: { Authorization: `Bearer ${aiAuthKey(apiKey)}`, "Content-Type": "application/json" },
           body: JSON.stringify({
             model: aiModel(SENTIMENT_MODEL),
+            temperature: 0,
             max_completion_tokens: SENTIMENT_MAX_TOKENS,
             messages: [
               {
