@@ -421,12 +421,18 @@ export function deterministicRedact(opts: {
   // 2. Redact capitalised proper-noun spans (1–4 words) not in allowlists.
   //    We match spans like "Poliform", "B&B Italia", "Kelly Wearstler", "Fendi Casa".
   out = out.replace(
-    /\b[A-Z][A-Za-z&'’\-]{2,}(?:\s+[A-Z][A-Za-z&'’\-]{2,}){0,3}\b/g,
-    (span) => {
+    /\b[A-Z][A-Za-z&'’\-]{2,}(?:\s+[A-Z][A-Za-z&'’\-]{2,}){0,3}\b(\s+[a-z][a-zàâäéèêëîïôöùûüç]+)?/g,
+    (span, trailer) => {
+      // If the span is immediately followed by a material noun ("Nero
+      // Marquina marble", "Belgian bluestone", "Calacatta Viola quartzite"),
+      // treat it as a material qualifier, not a brand.
+      const trailWord = trailer ? String(trailer).trim().toLowerCase() : "";
+      const headSpan = trailer ? span.slice(0, span.length - trailer.length) : span;
+      if (trailWord && MATERIAL_NOUN_AFTER.has(trailWord)) return span;
       // Skip if every part is a common stop word
-      const parts = span.split(/\s+/);
+      const parts = headSpan.split(/\s+/);
       if (parts.every((p) => REDACTOR_STOP.has(p))) return span;
-      const key = span.toLowerCase();
+      const key = headSpan.toLowerCase();
       // Allowed if the span is a substring of any allowed designer (or vice versa)
       for (const d of designerSet) {
         if (d === key || d.includes(key) || key.includes(d)) return span;
@@ -437,8 +443,8 @@ export function deterministicRedact(opts: {
       for (const t of titleSet) {
         if (t === key || t.includes(key) || key.includes(t)) return span;
       }
-      removed.push(span);
-      return "[redacted]";
+      removed.push(headSpan);
+      return trailer ? `[redacted]${trailer}` : "[redacted]";
     },
   );
 
