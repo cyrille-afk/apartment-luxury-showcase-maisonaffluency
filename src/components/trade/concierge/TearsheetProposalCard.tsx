@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { Loader2, Check, X, Pencil, ExternalLink, Plus, ChevronDown, Copy, Repeat, Lock, Unlock, RefreshCw, PlusCircle, MessageSquare, ShieldCheck } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
@@ -14,6 +14,7 @@ import { RequirementsBadge } from "@/components/trade/concierge/RequirementsBadg
 import { validateTearsheetEdits, realignUnlocked, type ValidationVerdict, type RealignmentDelta } from "@/lib/tearsheetSyncClient";
 import { ValidationBanner, RowVerdictPill } from "@/components/trade/concierge/ValidationSummary";
 import { RealignmentDiffPanel, type AppliedRealignment } from "@/components/trade/concierge/RealignmentDiffPanel";
+import { TearsheetInsightsSidebar } from "@/components/trade/concierge/TearsheetInsightsSidebar";
 
 
 type Status = "pending" | "committing" | "approved" | "discarded";
