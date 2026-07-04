@@ -196,7 +196,11 @@ Deno.serve(async (req) => {
     ]
 
     if (availableCatalog.length === 0) {
-      return new Response(JSON.stringify({ recommendations: [] }), {
+      return new Response(JSON.stringify({
+        recommendations: [],
+        applied_constraints: hardConstraints,
+        reason: 'No catalog items match the current hard constraints',
+      }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }
