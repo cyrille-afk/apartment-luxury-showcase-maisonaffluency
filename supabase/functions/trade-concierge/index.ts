@@ -7,7 +7,7 @@ import { embedQuery } from "../_shared/aiEmbeddings.ts";
 import { withSemanticCache } from "../_shared/aiCache.ts";
 import { coerceClearance, classifyResultFailure, countDimensionNumbers } from "../_shared/spatialFitValidation.ts";
 import { canAccessProject } from "../_shared/tenantAccess.ts";
-import { runInspectorPass, buildInspectorGroundTruth, buildInspectorLogRecord, logInspectorRun, validateRequirementsCoverage, runDiscoveryProseGuard, deterministicRedact, SAFE_FALLBACK_PROSE } from "../_shared/concierge-inspector.ts";
+import { runInspectorPass, buildInspectorGroundTruth, buildInspectorLogRecord, logInspectorRun, validateRequirementsCoverage, mergeRequirementsWithText, runDiscoveryProseGuard, deterministicRedact, SAFE_FALLBACK_PROSE } from "../_shared/concierge-inspector.ts";
 import { installFramePersistence, serveResume } from "./_resume.ts";
 import { deriveHardConstraints, applyHardConstraints, filterRowsByHardConstraints, type HardConstraints } from "../_shared/hardConstraints.ts";
 import { buildNoStrictTypologyReply, typologyLabel } from "./_no_strict_typology_reply.ts";
@@ -176,13 +176,15 @@ const CB_FAILURE_THRESHOLD = Number(Deno.env.get("CB_FAILURE_THRESHOLD") ?? "3")
 const CB_COOLDOWN_MS = Number(Deno.env.get("CB_COOLDOWN_MS") ?? "60000");
 
 // Requirements-diff enforcement mode (see `_requirements_enforcement.ts` for
-// the precedence rules). "open" (default) surfaces violations without
-// blocking; "closed" swallows failing cards and emits `event: proposal_blocked`.
+// precedence). This endpoint is fail-closed by default: a card that does not
+// satisfy the user's stated brief must not render.
 import { resolveRequirementsEnforcement } from "./_requirements_enforcement.ts";
-const REQUIREMENTS_ENFORCEMENT: "open" | "closed" = resolveRequirementsEnforcement({
-  CONCIERGE_REQUIREMENTS_ENFORCEMENT: Deno.env.get("CONCIERGE_REQUIREMENTS_ENFORCEMENT"),
-  CONCIERGE_REQUIREMENTS_STRICT: Deno.env.get("CONCIERGE_REQUIREMENTS_STRICT"),
-});
+const REQUIREMENTS_ENFORCEMENT: "open" | "closed" = (Deno.env.get("CONCIERGE_REQUIREMENTS_ENFORCEMENT") || Deno.env.get("CONCIERGE_REQUIREMENTS_STRICT"))
+  ? resolveRequirementsEnforcement({
+      CONCIERGE_REQUIREMENTS_ENFORCEMENT: Deno.env.get("CONCIERGE_REQUIREMENTS_ENFORCEMENT"),
+      CONCIERGE_REQUIREMENTS_STRICT: Deno.env.get("CONCIERGE_REQUIREMENTS_STRICT"),
+    })
+  : "closed";
 console.log(`[concierge] requirements enforcement: ${REQUIREMENTS_ENFORCEMENT}`);
 
 const breaker = createBreaker({
@@ -2744,6 +2746,37 @@ function sseProposalsThenTextResponse(proposals: unknown[], text: string): Respo
   return new Response(stream, { headers: { ...corsHeaders, "Content-Type": "text/event-stream" } });
 }
 
+function buildRequirementsBlockedMessage(violations: any[]): string {
+  const kinds = new Set((violations || []).map((v: any) => v?.kind).filter(Boolean));
+  if (kinds.has("budget_over")) {
+    return "I’m going to hold the tearsheet rather than show a draft that exceeds the budget. I need to reduce scope or broaden the pricing band before proposing real pieces.";
+  }
+  if (kinds.has("budget_unpriced")) {
+    return "I’m going to hold the tearsheet rather than imply the edit fits budget while one or more pieces are Price on Request. I need priced alternatives or approval to include POR pieces.";
+  }
+  if (kinds.has("capacity_unverified") || kinds.has("shape_unverified")) {
+    return "I’m going to hold the tearsheet rather than show pieces that don’t verify the stated shape or seating requirement. I need a confirmed matching table before proposing the edit.";
+  }
+  if (kinds.has("palette_mismatch")) {
+    return "I’m going to hold the tearsheet rather than show pieces that don’t match the stated material or finish constraints. I need to widen the palette or find closer matches.";
+  }
+  if (kinds.has("slot_undelivered")) {
+    return "I’m going to hold the tearsheet rather than show a draft that under-delivers the requested pieces. I need to broaden the typology or adjust the brief first.";
+  }
+  return "I’m going to hold the tearsheet rather than show a draft that does not satisfy the brief. I need to refine the constraints first.";
+}
+
+function validateProposalAgainstBrief(
+  proposal: any,
+  requestText: string,
+  explicitRequirements?: RequirementsPayload | null,
+) {
+  const requirements = mergeRequirementsWithText(explicitRequirements as any, requestText);
+  const previews = Array.isArray(proposal?.preview) ? proposal.preview : [];
+  const gt = buildInspectorGroundTruth([{ tool: String(proposal?.tool || "unknown"), pickIds: [], previews }]);
+  return { requirements, validation: validateRequirementsCoverage(requirements as any, gt) };
+}
+
 function titleTokens(value: string | null | undefined): string[] {
   return normalizeLoose(value).split(/\s+/).filter((t) => t.length > 2 && !GENERIC_PRODUCT_TOKENS.has(t));
 }
@@ -2824,11 +2857,11 @@ async function hydratePickPreview(
   const [{ data: picks }, { data: trades }] = await Promise.all([
     supabase
       .from("designer_curator_picks")
-      .select("id, title, image_url, materials, category, designer_id, trade_price_cents, currency")
+      .select("id, title, image_url, materials, category, dimensions, designer_id, trade_price_cents, currency")
       .in("id", pickIds),
     supabase
       .from("trade_products")
-      .select("id, product_name, brand_name, image_url, materials, category, trade_price_cents, rrp_price_cents, currency")
+      .select("id, product_name, brand_name, image_url, materials, category, dimensions, trade_price_cents, rrp_price_cents, currency")
       .in("id", pickIds),
   ]);
 
@@ -2944,6 +2977,7 @@ async function hydratePickPreview(
           image_from_hotspot: !p.image_url && !!fallback,
           materials: p.materials,
           category: p.category,
+          dimensions: p.dimensions || null,
           designer_name: designer,
           price_cents: typeof p.trade_price_cents === "number" ? p.trade_price_cents : null,
           currency: p.currency || null,
@@ -2963,6 +2997,7 @@ async function hydratePickPreview(
           image_from_hotspot: !t.image_url && !!fallback,
           materials: t.materials,
           category: t.category,
+          dimensions: t.dimensions || null,
           designer_name: baseBrand || null,
           price_cents:
             typeof t.trade_price_cents === "number"
@@ -4037,6 +4072,11 @@ serve(async (req) => {
           ? `Draft tear sheet with ${countPhrase} (skipped ${excludedIds.size} per your request). Review the list above and click **Approve & Create** to save it into a project folder — or **Discard** to cancel.`
           : `Draft tear sheet with ${countPhrase} in the Maison Affluency Curation, with trade pricing. Review the list above and click **Approve & Create** to save it into a project folder — or **Discard** to cancel.`)
           + unmetSuffix;
+        const { validation } = validateProposalAgainstBrief(proposal, userConversationText, null);
+        if (!validation.ok) {
+          console.warn("[concierge deterministic-enumeration] blocked proposal", JSON.stringify({ requestId, violations: validation.violations }));
+          return sseTextResponse(buildRequirementsBlockedMessage(validation.violations));
+        }
         return sseProposalThenTextResponse(proposal, closing);
 
 
@@ -4087,6 +4127,13 @@ serve(async (req) => {
         preview: Array.isArray(tearsheetProposal?.preview) ? tearsheetProposal.preview : [],
       });
       const proposals = tearsheetProposal ? [tearsheetProposal, vizProposal] : [vizProposal];
+      if (tearsheetProposal) {
+        const { validation } = validateProposalAgainstBrief(tearsheetProposal, userConversationText, null);
+        if (!validation.ok) {
+          console.warn("[concierge deterministic-visualization] blocked tearsheet proposal", JSON.stringify({ requestId, violations: validation.violations }));
+          return sseTextResponse(buildRequirementsBlockedMessage(validation.violations));
+        }
+      }
       return sseProposalsThenTextResponse(
         proposals,
         tearsheetProposal
@@ -4198,6 +4245,11 @@ serve(async (req) => {
         userConversationText,
       );
       if (deterministicProposal) {
+        const { validation } = validateProposalAgainstBrief(deterministicProposal, userConversationText, null);
+        if (!validation.ok) {
+          console.warn("[concierge deterministic-plan] blocked proposal", JSON.stringify({ requestId, violations: validation.violations }));
+          return sseTextResponse(buildRequirementsBlockedMessage(validation.violations));
+        }
         return sseProposalThenTextResponse(
           deterministicProposal,
           "Here's a first edit — would you like me to refine this selection against your client's intentions?",
@@ -4402,17 +4454,22 @@ serve(async (req) => {
               const gtOne = buildInspectorGroundTruth([
                 { tool: cardTool, pickIds: [], previews: Array.isArray(previewRows) ? previewRows : [] },
               ]);
-              const v = validateRequirementsCoverage(capturedRequirements as any, gtOne);
+              const effectiveRequirements = mergeRequirementsWithText(capturedRequirements as any, userConversationText);
+              const v = validateRequirementsCoverage(effectiveRequirements as any, gtOne);
               proposal.requirements_validation = {
                 ok: v.ok,
                 brand_ok: v.brand_ok,
+                budget_ok: v.budget_ok,
+                palette_ok: v.palette_ok,
                 coverage: v.coverage,
                 violations: v.violations,
+                budget: v.budget,
+                palette: v.palette,
                 total_items: v.total_items,
                 unmatched_ids: v.unmatched_ids,
                 enforcement: REQUIREMENTS_ENFORCEMENT,
               };
-              if (!v.ok && capturedRequirements) {
+              if (!v.ok && effectiveRequirements) {
                 validationFailed = true;
                 controller.enqueue(encoder.encode(
                   `event: requirements_validation\ndata: ${JSON.stringify({
@@ -4423,6 +4480,8 @@ serve(async (req) => {
                     enforcement: REQUIREMENTS_ENFORCEMENT,
                     coverage: v.coverage,
                     violations: v.violations,
+                    budget: v.budget,
+                    palette: v.palette,
                     total_items: v.total_items,
                   })}\n\n`,
                 ));
@@ -4437,8 +4496,11 @@ serve(async (req) => {
                     enforcement: REQUIREMENTS_ENFORCEMENT,
                     violations: v.violations,
                     coverage: v.coverage,
+                    budget: v.budget,
+                    palette: v.palette,
                     total_items: v.total_items,
                     unmatched_ids: v.unmatched_ids,
+                    requirements: effectiveRequirements,
                   }));
                 } catch { /* best-effort */ }
 
@@ -4453,8 +4515,11 @@ serve(async (req) => {
                       reason: "requirements_violation",
                       coverage: v.coverage,
                       violations: v.violations,
+                      message: buildRequirementsBlockedMessage(v.violations),
                     })}\n\n`,
                   ));
+                  const frame = { choices: [{ delta: { content: buildRequirementsBlockedMessage(v.violations) } }] };
+                  controller.enqueue(encoder.encode(`data: ${JSON.stringify(frame)}\n\n`));
                   return;
                 }
               }
@@ -5410,6 +5475,23 @@ serve(async (req) => {
             userConversationText,
           );
           if (!proposal) return false;
+          const { validation } = validateProposalAgainstBrief(proposal, userConversationText, capturedRequirements);
+          if (!validation.ok) {
+            controller.enqueue(encoder.encode(
+              `event: proposal_blocked\ndata: ${JSON.stringify({
+                request_id: requestId,
+                tool: "propose_tearsheet",
+                tool_call_id: proposal.tool_call_id || null,
+                reason: "requirements_violation",
+                coverage: validation.coverage,
+                violations: validation.violations,
+                message: buildRequirementsBlockedMessage(validation.violations),
+              })}\n\n`,
+            ));
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ choices: [{ delta: { content: buildRequirementsBlockedMessage(validation.violations) } }] })}\n\n`));
+            console.warn(`[concierge deterministic-fallback] blocked proposal (${proposal.args?.pick_ids?.length || 0} picks) violations=${JSON.stringify(validation.violations)}`);
+            return true;
+          }
           const maxIdx = Array.from(toolCallBuffers.keys()).reduce((m, i) => (i > m ? i : m), -1);
           toolCallBuffers.set(maxIdx + 1, { id: proposal.tool_call_id, name: "propose_tearsheet", argsText: JSON.stringify(proposal.args) });
           controller.enqueue(encoder.encode(`event: proposal\ndata: ${JSON.stringify(proposal)}\n\n`));
@@ -5549,6 +5631,23 @@ serve(async (req) => {
               },
               preview,
             };
+            const { validation } = validateProposalAgainstBrief(proposal, userConversationText, capturedRequirements);
+            if (!validation.ok) {
+              controller.enqueue(encoder.encode(
+                `event: proposal_blocked\ndata: ${JSON.stringify({
+                  request_id: requestId,
+                  tool: "draft_quote",
+                  tool_call_id: proposal.tool_call_id,
+                  reason: "requirements_violation",
+                  coverage: validation.coverage,
+                  violations: validation.violations,
+                  message: buildRequirementsBlockedMessage(validation.violations),
+                })}\n\n`,
+              ));
+              controller.enqueue(encoder.encode(`data: ${JSON.stringify({ choices: [{ delta: { content: buildRequirementsBlockedMessage(validation.violations) } }] })}\n\n`));
+              console.warn(`[concierge chain] blocked draft_quote with ${lines.length} lines violations=${JSON.stringify(validation.violations)}`);
+              return;
+            }
             controller.enqueue(encoder.encode(`event: proposal\ndata: ${JSON.stringify(proposal)}\n\n`));
             console.log(`[concierge chain] emitted draft_quote with ${lines.length} lines from tearsheet "${tearsheetTitle}"`);
           } catch (e) {
@@ -5668,6 +5767,23 @@ serve(async (req) => {
               },
               preview,
             };
+            const { validation } = validateProposalAgainstBrief(proposal, userConversationText, capturedRequirements);
+            if (!validation.ok) {
+              controller.enqueue(encoder.encode(
+                `event: proposal_blocked\ndata: ${JSON.stringify({
+                  request_id: requestId,
+                  tool: "propose_tearsheet",
+                  tool_call_id: proposal.tool_call_id,
+                  reason: "requirements_violation",
+                  coverage: validation.coverage,
+                  violations: validation.violations,
+                  message: buildRequirementsBlockedMessage(validation.violations),
+                })}\n\n`,
+              ));
+              controller.enqueue(encoder.encode(`data: ${JSON.stringify({ choices: [{ delta: { content: buildRequirementsBlockedMessage(validation.violations) } }] })}\n\n`));
+              console.warn(`[concierge promise-recovery] blocked propose_tearsheet (${pickIds.length} picks) violations=${JSON.stringify(validation.violations)}`);
+              return;
+            }
             // Register the synthesized buffer so chained-quote recovery can see it.
             const maxIdx = Array.from(toolCallBuffers.keys()).reduce((m, i) => (i > m ? i : m), -1);
             toolCallBuffers.set(maxIdx + 1, {
