@@ -6026,6 +6026,7 @@ serve(async (req) => {
               headers: { Authorization: `Bearer ${aiAuthKey(LOVABLE_API_KEY)}`, "Content-Type": "application/json" },
               body: JSON.stringify({
                 model: aiModel(modelFor("balanced")),
+                temperature: 0,
                 max_completion_tokens: CHAT_MAX_TOKENS,
                 messages: [
                   { role: "system", content: languageDirective + systemPrompt },
