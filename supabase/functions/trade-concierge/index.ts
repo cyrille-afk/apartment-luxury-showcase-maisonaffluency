@@ -4214,6 +4214,9 @@ serve(async (req) => {
     // Model router: Flash by default, Pro for complex multi-constraint briefs.
     const chosenModel = pickModel(lastUserMsg, includePieces);
 
+    mark("pre_llm", { model: chosenModel, tools: finalTools.length, toolChoice: typeof toolChoice === "string" ? toolChoice : (toolChoice?.function?.name ?? "forced") });
+    flushTrace("pre_llm");
+    const llmT0 = performance.now();
     const upstream = await chatFetch({
       method: "POST",
       headers: {
