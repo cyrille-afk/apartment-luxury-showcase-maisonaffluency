@@ -3447,7 +3447,9 @@ async function buildDeterministicTearsheetProposal(
     complianceNote = renderComplianceNote(compliance);
   }
   const baseNote = "Validated directly against the Maison Affluency Curation.";
-  const note = complianceNote ? `${baseNote}\n\n${complianceNote}` : baseNote;
+  const specSheetBlock = renderSpecSheetBlock(preview as any);
+  const specSheetRows = buildSpecSheetRows(preview as any);
+  const note = [baseNote, specSheetBlock, complianceNote].filter((s) => s && s.length).join("\n\n");
   return {
     tool: "propose_tearsheet",
     tool_call_id: crypto.randomUUID(),
@@ -3457,6 +3459,7 @@ async function buildDeterministicTearsheetProposal(
       note,
       pick_rationales: rationaleMap,
       constraint_compliance: compliance.length ? compliance : undefined,
+      spec_sheet: specSheetRows.length ? specSheetRows : undefined,
     },
     preview,
   };
