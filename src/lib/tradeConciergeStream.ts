@@ -262,6 +262,10 @@ export type AppliedConstraintsEvent = {
   categories: string[];
   /** Which catalog path(s) the filters were actually applied to. */
   applied_to: Array<"rag" | "sql">;
+  /** True when the hard-constraint pre-filter matched zero pieces this turn. */
+  empty?: boolean;
+  /** Which retrieval path returned zero rows (rag = pgvector shortlist, sql = bulk catalog). */
+  empty_source?: "rag" | "sql" | null;
 };
 
 /**

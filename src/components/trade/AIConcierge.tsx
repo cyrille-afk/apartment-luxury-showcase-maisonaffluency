@@ -1791,6 +1791,64 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
                         </div>
                       )
                     )}
+                    {item.role === "assistant" && item.appliedConstraints?.empty && (
+                      <div
+                        className={cn(
+                          "rounded-lg border border-border/70 bg-muted/30 p-3 space-y-2",
+                          expanded ? "max-w-[92%]" : "max-w-[88%]",
+                        )}
+                      >
+                        <div className="flex items-start gap-2">
+                          <span className="text-base leading-none mt-0.5">✦</span>
+                          <div className="text-xs font-body text-foreground/85 leading-relaxed">
+                            Nothing in the curated selection currently matches every constraint together. The filter was too tight — try relaxing one below and I'll re-scan.
+                          </div>
+                        </div>
+                        <div className="flex flex-wrap gap-1.5 pt-1">
+                          {item.appliedConstraints.colors.map((c) => (
+                            <button
+                              key={`relax-c-${c}`}
+                              type="button"
+                              disabled={streaming}
+                              onClick={() => send(`Drop the "${c}" colour constraint and try again.`)}
+                              className="rounded-full border border-border bg-background hover:bg-accent/10 hover:border-accent/40 px-3 py-1 text-[11px] font-body text-foreground disabled:opacity-40"
+                            >
+                              Relax colour · {c}
+                            </button>
+                          ))}
+                          {item.appliedConstraints.materials.map((m) => (
+                            <button
+                              key={`relax-m-${m}`}
+                              type="button"
+                              disabled={streaming}
+                              onClick={() => send(`Drop the "${m}" material constraint and try again.`)}
+                              className="rounded-full border border-border bg-background hover:bg-accent/10 hover:border-accent/40 px-3 py-1 text-[11px] font-body text-foreground disabled:opacity-40"
+                            >
+                              Relax material · {m}
+                            </button>
+                          ))}
+                          {item.appliedConstraints.categories.map((cat) => (
+                            <button
+                              key={`relax-cat-${cat}`}
+                              type="button"
+                              disabled={streaming}
+                              onClick={() => send(`Broaden beyond the "${cat}" typology and try again.`)}
+                              className="rounded-full border border-border bg-background hover:bg-accent/10 hover:border-accent/40 px-3 py-1 text-[11px] font-body text-foreground disabled:opacity-40"
+                            >
+                              Broaden typology · {cat}
+                            </button>
+                          ))}
+                          <button
+                            type="button"
+                            disabled={streaming}
+                            onClick={() => send("Drop all hard filters and show the closest matches you have.")}
+                            className="rounded-full border border-foreground/60 bg-background hover:bg-foreground hover:text-background px-3 py-1 text-[11px] font-body text-foreground/80 disabled:opacity-40"
+                          >
+                            Drop all filters
+                          </button>
+                        </div>
+                      </div>
+                    )}
                     {item.role === "assistant" && item.actions && item.actions.length > 0 && (
                       <div className={cn("flex flex-wrap gap-1.5", expanded ? "max-w-[92%]" : "max-w-[88%]")}>
                         {item.actions.map((a, idx) => (
