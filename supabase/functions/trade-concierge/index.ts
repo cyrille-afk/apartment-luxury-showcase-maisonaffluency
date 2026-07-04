@@ -2322,6 +2322,7 @@ async function extractBrief(apiKey: string, latestUserMessage: string): Promise<
           headers: { Authorization: `Bearer ${aiAuthKey(apiKey)}`, "Content-Type": "application/json" },
           body: JSON.stringify({
             model: aiModel(SENTIMENT_MODEL),
+            temperature: 0,
             max_completion_tokens: 400,
             messages: [
               {
