@@ -495,6 +495,24 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
                         <div className="flex items-center gap-1 self-center shrink-0">
                           <button
                             type="button"
+                            onClick={() => toggleLock(p.id)}
+                            disabled={isExcluded}
+                            className={cn(
+                              "inline-flex items-center gap-1 text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded border transition-colors",
+                              isLocked
+                                ? "border-accent/50 bg-accent/15 text-accent hover:bg-accent/25"
+                                : "border-border text-muted-foreground hover:text-foreground",
+                              isExcluded && "opacity-40 cursor-not-allowed",
+                            )}
+                            aria-label={isLocked ? `Unlock ${p.title || "this pick"}` : `Lock ${p.title || "this pick"} so re-generation keeps it`}
+                            aria-pressed={isLocked}
+                            title={isLocked ? "Locked — re-generation will keep this piece" : "Lock this piece so re-generation keeps it"}
+                          >
+                            {isLocked ? <Lock className="h-2.5 w-2.5" /> : <Unlock className="h-2.5 w-2.5" />}
+                            {isLocked ? "Locked" : "Lock"}
+                          </button>
+                          <button
+                            type="button"
                             onClick={() => sendConciergePrefill(buildSwapPrompt({
                               pick_id: p.id,
                               title: p.title,
