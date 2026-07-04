@@ -624,10 +624,16 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
                   return (
                     <li
                       key={p.id}
+                      data-pick-id={p.id}
+                      ref={(el) => {
+                        if (el) rowRefs.current.set(p.id, el);
+                        else rowRefs.current.delete(p.id);
+                      }}
                       className={cn(
-                        "flex items-start gap-2.5 rounded-lg p-1.5 transition-opacity",
+                        "flex items-start gap-2.5 rounded-lg p-1.5 transition-all duration-300",
                         isExcluded && "opacity-40",
                         isLocked && "bg-muted/40 opacity-70 ring-1 ring-accent/20",
+                        highlightedRowId === p.id && "ring-2 ring-accent bg-accent/[0.06]",
                       )}
                     >
                       <div className="relative h-10 w-10 shrink-0">
