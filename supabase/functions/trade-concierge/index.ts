@@ -3341,9 +3341,23 @@ serve(async (req) => {
     const isShortFollowUp = wordCount <= 4 && !heuristicNeedsPieces;
 
     const mentionedProjectIdPromise = activeProjectId ? Promise.resolve(null) : resolveMentionedProjectId(supabase, userId, lastUserMsg);
+    // Hard-constraint pre-filter derived from the user's latest message:
+    // color + material tokens the caller has stated (e.g. "forest green oak
+    // dining table"). Applied to BOTH the pgvector RAG shortlist and the
+    // bulk SQL catalog load so the AI never sees candidates that violate
+    // a stated constraint. Empty on discovery turns → no filtering.
+    const preRequestConstraints = deriveHardConstraints(
+      [{ title: lastUserMsg }],
+    );
+    const hasAnyPreConstraint =
+      (preRequestConstraints.materials?.length || 0) +
+      (preRequestConstraints.colors?.length || 0) > 0;
+    if (hasAnyPreConstraint) {
+      console.log("[concierge hard-constraints]", JSON.stringify(preRequestConstraints));
+    }
     // Run sentiment + RAG retrieval in parallel with the rest. RAG is best-effort.
     const ragPromise = (heuristicNeedsPieces || lastUserMsg.length > 40)
-      ? loadRelevantPieces(supabase, LOVABLE_API_KEY, lastUserMsg, userId, 40)
+      ? loadRelevantPieces(supabase, LOVABLE_API_KEY, lastUserMsg, userId, 40, hasAnyPreConstraint ? preRequestConstraints : undefined)
       : Promise.resolve(null);
     const [sentiment, extractedBrief, ragResult, userBoards, userSignals, userMemory, mentionedProjectId, openQuotes, discountRow, cadDocuments, productCadAssets] = await Promise.all([
       isShortFollowUp
