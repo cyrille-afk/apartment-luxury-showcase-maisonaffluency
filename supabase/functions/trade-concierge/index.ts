@@ -1403,6 +1403,12 @@ async function loadCatalogContext(
   if (useDesignerFilter && filteredDesignerIds.length) {
     picksQuery = picksQuery.in("designer_id", filteredDesignerIds);
   }
+  if (hardConstraints) {
+    picksQuery = applyHardConstraints(picksQuery as any, hardConstraints, {
+      text: ["title", "materials", "category", "subcategory"],
+      category: "category",
+    }) as typeof picksQuery;
+  }
   const { data: picks } = includePieces ? await picksQuery : { data: [] as any[] };
 
   // Trade products — same designer-scoping when a filter is active.
