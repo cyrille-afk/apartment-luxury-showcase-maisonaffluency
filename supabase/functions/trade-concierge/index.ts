@@ -3527,7 +3527,24 @@ serve(async (req) => {
       mentionsKnownDesigner ? mentionedDesigners : undefined,
       hasSqlConstraint && !mentionsKnownDesigner ? sqlLoadConstraints : undefined,
     );
-    const piecesList = useRag ? (ragResult as { contextText: string }).contextText : fullPiecesList;
+    // Detect "hard constraints matched zero pieces" so the UI can render a
+    // friendly empty-state and the model can acknowledge it warmly instead of
+    // hallucinating alternatives.
+    const ragEmpty = useRag && hasAnyPreConstraint && (!ragResult || !Array.isArray((ragResult as any).rows) || (ragResult as any).rows.length === 0 || !(ragResult as { contextText: string }).contextText);
+    const sqlEmpty = !useRag && hasSqlConstraint && !mentionsKnownDesigner && (fullPiecesList === "No pieces currently loaded." || !fullPiecesList);
+    const constraintsMatchedZero = ragEmpty || sqlEmpty;
+    const constraintsEmptySource: "rag" | "sql" | null = ragEmpty ? "rag" : sqlEmpty ? "sql" : null;
+    const emptyConstraintNote = constraintsMatchedZero
+      ? [
+          "",
+          "⚠️ HARD-CONSTRAINT EMPTY RESULT ⚠️",
+          `The active hard-constraint pre-filter matched ZERO pieces from the Maison Affluency Curation. Filter tokens applied — colors: ${JSON.stringify(sqlLoadConstraints.colors || preRequestConstraints.colors || [])}, materials: ${JSON.stringify(sqlLoadConstraints.materials || preRequestConstraints.materials || [])}, categories: ${JSON.stringify(sqlLoadConstraints.categories || [])}.`,
+          "DO NOT invent or propose any piece. DO NOT call propose_tearsheet / add_to_tearsheet / draft_quote this turn.",
+          "Reply in ONE short warm paragraph: acknowledge that nothing in the curated selection currently matches that exact combination, name the specific constraint(s) that eliminated the results, and invite the architect to relax ONE constraint (e.g. widen the palette from 'forest green' to 'muted greens', drop the material filter, or broaden the typology). Offer to expand the search through the designer's own archives via the Axonometric Studio if they prefer to hold the constraint.",
+          "",
+        ].join("\n")
+      : "";
+    const piecesList = (useRag ? (ragResult as { contextText: string })?.contextText || "" : fullPiecesList) + emptyConstraintNote;
 
     // Deterministic designer-enumeration shortcut: when the user asks to list
     // / show / see everything by a specific named designer, bypass the LLM
