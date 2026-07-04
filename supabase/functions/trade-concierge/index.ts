@@ -2282,12 +2282,14 @@ export function reconcileMaterialsWithSource(
   // planner has a documented history of dropping crystal.
   const userSaidGlass = containsToken(raw, "glass");
   const userSaidCrystal = containsToken(raw, "crystal");
-  if (userSaidGlass && !seen.has("glass")) {
+  const glassCovered = seen.has("glass") || Object.entries(MATERIAL_COMPOUND_TO_BASE).some(([c, b]) => b === "glass" && seen.has(c));
+  const crystalCovered = seen.has("crystal") || Object.entries(MATERIAL_COMPOUND_TO_BASE).some(([c, b]) => b === "crystal" && seen.has(c));
+  if (userSaidGlass && !glassCovered) {
     out.push("glass");
     seen.add("glass");
     repair.added.push("glass");
   }
-  if (userSaidCrystal && !seen.has("crystal")) {
+  if (userSaidCrystal && !crystalCovered) {
     out.push("crystal");
     seen.add("crystal");
     repair.added.push("crystal");
