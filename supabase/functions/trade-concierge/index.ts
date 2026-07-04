@@ -2519,7 +2519,7 @@ function typologyLabel(typology: RequestedTypology | null): string {
   return "piece";
 }
 
-function buildNoStrictTypologyReply(typology: RequestedTypology): string {
+export function buildNoStrictTypologyReply(typology: RequestedTypology): string {
   const label = typologyLabel(typology);
   // Prepended blank lines so this release notice never glues onto whatever
   // prose the model already streamed in the same turn (which read as a
