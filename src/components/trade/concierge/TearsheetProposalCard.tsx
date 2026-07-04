@@ -590,23 +590,51 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
       {/* Actions */}
       {status === "pending" && (
         <div className="flex flex-wrap items-center justify-end gap-2">
-          <button
-            type="button"
-            onClick={handleRegenerateUnlocked}
-            disabled={lockedVisible.length === 0 || unlockedVisibleCount === 0}
-            className="mr-auto inline-flex items-center gap-1.5 rounded-full border border-accent/40 bg-accent/[0.06] text-accent font-body text-[11px] uppercase tracking-widest px-3 py-1.5 hover:bg-accent/15 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-            title={
-              lockedVisible.length === 0
-                ? "Lock at least one piece to re-generate the rest"
-                : unlockedVisibleCount === 0
-                ? "Every included piece is locked"
-                : `Re-generate ${unlockedVisibleCount} unlocked ${unlockedVisibleCount === 1 ? "piece" : "pieces"}, keep ${lockedVisible.length} locked`
-            }
-            aria-label="Re-generate unlocked pieces"
-          >
-            <RefreshCw className="h-3 w-3" />
-            Re-generate unlocked{lockedVisible.length > 0 ? ` (${unlockedVisibleCount})` : ""}
-          </button>
+          <div className="mr-auto flex flex-wrap items-center gap-1.5">
+            <button
+              type="button"
+              onClick={handleRegenerateUnlocked}
+              disabled={lockedVisible.length === 0 || unlockedVisibleCount === 0}
+              className="inline-flex items-center gap-1.5 rounded-full border border-accent/40 bg-accent/[0.06] text-accent font-body text-[11px] uppercase tracking-widest px-3 py-1.5 hover:bg-accent/15 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              title={
+                lockedVisible.length === 0
+                  ? "Lock at least one piece to re-generate the rest"
+                  : unlockedVisibleCount === 0
+                  ? "Every included piece is locked"
+                  : `Re-generate ${unlockedVisibleCount} unlocked ${unlockedVisibleCount === 1 ? "piece" : "pieces"}, keep ${lockedVisible.length} locked`
+              }
+              aria-label="Re-generate unlocked pieces"
+            >
+              <RefreshCw className="h-3 w-3" />
+              Re-generate unlocked{lockedVisible.length > 0 ? ` (${unlockedVisibleCount})` : ""}
+            </button>
+            <button
+              type="button"
+              onClick={handleSuggestOneMore}
+              disabled={visiblePicks.length === 0}
+              className="inline-flex items-center gap-1.5 rounded-full border border-border text-muted-foreground font-body text-[11px] uppercase tracking-widest px-3 py-1.5 hover:text-foreground hover:bg-muted/40 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              title="Ask the concierge to add one more piece that harmonises with the current selection"
+              aria-label="Suggest one more piece"
+            >
+              <PlusCircle className="h-3 w-3" />
+              Suggest one more
+            </button>
+            <button
+              type="button"
+              onClick={handleCritiqueEdits}
+              disabled={excluded.size === 0 && locked.size === 0}
+              className="inline-flex items-center gap-1.5 rounded-full border border-border text-muted-foreground font-body text-[11px] uppercase tracking-widest px-3 py-1.5 hover:text-foreground hover:bg-muted/40 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              title={
+                excluded.size === 0 && locked.size === 0
+                  ? "Skip or lock a piece to give the critique something to react to"
+                  : "Ask the concierge to critique how your edits shift the design"
+              }
+              aria-label="Critique my edits"
+            >
+              <MessageSquare className="h-3 w-3" />
+              Critique my edits
+            </button>
+          </div>
           <button
             onClick={handleDiscard}
             className="font-body text-[11px] uppercase tracking-widest text-muted-foreground hover:text-foreground px-2.5 py-1.5 transition-colors"
