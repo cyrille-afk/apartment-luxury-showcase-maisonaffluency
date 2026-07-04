@@ -68,8 +68,8 @@ Deno.test("compliance: no constraints -> empty", () => {
 
 Deno.test("compliance: seat depth min", () => {
   const seat = [
-    { id: "s1", title: "Deep Lounge", dimensions: "W 90 x SD 55 x H 75 cm" },
-    { id: "s2", title: "Shallow Chair", dimensions: "W 60 x SD 40 x H 80 cm" },
+    { id: "s1", title: "Deep Lounge", dimensions: "W 90 x D 90 x H 75 cm, seat depth 55 cm" },
+    { id: "s2", title: "Shallow Chair", dimensions: "W 60 x D 60 x H 80 cm, seat depth 40 cm" },
   ];
   const rows = buildConstraintCompliance({
     dim: { minSeatDepthMm: 500 },
