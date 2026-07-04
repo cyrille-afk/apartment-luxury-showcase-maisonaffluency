@@ -76,6 +76,32 @@ export function inferLeadTimeConstraints(text: string | null | undefined): LeadT
     out.maxWeeks = 0;
   }
 
+  // Ranges: "between 4 and 6 weeks", "4-6 weeks", "4 to 6 weeks", "4–6 weeks",
+  // optionally preceded by "in", "within", "delivered in", "ships in",
+  // "lead time (of)", "delivery in". A range imposes BOTH a floor (lower bound)
+  // AND a ceiling (upper bound) — strict interpretation: the piece must fit
+  // entirely inside the stated window.
+  const UNIT = "(week|wk|wks|weeks|month|months|mo|mos)";
+  const NUM = "(\\d+(?:\\.\\d+)?)";
+  const rangePatterns: RegExp[] = [
+    new RegExp(`between\\s*${NUM}\\s*(?:and|-|–|to)\\s*${NUM}\\s*${UNIT}\\b`, "g"),
+    new RegExp(`(?:in|within|delivered in|delivery in|ships? in|lead[\\s-]?time(?:\\s+of)?|need it in|need in)\\s*${NUM}\\s*(?:-|–|to)\\s*${NUM}\\s*${UNIT}\\b`, "g"),
+    // Bare range with unit only after the second number: "4-6 weeks", "8 to 10 months"
+    new RegExp(`\\b${NUM}\\s*(?:-|–|to)\\s*${NUM}\\s*${UNIT}\\b`, "g"),
+  ];
+  for (const re of rangePatterns) {
+    for (const m of s.matchAll(re)) {
+      const lo = parseFloat(m[1]);
+      const hi = parseFloat(m[2]);
+      const mult = m[3].startsWith("mo") ? 4 : 1;
+      const loW = lo * mult;
+      const hiW = hi * mult;
+      if (!Number.isFinite(loW) || !Number.isFinite(hiW) || loW <= 0 || hiW <= 0 || hiW < loW) continue;
+      out.maxWeeks = out.maxWeeks == null ? hiW : Math.min(out.maxWeeks, hiW);
+      out.minWeeks = out.minWeeks == null ? loW : Math.max(out.minWeeks, loW);
+    }
+  }
+
   // Ceilings: "under 8 weeks", "less than 8 weeks", "no more than 10 weeks",
   // "max 6 weeks", "within 8 weeks", "delivered in 8 weeks or less",
   // "up to 12 weeks", "≤ 8 weeks", "under 3 months"
@@ -199,8 +225,11 @@ export function filterRowsByLeadTimeConstraints<T extends Record<string, any>>(
       continue;
     }
     if (constraints.inStockOnly && !parsed.isInStock) continue;
-    if (constraints.maxWeeks != null && parsed.minWeeks > constraints.maxWeeks) continue;
-    if (constraints.minWeeks != null && parsed.maxWeeks < constraints.minWeeks) continue;
+    // Strict range enforcement: the piece's worst-case bounds must fit inside
+    // the user's window. A brand default of "8–12 weeks" against a "≤ 10
+    // weeks" ceiling FAILS (upper 12 > 10) even though its lower bound fits.
+    if (constraints.maxWeeks != null && parsed.maxWeeks > constraints.maxWeeks) continue;
+    if (constraints.minWeeks != null && parsed.minWeeks < constraints.minWeeks) continue;
     strictKept.push(r);
   }
   const dropped = rows.length - strictKept.length;
