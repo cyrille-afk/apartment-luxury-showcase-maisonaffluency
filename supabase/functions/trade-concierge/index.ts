@@ -4072,6 +4072,11 @@ serve(async (req) => {
           ? `Draft tear sheet with ${countPhrase} (skipped ${excludedIds.size} per your request). Review the list above and click **Approve & Create** to save it into a project folder — or **Discard** to cancel.`
           : `Draft tear sheet with ${countPhrase} in the Maison Affluency Curation, with trade pricing. Review the list above and click **Approve & Create** to save it into a project folder — or **Discard** to cancel.`)
           + unmetSuffix;
+        const { validation } = validateProposalAgainstBrief(proposal, userConversationText, null);
+        if (!validation.ok) {
+          console.warn("[concierge deterministic-enumeration] blocked proposal", JSON.stringify({ requestId, violations: validation.violations }));
+          return sseTextResponse(buildRequirementsBlockedMessage(validation.violations));
+        }
         return sseProposalThenTextResponse(proposal, closing);
 
 
@@ -4122,6 +4127,13 @@ serve(async (req) => {
         preview: Array.isArray(tearsheetProposal?.preview) ? tearsheetProposal.preview : [],
       });
       const proposals = tearsheetProposal ? [tearsheetProposal, vizProposal] : [vizProposal];
+      if (tearsheetProposal) {
+        const { validation } = validateProposalAgainstBrief(tearsheetProposal, userConversationText, null);
+        if (!validation.ok) {
+          console.warn("[concierge deterministic-visualization] blocked tearsheet proposal", JSON.stringify({ requestId, violations: validation.violations }));
+          return sseTextResponse(buildRequirementsBlockedMessage(validation.violations));
+        }
+      }
       return sseProposalsThenTextResponse(
         proposals,
         tearsheetProposal
@@ -4233,6 +4245,11 @@ serve(async (req) => {
         userConversationText,
       );
       if (deterministicProposal) {
+        const { validation } = validateProposalAgainstBrief(deterministicProposal, userConversationText, null);
+        if (!validation.ok) {
+          console.warn("[concierge deterministic-plan] blocked proposal", JSON.stringify({ requestId, violations: validation.violations }));
+          return sseTextResponse(buildRequirementsBlockedMessage(validation.violations));
+        }
         return sseProposalThenTextResponse(
           deterministicProposal,
           "Here's a first edit — would you like me to refine this selection against your client's intentions?",
