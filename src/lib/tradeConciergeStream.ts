@@ -413,6 +413,10 @@ export async function streamConcierge({
         if (onInspector) onInspector(parsed as InspectorEvent);
         return;
       }
+      if (currentEvent === "applied_constraints") {
+        if (onAppliedConstraints) onAppliedConstraints(parsed as AppliedConstraintsEvent);
+        return;
+      }
       if (currentEvent === "proposal") {
         if (onProposal) onProposal(parsed as ConciergeProposal);
         return;
