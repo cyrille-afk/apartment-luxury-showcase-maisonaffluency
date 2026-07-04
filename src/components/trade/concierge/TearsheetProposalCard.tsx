@@ -377,6 +377,7 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
               <ul className="space-y-1.5">
                 {items.map((p) => {
                   const isExcluded = excluded.has(p.id);
+                  const isLocked = locked.has(p.id) && !isExcluded;
                   const isNew = newPickIds ? newPickIds.includes(p.id) : false;
                   const fromArgs = proposal.args.pick_rationales?.[p.id];
                   const rationale = (p as any).rationale || fromArgs?.reason || null;
@@ -399,6 +400,7 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
                       className={cn(
                         "flex items-start gap-2.5 rounded-lg p-1.5 transition-opacity",
                         isExcluded && "opacity-40",
+                        isLocked && "bg-muted/40 opacity-70 ring-1 ring-accent/20",
                       )}
                     >
                       <div className="relative h-10 w-10 shrink-0">
@@ -408,13 +410,23 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
                           <div className="h-10 w-10 rounded bg-muted" />
                         )}
                         {p.image_from_hotspot && <HotspotImageBadge className="top-0 left-0 px-1 py-0 text-[8px]" />}
+                        {isLocked && (
+                          <div className="absolute -top-1 -right-1 rounded-full bg-accent text-accent-foreground p-0.5 shadow-sm" title="Locked — will not change on re-generate">
+                            <Lock className="h-2.5 w-2.5" />
+                          </div>
+                        )}
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-1.5">
                           <div className="font-body text-xs text-foreground truncate">{p.title}</div>
-                          {isNew && (
+                          {isNew && !isLocked && (
                             <span className="shrink-0 rounded-full bg-accent/15 text-accent font-body text-[8px] uppercase tracking-widest px-1.5 py-0.5">
                               New
+                            </span>
+                          )}
+                          {isLocked && (
+                            <span className="shrink-0 rounded-full bg-accent/20 text-accent font-body text-[8px] uppercase tracking-widest px-1.5 py-0.5">
+                              Locked
                             </span>
                           )}
                         </div>
