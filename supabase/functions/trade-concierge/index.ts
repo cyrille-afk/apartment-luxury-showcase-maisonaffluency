@@ -4202,7 +4202,20 @@ serve(async (req) => {
     if (hasExplicitSelectionVerb && requestedTypology && !mentionsKnownDesigner) {
       const budgetCeiling = inferBudgetCeilingCents(lastUserMsg || "");
       const dimCeiling = inferDimensionConstraints(lastUserMsg || "");
-      const allTypeCandidates = await fetchStrictTypologyCandidates(supabase, requestedTypology, dimCeiling);
+      const inferredLead = inferLeadTimeConstraints(lastUserMsg || "");
+      const briefLeadCeiling = typeof effectiveBrief.brief?.lead_weeks_max === "number" && effectiveBrief.brief.lead_weeks_max > 0
+        ? effectiveBrief.brief.lead_weeks_max
+        : null;
+      let leadCeiling: LeadTimeConstraints | null = null;
+      if (inferredLead || briefLeadCeiling != null) {
+        leadCeiling = { ...(inferredLead || {}) };
+        if (briefLeadCeiling != null) {
+          leadCeiling.maxWeeks = leadCeiling.maxWeeks == null
+            ? briefLeadCeiling
+            : Math.min(leadCeiling.maxWeeks, briefLeadCeiling);
+        }
+      }
+      const allTypeCandidates = await fetchStrictTypologyCandidates(supabase, requestedTypology, dimCeiling, leadCeiling);
       const budgetedCandidates = budgetCeiling
         ? allTypeCandidates.filter((r: any) => Number(r?.trade_price_cents || 0) > 0 && Number(r.trade_price_cents) <= budgetCeiling.cents)
         : allTypeCandidates;
