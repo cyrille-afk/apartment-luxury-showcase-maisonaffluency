@@ -866,8 +866,10 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
     const proposalContext: ChatMessage[] = [];
     if (lastProposal && !isFreshOpeningBrief && referencesCurrentDraft) {
       const excludedSet = new Set(lastProposal.excluded || []);
+      const lockedSet = new Set(lastProposal.locked || []);
       const kept = lastProposal.proposal.preview.filter((p) => !excludedSet.has(p.id));
       const removed = lastProposal.proposal.preview.filter((p) => excludedSet.has(p.id));
+      const locked = lastProposal.proposal.preview.filter((p) => lockedSet.has(p.id) && !excludedSet.has(p.id));
       const fmt = (p: { id: string; title: string; designer_name: string | null }) =>
         `  - "${p.title}" by ${p.designer_name || "—"} [id: ${p.id}]`;
       const lines: string[] = [
@@ -875,6 +877,12 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
         `KEPT (must remain in the next proposal, with the SAME ids):`,
         kept.length ? kept.map(fmt).join("\n") : "  (none)",
       ];
+      if (locked.length) {
+        lines.push(
+          `LOCKED 🔒 (frozen by the architect — retain these EXACT pick_ids verbatim, do NOT substitute, do NOT alter):`,
+          locked.map(fmt).join("\n"),
+        );
+      }
       if (removed.length) {
         lines.push(
           `REMOVED by the user (do NOT bring these back unless the user explicitly re-requests them):`,
