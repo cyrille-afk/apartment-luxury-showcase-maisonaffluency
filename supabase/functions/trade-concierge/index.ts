@@ -1349,6 +1349,7 @@ async function loadCatalogContext(
   supabase: ReturnType<typeof createClient>,
   includePieces: boolean,
   designerFilter?: string[],
+  hardConstraints?: HardConstraints,
 ) {
   // Fetch published designers
   const { data: designers } = await supabase
