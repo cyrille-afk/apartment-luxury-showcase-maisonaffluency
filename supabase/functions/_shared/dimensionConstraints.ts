@@ -223,6 +223,7 @@ export function parseDimensionsToMm(raw: string | null | undefined): ParsedRowDi
     else if (label.startsWith("d")) out.depthMm = mm;
     else if (label.startsWith("h")) out.heightMm = mm;
     else if (label.startsWith("l")) out.lengthMm = mm;
+  }
   for (const m of raw.matchAll(seatDepthRe)) {
     const mm = toMm(m[1], sniffUnit(m[0]) ?? unit);
     if (mm != null) out.seatDepthMm = mm;
