@@ -454,6 +454,9 @@ Deno.test("structured log — original_prose and corrected_prose are truncated a
 import {
   runDiscoveryProseGuard,
   deterministicRedact,
+  deriveRequirementsFromText,
+  mergeRequirementsWithText,
+  validateRequirementsCoverage,
   SAFE_FALLBACK_PROSE,
 } from "./concierge-inspector.ts";
 
@@ -603,4 +606,80 @@ Deno.test("runDiscoveryProseGuard returns ok:false on HTTP error (caller must ha
     assertEquals(res.ok, false);
     assert(res.reason?.startsWith("http_"), `expected http_ reason, got ${res.reason}`);
   } finally { restoreFetch(); }
+});
+
+Deno.test("requirements validator derives budget + material + shape + seats from raw prompt and blocks unverifiable cards", () => {
+  const requirements = deriveRequirementsFromText("Draft a dining edit — 8 seats, walnut, rectangular, under $12k");
+  const gt = buildInspectorGroundTruth([{
+    tool: "propose_tearsheet",
+    pickIds: ["a", "b"],
+    previews: [
+      {
+        id: "a",
+        title: "Rocwood Dining Table",
+        designer_name: "Eric Schmitt Studio",
+        category: "Dining Table",
+        materials: "Patinated bronze base, black tinted walnut top",
+        dimensions: "240 cm long",
+        price_cents: null,
+        currency: "USD",
+      },
+      {
+        id: "b",
+        title: "Angelo M Dining Table",
+        designer_name: "Alinéa Design Objects",
+        category: "Dining Table",
+        materials: "Natural stone top and base, solid American walnut",
+        dimensions: "oval top, 210 cm long",
+        price_cents: 9_000_00,
+        currency: "USD",
+      },
+    ],
+  }]);
+  const validation = validateRequirementsCoverage(requirements, gt);
+  assertEquals(validation.ok, false);
+  const kinds = validation.violations.map((v) => v.kind);
+  assert(kinds.includes("budget_unpriced"), `expected budget_unpriced, got ${JSON.stringify(validation.violations)}`);
+  assert(kinds.includes("shape_unverified"), `expected shape_unverified, got ${JSON.stringify(validation.violations)}`);
+  assert(kinds.includes("capacity_unverified"), `expected capacity_unverified, got ${JSON.stringify(validation.violations)}`);
+});
+
+Deno.test("requirements validator passes a fully verified priced dining table", () => {
+  const requirements = deriveRequirementsFromText("Draft a dining edit — 8 seats, walnut, rectangular, under $12k");
+  const gt = buildInspectorGroundTruth([{
+    tool: "propose_tearsheet",
+    pickIds: ["ok"],
+    previews: [{
+      id: "ok",
+      title: "Rectangular Walnut Dining Table",
+      designer_name: "Maison Affluency Atelier",
+      category: "Dining Table",
+      materials: "Walnut",
+      dimensions: "Rectangular, seats 8, 280 cm long",
+      price_cents: 11_500_00,
+      currency: "USD",
+    }],
+  }]);
+  const validation = validateRequirementsCoverage(requirements, gt);
+  assertEquals(validation.ok, true, JSON.stringify(validation.violations));
+});
+
+Deno.test("mergeRequirementsWithText restores prompt constraints omitted by model-extracted requirements", () => {
+  const modelReq = {
+    slots: [{ typology: "dining_table", qty_min: 1, qty_max: 1 }],
+    brands: [],
+    style: [],
+    materials: [],
+    room: "dining room",
+    scale: "",
+    era: "",
+    notes: "",
+  };
+  const merged = mergeRequirementsWithText(modelReq, "Draft a dining edit — 8 seats, walnut, rectangular, under $12k");
+  assert(merged, "expected merged requirements");
+  assertEquals(merged?.budget_cents, 1_200_000);
+  assertEquals(merged?.budget_currency, "USD");
+  assert(merged?.materials?.includes("walnut"), `expected walnut in ${JSON.stringify(merged?.materials)}`);
+  assertStringIncludes(merged?.scale || "", "seats 8");
+  assertStringIncludes(merged?.notes || "", "rectangular");
 });
