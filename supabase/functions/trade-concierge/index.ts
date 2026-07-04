@@ -4300,7 +4300,7 @@ serve(async (req) => {
         );
       }
       if (pickIds.length >= 1) {
-        const previewRawAll: Array<{ id: string; title?: string | null; [key: string]: any }> = (await hydratePickPreview(supabase, pickIds))
+        const previewRawAll: Array<{ id: string; title?: string | null; [key: string]: any }> = ((await hydratePickPreview(supabase, pickIds)) as any[])
           .filter((p: any): p is { id: string; title?: string | null; [key: string]: any } => p && typeof p.id === "string");
         const validIds = new Set(previewRawAll.map((p: any) => p?.id).filter(Boolean));
         // Honour in-chat "skip / exclude / omit …" instructions so the
@@ -5640,7 +5640,7 @@ serve(async (req) => {
                 }
               }
             }
-            let previewRaw: Array<{ id: string; title?: string | null; [key: string]: any }> = (await hydratePickPreview(supabase, pickIds))
+            let previewRaw: Array<{ id: string; title?: string | null; [key: string]: any }> = ((await hydratePickPreview(supabase, pickIds)) as any[])
               .filter((p: any): p is { id: string; title?: string | null; [key: string]: any } => p && typeof p.id === "string");
             if (requestedTypology) {
               previewRaw = previewRaw.filter((p: any) => rowMatchesRequestedTypology(p, requestedTypology));
