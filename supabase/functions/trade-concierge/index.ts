@@ -3592,10 +3592,9 @@ serve(async (req) => {
       console.log("[concierge discovery-gate] stripping plan — opening brief without selection verb", { lastUserMsg, originalPlan: effectiveBrief.plan });
       effectiveBrief = { ...effectiveBrief, intent: "discovery", plan: [] };
     }
-    if (!hasExplicitSelectionVerb && !hasVisualizationVerb && opensWithLookingFor) {
-      console.log("[concierge discovery-gate] deterministic opening-brief reply", { lastUserMsg });
-      return sseTextResponse(buildOpeningBriefDiscoveryReply(lastUserMsg, langCode));
-    }
+    // Deterministic opening-brief reply removed — it hardcoded "dining table"
+    // and ignored actual user content (room type, seat count, shape, etc.).
+    // The LLM handles discovery turns directly now.
     const requestedTypology = inferRequestedTypology(effectiveBrief.brief, userConversationText);
 
     if (shouldActOnAccumulatedBrief && breaker.state() === "open" && CLOUDFLARE_ENABLED) {
