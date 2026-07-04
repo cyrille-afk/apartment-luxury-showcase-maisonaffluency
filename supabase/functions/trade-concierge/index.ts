@@ -3323,6 +3323,9 @@ async function hydratePickPreview(
           category: t.category,
           dimensions: t.dimensions || null,
           designer_name: baseBrand || null,
+          brand_name: rawBrand || null,
+          lead_time: t.lead_time || null,
+          stock_status: t.stock_status_override || null,
           price_cents:
             typeof t.trade_price_cents === "number"
               ? t.trade_price_cents
