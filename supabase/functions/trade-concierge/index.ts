@@ -2843,29 +2843,43 @@ async function fetchStrictTypologyCandidates(
   supabase: ConciergeDbClient,
   typology: RequestedTypology,
   dimConstraints?: DimensionConstraints | null,
+  leadConstraints?: LeadTimeConstraints | null,
 ): Promise<any[]> {
   const term = typology === "dining_table" ? "dining" : "table";
   const [pickRes, tradeRes] = await Promise.all([
     supabase
       .from("designer_curator_picks")
-      .select("id, title, materials, category, subcategory, dimensions, trade_price_cents, currency")
+      .select("id, title, materials, category, subcategory, dimensions, trade_price_cents, currency, lead_time, stock_status, designer_id")
       .or(`title.ilike.%${term}%,subcategory.ilike.%${term}%,category.ilike.%${term}%`)
       .limit(160),
     supabase
       .from("trade_products")
-      .select("id, product_name, materials, category, subcategory, dimensions, trade_price_cents, rrp_price_cents, currency")
+      .select("id, product_name, materials, category, subcategory, dimensions, trade_price_cents, rrp_price_cents, currency, lead_time, stock_status_override, brand_name")
       .eq("is_active", true)
       .or(`product_name.ilike.%${term}%,subcategory.ilike.%${term}%,category.ilike.%${term}%`)
       .limit(160),
   ]);
-  const typologyFiltered = [
+  let typologyFiltered = [
     ...(pickRes.data || []),
-    ...(tradeRes.data || []).map((r: any) => ({ ...r, title: r.product_name, trade_price_cents: r.trade_price_cents ?? r.rrp_price_cents ?? null })),
+    ...(tradeRes.data || []).map((r: any) => ({
+      ...r,
+      title: r.product_name,
+      trade_price_cents: r.trade_price_cents ?? r.rrp_price_cents ?? null,
+      stock_status: r.stock_status_override ?? null,
+    })),
   ].filter((r: any) => rowMatchesRequestedTypology(r, typology));
-  if (!dimConstraints) return typologyFiltered;
-  const dimRes = filterRowsByDimensionConstraints(typologyFiltered, dimConstraints);
-  console.log(`[concierge strict-typology dim] typology=${typology} pre=${typologyFiltered.length} strict=${dimRes.strictKept.length} kept=${dimRes.kept.length} dropped=${dimRes.dropped} unknownDropped=${dimRes.unknownDropped} fellBack=${dimRes.fellBack} constraints=${JSON.stringify(dimConstraints)}`);
-  return dimRes.kept;
+  if (dimConstraints) {
+    const dimRes = filterRowsByDimensionConstraints(typologyFiltered, dimConstraints);
+    console.log(`[concierge strict-typology dim] typology=${typology} pre=${typologyFiltered.length} strict=${dimRes.strictKept.length} kept=${dimRes.kept.length} dropped=${dimRes.dropped} unknownDropped=${dimRes.unknownDropped} fellBack=${dimRes.fellBack} constraints=${JSON.stringify(dimConstraints)}`);
+    typologyFiltered = dimRes.kept;
+  }
+  if (leadConstraints) {
+    const brandIdx = await getBrandLeadTimeIndex(supabase);
+    const leadRes = filterRowsByLeadTimeConstraints(typologyFiltered, leadConstraints, brandIdx);
+    console.log(`[concierge strict-typology lead] typology=${typology} pre=${typologyFiltered.length} kept=${leadRes.kept.length} dropped=${leadRes.dropped} unknownDropped=${leadRes.unknownDropped} fellBack=${leadRes.fellBack} constraints=${JSON.stringify(leadConstraints)}`);
+    typologyFiltered = leadRes.kept;
+  }
+  return typologyFiltered;
 }
 
 // Common city / country abbreviations mapped to canonical full names.
