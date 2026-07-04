@@ -320,6 +320,8 @@ export async function streamConcierge({
   onRequestId?: (requestId: string) => void;
   /** Fires each time the Inspector Agent completes a card run. */
   onInspector?: (event: InspectorEvent) => void;
+  /** Fires once near the start with the hard-constraint pre-filters applied to catalog retrieval. */
+  onAppliedConstraints?: (event: AppliedConstraintsEvent) => void;
   onDone: () => void;
   onError: (msg: string) => void;
   signal?: AbortSignal;
