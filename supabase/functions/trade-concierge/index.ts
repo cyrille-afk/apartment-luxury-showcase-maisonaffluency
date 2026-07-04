@@ -3683,12 +3683,14 @@ serve(async (req) => {
       (sqlLoadConstraints.materials?.length || 0) +
       (sqlLoadConstraints.colors?.length || 0) +
       (sqlLoadConstraints.categories?.length || 0) > 0;
+    const catalogT0 = performance.now();
     const { designersList, piecesList: fullPiecesList, showroomBrands } = await loadCatalogContext(
       supabase,
       includePieces && !useRag,
       mentionsKnownDesigner ? mentionedDesigners : undefined,
       hasSqlConstraint && !mentionsKnownDesigner ? sqlLoadConstraints : undefined,
     );
+    mark("loadCatalogContext", { ms: Math.round(performance.now() - catalogT0), includePieces, useRag });
     // Detect "hard constraints matched zero pieces" so the UI can render a
     // friendly empty-state and the model can acknowledge it warmly instead of
     // hallucinating alternatives.
