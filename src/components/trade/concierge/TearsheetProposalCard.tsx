@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
-import { Loader2, Check, X, Pencil, ExternalLink, Plus, ChevronDown, Copy, Repeat, Lock, Unlock, RefreshCw, PlusCircle, MessageSquare } from "lucide-react";
+import { Loader2, Check, X, Pencil, ExternalLink, Plus, ChevronDown, Copy, Repeat, Lock, Unlock, RefreshCw, PlusCircle, MessageSquare, ShieldCheck } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { commitProposal, type TearsheetProposal } from "@/lib/tradeConciergeStream";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 import { BoardPicker } from "@/components/trade/concierge/BoardPicker";
 import { ProjectAssignInline } from "@/components/trade/concierge/ProjectAssignInline";
 import { HotspotImageBadge } from "@/components/trade/HotspotImageBadge";
-import { buildSwapPrompt, buildRegenerateUnlockedPrompt, buildSuggestOneMorePrompt, buildCritiqueEditsPrompt, sendConciergePrefill, type SwapPromptItem } from "@/lib/conciergePrefill";
+import { buildSwapPrompt, buildRegenerateUnlockedPrompt, buildSuggestOneMorePrompt, buildCritiqueEditsPrompt, buildValidateDiffPrompt, sendConciergePrefill, type SwapPromptItem } from "@/lib/conciergePrefill";
 import { RequirementsBadge } from "@/components/trade/concierge/RequirementsBadge";
 
 type Status = "pending" | "committing" | "approved" | "discarded";
@@ -173,6 +173,28 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
     );
     sendConciergePrefill(prompt);
   };
+
+  // #5 — Validate / Sync: batch-review pending manual edits as a diff.
+  // Only lit up while there are unverified changes (skip, lock, title rename).
+  const titleChanged = !isAppend && title.trim() !== initialTitle.trim();
+  const pendingChangesCount = excluded.size + locked.size + (titleChanged ? 1 : 0);
+  const handleValidate = () => {
+    if (pendingChangesCount === 0) {
+      toast.error("Make an edit first (skip, lock, or rename) and I'll run a validation pass.");
+      return;
+    }
+    const skipped = uniquePreview.filter((p) => excluded.has(p.id));
+    const lockedItems = uniquePreview.filter((p) => locked.has(p.id) && !excluded.has(p.id));
+    const keptCount = uniquePreview.length - excluded.size;
+    const prompt = buildValidateDiffPrompt({
+      skipped: skipped.map(asItem),
+      locked: lockedItems.map(asItem),
+      titleChange: titleChanged ? { from: initialTitle, to: title.trim() } : null,
+      keptCount,
+    });
+    sendConciergePrefill(prompt);
+  };
+
 
 
   const handleApprove = async () => {
@@ -633,6 +655,26 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
             >
               <MessageSquare className="h-3 w-3" />
               Critique my edits
+            </button>
+            <button
+              type="button"
+              onClick={handleValidate}
+              disabled={pendingChangesCount === 0}
+              className={cn(
+                "inline-flex items-center gap-1.5 rounded-full font-body text-[11px] uppercase tracking-widest px-3 py-1.5 transition-colors",
+                pendingChangesCount > 0
+                  ? "bg-accent text-accent-foreground border border-accent hover:opacity-90"
+                  : "border border-border text-muted-foreground/60 cursor-not-allowed",
+              )}
+              title={
+                pendingChangesCount === 0
+                  ? "No pending changes to validate — edit the draft first"
+                  : `Batch-review your ${pendingChangesCount} pending manual ${pendingChangesCount === 1 ? "change" : "changes"} against the brief`
+              }
+              aria-label={`Validate ${pendingChangesCount} pending changes`}
+            >
+              <ShieldCheck className="h-3 w-3" />
+              Validate changes{pendingChangesCount > 0 ? ` (${pendingChangesCount})` : ""}
             </button>
           </div>
           <button
