@@ -366,13 +366,11 @@ export async function streamConcierge({
 
   const endpoint = surface === "public" ? PUBLIC_CHAT_URL : CHAT_URL;
 
-  // Reconnect budget. Kept tight because the edge function has no
-  // server-side session/replay — resuming means resending the transcript
-  // plus a synthetic partial-assistant turn and asking the model to
-  // continue where it left off. We only attempt this while the drop was
-  // "safe": before any structured output (tool_start / proposal /
-  // escalation) has been emitted. After a structured event the caller
-  // surfaces its own retry card via onError.
+  // Reconnect budget. When we hold a server-side resume token
+  // (`streamId`) we can safely reconnect even after structured events
+  // have been emitted, because the server replays only frames with
+  // seq > lastSeq — no duplicates. Without a token we fall back to
+  // partial-text continuation and stop after structured output.
   const MAX_ATTEMPTS = 3;
   const backoffMs = (attempt: number) => Math.min(4000, 500 * 2 ** attempt);
 
@@ -381,24 +379,32 @@ export async function streamConcierge({
   let hasStructuredOutput = false;
   let requestIdNotified = false;
   let currentMessages: ChatMessage[] = messages;
+  // Server-side cursor. Populated from `event: stream_start` and
+  // `:seq=N` SSE comments so a reconnect can request an exact resume.
+  let streamId: string | null = null;
+  let lastSeq = 0;
 
-  // Mint a client-side trace id once. On reconnect we mint a fresh id for
-  // the new HTTP request but only report the original to the caller so the
-  // UI chip stays stable.
   const initialClientRequestId = (typeof crypto !== "undefined" && crypto.randomUUID)
     ? crypto.randomUUID()
     : `req-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
   type AttemptOutcome =
     | { kind: "done" }
-    | { kind: "truncated" }        // stream ended without [DONE]
+    | { kind: "truncated" }
     | { kind: "network_error"; message: string }
-    | { kind: "hard_error"; message: string }; // 4xx/5xx or unrecoverable
+    | { kind: "hard_error"; message: string }
+    | { kind: "resume_expired" }; // server returned 410; caller should fall back to continuation
 
-  const runOnce = async (isReconnect: boolean): Promise<AttemptOutcome> => {
-    const clientRequestId = isReconnect
-      ? (crypto.randomUUID?.() ?? `req-${Date.now()}-${Math.random().toString(36).slice(2)}`)
-      : initialClientRequestId;
+  type AttemptMode = "fresh" | "resume" | "continuation";
+
+  const runOnce = async (mode: AttemptMode): Promise<AttemptOutcome> => {
+    const clientRequestId = mode === "fresh"
+      ? initialClientRequestId
+      : (crypto.randomUUID?.() ?? `req-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+
+    const body = mode === "resume" && streamId
+      ? { resume: { stream_id: streamId, last_seq: lastSeq }, surface: surface ?? "trade" }
+      : { messages: currentMessages, project_id: projectId ?? null, surface: surface ?? "trade", lang: lang ?? null };
 
     let resp: Response;
     try {
@@ -411,7 +417,7 @@ export async function streamConcierge({
           "x-request-id": clientRequestId,
           ...(surface === "public" ? { "x-concierge-surface": "public", "x-concierge-sid": publicSid ?? "" } : {}),
         },
-        body: JSON.stringify({ messages: currentMessages, project_id: projectId ?? null, surface: surface ?? "trade", lang: lang ?? null }),
+        body: JSON.stringify(body),
         signal,
       });
     } catch (e) {
@@ -420,16 +426,16 @@ export async function streamConcierge({
     }
 
     if (!resp.ok) {
-      let body: any;
-      try { body = await resp.json(); } catch { body = { error: "Request failed" }; }
+      let errBody: any;
+      try { errBody = await resp.json(); } catch { errBody = { error: "Request failed" }; }
+      if (mode === "resume" && resp.status === 410) return { kind: "resume_expired" };
       if (resp.status === 401 || resp.status === 403) return { kind: "hard_error", message: "UNAUTHORIZED" };
-      if (resp.status === 429 && body.retry_in != null) return { kind: "hard_error", message: `RATE_LIMIT:${body.retry_in}` };
-      return { kind: "hard_error", message: body.error || `Error ${resp.status}` };
+      if (resp.status === 429 && errBody.retry_in != null) return { kind: "hard_error", message: `RATE_LIMIT:${errBody.retry_in}` };
+      return { kind: "hard_error", message: errBody.error || `Error ${resp.status}` };
     }
 
     if (!resp.body) return { kind: "hard_error", message: "No response stream" };
 
-    // Notify the caller with the stable trace id the first time only.
     if (!requestIdNotified && onRequestId) {
       requestIdNotified = true;
       try { onRequestId(initialClientRequestId); } catch { /* ignore */ }
@@ -442,15 +448,20 @@ export async function streamConcierge({
     let currentEvent: string | null = null;
 
     const handleDataPayload = (jsonStr: string) => {
-      if (jsonStr === "[DONE]") {
-        streamDone = true;
-        return;
-      }
+      if (jsonStr === "[DONE]") { streamDone = true; return; }
       try {
         const parsed = JSON.parse(jsonStr);
+        if (currentEvent === "stream_start") {
+          const sid = (parsed as { stream_id?: string })?.stream_id;
+          if (typeof sid === "string") streamId = sid;
+          return;
+        }
+        if (currentEvent === "stream_resume" || currentEvent === "resume_timeout" || currentEvent === "resume_error") {
+          // Informational — ignored by callers, but useful in devtools.
+          return;
+        }
         if (currentEvent === "request_id") {
-          // Ignore server-echoed id on reconnect attempts; keep the original.
-          if (!isReconnect) {
+          if (mode === "fresh") {
             const rid = (parsed as { request_id?: string })?.request_id;
             if (typeof rid === "string" && onRequestId && !requestIdNotified) {
               requestIdNotified = true;
@@ -459,37 +470,31 @@ export async function streamConcierge({
           }
           return;
         }
-        if (currentEvent === "inspector") {
-          if (onInspector) onInspector(parsed as InspectorEvent);
-          return;
-        }
-        if (currentEvent === "applied_constraints") {
-          if (onAppliedConstraints) onAppliedConstraints(parsed as AppliedConstraintsEvent);
-          return;
-        }
-        if (currentEvent === "proposal") {
-          hasStructuredOutput = true;
-          if (onProposal) onProposal(parsed as ConciergeProposal);
-          return;
-        }
-        if (currentEvent === "tool_start") {
-          hasStructuredOutput = true;
-          if (onToolStart) onToolStart(parsed as ToolStartEvent);
-          return;
-        }
-        if (currentEvent === "escalation") {
-          hasStructuredOutput = true;
-          if (onEscalation) onEscalation(parsed as EscalationEvent);
-          return;
-        }
+        if (currentEvent === "inspector") { if (onInspector) onInspector(parsed as InspectorEvent); return; }
+        if (currentEvent === "applied_constraints") { if (onAppliedConstraints) onAppliedConstraints(parsed as AppliedConstraintsEvent); return; }
+        if (currentEvent === "proposal") { hasStructuredOutput = true; if (onProposal) onProposal(parsed as ConciergeProposal); return; }
+        if (currentEvent === "tool_start") { hasStructuredOutput = true; if (onToolStart) onToolStart(parsed as ToolStartEvent); return; }
+        if (currentEvent === "escalation") { hasStructuredOutput = true; if (onEscalation) onEscalation(parsed as EscalationEvent); return; }
         const content = parsed.choices?.[0]?.delta?.content as string | undefined;
-        if (content) {
-          partialText += content;
-          onDelta(content);
+        if (content) { partialText += content; onDelta(content); }
+      } catch { /* ignore partial / unparseable */ }
+    };
+
+    const handleLine = (line: string) => {
+      if (line === "") { currentEvent = null; return; }
+      if (line.startsWith(":")) {
+        // SSE comment. The server tags every frame with `:seq=N` so we
+        // can request an exact resume cursor on reconnect.
+        const m = /^:seq=(\d+)/.exec(line);
+        if (m) {
+          const n = Number(m[1]);
+          if (Number.isFinite(n) && n > lastSeq) lastSeq = n;
         }
-      } catch {
-        /* ignore partial / unparseable */
+        return;
       }
+      if (line.startsWith("event: ")) { currentEvent = line.slice(7).trim(); return; }
+      if (!line.startsWith("data: ")) return;
+      handleDataPayload(line.slice(6).trim());
     };
 
     try {
@@ -503,24 +508,15 @@ export async function streamConcierge({
           let line = buffer.slice(0, idx);
           buffer = buffer.slice(idx + 1);
           if (line.endsWith("\r")) line = line.slice(0, -1);
-
-          if (line === "") { currentEvent = null; continue; }
-          if (line.startsWith(":")) continue;
-          if (line.startsWith("event: ")) { currentEvent = line.slice(7).trim(); continue; }
-          if (!line.startsWith("data: ")) continue;
-          handleDataPayload(line.slice(6).trim());
+          handleLine(line);
           if (streamDone) break;
         }
       }
-
-      // flush remaining
       if (buffer.trim()) {
         for (let raw of buffer.split("\n")) {
           if (!raw) continue;
           if (raw.endsWith("\r")) raw = raw.slice(0, -1);
-          if (raw.startsWith("event: ")) { currentEvent = raw.slice(7).trim(); continue; }
-          if (!raw.startsWith("data: ")) continue;
-          handleDataPayload(raw.slice(6).trim());
+          handleLine(raw);
         }
       }
     } catch (e) {
@@ -532,14 +528,12 @@ export async function streamConcierge({
     return { kind: "truncated" };
   };
 
+  let mode: AttemptMode = "fresh";
   for (let attempt = 0; attempt <= MAX_ATTEMPTS; attempt++) {
     if (signal?.aborted) return;
-    const outcome = await runOnce(attempt > 0);
+    const outcome = await runOnce(mode);
 
-    if (outcome.kind === "done") {
-      onDone();
-      return;
-    }
+    if (outcome.kind === "done") { onDone(); return; }
 
     if (outcome.kind === "hard_error") {
       if (outcome.message === "aborted") return;
@@ -547,11 +541,23 @@ export async function streamConcierge({
       return;
     }
 
-    // truncated | network_error → maybe reconnect.
-    // Fail closed once structured output has streamed: replaying would
-    // duplicate cards and confuse the timeline. Let the UI show its retry card.
-    if (hasStructuredOutput || attempt >= MAX_ATTEMPTS) {
-      onError(outcome.kind === "truncated" ? "STREAM_TRUNCATED" : outcome.message);
+    if (outcome.kind === "resume_expired") {
+      // Server dropped the frames for this stream_id. Fall through to
+      // partial-text continuation on the next attempt.
+      streamId = null;
+    }
+
+    // truncated | network_error | resume_expired → maybe reconnect.
+    // With a resume token we can always safely reconnect (server replays
+    // only unseen frames). Without one, stop once structured output has
+    // been emitted so we don't duplicate cards.
+    const canResume = streamId !== null;
+    if (!canResume && hasStructuredOutput) {
+      onError(outcome.kind === "truncated" ? "STREAM_TRUNCATED" : (outcome as any).message ?? "STREAM_TRUNCATED");
+      return;
+    }
+    if (attempt >= MAX_ATTEMPTS) {
+      onError(outcome.kind === "truncated" ? "STREAM_TRUNCATED" : (outcome as any).message ?? "STREAM_TRUNCATED");
       return;
     }
 
@@ -561,7 +567,7 @@ export async function streamConcierge({
         onReconnect({
           attempt: attempt + 1,
           maxAttempts: MAX_ATTEMPTS,
-          reason: outcome.kind === "truncated" ? "stream_truncated" : "network_error",
+          reason: outcome.kind === "truncated" ? "stream_truncated" : outcome.kind === "resume_expired" ? "network_error" : "network_error",
           delayMs,
         });
       } catch { /* ignore */ }
@@ -569,10 +575,12 @@ export async function streamConcierge({
     await new Promise((r) => setTimeout(r, delayMs));
     if (signal?.aborted) return;
 
-    // Rebuild the messages payload with the partial assistant turn +
-    // a continuation nudge. The edge function has no server-side session,
-    // so "resume" = model picks up where its stream was cut.
-    if (partialText.trim().length > 0) {
+    if (canResume) {
+      mode = "resume";
+      // Nothing else to reshape — the resume request already carries
+      // { stream_id, last_seq } and the server picks up from the DB.
+    } else if (partialText.trim().length > 0) {
+      mode = "continuation";
       currentMessages = [
         ...messages,
         { role: "assistant", content: partialText },
@@ -583,7 +591,7 @@ export async function streamConcierge({
         },
       ];
     } else {
-      // Nothing streamed yet — a clean retry of the original turn.
+      mode = "fresh";
       currentMessages = messages;
     }
   }
