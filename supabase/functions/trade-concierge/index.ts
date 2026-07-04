@@ -2692,9 +2692,10 @@ type RequestedTypology = "dining_table" | "table";
 function inferBudgetCeilingCents(requestText: string): { cents: number; label: string } | null {
   const text = String(requestText || "");
   if (!text.trim()) return null;
-  const budgetCue = /\b(under|below|less\s+than|up\s+to|max(?:imum)?|budget(?:\s+of)?|not\s+over|no\s+more\s+than)\b/i;
+  const budgetCue = /\b(?:under|below|less\s+than|up\s+to|max(?:imum)?|budget(?:\s+of)?|not\s+over|no\s+more\s+than)\b/i;
   if (!budgetCue.test(text)) return null;
-  const match = text.match(/(?:[$€£]\s*)?(\d+(?:[.,]\d+)?)(\s*(?:k|m|000))?\s*(?:usd|eur|gbp|dollars?|euros?|pounds?)?/i);
+  const match = text.match(/\b(?:under|below|less\s+than|up\s+to|max(?:imum)?|budget(?:\s+of)?|not\s+over|no\s+more\s+than)\b[^$€£\d]{0,24}(?:[$€£]\s*)?(\d+(?:[.,]\d+)?)(\s*(?:k|m|000))?\s*(?:usd|eur|gbp|dollars?|euros?|pounds?)?/i)
+    || text.match(/(?:[$€£]\s*)(\d+(?:[.,]\d+)?)(\s*(?:k|m|000))?\s*(?:usd|eur|gbp|dollars?|euros?|pounds?)?/i);
   if (!match) return null;
   const raw = Number(match[1].replace(",", "."));
   if (!Number.isFinite(raw) || raw <= 0) return null;
