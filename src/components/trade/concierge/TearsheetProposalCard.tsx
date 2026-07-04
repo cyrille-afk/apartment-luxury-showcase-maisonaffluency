@@ -784,7 +784,7 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
             <button
               type="button"
               onClick={handleValidate}
-              disabled={pendingChangesCount === 0}
+              disabled={pendingChangesCount === 0 || verdictLoading}
               className={cn(
                 "inline-flex items-center gap-1.5 rounded-full font-body text-[11px] uppercase tracking-widest px-3 py-1.5 transition-colors",
                 pendingChangesCount > 0
@@ -798,9 +798,10 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
               }
               aria-label={`Validate ${pendingChangesCount} pending changes`}
             >
-              <ShieldCheck className="h-3 w-3" />
+              {verdictLoading ? <Loader2 className="h-3 w-3 animate-spin" /> : <ShieldCheck className="h-3 w-3" />}
               Validate changes{pendingChangesCount > 0 ? ` (${pendingChangesCount})` : ""}
             </button>
+
           </div>
           <button
             onClick={handleDiscard}
