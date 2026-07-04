@@ -4139,7 +4139,7 @@ serve(async (req) => {
           const price = typeof p.price_cents === "number" && p.currency
             ? `${p.currency} ${Math.round(p.price_cents / 100).toLocaleString("en-US")}`
             : "published trade details";
-          rationaleMap[p.id] = { reason: budgetCeiling ? `Matches the requested typology and stays within ${budgetCeiling.label} (${price}).` : "Matches the requested typology from the Maison Affluency Curation." };
+          rationaleMap[p.id] = { reason: budgetCeiling ? `Matches the requested typology and budget (${price}, ${budgetCeiling.label}).` : "Matches the requested typology from the Maison Affluency Curation." };
         }
         const proposal = {
           tool: "propose_tearsheet",
@@ -4156,7 +4156,7 @@ serve(async (req) => {
         };
         const requestedQty = effectiveBrief.brief.qty_hint || (lastUserMsg.match(/\b(\d{1,2})\b/) ? Number(lastUserMsg.match(/\b(\d{1,2})\b/)?.[1]) : null);
         const quantityNote = requestedQty && requestedQty > dedupedIds.length
-          ? ` I found ${dedupedIds.length}, not ${requestedQty}, that truly match the typology${budgetCeiling ? ` and ${budgetCeiling.label}` : ""}; I did not pad with adjacent categories.`
+          ? ` I found ${dedupedIds.length}, not ${requestedQty}, that truly match the typology${budgetCeiling ? ` with published pricing ${budgetCeiling.label}` : ""}; I did not pad with adjacent categories.`
           : "";
         return sseProposalThenTextResponse(
           proposal,
