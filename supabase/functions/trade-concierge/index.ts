@@ -7,7 +7,7 @@ import { embedQuery } from "../_shared/aiEmbeddings.ts";
 import { withSemanticCache } from "../_shared/aiCache.ts";
 import { coerceClearance, classifyResultFailure, countDimensionNumbers } from "../_shared/spatialFitValidation.ts";
 import { canAccessProject } from "../_shared/tenantAccess.ts";
-import { runInspectorPass, buildInspectorGroundTruth, buildInspectorLogRecord, logInspectorRun, validateRequirementsCoverage, runDiscoveryProseGuard, deterministicRedact, SAFE_FALLBACK_PROSE } from "../_shared/concierge-inspector.ts";
+import { runInspectorPass, buildInspectorGroundTruth, buildInspectorLogRecord, logInspectorRun, validateRequirementsCoverage, mergeRequirementsWithText, runDiscoveryProseGuard, deterministicRedact, SAFE_FALLBACK_PROSE } from "../_shared/concierge-inspector.ts";
 import { installFramePersistence, serveResume } from "./_resume.ts";
 import { deriveHardConstraints, applyHardConstraints, filterRowsByHardConstraints, type HardConstraints } from "../_shared/hardConstraints.ts";
 import { buildNoStrictTypologyReply, typologyLabel } from "./_no_strict_typology_reply.ts";
@@ -176,13 +176,15 @@ const CB_FAILURE_THRESHOLD = Number(Deno.env.get("CB_FAILURE_THRESHOLD") ?? "3")
 const CB_COOLDOWN_MS = Number(Deno.env.get("CB_COOLDOWN_MS") ?? "60000");
 
 // Requirements-diff enforcement mode (see `_requirements_enforcement.ts` for
-// the precedence rules). "open" (default) surfaces violations without
-// blocking; "closed" swallows failing cards and emits `event: proposal_blocked`.
+// precedence). This endpoint is fail-closed by default: a card that does not
+// satisfy the user's stated brief must not render.
 import { resolveRequirementsEnforcement } from "./_requirements_enforcement.ts";
-const REQUIREMENTS_ENFORCEMENT: "open" | "closed" = resolveRequirementsEnforcement({
-  CONCIERGE_REQUIREMENTS_ENFORCEMENT: Deno.env.get("CONCIERGE_REQUIREMENTS_ENFORCEMENT"),
-  CONCIERGE_REQUIREMENTS_STRICT: Deno.env.get("CONCIERGE_REQUIREMENTS_STRICT"),
-});
+const REQUIREMENTS_ENFORCEMENT: "open" | "closed" = (Deno.env.get("CONCIERGE_REQUIREMENTS_ENFORCEMENT") || Deno.env.get("CONCIERGE_REQUIREMENTS_STRICT"))
+  ? resolveRequirementsEnforcement({
+      CONCIERGE_REQUIREMENTS_ENFORCEMENT: Deno.env.get("CONCIERGE_REQUIREMENTS_ENFORCEMENT"),
+      CONCIERGE_REQUIREMENTS_STRICT: Deno.env.get("CONCIERGE_REQUIREMENTS_STRICT"),
+    })
+  : "closed";
 console.log(`[concierge] requirements enforcement: ${REQUIREMENTS_ENFORCEMENT}`);
 
 const breaker = createBreaker({
@@ -2824,11 +2826,11 @@ async function hydratePickPreview(
   const [{ data: picks }, { data: trades }] = await Promise.all([
     supabase
       .from("designer_curator_picks")
-      .select("id, title, image_url, materials, category, designer_id, trade_price_cents, currency")
+      .select("id, title, image_url, materials, category, dimensions, designer_id, trade_price_cents, currency")
       .in("id", pickIds),
     supabase
       .from("trade_products")
-      .select("id, product_name, brand_name, image_url, materials, category, trade_price_cents, rrp_price_cents, currency")
+      .select("id, product_name, brand_name, image_url, materials, category, dimensions, trade_price_cents, rrp_price_cents, currency")
       .in("id", pickIds),
   ]);
 
@@ -2944,6 +2946,7 @@ async function hydratePickPreview(
           image_from_hotspot: !p.image_url && !!fallback,
           materials: p.materials,
           category: p.category,
+          dimensions: p.dimensions || null,
           designer_name: designer,
           price_cents: typeof p.trade_price_cents === "number" ? p.trade_price_cents : null,
           currency: p.currency || null,
@@ -2963,6 +2966,7 @@ async function hydratePickPreview(
           image_from_hotspot: !t.image_url && !!fallback,
           materials: t.materials,
           category: t.category,
+          dimensions: t.dimensions || null,
           designer_name: baseBrand || null,
           price_cents:
             typeof t.trade_price_cents === "number"
