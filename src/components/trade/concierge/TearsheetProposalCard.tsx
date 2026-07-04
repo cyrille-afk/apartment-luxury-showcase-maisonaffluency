@@ -283,7 +283,7 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
     }
   };
 
-  };
+
 
 
 
