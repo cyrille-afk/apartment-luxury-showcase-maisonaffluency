@@ -296,6 +296,7 @@ export async function streamConcierge({
   onEscalation,
   onRequestId,
   onInspector,
+  onAppliedConstraints,
   onDone,
   onError,
   signal,
