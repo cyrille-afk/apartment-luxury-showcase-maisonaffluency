@@ -174,6 +174,28 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
     sendConciergePrefill(prompt);
   };
 
+  // #5 — Validate / Sync: batch-review pending manual edits as a diff.
+  // Only lit up while there are unverified changes (skip, lock, title rename).
+  const titleChanged = !isAppend && title.trim() !== initialTitle.trim();
+  const pendingChangesCount = excluded.size + locked.size + (titleChanged ? 1 : 0);
+  const handleValidate = () => {
+    if (pendingChangesCount === 0) {
+      toast.error("Make an edit first (skip, lock, or rename) and I'll run a validation pass.");
+      return;
+    }
+    const skipped = uniquePreview.filter((p) => excluded.has(p.id));
+    const lockedItems = uniquePreview.filter((p) => locked.has(p.id) && !excluded.has(p.id));
+    const keptCount = uniquePreview.length - excluded.size;
+    const prompt = buildValidateDiffPrompt({
+      skipped: skipped.map(asItem),
+      locked: lockedItems.map(asItem),
+      titleChange: titleChanged ? { from: initialTitle, to: title.trim() } : null,
+      keptCount,
+    });
+    sendConciergePrefill(prompt);
+  };
+
+
 
   const handleApprove = async () => {
     if (visiblePicks.length === 0) {
