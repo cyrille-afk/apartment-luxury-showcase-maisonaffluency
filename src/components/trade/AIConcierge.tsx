@@ -985,6 +985,11 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
     };
     armStall();
 
+    // Track hard-constraint pre-filters applied to catalog retrieval for
+    // this turn. Emitted by the edge function once, near the start of the
+    // SSE stream. Attached to the assistant msg so the UI can show chips.
+    let turnConstraints: AppliedConstraintsEvent | null = null;
+
     const upsertAssistant = (chunk: string) => {
       armStall();
       assistantSoFar += chunk;
@@ -995,12 +1000,12 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
           const last = prev[idx];
           if (last?.kind === "msg" && last.role === "assistant") {
             const copy = prev.slice();
-            copy[idx] = { ...last, content: assistantSoFar };
+            copy[idx] = { ...last, content: assistantSoFar, appliedConstraints: turnConstraints ?? last.appliedConstraints };
             return copy;
           }
         }
         assistantStarted = true;
-        return [...prev, { kind: "msg", role: "assistant", content: assistantSoFar }];
+        return [...prev, { kind: "msg", role: "assistant", content: assistantSoFar, appliedConstraints: turnConstraints ?? undefined }];
       });
     };
 
