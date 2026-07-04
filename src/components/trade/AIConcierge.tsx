@@ -1086,7 +1086,9 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
             const insertAt = Math.min(Math.max(origIdx, 0), merged.length);
             merged.splice(insertAt, 0, lp);
           }
-          proposal = { ...proposal, preview: merged };
+          // Preserve discriminated-union narrowing by mutating `preview` in place
+          // rather than spreading (spread widens `tool` back to the full union).
+          (proposal as { preview: typeof merged }).preview = merged;
         }
         carriedLocked = lastProposal.proposal.preview
           .filter((p) => lockedSet.has(p.id) && !excludedSet.has(p.id))
