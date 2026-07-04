@@ -137,3 +137,48 @@ export function applyHardConstraints<Q extends {
   }
   return q;
 }
+
+/**
+ * In-memory equivalent of applyHardConstraints, used to post-filter rows
+ * returned by pgvector RPCs (which can't accept SQL text filters).
+ * Row must match at least one material token AND one color token AND (if
+ * given) fall inside `categories` AND not match any excludeBrands.
+ * Empty buckets are treated as pass-through.
+ */
+export function filterRowsByHardConstraints<
+  R extends Record<string, unknown>,
+>(
+  rows: R[],
+  constraints: HardConstraints,
+  columns: { text?: string[]; brand?: string; category?: string } = {},
+): R[] {
+  const textCols = columns.text ?? [
+    "title", "product_name", "materials", "category", "subcategory",
+  ];
+  const brandCol = columns.brand ?? "brand_name";
+  const categoryCol = columns.category ?? "category";
+
+  const matTokens = (constraints.materials || []).map((m) => m.toLowerCase()).filter(Boolean);
+  const colorTokens = (constraints.colors || []).map((c) => c.toLowerCase()).filter(Boolean);
+  const cats = (constraints.categories || []).map((c) => c.toLowerCase()).filter(Boolean);
+  const excl = (constraints.excludeBrands || []).map((b) => b.toLowerCase()).filter(Boolean);
+
+  const rowText = (r: R): string =>
+    textCols.map((c) => String(r[c] ?? "")).join(" ").toLowerCase();
+
+  return rows.filter((r) => {
+    const hay = rowText(r);
+    if (matTokens.length && !matTokens.some((t) => hay.includes(t))) return false;
+    if (colorTokens.length && !colorTokens.some((t) => hay.includes(t))) return false;
+    if (cats.length) {
+      const rc = String(r[categoryCol] ?? "").toLowerCase();
+      if (!cats.some((c) => rc.includes(c))) return false;
+    }
+    if (excl.length) {
+      const rb = String(r[brandCol] ?? "").toLowerCase();
+      if (excl.some((b) => rb.includes(b))) return false;
+    }
+    return true;
+  });
+}
+
