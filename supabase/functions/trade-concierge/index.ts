@@ -11,6 +11,7 @@ import { runInspectorPass, buildInspectorGroundTruth, buildInspectorLogRecord, l
 import { installFramePersistence, serveResume } from "./_resume.ts";
 import { deriveHardConstraints, applyHardConstraints, filterRowsByHardConstraints, type HardConstraints } from "../_shared/hardConstraints.ts";
 import { inferDimensionConstraints, filterRowsByDimensionConstraints, type DimensionConstraints } from "../_shared/dimensionConstraints.ts";
+import { buildConstraintCompliance, renderComplianceNote } from "../_shared/constraintCompliance.ts";
 import {
   inferLeadTimeConstraints,
   filterRowsByLeadTimeConstraints,
@@ -3178,11 +3179,11 @@ async function hydratePickPreview(
   const [{ data: picks }, { data: trades }] = await Promise.all([
     supabase
       .from("designer_curator_picks")
-      .select("id, title, image_url, materials, category, dimensions, designer_id, trade_price_cents, currency")
+      .select("id, title, image_url, materials, category, dimensions, designer_id, trade_price_cents, currency, lead_time, stock_status")
       .in("id", pickIds),
     supabase
       .from("trade_products")
-      .select("id, product_name, brand_name, image_url, materials, category, dimensions, trade_price_cents, rrp_price_cents, currency")
+      .select("id, product_name, brand_name, image_url, materials, category, dimensions, trade_price_cents, rrp_price_cents, currency, lead_time, stock_status_override")
       .in("id", pickIds),
   ]);
 
@@ -3300,6 +3301,9 @@ async function hydratePickPreview(
           category: p.category,
           dimensions: p.dimensions || null,
           designer_name: designer,
+          brand_name: designer,
+          lead_time: p.lead_time || null,
+          stock_status: p.stock_status || null,
           price_cents: typeof p.trade_price_cents === "number" ? p.trade_price_cents : null,
           currency: p.currency || null,
         };
@@ -3320,6 +3324,9 @@ async function hydratePickPreview(
           category: t.category,
           dimensions: t.dimensions || null,
           designer_name: baseBrand || null,
+          brand_name: rawBrand || null,
+          lead_time: t.lead_time || null,
+          stock_status: t.stock_status_override || null,
           price_cents:
             typeof t.trade_price_cents === "number"
               ? t.trade_price_cents
@@ -3414,14 +3421,41 @@ async function buildDeterministicTearsheetProposal(
   const preview = previewRaw
     .filter((p: any) => finalIds.includes(p?.id))
     .map((p: any) => ({ ...p, rationale: rationaleMap[p.id]?.reason || null }));
+  // Constraint compliance summary — detected constraint → per-piece pass/fail.
+  let complianceNote = "";
+  let compliance: ReturnType<typeof buildConstraintCompliance> = [];
+  if (dimConstraints || leadConstraints) {
+    const brandIdx = (dimConstraints || leadConstraints) ? await getBrandLeadTimeIndex(supabase) : null;
+    const compliancePieces = preview.map((p: any) => ({
+      id: p.id,
+      title: p.title,
+      dimensions: p.dimensions,
+      lead_time: p.lead_time,
+      stock_status: p.stock_status,
+      brand_name: p.brand_name,
+      designer_name: p.designer_name,
+      price_cents: p.price_cents,
+      currency: p.currency,
+    }));
+    compliance = buildConstraintCompliance({
+      dim: dimConstraints,
+      lead: leadConstraints,
+      pieces: compliancePieces,
+      brandLeadIndex: brandIdx,
+    });
+    complianceNote = renderComplianceNote(compliance);
+  }
+  const baseNote = "Validated directly against the Maison Affluency Curation.";
+  const note = complianceNote ? `${baseNote}\n\n${complianceNote}` : baseNote;
   return {
     tool: "propose_tearsheet",
     tool_call_id: crypto.randomUUID(),
     args: {
       title: brief.room ? `${brief.room} first edit` : "Curated first edit",
       pick_ids: finalIds,
-      note: "Validated directly against the Maison Affluency Curation.",
+      note,
       pick_rationales: rationaleMap,
+      constraint_compliance: compliance.length ? compliance : undefined,
     },
     preview,
   };
