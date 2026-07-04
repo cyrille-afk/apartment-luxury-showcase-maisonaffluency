@@ -3243,6 +3243,50 @@ serve(async (req) => {
   const requestId = req.headers.get("x-request-id") || (crypto?.randomUUID?.() ?? `req-${Date.now()}`);
   logCorsInspection(req, "request", requestId);
 
+  // ── Per-request pre-LLM stage tracer ──────────────────────────────────
+  // Each `mark(stage, meta?)` records elapsed time since request start and
+  // delta since the previous mark. Flushed as a single JSON log line:
+  //  • right before the first LLM call (`phase: "pre_llm"`)
+  //  • on client abort (`phase: "aborted"`) — reveals which stage was live
+  //    when the frontend stall watchdog killed the stream
+  //  • on any thrown error (`phase: "error"`)
+  const traceT0 = performance.now();
+  let traceTPrev = traceT0;
+  const traceStages: Array<{ stage: string; at_ms: number; dt_ms: number; meta?: unknown }> = [];
+  const mark = (stage: string, meta?: unknown) => {
+    const now = performance.now();
+    traceStages.push({
+      stage,
+      at_ms: Math.round(now - traceT0),
+      dt_ms: Math.round(now - traceTPrev),
+      ...(meta !== undefined ? { meta } : {}),
+    });
+    traceTPrev = now;
+  };
+  let traceFlushed = false;
+  const flushTrace = (phase: "pre_llm" | "aborted" | "error", extra?: unknown) => {
+    if (traceFlushed) return;
+    traceFlushed = true;
+    try {
+      console.log(
+        `[concierge trace] ${JSON.stringify({
+          phase,
+          requestId,
+          total_ms: Math.round(performance.now() - traceT0),
+          stages: traceStages,
+          ...(extra !== undefined ? { extra } : {}),
+        })}`,
+      );
+    } catch { /* logging must never throw */ }
+  };
+  try {
+    req.signal?.addEventListener?.("abort", () => {
+      const last = traceStages[traceStages.length - 1]?.stage ?? "start";
+      flushTrace("aborted", { last_completed_stage: last });
+    });
+  } catch { /* signal may be unavailable in some runtimes */ }
+  mark("start");
+
   if (req.method !== "POST") {
     console.warn(`[concierge cors_block] ${JSON.stringify({ phase: "request", requestId, method: req.method, reason: "method_not_allowed_at_handler" })}`);
     return new Response(JSON.stringify({ error: "Method not allowed" }), {
@@ -3252,12 +3296,14 @@ serve(async (req) => {
 
   try {
     const auth = await requireUser(req);
+    mark("auth", { ok: auth.ok });
     if (!auth.ok) {
       return new Response(JSON.stringify(auth.body), {
         status: auth.status, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
     const rl = rateLimit(`concierge:${auth.userId}`, 20, 60_000);
+    mark("rate_limit", { ok: rl.ok });
     if (!rl.ok) {
       return new Response(JSON.stringify({ error: "Rate limit exceeded", retry_in: rl.retryInSec }), {
         status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -3265,6 +3311,7 @@ serve(async (req) => {
     }
 
     const { messages, project_id: bodyProjectId, lang: bodyLang, resume: resumeBody } = await req.json();
+    mark("parse_body", { messages: Array.isArray(messages) ? messages.length : 0 });
 
     // ----- Resume-token short-circuit ------------------------------------
     // A reconnecting client sends `{ resume: { stream_id, last_seq } }`.
@@ -3414,11 +3461,13 @@ serve(async (req) => {
 
     // Daily token cap (skip for admins). Soft block with friendly message.
     if (await isOverDailyCap(supabase, userId)) {
+      mark("daily_cap", { over: true });
       return new Response(
         JSON.stringify({ error: "You've reached today's concierge usage limit. Please come back tomorrow — or reach the team directly for urgent requests." }),
         { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
+    mark("daily_cap", { over: false });
 
     // Trim history: keep only the last ~8 turns to control prompt size.
     const trimmedMessages = messages.slice(-8);
@@ -3432,6 +3481,7 @@ serve(async (req) => {
       .flatMap((d: any) => [d.name, d.display_name])
       .filter(Boolean) as string[];
     const heuristicNeedsPieces = needsFullCatalog(lastUserMsg, designerNames);
+    mark("designers_query", { count: designerNames.length, needsPieces: heuristicNeedsPieces });
 
     // Short follow-ups (≤4 words, no catalog keywords) skip the classifier +
     // planner round-trips entirely — they were dominating latency on replies
@@ -3455,24 +3505,37 @@ serve(async (req) => {
       console.log("[concierge hard-constraints]", JSON.stringify(preRequestConstraints));
     }
     // Run sentiment + RAG retrieval in parallel with the rest. RAG is best-effort.
+    const timed = async <T,>(name: string, p: Promise<T>): Promise<T> => {
+      const s = performance.now();
+      try {
+        const v = await p;
+        mark(`bundle:${name}`, { ms: Math.round(performance.now() - s), ok: true });
+        return v;
+      } catch (e) {
+        mark(`bundle:${name}`, { ms: Math.round(performance.now() - s), ok: false, err: (e as Error)?.message });
+        throw e;
+      }
+    };
     const ragPromise = (heuristicNeedsPieces || lastUserMsg.length > 40)
       ? loadRelevantPieces(supabase, LOVABLE_API_KEY, lastUserMsg, userId, 40, hasAnyPreConstraint ? preRequestConstraints : undefined)
       : Promise.resolve(null);
+    const bundleT0 = performance.now();
     const [sentiment, extractedBrief, ragResult, userBoards, userSignals, userMemory, mentionedProjectId, openQuotes, discountRow, cadDocuments, productCadAssets] = await Promise.all([
       isShortFollowUp
         ? Promise.resolve({ sentiment: "neutral", intent: "question", escalate: false, needs_catalog: false })
-        : classifySentiment(LOVABLE_API_KEY, lastUserMsg),
-      isShortFollowUp ? Promise.resolve(EMPTY_BRIEF) : extractBrief(LOVABLE_API_KEY, lastUserMsg),
-      ragPromise,
-      loadUserBoards(supabase, userId),
-      loadUserSignals(supabase, userId),
-      loadUserMemory(supabase, userId),
-      mentionedProjectIdPromise,
-      loadOpenQuotes(supabase, userId),
-      supabase.from("profiles").select("trade_tier").eq("id", userId).maybeSingle(),
-      loadCadDocuments(supabase, userId),
-      loadProductCadAssets(supabase),
+        : timed("classifySentiment", classifySentiment(LOVABLE_API_KEY, lastUserMsg)),
+      isShortFollowUp ? Promise.resolve(EMPTY_BRIEF) : timed("extractBrief", extractBrief(LOVABLE_API_KEY, lastUserMsg)),
+      timed("rag", ragPromise),
+      timed("userBoards", loadUserBoards(supabase, userId)),
+      timed("userSignals", loadUserSignals(supabase, userId)),
+      timed("userMemory", loadUserMemory(supabase, userId)),
+      timed("mentionedProject", mentionedProjectIdPromise),
+      timed("openQuotes", loadOpenQuotes(supabase, userId)),
+      timed("tradeTier", supabase.from("profiles").select("trade_tier").eq("id", userId).maybeSingle()),
+      timed("cadDocuments", loadCadDocuments(supabase, userId)),
+      timed("productCadAssets", loadProductCadAssets(supabase)),
     ]);
+    mark("rag_bundle_all", { total_ms: Math.round(performance.now() - bundleT0) });
 
     // Selection verbs must appear in the LATEST user message to authorize a
     // tearsheet proposal. Otherwise the turn is treated as discovery — the
@@ -3620,12 +3683,14 @@ serve(async (req) => {
       (sqlLoadConstraints.materials?.length || 0) +
       (sqlLoadConstraints.colors?.length || 0) +
       (sqlLoadConstraints.categories?.length || 0) > 0;
+    const catalogT0 = performance.now();
     const { designersList, piecesList: fullPiecesList, showroomBrands } = await loadCatalogContext(
       supabase,
       includePieces && !useRag,
       mentionsKnownDesigner ? mentionedDesigners : undefined,
       hasSqlConstraint && !mentionsKnownDesigner ? sqlLoadConstraints : undefined,
     );
+    mark("loadCatalogContext", { ms: Math.round(performance.now() - catalogT0), includePieces, useRag });
     // Detect "hard constraints matched zero pieces" so the UI can render a
     // friendly empty-state and the model can acknowledge it warmly instead of
     // hallucinating alternatives.
@@ -4048,7 +4113,9 @@ serve(async (req) => {
     }
 
     const resolvedProjectId = activeProjectId || mentionedProjectId;
+    const projectT0 = performance.now();
     const projectContext = await loadProjectContext(supabase, userId, resolvedProjectId);
+    mark("loadProjectContext", { ms: Math.round(performance.now() - projectT0), hasProject: !!resolvedProjectId });
     // Resolve trade discount % for this user (defaults to 8%).
     let tradeDiscountPct = 0.08;
     try {
@@ -4147,6 +4214,9 @@ serve(async (req) => {
     // Model router: Flash by default, Pro for complex multi-constraint briefs.
     const chosenModel = pickModel(lastUserMsg, includePieces);
 
+    mark("pre_llm", { model: chosenModel, tools: finalTools.length, toolChoice: typeof toolChoice === "string" ? toolChoice : (toolChoice?.function?.name ?? "forced") });
+    flushTrace("pre_llm");
+    const llmT0 = performance.now();
     const upstream = await chatFetch({
       method: "POST",
       headers: {
@@ -4163,6 +4233,7 @@ serve(async (req) => {
         stream_options: { include_usage: true },
       }),
     });
+    console.log(`[concierge trace] ${JSON.stringify({ phase: "llm_first_response", requestId, llm_ms: Math.round(performance.now() - llmT0), status: upstream.status })}`);
 
     if (!upstream.ok) {
       if (upstream.status === 429) {
@@ -5969,6 +6040,7 @@ serve(async (req) => {
     });
   } catch (e) {
     console.error("trade-concierge error:", e);
+    flushTrace("error", { message: e instanceof Error ? e.message : String(e) });
     return new Response(
       JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
