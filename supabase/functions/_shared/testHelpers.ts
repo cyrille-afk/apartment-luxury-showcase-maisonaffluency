@@ -14,9 +14,12 @@ export async function readConciergeStream(
   proposals: unknown[];
   escalations: unknown[];
   requestIds: string[];
-  inspectorEvents: Array<{ ok?: boolean; corrections?: unknown[]; ms?: number; request_id?: string }>;
+  inspectorEvents: Array<{ ok?: boolean; corrections?: unknown[]; ms?: number; request_id?: string; discovery?: boolean }>;
+  discoveryGuardEvents: Array<{ removed?: string[]; ms?: number; request_id?: string }>;
+  hardFallbackEvents: Array<{ source?: string; reason?: string; removed?: string[]; safe_fallback?: boolean; request_id?: string }>;
 }> {
-  if (!resp.body) return { text: "", proposals: [], escalations: [], requestIds: [], inspectorEvents: [] };
+  const empty = { text: "", proposals: [], escalations: [], requestIds: [], inspectorEvents: [], discoveryGuardEvents: [], hardFallbackEvents: [] };
+  if (!resp.body) return empty;
   const timeoutMs = opts.timeoutMs ?? 45_000;
   const reader = resp.body.getReader();
   const decoder = new TextDecoder();
@@ -25,9 +28,13 @@ export async function readConciergeStream(
   const proposals: unknown[] = [];
   const escalations: unknown[] = [];
   const requestIds: string[] = [];
-  const inspectorEvents: Array<{ ok?: boolean; corrections?: unknown[]; ms?: number; request_id?: string }> = [];
+  const inspectorEvents: Array<{ ok?: boolean; corrections?: unknown[]; ms?: number; request_id?: string; discovery?: boolean }> = [];
+  const discoveryGuardEvents: Array<{ removed?: string[]; ms?: number; request_id?: string }> = [];
+  const hardFallbackEvents: Array<{ source?: string; reason?: string; removed?: string[]; safe_fallback?: boolean; request_id?: string }> = [];
   let currentEvent: string | null = null;
   const started = Date.now();
+
+  const snapshot = () => ({ text, proposals, escalations, requestIds, inspectorEvents, discoveryGuardEvents, hardFallbackEvents });
 
   const handle = (jsonStr: string) => {
     if (jsonStr === "[DONE]") return "done";
@@ -44,6 +51,16 @@ export async function readConciergeStream(
       if (currentEvent === "inspector") {
         // deno-lint-ignore no-explicit-any
         inspectorEvents.push(parsed as any);
+        return;
+      }
+      if (currentEvent === "discovery_guard") {
+        // deno-lint-ignore no-explicit-any
+        discoveryGuardEvents.push(parsed as any);
+        return;
+      }
+      if (currentEvent === "hard_fallback") {
+        // deno-lint-ignore no-explicit-any
+        hardFallbackEvents.push(parsed as any);
         return;
       }
       // deno-lint-ignore no-explicit-any
@@ -71,12 +88,13 @@ export async function readConciergeStream(
       if (!line.startsWith("data: ")) continue;
       if (handle(line.slice(6).trim()) === "done") {
         try { await reader.cancel(); } catch { /* ignore */ }
-        return { text, proposals, escalations, requestIds, inspectorEvents };
+        return snapshot();
       }
     }
   }
-  return { text, proposals, escalations, requestIds, inspectorEvents };
+  return snapshot();
 }
+
 
 /** Case-insensitive substring match on the accumulated stream text. */
 export function streamContainsAny(haystack: string, needles: string[]): string | null {
