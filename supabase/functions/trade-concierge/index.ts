@@ -8,6 +8,7 @@ import { withSemanticCache } from "../_shared/aiCache.ts";
 import { coerceClearance, classifyResultFailure, countDimensionNumbers } from "../_shared/spatialFitValidation.ts";
 import { canAccessProject } from "../_shared/tenantAccess.ts";
 import { runInspectorPass, buildInspectorGroundTruth, buildInspectorLogRecord, logInspectorRun, validateRequirementsCoverage } from "../_shared/concierge-inspector.ts";
+import { deriveHardConstraints, applyHardConstraints, filterRowsByHardConstraints, type HardConstraints } from "../_shared/hardConstraints.ts";
 
 const SENTIMENT_MODEL = modelFor("cheap");
 const SENTIMENT_MAX_TOKENS = tokenBudget("classify");
@@ -1348,6 +1349,7 @@ async function loadCatalogContext(
   supabase: ReturnType<typeof createClient>,
   includePieces: boolean,
   designerFilter?: string[],
+  hardConstraints?: HardConstraints,
 ) {
   // Fetch published designers
   const { data: designers } = await supabase
@@ -1401,6 +1403,12 @@ async function loadCatalogContext(
   if (useDesignerFilter && filteredDesignerIds.length) {
     picksQuery = picksQuery.in("designer_id", filteredDesignerIds);
   }
+  if (hardConstraints) {
+    picksQuery = applyHardConstraints(picksQuery as any, hardConstraints, {
+      text: ["title", "materials", "category", "subcategory"],
+      category: "category",
+    }) as typeof picksQuery;
+  }
   const { data: picks } = includePieces ? await picksQuery : { data: [] as any[] };
 
   // Trade products — same designer-scoping when a filter is active.
@@ -1414,6 +1422,13 @@ async function loadCatalogContext(
     .limit(2000);
   if (useDesignerFilter && filteredBrandNames.size) {
     tradeQuery = tradeQuery.in("brand_name", Array.from(filteredBrandNames));
+  }
+  if (hardConstraints) {
+    tradeQuery = applyHardConstraints(tradeQuery as any, hardConstraints, {
+      text: ["product_name", "materials", "category", "subcategory"],
+      brand: "brand_name",
+      category: "category",
+    }) as typeof tradeQuery;
   }
   const { data: tradeAll } = includePieces
     ? await tradeQuery
@@ -2181,6 +2196,7 @@ async function loadRelevantPieces(
   query: string,
   userId: string | null,
   k = 40,
+  hardConstraints?: HardConstraints,
 ): Promise<{ contextText: string; rows: any[] } | null> {
   if (!apiKey || !query?.trim()) return null;
   try {
@@ -2191,13 +2207,35 @@ async function loadRelevantPieces(
       model: "openai/text-embedding-3-small",
       usage: { prompt_tokens: Math.ceil(query.length / 4), completion_tokens: 0, total_tokens: Math.ceil(query.length / 4) },
     }).catch(() => {});
-    const { data, error } = await supabase.rpc("match_catalog", {
+    // Over-fetch when hard constraints will filter the shortlist, so we still
+    // have enough survivors for the AI to reason over.
+    const wantsConstraintFilter = !!hardConstraints && (
+      (hardConstraints.materials?.length || 0) +
+      (hardConstraints.colors?.length || 0) +
+      (hardConstraints.categories?.length || 0) > 0
+    );
+    const matchCount = wantsConstraintFilter ? Math.min(k * 4, 200) : k;
+    const { data: rawData, error } = await supabase.rpc("match_catalog", {
       query_embedding: vec as any,
-      match_count: k,
+      match_count: matchCount,
     });
-    if (error || !Array.isArray(data) || data.length < 5) {
+    if (error || !Array.isArray(rawData) || rawData.length < 5) {
       if (error) console.error("match_catalog rpc failed:", error.message);
       return null;
+    }
+    // Post-filter the pgvector shortlist with the same token dictionary the
+    // SQL path uses, so hard constraints (color, material, category, brand
+    // exclusion) apply identically whether we use vector or bulk SQL.
+    const data = wantsConstraintFilter
+      ? filterRowsByHardConstraints(rawData, hardConstraints!).slice(0, k)
+      : rawData.slice(0, k);
+    if (data.length < 5) {
+      // Filter too strict — fall back to unfiltered top-K rather than blank.
+      console.warn("[concierge RAG] hard constraints filtered <5 rows; falling back", {
+        constraints: hardConstraints,
+        preFilter: rawData.length,
+      });
+      return { contextText: "", rows: [] };
     }
     const fmtLead = (r: any) => (r.lead_time ? String(r.lead_time).trim() : "");
     const fmtStock = (r: any) => (r.stock_status ? String(r.stock_status).trim() : "");
@@ -3303,9 +3341,23 @@ serve(async (req) => {
     const isShortFollowUp = wordCount <= 4 && !heuristicNeedsPieces;
 
     const mentionedProjectIdPromise = activeProjectId ? Promise.resolve(null) : resolveMentionedProjectId(supabase, userId, lastUserMsg);
+    // Hard-constraint pre-filter derived from the user's latest message:
+    // color + material tokens the caller has stated (e.g. "forest green oak
+    // dining table"). Applied to BOTH the pgvector RAG shortlist and the
+    // bulk SQL catalog load so the AI never sees candidates that violate
+    // a stated constraint. Empty on discovery turns → no filtering.
+    const preRequestConstraints = deriveHardConstraints(
+      [{ title: lastUserMsg }],
+    );
+    const hasAnyPreConstraint =
+      (preRequestConstraints.materials?.length || 0) +
+      (preRequestConstraints.colors?.length || 0) > 0;
+    if (hasAnyPreConstraint) {
+      console.log("[concierge hard-constraints]", JSON.stringify(preRequestConstraints));
+    }
     // Run sentiment + RAG retrieval in parallel with the rest. RAG is best-effort.
     const ragPromise = (heuristicNeedsPieces || lastUserMsg.length > 40)
-      ? loadRelevantPieces(supabase, LOVABLE_API_KEY, lastUserMsg, userId, 40)
+      ? loadRelevantPieces(supabase, LOVABLE_API_KEY, lastUserMsg, userId, 40, hasAnyPreConstraint ? preRequestConstraints : undefined)
       : Promise.resolve(null);
     const [sentiment, extractedBrief, ragResult, userBoards, userSignals, userMemory, mentionedProjectId, openQuotes, discountRow, cadDocuments, productCadAssets] = await Promise.all([
       isShortFollowUp
@@ -3454,10 +3506,26 @@ serve(async (req) => {
     // AND scope the catalog load to just those designers — no reason to ship
     // the full 2000-row catalog when the question is about one designer.
     const useRag = includePieces && !!ragResult && !mentionsKnownDesigner;
+    // Merge extractedBrief material/category signal into the SQL-load
+    // constraints so the bulk catalog path narrows even when the raw user
+    // message did not contain a keyword (the classifier already normalised it).
+    const sqlLoadConstraints: HardConstraints = {
+      materials: [
+        ...(preRequestConstraints.materials || []),
+        ...((effectiveBrief.brief.materials || []).map((m) => String(m).toLowerCase())),
+      ].filter(Boolean),
+      colors: preRequestConstraints.colors || [],
+      categories: (effectiveBrief.brief.categories || []).map((c) => String(c).toLowerCase()).filter(Boolean),
+    };
+    const hasSqlConstraint =
+      (sqlLoadConstraints.materials?.length || 0) +
+      (sqlLoadConstraints.colors?.length || 0) +
+      (sqlLoadConstraints.categories?.length || 0) > 0;
     const { designersList, piecesList: fullPiecesList, showroomBrands } = await loadCatalogContext(
       supabase,
       includePieces && !useRag,
       mentionsKnownDesigner ? mentionedDesigners : undefined,
+      hasSqlConstraint && !mentionsKnownDesigner ? sqlLoadConstraints : undefined,
     );
     const piecesList = useRag ? (ragResult as { contextText: string }).contextText : fullPiecesList;
 
