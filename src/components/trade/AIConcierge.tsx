@@ -1174,7 +1174,9 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
             // user has a one-click path back to a working turn.
             const friendly = /IDLE_TIMEOUT|504|timeout/i.test(msg)
               ? "The concierge timed out before answering."
-              : msg || "The concierge hit an error.";
+              : msg === "STREAM_TRUNCATED"
+                ? "The connection to the concierge dropped after auto-reconnect attempts."
+                : msg || "The concierge hit an error.";
             pushRetry(text, friendly);
           }
           setStreaming(false);
