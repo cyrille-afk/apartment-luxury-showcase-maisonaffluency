@@ -3232,6 +3232,7 @@ async function hydrateQuotePreview(
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
+    logCorsInspection(req, "preflight");
     return new Response(null, { headers: corsHeaders });
   }
   // Single end-to-end trace id for this HTTP invocation. Honored from the
@@ -3239,6 +3240,14 @@ serve(async (req) => {
   // to the initial SSE `event: request_id` frame AND every Inspector log
   // entry so a run can be traced client → edge → inspector.
   const requestId = req.headers.get("x-request-id") || (crypto?.randomUUID?.() ?? `req-${Date.now()}`);
+  logCorsInspection(req, "request", requestId);
+
+  if (req.method !== "POST") {
+    console.warn(`[concierge cors_block] ${JSON.stringify({ phase: "request", requestId, method: req.method, reason: "method_not_allowed_at_handler" })}`);
+    return new Response(JSON.stringify({ error: "Method not allowed" }), {
+      status: 405, headers: { ...corsHeaders, "Content-Type": "application/json", "Allow": "POST, OPTIONS" },
+    });
+  }
 
   try {
     const auth = await requireUser(req);
