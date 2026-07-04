@@ -6063,6 +6063,40 @@ serve(async (req) => {
               controller.enqueue(encoder.encode(`data: ${JSON.stringify(frame)}\n\n`));
             };
 
+            // Trivial-completion sanity net: some upstream models (or the
+            // Cloudflare Llama fallback with tools stripped) occasionally emit
+            // a single-token reply like `true` / `false` / `null` / `{}`.
+            // The guardrail pipeline would happily pass those through — they
+            // contain no designer names — so the user sees the literal word
+            // "true" as the assistant reply. Detect and swap for the safe
+            // discovery fallback before running any guard/inspector.
+            {
+              const trivial = assistantTextBuf.trim();
+              const looksTrivial =
+                trivial.length > 0 &&
+                trivial.length <= 8 &&
+                /^["'`]?(true|false|null|undefined|yes|no|ok|okay|\{\}|\[\]|""|'')["'`]?[.!?]?$/i.test(trivial);
+              const hasAnyCard = toolCallBuffers.size > 0;
+              if (looksTrivial && !hasAnyCard) {
+                try {
+                  console.log(JSON.stringify({
+                    tag: "concierge_trivial_completion",
+                    request_id: requestId,
+                    ts: new Date().toISOString(),
+                    raw: trivial,
+                    len: trivial.length,
+                  }));
+                } catch { /* best-effort */ }
+                controller.enqueue(encoder.encode(`event: hard_fallback\ndata: ${JSON.stringify({ source: "trivial_completion", reason: "single_token_reply", raw: trivial, request_id: requestId })}\n\n`));
+                const frame = { choices: [{ delta: { content: SAFE_FALLBACK_PROSE } }] };
+                controller.enqueue(encoder.encode(`data: ${JSON.stringify(frame)}\n\n`));
+                if (sawDone) controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+                try { await finalizeResume("complete"); } catch { /* ignore */ }
+                controller.close();
+                return;
+              }
+            }
+
             try {
               const cardBufs = Array.from(toolCallBuffers.values()).filter((b) =>
                 b.name === "propose_tearsheet" || b.name === "add_to_tearsheet" ||
