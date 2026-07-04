@@ -12,6 +12,7 @@ import { installFramePersistence, serveResume } from "./_resume.ts";
 import { deriveHardConstraints, applyHardConstraints, filterRowsByHardConstraints, type HardConstraints } from "../_shared/hardConstraints.ts";
 import { inferDimensionConstraints, filterRowsByDimensionConstraints, type DimensionConstraints } from "../_shared/dimensionConstraints.ts";
 import { buildConstraintCompliance, renderComplianceNote } from "../_shared/constraintCompliance.ts";
+import { renderSpecSheetBlock, buildSpecSheetRows } from "../_shared/specSheetBlock.ts";
 import {
   inferLeadTimeConstraints,
   filterRowsByLeadTimeConstraints,
