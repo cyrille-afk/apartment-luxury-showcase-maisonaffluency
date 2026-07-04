@@ -10,6 +10,7 @@ import { canAccessProject } from "../_shared/tenantAccess.ts";
 import { runInspectorPass, buildInspectorGroundTruth, buildInspectorLogRecord, logInspectorRun, validateRequirementsCoverage } from "../_shared/concierge-inspector.ts";
 import { installFramePersistence, serveResume } from "./_resume.ts";
 import { deriveHardConstraints, applyHardConstraints, filterRowsByHardConstraints, type HardConstraints } from "../_shared/hardConstraints.ts";
+import { buildNoStrictTypologyReply, typologyLabel } from "./_no_strict_typology_reply.ts";
 
 const SENTIMENT_MODEL = modelFor("cheap");
 const SENTIMENT_MAX_TOKENS = tokenBudget("classify");
@@ -1106,9 +1107,9 @@ NO-NAMEDROPPING-IN-DISCOVERY RULE: While still qualifying (asking sticky-fact qu
 REFERENCE-PHOTO RULE (user uploads a photo of a specific piece, e.g. a table, sofa, chair, lamp, rug, etc.):
 1. First, describe in one short sentence what you see (typology, silhouette, material, era/style cue — e.g. "a classical mahogany twin-pedestal oval dining table, Art Deco lineage").
 2. Then scan the CURATED PIECES below for the closest spiritual matches on typology + material + proportion + era. If you find 2+ plausible matches, call \`propose_tearsheet\` with those pieces and explain in one line WHY each was chosen against the reference (material echo, silhouette, scale).
-3. If the Maison Affluency Curation has nothing close, apologise briefly and sincerely ("I don't have a true twin to this piece in our current curated selection") and offer the client TWO explicit choices, as a question:
-   (a) "Would you like me to expand my search through the designers' own collections — I can use our Axonometric Studio archives and tools to look for a closer match," OR
-   (b) "or shall I propose a more contemporary reinterpretation from the Maison Affluency Curation? — and I'll explain why each piece honours the spirit of your reference (silhouette, materiality, or proportion)."
+3. If the Maison Affluency Curation has nothing close, state that plainly without a self-correction, apology, or external-archive claim, then offer the client TWO explicit choices, as a question:
+   (a) broaden the typology/material constraints inside the Maison Affluency Curation, OR
+   (b) propose a more contemporary reinterpretation from the Maison Affluency Curation, clearly explaining why each piece honours the spirit of the reference (silhouette, materiality, or proportion).
    Wait for the user to choose before acting. Never silently pivot to modern alternatives without naming the trade-off.
 4. Never claim a curated piece "matches" the photo when it doesn't — under-promise on the likeness and over-deliver on the reasoning.
 
@@ -1136,7 +1137,7 @@ You must ONLY mention designers, ateliers, pieces, brands, and works that appear
 Before sending ANY reply that names a designer or piece, silently verify:
   1. Every designer name in your draft appears verbatim in CURATION DATA — DESIGNERS & ATELIERS.
   2. Every piece title in your draft appears verbatim in CURATED PIECES.
-If either check fails, DELETE the offending sentence and either (a) call \`propose_tearsheet\` with real pick_ids from CURATED PIECES, or (b) reply with the refusal phrase above and offer to expand the search through the designers' own collections via Axonometric Studio archives. There is NO situation in which inventing a name or piece is acceptable — not as an "example", not as a "suggestion", not as "inspiration".
+If either check fails, DELETE the offending sentence and either (a) call \`propose_tearsheet\` with real pick_ids from CURATED PIECES, or (b) reply with the refusal phrase above and ask whether to broaden the typology/material constraints inside the Maison Affluency Curation. There is NO situation in which inventing a name or piece is acceptable — not as an "example", not as a "suggestion", not as "inspiration".
 
 ## ABSOLUTE LANGUAGE RULE — NEVER SAY "CATALOG"
 In every user-facing message, NEVER use the words "catalog", "catalogue", "cataloged", or "catalogued". Maison Affluency is the deliberate opposite of an Invisible Collection-style catalog: we are a curation. Always say:
@@ -1165,7 +1166,7 @@ You have two tools for tearsheets:
 
 CRITICAL — NEVER list catalog pieces in plain text. Whenever your reply would mention 2+ catalog pieces by name (e.g. "you might consider X, Y and Z", "I'd recommend the following options:", a numbered/bulleted list of pieces, or a colon-separated "Brand X's Oak Table: …" mini-essay per piece), you MUST instead call \`propose_tearsheet\` (or \`add_to_tearsheet\`) and let the visual card render them. Forbidden prose patterns include: "I'd recommend the following…", "Here are some options…", "Consider the following pieces…", and any newline-separated list where each item names a piece. The card carries the rationale (\`pick_rationales\`) — do NOT also re-explain each piece in chat. After the tool call, ONE short sentence only (e.g. "Here's a first edit — review and amend below.").
 
-SINGLE-PIECE PROSE TRAP — describing ONE piece in prose ("I suggest considering a piece like the 'Elliptical Dining Table' by a renowned designer…", "one piece that caught my eye…", "this table features…") is ALSO FORBIDDEN when the user asked for a selection / proposal / curation / reinterpretation / alternatives. Whenever the user uses verbs like "propose", "suggest", "recommend", "show", "pull", "curate", "reinterpret", "alternatives", "options" → you MUST call \`propose_tearsheet\` with real pick_ids from CURATED PIECES. If you cannot find ≥2 real matches, follow the ZERO-MATCH protocol (apologise + offer Axonometric Studio expansion) — do NOT improvise a single fictional piece in prose as a substitute.
+SINGLE-PIECE PROSE TRAP — describing ONE piece in prose ("I suggest considering a piece like the 'Elliptical Dining Table' by a renowned designer…", "one piece that caught my eye…", "this table features…") is ALSO FORBIDDEN when the user asked for a selection / proposal / curation / reinterpretation / alternatives. Whenever the user uses verbs like "propose", "suggest", "recommend", "show", "pull", "curate", "reinterpret", "alternatives", "options" → you MUST call \`propose_tearsheet\` with real pick_ids from CURATED PIECES. If you cannot find ≥2 real matches, follow the ZERO-MATCH protocol: state the mismatch plainly and ask whether to broaden typology/material constraints inside the Maison Affluency Curation — do NOT improvise a single fictional piece in prose as a substitute.
 
 ANTI-RAMBLE RULE: Do NOT close with a fresh open-ended question ("could you tell me a bit more about the townhouse's architectural style?") when you already have ≥3 sticky facts. Propose first; refine after the user reacts to the card.
 
@@ -1321,7 +1322,7 @@ PIECE-TYPE FILTERING — when the user asks for a specific TYPE of piece (e.g. "
 2. A piece only qualifies if its title or its subcategory/category explicitly matches. Do NOT include items just because they share the broader category (e.g. "Lighting" alone is NOT a chandelier — only items whose title or subcategory contains "chandelier" qualify). A "Sconce" or a "Lamp" is NOT a "Chandelier".
 3. TYPOLOGY IS NON-NEGOTIABLE. A lamp is NOT a table. A bookshelf is NOT a table. A sideboard is NOT a dining table. A cabinet is NOT a table. Shared material (oak, walnut, bronze) is NEVER a substitute for the requested typology — never propose a non-table when the user asked for a table, even if the wood/finish matches the brief.
 4. Return ALL qualifying matches. The list IS complete — never truncate or sample.
-5. If ZERO curated pieces match the requested typology, DO NOT call \`propose_tearsheet\` with adjacent-category substitutes. Instead reply in prose: (a) apologise briefly that the Maison Affluency Curation has no [typology] matching the brief today, (b) offer to expand the search through the designers' own collections using our Axonometric Studio archives and tools, and (c) optionally suggest a more modern or alternative direction the curated selection DOES cover, clearly framed as an alternative — not as a substitute. Wait for the user to choose before drafting a tearsheet.
+5. If ZERO curated pieces match the requested typology, DO NOT call \`propose_tearsheet\` with adjacent-category substitutes. Instead reply in prose: state plainly that the Maison Affluency Curation has no [typology] matching the brief today, then ask whether to broaden the typology/material constraints or consider a clearly-framed alternative direction the curated selection DOES cover. Do not apologise, self-correct, mention external archives, or imply there is a hidden search source. Wait for the user to choose before drafting a tearsheet.
 
 CRITICAL SEARCH PROCEDURE — when the user combines designer + material/finish (e.g. "Man of Parts in oak"):
 1. First, locate EVERY line where the designer name appears (literal substring scan of the "by X" portion).
@@ -1329,7 +1330,7 @@ CRITICAL SEARCH PROCEDURE — when the user combines designer + material/finish 
 3. Return ALL matches. Only after a true scan with zero matches may you say "I don't currently have…".
 
 Worked example A: "show me chandeliers" → scan every line for 'chandelier' in title or subcategory → expected matches include Calliope Medium Chandelier, Cloud Chandelier, Carolina Chandelier, Curve XXL Chandelier, Firefly Chandelier, MicMac Chandelier, Bronze MicMac Chandelier. Returning a sconce or table lamp for this query would be a factual error.
-Worked example B: "I'm looking for a 340cm oak dining table" → scan every line where title or subcategory contains 'table' (ideally 'dining table'). If none qualify, DO NOT pad the tearsheet with oak lamps, oak bookshelves, or oak sideboards. Reply in prose, apologise, and offer to expand the search through the designers' own collections via our Axonometric Studio archives OR suggest a more modern alternative typology — explicitly framed as an alternative, not a substitute. Never use the word "catalog".
+Worked example B: "I'm looking for a 340cm oak dining table" → scan every line where title or subcategory contains 'table' (ideally 'dining table'). If none qualify, DO NOT pad the tearsheet with oak lamps, oak bookshelves, or oak sideboards. Reply in prose with a plain no-match notice and ask whether to broaden typology/material constraints OR consider a more modern alternative typology — explicitly framed as an alternative, not a substitute. Never use the word "catalog".
 
 ${piecesList}
 
@@ -2516,7 +2517,7 @@ function dedupePreviewRows(previewRaw: any[], pickIds: string[]): { previewRaw: 
 // typologyLabel + buildNoStrictTypologyReply live in a dedicated module so
 // they can be unit-tested without importing this whole file (see
 // no_strict_typology_reply_test.ts). Re-exported for backwards compat.
-export { buildNoStrictTypologyReply, typologyLabel } from "./_no_strict_typology_reply.ts";
+export { buildNoStrictTypologyReply, typologyLabel };
 
 function buildOpeningBriefDiscoveryReply(latestUserMessage: string, langCode = "en"): string {
   const lower = (latestUserMessage || "").toLowerCase();
