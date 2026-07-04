@@ -456,7 +456,11 @@ Return a JSON object with a recommendations array:
       }
     })
 
-    return new Response(JSON.stringify({ recommendations: enriched, board_title: boardTitle }), {
+    return new Response(JSON.stringify({
+      recommendations: enriched,
+      board_title: boardTitle,
+      applied_constraints: hardConstraints,
+    }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
   } catch (error) {
