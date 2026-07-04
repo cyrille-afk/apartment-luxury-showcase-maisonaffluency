@@ -13,6 +13,7 @@ import { EscalationCard } from "@/components/trade/concierge/EscalationCard";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { buildSeedDirective } from "@/lib/conciergePrefill";
 import {
   conciergeCopy,
   conciergeStatusCopy,
