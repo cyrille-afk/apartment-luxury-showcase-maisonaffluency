@@ -6802,6 +6802,7 @@ export type Database = {
           currency: string
           default_ship_mode: string
           designer: string
+          dimensions: string
           id: string
           lead_time: string
           materials: string
