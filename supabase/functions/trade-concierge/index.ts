@@ -7,7 +7,7 @@ import { embedQuery } from "../_shared/aiEmbeddings.ts";
 import { withSemanticCache } from "../_shared/aiCache.ts";
 import { coerceClearance, classifyResultFailure, countDimensionNumbers } from "../_shared/spatialFitValidation.ts";
 import { canAccessProject } from "../_shared/tenantAccess.ts";
-import { runInspectorPass, buildInspectorGroundTruth, buildInspectorLogRecord, logInspectorRun, validateRequirementsCoverage } from "../_shared/concierge-inspector.ts";
+import { runInspectorPass, buildInspectorGroundTruth, buildInspectorLogRecord, logInspectorRun, validateRequirementsCoverage, runDiscoveryProseGuard } from "../_shared/concierge-inspector.ts";
 import { installFramePersistence, serveResume } from "./_resume.ts";
 import { deriveHardConstraints, applyHardConstraints, filterRowsByHardConstraints, type HardConstraints } from "../_shared/hardConstraints.ts";
 import { buildNoStrictTypologyReply, typologyLabel } from "./_no_strict_typology_reply.ts";
@@ -5713,14 +5713,17 @@ serve(async (req) => {
         // Inspector gate: when the planner expects a card (tearsheet / quote /
         // ffe / etc), buffer prose deltas instead of streaming live so the
         // Inspector agent can diff-check against DB ground truth and rewrite
-        // any factual claim before the user sees it. Non-card chat turns keep
-        // live streaming — perceived latency wins.
+        // any factual claim before the user sees it.
         const plannerExpectsCard = Array.isArray(effectiveBrief?.plan) && effectiveBrief.plan.some((t) =>
           t === "propose_tearsheet" || t === "add_to_tearsheet" ||
           t === "draft_quote" || t === "add_to_quote" ||
           t === "propose_ffe_rows" || t === "estimate_shipping"
         );
-        const shouldBufferProseForInspector = plannerExpectsCard && !shouldSuppressSelectionProse;
+        // Discovery-stage guard: ALSO buffer prose on turns with no expected
+        // card, so the Discovery Guard can scrub invented brand/piece names
+        // before the user sees them. Trust > streaming latency for a luxury
+        // concierge. Only bypass when we already fully suppress prose.
+        const shouldBufferProseForInspector = !shouldSuppressSelectionProse;
         const bufferedProseLines: string[] = [];
         // Some fallback models (notably Cloudflare Llama) do NOT emit native
         // `tool_calls`; they stringify the JSON envelope into `delta.content`.
@@ -5973,10 +5976,60 @@ serve(async (req) => {
                   controller.enqueue(encoder.encode(`data: ${JSON.stringify(frame)}\n\n`));
                 }
               } else {
-                // No card actually emitted (or no prose) — release the
-                // buffered prose lines verbatim so the user still sees them.
-                for (const line of bufferedProseLines) {
-                  controller.enqueue(encoder.encode(line + "\n"));
+                // No card emitted this turn — run the Discovery Guard to
+                // strip any invented brand / piece names from the buffered
+                // prose (NO-NAMEDROPPING-IN-DISCOVERY enforcement).
+                const proseTextForGuard = assistantTextBuf.trim();
+                if (proseTextForGuard.length > 0) {
+                  // Build allowlists from the curation snapshot fed to the
+                  // model this turn. designerNames comes from the DB query;
+                  // piece titles are extracted from the piecesList markdown
+                  // (`- "Title" by Designer …`).
+                  const allowedDesigners = Array.isArray(designerNames) ? designerNames.slice(0, 400) : [];
+                  const titleRe = /["“]([^"”\n]{2,120})["”]/g;
+                  const allowedTitles: string[] = [];
+                  let tm: RegExpExecArray | null;
+                  const src = typeof piecesList === "string" ? piecesList : "";
+                  while ((tm = titleRe.exec(src)) !== null) {
+                    const t = tm[1].trim();
+                    if (t) allowedTitles.push(t);
+                    if (allowedTitles.length >= 800) break;
+                  }
+                  const guard = await runDiscoveryProseGuard({
+                    prose: proseTextForGuard,
+                    allowedDesigners,
+                    allowedPieceTitles: allowedTitles,
+                    apiKey: LOVABLE_API_KEY,
+                  });
+                  const finalProse = guard.ok ? guard.corrected_prose : proseTextForGuard;
+                  try {
+                    console.log(JSON.stringify({
+                      tag: "concierge_discovery_guard",
+                      request_id: requestId,
+                      ts: new Date().toISOString(),
+                      ok: guard.ok,
+                      ms: guard.ms,
+                      reason: guard.reason,
+                      removed_names: guard.removed_names,
+                      changed: guard.ok && finalProse.trim() !== proseTextForGuard.trim(),
+                      original_len: proseTextForGuard.length,
+                      corrected_len: finalProse.length,
+                      allowed_designers_count: allowedDesigners.length,
+                      allowed_titles_count: allowedTitles.length,
+                    }));
+                  } catch { /* best-effort */ }
+                  if (guard.removed_names.length > 0) {
+                    controller.enqueue(encoder.encode(`event: discovery_guard\ndata: ${JSON.stringify({ removed: guard.removed_names, ms: guard.ms, request_id: requestId })}\n\n`));
+                  }
+                  if (finalProse) {
+                    const frame = { choices: [{ delta: { content: finalProse } }] };
+                    controller.enqueue(encoder.encode(`data: ${JSON.stringify(frame)}\n\n`));
+                  }
+                } else {
+                  // No prose at all — release whatever was buffered as-is.
+                  for (const line of bufferedProseLines) {
+                    controller.enqueue(encoder.encode(line + "\n"));
+                  }
                 }
               }
             } catch (inspErr) {

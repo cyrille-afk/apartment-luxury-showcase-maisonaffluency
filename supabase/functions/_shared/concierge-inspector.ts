@@ -159,6 +159,150 @@ export async function runInspectorPass(opts: {
   }
 }
 
+// ---------------------------------------------------------------------------
+// Discovery-stage prose guard
+// ---------------------------------------------------------------------------
+//
+// Runs on turns where NO card was emitted (pure discovery / clarification /
+// chitchat). Strips any specific product, designer, brand, or atelier name
+// that the model may have invented from training data, unless the name is a
+// literal substring of the allowlist assembled from the CURATION DATA the
+// model was fed this turn.
+//
+// This is the safety net for the NO-NAMEDROPPING-IN-DISCOVERY rule and the
+// "never invent piece names" rule when no ground-truth card exists to diff
+// against. Fail-open: on error the original prose is returned unchanged.
+
+export type DiscoveryGuardResult = {
+  ok: boolean;
+  corrected_prose: string;
+  removed_names: string[];
+  ms: number;
+  reason?: string;
+};
+
+const DISCOVERY_GUARD_MODEL = "google/gemini-3.1-flash-lite";
+const DISCOVERY_GUARD_TIMEOUT_MS = 2500;
+
+const DISCOVERY_GUARD_SYSTEM = `You are the Discovery Guard — a hallucination scrubber for a luxury B2B interior-design concierge (Felix, Maison Affluency).
+
+You receive:
+1. ASSISTANT_PROSE — a discovery / clarification reply the assistant is about to send. NO product card is being sent with it.
+2. ALLOWED_DESIGNERS — the ONLY designer / atelier / brand names the assistant is permitted to name.
+3. ALLOWED_PIECE_TITLES — the ONLY specific product / piece titles the assistant is permitted to name.
+
+RULES:
+- Any proper-noun designer, atelier, brand, studio, or maison name in ASSISTANT_PROSE that is NOT a literal case-insensitive substring of ALLOWED_DESIGNERS must be removed. Examples of names to STRIP if not in the allowlist: Poliform, Lasvit, Moooi, B&B Italia, Cassina, Minotti, Baxter, Flexform, Fendi Casa, Vitra, Herman Miller, Knoll, Roche Bobois, Ligne Roset, Kelly Wearstler, John Pawson, Vincent Van Duysen, Piero Lissoni, Patricia Urquiola, Jean-Michel Frank, etc.
+- Any specific PIECE / PRODUCT NAME (usually a quoted or capitalised title like "Torus", "Luminous Aura", "Helix", "Elliptical Dining Table") that is NOT a literal case-insensitive substring of ALLOWED_PIECE_TITLES must be removed. This applies EVEN IF the accompanying designer name IS in the allowlist — piece titles must be verbatim from the allowlist or gone.
+- Rewrite the sentence to keep the useful qualifying question or atmosphere framing intact WITHOUT naming any specific brand or piece. Do NOT invent a replacement name. Do NOT say "I could suggest" or "for example" — just drop the namedrop and keep the rest of the sentence readable.
+- Do NOT add apologies, do NOT mention external archives ("Axonometric Studio", "designers' own collections"), do NOT self-correct in the prose ("actually, on second thought…").
+- Preserve tone, register, paragraph structure, questions, and any user-facing formatting. Keep the assistant's persona (Felix, the concierge).
+- The word "Maison Affluency" is always allowed. "Felix" is always allowed. Generic material / typology words (bronze, stone, oak, dining table, chandelier) are always allowed.
+- If the prose is already clean, return it unchanged with an empty removed_names array.
+
+Output STRICT JSON only, no code fences:
+{
+  "corrected_prose": "<the cleaned (or unchanged) prose>",
+  "removed_names": ["<name1>", "<name2>"]
+}`;
+
+export async function runDiscoveryProseGuard(opts: {
+  prose: string;
+  allowedDesigners: string[];
+  allowedPieceTitles: string[];
+  apiKey: string;
+}): Promise<DiscoveryGuardResult> {
+  const t0 = Date.now();
+  const prose = (opts.prose || "").trim();
+  if (!prose) {
+    return { ok: true, corrected_prose: prose, removed_names: [], ms: Date.now() - t0, reason: "empty_prose" };
+  }
+  if (!opts.apiKey) {
+    return { ok: false, corrected_prose: prose, removed_names: [], ms: Date.now() - t0, reason: "no_api_key" };
+  }
+
+  // Cheap pre-check: if the prose contains no capitalised multi-letter tokens
+  // beyond obvious common words, skip the LLM round-trip. Keeps happy-path
+  // latency low.
+  const capTokens = prose.match(/\b[A-Z][A-Za-z&'’\-]{2,}(?:\s+[A-Z][A-Za-z&'’\-]{2,}){0,3}\b/g) || [];
+  const COMMON_STOP = new Set([
+    "Maison", "Affluency", "Felix", "I", "The", "This", "That", "You", "Your", "We", "Our",
+    "Let", "Would", "Could", "Should", "Once", "For", "With", "And", "But", "Or", "If",
+    "Curation", "Discover", "Discovery", "Tearsheet", "Quote", "Showroom", "Gallery",
+    "Belgravia", "Mayfair", "London", "Paris", "Milan", "Monaco", "New York",
+  ]);
+  const suspicious = capTokens.filter((t) => {
+    // Drop if every whitespace-separated part is a stop word
+    return !t.split(/\s+/).every((p) => COMMON_STOP.has(p));
+  });
+  if (!suspicious.length) {
+    return { ok: true, corrected_prose: prose, removed_names: [], ms: Date.now() - t0, reason: "no_suspicious_tokens" };
+  }
+
+  const userPayload = {
+    ASSISTANT_PROSE: prose,
+    ALLOWED_DESIGNERS: opts.allowedDesigners.slice(0, 400),
+    ALLOWED_PIECE_TITLES: opts.allowedPieceTitles.slice(0, 800),
+  };
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), DISCOVERY_GUARD_TIMEOUT_MS);
+  try {
+    const resp = await fetch(INSPECTOR_URL, {
+      method: "POST",
+      signal: controller.signal,
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${opts.apiKey}`,
+      },
+      body: JSON.stringify({
+        model: DISCOVERY_GUARD_MODEL,
+        temperature: 0,
+        max_tokens: 900,
+        response_format: { type: "json_object" },
+        messages: [
+          { role: "system", content: DISCOVERY_GUARD_SYSTEM },
+          { role: "user", content: JSON.stringify(userPayload) },
+        ],
+      }),
+    });
+    if (!resp.ok) {
+      return { ok: false, corrected_prose: prose, removed_names: [], ms: Date.now() - t0, reason: `http_${resp.status}` };
+    }
+    const j = await resp.json().catch(() => null);
+    const raw = j?.choices?.[0]?.message?.content;
+    if (typeof raw !== "string") {
+      return { ok: false, corrected_prose: prose, removed_names: [], ms: Date.now() - t0, reason: "no_content" };
+    }
+    let parsed: any;
+    try {
+      parsed = JSON.parse(raw);
+    } catch {
+      const fence = raw.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+      if (fence) {
+        try { parsed = JSON.parse(fence[1]); } catch { /* fall through */ }
+      }
+    }
+    if (!parsed || typeof parsed.corrected_prose !== "string") {
+      return { ok: false, corrected_prose: prose, removed_names: [], ms: Date.now() - t0, reason: "parse_failed" };
+    }
+    const removed = Array.isArray(parsed.removed_names)
+      ? parsed.removed_names.filter((x: unknown) => typeof x === "string").slice(0, 20).map((s: string) => s.slice(0, 120))
+      : [];
+    return {
+      ok: true,
+      corrected_prose: String(parsed.corrected_prose).slice(0, 4000),
+      removed_names: removed,
+      ms: Date.now() - t0,
+    };
+  } catch (e) {
+    const reason = (e as Error)?.name === "AbortError" ? "timeout" : `error:${(e as Error)?.message || "unknown"}`;
+    return { ok: false, corrected_prose: prose, removed_names: [], ms: Date.now() - t0, reason };
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 // Build the compact ground-truth object from emitted tool-call buffers +
 // hydrated preview rows. Cheap and pure — no I/O.
 export function buildInspectorGroundTruth(
