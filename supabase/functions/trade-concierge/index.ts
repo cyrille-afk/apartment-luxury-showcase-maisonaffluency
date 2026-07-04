@@ -2196,6 +2196,7 @@ async function loadRelevantPieces(
   query: string,
   userId: string | null,
   k = 40,
+  hardConstraints?: HardConstraints,
 ): Promise<{ contextText: string; rows: any[] } | null> {
   if (!apiKey || !query?.trim()) return null;
   try {
@@ -2206,13 +2207,35 @@ async function loadRelevantPieces(
       model: "openai/text-embedding-3-small",
       usage: { prompt_tokens: Math.ceil(query.length / 4), completion_tokens: 0, total_tokens: Math.ceil(query.length / 4) },
     }).catch(() => {});
-    const { data, error } = await supabase.rpc("match_catalog", {
+    // Over-fetch when hard constraints will filter the shortlist, so we still
+    // have enough survivors for the AI to reason over.
+    const wantsConstraintFilter = !!hardConstraints && (
+      (hardConstraints.materials?.length || 0) +
+      (hardConstraints.colors?.length || 0) +
+      (hardConstraints.categories?.length || 0) > 0
+    );
+    const matchCount = wantsConstraintFilter ? Math.min(k * 4, 200) : k;
+    const { data: rawData, error } = await supabase.rpc("match_catalog", {
       query_embedding: vec as any,
-      match_count: k,
+      match_count: matchCount,
     });
-    if (error || !Array.isArray(data) || data.length < 5) {
+    if (error || !Array.isArray(rawData) || rawData.length < 5) {
       if (error) console.error("match_catalog rpc failed:", error.message);
       return null;
+    }
+    // Post-filter the pgvector shortlist with the same token dictionary the
+    // SQL path uses, so hard constraints (color, material, category, brand
+    // exclusion) apply identically whether we use vector or bulk SQL.
+    const data = wantsConstraintFilter
+      ? filterRowsByHardConstraints(rawData, hardConstraints!).slice(0, k)
+      : rawData.slice(0, k);
+    if (data.length < 5) {
+      // Filter too strict — fall back to unfiltered top-K rather than blank.
+      console.warn("[concierge RAG] hard constraints filtered <5 rows; falling back", {
+        constraints: hardConstraints,
+        preFilter: rawData.length,
+      });
+      return { contextText: "", rows: [] };
     }
     const fmtLead = (r: any) => (r.lead_time ? String(r.lead_time).trim() : "");
     const fmtStock = (r: any) => (r.stock_status ? String(r.stock_status).trim() : "");
