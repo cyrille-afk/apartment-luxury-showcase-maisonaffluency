@@ -440,11 +440,70 @@ console.log(`[concierge] chat backend: ${USE_GEMINI_DIRECT ? "google-ai-studio" 
 
 
 
+const ALLOWED_REQUEST_HEADERS = [
+  "authorization",
+  "x-client-info",
+  "apikey",
+  "content-type",
+  "x-request-id",
+  "x-concierge-surface",
+  "x-concierge-sid",
+  "x-supabase-client-platform",
+  "x-supabase-client-platform-version",
+  "x-supabase-client-runtime",
+  "x-supabase-client-runtime-version",
+];
+const ALLOWED_REQUEST_HEADERS_SET = new Set(ALLOWED_REQUEST_HEADERS.map((h) => h.toLowerCase()));
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type, x-request-id, x-concierge-surface, x-concierge-sid, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
+  "Access-Control-Allow-Headers": ALLOWED_REQUEST_HEADERS.join(", "),
+  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+  "Access-Control-Max-Age": "86400",
 };
+
+/**
+ * Emit a structured "cors_block" log line whenever an OPTIONS preflight or a
+ * POST arrives with headers we don't recognise, or from an origin/method that
+ * would be rejected downstream. Purely observational — we still return the
+ * corsHeaders response, so browsers get the same behaviour they always did,
+ * but we now have a searchable audit trail of every mismatch that could break
+ * a stream.
+ */
+function logCorsInspection(req: Request, phase: "preflight" | "request", requestId?: string) {
+  try {
+    const origin = req.headers.get("origin") || "";
+    const method = req.method;
+    const acrm = req.headers.get("access-control-request-method") || "";
+    const acrh = req.headers.get("access-control-request-headers") || "";
+    const requestedHeaders = acrh
+      ? acrh.split(",").map((h) => h.trim().toLowerCase()).filter(Boolean)
+      : phase === "request"
+      ? Array.from(req.headers.keys()).map((h) => h.toLowerCase())
+      : [];
+    const unknown = requestedHeaders.filter((h) => !ALLOWED_REQUEST_HEADERS_SET.has(h) && !h.startsWith("sec-") && !["accept","accept-language","accept-encoding","cache-control","connection","host","origin","referer","user-agent","pragma","dnt","cookie"].includes(h));
+    const methodBlocked = phase === "preflight" && acrm && !["GET","POST","OPTIONS"].includes(acrm.toUpperCase());
+    if (unknown.length > 0 || methodBlocked) {
+      console.warn(
+        `[concierge cors_block] ${JSON.stringify({
+          phase,
+          requestId: requestId || null,
+          origin,
+          method,
+          requestedMethod: acrm || null,
+          requestedHeaders: acrh || null,
+          unknownHeaders: unknown,
+          methodBlocked: !!methodBlocked,
+          reason: methodBlocked ? "method_not_allowed" : "header_not_in_allow_list",
+          hint: unknown.length
+            ? `Add ${unknown.join(", ")} to ALLOWED_REQUEST_HEADERS in trade-concierge/index.ts`
+            : "Add the requested method to Access-Control-Allow-Methods",
+        })}`,
+      );
+    }
+  } catch (e) {
+    console.warn("[concierge cors_block] inspection failed:", (e as Error)?.message);
+  }
+}
 
 const TOOLS = [
   {
@@ -3173,6 +3232,7 @@ async function hydrateQuotePreview(
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
+    logCorsInspection(req, "preflight");
     return new Response(null, { headers: corsHeaders });
   }
   // Single end-to-end trace id for this HTTP invocation. Honored from the
@@ -3180,6 +3240,14 @@ serve(async (req) => {
   // to the initial SSE `event: request_id` frame AND every Inspector log
   // entry so a run can be traced client → edge → inspector.
   const requestId = req.headers.get("x-request-id") || (crypto?.randomUUID?.() ?? `req-${Date.now()}`);
+  logCorsInspection(req, "request", requestId);
+
+  if (req.method !== "POST") {
+    console.warn(`[concierge cors_block] ${JSON.stringify({ phase: "request", requestId, method: req.method, reason: "method_not_allowed_at_handler" })}`);
+    return new Response(JSON.stringify({ error: "Method not allowed" }), {
+      status: 405, headers: { ...corsHeaders, "Content-Type": "application/json", "Allow": "POST, OPTIONS" },
+    });
+  }
 
   try {
     const auth = await requireUser(req);
