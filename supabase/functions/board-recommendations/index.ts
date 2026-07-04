@@ -1,6 +1,7 @@
 import { createClient } from 'npm:@supabase/supabase-js@2'
 
 import { rankCatalogCandidates, selectCandidateShortlist, summarizeBoardIntent } from './relevance.ts'
+import { deriveHardConstraints, applyHardConstraints, type HardConstraints } from './hardConstraints.ts'
 import { logAiUsage } from '../_shared/aiUsage.ts'
 import { modelFor, tokenBudget } from '../_shared/aiModels.ts'
 
