@@ -271,13 +271,14 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
       }
       try {
         const dataUrl = await readFileAsDataUrl(f);
+        const previewUrl = isImage ? await buildThumbnailDataUrl(dataUrl) : undefined;
         accepted.push({
           id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
           name: f.name,
           mime: f.type || (isPdf ? "application/pdf" : "image/jpeg"),
           kind: isImage ? "image" : "pdf",
           dataUrl,
-          previewUrl: isImage ? dataUrl : undefined,
+          previewUrl,
           size: f.size,
         });
       } catch {
