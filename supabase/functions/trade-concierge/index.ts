@@ -3296,12 +3296,14 @@ serve(async (req) => {
 
   try {
     const auth = await requireUser(req);
+    mark("auth", { ok: auth.ok });
     if (!auth.ok) {
       return new Response(JSON.stringify(auth.body), {
         status: auth.status, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
     const rl = rateLimit(`concierge:${auth.userId}`, 20, 60_000);
+    mark("rate_limit", { ok: rl.ok });
     if (!rl.ok) {
       return new Response(JSON.stringify({ error: "Rate limit exceeded", retry_in: rl.retryInSec }), {
         status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -3309,6 +3311,7 @@ serve(async (req) => {
     }
 
     const { messages, project_id: bodyProjectId, lang: bodyLang, resume: resumeBody } = await req.json();
+    mark("parse_body", { messages: Array.isArray(messages) ? messages.length : 0 });
 
     // ----- Resume-token short-circuit ------------------------------------
     // A reconnecting client sends `{ resume: { stream_id, last_seq } }`.
