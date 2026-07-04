@@ -2106,13 +2106,26 @@ type ExtractedBrief = {
     qty_hint: number | null;
     lead_weeks_max: number | null;
     budget_band: string | null;
+    /**
+     * Anchor / centerpiece semantics preserved verbatim from the user's turn.
+     * The user's exact anchor phrasing ("show-stopping centerpiece", "statement
+     * chandelier", "hero piece", "anchor of the room") — never paraphrased and
+     * never collapsed into `style`. Downstream uses this to (a) route to a
+     * card tool instead of generic prose, (b) inject an unmistakable anchor
+     * directive into the plan, so the concierge never softens the request.
+     */
+    anchor_role: string | null;
+    /** Typology the anchor refers to (dining_table, chandelier, sofa, …), when nameable. */
+    anchor_typology: string | null;
+    /** Emphasis adjectives the user used (show-stopping, sculptural, dramatic, monumental). */
+    emphasis: string[];
   };
   plan: BriefPlanTool[];
 };
 
 const EMPTY_BRIEF: ExtractedBrief = {
   intent: "chitchat",
-  brief: { summary: "", room: null, style: null, materials: [], categories: [], designers: [], qty_hint: null, lead_weeks_max: null, budget_band: null },
+  brief: { summary: "", room: null, style: null, materials: [], categories: [], designers: [], qty_hint: null, lead_weeks_max: null, budget_band: null, anchor_role: null, anchor_typology: null, emphasis: [] },
   plan: [],
 };
 
