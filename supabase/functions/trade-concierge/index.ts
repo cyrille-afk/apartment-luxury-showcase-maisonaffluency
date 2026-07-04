@@ -1002,7 +1002,7 @@ async function runShippingEstimate(
 
   let best: any = null;
   for (const lane of lanes) {
-    const laneKg = chargeableKgFor(lane.mode);
+    const laneKg = chargeableKgFor(String(lane.mode || ""));
     const candidates = (brackets || []).filter((b: any) =>
       b.lane_id === lane.id &&
       Number(b.min_volume_cbm) <= cbm && Number(b.max_volume_cbm) >= cbm &&
@@ -1780,7 +1780,7 @@ async function resolveMentionedProjectId(
     const name = normalize(p.name);
     return name && (haystack.includes(name) || name.includes(haystack));
   });
-  return match?.id || null;
+  return typeof match?.id === "string" ? match.id : null;
 }
 
 /** Load predictive personalization signals for the signed-in user. */
@@ -3118,8 +3118,8 @@ async function hydratePickPreview(
   const dmap = new Map<string, string>();
   (designers || []).forEach((d: any) => dmap.set(d.id, d.display_name || d.name));
 
-  const pickById = new Map((picks || []).map((p: any) => [p.id, p]));
-  const tradeById = new Map((trades || []).map((t: any) => [t.id, t]));
+  const pickById = new Map<string, any>((picks || []).map((p: any) => [p.id, p] as [string, any]));
+  const tradeById = new Map<string, any>((trades || []).map((t: any) => [t.id, t] as [string, any]));
 
   // Build a fallback image map from gallery_hotspots so any product whose
   // main row lacks image_url (e.g. rugs like Giudecca, where the only photo
@@ -3292,7 +3292,11 @@ async function buildDeterministicTearsheetProposal(
   if (pickIds.length < 2) return null;
   const hydratedRaw = await hydratePickPreview(supabase, pickIds);
   const validIds = new Set(hydratedRaw.map((p: any) => p?.id).filter(Boolean));
-  const previewById = new Map(hydratedRaw.map((p: any) => [p?.id, p]).filter(([id]) => !!id));
+  const previewById = new Map<string, any>(
+    hydratedRaw
+      .map((p: any) => [p?.id, p] as [string | undefined, any])
+      .filter((entry): entry is [string, any] => typeof entry[0] === "string" && !!entry[0]),
+  );
   const validPickIds = pickIds.filter((id) => validIds.has(id) && rowMatchesRequestedTypology(previewById.get(id), requestedTypology));
   const { previewRaw, pickIds: finalIds } = dedupePreviewRows(
     hydratedRaw.filter((p: any) => validPickIds.includes(p?.id)),
