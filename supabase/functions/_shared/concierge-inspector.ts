@@ -21,6 +21,7 @@ export type InspectorGroundTruth = {
       designer: string | null;
       category: string | null;
       materials: string | null;
+      dimensions?: string | null;
       price_cents: number | null;
       currency: string | null;
     }>;
@@ -447,6 +448,7 @@ export function buildInspectorGroundTruth(
         designer: p.designer_name ? String(p.designer_name) : null,
         category: p.category ? String(p.category) : null,
         materials: p.materials ? String(p.materials) : null,
+        dimensions: p.dimensions ? String(p.dimensions) : null,
         price_cents:
           typeof p.price_cents === "number"
             ? p.price_cents
@@ -616,7 +618,10 @@ export type RequirementsViolation =
   | { kind: "brand_mismatch"; requested: string[]; found: string[] }
   | { kind: "budget_over"; requested_cents: number; total_cents: number; currency: string; over_by_cents: number }
   | { kind: "budget_currency_mismatch"; requested: string; found: string[] }
+  | { kind: "budget_unpriced"; requested_cents: number; currency: string; unpriced_items: number; unpriced_titles: string[] }
   | { kind: "palette_mismatch"; requested: string[]; offending_ids: string[]; offending_titles: string[] }
+  | { kind: "shape_unverified"; requested: string[]; offending_ids: string[]; offending_titles: string[] }
+  | { kind: "capacity_unverified"; requested_seats: number; offending_ids: string[]; offending_titles: string[] }
   | { kind: "no_slots" };
 
 export type RequirementsValidation = {
@@ -693,6 +698,126 @@ function normalizeText(s: string | null | undefined): string {
     .trim();
 }
 
+function parseBudgetFromText(text: string): { cents: number; currency: string } | null {
+  const raw = String(text || "");
+  const re = /(?:under|below|less\s+than|up\s+to|max(?:imum)?|budget(?:\s+of)?|<=?)\s*(?:about|around|roughly|approx(?:\.)?)?\s*([$€£])?\s*([0-9][0-9,]*(?:\.[0-9]+)?)\s*(k|m|thousand|million)?\s*(usd|eur|gbp|chf|aed|sgd|hkd|jpy|dollars?|euros?|pounds?)?/i;
+  const m = raw.match(re);
+  if (!m) return null;
+  const sym = m[1] || "";
+  const n = Number(String(m[2] || "").replace(/,/g, ""));
+  if (!Number.isFinite(n) || n <= 0) return null;
+  const multWord = String(m[3] || "").toLowerCase();
+  const mult = multWord === "m" || multWord === "million" ? 1_000_000 : multWord === "k" || multWord === "thousand" ? 1_000 : 1;
+  const ccyWord = String(m[4] || "").toLowerCase();
+  const currency = sym === "$" || /usd|dollar/.test(ccyWord)
+    ? "USD"
+    : sym === "£" || /gbp|pound/.test(ccyWord)
+      ? "GBP"
+      : sym === "€" || /eur|euro/.test(ccyWord)
+        ? "EUR"
+        : /chf/.test(ccyWord)
+          ? "CHF"
+          : /aed/.test(ccyWord)
+            ? "AED"
+            : /sgd/.test(ccyWord)
+              ? "SGD"
+              : /hkd/.test(ccyWord)
+                ? "HKD"
+                : /jpy/.test(ccyWord)
+                  ? "JPY"
+                  : "USD";
+  return { cents: Math.round(n * mult * 100), currency };
+}
+
+const MATERIAL_KEYWORDS = [
+  "walnut", "oak", "bronze", "brass", "marble", "travertine", "stone", "glass", "crystal",
+  "leather", "velvet", "mohair", "linen", "wool", "silk", "boucle", "bouclé", "lacquer", "wood",
+];
+
+const SHAPE_KEYWORDS = ["rectangular", "rectangle", "round", "oval", "square", "circular", "racetrack"];
+
+function extractSeatCapacity(text: string): number | null {
+  const hay = String(text || "").toLowerCase();
+  const patterns = [
+    /(?:seats?|seating|seat)\s*(?:for)?\s*(\d{1,2})\b/,
+    /\b(\d{1,2})\s*(?:seats?|seater|person|people)\b/,
+  ];
+  for (const re of patterns) {
+    const m = hay.match(re);
+    if (m) {
+      const n = Number(m[1]);
+      if (Number.isFinite(n) && n > 0 && n <= 30) return n;
+    }
+  }
+  return null;
+}
+
+function extractShapes(text: string): string[] {
+  const hay = normalizeText(text);
+  return Array.from(new Set(SHAPE_KEYWORDS.filter((s) => hay.includes(s))));
+}
+
+export function deriveRequirementsFromText(text: string): RequirementsInput | null {
+  const raw = String(text || "");
+  const hay = normalizeText(raw);
+  const slots: RequirementsSlotInput[] = [];
+  if (/\bdining\b/.test(hay) && /\b(table|tables|edit|set)\b/.test(hay)) {
+    slots.push({ typology: "dining_table", qty_min: 1, qty_max: 1 });
+  } else if (/\btables?\b/.test(hay)) {
+    slots.push({ typology: "table", qty_min: 1, qty_max: 1 });
+  }
+  const materials = Array.from(new Set(MATERIAL_KEYWORDS.filter((m) => hay.includes(normalizeText(m)))));
+  const shapes = extractShapes(raw);
+  const seats = extractSeatCapacity(raw);
+  const budget = parseBudgetFromText(raw);
+  const notes = [
+    shapes.length ? `shape: ${shapes.join(", ")}` : "",
+    seats ? `capacity: seats ${seats}` : "",
+  ].filter(Boolean).join("; ");
+  const out: RequirementsInput = {
+    slots,
+    brands: [],
+    style: [],
+    materials,
+    room: /\bdining\b/.test(hay) ? "dining room" : "",
+    scale: seats ? `seats ${seats}` : "",
+    era: "",
+    notes,
+  };
+  if (budget) {
+    out.budget_cents = budget.cents;
+    out.budget_currency = budget.currency;
+  }
+  const meaningful = slots.length || materials.length || shapes.length || seats || budget;
+  return meaningful ? out : null;
+}
+
+export function mergeRequirementsWithText(
+  requirements: RequirementsInput | null | undefined,
+  text: string,
+): RequirementsInput | null {
+  const inferred = deriveRequirementsFromText(text);
+  if (!requirements && !inferred) return null;
+  if (!requirements) return inferred;
+  if (!inferred) return requirements;
+  const merged: RequirementsInput = {
+    ...requirements,
+    slots: Array.isArray(requirements.slots) && requirements.slots.length ? requirements.slots : inferred.slots,
+    brands: Array.from(new Set([...(requirements.brands || []), ...(inferred.brands || [])])).filter(Boolean),
+    style: Array.from(new Set([...(requirements.style || []), ...(inferred.style || [])])).filter(Boolean),
+    materials: Array.from(new Set([...(requirements.materials || []), ...(inferred.materials || [])])).filter(Boolean),
+    room: requirements.room || inferred.room || "",
+    scale: [requirements.scale, inferred.scale].filter(Boolean).join("; ").slice(0, 160),
+    era: requirements.era || inferred.era || "",
+    notes: [requirements.notes, inferred.notes].filter(Boolean).join("; ").slice(0, 600),
+  };
+  if (!merged.budget_cents && inferred.budget_cents) {
+    merged.budget_cents = inferred.budget_cents;
+    merged.budget_currency = inferred.budget_currency;
+  }
+  return merged;
+}
+
 function keywordsForTypology(typology: string): string[] {
   const raw = normalizeText(typology).replace(/\s+/g, "_");
   const explicit = TYPOLOGY_SYNONYMS[raw];
@@ -737,7 +862,7 @@ export function validateRequirementsCoverage(
   for (const it of allItems) {
     itemText.set(
       it.id,
-      normalizeText(`${it.category || ""} ${it.title || ""} ${it.materials || ""}`),
+      normalizeText(`${it.category || ""} ${it.title || ""} ${it.materials || ""} ${it.dimensions || ""}`),
     );
   }
 
@@ -806,9 +931,19 @@ export function validateRequirementsCoverage(
     const foundCurrencies = Array.from(
       new Set(priced.map((i) => (i.currency || "").toUpperCase()).filter(Boolean)),
     );
-    // Currency-mismatch is a soft-info violation (still enforce numeric sum).
     if (foundCurrencies.length && !foundCurrencies.every((c) => c === reqCurrency)) {
+      budget_ok = false;
       violations.push({ kind: "budget_currency_mismatch", requested: reqCurrency, found: foundCurrencies });
+    }
+    if (unpriced > 0) {
+      budget_ok = false;
+      violations.push({
+        kind: "budget_unpriced",
+        requested_cents: reqBudget,
+        currency: reqCurrency,
+        unpriced_items: unpriced,
+        unpriced_titles: allItems.filter((i) => !(typeof i.price_cents === "number" && (i.price_cents as number) > 0)).slice(0, 8).map((i) => i.title || i.id),
+      });
     }
     const total = priced.reduce((acc, i) => acc + Number(i.price_cents || 0), 0);
     const over = total - reqBudget;
@@ -872,6 +1007,65 @@ export function validateRequirementsCoverage(
         requested: requestedPalette,
         offending_ids: offending,
         offending_titles: offendingTitles,
+      });
+    }
+  }
+
+  // ---- Shape + seating capacity checks ----------------------------------
+  // These are fail-closed verification checks. If the user asked for an
+  // 8-seat rectangular dining table, a card must not ship unless the selected
+  // dining-table row itself verifies those facts in title/materials/dimensions.
+  const requirementText = normalizeText([
+    requirements.scale,
+    requirements.notes,
+    ...(requirements.style || []),
+  ].filter(Boolean).join(" "));
+  const requestedShapes = Array.from(new Set(SHAPE_KEYWORDS.filter((s) => requirementText.includes(s))));
+  const tableItems = allItems.filter((it) => itemMatchesTypology(itemText.get(it.id) || "", keywordsForTypology("dining_table")) || itemMatchesTypology(itemText.get(it.id) || "", keywordsForTypology("table")));
+  if (requestedShapes.length && tableItems.length) {
+    const offending = tableItems.filter((it) => {
+      const hay = itemText.get(it.id) || "";
+      return !requestedShapes.some((shape) => hay.includes(shape));
+    });
+    if (offending.length > 0) {
+      violations.push({
+        kind: "shape_unverified",
+        requested: requestedShapes,
+        offending_ids: offending.map((i) => i.id),
+        offending_titles: offending.slice(0, 8).map((i) => i.title || i.id),
+      });
+    }
+  }
+
+  const requestedSeats = extractSeatCapacity(`${requirements.scale || ""} ${requirements.notes || ""}`);
+  if (requestedSeats && tableItems.length) {
+    const minCm = requestedSeats <= 4 ? 120 : requestedSeats <= 6 ? 180 : requestedSeats <= 8 ? 220 : requestedSeats <= 10 ? 280 : 330;
+    const dimensionSuggestsCapacity = (dims: string | null | undefined) => {
+      const s = String(dims || "").toLowerCase();
+      if (!s) return false;
+      if (new RegExp(`\\b(?:seats?|seater)\\s*${requestedSeats}\\b|\\b${requestedSeats}\\s*(?:seats?|seater)\\b`).test(s)) return true;
+      const nums = Array.from(s.matchAll(/(\d+(?:\.\d+)?)\s*(mm|cm|m|in|inch|inches|″|")?/g)).map((m) => {
+        const n = Number(m[1]);
+        const unit = m[2] || "cm";
+        if (!Number.isFinite(n)) return 0;
+        if (unit === "mm") return n / 10;
+        if (unit === "m") return n * 100;
+        if (/in|inch|″|"/.test(unit)) return n * 2.54;
+        return n;
+      }).filter((n) => n > 0 && n < 2000);
+      return nums.length > 0 && Math.max(...nums) >= minCm;
+    };
+    const offending = tableItems.filter((it) => {
+      const hay = itemText.get(it.id) || "";
+      if (new RegExp(`\\b(?:seats?|seater)\\s*${requestedSeats}\\b|\\b${requestedSeats}\\s*(?:seats?|seater)\\b`).test(hay)) return false;
+      return !dimensionSuggestsCapacity(it.dimensions);
+    });
+    if (offending.length > 0) {
+      violations.push({
+        kind: "capacity_unverified",
+        requested_seats: requestedSeats,
+        offending_ids: offending.map((i) => i.id),
+        offending_titles: offending.slice(0, 8).map((i) => i.title || i.id),
       });
     }
   }
