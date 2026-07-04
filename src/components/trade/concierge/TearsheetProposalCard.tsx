@@ -21,11 +21,14 @@ interface Props {
   /** Lifted exclusion state so the parent can inject "kept vs removed" into the next chat turn. */
   excluded?: Set<string>;
   onExcludedChange?: (excluded: Set<string>) => void;
+  /** Lifted locked state — items the architect has frozen so re-generation preserves them verbatim. */
+  locked?: Set<string>;
+  onLockedChange?: (locked: Set<string>) => void;
   /** IDs that are NEW vs the previous proposal — rationale will be shown for these. */
   newPickIds?: string[];
 }
 
-export function TearsheetProposalCard({ proposal, onResolved, excluded: excludedProp, onExcludedChange, newPickIds }: Props) {
+export function TearsheetProposalCard({ proposal, onResolved, excluded: excludedProp, onExcludedChange, locked: lockedProp, onLockedChange, newPickIds }: Props) {
   const initialMode: Mode = proposal.tool === "add_to_tearsheet" ? "append" : "create";
   const [mode, setMode] = useState<Mode>(initialMode);
 
