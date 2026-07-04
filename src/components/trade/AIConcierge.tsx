@@ -13,6 +13,7 @@ import { EscalationCard } from "@/components/trade/concierge/EscalationCard";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { buildSeedDirective } from "@/lib/conciergePrefill";
 import {
   conciergeCopy,
   conciergeStatusCopy,
@@ -893,6 +894,21 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
         `When the user asks for a replacement or a new search, build the next proposal as: KEPT ids + the NEW pieces you suggest. Do not silently drop kept items, do not re-introduce removed items.`,
       );
       proposalContext.push({ role: "user", content: lines.join("\n") });
+
+      // Seed extraction (#4) — mine manual edit signals for repeated
+      // material/designer patterns. If we find any, inject as a soft directive
+      // so the next generation leans into what the user anchored and steers
+      // away from what they rejected.
+      const toItem = (p: { id: string; title: string; designer_name: string | null; materials: string | null }) => ({
+        pick_id: p.id,
+        title: p.title,
+        designer_name: p.designer_name,
+        materials: p.materials,
+      });
+      const seedDirective = buildSeedDirective(locked.map(toItem), removed.map(toItem));
+      if (seedDirective) {
+        proposalContext.push({ role: "user", content: seedDirective });
+      }
     }
 
     const toneContext: ChatMessage = { role: "user", content: toneSystemNote(tone, lang) };

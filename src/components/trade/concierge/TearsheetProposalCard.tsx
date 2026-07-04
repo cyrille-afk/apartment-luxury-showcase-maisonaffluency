@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
-import { Loader2, Check, X, Pencil, ExternalLink, Plus, ChevronDown, Copy, Repeat, Lock, Unlock, RefreshCw } from "lucide-react";
+import { Loader2, Check, X, Pencil, ExternalLink, Plus, ChevronDown, Copy, Repeat, Lock, Unlock, RefreshCw, PlusCircle, MessageSquare } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { commitProposal, type TearsheetProposal } from "@/lib/tradeConciergeStream";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 import { BoardPicker } from "@/components/trade/concierge/BoardPicker";
 import { ProjectAssignInline } from "@/components/trade/concierge/ProjectAssignInline";
 import { HotspotImageBadge } from "@/components/trade/HotspotImageBadge";
-import { buildSwapPrompt, buildRegenerateUnlockedPrompt, sendConciergePrefill } from "@/lib/conciergePrefill";
+import { buildSwapPrompt, buildRegenerateUnlockedPrompt, buildSuggestOneMorePrompt, buildCritiqueEditsPrompt, sendConciergePrefill, type SwapPromptItem } from "@/lib/conciergePrefill";
 import { RequirementsBadge } from "@/components/trade/concierge/RequirementsBadge";
 
 type Status = "pending" | "committing" | "approved" | "discarded";
@@ -135,6 +135,45 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
     );
     sendConciergePrefill(prompt);
   };
+
+  const asItem = (p: (typeof visiblePicks)[number]): SwapPromptItem => ({
+    pick_id: p.id,
+    title: p.title,
+    designer_name: p.designer_name,
+    materials: p.materials,
+    category: (p as any).category ?? null,
+  });
+
+  // #2 — Live suggestion: ask the AI for ONE more piece that fills a gap in
+  // the current selection. Prefills the composer; the user confirms.
+  const handleSuggestOneMore = () => {
+    if (visiblePicks.length === 0) {
+      toast.error("Keep at least one piece so the AI knows what to harmonise with.");
+      return;
+    }
+    const prompt = buildSuggestOneMorePrompt(visiblePicks.map(asItem));
+    sendConciergePrefill(prompt);
+  };
+
+  // #3 — Critique & Explain: prose-only breakdown of how the architect's
+  // manual edits (skips, locks) shift the design vs the original proposal.
+  const handleCritiqueEdits = () => {
+    const skipped = uniquePreview.filter((p) => excluded.has(p.id));
+    const lockedItems = uniquePreview.filter((p) => locked.has(p.id) && !excluded.has(p.id));
+    const keptItems = uniquePreview.filter((p) => !excluded.has(p.id));
+    if (skipped.length === 0 && lockedItems.length === 0) {
+      toast.error("Skip or lock at least one piece so the critique has something to react to.");
+      return;
+    }
+    const prompt = buildCritiqueEditsPrompt(
+      uniquePreview.map(asItem),
+      keptItems.map(asItem),
+      skipped.map(asItem),
+      lockedItems.map(asItem),
+    );
+    sendConciergePrefill(prompt);
+  };
+
 
   const handleApprove = async () => {
     if (visiblePicks.length === 0) {
@@ -551,23 +590,51 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
       {/* Actions */}
       {status === "pending" && (
         <div className="flex flex-wrap items-center justify-end gap-2">
-          <button
-            type="button"
-            onClick={handleRegenerateUnlocked}
-            disabled={lockedVisible.length === 0 || unlockedVisibleCount === 0}
-            className="mr-auto inline-flex items-center gap-1.5 rounded-full border border-accent/40 bg-accent/[0.06] text-accent font-body text-[11px] uppercase tracking-widest px-3 py-1.5 hover:bg-accent/15 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-            title={
-              lockedVisible.length === 0
-                ? "Lock at least one piece to re-generate the rest"
-                : unlockedVisibleCount === 0
-                ? "Every included piece is locked"
-                : `Re-generate ${unlockedVisibleCount} unlocked ${unlockedVisibleCount === 1 ? "piece" : "pieces"}, keep ${lockedVisible.length} locked`
-            }
-            aria-label="Re-generate unlocked pieces"
-          >
-            <RefreshCw className="h-3 w-3" />
-            Re-generate unlocked{lockedVisible.length > 0 ? ` (${unlockedVisibleCount})` : ""}
-          </button>
+          <div className="mr-auto flex flex-wrap items-center gap-1.5">
+            <button
+              type="button"
+              onClick={handleRegenerateUnlocked}
+              disabled={lockedVisible.length === 0 || unlockedVisibleCount === 0}
+              className="inline-flex items-center gap-1.5 rounded-full border border-accent/40 bg-accent/[0.06] text-accent font-body text-[11px] uppercase tracking-widest px-3 py-1.5 hover:bg-accent/15 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              title={
+                lockedVisible.length === 0
+                  ? "Lock at least one piece to re-generate the rest"
+                  : unlockedVisibleCount === 0
+                  ? "Every included piece is locked"
+                  : `Re-generate ${unlockedVisibleCount} unlocked ${unlockedVisibleCount === 1 ? "piece" : "pieces"}, keep ${lockedVisible.length} locked`
+              }
+              aria-label="Re-generate unlocked pieces"
+            >
+              <RefreshCw className="h-3 w-3" />
+              Re-generate unlocked{lockedVisible.length > 0 ? ` (${unlockedVisibleCount})` : ""}
+            </button>
+            <button
+              type="button"
+              onClick={handleSuggestOneMore}
+              disabled={visiblePicks.length === 0}
+              className="inline-flex items-center gap-1.5 rounded-full border border-border text-muted-foreground font-body text-[11px] uppercase tracking-widest px-3 py-1.5 hover:text-foreground hover:bg-muted/40 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              title="Ask the concierge to add one more piece that harmonises with the current selection"
+              aria-label="Suggest one more piece"
+            >
+              <PlusCircle className="h-3 w-3" />
+              Suggest one more
+            </button>
+            <button
+              type="button"
+              onClick={handleCritiqueEdits}
+              disabled={excluded.size === 0 && locked.size === 0}
+              className="inline-flex items-center gap-1.5 rounded-full border border-border text-muted-foreground font-body text-[11px] uppercase tracking-widest px-3 py-1.5 hover:text-foreground hover:bg-muted/40 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              title={
+                excluded.size === 0 && locked.size === 0
+                  ? "Skip or lock a piece to give the critique something to react to"
+                  : "Ask the concierge to critique how your edits shift the design"
+              }
+              aria-label="Critique my edits"
+            >
+              <MessageSquare className="h-3 w-3" />
+              Critique my edits
+            </button>
+          </div>
           <button
             onClick={handleDiscard}
             className="font-body text-[11px] uppercase tracking-widest text-muted-foreground hover:text-foreground px-2.5 py-1.5 transition-colors"
