@@ -114,6 +114,46 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
 
   const visiblePicks = uniquePreview.filter((p) => !excluded.has(p.id));
 
+  // Lookup for the insights sidebar so it can render a pick's title/designer
+  // next to each validation row and delta entry.
+  const previewById = useMemo(() => new Map(uniquePreview.map((p) => [p.id, p])), [uniquePreview]);
+
+  // ── Insights sidebar coordination ──────────────────────────────────────
+  // Row refs for card→row scroll+flash triggered from the sidebar. Scroll
+  // uses `scrollIntoView({ block: "nearest" })` inside the card's own
+  // scroll container so the concierge chat viewport is not moved.
+  const rowRefs = useRef<Map<string, HTMLLIElement>>(new Map());
+  const [highlightedRowId, setHighlightedRowId] = useState<string | null>(null);
+  const highlightTimerRef = useRef<number | null>(null);
+
+  const focusRow = (pickId: string) => {
+    const node = rowRefs.current.get(pickId);
+    if (node) {
+      node.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+    setHighlightedRowId(pickId);
+    if (highlightTimerRef.current) window.clearTimeout(highlightTimerRef.current);
+    highlightTimerRef.current = window.setTimeout(() => setHighlightedRowId(null), 1600);
+  };
+
+  useEffect(() => () => {
+    if (highlightTimerRef.current) window.clearTimeout(highlightTimerRef.current);
+  }, []);
+
+  // Ask AIConcierge to widen its panel while insights are showing (so the
+  // sidebar and the pick list are visible together on desktop). Fires an
+  // idempotent open/close event; AIConcierge listens and toggles `expanded`.
+  const insightsOpen = verdictLoading || !!verdict || deltaLoading || !!delta;
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.dispatchEvent(new CustomEvent("maf:concierge:insights", { detail: { open: insightsOpen } }));
+    // On unmount, always signal closed so a stale value never lingers.
+    return () => {
+      window.dispatchEvent(new CustomEvent("maf:concierge:insights", { detail: { open: false } }));
+    };
+  }, [insightsOpen]);
+
+
   const togglePick = (id: string) => {
     const next = new Set(excluded);
     if (next.has(id)) next.delete(id);
