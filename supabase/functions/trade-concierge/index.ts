@@ -4300,7 +4300,8 @@ serve(async (req) => {
         );
       }
       if (pickIds.length >= 1) {
-        const previewRawAll = (await hydratePickPreview(supabase, pickIds)).filter((p: any) => p && typeof p.id === "string");
+        const previewRawAll: Array<{ id: string; title?: string | null; [key: string]: any }> = (await hydratePickPreview(supabase, pickIds))
+          .filter((p: any): p is { id: string; title?: string | null; [key: string]: any } => p && typeof p.id === "string");
         const validIds = new Set(previewRawAll.map((p: any) => p?.id).filter(Boolean));
         // Honour in-chat "skip / exclude / omit …" instructions so the
         // proposal card is pre-filtered instead of shipping all 10 when the
@@ -5639,7 +5640,8 @@ serve(async (req) => {
                 }
               }
             }
-            let previewRaw = (await hydratePickPreview(supabase, pickIds)).filter((p: any) => p && typeof p.id === "string");
+            let previewRaw: Array<{ id: string; title?: string | null; [key: string]: any }> = (await hydratePickPreview(supabase, pickIds))
+              .filter((p: any): p is { id: string; title?: string | null; [key: string]: any } => p && typeof p.id === "string");
             if (requestedTypology) {
               previewRaw = previewRaw.filter((p: any) => rowMatchesRequestedTypology(p, requestedTypology));
             }
