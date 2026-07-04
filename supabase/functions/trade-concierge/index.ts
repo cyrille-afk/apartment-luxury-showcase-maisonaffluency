@@ -11,6 +11,35 @@ import { runInspectorPass, buildInspectorGroundTruth, buildInspectorLogRecord, l
 import { installFramePersistence, serveResume } from "./_resume.ts";
 import { deriveHardConstraints, applyHardConstraints, filterRowsByHardConstraints, type HardConstraints } from "../_shared/hardConstraints.ts";
 import { inferDimensionConstraints, filterRowsByDimensionConstraints, type DimensionConstraints } from "../_shared/dimensionConstraints.ts";
+import {
+  inferLeadTimeConstraints,
+  filterRowsByLeadTimeConstraints,
+  buildBrandLeadTimeIndex,
+  type LeadTimeConstraints,
+  type BrandLeadTimeEntry,
+} from "../_shared/leadTimeConstraints.ts";
+
+// Lazy, per-invocation cache of the brand-level lead-time index. Empty table
+// today, but as it fills the fallback engages automatically.
+let _brandLeadIndex: Map<string, BrandLeadTimeEntry> | null = null;
+let _brandLeadIndexFetchedAt = 0;
+const BRAND_LEAD_INDEX_TTL_MS = 5 * 60_000;
+async function getBrandLeadTimeIndex(supabase: ConciergeDbClient): Promise<Map<string, BrandLeadTimeEntry>> {
+  const now = Date.now();
+  if (_brandLeadIndex && now - _brandLeadIndexFetchedAt < BRAND_LEAD_INDEX_TTL_MS) return _brandLeadIndex;
+  try {
+    const { data, error } = await supabase
+      .from("brand_lead_times")
+      .select("brand_name, default_lead_weeks_min, default_lead_weeks_max, default_stock_status");
+    if (error) throw error;
+    _brandLeadIndex = buildBrandLeadTimeIndex((data as any[]) || []);
+  } catch (e) {
+    console.warn("[concierge lead] brand_lead_times fetch failed:", (e as Error)?.message || e);
+    _brandLeadIndex = new Map();
+  }
+  _brandLeadIndexFetchedAt = now;
+  return _brandLeadIndex;
+}
 import { buildNoStrictTypologyReply, typologyLabel } from "./_no_strict_typology_reply.ts";
 
 type ConciergeDbClient = any;
@@ -2511,13 +2540,15 @@ async function loadRelevantPieces(
     // have enough survivors for the AI to reason over. Dimension constraints
     // are strict + can drop unknown-dim rows, so they widen the multiplier too.
     const dimConstraints: DimensionConstraints | null = inferDimensionConstraints(query);
+    const leadConstraints: LeadTimeConstraints | null = inferLeadTimeConstraints(query);
     const wantsConstraintFilter = !!hardConstraints && (
       (hardConstraints.materials?.length || 0) +
       (hardConstraints.colors?.length || 0) +
       (hardConstraints.categories?.length || 0) > 0
     );
     const wantsDimFilter = !!dimConstraints;
-    const matchCount = (wantsConstraintFilter || wantsDimFilter) ? Math.min(k * 4, 200) : k;
+    const wantsLeadFilter = !!leadConstraints;
+    const matchCount = (wantsConstraintFilter || wantsDimFilter || wantsLeadFilter) ? Math.min(k * 4, 200) : k;
     const { data: rawData, error } = await supabase.rpc("match_catalog", {
       query_embedding: vec as any,
       match_count: matchCount,
@@ -2538,6 +2569,14 @@ async function loadRelevantPieces(
       const dimRes = filterRowsByDimensionConstraints(filtered as any[], dimConstraints);
       console.log(`[concierge RAG dim] pre=${filtered.length} strict=${dimRes.strictKept.length} kept=${dimRes.kept.length} dropped=${dimRes.dropped} unknownDropped=${dimRes.unknownDropped} fellBack=${dimRes.fellBack} constraints=${JSON.stringify(dimConstraints)}`);
       filtered = dimRes.kept as any[];
+    }
+    // Hard lead-time ceiling / floor / in-stock-only — parsed from row.lead_time
+    // with brand_lead_times fallback for unresolved rows.
+    if (wantsLeadFilter) {
+      const brandIdx = await getBrandLeadTimeIndex(supabase);
+      const leadRes = filterRowsByLeadTimeConstraints(filtered as any[], leadConstraints!, brandIdx);
+      console.log(`[concierge RAG lead] pre=${filtered.length} kept=${leadRes.kept.length} dropped=${leadRes.dropped} unknownDropped=${leadRes.unknownDropped} fellBack=${leadRes.fellBack} constraints=${JSON.stringify(leadConstraints)}`);
+      filtered = leadRes.kept as any[];
     }
     const data = filtered.slice(0, k);
     if (data.length < 5) {
@@ -2804,29 +2843,43 @@ async function fetchStrictTypologyCandidates(
   supabase: ConciergeDbClient,
   typology: RequestedTypology,
   dimConstraints?: DimensionConstraints | null,
+  leadConstraints?: LeadTimeConstraints | null,
 ): Promise<any[]> {
   const term = typology === "dining_table" ? "dining" : "table";
   const [pickRes, tradeRes] = await Promise.all([
     supabase
       .from("designer_curator_picks")
-      .select("id, title, materials, category, subcategory, dimensions, trade_price_cents, currency")
+      .select("id, title, materials, category, subcategory, dimensions, trade_price_cents, currency, lead_time, stock_status, designer_id")
       .or(`title.ilike.%${term}%,subcategory.ilike.%${term}%,category.ilike.%${term}%`)
       .limit(160),
     supabase
       .from("trade_products")
-      .select("id, product_name, materials, category, subcategory, dimensions, trade_price_cents, rrp_price_cents, currency")
+      .select("id, product_name, materials, category, subcategory, dimensions, trade_price_cents, rrp_price_cents, currency, lead_time, stock_status_override, brand_name")
       .eq("is_active", true)
       .or(`product_name.ilike.%${term}%,subcategory.ilike.%${term}%,category.ilike.%${term}%`)
       .limit(160),
   ]);
-  const typologyFiltered = [
+  let typologyFiltered = [
     ...(pickRes.data || []),
-    ...(tradeRes.data || []).map((r: any) => ({ ...r, title: r.product_name, trade_price_cents: r.trade_price_cents ?? r.rrp_price_cents ?? null })),
+    ...(tradeRes.data || []).map((r: any) => ({
+      ...r,
+      title: r.product_name,
+      trade_price_cents: r.trade_price_cents ?? r.rrp_price_cents ?? null,
+      stock_status: r.stock_status_override ?? null,
+    })),
   ].filter((r: any) => rowMatchesRequestedTypology(r, typology));
-  if (!dimConstraints) return typologyFiltered;
-  const dimRes = filterRowsByDimensionConstraints(typologyFiltered, dimConstraints);
-  console.log(`[concierge strict-typology dim] typology=${typology} pre=${typologyFiltered.length} strict=${dimRes.strictKept.length} kept=${dimRes.kept.length} dropped=${dimRes.dropped} unknownDropped=${dimRes.unknownDropped} fellBack=${dimRes.fellBack} constraints=${JSON.stringify(dimConstraints)}`);
-  return dimRes.kept;
+  if (dimConstraints) {
+    const dimRes = filterRowsByDimensionConstraints(typologyFiltered, dimConstraints);
+    console.log(`[concierge strict-typology dim] typology=${typology} pre=${typologyFiltered.length} strict=${dimRes.strictKept.length} kept=${dimRes.kept.length} dropped=${dimRes.dropped} unknownDropped=${dimRes.unknownDropped} fellBack=${dimRes.fellBack} constraints=${JSON.stringify(dimConstraints)}`);
+    typologyFiltered = dimRes.kept;
+  }
+  if (leadConstraints) {
+    const brandIdx = await getBrandLeadTimeIndex(supabase);
+    const leadRes = filterRowsByLeadTimeConstraints(typologyFiltered, leadConstraints, brandIdx);
+    console.log(`[concierge strict-typology lead] typology=${typology} pre=${typologyFiltered.length} kept=${leadRes.kept.length} dropped=${leadRes.dropped} unknownDropped=${leadRes.unknownDropped} fellBack=${leadRes.fellBack} constraints=${JSON.stringify(leadConstraints)}`);
+    typologyFiltered = leadRes.kept;
+  }
+  return typologyFiltered;
 }
 
 // Common city / country abbreviations mapped to canonical full names.
@@ -3291,6 +3344,18 @@ async function buildDeterministicTearsheetProposal(
   const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
   const requestedTypology = inferRequestedTypology(brief, requestText);
   const dimConstraints = inferDimensionConstraints(requestText);
+  // Combine any inferred lead-time constraint with the brief's stored ceiling.
+  const inferredLead = inferLeadTimeConstraints(requestText);
+  const briefCeiling = typeof brief?.lead_weeks_max === "number" && brief.lead_weeks_max > 0 ? brief.lead_weeks_max : null;
+  let leadConstraints: LeadTimeConstraints | null = null;
+  if (inferredLead || briefCeiling != null) {
+    leadConstraints = { ...(inferredLead || {}) };
+    if (briefCeiling != null) {
+      leadConstraints.maxWeeks = leadConstraints.maxWeeks == null
+        ? briefCeiling
+        : Math.min(leadConstraints.maxWeeks, briefCeiling);
+    }
+  }
   const scoreRow = (r: any) => {
     const hay = `${r?.title || ""} ${r?.category || ""} ${r?.subcategory || ""} ${r?.materials || ""}`.toLowerCase();
     let score = Number(r?.similarity || 0);
@@ -3310,8 +3375,15 @@ async function buildDeterministicTearsheetProposal(
     console.log(`[concierge tearsheet dim] pre=${candidateRows.length} strict=${dimRes.strictKept.length} kept=${dimRes.kept.length} dropped=${dimRes.dropped} unknownDropped=${dimRes.unknownDropped} fellBack=${dimRes.fellBack} constraints=${JSON.stringify(dimConstraints)}`);
     candidateRows = dimRes.kept;
   }
+  // Hard lead-time ceiling — bounces made-to-order pieces that miss the deadline.
+  if (leadConstraints && candidateRows.length) {
+    const brandIdx = await getBrandLeadTimeIndex(supabase);
+    const leadRes = filterRowsByLeadTimeConstraints(candidateRows, leadConstraints, brandIdx);
+    console.log(`[concierge tearsheet lead] pre=${candidateRows.length} kept=${leadRes.kept.length} dropped=${leadRes.dropped} unknownDropped=${leadRes.unknownDropped} fellBack=${leadRes.fellBack} constraints=${JSON.stringify(leadConstraints)}`);
+    candidateRows = leadRes.kept;
+  }
   if (candidateRows.length < 2 && requestedTypology) {
-    candidateRows = (await fetchStrictTypologyCandidates(supabase, requestedTypology, dimConstraints))
+    candidateRows = (await fetchStrictTypologyCandidates(supabase, requestedTypology, dimConstraints, leadConstraints))
       .filter((r: any) => r && typeof r.id === "string" && UUID_RE.test(r.id))
       .sort((a: any, b: any) => scoreRow(b) - scoreRow(a));
   }
@@ -4130,7 +4202,20 @@ serve(async (req) => {
     if (hasExplicitSelectionVerb && requestedTypology && !mentionsKnownDesigner) {
       const budgetCeiling = inferBudgetCeilingCents(lastUserMsg || "");
       const dimCeiling = inferDimensionConstraints(lastUserMsg || "");
-      const allTypeCandidates = await fetchStrictTypologyCandidates(supabase, requestedTypology, dimCeiling);
+      const inferredLead = inferLeadTimeConstraints(lastUserMsg || "");
+      const briefLeadCeiling = typeof effectiveBrief.brief?.lead_weeks_max === "number" && effectiveBrief.brief.lead_weeks_max > 0
+        ? effectiveBrief.brief.lead_weeks_max
+        : null;
+      let leadCeiling: LeadTimeConstraints | null = null;
+      if (inferredLead || briefLeadCeiling != null) {
+        leadCeiling = { ...(inferredLead || {}) };
+        if (briefLeadCeiling != null) {
+          leadCeiling.maxWeeks = leadCeiling.maxWeeks == null
+            ? briefLeadCeiling
+            : Math.min(leadCeiling.maxWeeks, briefLeadCeiling);
+        }
+      }
+      const allTypeCandidates = await fetchStrictTypologyCandidates(supabase, requestedTypology, dimCeiling, leadCeiling);
       const budgetedCandidates = budgetCeiling
         ? allTypeCandidates.filter((r: any) => Number(r?.trade_price_cents || 0) > 0 && Number(r.trade_price_cents) <= budgetCeiling.cents)
         : allTypeCandidates;
