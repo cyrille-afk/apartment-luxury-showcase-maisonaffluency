@@ -2513,19 +2513,10 @@ function dedupePreviewRows(previewRaw: any[], pickIds: string[]): { previewRaw: 
   return { previewRaw: kept, pickIds: pickIds.filter((id) => keptIds.has(id)) };
 }
 
-function typologyLabel(typology: RequestedTypology | null): string {
-  if (typology === "dining_table") return "dining table";
-  if (typology === "table") return "table";
-  return "piece";
-}
-
-export function buildNoStrictTypologyReply(typology: RequestedTypology): string {
-  const label = typologyLabel(typology);
-  // Prepended blank lines so this release notice never glues onto whatever
-  // prose the model already streamed in the same turn (which read as a
-  // fabricated self-correction / apology).
-  return `\n\n_(A tearsheet draft was suppressed: fewer than 2 true ${label}s matched this brief in the curated selection. Ask me to broaden the typology or relax a constraint if you'd like me to try again.)_`;
-}
+// typologyLabel + buildNoStrictTypologyReply live in a dedicated module so
+// they can be unit-tested without importing this whole file (see
+// no_strict_typology_reply_test.ts). Re-exported for backwards compat.
+export { buildNoStrictTypologyReply, typologyLabel } from "./_no_strict_typology_reply.ts";
 
 function buildOpeningBriefDiscoveryReply(latestUserMessage: string, langCode = "en"): string {
   const lower = (latestUserMessage || "").toLowerCase();
