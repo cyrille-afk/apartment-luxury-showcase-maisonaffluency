@@ -1,0 +1,70 @@
+name: Concierge Eval Battery
+
+# Fires a fixed set of architect/designer prompts at the LIVE deployed
+# trade-concierge edge function and asserts the streamed replies satisfy
+# grounding, forbidden-term, and auto-spec-sheet expectations.
+#
+# Requires GitHub secrets:
+#   VITE_SUPABASE_URL
+#   VITE_SUPABASE_PUBLISHABLE_KEY
+#   E2E_USER_ACCESS_TOKEN   (long-lived JWT for a trade user; see scripts/mint-e2e-token.mjs)
+#
+# The suite is `ignore`-guarded on E2E_USER_ACCESS_TOKEN so a missing secret
+# skips tests instead of failing the job — allowing forks to run CI.
+
+on:
+  pull_request:
+    paths:
+      - "supabase/functions/trade-concierge/**"
+      - "supabase/functions/_shared/specSheetBlock.ts"
+      - "supabase/functions/_shared/constraintCompliance.ts"
+      - "supabase/functions/_shared/dimensionConstraints.ts"
+      - "supabase/functions/_shared/leadTimeConstraints.ts"
+      - "supabase/functions/_shared/testHelpers.ts"
+      - ".github/workflows/concierge-eval-battery.yml"
+  push:
+    branches: [main]
+    paths:
+      - "supabase/functions/trade-concierge/**"
+      - "supabase/functions/_shared/specSheetBlock.ts"
+  schedule:
+    # Nightly regression at 03:17 UTC — catches drift in the deployed model.
+    - cron: "17 3 * * *"
+  workflow_dispatch:
+
+jobs:
+  eval-battery:
+    name: Deno test — deployed concierge eval battery
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Write .env from secrets
+        run: |
+          {
+            echo "VITE_SUPABASE_URL=${{ secrets.VITE_SUPABASE_URL }}"
+            echo "VITE_SUPABASE_PUBLISHABLE_KEY=${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}"
+            echo "E2E_USER_ACCESS_TOKEN=${{ secrets.E2E_USER_ACCESS_TOKEN }}"
+          } > .env
+
+      - name: Run spec-sheet unit tests (offline)
+        run: |
+          deno test \
+            --allow-net --allow-env --allow-read \
+            --no-check \
+            supabase/functions/trade-concierge/specSheetBlock_test.ts
+
+      - name: Run eval battery against deployed function
+        run: |
+          deno test \
+            --allow-net --allow-env --allow-read \
+            --no-check \
+            supabase/functions/trade-concierge/evalBattery_test.ts
