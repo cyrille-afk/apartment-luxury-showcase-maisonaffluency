@@ -2374,7 +2374,7 @@ async function loadRelevantPieces(
     ].filter(Boolean);
 
     const contextText = [
-      "Note: the lines below are the catalog pieces most semantically relevant to the user's latest query (top-K retrieval, not the full catalog). If the user asks for a broad scan and nothing here matches, say so politely and offer to expand the search through the designers' own catalogs using our Axonometric Studio archives and tools.",
+      "Note: the lines below are the curated pieces most semantically relevant to the user's latest query (top-K retrieval, not the full Curation). If the user asks for a broad scan and nothing here matches, say so plainly and ask whether to broaden typology/material constraints inside the Maison Affluency Curation.",
       "",
       `Collective context (reason across the whole set, not just individual items): ${summaryBits.join(" · ")}. Use this to make holistic statements when relevant (e.g. "all of these ship within 4 weeks", "the whole edit is European-made", "most pieces share an oak / brass palette"). Only assert a collective fact when it truly holds for every item you propose.`,
       "",
@@ -3698,7 +3698,7 @@ serve(async (req) => {
           "⚠️ HARD-CONSTRAINT EMPTY RESULT ⚠️",
           `The active hard-constraint pre-filter matched ZERO pieces from the Maison Affluency Curation. Filter tokens applied — colors: ${JSON.stringify(sqlLoadConstraints.colors || preRequestConstraints.colors || [])}, materials: ${JSON.stringify(sqlLoadConstraints.materials || preRequestConstraints.materials || [])}, categories: ${JSON.stringify(sqlLoadConstraints.categories || [])}.`,
           "DO NOT invent or propose any piece. DO NOT call propose_tearsheet / add_to_tearsheet / draft_quote this turn.",
-          "Reply in ONE short warm paragraph: acknowledge that nothing in the curated selection currently matches that exact combination, name the specific constraint(s) that eliminated the results, and invite the architect to relax ONE constraint (e.g. widen the palette from 'forest green' to 'muted greens', drop the material filter, or broaden the typology). Offer to expand the search through the designer's own archives via the Axonometric Studio if they prefer to hold the constraint.",
+          "Reply in ONE short warm paragraph: acknowledge that nothing in the curated selection currently matches that exact combination, name the specific constraint(s) that eliminated the results, and invite the architect to relax ONE constraint (e.g. widen the palette from 'forest green' to 'muted greens', drop the material filter, or broaden the typology). Do not apologise, self-correct, mention external archives, or imply there is a hidden search source.",
           "",
         ].join("\n")
       : "";
