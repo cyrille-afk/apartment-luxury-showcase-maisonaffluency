@@ -2689,6 +2689,20 @@ function normalizeLoose(value: string | null | undefined): string {
 
 type RequestedTypology = "dining_table" | "table";
 
+function inferBudgetCeilingCents(requestText: string): { cents: number; label: string } | null {
+  const text = String(requestText || "");
+  if (!text.trim()) return null;
+  const budgetCue = /\b(under|below|less\s+than|up\s+to|max(?:imum)?|budget(?:\s+of)?|not\s+over|no\s+more\s+than)\b/i;
+  if (!budgetCue.test(text)) return null;
+  const match = text.match(/(?:[$€£]\s*)?(\d+(?:[.,]\d+)?)(\s*(?:k|m|000))?\s*(?:usd|eur|gbp|dollars?|euros?|pounds?)?/i);
+  if (!match) return null;
+  const raw = Number(match[1].replace(",", "."));
+  if (!Number.isFinite(raw) || raw <= 0) return null;
+  const suffix = String(match[2] || "").trim().toLowerCase();
+  const units = suffix === "m" ? 1_000_000 : suffix === "k" ? 1_000 : suffix === "000" ? 1_000 : 1;
+  return { cents: Math.round(raw * units * 100), label: match[0].trim() };
+}
+
 function inferRequestedTypology(brief: ExtractedBrief["brief"], requestText: string): RequestedTypology | null {
   const hay = normalizeLoose([
     requestText,
@@ -2776,19 +2790,19 @@ async function fetchStrictTypologyCandidates(
   const [pickRes, tradeRes] = await Promise.all([
     supabase
       .from("designer_curator_picks")
-      .select("id, title, materials, category, subcategory")
+      .select("id, title, materials, category, subcategory, trade_price_cents, currency")
       .or(`title.ilike.%${term}%,subcategory.ilike.%${term}%,category.ilike.%${term}%`)
       .limit(160),
     supabase
       .from("trade_products")
-      .select("id, product_name, materials, category, subcategory")
+      .select("id, product_name, materials, category, subcategory, trade_price_cents, rrp_price_cents, currency")
       .eq("is_active", true)
       .or(`product_name.ilike.%${term}%,subcategory.ilike.%${term}%,category.ilike.%${term}%`)
       .limit(160),
   ]);
   return [
     ...(pickRes.data || []),
-    ...(tradeRes.data || []).map((r: any) => ({ ...r, title: r.product_name })),
+    ...(tradeRes.data || []).map((r: any) => ({ ...r, title: r.product_name, trade_price_cents: r.trade_price_cents ?? r.rrp_price_cents ?? null })),
   ].filter((r: any) => rowMatchesRequestedTypology(r, typology));
 }
 
