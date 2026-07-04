@@ -4113,7 +4113,9 @@ serve(async (req) => {
     }
 
     const resolvedProjectId = activeProjectId || mentionedProjectId;
+    const projectT0 = performance.now();
     const projectContext = await loadProjectContext(supabase, userId, resolvedProjectId);
+    mark("loadProjectContext", { ms: Math.round(performance.now() - projectT0), hasProject: !!resolvedProjectId });
     // Resolve trade discount % for this user (defaults to 8%).
     let tradeDiscountPct = 0.08;
     try {
