@@ -3420,14 +3420,41 @@ async function buildDeterministicTearsheetProposal(
   const preview = previewRaw
     .filter((p: any) => finalIds.includes(p?.id))
     .map((p: any) => ({ ...p, rationale: rationaleMap[p.id]?.reason || null }));
+  // Constraint compliance summary — detected constraint → per-piece pass/fail.
+  let complianceNote = "";
+  let compliance: ReturnType<typeof buildConstraintCompliance> = [];
+  if (dimConstraints || leadConstraints) {
+    const brandIdx = (dimConstraints || leadConstraints) ? await getBrandLeadTimeIndex(supabase) : null;
+    const compliancePieces = preview.map((p: any) => ({
+      id: p.id,
+      title: p.title,
+      dimensions: p.dimensions,
+      lead_time: p.lead_time,
+      stock_status: p.stock_status,
+      brand_name: p.brand_name,
+      designer_name: p.designer_name,
+      price_cents: p.price_cents,
+      currency: p.currency,
+    }));
+    compliance = buildConstraintCompliance({
+      dim: dimConstraints,
+      lead: leadConstraints,
+      pieces: compliancePieces,
+      brandLeadIndex: brandIdx,
+    });
+    complianceNote = renderComplianceNote(compliance);
+  }
+  const baseNote = "Validated directly against the Maison Affluency Curation.";
+  const note = complianceNote ? `${baseNote}\n\n${complianceNote}` : baseNote;
   return {
     tool: "propose_tearsheet",
     tool_call_id: crypto.randomUUID(),
     args: {
       title: brief.room ? `${brief.room} first edit` : "Curated first edit",
       pick_ids: finalIds,
-      note: "Validated directly against the Maison Affluency Curation.",
+      note,
       pick_rationales: rationaleMap,
+      constraint_compliance: compliance.length ? compliance : undefined,
     },
     preview,
   };
