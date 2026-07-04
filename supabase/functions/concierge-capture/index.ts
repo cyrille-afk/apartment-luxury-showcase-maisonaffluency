@@ -221,6 +221,17 @@ function heuristic(text: string): Qualified {
       }
     }
   }
+  // Fuzzy fallback for typos like "Singqpore" → Singapore. Only runs on short
+  // bare answers (≤ 4 tokens); prose is left alone.
+  if (!city) {
+    const fuzzy = fuzzyCityMatch(text);
+    if (fuzzy) {
+      city = fuzzy.city;
+      country = fuzzy.country;
+      if (!signals.includes("high_value_location")) signals.push("high_value_location");
+      signals.push("fuzzy_city_match");
+    }
+  }
 
   const rooms = [
     "dining", "living", "bedroom", "study", "library", "entry", "foyer",
