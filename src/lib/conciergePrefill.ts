@@ -130,6 +130,52 @@ export function buildCritiqueEditsPrompt(
   ].join("");
 }
 
+// ─── Validate / Sync (#5) ─────────────────────────────────────────────────
+// Batch-review the architect's pending manual edits. We send a compact DIFF
+// (skipped ids, locked ids, title change) rather than the full list, and ask
+// the AI for a pass/fail-style review against the original brief. Read-only:
+// the model MUST NOT emit a tool call — it just returns a structured verdict
+// the user can read before deciding to Approve or Re-generate.
+export function buildValidateDiffPrompt(diff: {
+  skipped: SwapPromptItem[];
+  locked: SwapPromptItem[];
+  titleChange?: { from: string; to: string } | null;
+  keptCount: number;
+}): string {
+  const fmt = (it: SwapPromptItem) => {
+    const title = String(it.title || "piece").trim();
+    const designer = it.designer_name ? ` — ${it.designer_name}` : "";
+    const mat = it.materials ? ` (${it.materials})` : "";
+    const sku = shortSku(it.pick_id);
+    return `  • "${title}"${designer}${mat} [SKU ${sku}]`;
+  };
+  const block = (arr: SwapPromptItem[]) => (arr.length ? arr.map(fmt).join("\n") : "  (none)");
+  const total = diff.skipped.length + diff.locked.length + (diff.titleChange ? 1 : 0);
+  const noun = total === 1 ? "change" : "changes";
+  const parts: string[] = [
+    `Validate the ${total} pending manual ${noun} I've made to the current tearsheet draft. Do NOT emit any tool call — reply as prose only.`,
+    `\n\n## DIFF (only what changed since your original proposal)`,
+    `\nSKIPPED (${diff.skipped.length}):\n${block(diff.skipped)}`,
+    `\nLOCKED 🔒 (${diff.locked.length}):\n${block(diff.locked)}`,
+  ];
+  if (diff.titleChange) {
+    parts.push(
+      `\nTITLE renamed: "${diff.titleChange.from}" → "${diff.titleChange.to}"`,
+    );
+  }
+  parts.push(
+    `\nUNCHANGED: ${diff.keptCount} kept ${diff.keptCount === 1 ? "piece" : "pieces"} (still in the draft).`,
+    `\n\n## REVIEW — respond in this exact structure`,
+    `\n**Brief coverage:** PASS / WARN / FAIL — does the remaining set still cover the original brief's required typologies, palette, and quantities? Name any gap.`,
+    `\n**Palette & materials:** PASS / WARN / FAIL — do the skips/locks push the palette into an inconsistent place? Name any clash.`,
+    `\n**Scale & silhouette:** PASS / WARN / FAIL — any imbalance introduced (all small, all heavy, no anchor piece)?`,
+    `\n**Budget posture:** PASS / WARN / FAIL — if the locked pieces skew luxury or entry, flag it.`,
+    `\n**Recommended next step:** ONE line — either "Approve as-is", "Re-generate unlocked", or a specific single fix.`,
+    `\n\nBe terse and specific. No preamble.`,
+  );
+  return parts.join("");
+}
+
 // ─── Seed extraction (#4) ────────────────────────────────────────────────
 // Detect micro-patterns from the architect's manual edits (skipped + locked)
 // so the next AI turn can lean into what they anchored and avoid what they
