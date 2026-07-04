@@ -1,5 +1,5 @@
 import { assert, assertStringIncludes } from "https://deno.land/std@0.224.0/assert/mod.ts";
-import { buildNoStrictTypologyReply } from "./index.ts";
+import { buildNoStrictTypologyReply } from "./_no_strict_typology_reply.ts";
 
 // Regression: previously this template read as a fabricated self-correction
 // ("You're right — I won't present adjacent pieces…") and advertised a
