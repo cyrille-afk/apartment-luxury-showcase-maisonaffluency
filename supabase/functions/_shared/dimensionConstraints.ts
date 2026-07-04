@@ -210,7 +210,7 @@ export function parseDimensionsToMm(raw: string | null | undefined): ParsedRowDi
   const out = { ...empty };
 
   // Explicit-labelled axes: "W 140 x D 50 x H 100 cm", "H75 × W80 × D85 cm", "Dia 120 x H 25 cm"
-  const axisRe = /\b(W|Width|D|Depth|H|Height|L|Length|Dia|Ø|Diameter)\s*[:.]?\s*(\d+(?:[.,]\d+)?)/gi;
+  const axisRe = /\b(Width|Length|Depth|Height|Diameter|Dia|Ø|W|D|H|L)\s*[:.]?\s*(\d+(?:[.,]\d+)?)/gi;
   const seatDepthRe = /\bseat\s+depth\s*[:.]?\s*(\d+(?:[.,]\d+)?)/gi;
   const seatHeightRe = /\bseat\s+height\s*[:.]?\s*(\d+(?:[.,]\d+)?)/gi;
 
