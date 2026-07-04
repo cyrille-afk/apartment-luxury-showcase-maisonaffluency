@@ -434,3 +434,173 @@ Deno.test("structured log — original_prose and corrected_prose are truncated a
     assertEquals(rec.prose_len, 5000);
   } finally { cap.restore(); }
 });
+
+// ---------------------------------------------------------------------------
+// Discovery-turn Inspector regression tests
+// ---------------------------------------------------------------------------
+//
+// Locks in the guarantee that:
+//   1. runInspectorPass DOES run on pure-discovery turns (empty GT) as long
+//      as a CURATION allowlist is provided — it must NOT short-circuit.
+//   2. The request payload carries CURATION_ALLOWLIST and the system prompt
+//      includes the DISCOVERY-TURN RULE, so the LLM has the scope of
+//      permitted names.
+//   3. The deterministic redactor strips uncited designer + piece names and
+//      never lets a Poliform / Lasvit / Moooi / Kelly Wearstler through.
+//   4. On any inspector failure mode (timeout, HTTP error, malformed JSON)
+//      the deterministic redactor is a safe drop-in that also strips those
+//      uncited names.
+
+import {
+  runDiscoveryProseGuard,
+  deterministicRedact,
+  SAFE_FALLBACK_PROSE,
+} from "./concierge-inspector.ts";
+
+const DISCOVERY_PROSE_HALLUCINATION =
+  "With your warm bronze and stone palette, I'd suggest a piece like the 'Torus' table by Poliform, " +
+  "and the 'Luminous Aura' chandelier by Lasvit. Alternatively the 'Helix' chandelier by Moooi could work. " +
+  "We could also draw on Kelly Wearstler's approach to sculptural forms.";
+
+const ALLOWED_DESIGNERS_SAMPLE = ["Saint-Louis", "Alinea Design Objects", "Andrée Putman"];
+const ALLOWED_TITLES_SAMPLE = ["Calliope Medium Chandelier", "Bronze MicMac Chandelier"];
+
+// 1. Inspector must NOT short-circuit on empty GT when allowlist is present.
+Deno.test("runInspectorPass runs on discovery turns when allowlist is provided", async () => {
+  const { calls } = stubFetchWithReply({
+    corrected_prose:
+      "With your warm bronze and stone palette, I'd like to hear more about the atmosphere before I name specific pieces.",
+    corrections: [
+      { original: "'Torus' table by Poliform", replacement: "[removed]", reason: "not in curation" },
+      { original: "'Luminous Aura' chandelier by Lasvit", replacement: "[removed]", reason: "not in curation" },
+    ],
+  });
+  try {
+    const res = await runInspectorPass({
+      prose: DISCOVERY_PROSE_HALLUCINATION,
+      groundTruth: { cards: [] },
+      apiKey: "test-key",
+      allowedDesigners: ALLOWED_DESIGNERS_SAMPLE,
+      allowedPieceTitles: ALLOWED_TITLES_SAMPLE,
+    });
+    assertEquals(res.ok, true, "inspector should complete, not skip");
+    assertEquals(res.reason, undefined, `inspector unexpectedly skipped: ${res.reason}`);
+    assert(res.corrections.length > 0, "inspector should have emitted corrections");
+    assertEquals(calls.length, 1, "inspector must actually call the LLM (not short-circuit)");
+    // The payload MUST include the CURATION_ALLOWLIST so the LLM has scope.
+    const userMsg = calls[0].body.messages.find((m: any) => m.role === "user");
+    const payload = JSON.parse(userMsg.content);
+    assert("CURATION_ALLOWLIST" in payload, "payload must include CURATION_ALLOWLIST");
+    assert(
+      Array.isArray(payload.CURATION_ALLOWLIST.designers) &&
+        payload.CURATION_ALLOWLIST.designers.includes("Saint-Louis"),
+      "allowed designers must be forwarded",
+    );
+    // System prompt must instruct the LLM about the discovery-turn rule.
+    const sysMsg = calls[0].body.messages.find((m: any) => m.role === "system");
+    assertStringIncludes(sysMsg.content, "DISCOVERY-TURN RULE");
+    assertStringIncludes(sysMsg.content, "CURATION_ALLOWLIST");
+  } finally { restoreFetch(); }
+});
+
+// 2. Inspector still short-circuits when BOTH GT and allowlist are empty
+// (nothing to compare against — legacy behaviour preserved for safety).
+Deno.test("runInspectorPass short-circuits when GT and allowlist are both empty", async () => {
+  const { calls } = stubFetchWithReply({ corrected_prose: "should not be called", corrections: [] });
+  try {
+    const res = await runInspectorPass({
+      prose: "Some prose.",
+      groundTruth: { cards: [] },
+      apiKey: "test-key",
+    });
+    assertEquals(res.ok, true);
+    assertEquals(res.reason, "skipped_empty");
+    assertEquals(calls.length, 0, "must not call LLM when nothing to check");
+  } finally { restoreFetch(); }
+});
+
+// 3. Deterministic redactor — regression against the exact hallucination the
+// user hit ("Torus by Poliform / Luminous Aura by Lasvit / Helix by Moooi").
+Deno.test("deterministicRedact strips uncited designers and piece titles", () => {
+  const res = deterministicRedact({
+    prose: DISCOVERY_PROSE_HALLUCINATION,
+    allowedDesigners: ALLOWED_DESIGNERS_SAMPLE,
+    allowedPieceTitles: ALLOWED_TITLES_SAMPLE,
+  });
+  const p = res.redacted_prose;
+  // None of the uncited names may survive.
+  for (const forbidden of ["Poliform", "Lasvit", "Moooi", "Kelly Wearstler", "Torus", "Luminous Aura", "Helix"]) {
+    assert(
+      !p.includes(forbidden),
+      `deterministicRedact must strip "${forbidden}" but kept it: ${p}`,
+    );
+  }
+  assert(res.removed_spans.length > 0, "must record what was stripped");
+});
+
+// 4. Allowlisted names are preserved verbatim.
+Deno.test("deterministicRedact keeps allowlisted designer names", () => {
+  const prose = "The Calliope Medium Chandelier by Saint-Louis pairs well with pieces by Andrée Putman.";
+  const res = deterministicRedact({
+    prose,
+    allowedDesigners: ALLOWED_DESIGNERS_SAMPLE,
+    allowedPieceTitles: ALLOWED_TITLES_SAMPLE,
+  });
+  assertStringIncludes(res.redacted_prose, "Saint-Louis");
+  assertStringIncludes(res.redacted_prose, "Calliope Medium Chandelier");
+  assertStringIncludes(res.redacted_prose, "Andrée Putman");
+});
+
+// 5. Heavy-hallucination prose triggers the `gutted` flag so the caller
+// swaps in SAFE_FALLBACK_PROSE instead of releasing a Swiss-cheese reply.
+Deno.test("deterministicRedact flags gutted output for safe-fallback swap", () => {
+  const prose =
+    "Poliform, Lasvit, Moooi, B&B Italia, Cassina, Minotti, Baxter, Flexform, Fendi Casa, Vitra.";
+  const res = deterministicRedact({
+    prose,
+    allowedDesigners: ALLOWED_DESIGNERS_SAMPLE,
+    allowedPieceTitles: ALLOWED_TITLES_SAMPLE,
+  });
+  assertEquals(res.gutted, true, "too many redactions must flag gutted");
+  assert(SAFE_FALLBACK_PROSE.length > 40, "safe fallback must be non-trivial");
+});
+
+// 6. Discovery Guard: when the LLM strips namedrops, the returned prose must
+// not carry any of the forbidden names.
+Deno.test("runDiscoveryProseGuard returns prose free of uncited names on happy path", async () => {
+  const cleaned =
+    "With your warm bronze and stone palette, tell me more about the atmosphere and I'll pull a curated first edit.";
+  stubFetchWithReply({ corrected_prose: cleaned, corrections: [] } as any);
+  // Overwrite the stub reply to include removed_names (guard uses a different key).
+  globalThis.fetch = (async () => new Response(JSON.stringify({
+    choices: [{ message: { content: JSON.stringify({ corrected_prose: cleaned, removed_names: ["Poliform", "Lasvit", "Moooi", "Kelly Wearstler"] }) } }],
+  }), { status: 200, headers: { "Content-Type": "application/json" } })) as typeof fetch;
+  try {
+    const res = await runDiscoveryProseGuard({
+      prose: DISCOVERY_PROSE_HALLUCINATION,
+      allowedDesigners: ALLOWED_DESIGNERS_SAMPLE,
+      allowedPieceTitles: ALLOWED_TITLES_SAMPLE,
+      apiKey: "test-key",
+    });
+    assertEquals(res.ok, true);
+    for (const forbidden of ["Poliform", "Lasvit", "Moooi", "Kelly Wearstler"]) {
+      assert(!res.corrected_prose.includes(forbidden), `guard output leaked "${forbidden}"`);
+    }
+    assert(res.removed_names.length >= 3);
+  } finally { restoreFetch(); }
+});
+
+// 7. Discovery Guard failure surfaces ok:false so the caller can hard-fallback.
+Deno.test("runDiscoveryProseGuard returns ok:false on HTTP error (caller must hard-fallback)", async () => {
+  stubFetchWithReply("http_500");
+  try {
+    const res = await runDiscoveryProseGuard({
+      prose: DISCOVERY_PROSE_HALLUCINATION,
+      allowedDesigners: ALLOWED_DESIGNERS_SAMPLE,
+      allowedPieceTitles: ALLOWED_TITLES_SAMPLE,
+      apiKey: "test-key",
+    });
+    assertEquals(res.ok, false);
+    assert(res.reason?.startsWith("http_"), `expected http_ reason, got ${res.reason}`);
+  } finally { restoreFetch(); }
+});
