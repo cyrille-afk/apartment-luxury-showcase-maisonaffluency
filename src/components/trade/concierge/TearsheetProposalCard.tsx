@@ -503,33 +503,39 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
         <p className="font-body text-xs text-muted-foreground italic mb-2.5">"{proposal.args.note}"</p>
       )}
 
-      {/* Structured validation banner (Validate/Sync #A) */}
-      {verdictLoading && (
-        <div className="flex items-center gap-2 rounded-lg border border-border/60 bg-muted/30 px-2.5 py-2 mb-2.5">
-          <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
-          <span className="font-body text-[11px] text-muted-foreground">Validator reviewing your edits…</span>
-        </div>
-      )}
-      {verdict && !verdictLoading && (
-        <ValidationBanner verdict={verdict} onDismiss={() => setVerdict(null)} />
-      )}
+      {/*
+        Validate/Sync + cascading re-alignment.
+        Desktop (≥lg): rendered in the docked <TearsheetInsightsSidebar>
+        via portal (see end of component). Below lg the sidebar can't fit,
+        so we keep the inline banner + diff panel as a fallback.
+      */}
+      <div className="lg:hidden">
+        {verdictLoading && (
+          <div className="flex items-center gap-2 rounded-lg border border-border/60 bg-muted/30 px-2.5 py-2 mb-2.5">
+            <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
+            <span className="font-body text-[11px] text-muted-foreground">Validator reviewing your edits…</span>
+          </div>
+        )}
+        {verdict && !verdictLoading && (
+          <ValidationBanner verdict={verdict} onDismiss={() => setVerdict(null)} />
+        )}
+        {deltaLoading && (
+          <div className="flex items-center gap-2 rounded-lg border border-accent/40 bg-accent/[0.04] px-2.5 py-2 mb-2.5">
+            <Loader2 className="h-3 w-3 animate-spin text-accent" />
+            <span className="font-body text-[11px] text-accent">Re-aligner considering alternatives…</span>
+          </div>
+        )}
+        {delta && !deltaLoading && (
+          <RealignmentDiffPanel
+            delta={delta}
+            lockedItems={uniquePreview.filter((p) => locked.has(p.id) && !excluded.has(p.id))}
+            keptUnlockedItems={uniquePreview.filter((p) => !locked.has(p.id) && !excluded.has(p.id))}
+            onApply={handleApplyRealignment}
+            onDismiss={() => setDelta(null)}
+          />
+        )}
+      </div>
 
-      {/* Cascading re-alignment diff panel (Validate/Sync #B) */}
-      {deltaLoading && (
-        <div className="flex items-center gap-2 rounded-lg border border-accent/40 bg-accent/[0.04] px-2.5 py-2 mb-2.5">
-          <Loader2 className="h-3 w-3 animate-spin text-accent" />
-          <span className="font-body text-[11px] text-accent">Re-aligner considering alternatives…</span>
-        </div>
-      )}
-      {delta && !deltaLoading && (
-        <RealignmentDiffPanel
-          delta={delta}
-          lockedItems={uniquePreview.filter((p) => locked.has(p.id) && !excluded.has(p.id))}
-          keptUnlockedItems={uniquePreview.filter((p) => !locked.has(p.id) && !excluded.has(p.id))}
-          onApply={handleApplyRealignment}
-          onDismiss={() => setDelta(null)}
-        />
-      )}
 
 
       {/* Collapse all reasoning panels — only when something is currently expanded */}
