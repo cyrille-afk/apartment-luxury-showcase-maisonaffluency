@@ -1121,6 +1121,13 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
             return copy;
           });
         },
+        onReconnect: (ev) => {
+          armStall();
+          toast.message("Reconnecting to the concierge…", {
+            description: `Connection ${ev.reason === "stream_truncated" ? "dropped" : "hiccup"} — retrying (${ev.attempt}/${ev.maxAttempts}).`,
+            duration: Math.max(1500, ev.delayMs),
+          });
+        },
         onEscalation: (ev) => {
           armStall();
           setTimeline((prev) => [
@@ -1167,7 +1174,9 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
             // user has a one-click path back to a working turn.
             const friendly = /IDLE_TIMEOUT|504|timeout/i.test(msg)
               ? "The concierge timed out before answering."
-              : msg || "The concierge hit an error.";
+              : msg === "STREAM_TRUNCATED"
+                ? "The connection to the concierge dropped after auto-reconnect attempts."
+                : msg || "The concierge hit an error.";
             pushRetry(text, friendly);
           }
           setStreaming(false);

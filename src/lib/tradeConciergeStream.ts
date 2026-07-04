@@ -289,6 +289,20 @@ export type ToolStartEvent = {
   request_id?: string;
 };
 
+/**
+ * Fires when the SSE stream drops mid-turn and the client is about to
+ * transparently reconnect. Lets the UI surface a subtle "Reconnecting…"
+ * hint without treating the drop as a hard error. `attempt` is 1-indexed
+ * (attempt=1 = first retry after the initial failure).
+ */
+export type ReconnectEvent = {
+  attempt: number;
+  maxAttempts: number;
+  reason: "network_error" | "stream_truncated";
+  /** ms until the next attempt starts (already scheduled). */
+  delayMs: number;
+};
+
 export async function streamConcierge({
   messages,
   projectId,
@@ -301,6 +315,7 @@ export async function streamConcierge({
   onRequestId,
   onInspector,
   onAppliedConstraints,
+  onReconnect,
   onDone,
   onError,
   signal,
@@ -327,6 +342,8 @@ export async function streamConcierge({
   onInspector?: (event: InspectorEvent) => void;
   /** Fires once near the start with the hard-constraint pre-filters applied to catalog retrieval. */
   onAppliedConstraints?: (event: AppliedConstraintsEvent) => void;
+  /** Fires when the stream drops mid-turn and we're about to auto-reconnect. */
+  onReconnect?: (event: ReconnectEvent) => void;
   onDone: () => void;
   onError: (msg: string) => void;
   signal?: AbortSignal;
@@ -348,139 +365,228 @@ export async function streamConcierge({
   }
 
   const endpoint = surface === "public" ? PUBLIC_CHAT_URL : CHAT_URL;
-  // Mint a client-side trace id. The edge function honors `x-request-id`
-  // when present, so the same id appears in the SSE `event: request_id`
-  // frame, every `event: inspector` frame, and the server `concierge_inspector`
-  // log line. Displayed in the UI so the user can copy it while debugging.
-  const clientRequestId = (typeof crypto !== "undefined" && crypto.randomUUID)
+
+  // Reconnect budget. Kept tight because the edge function has no
+  // server-side session/replay — resuming means resending the transcript
+  // plus a synthetic partial-assistant turn and asking the model to
+  // continue where it left off. We only attempt this while the drop was
+  // "safe": before any structured output (tool_start / proposal /
+  // escalation) has been emitted. After a structured event the caller
+  // surfaces its own retry card via onError.
+  const MAX_ATTEMPTS = 3;
+  const backoffMs = (attempt: number) => Math.min(4000, 500 * 2 ** attempt);
+
+  // Preserved across reconnect attempts.
+  let partialText = "";
+  let hasStructuredOutput = false;
+  let requestIdNotified = false;
+  let currentMessages: ChatMessage[] = messages;
+
+  // Mint a client-side trace id once. On reconnect we mint a fresh id for
+  // the new HTTP request but only report the original to the caller so the
+  // UI chip stays stable.
+  const initialClientRequestId = (typeof crypto !== "undefined" && crypto.randomUUID)
     ? crypto.randomUUID()
     : `req-${Date.now()}-${Math.random().toString(36).slice(2)}`;
-  const resp = await fetch(endpoint, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${bearer}`,
-      apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string,
-      "x-request-id": clientRequestId,
-      ...(surface === "public" ? { "x-concierge-surface": "public", "x-concierge-sid": publicSid ?? "" } : {}),
-    },
-    body: JSON.stringify({ messages, project_id: projectId ?? null, surface: surface ?? "trade", lang: lang ?? null }),
-    signal,
-  });
 
-  if (!resp.ok) {
-    let body: any;
-    try { body = await resp.json(); } catch { body = { error: "Request failed" }; }
-    if (resp.status === 401 || resp.status === 403) {
-      onError("UNAUTHORIZED");
-      return;
-    }
-    if (resp.status === 429 && body.retry_in != null) {
-      onError(`RATE_LIMIT:${body.retry_in}`);
-      return;
-    }
-    onError(body.error || `Error ${resp.status}`);
-    return;
-  }
+  type AttemptOutcome =
+    | { kind: "done" }
+    | { kind: "truncated" }        // stream ended without [DONE]
+    | { kind: "network_error"; message: string }
+    | { kind: "hard_error"; message: string }; // 4xx/5xx or unrecoverable
 
-  if (!resp.body) {
-    onError("No response stream");
-    return;
-  }
+  const runOnce = async (isReconnect: boolean): Promise<AttemptOutcome> => {
+    const clientRequestId = isReconnect
+      ? (crypto.randomUUID?.() ?? `req-${Date.now()}-${Math.random().toString(36).slice(2)}`)
+      : initialClientRequestId;
 
-  const reader = resp.body.getReader();
-  const decoder = new TextDecoder();
-  let buffer = "";
-  let streamDone = false;
-  let currentEvent: string | null = null;
-
-  // Notify the caller immediately with the client-minted id so the UI can
-  // render the correlation chip even before the server's `event: request_id`
-  // frame arrives. The server will echo this exact value.
-  if (onRequestId) {
-    try { onRequestId(clientRequestId); } catch { /* ignore */ }
-  }
-
-  const handleDataPayload = (jsonStr: string) => {
-    if (jsonStr === "[DONE]") {
-      streamDone = true;
-      return;
-    }
+    let resp: Response;
     try {
-      const parsed = JSON.parse(jsonStr);
-      if (currentEvent === "request_id") {
-        const rid = (parsed as { request_id?: string })?.request_id;
-        if (typeof rid === "string" && onRequestId) onRequestId(rid);
-        return;
-      }
-      if (currentEvent === "inspector") {
-        if (onInspector) onInspector(parsed as InspectorEvent);
-        return;
-      }
-      if (currentEvent === "applied_constraints") {
-        if (onAppliedConstraints) onAppliedConstraints(parsed as AppliedConstraintsEvent);
-        return;
-      }
-      if (currentEvent === "proposal") {
-        if (onProposal) onProposal(parsed as ConciergeProposal);
-        return;
-      }
-      if (currentEvent === "tool_start") {
-        if (onToolStart) onToolStart(parsed as ToolStartEvent);
-        return;
-      }
-      if (currentEvent === "escalation") {
-        if (onEscalation) onEscalation(parsed as EscalationEvent);
-        return;
-      }
-      const content = parsed.choices?.[0]?.delta?.content as string | undefined;
-      if (content) onDelta(content);
-    } catch {
-      /* ignore partial / unparseable */
+      resp = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${bearer}`,
+          apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string,
+          "x-request-id": clientRequestId,
+          ...(surface === "public" ? { "x-concierge-surface": "public", "x-concierge-sid": publicSid ?? "" } : {}),
+        },
+        body: JSON.stringify({ messages: currentMessages, project_id: projectId ?? null, surface: surface ?? "trade", lang: lang ?? null }),
+        signal,
+      });
+    } catch (e) {
+      if (signal?.aborted) return { kind: "hard_error", message: "aborted" };
+      return { kind: "network_error", message: e instanceof Error ? e.message : "fetch failed" };
     }
+
+    if (!resp.ok) {
+      let body: any;
+      try { body = await resp.json(); } catch { body = { error: "Request failed" }; }
+      if (resp.status === 401 || resp.status === 403) return { kind: "hard_error", message: "UNAUTHORIZED" };
+      if (resp.status === 429 && body.retry_in != null) return { kind: "hard_error", message: `RATE_LIMIT:${body.retry_in}` };
+      return { kind: "hard_error", message: body.error || `Error ${resp.status}` };
+    }
+
+    if (!resp.body) return { kind: "hard_error", message: "No response stream" };
+
+    // Notify the caller with the stable trace id the first time only.
+    if (!requestIdNotified && onRequestId) {
+      requestIdNotified = true;
+      try { onRequestId(initialClientRequestId); } catch { /* ignore */ }
+    }
+
+    const reader = resp.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+    let streamDone = false;
+    let currentEvent: string | null = null;
+
+    const handleDataPayload = (jsonStr: string) => {
+      if (jsonStr === "[DONE]") {
+        streamDone = true;
+        return;
+      }
+      try {
+        const parsed = JSON.parse(jsonStr);
+        if (currentEvent === "request_id") {
+          // Ignore server-echoed id on reconnect attempts; keep the original.
+          if (!isReconnect) {
+            const rid = (parsed as { request_id?: string })?.request_id;
+            if (typeof rid === "string" && onRequestId && !requestIdNotified) {
+              requestIdNotified = true;
+              onRequestId(rid);
+            }
+          }
+          return;
+        }
+        if (currentEvent === "inspector") {
+          if (onInspector) onInspector(parsed as InspectorEvent);
+          return;
+        }
+        if (currentEvent === "applied_constraints") {
+          if (onAppliedConstraints) onAppliedConstraints(parsed as AppliedConstraintsEvent);
+          return;
+        }
+        if (currentEvent === "proposal") {
+          hasStructuredOutput = true;
+          if (onProposal) onProposal(parsed as ConciergeProposal);
+          return;
+        }
+        if (currentEvent === "tool_start") {
+          hasStructuredOutput = true;
+          if (onToolStart) onToolStart(parsed as ToolStartEvent);
+          return;
+        }
+        if (currentEvent === "escalation") {
+          hasStructuredOutput = true;
+          if (onEscalation) onEscalation(parsed as EscalationEvent);
+          return;
+        }
+        const content = parsed.choices?.[0]?.delta?.content as string | undefined;
+        if (content) {
+          partialText += content;
+          onDelta(content);
+        }
+      } catch {
+        /* ignore partial / unparseable */
+      }
+    };
+
+    try {
+      while (!streamDone) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+
+        let idx: number;
+        while ((idx = buffer.indexOf("\n")) !== -1) {
+          let line = buffer.slice(0, idx);
+          buffer = buffer.slice(idx + 1);
+          if (line.endsWith("\r")) line = line.slice(0, -1);
+
+          if (line === "") { currentEvent = null; continue; }
+          if (line.startsWith(":")) continue;
+          if (line.startsWith("event: ")) { currentEvent = line.slice(7).trim(); continue; }
+          if (!line.startsWith("data: ")) continue;
+          handleDataPayload(line.slice(6).trim());
+          if (streamDone) break;
+        }
+      }
+
+      // flush remaining
+      if (buffer.trim()) {
+        for (let raw of buffer.split("\n")) {
+          if (!raw) continue;
+          if (raw.endsWith("\r")) raw = raw.slice(0, -1);
+          if (raw.startsWith("event: ")) { currentEvent = raw.slice(7).trim(); continue; }
+          if (!raw.startsWith("data: ")) continue;
+          handleDataPayload(raw.slice(6).trim());
+        }
+      }
+    } catch (e) {
+      if (signal?.aborted) return { kind: "hard_error", message: "aborted" };
+      return { kind: "network_error", message: e instanceof Error ? e.message : "read failed" };
+    }
+
+    if (streamDone) return { kind: "done" };
+    return { kind: "truncated" };
   };
 
-  while (!streamDone) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    buffer += decoder.decode(value, { stream: true });
+  for (let attempt = 0; attempt <= MAX_ATTEMPTS; attempt++) {
+    if (signal?.aborted) return;
+    const outcome = await runOnce(attempt > 0);
 
-    let idx: number;
-    while ((idx = buffer.indexOf("\n")) !== -1) {
-      let line = buffer.slice(0, idx);
-      buffer = buffer.slice(idx + 1);
-      if (line.endsWith("\r")) line = line.slice(0, -1);
+    if (outcome.kind === "done") {
+      onDone();
+      return;
+    }
 
-      if (line === "") {
-        // SSE event terminator — reset event name
-        currentEvent = null;
-        continue;
-      }
-      if (line.startsWith(":")) continue;
+    if (outcome.kind === "hard_error") {
+      if (outcome.message === "aborted") return;
+      onError(outcome.message);
+      return;
+    }
 
-      if (line.startsWith("event: ")) {
-        currentEvent = line.slice(7).trim();
-        continue;
-      }
-      if (!line.startsWith("data: ")) continue;
+    // truncated | network_error → maybe reconnect.
+    // Fail closed once structured output has streamed: replaying would
+    // duplicate cards and confuse the timeline. Let the UI show its retry card.
+    if (hasStructuredOutput || attempt >= MAX_ATTEMPTS) {
+      onError(outcome.kind === "truncated" ? "STREAM_TRUNCATED" : outcome.message);
+      return;
+    }
 
-      handleDataPayload(line.slice(6).trim());
-      if (streamDone) break;
+    const delayMs = backoffMs(attempt);
+    if (onReconnect) {
+      try {
+        onReconnect({
+          attempt: attempt + 1,
+          maxAttempts: MAX_ATTEMPTS,
+          reason: outcome.kind === "truncated" ? "stream_truncated" : "network_error",
+          delayMs,
+        });
+      } catch { /* ignore */ }
+    }
+    await new Promise((r) => setTimeout(r, delayMs));
+    if (signal?.aborted) return;
+
+    // Rebuild the messages payload with the partial assistant turn +
+    // a continuation nudge. The edge function has no server-side session,
+    // so "resume" = model picks up where its stream was cut.
+    if (partialText.trim().length > 0) {
+      currentMessages = [
+        ...messages,
+        { role: "assistant", content: partialText },
+        {
+          role: "user",
+          content:
+            "(the previous response was cut off by a dropped connection) Please continue exactly from where you left off. Do not repeat, summarise, or re-introduce anything you already said.",
+        },
+      ];
+    } else {
+      // Nothing streamed yet — a clean retry of the original turn.
+      currentMessages = messages;
     }
   }
-
-  // flush remaining
-  if (buffer.trim()) {
-    for (let raw of buffer.split("\n")) {
-      if (!raw) continue;
-      if (raw.endsWith("\r")) raw = raw.slice(0, -1);
-      if (raw.startsWith("event: ")) { currentEvent = raw.slice(7).trim(); continue; }
-      if (!raw.startsWith("data: ")) continue;
-      handleDataPayload(raw.slice(6).trim());
-    }
-  }
-
-  onDone();
 }
 
 const COMMIT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/trade-concierge-commit`;
