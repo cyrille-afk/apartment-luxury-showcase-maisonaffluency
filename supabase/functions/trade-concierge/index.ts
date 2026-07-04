@@ -4526,16 +4526,20 @@ serve(async (req) => {
         const countPhrase = brandCounts.size > 1
           ? `${finalIds.length} pieces (${brandCountSummary})`
           : `${finalIds.length} ${multiLabel} pieces`;
+        const specSheetBlock = renderSpecSheetBlock(preview as any);
+        const specSheetRows = buildSpecSheetRows(preview as any);
+        const baseNote = excludedIds.size > 0
+          ? `${countPhrase} of ${pickIds.length} matched pieces (skipped ${excludedIds.size} per your request), with trade pricing.`
+          : `${countPhrase} from the Maison Affluency Curation, with trade pricing.`;
         const proposal = {
           tool: "propose_tearsheet",
           tool_call_id: crypto.randomUUID(),
           args: {
             title: `${multiLabel} — curated edit`,
             pick_ids: finalIds,
-            note: excludedIds.size > 0
-              ? `${countPhrase} of ${pickIds.length} matched pieces (skipped ${excludedIds.size} per your request), with trade pricing.`
-              : `${countPhrase} from the Maison Affluency Curation, with trade pricing.`,
+            note: specSheetBlock ? `${baseNote}\n\n${specSheetBlock}` : baseNote,
             pick_rationales: rationaleMap,
+            spec_sheet: specSheetRows.length ? specSheetRows : undefined,
           },
           preview,
         };
