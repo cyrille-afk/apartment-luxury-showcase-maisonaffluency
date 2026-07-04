@@ -402,6 +402,18 @@ export const quickClientProfile = (text: string): QuickProfile | null => {
       }
     }
   }
+  // Fuzzy fallback: catches typos like "Singqpore" → Singapore when the user's
+  // input is a short standalone token. Only applied when no exact match was
+  // found and the text looks like a bare city answer (not a full sentence).
+  if (!city) {
+    const fuzzy = fuzzyCityMatch(text);
+    if (fuzzy) {
+      city = fuzzy.city;
+      country = fuzzy.country;
+      if (!signals.includes("high_value_location")) signals.push("high_value_location");
+      signals.push("fuzzy_city_match");
+    }
+  }
 
   for (const p of PROPERTY_TYPES) {
     if (new RegExp(`\\b${p}\\b`, "i").test(text)) {
