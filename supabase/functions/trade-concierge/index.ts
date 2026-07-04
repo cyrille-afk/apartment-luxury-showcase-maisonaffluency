@@ -11,6 +11,35 @@ import { runInspectorPass, buildInspectorGroundTruth, buildInspectorLogRecord, l
 import { installFramePersistence, serveResume } from "./_resume.ts";
 import { deriveHardConstraints, applyHardConstraints, filterRowsByHardConstraints, type HardConstraints } from "../_shared/hardConstraints.ts";
 import { inferDimensionConstraints, filterRowsByDimensionConstraints, type DimensionConstraints } from "../_shared/dimensionConstraints.ts";
+import {
+  inferLeadTimeConstraints,
+  filterRowsByLeadTimeConstraints,
+  buildBrandLeadTimeIndex,
+  type LeadTimeConstraints,
+  type BrandLeadTimeEntry,
+} from "../_shared/leadTimeConstraints.ts";
+
+// Lazy, per-invocation cache of the brand-level lead-time index. Empty table
+// today, but as it fills the fallback engages automatically.
+let _brandLeadIndex: Map<string, BrandLeadTimeEntry> | null = null;
+let _brandLeadIndexFetchedAt = 0;
+const BRAND_LEAD_INDEX_TTL_MS = 5 * 60_000;
+async function getBrandLeadTimeIndex(supabase: ConciergeDbClient): Promise<Map<string, BrandLeadTimeEntry>> {
+  const now = Date.now();
+  if (_brandLeadIndex && now - _brandLeadIndexFetchedAt < BRAND_LEAD_INDEX_TTL_MS) return _brandLeadIndex;
+  try {
+    const { data, error } = await supabase
+      .from("brand_lead_times")
+      .select("brand_name, default_lead_weeks_min, default_lead_weeks_max, default_stock_status");
+    if (error) throw error;
+    _brandLeadIndex = buildBrandLeadTimeIndex((data as any[]) || []);
+  } catch (e) {
+    console.warn("[concierge lead] brand_lead_times fetch failed:", (e as Error)?.message || e);
+    _brandLeadIndex = new Map();
+  }
+  _brandLeadIndexFetchedAt = now;
+  return _brandLeadIndex;
+}
 import { buildNoStrictTypologyReply, typologyLabel } from "./_no_strict_typology_reply.ts";
 
 type ConciergeDbClient = any;
