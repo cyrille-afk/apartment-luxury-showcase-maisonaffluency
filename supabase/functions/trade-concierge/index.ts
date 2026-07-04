@@ -2508,13 +2508,16 @@ async function loadRelevantPieces(
       usage: { prompt_tokens: Math.ceil(query.length / 4), completion_tokens: 0, total_tokens: Math.ceil(query.length / 4) },
     }).catch(() => {});
     // Over-fetch when hard constraints will filter the shortlist, so we still
-    // have enough survivors for the AI to reason over.
+    // have enough survivors for the AI to reason over. Dimension constraints
+    // are strict + can drop unknown-dim rows, so they widen the multiplier too.
+    const dimConstraints: DimensionConstraints | null = inferDimensionConstraints(query);
     const wantsConstraintFilter = !!hardConstraints && (
       (hardConstraints.materials?.length || 0) +
       (hardConstraints.colors?.length || 0) +
       (hardConstraints.categories?.length || 0) > 0
     );
-    const matchCount = wantsConstraintFilter ? Math.min(k * 4, 200) : k;
+    const wantsDimFilter = !!dimConstraints;
+    const matchCount = (wantsConstraintFilter || wantsDimFilter) ? Math.min(k * 4, 200) : k;
     const { data: rawData, error } = await supabase.rpc("match_catalog", {
       query_embedding: vec as any,
       match_count: matchCount,
@@ -2526,13 +2529,22 @@ async function loadRelevantPieces(
     // Post-filter the pgvector shortlist with the same token dictionary the
     // SQL path uses, so hard constraints (color, material, category, brand
     // exclusion) apply identically whether we use vector or bulk SQL.
-    const data = wantsConstraintFilter
-      ? filterRowsByHardConstraints(rawData, hardConstraints!).slice(0, k)
-      : rawData.slice(0, k);
+    let filtered = wantsConstraintFilter
+      ? filterRowsByHardConstraints(rawData, hardConstraints!)
+      : rawData;
+    // Hard dimension constraints — deterministic mm parse; unknowns dropped in
+    // strict mode, safety-valve keeps them only if <2 survivors.
+    if (wantsDimFilter) {
+      const dimRes = filterRowsByDimensionConstraints(filtered as any[], dimConstraints);
+      console.log(`[concierge RAG dim] pre=${filtered.length} strict=${dimRes.strictKept.length} kept=${dimRes.kept.length} dropped=${dimRes.dropped} unknownDropped=${dimRes.unknownDropped} fellBack=${dimRes.fellBack} constraints=${JSON.stringify(dimConstraints)}`);
+      filtered = dimRes.kept as any[];
+    }
+    const data = filtered.slice(0, k);
     if (data.length < 5) {
       // Filter too strict — fall back to unfiltered top-K rather than blank.
       console.warn("[concierge RAG] hard constraints filtered <5 rows; falling back", {
         constraints: hardConstraints,
+        dimConstraints,
         preFilter: rawData.length,
       });
       return { contextText: "", rows: [] };
