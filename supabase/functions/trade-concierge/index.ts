@@ -3421,7 +3421,7 @@ async function hydrateQuotePreview(
         cents: c.trade_price_cents ?? c.rrp_price_cents ?? null,
         score: ((c.trade_price_cents ?? c.rrp_price_cents) ? 1000 : 0) + (c.price_unit !== "per_sqm" ? 100 : 0),
       }))
-      .sort((a, b) => b.score - a.score)[0];
+      .sort((a: any, b: any) => b.score - a.score)[0];
     if (!best?.cents) return null;
     const currentCents = tradeRow.trade_price_cents ?? tradeRow.rrp_price_cents ?? null;
     if (!currentCents || tradeRow.price_unit === "per_sqm" || best.score > 1000) {
@@ -3813,7 +3813,7 @@ serve(async (req) => {
       timed("userMemory", loadUserMemory(supabase, userId)),
       timed("mentionedProject", mentionedProjectIdPromise),
       timed("openQuotes", loadOpenQuotes(supabase, userId)),
-      timed("tradeTier", supabase.from("profiles").select("trade_tier").eq("id", userId).maybeSingle()),
+      timed("tradeTier", Promise.resolve(supabase.from("profiles").select("trade_tier").eq("id", userId).maybeSingle())),
       timed("cadDocuments", loadCadDocuments(supabase, userId)),
       timed("productCadAssets", loadProductCadAssets(supabase)),
     ]);
@@ -4300,7 +4300,7 @@ serve(async (req) => {
         );
       }
       if (pickIds.length >= 1) {
-        const previewRawAll = await hydratePickPreview(supabase, pickIds);
+        const previewRawAll = (await hydratePickPreview(supabase, pickIds)).filter((p: any) => p && typeof p.id === "string");
         const validIds = new Set(previewRawAll.map((p: any) => p?.id).filter(Boolean));
         // Honour in-chat "skip / exclude / omit …" instructions so the
         // proposal card is pre-filtered instead of shipping all 10 when the
@@ -5639,7 +5639,7 @@ serve(async (req) => {
                 }
               }
             }
-            let previewRaw = await hydratePickPreview(supabase, pickIds);
+            let previewRaw = (await hydratePickPreview(supabase, pickIds)).filter((p: any) => p && typeof p.id === "string");
             if (requestedTypology) {
               previewRaw = previewRaw.filter((p: any) => rowMatchesRequestedTypology(p, requestedTypology));
             }
@@ -6151,7 +6151,7 @@ serve(async (req) => {
         const plannerExpectsCard = Array.isArray(effectiveBrief?.plan) && effectiveBrief.plan.some((t) =>
           t === "propose_tearsheet" || t === "add_to_tearsheet" ||
           t === "draft_quote" || t === "add_to_quote" ||
-          t === "propose_ffe_rows" || t === "estimate_shipping"
+          t === "propose_ffe_rows"
         );
         // Discovery-stage guard: ALSO buffer prose on turns with no expected
         // card, so the Discovery Guard can scrub invented brand/piece names
