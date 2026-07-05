@@ -2584,18 +2584,37 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
                     </button>
                   </div>
                   <div className="space-y-3">
-                    {sections.map((s, i) => (
-                      <div key={i}>
-                        {s.header && (
-                          <div className="font-heading text-[12px] font-semibold text-accent mb-1">
-                            {s.header}
-                          </div>
-                        )}
-                        <pre className="whitespace-pre-wrap font-body text-[12px] leading-relaxed text-foreground">
-                          {s.body}
-                        </pre>
-                      </div>
-                    ))}
+                    {sections.map((s, i) => {
+                      const isBlock3 = !!s.header && /^Block\s+3\b/i.test(s.header);
+                      const moodImages = isBlock3
+                        ? attachments.filter((a) => a.role === "moodboard" && a.kind === "image")
+                        : [];
+                      return (
+                        <div key={i}>
+                          {s.header && (
+                            <div className="font-heading text-[12px] font-semibold text-accent mb-1">
+                              {s.header}
+                            </div>
+                          )}
+                          <pre className="whitespace-pre-wrap font-body text-[12px] leading-relaxed text-foreground">
+                            {s.body}
+                          </pre>
+                          {moodImages.length > 0 && (
+                            <div className="mt-2 flex flex-wrap gap-1.5">
+                              {moodImages.map((m) => (
+                                <img
+                                  key={m.id}
+                                  src={m.previewUrl || m.dataUrl}
+                                  alt={m.name}
+                                  className="h-14 w-14 rounded object-cover border border-accent/40"
+                                  title={m.name}
+                                />
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                   {attachments.length > 0 && (
                     <div className="mt-3 pt-2 border-t border-border/60">
