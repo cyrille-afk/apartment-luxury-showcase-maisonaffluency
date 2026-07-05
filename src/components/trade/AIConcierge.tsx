@@ -1167,6 +1167,32 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
       } catch (e) { console.warn("[concierge-capture] setup", e); }
     }
 
+    // Project-scale auto-detection — on the first user turn, if the message
+    // reads as a whole-home / multi-room project brief, skip the slow
+    // one-question-at-a-time intake and immediately open the Architectural
+    // Brief Builder with the detected typology/city prefilled.
+    if (isFirstUserTurn && sendingAttachments.length === 0) {
+      const scale = detectProjectScale(text);
+      if (scale) {
+        const profileLine = [scale.typology, scale.city].filter(Boolean).join(", ");
+        const prefilled = SPEC_BRIEF_TEMPLATE.replace("[typology, city/area]", profileLine || "[typology, city/area]");
+        setInput(prefilled);
+        setBriefBuilderOpen(true);
+        setTimeline((prev) => [
+          ...prev,
+          {
+            kind: "msg",
+            role: "assistant",
+            content: `A project of this scale deserves a structured brief${profileLine ? ` — I've noted **${profileLine}**` : ""}. I've opened the Architectural Brief Builder and prefilled what I picked up. Fill in the zone, footprint, timeline, and aesthetic direction, then send it back and I'll return three layout configurations with a full Architectural Specification Schedule.`,
+          },
+        ]);
+        setStreaming(false);
+        return;
+      }
+    }
+
+
+
     // Build the chat message history for the API (text-only items),
     // prefixed with a lightweight stage-context note so the assistant
     // always references the user's current workflow stage.
