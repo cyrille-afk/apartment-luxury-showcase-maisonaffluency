@@ -319,6 +319,95 @@ export function SpecScheduleBlock({ zone, markdown }: Props) {
         </ReactMarkdown>
       </div>
 
+      <Dialog open={coverOpen} onOpenChange={setCoverOpen}>
+        <DialogContent className="max-w-md p-0 gap-0 overflow-hidden">
+          <DialogHeader className="px-4 py-3 border-b border-border/60 space-y-0">
+            <DialogTitle className="font-display text-sm uppercase tracking-[0.14em]">
+              Cover page
+            </DialogTitle>
+          </DialogHeader>
+          <form
+            className="p-4 space-y-3"
+            onSubmit={(e) => {
+              e.preventDefault();
+              setCoverOpen(false);
+              onOpenPreview();
+            }}
+          >
+            <label className="flex items-center gap-2 text-[12px] font-body text-foreground">
+              <input
+                type="checkbox"
+                checked={includeCover}
+                onChange={(e) => setIncludeCover(e.target.checked)}
+                className="h-3.5 w-3.5 accent-current"
+              />
+              Include cover page
+            </label>
+
+            <div className="space-y-1">
+              <label className="text-[10px] uppercase tracking-[0.14em] font-body text-muted-foreground">
+                Project name
+              </label>
+              <input
+                type="text"
+                value={projectName}
+                onChange={(e) => setProjectName(e.target.value)}
+                disabled={!includeCover}
+                placeholder={zone || "Untitled Project"}
+                className="w-full rounded-md border border-border bg-background px-2.5 py-1.5 text-[13px] font-body text-foreground focus:outline-none focus:border-accent/60 disabled:opacity-50"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-[10px] uppercase tracking-[0.14em] font-body text-muted-foreground">
+                Designer / studio
+              </label>
+              <input
+                type="text"
+                value={designerName}
+                onChange={(e) => setDesignerName(e.target.value)}
+                disabled={!includeCover}
+                placeholder="e.g. Maison Affluency"
+                className="w-full rounded-md border border-border bg-background px-2.5 py-1.5 text-[13px] font-body text-foreground focus:outline-none focus:border-accent/60 disabled:opacity-50"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-[10px] uppercase tracking-[0.14em] font-body text-muted-foreground">
+                Date
+              </label>
+              <input
+                type="date"
+                value={coverDate}
+                onChange={(e) => setCoverDate(e.target.value)}
+                disabled={!includeCover}
+                className="w-full rounded-md border border-border bg-background px-2.5 py-1.5 text-[13px] font-body text-foreground focus:outline-none focus:border-accent/60 disabled:opacity-50"
+              />
+            </div>
+
+            <div className="flex items-center justify-end gap-1.5 pt-1">
+              <button
+                type="button"
+                onClick={() => setCoverOpen(false)}
+                className="inline-flex items-center rounded-full border border-border bg-background hover:bg-accent/10 hover:border-accent/40 px-3 py-1.5 text-[11px] font-body text-foreground transition"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={building}
+                className="inline-flex items-center gap-1.5 rounded-full border border-accent/60 bg-accent/10 hover:bg-accent/20 px-3 py-1.5 text-[11px] font-body text-foreground transition disabled:opacity-60"
+              >
+                <Eye className="h-3 w-3" />
+                Build preview
+              </button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+
+
       <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
         <DialogContent className="max-w-5xl w-[92vw] h-[88vh] p-0 gap-0 overflow-hidden">
           <DialogHeader className="px-4 py-3 border-b border-border/60 flex-row items-center justify-between space-y-0">
