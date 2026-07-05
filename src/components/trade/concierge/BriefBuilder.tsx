@@ -202,7 +202,10 @@ function saveDraft(draft: BriefDraft) {
   }
 }
 
-const EXPANDED_STORAGE_KEY = "concierge:briefBuilder:expanded";
+const EXPANDED_STORAGE_PREFIX = "concierge:briefBuilder:expanded";
+// Legacy global key — read once as fallback so existing users keep their layout
+// the first time they open the builder after this change.
+const LEGACY_EXPANDED_STORAGE_KEY = "concierge:briefBuilder:expanded";
 
 type ExpandedSections = Record<ObjectBlock, boolean>;
 
@@ -212,27 +215,57 @@ const DEFAULT_EXPANDED: ExpandedSections = {
   block3: true,
 };
 
-function loadExpanded(): ExpandedSections {
+// Scope the expanded/collapsed layout per active trade project so switching
+// projects restores that project's preferred section layout. Falls back to a
+// shared "global" bucket when no project is active.
+function getProjectScope(): string {
+  if (typeof window === "undefined") return "global";
+  try {
+    const id = window.sessionStorage.getItem("trade:lastProjectFilter");
+    return id && id.trim() ? id : "global";
+  } catch {
+    return "global";
+  }
+}
+
+function expandedStorageKey(scope: string): string {
+  return `${EXPANDED_STORAGE_PREFIX}:${scope}`;
+}
+
+function coerceExpanded(parsed: unknown): ExpandedSections | null {
+  if (!parsed || typeof parsed !== "object") return null;
+  const p = parsed as Record<string, unknown>;
+  return {
+    block1: !!p.block1,
+    block2: !!p.block2,
+    block3: !!p.block3,
+  };
+}
+
+function loadExpanded(scope: string): ExpandedSections {
   if (typeof window === "undefined") return DEFAULT_EXPANDED;
   try {
-    const raw = window.localStorage.getItem(EXPANDED_STORAGE_KEY);
-    if (!raw) return DEFAULT_EXPANDED;
-    const parsed = JSON.parse(raw);
-    if (!parsed || typeof parsed !== "object") return DEFAULT_EXPANDED;
-    return {
-      block1: !!parsed.block1,
-      block2: !!parsed.block2,
-      block3: !!parsed.block3,
-    };
+    const raw = window.localStorage.getItem(expandedStorageKey(scope));
+    if (raw) {
+      const parsed = coerceExpanded(JSON.parse(raw));
+      if (parsed) return parsed;
+    }
+    // First open in this scope: seed from legacy global key if present.
+    const legacy = window.localStorage.getItem(LEGACY_EXPANDED_STORAGE_KEY);
+    if (legacy) {
+      const parsed = coerceExpanded(JSON.parse(legacy));
+      if (parsed) return parsed;
+    }
+    return DEFAULT_EXPANDED;
   } catch {
     return DEFAULT_EXPANDED;
   }
 }
 
-function saveExpanded(state: ExpandedSections) {
+function saveExpanded(scope: string, state: ExpandedSections) {
   if (typeof window === "undefined") return;
   try {
-    window.localStorage.setItem(EXPANDED_STORAGE_KEY, JSON.stringify(state));
+    window.localStorage.setItem(expandedStorageKey(scope), JSON.stringify(state));
   } catch {
     // ignore quota errors
   }
@@ -252,7 +285,25 @@ export function BriefBuilder({
   const [suffix, setSuffix] = useState("");
   const lastEmitted = useRef<string>("");
   const restoredRef = useRef(false);
-  const [expanded, setExpanded] = useState<ExpandedSections>(loadExpanded());
+  const scopeRef = useRef<string>(getProjectScope());
+  const [expanded, setExpanded] = useState<ExpandedSections>(() => loadExpanded(scopeRef.current));
+
+  // Re-read the scope + its saved layout whenever the active project changes
+  // while the builder is mounted (e.g. user switches project filter).
+  useEffect(() => {
+    const sync = () => {
+      const next = getProjectScope();
+      if (next === scopeRef.current) return;
+      scopeRef.current = next;
+      setExpanded(loadExpanded(next));
+    };
+    window.addEventListener("storage", sync);
+    window.addEventListener("focus", sync);
+    return () => {
+      window.removeEventListener("storage", sync);
+      window.removeEventListener("focus", sync);
+    };
+  }, []);
 
   // Restore draft on mount (once), overriding whatever the parent seeded.
   useEffect(() => {
@@ -310,7 +361,7 @@ export function BriefBuilder({
   const toggleSection = (block: ObjectBlock) => {
     const next = { ...expanded, [block]: !expanded[block] };
     setExpanded(next);
-    saveExpanded(next);
+    saveExpanded(scopeRef.current, next);
   };
 
   const SectionHeader = ({
