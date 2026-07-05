@@ -561,7 +561,7 @@ const App = () => {
                     <Route path="spatial-fit/audit" element={<TradeSpatialFitAudit />} />
                     <Route path="insights" element={<TradeInsights />} />
                     <Route path="downloads-by-country" element={<TradeDownloadsByCountry />} />
-                    <Route path="magazine-analytics" element={<TradeMagazineAnalytics />} />
+                    {/* magazine-analytics route removed — AD free-download flow discontinued */}
                     <Route path="designers" element={<TradeDesigners />} />
                     <Route path="designers/admin" element={<TradeDesignersAdmin />} />
                     <Route path="collectibles/admin" element={<TradeCollectiblesAdmin />} />
