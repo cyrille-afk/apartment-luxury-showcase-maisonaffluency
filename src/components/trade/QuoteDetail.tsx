@@ -39,6 +39,7 @@ import { priceRugVariantFromLabel } from "@/lib/rugPricing";
 import { computeWeightedDepositPct } from "@/lib/computeDepositPct";
 import BillingModeCard from "@/components/trade/BillingModeCard";
 import { resolveWoodFinishLabel } from "@/lib/resolveWoodFinishLabel";
+import { splitFinishAndDimensions, formatImperialDimensions } from "@/lib/formatDimensions";
 
 const CURRENCIES = ["SGD", "USD", "EUR", "GBP"] as const;
 type Currency = (typeof CURRENCIES)[number];
@@ -2635,11 +2636,30 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                           <p className="font-body text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5 truncate">
                             {product?.brand_name?.includes(' - ') ? product.brand_name.split(' - ')[0].trim() : product?.brand_name}
                           </p>
-                          {item.variant_label && (
-                            <p className="font-body text-[10px] md:text-[11px] text-foreground/90 mt-1 break-words">
-                              <span className="text-muted-foreground">Finish:</span> {item.variant_label}
-                            </p>
-                          )}
+                          {(() => {
+                            // Split the variant label into finish tokens and
+                            // dimension tokens so the legend renders on two
+                            // clean lines with dual units (cm | in), matching
+                            // the PDF composer.
+                            const { finish: finishOnly, dims: dimsFromVariant } = splitFinishAndDimensions(item.variant_label);
+                            const dimsSource = dimsFromVariant || (product?.dimensions ? String(product.dimensions).trim() : "");
+                            const dimsImp = dimsSource ? formatImperialDimensions(dimsSource) : null;
+                            return (
+                              <>
+                                {finishOnly && (
+                                  <p className="font-body text-[10px] md:text-[11px] text-foreground/90 mt-1 break-words">
+                                    <span className="text-muted-foreground">Finish:</span> {finishOnly}
+                                  </p>
+                                )}
+                                {dimsSource && (
+                                  <p className="font-body text-[10px] md:text-[11px] text-muted-foreground mt-1 break-words">
+                                    <span className="text-muted-foreground">Dimensions:</span> {dimsSource}
+                                    {dimsImp ? <span className="text-muted-foreground/80"> | {dimsImp}</span> : null}
+                                  </p>
+                                )}
+                              </>
+                            );
+                          })()}
                           {((item as any).fabric?.name || (item as any).fabric_upcharge_cents) && (() => {
                             const f: any = (item as any).fabric;
                             const upcharge = (item as any).fabric_upcharge_cents as number | null;
@@ -2661,7 +2681,6 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                             );
                           })()}
 
-                          {product?.dimensions && !item.variant_label && <p className="font-body text-[10px] md:text-[11px] text-muted-foreground mt-1 break-words">{product.dimensions}</p>}
                           {!item.variant_label && product?.materials && <p className="font-body text-[10px] md:text-[11px] text-muted-foreground break-words">{product.materials}</p>}
                           {item.edition && <p className="font-body text-[10px] md:text-[11px] text-foreground/80 italic mt-0.5 break-words">Edition: {String(item.edition).replace(/^edition\s*[:\-—]?\s*/i, "").trim()}</p>}
                           {(() => {
