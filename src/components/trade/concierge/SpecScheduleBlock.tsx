@@ -458,22 +458,31 @@ export function SpecScheduleBlock({ zone, markdown }: Props) {
             </div>
 
 
-            <div className="flex items-center justify-end gap-1.5 pt-1">
+            <div className="flex items-center justify-between gap-1.5 pt-1">
               <button
                 type="button"
-                onClick={() => setCoverOpen(false)}
-                className="inline-flex items-center rounded-full border border-border bg-background hover:bg-accent/10 hover:border-accent/40 px-3 py-1.5 text-[11px] font-body text-foreground transition"
+                onClick={resetCoverPrefs}
+                className="inline-flex items-center rounded-full border border-border bg-background hover:bg-destructive/10 hover:border-destructive/40 px-3 py-1.5 text-[11px] font-body text-muted-foreground hover:text-destructive transition"
               >
-                Cancel
+                Reset
               </button>
-              <button
-                type="submit"
-                disabled={building}
-                className="inline-flex items-center gap-1.5 rounded-full border border-accent/60 bg-accent/10 hover:bg-accent/20 px-3 py-1.5 text-[11px] font-body text-foreground transition disabled:opacity-60"
-              >
-                <Eye className="h-3 w-3" />
-                Build preview
-              </button>
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => setCoverOpen(false)}
+                  className="inline-flex items-center rounded-full border border-border bg-background hover:bg-accent/10 hover:border-accent/40 px-3 py-1.5 text-[11px] font-body text-foreground transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={building}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-accent/60 bg-accent/10 hover:bg-accent/20 px-3 py-1.5 text-[11px] font-body text-foreground transition disabled:opacity-60"
+                >
+                  <Eye className="h-3 w-3" />
+                  Build preview
+                </button>
+              </div>
             </div>
           </form>
         </DialogContent>
