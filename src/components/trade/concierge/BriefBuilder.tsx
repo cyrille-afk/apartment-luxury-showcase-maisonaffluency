@@ -37,7 +37,7 @@ const DEFAULT_VALUES: BriefValues = {
   },
   block3: {
     vibe: "[e.g. Japandi-Luxe, Italian Minimalism]",
-    references: "[Minotti / B&B Italia / Edra / …]",
+    references: "Man of Parts (Sandy Cove / Bond Street / Rua Leblon) / Collection Particulière / De La Espada / Leo Sentou",
     palette: "[materials + finishes]",
   },
   block4:
@@ -320,7 +320,7 @@ export function BriefBuilder({
             <Field
               label="References"
               value={values.block3.references}
-              placeholder="[Minotti / B&B Italia / Edra / …]"
+              placeholder="Man of Parts / Collection Particulière / De La Espada / Leo Sentou"
               onChange={(v) => setBlockField("block3", "references", v)}
             />
             <Field
