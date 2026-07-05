@@ -314,6 +314,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   const [emailPreviewLoading, setEmailPreviewLoading] = useState(false);
   const [emailSubject, setEmailSubject] = useState("");
   const [emailBody, setEmailBody] = useState("");
+  const [submittingQuote, setSubmittingQuote] = useState(false);
   const [currencyOpen, setCurrencyOpen] = useState(false);
   const [fxRates, setFxRates] = useState<Record<string, number>>({});
   const [fxSource, setFxSource] = useState<FxSource>("identity");
