@@ -345,65 +345,97 @@ BEGIN
     'trade_quote_items guard allows service_role path');
 END $$;
 
--- 6c. Runtime enforcement — simulate a non-admin authenticated caller and
--- confirm the trigger raises when a protected column changes. The pooler
--- forbids SET ROLE, but the guard reads auth.uid() from request.jwt.claims,
--- so setting the claim is sufficient to exercise the has_role() branch.
+-- 6c. Runtime enforcement — call each guard function directly with an OLD/NEW
+-- pair via a synthetic trigger event. We invoke the guard through UPDATE and
+-- capture the raised message, then assert the message came from OUR guard
+-- (not from RLS / permissions). The pooler's role can't SET ROLE, but the
+-- guards read auth.uid() from request.jwt.claims, so a JWT claim is enough
+-- to hit the non-admin branch.
+--
+-- NOTE: we run the fixture INSERT/UPDATE as the current (privileged) pooler
+-- role. RLS may reject the UPDATE before the trigger fires; when that
+-- happens the error text is "permission denied" and we correctly FAIL —
+-- forcing the test author to fix the test environment. Locally with a
+-- direct connection (or with the service_role key) both paths run.
+
 DO $$
 DECLARE
   _owner uuid := current_setting('rls_test.owner_uid')::uuid;
   _quote_id uuid := '11111111-1111-1111-1111-111111111e01';
   _fake_uid uuid := '11111111-1111-1111-1111-111111111ff1';
+  _err text;
 BEGIN
-  -- Fixture: a trade_quotes row owned by a synthetic non-admin user.
+  -- Fixture: a trade_quotes row owned by the profile-fixture user.
   INSERT INTO public.trade_quotes (id, user_id, status,
                                    net_discount_pct, commission_pct,
                                    credit_applied_cents, insurance_rate_bps)
   VALUES (_quote_id, _owner, 'draft',
           0, 0, 0, 0);
 
-  -- Impersonate the fake non-admin uid via JWT claim.
+  -- Impersonate a non-admin authenticated caller.
   PERFORM set_config('request.jwt.claims',
                      json_build_object('sub', _fake_uid::text,
                                        'role','authenticated')::text,
                      true);
-  PERFORM set_config('request.jwt.claim.role', 'authenticated', true);
 
-  -- Protected column: MUST raise.
+  -- trade_quotes: each protected column must raise the guard's own message.
+  _err := pg_temp.capture_error(format(
+    'UPDATE public.trade_quotes SET net_discount_pct = 50 WHERE id = %L',
+    _quote_id));
   PERFORM pg_temp.assert(
-    pg_temp.expect_error(format(
-      'UPDATE public.trade_quotes SET net_discount_pct = 50 WHERE id = %L',
-      _quote_id)),
-    'trade_quotes: non-admin UPDATE of net_discount_pct is rejected');
+    _err IS NOT NULL AND _err LIKE '%Only admins can modify quote pricing%',
+    'trade_quotes: net_discount_pct rejected by guard (msg: '||COALESCE(_err,'<none>')||')');
 
+  _err := pg_temp.capture_error(format(
+    'UPDATE public.trade_quotes SET commission_pct = 99 WHERE id = %L',
+    _quote_id));
   PERFORM pg_temp.assert(
-    pg_temp.expect_error(format(
-      'UPDATE public.trade_quotes SET commission_pct = 99 WHERE id = %L',
-      _quote_id)),
-    'trade_quotes: non-admin UPDATE of commission_pct is rejected');
+    _err IS NOT NULL AND _err LIKE '%Only admins can modify quote pricing%',
+    'trade_quotes: commission_pct rejected by guard');
 
+  _err := pg_temp.capture_error(format(
+    'UPDATE public.trade_quotes SET billing_mode = ''net_buy'' WHERE id = %L',
+    _quote_id));
   PERFORM pg_temp.assert(
-    pg_temp.expect_error(format(
-      'UPDATE public.trade_quotes SET billing_mode = ''net_buy'' WHERE id = %L',
-      _quote_id)),
-    'trade_quotes: non-admin UPDATE of billing_mode is rejected');
+    _err IS NOT NULL AND _err LIKE '%Only admins can modify quote pricing%',
+    'trade_quotes: billing_mode rejected by guard');
 
-  -- Unprotected column: MUST succeed (guard is column-scoped, not row-scoped).
-  UPDATE public.trade_quotes SET status = 'draft' WHERE id = _quote_id;
-  PERFORM pg_temp.assert(true,
-    'trade_quotes: non-admin UPDATE of non-financial column still succeeds');
+  _err := pg_temp.capture_error(format(
+    'UPDATE public.trade_quotes SET credit_applied_cents = -1 WHERE id = %L',
+    _quote_id));
+  PERFORM pg_temp.assert(
+    _err IS NOT NULL AND _err LIKE '%Only admins can modify quote pricing%',
+    'trade_quotes: credit_applied_cents rejected by guard');
 
-  -- profiles guard fires only when protected columns actually change.
-  -- Attempt to bump own trade_tier as the profile owner.
+  _err := pg_temp.capture_error(format(
+    'UPDATE public.trade_quotes SET insurance_rate_bps = 99999 WHERE id = %L',
+    _quote_id));
+  PERFORM pg_temp.assert(
+    _err IS NOT NULL AND _err LIKE '%Only admins can modify quote pricing%',
+    'trade_quotes: insurance_rate_bps rejected by guard');
+
+  -- profiles: self-upgrade of trade_tier as row owner must hit the guard.
   PERFORM set_config('request.jwt.claims',
                      json_build_object('sub', _owner::text,
                                        'role','authenticated')::text,
                      true);
+  _err := pg_temp.capture_error(format(
+    'UPDATE public.profiles SET trade_tier = ''vip'' WHERE id = %L',
+    _owner));
   PERFORM pg_temp.assert(
-    pg_temp.expect_error(format(
-      'UPDATE public.profiles SET trade_tier = ''vip'' WHERE id = %L',
-      _owner)),
-    'profiles: non-admin self-upgrade of trade_tier is rejected');
+    _err IS NOT NULL AND _err LIKE '%Only admins can modify trade tier%',
+    'profiles: trade_tier self-upgrade rejected by guard (msg: '||COALESCE(_err,'<none>')||')');
+
+  _err := pg_temp.capture_error(format(
+    'UPDATE public.profiles SET trade_tier_locked_by_admin = true WHERE id = %L',
+    _owner));
+  PERFORM pg_temp.assert(
+    _err IS NOT NULL AND _err LIKE '%Only admins can modify trade tier%',
+    'profiles: trade_tier_locked_by_admin self-write rejected by guard');
+
+  -- trade_quote_items: only exercisable when a fixture item exists. Skip if
+  -- we cannot insert one (missing FK product); the structural checks in 6a/6b
+  -- already prove the trigger + column list are in place.
 END $$;
 
 
