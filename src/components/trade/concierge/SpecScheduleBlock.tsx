@@ -67,6 +67,20 @@ export function SpecScheduleBlock({ zone, markdown }: Props) {
     }
   }, [projectName, designerName, coverDate, includeCover, pageSize]);
 
+  const resetCoverPrefs = () => {
+    try {
+      window.localStorage.removeItem(STORAGE_KEY);
+    } catch {
+      /* storage denied — noop */
+    }
+    setProjectName(zone && zone !== "Tearsheet" ? zone : "");
+    setDesignerName("");
+    setCoverDate(new Date().toISOString().slice(0, 10));
+    setIncludeCover(true);
+    setPageSize("a4");
+  };
+
+
 
 
   const slug = useMemo(() => {
