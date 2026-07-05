@@ -2835,58 +2835,9 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
               >
                 <Palette className="h-4 w-4" />
               </button>
-              <button
-                type="button"
-                onClick={() => {
-                  const current = input.trim();
-                  const next = current
-                    ? `${input.replace(/\s+$/, "")}\n\n${SPEC_BRIEF_TEMPLATE}`
-                    : SPEC_BRIEF_TEMPLATE;
-                  setInput(next);
-                  setBriefBuilderOpen(true);
-                  setShowBriefPreview(true);
-                  setTimeout(() => {
-                    const el = inputRef.current;
-                    if (el) {
-                      el.focus();
-                      el.setSelectionRange(el.value.length, el.value.length);
-                    }
-                  }, 0);
-                }}
-                disabled={streaming}
-                className="shrink-0 rounded-xl border border-border bg-muted/40 p-2 text-muted-foreground hover:text-foreground hover:bg-muted disabled:opacity-40 transition-colors"
-                aria-label="Insert spec brief template"
-                title="Insert 4-block spec brief template"
-              >
-                <ListChecks className="h-4 w-4" />
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  if (!briefBuilderOpen) {
-                    if (!/Block\s+1\s*—/i.test(input)) {
-                      const current = input.trim();
-                      const next = current
-                        ? `${input.replace(/\s+$/, "")}\n\n${SPEC_BRIEF_TEMPLATE}`
-                        : SPEC_BRIEF_TEMPLATE;
-                      setInput(next);
-                    }
-                    setShowBriefPreview(true);
-                  }
-                  setBriefBuilderOpen((v) => !v);
-                }}
-                disabled={streaming}
-                className={`shrink-0 rounded-xl border p-2 disabled:opacity-40 transition-colors ${
-                  briefBuilderOpen
-                    ? "border-accent bg-accent/10 text-accent"
-                    : "border-border bg-muted/40 text-muted-foreground hover:text-foreground hover:bg-muted"
-                }`}
-                aria-label={briefBuilderOpen ? "Close brief builder" : "Edit brief as structured form"}
-                aria-pressed={briefBuilderOpen}
-                title={briefBuilderOpen ? "Close structured brief editor" : "Edit the four-block brief as a structured form"}
-              >
-                <LayoutList className="h-4 w-4" />
-              </button>
+              {/* 4-block spec-brief insert + edit buttons removed —
+                  detection auto-opens the Brief Builder on project-scale intake. */}
+
               <button
                 type="button"
                 onClick={() => setShowBriefPreview((v) => !v)}
