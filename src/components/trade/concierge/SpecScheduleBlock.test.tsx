@@ -74,4 +74,27 @@ describe("SpecScheduleBlock page size persistence", () => {
       expect(saved.pageSize).toBe("a4");
     });
   });
+
+  it("reset button clears localStorage and restores defaults", async () => {
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({ projectName: "Project X", designerName: "Studio Y", coverDate: "2026-07-05", includeCover: false, pageSize: "letter" }),
+    );
+
+    render(<SpecScheduleBlock zone="Salon" markdown={markdown} />);
+    fireEvent.click(screen.getByRole("button", { name: /preview pdf/i }));
+
+    const letterButton = screen.getByRole("button", { name: /letter/i });
+    expect(letterButton).toHaveAttribute("aria-pressed", "true");
+
+    fireEvent.click(screen.getByRole("button", { name: /^reset$/i }));
+
+    await waitFor(() => {
+      expect(localStorage.getItem(STORAGE_KEY)).toBeNull();
+    });
+
+    const a4Button = screen.getByRole("button", { name: /a4/i });
+    expect(a4Button).toHaveAttribute("aria-pressed", "true");
+  });
+
 });
