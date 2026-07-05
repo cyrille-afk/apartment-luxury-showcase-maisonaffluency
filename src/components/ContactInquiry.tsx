@@ -182,7 +182,16 @@ const ContactInquiry = () => {
 
     try {
       const { data, error } = await supabase.functions.invoke("send-inquiry", {
-        body: { ...result.data, turnstileToken }
+        body: {
+          ...result.data,
+          turnstileToken,
+          subject: urlSubject || undefined,
+          productId: urlProductId,
+          productSlug: urlProductSlug,
+          productName: urlProductName,
+          designerName: urlDesignerName,
+          source: urlProductId || urlProductSlug ? "public_product" : "contact_form",
+        },
       });
 
       if (error) throw error;
