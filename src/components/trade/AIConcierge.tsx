@@ -2610,6 +2610,14 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
                 className="hidden"
                 onChange={(e) => handleFilesPicked(e.target.files)}
               />
+              <input
+                ref={moodInputRef}
+                type="file"
+                multiple
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => handleMoodBoardPicked(e.target.files)}
+              />
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
@@ -2619,6 +2627,16 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
                 title="Attach a room plan, photo or PDF"
               >
                 <Paperclip className="h-4 w-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => moodInputRef.current?.click()}
+                disabled={streaming || attachments.length >= MAX_ATTACHMENTS}
+                className="shrink-0 rounded-xl border border-border bg-muted/40 p-2 text-muted-foreground hover:text-foreground hover:bg-muted disabled:opacity-40 transition-colors"
+                aria-label="Attach mood board images to Block 3"
+                title="Attach mood board (images bound to Block 3)"
+              >
+                <Palette className="h-4 w-4" />
               </button>
               <button
                 type="button"
