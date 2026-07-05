@@ -66,12 +66,26 @@ DO $$
 DECLARE
   _owner_uid uuid;
 BEGIN
-  SELECT id INTO _owner_uid FROM public.profiles LIMIT 1;
+  -- Prefer a non-admin profile so the runtime guard tests can actually fire.
+  SELECT id INTO _owner_uid
+  FROM public.profiles p
+  WHERE NOT EXISTS (
+    SELECT 1 FROM public.user_roles ur
+    WHERE ur.user_id = p.id AND ur.role = 'admin'::app_role
+  )
+  LIMIT 1;
+
+  -- Fallback to any profile if everyone is an admin.
+  IF _owner_uid IS NULL THEN
+    SELECT id INTO _owner_uid FROM public.profiles LIMIT 1;
+  END IF;
+
   IF _owner_uid IS NULL THEN
     RAISE EXCEPTION 'fixture: need at least one profiles row to satisfy clients.created_by FK';
   END IF;
   PERFORM set_config('rls_test.owner_uid', _owner_uid::text, false);
 END $$;
+
 
 INSERT INTO public.studios (id, name, created_by)
 VALUES ('11111111-1111-1111-1111-111111111aa1',
