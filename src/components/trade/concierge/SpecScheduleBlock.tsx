@@ -69,12 +69,19 @@ export function SpecScheduleBlock({ zone, markdown }: Props) {
     try {
       window.localStorage.setItem(
         STORAGE_KEY,
-        JSON.stringify({ projectName, designerName, coverDate, includeCover, pageSize }),
+        JSON.stringify({
+          projectName,
+          designerName,
+          coverDate,
+          includeCover,
+          pageSize,
+          designerLogo: designerLogo ?? undefined,
+        }),
       );
     } catch {
-      /* storage denied — noop */
+      /* storage denied or quota exceeded — noop */
     }
-  }, [projectName, designerName, coverDate, includeCover, pageSize]);
+  }, [projectName, designerName, coverDate, includeCover, pageSize, designerLogo]);
 
   const resetCoverPrefs = () => {
     skipNextSave.current = true;
@@ -88,6 +95,28 @@ export function SpecScheduleBlock({ zone, markdown }: Props) {
     setCoverDate(new Date().toISOString().slice(0, 10));
     setIncludeCover(true);
     setPageSize("a4");
+    setDesignerLogo(null);
+    setLogoError(null);
+  };
+
+  const onLogoFile = (file: File | null) => {
+    setLogoError(null);
+    if (!file) return;
+    if (!/^image\/(png|jpe?g|webp|svg\+xml)$/.test(file.type)) {
+      setLogoError("Use PNG, JPG, WEBP or SVG.");
+      return;
+    }
+    if (file.size > MAX_LOGO_BYTES) {
+      setLogoError("Logo must be under 500 KB.");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = typeof reader.result === "string" ? reader.result : null;
+      if (result) setDesignerLogo(result);
+    };
+    reader.onerror = () => setLogoError("Could not read file.");
+    reader.readAsDataURL(file);
   };
 
 
