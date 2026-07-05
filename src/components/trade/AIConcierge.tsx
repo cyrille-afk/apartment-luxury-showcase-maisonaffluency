@@ -17,7 +17,7 @@ MATERIALS: [performance criteria, exclusions]
 
 Block 3 — Aesthetic & Visual DNA
 VIBE: [e.g. Japandi-Luxe, Italian Minimalism]
-REFERENCES: [Minotti / B&B Italia / Edra / …]
+REFERENCES: Man of Parts (Sandy Cove / Bond Street / Rua Leblon) / Collection Particulière / De La Espada / Leo Sentou
 PALETTE: [materials + finishes]
 
 Block 4 — Output Execution Protocol
