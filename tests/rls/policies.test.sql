@@ -341,10 +341,10 @@ DECLARE
   _fake_uid uuid := '11111111-1111-1111-1111-111111111ff1';
 BEGIN
   -- Fixture: a trade_quotes row owned by a synthetic non-admin user.
-  INSERT INTO public.trade_quotes (id, user_id, quote_number, status,
+  INSERT INTO public.trade_quotes (id, user_id, status,
                                    net_discount_pct, commission_pct,
                                    credit_applied_cents, insurance_rate_bps)
-  VALUES (_quote_id, _owner, 'RLS-TEST-0001', 'draft',
+  VALUES (_quote_id, _owner, 'draft',
           0, 0, 0, 0);
 
   -- Impersonate the fake non-admin uid via JWT claim.
