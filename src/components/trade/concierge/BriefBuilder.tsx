@@ -226,7 +226,7 @@ export function BriefBuilder({
   );
 
   return (
-    <div className="mb-2 rounded-xl border border-accent/40 bg-muted/30 p-3 max-h-[45vh] overflow-y-auto">
+    <div className="mb-2 rounded-xl border border-accent/40 bg-muted/30 p-3">
       <div className="flex items-center justify-between mb-3">
         <span className="font-body text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
           Brief Builder
