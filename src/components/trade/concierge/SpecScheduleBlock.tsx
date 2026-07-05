@@ -18,14 +18,14 @@ interface Props {
 export function SpecScheduleBlock({ zone, markdown }: Props) {
   const [copied, setCopied] = useState(false);
 
-  const filename = useMemo(() => {
-    const slug =
+  const slug = useMemo(() => {
+    return (
       zone
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, "-")
         .replace(/^-|-$/g, "")
-        .slice(0, 60) || "spec-schedule";
-    return `${slug}.md`;
+        .slice(0, 60) || "spec-schedule"
+    );
   }, [zone]);
 
   const onCopy = async () => {
@@ -43,12 +43,84 @@ export function SpecScheduleBlock({ zone, markdown }: Props) {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = filename;
+    a.download = `${slug}.md`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   };
+
+  const onDownloadPdf = async () => {
+    const { jsPDF } = await import("jspdf");
+    const doc = new jsPDF({ unit: "pt", format: "a4" });
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const marginX = 48;
+    const marginY = 56;
+    const maxWidth = pageWidth - marginX * 2;
+    let y = marginY;
+
+    // Title
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(14);
+    doc.text("Specification Schedule", marginX, y);
+    y += 18;
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.setTextColor(120);
+    doc.text(zone, marginX, y);
+    doc.setTextColor(0);
+    y += 18;
+
+    // Strip markdown to plain text lines preserving structure
+    const lines: { text: string; bold?: boolean; heading?: boolean }[] = [];
+    for (const raw of markdown.split("\n")) {
+      const line = raw.replace(/\s+$/, "");
+      if (!line.trim()) {
+        lines.push({ text: "" });
+        continue;
+      }
+      const h = line.match(/^#{1,6}\s+(.*)$/);
+      if (h) {
+        lines.push({ text: h[1], heading: true });
+        continue;
+      }
+      if (/^---+$/.test(line.trim())) {
+        lines.push({ text: "────────────────────────" });
+        continue;
+      }
+      // bullets
+      const b = line.match(/^\s*[-*]\s+(.*)$/);
+      const body = (b ? `• ${b[1]}` : line)
+        .replace(/\*\*(.+?)\*\*/g, "$1")
+        .replace(/\*(.+?)\*/g, "$1")
+        .replace(/`([^`]+)`/g, "$1");
+      lines.push({ text: body, bold: /\*\*/.test(line) });
+    }
+
+    const lineHeight = 13;
+    for (const item of lines) {
+      if (item.heading) {
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(11);
+      } else {
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(10);
+      }
+      const wrapped = item.text ? doc.splitTextToSize(item.text, maxWidth) : [""];
+      for (const w of wrapped) {
+        if (y > pageHeight - marginY) {
+          doc.addPage();
+          y = marginY;
+        }
+        doc.text(w, marginX, y);
+        y += lineHeight;
+      }
+    }
+
+    doc.save(`${slug}.pdf`);
+  };
+
 
   return (
     <div className="rounded-2xl border border-border/70 bg-muted/60 p-4 space-y-3 max-w-[92%]">
