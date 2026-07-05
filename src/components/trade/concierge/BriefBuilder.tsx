@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { ChevronDown, ChevronRight, X } from "lucide-react";
+import { ChevronDown, ChevronRight, ClipboardPaste, X } from "lucide-react";
 import { BrandPicker } from "@/components/trade/concierge/BrandPicker";
 
 export type BriefValues = {
@@ -462,6 +462,63 @@ export function BriefBuilder({
     saveExpanded(scopeRef.current, next);
   };
 
+  // Merge a pasted brief into the current builder state without wiping
+  // fields the user already filled in. Only fields the paste actually
+  // supplied (i.e. differ from DEFAULT_VALUES) overwrite the current values.
+  const [pasteStatus, setPasteStatus] = useState<null | "ok" | "empty" | "denied">(null);
+  const handlePasteBrief = async () => {
+    try {
+      const text = await navigator.clipboard.readText();
+      if (!text || !text.trim()) {
+        setPasteStatus("empty");
+        setTimeout(() => setPasteStatus(null), 2000);
+        return;
+      }
+      const parsed = parseBrief(text);
+      const merged: BriefValues = {
+        block1: { ...values.block1 },
+        block2: { ...values.block2 },
+        block3: { ...values.block3 },
+        block4: values.block4,
+      };
+      let filled = 0;
+      (Object.keys(parsed.values.block1) as (keyof BriefValues["block1"])[]).forEach((k) => {
+        if (parsed.values.block1[k] !== DEFAULT_VALUES.block1[k]) {
+          merged.block1[k] = parsed.values.block1[k];
+          filled++;
+        }
+      });
+      (Object.keys(parsed.values.block2) as (keyof BriefValues["block2"])[]).forEach((k) => {
+        if (parsed.values.block2[k] !== DEFAULT_VALUES.block2[k]) {
+          merged.block2[k] = parsed.values.block2[k];
+          filled++;
+        }
+      });
+      (Object.keys(parsed.values.block3) as (keyof BriefValues["block3"])[]).forEach((k) => {
+        if (parsed.values.block3[k] !== DEFAULT_VALUES.block3[k]) {
+          merged.block3[k] = parsed.values.block3[k];
+          filled++;
+        }
+      });
+      if (parsed.values.block4 !== DEFAULT_VALUES.block4) {
+        merged.block4 = parsed.values.block4;
+        filled++;
+      }
+
+      const nextPrefix = parsed.prefix || prefix;
+      const nextSuffix = parsed.suffix || suffix;
+      setValues(merged);
+      setPrefix(nextPrefix);
+      setSuffix(nextSuffix);
+      emit(merged, nextPrefix, nextSuffix);
+      setPasteStatus(filled > 0 ? "ok" : "empty");
+      setTimeout(() => setPasteStatus(null), 2000);
+    } catch {
+      setPasteStatus("denied");
+      setTimeout(() => setPasteStatus(null), 2500);
+    }
+  };
+
   const SectionHeader = ({
     title,
     open,
@@ -515,19 +572,46 @@ export function BriefBuilder({
 
   return (
     <div className="mb-2 rounded-xl border border-accent/40 bg-muted/30 p-3 max-h-[38vh] overflow-y-auto overscroll-contain">
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex items-center justify-between mb-3 gap-2">
         <span className="font-body text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
           Brief Builder
         </span>
-        <button
-          type="button"
-          onClick={onClose}
-          className="rounded p-0.5 text-muted-foreground hover:text-foreground hover:bg-foreground/10"
-          aria-label="Close brief builder"
-          title="Close brief builder"
-        >
-          <X className="h-3.5 w-3.5" />
-        </button>
+        <div className="flex items-center gap-1.5">
+          {pasteStatus === "ok" && (
+            <span className="font-body text-[10px] uppercase tracking-[0.12em] text-accent">
+              Filled from clipboard
+            </span>
+          )}
+          {pasteStatus === "empty" && (
+            <span className="font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
+              No brief detected
+            </span>
+          )}
+          {pasteStatus === "denied" && (
+            <span className="font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
+              Clipboard blocked
+            </span>
+          )}
+          <button
+            type="button"
+            onClick={handlePasteBrief}
+            className="flex items-center gap-1 rounded-md border border-accent/40 px-2 py-1 font-body text-[11px] text-accent hover:bg-accent/10"
+            aria-label="Paste brief from clipboard"
+            title="Paste brief from clipboard"
+          >
+            <ClipboardPaste className="h-3.5 w-3.5" />
+            Paste brief
+          </button>
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded p-0.5 text-muted-foreground hover:text-foreground hover:bg-foreground/10"
+            aria-label="Close brief builder"
+            title="Close brief builder"
+          >
+            <X className="h-3.5 w-3.5" />
+          </button>
+        </div>
       </div>
 
       <div className="space-y-4">
