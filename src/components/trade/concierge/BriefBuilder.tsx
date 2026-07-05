@@ -320,7 +320,7 @@ export function BriefBuilder({
             <Field
               label="References"
               value={values.block3.references}
-              placeholder="[Minotti / B&B Italia / Edra / …]"
+              placeholder="Man of Parts / Collection Particulière / De La Espada / Leo Sentou"
               onChange={(v) => setBlockField("block3", "references", v)}
             />
             <Field
