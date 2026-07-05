@@ -106,8 +106,24 @@ export function BrandPicker({
       <span className="font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
         References (in-catalogue brands)
       </span>
+      <div className="mt-1 flex flex-wrap gap-1 mb-1.5">
+        {CATEGORY_LABELS.map((c) => (
+          <button
+            key={c.key}
+            type="button"
+            onClick={() => setCategory(c.key)}
+            className={`rounded-full border px-2 py-0.5 font-body text-[10px] uppercase tracking-[0.08em] transition-colors ${
+              category === c.key
+                ? "border-accent bg-accent text-accent-foreground"
+                : "border-border bg-muted/40 text-muted-foreground hover:bg-muted"
+            }`}
+          >
+            {c.label}
+          </button>
+        ))}
+      </div>
       <div
-        className="mt-1 rounded-lg border border-border bg-background px-2 py-1.5 focus-within:ring-1 focus-within:ring-accent"
+        className="rounded-lg border border-border bg-background px-2 py-1.5 focus-within:ring-1 focus-within:ring-accent"
         onClick={() => inputRef.current?.focus()}
       >
         <div className="flex flex-wrap gap-1.5 items-center">
