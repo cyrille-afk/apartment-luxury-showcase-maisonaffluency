@@ -2274,7 +2274,7 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
               </div>
             </div>
             {!minimized && (
-              <div className="flex items-center pl-6">
+              <div className="flex items-center gap-2 pl-6">
                 <span
                   className="inline-flex items-center gap-1 rounded-full border border-border bg-muted/60 px-2 py-0.5 font-body text-[10px] uppercase tracking-widest text-muted-foreground"
                   title={`Current workflow stage: ${stage}`}
@@ -2282,8 +2282,26 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
                   <span className="h-1.5 w-1.5 rounded-full bg-accent" aria-hidden="true" />
                   {copy.stage}: {stage}
                 </span>
+                {briefBuilderOpen && (
+                  <span
+                    className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 font-body text-[10px] uppercase tracking-widest ${
+                      briefValidation.valid
+                        ? "border-accent/60 bg-accent/10 text-accent"
+                        : "border-destructive/60 bg-destructive/10 text-destructive"
+                    }`}
+                    title={
+                      briefValidation.valid
+                        ? "Brief Builder is open — structured brief ready"
+                        : `Brief Builder is open — complete: ${briefValidation.missing.join(", ")}`
+                    }
+                  >
+                    <span className={`h-1.5 w-1.5 rounded-full ${briefValidation.valid ? "bg-accent" : "bg-destructive"} animate-pulse`} aria-hidden="true" />
+                    Brief Builder Open
+                  </span>
+                )}
               </div>
             )}
+
           </div>
 
           {!minimized && (<>
