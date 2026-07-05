@@ -368,7 +368,16 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
   }, [handleFilesPicked, attachments, upsertMoodBoardBlock3]);
 
   const removeAttachment = (id: string) =>
-    setAttachments((prev) => prev.filter((a) => a.id !== id));
+    setAttachments((prev) => {
+      const target = prev.find((a) => a.id === id);
+      const next = prev.filter((a) => a.id !== id);
+      if (target?.role === "moodboard") {
+        const remainingMoodNames = next.filter((a) => a.role === "moodboard").map((a) => a.name);
+        // Defer to avoid setState-in-setState.
+        setTimeout(() => upsertMoodBoardBlock3(remainingMoodNames), 0);
+      }
+      return next;
+    });
 
 
   // Draggable position — persisted in localStorage. `null` = use default
