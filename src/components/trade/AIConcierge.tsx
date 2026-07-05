@@ -1220,11 +1220,19 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
       } catch (e) { console.warn("[concierge-capture] setup", e); }
     }
 
-    // Project-scale auto-detection — on the first user turn, if the message
-    // reads as a whole-home / multi-room project brief, skip the slow
+    // Project-scale auto-detection — whenever the user's message reads as a
+    // whole-home / multi-room project brief AND the Brief Builder hasn't been
+    // auto-opened yet AND no tearsheet has been proposed, skip the slow
     // one-question-at-a-time intake and immediately open the Architectural
-    // Brief Builder with the detected typology/city prefilled.
-    if (isFirstUserTurn && sendingAttachments.length === 0) {
+    // Brief Builder with the detected typology/city prefilled. Not gated to
+    // turn 1 — the signal often arrives on turn 2 or 3 (e.g. "Singapore" →
+    // "I'm looking to furnish my GCB").
+    const briefAlreadyAutoOpened = (() => {
+      try { return sessionStorage.getItem("concierge:briefAutoOpened") === "1"; } catch { return false; }
+    })();
+    const hasProposal = timeline.some((t) => t.kind === "proposal" || t.kind === "quote_proposal" || t.kind === "ffe_proposal");
+    if (!briefAlreadyAutoOpened && !hasProposal && !briefBuilderOpen && sendingAttachments.length === 0) {
+
       const scale = detectProjectScale(text);
       if (scale) {
         // Fallback city from the synchronous qualifier (e.g. "in Sentosa Cove"
