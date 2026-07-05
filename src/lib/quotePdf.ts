@@ -20,7 +20,7 @@ import { optimizeImageUrl } from "@/lib/cloudinary-optimize";
 import { appendHkDapPage, type HkDapPageArgs } from "@/lib/hkDapPdf";
 import { appendUkDdpPage, type UkDdpPageArgs } from "@/lib/ukDdpPdf";
 import { formatFxSnapshotLine } from "@/lib/fxSnapshot";
-import { splitFinishAndDimensions, withImperialInline, formatImperialDimensions } from "@/lib/formatDimensions";
+import { splitFinishAndDimensions, formatImperialDimensions } from "@/lib/formatDimensions";
 
 // Maison palette — matches studio-guide / UK DDP PDFs
 const JADE = [12, 49, 47] as const;        // #0C312F
