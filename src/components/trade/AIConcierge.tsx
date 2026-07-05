@@ -441,6 +441,9 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
   const [expanded, setExpanded] = useState<boolean>(() => {
     try { return localStorage.getItem("concierge:expanded") === "1"; } catch { return false; }
   });
+  const [fullscreen, setFullscreen] = useState<boolean>(() => {
+    try { return localStorage.getItem("concierge:fullscreen") === "1"; } catch { return false; }
+  });
   // When the tearsheet card opens its Insights sidebar it needs the concierge
   // panel to be at its wide 560px size so the sidebar sits alongside instead
   // of overlapping. We temporarily force-expand without persisting, and
