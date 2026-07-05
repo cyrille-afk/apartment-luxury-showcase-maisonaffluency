@@ -2584,6 +2584,21 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
               >
                 <ListChecks className="h-4 w-4" />
               </button>
+              <button
+                type="button"
+                onClick={() => setShowBriefPreview((v) => !v)}
+                disabled={!input.trim()}
+                className={`shrink-0 rounded-xl border p-2 disabled:opacity-40 transition-colors ${
+                  showBriefPreview
+                    ? "border-accent bg-accent/10 text-accent"
+                    : "border-border bg-muted/40 text-muted-foreground hover:text-foreground hover:bg-muted"
+                }`}
+                aria-label={showBriefPreview ? "Hide brief preview" : "Preview brief"}
+                aria-pressed={showBriefPreview}
+                title={showBriefPreview ? "Hide brief preview" : "Preview formatted brief before sending"}
+              >
+                <Eye className="h-4 w-4" />
+              </button>
               <textarea
                 ref={inputRef}
                 value={input}
