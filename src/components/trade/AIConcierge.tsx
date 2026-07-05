@@ -2723,6 +2723,8 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
                     ? `${input.replace(/\s+$/, "")}\n\n${SPEC_BRIEF_TEMPLATE}`
                     : SPEC_BRIEF_TEMPLATE;
                   setInput(next);
+                  setBriefBuilderOpen(true);
+                  setShowBriefPreview(true);
                   setTimeout(() => {
                     const el = inputRef.current;
                     if (el) {
@@ -2737,6 +2739,33 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
                 title="Insert 4-block spec brief template"
               >
                 <ListChecks className="h-4 w-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (!briefBuilderOpen) {
+                    if (!/Block\s+1\s*—/i.test(input)) {
+                      const current = input.trim();
+                      const next = current
+                        ? `${input.replace(/\s+$/, "")}\n\n${SPEC_BRIEF_TEMPLATE}`
+                        : SPEC_BRIEF_TEMPLATE;
+                      setInput(next);
+                    }
+                    setShowBriefPreview(true);
+                  }
+                  setBriefBuilderOpen((v) => !v);
+                }}
+                disabled={streaming}
+                className={`shrink-0 rounded-xl border p-2 disabled:opacity-40 transition-colors ${
+                  briefBuilderOpen
+                    ? "border-accent bg-accent/10 text-accent"
+                    : "border-border bg-muted/40 text-muted-foreground hover:text-foreground hover:bg-muted"
+                }`}
+                aria-label={briefBuilderOpen ? "Close brief builder" : "Edit brief as structured form"}
+                aria-pressed={briefBuilderOpen}
+                title={briefBuilderOpen ? "Close structured brief editor" : "Edit the four-block brief as a structured form"}
+              >
+                <LayoutList className="h-4 w-4" />
               </button>
               <button
                 type="button"
