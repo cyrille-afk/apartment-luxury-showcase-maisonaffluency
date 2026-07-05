@@ -1,12 +1,45 @@
 import { useMemo, useRef, useState } from "react";
 import { X, ChevronDown } from "lucide-react";
 import designersIndex from "@/data/designersIndex.json";
+import brandCategoriesRaw from "@/data/brandCategories.json";
 
 type Designer = { slug: string; name: string };
+
+export type BrandCategory =
+  | "all"
+  | "seating"
+  | "lighting"
+  | "tables"
+  | "storage"
+  | "rugs"
+  | "decor"
+  | "bedroom";
+
+const BRAND_CATEGORIES: Record<Exclude<BrandCategory, "all">, string[]> =
+  brandCategoriesRaw as Record<Exclude<BrandCategory, "all">, string[]>;
+
+const CATEGORY_LABELS: { key: BrandCategory; label: string }[] = [
+  { key: "all", label: "All" },
+  { key: "seating", label: "Seating" },
+  { key: "lighting", label: "Lighting" },
+  { key: "tables", label: "Tables" },
+  { key: "storage", label: "Storage" },
+  { key: "rugs", label: "Rugs" },
+  { key: "decor", label: "Decor" },
+  { key: "bedroom", label: "Bedroom" },
+];
 
 const ALL_BRANDS: string[] = (designersIndex as Designer[])
   .map((d) => d.name)
   .sort((a, b) => a.localeCompare(b, "en", { sensitivity: "base" }));
+
+function poolForCategory(cat: BrandCategory): string[] {
+  if (cat === "all") return ALL_BRANDS;
+  const set = new Set(
+    (BRAND_CATEGORIES[cat] ?? []).map((n) => n.toLowerCase())
+  );
+  return ALL_BRANDS.filter((b) => set.has(b.toLowerCase()));
+}
 
 function parseSelected(value: string): string[] {
   if (!value.trim()) return [];
@@ -23,12 +56,15 @@ function formatSelected(names: string[]): string {
 export function BrandPicker({
   value,
   onChange,
+  defaultCategory = "all",
 }: {
   value: string;
   onChange: (next: string) => void;
+  defaultCategory?: BrandCategory;
 }) {
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
+  const [category, setCategory] = useState<BrandCategory>(defaultCategory);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const selected = useMemo(() => parseSelected(value), [value]);
@@ -37,12 +73,14 @@ export function BrandPicker({
     [selected]
   );
 
+  const pool = useMemo(() => poolForCategory(category), [category]);
+
   const suggestions = useMemo(() => {
     const q = query.trim().toLowerCase();
-    const pool = ALL_BRANDS.filter((b) => !selectedSet.has(b.toLowerCase()));
-    if (!q) return pool.slice(0, 8);
-    return pool.filter((b) => b.toLowerCase().includes(q)).slice(0, 8);
-  }, [query, selectedSet]);
+    const filtered = pool.filter((b) => !selectedSet.has(b.toLowerCase()));
+    if (!q) return filtered.slice(0, 10);
+    return filtered.filter((b) => b.toLowerCase().includes(q)).slice(0, 10);
+  }, [pool, query, selectedSet]);
 
   const add = (name: string) => {
     if (selectedSet.has(name.toLowerCase())) return;
