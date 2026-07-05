@@ -146,6 +146,7 @@ export default function TradeAdminFabrics() {
 
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<string>("");
+  const [supplierFilter, setSupplierFilter] = useState<string>("");
   const [designerFilter, setDesignerFilter] = useState<string>("");
   const [productFilter, setProductFilter] = useState<"all" | "picks" | "labels">("all");
 
@@ -259,6 +260,11 @@ export default function TradeAdminFabrics() {
     return new Set(links.filter((l) => l.fabric_id === linkingId).map((l) => l.pick_id));
   }, [links, linkingId]);
 
+  const supplierOptions = useMemo(() => {
+    const collator = new Intl.Collator("en", { sensitivity: "base", numeric: true });
+    return Array.from(new Set(fabrics.map((f) => f.supplier?.trim()).filter(Boolean) as string[])).sort(collator.compare);
+  }, [fabrics]);
+
   const linkByPickId = useMemo(() => {
     const m = new Map<string, ProductFabric>();
     if (!linkingId) return m;
@@ -282,6 +288,7 @@ export default function TradeAdminFabrics() {
   const filtered = useMemo(() => {
     let rows = fabrics;
     if (categoryFilter) rows = rows.filter((r) => normalizeAdminFabricCategory(r.category) === categoryFilter);
+    if (supplierFilter) rows = rows.filter((r) => (r.supplier || "").trim() === supplierFilter);
     if (designerFilter) {
       rows = rows.filter((r) => {
         const linked = linkedPicksByFabric.get(r.id) || [];
@@ -305,7 +312,7 @@ export default function TradeAdminFabrics() {
       });
     }
     return rows;
-  }, [fabrics, search, categoryFilter, designerFilter, linkedPicksByFabric, designerNameById]);
+  }, [fabrics, search, categoryFilter, supplierFilter, designerFilter, linkedPicksByFabric, designerNameById]);
 
 
   const grouped = useMemo(() => {
@@ -477,7 +484,7 @@ export default function TradeAdminFabrics() {
         <title>Fabrics & Finishes — Admin — Maison Affluency</title>
       </Helmet>
       <div className="max-w-6xl space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="flex items-start justify-between gap-4">
           <div className="flex items-center gap-3">
             <Link to="/trade/admin-dashboard" className="p-1.5 rounded-md hover:bg-muted transition-colors">
               <ArrowLeft className="h-4 w-4 text-muted-foreground" />
@@ -489,7 +496,7 @@ export default function TradeAdminFabrics() {
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center justify-end gap-2">
             <input
               type="text"
               value={search}
@@ -506,6 +513,16 @@ export default function TradeAdminFabrics() {
               <option value="">All categories</option>
               {CATEGORIES.map((c) => (
                 <option key={c} value={c}>{c}</option>
+              ))}
+            </select>
+            <select
+              value={supplierFilter}
+              onChange={(e) => setSupplierFilter(e.target.value)}
+              className="px-3 py-1.5 text-sm font-body rounded-md border border-border bg-background"
+            >
+              <option value="">All suppliers</option>
+              {supplierOptions.map((s) => (
+                <option key={s} value={s}>{s}</option>
               ))}
             </select>
             <select
@@ -625,9 +642,9 @@ export default function TradeAdminFabrics() {
         ) : Object.keys(grouped).length === 0 ? (
           <div className="text-sm text-muted-foreground py-12 text-center border border-dashed border-border rounded-lg space-y-3">
             <p>{fabrics.length === 0 ? "No fabrics yet. Add your first swatch above." : "No fabrics match your filters."}</p>
-            {(search || categoryFilter || designerFilter || productFilter !== "all") && (
+            {(search || categoryFilter || supplierFilter || designerFilter || productFilter !== "all") && (
               <button
-                onClick={() => { setSearch(""); setCategoryFilter(""); setDesignerFilter(""); setProductFilter("all"); }}
+                onClick={() => { setSearch(""); setCategoryFilter(""); setSupplierFilter(""); setDesignerFilter(""); setProductFilter("all"); }}
                 className="px-3 py-1.5 text-xs rounded border border-border hover:bg-muted"
               >
                 Clear filters
