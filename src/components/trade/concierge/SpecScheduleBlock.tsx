@@ -180,6 +180,27 @@ export function SpecScheduleBlock({ zone, markdown }: Props) {
       const centerX = pageWidth / 2;
       let cy = pageHeight / 2 - 80;
 
+      // Optional designer logo above the label
+      if (designerLogo) {
+        try {
+          const props = doc.getImageProperties(designerLogo);
+          const maxLogoW = 160;
+          const maxLogoH = 80;
+          const ratio = props.width / props.height;
+          let lw = maxLogoW;
+          let lh = lw / ratio;
+          if (lh > maxLogoH) {
+            lh = maxLogoH;
+            lw = lh * ratio;
+          }
+          const fmt = /^data:image\/(png|jpe?g|webp|svg\+xml)/i.exec(designerLogo)?.[1]?.toUpperCase();
+          const jsFmt = fmt === "JPG" ? "JPEG" : fmt === "SVG+XML" ? "PNG" : fmt || "PNG";
+          doc.addImage(designerLogo, jsFmt as any, centerX - lw / 2, cy - lh - 24, lw, lh);
+        } catch {
+          /* unreadable image — skip */
+        }
+      }
+
       doc.setFont("helvetica", "normal");
       doc.setFontSize(9);
       doc.setTextColor(140);
