@@ -5702,6 +5702,8 @@ export type Database = {
           is_hidden: boolean
           is_upholstered: boolean | null
           lead_time: string | null
+          lead_time_weeks_max: number | null
+          lead_time_weeks_min: number | null
           lead_weeks_max_override: number | null
           lead_weeks_min_override: number | null
           materials: string | null
@@ -5760,6 +5762,8 @@ export type Database = {
           is_hidden?: boolean
           is_upholstered?: boolean | null
           lead_time?: string | null
+          lead_time_weeks_max?: number | null
+          lead_time_weeks_min?: number | null
           lead_weeks_max_override?: number | null
           lead_weeks_min_override?: number | null
           materials?: string | null
@@ -5818,6 +5822,8 @@ export type Database = {
           is_hidden?: boolean
           is_upholstered?: boolean | null
           lead_time?: string | null
+          lead_time_weeks_max?: number | null
+          lead_time_weeks_min?: number | null
           lead_weeks_max_override?: number | null
           lead_weeks_min_override?: number | null
           materials?: string | null
