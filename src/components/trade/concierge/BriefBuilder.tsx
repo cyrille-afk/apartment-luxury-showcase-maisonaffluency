@@ -285,7 +285,25 @@ export function BriefBuilder({
   const [suffix, setSuffix] = useState("");
   const lastEmitted = useRef<string>("");
   const restoredRef = useRef(false);
-  const [expanded, setExpanded] = useState<ExpandedSections>(loadExpanded());
+  const scopeRef = useRef<string>(getProjectScope());
+  const [expanded, setExpanded] = useState<ExpandedSections>(() => loadExpanded(scopeRef.current));
+
+  // Re-read the scope + its saved layout whenever the active project changes
+  // while the builder is mounted (e.g. user switches project filter).
+  useEffect(() => {
+    const sync = () => {
+      const next = getProjectScope();
+      if (next === scopeRef.current) return;
+      scopeRef.current = next;
+      setExpanded(loadExpanded(next));
+    };
+    window.addEventListener("storage", sync);
+    window.addEventListener("focus", sync);
+    return () => {
+      window.removeEventListener("storage", sync);
+      window.removeEventListener("focus", sync);
+    };
+  }, []);
 
   // Restore draft on mount (once), overriding whatever the parent seeded.
   useEffect(() => {
