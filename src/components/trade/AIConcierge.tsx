@@ -2950,12 +2950,22 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
 
               <button
                 onClick={() => send()}
-                disabled={(!input.trim() && attachments.length === 0) || streaming}
+                disabled={
+                  (!input.trim() && attachments.length === 0) ||
+                  streaming ||
+                  (briefBuilderOpen && !briefValidation.valid)
+                }
                 className="shrink-0 rounded-xl bg-foreground text-background p-2 disabled:opacity-40 hover:opacity-90 transition-opacity"
                 aria-label="Send"
+                title={
+                  briefBuilderOpen && !briefValidation.valid
+                    ? `Complete: ${briefValidation.missing.join(", ")}`
+                    : "Send"
+                }
               >
                 <Send className="h-4 w-4" />
               </button>
+
             </div>
             <p className="font-body text-[10px] text-muted-foreground mt-1.5 text-center">
               {copy.footer}
