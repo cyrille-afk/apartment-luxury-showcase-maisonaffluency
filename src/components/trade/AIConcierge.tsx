@@ -3058,7 +3058,7 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
               </button>
 
             </div>
-            <p className="font-body text-[10px] text-muted-foreground mt-1.5 text-center">
+            <p className={cn("font-body text-[10px] text-muted-foreground mt-1.5 text-center", fullscreen && "shrink-0")}>
               {copy.footer}
             </p>
           </div>
