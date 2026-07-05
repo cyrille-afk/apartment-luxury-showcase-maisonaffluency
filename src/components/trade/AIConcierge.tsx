@@ -2553,6 +2553,13 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
                 ))}
               </div>
             )}
+            {briefBuilderOpen && (
+              <BriefBuilder
+                value={input}
+                onChange={(next) => setInput(next)}
+                onClose={() => setBriefBuilderOpen(false)}
+              />
+            )}
             {showBriefPreview && input.trim() && (() => {
               const raw = input.trim();
               const blockRegex = /^Block\s+\d+.*$/gim;
