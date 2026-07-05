@@ -183,9 +183,9 @@ export function BriefBuilder({
     onChange(nextText);
   };
 
-  const setBlockField = <K extends keyof BriefValues>(
-    block: K,
-    field: keyof BriefValues[K],
+  const setBlockField = <B extends ObjectBlock>(
+    block: B,
+    field: keyof BriefValues[B],
     nextValue: string
   ) => {
     const nextValues = updateBlockField(values, block, field, nextValue);
