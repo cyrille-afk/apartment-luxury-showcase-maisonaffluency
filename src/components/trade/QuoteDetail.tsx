@@ -322,6 +322,10 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   const [fxAppliedAt, setFxAppliedAt] = useState<Date | null>(null);
 
   const [tradeDiscount, setTradeDiscount] = useState(true);
+  // MSRP-only quotes must never apply the trade discount — the whole point of
+  // that billing mode is "full retail, no trade markdown". We derive this once
+  // and gate the toggle + every downstream calc off it below.
+
   // GST defaults to ON only for SGD quotes; other currencies (EUR/USD/GBP) default OFF.
   // The user can still toggle it on manually if needed.
   const [gstEnabled, setGstEnabled] = useState(false);
