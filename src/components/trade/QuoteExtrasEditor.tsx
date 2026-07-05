@@ -30,6 +30,7 @@ type Extra = {
   id: string;
   label: string;
   amount_cents: number;
+  currency: string | null;
   sort_order: number;
 };
 
@@ -37,16 +38,29 @@ interface Props {
   quoteId: string;
   currency: string;
   isReadOnly?: boolean;
-  /** Called whenever the total of all extras changes (in quote currency cents). */
+  /** Called whenever the total of all extras changes, converted to the quote (display) currency in cents. */
   onTotalChange?: (totalCents: number) => void;
+  /** Convert cents between currencies via the parent's live FX rates. */
+  convertCents?: (cents: number | null, from: string, to: string) => number | null;
 }
 
-export const QuoteExtrasEditor = ({ quoteId, currency, isReadOnly = false, onTotalChange }: Props) => {
+export const QuoteExtrasEditor = ({ quoteId, currency, isReadOnly = false, onTotalChange, convertCents }: Props) => {
   const { toast } = useToast();
   const [extras, setExtras] = useState<Extra[]>([]);
   const [loading, setLoading] = useState(true);
   const [draftLabel, setDraftLabel] = useState("");
   const [draftAmount, setDraftAmount] = useState("");
+
+  const toDisplay = (cents: number, from: string): number => {
+    const src = (from || currency).toUpperCase();
+    const tgt = currency.toUpperCase();
+    if (src === tgt) return cents;
+    if (convertCents) {
+      const v = convertCents(cents, src, tgt);
+      return typeof v === "number" ? v : cents;
+    }
+    return cents;
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -54,7 +68,7 @@ export const QuoteExtrasEditor = ({ quoteId, currency, isReadOnly = false, onTot
       setLoading(true);
       const { data, error } = await supabase
         .from("trade_quote_extras" as any)
-        .select("id, label, amount_cents, sort_order")
+        .select("id, label, amount_cents, currency, sort_order")
         .eq("quote_id", quoteId)
         .order("sort_order", { ascending: true })
         .order("created_at", { ascending: true });
@@ -72,8 +86,13 @@ export const QuoteExtrasEditor = ({ quoteId, currency, isReadOnly = false, onTot
   }, [quoteId]);
 
   useEffect(() => {
-    onTotalChange?.(extras.reduce((s, e) => s + (e.amount_cents || 0), 0));
-  }, [extras, onTotalChange]);
+    const totalInDisplay = extras.reduce(
+      (s, e) => s + toDisplay(e.amount_cents || 0, e.currency || currency),
+      0,
+    );
+    onTotalChange?.(totalInDisplay);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [extras, currency, convertCents]);
 
   const handleAdd = async () => {
     const label = draftLabel.trim();
@@ -86,8 +105,8 @@ export const QuoteExtrasEditor = ({ quoteId, currency, isReadOnly = false, onTot
     const nextSort = extras.length ? Math.max(...extras.map((e) => e.sort_order)) + 1 : 0;
     const { data, error } = await supabase
       .from("trade_quote_extras" as any)
-      .insert({ quote_id: quoteId, label, amount_cents: amountCents, sort_order: nextSort })
-      .select("id, label, amount_cents, sort_order")
+      .insert({ quote_id: quoteId, label, amount_cents: amountCents, currency, sort_order: nextSort })
+      .select("id, label, amount_cents, currency, sort_order")
       .single();
     if (error || !data) {
       toast({ title: "Error", description: error?.message ?? "Could not add extra", variant: "destructive" });
