@@ -2182,6 +2182,13 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
                   </div>
                 );
               }
+              if (item.kind === "spec_schedule") {
+                return (
+                  <div key={i} className="self-start">
+                    <SpecScheduleBlock zone={item.zone} markdown={item.markdown} />
+                  </div>
+                );
+              }
               if (item.kind === "retry") {
                 return (
                   <div
