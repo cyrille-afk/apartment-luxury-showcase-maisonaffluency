@@ -437,7 +437,7 @@ export function SpecScheduleBlock({ zone, markdown }: Props) {
         <DialogContent className="max-w-5xl w-[92vw] h-[88vh] p-0 gap-0 overflow-hidden">
           <DialogHeader className="px-4 py-3 border-b border-border/60 flex-row items-center justify-between space-y-0">
             <DialogTitle className="font-display text-sm uppercase tracking-[0.14em]">
-              PDF preview · {zone}
+              PDF preview · {zone} · {pageSize === "a4" ? "A4" : "Letter"}
             </DialogTitle>
             <div className="flex items-center gap-1.5">
               <button
