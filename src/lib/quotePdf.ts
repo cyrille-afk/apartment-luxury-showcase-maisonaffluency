@@ -20,6 +20,7 @@ import { optimizeImageUrl } from "@/lib/cloudinary-optimize";
 import { appendHkDapPage, type HkDapPageArgs } from "@/lib/hkDapPdf";
 import { appendUkDdpPage, type UkDdpPageArgs } from "@/lib/ukDdpPdf";
 import { formatFxSnapshotLine } from "@/lib/fxSnapshot";
+import { splitFinishAndDimensions, formatImperialDimensions } from "@/lib/formatDimensions";
 
 // Maison palette — matches studio-guide / UK DDP PDFs
 const JADE = [12, 49, 47] as const;        // #0C312F
@@ -888,25 +889,31 @@ function drawTable(
     const editionRaw = (line.edition ?? "").trim();
     const editionClean = editionRaw.replace(/^edition\s*[:\-—]?\s*/i, "").trim();
     const editionLabel = editionClean ? `Edition: ${editionClean}` : null;
-    const variantLabel = line.variantLabel ? `Finish: ${line.variantLabel}` : null;
-      const finishSwatchLabel = line.finishSwatchLabel ? `Selected finishes: ${line.finishSwatchLabel}` : null;
-    // When the user picked a finish, it supersedes the generic catalogue
-    // materials line (which is otherwise repetitive noise). Dimensions remain
-    // visible unless they are already embedded in the variant label.
-    // When a finish/variant is chosen the customer has picked a specific size;
-    // the catalogue's multi-size dimensions string becomes noise. Suppress it
-    // whenever the variant label already carries dimensional tokens
-    // (cm / mm / × / Ø), regardless of whether the two strings share a prefix.
-    const variantHasDims = !!(line.variantLabel && /(\d\s*(cm|mm)\b|[×xX]\s*\d|Ø)/.test(line.variantLabel));
-    const dimsAlreadyInVariant = variantHasDims || !!(line.variantLabel && line.dimensions &&
-      line.variantLabel.toLowerCase().includes(String(line.dimensions).toLowerCase().slice(0, 8)));
+
+    // Split "Bronze · Chintz · W 15.5 × D 11 × H 57 cm" → finish + dims so the
+    // legend is not a run-on. Dimensions are then always rendered on their own
+    // line with both metric and imperial units.
+    const { finish: finishOnly, dims: dimsFromVariant } = splitFinishAndDimensions(line.variantLabel);
+    const variantLabel = finishOnly ? `Finish: ${finishOnly}` : null;
+    const finishSwatchLabel = line.finishSwatchLabel ? `Selected finishes: ${line.finishSwatchLabel}` : null;
+
+    // Prefer dimensions carried inside the variant label (customer-picked size)
+    // over the catalogue's generic multi-size string. Fall back to the
+    // product's own dimensions when the variant carries none.
+    const dimsSource = dimsFromVariant || (line.dimensions ? String(line.dimensions).trim() : "");
+    let dimensionsLabel: string | null = null;
+    if (dimsSource) {
+      const imp = formatImperialDimensions(dimsSource);
+      dimensionsLabel = imp ? `Dimensions: ${dimsSource} | ${imp}` : `Dimensions: ${dimsSource}`;
+    }
+
     const showMaterials = !line.variantLabel;
     const meta = [
       variantLabel,
       finishSwatchLabel,
       line.fabricLabel ?? null,
       line.woodFinishLabel ?? null,
-      dimsAlreadyInVariant ? null : line.dimensions,
+      dimensionsLabel,
       showMaterials ? line.materials : null,
       editionLabel,
       line.leadTime,
