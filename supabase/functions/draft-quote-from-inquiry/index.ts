@@ -95,8 +95,9 @@ serve(async (req) => {
     // Add line item when a product was matched
     if (product) {
       const unitPrice = quoteKind === "public"
-        ? product.retail_price_cents
-        : (product.trade_price_cents || product.retail_price_cents);
+        ? product.rrp_price_cents
+        : (product.trade_price_cents || product.rrp_price_cents);
+
 
       const { error: itemErr } = await supabase.from("trade_quote_items").insert({
         quote_id: quote.id,
