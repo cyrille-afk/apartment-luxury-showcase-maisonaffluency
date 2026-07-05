@@ -252,6 +252,7 @@ export function BriefBuilder({
   const [suffix, setSuffix] = useState("");
   const lastEmitted = useRef<string>("");
   const restoredRef = useRef(false);
+  const [expanded, setExpanded] = useState<ExpandedSections>(loadExpanded());
 
   // Restore draft on mount (once), overriding whatever the parent seeded.
   useEffect(() => {
@@ -305,6 +306,37 @@ export function BriefBuilder({
     setValues(nextValues);
     emit(nextValues, prefix, suffix);
   };
+
+  const toggleSection = (block: ObjectBlock) => {
+    const next = { ...expanded, [block]: !expanded[block] };
+    setExpanded(next);
+    saveExpanded(next);
+  };
+
+  const SectionHeader = ({
+    title,
+    open,
+    onToggle,
+  }: {
+    title: string;
+    open: boolean;
+    onToggle: () => void;
+  }) => (
+    <button
+      type="button"
+      onClick={onToggle}
+      className="mb-2 flex w-full items-center justify-between font-heading text-[12px] font-semibold text-accent"
+      aria-expanded={open}
+      aria-label={open ? `Collapse ${title}` : `Expand ${title}`}
+    >
+      <span>{title}</span>
+      {open ? (
+        <ChevronDown className="h-3.5 w-3.5" />
+      ) : (
+        <ChevronRight className="h-3.5 w-3.5" />
+      )}
+    </button>
+  );
 
 
   const Field = ({
