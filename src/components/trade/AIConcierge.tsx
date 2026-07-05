@@ -2909,8 +2909,28 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
               >
                 <Palette className="h-4 w-4" />
               </button>
-              {/* 4-block spec-brief insert + edit buttons removed —
-                  detection auto-opens the Brief Builder on project-scale intake. */}
+              {!briefBuilderOpen && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!/Block\s+1\s*—/i.test(input)) {
+                      const current = input.trim();
+                      const next = current
+                        ? `${input.replace(/\s+$/, "")}\n\n${SPEC_BRIEF_TEMPLATE}`
+                        : SPEC_BRIEF_TEMPLATE;
+                      setInput(next);
+                    }
+                    setBriefBuilderOpen(true);
+                  }}
+                  disabled={streaming}
+                  className="shrink-0 rounded-xl border border-border bg-muted/40 p-2 text-muted-foreground hover:text-foreground hover:bg-muted disabled:opacity-40 transition-colors"
+                  aria-label="Open Architectural Brief Builder"
+                  title="Open Architectural Brief Builder"
+                >
+                  <LayoutList className="h-4 w-4" />
+                </button>
+              )}
+
 
               <button
                 type="button"
