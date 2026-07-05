@@ -271,10 +271,14 @@ SELECT pg_temp.assert(
 --      - trade_quotes_self_pricing_tamper
 --      - trade_quote_items_self_price_tamper
 --
---    Two layers of assertions:
---      (a) Trigger + guard function exist on each table.
---      (b) The guard function body references every protected column, so
---          dropping a column from the guard is caught immediately.
+--    Guards are a second layer AFTER RLS policies. For non-admin,
+--    non-service-role callers the BEFORE UPDATE trigger:
+--      (a) silently reverts any protected column to its OLD value,
+--      (b) calls log_pricing_tamper_attempt() which writes a
+--          security_audit_events row and fires a rate-limited admin alert.
+--    Structural checks prove the guard functions still cover every protected
+--    column and still call the logger. Runtime checks exercise the silent
+--    revert when the connection bypasses RLS.
 -- ---------------------------------------------------------------------------
 
 -- 6a. Trigger existence
@@ -299,7 +303,13 @@ SELECT pg_temp.assert(
             AND NOT tgisinternal),
   'trade_quote_items: prevent_quote_item_price_self_update trigger is attached');
 
--- 6b. Guard function body references every protected column
+-- 6b. Guard function body covers every protected column AND calls the logger
+SELECT pg_temp.assert(
+  EXISTS (SELECT 1 FROM pg_proc
+          WHERE proname='log_pricing_tamper_attempt'
+            AND pronamespace='public'::regnamespace),
+  'log_pricing_tamper_attempt helper function exists');
+
 DO $$
 DECLARE
   _src text;
@@ -318,7 +328,11 @@ BEGIN
   FOREACH _col IN ARRAY _cols LOOP
     PERFORM pg_temp.assert(_src LIKE '%'||_col||'%',
       'profiles guard covers column '||_col);
+    PERFORM pg_temp.assert(_src LIKE '%NEW.'||_col||'%' AND _src LIKE '%OLD.'||_col||'%',
+      'profiles guard silently reverts column '||_col);
   END LOOP;
+  PERFORM pg_temp.assert(_src LIKE '%log_pricing_tamper_attempt%',
+    'profiles guard calls log_pricing_tamper_attempt');
   PERFORM pg_temp.assert(_src LIKE '%has_role%admin%',
     'profiles guard bypass restricted to admin role');
 
@@ -334,7 +348,11 @@ BEGIN
   FOREACH _col IN ARRAY _cols LOOP
     PERFORM pg_temp.assert(_src LIKE '%'||_col||'%',
       'trade_quotes guard covers column '||_col);
+    PERFORM pg_temp.assert(_src LIKE '%NEW.'||_col||'%' AND _src LIKE '%OLD.'||_col||'%',
+      'trade_quotes guard silently reverts column '||_col);
   END LOOP;
+  PERFORM pg_temp.assert(_src LIKE '%log_pricing_tamper_attempt%',
+    'trade_quotes guard calls log_pricing_tamper_attempt');
   PERFORM pg_temp.assert(_src LIKE '%has_role%admin%',
     'trade_quotes guard bypass restricted to admin/service_role');
   PERFORM pg_temp.assert(_src LIKE '%service_role%',
@@ -352,15 +370,19 @@ BEGIN
   FOREACH _col IN ARRAY _cols LOOP
     PERFORM pg_temp.assert(_src LIKE '%'||_col||'%',
       'trade_quote_items guard covers column '||_col);
+    PERFORM pg_temp.assert(_src LIKE '%NEW.'||_col||'%' AND _src LIKE '%OLD.'||_col||'%',
+      'trade_quote_items guard silently reverts column '||_col);
   END LOOP;
+  PERFORM pg_temp.assert(_src LIKE '%log_pricing_tamper_attempt%',
+    'trade_quote_items guard calls log_pricing_tamper_attempt');
   PERFORM pg_temp.assert(_src LIKE '%has_role%admin%',
     'trade_quote_items guard bypass restricted to admin/service_role');
   PERFORM pg_temp.assert(_src LIKE '%service_role%',
     'trade_quote_items guard allows service_role path');
 END $$;
 
--- 6c. Runtime enforcement — capture the guard's own error message when a
--- non-admin caller attempts to change a protected column.
+-- 6c. Runtime enforcement -- verify the silent revert and audit row under a
+-- simulated non-admin JWT when the connection bypasses RLS.
 --
 -- Preflight: pooled Supabase connections typically don't bypass RLS, so the
 -- UPDATE gets a "permission denied" from the policy layer BEFORE the trigger
@@ -373,90 +395,134 @@ DO $$
 DECLARE
   _owner uuid := current_setting('rls_test.owner_uid')::uuid;
   _quote_id uuid := '11111111-1111-1111-1111-111111111e01';
-  _fake_uid uuid := '11111111-1111-1111-1111-111111111ff1';
+  _item_id uuid := '11111111-1111-1111-1111-111111111e02';
+  _product_id uuid := '11111111-1111-1111-1111-111111111e03';
   _err text;
   _preflight text;
+  _num numeric;
+  _txt text;
+  _bool boolean;
+  _billing public.billing_mode;
+  _tier public.trade_tier;
+  _audit_count int;
+  _audit_count_before int;
 BEGIN
   _preflight := pg_temp.capture_error(format(
     'UPDATE public.trade_quotes SET status = status WHERE id = %L',
     '00000000-0000-0000-0000-000000000000'));
   IF _preflight IS NOT NULL AND _preflight LIKE '%permission denied%' THEN
-    RAISE NOTICE 'SKIP: section 6c runtime checks — session lacks RLS bypass (msg: %). Structural checks in 6a/6b remain authoritative.', _preflight;
+    RAISE NOTICE 'SKIP: section 6c runtime checks -- session lacks RLS bypass (msg: %). Structural checks in 6a/6b remain authoritative.', _preflight;
     RETURN;
   END IF;
 
+  -- Need a non-admin fixture user to test the guard. If the sampled profile
+  -- is an admin, the guard bypasses and we cannot exercise this path.
+  IF public.has_role(_owner, 'admin'::app_role) THEN
+    RAISE NOTICE 'SKIP: section 6c runtime checks -- fixture profile is an admin, so guard bypasses. Structural checks in 6a/6b remain authoritative.';
+    RETURN;
+  END IF;
+
+  -- Ensure the fixture user has trade_user role so trade_quote_items RLS passes.
+  INSERT INTO public.user_roles (user_id, role) VALUES (_owner, 'trade_user')
+  ON CONFLICT (user_id, role) DO NOTHING;
+
+  -- Fixture product required by trade_quote_items.product_id FK.
+  INSERT INTO public.trade_products (id, brand_name, product_name)
+  VALUES (_product_id, 'RLS Test Brand', 'RLS Test Product');
+
   -- Fixture: a trade_quotes row owned by the profile-fixture user.
-  INSERT INTO public.trade_quotes (id, user_id, status,
+  INSERT INTO public.trade_quotes (id, user_id, status, studio_id, project_id,
                                    net_discount_pct, commission_pct,
-                                   credit_applied_cents, insurance_rate_bps)
-  VALUES (_quote_id, _owner, 'draft',
-          0, 0, 0, 0);
+                                   credit_applied_cents, insurance_rate_bps,
+                                   billing_mode)
+  VALUES (_quote_id, _owner, 'draft', NULL, NULL,
+          0, 0, 0, 0, 'agent_commission');
 
-  -- Impersonate a non-admin authenticated caller.
-  PERFORM set_config('request.jwt.claims',
-                     json_build_object('sub', _fake_uid::text,
-                                       'role','authenticated')::text,
-                     true);
+  -- Fixture: a trade_quote_items row attached to that quote.
+  INSERT INTO public.trade_quote_items (id, quote_id, product_id, quantity,
+                                        unit_price_cents, unit_price_currency,
+                                        fabric_upcharge_cents, fabric_currency)
+  VALUES (_item_id, _quote_id, _product_id, 1,
+          10000, 'SGD', 0, 'SGD');
 
-
-  -- trade_quotes: each protected column must raise the guard's own message.
-  _err := pg_temp.capture_error(format(
-    'UPDATE public.trade_quotes SET net_discount_pct = 50 WHERE id = %L',
-    _quote_id));
-  PERFORM pg_temp.assert(
-    _err IS NOT NULL AND _err LIKE '%Only admins can modify quote pricing%',
-    'trade_quotes: net_discount_pct rejected by guard (msg: '||COALESCE(_err,'<none>')||')');
-
-  _err := pg_temp.capture_error(format(
-    'UPDATE public.trade_quotes SET commission_pct = 99 WHERE id = %L',
-    _quote_id));
-  PERFORM pg_temp.assert(
-    _err IS NOT NULL AND _err LIKE '%Only admins can modify quote pricing%',
-    'trade_quotes: commission_pct rejected by guard');
-
-  _err := pg_temp.capture_error(format(
-    'UPDATE public.trade_quotes SET billing_mode = ''net_buy'' WHERE id = %L',
-    _quote_id));
-  PERFORM pg_temp.assert(
-    _err IS NOT NULL AND _err LIKE '%Only admins can modify quote pricing%',
-    'trade_quotes: billing_mode rejected by guard');
-
-  _err := pg_temp.capture_error(format(
-    'UPDATE public.trade_quotes SET credit_applied_cents = -1 WHERE id = %L',
-    _quote_id));
-  PERFORM pg_temp.assert(
-    _err IS NOT NULL AND _err LIKE '%Only admins can modify quote pricing%',
-    'trade_quotes: credit_applied_cents rejected by guard');
-
-  _err := pg_temp.capture_error(format(
-    'UPDATE public.trade_quotes SET insurance_rate_bps = 99999 WHERE id = %L',
-    _quote_id));
-  PERFORM pg_temp.assert(
-    _err IS NOT NULL AND _err LIKE '%Only admins can modify quote pricing%',
-    'trade_quotes: insurance_rate_bps rejected by guard');
-
-  -- profiles: self-upgrade of trade_tier as row owner must hit the guard.
+  -- Impersonate the row owner (non-admin authenticated caller).
   PERFORM set_config('request.jwt.claims',
                      json_build_object('sub', _owner::text,
                                        'role','authenticated')::text,
                      true);
-  _err := pg_temp.capture_error(format(
-    'UPDATE public.profiles SET trade_tier = ''vip'' WHERE id = %L',
-    _owner));
-  PERFORM pg_temp.assert(
-    _err IS NOT NULL AND _err LIKE '%Only admins can modify trade tier%',
-    'profiles: trade_tier self-upgrade rejected by guard (msg: '||COALESCE(_err,'<none>')||')');
 
-  _err := pg_temp.capture_error(format(
-    'UPDATE public.profiles SET trade_tier_locked_by_admin = true WHERE id = %L',
-    _owner));
-  PERFORM pg_temp.assert(
-    _err IS NOT NULL AND _err LIKE '%Only admins can modify trade tier%',
-    'profiles: trade_tier_locked_by_admin self-write rejected by guard');
+  -- trade_quotes: each protected column must be silently reverted.
+  _audit_count_before := (SELECT count(*) FROM public.security_audit_events
+                          WHERE event_type = 'pricing_tamper_attempt'
+                            AND source = 'prevent_quote_pricing_self_update');
 
-  -- trade_quote_items: only exercisable when a fixture item exists. Skip if
-  -- we cannot insert one (missing FK product); the structural checks in 6a/6b
-  -- already prove the trigger + column list are in place.
+  UPDATE public.trade_quotes SET net_discount_pct = 50 WHERE id = _quote_id;
+  SELECT net_discount_pct INTO _num FROM public.trade_quotes WHERE id = _quote_id;
+  PERFORM pg_temp.assert(_num = 0, 'trade_quotes: net_discount_pct silently reverted');
+
+  UPDATE public.trade_quotes SET commission_pct = 99 WHERE id = _quote_id;
+  SELECT commission_pct INTO _num FROM public.trade_quotes WHERE id = _quote_id;
+  PERFORM pg_temp.assert(_num = 0, 'trade_quotes: commission_pct silently reverted');
+
+  UPDATE public.trade_quotes SET billing_mode = 'net_buy' WHERE id = _quote_id;
+  SELECT billing_mode INTO _billing FROM public.trade_quotes WHERE id = _quote_id;
+  PERFORM pg_temp.assert(_billing = 'agent_commission', 'trade_quotes: billing_mode silently reverted');
+
+  UPDATE public.trade_quotes SET credit_applied_cents = -1 WHERE id = _quote_id;
+  SELECT credit_applied_cents INTO _num FROM public.trade_quotes WHERE id = _quote_id;
+  PERFORM pg_temp.assert(_num = 0, 'trade_quotes: credit_applied_cents silently reverted');
+
+  UPDATE public.trade_quotes SET insurance_rate_bps = 99999 WHERE id = _quote_id;
+  SELECT insurance_rate_bps INTO _num FROM public.trade_quotes WHERE id = _quote_id;
+  PERFORM pg_temp.assert(_num = 0, 'trade_quotes: insurance_rate_bps silently reverted');
+
+  _audit_count := (SELECT count(*) FROM public.security_audit_events
+                   WHERE event_type = 'pricing_tamper_attempt'
+                     AND source = 'prevent_quote_pricing_self_update');
+  PERFORM pg_temp.assert(_audit_count > _audit_count_before,
+    'trade_quotes: pricing tamper attempts logged to security_audit_events');
+
+  -- trade_quote_items: protected price columns must be silently reverted.
+  _audit_count_before := (SELECT count(*) FROM public.security_audit_events
+                          WHERE event_type = 'pricing_tamper_attempt'
+                            AND source = 'prevent_quote_item_price_self_update');
+
+  UPDATE public.trade_quote_items SET unit_price_cents = 99999 WHERE id = _item_id;
+  SELECT unit_price_cents INTO _num FROM public.trade_quote_items WHERE id = _item_id;
+  PERFORM pg_temp.assert(_num = 10000, 'trade_quote_items: unit_price_cents silently reverted');
+
+  UPDATE public.trade_quote_items SET unit_price_currency = 'USD' WHERE id = _item_id;
+  SELECT unit_price_currency INTO _txt FROM public.trade_quote_items WHERE id = _item_id;
+  PERFORM pg_temp.assert(_txt = 'SGD', 'trade_quote_items: unit_price_currency silently reverted');
+
+  UPDATE public.trade_quote_items SET fabric_upcharge_cents = 5000 WHERE id = _item_id;
+  SELECT fabric_upcharge_cents INTO _num FROM public.trade_quote_items WHERE id = _item_id;
+  PERFORM pg_temp.assert(_num = 0, 'trade_quote_items: fabric_upcharge_cents silently reverted');
+
+  _audit_count := (SELECT count(*) FROM public.security_audit_events
+                   WHERE event_type = 'pricing_tamper_attempt'
+                     AND source = 'prevent_quote_item_price_self_update');
+  PERFORM pg_temp.assert(_audit_count > _audit_count_before,
+    'trade_quote_items: pricing tamper attempts logged to security_audit_events');
+
+  -- profiles: self-upgrade of trade_tier as row owner must be reverted.
+  _audit_count_before := (SELECT count(*) FROM public.security_audit_events
+                          WHERE event_type = 'pricing_tamper_attempt'
+                            AND source = 'prevent_profile_tier_self_update');
+
+  UPDATE public.profiles SET trade_tier = 'platinum' WHERE id = _owner;
+  SELECT trade_tier INTO _tier FROM public.profiles WHERE id = _owner;
+  PERFORM pg_temp.assert(_tier IS DISTINCT FROM 'platinum', 'profiles: trade_tier self-upgrade silently reverted');
+
+  UPDATE public.profiles SET trade_tier_locked_by_admin = true WHERE id = _owner;
+  SELECT trade_tier_locked_by_admin INTO _bool FROM public.profiles WHERE id = _owner;
+  PERFORM pg_temp.assert(_bool IS NOT TRUE, 'profiles: trade_tier_locked_by_admin self-write silently reverted');
+
+  _audit_count := (SELECT count(*) FROM public.security_audit_events
+                   WHERE event_type = 'pricing_tamper_attempt'
+                     AND source = 'prevent_profile_tier_self_update');
+  PERFORM pg_temp.assert(_audit_count > _audit_count_before,
+    'profiles: pricing tamper attempts logged to security_audit_events');
 END $$;
 
 
