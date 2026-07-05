@@ -280,10 +280,13 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
       }
     });
 
-  const handleFilesPicked = useCallback(async (files: FileList | File[] | null) => {
-    if (!files) return;
+  const handleFilesPicked = useCallback(async (
+    files: FileList | File[] | null,
+    opts?: { role?: "moodboard"; imagesOnly?: boolean },
+  ) => {
+    if (!files) return [] as StagedAttachment[];
     const list = Array.from(files);
-    if (!list.length) return;
+    if (!list.length) return [] as StagedAttachment[];
     const accepted: StagedAttachment[] = [];
     for (const f of list) {
       if (attachments.length + accepted.length >= MAX_ATTACHMENTS) {
@@ -292,6 +295,10 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
       }
       const isImage = f.type.startsWith("image/");
       const isPdf = f.type === "application/pdf" || /\.pdf$/i.test(f.name);
+      if (opts?.imagesOnly && !isImage) {
+        toast.error(`${f.name}: mood board must be an image.`);
+        continue;
+      }
       if (!isImage && !isPdf) {
         toast.error(`${f.name}: only images and PDFs are supported.`);
         continue;
@@ -311,6 +318,7 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
           dataUrl,
           previewUrl,
           size: f.size,
+          ...(opts?.role ? { role: opts.role } : {}),
         });
       } catch {
         toast.error(`Couldn't read ${f.name}.`);
@@ -318,7 +326,46 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
     }
     if (accepted.length) setAttachments((prev) => [...prev, ...accepted]);
     if (fileInputRef.current) fileInputRef.current.value = "";
+    if (moodInputRef.current) moodInputRef.current.value = "";
+    return accepted;
   }, [attachments.length]);
+
+  /**
+   * Insert or update a "MOOD BOARD REFERENCE:" line inside Block 3 of the
+   * spec brief. If Block 3 isn't present, append a minimal Block 3 stub.
+   * Merges names across all currently-staged mood board attachments.
+   */
+  const upsertMoodBoardBlock3 = useCallback((allMoodNames: string[]) => {
+    const refLine = allMoodNames.length
+      ? `MOOD BOARD REFERENCE: ${allMoodNames.join(", ")}`
+      : "";
+    setInput((prev) => {
+      const text = prev ?? "";
+      // Strip any prior MOOD BOARD REFERENCE line anywhere.
+      const stripped = text.replace(/^\s*MOOD BOARD REFERENCE:.*$/gim, "").replace(/\n{3,}/g, "\n\n");
+      if (!refLine) return stripped.trimEnd();
+      // Find Block 3 header and insert the reference line right after it.
+      const block3Regex = /^(Block\s+3\b[^\n]*)$/im;
+      if (block3Regex.test(stripped)) {
+        return stripped.replace(block3Regex, `$1\n${refLine}`);
+      }
+      // No Block 3 yet — append a minimal stub so the reference has a home.
+      const sep = stripped.trim() ? "\n\n" : "";
+      return `${stripped.trimEnd()}${sep}Block 3 — Aesthetic & Visual DNA\n${refLine}`;
+    });
+  }, []);
+
+  const handleMoodBoardPicked = useCallback(async (files: FileList | File[] | null) => {
+    const added = await handleFilesPicked(files, { role: "moodboard", imagesOnly: true });
+    if (!added.length) return;
+    // Compose the current + newly-added mood board names.
+    const names = [
+      ...attachments.filter((a) => a.role === "moodboard").map((a) => a.name),
+      ...added.map((a) => a.name),
+    ];
+    upsertMoodBoardBlock3(names);
+    toast.success(added.length === 1 ? "Mood board attached to Block 3." : `${added.length} mood board images attached to Block 3.`);
+  }, [handleFilesPicked, attachments, upsertMoodBoardBlock3]);
 
   const removeAttachment = (id: string) =>
     setAttachments((prev) => prev.filter((a) => a.id !== id));
