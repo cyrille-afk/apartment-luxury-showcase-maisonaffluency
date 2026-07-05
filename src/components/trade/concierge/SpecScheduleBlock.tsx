@@ -22,17 +22,51 @@ interface Props {
  * database rows — never model output — so there is no hallucination risk.
  */
 export function SpecScheduleBlock({ zone, markdown }: Props) {
+  const STORAGE_KEY = "maison:spec-schedule:cover-prefs:v1";
+  type CoverPrefs = {
+    projectName?: string;
+    designerName?: string;
+    coverDate?: string;
+    includeCover?: boolean;
+    pageSize?: "a4" | "letter";
+  };
+  const loadPrefs = (): CoverPrefs => {
+    try {
+      const raw = typeof window !== "undefined" ? window.localStorage.getItem(STORAGE_KEY) : null;
+      return raw ? (JSON.parse(raw) as CoverPrefs) : {};
+    } catch {
+      return {};
+    }
+  };
+  const initialPrefs = loadPrefs();
+
   const [copied, setCopied] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [building, setBuilding] = useState(false);
   const [coverOpen, setCoverOpen] = useState(false);
-  const [projectName, setProjectName] = useState(zone && zone !== "Tearsheet" ? zone : "");
-  const [designerName, setDesignerName] = useState("");
-  const [coverDate, setCoverDate] = useState(() => new Date().toISOString().slice(0, 10));
-  const [includeCover, setIncludeCover] = useState(true);
-  const [pageSize, setPageSize] = useState<"a4" | "letter">("a4");
+  const [projectName, setProjectName] = useState(
+    initialPrefs.projectName ?? (zone && zone !== "Tearsheet" ? zone : ""),
+  );
+  const [designerName, setDesignerName] = useState(initialPrefs.designerName ?? "");
+  const [coverDate, setCoverDate] = useState(
+    initialPrefs.coverDate ?? new Date().toISOString().slice(0, 10),
+  );
+  const [includeCover, setIncludeCover] = useState(initialPrefs.includeCover ?? true);
+  const [pageSize, setPageSize] = useState<"a4" | "letter">(initialPrefs.pageSize ?? "a4");
   const docRef = useRef<any>(null);
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify({ projectName, designerName, coverDate, includeCover, pageSize }),
+      );
+    } catch {
+      /* storage denied — noop */
+    }
+  }, [projectName, designerName, coverDate, includeCover, pageSize]);
+
 
 
   const slug = useMemo(() => {
