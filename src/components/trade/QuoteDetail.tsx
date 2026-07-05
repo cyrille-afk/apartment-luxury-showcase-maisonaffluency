@@ -3776,6 +3776,16 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
               subtotalCents={subtotalCents}
               currency={currency}
               isEditable={isDraft || isPriced}
+              onBillingModeChange={(next) => {
+                setBillingMeta((prev) => ({
+                  billing_mode: next.billing_mode,
+                  net_discount_pct: next.net_discount_pct,
+                  commission_pct: next.commission_pct,
+                  end_client_billing: (next.end_client_billing as Record<string, string> | null) ?? null,
+                  resale_certificate_id: next.resale_certificate_id,
+                  studio_id: prev?.studio_id ?? null,
+                }));
+              }}
             />
           </div>
         )}
