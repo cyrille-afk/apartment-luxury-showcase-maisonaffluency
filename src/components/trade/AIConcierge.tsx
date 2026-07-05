@@ -2295,7 +2295,7 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
               </div>
             </div>
             {!minimized && (
-              <div className="flex items-center gap-2 pl-6">
+              <div className="flex items-center gap-2 flex-wrap pl-6">
                 <span
                   className="inline-flex items-center gap-1 rounded-full border border-border bg-muted/60 px-2 py-0.5 font-body text-[10px] uppercase tracking-widest text-muted-foreground"
                   title={`Current workflow stage: ${stage}`}
