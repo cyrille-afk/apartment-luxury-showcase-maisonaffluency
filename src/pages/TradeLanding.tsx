@@ -5,8 +5,6 @@ import { Link, useLocation, useNavigate, useSearchParams } from "react-router-do
 import { Helmet } from "react-helmet-async";
 import { cloudinaryUrl } from "@/lib/cloudinary";
 import { withOgCacheBust, shareOnWhatsApp } from "@/lib/whatsapp-share";
-import { trackMagazine } from "@/lib/analytics";
-import { supabase } from "@/integrations/supabase/client";
 import tradeClientAdvisorImg from "@/assets/trade-client-advisor.jpg";
 import projectFoldersImg from "@/assets/benefit-project-folders.jpg";
 const studioBeforeImgFallback = "https://res.cloudinary.com/dif1oamtj/image/upload/v1773976063/Screen_Shot_2026-03-20_at_11.05.23_AM_fo0aaz.png";
