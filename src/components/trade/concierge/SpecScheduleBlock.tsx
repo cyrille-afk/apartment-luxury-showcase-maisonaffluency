@@ -149,6 +149,16 @@ export function SpecScheduleBlock({ zone, markdown }: Props) {
             <Download className="h-3 w-3" />
             .md
           </button>
+          <button
+            type="button"
+            onClick={onDownloadPdf}
+            className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background hover:bg-accent/10 hover:border-accent/40 px-2.5 py-1 text-[11px] font-body text-foreground transition"
+            aria-label="Download schedule as PDF"
+          >
+            <Download className="h-3 w-3" />
+            PDF
+          </button>
+
         </div>
       </div>
 
