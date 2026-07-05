@@ -76,7 +76,7 @@ describe("Trade area: AD free-download flow stays removed", () => {
     const offenders: Array<{ file: string; pattern: string; line: string }> = [];
 
     for (const file of files) {
-      const rel = relative(process.cwd(), file).replaceAll("\\", "/");
+      const rel = relative(process.cwd(), file).split("\\").join("/");
       if (ALLOW_LIST.has(rel)) continue;
 
       const contents = readFileSync(file, "utf8");
