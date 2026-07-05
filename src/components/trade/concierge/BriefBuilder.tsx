@@ -377,10 +377,36 @@ export function BriefBuilder({
     };
   }, []);
 
-  // Restore draft on mount (once), overriding whatever the parent seeded.
+  // On mount: if the composer already contains a recognizable brief (e.g. the
+  // user pasted a template before opening the builder), parse THAT and skip
+  // draft restore — otherwise the saved draft would wipe the paste. Only fall
+  // back to the saved draft when the composer has nothing parseable.
   useEffect(() => {
     if (restoredRef.current) return;
     restoredRef.current = true;
+
+    const parsedFromValue = value ? parseBrief(value) : null;
+    const hasParsedContent =
+      !!parsedFromValue &&
+      JSON.stringify(parsedFromValue.values) !== JSON.stringify(DEFAULT_VALUES);
+
+    if (hasParsedContent && parsedFromValue) {
+      setValues(parsedFromValue.values);
+      setPrefix(parsedFromValue.prefix);
+      setSuffix(parsedFromValue.suffix);
+      const formatted = formatBrief(parsedFromValue.values);
+      const parts = [parsedFromValue.prefix, formatted, parsedFromValue.suffix].filter(Boolean);
+      const nextText = parts.join("\n\n");
+      lastEmitted.current = nextText;
+      saveDraft({
+        values: parsedFromValue.values,
+        prefix: parsedFromValue.prefix,
+        suffix: parsedFromValue.suffix,
+      });
+      onChange(nextText);
+      return;
+    }
+
     const draft = loadDraft();
     if (!draft) return;
     setValues(draft.values);
@@ -391,7 +417,7 @@ export function BriefBuilder({
     const nextText = parts.join("\n\n");
     lastEmitted.current = nextText;
     onChange(nextText);
-  }, [onChange]);
+  }, [onChange, value]);
 
   useEffect(() => {
     if (!restoredRef.current) return;
