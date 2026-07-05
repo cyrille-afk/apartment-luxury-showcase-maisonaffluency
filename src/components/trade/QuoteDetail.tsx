@@ -555,11 +555,29 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
           }
           loadedItems = loadedItems.map((item) => {
             const pickId = item.trade_products?.source_pick_id;
-            const swatches = pickId
-              ? findQuoteFinishSwatches(item.variant_label, byPick.get(pickId) || [])
+            const pickSwatches = pickId ? byPick.get(pickId) || [] : [];
+
+            // Prefer explicitly-saved selections on the quote item over any
+            // variant-label matching. Users pick specific finishes (e.g. "Light
+            // Bronze Medal 0922") that share a generic axis token ("Bronze")
+            // with sibling swatches — label matching would drag those siblings
+            // in as false positives.
+            const explicit: { name: string; image_url: string }[] = [];
+            const pushExplicit = (id: string | null | undefined) => {
+              if (!id) return;
+              const hit = pickSwatches.find((s) => s.fabric_id === id);
+              if (hit && hit.image_url && !explicit.some((e) => e.image_url === hit.image_url)) {
+                explicit.push({ name: hit.name, image_url: hit.image_url });
+              }
+            };
+            pushExplicit((item as any).wood_fabric_id);
+            pushExplicit((item as any).fabric_id);
+
+            const swatches = explicit.length > 0
+              ? explicit
+              : findQuoteFinishSwatches(item.variant_label, pickSwatches)
                   .map((swatch) => ({ name: swatch.name, image_url: swatch.image_url || "" }))
-                  .filter((swatch) => swatch.image_url)
-              : [];
+                  .filter((swatch) => swatch.image_url);
             if (swatches.length === 0) return item;
             const first = swatches[0];
             return {
