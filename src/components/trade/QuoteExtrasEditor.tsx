@@ -152,11 +152,6 @@ export const QuoteExtrasEditor = ({ quoteId, currency, isReadOnly = false, onTot
     if (error) toast({ title: "Error", description: error.message, variant: "destructive" });
   };
 
-  const total = extras.reduce(
-    (s, e) => s + toDisplay(e.amount_cents || 0, e.currency || currency),
-    0,
-  );
-
   if (loading) return null;
   if (isReadOnly && extras.length === 0) return null;
 
@@ -172,6 +167,25 @@ export const QuoteExtrasEditor = ({ quoteId, currency, isReadOnly = false, onTot
           </span>
         )}
       </div>
+
+      {(totalMismatch || missingRateRows.length > 0) && (
+        <div className="mb-2 rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-[11px] text-destructive">
+          {totalMismatch && (
+            <p>
+              Extras total doesn't match the sum of converted rows
+              ({currencySymbol(currency)}{formatPriceRaw(total, currency)} vs
+              {" "}{currencySymbol(currency)}{formatPriceRaw(verifiedTotal, currency)}).
+              Refresh the quote or re-enter the row.
+            </p>
+          )}
+          {missingRateRows.length > 0 && (
+            <p>
+              Missing FX rate for {missingRateRows.map((r) => r.rowCcy).join(", ")} → {currency.toUpperCase()};
+              those rows are being summed at 1:1. Totals may be inaccurate until rates load.
+            </p>
+          )}
+        </div>
+      )}
 
       {extras.length > 0 && (
         <div className="space-y-1.5 mb-2">
