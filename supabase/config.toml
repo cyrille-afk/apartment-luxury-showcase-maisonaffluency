@@ -51,3 +51,6 @@ project_id = "dcrauiygaezoduwdjmsm"
     verify_jwt = false
   [functions.trade-concierge-realign]
     verify_jwt = false
+  [functions.security-alert]
+    verify_jwt = false
+
