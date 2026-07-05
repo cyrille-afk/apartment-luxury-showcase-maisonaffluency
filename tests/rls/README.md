@@ -20,6 +20,17 @@ fixtures persist.
    RLS is enabled and every write policy is gated on
    `auth.role() = 'service_role'` or admin (no path is reachable from
    `authenticated` / `anon`).
+4. **Column-level write guards** on `profiles`, `trade_quotes`, and
+   `trade_quote_items` — verifies that the BEFORE UPDATE triggers
+   (`prevent_profile_tier_self_update`,
+   `prevent_quote_pricing_self_update`,
+   `prevent_quote_item_price_self_update`) are attached and that their
+   function bodies still cover every protected column (tier fields,
+   `net_discount_pct`, `commission_pct`, `credit_applied_cents`,
+   `insurance_rate_bps`, `billing_mode`, `unit_price_cents`, etc.). A
+   runtime block additionally captures the guard's own error message
+   under a simulated non-admin JWT; it self-skips when the session lacks
+   RLS bypass (pooled Supabase connections).
 
 ## Running
 
