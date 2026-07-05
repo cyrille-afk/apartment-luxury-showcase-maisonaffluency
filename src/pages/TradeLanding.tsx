@@ -546,59 +546,8 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
           </div>
         </div>
 
-        {/* ─── Featured Download Banner ─── */}
-        {featuredDoc && (
-          <div className="w-full bg-[hsl(var(--card))] border-b border-border">
-            <div className="max-w-6xl mx-auto px-6 md:px-12 py-8 md:py-12">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.7 }}
-                className="flex flex-col md:flex-row items-center gap-6 md:gap-10"
-              >
-                {/* Catalogue cover thumbnail */}
-                <button
-                  type="button"
-                  onClick={() => void handleTrackedCatalogueDownload(`${featuredDoc.title} — Landing`, "trade_landing_cover")}
-                  className="group relative w-40 md:w-48 flex-shrink-0 rounded-sm overflow-hidden shadow-lg border border-border aspect-[3/4] bg-muted/20"
-                >
-                  {featuredDoc.cover_image_url && (
-                    <img
-                      src={featuredDoc.cover_image_url}
-                      alt={`${featuredDoc.title} cover`}
-                      className="w-full h-full object-cover"
-                    />
-                  )}
-                  <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/10 transition-colors flex items-center justify-center">
-                    <div className="opacity-0 group-hover:opacity-100 transition-opacity p-2.5 rounded-full bg-[hsl(var(--pdf-red))] text-white shadow-lg">
-                      <FileDown className="h-4 w-4" />
-                    </div>
-                  </div>
-                </button>
+        {/* Featured Issue download banner removed — AD issue no longer offered as free download in the trade area. */}
 
-                {/* Text + CTA */}
-                <div className="flex-1 text-center md:text-left">
-                  <p className="font-body text-[10px] tracking-[0.25em] uppercase text-accent mb-2">Featured Issue</p>
-                  <h3 className="font-display text-lg md:text-xl text-foreground mb-2">
-                    {featuredDoc.title}
-                  </h3>
-                  <p className="font-body text-sm text-muted-foreground leading-relaxed mb-5 max-w-lg">
-                    A curated edition selected by Maison Affluency for our trade community — free to download.
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => void handleTrackedCatalogueDownload(`${featuredDoc.title} — Landing CTA`, "trade_landing_cta")}
-                    className="inline-flex items-center gap-2 px-6 py-2.5 bg-foreground text-background font-body text-xs uppercase tracking-[0.15em] rounded-full hover:bg-foreground/90 transition-colors"
-                  >
-                    <FileDown className="h-3.5 w-3.5" />
-                    Download Issue
-                  </button>
-                </div>
-              </motion.div>
-            </div>
-          </div>
-        )}
 
         {/* ─── Intro text block ─── */}
         <motion.div
