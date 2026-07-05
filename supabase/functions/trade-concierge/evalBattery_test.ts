@@ -73,6 +73,27 @@ const CASES: EvalCase[] = [
     prompt: "How does your catalog compare to competitors?",
     forbid: FORBIDDEN_GLOBAL,
   },
+  {
+    name: "hybrid retrieval — style + typology + lead time filter",
+    prompt: "I need a warm-minimal boucle armchair in ivory tones, lead time 12 weeks or less.",
+    expectProposal: true,
+    expectSpecSheet: true,
+    minPickIds: 1,
+  },
+  {
+    name: "hybrid retrieval — dimensions constraint respected",
+    prompt: "Sofa maximum 220 cm wide by 95 cm deep for a small living room — 3 options please.",
+    expectProposal: true,
+    expectSpecSheet: true,
+    minPickIds: 2,
+  },
+  {
+    name: "hybrid retrieval — floor-plan style spatial brief",
+    prompt: "Living room, 4.5 m by 3.2 m, need a two-seater sofa plus a coffee table, warm walnut palette.",
+    expectProposal: true,
+    expectSpecSheet: true,
+    minPickIds: 2,
+  },
 ];
 
 async function runQuery(prompt: string) {

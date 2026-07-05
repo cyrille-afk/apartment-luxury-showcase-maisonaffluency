@@ -1,68 +1,77 @@
-## Current state (already built, keep as-is)
+# Multimodal Concierge — Vector + SQL Hybrid Search
 
-- Row **locks** (🔒), **skips**, and **title rename** exist in `TearsheetProposalCard`.
-- Buttons already present: **Validate Changes (N)**, **Critique My Edits**, **Regenerate Unlocked**.
-- Existing behavior: all three send a prose prompt into chat; the model replies as plain text. `handleRegenerateUnlocked` replaces the whole card with a new proposal.
+Extends the trade concierge to accept mood boards, floor plans, product photos, and PDF tearsheets, extract structured metadata with a multimodal LLM, and retrieve products using **both** aesthetic similarity (pgvector) and strict structural filters (SQL), then output the spec-sheet block already built.
 
-## What's missing (this plan)
+## Flow
 
-1. Validation returns **prose only** — no traffic lights, no per-row verdict.
-2. Regeneration **overwrites** unlocked rows silently — no diff, no per-line accept, no "Your Edits vs AI Suggestions" view.
+```text
+Upload (image / PDF) ─┐
+Text prompt ──────────┤─► Gemini 2.5 Pro (vision)
+                      │      extracts JSON:
+                      │      { style, palette, materials,
+                      │        room_type, dims_cm, categories,
+                      │        designer_hints, budget }
+                      ▼
+        ┌─────────────────────────────┐
+        │  Hybrid retrieval           │
+        │  • pgvector cosine on       │
+        │    product embedding        │
+        │    (name+desc+materials+    │
+        │     designer+style tags)    │
+        │  • SQL WHERE on category,   │
+        │    dims fit, lead-time,     │
+        │    price band, in-stock     │
+        └─────────────┬───────────────┘
+                      ▼
+       Gemini formats reply +
+       compileSpecSheetBlock() footer
+                      ▼
+                 User output
+```
 
-## Deliverables
+## Database changes (one migration)
 
-### A. Structured Validation (traffic-light per row)
+1. `create extension if not exists vector;`
+2. Add `embedding vector(3072)` + `embedding_model text` + `embedding_updated_at timestamptz` to `trade_products`.
+3. HNSW index: `create index trade_products_embedding_idx on trade_products using hnsw (embedding vector_cosine_ops);`
+4. RPC `match_trade_products(query_embedding vector(3072), match_count int, filter jsonb)` — returns id, name, designer, similarity, applying optional SQL filters (category, max_width_cm, max_depth_cm, max_height_cm, max_lead_weeks, price_band) inside the function. `security definer`, `search_path = public`, granted to `authenticated` + `service_role`.
+5. Backfill job runs via a new edge function `embed-trade-products` (batched, idempotent on `embedding_updated_at`).
 
-- New edge tool `validate_tearsheet_edits` in `supabase/functions/trade-concierge/index.ts`.
-  - Input: `{ tearsheet_id, kept_ids[], skipped_ids[], locked_ids[], title_from?, title_to? }`.
-  - Output: `{ overall: "green"|"yellow"|"red", summary: string, per_row: [{ pick_id, status: "green"|"yellow"|"red", reason: string }], global_warnings: string[] }`.
-  - Grounded on the same catalog rows the original proposal used (brief coverage, palette clash, scale imbalance, budget posture).
-- New SSE event `event: validation` streamed alongside `event: proposal`.
-- Client: on **Validate Changes** click, call the tool and render results **inline in the card** as small pills next to each row + a header banner (overall + summary). Replaces today's chat-message prose fallback for this button only. Critique button remains prose.
+Model: `google/gemini-embedding-001` (3072-dim, default per Lovable AI embeddings guidance). Column sized to match; re-embed if we ever change model.
 
-### B. Cascading Re-align with diff UI
+## New edge functions
 
-- New edge tool `realign_unlocked_picks`.
-  - Input: `{ tearsheet_id, locked_ids[], excluded_ids[], unlocked_ids[], title }`.
-  - Output: `{ replacements: [{ old_pick_id, new_pick_id, reason }], additions: [{ new_pick_id, reason }], removals: [{ pick_id, reason }] }` — a **delta**, not a whole new list. Never touches locked or excluded ids.
-- New SSE event `event: realignment` carrying the delta + hydrated preview rows for any new pick_ids.
-- Client: replace the current "wholesale replace" flow with a **RealignmentDiffPanel** rendered inside the card:
-  - Two columns: **Your Edits** (locked + kept) vs **AI Suggested Re-alignments** (replacements/additions/removals with reasons).
-  - Per-row **Accept** / **Reject** buttons + **Accept All** at the top.
-  - Accepted deltas mutate the local proposal (swap old→new, add, remove). Locked rows are never in the delta.
-- Keep the "regenerate from scratch" option available as a secondary menu item.
+- **`embed-trade-products`** — service-role. Iterates `trade_products` where `embedding is null or updated_at > embedding_updated_at`, builds an embedding text (`name • designer • materials • primary_category • short description`), calls Lovable AI `/v1/embeddings`, upserts vector. Invocable manually and via nightly cron.
+- **`concierge-vision-extract`** — accepts `{ imageUrl | pdfBase64, kind: 'mood_board'|'floor_plan'|'product_photo'|'tearsheet' }`, calls Gemini 2.5 Pro with a schema-locked prompt per `kind`, returns structured JSON. Reused by concierge and future upload UIs.
 
-### C. Row-lock enforcement (server-side)
+## trade-concierge changes
 
-- Both new tools receive `locked_ids` and MUST NOT include any locked id in outputs. Add server assertion + one log line if violated (fail-closed: drop that entry, don't crash).
-- Add unit tests in `supabase/functions/trade-concierge/` for both tools' lock enforcement.
+- When the incoming message contains an attachment, first call `concierge-vision-extract` to get structured params.
+- Merge extracted params with the user's text prompt into a **retrieval query**: text → embedding via `/v1/embeddings`; structural params → `filter` jsonb.
+- Call `match_trade_products` (top 12), then hydrate with `designer`, `lead_time_weeks`, `sku`, dims, materials.
+- Feed the hydrated list into the existing answer prompt; `compileSpecSheetBlock()` (already shipped) renders the footer.
+- Floor-plan branch uses `strong` tier (Gemini 2.5 Pro) with a spatial-reasoning prompt returning zones + max dims per zone; those become per-zone filters.
 
-## Files
+## Frontend
 
-**New**
-- `src/components/trade/concierge/RealignmentDiffPanel.tsx` — split-view diff + accept controls.
-- `src/components/trade/concierge/ValidationSummary.tsx` — banner + per-row pill renderer.
-- `supabase/functions/trade-concierge/_realign.ts` — tool schema, catalog query, lock-guard, unit test target.
-- `supabase/functions/trade-concierge/_realign_test.ts` — lock-enforcement tests.
-- `supabase/functions/trade-concierge/_validate.ts` + `_validate_test.ts`.
+- Trade concierge input gets an existing-style attach button accepting images (jpg/png/webp ≤10 MB) and PDFs (≤10 MB). Uploads go to a private `concierge-uploads` bucket; a 60s signed URL is passed to the edge function. No changes to public views.
 
-**Edited**
-- `src/components/trade/concierge/TearsheetProposalCard.tsx` — wire new panels; keep locks/skips/rename UI intact; rewire Validate + Regenerate Unlocked buttons.
-- `src/lib/tradeConciergeStream.ts` — add `onValidation`, `onRealignment` callbacks + SSE frame parsing.
-- `src/components/trade/AIConcierge.tsx` — plumb new callbacks to the active card.
-- `supabase/functions/trade-concierge/index.ts` — register tools, emit new SSE frames, plumb into tool loop.
+## Rollout
 
-**Untouched**
-- Existing critique/seed extraction, lock UI, chat transport, discovery gate (already fixed).
+1. Migration (pgvector + column + RPC).
+2. Deploy `embed-trade-products`; run once to backfill.
+3. Deploy `concierge-vision-extract`.
+4. Wire trade-concierge to hybrid retrieval + vision extract.
+5. Add attach UI in trade concierge.
+6. Extend eval battery with 3 vision cases (mood board, floor plan, tearsheet) and 3 hybrid-search cases (style-only, dims-only, style+dims+lead-time).
 
-## Out of scope
+## Technical notes
 
-- Persisting validation history to DB (in-memory per card session for now).
-- Locks that survive tearsheet approval (locks live in the draft card only).
-- Auto-triggering validation on every edit (stays manual — "Validate Changes (N)" button).
+- Hybrid ranking: rank = `0.7 * cosine_sim + 0.3 * structural_fit_score` (structural_fit_score = fraction of active filters satisfied); computed in the RPC so pagination is stable.
+- Embedding text stays under 2048 tokens (Gemini embedding-001 cap); chunk long descriptions.
+- Re-embed trigger on `AFTER UPDATE OF name, materials, primary_category, description ON trade_products` sets `embedding = null` to force refresh on next cron run.
+- Vision extraction JSON is validated with Zod; failures degrade to text-only retrieval, never crash the reply.
+- Costs: embedding backfill is one-time (~4k products); per-request adds 1 embedding + optionally 1 vision call. Both go through Lovable AI Gateway, no new secrets.
+- Respects existing rules: English only, no French-market assumptions, trade-only pricing paths untouched, public views unaffected.
 
-## Verification
-
-1. Type-check + build.
-2. New edge-function unit tests pass (lock enforcement).
-3. Manual: skip 1, lock 2, rename title → click Validate → see per-row pills + banner. Click Regenerate Unlocked → see diff panel with locked pieces on left, deltas on right → Accept per-line → card updates only those rows → locked rows are provably identical.
+Approve to proceed with the migration first.
