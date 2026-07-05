@@ -263,7 +263,7 @@ export default function BillingModeCard({
         {!isEditable && <Badge variant="outline">Locked — submitted</Badge>}
       </div>
 
-      <div className="grid md:grid-cols-2 gap-3">
+      <div className="grid md:grid-cols-3 gap-3">
         {/* AGENT COMMISSION */}
         <button
           type="button"
