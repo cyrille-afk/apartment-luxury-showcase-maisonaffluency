@@ -191,7 +191,7 @@ export const QuoteExtrasEditor = ({ quoteId, currency, isReadOnly = false, onTot
         <div className="space-y-1.5 mb-2">
           {extras.map((e) => {
             const rowCcy = (e.currency || currency).toUpperCase();
-            const displayCents = toDisplay(e.amount_cents || 0, rowCcy);
+            const displayCents = toDisplay(e.amount_cents || 0, rowCcy).cents;
             const showConversion = rowCcy !== currency.toUpperCase();
             return (
               <div key={e.id} className="flex items-center gap-2">
