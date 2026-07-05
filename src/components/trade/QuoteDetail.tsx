@@ -1298,7 +1298,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
           : wood?.image_url
             ? [{ name: wood.name, imageUrl: wood.image_url }]
             : []
-        ).map((swatch) => ({ name: swatch.name, imageUrl: swatch.image_url })),
+        ).map((swatch: any) => ({ name: swatch.name, imageUrl: swatch.image_url || swatch.imageUrl })),
         fabricSwatchUrl: fabric?.image_url ?? null,
         shipOriginCountry: toIsoCountry(item.ship_origin_country ?? product?.origin ?? null, "FR"),
         shipMode: item.ship_mode || null,
