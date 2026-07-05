@@ -1,13 +1,10 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, ChevronDown, Quote, Share2, Check, FileDown } from "lucide-react";
+import { ArrowLeft, ChevronDown, Quote, Share2, Check } from "lucide-react";
 import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { cloudinaryUrl } from "@/lib/cloudinary";
 import { withOgCacheBust, shareOnWhatsApp } from "@/lib/whatsapp-share";
-import { trackDownload } from "@/lib/trackDownload";
-import { trackMagazine } from "@/lib/analytics";
-import { supabase } from "@/integrations/supabase/client";
 import tradeClientAdvisorImg from "@/assets/trade-client-advisor.jpg";
 import projectFoldersImg from "@/assets/benefit-project-folders.jpg";
 const studioBeforeImgFallback = "https://res.cloudinary.com/dif1oamtj/image/upload/v1773976063/Screen_Shot_2026-03-20_at_11.05.23_AM_fo0aaz.png";
@@ -15,7 +12,6 @@ const studioAfterImgFallback = "https://res.cloudinary.com/dif1oamtj/image/uploa
 import { loadHeroOverrides, getHeroCacheEntry } from "@/components/trade/SectionHero";
 import TradeRegistrationForm from "@/components/trade/TradeRegistrationForm";
 import ShippingTermsExplainer from "@/components/trade/ShippingTermsExplainer";
-import { useFeaturedPublicDocument } from "@/hooks/useFeaturedPublicDocument";
 const TRADE_PROGRAM_SHARE_URL = withOgCacheBust("https://www.maisonaffluency.com/trade-program-og.html");
 
 // Browser country inference moved to src/lib/inferCountry.ts and is now consumed
@@ -126,44 +122,9 @@ const TradeLanding = () => {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   const [faqExpanded, setFaqExpanded] = useState(false);
   const formRef = useRef<HTMLDivElement>(null);
-  const { doc: featuredDoc } = useFeaturedPublicDocument();
+  // Featured Issue (AD) free-download removed from the trade area.
 
-  const handleTrackedCatalogueDownload = useCallback(async (label: string, source: string) => {
-    if (!featuredDoc) return;
-    // Tie this CTA click to the same document_id used by the nav badge so the
-    // funnel (impression → click → download) can be analysed end-to-end.
-    trackMagazine.badgeClick(featuredDoc.id, featuredDoc.title, source);
-    const { data: { session } } = await supabase.auth.getSession();
 
-    if (session?.user) {
-      trackDownload(featuredDoc.id, label);
-    } else {
-      // For guests, don't send browser-inferred country — let the edge function
-      // resolve it from CDN geo headers (cf-ipcountry) for accuracy.
-      void supabase.functions.invoke("log-public-download", {
-        body: {
-          documentId: featuredDoc.id,
-          label,
-          source: "trade-landing",
-        },
-      });
-    }
-
-    try {
-      const response = await fetch(featuredDoc.file_url);
-      const blob = await response.blob();
-      const blobUrl = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = blobUrl;
-      link.download = `${featuredDoc.title}.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      URL.revokeObjectURL(blobUrl);
-    } catch {
-      window.open(featuredDoc.file_url, "_blank", "noopener,noreferrer");
-    }
-  }, [featuredDoc]);
   const [searchParams] = useSearchParams();
   const prefillEmail = searchParams.get("email") || "";
   const regionParam = (searchParams.get("region") || "").toLowerCase();
