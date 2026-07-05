@@ -34,7 +34,7 @@ const commerceGroup: AdminCard[] = [
   { title: "Quote Management", description: "Review and respond to submitted trade quotes", url: "/trade/quotes-admin", icon: DollarSign },
   { title: "Order Timeline", description: "Kanban view of orders from deposit to delivery", url: "/trade/order-timeline", icon: CalendarClock },
   { title: "Sample Requests", description: "Track sample shipments and returns", url: "/trade/admin", icon: Package },
-  { title: "Trade Applications", description: "Review and approve new trade registrations", url: "/trade/admin", icon: Shield },
+  { title: "Trade Applications & Price On Request Submissions", description: "Review and approve new trade registrations, and reply to Price-on-Request inquiries", url: "/trade/admin", icon: Shield },
   { title: "Registered Users", description: "View all sign-ups, roles, and application status", url: "/trade/registered-users", icon: Users },
   { title: "Custom Requests", description: "Concierge inbox — reply to bespoke requests inline", url: "/trade/custom-requests", icon: Inbox },
   { title: "Client Directory", description: "Studio address book — companies, billing addresses, staff contacts, and attached documents (NDA, T&Cs, counterparty forms)", url: "/trade/clients", icon: Users },
