@@ -5,7 +5,6 @@ import { Link, useLocation, useNavigate, useSearchParams } from "react-router-do
 import { Helmet } from "react-helmet-async";
 import { cloudinaryUrl } from "@/lib/cloudinary";
 import { withOgCacheBust, shareOnWhatsApp } from "@/lib/whatsapp-share";
-import { trackDownload } from "@/lib/trackDownload";
 import { trackMagazine } from "@/lib/analytics";
 import { supabase } from "@/integrations/supabase/client";
 import tradeClientAdvisorImg from "@/assets/trade-client-advisor.jpg";
@@ -15,7 +14,6 @@ const studioAfterImgFallback = "https://res.cloudinary.com/dif1oamtj/image/uploa
 import { loadHeroOverrides, getHeroCacheEntry } from "@/components/trade/SectionHero";
 import TradeRegistrationForm from "@/components/trade/TradeRegistrationForm";
 import ShippingTermsExplainer from "@/components/trade/ShippingTermsExplainer";
-import { useFeaturedPublicDocument } from "@/hooks/useFeaturedPublicDocument";
 const TRADE_PROGRAM_SHARE_URL = withOgCacheBust("https://www.maisonaffluency.com/trade-program-og.html");
 
 // Browser country inference moved to src/lib/inferCountry.ts and is now consumed
