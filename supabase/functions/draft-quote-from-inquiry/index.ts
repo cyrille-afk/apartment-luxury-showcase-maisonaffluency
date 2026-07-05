@@ -65,7 +65,7 @@ serve(async (req) => {
     if (inquiry.product_id) {
       const { data } = await supabase
         .from("trade_products")
-        .select("id, name, retail_price_cents, trade_price_cents, currency")
+        .select("id, rrp_price_cents, trade_price_cents, currency")
         .eq("id", inquiry.product_id)
         .maybeSingle();
       product = data;
