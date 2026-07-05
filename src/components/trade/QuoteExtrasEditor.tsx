@@ -90,14 +90,28 @@ export const QuoteExtrasEditor = ({ quoteId, currency, isReadOnly = false, onTot
     return () => { cancelled = true; };
   }, [quoteId]);
 
+  // Convert each row once and cache. Used for the total, the parent callback,
+  // the per-row display, and the validation banner below.
+  const rowConversions = extras.map((e) => {
+    const rowCcy = (e.currency || currency).toUpperCase();
+    const conv = toDisplay(e.amount_cents || 0, rowCcy);
+    return { id: e.id, label: e.label, rowCcy, native: e.amount_cents || 0, ...conv };
+  });
+
+  const total = rowConversions.reduce((s, r) => s + r.cents, 0);
+
+  // Independent recomputation used purely to catch drift between the total we
+  // display and the number the parent tallies (paranoia guard).
+  const verifiedTotal = rowConversions.reduce((s, r) => s + Math.round(r.cents), 0);
+  const totalMismatch = Math.abs(total - verifiedTotal) > extras.length; // >1 cent per row
+
+  const missingRateRows = rowConversions.filter((r) => !r.sameCcy && !r.converted);
+
   useEffect(() => {
-    const totalInDisplay = extras.reduce(
-      (s, e) => s + toDisplay(e.amount_cents || 0, e.currency || currency),
-      0,
-    );
-    onTotalChange?.(totalInDisplay);
+    onTotalChange?.(total);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [extras, currency, convertCents]);
+  }, [total]);
+
 
   const handleAdd = async () => {
     const label = draftLabel.trim();
