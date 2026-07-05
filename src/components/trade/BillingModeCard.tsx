@@ -30,6 +30,7 @@ type Props = {
   subtotalCents: number;
   currency: string;
   isEditable: boolean; // false once order leaves draft/sent (pay/confirm phase)
+  onBillingModeChange?: (billing: QuoteBilling) => void;
 };
 
 const NET_BUY_COUNTRIES = new Set(["US", "CA", "MX"]);
@@ -93,6 +94,7 @@ export default function BillingModeCard({
   subtotalCents,
   currency,
   isEditable,
+  onBillingModeChange,
 }: Props) {
   const { currentStudio } = useStudio();
   const { toast } = useToast();
@@ -221,7 +223,18 @@ export default function BillingModeCard({
       toast({ title: "Could not save billing mode", description: error.message, variant: "destructive" });
       return;
     }
-    setBilling(next);
+    const persistedBilling: QuoteBilling = {
+      ...next,
+      payer_type: updates.payer_type,
+      commission_pct: updates.commission_pct,
+      net_discount_pct: updates.net_discount_pct,
+      end_client_billing: updates.end_client_billing,
+      designer_payout_account_id: updates.designer_payout_account_id,
+      resale_certificate_id: updates.resale_certificate_id,
+      managed_freight_quote_id: updates.managed_freight_quote_id,
+    };
+    setBilling(persistedBilling);
+    onBillingModeChange?.(persistedBilling);
   };
 
   const handleModeChange = async (mode: BillingMode) => {
