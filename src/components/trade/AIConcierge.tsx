@@ -1,6 +1,28 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
-import { X, Send, Loader2, Sparkles, Minus, GripHorizontal, RotateCcw, Maximize2, Minimize2, Palette, Check, Languages, Pencil, Paperclip, FileText, Download, FileDown, Copy, ShieldCheck } from "lucide-react";
+import { X, Send, Loader2, Sparkles, Minus, GripHorizontal, RotateCcw, Maximize2, Minimize2, Palette, Check, Languages, Pencil, Paperclip, FileText, Download, FileDown, Copy, ShieldCheck, ListChecks } from "lucide-react";
+
+const SPEC_BRIEF_TEMPLATE = `Block 1 — Spatial & Project Context
+PROJECT PROFILE: [typology, city/area]
+ZONE: [room, ceiling height]
+ENVIRONMENT: [humidity, sun exposure, glazing]
+TIMELINE: Handover in [N] weeks (max lead time [N] weeks).
+
+Block 2 — Hard Technical Parameters
+TYPOLOGY: [e.g. sectional + accent chairs]
+MAX FOOTPRINT: length ≤ [mm], depth ≤ [mm]
+CLEARANCE: min [mm] perimeter pathway
+MATERIALS: [performance criteria, exclusions]
+
+Block 3 — Aesthetic & Visual DNA
+VIBE: [e.g. Japandi-Luxe, Italian Minimalism]
+REFERENCES: [Minotti / B&B Italia / Edra / …]
+PALETTE: [materials + finishes]
+
+Block 4 — Output Execution Protocol
+Return 3 layout configurations. For every piece, output a strict Architectural Specification Schedule:
+Product Name · Designer · Exact mm Dimensions · Verified Finish Options · Lead Time · Cloudinary image URL · Supabase CAD/BIM URL.
+No conversational intro.`;
 import { useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { streamConcierge, type ChatMessage, type ChatContentPart, type TearsheetProposal, type QuoteProposal, type FfeProposal, type VisualizationBriefProposal, type ConciergeProposal, type AppliedConstraintsEvent } from "@/lib/tradeConciergeStream";
