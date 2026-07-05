@@ -1268,17 +1268,16 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
     }
 
     // Project-scale auto-detection — whenever the user's message reads as a
-    // whole-home / multi-room project brief AND the Brief Builder hasn't been
-    // auto-opened yet AND no tearsheet has been proposed, skip the slow
-    // one-question-at-a-time intake and immediately open the Architectural
-    // Brief Builder with the detected typology/city prefilled. Not gated to
-    // turn 1 — the signal often arrives on turn 2 or 3 (e.g. "Singapore" →
-    // "I'm looking to furnish my GCB").
-    const briefAlreadyAutoOpened = (() => {
-      try { return sessionStorage.getItem("concierge:briefAutoOpened") === "1"; } catch { return false; }
-    })();
+    // whole-home / multi-room project brief AND the Brief Builder isn't
+    // already open AND no tearsheet has been proposed yet, skip the slow
+    // one-question-at-a-time intake and open the Architectural Brief Builder
+    // with the detected typology/city prefilled. Not gated to turn 1, and
+    // deliberately not gated by a persistent sessionStorage flag: if the user
+    // closes the builder and later types another project-scale message, it
+    // should re-open.
     const hasProposal = timeline.some((t) => t.kind === "proposal" || t.kind === "quote_proposal" || t.kind === "ffe_proposal");
-    if (!briefAlreadyAutoOpened && !hasProposal && !briefBuilderOpen && sendingAttachments.length === 0) {
+    if (!hasProposal && !briefBuilderOpen && sendingAttachments.length === 0) {
+
 
       const scale = detectProjectScale(text);
       if (scale) {
@@ -1336,7 +1335,7 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
 
         setInput(prefilled);
         setBriefBuilderOpen(true);
-        try { sessionStorage.setItem("concierge:briefAutoOpened", "1"); } catch {}
+        try { sessionStorage.removeItem("concierge:briefAutoOpened"); } catch {}
 
 
         const noted = [
@@ -2910,8 +2909,28 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
               >
                 <Palette className="h-4 w-4" />
               </button>
-              {/* 4-block spec-brief insert + edit buttons removed —
-                  detection auto-opens the Brief Builder on project-scale intake. */}
+              {!briefBuilderOpen && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!/Block\s+1\s*—/i.test(input)) {
+                      const current = input.trim();
+                      const next = current
+                        ? `${input.replace(/\s+$/, "")}\n\n${SPEC_BRIEF_TEMPLATE}`
+                        : SPEC_BRIEF_TEMPLATE;
+                      setInput(next);
+                    }
+                    setBriefBuilderOpen(true);
+                  }}
+                  disabled={streaming}
+                  className="shrink-0 rounded-xl border border-border bg-muted/40 p-2 text-muted-foreground hover:text-foreground hover:bg-muted disabled:opacity-40 transition-colors"
+                  aria-label="Open Architectural Brief Builder"
+                  title="Open Architectural Brief Builder"
+                >
+                  <LayoutList className="h-4 w-4" />
+                </button>
+              )}
+
 
               <button
                 type="button"
