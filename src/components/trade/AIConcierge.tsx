@@ -1895,7 +1895,7 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
             onPointerCancel={onDragEnd}
             onDoubleClick={() => setMinimized((m) => !m)}
             className={cn(
-              "flex flex-col gap-1.5 px-4 py-3 border-b cursor-grab active:cursor-grabbing select-none touch-none",
+              "flex flex-col gap-1.5 px-4 py-3 border-b cursor-grab active:cursor-grabbing select-none touch-none shrink-0",
               modalMode
                 ? "bg-jade text-cream border-jade [&_.text-muted-foreground]:text-cream/70 [&_.text-accent]:text-cream [&_button:hover]:bg-cream/10 [&_button:hover]:text-cream"
                 : "border-border"
@@ -2295,7 +2295,7 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
               </div>
             </div>
             {!minimized && (
-              <div className="flex items-center gap-2 pl-6">
+              <div className="flex items-center gap-2 flex-wrap pl-6">
                 <span
                   className="inline-flex items-center gap-1 rounded-full border border-border bg-muted/60 px-2 py-0.5 font-body text-[10px] uppercase tracking-widest text-muted-foreground"
                   title={`Current workflow stage: ${stage}`}
@@ -2327,7 +2327,7 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
 
           {!minimized && (<>
 
-          <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4 space-y-5">
+          <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto px-4 py-4 space-y-5">
             {timeline.map((item, i) => {
               if (item.kind === "msg") {
                 const atts = item.role === "user" ? item.attachments : undefined;
@@ -2710,7 +2710,8 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
             )}
           </div>
 
-          <div className="border-t border-border p-3">
+          <div className={cn("border-t border-border p-3 shrink-0 min-h-0", fullscreen && "flex flex-col gap-3 max-h-[45vh] overflow-hidden")}>
+            <div className={cn(fullscreen && "flex-1 min-h-0 overflow-y-auto")}>
             {/* Correlation-id chip — copy-to-clipboard trace id for the
                 current concierge turn. Matches the server's SSE `event: request_id`
                 and every `concierge_inspector` log line for this run. */}
@@ -2925,7 +2926,8 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
                 </div>
               );
             })()}
-            <div className="flex items-end gap-2">
+            </div>
+            <div className={cn("flex items-end gap-2", fullscreen && "shrink-0")}>
               <input
                 ref={fileInputRef}
                 type="file"
@@ -3056,7 +3058,7 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
               </button>
 
             </div>
-            <p className="font-body text-[10px] text-muted-foreground mt-1.5 text-center">
+            <p className={cn("font-body text-[10px] text-muted-foreground mt-1.5 text-center", fullscreen && "shrink-0")}>
               {copy.footer}
             </p>
           </div>
