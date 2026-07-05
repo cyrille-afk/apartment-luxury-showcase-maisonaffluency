@@ -268,7 +268,7 @@ export function SpecScheduleBlock({ zone, markdown }: Props) {
           </button>
           <button
             type="button"
-            onClick={onOpenPreview}
+            onClick={() => setCoverOpen(true)}
             disabled={building}
             className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background hover:bg-accent/10 hover:border-accent/40 px-2.5 py-1 text-[11px] font-body text-foreground transition disabled:opacity-60"
             aria-label="Preview PDF before download"
@@ -276,6 +276,7 @@ export function SpecScheduleBlock({ zone, markdown }: Props) {
             <Eye className="h-3 w-3" />
             {building ? "Building…" : "Preview PDF"}
           </button>
+
         </div>
       </div>
 
