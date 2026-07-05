@@ -134,7 +134,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
   const [activeMegaCat, setActiveMegaCat] = useState<string | null>(null);
   const [activeMegaSub, setActiveMegaSub] = useState<string | null>(null);
   const megaMenuRef = useRef<HTMLDivElement>(null);
-  const { doc: featuredDoc } = useFeaturedPublicDocument();
+  // featuredDoc removed — AD free-download flow discontinued.
 
   const resetMobilePanels = () => {
     setCategoryPanelOpen(false);
