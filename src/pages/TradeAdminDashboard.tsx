@@ -156,7 +156,7 @@ export default function TradeAdminDashboard() {
   // Assign badges dynamically
   const getBadge = (title: string) => {
     if (title === "Quote Management") return submittedCount;
-    if (title === "Trade Applications") return pendingApps;
+    if (title === "Trade Applications & Price On Request Submissions") return pendingApps;
     if (title === "Instagram Audit") return missingIg;
     if (title === "Custom Requests") return openCustomRequests;
     return 0;
