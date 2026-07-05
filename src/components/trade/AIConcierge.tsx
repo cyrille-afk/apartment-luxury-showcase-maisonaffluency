@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { X, Send, Loader2, Sparkles, Minus, GripHorizontal, RotateCcw, Maximize2, Minimize2, Palette, Check, Languages, Pencil, Paperclip, FileText, Download, FileDown, Copy, ShieldCheck, ListChecks, Eye, LayoutList } from "lucide-react";
 import { BriefBuilder } from "@/components/trade/concierge/BriefBuilder";
