@@ -1869,9 +1869,11 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
           style={
             modalMode
               ? { width: PANEL_W }
-              : pos
-                ? { top: pos.y, left: pos.x, right: "auto", bottom: "auto", width: PANEL_W }
-                : { width: PANEL_W }
+              : fullscreen
+                ? { width: PANEL_W }
+                : pos
+                  ? { top: pos.y, left: pos.x, right: "auto", bottom: "auto", width: PANEL_W }
+                  : { width: PANEL_W }
           }
           className={cn(
             "fixed z-[10000] max-w-[calc(100vw-2rem)] flex flex-col rounded-2xl border shadow-2xl print:hidden overflow-hidden",
@@ -1881,8 +1883,9 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
                   welcomeClosing ? "animate-scale-out" : "animate-scale-in"
                 )
               : "bg-background border-border animate-fade-in",
-            !modalMode && !pos && "bottom-20 md:bottom-6 right-4",
-            minimized ? "h-auto" : (expanded ? "h-[760px] max-h-[calc(100vh-4rem)]" : "h-[560px] max-h-[calc(100vh-6rem)]")
+            !modalMode && fullscreen && "left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2",
+            !modalMode && !fullscreen && !pos && "bottom-20 md:bottom-6 right-4",
+            minimized ? "h-auto" : (fullscreen ? "h-[calc(100vh-2rem)]" : (expanded ? "h-[760px] max-h-[calc(100vh-4rem)]" : "h-[560px] max-h-[calc(100vh-6rem)]"))
           )}
         >
           <div
