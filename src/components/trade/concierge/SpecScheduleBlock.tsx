@@ -484,6 +484,61 @@ export function SpecScheduleBlock({ zone, markdown }: Props) {
 
             <div className="space-y-1">
               <label className="text-[10px] uppercase tracking-[0.14em] font-body text-muted-foreground">
+                Designer logo (optional)
+              </label>
+              <div className="flex items-center gap-2">
+                {designerLogo ? (
+                  <img
+                    src={designerLogo}
+                    alt="Designer logo preview"
+                    className="h-10 w-auto max-w-[96px] rounded border border-border bg-background object-contain p-1"
+                  />
+                ) : (
+                  <div className="h-10 w-10 rounded border border-dashed border-border/70 bg-background" aria-hidden />
+                )}
+                <label
+                  className={cn(
+                    "inline-flex items-center rounded-full border border-border bg-background hover:bg-accent/10 hover:border-accent/40 px-3 py-1 text-[11px] font-body text-foreground transition cursor-pointer",
+                    !includeCover && "opacity-50 pointer-events-none",
+                  )}
+                >
+                  {designerLogo ? "Replace" : "Upload"}
+                  <input
+                    type="file"
+                    accept="image/png,image/jpeg,image/webp,image/svg+xml"
+                    className="hidden"
+                    onChange={(e) => {
+                      const f = e.target.files?.[0] ?? null;
+                      onLogoFile(f);
+                      e.target.value = "";
+                    }}
+                    disabled={!includeCover}
+                  />
+                </label>
+                {designerLogo && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setDesignerLogo(null);
+                      setLogoError(null);
+                    }}
+                    disabled={!includeCover}
+                    className="inline-flex items-center rounded-full border border-border bg-background hover:bg-destructive/10 hover:border-destructive/40 px-3 py-1 text-[11px] font-body text-muted-foreground hover:text-destructive transition disabled:opacity-50"
+                  >
+                    Remove
+                  </button>
+                )}
+              </div>
+              {logoError ? (
+                <p className="text-[11px] font-body text-destructive">{logoError}</p>
+              ) : (
+                <p className="text-[10px] font-body text-muted-foreground">
+                  PNG, JPG, WEBP or SVG · max 500 KB · shown centered above the cover title.
+                </p>
+              )}
+
+            <div className="space-y-1">
+              <label className="text-[10px] uppercase tracking-[0.14em] font-body text-muted-foreground">
                 Date
               </label>
               <input
