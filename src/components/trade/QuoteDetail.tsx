@@ -421,6 +421,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   // quote lands (or is switched) into that mode, force the toggle off so the
   // subtotal, extras, landed-cost panels and PDF totals all show full retail.
   const isMsrpOnly = billingMeta?.billing_mode === "msrp_only";
+  const discountApplies = !isMsrpOnly && tradeDiscount;
   useEffect(() => {
     if (isMsrpOnly && tradeDiscount) setTradeDiscount(false);
   }, [isMsrpOnly, tradeDiscount]);
@@ -1321,6 +1322,8 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     const converted = convertCents(rawPrice, itemPriceCurrency(item, currency), currency) ?? 0;
     return sum + converted * item.quantity;
   }, 0);
+  const tradeDiscountCents = discountApplies && subtotalCents > 0 ? Math.round(subtotalCents * tradeDiscountPct) : 0;
+  const goodsAfterDiscountCents = subtotalCents - tradeDiscountCents;
 
   const buildPdfArgs = async () => {
     const lines: QuotePdfLine[] = items.map((item) => {
@@ -1483,7 +1486,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
       lines,
       subtotalCents,
       tradeDiscountPct,
-      tradeDiscountApplied: tradeDiscount,
+      tradeDiscountApplied: discountApplies,
       tierLabel,
       tierBreakdown: tierConfig
         ? (["silver", "gold", "platinum"] as const).map((t) => ({
@@ -1502,7 +1505,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
         const liveFreightCents = (fxQuoteEur && livePerLine.totalShippingEurCents > 0)
           ? Math.round(livePerLine.totalShippingEurCents / fxQuoteEur)
           : 0;
-        const cifBase = insuredBaseCents + liveFreightCents;
+        const cifBase = goodsAfterDiscountCents + liveFreightCents;
         return cifBase > 0 ? Math.round(cifBase * insuranceRateBps / 10000) : 0;
       })(),
       depositPct: computeWeightedDepositPct(
@@ -1789,10 +1792,8 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     if (error) toast({ title: "Save failed", description: error.message, variant: "destructive" });
   };
 
-  /** Insured goods base: subtotal − trade discount (used by GBP/HK landed-cost panels). */
-  const insuredBaseCents = tradeDiscount && subtotalCents > 0
-    ? subtotalCents - Math.round(subtotalCents * tradeDiscountPct)
-    : subtotalCents;
+  /** Insured goods base: subtotal minus any actually-applicable trade discount. */
+  const insuredBaseCents = goodsAfterDiscountCents;
 
   /**
    * Per-line shipping: groups quote lines by (origin, mode), runs the
