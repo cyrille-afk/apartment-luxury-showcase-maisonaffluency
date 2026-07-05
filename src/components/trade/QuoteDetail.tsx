@@ -82,7 +82,7 @@ interface QuoteItemWithProduct {
   /** Enriched at load time from designer_curator_picks (limited-edition / edition note). */
   edition?: string | null;
   /** Resolved from the saved variant label so stale swatch IDs do not override the chosen finish. */
-  variant_swatches?: { name: string; image_url: string }[];
+  variant_swatches?: { name: string; image_url: string; fabric_id?: string | null }[];
 }
 
 interface QuoteDetailProps {
@@ -563,12 +563,12 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
             // Bronze Medal 0922") that share a generic axis token ("Bronze")
             // with sibling swatches — label matching would drag those siblings
             // in as false positives.
-            const explicit: { name: string; image_url: string }[] = [];
+            const explicit: { name: string; image_url: string; fabric_id?: string | null }[] = [];
             const pushExplicit = (id: string | null | undefined) => {
               if (!id) return;
               const hit = pickSwatches.find((s) => s.fabric_id === id);
               if (hit && hit.image_url && !explicit.some((e) => e.image_url === hit.image_url)) {
-                explicit.push({ name: hit.name, image_url: hit.image_url });
+                explicit.push({ name: hit.name, image_url: hit.image_url, fabric_id: hit.fabric_id ?? id });
               }
             };
             pushExplicit((item as any).wood_fabric_id);
@@ -577,7 +577,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
             const swatches = explicit.length > 0
               ? explicit
               : findQuoteFinishSwatches(item.variant_label, pickSwatches)
-                  .map((swatch) => ({ name: swatch.name, image_url: swatch.image_url || "" }))
+                  .map((swatch) => ({ name: swatch.name, image_url: swatch.image_url || "", fabric_id: swatch.fabric_id ?? swatch.id ?? null }))
                   .filter((swatch) => swatch.image_url);
             if (swatches.length === 0) return item;
             const first = swatches[0];
@@ -4175,6 +4175,53 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
           })()}
         </DialogContent>
       </Dialog>
+
+      {/* Hidden debug panel — append ?debug=1 to the URL to reveal.
+          Lists the exact swatch IDs resolved for each PDF line so we can
+          audit the finish-resolution pipeline without opening devtools. */}
+      {typeof window !== "undefined" && new URLSearchParams(window.location.search).get("debug") === "1" && (
+        <details className="mt-8 print:hidden border border-dashed border-border rounded-md bg-muted/30" open>
+          <summary className="cursor-pointer px-3 py-2 font-body text-[11px] uppercase tracking-wider text-muted-foreground">
+            Debug · resolved swatch IDs (PDF pipeline)
+          </summary>
+          <div className="p-3 space-y-3 font-mono text-[10px] leading-relaxed text-foreground/80 overflow-x-auto">
+            {items.length === 0 && <div className="text-muted-foreground">No items on this quote.</div>}
+            {items.map((item, idx) => {
+              const product = item.trade_products;
+              const variantSwatches = ((item as any).variant_swatches || []) as Array<{ name: string; image_url: string; fabric_id?: string | null }>;
+              const wood: any = (item as any).wood_fabric;
+              const fabric: any = (item as any).fabric;
+              const woodLabel = resolveWoodFinishLabel(wood, item.variant_label, variantSwatches);
+              return (
+                <div key={item.id || idx} className="border-l-2 border-border pl-2">
+                  <div className="text-foreground">
+                    <span className="text-muted-foreground">line {idx + 1}:</span> {product?.brand_name || "—"} — {product?.product_name || "—"}
+                  </div>
+                  <div><span className="text-muted-foreground">item.id:</span> {item.id || "(unsaved)"}</div>
+                  <div><span className="text-muted-foreground">variant_label:</span> {item.variant_label || "∅"}</div>
+                  <div><span className="text-muted-foreground">fabric_id:</span> {(item as any).fabric_id || "∅"} {fabric?.name ? `→ ${fabric.name}` : ""}</div>
+                  <div><span className="text-muted-foreground">wood_fabric_id:</span> {(item as any).wood_fabric_id || "∅"} {wood?.name ? `→ ${wood.name}` : ""}</div>
+                  <div><span className="text-muted-foreground">variant_swatches ({variantSwatches.length}):</span></div>
+                  {variantSwatches.length === 0 ? (
+                    <div className="pl-3 text-muted-foreground">∅</div>
+                  ) : (
+                    <ul className="pl-3">
+                      {variantSwatches.map((s, i) => (
+                        <li key={i}>
+                          [{i}] id={s.fabric_id || "∅"} · name={s.name || "∅"}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  <div>
+                    <span className="text-muted-foreground">→ PDF woodFinishLabel:</span> {woodLabel ?? <span className="text-emerald-600">null (suppressed)</span>}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </details>
+      )}
     </div>
   );
 };
