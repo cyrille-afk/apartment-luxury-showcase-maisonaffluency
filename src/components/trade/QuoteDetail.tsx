@@ -3357,6 +3357,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                 currency={currency}
                 isReadOnly={isReadOnly}
                 onTotalChange={setExtrasTotalCents}
+                convertCents={convertCents}
               />
 
               {/* Totals */}
