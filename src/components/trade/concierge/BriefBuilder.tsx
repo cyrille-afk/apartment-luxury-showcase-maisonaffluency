@@ -316,7 +316,7 @@ export function BriefBuilder({
       <div className="space-y-4">
         <section>
           <div className="font-heading text-[12px] font-semibold text-accent mb-2">
-            {BLOCK_LABELS.block1}
+            {UI_BLOCK_LABELS.block1}
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
             <Field
