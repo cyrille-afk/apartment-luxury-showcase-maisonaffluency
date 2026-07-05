@@ -18,10 +18,11 @@ import {
   User,
   ExternalLink,
   Truck,
+  Tag,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
-type BillingMode = "agent_commission" | "net_buy";
+type BillingMode = "agent_commission" | "net_buy" | "msrp_only";
 
 type Props = {
   quoteId: string;
@@ -205,7 +206,10 @@ export default function BillingModeCard({
       payer_type: next.billing_mode === "net_buy" ? "designer_firm" : "end_client",
       commission_pct: next.billing_mode === "agent_commission" ? tierPct : null,
       net_discount_pct: next.billing_mode === "net_buy" ? tierPct : null,
-      end_client_billing: next.billing_mode === "agent_commission" ? next.end_client_billing : null,
+      end_client_billing:
+        next.billing_mode === "agent_commission" || next.billing_mode === "msrp_only"
+          ? next.end_client_billing
+          : null,
       designer_payout_account_id:
         next.billing_mode === "agent_commission" ? next.designer_payout_account_id : null,
       resale_certificate_id: next.billing_mode === "net_buy" ? next.resale_certificate_id : null,
@@ -259,7 +263,7 @@ export default function BillingModeCard({
         {!isEditable && <Badge variant="outline">Locked — submitted</Badge>}
       </div>
 
-      <div className="grid md:grid-cols-2 gap-3">
+      <div className="grid md:grid-cols-3 gap-3">
         {/* AGENT COMMISSION */}
         <button
           type="button"
@@ -316,6 +320,37 @@ export default function BillingModeCard({
               </p>
               <p className="text-xs text-foreground/80 tabular-nums">
                 You pay: {fmtCents(netSubtotal, currency)} (saved {fmtCents(discountCents, currency)})
+              </p>
+            </div>
+          </div>
+        </button>
+
+        {/* MSRP ONLY — price-on-request / retail quote */}
+        <button
+          type="button"
+          onClick={() => isEditable && !saving && handleModeChange("msrp_only")}
+          disabled={!isEditable || saving}
+          className={`text-left rounded-md border p-4 transition-colors ${
+            mode === "msrp_only" ? "border-foreground bg-muted/40" : "border-border hover:bg-muted/20"
+          } ${!isEditable ? "cursor-not-allowed opacity-70" : ""}`}
+        >
+          <div className="flex items-start gap-3">
+            <span
+              className={`mt-1 inline-block h-4 w-4 rounded-full border-2 shrink-0 ${
+                mode === "msrp_only" ? "border-foreground bg-foreground" : "border-muted-foreground bg-background"
+              }`}
+              aria-hidden
+            />
+            <div className="space-y-1 min-w-0 flex-1">
+              <div className="font-medium text-sm flex items-center gap-2">
+                <Tag className="h-3.5 w-3.5" /> MSRP only — price on request
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Retail quote at full MSRP with no trade commission or buy-net margin. Use for
+                price-on-request replies to prospective clients before a trade relationship is set.
+              </p>
+              <p className="text-xs text-foreground/80 tabular-nums">
+                Client pays: {fmtCents(subtotalCents, currency)}
               </p>
             </div>
           </div>
