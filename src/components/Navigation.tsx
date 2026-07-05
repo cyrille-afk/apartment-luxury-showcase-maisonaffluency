@@ -777,9 +777,6 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                   <button
                     onClick={() => {
                       setMegaMenuOpen(false);
-                      if (featuredDoc) {
-                        trackMagazine.badgeClick(featuredDoc.id, featuredDoc.title, "nav_trade_button");
-                      }
                       handleNavClick(item.href);
                     }}
                     className="font-body text-xs uppercase tracking-[0.2em] font-bold transition-all duration-300 relative whitespace-nowrap flex items-center gap-1.5 text-[hsl(var(--gold))] hover:text-white bg-[hsl(var(--gold)/0.1)] hover:bg-[hsl(var(--gold))] px-3 py-1 rounded-full"
