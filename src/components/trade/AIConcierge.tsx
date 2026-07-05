@@ -2254,6 +2254,21 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
               </button>
               <button
                 onPointerDown={(e) => e.stopPropagation()}
+                onClick={() => {
+                  setFullscreen((v) => {
+                    const nv = !v;
+                    try { localStorage.setItem("concierge:fullscreen", nv ? "1" : "0"); } catch {}
+                    return nv;
+                  });
+                }}
+                className="text-muted-foreground hover:text-foreground transition-colors p-1 rounded-md hover:bg-muted"
+                aria-label={fullscreen ? "Exit full screen" : "Full screen"}
+                title={fullscreen ? "Exit full screen" : "Full screen"}
+              >
+                {fullscreen ? <Shrink className="h-3.5 w-3.5" /> : <Expand className="h-3.5 w-3.5" />}
+              </button>
+              <button
+                onPointerDown={(e) => e.stopPropagation()}
                 onClick={() => setMinimized((m) => !m)}
                 className="text-muted-foreground hover:text-foreground transition-colors p-1 rounded-md hover:bg-muted"
                 aria-label={minimized ? "Expand" : "Collapse"}
