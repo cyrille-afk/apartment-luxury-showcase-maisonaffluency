@@ -691,7 +691,7 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
                   const priceStr = itemPrices[item.id] || "";
                   const cents = priceStr ? Math.round(parseFloat(priceStr) * 100) : 0;
                   const lineTotal = cents * item.quantity;
-                  const discountedUnit = ownerDiscountPct > 0 ? Math.round(cents * (1 - ownerDiscountPct)) : cents;
+                  const discountedUnit = effectiveOwnerDiscountPct > 0 ? Math.round(cents * (1 - effectiveOwnerDiscountPct)) : cents;
                   const lead = leadTimes[item.id];
                   // Per-line admin override wins over the catalog/brand default from the RPC.
                   const overrideLead = leadOverride(item.lead_time_weeks_override);
@@ -744,9 +744,9 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
                             className="w-full pl-8 pr-2 py-1.5 border border-border rounded-md font-body text-sm text-foreground text-right bg-background focus:outline-none focus:ring-1 focus:ring-primary/30"
                           />
                         </div>
-                        {ownerDiscountPct > 0 && cents > 0 && (
+                        {effectiveOwnerDiscountPct > 0 && cents > 0 && (
                           <p className="font-body text-[9px] text-emerald-600/80 text-right mt-0.5">
-                            After {(ownerDiscountPct * 100).toFixed(0)}% trade: {formatPrice(discountedUnit, currency)}
+                            After {(effectiveOwnerDiscountPct * 100).toFixed(0)}% trade: {formatPrice(discountedUnit, currency)}
                           </p>
                         )}
                       </div>
