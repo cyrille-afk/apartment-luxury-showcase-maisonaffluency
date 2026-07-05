@@ -51,15 +51,20 @@ export const QuoteExtrasEditor = ({ quoteId, currency, isReadOnly = false, onTot
   const [draftLabel, setDraftLabel] = useState("");
   const [draftAmount, setDraftAmount] = useState("");
 
-  const toDisplay = (cents: number, from: string): number => {
+  const toDisplay = (cents: number, from: string): { cents: number; converted: boolean; sameCcy: boolean } => {
     const src = (from || currency).toUpperCase();
     const tgt = currency.toUpperCase();
-    if (src === tgt) return cents;
+    if (src === tgt) return { cents, converted: true, sameCcy: true };
     if (convertCents) {
+      // Probe the rate on a known amount to detect "no rate available" (helper
+      // returns the input unchanged when the pair isn't in fxRates/FALLBACK).
+      const probe = convertCents(10_000, src, tgt);
+      const rateAvailable = typeof probe === "number" && probe !== 10_000;
       const v = convertCents(cents, src, tgt);
-      return typeof v === "number" ? v : cents;
+      const out = typeof v === "number" ? v : cents;
+      return { cents: out, converted: rateAvailable, sameCcy: false };
     }
-    return cents;
+    return { cents, converted: false, sameCcy: false };
   };
 
   useEffect(() => {
