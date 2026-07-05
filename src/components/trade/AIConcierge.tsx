@@ -466,6 +466,25 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
     window.addEventListener("maf:concierge:insights", onInsights as EventListener);
     return () => window.removeEventListener("maf:concierge:insights", onInsights as EventListener);
   }, [expanded, insightsForcedExpand]);
+
+  // Auto-expand the panel while the Brief Builder is open so the four blocks
+  // aren't cramped, and restore the user's prior expanded preference on close.
+  const [briefForcedExpand, setBriefForcedExpand] = useState(false);
+  const priorExpandedForBriefRef = useRef<boolean | null>(null);
+  useEffect(() => {
+    if (briefBuilderOpen) {
+      if (!briefForcedExpand) {
+        priorExpandedForBriefRef.current = expanded;
+        setBriefForcedExpand(true);
+        setExpanded(true);
+      }
+    } else if (briefForcedExpand) {
+      setBriefForcedExpand(false);
+      if (priorExpandedForBriefRef.current !== null) setExpanded(priorExpandedForBriefRef.current);
+      priorExpandedForBriefRef.current = null;
+    }
+  }, [briefBuilderOpen]);
+
   const PANEL_W = expanded ? 560 : 380;
   const PANEL_H_OPEN = expanded ? 760 : 560;
   const PANEL_H_MIN = 52;
@@ -2881,16 +2900,26 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
               >
                 <Eye className="h-4 w-4" />
               </button>
-              <textarea
-                ref={inputRef}
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder={copy.ask}
-                rows={1}
-                className="flex-1 resize-none rounded-xl border border-border bg-muted/50 px-3 py-2 font-body text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-accent"
-                disabled={streaming}
-              />
+              {briefBuilderOpen ? (
+                <div
+                  className="flex-1 rounded-xl border border-dashed border-accent/50 bg-accent/5 px-3 py-2 font-body text-xs text-muted-foreground italic truncate"
+                  title="Editing structured brief above — press Send when ready"
+                >
+                  Editing structured brief above · press Send when ready
+                </div>
+              ) : (
+                <textarea
+                  ref={inputRef}
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  placeholder={copy.ask}
+                  rows={1}
+                  className="flex-1 resize-none rounded-xl border border-border bg-muted/50 px-3 py-2 font-body text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-accent"
+                  disabled={streaming}
+                />
+              )}
+
               <button
                 onClick={() => send()}
                 disabled={(!input.trim() && attachments.length === 0) || streaming}
