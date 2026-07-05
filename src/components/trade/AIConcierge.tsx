@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
-import { X, Send, Loader2, Sparkles, Minus, GripHorizontal, RotateCcw, Maximize2, Minimize2, Palette, Check, Languages, Pencil, Paperclip, FileText, Download, FileDown, Copy, ShieldCheck, ListChecks } from "lucide-react";
+import { X, Send, Loader2, Sparkles, Minus, GripHorizontal, RotateCcw, Maximize2, Minimize2, Palette, Check, Languages, Pencil, Paperclip, FileText, Download, FileDown, Copy, ShieldCheck, ListChecks, Eye } from "lucide-react";
 
 const SPEC_BRIEF_TEMPLATE = `Block 1 — Spatial & Project Context
 PROJECT PROFILE: [typology, city/area]
@@ -137,6 +137,7 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
   const [toneMenuOpen, setToneMenuOpen] = useState(false);
   const [langMenuOpen, setLangMenuOpen] = useState(false);
+  const [showBriefPreview, setShowBriefPreview] = useState(false);
   const [timeline, setTimeline] = useState<TimelineItem[]>(() => {
     try {
       const raw = sessionStorage.getItem("concierge:timeline");
@@ -2479,6 +2480,68 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
                 ))}
               </div>
             )}
+            {showBriefPreview && input.trim() && (() => {
+              const raw = input.trim();
+              const blockRegex = /^Block\s+\d+.*$/gim;
+              const headers: string[] = [];
+              let m: RegExpExecArray | null;
+              while ((m = blockRegex.exec(raw)) !== null) headers.push(m[0]);
+              type Section = { header: string | null; body: string };
+              const sections: Section[] = [];
+              if (headers.length === 0) {
+                sections.push({ header: null, body: raw });
+              } else {
+                const parts = raw.split(/^Block\s+\d+.*$/gim);
+                const preface = parts.shift()?.trim();
+                if (preface) sections.push({ header: null, body: preface });
+                headers.forEach((h, i) => {
+                  sections.push({ header: h.trim(), body: (parts[i] ?? "").trim() });
+                });
+              }
+              return (
+                <div className="mb-2 rounded-xl border border-accent/40 bg-muted/30 p-3 max-h-[45vh] overflow-y-auto">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="font-body text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
+                      Brief preview
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setShowBriefPreview(false)}
+                      className="rounded p-0.5 text-muted-foreground hover:text-foreground hover:bg-foreground/10"
+                      aria-label="Close preview"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                  <div className="space-y-3">
+                    {sections.map((s, i) => (
+                      <div key={i}>
+                        {s.header && (
+                          <div className="font-heading text-[12px] font-semibold text-accent mb-1">
+                            {s.header}
+                          </div>
+                        )}
+                        <pre className="whitespace-pre-wrap font-body text-[12px] leading-relaxed text-foreground">
+                          {s.body}
+                        </pre>
+                      </div>
+                    ))}
+                  </div>
+                  {attachments.length > 0 && (
+                    <div className="mt-3 pt-2 border-t border-border/60">
+                      <div className="font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground mb-1">
+                        Attachments ({attachments.length})
+                      </div>
+                      <ul className="font-body text-[11px] text-muted-foreground space-y-0.5">
+                        {attachments.map((a) => (
+                          <li key={a.id} className="truncate">• {a.name}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
             <div className="flex items-end gap-2">
               <input
                 ref={fileInputRef}
@@ -2520,6 +2583,21 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
                 title="Insert 4-block spec brief template"
               >
                 <ListChecks className="h-4 w-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowBriefPreview((v) => !v)}
+                disabled={!input.trim()}
+                className={`shrink-0 rounded-xl border p-2 disabled:opacity-40 transition-colors ${
+                  showBriefPreview
+                    ? "border-accent bg-accent/10 text-accent"
+                    : "border-border bg-muted/40 text-muted-foreground hover:text-foreground hover:bg-muted"
+                }`}
+                aria-label={showBriefPreview ? "Hide brief preview" : "Preview brief"}
+                aria-pressed={showBriefPreview}
+                title={showBriefPreview ? "Hide brief preview" : "Preview formatted brief before sending"}
+              >
+                <Eye className="h-4 w-4" />
               </button>
               <textarea
                 ref={inputRef}
