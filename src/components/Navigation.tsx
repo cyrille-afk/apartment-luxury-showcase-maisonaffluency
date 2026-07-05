@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { Menu, X, Crown, Search, ChevronDown, ChevronRight, ChevronLeft, Calendar, MessageCircle, Mail, LayoutGrid, Image, Palette, Gem, Briefcase, BookOpen, Heart, Pin, User, LogIn, UserPlus, LogOut } from "lucide-react";
 import { useCompare } from "@/contexts/CompareContext";
 import { useAuth } from "@/hooks/useAuth";
-import { trackCTA, trackMagazine } from "@/lib/analytics";
+import { trackCTA } from "@/lib/analytics";
 import { deferHashScrollUntilSheetClosed } from "@/lib/mobileHashNavigation";
 import { scrollToSection } from "@/lib/scrollToSection";
 import { Button } from "@/components/ui/button";
