@@ -404,7 +404,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
 
   // Dual-billing meta (loaded async — drives the invoice/proforma button).
   const [billingMeta, setBillingMeta] = useState<{
-    billing_mode: "agent_commission" | "net_buy";
+    billing_mode: "agent_commission" | "net_buy" | "msrp_only";
     net_discount_pct: number | null;
     commission_pct: number | null;
     end_client_billing: Record<string, string> | null;
