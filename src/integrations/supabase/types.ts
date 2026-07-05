@@ -5677,23 +5677,28 @@ export type Database = {
       }
       trade_products: {
         Row: {
+          available_finishes: string[]
           base_axis_label: string | null
           brand_name: string
           category: string
           created_at: string
           currency: string
           default_ship_mode: string | null
+          depth_mm: number | null
           description: string | null
           dimensions: string | null
           embedded_at: string | null
           embedding: string | null
           embedding_source_hash: string | null
+          fabric_options: string[]
           gallery_images: string[] | null
           glb_url: string | null
+          height_mm: number | null
           hs_code: string | null
           id: string
           image_url: string | null
           is_active: boolean
+          is_contract_grade: boolean
           is_hidden: boolean
           is_upholstered: boolean | null
           lead_time: string | null
@@ -5714,6 +5719,7 @@ export type Database = {
           price_unit: string
           product_name: string
           rrp_price_cents: number | null
+          seat_height_mm: number | null
           size_variants: Json | null
           sku: string | null
           source_pick_id: string | null
@@ -5725,26 +5731,32 @@ export type Database = {
           updated_at: string
           variant_image_map: Json | null
           variant_placeholder: string | null
+          width_mm: number | null
           wood_label_override: string | null
         }
         Insert: {
+          available_finishes?: string[]
           base_axis_label?: string | null
           brand_name: string
           category?: string
           created_at?: string
           currency?: string
           default_ship_mode?: string | null
+          depth_mm?: number | null
           description?: string | null
           dimensions?: string | null
           embedded_at?: string | null
           embedding?: string | null
           embedding_source_hash?: string | null
+          fabric_options?: string[]
           gallery_images?: string[] | null
           glb_url?: string | null
+          height_mm?: number | null
           hs_code?: string | null
           id?: string
           image_url?: string | null
           is_active?: boolean
+          is_contract_grade?: boolean
           is_hidden?: boolean
           is_upholstered?: boolean | null
           lead_time?: string | null
@@ -5765,6 +5777,7 @@ export type Database = {
           price_unit?: string
           product_name: string
           rrp_price_cents?: number | null
+          seat_height_mm?: number | null
           size_variants?: Json | null
           sku?: string | null
           source_pick_id?: string | null
@@ -5776,26 +5789,32 @@ export type Database = {
           updated_at?: string
           variant_image_map?: Json | null
           variant_placeholder?: string | null
+          width_mm?: number | null
           wood_label_override?: string | null
         }
         Update: {
+          available_finishes?: string[]
           base_axis_label?: string | null
           brand_name?: string
           category?: string
           created_at?: string
           currency?: string
           default_ship_mode?: string | null
+          depth_mm?: number | null
           description?: string | null
           dimensions?: string | null
           embedded_at?: string | null
           embedding?: string | null
           embedding_source_hash?: string | null
+          fabric_options?: string[]
           gallery_images?: string[] | null
           glb_url?: string | null
+          height_mm?: number | null
           hs_code?: string | null
           id?: string
           image_url?: string | null
           is_active?: boolean
+          is_contract_grade?: boolean
           is_hidden?: boolean
           is_upholstered?: boolean | null
           lead_time?: string | null
@@ -5816,6 +5835,7 @@ export type Database = {
           price_unit?: string
           product_name?: string
           rrp_price_cents?: number | null
+          seat_height_mm?: number | null
           size_variants?: Json | null
           sku?: string | null
           source_pick_id?: string | null
@@ -5827,6 +5847,7 @@ export type Database = {
           updated_at?: string
           variant_image_map?: Json | null
           variant_placeholder?: string | null
+          width_mm?: number | null
           wood_label_override?: string | null
         }
         Relationships: [
@@ -6822,9 +6843,12 @@ export type Database = {
           category: string
           currency: string
           default_ship_mode: string
+          depth_mm: number
           designer: string
           dimensions: string
+          height_mm: number
           id: string
+          is_contract_grade: boolean
           lead_time: string
           materials: string
           origin: string
@@ -6836,6 +6860,7 @@ export type Database = {
           subcategory: string
           title: string
           trade_price_cents: number
+          width_mm: number
         }[]
       }
       match_semantic_cache: {
@@ -6871,6 +6896,15 @@ export type Database = {
           _requester_name: string
         }
         Returns: undefined
+      }
+      parse_dimensions_to_mm: {
+        Args: { dim_text: string }
+        Returns: {
+          depth_mm: number
+          height_mm: number
+          seat_height_mm: number
+          width_mm: number
+        }[]
       }
       purge_stale_concierge_streams: { Args: never; Returns: undefined }
       read_email_batch: {
