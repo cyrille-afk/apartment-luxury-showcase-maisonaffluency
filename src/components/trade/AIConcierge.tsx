@@ -232,11 +232,14 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
     /** UI preview — same as dataUrl for images, undefined for PDFs */
     previewUrl?: string;
     size: number;
+    /** Optional semantic role, e.g. "moodboard" to bind to Block 3 of a spec brief. */
+    role?: "moodboard";
   };
   const MAX_ATTACHMENT_BYTES = 8 * 1024 * 1024; // 8 MB per file — base64 inflates ~33%
   const MAX_ATTACHMENTS = 4;
   const [attachments, setAttachments] = useState<StagedAttachment[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const moodInputRef = useRef<HTMLInputElement>(null);
 
   const readFileAsDataUrl = (file: File): Promise<string> =>
     new Promise((resolve, reject) => {
