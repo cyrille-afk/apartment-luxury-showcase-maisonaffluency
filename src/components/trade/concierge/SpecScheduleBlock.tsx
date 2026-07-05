@@ -29,7 +29,9 @@ export function SpecScheduleBlock({ zone, markdown }: Props) {
     coverDate?: string;
     includeCover?: boolean;
     pageSize?: "a4" | "letter";
+    designerLogo?: string; // data URL
   };
+  const MAX_LOGO_BYTES = 500 * 1024;
   const loadPrefs = (): CoverPrefs => {
     try {
       const raw = typeof window !== "undefined" ? window.localStorage.getItem(STORAGE_KEY) : null;
@@ -54,6 +56,8 @@ export function SpecScheduleBlock({ zone, markdown }: Props) {
   );
   const [includeCover, setIncludeCover] = useState(initialPrefs.includeCover ?? true);
   const [pageSize, setPageSize] = useState<"a4" | "letter">(initialPrefs.pageSize ?? "a4");
+  const [designerLogo, setDesignerLogo] = useState<string | null>(initialPrefs.designerLogo ?? null);
+  const [logoError, setLogoError] = useState<string | null>(null);
   const docRef = useRef<any>(null);
   const skipNextSave = useRef(false);
 
@@ -65,12 +69,19 @@ export function SpecScheduleBlock({ zone, markdown }: Props) {
     try {
       window.localStorage.setItem(
         STORAGE_KEY,
-        JSON.stringify({ projectName, designerName, coverDate, includeCover, pageSize }),
+        JSON.stringify({
+          projectName,
+          designerName,
+          coverDate,
+          includeCover,
+          pageSize,
+          designerLogo: designerLogo ?? undefined,
+        }),
       );
     } catch {
-      /* storage denied — noop */
+      /* storage denied or quota exceeded — noop */
     }
-  }, [projectName, designerName, coverDate, includeCover, pageSize]);
+  }, [projectName, designerName, coverDate, includeCover, pageSize, designerLogo]);
 
   const resetCoverPrefs = () => {
     skipNextSave.current = true;
@@ -84,6 +95,28 @@ export function SpecScheduleBlock({ zone, markdown }: Props) {
     setCoverDate(new Date().toISOString().slice(0, 10));
     setIncludeCover(true);
     setPageSize("a4");
+    setDesignerLogo(null);
+    setLogoError(null);
+  };
+
+  const onLogoFile = (file: File | null) => {
+    setLogoError(null);
+    if (!file) return;
+    if (!/^image\/(png|jpe?g|webp|svg\+xml)$/.test(file.type)) {
+      setLogoError("Use PNG, JPG, WEBP or SVG.");
+      return;
+    }
+    if (file.size > MAX_LOGO_BYTES) {
+      setLogoError("Logo must be under 500 KB.");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = typeof reader.result === "string" ? reader.result : null;
+      if (result) setDesignerLogo(result);
+    };
+    reader.onerror = () => setLogoError("Could not read file.");
+    reader.readAsDataURL(file);
   };
 
 
@@ -146,6 +179,27 @@ export function SpecScheduleBlock({ zone, markdown }: Props) {
     if (includeCover) {
       const centerX = pageWidth / 2;
       let cy = pageHeight / 2 - 80;
+
+      // Optional designer logo above the label
+      if (designerLogo) {
+        try {
+          const props = doc.getImageProperties(designerLogo);
+          const maxLogoW = 160;
+          const maxLogoH = 80;
+          const ratio = props.width / props.height;
+          let lw = maxLogoW;
+          let lh = lw / ratio;
+          if (lh > maxLogoH) {
+            lh = maxLogoH;
+            lw = lh * ratio;
+          }
+          const fmt = /^data:image\/(png|jpe?g|webp|svg\+xml)/i.exec(designerLogo)?.[1]?.toUpperCase();
+          const jsFmt = fmt === "JPG" ? "JPEG" : fmt === "SVG+XML" ? "PNG" : fmt || "PNG";
+          doc.addImage(designerLogo, jsFmt as any, centerX - lw / 2, cy - lh - 24, lw, lh);
+        } catch {
+          /* unreadable image — skip */
+        }
+      }
 
       doc.setFont("helvetica", "normal");
       doc.setFontSize(9);
@@ -427,6 +481,64 @@ export function SpecScheduleBlock({ zone, markdown }: Props) {
                 className="w-full rounded-md border border-border bg-background px-2.5 py-1.5 text-[13px] font-body text-foreground focus:outline-none focus:border-accent/60 disabled:opacity-50"
               />
             </div>
+
+            <div className="space-y-1">
+              <label className="text-[10px] uppercase tracking-[0.14em] font-body text-muted-foreground">
+                Designer logo (optional)
+              </label>
+              <div className="flex items-center gap-2">
+                {designerLogo ? (
+                  <img
+                    src={designerLogo}
+                    alt="Designer logo preview"
+                    className="h-10 w-auto max-w-[96px] rounded border border-border bg-background object-contain p-1"
+                  />
+                ) : (
+                  <div className="h-10 w-10 rounded border border-dashed border-border/70 bg-background" aria-hidden />
+                )}
+                <label
+                  className={cn(
+                    "inline-flex items-center rounded-full border border-border bg-background hover:bg-accent/10 hover:border-accent/40 px-3 py-1 text-[11px] font-body text-foreground transition cursor-pointer",
+                    !includeCover && "opacity-50 pointer-events-none",
+                  )}
+                >
+                  {designerLogo ? "Replace" : "Upload"}
+                  <input
+                    type="file"
+                    accept="image/png,image/jpeg,image/webp,image/svg+xml"
+                    className="hidden"
+                    onChange={(e) => {
+                      const f = e.target.files?.[0] ?? null;
+                      onLogoFile(f);
+                      e.target.value = "";
+                    }}
+                    disabled={!includeCover}
+                  />
+                </label>
+                {designerLogo && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setDesignerLogo(null);
+                      setLogoError(null);
+                    }}
+                    disabled={!includeCover}
+                    className="inline-flex items-center rounded-full border border-border bg-background hover:bg-destructive/10 hover:border-destructive/40 px-3 py-1 text-[11px] font-body text-muted-foreground hover:text-destructive transition disabled:opacity-50"
+                  >
+                    Remove
+                  </button>
+                )}
+              </div>
+              {logoError ? (
+                <p className="text-[11px] font-body text-destructive">{logoError}</p>
+              ) : (
+                <p className="text-[10px] font-body text-muted-foreground">
+                  PNG, JPG, WEBP or SVG · max 500 KB · shown centered above the cover title.
+                </p>
+              )}
+            </div>
+
+
 
             <div className="space-y-1">
               <label className="text-[10px] uppercase tracking-[0.14em] font-body text-muted-foreground">
