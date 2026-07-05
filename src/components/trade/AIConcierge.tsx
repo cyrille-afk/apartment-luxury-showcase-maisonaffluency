@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { X, Send, Loader2, Sparkles, Minus, GripHorizontal, RotateCcw, Maximize2, Minimize2, Palette, Check, Languages, Pencil, Paperclip, FileText, Download, FileDown, Copy, ShieldCheck, ListChecks, Eye, LayoutList } from "lucide-react";
 import { BriefBuilder } from "@/components/trade/concierge/BriefBuilder";
@@ -484,6 +484,34 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
       priorExpandedForBriefRef.current = null;
     }
   }, [briefBuilderOpen]);
+
+  // Validate the structured brief: PROJECT PROFILE, ZONE, TYPOLOGY, and VIBE
+  // must be filled in (no lingering `[bracket]` placeholders). Other fields
+  // stay optional so briefs remain flexible.
+  const briefValidation = useMemo(() => {
+    if (!briefBuilderOpen) return { valid: true, missing: [] as string[] };
+    const text = input;
+    const required: { label: string; key: string }[] = [
+      { label: "PROJECT PROFILE", key: "Project profile" },
+      { label: "ZONE", key: "Zone" },
+      { label: "TYPOLOGY", key: "Typology" },
+      { label: "VIBE", key: "Vibe" },
+    ];
+    const missing: string[] = [];
+    for (const { label, key } of required) {
+      const re = new RegExp(`^${label}:\\s*(.*)$`, "im");
+      const m = text.match(re);
+      const val = (m?.[1] || "").trim();
+      // Invalid when empty OR the value still reads as a bracketed template
+      // placeholder like "[typology, city/area]", "[room, ceiling height]",
+      // "[e.g. sectional + accent chairs]".
+      const isPlaceholder = !val || /^\[[^\]]*\]$/.test(val);
+      if (isPlaceholder) missing.push(key);
+    }
+    return { valid: missing.length === 0, missing };
+  }, [briefBuilderOpen, input]);
+
+
 
   const PANEL_W = expanded ? 560 : 380;
   const PANEL_H_OPEN = expanded ? 760 : 560;
@@ -2902,12 +2930,23 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
               </button>
               {briefBuilderOpen ? (
                 <div
-                  className="flex-1 rounded-xl border border-dashed border-accent/50 bg-accent/5 px-3 py-2 font-body text-xs text-muted-foreground italic truncate"
-                  title="Editing structured brief above — press Send when ready"
+                  className={`flex-1 rounded-xl border border-dashed px-3 py-2 font-body text-xs italic truncate ${
+                    briefValidation.valid
+                      ? "border-accent/50 bg-accent/5 text-muted-foreground"
+                      : "border-destructive/50 bg-destructive/5 text-destructive"
+                  }`}
+                  title={
+                    briefValidation.valid
+                      ? "Structured brief ready — press Send"
+                      : `Complete: ${briefValidation.missing.join(", ")}`
+                  }
                 >
-                  Editing structured brief above · press Send when ready
+                  {briefValidation.valid
+                    ? "Structured brief ready · press Send"
+                    : `Fill required fields: ${briefValidation.missing.join(", ")}`}
                 </div>
               ) : (
+
                 <textarea
                   ref={inputRef}
                   value={input}
@@ -2922,12 +2961,22 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
 
               <button
                 onClick={() => send()}
-                disabled={(!input.trim() && attachments.length === 0) || streaming}
+                disabled={
+                  (!input.trim() && attachments.length === 0) ||
+                  streaming ||
+                  (briefBuilderOpen && !briefValidation.valid)
+                }
                 className="shrink-0 rounded-xl bg-foreground text-background p-2 disabled:opacity-40 hover:opacity-90 transition-opacity"
                 aria-label="Send"
+                title={
+                  briefBuilderOpen && !briefValidation.valid
+                    ? `Complete: ${briefValidation.missing.join(", ")}`
+                    : "Send"
+                }
               >
                 <Send className="h-4 w-4" />
               </button>
+
             </div>
             <p className="font-body text-[10px] text-muted-foreground mt-1.5 text-center">
               {copy.footer}
