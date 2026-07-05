@@ -82,9 +82,13 @@ describe("Trade area: AD free-download flow stays removed", () => {
       const contents = readFileSync(file, "utf8");
       const lines = contents.split("\n");
       lines.forEach((line, idx) => {
-        // Ignore comment lines that explicitly document the removal.
         const trimmed = line.trim();
-        if (/removed|discontinued|deprecated/i.test(trimmed) && trimmed.startsWith("//")) {
+        // Ignore comment lines that explicitly document the removal
+        // (JS `//`, JSX `{/* */}`, or block `/* */` comments).
+        if (
+          /(removed|discontinued|deprecated)/i.test(trimmed) &&
+          /^(\/\/|\{?\/\*)/.test(trimmed)
+        ) {
           return;
         }
         for (const pattern of FORBIDDEN_PATTERNS) {
