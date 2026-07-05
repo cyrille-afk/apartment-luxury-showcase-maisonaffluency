@@ -1,8 +1,14 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { Copy, Download, Check } from "lucide-react";
+import { Copy, Download, Check, Eye, Printer, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface Props {
   zone: string;
@@ -10,13 +16,17 @@ interface Props {
 }
 
 /**
- * Renders a client-generated markdown SPECIFICATION SCHEDULE with Copy and
- * Download-as-.md actions. Rendered inline as an assistant message.
- * The markdown is built deterministically from database rows — never model
- * output — so there is no hallucination risk here.
+ * Renders a client-generated markdown SPECIFICATION SCHEDULE with Copy,
+ * Download-as-.md, and a Preview-then-Download PDF flow. Rendered inline as
+ * an assistant message. The markdown is built deterministically from
+ * database rows — never model output — so there is no hallucination risk.
  */
 export function SpecScheduleBlock({ zone, markdown }: Props) {
   const [copied, setCopied] = useState(false);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [building, setBuilding] = useState(false);
+  const docRef = useRef<any>(null);
 
   const slug = useMemo(() => {
     return (
@@ -38,7 +48,7 @@ export function SpecScheduleBlock({ zone, markdown }: Props) {
     }
   };
 
-  const onDownload = () => {
+  const onDownloadMd = () => {
     const blob = new Blob([markdown], { type: "text/markdown;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -50,7 +60,7 @@ export function SpecScheduleBlock({ zone, markdown }: Props) {
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   };
 
-  const onDownloadPdf = async () => {
+  const buildPdfDoc = async () => {
     const { jsPDF } = await import("jspdf");
     const doc = new jsPDF({ unit: "pt", format: "a4" });
     const pageWidth = doc.internal.pageSize.getWidth();
@@ -60,7 +70,6 @@ export function SpecScheduleBlock({ zone, markdown }: Props) {
     const maxWidth = pageWidth - marginX * 2;
     let y = marginY;
 
-    // Title
     doc.setFont("helvetica", "bold");
     doc.setFontSize(14);
     doc.text("Specification Schedule", marginX, y);
@@ -72,8 +81,7 @@ export function SpecScheduleBlock({ zone, markdown }: Props) {
     doc.setTextColor(0);
     y += 18;
 
-    // Strip markdown to plain text lines preserving structure
-    const lines: { text: string; bold?: boolean; heading?: boolean }[] = [];
+    const lines: { text: string; heading?: boolean }[] = [];
     for (const raw of markdown.split("\n")) {
       const line = raw.replace(/\s+$/, "");
       if (!line.trim()) {
@@ -89,13 +97,12 @@ export function SpecScheduleBlock({ zone, markdown }: Props) {
         lines.push({ text: "────────────────────────" });
         continue;
       }
-      // bullets
       const b = line.match(/^\s*[-*]\s+(.*)$/);
       const body = (b ? `• ${b[1]}` : line)
         .replace(/\*\*(.+?)\*\*/g, "$1")
         .replace(/\*(.+?)\*/g, "$1")
         .replace(/`([^`]+)`/g, "$1");
-      lines.push({ text: body, bold: /\*\*/.test(line) });
+      lines.push({ text: body });
     }
 
     const lineHeight = 13;
@@ -118,9 +125,53 @@ export function SpecScheduleBlock({ zone, markdown }: Props) {
       }
     }
 
-    doc.save(`${slug}.pdf`);
+    return doc;
   };
 
+  const onOpenPreview = async () => {
+    setBuilding(true);
+    try {
+      const doc = await buildPdfDoc();
+      docRef.current = doc;
+      const blob = doc.output("blob");
+      const url = URL.createObjectURL(blob);
+      setPreviewUrl((prev) => {
+        if (prev) URL.revokeObjectURL(prev);
+        return url;
+      });
+      setPreviewOpen(true);
+    } finally {
+      setBuilding(false);
+    }
+  };
+
+  const onDownloadPdfFromPreview = () => {
+    if (docRef.current) {
+      docRef.current.save(`${slug}.pdf`);
+    }
+  };
+
+  const onPrintPdf = () => {
+    if (!previewUrl) return;
+    const w = window.open(previewUrl, "_blank");
+    if (w) {
+      w.addEventListener("load", () => {
+        try {
+          w.focus();
+          w.print();
+        } catch {
+          /* noop */
+        }
+      });
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className="rounded-2xl border border-border/70 bg-muted/60 p-4 space-y-3 max-w-[92%]">
@@ -142,7 +193,7 @@ export function SpecScheduleBlock({ zone, markdown }: Props) {
           </button>
           <button
             type="button"
-            onClick={onDownload}
+            onClick={onDownloadMd}
             className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background hover:bg-accent/10 hover:border-accent/40 px-2.5 py-1 text-[11px] font-body text-foreground transition"
             aria-label="Download schedule as markdown"
           >
@@ -151,14 +202,14 @@ export function SpecScheduleBlock({ zone, markdown }: Props) {
           </button>
           <button
             type="button"
-            onClick={onDownloadPdf}
-            className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background hover:bg-accent/10 hover:border-accent/40 px-2.5 py-1 text-[11px] font-body text-foreground transition"
-            aria-label="Download schedule as PDF"
+            onClick={onOpenPreview}
+            disabled={building}
+            className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background hover:bg-accent/10 hover:border-accent/40 px-2.5 py-1 text-[11px] font-body text-foreground transition disabled:opacity-60"
+            aria-label="Preview PDF before download"
           >
-            <Download className="h-3 w-3" />
-            PDF
+            <Eye className="h-3 w-3" />
+            {building ? "Building…" : "Preview PDF"}
           </button>
-
         </div>
       </div>
 
@@ -200,6 +251,55 @@ export function SpecScheduleBlock({ zone, markdown }: Props) {
           {markdown}
         </ReactMarkdown>
       </div>
+
+      <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
+        <DialogContent className="max-w-5xl w-[92vw] h-[88vh] p-0 gap-0 overflow-hidden">
+          <DialogHeader className="px-4 py-3 border-b border-border/60 flex-row items-center justify-between space-y-0">
+            <DialogTitle className="font-display text-sm uppercase tracking-[0.14em]">
+              PDF preview · {zone}
+            </DialogTitle>
+            <div className="flex items-center gap-1.5">
+              <button
+                type="button"
+                onClick={onPrintPdf}
+                className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background hover:bg-accent/10 hover:border-accent/40 px-2.5 py-1 text-[11px] font-body text-foreground transition"
+              >
+                <Printer className="h-3 w-3" />
+                Print
+              </button>
+              <button
+                type="button"
+                onClick={onDownloadPdfFromPreview}
+                className="inline-flex items-center gap-1.5 rounded-full border border-accent/60 bg-accent/10 hover:bg-accent/20 px-2.5 py-1 text-[11px] font-body text-foreground transition"
+              >
+                <Download className="h-3 w-3" />
+                Download PDF
+              </button>
+              <button
+                type="button"
+                onClick={() => setPreviewOpen(false)}
+                className="inline-flex items-center justify-center rounded-full border border-border bg-background hover:bg-accent/10 hover:border-accent/40 h-6 w-6 text-foreground transition"
+                aria-label="Close preview"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </div>
+          </DialogHeader>
+          <div className="w-full h-full bg-muted/30">
+            {previewUrl ? (
+              <iframe
+                title="Specification schedule preview"
+                src={previewUrl}
+                className="w-full h-full border-0"
+              />
+            ) : (
+              <div className="flex items-center justify-center h-full text-xs text-muted-foreground">
+                Building preview…
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
