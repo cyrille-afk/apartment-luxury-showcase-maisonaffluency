@@ -1895,7 +1895,7 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
             onPointerCancel={onDragEnd}
             onDoubleClick={() => setMinimized((m) => !m)}
             className={cn(
-              "flex flex-col gap-1.5 px-4 py-3 border-b cursor-grab active:cursor-grabbing select-none touch-none",
+              "flex flex-col gap-1.5 px-4 py-3 border-b cursor-grab active:cursor-grabbing select-none touch-none shrink-0",
               modalMode
                 ? "bg-jade text-cream border-jade [&_.text-muted-foreground]:text-cream/70 [&_.text-accent]:text-cream [&_button:hover]:bg-cream/10 [&_button:hover]:text-cream"
                 : "border-border"
