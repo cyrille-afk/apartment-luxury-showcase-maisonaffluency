@@ -38,6 +38,7 @@ import { PerOriginShippingRecap } from "@/components/trade/PerOriginShippingReca
 import { priceRugVariantFromLabel } from "@/lib/rugPricing";
 import { computeWeightedDepositPct } from "@/lib/computeDepositPct";
 import BillingModeCard from "@/components/trade/BillingModeCard";
+import { resolveWoodFinishLabel } from "@/lib/resolveWoodFinishLabel";
 
 const CURRENCIES = ["SGD", "USD", "EUR", "GBP"] as const;
 type Currency = (typeof CURRENCIES)[number];
