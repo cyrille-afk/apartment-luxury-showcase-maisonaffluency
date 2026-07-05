@@ -65,6 +65,7 @@ const systemGroup: AdminCard[] = [
   { title: "Sync Status", description: "Compare Designer Editor vs trade products — flag mismatches", url: "/trade/admin/sync-status", icon: AlertCircle },
   { title: "CAD & 3D Assets", description: "Upload .dwg, .rfa, .skp files per product and per variant", url: "/trade/admin/cad-assets", icon: FileBox },
   { title: "Fabrics & Finishes", description: "Manage upholstery, wood, leather, stone & metal swatches and link them to products", url: "/trade/admin/fabrics", icon: Layers },
+  { title: "Bulk Finishes & Fabrics", description: "Edit available_finishes and fabric_options across many trade products at once (add/remove/replace)", url: "/trade/admin/bulk-finishes", icon: Layers },
   { title: "First-login Flow", description: "Edit welcome panel, Quick Tour steps, and replay onboarding for any user", url: "/trade/admin/onboarding", icon: Sparkle },
   { title: "Onboarding Funnel", description: "Step views, sub-step clicks, completes and skips — filterable by device", url: "/trade/admin/onboarding-funnel", icon: BarChart3 },
   { title: "Duplicate Products", description: "Inspect and hide near-duplicate cards detected in the Trade catalog merge", url: "/trade/admin/duplicates", icon: Layers },
