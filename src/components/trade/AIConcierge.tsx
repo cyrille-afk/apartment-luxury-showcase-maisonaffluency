@@ -2710,7 +2710,7 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
             )}
           </div>
 
-          <div className="border-t border-border p-3">
+          <div className={cn("border-t border-border p-3 shrink-0 min-h-0", fullscreen && "flex flex-col gap-3 max-h-[45vh] overflow-hidden")}>
             {/* Correlation-id chip — copy-to-clipboard trace id for the
                 current concierge turn. Matches the server's SSE `event: request_id`
                 and every `concierge_inspector` log line for this run. */}
