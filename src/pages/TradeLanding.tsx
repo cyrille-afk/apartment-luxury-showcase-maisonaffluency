@@ -122,10 +122,8 @@ const TradeLanding = () => {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   const [faqExpanded, setFaqExpanded] = useState(false);
   const formRef = useRef<HTMLDivElement>(null);
-  // Featured Issue (AD) free-download removed from the trade area — handler and
-  // hook usage intentionally deleted.
-  void trackMagazine;
-  void supabase;
+  // Featured Issue (AD) free-download removed from the trade area.
+
 
   const [searchParams] = useSearchParams();
   const prefillEmail = searchParams.get("email") || "";
