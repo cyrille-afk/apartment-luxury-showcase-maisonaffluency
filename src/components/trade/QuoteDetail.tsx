@@ -82,7 +82,7 @@ interface QuoteItemWithProduct {
   /** Enriched at load time from designer_curator_picks (limited-edition / edition note). */
   edition?: string | null;
   /** Resolved from the saved variant label so stale swatch IDs do not override the chosen finish. */
-  variant_swatches?: { name: string; image_url: string }[];
+  variant_swatches?: { name: string; image_url: string; fabric_id?: string | null }[];
 }
 
 interface QuoteDetailProps {
@@ -563,12 +563,12 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
             // Bronze Medal 0922") that share a generic axis token ("Bronze")
             // with sibling swatches — label matching would drag those siblings
             // in as false positives.
-            const explicit: { name: string; image_url: string }[] = [];
+            const explicit: { name: string; image_url: string; fabric_id?: string | null }[] = [];
             const pushExplicit = (id: string | null | undefined) => {
               if (!id) return;
               const hit = pickSwatches.find((s) => s.fabric_id === id);
               if (hit && hit.image_url && !explicit.some((e) => e.image_url === hit.image_url)) {
-                explicit.push({ name: hit.name, image_url: hit.image_url });
+                explicit.push({ name: hit.name, image_url: hit.image_url, fabric_id: hit.fabric_id ?? id });
               }
             };
             pushExplicit((item as any).wood_fabric_id);
@@ -577,7 +577,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
             const swatches = explicit.length > 0
               ? explicit
               : findQuoteFinishSwatches(item.variant_label, pickSwatches)
-                  .map((swatch) => ({ name: swatch.name, image_url: swatch.image_url || "" }))
+                  .map((swatch) => ({ name: swatch.name, image_url: swatch.image_url || "", fabric_id: swatch.fabric_id ?? swatch.id ?? null }))
                   .filter((swatch) => swatch.image_url);
             if (swatches.length === 0) return item;
             const first = swatches[0];
