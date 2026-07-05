@@ -52,6 +52,8 @@ export interface QuotePdfLine {
   sourceCurrency?: string | null;
   imageUrl?: string | null;          // optional product thumbnail
   finishSwatchUrl?: string | null;
+  finishSwatches?: Array<{ name?: string | null; imageUrl?: string | null }>;
+  finishSwatchLabel?: string | null;
   fabricSwatchUrl?: string | null;
   shipOriginCountry?: string | null;
   shipMode?: string | null;
@@ -242,17 +244,20 @@ export async function buildQuotePdf(args: QuotePdfArgs): Promise<jsPDF> {
   const contentW = pageW - 2 * M;
 
   // Pre-fetch logo + product/finish swatch images in parallel (best-effort)
-  const [logo, ...lineImages] = await Promise.all([
+  const [logo, productImages, finishSwatchImages, fabricSwatchImages] = await Promise.all([
     fetchImageDataUrl(affluencyLogoUrl),
-    ...args.lines.flatMap((l) => [
-      l.imageUrl ? fetchImageDataUrl(l.imageUrl) : Promise.resolve(null),
-      l.finishSwatchUrl ? fetchImageDataUrl(l.finishSwatchUrl) : Promise.resolve(null),
-      l.fabricSwatchUrl ? fetchImageDataUrl(l.fabricSwatchUrl) : Promise.resolve(null),
-    ]),
+    Promise.all(args.lines.map((l) => l.imageUrl ? fetchImageDataUrl(l.imageUrl) : Promise.resolve(null))),
+    Promise.all(args.lines.map((l) => {
+      const swatches = (l.finishSwatches?.length
+        ? l.finishSwatches
+        : l.finishSwatchUrl
+          ? [{ imageUrl: l.finishSwatchUrl }]
+          : []
+      ).filter((s) => s?.imageUrl);
+      return Promise.all(swatches.slice(0, 4).map((s) => fetchImageDataUrl(s.imageUrl!)));
+    })),
+    Promise.all(args.lines.map((l) => l.fabricSwatchUrl ? fetchImageDataUrl(l.fabricSwatchUrl) : Promise.resolve(null))),
   ]);
-  const productImages = args.lines.map((_, idx) => lineImages[idx * 3] ?? null);
-  const finishSwatchImages = args.lines.map((_, idx) => lineImages[idx * 3 + 1] ?? null);
-  const fabricSwatchImages = args.lines.map((_, idx) => lineImages[idx * 3 + 2] ?? null);
 
   drawHeader(doc, args, pageW, M, logo);
 
@@ -846,7 +851,7 @@ function drawTable(
   contentW: number,
   pageH: number,
   images: (Awaited<ReturnType<typeof fetchImageDataUrl>>)[],
-  finishSwatches: (Awaited<ReturnType<typeof fetchImageDataUrl>>)[],
+  finishSwatches: (Awaited<ReturnType<typeof fetchImageDataUrl>>)[][],
   fabricSwatches: (Awaited<ReturnType<typeof fetchImageDataUrl>>)[],
 ): number {
   // Columns: Image | Description (flex) | Qty | Unit | Amount
@@ -884,6 +889,7 @@ function drawTable(
     const editionClean = editionRaw.replace(/^edition\s*[:\-—]?\s*/i, "").trim();
     const editionLabel = editionClean ? `Edition: ${editionClean}` : null;
     const variantLabel = line.variantLabel ? `Finish: ${line.variantLabel}` : null;
+      const finishSwatchLabel = line.finishSwatchLabel ? `Selected finishes: ${line.finishSwatchLabel}` : null;
     // When the user picked a finish, it supersedes the generic catalogue
     // materials line (which is otherwise repetitive noise). Dimensions remain
     // visible unless they are already embedded in the variant label.
@@ -897,6 +903,7 @@ function drawTable(
     const showMaterials = !line.variantLabel;
     const meta = [
       variantLabel,
+      finishSwatchLabel,
       line.fabricLabel ?? null,
       line.woodFinishLabel ?? null,
       dimsAlreadyInVariant ? null : line.dimensions,
@@ -914,8 +921,10 @@ function drawTable(
     const metaLineCount = metaWrapped.reduce((sum, w) => sum + w.length, 0);
     const metaHeight = metaLineCount * 10;
     const titleHeight = titleWrap.length * 12;
-    const hasSwatches = !!(finishSwatches[idx] || fabricSwatches[idx]);
-    const rowH = Math.max(hasSwatches ? 90 : 56, 12 /* brand */ + titleHeight + metaHeight + 14);
+    const swatchCount = (finishSwatches[idx]?.filter(Boolean).length || 0) + (fabricSwatches[idx] ? 1 : 0);
+    const swatchRows = swatchCount > 0 ? Math.ceil(Math.min(swatchCount, 5) / 2) : 0;
+    const hasSwatches = swatchCount > 0;
+    const rowH = Math.max(hasSwatches ? 58 + swatchRows * 24 + 10 : 56, 12 /* brand */ + titleHeight + metaHeight + 14);
 
     // page break
     if (y + rowH > pageH - 90) {
@@ -943,12 +952,12 @@ function drawTable(
       doc.rect(xImg + 2, y + 4, 48, 48, "F");
     }
 
-    const swatches = [finishSwatches[idx], fabricSwatches[idx]].filter(Boolean) as NonNullable<Awaited<ReturnType<typeof fetchImageDataUrl>>>[];
-    swatches.slice(0, 2).forEach((swatch, swatchIdx) => {
+    const swatches = [...(finishSwatches[idx] || []), fabricSwatches[idx]].filter(Boolean) as NonNullable<Awaited<ReturnType<typeof fetchImageDataUrl>>>[];
+    swatches.slice(0, 5).forEach((swatch, swatchIdx) => {
       try {
         const size = 20;
-        const sx = xImg + 2 + swatchIdx * 24;
-        const sy = y + 58;
+        const sx = xImg + 2 + (swatchIdx % 2) * 24;
+        const sy = y + 58 + Math.floor(swatchIdx / 2) * 24;
         doc.setDrawColor(RULE[0], RULE[1], RULE[2]);
         doc.setLineWidth(0.25);
         doc.rect(sx, sy, size, size);

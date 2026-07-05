@@ -1255,6 +1255,9 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
       const fabric: any = (item as any).fabric;
       const wood: any = (item as any).wood_fabric;
       const variantSwatches = ((item as any).variant_swatches || []) as Array<{ name: string; image_url: string }>;
+      const finishSwatchLabel = variantSwatches.length > 0
+        ? variantSwatches.map((swatch) => swatch.name).filter(Boolean).join(" · ")
+        : wood?.name || null;
       const fabricCcy = ((item as any).fabric_currency as string | null) || fabric?.currency || "EUR";
       const fabricUpcharge = (item as any).fabric_upcharge_cents as number | null;
       const fabricMeters = (item as any).fabric_meters as number | null;
@@ -1293,6 +1296,13 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
         sourceCurrency: itemPriceCurrency(item, currency),
         imageUrl: item.image_url ?? product?.image_url ?? null,
         finishSwatchUrl: variantSwatches[0]?.image_url ?? wood?.image_url ?? null,
+        finishSwatches: (variantSwatches.length > 0
+          ? variantSwatches
+          : wood?.image_url
+            ? [{ name: wood.name, imageUrl: wood.image_url }]
+            : []
+        ).map((swatch: any) => ({ name: swatch.name, imageUrl: swatch.image_url || swatch.imageUrl })),
+        finishSwatchLabel,
         fabricSwatchUrl: fabric?.image_url ?? null,
         shipOriginCountry: toIsoCountry(item.ship_origin_country ?? product?.origin ?? null, "FR"),
         shipMode: item.ship_mode || null,
@@ -2583,23 +2593,33 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                               ? (item as any).variant_swatches
                               : ((item as any).wood_fabric?.image_url ? [(item as any).wood_fabric] : [])
                             ).map((swatch: any) => (
-                              <div className="relative group" key={swatch.image_url || swatch.name}>
+                              <div className="relative group min-w-0" key={swatch.image_url || swatch.name}>
                                 <img
                                   src={swatch.image_url}
                                   alt={swatch.name || "Finish"}
                                   className="w-full aspect-square rounded object-cover ring-1 ring-border"
                                   loading="lazy"
                                 />
+                                {swatch.name && (
+                                  <p className="mt-1 font-body text-[9px] leading-tight text-muted-foreground break-words">
+                                    {swatch.name}
+                                  </p>
+                                )}
                               </div>
                             ))}
                             {(item as any).fabric?.image_url && (
-                              <div className="relative group">
+                              <div className="relative group min-w-0">
                                 <img
                                   src={(item as any).fabric.image_url}
                                   alt={(item as any).fabric?.name || "Fabric"}
                                   className="w-full aspect-square rounded object-cover ring-1 ring-border"
                                   loading="lazy"
                                 />
+                                {(item as any).fabric?.name && (
+                                  <p className="mt-1 font-body text-[9px] leading-tight text-muted-foreground break-words">
+                                    {(item as any).fabric.name}
+                                  </p>
+                                )}
                               </div>
                             )}
                           </div>
