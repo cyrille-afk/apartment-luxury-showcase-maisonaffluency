@@ -2769,9 +2769,23 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
               <BriefBuilder
                 value={input}
                 onChange={(next) => setInput(next)}
-                onClose={() => setBriefBuilderOpen(false)}
+                onClose={() => {
+                  // Strip the structured brief from the composer so it doesn't
+                  // linger in the "Ask me anything" field after the builder closes.
+                  // The draft is still persisted in localStorage and will be
+                  // restored the next time the builder is opened.
+                  setInput((current) => {
+                    const withoutBrief = current
+                      .replace(/(^|\n)Block\s+\d+\s*—[\s\S]*?(?=\nBlock\s+\d+\s*—|$)/gi, "")
+                      .replace(/\n{3,}/g, "\n\n")
+                      .trim();
+                    return withoutBrief;
+                  });
+                  setBriefBuilderOpen(false);
+                }}
               />
             )}
+
             {showBriefPreview && input.trim() && (() => {
               const raw = input.trim();
               const blockRegex = /^Block\s+\d+.*$/gim;
