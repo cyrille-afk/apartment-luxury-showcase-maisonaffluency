@@ -69,6 +69,7 @@ const TradeAdminTaxonomyAudit = lazy(() => import("./pages/TradeAdminTaxonomyAud
 const TradeAdminSyncStatus = lazy(() => import("./pages/TradeAdminSyncStatus"));
 const TradeAdminBrandLeadTimes = lazy(() => import("./pages/TradeAdminBrandLeadTimes"));
 const TradeAdminFabrics = lazy(() => import("./pages/TradeAdminFabrics"));
+const TradeAdminBulkFinishes = lazy(() => import("./pages/TradeAdminBulkFinishes"));
 const TradeAdminTiers = lazy(() => import("./pages/TradeAdminTiers"));
 const TradeAdminCadAssets = lazy(() => import("./pages/TradeAdminCadAssets"));
 const TradeAdminGlbModels = lazy(() => import("./pages/TradeAdminGlbModels"));
@@ -591,6 +592,7 @@ const App = () => {
                     <Route path="admin/sync-status" element={<TradeAdminSyncStatus />} />
                     <Route path="admin/brand-lead-times" element={<TradeAdminBrandLeadTimes />} />
                     <Route path="admin/fabrics" element={<TradeAdminFabrics />} />
+                    <Route path="admin/bulk-finishes" element={<TradeAdminBulkFinishes />} />
                     <Route path="admin/tiers" element={<TradeAdminTiers />} />
                     <Route path="admin/cad-assets" element={<TradeAdminCadAssets />} />
                     <Route path="admin/glb-models" element={<TradeAdminGlbModels />} />
