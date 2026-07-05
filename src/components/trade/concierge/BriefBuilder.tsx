@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { X } from "lucide-react";
+import { ChevronDown, ChevronRight, X } from "lucide-react";
 import { BrandPicker } from "@/components/trade/concierge/BrandPicker";
 
 export type BriefValues = {
@@ -202,6 +202,42 @@ function saveDraft(draft: BriefDraft) {
   }
 }
 
+const EXPANDED_STORAGE_KEY = "concierge:briefBuilder:expanded";
+
+type ExpandedSections = Record<ObjectBlock, boolean>;
+
+const DEFAULT_EXPANDED: ExpandedSections = {
+  block1: true,
+  block2: true,
+  block3: true,
+};
+
+function loadExpanded(): ExpandedSections {
+  if (typeof window === "undefined") return DEFAULT_EXPANDED;
+  try {
+    const raw = window.localStorage.getItem(EXPANDED_STORAGE_KEY);
+    if (!raw) return DEFAULT_EXPANDED;
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== "object") return DEFAULT_EXPANDED;
+    return {
+      block1: !!parsed.block1,
+      block2: !!parsed.block2,
+      block3: !!parsed.block3,
+    };
+  } catch {
+    return DEFAULT_EXPANDED;
+  }
+}
+
+function saveExpanded(state: ExpandedSections) {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(EXPANDED_STORAGE_KEY, JSON.stringify(state));
+  } catch {
+    // ignore quota errors
+  }
+}
+
 export function BriefBuilder({
   value,
   onChange,
@@ -216,6 +252,7 @@ export function BriefBuilder({
   const [suffix, setSuffix] = useState("");
   const lastEmitted = useRef<string>("");
   const restoredRef = useRef(false);
+  const [expanded, setExpanded] = useState<ExpandedSections>(loadExpanded());
 
   // Restore draft on mount (once), overriding whatever the parent seeded.
   useEffect(() => {
@@ -270,6 +307,37 @@ export function BriefBuilder({
     emit(nextValues, prefix, suffix);
   };
 
+  const toggleSection = (block: ObjectBlock) => {
+    const next = { ...expanded, [block]: !expanded[block] };
+    setExpanded(next);
+    saveExpanded(next);
+  };
+
+  const SectionHeader = ({
+    title,
+    open,
+    onToggle,
+  }: {
+    title: string;
+    open: boolean;
+    onToggle: () => void;
+  }) => (
+    <button
+      type="button"
+      onClick={onToggle}
+      className="mb-2 flex w-full items-center justify-between font-heading text-[12px] font-semibold text-accent"
+      aria-expanded={open}
+      aria-label={open ? `Collapse ${title}` : `Expand ${title}`}
+    >
+      <span>{title}</span>
+      {open ? (
+        <ChevronDown className="h-3.5 w-3.5" />
+      ) : (
+        <ChevronRight className="h-3.5 w-3.5" />
+      )}
+    </button>
+  );
+
 
   const Field = ({
     label,
@@ -315,10 +383,12 @@ export function BriefBuilder({
 
       <div className="space-y-4">
         <section>
-          <div className="font-heading text-[12px] font-semibold text-accent mb-2">
-            {UI_BLOCK_LABELS.block1}
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          <SectionHeader
+            title={UI_BLOCK_LABELS.block1}
+            open={expanded.block1}
+            onToggle={() => toggleSection("block1")}
+          />
+          <div className={expanded.block1 ? "grid grid-cols-1 sm:grid-cols-2 gap-2.5" : "hidden"}>
             <Field
               label="Project Profile"
               value={values.block1.projectProfile}
@@ -347,10 +417,12 @@ export function BriefBuilder({
         </section>
 
         <section>
-          <div className="font-heading text-[12px] font-semibold text-accent mb-2">
-            {UI_BLOCK_LABELS.block2}
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          <SectionHeader
+            title={UI_BLOCK_LABELS.block2}
+            open={expanded.block2}
+            onToggle={() => toggleSection("block2")}
+          />
+          <div className={expanded.block2 ? "grid grid-cols-1 sm:grid-cols-2 gap-2.5" : "hidden"}>
             <Field
               label="Typology"
               value={values.block2.typology}
@@ -379,10 +451,12 @@ export function BriefBuilder({
         </section>
 
         <section>
-          <div className="font-heading text-[12px] font-semibold text-accent mb-2">
-            {UI_BLOCK_LABELS.block3}
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          <SectionHeader
+            title={UI_BLOCK_LABELS.block3}
+            open={expanded.block3}
+            onToggle={() => toggleSection("block3")}
+          />
+          <div className={expanded.block3 ? "grid grid-cols-1 sm:grid-cols-2 gap-2.5" : "hidden"}>
             <Field
               label="Vibe"
               value={values.block3.vibe}
