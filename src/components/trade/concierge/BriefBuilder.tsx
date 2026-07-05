@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
+import { BrandPicker } from "@/components/trade/concierge/BrandPicker";
 
 export type BriefValues = {
   block1: {
