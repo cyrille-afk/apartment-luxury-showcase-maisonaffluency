@@ -66,6 +66,17 @@ export function SpecScheduleBlock({ zone, markdown }: Props) {
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   };
 
+  const formatCoverDate = (iso: string) => {
+    if (!iso) return "";
+    const d = new Date(iso + "T00:00:00");
+    if (isNaN(d.getTime())) return iso;
+    return d.toLocaleDateString(undefined, {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
+
   const buildPdfDoc = async () => {
     const { jsPDF } = await import("jspdf");
     const doc = new jsPDF({ unit: "pt", format: "a4" });
@@ -74,6 +85,54 @@ export function SpecScheduleBlock({ zone, markdown }: Props) {
     const marginX = 48;
     const marginY = 56;
     const maxWidth = pageWidth - marginX * 2;
+
+    // Cover page (optional, configurable)
+    if (includeCover) {
+      const centerX = pageWidth / 2;
+      let cy = pageHeight / 2 - 80;
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(9);
+      doc.setTextColor(140);
+      doc.text("SPECIFICATION SCHEDULE", centerX, cy, { align: "center" });
+      cy += 40;
+
+      doc.setTextColor(0);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(22);
+      const projectLines = doc.splitTextToSize(
+        projectName?.trim() || zone || "Untitled Project",
+        maxWidth,
+      );
+      for (const l of projectLines) {
+        doc.text(l, centerX, cy, { align: "center" });
+        cy += 26;
+      }
+
+      cy += 10;
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(11);
+      doc.setTextColor(80);
+      if (designerName.trim()) {
+        doc.text(designerName.trim(), centerX, cy, { align: "center" });
+        cy += 18;
+      }
+      if (coverDate) {
+        doc.text(formatCoverDate(coverDate), centerX, cy, { align: "center" });
+        cy += 18;
+      }
+
+      // Footer rule
+      doc.setDrawColor(200);
+      doc.line(marginX, pageHeight - marginY, pageWidth - marginX, pageHeight - marginY);
+      doc.setFontSize(8);
+      doc.setTextColor(140);
+      doc.text(zone, marginX, pageHeight - marginY + 14);
+
+      doc.addPage();
+      doc.setTextColor(0);
+    }
+
     let y = marginY;
 
     doc.setFont("helvetica", "bold");
@@ -86,6 +145,7 @@ export function SpecScheduleBlock({ zone, markdown }: Props) {
     doc.text(zone, marginX, y);
     doc.setTextColor(0);
     y += 18;
+
 
     const lines: { text: string; heading?: boolean }[] = [];
     for (const raw of markdown.split("\n")) {
