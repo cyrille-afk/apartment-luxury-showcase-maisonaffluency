@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
+import { BrandPicker } from "@/components/trade/concierge/BrandPicker";
 
 export type BriefValues = {
   block1: {
@@ -317,10 +318,8 @@ export function BriefBuilder({
               placeholder="[e.g. Japandi-Luxe, Italian Minimalism]"
               onChange={(v) => setBlockField("block3", "vibe", v)}
             />
-            <Field
-              label="References"
+            <BrandPicker
               value={values.block3.references}
-              placeholder="Man of Parts / Collection Particulière / De La Espada / Leo Sentou"
               onChange={(v) => setBlockField("block3", "references", v)}
             />
             <Field
