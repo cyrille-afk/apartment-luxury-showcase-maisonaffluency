@@ -430,6 +430,19 @@ function InstagramAuditCard() {
     <>
       <Helmet><title>Admin — Trade Portal — Maison Affluency</title></Helmet>
     <div className="max-w-5xl space-y-6">
+      {/* Inquiries Inbox — Price on Request + concierge + contact form */}
+      <Link
+        to="/trade/admin/inquiries"
+        className="flex items-center gap-2 px-4 py-3 rounded-lg border border-border hover:border-foreground/30 transition-all group"
+      >
+        <Inbox className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+        <div className="flex-1">
+          <span className="font-display text-sm text-foreground">Inquiries Inbox</span>
+          <p className="font-body text-[10px] text-muted-foreground">Review Price-on-Request submissions, concierge chat leads, and contact-form messages. Draft a quote from each and mark it ready to send.</p>
+        </div>
+        <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+      </Link>
+
       {/* Concierge Leads */}
       <Link
         to="/trade/admin/concierge-leads"
