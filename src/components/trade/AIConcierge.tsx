@@ -516,7 +516,7 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
 
 
 
-  const PANEL_W = expanded ? 560 : 380;
+  const PANEL_W = fullscreen ? Math.min(1200, typeof window !== "undefined" ? window.innerWidth - 32 : 1200) : (expanded ? 560 : 380);
   const PANEL_H_OPEN = expanded ? 760 : 560;
   const PANEL_H_MIN = 52;
   const [pos, setPos] = useState<{ x: number; y: number } | null>(() => {
