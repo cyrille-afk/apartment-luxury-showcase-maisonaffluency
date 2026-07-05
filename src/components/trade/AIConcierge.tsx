@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
-import { X, Send, Loader2, Sparkles, Minus, GripHorizontal, RotateCcw, Maximize2, Minimize2, Palette, Check, Languages, Pencil, Paperclip, FileText, Download, FileDown, Copy, ShieldCheck, ListChecks, Eye } from "lucide-react";
+import { X, Send, Loader2, Sparkles, Minus, GripHorizontal, RotateCcw, Maximize2, Minimize2, Palette, Check, Languages, Pencil, Paperclip, FileText, Download, FileDown, Copy, ShieldCheck, ListChecks, Eye, LayoutList } from "lucide-react";
+import { BriefBuilder } from "@/components/trade/concierge/BriefBuilder";
 
 const SPEC_BRIEF_TEMPLATE = `Block 1 — Spatial & Project Context
 PROJECT PROFILE: [typology, city/area]
@@ -138,6 +139,7 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
   const [toneMenuOpen, setToneMenuOpen] = useState(false);
   const [langMenuOpen, setLangMenuOpen] = useState(false);
   const [showBriefPreview, setShowBriefPreview] = useState(false);
+  const [briefBuilderOpen, setBriefBuilderOpen] = useState(false);
   const [timeline, setTimeline] = useState<TimelineItem[]>(() => {
     try {
       const raw = sessionStorage.getItem("concierge:timeline");
@@ -2551,6 +2553,13 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
                 ))}
               </div>
             )}
+            {briefBuilderOpen && (
+              <BriefBuilder
+                value={input}
+                onChange={(next) => setInput(next)}
+                onClose={() => setBriefBuilderOpen(false)}
+              />
+            )}
             {showBriefPreview && input.trim() && (() => {
               const raw = input.trim();
               const blockRegex = /^Block\s+\d+.*$/gim;
@@ -2714,6 +2723,8 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
                     ? `${input.replace(/\s+$/, "")}\n\n${SPEC_BRIEF_TEMPLATE}`
                     : SPEC_BRIEF_TEMPLATE;
                   setInput(next);
+                  setBriefBuilderOpen(true);
+                  setShowBriefPreview(true);
                   setTimeout(() => {
                     const el = inputRef.current;
                     if (el) {
@@ -2728,6 +2739,33 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
                 title="Insert 4-block spec brief template"
               >
                 <ListChecks className="h-4 w-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (!briefBuilderOpen) {
+                    if (!/Block\s+1\s*—/i.test(input)) {
+                      const current = input.trim();
+                      const next = current
+                        ? `${input.replace(/\s+$/, "")}\n\n${SPEC_BRIEF_TEMPLATE}`
+                        : SPEC_BRIEF_TEMPLATE;
+                      setInput(next);
+                    }
+                    setShowBriefPreview(true);
+                  }
+                  setBriefBuilderOpen((v) => !v);
+                }}
+                disabled={streaming}
+                className={`shrink-0 rounded-xl border p-2 disabled:opacity-40 transition-colors ${
+                  briefBuilderOpen
+                    ? "border-accent bg-accent/10 text-accent"
+                    : "border-border bg-muted/40 text-muted-foreground hover:text-foreground hover:bg-muted"
+                }`}
+                aria-label={briefBuilderOpen ? "Close brief builder" : "Edit brief as structured form"}
+                aria-pressed={briefBuilderOpen}
+                title={briefBuilderOpen ? "Close structured brief editor" : "Edit the four-block brief as a structured form"}
+              >
+                <LayoutList className="h-4 w-4" />
               </button>
               <button
                 type="button"
