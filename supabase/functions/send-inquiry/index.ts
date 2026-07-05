@@ -99,7 +99,10 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    const { name, firm, company, email, phone, message, subject, turnstileToken } = parsed.data;
+    const {
+      name, firm, company, email, phone, message, subject, turnstileToken,
+      productId, productSlug, productName, designerName, source,
+    } = parsed.data;
 
     const turnstileOk = await verifyTurnstile(turnstileToken, clientIp);
     if (!turnstileOk) {
@@ -118,6 +121,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Persist the inquiry so it appears in the admin side, not just email.
     const userAgent = req.headers.get("user-agent") || null;
+    const resolvedSource = source || (productId || productSlug ? "public_product" : "contact_form");
     const { error: insertErr } = await supabase.from("inquiries").insert({
       id: idStem,
       name,
@@ -126,11 +130,17 @@ const handler = async (req: Request): Promise<Response> => {
       phone: phone || null,
       subject: subject || null,
       message,
-      source: "send-inquiry",
+      source: resolvedSource,
+      product_id: productId || null,
+      product_slug: productSlug || null,
+      product_name: productName || null,
+      designer_name: designerName || null,
+      status: "new",
       ip_address: clientIp === "unknown" ? null : clientIp,
       user_agent: userAgent,
     });
     if (insertErr) console.error("Inquiry insert failed:", insertErr);
+
 
 
     // 1. Admin notification → concierge inbox
