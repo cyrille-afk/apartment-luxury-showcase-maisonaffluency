@@ -50,7 +50,7 @@ const TradeRegisteredUsers = lazy(() => import("./pages/TradeRegisteredUsers"));
 const TradeGallery = lazy(() => import("./pages/TradeGallery"));
 const TradeDocuments = lazy(() => import("./pages/TradeDocuments"));
 const TradeDownloadsByCountry = lazy(() => import("./pages/TradeDownloadsByCountry"));
-const TradeMagazineAnalytics = lazy(() => import("./pages/TradeMagazineAnalytics"));
+
 const TradeQuotes = lazy(() => import("./pages/TradeQuotes"));
 const TradeQuoteReview = lazy(() => import("./pages/TradeQuoteReview"));
 const TradeSettings = lazy(() => import("./pages/TradeSettings"));
@@ -561,7 +561,7 @@ const App = () => {
                     <Route path="spatial-fit/audit" element={<TradeSpatialFitAudit />} />
                     <Route path="insights" element={<TradeInsights />} />
                     <Route path="downloads-by-country" element={<TradeDownloadsByCountry />} />
-                    <Route path="magazine-analytics" element={<TradeMagazineAnalytics />} />
+                    {/* magazine-analytics route removed — AD free-download flow discontinued */}
                     <Route path="designers" element={<TradeDesigners />} />
                     <Route path="designers/admin" element={<TradeDesignersAdmin />} />
                     <Route path="collectibles/admin" element={<TradeCollectiblesAdmin />} />

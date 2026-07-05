@@ -44,7 +44,7 @@ const commerceGroup: AdminCard[] = [
 const analyticsGroup: AdminCard[] = [
   { title: "Insights", description: "Portal engagement, traffic, and usage analytics", url: "/trade/insights", icon: BarChart3 },
   { title: "Downloads by Country", description: "Track catalogue and spec sheet downloads per country", url: "/trade/downloads-by-country", icon: Globe },
-  { title: "Magazine Funnel", description: "Featured issue impressions, clicks, and downloads", url: "/trade/magazine-analytics", icon: BarChart3 },
+  // Magazine Funnel card removed — AD free-download flow discontinued.
   { title: "Client Profiles", description: "AI-powered taste profiles and engagement scores", url: "/trade/client-profiles", icon: Sparkles },
   { title: "Concierge Token Usage", description: "AI concierge token consumption per user (last 30 days) with cost estimate", url: "/trade/admin/concierge-usage", icon: Sparkles },
   { title: "AI Usage Dashboard", description: "Tokens, requests, and estimated cost by feature and day across all AI features", url: "/trade/admin/ai-usage", icon: BarChart3 },
