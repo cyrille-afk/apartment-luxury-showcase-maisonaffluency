@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { X } from "lucide-react";
+import { ChevronDown, ChevronRight, X } from "lucide-react";
 import { BrandPicker } from "@/components/trade/concierge/BrandPicker";
 
 export type BriefValues = {
@@ -199,6 +199,42 @@ function saveDraft(draft: BriefDraft) {
     window.localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draft));
   } catch {
     // ignore quota / serialization errors
+  }
+}
+
+const EXPANDED_STORAGE_KEY = "concierge:briefBuilder:expanded";
+
+type ExpandedSections = Record<ObjectBlock, boolean>;
+
+const DEFAULT_EXPANDED: ExpandedSections = {
+  block1: true,
+  block2: true,
+  block3: true,
+};
+
+function loadExpanded(): ExpandedSections {
+  if (typeof window === "undefined") return DEFAULT_EXPANDED;
+  try {
+    const raw = window.localStorage.getItem(EXPANDED_STORAGE_KEY);
+    if (!raw) return DEFAULT_EXPANDED;
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== "object") return DEFAULT_EXPANDED;
+    return {
+      block1: !!parsed.block1,
+      block2: !!parsed.block2,
+      block3: !!parsed.block3,
+    };
+  } catch {
+    return DEFAULT_EXPANDED;
+  }
+}
+
+function saveExpanded(state: ExpandedSections) {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(EXPANDED_STORAGE_KEY, JSON.stringify(state));
+  } catch {
+    // ignore quota errors
   }
 }
 
