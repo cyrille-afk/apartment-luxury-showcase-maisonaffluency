@@ -31,6 +31,7 @@ export function SpecScheduleBlock({ zone, markdown }: Props) {
   const [designerName, setDesignerName] = useState("");
   const [coverDate, setCoverDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [includeCover, setIncludeCover] = useState(true);
+  const [pageSize, setPageSize] = useState<"a4" | "letter">("a4");
   const docRef = useRef<any>(null);
 
 
