@@ -12,14 +12,9 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import TaxonomyAudit from "@/components/trade/TaxonomyAudit";
-import HeroManager from "@/components/trade/HeroManager";
-import SampleRequestsAdmin from "@/components/trade/SampleRequestsAdmin";
-import ScrapeProducts from "@/components/trade/ScrapeProducts";
-import InstagramFeedAdmin from "@/components/trade/InstagramFeedAdmin";
-import OgRescrapeAdmin from "@/components/trade/OgRescrapeAdmin";
 import { Link } from "react-router-dom";
-import { Instagram, FileBox, Sparkles, Inbox, FileSpreadsheet, MapPin, AlertTriangle, ShieldCheck, Mail } from "lucide-react";
+import { Inbox, AlertTriangle, ShieldCheck, Mail } from "lucide-react";
+
 
 /**
  * Build a previewable verification checklist for the applicant. The items are
