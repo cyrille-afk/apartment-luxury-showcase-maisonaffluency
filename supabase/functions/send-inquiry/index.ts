@@ -39,6 +39,13 @@ const InquirySchema = z.object({
   message: z.string().trim().min(10, "Message must be at least 10 characters").max(2000),
   subject: z.string().trim().max(200).optional(),
   turnstileToken: z.string().trim().min(10).max(4096).optional(),
+  // Optional product context — set by public "Price on Request" flow so
+  // admins can generate a draft quote directly from the inquiry inbox.
+  productId: z.string().uuid().optional(),
+  productSlug: z.string().trim().max(200).optional(),
+  productName: z.string().trim().max(200).optional(),
+  designerName: z.string().trim().max(200).optional(),
+  source: z.enum(["public_product", "concierge_lead", "contact_form"]).optional(),
 });
 
 async function verifyTurnstile(token: string | undefined, ip: string): Promise<boolean> {
