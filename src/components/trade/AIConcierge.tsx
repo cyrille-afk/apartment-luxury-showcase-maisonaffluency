@@ -2930,12 +2930,23 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
               </button>
               {briefBuilderOpen ? (
                 <div
-                  className="flex-1 rounded-xl border border-dashed border-accent/50 bg-accent/5 px-3 py-2 font-body text-xs text-muted-foreground italic truncate"
-                  title="Editing structured brief above — press Send when ready"
+                  className={`flex-1 rounded-xl border border-dashed px-3 py-2 font-body text-xs italic truncate ${
+                    briefValidation.valid
+                      ? "border-accent/50 bg-accent/5 text-muted-foreground"
+                      : "border-destructive/50 bg-destructive/5 text-destructive"
+                  }`}
+                  title={
+                    briefValidation.valid
+                      ? "Structured brief ready — press Send"
+                      : `Complete: ${briefValidation.missing.join(", ")}`
+                  }
                 >
-                  Editing structured brief above · press Send when ready
+                  {briefValidation.valid
+                    ? "Structured brief ready · press Send"
+                    : `Fill required fields: ${briefValidation.missing.join(", ")}`}
                 </div>
               ) : (
+
                 <textarea
                   ref={inputRef}
                   value={input}
