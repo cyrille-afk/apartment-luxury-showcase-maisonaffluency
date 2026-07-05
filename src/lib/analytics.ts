@@ -240,48 +240,20 @@ export const trackGuide = {
 };
 
 /**
- * Featured free magazine analytics — measure whether the persistent
- * "Free download" badge under Trade Program (and other surfaces) drives
- * downloads. `source` identifies the surface (e.g. "nav_badge",
- * "trade_landing_cta", "trade_landing_cover").
+ * Featured free magazine analytics — DEPRECATED.
+ *
+ * The AD free-download flow has been removed from the trade area. These
+ * helpers are retained as no-ops so any lingering imports keep compiling,
+ * but they no longer emit GA events or hit the `log-magazine-event` edge
+ * function. Safe to delete once we confirm nothing external still calls
+ * them.
  */
-const persistMagazineEvent = (
-  documentId: string,
-  title: string,
-  source: string,
-  eventType: "impression" | "click",
-) => {
-  // Lazy import to avoid circular deps; fire-and-forget.
-  import("@/integrations/supabase/client")
-    .then(({ supabase }) => {
-      void supabase.functions.invoke("log-magazine-event", {
-        body: { documentId, label: title, source, eventType },
-      });
-    })
-    .catch(() => {});
-};
-
 export const trackMagazine = {
-  badgeImpression: (documentId: string, title: string, source: string) => {
-    trackEvent("magazine_badge_impression", {
-      event_category: "Magazine",
-      event_label: title,
-      document_id: documentId,
-      source,
-      ...getDeviceContext(),
-    });
-    persistMagazineEvent(documentId, title, source, "impression");
+  badgeImpression: (_documentId: string, _title: string, _source: string) => {
+    /* no-op: AD free-download flow removed */
   },
-
-  badgeClick: (documentId: string, title: string, source: string) => {
-    trackEvent("magazine_badge_click", {
-      event_category: "Magazine",
-      event_label: title,
-      document_id: documentId,
-      source,
-      ...getDeviceContext(),
-    });
-    persistMagazineEvent(documentId, title, source, "click");
+  badgeClick: (_documentId: string, _title: string, _source: string) => {
+    /* no-op: AD free-download flow removed */
   },
 };
 
