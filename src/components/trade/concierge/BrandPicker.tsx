@@ -43,10 +43,24 @@ function poolForCategory(cat: BrandCategory): string[] {
 
 function parseSelected(value: string): string[] {
   if (!value.trim()) return [];
-  return value
-    .split(/\s*\/\s*/)
-    .map((s) => s.trim())
-    .filter(Boolean);
+  const out: string[] = [];
+  let buf = "";
+  let depth = 0;
+  for (let i = 0; i < value.length; i++) {
+    const ch = value[i];
+    if (ch === "(") depth++;
+    else if (ch === ")") depth = Math.max(0, depth - 1);
+    if (ch === "/" && depth === 0) {
+      const t = buf.trim();
+      if (t) out.push(t);
+      buf = "";
+    } else {
+      buf += ch;
+    }
+  }
+  const t = buf.trim();
+  if (t) out.push(t);
+  return out;
 }
 
 function formatSelected(names: string[]): string {
