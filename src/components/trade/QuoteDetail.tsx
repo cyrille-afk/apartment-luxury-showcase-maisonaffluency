@@ -421,6 +421,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   // quote lands (or is switched) into that mode, force the toggle off so the
   // subtotal, extras, landed-cost panels and PDF totals all show full retail.
   const isMsrpOnly = billingMeta?.billing_mode === "msrp_only";
+  const discountApplies = !isMsrpOnly && tradeDiscount;
   useEffect(() => {
     if (isMsrpOnly && tradeDiscount) setTradeDiscount(false);
   }, [isMsrpOnly, tradeDiscount]);
@@ -1321,6 +1322,8 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     const converted = convertCents(rawPrice, itemPriceCurrency(item, currency), currency) ?? 0;
     return sum + converted * item.quantity;
   }, 0);
+  const tradeDiscountCents = discountApplies && subtotalCents > 0 ? Math.round(subtotalCents * tradeDiscountPct) : 0;
+  const goodsAfterDiscountCents = subtotalCents - tradeDiscountCents;
 
   const buildPdfArgs = async () => {
     const lines: QuotePdfLine[] = items.map((item) => {
@@ -1483,7 +1486,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
       lines,
       subtotalCents,
       tradeDiscountPct,
-      tradeDiscountApplied: tradeDiscount,
+      tradeDiscountApplied: discountApplies,
       tierLabel,
       tierBreakdown: tierConfig
         ? (["silver", "gold", "platinum"] as const).map((t) => ({
@@ -1502,7 +1505,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
         const liveFreightCents = (fxQuoteEur && livePerLine.totalShippingEurCents > 0)
           ? Math.round(livePerLine.totalShippingEurCents / fxQuoteEur)
           : 0;
-        const cifBase = insuredBaseCents + liveFreightCents;
+        const cifBase = goodsAfterDiscountCents + liveFreightCents;
         return cifBase > 0 ? Math.round(cifBase * insuranceRateBps / 10000) : 0;
       })(),
       depositPct: computeWeightedDepositPct(
@@ -1789,10 +1792,8 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     if (error) toast({ title: "Save failed", description: error.message, variant: "destructive" });
   };
 
-  /** Insured goods base: subtotal − trade discount (used by GBP/HK landed-cost panels). */
-  const insuredBaseCents = tradeDiscount && subtotalCents > 0
-    ? subtotalCents - Math.round(subtotalCents * tradeDiscountPct)
-    : subtotalCents;
+  /** Insured goods base: subtotal minus any actually-applicable trade discount. */
+  const insuredBaseCents = goodsAfterDiscountCents;
 
   /**
    * Per-line shipping: groups quote lines by (origin, mode), runs the
@@ -2437,8 +2438,8 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                 title={isMsrpOnly ? "Trade discount is disabled on MSRP-only quotes" : undefined}
                 className={`flex items-center gap-2 ${isMsrpOnly ? "opacity-50 cursor-not-allowed" : ""}`}
               >
-                <div className={`relative w-8 h-[18px] rounded-full transition-colors ${tradeDiscount ? "bg-foreground" : "bg-border"}`}>
-                  <div className={`absolute top-[2px] h-[14px] w-[14px] rounded-full bg-background shadow-sm transition-transform ${tradeDiscount ? "translate-x-[14px]" : "translate-x-[2px]"}`} />
+                <div className={`relative w-8 h-[18px] rounded-full transition-colors ${discountApplies ? "bg-foreground" : "bg-border"}`}>
+                  <div className={`absolute top-[2px] h-[14px] w-[14px] rounded-full bg-background shadow-sm transition-transform ${discountApplies ? "translate-x-[14px]" : "translate-x-[2px]"}`} />
                 </div>
                 <span className="font-body text-[10px] text-muted-foreground uppercase tracking-widest">
                   Trade discount
@@ -2482,7 +2483,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
               </div>
             </div>
 
-            {tradeDiscount && tierConfig && (
+            {discountApplies && tierConfig && (
               <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 font-body text-[10px] text-muted-foreground">
                 <span className="uppercase tracking-widest">Tiers:</span>
                 {(["silver","gold","platinum"] as const).map((t) => {
@@ -3298,7 +3299,9 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                   <div>
                     <div className="font-display text-xs uppercase tracking-[0.15em] text-foreground">Coverage & Insurance</div>
                     <div className="font-body text-[11px] text-muted-foreground mt-0.5">
-                      Bundle transit & all-risk coverage with this quote. Premium is calculated on net value after trade discount.
+                      {isMsrpOnly
+                        ? "Bundle transit & all-risk coverage with this quote. Premium is calculated on full MSRP."
+                        : "Bundle transit & all-risk coverage with this quote. Premium is calculated on net value after trade discount."}
                     </div>
                   </div>
                   <label className="inline-flex items-center gap-2 cursor-pointer select-none shrink-0">
@@ -3393,7 +3396,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                   {displayCcy === "gbp" && subtotalCents > 0 && isUkDestination ? (
                     <div className="w-72 space-y-1">
                       <div className="flex justify-between font-body text-xs text-muted-foreground">
-                        <span>Goods (after discount)</span>
+                        <span>{discountApplies ? "Goods (after discount)" : "Goods (MSRP)"}</span>
                         <span>{gbp.ready ? fmtGbp(gbp.goodsGbpCents) : "…"}</span>
                       </div>
                       <div className="flex justify-between font-body text-xs text-muted-foreground">
@@ -3431,10 +3434,10 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                       <span>Subtotal</span>
                       <span>{formatPriceRaw(subtotalCents, currency) || "TBD"}</span>
                     </div>
-                    {tradeDiscount && subtotalCents > 0 && (
+                    {discountApplies && subtotalCents > 0 && (
                       <div className="flex justify-between font-body text-xs text-muted-foreground">
                         <span>Trade Discount ({tradeDiscountLabel})</span>
-                        <span>-{formatPriceRaw(Math.round(subtotalCents * tradeDiscountPct), currency)}</span>
+                        <span>-{formatPriceRaw(tradeDiscountCents, currency)}</span>
                       </div>
                     )}
                     {insuranceEnabled && insurancePremiumCents > 0 && (
@@ -3446,8 +3449,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                       </div>
                     )}
                     {gstEnabled && subtotalCents > 0 && (() => {
-                      const afterDiscount = tradeDiscount ? subtotalCents - Math.round(subtotalCents * tradeDiscountPct) : subtotalCents;
-                      const taxable = afterDiscount + insurancePremiumCents;
+                      const taxable = goodsAfterDiscountCents + insurancePremiumCents;
                       return (
                         <div className="flex justify-between font-body text-xs text-muted-foreground">
                           <span>GST ({gstRate}%)</span>
@@ -3456,8 +3458,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                       );
                     })()}
                     {(() => {
-                      const afterDiscount = tradeDiscount && subtotalCents > 0 ? subtotalCents - Math.round(subtotalCents * tradeDiscountPct) : subtotalCents;
-                      const taxable = afterDiscount + insurancePremiumCents;
+                      const taxable = goodsAfterDiscountCents + insurancePremiumCents;
                       const goodsTotal = gstEnabled && taxable > 0
                         ? taxable + Math.round(taxable * gstRate / 100)
                         : taxable;
@@ -3554,11 +3555,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                 {subtotalCents > 0 && isUkDestination && (
                   <div className="mt-4">
                     <UkLandedCostPanel
-                      goodsAfterDiscountCents={
-                        tradeDiscount
-                          ? subtotalCents - Math.round(subtotalCents * tradeDiscountPct)
-                          : subtotalCents
-                      }
+                      goodsAfterDiscountCents={goodsAfterDiscountCents}
                       quoteCurrency={currency}
                       defaultExpanded={false}
                       quoteRef={quoteNumber}
@@ -3575,11 +3572,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                 {subtotalCents > 0 && isHkDestination && (
                   <div className="mt-4">
                     <HkLandedCostPanel
-                      goodsAfterDiscountCents={
-                        tradeDiscount
-                          ? subtotalCents - Math.round(subtotalCents * tradeDiscountPct)
-                          : subtotalCents
-                      }
+                      goodsAfterDiscountCents={goodsAfterDiscountCents}
                       quoteCurrency={currency}
                       defaultExpanded={false}
                       quoteRef={quoteNumber}
@@ -3783,6 +3776,16 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
               subtotalCents={subtotalCents}
               currency={currency}
               isEditable={isDraft || isPriced}
+              onBillingModeChange={(next) => {
+                setBillingMeta((prev) => ({
+                  billing_mode: next.billing_mode,
+                  net_discount_pct: next.net_discount_pct,
+                  commission_pct: next.commission_pct,
+                  end_client_billing: (next.end_client_billing as Record<string, string> | null) ?? null,
+                  resale_certificate_id: next.resale_certificate_id,
+                  studio_id: prev?.studio_id ?? null,
+                }));
+              }}
             />
           </div>
         )}
@@ -3801,7 +3804,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
         )}
 
         {isPriced && (() => {
-          const afterDiscount = tradeDiscount && subtotalCents > 0 ? subtotalCents - Math.round(subtotalCents * tradeDiscountPct) : subtotalCents;
+          const afterDiscount = goodsAfterDiscountCents;
           const withGst = gstEnabled && afterDiscount > 0 ? afterDiscount + Math.round(afterDiscount * gstRate / 100) : afterDiscount;
           const shippingQuoteCents = (fxQuoteEur && perLine.totalShippingEurCents > 0)
             ? Math.round(perLine.totalShippingEurCents / fxQuoteEur)
@@ -3845,7 +3848,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
               {subtotalCents > 0 && (() => {
                 const sym = currencySymbol(currency);
                 const fmt = (c: number) => `${sym}${formatPriceRaw(c, currency)}`;
-                const discountCents = tradeDiscount ? Math.round(subtotalCents * tradeDiscountPct) : 0;
+                const discountCents = tradeDiscountCents;
                 const gstCents = gstEnabled ? Math.round(afterDiscount * gstRate / 100) : 0;
                 const processingFee = chargeTotal - depositCents;
                 const Row = ({ label, value, strong = false, muted = false }: { label: React.ReactNode; value: React.ReactNode; strong?: boolean; muted?: boolean }) => (
@@ -3859,7 +3862,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                     <p className="font-display text-[10px] uppercase tracking-[0.15em] text-foreground/70 mb-2">60% Deposit Breakdown</p>
                     <div className="font-body text-[11px] space-y-1">
                       <Row label="Item subtotal" value={`${fmt(subtotalCents)} ${currency}`} />
-                      {tradeDiscount && discountCents > 0 && (
+                      {discountApplies && discountCents > 0 && (
                         <Row label={`Trade discount (${Math.round(tradeDiscountPct * 100)}%)`} value={`− ${fmt(discountCents)} ${currency}`} muted />
                       )}
                       <Row label="Net subtotal" value={`${fmt(afterDiscount)} ${currency}`} />
@@ -3892,7 +3895,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
         })()}
 
         {isConfirmed && !isFullyPaid && (() => {
-          const afterDiscount = tradeDiscount && subtotalCents > 0 ? subtotalCents - Math.round(subtotalCents * tradeDiscountPct) : subtotalCents;
+          const afterDiscount = goodsAfterDiscountCents;
           const withGst = gstEnabled && afterDiscount > 0
             ? afterDiscount + Math.round(afterDiscount * gstRate / 100)
             : afterDiscount;

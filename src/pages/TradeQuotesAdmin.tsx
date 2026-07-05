@@ -31,6 +31,7 @@ interface AdminQuote {
   confirmed_at: string | null;
   created_at: string;
   updated_at: string;
+  billing_mode?: "agent_commission" | "net_buy" | "msrp_only" | null;
   landed_cost_cbm?: number | null;
   landed_cost_kg?: number | null;
   landed_cost_mode?: "road" | "courier" | null;
@@ -521,6 +522,8 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
   }, [quoteId]);
 
   const currency = quote?.currency || "SGD";
+  const isMsrpOnly = quote?.billing_mode === "msrp_only";
+  const effectiveOwnerDiscountPct = isMsrpOnly ? 0 : ownerDiscountPct;
 
   const handleSendPricing = async () => {
     setSaving(true);
@@ -614,7 +617,7 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
 
   // GBP DDP landed-cost amounts for the totals toggle
   const goodsAfterDiscountCents =
-    subtotalCents - (ownerDiscountPct > 0 ? Math.round(subtotalCents * ownerDiscountPct) : 0);
+    subtotalCents - (effectiveOwnerDiscountPct > 0 ? Math.round(subtotalCents * effectiveOwnerDiscountPct) : 0);
   const gbp = useGbpLandedCost({
     goodsAfterDiscountCents: isUkDestination ? goodsAfterDiscountCents : 0,
     quoteCurrency: currency,
@@ -688,7 +691,7 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
                   const priceStr = itemPrices[item.id] || "";
                   const cents = priceStr ? Math.round(parseFloat(priceStr) * 100) : 0;
                   const lineTotal = cents * item.quantity;
-                  const discountedUnit = ownerDiscountPct > 0 ? Math.round(cents * (1 - ownerDiscountPct)) : cents;
+                  const discountedUnit = effectiveOwnerDiscountPct > 0 ? Math.round(cents * (1 - effectiveOwnerDiscountPct)) : cents;
                   const lead = leadTimes[item.id];
                   // Per-line admin override wins over the catalog/brand default from the RPC.
                   const overrideLead = leadOverride(item.lead_time_weeks_override);
@@ -741,9 +744,9 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
                             className="w-full pl-8 pr-2 py-1.5 border border-border rounded-md font-body text-sm text-foreground text-right bg-background focus:outline-none focus:ring-1 focus:ring-primary/30"
                           />
                         </div>
-                        {ownerDiscountPct > 0 && cents > 0 && (
+                        {effectiveOwnerDiscountPct > 0 && cents > 0 && (
                           <p className="font-body text-[9px] text-emerald-600/80 text-right mt-0.5">
-                            After {(ownerDiscountPct * 100).toFixed(0)}% trade: {formatPrice(discountedUnit, currency)}
+                            After {(effectiveOwnerDiscountPct * 100).toFixed(0)}% trade: {formatPrice(discountedUnit, currency)}
                           </p>
                         )}
                       </div>
@@ -785,7 +788,7 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
                   </div>
                 )}
                 {(() => {
-                  const discountCents = ownerDiscountPct > 0 ? Math.round(subtotalCents * ownerDiscountPct) : 0;
+                  const discountCents = effectiveOwnerDiscountPct > 0 ? Math.round(subtotalCents * effectiveOwnerDiscountPct) : 0;
                   const afterDiscountCents = subtotalCents - discountCents;
                   // Strict GST guard: only when the quote is SGD AND fully loaded (never on the SGD fallback while quote is still null).
                   const showGst = quote?.currency === "SGD" && afterDiscountCents > 0;
@@ -797,7 +800,7 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
                     return (
                       <div className="w-72 space-y-1">
                         <div className="flex justify-between font-body text-xs text-muted-foreground">
-                          <span>Goods (after discount)</span>
+                          <span>{effectiveOwnerDiscountPct > 0 ? "Goods (after discount)" : "Goods (MSRP)"}</span>
                           <span>{gbp.ready ? fmtGbp(gbp.goodsGbpCents) : "…"}</span>
                         </div>
                         <div className="flex justify-between font-body text-xs text-muted-foreground">
@@ -841,9 +844,9 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
                         <span>Subtotal</span>
                         <span>{subtotalCents > 0 ? formatPrice(subtotalCents, currency) : "—"}</span>
                       </div>
-                      {ownerDiscountPct > 0 && subtotalCents > 0 && (
+                      {effectiveOwnerDiscountPct > 0 && subtotalCents > 0 && (
                         <div className="flex justify-between font-body text-xs text-emerald-600/80">
-                          <span>Trade discount ({(ownerDiscountPct * 100).toFixed(0)}% · {ownerTierLabel})</span>
+                          <span>Trade discount ({(effectiveOwnerDiscountPct * 100).toFixed(0)}% · {ownerTierLabel})</span>
                           <span>− {formatPrice(discountCents, currency)}</span>
                         </div>
                       )}
@@ -866,7 +869,7 @@ const AdminQuoteDetail = ({ quoteId, onBack }: { quoteId: string; onBack: () => 
 
               {/* UK landed cost (DDP, GBP) — only for linked UK clients */}
               {subtotalCents > 0 && isUkDestination && (() => {
-                const discountCents = ownerDiscountPct > 0 ? Math.round(subtotalCents * ownerDiscountPct) : 0;
+                const discountCents = effectiveOwnerDiscountPct > 0 ? Math.round(subtotalCents * effectiveOwnerDiscountPct) : 0;
                 const goodsAfter = subtotalCents - discountCents;
                 return (
                   <div className="mt-4">
