@@ -27,7 +27,8 @@ vi.mock("@/integrations/supabase/client", () => {
     select: () => chain,
     eq: () => chain,
     order: () => chain,
-    then: (resolve: any) => resolve({ data: rows, error: null }),
+    then: (onFulfilled: any, onRejected: any) =>
+      Promise.resolve({ data: rows, error: null }).then(onFulfilled, onRejected),
   };
   return {
     supabase: {
