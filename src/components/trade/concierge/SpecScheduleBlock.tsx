@@ -26,7 +26,13 @@ export function SpecScheduleBlock({ zone, markdown }: Props) {
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [building, setBuilding] = useState(false);
+  const [coverOpen, setCoverOpen] = useState(false);
+  const [projectName, setProjectName] = useState(zone && zone !== "Tearsheet" ? zone : "");
+  const [designerName, setDesignerName] = useState("");
+  const [coverDate, setCoverDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const [includeCover, setIncludeCover] = useState(true);
   const docRef = useRef<any>(null);
+
 
   const slug = useMemo(() => {
     return (
@@ -60,6 +66,17 @@ export function SpecScheduleBlock({ zone, markdown }: Props) {
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   };
 
+  const formatCoverDate = (iso: string) => {
+    if (!iso) return "";
+    const d = new Date(iso + "T00:00:00");
+    if (isNaN(d.getTime())) return iso;
+    return d.toLocaleDateString(undefined, {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
+
   const buildPdfDoc = async () => {
     const { jsPDF } = await import("jspdf");
     const doc = new jsPDF({ unit: "pt", format: "a4" });
@@ -68,6 +85,54 @@ export function SpecScheduleBlock({ zone, markdown }: Props) {
     const marginX = 48;
     const marginY = 56;
     const maxWidth = pageWidth - marginX * 2;
+
+    // Cover page (optional, configurable)
+    if (includeCover) {
+      const centerX = pageWidth / 2;
+      let cy = pageHeight / 2 - 80;
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(9);
+      doc.setTextColor(140);
+      doc.text("SPECIFICATION SCHEDULE", centerX, cy, { align: "center" });
+      cy += 40;
+
+      doc.setTextColor(0);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(22);
+      const projectLines = doc.splitTextToSize(
+        projectName?.trim() || zone || "Untitled Project",
+        maxWidth,
+      );
+      for (const l of projectLines) {
+        doc.text(l, centerX, cy, { align: "center" });
+        cy += 26;
+      }
+
+      cy += 10;
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(11);
+      doc.setTextColor(80);
+      if (designerName.trim()) {
+        doc.text(designerName.trim(), centerX, cy, { align: "center" });
+        cy += 18;
+      }
+      if (coverDate) {
+        doc.text(formatCoverDate(coverDate), centerX, cy, { align: "center" });
+        cy += 18;
+      }
+
+      // Footer rule
+      doc.setDrawColor(200);
+      doc.line(marginX, pageHeight - marginY, pageWidth - marginX, pageHeight - marginY);
+      doc.setFontSize(8);
+      doc.setTextColor(140);
+      doc.text(zone, marginX, pageHeight - marginY + 14);
+
+      doc.addPage();
+      doc.setTextColor(0);
+    }
+
     let y = marginY;
 
     doc.setFont("helvetica", "bold");
@@ -80,6 +145,7 @@ export function SpecScheduleBlock({ zone, markdown }: Props) {
     doc.text(zone, marginX, y);
     doc.setTextColor(0);
     y += 18;
+
 
     const lines: { text: string; heading?: boolean }[] = [];
     for (const raw of markdown.split("\n")) {
@@ -202,7 +268,7 @@ export function SpecScheduleBlock({ zone, markdown }: Props) {
           </button>
           <button
             type="button"
-            onClick={onOpenPreview}
+            onClick={() => setCoverOpen(true)}
             disabled={building}
             className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background hover:bg-accent/10 hover:border-accent/40 px-2.5 py-1 text-[11px] font-body text-foreground transition disabled:opacity-60"
             aria-label="Preview PDF before download"
@@ -210,6 +276,7 @@ export function SpecScheduleBlock({ zone, markdown }: Props) {
             <Eye className="h-3 w-3" />
             {building ? "Building…" : "Preview PDF"}
           </button>
+
         </div>
       </div>
 
@@ -251,6 +318,95 @@ export function SpecScheduleBlock({ zone, markdown }: Props) {
           {markdown}
         </ReactMarkdown>
       </div>
+
+      <Dialog open={coverOpen} onOpenChange={setCoverOpen}>
+        <DialogContent className="max-w-md p-0 gap-0 overflow-hidden">
+          <DialogHeader className="px-4 py-3 border-b border-border/60 space-y-0">
+            <DialogTitle className="font-display text-sm uppercase tracking-[0.14em]">
+              Cover page
+            </DialogTitle>
+          </DialogHeader>
+          <form
+            className="p-4 space-y-3"
+            onSubmit={(e) => {
+              e.preventDefault();
+              setCoverOpen(false);
+              onOpenPreview();
+            }}
+          >
+            <label className="flex items-center gap-2 text-[12px] font-body text-foreground">
+              <input
+                type="checkbox"
+                checked={includeCover}
+                onChange={(e) => setIncludeCover(e.target.checked)}
+                className="h-3.5 w-3.5 accent-current"
+              />
+              Include cover page
+            </label>
+
+            <div className="space-y-1">
+              <label className="text-[10px] uppercase tracking-[0.14em] font-body text-muted-foreground">
+                Project name
+              </label>
+              <input
+                type="text"
+                value={projectName}
+                onChange={(e) => setProjectName(e.target.value)}
+                disabled={!includeCover}
+                placeholder={zone || "Untitled Project"}
+                className="w-full rounded-md border border-border bg-background px-2.5 py-1.5 text-[13px] font-body text-foreground focus:outline-none focus:border-accent/60 disabled:opacity-50"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-[10px] uppercase tracking-[0.14em] font-body text-muted-foreground">
+                Designer / studio
+              </label>
+              <input
+                type="text"
+                value={designerName}
+                onChange={(e) => setDesignerName(e.target.value)}
+                disabled={!includeCover}
+                placeholder="e.g. Maison Affluency"
+                className="w-full rounded-md border border-border bg-background px-2.5 py-1.5 text-[13px] font-body text-foreground focus:outline-none focus:border-accent/60 disabled:opacity-50"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-[10px] uppercase tracking-[0.14em] font-body text-muted-foreground">
+                Date
+              </label>
+              <input
+                type="date"
+                value={coverDate}
+                onChange={(e) => setCoverDate(e.target.value)}
+                disabled={!includeCover}
+                className="w-full rounded-md border border-border bg-background px-2.5 py-1.5 text-[13px] font-body text-foreground focus:outline-none focus:border-accent/60 disabled:opacity-50"
+              />
+            </div>
+
+            <div className="flex items-center justify-end gap-1.5 pt-1">
+              <button
+                type="button"
+                onClick={() => setCoverOpen(false)}
+                className="inline-flex items-center rounded-full border border-border bg-background hover:bg-accent/10 hover:border-accent/40 px-3 py-1.5 text-[11px] font-body text-foreground transition"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={building}
+                className="inline-flex items-center gap-1.5 rounded-full border border-accent/60 bg-accent/10 hover:bg-accent/20 px-3 py-1.5 text-[11px] font-body text-foreground transition disabled:opacity-60"
+              >
+                <Eye className="h-3 w-3" />
+                Build preview
+              </button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+
 
       <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
         <DialogContent className="max-w-5xl w-[92vw] h-[88vh] p-0 gap-0 overflow-hidden">
