@@ -1,19 +1,66 @@
 import { useMemo, useRef, useState } from "react";
 import { X, ChevronDown } from "lucide-react";
 import designersIndex from "@/data/designersIndex.json";
+import brandCategoriesRaw from "@/data/brandCategories.json";
 
 type Designer = { slug: string; name: string };
+
+export type BrandCategory =
+  | "all"
+  | "seating"
+  | "lighting"
+  | "tables"
+  | "storage"
+  | "rugs"
+  | "decor"
+  | "bedroom";
+
+const BRAND_CATEGORIES: Record<Exclude<BrandCategory, "all">, string[]> =
+  brandCategoriesRaw as Record<Exclude<BrandCategory, "all">, string[]>;
+
+const CATEGORY_LABELS: { key: BrandCategory; label: string }[] = [
+  { key: "all", label: "All" },
+  { key: "seating", label: "Seating" },
+  { key: "lighting", label: "Lighting" },
+  { key: "tables", label: "Tables" },
+  { key: "storage", label: "Storage" },
+  { key: "rugs", label: "Rugs" },
+  { key: "decor", label: "Decor" },
+  { key: "bedroom", label: "Bedroom" },
+];
 
 const ALL_BRANDS: string[] = (designersIndex as Designer[])
   .map((d) => d.name)
   .sort((a, b) => a.localeCompare(b, "en", { sensitivity: "base" }));
 
+function poolForCategory(cat: BrandCategory): string[] {
+  if (cat === "all") return ALL_BRANDS;
+  const set = new Set(
+    (BRAND_CATEGORIES[cat] ?? []).map((n) => n.toLowerCase())
+  );
+  return ALL_BRANDS.filter((b) => set.has(b.toLowerCase()));
+}
+
 function parseSelected(value: string): string[] {
   if (!value.trim()) return [];
-  return value
-    .split(/\s*\/\s*/)
-    .map((s) => s.trim())
-    .filter(Boolean);
+  const out: string[] = [];
+  let buf = "";
+  let depth = 0;
+  for (let i = 0; i < value.length; i++) {
+    const ch = value[i];
+    if (ch === "(") depth++;
+    else if (ch === ")") depth = Math.max(0, depth - 1);
+    if (ch === "/" && depth === 0) {
+      const t = buf.trim();
+      if (t) out.push(t);
+      buf = "";
+    } else {
+      buf += ch;
+    }
+  }
+  const t = buf.trim();
+  if (t) out.push(t);
+  return out;
 }
 
 function formatSelected(names: string[]): string {
@@ -23,12 +70,15 @@ function formatSelected(names: string[]): string {
 export function BrandPicker({
   value,
   onChange,
+  defaultCategory = "all",
 }: {
   value: string;
   onChange: (next: string) => void;
+  defaultCategory?: BrandCategory;
 }) {
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
+  const [category, setCategory] = useState<BrandCategory>(defaultCategory);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const selected = useMemo(() => parseSelected(value), [value]);
@@ -37,12 +87,14 @@ export function BrandPicker({
     [selected]
   );
 
+  const pool = useMemo(() => poolForCategory(category), [category]);
+
   const suggestions = useMemo(() => {
     const q = query.trim().toLowerCase();
-    const pool = ALL_BRANDS.filter((b) => !selectedSet.has(b.toLowerCase()));
-    if (!q) return pool.slice(0, 8);
-    return pool.filter((b) => b.toLowerCase().includes(q)).slice(0, 8);
-  }, [query, selectedSet]);
+    const filtered = pool.filter((b) => !selectedSet.has(b.toLowerCase()));
+    if (!q) return filtered.slice(0, 10);
+    return filtered.filter((b) => b.toLowerCase().includes(q)).slice(0, 10);
+  }, [pool, query, selectedSet]);
 
   const add = (name: string) => {
     if (selectedSet.has(name.toLowerCase())) return;
@@ -68,8 +120,24 @@ export function BrandPicker({
       <span className="font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
         References (in-catalogue brands)
       </span>
+      <div className="mt-1 flex flex-wrap gap-1 mb-1.5">
+        {CATEGORY_LABELS.map((c) => (
+          <button
+            key={c.key}
+            type="button"
+            onClick={() => setCategory(c.key)}
+            className={`rounded-full border px-2 py-0.5 font-body text-[10px] uppercase tracking-[0.08em] transition-colors ${
+              category === c.key
+                ? "border-accent bg-accent text-accent-foreground"
+                : "border-border bg-muted/40 text-muted-foreground hover:bg-muted"
+            }`}
+          >
+            {c.label}
+          </button>
+        ))}
+      </div>
       <div
-        className="mt-1 rounded-lg border border-border bg-background px-2 py-1.5 focus-within:ring-1 focus-within:ring-accent"
+        className="rounded-lg border border-border bg-background px-2 py-1.5 focus-within:ring-1 focus-within:ring-accent"
         onClick={() => inputRef.current?.focus()}
       >
         <div className="flex flex-wrap gap-1.5 items-center">
@@ -146,7 +214,7 @@ export function BrandPicker({
         )}
       </div>
       <span className="mt-1 block font-body text-[10px] text-muted-foreground">
-        {selected.length} selected · {ALL_BRANDS.length} brands in catalogue
+        {selected.length} selected · {pool.length} {category === "all" ? "brands" : `${category} brands`} in catalogue
       </span>
     </label>
   );
