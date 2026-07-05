@@ -27,7 +27,7 @@ import { CATEGORY_ORDER, SUBCATEGORY_MAP } from "@/lib/productTaxonomy";
 import { categoryUrl } from "@/lib/categorySlugs";
 import AuthGateDialog from "@/components/AuthGateDialog";
 import { supabase } from "@/integrations/supabase/client";
-import { useFeaturedPublicDocument } from "@/hooks/useFeaturedPublicDocument";
+// useFeaturedPublicDocument import removed — AD free-download flow discontinued.
 import FavoritesHoverPreview from "@/components/FavoritesHoverPreview";
 import ShippingDestinationSwitcher from "@/components/ShippingDestinationSwitcher";
 const logoIcon = cloudinaryUrl("affluency-logo-icon_mpchum", { width: 200, quality: "auto", crop: "fill" });
