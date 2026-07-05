@@ -331,20 +331,11 @@ export function BriefBuilder({
           </div>
         </section>
 
-        <section>
-          <div className="font-heading text-[12px] font-semibold text-accent mb-2">
-            {BLOCK_LABELS.block4}
-          </div>
-          <label className="block">
-            <textarea
-              value={values.block4}
-              onChange={(e) => setBlock4(e.target.value)}
-              rows={5}
-              placeholder="Describe the output you want..."
-              className="mt-1 block w-full rounded-lg border border-border bg-background px-2.5 py-1.5 font-body text-[12px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-accent resize-none"
-            />
-          </label>
-        </section>
+        {/* Block 4 (Output Execution Protocol) is intentionally hidden from
+            the user — it's a fixed internal directive that ships with every
+            brief. The value is still preserved via `values.block4` and emitted
+            through formatBrief so the model always receives it. */}
+
       </div>
     </div>
   );
