@@ -324,6 +324,37 @@ export default function BillingModeCard({
             </div>
           </div>
         </button>
+
+        {/* MSRP ONLY — price-on-request / retail quote */}
+        <button
+          type="button"
+          onClick={() => isEditable && !saving && handleModeChange("msrp_only")}
+          disabled={!isEditable || saving}
+          className={`text-left rounded-md border p-4 transition-colors ${
+            mode === "msrp_only" ? "border-foreground bg-muted/40" : "border-border hover:bg-muted/20"
+          } ${!isEditable ? "cursor-not-allowed opacity-70" : ""}`}
+        >
+          <div className="flex items-start gap-3">
+            <span
+              className={`mt-1 inline-block h-4 w-4 rounded-full border-2 shrink-0 ${
+                mode === "msrp_only" ? "border-foreground bg-foreground" : "border-muted-foreground bg-background"
+              }`}
+              aria-hidden
+            />
+            <div className="space-y-1 min-w-0 flex-1">
+              <div className="font-medium text-sm flex items-center gap-2">
+                <Tag className="h-3.5 w-3.5" /> MSRP only — price on request
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Retail quote at full MSRP with no trade commission or buy-net margin. Use for
+                price-on-request replies to prospective clients before a trade relationship is set.
+              </p>
+              <p className="text-xs text-foreground/80 tabular-nums">
+                Client pays: {fmtCents(subtotalCents, currency)}
+              </p>
+            </div>
+          </div>
+        </button>
       </div>
 
       {/* AGENT mode — end-client billing */}
