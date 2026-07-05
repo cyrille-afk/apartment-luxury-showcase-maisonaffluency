@@ -383,10 +383,12 @@ export function BriefBuilder({
 
       <div className="space-y-4">
         <section>
-          <div className="font-heading text-[12px] font-semibold text-accent mb-2">
-            {UI_BLOCK_LABELS.block1}
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          <SectionHeader
+            title={UI_BLOCK_LABELS.block1}
+            open={expanded.block1}
+            onToggle={() => toggleSection("block1")}
+          />
+          <div className={expanded.block1 ? "grid grid-cols-1 sm:grid-cols-2 gap-2.5" : "hidden"}>
             <Field
               label="Project Profile"
               value={values.block1.projectProfile}
@@ -415,10 +417,12 @@ export function BriefBuilder({
         </section>
 
         <section>
-          <div className="font-heading text-[12px] font-semibold text-accent mb-2">
-            {UI_BLOCK_LABELS.block2}
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          <SectionHeader
+            title={UI_BLOCK_LABELS.block2}
+            open={expanded.block2}
+            onToggle={() => toggleSection("block2")}
+          />
+          <div className={expanded.block2 ? "grid grid-cols-1 sm:grid-cols-2 gap-2.5" : "hidden"}>
             <Field
               label="Typology"
               value={values.block2.typology}
@@ -447,10 +451,12 @@ export function BriefBuilder({
         </section>
 
         <section>
-          <div className="font-heading text-[12px] font-semibold text-accent mb-2">
-            {UI_BLOCK_LABELS.block3}
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          <SectionHeader
+            title={UI_BLOCK_LABELS.block3}
+            open={expanded.block3}
+            onToggle={() => toggleSection("block3")}
+          />
+          <div className={expanded.block3 ? "grid grid-cols-1 sm:grid-cols-2 gap-2.5" : "hidden"}>
             <Field
               label="Vibe"
               value={values.block3.vibe}
