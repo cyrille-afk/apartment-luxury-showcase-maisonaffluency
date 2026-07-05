@@ -2569,20 +2569,57 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
                   sections.push({ header: h.trim(), body: (parts[i] ?? "").trim() });
                 });
               }
+              const formattedText = sections
+                .map((s) => {
+                  const isBlock3 = !!s.header && /^Block\s+3\b/i.test(s.header);
+                  const moodImages = isBlock3
+                    ? attachments.filter((a) => a.role === "moodboard" && a.kind === "image")
+                    : [];
+                  let block = s.header ? `${s.header}\n${s.body}` : s.body;
+                  if (moodImages.length) {
+                    block += `\nMOOD BOARD REFERENCES: ${moodImages.map((m) => m.name).join(", ")}`;
+                  }
+                  return block;
+                })
+                .join("\n\n") +
+                (attachments.length
+                  ? "\n\nATTACHMENTS:\n" + attachments.map((a) => `- ${a.name}`).join("\n")
+                  : "");
               return (
                 <div className="mb-2 rounded-xl border border-accent/40 bg-muted/30 p-3 max-h-[45vh] overflow-y-auto">
                   <div className="flex items-center justify-between mb-2">
                     <span className="font-body text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
                       Brief preview
                     </span>
-                    <button
-                      type="button"
-                      onClick={() => setShowBriefPreview(false)}
-                      className="rounded p-0.5 text-muted-foreground hover:text-foreground hover:bg-foreground/10"
-                      aria-label="Close preview"
-                    >
-                      <X className="h-3.5 w-3.5" />
-                    </button>
+                    <div className="flex items-center gap-1">
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          try {
+                            await navigator.clipboard.writeText(formattedText);
+                            setPreviewCopied(true);
+                            setTimeout(() => setPreviewCopied(false), 1400);
+                          } catch { /* ignore */ }
+                        }}
+                        className="rounded p-0.5 text-muted-foreground hover:text-foreground hover:bg-foreground/10"
+                        title="Copy formatted brief"
+                        aria-label="Copy formatted brief"
+                      >
+                        {previewCopied ? (
+                          <Check className="h-3.5 w-3.5 text-emerald-600" />
+                        ) : (
+                          <Copy className="h-3.5 w-3.5" />
+                        )}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setShowBriefPreview(false)}
+                        className="rounded p-0.5 text-muted-foreground hover:text-foreground hover:bg-foreground/10"
+                        aria-label="Close preview"
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
                   </div>
                   <div className="space-y-3">
                     {sections.map((s, i) => {
