@@ -80,7 +80,7 @@ export function SpecScheduleBlock({ zone, markdown }: Props) {
 
   const buildPdfDoc = async () => {
     const { jsPDF } = await import("jspdf");
-    const doc = new jsPDF({ unit: "pt", format: "a4" });
+    const doc = new jsPDF({ unit: "pt", format: pageSize });
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
     const marginX = 48;
