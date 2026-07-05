@@ -2483,7 +2483,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
               </div>
             </div>
 
-            {tradeDiscount && tierConfig && (
+            {discountApplies && tierConfig && (
               <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 font-body text-[10px] text-muted-foreground">
                 <span className="uppercase tracking-widest">Tiers:</span>
                 {(["silver","gold","platinum"] as const).map((t) => {
@@ -3396,7 +3396,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                   {displayCcy === "gbp" && subtotalCents > 0 && isUkDestination ? (
                     <div className="w-72 space-y-1">
                       <div className="flex justify-between font-body text-xs text-muted-foreground">
-                        <span>Goods (after discount)</span>
+                        <span>{discountApplies ? "Goods (after discount)" : "Goods (MSRP)"}</span>
                         <span>{gbp.ready ? fmtGbp(gbp.goodsGbpCents) : "…"}</span>
                       </div>
                       <div className="flex justify-between font-body text-xs text-muted-foreground">
