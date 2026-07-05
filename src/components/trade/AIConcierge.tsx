@@ -2498,6 +2498,28 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
               >
                 <Paperclip className="h-4 w-4" />
               </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const current = input.trim();
+                  const next = current
+                    ? `${input.replace(/\s+$/, "")}\n\n${SPEC_BRIEF_TEMPLATE}`
+                    : SPEC_BRIEF_TEMPLATE;
+                  setInput(next);
+                  setTimeout(() => {
+                    const el = inputRef.current;
+                    if (el) {
+                      el.focus();
+                      el.setSelectionRange(el.value.length, el.value.length);
+                    }
+                  }, 0);
+                }}
+                disabled={streaming}
+                className="shrink-0 rounded-xl border border-border bg-muted/40 p-2 text-muted-foreground hover:text-foreground hover:bg-muted disabled:opacity-40 transition-colors"
+                aria-label="Insert spec brief template"
+                title="Insert 4-block spec brief template"
+              >
+                <ListChecks className="h-4 w-4" />
               <textarea
                 ref={inputRef}
                 value={input}
