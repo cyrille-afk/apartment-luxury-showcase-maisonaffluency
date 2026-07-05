@@ -2646,6 +2646,51 @@ export type Database = {
         }
         Relationships: []
       }
+      inquiries: {
+        Row: {
+          company: string | null
+          created_at: string
+          email: string
+          id: string
+          ip_address: string | null
+          message: string
+          name: string
+          phone: string | null
+          source: string | null
+          subject: string | null
+          updated_at: string
+          user_agent: string | null
+        }
+        Insert: {
+          company?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          ip_address?: string | null
+          message: string
+          name: string
+          phone?: string | null
+          source?: string | null
+          subject?: string | null
+          updated_at?: string
+          user_agent?: string | null
+        }
+        Update: {
+          company?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          ip_address?: string | null
+          message?: string
+          name?: string
+          phone?: string | null
+          source?: string | null
+          subject?: string | null
+          updated_at?: string
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       journal_articles: {
         Row: {
           author: string

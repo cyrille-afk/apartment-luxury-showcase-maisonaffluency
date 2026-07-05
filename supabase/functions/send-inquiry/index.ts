@@ -109,6 +109,23 @@ const handler = async (req: Request): Promise<Response> => {
 
     const idStem = crypto.randomUUID();
 
+    // Persist the inquiry so it appears in the admin side, not just email.
+    const userAgent = req.headers.get("user-agent") || null;
+    const { error: insertErr } = await supabase.from("inquiries").insert({
+      id: idStem,
+      name,
+      company: companyName || null,
+      email,
+      phone: phone || null,
+      subject: subject || null,
+      message,
+      source: "send-inquiry",
+      ip_address: clientIp === "unknown" ? null : clientIp,
+      user_agent: userAgent,
+    });
+    if (insertErr) console.error("Inquiry insert failed:", insertErr);
+
+
     // 1. Admin notification → concierge inbox
     const { error: notifyErr } = await supabase.functions.invoke(
       "send-transactional-email",
