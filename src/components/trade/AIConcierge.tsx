@@ -24,6 +24,40 @@ Block 4 — Output Execution Protocol
 Return 3 layout configurations. For every piece, output a strict Architectural Specification Schedule:
 Product Name · Designer · Exact mm Dimensions · Verified Finish Options · Lead Time · Cloudinary image URL · Supabase CAD/BIM URL.
 No conversational intro.`;
+
+// Detect a "project-scale" first-turn brief so the concierge can skip
+// one-question intake and jump straight to the structured Brief Builder.
+// Returns null when the message reads like a single-piece enquiry.
+function detectProjectScale(message: string): { typology: string; city: string } | null {
+  if (!message) return null;
+  const text = message.trim();
+  if (text.length < 25) return null;
+
+  const keywordRe = /\b(gcb|good class bungalow|bungalow|penthouse|whole[- ]?home|whole[- ]?house|multi[- ]?room|pavilion|villa|residence|to furnish|full home furnishing|entire (?:home|residence|apartment|villa|house))\b/i;
+  const projectPhraseRe = /\bi(?:'m| am|'ve| have)\s+(?:got\s+)?(?:a |an )?(?:new\s+)?project\b/i;
+  const zoneRe = /\b(living|dining|kitchen|bedroom|master|study|library|foyer|entryway|powder|guest|family|media|lounge|terrace|garden|pool|bar|home\s?office|office)\b/gi;
+  const zoneCount = (text.match(zoneRe) || []).length;
+  const longMultiZone = text.length > 120 && zoneCount >= 2;
+
+  if (!keywordRe.test(text) && !projectPhraseRe.test(text) && !longMultiZone) return null;
+
+  const typology = /\b(gcb|good class bungalow)\b/i.test(text) ? "GCB"
+    : /\bpenthouse\b/i.test(text) ? "Penthouse"
+    : /\bvilla\b/i.test(text) ? "Villa"
+    : /\bbungalow\b/i.test(text) ? "Bungalow"
+    : /\bpavilion\b/i.test(text) ? "Pavilion"
+    : /\bapartment\b/i.test(text) ? "Apartment"
+    : /\btownhouse\b/i.test(text) ? "Townhouse"
+    : /\bresidence\b/i.test(text) ? "Private residence"
+    : "Multi-room residence";
+
+  let city = "";
+  const cityMatch = text.match(/\b(?:in|at)\s+([A-Z][a-zA-Z]+(?:\s+[A-Z][a-zA-Z]+){0,2})\b/);
+  if (cityMatch) city = cityMatch[1];
+
+  return { typology, city };
+}
+
 import { useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { streamConcierge, type ChatMessage, type ChatContentPart, type TearsheetProposal, type QuoteProposal, type FfeProposal, type VisualizationBriefProposal, type ConciergeProposal, type AppliedConstraintsEvent } from "@/lib/tradeConciergeStream";
@@ -1166,6 +1200,32 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
         }).catch((e) => console.warn("[concierge-capture]", e));
       } catch (e) { console.warn("[concierge-capture] setup", e); }
     }
+
+    // Project-scale auto-detection — on the first user turn, if the message
+    // reads as a whole-home / multi-room project brief, skip the slow
+    // one-question-at-a-time intake and immediately open the Architectural
+    // Brief Builder with the detected typology/city prefilled.
+    if (isFirstUserTurn && sendingAttachments.length === 0) {
+      const scale = detectProjectScale(text);
+      if (scale) {
+        const profileLine = [scale.typology, scale.city].filter(Boolean).join(", ");
+        const prefilled = SPEC_BRIEF_TEMPLATE.replace("[typology, city/area]", profileLine || "[typology, city/area]");
+        setInput(prefilled);
+        setBriefBuilderOpen(true);
+        setTimeline((prev) => [
+          ...prev,
+          {
+            kind: "msg",
+            role: "assistant",
+            content: `A project of this scale deserves a structured brief${profileLine ? ` — I've noted **${profileLine}**` : ""}. I've opened the Architectural Brief Builder and prefilled what I picked up. Fill in the zone, footprint, timeline, and aesthetic direction, then send it back and I'll return three layout configurations with a full Architectural Specification Schedule.`,
+          },
+        ]);
+        setStreaming(false);
+        return;
+      }
+    }
+
+
 
     // Build the chat message history for the API (text-only items),
     // prefixed with a lightweight stage-context note so the assistant
