@@ -2926,7 +2926,8 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
                 </div>
               );
             })()}
-            <div className="flex items-end gap-2">
+            </div>
+            <div className={cn("flex items-end gap-2", fullscreen && "shrink-0")}>
               <input
                 ref={fileInputRef}
                 type="file"
