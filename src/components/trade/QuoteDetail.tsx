@@ -417,6 +417,15 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   } | null>(null);
   const [invoiceBusy, setInvoiceBusy] = useState(false);
 
+  // MSRP-only billing mode forbids the trade discount entirely. Whenever the
+  // quote lands (or is switched) into that mode, force the toggle off so the
+  // subtotal, extras, landed-cost panels and PDF totals all show full retail.
+  const isMsrpOnly = billingMeta?.billing_mode === "msrp_only";
+  useEffect(() => {
+    if (isMsrpOnly && tradeDiscount) setTradeDiscount(false);
+  }, [isMsrpOnly, tradeDiscount]);
+
+
 
   const quoteNumber = `QU-${quoteId.slice(0, 6).toUpperCase()}`;
   const isDraft = quoteStatus === "draft";
