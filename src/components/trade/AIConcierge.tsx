@@ -485,6 +485,34 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
     }
   }, [briefBuilderOpen]);
 
+  // Validate the structured brief: PROJECT PROFILE, ZONE, TYPOLOGY, and VIBE
+  // must be filled in (no lingering `[bracket]` placeholders). Other fields
+  // stay optional so briefs remain flexible.
+  const briefValidation = useMemo(() => {
+    if (!briefBuilderOpen) return { valid: true, missing: [] as string[] };
+    const text = input;
+    const required: { label: string; key: string }[] = [
+      { label: "PROJECT PROFILE", key: "Project profile" },
+      { label: "ZONE", key: "Zone" },
+      { label: "TYPOLOGY", key: "Typology" },
+      { label: "VIBE", key: "Vibe" },
+    ];
+    const missing: string[] = [];
+    for (const { label, key } of required) {
+      const re = new RegExp(`^${label}:\\s*(.*)$`, "im");
+      const m = text.match(re);
+      const val = (m?.[1] || "").trim();
+      // Invalid when empty OR the value still reads as a bracketed template
+      // placeholder like "[typology, city/area]", "[room, ceiling height]",
+      // "[e.g. sectional + accent chairs]".
+      const isPlaceholder = !val || /^\[[^\]]*\]$/.test(val);
+      if (isPlaceholder) missing.push(key);
+    }
+    return { valid: missing.length === 0, missing };
+  }, [briefBuilderOpen, input]);
+
+
+
   const PANEL_W = expanded ? 560 : 380;
   const PANEL_H_OPEN = expanded ? 760 : 560;
   const PANEL_H_MIN = 52;
