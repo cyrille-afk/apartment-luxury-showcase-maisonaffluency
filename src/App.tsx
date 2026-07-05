@@ -521,6 +521,7 @@ const App = () => {
                     <Route index element={<TradeDashboard />} />
                     <Route path="dashboard" element={<TradeDashboard />} />
                     <Route path="admin" element={<TradeAdmin />} />
+                    <Route path="admin/tools" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAdminTools /></Suspense>} />
                     <Route path="admin-dashboard" element={<TradeAdminDashboard />} />
                     <Route path="admin/concierge-usage" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeConciergeUsage /></Suspense>} />
                     <Route path="admin/ai-usage" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAiUsageDashboard /></Suspense>} />
