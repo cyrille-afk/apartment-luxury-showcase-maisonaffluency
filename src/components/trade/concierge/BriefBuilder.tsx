@@ -45,11 +45,21 @@ const DEFAULT_VALUES: BriefValues = {
     "Return 3 layout configurations. For every piece, output a strict Architectural Specification Schedule:\nProduct Name · Designer · Exact mm Dimensions · Verified Finish Options · Lead Time · Cloudinary image URL · Supabase CAD/BIM URL.\nNo conversational intro.",
 };
 
+// Header labels used in the formatted brief sent to Felix. Do NOT change the
+// "Block N —" prefixes; parseBrief() relies on them.
 const BLOCK_LABELS: Record<string, string> = {
   block1: "Block 1 — Spatial & Project Context",
   block2: "Block 2 — Hard Technical Parameters",
   block3: "Block 3 — Aesthetic & Visual DNA",
   block4: "Block 4 — Output Execution Protocol",
+};
+
+// UI-only labels — the visible section headings in the builder. Kept short so
+// the user isn't distracted by "Block 1/2/3" numbering.
+const UI_BLOCK_LABELS: Record<string, string> = {
+  block1: "Spatial & Project Context",
+  block2: "Hard Technical Parameters",
+  block3: "Aesthetic & Visual DNA",
 };
 
 const FIELD_LABELS: { key: keyof BriefValues["block1"] | keyof BriefValues["block2"] | keyof BriefValues["block3"]; label: string }[] = [
