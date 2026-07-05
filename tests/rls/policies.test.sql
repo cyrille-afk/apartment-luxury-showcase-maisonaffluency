@@ -235,6 +235,163 @@ SELECT pg_temp.assert(
 -- pooler refuses SET ROLE. Structural assertions above cover the same drift.
 
 
+-- ---------------------------------------------------------------------------
+-- 6. Column-level write guards (triggers) on financial / tier columns
+--    Locks in the fix for security findings:
+--      - profiles_self_trade_tier_update
+--      - trade_quotes_self_pricing_tamper
+--      - trade_quote_items_self_price_tamper
+--
+--    Two layers of assertions:
+--      (a) Trigger + guard function exist on each table.
+--      (b) The guard function body references every protected column, so
+--          dropping a column from the guard is caught immediately.
+-- ---------------------------------------------------------------------------
+
+-- 6a. Trigger existence
+SELECT pg_temp.assert(
+  EXISTS (SELECT 1 FROM pg_trigger
+          WHERE tgname='trg_prevent_profile_tier_self_update'
+            AND tgrelid='public.profiles'::regclass
+            AND NOT tgisinternal),
+  'profiles: prevent_profile_tier_self_update trigger is attached');
+
+SELECT pg_temp.assert(
+  EXISTS (SELECT 1 FROM pg_trigger
+          WHERE tgname='trg_prevent_quote_pricing_self_update'
+            AND tgrelid='public.trade_quotes'::regclass
+            AND NOT tgisinternal),
+  'trade_quotes: prevent_quote_pricing_self_update trigger is attached');
+
+SELECT pg_temp.assert(
+  EXISTS (SELECT 1 FROM pg_trigger
+          WHERE tgname='trg_prevent_quote_item_price_self_update'
+            AND tgrelid='public.trade_quote_items'::regclass
+            AND NOT tgisinternal),
+  'trade_quote_items: prevent_quote_item_price_self_update trigger is attached');
+
+-- 6b. Guard function body references every protected column
+DO $$
+DECLARE
+  _src text;
+  _col text;
+  _cols text[];
+BEGIN
+  -- profiles guard
+  SELECT pg_get_functiondef(oid) INTO _src
+  FROM pg_proc
+  WHERE proname='prevent_profile_tier_self_update'
+    AND pronamespace='public'::regnamespace;
+  PERFORM pg_temp.assert(_src IS NOT NULL,
+    'prevent_profile_tier_self_update function exists');
+  _cols := ARRAY['trade_tier','trade_tier_locked_by_admin',
+                 'trade_tier_suggested','trade_tier_computed_at'];
+  FOREACH _col IN ARRAY _cols LOOP
+    PERFORM pg_temp.assert(_src LIKE '%'||_col||'%',
+      'profiles guard covers column '||_col);
+  END LOOP;
+  PERFORM pg_temp.assert(_src LIKE '%has_role%admin%',
+    'profiles guard bypass restricted to admin role');
+
+  -- trade_quotes guard
+  SELECT pg_get_functiondef(oid) INTO _src
+  FROM pg_proc
+  WHERE proname='prevent_quote_pricing_self_update'
+    AND pronamespace='public'::regnamespace;
+  PERFORM pg_temp.assert(_src IS NOT NULL,
+    'prevent_quote_pricing_self_update function exists');
+  _cols := ARRAY['net_discount_pct','commission_pct','credit_applied_cents',
+                 'insurance_rate_bps','billing_mode'];
+  FOREACH _col IN ARRAY _cols LOOP
+    PERFORM pg_temp.assert(_src LIKE '%'||_col||'%',
+      'trade_quotes guard covers column '||_col);
+  END LOOP;
+  PERFORM pg_temp.assert(_src LIKE '%has_role%admin%',
+    'trade_quotes guard bypass restricted to admin/service_role');
+  PERFORM pg_temp.assert(_src LIKE '%service_role%',
+    'trade_quotes guard allows service_role path');
+
+  -- trade_quote_items guard
+  SELECT pg_get_functiondef(oid) INTO _src
+  FROM pg_proc
+  WHERE proname='prevent_quote_item_price_self_update'
+    AND pronamespace='public'::regnamespace;
+  PERFORM pg_temp.assert(_src IS NOT NULL,
+    'prevent_quote_item_price_self_update function exists');
+  _cols := ARRAY['unit_price_cents','unit_price_currency',
+                 'fabric_upcharge_cents','fabric_currency'];
+  FOREACH _col IN ARRAY _cols LOOP
+    PERFORM pg_temp.assert(_src LIKE '%'||_col||'%',
+      'trade_quote_items guard covers column '||_col);
+  END LOOP;
+  PERFORM pg_temp.assert(_src LIKE '%has_role%admin%',
+    'trade_quote_items guard bypass restricted to admin/service_role');
+  PERFORM pg_temp.assert(_src LIKE '%service_role%',
+    'trade_quote_items guard allows service_role path');
+END $$;
+
+-- 6c. Runtime enforcement — simulate a non-admin authenticated caller and
+-- confirm the trigger raises when a protected column changes. The pooler
+-- forbids SET ROLE, but the guard reads auth.uid() from request.jwt.claims,
+-- so setting the claim is sufficient to exercise the has_role() branch.
+DO $$
+DECLARE
+  _owner uuid := current_setting('rls_test.owner_uid')::uuid;
+  _quote_id uuid := '11111111-1111-1111-1111-111111111e01';
+  _fake_uid uuid := '11111111-1111-1111-1111-111111111ff1';
+BEGIN
+  -- Fixture: a trade_quotes row owned by a synthetic non-admin user.
+  INSERT INTO public.trade_quotes (id, user_id, quote_number, status,
+                                   net_discount_pct, commission_pct,
+                                   credit_applied_cents, insurance_rate_bps)
+  VALUES (_quote_id, _owner, 'RLS-TEST-0001', 'draft',
+          0, 0, 0, 0);
+
+  -- Impersonate the fake non-admin uid via JWT claim.
+  PERFORM set_config('request.jwt.claims',
+                     json_build_object('sub', _fake_uid::text,
+                                       'role','authenticated')::text,
+                     true);
+  PERFORM set_config('request.jwt.claim.role', 'authenticated', true);
+
+  -- Protected column: MUST raise.
+  PERFORM pg_temp.assert(
+    pg_temp.expect_error(format(
+      'UPDATE public.trade_quotes SET net_discount_pct = 50 WHERE id = %L',
+      _quote_id)),
+    'trade_quotes: non-admin UPDATE of net_discount_pct is rejected');
+
+  PERFORM pg_temp.assert(
+    pg_temp.expect_error(format(
+      'UPDATE public.trade_quotes SET commission_pct = 99 WHERE id = %L',
+      _quote_id)),
+    'trade_quotes: non-admin UPDATE of commission_pct is rejected');
+
+  PERFORM pg_temp.assert(
+    pg_temp.expect_error(format(
+      'UPDATE public.trade_quotes SET billing_mode = ''net_buy'' WHERE id = %L',
+      _quote_id)),
+    'trade_quotes: non-admin UPDATE of billing_mode is rejected');
+
+  -- Unprotected column: MUST succeed (guard is column-scoped, not row-scoped).
+  UPDATE public.trade_quotes SET status = 'draft' WHERE id = _quote_id;
+  PERFORM pg_temp.assert(true,
+    'trade_quotes: non-admin UPDATE of non-financial column still succeeds');
+
+  -- profiles guard fires only when protected columns actually change.
+  -- Attempt to bump own trade_tier as the profile owner.
+  PERFORM set_config('request.jwt.claims',
+                     json_build_object('sub', _owner::text,
+                                       'role','authenticated')::text,
+                     true);
+  PERFORM pg_temp.assert(
+    pg_temp.expect_error(format(
+      'UPDATE public.profiles SET trade_tier = ''vip'' WHERE id = %L',
+      _owner)),
+    'profiles: non-admin self-upgrade of trade_tier is rejected');
+END $$;
+
+
 \echo ''
 \echo '================================================='
 \echo '  All RLS regression assertions passed.'
