@@ -18,10 +18,11 @@ import {
   User,
   ExternalLink,
   Truck,
+  Tag,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
-type BillingMode = "agent_commission" | "net_buy";
+type BillingMode = "agent_commission" | "net_buy" | "msrp_only";
 
 type Props = {
   quoteId: string;
