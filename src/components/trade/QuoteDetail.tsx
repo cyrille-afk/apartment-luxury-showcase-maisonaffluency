@@ -3678,18 +3678,6 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
           </div>
         )}
 
-        {/* Actions — hidden in print */}
-        {isDraft && (
-          <div className="border-t border-border p-4 md:p-6 lg:p-8 flex items-center justify-between print:hidden">
-            <button onClick={handleDelete} className="inline-flex items-center gap-1.5 font-body text-[10px] text-destructive hover:text-destructive/80 uppercase tracking-wider transition-colors">
-              <Trash2 className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Delete Quote</span><span className="sm:hidden">Delete</span>
-            </button>
-            <button onClick={handleSubmit} disabled={items.length === 0} className="inline-flex items-center gap-2 px-4 py-2 md:px-5 md:py-2.5 bg-foreground text-background font-body text-xs uppercase tracking-[0.1em] rounded-md hover:bg-foreground/90 transition-colors disabled:opacity-40">
-              <Send className="h-3.5 w-3.5" /> Submit
-            </button>
-          </div>
-        )}
-
         {/* Request changes / Cancel — shown for submitted or priced quotes */}
         {(quoteStatus === "submitted" || quoteStatus === "priced") && (
           <div className="border-t border-border p-4 md:p-6 lg:p-8 flex flex-wrap items-center justify-between gap-3 print:hidden">
@@ -3726,13 +3714,28 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
 
         {/* Billing mode selector — show whenever the quote is editable or being paid */}
         {(isDraft || isPriced) && (
-          <BillingModeCard
-            quoteId={quoteId}
-            shipToCountry={shipTo.country}
-            subtotalCents={subtotalCents}
-            currency={currency}
-            isEditable={isDraft || isPriced}
-          />
+          <div id="quote-billing-mode">
+            <BillingModeCard
+              quoteId={quoteId}
+              shipToCountry={shipTo.country}
+              subtotalCents={subtotalCents}
+              currency={currency}
+              isEditable={isDraft || isPriced}
+            />
+          </div>
+        )}
+
+        {/* Actions — hidden in print */}
+        {isDraft && (
+          <div className="border-t border-border p-4 md:p-6 lg:p-8 flex items-center justify-between print:hidden">
+            <button onClick={handleDelete} className="inline-flex items-center gap-1.5 font-body text-[10px] text-destructive hover:text-destructive/80 uppercase tracking-wider transition-colors">
+              <Trash2 className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Delete Quote</span><span className="sm:hidden">Delete</span>
+            </button>
+            <button onClick={handleSubmit} disabled={items.length === 0 || submittingQuote} className="inline-flex items-center gap-2 px-4 py-2 md:px-5 md:py-2.5 bg-foreground text-background font-body text-xs uppercase tracking-[0.1em] rounded-md hover:bg-foreground/90 transition-colors disabled:opacity-40">
+              {submittingQuote ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
+              {submittingQuote ? "Submitting…" : "Submit"}
+            </button>
+          </div>
         )}
 
         {isPriced && (() => {
