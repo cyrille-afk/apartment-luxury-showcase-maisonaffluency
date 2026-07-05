@@ -1255,6 +1255,9 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
       const fabric: any = (item as any).fabric;
       const wood: any = (item as any).wood_fabric;
       const variantSwatches = ((item as any).variant_swatches || []) as Array<{ name: string; image_url: string }>;
+      const finishSwatchLabel = variantSwatches.length > 0
+        ? variantSwatches.map((swatch) => swatch.name).filter(Boolean).join(" · ")
+        : wood?.name || null;
       const fabricCcy = ((item as any).fabric_currency as string | null) || fabric?.currency || "EUR";
       const fabricUpcharge = (item as any).fabric_upcharge_cents as number | null;
       const fabricMeters = (item as any).fabric_meters as number | null;
@@ -1299,6 +1302,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
             ? [{ name: wood.name, imageUrl: wood.image_url }]
             : []
         ).map((swatch: any) => ({ name: swatch.name, imageUrl: swatch.image_url || swatch.imageUrl })),
+        finishSwatchLabel,
         fabricSwatchUrl: fabric?.image_url ?? null,
         shipOriginCountry: toIsoCountry(item.ship_origin_country ?? product?.origin ?? null, "FR"),
         shipMode: item.ship_mode || null,
