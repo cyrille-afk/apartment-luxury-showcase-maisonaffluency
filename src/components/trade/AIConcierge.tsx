@@ -2513,7 +2513,11 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
                 {attachments.map((a) => (
                   <div
                     key={a.id}
-                    className="flex items-center gap-2 rounded-lg border border-border bg-muted/40 pl-1.5 pr-1 py-1 text-xs"
+                    className={`flex items-center gap-2 rounded-lg border pl-1.5 pr-1 py-1 text-xs ${
+                      a.role === "moodboard"
+                        ? "border-accent/60 bg-accent/10"
+                        : "border-border bg-muted/40"
+                    }`}
                   >
                     {a.kind === "image" && a.previewUrl ? (
                       <img
@@ -2526,7 +2530,14 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
                         <FileText className="h-3.5 w-3.5 text-muted-foreground" />
                       </div>
                     )}
-                    <span className="font-body max-w-[140px] truncate text-foreground">{a.name}</span>
+                    <div className="flex flex-col min-w-0">
+                      <span className="font-body max-w-[140px] truncate text-foreground">{a.name}</span>
+                      {a.role === "moodboard" && (
+                        <span className="font-body text-[9px] uppercase tracking-[0.1em] text-accent">
+                          Mood board · Block 3
+                        </span>
+                      )}
+                    </div>
                     <button
                       type="button"
                       onClick={() => removeAttachment(a.id)}
