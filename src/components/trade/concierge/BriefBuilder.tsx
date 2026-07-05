@@ -572,19 +572,46 @@ export function BriefBuilder({
 
   return (
     <div className="mb-2 rounded-xl border border-accent/40 bg-muted/30 p-3 max-h-[38vh] overflow-y-auto overscroll-contain">
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex items-center justify-between mb-3 gap-2">
         <span className="font-body text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
           Brief Builder
         </span>
-        <button
-          type="button"
-          onClick={onClose}
-          className="rounded p-0.5 text-muted-foreground hover:text-foreground hover:bg-foreground/10"
-          aria-label="Close brief builder"
-          title="Close brief builder"
-        >
-          <X className="h-3.5 w-3.5" />
-        </button>
+        <div className="flex items-center gap-1.5">
+          {pasteStatus === "ok" && (
+            <span className="font-body text-[10px] uppercase tracking-[0.12em] text-accent">
+              Filled from clipboard
+            </span>
+          )}
+          {pasteStatus === "empty" && (
+            <span className="font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
+              No brief detected
+            </span>
+          )}
+          {pasteStatus === "denied" && (
+            <span className="font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
+              Clipboard blocked
+            </span>
+          )}
+          <button
+            type="button"
+            onClick={handlePasteBrief}
+            className="flex items-center gap-1 rounded-md border border-accent/40 px-2 py-1 font-body text-[11px] text-accent hover:bg-accent/10"
+            aria-label="Paste brief from clipboard"
+            title="Paste brief from clipboard"
+          >
+            <ClipboardPaste className="h-3.5 w-3.5" />
+            Paste brief
+          </button>
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded p-0.5 text-muted-foreground hover:text-foreground hover:bg-foreground/10"
+            aria-label="Close brief builder"
+            title="Close brief builder"
+          >
+            <X className="h-3.5 w-3.5" />
+          </button>
+        </div>
       </div>
 
       <div className="space-y-4">
