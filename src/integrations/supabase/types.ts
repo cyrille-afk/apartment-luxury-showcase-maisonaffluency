@@ -7048,6 +7048,20 @@ export type Database = {
         Args: { _approval_status: string; _item_id: string; _token: string }
         Returns: undefined
       }
+      upsert_admin_directory_client: {
+        Args: {
+          p_company: string
+          p_created_by: string
+          p_email: string
+          p_first_name: string
+          p_last_name: string
+          p_notes: string
+          p_phone: string
+          p_role_title: string
+          p_studio_id: string
+        }
+        Returns: string
+      }
     }
     Enums: {
       app_role: "admin" | "trade_user" | "super_admin"
