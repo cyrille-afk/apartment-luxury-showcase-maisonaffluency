@@ -1037,52 +1037,93 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   };
 
   const handleSubmit = async () => {
-    // Persist and VERIFY the status flipped. Previously we ignored the update
-    // result, so an RLS block or 0-row match would still show "Quote submitted"
-    // while the row stayed a draft. Use .select() to confirm the write landed.
-    const { data: updated, error: updateError } = await supabase
-      .from("trade_quotes")
-      .update({
-        notes: notes || null,
-        status: "submitted",
-        submitted_at: new Date().toISOString(),
-        landed_cost_cbm: landedCostSettings.cbm,
-        landed_cost_kg: landedCostSettings.kg,
-        landed_cost_mode: landedCostSettings.mode,
-      } as any)
-      .eq("id", quoteId)
-      .select("id, status, submitted_at");
-
-    if (updateError) {
-      console.error("Quote submit update failed:", updateError);
-      toast({ title: "Could not submit quote", description: updateError.message, variant: "destructive" });
-      return;
-    }
-    if (!updated || updated.length === 0) {
-      console.error("Quote submit update matched 0 rows — likely RLS or missing quote id", { quoteId });
-      toast({
-        title: "Quote not submitted",
-        description: "The update didn't reach the database. Reload the page and try again — if it persists, this is a permissions issue.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Auto-apply any available credit (e.g. FF&E unlock)
+    if (submittingQuote) return;
+    setSubmittingQuote(true);
     try {
-      const { data: applied } = await supabase.rpc("apply_available_credit_to_quote", { _quote_id: quoteId });
-      if (applied && (applied as number) > 0) {
-        toast({ title: "Credit applied", description: `$${((applied as number) / 100).toLocaleString()} credit applied to this quote.` });
+      // Submission can be blocked by billing validation. Check it first so the
+      // user sees the missing requirement instead of a false success toast.
+      const { data: latestQuote, error: latestQuoteError } = await supabase
+        .from("trade_quotes")
+        .select("billing_mode, end_client_billing")
+        .eq("id", quoteId)
+        .maybeSingle();
+
+      if (latestQuoteError) {
+        toast({ title: "Could not verify quote", description: latestQuoteError.message, variant: "destructive" });
+        return;
       }
-    } catch (err) { console.error("Credit apply failed:", err); }
 
-    // Notify admin via email (fire-and-forget)
-    supabase.functions.invoke("send-quote-submitted", {
-      body: { quoteId },
-    }).catch((err) => console.error("Quote notification email failed:", err));
+      const latestBilling = ((latestQuote as any)?.end_client_billing ?? billingMeta?.end_client_billing ?? {}) as Record<string, unknown>;
+      const latestBillingMode = ((latestQuote as any)?.billing_mode ?? billingMeta?.billing_mode ?? "agent_commission") as string;
+      const endClientName = String(latestBilling.name ?? "").trim();
+      const endClientEmail = String(latestBilling.email ?? "").trim();
+      const hasValidEndClientEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(endClientEmail);
 
-    toast({ title: "Quote submitted", description: "Our team will review and respond within 1-2 business days." });
-    onStatusChange();
+      if (latestBillingMode === "agent_commission" && (!endClientName || !hasValidEndClientEmail)) {
+        toast({
+          title: "End-client billing required",
+          description: "Add the client legal name and invoice email in Billing mode, then submit again.",
+          variant: "destructive",
+        });
+        document.getElementById("quote-billing-mode")?.scrollIntoView({ behavior: "smooth", block: "start" });
+        return;
+      }
+
+      // Persist and VERIFY the status flipped. Previously we ignored the update
+      // result, so an RLS block or 0-row match would still show "Quote submitted"
+      // while the row stayed a draft. Use .select() to confirm the write landed.
+      const { data: updated, error: updateError } = await supabase
+        .from("trade_quotes")
+        .update({
+          notes: notes || null,
+          status: "submitted",
+          submitted_at: new Date().toISOString(),
+          landed_cost_cbm: landedCostSettings.cbm,
+          landed_cost_kg: landedCostSettings.kg,
+          landed_cost_mode: landedCostSettings.mode,
+        } as any)
+        .eq("id", quoteId)
+        .select("id, status, submitted_at");
+
+      if (updateError) {
+        console.error("Quote submit update failed:", updateError);
+        const description = updateError.message.includes("end-client billing")
+          ? "Add the client legal name and invoice email in Billing mode, then submit again."
+          : updateError.message;
+        toast({ title: "Could not submit quote", description, variant: "destructive" });
+        if (updateError.message.includes("end-client billing")) {
+          document.getElementById("quote-billing-mode")?.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+        return;
+      }
+      if (!updated || updated.length === 0) {
+        console.error("Quote submit update matched 0 rows — likely RLS or missing quote id", { quoteId });
+        toast({
+          title: "Quote not submitted",
+          description: "The update didn't reach the database. Reload the page and try again — if it persists, this is a permissions issue.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Auto-apply any available credit (e.g. FF&E unlock)
+      try {
+        const { data: applied } = await supabase.rpc("apply_available_credit_to_quote", { _quote_id: quoteId });
+        if (applied && (applied as number) > 0) {
+          toast({ title: "Credit applied", description: `$${((applied as number) / 100).toLocaleString()} credit applied to this quote.` });
+        }
+      } catch (err) { console.error("Credit apply failed:", err); }
+
+      // Notify admin via email (fire-and-forget)
+      supabase.functions.invoke("send-quote-submitted", {
+        body: { quoteId },
+      }).catch((err) => console.error("Quote notification email failed:", err));
+
+      toast({ title: "Quote submitted", description: "Our team will review and respond within 1-2 business days." });
+      onStatusChange();
+    } finally {
+      setSubmittingQuote(false);
+    }
   };
 
   const handleConfirmOrder = async () => {
