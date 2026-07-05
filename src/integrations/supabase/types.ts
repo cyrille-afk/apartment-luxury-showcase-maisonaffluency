@@ -6816,6 +6816,28 @@ export type Database = {
           trade_price_cents: number
         }[]
       }
+      match_catalog_filtered: {
+        Args: { filter?: Json; match_count?: number; query_embedding: string }
+        Returns: {
+          category: string
+          currency: string
+          default_ship_mode: string
+          designer: string
+          dimensions: string
+          id: string
+          lead_time: string
+          materials: string
+          origin: string
+          price_prefix: string
+          similarity: number
+          source: string
+          stock_status: string
+          structural_fit: number
+          subcategory: string
+          title: string
+          trade_price_cents: number
+        }[]
+      }
       match_semantic_cache: {
         Args: {
           _feature: string
