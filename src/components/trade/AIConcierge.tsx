@@ -24,6 +24,40 @@ Block 4 — Output Execution Protocol
 Return 3 layout configurations. For every piece, output a strict Architectural Specification Schedule:
 Product Name · Designer · Exact mm Dimensions · Verified Finish Options · Lead Time · Cloudinary image URL · Supabase CAD/BIM URL.
 No conversational intro.`;
+
+// Detect a "project-scale" first-turn brief so the concierge can skip
+// one-question intake and jump straight to the structured Brief Builder.
+// Returns null when the message reads like a single-piece enquiry.
+function detectProjectScale(message: string): { typology: string; city: string } | null {
+  if (!message) return null;
+  const text = message.trim();
+  if (text.length < 25) return null;
+
+  const keywordRe = /\b(gcb|good class bungalow|bungalow|penthouse|whole[- ]?home|whole[- ]?house|multi[- ]?room|pavilion|villa|residence|to furnish|full home furnishing|entire (?:home|residence|apartment|villa|house))\b/i;
+  const projectPhraseRe = /\bi(?:'m| am|'ve| have)\s+(?:got\s+)?(?:a |an )?(?:new\s+)?project\b/i;
+  const zoneRe = /\b(living|dining|kitchen|bedroom|master|study|library|foyer|entryway|powder|guest|family|media|lounge|terrace|garden|pool|bar|home\s?office|office)\b/gi;
+  const zoneCount = (text.match(zoneRe) || []).length;
+  const longMultiZone = text.length > 120 && zoneCount >= 2;
+
+  if (!keywordRe.test(text) && !projectPhraseRe.test(text) && !longMultiZone) return null;
+
+  const typology = /\b(gcb|good class bungalow)\b/i.test(text) ? "GCB"
+    : /\bpenthouse\b/i.test(text) ? "Penthouse"
+    : /\bvilla\b/i.test(text) ? "Villa"
+    : /\bbungalow\b/i.test(text) ? "Bungalow"
+    : /\bpavilion\b/i.test(text) ? "Pavilion"
+    : /\bapartment\b/i.test(text) ? "Apartment"
+    : /\btownhouse\b/i.test(text) ? "Townhouse"
+    : /\bresidence\b/i.test(text) ? "Private residence"
+    : "Multi-room residence";
+
+  let city = "";
+  const cityMatch = text.match(/\b(?:in|at)\s+([A-Z][a-zA-Z]+(?:\s+[A-Z][a-zA-Z]+){0,2})\b/);
+  if (cityMatch) city = cityMatch[1];
+
+  return { typology, city };
+}
+
 import { useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { streamConcierge, type ChatMessage, type ChatContentPart, type TearsheetProposal, type QuoteProposal, type FfeProposal, type VisualizationBriefProposal, type ConciergeProposal, type AppliedConstraintsEvent } from "@/lib/tradeConciergeStream";
