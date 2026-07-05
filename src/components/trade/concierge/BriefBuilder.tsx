@@ -85,63 +85,135 @@ function formatBrief(values: BriefValues): string {
   ].join("\n\n");
 }
 
+// Alternative section headers we recognize when a brief isn't using the
+// canonical "Block N —" prefixes (e.g. templates written with markdown ###
+// headings like "### PROJECT CONTEXT").
+const ALT_BLOCK_HEADERS: { pattern: RegExp; block: "block1" | "block2" | "block3" | "block4" }[] = [
+  { pattern: /project\s*context|spatial\s*&?\s*project/i, block: "block1" },
+  { pattern: /hard\s*(technical\s*)?parameters|sql\s*constraints/i, block: "block2" },
+  { pattern: /aesthetic\s*(dna|&?\s*visual)|vector\s*match/i, block: "block3" },
+  { pattern: /execution\s*(directive|protocol)|output\s*execution/i, block: "block4" },
+];
+
+// Field label aliases → canonical field key per block. Order matters: the
+// first matching alias wins, so put more specific labels first.
+const FIELD_ALIASES: Record<"block1" | "block2" | "block3", Record<string, string[]>> = {
+  block1: {
+    projectProfile: ["PROJECT PROFILE", "PROJECT TYPE"],
+    zone: ["ZONE"],
+    environment: ["ENVIRONMENT"],
+    timeline: ["TIMELINE", "LOGISTICS DEADLINE", "DEADLINE", "LEAD TIME"],
+  },
+  block2: {
+    typology: ["TYPOLOGY"],
+    maxFootprint: ["MAX FOOTPRINT", "TABLE DIMENSIONS", "DIMENSIONS", "FOOTPRINT"],
+    clearance: ["CLEARANCE", "CHAIR CLEARANCE"],
+    materials: ["MATERIALS", "MATERIAL PERFORMANCE", "MATERIAL"],
+  },
+  block3: {
+    vibe: ["VIBE", "DESIGN PROFILE", "STYLE"],
+    references: ["REFERENCES", "DESIGN BRAND/STYLES", "DESIGN BRANDS", "BRAND REFERENCES"],
+    palette: ["PALETTE", "PALETTE & TEXTURES", "PALETTE AND TEXTURES"],
+  },
+};
+
+function classifyHeader(text: string): "block1" | "block2" | "block3" | "block4" | null {
+  const m = text.match(/^Block\s+(\d)\b/i);
+  if (m) {
+    const n = m[1];
+    if (n === "1") return "block1";
+    if (n === "2") return "block2";
+    if (n === "3") return "block3";
+    if (n === "4") return "block4";
+  }
+  for (const { pattern, block } of ALT_BLOCK_HEADERS) {
+    if (pattern.test(text)) return block;
+  }
+  return null;
+}
+
 function parseBrief(text: string): { values: BriefValues; prefix: string; suffix: string } {
-  const headerRegex = /^Block\s+\d+\s*—\s*.*?\s*$/gim;
-  const headers: { text: string; index: number }[] = [];
+  // Match either canonical "Block N — ..." headers OR markdown-style
+  // "### <SECTION NAME>" / "## <SECTION NAME>" headers so pasted templates
+  // that use "### PROJECT CONTEXT" still auto-fill the builder.
+  const headerRegex = /^(?:Block\s+\d+\s*—\s*.*?|#{1,6}\s+.+?)\s*$/gim;
+  const rawHeaders: { text: string; index: number; block: "block1" | "block2" | "block3" | "block4" }[] = [];
   let m: RegExpExecArray | null;
   while ((m = headerRegex.exec(text)) !== null) {
-    headers.push({ text: m[0], index: m.index });
+    const block = classifyHeader(m[0]);
+    if (block) rawHeaders.push({ text: m[0], index: m.index, block });
   }
 
-  if (headers.length === 0 || !/^Block\s+1\b/i.test(headers[0].text)) {
+  if (rawHeaders.length === 0 || rawHeaders[0].block !== "block1") {
     return { values: DEFAULT_VALUES, prefix: text, suffix: "" };
   }
 
-  const prefix = text.slice(0, headers[0].index).trim();
+  const prefix = text.slice(0, rawHeaders[0].index).trim();
   const blockBodies: Record<string, string> = {};
-  for (let i = 0; i < headers.length; i++) {
-    const start = headers[i].index + headers[i].text.length;
-    const end = i + 1 < headers.length ? headers[i + 1].index : text.length;
-    blockBodies[headers[i].text] = text.slice(start, end).trim();
+  for (let i = 0; i < rawHeaders.length; i++) {
+    const start = rawHeaders[i].index + rawHeaders[i].text.length;
+    const end = i + 1 < rawHeaders.length ? rawHeaders[i + 1].index : text.length;
+    blockBodies[rawHeaders[i].text] = text.slice(start, end).trim();
   }
 
   const values: BriefValues = JSON.parse(JSON.stringify(DEFAULT_VALUES));
 
-  for (const header of headers) {
+  for (const header of rawHeaders) {
     const body = blockBodies[header.text] || "";
-    if (/^Block\s+1\b/i.test(header.text)) {
-      values.block1.projectProfile = extractField(body, "PROJECT PROFILE") || DEFAULT_VALUES.block1.projectProfile;
-      values.block1.zone = extractField(body, "ZONE") || DEFAULT_VALUES.block1.zone;
-      values.block1.environment = extractField(body, "ENVIRONMENT") || DEFAULT_VALUES.block1.environment;
-      values.block1.timeline = extractField(body, "TIMELINE") || DEFAULT_VALUES.block1.timeline;
-    } else if (/^Block\s+2\b/i.test(header.text)) {
-      values.block2.typology = extractField(body, "TYPOLOGY") || DEFAULT_VALUES.block2.typology;
-      values.block2.maxFootprint = extractField(body, "MAX FOOTPRINT") || DEFAULT_VALUES.block2.maxFootprint;
-      values.block2.clearance = extractField(body, "CLEARANCE") || DEFAULT_VALUES.block2.clearance;
-      values.block2.materials = extractField(body, "MATERIALS") || DEFAULT_VALUES.block2.materials;
-    } else if (/^Block\s+3\b/i.test(header.text)) {
-      values.block3.vibe = extractField(body, "VIBE") || DEFAULT_VALUES.block3.vibe;
-      values.block3.references = extractField(body, "REFERENCES") || DEFAULT_VALUES.block3.references;
-      values.block3.palette = extractField(body, "PALETTE") || DEFAULT_VALUES.block3.palette;
-    } else if (/^Block\s+4\b/i.test(header.text)) {
+    if (header.block === "block1") {
+      for (const [key, aliases] of Object.entries(FIELD_ALIASES.block1)) {
+        const v = extractFirstField(body, aliases);
+        if (v) (values.block1 as Record<string, string>)[key] = v;
+      }
+    } else if (header.block === "block2") {
+      for (const [key, aliases] of Object.entries(FIELD_ALIASES.block2)) {
+        const v = extractFirstField(body, aliases);
+        if (v) (values.block2 as Record<string, string>)[key] = v;
+      }
+    } else if (header.block === "block3") {
+      for (const [key, aliases] of Object.entries(FIELD_ALIASES.block3)) {
+        const v = extractFirstField(body, aliases);
+        if (v) (values.block3 as Record<string, string>)[key] = v;
+      }
+    } else if (header.block === "block4") {
       values.block4 = body || DEFAULT_VALUES.block4;
     }
   }
 
-  const lastHeader = headers[headers.length - 1];
+  const lastHeader = rawHeaders[rawHeaders.length - 1];
   const suffix = text.slice(lastHeader.index + lastHeader.text.length + blockBodies[lastHeader.text].length).trim();
 
   return { values, prefix, suffix };
 }
 
+// Escape a label for use inside a RegExp — labels may contain "&", "/", etc.
+function escapeRe(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 function extractField(body: string, label: string): string | null {
-  const regex = new RegExp(`^${label}\\s*:\\s*(.*)$`, "im");
+  // Allow an optional leading bullet ("- ", "* ", "• ") and optional bold
+  // markers ("**LABEL**:") so lines like "- ZONE: ..." are recognized.
+  const regex = new RegExp(
+    `^\\s*(?:[-*•]\\s+)?\\*{0,2}${escapeRe(label)}\\*{0,2}\\s*:\\s*(.*)$`,
+    "im"
+  );
   const match = body.match(regex);
   if (match && match[1] !== undefined) {
-    return match[1].trim();
+    const value = match[1].trim();
+    return value ? value : null;
   }
   return null;
 }
+
+function extractFirstField(body: string, labels: string[]): string | null {
+  for (const label of labels) {
+    const v = extractField(body, label);
+    if (v) return v;
+  }
+  return null;
+}
+
 
 type ObjectBlock = "block1" | "block2" | "block3";
 
