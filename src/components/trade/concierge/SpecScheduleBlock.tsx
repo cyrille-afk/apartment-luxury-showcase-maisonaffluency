@@ -26,7 +26,13 @@ export function SpecScheduleBlock({ zone, markdown }: Props) {
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [building, setBuilding] = useState(false);
+  const [coverOpen, setCoverOpen] = useState(false);
+  const [projectName, setProjectName] = useState(zone && zone !== "Tearsheet" ? zone : "");
+  const [designerName, setDesignerName] = useState("");
+  const [coverDate, setCoverDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const [includeCover, setIncludeCover] = useState(true);
   const docRef = useRef<any>(null);
+
 
   const slug = useMemo(() => {
     return (
