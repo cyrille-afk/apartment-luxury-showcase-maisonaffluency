@@ -385,6 +385,30 @@ export function SpecScheduleBlock({ zone, markdown }: Props) {
                 className="w-full rounded-md border border-border bg-background px-2.5 py-1.5 text-[13px] font-body text-foreground focus:outline-none focus:border-accent/60 disabled:opacity-50"
               />
             </div>
+            <div className="space-y-1">
+              <label className="text-[10px] uppercase tracking-[0.14em] font-body text-muted-foreground">
+                Page size
+              </label>
+              <div className="flex items-center gap-1.5">
+                {(["a4", "letter"] as const).map((size) => (
+                  <button
+                    key={size}
+                    type="button"
+                    onClick={() => setPageSize(size)}
+                    aria-pressed={pageSize === size}
+                    className={cn(
+                      "inline-flex items-center rounded-full border px-3 py-1 text-[11px] font-body transition",
+                      pageSize === size
+                        ? "border-accent/60 bg-accent/15 text-foreground"
+                        : "border-border bg-background text-foreground hover:bg-accent/10 hover:border-accent/40",
+                    )}
+                  >
+                    {size === "a4" ? "A4 (210 × 297 mm)" : "Letter (8.5 × 11 in)"}
+                  </button>
+                ))}
+              </div>
+            </div>
+
 
             <div className="flex items-center justify-end gap-1.5 pt-1">
               <button
