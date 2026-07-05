@@ -2520,6 +2520,7 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
                 title="Insert 4-block spec brief template"
               >
                 <ListChecks className="h-4 w-4" />
+              </button>
               <textarea
                 ref={inputRef}
                 value={input}
