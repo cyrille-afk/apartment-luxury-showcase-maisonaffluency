@@ -232,11 +232,14 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
     /** UI preview — same as dataUrl for images, undefined for PDFs */
     previewUrl?: string;
     size: number;
+    /** Optional semantic role, e.g. "moodboard" to bind to Block 3 of a spec brief. */
+    role?: "moodboard";
   };
   const MAX_ATTACHMENT_BYTES = 8 * 1024 * 1024; // 8 MB per file — base64 inflates ~33%
   const MAX_ATTACHMENTS = 4;
   const [attachments, setAttachments] = useState<StagedAttachment[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const moodInputRef = useRef<HTMLInputElement>(null);
 
   const readFileAsDataUrl = (file: File): Promise<string> =>
     new Promise((resolve, reject) => {
@@ -277,10 +280,13 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
       }
     });
 
-  const handleFilesPicked = useCallback(async (files: FileList | File[] | null) => {
-    if (!files) return;
+  const handleFilesPicked = useCallback(async (
+    files: FileList | File[] | null,
+    opts?: { role?: "moodboard"; imagesOnly?: boolean },
+  ) => {
+    if (!files) return [] as StagedAttachment[];
     const list = Array.from(files);
-    if (!list.length) return;
+    if (!list.length) return [] as StagedAttachment[];
     const accepted: StagedAttachment[] = [];
     for (const f of list) {
       if (attachments.length + accepted.length >= MAX_ATTACHMENTS) {
@@ -289,6 +295,10 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
       }
       const isImage = f.type.startsWith("image/");
       const isPdf = f.type === "application/pdf" || /\.pdf$/i.test(f.name);
+      if (opts?.imagesOnly && !isImage) {
+        toast.error(`${f.name}: mood board must be an image.`);
+        continue;
+      }
       if (!isImage && !isPdf) {
         toast.error(`${f.name}: only images and PDFs are supported.`);
         continue;
@@ -308,6 +318,7 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
           dataUrl,
           previewUrl,
           size: f.size,
+          ...(opts?.role ? { role: opts.role } : {}),
         });
       } catch {
         toast.error(`Couldn't read ${f.name}.`);
@@ -315,10 +326,58 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
     }
     if (accepted.length) setAttachments((prev) => [...prev, ...accepted]);
     if (fileInputRef.current) fileInputRef.current.value = "";
+    if (moodInputRef.current) moodInputRef.current.value = "";
+    return accepted;
   }, [attachments.length]);
 
+  /**
+   * Insert or update a "MOOD BOARD REFERENCE:" line inside Block 3 of the
+   * spec brief. If Block 3 isn't present, append a minimal Block 3 stub.
+   * Merges names across all currently-staged mood board attachments.
+   */
+  const upsertMoodBoardBlock3 = useCallback((allMoodNames: string[]) => {
+    const refLine = allMoodNames.length
+      ? `MOOD BOARD REFERENCE: ${allMoodNames.join(", ")}`
+      : "";
+    setInput((prev) => {
+      const text = prev ?? "";
+      // Strip any prior MOOD BOARD REFERENCE line anywhere.
+      const stripped = text.replace(/^\s*MOOD BOARD REFERENCE:.*$/gim, "").replace(/\n{3,}/g, "\n\n");
+      if (!refLine) return stripped.trimEnd();
+      // Find Block 3 header and insert the reference line right after it.
+      const block3Regex = /^(Block\s+3\b[^\n]*)$/im;
+      if (block3Regex.test(stripped)) {
+        return stripped.replace(block3Regex, `$1\n${refLine}`);
+      }
+      // No Block 3 yet — append a minimal stub so the reference has a home.
+      const sep = stripped.trim() ? "\n\n" : "";
+      return `${stripped.trimEnd()}${sep}Block 3 — Aesthetic & Visual DNA\n${refLine}`;
+    });
+  }, []);
+
+  const handleMoodBoardPicked = useCallback(async (files: FileList | File[] | null) => {
+    const added = await handleFilesPicked(files, { role: "moodboard", imagesOnly: true });
+    if (!added.length) return;
+    // Compose the current + newly-added mood board names.
+    const names = [
+      ...attachments.filter((a) => a.role === "moodboard").map((a) => a.name),
+      ...added.map((a) => a.name),
+    ];
+    upsertMoodBoardBlock3(names);
+    toast.success(added.length === 1 ? "Mood board attached to Block 3." : `${added.length} mood board images attached to Block 3.`);
+  }, [handleFilesPicked, attachments, upsertMoodBoardBlock3]);
+
   const removeAttachment = (id: string) =>
-    setAttachments((prev) => prev.filter((a) => a.id !== id));
+    setAttachments((prev) => {
+      const target = prev.find((a) => a.id === id);
+      const next = prev.filter((a) => a.id !== id);
+      if (target?.role === "moodboard") {
+        const remainingMoodNames = next.filter((a) => a.role === "moodboard").map((a) => a.name);
+        // Defer to avoid setState-in-setState.
+        setTimeout(() => upsertMoodBoardBlock3(remainingMoodNames), 0);
+      }
+      return next;
+    });
 
 
   // Draggable position — persisted in localStorage. `null` = use default
@@ -2454,7 +2513,11 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
                 {attachments.map((a) => (
                   <div
                     key={a.id}
-                    className="flex items-center gap-2 rounded-lg border border-border bg-muted/40 pl-1.5 pr-1 py-1 text-xs"
+                    className={`flex items-center gap-2 rounded-lg border pl-1.5 pr-1 py-1 text-xs ${
+                      a.role === "moodboard"
+                        ? "border-accent/60 bg-accent/10"
+                        : "border-border bg-muted/40"
+                    }`}
                   >
                     {a.kind === "image" && a.previewUrl ? (
                       <img
@@ -2467,7 +2530,14 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
                         <FileText className="h-3.5 w-3.5 text-muted-foreground" />
                       </div>
                     )}
-                    <span className="font-body max-w-[140px] truncate text-foreground">{a.name}</span>
+                    <div className="flex flex-col min-w-0">
+                      <span className="font-body max-w-[140px] truncate text-foreground">{a.name}</span>
+                      {a.role === "moodboard" && (
+                        <span className="font-body text-[9px] uppercase tracking-[0.1em] text-accent">
+                          Mood board · Block 3
+                        </span>
+                      )}
+                    </div>
                     <button
                       type="button"
                       onClick={() => removeAttachment(a.id)}
@@ -2514,18 +2584,37 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
                     </button>
                   </div>
                   <div className="space-y-3">
-                    {sections.map((s, i) => (
-                      <div key={i}>
-                        {s.header && (
-                          <div className="font-heading text-[12px] font-semibold text-accent mb-1">
-                            {s.header}
-                          </div>
-                        )}
-                        <pre className="whitespace-pre-wrap font-body text-[12px] leading-relaxed text-foreground">
-                          {s.body}
-                        </pre>
-                      </div>
-                    ))}
+                    {sections.map((s, i) => {
+                      const isBlock3 = !!s.header && /^Block\s+3\b/i.test(s.header);
+                      const moodImages = isBlock3
+                        ? attachments.filter((a) => a.role === "moodboard" && a.kind === "image")
+                        : [];
+                      return (
+                        <div key={i}>
+                          {s.header && (
+                            <div className="font-heading text-[12px] font-semibold text-accent mb-1">
+                              {s.header}
+                            </div>
+                          )}
+                          <pre className="whitespace-pre-wrap font-body text-[12px] leading-relaxed text-foreground">
+                            {s.body}
+                          </pre>
+                          {moodImages.length > 0 && (
+                            <div className="mt-2 flex flex-wrap gap-1.5">
+                              {moodImages.map((m) => (
+                                <img
+                                  key={m.id}
+                                  src={m.previewUrl || m.dataUrl}
+                                  alt={m.name}
+                                  className="h-14 w-14 rounded object-cover border border-accent/40"
+                                  title={m.name}
+                                />
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                   {attachments.length > 0 && (
                     <div className="mt-3 pt-2 border-t border-border/60">
@@ -2551,6 +2640,14 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
                 className="hidden"
                 onChange={(e) => handleFilesPicked(e.target.files)}
               />
+              <input
+                ref={moodInputRef}
+                type="file"
+                multiple
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => handleMoodBoardPicked(e.target.files)}
+              />
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
@@ -2560,6 +2657,16 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
                 title="Attach a room plan, photo or PDF"
               >
                 <Paperclip className="h-4 w-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => moodInputRef.current?.click()}
+                disabled={streaming || attachments.length >= MAX_ATTACHMENTS}
+                className="shrink-0 rounded-xl border border-border bg-muted/40 p-2 text-muted-foreground hover:text-foreground hover:bg-muted disabled:opacity-40 transition-colors"
+                aria-label="Attach mood board images to Block 3"
+                title="Attach mood board (images bound to Block 3)"
+              >
+                <Palette className="h-4 w-4" />
               </button>
               <button
                 type="button"
