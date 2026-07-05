@@ -30,6 +30,7 @@ type Extra = {
   id: string;
   label: string;
   amount_cents: number;
+  currency: string | null;
   sort_order: number;
 };
 
@@ -37,16 +38,29 @@ interface Props {
   quoteId: string;
   currency: string;
   isReadOnly?: boolean;
-  /** Called whenever the total of all extras changes (in quote currency cents). */
+  /** Called whenever the total of all extras changes, converted to the quote (display) currency in cents. */
   onTotalChange?: (totalCents: number) => void;
+  /** Convert cents between currencies via the parent's live FX rates. */
+  convertCents?: (cents: number | null, from: string, to: string) => number | null;
 }
 
-export const QuoteExtrasEditor = ({ quoteId, currency, isReadOnly = false, onTotalChange }: Props) => {
+export const QuoteExtrasEditor = ({ quoteId, currency, isReadOnly = false, onTotalChange, convertCents }: Props) => {
   const { toast } = useToast();
   const [extras, setExtras] = useState<Extra[]>([]);
   const [loading, setLoading] = useState(true);
   const [draftLabel, setDraftLabel] = useState("");
   const [draftAmount, setDraftAmount] = useState("");
+
+  const toDisplay = (cents: number, from: string): number => {
+    const src = (from || currency).toUpperCase();
+    const tgt = currency.toUpperCase();
+    if (src === tgt) return cents;
+    if (convertCents) {
+      const v = convertCents(cents, src, tgt);
+      return typeof v === "number" ? v : cents;
+    }
+    return cents;
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -54,7 +68,7 @@ export const QuoteExtrasEditor = ({ quoteId, currency, isReadOnly = false, onTot
       setLoading(true);
       const { data, error } = await supabase
         .from("trade_quote_extras" as any)
-        .select("id, label, amount_cents, sort_order")
+        .select("id, label, amount_cents, currency, sort_order")
         .eq("quote_id", quoteId)
         .order("sort_order", { ascending: true })
         .order("created_at", { ascending: true });
@@ -72,8 +86,13 @@ export const QuoteExtrasEditor = ({ quoteId, currency, isReadOnly = false, onTot
   }, [quoteId]);
 
   useEffect(() => {
-    onTotalChange?.(extras.reduce((s, e) => s + (e.amount_cents || 0), 0));
-  }, [extras, onTotalChange]);
+    const totalInDisplay = extras.reduce(
+      (s, e) => s + toDisplay(e.amount_cents || 0, e.currency || currency),
+      0,
+    );
+    onTotalChange?.(totalInDisplay);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [extras, currency, convertCents]);
 
   const handleAdd = async () => {
     const label = draftLabel.trim();
@@ -86,8 +105,8 @@ export const QuoteExtrasEditor = ({ quoteId, currency, isReadOnly = false, onTot
     const nextSort = extras.length ? Math.max(...extras.map((e) => e.sort_order)) + 1 : 0;
     const { data, error } = await supabase
       .from("trade_quote_extras" as any)
-      .insert({ quote_id: quoteId, label, amount_cents: amountCents, sort_order: nextSort })
-      .select("id, label, amount_cents, sort_order")
+      .insert({ quote_id: quoteId, label, amount_cents: amountCents, currency, sort_order: nextSort })
+      .select("id, label, amount_cents, currency, sort_order")
       .single();
     if (error || !data) {
       toast({ title: "Error", description: error?.message ?? "Could not add extra", variant: "destructive" });
@@ -114,7 +133,10 @@ export const QuoteExtrasEditor = ({ quoteId, currency, isReadOnly = false, onTot
     if (error) toast({ title: "Error", description: error.message, variant: "destructive" });
   };
 
-  const total = extras.reduce((s, e) => s + (e.amount_cents || 0), 0);
+  const total = extras.reduce(
+    (s, e) => s + toDisplay(e.amount_cents || 0, e.currency || currency),
+    0,
+  );
 
   if (loading) return null;
   if (isReadOnly && extras.length === 0) return null;
@@ -134,58 +156,74 @@ export const QuoteExtrasEditor = ({ quoteId, currency, isReadOnly = false, onTot
 
       {extras.length > 0 && (
         <div className="space-y-1.5 mb-2">
-          {extras.map((e) => (
-            <div key={e.id} className="flex items-center gap-2">
-              {isReadOnly ? (
-                <>
-                  <span className="flex-1 font-body text-xs text-foreground truncate">{e.label}</span>
-                  <span className="font-body text-xs text-foreground tabular-nums">
-                    {currencySymbol(currency)}{formatPriceRaw(e.amount_cents, currency)}
-                  </span>
-                </>
-              ) : (
-                <>
-                  <input
-                    type="text"
-                    value={e.label}
-                    onChange={(ev) =>
-                      setExtras((curr) => curr.map((x) => (x.id === e.id ? { ...x, label: ev.target.value } : x)))
-                    }
-                    onBlur={(ev) => handleEdit(e.id, { label: ev.target.value.trim() || "Charge" })}
-                    className="flex-1 bg-background border border-border rounded px-2 py-1 font-body text-xs text-foreground"
-                  />
-                  <div className="flex items-center gap-1">
-                    <span className="font-body text-xs text-muted-foreground">{currencySymbol(currency)}</span>
+          {extras.map((e) => {
+            const rowCcy = (e.currency || currency).toUpperCase();
+            const displayCents = toDisplay(e.amount_cents || 0, rowCcy);
+            const showConversion = rowCcy !== currency.toUpperCase();
+            return (
+              <div key={e.id} className="flex items-center gap-2">
+                {isReadOnly ? (
+                  <>
+                    <span className="flex-1 font-body text-xs text-foreground truncate">{e.label}</span>
+                    <span className="font-body text-xs text-foreground tabular-nums">
+                      {currencySymbol(currency)}{formatPriceRaw(displayCents, currency)}
+                      {showConversion && (
+                        <span className="ml-1 text-[10px] text-muted-foreground">
+                          (entered {currencySymbol(rowCcy)}{formatPriceRaw(e.amount_cents, rowCcy)})
+                        </span>
+                      )}
+                    </span>
+                  </>
+                ) : (
+                  <>
                     <input
-                      type="number"
-                      step="0.01"
-                      value={(e.amount_cents / 100).toString()}
-                      onChange={(ev) => {
-                        const v = parseFloat(ev.target.value);
-                        const cents = Number.isFinite(v) ? Math.round(v * 100) : 0;
-                        setExtras((curr) => curr.map((x) => (x.id === e.id ? { ...x, amount_cents: cents } : x)));
-                      }}
-                      onBlur={(ev) => {
-                        const v = parseFloat(ev.target.value);
-                        handleEdit(e.id, { amount_cents: Number.isFinite(v) ? Math.round(v * 100) : 0 });
-                      }}
-                      className="w-24 bg-background border border-border rounded px-2 py-1 font-body text-xs text-foreground tabular-nums text-right"
+                      type="text"
+                      value={e.label}
+                      onChange={(ev) =>
+                        setExtras((curr) => curr.map((x) => (x.id === e.id ? { ...x, label: ev.target.value } : x)))
+                      }
+                      onBlur={(ev) => handleEdit(e.id, { label: ev.target.value.trim() || "Charge" })}
+                      className="flex-1 bg-background border border-border rounded px-2 py-1 font-body text-xs text-foreground"
                     />
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => handleRemove(e.id)}
-                    className="p-1 text-muted-foreground hover:text-destructive transition-colors"
-                    aria-label="Remove charge"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
-                </>
-              )}
-            </div>
-          ))}
+                    <div className="flex items-center gap-1">
+                      <span className="font-body text-xs text-muted-foreground">{currencySymbol(rowCcy)}</span>
+                      <input
+                        type="number"
+                        step="0.01"
+                        value={(e.amount_cents / 100).toString()}
+                        onChange={(ev) => {
+                          const v = parseFloat(ev.target.value);
+                          const cents = Number.isFinite(v) ? Math.round(v * 100) : 0;
+                          setExtras((curr) => curr.map((x) => (x.id === e.id ? { ...x, amount_cents: cents } : x)));
+                        }}
+                        onBlur={(ev) => {
+                          const v = parseFloat(ev.target.value);
+                          handleEdit(e.id, { amount_cents: Number.isFinite(v) ? Math.round(v * 100) : 0 });
+                        }}
+                        className="w-24 bg-background border border-border rounded px-2 py-1 font-body text-xs text-foreground tabular-nums text-right"
+                      />
+                      {showConversion && (
+                        <span className="text-[10px] text-muted-foreground whitespace-nowrap">
+                          ≈ {currencySymbol(currency)}{formatPriceRaw(displayCents, currency)}
+                        </span>
+                      )}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleRemove(e.id)}
+                      className="p-1 text-muted-foreground hover:text-destructive transition-colors"
+                      aria-label="Remove charge"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </>
+                )}
+              </div>
+            );
+          })}
         </div>
       )}
+
 
       {!isReadOnly && (
         <div className="flex items-center gap-2 pt-2 border-t border-border/40">

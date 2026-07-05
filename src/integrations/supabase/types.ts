@@ -5957,6 +5957,7 @@ export type Database = {
         Row: {
           amount_cents: number
           created_at: string
+          currency: string | null
           id: string
           label: string
           quote_id: string
@@ -5966,6 +5967,7 @@ export type Database = {
         Insert: {
           amount_cents?: number
           created_at?: string
+          currency?: string | null
           id?: string
           label: string
           quote_id: string
@@ -5975,6 +5977,7 @@ export type Database = {
         Update: {
           amount_cents?: number
           created_at?: string
+          currency?: string | null
           id?: string
           label?: string
           quote_id?: string
