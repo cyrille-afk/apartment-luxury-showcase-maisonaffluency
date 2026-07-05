@@ -137,6 +137,7 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
   const [toneMenuOpen, setToneMenuOpen] = useState(false);
   const [langMenuOpen, setLangMenuOpen] = useState(false);
+  const [showBriefPreview, setShowBriefPreview] = useState(false);
   const [timeline, setTimeline] = useState<TimelineItem[]>(() => {
     try {
       const raw = sessionStorage.getItem("concierge:timeline");
