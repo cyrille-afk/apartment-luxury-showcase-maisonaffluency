@@ -28,20 +28,24 @@ No conversational intro.`;
 // Detect a "project-scale" first-turn brief so the concierge can skip
 // one-question intake and jump straight to the structured Brief Builder.
 // Returns null when the message reads like a single-piece enquiry.
-function detectProjectScale(message: string): { typology: string; city: string } | null {
+function detectProjectScale(
+  message: string,
+): { typology: string; city: string; country: string; zones: string[]; timelineWeeks: number | null } | null {
   if (!message) return null;
   const text = message.trim();
   if (text.length < 25) return null;
 
   const keywordRe = /\b(gcb|good class bungalow|bungalow|penthouse|whole[- ]?home|whole[- ]?house|multi[- ]?room|pavilion|villa|residence|to furnish|full home furnishing|entire (?:home|residence|apartment|villa|house))\b/i;
   const projectPhraseRe = /\bi(?:'m| am|'ve| have)\s+(?:got\s+)?(?:a |an )?(?:new\s+)?project\b/i;
-  const zoneRe = /\b(living|dining|kitchen|bedroom|master|study|library|foyer|entryway|powder|guest|family|media|lounge|terrace|garden|pool|bar|home\s?office|office)\b/gi;
-  const zoneCount = (text.match(zoneRe) || []).length;
-  const longMultiZone = text.length > 120 && zoneCount >= 2;
+  const zoneWords = ["living", "dining", "kitchen", "bedroom", "master", "study", "library", "foyer", "entryway", "powder", "guest", "family", "media", "lounge", "terrace", "garden", "pool", "bar", "home office", "office"];
+  const zoneRe = new RegExp(`\\b(${zoneWords.join("|")})\\b`, "gi");
+  const zoneMatches = Array.from(new Set((text.match(zoneRe) || []).map((z) => z.toLowerCase())));
+  const longMultiZone = text.length > 120 && zoneMatches.length >= 2;
 
   if (!keywordRe.test(text) && !projectPhraseRe.test(text) && !longMultiZone) return null;
 
-  const typology = /\b(gcb|good class bungalow)\b/i.test(text) ? "GCB"
+  const isGCB = /\b(gcb|good class bungalow)\b/i.test(text);
+  const typology = isGCB ? "GCB (Good Class Bungalow)"
     : /\bpenthouse\b/i.test(text) ? "Penthouse"
     : /\bvilla\b/i.test(text) ? "Villa"
     : /\bbungalow\b/i.test(text) ? "Bungalow"
@@ -51,12 +55,27 @@ function detectProjectScale(message: string): { typology: string; city: string }
     : /\bresidence\b/i.test(text) ? "Private residence"
     : "Multi-room residence";
 
+  // GCB is a Singapore-only typology — default city/country when the user
+  // hasn't spelled it out.
   let city = "";
-  const cityMatch = text.match(/\b(?:in|at)\s+([A-Z][a-zA-Z]+(?:\s+[A-Z][a-zA-Z]+){0,2})\b/);
+  let country = "";
+  if (isGCB) {
+    city = "Singapore";
+    country = "Singapore";
+  }
+  const cityMatch = text.match(/\b(?:in|at|located in)\s+([A-Z][a-zA-Z]+(?:\s+[A-Z][a-zA-Z]+){0,2})\b/);
   if (cityMatch) city = cityMatch[1];
 
-  return { typology, city };
+  // Timeline: "handover in 12 weeks", "in 6 weeks", "6-week", "3 months"
+  let timelineWeeks: number | null = null;
+  const wk = text.match(/(\d{1,3})\s*(?:-|\s)?\s*week/i);
+  const mo = text.match(/(\d{1,2})\s*month/i);
+  if (wk) timelineWeeks = parseInt(wk[1], 10);
+  else if (mo) timelineWeeks = parseInt(mo[1], 10) * 4;
+
+  return { typology, city, country, zones: zoneMatches, timelineWeeks };
 }
+
 
 import { useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -1208,22 +1227,63 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
     if (isFirstUserTurn && sendingAttachments.length === 0) {
       const scale = detectProjectScale(text);
       if (scale) {
-        const profileLine = [scale.typology, scale.city].filter(Boolean).join(", ");
-        const prefilled = SPEC_BRIEF_TEMPLATE.replace("[typology, city/area]", profileLine || "[typology, city/area]");
+        // Fallback city from the synchronous qualifier (e.g. "in Sentosa Cove"
+        // → Singapore) when the user didn't explicitly name a city.
+        let city = scale.city;
+        let country = scale.country;
+        if (!city) {
+          const quick = quickClientProfile(text);
+          if (quick?.city) city = quick.city;
+          if (quick?.country) country = country || quick.country;
+        }
+        const profileLine = [scale.typology, [city, country].filter(Boolean).filter((v, i, arr) => arr.indexOf(v) === i).join(", ")]
+          .filter(Boolean)
+          .join(", ");
+
+        // Zone line — capitalize + join detected zones (e.g. "Living, Dining, Master")
+        const zoneLine = scale.zones.length
+          ? `${scale.zones.map((z) => z.charAt(0).toUpperCase() + z.slice(1)).join(", ")} — ceiling height [mm]`
+          : null;
+
+        // Timeline line
+        const timelineLine = scale.timelineWeeks
+          ? `Handover in ${scale.timelineWeeks} weeks (max lead time [N] weeks).`
+          : null;
+
+        let prefilled = SPEC_BRIEF_TEMPLATE.replace("[typology, city/area]", profileLine || "[typology, city/area]");
+        if (zoneLine) {
+          prefilled = prefilled.replace("[room, ceiling height]", zoneLine);
+        }
+        if (timelineLine) {
+          prefilled = prefilled.replace(
+            "Handover in [N] weeks (max lead time [N] weeks).",
+            timelineLine,
+          );
+        }
+
         setInput(prefilled);
         setBriefBuilderOpen(true);
+
+        const noted = [
+          scale.typology,
+          city ? `city: ${city}` : null,
+          scale.zones.length ? `zones: ${scale.zones.join(", ")}` : null,
+          scale.timelineWeeks ? `${scale.timelineWeeks}-week handover` : null,
+        ].filter(Boolean).join(" · ");
+
         setTimeline((prev) => [
           ...prev,
           {
             kind: "msg",
             role: "assistant",
-            content: `A project of this scale deserves a structured brief${profileLine ? ` — I've noted **${profileLine}**` : ""}. I've opened the Architectural Brief Builder and prefilled what I picked up. Fill in the zone, footprint, timeline, and aesthetic direction, then send it back and I'll return three layout configurations with a full Architectural Specification Schedule.`,
+            content: `A project of this scale deserves a structured brief${noted ? ` — noted **${noted}**` : ""}. I've opened the Architectural Brief Builder and prefilled what I picked up. Fill in footprint, materials, and aesthetic direction, then send it back and I'll return three layout configurations with a full Architectural Specification Schedule.`,
           },
         ]);
         setStreaming(false);
         return;
       }
     }
+
 
 
 
