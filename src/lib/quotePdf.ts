@@ -53,6 +53,7 @@ export interface QuotePdfLine {
   imageUrl?: string | null;          // optional product thumbnail
   finishSwatchUrl?: string | null;
   finishSwatches?: Array<{ name?: string | null; imageUrl?: string | null }>;
+  finishSwatchLabel?: string | null;
   fabricSwatchUrl?: string | null;
   shipOriginCountry?: string | null;
   shipMode?: string | null;
@@ -888,6 +889,7 @@ function drawTable(
     const editionClean = editionRaw.replace(/^edition\s*[:\-—]?\s*/i, "").trim();
     const editionLabel = editionClean ? `Edition: ${editionClean}` : null;
     const variantLabel = line.variantLabel ? `Finish: ${line.variantLabel}` : null;
+      const finishSwatchLabel = line.finishSwatchLabel ? `Selected finishes: ${line.finishSwatchLabel}` : null;
     // When the user picked a finish, it supersedes the generic catalogue
     // materials line (which is otherwise repetitive noise). Dimensions remain
     // visible unless they are already embedded in the variant label.
@@ -901,6 +903,7 @@ function drawTable(
     const showMaterials = !line.variantLabel;
     const meta = [
       variantLabel,
+      finishSwatchLabel,
       line.fabricLabel ?? null,
       line.woodFinishLabel ?? null,
       dimsAlreadyInVariant ? null : line.dimensions,
