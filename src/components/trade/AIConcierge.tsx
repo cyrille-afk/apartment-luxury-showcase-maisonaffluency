@@ -10,6 +10,9 @@ import { FfeProposalCard } from "@/components/trade/concierge/FfeProposalCard";
 import { VisualizationBriefCard, VIZ_BRIEF_INCOMING_KEY } from "@/components/trade/concierge/VisualizationBriefCard";
 import { PendingProposalSkeleton } from "@/components/trade/concierge/PendingProposalSkeleton";
 import { EscalationCard } from "@/components/trade/concierge/EscalationCard";
+import { SpecScheduleBlock } from "@/components/trade/concierge/SpecScheduleBlock";
+import { parseSlashCommand, SLASH_COMMAND_HELP } from "@/lib/conciergeSlashCommands";
+import { buildSpecSchedule, type SpecScheduleItem } from "@/lib/specScheduleBuilder";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -41,7 +44,9 @@ type TimelineItem =
   | { kind: "viz_brief"; proposal: VisualizationBriefProposal; resolved?: "opened" | "discarded" }
   | { kind: "pending_proposal"; tool: PendingProposalTool; toolCallId: string | null; index: number }
   | { kind: "escalation"; sentiment: string; intent: string; excerpt: ChatMessage[]; resolved?: "requested" | "dismissed" }
-  | { kind: "retry"; text: string; reason: string };
+  | { kind: "retry"; text: string; reason: string }
+  | { kind: "spec_schedule"; zone: string; markdown: string };
+
 
 
 import {
@@ -786,7 +791,176 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
 
 
 
+    // Client-side slash commands — deterministic, never call the LLM.
+    // Keep this ABOVE all `__concierge:*` intercepts and above streamConcierge.
+    if (text.startsWith("/")) {
+      const parsed = parseSlashCommand(text);
+      if (parsed) {
+        setInput("");
+        // Echo the user's command in the transcript so the exchange is legible.
+        setTimeline((prev) => [...prev, { kind: "msg", role: "user", content: text }]);
+
+        if (parsed.kind === "help") {
+          setTimeline((prev) => [
+            ...prev,
+            { kind: "msg", role: "assistant", content: SLASH_COMMAND_HELP },
+          ]);
+          return;
+        }
+
+        if (parsed.kind === "spec_schedule") {
+          try {
+            // 1. Resolve target tearsheet (client_boards).
+            //    Priority: caller-supplied board hint (id prefix OR title match),
+            //    else the most-recently-updated non-converted board.
+            let boardQuery = supabase
+              .from("client_boards")
+              .select("id, title, user_id, status")
+              .eq("user_id", user.id)
+              .order("updated_at", { ascending: false })
+              .limit(20);
+
+            const { data: boards, error: boardsErr } = await boardQuery;
+            if (boardsErr) throw new Error(boardsErr.message);
+            if (!boards || boards.length === 0) {
+              setTimeline((prev) => [
+                ...prev,
+                {
+                  kind: "msg",
+                  role: "assistant",
+                  content:
+                    "No tearsheets found on your account yet — create one from the Concierge or the tearsheet page, then run `/spec-schedule` again.",
+                },
+              ]);
+              return;
+            }
+
+            const hint = parsed.boardHint?.toLowerCase() ?? null;
+            const target = hint
+              ? boards.find(
+                  (b) =>
+                    b.id.toLowerCase().startsWith(hint) ||
+                    (b.title ?? "").toLowerCase().includes(hint),
+                ) ?? null
+              : boards.find((b) => b.status !== "converted") ?? boards[0];
+
+            if (!target) {
+              setTimeline((prev) => [
+                ...prev,
+                {
+                  kind: "msg",
+                  role: "assistant",
+                  content: `No tearsheet matched \`board:${parsed.boardHint}\`. Try \`/spec-schedule\` alone to use your most recent tearsheet.`,
+                },
+              ]);
+              return;
+            }
+
+            // 2. Fetch items + products.
+            const { data: itemRows, error: itemsErr } = await supabase
+              .from("client_board_items")
+              .select("product_id, sort_order")
+              .eq("board_id", target.id)
+              .order("sort_order", { ascending: true });
+            if (itemsErr) throw new Error(itemsErr.message);
+            const productIds = (itemRows ?? []).map((r) => r.product_id).filter(Boolean);
+            if (!productIds.length) {
+              setTimeline((prev) => [
+                ...prev,
+                {
+                  kind: "msg",
+                  role: "assistant",
+                  content: `Tearsheet **${target.title}** is empty — add pieces to it, then run \`/spec-schedule\` again.`,
+                },
+              ]);
+              return;
+            }
+
+            const { data: products, error: prodErr } = await supabase
+              .from("trade_products")
+              .select(
+                "id, product_name, brand_name, category, subcategory, width_mm, depth_mm, height_mm, seat_height_mm, materials, available_finishes, lead_time_weeks_min, lead_time_weeks_max, lead_time, is_contract_grade, image_url, spec_sheet_url, sku, source_pick_id",
+              )
+              .in("id", productIds);
+            if (prodErr) throw new Error(prodErr.message);
+
+            // 3. Enrich with designer names via source_pick_id -> designers.
+            const pickIds = (products ?? [])
+              .map((p) => p.source_pick_id)
+              .filter((x): x is string => !!x);
+            const designerByProductId = new Map<string, string>();
+            if (pickIds.length) {
+              const { data: picks } = await supabase
+                .from("designer_curator_picks")
+                .select("id, designer_id, designers:designer_id(display_name, name)")
+                .in("id", pickIds);
+              const pickToDesigner = new Map<string, string>();
+              (picks ?? []).forEach((p: any) => {
+                const d = p.designers;
+                const name = (d?.display_name ?? d?.name ?? "").trim();
+                if (name) pickToDesigner.set(p.id, name);
+              });
+              (products ?? []).forEach((p) => {
+                if (p.source_pick_id && pickToDesigner.has(p.source_pick_id)) {
+                  designerByProductId.set(p.id, pickToDesigner.get(p.source_pick_id)!);
+                }
+              });
+            }
+
+            // 4. Preserve tearsheet sort order.
+            const orderIndex = new Map<string, number>();
+            (itemRows ?? []).forEach((r, i) => orderIndex.set(r.product_id, i));
+            const ordered = [...(products ?? [])].sort(
+              (a, b) => (orderIndex.get(a.id) ?? 0) - (orderIndex.get(b.id) ?? 0),
+            );
+
+            const items: SpecScheduleItem[] = ordered.map((p) => ({
+              product_name: p.product_name ?? null,
+              designer: designerByProductId.get(p.id) ?? null,
+              brand_name: p.brand_name ?? null,
+              category: p.category ?? null,
+              subcategory: p.subcategory ?? null,
+              width_mm: p.width_mm ?? null,
+              depth_mm: p.depth_mm ?? null,
+              height_mm: p.height_mm ?? null,
+              seat_height_mm: p.seat_height_mm ?? null,
+              materials: p.materials ?? null,
+              available_finishes: p.available_finishes ?? null,
+              lead_time_weeks_min: p.lead_time_weeks_min ?? null,
+              lead_time_weeks_max: p.lead_time_weeks_max ?? null,
+              lead_time: p.lead_time ?? null,
+              is_contract_grade: p.is_contract_grade ?? null,
+              image_url: p.image_url ?? null,
+              spec_sheet_url: p.spec_sheet_url ?? null,
+              sku: p.sku ?? null,
+            }));
+
+            const zone = parsed.zone ?? target.title ?? "Untitled Zone";
+            const markdown = buildSpecSchedule(zone, items);
+
+            setTimeline((prev) => [
+              ...prev,
+              { kind: "spec_schedule", zone, markdown },
+            ]);
+            return;
+          } catch (err: any) {
+            setTimeline((prev) => [
+              ...prev,
+              {
+                kind: "msg",
+                role: "assistant",
+                content: `Couldn't build the specification schedule — ${err?.message ?? "unknown error"}.`,
+              },
+            ]);
+            return;
+          }
+        }
+      }
+      // Unknown /command — fall through and send to concierge as normal.
+    }
+
     // Special intercepts: client-side actions instead of model calls
+
     if (text === "__concierge:rename__") {
       setNameDraft(name === DEFAULT_NAME ? "" : name);
       setNameMenuOpen(true);
@@ -2005,6 +2179,13 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
                         ))}
                       </div>
                     )}
+                  </div>
+                );
+              }
+              if (item.kind === "spec_schedule") {
+                return (
+                  <div key={i} className="self-start">
+                    <SpecScheduleBlock zone={item.zone} markdown={item.markdown} />
                   </div>
                 );
               }
