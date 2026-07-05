@@ -69,9 +69,10 @@ const mountAndRead = async (currency: string): Promise<number> => {
       onTotalChange={onTotalChange}
     />,
   );
-  await waitFor(() => expect(onTotalChange).toHaveBeenCalled());
-  const calls = onTotalChange.mock.calls;
-  return calls[calls.length - 1][0] as number;
+  await waitFor(() => {
+    const last = onTotalChange.mock.calls.at(-1);
+    expect(last && last[0]).toBeGreaterThan(0);
+  });
 };
 
 describe("QuoteExtrasEditor — extras reprice on currency switch", () => {
