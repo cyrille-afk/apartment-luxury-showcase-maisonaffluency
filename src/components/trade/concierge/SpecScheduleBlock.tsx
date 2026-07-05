@@ -56,6 +56,8 @@ export function SpecScheduleBlock({ zone, markdown }: Props) {
   );
   const [includeCover, setIncludeCover] = useState(initialPrefs.includeCover ?? true);
   const [pageSize, setPageSize] = useState<"a4" | "letter">(initialPrefs.pageSize ?? "a4");
+  const [designerLogo, setDesignerLogo] = useState<string | null>(initialPrefs.designerLogo ?? null);
+  const [logoError, setLogoError] = useState<string | null>(null);
   const docRef = useRef<any>(null);
   const skipNextSave = useRef(false);
 
