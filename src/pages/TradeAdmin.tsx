@@ -12,14 +12,9 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import TaxonomyAudit from "@/components/trade/TaxonomyAudit";
-import HeroManager from "@/components/trade/HeroManager";
-import SampleRequestsAdmin from "@/components/trade/SampleRequestsAdmin";
-import ScrapeProducts from "@/components/trade/ScrapeProducts";
-import InstagramFeedAdmin from "@/components/trade/InstagramFeedAdmin";
-import OgRescrapeAdmin from "@/components/trade/OgRescrapeAdmin";
 import { Link } from "react-router-dom";
-import { Instagram, FileBox, Sparkles, Inbox, FileSpreadsheet, MapPin, AlertTriangle, ShieldCheck, Mail } from "lucide-react";
+import { Inbox, AlertTriangle, ShieldCheck, Mail } from "lucide-react";
+
 
 /**
  * Build a previewable verification checklist for the applicant. The items are
@@ -300,43 +295,8 @@ const TradeAdmin = () => {
     };
   }, [checklistPreview]);
 
-function InstagramAuditCard() {
-  const { data: missingCount = 0 } = useQuery({
-    queryKey: ["ig-missing-count"],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from("designers")
-        .select("slug, links")
-        .eq("is_published", true);
-      if (!data) return 0;
-      return data.filter((d) => {
-        const links = d.links as any[] | null;
-        if (!links || !Array.isArray(links)) return true;
-        return !links.some((l: any) => l.type === "Instagram" || l.type === "instagram");
-      }).length;
-    },
-    staleTime: 1000 * 60 * 5,
-  });
 
-  return (
-    <Link
-      to="/trade/designers/instagram"
-      className="flex items-center gap-2 px-4 py-3 rounded-lg border border-border hover:border-foreground/30 transition-all group"
-    >
-      <Instagram className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
-      <div className="flex-1">
-        <span className="font-display text-sm text-foreground">Instagram Audit</span>
-        <p className="font-body text-[10px] text-muted-foreground">Visual map of all designer IG accounts</p>
-      </div>
-      {missingCount > 0 && (
-        <span className="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-destructive text-destructive-foreground font-body text-[10px] font-medium">
-          {missingCount}
-        </span>
-      )}
-      <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
-    </Link>
-  );
-}
+
 
 
   useEffect(() => {
@@ -443,107 +403,8 @@ function InstagramAuditCard() {
         <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
       </Link>
 
-      {/* Concierge Leads */}
-      <Link
-        to="/trade/admin/concierge-leads"
-        className="flex items-center gap-2 px-4 py-3 rounded-lg border border-border hover:border-foreground/30 transition-all group"
-      >
-        <Inbox className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
-        <div className="flex-1">
-          <span className="font-display text-sm text-foreground">Concierge Leads</span>
-          <p className="font-body text-[10px] text-muted-foreground">Browse and filter AI-captured lead intake from public and trade concierge</p>
-        </div>
-        <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
-      </Link>
-
-      {/* Instagram Audit link */}
-      <InstagramAuditCard />
-
-      {/* CAD / 3D Assets manager */}
-      <Link
-        to="/trade/admin/cad-assets"
-        className="flex items-center gap-2 px-4 py-3 rounded-lg border border-border hover:border-foreground/30 transition-all group"
-      >
-        <FileBox className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
-        <div className="flex-1">
-          <span className="font-display text-sm text-foreground">CAD &amp; 3D Assets</span>
-          <p className="font-body text-[10px] text-muted-foreground">Upload .dwg, .rfa, .skp files per product and variant for trade users</p>
-        </div>
-      </Link>
-
-      {/* 3D Models (GLB) uploader */}
-      <Link
-        to="/trade/admin/glb-models"
-        className="flex items-center gap-2 px-4 py-3 rounded-lg border border-border hover:border-foreground/30 transition-all group"
-      >
-        <FileBox className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
-        <div className="flex-1">
-          <span className="font-display text-sm text-foreground">3D Models (GLB)</span>
-          <p className="font-body text-[10px] text-muted-foreground">Upload a .glb/.gltf to a product — auto-saves the URL and shows the interactive viewer on the trade page</p>
-        </div>
-      </Link>
-
-      {/* Hotspot → catalog bulk mapping */}
-      <Link
-        to="/trade/admin/hotspot-mapping"
-        className="flex items-center gap-2 px-4 py-3 rounded-lg border border-border hover:border-foreground/30 transition-all group"
-      >
-        <MapPin className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
-        <div className="flex-1">
-          <span className="font-display text-sm text-foreground">Hotspot → Catalog Mapping</span>
-          <p className="font-body text-[10px] text-muted-foreground">Bulk-assign exact catalog picks to gallery hotspots and override the View Product fuzzy matcher</p>
-        </div>
-      </Link>
-
-      {/* Onboarding flow editor */}
-      <Link
-        to="/trade/admin/onboarding"
-        className="flex items-center gap-2 px-4 py-3 rounded-lg border border-border hover:border-foreground/30 transition-all group"
-      >
-        <Sparkles className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
-        <div className="flex-1">
-          <span className="font-display text-sm text-foreground">First-login flow</span>
-          <p className="font-body text-[10px] text-muted-foreground">Edit the welcome panel, Quick Tour steps, and replay onboarding for any user</p>
-        </div>
-      </Link>
-
-      {/* Onboarding funnel analytics */}
-      <Link
-        to="/trade/admin/onboarding-funnel"
-        className="flex items-center gap-2 px-4 py-3 rounded-lg border border-border hover:border-foreground/30 transition-all group"
-      >
-        <Sparkles className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
-        <div className="flex-1">
-          <span className="font-display text-sm text-foreground">Onboarding funnel</span>
-          <p className="font-body text-[10px] text-muted-foreground">Step views, sub-step clicks, completes and skips — filterable by device</p>
-        </div>
-      </Link>
 
 
-      <InstagramFeedAdmin />
-
-      <TaxonomyAudit />
-
-      {/* Section Hero Manager — collapsible */}
-      <Collapsible>
-        <CollapsibleTrigger className="flex items-center gap-2 group cursor-pointer">
-          <ChevronRight className="h-4 w-4 text-muted-foreground transition-transform group-data-[state=open]:rotate-90" />
-          <h2 className="font-display text-lg text-foreground">Section Hero Images</h2>
-        </CollapsibleTrigger>
-        <p className="font-body text-xs text-muted-foreground ml-6">Upload custom hero banners for trade portal sections. Remove to revert to defaults.</p>
-        <CollapsibleContent className="mt-3">
-          <HeroManager />
-        </CollapsibleContent>
-      </Collapsible>
-
-      {/* Scrape Products */}
-      <ScrapeProducts />
-
-      {/* OG Rescrape */}
-      <OgRescrapeAdmin />
-
-      {/* Sample Requests Manager */}
-      <SampleRequestsAdmin />
 
       <h1 className="font-display text-2xl text-foreground">Trade Applications</h1>
 

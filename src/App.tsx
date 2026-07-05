@@ -35,6 +35,7 @@ const TradeGuidesAnalytics = lazy(() => import("./pages/TradeGuidesAnalytics"));
 const TradeErrorBoundary = lazy(() => import("./components/trade/TradeErrorBoundary"));
 const TradeDashboard = lazy(() => import("./pages/TradeDashboard"));
 const TradeAdmin = lazy(() => import("./pages/TradeAdmin"));
+const TradeAdminTools = lazy(() => import("./pages/TradeAdminTools"));
 const TradeAdminDashboard = lazy(() => import("./pages/TradeAdminDashboard"));
 const TradeConciergeUsage = lazy(() => import("./pages/TradeConciergeUsage"));
 const TradeAiUsageDashboard = lazy(() => import("./pages/TradeAiUsageDashboard"));
@@ -520,6 +521,7 @@ const App = () => {
                     <Route index element={<TradeDashboard />} />
                     <Route path="dashboard" element={<TradeDashboard />} />
                     <Route path="admin" element={<TradeAdmin />} />
+                    <Route path="admin/tools" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAdminTools /></Suspense>} />
                     <Route path="admin-dashboard" element={<TradeAdminDashboard />} />
                     <Route path="admin/concierge-usage" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeConciergeUsage /></Suspense>} />
                     <Route path="admin/ai-usage" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAiUsageDashboard /></Suspense>} />
