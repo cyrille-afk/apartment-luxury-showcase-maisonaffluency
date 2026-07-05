@@ -55,8 +55,13 @@ export function SpecScheduleBlock({ zone, markdown }: Props) {
   const [includeCover, setIncludeCover] = useState(initialPrefs.includeCover ?? true);
   const [pageSize, setPageSize] = useState<"a4" | "letter">(initialPrefs.pageSize ?? "a4");
   const docRef = useRef<any>(null);
+  const skipNextSave = useRef(false);
 
   useEffect(() => {
+    if (skipNextSave.current) {
+      skipNextSave.current = false;
+      return;
+    }
     try {
       window.localStorage.setItem(
         STORAGE_KEY,
@@ -66,6 +71,22 @@ export function SpecScheduleBlock({ zone, markdown }: Props) {
       /* storage denied — noop */
     }
   }, [projectName, designerName, coverDate, includeCover, pageSize]);
+
+  const resetCoverPrefs = () => {
+    skipNextSave.current = true;
+    try {
+      window.localStorage.removeItem(STORAGE_KEY);
+    } catch {
+      /* storage denied — noop */
+    }
+    setProjectName(zone && zone !== "Tearsheet" ? zone : "");
+    setDesignerName("");
+    setCoverDate(new Date().toISOString().slice(0, 10));
+    setIncludeCover(true);
+    setPageSize("a4");
+  };
+
+
 
 
 
@@ -444,22 +465,31 @@ export function SpecScheduleBlock({ zone, markdown }: Props) {
             </div>
 
 
-            <div className="flex items-center justify-end gap-1.5 pt-1">
+            <div className="flex items-center justify-between gap-1.5 pt-1">
               <button
                 type="button"
-                onClick={() => setCoverOpen(false)}
-                className="inline-flex items-center rounded-full border border-border bg-background hover:bg-accent/10 hover:border-accent/40 px-3 py-1.5 text-[11px] font-body text-foreground transition"
+                onClick={resetCoverPrefs}
+                className="inline-flex items-center rounded-full border border-border bg-background hover:bg-destructive/10 hover:border-destructive/40 px-3 py-1.5 text-[11px] font-body text-muted-foreground hover:text-destructive transition"
               >
-                Cancel
+                Reset
               </button>
-              <button
-                type="submit"
-                disabled={building}
-                className="inline-flex items-center gap-1.5 rounded-full border border-accent/60 bg-accent/10 hover:bg-accent/20 px-3 py-1.5 text-[11px] font-body text-foreground transition disabled:opacity-60"
-              >
-                <Eye className="h-3 w-3" />
-                Build preview
-              </button>
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => setCoverOpen(false)}
+                  className="inline-flex items-center rounded-full border border-border bg-background hover:bg-accent/10 hover:border-accent/40 px-3 py-1.5 text-[11px] font-body text-foreground transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={building}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-accent/60 bg-accent/10 hover:bg-accent/20 px-3 py-1.5 text-[11px] font-body text-foreground transition disabled:opacity-60"
+                >
+                  <Eye className="h-3 w-3" />
+                  Build preview
+                </button>
+              </div>
             </div>
           </form>
         </DialogContent>
