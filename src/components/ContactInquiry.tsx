@@ -73,6 +73,12 @@ const ContactInquiry = () => {
   const urlSubject = params.get("subject");
   const urlMessage = params.get("message");
   const urlStudio = params.get("studio");
+  // Product context — set by the public product page "Price on Request" CTA
+  // so the admin inquiry inbox can pre-fill a draft quote.
+  const urlProductId = params.get("productId") || undefined;
+  const urlProductSlug = params.get("productSlug") || undefined;
+  const urlProductName = params.get("productName") || undefined;
+  const urlDesignerName = params.get("designerName") || undefined;
   const draftKey = `contactInquiryDraft:${urlStudio || urlSubject || urlMessage || "default"}`;
   const composedPrefill = urlSubject && urlMessage
     ? `${urlSubject}\n\n${urlMessage}`
@@ -176,7 +182,16 @@ const ContactInquiry = () => {
 
     try {
       const { data, error } = await supabase.functions.invoke("send-inquiry", {
-        body: { ...result.data, turnstileToken }
+        body: {
+          ...result.data,
+          turnstileToken,
+          subject: urlSubject || undefined,
+          productId: urlProductId,
+          productSlug: urlProductSlug,
+          productName: urlProductName,
+          designerName: urlDesignerName,
+          source: urlProductId || urlProductSlug ? "public_product" : "contact_form",
+        },
       });
 
       if (error) throw error;

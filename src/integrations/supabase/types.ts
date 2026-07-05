@@ -2648,48 +2648,90 @@ export type Database = {
       }
       inquiries: {
         Row: {
+          admin_notes: string | null
+          assigned_admin_id: string | null
           company: string | null
+          concierge_lead_id: string | null
           created_at: string
+          designer_name: string | null
           email: string
           id: string
           ip_address: string | null
+          linked_quote_id: string | null
           message: string
           name: string
           phone: string | null
+          product_id: string | null
+          product_name: string | null
+          product_slug: string | null
           source: string | null
+          status: string
           subject: string | null
           updated_at: string
           user_agent: string | null
         }
         Insert: {
+          admin_notes?: string | null
+          assigned_admin_id?: string | null
           company?: string | null
+          concierge_lead_id?: string | null
           created_at?: string
+          designer_name?: string | null
           email: string
           id?: string
           ip_address?: string | null
+          linked_quote_id?: string | null
           message: string
           name: string
           phone?: string | null
+          product_id?: string | null
+          product_name?: string | null
+          product_slug?: string | null
           source?: string | null
+          status?: string
           subject?: string | null
           updated_at?: string
           user_agent?: string | null
         }
         Update: {
+          admin_notes?: string | null
+          assigned_admin_id?: string | null
           company?: string | null
+          concierge_lead_id?: string | null
           created_at?: string
+          designer_name?: string | null
           email?: string
           id?: string
           ip_address?: string | null
+          linked_quote_id?: string | null
           message?: string
           name?: string
           phone?: string | null
+          product_id?: string | null
+          product_name?: string | null
+          product_slug?: string | null
           source?: string | null
+          status?: string
           subject?: string | null
           updated_at?: string
           user_agent?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "inquiries_concierge_lead_id_fkey"
+            columns: ["concierge_lead_id"]
+            isOneToOne: true
+            referencedRelation: "concierge_leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inquiries_linked_quote_fk"
+            columns: ["linked_quote_id"]
+            isOneToOne: false
+            referencedRelation: "trade_quotes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       journal_articles: {
         Row: {
@@ -6110,6 +6152,7 @@ export type Database = {
           notes: string | null
           payer_type: Database["public"]["Enums"]["payer_type"]
           project_id: string | null
+          quote_kind: string
           resale_certificate_id: string | null
           responded_at: string | null
           ship_to_address1: string | null
@@ -6124,6 +6167,7 @@ export type Database = {
           ship_to_postal_code: string | null
           ship_to_same_as_bill: boolean
           ship_to_state: string | null
+          source_inquiry_id: string | null
           status: string
           studio_id: string | null
           submitted_at: string | null
@@ -6157,6 +6201,7 @@ export type Database = {
           notes?: string | null
           payer_type?: Database["public"]["Enums"]["payer_type"]
           project_id?: string | null
+          quote_kind?: string
           resale_certificate_id?: string | null
           responded_at?: string | null
           ship_to_address1?: string | null
@@ -6171,6 +6216,7 @@ export type Database = {
           ship_to_postal_code?: string | null
           ship_to_same_as_bill?: boolean
           ship_to_state?: string | null
+          source_inquiry_id?: string | null
           status?: string
           studio_id?: string | null
           submitted_at?: string | null
@@ -6204,6 +6250,7 @@ export type Database = {
           notes?: string | null
           payer_type?: Database["public"]["Enums"]["payer_type"]
           project_id?: string | null
+          quote_kind?: string
           resale_certificate_id?: string | null
           responded_at?: string | null
           ship_to_address1?: string | null
@@ -6218,6 +6265,7 @@ export type Database = {
           ship_to_postal_code?: string | null
           ship_to_same_as_bill?: boolean
           ship_to_state?: string | null
+          source_inquiry_id?: string | null
           status?: string
           studio_id?: string | null
           submitted_at?: string | null
@@ -6258,6 +6306,13 @@ export type Database = {
             columns: ["resale_certificate_id"]
             isOneToOne: false
             referencedRelation: "studio_resale_certificates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trade_quotes_source_inquiry_id_fkey"
+            columns: ["source_inquiry_id"]
+            isOneToOne: false
+            referencedRelation: "inquiries"
             referencedColumns: ["id"]
           },
           {
