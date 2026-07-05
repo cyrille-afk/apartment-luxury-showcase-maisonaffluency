@@ -206,7 +206,10 @@ export default function BillingModeCard({
       payer_type: next.billing_mode === "net_buy" ? "designer_firm" : "end_client",
       commission_pct: next.billing_mode === "agent_commission" ? tierPct : null,
       net_discount_pct: next.billing_mode === "net_buy" ? tierPct : null,
-      end_client_billing: next.billing_mode === "agent_commission" ? next.end_client_billing : null,
+      end_client_billing:
+        next.billing_mode === "agent_commission" || next.billing_mode === "msrp_only"
+          ? next.end_client_billing
+          : null,
       designer_payout_account_id:
         next.billing_mode === "agent_commission" ? next.designer_payout_account_id : null,
       resale_certificate_id: next.billing_mode === "net_buy" ? next.resale_certificate_id : null,
