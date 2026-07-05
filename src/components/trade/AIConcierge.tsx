@@ -166,6 +166,7 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
   const [lastRequestId, setLastRequestId] = useState<string | null>(null);
   const [lastInspectorCount, setLastInspectorCount] = useState<number>(0);
   const [reqIdCopied, setReqIdCopied] = useState<boolean>(false);
+  const [previewCopied, setPreviewCopied] = useState<boolean>(false);
   const [stageOverride, setStageOverride] = useState<Stage | null>(null);
   const [hasTradeArtifacts, setHasTradeArtifacts] = useState<boolean | null>(null);
   const [artifactRefreshKey, setArtifactRefreshKey] = useState(0);
