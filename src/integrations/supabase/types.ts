@@ -7073,7 +7073,7 @@ export type Database = {
         | "in_progress"
         | "completed"
         | "cancelled"
-      billing_mode: "agent_commission" | "net_buy"
+      billing_mode: "agent_commission" | "net_buy" | "msrp_only"
       client_document_storage: "link" | "upload"
       client_document_type:
         | "nda"
@@ -7242,7 +7242,7 @@ export const Constants = {
         "completed",
         "cancelled",
       ],
-      billing_mode: ["agent_commission", "net_buy"],
+      billing_mode: ["agent_commission", "net_buy", "msrp_only"],
       client_document_storage: ["link", "upload"],
       client_document_type: [
         "nda",

@@ -1,0 +1,1 @@
+ALTER TYPE public.billing_mode ADD VALUE IF NOT EXISTS 'msrp_only';
