@@ -3588,9 +3588,55 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                   <div className="mt-4 rounded-md border border-dashed border-border bg-muted/30 p-4 text-sm text-muted-foreground">
                     <p className="font-medium text-foreground">Select a delivery country</p>
                     <p className="mt-1">
-                      Add a billing country to the linked client (or fill in a ship-to country) to calculate landed costs (UK DDP in GBP, HK DAP in HKD, …).
+                      Set a ship-to country to calculate landed costs (UK DDP in GBP, HK DAP in HKD, …).
                       Until then, destination-specific duties and taxes can't be estimated.
                     </p>
+                    {isDraft ? (
+                      <div className="mt-3 flex flex-wrap items-center gap-2">
+                        <label className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                          Delivery country
+                        </label>
+                        <select
+                          value={(shipTo.country || "").toUpperCase()}
+                          onChange={async (e) => {
+                            const iso = e.target.value;
+                            setShipTo((s) => ({ ...s, country: iso }));
+                            setShipToSameAsBill(false);
+                            if (iso) setShipToOpen(true);
+                            const patch: any = {
+                              ship_to_country: iso || null,
+                              ship_to_same_as_bill: false,
+                            };
+                            if (iso && !incoterm) {
+                              setIncoterm("DAP");
+                              patch.incoterm = "DAP";
+                            }
+                            await supabase.from("trade_quotes").update(patch).eq("id", quoteId);
+                          }}
+                          className="h-8 rounded-md border border-input bg-background px-2 text-xs font-body text-foreground"
+                        >
+                          <option value="">— Select —</option>
+                          <option value="GB">United Kingdom (UK DDP, GBP)</option>
+                          <option value="HK">Hong Kong (DAP, HKD)</option>
+                          <option value="FR">France</option>
+                          <option value="DE">Germany</option>
+                          <option value="IT">Italy</option>
+                          <option value="ES">Spain</option>
+                          <option value="BE">Belgium</option>
+                          <option value="NL">Netherlands</option>
+                          <option value="CH">Switzerland</option>
+                          <option value="US">United States</option>
+                          <option value="CA">Canada</option>
+                          <option value="AE">United Arab Emirates</option>
+                          <option value="SG">Singapore</option>
+                          <option value="AU">Australia</option>
+                          <option value="JP">Japan</option>
+                        </select>
+                        <span className="text-[11px] text-muted-foreground">
+                          Or open the Ship-to panel above for a full address.
+                        </span>
+                      </div>
+                    ) : null}
                   </div>
                 )}
 
