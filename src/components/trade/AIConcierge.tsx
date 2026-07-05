@@ -1227,22 +1227,63 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
     if (isFirstUserTurn && sendingAttachments.length === 0) {
       const scale = detectProjectScale(text);
       if (scale) {
-        const profileLine = [scale.typology, scale.city].filter(Boolean).join(", ");
-        const prefilled = SPEC_BRIEF_TEMPLATE.replace("[typology, city/area]", profileLine || "[typology, city/area]");
+        // Fallback city from the synchronous qualifier (e.g. "in Sentosa Cove"
+        // → Singapore) when the user didn't explicitly name a city.
+        let city = scale.city;
+        let country = scale.country;
+        if (!city) {
+          const quick = quickClientProfile(text);
+          if (quick?.city) city = quick.city;
+          if (quick?.country) country = country || quick.country;
+        }
+        const profileLine = [scale.typology, [city, country].filter(Boolean).filter((v, i, arr) => arr.indexOf(v) === i).join(", ")]
+          .filter(Boolean)
+          .join(", ");
+
+        // Zone line — capitalize + join detected zones (e.g. "Living, Dining, Master")
+        const zoneLine = scale.zones.length
+          ? `${scale.zones.map((z) => z.charAt(0).toUpperCase() + z.slice(1)).join(", ")} — ceiling height [mm]`
+          : null;
+
+        // Timeline line
+        const timelineLine = scale.timelineWeeks
+          ? `Handover in ${scale.timelineWeeks} weeks (max lead time [N] weeks).`
+          : null;
+
+        let prefilled = SPEC_BRIEF_TEMPLATE.replace("[typology, city/area]", profileLine || "[typology, city/area]");
+        if (zoneLine) {
+          prefilled = prefilled.replace("[room, ceiling height]", zoneLine);
+        }
+        if (timelineLine) {
+          prefilled = prefilled.replace(
+            "Handover in [N] weeks (max lead time [N] weeks).",
+            timelineLine,
+          );
+        }
+
         setInput(prefilled);
         setBriefBuilderOpen(true);
+
+        const noted = [
+          scale.typology,
+          city ? `city: ${city}` : null,
+          scale.zones.length ? `zones: ${scale.zones.join(", ")}` : null,
+          scale.timelineWeeks ? `${scale.timelineWeeks}-week handover` : null,
+        ].filter(Boolean).join(" · ");
+
         setTimeline((prev) => [
           ...prev,
           {
             kind: "msg",
             role: "assistant",
-            content: `A project of this scale deserves a structured brief${profileLine ? ` — I've noted **${profileLine}**` : ""}. I've opened the Architectural Brief Builder and prefilled what I picked up. Fill in the zone, footprint, timeline, and aesthetic direction, then send it back and I'll return three layout configurations with a full Architectural Specification Schedule.`,
+            content: `A project of this scale deserves a structured brief${noted ? ` — noted **${noted}**` : ""}. I've opened the Architectural Brief Builder and prefilled what I picked up. Fill in footprint, materials, and aesthetic direction, then send it back and I'll return three layout configurations with a full Architectural Specification Schedule.`,
           },
         ]);
         setStreaming(false);
         return;
       }
     }
+
 
 
 
