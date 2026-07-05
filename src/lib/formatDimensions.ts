@@ -223,5 +223,43 @@ export const withImperialPerLine = (raw: string | null | undefined): string => {
 };
 
 
+/**
+ * Peel dimension segments out of a variant label so a legend line like
+ *   "Bronze · Chintz · W 15.5 × D 11 × H 57 cm"
+ * becomes
+ *   { finish: "Bronze · Chintz", dims: "W 15.5 × D 11 × H 57 cm" }.
+ *
+ * Splits on the same " · " / " • " / ";" separators the quote UI uses to
+ * concatenate variant tokens, then classifies each chunk as "dimensional"
+ * when it contains a cm/mm/inch unit or a ×/x/Ø token. Chunks without any
+ * are treated as finish/fabric tokens.
+ */
+export const splitFinishAndDimensions = (
+  variantLabel: string | null | undefined,
+): { finish: string; dims: string } => {
+  const raw = (variantLabel || "").trim();
+  if (!raw) return { finish: "", dims: "" };
+  const parts = raw.split(/\s+[·•;]\s+/).map((p) => p.trim()).filter(Boolean);
+  const isDim = (chunk: string) =>
+    DIM_UNIT_RE.test(chunk) || /[×xX]\s*\d/.test(chunk) || /Ø\s*\d/.test(chunk);
+  const dims: string[] = [];
+  const finish: string[] = [];
+  for (const p of parts) (isDim(p) ? dims : finish).push(p);
+  return { finish: finish.join(" · "), dims: dims.join(" · ") };
+};
+
+/**
+ * Human-readable dimensions string with dual units: "W 15.5 × D 11 × H 57 cm | W 6.1 × D 4.3 × H 22.4 in".
+ * Falls back to the metric string if the imperial conversion can't be computed.
+ */
+export const withImperialInline = (dims: string | null | undefined): string => {
+  const t = (dims || "").trim();
+  if (!t) return "";
+  const imp = toImperialLine(t);
+  return imp ? `${t} | ${imp}` : t;
+};
+
+
+
 
 
