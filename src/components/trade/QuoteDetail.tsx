@@ -2432,8 +2432,10 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
 
             <div className="flex items-center gap-4 flex-wrap">
               <button
-                onClick={() => setTradeDiscount(!tradeDiscount)}
-                className="flex items-center gap-2"
+                onClick={() => !isMsrpOnly && setTradeDiscount(!tradeDiscount)}
+                disabled={isMsrpOnly}
+                title={isMsrpOnly ? "Trade discount is disabled on MSRP-only quotes" : undefined}
+                className={`flex items-center gap-2 ${isMsrpOnly ? "opacity-50 cursor-not-allowed" : ""}`}
               >
                 <div className={`relative w-8 h-[18px] rounded-full transition-colors ${tradeDiscount ? "bg-foreground" : "bg-border"}`}>
                   <div className={`absolute top-[2px] h-[14px] w-[14px] rounded-full bg-background shadow-sm transition-transform ${tradeDiscount ? "translate-x-[14px]" : "translate-x-[2px]"}`} />
@@ -2442,7 +2444,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                   Trade discount
                 </span>
                 <span className="font-body text-[10px] text-foreground uppercase tracking-widest">
-                  · {tierLabel} {tradeDiscountLabel}
+                  · {isMsrpOnly ? "n/a — MSRP only" : `${tierLabel} ${tradeDiscountLabel}`}
                 </span>
               </button>
 
