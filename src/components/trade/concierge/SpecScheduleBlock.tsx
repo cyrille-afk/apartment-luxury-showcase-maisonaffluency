@@ -55,8 +55,13 @@ export function SpecScheduleBlock({ zone, markdown }: Props) {
   const [includeCover, setIncludeCover] = useState(initialPrefs.includeCover ?? true);
   const [pageSize, setPageSize] = useState<"a4" | "letter">(initialPrefs.pageSize ?? "a4");
   const docRef = useRef<any>(null);
+  const skipNextSave = useRef(false);
 
   useEffect(() => {
+    if (skipNextSave.current) {
+      skipNextSave.current = false;
+      return;
+    }
     try {
       window.localStorage.setItem(
         STORAGE_KEY,
@@ -68,6 +73,7 @@ export function SpecScheduleBlock({ zone, markdown }: Props) {
   }, [projectName, designerName, coverDate, includeCover, pageSize]);
 
   const resetCoverPrefs = () => {
+    skipNextSave.current = true;
     try {
       window.localStorage.removeItem(STORAGE_KEY);
     } catch {
@@ -79,6 +85,7 @@ export function SpecScheduleBlock({ zone, markdown }: Props) {
     setIncludeCover(true);
     setPageSize("a4");
   };
+
 
 
 
