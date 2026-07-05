@@ -1271,7 +1271,18 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
         }
         fabricLabel = f;
       }
-      const woodFinishLabel = wood?.name && !(item.variant_label && item.variant_label.toLowerCase().includes(String(wood.name).toLowerCase()))
+      // Suppress the dedicated "Wood finish" row when the swatch is already
+      // reflected in the variant label OR in the resolved finish swatches
+      // (avoids duplicating "Light Bronze Medal 0922" on lamp/metal items
+      // where wood_fabric_id was reused to store the metal finish).
+      const woodNameLc = wood?.name ? String(wood.name).toLowerCase() : "";
+      const variantLabelLc = (item.variant_label || "").toLowerCase();
+      const swatchNamesLc = variantSwatches.map((s) => (s.name || "").toLowerCase());
+      const woodAlreadyShown = !!woodNameLc && (
+        variantLabelLc.includes(woodNameLc) ||
+        swatchNamesLc.some((n) => n === woodNameLc || n.includes(woodNameLc) || woodNameLc.includes(n))
+      );
+      const woodFinishLabel = wood?.name && !woodAlreadyShown
         ? `Wood finish: ${wood.name}`
         : null;
 
