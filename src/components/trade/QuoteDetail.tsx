@@ -38,6 +38,7 @@ import { PerOriginShippingRecap } from "@/components/trade/PerOriginShippingReca
 import { priceRugVariantFromLabel } from "@/lib/rugPricing";
 import { computeWeightedDepositPct } from "@/lib/computeDepositPct";
 import BillingModeCard from "@/components/trade/BillingModeCard";
+import { resolveWoodFinishLabel } from "@/lib/resolveWoodFinishLabel";
 
 const CURRENCIES = ["SGD", "USD", "EUR", "GBP"] as const;
 type Currency = (typeof CURRENCIES)[number];
@@ -1271,20 +1272,12 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
         }
         fabricLabel = f;
       }
-      // Suppress the dedicated "Wood finish" row when the swatch is already
-      // reflected in the variant label OR in the resolved finish swatches
-      // (avoids duplicating "Light Bronze Medal 0922" on lamp/metal items
-      // where wood_fabric_id was reused to store the metal finish).
-      const woodNameLc = wood?.name ? String(wood.name).toLowerCase() : "";
-      const variantLabelLc = (item.variant_label || "").toLowerCase();
-      const swatchNamesLc = variantSwatches.map((s) => (s.name || "").toLowerCase());
-      const woodAlreadyShown = !!woodNameLc && (
-        variantLabelLc.includes(woodNameLc) ||
-        swatchNamesLc.some((n) => n === woodNameLc || n.includes(woodNameLc) || woodNameLc.includes(n))
-      );
-      const woodFinishLabel = wood?.name && !woodAlreadyShown
-        ? `Wood finish: ${wood.name}`
-        : null;
+      // Single source of truth (also covered by a regression test) — see
+      // src/lib/resolveWoodFinishLabel.ts. Suppresses the dedicated
+      // "Wood finish" row when the same swatch is already reflected in
+      // the variant label or in variant_swatches (e.g. metal finishes
+      // stored in wood_fabric_id on lamp items).
+      const woodFinishLabel = resolveWoodFinishLabel(wood, item.variant_label, variantSwatches);
 
       return {
         productName: product?.product_name || "—",
