@@ -1335,7 +1335,7 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
 
         setInput(prefilled);
         setBriefBuilderOpen(true);
-        try { sessionStorage.setItem("concierge:briefAutoOpened", "1"); } catch {}
+        try { sessionStorage.removeItem("concierge:briefAutoOpened"); } catch {}
 
 
         const noted = [
