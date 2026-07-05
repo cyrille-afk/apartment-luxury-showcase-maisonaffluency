@@ -132,16 +132,19 @@ function extractField(body: string, label: string): string | null {
   return null;
 }
 
-function updateBlockField<K extends keyof BriefValues>(
+type ObjectBlock = "block1" | "block2" | "block3";
+
+function updateBlockField<B extends ObjectBlock>(
   values: BriefValues,
-  block: K,
-  field: keyof BriefValues[K],
+  block: B,
+  field: keyof BriefValues[B],
   value: string
 ): BriefValues {
+  const target = values[block] as Record<string, string>;
   return {
     ...values,
     [block]: {
-      ...values[block],
+      ...target,
       [field]: value,
     },
   };
