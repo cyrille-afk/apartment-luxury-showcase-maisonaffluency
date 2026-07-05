@@ -73,6 +73,8 @@ const mountAndRead = async (currency: string): Promise<number> => {
     const last = onTotalChange.mock.calls.at(-1);
     expect(last && last[0]).toBeGreaterThan(0);
   });
+  const calls = onTotalChange.mock.calls;
+  return calls[calls.length - 1][0] as number;
 };
 
 describe("QuoteExtrasEditor — extras reprice on currency switch", () => {
