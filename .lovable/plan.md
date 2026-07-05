@@ -1,75 +1,57 @@
-# `/spec-schedule` opt-in spec-sheet export
-
 ## Goal
+Add a small helper button in the trade AI Concierge composer that pre-fills the composer textarea with the 4-Block Ingestion Framework scaffold, so trade users can quickly structure spec-grade briefs (GCB or similar) without retyping the format.
 
-Let a trade user type `/spec-schedule` in the concierge composer and get a markdown SPECIFICATION SCHEDULE for the pieces already in their active tearsheet — without changing the default tearsheet-card contract, without touching the eval battery, and without any risk of model hallucination.
+## Scope
+Frontend / presentation only. No changes to the concierge system prompt, edge function, or model behavior.
 
-## Approach: pure client-side command, no LLM call
+## Where
+`src/components/trade/AIConcierge.tsx` — the composer row at lines ~2460–2497 (Paperclip attach button → textarea → Send button).
 
-The command is intercepted in the composer BEFORE the message reaches the concierge edge function. The client resolves the active tearsheet, pulls its items and product rows directly from the database, and renders a deterministically-built markdown block as a synthetic assistant message. Because the content comes straight from `trade_products`, the "zero hallucination on metrics" mandate is honoured by construction.
+## UX
+- Add a new icon button next to the Paperclip (before the textarea), using a `FileText`/`SquarePen`/`ListChecks` lucide icon (already imported: `FileText`).
+- Label: `aria-label="Insert spec brief template"`, tooltip `title="Insert 4-block spec brief template"`.
+- Style: matches the Paperclip button (`shrink-0 rounded-xl border border-border bg-muted/40 p-2 …`).
+- Behavior on click:
+  - If the textarea already has non-whitespace content, append the template on a new line (preserve user text).
+  - Otherwise set it to the template.
+  - Then `setInput(...)` and refocus the textarea, moving caret to end.
+  - Disabled while `streaming`.
 
-Missing fields render literally as `Data not found in database.` per the copilot mandate; nothing is inferred or rounded.
+## Template content
+Neutral 4-block scaffold with placeholder brackets (not GCB-specific), so it's reusable for any project. Example:
 
-## Command surface
+```
+Block 1 — Spatial & Project Context
+PROJECT PROFILE: [typology, city/area]
+ZONE: [room, ceiling height]
+ENVIRONMENT: [humidity, sun exposure, glazing]
+TIMELINE: Handover in [N] weeks (max lead time [N] weeks).
 
-- `/spec-schedule` — export the current active tearsheet (most-recently-updated non-converted board for the user).
-- `/spec-schedule Dining Room A` — same, with a caller-supplied zone label in the header.
-- `/spec-schedule board:<partial title or id>` — target a specific board by title match or UUID prefix.
-- `/help` — list available slash commands (spec-schedule for now; room to add more).
+Block 2 — Hard Technical Parameters
+TYPOLOGY: [e.g. sectional + accent chairs]
+MAX FOOTPRINT: length ≤ [mm], depth ≤ [mm]
+CLEARANCE: min [mm] perimeter pathway
+MATERIALS: [performance criteria, exclusions]
 
-Anything not matching the registry is passed through to the concierge as normal chat.
+Block 3 — Aesthetic & Visual DNA
+VIBE: [e.g. Japandi-Luxe, Italian Minimalism]
+REFERENCES: [Minotti / B&B Italia / Edra / …]
+PALETTE: [materials + finishes]
 
-## User flow
-
-1. User types `/spec-schedule Salon` and hits send.
-2. Composer intercepts, does NOT stream to the concierge.
-3. Client fetches:
-   - active `client_boards` row (scoped to `auth.uid()`),
-   - `client_board_items` for that board,
-   - matching `trade_products` rows (title, category, designer, brand, dimensions, seat/arm heights, lead-time min/max, `is_contract_grade`, materials, `available_finishes`, image, sku, cad asset link).
-4. Client builds the markdown block from a pure function and appends it as an assistant message (rendered with existing ReactMarkdown).
-5. The block gets Copy-to-clipboard and Download-as-`.md` buttons; nothing is persisted server-side.
-
-## Output format (markdown, per item)
-
-```text
-### SPECIFICATION SCHEDULE: <zone or board title>
-
-**01 | <Product title>**
-- **Designer / Brand:** <designer> | <brand>
-- **Category / Typology:** <category>
-- **Dimensions:** W: <width>mm x D: <depth>mm x H: <height>mm (Seat: <seat>mm / Arm: <arm>mm)
-- **Material & Finish Catalogue:** <materials, available_finishes>
-- **Technical & Logistics:** Lead Time: <min>-<max> weeks | Contract Grade: Yes/No
-- **Project Documentation Assets:** [Image](<url>) | [CAD](<url>)
+Block 4 — Output Execution Protocol
+Return 3 layout configurations. For every piece, output a strict Architectural Specification Schedule:
+Product Name · Designer · Exact mm Dimensions · Verified Finish Options · Lead Time · Cloudinary image URL · Supabase CAD/BIM URL.
+No conversational intro.
 ```
 
-Any field whose source column is null/empty renders as `Data not found in database.` on that line. No fabricated values, no unit conversion beyond mm (already the storage unit).
+Store as a top-level `const SPEC_BRIEF_TEMPLATE` in the file.
 
-## Files
+## Out of scope
+- No changes to system prompt, RAG, or model routing.
+- No mobile-specific layout changes beyond the extra button (row already flex-wraps its inner controls; verify it still fits at mobile widths — if crowded, we can hide the label-only, keep icon).
+- No persistence beyond the existing `sessionStorage("concierge:draft")` already wired to `input`.
 
-- **New:** `src/lib/conciergeSlashCommands.ts` — parser + registry (`{ name, aliases, handler }`).
-- **New:** `src/lib/specScheduleBuilder.ts` — pure function `buildSpecSchedule(zone, items[]) -> string`, easy to unit-test.
-- **New:** `src/lib/specScheduleBuilder.test.ts` — fixtures covering (a) full data, (b) all-null fields render `Data not found in database.`, (c) partial data.
-- **New:** `src/components/trade/concierge/SpecScheduleBlock.tsx` — renders the markdown with Copy + Download .md actions.
-- **Edit:** `src/components/trade/AIConcierge.tsx` — in the composer submit path, run the slash parser first; on a match, resolve the active board via Supabase, hydrate items, append a synthetic assistant message rendered by `SpecScheduleBlock`. On failure (no active board, no items, RLS error), append an assistant message stating the specific reason — never fall through silently to the LLM.
-- **Edit:** `supabase/functions/trade-concierge/index.ts` — add one short sentence to the system prompt clarifying that `/spec-schedule` is a client-side command and the model must NEVER emit a markdown SPECIFICATION SCHEDULE itself, even if the user asks — the client renders it. Reinforces existing prohibition.
-
-## What does NOT change
-
-- The default tearsheet-card output contract stays intact.
-- No changes to `propose_tearsheet` / `add_to_tearsheet` tools.
-- No changes to the eval battery (`evalBattery_test.ts`, `specSheetBlock_test.ts`, `no_strict_typology_reply_test.ts`).
-- No new edge function, no new table, no new RLS policy — the command uses the existing `client_boards` / `client_board_items` / `trade_products` reads that already work for the user.
-
-## Verification steps (after implementation)
-
-1. `bunx vitest run src/lib/specScheduleBuilder.test.ts` — pure-function snapshots pass, including the all-null "Data not found in database." case.
-2. Manual: log in, open an existing tearsheet with 3+ items, type `/spec-schedule` in the concierge, confirm block renders with real DB values and no fabricated fields.
-3. Manual: empty account with zero boards, type `/spec-schedule`, confirm the assistant message says "No active tearsheet found" rather than calling the LLM.
-4. Manual: type `/spec-scheduleXYZ` (unknown), confirm the message goes to the concierge normally.
-5. Re-run the concierge eval battery to confirm no regression in the default card contract.
-
-## Open question
-
-Should `/spec-schedule` (a) render inline as an assistant message with copy/download (recommended, matches how tearsheet cards live inline), or (b) open the block in a side panel like `TearsheetInsightsSidebar`? I will default to (a) unless you say otherwise.
+## Verification
+- Open `/trade/…` where AIConcierge mounts (floating widget), click the new button, confirm the textarea fills with the scaffold and focus returns to it.
+- Click again with content present → template appended on new line.
+- Sending works unchanged.
