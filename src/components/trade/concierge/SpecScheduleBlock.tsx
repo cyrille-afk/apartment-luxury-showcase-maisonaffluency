@@ -536,6 +536,9 @@ export function SpecScheduleBlock({ zone, markdown }: Props) {
                   PNG, JPG, WEBP or SVG · max 500 KB · shown centered above the cover title.
                 </p>
               )}
+            </div>
+
+
 
             <div className="space-y-1">
               <label className="text-[10px] uppercase tracking-[0.14em] font-body text-muted-foreground">
