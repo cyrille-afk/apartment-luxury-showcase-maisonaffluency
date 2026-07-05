@@ -178,48 +178,86 @@ export function SpecScheduleBlock({ zone, markdown }: Props) {
     // Cover page (optional, configurable)
     if (includeCover) {
       const centerX = pageWidth / 2;
-      let cy = pageHeight / 2 - 80;
 
-      // Optional designer logo above the label
+      // 1. Measure the text block first so we can reserve safe space for the logo.
+      const projectText = projectName?.trim() || zone || "Untitled Project";
+      const projectLines = (() => {
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(22);
+        return doc.splitTextToSize(projectText, maxWidth) as string[];
+      })();
+      const labelH = 40; // "SPECIFICATION SCHEDULE" + gap
+      const titleH = projectLines.length * 26;
+      const afterTitleGap = 10;
+      const designerH = designerName.trim() ? 18 : 0;
+      const dateH = coverDate ? 18 : 0;
+      const textBlockH = labelH + titleH + afterTitleGap + designerH + dateH;
+
+      // 2. Center the text block vertically, but leave headroom for a logo on top.
+      const footerReserve = marginY + 24;
+      const idealTop = (pageHeight - textBlockH) / 2;
+      // Push title down a bit if a logo is present so the layout stays balanced.
+      const logoHeadroomWanted = designerLogo ? 120 : 0;
+      const titleTop = Math.max(
+        marginY + logoHeadroomWanted,
+        Math.min(idealTop, pageHeight - footerReserve - textBlockH),
+      );
+      let cy = titleTop;
+
+      // 3. Fit the logo inside the strip above the title, preserving aspect ratio.
       if (designerLogo) {
         try {
           const props = doc.getImageProperties(designerLogo);
-          const maxLogoW = 160;
-          const maxLogoH = 80;
-          const ratio = props.width / props.height;
-          let lw = maxLogoW;
+          const ratio =
+            props.width && props.height ? props.width / props.height : 1;
+
+          const gapBelowLogo = 24;
+          // Vertical zone: from top margin to the title, minus the gap.
+          const zoneH = Math.max(0, titleTop - marginY - gapBelowLogo);
+          // Horizontal cap: 45% of page width, and never wider than the text column.
+          const zoneW = Math.min(pageWidth * 0.45, maxWidth);
+          // Hard caps so a massive banner or tall crest can't dominate the page.
+          const absMaxW = Math.min(zoneW, 220);
+          const absMaxH = Math.min(zoneH, pageHeight * 0.22, 110);
+
+          let lw = absMaxW;
           let lh = lw / ratio;
-          if (lh > maxLogoH) {
-            lh = maxLogoH;
+          if (lh > absMaxH) {
+            lh = absMaxH;
             lw = lh * ratio;
           }
-          const fmt = /^data:image\/(png|jpe?g|webp|svg\+xml)/i.exec(designerLogo)?.[1]?.toUpperCase();
-          const jsFmt = fmt === "JPG" ? "JPEG" : fmt === "SVG+XML" ? "PNG" : fmt || "PNG";
-          doc.addImage(designerLogo, jsFmt as any, centerX - lw / 2, cy - lh - 24, lw, lh);
+
+          if (lw > 8 && lh > 8) {
+            const fmt = /^data:image\/(png|jpe?g|webp|svg\+xml)/i
+              .exec(designerLogo)?.[1]
+              ?.toUpperCase();
+            const jsFmt =
+              fmt === "JPG" ? "JPEG" : fmt === "SVG+XML" ? "PNG" : fmt || "PNG";
+            // Bottom-align the logo to the strip above the title so the gap is stable.
+            const ly = titleTop - gapBelowLogo - lh;
+            doc.addImage(designerLogo, jsFmt as any, centerX - lw / 2, ly, lw, lh);
+          }
         } catch {
           /* unreadable image — skip */
         }
       }
 
+      // 4. Draw the text block at the reserved position.
       doc.setFont("helvetica", "normal");
       doc.setFontSize(9);
       doc.setTextColor(140);
       doc.text("SPECIFICATION SCHEDULE", centerX, cy, { align: "center" });
-      cy += 40;
+      cy += labelH;
 
       doc.setTextColor(0);
       doc.setFont("helvetica", "bold");
       doc.setFontSize(22);
-      const projectLines = doc.splitTextToSize(
-        projectName?.trim() || zone || "Untitled Project",
-        maxWidth,
-      );
       for (const l of projectLines) {
         doc.text(l, centerX, cy, { align: "center" });
         cy += 26;
       }
 
-      cy += 10;
+      cy += afterTitleGap;
       doc.setFont("helvetica", "normal");
       doc.setFontSize(11);
       doc.setTextColor(80);
