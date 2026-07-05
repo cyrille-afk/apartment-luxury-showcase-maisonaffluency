@@ -466,6 +466,25 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
     window.addEventListener("maf:concierge:insights", onInsights as EventListener);
     return () => window.removeEventListener("maf:concierge:insights", onInsights as EventListener);
   }, [expanded, insightsForcedExpand]);
+
+  // Auto-expand the panel while the Brief Builder is open so the four blocks
+  // aren't cramped, and restore the user's prior expanded preference on close.
+  const [briefForcedExpand, setBriefForcedExpand] = useState(false);
+  const priorExpandedForBriefRef = useRef<boolean | null>(null);
+  useEffect(() => {
+    if (briefBuilderOpen) {
+      if (!briefForcedExpand) {
+        priorExpandedForBriefRef.current = expanded;
+        setBriefForcedExpand(true);
+        setExpanded(true);
+      }
+    } else if (briefForcedExpand) {
+      setBriefForcedExpand(false);
+      if (priorExpandedForBriefRef.current !== null) setExpanded(priorExpandedForBriefRef.current);
+      priorExpandedForBriefRef.current = null;
+    }
+  }, [briefBuilderOpen]);
+
   const PANEL_W = expanded ? 560 : 380;
   const PANEL_H_OPEN = expanded ? 760 : 560;
   const PANEL_H_MIN = 52;
