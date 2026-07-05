@@ -44,6 +44,21 @@ BEGIN
 END
 $$;
 
+-- Returns the SQLERRM raised by `sql`, or NULL if it succeeded. Used to
+-- prove that a rejection came from the intended guard (not from RLS or a
+-- permission check further up the stack).
+CREATE OR REPLACE FUNCTION pg_temp.capture_error(sql text) RETURNS text
+LANGUAGE plpgsql AS $$
+BEGIN
+  BEGIN
+    EXECUTE sql;
+    RETURN NULL;
+  EXCEPTION WHEN OTHERS THEN
+    RETURN SQLERRM;
+  END;
+END
+$$;
+
 -- ---------------------------------------------------------------------------
 -- Fixture: one studio, three synthetic members, one outsider
 -- ---------------------------------------------------------------------------
