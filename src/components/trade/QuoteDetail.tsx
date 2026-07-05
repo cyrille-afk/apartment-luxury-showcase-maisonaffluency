@@ -322,6 +322,10 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   const [fxAppliedAt, setFxAppliedAt] = useState<Date | null>(null);
 
   const [tradeDiscount, setTradeDiscount] = useState(true);
+  // MSRP-only quotes must never apply the trade discount — the whole point of
+  // that billing mode is "full retail, no trade markdown". We derive this once
+  // and gate the toggle + every downstream calc off it below.
+
   // GST defaults to ON only for SGD quotes; other currencies (EUR/USD/GBP) default OFF.
   // The user can still toggle it on manually if needed.
   const [gstEnabled, setGstEnabled] = useState(false);
@@ -412,6 +416,15 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
     studio_id: string | null;
   } | null>(null);
   const [invoiceBusy, setInvoiceBusy] = useState(false);
+
+  // MSRP-only billing mode forbids the trade discount entirely. Whenever the
+  // quote lands (or is switched) into that mode, force the toggle off so the
+  // subtotal, extras, landed-cost panels and PDF totals all show full retail.
+  const isMsrpOnly = billingMeta?.billing_mode === "msrp_only";
+  useEffect(() => {
+    if (isMsrpOnly && tradeDiscount) setTradeDiscount(false);
+  }, [isMsrpOnly, tradeDiscount]);
+
 
 
   const quoteNumber = `QU-${quoteId.slice(0, 6).toUpperCase()}`;
@@ -2419,8 +2432,10 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
 
             <div className="flex items-center gap-4 flex-wrap">
               <button
-                onClick={() => setTradeDiscount(!tradeDiscount)}
-                className="flex items-center gap-2"
+                onClick={() => !isMsrpOnly && setTradeDiscount(!tradeDiscount)}
+                disabled={isMsrpOnly}
+                title={isMsrpOnly ? "Trade discount is disabled on MSRP-only quotes" : undefined}
+                className={`flex items-center gap-2 ${isMsrpOnly ? "opacity-50 cursor-not-allowed" : ""}`}
               >
                 <div className={`relative w-8 h-[18px] rounded-full transition-colors ${tradeDiscount ? "bg-foreground" : "bg-border"}`}>
                   <div className={`absolute top-[2px] h-[14px] w-[14px] rounded-full bg-background shadow-sm transition-transform ${tradeDiscount ? "translate-x-[14px]" : "translate-x-[2px]"}`} />
@@ -2429,7 +2444,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                   Trade discount
                 </span>
                 <span className="font-body text-[10px] text-foreground uppercase tracking-widest">
-                  · {tierLabel} {tradeDiscountLabel}
+                  · {isMsrpOnly ? "n/a — MSRP only" : `${tierLabel} ${tradeDiscountLabel}`}
                 </span>
               </button>
 
