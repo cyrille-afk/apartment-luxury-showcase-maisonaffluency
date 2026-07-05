@@ -151,6 +151,47 @@ function updateBlockField<B extends ObjectBlock>(
   };
 }
 
+const DRAFT_STORAGE_KEY = "concierge:briefBuilder:draft";
+
+type BriefDraft = {
+  values: BriefValues;
+  prefix: string;
+  suffix: string;
+};
+
+function loadDraft(): BriefDraft | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.localStorage.getItem(DRAFT_STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as Partial<BriefDraft>;
+    if (!parsed || typeof parsed !== "object" || !parsed.values) return null;
+    const v = parsed.values as Partial<BriefValues>;
+    const merged: BriefValues = {
+      block1: { ...DEFAULT_VALUES.block1, ...(v.block1 || {}) },
+      block2: { ...DEFAULT_VALUES.block2, ...(v.block2 || {}) },
+      block3: { ...DEFAULT_VALUES.block3, ...(v.block3 || {}) },
+      block4: typeof v.block4 === "string" ? v.block4 : DEFAULT_VALUES.block4,
+    };
+    return {
+      values: merged,
+      prefix: typeof parsed.prefix === "string" ? parsed.prefix : "",
+      suffix: typeof parsed.suffix === "string" ? parsed.suffix : "",
+    };
+  } catch {
+    return null;
+  }
+}
+
+function saveDraft(draft: BriefDraft) {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draft));
+  } catch {
+    // ignore quota / serialization errors
+  }
+}
+
 export function BriefBuilder({
   value,
   onChange,
@@ -164,8 +205,26 @@ export function BriefBuilder({
   const [prefix, setPrefix] = useState("");
   const [suffix, setSuffix] = useState("");
   const lastEmitted = useRef<string>("");
+  const restoredRef = useRef(false);
+
+  // Restore draft on mount (once), overriding whatever the parent seeded.
+  useEffect(() => {
+    if (restoredRef.current) return;
+    restoredRef.current = true;
+    const draft = loadDraft();
+    if (!draft) return;
+    setValues(draft.values);
+    setPrefix(draft.prefix);
+    setSuffix(draft.suffix);
+    const formatted = formatBrief(draft.values);
+    const parts = [draft.prefix, formatted, draft.suffix].filter(Boolean);
+    const nextText = parts.join("\n\n");
+    lastEmitted.current = nextText;
+    onChange(nextText);
+  }, [onChange]);
 
   useEffect(() => {
+    if (!restoredRef.current) return;
     const formatted = formatBrief(values);
     const current = prefix + (prefix ? "\n\n" : "") + formatted + (suffix ? "\n\n" : "") + suffix;
     if (value === current || value === lastEmitted.current) return;
@@ -181,6 +240,7 @@ export function BriefBuilder({
     const parts = [nextPrefix, formatted, nextSuffix].filter(Boolean);
     const nextText = parts.join("\n\n");
     lastEmitted.current = nextText;
+    saveDraft({ values: nextValues, prefix: nextPrefix, suffix: nextSuffix });
     onChange(nextText);
   };
 
@@ -199,6 +259,7 @@ export function BriefBuilder({
     setValues(nextValues);
     emit(nextValues, prefix, suffix);
   };
+
 
   const Field = ({
     label,
