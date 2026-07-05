@@ -1,77 +1,75 @@
-# Multimodal Concierge — Vector + SQL Hybrid Search
+# `/spec-schedule` opt-in spec-sheet export
 
-Extends the trade concierge to accept mood boards, floor plans, product photos, and PDF tearsheets, extract structured metadata with a multimodal LLM, and retrieve products using **both** aesthetic similarity (pgvector) and strict structural filters (SQL), then output the spec-sheet block already built.
+## Goal
 
-## Flow
+Let a trade user type `/spec-schedule` in the concierge composer and get a markdown SPECIFICATION SCHEDULE for the pieces already in their active tearsheet — without changing the default tearsheet-card contract, without touching the eval battery, and without any risk of model hallucination.
+
+## Approach: pure client-side command, no LLM call
+
+The command is intercepted in the composer BEFORE the message reaches the concierge edge function. The client resolves the active tearsheet, pulls its items and product rows directly from the database, and renders a deterministically-built markdown block as a synthetic assistant message. Because the content comes straight from `trade_products`, the "zero hallucination on metrics" mandate is honoured by construction.
+
+Missing fields render literally as `Data not found in database.` per the copilot mandate; nothing is inferred or rounded.
+
+## Command surface
+
+- `/spec-schedule` — export the current active tearsheet (most-recently-updated non-converted board for the user).
+- `/spec-schedule Dining Room A` — same, with a caller-supplied zone label in the header.
+- `/spec-schedule board:<partial title or id>` — target a specific board by title match or UUID prefix.
+- `/help` — list available slash commands (spec-schedule for now; room to add more).
+
+Anything not matching the registry is passed through to the concierge as normal chat.
+
+## User flow
+
+1. User types `/spec-schedule Salon` and hits send.
+2. Composer intercepts, does NOT stream to the concierge.
+3. Client fetches:
+   - active `client_boards` row (scoped to `auth.uid()`),
+   - `client_board_items` for that board,
+   - matching `trade_products` rows (title, category, designer, brand, dimensions, seat/arm heights, lead-time min/max, `is_contract_grade`, materials, `available_finishes`, image, sku, cad asset link).
+4. Client builds the markdown block from a pure function and appends it as an assistant message (rendered with existing ReactMarkdown).
+5. The block gets Copy-to-clipboard and Download-as-`.md` buttons; nothing is persisted server-side.
+
+## Output format (markdown, per item)
 
 ```text
-Upload (image / PDF) ─┐
-Text prompt ──────────┤─► Gemini 2.5 Pro (vision)
-                      │      extracts JSON:
-                      │      { style, palette, materials,
-                      │        room_type, dims_cm, categories,
-                      │        designer_hints, budget }
-                      ▼
-        ┌─────────────────────────────┐
-        │  Hybrid retrieval           │
-        │  • pgvector cosine on       │
-        │    product embedding        │
-        │    (name+desc+materials+    │
-        │     designer+style tags)    │
-        │  • SQL WHERE on category,   │
-        │    dims fit, lead-time,     │
-        │    price band, in-stock     │
-        └─────────────┬───────────────┘
-                      ▼
-       Gemini formats reply +
-       compileSpecSheetBlock() footer
-                      ▼
-                 User output
+### SPECIFICATION SCHEDULE: <zone or board title>
+
+**01 | <Product title>**
+- **Designer / Brand:** <designer> | <brand>
+- **Category / Typology:** <category>
+- **Dimensions:** W: <width>mm x D: <depth>mm x H: <height>mm (Seat: <seat>mm / Arm: <arm>mm)
+- **Material & Finish Catalogue:** <materials, available_finishes>
+- **Technical & Logistics:** Lead Time: <min>-<max> weeks | Contract Grade: Yes/No
+- **Project Documentation Assets:** [Image](<url>) | [CAD](<url>)
 ```
 
-## Database changes (one migration)
+Any field whose source column is null/empty renders as `Data not found in database.` on that line. No fabricated values, no unit conversion beyond mm (already the storage unit).
 
-1. `create extension if not exists vector;`
-2. Add `embedding vector(3072)` + `embedding_model text` + `embedding_updated_at timestamptz` to `trade_products`.
-3. HNSW index: `create index trade_products_embedding_idx on trade_products using hnsw (embedding vector_cosine_ops);`
-4. RPC `match_trade_products(query_embedding vector(3072), match_count int, filter jsonb)` — returns id, name, designer, similarity, applying optional SQL filters (category, max_width_cm, max_depth_cm, max_height_cm, max_lead_weeks, price_band) inside the function. `security definer`, `search_path = public`, granted to `authenticated` + `service_role`.
-5. Backfill job runs via a new edge function `embed-trade-products` (batched, idempotent on `embedding_updated_at`).
+## Files
 
-Model: `google/gemini-embedding-001` (3072-dim, default per Lovable AI embeddings guidance). Column sized to match; re-embed if we ever change model.
+- **New:** `src/lib/conciergeSlashCommands.ts` — parser + registry (`{ name, aliases, handler }`).
+- **New:** `src/lib/specScheduleBuilder.ts` — pure function `buildSpecSchedule(zone, items[]) -> string`, easy to unit-test.
+- **New:** `src/lib/specScheduleBuilder.test.ts` — fixtures covering (a) full data, (b) all-null fields render `Data not found in database.`, (c) partial data.
+- **New:** `src/components/trade/concierge/SpecScheduleBlock.tsx` — renders the markdown with Copy + Download .md actions.
+- **Edit:** `src/components/trade/AIConcierge.tsx` — in the composer submit path, run the slash parser first; on a match, resolve the active board via Supabase, hydrate items, append a synthetic assistant message rendered by `SpecScheduleBlock`. On failure (no active board, no items, RLS error), append an assistant message stating the specific reason — never fall through silently to the LLM.
+- **Edit:** `supabase/functions/trade-concierge/index.ts` — add one short sentence to the system prompt clarifying that `/spec-schedule` is a client-side command and the model must NEVER emit a markdown SPECIFICATION SCHEDULE itself, even if the user asks — the client renders it. Reinforces existing prohibition.
 
-## New edge functions
+## What does NOT change
 
-- **`embed-trade-products`** — service-role. Iterates `trade_products` where `embedding is null or updated_at > embedding_updated_at`, builds an embedding text (`name • designer • materials • primary_category • short description`), calls Lovable AI `/v1/embeddings`, upserts vector. Invocable manually and via nightly cron.
-- **`concierge-vision-extract`** — accepts `{ imageUrl | pdfBase64, kind: 'mood_board'|'floor_plan'|'product_photo'|'tearsheet' }`, calls Gemini 2.5 Pro with a schema-locked prompt per `kind`, returns structured JSON. Reused by concierge and future upload UIs.
+- The default tearsheet-card output contract stays intact.
+- No changes to `propose_tearsheet` / `add_to_tearsheet` tools.
+- No changes to the eval battery (`evalBattery_test.ts`, `specSheetBlock_test.ts`, `no_strict_typology_reply_test.ts`).
+- No new edge function, no new table, no new RLS policy — the command uses the existing `client_boards` / `client_board_items` / `trade_products` reads that already work for the user.
 
-## trade-concierge changes
+## Verification steps (after implementation)
 
-- When the incoming message contains an attachment, first call `concierge-vision-extract` to get structured params.
-- Merge extracted params with the user's text prompt into a **retrieval query**: text → embedding via `/v1/embeddings`; structural params → `filter` jsonb.
-- Call `match_trade_products` (top 12), then hydrate with `designer`, `lead_time_weeks`, `sku`, dims, materials.
-- Feed the hydrated list into the existing answer prompt; `compileSpecSheetBlock()` (already shipped) renders the footer.
-- Floor-plan branch uses `strong` tier (Gemini 2.5 Pro) with a spatial-reasoning prompt returning zones + max dims per zone; those become per-zone filters.
+1. `bunx vitest run src/lib/specScheduleBuilder.test.ts` — pure-function snapshots pass, including the all-null "Data not found in database." case.
+2. Manual: log in, open an existing tearsheet with 3+ items, type `/spec-schedule` in the concierge, confirm block renders with real DB values and no fabricated fields.
+3. Manual: empty account with zero boards, type `/spec-schedule`, confirm the assistant message says "No active tearsheet found" rather than calling the LLM.
+4. Manual: type `/spec-scheduleXYZ` (unknown), confirm the message goes to the concierge normally.
+5. Re-run the concierge eval battery to confirm no regression in the default card contract.
 
-## Frontend
+## Open question
 
-- Trade concierge input gets an existing-style attach button accepting images (jpg/png/webp ≤10 MB) and PDFs (≤10 MB). Uploads go to a private `concierge-uploads` bucket; a 60s signed URL is passed to the edge function. No changes to public views.
-
-## Rollout
-
-1. Migration (pgvector + column + RPC).
-2. Deploy `embed-trade-products`; run once to backfill.
-3. Deploy `concierge-vision-extract`.
-4. Wire trade-concierge to hybrid retrieval + vision extract.
-5. Add attach UI in trade concierge.
-6. Extend eval battery with 3 vision cases (mood board, floor plan, tearsheet) and 3 hybrid-search cases (style-only, dims-only, style+dims+lead-time).
-
-## Technical notes
-
-- Hybrid ranking: rank = `0.7 * cosine_sim + 0.3 * structural_fit_score` (structural_fit_score = fraction of active filters satisfied); computed in the RPC so pagination is stable.
-- Embedding text stays under 2048 tokens (Gemini embedding-001 cap); chunk long descriptions.
-- Re-embed trigger on `AFTER UPDATE OF name, materials, primary_category, description ON trade_products` sets `embedding = null` to force refresh on next cron run.
-- Vision extraction JSON is validated with Zod; failures degrade to text-only retrieval, never crash the reply.
-- Costs: embedding backfill is one-time (~4k products); per-request adds 1 embedding + optionally 1 vision call. Both go through Lovable AI Gateway, no new secrets.
-- Respects existing rules: English only, no French-market assumptions, trade-only pricing paths untouched, public views unaffected.
-
-Approve to proceed with the migration first.
+Should `/spec-schedule` (a) render inline as an assistant message with copy/download (recommended, matches how tearsheet cards live inline), or (b) open the block in a side panel like `TearsheetInsightsSidebar`? I will default to (a) unless you say otherwise.
