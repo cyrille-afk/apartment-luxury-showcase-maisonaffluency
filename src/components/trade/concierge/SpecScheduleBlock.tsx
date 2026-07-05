@@ -29,7 +29,9 @@ export function SpecScheduleBlock({ zone, markdown }: Props) {
     coverDate?: string;
     includeCover?: boolean;
     pageSize?: "a4" | "letter";
+    designerLogo?: string; // data URL
   };
+  const MAX_LOGO_BYTES = 500 * 1024;
   const loadPrefs = (): CoverPrefs => {
     try {
       const raw = typeof window !== "undefined" ? window.localStorage.getItem(STORAGE_KEY) : null;
