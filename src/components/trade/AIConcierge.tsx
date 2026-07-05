@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
-import { X, Send, Loader2, Sparkles, Minus, GripHorizontal, RotateCcw, Maximize2, Minimize2, Palette, Check, Languages, Pencil, Paperclip, FileText, Download, FileDown, Copy, ShieldCheck, ListChecks, Eye, LayoutList } from "lucide-react";
+import { X, Send, Loader2, Sparkles, Minus, GripHorizontal, RotateCcw, Maximize2, Minimize2, Expand, Shrink, Palette, Check, Languages, Pencil, Paperclip, FileText, Download, FileDown, Copy, ShieldCheck, ListChecks, Eye, LayoutList } from "lucide-react";
 import { BriefBuilder } from "@/components/trade/concierge/BriefBuilder";
 
 const SPEC_BRIEF_TEMPLATE = `Block 1 — Spatial & Project Context
@@ -441,6 +441,9 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
   const [expanded, setExpanded] = useState<boolean>(() => {
     try { return localStorage.getItem("concierge:expanded") === "1"; } catch { return false; }
   });
+  const [fullscreen, setFullscreen] = useState<boolean>(() => {
+    try { return localStorage.getItem("concierge:fullscreen") === "1"; } catch { return false; }
+  });
   // When the tearsheet card opens its Insights sidebar it needs the concierge
   // panel to be at its wide 560px size so the sidebar sits alongside instead
   // of overlapping. We temporarily force-expand without persisting, and
@@ -513,7 +516,7 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
 
 
 
-  const PANEL_W = expanded ? 560 : 380;
+  const PANEL_W = fullscreen ? Math.min(1200, typeof window !== "undefined" ? window.innerWidth - 32 : 1200) : (expanded ? 560 : 380);
   const PANEL_H_OPEN = expanded ? 760 : 560;
   const PANEL_H_MIN = 52;
   const [pos, setPos] = useState<{ x: number; y: number } | null>(() => {
@@ -1866,9 +1869,11 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
           style={
             modalMode
               ? { width: PANEL_W }
-              : pos
-                ? { top: pos.y, left: pos.x, right: "auto", bottom: "auto", width: PANEL_W }
-                : { width: PANEL_W }
+              : fullscreen
+                ? { width: PANEL_W }
+                : pos
+                  ? { top: pos.y, left: pos.x, right: "auto", bottom: "auto", width: PANEL_W }
+                  : { width: PANEL_W }
           }
           className={cn(
             "fixed z-[10000] max-w-[calc(100vw-2rem)] flex flex-col rounded-2xl border shadow-2xl print:hidden overflow-hidden",
@@ -1878,8 +1883,9 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
                   welcomeClosing ? "animate-scale-out" : "animate-scale-in"
                 )
               : "bg-background border-border animate-fade-in",
-            !modalMode && !pos && "bottom-20 md:bottom-6 right-4",
-            minimized ? "h-auto" : (expanded ? "h-[760px] max-h-[calc(100vh-4rem)]" : "h-[560px] max-h-[calc(100vh-6rem)]")
+            !modalMode && fullscreen && "left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2",
+            !modalMode && !fullscreen && !pos && "bottom-20 md:bottom-6 right-4",
+            minimized ? "h-auto" : (fullscreen ? "h-[calc(100vh-2rem)]" : (expanded ? "h-[760px] max-h-[calc(100vh-4rem)]" : "h-[560px] max-h-[calc(100vh-6rem)]"))
           )}
         >
           <div
@@ -2245,6 +2251,21 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
                 title={expanded ? "Shrink" : "Expand"}
               >
                 {expanded ? <Minimize2 className="h-3.5 w-3.5" /> : <Maximize2 className="h-3.5 w-3.5" />}
+              </button>
+              <button
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={() => {
+                  setFullscreen((v) => {
+                    const nv = !v;
+                    try { localStorage.setItem("concierge:fullscreen", nv ? "1" : "0"); } catch {}
+                    return nv;
+                  });
+                }}
+                className="text-muted-foreground hover:text-foreground transition-colors p-1 rounded-md hover:bg-muted"
+                aria-label={fullscreen ? "Exit full screen" : "Full screen"}
+                title={fullscreen ? "Exit full screen" : "Full screen"}
+              >
+                {fullscreen ? <Shrink className="h-3.5 w-3.5" /> : <Expand className="h-3.5 w-3.5" />}
               </button>
               <button
                 onPointerDown={(e) => e.stopPropagation()}

@@ -45,11 +45,21 @@ const DEFAULT_VALUES: BriefValues = {
     "Return 3 layout configurations. For every piece, output a strict Architectural Specification Schedule:\nProduct Name · Designer · Exact mm Dimensions · Verified Finish Options · Lead Time · Cloudinary image URL · Supabase CAD/BIM URL.\nNo conversational intro.",
 };
 
+// Header labels used in the formatted brief sent to Felix. Do NOT change the
+// "Block N —" prefixes; parseBrief() relies on them.
 const BLOCK_LABELS: Record<string, string> = {
   block1: "Block 1 — Spatial & Project Context",
   block2: "Block 2 — Hard Technical Parameters",
   block3: "Block 3 — Aesthetic & Visual DNA",
   block4: "Block 4 — Output Execution Protocol",
+};
+
+// UI-only labels — the visible section headings in the builder. Kept short so
+// the user isn't distracted by "Block 1/2/3" numbering.
+const UI_BLOCK_LABELS: Record<string, string> = {
+  block1: "Spatial & Project Context",
+  block2: "Hard Technical Parameters",
+  block3: "Aesthetic & Visual DNA",
 };
 
 const FIELD_LABELS: { key: keyof BriefValues["block1"] | keyof BriefValues["block2"] | keyof BriefValues["block3"]; label: string }[] = [
@@ -306,7 +316,7 @@ export function BriefBuilder({
       <div className="space-y-4">
         <section>
           <div className="font-heading text-[12px] font-semibold text-accent mb-2">
-            {BLOCK_LABELS.block1}
+            {UI_BLOCK_LABELS.block1}
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
             <Field
@@ -338,7 +348,7 @@ export function BriefBuilder({
 
         <section>
           <div className="font-heading text-[12px] font-semibold text-accent mb-2">
-            {BLOCK_LABELS.block2}
+            {UI_BLOCK_LABELS.block2}
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
             <Field
@@ -370,7 +380,7 @@ export function BriefBuilder({
 
         <section>
           <div className="font-heading text-[12px] font-semibold text-accent mb-2">
-            {BLOCK_LABELS.block3}
+            {UI_BLOCK_LABELS.block3}
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
             <Field
