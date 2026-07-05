@@ -361,7 +361,7 @@ export function BriefBuilder({
   const toggleSection = (block: ObjectBlock) => {
     const next = { ...expanded, [block]: !expanded[block] };
     setExpanded(next);
-    saveExpanded(next);
+    saveExpanded(scopeRef.current, next);
   };
 
   const SectionHeader = ({
