@@ -1220,15 +1220,24 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
       } catch (e) { console.warn("[concierge-capture] setup", e); }
     }
 
-    // Project-scale auto-detection — on the first user turn, if the message
-    // reads as a whole-home / multi-room project brief, skip the slow
+    // Project-scale auto-detection — whenever the user's message reads as a
+    // whole-home / multi-room project brief AND the Brief Builder hasn't been
+    // auto-opened yet AND no tearsheet has been proposed, skip the slow
     // one-question-at-a-time intake and immediately open the Architectural
-    // Brief Builder with the detected typology/city prefilled.
-    if (isFirstUserTurn && sendingAttachments.length === 0) {
+    // Brief Builder with the detected typology/city prefilled. Not gated to
+    // turn 1 — the signal often arrives on turn 2 or 3 (e.g. "Singapore" →
+    // "I'm looking to furnish my GCB").
+    const briefAlreadyAutoOpened = (() => {
+      try { return sessionStorage.getItem("concierge:briefAutoOpened") === "1"; } catch { return false; }
+    })();
+    const hasProposal = timeline.some((t) => t.kind === "proposal" || t.kind === "quote_proposal" || t.kind === "ffe_proposal");
+    if (!briefAlreadyAutoOpened && !hasProposal && !briefBuilderOpen && sendingAttachments.length === 0) {
+
       const scale = detectProjectScale(text);
       if (scale) {
-        // Fallback city from the synchronous qualifier (e.g. "in Sentosa Cove"
-        // → Singapore) when the user didn't explicitly name a city.
+        // Fallback city: (a) synchronous qualifier on current text,
+        // (b) any prior user turn's text (e.g. user answered "Singapore" on
+        // turn 1, then "furnish my GCB" on turn 2), (c) captured profile.
         let city = scale.city;
         let country = scale.country;
         if (!city) {
@@ -1236,6 +1245,23 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
           if (quick?.city) city = quick.city;
           if (quick?.country) country = country || quick.country;
         }
+        if (!city) {
+          const priorUserText = timeline
+            .filter((t): t is Extract<TimelineItem, { kind: "msg" }> => t.kind === "msg" && t.role === "user")
+            .map((t) => t.content || "")
+            .join(" \n ");
+          if (priorUserText) {
+            const priorQuick = quickClientProfile(priorUserText);
+            if (priorQuick?.city) city = priorQuick.city;
+            if (priorQuick?.country) country = country || priorQuick.country;
+            // Also try a bare capitalized city token ("Singapore", "London")
+            if (!city) {
+              const bare = priorUserText.match(/\b(Singapore|London|Paris|New York|Hong Kong|Dubai|Monaco|Los Angeles|Miami|Bangkok|Jakarta|Kuala Lumpur|Tokyo|Sydney|Milan|Geneva|Zurich)\b/);
+              if (bare) city = bare[1];
+            }
+          }
+        }
+
         const profileLine = [scale.typology, [city, country].filter(Boolean).filter((v, i, arr) => arr.indexOf(v) === i).join(", ")]
           .filter(Boolean)
           .join(", ");
@@ -1263,6 +1289,8 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
 
         setInput(prefilled);
         setBriefBuilderOpen(true);
+        try { sessionStorage.setItem("concierge:briefAutoOpened", "1"); } catch {}
+
 
         const noted = [
           scale.typology,
