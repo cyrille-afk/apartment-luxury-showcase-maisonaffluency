@@ -200,7 +200,7 @@ export function BrandPicker({
         )}
       </div>
       <span className="mt-1 block font-body text-[10px] text-muted-foreground">
-        {selected.length} selected · {ALL_BRANDS.length} brands in catalogue
+        {selected.length} selected · {pool.length} {category === "all" ? "brands" : `${category} brands`} in catalogue
       </span>
     </label>
   );
