@@ -148,6 +148,8 @@ export const findQuoteFinishSwatches = (
     .sort(bySortOrder);
 
   for (const part of variantCandidates(variant)) {
+    const sizeBefore = matches.length;
+
     // Try single best-match first (exact / fuzzy / token-overlap).
     pushMatch(findQuoteFinishSwatch([part], swatches));
 
@@ -155,24 +157,26 @@ export const findQuoteFinishSwatches = (
     // tokens — e.g. "Fabric Cat. Perfect Match" reveals all colourways in
     // the Perfect Match category, mirroring the curator lightbox behaviour.
     const partTokens = significantTokens(part);
-    if (partTokens.length === 0) continue;
-    const partSet = new Set(partTokens);
-    for (const swatch of ordered) {
-      const swTokens = significantTokens(swatch.name);
-      if (swTokens.length === 0) continue;
-      const allCovered = swTokens.every((t) => partSet.has(t));
-      if (allCovered) pushMatch(swatch);
+    if (partTokens.length > 0) {
+      const partSet = new Set(partTokens);
+      for (const swatch of ordered) {
+        const swTokens = significantTokens(swatch.name);
+        if (swTokens.length === 0) continue;
+        const allCovered = swTokens.every((t) => partSet.has(t));
+        if (allCovered) pushMatch(swatch);
+      }
     }
 
-    // Product pages show material swatches grouped by category. Variant labels
-    // often say "Marble 1/2" or "Oak" while the actual library contains named
-    // finishes such as "Marble Laguetta". When exact names are absent, fall
-    // back to the same material category rather than showing a false empty state.
-    const partCategories = matchingMaterialCategories(part);
-    if (partCategories.size > 0) {
-      for (const swatch of ordered) {
-        const swatchCategory = swatch.category?.trim();
-        if (swatchCategory && partCategories.has(swatchCategory)) pushMatch(swatch);
+    // Category fallback: only when NOTHING matched this part — otherwise a
+    // generic axis token like "Bronze" would drag in every bronze swatch on
+    // top of the specific finish the user selected.
+    if (matches.length === sizeBefore) {
+      const partCategories = matchingMaterialCategories(part);
+      if (partCategories.size > 0) {
+        for (const swatch of ordered) {
+          const swatchCategory = swatch.category?.trim();
+          if (swatchCategory && partCategories.has(swatchCategory)) pushMatch(swatch);
+        }
       }
     }
   }
