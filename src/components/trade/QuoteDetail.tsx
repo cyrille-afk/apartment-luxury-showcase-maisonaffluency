@@ -1036,14 +1036,36 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
   };
 
   const handleSubmit = async () => {
-    await supabase.from("trade_quotes").update({
-      notes: notes || null,
-      status: "submitted",
-      submitted_at: new Date().toISOString(),
-      landed_cost_cbm: landedCostSettings.cbm,
-      landed_cost_kg: landedCostSettings.kg,
-      landed_cost_mode: landedCostSettings.mode,
-    } as any).eq("id", quoteId);
+    // Persist and VERIFY the status flipped. Previously we ignored the update
+    // result, so an RLS block or 0-row match would still show "Quote submitted"
+    // while the row stayed a draft. Use .select() to confirm the write landed.
+    const { data: updated, error: updateError } = await supabase
+      .from("trade_quotes")
+      .update({
+        notes: notes || null,
+        status: "submitted",
+        submitted_at: new Date().toISOString(),
+        landed_cost_cbm: landedCostSettings.cbm,
+        landed_cost_kg: landedCostSettings.kg,
+        landed_cost_mode: landedCostSettings.mode,
+      } as any)
+      .eq("id", quoteId)
+      .select("id, status, submitted_at");
+
+    if (updateError) {
+      console.error("Quote submit update failed:", updateError);
+      toast({ title: "Could not submit quote", description: updateError.message, variant: "destructive" });
+      return;
+    }
+    if (!updated || updated.length === 0) {
+      console.error("Quote submit update matched 0 rows — likely RLS or missing quote id", { quoteId });
+      toast({
+        title: "Quote not submitted",
+        description: "The update didn't reach the database. Reload the page and try again — if it persists, this is a permissions issue.",
+        variant: "destructive",
+      });
+      return;
+    }
 
     // Auto-apply any available credit (e.g. FF&E unlock)
     try {
