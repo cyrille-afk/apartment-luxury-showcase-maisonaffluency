@@ -124,44 +124,11 @@ const TradeLanding = () => {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   const [faqExpanded, setFaqExpanded] = useState(false);
   const formRef = useRef<HTMLDivElement>(null);
-  const { doc: featuredDoc } = useFeaturedPublicDocument();
+  // Featured Issue (AD) free-download removed from the trade area — handler and
+  // hook usage intentionally deleted.
+  void trackMagazine;
+  void supabase;
 
-  const handleTrackedCatalogueDownload = useCallback(async (label: string, source: string) => {
-    if (!featuredDoc) return;
-    // Tie this CTA click to the same document_id used by the nav badge so the
-    // funnel (impression → click → download) can be analysed end-to-end.
-    trackMagazine.badgeClick(featuredDoc.id, featuredDoc.title, source);
-    const { data: { session } } = await supabase.auth.getSession();
-
-    if (session?.user) {
-      trackDownload(featuredDoc.id, label);
-    } else {
-      // For guests, don't send browser-inferred country — let the edge function
-      // resolve it from CDN geo headers (cf-ipcountry) for accuracy.
-      void supabase.functions.invoke("log-public-download", {
-        body: {
-          documentId: featuredDoc.id,
-          label,
-          source: "trade-landing",
-        },
-      });
-    }
-
-    try {
-      const response = await fetch(featuredDoc.file_url);
-      const blob = await response.blob();
-      const blobUrl = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = blobUrl;
-      link.download = `${featuredDoc.title}.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      URL.revokeObjectURL(blobUrl);
-    } catch {
-      window.open(featuredDoc.file_url, "_blank", "noopener,noreferrer");
-    }
-  }, [featuredDoc]);
   const [searchParams] = useSearchParams();
   const prefillEmail = searchParams.get("email") || "";
   const regionParam = (searchParams.get("region") || "").toLowerCase();
