@@ -1634,6 +1634,7 @@ export type Database = {
           created_at: string
           currency: string
           default_ship_mode: string | null
+          depth_mm: number | null
           description: string | null
           designer_id: string
           dimensions: string | null
@@ -1647,10 +1648,12 @@ export type Database = {
           fabric_size_label_b: string | null
           gallery_captions: Json | null
           gallery_images: string[] | null
+          height_mm: number | null
           hover_image_url: string | null
           hs_code: string | null
           id: string
           image_url: string
+          is_contract_grade: boolean
           is_hidden: boolean
           is_upholstered: boolean | null
           lead_time: string | null
@@ -1669,6 +1672,7 @@ export type Database = {
           pickup_postcode: string | null
           price_per_sqm_cents: number | null
           price_prefix: string | null
+          seat_height_mm: number | null
           size_variants: Json | null
           sort_order: number
           subcategory: string | null
@@ -1679,6 +1683,7 @@ export type Database = {
           trade_price_cents: number | null
           variant_image_map: Json | null
           variant_placeholder: string | null
+          width_mm: number | null
           wood_label_override: string | null
         }
         Insert: {
@@ -1689,6 +1694,7 @@ export type Database = {
           created_at?: string
           currency?: string
           default_ship_mode?: string | null
+          depth_mm?: number | null
           description?: string | null
           designer_id: string
           dimensions?: string | null
@@ -1702,10 +1708,12 @@ export type Database = {
           fabric_size_label_b?: string | null
           gallery_captions?: Json | null
           gallery_images?: string[] | null
+          height_mm?: number | null
           hover_image_url?: string | null
           hs_code?: string | null
           id?: string
           image_url?: string
+          is_contract_grade?: boolean
           is_hidden?: boolean
           is_upholstered?: boolean | null
           lead_time?: string | null
@@ -1724,6 +1732,7 @@ export type Database = {
           pickup_postcode?: string | null
           price_per_sqm_cents?: number | null
           price_prefix?: string | null
+          seat_height_mm?: number | null
           size_variants?: Json | null
           sort_order?: number
           subcategory?: string | null
@@ -1734,6 +1743,7 @@ export type Database = {
           trade_price_cents?: number | null
           variant_image_map?: Json | null
           variant_placeholder?: string | null
+          width_mm?: number | null
           wood_label_override?: string | null
         }
         Update: {
@@ -1744,6 +1754,7 @@ export type Database = {
           created_at?: string
           currency?: string
           default_ship_mode?: string | null
+          depth_mm?: number | null
           description?: string | null
           designer_id?: string
           dimensions?: string | null
@@ -1757,10 +1768,12 @@ export type Database = {
           fabric_size_label_b?: string | null
           gallery_captions?: Json | null
           gallery_images?: string[] | null
+          height_mm?: number | null
           hover_image_url?: string | null
           hs_code?: string | null
           id?: string
           image_url?: string
+          is_contract_grade?: boolean
           is_hidden?: boolean
           is_upholstered?: boolean | null
           lead_time?: string | null
@@ -1779,6 +1792,7 @@ export type Database = {
           pickup_postcode?: string | null
           price_per_sqm_cents?: number | null
           price_prefix?: string | null
+          seat_height_mm?: number | null
           size_variants?: Json | null
           sort_order?: number
           subcategory?: string | null
@@ -1789,6 +1803,7 @@ export type Database = {
           trade_price_cents?: number | null
           variant_image_map?: Json | null
           variant_placeholder?: string | null
+          width_mm?: number | null
           wood_label_override?: string | null
         }
         Relationships: [
@@ -2971,6 +2986,48 @@ export type Database = {
         }
         Relationships: []
       }
+      material_taxonomy: {
+        Row: {
+          created_at: string
+          description: string | null
+          durability_rating: number | null
+          family: string
+          id: string
+          is_active: boolean
+          is_contract_grade: boolean
+          name: string
+          slug: string
+          synonyms: string[]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          durability_rating?: number | null
+          family: string
+          id?: string
+          is_active?: boolean
+          is_contract_grade?: boolean
+          name: string
+          slug: string
+          synonyms?: string[]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          durability_rating?: number | null
+          family?: string
+          id?: string
+          is_active?: boolean
+          is_contract_grade?: boolean
+          name?: string
+          slug?: string
+          synonyms?: string[]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           created_at: string
@@ -3680,6 +3737,64 @@ export type Database = {
             columns: ["pick_id"]
             isOneToOne: false
             referencedRelation: "designer_curator_picks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      product_material_links: {
+        Row: {
+          created_at: string
+          id: string
+          material_id: string
+          pick_id: string | null
+          position_note: string | null
+          product_id: string | null
+          role: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          material_id: string
+          pick_id?: string | null
+          position_note?: string | null
+          product_id?: string | null
+          role?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          material_id?: string
+          pick_id?: string | null
+          position_note?: string | null
+          product_id?: string | null
+          role?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_material_links_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "material_taxonomy"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_material_links_pick_id_fkey"
+            columns: ["pick_id"]
+            isOneToOne: false
+            referencedRelation: "designer_curator_picks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_material_links_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "trade_products"
             referencedColumns: ["id"]
           },
         ]
