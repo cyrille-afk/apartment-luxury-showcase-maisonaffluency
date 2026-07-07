@@ -226,6 +226,10 @@ const Product3DViewer: React.FC<Props> = ({
         originalTexturesRef.current = cache;
       }
 
+      // Notify parent (admin UI) of the material names in this GLB.
+      const allNames = materials.map((m) => String(m?.name || "(unnamed)"));
+      onMaterialsDiscovered?.(allNames);
+
       const toList = (v: string | string[] | undefined) =>
         v ? (Array.isArray(v) ? v : [v]).map((k) => k.toLowerCase()) : null;
 
@@ -237,21 +241,45 @@ const Product3DViewer: React.FC<Props> = ({
         return kws.some((k) => name.includes(k));
       };
 
-      const fabricMatched = materials.filter(matchByKeywords(fabricKeywords));
-      const baseMatchedRaw = materials.filter(matchByKeywords(baseKeywords));
-      // Prevent overlap: fabric wins on any material that also matches base keywords.
-      const baseMatched = baseMatchedRaw.filter((m) => !fabricMatched.includes(m));
+      const hasExplicitRoles = !!materialRoles && Object.keys(materialRoles).length > 0;
+      const roleOf = (m: any): "fabric" | "base" | "ignore" | null => {
+        const name = String(m?.name || "");
+        if (materialRoles && Object.prototype.hasOwnProperty.call(materialRoles, name)) {
+          return materialRoles[name];
+        }
+        return null;
+      };
 
-      // Fallback rules:
-      // - Fabric texture with no matches → apply to all (legacy behavior).
-      // - Base texture with no matches → apply only to non-fabric materials
-      //   (safer than "all", since single-axis GLBs use fabric fallback).
+      let fabricMatched: any[];
+      let baseMatched: any[];
+      let ignored: any[];
+
+      if (hasExplicitRoles) {
+        // Explicit map wins. Unmapped materials default to "ignore".
+        fabricMatched = materials.filter((m) => roleOf(m) === "fabric");
+        baseMatched = materials.filter((m) => roleOf(m) === "base");
+        ignored = materials.filter((m) => (roleOf(m) ?? "ignore") === "ignore");
+      } else {
+        fabricMatched = materials.filter(matchByKeywords(fabricKeywords));
+        const baseMatchedRaw = materials.filter(matchByKeywords(baseKeywords));
+        // Prevent overlap: fabric wins on any material that also matches base keywords.
+        baseMatched = baseMatchedRaw.filter((m) => !fabricMatched.includes(m));
+        ignored = [];
+      }
+
+      // Fallback rules (only when there are NO explicit roles):
+      // - Fabric with no matches → all materials (legacy behavior).
+      // - Base with no matches → non-fabric materials.
       const nonFabric = materials.filter((m) => !fabricMatched.includes(m));
-
-      const fabricTargets = fabricMatched.length > 0 ? fabricMatched : materials;
-      const baseTargets = baseMatched.length > 0 ? baseMatched : nonFabric;
+      const fabricTargets = hasExplicitRoles
+        ? fabricMatched
+        : (fabricMatched.length > 0 ? fabricMatched : materials);
+      const baseTargets = hasExplicitRoles
+        ? baseMatched
+        : (baseMatched.length > 0 ? baseMatched : nonFabric);
 
       const restoreOne = (m: any) => {
+
         const original = originalTexturesRef.current!.get(m) ?? null;
         try { m.pbrMetallicRoughness.baseColorTexture.setTexture(original); } catch { /* noop */ }
       };
