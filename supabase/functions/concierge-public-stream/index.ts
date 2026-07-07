@@ -2,8 +2,14 @@
 // Minimal SSE chat endpoint with per-IP + per-session rate limiting.
 // Does NOT expose catalog tools, RAG, or user-scoped data — those live on
 // the authenticated /trade-concierge endpoint.
+//
+// Grounding: every turn is prefixed with a deterministic roster block
+// (see ./_grounding.ts) so the model can only cite designers, studios, and
+// ateliers Maison Affluency actually represents. This closes the last
+// hallucination surface without adding DB roundtrips on the hot path.
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
+import { buildGroundingBlock } from "./_grounding.ts";
 
 const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY")!;
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
@@ -135,15 +141,15 @@ function validateMessage(text: string): ValidationResult {
 
 // -----------------------------------
 
-const SYSTEM_PROMPT = `You are the private concierge for Maison Affluency — a collectible-design gallery representing world-class designers (Andrée Putman, Pierre Yovanovitch, Man of Parts, India Mahdavi, Alexander Lamont and many others). You speak to discerning private collectors and interior designers.
+const SYSTEM_PROMPT = `You are the private concierge for Maison Affluency — a collectible-design gallery representing world-class designers, studios, and ateliers. You speak to discerning private collectors and interior designers.
 
 Voice: warm, confident, elite, never sycophantic. Short paragraphs. British English. Never reveal you are an AI or expose internal notes/profiles.
 
-You can: source exceptional artisan and collectible objects, discuss designers and provenance, gather a project brief (room, address/city, style direction, timeline, budget posture), and explain that we ship white-glove worldwide from European ateliers (~99% of pieces ship from Europe, not Singapore).
+You can: source exceptional artisan and collectible objects, discuss designers and provenance (only names from the verified roster below), gather a project brief (room, address/city, style direction, timeline, budget posture), and explain that we ship white-glove worldwide from European ateliers (~99% of pieces ship from Europe, not Singapore).
 
 You can NOT: quote firm prices, commit to lead times, or browse the live catalogue (that requires our trade portal). When a visitor asks for pricing or to see specific pieces, invite them to share their email so our director can follow up with a private selection and indicative pricing. Public prices are shown as "Price on Request" by design.
 
-Never mention competitors. Never invent designers, pieces, or prices.`;
+Never mention competitors. Never invent designers, ateliers, pieces, prices, exhibitions, or collaborations — always defer to the verified roster block below.`;
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -252,6 +258,12 @@ serve(async (req) => {
     }
   }
 
+  // Build the grounding block from the latest user message so the model gets
+  // an authoritative allow-list of designer/atelier names plus any specialty
+  // facts relevant to this turn. Sent as a second system message so it stays
+  // above the conversation and inside the same cache prefix.
+  const groundingBlock = buildGroundingBlock(latestUser?.content ?? "");
+
   const upstream = await fetch(LOVABLE_CHAT_URL, {
     method: "POST",
     headers: {
@@ -260,7 +272,11 @@ serve(async (req) => {
     },
     body: JSON.stringify({
       model: MODEL,
-      messages: [{ role: "system", content: SYSTEM_PROMPT }, ...trimmed],
+      messages: [
+        { role: "system", content: SYSTEM_PROMPT },
+        { role: "system", content: groundingBlock },
+        ...trimmed,
+      ],
       stream: true,
       max_completion_tokens: 800,
     }),
