@@ -97,21 +97,10 @@ export function PickAssetDrawer({ pickId, title }: Props) {
     return { fabricSwatches: fab, baseSwatches: base };
   }, [swatches]);
 
-  if (loading) {
-    return (
-      <div className="mt-2 flex items-center gap-2 rounded-md border border-border/60 bg-background/40 px-2 py-2">
-        <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
-        <span className="font-body text-[10px] uppercase tracking-widest text-muted-foreground">
-          Loading 3D &amp; finishes…
-        </span>
-      </div>
-    );
-  }
-
   const hasGlb = !!glbUrl;
   const hasSwatches = swatches.length > 0;
 
-  if (!hasGlb && !hasSwatches) {
+  if (!loading && !hasGlb && !hasSwatches) {
     return (
       <div className="mt-2 rounded-md border border-border/60 bg-background/40 px-2 py-1.5 font-body text-[10px] text-muted-foreground">
         No 3D model or finish swatches on file for this piece.
@@ -119,6 +108,7 @@ export function PickAssetDrawer({ pickId, title }: Props) {
       </div>
     );
   }
+
 
   const fabricTextureUrl = selectedFabricId
     ? fabricSwatches.find((s) => s.fabric_id === selectedFabricId)?.image_url ?? null
