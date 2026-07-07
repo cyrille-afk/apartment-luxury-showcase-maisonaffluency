@@ -25,7 +25,7 @@ const PRINT_SRC = readFileSync(
   path.resolve(__dirname, "../../lib/tearsheetPrintHtml.ts"),
   "utf8",
 );
-void BOTH; // reserved for future combined-scan assertions
+
 
 describe("TradeTearsheets print/PDF parity with on-screen preview", () => {
   it("imports withImperialInline and derives dimensionsDisplay from it", () => {
