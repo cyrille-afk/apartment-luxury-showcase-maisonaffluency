@@ -121,8 +121,9 @@ const TradeAdminGlbModels: React.FC = () => {
             <Box size={22} /> 3D Models
           </h1>
           <p className="font-body text-sm text-muted-foreground mb-10 max-w-2xl">
-            Upload a GLB or GLTF file and we'll attach it to the product's <code>glb_url</code>.
-            The interactive 3D viewer then appears on the trade product page.
+            Attach a 3D model per size variant (e.g. 2-seater vs 3-seater, or W 180 vs W 220).
+            Upload .glb, .gltf, or an .obj bundle — the trade product page and concierge tearsheet
+            drawer will pick the right model automatically based on the size the user selects.
           </p>
 
           <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.2fr] gap-10">
