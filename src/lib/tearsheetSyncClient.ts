@@ -67,6 +67,7 @@ export async function validateTearsheetEdits(payload: {
   skipped: SyncItem[];
   locked: SyncItem[];
   title_change?: { from: string; to: string } | null;
+  locked_finishes?: { fabric?: string | null; wood?: string | null; variant?: string | null } | null;
 }): Promise<ValidationVerdict> {
   const res = await fetch(`${BASE}/trade-concierge-validate`, {
     method: "POST",
