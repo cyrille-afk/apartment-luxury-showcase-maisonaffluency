@@ -6,7 +6,16 @@ import path from "node:path";
 
 import { buildTearsheetPrintHtml } from "../src/lib/tearsheetPrintHtml";
 import { withImperialInline } from "../src/lib/formatDimensions";
-import { formatLeadTime } from "../src/components/trade/AvailabilityBadge";
+// NOTE: `formatLeadTime` normally lives in `@/components/trade/AvailabilityBadge`,
+// but importing it here would drag in `@/integrations/supabase/client`, which
+// depends on Vite's `import.meta.env` and is unavailable in the Playwright
+// Node runtime. Inlining the tiny pure helper keeps this test hermetic while
+// staying byte-identical to the production string.
+function formatLeadTime(min: number | null, max: number | null): string | null {
+  if (!min && !max) return null;
+  if (min && max && min !== max) return `${min}–${max} wks`;
+  return `${min ?? max} wks`;
+}
 
 /**
  * End-to-end verification of the trade tearsheet PDF export.
