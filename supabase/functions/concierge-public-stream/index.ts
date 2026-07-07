@@ -2,8 +2,14 @@
 // Minimal SSE chat endpoint with per-IP + per-session rate limiting.
 // Does NOT expose catalog tools, RAG, or user-scoped data — those live on
 // the authenticated /trade-concierge endpoint.
+//
+// Grounding: every turn is prefixed with a deterministic roster block
+// (see ./_grounding.ts) so the model can only cite designers, studios, and
+// ateliers Maison Affluency actually represents. This closes the last
+// hallucination surface without adding DB roundtrips on the hot path.
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
+import { buildGroundingBlock } from "./_grounding.ts";
 
 const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY")!;
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
