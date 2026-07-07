@@ -35,6 +35,7 @@ const EMBED_MODEL = "openai/text-embedding-3-small";
 const EMBED_DIMS = 1536;
 const TOP_K = 6;
 const SIM_FLOOR = 0.25;
+const SIM_STRICT_FLOOR = 0.45;
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
