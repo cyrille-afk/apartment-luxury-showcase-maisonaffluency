@@ -1375,6 +1375,24 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
       content: `[Workflow context] Current stage: ${stage}. Tailor guidance to this stage and reference it explicitly when helpful.`,
     };
 
+    // Discover-stage tolerance: the greeting asks for the project city, but
+    // users frequently answer off-script (naming a piece, a designer, a room,
+    // a style, or a general question) on turn 1. Do NOT loop back demanding
+    // the city, do NOT stall, and do NOT emit a "stopped responding" style
+    // dead-end. Accept whatever the user said, act on it, and — if a
+    // qualifier (city / room / typology) is still missing — fold ONE brief
+    // confirmation into the SAME reply while continuing to build the brief.
+    const discoverToleranceContext: ChatMessage[] =
+      stage === "Discover"
+        ? [{
+            role: "user",
+            content:
+              "[Discover-stage rule] The greeting invited the user to share a project city. If their reply does not answer that (e.g. they name a specific piece, a designer, a room, a style, a question, or anything else), DO NOT re-ask the city as a blocking gate and DO NOT reply with a scripted fallback. Instead: (1) acknowledge what they actually said and act on it — if they named a piece, discuss that piece; if they named a style/room, engage with it; (2) if the city (or another key qualifier like room or typology) is still unknown, weave ONE short, single-sentence confirmation into the same reply — e.g. \"— and, so I can tailor shipping and pricing, which city is the project in?\" — never as a standalone re-prompt; (3) keep moving the brief forward on the next turn even if the user still hasn't answered the qualifier. Never ask the same qualifier twice.",
+          }]
+        : [];
+
+
+
     // Find the most recent proposal (resolved or not) so we can tell the
     // model which items the user kept vs removed. Without this context the
     // model regenerates a fresh selection on every follow-up turn, which
