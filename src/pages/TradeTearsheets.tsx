@@ -18,6 +18,8 @@ import { normalizeCategory, normalizeSubcategory, CATEGORY_ORDER, getSubcategori
 import { ProjectPicker } from "@/components/trade/ProjectPicker";
 import TradeBreadcrumb from "@/components/trade/TradeBreadcrumb";
 import { getConciergeSession, useConciergeSession } from "@/hooks/useConciergeSession";
+import { withImperialInline } from "@/lib/formatDimensions";
+import { formatLeadTime } from "@/components/trade/AvailabilityBadge";
 
 interface TearsheetProduct {
   id: string;
@@ -106,6 +108,68 @@ export default function TradeTearsheets() {
   }, [filterProjectId]);
   const [selectedProduct, setSelectedProduct] = useState<TearsheetProduct | null>(null);
   const printRef = useRef<HTMLDivElement>(null);
+
+  // Resolve a display-ready lead time for the selected product:
+  //  1) trade_products.lead_time (freeform string) if present
+  //  2) product override on trade_products
+  //  3) brand_lead_times default (looked up by brand_name AND parent_brand)
+  const { data: leadTimeInfo } = useQuery({
+    queryKey: ["tearsheet-lead-time", selectedProduct?.id, selectedProduct?.brand_name, selectedProduct?.parent_brand],
+    enabled: !!selectedProduct,
+    queryFn: async () => {
+      if (!selectedProduct) return null;
+      if (selectedProduct.lead_time && selectedProduct.lead_time.trim()) {
+        return { display: selectedProduct.lead_time.trim() };
+      }
+      let min: number | null = null;
+      let max: number | null = null;
+      if (selectedProduct.source === "trade") {
+        const { data: tp } = await supabase
+          .from("trade_products")
+          .select("lead_weeks_min_override, lead_weeks_max_override")
+          .eq("id", selectedProduct.id)
+          .maybeSingle();
+        min = (tp as any)?.lead_weeks_min_override ?? null;
+        max = (tp as any)?.lead_weeks_max_override ?? null;
+      }
+      if (min == null && max == null) {
+        const brands = Array.from(new Set([selectedProduct.brand_name, selectedProduct.parent_brand].filter(Boolean)));
+        const { data: blt } = await supabase
+          .from("brand_lead_times")
+          .select("brand_name, default_lead_weeks_min, default_lead_weeks_max")
+          .in("brand_name", brands);
+        // Prefer the child brand over the parent when both exist.
+        const byBrand = new Map<string, any>();
+        (blt || []).forEach((b: any) => byBrand.set(b.brand_name, b));
+        const b = byBrand.get(selectedProduct.brand_name) || byBrand.get(selectedProduct.parent_brand);
+        min = b?.default_lead_weeks_min ?? null;
+        max = b?.default_lead_weeks_max ?? null;
+      }
+      const lt = formatLeadTime(min, max);
+      return { display: lt };
+    },
+  });
+  const leadTimeDisplay = leadTimeInfo?.display || null;
+
+  const dimensionsDisplay = useMemo(
+    () => withImperialInline(selectedProduct?.dimensions) || null,
+    [selectedProduct?.dimensions],
+  );
+
+  // Show selected finishes inline within the Materials cell so the tearsheet
+  // reflects the picked wood/fabric even when the base `materials` column is
+  // empty (curator picks often have no free-form materials text).
+  const materialsDisplay = useMemo(() => {
+    const base = (selectedProduct?.materials || "").trim();
+    const finishParts = [
+      chosenFinishes.wood && `Base / Wood: ${chosenFinishes.wood}`,
+      chosenFinishes.fabric && `Fabric: ${chosenFinishes.fabric}`,
+    ].filter(Boolean) as string[];
+    if (!finishParts.length) return base || null;
+    if (!base) return finishParts.join(" · ");
+    return `${base} · ${finishParts.join(" · ")}`;
+  }, [selectedProduct?.materials, chosenFinishes.wood, chosenFinishes.fabric]);
+
 
   // Fetch the set of product IDs (from quotes + boards) belonging to the selected
   // project. We also expand the set with curator-pick "twins" of any
@@ -491,9 +555,9 @@ export default function TradeTearsheets() {
       </div>` : ""}
       <div class="grid" style="margin-top:24px">
         <div><p class="label">Category</p><p class="value">${esc(selectedProduct.category) || "—"}</p></div>
-        <div><p class="label">Dimensions</p><p class="value">${esc(selectedProduct.dimensions) || "—"}</p></div>
-        <div><p class="label">Materials</p><p class="value">${esc(selectedProduct.materials) || "—"}</p></div>
-        <div><p class="label">Lead Time</p><p class="value">${esc(selectedProduct.lead_time) || "—"}</p></div>
+        <div><p class="label">Dimensions</p><p class="value" style="white-space:pre-line">${esc(dimensionsDisplay) || "—"}</p></div>
+        <div><p class="label">Materials</p><p class="value" style="white-space:pre-line">${esc(materialsDisplay) || "—"}</p></div>
+        <div><p class="label">Lead Time</p><p class="value">${esc(leadTimeDisplay) || "—"}</p></div>
         <div><p class="label">Trade Price</p><p class="value">${esc(priceStr)}</p></div>
         ${selectedProduct.description ? `<div style="grid-column:1/3"><p class="label">Description</p><p class="value">${esc(selectedProduct.description)}</p></div>` : ""}
       </div>
@@ -636,19 +700,20 @@ export default function TradeTearsheets() {
               <div className="grid grid-cols-2 gap-4">
                 {([
                   ["Category", selectedProduct.category],
-                  ["Dimensions", selectedProduct.dimensions],
-                  ["Materials", selectedProduct.materials],
-                  ["Lead Time", selectedProduct.lead_time],
+                  ["Dimensions", dimensionsDisplay],
+                  ["Materials", materialsDisplay],
+                  ["Lead Time", leadTimeDisplay],
                   ["Trade Price", selectedProduct.trade_price_cents
                     ? `${selectedProduct.currency === "USD" ? "$" : selectedProduct.currency === "GBP" ? "£" : selectedProduct.currency === "SGD" ? "S$" : "€"}${(selectedProduct.trade_price_cents / 100).toLocaleString()}`
                     : "Price Upon Request"],
                 ] as const).map(([label, val]) => (
                   <div key={label}>
                     <p className="font-body text-[10px] uppercase tracking-wider text-muted-foreground">{label}</p>
-                    <p className="font-body text-sm text-foreground mt-0.5">{val || "—"}</p>
+                    <p className="font-body text-sm text-foreground mt-0.5 whitespace-pre-line">{val || "—"}</p>
                   </div>
                 ))}
               </div>
+
               {selectedProduct.description && (
                 <div>
                   <p className="font-body text-[10px] uppercase tracking-wider text-muted-foreground">Description</p>
