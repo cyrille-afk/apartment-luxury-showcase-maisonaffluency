@@ -2318,7 +2318,7 @@ const TradeProductPage: React.FC = () => {
                 .map(norm)
                 .filter(Boolean);
               const byLabel = candidates.reduce<
-                { variant_label: string; glb_url: string; is_default: boolean } | null
+                { variant_label: string; glb_url: string; is_default: boolean; material_roles: Record<string, "fabric" | "base" | "ignore"> | null } | null
               >((hit, cand) => {
                 if (hit) return hit;
                 return (
@@ -2326,8 +2326,10 @@ const TradeProductPage: React.FC = () => {
                 );
               }, null);
               const byDefault = glbVariants.find((v) => v.is_default);
-              const resolvedGlbUrl = byLabel?.glb_url || byDefault?.glb_url || glbUrl || null;
+              const resolvedVariant = byLabel || byDefault || null;
+              const resolvedGlbUrl = resolvedVariant?.glb_url || glbUrl || null;
               if (!resolvedGlbUrl) return null;
+              const resolvedRoles = resolvedVariant?.material_roles || undefined;
               return (
                 <Product3DViewer
                   url={resolvedGlbUrl}
@@ -2335,9 +2337,10 @@ const TradeProductPage: React.FC = () => {
                   poster={product.image_url}
                   fabricTextureUrl={selectedFabric?.image_url || null}
                   baseTextureUrl={selectedWoodPrice?.image_url || null}
-
+                  materialRoles={resolvedRoles || undefined}
                 />
               );
+
             })()}
 
             {/* CAD / 3D file downloads (trade-gated; only renders when files exist) */}
