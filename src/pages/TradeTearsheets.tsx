@@ -109,6 +109,68 @@ export default function TradeTearsheets() {
   const [selectedProduct, setSelectedProduct] = useState<TearsheetProduct | null>(null);
   const printRef = useRef<HTMLDivElement>(null);
 
+  // Resolve a display-ready lead time for the selected product:
+  //  1) trade_products.lead_time (freeform string) if present
+  //  2) product override on trade_products
+  //  3) brand_lead_times default (looked up by brand_name AND parent_brand)
+  const { data: leadTimeInfo } = useQuery({
+    queryKey: ["tearsheet-lead-time", selectedProduct?.id, selectedProduct?.brand_name, selectedProduct?.parent_brand],
+    enabled: !!selectedProduct,
+    queryFn: async () => {
+      if (!selectedProduct) return null;
+      if (selectedProduct.lead_time && selectedProduct.lead_time.trim()) {
+        return { display: selectedProduct.lead_time.trim() };
+      }
+      let min: number | null = null;
+      let max: number | null = null;
+      if (selectedProduct.source === "trade") {
+        const { data: tp } = await supabase
+          .from("trade_products")
+          .select("lead_weeks_min_override, lead_weeks_max_override")
+          .eq("id", selectedProduct.id)
+          .maybeSingle();
+        min = (tp as any)?.lead_weeks_min_override ?? null;
+        max = (tp as any)?.lead_weeks_max_override ?? null;
+      }
+      if (min == null && max == null) {
+        const brands = Array.from(new Set([selectedProduct.brand_name, selectedProduct.parent_brand].filter(Boolean)));
+        const { data: blt } = await supabase
+          .from("brand_lead_times")
+          .select("brand_name, default_lead_weeks_min, default_lead_weeks_max")
+          .in("brand_name", brands);
+        // Prefer the child brand over the parent when both exist.
+        const byBrand = new Map<string, any>();
+        (blt || []).forEach((b: any) => byBrand.set(b.brand_name, b));
+        const b = byBrand.get(selectedProduct.brand_name) || byBrand.get(selectedProduct.parent_brand);
+        min = b?.default_lead_weeks_min ?? null;
+        max = b?.default_lead_weeks_max ?? null;
+      }
+      const lt = formatLeadTime(min, max);
+      return { display: lt };
+    },
+  });
+  const leadTimeDisplay = leadTimeInfo?.display || null;
+
+  const dimensionsDisplay = useMemo(
+    () => withImperialInline(selectedProduct?.dimensions) || null,
+    [selectedProduct?.dimensions],
+  );
+
+  // Show selected finishes inline within the Materials cell so the tearsheet
+  // reflects the picked wood/fabric even when the base `materials` column is
+  // empty (curator picks often have no free-form materials text).
+  const materialsDisplay = useMemo(() => {
+    const base = (selectedProduct?.materials || "").trim();
+    const finishParts = [
+      chosenFinishes.wood && `Base / Wood: ${chosenFinishes.wood}`,
+      chosenFinishes.fabric && `Fabric: ${chosenFinishes.fabric}`,
+    ].filter(Boolean) as string[];
+    if (!finishParts.length) return base || null;
+    if (!base) return finishParts.join(" · ");
+    return `${base} · ${finishParts.join(" · ")}`;
+  }, [selectedProduct?.materials, chosenFinishes.wood, chosenFinishes.fabric]);
+
+
   // Fetch the set of product IDs (from quotes + boards) belonging to the selected
   // project. We also expand the set with curator-pick "twins" of any
   // trade_products IDs — the merged catalog dedups (brand, title) pairs and
