@@ -331,6 +331,68 @@ export default function TradeTearsheets() {
     return true;
   });
 
+  // ─── Push to Client Board ────────────────────────────────────────────────
+  const { toast } = useToast();
+  const [boardPickerOpen, setBoardPickerOpen] = useState(false);
+  const [pushingBoardId, setPushingBoardId] = useState<string | null>(null);
+  const [pushedBoardIds, setPushedBoardIds] = useState<Set<string>>(new Set());
+  const { boards: userBoards, loading: boardsLoading } = useUserBoards(boardPickerOpen);
+
+  const pushToBoard = async (boardId: string) => {
+    if (!selectedProduct) return;
+    setPushingBoardId(boardId);
+    try {
+      // client_board_items.product_id FKs to trade_products.id. Resolve if the
+      // selected row is a curator pick (source_pick_id → trade_products.id).
+      let tradeProductId: string | null = null;
+      if (selectedProduct.source === "trade") {
+        tradeProductId = selectedProduct.id;
+      } else {
+        const { data: tp } = await supabase
+          .from("trade_products")
+          .select("id")
+          .eq("source_pick_id", selectedProduct.id)
+          .maybeSingle();
+        tradeProductId = (tp as any)?.id ?? null;
+      }
+      if (!tradeProductId) {
+        toast({
+          title: "Not on the trade catalog yet",
+          description: "This product hasn't been mirrored into trade_products, so it can't be pinned to a board.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const noteLines: string[] = [];
+      if (chosenFinishes.variant) noteLines.push(`Variant: ${chosenFinishes.variant}`);
+      if (chosenFinishes.wood) noteLines.push(`Base / Wood: ${chosenFinishes.wood}`);
+      if (chosenFinishes.fabric) noteLines.push(`Fabric: ${chosenFinishes.fabric}`);
+      const notes = noteLines.length ? noteLines.join("\n") : null;
+
+      // Next sort_order = current item count on the board.
+      const { count } = await supabase
+        .from("client_board_items")
+        .select("id", { count: "exact", head: true })
+        .eq("board_id", boardId);
+
+      const { error } = await supabase
+        .from("client_board_items")
+        .insert({ board_id: boardId, product_id: tradeProductId, sort_order: count ?? 0, notes });
+
+      if (error) {
+        toast({ title: "Couldn't add to board", description: error.message, variant: "destructive" });
+        return;
+      }
+      setPushedBoardIds((prev) => new Set(prev).add(boardId));
+      toast({ title: "Added to board", description: `${selectedProduct.product_name} pinned with the chosen finishes.` });
+    } finally {
+      setPushingBoardId(null);
+    }
+  };
+
+
+
   const handlePrint = () => {
     if (!printRef.current || !selectedProduct) return;
     const win = window.open("", "_blank");
