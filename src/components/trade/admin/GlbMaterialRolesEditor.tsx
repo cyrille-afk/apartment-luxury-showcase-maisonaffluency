@@ -37,6 +37,8 @@ export function GlbMaterialRolesEditor({
   initialRoles,
   onChange,
   onSaved,
+  onIdentifyChange,
+  identifying,
 }: Props) {
   const [roles, setRoles] = useState<Record<string, MaterialRole>>({});
   const [saving, setSaving] = useState(false);
