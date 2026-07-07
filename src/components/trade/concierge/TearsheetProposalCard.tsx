@@ -94,6 +94,17 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
     }
   };
   const [status, setStatus] = useState<Status>("pending");
+  // Per-row "3D & finishes" drawer toggles. Kept separate from the
+  // rationale-expanded set so opening a viewer never collapses reading state.
+  const [assetsOpen, setAssetsOpen] = useState<Set<string>>(new Set());
+  const toggleAssets = (id: string) => {
+    setAssetsOpen((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
   const [result, setResult] = useState<{ boardId: string; url: string; added: number; duplicates: number } | null>(null);
   const [error, setError] = useState<string | null>(null);
   // After commit, holds the board's existing project_id (null = no project assigned yet).
