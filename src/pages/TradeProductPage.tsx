@@ -2297,20 +2297,33 @@ const TradeProductPage: React.FC = () => {
                 selection, falls back to the default variant, then to the legacy
                 trade_products.glb_url. */}
             {(() => {
-              const norm = (s: string | null | undefined) => (s || "").trim().toLowerCase();
-              const activeLabel =
-                norm((activeVariant as any)?.label) ||
-                norm(selectedDualSize) ||
-                norm(selectedSingleSize) ||
-                (() => {
-                  const combo = [(activeVariant as any)?.base, (activeVariant as any)?.top]
-                    .filter(Boolean)
-                    .join(" × ");
-                  return norm(combo);
-                })();
-              const byLabel = activeLabel
-                ? glbVariants.find((v) => norm(v.variant_label) === activeLabel)
-                : null;
+              const norm = (s: string | null | undefined) =>
+                (s || "").trim().toLowerCase().replace(/\s+/g, " ");
+              const av: any = activeVariant || {};
+              // Candidate labels to match against, most-specific first. GLBs
+              // describe geometry, so we prefer the dimensional axis (base,
+              // sometimes top) over the combined label. This lets a single
+              // "W 190 × D 108 × H 70 SH 40 cm" GLB serve every fabric.
+              const candidates: string[] = [
+                av.label,
+                selectedDualSize,
+                selectedSingleSize,
+                av.base,
+                av.top,
+                selectedBase,
+                selectedTop,
+                [av.base, av.top].filter(Boolean).join(" × "),
+              ]
+                .map(norm)
+                .filter(Boolean);
+              const byLabel = candidates.reduce<
+                { variant_label: string; glb_url: string; is_default: boolean } | null
+              >((hit, cand) => {
+                if (hit) return hit;
+                return (
+                  glbVariants.find((v) => norm(v.variant_label) === cand) || null
+                );
+              }, null);
               const byDefault = glbVariants.find((v) => v.is_default);
               const resolvedGlbUrl = byLabel?.glb_url || byDefault?.glb_url || glbUrl || null;
               if (!resolvedGlbUrl) return null;
