@@ -481,7 +481,14 @@ export async function streamConcierge({
         const parsed = JSON.parse(jsonStr);
         if (currentEvent === "stream_start") {
           const sid = (parsed as { stream_id?: string })?.stream_id;
-          if (typeof sid === "string") streamId = sid;
+          if (typeof sid === "string") {
+            const isFirstAnnounce = streamId !== sid;
+            streamId = sid;
+            // Fire once per streamId (resume attempts re-emit the same id).
+            if (isFirstAnnounce && onStreamStart) {
+              try { onStreamStart(sid); } catch { /* ignore */ }
+            }
+          }
           return;
         }
         if (currentEvent === "stream_resume" || currentEvent === "resume_timeout" || currentEvent === "resume_error") {
