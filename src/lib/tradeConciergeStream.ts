@@ -313,6 +313,7 @@ export async function streamConcierge({
   onToolStart,
   onEscalation,
   onRequestId,
+  onStreamStart,
   onInspector,
   onAppliedConstraints,
   onReconnect,
