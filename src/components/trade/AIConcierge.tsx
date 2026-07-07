@@ -1701,6 +1701,25 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
         lang,
         onDelta: upsertAssistant,
         onProposal: handleProposal,
+        onStreamStart: (streamId) => {
+          // Persist the stream id in the concierge session so hooks like
+          // `useConciergeSession().emit(...)` and `lockFinishes()` can push
+          // client-originated events onto `concierge:${streamId}`.
+          setStreamId(streamId);
+          // Tear down any previous handoff channel and re-subscribe on the
+          // new topic so peer tabs / dashboards receive server broadcasts
+          // (`proposal_ready`, `stream_completed`, ...) in near real time.
+          try { handoffDisposeRef.current?.(); } catch { /* ignore */ }
+          handoffDisposeRef.current = openHandoffChannel(streamId, {
+            onEvent: (frame) => {
+              // Surface every broadcast on a window event so debug tools /
+              // sibling components can observe without importing this module.
+              try {
+                window.dispatchEvent(new CustomEvent("concierge:handoff", { detail: { streamId, ...frame } }));
+              } catch { /* ignore */ }
+            },
+          });
+        },
         onToolStart: (ev) => {
           armStall();
           setTimeline((prev) => {
