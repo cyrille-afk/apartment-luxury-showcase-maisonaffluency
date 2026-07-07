@@ -136,7 +136,9 @@ const Product3DViewer: React.FC<Props> = ({
   alt,
   poster,
   fabricTextureUrl,
+  baseTextureUrl,
   fabricMaterialNameIncludes,
+  baseMaterialNameIncludes,
   debug = false,
 }) => {
   const [ready, setReady] = useState(() =>
@@ -160,20 +162,19 @@ const Product3DViewer: React.FC<Props> = ({
     };
   }, []);
 
-  // Re-apply / restore fabric texture whenever the swatch changes.
+  // Re-apply / restore textures whenever a swatch changes.
   useEffect(() => {
     if (!ready) return;
     const mv = mvRef.current;
     if (!mv) return;
     let cancelled = false;
 
-    const applyTexture = async () => {
-      // Wait for the model to be loaded.
+    const applyTextures = async () => {
       const model = mv.model;
       if (!model) {
         const onLoad = () => {
           mv.removeEventListener("load", onLoad);
-          if (!cancelled) applyTexture();
+          if (!cancelled) applyTextures();
         };
         mv.addEventListener("load", onLoad);
         return;
@@ -181,101 +182,115 @@ const Product3DViewer: React.FC<Props> = ({
       const materials: any[] = model.materials || [];
       if (materials.length === 0) return;
 
-      // Cache original baseColorTextures once, so we can restore.
+      // Cache original baseColorTextures once.
       if (!originalTexturesRef.current) {
         const cache = new Map<any, any>();
         for (const m of materials) {
           try {
             const tex = m?.pbrMetallicRoughness?.baseColorTexture?.texture ?? null;
             cache.set(m, tex);
-          } catch {
-            /* noop */
-          }
+          } catch { /* noop */ }
         }
         originalTexturesRef.current = cache;
       }
 
-      // Build the keyword list for the convention-based filter.
-      const explicitKeywords = fabricMaterialNameIncludes
-        ? (Array.isArray(fabricMaterialNameIncludes)
-            ? fabricMaterialNameIncludes
-            : [fabricMaterialNameIncludes])
-        : null;
-      const conventionKeywords = [
-        "fabric",
-        "upholstery",
-        "cushion",
-        "seat",
-        "cover",
-        "textile",
-        "pillow",
-        "sofa",
-      ];
-      const keywords = (explicitKeywords ?? conventionKeywords).map((k) =>
-        k.toLowerCase(),
-      );
-      const matchesKeywords = (m: any) => {
+      const toList = (v: string | string[] | undefined) =>
+        v ? (Array.isArray(v) ? v : [v]).map((k) => k.toLowerCase()) : null;
+
+      const fabricKeywords = toList(fabricMaterialNameIncludes) ?? FABRIC_KEYWORDS.map((k) => k.toLowerCase());
+      const baseKeywords = toList(baseMaterialNameIncludes) ?? BASE_KEYWORDS.map((k) => k.toLowerCase());
+
+      const matchByKeywords = (kws: string[]) => (m: any) => {
         const name = String(m?.name || "").toLowerCase();
-        return keywords.some((k) => name.includes(k));
+        return kws.some((k) => name.includes(k));
       };
-      // Determine effective target materials: if any material matches the
-      // convention, restrict to those; otherwise fall back to all materials
-      // so legacy GLBs without the naming convention still swap.
-      const matched = materials.filter(matchesKeywords);
-      const targets = matched.length > 0 ? matched : materials;
-      const filter = (m: any) => targets.includes(m);
 
-      // Publish debug info for the UI panel.
-      setDebugInfo({
-        all: materials.map((m) => String(m?.name || "(unnamed)")),
-        matched: matched.map((m) => String(m?.name || "(unnamed)")),
-        fellBackToAll: matched.length === 0,
-        keywords,
-      });
+      const fabricMatched = materials.filter(matchByKeywords(fabricKeywords));
+      const baseMatchedRaw = materials.filter(matchByKeywords(baseKeywords));
+      // Prevent overlap: fabric wins on any material that also matches base keywords.
+      const baseMatched = baseMatchedRaw.filter((m) => !fabricMatched.includes(m));
 
-      if (!fabricTextureUrl) {
-        // Restore originals.
-        for (const m of materials) {
-          if (!filter(m)) continue;
-          const original = originalTexturesRef.current.get(m) ?? null;
-          try {
-            m.pbrMetallicRoughness.baseColorTexture.setTexture(original);
-          } catch {
-            /* noop */
-          }
-        }
-        return;
-      }
+      // Fallback rules:
+      // - Fabric texture with no matches → apply to all (legacy behavior).
+      // - Base texture with no matches → apply only to non-fabric materials
+      //   (safer than "all", since single-axis GLBs use fabric fallback).
+      const nonFabric = materials.filter((m) => !fabricMatched.includes(m));
 
-      try {
-        const texture = await mv.createTexture!(fabricTextureUrl);
+      const fabricTargets = fabricMatched.length > 0 ? fabricMatched : materials;
+      const baseTargets = baseMatched.length > 0 ? baseMatched : nonFabric;
+
+      const restoreOne = (m: any) => {
+        const original = originalTexturesRef.current!.get(m) ?? null;
+        try { m.pbrMetallicRoughness.baseColorTexture.setTexture(original); } catch { /* noop */ }
+      };
+
+      const applyOne = async (targets: any[], textureUrl: string) => {
+        const texture = await mv.createTexture!(textureUrl);
         if (cancelled || !texture) return;
-        for (const m of materials) {
-          if (!filter(m)) continue;
+        for (const m of targets) {
           try {
             m.pbrMetallicRoughness.baseColorTexture.setTexture(texture);
-            // Neutralise the base color factor so the texture reads true.
             m.pbrMetallicRoughness.setBaseColorFactor?.([1, 1, 1, 1]);
-          } catch {
-            /* noop */
-          }
+          } catch { /* noop */ }
+        }
+      };
+
+      // Publish debug info.
+      setDebugInfo({
+        all: materials.map((m) => String(m?.name || "(unnamed)")),
+        fabric: {
+          matched: fabricMatched.map((m) => String(m?.name || "(unnamed)")),
+          fellBackToAll: fabricMatched.length === 0,
+          keywords: fabricKeywords,
+        },
+        base: {
+          matched: baseMatched.map((m) => String(m?.name || "(unnamed)")),
+          fellBackToAll: baseMatched.length === 0,
+          keywords: baseKeywords,
+        },
+      });
+
+      try {
+        // Fabric layer
+        if (fabricTextureUrl) {
+          await applyOne(fabricTargets, fabricTextureUrl);
+        } else {
+          for (const m of fabricTargets) restoreOne(m);
+        }
+        // Base layer
+        if (baseTextureUrl) {
+          await applyOne(baseTargets, baseTextureUrl);
+        } else {
+          for (const m of baseTargets) restoreOne(m);
         }
       } catch (err) {
         // eslint-disable-next-line no-console
-        console.warn("[Product3DViewer] Failed to apply fabric texture", err);
+        console.warn("[Product3DViewer] Failed to apply texture", err);
       }
     };
 
-    applyTexture();
-    return () => {
-      cancelled = true;
-    };
-  }, [ready, fabricTextureUrl, fabricMaterialNameIncludes, url]);
+    applyTextures();
+    return () => { cancelled = true; };
+  }, [ready, fabricTextureUrl, baseTextureUrl, fabricMaterialNameIncludes, baseMaterialNameIncludes, url]);
 
   // Reset cached originals whenever the model URL changes.
   useEffect(() => {
     originalTexturesRef.current = null;
   }, [url]);
+
+  const renderLayer = (label: string, info: LayerDebug, active: boolean) => (
+    <div>
+      <div className="text-muted-foreground uppercase tracking-[0.12em] text-[9px] mb-0.5">
+        {label} · {info.matched.length} matched{info.fellBackToAll ? " · fallback" : ""}{active ? " · active" : ""}
+      </div>
+      <div className="text-emerald-600 break-words">
+        {info.matched.length > 0 ? info.matched.join(", ") : "— none —"}
+      </div>
+      <div className="text-muted-foreground/70 text-[9px] mt-0.5">
+        keywords: {info.keywords.join(", ")}
+      </div>
+    </div>
+  );
 
   return (
     <div className="border border-border rounded-md overflow-hidden bg-muted/30">
@@ -319,55 +334,29 @@ const Product3DViewer: React.FC<Props> = ({
             className="w-full flex items-center justify-between px-3 py-2 font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground hover:text-foreground transition-colors"
           >
             <span>
-              Fabric filter · {debugInfo.matched.length}/{debugInfo.all.length} matched
-              {debugInfo.fellBackToAll && " · fallback: all"}
-              {fabricTextureUrl ? " · swatch active" : " · original"}
+              Materials · fabric {debugInfo.fabric.matched.length} · base {debugInfo.base.matched.length} / {debugInfo.all.length}
             </span>
             <span>{debugOpen ? "−" : "+"}</span>
           </button>
           {debugOpen && (
             <div className="px-3 pb-3 space-y-2 font-body text-[10px] leading-relaxed">
-              <div>
-                <div className="text-muted-foreground uppercase tracking-[0.12em] text-[9px] mb-0.5">
-                  Keywords
-                </div>
-                <div className="text-foreground/80">{debugInfo.keywords.join(", ")}</div>
-              </div>
-              <div>
-                <div className="text-muted-foreground uppercase tracking-[0.12em] text-[9px] mb-0.5">
-                  Matched ({debugInfo.matched.length})
-                </div>
-                <div className="text-emerald-600 break-words">
-                  {debugInfo.matched.length > 0 ? debugInfo.matched.join(", ") : "— none —"}
-                </div>
-              </div>
+              {renderLayer("Fabric layer", debugInfo.fabric, !!fabricTextureUrl)}
+              {renderLayer("Base layer", debugInfo.base, !!baseTextureUrl)}
               <div>
                 <div className="text-muted-foreground uppercase tracking-[0.12em] text-[9px] mb-0.5">
                   All materials ({debugInfo.all.length})
                 </div>
                 <div className="text-foreground/70 break-words">
-                  {debugInfo.all.map((n, i) => {
-                    const isMatch = debugInfo.matched.includes(n);
-                    return (
-                      <span key={`${n}-${i}`}>
-                        {i > 0 && ", "}
-                        <span className={isMatch ? "text-emerald-600" : ""}>{n}</span>
-                      </span>
-                    );
-                  })}
+                  {debugInfo.all.join(", ")}
                 </div>
               </div>
-              {debugInfo.fellBackToAll && (
-                <div className="text-amber-600">
-                  No material matched the convention — the swatch is applied to every material as a fallback. Rename your upholstery mesh to include one of the keywords above.
-                </div>
-              )}
             </div>
           )}
         </div>
       )}
     </div>
   );
+
 };
 
 export default Product3DViewer;
