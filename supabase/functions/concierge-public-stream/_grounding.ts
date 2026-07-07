@@ -147,8 +147,29 @@ export function buildGroundingBlock(
       .slice(0, 10)
       .map((e) => (e.specialty ? `${e.name} — ${e.specialty}` : e.name));
     parts.push("");
-    parts.push("[Most relevant roster members for this query — quote from these lines, don't paraphrase from memory]");
+    // When retrieval confidence is low, tell the model these are exploratory
+    // — it still can name them, but only as a soft suggestion, not a firm
+    // attribution. When retrieval is unavailable, we only reach this branch
+    // via lexical hits, which are exact by construction — keep the strong
+    // "quote from these" instruction.
+    const status = opts?.retrievalStatus ?? "ok";
+    const heading = status === "low_confidence"
+      ? "[Roster members that MAY relate to this query — offer as gentle suggestions, do not present as a firm curatorial match unless the visitor confirms interest]"
+      : "[Most relevant roster members for this query — quote from these lines, don't paraphrase from memory]";
+    parts.push(heading);
     parts.push(lines.join("\n"));
+  } else {
+    // No lexical hits AND no semantic hits above the similarity floor (or
+    // retrieval was unavailable). This is the graceful-refusal branch: the
+    // model has the full allow-list but no per-query context, so it must
+    // NOT invent an attribution. Give it an explicit instruction so it
+    // deflects to the enquiry-capture path instead of guessing.
+    parts.push("");
+    parts.push(
+      opts?.retrievalStatus === "unavailable"
+        ? "[No retrieval context available for this turn — do NOT name a specific designer or atelier speculatively. If the visitor asked for a specific piece or style, offer to note the enquiry so our director can hand-pick a shortlist.]"
+        : "[No confident roster match for this query — do NOT name a specific designer or atelier as a match. If the visitor asked for a specific piece, style, or era, acknowledge the intent, ask one clarifying question about room / use / budget posture if useful, and offer to note the enquiry so our director can hand-pick a shortlist.]",
+    );
   }
 
   parts.push("");
