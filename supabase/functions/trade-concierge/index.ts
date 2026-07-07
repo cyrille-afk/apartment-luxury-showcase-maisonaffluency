@@ -4229,24 +4229,49 @@ serve(async (req) => {
     // Merge extractedBrief material/category signal into the SQL-load
     // constraints so the bulk catalog path narrows even when the raw user
     // message did not contain a keyword (the classifier already normalised it).
+    // Also deterministically parse TYPOLOGY from the structured brief so the
+    // category filter stays live even on follow-up turns (the LLM extractor
+    // won't see the brief again after turn 1).
+    const parsedTypologyCats: string[] = [];
+    {
+      const typRe = /typology[^:\n]*:\s*([^\n]+)/i;
+      const tm = userConversationText.match(typRe);
+      if (tm) {
+        const raw = tm[1].replace(/[\[\]]/g, "");
+        // Split on commas, plus, ampersand, slash, and " and "
+        const tokens = raw.split(/,|\+|&|\/|\band\b/i).map((t) => t.trim().toLowerCase()).filter(Boolean);
+        for (const t of tokens) {
+          // Strip trailing counts like "coffee table x2".
+          const cleaned = t.replace(/\s*x?\s*\d+\s*$/i, "").trim();
+          if (cleaned.length >= 3) parsedTypologyCats.push(cleaned);
+        }
+      }
+    }
     const sqlLoadConstraints: HardConstraints = {
       materials: [
         ...(preRequestConstraints.materials || []),
         ...((effectiveBrief.brief.materials || []).map((m) => String(m).toLowerCase())),
       ].filter(Boolean),
       colors: preRequestConstraints.colors || [],
-      categories: (effectiveBrief.brief.categories || []).map((c) => String(c).toLowerCase()).filter(Boolean),
+      categories: [
+        ...(effectiveBrief.brief.categories || []).map((c) => String(c).toLowerCase()),
+        ...parsedTypologyCats,
+      ].filter(Boolean),
     };
     const hasSqlConstraint =
       (sqlLoadConstraints.materials?.length || 0) +
       (sqlLoadConstraints.colors?.length || 0) +
       (sqlLoadConstraints.categories?.length || 0) > 0;
     const catalogT0 = performance.now();
+    // When BOTH a designer scope and a category/material constraint exist,
+    // apply them together — retrieval must be scoped to the allowed brands
+    // AND the requested typologies (e.g. Man of Parts + Apparatus × sectional
+    // + accent chair + floor lamp). Previously only one filter was applied.
     const { designersList, piecesList: fullPiecesList, showroomBrands } = await loadCatalogContext(
       supabase,
       includePieces && !useRag,
       hasScopedDesigners ? scopedDesigners : undefined,
-      hasSqlConstraint && !hasScopedDesigners ? sqlLoadConstraints : undefined,
+      hasSqlConstraint ? sqlLoadConstraints : undefined,
     );
     mark("loadCatalogContext", { ms: Math.round(performance.now() - catalogT0), includePieces, useRag });
     // Detect "hard constraints matched zero pieces" so the UI can render a
