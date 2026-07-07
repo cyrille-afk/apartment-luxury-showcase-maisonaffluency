@@ -15,7 +15,13 @@ const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY")!;
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const LOVABLE_CHAT_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
+const LOVABLE_EMBED_URL = "https://ai.gateway.lovable.dev/v1/embeddings";
 const MODEL = "google/gemini-3-flash-preview";
+const EMBED_MODEL = "openai/text-embedding-3-small";
+const EMBED_DIMS = 1536;
+const SEMANTIC_MIN_CHARS = 20; // skip retrieval for tiny "hi", "?", etc.
+const SEMANTIC_TOP_K = 6;
+const SEMANTIC_TIMEOUT_MS = 1500; // never block the stream on retrieval
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -262,7 +268,64 @@ serve(async (req) => {
   // an authoritative allow-list of designer/atelier names plus any specialty
   // facts relevant to this turn. Sent as a second system message so it stays
   // above the conversation and inside the same cache prefix.
-  const groundingBlock = buildGroundingBlock(latestUser?.content ?? "");
+  //
+  // Tier B: for non-trivial queries, embed the user message and pull the
+  // top-K most semantically similar roster entries from
+  // concierge_roster_embeddings. This surfaces designers the visitor never
+  // named directly (e.g. "art-deco lighting" → Arredoluce, Angelo Lelii)
+  // without letting the model roam outside the roster — the allow-list block
+  // still constrains what it can name.
+  //
+  // Retrieval is bounded (SEMANTIC_TIMEOUT_MS) and fully fault-tolerant: on
+  // any error, empty result, or timeout we fall back to Tier A grounding
+  // (bare allow-list + lexical hits). No user-visible failure path.
+  const queryText = latestUser?.content ?? "";
+  let semanticHits: Array<{ name: string; specialty: string }> = [];
+  if (queryText.length >= SEMANTIC_MIN_CHARS) {
+    try {
+      const ac = new AbortController();
+      const timer = setTimeout(() => ac.abort(), SEMANTIC_TIMEOUT_MS);
+      const embedResp = await fetch(LOVABLE_EMBED_URL, {
+        method: "POST",
+        signal: ac.signal,
+        headers: {
+          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: EMBED_MODEL,
+          input: queryText.slice(0, 2000),
+          dimensions: EMBED_DIMS,
+        }),
+      }).finally(() => clearTimeout(timer));
+      if (embedResp.ok) {
+        const embedJson = await embedResp.json();
+        const vec = embedJson?.data?.[0]?.embedding;
+        if (Array.isArray(vec) && vec.length === EMBED_DIMS) {
+          const { data: matches, error: matchErr } = await sb.rpc("match_roster_public", {
+            query_embedding: vec as unknown as string, // supabase-js stringifies
+            match_count: SEMANTIC_TOP_K,
+          });
+          if (!matchErr && Array.isArray(matches)) {
+            semanticHits = matches
+              .filter((m: { similarity?: number }) => (m.similarity ?? 0) > 0.25)
+              .map((m: { name: string; specialty: string | null }) => ({
+                name: m.name,
+                specialty: m.specialty ?? "",
+              }));
+          } else if (matchErr) {
+            console.warn("[concierge-public-stream] match_roster_public error", matchErr);
+          }
+        }
+      } else {
+        console.warn("[concierge-public-stream] embed non-ok", embedResp.status);
+      }
+    } catch (e) {
+      // AbortError, network, JSON parse — all fall back to Tier A.
+      console.warn("[concierge-public-stream] semantic retrieval skipped", e);
+    }
+  }
+  const groundingBlock = buildGroundingBlock(queryText, semanticHits);
 
   const upstream = await fetch(LOVABLE_CHAT_URL, {
     method: "POST",

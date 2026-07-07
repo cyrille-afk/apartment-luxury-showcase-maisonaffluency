@@ -1420,6 +1420,36 @@ export type Database = {
         }
         Relationships: []
       }
+      concierge_roster_embeddings: {
+        Row: {
+          created_at: string
+          embedding: string
+          id: string
+          model_version: string
+          name: string
+          specialty: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          embedding: string
+          id?: string
+          model_version?: string
+          name: string
+          specialty?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          embedding?: string
+          id?: string
+          model_version?: string
+          name?: string
+          specialty?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       concierge_stream_frames: {
         Row: {
           chunk: string
@@ -7223,6 +7253,14 @@ export type Database = {
           title: string
           trade_price_cents: number
           width_mm: number
+        }[]
+      }
+      match_roster_public: {
+        Args: { match_count?: number; query_embedding: string }
+        Returns: {
+          name: string
+          similarity: number
+          specialty: string
         }[]
       }
       match_semantic_cache: {
