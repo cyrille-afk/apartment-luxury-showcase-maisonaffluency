@@ -46,16 +46,22 @@ function pickSizeLabel(v: {
   top?: string;
   meters?: number | null;
 }): string | null {
-  if (v?.label && v.label.trim()) return v.label.trim();
-  const baseDim = looksDimensional(v?.base);
-  const topDim = looksDimensional(v?.top);
-  // Dimensional base + non-dimensional top → keep the size only.
-  if (baseDim && v?.top && !topDim) return (v.base || "").trim() || null;
-  // Non-dimensional base + dimensional top → keep the size only.
-  if (topDim && v?.base && !baseDim) return (v.top || "").trim() || null;
-  // Both dimensional (or both non-dimensional) → combine.
-  const combo = [v?.base, v?.top].filter(Boolean).join(" × ");
-  return combo ? combo.trim() : null;
+  const label = v?.label?.trim() || "";
+  const base = v?.base?.trim() || "";
+  const top = v?.top?.trim() || "";
+  const labelDim = looksDimensional(label);
+  const baseDim = looksDimensional(base);
+  const topDim = looksDimensional(top);
+
+  // GLBs are geometry-only. Return a label ONLY when at least one axis (or
+  // the explicit `label` field) carries dimensions. When neither axis is
+  // dimensional (e.g. wood × fabric), every entry collapses to null and the
+  // manager falls back to a single "Default" slot.
+  if (labelDim) return label;
+  if (baseDim && !topDim) return base;
+  if (topDim && !baseDim) return top;
+  if (baseDim && topDim) return [base, top].filter(Boolean).join(" × ");
+  return null;
 }
 
 export function GlbVariantManager({ productId, productName, posterImageUrl, onChange }: Props) {
