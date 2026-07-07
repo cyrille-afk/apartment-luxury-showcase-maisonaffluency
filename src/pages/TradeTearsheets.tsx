@@ -18,6 +18,8 @@ import { normalizeCategory, normalizeSubcategory, CATEGORY_ORDER, getSubcategori
 import { ProjectPicker } from "@/components/trade/ProjectPicker";
 import TradeBreadcrumb from "@/components/trade/TradeBreadcrumb";
 import { getConciergeSession, useConciergeSession } from "@/hooks/useConciergeSession";
+import { withImperialInline } from "@/lib/formatDimensions";
+import { formatLeadTime } from "@/components/trade/AvailabilityBadge";
 
 interface TearsheetProduct {
   id: string;
