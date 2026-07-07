@@ -687,7 +687,12 @@ export default function TradeTearsheets() {
 
       <Dialog open={boardPickerOpen} onOpenChange={(open) => {
         setBoardPickerOpen(open);
-        if (!open) setShowCreateBoardForm(false);
+        if (!open) {
+          setShowCreateBoardForm(false);
+          setNewBoardTitle("");
+          setNewBoardClientName("");
+          setNewBoardClientEmail("");
+        }
       }}>
         <DialogContent className="max-w-md">
           <DialogHeader>
