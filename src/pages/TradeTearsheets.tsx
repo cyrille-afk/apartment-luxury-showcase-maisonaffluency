@@ -639,6 +639,68 @@ export default function TradeTearsheets() {
           </>
         )}
       </div>
+
+      <Dialog open={boardPickerOpen} onOpenChange={setBoardPickerOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-display text-lg">Push to Client Board</DialogTitle>
+            <DialogDescription className="font-body text-xs">
+              Pin {selectedProduct?.product_name ?? "this product"} to one of your boards.
+              {(chosenFinishes.fabric || chosenFinishes.wood || chosenFinishes.variant) && (
+                <span className="block mt-1 text-muted-foreground">
+                  Finishes will be saved as a note on the board item:
+                  {chosenFinishes.variant ? ` ${chosenFinishes.variant}` : ""}
+                  {chosenFinishes.wood ? ` · ${chosenFinishes.wood}` : ""}
+                  {chosenFinishes.fabric ? ` · ${chosenFinishes.fabric}` : ""}
+                </span>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="max-h-80 overflow-y-auto space-y-2 pr-1">
+            {boardsLoading ? (
+              <div className="flex justify-center py-8">
+                <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+              </div>
+            ) : userBoards.length === 0 ? (
+              <p className="font-body text-sm text-muted-foreground py-6 text-center">
+                You don't have any client boards yet. Create one from{" "}
+                <a href="/trade/boards" className="underline">Trade → Boards</a>.
+              </p>
+            ) : (
+              userBoards.map((b) => {
+                const pushed = pushedBoardIds.has(b.id);
+                const busy = pushingBoardId === b.id;
+                return (
+                  <button
+                    key={b.id}
+                    type="button"
+                    disabled={busy || pushed}
+                    onClick={() => pushToBoard(b.id)}
+                    className="w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-md border border-border hover:border-foreground/30 bg-card text-left transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                  >
+                    <div className="min-w-0">
+                      <p className="font-display text-sm text-foreground truncate">{b.title}</p>
+                      <p className="font-body text-[11px] text-muted-foreground truncate">
+                        {b.client_name || "—"} · {b.item_count} item{b.item_count === 1 ? "" : "s"} · {b.status}
+                      </p>
+                    </div>
+                    {pushed ? (
+                      <span className="flex items-center gap-1 font-body text-[10px] uppercase tracking-widest text-emerald-600">
+                        <Check className="h-3 w-3" /> Added
+                      </span>
+                    ) : busy ? (
+                      <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                    ) : (
+                      <span className="font-body text-[10px] uppercase tracking-widest text-muted-foreground">Add →</span>
+                    )}
+                  </button>
+                );
+              })
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
+
   );
 }
