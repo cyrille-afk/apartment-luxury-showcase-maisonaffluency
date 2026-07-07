@@ -413,6 +413,19 @@ const Product3DViewer: React.FC<Props> = ({
           : "Tap to load the interactive 3D model (downloads on demand)"}
       </p>
 
+      {opened && !hasExplicitRoles && (
+        <div className="px-3 py-2 border-t border-border bg-[hsl(var(--warning)/0.08)]">
+          <div className="flex items-start gap-2">
+            <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[hsl(var(--warning))]" />
+            <p className="font-body text-[10px] leading-snug text-[hsl(var(--warning))]">
+              No materials are tagged for this GLB variant. Finish swatches may
+              not update the 3D model. Ask your admin to tag material roles in
+              the GLB manager.
+            </p>
+          </div>
+        </div>
+      )}
+
       {debug && debugInfo && (
         <div className="border-t border-border bg-background/60">
           <button
