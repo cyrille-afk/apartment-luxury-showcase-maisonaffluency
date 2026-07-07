@@ -34,6 +34,25 @@ function clean(v: unknown): string {
   return s.length ? s : DASH;
 }
 
+/**
+ * Append inches after every "<number> cm" occurrence in a dimensions string,
+ * matching the trade product page convention: "W 79 cm × D 77 cm x H 67 cm"
+ * → "W 79 cm / 31" × D 77 cm / 30" x H 67 cm / 26"".
+ * If the string already includes an inch marker (") we skip conversion.
+ */
+export function appendInchesToDimensions(input: string | null | undefined): string {
+  const s = typeof input === "string" ? input.trim() : "";
+  if (!s || s === DASH) return DASH;
+  // Skip if it already carries inch marks or "in" tokens.
+  if (/["″]|\bin\b/i.test(s)) return s;
+  return s.replace(/(\d+(?:[.,]\d+)?)\s*cm\b/gi, (_m, num: string) => {
+    const cm = parseFloat(num.replace(",", "."));
+    if (!Number.isFinite(cm)) return _m;
+    const inches = Math.round(cm / 2.54);
+    return `${num} cm / ${inches}"`;
+  });
+}
+
 /** Short 8-char SKU derived from the pick UUID — stable and copy-pasteable. */
 export function shortSku(id: string): string {
   const compact = String(id || "").replace(/-/g, "");
@@ -48,7 +67,7 @@ export function buildSpecSheetRows(pieces: SpecSheetPiece[]): SpecSheetRow[] {
       sku: shortSku(p.id),
       title: clean(p.title),
       designer: clean(p.designer_name || p.brand_name),
-      dimensions: clean(p.dimensions),
+      dimensions: appendInchesToDimensions(p.dimensions),
       materials: clean(p.materials),
       lead_time: clean(p.lead_time || p.stock_status),
     }));
