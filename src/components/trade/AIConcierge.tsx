@@ -1296,7 +1296,8 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
     if (!hasProposal && !briefBuilderOpen && sendingAttachments.length === 0) {
 
 
-      const scale = detectProjectScale(text);
+      const priorUserTurns = timeline.filter((t) => t.kind === "msg" && (t as any).role === "user").length;
+      const scale = detectProjectScale(text, priorUserTurns);
       if (scale) {
         // Fallback city: (a) synchronous qualifier on current text,
         // (b) any prior user turn's text (e.g. user answered "Singapore" on
