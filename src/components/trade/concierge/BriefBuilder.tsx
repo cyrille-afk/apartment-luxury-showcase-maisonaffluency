@@ -465,6 +465,9 @@ export function BriefBuilder({
     const nextText = parts.join("\n\n");
     lastEmitted.current = nextText;
     saveDraft({ values: nextValues, prefix: nextPrefix, suffix: nextSuffix });
+    // Mirror the composed brief into the cross-surface concierge session so
+    // the Tearsheet Builder and Quote flow can carry the brief forward.
+    updateConciergeSession({ briefText: nextText });
     onChange(nextText);
   };
 
