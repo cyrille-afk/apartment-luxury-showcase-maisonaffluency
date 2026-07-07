@@ -2333,6 +2333,8 @@ const TradeProductPage: React.FC = () => {
                   alt={`${product.title} — 3D model${byLabel ? ` (${byLabel.variant_label})` : ""}`}
                   poster={product.image_url}
                   fabricTextureUrl={selectedFabric?.image_url || null}
+                  baseTextureUrl={selectedWoodPrice?.image_url || null}
+
                 />
               );
             })()}
