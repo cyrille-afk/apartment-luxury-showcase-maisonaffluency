@@ -83,6 +83,7 @@ function readSession(): ConciergeSession | null {
       tearsheetProjectId: parsed.tearsheetProjectId ?? null,
       boardId: parsed.boardId ?? null,
       quoteId: parsed.quoteId ?? null,
+      streamId: parsed.streamId ?? null,
     };
   } catch {
     return null;
