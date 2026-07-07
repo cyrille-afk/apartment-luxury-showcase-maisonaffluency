@@ -457,6 +457,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
       tier: match.tier ?? null,
       price_per_lm_cents: match.price_per_lm_cents ?? null,
       currency: match.currency || "EUR",
+      image_url: match.image_url ?? null,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fabrics, currentGalleryIndex]);
