@@ -4826,7 +4826,10 @@ serve(async (req) => {
       }
     } catch { /* keep default */ }
     const sentimentDirective = buildSentimentDirective(sentiment);
-    const planDirective = buildPlanDirective(effectiveBrief) + (lacksUploadedRoomContext && shouldActOnAccumulatedBrief
+    const scopeDirective = hasScopedDesigners
+      ? `\n\nBRIEF ALLOW-LIST — the client has explicitly named these brands as their references: ${scopedDesigners.join(", ")}. You may ONLY propose pieces from these brands. Do NOT recommend, name-drop, or include pieces from any other brand (Lost Profile Studio, or anyone else) — even as a "harmonising" or "companion" piece. If the allow-list cannot cover a requested typology, say so plainly and offer to widen the scope; never silently substitute another brand.`
+      : "";
+    const planDirective = buildPlanDirective(effectiveBrief) + scopeDirective + (lacksUploadedRoomContext && shouldActOnAccumulatedBrief
       ? "\n\nAfter the tearsheet card, add one short sentence inviting the user to attach a room plan, reference photo, or PDF with the paperclip and send it here so Felix can refine dimensions and placement."
       : "");
     const systemPrompt = buildSystemPrompt(
