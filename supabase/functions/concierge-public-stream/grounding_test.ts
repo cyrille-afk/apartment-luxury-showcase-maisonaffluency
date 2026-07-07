@@ -73,14 +73,37 @@ Deno.test("grounding block always includes the allow-list and rule", () => {
 Deno.test("grounding block appends details section only on relevant queries", () => {
   const plain = buildGroundingBlock("What's your shipping policy?");
   assertEquals(
-    plain.includes("Facts for this query"),
+    plain.includes("Most relevant roster members"),
     false,
-    "empty query should not add the details block",
+    "empty-hit query should not add the details block",
   );
 
   const named = buildGroundingBlock("I'd like a Chareau piece for my library.");
-  assertStringIncludes(named, "Facts for this query");
+  assertStringIncludes(named, "Most relevant roster members");
   assertStringIncludes(named, "Pierre Chareau");
+});
+
+Deno.test("semantic hits are merged into the details section", () => {
+  // Tier B: the caller passes retrieval results. They must appear in the
+  // block even when the query text mentions no roster name directly.
+  const semanticHits = [
+    { name: "Arredoluce", specialty: "Italian Mid-Century Lighting re-edition" },
+    { name: "Angelo Lelii", specialty: "Lighting design pioneer" },
+  ];
+  const block = buildGroundingBlock("looking for art-deco lighting", semanticHits);
+  assertStringIncludes(block, "Most relevant roster members");
+  assertStringIncludes(block, "Arredoluce");
+  assertStringIncludes(block, "Angelo Lelii");
+});
+
+Deno.test("lexical hits win over semantic hits on dedupe", () => {
+  // A roster entry hit by both lexical name-match and semantic retrieval
+  // should appear exactly once in the merged block.
+  const block = buildGroundingBlock("Tell me about Chareau", [
+    { name: "Pierre Chareau", specialty: "Different specialty from semantic side" },
+  ]);
+  const occurrences = block.split("Pierre Chareau").length - 1;
+  assertEquals(occurrences, 1, "Pierre Chareau should appear once after dedupe");
 });
 
 Deno.test("specialties block is capped at 8 hits", () => {
