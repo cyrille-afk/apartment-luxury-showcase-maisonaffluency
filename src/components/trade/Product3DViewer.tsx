@@ -338,20 +338,23 @@ const Product3DViewer: React.FC<Props> = ({
         }
       };
 
-      // Publish debug info.
+      // Publish debug info + a signal for the UI banner.
       setDebugInfo({
         all: allNames,
         fabric: {
           matched: fabricMatched.map((m) => String(m?.name || "(unnamed)")),
-          fellBackToAll: !hasExplicitRoles && fabricMatched.length === 0,
+          fellBackToAll: false,
           keywords: hasExplicitRoles ? ["(explicit role map)"] : fabricKeywords,
         },
         base: {
           matched: baseMatched.map((m) => String(m?.name || "(unnamed)")),
-          fellBackToAll: !hasExplicitRoles && baseMatched.length === 0,
+          fellBackToAll: false,
           keywords: hasExplicitRoles ? ["(explicit role map)"] : baseKeywords,
         },
       });
+      setAutoTagged(!hasExplicitRoles && (fabricMatched.length > 0 || baseMatched.length > 0));
+      setNoTargets(fabricMatched.length === 0 && baseMatched.length === 0);
+
 
 
       try {
