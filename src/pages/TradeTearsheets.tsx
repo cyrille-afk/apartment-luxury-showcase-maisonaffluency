@@ -335,13 +335,19 @@ export default function TradeTearsheets() {
 
   // ─── Push to Client Board ────────────────────────────────────────────────
   const { toast } = useToast();
+  const { currentStudio, canEdit } = useStudio();
   const [boardPickerOpen, setBoardPickerOpen] = useState(false);
   const [pushingBoardId, setPushingBoardId] = useState<string | null>(null);
   const [pushedBoardIds, setPushedBoardIds] = useState<Set<string>>(new Set());
+  const [showCreateBoardForm, setShowCreateBoardForm] = useState(false);
+  const [newBoardTitle, setNewBoardTitle] = useState("");
+  const [newBoardClientName, setNewBoardClientName] = useState("");
+  const [newBoardClientEmail, setNewBoardClientEmail] = useState("");
+  const [creatingBoard, setCreatingBoard] = useState(false);
   const { boards: userBoards, loading: boardsLoading } = useUserBoards(boardPickerOpen);
 
-  const pushToBoard = async (boardId: string) => {
-    if (!selectedProduct) return;
+  const pushToBoard = async (boardId: string): Promise<boolean> => {
+    if (!selectedProduct) return false;
     setPushingBoardId(boardId);
     try {
       // client_board_items.product_id FKs to trade_products.id. Resolve if the
@@ -363,7 +369,7 @@ export default function TradeTearsheets() {
           description: "This product hasn't been mirrored into trade_products, so it can't be pinned to a board.",
           variant: "destructive",
         });
-        return;
+        return false;
       }
 
       const noteLines: string[] = [];
@@ -384,12 +390,49 @@ export default function TradeTearsheets() {
 
       if (error) {
         toast({ title: "Couldn't add to board", description: error.message, variant: "destructive" });
-        return;
+        return false;
       }
       setPushedBoardIds((prev) => new Set(prev).add(boardId));
       toast({ title: "Added to board", description: `${selectedProduct.product_name} pinned with the chosen finishes.` });
+      return true;
     } finally {
       setPushingBoardId(null);
+    }
+  };
+
+  const createBoardAndPush = async () => {
+    if (!user || !newBoardTitle.trim() || !selectedProduct) return;
+    if (currentStudio && !canEdit) {
+      toast({ title: "Read-only role", description: "Your role in this studio doesn't allow creating boards.", variant: "destructive" });
+      return;
+    }
+    setCreatingBoard(true);
+    try {
+      const { data, error } = await supabase
+        .from("client_boards")
+        .insert({
+          user_id: user.id,
+          studio_id: currentStudio?.id ?? null,
+          title: newBoardTitle.trim(),
+          client_name: newBoardClientName.trim() || null,
+          client_email: newBoardClientEmail.trim() || null,
+        } as any)
+        .select()
+        .single();
+      if (error || !data) {
+        toast({ title: "Couldn't create board", description: error?.message || "Unknown error", variant: "destructive" });
+        return;
+      }
+      const success = await pushToBoard(data.id);
+      if (success) {
+        setNewBoardTitle("");
+        setNewBoardClientName("");
+        setNewBoardClientEmail("");
+        setShowCreateBoardForm(false);
+        setBoardPickerOpen(false);
+      }
+    } finally {
+      setCreatingBoard(false);
     }
   };
 
