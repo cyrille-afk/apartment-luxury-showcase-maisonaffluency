@@ -258,6 +258,12 @@ serve(async (req) => {
     }
   }
 
+  // Build the grounding block from the latest user message so the model gets
+  // an authoritative allow-list of designer/atelier names plus any specialty
+  // facts relevant to this turn. Sent as a second system message so it stays
+  // above the conversation and inside the same cache prefix.
+  const groundingBlock = buildGroundingBlock(latestUser?.content ?? "");
+
   const upstream = await fetch(LOVABLE_CHAT_URL, {
     method: "POST",
     headers: {
@@ -266,7 +272,11 @@ serve(async (req) => {
     },
     body: JSON.stringify({
       model: MODEL,
-      messages: [{ role: "system", content: SYSTEM_PROMPT }, ...trimmed],
+      messages: [
+        { role: "system", content: SYSTEM_PROMPT },
+        { role: "system", content: groundingBlock },
+        ...trimmed,
+      ],
       stream: true,
       max_completion_tokens: 800,
     }),
