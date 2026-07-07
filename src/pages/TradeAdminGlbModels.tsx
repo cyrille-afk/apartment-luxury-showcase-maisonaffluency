@@ -300,6 +300,8 @@ const TradeAdminGlbModels: React.FC = () => {
                     <span className="font-body text-[10px] text-muted-foreground text-center leading-relaxed max-w-[260px]">
                       Accepts .glb / .gltf, or select an .obj together with its .mtl and texture images — we'll convert to GLB in your browser.
                     </span>
+                  </label>
+
 
                   {selected.glb_url && (
                     <>
