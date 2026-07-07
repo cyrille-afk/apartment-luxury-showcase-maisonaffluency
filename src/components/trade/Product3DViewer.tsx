@@ -242,7 +242,6 @@ const Product3DViewer: React.FC<Props> = ({
         return kws.some((k) => name.includes(k));
       };
 
-      const hasExplicitRoles = !!materialRoles && Object.keys(materialRoles).length > 0;
       const roleOf = (m: any): "fabric" | "base" | "ignore" | null => {
         const name = String(m?.name || "");
         if (materialRoles && Object.prototype.hasOwnProperty.call(materialRoles, name)) {
