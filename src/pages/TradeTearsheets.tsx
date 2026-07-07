@@ -519,6 +519,58 @@ export default function TradeTearsheets() {
           </p>
         </div>
 
+        {conciergeSession && (conciergeSession.product || conciergeSession.briefText || conciergeSession.finishes.fabric || conciergeSession.finishes.wood) && (
+          <div className="rounded-lg border border-accent/40 bg-accent/5 p-3 flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <div className="font-body text-[10px] uppercase tracking-[0.14em] text-accent mb-1">
+                Concierge session active
+              </div>
+              <div className="font-body text-xs text-foreground truncate">
+                {conciergeSession.product?.title ? (
+                  <>
+                    <span className="font-medium">{conciergeSession.product.title}</span>
+                    {conciergeSession.product.designer_name && (
+                      <span className="text-muted-foreground"> · {conciergeSession.product.designer_name}</span>
+                    )}
+                    {conciergeSession.locked && <span className="text-accent"> · Finishes locked</span>}
+                  </>
+                ) : (
+                  <span className="text-muted-foreground">Brief captured — pick a product to continue</span>
+                )}
+              </div>
+              {(conciergeSession.finishes.fabric || conciergeSession.finishes.wood || conciergeSession.finishes.variant) && (
+                <div className="font-body text-[11px] text-muted-foreground mt-0.5 truncate">
+                  {[
+                    conciergeSession.finishes.fabric && `Fabric: ${conciergeSession.finishes.fabric}`,
+                    conciergeSession.finishes.wood && `Wood: ${conciergeSession.finishes.wood}`,
+                    conciergeSession.finishes.variant && `Variant: ${conciergeSession.finishes.variant}`,
+                  ].filter(Boolean).join(" · ")}
+                </div>
+              )}
+              {conciergeSession.briefText && (
+                <div className="font-body text-[11px] text-muted-foreground mt-0.5">
+                  Brief attached ({conciergeSession.briefText.length.toLocaleString()} chars) — carried into quote.
+                </div>
+              )}
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              {conciergeSession.product && (
+                <Button
+                  size="sm"
+                  onClick={() => {
+                    const params = new URLSearchParams();
+                    params.set("fromSession", "1");
+                    navigate(`/trade/quotes?${params.toString()}`);
+                  }}
+                >
+                  Continue to Quote →
+                </Button>
+              )}
+              <Button variant="ghost" size="sm" onClick={() => resetConcierge()}>Clear</Button>
+            </div>
+          </div>
+        )}
+
         {selectedProduct ? (
           <div className="space-y-4">
             <div className="flex items-center justify-between">
