@@ -2560,6 +2560,40 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
                         <Sparkles className="h-3 w-3" />
                         Try again
                       </button>
+                      {(() => {
+                        const sess = getConciergeSession();
+                        const brief = sess?.briefText?.trim();
+                        if (!brief) return null;
+                        return (
+                          <button
+                            type="button"
+                            disabled={streaming}
+                            onClick={() => {
+                              setTimeline((prev) => prev.filter((_, idx) => idx !== i));
+                              const product = sess?.product
+                                ? `\n\nSelected piece: ${sess.product.title}${sess.product.designer_name ? ` by ${sess.product.designer_name}` : ""}.`
+                                : "";
+                              const finishes = sess?.finishes
+                                ? [
+                                    sess.finishes.fabric ? `Fabric: ${sess.finishes.fabric}` : null,
+                                    sess.finishes.wood ? `Wood: ${sess.finishes.wood}` : null,
+                                    sess.finishes.variant ? `Variant: ${sess.finishes.variant}` : null,
+                                  ].filter(Boolean).join(" · ")
+                                : "";
+                              const finishLine = finishes ? `\nLocked finishes: ${finishes}.` : "";
+                              const resumeText =
+                                `[Resume — continue from where we left off; do NOT re-ask qualifiers I've already answered in the brief below. Acknowledge briefly and take the next concrete step in stage "${stage}".]\n\n` +
+                                `Current brief so far:\n${brief}${product}${finishLine}\n\n` +
+                                (item.text ? `My last message was: "${item.text}". Please continue.` : `Please continue building the brief.`);
+                              send(resumeText);
+                            }}
+                            className="rounded-full border border-accent/50 bg-accent/10 px-4 py-1.5 text-[13px] text-foreground inline-flex items-center gap-1.5 hover:bg-accent/20 disabled:opacity-40"
+                            title="Continue from the last saved brief without repeating earlier questions"
+                          >
+                            Resume brief
+                          </button>
+                        );
+                      })()}
                       <button
                         type="button"
                         onClick={() => setTimeline((prev) => prev.filter((_, idx) => idx !== i))}
