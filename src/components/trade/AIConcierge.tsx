@@ -30,10 +30,20 @@ No conversational intro.`;
 // Returns null when the message reads like a single-piece enquiry.
 function detectProjectScale(
   message: string,
+  priorUserTurns: number = 0,
 ): { typology: string; city: string; country: string; zones: string[]; timelineWeeks: number | null } | null {
   if (!message) return null;
   const text = message.trim();
-  if (text.length < 25) return null;
+
+  // Strong typology keywords (GCB, penthouse, villa, etc.) reveal project scale
+  // even in short messages like "a GCB living room" — but only fire AFTER at
+  // least one prior user turn so the concierge has had a chance to qualify the
+  // city/scope conversationally first. On turn 1, wait for a longer message
+  // (≥25 chars) so the brief doesn't slam open the instant "GCB" is detected.
+  const strongTypologyRe = /\b(gcb|good class bungalow|bungalow|penthouse|pavilion|villa)\b/i;
+  const hasStrongTypology = strongTypologyRe.test(text);
+  const minLen = hasStrongTypology && priorUserTurns >= 1 ? 8 : 25;
+  if (text.length < minLen) return null;
 
   const keywordRe = /\b(gcb|good class bungalow|bungalow|penthouse|whole[- ]?home|whole[- ]?house|multi[- ]?room|pavilion|villa|residence|to furnish|full home furnishing|entire (?:home|residence|apartment|villa|house))\b/i;
   const projectPhraseRe = /\bi(?:'m| am|'ve| have)\s+(?:got\s+)?(?:a |an )?(?:new\s+)?project\b/i;
