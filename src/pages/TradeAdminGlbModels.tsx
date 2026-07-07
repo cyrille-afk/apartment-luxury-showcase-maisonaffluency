@@ -40,6 +40,7 @@ const TradeAdminGlbModels: React.FC = () => {
   const [managerBrand, setManagerBrand] = useState<string>("");
   const [managerSort, setManagerSort] = useState<SortKey>("updated_desc");
   const [managerPage, setManagerPage] = useState(1);
+  useEffect(() => { setManagerPage(1); }, [managerSearch, managerBrand, managerSort]);
 
   // Load products that already have a GLB (used by both sidebar and manager)
   useEffect(() => {
