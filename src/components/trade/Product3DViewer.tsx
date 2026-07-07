@@ -148,8 +148,10 @@ const Product3DViewer: React.FC<Props> = ({
   baseTextureUrl,
   fabricMaterialNameIncludes,
   baseMaterialNameIncludes,
+  autoOpen = false,
   debug = false,
 }) => {
+  const [opened, setOpened] = useState(autoOpen);
   const [ready, setReady] = useState(() =>
     typeof window !== "undefined" && !!customElements.get("model-viewer"),
   );
@@ -161,7 +163,9 @@ const Product3DViewer: React.FC<Props> = ({
   const [debugInfo, setDebugInfo] = useState<DebugInfo | null>(null);
   const [debugOpen, setDebugOpen] = useState(false);
 
+  // Only load the ~1MB model-viewer script once the user has opted in.
   useEffect(() => {
+    if (!opened) return;
     let mounted = true;
     ensureModelViewer()
       .then(() => mounted && setReady(true))
@@ -169,7 +173,8 @@ const Product3DViewer: React.FC<Props> = ({
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [opened]);
+
 
   // Re-apply / restore textures whenever a swatch changes.
   useEffect(() => {
