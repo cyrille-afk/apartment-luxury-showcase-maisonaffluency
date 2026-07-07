@@ -1931,8 +1931,8 @@ const TradeProductPage: React.FC = () => {
                   showUpholsterySection={isUpholsteredProduct}
                   showWoodSection
                   hideBaseAccordion={isDualAxis && baseAxisIsDim}
-                  onHasFabricsChange={setHasLinkedFabrics}
-                  onWoodFinishesAvailable={setLinkedWoodFinishes}
+                  onHasFabricsChange={handleHasFabricsChange}
+                  onWoodFinishesAvailable={handleWoodFinishesAvailable}
                   onFinishesMissingImagesChange={setFinishesMissingImages}
                   onFabricChange={setSelectedFabric}
                   onWoodFinishPricingChange={setSelectedWoodPrice}
