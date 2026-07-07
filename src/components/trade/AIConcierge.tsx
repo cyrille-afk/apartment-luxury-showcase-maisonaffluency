@@ -525,18 +525,12 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
     }
   }, [briefBuilderOpen]);
 
-  // Validate the structured brief: PROJECT PROFILE, ZONE, TYPOLOGY, and VIBE
-  // must be filled in (no lingering `[bracket]` placeholders). Other fields
-  // stay optional so briefs remain flexible.
+  // Soft-check the structured brief. Only TYPOLOGY matters for readiness;
+  // everything else is optional and must never block sending.
   const briefValidation = useMemo(() => {
     if (!briefBuilderOpen) return { valid: true, missing: [] as string[] };
     const text = input;
-    const required: { label: string; key: string }[] = [
-      { label: "PROJECT PROFILE", key: "Project profile" },
-      { label: "ZONE", key: "Zone" },
-      { label: "TYPOLOGY", key: "Typology" },
-      { label: "VIBE", key: "Vibe" },
-    ];
+    const required: { label: string; key: string }[] = [{ label: "TYPOLOGY", key: "Typology" }];
     const missing: string[] = [];
     for (const { label, key } of required) {
       const re = new RegExp(`^${label}:\\s*(.*)$`, "im");
@@ -2405,8 +2399,8 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
                     }`}
                     title={
                       briefValidation.valid
-                        ? "Brief Builder is open — structured brief ready"
-                        : `Brief Builder is open — complete: ${briefValidation.missing.join(", ")}`
+                        ? "Brief Builder is open — ready to send"
+                        : `Brief Builder is open — add: ${briefValidation.missing.join(", ")}`
                     }
                   >
                     <span className={`h-1.5 w-1.5 rounded-full ${briefValidation.valid ? "bg-accent" : "bg-destructive"} animate-pulse`} aria-hidden="true" />
@@ -3145,7 +3139,7 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
                   <span className="truncate flex-1">
                     {briefValidation.valid
                       ? "Structured brief ready · press Send"
-                      : `Send anytime — optional: ${briefValidation.missing.join(", ")}`}
+                      : `Add ${briefValidation.missing.join(", ")} to improve the brief`}
                   </span>
                   <button
                     type="button"

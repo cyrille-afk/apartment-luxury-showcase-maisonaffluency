@@ -1531,6 +1531,7 @@ async function loadCatalogContext(
   includePieces: boolean,
   designerFilter?: string[],
   hardConstraints?: HardConstraints,
+  typologyTerms?: string[],
 ) {
   // Fetch published designers
   const { data: designers } = await supabase
@@ -1690,6 +1691,7 @@ async function loadCatalogContext(
   });
 
   const pieceLines = Array.from(merged.values())
+    .filter((p) => lineMatchesTypologyTerms(p, typologyTerms))
     .sort((a, b) => a.designer.localeCompare(b.designer) || a.title.localeCompare(b.title))
     .map((p) => {
       const meta = [p.subcategory || p.category, p.materials, p.priceNote ? `pricing: ${p.priceNote}` : null].filter(Boolean).join(" · ");
@@ -2814,6 +2816,78 @@ function normalizeLoose(value: string | null | undefined): string {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, " ")
     .trim();
+}
+
+function splitReferenceTokens(line: string): string[] {
+  const out: string[] = [];
+  let buf = "";
+  let depth = 0;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (ch === "(") depth++;
+    else if (ch === ")") depth = Math.max(0, depth - 1);
+    const startsAnd = depth === 0 && /\band\b/i.test(line.slice(i, i + 5));
+    if (depth === 0 && (ch === "/" || ch === "," || startsAnd)) {
+      const token = buf.trim();
+      if (token) out.push(token);
+      buf = "";
+      if (startsAnd) i += 4;
+      continue;
+    }
+    buf += ch;
+  }
+  const token = buf.trim();
+  if (token) out.push(token);
+  return out;
+}
+
+function typologyTokensToCategories(tokens: string[]): string[] {
+  const hits = new Set<string>();
+  for (const raw of tokens) {
+    const t = normalizeLoose(raw);
+    if (!t) continue;
+    if (/\b(sectional|sofa|settee|loveseat|accent chair|armchair|lounge chair|dining chair|chair|bench|stool|ottoman|pouf|banquette|seating)\b/.test(t)) hits.add("Seating");
+    if (/\b(dining table|coffee table|side table|console|desk|table)\b/.test(t)) hits.add("Tables");
+    if (/\b(floor lamps?|floor lights?|table lamps?|table lights?|pendants?|ceiling lights?|chandeliers?|sconces?|wall lights?|lanterns?|lighting|lamps?|lights?)\b/.test(t)) hits.add("Lighting");
+    if (/\b(cabinet|sideboard|credenza|shelving|bookcase|dresser|chest|armoire|storage)\b/.test(t)) hits.add("Storage");
+    if (/\b(bed|headboard|nightstand|bedside|bedroom)\b/.test(t)) hits.add("Bedroom Furniture");
+    if (/\b(rug|carpet|kilim|dhurrie)\b/.test(t)) hits.add("Rugs");
+    if (/\b(vase|sculpture|object|screen|mirror|art|decor)\b/.test(t)) hits.add("Décor");
+  }
+  return Array.from(hits);
+}
+
+function lineMatchesTypologyTerms(line: { title?: string | null; category?: string | null; subcategory?: string | null }, terms: string[] | undefined): boolean {
+  const normalizedTerms = (terms || []).map((t) => normalizeLoose(t)).filter(Boolean);
+  if (!normalizedTerms.length) return true;
+  const hay = normalizeLoose([line.title, line.category, line.subcategory].filter(Boolean).join(" "));
+  return normalizedTerms.some((term) => {
+    if (!term) return false;
+    if (hay.includes(term)) return true;
+    if (/\bsectional\b/.test(term)) return /\b(sectional|modular sofa|sofa)\b/.test(hay);
+    if (/\b(accent chair|lounge chair|armchair|chair)\b/.test(term)) return /\b(accent chair|lounge chair|armchair|chair)\b/.test(hay);
+    if (/\bcoffee table\b/.test(term)) return /\bcoffee table\b/.test(hay);
+    if (/\bfloor\b/.test(term) && /\b(light|lamp|lighting)\b/.test(hay)) return /\bfloor\b/.test(hay);
+    if (/\bceiling\b/.test(term) && /\b(light|lamp|lighting|chandelier|pendant)\b/.test(hay)) return /\b(ceiling|chandelier|pendant)\b/.test(hay);
+    if (term === "seating") return /\b(sectional|sofa|settee|loveseat|chair|armchair|bench|stool|ottoman|pouf|banquette)\b/.test(hay);
+    if (term === "tables") return /\b(dining table|coffee table|side table|console|desk|table)\b/.test(hay) && !/\b(table lamp|table light)\b/.test(hay);
+    if (term === "lighting") return /\b(floor lamp|floor light|table lamp|table light|pendant|ceiling light|chandelier|sconce|wall light|lantern|lighting|lamp)\b/.test(hay);
+    if (term === "storage") return /\b(cabinet|sideboard|credenza|shelving|bookcase|dresser|chest|armoire)\b/.test(hay);
+    if (term === "bedroom furniture") return /\b(bed|headboard|nightstand|bedside)\b/.test(hay);
+    if (term === "rugs") return /\b(rug|carpet|kilim|dhurrie)\b/.test(hay);
+    if (term === "decor") return /\b(vase|sculpture|object|screen|mirror|art|decor)\b/.test(hay);
+    return false;
+  });
+}
+
+function usableConstraintText(value: unknown): string | null {
+  const raw = String(value || "").trim();
+  if (!raw) return null;
+  const normalized = normalizeLoose(raw.replace(/[\[\]]/g, ""));
+  if (!normalized) return null;
+  if (/^(e g|example|typology|city area|room ceiling height|humidity sun exposure glazing|n weeks|max lead time n weeks|mm|performance criteria exclusions|materials finishes|materials performance|exclusions)$/.test(normalized)) return null;
+  if (normalized.includes("performance criteria") || normalized.includes("exclusions")) return null;
+  return raw;
 }
 
 type RequestedTypology = "dining_table" | "table";
@@ -4112,7 +4186,7 @@ serve(async (req) => {
       "design", "designs", "designer", "designers", "studio", "studios",
       "atelier", "ateliers", "editions", "edition", "objects", "collection",
       "collections", "paris", "milano", "london", "and", "the", "by", "of",
-      "co", "company", "group", "maison", "house", "works",
+      "co", "company", "group", "maison", "house", "works", "profile",
     ]);
     const normalizedUserMsg = normalizeLoose(lastUserMsg || "");
     const userMsgTokens = new Set(normalizedUserMsg.split(/\s+/).filter(Boolean));
@@ -4184,17 +4258,19 @@ serve(async (req) => {
           if (lc && !knownLc.has(lc)) knownLc.set(lc, n);
         }
         for (const line of foundLines) {
-          // Split on commas AND on " and " to tolerate free-form joining.
-          const tokens = line.split(/,|\band\b/i).map((t) => t.trim()).filter(Boolean);
+          // Split on separators outside parenthetical product notes. This keeps
+          // "Man of Parts (Sandy Cove / Bond Street / Rua Leblon)" intact.
+          const tokens = splitReferenceTokens(line);
           for (const tok of tokens) {
             // Strip trailing parenthetical clarifiers like
             // "Man of Parts (Sandy Cove / Bond Street / Rua Leblon)".
-            const cleaned = tok.replace(/\s*\(.*?\)\s*$/g, "").trim().toLowerCase();
+            const cleaned = normalizeLoose(tok.replace(/\s*\(.*?\)\s*$/g, ""));
             if (!cleaned || cleaned.length < 3) continue;
             // Exact match, or the cleaned token contains a known designer
             // name as a substring (handles "man of parts — sandy cove").
             for (const [lc, orig] of knownLc.entries()) {
-              if (cleaned === lc || cleaned.startsWith(lc + " ") || cleaned.endsWith(" " + lc) || cleaned.includes(lc)) {
+              const known = normalizeLoose(lc);
+              if (cleaned === known || cleaned.startsWith(known + " ") || cleaned.endsWith(" " + known) || cleaned.includes(known)) {
                 parsedReferenceDesigners.push(orig);
                 break;
               }
@@ -4205,10 +4281,15 @@ serve(async (req) => {
     }
 
     // Merge live-text mentions + LLM-extracted brief designers + deterministic
-    // REFERENCES parse (dedup, case-insensitive). The deterministic parse is
-    // the source of truth when the user is following up on a prior brief.
+    // REFERENCES parse (dedup, case-insensitive). If a structured REFERENCES
+    // line exists, it is the allow-list source of truth — do not merge casual
+    // token matches, otherwise labels like "PROJECT PROFILE" can match the
+    // brand "Lost Profile Studio" and leak unrelated pieces.
     const scopedDesignerSet = new Map<string, string>();
-    for (const n of [...mentionedDesigners, ...briefDesignerNames, ...parsedReferenceDesigners]) {
+    const scopeSource = parsedReferenceDesigners.length > 0
+      ? parsedReferenceDesigners
+      : [...mentionedDesigners, ...briefDesignerNames];
+    for (const n of scopeSource) {
       const key = n.toLowerCase();
       if (!scopedDesignerSet.has(key)) scopedDesignerSet.set(key, n);
     }
@@ -4234,9 +4315,9 @@ serve(async (req) => {
     // won't see the brief again after turn 1).
     const parsedTypologyCats: string[] = [];
     {
-      const typRe = /typology[^:\n]*:\s*([^\n]+)/i;
-      const tm = userConversationText.match(typRe);
-      if (tm) {
+      const typRe = /typology[^:\n]*:\s*([^\n]+)/gi;
+      let tm: RegExpExecArray | null;
+      while ((tm = typRe.exec(userConversationText)) !== null) {
         const raw = tm[1].replace(/[\[\]]/g, "");
         // Split on commas, plus, ampersand, slash, and " and "
         const tokens = raw.split(/,|\+|&|\/|\band\b/i).map((t) => t.trim().toLowerCase()).filter(Boolean);
@@ -4245,16 +4326,17 @@ serve(async (req) => {
           const cleaned = t.replace(/\s*x?\s*\d+\s*$/i, "").trim();
           if (cleaned.length >= 3) parsedTypologyCats.push(cleaned);
         }
+        for (const cat of typologyTokensToCategories(tokens)) parsedTypologyCats.push(cat);
       }
     }
     const sqlLoadConstraints: HardConstraints = {
       materials: [
         ...(preRequestConstraints.materials || []),
-        ...((effectiveBrief.brief.materials || []).map((m) => String(m).toLowerCase())),
+        ...((effectiveBrief.brief.materials || []).map(usableConstraintText).filter(Boolean) as string[]),
       ].filter(Boolean),
       colors: preRequestConstraints.colors || [],
       categories: [
-        ...(effectiveBrief.brief.categories || []).map((c) => String(c).toLowerCase()),
+        ...((effectiveBrief.brief.categories || []).map(usableConstraintText).filter(Boolean) as string[]),
         ...parsedTypologyCats,
       ].filter(Boolean),
     };
@@ -4272,6 +4354,7 @@ serve(async (req) => {
       includePieces && !useRag,
       hasScopedDesigners ? scopedDesigners : undefined,
       hasSqlConstraint ? sqlLoadConstraints : undefined,
+      parsedTypologyCats,
     );
     mark("loadCatalogContext", { ms: Math.round(performance.now() - catalogT0), includePieces, useRag });
     // Detect "hard constraints matched zero pieces" so the UI can render a
@@ -4763,6 +4846,82 @@ serve(async (req) => {
       return sseTextResponse(
         `I couldn't identify a designer in your request, so I have nothing to enumerate. Try the exact atelier name — e.g. "list all Alinea Design Objects pieces", "show every Pouénat item", or "what do you have by Alexander Lamont?". You can also ask by typology ("all consoles", "all sconces") and I'll propose a tear sheet across the Curation.`,
       );
+    }
+
+
+    if (hasScopedDesigners && parsedTypologyCats.length > 0 && /\bBlock\s+2\b|\bREFERENCES\s*:/i.test(userConversationText)) {
+      const { data: designerRows } = await supabase
+        .from("designers")
+        .select("id, name, display_name")
+        .eq("is_published", true);
+      const targetLc = scopedDesigners.map((n) => normalizeLoose(n));
+      const targetRows = (designerRows || []).filter((d: any) => {
+        const nm = normalizeLoose(d.name);
+        const dn = normalizeLoose(d.display_name);
+        return targetLc.some((f) => (nm && (nm === f || f.includes(nm))) || (dn && (dn === f || f.includes(dn))));
+      });
+      const targetIds = targetRows.map((d: any) => d.id).filter(Boolean);
+      if (targetIds.length > 0) {
+        const { data: allPicks } = await supabase
+          .from("designer_curator_picks")
+          .select("id, title, category, subcategory, materials, designer_id")
+          .in("designer_id", targetIds)
+          .order("title", { ascending: true })
+          .limit(80);
+        const designerNameById = new Map<string, string>();
+        for (const d of targetRows) designerNameById.set(d.id, d.display_name || d.name);
+        const filteredPicks = (allPicks || []).filter((p: any) => lineMatchesTypologyTerms(p, parsedTypologyCats));
+        const pickIds = filteredPicks.map((p: any) => p.id).filter(Boolean).slice(0, 10);
+        if (pickIds.length > 0) {
+          let previewRaw: Array<{ id: string; title?: string | null; [key: string]: any }> = ((await hydratePickPreview(supabase, pickIds)) as any[])
+            .filter((p: any): p is { id: string; title?: string | null; [key: string]: any } => p && typeof p.id === "string");
+          let finalIds = pickIds.filter((id: string) => previewRaw.some((p: any) => p.id === id));
+          ({ previewRaw, pickIds: finalIds } = dedupePreviewRows(previewRaw, finalIds));
+          const excludedIds = parseUserExclusions(lastUserMsg || "", previewRaw);
+          if (excludedIds.size > 0) {
+            previewRaw = previewRaw.filter((p: any) => p?.id && !excludedIds.has(p.id));
+            finalIds = finalIds.filter((id: string) => !excludedIds.has(id));
+          }
+          if (finalIds.length > 0) {
+            const rationaleMap: Record<string, { reason: string }> = {};
+            const brandCounts = new Map<string, number>();
+            const pickDesignerById = new Map<string, string>();
+            for (const p of filteredPicks) if (p?.id && p?.designer_id) pickDesignerById.set(p.id, p.designer_id);
+            for (const p of previewRaw) {
+              if (!p?.id) continue;
+              const dName = designerNameById.get(pickDesignerById.get(p.id) || "") || p.designer_name || "selected brand";
+              brandCounts.set(dName, (brandCounts.get(dName) || 0) + 1);
+              rationaleMap[p.id] = { reason: `Matches the submitted typology within the approved ${dName} reference scope.` };
+            }
+            const preview = previewRaw.map((p: any) => ({ ...p, rationale: rationaleMap[p.id]?.reason || null }));
+            const brandCountSummary = [...brandCounts.entries()]
+              .sort(([a], [b]) => a.localeCompare(b))
+              .map(([name, count]) => `${count} ${name}`)
+              .join(", ");
+            const countPhrase = brandCounts.size > 1
+              ? `${finalIds.length} pieces (${brandCountSummary})`
+              : `${finalIds.length} scoped pieces`;
+            const proposal = {
+              tool: "propose_tearsheet",
+              tool_call_id: crypto.randomUUID(),
+              args: {
+                title: `${scopedDesigners.slice(0, 2).join(" + ")} — typology edit`,
+                pick_ids: finalIds,
+                note: `Drafted strictly from the submitted reference brands and filled typology: ${parsedTypologyCats.slice(0, 7).join(", ")}.`,
+                pick_rationales: rationaleMap,
+              },
+              preview,
+            };
+            return sseProposalThenTextResponse(
+              proposal,
+              `Draft tearsheet selected with ${countPhrase}; the brief is tucked away and can be reopened anytime.`
+            );
+          }
+        }
+        return sseTextResponse(
+          `I found the submitted reference brands, but no pieces matching that typology inside those brands. Broaden References or Typology and I’ll draft it immediately.`
+        );
+      }
     }
 
 
