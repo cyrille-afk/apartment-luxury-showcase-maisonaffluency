@@ -30,6 +30,69 @@ type SupaClient = any;
 const encoder = new TextEncoder();
 
 /**
+ * Fire-and-forget Realtime broadcast on the `concierge:${streamId}` topic.
+ * Used to notify late-joining tabs / auxiliary UI (e.g. the trade dashboard
+ * running alongside the concierge popover in another tab) of key lifecycle
+ * events without maintaining a second SSE connection.
+ *
+ * Failures are swallowed — the SSE stream is the source of truth. Realtime
+ * is an opportunistic side-channel.
+ */
+async function broadcastRealtime(topic: string, event: string, payload: Record<string, unknown>): Promise<void> {
+  const url = Deno.env.get("SUPABASE_URL");
+  const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  if (!url || !key) return;
+  try {
+    await fetch(`${url}/realtime/v1/api/broadcast`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        apikey: key,
+        Authorization: `Bearer ${key}`,
+      },
+      body: JSON.stringify({
+        messages: [{ topic, event, payload, private: false }],
+      }),
+    });
+  } catch (e) {
+    console.warn("[concierge broadcast] failed:", e instanceof Error ? e.message : e);
+  }
+}
+
+/**
+ * Scan an outgoing SSE chunk for lifecycle-worthy events (`proposal`,
+ * `escalation`, `tool_start`) and emit a matching Realtime broadcast on
+ * `concierge:${streamId}`. Only the event kind + minimal payload is echoed —
+ * consumers that need the full frame should read the SSE stream or resume
+ * from `concierge_stream_frames`.
+ */
+function autoBroadcastFromChunk(streamId: string, chunkText: string): void {
+  // Fast path: skip chunks that don't declare an event.
+  if (!chunkText.includes("event: ")) return;
+  const lines = chunkText.split("\n");
+  let currentEvent: string | null = null;
+  for (const line of lines) {
+    if (line.startsWith("event: ")) { currentEvent = line.slice(7).trim(); continue; }
+    if (!line.startsWith("data: ") || !currentEvent) continue;
+    if (currentEvent !== "proposal" && currentEvent !== "escalation" && currentEvent !== "tool_start") {
+      currentEvent = null;
+      continue;
+    }
+    let parsed: Record<string, unknown> = {};
+    try { parsed = JSON.parse(line.slice(6).trim()); } catch { /* opaque payload — broadcast without body */ }
+    const compact: Record<string, unknown> = {
+      tool: (parsed as { tool?: string }).tool ?? null,
+      tool_call_id: (parsed as { tool_call_id?: string }).tool_call_id ?? null,
+      request_id: (parsed as { request_id?: string }).request_id ?? null,
+    };
+    // deno-lint-ignore no-explicit-any
+    if (currentEvent === "escalation") (compact as any).intent = (parsed as any)?.intent ?? null;
+    void broadcastRealtime(`concierge:${streamId}`, `${currentEvent}_ready`, compact);
+    currentEvent = null;
+  }
+}
+
+/**
  * Wraps a stream controller so every enqueue is
  *   1. tagged with an SSE `:seq=N` comment on the wire
  *   2. persisted to `concierge_stream_frames` (best-effort, batched)
@@ -99,6 +162,9 @@ export function installFramePersistence(opts: {
       console.warn("[concierge resume] client stream write failed:", e instanceof Error ? e.message : e);
     }
     pending.push({ seq, chunk: asText });
+    // Piggyback: mirror lifecycle events onto the Realtime side-channel so
+    // other tabs / dashboards observe proposal/escalation without a second SSE.
+    autoBroadcastFromChunk(streamId, asText);
     // Batch inserts into ~150ms windows so we don't overwhelm PG on chatty
     // token streams. Small enough that a fast reconnect still finds recent
     // frames on disk.
@@ -114,6 +180,9 @@ export function installFramePersistence(opts: {
   (controller as any).enqueue(encoder.encode(
     `event: stream_start\ndata: ${JSON.stringify({ stream_id: streamId })}\n\n`,
   ));
+  // Announce the new session on the Realtime channel so external observers
+  // (e.g. a second tab) can bind before the first proposal lands.
+  void broadcastRealtime(`concierge:${streamId}`, "stream_started", { user_id: userId, request_id: requestId, surface });
 
   const finalize = async (status: "complete" | "error") => {
     // Ensure all pending frames are on disk before flipping status; the
@@ -132,7 +201,9 @@ export function installFramePersistence(opts: {
         .eq("stream_id", streamId);
     } catch (e) {
       console.warn("[concierge resume] session finalize failed:", e instanceof Error ? e.message : e);
-    }
+    // Terminal broadcast on the same Realtime topic so late-bound observers
+    // stop showing a "streaming" indicator without waiting for the SSE close.
+    void broadcastRealtime(`concierge:${streamId}`, "stream_completed", { status });
   };
 
   return { streamId, finalize };

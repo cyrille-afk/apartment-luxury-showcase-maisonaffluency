@@ -113,6 +113,8 @@ import { PendingProposalSkeleton } from "@/components/trade/concierge/PendingPro
 import { EscalationCard } from "@/components/trade/concierge/EscalationCard";
 import { SpecScheduleBlock } from "@/components/trade/concierge/SpecScheduleBlock";
 import { parseSlashCommand, SLASH_COMMAND_HELP } from "@/lib/conciergeSlashCommands";
+import { openHandoffChannel } from "@/lib/conciergeHandoff";
+import { useConciergeSession } from "@/hooks/useConciergeSession";
 import { buildSpecSchedule, type SpecScheduleItem } from "@/lib/specScheduleBuilder";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
@@ -200,6 +202,12 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
   const navigate = useNavigate();
   const { currentStudio } = useStudio();
   const { user, isAdmin } = useAuth();
+  const { setStreamId } = useConciergeSession();
+  // Realtime handoff channel disposer for the current stream_id. Recreated
+  // every time the server announces a new stream via onStreamStart, and
+  // torn down on unmount so we don't leak Realtime subscriptions.
+  const handoffDisposeRef = useRef<null | (() => void)>(null);
+  useEffect(() => () => { try { handoffDisposeRef.current?.(); } catch { /* ignore */ } }, []);
   const isDashboard = pathname === "/trade";
   // Persist open/minimized/timeline in sessionStorage so the conversation
   // survives route changes (e.g. when Felix auto-navigates to a freshly
@@ -1693,6 +1701,25 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
         lang,
         onDelta: upsertAssistant,
         onProposal: handleProposal,
+        onStreamStart: (streamId) => {
+          // Persist the stream id in the concierge session so hooks like
+          // `useConciergeSession().emit(...)` and `lockFinishes()` can push
+          // client-originated events onto `concierge:${streamId}`.
+          setStreamId(streamId);
+          // Tear down any previous handoff channel and re-subscribe on the
+          // new topic so peer tabs / dashboards receive server broadcasts
+          // (`proposal_ready`, `stream_completed`, ...) in near real time.
+          try { handoffDisposeRef.current?.(); } catch { /* ignore */ }
+          handoffDisposeRef.current = openHandoffChannel(streamId, {
+            onEvent: (frame) => {
+              // Surface every broadcast on a window event so debug tools /
+              // sibling components can observe without importing this module.
+              try {
+                window.dispatchEvent(new CustomEvent("concierge:handoff", { detail: { streamId, ...frame } }));
+              } catch { /* ignore */ }
+            },
+          });
+        },
         onToolStart: (ev) => {
           armStall();
           setTimeline((prev) => {

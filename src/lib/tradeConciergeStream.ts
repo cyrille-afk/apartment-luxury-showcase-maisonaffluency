@@ -313,6 +313,7 @@ export async function streamConcierge({
   onToolStart,
   onEscalation,
   onRequestId,
+  onStreamStart,
   onInspector,
   onAppliedConstraints,
   onReconnect,
@@ -338,6 +339,13 @@ export async function streamConcierge({
   onEscalation?: (event: EscalationEvent) => void;
   /** Fires once at the start of the stream with the server-side trace id. */
   onRequestId?: (requestId: string) => void;
+  /**
+   * Fires once as soon as the server emits `event: stream_start` (before any
+   * proposal / delta). The `streamId` is the key for the Realtime handoff
+   * channel `concierge:${streamId}` — callers pass it to `openHandoffChannel`
+   * to receive server broadcasts and to `emitHandoff` to push client events.
+   */
+  onStreamStart?: (streamId: string) => void;
   /** Fires each time the Inspector Agent completes a card run. */
   onInspector?: (event: InspectorEvent) => void;
   /** Fires once near the start with the hard-constraint pre-filters applied to catalog retrieval. */
@@ -473,7 +481,14 @@ export async function streamConcierge({
         const parsed = JSON.parse(jsonStr);
         if (currentEvent === "stream_start") {
           const sid = (parsed as { stream_id?: string })?.stream_id;
-          if (typeof sid === "string") streamId = sid;
+          if (typeof sid === "string") {
+            const isFirstAnnounce = streamId !== sid;
+            streamId = sid;
+            // Fire once per streamId (resume attempts re-emit the same id).
+            if (isFirstAnnounce && onStreamStart) {
+              try { onStreamStart(sid); } catch { /* ignore */ }
+            }
+          }
           return;
         }
         if (currentEvent === "stream_resume" || currentEvent === "resume_timeout" || currentEvent === "resume_error") {
