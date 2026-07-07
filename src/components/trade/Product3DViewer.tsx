@@ -66,11 +66,18 @@ interface Props {
    */
   fabricTextureUrl?: string | null;
   /**
-   * Optional filter: only swap materials whose name matches. Defaults to
-   * applying to all materials, which is the pragmatic behaviour when the GLB
-   * doesn't tag a specific fabric slot.
+   * Optional filter: restrict the swap to materials whose name matches one of
+   * these substrings (case-insensitive). If omitted, we auto-detect upholstery
+   * meshes using a naming convention (see UPHOLSTERY_KEYWORDS). If no material
+   * matches the convention, we fall back to applying the texture to every
+   * material so older GLBs without the convention still swap.
+   *
+   * Convention for GLB authors: name any mesh/material that should accept the
+   * user-selected fabric using one of the keywords below (e.g. "fabric",
+   * "upholstery_seat", "cushion_back", "cover_main"). Non-upholstery parts
+   * (wood_leg, metal_frame, glass_top, etc.) will then be left untouched.
    */
-  fabricMaterialNameIncludes?: string;
+  fabricMaterialNameIncludes?: string | string[];
 }
 
 const Product3DViewer: React.FC<Props> = ({
