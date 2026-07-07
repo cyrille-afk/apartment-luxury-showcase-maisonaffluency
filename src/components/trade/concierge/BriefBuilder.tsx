@@ -2,6 +2,53 @@ import { useEffect, useRef, useState } from "react";
 import { ChevronDown, ChevronRight, ClipboardPaste, X } from "lucide-react";
 import { BrandPicker } from "@/components/trade/concierge/BrandPicker";
 import { updateConciergeSession } from "@/hooks/useConciergeSession";
+import brandCategoriesRaw from "@/data/brandCategories.json";
+
+// Typology token → catalogue category. Ordered so more specific tokens
+// (e.g. "coffee table", "floor lamp") match before generic ones ("table",
+// "lamp"). Add tokens as new archetypes appear in briefs.
+const TYPOLOGY_TO_CATEGORY: { re: RegExp; category: keyof typeof brandCategoriesRaw }[] = [
+  // Lighting — floor/table/pendant/ceiling/sconce/chandelier/lamp
+  { re: /\b(floor\s*lamp|table\s*lamp|pendant|ceiling\s*light|chandelier|sconce|wall\s*light|lantern|lighting|lamps?)\b/i, category: "lighting" as never },
+  // Rugs
+  { re: /\b(rugs?|carpet|kilim|dhurrie)\b/i, category: "rugs" as never },
+  // Tables — dining/coffee/side/console
+  { re: /\b(dining\s*table|coffee\s*table|side\s*table|console|tables?|desk)\b/i, category: "tables" as never },
+  // Storage
+  { re: /\b(cabinet|sideboard|credenza|shelving|bookcase|dresser|chest|armoire|storage)\b/i, category: "storage" as never },
+  // Bedroom
+  { re: /\b(bed|headboard|nightstand|bedside|bedroom)\b/i, category: "bedroom" as never },
+  // Decor
+  { re: /\b(vase|sculpture|object|screen|mirror|art|decor)\b/i, category: "decor" as never },
+  // Seating — sectional/sofa/accent chair/armchair/lounge/bench/stool/ottoman
+  { re: /\b(sectional|sofa|settee|loveseat|accent\s*chair|armchair|lounge\s*chair|dining\s*chair|chairs?|bench|stool|ottoman|pouf|banquette|seating)\b/i, category: "seating" as never },
+];
+
+// Anchor brand picks per category — always present when the typology maps
+// there. Apparatus Studio is the anchor for lighting so briefs that request
+// floor/ceiling lights auto-include it. Keep the list short (2 brands per
+// category) so the References field stays legible.
+const CATEGORY_ANCHOR_BRANDS: Record<string, string[]> = {
+  lighting: ["Apparatus Studio", "Serge Mouille"],
+  seating: ["Man of Parts", "De La Espada"],
+  tables: ["Collection Particulière", "Alinea Design Objects"],
+  storage: ["De La Espada", "Alexander Lamont"],
+  rugs: ["CC-Tapis", "Apparatus Studio"],
+  decor: ["Alexander Lamont", "L'Objet"],
+  bedroom: ["Pierre Frey", "Bruno Moinard Editions"],
+};
+
+function suggestBrandsFromTypology(typology: string): string[] {
+  const hits = new Set<string>();
+  for (const { re, category } of TYPOLOGY_TO_CATEGORY) {
+    if (re.test(typology)) {
+      const anchors = CATEGORY_ANCHOR_BRANDS[category as string] || [];
+      for (const b of anchors) hits.add(b);
+    }
+  }
+  return Array.from(hits);
+}
+
 
 export type BriefValues = {
   block1: {
