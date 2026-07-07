@@ -1566,6 +1566,64 @@ const TradeProductPage: React.FC = () => {
               }
             />
             <ActiveSwatchCaption pickId={product.id} activeIndex={galleryActiveIndex ?? 0} />
+
+            {/* Interactive 3D model — collapsed by default under the photo.
+                The finish selectors in the right column act as its legend. */}
+            {(() => {
+              const norm = (s: string | null | undefined) =>
+                (s || "").trim().toLowerCase().replace(/\s+/g, " ");
+              const av: any = activeVariant || {};
+              const candidates: string[] = [
+                av.label,
+                selectedDualSize,
+                selectedSingleSize,
+                av.base,
+                av.top,
+                selectedBase,
+                selectedTop,
+                [av.base, av.top].filter(Boolean).join(" × "),
+              ]
+                .map(norm)
+                .filter(Boolean);
+              const byLabel = candidates.reduce<
+                { variant_label: string; glb_url: string; is_default: boolean; material_roles: Record<string, "fabric" | "base" | "ignore"> | null } | null
+              >((hit, cand) => {
+                if (hit) return hit;
+                return (
+                  glbVariants.find((v) => norm(v.variant_label) === cand) || null
+                );
+              }, null);
+              const byDefault = glbVariants.find((v) => v.is_default);
+              const resolvedVariant = byLabel || byDefault || null;
+              const resolvedGlbUrl = resolvedVariant?.glb_url || glbUrl || null;
+              if (!resolvedGlbUrl) return null;
+              const resolvedRoles = resolvedVariant?.material_roles || undefined;
+              return (
+                <details className="mt-4 group border border-border rounded-md bg-muted/20">
+                  <summary className="flex items-center justify-between gap-2 px-3 py-2 cursor-pointer list-none select-none">
+                    <span className="font-body text-[11px] uppercase tracking-[0.15em] text-muted-foreground">
+                      Interactive 3D Model
+                    </span>
+                    <span className="font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground group-open:hidden">
+                      Expand ▾
+                    </span>
+                    <span className="font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground hidden group-open:inline">
+                      Collapse ▴
+                    </span>
+                  </summary>
+                  <div className="p-3 pt-0">
+                    <Product3DViewer
+                      url={resolvedGlbUrl}
+                      alt={`${product.title} — 3D model${byLabel ? ` (${byLabel.variant_label})` : ""}`}
+                      poster={product.image_url}
+                      fabricTextureUrl={selectedFabric?.image_url || null}
+                      baseTextureUrl={selectedWoodPrice?.image_url || null}
+                      materialRoles={resolvedRoles || undefined}
+                    />
+                  </div>
+                </details>
+              );
+            })()}
           </div>
 
           <div className="relative flex flex-col gap-4">
