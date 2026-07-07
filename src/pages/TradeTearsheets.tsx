@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { fillTradeProductImageFallbacks } from "@/lib/tradeProductImageFallback";
 import { useAuth } from "@/hooks/useAuth";
 import { useState, useRef, useMemo, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { FileText, Loader2, Search, Printer, LayoutGrid, Check, Plus } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
