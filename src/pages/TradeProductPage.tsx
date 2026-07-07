@@ -31,6 +31,7 @@ import Product3DViewer from "@/components/trade/Product3DViewer";
 import { useCompare, type CompareItem } from "@/contexts/CompareContext";
 import { useAuth } from "@/hooks/useAuth";
 import { useFavorites } from "@/hooks/useFavorites";
+import { updateConciergeSession } from "@/hooks/useConciergeSession";
 import TradeFavoriteFolderPicker from "@/components/trade/TradeFavoriteFolderPicker";
 
 import { useToast } from "@/hooks/use-toast";
