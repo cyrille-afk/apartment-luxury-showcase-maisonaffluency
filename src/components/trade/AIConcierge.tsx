@@ -439,7 +439,10 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
   // Draggable position — persisted in localStorage. `null` = use default
   // bottom-right anchor; once user drags, we switch to absolute top/left.
   const [expanded, setExpanded] = useState<boolean>(() => {
-    try { return localStorage.getItem("concierge:expanded") === "1"; } catch { return false; }
+    try {
+      const v = localStorage.getItem("concierge:expanded");
+      return v === null ? true : v === "1";
+    } catch { return true; }
   });
   const [fullscreen, setFullscreen] = useState<boolean>(() => {
     try { return localStorage.getItem("concierge:fullscreen") === "1"; } catch { return false; }
