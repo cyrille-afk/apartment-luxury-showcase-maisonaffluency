@@ -44,19 +44,22 @@ export default function TradeTearsheets() {
   const [filterSubcategory, setFilterSubcategory] = useState("");
   const [searchParams, setSearchParams] = useSearchParams();
   const filterProjectId = searchParams.get("project");
-  // Finish handoff from the Trade Product Page ("Draft Tearsheet with These
-  // Finishes" button). We keep the values in local state so the user can
-  // clear them without touching the URL.
-  const initialFinishes = useMemo(() => ({
-    productId: searchParams.get("product"),
-    fabric: searchParams.get("fabric"),
-    fabricImg: searchParams.get("fabricImg"),
-    wood: searchParams.get("wood"),
-    woodImg: searchParams.get("woodImg"),
-    variant: searchParams.get("variant"),
+  // Finish handoff. Priority: URL params (from Draft-Tearsheet CTA) →
+  // concierge session (persists across surfaces even when the URL is bare).
+  const initialFinishes = useMemo(() => {
+    const sess = getConciergeSession();
+    const p = (k: string) => searchParams.get(k);
+    return {
+      productId: p("product") ?? sess?.product?.id ?? null,
+      fabric: p("fabric") ?? sess?.finishes.fabric ?? null,
+      fabricImg: p("fabricImg") ?? sess?.finishes.fabricImg ?? null,
+      wood: p("wood") ?? sess?.finishes.wood ?? null,
+      woodImg: p("woodImg") ?? sess?.finishes.woodImg ?? null,
+      variant: p("variant") ?? sess?.finishes.variant ?? null,
+    };
   // Only read once on mount — subsequent URL edits don't reset the state.
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }), []);
+  }, []);
   const [chosenFinishes, setChosenFinishes] = useState<{
     fabric: string | null; fabricImg: string | null;
     wood: string | null; woodImg: string | null;
