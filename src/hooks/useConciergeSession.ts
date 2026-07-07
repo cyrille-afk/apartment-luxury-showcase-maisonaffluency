@@ -7,6 +7,7 @@
 // Cross-component sync in the same tab is done via a custom event.
 
 import { useCallback, useEffect, useState } from "react";
+import { emitHandoff, type HandoffEvent } from "@/lib/conciergeHandoff";
 
 export type ConciergeSessionProduct = {
   id: string;
