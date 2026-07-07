@@ -109,9 +109,12 @@ export function buildQuerySpecialties(query: string): string {
  *   listed, say the gallery may still be able to source them and offer
  *   to note the enquiry — do NOT invent a bio, piece, or provenance.
  */
+export type RetrievalStatus = "ok" | "low_confidence" | "unavailable";
+
 export function buildGroundingBlock(
   query: string,
   semanticHits: readonly RosterEntry[] = [],
+  opts?: { retrievalStatus?: RetrievalStatus },
 ): string {
   const specialties = buildQuerySpecialties(query);
   const parts: string[] = [
