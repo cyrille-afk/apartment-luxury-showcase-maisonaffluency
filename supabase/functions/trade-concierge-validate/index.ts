@@ -106,6 +106,8 @@ Deno.serve(async (req) => {
   const keptIds = new Set(body.kept.map((k) => k.pick_id));
   const lockedIds = new Set((body.locked || []).map((k) => k.pick_id));
 
+  const lf = body.locked_finishes || null;
+  const hasAnyFinish = !!(lf && (lf.fabric || lf.wood || lf.variant));
   const userPayload = {
     TITLE: body.title,
     ORIGINAL_NOTE: body.original_note || null,
@@ -113,6 +115,9 @@ Deno.serve(async (req) => {
     SKIPPED: body.skipped || [],
     LOCKED: body.locked || [],
     TITLE_CHANGE: body.title_change || null,
+    LOCKED_FINISHES: hasAnyFinish
+      ? { fabric: lf?.fabric || null, wood: lf?.wood || null, variant: lf?.variant || null }
+      : null,
   };
 
   const controller = new AbortController();
