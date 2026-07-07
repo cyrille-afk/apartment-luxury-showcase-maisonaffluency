@@ -194,6 +194,8 @@ const Product3DViewer: React.FC<Props> = ({
         fellBackToAll: matched.length === 0,
         keywords,
       });
+
+      if (!fabricTextureUrl) {
         // Restore originals.
         for (const m of materials) {
           if (!filter(m)) continue;
