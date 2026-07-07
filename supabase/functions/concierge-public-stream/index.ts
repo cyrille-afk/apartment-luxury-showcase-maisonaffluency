@@ -281,7 +281,19 @@ serve(async (req) => {
   // (bare allow-list + lexical hits). No user-visible failure path.
   const queryText = latestUser?.content ?? "";
   let semanticHits: Array<{ name: string; specialty: string }> = [];
+  // "unavailable" = embed or RPC failed / timed out; caller can't distinguish
+  //   low-signal query from infrastructure failure, so we must not treat an
+  //   empty result as an authoritative "no match".
+  // "low_confidence" = retrieval ran but no hit cleared the strict floor (0.45)
+  //   — the block asks the model to offer any hits as gentle suggestions only.
+  // "ok" = at least one hit above the strict floor, or retrieval was skipped
+  //   because the query is too short (in which case Tier A lexical is the
+  //   authoritative source and we keep the strong "quote these" instruction).
+  let retrievalStatus: "ok" | "low_confidence" | "unavailable" = "ok";
+  const SIM_FLOOR = 0.25;         // absolute minimum to include a hit at all
+  const SIM_STRICT_FLOOR = 0.45;  // minimum for the "quote these" strong prompt
   if (queryText.length >= SEMANTIC_MIN_CHARS) {
+    retrievalStatus = "unavailable"; // flipped to ok/low_confidence on success
     try {
       const ac = new AbortController();
       const timer = setTimeout(() => ac.abort(), SEMANTIC_TIMEOUT_MS);
@@ -307,12 +319,16 @@ serve(async (req) => {
             match_count: SEMANTIC_TOP_K,
           });
           if (!matchErr && Array.isArray(matches)) {
-            semanticHits = matches
-              .filter((m: { similarity?: number }) => (m.similarity ?? 0) > 0.25)
-              .map((m: { name: string; specialty: string | null }) => ({
-                name: m.name,
-                specialty: m.specialty ?? "",
-              }));
+            const scored = matches.map((m: { name: string; specialty: string | null; similarity?: number }) => ({
+              name: m.name,
+              specialty: m.specialty ?? "",
+              similarity: Number(m.similarity ?? 0),
+            }));
+            const topSim = scored.reduce((a, b) => (b.similarity > a ? b.similarity : a), 0);
+            semanticHits = scored
+              .filter((m) => m.similarity > SIM_FLOOR)
+              .map((m) => ({ name: m.name, specialty: m.specialty }));
+            retrievalStatus = topSim >= SIM_STRICT_FLOOR ? "ok" : "low_confidence";
           } else if (matchErr) {
             console.warn("[concierge-public-stream] match_roster_public error", matchErr);
           }
@@ -321,11 +337,12 @@ serve(async (req) => {
         console.warn("[concierge-public-stream] embed non-ok", embedResp.status);
       }
     } catch (e) {
-      // AbortError, network, JSON parse — all fall back to Tier A.
+      // AbortError, network, JSON parse — all fall back to Tier A + refusal.
       console.warn("[concierge-public-stream] semantic retrieval skipped", e);
     }
   }
-  const groundingBlock = buildGroundingBlock(queryText, semanticHits);
+  const groundingBlock = buildGroundingBlock(queryText, semanticHits, { retrievalStatus });
+
 
   const upstream = await fetch(LOVABLE_CHAT_URL, {
     method: "POST",

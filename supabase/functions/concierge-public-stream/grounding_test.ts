@@ -118,3 +118,63 @@ Deno.test("specialties block is capped at 8 hits", () => {
   const lines = specs.split("\n").filter(Boolean);
   assert(lines.length <= 8, `expected ≤8 lines, got ${lines.length}`);
 });
+
+// -------------------- Low-confidence / graceful-refusal fallback --------------------
+
+Deno.test("no hits + no lexical → graceful-refusal directive is injected", () => {
+  const block = buildGroundingBlock("What's your shipping policy?", []);
+  assertStringIncludes(block, "No confident roster match");
+  assertStringIncludes(block, "hand-pick a shortlist");
+  assertEquals(
+    block.includes("Most relevant roster members"),
+    false,
+    "must not present a curatorial-match section when there are no hits",
+  );
+  assertEquals(
+    block.includes("Roster members that MAY relate"),
+    false,
+    "must not present a soft-suggestion section when there are no hits",
+  );
+});
+
+Deno.test("retrievalStatus 'unavailable' + no hits → infra-aware refusal directive", () => {
+  const block = buildGroundingBlock("art deco lighting", [], {
+    retrievalStatus: "unavailable",
+  });
+  assertStringIncludes(block, "No retrieval context available");
+  assertStringIncludes(block, "do NOT name a specific designer");
+});
+
+Deno.test("retrievalStatus 'low_confidence' with hits → soft-suggestion heading, not the strict quote-these heading", () => {
+  const hits = [{ name: "Arredoluce", specialty: "Italian mid-century lighting" }];
+  const block = buildGroundingBlock("some fuzzy query", hits, {
+    retrievalStatus: "low_confidence",
+  });
+  assertStringIncludes(block, "Roster members that MAY relate");
+  assertStringIncludes(block, "Arredoluce");
+  assertEquals(
+    block.includes("Most relevant roster members"),
+    false,
+    "low-confidence retrieval must not use the strict 'quote these' heading",
+  );
+});
+
+Deno.test("retrievalStatus 'ok' with hits → strict quote-these heading", () => {
+  const hits = [{ name: "Pierre Chareau", specialty: "Radical light" }];
+  const block = buildGroundingBlock("chareau library", hits, { retrievalStatus: "ok" });
+  assertStringIncludes(block, "Most relevant roster members");
+  assertEquals(
+    block.includes("Roster members that MAY relate"),
+    false,
+    "high-confidence retrieval must not downgrade to the soft-suggestion heading",
+  );
+});
+
+Deno.test("lexical-only hits are treated as strict even without a retrievalStatus", () => {
+  // When Tier B is skipped entirely (short query) the caller passes no
+  // semantic hits and no options. Lexical hits are exact matches, so they
+  // must still use the strict "quote these" heading.
+  const block = buildGroundingBlock("Chareau?");
+  assertStringIncludes(block, "Pierre Chareau");
+  assertStringIncludes(block, "Most relevant roster members");
+});
