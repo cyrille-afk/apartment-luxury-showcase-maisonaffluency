@@ -5936,6 +5936,50 @@ export type Database = {
         }
         Relationships: []
       }
+      trade_product_glb_variants: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          file_size_bytes: number | null
+          glb_url: string
+          id: string
+          is_default: boolean
+          product_id: string
+          updated_at: string
+          variant_label: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          file_size_bytes?: number | null
+          glb_url: string
+          id?: string
+          is_default?: boolean
+          product_id: string
+          updated_at?: string
+          variant_label: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          file_size_bytes?: number | null
+          glb_url?: string
+          id?: string
+          is_default?: boolean
+          product_id?: string
+          updated_at?: string
+          variant_label?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trade_product_glb_variants_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "trade_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       trade_product_pricing: {
         Row: {
           pick_id: string
