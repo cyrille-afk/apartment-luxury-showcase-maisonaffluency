@@ -19,19 +19,14 @@ interface ProductRow {
 type SortKey = "updated_desc" | "updated_asc" | "name_asc" | "name_desc";
 const PAGE_SIZE = 24;
 
-const MAX_MB = 50;
-
 const TradeAdminGlbModels: React.FC = () => {
   const { isAdmin, loading } = useAuth();
-  const inputRef = useRef<HTMLInputElement>(null);
 
   const [search, setSearch] = useState("");
   const [withGlb, setWithGlb] = useState<ProductRow[]>([]);
   const [results, setResults] = useState<ProductRow[]>([]);
   const [searching, setSearching] = useState(false);
   const [selected, setSelected] = useState<ProductRow | null>(null);
-  const [uploading, setUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
   const [reloadKey, setReloadKey] = useState(0);
 
   // Manager section state
