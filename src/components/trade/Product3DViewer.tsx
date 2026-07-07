@@ -180,6 +180,8 @@ const Product3DViewer: React.FC<Props> = ({
   const originalTexturesRef = useRef<Map<any, any> | null>(null);
   const [debugInfo, setDebugInfo] = useState<DebugInfo | null>(null);
   const [debugOpen, setDebugOpen] = useState(false);
+  const [autoTagged, setAutoTagged] = useState(false);
+  const [noTargets, setNoTargets] = useState(false);
 
   // Only load the ~1MB model-viewer script once the user has opted in.
   useEffect(() => {
