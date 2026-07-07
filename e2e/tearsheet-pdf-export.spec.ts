@@ -123,33 +123,39 @@ test("tearsheet PDF export includes lead time, imperial inches, and finishes lay
   expect(pdfBytes.slice(0, 4).toString("ascii"), "PDF magic bytes").toBe("%PDF");
 
   // Extract text via poppler's pdftotext (already available in the sandbox).
-  execFileSync("pdftotext", ["-layout", pdfPath, "-"], { encoding: "utf8" });
   const pdfText = execFileSync("pdftotext", ["-layout", pdfPath, "-"], { encoding: "utf8" });
 
-  // 1. Lead time. `formatLeadTime` currently emits "12–14 wks" (en-dash) —
-  //    accept the exact rendered string.
-  expect(pdfText, "PDF must show the derived lead time verbatim").toContain(leadTimeDisplay!);
-  expect(pdfText).toMatch(/Lead Time/);
+  // CSS `letter-spacing: 0.1em/0.15em` on `.label` uppercase headings causes
+  // pdftotext to insert whitespace between individual glyphs (e.g. "LEAD TIME"
+  // extracts as "L EA D TI M E"). Values themselves have no letter-spacing and
+  // extract verbatim. We normalize *only* for the label-presence checks; value
+  // assertions still match the exact strings emitted by the on-screen preview.
+  const collapse = (s: string) => s.replace(/\s+/g, "").toLowerCase();
+  const flat = collapse(pdfText);
 
-  // 2. Imperial inches. `withImperialInline` appends an inches conversion —
-  //    accept either the `"` glyph or the "in" suffix, whichever it uses.
+  // 1. Lead time — label present + verbatim rendered value.
+  expect(flat, "PDF must contain a 'Lead Time' label").toContain(collapse("Lead Time"));
+  expect(pdfText, "PDF must show the derived lead time verbatim").toContain(leadTimeDisplay!);
+
+  // 2. Imperial inches — verbatim rendered dimensions string, plus a numeric
+  //    inches token to guarantee the conversion actually ran (not just cm).
   expect(pdfText, "PDF must contain the same dimensions string as the UI").toContain(
     dimensionsDisplay!,
   );
-  expect(pdfText, "PDF must show an inches conversion").toMatch(/\d+(\.\d+)?\s*(in\b|")/);
+  expect(flat, "PDF must show an inches conversion").toMatch(/\d+(\.\d+)?in\b/);
 
-  // 3. Selected Finishes layout — label + both finish rows.
-  expect(pdfText).toMatch(/Selected Finishes/i);
-  expect(pdfText).toMatch(/Base\s*\/\s*Wood/);
+  // 3. Selected Finishes layout — label + both finish labels + both values.
+  expect(flat).toContain(collapse("Selected Finishes"));
+  expect(flat).toContain(collapse("Base / Wood"));
   expect(pdfText).toContain("Smoked Oak");
-  expect(pdfText).toMatch(/\bFabric\b/);
+  expect(flat).toContain(collapse("Fabric"));
   expect(pdfText).toContain("Kvadrat Hallingdal 65 / 227");
 
-  // 4. Finishes block must precede the spec grid rows in reading order —
-  //    guards against a future refactor that reorders sections in the PDF
-  //    but leaves the on-screen preview alone.
-  const finishesIdx = pdfText.search(/Selected Finishes/i);
-  const dimsIdx = pdfText.search(/\bDimensions\b/);
+  // 4. Finishes block must precede the spec grid in reading order — guards
+  //    against a future refactor that reorders sections in the PDF but
+  //    leaves the on-screen preview alone.
+  const finishesIdx = flat.indexOf(collapse("Selected Finishes"));
+  const dimsIdx = flat.indexOf(collapse("Dimensions"));
   expect(finishesIdx).toBeGreaterThan(-1);
   expect(dimsIdx).toBeGreaterThan(-1);
   expect(finishesIdx).toBeLessThan(dimsIdx);
