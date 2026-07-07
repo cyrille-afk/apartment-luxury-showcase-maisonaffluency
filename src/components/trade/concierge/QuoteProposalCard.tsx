@@ -207,6 +207,17 @@ export function QuoteProposalCard({ proposal, onResolved }: Props) {
 
   const visibleLines = lines.filter((l) => !excluded.has(l.pick_id));
 
+  // Per-row "3D & finishes" drawer state.
+  const [assetsOpen, setAssetsOpen] = useState<Set<string>>(new Set());
+  const toggleAssets = (id: string) => {
+    setAssetsOpen((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
   const effectiveLineUnitPrice = (l: (typeof lines)[number]) => {
     if (l.variant_options?.length) {
       if (!l.variant) return null;
