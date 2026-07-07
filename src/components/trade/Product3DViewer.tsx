@@ -316,7 +316,30 @@ const Product3DViewer: React.FC<Props> = ({
         </span>
       </div>
       <div className="relative w-full aspect-square">
-        {ready ? (
+        {!opened ? (
+          <button
+            type="button"
+            onClick={() => setOpened(true)}
+            className="absolute inset-0 flex flex-col items-center justify-center gap-2 group focus:outline-none focus:ring-2 focus:ring-primary/40"
+            aria-label="Load interactive 3D model"
+          >
+            {poster ? (
+              <img
+                src={poster}
+                alt={alt}
+                loading="lazy"
+                decoding="async"
+                className="absolute inset-0 h-full w-full object-cover opacity-70 group-hover:opacity-90 transition-opacity"
+              />
+            ) : (
+              <div className="absolute inset-0 bg-muted/40" />
+            )}
+            <span className="relative z-10 flex items-center gap-1.5 rounded-full bg-background/90 px-3 py-1.5 border border-border shadow-sm font-body text-[11px] uppercase tracking-[0.12em] text-foreground group-hover:bg-background transition-colors">
+              <Box size={13} />
+              View in 3D
+            </span>
+          </button>
+        ) : ready ? (
           <model-viewer
             ref={mvRef as any}
             src={url}
@@ -328,7 +351,7 @@ const Product3DViewer: React.FC<Props> = ({
             shadow-intensity="1"
             exposure="1"
             tone-mapping="neutral"
-            loading="lazy"
+            loading="eager"
             reveal="auto"
             style={{ width: "100%", height: "100%", backgroundColor: "transparent" }}
           />
@@ -339,8 +362,11 @@ const Product3DViewer: React.FC<Props> = ({
         )}
       </div>
       <p className="px-3 py-2 font-body text-[10px] text-muted-foreground border-t border-border">
-        Drag to rotate · scroll to zoom · tap the cube to view in your room (AR)
+        {opened
+          ? "Drag to rotate · scroll to zoom · tap the cube to view in your room (AR)"
+          : "Tap to load the interactive 3D model (downloads on demand)"}
       </p>
+
       {debug && debugInfo && (
         <div className="border-t border-border bg-background/60">
           <button
