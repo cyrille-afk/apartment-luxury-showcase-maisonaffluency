@@ -88,6 +88,12 @@ interface FinishSelectorProps {
   onWoodFinishPricingChange?: (info: { id: string; name: string; price_cents: number; currency: string; image_url: string | null } | null) => void;
   /** Fires with the list of linked wood-swatch names after fetch. */
   onWoodFinishesAvailable?: (names: string[]) => void;
+  /**
+   * Fires once after swatches load with the first fabric + first wood swatch
+   * image URLs. Purely a preview signal for the 3D configurator; does NOT
+   * alter selection or pricing state.
+   */
+  onPreviewSwatchesResolved?: (preview: { fabricImageUrl: string | null; woodImageUrl: string | null }) => void;
   /** Trade-only: include fabric price/tier fields for quote upcharge math. */
   includePricing?: boolean;
   /**
@@ -233,7 +239,7 @@ const pickFinishGlyph = (
  * (Trade + Public). Tiles are grouped by category (Upholstery, Wood, …)
  * with a COM ("Customer's Own Material") tile always offered.
  */
-export default function FinishSelector({ pickId, className, productTitle, productCategory, onUpholsteryTierChange, onFabricChange, onHasFabricsChange, onWoodFinishChange, onWoodFinishPricingChange, onWoodFinishesAvailable, includePricing = false, onSwatchImagesChange, woodLabel, showUpholsterySection = true, showWoodSection = true, hideBaseAccordion = false, woodFilter, topFilter, topLabel, onTopFinishChange, onFinishesMissingImagesChange, currentGalleryIndex }: FinishSelectorProps) {
+export default function FinishSelector({ pickId, className, productTitle, productCategory, onUpholsteryTierChange, onFabricChange, onHasFabricsChange, onWoodFinishChange, onWoodFinishPricingChange, onWoodFinishesAvailable, onPreviewSwatchesResolved, includePricing = false, onSwatchImagesChange, woodLabel, showUpholsterySection = true, showWoodSection = true, hideBaseAccordion = false, woodFilter, topFilter, topLabel, onTopFinishChange, onFinishesMissingImagesChange, currentGalleryIndex }: FinishSelectorProps) {
 
   const isRugProduct = /\brugs?\b/i.test(`${productTitle || ""} ${productCategory || ""}`);
   const isRugComponentSwatch = (fabric: Pick<Fabric, "name" | "category">) => {
@@ -355,6 +361,15 @@ export default function FinishSelector({ pickId, className, productTitle, produc
 
       setSelectedCoverId(null);
       setSelectedRugComponentIds({});
+
+      // Preview signal for the 3D configurator: first fabric + first wood
+      // swatch that carry image_url values, without touching selection.
+      const defaultWood = list.find((f) => isFinishCategory(f) && f.image_url) || null;
+      onPreviewSwatchesResolved?.({
+        fabricImageUrl: defaultFabric?.image_url ?? null,
+        woodImageUrl: defaultWood?.image_url ?? null,
+      });
+
 
 
 

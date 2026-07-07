@@ -542,6 +542,18 @@ const TradeProductPage: React.FC = () => {
   // Tracks whether linked finish swatches are still being fetched by the
   // FinishSelector so the tearsheet CTA can show a disabled loading state.
   const [finishesLoading, setFinishesLoading] = useState(true);
+  // Preview-only default fabric/wood textures for the 3D configurator so it
+  // opens with a plausible finish applied before the user picks a swatch.
+  // Does NOT drive pricing or the "Draft Tearsheet" button.
+  const [previewFabricImg, setPreviewFabricImg] = useState<string | null>(null);
+  const [previewWoodImg, setPreviewWoodImg] = useState<string | null>(null);
+  const handlePreviewSwatchesResolved = useCallback(
+    (p: { fabricImageUrl: string | null; woodImageUrl: string | null }) => {
+      setPreviewFabricImg(p.fabricImageUrl);
+      setPreviewWoodImg(p.woodImageUrl);
+    },
+    [],
+  );
 
   const handleHasFabricsChange = useCallback((has: boolean) => {
     setHasLinkedFabrics(has);
@@ -1620,8 +1632,8 @@ const TradeProductPage: React.FC = () => {
                       url={resolvedGlbUrl}
                       alt={`${product.title} — 3D model${byLabel ? ` (${byLabel.variant_label})` : ""}`}
                       poster={product.image_url}
-                      fabricTextureUrl={selectedFabric?.image_url || null}
-                      baseTextureUrl={selectedWoodPrice?.image_url || null}
+                      fabricTextureUrl={selectedFabric?.image_url || previewFabricImg || null}
+                      baseTextureUrl={selectedWoodPrice?.image_url || previewWoodImg || null}
                       materialRoles={resolvedRoles || undefined}
                       autoOpen
                     />
@@ -2000,6 +2012,7 @@ const TradeProductPage: React.FC = () => {
                   hideBaseAccordion={isDualAxis && baseAxisIsDim}
                   onHasFabricsChange={handleHasFabricsChange}
                   onWoodFinishesAvailable={handleWoodFinishesAvailable}
+                  onPreviewSwatchesResolved={handlePreviewSwatchesResolved}
                   onFinishesMissingImagesChange={setFinishesMissingImages}
                   onFabricChange={setSelectedFabric}
                   onWoodFinishPricingChange={setSelectedWoodPrice}
