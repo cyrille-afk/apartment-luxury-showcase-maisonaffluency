@@ -71,91 +71,10 @@ const TradeAdminGlbModels: React.FC = () => {
     return () => clearTimeout(t);
   }, [search]);
 
-  const handleUpload = async (files: File[]) => {
-    if (!selected || files.length === 0) return;
+  // Per-product variants are managed inline by <GlbVariantManager />; this page
+  // only owns product selection + library browsing. Removing a product's 3D
+  // presence from the library (below) clears every uploaded variant.
 
-    let fileToUpload: File | null = null;
-    let ext: "glb" | "gltf" = "glb";
-
-    // Case 1: single GLB/GLTF direct upload
-    if (files.length === 1) {
-      const f = files[0];
-      const n = f.name.toLowerCase();
-      if (n.endsWith(".glb") || n.endsWith(".gltf")) {
-        fileToUpload = f;
-        ext = n.endsWith(".gltf") ? "gltf" : "glb";
-      }
-    }
-
-    // Case 2: OBJ (+ MTL + textures) bundle → convert to GLB
-    if (!fileToUpload) {
-      const bundle = classifyObjBundle(files);
-      if (bundle) {
-        setUploading(true);
-        setUploadProgress(0);
-        try {
-          toast.message("Converting OBJ to GLB in your browser…");
-          const outName = bundle.objFile.name.replace(/\.obj$/i, "") + ".glb";
-          fileToUpload = await convertObjBundleToGlb(bundle, outName);
-          ext = "glb";
-        } catch (e: any) {
-          setUploading(false);
-          toast.error(`OBJ→GLB conversion failed: ${e?.message || e}`);
-          return;
-        }
-      }
-    }
-
-    if (!fileToUpload) {
-      toast.error("Please upload a .glb/.gltf, or an .obj (optionally with .mtl + textures).");
-      return;
-    }
-
-    if (fileToUpload.size > MAX_MB * 1024 * 1024) {
-      setUploading(false);
-      toast.error(`${(fileToUpload.size / 1024 / 1024).toFixed(1)} MB exceeds the ${MAX_MB} MB limit.`);
-      return;
-    }
-
-    setUploading(true);
-    setUploadProgress(0);
-    try {
-      const contentType = ext === "glb" ? "model/gltf-binary" : "model/gltf+json";
-      const path = `glb-models/${selected.id}/${Date.now()}.${ext}`;
-
-      const { error: upErr } = await supabase.storage
-        .from("assets")
-        .upload(path, fileToUpload, {
-          contentType,
-          cacheControl: "31536000",
-          upsert: false,
-          onUploadProgress: (evt: { loaded?: number; total?: number }) => {
-            const pct = Math.round(((evt.loaded || 0) / (evt.total || fileToUpload!.size)) * 100);
-            setUploadProgress(pct);
-          },
-        } as any);
-      if (upErr) throw upErr;
-
-      const { data: urlData } = supabase.storage.from("assets").getPublicUrl(path);
-      const publicUrl = urlData.publicUrl;
-
-      const { error: updErr } = await supabase
-        .from("trade_products")
-        .update({ glb_url: publicUrl })
-        .eq("id", selected.id);
-      if (updErr) throw updErr;
-
-      toast.success(`3D model saved for "${selected.product_name}"`);
-      setSelected({ ...selected, glb_url: publicUrl });
-      setReloadKey((k) => k + 1);
-    } catch (e: any) {
-      toast.error(e?.message || "Upload failed");
-    } finally {
-      setUploading(false);
-      setUploadProgress(0);
-      if (inputRef.current) inputRef.current.value = "";
-    }
-  };
 
   const handleRemove = async (row: ProductRow) => {
     if (!confirm(`Remove the 3D model from "${row.product_name}"?`)) return;
