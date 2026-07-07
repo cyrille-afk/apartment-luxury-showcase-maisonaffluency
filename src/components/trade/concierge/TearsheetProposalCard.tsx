@@ -12,6 +12,7 @@ import { HotspotImageBadge } from "@/components/trade/HotspotImageBadge";
 import { buildSwapPrompt, buildSuggestOneMorePrompt, buildCritiqueEditsPrompt, sendConciergePrefill, type SwapPromptItem } from "@/lib/conciergePrefill";
 import { RequirementsBadge } from "@/components/trade/concierge/RequirementsBadge";
 import { validateTearsheetEdits, realignUnlocked, type ValidationVerdict, type RealignmentDelta } from "@/lib/tearsheetSyncClient";
+import { getConciergeSession } from "@/hooks/useConciergeSession";
 import { ValidationBanner, RowVerdictPill } from "@/components/trade/concierge/ValidationSummary";
 import { RealignmentDiffPanel, type AppliedRealignment } from "@/components/trade/concierge/RealignmentDiffPanel";
 import { TearsheetInsightsSidebar } from "@/components/trade/concierge/TearsheetInsightsSidebar";
@@ -321,6 +322,7 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
       const skipped = uniquePreview.filter((p) => excluded.has(p.id));
       const lockedItems = uniquePreview.filter((p) => locked.has(p.id) && !excluded.has(p.id));
       const kept = uniquePreview.filter((p) => !excluded.has(p.id));
+      const sessionFinishes = getConciergeSession()?.finishes || null;
       const v = await validateTearsheetEdits({
         title: title.trim() || initialTitle,
         original_note: proposal.args.note,
@@ -328,6 +330,9 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
         skipped: skipped.map(asItem),
         locked: lockedItems.map(asItem),
         title_change: titleChanged ? { from: initialTitle, to: title.trim() } : null,
+        locked_finishes: sessionFinishes
+          ? { fabric: sessionFinishes.fabric, wood: sessionFinishes.wood, variant: sessionFinishes.variant }
+          : null,
       });
       setVerdict(v);
     } catch (e) {

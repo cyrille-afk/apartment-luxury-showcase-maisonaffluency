@@ -29,6 +29,12 @@ type Item = {
   category: string | null;
 };
 
+type LockedFinishes = {
+  fabric?: string | null;
+  wood?: string | null;
+  variant?: string | null;
+};
+
 type Body = {
   title: string;
   original_note?: string | null;
@@ -36,6 +42,7 @@ type Body = {
   skipped: Item[];
   locked: Item[];
   title_change?: { from: string; to: string } | null;
+  locked_finishes?: LockedFinishes | null;
 };
 
 type PerRow = { pick_id: string; status: "green" | "yellow" | "red"; reason: string };
@@ -63,6 +70,7 @@ Rules:
 - Overall = worst per-row status, or "green" if all green.
 - summary: ONE sentence, editorial and specific. No preamble.
 - global_warnings: 0-3 short bullets about the SET as a whole (scale imbalance, missing typology given locked anchors, palette drift). Empty array is fine.
+- If LOCKED_FINISHES is provided and non-empty (fabric, wood/base, or variant is specified), treat finishes as SPECIFIED for the whole set. Do NOT flag "material ambiguity", "unspecified finish", or "palette clashes during procurement" as global_warnings or per_row reasons on that basis. You may still flag a palette clash if the specified finishes actually conflict with each other or with the brief — but never merely because a piece's own materials field is empty.
 - Be terse. Reference pieces by title when useful.
 
 Output STRICT JSON only, no code fences:
@@ -98,6 +106,8 @@ Deno.serve(async (req) => {
   const keptIds = new Set(body.kept.map((k) => k.pick_id));
   const lockedIds = new Set((body.locked || []).map((k) => k.pick_id));
 
+  const lf = body.locked_finishes || null;
+  const hasAnyFinish = !!(lf && (lf.fabric || lf.wood || lf.variant));
   const userPayload = {
     TITLE: body.title,
     ORIGINAL_NOTE: body.original_note || null,
@@ -105,6 +115,9 @@ Deno.serve(async (req) => {
     SKIPPED: body.skipped || [],
     LOCKED: body.locked || [],
     TITLE_CHANGE: body.title_change || null,
+    LOCKED_FINISHES: hasAnyFinish
+      ? { fabric: lf?.fabric || null, wood: lf?.wood || null, variant: lf?.variant || null }
+      : null,
   };
 
   const controller = new AbortController();
