@@ -8,6 +8,8 @@ import { inspectGlbFile, UPHOLSTERY_KEYWORDS } from "@/lib/glbInspect";
 
 const MAX_MB = 50;
 
+type MaterialRole = "fabric" | "base" | "ignore";
+
 interface GlbVariantRow {
   id: string;
   variant_label: string;
@@ -15,7 +17,9 @@ interface GlbVariantRow {
   is_default: boolean;
   file_size_bytes: number | null;
   updated_at?: string | null;
+  material_roles?: Record<string, MaterialRole> | null;
 }
+
 
 interface Props {
   productId: string;
