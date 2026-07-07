@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Product3DViewer from "@/components/trade/Product3DViewer";
 import { FileText, Loader2 } from "lucide-react";
+import { updateConciergeSession } from "@/hooks/useConciergeSession";
 
 interface Swatch {
   fabric_id: string;
