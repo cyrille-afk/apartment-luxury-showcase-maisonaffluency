@@ -544,16 +544,43 @@ function PreviewPanel({
   const [liveRoles, setLiveRoles] = useState<Record<string, MaterialRole>>(
     () => (variant.material_roles as Record<string, MaterialRole>) || {},
   );
+  // When set, we temporarily override the viewer's material_roles to isolate
+  // this single material as "fabric" and pass a bright magenta 1×1 PNG as the
+  // fabric texture — makes it obvious which mesh the opaque UUID name maps to.
+  const [identifying, setIdentifying] = useState<string | null>(null);
 
   useEffect(() => {
     setLiveRoles((variant.material_roles as Record<string, MaterialRole>) || {});
     setMaterialNames([]);
+    setIdentifying(null);
   }, [variant.id]);
+
+  // Bright magenta 1×1 PNG (data URI) used as the identify highlight texture.
+  const HIGHLIGHT_PNG =
+    "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII=";
+  // Magenta 1×1 built via canvas so it's actually pink at runtime; the base64
+  // above is a placeholder. Use a colored data URI:
+  const MAGENTA_DATA_URI =
+    "data:image/svg+xml;utf8," +
+    encodeURIComponent(
+      "<svg xmlns='http://www.w3.org/2000/svg' width='2' height='2'><rect width='2' height='2' fill='%23ff00aa'/></svg>",
+    );
+
+  const viewerRoles: Record<string, MaterialRole> = identifying
+    ? Object.fromEntries(
+        materialNames.map((n) => [n, n === identifying ? "fabric" : "ignore"]),
+      )
+    : liveRoles;
 
   return (
     <div className="max-w-[420px] space-y-2">
       <div className="font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
         Preview · {variant.variant_label}
+        {identifying && (
+          <span className="ml-2 text-fuchsia-600 normal-case tracking-normal">
+            · highlighting {identifying.slice(0, 12)}…
+          </span>
+        )}
       </div>
       <Product3DViewer
         url={variant.glb_url}
@@ -561,7 +588,9 @@ function PreviewPanel({
         poster={posterImageUrl || null}
         autoOpen
         debug
-        materialRoles={liveRoles}
+        materialRoles={viewerRoles}
+        fabricTextureUrl={identifying ? MAGENTA_DATA_URI : null}
+        baseTextureUrl={null}
         onMaterialsDiscovered={(names) => setMaterialNames(names)}
       />
       <GlbMaterialRolesEditor
@@ -570,6 +599,8 @@ function PreviewPanel({
         initialRoles={variant.material_roles}
         onChange={setLiveRoles}
         onSaved={onRolesSaved}
+        identifying={identifying}
+        onIdentifyChange={setIdentifying}
       />
     </div>
   );

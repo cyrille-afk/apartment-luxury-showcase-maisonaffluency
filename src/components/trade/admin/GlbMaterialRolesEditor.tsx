@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Loader2, Check } from "lucide-react";
+import { Loader2, Check, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -13,6 +13,14 @@ interface Props {
   onChange: (roles: Record<string, MaterialRole>) => void;
   /** Called after a successful DB save with the persisted map. */
   onSaved?: (roles: Record<string, MaterialRole>) => void;
+  /**
+   * When set, the parent viewer should flash this single material in a bright
+   * highlight colour so the admin can visually identify which mesh a given
+   * (usually opaque) material name maps to. Null clears the highlight.
+   */
+  onIdentifyChange?: (materialName: string | null) => void;
+  /** The currently-identified material, controlled by the parent. */
+  identifying?: string | null;
 }
 
 const ROLE_LABEL: Record<MaterialRole, string> = {
@@ -29,6 +37,8 @@ export function GlbMaterialRolesEditor({
   initialRoles,
   onChange,
   onSaved,
+  onIdentifyChange,
+  identifying,
 }: Props) {
   const [roles, setRoles] = useState<Record<string, MaterialRole>>({});
   const [saving, setSaving] = useState(false);
@@ -95,41 +105,60 @@ export function GlbMaterialRolesEditor({
         </button>
       </div>
       <div className="space-y-1.5">
-        {materialNames.map((name) => (
-          <div key={name} className="flex items-center gap-2">
-            <div className="flex-1 min-w-0 font-mono text-[10px] text-foreground/80 truncate" title={name}>
-              {name || "(unnamed)"}
+        {materialNames.map((name) => {
+          const isId = identifying === name;
+          return (
+            <div key={name} className="flex items-center gap-2">
+              {onIdentifyChange && (
+                <button
+                  type="button"
+                  onClick={() => onIdentifyChange(isId ? null : name)}
+                  title={isId ? "Stop highlighting" : "Flash this mesh in the 3D viewer"}
+                  className={`shrink-0 p-1 rounded border transition-colors ${
+                    isId
+                      ? "bg-fuchsia-600 text-white border-fuchsia-600"
+                      : "text-muted-foreground border-border hover:text-foreground hover:border-foreground/40"
+                  }`}
+                >
+                  {isId ? <EyeOff size={11} /> : <Eye size={11} />}
+                </button>
+              )}
+              <div className="flex-1 min-w-0 font-mono text-[10px] text-foreground/80 truncate" title={name}>
+                {name || "(unnamed)"}
+              </div>
+              <div className="flex gap-1 shrink-0">
+                {ROLE_ORDER.map((r) => {
+                  const active = roles[name] === r;
+                  return (
+                    <button
+                      key={r}
+                      type="button"
+                      onClick={() => setRole(name, r)}
+                      className={`px-2 py-0.5 rounded font-body text-[9px] uppercase tracking-[0.12em] transition-colors border ${
+                        active
+                          ? r === "fabric"
+                            ? "bg-emerald-600 text-white border-emerald-600"
+                            : r === "base"
+                              ? "bg-amber-700 text-white border-amber-700"
+                              : "bg-muted text-foreground border-border"
+                          : "text-muted-foreground border-border hover:text-foreground hover:border-foreground/40"
+                      }`}
+                    >
+                      {ROLE_LABEL[r]}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
-            <div className="flex gap-1 shrink-0">
-              {ROLE_ORDER.map((r) => {
-                const active = roles[name] === r;
-                return (
-                  <button
-                    key={r}
-                    type="button"
-                    onClick={() => setRole(name, r)}
-                    className={`px-2 py-0.5 rounded font-body text-[9px] uppercase tracking-[0.12em] transition-colors border ${
-                      active
-                        ? r === "fabric"
-                          ? "bg-emerald-600 text-white border-emerald-600"
-                          : r === "base"
-                            ? "bg-amber-700 text-white border-amber-700"
-                            : "bg-muted text-foreground border-border"
-                        : "text-muted-foreground border-border hover:text-foreground hover:border-foreground/40"
-                    }`}
-                  >
-                    {ROLE_LABEL[r]}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
       <p className="font-body text-[9px] text-muted-foreground leading-relaxed">
         Tag which materials receive the fabric swatch, which receive the base
-        (wood / stone / metal) swatch, and which stay as-is. Required whenever
-        the GLB's material names are opaque IDs from the CAD tool.
+        (wood / stone / metal) swatch, and which stay as-is. Tap the
+        <Eye size={9} className="inline mx-0.5 -mt-0.5" /> icon to flash a mesh
+        in the 3D viewer so you can tell opaque CAD IDs apart. Required
+        whenever the GLB's material names are opaque IDs.
       </p>
     </div>
   );
