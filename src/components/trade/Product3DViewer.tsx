@@ -93,12 +93,43 @@ interface Props {
 }
 
 
-interface DebugInfo {
-  all: string[];
+interface LayerDebug {
   matched: string[];
   fellBackToAll: boolean;
   keywords: string[];
 }
+interface DebugInfo {
+  all: string[];
+  fabric: LayerDebug;
+  base: LayerDebug;
+}
+
+const FABRIC_KEYWORDS = [
+  "fabric",
+  "upholstery",
+  "cushion",
+  "seat",
+  "cover",
+  "textile",
+  "pillow",
+  "sofa",
+];
+
+const BASE_KEYWORDS = [
+  "wood",
+  "frame",
+  "leg",
+  "base",
+  "structure",
+  "marble",
+  "stone",
+  "metal",
+  "brass",
+  "steel",
+  "bronze",
+  "top", // table tops, cabinet tops
+];
+
 
 const Product3DViewer: React.FC<Props> = ({
   url,
