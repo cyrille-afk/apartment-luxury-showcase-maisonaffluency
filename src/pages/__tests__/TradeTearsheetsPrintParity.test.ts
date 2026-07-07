@@ -44,13 +44,26 @@ describe("TradeTearsheets print/PDF parity with on-screen preview", () => {
 
   it("exposes a single leadTimeDisplay used by both grids", () => {
     expect(SRC).toMatch(/const\s+leadTimeDisplay\s*=/);
-    // Both the on-screen grid and print HTML must reference the same var.
-    const onScreen = SRC.indexOf('["Lead Time", leadTimeDisplay]');
-    const inPrint = SRC.indexOf(
+    // On-screen grid references the shared var…
+    expect(SRC).toContain('["Lead Time", leadTimeDisplay]');
+    // …and so does the print HTML builder.
+    expect(PRINT_SRC).toContain(
       '<p class="label">Lead Time</p><p class="value">${esc(leadTimeDisplay)',
     );
-    expect(onScreen).toBeGreaterThan(-1);
-    expect(inPrint).toBeGreaterThan(-1);
+  });
+
+  it("print HTML grid uses the shared *Display variables (no raw selectedProduct fallbacks)", () => {
+    // Dimensions / Materials / Lead Time cells in the print grid must all
+    // use the derived *Display vars, not raw selectedProduct fields.
+    expect(PRINT_SRC).toMatch(
+      /<p class="label">Dimensions<\/p><p class="value"[^>]*>\$\{esc\(dimensionsDisplay\)/,
+    );
+    expect(PRINT_SRC).toMatch(
+      /<p class="label">Materials<\/p><p class="value"[^>]*>\$\{esc\(materialsDisplay\)/,
+    );
+    expect(PRINT_SRC).toMatch(
+      /<p class="label">Lead Time<\/p><p class="value">\$\{esc\(leadTimeDisplay\)/,
+    );
   });
 
   it("print HTML grid uses the shared *Display variables (no raw selectedProduct fallbacks)", () => {
