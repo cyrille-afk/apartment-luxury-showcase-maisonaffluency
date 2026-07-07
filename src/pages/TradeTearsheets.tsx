@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { fillTradeProductImageFallbacks } from "@/lib/tradeProductImageFallback";
 import { useAuth } from "@/hooks/useAuth";
 import { useState, useRef, useMemo, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { FileText, Loader2, Search, Printer, LayoutGrid, Check, Plus } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -17,6 +17,7 @@ import { useStudio } from "@/hooks/useStudio";
 import { normalizeCategory, normalizeSubcategory, CATEGORY_ORDER, getSubcategoriesForCategory } from "@/lib/productTaxonomy";
 import { ProjectPicker } from "@/components/trade/ProjectPicker";
 import TradeBreadcrumb from "@/components/trade/TradeBreadcrumb";
+import { getConciergeSession, useConciergeSession } from "@/hooks/useConciergeSession";
 
 interface TearsheetProduct {
   id: string;
@@ -37,25 +38,30 @@ interface TearsheetProduct {
 
 export default function TradeTearsheets() {
   const { user } = useAuth();
+  const navigate = useNavigate();
+  const { session: conciergeSession, reset: resetConcierge } = useConciergeSession();
   const [search, setSearch] = useState("");
   const [filterDesigner, setFilterDesigner] = useState("");
   const [filterCategory, setFilterCategory] = useState("");
   const [filterSubcategory, setFilterSubcategory] = useState("");
   const [searchParams, setSearchParams] = useSearchParams();
   const filterProjectId = searchParams.get("project");
-  // Finish handoff from the Trade Product Page ("Draft Tearsheet with These
-  // Finishes" button). We keep the values in local state so the user can
-  // clear them without touching the URL.
-  const initialFinishes = useMemo(() => ({
-    productId: searchParams.get("product"),
-    fabric: searchParams.get("fabric"),
-    fabricImg: searchParams.get("fabricImg"),
-    wood: searchParams.get("wood"),
-    woodImg: searchParams.get("woodImg"),
-    variant: searchParams.get("variant"),
+  // Finish handoff. Priority: URL params (from Draft-Tearsheet CTA) →
+  // concierge session (persists across surfaces even when the URL is bare).
+  const initialFinishes = useMemo(() => {
+    const sess = getConciergeSession();
+    const p = (k: string) => searchParams.get(k);
+    return {
+      productId: p("product") ?? sess?.product?.id ?? null,
+      fabric: p("fabric") ?? sess?.finishes.fabric ?? null,
+      fabricImg: p("fabricImg") ?? sess?.finishes.fabricImg ?? null,
+      wood: p("wood") ?? sess?.finishes.wood ?? null,
+      woodImg: p("woodImg") ?? sess?.finishes.woodImg ?? null,
+      variant: p("variant") ?? sess?.finishes.variant ?? null,
+    };
   // Only read once on mount — subsequent URL edits don't reset the state.
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }), []);
+  }, []);
   const [chosenFinishes, setChosenFinishes] = useState<{
     fabric: string | null; fabricImg: string | null;
     wood: string | null; woodImg: string | null;
@@ -512,6 +518,58 @@ export default function TradeTearsheets() {
             Generate one-click product tearsheets with specs, dimensions, and pricing for client handoff.
           </p>
         </div>
+
+        {conciergeSession && (conciergeSession.product || conciergeSession.briefText || conciergeSession.finishes.fabric || conciergeSession.finishes.wood) && (
+          <div className="rounded-lg border border-accent/40 bg-accent/5 p-3 flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <div className="font-body text-[10px] uppercase tracking-[0.14em] text-accent mb-1">
+                Concierge session active
+              </div>
+              <div className="font-body text-xs text-foreground truncate">
+                {conciergeSession.product?.title ? (
+                  <>
+                    <span className="font-medium">{conciergeSession.product.title}</span>
+                    {conciergeSession.product.designer_name && (
+                      <span className="text-muted-foreground"> · {conciergeSession.product.designer_name}</span>
+                    )}
+                    {conciergeSession.locked && <span className="text-accent"> · Finishes locked</span>}
+                  </>
+                ) : (
+                  <span className="text-muted-foreground">Brief captured — pick a product to continue</span>
+                )}
+              </div>
+              {(conciergeSession.finishes.fabric || conciergeSession.finishes.wood || conciergeSession.finishes.variant) && (
+                <div className="font-body text-[11px] text-muted-foreground mt-0.5 truncate">
+                  {[
+                    conciergeSession.finishes.fabric && `Fabric: ${conciergeSession.finishes.fabric}`,
+                    conciergeSession.finishes.wood && `Wood: ${conciergeSession.finishes.wood}`,
+                    conciergeSession.finishes.variant && `Variant: ${conciergeSession.finishes.variant}`,
+                  ].filter(Boolean).join(" · ")}
+                </div>
+              )}
+              {conciergeSession.briefText && (
+                <div className="font-body text-[11px] text-muted-foreground mt-0.5">
+                  Brief attached ({conciergeSession.briefText.length.toLocaleString()} chars) — carried into quote.
+                </div>
+              )}
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              {conciergeSession.product && (
+                <Button
+                  size="sm"
+                  onClick={() => {
+                    const params = new URLSearchParams();
+                    params.set("fromSession", "1");
+                    navigate(`/trade/quotes?${params.toString()}`);
+                  }}
+                >
+                  Continue to Quote →
+                </Button>
+              )}
+              <Button variant="ghost" size="sm" onClick={() => resetConcierge()}>Clear</Button>
+            </div>
+          </div>
+        )}
 
         {selectedProduct ? (
           <div className="space-y-4">

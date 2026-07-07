@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Product3DViewer from "@/components/trade/Product3DViewer";
 import { FileText, Loader2 } from "lucide-react";
+import { updateConciergeSession } from "@/hooks/useConciergeSession";
 
 interface Swatch {
   fabric_id: string;
@@ -226,6 +227,22 @@ export function PickAssetDrawer({ pickId, title }: Props) {
         canDraft ? (
           <Link
             to={`/trade/tearsheets?${draftParams.toString()}`}
+            onClick={() => {
+              // Persist product + locked finishes into the cross-surface
+              // concierge session so the Tearsheet Builder and Quote flow
+              // can carry them forward even if the URL params are stripped.
+              updateConciergeSession({
+                product: { id: pickId, title, source: "curator" },
+                finishes: {
+                  fabric: fabricSwatch?.name ?? null,
+                  fabricImg: fabricSwatch?.image_url ?? null,
+                  wood: baseSwatch?.name ?? null,
+                  woodImg: baseSwatch?.image_url ?? null,
+                  variant: null,
+                },
+                locked: true,
+              });
+            }}
             className="mt-1 flex items-center justify-center gap-1.5 rounded-md border border-foreground/30 bg-foreground text-background px-2.5 py-1.5 font-body text-[10px] uppercase tracking-widest hover:bg-foreground/90 transition-colors"
           >
             <FileText size={11} />
