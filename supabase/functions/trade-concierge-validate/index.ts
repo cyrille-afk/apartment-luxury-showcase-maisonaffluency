@@ -29,6 +29,12 @@ type Item = {
   category: string | null;
 };
 
+type LockedFinishes = {
+  fabric?: string | null;
+  wood?: string | null;
+  variant?: string | null;
+};
+
 type Body = {
   title: string;
   original_note?: string | null;
@@ -36,6 +42,7 @@ type Body = {
   skipped: Item[];
   locked: Item[];
   title_change?: { from: string; to: string } | null;
+  locked_finishes?: LockedFinishes | null;
 };
 
 type PerRow = { pick_id: string; status: "green" | "yellow" | "red"; reason: string };
