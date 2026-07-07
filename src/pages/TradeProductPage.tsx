@@ -2311,54 +2311,8 @@ const TradeProductPage: React.FC = () => {
               Request Customisation
             </button>
 
-            {/* 3D model viewer — picks the variant matching the current size
-                selection, falls back to the default variant, then to the legacy
-                trade_products.glb_url. */}
-            {(() => {
-              const norm = (s: string | null | undefined) =>
-                (s || "").trim().toLowerCase().replace(/\s+/g, " ");
-              const av: any = activeVariant || {};
-              // Candidate labels to match against, most-specific first. GLBs
-              // describe geometry, so we prefer the dimensional axis (base,
-              // sometimes top) over the combined label. This lets a single
-              // "W 190 × D 108 × H 70 SH 40 cm" GLB serve every fabric.
-              const candidates: string[] = [
-                av.label,
-                selectedDualSize,
-                selectedSingleSize,
-                av.base,
-                av.top,
-                selectedBase,
-                selectedTop,
-                [av.base, av.top].filter(Boolean).join(" × "),
-              ]
-                .map(norm)
-                .filter(Boolean);
-              const byLabel = candidates.reduce<
-                { variant_label: string; glb_url: string; is_default: boolean; material_roles: Record<string, "fabric" | "base" | "ignore"> | null } | null
-              >((hit, cand) => {
-                if (hit) return hit;
-                return (
-                  glbVariants.find((v) => norm(v.variant_label) === cand) || null
-                );
-              }, null);
-              const byDefault = glbVariants.find((v) => v.is_default);
-              const resolvedVariant = byLabel || byDefault || null;
-              const resolvedGlbUrl = resolvedVariant?.glb_url || glbUrl || null;
-              if (!resolvedGlbUrl) return null;
-              const resolvedRoles = resolvedVariant?.material_roles || undefined;
-              return (
-                <Product3DViewer
-                  url={resolvedGlbUrl}
-                  alt={`${product.title} — 3D model${byLabel ? ` (${byLabel.variant_label})` : ""}`}
-                  poster={product.image_url}
-                  fabricTextureUrl={selectedFabric?.image_url || null}
-                  baseTextureUrl={selectedWoodPrice?.image_url || null}
-                  materialRoles={resolvedRoles || undefined}
-                />
-              );
-
-            })()}
+            {/* 3D model viewer moved beneath the photo (left column) as a
+                collapsed accordion. Finish selectors act as its legend here. */}
 
             {/* Draft a tearsheet with the currently-selected fabric / wood finishes.
                 Visible whenever the product has linked swatches. Disabled while
