@@ -113,6 +113,8 @@ import { PendingProposalSkeleton } from "@/components/trade/concierge/PendingPro
 import { EscalationCard } from "@/components/trade/concierge/EscalationCard";
 import { SpecScheduleBlock } from "@/components/trade/concierge/SpecScheduleBlock";
 import { parseSlashCommand, SLASH_COMMAND_HELP } from "@/lib/conciergeSlashCommands";
+import { openHandoffChannel } from "@/lib/conciergeHandoff";
+import { useConciergeSession } from "@/hooks/useConciergeSession";
 import { buildSpecSchedule, type SpecScheduleItem } from "@/lib/specScheduleBuilder";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
