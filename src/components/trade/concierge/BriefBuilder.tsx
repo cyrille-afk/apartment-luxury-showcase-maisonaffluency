@@ -545,31 +545,6 @@ export function BriefBuilder({
   );
 
 
-  const Field = ({
-    label,
-    value,
-    onChange,
-    placeholder,
-  }: {
-    label: string;
-    value: string;
-    onChange: (v: string) => void;
-    placeholder: string;
-  }) => (
-    <label className="block">
-      <span className="font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
-        {label}
-      </span>
-      <input
-        type="text"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
-        className="mt-1 block w-full rounded-lg border border-border bg-background px-2.5 py-1.5 font-body text-[12px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-accent"
-      />
-    </label>
-  );
-
   return (
     <div className="mb-2 rounded-xl border border-accent/40 bg-muted/30 p-3 max-h-[38vh] overflow-y-auto overscroll-contain">
       <div className="flex items-center justify-between mb-3 gap-2">
