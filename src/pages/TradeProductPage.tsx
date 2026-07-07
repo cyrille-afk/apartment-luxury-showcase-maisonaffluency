@@ -538,6 +538,19 @@ const TradeProductPage: React.FC = () => {
   // Names of currently-selected wood/top finish swatches that lack mapped
   // gallery images — surfaced as a note on the quote line.
   const [finishesMissingImages, setFinishesMissingImages] = useState<string[]>([]);
+  // Tracks whether linked finish swatches are still being fetched by the
+  // FinishSelector so the tearsheet CTA can show a disabled loading state.
+  const [finishesLoading, setFinishesLoading] = useState(true);
+
+  const handleHasFabricsChange = useCallback((has: boolean) => {
+    setHasLinkedFabrics(has);
+    setFinishesLoading(false);
+  }, []);
+
+  const handleWoodFinishesAvailable = useCallback((names: string[]) => {
+    setLinkedWoodFinishes(names);
+    setFinishesLoading(false);
+  }, []);
 
   // Per-variant 3D models: one row per size/label. `default` variant wins when
   // no size is selected. Falls back to legacy tradeProducts.glb_url otherwise.
@@ -578,9 +591,12 @@ const TradeProductPage: React.FC = () => {
   useEffect(() => {
     window.scrollTo({ top: 0 });
     // Reset gallery to first image when navigating between products — the page
-    // component instance is reused across slug changes, so stale index from
-    // the previous product would otherwise persist (e.g. land on picture 3).
+    // component instance is reused across slug changes, so stale index from the
+    // previous product would otherwise persist (e.g. land on picture 3).
     setGalleryActiveIndex(undefined);
+    // Swatches are re-fetched by FinishSelector on slug change, so the CTA
+    // should re-enter its loading/disabled state until the new data reports in.
+    setFinishesLoading(true);
   }, [designerSlug, productSlug]);
 
   // ── Unified variant resolution ──
@@ -1915,8 +1931,8 @@ const TradeProductPage: React.FC = () => {
                   showUpholsterySection={isUpholsteredProduct}
                   showWoodSection
                   hideBaseAccordion={isDualAxis && baseAxisIsDim}
-                  onHasFabricsChange={setHasLinkedFabrics}
-                  onWoodFinishesAvailable={setLinkedWoodFinishes}
+                  onHasFabricsChange={handleHasFabricsChange}
+                  onWoodFinishesAvailable={handleWoodFinishesAvailable}
                   onFinishesMissingImagesChange={setFinishesMissingImages}
                   onFabricChange={setSelectedFabric}
                   onWoodFinishPricingChange={setSelectedWoodPrice}
@@ -2344,27 +2360,48 @@ const TradeProductPage: React.FC = () => {
             })()}
 
             {/* Draft a tearsheet with the currently-selected fabric / wood finishes.
-                Only enabled once at least one finish has been chosen. */}
-            {(selectedFabric || selectedWoodPrice) && (
-              <button
-                type="button"
-                onClick={() => {
-                  const params = new URLSearchParams();
-                  params.set("product", product.id);
-                  if (selectedFabric?.name) params.set("fabric", selectedFabric.name);
-                  if (selectedFabric?.image_url) params.set("fabricImg", selectedFabric.image_url);
-                  if (selectedWoodPrice?.name) params.set("wood", selectedWoodPrice.name);
-                  if (selectedWoodPrice?.image_url) params.set("woodImg", selectedWoodPrice.image_url);
-                  const variantLabelParts = [selectedBase, selectedTop, selectedDualSize, selectedSingleSize]
-                    .filter(Boolean).map(String);
-                  if (variantLabelParts.length) params.set("variant", variantLabelParts.join(" · "));
-                  navigate(`/trade/tearsheets?${params.toString()}`);
-                }}
-                className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-md font-body text-[11px] uppercase tracking-[0.12em] transition-all border border-foreground/30 bg-foreground text-background hover:bg-foreground/90 w-full"
-              >
-                <FileText size={13} />
-                Draft Tearsheet with These Finishes
-              </button>
+                Visible whenever the product has linked swatches. Disabled while
+                swatches load and until at least one finish is chosen. */}
+            {(finishesLoading || hasLinkedFabrics || linkedWoodFinishes.length > 0) && (
+              (selectedFabric || selectedWoodPrice) && !finishesLoading ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    const params = new URLSearchParams();
+                    params.set("product", product.id);
+                    if (selectedFabric?.name) params.set("fabric", selectedFabric.name);
+                    if (selectedFabric?.image_url) params.set("fabricImg", selectedFabric.image_url);
+                    if (selectedWoodPrice?.name) params.set("wood", selectedWoodPrice.name);
+                    if (selectedWoodPrice?.image_url) params.set("woodImg", selectedWoodPrice.image_url);
+                    const variantLabelParts = [selectedBase, selectedTop, selectedDualSize, selectedSingleSize]
+                      .filter(Boolean).map(String);
+                    if (variantLabelParts.length) params.set("variant", variantLabelParts.join(" · "));
+                    navigate(`/trade/tearsheets?${params.toString()}`);
+                  }}
+                  className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-md font-body text-[11px] uppercase tracking-[0.12em] transition-all border border-foreground/30 bg-foreground text-background hover:bg-foreground/90 w-full"
+                >
+                  <FileText size={13} />
+                  Draft Tearsheet with These Finishes
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  disabled
+                  className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-md font-body text-[11px] uppercase tracking-[0.12em] transition-all border border-foreground/30 bg-foreground text-background opacity-50 cursor-not-allowed w-full"
+                >
+                  {finishesLoading ? (
+                    <>
+                      <Loader2 size={13} className="animate-spin" />
+                      Loading finishes…
+                    </>
+                  ) : (
+                    <>
+                      <FileText size={13} />
+                      Draft Tearsheet with These Finishes
+                    </>
+                  )}
+                </button>
+              )
             )}
 
             {/* CAD / 3D file downloads (trade-gated; only renders when files exist) */}

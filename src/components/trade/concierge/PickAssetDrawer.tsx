@@ -127,6 +127,21 @@ export function PickAssetDrawer({ pickId, title }: Props) {
     ? baseSwatches.find((s) => s.fabric_id === selectedBaseId)?.image_url ?? null
     : null;
 
+  const fabricSwatch = selectedFabricId
+    ? fabricSwatches.find((s) => s.fabric_id === selectedFabricId) ?? null
+    : null;
+  const baseSwatch = selectedBaseId
+    ? baseSwatches.find((s) => s.fabric_id === selectedBaseId) ?? null
+    : null;
+  const showDraftButton = loading || hasSwatches;
+  const canDraft = !loading && (selectedFabricId || selectedBaseId);
+  const draftParams = new URLSearchParams();
+  draftParams.set("product", pickId);
+  if (fabricSwatch?.name) draftParams.set("fabric", fabricSwatch.name);
+  if (fabricSwatch?.image_url) draftParams.set("fabricImg", fabricSwatch.image_url);
+  if (baseSwatch?.name) draftParams.set("wood", baseSwatch.name);
+  if (baseSwatch?.image_url) draftParams.set("woodImg", baseSwatch.image_url);
+
   const renderGroup = (
     label: string,
     list: Swatch[],
@@ -217,25 +232,30 @@ export function PickAssetDrawer({ pickId, title }: Props) {
           {renderGroup("Fabrics", fabricSwatches, selectedFabricId, setSelectedFabricId)}
         </div>
       )}
-      {(selectedFabricId || selectedBaseId) && (() => {
-        const fab = selectedFabricId ? fabricSwatches.find((s) => s.fabric_id === selectedFabricId) : null;
-        const base = selectedBaseId ? baseSwatches.find((s) => s.fabric_id === selectedBaseId) : null;
-        const params = new URLSearchParams();
-        params.set("product", pickId);
-        if (fab?.name) params.set("fabric", fab.name);
-        if (fab?.image_url) params.set("fabricImg", fab.image_url);
-        if (base?.name) params.set("wood", base.name);
-        if (base?.image_url) params.set("woodImg", base.image_url);
-        return (
+      {showDraftButton && (
+        canDraft ? (
           <Link
-            to={`/trade/tearsheets?${params.toString()}`}
+            to={`/trade/tearsheets?${draftParams.toString()}`}
             className="mt-1 flex items-center justify-center gap-1.5 rounded-md border border-foreground/30 bg-foreground text-background px-2.5 py-1.5 font-body text-[10px] uppercase tracking-widest hover:bg-foreground/90 transition-colors"
           >
             <FileText size={11} />
             Draft Tearsheet with These Finishes
           </Link>
-        );
-      })()}
+        ) : (
+          <button
+            type="button"
+            disabled
+            className="mt-1 flex w-full items-center justify-center gap-1.5 rounded-md border border-foreground/30 bg-foreground text-background px-2.5 py-1.5 font-body text-[10px] uppercase tracking-widest opacity-50 cursor-not-allowed transition-colors"
+          >
+            {loading ? (
+              <Loader2 size={11} className="animate-spin" />
+            ) : (
+              <FileText size={11} />
+            )}
+            {loading ? "Loading finishes…" : "Draft Tearsheet with These Finishes"}
+          </button>
+        )
+      )}
     </div>
   );
 }
