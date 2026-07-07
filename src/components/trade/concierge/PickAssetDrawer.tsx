@@ -19,10 +19,21 @@ interface Props {
   title: string;
 }
 
-/** Classify a swatch as "base" (wood / metal / stone finish) vs "fabric". */
+/** Classify a swatch as "base" (wood / metal / stone finish) vs "fabric".
+ *  Category is authoritative — "Fabric & Leather" and "Rug Finish" are always
+ *  fabric-side, everything else (Wood, Metal, Stone, Glass, Ceramic, Cover, …)
+ *  is base. Fall back to a name/label regex ONLY when the category is missing.
+ */
 function isBaseFinish(s: Swatch): boolean {
-  const hay = `${s.category ?? ""} ${s.name ?? ""}`.toLowerCase();
-  return /(wood|oak|walnut|ash|teak|maple|mahogany|metal|brass|bronze|steel|iron|marble|stone|leather|lacquer|paint|finish|frame|base)/.test(
+  const cat = (s.category ?? "").trim().toLowerCase();
+  if (cat) {
+    if (cat === "fabric & leather" || cat === "fabric" || cat === "leather" || cat === "upholstery" || cat === "rug finish" || cat === "rug finishes" || cat === "rug") {
+      return false;
+    }
+    return true;
+  }
+  const hay = (s.name ?? "").toLowerCase();
+  return /(wood|oak|walnut|ash|teak|maple|mahogany|metal|brass|bronze|steel|iron|marble|stone|lacquer|paint|finish|frame|base)/.test(
     hay,
   );
 }
