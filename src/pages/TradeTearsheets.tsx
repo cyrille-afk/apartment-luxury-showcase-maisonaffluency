@@ -700,19 +700,20 @@ export default function TradeTearsheets() {
               <div className="grid grid-cols-2 gap-4">
                 {([
                   ["Category", selectedProduct.category],
-                  ["Dimensions", selectedProduct.dimensions],
-                  ["Materials", selectedProduct.materials],
-                  ["Lead Time", selectedProduct.lead_time],
+                  ["Dimensions", dimensionsDisplay],
+                  ["Materials", materialsDisplay],
+                  ["Lead Time", leadTimeDisplay],
                   ["Trade Price", selectedProduct.trade_price_cents
                     ? `${selectedProduct.currency === "USD" ? "$" : selectedProduct.currency === "GBP" ? "£" : selectedProduct.currency === "SGD" ? "S$" : "€"}${(selectedProduct.trade_price_cents / 100).toLocaleString()}`
                     : "Price Upon Request"],
                 ] as const).map(([label, val]) => (
                   <div key={label}>
                     <p className="font-body text-[10px] uppercase tracking-wider text-muted-foreground">{label}</p>
-                    <p className="font-body text-sm text-foreground mt-0.5">{val || "—"}</p>
+                    <p className="font-body text-sm text-foreground mt-0.5 whitespace-pre-line">{val || "—"}</p>
                   </div>
                 ))}
               </div>
+
               {selectedProduct.description && (
                 <div>
                   <p className="font-body text-[10px] uppercase tracking-wider text-muted-foreground">Description</p>
