@@ -592,6 +592,7 @@ const App = () => {
                     <Route path="admin/shipping-rates" element={<TradeAdminShippingRates />} />
                     <Route path="admin/shipping-surcharges" element={<TradeAdminShippingSurcharges />} />
                     <Route path="admin/taxonomy-audit" element={<TradeAdminTaxonomyAudit />} />
+                    <Route path="admin/descriptor-taxonomy" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAdminDescriptorTaxonomy /></Suspense>} />
                     <Route path="admin/duplicates" element={<TradeAdminDuplicates />} />
                     <Route path="admin/axonometric-cad-qa" element={<TradeAdminAxonometricCadQa />} />
                     <Route path="admin/sync-status" element={<TradeAdminSyncStatus />} />
