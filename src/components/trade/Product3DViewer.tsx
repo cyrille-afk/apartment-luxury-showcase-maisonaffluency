@@ -78,6 +78,19 @@ interface Props {
    * (wood_leg, metal_frame, glass_top, etc.) will then be left untouched.
    */
   fabricMaterialNameIncludes?: string | string[];
+  /**
+   * When true, renders a small collapsible panel showing which material
+   * names were detected on the GLB and which ones the upholstery filter
+   * matched for the current swatch. Intended for admin/debug use.
+   */
+  debug?: boolean;
+}
+
+interface DebugInfo {
+  all: string[];
+  matched: string[];
+  fellBackToAll: boolean;
+  keywords: string[];
 }
 
 const Product3DViewer: React.FC<Props> = ({
@@ -86,6 +99,7 @@ const Product3DViewer: React.FC<Props> = ({
   poster,
   fabricTextureUrl,
   fabricMaterialNameIncludes,
+  debug = false,
 }) => {
   const [ready, setReady] = useState(() =>
     typeof window !== "undefined" && !!customElements.get("model-viewer"),
@@ -95,6 +109,8 @@ const Product3DViewer: React.FC<Props> = ({
     createTexture?: (url: string) => Promise<any>;
   } | null>(null);
   const originalTexturesRef = useRef<Map<any, any> | null>(null);
+  const [debugInfo, setDebugInfo] = useState<DebugInfo | null>(null);
+  const [debugOpen, setDebugOpen] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -170,6 +186,14 @@ const Product3DViewer: React.FC<Props> = ({
       const matched = materials.filter(matchesKeywords);
       const targets = matched.length > 0 ? matched : materials;
       const filter = (m: any) => targets.includes(m);
+
+      // Publish debug info for the UI panel.
+      setDebugInfo({
+        all: materials.map((m) => String(m?.name || "(unnamed)")),
+        matched: matched.map((m) => String(m?.name || "(unnamed)")),
+        fellBackToAll: matched.length === 0,
+        keywords,
+      });
 
       if (!fabricTextureUrl) {
         // Restore originals.
@@ -249,6 +273,61 @@ const Product3DViewer: React.FC<Props> = ({
       <p className="px-3 py-2 font-body text-[10px] text-muted-foreground border-t border-border">
         Drag to rotate · scroll to zoom · tap the cube to view in your room (AR)
       </p>
+      {debug && debugInfo && (
+        <div className="border-t border-border bg-background/60">
+          <button
+            type="button"
+            onClick={() => setDebugOpen((s) => !s)}
+            className="w-full flex items-center justify-between px-3 py-2 font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <span>
+              Fabric filter · {debugInfo.matched.length}/{debugInfo.all.length} matched
+              {debugInfo.fellBackToAll && " · fallback: all"}
+              {fabricTextureUrl ? " · swatch active" : " · original"}
+            </span>
+            <span>{debugOpen ? "−" : "+"}</span>
+          </button>
+          {debugOpen && (
+            <div className="px-3 pb-3 space-y-2 font-body text-[10px] leading-relaxed">
+              <div>
+                <div className="text-muted-foreground uppercase tracking-[0.12em] text-[9px] mb-0.5">
+                  Keywords
+                </div>
+                <div className="text-foreground/80">{debugInfo.keywords.join(", ")}</div>
+              </div>
+              <div>
+                <div className="text-muted-foreground uppercase tracking-[0.12em] text-[9px] mb-0.5">
+                  Matched ({debugInfo.matched.length})
+                </div>
+                <div className="text-emerald-600 break-words">
+                  {debugInfo.matched.length > 0 ? debugInfo.matched.join(", ") : "— none —"}
+                </div>
+              </div>
+              <div>
+                <div className="text-muted-foreground uppercase tracking-[0.12em] text-[9px] mb-0.5">
+                  All materials ({debugInfo.all.length})
+                </div>
+                <div className="text-foreground/70 break-words">
+                  {debugInfo.all.map((n, i) => {
+                    const isMatch = debugInfo.matched.includes(n);
+                    return (
+                      <span key={`${n}-${i}`}>
+                        {i > 0 && ", "}
+                        <span className={isMatch ? "text-emerald-600" : ""}>{n}</span>
+                      </span>
+                    );
+                  })}
+                </div>
+              </div>
+              {debugInfo.fellBackToAll && (
+                <div className="text-amber-600">
+                  No material matched the convention — the swatch is applied to every material as a fallback. Rename your upholstery mesh to include one of the keywords above.
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };
