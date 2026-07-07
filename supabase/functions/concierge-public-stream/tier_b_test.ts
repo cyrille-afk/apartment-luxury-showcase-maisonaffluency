@@ -139,6 +139,48 @@ if (!USER_TOKEN) {
     });
   }
 
+  // Off-topic queries that should NOT confidently match any roster entry —
+  // proves the low-confidence / graceful-refusal fallback kicks in end-to-end.
+  const OFF_TOPIC_QUERIES = [
+    "What's your shipping policy for the Middle East?",
+    "Can you recommend a good sushi restaurant in Tokyo?",
+  ];
+  for (const query of OFF_TOPIC_QUERIES) {
+    Deno.test({
+      name: `Graceful fallback (no confident match) for: "${query}"`,
+      async fn() {
+        const { status, json } = await probe(query);
+        assertEquals(status, 200);
+        assert(json, "probe returned non-JSON body");
+        // Either the top hit was below the strict floor (low_confidence)
+        // or nothing cleared the absolute floor at all — both are "not ok".
+        const rs = json.retrieval_status as string;
+        assert(
+          rs === "low_confidence" || rs === "unavailable" ||
+            (rs === "ok" && (json.semantic_hits as unknown[]).length === 0),
+          `expected non-ok retrieval status for off-topic query, got "${rs}" with ${(json.semantic_hits as unknown[]).length} hits`,
+        );
+        // The grounding block must NOT present these as a firm curatorial
+        // match — either it uses the soft-suggestion heading or the
+        // graceful-refusal directive.
+        const block = json.grounding_block as string;
+        assertEquals(
+          block.includes("Most relevant roster members"),
+          false,
+          `off-topic query "${query}" must not surface the strict quote-these heading`,
+        );
+        // One of the fallback affordances must be present.
+        const hasFallback = block.includes("Roster members that MAY relate") ||
+          block.includes("No confident roster match") ||
+          block.includes("No retrieval context available");
+        assert(
+          hasFallback,
+          `expected fallback directive in grounding block for "${query}"`,
+        );
+      },
+    });
+  }
+
   Deno.test("Rejects unauthenticated probes", async () => {
     const resp = await fetch(ENDPOINT, {
       method: "POST",
