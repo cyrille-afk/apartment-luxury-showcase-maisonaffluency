@@ -4162,14 +4162,66 @@ serve(async (req) => {
     const briefDesignerNames = Array.isArray(effectiveBrief.brief.designers)
       ? effectiveBrief.brief.designers.map((d) => String(d || "").trim()).filter(Boolean)
       : [];
-    // Merge live-text mentions with the brief allow-list (dedup, case-insensitive).
+
+    // DETERMINISTIC REFERENCES PARSER — the LLM extractor is unreliable on
+    // structured Brief Builder text and evaporates entirely on follow-up
+    // turns whose lastUserMsg no longer contains the brief. Scan the FULL
+    // user conversation for a `REFERENCES ... : <names>` line and match
+    // each comma-separated token against the known published designer list.
+    // This locks the allow-list even when the brief was submitted turns ago.
+    const parsedReferenceDesigners: string[] = [];
+    {
+      const refLineRe = /references[^:\n]*:\s*([^\n]+)/gi;
+      const foundLines: string[] = [];
+      let rm: RegExpExecArray | null;
+      while ((rm = refLineRe.exec(userConversationText)) !== null) {
+        foundLines.push(rm[1]);
+      }
+      if (foundLines.length) {
+        const knownLc = new Map<string, string>();
+        for (const n of designerNames) {
+          const lc = String(n || "").trim().toLowerCase();
+          if (lc && !knownLc.has(lc)) knownLc.set(lc, n);
+        }
+        for (const line of foundLines) {
+          // Split on commas AND on " and " to tolerate free-form joining.
+          const tokens = line.split(/,|\band\b/i).map((t) => t.trim()).filter(Boolean);
+          for (const tok of tokens) {
+            // Strip trailing parenthetical clarifiers like
+            // "Man of Parts (Sandy Cove / Bond Street / Rua Leblon)".
+            const cleaned = tok.replace(/\s*\(.*?\)\s*$/g, "").trim().toLowerCase();
+            if (!cleaned || cleaned.length < 3) continue;
+            // Exact match, or the cleaned token contains a known designer
+            // name as a substring (handles "man of parts — sandy cove").
+            for (const [lc, orig] of knownLc.entries()) {
+              if (cleaned === lc || cleaned.startsWith(lc + " ") || cleaned.endsWith(" " + lc) || cleaned.includes(lc)) {
+                parsedReferenceDesigners.push(orig);
+                break;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    // Merge live-text mentions + LLM-extracted brief designers + deterministic
+    // REFERENCES parse (dedup, case-insensitive). The deterministic parse is
+    // the source of truth when the user is following up on a prior brief.
     const scopedDesignerSet = new Map<string, string>();
-    for (const n of [...mentionedDesigners, ...briefDesignerNames]) {
+    for (const n of [...mentionedDesigners, ...briefDesignerNames, ...parsedReferenceDesigners]) {
       const key = n.toLowerCase();
       if (!scopedDesignerSet.has(key)) scopedDesignerSet.set(key, n);
     }
     const scopedDesigners = Array.from(scopedDesignerSet.values());
     const hasScopedDesigners = scopedDesigners.length > 0;
+    if (hasScopedDesigners) {
+      console.log("[concierge scoped-designers]", {
+        mentioned: mentionedDesigners,
+        brief: briefDesignerNames,
+        parsed_references: parsedReferenceDesigners,
+        final: scopedDesigners,
+      });
+    }
     // If a designer scope exists (from live text OR the brief), skip RAG (top-K
     // may miss items) AND scope the catalog load to just those designers — no
     // reason to ship the full 2000-row catalog when the brief names them.
@@ -4177,24 +4229,49 @@ serve(async (req) => {
     // Merge extractedBrief material/category signal into the SQL-load
     // constraints so the bulk catalog path narrows even when the raw user
     // message did not contain a keyword (the classifier already normalised it).
+    // Also deterministically parse TYPOLOGY from the structured brief so the
+    // category filter stays live even on follow-up turns (the LLM extractor
+    // won't see the brief again after turn 1).
+    const parsedTypologyCats: string[] = [];
+    {
+      const typRe = /typology[^:\n]*:\s*([^\n]+)/i;
+      const tm = userConversationText.match(typRe);
+      if (tm) {
+        const raw = tm[1].replace(/[\[\]]/g, "");
+        // Split on commas, plus, ampersand, slash, and " and "
+        const tokens = raw.split(/,|\+|&|\/|\band\b/i).map((t) => t.trim().toLowerCase()).filter(Boolean);
+        for (const t of tokens) {
+          // Strip trailing counts like "coffee table x2".
+          const cleaned = t.replace(/\s*x?\s*\d+\s*$/i, "").trim();
+          if (cleaned.length >= 3) parsedTypologyCats.push(cleaned);
+        }
+      }
+    }
     const sqlLoadConstraints: HardConstraints = {
       materials: [
         ...(preRequestConstraints.materials || []),
         ...((effectiveBrief.brief.materials || []).map((m) => String(m).toLowerCase())),
       ].filter(Boolean),
       colors: preRequestConstraints.colors || [],
-      categories: (effectiveBrief.brief.categories || []).map((c) => String(c).toLowerCase()).filter(Boolean),
+      categories: [
+        ...(effectiveBrief.brief.categories || []).map((c) => String(c).toLowerCase()),
+        ...parsedTypologyCats,
+      ].filter(Boolean),
     };
     const hasSqlConstraint =
       (sqlLoadConstraints.materials?.length || 0) +
       (sqlLoadConstraints.colors?.length || 0) +
       (sqlLoadConstraints.categories?.length || 0) > 0;
     const catalogT0 = performance.now();
+    // When BOTH a designer scope and a category/material constraint exist,
+    // apply them together — retrieval must be scoped to the allowed brands
+    // AND the requested typologies (e.g. Man of Parts + Apparatus × sectional
+    // + accent chair + floor lamp). Previously only one filter was applied.
     const { designersList, piecesList: fullPiecesList, showroomBrands } = await loadCatalogContext(
       supabase,
       includePieces && !useRag,
       hasScopedDesigners ? scopedDesigners : undefined,
-      hasSqlConstraint && !hasScopedDesigners ? sqlLoadConstraints : undefined,
+      hasSqlConstraint ? sqlLoadConstraints : undefined,
     );
     mark("loadCatalogContext", { ms: Math.round(performance.now() - catalogT0), includePieces, useRag });
     // Detect "hard constraints matched zero pieces" so the UI can render a
@@ -4749,7 +4826,10 @@ serve(async (req) => {
       }
     } catch { /* keep default */ }
     const sentimentDirective = buildSentimentDirective(sentiment);
-    const planDirective = buildPlanDirective(effectiveBrief) + (lacksUploadedRoomContext && shouldActOnAccumulatedBrief
+    const scopeDirective = hasScopedDesigners
+      ? `\n\nBRIEF ALLOW-LIST — the client has explicitly named these brands as their references: ${scopedDesigners.join(", ")}. You may ONLY propose pieces from these brands. Do NOT recommend, name-drop, or include pieces from any other brand (Lost Profile Studio, or anyone else) — even as a "harmonising" or "companion" piece. If the allow-list cannot cover a requested typology, say so plainly and offer to widen the scope; never silently substitute another brand.`
+      : "";
+    const planDirective = buildPlanDirective(effectiveBrief) + scopeDirective + (lacksUploadedRoomContext && shouldActOnAccumulatedBrief
       ? "\n\nAfter the tearsheet card, add one short sentence inviting the user to attach a room plan, reference photo, or PDF with the paperclip and send it here so Felix can refine dimensions and placement."
       : "");
     const systemPrompt = buildSystemPrompt(
