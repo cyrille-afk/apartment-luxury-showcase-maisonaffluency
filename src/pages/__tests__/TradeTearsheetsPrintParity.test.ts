@@ -96,21 +96,21 @@ describe("TradeTearsheets print/PDF parity with on-screen preview", () => {
   });
 
   it("Selected Finishes block renders BEFORE the spec grid in the print HTML", () => {
-    const finishesIdx = SRC.indexOf(
+    const finishesIdx = PRINT_SRC.indexOf(
       '<p class="label" style="margin-bottom:12px">Selected Finishes</p>',
     );
-    const gridIdx = SRC.indexOf('<div class="grid" style="margin-top:24px">');
+    const gridIdx = PRINT_SRC.indexOf('<div class="grid" style="margin-top:24px">');
     expect(finishesIdx).toBeGreaterThan(-1);
     expect(gridIdx).toBeGreaterThan(-1);
     expect(finishesIdx).toBeLessThan(gridIdx);
   });
 
   it("print HTML labels wood as 'Base / Wood' and fabric as 'Fabric', matching on-screen", () => {
-    // Print
-    expect(SRC).toMatch(
+    // Print builder
+    expect(PRINT_SRC).toMatch(
       /<p class="label">Base \/ Wood<\/p><p class="value">\$\{esc\(chosenFinishes\.wood\)\}/,
     );
-    expect(SRC).toMatch(
+    expect(PRINT_SRC).toMatch(
       /<p class="label">Fabric<\/p><p class="value">\$\{esc\(chosenFinishes\.fabric\)\}/,
     );
     // On-screen JSX renders chosenFinishes.wood / .fabric values too.
