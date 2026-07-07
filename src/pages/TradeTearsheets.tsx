@@ -756,7 +756,12 @@ export default function TradeTearsheets() {
                   <Button
                     type="button"
                     variant="outline"
-                    onClick={() => setShowCreateBoardForm(false)}
+                    onClick={() => {
+                      setShowCreateBoardForm(false);
+                      setNewBoardTitle("");
+                      setNewBoardClientName("");
+                      setNewBoardClientEmail("");
+                    }}
                     disabled={creatingBoard}
                     className="font-body text-xs uppercase tracking-widest"
                   >
