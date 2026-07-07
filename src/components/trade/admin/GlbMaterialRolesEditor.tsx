@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Loader2, Check } from "lucide-react";
+import { Loader2, Check, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -13,6 +13,14 @@ interface Props {
   onChange: (roles: Record<string, MaterialRole>) => void;
   /** Called after a successful DB save with the persisted map. */
   onSaved?: (roles: Record<string, MaterialRole>) => void;
+  /**
+   * When set, the parent viewer should flash this single material in a bright
+   * highlight colour so the admin can visually identify which mesh a given
+   * (usually opaque) material name maps to. Null clears the highlight.
+   */
+  onIdentifyChange?: (materialName: string | null) => void;
+  /** The currently-identified material, controlled by the parent. */
+  identifying?: string | null;
 }
 
 const ROLE_LABEL: Record<MaterialRole, string> = {
