@@ -29,6 +29,7 @@ export function PickAssetDrawer({ pickId, title }: Props) {
   const [poster, setPoster] = useState<string | null>(null);
   const [swatches, setSwatches] = useState<Swatch[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [selectedFabricId, setSelectedFabricId] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
