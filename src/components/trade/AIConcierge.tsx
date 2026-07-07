@@ -1282,6 +1282,23 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
     setAttachments([]);
     setStreaming(true);
 
+    // If the Brief Builder was open, tuck it away on send with a light
+    // wink from the concierge so the user knows they can reopen it to
+    // adjust the brief. Missing fields no longer block submission — they
+    // become soft signals we surface inside the wink.
+    if (briefBuilderOpen) {
+      setBriefBuilderOpen(false);
+      const missing = briefValidation.missing;
+      const winkBase = "Brief tucked away for now — tap the brief icon anytime to reopen and refine it.";
+      const winkMissing = missing.length
+        ? ` Fields left blank: ${missing.join(", ")} — happy to work with what you gave me.`
+        : "";
+      setTimeline((prev) => [
+        ...prev,
+        { kind: "msg", role: "assistant", content: `${winkBase}${winkMissing}` },
+      ]);
+    }
+
     // First user turn — fire invisible qualifier + lead capture (non-blocking).
     const isFirstUserTurn = !timeline.some((t) => t.kind === "msg" && t.role === "user");
     if (isFirstUserTurn) {
