@@ -66,11 +66,18 @@ interface Props {
    */
   fabricTextureUrl?: string | null;
   /**
-   * Optional filter: only swap materials whose name matches. Defaults to
-   * applying to all materials, which is the pragmatic behaviour when the GLB
-   * doesn't tag a specific fabric slot.
+   * Optional filter: restrict the swap to materials whose name matches one of
+   * these substrings (case-insensitive). If omitted, we auto-detect upholstery
+   * meshes using a naming convention (see UPHOLSTERY_KEYWORDS). If no material
+   * matches the convention, we fall back to applying the texture to every
+   * material so older GLBs without the convention still swap.
+   *
+   * Convention for GLB authors: name any mesh/material that should accept the
+   * user-selected fabric using one of the keywords below (e.g. "fabric",
+   * "upholstery_seat", "cushion_back", "cover_main"). Non-upholstery parts
+   * (wood_leg, metal_frame, glass_top, etc.) will then be left untouched.
    */
-  fabricMaterialNameIncludes?: string;
+  fabricMaterialNameIncludes?: string | string[];
 }
 
 const Product3DViewer: React.FC<Props> = ({
@@ -134,9 +141,35 @@ const Product3DViewer: React.FC<Props> = ({
         originalTexturesRef.current = cache;
       }
 
-      const filter = (m: any) =>
-        !fabricMaterialNameIncludes ||
-        String(m?.name || "").toLowerCase().includes(fabricMaterialNameIncludes.toLowerCase());
+      // Build the keyword list for the convention-based filter.
+      const explicitKeywords = fabricMaterialNameIncludes
+        ? (Array.isArray(fabricMaterialNameIncludes)
+            ? fabricMaterialNameIncludes
+            : [fabricMaterialNameIncludes])
+        : null;
+      const conventionKeywords = [
+        "fabric",
+        "upholstery",
+        "cushion",
+        "seat",
+        "cover",
+        "textile",
+        "pillow",
+        "sofa",
+      ];
+      const keywords = (explicitKeywords ?? conventionKeywords).map((k) =>
+        k.toLowerCase(),
+      );
+      const matchesKeywords = (m: any) => {
+        const name = String(m?.name || "").toLowerCase();
+        return keywords.some((k) => name.includes(k));
+      };
+      // Determine effective target materials: if any material matches the
+      // convention, restrict to those; otherwise fall back to all materials
+      // so legacy GLBs without the naming convention still swap.
+      const matched = materials.filter(matchesKeywords);
+      const targets = matched.length > 0 ? matched : materials;
+      const filter = (m: any) => targets.includes(m);
 
       if (!fabricTextureUrl) {
         // Restore originals.
