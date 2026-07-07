@@ -313,16 +313,13 @@ const Product3DViewer: React.FC<Props> = ({
       }
 
 
-      // Fallback rules (only when there are NO explicit roles):
-      // - Fabric with no matches → all materials (legacy behavior).
-      // - Base with no matches → non-fabric materials.
-      const nonFabric = materials.filter((m) => !fabricMatched.includes(m));
-      const fabricTargets = hasExplicitRoles
-        ? fabricMatched
-        : (fabricMatched.length > 0 ? fabricMatched : materials);
-      const baseTargets = hasExplicitRoles
-        ? baseMatched
-        : (baseMatched.length > 0 ? baseMatched : nonFabric);
+      // Targets: after explicit roles + name/URI matching + luminance auto-tag,
+      // if a layer still has zero matches we apply to NOTHING rather than
+      // painting the fabric texture over the entire model (the legacy
+      // fallback that made a fabric swatch retexture wood legs, etc.).
+      const fabricTargets = fabricMatched;
+      const baseTargets = baseMatched;
+
 
       const restoreOne = (m: any) => {
 
