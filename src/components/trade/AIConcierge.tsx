@@ -1519,6 +1519,7 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
 
     const messagesForApi: ChatMessage[] = [
       stageContext,
+      ...discoverToleranceContext,
       toneContext,
       ...identityContext,
       ...profileContext,
