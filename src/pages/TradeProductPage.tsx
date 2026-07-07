@@ -2012,6 +2012,7 @@ const TradeProductPage: React.FC = () => {
                   hideBaseAccordion={isDualAxis && baseAxisIsDim}
                   onHasFabricsChange={handleHasFabricsChange}
                   onWoodFinishesAvailable={handleWoodFinishesAvailable}
+                  onPreviewSwatchesResolved={handlePreviewSwatchesResolved}
                   onFinishesMissingImagesChange={setFinishesMissingImages}
                   onFabricChange={setSelectedFabric}
                   onWoodFinishPricingChange={setSelectedWoodPrice}
