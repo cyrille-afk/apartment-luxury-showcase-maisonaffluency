@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Navigate, Link } from "react-router-dom";
-import { ChevronLeft, Search, Upload, Loader2, Trash2, ExternalLink, Box } from "lucide-react";
+import { ChevronLeft, Search, Upload, Loader2, Trash2, ExternalLink, Box, Filter } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -31,7 +31,11 @@ const TradeAdminGlbModels: React.FC = () => {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [reloadKey, setReloadKey] = useState(0);
 
-  // Load products that already have a GLB
+  // Manager section state
+  const [managerSearch, setManagerSearch] = useState("");
+  const [managerBrand, setManagerBrand] = useState<string>("");
+
+  // Load products that already have a GLB (used by both sidebar and manager)
   useEffect(() => {
     (async () => {
       const { data } = await supabase
@@ -39,7 +43,7 @@ const TradeAdminGlbModels: React.FC = () => {
         .select("id, product_name, brand_name, image_url, glb_url")
         .not("glb_url", "is", null)
         .order("updated_at", { ascending: false })
-        .limit(100);
+        .limit(500);
       setWithGlb((data as ProductRow[]) || []);
     })();
   }, [reloadKey]);
@@ -333,7 +337,121 @@ const TradeAdminGlbModels: React.FC = () => {
               )}
             </div>
           </div>
+
+          {/* ============ GLB LIBRARY MANAGER ============ */}
+          <div className="mt-16 border-t border-border pt-10">
+            <div className="flex items-baseline justify-between mb-6 flex-wrap gap-3">
+              <div>
+                <h2 className="font-display text-2xl flex items-center gap-2">
+                  <Box size={18} /> GLB library
+                </h2>
+                <p className="font-body text-xs text-muted-foreground mt-1">
+                  {withGlb.length} product{withGlb.length === 1 ? "" : "s"} with a 3D model. Click a card to load it above for replacement or removal.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap gap-3 mb-5">
+              <div className="relative flex-1 min-w-[220px]">
+                <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                <input
+                  type="text"
+                  value={managerSearch}
+                  onChange={(e) => setManagerSearch(e.target.value)}
+                  placeholder="Filter by product name…"
+                  className="w-full pl-9 pr-3 py-2 border border-border rounded-md bg-background font-body text-sm focus:outline-none focus:border-foreground/40"
+                />
+              </div>
+              <div className="relative min-w-[220px]">
+                <Filter size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+                <select
+                  value={managerBrand}
+                  onChange={(e) => setManagerBrand(e.target.value)}
+                  className="w-full pl-9 pr-3 py-2 border border-border rounded-md bg-background font-body text-sm focus:outline-none focus:border-foreground/40 appearance-none"
+                >
+                  <option value="">All brands</option>
+                  {Array.from(new Set(withGlb.map((r) => r.brand_name).filter(Boolean) as string[]))
+                    .sort((a, b) => a.localeCompare(b))
+                    .map((b) => (
+                      <option key={b} value={b}>{b}</option>
+                    ))}
+                </select>
+              </div>
+              {(managerSearch || managerBrand) && (
+                <button
+                  onClick={() => { setManagerSearch(""); setManagerBrand(""); }}
+                  className="font-body text-[11px] uppercase tracking-[0.12em] text-muted-foreground hover:text-foreground px-3"
+                >
+                  Clear
+                </button>
+              )}
+            </div>
+
+            {(() => {
+              const filtered = withGlb.filter((r) => {
+                if (managerBrand && r.brand_name !== managerBrand) return false;
+                if (managerSearch.trim()) {
+                  const t = managerSearch.trim().toLowerCase();
+                  const hay = `${r.product_name} ${r.brand_name || ""}`.toLowerCase();
+                  if (!hay.includes(t)) return false;
+                }
+                return true;
+              });
+              if (filtered.length === 0) {
+                return (
+                  <div className="border border-dashed border-border rounded-md p-10 text-center text-muted-foreground font-body text-sm">
+                    {withGlb.length === 0 ? "No products have a 3D model yet." : "No models match the current filters."}
+                  </div>
+                );
+              }
+              return (
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                  {filtered.map((row) => (
+                    <div key={row.id} className={`group border rounded-md overflow-hidden transition-colors ${selected?.id === row.id ? "border-foreground" : "border-border hover:border-foreground/40"}`}>
+                      <button
+                        onClick={() => {
+                          setSelected(row);
+                          window.scrollTo({ top: 0, behavior: "smooth" });
+                        }}
+                        className="block w-full text-left"
+                      >
+                        <div className="relative aspect-square bg-muted">
+                          {row.image_url ? (
+                            <img src={row.image_url} alt="" className="w-full h-full object-cover" loading="lazy" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-muted-foreground"><Box size={22} /></div>
+                          )}
+                          <span className="absolute top-2 left-2 font-body text-[9px] uppercase tracking-[0.14em] bg-emerald-600 text-white px-1.5 py-0.5 rounded">3D</span>
+                        </div>
+                        <div className="p-3">
+                          <div className="font-body text-sm truncate">{row.product_name}</div>
+                          <div className="font-body text-[11px] text-muted-foreground truncate">{row.brand_name || "—"}</div>
+                        </div>
+                      </button>
+                      <div className="flex items-center justify-between px-3 pb-3 -mt-1">
+                        <a
+                          href={row.glb_url!}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center gap-1 font-body text-[10px] text-muted-foreground hover:text-foreground underline-offset-2 hover:underline"
+                        >
+                          <ExternalLink size={11} /> GLB
+                        </a>
+                        <button
+                          onClick={() => handleRemove(row)}
+                          className="inline-flex items-center gap-1 font-body text-[10px] text-destructive hover:underline underline-offset-2"
+                        >
+                          <Trash2 size={11} /> Remove
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              );
+            })()}
+          </div>
         </div>
+
       </div>
     </>
   );
