@@ -4976,7 +4976,7 @@ serve(async (req) => {
           categories: [...new Set(((sqlLoadConstraints.categories) || []))],
           applied_to: [
             hasAnyPreConstraint ? "rag" : null,
-            (hasSqlConstraint && !mentionsKnownDesigner) ? "sql" : null,
+            (hasSqlConstraint && !hasScopedDesigners) ? "sql" : null,
           ].filter(Boolean) as string[],
           empty: constraintsMatchedZero,
           empty_source: constraintsEmptySource,
