@@ -70,6 +70,7 @@ Rules:
 - Overall = worst per-row status, or "green" if all green.
 - summary: ONE sentence, editorial and specific. No preamble.
 - global_warnings: 0-3 short bullets about the SET as a whole (scale imbalance, missing typology given locked anchors, palette drift). Empty array is fine.
+- If LOCKED_FINISHES is provided and non-empty (fabric, wood/base, or variant is specified), treat finishes as SPECIFIED for the whole set. Do NOT flag "material ambiguity", "unspecified finish", or "palette clashes during procurement" as global_warnings or per_row reasons on that basis. You may still flag a palette clash if the specified finishes actually conflict with each other or with the brief — but never merely because a piece's own materials field is empty.
 - Be terse. Reference pieces by title when useful.
 
 Output STRICT JSON only, no code fences:
