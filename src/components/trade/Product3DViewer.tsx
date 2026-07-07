@@ -187,7 +187,13 @@ const Product3DViewer: React.FC<Props> = ({
       const targets = matched.length > 0 ? matched : materials;
       const filter = (m: any) => targets.includes(m);
 
-      if (!fabricTextureUrl) {
+      // Publish debug info for the UI panel.
+      setDebugInfo({
+        all: materials.map((m) => String(m?.name || "(unnamed)")),
+        matched: matched.map((m) => String(m?.name || "(unnamed)")),
+        fellBackToAll: matched.length === 0,
+        keywords,
+      });
         // Restore originals.
         for (const m of materials) {
           if (!filter(m)) continue;
