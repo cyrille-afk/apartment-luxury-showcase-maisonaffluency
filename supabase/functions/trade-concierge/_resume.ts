@@ -201,7 +201,9 @@ export function installFramePersistence(opts: {
         .eq("stream_id", streamId);
     } catch (e) {
       console.warn("[concierge resume] session finalize failed:", e instanceof Error ? e.message : e);
-    }
+    // Terminal broadcast on the same Realtime topic so late-bound observers
+    // stop showing a "streaming" indicator without waiting for the SSE close.
+    void broadcastRealtime(`concierge:${streamId}`, "stream_completed", { status });
   };
 
   return { streamId, finalize };
