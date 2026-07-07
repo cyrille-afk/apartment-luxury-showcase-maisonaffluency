@@ -3251,7 +3251,7 @@ async function hydratePickPreview(
   const [{ data: picks }, { data: trades }] = await Promise.all([
     supabase
       .from("designer_curator_picks")
-      .select("id, title, image_url, materials, category, dimensions, designer_id, trade_price_cents, currency, lead_time, stock_status")
+      .select("id, title, image_url, materials, category, dimensions, designer_id, trade_price_cents, currency, lead_time")
       .in("id", pickIds),
     supabase
       .from("trade_products")
