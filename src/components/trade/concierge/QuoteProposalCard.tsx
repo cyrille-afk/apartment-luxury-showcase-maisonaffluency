@@ -505,9 +505,28 @@ export function QuoteProposalCard({ proposal, onResolved }: Props) {
                   )}
                   {l.lead_weeks != null && <span className="ml-2">· {l.lead_weeks}w lead</span>}
                 </div>
+                {assetsOpen.has(l.pick_id) && (
+                  <PickAssetDrawer pickId={l.pick_id} title={l.title} />
+                )}
               </div>
               {status === "pending" && (
                 <div className="flex items-center gap-1.5 self-center shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => toggleAssets(l.pick_id)}
+                    className={cn(
+                      "inline-flex items-center gap-1 text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded border transition-colors",
+                      assetsOpen.has(l.pick_id)
+                        ? "border-accent/50 bg-accent/10 text-accent"
+                        : "border-border text-muted-foreground hover:text-foreground",
+                    )}
+                    aria-label={assetsOpen.has(l.pick_id) ? `Hide 3D and finishes for ${l.title || "this line"}` : `Show 3D and finishes for ${l.title || "this line"}`}
+                    aria-pressed={assetsOpen.has(l.pick_id)}
+                    title="3D model & fabric swatches"
+                  >
+                    <Box className="h-3 w-3" />
+                    3D
+                  </button>
                   <div className="flex items-center rounded border border-border">
                     <button
                       onClick={() => setQty(l.pick_id, l.qty - 1)}
