@@ -2,7 +2,7 @@ import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/hooks/useAuth";
 import { Link, Navigate } from "react-router-dom";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ChevronRight, FileBox, Inbox, Instagram, MapPin, Sparkles } from "lucide-react";
+import { ChevronRight, FileBox, Inbox, Instagram, MapPin, Sparkles, Tags } from "lucide-react";
 import TaxonomyAudit from "@/components/trade/TaxonomyAudit";
 import HeroManager from "@/components/trade/HeroManager";
 import SampleRequestsAdmin from "@/components/trade/SampleRequestsAdmin";
