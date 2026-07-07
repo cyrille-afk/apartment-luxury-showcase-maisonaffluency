@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import Product3DViewer from "@/components/trade/Product3DViewer";
+import { classifyObjBundle, convertObjBundleToGlb } from "@/lib/objToGlb";
 
 interface ProductRow {
   id: string;
