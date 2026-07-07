@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Product3DViewer from "@/components/trade/Product3DViewer";
-import { Loader2 } from "lucide-react";
+import { FileText, Loader2 } from "lucide-react";
 
 interface Swatch {
   fabric_id: string;
@@ -216,6 +217,25 @@ export function PickAssetDrawer({ pickId, title }: Props) {
           {renderGroup("Fabrics", fabricSwatches, selectedFabricId, setSelectedFabricId)}
         </div>
       )}
+      {(selectedFabricId || selectedBaseId) && (() => {
+        const fab = selectedFabricId ? fabricSwatches.find((s) => s.fabric_id === selectedFabricId) : null;
+        const base = selectedBaseId ? baseSwatches.find((s) => s.fabric_id === selectedBaseId) : null;
+        const params = new URLSearchParams();
+        params.set("product", pickId);
+        if (fab?.name) params.set("fabric", fab.name);
+        if (fab?.image_url) params.set("fabricImg", fab.image_url);
+        if (base?.name) params.set("wood", base.name);
+        if (base?.image_url) params.set("woodImg", base.image_url);
+        return (
+          <Link
+            to={`/trade/tearsheets?${params.toString()}`}
+            className="mt-1 flex items-center justify-center gap-1.5 rounded-md border border-foreground/30 bg-foreground text-background px-2.5 py-1.5 font-body text-[10px] uppercase tracking-widest hover:bg-foreground/90 transition-colors"
+          >
+            <FileText size={11} />
+            Draft Tearsheet with These Finishes
+          </Link>
+        );
+      })()}
     </div>
   );
 }
