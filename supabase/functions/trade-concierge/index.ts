@@ -4162,14 +4162,66 @@ serve(async (req) => {
     const briefDesignerNames = Array.isArray(effectiveBrief.brief.designers)
       ? effectiveBrief.brief.designers.map((d) => String(d || "").trim()).filter(Boolean)
       : [];
-    // Merge live-text mentions with the brief allow-list (dedup, case-insensitive).
+
+    // DETERMINISTIC REFERENCES PARSER — the LLM extractor is unreliable on
+    // structured Brief Builder text and evaporates entirely on follow-up
+    // turns whose lastUserMsg no longer contains the brief. Scan the FULL
+    // user conversation for a `REFERENCES ... : <names>` line and match
+    // each comma-separated token against the known published designer list.
+    // This locks the allow-list even when the brief was submitted turns ago.
+    const parsedReferenceDesigners: string[] = [];
+    {
+      const refLineRe = /references[^:\n]*:\s*([^\n]+)/gi;
+      const foundLines: string[] = [];
+      let rm: RegExpExecArray | null;
+      while ((rm = refLineRe.exec(userConversationText)) !== null) {
+        foundLines.push(rm[1]);
+      }
+      if (foundLines.length) {
+        const knownLc = new Map<string, string>();
+        for (const n of designerNames) {
+          const lc = String(n || "").trim().toLowerCase();
+          if (lc && !knownLc.has(lc)) knownLc.set(lc, n);
+        }
+        for (const line of foundLines) {
+          // Split on commas AND on " and " to tolerate free-form joining.
+          const tokens = line.split(/,|\band\b/i).map((t) => t.trim()).filter(Boolean);
+          for (const tok of tokens) {
+            // Strip trailing parenthetical clarifiers like
+            // "Man of Parts (Sandy Cove / Bond Street / Rua Leblon)".
+            const cleaned = tok.replace(/\s*\(.*?\)\s*$/g, "").trim().toLowerCase();
+            if (!cleaned || cleaned.length < 3) continue;
+            // Exact match, or the cleaned token contains a known designer
+            // name as a substring (handles "man of parts — sandy cove").
+            for (const [lc, orig] of knownLc.entries()) {
+              if (cleaned === lc || cleaned.startsWith(lc + " ") || cleaned.endsWith(" " + lc) || cleaned.includes(lc)) {
+                parsedReferenceDesigners.push(orig);
+                break;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    // Merge live-text mentions + LLM-extracted brief designers + deterministic
+    // REFERENCES parse (dedup, case-insensitive). The deterministic parse is
+    // the source of truth when the user is following up on a prior brief.
     const scopedDesignerSet = new Map<string, string>();
-    for (const n of [...mentionedDesigners, ...briefDesignerNames]) {
+    for (const n of [...mentionedDesigners, ...briefDesignerNames, ...parsedReferenceDesigners]) {
       const key = n.toLowerCase();
       if (!scopedDesignerSet.has(key)) scopedDesignerSet.set(key, n);
     }
     const scopedDesigners = Array.from(scopedDesignerSet.values());
     const hasScopedDesigners = scopedDesigners.length > 0;
+    if (hasScopedDesigners) {
+      console.log("[concierge scoped-designers]", {
+        mentioned: mentionedDesigners,
+        brief: briefDesignerNames,
+        parsed_references: parsedReferenceDesigners,
+        final: scopedDesigners,
+      });
+    }
     // If a designer scope exists (from live text OR the brief), skip RAG (top-K
     // may miss items) AND scope the catalog load to just those designers — no
     // reason to ship the full 2000-row catalog when the brief names them.
