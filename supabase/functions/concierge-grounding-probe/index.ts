@@ -89,6 +89,8 @@ serve(async (req) => {
   let embed_ok = false;
   let rpc_ok = false;
   let semanticHits: Array<{ name: string; specialty: string; similarity: number }> = [];
+  let retrieval_status: "ok" | "low_confidence" | "unavailable" = "unavailable";
+  let top_similarity = 0;
   try {
     const r = await fetch(EMBED_URL, {
       method: "POST",
@@ -109,13 +111,14 @@ serve(async (req) => {
         });
         if (!matchErr && Array.isArray(matches)) {
           rpc_ok = true;
-          semanticHits = matches
-            .filter((m: { similarity?: number }) => (m.similarity ?? 0) > SIM_FLOOR)
-            .map((m: { name: string; specialty: string | null; similarity: number }) => ({
-              name: m.name,
-              specialty: m.specialty ?? "",
-              similarity: Number(m.similarity ?? 0),
-            }));
+          const scored = matches.map((m: { name: string; specialty: string | null; similarity?: number }) => ({
+            name: m.name,
+            specialty: m.specialty ?? "",
+            similarity: Number(m.similarity ?? 0),
+          }));
+          top_similarity = scored.reduce((a, b) => (b.similarity > a ? b.similarity : a), 0);
+          semanticHits = scored.filter((m) => m.similarity > SIM_FLOOR);
+          retrieval_status = top_similarity >= SIM_STRICT_FLOOR ? "ok" : "low_confidence";
         }
       }
     }
@@ -126,6 +129,7 @@ serve(async (req) => {
   const grounding_block = buildGroundingBlock(
     query,
     semanticHits.map((h) => ({ name: h.name, specialty: h.specialty })),
+    { retrievalStatus: retrieval_status },
   );
 
   return new Response(JSON.stringify({
@@ -133,11 +137,15 @@ serve(async (req) => {
     tier_a_specialties: tierA,
     tier_a_empty: tierA.length === 0,
     semantic_hits: semanticHits,
+    top_similarity,
+    retrieval_status,
     grounding_block,
-    has_details_section: grounding_block.includes("Most relevant roster members"),
+    has_details_section: grounding_block.includes("Most relevant roster members") || grounding_block.includes("Roster members that MAY relate"),
+    graceful_refusal: grounding_block.includes("No confident roster match") || grounding_block.includes("No retrieval context"),
     embed_ok,
     rpc_ok,
   }), {
     status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
+});
 });
