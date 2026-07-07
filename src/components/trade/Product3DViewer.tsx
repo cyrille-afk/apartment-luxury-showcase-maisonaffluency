@@ -85,6 +85,20 @@ interface Props {
    */
   baseMaterialNameIncludes?: string | string[];
   /**
+   * Explicit per-material role map: { [materialName]: 'fabric'|'base'|'ignore' }.
+   * When provided, takes priority over the keyword heuristics (needed when
+   * GLB materials are named with opaque IDs from CAD tools). Materials absent
+   * from the map fall through to keyword matching, then to the "ignore"
+   * default (they keep their original texture and receive no swatch).
+   */
+  materialRoles?: Record<string, "fabric" | "base" | "ignore">;
+  /**
+   * Called once the underlying GLB has loaded, with the actual material names
+   * discovered in the file. Used by the admin manager to build the role UI.
+   */
+  onMaterialsDiscovered?: (names: string[]) => void;
+
+  /**
    * When true, mount the model-viewer element immediately (loads the
    * model-viewer script AND fetches the GLB on mount). Defaults to false:
    * the component shows a lightweight poster + "View in 3D" button and
@@ -148,9 +162,12 @@ const Product3DViewer: React.FC<Props> = ({
   baseTextureUrl,
   fabricMaterialNameIncludes,
   baseMaterialNameIncludes,
+  materialRoles,
+  onMaterialsDiscovered,
   autoOpen = false,
   debug = false,
 }) => {
+
   const [opened, setOpened] = useState(autoOpen);
   const [ready, setReady] = useState(() =>
     typeof window !== "undefined" && !!customElements.get("model-viewer"),
@@ -209,6 +226,10 @@ const Product3DViewer: React.FC<Props> = ({
         originalTexturesRef.current = cache;
       }
 
+      // Notify parent (admin UI) of the material names in this GLB.
+      const allNames = materials.map((m) => String(m?.name || "(unnamed)"));
+      onMaterialsDiscovered?.(allNames);
+
       const toList = (v: string | string[] | undefined) =>
         v ? (Array.isArray(v) ? v : [v]).map((k) => k.toLowerCase()) : null;
 
@@ -220,21 +241,45 @@ const Product3DViewer: React.FC<Props> = ({
         return kws.some((k) => name.includes(k));
       };
 
-      const fabricMatched = materials.filter(matchByKeywords(fabricKeywords));
-      const baseMatchedRaw = materials.filter(matchByKeywords(baseKeywords));
-      // Prevent overlap: fabric wins on any material that also matches base keywords.
-      const baseMatched = baseMatchedRaw.filter((m) => !fabricMatched.includes(m));
+      const hasExplicitRoles = !!materialRoles && Object.keys(materialRoles).length > 0;
+      const roleOf = (m: any): "fabric" | "base" | "ignore" | null => {
+        const name = String(m?.name || "");
+        if (materialRoles && Object.prototype.hasOwnProperty.call(materialRoles, name)) {
+          return materialRoles[name];
+        }
+        return null;
+      };
 
-      // Fallback rules:
-      // - Fabric texture with no matches → apply to all (legacy behavior).
-      // - Base texture with no matches → apply only to non-fabric materials
-      //   (safer than "all", since single-axis GLBs use fabric fallback).
+      let fabricMatched: any[];
+      let baseMatched: any[];
+      let ignored: any[];
+
+      if (hasExplicitRoles) {
+        // Explicit map wins. Unmapped materials default to "ignore".
+        fabricMatched = materials.filter((m) => roleOf(m) === "fabric");
+        baseMatched = materials.filter((m) => roleOf(m) === "base");
+        ignored = materials.filter((m) => (roleOf(m) ?? "ignore") === "ignore");
+      } else {
+        fabricMatched = materials.filter(matchByKeywords(fabricKeywords));
+        const baseMatchedRaw = materials.filter(matchByKeywords(baseKeywords));
+        // Prevent overlap: fabric wins on any material that also matches base keywords.
+        baseMatched = baseMatchedRaw.filter((m) => !fabricMatched.includes(m));
+        ignored = [];
+      }
+
+      // Fallback rules (only when there are NO explicit roles):
+      // - Fabric with no matches → all materials (legacy behavior).
+      // - Base with no matches → non-fabric materials.
       const nonFabric = materials.filter((m) => !fabricMatched.includes(m));
-
-      const fabricTargets = fabricMatched.length > 0 ? fabricMatched : materials;
-      const baseTargets = baseMatched.length > 0 ? baseMatched : nonFabric;
+      const fabricTargets = hasExplicitRoles
+        ? fabricMatched
+        : (fabricMatched.length > 0 ? fabricMatched : materials);
+      const baseTargets = hasExplicitRoles
+        ? baseMatched
+        : (baseMatched.length > 0 ? baseMatched : nonFabric);
 
       const restoreOne = (m: any) => {
+
         const original = originalTexturesRef.current!.get(m) ?? null;
         try { m.pbrMetallicRoughness.baseColorTexture.setTexture(original); } catch { /* noop */ }
       };
@@ -252,18 +297,19 @@ const Product3DViewer: React.FC<Props> = ({
 
       // Publish debug info.
       setDebugInfo({
-        all: materials.map((m) => String(m?.name || "(unnamed)")),
+        all: allNames,
         fabric: {
           matched: fabricMatched.map((m) => String(m?.name || "(unnamed)")),
-          fellBackToAll: fabricMatched.length === 0,
-          keywords: fabricKeywords,
+          fellBackToAll: !hasExplicitRoles && fabricMatched.length === 0,
+          keywords: hasExplicitRoles ? ["(explicit role map)"] : fabricKeywords,
         },
         base: {
           matched: baseMatched.map((m) => String(m?.name || "(unnamed)")),
-          fellBackToAll: baseMatched.length === 0,
-          keywords: baseKeywords,
+          fellBackToAll: !hasExplicitRoles && baseMatched.length === 0,
+          keywords: hasExplicitRoles ? ["(explicit role map)"] : baseKeywords,
         },
       });
+
 
       try {
         // Fabric layer
@@ -286,7 +332,7 @@ const Product3DViewer: React.FC<Props> = ({
 
     applyTextures();
     return () => { cancelled = true; };
-  }, [opened, ready, fabricTextureUrl, baseTextureUrl, fabricMaterialNameIncludes, baseMaterialNameIncludes, url]);
+  }, [opened, ready, fabricTextureUrl, baseTextureUrl, fabricMaterialNameIncludes, baseMaterialNameIncludes, materialRoles, onMaterialsDiscovered, url]);
 
   // Reset cached originals whenever the model URL changes.
   useEffect(() => {

@@ -5944,6 +5944,7 @@ export type Database = {
           glb_url: string
           id: string
           is_default: boolean
+          material_roles: Json
           product_id: string
           updated_at: string
           variant_label: string
@@ -5955,6 +5956,7 @@ export type Database = {
           glb_url: string
           id?: string
           is_default?: boolean
+          material_roles?: Json
           product_id: string
           updated_at?: string
           variant_label: string
@@ -5966,6 +5968,7 @@ export type Database = {
           glb_url?: string
           id?: string
           is_default?: boolean
+          material_roles?: Json
           product_id?: string
           updated_at?: string
           variant_label?: string

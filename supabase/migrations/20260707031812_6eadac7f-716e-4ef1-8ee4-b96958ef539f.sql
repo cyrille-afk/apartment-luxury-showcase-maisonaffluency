@@ -1,0 +1,2 @@
+ALTER TABLE public.trade_product_glb_variants ADD COLUMN IF NOT EXISTS material_roles jsonb NOT NULL DEFAULT '{}'::jsonb;
+COMMENT ON COLUMN public.trade_product_glb_variants.material_roles IS 'Maps GLB material name -> role: "fabric" (upholstery, receives fabric swatch), "base" (frame/wood, receives base swatch), or "ignore" (keeps original texture).';

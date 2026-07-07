@@ -542,7 +542,7 @@ const TradeProductPage: React.FC = () => {
   // Per-variant 3D models: one row per size/label. `default` variant wins when
   // no size is selected. Falls back to legacy tradeProducts.glb_url otherwise.
   const [glbVariants, setGlbVariants] = useState<
-    { variant_label: string; glb_url: string; is_default: boolean }[]
+    { variant_label: string; glb_url: string; is_default: boolean; material_roles: Record<string, "fabric" | "base" | "ignore"> | null }[]
   >([]);
   useEffect(() => {
     const tpId = (data as any)?.tradeProductId as string | null | undefined;
@@ -554,11 +554,12 @@ const TradeProductPage: React.FC = () => {
     (async () => {
       const { data: rows } = await supabase
         .from("trade_product_glb_variants")
-        .select("variant_label, glb_url, is_default")
+        .select("variant_label, glb_url, is_default, material_roles")
         .eq("product_id", tpId);
       if (cancelled) return;
       setGlbVariants((rows as any[]) || []);
     })();
+
     return () => {
       cancelled = true;
     };
@@ -2317,7 +2318,7 @@ const TradeProductPage: React.FC = () => {
                 .map(norm)
                 .filter(Boolean);
               const byLabel = candidates.reduce<
-                { variant_label: string; glb_url: string; is_default: boolean } | null
+                { variant_label: string; glb_url: string; is_default: boolean; material_roles: Record<string, "fabric" | "base" | "ignore"> | null } | null
               >((hit, cand) => {
                 if (hit) return hit;
                 return (
@@ -2325,8 +2326,10 @@ const TradeProductPage: React.FC = () => {
                 );
               }, null);
               const byDefault = glbVariants.find((v) => v.is_default);
-              const resolvedGlbUrl = byLabel?.glb_url || byDefault?.glb_url || glbUrl || null;
+              const resolvedVariant = byLabel || byDefault || null;
+              const resolvedGlbUrl = resolvedVariant?.glb_url || glbUrl || null;
               if (!resolvedGlbUrl) return null;
+              const resolvedRoles = resolvedVariant?.material_roles || undefined;
               return (
                 <Product3DViewer
                   url={resolvedGlbUrl}
@@ -2334,9 +2337,10 @@ const TradeProductPage: React.FC = () => {
                   poster={product.image_url}
                   fabricTextureUrl={selectedFabric?.image_url || null}
                   baseTextureUrl={selectedWoodPrice?.image_url || null}
-
+                  materialRoles={resolvedRoles || undefined}
                 />
               );
+
             })()}
 
             {/* CAD / 3D file downloads (trade-gated; only renders when files exist) */}

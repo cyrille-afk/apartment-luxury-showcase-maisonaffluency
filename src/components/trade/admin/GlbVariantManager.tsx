@@ -5,8 +5,12 @@ import { supabase } from "@/integrations/supabase/client";
 import Product3DViewer from "@/components/trade/Product3DViewer";
 import { classifyObjBundle, convertObjBundleToGlb } from "@/lib/objToGlb";
 import { inspectGlbFile, UPHOLSTERY_KEYWORDS } from "@/lib/glbInspect";
+import GlbMaterialRolesEditor from "@/components/trade/admin/GlbMaterialRolesEditor";
+
 
 const MAX_MB = 50;
+
+type MaterialRole = "fabric" | "base" | "ignore";
 
 interface GlbVariantRow {
   id: string;
@@ -15,7 +19,9 @@ interface GlbVariantRow {
   is_default: boolean;
   file_size_bytes: number | null;
   updated_at?: string | null;
+  material_roles?: Record<string, MaterialRole> | null;
 }
+
 
 interface Props {
   productId: string;
@@ -81,7 +87,7 @@ export function GlbVariantManager({ productId, productName, posterImageUrl, onCh
     // 1) existing GLB variants
     const { data: vrows, error: vErr } = await supabase
       .from("trade_product_glb_variants")
-      .select("id, variant_label, glb_url, is_default, file_size_bytes, updated_at")
+      .select("id, variant_label, glb_url, is_default, file_size_bytes, updated_at, material_roles")
       .eq("product_id", productId)
       .order("is_default", { ascending: false })
       .order("variant_label", { ascending: true });
@@ -482,20 +488,20 @@ export function GlbVariantManager({ productId, productName, posterImageUrl, onCh
       )}
 
       {preview && (
-        <div className="max-w-[360px]">
-          <div className="mb-1 font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
-            Preview · {preview.variant_label}
-          </div>
-          <Product3DViewer
-            url={preview.glb_url}
-            alt={`${productName} — ${preview.variant_label}`}
-            poster={posterImageUrl || null}
-            autoOpen
-            debug
-          />
-
-        </div>
+        <PreviewPanel
+          key={preview.id}
+          variant={preview}
+          productName={productName}
+          posterImageUrl={posterImageUrl || null}
+          onRolesSaved={(roles) => {
+            setVariants((prev) =>
+              prev.map((v) => (v.id === preview.id ? { ...v, material_roles: roles } : v)),
+            );
+            setPreview((p) => (p && p.id === preview.id ? { ...p, material_roles: roles } : p));
+          }}
+        />
       )}
+
 
       <p className="font-body text-[10px] text-muted-foreground leading-relaxed max-w-[520px]">
         Accepted files per variant: <b>.glb</b>, <b>.gltf</b>, or an <b>.obj</b> with its <b>.mtl</b> and texture images (⌘/Ctrl to multi-select — converted to GLB in your browser). Max {MAX_MB} MB per file. The default variant is what shows on public product pages and inside the concierge tearsheet drawer when no size is selected.
@@ -516,5 +522,58 @@ export function GlbVariantManager({ productId, productName, posterImageUrl, onCh
     </div>
   );
 }
+
+/**
+ * Preview + material-role editor for a single GLB variant. Owns the
+ * discovered material names, the working role map, and passes both into
+ * the viewer so the fabric/base swatch preview updates live as the admin
+ * toggles roles.
+ */
+function PreviewPanel({
+  variant,
+  productName,
+  posterImageUrl,
+  onRolesSaved,
+}: {
+  variant: GlbVariantRow;
+  productName: string;
+  posterImageUrl: string | null;
+  onRolesSaved: (roles: Record<string, MaterialRole>) => void;
+}) {
+  const [materialNames, setMaterialNames] = useState<string[]>([]);
+  const [liveRoles, setLiveRoles] = useState<Record<string, MaterialRole>>(
+    () => (variant.material_roles as Record<string, MaterialRole>) || {},
+  );
+
+  useEffect(() => {
+    setLiveRoles((variant.material_roles as Record<string, MaterialRole>) || {});
+    setMaterialNames([]);
+  }, [variant.id]);
+
+  return (
+    <div className="max-w-[420px] space-y-2">
+      <div className="font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
+        Preview · {variant.variant_label}
+      </div>
+      <Product3DViewer
+        url={variant.glb_url}
+        alt={`${productName} — ${variant.variant_label}`}
+        poster={posterImageUrl || null}
+        autoOpen
+        debug
+        materialRoles={liveRoles}
+        onMaterialsDiscovered={(names) => setMaterialNames(names)}
+      />
+      <GlbMaterialRolesEditor
+        variantId={variant.id}
+        materialNames={materialNames}
+        initialRoles={variant.material_roles}
+        onChange={setLiveRoles}
+        onSaved={onRolesSaved}
+      />
+    </div>
+  );
+}
+
 
 export default GlbVariantManager;
