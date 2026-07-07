@@ -3131,15 +3131,11 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
               </button>
               {briefBuilderOpen ? (
                 <div
-                  className={`flex-1 flex items-center gap-2 rounded-xl border border-dashed px-3 py-2 font-body text-xs italic ${
-                    briefValidation.valid
-                      ? "border-accent/50 bg-accent/5 text-muted-foreground"
-                      : "border-destructive/50 bg-destructive/5 text-destructive"
-                  }`}
+                  className={`flex-1 flex items-center gap-2 rounded-xl border border-dashed px-3 py-2 font-body text-xs italic border-accent/50 bg-accent/5 text-muted-foreground`}
                   title={
                     briefValidation.valid
                       ? "Structured brief ready — press Send"
-                      : `Complete: ${briefValidation.missing.join(", ")}`
+                      : `Optional fields still empty: ${briefValidation.missing.join(", ")} — send anyway if you like`
                   }
                 >
                   <span className="shrink-0 inline-flex items-center gap-1.5 rounded-full bg-background/80 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-foreground">
@@ -3149,14 +3145,14 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
                   <span className="truncate flex-1">
                     {briefValidation.valid
                       ? "Structured brief ready · press Send"
-                      : `Fill required fields: ${briefValidation.missing.join(", ")}`}
+                      : `Send anytime — optional: ${briefValidation.missing.join(", ")}`}
                   </span>
                   <button
                     type="button"
                     onClick={() => setBriefBuilderOpen(false)}
                     className="shrink-0 rounded-full p-1 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-                    aria-label="Close Brief Builder and skip required fields"
-                    title="Close Brief Builder — send anyway without required fields"
+                    aria-label="Close Brief Builder"
+                    title="Close Brief Builder"
                   >
                     <X className="h-3.5 w-3.5" />
                   </button>
@@ -3179,16 +3175,11 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
                 onClick={() => send()}
                 disabled={
                   (!input.trim() && attachments.length === 0) ||
-                  streaming ||
-                  (briefBuilderOpen && !briefValidation.valid)
+                  streaming
                 }
                 className="shrink-0 rounded-xl bg-foreground text-background p-2 disabled:opacity-40 hover:opacity-90 transition-opacity"
                 aria-label="Send"
-                title={
-                  briefBuilderOpen && !briefValidation.valid
-                    ? `Complete: ${briefValidation.missing.join(", ")}`
-                    : "Send"
-                }
+                title="Send"
               >
                 <Send className="h-4 w-4" />
               </button>
