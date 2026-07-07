@@ -1,12 +1,11 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Navigate, Link } from "react-router-dom";
-import { ChevronLeft, Search, Upload, Loader2, Trash2, ExternalLink, Box, Filter } from "lucide-react";
+import { ChevronLeft, Search, Loader2, Trash2, ExternalLink, Box, Filter } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import Product3DViewer from "@/components/trade/Product3DViewer";
-import { classifyObjBundle, convertObjBundleToGlb } from "@/lib/objToGlb";
+import { GlbVariantManager } from "@/components/trade/admin/GlbVariantManager";
 
 interface ProductRow {
   id: string;
@@ -20,19 +19,14 @@ interface ProductRow {
 type SortKey = "updated_desc" | "updated_asc" | "name_asc" | "name_desc";
 const PAGE_SIZE = 24;
 
-const MAX_MB = 50;
-
 const TradeAdminGlbModels: React.FC = () => {
   const { isAdmin, loading } = useAuth();
-  const inputRef = useRef<HTMLInputElement>(null);
 
   const [search, setSearch] = useState("");
   const [withGlb, setWithGlb] = useState<ProductRow[]>([]);
   const [results, setResults] = useState<ProductRow[]>([]);
   const [searching, setSearching] = useState(false);
   const [selected, setSelected] = useState<ProductRow | null>(null);
-  const [uploading, setUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
   const [reloadKey, setReloadKey] = useState(0);
 
   // Manager section state
@@ -77,103 +71,26 @@ const TradeAdminGlbModels: React.FC = () => {
     return () => clearTimeout(t);
   }, [search]);
 
-  const handleUpload = async (files: File[]) => {
-    if (!selected || files.length === 0) return;
+  // Per-product variants are managed inline by <GlbVariantManager />; this page
+  // only owns product selection + library browsing. Removing a product's 3D
+  // presence from the library (below) clears every uploaded variant.
 
-    let fileToUpload: File | null = null;
-    let ext: "glb" | "gltf" = "glb";
-
-    // Case 1: single GLB/GLTF direct upload
-    if (files.length === 1) {
-      const f = files[0];
-      const n = f.name.toLowerCase();
-      if (n.endsWith(".glb") || n.endsWith(".gltf")) {
-        fileToUpload = f;
-        ext = n.endsWith(".gltf") ? "gltf" : "glb";
-      }
-    }
-
-    // Case 2: OBJ (+ MTL + textures) bundle → convert to GLB
-    if (!fileToUpload) {
-      const bundle = classifyObjBundle(files);
-      if (bundle) {
-        setUploading(true);
-        setUploadProgress(0);
-        try {
-          toast.message("Converting OBJ to GLB in your browser…");
-          const outName = bundle.objFile.name.replace(/\.obj$/i, "") + ".glb";
-          fileToUpload = await convertObjBundleToGlb(bundle, outName);
-          ext = "glb";
-        } catch (e: any) {
-          setUploading(false);
-          toast.error(`OBJ→GLB conversion failed: ${e?.message || e}`);
-          return;
-        }
-      }
-    }
-
-    if (!fileToUpload) {
-      toast.error("Please upload a .glb/.gltf, or an .obj (optionally with .mtl + textures).");
-      return;
-    }
-
-    if (fileToUpload.size > MAX_MB * 1024 * 1024) {
-      setUploading(false);
-      toast.error(`${(fileToUpload.size / 1024 / 1024).toFixed(1)} MB exceeds the ${MAX_MB} MB limit.`);
-      return;
-    }
-
-    setUploading(true);
-    setUploadProgress(0);
-    try {
-      const contentType = ext === "glb" ? "model/gltf-binary" : "model/gltf+json";
-      const path = `glb-models/${selected.id}/${Date.now()}.${ext}`;
-
-      const { error: upErr } = await supabase.storage
-        .from("assets")
-        .upload(path, fileToUpload, {
-          contentType,
-          cacheControl: "31536000",
-          upsert: false,
-          onUploadProgress: (evt: { loaded?: number; total?: number }) => {
-            const pct = Math.round(((evt.loaded || 0) / (evt.total || fileToUpload!.size)) * 100);
-            setUploadProgress(pct);
-          },
-        } as any);
-      if (upErr) throw upErr;
-
-      const { data: urlData } = supabase.storage.from("assets").getPublicUrl(path);
-      const publicUrl = urlData.publicUrl;
-
-      const { error: updErr } = await supabase
-        .from("trade_products")
-        .update({ glb_url: publicUrl })
-        .eq("id", selected.id);
-      if (updErr) throw updErr;
-
-      toast.success(`3D model saved for "${selected.product_name}"`);
-      setSelected({ ...selected, glb_url: publicUrl });
-      setReloadKey((k) => k + 1);
-    } catch (e: any) {
-      toast.error(e?.message || "Upload failed");
-    } finally {
-      setUploading(false);
-      setUploadProgress(0);
-      if (inputRef.current) inputRef.current.value = "";
-    }
-  };
 
   const handleRemove = async (row: ProductRow) => {
-    if (!confirm(`Remove the 3D model from "${row.product_name}"?`)) return;
+    if (!confirm(`Remove ALL 3D models from "${row.product_name}"? This deletes every uploaded variant.`)) return;
+    // Delete every variant row. The AFTER trigger will null out trade_products.glb_url.
     const { error } = await supabase
-      .from("trade_products")
-      .update({ glb_url: null })
-      .eq("id", row.id);
+      .from("trade_product_glb_variants")
+      .delete()
+      .eq("product_id", row.id);
     if (error) {
       toast.error(error.message);
       return;
     }
-    toast.success("3D model removed");
+    // Belt-and-braces: also clear the legacy column for products that were never
+    // migrated (e.g. glb_url written before the variants table existed).
+    await supabase.from("trade_products").update({ glb_url: null }).eq("id", row.id);
+    toast.success("All 3D models removed");
     if (selected?.id === row.id) setSelected({ ...row, glb_url: null });
     setReloadKey((k) => k + 1);
   };
@@ -204,8 +121,9 @@ const TradeAdminGlbModels: React.FC = () => {
             <Box size={22} /> 3D Models
           </h1>
           <p className="font-body text-sm text-muted-foreground mb-10 max-w-2xl">
-            Upload a GLB or GLTF file and we'll attach it to the product's <code>glb_url</code>.
-            The interactive 3D viewer then appears on the trade product page.
+            Attach a 3D model per size variant (e.g. 2-seater vs 3-seater, or W 180 vs W 220).
+            Upload .glb, .gltf, or an .obj bundle — the trade product page and concierge tearsheet
+            drawer will pick the right model automatically based on the size the user selects.
           </p>
 
           <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.2fr] gap-10">
@@ -268,84 +186,13 @@ const TradeAdminGlbModels: React.FC = () => {
                   Select a product on the left to upload or replace its 3D model.
                 </div>
               ) : (
-                <div className="space-y-4">
-                  <div>
-                    <div className="font-display text-xl">{selected.product_name}</div>
-                    <div className="font-body text-xs text-muted-foreground">{selected.brand_name || "—"}</div>
-                  </div>
-
-                  <label
-                    className={`flex flex-col items-center justify-center gap-2 border-2 border-dashed border-border rounded-md p-8 cursor-pointer hover:border-foreground/40 transition-colors ${
-                      uploading ? "opacity-60 pointer-events-none" : ""
-                    }`}
-                  >
-                    {uploading ? <Loader2 size={20} className="animate-spin" /> : <Upload size={20} />}
-                    <span className="font-body text-sm">
-                      {uploading ? "Uploading…" : selected.glb_url ? "Replace 3D model" : "Upload .glb / .gltf  •  or .obj (auto-converted)"}
-                    </span>
-                    {uploading && (
-                      <div className="w-full max-w-[200px]">
-                        <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden">
-                          <div
-                            className="h-full bg-foreground transition-all duration-200"
-                            style={{ width: `${uploadProgress}%` }}
-                          />
-                        </div>
-                        <div className="text-center font-body text-[10px] text-muted-foreground mt-1">
-                          {uploadProgress}%
-                        </div>
-                      </div>
-                    )}
-                    <div className="flex items-center gap-1.5 flex-wrap justify-center">
-                      <span className="font-body text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground">.glb</span>
-                      <span className="font-body text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground">.gltf</span>
-                      <span className="font-body text-[10px] px-1.5 py-0.5 rounded bg-foreground/10 text-foreground">.obj → .glb</span>
-                    </div>
-                    <span className="font-body text-[11px] text-muted-foreground">Max {MAX_MB} MB</span>
-                    <input
-                      ref={inputRef}
-                      type="file"
-                      multiple
-                      accept=".glb,.gltf,.obj,.mtl,.png,.jpg,.jpeg,.webp,.bmp,.tga,.tif,.tiff,model/gltf-binary,model/gltf+json,image/*"
-                      className="hidden"
-                      onChange={(e) => {
-                        const fs = e.target.files ? Array.from(e.target.files) : [];
-                        if (fs.length) handleUpload(fs);
-                      }}
-                    />
-                    <span className="font-body text-[10px] text-muted-foreground text-center leading-relaxed max-w-[280px]">
-                      For OBJ: select the <b>.obj</b> together with its <b>.mtl</b> and any texture images (hold ⌘/Ctrl to multi-select). We convert to GLB right in your browser before uploading.
-                    </span>
-                  </label>
-
-
-                  {selected.glb_url && (
-                    <>
-                      <div className="flex items-center gap-3 text-xs">
-                        <a
-                          href={selected.glb_url}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="inline-flex items-center gap-1 text-muted-foreground hover:text-foreground underline-offset-2 hover:underline"
-                        >
-                          <ExternalLink size={12} /> Open GLB
-                        </a>
-                        <button
-                          onClick={() => handleRemove(selected)}
-                          className="inline-flex items-center gap-1 text-destructive hover:underline underline-offset-2"
-                        >
-                          <Trash2 size={12} /> Remove from product
-                        </button>
-                      </div>
-
-                      <Product3DViewer
-                        url={selected.glb_url}
-                        alt={`${selected.product_name} — 3D model`}
-                        poster={selected.image_url}
-                      />
-                    </>
-                  )}
-                </div>
+                <GlbVariantManager
+                  key={selected.id}
+                  productId={selected.id}
+                  productName={selected.product_name}
+                  posterImageUrl={selected.image_url}
+                  onChange={() => setReloadKey((k) => k + 1)}
+                />
               )}
             </div>
           </div>
