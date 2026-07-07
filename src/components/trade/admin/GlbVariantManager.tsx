@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import Product3DViewer from "@/components/trade/Product3DViewer";
 import { classifyObjBundle, convertObjBundleToGlb } from "@/lib/objToGlb";
+import { inspectGlbFile, UPHOLSTERY_KEYWORDS } from "@/lib/glbInspect";
 
 const MAX_MB = 50;
 
