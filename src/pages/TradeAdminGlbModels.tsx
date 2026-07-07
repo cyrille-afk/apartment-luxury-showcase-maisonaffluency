@@ -383,9 +383,22 @@ const TradeAdminGlbModels: React.FC = () => {
                     ))}
                 </select>
               </div>
+              <div className="relative min-w-[200px]">
+                <select
+                  value={managerSort}
+                  onChange={(e) => setManagerSort(e.target.value as SortKey)}
+                  className="w-full pl-3 pr-3 py-2 border border-border rounded-md bg-background font-body text-sm focus:outline-none focus:border-foreground/40 appearance-none"
+                  aria-label="Sort GLB library"
+                >
+                  <option value="updated_desc">Newest uploads first</option>
+                  <option value="updated_asc">Oldest uploads first</option>
+                  <option value="name_asc">Name A → Z</option>
+                  <option value="name_desc">Name Z → A</option>
+                </select>
+              </div>
               {(managerSearch || managerBrand) && (
                 <button
-                  onClick={() => { setManagerSearch(""); setManagerBrand(""); }}
+                  onClick={() => { setManagerSearch(""); setManagerBrand(""); setManagerPage(1); }}
                   className="font-body text-[11px] uppercase tracking-[0.12em] text-muted-foreground hover:text-foreground px-3"
                 >
                   Clear
@@ -403,56 +416,128 @@ const TradeAdminGlbModels: React.FC = () => {
                 }
                 return true;
               });
-              if (filtered.length === 0) {
+
+              const sorted = [...filtered].sort((a, b) => {
+                switch (managerSort) {
+                  case "name_asc":
+                    return a.product_name.localeCompare(b.product_name);
+                  case "name_desc":
+                    return b.product_name.localeCompare(a.product_name);
+                  case "updated_asc":
+                    return (a.updated_at || "").localeCompare(b.updated_at || "");
+                  case "updated_desc":
+                  default:
+                    return (b.updated_at || "").localeCompare(a.updated_at || "");
+                }
+              });
+
+              const total = sorted.length;
+              const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+              const page = Math.min(managerPage, totalPages);
+              const start = (page - 1) * PAGE_SIZE;
+              const pageRows = sorted.slice(start, start + PAGE_SIZE);
+
+              if (total === 0) {
                 return (
                   <div className="border border-dashed border-border rounded-md p-10 text-center text-muted-foreground font-body text-sm">
                     {withGlb.length === 0 ? "No products have a 3D model yet." : "No models match the current filters."}
                   </div>
                 );
               }
+
               return (
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                  {filtered.map((row) => (
-                    <div key={row.id} className={`group border rounded-md overflow-hidden transition-colors ${selected?.id === row.id ? "border-foreground" : "border-border hover:border-foreground/40"}`}>
-                      <button
-                        onClick={() => {
-                          setSelected(row);
-                          window.scrollTo({ top: 0, behavior: "smooth" });
-                        }}
-                        className="block w-full text-left"
-                      >
-                        <div className="relative aspect-square bg-muted">
-                          {row.image_url ? (
-                            <img src={row.image_url} alt="" className="w-full h-full object-cover" loading="lazy" />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center text-muted-foreground"><Box size={22} /></div>
-                          )}
-                          <span className="absolute top-2 left-2 font-body text-[9px] uppercase tracking-[0.14em] bg-emerald-600 text-white px-1.5 py-0.5 rounded">3D</span>
-                        </div>
-                        <div className="p-3">
-                          <div className="font-body text-sm truncate">{row.product_name}</div>
-                          <div className="font-body text-[11px] text-muted-foreground truncate">{row.brand_name || "—"}</div>
-                        </div>
-                      </button>
-                      <div className="flex items-center justify-between px-3 pb-3 -mt-1">
-                        <a
-                          href={row.glb_url!}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="inline-flex items-center gap-1 font-body text-[10px] text-muted-foreground hover:text-foreground underline-offset-2 hover:underline"
-                        >
-                          <ExternalLink size={11} /> GLB
-                        </a>
+                <>
+                  <div className="flex items-center justify-between mb-3 font-body text-[11px] text-muted-foreground">
+                    <span>
+                      Showing {start + 1}–{Math.min(start + PAGE_SIZE, total)} of {total}
+                    </span>
+                    <span className="uppercase tracking-[0.12em]">Page {page} / {totalPages}</span>
+                  </div>
+
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    {pageRows.map((row) => (
+                      <div key={row.id} className={`group border rounded-md overflow-hidden transition-colors ${selected?.id === row.id ? "border-foreground" : "border-border hover:border-foreground/40"}`}>
                         <button
-                          onClick={() => handleRemove(row)}
-                          className="inline-flex items-center gap-1 font-body text-[10px] text-destructive hover:underline underline-offset-2"
+                          onClick={() => {
+                            setSelected(row);
+                            window.scrollTo({ top: 0, behavior: "smooth" });
+                          }}
+                          className="block w-full text-left"
                         >
-                          <Trash2 size={11} /> Remove
+                          <div className="relative aspect-square bg-muted">
+                            {row.image_url ? (
+                              <img src={row.image_url} alt="" className="w-full h-full object-cover" loading="lazy" />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center text-muted-foreground"><Box size={22} /></div>
+                            )}
+                            <span className="absolute top-2 left-2 font-body text-[9px] uppercase tracking-[0.14em] bg-emerald-600 text-white px-1.5 py-0.5 rounded">3D</span>
+                          </div>
+                          <div className="p-3">
+                            <div className="font-body text-sm truncate">{row.product_name}</div>
+                            <div className="font-body text-[11px] text-muted-foreground truncate">{row.brand_name || "—"}</div>
+                            {row.updated_at && (
+                              <div className="font-body text-[10px] text-muted-foreground/70 mt-0.5">
+                                {new Date(row.updated_at).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" })}
+                              </div>
+                            )}
+                          </div>
                         </button>
+                        <div className="flex items-center justify-between px-3 pb-3 -mt-1">
+                          <a
+                            href={row.glb_url!}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex items-center gap-1 font-body text-[10px] text-muted-foreground hover:text-foreground underline-offset-2 hover:underline"
+                          >
+                            <ExternalLink size={11} /> GLB
+                          </a>
+                          <button
+                            onClick={() => handleRemove(row)}
+                            className="inline-flex items-center gap-1 font-body text-[10px] text-destructive hover:underline underline-offset-2"
+                          >
+                            <Trash2 size={11} /> Remove
+                          </button>
+                        </div>
                       </div>
+                    ))}
+                  </div>
+
+                  {totalPages > 1 && (
+                    <div className="flex items-center justify-center gap-2 mt-6">
+                      <button
+                        onClick={() => setManagerPage(1)}
+                        disabled={page === 1}
+                        className="px-2.5 py-1 border border-border rounded font-body text-xs disabled:opacity-40 hover:bg-muted/40"
+                      >
+                        « First
+                      </button>
+                      <button
+                        onClick={() => setManagerPage((p) => Math.max(1, p - 1))}
+                        disabled={page === 1}
+                        className="px-2.5 py-1 border border-border rounded font-body text-xs disabled:opacity-40 hover:bg-muted/40"
+                      >
+                        ‹ Prev
+                      </button>
+                      <span className="font-body text-xs text-muted-foreground px-2">
+                        {page} / {totalPages}
+                      </span>
+                      <button
+                        onClick={() => setManagerPage((p) => Math.min(totalPages, p + 1))}
+                        disabled={page === totalPages}
+                        className="px-2.5 py-1 border border-border rounded font-body text-xs disabled:opacity-40 hover:bg-muted/40"
+                      >
+                        Next ›
+                      </button>
+                      <button
+                        onClick={() => setManagerPage(totalPages)}
+                        disabled={page === totalPages}
+                        className="px-2.5 py-1 border border-border rounded font-body text-xs disabled:opacity-40 hover:bg-muted/40"
+                      >
+                        Last »
+                      </button>
                     </div>
-                  ))}
-                </div>
+                  )}
+                </>
               );
             })()}
           </div>
