@@ -85,7 +85,7 @@ export function GlbVariantManager({ productId, productName, posterImageUrl, onCh
     // 1) existing GLB variants
     const { data: vrows, error: vErr } = await supabase
       .from("trade_product_glb_variants")
-      .select("id, variant_label, glb_url, is_default, file_size_bytes, updated_at")
+      .select("id, variant_label, glb_url, is_default, file_size_bytes, updated_at, material_roles")
       .eq("product_id", productId)
       .order("is_default", { ascending: false })
       .order("variant_label", { ascending: true });
