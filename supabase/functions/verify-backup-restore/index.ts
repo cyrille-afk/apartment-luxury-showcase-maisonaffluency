@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
+import { requireAdmin } from "../_shared/auth.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -27,6 +28,24 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
+
+  // Auth guard — matches the pattern in backup-critical-data. Allows the
+  // pg_cron scheduler (service-role bearer) and authenticated admin users;
+  // anonymous callers are rejected before any storage/DB access so this
+  // endpoint cannot be used to enumerate table names, row counts, or
+  // backup health metadata.
+  const bearer = req.headers.get("Authorization")?.replace(/^Bearer\s+/i, "");
+  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+  if (bearer !== serviceKey) {
+    const auth = await requireAdmin(req);
+    if (!auth.ok) {
+      return new Response(JSON.stringify(auth.body), {
+        status: auth.status,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+  }
+
 
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
