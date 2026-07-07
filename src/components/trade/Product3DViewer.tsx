@@ -297,18 +297,19 @@ const Product3DViewer: React.FC<Props> = ({
 
       // Publish debug info.
       setDebugInfo({
-        all: materials.map((m) => String(m?.name || "(unnamed)")),
+        all: allNames,
         fabric: {
           matched: fabricMatched.map((m) => String(m?.name || "(unnamed)")),
-          fellBackToAll: fabricMatched.length === 0,
-          keywords: fabricKeywords,
+          fellBackToAll: !hasExplicitRoles && fabricMatched.length === 0,
+          keywords: hasExplicitRoles ? ["(explicit role map)"] : fabricKeywords,
         },
         base: {
           matched: baseMatched.map((m) => String(m?.name || "(unnamed)")),
-          fellBackToAll: baseMatched.length === 0,
-          keywords: baseKeywords,
+          fellBackToAll: !hasExplicitRoles && baseMatched.length === 0,
+          keywords: hasExplicitRoles ? ["(explicit role map)"] : baseKeywords,
         },
       });
+
 
       try {
         // Fabric layer
