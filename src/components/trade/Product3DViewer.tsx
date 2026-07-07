@@ -162,9 +162,12 @@ const Product3DViewer: React.FC<Props> = ({
   baseTextureUrl,
   fabricMaterialNameIncludes,
   baseMaterialNameIncludes,
+  materialRoles,
+  onMaterialsDiscovered,
   autoOpen = false,
   debug = false,
 }) => {
+
   const [opened, setOpened] = useState(autoOpen);
   const [ready, setReady] = useState(() =>
     typeof window !== "undefined" && !!customElements.get("model-viewer"),
