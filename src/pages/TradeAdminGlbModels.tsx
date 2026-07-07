@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Navigate, Link } from "react-router-dom";
-import { ChevronLeft, Search, Upload, Loader2, Trash2, ExternalLink, Box } from "lucide-react";
+import { ChevronLeft, Search, Upload, Loader2, Trash2, ExternalLink, Box, Filter } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
