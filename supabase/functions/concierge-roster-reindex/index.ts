@@ -63,8 +63,33 @@ serve(async (req) => {
     });
   }
 
-  // TEMP: auth disabled for one-shot reindex. Restore admin gate after run.
-  void SERVICE_ROLE_KEY;
+  // Admin auth. Accepts a service-role Bearer (server-to-server / one-off
+  // maintenance triggers) or a user JWT whose sub has the admin role.
+  const authHeader = req.headers.get("Authorization") || "";
+  const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
+  if (!token) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+  if (token !== SERVICE_ROLE_KEY) {
+    const { data: claimsData, error: claimsErr } = await sb.auth.getClaims(token);
+    const sub = (claimsData?.claims as { sub?: string } | null | undefined)?.sub;
+    if (claimsErr || !sub) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const { data: isAdmin, error: roleErr } = await sb.rpc("has_role", {
+      _user_id: sub,
+      _role: "admin",
+    });
+    if (roleErr || !isAdmin) {
+      return new Response(JSON.stringify({ error: "Forbidden" }), {
+        status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+  }
 
   const entries = ROSTER.map((r) => ({
     name: r.name,
