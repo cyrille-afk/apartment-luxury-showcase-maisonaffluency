@@ -362,6 +362,15 @@ export default function FinishSelector({ pickId, className, productTitle, produc
       setSelectedCoverId(null);
       setSelectedRugComponentIds({});
 
+      // Preview signal for the 3D configurator: first fabric + first wood
+      // swatch that carry image_url values, without touching selection.
+      const defaultWood = list.find((f) => isFinishCategory(f) && f.image_url) || null;
+      onPreviewSwatchesResolved?.({
+        fabricImageUrl: defaultFabric?.image_url ?? null,
+        woodImageUrl: defaultWood?.image_url ?? null,
+      });
+
+
 
 
     })();
