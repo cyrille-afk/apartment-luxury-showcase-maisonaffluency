@@ -555,9 +555,9 @@ export default function TradeTearsheets() {
       </div>` : ""}
       <div class="grid" style="margin-top:24px">
         <div><p class="label">Category</p><p class="value">${esc(selectedProduct.category) || "—"}</p></div>
-        <div><p class="label">Dimensions</p><p class="value">${esc(selectedProduct.dimensions) || "—"}</p></div>
-        <div><p class="label">Materials</p><p class="value">${esc(selectedProduct.materials) || "—"}</p></div>
-        <div><p class="label">Lead Time</p><p class="value">${esc(selectedProduct.lead_time) || "—"}</p></div>
+        <div><p class="label">Dimensions</p><p class="value" style="white-space:pre-line">${esc(dimensionsDisplay) || "—"}</p></div>
+        <div><p class="label">Materials</p><p class="value" style="white-space:pre-line">${esc(materialsDisplay) || "—"}</p></div>
+        <div><p class="label">Lead Time</p><p class="value">${esc(leadTimeDisplay) || "—"}</p></div>
         <div><p class="label">Trade Price</p><p class="value">${esc(priceStr)}</p></div>
         ${selectedProduct.description ? `<div style="grid-column:1/3"><p class="label">Description</p><p class="value">${esc(selectedProduct.description)}</p></div>` : ""}
       </div>
