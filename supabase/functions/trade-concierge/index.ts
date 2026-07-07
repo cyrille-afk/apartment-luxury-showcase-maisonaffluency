@@ -4844,6 +4844,82 @@ serve(async (req) => {
     }
 
 
+    if (hasScopedDesigners && parsedTypologyCats.length > 0 && /\bBlock\s+2\b|\bREFERENCES\s*:/i.test(userConversationText)) {
+      const { data: designerRows } = await supabase
+        .from("designers")
+        .select("id, name, display_name")
+        .eq("is_published", true);
+      const targetLc = scopedDesigners.map((n) => normalizeLoose(n));
+      const targetRows = (designerRows || []).filter((d: any) => {
+        const nm = normalizeLoose(d.name);
+        const dn = normalizeLoose(d.display_name);
+        return targetLc.some((f) => (nm && (nm === f || f.includes(nm))) || (dn && (dn === f || f.includes(dn))));
+      });
+      const targetIds = targetRows.map((d: any) => d.id).filter(Boolean);
+      if (targetIds.length > 0) {
+        const { data: allPicks } = await supabase
+          .from("designer_curator_picks")
+          .select("id, title, category, subcategory, materials, designer_id")
+          .in("designer_id", targetIds)
+          .order("title", { ascending: true })
+          .limit(80);
+        const designerNameById = new Map<string, string>();
+        for (const d of targetRows) designerNameById.set(d.id, d.display_name || d.name);
+        const filteredPicks = (allPicks || []).filter((p: any) => lineMatchesTypologyTerms(p, parsedTypologyCats));
+        const pickIds = filteredPicks.map((p: any) => p.id).filter(Boolean).slice(0, 10);
+        if (pickIds.length > 0) {
+          let previewRaw: Array<{ id: string; title?: string | null; [key: string]: any }> = ((await hydratePickPreview(supabase, pickIds)) as any[])
+            .filter((p: any): p is { id: string; title?: string | null; [key: string]: any } => p && typeof p.id === "string");
+          let finalIds = pickIds.filter((id: string) => previewRaw.some((p: any) => p.id === id));
+          ({ previewRaw, pickIds: finalIds } = dedupePreviewRows(previewRaw, finalIds));
+          const excludedIds = parseUserExclusions(lastUserMsg || "", previewRaw);
+          if (excludedIds.size > 0) {
+            previewRaw = previewRaw.filter((p: any) => p?.id && !excludedIds.has(p.id));
+            finalIds = finalIds.filter((id: string) => !excludedIds.has(id));
+          }
+          if (finalIds.length > 0) {
+            const rationaleMap: Record<string, { reason: string }> = {};
+            const brandCounts = new Map<string, number>();
+            const pickDesignerById = new Map<string, string>();
+            for (const p of filteredPicks) if (p?.id && p?.designer_id) pickDesignerById.set(p.id, p.designer_id);
+            for (const p of previewRaw) {
+              if (!p?.id) continue;
+              const dName = designerNameById.get(pickDesignerById.get(p.id) || "") || p.designer_name || "selected brand";
+              brandCounts.set(dName, (brandCounts.get(dName) || 0) + 1);
+              rationaleMap[p.id] = { reason: `Matches the submitted typology within the approved ${dName} reference scope.` };
+            }
+            const preview = previewRaw.map((p: any) => ({ ...p, rationale: rationaleMap[p.id]?.reason || null }));
+            const brandCountSummary = [...brandCounts.entries()]
+              .sort(([a], [b]) => a.localeCompare(b))
+              .map(([name, count]) => `${count} ${name}`)
+              .join(", ");
+            const countPhrase = brandCounts.size > 1
+              ? `${finalIds.length} pieces (${brandCountSummary})`
+              : `${finalIds.length} scoped pieces`;
+            const proposal = {
+              tool: "propose_tearsheet",
+              tool_call_id: crypto.randomUUID(),
+              args: {
+                title: `${scopedDesigners.slice(0, 2).join(" + ")} — typology edit`,
+                pick_ids: finalIds,
+                note: `Drafted strictly from the submitted reference brands and filled typology: ${parsedTypologyCats.slice(0, 7).join(", ")}.`,
+                pick_rationales: rationaleMap,
+              },
+              preview,
+            };
+            return sseProposalThenTextResponse(
+              proposal,
+              `Draft tearsheet selected with ${countPhrase}; the brief is tucked away and can be reopened anytime.`
+            );
+          }
+        }
+        return sseTextResponse(
+          `I found the submitted reference brands, but no pieces matching that typology inside those brands. Broaden References or Typology and I’ll draft it immediately.`
+        );
+      }
+    }
+
+
     if (hasVisualizationVerb) {
       const tearsheetProposal = visualizationNeedsCatalogPicks
         ? await buildDeterministicTearsheetProposal(
