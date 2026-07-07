@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo, useRef } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
-import { Check, X, ExternalLink, Plus, FileText, Minus, FolderOpen, Coins, Repeat } from "lucide-react";
+import { Check, X, ExternalLink, Plus, FileText, Minus, FolderOpen, Coins, Repeat, Box } from "lucide-react";
+import { PickAssetDrawer } from "@/components/trade/concierge/PickAssetDrawer";
 import { buildSwapPrompt, sendConciergePrefill } from "@/lib/conciergePrefill";
 import { Link } from "react-router-dom";
 import { commitProposal, type QuoteProposal } from "@/lib/tradeConciergeStream";
@@ -205,6 +206,17 @@ export function QuoteProposalCard({ proposal, onResolved }: Props) {
   }, [currency, isAppend, lineCurrency]);
 
   const visibleLines = lines.filter((l) => !excluded.has(l.pick_id));
+
+  // Per-row "3D & finishes" drawer state.
+  const [assetsOpen, setAssetsOpen] = useState<Set<string>>(new Set());
+  const toggleAssets = (id: string) => {
+    setAssetsOpen((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
 
   const effectiveLineUnitPrice = (l: (typeof lines)[number]) => {
     if (l.variant_options?.length) {
@@ -493,9 +505,28 @@ export function QuoteProposalCard({ proposal, onResolved }: Props) {
                   )}
                   {l.lead_weeks != null && <span className="ml-2">· {l.lead_weeks}w lead</span>}
                 </div>
+                {assetsOpen.has(l.pick_id) && (
+                  <PickAssetDrawer pickId={l.pick_id} title={l.title} />
+                )}
               </div>
               {status === "pending" && (
                 <div className="flex items-center gap-1.5 self-center shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => toggleAssets(l.pick_id)}
+                    className={cn(
+                      "inline-flex items-center gap-1 text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded border transition-colors",
+                      assetsOpen.has(l.pick_id)
+                        ? "border-accent/50 bg-accent/10 text-accent"
+                        : "border-border text-muted-foreground hover:text-foreground",
+                    )}
+                    aria-label={assetsOpen.has(l.pick_id) ? `Hide 3D and finishes for ${l.title || "this line"}` : `Show 3D and finishes for ${l.title || "this line"}`}
+                    aria-pressed={assetsOpen.has(l.pick_id)}
+                    title="3D model & fabric swatches"
+                  >
+                    <Box className="h-3 w-3" />
+                    3D
+                  </button>
                   <div className="flex items-center rounded border border-border">
                     <button
                       onClick={() => setQty(l.pick_id, l.qty - 1)}

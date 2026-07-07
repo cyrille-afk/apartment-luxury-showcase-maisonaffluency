@@ -15,6 +15,8 @@ import { validateTearsheetEdits, realignUnlocked, type ValidationVerdict, type R
 import { ValidationBanner, RowVerdictPill } from "@/components/trade/concierge/ValidationSummary";
 import { RealignmentDiffPanel, type AppliedRealignment } from "@/components/trade/concierge/RealignmentDiffPanel";
 import { TearsheetInsightsSidebar } from "@/components/trade/concierge/TearsheetInsightsSidebar";
+import { PickAssetDrawer } from "@/components/trade/concierge/PickAssetDrawer";
+import { Box } from "lucide-react";
 
 
 type Status = "pending" | "committing" | "approved" | "discarded";
@@ -92,6 +94,17 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
     }
   };
   const [status, setStatus] = useState<Status>("pending");
+  // Per-row "3D & finishes" drawer toggles. Kept separate from the
+  // rationale-expanded set so opening a viewer never collapses reading state.
+  const [assetsOpen, setAssetsOpen] = useState<Set<string>>(new Set());
+  const toggleAssets = (id: string) => {
+    setAssetsOpen((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
   const [result, setResult] = useState<{ boardId: string; url: string; added: number; duplicates: number } | null>(null);
   const [error, setError] = useState<string | null>(null);
   // After commit, holds the board's existing project_id (null = no project assigned yet).
@@ -728,9 +741,28 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
                             )}
                           </>
                         )}
+                        {assetsOpen.has(p.id) && (
+                          <PickAssetDrawer pickId={p.id} title={p.title} />
+                        )}
                       </div>
                       {status === "pending" && (
                         <div className="flex items-center gap-1 self-center shrink-0">
+                          <button
+                            type="button"
+                            onClick={() => toggleAssets(p.id)}
+                            className={cn(
+                              "inline-flex items-center gap-1 text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded border transition-colors",
+                              assetsOpen.has(p.id)
+                                ? "border-accent/50 bg-accent/10 text-accent"
+                                : "border-border text-muted-foreground hover:text-foreground",
+                            )}
+                            aria-label={assetsOpen.has(p.id) ? `Hide 3D and finishes for ${p.title || "this pick"}` : `Show 3D and finishes for ${p.title || "this pick"}`}
+                            aria-pressed={assetsOpen.has(p.id)}
+                            title="3D model & fabric swatches"
+                          >
+                            <Box className="h-2.5 w-2.5" />
+                            3D
+                          </button>
                           <button
                             type="button"
                             onClick={() => toggleLock(p.id)}
