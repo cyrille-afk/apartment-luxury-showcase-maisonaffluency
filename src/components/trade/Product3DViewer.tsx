@@ -66,18 +66,24 @@ interface Props {
    */
   fabricTextureUrl?: string | null;
   /**
-   * Optional filter: restrict the swap to materials whose name matches one of
-   * these substrings (case-insensitive). If omitted, we auto-detect upholstery
-   * meshes using a naming convention (see UPHOLSTERY_KEYWORDS). If no material
-   * matches the convention, we fall back to applying the texture to every
-   * material so older GLBs without the convention still swap.
-   *
-   * Convention for GLB authors: name any mesh/material that should accept the
-   * user-selected fabric using one of the keywords below (e.g. "fabric",
-   * "upholstery_seat", "cushion_back", "cover_main"). Non-upholstery parts
-   * (wood_leg, metal_frame, glass_top, etc.) will then be left untouched.
+   * Optional SECOND texture layer for dual-axis products (e.g. Base finish ×
+   * Top fabric). When set, applied to materials matching the "frame/base"
+   * keyword group (wood, frame, leg, base, marble, metal, structure) while
+   * `fabricTextureUrl` continues to target upholstery materials. Passing null
+   * restores originals for that group.
+   */
+  baseTextureUrl?: string | null;
+  /**
+   * Optional filter: restrict the fabric swap to materials whose name matches
+   * one of these substrings (case-insensitive). If omitted, we auto-detect
+   * upholstery meshes using a naming convention (see UPHOLSTERY_KEYWORDS).
    */
   fabricMaterialNameIncludes?: string | string[];
+  /**
+   * Optional filter for the base/frame texture. Defaults to the frame
+   * keyword group (wood, frame, leg, base, marble, metal, structure).
+   */
+  baseMaterialNameIncludes?: string | string[];
   /**
    * When true, renders a small collapsible panel showing which material
    * names were detected on the GLB and which ones the upholstery filter
@@ -85,6 +91,7 @@ interface Props {
    */
   debug?: boolean;
 }
+
 
 interface DebugInfo {
   all: string[];
