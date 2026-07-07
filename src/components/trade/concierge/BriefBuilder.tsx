@@ -476,7 +476,29 @@ export function BriefBuilder({
     field: keyof BriefValues[B],
     nextValue: string
   ) => {
-    const nextValues = updateBlockField(values, block, field, nextValue);
+    let nextValues = updateBlockField(values, block, field, nextValue);
+    // Auto-suggest References from Typology — the moment the user types a
+    // real Typology (leaves the "[e.g. …]" template behind), map its tokens
+    // to the closest in-catalogue brands and pre-fill References so the
+    // brief can be submitted without hunting for reference brands. Only
+    // fires while References is still the default template — once the user
+    // edits References by hand, we never overwrite their picks.
+    if (block === "block2" && field === "typology") {
+      const typText = String(nextValue || "").trim();
+      const isPlaceholder = !typText || /^\[[^\]]*\]$/.test(typText);
+      const refsUntouched =
+        values.block3.references === DEFAULT_VALUES.block3.references ||
+        !values.block3.references.trim();
+      if (!isPlaceholder && refsUntouched) {
+        const suggested = suggestBrandsFromTypology(typText);
+        if (suggested.length) {
+          nextValues = {
+            ...nextValues,
+            block3: { ...nextValues.block3, references: suggested.join(" / ") },
+          };
+        }
+      }
+    }
     setValues(nextValues);
     emit(nextValues, prefix, suffix);
   };
