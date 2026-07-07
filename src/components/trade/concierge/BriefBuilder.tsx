@@ -342,6 +342,33 @@ function saveExpanded(scope: string, state: ExpandedSections) {
     // ignore quota errors
   }
 }
+function Field({
+  label,
+  value,
+  onChange,
+  placeholder,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  placeholder: string;
+}) {
+  return (
+    <label className="block">
+      <span className="font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
+        {label}
+      </span>
+      <input
+        type="text"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        className="mt-1 block w-full rounded-lg border border-border bg-background px-2.5 py-1.5 font-body text-[12px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-accent"
+      />
+    </label>
+  );
+}
+
 
 export function BriefBuilder({
   value,
