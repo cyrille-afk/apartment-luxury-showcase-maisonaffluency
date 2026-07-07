@@ -85,6 +85,20 @@ interface Props {
    */
   baseMaterialNameIncludes?: string | string[];
   /**
+   * Explicit per-material role map: { [materialName]: 'fabric'|'base'|'ignore' }.
+   * When provided, takes priority over the keyword heuristics (needed when
+   * GLB materials are named with opaque IDs from CAD tools). Materials absent
+   * from the map fall through to keyword matching, then to the "ignore"
+   * default (they keep their original texture and receive no swatch).
+   */
+  materialRoles?: Record<string, "fabric" | "base" | "ignore">;
+  /**
+   * Called once the underlying GLB has loaded, with the actual material names
+   * discovered in the file. Used by the admin manager to build the role UI.
+   */
+  onMaterialsDiscovered?: (names: string[]) => void;
+
+  /**
    * When true, mount the model-viewer element immediately (loads the
    * model-viewer script AND fetches the GLB on mount). Defaults to false:
    * the component shows a lightweight poster + "View in 3D" button and
