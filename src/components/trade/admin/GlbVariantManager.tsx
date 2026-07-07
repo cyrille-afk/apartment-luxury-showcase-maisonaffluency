@@ -5,6 +5,8 @@ import { supabase } from "@/integrations/supabase/client";
 import Product3DViewer from "@/components/trade/Product3DViewer";
 import { classifyObjBundle, convertObjBundleToGlb } from "@/lib/objToGlb";
 import { inspectGlbFile, UPHOLSTERY_KEYWORDS } from "@/lib/glbInspect";
+import GlbMaterialRolesEditor from "@/components/trade/admin/GlbMaterialRolesEditor";
+
 
 const MAX_MB = 50;
 
