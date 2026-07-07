@@ -2383,7 +2383,7 @@ const TradeProductPage: React.FC = () => {
                       product: {
                         id: product.id,
                         title: product.title,
-                        designer_name: product.designer_name ?? null,
+                        designer_name: (product as { designer_name?: string | null }).designer_name ?? null,
                         imageUrl: selectedFabric?.image_url ?? null,
                         source: "trade",
                       },
