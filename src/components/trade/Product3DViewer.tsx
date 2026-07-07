@@ -85,12 +85,21 @@ interface Props {
    */
   baseMaterialNameIncludes?: string | string[];
   /**
+   * When true, mount the model-viewer element immediately (loads the
+   * model-viewer script AND fetches the GLB on mount). Defaults to false:
+   * the component shows a lightweight poster + "View in 3D" button and
+   * only fetches the script/GLB after the user opts in. This keeps GLB
+   * bytes off the critical path of the product page.
+   */
+  autoOpen?: boolean;
+  /**
    * When true, renders a small collapsible panel showing which material
    * names were detected on the GLB and which ones the upholstery filter
    * matched for the current swatch. Intended for admin/debug use.
    */
   debug?: boolean;
 }
+
 
 
 interface LayerDebug {
