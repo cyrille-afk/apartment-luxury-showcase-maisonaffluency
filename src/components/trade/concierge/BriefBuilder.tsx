@@ -49,6 +49,41 @@ function suggestBrandsFromTypology(typology: string): string[] {
   return Array.from(hits);
 }
 
+function parseReferenceBrands(value: string): string[] {
+  if (!value.trim()) return [];
+  const out: string[] = [];
+  let buf = "";
+  let depth = 0;
+  for (let i = 0; i < value.length; i++) {
+    const ch = value[i];
+    if (ch === "(") depth++;
+    else if (ch === ")") depth = Math.max(0, depth - 1);
+    if (ch === "/" && depth === 0) {
+      const t = buf.trim();
+      if (t) out.push(t);
+      buf = "";
+    } else {
+      buf += ch;
+    }
+  }
+  const t = buf.trim();
+  if (t) out.push(t);
+  return out;
+}
+
+function mergeReferenceBrands(current: string, suggested: string[]): string {
+  const existing = parseReferenceBrands(current);
+  const seen = new Set(existing.map((n) => n.toLowerCase()));
+  const merged = [...existing];
+  for (const name of suggested) {
+    const key = name.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    merged.push(name);
+  }
+  return merged.join(" / ");
+}
+
 
 export type BriefValues = {
   block1: {
@@ -525,23 +560,21 @@ export function BriefBuilder({
   ) => {
     let nextValues = updateBlockField(values, block, field, nextValue);
     // Auto-suggest References from Typology — the moment the user types a
-    // real Typology (leaves the "[e.g. …]" template behind), map its tokens
-    // to the closest in-catalogue brands and pre-fill References so the
-    // brief can be submitted without hunting for reference brands. Only
-    // fires while References is still the default template — once the user
-    // edits References by hand, we never overwrite their picks.
+    // real Typology, map its tokens to in-catalogue brands and MERGE them
+    // into References. This preserves manually chosen brands while ensuring
+    // lighting requests automatically include Apparatus Studio.
     if (block === "block2" && field === "typology") {
       const typText = String(nextValue || "").trim();
-      const isPlaceholder = !typText || /^\[[^\]]*\]$/.test(typText);
-      const refsUntouched =
-        values.block3.references === DEFAULT_VALUES.block3.references ||
-        !values.block3.references.trim();
-      if (!isPlaceholder && refsUntouched) {
+      const normalizedTemplate = DEFAULT_VALUES.block2.typology.replace(/[\[\]]/g, "").trim().toLowerCase();
+      const normalizedTypology = typText.replace(/[\[\]]/g, "").trim().toLowerCase();
+      const isPlaceholder = !normalizedTypology || normalizedTypology === normalizedTemplate;
+      if (!isPlaceholder) {
         const suggested = suggestBrandsFromTypology(typText);
         if (suggested.length) {
+          const nextReferences = mergeReferenceBrands(nextValues.block3.references, suggested);
           nextValues = {
             ...nextValues,
-            block3: { ...nextValues.block3, references: suggested.join(" / ") },
+            block3: { ...nextValues.block3, references: nextReferences },
           };
         }
       }

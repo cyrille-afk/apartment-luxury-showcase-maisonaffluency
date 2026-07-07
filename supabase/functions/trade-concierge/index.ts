@@ -1531,6 +1531,7 @@ async function loadCatalogContext(
   includePieces: boolean,
   designerFilter?: string[],
   hardConstraints?: HardConstraints,
+  typologyTerms?: string[],
 ) {
   // Fetch published designers
   const { data: designers } = await supabase
@@ -1690,6 +1691,7 @@ async function loadCatalogContext(
   });
 
   const pieceLines = Array.from(merged.values())
+    .filter((p) => lineMatchesTypologyTerms(p, typologyTerms))
     .sort((a, b) => a.designer.localeCompare(b.designer) || a.title.localeCompare(b.title))
     .map((p) => {
       const meta = [p.subcategory || p.category, p.materials, p.priceNote ? `pricing: ${p.priceNote}` : null].filter(Boolean).join(" · ");
@@ -2814,6 +2816,78 @@ function normalizeLoose(value: string | null | undefined): string {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, " ")
     .trim();
+}
+
+function splitReferenceTokens(line: string): string[] {
+  const out: string[] = [];
+  let buf = "";
+  let depth = 0;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (ch === "(") depth++;
+    else if (ch === ")") depth = Math.max(0, depth - 1);
+    const startsAnd = depth === 0 && /\band\b/i.test(line.slice(i, i + 5));
+    if (depth === 0 && (ch === "/" || ch === "," || startsAnd)) {
+      const token = buf.trim();
+      if (token) out.push(token);
+      buf = "";
+      if (startsAnd) i += 4;
+      continue;
+    }
+    buf += ch;
+  }
+  const token = buf.trim();
+  if (token) out.push(token);
+  return out;
+}
+
+function typologyTokensToCategories(tokens: string[]): string[] {
+  const hits = new Set<string>();
+  for (const raw of tokens) {
+    const t = normalizeLoose(raw);
+    if (!t) continue;
+    if (/\b(sectional|sofa|settee|loveseat|accent chair|armchair|lounge chair|dining chair|chair|bench|stool|ottoman|pouf|banquette|seating)\b/.test(t)) hits.add("Seating");
+    if (/\b(dining table|coffee table|side table|console|desk|table)\b/.test(t)) hits.add("Tables");
+    if (/\b(floor lamps?|floor lights?|table lamps?|table lights?|pendants?|ceiling lights?|chandeliers?|sconces?|wall lights?|lanterns?|lighting|lamps?|lights?)\b/.test(t)) hits.add("Lighting");
+    if (/\b(cabinet|sideboard|credenza|shelving|bookcase|dresser|chest|armoire|storage)\b/.test(t)) hits.add("Storage");
+    if (/\b(bed|headboard|nightstand|bedside|bedroom)\b/.test(t)) hits.add("Bedroom Furniture");
+    if (/\b(rug|carpet|kilim|dhurrie)\b/.test(t)) hits.add("Rugs");
+    if (/\b(vase|sculpture|object|screen|mirror|art|decor)\b/.test(t)) hits.add("Décor");
+  }
+  return Array.from(hits);
+}
+
+function lineMatchesTypologyTerms(line: { title?: string | null; category?: string | null; subcategory?: string | null }, terms: string[] | undefined): boolean {
+  const normalizedTerms = (terms || []).map((t) => normalizeLoose(t)).filter(Boolean);
+  if (!normalizedTerms.length) return true;
+  const hay = normalizeLoose([line.title, line.category, line.subcategory].filter(Boolean).join(" "));
+  return normalizedTerms.some((term) => {
+    if (!term) return false;
+    if (hay.includes(term)) return true;
+    if (/\bsectional\b/.test(term)) return /\b(sectional|modular sofa|sofa)\b/.test(hay);
+    if (/\b(accent chair|lounge chair|armchair|chair)\b/.test(term)) return /\b(accent chair|lounge chair|armchair|chair)\b/.test(hay);
+    if (/\bcoffee table\b/.test(term)) return /\bcoffee table\b/.test(hay);
+    if (/\bfloor\b/.test(term) && /\b(light|lamp|lighting)\b/.test(hay)) return /\bfloor\b/.test(hay);
+    if (/\bceiling\b/.test(term) && /\b(light|lamp|lighting|chandelier|pendant)\b/.test(hay)) return /\b(ceiling|chandelier|pendant)\b/.test(hay);
+    if (term === "seating") return /\b(sectional|sofa|settee|loveseat|chair|armchair|bench|stool|ottoman|pouf|banquette)\b/.test(hay);
+    if (term === "tables") return /\b(dining table|coffee table|side table|console|desk|table)\b/.test(hay) && !/\b(table lamp|table light)\b/.test(hay);
+    if (term === "lighting") return /\b(floor lamp|floor light|table lamp|table light|pendant|ceiling light|chandelier|sconce|wall light|lantern|lighting|lamp)\b/.test(hay);
+    if (term === "storage") return /\b(cabinet|sideboard|credenza|shelving|bookcase|dresser|chest|armoire)\b/.test(hay);
+    if (term === "bedroom furniture") return /\b(bed|headboard|nightstand|bedside)\b/.test(hay);
+    if (term === "rugs") return /\b(rug|carpet|kilim|dhurrie)\b/.test(hay);
+    if (term === "decor") return /\b(vase|sculpture|object|screen|mirror|art|decor)\b/.test(hay);
+    return false;
+  });
+}
+
+function usableConstraintText(value: unknown): string | null {
+  const raw = String(value || "").trim();
+  if (!raw) return null;
+  const normalized = normalizeLoose(raw.replace(/[\[\]]/g, ""));
+  if (!normalized) return null;
+  if (/^(e g|example|typology|city area|room ceiling height|humidity sun exposure glazing|n weeks|max lead time n weeks|mm|performance criteria exclusions|materials finishes|materials performance|exclusions)$/.test(normalized)) return null;
+  if (normalized.includes("performance criteria") || normalized.includes("exclusions")) return null;
+  return raw;
 }
 
 type RequestedTypology = "dining_table" | "table";
@@ -4184,17 +4258,19 @@ serve(async (req) => {
           if (lc && !knownLc.has(lc)) knownLc.set(lc, n);
         }
         for (const line of foundLines) {
-          // Split on commas AND on " and " to tolerate free-form joining.
-          const tokens = line.split(/,|\band\b/i).map((t) => t.trim()).filter(Boolean);
+          // Split on separators outside parenthetical product notes. This keeps
+          // "Man of Parts (Sandy Cove / Bond Street / Rua Leblon)" intact.
+          const tokens = splitReferenceTokens(line);
           for (const tok of tokens) {
             // Strip trailing parenthetical clarifiers like
             // "Man of Parts (Sandy Cove / Bond Street / Rua Leblon)".
-            const cleaned = tok.replace(/\s*\(.*?\)\s*$/g, "").trim().toLowerCase();
+            const cleaned = normalizeLoose(tok.replace(/\s*\(.*?\)\s*$/g, ""));
             if (!cleaned || cleaned.length < 3) continue;
             // Exact match, or the cleaned token contains a known designer
             // name as a substring (handles "man of parts — sandy cove").
             for (const [lc, orig] of knownLc.entries()) {
-              if (cleaned === lc || cleaned.startsWith(lc + " ") || cleaned.endsWith(" " + lc) || cleaned.includes(lc)) {
+              const known = normalizeLoose(lc);
+              if (cleaned === known || cleaned.startsWith(known + " ") || cleaned.endsWith(" " + known) || cleaned.includes(known)) {
                 parsedReferenceDesigners.push(orig);
                 break;
               }
@@ -4234,9 +4310,9 @@ serve(async (req) => {
     // won't see the brief again after turn 1).
     const parsedTypologyCats: string[] = [];
     {
-      const typRe = /typology[^:\n]*:\s*([^\n]+)/i;
-      const tm = userConversationText.match(typRe);
-      if (tm) {
+      const typRe = /typology[^:\n]*:\s*([^\n]+)/gi;
+      let tm: RegExpExecArray | null;
+      while ((tm = typRe.exec(userConversationText)) !== null) {
         const raw = tm[1].replace(/[\[\]]/g, "");
         // Split on commas, plus, ampersand, slash, and " and "
         const tokens = raw.split(/,|\+|&|\/|\band\b/i).map((t) => t.trim().toLowerCase()).filter(Boolean);
@@ -4245,16 +4321,17 @@ serve(async (req) => {
           const cleaned = t.replace(/\s*x?\s*\d+\s*$/i, "").trim();
           if (cleaned.length >= 3) parsedTypologyCats.push(cleaned);
         }
+        for (const cat of typologyTokensToCategories(tokens)) parsedTypologyCats.push(cat);
       }
     }
     const sqlLoadConstraints: HardConstraints = {
       materials: [
         ...(preRequestConstraints.materials || []),
-        ...((effectiveBrief.brief.materials || []).map((m) => String(m).toLowerCase())),
+        ...((effectiveBrief.brief.materials || []).map(usableConstraintText).filter(Boolean) as string[]),
       ].filter(Boolean),
       colors: preRequestConstraints.colors || [],
       categories: [
-        ...(effectiveBrief.brief.categories || []).map((c) => String(c).toLowerCase()),
+        ...((effectiveBrief.brief.categories || []).map(usableConstraintText).filter(Boolean) as string[]),
         ...parsedTypologyCats,
       ].filter(Boolean),
     };
@@ -4272,6 +4349,7 @@ serve(async (req) => {
       includePieces && !useRag,
       hasScopedDesigners ? scopedDesigners : undefined,
       hasSqlConstraint ? sqlLoadConstraints : undefined,
+      parsedTypologyCats,
     );
     mark("loadCatalogContext", { ms: Math.round(performance.now() - catalogT0), includePieces, useRag });
     // Detect "hard constraints matched zero pieces" so the UI can render a
