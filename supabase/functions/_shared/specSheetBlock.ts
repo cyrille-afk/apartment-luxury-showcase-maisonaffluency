@@ -35,22 +35,37 @@ function clean(v: unknown): string {
 }
 
 /**
- * Append inches after every "<number> cm" occurrence in a dimensions string,
- * matching the trade product page convention: "W 79 cm × D 77 cm x H 67 cm"
- * → "W 79 cm / 31" × D 77 cm / 30" x H 67 cm / 26"".
- * If the string already includes an inch marker (") we skip conversion.
+ * Append an imperial conversion to a metric dimensions string, matching the
+ * site-wide convention used by <ProductPage />:
+ *   "W 82 × D 77 × H 73 cm — SH 41 cm"
+ *   → "W 82 × D 77 × H 73 cm — SH 41 cm | W 32.3 × D 30.3 × H 28.7 — SH 16.1 in"
+ *
+ * Rules:
+ *   • Only runs when the string carries at least one "cm" token.
+ *   • Skips conversion if the string already contains an inch marker (", ″, in).
+ *   • Preserves labels (W/D/H/SH/Ø…) and separators (×, x, —, /, ,).
+ *   • Uses one decimal place, mirroring formatDimensions.ts.
  */
 export function appendInchesToDimensions(input: string | null | undefined): string {
   const s = typeof input === "string" ? input.trim() : "";
   if (!s || s === DASH) return DASH;
-  // Skip if it already carries inch marks or "in" tokens.
   if (/["″]|\bin\b/i.test(s)) return s;
-  return s.replace(/(\d+(?:[.,]\d+)?)\s*cm\b/gi, (_m, num: string) => {
-    const cm = parseFloat(num.replace(",", "."));
-    if (!Number.isFinite(cm)) return _m;
-    const inches = Math.round(cm / 2.54);
-    return `${num} cm / ${inches}"`;
-  });
+  if (!/\bcm\b/i.test(s)) return s;
+
+  const imperial = s
+    // Drop every "cm" token — the trailing " in" will label the whole clause.
+    .replace(/\s*\bcm\b/gi, "")
+    // Convert every numeric literal (including decimals with . or ,) to inches.
+    .replace(/(\d+(?:[.,]\d+)?)/g, (_m, num: string) => {
+      const cm = parseFloat(num.replace(",", "."));
+      if (!Number.isFinite(cm)) return num;
+      return (cm / 2.54).toFixed(1);
+    })
+    .replace(/\s+/g, " ")
+    .trim();
+
+  if (!imperial) return s;
+  return `${s} | ${imperial} in`;
 }
 
 /** Short 8-char SKU derived from the pick UUID — stable and copy-pasteable. */
