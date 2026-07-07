@@ -29,9 +29,16 @@ interface SizeVariantEntry {
   meters?: number | null;
 }
 
+const DIM_RE = /\b(?:cm|mm|in|inches?|")\b|[×xX]\s*\d|Ø\s*\d|\bW\s*\d|\bD\s*\d|\bH\s*\d|\bSH\s*\d/i;
+const looksDimensional = (s: unknown) => typeof s === "string" && DIM_RE.test(s);
+
 /**
  * Normalise a size_variants[].label / .base / .top pairing into a single
  * human-readable label used as the variant key in trade_product_glb_variants.
+ *
+ * GLBs describe geometry only, so when a dual-axis pick pairs a dimensional
+ * `base` with a material/finish `top` (e.g. size × fabric), we key by size
+ * alone. Fabric is swapped at runtime by the viewer.
  */
 function pickSizeLabel(v: {
   label?: string;
@@ -40,8 +47,15 @@ function pickSizeLabel(v: {
   meters?: number | null;
 }): string | null {
   if (v?.label && v.label.trim()) return v.label.trim();
+  const baseDim = looksDimensional(v?.base);
+  const topDim = looksDimensional(v?.top);
+  // Dimensional base + non-dimensional top → keep the size only.
+  if (baseDim && v?.top && !topDim) return (v.base || "").trim() || null;
+  // Non-dimensional base + dimensional top → keep the size only.
+  if (topDim && v?.base && !baseDim) return (v.top || "").trim() || null;
+  // Both dimensional (or both non-dimensional) → combine.
   const combo = [v?.base, v?.top].filter(Boolean).join(" × ");
-  return combo ? combo : null;
+  return combo ? combo.trim() : null;
 }
 
 export function GlbVariantManager({ productId, productName, posterImageUrl, onChange }: Props) {
