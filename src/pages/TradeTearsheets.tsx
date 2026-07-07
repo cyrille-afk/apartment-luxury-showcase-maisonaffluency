@@ -20,6 +20,7 @@ import TradeBreadcrumb from "@/components/trade/TradeBreadcrumb";
 import { getConciergeSession, useConciergeSession } from "@/hooks/useConciergeSession";
 import { withImperialInline } from "@/lib/formatDimensions";
 import { formatLeadTime } from "@/components/trade/AvailabilityBadge";
+import { buildTearsheetPrintHtml } from "@/lib/tearsheetPrintHtml";
 
 interface TearsheetProduct {
   id: string;
