@@ -289,14 +289,17 @@ const TradeAdminGlbModels: React.FC = () => {
                     <input
                       ref={inputRef}
                       type="file"
-                      accept=".glb,.gltf,model/gltf-binary,model/gltf+json"
+                      multiple
+                      accept=".glb,.gltf,.obj,.mtl,.png,.jpg,.jpeg,.webp,.bmp,.tga,.tif,.tiff,model/gltf-binary,model/gltf+json,image/*"
                       className="hidden"
                       onChange={(e) => {
-                        const f = e.target.files?.[0];
-                        if (f) handleUpload(f);
+                        const fs = e.target.files ? Array.from(e.target.files) : [];
+                        if (fs.length) handleUpload(fs);
                       }}
                     />
-                  </label>
+                    <span className="font-body text-[10px] text-muted-foreground text-center leading-relaxed max-w-[260px]">
+                      Accepts .glb / .gltf, or select an .obj together with its .mtl and texture images — we'll convert to GLB in your browser.
+                    </span>
 
                   {selected.glb_url && (
                     <>
