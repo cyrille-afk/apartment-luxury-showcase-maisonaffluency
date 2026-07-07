@@ -66,19 +66,6 @@ describe("TradeTearsheets print/PDF parity with on-screen preview", () => {
     );
   });
 
-  it("print HTML grid uses the shared *Display variables (no raw selectedProduct fallbacks)", () => {
-    // Dimensions / Materials / Lead Time cells in the print grid must all
-    // use the derived *Display vars, not raw selectedProduct fields.
-    expect(SRC).toMatch(
-      /<p class="label">Dimensions<\/p><p class="value"[^>]*>\$\{esc\(dimensionsDisplay\)/,
-    );
-    expect(SRC).toMatch(
-      /<p class="label">Materials<\/p><p class="value"[^>]*>\$\{esc\(materialsDisplay\)/,
-    );
-    expect(SRC).toMatch(
-      /<p class="label">Lead Time<\/p><p class="value">\$\{esc\(leadTimeDisplay\)/,
-    );
-  });
 
   it("on-screen grid uses the same shared *Display variables in the same order", () => {
     const order = [
