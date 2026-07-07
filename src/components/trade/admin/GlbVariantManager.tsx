@@ -470,6 +470,7 @@ export function GlbVariantManager({ productId, productName, posterImageUrl, onCh
             url={preview.glb_url}
             alt={`${productName} — ${preview.variant_label}`}
             poster={posterImageUrl || null}
+            debug
           />
         </div>
       )}
