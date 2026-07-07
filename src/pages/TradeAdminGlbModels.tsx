@@ -38,13 +38,15 @@ const TradeAdminGlbModels: React.FC = () => {
   // Manager section state
   const [managerSearch, setManagerSearch] = useState("");
   const [managerBrand, setManagerBrand] = useState<string>("");
+  const [managerSort, setManagerSort] = useState<SortKey>("updated_desc");
+  const [managerPage, setManagerPage] = useState(1);
 
   // Load products that already have a GLB (used by both sidebar and manager)
   useEffect(() => {
     (async () => {
       const { data } = await supabase
         .from("trade_products")
-        .select("id, product_name, brand_name, image_url, glb_url")
+        .select("id, product_name, brand_name, image_url, glb_url, updated_at")
         .not("glb_url", "is", null)
         .order("updated_at", { ascending: false })
         .limit(500);
