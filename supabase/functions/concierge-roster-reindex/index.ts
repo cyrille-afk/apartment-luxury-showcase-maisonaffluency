@@ -17,8 +17,8 @@
 // - Idempotent: uses ON CONFLICT(name) so a repeat run just refreshes vectors.
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
-import { ROSTER } from "../concierge-public-stream/_roster.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.4";
+import { ROSTER } from "./_roster.ts";
 
 const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY")!;
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
@@ -63,7 +63,8 @@ serve(async (req) => {
     });
   }
 
-  // Admin auth.
+  // Admin auth. Accepts a service-role Bearer (server-to-server / one-off
+  // maintenance triggers) or a user JWT whose sub has the admin role.
   const authHeader = req.headers.get("Authorization") || "";
   const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
   if (!token) {
@@ -71,21 +72,23 @@ serve(async (req) => {
       status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
-  const { data: claimsData, error: claimsErr } = await sb.auth.getClaims(token);
-  const sub = (claimsData?.claims as { sub?: string } | null | undefined)?.sub;
-  if (claimsErr || !sub) {
-    return new Response(JSON.stringify({ error: "Unauthorized" }), {
-      status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+  if (token !== SERVICE_ROLE_KEY) {
+    const { data: claimsData, error: claimsErr } = await sb.auth.getClaims(token);
+    const sub = (claimsData?.claims as { sub?: string } | null | undefined)?.sub;
+    if (claimsErr || !sub) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const { data: isAdmin, error: roleErr } = await sb.rpc("has_role", {
+      _user_id: sub,
+      _role: "admin",
     });
-  }
-  const { data: isAdmin, error: roleErr } = await sb.rpc("has_role", {
-    _user_id: sub,
-    _role: "admin",
-  });
-  if (roleErr || !isAdmin) {
-    return new Response(JSON.stringify({ error: "Forbidden" }), {
-      status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    if (roleErr || !isAdmin) {
+      return new Response(JSON.stringify({ error: "Forbidden" }), {
+        status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
   }
 
   const entries = ROSTER.map((r) => ({
