@@ -1634,6 +1634,7 @@ export type Database = {
           is_active: boolean
           name: string
           slug: string
+          sort_order: number
           synonyms: string[]
           updated_at: string
         }
@@ -1645,6 +1646,7 @@ export type Database = {
           is_active?: boolean
           name: string
           slug: string
+          sort_order?: number
           synonyms?: string[]
           updated_at?: string
         }
@@ -1656,6 +1658,7 @@ export type Database = {
           is_active?: boolean
           name?: string
           slug?: string
+          sort_order?: number
           synonyms?: string[]
           updated_at?: string
         }
@@ -7238,6 +7241,7 @@ export type Database = {
         }
         Returns: string
       }
+      remap_product_descriptors: { Args: never; Returns: number }
       rotate_board_token: { Args: { _board_id: string }; Returns: string }
       sanitize_biography_citations: { Args: { input: string }; Returns: string }
       scan_sec_query: { Args: { _sql: string }; Returns: Json[] }
