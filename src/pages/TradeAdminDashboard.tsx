@@ -65,6 +65,7 @@ const systemGroup: AdminCard[] = [
   { title: "Taxonomy Audit", description: "Find curator picks with non-canonical or mismatched categories", url: "/trade/admin/taxonomy-audit", icon: Layers },
   { title: "Sync Status", description: "Compare Designer Editor vs trade products — flag mismatches", url: "/trade/admin/sync-status", icon: AlertCircle },
   { title: "CAD & 3D Assets", description: "Upload .dwg, .rfa, .skp files per product and per variant", url: "/trade/admin/cad-assets", icon: FileBox },
+  { title: "3D Models (GLB)", description: "Upload .glb/.gltf or .obj+.mtl+textures (auto-converted) — powers the interactive 3D viewer", url: "/trade/admin/glb-models", icon: Box },
   { title: "Fabrics & Finishes", description: "Manage upholstery, wood, leather, stone & metal swatches and link them to products", url: "/trade/admin/fabrics", icon: Layers },
   { title: "Bulk Finishes & Fabrics", description: "Edit available_finishes and fabric_options across many trade products at once (add/remove/replace)", url: "/trade/admin/bulk-finishes", icon: Layers },
   { title: "First-login Flow", description: "Edit welcome panel, Quick Tour steps, and replay onboarding for any user", url: "/trade/admin/onboarding", icon: Sparkle },
