@@ -15,6 +15,8 @@ import { validateTearsheetEdits, realignUnlocked, type ValidationVerdict, type R
 import { ValidationBanner, RowVerdictPill } from "@/components/trade/concierge/ValidationSummary";
 import { RealignmentDiffPanel, type AppliedRealignment } from "@/components/trade/concierge/RealignmentDiffPanel";
 import { TearsheetInsightsSidebar } from "@/components/trade/concierge/TearsheetInsightsSidebar";
+import { PickAssetDrawer } from "@/components/trade/concierge/PickAssetDrawer";
+import { Box } from "lucide-react";
 
 
 type Status = "pending" | "committing" | "approved" | "discarded";
