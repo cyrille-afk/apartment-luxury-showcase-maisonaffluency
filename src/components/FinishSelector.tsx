@@ -88,6 +88,12 @@ interface FinishSelectorProps {
   onWoodFinishPricingChange?: (info: { id: string; name: string; price_cents: number; currency: string; image_url: string | null } | null) => void;
   /** Fires with the list of linked wood-swatch names after fetch. */
   onWoodFinishesAvailable?: (names: string[]) => void;
+  /**
+   * Fires once after swatches load with the first fabric + first wood swatch
+   * image URLs. Purely a preview signal for the 3D configurator; does NOT
+   * alter selection or pricing state.
+   */
+  onPreviewSwatchesResolved?: (preview: { fabricImageUrl: string | null; woodImageUrl: string | null }) => void;
   /** Trade-only: include fabric price/tier fields for quote upcharge math. */
   includePricing?: boolean;
   /**
