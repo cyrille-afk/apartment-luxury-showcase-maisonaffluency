@@ -1,145 +1,120 @@
-
 ## Goal
 
-Every "Price on Request" submission and every qualified Concierge lead lands in a new **/admin/inquiries** inbox. From there the admin generates a **draft quote** (public client-facing or internal trade), reviews the pre-filled line items and pricing, then marks it **Ready to send** — no automated email goes to the visitor.
+Close the last two gaps in the concierge stack:
+
+1. **Grounding for `concierge-public-stream`** — today the public endpoint has zero retrieval and relies entirely on the system prompt to keep the model on-brand. It can and does invent designer names, ateliers, and product details. Add a grounding layer so every reply is anchored to a small, curated slice of real Maison Affluency content.
+2. **Bidirectional handoff on the SSE stream** — today the server → client direction runs on SSE and the client → server direction runs on fresh POSTs. There is no live back-channel for "user just locked a brief / picked a product / dismissed a proposal". Add a Supabase Realtime broadcast channel keyed by `stream_id` so both directions share one addressable session.
+
+Scope is deliberately narrow: no changes to `trade-concierge` (already has RAG + resume), no schema-breaking migrations, no UI redesign.
 
 ---
 
-## 1. Data model changes (one migration)
+## Part 1 — Grounding for `concierge-public-stream`
 
-### `public.inquiries` — extend
+### Approach: hard scripted grounding first, RAG second (behind the same interface)
 
-Add columns:
-- `source` (text) — `public_product` · `concierge_lead` · `contact_form`
-- `product_id` (uuid, nullable) — matched `trade_products.id`
-- `product_slug`, `product_name`, `designer_name` (text, nullable) — snapshot in case product is later renamed
-- `concierge_lead_id` (uuid, nullable, FK `concierge_leads.id`)
-- `status` (text, default `new`) — `new` · `in_review` · `quote_drafted` · `ready_to_send` · `sent` · `closed` · `rejected`
-- `linked_quote_id` (uuid, nullable, FK `trade_quotes.id`)
-- `assigned_admin_id` (uuid, nullable)
-- `admin_notes` (text)
+The public endpoint currently ships **11 named entities** in its system prompt (Andrée Putman, Yovanovitch, Man of Parts, Mahdavi, Alexander Lamont, plus "many others"). The model then extrapolates freely from there. We replace that with a two-tier grounding pipeline invoked before the upstream chat call:
 
-Index on `(status, created_at DESC)`.
+**Tier A — deterministic roster grounding (scripted)**
+- New file `supabase/functions/concierge-public-stream/_grounding.ts` exports a curated roster: `{ designers: [...], ateliers: [...], hero_pieces: [...] }`.
+- Roster is generated at deploy time by a small script from the `designers`, `featured_studios_public`, and `designer_curator_picks_public` tables (public rows only, no pricing). Kept inline in the function bundle so there is zero DB latency on the hot path.
+- Each entry is 1–2 sentences (name, discipline, one anchor fact) — the model quotes from this snippet, not from its training data.
 
-### `public.concierge_leads` → inquiries bridge
+**Tier B — semantic retrieval (optional, gated)**
+- When the trimmed user turn is > 20 chars and mentions a discipline/room/style token, embed the query via `openai/text-embedding-3-small` and call the existing `match_catalog` RPC with a **public-safe projection** (a new `match_catalog_public` RPC — same body, restricted columns: `id, title, designer_name, category, subcategory, hero_image_url` — never pricing, lead times, or stock).
+- Top-8 rows appended to the grounding block. Falls back silently to Tier A only on error or < 3 rows.
 
-Trigger `AFTER INSERT` on `concierge_leads` (when a lead has `email` + `intent = 'quote'` or an equivalent qualifying flag) inserts a matching row into `inquiries` with `source = 'concierge_lead'`.
-
-### RLS
-
-- Insert: `service_role` only (edge functions).
-- Select/Update/Delete: `has_role(auth.uid(), 'admin')`.
-
----
-
-## 2. Capture path A — Public "Price on Request"
-
-`ProductPage.tsx` / `PublicProductPage.tsx` already call `send-inquiry`. Extend the payload with:
+**Prompt injection shape**
 
 ```
-{ product_id, product_slug, product_name, designer_name, source: 'public_product' }
+[Verified Maison Affluency roster — quote only from this list; do not invent names]
+Designers:
+- Andrée Putman — French interior designer known for minimalist luxury (b.1925).
+- ...
+Ateliers we currently represent:
+- Pouénat — Parisian ferronnerie house, AD100 (2025).
+- ...
+Sample of pieces referenced publicly:
+- "Rift Cabinet" by Man of Parts (case goods).
+- ...
+[End roster]
 ```
 
-`send-inquiry` edge function persists these fields into `inquiries` (currently only writes contact info + message).
+System prompt gains one hard rule: *"Never mention a designer, atelier, or piece that is not in the roster above. If asked about someone outside it, say the gallery may still be able to source them and offer to note the enquiry."*
 
-## 3. Capture path B — Concierge leads
+### Guard rails
+- Roster block capped at ~2 kB so cache prefixes stay warm on Gemini.
+- `logAiUsage({ feature: "public-concierge-rag", ... })` for the embed call, same pattern as `trade-concierge-rag`.
+- Ship Tier A on day 1; Tier B behind a `PUBLIC_RAG_ENABLED` env flag so we can dark-launch.
 
-The `concierge_leads` insert trigger writes an inquiry with the lead's captured `name/email/phone/company/message`, `source = 'concierge_lead'`, and product context if the lead's `qualifier` JSON contains a resolved product/designer.
+### Files touched
+- `supabase/functions/concierge-public-stream/index.ts` — assemble grounding block, inject into `messages`, tighten SYSTEM_PROMPT.
+- `supabase/functions/concierge-public-stream/_grounding.ts` (new) — roster snippet + `buildGroundingBlock({ query, useRag })`.
+- `supabase/migrations/<ts>_match_catalog_public.sql` (new) — `match_catalog_public` RPC + `GRANT EXECUTE TO authenticated` (endpoint requires auth).
+- `scripts/build-public-concierge-roster.ts` (new, one-shot regeneration script that writes `_grounding.roster.json` into the function dir).
 
----
-
-## 4. Admin inbox — `/admin/inquiries`
-
-New route gated by admin role.
-
-Layout:
-```text
-┌──────────────────────────────────────────────────────────┐
-│ Filters: status ▾  source ▾  search                       │
-├────────────┬─────────────────────────────────────────────┤
-│ Inquiry    │ Detail panel                                 │
-│ list       │  visitor · message · product card            │
-│ (compact   │  status pill · admin notes                   │
-│ rows)      │  ┌───────── Draft quote ───────────┐        │
-│            │  │ Type: (•) Public   ( ) Trade    │        │
-│            │  │ Line: Socle Table Lamp — Felix… │        │
-│            │  │ Price: [ Price on Request ] ▾   │        │
-│            │  │ [ Generate draft quote ]        │        │
-│            │  └─────────────────────────────────┘        │
-│            │  [ Mark ready to send ]  [ Reject ]          │
-└────────────┴─────────────────────────────────────────────┘
-```
-
-Actions:
-- **Generate draft quote** — creates a `trade_quotes` row with `status = 'draft'`, `internal_only = true`, one `trade_quote_items` row derived from `product_id` (auto-pulls MSRP + trade price). Public vs trade toggle controls the `quote_kind` and pricing shown.
-- **Mark ready to send** — sets inquiry `status = 'ready_to_send'` and enqueues an admin notification email with a deep link to the quote page. No email to visitor.
-- **Reject** — sets `status = 'rejected'` with the reason stored in `admin_notes`.
-
-Links:
-- Existing header/admin nav gets an **Inquiries** entry with an unread-count badge (`status = 'new'`).
+### Verification
+- Add a unit test `concierge-public-stream/grounding_test.ts`: given a query "Do you carry Pierre Chareau?" the grounding block must include Chareau if on-roster, and the response must not invent a fake designer when asked "Do you carry Foobar Studios?" — deterministic check on the injected roster contents, not the model output.
+- Manual: 5 canned adversarial prompts ("recommend a chandelier by X" where X is off-roster) run through `supabase--curl_edge_functions` and eyeball the reply for hallucination.
 
 ---
 
-## 5. Draft quote generation
+## Part 2 — Bidirectional handoff on `stream_session`
 
-Reuse existing `trade_quotes` + `trade_quote_items` tables. New helper edge function `draft-quote-from-inquiry`:
+### Approach: Supabase Realtime broadcast channel named `concierge:<stream_id>`
 
-Inputs: `inquiry_id`, `quote_kind: 'public' | 'trade'`.
+`installFramePersistence` already mints `stream_id` (UUID) and writes `concierge_stream_sessions`. Reuse that id as the Realtime channel name. Both sides publish and subscribe.
 
-Behavior:
-1. Load inquiry and matched product.
-2. Insert a `trade_quotes` row: `status = 'draft'`, `visitor_name`, `visitor_email`, `visitor_phone`, `internal_only = true`, `owner_admin_id = auth.uid()`, `source_inquiry_id = inquiry.id`.
-3. Insert one `trade_quote_items` row: product snapshot (name, designer, MSRP, trade_price, image).
-4. Update inquiry: `linked_quote_id`, `status = 'quote_drafted'`.
-5. Return the quote id so the admin UI can navigate to `/trade/quote/:id?draftFrom=<inquiry_id>` for line-item edits.
+**Server → client events** (already covered by SSE; broadcast is additive for multi-tab / late-joiner cases):
+- `proposal_ready` — a tearsheet/quote/FFE card is available on the timeline.
+- `stream_completed` — turn finished, safe to release the composer.
 
-Trade quotes already support tier pricing; adding two new columns (`quote_kind` default `trade`, `source_inquiry_id` nullable) keeps public drafts distinct without a schema fork.
+**Client → server events** (this is the new bit, and it's the missing side of #6):
+- `brief_locked` — the Brief Builder was completed; payload = structured brief. Server persists to `brief_drafts` and, if the isolate is still alive on this stream, injects the brief into the next model turn without requiring a fresh POST.
+- `product_selected` — user picked a product from the PickAssetDrawer / tearsheet.
+- `finishes_locked` — wood + fabric picks committed.
+- `proposal_dismissed` — user rejected a card; server logs to `trade_concierge_actions` for future preference learning.
 
----
+**Why broadcast (not `postgres_changes`)**: no write amplification on hot tables, sub-100ms fan-out, and the channel dies when the last subscriber leaves. RLS is handled by requiring the channel name to include the `stream_id` (a UUID the requester already proved ownership of at POST time).
 
-## 6. Admin notification on "Ready to send"
+### Wire-up
 
-New app email template `inquiry-quote-ready.tsx` (React Email, existing infra). Sent to `concierge@myaffluency.com`:
-- Visitor name/email
-- Product line
-- Direct link to `/trade/quote/:id`
-- Notes
+Server side (`_resume.ts`, additions):
+- New `openHandoffChannel({ streamId, userId })` helper — creates the channel with the service-role client and returns `{ emit(event, payload), close() }`.
+- `installFramePersistence` opens the channel and hands the emitter back to the caller.
+- `finalize()` broadcasts `stream_completed` before closing.
+- New handler in `index.ts` for `POST /concierge-handoff` (same function, new subpath) that accepts `{ stream_id, event, payload }`, verifies the caller's JWT `sub` matches `concierge_stream_sessions.user_id`, and broadcasts on the channel — plus persists `brief_locked` / `finishes_locked` into their respective tables.
 
-No email to the visitor at any step.
+Client side (`src/lib/tradeConciergeStream.ts`, `src/components/trade/AIConcierge.tsx`, `src/hooks/useConciergeSession.ts`):
+- On `stream_start`, subscribe to `supabase.channel(\`concierge:${stream_id}\`)`.
+- `useConciergeSession` gains `emit(event, payload)` that both updates local state AND posts to `/concierge-handoff`.
+- Existing brief-builder submit / product-pick handlers call `emit()` instead of (or in addition to) creating a brand-new turn POST.
+- Channel torn down on `stream_completed` or component unmount.
 
----
+### Files touched
+- `supabase/functions/trade-concierge/_resume.ts` — add `openHandoffChannel` + broadcast in `finalize`.
+- `supabase/functions/trade-concierge/index.ts` — add `/concierge-handoff` subpath handler, thread the channel emitter through the streaming turn so mid-turn client events can influence the next tool call.
+- `supabase/functions/concierge-public-stream/index.ts` — same handoff subpath, so public visitors also get the bidirectional channel (server → client only for the public surface; brief/product events aren't relevant there).
+- `src/lib/tradeConciergeStream.ts` — parse `stream_start`, expose `streamId` in `streamConcierge` callbacks.
+- `src/hooks/useConciergeSession.ts` — add `emit` method + realtime subscription hook.
+- `src/components/trade/AIConcierge.tsx` — replace ad-hoc `dispatchEvent(new Event(...))` handoffs with `emit()` calls where appropriate.
+- New migration granting `authenticated` role realtime access to the specific channel namespace via `realtime.set_config` — no new tables.
 
-## 7. Files to add / edit
-
-**Migration**
-- extend `public.inquiries`, add trigger on `concierge_leads`, add `quote_kind` + `source_inquiry_id` on `trade_quotes`.
-
-**Edge functions**
-- `send-inquiry/index.ts` — accept + persist product context.
-- `draft-quote-from-inquiry/index.ts` — new.
-- `_shared/transactional-email-templates/inquiry-quote-ready.tsx` — new + register.
-
-**Frontend**
-- `src/pages/admin/InquiriesInbox.tsx` — new (list + detail).
-- `src/components/admin/InquiryRow.tsx`, `InquiryDetail.tsx`, `DraftQuotePanel.tsx` — new.
-- `src/pages/ProductPage.tsx` + `PublicProductPage.tsx` — pass product context to `send-inquiry`.
-- Admin nav — add "Inquiries" with unread badge.
-- Route registration in `App.tsx` under `/admin/inquiries`, guarded by `has_role('admin')`.
-
----
-
-## 8. Out of scope (confirm if desired later)
-
-- Auto-emailing the visitor when the quote is sent.
-- PDF quote generation from an inquiry (existing quote PDF flow already covers this once the draft is opened).
-- Matching products by fuzzy name when the inquiry has no `product_id` (contact form path) — for now those inquiries land in the inbox without a pre-filled line item; admin adds items manually.
+### Verification
+- Playwright e2e: open two tabs on `/trade` for the same user, start a concierge turn in tab A, lock the brief in tab B, confirm tab A's UI receives `brief_locked` and the next assistant turn cites the brief without a fresh page load.
+- Server-side unit test in `_resume.ts` companion test file: mock supabase client, assert `openHandoffChannel().emit("proposal_ready", ...)` calls `channel.send` with the expected shape.
+- Manual: kill the tab mid-turn, reopen, verify `serveResume` still terminates cleanly (no channel leak) — the finalize path must broadcast + close in one atomic block.
 
 ---
 
-## Technical notes
+## Non-goals for this change
+- No changes to the RAG pipeline in `trade-concierge` (already mature).
+- No new tables; both parts reuse existing infra (`concierge_stream_sessions`, `brief_drafts`, `trade_concierge_actions`).
+- No changes to auth model — the public endpoint stays behind its member-only JWT gate.
+- No LLM model swap.
 
-- `has_role(auth.uid(), 'admin')` gates every read/write and the `/admin/inquiries` route.
-- Edge functions use `service_role` for inserts (RLS blocks `authenticated`/`anon` writes).
-- The `concierge_leads → inquiries` trigger is idempotent via `ON CONFLICT (concierge_lead_id) DO NOTHING`.
-- `linked_quote_id` uses `ON DELETE SET NULL` so purging a draft quote doesn't orphan the inquiry.
-- No changes to the existing visitor-facing confirmation email; that still fires.
+## Rollout order
+1. Ship Part 1 Tier A (scripted roster) — smallest surface, immediate hallucination reduction.
+2. Ship Part 2 server side + client subscription (server → client redundancy), verify no regressions on the SSE path.
+3. Turn on Part 2 client → server events (brief_locked first, others behind a feature flag).
+4. Ship Part 1 Tier B (semantic retrieval) once the public RPC is reviewed.
