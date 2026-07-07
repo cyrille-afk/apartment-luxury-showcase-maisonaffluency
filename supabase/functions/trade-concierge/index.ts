@@ -4201,7 +4201,7 @@ serve(async (req) => {
     // friendly empty-state and the model can acknowledge it warmly instead of
     // hallucinating alternatives.
     const ragEmpty = useRag && hasAnyPreConstraint && (!ragResult || !Array.isArray((ragResult as any).rows) || (ragResult as any).rows.length === 0 || !(ragResult as { contextText: string }).contextText);
-    const sqlEmpty = !useRag && hasSqlConstraint && !mentionsKnownDesigner && (fullPiecesList === "No pieces currently loaded." || !fullPiecesList);
+    const sqlEmpty = !useRag && hasSqlConstraint && !hasScopedDesigners && (fullPiecesList === "No pieces currently loaded." || !fullPiecesList);
     const constraintsMatchedZero = ragEmpty || sqlEmpty;
     const constraintsEmptySource: "rag" | "sql" | null = ragEmpty ? "rag" : sqlEmpty ? "sql" : null;
     const emptyConstraintNote = constraintsMatchedZero
