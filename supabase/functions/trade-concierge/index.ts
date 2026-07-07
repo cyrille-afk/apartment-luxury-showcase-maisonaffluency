@@ -4538,8 +4538,23 @@ serve(async (req) => {
         const previewRaw = previewRawAll.filter((p: any) => p?.id && !excludedIds.has(p.id));
         const finalIds = pickIds.filter((id: string) => validIds.has(id) && !excludedIds.has(id));
         if (finalIds.length === 0) {
+          console.warn("[concierge finalIds=0]", JSON.stringify({
+            designerLabel,
+            pickIdsCount: pickIds.length,
+            previewRawAllCount: previewRawAll.length,
+            validIdsCount: validIds.size,
+            excludedIdsCount: excludedIds.size,
+            userMsg: String(lastUserMsg || "").slice(0, 200),
+          }));
+          if (excludedIds.size > 0) {
+            return sseTextResponse(
+              `Your skip list would remove every ${designerLabel} piece — nothing left to propose. Send the message again with a shorter exclusion (or say "list all ${designerLabel}" for the full set).`,
+            );
+          }
+          // No user exclusion — the pipeline dropped the picks itself. Don't
+          // blame the user's message.
           return sseTextResponse(
-            `Your skip list would remove every ${designerLabel} piece — nothing left to propose. Send the message again with a shorter exclusion (or say "list all ${designerLabel}" for the full set).`,
+            `I matched ${pickIds.length} ${designerLabel} piece${pickIds.length === 1 ? "" : "s"} for that request but couldn't hydrate them for the tearsheet. Try again with the specific piece name (e.g. "Rua Leblon lounge chair by Man of Parts and 3 harmonising pieces"), or say "list all ${designerLabel}" and I'll pick from there.`,
           );
         }
         // Confirmation gate: don't ship the tear sheet on the same turn the
