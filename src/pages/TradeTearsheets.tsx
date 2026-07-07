@@ -17,6 +17,7 @@ import { useStudio } from "@/hooks/useStudio";
 import { normalizeCategory, normalizeSubcategory, CATEGORY_ORDER, getSubcategoriesForCategory } from "@/lib/productTaxonomy";
 import { ProjectPicker } from "@/components/trade/ProjectPicker";
 import TradeBreadcrumb from "@/components/trade/TradeBreadcrumb";
+import { getConciergeSession, useConciergeSession } from "@/hooks/useConciergeSession";
 
 interface TearsheetProduct {
   id: string;
