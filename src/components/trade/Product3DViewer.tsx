@@ -178,10 +178,11 @@ const Product3DViewer: React.FC<Props> = ({
 
   // Re-apply / restore textures whenever a swatch changes.
   useEffect(() => {
-    if (!ready) return;
+    if (!opened || !ready) return;
     const mv = mvRef.current;
     if (!mv) return;
     let cancelled = false;
+
 
     const applyTextures = async () => {
       const model = mv.model;
