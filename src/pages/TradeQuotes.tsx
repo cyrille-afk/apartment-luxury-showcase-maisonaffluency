@@ -159,6 +159,66 @@ const TradeQuotes = () => {
     if (q && q !== selectedQuoteId) setSelectedQuoteId(q);
   }, [quoteId, searchParams, selectedQuoteId]);
 
+  // Concierge session handoff: when arriving with ?fromSession=1, auto-create a
+  // draft quote seeded with the brief + product + finishes summary in `notes`,
+  // stamp the quote id back into the session, and open the detail view. The
+  // guard fires once per session id per mount.
+  const sessionSeedRef = useState<{ done: string | null }>({ done: null })[0];
+  useEffect(() => {
+    if (!user) return;
+    if (searchParams.get("fromSession") !== "1") return;
+    const sess = getConciergeSession();
+    if (!sess) return;
+    if (sessionSeedRef.done === sess.id) return;
+    sessionSeedRef.done = sess.id;
+
+    (async () => {
+      // If the session already has a quoteId, just open it.
+      if (sess.quoteId) {
+        setSelectedQuoteId(sess.quoteId);
+        const clean = new URLSearchParams(searchParams);
+        clean.delete("fromSession");
+        setSearchParams(clean, { replace: true });
+        return;
+      }
+      if (currentStudio && !canEdit) return;
+
+      const finishLine = [
+        sess.finishes.fabric && `Fabric: ${sess.finishes.fabric}`,
+        sess.finishes.wood && `Wood: ${sess.finishes.wood}`,
+        sess.finishes.variant && `Variant: ${sess.finishes.variant}`,
+      ].filter(Boolean).join(" · ");
+      const notesParts = [
+        sess.product ? `Concierge selection: ${sess.product.title}${sess.product.designer_name ? ` — ${sess.product.designer_name}` : ""}` : null,
+        finishLine ? `Locked finishes — ${finishLine}` : null,
+        sess.briefText ? `\n— Brief —\n${sess.briefText}` : null,
+      ].filter(Boolean);
+
+      const { data, error } = await supabase
+        .from("trade_quotes")
+        .insert({
+          user_id: user.id,
+          studio_id: currentStudio?.id ?? null,
+          status: "draft",
+          notes: notesParts.length ? notesParts.join("\n\n") : null,
+        } as any)
+        .select()
+        .single();
+      if (error || !data) {
+        toast({ title: "Could not start quote", description: error?.message || "Please try again.", variant: "destructive" });
+        return;
+      }
+      updateConciergeSession({ quoteId: (data as any).id });
+      const clean = new URLSearchParams(searchParams);
+      clean.delete("fromSession");
+      setSearchParams(clean, { replace: true });
+      setSelectedQuoteId((data as any).id);
+      toast({ title: "Quote seeded from concierge session", description: "Your brief and locked finishes were added to the quote notes." });
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, currentStudio, canEdit, searchParams]);
+
+
   const handleCreateQuote = async () => {
     if (!user) return;
     if (currentStudio && !canEdit) {
