@@ -6,9 +6,12 @@ import { fillTradeProductImageFallbacks } from "@/lib/tradeProductImageFallback"
 import { useAuth } from "@/hooks/useAuth";
 import { useState, useRef, useMemo, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
-import { FileText, Loader2, Search, Printer } from "lucide-react";
+import { FileText, Loader2, Search, Printer, LayoutGrid, Check } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { useToast } from "@/hooks/use-toast";
+import { useUserBoards } from "@/hooks/useUserBoards";
 import { normalizeCategory, normalizeSubcategory, CATEGORY_ORDER, getSubcategoriesForCategory } from "@/lib/productTaxonomy";
 import { ProjectPicker } from "@/components/trade/ProjectPicker";
 import TradeBreadcrumb from "@/components/trade/TradeBreadcrumb";
