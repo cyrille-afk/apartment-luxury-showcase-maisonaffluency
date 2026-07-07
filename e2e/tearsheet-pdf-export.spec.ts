@@ -137,10 +137,11 @@ test("tearsheet PDF export includes lead time, imperial inches, and finishes lay
   expect(flat, "PDF must contain a 'Lead Time' label").toContain(collapse("Lead Time"));
   expect(pdfText, "PDF must show the derived lead time verbatim").toContain(leadTimeDisplay!);
 
-  // 2. Imperial inches — verbatim rendered dimensions string, plus a numeric
-  //    inches token to guarantee the conversion actually ran (not just cm).
-  expect(pdfText, "PDF must contain the same dimensions string as the UI").toContain(
-    dimensionsDisplay!,
+  // 2. Imperial inches — verbatim rendered dimensions string (whitespace-
+  //    normalized to survive pdftotext's -layout line wrapping), plus a
+  //    numeric inches token to guarantee the conversion actually ran.
+  expect(flat, "PDF must contain the same dimensions string as the UI").toContain(
+    collapse(dimensionsDisplay!),
   );
   expect(flat, "PDF must show an inches conversion").toMatch(/\d+(\.\d+)?in\b/);
 
