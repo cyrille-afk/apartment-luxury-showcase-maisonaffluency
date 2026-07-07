@@ -109,17 +109,48 @@ export function buildQuerySpecialties(query: string): string {
  *   listed, say the gallery may still be able to source them and offer
  *   to note the enquiry — do NOT invent a bio, piece, or provenance.
  */
-export function buildGroundingBlock(query: string): string {
+export function buildGroundingBlock(
+  query: string,
+  semanticHits: readonly RosterEntry[] = [],
+): string {
   const specialties = buildQuerySpecialties(query);
   const parts: string[] = [
     "[Verified Maison Affluency roster — the ONLY designers, studios, and ateliers you may name]",
     ROSTER_NAMES_BLOCK,
   ];
+
+  // Merge lexical hits (exact substring matches on names) with semantic hits
+  // (top-K cosine similarity from concierge_roster_embeddings). Lexical wins
+  // on ties — a direct name mention is stronger evidence than embedding
+  // similarity — and the union is capped at 10 entries so the block stays
+  // bounded.
+  const merged: RosterEntry[] = [];
+  const seen = new Set<string>();
+  const push = (e: RosterEntry) => {
+    if (seen.has(e.name)) return;
+    seen.add(e.name);
+    merged.push(e);
+  };
+  // Lexical hits first.
   if (specialties) {
-    parts.push("");
-    parts.push("[Facts for this query — quote from these lines, don't paraphrase from memory]");
-    parts.push(specialties);
+    for (const line of specialties.split("\n")) {
+      const [n, s] = line.split(" — ");
+      const entry = ROSTER_INDEX.get((n || "").toLowerCase().trim());
+      if (entry) push(entry);
+      else if (n) push({ name: n.trim(), specialty: (s || "").trim() });
+    }
   }
+  for (const h of semanticHits) push(h);
+
+  if (merged.length > 0) {
+    const lines = merged
+      .slice(0, 10)
+      .map((e) => (e.specialty ? `${e.name} — ${e.specialty}` : e.name));
+    parts.push("");
+    parts.push("[Most relevant roster members for this query — quote from these lines, don't paraphrase from memory]");
+    parts.push(lines.join("\n"));
+  }
+
   parts.push("");
   parts.push(
     "[Grounding rule] Never name a designer, atelier, piece, exhibition, or " +
