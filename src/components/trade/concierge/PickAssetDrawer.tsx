@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Product3DViewer from "@/components/trade/Product3DViewer";
-import { cn } from "@/lib/utils";
 import { FileText, Loader2 } from "lucide-react";
 
 interface Swatch {
