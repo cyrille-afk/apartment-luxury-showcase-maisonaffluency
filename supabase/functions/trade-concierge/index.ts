@@ -4186,7 +4186,7 @@ serve(async (req) => {
       "design", "designs", "designer", "designers", "studio", "studios",
       "atelier", "ateliers", "editions", "edition", "objects", "collection",
       "collections", "paris", "milano", "london", "and", "the", "by", "of",
-      "co", "company", "group", "maison", "house", "works",
+      "co", "company", "group", "maison", "house", "works", "profile",
     ]);
     const normalizedUserMsg = normalizeLoose(lastUserMsg || "");
     const userMsgTokens = new Set(normalizedUserMsg.split(/\s+/).filter(Boolean));
@@ -4281,10 +4281,15 @@ serve(async (req) => {
     }
 
     // Merge live-text mentions + LLM-extracted brief designers + deterministic
-    // REFERENCES parse (dedup, case-insensitive). The deterministic parse is
-    // the source of truth when the user is following up on a prior brief.
+    // REFERENCES parse (dedup, case-insensitive). If a structured REFERENCES
+    // line exists, it is the allow-list source of truth — do not merge casual
+    // token matches, otherwise labels like "PROJECT PROFILE" can match the
+    // brand "Lost Profile Studio" and leak unrelated pieces.
     const scopedDesignerSet = new Map<string, string>();
-    for (const n of [...mentionedDesigners, ...briefDesignerNames, ...parsedReferenceDesigners]) {
+    const scopeSource = parsedReferenceDesigners.length > 0
+      ? parsedReferenceDesigners
+      : [...mentionedDesigners, ...briefDesignerNames];
+    for (const n of scopeSource) {
       const key = n.toLowerCase();
       if (!scopedDesignerSet.has(key)) scopedDesignerSet.set(key, n);
     }
