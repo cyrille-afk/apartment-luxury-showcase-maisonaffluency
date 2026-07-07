@@ -98,12 +98,16 @@ Deno.test("semantic hits are merged into the details section", () => {
 
 Deno.test("lexical hits win over semantic hits on dedupe", () => {
   // A roster entry hit by both lexical name-match and semantic retrieval
-  // should appear exactly once in the merged block.
+  // should appear exactly once in the merged DETAILS section (it also
+  // appears in the allow-list block, which is unrelated).
   const block = buildGroundingBlock("Tell me about Chareau", [
     { name: "Pierre Chareau", specialty: "Different specialty from semantic side" },
   ]);
-  const occurrences = block.split("Pierre Chareau").length - 1;
-  assertEquals(occurrences, 1, "Pierre Chareau should appear once after dedupe");
+  const detailsIdx = block.indexOf("Most relevant roster members");
+  assert(detailsIdx > -1, "details section should be present");
+  const details = block.slice(detailsIdx);
+  const occurrences = details.split("Pierre Chareau").length - 1;
+  assertEquals(occurrences, 1, "Pierre Chareau should appear once in details after dedupe");
 });
 
 Deno.test("specialties block is capped at 8 hits", () => {
