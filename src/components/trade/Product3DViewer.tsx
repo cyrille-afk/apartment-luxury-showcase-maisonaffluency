@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Box } from "lucide-react";
+import { AlertTriangle, Box } from "lucide-react";
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
