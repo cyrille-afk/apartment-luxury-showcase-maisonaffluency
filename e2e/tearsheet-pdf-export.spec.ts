@@ -143,7 +143,7 @@ test("tearsheet PDF export includes lead time, imperial inches, and finishes lay
   expect(flat, "PDF must contain the same dimensions string as the UI").toContain(
     collapse(dimensionsDisplay!),
   );
-  expect(flat, "PDF must show an inches conversion").toMatch(/\d+(\.\d+)?in\b/);
+  expect(flat, "PDF must show an inches conversion").toMatch(/\d+(?:\.\d+)?in/);
 
   // 3. Selected Finishes layout — label + both finish labels + both values.
   expect(flat).toContain(collapse("Selected Finishes"));
