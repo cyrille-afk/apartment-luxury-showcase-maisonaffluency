@@ -38,6 +38,8 @@ interface TearsheetProduct {
 
 export default function TradeTearsheets() {
   const { user } = useAuth();
+  const navigate = useNavigate();
+  const { session: conciergeSession, reset: resetConcierge } = useConciergeSession();
   const [search, setSearch] = useState("");
   const [filterDesigner, setFilterDesigner] = useState("");
   const [filterCategory, setFilterCategory] = useState("");
