@@ -77,16 +77,20 @@ const TradeAdminGlbModels: React.FC = () => {
 
 
   const handleRemove = async (row: ProductRow) => {
-    if (!confirm(`Remove the 3D model from "${row.product_name}"?`)) return;
+    if (!confirm(`Remove ALL 3D models from "${row.product_name}"? This deletes every uploaded variant.`)) return;
+    // Delete every variant row. The AFTER trigger will null out trade_products.glb_url.
     const { error } = await supabase
-      .from("trade_products")
-      .update({ glb_url: null })
-      .eq("id", row.id);
+      .from("trade_product_glb_variants")
+      .delete()
+      .eq("product_id", row.id);
     if (error) {
       toast.error(error.message);
       return;
     }
-    toast.success("3D model removed");
+    // Belt-and-braces: also clear the legacy column for products that were never
+    // migrated (e.g. glb_url written before the variants table existed).
+    await supabase.from("trade_products").update({ glb_url: null }).eq("id", row.id);
+    toast.success("All 3D models removed");
     if (selected?.id === row.id) setSelected({ ...row, glb_url: null });
     setReloadKey((k) => k + 1);
   };
