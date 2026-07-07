@@ -31,7 +31,11 @@ const TradeAdminGlbModels: React.FC = () => {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [reloadKey, setReloadKey] = useState(0);
 
-  // Load products that already have a GLB
+  // Manager section state
+  const [managerSearch, setManagerSearch] = useState("");
+  const [managerBrand, setManagerBrand] = useState<string>("");
+
+  // Load products that already have a GLB (used by both sidebar and manager)
   useEffect(() => {
     (async () => {
       const { data } = await supabase
@@ -39,7 +43,7 @@ const TradeAdminGlbModels: React.FC = () => {
         .select("id, product_name, brand_name, image_url, glb_url")
         .not("glb_url", "is", null)
         .order("updated_at", { ascending: false })
-        .limit(100);
+        .limit(500);
       setWithGlb((data as ProductRow[]) || []);
     })();
   }, [reloadKey]);
