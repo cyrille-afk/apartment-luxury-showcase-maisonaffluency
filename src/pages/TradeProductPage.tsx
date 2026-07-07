@@ -2377,6 +2377,25 @@ const TradeProductPage: React.FC = () => {
                     const variantLabelParts = [selectedBase, selectedTop, selectedDualSize, selectedSingleSize]
                       .filter(Boolean).map(String);
                     if (variantLabelParts.length) params.set("variant", variantLabelParts.join(" · "));
+                    // Persist product + locked finishes into the concierge session
+                    // so the Tearsheet Builder and Quote flow can carry them forward.
+                    updateConciergeSession({
+                      product: {
+                        id: product.id,
+                        title: product.title,
+                        designer_name: product.designer_name ?? null,
+                        imageUrl: selectedFabric?.image_url ?? null,
+                        source: "trade",
+                      },
+                      finishes: {
+                        fabric: selectedFabric?.name ?? null,
+                        fabricImg: selectedFabric?.image_url ?? null,
+                        wood: selectedWoodPrice?.name ?? null,
+                        woodImg: selectedWoodPrice?.image_url ?? null,
+                        variant: variantLabelParts.length ? variantLabelParts.join(" · ") : null,
+                      },
+                      locked: true,
+                    });
                     navigate(`/trade/tearsheets?${params.toString()}`);
                   }}
                   className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-md font-body text-[11px] uppercase tracking-[0.12em] transition-all border border-foreground/30 bg-foreground text-background hover:bg-foreground/90 w-full"
