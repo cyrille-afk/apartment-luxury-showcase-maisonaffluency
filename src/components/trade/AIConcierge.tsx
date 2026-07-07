@@ -36,13 +36,28 @@ function detectProjectScale(
   const text = message.trim();
 
   // Strong typology keywords (GCB, penthouse, villa, etc.) reveal project scale
-  // even in short messages like "a GCB living room" — but only fire AFTER at
-  // least one prior user turn so the concierge has had a chance to qualify the
-  // city/scope conversationally first. On turn 1, wait for a longer message
-  // (≥25 chars) so the brief doesn't slam open the instant "GCB" is detected.
+  // even in shortish messages like "a GCB living room" — but the trigger is
+  // gated on both message length AND how many turns the user has taken so the
+  // brief doesn't slam open on a passing mention.
+  //
+  //   • Turn 1 (priorUserTurns = 0): require 25 chars regardless — let the
+  //     concierge qualify conversationally first.
+  //   • Turn 2 (priorUserTurns = 1): require 14 chars + strong keyword. Blocks
+  //     casual mentions like "a GCB?" (7), "not a GCB" (9), "GCB living" (10)
+  //     while allowing "a GCB living room" (17), "GCB in Singapore" (16).
+  //   • Turn 3+ (priorUserTurns ≥ 2): require 10 chars + strong keyword. By
+  //     now the user has clearly committed to the topic.
+  //
+  // Also reject explicit negations ("not a GCB", "isn't a villa") which would
+  // otherwise trip the keyword regex.
+  const negationRe = /\b(not|isn'?t|aren'?t|no|never|without)\s+(?:a\s+|an\s+|the\s+)?(?:gcb|good class bungalow|bungalow|penthouse|pavilion|villa)\b/i;
+  if (negationRe.test(text)) return null;
+
   const strongTypologyRe = /\b(gcb|good class bungalow|bungalow|penthouse|pavilion|villa)\b/i;
   const hasStrongTypology = strongTypologyRe.test(text);
-  const minLen = hasStrongTypology && priorUserTurns >= 1 ? 8 : 25;
+  const minLen = hasStrongTypology
+    ? priorUserTurns >= 2 ? 10 : priorUserTurns >= 1 ? 14 : 25
+    : 25;
   if (text.length < minLen) return null;
 
   const keywordRe = /\b(gcb|good class bungalow|bungalow|penthouse|whole[- ]?home|whole[- ]?house|multi[- ]?room|pavilion|villa|residence|to furnish|full home furnishing|entire (?:home|residence|apartment|villa|house))\b/i;
