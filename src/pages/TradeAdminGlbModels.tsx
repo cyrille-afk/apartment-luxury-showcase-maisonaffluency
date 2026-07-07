@@ -181,84 +181,13 @@ const TradeAdminGlbModels: React.FC = () => {
                   Select a product on the left to upload or replace its 3D model.
                 </div>
               ) : (
-                <div className="space-y-4">
-                  <div>
-                    <div className="font-display text-xl">{selected.product_name}</div>
-                    <div className="font-body text-xs text-muted-foreground">{selected.brand_name || "—"}</div>
-                  </div>
-
-                  <label
-                    className={`flex flex-col items-center justify-center gap-2 border-2 border-dashed border-border rounded-md p-8 cursor-pointer hover:border-foreground/40 transition-colors ${
-                      uploading ? "opacity-60 pointer-events-none" : ""
-                    }`}
-                  >
-                    {uploading ? <Loader2 size={20} className="animate-spin" /> : <Upload size={20} />}
-                    <span className="font-body text-sm">
-                      {uploading ? "Uploading…" : selected.glb_url ? "Replace 3D model" : "Upload .glb / .gltf  •  or .obj (auto-converted)"}
-                    </span>
-                    {uploading && (
-                      <div className="w-full max-w-[200px]">
-                        <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden">
-                          <div
-                            className="h-full bg-foreground transition-all duration-200"
-                            style={{ width: `${uploadProgress}%` }}
-                          />
-                        </div>
-                        <div className="text-center font-body text-[10px] text-muted-foreground mt-1">
-                          {uploadProgress}%
-                        </div>
-                      </div>
-                    )}
-                    <div className="flex items-center gap-1.5 flex-wrap justify-center">
-                      <span className="font-body text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground">.glb</span>
-                      <span className="font-body text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground">.gltf</span>
-                      <span className="font-body text-[10px] px-1.5 py-0.5 rounded bg-foreground/10 text-foreground">.obj → .glb</span>
-                    </div>
-                    <span className="font-body text-[11px] text-muted-foreground">Max {MAX_MB} MB</span>
-                    <input
-                      ref={inputRef}
-                      type="file"
-                      multiple
-                      accept=".glb,.gltf,.obj,.mtl,.png,.jpg,.jpeg,.webp,.bmp,.tga,.tif,.tiff,model/gltf-binary,model/gltf+json,image/*"
-                      className="hidden"
-                      onChange={(e) => {
-                        const fs = e.target.files ? Array.from(e.target.files) : [];
-                        if (fs.length) handleUpload(fs);
-                      }}
-                    />
-                    <span className="font-body text-[10px] text-muted-foreground text-center leading-relaxed max-w-[280px]">
-                      For OBJ: select the <b>.obj</b> together with its <b>.mtl</b> and any texture images (hold ⌘/Ctrl to multi-select). We convert to GLB right in your browser before uploading.
-                    </span>
-                  </label>
-
-
-                  {selected.glb_url && (
-                    <>
-                      <div className="flex items-center gap-3 text-xs">
-                        <a
-                          href={selected.glb_url}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="inline-flex items-center gap-1 text-muted-foreground hover:text-foreground underline-offset-2 hover:underline"
-                        >
-                          <ExternalLink size={12} /> Open GLB
-                        </a>
-                        <button
-                          onClick={() => handleRemove(selected)}
-                          className="inline-flex items-center gap-1 text-destructive hover:underline underline-offset-2"
-                        >
-                          <Trash2 size={12} /> Remove from product
-                        </button>
-                      </div>
-
-                      <Product3DViewer
-                        url={selected.glb_url}
-                        alt={`${selected.product_name} — 3D model`}
-                        poster={selected.image_url}
-                      />
-                    </>
-                  )}
-                </div>
+                <GlbVariantManager
+                  key={selected.id}
+                  productId={selected.id}
+                  productName={selected.product_name}
+                  posterImageUrl={selected.image_url}
+                  onChange={() => setReloadKey((k) => k + 1)}
+                />
               )}
             </div>
           </div>
