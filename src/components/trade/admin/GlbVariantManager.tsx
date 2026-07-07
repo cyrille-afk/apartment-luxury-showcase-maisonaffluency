@@ -523,4 +523,57 @@ export function GlbVariantManager({ productId, productName, posterImageUrl, onCh
   );
 }
 
+/**
+ * Preview + material-role editor for a single GLB variant. Owns the
+ * discovered material names, the working role map, and passes both into
+ * the viewer so the fabric/base swatch preview updates live as the admin
+ * toggles roles.
+ */
+function PreviewPanel({
+  variant,
+  productName,
+  posterImageUrl,
+  onRolesSaved,
+}: {
+  variant: GlbVariantRow;
+  productName: string;
+  posterImageUrl: string | null;
+  onRolesSaved: (roles: Record<string, MaterialRole>) => void;
+}) {
+  const [materialNames, setMaterialNames] = useState<string[]>([]);
+  const [liveRoles, setLiveRoles] = useState<Record<string, MaterialRole>>(
+    () => (variant.material_roles as Record<string, MaterialRole>) || {},
+  );
+
+  useEffect(() => {
+    setLiveRoles((variant.material_roles as Record<string, MaterialRole>) || {});
+    setMaterialNames([]);
+  }, [variant.id]);
+
+  return (
+    <div className="max-w-[420px] space-y-2">
+      <div className="font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
+        Preview · {variant.variant_label}
+      </div>
+      <Product3DViewer
+        url={variant.glb_url}
+        alt={`${productName} — ${variant.variant_label}`}
+        poster={posterImageUrl || null}
+        autoOpen
+        debug
+        materialRoles={liveRoles}
+        onMaterialsDiscovered={(names) => setMaterialNames(names)}
+      />
+      <GlbMaterialRolesEditor
+        variantId={variant.id}
+        materialNames={materialNames}
+        initialRoles={variant.material_roles}
+        onChange={setLiveRoles}
+        onSaved={onRolesSaved}
+      />
+    </div>
+  );
+}
+
+
 export default GlbVariantManager;
