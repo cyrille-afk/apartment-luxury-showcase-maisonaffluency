@@ -39,6 +39,11 @@ export interface SelectedFinishInfo {
   tier: string | null;
   price_per_lm_cents: number | null;
   currency: string;
+  /**
+   * Public URL of the swatch image. Consumed by Product3DViewer to apply the
+   * swatch as a runtime baseColorTexture on the GLB fabric material.
+   */
+  image_url: string | null;
 }
 
 interface FinishSelectorProps {
