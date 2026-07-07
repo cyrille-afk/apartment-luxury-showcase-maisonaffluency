@@ -175,6 +175,31 @@ export function GlbVariantManager({ productId, productName, posterImageUrl, onCh
       return;
     }
 
+    // Fabric-convention validator: warn (but don't block) if no material/mesh
+    // name matches the upholstery keyword list expected by Product3DViewer.
+    try {
+      const report = await inspectGlbFile(fileToUpload);
+      if (report.parseError) {
+        toast.warning(
+          `Couldn't inspect GLB material names (${report.parseError}). Upload will continue.`,
+        );
+      } else if (!report.hasUpholsteryConvention) {
+        const preview = [...report.materialNames, ...report.meshNames]
+          .slice(0, 4)
+          .join(", ") || "(no named materials/meshes)";
+        toast.warning(
+          `No upholstery material detected in this GLB. Fabric swaps will fall back to every material. Rename your seat/cushion material to include one of: ${UPHOLSTERY_KEYWORDS.join(", ")}. Found: ${preview}`,
+          { duration: 10000 },
+        );
+      } else {
+        toast.success(
+          `Fabric convention detected on: ${report.matchedNames.slice(0, 3).join(", ")}${report.matchedNames.length > 3 ? "…" : ""}`,
+        );
+      }
+    } catch {
+      /* non-fatal */
+    }
+
     setUploading(label);
     setUploadProgress(0);
     try {
