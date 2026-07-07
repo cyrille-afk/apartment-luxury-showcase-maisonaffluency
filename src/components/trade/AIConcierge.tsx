@@ -151,6 +151,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useStudio } from "@/hooks/useStudio";
 import { useAuth } from "@/hooks/useAuth";
+import { getConciergeSession } from "@/hooks/useConciergeSession";
 
 const hasWelcomeActions = (actions: ConciergeQuickAction[] | undefined) =>
   !!actions?.some((action) => isOnboardingActionPrompt(action.prompt));
