@@ -1632,8 +1632,8 @@ const TradeProductPage: React.FC = () => {
                       url={resolvedGlbUrl}
                       alt={`${product.title} — 3D model${byLabel ? ` (${byLabel.variant_label})` : ""}`}
                       poster={product.image_url}
-                      fabricTextureUrl={selectedFabric?.image_url || null}
-                      baseTextureUrl={selectedWoodPrice?.image_url || null}
+                      fabricTextureUrl={selectedFabric?.image_url || previewFabricImg || null}
+                      baseTextureUrl={selectedWoodPrice?.image_url || previewWoodImg || null}
                       materialRoles={resolvedRoles || undefined}
                       autoOpen
                     />
