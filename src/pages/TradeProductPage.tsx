@@ -1599,19 +1599,23 @@ const TradeProductPage: React.FC = () => {
               if (!resolvedGlbUrl) return null;
               const resolvedRoles = resolvedVariant?.material_roles || undefined;
               return (
-                <details className="mt-4 group border border-border rounded-md bg-muted/20">
-                  <summary className="flex items-center justify-between gap-2 px-3 py-2 cursor-pointer list-none select-none">
-                    <span className="font-body text-[11px] uppercase tracking-[0.15em] text-muted-foreground">
-                      Interactive 3D Model
-                    </span>
+                <details open className="mt-6 group border border-border rounded-md bg-muted/20">
+                  <summary className="flex items-center justify-between gap-2 px-4 py-3 cursor-pointer list-none select-none border-b border-border">
+                    <div className="flex items-center gap-2">
+                      <Box size={14} className="text-foreground" />
+                      <span className="font-display text-base leading-none">Configure in 3D</span>
+                      <span className="font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground ml-2">
+                        Live preview · rotate · AR
+                      </span>
+                    </div>
                     <span className="font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground group-open:hidden">
-                      Expand ▾
+                      Open ▾
                     </span>
                     <span className="font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground hidden group-open:inline">
-                      Collapse ▴
+                      Close ▴
                     </span>
                   </summary>
-                  <div className="p-3 pt-0">
+                  <div className="p-3">
                     <Product3DViewer
                       url={resolvedGlbUrl}
                       alt={`${product.title} — 3D model${byLabel ? ` (${byLabel.variant_label})` : ""}`}
@@ -1619,7 +1623,11 @@ const TradeProductPage: React.FC = () => {
                       fabricTextureUrl={selectedFabric?.image_url || null}
                       baseTextureUrl={selectedWoodPrice?.image_url || null}
                       materialRoles={resolvedRoles || undefined}
+                      autoOpen
                     />
+                    <p className="mt-2 font-body text-[10px] leading-snug text-muted-foreground">
+                      Pick a fabric or wood finish on the right — the 3D preview updates live.
+                    </p>
                   </div>
                 </details>
               );
