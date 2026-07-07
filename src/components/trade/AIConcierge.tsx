@@ -3076,11 +3076,20 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
                     <span className="h-1.5 w-1.5 rounded-full bg-accent" />
                     Brief Builder Open
                   </span>
-                  <span className="truncate">
+                  <span className="truncate flex-1">
                     {briefValidation.valid
                       ? "Structured brief ready · press Send"
                       : `Fill required fields: ${briefValidation.missing.join(", ")}`}
                   </span>
+                  <button
+                    type="button"
+                    onClick={() => setBriefBuilderOpen(false)}
+                    className="shrink-0 rounded-full p-1 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                    aria-label="Close Brief Builder and skip required fields"
+                    title="Close Brief Builder — send anyway without required fields"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
                 </div>
               ) : (
 
