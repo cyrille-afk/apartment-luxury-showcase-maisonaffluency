@@ -413,10 +413,52 @@ export default function TradeTearsheets() {
               <div className="border-b border-border pb-4">
                 <p className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">{selectedProduct.brand_name}</p>
                 <h2 className="font-display text-xl text-foreground mt-1">{selectedProduct.product_name}</h2>
+                {chosenFinishes.variant && (
+                  <p className="font-body text-[11px] text-muted-foreground mt-1">Variant · {chosenFinishes.variant}</p>
+                )}
               </div>
               {selectedProduct.image_url && (
                 <img src={selectedProduct.image_url} alt={selectedProduct.product_name} className="max-h-72 object-contain border border-border rounded" />
               )}
+              {(chosenFinishes.fabric || chosenFinishes.wood) && (
+                <div className="border border-border rounded-lg p-4 bg-muted/30">
+                  <div className="flex items-center justify-between mb-3">
+                    <p className="font-body text-[10px] uppercase tracking-wider text-muted-foreground">Selected Finishes</p>
+                    <button
+                      type="button"
+                      onClick={() => setChosenFinishes({ fabric: null, fabricImg: null, wood: null, woodImg: null, variant: null })}
+                      className="font-body text-[10px] uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      Clear
+                    </button>
+                  </div>
+                  <div className="flex flex-wrap gap-6">
+                    {chosenFinishes.wood && (
+                      <div className="flex items-center gap-3">
+                        {chosenFinishes.woodImg && (
+                          <img src={chosenFinishes.woodImg} alt={chosenFinishes.wood} className="w-14 h-14 object-cover rounded border border-border" />
+                        )}
+                        <div>
+                          <p className="font-body text-[10px] uppercase tracking-wider text-muted-foreground">Base / Wood</p>
+                          <p className="font-body text-sm text-foreground">{chosenFinishes.wood}</p>
+                        </div>
+                      </div>
+                    )}
+                    {chosenFinishes.fabric && (
+                      <div className="flex items-center gap-3">
+                        {chosenFinishes.fabricImg && (
+                          <img src={chosenFinishes.fabricImg} alt={chosenFinishes.fabric} className="w-14 h-14 object-cover rounded border border-border" />
+                        )}
+                        <div>
+                          <p className="font-body text-[10px] uppercase tracking-wider text-muted-foreground">Fabric</p>
+                          <p className="font-body text-sm text-foreground">{chosenFinishes.fabric}</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
               <div className="grid grid-cols-2 gap-4">
                 {([
                   ["Category", selectedProduct.category],
