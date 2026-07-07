@@ -12,6 +12,7 @@ import { HotspotImageBadge } from "@/components/trade/HotspotImageBadge";
 import { buildSwapPrompt, buildSuggestOneMorePrompt, buildCritiqueEditsPrompt, sendConciergePrefill, type SwapPromptItem } from "@/lib/conciergePrefill";
 import { RequirementsBadge } from "@/components/trade/concierge/RequirementsBadge";
 import { validateTearsheetEdits, realignUnlocked, type ValidationVerdict, type RealignmentDelta } from "@/lib/tearsheetSyncClient";
+import { getConciergeSession } from "@/hooks/useConciergeSession";
 import { ValidationBanner, RowVerdictPill } from "@/components/trade/concierge/ValidationSummary";
 import { RealignmentDiffPanel, type AppliedRealignment } from "@/components/trade/concierge/RealignmentDiffPanel";
 import { TearsheetInsightsSidebar } from "@/components/trade/concierge/TearsheetInsightsSidebar";
