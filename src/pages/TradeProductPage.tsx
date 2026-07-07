@@ -538,6 +538,19 @@ const TradeProductPage: React.FC = () => {
   // Names of currently-selected wood/top finish swatches that lack mapped
   // gallery images — surfaced as a note on the quote line.
   const [finishesMissingImages, setFinishesMissingImages] = useState<string[]>([]);
+  // Tracks whether linked finish swatches are still being fetched by the
+  // FinishSelector so the tearsheet CTA can show a disabled loading state.
+  const [finishesLoading, setFinishesLoading] = useState(true);
+
+  const handleHasFabricsChange = useCallback((has: boolean) => {
+    setHasLinkedFabrics(has);
+    setFinishesLoading(false);
+  }, []);
+
+  const handleWoodFinishesAvailable = useCallback((names: string[]) => {
+    setLinkedWoodFinishes(names);
+    setFinishesLoading(false);
+  }, []);
 
   // Per-variant 3D models: one row per size/label. `default` variant wins when
   // no size is selected. Falls back to legacy tradeProducts.glb_url otherwise.
