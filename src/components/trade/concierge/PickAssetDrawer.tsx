@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import Product3DViewer from "@/components/trade/Product3DViewer";
 import { Loader2 } from "lucide-react";
@@ -17,6 +17,14 @@ interface Props {
   title: string;
 }
 
+/** Classify a swatch as "base" (wood / metal / stone finish) vs "fabric". */
+function isBaseFinish(s: Swatch): boolean {
+  const hay = `${s.category ?? ""} ${s.name ?? ""}`.toLowerCase();
+  return /(wood|oak|walnut|ash|teak|maple|mahogany|metal|brass|bronze|steel|iron|marble|stone|leather|lacquer|paint|finish|frame|base)/.test(
+    hay,
+  );
+}
+
 /**
  * Inline drawer that fetches a pick's GLB URL (via trade_products.source_pick_id)
  * and its fabric swatch strip (product_fabric_swatches_public). Rendered lazily
@@ -27,20 +35,27 @@ export function PickAssetDrawer({ pickId, title }: Props) {
   const [loading, setLoading] = useState(true);
   const [glbUrl, setGlbUrl] = useState<string | null>(null);
   const [poster, setPoster] = useState<string | null>(null);
+  const [materialRoles, setMaterialRoles] = useState<
+    Record<string, "fabric" | "base" | "ignore"> | undefined
+  >(undefined);
   const [swatches, setSwatches] = useState<Swatch[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [selectedFabricId, setSelectedFabricId] = useState<string | null>(null);
+  const [selectedBaseId, setSelectedBaseId] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
       setLoading(true);
-      const [prodRes, swRes] = await Promise.all([
-        supabase
-          .from("trade_products")
-          .select("glb_url, image_url")
-          .eq("source_pick_id", pickId)
-          .maybeSingle(),
+      const prodRes = await supabase
+        .from("trade_products")
+        .select("id, glb_url, image_url")
+        .eq("source_pick_id", pickId)
+        .maybeSingle();
+
+      const tpId = (prodRes.data as any)?.id as string | undefined;
+
+      const [swRes, glbVarRes] = await Promise.all([
         supabase
           .from("product_fabric_swatches_public")
           .select("fabric_id, name, image_url, supplier, category, sort_order")
@@ -48,10 +63,23 @@ export function PickAssetDrawer({ pickId, title }: Props) {
           .eq("is_active", true)
           .order("sort_order", { ascending: true, nullsFirst: false })
           .order("name", { ascending: true }),
+        tpId
+          ? supabase
+              .from("trade_product_glb_variants")
+              .select("glb_url, is_default, material_roles")
+              .eq("product_id", tpId)
+          : Promise.resolve({ data: null, error: null } as any),
       ]);
+
       if (cancelled) return;
       if (prodRes.error) setError(prodRes.error.message);
-      setGlbUrl((prodRes.data as any)?.glb_url ?? null);
+
+      const variants = ((glbVarRes as any)?.data as any[]) || [];
+      const defaultVar = variants.find((v) => v.is_default) || variants[0];
+      const resolvedGlb =
+        defaultVar?.glb_url ?? ((prodRes.data as any)?.glb_url ?? null);
+      setGlbUrl(resolvedGlb);
+      setMaterialRoles(defaultVar?.material_roles || undefined);
       setPoster((prodRes.data as any)?.image_url ?? null);
       setSwatches(((swRes.data as any[]) ?? []) as Swatch[]);
       setLoading(false);
@@ -60,6 +88,13 @@ export function PickAssetDrawer({ pickId, title }: Props) {
       cancelled = true;
     };
   }, [pickId]);
+
+  const { fabricSwatches, baseSwatches } = useMemo(() => {
+    const base: Swatch[] = [];
+    const fab: Swatch[] = [];
+    for (const s of swatches) (isBaseFinish(s) ? base : fab).push(s);
+    return { fabricSwatches: fab, baseSwatches: base };
+  }, [swatches]);
 
   if (loading) {
     return (
@@ -84,6 +119,83 @@ export function PickAssetDrawer({ pickId, title }: Props) {
     );
   }
 
+  const fabricTextureUrl = selectedFabricId
+    ? fabricSwatches.find((s) => s.fabric_id === selectedFabricId)?.image_url ?? null
+    : null;
+  const baseTextureUrl = selectedBaseId
+    ? baseSwatches.find((s) => s.fabric_id === selectedBaseId)?.image_url ?? null
+    : null;
+
+  const renderGroup = (
+    label: string,
+    list: Swatch[],
+    selectedId: string | null,
+    setSelected: (id: string | null) => void,
+  ) => {
+    if (list.length === 0) return null;
+    return (
+      <div>
+        <div className="mb-1 flex items-center justify-between gap-2">
+          <span className="font-display text-[9px] uppercase tracking-widest text-muted-foreground">
+            {label} ({list.length})
+          </span>
+          {selectedId && (
+            <button
+              type="button"
+              onClick={() => setSelected(null)}
+              className="font-body text-[9px] uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Reset
+            </button>
+          )}
+        </div>
+        <div className="flex gap-1.5 overflow-x-auto pb-1 -mx-0.5 px-0.5 scrollbar-none">
+          {list.map((s) => {
+            const isSelected = s.fabric_id === selectedId;
+            return (
+              <button
+                type="button"
+                key={s.fabric_id}
+                onClick={() =>
+                  setSelected(selectedId === s.fabric_id ? null : s.fabric_id)
+                }
+                className="shrink-0 w-11 flex flex-col items-center gap-0.5 group focus:outline-none"
+                title={[s.name, s.supplier, s.category].filter(Boolean).join(" · ")}
+                aria-pressed={isSelected}
+              >
+                {s.image_url ? (
+                  <img
+                    src={s.image_url}
+                    alt={s.name}
+                    loading="lazy"
+                    className={`h-11 w-11 rounded object-cover bg-muted border transition-all ${
+                      isSelected
+                        ? "border-primary ring-2 ring-primary/40"
+                        : "border-border/60 group-hover:border-foreground/40"
+                    }`}
+                  />
+                ) : (
+                  <div
+                    className={`h-11 w-11 rounded bg-muted border ${
+                      isSelected ? "border-primary ring-2 ring-primary/40" : "border-border/60"
+                    }`}
+                  />
+                )}
+                <span
+                  className={`w-11 truncate text-center font-body text-[8px] leading-tight ${
+                    isSelected ? "text-foreground" : "text-muted-foreground"
+                  }`}
+                >
+                  {s.name}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="mt-2 rounded-md border border-border/60 bg-background/40 p-2 space-y-2 animate-fade-in">
       {hasGlb && (
@@ -92,73 +204,16 @@ export function PickAssetDrawer({ pickId, title }: Props) {
             url={glbUrl!}
             alt={title}
             poster={poster}
-            fabricTextureUrl={
-              selectedFabricId
-                ? swatches.find((s) => s.fabric_id === selectedFabricId)?.image_url ?? null
-                : null
-            }
+            fabricTextureUrl={fabricTextureUrl}
+            baseTextureUrl={baseTextureUrl}
+            materialRoles={materialRoles}
           />
         </div>
       )}
       {hasSwatches && (
-        <div>
-          <div className="mb-1 flex items-center justify-between gap-2">
-            <span className="font-display text-[9px] uppercase tracking-widest text-muted-foreground">
-              Finishes &amp; fabrics ({swatches.length})
-            </span>
-            {selectedFabricId && (
-              <button
-                type="button"
-                onClick={() => setSelectedFabricId(null)}
-                className="font-body text-[9px] uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors"
-              >
-                Reset
-              </button>
-            )}
-          </div>
-          <div className="flex gap-1.5 overflow-x-auto pb-1 -mx-0.5 px-0.5 scrollbar-none">
-            {swatches.map((s) => {
-              const isSelected = s.fabric_id === selectedFabricId;
-              return (
-                <button
-                  type="button"
-                  key={s.fabric_id}
-                  onClick={() =>
-                    setSelectedFabricId((prev) => (prev === s.fabric_id ? null : s.fabric_id))
-                  }
-                  className="shrink-0 w-11 flex flex-col items-center gap-0.5 group focus:outline-none"
-                  title={[s.name, s.supplier, s.category].filter(Boolean).join(" · ")}
-                  aria-pressed={isSelected}
-                >
-                  {s.image_url ? (
-                    <img
-                      src={s.image_url}
-                      alt={s.name}
-                      loading="lazy"
-                      className={`h-11 w-11 rounded object-cover bg-muted border transition-all ${
-                        isSelected
-                          ? "border-primary ring-2 ring-primary/40"
-                          : "border-border/60 group-hover:border-foreground/40"
-                      }`}
-                    />
-                  ) : (
-                    <div
-                      className={`h-11 w-11 rounded bg-muted border ${
-                        isSelected ? "border-primary ring-2 ring-primary/40" : "border-border/60"
-                      }`}
-                    />
-                  )}
-                  <span
-                    className={`w-11 truncate text-center font-body text-[8px] leading-tight ${
-                      isSelected ? "text-foreground" : "text-muted-foreground"
-                    }`}
-                  >
-                    {s.name}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
+        <div className="space-y-2">
+          {renderGroup("Wood & base finishes", baseSwatches, selectedBaseId, setSelectedBaseId)}
+          {renderGroup("Fabrics", fabricSwatches, selectedFabricId, setSelectedFabricId)}
         </div>
       )}
     </div>
