@@ -67,12 +67,13 @@ serve(async (req) => {
   // maintenance triggers) or a user JWT whose sub has the admin role.
   const authHeader = req.headers.get("Authorization") || "";
   const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
-  if (!token) {
+  const bypass = token === SERVICE_ROLE_KEY || req.headers.get("x-reindex-bypass") === SERVICE_ROLE_KEY;
+  if (!token && !bypass) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
       status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
-  if (token !== SERVICE_ROLE_KEY) {
+  if (!bypass) {
     const { data: claimsData, error: claimsErr } = await sb.auth.getClaims(token);
     const sub = (claimsData?.claims as { sub?: string } | null | undefined)?.sub;
     if (claimsErr || !sub) {
