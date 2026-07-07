@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Box } from "lucide-react";
 
 declare global {
@@ -59,12 +59,35 @@ interface Props {
   url: string;
   alt: string;
   poster?: string | null;
+  /**
+   * Optional fabric/finish texture URL. When set, its image is applied as the
+   * baseColorTexture of every PBR material in the loaded GLB. Passing null or
+   * undefined restores the model's original materials (by re-issuing `src`).
+   */
+  fabricTextureUrl?: string | null;
+  /**
+   * Optional filter: only swap materials whose name matches. Defaults to
+   * applying to all materials, which is the pragmatic behaviour when the GLB
+   * doesn't tag a specific fabric slot.
+   */
+  fabricMaterialNameIncludes?: string;
 }
 
-const Product3DViewer: React.FC<Props> = ({ url, alt, poster }) => {
+const Product3DViewer: React.FC<Props> = ({
+  url,
+  alt,
+  poster,
+  fabricTextureUrl,
+  fabricMaterialNameIncludes,
+}) => {
   const [ready, setReady] = useState(() =>
     typeof window !== "undefined" && !!customElements.get("model-viewer"),
   );
+  const mvRef = useRef<HTMLElement & {
+    model?: any;
+    createTexture?: (url: string) => Promise<any>;
+  } | null>(null);
+  const originalTexturesRef = useRef<Map<any, any> | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -75,6 +98,89 @@ const Product3DViewer: React.FC<Props> = ({ url, alt, poster }) => {
       mounted = false;
     };
   }, []);
+
+  // Re-apply / restore fabric texture whenever the swatch changes.
+  useEffect(() => {
+    if (!ready) return;
+    const mv = mvRef.current;
+    if (!mv) return;
+    let cancelled = false;
+
+    const applyTexture = async () => {
+      // Wait for the model to be loaded.
+      const model = mv.model;
+      if (!model) {
+        const onLoad = () => {
+          mv.removeEventListener("load", onLoad);
+          if (!cancelled) applyTexture();
+        };
+        mv.addEventListener("load", onLoad);
+        return;
+      }
+      const materials: any[] = model.materials || [];
+      if (materials.length === 0) return;
+
+      // Cache original baseColorTextures once, so we can restore.
+      if (!originalTexturesRef.current) {
+        const cache = new Map<any, any>();
+        for (const m of materials) {
+          try {
+            const tex = m?.pbrMetallicRoughness?.baseColorTexture?.texture ?? null;
+            cache.set(m, tex);
+          } catch {
+            /* noop */
+          }
+        }
+        originalTexturesRef.current = cache;
+      }
+
+      const filter = (m: any) =>
+        !fabricMaterialNameIncludes ||
+        String(m?.name || "").toLowerCase().includes(fabricMaterialNameIncludes.toLowerCase());
+
+      if (!fabricTextureUrl) {
+        // Restore originals.
+        for (const m of materials) {
+          if (!filter(m)) continue;
+          const original = originalTexturesRef.current.get(m) ?? null;
+          try {
+            m.pbrMetallicRoughness.baseColorTexture.setTexture(original);
+          } catch {
+            /* noop */
+          }
+        }
+        return;
+      }
+
+      try {
+        const texture = await mv.createTexture!(fabricTextureUrl);
+        if (cancelled || !texture) return;
+        for (const m of materials) {
+          if (!filter(m)) continue;
+          try {
+            m.pbrMetallicRoughness.baseColorTexture.setTexture(texture);
+            // Neutralise the base color factor so the texture reads true.
+            m.pbrMetallicRoughness.setBaseColorFactor?.([1, 1, 1, 1]);
+          } catch {
+            /* noop */
+          }
+        }
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.warn("[Product3DViewer] Failed to apply fabric texture", err);
+      }
+    };
+
+    applyTexture();
+    return () => {
+      cancelled = true;
+    };
+  }, [ready, fabricTextureUrl, fabricMaterialNameIncludes, url]);
+
+  // Reset cached originals whenever the model URL changes.
+  useEffect(() => {
+    originalTexturesRef.current = null;
+  }, [url]);
 
   return (
     <div className="border border-border rounded-md overflow-hidden bg-muted/30">
@@ -87,6 +193,7 @@ const Product3DViewer: React.FC<Props> = ({ url, alt, poster }) => {
       <div className="relative w-full aspect-square">
         {ready ? (
           <model-viewer
+            ref={mvRef as any}
             src={url}
             alt={alt}
             poster={poster || undefined}

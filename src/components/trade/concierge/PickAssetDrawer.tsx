@@ -29,6 +29,7 @@ export function PickAssetDrawer({ pickId, title }: Props) {
   const [poster, setPoster] = useState<string | null>(null);
   const [swatches, setSwatches] = useState<Swatch[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [selectedFabricId, setSelectedFabricId] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -87,36 +88,76 @@ export function PickAssetDrawer({ pickId, title }: Props) {
     <div className="mt-2 rounded-md border border-border/60 bg-background/40 p-2 space-y-2 animate-fade-in">
       {hasGlb && (
         <div className="max-w-[240px]">
-          <Product3DViewer url={glbUrl!} alt={title} poster={poster} />
+          <Product3DViewer
+            url={glbUrl!}
+            alt={title}
+            poster={poster}
+            fabricTextureUrl={
+              selectedFabricId
+                ? swatches.find((s) => s.fabric_id === selectedFabricId)?.image_url ?? null
+                : null
+            }
+          />
         </div>
       )}
       {hasSwatches && (
         <div>
-          <div className="mb-1 font-display text-[9px] uppercase tracking-widest text-muted-foreground">
-            Finishes &amp; fabrics ({swatches.length})
+          <div className="mb-1 flex items-center justify-between gap-2">
+            <span className="font-display text-[9px] uppercase tracking-widest text-muted-foreground">
+              Finishes &amp; fabrics ({swatches.length})
+            </span>
+            {selectedFabricId && (
+              <button
+                type="button"
+                onClick={() => setSelectedFabricId(null)}
+                className="font-body text-[9px] uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Reset
+              </button>
+            )}
           </div>
           <div className="flex gap-1.5 overflow-x-auto pb-1 -mx-0.5 px-0.5 scrollbar-none">
-            {swatches.map((s) => (
-              <div
-                key={s.fabric_id}
-                className="shrink-0 w-11 flex flex-col items-center gap-0.5"
-                title={[s.name, s.supplier, s.category].filter(Boolean).join(" · ")}
-              >
-                {s.image_url ? (
-                  <img
-                    src={s.image_url}
-                    alt={s.name}
-                    loading="lazy"
-                    className="h-11 w-11 rounded object-cover bg-muted border border-border/60"
-                  />
-                ) : (
-                  <div className="h-11 w-11 rounded bg-muted border border-border/60" />
-                )}
-                <span className="w-11 truncate text-center font-body text-[8px] text-muted-foreground leading-tight">
-                  {s.name}
-                </span>
-              </div>
-            ))}
+            {swatches.map((s) => {
+              const isSelected = s.fabric_id === selectedFabricId;
+              return (
+                <button
+                  type="button"
+                  key={s.fabric_id}
+                  onClick={() =>
+                    setSelectedFabricId((prev) => (prev === s.fabric_id ? null : s.fabric_id))
+                  }
+                  className="shrink-0 w-11 flex flex-col items-center gap-0.5 group focus:outline-none"
+                  title={[s.name, s.supplier, s.category].filter(Boolean).join(" · ")}
+                  aria-pressed={isSelected}
+                >
+                  {s.image_url ? (
+                    <img
+                      src={s.image_url}
+                      alt={s.name}
+                      loading="lazy"
+                      className={`h-11 w-11 rounded object-cover bg-muted border transition-all ${
+                        isSelected
+                          ? "border-primary ring-2 ring-primary/40"
+                          : "border-border/60 group-hover:border-foreground/40"
+                      }`}
+                    />
+                  ) : (
+                    <div
+                      className={`h-11 w-11 rounded bg-muted border ${
+                        isSelected ? "border-primary ring-2 ring-primary/40" : "border-border/60"
+                      }`}
+                    />
+                  )}
+                  <span
+                    className={`w-11 truncate text-center font-body text-[8px] leading-tight ${
+                      isSelected ? "text-foreground" : "text-muted-foreground"
+                    }`}
+                  >
+                    {s.name}
+                  </span>
+                </button>
+              );
+            })}
           </div>
         </div>
       )}
