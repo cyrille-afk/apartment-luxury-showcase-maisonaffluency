@@ -78,6 +78,19 @@ interface Props {
    * (wood_leg, metal_frame, glass_top, etc.) will then be left untouched.
    */
   fabricMaterialNameIncludes?: string | string[];
+  /**
+   * When true, renders a small collapsible panel showing which material
+   * names were detected on the GLB and which ones the upholstery filter
+   * matched for the current swatch. Intended for admin/debug use.
+   */
+  debug?: boolean;
+}
+
+interface DebugInfo {
+  all: string[];
+  matched: string[];
+  fellBackToAll: boolean;
+  keywords: string[];
 }
 
 const Product3DViewer: React.FC<Props> = ({
@@ -86,6 +99,7 @@ const Product3DViewer: React.FC<Props> = ({
   poster,
   fabricTextureUrl,
   fabricMaterialNameIncludes,
+  debug = false,
 }) => {
   const [ready, setReady] = useState(() =>
     typeof window !== "undefined" && !!customElements.get("model-viewer"),
@@ -95,6 +109,8 @@ const Product3DViewer: React.FC<Props> = ({
     createTexture?: (url: string) => Promise<any>;
   } | null>(null);
   const originalTexturesRef = useRef<Map<any, any> | null>(null);
+  const [debugInfo, setDebugInfo] = useState<DebugInfo | null>(null);
+  const [debugOpen, setDebugOpen] = useState(false);
 
   useEffect(() => {
     let mounted = true;
