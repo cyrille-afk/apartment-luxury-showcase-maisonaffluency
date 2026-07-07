@@ -2293,14 +2293,35 @@ const TradeProductPage: React.FC = () => {
               Request Customisation
             </button>
 
-            {/* 3D model viewer (trade-only; renders when glb_url is set on trade_products) */}
-            {glbUrl && (
-              <Product3DViewer
-                url={glbUrl}
-                alt={`${product.title} — 3D model`}
-                poster={product.image_url}
-              />
-            )}
+            {/* 3D model viewer — picks the variant matching the current size
+                selection, falls back to the default variant, then to the legacy
+                trade_products.glb_url. */}
+            {(() => {
+              const norm = (s: string | null | undefined) => (s || "").trim().toLowerCase();
+              const activeLabel =
+                norm((activeVariant as any)?.label) ||
+                norm(selectedDualSize) ||
+                norm(selectedSingleSize) ||
+                (() => {
+                  const combo = [(activeVariant as any)?.base, (activeVariant as any)?.top]
+                    .filter(Boolean)
+                    .join(" × ");
+                  return norm(combo);
+                })();
+              const byLabel = activeLabel
+                ? glbVariants.find((v) => norm(v.variant_label) === activeLabel)
+                : null;
+              const byDefault = glbVariants.find((v) => v.is_default);
+              const resolvedGlbUrl = byLabel?.glb_url || byDefault?.glb_url || glbUrl || null;
+              if (!resolvedGlbUrl) return null;
+              return (
+                <Product3DViewer
+                  url={resolvedGlbUrl}
+                  alt={`${product.title} — 3D model${byLabel ? ` (${byLabel.variant_label})` : ""}`}
+                  poster={product.image_url}
+                />
+              );
+            })()}
 
             {/* CAD / 3D file downloads (trade-gated; only renders when files exist) */}
             <CadAssetsSection productId={tradeProductId} productName={product.title} />
