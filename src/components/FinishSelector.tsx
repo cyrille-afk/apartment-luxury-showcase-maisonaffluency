@@ -39,6 +39,11 @@ export interface SelectedFinishInfo {
   tier: string | null;
   price_per_lm_cents: number | null;
   currency: string;
+  /**
+   * Public URL of the swatch image. Consumed by Product3DViewer to apply the
+   * swatch as a runtime baseColorTexture on the GLB fabric material.
+   */
+  image_url: string | null;
 }
 
 interface FinishSelectorProps {
@@ -452,6 +457,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
       tier: match.tier ?? null,
       price_per_lm_cents: match.price_per_lm_cents ?? null,
       currency: match.currency || "EUR",
+      image_url: match.image_url ?? null,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fabrics, currentGalleryIndex]);
@@ -512,6 +518,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
             tier: f.tier ?? null,
             price_per_lm_cents: f.price_per_lm_cents ?? null,
             currency: f.currency || "EUR",
+            image_url: f.image_url ?? null,
           });
         }
       } else if (isCoverGroup) {
@@ -922,6 +929,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
                           tier: zoomed.tier ?? null,
                           price_per_lm_cents: zoomed.price_per_lm_cents ?? null,
                           currency: zoomed.currency || "EUR",
+                          image_url: zoomed.image_url ?? null,
                         });
                       }
                     } else if (isCoverCategory(zoomed)) {
