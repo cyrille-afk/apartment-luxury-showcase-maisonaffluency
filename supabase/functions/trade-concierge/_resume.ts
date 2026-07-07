@@ -162,6 +162,9 @@ export function installFramePersistence(opts: {
       console.warn("[concierge resume] client stream write failed:", e instanceof Error ? e.message : e);
     }
     pending.push({ seq, chunk: asText });
+    // Piggyback: mirror lifecycle events onto the Realtime side-channel so
+    // other tabs / dashboards observe proposal/escalation without a second SSE.
+    autoBroadcastFromChunk(streamId, asText);
     // Batch inserts into ~150ms windows so we don't overwhelm PG on chatty
     // token streams. Small enough that a fast reconnect still finds recent
     // frames on disk.
@@ -177,6 +180,9 @@ export function installFramePersistence(opts: {
   (controller as any).enqueue(encoder.encode(
     `event: stream_start\ndata: ${JSON.stringify({ stream_id: streamId })}\n\n`,
   ));
+  // Announce the new session on the Realtime channel so external observers
+  // (e.g. a second tab) can bind before the first proposal lands.
+  void broadcastRealtime(`concierge:${streamId}`, "stream_started", { user_id: userId, request_id: requestId, surface });
 
   const finalize = async (status: "complete" | "error") => {
     // Ensure all pending frames are on disk before flipping status; the
