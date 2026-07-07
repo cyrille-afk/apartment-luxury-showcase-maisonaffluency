@@ -281,7 +281,7 @@ const TradeAdminGlbModels: React.FC = () => {
                   >
                     {uploading ? <Loader2 size={20} className="animate-spin" /> : <Upload size={20} />}
                     <span className="font-body text-sm">
-                      {uploading ? "Uploading…" : selected.glb_url ? "Replace 3D model" : "Upload .glb or .gltf"}
+                      {uploading ? "Uploading…" : selected.glb_url ? "Replace 3D model" : "Upload .glb / .gltf  •  or .obj (auto-converted)"}
                     </span>
                     {uploading && (
                       <div className="w-full max-w-[200px]">
@@ -296,6 +296,11 @@ const TradeAdminGlbModels: React.FC = () => {
                         </div>
                       </div>
                     )}
+                    <div className="flex items-center gap-1.5 flex-wrap justify-center">
+                      <span className="font-body text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground">.glb</span>
+                      <span className="font-body text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground">.gltf</span>
+                      <span className="font-body text-[10px] px-1.5 py-0.5 rounded bg-foreground/10 text-foreground">.obj → .glb</span>
+                    </div>
                     <span className="font-body text-[11px] text-muted-foreground">Max {MAX_MB} MB</span>
                     <input
                       ref={inputRef}
@@ -308,8 +313,8 @@ const TradeAdminGlbModels: React.FC = () => {
                         if (fs.length) handleUpload(fs);
                       }}
                     />
-                    <span className="font-body text-[10px] text-muted-foreground text-center leading-relaxed max-w-[260px]">
-                      Accepts .glb / .gltf, or select an .obj together with its .mtl and texture images — we'll convert to GLB in your browser.
+                    <span className="font-body text-[10px] text-muted-foreground text-center leading-relaxed max-w-[280px]">
+                      For OBJ: select the <b>.obj</b> together with its <b>.mtl</b> and any texture images (hold ⌘/Ctrl to multi-select). We convert to GLB right in your browser before uploading.
                     </span>
                   </label>
 
