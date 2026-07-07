@@ -6,9 +6,12 @@ import { fillTradeProductImageFallbacks } from "@/lib/tradeProductImageFallback"
 import { useAuth } from "@/hooks/useAuth";
 import { useState, useRef, useMemo, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
-import { FileText, Loader2, Search, Printer } from "lucide-react";
+import { FileText, Loader2, Search, Printer, LayoutGrid, Check } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { useToast } from "@/hooks/use-toast";
+import { useUserBoards } from "@/hooks/useUserBoards";
 import { normalizeCategory, normalizeSubcategory, CATEGORY_ORDER, getSubcategoriesForCategory } from "@/lib/productTaxonomy";
 import { ProjectPicker } from "@/components/trade/ProjectPicker";
 import TradeBreadcrumb from "@/components/trade/TradeBreadcrumb";
@@ -328,6 +331,68 @@ export default function TradeTearsheets() {
     return true;
   });
 
+  // ─── Push to Client Board ────────────────────────────────────────────────
+  const { toast } = useToast();
+  const [boardPickerOpen, setBoardPickerOpen] = useState(false);
+  const [pushingBoardId, setPushingBoardId] = useState<string | null>(null);
+  const [pushedBoardIds, setPushedBoardIds] = useState<Set<string>>(new Set());
+  const { boards: userBoards, loading: boardsLoading } = useUserBoards(boardPickerOpen);
+
+  const pushToBoard = async (boardId: string) => {
+    if (!selectedProduct) return;
+    setPushingBoardId(boardId);
+    try {
+      // client_board_items.product_id FKs to trade_products.id. Resolve if the
+      // selected row is a curator pick (source_pick_id → trade_products.id).
+      let tradeProductId: string | null = null;
+      if (selectedProduct.source === "trade") {
+        tradeProductId = selectedProduct.id;
+      } else {
+        const { data: tp } = await supabase
+          .from("trade_products")
+          .select("id")
+          .eq("source_pick_id", selectedProduct.id)
+          .maybeSingle();
+        tradeProductId = (tp as any)?.id ?? null;
+      }
+      if (!tradeProductId) {
+        toast({
+          title: "Not on the trade catalog yet",
+          description: "This product hasn't been mirrored into trade_products, so it can't be pinned to a board.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const noteLines: string[] = [];
+      if (chosenFinishes.variant) noteLines.push(`Variant: ${chosenFinishes.variant}`);
+      if (chosenFinishes.wood) noteLines.push(`Base / Wood: ${chosenFinishes.wood}`);
+      if (chosenFinishes.fabric) noteLines.push(`Fabric: ${chosenFinishes.fabric}`);
+      const notes = noteLines.length ? noteLines.join("\n") : null;
+
+      // Next sort_order = current item count on the board.
+      const { count } = await supabase
+        .from("client_board_items")
+        .select("id", { count: "exact", head: true })
+        .eq("board_id", boardId);
+
+      const { error } = await supabase
+        .from("client_board_items")
+        .insert({ board_id: boardId, product_id: tradeProductId, sort_order: count ?? 0, notes });
+
+      if (error) {
+        toast({ title: "Couldn't add to board", description: error.message, variant: "destructive" });
+        return;
+      }
+      setPushedBoardIds((prev) => new Set(prev).add(boardId));
+      toast({ title: "Added to board", description: `${selectedProduct.product_name} pinned with the chosen finishes.` });
+    } finally {
+      setPushingBoardId(null);
+    }
+  };
+
+
+
   const handlePrint = () => {
     if (!printRef.current || !selectedProduct) return;
     const win = window.open("", "_blank");
@@ -407,8 +472,14 @@ export default function TradeTearsheets() {
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <Button variant="ghost" size="sm" onClick={() => setSelectedProduct(null)}>← Back to products</Button>
-              <Button variant="outline" size="sm" onClick={handlePrint}><Printer className="h-4 w-4 mr-2" />Print Tearsheet</Button>
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="sm" onClick={() => { setPushedBoardIds(new Set()); setBoardPickerOpen(true); }}>
+                  <LayoutGrid className="h-4 w-4 mr-2" />Push to Client Board
+                </Button>
+                <Button variant="outline" size="sm" onClick={handlePrint}><Printer className="h-4 w-4 mr-2" />Print Tearsheet</Button>
+              </div>
             </div>
+
             <div ref={printRef} className="border border-border rounded-lg p-6 space-y-6">
               <div className="border-b border-border pb-4">
                 <p className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">{selectedProduct.brand_name}</p>
@@ -568,6 +639,68 @@ export default function TradeTearsheets() {
           </>
         )}
       </div>
+
+      <Dialog open={boardPickerOpen} onOpenChange={setBoardPickerOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-display text-lg">Push to Client Board</DialogTitle>
+            <DialogDescription className="font-body text-xs">
+              Pin {selectedProduct?.product_name ?? "this product"} to one of your boards.
+              {(chosenFinishes.fabric || chosenFinishes.wood || chosenFinishes.variant) && (
+                <span className="block mt-1 text-muted-foreground">
+                  Finishes will be saved as a note on the board item:
+                  {chosenFinishes.variant ? ` ${chosenFinishes.variant}` : ""}
+                  {chosenFinishes.wood ? ` · ${chosenFinishes.wood}` : ""}
+                  {chosenFinishes.fabric ? ` · ${chosenFinishes.fabric}` : ""}
+                </span>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="max-h-80 overflow-y-auto space-y-2 pr-1">
+            {boardsLoading ? (
+              <div className="flex justify-center py-8">
+                <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+              </div>
+            ) : userBoards.length === 0 ? (
+              <p className="font-body text-sm text-muted-foreground py-6 text-center">
+                You don't have any client boards yet. Create one from{" "}
+                <a href="/trade/boards" className="underline">Trade → Boards</a>.
+              </p>
+            ) : (
+              userBoards.map((b) => {
+                const pushed = pushedBoardIds.has(b.id);
+                const busy = pushingBoardId === b.id;
+                return (
+                  <button
+                    key={b.id}
+                    type="button"
+                    disabled={busy || pushed}
+                    onClick={() => pushToBoard(b.id)}
+                    className="w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-md border border-border hover:border-foreground/30 bg-card text-left transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                  >
+                    <div className="min-w-0">
+                      <p className="font-display text-sm text-foreground truncate">{b.title}</p>
+                      <p className="font-body text-[11px] text-muted-foreground truncate">
+                        {b.client_name || "—"} · {b.item_count} item{b.item_count === 1 ? "" : "s"} · {b.status}
+                      </p>
+                    </div>
+                    {pushed ? (
+                      <span className="flex items-center gap-1 font-body text-[10px] uppercase tracking-widest text-emerald-600">
+                        <Check className="h-3 w-3" /> Added
+                      </span>
+                    ) : busy ? (
+                      <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                    ) : (
+                      <span className="font-body text-[10px] uppercase tracking-widest text-muted-foreground">Add →</span>
+                    )}
+                  </button>
+                );
+              })
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
+
   );
 }
