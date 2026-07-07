@@ -6,12 +6,14 @@ import { fillTradeProductImageFallbacks } from "@/lib/tradeProductImageFallback"
 import { useAuth } from "@/hooks/useAuth";
 import { useState, useRef, useMemo, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
-import { FileText, Loader2, Search, Printer, LayoutGrid, Check } from "lucide-react";
+import { FileText, Loader2, Search, Printer, LayoutGrid, Check, Plus } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { useUserBoards } from "@/hooks/useUserBoards";
+import { useStudio } from "@/hooks/useStudio";
 import { normalizeCategory, normalizeSubcategory, CATEGORY_ORDER, getSubcategoriesForCategory } from "@/lib/productTaxonomy";
 import { ProjectPicker } from "@/components/trade/ProjectPicker";
 import TradeBreadcrumb from "@/components/trade/TradeBreadcrumb";
@@ -333,13 +335,19 @@ export default function TradeTearsheets() {
 
   // ─── Push to Client Board ────────────────────────────────────────────────
   const { toast } = useToast();
+  const { currentStudio, canEdit } = useStudio();
   const [boardPickerOpen, setBoardPickerOpen] = useState(false);
   const [pushingBoardId, setPushingBoardId] = useState<string | null>(null);
   const [pushedBoardIds, setPushedBoardIds] = useState<Set<string>>(new Set());
+  const [showCreateBoardForm, setShowCreateBoardForm] = useState(false);
+  const [newBoardTitle, setNewBoardTitle] = useState("");
+  const [newBoardClientName, setNewBoardClientName] = useState("");
+  const [newBoardClientEmail, setNewBoardClientEmail] = useState("");
+  const [creatingBoard, setCreatingBoard] = useState(false);
   const { boards: userBoards, loading: boardsLoading } = useUserBoards(boardPickerOpen);
 
-  const pushToBoard = async (boardId: string) => {
-    if (!selectedProduct) return;
+  const pushToBoard = async (boardId: string): Promise<boolean> => {
+    if (!selectedProduct) return false;
     setPushingBoardId(boardId);
     try {
       // client_board_items.product_id FKs to trade_products.id. Resolve if the
@@ -361,7 +369,7 @@ export default function TradeTearsheets() {
           description: "This product hasn't been mirrored into trade_products, so it can't be pinned to a board.",
           variant: "destructive",
         });
-        return;
+        return false;
       }
 
       const noteLines: string[] = [];
@@ -382,12 +390,49 @@ export default function TradeTearsheets() {
 
       if (error) {
         toast({ title: "Couldn't add to board", description: error.message, variant: "destructive" });
-        return;
+        return false;
       }
       setPushedBoardIds((prev) => new Set(prev).add(boardId));
       toast({ title: "Added to board", description: `${selectedProduct.product_name} pinned with the chosen finishes.` });
+      return true;
     } finally {
       setPushingBoardId(null);
+    }
+  };
+
+  const createBoardAndPush = async () => {
+    if (!user || !newBoardTitle.trim() || !selectedProduct) return;
+    if (currentStudio && !canEdit) {
+      toast({ title: "Read-only role", description: "Your role in this studio doesn't allow creating boards.", variant: "destructive" });
+      return;
+    }
+    setCreatingBoard(true);
+    try {
+      const { data, error } = await supabase
+        .from("client_boards")
+        .insert({
+          user_id: user.id,
+          studio_id: currentStudio?.id ?? null,
+          title: newBoardTitle.trim(),
+          client_name: newBoardClientName.trim() || null,
+          client_email: newBoardClientEmail.trim() || null,
+        } as any)
+        .select()
+        .single();
+      if (error || !data) {
+        toast({ title: "Couldn't create board", description: error?.message || "Unknown error", variant: "destructive" });
+        return;
+      }
+      const success = await pushToBoard(data.id);
+      if (success) {
+        setNewBoardTitle("");
+        setNewBoardClientName("");
+        setNewBoardClientEmail("");
+        setShowCreateBoardForm(false);
+        setBoardPickerOpen(false);
+      }
+    } finally {
+      setCreatingBoard(false);
     }
   };
 
@@ -640,12 +685,20 @@ export default function TradeTearsheets() {
         )}
       </div>
 
-      <Dialog open={boardPickerOpen} onOpenChange={setBoardPickerOpen}>
+      <Dialog open={boardPickerOpen} onOpenChange={(open) => {
+        setBoardPickerOpen(open);
+        if (!open) {
+          setShowCreateBoardForm(false);
+          setNewBoardTitle("");
+          setNewBoardClientName("");
+          setNewBoardClientEmail("");
+        }
+      }}>
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle className="font-display text-lg">Push to Client Board</DialogTitle>
             <DialogDescription className="font-body text-xs">
-              Pin {selectedProduct?.product_name ?? "this product"} to one of your boards.
+              Pin {selectedProduct?.product_name ?? "this product"} to one of your boards, or create a new board on the fly.
               {(chosenFinishes.fabric || chosenFinishes.wood || chosenFinishes.variant) && (
                 <span className="block mt-1 text-muted-foreground">
                   Finishes will be saved as a note on the board item:
@@ -656,46 +709,114 @@ export default function TradeTearsheets() {
               )}
             </DialogDescription>
           </DialogHeader>
-          <div className="max-h-80 overflow-y-auto space-y-2 pr-1">
+          <div className="max-h-[28rem] overflow-y-auto space-y-3 pr-1">
+            {!showCreateBoardForm ? (
+              <button
+                type="button"
+                onClick={() => setShowCreateBoardForm(true)}
+                className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-md border border-dashed border-border hover:border-foreground/30 bg-background text-left transition-all text-muted-foreground hover:text-foreground"
+              >
+                <Plus className="h-4 w-4" />
+                <span className="font-body text-xs uppercase tracking-widest">Create new client board</span>
+              </button>
+            ) : (
+              <div className="rounded-md border border-border bg-card p-3 space-y-3">
+                <div className="space-y-1.5">
+                  <Label className="font-body text-xs uppercase tracking-wider">Board Title</Label>
+                  <Input
+                    value={newBoardTitle}
+                    onChange={(e) => setNewBoardTitle(e.target.value)}
+                    placeholder="e.g. Smith Residence"
+                    className="font-body text-sm"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="font-body text-xs uppercase tracking-wider">Client Name (optional)</Label>
+                  <Input
+                    value={newBoardClientName}
+                    onChange={(e) => setNewBoardClientName(e.target.value)}
+                    placeholder="Client name"
+                    className="font-body text-sm"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="font-body text-xs uppercase tracking-wider">Client Email (optional)</Label>
+                  <Input
+                    value={newBoardClientEmail}
+                    onChange={(e) => setNewBoardClientEmail(e.target.value)}
+                    placeholder="client@email.com"
+                    className="font-body text-sm"
+                  />
+                </div>
+                <div className="flex items-center gap-2 pt-1">
+                  <Button
+                    type="button"
+                    onClick={createBoardAndPush}
+                    disabled={creatingBoard || !newBoardTitle.trim()}
+                    className="flex-1 font-body text-xs uppercase tracking-widest"
+                  >
+                    {creatingBoard && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+                    Create & Push
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      setShowCreateBoardForm(false);
+                      setNewBoardTitle("");
+                      setNewBoardClientName("");
+                      setNewBoardClientEmail("");
+                    }}
+                    disabled={creatingBoard}
+                    className="font-body text-xs uppercase tracking-widest"
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            )}
+
             {boardsLoading ? (
               <div className="flex justify-center py-8">
                 <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
               </div>
             ) : userBoards.length === 0 ? (
               <p className="font-body text-sm text-muted-foreground py-6 text-center">
-                You don't have any client boards yet. Create one from{" "}
-                <a href="/trade/boards" className="underline">Trade → Boards</a>.
+                No existing boards. Create one above to push this tear sheet.
               </p>
             ) : (
-              userBoards.map((b) => {
-                const pushed = pushedBoardIds.has(b.id);
-                const busy = pushingBoardId === b.id;
-                return (
-                  <button
-                    key={b.id}
-                    type="button"
-                    disabled={busy || pushed}
-                    onClick={() => pushToBoard(b.id)}
-                    className="w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-md border border-border hover:border-foreground/30 bg-card text-left transition-all disabled:opacity-60 disabled:cursor-not-allowed"
-                  >
-                    <div className="min-w-0">
-                      <p className="font-display text-sm text-foreground truncate">{b.title}</p>
-                      <p className="font-body text-[11px] text-muted-foreground truncate">
-                        {b.client_name || "—"} · {b.item_count} item{b.item_count === 1 ? "" : "s"} · {b.status}
-                      </p>
-                    </div>
-                    {pushed ? (
-                      <span className="flex items-center gap-1 font-body text-[10px] uppercase tracking-widest text-emerald-600">
-                        <Check className="h-3 w-3" /> Added
-                      </span>
-                    ) : busy ? (
-                      <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-                    ) : (
-                      <span className="font-body text-[10px] uppercase tracking-widest text-muted-foreground">Add →</span>
-                    )}
-                  </button>
-                );
-              })
+              <div className="space-y-2">
+                <p className="font-body text-[10px] uppercase tracking-widest text-muted-foreground">Existing boards</p>
+                {userBoards.map((b) => {
+                  const pushed = pushedBoardIds.has(b.id);
+                  const busy = pushingBoardId === b.id;
+                  return (
+                    <button
+                      key={b.id}
+                      type="button"
+                      disabled={busy || pushed}
+                      onClick={() => pushToBoard(b.id)}
+                      className="w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-md border border-border hover:border-foreground/30 bg-card text-left transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                    >
+                      <div className="min-w-0">
+                        <p className="font-display text-sm text-foreground truncate">{b.title}</p>
+                        <p className="font-body text-[11px] text-muted-foreground truncate">
+                          {b.client_name || "—"} · {b.item_count} item{b.item_count === 1 ? "" : "s"} · {b.status}
+                        </p>
+                      </div>
+                      {pushed ? (
+                        <span className="flex items-center gap-1 font-body text-[10px] uppercase tracking-widest text-emerald-600">
+                          <Check className="h-3 w-3" /> Added
+                        </span>
+                      ) : busy ? (
+                        <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                      ) : (
+                        <span className="font-body text-[10px] uppercase tracking-widest text-muted-foreground">Add →</span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
             )}
           </div>
         </DialogContent>
