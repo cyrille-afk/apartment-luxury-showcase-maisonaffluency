@@ -685,12 +685,15 @@ export default function TradeTearsheets() {
         )}
       </div>
 
-      <Dialog open={boardPickerOpen} onOpenChange={setBoardPickerOpen}>
+      <Dialog open={boardPickerOpen} onOpenChange={(open) => {
+        setBoardPickerOpen(open);
+        if (!open) setShowCreateBoardForm(false);
+      }}>
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle className="font-display text-lg">Push to Client Board</DialogTitle>
             <DialogDescription className="font-body text-xs">
-              Pin {selectedProduct?.product_name ?? "this product"} to one of your boards.
+              Pin {selectedProduct?.product_name ?? "this product"} to one of your boards, or create a new board on the fly.
               {(chosenFinishes.fabric || chosenFinishes.wood || chosenFinishes.variant) && (
                 <span className="block mt-1 text-muted-foreground">
                   Finishes will be saved as a note on the board item:
@@ -701,46 +704,109 @@ export default function TradeTearsheets() {
               )}
             </DialogDescription>
           </DialogHeader>
-          <div className="max-h-80 overflow-y-auto space-y-2 pr-1">
+          <div className="max-h-[28rem] overflow-y-auto space-y-3 pr-1">
+            {!showCreateBoardForm ? (
+              <button
+                type="button"
+                onClick={() => setShowCreateBoardForm(true)}
+                className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-md border border-dashed border-border hover:border-foreground/30 bg-background text-left transition-all text-muted-foreground hover:text-foreground"
+              >
+                <Plus className="h-4 w-4" />
+                <span className="font-body text-xs uppercase tracking-widest">Create new client board</span>
+              </button>
+            ) : (
+              <div className="rounded-md border border-border bg-card p-3 space-y-3">
+                <div className="space-y-1.5">
+                  <Label className="font-body text-xs uppercase tracking-wider">Board Title</Label>
+                  <Input
+                    value={newBoardTitle}
+                    onChange={(e) => setNewBoardTitle(e.target.value)}
+                    placeholder="e.g. Smith Residence"
+                    className="font-body text-sm"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="font-body text-xs uppercase tracking-wider">Client Name (optional)</Label>
+                  <Input
+                    value={newBoardClientName}
+                    onChange={(e) => setNewBoardClientName(e.target.value)}
+                    placeholder="Client name"
+                    className="font-body text-sm"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="font-body text-xs uppercase tracking-wider">Client Email (optional)</Label>
+                  <Input
+                    value={newBoardClientEmail}
+                    onChange={(e) => setNewBoardClientEmail(e.target.value)}
+                    placeholder="client@email.com"
+                    className="font-body text-sm"
+                  />
+                </div>
+                <div className="flex items-center gap-2 pt-1">
+                  <Button
+                    type="button"
+                    onClick={createBoardAndPush}
+                    disabled={creatingBoard || !newBoardTitle.trim()}
+                    className="flex-1 font-body text-xs uppercase tracking-widest"
+                  >
+                    {creatingBoard && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+                    Create & Push
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setShowCreateBoardForm(false)}
+                    disabled={creatingBoard}
+                    className="font-body text-xs uppercase tracking-widest"
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            )}
+
             {boardsLoading ? (
               <div className="flex justify-center py-8">
                 <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
               </div>
             ) : userBoards.length === 0 ? (
               <p className="font-body text-sm text-muted-foreground py-6 text-center">
-                You don't have any client boards yet. Create one from{" "}
-                <a href="/trade/boards" className="underline">Trade → Boards</a>.
+                No existing boards. Create one above to push this tear sheet.
               </p>
             ) : (
-              userBoards.map((b) => {
-                const pushed = pushedBoardIds.has(b.id);
-                const busy = pushingBoardId === b.id;
-                return (
-                  <button
-                    key={b.id}
-                    type="button"
-                    disabled={busy || pushed}
-                    onClick={() => pushToBoard(b.id)}
-                    className="w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-md border border-border hover:border-foreground/30 bg-card text-left transition-all disabled:opacity-60 disabled:cursor-not-allowed"
-                  >
-                    <div className="min-w-0">
-                      <p className="font-display text-sm text-foreground truncate">{b.title}</p>
-                      <p className="font-body text-[11px] text-muted-foreground truncate">
-                        {b.client_name || "—"} · {b.item_count} item{b.item_count === 1 ? "" : "s"} · {b.status}
-                      </p>
-                    </div>
-                    {pushed ? (
-                      <span className="flex items-center gap-1 font-body text-[10px] uppercase tracking-widest text-emerald-600">
-                        <Check className="h-3 w-3" /> Added
-                      </span>
-                    ) : busy ? (
-                      <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-                    ) : (
-                      <span className="font-body text-[10px] uppercase tracking-widest text-muted-foreground">Add →</span>
-                    )}
-                  </button>
-                );
-              })
+              <div className="space-y-2">
+                <p className="font-body text-[10px] uppercase tracking-widest text-muted-foreground">Existing boards</p>
+                {userBoards.map((b) => {
+                  const pushed = pushedBoardIds.has(b.id);
+                  const busy = pushingBoardId === b.id;
+                  return (
+                    <button
+                      key={b.id}
+                      type="button"
+                      disabled={busy || pushed}
+                      onClick={() => pushToBoard(b.id)}
+                      className="w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-md border border-border hover:border-foreground/30 bg-card text-left transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                    >
+                      <div className="min-w-0">
+                        <p className="font-display text-sm text-foreground truncate">{b.title}</p>
+                        <p className="font-body text-[11px] text-muted-foreground truncate">
+                          {b.client_name || "—"} · {b.item_count} item{b.item_count === 1 ? "" : "s"} · {b.status}
+                        </p>
+                      </div>
+                      {pushed ? (
+                        <span className="flex items-center gap-1 font-body text-[10px] uppercase tracking-widest text-emerald-600">
+                          <Check className="h-3 w-3" /> Added
+                        </span>
+                      ) : busy ? (
+                        <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                      ) : (
+                        <span className="font-body text-[10px] uppercase tracking-widest text-muted-foreground">Add →</span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
             )}
           </div>
         </DialogContent>
