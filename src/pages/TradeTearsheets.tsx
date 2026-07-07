@@ -292,6 +292,33 @@ export default function TradeTearsheets() {
     return ordered;
   }, [products, filterCategory]);
 
+  // Auto-select the incoming product once the merged catalog is loaded.
+  // We match by exact id first, then by curator/trade twin (same id present
+  // on either side of the merge), so links from the product page land on the
+  // right tearsheet even when the merge kept the "other" canonical id.
+  useEffect(() => {
+    if (!initialFinishes.productId || selectedProduct || products.length === 0) return;
+    const direct = products.find((p) => p.id === initialFinishes.productId);
+    if (direct) { setSelectedProduct(direct); return; }
+    // Twin fallback: look up the incoming id's (brand, title) pair from both
+    // source tables and match against the merged list.
+    (async () => {
+      const [tp, cp] = await Promise.all([
+        supabase.from("trade_products").select("brand_name, product_name").eq("id", initialFinishes.productId!).maybeSingle(),
+        supabase.from("designer_curator_picks").select("title, designers!inner(name)").eq("id", initialFinishes.productId!).maybeSingle(),
+      ]);
+      const brand = (tp.data as any)?.brand_name || ((cp.data as any)?.designers?.name);
+      const name = (tp.data as any)?.product_name || (cp.data as any)?.title;
+      if (!brand || !name) return;
+      const match = products.find(
+        (p) => p.product_name.toLowerCase() === String(name).toLowerCase() &&
+               (p.brand_name.toLowerCase() === String(brand).toLowerCase() || p.parent_brand.toLowerCase() === String(brand).toLowerCase())
+      );
+      if (match) setSelectedProduct(match);
+    })();
+  }, [products, initialFinishes.productId, selectedProduct]);
+
+
   const filtered = products.filter((p) => {
     if (search && ![p.product_name, p.brand_name].some((f) => f?.toLowerCase().includes(search.toLowerCase()))) return false;
     if (filterDesigner && p.parent_brand !== filterDesigner) return false;
