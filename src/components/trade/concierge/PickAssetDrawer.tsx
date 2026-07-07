@@ -233,15 +233,6 @@ export function PickAssetDrawer({ pickId, title }: Props) {
           {renderGroup("Fabrics", fabricSwatches, selectedFabricId, setSelectedFabricId)}
         </div>
       )}
-      const showDraftButton = loading || hasSwatches;
-      const canDraft = !loading && (selectedFabricId || selectedBaseId);
-      const draftParams = new URLSearchParams();
-      draftParams.set("product", pickId);
-      if (fabricSwatch?.name) draftParams.set("fabric", fabricSwatch.name);
-      if (fabricSwatch?.image_url) draftParams.set("fabricImg", fabricSwatch.image_url);
-      if (baseSwatch?.name) draftParams.set("wood", baseSwatch.name);
-      if (baseSwatch?.image_url) draftParams.set("woodImg", baseSwatch.image_url);
-
       {showDraftButton && (
         canDraft ? (
           <Link
