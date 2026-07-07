@@ -167,6 +167,7 @@ const Product3DViewer: React.FC<Props> = ({
   autoOpen = false,
   debug = false,
 }) => {
+  const hasExplicitRoles = !!materialRoles && Object.keys(materialRoles).length > 0;
 
   const [opened, setOpened] = useState(autoOpen);
   const [ready, setReady] = useState(() =>
