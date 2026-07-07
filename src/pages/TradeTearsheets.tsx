@@ -38,6 +38,30 @@ export default function TradeTearsheets() {
   const [filterSubcategory, setFilterSubcategory] = useState("");
   const [searchParams, setSearchParams] = useSearchParams();
   const filterProjectId = searchParams.get("project");
+  // Finish handoff from the Trade Product Page ("Draft Tearsheet with These
+  // Finishes" button). We keep the values in local state so the user can
+  // clear them without touching the URL.
+  const initialFinishes = useMemo(() => ({
+    productId: searchParams.get("product"),
+    fabric: searchParams.get("fabric"),
+    fabricImg: searchParams.get("fabricImg"),
+    wood: searchParams.get("wood"),
+    woodImg: searchParams.get("woodImg"),
+    variant: searchParams.get("variant"),
+  // Only read once on mount — subsequent URL edits don't reset the state.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }), []);
+  const [chosenFinishes, setChosenFinishes] = useState<{
+    fabric: string | null; fabricImg: string | null;
+    wood: string | null; woodImg: string | null;
+    variant: string | null;
+  }>({
+    fabric: initialFinishes.fabric,
+    fabricImg: initialFinishes.fabricImg,
+    wood: initialFinishes.wood,
+    woodImg: initialFinishes.woodImg,
+    variant: initialFinishes.variant,
+  });
   const setFilterProjectId = (id: string | null) => {
     try {
       if (id) sessionStorage.setItem("trade:lastProjectFilter", id);
@@ -268,6 +292,33 @@ export default function TradeTearsheets() {
     return ordered;
   }, [products, filterCategory]);
 
+  // Auto-select the incoming product once the merged catalog is loaded.
+  // We match by exact id first, then by curator/trade twin (same id present
+  // on either side of the merge), so links from the product page land on the
+  // right tearsheet even when the merge kept the "other" canonical id.
+  useEffect(() => {
+    if (!initialFinishes.productId || selectedProduct || products.length === 0) return;
+    const direct = products.find((p) => p.id === initialFinishes.productId);
+    if (direct) { setSelectedProduct(direct); return; }
+    // Twin fallback: look up the incoming id's (brand, title) pair from both
+    // source tables and match against the merged list.
+    (async () => {
+      const [tp, cp] = await Promise.all([
+        supabase.from("trade_products").select("brand_name, product_name").eq("id", initialFinishes.productId!).maybeSingle(),
+        supabase.from("designer_curator_picks").select("title, designers!inner(name)").eq("id", initialFinishes.productId!).maybeSingle(),
+      ]);
+      const brand = (tp.data as any)?.brand_name || ((cp.data as any)?.designers?.name);
+      const name = (tp.data as any)?.product_name || (cp.data as any)?.title;
+      if (!brand || !name) return;
+      const match = products.find(
+        (p) => p.product_name.toLowerCase() === String(name).toLowerCase() &&
+               (p.brand_name.toLowerCase() === String(brand).toLowerCase() || p.parent_brand.toLowerCase() === String(brand).toLowerCase())
+      );
+      if (match) setSelectedProduct(match);
+    })();
+  }, [products, initialFinishes.productId, selectedProduct]);
+
+
   const filtered = products.filter((p) => {
     if (search && ![p.product_name, p.brand_name].some((f) => f?.toLowerCase().includes(search.toLowerCase()))) return false;
     if (filterDesigner && p.parent_brand !== filterDesigner) return false;
@@ -303,8 +354,25 @@ export default function TradeTearsheets() {
       <div class="header">
         <p class="brand">${esc(selectedProduct.brand_name)}</p>
         <h1 class="name">${esc(selectedProduct.product_name)}</h1>
+        ${chosenFinishes.variant ? `<p class="brand" style="margin-top:6px">Variant · ${esc(chosenFinishes.variant)}</p>` : ""}
       </div>
       ${selectedProduct.image_url ? `<img class="img" src="${esc(selectedProduct.image_url)}" />` : ""}
+      ${(chosenFinishes.fabric || chosenFinishes.wood) ? `
+      <div style="margin-top:24px;border:1px solid #eee;padding:16px;border-radius:6px;background:#fafafa">
+        <p class="label" style="margin-bottom:12px">Selected Finishes</p>
+        <div style="display:flex;gap:24px;flex-wrap:wrap">
+          ${chosenFinishes.wood ? `
+            <div style="display:flex;gap:10px;align-items:center">
+              ${chosenFinishes.woodImg ? `<img src="${esc(chosenFinishes.woodImg)}" style="width:56px;height:56px;object-fit:cover;border:1px solid #ddd;border-radius:4px" />` : ""}
+              <div><p class="label">Base / Wood</p><p class="value">${esc(chosenFinishes.wood)}</p></div>
+            </div>` : ""}
+          ${chosenFinishes.fabric ? `
+            <div style="display:flex;gap:10px;align-items:center">
+              ${chosenFinishes.fabricImg ? `<img src="${esc(chosenFinishes.fabricImg)}" style="width:56px;height:56px;object-fit:cover;border:1px solid #ddd;border-radius:4px" />` : ""}
+              <div><p class="label">Fabric</p><p class="value">${esc(chosenFinishes.fabric)}</p></div>
+            </div>` : ""}
+        </div>
+      </div>` : ""}
       <div class="grid" style="margin-top:24px">
         <div><p class="label">Category</p><p class="value">${esc(selectedProduct.category) || "—"}</p></div>
         <div><p class="label">Dimensions</p><p class="value">${esc(selectedProduct.dimensions) || "—"}</p></div>
@@ -317,6 +385,7 @@ export default function TradeTearsheets() {
         <p>Generated by Maison Affluency Trade Portal · ${esc(new Date().toLocaleDateString())}</p>
       </div>
       </body></html>
+
     `);
     win.document.close();
     win.print();
@@ -344,10 +413,52 @@ export default function TradeTearsheets() {
               <div className="border-b border-border pb-4">
                 <p className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">{selectedProduct.brand_name}</p>
                 <h2 className="font-display text-xl text-foreground mt-1">{selectedProduct.product_name}</h2>
+                {chosenFinishes.variant && (
+                  <p className="font-body text-[11px] text-muted-foreground mt-1">Variant · {chosenFinishes.variant}</p>
+                )}
               </div>
               {selectedProduct.image_url && (
                 <img src={selectedProduct.image_url} alt={selectedProduct.product_name} className="max-h-72 object-contain border border-border rounded" />
               )}
+              {(chosenFinishes.fabric || chosenFinishes.wood) && (
+                <div className="border border-border rounded-lg p-4 bg-muted/30">
+                  <div className="flex items-center justify-between mb-3">
+                    <p className="font-body text-[10px] uppercase tracking-wider text-muted-foreground">Selected Finishes</p>
+                    <button
+                      type="button"
+                      onClick={() => setChosenFinishes({ fabric: null, fabricImg: null, wood: null, woodImg: null, variant: null })}
+                      className="font-body text-[10px] uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      Clear
+                    </button>
+                  </div>
+                  <div className="flex flex-wrap gap-6">
+                    {chosenFinishes.wood && (
+                      <div className="flex items-center gap-3">
+                        {chosenFinishes.woodImg && (
+                          <img src={chosenFinishes.woodImg} alt={chosenFinishes.wood} className="w-14 h-14 object-cover rounded border border-border" />
+                        )}
+                        <div>
+                          <p className="font-body text-[10px] uppercase tracking-wider text-muted-foreground">Base / Wood</p>
+                          <p className="font-body text-sm text-foreground">{chosenFinishes.wood}</p>
+                        </div>
+                      </div>
+                    )}
+                    {chosenFinishes.fabric && (
+                      <div className="flex items-center gap-3">
+                        {chosenFinishes.fabricImg && (
+                          <img src={chosenFinishes.fabricImg} alt={chosenFinishes.fabric} className="w-14 h-14 object-cover rounded border border-border" />
+                        )}
+                        <div>
+                          <p className="font-body text-[10px] uppercase tracking-wider text-muted-foreground">Fabric</p>
+                          <p className="font-body text-sm text-foreground">{chosenFinishes.fabric}</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
               <div className="grid grid-cols-2 gap-4">
                 {([
                   ["Category", selectedProduct.category],

@@ -16,7 +16,7 @@ import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { useParams, useNavigate, Link, useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import {
-  Heart, Scale, ArrowLeft, Layers, Clock, Globe, ShoppingCart, Check, Loader2, Package, Wand2, ChevronDown, Sparkles,
+  Heart, Scale, ArrowLeft, Layers, Clock, Globe, ShoppingCart, Check, Loader2, Package, Wand2, ChevronDown, Sparkles, FileText,
 } from "lucide-react";
 import { renderParagraph } from "@/components/EditorialBiography";
 import { useQuery } from "@tanstack/react-query";
@@ -2343,8 +2343,33 @@ const TradeProductPage: React.FC = () => {
 
             })()}
 
+            {/* Draft a tearsheet with the currently-selected fabric / wood finishes.
+                Only enabled once at least one finish has been chosen. */}
+            {(selectedFabric || selectedWoodPrice) && (
+              <button
+                type="button"
+                onClick={() => {
+                  const params = new URLSearchParams();
+                  params.set("product", product.id);
+                  if (selectedFabric?.name) params.set("fabric", selectedFabric.name);
+                  if (selectedFabric?.image_url) params.set("fabricImg", selectedFabric.image_url);
+                  if (selectedWoodPrice?.name) params.set("wood", selectedWoodPrice.name);
+                  if (selectedWoodPrice?.image_url) params.set("woodImg", selectedWoodPrice.image_url);
+                  const variantLabelParts = [selectedBase, selectedTop, selectedDualSize, selectedSingleSize]
+                    .filter(Boolean).map(String);
+                  if (variantLabelParts.length) params.set("variant", variantLabelParts.join(" · "));
+                  navigate(`/trade/tearsheets?${params.toString()}`);
+                }}
+                className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-md font-body text-[11px] uppercase tracking-[0.12em] transition-all border border-foreground/30 bg-foreground text-background hover:bg-foreground/90 w-full"
+              >
+                <FileText size={13} />
+                Draft Tearsheet with These Finishes
+              </button>
+            )}
+
             {/* CAD / 3D file downloads (trade-gated; only renders when files exist) */}
             <CadAssetsSection productId={tradeProductId} productName={product.title} />
+
 
             {/* Inline subtle nudge: Sample Requests live in Procurement */}
             <p className="font-body text-[11px] text-muted-foreground text-center">
