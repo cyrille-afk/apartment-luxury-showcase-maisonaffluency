@@ -13,6 +13,7 @@ import QuoteDetail from "@/components/trade/QuoteDetail";
 import SectionHero from "@/components/trade/SectionHero";
 import ActiveFilterChips from "@/components/trade/ActiveFilterChips";
 import TradeBreadcrumb from "@/components/trade/TradeBreadcrumb";
+import { getConciergeSession, updateConciergeSession } from "@/hooks/useConciergeSession";
 
 interface Quote {
   id: string;
