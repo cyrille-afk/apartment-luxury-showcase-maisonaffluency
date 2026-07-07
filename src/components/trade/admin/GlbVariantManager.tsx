@@ -488,20 +488,20 @@ export function GlbVariantManager({ productId, productName, posterImageUrl, onCh
       )}
 
       {preview && (
-        <div className="max-w-[360px]">
-          <div className="mb-1 font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
-            Preview · {preview.variant_label}
-          </div>
-          <Product3DViewer
-            url={preview.glb_url}
-            alt={`${productName} — ${preview.variant_label}`}
-            poster={posterImageUrl || null}
-            autoOpen
-            debug
-          />
-
-        </div>
+        <PreviewPanel
+          key={preview.id}
+          variant={preview}
+          productName={productName}
+          posterImageUrl={posterImageUrl || null}
+          onRolesSaved={(roles) => {
+            setVariants((prev) =>
+              prev.map((v) => (v.id === preview.id ? { ...v, material_roles: roles } : v)),
+            );
+            setPreview((p) => (p && p.id === preview.id ? { ...p, material_roles: roles } : p));
+          }}
+        />
       )}
+
 
       <p className="font-body text-[10px] text-muted-foreground leading-relaxed max-w-[520px]">
         Accepted files per variant: <b>.glb</b>, <b>.gltf</b>, or an <b>.obj</b> with its <b>.mtl</b> and texture images (⌘/Ctrl to multi-select — converted to GLB in your browser). Max {MAX_MB} MB per file. The default variant is what shows on public product pages and inside the concierge tearsheet drawer when no size is selected.
