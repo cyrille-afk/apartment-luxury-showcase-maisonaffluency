@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import Product3DViewer from "@/components/trade/Product3DViewer";
+import { classifyObjBundle, convertObjBundleToGlb } from "@/lib/objToGlb";
 
 interface ProductRow {
   id: string;
@@ -65,33 +66,66 @@ const TradeAdminGlbModels: React.FC = () => {
     return () => clearTimeout(t);
   }, [search]);
 
-  const handleUpload = async (file: File) => {
-    if (!selected) return;
-    const name = file.name.toLowerCase();
-    if (!(name.endsWith(".glb") || name.endsWith(".gltf"))) {
-      toast.error("Please upload a .glb or .gltf model.");
+  const handleUpload = async (files: File[]) => {
+    if (!selected || files.length === 0) return;
+
+    let fileToUpload: File | null = null;
+    let ext: "glb" | "gltf" = "glb";
+
+    // Case 1: single GLB/GLTF direct upload
+    if (files.length === 1) {
+      const f = files[0];
+      const n = f.name.toLowerCase();
+      if (n.endsWith(".glb") || n.endsWith(".gltf")) {
+        fileToUpload = f;
+        ext = n.endsWith(".gltf") ? "gltf" : "glb";
+      }
+    }
+
+    // Case 2: OBJ (+ MTL + textures) bundle → convert to GLB
+    if (!fileToUpload) {
+      const bundle = classifyObjBundle(files);
+      if (bundle) {
+        setUploading(true);
+        setUploadProgress(0);
+        try {
+          toast.message("Converting OBJ to GLB in your browser…");
+          const outName = bundle.objFile.name.replace(/\.obj$/i, "") + ".glb";
+          fileToUpload = await convertObjBundleToGlb(bundle, outName);
+          ext = "glb";
+        } catch (e: any) {
+          setUploading(false);
+          toast.error(`OBJ→GLB conversion failed: ${e?.message || e}`);
+          return;
+        }
+      }
+    }
+
+    if (!fileToUpload) {
+      toast.error("Please upload a .glb/.gltf, or an .obj (optionally with .mtl + textures).");
       return;
     }
-    if (file.size > MAX_MB * 1024 * 1024) {
-      toast.error(`${(file.size / 1024 / 1024).toFixed(1)} MB exceeds the ${MAX_MB} MB limit.`);
+
+    if (fileToUpload.size > MAX_MB * 1024 * 1024) {
+      setUploading(false);
+      toast.error(`${(fileToUpload.size / 1024 / 1024).toFixed(1)} MB exceeds the ${MAX_MB} MB limit.`);
       return;
     }
 
     setUploading(true);
     setUploadProgress(0);
     try {
-      const ext = name.endsWith(".gltf") ? "gltf" : "glb";
       const contentType = ext === "glb" ? "model/gltf-binary" : "model/gltf+json";
       const path = `glb-models/${selected.id}/${Date.now()}.${ext}`;
 
       const { error: upErr } = await supabase.storage
         .from("assets")
-        .upload(path, file, {
+        .upload(path, fileToUpload, {
           contentType,
           cacheControl: "31536000",
           upsert: false,
           onUploadProgress: (evt: { loaded?: number; total?: number }) => {
-            const pct = Math.round(((evt.loaded || 0) / (evt.total || file.size)) * 100);
+            const pct = Math.round(((evt.loaded || 0) / (evt.total || fileToUpload!.size)) * 100);
             setUploadProgress(pct);
           },
         } as any);
@@ -255,14 +289,19 @@ const TradeAdminGlbModels: React.FC = () => {
                     <input
                       ref={inputRef}
                       type="file"
-                      accept=".glb,.gltf,model/gltf-binary,model/gltf+json"
+                      multiple
+                      accept=".glb,.gltf,.obj,.mtl,.png,.jpg,.jpeg,.webp,.bmp,.tga,.tif,.tiff,model/gltf-binary,model/gltf+json,image/*"
                       className="hidden"
                       onChange={(e) => {
-                        const f = e.target.files?.[0];
-                        if (f) handleUpload(f);
+                        const fs = e.target.files ? Array.from(e.target.files) : [];
+                        if (fs.length) handleUpload(fs);
                       }}
                     />
+                    <span className="font-body text-[10px] text-muted-foreground text-center leading-relaxed max-w-[260px]">
+                      Accepts .glb / .gltf, or select an .obj together with its .mtl and texture images — we'll convert to GLB in your browser.
+                    </span>
                   </label>
+
 
                   {selected.glb_url && (
                     <>
