@@ -160,11 +160,23 @@ export function useConciergeSession() {
   }, []);
 
   const setBrief = useCallback((briefText: string | null) => {
-    updateConciergeSession({ briefText });
+    const next = updateConciergeSession({ briefText });
+    // Bridge onto the Realtime handoff channel so peer tabs / dashboards
+    // pick up the locked brief without polling localStorage.
+    if (next.streamId && briefText != null) {
+      void emitHandoff(next.streamId, "brief_locked", { brief_text_length: briefText.length });
+    }
   }, []);
 
   const setProduct = useCallback((product: ConciergeSessionProduct | null) => {
-    updateConciergeSession({ product, locked: false });
+    const next = updateConciergeSession({ product, locked: false });
+    if (next.streamId && product) {
+      void emitHandoff(next.streamId, "product_selected", {
+        product_id: product.id,
+        title: product.title,
+        source: product.source ?? null,
+      });
+    }
   }, []);
 
   const setFinishes = useCallback((finishes: Partial<ConciergeSessionFinishes>) => {
@@ -172,7 +184,14 @@ export function useConciergeSession() {
   }, []);
 
   const lockFinishes = useCallback(() => {
-    updateConciergeSession({ locked: true });
+    const next = updateConciergeSession({ locked: true });
+    if (next.streamId) {
+      void emitHandoff(next.streamId, "finishes_locked", {
+        fabric: next.finishes.fabric,
+        wood: next.finishes.wood,
+        variant: next.finishes.variant,
+      });
+    }
   }, []);
 
   const setBoardId = useCallback((boardId: string | null) => {
@@ -181,6 +200,25 @@ export function useConciergeSession() {
 
   const setQuoteId = useCallback((quoteId: string | null) => {
     updateConciergeSession({ quoteId });
+  }, []);
+
+  /**
+   * Set/replace the active stream id (from `streamConcierge`'s
+   * `onStreamStart` callback). This is what unlocks bidirectional handoff:
+   * without a streamId we have no Realtime topic to broadcast on.
+   */
+  const setStreamId = useCallback((streamId: string | null) => {
+    updateConciergeSession({ streamId });
+  }, []);
+
+  /**
+   * Emit a client-originated handoff event on the current stream. No-op if
+   * there is no active streamId — callers can call this unconditionally.
+   */
+  const emit = useCallback(async (event: HandoffEvent, payload: Record<string, unknown> = {}) => {
+    const sid = readSession()?.streamId;
+    if (!sid) return { ok: false, error: "no active stream" as const };
+    return emitHandoff(sid, event, payload);
   }, []);
 
   const reset = useCallback(() => {
@@ -195,6 +233,8 @@ export function useConciergeSession() {
     lockFinishes,
     setBoardId,
     setQuoteId,
+    setStreamId,
+    emit,
     reset,
   };
 }
