@@ -1625,6 +1625,42 @@ export type Database = {
         }
         Relationships: []
       }
+      descriptor_taxonomy: {
+        Row: {
+          category: string
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          slug: string
+          synonyms: string[]
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          slug: string
+          synonyms?: string[]
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          slug?: string
+          synonyms?: string[]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       designer_curator_picks: {
         Row: {
           allow_com_col: boolean
@@ -3631,6 +3667,58 @@ export type Database = {
             columns: ["cad_asset_id"]
             isOneToOne: true
             referencedRelation: "trade_product_cad_assets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      product_descriptor_links: {
+        Row: {
+          created_at: string
+          descriptor_id: string
+          id: string
+          pick_id: string | null
+          product_id: string | null
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          descriptor_id: string
+          id?: string
+          pick_id?: string | null
+          product_id?: string | null
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          descriptor_id?: string
+          id?: string
+          pick_id?: string | null
+          product_id?: string | null
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_descriptor_links_descriptor_id_fkey"
+            columns: ["descriptor_id"]
+            isOneToOne: false
+            referencedRelation: "descriptor_taxonomy"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_descriptor_links_pick_id_fkey"
+            columns: ["pick_id"]
+            isOneToOne: false
+            referencedRelation: "designer_curator_picks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_descriptor_links_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "trade_products"
             referencedColumns: ["id"]
           },
         ]
