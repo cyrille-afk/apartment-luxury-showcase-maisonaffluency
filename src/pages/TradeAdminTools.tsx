@@ -2,7 +2,7 @@ import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/hooks/useAuth";
 import { Link, Navigate } from "react-router-dom";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ChevronRight, FileBox, Inbox, Instagram, MapPin, Sparkles } from "lucide-react";
+import { ChevronRight, FileBox, Inbox, Instagram, MapPin, Sparkles, Tags } from "lucide-react";
 import TaxonomyAudit from "@/components/trade/TaxonomyAudit";
 import HeroManager from "@/components/trade/HeroManager";
 import SampleRequestsAdmin from "@/components/trade/SampleRequestsAdmin";
@@ -100,6 +100,18 @@ export default function TradeAdminTools() {
             <span className="font-display text-sm text-foreground">Onboarding funnel</span>
             <p className="font-body text-[10px] text-muted-foreground">Step views, sub-step clicks, completes and skips — filterable by device</p>
           </div>
+        </Link>
+
+        <Link
+          to="/trade/admin/descriptor-taxonomy"
+          className="flex items-center gap-2 px-4 py-3 rounded-lg border border-border hover:border-foreground/30 transition-all group"
+        >
+          <Tags className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+          <div className="flex-1">
+            <span className="font-display text-sm text-foreground">Descriptor Taxonomy</span>
+            <p className="font-body text-[10px] text-muted-foreground">View, edit, and re-order non-material descriptor tags (foam, treatments, finishes, features) and their remap rules</p>
+          </div>
+          <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
         </Link>
 
         <InstagramFeedAdmin />

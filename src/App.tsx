@@ -68,6 +68,7 @@ const TradeShippingEstimator = lazy(() => import("./pages/TradeShippingEstimator
 const TradeAdminShippingRates = lazy(() => import("./pages/TradeAdminShippingRates"));
 const TradeAdminShippingSurcharges = lazy(() => import("./pages/TradeAdminShippingSurcharges"));
 const TradeAdminTaxonomyAudit = lazy(() => import("./pages/TradeAdminTaxonomyAudit"));
+const TradeAdminDescriptorTaxonomy = lazy(() => import("./pages/TradeAdminDescriptorTaxonomy"));
 const TradeAdminSyncStatus = lazy(() => import("./pages/TradeAdminSyncStatus"));
 const TradeAdminBrandLeadTimes = lazy(() => import("./pages/TradeAdminBrandLeadTimes"));
 const TradeAdminFabrics = lazy(() => import("./pages/TradeAdminFabrics"));
@@ -591,6 +592,7 @@ const App = () => {
                     <Route path="admin/shipping-rates" element={<TradeAdminShippingRates />} />
                     <Route path="admin/shipping-surcharges" element={<TradeAdminShippingSurcharges />} />
                     <Route path="admin/taxonomy-audit" element={<TradeAdminTaxonomyAudit />} />
+                    <Route path="admin/descriptor-taxonomy" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAdminDescriptorTaxonomy /></Suspense>} />
                     <Route path="admin/duplicates" element={<TradeAdminDuplicates />} />
                     <Route path="admin/axonometric-cad-qa" element={<TradeAdminAxonometricCadQa />} />
                     <Route path="admin/sync-status" element={<TradeAdminSyncStatus />} />
