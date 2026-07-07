@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Box } from "lucide-react";
+import { AlertTriangle, Box } from "lucide-react";
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -167,6 +167,7 @@ const Product3DViewer: React.FC<Props> = ({
   autoOpen = false,
   debug = false,
 }) => {
+  const hasExplicitRoles = !!materialRoles && Object.keys(materialRoles).length > 0;
 
   const [opened, setOpened] = useState(autoOpen);
   const [ready, setReady] = useState(() =>
@@ -241,7 +242,6 @@ const Product3DViewer: React.FC<Props> = ({
         return kws.some((k) => name.includes(k));
       };
 
-      const hasExplicitRoles = !!materialRoles && Object.keys(materialRoles).length > 0;
       const roleOf = (m: any): "fabric" | "base" | "ignore" | null => {
         const name = String(m?.name || "");
         if (materialRoles && Object.prototype.hasOwnProperty.call(materialRoles, name)) {
@@ -332,7 +332,7 @@ const Product3DViewer: React.FC<Props> = ({
 
     applyTextures();
     return () => { cancelled = true; };
-  }, [opened, ready, fabricTextureUrl, baseTextureUrl, fabricMaterialNameIncludes, baseMaterialNameIncludes, materialRoles, onMaterialsDiscovered, url]);
+  }, [opened, ready, fabricTextureUrl, baseTextureUrl, fabricMaterialNameIncludes, baseMaterialNameIncludes, materialRoles, hasExplicitRoles, onMaterialsDiscovered, url]);
 
   // Reset cached originals whenever the model URL changes.
   useEffect(() => {
@@ -412,6 +412,19 @@ const Product3DViewer: React.FC<Props> = ({
           ? "Drag to rotate · scroll to zoom · tap the cube to view in your room (AR)"
           : "Tap to load the interactive 3D model (downloads on demand)"}
       </p>
+
+      {opened && !hasExplicitRoles && (
+        <div className="px-3 py-2 border-t border-border bg-[hsl(var(--warning)/0.08)]">
+          <div className="flex items-start gap-2">
+            <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[hsl(var(--warning))]" />
+            <p className="font-body text-[10px] leading-snug text-[hsl(var(--warning))]">
+              No materials are tagged for this GLB variant. Finish swatches may
+              not update the 3D model. Ask your admin to tag material roles in
+              the GLB manager.
+            </p>
+          </div>
+        </div>
+      )}
 
       {debug && debugInfo && (
         <div className="border-t border-border bg-background/60">
