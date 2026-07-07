@@ -286,7 +286,7 @@ const Product3DViewer: React.FC<Props> = ({
 
     applyTextures();
     return () => { cancelled = true; };
-  }, [ready, fabricTextureUrl, baseTextureUrl, fabricMaterialNameIncludes, baseMaterialNameIncludes, url]);
+  }, [opened, ready, fabricTextureUrl, baseTextureUrl, fabricMaterialNameIncludes, baseMaterialNameIncludes, url]);
 
   // Reset cached originals whenever the model URL changes.
   useEffect(() => {
