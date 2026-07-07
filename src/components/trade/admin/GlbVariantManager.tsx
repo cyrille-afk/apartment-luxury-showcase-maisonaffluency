@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import Product3DViewer from "@/components/trade/Product3DViewer";
 import { classifyObjBundle, convertObjBundleToGlb } from "@/lib/objToGlb";
+import { inspectGlbFile, UPHOLSTERY_KEYWORDS } from "@/lib/glbInspect";
 
 const MAX_MB = 50;
 
@@ -172,6 +173,31 @@ export function GlbVariantManager({ productId, productName, posterImageUrl, onCh
       setUploading(null);
       toast.error(`${(fileToUpload.size / 1024 / 1024).toFixed(1)} MB exceeds the ${MAX_MB} MB limit.`);
       return;
+    }
+
+    // Fabric-convention validator: warn (but don't block) if no material/mesh
+    // name matches the upholstery keyword list expected by Product3DViewer.
+    try {
+      const report = await inspectGlbFile(fileToUpload);
+      if (report.parseError) {
+        toast.warning(
+          `Couldn't inspect GLB material names (${report.parseError}). Upload will continue.`,
+        );
+      } else if (!report.hasUpholsteryConvention) {
+        const preview = [...report.materialNames, ...report.meshNames]
+          .slice(0, 4)
+          .join(", ") || "(no named materials/meshes)";
+        toast.warning(
+          `No upholstery material detected in this GLB. Fabric swaps will fall back to every material. Rename your seat/cushion material to include one of: ${UPHOLSTERY_KEYWORDS.join(", ")}. Found: ${preview}`,
+          { duration: 10000 },
+        );
+      } else {
+        toast.success(
+          `Fabric convention detected on: ${report.matchedNames.slice(0, 3).join(", ")}${report.matchedNames.length > 3 ? "…" : ""}`,
+        );
+      }
+    } catch {
+      /* non-fatal */
     }
 
     setUploading(label);
