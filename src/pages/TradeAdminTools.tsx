@@ -102,6 +102,18 @@ export default function TradeAdminTools() {
           </div>
         </Link>
 
+        <Link
+          to="/trade/admin/descriptor-taxonomy"
+          className="flex items-center gap-2 px-4 py-3 rounded-lg border border-border hover:border-foreground/30 transition-all group"
+        >
+          <Tags className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+          <div className="flex-1">
+            <span className="font-display text-sm text-foreground">Descriptor Taxonomy</span>
+            <p className="font-body text-[10px] text-muted-foreground">View, edit, and re-order non-material descriptor tags (foam, treatments, finishes, features) and their remap rules</p>
+          </div>
+          <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+        </Link>
+
         <InstagramFeedAdmin />
 
         <TaxonomyAudit />
