@@ -929,6 +929,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
                           tier: zoomed.tier ?? null,
                           price_per_lm_cents: zoomed.price_per_lm_cents ?? null,
                           currency: zoomed.currency || "EUR",
+                          image_url: zoomed.image_url ?? null,
                         });
                       }
                     } else if (isCoverCategory(zoomed)) {
