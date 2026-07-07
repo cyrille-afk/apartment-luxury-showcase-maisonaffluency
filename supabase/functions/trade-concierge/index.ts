@@ -4154,10 +4154,26 @@ serve(async (req) => {
       if (distinctive) mentionedDesigners.push(n);
     }
     const mentionsKnownDesigner = mentionedDesigners.length > 0;
-    // If the user names a specific designer, skip RAG (top-K may miss items)
-    // AND scope the catalog load to just those designers — no reason to ship
-    // the full 2000-row catalog when the question is about one designer.
-    const useRag = includePieces && !!ragResult && !mentionsKnownDesigner;
+    // A structured brief (e.g. Architectural Brief Builder → "REFERENCES:" line)
+    // is extracted by the planner LLM into `brief.designers`. Treat that as an
+    // explicit brand allow-list even when the raw user text does not literally
+    // spell the designer name — otherwise retrieval falls back to whatever RAG
+    // scores highest (e.g. asking for Man of Parts and getting Lost Profile).
+    const briefDesignerNames = Array.isArray(effectiveBrief.brief.designers)
+      ? effectiveBrief.brief.designers.map((d) => String(d || "").trim()).filter(Boolean)
+      : [];
+    // Merge live-text mentions with the brief allow-list (dedup, case-insensitive).
+    const scopedDesignerSet = new Map<string, string>();
+    for (const n of [...mentionedDesigners, ...briefDesignerNames]) {
+      const key = n.toLowerCase();
+      if (!scopedDesignerSet.has(key)) scopedDesignerSet.set(key, n);
+    }
+    const scopedDesigners = Array.from(scopedDesignerSet.values());
+    const hasScopedDesigners = scopedDesigners.length > 0;
+    // If a designer scope exists (from live text OR the brief), skip RAG (top-K
+    // may miss items) AND scope the catalog load to just those designers — no
+    // reason to ship the full 2000-row catalog when the brief names them.
+    const useRag = includePieces && !!ragResult && !hasScopedDesigners;
     // Merge extractedBrief material/category signal into the SQL-load
     // constraints so the bulk catalog path narrows even when the raw user
     // message did not contain a keyword (the classifier already normalised it).
@@ -4177,8 +4193,8 @@ serve(async (req) => {
     const { designersList, piecesList: fullPiecesList, showroomBrands } = await loadCatalogContext(
       supabase,
       includePieces && !useRag,
-      mentionsKnownDesigner ? mentionedDesigners : undefined,
-      hasSqlConstraint && !mentionsKnownDesigner ? sqlLoadConstraints : undefined,
+      hasScopedDesigners ? scopedDesigners : undefined,
+      hasSqlConstraint && !hasScopedDesigners ? sqlLoadConstraints : undefined,
     );
     mark("loadCatalogContext", { ms: Math.round(performance.now() - catalogT0), includePieces, useRag });
     // Detect "hard constraints matched zero pieces" so the UI can render a
