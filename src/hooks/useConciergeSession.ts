@@ -37,6 +37,13 @@ export type ConciergeSession = {
   tearsheetProjectId?: string | null;
   boardId?: string | null;
   quoteId?: string | null;
+  /**
+   * Server-side stream id from the most recent `trade-concierge` turn.
+   * Populated via `useConciergeSession().setStreamId(id)` on the
+   * `onStreamStart` callback of `streamConcierge`. Used as the Realtime
+   * topic key (`concierge:${streamId}`) for bidirectional handoff.
+   */
+  streamId?: string | null;
 };
 
 const STORAGE_KEY = "concierge:session";
