@@ -518,6 +518,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
             tier: f.tier ?? null,
             price_per_lm_cents: f.price_per_lm_cents ?? null,
             currency: f.currency || "EUR",
+            image_url: f.image_url ?? null,
           });
         }
       } else if (isCoverGroup) {
