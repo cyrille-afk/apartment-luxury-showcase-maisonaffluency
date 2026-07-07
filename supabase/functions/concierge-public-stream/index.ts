@@ -15,7 +15,13 @@ const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY")!;
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const LOVABLE_CHAT_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
+const LOVABLE_EMBED_URL = "https://ai.gateway.lovable.dev/v1/embeddings";
 const MODEL = "google/gemini-3-flash-preview";
+const EMBED_MODEL = "openai/text-embedding-3-small";
+const EMBED_DIMS = 1536;
+const SEMANTIC_MIN_CHARS = 20; // skip retrieval for tiny "hi", "?", etc.
+const SEMANTIC_TOP_K = 6;
+const SEMANTIC_TIMEOUT_MS = 1500; // never block the stream on retrieval
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
