@@ -141,9 +141,35 @@ const Product3DViewer: React.FC<Props> = ({
         originalTexturesRef.current = cache;
       }
 
-      const filter = (m: any) =>
-        !fabricMaterialNameIncludes ||
-        String(m?.name || "").toLowerCase().includes(fabricMaterialNameIncludes.toLowerCase());
+      // Build the keyword list for the convention-based filter.
+      const explicitKeywords = fabricMaterialNameIncludes
+        ? (Array.isArray(fabricMaterialNameIncludes)
+            ? fabricMaterialNameIncludes
+            : [fabricMaterialNameIncludes])
+        : null;
+      const conventionKeywords = [
+        "fabric",
+        "upholstery",
+        "cushion",
+        "seat",
+        "cover",
+        "textile",
+        "pillow",
+        "sofa",
+      ];
+      const keywords = (explicitKeywords ?? conventionKeywords).map((k) =>
+        k.toLowerCase(),
+      );
+      const matchesKeywords = (m: any) => {
+        const name = String(m?.name || "").toLowerCase();
+        return keywords.some((k) => name.includes(k));
+      };
+      // Determine effective target materials: if any material matches the
+      // convention, restrict to those; otherwise fall back to all materials
+      // so legacy GLBs without the naming convention still swap.
+      const matched = materials.filter(matchesKeywords);
+      const targets = matched.length > 0 ? matched : materials;
+      const filter = (m: any) => targets.includes(m);
 
       if (!fabricTextureUrl) {
         // Restore originals.
