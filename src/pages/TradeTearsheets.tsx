@@ -472,8 +472,14 @@ export default function TradeTearsheets() {
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <Button variant="ghost" size="sm" onClick={() => setSelectedProduct(null)}>← Back to products</Button>
-              <Button variant="outline" size="sm" onClick={handlePrint}><Printer className="h-4 w-4 mr-2" />Print Tearsheet</Button>
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="sm" onClick={() => { setPushedBoardIds(new Set()); setBoardPickerOpen(true); }}>
+                  <LayoutGrid className="h-4 w-4 mr-2" />Push to Client Board
+                </Button>
+                <Button variant="outline" size="sm" onClick={handlePrint}><Printer className="h-4 w-4 mr-2" />Print Tearsheet</Button>
+              </div>
             </div>
+
             <div ref={printRef} className="border border-border rounded-lg p-6 space-y-6">
               <div className="border-b border-border pb-4">
                 <p className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">{selectedProduct.brand_name}</p>
