@@ -180,6 +180,8 @@ const Product3DViewer: React.FC<Props> = ({
   const originalTexturesRef = useRef<Map<any, any> | null>(null);
   const [debugInfo, setDebugInfo] = useState<DebugInfo | null>(null);
   const [debugOpen, setDebugOpen] = useState(false);
+  const [autoTagged, setAutoTagged] = useState(false);
+  const [noTargets, setNoTargets] = useState(false);
 
   // Only load the ~1MB model-viewer script once the user has opted in.
   useEffect(() => {
@@ -215,7 +217,9 @@ const Product3DViewer: React.FC<Props> = ({
       const materials: any[] = model.materials || [];
       if (materials.length === 0) return;
 
-      // Cache original baseColorTextures once.
+      // Cache original baseColorTextures + texture-image identifiers once.
+      // The texture-image identifier is used by the auto-detection fallback
+      // when the material's own name is opaque (e.g. "Material.001").
       if (!originalTexturesRef.current) {
         const cache = new Map<any, any>();
         for (const m of materials) {
@@ -227,7 +231,25 @@ const Product3DViewer: React.FC<Props> = ({
         originalTexturesRef.current = cache;
       }
 
-      // Notify parent (admin UI) of the material names in this GLB.
+      // Extract every string we can find that might describe what this
+      // material actually is: material name, texture name, and any image
+      // URI/name on the baseColorTexture (glTF often keeps original file
+      // names like "wood_oak.jpg" or "Fabric_Base.png").
+      const identifiersFor = (m: any): string[] => {
+        const out: string[] = [];
+        try { if (m?.name) out.push(String(m.name)); } catch { /* noop */ }
+        try {
+          const tex = m?.pbrMetallicRoughness?.baseColorTexture?.texture;
+          if (tex?.name) out.push(String(tex.name));
+          const src = tex?.source;
+          if (src?.name) out.push(String(src.name));
+          if (src?.uri) out.push(String(src.uri));
+          if (src?.bufferView?.name) out.push(String(src.bufferView.name));
+        } catch { /* noop */ }
+        return out.map((s) => s.toLowerCase());
+      };
+
+      // Publish material names for the admin UI.
       const allNames = materials.map((m) => String(m?.name || "(unnamed)"));
       onMaterialsDiscovered?.(allNames);
 
@@ -237,9 +259,9 @@ const Product3DViewer: React.FC<Props> = ({
       const fabricKeywords = toList(fabricMaterialNameIncludes) ?? FABRIC_KEYWORDS.map((k) => k.toLowerCase());
       const baseKeywords = toList(baseMaterialNameIncludes) ?? BASE_KEYWORDS.map((k) => k.toLowerCase());
 
-      const matchByKeywords = (kws: string[]) => (m: any) => {
-        const name = String(m?.name || "").toLowerCase();
-        return kws.some((k) => name.includes(k));
+      const matchAnyIdentifier = (m: any, kws: string[]) => {
+        const ids = identifiersFor(m);
+        return ids.some((id) => kws.some((k) => id.includes(k)));
       };
 
       const roleOf = (m: any): "fabric" | "base" | "ignore" | null => {
@@ -248,6 +270,22 @@ const Product3DViewer: React.FC<Props> = ({
           return materialRoles[name];
         }
         return null;
+      };
+
+      // Last-resort classifier: use baseColorFactor luminance. Dark & warm →
+      // wood/base. Light or neutral → fabric. Only used when a GLB has
+      // exactly two untagged materials and no keyword hits.
+      const luminanceRole = (m: any): "fabric" | "base" | null => {
+        try {
+          const f = m?.pbrMetallicRoughness?.baseColorFactor;
+          if (!Array.isArray(f) || f.length < 3) return null;
+          const [r, g, b] = f;
+          const lum = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+          const warm = r > b; // brown/wood tones skew red > blue
+          if (lum < 0.35 && warm) return "base";
+          if (lum > 0.5) return "fabric";
+          return null;
+        } catch { return null; }
       };
 
       let fabricMatched: any[];
@@ -260,23 +298,30 @@ const Product3DViewer: React.FC<Props> = ({
         baseMatched = materials.filter((m) => roleOf(m) === "base");
         ignored = materials.filter((m) => (roleOf(m) ?? "ignore") === "ignore");
       } else {
-        fabricMatched = materials.filter(matchByKeywords(fabricKeywords));
-        const baseMatchedRaw = materials.filter(matchByKeywords(baseKeywords));
-        // Prevent overlap: fabric wins on any material that also matches base keywords.
+        // Tier 1: keyword match against material name + texture image URI.
+        fabricMatched = materials.filter((m) => matchAnyIdentifier(m, fabricKeywords));
+        const baseMatchedRaw = materials.filter((m) => matchAnyIdentifier(m, baseKeywords));
         baseMatched = baseMatchedRaw.filter((m) => !fabricMatched.includes(m));
+
+        // Tier 2: for still-untagged materials, use baseColorFactor luminance.
+        const tagged = new Set<any>([...fabricMatched, ...baseMatched]);
+        for (const m of materials) {
+          if (tagged.has(m)) continue;
+          const guess = luminanceRole(m);
+          if (guess === "fabric") fabricMatched.push(m);
+          else if (guess === "base") baseMatched.push(m);
+        }
         ignored = [];
       }
 
-      // Fallback rules (only when there are NO explicit roles):
-      // - Fabric with no matches → all materials (legacy behavior).
-      // - Base with no matches → non-fabric materials.
-      const nonFabric = materials.filter((m) => !fabricMatched.includes(m));
-      const fabricTargets = hasExplicitRoles
-        ? fabricMatched
-        : (fabricMatched.length > 0 ? fabricMatched : materials);
-      const baseTargets = hasExplicitRoles
-        ? baseMatched
-        : (baseMatched.length > 0 ? baseMatched : nonFabric);
+
+      // Targets: after explicit roles + name/URI matching + luminance auto-tag,
+      // if a layer still has zero matches we apply to NOTHING rather than
+      // painting the fabric texture over the entire model (the legacy
+      // fallback that made a fabric swatch retexture wood legs, etc.).
+      const fabricTargets = fabricMatched;
+      const baseTargets = baseMatched;
+
 
       const restoreOne = (m: any) => {
 
@@ -295,20 +340,23 @@ const Product3DViewer: React.FC<Props> = ({
         }
       };
 
-      // Publish debug info.
+      // Publish debug info + a signal for the UI banner.
       setDebugInfo({
         all: allNames,
         fabric: {
           matched: fabricMatched.map((m) => String(m?.name || "(unnamed)")),
-          fellBackToAll: !hasExplicitRoles && fabricMatched.length === 0,
+          fellBackToAll: false,
           keywords: hasExplicitRoles ? ["(explicit role map)"] : fabricKeywords,
         },
         base: {
           matched: baseMatched.map((m) => String(m?.name || "(unnamed)")),
-          fellBackToAll: !hasExplicitRoles && baseMatched.length === 0,
+          fellBackToAll: false,
           keywords: hasExplicitRoles ? ["(explicit role map)"] : baseKeywords,
         },
       });
+      setAutoTagged(!hasExplicitRoles && (fabricMatched.length > 0 || baseMatched.length > 0));
+      setNoTargets(fabricMatched.length === 0 && baseMatched.length === 0);
+
 
 
       try {
@@ -413,16 +461,25 @@ const Product3DViewer: React.FC<Props> = ({
           : "Tap to load the interactive 3D model (downloads on demand)"}
       </p>
 
-      {opened && !hasExplicitRoles && (
+      {opened && !hasExplicitRoles && noTargets && (
         <div className="px-3 py-2 border-t border-border bg-[hsl(var(--warning)/0.08)]">
           <div className="flex items-start gap-2">
             <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[hsl(var(--warning))]" />
             <p className="font-body text-[10px] leading-snug text-[hsl(var(--warning))]">
-              No materials are tagged for this GLB variant. Finish swatches may
-              not update the 3D model. Ask your admin to tag material roles in
-              the GLB manager.
+              This GLB uses opaque material names and no fabric/wood roles could
+              be auto-detected. Finish swatches will not update the 3D model
+              until an admin tags material roles in the GLB manager.
             </p>
           </div>
+        </div>
+      )}
+      {opened && !hasExplicitRoles && autoTagged && (
+        <div className="px-3 py-2 border-t border-border bg-muted/40">
+          <p className="font-body text-[10px] leading-snug text-muted-foreground">
+            Material roles auto-detected from texture names / base colours.
+            For a permanent mapping, ask an admin to tag roles in the GLB
+            manager.
+          </p>
         </div>
       )}
 
