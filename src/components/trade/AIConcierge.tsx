@@ -202,6 +202,12 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
   const navigate = useNavigate();
   const { currentStudio } = useStudio();
   const { user, isAdmin } = useAuth();
+  const { setStreamId } = useConciergeSession();
+  // Realtime handoff channel disposer for the current stream_id. Recreated
+  // every time the server announces a new stream via onStreamStart, and
+  // torn down on unmount so we don't leak Realtime subscriptions.
+  const handoffDisposeRef = useRef<null | (() => void)>(null);
+  useEffect(() => () => { try { handoffDisposeRef.current?.(); } catch { /* ignore */ } }, []);
   const isDashboard = pathname === "/trade";
   // Persist open/minimized/timeline in sessionStorage so the conversation
   // survives route changes (e.g. when Felix auto-navigates to a freshly
