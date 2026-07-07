@@ -539,6 +539,31 @@ const TradeProductPage: React.FC = () => {
   // gallery images — surfaced as a note on the quote line.
   const [finishesMissingImages, setFinishesMissingImages] = useState<string[]>([]);
 
+  // Per-variant 3D models: one row per size/label. `default` variant wins when
+  // no size is selected. Falls back to legacy tradeProducts.glb_url otherwise.
+  const [glbVariants, setGlbVariants] = useState<
+    { variant_label: string; glb_url: string; is_default: boolean }[]
+  >([]);
+  useEffect(() => {
+    const tpId = (data as any)?.tradeProductId as string | null | undefined;
+    if (!tpId) {
+      setGlbVariants([]);
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      const { data: rows } = await supabase
+        .from("trade_product_glb_variants")
+        .select("variant_label, glb_url, is_default")
+        .eq("product_id", tpId);
+      if (cancelled) return;
+      setGlbVariants((rows as any[]) || []);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [(data as any)?.tradeProductId]);
+
 
 
 
