@@ -14,7 +14,11 @@ interface ProductRow {
   brand_name: string | null;
   image_url: string | null;
   glb_url: string | null;
+  updated_at?: string | null;
 }
+
+type SortKey = "updated_desc" | "updated_asc" | "name_asc" | "name_desc";
+const PAGE_SIZE = 24;
 
 const MAX_MB = 50;
 
