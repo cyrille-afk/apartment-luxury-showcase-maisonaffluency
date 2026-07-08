@@ -124,6 +124,14 @@ export function PickAssetDrawer({ pickId, title }: Props) {
     leadTime: string | null;
   }>({ tradeProductId: null, tradePriceCents: null, currency: null, leadTime: null });
 
+  // Project / client-folder name for this concierge chat. Persisted on the
+  // shared concierge session so subsequent items in the same chat auto-reuse
+  // it (see "Would you like me to add this to Apt 4B as well?" flow).
+  const { session } = useConciergeSession();
+  const projectName = session?.projectName ?? null;
+  const [projectDraft, setProjectDraft] = useState<string>("");
+  const [editingProject, setEditingProject] = useState(false);
+
   // Mirror selections to sessionStorage on every change so a collapse/expand
   // (or an "unlock → re-lock") cycle restores the previous picks verbatim.
   useEffect(() => {
