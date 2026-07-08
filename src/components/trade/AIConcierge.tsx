@@ -148,7 +148,8 @@ type TimelineItem =
   | { kind: "pending_proposal"; tool: PendingProposalTool; toolCallId: string | null; index: number }
   | { kind: "escalation"; sentiment: string; intent: string; excerpt: ChatMessage[]; resolved?: "requested" | "dismissed" }
   | { kind: "retry"; text: string; reason: string }
-  | { kind: "spec_schedule"; zone: string; markdown: string };
+  | { kind: "spec_schedule"; zone: string; markdown: string }
+  | { kind: "proactive_tearsheet"; data: import("@/components/trade/concierge/ProactiveTearsheetCard").ProactiveTearsheetData; resolved?: "generated" | "boarded" | "dismissed" };
 
 
 
