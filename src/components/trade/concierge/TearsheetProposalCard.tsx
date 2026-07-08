@@ -285,7 +285,11 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
       return;
     }
     const prompt = buildSuggestOneMorePrompt(visiblePicks.map(asItem));
-    sendConciergePrefill(prompt);
+    sendConciergePrefill(prompt, {
+      autoSend: true,
+      displayText: "Suggest one more piece to complete the room.",
+    });
+
   };
 
   // #3 — Critique & Explain: prose-only breakdown of how the architect's
