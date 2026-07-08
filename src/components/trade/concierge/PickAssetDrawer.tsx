@@ -491,8 +491,36 @@ export function PickAssetDrawer({ pickId, title }: Props) {
         </div>
       )}
       {hasGlb && (
-        <div className="max-w-[240px]">
+        <div className="max-w-[240px] space-y-1.5">
+          {hasGlbVariantChoices && (
+            <div>
+              <div className="mb-1 font-display text-[9px] uppercase tracking-widest text-muted-foreground">
+                Size ({glbVariants.length})
+              </div>
+              <div className="flex flex-wrap gap-1">
+                {glbVariants.map((v) => {
+                  const isActive = activeGlbVariant?.glb_url === v.glb_url;
+                  return (
+                    <button
+                      key={v.label + v.glb_url}
+                      type="button"
+                      onClick={() => setSelectedGlbLabel(v.label)}
+                      className={`rounded-full border px-2 py-0.5 font-body text-[9px] uppercase tracking-widest transition-colors ${
+                        isActive
+                          ? "border-foreground bg-foreground text-background"
+                          : "border-border/60 text-muted-foreground hover:border-foreground/60 hover:text-foreground"
+                      }`}
+                      title={v.label}
+                    >
+                      {v.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
           <Product3DViewer
+            key={glbUrl!}
             url={glbUrl!}
             alt={title}
             poster={poster}
