@@ -10,7 +10,7 @@ import GlbMaterialRolesEditor from "@/components/trade/admin/GlbMaterialRolesEdi
 
 const MAX_MB = 50;
 
-type MaterialRole = "fabric" | "base" | "ignore";
+type MaterialRole = "fabric" | "base" | "top" | "ignore";
 
 interface GlbVariantRow {
   id: string;

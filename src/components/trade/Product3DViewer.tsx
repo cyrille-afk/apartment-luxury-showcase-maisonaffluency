@@ -85,13 +85,24 @@ interface Props {
    */
   baseMaterialNameIncludes?: string | string[];
   /**
-   * Explicit per-material role map: { [materialName]: 'fabric'|'base'|'ignore' }.
+   * Optional THIRD texture layer for pieces whose top surface is distinct
+   * from the base (e.g. marble top on a metal base). Applied to materials
+   * tagged with role "top" in the explicit role map, or matching the top
+   * keyword group (top, tabletop, surface, marble, stone, glass).
+   */
+  topTextureUrl?: string | null;
+  /**
+   * Optional filter for the top texture. Defaults to the top keyword group.
+   */
+  topMaterialNameIncludes?: string | string[];
+  /**
+   * Explicit per-material role map: { [materialName]: 'fabric'|'base'|'top'|'ignore' }.
    * When provided, takes priority over the keyword heuristics (needed when
    * GLB materials are named with opaque IDs from CAD tools). Materials absent
    * from the map fall through to keyword matching, then to the "ignore"
    * default (they keep their original texture and receive no swatch).
    */
-  materialRoles?: Record<string, "fabric" | "base" | "ignore">;
+  materialRoles?: Record<string, "fabric" | "base" | "top" | "ignore">;
   /**
    * Called once the underlying GLB has loaded, with the actual material names
    * discovered in the file. Used by the admin manager to build the role UI.
@@ -125,6 +136,7 @@ interface DebugInfo {
   all: string[];
   fabric: LayerDebug;
   base: LayerDebug;
+  top: LayerDebug;
 }
 
 const FABRIC_KEYWORDS = [
@@ -144,13 +156,20 @@ const BASE_KEYWORDS = [
   "leg",
   "base",
   "structure",
-  "marble",
-  "stone",
   "metal",
   "brass",
   "steel",
   "bronze",
-  "top", // table tops, cabinet tops
+];
+
+const TOP_KEYWORDS = [
+  "top",
+  "tabletop",
+  "surface",
+  "marble",
+  "stone",
+  "glass",
+  "onyx",
 ];
 
 
@@ -160,8 +179,10 @@ const Product3DViewer: React.FC<Props> = ({
   poster,
   fabricTextureUrl,
   baseTextureUrl,
+  topTextureUrl,
   fabricMaterialNameIncludes,
   baseMaterialNameIncludes,
+  topMaterialNameIncludes,
   materialRoles,
   onMaterialsDiscovered,
   autoOpen = false,
@@ -258,13 +279,14 @@ const Product3DViewer: React.FC<Props> = ({
 
       const fabricKeywords = toList(fabricMaterialNameIncludes) ?? FABRIC_KEYWORDS.map((k) => k.toLowerCase());
       const baseKeywords = toList(baseMaterialNameIncludes) ?? BASE_KEYWORDS.map((k) => k.toLowerCase());
+      const topKeywords = toList(topMaterialNameIncludes) ?? TOP_KEYWORDS.map((k) => k.toLowerCase());
 
       const matchAnyIdentifier = (m: any, kws: string[]) => {
         const ids = identifiersFor(m);
         return ids.some((id) => kws.some((k) => id.includes(k)));
       };
 
-      const roleOf = (m: any): "fabric" | "base" | "ignore" | null => {
+      const roleOf = (m: any): "fabric" | "base" | "top" | "ignore" | null => {
         const name = String(m?.name || "");
         if (materialRoles && Object.prototype.hasOwnProperty.call(materialRoles, name)) {
           return materialRoles[name];
@@ -290,21 +312,27 @@ const Product3DViewer: React.FC<Props> = ({
 
       let fabricMatched: any[];
       let baseMatched: any[];
+      let topMatched: any[];
       let ignored: any[];
 
       if (hasExplicitRoles) {
         // Explicit map wins. Unmapped materials default to "ignore".
         fabricMatched = materials.filter((m) => roleOf(m) === "fabric");
         baseMatched = materials.filter((m) => roleOf(m) === "base");
+        topMatched = materials.filter((m) => roleOf(m) === "top");
         ignored = materials.filter((m) => (roleOf(m) ?? "ignore") === "ignore");
       } else {
         // Tier 1: keyword match against material name + texture image URI.
         fabricMatched = materials.filter((m) => matchAnyIdentifier(m, fabricKeywords));
+        const topMatchedRaw = materials.filter((m) => matchAnyIdentifier(m, topKeywords));
+        topMatched = topMatchedRaw.filter((m) => !fabricMatched.includes(m));
         const baseMatchedRaw = materials.filter((m) => matchAnyIdentifier(m, baseKeywords));
-        baseMatched = baseMatchedRaw.filter((m) => !fabricMatched.includes(m));
+        baseMatched = baseMatchedRaw.filter(
+          (m) => !fabricMatched.includes(m) && !topMatched.includes(m),
+        );
 
         // Tier 2: for still-untagged materials, use baseColorFactor luminance.
-        const tagged = new Set<any>([...fabricMatched, ...baseMatched]);
+        const tagged = new Set<any>([...fabricMatched, ...baseMatched, ...topMatched]);
         for (const m of materials) {
           if (tagged.has(m)) continue;
           const guess = luminanceRole(m);
@@ -321,6 +349,7 @@ const Product3DViewer: React.FC<Props> = ({
       // fallback that made a fabric swatch retexture wood legs, etc.).
       const fabricTargets = fabricMatched;
       const baseTargets = baseMatched;
+      const topTargets = topMatched;
 
 
       const restoreOne = (m: any) => {
@@ -353,9 +382,19 @@ const Product3DViewer: React.FC<Props> = ({
           fellBackToAll: false,
           keywords: hasExplicitRoles ? ["(explicit role map)"] : baseKeywords,
         },
+        top: {
+          matched: topMatched.map((m) => String(m?.name || "(unnamed)")),
+          fellBackToAll: false,
+          keywords: hasExplicitRoles ? ["(explicit role map)"] : topKeywords,
+        },
       });
-      setAutoTagged(!hasExplicitRoles && (fabricMatched.length > 0 || baseMatched.length > 0));
-      setNoTargets(fabricMatched.length === 0 && baseMatched.length === 0);
+      setAutoTagged(
+        !hasExplicitRoles &&
+          (fabricMatched.length > 0 || baseMatched.length > 0 || topMatched.length > 0),
+      );
+      setNoTargets(
+        fabricMatched.length === 0 && baseMatched.length === 0 && topMatched.length === 0,
+      );
 
 
 
@@ -372,6 +411,12 @@ const Product3DViewer: React.FC<Props> = ({
         } else {
           for (const m of baseTargets) restoreOne(m);
         }
+        // Top layer
+        if (topTextureUrl) {
+          await applyOne(topTargets, topTextureUrl);
+        } else {
+          for (const m of topTargets) restoreOne(m);
+        }
       } catch (err) {
         // eslint-disable-next-line no-console
         console.warn("[Product3DViewer] Failed to apply texture", err);
@@ -380,7 +425,7 @@ const Product3DViewer: React.FC<Props> = ({
 
     applyTextures();
     return () => { cancelled = true; };
-  }, [opened, ready, fabricTextureUrl, baseTextureUrl, fabricMaterialNameIncludes, baseMaterialNameIncludes, materialRoles, hasExplicitRoles, onMaterialsDiscovered, url]);
+  }, [opened, ready, fabricTextureUrl, baseTextureUrl, topTextureUrl, fabricMaterialNameIncludes, baseMaterialNameIncludes, topMaterialNameIncludes, materialRoles, hasExplicitRoles, onMaterialsDiscovered, url]);
 
   // Reset cached originals whenever the model URL changes.
   useEffect(() => {
@@ -491,7 +536,7 @@ const Product3DViewer: React.FC<Props> = ({
             className="w-full flex items-center justify-between px-3 py-2 font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground hover:text-foreground transition-colors"
           >
             <span>
-              Materials · fabric {debugInfo.fabric.matched.length} · base {debugInfo.base.matched.length} / {debugInfo.all.length}
+              Materials · fabric {debugInfo.fabric.matched.length} · base {debugInfo.base.matched.length} · top {debugInfo.top.matched.length} / {debugInfo.all.length}
             </span>
             <span>{debugOpen ? "−" : "+"}</span>
           </button>
@@ -499,6 +544,7 @@ const Product3DViewer: React.FC<Props> = ({
             <div className="px-3 pb-3 space-y-2 font-body text-[10px] leading-relaxed">
               {renderLayer("Fabric layer", debugInfo.fabric, !!fabricTextureUrl)}
               {renderLayer("Base layer", debugInfo.base, !!baseTextureUrl)}
+              {renderLayer("Top layer", debugInfo.top, !!topTextureUrl)}
               <div>
                 <div className="text-muted-foreground uppercase tracking-[0.12em] text-[9px] mb-0.5">
                   All materials ({debugInfo.all.length})
