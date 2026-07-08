@@ -300,7 +300,7 @@ export async function buildQuotePdf(args: QuotePdfArgs): Promise<jsPDF> {
   y = drawCompanyAndMeta(doc, args, M, y, contentW);
 
   // ---- Line items table (with thumbnails)
-  y = drawTable(doc, args, M, y, contentW, pageH, productImages, finishSwatchImages, fabricSwatchImages);
+  y = drawTable(doc, args, M, y, contentW, pageH, productImages, finishSwatchImages, fabricSwatchImages, finishSwatchNames);
 
   // ---- Totals block (right aligned)
   y = ensureSpace(doc, y, 220, pageH);
