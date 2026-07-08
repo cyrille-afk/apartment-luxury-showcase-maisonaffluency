@@ -1979,7 +1979,7 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
               : "bg-background border-border animate-fade-in",
             !modalMode && fullscreen && "left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2",
             !modalMode && !fullscreen && !pos && "bottom-20 md:bottom-6 right-4",
-            minimized ? "h-auto" : (fullscreen ? "h-[calc(100vh-2rem)]" : (expanded ? "h-[760px] max-h-[calc(100vh-4rem)]" : "h-[560px] max-h-[calc(100vh-6rem)]"))
+            minimized ? "h-auto" : ((fullscreen || modalMode) ? "h-[calc(100vh-2rem)]" : (expanded ? "h-[760px] max-h-[calc(100vh-4rem)]" : "h-[560px] max-h-[calc(100vh-6rem)]"))
           )}
         >
           <div
