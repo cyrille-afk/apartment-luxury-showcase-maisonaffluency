@@ -148,6 +148,11 @@ interface FinishSelectorProps {
   /** Fires when the user picks a top-axis swatch. */
   onTopFinishChange?: (name: string | null) => void;
   /**
+   * Fires alongside onTopFinishChange with the swatch's image_url so callers
+   * (product page 3D viewer) can feed it as the top-material texture.
+   */
+  onTopFinishSwatchChange?: (info: { name: string; image_url: string | null } | null) => void;
+  /**
    * Fires whenever the currently-selected wood/top finish swatches change.
    * Receives the names of selected finishes that have NO mapped gallery
    * images (`image_indices` empty). The product page surfaces these on the
@@ -239,7 +244,7 @@ const pickFinishGlyph = (
  * (Trade + Public). Tiles are grouped by category (Upholstery, Wood, …)
  * with a COM ("Customer's Own Material") tile always offered.
  */
-export default function FinishSelector({ pickId, className, productTitle, productCategory, onUpholsteryTierChange, onFabricChange, onHasFabricsChange, onWoodFinishChange, onWoodFinishPricingChange, onWoodFinishesAvailable, onPreviewSwatchesResolved, includePricing = false, onSwatchImagesChange, woodLabel, showUpholsterySection = true, showWoodSection = true, hideBaseAccordion = false, woodFilter, topFilter, topLabel, onTopFinishChange, onFinishesMissingImagesChange, currentGalleryIndex }: FinishSelectorProps) {
+export default function FinishSelector({ pickId, className, productTitle, productCategory, onUpholsteryTierChange, onFabricChange, onHasFabricsChange, onWoodFinishChange, onWoodFinishPricingChange, onWoodFinishesAvailable, onPreviewSwatchesResolved, includePricing = false, onSwatchImagesChange, woodLabel, showUpholsterySection = true, showWoodSection = true, hideBaseAccordion = false, woodFilter, topFilter, topLabel, onTopFinishChange, onTopFinishSwatchChange, onFinishesMissingImagesChange, currentGalleryIndex }: FinishSelectorProps) {
 
   const isRugProduct = /\brugs?\b/i.test(`${productTitle || ""} ${productCategory || ""}`);
   const isRugComponentSwatch = (fabric: Pick<Fabric, "name" | "category">) => {
@@ -358,6 +363,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
       setSelectedWoodId(null);
       onWoodFinishChange?.(null);
       onWoodFinishPricingChange?.(null);
+      onTopFinishSwatchChange?.(null);
 
       setSelectedCoverId(null);
       setSelectedRugComponentIds({});
@@ -540,8 +546,11 @@ export default function FinishSelector({ pickId, className, productTitle, produc
         // Cover (rattan/cane/wicker) is purely decorative — only update the
         // hero image; do not drive the Frame variant matrix or pricing.
       } else if (isTopGroup) {
-        // Top-axis finish (e.g. diffuser on a pendant) — drive the Top axis.
+        // Top-axis finish (e.g. diffuser on a pendant, marble top on a table)
+        // — drive the Top axis + emit the image_url so the 3D viewer can
+        // retexture the top material.
         onTopFinishChange?.(f.name);
+        onTopFinishSwatchChange?.({ name: f.name, image_url: f.image_url ?? null });
       } else {
         // Wood finish picked — drive the Frame axis on the price matrix.
         onWoodFinishChange?.(f.name);
