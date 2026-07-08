@@ -78,6 +78,14 @@ export default function TradeProjects() {
     refresh();
   };
 
+  const handleDelete = async (id: string, name: string) => {
+    if (!canEdit) { toast.error("Your role doesn't allow deleting projects"); return; }
+    const { error } = await supabase.from("projects" as any).delete().eq("id", id);
+    if (error) { toast.error("Could not delete project"); return; }
+    toast.success(`Deleted "${name}"`);
+    refresh();
+  };
+
   return (
     <div className="max-w-6xl mx-auto">
       <div className="flex items-start justify-between mb-8 gap-4">
