@@ -1081,6 +1081,35 @@ export function BriefBuilder({
               className="w-full rounded-md border border-accent/30 bg-muted/30 p-2 font-body text-[12px] outline-none focus:border-accent"
               placeholder="Paste brief text here…"
             />
+            {(() => {
+              const t = pasteFallbackText.trim();
+              if (!t) return null;
+              const parsed = parseBrief(t);
+              const prose = extractProseFields(t);
+              const preview = {
+                Zone: parsed.values.zone || prose.zone || "—",
+                "Max Footprint": parsed.values.maxFootprint || prose.maxFootprint || "—",
+                Typology: parsed.values.typology || prose.typology || "—",
+                Vibe: parsed.values.vibe || prose.vibe || "—",
+              };
+              const anyDetected = Object.values(preview).some((v) => v && v !== "—");
+              return (
+                <div className="mt-3 rounded-md border border-accent/30 bg-accent/5 p-2">
+                  <div className="mb-1 font-heading text-[10px] font-semibold uppercase tracking-[0.12em] text-accent">
+                    {anyDetected ? "Detected fields (live preview)" : "No fields detected yet"}
+                  </div>
+                  <dl className="grid grid-cols-[110px_1fr] gap-x-2 gap-y-1 font-body text-[11px]">
+                    {Object.entries(preview).map(([k, v]) => (
+                      <React.Fragment key={k}>
+                        <dt className="text-muted-foreground">{k}</dt>
+                        <dd className={v === "—" ? "text-muted-foreground/60" : "text-foreground"}>{v}</dd>
+                      </React.Fragment>
+                    ))}
+                  </dl>
+                </div>
+              );
+            })()}
+
             <div className="mt-3 flex items-center justify-end gap-2">
               <button
                 type="button"
