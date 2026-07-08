@@ -106,6 +106,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { streamConcierge, type ChatMessage, type ChatContentPart, type TearsheetProposal, type QuoteProposal, type FfeProposal, type VisualizationBriefProposal, type ConciergeProposal, type AppliedConstraintsEvent } from "@/lib/tradeConciergeStream";
 import { TearsheetProposalCard } from "@/components/trade/concierge/TearsheetProposalCard";
+import { ProactiveTearsheetCard, type ProactiveTearsheetData } from "@/components/trade/concierge/ProactiveTearsheetCard";
 import { QuoteProposalCard } from "@/components/trade/concierge/QuoteProposalCard";
 import { FfeProposalCard } from "@/components/trade/concierge/FfeProposalCard";
 import { VisualizationBriefCard, VIZ_BRIEF_INCOMING_KEY } from "@/components/trade/concierge/VisualizationBriefCard";
@@ -148,7 +149,8 @@ type TimelineItem =
   | { kind: "pending_proposal"; tool: PendingProposalTool; toolCallId: string | null; index: number }
   | { kind: "escalation"; sentiment: string; intent: string; excerpt: ChatMessage[]; resolved?: "requested" | "dismissed" }
   | { kind: "retry"; text: string; reason: string }
-  | { kind: "spec_schedule"; zone: string; markdown: string };
+  | { kind: "spec_schedule"; zone: string; markdown: string }
+  | { kind: "proactive_tearsheet"; data: import("@/components/trade/concierge/ProactiveTearsheetCard").ProactiveTearsheetData; resolved?: "generated" | "boarded" | "dismissed" };
 
 
 
@@ -905,6 +907,29 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
     };
     window.addEventListener("concierge:stage", handler as EventListener);
     return () => window.removeEventListener("concierge:stage", handler as EventListener);
+  }, []);
+
+  // Proactive tearsheet nudge — dispatched by product pages after a short
+  // idle following finish changes. Opens the panel and drops a lightweight
+  // spec card into the transcript. See ProactiveTearsheetCard.
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent<ProactiveTearsheetData>).detail;
+      if (!detail || !detail.productId) return;
+      setMinimized(false);
+      setOpen(true);
+      setTimeline((prev) => {
+        // Replace any previous unresolved proactive card for the same
+        // product so rapid re-nudges don't stack up.
+        const next = prev.filter(
+          (t) => !(t.kind === "proactive_tearsheet" && !t.resolved && t.data.productId === detail.productId),
+        );
+        next.push({ kind: "proactive_tearsheet", data: detail });
+        return next;
+      });
+    };
+    window.addEventListener("concierge:propose_tearsheet_proactive", handler as EventListener);
+    return () => window.removeEventListener("concierge:propose_tearsheet_proactive", handler as EventListener);
   }, []);
 
   // Auto-close Felix while the Quick Tour is running so its panel never
@@ -2814,6 +2839,38 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
               }
               if (item.kind === "pending_proposal") {
                 return <PendingProposalSkeleton key={i} tool={item.tool} />;
+              }
+              if (item.kind === "proactive_tearsheet") {
+                const data = item.data;
+                const finishSummary = [data.fabricLabel, data.baseLabel, data.topLabel]
+                  .filter(Boolean)
+                  .join(" · ");
+                const resolveAt = (outcome: "generated" | "boarded" | "dismissed") => {
+                  setTimeline((prev) => {
+                    const copy = prev.slice();
+                    const t = copy[i];
+                    if (t?.kind === "proactive_tearsheet") copy[i] = { ...t, resolved: outcome };
+                    return copy;
+                  });
+                };
+                return (
+                  <ProactiveTearsheetCard
+                    key={i}
+                    data={data}
+                    resolved={item.resolved}
+                    onGenerate={() => {
+                      resolveAt("generated");
+                      const prompt = `Generate a tearsheet for ${data.productName}${finishSummary ? ` — ${finishSummary}` : ""}. Lock in the current trade price${data.tradePriceLabel ? ` (${data.tradePriceLabel})` : ""}${data.leadTimeLabel ? ` and ${data.leadTimeLabel} lead time` : ""}.`;
+                      void sendRef.current?.(prompt, { displayText: "Generate tearsheet with current finish selection" });
+                    }}
+                    onAddToBoard={() => {
+                      resolveAt("boarded");
+                      const prompt = `Add ${data.productName}${finishSummary ? ` — ${finishSummary}` : ""} to my project board.`;
+                      void sendRef.current?.(prompt, { displayText: "Add current selection to project board" });
+                    }}
+                    onDismiss={() => resolveAt("dismissed")}
+                  />
+                );
               }
               if (item.kind !== "proposal") return null;
               return (
