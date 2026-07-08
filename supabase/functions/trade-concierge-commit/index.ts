@@ -821,12 +821,18 @@ serve(async (req) => {
 
       let added = 0;
       if (newRows.length > 0) {
-        const itemsPayload = newRows.map((r, i) => ({
-          board_id: boardId,
-          product_id: r.tradeProductId,
-          sort_order: startOrder + i,
-          notes: i === 0 && note ? note : null,
-        }));
+        const itemsPayload = newRows.map((r, i) => {
+          const f = finishForResolved(r);
+          return {
+            board_id: boardId,
+            product_id: r.tradeProductId,
+            sort_order: startOrder + i,
+            notes: i === 0 && note ? note : null,
+            variant_label: f.variant_label,
+            fabric_label: f.fabric_label,
+            wood_label: f.wood_label,
+          };
+        });
         const { error: itemsErr } = await supabase
           .from("client_board_items")
           .insert(itemsPayload);
