@@ -536,7 +536,7 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
         if (autoProjectId) {
           await supabase
             .from("client_boards")
-            .update({ project_id: autoProjectId, project_name: sessionProjectName })
+            .update({ project_id: autoProjectId })
             .eq("id", res.board_id);
           // Persist for downstream components in this chat.
           try {
