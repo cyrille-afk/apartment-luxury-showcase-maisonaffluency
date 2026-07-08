@@ -104,6 +104,29 @@ function extractFurnitureTypology(text: string): string[] {
   return collapseFurnitureTokens(Array.from(kept));
 }
 
+function extractRoomFootprint(text: string): string | null {
+  const m = text.replace(/\s+/g, " ").match(/\b(\d+(?:\.\d+)?)\s*[x×]\s*(\d+(?:\.\d+)?)\s*(m|cm|mm)?\b/i);
+  if (!m) return null;
+  const unit = (m[3] || "m").toLowerCase();
+  const toMm = (n: number) => unit === "mm" ? n : unit === "cm" ? n * 10 : n * 1000;
+  const a = toMm(parseFloat(m[1]));
+  const b = toMm(parseFloat(m[2]));
+  return `length ≤ ${Math.max(a, b)}mm, depth ≤ ${Math.min(a, b)}mm`;
+}
+
+function extractCeilingLabel(text: string): string | null {
+  const m = text.replace(/\s+/g, " ").match(/(?:(\d+(?:\.\d+)?)\s*(m|cm|mm|["'])\s*(?:high\s*)?ceiling|ceiling(?:\s*height)?(?:\s*of)?\s*(\d+(?:\.\d+)?)\s*(m|cm|mm|["']))/i);
+  if (!m) return null;
+  const v = m[1] || m[3];
+  const u = (m[2] || m[4] || "m").toLowerCase();
+  return `${v}${u} ceiling`;
+}
+
+function extractVibeLabel(text: string): string | null {
+  const m = text.replace(/\s+/g, " ").match(/\b(?:in|with)\s+(?:an?\s+)?((?:(?!\b(?:in|with)\b)[a-z-]+\s+){0,6}[a-z-]+)\s+(?:manner|style|vibe|atmosphere|aesthetic)\b/i);
+  return m ? m[1].replace(/\s+/g, " ").trim().toLowerCase() : null;
+}
+
 const CATALOGUE_BRANDS = Array.from(
   new Set(Object.values(brandCategoriesRaw).flat().filter((name): name is string => typeof name === "string" && !!name.trim()))
 ).sort((a, b) => b.length - a.length);
@@ -136,7 +159,7 @@ function extractExplicitReferenceBrands(text: string): string[] {
 function detectProjectScale(
   message: string,
   priorUserTurns: number = 0,
-): { typology: string; city: string; country: string; zones: string[]; timelineWeeks: number | null; furniture: string[] } | null {
+): { typology: string; city: string; country: string; zones: string[]; timelineWeeks: number | null; furniture: string[]; maxFootprint: string | null; ceiling: string | null; vibe: string | null } | null {
   if (!message) return null;
   const text = message.trim();
 
@@ -214,7 +237,17 @@ function detectProjectScale(
   else if (mo) timelineWeeks = parseInt(mo[1], 10) * 4;
 
   const furniture = extractFurnitureTypology(text);
-  return { typology, city, country, zones: zoneMatches, timelineWeeks, furniture };
+  return {
+    typology,
+    city,
+    country,
+    zones: zoneMatches,
+    timelineWeeks,
+    furniture,
+    maxFootprint: extractRoomFootprint(text),
+    ceiling: extractCeilingLabel(text),
+    vibe: extractVibeLabel(text),
+  };
 }
 
 
@@ -1525,7 +1558,7 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
 
         // Zone line — capitalize + join detected zones (e.g. "Living, Dining, Master")
         const zoneLine = scale.zones.length
-          ? `${scale.zones.map((z) => z.charAt(0).toUpperCase() + z.slice(1)).join(", ")} — ceiling height [mm]`
+          ? `${scale.zones.map((z) => z.charAt(0).toUpperCase() + z.slice(1)).join(", ")}${scale.ceiling ? ` — ${scale.ceiling}` : " — ceiling height [mm]"}`
           : null;
 
         // Timeline line
@@ -1542,6 +1575,12 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
             "Handover in [N] weeks (max lead time [N] weeks).",
             timelineLine,
           );
+        }
+        if (scale.maxFootprint) {
+          prefilled = prefilled.replace("length ≤ [mm], depth ≤ [mm]", scale.maxFootprint);
+        }
+        if (scale.vibe) {
+          prefilled = prefilled.replace("[e.g. Japandi-Luxe, Italian Minimalism]", scale.vibe);
         }
 
         // Merge furniture typologies from the current message + every prior

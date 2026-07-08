@@ -321,8 +321,57 @@ function extractFirstField(body: string, labels: string[]): string | null {
 // (from "5x6m" style room dimensions), and typology (furniture terms mentioned)
 // out of ordinary sentences so pastes without "Block N —" or "###" headers
 // still fill the builder fields, not just the free-form notes area.
-function extractProseFields(text: string): { zone?: string; maxFootprint?: string; typology?: string } {
-  const out: { zone?: string; maxFootprint?: string; typology?: string } = {};
+const PROSE_FURNITURE_TOKEN_RE = /\b(sectional\s+sofas?|sectionals?|sofas?|settees?|loveseats?|accent\s+chairs?|arm\s*chairs?|lounge\s+chairs?|dining\s+chairs?|chairs?|side\s+tables?|coffee\s+tables?|dining\s+tables?|consoles?|desks?|tables?|benches|bench|stools?|ottomans?|poufs?|floor\s+lamps?|table\s+lamps?|pendants?|chandeliers?|sconces?|wall\s+lights?|lamps?|rugs?|mirrors?|cabinets?|sideboards?|credenzas?|shelving|bookcases?|dressers?|chests?|armoires?|beds?|headboards?|nightstands?|bedsides?)\b/gi;
+
+const PROSE_DEFERRAL_RE = /\b(at a later (?:date|stage|time)|later on|later date|another time|down the (?:road|line)|for (?:a )?later|not (?:now|yet|for now)|(?:for|in) a later phase|excluding|except(?:\s+for)?|leaving out|skip(?:ping)?|omit(?:ting)?|will (?:select|pick|choose|source|find|decide|specify)\b[^.?!\n]*\b(later|another time|down the (?:road|line))|(?:pick|choose|select|source|specify|decide)\s+(?:on\s+)?(?:the\s+)?[^.?!\n]*\b(later|another time|down the (?:road|line)))\b/i;
+
+function splitProseClauses(text: string): string[] {
+  return text.split(/(?<=[.?!])\s+|\n+/).map((s) => s.trim()).filter(Boolean);
+}
+
+function normalizeProseFurnitureToken(token: string): string {
+  const s = token.toLowerCase().replace(/\s+/g, " ").trim();
+  if (/^sectional(\s+sofa)?s?$/.test(s)) return "sectional sofas";
+  if (/^arm\s*chairs?$/.test(s)) return "armchairs";
+  if (/^side\s+tables?$/.test(s)) return "side tables";
+  if (/^coffee\s+tables?$/.test(s)) return "coffee tables";
+  if (/^dining\s+tables?$/.test(s)) return "dining tables";
+  if (/^floor\s+lamps?$/.test(s)) return "floor lamps";
+  if (/^table\s+lamps?$/.test(s)) return "table lamps";
+  if (/^accent\s+chairs?$/.test(s)) return "accent chairs";
+  if (/^lounge\s+chairs?$/.test(s)) return "lounge chairs";
+  if (/^dining\s+chairs?$/.test(s)) return "dining chairs";
+  if (/^wall\s+lights?$/.test(s)) return "wall lights";
+  if (s.endsWith("y")) return s.slice(0, -1) + "ies";
+  if (/(s|x|z|ch|sh)$/.test(s)) return s;
+  if (s.endsWith("s")) return s;
+  return s + "s";
+}
+
+function collapseProseFurnitureTokens(tokens: string[]): string[] {
+  const set = new Set(tokens);
+  const drop = (parent: string, ...children: string[]) => {
+    if (children.some((c) => set.has(c))) set.delete(parent);
+  };
+  drop("tables", "side tables", "coffee tables", "dining tables");
+  drop("chairs", "armchairs", "accent chairs", "lounge chairs", "dining chairs");
+  drop("lamps", "floor lamps", "table lamps");
+  drop("sofas", "sectional sofas");
+  return Array.from(set);
+}
+
+function extractProseFurnitureTypology(text: string): string[] {
+  const kept = new Set<string>();
+  for (const clause of splitProseClauses(text)) {
+    if (PROSE_DEFERRAL_RE.test(clause)) continue;
+    const raw = clause.match(PROSE_FURNITURE_TOKEN_RE) || [];
+    for (const tok of raw) kept.add(normalizeProseFurnitureToken(tok));
+  }
+  return collapseProseFurnitureTokens(Array.from(kept));
+}
+
+function extractProseFields(text: string): { zone?: string; maxFootprint?: string; typology?: string; vibe?: string } {
+  const out: { zone?: string; maxFootprint?: string; typology?: string; vibe?: string } = {};
   const src = text.replace(/\s+/g, " ");
 
   // Zone: <room> + optional ceiling height.
@@ -358,29 +407,10 @@ function extractProseFields(text: string): { zone?: string; maxFootprint?: strin
     out.maxFootprint = `length ≤ ${max}mm, depth ≤ ${min}mm`;
   }
 
-  // Typology — recognised furniture tokens (longer first so "sectional sofa"
-  // beats "sofa" / "sectional").
-  const FURN = [
-    "sectional sofa", "lounge chair", "accent chair", "dining table", "dining chair",
-    "coffee table", "side table", "bar cart", "bar stool", "floor lamp", "table lamp",
-    "home office desk", "sectional", "sofa", "armchair", "console", "credenza",
-    "sideboard", "bed", "nightstand", "dresser", "desk", "chandelier", "pendant",
-    "rug", "mirror", "bookcase", "bench", "ottoman", "stool", "cabinet", "chair",
-  ];
-  const found: string[] = [];
-  const seen = new Set<string>();
-  for (const t of FURN) {
-    const re = new RegExp(`\\b${t.replace(/\s+/g, "\\s+")}s?\\b`, "i");
-    const m = src.match(re);
-    if (!m) continue;
-    // Skip if a longer already-captured token covers this one.
-    const label = m[0].toLowerCase();
-    const key = t;
-    if (found.some((f) => f.includes(t) || t.includes(f) && f !== t)) continue;
-    if (seen.has(key)) continue;
-    seen.add(key);
-    found.push(label);
-  }
+  const vibeM = src.match(/\b(?:in|with)\s+(?:an?\s+)?((?:(?!\b(?:in|with)\b)[a-z-]+\s+){0,6}[a-z-]+)\s+(?:manner|style|vibe|atmosphere|aesthetic)\b/i);
+  if (vibeM) out.vibe = vibeM[1].replace(/\s+/g, " ").trim().toLowerCase();
+
+  const found = extractProseFurnitureTypology(text);
   if (found.length) out.typology = found.join(", ");
 
   return out;
@@ -427,6 +457,11 @@ function loadDraft(): BriefDraft | null {
       block4: typeof v.block4 === "string" ? v.block4 : DEFAULT_VALUES.block4,
     };
     merged.block3.references = sanitizeReferences(merged.block3.references);
+    const hasRealDraft =
+      JSON.stringify(merged) !== JSON.stringify(DEFAULT_VALUES) ||
+      !!(typeof parsed.prefix === "string" && parsed.prefix.trim()) ||
+      !!(typeof parsed.suffix === "string" && parsed.suffix.trim());
+    if (!hasRealDraft) return null;
     return {
       values: merged,
       prefix: typeof parsed.prefix === "string" ? parsed.prefix : "",
@@ -734,11 +769,11 @@ export function BriefBuilder({
     // Sectional sofas, accent chairs…" so pastes without block headers still
     // populate the builder fields (not just the free-form notes area).
     const prose = extractProseFields(text);
-    if (prose.zone && merged.block1.zone === DEFAULT_VALUES.block1.zone) {
+    if (prose.zone && merged.block1.zone !== prose.zone) {
       merged.block1.zone = prose.zone;
       filled++;
     }
-    if (prose.maxFootprint && merged.block2.maxFootprint === DEFAULT_VALUES.block2.maxFootprint) {
+    if (prose.maxFootprint && merged.block2.maxFootprint !== prose.maxFootprint) {
       merged.block2.maxFootprint = prose.maxFootprint;
       filled++;
     }
@@ -747,6 +782,10 @@ export function BriefBuilder({
     if (prose.typology) {
       if (merged.block2.typology !== prose.typology) filled++;
       merged.block2.typology = prose.typology;
+    }
+    if (prose.vibe && merged.block3.vibe !== prose.vibe) {
+      merged.block3.vibe = prose.vibe;
+      filled++;
     }
 
     // When the paste is free-form prose (no recognisable block headers),
