@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { ChevronDown, ChevronRight, ClipboardPaste, X } from "lucide-react";
+import { Bookmark, BookmarkPlus, ChevronDown, ChevronRight, ClipboardPaste, Trash2, X } from "lucide-react";
 import { BrandPicker } from "@/components/trade/concierge/BrandPicker";
 import { updateConciergeSession } from "@/hooks/useConciergeSession";
 import brandCategoriesRaw from "@/data/brandCategories.json";
@@ -481,6 +481,55 @@ function saveDraft(draft: BriefDraft) {
   }
 }
 
+const PRESETS_STORAGE_KEY = "concierge:briefBuilder:presets";
+
+type BriefPreset = {
+  id: string;
+  name: string;
+  values: BriefValues;
+  prefix: string;
+  suffix: string;
+  savedAt: number;
+};
+
+function loadPresets(): BriefPreset[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = window.localStorage.getItem(PRESETS_STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter(
+      (p) => p && typeof p.id === "string" && typeof p.name === "string" && p.values,
+    ) as BriefPreset[];
+  } catch {
+    return [];
+  }
+}
+
+function savePresets(list: BriefPreset[]) {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(PRESETS_STORAGE_KEY, JSON.stringify(list));
+  } catch {
+    // ignore
+  }
+}
+
+function summarizePreset(p: BriefPreset): string {
+  const parts = [
+    p.values.block1?.zone,
+    p.values.block2?.typology,
+    p.values.block3?.vibe,
+  ]
+    .map((s) => (s && !s.trim().startsWith("[") ? s.trim() : ""))
+    .filter(Boolean);
+  return parts.join(" · ");
+}
+
+
+
+
 const EXPANDED_STORAGE_PREFIX = "concierge:briefBuilder:expanded";
 // Legacy global key — read once as fallback so existing users keep their layout
 // the first time they open the builder after this change.
@@ -730,6 +779,69 @@ export function BriefBuilder({
   const [pasteStatus, setPasteStatus] = useState<null | "ok" | "notes" | "empty" | "denied">(null);
   const [pasteFallbackOpen, setPasteFallbackOpen] = useState(false);
   const [pasteFallbackText, setPasteFallbackText] = useState("");
+  const [presets, setPresets] = useState<BriefPreset[]>(() => loadPresets());
+  const [presetsMenuOpen, setPresetsMenuOpen] = useState(false);
+  const [presetStatus, setPresetStatus] = useState<null | "saved" | "loaded" | "exists" | "empty">(null);
+
+  const flashPresetStatus = (s: "saved" | "loaded" | "exists" | "empty") => {
+    setPresetStatus(s);
+    setTimeout(() => setPresetStatus(null), 2000);
+  };
+
+  const handleSavePreset = () => {
+    const isEmpty = JSON.stringify(values) === JSON.stringify(DEFAULT_VALUES) && !prefix.trim() && !suffix.trim();
+    if (isEmpty) {
+      flashPresetStatus("empty");
+      return;
+    }
+    const defaultName = summarizePreset({
+      id: "", name: "", values, prefix, suffix, savedAt: 0,
+    }) || "Untitled preset";
+    const name = window.prompt("Name this brief preset", defaultName);
+    if (!name || !name.trim()) return;
+    const trimmed = name.trim();
+    const existing = presets.find((p) => p.name.toLowerCase() === trimmed.toLowerCase());
+    if (existing && !window.confirm(`A preset named "${trimmed}" exists. Overwrite?`)) return;
+    const next: BriefPreset = {
+      id: existing?.id || `p_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 6)}`,
+      name: trimmed,
+      values: JSON.parse(JSON.stringify(values)),
+      prefix,
+      suffix,
+      savedAt: Date.now(),
+    };
+    const list = existing
+      ? presets.map((p) => (p.id === existing.id ? next : p))
+      : [next, ...presets];
+    setPresets(list);
+    savePresets(list);
+    flashPresetStatus("saved");
+  };
+
+  const handleLoadPreset = (id: string) => {
+    const p = presets.find((x) => x.id === id);
+    if (!p) return;
+    const nextValues: BriefValues = {
+      block1: { ...DEFAULT_VALUES.block1, ...(p.values.block1 || {}) },
+      block2: { ...DEFAULT_VALUES.block2, ...(p.values.block2 || {}) },
+      block3: { ...DEFAULT_VALUES.block3, ...(p.values.block3 || {}) },
+      block4: typeof p.values.block4 === "string" ? p.values.block4 : DEFAULT_VALUES.block4,
+    };
+    setValues(nextValues);
+    setPrefix(p.prefix || "");
+    setSuffix(p.suffix || "");
+    emit(nextValues, p.prefix || "", p.suffix || "");
+    setPresetsMenuOpen(false);
+    flashPresetStatus("loaded");
+  };
+
+  const handleDeletePreset = (id: string) => {
+    if (!window.confirm("Delete this preset?")) return;
+    const list = presets.filter((p) => p.id !== id);
+    setPresets(list);
+    savePresets(list);
+  };
+
 
   const applyPastedText = (text: string): "ok" | "notes" | "empty" => {
     if (!text || !text.trim()) return "empty";
@@ -902,6 +1014,96 @@ export function BriefBuilder({
               Clipboard blocked
             </span>
           )}
+          {presetStatus === "saved" && (
+            <span className="font-body text-[10px] uppercase tracking-[0.12em] text-accent">Preset saved</span>
+          )}
+          {presetStatus === "loaded" && (
+            <span className="font-body text-[10px] uppercase tracking-[0.12em] text-accent">Preset loaded</span>
+          )}
+          {presetStatus === "empty" && (
+            <span className="font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground">Nothing to save</span>
+          )}
+          <button
+            type="button"
+            onClick={handleSavePreset}
+            className="flex items-center gap-1 rounded-md border border-accent/40 px-2 py-1 font-body text-[11px] text-accent hover:bg-accent/10"
+            aria-label="Save current brief as preset"
+            title="Save current brief as preset"
+          >
+            <BookmarkPlus className="h-3.5 w-3.5" />
+            Save preset
+          </button>
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setPresetsMenuOpen((o) => !o)}
+              className="flex items-center gap-1 rounded-md border border-accent/40 px-2 py-1 font-body text-[11px] text-accent hover:bg-accent/10"
+              aria-haspopup="menu"
+              aria-expanded={presetsMenuOpen}
+              aria-label="Load a saved preset"
+              title="Load a saved preset"
+            >
+              <Bookmark className="h-3.5 w-3.5" />
+              Presets{presets.length ? ` (${presets.length})` : ""}
+              <ChevronDown className="h-3 w-3" />
+            </button>
+            {presetsMenuOpen && (
+              <>
+                <div
+                  className="fixed inset-0 z-[90]"
+                  onClick={() => setPresetsMenuOpen(false)}
+                  aria-hidden="true"
+                />
+                <div
+                  role="menu"
+                  className="absolute right-0 top-full z-[95] mt-1 w-72 overflow-hidden rounded-md border border-accent/40 bg-background shadow-xl"
+                >
+                  {presets.length === 0 ? (
+                    <div className="px-3 py-2 font-body text-[11px] text-muted-foreground">
+                      No presets yet. Fill the brief and click "Save preset".
+                    </div>
+                  ) : (
+                    <ul className="max-h-72 overflow-y-auto py-1">
+                      {presets.map((p) => {
+                        const summary = summarizePreset(p);
+                        return (
+                          <li
+                            key={p.id}
+                            className="group flex items-start gap-2 px-2 py-1.5 hover:bg-accent/10"
+                          >
+                            <button
+                              type="button"
+                              onClick={() => handleLoadPreset(p.id)}
+                              className="flex-1 text-left"
+                              role="menuitem"
+                            >
+                              <div className="font-body text-[11px] font-medium text-foreground">
+                                {p.name}
+                              </div>
+                              {summary && (
+                                <div className="font-body text-[10px] text-muted-foreground line-clamp-2">
+                                  {summary}
+                                </div>
+                              )}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDeletePreset(p.id)}
+                              className="mt-0.5 rounded p-1 text-muted-foreground opacity-0 hover:bg-destructive/10 hover:text-destructive group-hover:opacity-100"
+                              aria-label={`Delete preset ${p.name}`}
+                              title="Delete preset"
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </button>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  )}
+                </div>
+              </>
+            )}
+          </div>
           <button
             type="button"
             onClick={handlePasteBrief}
@@ -912,6 +1114,7 @@ export function BriefBuilder({
             <ClipboardPaste className="h-3.5 w-3.5" />
             Paste brief
           </button>
+
           <button
             type="button"
             onClick={onClose}
