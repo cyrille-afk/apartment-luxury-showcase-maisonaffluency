@@ -91,11 +91,13 @@ export function PickAssetDrawer({ pickId, title }: Props) {
   const persisted = readPersisted();
 
   const [loading, setLoading] = useState(true);
-  const [glbUrl, setGlbUrl] = useState<string | null>(null);
   const [poster, setPoster] = useState<string | null>(null);
-  const [materialRoles, setMaterialRoles] = useState<
-    Record<string, "fabric" | "base" | "top" | "ignore"> | undefined
-  >(undefined);
+  const [glbVariants, setGlbVariants] = useState<
+    { label: string; glb_url: string; material_roles: Record<string, "fabric" | "base" | "top" | "ignore"> | null; is_default: boolean }[]
+  >([]);
+  const [selectedGlbLabel, setSelectedGlbLabel] = useState<string | null>(
+    persisted?.glbLabel ?? null,
+  );
   const [swatches, setSwatches] = useState<Swatch[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [selectedFabricId, setSelectedFabricId] = useState<string | null>(
@@ -123,8 +125,9 @@ export function PickAssetDrawer({ pickId, title }: Props) {
         fabricId: selectedFabricId,
         baseId: selectedBaseId,
         topId: selectedTopId,
+        glbLabel: selectedGlbLabel,
       };
-      if (!selectedFabricId && !selectedBaseId && !selectedTopId) {
+      if (!selectedFabricId && !selectedBaseId && !selectedTopId && !selectedGlbLabel) {
         sessionStorage.removeItem(storageKey);
       } else {
         sessionStorage.setItem(storageKey, JSON.stringify(payload));
@@ -132,7 +135,7 @@ export function PickAssetDrawer({ pickId, title }: Props) {
     } catch {
       /* quota / disabled — ignore */
     }
-  }, [storageKey, selectedFabricId, selectedBaseId, selectedTopId]);
+  }, [storageKey, selectedFabricId, selectedBaseId, selectedTopId, selectedGlbLabel]);
 
   useEffect(() => {
     let cancelled = false;
@@ -164,7 +167,7 @@ export function PickAssetDrawer({ pickId, title }: Props) {
         tpId
           ? supabase
               .from("trade_product_glb_variants")
-              .select("glb_url, is_default, material_roles")
+              .select("variant_label, glb_url, is_default, material_roles")
               .eq("product_id", tpId)
           : Promise.resolve({ data: null, error: null } as any),
       ]);
@@ -172,12 +175,21 @@ export function PickAssetDrawer({ pickId, title }: Props) {
       if (cancelled) return;
       if (prodRes.error) setError(prodRes.error.message);
 
-      const variants = ((glbVarRes as any)?.data as any[]) || [];
-      const defaultVar = variants.find((v) => v.is_default) || variants[0];
-      const resolvedGlb =
-        defaultVar?.glb_url ?? ((prodRes.data as any)?.glb_url ?? null);
-      setGlbUrl(resolvedGlb);
-      setMaterialRoles(defaultVar?.material_roles || undefined);
+      const rawVariants = ((glbVarRes as any)?.data as any[]) || [];
+      const legacyGlb = (prodRes.data as any)?.glb_url ?? null;
+      const normalized = rawVariants
+        .filter((v) => !!v?.glb_url)
+        .map((v) => ({
+          label: (v.variant_label as string) || "Default",
+          glb_url: v.glb_url as string,
+          material_roles: (v.material_roles as any) || null,
+          is_default: !!v.is_default,
+        }));
+      // Fall back to the legacy single glb_url when no variants rows exist.
+      if (normalized.length === 0 && legacyGlb) {
+        normalized.push({ label: "Default", glb_url: legacyGlb, material_roles: null, is_default: true });
+      }
+      setGlbVariants(normalized);
       setPoster((prodRes.data as any)?.image_url ?? null);
       setSwatches(((swRes.data as any[]) ?? []) as Swatch[]);
 
@@ -330,7 +342,20 @@ export function PickAssetDrawer({ pickId, title }: Props) {
   const useCoupled =
     !topAxisIsFabric && combinations.length >= 2 && !!pickAxes.baseAxisLabel && !!pickAxes.topAxisLabel;
 
+  // Resolve which GLB variant should render: user-selected label wins; otherwise
+  // the row flagged is_default; otherwise the first row.
+  const activeGlbVariant = useMemo(() => {
+    if (glbVariants.length === 0) return null;
+    if (selectedGlbLabel) {
+      const hit = glbVariants.find((v) => v.label === selectedGlbLabel);
+      if (hit) return hit;
+    }
+    return glbVariants.find((v) => v.is_default) || glbVariants[0];
+  }, [glbVariants, selectedGlbLabel]);
+  const glbUrl = activeGlbVariant?.glb_url ?? null;
+  const materialRoles = activeGlbVariant?.material_roles || undefined;
   const hasGlb = !!glbUrl;
+  const hasGlbVariantChoices = glbVariants.length > 1;
   const hasSwatches = swatches.length > 0;
 
   if (!loading && !hasGlb && !hasSwatches) {
@@ -466,8 +491,36 @@ export function PickAssetDrawer({ pickId, title }: Props) {
         </div>
       )}
       {hasGlb && (
-        <div className="max-w-[240px]">
+        <div className="max-w-[240px] space-y-1.5">
+          {hasGlbVariantChoices && (
+            <div>
+              <div className="mb-1 font-display text-[9px] uppercase tracking-widest text-muted-foreground">
+                Size ({glbVariants.length})
+              </div>
+              <div className="flex flex-wrap gap-1">
+                {glbVariants.map((v) => {
+                  const isActive = activeGlbVariant?.glb_url === v.glb_url;
+                  return (
+                    <button
+                      key={v.label + v.glb_url}
+                      type="button"
+                      onClick={() => setSelectedGlbLabel(v.label)}
+                      className={`rounded-full border px-2 py-0.5 font-body text-[9px] uppercase tracking-widest transition-colors ${
+                        isActive
+                          ? "border-foreground bg-foreground text-background"
+                          : "border-border/60 text-muted-foreground hover:border-foreground/60 hover:text-foreground"
+                      }`}
+                      title={v.label}
+                    >
+                      {v.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
           <Product3DViewer
+            key={glbUrl!}
             url={glbUrl!}
             alt={title}
             poster={poster}
