@@ -389,6 +389,10 @@ export default function TradeTearsheets() {
         const key = `${resolvedParent.toLowerCase()}::${p.product_name.toLowerCase()}`;
         if (seen.has(key)) return;
         seen.set(key, true);
+        const tVariantList = (p.size_variants as any[]) || [];
+        const tFirstVariantDim = tVariantList
+          .map((v: any) => String(v?.label || "").trim())
+          .find((s: string) => /\d/.test(s) && /(cm|mm|in|["″])/i.test(s)) || null;
         merged.push({
           id: p.id,
           product_name: p.product_name,
@@ -397,7 +401,7 @@ export default function TradeTearsheets() {
           category: normalizeCategory(p.category, p.subcategory) || null,
           subcategory: normalizeSubcategory(p.subcategory) || null,
           image_url: p.image_url,
-          dimensions: p.dimensions,
+          dimensions: p.dimensions || tFirstVariantDim,
           materials: p.materials,
           description: p.description,
           lead_time: p.lead_time,
@@ -405,7 +409,7 @@ export default function TradeTearsheets() {
           currency: p.currency || "EUR",
           source: "trade",
           source_pick_id: p.source_pick_id ?? null,
-          size_variants: (p.size_variants as any[]) || null,
+          size_variants: tVariantList,
         });
       });
 
