@@ -481,12 +481,11 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     onFinishesMissingImagesChange(missing);
   }, [selectedWoodItem?.id, selectedTopItem?.id, onFinishesMissingImagesChange]);
 
-  // Auto-select the fabric/leather swatch whose mapped image_indices include
-  // the image currently visible in the hero gallery. Keeps the accordion
-  // label honest on first paint (e.g. when the gallery opens on Belsuede-
-  // Deserto, the selector shows "Belsuede-Deserto" — not the first sort_order
-  // fabric). The user's own swatch clicks still win because they update both
-  // selectedFabricId and the gallery index in the same gesture.
+  // Highlight the fabric/leather swatch whose mapped image_indices include
+  // the image currently visible in the hero gallery. This is display-only:
+  // gallery arrows must not emit selection/pricing callbacks, otherwise an
+  // image-only navigation can trigger product-page variant sync and snap the
+  // gallery back to the first image.
   useEffect(() => {
     if (isRugProduct) return;
     if (fabrics.length === 0) return;
@@ -498,15 +497,6 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     if (!match) return;
     if (selectedFabricId === match.id) return;
     setSelectedFabricId(match.id);
-    onUpholsteryTierChange?.(match.price_tier_label ?? null);
-    onFabricChange?.({
-      id: match.id,
-      name: match.name,
-      tier: match.tier ?? null,
-      price_per_lm_cents: match.price_per_lm_cents ?? null,
-      currency: match.currency || "EUR",
-      image_url: match.image_url ?? null,
-    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fabrics, currentGalleryIndex]);
 
