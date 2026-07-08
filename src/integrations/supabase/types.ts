@@ -779,6 +779,7 @@ export type Database = {
       client_boards: {
         Row: {
           client_email: string | null
+          client_id: string | null
           client_name: string
           created_at: string
           hide_maison_branding: boolean
@@ -798,6 +799,7 @@ export type Database = {
         }
         Insert: {
           client_email?: string | null
+          client_id?: string | null
           client_name?: string
           created_at?: string
           hide_maison_branding?: boolean
@@ -817,6 +819,7 @@ export type Database = {
         }
         Update: {
           client_email?: string | null
+          client_id?: string | null
           client_name?: string
           created_at?: string
           hide_maison_branding?: boolean
@@ -835,6 +838,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "client_boards_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "client_boards_project_id_fkey"
             columns: ["project_id"]

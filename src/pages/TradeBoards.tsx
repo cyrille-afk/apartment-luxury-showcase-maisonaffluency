@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import ClientPicker, { type PickedClient } from "@/components/trade/ClientPicker";
 import {
   Dialog,
   DialogContent,
@@ -64,6 +65,7 @@ const TradeBoards = () => {
   const [loading, setLoading] = useState(true);
   const [createOpen, setCreateOpen] = useState(false);
   const [title, setTitle] = useState("");
+  const [clientId, setClientId] = useState<string | null>(null);
   const [clientName, setClientName] = useState("");
   const [clientEmail, setClientEmail] = useState("");
   const [creating, setCreating] = useState(false);
@@ -150,7 +152,7 @@ const TradeBoards = () => {
     setCreating(true);
     const { data, error } = await supabase
       .from("client_boards")
-      .insert({ user_id: user.id, studio_id: currentStudio?.id ?? null, title: title.trim(), client_name: clientName.trim(), client_email: clientEmail.trim() || null } as any)
+      .insert({ user_id: user.id, studio_id: currentStudio?.id ?? null, title: title.trim(), client_id: clientId, client_name: clientName.trim(), client_email: clientEmail.trim() || null } as any)
       .select()
       .single();
     setCreating(false);
@@ -158,7 +160,7 @@ const TradeBoards = () => {
       toast({ title: "Error", description: error.message, variant: "destructive" });
     } else {
       setCreateOpen(false);
-      setTitle(""); setClientName(""); setClientEmail("");
+      setTitle(""); setClientId(null); setClientName(""); setClientEmail("");
       navigate(`/trade/boards/${data.id}`);
     }
   };
@@ -204,8 +206,18 @@ const TradeBoards = () => {
                   <Input value={title} onChange={e => setTitle(e.target.value)} placeholder="e.g. Villa Marina Living Room" className="mt-1.5" />
                 </div>
                 <div>
-                  <Label className="font-body text-xs uppercase tracking-wider">Client Name</Label>
-                  <Input value={clientName} onChange={e => setClientName(e.target.value)} placeholder="e.g. Sarah Chen" className="mt-1.5" />
+                  <Label className="font-body text-xs uppercase tracking-wider">Client</Label>
+                  <div className="mt-1.5">
+                    <ClientPicker
+                      value={clientId}
+                      onChange={(c: PickedClient | null) => {
+                        setClientId(c?.id ?? null);
+                        setClientName(c?.name ?? "");
+                        if (c?.primary_contact?.email) setClientEmail(c.primary_contact.email);
+                      }}
+                      placeholder="Select or add a client…"
+                    />
+                  </div>
                 </div>
                 <div>
                   <Label className="font-body text-xs uppercase tracking-wider">Client Email (optional)</Label>
