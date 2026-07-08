@@ -4821,13 +4821,13 @@ serve(async (req) => {
         const unmetSuffix = unmetNotes.length
           ? ` Note: ${unmetNotes.join("; ")}.`
           : "";
-        const multiLabel = mentionedDesigners.length > 1
-          ? mentionedDesigners.slice(0, 3).join(" + ")
+        const multiLabel = enumerationSourceDesigners.length > 1
+          ? enumerationSourceDesigners.slice(0, 3).join(" + ")
           : designerLabel;
         const brandCountSummary = [...brandCounts.entries()]
           .sort(([a], [b]) => {
-            const ai = mentionedDesigners.findIndex((n) => normalizeLoose(n) === normalizeLoose(a));
-            const bi = mentionedDesigners.findIndex((n) => normalizeLoose(n) === normalizeLoose(b));
+            const ai = enumerationSourceDesigners.findIndex((n) => normalizeLoose(n) === normalizeLoose(a));
+            const bi = enumerationSourceDesigners.findIndex((n) => normalizeLoose(n) === normalizeLoose(b));
             if (ai !== -1 || bi !== -1) return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
             return a.localeCompare(b);
           })
