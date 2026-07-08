@@ -85,13 +85,24 @@ interface Props {
    */
   baseMaterialNameIncludes?: string | string[];
   /**
-   * Explicit per-material role map: { [materialName]: 'fabric'|'base'|'ignore' }.
+   * Optional THIRD texture layer for pieces whose top surface is distinct
+   * from the base (e.g. marble top on a metal base). Applied to materials
+   * tagged with role "top" in the explicit role map, or matching the top
+   * keyword group (top, tabletop, surface, marble, stone, glass).
+   */
+  topTextureUrl?: string | null;
+  /**
+   * Optional filter for the top texture. Defaults to the top keyword group.
+   */
+  topMaterialNameIncludes?: string | string[];
+  /**
+   * Explicit per-material role map: { [materialName]: 'fabric'|'base'|'top'|'ignore' }.
    * When provided, takes priority over the keyword heuristics (needed when
    * GLB materials are named with opaque IDs from CAD tools). Materials absent
    * from the map fall through to keyword matching, then to the "ignore"
    * default (they keep their original texture and receive no swatch).
    */
-  materialRoles?: Record<string, "fabric" | "base" | "ignore">;
+  materialRoles?: Record<string, "fabric" | "base" | "top" | "ignore">;
   /**
    * Called once the underlying GLB has loaded, with the actual material names
    * discovered in the file. Used by the admin manager to build the role UI.
