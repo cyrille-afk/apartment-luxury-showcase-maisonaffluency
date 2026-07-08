@@ -91,6 +91,7 @@ function readSession(): ConciergeSession | null {
       boardId: parsed.boardId ?? null,
       quoteId: parsed.quoteId ?? null,
       streamId: parsed.streamId ?? null,
+      projectName: parsed.projectName ?? null,
     };
   } catch {
     return null;
