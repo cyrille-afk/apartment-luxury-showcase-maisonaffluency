@@ -993,6 +993,11 @@ const PublicProductPage: React.FC = () => {
     [data]
   );
 
+  // Trade-only visibility for individual collectible product pages.
+  if (isCollectibleSlug(designerSlug) && !authLoading && !isTradeUser) {
+    return <Navigate to={collectibleGateRedirect(location.pathname + location.search)} replace />;
+  }
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background">
