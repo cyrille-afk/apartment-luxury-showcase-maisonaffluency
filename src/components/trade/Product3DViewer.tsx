@@ -536,7 +536,7 @@ const Product3DViewer: React.FC<Props> = ({
             className="w-full flex items-center justify-between px-3 py-2 font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground hover:text-foreground transition-colors"
           >
             <span>
-              Materials · fabric {debugInfo.fabric.matched.length} · base {debugInfo.base.matched.length} / {debugInfo.all.length}
+              Materials · fabric {debugInfo.fabric.matched.length} · base {debugInfo.base.matched.length} · top {debugInfo.top.matched.length} / {debugInfo.all.length}
             </span>
             <span>{debugOpen ? "−" : "+"}</span>
           </button>
@@ -544,6 +544,7 @@ const Product3DViewer: React.FC<Props> = ({
             <div className="px-3 pb-3 space-y-2 font-body text-[10px] leading-relaxed">
               {renderLayer("Fabric layer", debugInfo.fabric, !!fabricTextureUrl)}
               {renderLayer("Base layer", debugInfo.base, !!baseTextureUrl)}
+              {renderLayer("Top layer", debugInfo.top, !!topTextureUrl)}
               <div>
                 <div className="text-muted-foreground uppercase tracking-[0.12em] text-[9px] mb-0.5">
                   All materials ({debugInfo.all.length})
