@@ -458,21 +458,92 @@ export function PickAssetDrawer({ pickId, title }: Props) {
       )}
       {hasSwatches && (
         <div className="space-y-2">
-          {renderGroup(
-            splitByClassifier
-              ? "Base (wood · metal)"
-              : (pickAxes.baseAxisLabel && formatVariantAxisLabel(pickAxes.baseAxisLabel)) || "Base (wood · metal)",
-            baseSwatches,
-            selectedBaseId,
-            setSelectedBaseId,
-          )}
-          {renderGroup(
-            splitByClassifier
-              ? "Top (stone · marble · glass)"
-              : (pickAxes.topAxisLabel && formatVariantAxisLabel(pickAxes.topAxisLabel)) || "Top (stone · marble · glass)",
-            topSwatches,
-            selectedTopId,
-            setSelectedTopId,
+          {useCoupled ? (
+            <div>
+              <div className="mb-1 flex items-center justify-between gap-2">
+                <span className="font-display text-[9px] uppercase tracking-widest text-muted-foreground">
+                  Finish Combinations ({combinations.length})
+                </span>
+                {(selectedBaseId || selectedTopId) && (
+                  <button
+                    type="button"
+                    onClick={() => { setSelectedBaseId(null); setSelectedTopId(null); }}
+                    className="font-body text-[9px] uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    Reset
+                  </button>
+                )}
+              </div>
+              <div className="flex gap-1.5 overflow-x-auto pb-1 -mx-0.5 px-0.5 scrollbar-none">
+                {combinations.map((c) => {
+                  const isSelected =
+                    c.base.fabric_id === selectedBaseId && c.top.fabric_id === selectedTopId;
+                  return (
+                    <button
+                      type="button"
+                      key={`${c.base.fabric_id}-${c.top.fabric_id}`}
+                      onClick={() => {
+                        if (isSelected) {
+                          setSelectedBaseId(null);
+                          setSelectedTopId(null);
+                        } else {
+                          setSelectedBaseId(c.base.fabric_id);
+                          setSelectedTopId(c.top.fabric_id);
+                        }
+                      }}
+                      className="shrink-0 w-24 flex flex-col items-center gap-0.5 group focus:outline-none"
+                      title={c.label}
+                      aria-pressed={isSelected}
+                    >
+                      <div
+                        className={`flex h-11 w-24 overflow-hidden rounded border transition-all ${
+                          isSelected
+                            ? "border-primary ring-2 ring-primary/40"
+                            : "border-border/60 group-hover:border-foreground/40"
+                        }`}
+                      >
+                        {c.base.image_url ? (
+                          <img src={c.base.image_url} alt={c.base.name} loading="lazy" className="h-full w-1/2 object-cover bg-muted" />
+                        ) : (
+                          <div className="h-full w-1/2 bg-muted" />
+                        )}
+                        {c.top.image_url ? (
+                          <img src={c.top.image_url} alt={c.top.name} loading="lazy" className="h-full w-1/2 object-cover bg-muted" />
+                        ) : (
+                          <div className="h-full w-1/2 bg-muted" />
+                        )}
+                      </div>
+                      <span
+                        className={`w-24 truncate text-center font-body text-[8px] leading-tight ${
+                          isSelected ? "text-foreground" : "text-muted-foreground"
+                        }`}
+                      >
+                        {c.label}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ) : (
+            <>
+              {renderGroup(
+                splitByClassifier
+                  ? "Base (wood · metal)"
+                  : (pickAxes.baseAxisLabel && formatVariantAxisLabel(pickAxes.baseAxisLabel)) || "Base (wood · metal)",
+                baseSwatches,
+                selectedBaseId,
+                setSelectedBaseId,
+              )}
+              {renderGroup(
+                splitByClassifier
+                  ? "Top (stone · marble · glass)"
+                  : (pickAxes.topAxisLabel && formatVariantAxisLabel(pickAxes.topAxisLabel)) || "Top (stone · marble · glass)",
+                topSwatches,
+                selectedTopId,
+                setSelectedTopId,
+              )}
+            </>
           )}
           {renderGroup("Fabrics", fabricSwatches, selectedFabricId, setSelectedFabricId)}
         </div>
