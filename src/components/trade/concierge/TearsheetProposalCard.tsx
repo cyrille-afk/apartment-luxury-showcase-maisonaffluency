@@ -23,6 +23,69 @@ import { Box } from "lucide-react";
 type Status = "pending" | "committing" | "approved" | "discarded";
 type Mode = "create" | "append";
 
+type PersistedPickFinishes = {
+  fabricId?: string | null;
+  baseId?: string | null;
+  topId?: string | null;
+};
+
+type CommitFinishSnapshot = {
+  pick_id: string;
+  variant_label: string | null;
+  fabric_label: string | null;
+  wood_label: string | null;
+};
+
+const readPickFinishes = (pickId: string): PersistedPickFinishes | null => {
+  try {
+    const raw = sessionStorage.getItem(`concierge:pick-finishes:${pickId}`);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === "object" ? parsed : null;
+  } catch {
+    return null;
+  }
+};
+
+const joinFinishLabels = (...labels: Array<string | null | undefined>) =>
+  labels.map((label) => String(label || "").trim()).filter(Boolean).join(" · ") || null;
+
+async function resolveCommitFinishes(pickIds: string[]): Promise<CommitFinishSnapshot[]> {
+  const persisted = pickIds
+    .map((pickId) => ({ pickId, saved: readPickFinishes(pickId) }))
+    .filter(({ saved }) => !!(saved?.fabricId || saved?.baseId || saved?.topId));
+
+  if (persisted.length === 0) return [];
+
+  const swatchIds = Array.from(new Set(
+    persisted.flatMap(({ saved }) => [saved?.fabricId, saved?.baseId, saved?.topId].filter(Boolean) as string[]),
+  ));
+
+  const { data } = await supabase
+    .from("product_fabric_swatches_public")
+    .select("pick_id, fabric_id, name")
+    .in("pick_id", persisted.map(({ pickId }) => pickId))
+    .in("fabric_id", swatchIds);
+
+  const byPickAndId = new Map<string, string>();
+  (data || []).forEach((row: any) => {
+    byPickAndId.set(`${row.pick_id}::${row.fabric_id}`, row.name);
+  });
+
+  return persisted.map(({ pickId, saved }) => {
+    const nameFor = (id?: string | null) => id ? byPickAndId.get(`${pickId}::${id}`) ?? null : null;
+    const fabric = nameFor(saved?.fabricId);
+    const base = nameFor(saved?.baseId);
+    const top = nameFor(saved?.topId);
+    return {
+      pick_id: pickId,
+      variant_label: null,
+      fabric_label: fabric,
+      wood_label: joinFinishLabels(base, top),
+    };
+  }).filter((f) => !!(f.fabric_label || f.wood_label || f.variant_label));
+}
+
 interface Props {
   proposal: TearsheetProposal;
   onResolved?: (outcome: "approved" | "discarded", info?: { boardId: string; url: string; added: number; duplicates: number; mode: Mode; deferNavigation?: boolean }) => void;
@@ -383,6 +446,7 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
     }
 
     const pickIds = visiblePicks.map((p) => p.id);
+    const finishSnapshots = await resolveCommitFinishes(pickIds);
 
     const requestBody = isAppend
       ? {
@@ -391,6 +455,7 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
             board_id: selectedBoardId,
             note: proposal.args.note,
             pick_ids: pickIds,
+            finishes: finishSnapshots,
           },
         }
       : {
@@ -399,6 +464,7 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
             title: title.trim() || "Untitled tearsheet",
             note: proposal.args.note,
             pick_ids: pickIds,
+            finishes: finishSnapshots,
           },
         };
 
