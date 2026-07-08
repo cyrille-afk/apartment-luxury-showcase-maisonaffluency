@@ -75,6 +75,7 @@ export function PickAssetDrawer({ pickId, title }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [selectedFabricId, setSelectedFabricId] = useState<string | null>(null);
   const [selectedBaseId, setSelectedBaseId] = useState<string | null>(null);
+  const [selectedTopId, setSelectedTopId] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
