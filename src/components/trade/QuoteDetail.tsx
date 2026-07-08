@@ -1437,7 +1437,15 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
             : []
         ).map((swatch: any) => ({ name: swatch.name, imageUrl: swatch.image_url || swatch.imageUrl })),
         finishSwatchLabel,
-        fabricSwatchUrl: fabric?.image_url ?? null,
+        // Suppress the standalone fabric swatch when it is already part of
+        // finishSwatches (variantSwatches is deduped upstream via the
+        // three-key guard). Prevents a duplicate fabric tile in the PDF.
+        fabricSwatchUrl: (() => {
+          const url = fabric?.image_url ?? null;
+          if (!url) return null;
+          const inVariant = variantSwatches.some((s: any) => (s.image_url || s.imageUrl) === url);
+          return inVariant ? null : url;
+        })(),
         shipOriginCountry: toIsoCountry(item.ship_origin_country ?? product?.origin ?? null, "FR"),
         shipMode: item.ship_mode || null,
         shipCbm: item.ship_cbm != null ? Number(item.ship_cbm) : null,
