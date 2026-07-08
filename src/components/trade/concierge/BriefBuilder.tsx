@@ -717,37 +717,8 @@ export function BriefBuilder({
     setTimeout(() => setPasteStatus(null), 2500);
   };
 
-  const handlePasteBrief = async () => {
-    // Inside the Lovable preview iframe, navigator.clipboard.readText() is
-    // blocked by permissions policy — fall back to a manual paste box.
-    const canReadClipboard =
-      typeof navigator !== "undefined" &&
-      navigator.clipboard &&
-      typeof navigator.clipboard.readText === "function";
-    if (!canReadClipboard) {
-      setPasteFallbackText("");
-      setPasteFallbackOpen(true);
-      return;
-    }
-    try {
-      const text = await navigator.clipboard.readText();
-      const status = applyPastedText(text);
-      setPasteStatus(status);
-      setTimeout(() => setPasteStatus(null), 2000);
-    } catch {
-      // Permission denied (typical in embedded/preview iframes) → open fallback.
-      setPasteFallbackText("");
-      setPasteFallbackOpen(true);
-    }
-  };
 
-  const handleFallbackApply = () => {
-    const status = applyPastedText(pasteFallbackText);
-    setPasteFallbackOpen(false);
-    setPasteFallbackText("");
-    setPasteStatus(status);
-    setTimeout(() => setPasteStatus(null), 2000);
-  };
+
 
 
   const SectionHeader = ({
