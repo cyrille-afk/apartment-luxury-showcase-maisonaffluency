@@ -841,7 +841,7 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
   useEffect(() => {
     const handler = (e: Event) => {
       const detail = (e as CustomEvent).detail as
-        | { message?: string; openPanel?: boolean; stage?: Stage; actions?: ConciergeQuickAction[]; resetPanel?: boolean; replaceTimeline?: boolean; onboarding?: boolean; prefill?: string }
+        | { message?: string; openPanel?: boolean; stage?: Stage; actions?: ConciergeQuickAction[]; resetPanel?: boolean; replaceTimeline?: boolean; onboarding?: boolean; prefill?: string; autoSend?: boolean; displayMessage?: string }
         | undefined;
       const message = detail?.message?.trim();
       if (detail?.resetPanel) {
@@ -875,23 +875,33 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
       if (detail?.stage) setStageOverride(detail.stage);
       if (detail?.openPanel) setOpen(true);
       // Prefill support — used by per-SKU "Swap" buttons on the concierge
-      // cards. We drop the text into the composer, focus it, and let the
-      // user edit/confirm before sending. Never auto-send.
+      // cards. Two modes:
+      //   • default: drop the text into the composer and focus it so the
+      //     user can review/edit before pressing send.
+      //   • autoSend: fire the prompt behind the scenes and show only a
+      //     short human-readable displayMessage in the transcript so the
+      //     user isn't confronted with the raw system prompt.
       if (typeof detail?.prefill === "string" && detail.prefill.trim().length > 0) {
-        setInput(detail.prefill);
         setMinimized(false);
         setOpen(true);
-        setTimeout(() => {
-          const el = inputRef.current;
-          if (el) {
-            el.focus();
-            // Move caret to end so the user can extend the prompt.
-            const len = el.value.length;
-            try { el.setSelectionRange(len, len); } catch { /* jsdom */ }
-            el.scrollIntoView({ block: "nearest", behavior: "smooth" });
-          }
-        }, 60);
+        if (detail.autoSend) {
+          const display = detail.displayMessage?.trim() || "…";
+          // Fire and forget — send() handles its own streaming state.
+          void send(detail.prefill, { displayText: display });
+        } else {
+          setInput(detail.prefill);
+          setTimeout(() => {
+            const el = inputRef.current;
+            if (el) {
+              el.focus();
+              const len = el.value.length;
+              try { el.setSelectionRange(len, len); } catch { /* jsdom */ }
+              el.scrollIntoView({ block: "nearest", behavior: "smooth" });
+            }
+          }, 60);
+        }
       }
+
     };
     window.addEventListener("concierge:stage", handler as EventListener);
     return () => window.removeEventListener("concierge:stage", handler as EventListener);
