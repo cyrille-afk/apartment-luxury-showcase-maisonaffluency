@@ -779,6 +779,69 @@ export function BriefBuilder({
   const [pasteStatus, setPasteStatus] = useState<null | "ok" | "notes" | "empty" | "denied">(null);
   const [pasteFallbackOpen, setPasteFallbackOpen] = useState(false);
   const [pasteFallbackText, setPasteFallbackText] = useState("");
+  const [presets, setPresets] = useState<BriefPreset[]>(() => loadPresets());
+  const [presetsMenuOpen, setPresetsMenuOpen] = useState(false);
+  const [presetStatus, setPresetStatus] = useState<null | "saved" | "loaded" | "exists" | "empty">(null);
+
+  const flashPresetStatus = (s: "saved" | "loaded" | "exists" | "empty") => {
+    setPresetStatus(s);
+    setTimeout(() => setPresetStatus(null), 2000);
+  };
+
+  const handleSavePreset = () => {
+    const isEmpty = JSON.stringify(values) === JSON.stringify(DEFAULT_VALUES) && !prefix.trim() && !suffix.trim();
+    if (isEmpty) {
+      flashPresetStatus("empty");
+      return;
+    }
+    const defaultName = summarizePreset({
+      id: "", name: "", values, prefix, suffix, savedAt: 0,
+    }) || "Untitled preset";
+    const name = window.prompt("Name this brief preset", defaultName);
+    if (!name || !name.trim()) return;
+    const trimmed = name.trim();
+    const existing = presets.find((p) => p.name.toLowerCase() === trimmed.toLowerCase());
+    if (existing && !window.confirm(`A preset named "${trimmed}" exists. Overwrite?`)) return;
+    const next: BriefPreset = {
+      id: existing?.id || `p_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 6)}`,
+      name: trimmed,
+      values: JSON.parse(JSON.stringify(values)),
+      prefix,
+      suffix,
+      savedAt: Date.now(),
+    };
+    const list = existing
+      ? presets.map((p) => (p.id === existing.id ? next : p))
+      : [next, ...presets];
+    setPresets(list);
+    savePresets(list);
+    flashPresetStatus("saved");
+  };
+
+  const handleLoadPreset = (id: string) => {
+    const p = presets.find((x) => x.id === id);
+    if (!p) return;
+    const nextValues: BriefValues = {
+      block1: { ...DEFAULT_VALUES.block1, ...(p.values.block1 || {}) },
+      block2: { ...DEFAULT_VALUES.block2, ...(p.values.block2 || {}) },
+      block3: { ...DEFAULT_VALUES.block3, ...(p.values.block3 || {}) },
+      block4: typeof p.values.block4 === "string" ? p.values.block4 : DEFAULT_VALUES.block4,
+    };
+    setValues(nextValues);
+    setPrefix(p.prefix || "");
+    setSuffix(p.suffix || "");
+    emit(nextValues, p.prefix || "", p.suffix || "");
+    setPresetsMenuOpen(false);
+    flashPresetStatus("loaded");
+  };
+
+  const handleDeletePreset = (id: string) => {
+    if (!window.confirm("Delete this preset?")) return;
+    const list = presets.filter((p) => p.id !== id);
+    setPresets(list);
+    savePresets(list);
+  };
+
 
   const applyPastedText = (text: string): "ok" | "notes" | "empty" => {
     if (!text || !text.trim()) return "empty";
