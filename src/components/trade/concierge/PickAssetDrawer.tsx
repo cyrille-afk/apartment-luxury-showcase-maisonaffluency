@@ -123,6 +123,9 @@ export function PickAssetDrawer({ pickId, title }: Props) {
     currency: string | null;
     leadTime: string | null;
   }>({ tradeProductId: null, tradePriceCents: null, currency: null, leadTime: null });
+  const [sizeVariants, setSizeVariants] = useState<
+    { label?: string; base?: string; top?: string; price_cents?: number }[]
+  >([]);
 
   // Project / client-folder name for this concierge chat. Persisted on the
   // shared concierge session so subsequent items in the same chat auto-reuse
