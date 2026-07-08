@@ -13,32 +13,45 @@ type MaterialRole = "fabric" | "base" | "top" | "ignore";
  * Token buckets are ordered by specificity: "tabletop" before "table" before
  * "top" so a mesh named "table_base" doesn't get mis-tagged as a top.
  */
-export function autoDetectRoleFromName(rawName: string): MaterialRole | null {
+export interface AutoDetectResult {
+  role: MaterialRole;
+  /** The specific token in the material name that produced the match. */
+  token: string;
+}
+
+const TOKEN_BUCKETS: { role: MaterialRole; tokens: string[] }[] = [
+  {
+    role: "fabric",
+    tokens: ["fabric", "upholstery", "cushion", "seat", "leather", "textile", "cloth"],
+  },
+  {
+    role: "top",
+    tokens: [
+      "tabletop", "table_top", "top", "surface", "slab", "worktop", "counter",
+      "marble", "onyx", "stone", "granite", "travertine", "quartz", "glass",
+    ],
+  },
+  {
+    role: "base",
+    tokens: [
+      "base", "frame", "leg", "legs", "plinth", "foot", "footing", "pedestal", "support", "structure", "chassis",
+      "brass", "metal", "steel", "bronze", "iron", "wood", "oak", "walnut", "ash",
+    ],
+  },
+];
+
+export function autoDetectRoleFromName(rawName: string): AutoDetectResult | null {
   const name = rawName.toLowerCase();
-  // Reject opaque CAD IDs (long hex, uuid fragments, "material_23").
   if (/^[0-9a-f]{8,}(-[0-9a-f]+)*$/i.test(rawName)) return null;
   if (/^(mesh|material|object|node)[_\-]?\d+$/i.test(rawName)) return null;
 
-  const has = (...tokens: string[]) =>
-    tokens.some((t) => new RegExp(`(^|[^a-z])${t}([^a-z]|$)`, "i").test(name));
-
-  // Fabric first — upholstery is unambiguous.
-  if (has("fabric", "upholstery", "cushion", "seat", "leather", "textile", "cloth")) return "fabric";
-
-  // Top: slab / surface / stone-family keywords.
-  if (
-    has("tabletop", "table_top", "top", "surface", "slab", "worktop", "counter") ||
-    has("marble", "onyx", "stone", "granite", "travertine", "quartz", "glass")
-  )
-    return "top";
-
-  // Base: structural / leg / frame keywords.
-  if (
-    has("base", "frame", "leg", "legs", "plinth", "foot", "footing", "pedestal", "support", "structure", "chassis") ||
-    has("brass", "metal", "steel", "bronze", "iron", "wood", "oak", "walnut", "ash")
-  )
-    return "base";
-
+  for (const bucket of TOKEN_BUCKETS) {
+    for (const t of bucket.tokens) {
+      if (new RegExp(`(^|[^a-z])${t}([^a-z]|$)`, "i").test(name)) {
+        return { role: bucket.role, token: t };
+      }
+    }
+  }
   return null;
 }
 
