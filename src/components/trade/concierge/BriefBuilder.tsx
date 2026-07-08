@@ -615,58 +615,82 @@ export function BriefBuilder({
   // fields the user already filled in. Only fields the paste actually
   // supplied (i.e. differ from DEFAULT_VALUES) overwrite the current values.
   const [pasteStatus, setPasteStatus] = useState<null | "ok" | "empty" | "denied">(null);
-  const handlePasteBrief = async () => {
-    try {
-      const text = await navigator.clipboard.readText();
-      if (!text || !text.trim()) {
-        setPasteStatus("empty");
-        setTimeout(() => setPasteStatus(null), 2000);
-        return;
-      }
-      const parsed = parseBrief(text);
-      const merged: BriefValues = {
-        block1: { ...values.block1 },
-        block2: { ...values.block2 },
-        block3: { ...values.block3 },
-        block4: values.block4,
-      };
-      let filled = 0;
-      (Object.keys(parsed.values.block1) as (keyof BriefValues["block1"])[]).forEach((k) => {
-        if (parsed.values.block1[k] !== DEFAULT_VALUES.block1[k]) {
-          merged.block1[k] = parsed.values.block1[k];
-          filled++;
-        }
-      });
-      (Object.keys(parsed.values.block2) as (keyof BriefValues["block2"])[]).forEach((k) => {
-        if (parsed.values.block2[k] !== DEFAULT_VALUES.block2[k]) {
-          merged.block2[k] = parsed.values.block2[k];
-          filled++;
-        }
-      });
-      (Object.keys(parsed.values.block3) as (keyof BriefValues["block3"])[]).forEach((k) => {
-        if (parsed.values.block3[k] !== DEFAULT_VALUES.block3[k]) {
-          merged.block3[k] = parsed.values.block3[k];
-          filled++;
-        }
-      });
-      if (parsed.values.block4 !== DEFAULT_VALUES.block4) {
-        merged.block4 = parsed.values.block4;
+  const [pasteFallbackOpen, setPasteFallbackOpen] = useState(false);
+  const [pasteFallbackText, setPasteFallbackText] = useState("");
+
+  const applyPastedText = (text: string): "ok" | "empty" => {
+    if (!text || !text.trim()) return "empty";
+    const parsed = parseBrief(text);
+    const merged: BriefValues = {
+      block1: { ...values.block1 },
+      block2: { ...values.block2 },
+      block3: { ...values.block3 },
+      block4: values.block4,
+    };
+    let filled = 0;
+    (Object.keys(parsed.values.block1) as (keyof BriefValues["block1"])[]).forEach((k) => {
+      if (parsed.values.block1[k] !== DEFAULT_VALUES.block1[k]) {
+        merged.block1[k] = parsed.values.block1[k];
         filled++;
       }
+    });
+    (Object.keys(parsed.values.block2) as (keyof BriefValues["block2"])[]).forEach((k) => {
+      if (parsed.values.block2[k] !== DEFAULT_VALUES.block2[k]) {
+        merged.block2[k] = parsed.values.block2[k];
+        filled++;
+      }
+    });
+    (Object.keys(parsed.values.block3) as (keyof BriefValues["block3"])[]).forEach((k) => {
+      if (parsed.values.block3[k] !== DEFAULT_VALUES.block3[k]) {
+        merged.block3[k] = parsed.values.block3[k];
+        filled++;
+      }
+    });
+    if (parsed.values.block4 !== DEFAULT_VALUES.block4) {
+      merged.block4 = parsed.values.block4;
+      filled++;
+    }
+    const nextPrefix = parsed.prefix || prefix;
+    const nextSuffix = parsed.suffix || suffix;
+    setValues(merged);
+    setPrefix(nextPrefix);
+    setSuffix(nextSuffix);
+    emit(merged, nextPrefix, nextSuffix);
+    return filled > 0 ? "ok" : "empty";
+  };
 
-      const nextPrefix = parsed.prefix || prefix;
-      const nextSuffix = parsed.suffix || suffix;
-      setValues(merged);
-      setPrefix(nextPrefix);
-      setSuffix(nextSuffix);
-      emit(merged, nextPrefix, nextSuffix);
-      setPasteStatus(filled > 0 ? "ok" : "empty");
+  const handlePasteBrief = async () => {
+    // Inside the Lovable preview iframe, navigator.clipboard.readText() is
+    // blocked by permissions policy — fall back to a manual paste box.
+    const canReadClipboard =
+      typeof navigator !== "undefined" &&
+      navigator.clipboard &&
+      typeof navigator.clipboard.readText === "function";
+    if (!canReadClipboard) {
+      setPasteFallbackText("");
+      setPasteFallbackOpen(true);
+      return;
+    }
+    try {
+      const text = await navigator.clipboard.readText();
+      const status = applyPastedText(text);
+      setPasteStatus(status);
       setTimeout(() => setPasteStatus(null), 2000);
     } catch {
-      setPasteStatus("denied");
-      setTimeout(() => setPasteStatus(null), 2500);
+      // Permission denied (typical in embedded/preview iframes) → open fallback.
+      setPasteFallbackText("");
+      setPasteFallbackOpen(true);
     }
   };
+
+  const handleFallbackApply = () => {
+    const status = applyPastedText(pasteFallbackText);
+    setPasteFallbackOpen(false);
+    setPasteFallbackText("");
+    setPasteStatus(status);
+    setTimeout(() => setPasteStatus(null), 2000);
+  };
+
 
   const SectionHeader = ({
     title,
