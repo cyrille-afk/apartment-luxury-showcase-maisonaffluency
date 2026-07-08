@@ -24,8 +24,8 @@ interface Props {
 }
 
 const ROLE_LABEL: Record<MaterialRole, string> = {
-  fabric: "Fabric",
-  base: "Base / Wood",
+  fabric: "Fabric / Leather",
+  base: "Base (wood · stone · metal)",
   ignore: "Ignore",
 };
 
