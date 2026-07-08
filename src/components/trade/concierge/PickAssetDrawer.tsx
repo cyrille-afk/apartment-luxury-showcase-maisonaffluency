@@ -343,8 +343,32 @@ export function PickAssetDrawer({ pickId, title }: Props) {
     );
   };
 
+  const hasSelection = selectedFabricId || selectedBaseId || selectedTopId;
+  const resetFinishes = () => {
+    setSelectedFabricId(null);
+    setSelectedBaseId(null);
+    setSelectedTopId(null);
+    try {
+      sessionStorage.removeItem(storageKey);
+    } catch {
+      /* ignore */
+    }
+  };
+
   return (
     <div className="mt-2 rounded-md border border-border/60 bg-background/40 p-2 space-y-2 animate-fade-in">
+      {hasSelection && (
+        <div className="flex items-center justify-end">
+          <button
+            type="button"
+            onClick={resetFinishes}
+            className="flex items-center gap-1 font-body text-[9px] uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <RotateCcw size={10} />
+            Reset finishes
+          </button>
+        </div>
+      )}
       {hasGlb && (
         <div className="max-w-[240px]">
           <Product3DViewer
