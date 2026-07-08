@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { X, Send, Loader2, Sparkles, Minus, GripHorizontal, RotateCcw, Maximize2, Minimize2, Expand, Shrink, Palette, Check, Languages, Pencil, Paperclip, FileText, Download, FileDown, Copy, ShieldCheck, ListChecks, Eye, LayoutList } from "lucide-react";
 import { BriefBuilder } from "@/components/trade/concierge/BriefBuilder";
+import { BriefBubble, isBriefContent } from "@/components/trade/concierge/BriefBubble";
 
 const SPEC_BRIEF_TEMPLATE = `Block 1 — Spatial & Project Context
 PROJECT PROFILE: [typology, city/area]
@@ -2566,6 +2567,11 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
                       </div>
                     )}
                     {item.content && (
+                      item.role === "user" && isBriefContent(item.content) ? (
+                        <div className={cn(expanded ? "max-w-[92%]" : "max-w-[88%]", "w-full flex justify-end")}>
+                          <BriefBubble content={item.content} />
+                        </div>
+                      ) : (
                     <div
                       className={cn(
                         "rounded-2xl px-4 py-3 font-body text-sm leading-relaxed",
@@ -2601,6 +2607,7 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
                         <span className="whitespace-pre-wrap">{item.content}</span>
                       )}
                     </div>
+                      )
                     )}
                     {item.role === "assistant" && item.appliedConstraints && (
                       (item.appliedConstraints.colors.length +
