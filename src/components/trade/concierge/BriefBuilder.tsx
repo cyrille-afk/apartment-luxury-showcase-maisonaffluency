@@ -624,11 +624,11 @@ export function BriefBuilder({
   // Merge a pasted brief into the current builder state without wiping
   // fields the user already filled in. Only fields the paste actually
   // supplied (i.e. differ from DEFAULT_VALUES) overwrite the current values.
-  const [pasteStatus, setPasteStatus] = useState<null | "ok" | "empty" | "denied">(null);
+  const [pasteStatus, setPasteStatus] = useState<null | "ok" | "notes" | "empty" | "denied">(null);
   const [pasteFallbackOpen, setPasteFallbackOpen] = useState(false);
   const [pasteFallbackText, setPasteFallbackText] = useState("");
 
-  const applyPastedText = (text: string): "ok" | "empty" => {
+  const applyPastedText = (text: string): "ok" | "notes" | "empty" => {
     if (!text || !text.trim()) return "empty";
     const parsed = parseBrief(text);
     const merged: BriefValues = {
@@ -660,13 +660,61 @@ export function BriefBuilder({
       merged.block4 = parsed.values.block4;
       filled++;
     }
-    const nextPrefix = parsed.prefix || prefix;
-    const nextSuffix = parsed.suffix || suffix;
+    // When the paste is free-form prose (no recognisable block headers),
+    // parseBrief returns prefix=<the whole text>. Merge it with any existing
+    // prefix rather than replacing so a previous freeform note isn't wiped.
+    const pastedPrefix = parsed.prefix?.trim() || "";
+    const pastedSuffix = parsed.suffix?.trim() || "";
+    const nextPrefix = pastedPrefix
+      ? (prefix && !prefix.includes(pastedPrefix) ? `${prefix}\n\n${pastedPrefix}` : pastedPrefix)
+      : prefix;
+    const nextSuffix = pastedSuffix || suffix;
     setValues(merged);
     setPrefix(nextPrefix);
     setSuffix(nextSuffix);
     emit(merged, nextPrefix, nextSuffix);
-    return filled > 0 ? "ok" : "empty";
+    if (filled > 0) return "ok";
+    // No structured fields matched, but we did capture the prose as notes.
+    if (pastedPrefix || pastedSuffix) return "notes";
+    return "empty";
+  };
+
+  const handlePasteBrief = async () => {
+    // Inside the Lovable preview iframe, navigator.clipboard.readText() is
+    // blocked by permissions policy — fall back to a manual paste box.
+    const canReadClipboard =
+      typeof navigator !== "undefined" &&
+      navigator.clipboard &&
+      typeof navigator.clipboard.readText === "function";
+    if (!canReadClipboard) {
+      setPasteFallbackText("");
+      setPasteFallbackOpen(true);
+      return;
+    }
+    try {
+      const text = await navigator.clipboard.readText();
+      const status = applyPastedText(text);
+      setPasteStatus(status);
+      setTimeout(() => setPasteStatus(null), 2500);
+    } catch {
+      // Permission denied (typical in embedded/preview iframes) → open fallback.
+      setPasteFallbackText("");
+      setPasteFallbackOpen(true);
+    }
+  };
+
+  const handleFallbackApply = () => {
+    const status = applyPastedText(pasteFallbackText);
+    if (status === "empty") {
+      // Keep the dialog open so the user doesn't lose what they typed.
+      setPasteStatus("empty");
+      setTimeout(() => setPasteStatus(null), 2500);
+      return;
+    }
+    setPasteFallbackOpen(false);
+    setPasteFallbackText("");
+    setPasteStatus(status);
+    setTimeout(() => setPasteStatus(null), 2500);
   };
 
   const handlePasteBrief = async () => {
