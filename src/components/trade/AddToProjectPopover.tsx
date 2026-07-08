@@ -14,6 +14,8 @@ import {
 interface AddToProjectPopoverProps {
   productId: string; // real UUID
   productName: string;
+  /** Preferred title for a newly-created project (e.g. concierge project name). */
+  defaultProjectName?: string;
   children: React.ReactNode;
 }
 
