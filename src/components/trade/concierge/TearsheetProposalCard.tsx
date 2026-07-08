@@ -1138,8 +1138,40 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
               onResolved={handleProjectStepResolved}
             />
           )}
+
+          {/* Project Deck pitch — once the auto-grouped project has 3+
+              tearsheets, offer to compile them into a client-ready deck. */}
+          {existingProjectId &&
+            projectIdForDeck &&
+            (projectBoardCount ?? 0) >= 3 &&
+            conciergeSession?.projectName && (
+              <div className="mt-2 rounded-md border border-accent/40 bg-accent/[0.05] px-2.5 py-2 space-y-1.5">
+                <div className="flex items-start gap-2">
+                  <Sparkles className="h-3.5 w-3.5 text-accent mt-0.5 shrink-0" />
+                  <p className="font-body text-[11px] leading-snug text-foreground">
+                    You have {projectBoardCount} tearsheets in{" "}
+                    <strong>{conciergeSession.projectName}</strong>. Compile them
+                    into a client-ready Project Presentation PDF?
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  disabled={deckBuilding}
+                  onClick={() => handleBuildProjectDeck(projectIdForDeck, conciergeSession.projectName || "Project")}
+                  className="w-full flex items-center justify-center gap-1.5 rounded-md bg-foreground text-background px-2.5 py-1.5 font-body text-[10px] uppercase tracking-widest hover:opacity-90 transition disabled:opacity-40"
+                >
+                  {deckBuilding ? (
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                  ) : (
+                    <Sparkles className="h-3 w-3" />
+                  )}
+                  {deckBuilding ? "Building deck…" : "Compile Project Presentation"}
+                </button>
+              </div>
+            )}
         </>
       )}
+
 
       {status === "discarded" && (
         <div className="flex items-center gap-1.5 text-muted-foreground">
