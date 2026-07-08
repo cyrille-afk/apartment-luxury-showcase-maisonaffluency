@@ -639,44 +639,103 @@ export function PickAssetDrawer({ pickId, title }: Props) {
         </div>
       )}
       {showDraftButton && (
-        canDraft ? (
-          <Link
-            to={`/trade/tearsheets?${draftParams.toString()}`}
-            onClick={() => {
-              // Persist product + locked finishes into the cross-surface
-              // concierge session so the Tearsheet Builder and Quote flow
-              // can carry them forward even if the URL params are stripped.
-              updateConciergeSession({
-                product: { id: pickId, title, source: "curator" },
-                finishes: {
-                  fabric: fabricLabel,
-                  fabricImg,
-                  wood: woodLabel,
-                  woodImg,
-                  variant: null,
-                },
-                locked: true,
-              });
-            }}
-            className="mt-1 flex items-center justify-center gap-1.5 rounded-md border border-foreground/30 bg-foreground text-background px-2.5 py-1.5 font-body text-[10px] uppercase tracking-widest hover:bg-foreground/90 transition-colors"
-          >
-            <FileText size={11} />
-            Generate Tearsheet
-          </Link>
-        ) : (
-          <button
-            type="button"
-            disabled
-            className="mt-1 flex w-full items-center justify-center gap-1.5 rounded-md border border-foreground/30 bg-foreground text-background px-2.5 py-1.5 font-body text-[10px] uppercase tracking-widest opacity-50 cursor-not-allowed transition-colors"
-          >
-            {loading ? (
-              <Loader2 size={11} className="animate-spin" />
+        <>
+          {canDraft && (
+            <div className="mt-1 rounded-md border border-border/60 bg-background/60 px-2.5 py-2 space-y-1">
+              <div className="font-display text-[9px] uppercase tracking-widest text-muted-foreground">
+                Locked Selection
+              </div>
+              <dl className="grid grid-cols-[auto,1fr] gap-x-2 gap-y-0.5 font-body text-[10px] leading-tight text-foreground">
+                <dt className="text-muted-foreground">SKU</dt>
+                <dd className="tabular-nums">MA-{pickId.replace(/-/g, "").slice(0, 8).toUpperCase()}</dd>
+                {woodLabel && (
+                  <>
+                    <dt className="text-muted-foreground">Frame</dt>
+                    <dd className="break-words">{woodLabel}</dd>
+                  </>
+                )}
+                {fabricLabel && (
+                  <>
+                    <dt className="text-muted-foreground">Seating</dt>
+                    <dd className="break-words">{fabricLabel}</dd>
+                  </>
+                )}
+                <dt className="text-muted-foreground">Trade Price</dt>
+                <dd>
+                  {tradeMeta.tradePriceCents
+                    ? `${
+                        tradeMeta.currency === "USD" ? "$" :
+                        tradeMeta.currency === "GBP" ? "£" :
+                        tradeMeta.currency === "SGD" ? "S$" : "€"
+                      }${(tradeMeta.tradePriceCents / 100).toLocaleString()}`
+                    : "Price on Request"}
+                </dd>
+                <dt className="text-muted-foreground">Lead Time</dt>
+                <dd>{tradeMeta.leadTime || "—"}</dd>
+              </dl>
+            </div>
+          )}
+          <div className="mt-1 flex flex-col sm:flex-row gap-1.5">
+            {canDraft ? (
+              <Link
+                to={`/trade/tearsheets?${draftParams.toString()}`}
+                onClick={() => {
+                  updateConciergeSession({
+                    product: { id: pickId, title, source: "curator" },
+                    finishes: {
+                      fabric: fabricLabel,
+                      fabricImg,
+                      wood: woodLabel,
+                      woodImg,
+                      variant: null,
+                    },
+                    locked: true,
+                  });
+                }}
+                className="flex-1 flex items-center justify-center gap-1.5 rounded-md border border-foreground/30 bg-foreground text-background px-2.5 py-1.5 font-body text-[10px] uppercase tracking-widest hover:bg-foreground/90 transition-colors"
+              >
+                <FileText size={11} />
+                Generate Tearsheet
+              </Link>
             ) : (
-              <FileText size={11} />
+              <button
+                type="button"
+                disabled
+                className="flex-1 flex items-center justify-center gap-1.5 rounded-md border border-foreground/30 bg-foreground text-background px-2.5 py-1.5 font-body text-[10px] uppercase tracking-widest opacity-50 cursor-not-allowed transition-colors"
+              >
+                {loading ? (
+                  <Loader2 size={11} className="animate-spin" />
+                ) : (
+                  <FileText size={11} />
+                )}
+                {loading ? "Loading finishes…" : "Generate Tearsheet"}
+              </button>
             )}
-            {loading ? "Loading finishes…" : "Generate Tearsheet"}
-          </button>
-        )
+            {canDraft && tradeMeta.tradeProductId ? (
+              <AddToProjectPopover
+                productId={tradeMeta.tradeProductId}
+                productName={title}
+              >
+                <button
+                  type="button"
+                  className="flex-1 flex items-center justify-center gap-1.5 rounded-md border border-foreground/30 bg-background text-foreground px-2.5 py-1.5 font-body text-[10px] uppercase tracking-widest hover:bg-foreground/5 transition-colors"
+                >
+                  <FolderPlus size={11} />
+                  Add to Project Board
+                </button>
+              </AddToProjectPopover>
+            ) : (
+              <button
+                type="button"
+                disabled
+                className="flex-1 flex items-center justify-center gap-1.5 rounded-md border border-foreground/30 bg-background text-foreground px-2.5 py-1.5 font-body text-[10px] uppercase tracking-widest opacity-50 cursor-not-allowed transition-colors"
+              >
+                <FolderPlus size={11} />
+                Add to Project Board
+              </button>
+            )}
+          </div>
+        </>
       )}
     </div>
   );
