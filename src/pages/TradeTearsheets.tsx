@@ -499,6 +499,66 @@ export default function TradeTearsheets() {
     return () => { cancelled = true; };
   }, [selectedProduct, chosenFinishes.fabric, chosenFinishes.fabricImg]);
 
+  // Split a combined finish label ("Natural Walnut · Pall Stone") that
+  // landed in a single field (usually `wood` from a legacy URL/board note)
+  // into wood + fabric so both swatches render on the tearsheet.
+  useEffect(() => {
+    if (!selectedProduct) return;
+    if (chosenFinishes.fabric) return;
+    if (!isCombinedFinishLabel(chosenFinishes.wood)) return;
+    const [left, right] = String(chosenFinishes.wood).split(/\s+[·•]\s+/).map((s) => s.trim());
+    if (!left || !right) return;
+    setChosenFinishes((prev) => ({
+      ...prev,
+      wood: left,
+      fabric: prev.fabric ?? right,
+    }));
+  }, [selectedProduct, chosenFinishes.wood, chosenFinishes.fabric]);
+
+  // Backfill missing swatch images by looking up the pick's active swatches
+  // by name (case-insensitive). Runs when a finish label is known but the
+  // corresponding `Img` URL is null — e.g. links from a client board that
+  // stored only labels, or brief-locked picks where only names were carried.
+  useEffect(() => {
+    if (!selectedProduct) return;
+    const needWood = !!chosenFinishes.wood && !chosenFinishes.woodImg;
+    const needFabric = !!chosenFinishes.fabric && !chosenFinishes.fabricImg;
+    if (!needWood && !needFabric) return;
+    const pickId = selectedProduct.source_pick_id || selectedProduct.id;
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from("product_fabric_swatches_public")
+        .select("name, image_url, category")
+        .eq("pick_id", pickId)
+        .eq("is_active", true);
+      if (cancelled || !data?.length) return;
+      const norm = (s: string) => normalizeFinishText(s);
+      const findByName = (label: string | null) => {
+        if (!label) return null;
+        const target = norm(label);
+        if (!target) return null;
+        const exact = (data as any[]).find((s) => norm(s.name) === target);
+        if (exact) return exact;
+        return (data as any[]).find((s) => {
+          const n = norm(s.name);
+          return n && (n.includes(target) || target.includes(n));
+        }) || null;
+      };
+      const woodMatch = needWood ? findByName(chosenFinishes.wood) : null;
+      const fabricMatch = needFabric ? findByName(chosenFinishes.fabric) : null;
+      if (!woodMatch && !fabricMatch) return;
+      setChosenFinishes((prev) => ({
+        ...prev,
+        woodImg: prev.woodImg ?? (woodMatch?.image_url || null),
+        fabricImg: prev.fabricImg ?? (fabricMatch?.image_url || null),
+      }));
+    })();
+    return () => { cancelled = true; };
+  }, [selectedProduct, chosenFinishes.wood, chosenFinishes.fabric, chosenFinishes.woodImg, chosenFinishes.fabricImg]);
+
+
+
 
   const filtered = products.filter((p) => {
     if (search && ![p.product_name, p.brand_name].some((f) => f?.toLowerCase().includes(search.toLowerCase()))) return false;
