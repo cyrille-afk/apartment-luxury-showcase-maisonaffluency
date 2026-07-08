@@ -319,8 +319,18 @@ export function PickAssetDrawer({ pickId, title }: Props) {
       )}
       {hasSwatches && (
         <div className="space-y-2">
-          {renderGroup("Base (wood · metal)", baseSwatches, selectedBaseId, setSelectedBaseId)}
-          {renderGroup("Top (stone · marble · glass)", topSwatches, selectedTopId, setSelectedTopId)}
+          {renderGroup(
+            (pickAxes.baseAxisLabel && formatVariantAxisLabel(pickAxes.baseAxisLabel)) || "Base (wood · metal)",
+            baseSwatches,
+            selectedBaseId,
+            setSelectedBaseId,
+          )}
+          {renderGroup(
+            (pickAxes.topAxisLabel && formatVariantAxisLabel(pickAxes.topAxisLabel)) || "Top (stone · marble · glass)",
+            topSwatches,
+            selectedTopId,
+            setSelectedTopId,
+          )}
           {renderGroup("Fabrics", fabricSwatches, selectedFabricId, setSelectedFabricId)}
         </div>
       )}
