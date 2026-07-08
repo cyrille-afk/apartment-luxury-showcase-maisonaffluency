@@ -84,13 +84,23 @@ export function GlbMaterialRolesEditor({
 
   // Rebuild the working map whenever the variant / discovered names change.
   useEffect(() => {
+    const hasSaved = !!initialRoles && Object.keys(initialRoles).length > 0;
     const next: Record<string, MaterialRole> = {};
+    let autoTagged = 0;
     for (const name of materialNames) {
       const existing = initialRoles?.[name];
-      next[name] = existing ?? "ignore";
+      if (existing) {
+        next[name] = existing;
+      } else {
+        const guess = autoDetectRoleFromName(name);
+        next[name] = guess ?? "ignore";
+        if (guess) autoTagged += 1;
+      }
     }
     setRoles(next);
-    setDirty(false);
+    // If nothing was ever saved and we auto-tagged at least one mesh, mark
+    // dirty so the admin can just review + hit Save.
+    setDirty(!hasSaved && autoTagged > 0);
     onChange(next);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [variantId, materialNames.join("|")]);
@@ -100,6 +110,26 @@ export function GlbMaterialRolesEditor({
     setRoles(next);
     setDirty(true);
     onChange(next);
+  };
+
+  const runAutoDetect = () => {
+    const next: Record<string, MaterialRole> = { ...roles };
+    let changed = 0;
+    for (const name of materialNames) {
+      const guess = autoDetectRoleFromName(name);
+      if (guess && next[name] !== guess) {
+        next[name] = guess;
+        changed += 1;
+      }
+    }
+    if (changed === 0) {
+      toast.info("No confident matches found — tag manually.");
+      return;
+    }
+    setRoles(next);
+    setDirty(true);
+    onChange(next);
+    toast.success(`Auto-detected ${changed} material${changed === 1 ? "" : "s"} from names`);
   };
 
   const save = async () => {
