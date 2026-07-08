@@ -547,7 +547,6 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
 
 
 
-  const PANEL_H_MIN_DECL = 52; // placeholder — real values assigned after welcomePending/pos below
   const PANEL_H_MIN = 52;
   const [pos, setPos] = useState<{ x: number; y: number } | null>(() => {
     try {
