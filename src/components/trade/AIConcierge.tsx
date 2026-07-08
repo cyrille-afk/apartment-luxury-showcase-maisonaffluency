@@ -147,7 +147,8 @@ function detectProjectScale(
   if (wk) timelineWeeks = parseInt(wk[1], 10);
   else if (mo) timelineWeeks = parseInt(mo[1], 10) * 4;
 
-  return { typology, city, country, zones: zoneMatches, timelineWeeks };
+  const furniture = extractFurnitureTypology(text);
+  return { typology, city, country, zones: zoneMatches, timelineWeeks, furniture };
 }
 
 
