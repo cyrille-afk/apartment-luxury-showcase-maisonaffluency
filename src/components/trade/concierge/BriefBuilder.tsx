@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { ChevronDown, ChevronRight, ClipboardPaste, X } from "lucide-react";
 import { BrandPicker } from "@/components/trade/concierge/BrandPicker";
 import { updateConciergeSession } from "@/hooks/useConciergeSession";
@@ -1081,6 +1081,36 @@ export function BriefBuilder({
               className="w-full rounded-md border border-accent/30 bg-muted/30 p-2 font-body text-[12px] outline-none focus:border-accent"
               placeholder="Paste brief text here…"
             />
+            {(() => {
+              const t = pasteFallbackText.trim();
+              if (!t) return null;
+              const parsed = parseBrief(t);
+              const prose = extractProseFields(t);
+              const clean = (s?: string) => (s && !s.trim().startsWith("[") ? s.trim() : "");
+              const preview = {
+                Zone: clean(parsed.values.block1.zone) || clean(prose.zone) || "—",
+                "Max Footprint": clean(parsed.values.block2.maxFootprint) || clean(prose.maxFootprint) || "—",
+                Typology: clean(parsed.values.block2.typology) || clean(prose.typology) || "—",
+                Vibe: clean(parsed.values.block3.vibe) || clean(prose.vibe) || "—",
+              };
+              const anyDetected = Object.values(preview).some((v) => v && v !== "—");
+              return (
+                <div className="mt-3 rounded-md border border-accent/30 bg-accent/5 p-2">
+                  <div className="mb-1 font-heading text-[10px] font-semibold uppercase tracking-[0.12em] text-accent">
+                    {anyDetected ? "Detected fields (live preview)" : "No fields detected yet"}
+                  </div>
+                  <dl className="grid grid-cols-[110px_1fr] gap-x-2 gap-y-1 font-body text-[11px]">
+                    {Object.entries(preview).map(([k, v]) => (
+                      <React.Fragment key={k}>
+                        <dt className="text-muted-foreground">{k}</dt>
+                        <dd className={v === "—" ? "text-muted-foreground/60" : "text-foreground"}>{v}</dd>
+                      </React.Fragment>
+                    ))}
+                  </dl>
+                </div>
+              );
+            })()}
+
             <div className="mt-3 flex items-center justify-end gap-2">
               <button
                 type="button"
