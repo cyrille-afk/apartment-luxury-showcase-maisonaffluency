@@ -2840,6 +2840,38 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
               if (item.kind === "pending_proposal") {
                 return <PendingProposalSkeleton key={i} tool={item.tool} />;
               }
+              if (item.kind === "proactive_tearsheet") {
+                const data = item.data;
+                const finishSummary = [data.fabricLabel, data.baseLabel, data.topLabel]
+                  .filter(Boolean)
+                  .join(" · ");
+                const resolveAt = (outcome: "generated" | "boarded" | "dismissed") => {
+                  setTimeline((prev) => {
+                    const copy = prev.slice();
+                    const t = copy[i];
+                    if (t?.kind === "proactive_tearsheet") copy[i] = { ...t, resolved: outcome };
+                    return copy;
+                  });
+                };
+                return (
+                  <ProactiveTearsheetCard
+                    key={i}
+                    data={data}
+                    resolved={item.resolved}
+                    onGenerate={() => {
+                      resolveAt("generated");
+                      const prompt = `Generate a tearsheet for ${data.productName}${finishSummary ? ` — ${finishSummary}` : ""}. Lock in the current trade price${data.tradePriceLabel ? ` (${data.tradePriceLabel})` : ""}${data.leadTimeLabel ? ` and ${data.leadTimeLabel} lead time` : ""}.`;
+                      void sendRef.current?.(prompt, { displayText: "Generate tearsheet with current finish selection" });
+                    }}
+                    onAddToBoard={() => {
+                      resolveAt("boarded");
+                      const prompt = `Add ${data.productName}${finishSummary ? ` — ${finishSummary}` : ""} to my project board.`;
+                      void sendRef.current?.(prompt, { displayText: "Add current selection to project board" });
+                    }}
+                    onDismiss={() => resolveAt("dismissed")}
+                  />
+                );
+              }
               if (item.kind !== "proposal") return null;
               return (
                 <TearsheetProposalCard
