@@ -90,7 +90,11 @@ interface NavigationProps {
 }
 
 const Navigation = ({ borderless = false }: NavigationProps) => {
-  const { user } = useAuth();
+  const { user, isTradeUser } = useAuth();
+  // Trade-only visibility: hide the "Collectible Design" nav item from public visitors.
+  const visibleLeftNavItems = isTradeUser
+    ? leftNavItems
+    : leftNavItems.filter((item) => item.href !== "/collectibles");
   const { items: pinItems, setIsComparing } = useCompare();
   const [authGateOpen, setAuthGateOpen] = useState(false);
   const [authGateMode, setAuthGateMode] = useState<"prompt" | "signup" | "login">("prompt");
