@@ -18,6 +18,7 @@ import { RealignmentDiffPanel, type AppliedRealignment } from "@/components/trad
 import { TearsheetInsightsSidebar } from "@/components/trade/concierge/TearsheetInsightsSidebar";
 import { PickAssetDrawer } from "@/components/trade/concierge/PickAssetDrawer";
 import { Box } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 
 
 type Status = "pending" | "committing" | "approved" | "discarded";
@@ -200,6 +201,15 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
   const [projectBoardCount, setProjectBoardCount] = useState<number | null>(null);
   const [projectIdForDeck, setProjectIdForDeck] = useState<string | null>(null);
   const [deckBuilding, setDeckBuilding] = useState(false);
+  // Preview modal — architect confirms the slide list before we actually
+  // create the `presentations` row + slides and navigate to the builder.
+  type DeckPreviewSlide = { boardId: string; title: string; productIds: string[] };
+  const [deckPreview, setDeckPreview] = useState<{
+    projectName: string;
+    projectId: string;
+    slides: DeckPreviewSlide[];
+  } | null>(null);
+  const [deckPreviewLoading, setDeckPreviewLoading] = useState(false);
   const navigate = useNavigate();
 
   const isAppend = mode === "append";
@@ -595,19 +605,15 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
    * Creates a `presentations` row titled after the project, then one slide per
    * board with `linked_product_ids` seeded from that board's items — the trade
    * user only has to review + publish.
+   *
+   * Two-phase flow:
+   *  1. `openDeckPreview` — fetch boards + items, open the confirmation modal.
+   *  2. `confirmBuildProjectDeck` — create `presentations` + slides, navigate.
    */
-  const handleBuildProjectDeck = async (projectId: string, projectDisplayName: string) => {
-    if (deckBuilding) return;
-    setDeckBuilding(true);
+  const openDeckPreview = async (projectId: string, projectDisplayName: string) => {
+    if (deckPreviewLoading || deckBuilding) return;
+    setDeckPreviewLoading(true);
     try {
-      const { data: userRes } = await supabase.auth.getUser();
-      const uid = userRes.user?.id;
-      if (!uid) {
-        toast.error("Sign in to build a project presentation.");
-        setDeckBuilding(false);
-        return;
-      }
-      // Fetch every board in this project (client_boards) with its items.
       const { data: boards } = await supabase
         .from("client_boards")
         .select("id, title, created_at")
@@ -615,7 +621,6 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
         .order("created_at", { ascending: true });
       if (!boards || boards.length === 0) {
         toast.error("No tearsheets in this project yet.");
-        setDeckBuilding(false);
         return;
       }
       const boardIds = boards.map((b: any) => b.id);
@@ -630,7 +635,31 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
         arr.push(row.product_id);
         itemsByBoard.set(row.board_id, arr);
       });
+      const slides: DeckPreviewSlide[] = boards.map((b: any) => ({
+        boardId: b.id,
+        title: b.title || "Untitled tearsheet",
+        productIds: itemsByBoard.get(b.id) ?? [],
+      }));
+      setDeckPreview({ projectId, projectName: projectDisplayName, slides });
+    } catch (e) {
+      toast.error(`Preview failed: ${(e as Error)?.message || "unknown"}`);
+    } finally {
+      setDeckPreviewLoading(false);
+    }
+  };
 
+  const confirmBuildProjectDeck = async () => {
+    if (!deckPreview || deckBuilding) return;
+    const { projectName: projectDisplayName, slides } = deckPreview;
+    setDeckBuilding(true);
+    try {
+      const { data: userRes } = await supabase.auth.getUser();
+      const uid = userRes.user?.id;
+      if (!uid) {
+        toast.error("Sign in to build a project presentation.");
+        setDeckBuilding(false);
+        return;
+      }
       const { data: pres, error: presErr } = await (supabase as any)
         .from("presentations")
         .insert({
@@ -645,18 +674,18 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
         setDeckBuilding(false);
         return;
       }
-
-      const slides = boards.map((b: any, idx: number) => ({
+      const slideRows = slides.map((s, idx) => ({
         presentation_id: pres.id,
-        title: b.title,
+        title: s.title,
         project_name: projectDisplayName,
         sort_order: idx,
-        linked_product_ids: itemsByBoard.get(b.id) ?? [],
+        linked_product_ids: s.productIds,
       }));
-      if (slides.length > 0) {
-        await (supabase as any).from("presentation_slides").insert(slides);
+      if (slideRows.length > 0) {
+        await (supabase as any).from("presentation_slides").insert(slideRows);
       }
-      toast.success(`Project deck created with ${slides.length} slide${slides.length === 1 ? "" : "s"}.`);
+      toast.success(`Project deck created with ${slideRows.length} slide${slideRows.length === 1 ? "" : "s"}.`);
+      setDeckPreview(null);
       try { window.dispatchEvent(new Event("concierge:close")); } catch {}
       navigate(`/trade/presentations/${pres.id}`);
     } catch (e) {
@@ -665,6 +694,8 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
       setDeckBuilding(false);
     }
   };
+
+
 
 
   const headerLabel = isAppend
@@ -1229,16 +1260,16 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
                 </div>
                 <button
                   type="button"
-                  disabled={deckBuilding}
-                  onClick={() => handleBuildProjectDeck(projectIdForDeck, conciergeSession.projectName || "Project")}
+                  disabled={deckPreviewLoading || deckBuilding}
+                  onClick={() => openDeckPreview(projectIdForDeck, conciergeSession.projectName || "Project")}
                   className="w-full flex items-center justify-center gap-1.5 rounded-md bg-foreground text-background px-2.5 py-1.5 font-body text-[10px] uppercase tracking-widest hover:opacity-90 transition disabled:opacity-40"
                 >
-                  {deckBuilding ? (
+                  {deckPreviewLoading ? (
                     <Loader2 className="h-3 w-3 animate-spin" />
                   ) : (
                     <Sparkles className="h-3 w-3" />
                   )}
-                  {deckBuilding ? "Building deck…" : "Compile Project Presentation"}
+                  {deckPreviewLoading ? "Loading preview…" : "Preview Project Presentation"}
                 </button>
               </div>
             )}
@@ -1267,6 +1298,59 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
         onApplyRealignment={handleApplyRealignment}
         onFocusRow={focusRow}
       />
+
+      {/* Project Deck preview — confirm slide list before creating the
+          presentation and navigating to the builder. */}
+      <Dialog open={!!deckPreview} onOpenChange={(o) => { if (!o && !deckBuilding) setDeckPreview(null); }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-display text-base">
+              {deckPreview?.projectName || "Project"} — Presentation preview
+            </DialogTitle>
+            <DialogDescription className="font-body text-[11px] text-muted-foreground">
+              One slide per tearsheet in this project. Review the list, then
+              confirm to open it in the presentation builder.
+            </DialogDescription>
+          </DialogHeader>
+          <ol className="max-h-72 overflow-y-auto space-y-1.5 rounded-md border border-border/60 bg-muted/20 p-2">
+            {deckPreview?.slides.map((s, i) => (
+              <li
+                key={s.boardId}
+                className="flex items-start gap-2 rounded-sm bg-background/70 px-2 py-1.5"
+              >
+                <span className="font-body text-[10px] tabular-nums text-muted-foreground w-5 shrink-0">
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                <div className="flex-1 min-w-0">
+                  <p className="font-body text-[12px] text-foreground truncate">{s.title}</p>
+                  <p className="font-body text-[10px] text-muted-foreground">
+                    {s.productIds.length} {s.productIds.length === 1 ? "piece" : "pieces"}
+                  </p>
+                </div>
+              </li>
+            ))}
+          </ol>
+          <DialogFooter className="flex flex-row justify-end gap-2">
+            <button
+              type="button"
+              disabled={deckBuilding}
+              onClick={() => setDeckPreview(null)}
+              className="rounded-md border border-border bg-background px-3 py-1.5 font-body text-[11px] uppercase tracking-widest text-muted-foreground hover:text-foreground disabled:opacity-40"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              disabled={deckBuilding || !deckPreview || deckPreview.slides.length === 0}
+              onClick={confirmBuildProjectDeck}
+              className="flex items-center gap-1.5 rounded-md bg-foreground text-background px-3 py-1.5 font-body text-[11px] uppercase tracking-widest hover:opacity-90 disabled:opacity-40"
+            >
+              {deckBuilding ? <Loader2 className="h-3 w-3 animate-spin" /> : <Sparkles className="h-3 w-3" />}
+              {deckBuilding ? "Building…" : "Confirm & open builder"}
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
