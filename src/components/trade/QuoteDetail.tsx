@@ -2692,21 +2692,36 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                                 )}
                               </div>
                             ))}
-                            {(item as any).fabric?.image_url && (
-                              <div className="relative group min-w-0">
-                                <img
-                                  src={(item as any).fabric.image_url}
-                                  alt={(item as any).fabric?.name || "Fabric"}
-                                  className="w-full aspect-square rounded object-cover ring-1 ring-border"
-                                  loading="lazy"
-                                />
-                                {(item as any).fabric?.name && (
-                                  <p className="mt-1 font-body text-[9px] leading-tight text-muted-foreground break-words">
-                                    {(item as any).fabric.name}
-                                  </p>
-                                )}
-                              </div>
-                            )}
+                            {(() => {
+                              // Suppress this fabric tile when the same swatch
+                              // is already present in variant_swatches (fabric_id
+                              // is pushed into variant_swatches by pushExplicit),
+                              // otherwise we render the fabric twice.
+                              const fabric: any = (item as any).fabric;
+                              if (!fabric?.image_url) return null;
+                              const already = ((item as any).variant_swatches || []).some(
+                                (s: any) =>
+                                  (s?.image_url && s.image_url === fabric.image_url) ||
+                                  (s?.fabric_id && (item as any).fabric_id && s.fabric_id === (item as any).fabric_id) ||
+                                  (s?.name && fabric?.name && String(s.name).trim().toLowerCase() === String(fabric.name).trim().toLowerCase()),
+                              );
+                              if (already) return null;
+                              return (
+                                <div className="relative group min-w-0">
+                                  <img
+                                    src={fabric.image_url}
+                                    alt={fabric?.name || "Fabric"}
+                                    className="w-full aspect-square rounded object-cover ring-1 ring-border"
+                                    loading="lazy"
+                                  />
+                                  {fabric?.name && (
+                                    <p className="mt-1 font-body text-[9px] leading-tight text-muted-foreground break-words">
+                                      {fabric.name}
+                                    </p>
+                                  )}
+                                </div>
+                              );
+                            })()}
                           </div>
                         </div>
                         <div className="min-w-0 flex-1">
