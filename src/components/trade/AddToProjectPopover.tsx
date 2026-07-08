@@ -101,9 +101,10 @@ export default function AddToProjectPopover({ productId, productName, defaultPro
   const createAndAdd = async () => {
     if (!user || adding) return;
     setAdding("new");
+    const newTitle = (defaultProjectName?.trim() || productName).slice(0, 60);
     const { data, error } = await supabase
       .from("client_boards")
-      .insert({ user_id: user.id, title: productName.slice(0, 60), client_name: "" })
+      .insert({ user_id: user.id, title: newTitle, client_name: "" })
       .select("id, title")
       .single();
 
