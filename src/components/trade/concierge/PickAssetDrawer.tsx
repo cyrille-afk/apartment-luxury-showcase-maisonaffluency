@@ -91,11 +91,13 @@ export function PickAssetDrawer({ pickId, title }: Props) {
   const persisted = readPersisted();
 
   const [loading, setLoading] = useState(true);
-  const [glbUrl, setGlbUrl] = useState<string | null>(null);
   const [poster, setPoster] = useState<string | null>(null);
-  const [materialRoles, setMaterialRoles] = useState<
-    Record<string, "fabric" | "base" | "top" | "ignore"> | undefined
-  >(undefined);
+  const [glbVariants, setGlbVariants] = useState<
+    { label: string; glb_url: string; material_roles: Record<string, "fabric" | "base" | "top" | "ignore"> | null; is_default: boolean }[]
+  >([]);
+  const [selectedGlbLabel, setSelectedGlbLabel] = useState<string | null>(
+    persisted?.glbLabel ?? null,
+  );
   const [swatches, setSwatches] = useState<Swatch[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [selectedFabricId, setSelectedFabricId] = useState<string | null>(
