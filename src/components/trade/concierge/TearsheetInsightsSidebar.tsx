@@ -291,12 +291,18 @@ export function TearsheetInsightsSidebar({
                       <button
                         type="button"
                         onClick={() => from && onFocusRow(from.id)}
-                        className="w-full text-left font-body text-[11px] text-foreground truncate hover:underline"
+                        className="flex w-full items-center gap-2 text-left hover:opacity-90"
                       >
-                        {from?.title || r.old_pick_id}
+                        <Thumb src={from?.image_url ?? null} alt={from?.title || r.old_pick_id} />
+                        <span className="min-w-0 flex-1 font-body text-[11px] text-foreground truncate hover:underline">
+                          {from?.title || r.old_pick_id}
+                        </span>
                       </button>
-                      <div className="font-body text-[11px] text-foreground truncate mt-0.5">
-                        → {to?.title || r.new_pick_id}{to?.designer_name && <span className="text-muted-foreground"> · {to.designer_name}</span>}
+                      <div className="mt-1 flex items-center gap-2">
+                        <Thumb src={to?.image_url ?? null} alt={to?.title || r.new_pick_id} />
+                        <div className="min-w-0 flex-1 font-body text-[11px] text-foreground truncate">
+                          → {to?.title || r.new_pick_id}{to?.designer_name && <span className="text-muted-foreground"> · {to.designer_name}</span>}
+                        </div>
                       </div>
                       <p className="font-body text-[10.5px] text-muted-foreground italic leading-snug mt-1">{r.reason}</p>
                       <DecisionButtons
@@ -320,8 +326,11 @@ export function TearsheetInsightsSidebar({
                       <div className="flex items-center gap-1 font-body text-[9px] uppercase tracking-widest text-sky-700 dark:text-sky-300 mb-1">
                         <Plus className="h-2.5 w-2.5" /> Add
                       </div>
-                      <div className="font-body text-[11px] text-foreground truncate">
-                        {to?.title || a.new_pick_id}{to?.designer_name && <span className="text-muted-foreground"> · {to.designer_name}</span>}
+                      <div className="flex items-center gap-2">
+                        <Thumb src={to?.image_url ?? null} alt={to?.title || a.new_pick_id} />
+                        <div className="min-w-0 flex-1 font-body text-[11px] text-foreground truncate">
+                          {to?.title || a.new_pick_id}{to?.designer_name && <span className="text-muted-foreground"> · {to.designer_name}</span>}
+                        </div>
                       </div>
                       <p className="font-body text-[10.5px] text-muted-foreground italic leading-snug mt-1">{a.reason}</p>
                       <DecisionButtons
@@ -348,9 +357,12 @@ export function TearsheetInsightsSidebar({
                       <button
                         type="button"
                         onClick={() => from && onFocusRow(from.id)}
-                        className="w-full text-left font-body text-[11px] text-foreground truncate hover:underline"
+                        className="flex w-full items-center gap-2 text-left hover:opacity-90"
                       >
-                        {from?.title || r.pick_id}
+                        <Thumb src={from?.image_url ?? null} alt={from?.title || r.pick_id} />
+                        <span className="min-w-0 flex-1 font-body text-[11px] text-foreground truncate hover:underline">
+                          {from?.title || r.pick_id}
+                        </span>
                       </button>
                       <p className="font-body text-[10.5px] text-muted-foreground italic leading-snug mt-1">{r.reason}</p>
                       <DecisionButtons
@@ -362,6 +374,7 @@ export function TearsheetInsightsSidebar({
                   );
                 })}
               </ul>
+
             )}
           </section>
         )}
@@ -436,3 +449,20 @@ function DecisionButtons({
     </div>
   );
 }
+
+function Thumb({ src, alt }: { src: string | null; alt: string }) {
+  if (!src) {
+    return (
+      <div className="h-10 w-10 shrink-0 rounded border border-border bg-muted" aria-hidden />
+    );
+  }
+  return (
+    <img
+      src={src}
+      alt={alt}
+      loading="lazy"
+      className="h-10 w-10 shrink-0 rounded border border-border object-cover bg-muted"
+    />
+  );
+}
+
