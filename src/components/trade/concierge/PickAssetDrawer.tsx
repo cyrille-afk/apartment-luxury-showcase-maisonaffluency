@@ -151,12 +151,12 @@ export function PickAssetDrawer({ pickId, title }: Props) {
       const [prodRes, pickRes] = await Promise.all([
         supabase
           .from("trade_products")
-          .select("id, glb_url, image_url")
+          .select("id, glb_url, image_url, trade_price_cents, currency, lead_time")
           .eq("source_pick_id", pickId)
           .maybeSingle(),
         supabase
           .from("designer_curator_picks_public")
-          .select("size_variants, base_axis_label, top_axis_label")
+          .select("size_variants, base_axis_label, top_axis_label, lead_time")
           .eq("id", pickId)
           .maybeSingle(),
       ]);
