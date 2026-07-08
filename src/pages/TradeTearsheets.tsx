@@ -221,10 +221,25 @@ export default function TradeTearsheets() {
       chosenFinishes.wood && `Base / Wood: ${chosenFinishes.wood}`,
       chosenFinishes.fabric && `Fabric: ${chosenFinishes.fabric}`,
     ].filter(Boolean) as string[];
-    if (!finishParts.length) return base || null;
-    if (!base) return finishParts.join(" · ");
-    return `${base} · ${finishParts.join(" · ")}`;
-  }, [selectedProduct?.materials, chosenFinishes.wood, chosenFinishes.fabric]);
+    if (finishParts.length) {
+      return base ? `${base} · ${finishParts.join(" · ")}` : finishParts.join(" · ");
+    }
+    if (base) return base;
+    // Final fallback: derive from size_variants axes so the tearsheet still
+    // shows a meaningful Materials line when the pick has no free-form text
+    // and no finish was selected (e.g. brief-locked picks with only the
+    // variant matrix populated).
+    const variants = (selectedProduct?.size_variants as any[]) || [];
+    if (variants.length) {
+      const bases = Array.from(new Set(variants.map((v) => String(v?.base || "").trim()).filter(Boolean)));
+      const tops = Array.from(new Set(variants.map((v) => String(v?.top || "").trim()).filter(Boolean)));
+      const parts: string[] = [];
+      if (bases.length) parts.push(`Base: ${bases.slice(0, 4).join(" / ")}`);
+      if (tops.length) parts.push(`Top: ${tops.slice(0, 4).join(" / ")}`);
+      if (parts.length) return parts.join(" · ");
+    }
+    return null;
+  }, [selectedProduct?.materials, selectedProduct?.size_variants, chosenFinishes.wood, chosenFinishes.fabric]);
 
 
   // Fetch the set of product IDs (from quotes + boards) belonging to the selected
@@ -483,6 +498,66 @@ export default function TradeTearsheets() {
     })();
     return () => { cancelled = true; };
   }, [selectedProduct, chosenFinishes.fabric, chosenFinishes.fabricImg]);
+
+  // Split a combined finish label ("Natural Walnut · Pall Stone") that
+  // landed in a single field (usually `wood` from a legacy URL/board note)
+  // into wood + fabric so both swatches render on the tearsheet.
+  useEffect(() => {
+    if (!selectedProduct) return;
+    if (chosenFinishes.fabric) return;
+    if (!isCombinedFinishLabel(chosenFinishes.wood)) return;
+    const [left, right] = String(chosenFinishes.wood).split(/\s+[·•]\s+/).map((s) => s.trim());
+    if (!left || !right) return;
+    setChosenFinishes((prev) => ({
+      ...prev,
+      wood: left,
+      fabric: prev.fabric ?? right,
+    }));
+  }, [selectedProduct, chosenFinishes.wood, chosenFinishes.fabric]);
+
+  // Backfill missing swatch images by looking up the pick's active swatches
+  // by name (case-insensitive). Runs when a finish label is known but the
+  // corresponding `Img` URL is null — e.g. links from a client board that
+  // stored only labels, or brief-locked picks where only names were carried.
+  useEffect(() => {
+    if (!selectedProduct) return;
+    const needWood = !!chosenFinishes.wood && !chosenFinishes.woodImg;
+    const needFabric = !!chosenFinishes.fabric && !chosenFinishes.fabricImg;
+    if (!needWood && !needFabric) return;
+    const pickId = selectedProduct.source_pick_id || selectedProduct.id;
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from("product_fabric_swatches_public")
+        .select("name, image_url, category")
+        .eq("pick_id", pickId)
+        .eq("is_active", true);
+      if (cancelled || !data?.length) return;
+      const norm = (s: string) => normalizeFinishText(s);
+      const findByName = (label: string | null) => {
+        if (!label) return null;
+        const target = norm(label);
+        if (!target) return null;
+        const exact = (data as any[]).find((s) => norm(s.name) === target);
+        if (exact) return exact;
+        return (data as any[]).find((s) => {
+          const n = norm(s.name);
+          return n && (n.includes(target) || target.includes(n));
+        }) || null;
+      };
+      const woodMatch = needWood ? findByName(chosenFinishes.wood) : null;
+      const fabricMatch = needFabric ? findByName(chosenFinishes.fabric) : null;
+      if (!woodMatch && !fabricMatch) return;
+      setChosenFinishes((prev) => ({
+        ...prev,
+        woodImg: prev.woodImg ?? (woodMatch?.image_url || null),
+        fabricImg: prev.fabricImg ?? (fabricMatch?.image_url || null),
+      }));
+    })();
+    return () => { cancelled = true; };
+  }, [selectedProduct, chosenFinishes.wood, chosenFinishes.fabric, chosenFinishes.woodImg, chosenFinishes.fabricImg]);
+
+
 
 
   const filtered = products.filter((p) => {
