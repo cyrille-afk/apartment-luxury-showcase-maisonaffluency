@@ -38,6 +38,10 @@ const CATEGORY_ANCHOR_BRANDS: Record<string, string[]> = {
   bedroom: ["Pierre Frey", "Bruno Moinard Editions"],
 };
 
+function stripBrandQualifier(name: string): string {
+  return name.replace(/\s*\([^)]*\)\s*/g, " ").replace(/\s+/g, " ").trim();
+}
+
 function suggestBrandsFromTypology(typology: string): string[] {
   const hits = new Set<string>();
   for (const { re, category } of TYPOLOGY_TO_CATEGORY) {
@@ -59,16 +63,26 @@ function parseReferenceBrands(value: string): string[] {
     if (ch === "(") depth++;
     else if (ch === ")") depth = Math.max(0, depth - 1);
     if (ch === "/" && depth === 0) {
-      const t = buf.trim();
+      const t = stripBrandQualifier(buf);
       if (t) out.push(t);
       buf = "";
     } else {
       buf += ch;
     }
   }
-  const t = buf.trim();
+  const t = stripBrandQualifier(buf);
   if (t) out.push(t);
-  return out;
+  const seen = new Set<string>();
+  return out.filter((name) => {
+    const key = name.toLowerCase();
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+function sanitizeReferences(value: string): string {
+  return parseReferenceBrands(value).join(" / ");
 }
 
 function mergeReferenceBrands(current: string, suggested: string[]): string {
@@ -121,7 +135,7 @@ const DEFAULT_VALUES: BriefValues = {
   },
   block3: {
     vibe: "[e.g. Japandi-Luxe, Italian Minimalism]",
-    references: "Man of Parts (Sandy Cove / Bond Street / Rua Leblon) / Collection Particulière / De La Espada / Leo Sentou",
+    references: "Man of Parts / Collection Particulière / De La Espada / Leo Sentou",
     palette: "[materials + finishes]",
   },
   block4:
@@ -258,6 +272,7 @@ function parseBrief(text: string): { values: BriefValues; prefix: string; suffix
         const v = extractFirstField(body, aliases);
         if (v) (values.block3 as Record<string, string>)[key] = v;
       }
+      values.block3.references = sanitizeReferences(values.block3.references);
     } else if (header.block === "block4") {
       values.block4 = body || DEFAULT_VALUES.block4;
     }
@@ -338,6 +353,7 @@ function loadDraft(): BriefDraft | null {
       block3: { ...DEFAULT_VALUES.block3, ...(v.block3 || {}) },
       block4: typeof v.block4 === "string" ? v.block4 : DEFAULT_VALUES.block4,
     };
+    merged.block3.references = sanitizeReferences(merged.block3.references);
     return {
       values: merged,
       prefix: typeof parsed.prefix === "string" ? parsed.prefix : "",
