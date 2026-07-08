@@ -51,16 +51,26 @@ function parseSelected(value: string): string[] {
     if (ch === "(") depth++;
     else if (ch === ")") depth = Math.max(0, depth - 1);
     if (ch === "/" && depth === 0) {
-      const t = buf.trim();
+      const t = stripBrandQualifier(buf);
       if (t) out.push(t);
       buf = "";
     } else {
       buf += ch;
     }
   }
-  const t = buf.trim();
+  const t = stripBrandQualifier(buf);
   if (t) out.push(t);
-  return out;
+  const seen = new Set<string>();
+  return out.filter((name) => {
+    const key = name.toLowerCase();
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+function stripBrandQualifier(name: string): string {
+  return name.replace(/\s*\([^)]*\)\s*/g, " ").replace(/\s+/g, " ").trim();
 }
 
 function formatSelected(names: string[]): string {
