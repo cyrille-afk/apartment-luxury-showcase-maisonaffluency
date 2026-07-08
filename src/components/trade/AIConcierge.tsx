@@ -547,8 +547,13 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
 
 
 
-  const PANEL_W = fullscreen ? Math.min(1200, typeof window !== "undefined" ? window.innerWidth - 32 : 1200) : (expanded ? 560 : 380);
-  const PANEL_H_OPEN = expanded ? 760 : 560;
+  // On first-open the concierge renders as a centered welcome modal — size it
+  // like the fullscreen panel so it never sits on top of the left navigation.
+  const modalWelcomeActive = welcomePending && !pos;
+  const PANEL_W = (fullscreen || modalWelcomeActive)
+    ? Math.min(1200, typeof window !== "undefined" ? window.innerWidth - 32 : 1200)
+    : (expanded ? 560 : 380);
+  const PANEL_H_OPEN = modalWelcomeActive ? 760 : (expanded ? 760 : 560);
   const PANEL_H_MIN = 52;
   const [pos, setPos] = useState<{ x: number; y: number } | null>(() => {
     try {
