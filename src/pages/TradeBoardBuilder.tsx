@@ -32,6 +32,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ProjectPicker } from "@/components/trade/ProjectPicker";
+import ClientPicker, { type PickedClient } from "@/components/trade/ClientPicker";
 import { BoardProjectHistory } from "@/components/trade/concierge/BoardProjectHistory";
 import { CreateQuoteFromBoard } from "@/components/trade/concierge/CreateQuoteFromBoard";
 import { fillHotspotImages } from "@/lib/hotspotImageFallback";
