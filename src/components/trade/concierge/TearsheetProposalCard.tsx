@@ -501,14 +501,67 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
     const duplicates = res.duplicates || 0;
     setResult({ boardId: res.board_id, url: res.url, added: res.added, duplicates });
 
-    // Look up the board's existing project_id so we know whether to prompt.
-    const { data: boardRow } = await supabase
-      .from("client_boards")
-      .select("project_id")
-      .eq("id", res.board_id)
-      .maybeSingle();
-    const currentProjectId = (boardRow?.project_id as string | null) ?? null;
+    // ── Auto-grouping ──────────────────────────────────────────────────
+    // If the concierge session has a projectName (from the inline "Save to
+    // project" input), upsert a `projects` row and attach this board to it.
+    // Every subsequent tearsheet in the same chat then lands in the same
+    // folder without re-prompting the user.
+    const sessionProjectName = (conciergeSession?.projectName || "").trim();
+    let autoProjectId: string | null = null;
+    if (sessionProjectName) {
+      const { data: userRes } = await supabase.auth.getUser();
+      const uid = userRes.user?.id;
+      if (uid) {
+        const { data: existingProject } = await supabase
+          .from("projects")
+          .select("id")
+          .eq("user_id", uid)
+          .ilike("name", sessionProjectName)
+          .maybeSingle();
+        if (existingProject?.id) {
+          autoProjectId = existingProject.id as string;
+        } else {
+          const { data: newProject } = await supabase
+            .from("projects")
+            .insert({ user_id: uid, name: sessionProjectName, status: "active" })
+            .select("id")
+            .single();
+          autoProjectId = (newProject?.id as string) ?? null;
+        }
+        if (autoProjectId) {
+          await supabase
+            .from("client_boards")
+            .update({ project_id: autoProjectId, project_name: sessionProjectName })
+            .eq("id", res.board_id);
+          // Persist for downstream components in this chat.
+          try {
+            updateConciergeSession({} as any);
+          } catch { /* noop */ }
+        }
+      }
+    }
+
+    // Look up the board's existing project_id (or the one we just auto-set).
+    const currentProjectId = autoProjectId ?? (await (async () => {
+      const { data: boardRow } = await supabase
+        .from("client_boards")
+        .select("project_id")
+        .eq("id", res.board_id)
+        .maybeSingle();
+      return (boardRow?.project_id as string | null) ?? null;
+    })());
     setExistingProjectId(currentProjectId);
+
+    // If we grouped into a project, count how many boards it already has so
+    // we can offer the "Project Deck" pitch once the folder has 3+ items.
+    if (currentProjectId) {
+      const { count } = await supabase
+        .from("client_boards")
+        .select("id", { count: "exact", head: true })
+        .eq("project_id", currentProjectId);
+      setProjectBoardCount(count ?? null);
+      setProjectIdForDeck(currentProjectId);
+    }
 
     // Defer parent's auto-navigation when we'll show the project picker.
     const willPromptForProject = !currentProjectId;
