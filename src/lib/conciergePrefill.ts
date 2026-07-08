@@ -245,15 +245,30 @@ export function buildSeedDirective(locked: SwapPromptItem[], skipped: SwapPrompt
 
 // Fire the prompt into the AIConcierge composer. Safe to call from any
 // concierge card. No-op in non-browser environments.
-export function sendConciergePrefill(prompt: string): void {
+//
+// By default the prompt lands in the composer for the user to review before
+// sending. Pass `{ autoSend: true, displayText }` to send the prompt behind
+// the scenes and show only `displayText` in the transcript — used for
+// meta-actions (e.g. "Suggest one more") where dumping the raw system prompt
+// into the composer is noise rather than signal.
+export function sendConciergePrefill(
+  prompt: string,
+  opts?: { autoSend?: boolean; displayText?: string },
+): void {
   if (typeof window === "undefined") return;
   try {
     window.dispatchEvent(
       new CustomEvent("concierge:stage", {
-        detail: { openPanel: true, prefill: prompt },
+        detail: {
+          openPanel: true,
+          prefill: prompt,
+          autoSend: !!opts?.autoSend,
+          displayMessage: opts?.displayText,
+        },
       }),
     );
   } catch {
     // Best-effort; the button just does nothing rather than throw.
   }
 }
+
