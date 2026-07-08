@@ -206,8 +206,18 @@ const TradeBoards = () => {
                   <Input value={title} onChange={e => setTitle(e.target.value)} placeholder="e.g. Villa Marina Living Room" className="mt-1.5" />
                 </div>
                 <div>
-                  <Label className="font-body text-xs uppercase tracking-wider">Client Name</Label>
-                  <Input value={clientName} onChange={e => setClientName(e.target.value)} placeholder="e.g. Sarah Chen" className="mt-1.5" />
+                  <Label className="font-body text-xs uppercase tracking-wider">Client</Label>
+                  <div className="mt-1.5">
+                    <ClientPicker
+                      value={clientId}
+                      onChange={(c: PickedClient | null) => {
+                        setClientId(c?.id ?? null);
+                        setClientName(c?.name ?? "");
+                        if (c?.primary_contact?.email) setClientEmail(c.primary_contact.email);
+                      }}
+                      placeholder="Select or add a client…"
+                    />
+                  </div>
                 </div>
                 <div>
                   <Label className="font-body text-xs uppercase tracking-wider">Client Email (optional)</Label>
