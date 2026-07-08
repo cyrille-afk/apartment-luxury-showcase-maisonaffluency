@@ -45,6 +45,14 @@ function BackToTopButton() {
 }
 
 const PublicCollectibles = () => {
+  // Trade-only visibility while Collectible Design is in soft launch.
+  const { isTradeUser, loading } = useAuth();
+  const location = useLocation();
+  if (loading) return null;
+  if (!isTradeUser) {
+    return <Navigate to={collectibleGateRedirect(location.pathname + location.search)} replace />;
+  }
+
   const { title, description, itemListLd, collectionLd } = useMemo(() => {
     const featured = collectibleDesigners
       .filter((d) => d.id && d.curatorPicks?.[0]?.image)
