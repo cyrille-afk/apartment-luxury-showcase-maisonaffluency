@@ -1014,6 +1014,96 @@ export function BriefBuilder({
               Clipboard blocked
             </span>
           )}
+          {presetStatus === "saved" && (
+            <span className="font-body text-[10px] uppercase tracking-[0.12em] text-accent">Preset saved</span>
+          )}
+          {presetStatus === "loaded" && (
+            <span className="font-body text-[10px] uppercase tracking-[0.12em] text-accent">Preset loaded</span>
+          )}
+          {presetStatus === "empty" && (
+            <span className="font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground">Nothing to save</span>
+          )}
+          <button
+            type="button"
+            onClick={handleSavePreset}
+            className="flex items-center gap-1 rounded-md border border-accent/40 px-2 py-1 font-body text-[11px] text-accent hover:bg-accent/10"
+            aria-label="Save current brief as preset"
+            title="Save current brief as preset"
+          >
+            <BookmarkPlus className="h-3.5 w-3.5" />
+            Save preset
+          </button>
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setPresetsMenuOpen((o) => !o)}
+              className="flex items-center gap-1 rounded-md border border-accent/40 px-2 py-1 font-body text-[11px] text-accent hover:bg-accent/10"
+              aria-haspopup="menu"
+              aria-expanded={presetsMenuOpen}
+              aria-label="Load a saved preset"
+              title="Load a saved preset"
+            >
+              <Bookmark className="h-3.5 w-3.5" />
+              Presets{presets.length ? ` (${presets.length})` : ""}
+              <ChevronDown className="h-3 w-3" />
+            </button>
+            {presetsMenuOpen && (
+              <>
+                <div
+                  className="fixed inset-0 z-[90]"
+                  onClick={() => setPresetsMenuOpen(false)}
+                  aria-hidden="true"
+                />
+                <div
+                  role="menu"
+                  className="absolute right-0 top-full z-[95] mt-1 w-72 overflow-hidden rounded-md border border-accent/40 bg-background shadow-xl"
+                >
+                  {presets.length === 0 ? (
+                    <div className="px-3 py-2 font-body text-[11px] text-muted-foreground">
+                      No presets yet. Fill the brief and click "Save preset".
+                    </div>
+                  ) : (
+                    <ul className="max-h-72 overflow-y-auto py-1">
+                      {presets.map((p) => {
+                        const summary = summarizePreset(p);
+                        return (
+                          <li
+                            key={p.id}
+                            className="group flex items-start gap-2 px-2 py-1.5 hover:bg-accent/10"
+                          >
+                            <button
+                              type="button"
+                              onClick={() => handleLoadPreset(p.id)}
+                              className="flex-1 text-left"
+                              role="menuitem"
+                            >
+                              <div className="font-body text-[11px] font-medium text-foreground">
+                                {p.name}
+                              </div>
+                              {summary && (
+                                <div className="font-body text-[10px] text-muted-foreground line-clamp-2">
+                                  {summary}
+                                </div>
+                              )}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDeletePreset(p.id)}
+                              className="mt-0.5 rounded p-1 text-muted-foreground opacity-0 hover:bg-destructive/10 hover:text-destructive group-hover:opacity-100"
+                              aria-label={`Delete preset ${p.name}`}
+                              title="Delete preset"
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </button>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  )}
+                </div>
+              </>
+            )}
+          </div>
           <button
             type="button"
             onClick={handlePasteBrief}
@@ -1024,6 +1114,7 @@ export function BriefBuilder({
             <ClipboardPaste className="h-3.5 w-3.5" />
             Paste brief
           </button>
+
           <button
             type="button"
             onClick={onClose}
