@@ -666,7 +666,7 @@ const TradeBoardBuilder = () => {
                 ) : (
                   <CreateQuoteFromBoard
                     board={board}
-                    items={items.map(i => ({ id: i.id, product_id: i.product_id, approval_status: i.approval_status }))}
+                    items={items.map(i => ({ id: i.id, product_id: i.product_id, approval_status: i.approval_status, variant_label: i.variant_label ?? null, fabric_label: i.fabric_label ?? null, wood_label: i.wood_label ?? null }))}
                     userId={user!.id}
                   />
                 )}
@@ -708,7 +708,7 @@ const TradeBoardBuilder = () => {
               ) : (
                 <CreateQuoteFromBoard
                   board={board}
-                  items={items.map((i) => ({ id: i.id, product_id: i.product_id, approval_status: i.approval_status }))}
+                  items={items.map((i) => ({ id: i.id, product_id: i.product_id, approval_status: i.approval_status, variant_label: i.variant_label ?? null, fabric_label: i.fabric_label ?? null, wood_label: i.wood_label ?? null }))}
                   userId={user!.id}
                 />
               )}
