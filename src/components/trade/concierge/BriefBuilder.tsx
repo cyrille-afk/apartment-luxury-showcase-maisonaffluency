@@ -817,6 +817,9 @@ export function BriefBuilder({
           </section>
         )}
 
+        <section>
+
+
           <SectionHeader
             title={UI_BLOCK_LABELS.block1}
             open={expanded.block1}
