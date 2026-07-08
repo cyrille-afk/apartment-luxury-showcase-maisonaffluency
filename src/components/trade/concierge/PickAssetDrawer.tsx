@@ -322,16 +322,6 @@ export function PickAssetDrawer({ pickId, title }: Props) {
   }
 
 
-  const fabricTextureUrl = selectedFabricId
-    ? fabricSwatches.find((s) => s.fabric_id === selectedFabricId)?.image_url ?? null
-    : null;
-  const baseTextureUrl = selectedBaseId
-    ? baseSwatches.find((s) => s.fabric_id === selectedBaseId)?.image_url ?? null
-    : null;
-  const topTextureUrl = selectedTopId
-    ? topSwatches.find((s) => s.fabric_id === selectedTopId)?.image_url ?? null
-    : null;
-
   const fabricSwatch = selectedFabricId
     ? fabricSwatches.find((s) => s.fabric_id === selectedFabricId) ?? null
     : null;
@@ -342,6 +332,9 @@ export function PickAssetDrawer({ pickId, title }: Props) {
     ? swatches.find((s) => s.fabric_id === selectedTopId) ?? null
     : null;
   const topIsFabric = topSwatch ? classifySwatch(topSwatch) === "fabric" : false;
+  const fabricTextureUrl = fabricSwatch?.image_url ?? (topIsFabric ? topSwatch?.image_url ?? null : null);
+  const baseTextureUrl = baseSwatch?.image_url ?? null;
+  const topTextureUrl = !topIsFabric ? topSwatch?.image_url ?? null : null;
   const fabricLabel = [fabricSwatch?.name, topIsFabric ? topSwatch?.name : null].filter(Boolean).join(" · ") || null;
   const fabricImg = fabricSwatch?.image_url ?? (topIsFabric ? topSwatch?.image_url ?? null : null);
   const woodLabel = [baseSwatch?.name, topIsFabric ? null : topSwatch?.name].filter(Boolean).join(" · ") || null;
