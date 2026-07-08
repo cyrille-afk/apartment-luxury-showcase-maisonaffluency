@@ -863,6 +863,60 @@ export function BriefBuilder({
             through formatBrief so the model always receives it. */}
 
       </div>
+
+      {pasteFallbackOpen && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4"
+          onClick={() => setPasteFallbackOpen(false)}
+        >
+          <div
+            className="w-full max-w-lg rounded-xl border border-accent/40 bg-background p-4 shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="mb-2 flex items-center justify-between">
+              <span className="font-heading text-[12px] font-semibold uppercase tracking-[0.12em] text-accent">
+                Paste brief
+              </span>
+              <button
+                type="button"
+                onClick={() => setPasteFallbackOpen(false)}
+                aria-label="Close"
+                className="text-muted-foreground hover:text-foreground"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <p className="mb-2 font-body text-[11px] text-muted-foreground">
+              The preview blocks direct clipboard access. Paste your brief here (⌘/Ctrl+V) and hit Apply.
+            </p>
+            <textarea
+              autoFocus
+              value={pasteFallbackText}
+              onChange={(e) => setPasteFallbackText(e.target.value)}
+              rows={10}
+              className="w-full rounded-md border border-accent/30 bg-muted/30 p-2 font-body text-[12px] outline-none focus:border-accent"
+              placeholder="Paste brief text here…"
+            />
+            <div className="mt-3 flex items-center justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setPasteFallbackOpen(false)}
+                className="rounded-md px-3 py-1 font-body text-[11px] text-muted-foreground hover:text-foreground"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleFallbackApply}
+                disabled={!pasteFallbackText.trim()}
+                className="rounded-md border border-accent/40 bg-accent/10 px-3 py-1 font-body text-[11px] text-accent hover:bg-accent/20 disabled:opacity-40"
+              >
+                Apply
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
