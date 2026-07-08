@@ -1,5 +1,6 @@
 import React, { useMemo } from "react";
 import { Helmet } from "react-helmet-async";
+import { Navigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronUp } from "lucide-react";
 import { useState, useEffect } from "react";
@@ -7,6 +8,8 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import Collectibles, { collectibleDesigners } from "@/components/Collectibles";
 import CollectiblesHoverHero from "@/components/CollectiblesHoverHero";
+import { useAuth } from "@/hooks/useAuth";
+import { collectibleGateRedirect } from "@/lib/collectibleGate";
 
 const CANONICAL = "https://www.maisonaffluency.com/collectibles";
 const OG_IMAGE =
