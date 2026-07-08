@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { Link } from "react-router-dom";
-import { Plus, FolderOpen, Loader2, Calendar, MapPin, User as UserIcon, Users, EyeOff } from "lucide-react";
+import { Plus, FolderOpen, Loader2, Calendar, MapPin, User as UserIcon, Users, EyeOff, Trash2 } from "lucide-react";
 import { useProjects } from "@/hooks/useProjects";
 import { useAuth } from "@/hooks/useAuth";
 import { useStudio } from "@/hooks/useStudio";
@@ -9,6 +9,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Label } from "@/components/ui/label";
 import ClientPicker, { type PickedClient } from "@/components/trade/ClientPicker";
 import { toast } from "sonner";
