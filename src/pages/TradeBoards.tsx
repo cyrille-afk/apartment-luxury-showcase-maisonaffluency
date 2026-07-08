@@ -287,7 +287,7 @@ const TradeBoards = () => {
             <p className="font-body text-xs text-muted-foreground/80 mb-5 max-w-xs mx-auto">
               Open the concierge on any product page to generate a complete tearsheet and save it here automatically.
             </p>
-            <Button onClick={() => navigate('/trade/products')} className="gap-2">
+            <Button onClick={() => navigate('/trade/showroom')} className="gap-2">
               <Sparkles className="h-4 w-4" /> Generate First Tearsheet
             </Button>
           </div>
