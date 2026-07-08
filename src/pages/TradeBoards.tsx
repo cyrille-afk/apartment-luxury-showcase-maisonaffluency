@@ -67,6 +67,7 @@ const TradeBoards = () => {
   const [clientName, setClientName] = useState("");
   const [clientEmail, setClientEmail] = useState("");
   const [creating, setCreating] = useState(false);
+  const [sourceFilter, setSourceFilter] = useState<"all" | "concierge" | "manual">("all");
 
   const fetchBoards = async () => {
     if (!user) return;
