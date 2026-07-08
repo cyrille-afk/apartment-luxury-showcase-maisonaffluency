@@ -37,6 +37,7 @@ interface TearsheetProduct {
   trade_price_cents: number | null;
   currency: string;
   source: "curator" | "trade";
+  source_pick_id?: string | null;
   size_variants?: { label?: string; base?: string; top?: string; price_cents?: number }[] | null;
 }
 
@@ -53,6 +54,9 @@ const splitFinishTokens = (...values: Array<string | null | undefined>) =>
     .flatMap((value) => String(value || "").split(/\s+[·•]\s+|\s+\/\s+|\s*,\s*/))
     .map(normalizeFinishText)
     .filter(Boolean);
+
+const isCombinedFinishLabel = (value: string | null | undefined) =>
+  /\s+[·•]\s+/.test(String(value || ""));
 
 function resolveSnapshotVariantPrice(
   variants: TearsheetProduct["size_variants"],
@@ -293,7 +297,7 @@ export default function TradeTearsheets() {
           .order("title"),
         supabase
           .from("trade_products")
-          .select("id, product_name, brand_name, category, subcategory, image_url, dimensions, materials, description, lead_time, trade_price_cents, currency, size_variants")
+          .select("id, product_name, brand_name, category, subcategory, image_url, dimensions, materials, description, lead_time, trade_price_cents, currency, size_variants, source_pick_id")
           .eq("is_active", true)
           // Note: we no longer require image_url at the query level — missing
           // hero images are backfilled from the linked curator pick below
@@ -352,6 +356,7 @@ export default function TradeTearsheets() {
           trade_price_cents: p.trade_price_cents || null,
           currency: p.currency || "EUR",
           source: "curator",
+          source_pick_id: p.id,
           size_variants: (p.size_variants as any[]) || null,
         });
       });
@@ -378,6 +383,7 @@ export default function TradeTearsheets() {
           trade_price_cents: p.trade_price_cents || null,
           currency: p.currency || "EUR",
           source: "trade",
+          source_pick_id: p.source_pick_id ?? null,
           size_variants: (p.size_variants as any[]) || null,
         });
       });
@@ -432,6 +438,26 @@ export default function TradeTearsheets() {
       if (match) setSelectedProduct(match);
     })();
   }, [products, initialFinishes.productId, selectedProduct]);
+
+  useEffect(() => {
+    if (!selectedProduct || !chosenFinishes.fabricImg || !isCombinedFinishLabel(chosenFinishes.fabric)) return;
+    const pickId = selectedProduct.source_pick_id || selectedProduct.id;
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from("product_fabric_swatches_public")
+        .select("name, image_url, category")
+        .eq("pick_id", pickId)
+        .eq("is_active", true);
+      if (cancelled) return;
+      const match = (data || []).find((s: any) => s.image_url === chosenFinishes.fabricImg);
+      const category = String((match as any)?.category || "").trim().toLowerCase();
+      if (match?.name && ["fabric & leather", "fabric", "leather", "upholstery"].includes(category)) {
+        setChosenFinishes((prev) => ({ ...prev, fabric: match.name }));
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [selectedProduct, chosenFinishes.fabric, chosenFinishes.fabricImg]);
 
 
   const filtered = products.filter((p) => {
