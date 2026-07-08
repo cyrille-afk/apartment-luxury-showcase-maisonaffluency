@@ -148,6 +148,11 @@ interface FinishSelectorProps {
   /** Fires when the user picks a top-axis swatch. */
   onTopFinishChange?: (name: string | null) => void;
   /**
+   * Fires alongside onTopFinishChange with the swatch's image_url so callers
+   * (product page 3D viewer) can feed it as the top-material texture.
+   */
+  onTopFinishSwatchChange?: (info: { name: string; image_url: string | null } | null) => void;
+  /**
    * Fires whenever the currently-selected wood/top finish swatches change.
    * Receives the names of selected finishes that have NO mapped gallery
    * images (`image_indices` empty). The product page surfaces these on the
