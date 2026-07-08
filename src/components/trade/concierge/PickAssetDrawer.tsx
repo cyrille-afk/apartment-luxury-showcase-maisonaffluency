@@ -243,7 +243,7 @@ export function PickAssetDrawer({ pickId, title }: Props) {
       top = rescuedTops;
     }
 
-    const splitByClassifier = rescuedTops.length > 0 && (!topFilter || (topFilter && topFilter.length === 0));
+    const splitByClassifier = rescuedTops.length > 0 && !topFilter;
 
     return { fabricSwatches: fab, baseSwatches: base, topSwatches: top, splitByClassifier };
   }, [swatches, pickAxes.baseOptions, pickAxes.topOptions]);
