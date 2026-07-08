@@ -1093,6 +1093,82 @@ const TradeProductPage: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [galleryActiveIndex, data?.product?.id]);
 
+  // Proactive tearsheet nudge — fires after the architect has stopped
+  // changing finishes for 3s. Sends a lightweight "lock this in" spec card
+  // into the concierge chat stream. Skips firing until at least one finish
+  // axis is actually selected, and dedupes by (product + selection key) so
+  // the same combo isn't re-nudged.
+  const lastNudgeKeyRef = useRef<string | null>(null);
+  useEffect(() => {
+    const productId = data?.product?.id as string | undefined;
+    if (!productId) return;
+    const fabricLabel = selectedFabric?.name ?? null;
+    const baseLabel = selectedWoodPrice?.name ?? selectedBase ?? null;
+    const topLabel = selectedTopSwatch?.name ?? selectedTop ?? null;
+    // Nothing to lock in yet.
+    if (!fabricLabel && !baseLabel && !topLabel) return;
+
+    const selectionKey = `${productId}::${fabricLabel ?? ""}::${baseLabel ?? ""}::${topLabel ?? ""}`;
+    if (lastNudgeKeyRef.current === selectionKey) return;
+
+    const t = window.setTimeout(() => {
+      // Format trade price using whichever cents we can trust.
+      const pricing = data?.pricing;
+      const product = data?.product as any;
+      const rawCents =
+        (selectedWoodPrice?.price_cents && selectedWoodPrice.price_cents > 0
+          ? selectedWoodPrice.price_cents
+          : null) ??
+        pricing?.trade_price_cents ??
+        product?.trade_price_cents ??
+        null;
+      const rawCcy = (selectedWoodPrice?.currency || pricing?.currency || product?.currency || "EUR") as DisplayCurrency;
+      let tradePriceLabel: string | null = null;
+      if (rawCents && rawCents > 0) {
+        try {
+          tradePriceLabel = formatPriceConverted(rawCents, rawCcy, displayCurrency, fxRates);
+        } catch {
+          tradePriceLabel = null;
+        }
+      }
+
+      const leadTimeLabel = (pricing?.lead_time || product?.lead_time || null) as string | null;
+
+      const detail = {
+        productId,
+        productName: (product?.title || product?.product_name || "This piece") as string,
+        brandName: (product?.brand_name || product?.subtitle || null) as string | null,
+        sku: null,
+        imageUrl: (product?.image_url || (product?.gallery_images?.[0] ?? null)) as string | null,
+        fabricLabel,
+        baseLabel,
+        topLabel,
+        tradePriceLabel,
+        leadTimeLabel,
+      };
+
+      lastNudgeKeyRef.current = selectionKey;
+      window.dispatchEvent(new CustomEvent("concierge:propose_tearsheet_proactive", { detail }));
+    }, 3000);
+
+    return () => window.clearTimeout(t);
+  }, [
+    data?.product?.id,
+    selectedFabric?.name,
+    selectedWoodPrice?.name,
+    selectedWoodPrice?.price_cents,
+    selectedWoodPrice?.currency,
+    selectedTopSwatch?.name,
+    selectedBase,
+    selectedTop,
+    displayCurrency,
+    fxRates,
+    data?.pricing,
+  ]);
+
+
+
+
 
   if (isLoading) {
     return <div className="pt-8"><PageLoadingSkeleton /></div>;
