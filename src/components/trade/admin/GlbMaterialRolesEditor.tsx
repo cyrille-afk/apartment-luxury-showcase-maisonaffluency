@@ -13,32 +13,45 @@ type MaterialRole = "fabric" | "base" | "top" | "ignore";
  * Token buckets are ordered by specificity: "tabletop" before "table" before
  * "top" so a mesh named "table_base" doesn't get mis-tagged as a top.
  */
-export function autoDetectRoleFromName(rawName: string): MaterialRole | null {
+export interface AutoDetectResult {
+  role: MaterialRole;
+  /** The specific token in the material name that produced the match. */
+  token: string;
+}
+
+const TOKEN_BUCKETS: { role: MaterialRole; tokens: string[] }[] = [
+  {
+    role: "fabric",
+    tokens: ["fabric", "upholstery", "cushion", "seat", "leather", "textile", "cloth"],
+  },
+  {
+    role: "top",
+    tokens: [
+      "tabletop", "table_top", "top", "surface", "slab", "worktop", "counter",
+      "marble", "onyx", "stone", "granite", "travertine", "quartz", "glass",
+    ],
+  },
+  {
+    role: "base",
+    tokens: [
+      "base", "frame", "leg", "legs", "plinth", "foot", "footing", "pedestal", "support", "structure", "chassis",
+      "brass", "metal", "steel", "bronze", "iron", "wood", "oak", "walnut", "ash",
+    ],
+  },
+];
+
+export function autoDetectRoleFromName(rawName: string): AutoDetectResult | null {
   const name = rawName.toLowerCase();
-  // Reject opaque CAD IDs (long hex, uuid fragments, "material_23").
   if (/^[0-9a-f]{8,}(-[0-9a-f]+)*$/i.test(rawName)) return null;
   if (/^(mesh|material|object|node)[_\-]?\d+$/i.test(rawName)) return null;
 
-  const has = (...tokens: string[]) =>
-    tokens.some((t) => new RegExp(`(^|[^a-z])${t}([^a-z]|$)`, "i").test(name));
-
-  // Fabric first — upholstery is unambiguous.
-  if (has("fabric", "upholstery", "cushion", "seat", "leather", "textile", "cloth")) return "fabric";
-
-  // Top: slab / surface / stone-family keywords.
-  if (
-    has("tabletop", "table_top", "top", "surface", "slab", "worktop", "counter") ||
-    has("marble", "onyx", "stone", "granite", "travertine", "quartz", "glass")
-  )
-    return "top";
-
-  // Base: structural / leg / frame keywords.
-  if (
-    has("base", "frame", "leg", "legs", "plinth", "foot", "footing", "pedestal", "support", "structure", "chassis") ||
-    has("brass", "metal", "steel", "bronze", "iron", "wood", "oak", "walnut", "ash")
-  )
-    return "base";
-
+  for (const bucket of TOKEN_BUCKETS) {
+    for (const t of bucket.tokens) {
+      if (new RegExp(`(^|[^a-z])${t}([^a-z]|$)`, "i").test(name)) {
+        return { role: bucket.role, token: t };
+      }
+    }
+  }
   return null;
 }
 
@@ -79,6 +92,7 @@ export function GlbMaterialRolesEditor({
   identifying,
 }: Props) {
   const [roles, setRoles] = useState<Record<string, MaterialRole>>({});
+  const [autoInfo, setAutoInfo] = useState<Record<string, AutoDetectResult>>({});
   const [saving, setSaving] = useState(false);
   const [dirty, setDirty] = useState(false);
 
@@ -86,6 +100,7 @@ export function GlbMaterialRolesEditor({
   useEffect(() => {
     const hasSaved = !!initialRoles && Object.keys(initialRoles).length > 0;
     const next: Record<string, MaterialRole> = {};
+    const info: Record<string, AutoDetectResult> = {};
     let autoTagged = 0;
     for (const name of materialNames) {
       const existing = initialRoles?.[name];
@@ -93,13 +108,17 @@ export function GlbMaterialRolesEditor({
         next[name] = existing;
       } else {
         const guess = autoDetectRoleFromName(name);
-        next[name] = guess ?? "ignore";
-        if (guess) autoTagged += 1;
+        if (guess) {
+          next[name] = guess.role;
+          info[name] = guess;
+          autoTagged += 1;
+        } else {
+          next[name] = "ignore";
+        }
       }
     }
     setRoles(next);
-    // If nothing was ever saved and we auto-tagged at least one mesh, mark
-    // dirty so the admin can just review + hit Save.
+    setAutoInfo(info);
     setDirty(!hasSaved && autoTagged > 0);
     onChange(next);
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -108,18 +127,27 @@ export function GlbMaterialRolesEditor({
   const setRole = (name: string, role: MaterialRole) => {
     const next = { ...roles, [name]: role };
     setRoles(next);
+    // Manual override clears the auto-detect provenance for that mesh.
+    if (autoInfo[name]) {
+      const { [name]: _drop, ...rest } = autoInfo;
+      setAutoInfo(rest);
+    }
     setDirty(true);
     onChange(next);
   };
 
   const runAutoDetect = () => {
     const next: Record<string, MaterialRole> = { ...roles };
+    const info: Record<string, AutoDetectResult> = { ...autoInfo };
     let changed = 0;
     for (const name of materialNames) {
       const guess = autoDetectRoleFromName(name);
-      if (guess && next[name] !== guess) {
-        next[name] = guess;
+      if (guess && next[name] !== guess.role) {
+        next[name] = guess.role;
+        info[name] = guess;
         changed += 1;
+      } else if (guess) {
+        info[name] = guess;
       }
     }
     if (changed === 0) {
@@ -127,6 +155,7 @@ export function GlbMaterialRolesEditor({
       return;
     }
     setRoles(next);
+    setAutoInfo(info);
     setDirty(true);
     onChange(next);
     toast.success(`Auto-detected ${changed} material${changed === 1 ? "" : "s"} from names`);
@@ -183,9 +212,54 @@ export function GlbMaterialRolesEditor({
         </button>
         </div>
       </div>
+      {(() => {
+        const grouped: Record<MaterialRole, { name: string; token: string }[]> = {
+          fabric: [], base: [], top: [], ignore: [],
+        };
+        for (const [name, info] of Object.entries(autoInfo)) {
+          grouped[info.role].push({ name, token: info.token });
+        }
+        const total = grouped.fabric.length + grouped.base.length + grouped.top.length;
+        if (total === 0) return null;
+        const swatch: Record<MaterialRole, string> = {
+          fabric: "bg-emerald-600",
+          base: "bg-amber-700",
+          top: "bg-neutral-500",
+          ignore: "bg-muted",
+        };
+        return (
+          <div className="rounded-md border border-dashed border-foreground/25 bg-background/40 p-2.5 space-y-1.5">
+            <div className="font-body text-[9px] uppercase tracking-[0.14em] text-muted-foreground">
+              Auto-detected — review before saving ({total})
+            </div>
+            {(["fabric", "base", "top"] as MaterialRole[]).map((r) =>
+              grouped[r].length === 0 ? null : (
+                <div key={r} className="flex items-start gap-2">
+                  <span className={`mt-0.5 shrink-0 inline-block w-1.5 h-1.5 rounded-full ${swatch[r]}`} />
+                  <div className="flex-1 min-w-0">
+                    <div className="font-body text-[9px] uppercase tracking-[0.12em] text-foreground/70">
+                      {ROLE_LABEL[r]} · {grouped[r].length}
+                    </div>
+                    <ul className="mt-0.5 space-y-0.5">
+                      {grouped[r].map((row) => (
+                        <li key={row.name} className="font-mono text-[10px] text-foreground/80 truncate" title={`${row.name} → matched "${row.token}"`}>
+                          <span className="truncate">{row.name || "(unnamed)"}</span>
+                          <span className="text-muted-foreground"> — matched </span>
+                          <span className="text-foreground/90">"{row.token}"</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              ),
+            )}
+          </div>
+        );
+      })()}
       <div className="space-y-1.5">
         {materialNames.map((name) => {
           const isId = identifying === name;
+          const auto = autoInfo[name];
           return (
             <div key={name} className="flex items-center gap-2">
               {onIdentifyChange && (
@@ -205,6 +279,15 @@ export function GlbMaterialRolesEditor({
               <div className="flex-1 min-w-0 font-mono text-[10px] text-foreground/80 truncate" title={name}>
                 {name || "(unnamed)"}
               </div>
+              {auto && (
+                <span
+                  className="shrink-0 inline-flex items-center gap-1 px-1.5 py-0.5 rounded border border-dashed border-foreground/30 font-body text-[9px] uppercase tracking-[0.1em] text-muted-foreground"
+                  title={`Auto-detected as ${auto.role} because the name contains "${auto.token}". Change the role below to override.`}
+                >
+                  <Wand2 size={9} />
+                  "{auto.token}"
+                </span>
+              )}
               <div className="flex gap-1 shrink-0">
                 {ROLE_ORDER.map((r) => {
                   const active = roles[name] === r;
