@@ -579,22 +579,71 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
             // Bronze Medal 0922") that share a generic axis token ("Bronze")
             // with sibling swatches — label matching would drag those siblings
             // in as false positives.
+            // Track duplicates by fabric_id, image_url, AND normalized name
+            // so the same swatch can never appear twice — regardless of which
+            // channel surfaced it (explicit fabric_id / wood_fabric_id, the
+            // joined fabric relation, or variant-label matching).
             const explicit: { name: string; image_url: string; fabric_id?: string | null }[] = [];
+            const seenIds = new Set<string>();
+            const seenUrls = new Set<string>();
+            const seenNames = new Set<string>();
+            const normName = (n: string | null | undefined) =>
+              (n || "").trim().toLowerCase();
+            const dedupePush = (swatch: { name?: string | null; image_url?: string | null; fabric_id?: string | null }) => {
+              const url = swatch.image_url || "";
+              if (!url) return;
+              const fid = swatch.fabric_id || "";
+              const nm = normName(swatch.name);
+              if (fid && seenIds.has(fid)) return;
+              if (url && seenUrls.has(url)) return;
+              if (nm && seenNames.has(nm)) return;
+              if (fid) seenIds.add(fid);
+              if (url) seenUrls.add(url);
+              if (nm) seenNames.add(nm);
+              explicit.push({ name: swatch.name || "", image_url: url, fabric_id: swatch.fabric_id ?? null });
+            };
             const pushExplicit = (id: string | null | undefined) => {
               if (!id) return;
               const hit = pickSwatches.find((s) => s.fabric_id === id);
-              if (hit && hit.image_url && !explicit.some((e) => e.image_url === hit.image_url)) {
-                explicit.push({ name: hit.name, image_url: hit.image_url, fabric_id: hit.fabric_id ?? id });
+              if (hit && hit.image_url) {
+                dedupePush({ name: hit.name, image_url: hit.image_url, fabric_id: hit.fabric_id ?? id });
               }
             };
             pushExplicit((item as any).wood_fabric_id);
             pushExplicit((item as any).fabric_id);
 
-            const swatches = explicit.length > 0
-              ? explicit
-              : findQuoteFinishSwatches(item.variant_label, pickSwatches)
-                  .map((swatch) => ({ name: swatch.name, image_url: swatch.image_url || "", fabric_id: swatch.fabric_id ?? swatch.id ?? null }))
-                  .filter((swatch) => swatch.image_url);
+            // Also fold in the joined `fabric` / `wood_fabric` relations
+            // (from the fabrics!fabric_id / fabrics!wood_fabric_id joins).
+            // dedupePush suppresses anything already covered by fabric_id /
+            // image_url / name so nothing renders twice downstream.
+            const joinedFabric: any = (item as any).fabric;
+            if (joinedFabric?.image_url) {
+              dedupePush({
+                name: joinedFabric.name,
+                image_url: joinedFabric.image_url,
+                fabric_id: (item as any).fabric_id ?? null,
+              });
+            }
+            const joinedWood: any = (item as any).wood_fabric;
+            if (joinedWood?.image_url) {
+              dedupePush({
+                name: joinedWood.name,
+                image_url: joinedWood.image_url,
+                fabric_id: (item as any).wood_fabric_id ?? null,
+              });
+            }
+
+            let swatches = explicit;
+            if (swatches.length === 0) {
+              for (const swatch of findQuoteFinishSwatches(item.variant_label, pickSwatches)) {
+                dedupePush({
+                  name: swatch.name,
+                  image_url: swatch.image_url || "",
+                  fabric_id: swatch.fabric_id ?? swatch.id ?? null,
+                });
+              }
+              swatches = explicit;
+            }
             if (swatches.length === 0) return item;
             const first = swatches[0];
             return {
