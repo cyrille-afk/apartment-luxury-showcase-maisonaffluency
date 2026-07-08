@@ -166,6 +166,8 @@ interface FinishSelectorProps {
    * gallery on page load.
    */
   currentGalleryIndex?: number;
+  /** Optional swatch name to select on first load, used by trade deep links. */
+  preselectFabricName?: string | null;
 }
 
 const normalizeFabricCategory = (category: string | null | undefined) => {
@@ -244,7 +246,7 @@ const pickFinishGlyph = (
  * (Trade + Public). Tiles are grouped by category (Upholstery, Wood, …)
  * with a COM ("Customer's Own Material") tile always offered.
  */
-export default function FinishSelector({ pickId, className, productTitle, productCategory, onUpholsteryTierChange, onFabricChange, onHasFabricsChange, onWoodFinishChange, onWoodFinishPricingChange, onWoodFinishesAvailable, onPreviewSwatchesResolved, includePricing = false, onSwatchImagesChange, woodLabel, showUpholsterySection = true, showWoodSection = true, hideBaseAccordion = false, woodFilter, topFilter, topLabel, onTopFinishChange, onTopFinishSwatchChange, onFinishesMissingImagesChange, currentGalleryIndex }: FinishSelectorProps) {
+export default function FinishSelector({ pickId, className, productTitle, productCategory, onUpholsteryTierChange, onFabricChange, onHasFabricsChange, onWoodFinishChange, onWoodFinishPricingChange, onWoodFinishesAvailable, onPreviewSwatchesResolved, includePricing = false, onSwatchImagesChange, woodLabel, showUpholsterySection = true, showWoodSection = true, hideBaseAccordion = false, woodFilter, topFilter, topLabel, onTopFinishChange, onTopFinishSwatchChange, onFinishesMissingImagesChange, currentGalleryIndex, preselectFabricName }: FinishSelectorProps) {
 
   const isRugProduct = /\brugs?\b/i.test(`${productTitle || ""} ${productCategory || ""}`);
   const isRugComponentSwatch = (fabric: Pick<Fabric, "name" | "category">) => {
@@ -440,6 +442,31 @@ export default function FinishSelector({ pickId, className, productTitle, produc
   const selectedWoodItem = fabrics.find((f) => f.id === selectedWoodId) || null;
   const selectedTopItem = fabrics.find((f) => f.id === selectedTopId) || null;
   const selectedCoverItem = fabrics.find((f) => f.id === selectedCoverId) || null;
+
+  useEffect(() => {
+    if (!preselectFabricName || fabrics.length === 0 || selectedFabricId) return;
+    const wanted = preselectFabricName.trim().toLowerCase();
+    const match = fabrics.find((f) => {
+      if (!isFabricCategory(f)) return false;
+      const names = [f.name, f.price_tier_label].filter(Boolean).map((s) => String(s).trim().toLowerCase());
+      return names.some((n) => n === wanted || n.includes(wanted) || wanted.includes(n));
+    });
+    if (!match) return;
+    setSelectedFabricId(match.id);
+    onUpholsteryTierChange?.(match.price_tier_label ?? null);
+    if (match.id === "__com__" || match.id === "__col__") {
+      onFabricChange?.(null);
+    } else {
+      onFabricChange?.({
+        id: match.id,
+        name: match.name,
+        tier: match.tier ?? null,
+        price_per_lm_cents: match.price_per_lm_cents ?? null,
+        currency: match.currency || "EUR",
+        image_url: match.image_url ?? null,
+      });
+    }
+  }, [preselectFabricName, fabrics, selectedFabricId, onUpholsteryTierChange, onFabricChange]);
 
   // Notify parent when the user has selected wood/top finishes that lack
   // mapped gallery images, so quote/bespoke messages can flag them.
