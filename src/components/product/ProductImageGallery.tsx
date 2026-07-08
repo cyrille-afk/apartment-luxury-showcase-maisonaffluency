@@ -49,8 +49,16 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
   const lightboxSwipeRef = useRef<HTMLDivElement>(null);
   const noZoomRef = useRef(false); // gallery doesn't pinch-zoom; required by hook signature.
 
-  const goTo = useCallback((i: number) => {
+  // When the active index changes because the user clicked/hovered a thumbnail
+  // in the vertical strip, we must NOT scrollIntoView — doing so slides a
+  // different thumb under the cursor and triggers a hover feedback loop that
+  // keeps snapping the strip back to the top. Only auto-scroll for index
+  // changes coming from arrows, swipes, dots, or the parent (finish sync).
+  const suppressThumbAutoScrollRef = useRef(false);
+
+  const goTo = useCallback((i: number, opts?: { fromThumbStrip?: boolean }) => {
     const next = Math.max(0, Math.min(i, images.length - 1));
+    if (opts?.fromThumbStrip) suppressThumbAutoScrollRef.current = true;
     setActiveIndex(next);
     onIndexChange?.(next);
   }, [images.length, onIndexChange]);
@@ -91,8 +99,15 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
     };
   }, [updateScrollState, images.length]);
 
-  // Keep active thumbnail in view when navigating with arrows
+  // Keep active thumbnail in view when navigating with arrows/swipes/dots.
+  // Skip when the change originated from clicking/hovering a thumbnail — the
+  // user is already looking at that thumb, and scrolling it would create a
+  // hover feedback loop that snaps the strip back to the top.
   useEffect(() => {
+    if (suppressThumbAutoScrollRef.current) {
+      suppressThumbAutoScrollRef.current = false;
+      return;
+    }
     const el = thumbsRef.current;
     if (!el) return;
     const child = el.children[activeIndex] as HTMLElement | undefined;
@@ -141,8 +156,8 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
             {images.map((img, i) => (
               <button
                 key={i}
-                onClick={() => goTo(i)}
-                onMouseEnter={() => goTo(i)}
+                onClick={() => goTo(i, { fromThumbStrip: true })}
+                onMouseEnter={() => goTo(i, { fromThumbStrip: true })}
                 className={cn(
                   "aspect-square rounded-md overflow-hidden border-2 transition-all shrink-0",
                   i === activeIndex
