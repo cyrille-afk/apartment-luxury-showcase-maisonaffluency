@@ -624,11 +624,11 @@ export function BriefBuilder({
   // Merge a pasted brief into the current builder state without wiping
   // fields the user already filled in. Only fields the paste actually
   // supplied (i.e. differ from DEFAULT_VALUES) overwrite the current values.
-  const [pasteStatus, setPasteStatus] = useState<null | "ok" | "empty" | "denied">(null);
+  const [pasteStatus, setPasteStatus] = useState<null | "ok" | "notes" | "empty" | "denied">(null);
   const [pasteFallbackOpen, setPasteFallbackOpen] = useState(false);
   const [pasteFallbackText, setPasteFallbackText] = useState("");
 
-  const applyPastedText = (text: string): "ok" | "empty" => {
+  const applyPastedText = (text: string): "ok" | "notes" | "empty" => {
     if (!text || !text.trim()) return "empty";
     const parsed = parseBrief(text);
     const merged: BriefValues = {
@@ -660,13 +660,23 @@ export function BriefBuilder({
       merged.block4 = parsed.values.block4;
       filled++;
     }
-    const nextPrefix = parsed.prefix || prefix;
-    const nextSuffix = parsed.suffix || suffix;
+    // When the paste is free-form prose (no recognisable block headers),
+    // parseBrief returns prefix=<the whole text>. Merge it with any existing
+    // prefix rather than replacing so a previous freeform note isn't wiped.
+    const pastedPrefix = parsed.prefix?.trim() || "";
+    const pastedSuffix = parsed.suffix?.trim() || "";
+    const nextPrefix = pastedPrefix
+      ? (prefix && !prefix.includes(pastedPrefix) ? `${prefix}\n\n${pastedPrefix}` : pastedPrefix)
+      : prefix;
+    const nextSuffix = pastedSuffix || suffix;
     setValues(merged);
     setPrefix(nextPrefix);
     setSuffix(nextSuffix);
     emit(merged, nextPrefix, nextSuffix);
-    return filled > 0 ? "ok" : "empty";
+    if (filled > 0) return "ok";
+    // No structured fields matched, but we did capture the prose as notes.
+    if (pastedPrefix || pastedSuffix) return "notes";
+    return "empty";
   };
 
   const handlePasteBrief = async () => {
@@ -685,7 +695,7 @@ export function BriefBuilder({
       const text = await navigator.clipboard.readText();
       const status = applyPastedText(text);
       setPasteStatus(status);
-      setTimeout(() => setPasteStatus(null), 2000);
+      setTimeout(() => setPasteStatus(null), 2500);
     } catch {
       // Permission denied (typical in embedded/preview iframes) → open fallback.
       setPasteFallbackText("");
@@ -695,11 +705,20 @@ export function BriefBuilder({
 
   const handleFallbackApply = () => {
     const status = applyPastedText(pasteFallbackText);
+    if (status === "empty") {
+      // Keep the dialog open so the user doesn't lose what they typed.
+      setPasteStatus("empty");
+      setTimeout(() => setPasteStatus(null), 2500);
+      return;
+    }
     setPasteFallbackOpen(false);
     setPasteFallbackText("");
     setPasteStatus(status);
-    setTimeout(() => setPasteStatus(null), 2000);
+    setTimeout(() => setPasteStatus(null), 2500);
   };
+
+
+
 
 
   const SectionHeader = ({
@@ -740,9 +759,14 @@ export function BriefBuilder({
               Filled from clipboard
             </span>
           )}
+          {pasteStatus === "notes" && (
+            <span className="font-body text-[10px] uppercase tracking-[0.12em] text-accent">
+              Added as free-form notes
+            </span>
+          )}
           {pasteStatus === "empty" && (
             <span className="font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
-              No brief detected
+              Nothing to apply
             </span>
           )}
           {pasteStatus === "denied" && (
@@ -773,7 +797,29 @@ export function BriefBuilder({
       </div>
 
       <div className="space-y-4">
+        {(prefix || suffix) && (
+          <section>
+            <div className="mb-2 font-heading text-[12px] font-semibold text-accent">
+              Notes
+            </div>
+            <textarea
+              value={[prefix, suffix].filter(Boolean).join("\n\n")}
+              onChange={(e) => {
+                const next = e.target.value;
+                setPrefix(next);
+                setSuffix("");
+                emit(values, next, "");
+              }}
+              rows={4}
+              className="w-full rounded-md border border-accent/30 bg-background/60 p-2 font-body text-[12px] outline-none focus:border-accent"
+              placeholder="Free-form notes captured from your paste…"
+            />
+          </section>
+        )}
+
         <section>
+
+
           <SectionHeader
             title={UI_BLOCK_LABELS.block1}
             open={expanded.block1}
