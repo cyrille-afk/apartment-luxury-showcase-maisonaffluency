@@ -212,9 +212,54 @@ export function GlbMaterialRolesEditor({
         </button>
         </div>
       </div>
+      {(() => {
+        const grouped: Record<MaterialRole, { name: string; token: string }[]> = {
+          fabric: [], base: [], top: [], ignore: [],
+        };
+        for (const [name, info] of Object.entries(autoInfo)) {
+          grouped[info.role].push({ name, token: info.token });
+        }
+        const total = grouped.fabric.length + grouped.base.length + grouped.top.length;
+        if (total === 0) return null;
+        const swatch: Record<MaterialRole, string> = {
+          fabric: "bg-emerald-600",
+          base: "bg-amber-700",
+          top: "bg-neutral-500",
+          ignore: "bg-muted",
+        };
+        return (
+          <div className="rounded-md border border-dashed border-foreground/25 bg-background/40 p-2.5 space-y-1.5">
+            <div className="font-body text-[9px] uppercase tracking-[0.14em] text-muted-foreground">
+              Auto-detected — review before saving ({total})
+            </div>
+            {(["fabric", "base", "top"] as MaterialRole[]).map((r) =>
+              grouped[r].length === 0 ? null : (
+                <div key={r} className="flex items-start gap-2">
+                  <span className={`mt-0.5 shrink-0 inline-block w-1.5 h-1.5 rounded-full ${swatch[r]}`} />
+                  <div className="flex-1 min-w-0">
+                    <div className="font-body text-[9px] uppercase tracking-[0.12em] text-foreground/70">
+                      {ROLE_LABEL[r]} · {grouped[r].length}
+                    </div>
+                    <ul className="mt-0.5 space-y-0.5">
+                      {grouped[r].map((row) => (
+                        <li key={row.name} className="font-mono text-[10px] text-foreground/80 truncate" title={`${row.name} → matched "${row.token}"`}>
+                          <span className="truncate">{row.name || "(unnamed)"}</span>
+                          <span className="text-muted-foreground"> — matched </span>
+                          <span className="text-foreground/90">"{row.token}"</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              ),
+            )}
+          </div>
+        );
+      })()}
       <div className="space-y-1.5">
         {materialNames.map((name) => {
           const isId = identifying === name;
+          const auto = autoInfo[name];
           return (
             <div key={name} className="flex items-center gap-2">
               {onIdentifyChange && (
@@ -234,6 +279,15 @@ export function GlbMaterialRolesEditor({
               <div className="flex-1 min-w-0 font-mono text-[10px] text-foreground/80 truncate" title={name}>
                 {name || "(unnamed)"}
               </div>
+              {auto && (
+                <span
+                  className="shrink-0 inline-flex items-center gap-1 px-1.5 py-0.5 rounded border border-dashed border-foreground/30 font-body text-[9px] uppercase tracking-[0.1em] text-muted-foreground"
+                  title={`Auto-detected as ${auto.role} because the name contains "${auto.token}". Change the role below to override.`}
+                >
+                  <Wand2 size={9} />
+                  "{auto.token}"
+                </span>
+              )}
               <div className="flex gap-1 shrink-0">
                 {ROLE_ORDER.map((r) => {
                   const active = roles[name] === r;
