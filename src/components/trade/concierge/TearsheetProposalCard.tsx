@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
-import { Loader2, Check, X, Pencil, ExternalLink, Plus, ChevronDown, Copy, Repeat, Lock, Unlock, RefreshCw, PlusCircle, MessageSquare, ShieldCheck } from "lucide-react";
+import { Loader2, Check, X, Pencil, ExternalLink, Plus, ChevronDown, Copy, Repeat, Lock, Unlock, RefreshCw, PlusCircle, MessageSquare, ShieldCheck, Sparkles } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { commitProposal, type TearsheetProposal, type PickPreview } from "@/lib/tradeConciergeStream";
 import { supabase } from "@/integrations/supabase/client";
@@ -195,6 +195,11 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
   // After commit, holds the board's existing project_id (null = no project assigned yet).
   const [existingProjectId, setExistingProjectId] = useState<string | null>(null);
   const [projectStepDone, setProjectStepDone] = useState(false);
+  // "Project Deck" pitch state — surfaces once the auto-grouped project has
+  // 3+ tearsheets ("I see you have 4 items in Malibu Beach House …").
+  const [projectBoardCount, setProjectBoardCount] = useState<number | null>(null);
+  const [projectIdForDeck, setProjectIdForDeck] = useState<string | null>(null);
+  const [deckBuilding, setDeckBuilding] = useState(false);
   const navigate = useNavigate();
 
   const isAppend = mode === "append";
@@ -501,14 +506,63 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
     const duplicates = res.duplicates || 0;
     setResult({ boardId: res.board_id, url: res.url, added: res.added, duplicates });
 
-    // Look up the board's existing project_id so we know whether to prompt.
-    const { data: boardRow } = await supabase
-      .from("client_boards")
-      .select("project_id")
-      .eq("id", res.board_id)
-      .maybeSingle();
-    const currentProjectId = (boardRow?.project_id as string | null) ?? null;
+    // ── Auto-grouping ──────────────────────────────────────────────────
+    // If the concierge session has a projectName (from the inline "Save to
+    // project" input), upsert a `projects` row and attach this board to it.
+    // Every subsequent tearsheet in the same chat then lands in the same
+    // folder without re-prompting the user.
+    const sessionProjectName = (conciergeSession?.projectName || "").trim();
+    let autoProjectId: string | null = null;
+    if (sessionProjectName) {
+      const { data: userRes } = await supabase.auth.getUser();
+      const uid = userRes.user?.id;
+      if (uid) {
+        const { data: existingProject } = await supabase
+          .from("projects")
+          .select("id")
+          .eq("user_id", uid)
+          .ilike("name", sessionProjectName)
+          .maybeSingle();
+        if (existingProject?.id) {
+          autoProjectId = existingProject.id as string;
+        } else {
+          const { data: newProject } = await supabase
+            .from("projects")
+            .insert({ user_id: uid, name: sessionProjectName, status: "active" })
+            .select("id")
+            .single();
+          autoProjectId = (newProject?.id as string) ?? null;
+        }
+        if (autoProjectId) {
+          await supabase
+            .from("client_boards")
+            .update({ project_id: autoProjectId })
+            .eq("id", res.board_id);
+        }
+      }
+    }
+
+    // Look up the board's existing project_id (or the one we just auto-set).
+    const currentProjectId = autoProjectId ?? (await (async () => {
+      const { data: boardRow } = await supabase
+        .from("client_boards")
+        .select("project_id")
+        .eq("id", res.board_id)
+        .maybeSingle();
+      return (boardRow?.project_id as string | null) ?? null;
+    })());
     setExistingProjectId(currentProjectId);
+
+    // If we grouped into a project, count how many boards it already has so
+    // we can offer the "Project Deck" pitch once the folder has 3+ items.
+    if (currentProjectId) {
+      const { count } = await supabase
+        .from("client_boards")
+        .select("id", { count: "exact", head: true })
+        .eq("project_id", currentProjectId);
+      setProjectBoardCount(count ?? null);
+      setProjectIdForDeck(currentProjectId);
+    }
 
     // Defer parent's auto-navigation when we'll show the project picker.
     const willPromptForProject = !currentProjectId;
@@ -535,6 +589,83 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
     setStatus("discarded");
     onResolved?.("discarded");
   };
+
+  /**
+   * Compile every board in a project into a single client-ready presentation.
+   * Creates a `presentations` row titled after the project, then one slide per
+   * board with `linked_product_ids` seeded from that board's items — the trade
+   * user only has to review + publish.
+   */
+  const handleBuildProjectDeck = async (projectId: string, projectDisplayName: string) => {
+    if (deckBuilding) return;
+    setDeckBuilding(true);
+    try {
+      const { data: userRes } = await supabase.auth.getUser();
+      const uid = userRes.user?.id;
+      if (!uid) {
+        toast.error("Sign in to build a project presentation.");
+        setDeckBuilding(false);
+        return;
+      }
+      // Fetch every board in this project (client_boards) with its items.
+      const { data: boards } = await supabase
+        .from("client_boards")
+        .select("id, title, created_at")
+        .eq("project_id", projectId)
+        .order("created_at", { ascending: true });
+      if (!boards || boards.length === 0) {
+        toast.error("No tearsheets in this project yet.");
+        setDeckBuilding(false);
+        return;
+      }
+      const boardIds = boards.map((b: any) => b.id);
+      const { data: items } = await supabase
+        .from("client_board_items")
+        .select("board_id, product_id, sort_order")
+        .in("board_id", boardIds)
+        .order("sort_order", { ascending: true });
+      const itemsByBoard = new Map<string, string[]>();
+      (items || []).forEach((row: any) => {
+        const arr = itemsByBoard.get(row.board_id) ?? [];
+        arr.push(row.product_id);
+        itemsByBoard.set(row.board_id, arr);
+      });
+
+      const { data: pres, error: presErr } = await (supabase as any)
+        .from("presentations")
+        .insert({
+          title: projectDisplayName,
+          project_name: projectDisplayName,
+          created_by: uid,
+        })
+        .select("id")
+        .single();
+      if (presErr || !pres) {
+        toast.error(presErr?.message || "Failed to create presentation");
+        setDeckBuilding(false);
+        return;
+      }
+
+      const slides = boards.map((b: any, idx: number) => ({
+        presentation_id: pres.id,
+        title: b.title,
+        project_name: projectDisplayName,
+        sort_order: idx,
+        linked_product_ids: itemsByBoard.get(b.id) ?? [],
+      }));
+      if (slides.length > 0) {
+        await (supabase as any).from("presentation_slides").insert(slides);
+      }
+      toast.success(`Project deck created with ${slides.length} slide${slides.length === 1 ? "" : "s"}.`);
+      try { window.dispatchEvent(new Event("concierge:close")); } catch {}
+      navigate(`/trade/presentations/${pres.id}`);
+    } catch (e) {
+      toast.error(`Deck build failed: ${(e as Error)?.message || "unknown"}`);
+    } finally {
+      setDeckBuilding(false);
+    }
+  };
+
 
   const headerLabel = isAppend
     ? "✦ Concierge proposes adding to your tearsheet"
@@ -1080,8 +1211,40 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
               onResolved={handleProjectStepResolved}
             />
           )}
+
+          {/* Project Deck pitch — once the auto-grouped project has 3+
+              tearsheets, offer to compile them into a client-ready deck. */}
+          {existingProjectId &&
+            projectIdForDeck &&
+            (projectBoardCount ?? 0) >= 3 &&
+            conciergeSession?.projectName && (
+              <div className="mt-2 rounded-md border border-accent/40 bg-accent/[0.05] px-2.5 py-2 space-y-1.5">
+                <div className="flex items-start gap-2">
+                  <Sparkles className="h-3.5 w-3.5 text-accent mt-0.5 shrink-0" />
+                  <p className="font-body text-[11px] leading-snug text-foreground">
+                    You have {projectBoardCount} tearsheets in{" "}
+                    <strong>{conciergeSession.projectName}</strong>. Compile them
+                    into a client-ready Project Presentation PDF?
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  disabled={deckBuilding}
+                  onClick={() => handleBuildProjectDeck(projectIdForDeck, conciergeSession.projectName || "Project")}
+                  className="w-full flex items-center justify-center gap-1.5 rounded-md bg-foreground text-background px-2.5 py-1.5 font-body text-[10px] uppercase tracking-widest hover:opacity-90 transition disabled:opacity-40"
+                >
+                  {deckBuilding ? (
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                  ) : (
+                    <Sparkles className="h-3 w-3" />
+                  )}
+                  {deckBuilding ? "Building deck…" : "Compile Project Presentation"}
+                </button>
+              </div>
+            )}
         </>
       )}
+
 
       {status === "discarded" && (
         <div className="flex items-center gap-1.5 text-muted-foreground">
