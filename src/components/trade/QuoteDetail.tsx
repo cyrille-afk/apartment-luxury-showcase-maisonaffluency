@@ -1446,10 +1446,13 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
           const inVariant = variantSwatches.some((s: any) => (s.image_url || s.imageUrl) === url);
           return inVariant ? null : url;
         })(),
-        shipOriginCountry: toIsoCountry(item.ship_origin_country ?? product?.origin ?? null, "FR"),
+        // Only surface shipping meta when the user has explicitly picked a
+        // shipping mode for this line. Otherwise leave fields null so the PDF
+        // doesn't fabricate a "Shipping: FR" row from catalogue defaults.
+        shipOriginCountry: item.ship_mode ? toIsoCountry(item.ship_origin_country ?? product?.origin ?? null, "FR") : null,
         shipMode: item.ship_mode || null,
-        shipCbm: item.ship_cbm != null ? Number(item.ship_cbm) : null,
-        shipWeightKg: item.ship_weight_kg != null ? Number(item.ship_weight_kg) : null,
+        shipCbm: item.ship_mode && item.ship_cbm != null ? Number(item.ship_cbm) : null,
+        shipWeightKg: item.ship_mode && item.ship_weight_kg != null ? Number(item.ship_weight_kg) : null,
       };
     });
     const statusEntry = STATUS_BADGE[quoteStatus] ?? { label: quoteStatus, cls: "" };
