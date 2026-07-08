@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { Link } from "react-router-dom";
-import { Plus, FolderOpen, Loader2, Calendar, MapPin, User as UserIcon, Users, EyeOff } from "lucide-react";
+import { Plus, FolderOpen, Loader2, Calendar, MapPin, User as UserIcon, Users, EyeOff, Trash2 } from "lucide-react";
 import { useProjects } from "@/hooks/useProjects";
 import { useAuth } from "@/hooks/useAuth";
 import { useStudio } from "@/hooks/useStudio";
@@ -9,6 +9,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Label } from "@/components/ui/label";
 import ClientPicker, { type PickedClient } from "@/components/trade/ClientPicker";
 import { toast } from "sonner";
@@ -71,6 +75,14 @@ export default function TradeProjects() {
     toast.success("Project created");
     setName(""); setClient(null); setLocation("");
     setDialogOpen(false);
+    refresh();
+  };
+
+  const handleDelete = async (id: string, name: string) => {
+    if (!canEdit) { toast.error("Your role doesn't allow deleting projects"); return; }
+    const { error } = await supabase.from("projects" as any).delete().eq("id", id);
+    if (error) { toast.error("Could not delete project"); return; }
+    toast.success(`Deleted "${name}"`);
     refresh();
   };
 
@@ -219,46 +231,79 @@ export default function TradeProjects() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {filtered.map((p) => (
-            <Link
+            <div
               key={p.id}
-              to={`/trade/projects/${p.id}`}
-              className="group block border border-border rounded-md overflow-hidden bg-background hover:shadow-md transition-shadow"
+              className="group relative border border-border rounded-md overflow-hidden bg-background hover:shadow-md transition-shadow"
             >
-              <div className="aspect-[4/3] bg-muted relative overflow-hidden">
-                {p.cover_image_url ? (
-                  <img
-                    src={p.cover_image_url}
-                    alt={p.name}
-                    className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-500"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <FolderOpen className="h-10 w-10 text-muted-foreground/40" />
-                  </div>
-                )}
-              </div>
-              <div className="p-4">
-                <h3 className="font-display text-base text-foreground truncate mb-1">{p.name}</h3>
-                <div className="space-y-1 text-xs text-muted-foreground font-body">
-                  {p.client_name && (
-                    <div className="flex items-center gap-1.5 truncate">
-                      <UserIcon className="h-3 w-3 shrink-0" /> {p.client_name}
-                    </div>
-                  )}
-                  {p.location && (
-                    <div className="flex items-center gap-1.5 truncate">
-                      <MapPin className="h-3 w-3 shrink-0" /> {p.location}
-                    </div>
-                  )}
-                  {p.target_completion_date && (
-                    <div className="flex items-center gap-1.5">
-                      <Calendar className="h-3 w-3 shrink-0" />
-                      {new Date(p.target_completion_date).toLocaleDateString()}
+              <Link to={`/trade/projects/${p.id}`} className="block">
+                <div className="aspect-[4/3] bg-muted relative overflow-hidden">
+                  {p.cover_image_url ? (
+                    <img
+                      src={p.cover_image_url}
+                      alt={p.name}
+                      className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-500"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <FolderOpen className="h-10 w-10 text-muted-foreground/40" />
                     </div>
                   )}
                 </div>
-              </div>
-            </Link>
+                <div className="p-4">
+                  <h3 className="font-display text-base text-foreground truncate mb-1">{p.name}</h3>
+                  <div className="space-y-1 text-xs text-muted-foreground font-body">
+                    {p.client_name && (
+                      <div className="flex items-center gap-1.5 truncate">
+                        <UserIcon className="h-3 w-3 shrink-0" /> {p.client_name}
+                      </div>
+                    )}
+                    {p.location && (
+                      <div className="flex items-center gap-1.5 truncate">
+                        <MapPin className="h-3 w-3 shrink-0" /> {p.location}
+                      </div>
+                    )}
+                    {p.target_completion_date && (
+                      <div className="flex items-center gap-1.5">
+                        <Calendar className="h-3 w-3 shrink-0" />
+                        {new Date(p.target_completion_date).toLocaleDateString()}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </Link>
+              {canEdit && (
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <button
+                      type="button"
+                      onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                      aria-label={`Delete ${p.name}`}
+                      title="Delete project"
+                      className="absolute top-2 right-2 h-8 w-8 inline-flex items-center justify-center rounded-full bg-background/90 backdrop-blur border border-border text-muted-foreground hover:text-destructive hover:border-destructive/40 opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Delete "{p.name}"?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This permanently deletes the project. Linked quotes, mood boards, and tearsheets stay in your account but are detached from this project.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        onClick={() => handleDelete(p.id, p.name)}
+                      >
+                        Delete project
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              )}
+            </div>
           ))}
         </div>
       )}
