@@ -178,11 +178,26 @@ export function PickAssetDrawer({ pickId, title }: Props) {
       const pickRow = (pickRes.data as any) || null;
       const sv = (pickRow?.size_variants as any[]) || [];
       const axes = computeVariantAxes(sv);
+      // Extract unique coupled (base, top) pairs from size_variants. These
+      // are the only valid combinations when the design-editor product sheet
+      // has locked base × top together (e.g. Praia da Granja: Walnut ↔ Pall
+      // Stone, Black Pepper Oak ↔ Nero Marquina). Base and Top can never be
+      // chosen independently for such picks.
+      const pairSet = new Map<string, { base: string; top: string }>();
+      for (const v of sv) {
+        const b = (v?.base ?? "").trim();
+        const t = (v?.top ?? "").trim();
+        if (b && t) {
+          const key = `${b.toLowerCase()}||${t.toLowerCase()}`;
+          if (!pairSet.has(key)) pairSet.set(key, { base: b, top: t });
+        }
+      }
       setPickAxes({
         baseOptions: axes.baseOptions || [],
         topOptions: axes.topOptions || [],
         baseAxisLabel: pickRow?.base_axis_label ?? null,
         topAxisLabel: pickRow?.top_axis_label ?? null,
+        pairs: Array.from(pairSet.values()),
       });
 
       setLoading(false);
