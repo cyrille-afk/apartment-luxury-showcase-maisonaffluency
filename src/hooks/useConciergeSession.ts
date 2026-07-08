@@ -44,6 +44,13 @@ export type ConciergeSession = {
    * topic key (`concierge:${streamId}`) for bidirectional handoff.
    */
   streamId?: string | null;
+  /**
+   * Human-readable project / client-folder name the architect gave to this
+   * session (e.g. "Apt 4B"). Set once after the first finish lock; reused
+   * across every subsequent tearsheet + Add-to-Project action in the same
+   * chat so the AI can say "Add this to the Apt 4B folder as well?".
+   */
+  projectName?: string | null;
 };
 
 const STORAGE_KEY = "concierge:session";
