@@ -798,6 +798,7 @@ export function PickAssetDrawer({ pickId, title }: Props) {
               <AddToProjectPopover
                 productId={tradeMeta.tradeProductId}
                 productName={title}
+                defaultProjectName={projectName || undefined}
               >
                 <button
                   type="button"
