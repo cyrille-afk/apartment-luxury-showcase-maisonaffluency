@@ -584,10 +584,15 @@ export function BriefBuilder({
       const normalizedTemplate = DEFAULT_VALUES.block2.typology.replace(/[\[\]]/g, "").trim().toLowerCase();
       const normalizedTypology = typText.replace(/[\[\]]/g, "").trim().toLowerCase();
       const isPlaceholder = !normalizedTypology || normalizedTypology === normalizedTemplate;
-      if (!isPlaceholder) {
+      // Only auto-seed References when the user hasn't picked any brand yet.
+      // Once they select even one brand, we respect their curation and never
+      // silently merge anchor brands on subsequent typology edits.
+      const currentRefs = parseReferenceBrands(nextValues.block3.references);
+      const refsIsEmpty = currentRefs.length === 0;
+      if (!isPlaceholder && refsIsEmpty) {
         const suggested = suggestBrandsFromTypology(typText);
         if (suggested.length) {
-          const nextReferences = mergeReferenceBrands(nextValues.block3.references, suggested);
+          const nextReferences = mergeReferenceBrands("", suggested);
           nextValues = {
             ...nextValues,
             block3: { ...nextValues.block3, references: nextReferences },
