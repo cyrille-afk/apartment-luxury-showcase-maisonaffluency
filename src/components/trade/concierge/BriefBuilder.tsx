@@ -797,7 +797,26 @@ export function BriefBuilder({
       </div>
 
       <div className="space-y-4">
-        <section>
+        {(prefix || suffix) && (
+          <section>
+            <div className="mb-2 font-heading text-[12px] font-semibold text-accent">
+              Notes
+            </div>
+            <textarea
+              value={[prefix, suffix].filter(Boolean).join("\n\n")}
+              onChange={(e) => {
+                const next = e.target.value;
+                setPrefix(next);
+                setSuffix("");
+                emit(values, next, "");
+              }}
+              rows={4}
+              className="w-full rounded-md border border-accent/30 bg-background/60 p-2 font-body text-[12px] outline-none focus:border-accent"
+              placeholder="Free-form notes captured from your paste…"
+            />
+          </section>
+        )}
+
           <SectionHeader
             title={UI_BLOCK_LABELS.block1}
             open={expanded.block1}
