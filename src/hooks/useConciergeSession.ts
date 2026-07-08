@@ -124,6 +124,7 @@ function ensureSession(existing: ConciergeSession | null): ConciergeSession {
     boardId: null,
     quoteId: null,
     streamId: null,
+    projectName: null,
   };
 }
 
