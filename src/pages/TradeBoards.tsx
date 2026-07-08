@@ -152,7 +152,7 @@ const TradeBoards = () => {
     setCreating(true);
     const { data, error } = await supabase
       .from("client_boards")
-      .insert({ user_id: user.id, studio_id: currentStudio?.id ?? null, title: title.trim(), client_name: clientName.trim(), client_email: clientEmail.trim() || null } as any)
+      .insert({ user_id: user.id, studio_id: currentStudio?.id ?? null, title: title.trim(), client_id: clientId, client_name: clientName.trim(), client_email: clientEmail.trim() || null } as any)
       .select()
       .single();
     setCreating(false);
@@ -160,7 +160,7 @@ const TradeBoards = () => {
       toast({ title: "Error", description: error.message, variant: "destructive" });
     } else {
       setCreateOpen(false);
-      setTitle(""); setClientName(""); setClientEmail("");
+      setTitle(""); setClientId(null); setClientName(""); setClientEmail("");
       navigate(`/trade/boards/${data.id}`);
     }
   };
