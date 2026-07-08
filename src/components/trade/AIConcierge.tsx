@@ -2858,10 +2858,47 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
                     key={i}
                     data={data}
                     resolved={item.resolved}
-                    onGenerate={() => {
+                    onGenerate={async () => {
                       resolveAt("generated");
-                      const prompt = `Generate a tearsheet for ${data.productName}${finishSummary ? ` — ${finishSummary}` : ""}. Lock in the current trade price${data.tradePriceLabel ? ` (${data.tradePriceLabel})` : ""}${data.leadTimeLabel ? ` and ${data.leadTimeLabel} lead time` : ""}.`;
-                      void sendRef.current?.(prompt, { displayText: "Generate tearsheet with current finish selection" });
+                      // Direct edge-function call so the exact finish selection is
+                      // persisted on the board item (bypasses the LLM which can't
+                      // see the fabric/base/top labels the user just picked).
+                      try {
+                        const title = `${data.productName}${finishSummary ? ` — ${finishSummary}` : ""}`.slice(0, 120);
+                        const { data: res, error } = await supabase.functions.invoke("trade-concierge-commit", {
+                          body: {
+                            tool: "propose_tearsheet",
+                            args: {
+                              title,
+                              pick_ids: [data.productId],
+                              finishes: [{
+                                pick_id: data.productId,
+                                variant_label: data.topLabel || null,
+                                fabric_label: data.fabricLabel || null,
+                                wood_label: data.baseLabel || null,
+                              }],
+                            },
+                          },
+                        });
+                        if (error) throw error;
+                        const url: string | undefined = (res as any)?.url;
+                        setTimeline((prev) => {
+                          const copy = prev.slice();
+                          copy.push({
+                            kind: "msg",
+                            role: "assistant",
+                            content: url
+                              ? `✓ Tearsheet locked in with ${finishSummary || "your current selection"}. [Open tearsheet](${url})`
+                              : "✓ Tearsheet saved with your current finish selection.",
+                          });
+                          return copy;
+                        });
+                      } catch (err) {
+                        console.error("proactive tearsheet direct commit failed", err);
+                        // Fallback to LLM path
+                        const prompt = `Generate a tearsheet for ${data.productName}${finishSummary ? ` — ${finishSummary}` : ""}. Lock in the current trade price${data.tradePriceLabel ? ` (${data.tradePriceLabel})` : ""}${data.leadTimeLabel ? ` and ${data.leadTimeLabel} lead time` : ""}.`;
+                        void sendRef.current?.(prompt, { displayText: "Generate tearsheet with current finish selection" });
+                      }
                     }}
                     onAddToBoard={() => {
                       resolveAt("boarded");
