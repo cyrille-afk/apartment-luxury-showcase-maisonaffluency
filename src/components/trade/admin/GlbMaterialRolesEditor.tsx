@@ -1,9 +1,46 @@
 import { useEffect, useState } from "react";
-import { Loader2, Check, Eye, EyeOff } from "lucide-react";
+import { Loader2, Check, Eye, EyeOff, Wand2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
 type MaterialRole = "fabric" | "base" | "top" | "ignore";
+
+/**
+ * Heuristic name-based role detection. Returns null when the material name is
+ * opaque (UUID-like, generic "Material_23", etc.) and no confident guess can
+ * be made — in which case the admin must tag it manually.
+ *
+ * Token buckets are ordered by specificity: "tabletop" before "table" before
+ * "top" so a mesh named "table_base" doesn't get mis-tagged as a top.
+ */
+export function autoDetectRoleFromName(rawName: string): MaterialRole | null {
+  const name = rawName.toLowerCase();
+  // Reject opaque CAD IDs (long hex, uuid fragments, "material_23").
+  if (/^[0-9a-f]{8,}(-[0-9a-f]+)*$/i.test(rawName)) return null;
+  if (/^(mesh|material|object|node)[_\-]?\d+$/i.test(rawName)) return null;
+
+  const has = (...tokens: string[]) =>
+    tokens.some((t) => new RegExp(`(^|[^a-z])${t}([^a-z]|$)`, "i").test(name));
+
+  // Fabric first — upholstery is unambiguous.
+  if (has("fabric", "upholstery", "cushion", "seat", "leather", "textile", "cloth")) return "fabric";
+
+  // Top: slab / surface / stone-family keywords.
+  if (
+    has("tabletop", "table_top", "top", "surface", "slab", "worktop", "counter") ||
+    has("marble", "onyx", "stone", "granite", "travertine", "quartz", "glass")
+  )
+    return "top";
+
+  // Base: structural / leg / frame keywords.
+  if (
+    has("base", "frame", "leg", "legs", "plinth", "foot", "footing", "pedestal", "support", "structure", "chassis") ||
+    has("brass", "metal", "steel", "bronze", "iron", "wood", "oak", "walnut", "ash")
+  )
+    return "base";
+
+  return null;
+}
 
 interface Props {
   variantId: string;
