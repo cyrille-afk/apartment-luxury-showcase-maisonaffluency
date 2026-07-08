@@ -1020,6 +1020,60 @@ const TradeProductPage: React.FC = () => {
     }
   }, [user, data, activeQuoteId, toast, selectedBase, selectedTop, selectedBaseDisplay, selectedTopDisplay, selectedSwatchGalleryIndices, selectedSwatchGalleryName, selectedDualSize, selectedSingleMaterial, selectedSingleSize, selectedVariantIdx, rugSelection, selectedFabric, selectedWoodPrice, fxRates, displayCurrency, finishesMissingImages, activeVariantCents]);
 
+  // Preselect Base/Top/Size (dual-axis) or Material/Size (single-axis) from
+  // URL query params — used when the concierge 3D drawer deep-links here so
+  // the on-page price reflects the finishes the architect just chose.
+  // Runs BEFORE the auto-default effect so ?base=/?top= take priority.
+  useEffect(() => {
+    const sv = data?.pricing?.size_variants;
+    if (!sv || !sv.length) return;
+    if (selectedBase || selectedTop || selectedSingleMaterial || selectedDualSize) return;
+    const qp = new URLSearchParams(location.search);
+    const qBase = qp.get("base");
+    const qTop = qp.get("top");
+    const qSize = qp.get("size");
+    const qMaterial = qp.get("material");
+    if (!qBase && !qTop && !qSize && !qMaterial) return;
+    const norm = (s: string | null | undefined) => (s ?? "").trim().toLowerCase();
+    const matchName = (candidate: string | null, values: (string | undefined)[]) => {
+      if (!candidate) return null;
+      const c = norm(candidate);
+      for (const v of values) {
+        if (!v) continue;
+        const vn = norm(v);
+        if (vn === c || vn.includes(c) || c.includes(vn)) return v;
+      }
+      return null;
+    };
+    const svArr = sv as any[];
+    if (qBase || qTop) {
+      const baseVal = matchName(qBase, svArr.map((v) => v?.base)) ?? qBase;
+      const topVal = matchName(qTop, svArr.map((v) => v?.top)) ?? qTop;
+      if (baseVal) setSelectedBase(baseVal);
+      if (topVal) setSelectedTop(topVal);
+      if (qSize) setSelectedDualSize(qSize);
+      const rawMap = (data?.product as any)?.variant_image_map;
+      const finishMap = buildProductFinishMap(rawMap);
+      const imgCount = ((data?.product as any)?.gallery_images?.length) ||
+        ([(data?.product as any)?.image_url, (data?.product as any)?.hover_image_url].filter(Boolean).length);
+      const idx = resolveVariantImageIndex(finishMap, {
+        base: baseVal || undefined,
+        top: topVal || undefined,
+        size: qSize || undefined,
+        variants: svArr as any,
+        imageCount: imgCount,
+      });
+      if (idx !== undefined) {
+        setGalleryActiveIndex(idx);
+        setGalleryJumpNonce((n) => n + 1);
+      }
+    } else if (qMaterial || qSize) {
+      if (qMaterial) setSelectedSingleMaterial(qMaterial);
+      if (qSize) setSelectedSingleSize(qSize);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data?.product?.id]);
+
   // Default the dual-axis pickers to the first base + its uniquely-compatible
   // top so users see a complete pairing on load (e.g. Pars Cocktail Table:
   // "Aged Brass + Bisque Leather" → "Paglierino Travertine"). Picking the
