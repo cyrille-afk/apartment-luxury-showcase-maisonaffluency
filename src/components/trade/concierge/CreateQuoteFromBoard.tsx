@@ -29,6 +29,9 @@ interface BoardItemLite {
   id: string;
   product_id: string;
   approval_status: string;
+  variant_label?: string | null;
+  fabric_label?: string | null;
+  wood_label?: string | null;
 }
 
 interface BoardLite {
