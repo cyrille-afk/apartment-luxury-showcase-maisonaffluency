@@ -584,17 +584,6 @@ const TradeBoardBuilder = () => {
                 </Button>
               </>
             )}
-            {!isEditable && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="gap-1.5 text-xs text-destructive hover:text-destructive"
-                onClick={deleteBoard}
-                title="Delete converted folder"
-              >
-                <Trash2 className="h-3.5 w-3.5" /> Delete
-              </Button>
-            )}
           </div>
         </div>
 
