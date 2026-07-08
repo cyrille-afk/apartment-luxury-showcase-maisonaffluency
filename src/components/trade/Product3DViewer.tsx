@@ -382,9 +382,19 @@ const Product3DViewer: React.FC<Props> = ({
           fellBackToAll: false,
           keywords: hasExplicitRoles ? ["(explicit role map)"] : baseKeywords,
         },
+        top: {
+          matched: topMatched.map((m) => String(m?.name || "(unnamed)")),
+          fellBackToAll: false,
+          keywords: hasExplicitRoles ? ["(explicit role map)"] : topKeywords,
+        },
       });
-      setAutoTagged(!hasExplicitRoles && (fabricMatched.length > 0 || baseMatched.length > 0));
-      setNoTargets(fabricMatched.length === 0 && baseMatched.length === 0);
+      setAutoTagged(
+        !hasExplicitRoles &&
+          (fabricMatched.length > 0 || baseMatched.length > 0 || topMatched.length > 0),
+      );
+      setNoTargets(
+        fabricMatched.length === 0 && baseMatched.length === 0 && topMatched.length === 0,
+      );
 
 
 
@@ -401,6 +411,12 @@ const Product3DViewer: React.FC<Props> = ({
         } else {
           for (const m of baseTargets) restoreOne(m);
         }
+        // Top layer
+        if (topTextureUrl) {
+          await applyOne(topTargets, topTextureUrl);
+        } else {
+          for (const m of topTargets) restoreOne(m);
+        }
       } catch (err) {
         // eslint-disable-next-line no-console
         console.warn("[Product3DViewer] Failed to apply texture", err);
@@ -409,7 +425,7 @@ const Product3DViewer: React.FC<Props> = ({
 
     applyTextures();
     return () => { cancelled = true; };
-  }, [opened, ready, fabricTextureUrl, baseTextureUrl, fabricMaterialNameIncludes, baseMaterialNameIncludes, materialRoles, hasExplicitRoles, onMaterialsDiscovered, url]);
+  }, [opened, ready, fabricTextureUrl, baseTextureUrl, topTextureUrl, fabricMaterialNameIncludes, baseMaterialNameIncludes, topMaterialNameIncludes, materialRoles, hasExplicitRoles, onMaterialsDiscovered, url]);
 
   // Reset cached originals whenever the model URL changes.
   useEffect(() => {
