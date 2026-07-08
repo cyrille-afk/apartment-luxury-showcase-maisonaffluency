@@ -92,6 +92,7 @@ export function GlbMaterialRolesEditor({
   identifying,
 }: Props) {
   const [roles, setRoles] = useState<Record<string, MaterialRole>>({});
+  const [autoInfo, setAutoInfo] = useState<Record<string, AutoDetectResult>>({});
   const [saving, setSaving] = useState(false);
   const [dirty, setDirty] = useState(false);
 
@@ -99,6 +100,7 @@ export function GlbMaterialRolesEditor({
   useEffect(() => {
     const hasSaved = !!initialRoles && Object.keys(initialRoles).length > 0;
     const next: Record<string, MaterialRole> = {};
+    const info: Record<string, AutoDetectResult> = {};
     let autoTagged = 0;
     for (const name of materialNames) {
       const existing = initialRoles?.[name];
@@ -106,13 +108,17 @@ export function GlbMaterialRolesEditor({
         next[name] = existing;
       } else {
         const guess = autoDetectRoleFromName(name);
-        next[name] = guess ?? "ignore";
-        if (guess) autoTagged += 1;
+        if (guess) {
+          next[name] = guess.role;
+          info[name] = guess;
+          autoTagged += 1;
+        } else {
+          next[name] = "ignore";
+        }
       }
     }
     setRoles(next);
-    // If nothing was ever saved and we auto-tagged at least one mesh, mark
-    // dirty so the admin can just review + hit Save.
+    setAutoInfo(info);
     setDirty(!hasSaved && autoTagged > 0);
     onChange(next);
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -121,18 +127,27 @@ export function GlbMaterialRolesEditor({
   const setRole = (name: string, role: MaterialRole) => {
     const next = { ...roles, [name]: role };
     setRoles(next);
+    // Manual override clears the auto-detect provenance for that mesh.
+    if (autoInfo[name]) {
+      const { [name]: _drop, ...rest } = autoInfo;
+      setAutoInfo(rest);
+    }
     setDirty(true);
     onChange(next);
   };
 
   const runAutoDetect = () => {
     const next: Record<string, MaterialRole> = { ...roles };
+    const info: Record<string, AutoDetectResult> = { ...autoInfo };
     let changed = 0;
     for (const name of materialNames) {
       const guess = autoDetectRoleFromName(name);
-      if (guess && next[name] !== guess) {
-        next[name] = guess;
+      if (guess && next[name] !== guess.role) {
+        next[name] = guess.role;
+        info[name] = guess;
         changed += 1;
+      } else if (guess) {
+        info[name] = guess;
       }
     }
     if (changed === 0) {
@@ -140,6 +155,7 @@ export function GlbMaterialRolesEditor({
       return;
     }
     setRoles(next);
+    setAutoInfo(info);
     setDirty(true);
     onChange(next);
     toast.success(`Auto-detected ${changed} material${changed === 1 ? "" : "s"} from names`);
