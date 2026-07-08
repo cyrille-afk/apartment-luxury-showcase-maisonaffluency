@@ -181,6 +181,7 @@ export function GlbMaterialRolesEditor({
           {saving ? <Loader2 size={11} className="animate-spin" /> : <Check size={11} />}
           {dirty ? "Save" : "Saved"}
         </button>
+        </div>
       </div>
       <div className="space-y-1.5">
         {materialNames.map((name) => {
