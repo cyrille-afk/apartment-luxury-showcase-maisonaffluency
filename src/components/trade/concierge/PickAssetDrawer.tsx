@@ -894,6 +894,7 @@ export function PickAssetDrawer({ pickId, title }: Props) {
                 if (selectedBaseAxis) p.set("base", selectedBaseAxis);
                 if (selectedTopAxis) p.set("top", selectedTopAxis);
                 if (selectedDualSize) p.set("size", selectedDualSize);
+                if (fabricSwatch?.name) p.set("fabric", fabricSwatch.name);
                 const qs = p.toString();
                 return `/trade/products/${tradeMeta.tradeProductId}${qs ? `?${qs}` : ""}`;
               })()}
