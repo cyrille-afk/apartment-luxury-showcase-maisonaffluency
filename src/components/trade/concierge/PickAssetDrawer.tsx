@@ -672,7 +672,7 @@ export function PickAssetDrawer({ pickId, title }: Props) {
           {canDraft && (
             <div className="mt-1 rounded-md border border-border/60 bg-background/60 px-2.5 py-2 space-y-1">
               <div className="font-display text-[9px] uppercase tracking-widest text-muted-foreground">
-                Locked Selection
+                Current Selection
               </div>
               <dl className="grid grid-cols-[auto,1fr] gap-x-2 gap-y-0.5 font-body text-[10px] leading-tight text-foreground">
                 <dt className="text-muted-foreground">SKU</dt>
@@ -691,12 +691,12 @@ export function PickAssetDrawer({ pickId, title }: Props) {
                 )}
                 <dt className="text-muted-foreground">Trade Price</dt>
                 <dd>
-                  {tradeMeta.tradePriceCents
+                  {livePriceCents
                     ? `${
                         tradeMeta.currency === "USD" ? "$" :
                         tradeMeta.currency === "GBP" ? "£" :
                         tradeMeta.currency === "SGD" ? "S$" : "€"
-                      }${(tradeMeta.tradePriceCents / 100).toLocaleString()}`
+                      }${(livePriceCents / 100).toLocaleString()}${variantMatch ? "" : sizeVariants.some((v) => v.price_cents) ? " (base)" : ""}`
                     : "Price on Request"}
                 </dd>
                 <dt className="text-muted-foreground">Lead Time</dt>
