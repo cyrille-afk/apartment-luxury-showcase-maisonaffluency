@@ -422,7 +422,7 @@ export function PickAssetDrawer({ pickId, title }: Props) {
   // from full `designer_curator_picks.size_variants` (the public view strips
   // `price_cents`), then fall back to partial/min/base RRP exactly as the page does.
   const norm = (s: string | null | undefined) => (s ?? "").trim().toLowerCase();
-  const axesForPricing = useMemo(() => computeVariantAxes(sizeVariants as any), [sizeVariants]);
+  const axesForPricing = computeVariantAxes(sizeVariants as any);
   const matchAxisValue = (candidate: string | null, values: string[]) => {
     if (!candidate) return null;
     const c = norm(candidate);
