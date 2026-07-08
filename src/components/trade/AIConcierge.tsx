@@ -123,7 +123,7 @@ function extractCeilingLabel(text: string): string | null {
 }
 
 function extractVibeLabel(text: string): string | null {
-  const m = text.replace(/\s+/g, " ").match(/\b(?:in|with)\s+(?:an?\s+)?([a-z][a-z\s-]{2,80}?)\s+(?:manner|style|vibe|atmosphere|aesthetic)\b/i);
+  const m = text.replace(/\s+/g, " ").match(/\b(?:in|with)\s+(?:an?\s+)?((?:(?!\b(?:in|with)\b)[a-z-]+\s+){0,6}[a-z-]+)\s+(?:manner|style|vibe|atmosphere|aesthetic)\b/i);
   return m ? m[1].replace(/\s+/g, " ").trim().toLowerCase() : null;
 }
 
