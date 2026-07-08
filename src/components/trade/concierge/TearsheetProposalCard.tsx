@@ -862,21 +862,6 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
             </button>
             <button
               type="button"
-              onClick={handleCritiqueEdits}
-              disabled={excluded.size === 0 && locked.size === 0}
-              className="inline-flex items-center gap-1.5 rounded-full border border-border text-muted-foreground font-body text-[11px] uppercase tracking-widest px-3 py-1.5 hover:text-foreground hover:bg-muted/40 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-              title={
-                excluded.size === 0 && locked.size === 0
-                  ? "Skip or lock a piece to give the critique something to react to"
-                  : "Ask the concierge to critique how your edits shift the design"
-              }
-              aria-label="Critique my edits"
-            >
-              <MessageSquare className="h-3 w-3" />
-              Critique my edits
-            </button>
-            <button
-              type="button"
               onClick={handleValidate}
               disabled={pendingChangesCount === 0 || verdictLoading}
               className={cn(
