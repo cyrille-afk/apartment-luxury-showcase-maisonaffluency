@@ -866,6 +866,7 @@ function drawTable(
   images: (Awaited<ReturnType<typeof fetchImageDataUrl>>)[],
   finishSwatches: (Awaited<ReturnType<typeof fetchImageDataUrl>>)[][],
   fabricSwatches: (Awaited<ReturnType<typeof fetchImageDataUrl>>)[],
+  finishSwatchNames: string[][],
 ): number {
   // Columns: Image | Description (flex) | Qty | Unit | Amount
   const colImg = 56;
