@@ -594,6 +594,83 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
     onResolved?.("discarded");
   };
 
+  /**
+   * Compile every board in a project into a single client-ready presentation.
+   * Creates a `presentations` row titled after the project, then one slide per
+   * board with `linked_product_ids` seeded from that board's items — the trade
+   * user only has to review + publish.
+   */
+  const handleBuildProjectDeck = async (projectId: string, projectDisplayName: string) => {
+    if (deckBuilding) return;
+    setDeckBuilding(true);
+    try {
+      const { data: userRes } = await supabase.auth.getUser();
+      const uid = userRes.user?.id;
+      if (!uid) {
+        toast.error("Sign in to build a project presentation.");
+        setDeckBuilding(false);
+        return;
+      }
+      // Fetch every board in this project (client_boards) with its items.
+      const { data: boards } = await supabase
+        .from("client_boards")
+        .select("id, title, created_at")
+        .eq("project_id", projectId)
+        .order("created_at", { ascending: true });
+      if (!boards || boards.length === 0) {
+        toast.error("No tearsheets in this project yet.");
+        setDeckBuilding(false);
+        return;
+      }
+      const boardIds = boards.map((b: any) => b.id);
+      const { data: items } = await supabase
+        .from("client_board_items")
+        .select("board_id, product_id, sort_order")
+        .in("board_id", boardIds)
+        .order("sort_order", { ascending: true });
+      const itemsByBoard = new Map<string, string[]>();
+      (items || []).forEach((row: any) => {
+        const arr = itemsByBoard.get(row.board_id) ?? [];
+        arr.push(row.product_id);
+        itemsByBoard.set(row.board_id, arr);
+      });
+
+      const { data: pres, error: presErr } = await (supabase as any)
+        .from("presentations")
+        .insert({
+          title: projectDisplayName,
+          project_name: projectDisplayName,
+          created_by: uid,
+        })
+        .select("id")
+        .single();
+      if (presErr || !pres) {
+        toast.error(presErr?.message || "Failed to create presentation");
+        setDeckBuilding(false);
+        return;
+      }
+
+      const slides = boards.map((b: any, idx: number) => ({
+        presentation_id: pres.id,
+        title: b.title,
+        project_name: projectDisplayName,
+        sort_order: idx,
+        linked_product_ids: itemsByBoard.get(b.id) ?? [],
+      }));
+      if (slides.length > 0) {
+        await (supabase as any).from("presentation_slides").insert(slides);
+      }
+      toast.success(`Project deck created with ${slides.length} slide${slides.length === 1 ? "" : "s"}.`);
+      try { window.dispatchEvent(new Event("concierge:close")); } catch {}
+      navigate(`/trade/presentations/${pres.id}`);
+    } catch (e) {
+      toast.error(`Deck build failed: ${(e as Error)?.message || "unknown"}`);
+    } finally {
+      setDeckBuilding(false);
+    }
+  };
+
+
   const headerLabel = isAppend
     ? "✦ Concierge proposes adding to your tearsheet"
     : "✦ Concierge proposes a new tearsheet";
