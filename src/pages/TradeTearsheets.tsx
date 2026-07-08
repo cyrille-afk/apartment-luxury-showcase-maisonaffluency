@@ -58,6 +58,20 @@ const splitFinishTokens = (...values: Array<string | null | undefined>) =>
 const isCombinedFinishLabel = (value: string | null | undefined) =>
   /\s+[·•]\s+/.test(String(value || ""));
 
+const meaningfulFinishWords = (value: string) =>
+  normalizeFinishText(value)
+    .split(/\s+/)
+    .filter((word) => word.length > 2 && !["cat", "fabric", "leather", "com", "finish", "upholstery"].includes(word));
+
+const finishTokenMatchesField = (token: string, field: string) => {
+  if (!token || !field) return false;
+  if (field === token || field.includes(token) || token.includes(field)) return true;
+  const tokenWords = meaningfulFinishWords(token);
+  if (tokenWords.length === 0) return false;
+  const fieldWords = new Set(meaningfulFinishWords(field));
+  return tokenWords.some((word) => fieldWords.has(word));
+};
+
 function resolveSnapshotVariantPrice(
   variants: TearsheetProduct["size_variants"],
   finishes: { variant: string | null; wood: string | null; fabric: string | null },
@@ -72,7 +86,7 @@ function resolveSnapshotVariantPrice(
     if (!(cents > 0)) continue;
     const fields = [v?.label, v?.base, v?.top].map(normalizeFinishText).filter(Boolean);
     const score = wanted.reduce(
-      (sum, token) => sum + (fields.some((field) => field === token || field.includes(token) || token.includes(field)) ? 1 : 0),
+      (sum, token) => sum + (fields.some((field) => finishTokenMatchesField(token, field)) ? 1 : 0),
       0,
     );
     if (score > 0 && (!best || score > best.score)) best = { cents, score };
