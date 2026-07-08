@@ -342,8 +342,19 @@ export function PickAssetDrawer({ pickId, title }: Props) {
   const useCoupled =
     !topAxisIsFabric && combinations.length >= 2 && !!pickAxes.baseAxisLabel && !!pickAxes.topAxisLabel;
 
+  // Resolve which GLB variant should render: user-selected label wins; otherwise
+  // the row flagged is_default; otherwise the first row.
+  const activeGlbVariant = useMemo(() => {
+    if (glbVariants.length === 0) return null;
+    if (selectedGlbLabel) {
+      const hit = glbVariants.find((v) => v.label === selectedGlbLabel);
+      if (hit) return hit;
+    }
+    return glbVariants.find((v) => v.is_default) || glbVariants[0];
+  }, [glbVariants, selectedGlbLabel]);
+  const glbUrl = activeGlbVariant?.glb_url ?? null;
+  const materialRoles = activeGlbVariant?.material_roles || undefined;
   const hasGlb = !!glbUrl;
-  const hasSwatches = swatches.length > 0;
 
   if (!loading && !hasGlb && !hasSwatches) {
     return (
