@@ -279,13 +279,14 @@ const Product3DViewer: React.FC<Props> = ({
 
       const fabricKeywords = toList(fabricMaterialNameIncludes) ?? FABRIC_KEYWORDS.map((k) => k.toLowerCase());
       const baseKeywords = toList(baseMaterialNameIncludes) ?? BASE_KEYWORDS.map((k) => k.toLowerCase());
+      const topKeywords = toList(topMaterialNameIncludes) ?? TOP_KEYWORDS.map((k) => k.toLowerCase());
 
       const matchAnyIdentifier = (m: any, kws: string[]) => {
         const ids = identifiersFor(m);
         return ids.some((id) => kws.some((k) => id.includes(k)));
       };
 
-      const roleOf = (m: any): "fabric" | "base" | "ignore" | null => {
+      const roleOf = (m: any): "fabric" | "base" | "top" | "ignore" | null => {
         const name = String(m?.name || "");
         if (materialRoles && Object.prototype.hasOwnProperty.call(materialRoles, name)) {
           return materialRoles[name];
@@ -311,21 +312,27 @@ const Product3DViewer: React.FC<Props> = ({
 
       let fabricMatched: any[];
       let baseMatched: any[];
+      let topMatched: any[];
       let ignored: any[];
 
       if (hasExplicitRoles) {
         // Explicit map wins. Unmapped materials default to "ignore".
         fabricMatched = materials.filter((m) => roleOf(m) === "fabric");
         baseMatched = materials.filter((m) => roleOf(m) === "base");
+        topMatched = materials.filter((m) => roleOf(m) === "top");
         ignored = materials.filter((m) => (roleOf(m) ?? "ignore") === "ignore");
       } else {
         // Tier 1: keyword match against material name + texture image URI.
         fabricMatched = materials.filter((m) => matchAnyIdentifier(m, fabricKeywords));
+        const topMatchedRaw = materials.filter((m) => matchAnyIdentifier(m, topKeywords));
+        topMatched = topMatchedRaw.filter((m) => !fabricMatched.includes(m));
         const baseMatchedRaw = materials.filter((m) => matchAnyIdentifier(m, baseKeywords));
-        baseMatched = baseMatchedRaw.filter((m) => !fabricMatched.includes(m));
+        baseMatched = baseMatchedRaw.filter(
+          (m) => !fabricMatched.includes(m) && !topMatched.includes(m),
+        );
 
         // Tier 2: for still-untagged materials, use baseColorFactor luminance.
-        const tagged = new Set<any>([...fabricMatched, ...baseMatched]);
+        const tagged = new Set<any>([...fabricMatched, ...baseMatched, ...topMatched]);
         for (const m of materials) {
           if (tagged.has(m)) continue;
           const guess = luminanceRole(m);
@@ -342,6 +349,7 @@ const Product3DViewer: React.FC<Props> = ({
       // fallback that made a fabric swatch retexture wood legs, etc.).
       const fabricTargets = fabricMatched;
       const baseTargets = baseMatched;
+      const topTargets = topMatched;
 
 
       const restoreOne = (m: any) => {
