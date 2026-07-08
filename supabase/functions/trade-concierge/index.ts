@@ -4604,7 +4604,20 @@ serve(async (req) => {
         .from("designers")
         .select("id, name, display_name")
         .eq("is_published", true);
-      const targetLc = mentionedDesigners.map((n) => String(n).toLowerCase().trim());
+      // BRIEF ALLOW-LIST GUARD — when the user submitted a structured brief
+      // with an explicit `REFERENCES:` line, that list is the ONLY allowed
+      // set of brands. Intersect mentionedDesigners against parsedReferenceDesigners
+      // so casual/legacy mentions (e.g. a brand named in a prior turn) can
+      // never leak into the enumeration proposal. Falls back to
+      // mentionedDesigners when no REFERENCES line is present.
+      const enumerationSourceDesigners = parsedReferenceDesigners.length > 0
+        ? (() => {
+            const allowLc = new Set(parsedReferenceDesigners.map((n) => normalizeLoose(n)));
+            const intersected = mentionedDesigners.filter((n) => allowLc.has(normalizeLoose(n)));
+            return intersected.length > 0 ? intersected : parsedReferenceDesigners;
+          })()
+        : mentionedDesigners;
+      const targetLc = enumerationSourceDesigners.map((n) => String(n).toLowerCase().trim());
       const targetIds = (designerRows || [])
         .filter((d: any) => {
           const nm = String(d.name || "").toLowerCase().trim();
@@ -4808,13 +4821,13 @@ serve(async (req) => {
         const unmetSuffix = unmetNotes.length
           ? ` Note: ${unmetNotes.join("; ")}.`
           : "";
-        const multiLabel = mentionedDesigners.length > 1
-          ? mentionedDesigners.slice(0, 3).join(" + ")
+        const multiLabel = enumerationSourceDesigners.length > 1
+          ? enumerationSourceDesigners.slice(0, 3).join(" + ")
           : designerLabel;
         const brandCountSummary = [...brandCounts.entries()]
           .sort(([a], [b]) => {
-            const ai = mentionedDesigners.findIndex((n) => normalizeLoose(n) === normalizeLoose(a));
-            const bi = mentionedDesigners.findIndex((n) => normalizeLoose(n) === normalizeLoose(b));
+            const ai = enumerationSourceDesigners.findIndex((n) => normalizeLoose(n) === normalizeLoose(a));
+            const bi = enumerationSourceDesigners.findIndex((n) => normalizeLoose(n) === normalizeLoose(b));
             if (ai !== -1 || bi !== -1) return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
             return a.localeCompare(b);
           })
