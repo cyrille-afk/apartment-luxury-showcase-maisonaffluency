@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
-import { Plus, Share2, FileText, Trash2, ExternalLink, FolderOpen } from "lucide-react";
+import { Plus, Share2, FileText, Trash2, ExternalLink, FolderOpen, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useProjectFilter } from "@/hooks/useProjectFilter";
 import { useDesignerDisplayName } from "@/hooks/useDesignerDisplayName";
