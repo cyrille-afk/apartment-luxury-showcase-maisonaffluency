@@ -166,7 +166,7 @@ export function PickAssetDrawer({ pickId, title }: Props) {
         tpId
           ? supabase
               .from("trade_product_glb_variants")
-              .select("glb_url, is_default, material_roles")
+              .select("variant_label, glb_url, is_default, material_roles")
               .eq("product_id", tpId)
           : Promise.resolve({ data: null, error: null } as any),
       ]);
@@ -174,12 +174,21 @@ export function PickAssetDrawer({ pickId, title }: Props) {
       if (cancelled) return;
       if (prodRes.error) setError(prodRes.error.message);
 
-      const variants = ((glbVarRes as any)?.data as any[]) || [];
-      const defaultVar = variants.find((v) => v.is_default) || variants[0];
-      const resolvedGlb =
-        defaultVar?.glb_url ?? ((prodRes.data as any)?.glb_url ?? null);
-      setGlbUrl(resolvedGlb);
-      setMaterialRoles(defaultVar?.material_roles || undefined);
+      const rawVariants = ((glbVarRes as any)?.data as any[]) || [];
+      const legacyGlb = (prodRes.data as any)?.glb_url ?? null;
+      const normalized = rawVariants
+        .filter((v) => !!v?.glb_url)
+        .map((v) => ({
+          label: (v.variant_label as string) || "Default",
+          glb_url: v.glb_url as string,
+          material_roles: (v.material_roles as any) || null,
+          is_default: !!v.is_default,
+        }));
+      // Fall back to the legacy single glb_url when no variants rows exist.
+      if (normalized.length === 0 && legacyGlb) {
+        normalized.push({ label: "Default", glb_url: legacyGlb, material_roles: null, is_default: true });
+      }
+      setGlbVariants(normalized);
       setPoster((prodRes.data as any)?.image_url ?? null);
       setSwatches(((swRes.data as any[]) ?? []) as Swatch[]);
 
