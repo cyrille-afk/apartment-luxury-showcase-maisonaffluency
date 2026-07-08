@@ -909,6 +909,29 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
     return () => window.removeEventListener("concierge:stage", handler as EventListener);
   }, []);
 
+  // Proactive tearsheet nudge — dispatched by product pages after a short
+  // idle following finish changes. Opens the panel and drops a lightweight
+  // spec card into the transcript. See ProactiveTearsheetCard.
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent<ProactiveTearsheetData>).detail;
+      if (!detail || !detail.productId) return;
+      setMinimized(false);
+      setOpen(true);
+      setTimeline((prev) => {
+        // Replace any previous unresolved proactive card for the same
+        // product so rapid re-nudges don't stack up.
+        const next = prev.filter(
+          (t) => !(t.kind === "proactive_tearsheet" && !t.resolved && t.data.productId === detail.productId),
+        );
+        next.push({ kind: "proactive_tearsheet", data: detail });
+        return next;
+      });
+    };
+    window.addEventListener("concierge:propose_tearsheet_proactive", handler as EventListener);
+    return () => window.removeEventListener("concierge:propose_tearsheet_proactive", handler as EventListener);
+  }, []);
+
   // Auto-close Felix while the Quick Tour is running so its panel never
   // overlaps the page being highlighted (especially the Tools step).
   useEffect(() => {
