@@ -536,6 +536,9 @@ const TradeProductPage: React.FC = () => {
   // When a wood-finish swatch carries its own frame price (product_fabrics.price_cents_a),
   // we use it as the RRP base and add the fabric per-LM upcharge on top.
   const [selectedWoodPrice, setSelectedWoodPrice] = useState<{ id: string; name: string; price_cents: number; currency: string; image_url: string | null } | null>(null);
+  // Top-axis swatch (for dual-axis Base × Top products) — drives the 3D
+  // viewer's `topTextureUrl` so the top material retextures independently.
+  const [selectedTopSwatch, setSelectedTopSwatch] = useState<{ name: string; image_url: string | null } | null>(null);
   // Names of currently-selected wood/top finish swatches that lack mapped
   // gallery images — surfaced as a note on the quote line.
   const [finishesMissingImages, setFinishesMissingImages] = useState<string[]>([]);
