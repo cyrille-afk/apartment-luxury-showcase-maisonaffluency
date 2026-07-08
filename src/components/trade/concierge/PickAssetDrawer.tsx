@@ -402,7 +402,7 @@ export function PickAssetDrawer({ pickId, title }: Props) {
                 onClick={() =>
                   setSelected(selectedId === s.fabric_id ? null : s.fabric_id)
                 }
-                className="shrink-0 w-11 flex flex-col items-center gap-0.5 group focus:outline-none"
+                className="shrink-0 w-20 flex flex-col items-center gap-0.5 group focus:outline-none"
                 title={[s.name, s.supplier, s.category].filter(Boolean).join(" · ")}
                 aria-pressed={isSelected}
               >
@@ -411,7 +411,7 @@ export function PickAssetDrawer({ pickId, title }: Props) {
                     src={s.image_url}
                     alt={s.name}
                     loading="lazy"
-                    className={`h-11 w-11 rounded object-cover bg-muted border transition-all ${
+                    className={`h-11 w-20 rounded object-cover bg-muted border transition-all ${
                       isSelected
                         ? "border-primary ring-2 ring-primary/40"
                         : "border-border/60 group-hover:border-foreground/40"
@@ -419,13 +419,13 @@ export function PickAssetDrawer({ pickId, title }: Props) {
                   />
                 ) : (
                   <div
-                    className={`h-11 w-11 rounded bg-muted border ${
+                    className={`h-11 w-20 rounded bg-muted border ${
                       isSelected ? "border-primary ring-2 ring-primary/40" : "border-border/60"
                     }`}
                   />
                 )}
                 <span
-                  className={`w-11 truncate text-center font-body text-[8px] leading-tight ${
+                  className={`w-20 whitespace-normal break-words text-center font-body text-[8px] leading-tight ${
                     isSelected ? "text-foreground" : "text-muted-foreground"
                   }`}
                 >
@@ -513,12 +513,12 @@ export function PickAssetDrawer({ pickId, title }: Props) {
                           setSelectedTopId(c.top.fabric_id);
                         }
                       }}
-                      className="shrink-0 w-24 flex flex-col items-center gap-0.5 group focus:outline-none"
+                      className="shrink-0 w-36 flex flex-col items-center gap-0.5 group focus:outline-none"
                       title={c.label}
                       aria-pressed={isSelected}
                     >
                       <div
-                        className={`flex h-11 w-24 overflow-hidden rounded border transition-all ${
+                         className={`flex h-11 w-36 overflow-hidden rounded border transition-all ${
                           isSelected
                             ? "border-primary ring-2 ring-primary/40"
                             : "border-border/60 group-hover:border-foreground/40"
@@ -536,7 +536,7 @@ export function PickAssetDrawer({ pickId, title }: Props) {
                         )}
                       </div>
                       <span
-                        className={`w-24 truncate text-center font-body text-[8px] leading-tight ${
+                         className={`w-36 whitespace-normal break-words text-center font-body text-[8px] leading-tight ${
                           isSelected ? "text-foreground" : "text-muted-foreground"
                         }`}
                       >
