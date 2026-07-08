@@ -68,6 +68,22 @@ function classifySwatch(s: Swatch): FinishRole {
  * per-row "3D & finishes" section.
  */
 export function PickAssetDrawer({ pickId, title }: Props) {
+  // Per-row finish persistence. Keyed by pickId so collapsing/re-locking a
+  // row restores the exact fabric/base/top the architect had chosen. Scoped
+  // to the tab via sessionStorage — never leaves the concierge session.
+  const storageKey = `concierge:pick-finishes:${pickId}`;
+  const readPersisted = () => {
+    try {
+      const raw = sessionStorage.getItem(storageKey);
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      return parsed && typeof parsed === "object" ? parsed : null;
+    } catch {
+      return null;
+    }
+  };
+  const persisted = readPersisted();
+
   const [loading, setLoading] = useState(true);
   const [glbUrl, setGlbUrl] = useState<string | null>(null);
   const [poster, setPoster] = useState<string | null>(null);
@@ -76,15 +92,40 @@ export function PickAssetDrawer({ pickId, title }: Props) {
   >(undefined);
   const [swatches, setSwatches] = useState<Swatch[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [selectedFabricId, setSelectedFabricId] = useState<string | null>(null);
-  const [selectedBaseId, setSelectedBaseId] = useState<string | null>(null);
-  const [selectedTopId, setSelectedTopId] = useState<string | null>(null);
+  const [selectedFabricId, setSelectedFabricId] = useState<string | null>(
+    persisted?.fabricId ?? null,
+  );
+  const [selectedBaseId, setSelectedBaseId] = useState<string | null>(
+    persisted?.baseId ?? null,
+  );
+  const [selectedTopId, setSelectedTopId] = useState<string | null>(
+    persisted?.topId ?? null,
+  );
   const [pickAxes, setPickAxes] = useState<{
     baseOptions: string[];
     topOptions: string[];
     baseAxisLabel: string | null;
     topAxisLabel: string | null;
   }>({ baseOptions: [], topOptions: [], baseAxisLabel: null, topAxisLabel: null });
+
+  // Mirror selections to sessionStorage on every change so a collapse/expand
+  // (or an "unlock → re-lock") cycle restores the previous picks verbatim.
+  useEffect(() => {
+    try {
+      const payload = {
+        fabricId: selectedFabricId,
+        baseId: selectedBaseId,
+        topId: selectedTopId,
+      };
+      if (!selectedFabricId && !selectedBaseId && !selectedTopId) {
+        sessionStorage.removeItem(storageKey);
+      } else {
+        sessionStorage.setItem(storageKey, JSON.stringify(payload));
+      }
+    } catch {
+      /* quota / disabled — ignore */
+    }
+  }, [storageKey, selectedFabricId, selectedBaseId, selectedTopId]);
 
   useEffect(() => {
     let cancelled = false;
