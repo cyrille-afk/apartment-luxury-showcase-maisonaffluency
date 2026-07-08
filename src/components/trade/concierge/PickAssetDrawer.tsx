@@ -414,6 +414,23 @@ export function PickAssetDrawer({ pickId, title }: Props) {
   const woodImg = baseSwatch?.image_url ?? (!topIsFabric ? topSwatch?.image_url ?? null : null);
   const showDraftButton = loading || hasSwatches;
   const canDraft = !loading && (selectedFabricId || selectedBaseId || selectedTopId);
+
+  // Live variant pricing — match the selected Base/Top swatch names to a row
+  // in `size_variants` and prefer that row's `price_cents`. Falls back to the
+  // flat `trade_price_cents` when no variant row matches (single-axis picks,
+  // fabrics-only selection, or an incomplete axis pick).
+  const norm = (s: string | null | undefined) => (s ?? "").trim().toLowerCase();
+  const selBaseName = baseSwatch?.name ?? null;
+  const selTopName = !topIsFabric ? topSwatch?.name ?? null : null;
+  const variantMatch = sizeVariants.find((v) => {
+    const b = norm(v.base);
+    const t = norm(v.top);
+    if (selBaseName && selTopName) return b === norm(selBaseName) && t === norm(selTopName);
+    if (selBaseName && !selTopName) return b === norm(selBaseName) && !t;
+    if (!selBaseName && selTopName) return !b && t === norm(selTopName);
+    return false;
+  }) || null;
+  const livePriceCents = variantMatch?.price_cents ?? tradeMeta.tradePriceCents;
   const draftParams = new URLSearchParams();
   draftParams.set("product", pickId);
   if (fabricLabel) draftParams.set("fabric", fabricLabel);
