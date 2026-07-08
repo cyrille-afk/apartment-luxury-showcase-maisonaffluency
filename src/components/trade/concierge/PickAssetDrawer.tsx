@@ -235,6 +235,7 @@ export function PickAssetDrawer({ pickId, title }: Props) {
         topAxisLabel: pickRow?.top_axis_label ?? null,
         pairs: Array.from(pairSet.values()),
       });
+      setSizeVariants(Array.isArray(sv) ? sv : []);
 
       const prodRow = (prodRes.data as any) || null;
       setTradeMeta({
