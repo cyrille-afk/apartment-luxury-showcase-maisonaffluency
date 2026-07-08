@@ -1132,7 +1132,7 @@ const TradeProductPage: React.FC = () => {
         }
       }
 
-      const leadTimeLabel = (pricing?.lead_time || product?.lead_time || null) as string | null;
+      const leadTimeLabel = ((pricing as any)?.lead_time || product?.lead_time || null) as string | null;
 
       const detail = {
         productId,
