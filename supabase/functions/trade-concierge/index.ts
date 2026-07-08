@@ -4245,17 +4245,40 @@ serve(async (req) => {
     // This locks the allow-list even when the brief was submitted turns ago.
     const parsedReferenceDesigners: string[] = [];
     {
-      const refLineRe = /references[^:\n]*:\s*([^\n]+)/gi;
+      // HARDENED: the label must be the leading token of its own line
+      // (optionally after list markers / block prefixes like "Block 3 —").
+      // This prevents conversational phrases such as "the project profile
+      // references a hotel lobby…" from being treated as a REFERENCES block.
+      // We also require a colon immediately after the label word (with an
+      // optional short qualifier like "REFERENCES (Brands)"), never letting
+      // arbitrary sentence text between the word and the colon slip through.
+      const refLineRe = /^[\s>*\-–—•]*(?:block\s*\d+[\s:.\-–—]*)?references(?:\s*\([^)\n]{0,40}\))?\s*[:\-–—]\s*(.+)$/gim;
       const foundLines: string[] = [];
       let rm: RegExpExecArray | null;
       while ((rm = refLineRe.exec(userConversationText)) !== null) {
-        foundLines.push(rm[1]);
+        const captured = rm[1].trim();
+        if (!captured) continue;
+        // Guard against a bare header echo like "REFERENCES: [BRANDS]" with no
+        // real payload, or a value that is itself just another block label.
+        if (/^(typology|materials?|palette|budget|constraints?|block\s*\d+)\b/i.test(captured)) continue;
+        foundLines.push(captured);
       }
       if (foundLines.length) {
         const knownLc = new Map<string, string>();
         for (const n of designerNames) {
           const lc = String(n || "").trim().toLowerCase();
           if (lc && !knownLc.has(lc)) knownLc.set(lc, n);
+        }
+        // Precompile whole-word regexes for every known designer so partial /
+        // substring bleeds (e.g. "profile" inside "PROJECT PROFILE" matching
+        // "Lost Profile Studio") can never happen. `\b` on normalized text is
+        // safe because normalizeLoose() removes punctuation/diacritics.
+        const escapeRe = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+        const knownPatterns: Array<{ orig: string; re: RegExp; norm: string }> = [];
+        for (const [lc, orig] of knownLc.entries()) {
+          const known = normalizeLoose(lc);
+          if (known.length < 3) continue;
+          knownPatterns.push({ orig, norm: known, re: new RegExp(`\\b${escapeRe(known)}\\b`) });
         }
         for (const line of foundLines) {
           // Split on separators outside parenthetical product notes. This keeps
@@ -4266,12 +4289,13 @@ serve(async (req) => {
             // "Man of Parts (Sandy Cove / Bond Street / Rua Leblon)".
             const cleaned = normalizeLoose(tok.replace(/\s*\(.*?\)\s*$/g, ""));
             if (!cleaned || cleaned.length < 3) continue;
-            // Exact match, or the cleaned token contains a known designer
-            // name as a substring (handles "man of parts — sandy cove").
-            for (const [lc, orig] of knownLc.entries()) {
-              const known = normalizeLoose(lc);
-              if (cleaned === known || cleaned.startsWith(known + " ") || cleaned.endsWith(" " + known) || cleaned.includes(known)) {
-                parsedReferenceDesigners.push(orig);
+            // Require a whole-word match of the FULL known designer name
+            // within the cleaned token. Never a substring or single-word
+            // fragment match — those leak brands (e.g. "PROJECT PROFILE"
+            // must never surface "Lost Profile Studio").
+            for (const p of knownPatterns) {
+              if (cleaned === p.norm || p.re.test(cleaned)) {
+                parsedReferenceDesigners.push(p.orig);
                 break;
               }
             }
@@ -4315,10 +4339,16 @@ serve(async (req) => {
     // won't see the brief again after turn 1).
     const parsedTypologyCats: string[] = [];
     {
-      const typRe = /typology[^:\n]*:\s*([^\n]+)/gi;
+      // HARDENED: label must lead its own line (allow list markers / block
+      // prefixes), immediately followed by a colon/dash. Prevents matches
+      // inside prose like "the typology of the project profile is loose."
+      const typRe = /^[\s>*\-–—•]*(?:block\s*\d+[\s:.\-–—]*)?typology(?:\s*\([^)\n]{0,40}\))?\s*[:\-–—]\s*(.+)$/gim;
       let tm: RegExpExecArray | null;
       while ((tm = typRe.exec(userConversationText)) !== null) {
-        const raw = tm[1].replace(/[\[\]]/g, "");
+        const raw = tm[1].replace(/[\[\]]/g, "").trim();
+        if (!raw) continue;
+        // Skip payloads that are themselves another block label echo.
+        if (/^(references|materials?|palette|budget|constraints?|block\s*\d+)\b/i.test(raw)) continue;
         // Split on commas, plus, ampersand, slash, and " and "
         const tokens = raw.split(/,|\+|&|\/|\band\b/i).map((t) => t.trim().toLowerCase()).filter(Boolean);
         for (const t of tokens) {
