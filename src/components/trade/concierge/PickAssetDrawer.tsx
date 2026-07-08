@@ -2,8 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Product3DViewer from "@/components/trade/Product3DViewer";
-import { FileText, FolderPlus, Loader2, RotateCcw } from "lucide-react";
-import { updateConciergeSession } from "@/hooks/useConciergeSession";
+import { FileText, FolderPlus, Loader2, RotateCcw, Check, Pencil } from "lucide-react";
+import { updateConciergeSession, useConciergeSession } from "@/hooks/useConciergeSession";
 import { computeVariantAxes } from "@/lib/parseSizeVariants";
 import { makeSwatchAxisFilter } from "@/lib/finishDuplication";
 import { formatVariantAxisLabel } from "@/lib/variantPlaceholders";
@@ -123,6 +123,14 @@ export function PickAssetDrawer({ pickId, title }: Props) {
     currency: string | null;
     leadTime: string | null;
   }>({ tradeProductId: null, tradePriceCents: null, currency: null, leadTime: null });
+
+  // Project / client-folder name for this concierge chat. Persisted on the
+  // shared concierge session so subsequent items in the same chat auto-reuse
+  // it (see "Would you like me to add this to Apt 4B as well?" flow).
+  const { session } = useConciergeSession();
+  const projectName = session?.projectName ?? null;
+  const [projectDraft, setProjectDraft] = useState<string>("");
+  const [editingProject, setEditingProject] = useState(false);
 
   // Mirror selections to sessionStorage on every change so a collapse/expand
   // (or an "unlock → re-lock") cycle restores the previous picks verbatim.
@@ -672,13 +680,88 @@ export function PickAssetDrawer({ pickId, title }: Props) {
                 </dd>
                 <dt className="text-muted-foreground">Lead Time</dt>
                 <dd>{tradeMeta.leadTime || "—"}</dd>
+                {projectName && !editingProject && (
+                  <>
+                    <dt className="text-muted-foreground">Project</dt>
+                    <dd className="flex items-center gap-1 break-words">
+                      <span className="truncate">{projectName}</span>
+                      <button
+                        type="button"
+                        onClick={() => { setProjectDraft(projectName); setEditingProject(true); }}
+                        className="text-muted-foreground/70 hover:text-foreground shrink-0"
+                        aria-label="Rename project"
+                      >
+                        <Pencil size={9} />
+                      </button>
+                    </dd>
+                  </>
+                )}
               </dl>
+              {(!projectName || editingProject) && (
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    const name = projectDraft.trim();
+                    if (!name) return;
+                    updateConciergeSession({ projectName: name });
+                    setEditingProject(false);
+                  }}
+                  className="mt-1.5 space-y-1"
+                >
+                  <label className="font-body text-[10px] text-muted-foreground block">
+                    {editingProject
+                      ? "Rename this project folder"
+                      : "Save this to a project — what name or client folder?"}
+                  </label>
+                  <div className="flex gap-1">
+                    <input
+                      type="text"
+                      value={projectDraft}
+                      onChange={(e) => setProjectDraft(e.target.value)}
+                      placeholder="e.g. Apt 4B"
+                      autoFocus={editingProject}
+                      className="flex-1 rounded-md border border-border bg-background px-2 py-1 font-body text-[11px] focus:outline-none focus:ring-1 focus:ring-foreground/30"
+                    />
+                    <button
+                      type="submit"
+                      disabled={!projectDraft.trim()}
+                      className="rounded-md bg-foreground text-background px-2 py-1 font-body text-[10px] uppercase tracking-widest disabled:opacity-40"
+                    >
+                      <Check size={11} />
+                    </button>
+                    {!editingProject && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          updateConciergeSession({ projectName: "" });
+                        }}
+                        className="rounded-md border border-border bg-background px-2 py-1 font-body text-[10px] uppercase tracking-widest text-muted-foreground hover:text-foreground"
+                      >
+                        Skip
+                      </button>
+                    )}
+                    {editingProject && (
+                      <button
+                        type="button"
+                        onClick={() => setEditingProject(false)}
+                        className="rounded-md border border-border bg-background px-2 py-1 font-body text-[10px] uppercase tracking-widest text-muted-foreground hover:text-foreground"
+                      >
+                        Cancel
+                      </button>
+                    )}
+                  </div>
+                </form>
+              )}
             </div>
           )}
           <div className="mt-1 flex flex-col sm:flex-row gap-1.5">
             {canDraft ? (
               <Link
-                to={`/trade/tearsheets?${draftParams.toString()}`}
+                to={(() => {
+                  const p = new URLSearchParams(draftParams);
+                  if (projectName) p.set("project", projectName);
+                  return `/trade/tearsheets?${p.toString()}`;
+                })()}
                 onClick={() => {
                   updateConciergeSession({
                     product: { id: pickId, title, source: "curator" },
@@ -715,6 +798,7 @@ export function PickAssetDrawer({ pickId, title }: Props) {
               <AddToProjectPopover
                 productId={tradeMeta.tradeProductId}
                 productName={title}
+                defaultProjectName={projectName || undefined}
               >
                 <button
                   type="button"

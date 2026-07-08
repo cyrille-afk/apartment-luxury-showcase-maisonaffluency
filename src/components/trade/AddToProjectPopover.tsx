@@ -14,6 +14,8 @@ import {
 interface AddToProjectPopoverProps {
   productId: string; // real UUID
   productName: string;
+  /** Preferred title for a newly-created project (e.g. concierge project name). */
+  defaultProjectName?: string;
   children: React.ReactNode;
 }
 
@@ -26,7 +28,7 @@ interface Board {
  * Popover that lets the user add a product to one of their project folders (client_boards).
  * Wraps a trigger element (e.g. a button).
  */
-export default function AddToProjectPopover({ productId, productName, children }: AddToProjectPopoverProps) {
+export default function AddToProjectPopover({ productId, productName, defaultProjectName, children }: AddToProjectPopoverProps) {
   const { user } = useAuth();
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
@@ -99,9 +101,10 @@ export default function AddToProjectPopover({ productId, productName, children }
   const createAndAdd = async () => {
     if (!user || adding) return;
     setAdding("new");
+    const newTitle = (defaultProjectName?.trim() || productName).slice(0, 60);
     const { data, error } = await supabase
       .from("client_boards")
-      .insert({ user_id: user.id, title: productName.slice(0, 60), client_name: "" })
+      .insert({ user_id: user.id, title: newTitle, client_name: "" })
       .select("id, title")
       .single();
 
