@@ -619,6 +619,48 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
         )}
       </div>
 
+      {/* Project / client folder — inline input so the architect can name the
+          project without typing a chat message. Reused across every tearsheet
+          in this concierge session. */}
+      {status === "pending" && (
+        <div className="mb-2.5 flex items-center gap-2 rounded-md border border-border/60 bg-background/60 px-2 py-1.5">
+          <label
+            htmlFor={`concierge-project-${proposal.tool_call_id}`}
+            className="font-body text-[10px] uppercase tracking-widest text-muted-foreground shrink-0"
+          >
+            Save to project
+          </label>
+          <input
+            id={`concierge-project-${proposal.tool_call_id}`}
+            type="text"
+            value={projectDraft}
+            onChange={(e) => setProjectDraft(e.target.value)}
+            onBlur={(e) => commitProjectName(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                commitProjectName((e.target as HTMLInputElement).value);
+                (e.target as HTMLInputElement).blur();
+              }
+            }}
+            placeholder="e.g. Apt 4B · Malibu Beach House"
+            maxLength={80}
+            className="flex-1 bg-transparent font-body text-[11px] text-foreground placeholder:text-muted-foreground/70 focus:outline-none"
+          />
+          {projectDraft && (
+            <button
+              type="button"
+              onClick={() => { setProjectDraft(""); commitProjectName(""); }}
+              className="font-body text-[10px] uppercase tracking-widest text-muted-foreground hover:text-foreground shrink-0"
+            >
+              Skip
+            </button>
+          )}
+        </div>
+      )}
+
+
+
       {proposal.args.note && (
         <p className="font-body text-xs text-muted-foreground italic mb-2.5">"{proposal.args.note}"</p>
       )}
