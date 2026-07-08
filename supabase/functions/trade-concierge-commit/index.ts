@@ -754,6 +754,27 @@ serve(async (req) => {
     if (pickIds.length === 0) return json(400, { error: "pick_ids must contain at least one ID" });
     if (pickIds.length > 24) return json(400, { error: "Too many picks (max 24)" });
 
+    // Optional per-pick finish snapshots so the tearsheet item can restore
+    // the exact fabric / base / wood the user had selected when generating.
+    // Shape: [{ pick_id, variant_label?, fabric_label?, wood_label? }]
+    const rawFinishes: any[] = Array.isArray(args.finishes) ? args.finishes : [];
+    const finishByPickId = new Map<string, { variant_label: string | null; fabric_label: string | null; wood_label: string | null }>();
+    for (const f of rawFinishes) {
+      if (!f || typeof f.pick_id !== "string") continue;
+      finishByPickId.set(f.pick_id, {
+        variant_label: typeof f.variant_label === "string" && f.variant_label.trim() ? f.variant_label.trim().slice(0, 200) : null,
+        fabric_label: typeof f.fabric_label === "string" && f.fabric_label.trim() ? f.fabric_label.trim().slice(0, 200) : null,
+        wood_label: typeof f.wood_label === "string" && f.wood_label.trim() ? f.wood_label.trim().slice(0, 200) : null,
+      });
+    }
+    const finishForResolved = (r: { tradeProductId: string; sourcePickId?: string | null }) => {
+      // Try the source pick_id first (what the LLM passed in), then fall back
+      // to the resolved trade_product id so callers can key either way.
+      if (r.sourcePickId && finishByPickId.has(r.sourcePickId)) return finishByPickId.get(r.sourcePickId)!;
+      if (finishByPickId.has(r.tradeProductId)) return finishByPickId.get(r.tradeProductId)!;
+      return { variant_label: null, fabric_label: null, wood_label: null };
+    };
+
     // ============================================================
     // TOOL: add_to_tearsheet  → append to existing board
     // ============================================================
