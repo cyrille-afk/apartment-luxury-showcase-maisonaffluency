@@ -61,6 +61,9 @@ interface BoardItem {
   notes: string | null;
   approval_status: string;
   subfolder: string | null;
+  variant_label: string | null;
+  fabric_label: string | null;
+  wood_label: string | null;
   product?: {
     product_name: string;
     brand_name: string;
@@ -89,10 +92,26 @@ const TradeBoardBuilder = () => {
 
   const openProductSheet = useCallback((item?: BoardItem) => {
     if (!item?.product_id) return;
+    // If the concierge captured finishes for this item, jump straight to the
+    // tearsheet workbench with those finishes pre-applied — the user doesn't
+    // have to reselect them. Otherwise fall back to the raw product page.
+    const hasFinishes = !!(item.variant_label || item.fabric_label || item.wood_label);
+    if (hasFinishes) {
+      const params = new URLSearchParams();
+      params.set("product", item.product_id);
+      if (item.fabric_label) params.set("fabric", item.fabric_label);
+      if (item.wood_label) params.set("wood", item.wood_label);
+      if (item.variant_label) params.set("variant", item.variant_label);
+      params.set("fromBoard", id || "");
+      navigate(`/trade/tearsheets?${params.toString()}`, {
+        state: { from: location.pathname + location.search },
+      });
+      return;
+    }
     navigate(`/trade/products/${item.product_id}`, {
       state: { from: location.pathname + location.search },
     });
-  }, [navigate, location.pathname, location.search]);
+  }, [navigate, location.pathname, location.search, id]);
 
   const [board, setBoard] = useState<Board | null>(null);
   const [items, setItems] = useState<BoardItem[]>([]);
