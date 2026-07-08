@@ -279,3 +279,57 @@ Deno.test("fail-open — malformed qty values are clamped, not thrown", () => {
   assertEquals(v.coverage[0].qty_min, 0);
   assertEquals(v.coverage[0].qty_max, 0);
 });
+
+// ---------- 6. Text-derived typology (Man of Parts scenario) ----------
+
+import { deriveRequirementsFromText, mergeRequirementsWithText } from "./concierge-inspector.ts";
+
+Deno.test("derive — 'sofas, armchairs, and coffee table' extracts three distinct slots", () => {
+  const derived = deriveRequirementsFromText(
+    "I'm particularly interested in the sofas, armchairs, and coffee table from Man of Parts",
+  );
+  assert(derived, "expected requirements to be derived");
+  const typs = new Set(derived!.slots.map((s) => s.typology));
+  assert(typs.has("sofa"), "missing sofa slot");
+  assert(typs.has("armchair"), "missing armchair slot");
+  assert(typs.has("coffee_table"), "missing coffee_table slot");
+  // Must NOT invent a side_table slot.
+  assert(!typs.has("side_table"), "unexpected side_table slot");
+});
+
+Deno.test("derive — 'coffee table' does not double-count as generic 'table'", () => {
+  const derived = deriveRequirementsFromText("I need a coffee table for the lounge.");
+  assert(derived);
+  const typs = derived!.slots.map((s) => s.typology);
+  assertEquals(typs.filter((t) => t === "coffee_table").length, 1);
+  assert(!typs.includes("table"), "should not add generic 'table' when coffee_table matched");
+});
+
+Deno.test("coverage — sofa/armchair/coffee_table brief with only side_table + coffee_table delivered → 2 undelivered violations", () => {
+  const derived = deriveRequirementsFromText(
+    "I'm particularly interested in the sofas, armchairs, and coffee table from Man of Parts",
+  );
+  assert(derived);
+  const g = gt([
+    { id: "s1", title: "Madison Avenue Side Table by Yabu Pushelberg", category: "Side Tables", designer: "Man of Parts" },
+    { id: "c1", title: "Praia da Granja Coffee Table by Sebastian Herkner", category: "Coffee Tables", designer: "Man of Parts" },
+  ]);
+  const v = validateRequirementsCoverage(derived, g);
+  assertEquals(v.ok, false);
+  const undelivered = v.violations.filter((x) => x.kind === "slot_undelivered").map((x: any) => x.typology).sort();
+  assertEquals(undelivered, ["armchair", "sofa"]);
+  // The side table must NOT be silently swallowed as a coffee_table.
+  const coffee = v.coverage.find((c) => c.typology === "coffee_table")!;
+  assertEquals(coffee.matched_ids, ["c1"]);
+});
+
+Deno.test("merge — user's inspector requirements are respected even when text derivation is broader", () => {
+  const derived = mergeRequirementsWithText(
+    { slots: [{ typology: "sofa", qty_min: 1, qty_max: 1 }], style: [], materials: [], brands: [], room: "", scale: "", era: "", notes: "" },
+    "I need sofas, armchairs, and a coffee table",
+  );
+  assert(derived);
+  // Model-provided slots win; the derived list is not merged over them.
+  assertEquals(derived!.slots.length, 1);
+  assertEquals(derived!.slots[0].typology, "sofa");
+});
