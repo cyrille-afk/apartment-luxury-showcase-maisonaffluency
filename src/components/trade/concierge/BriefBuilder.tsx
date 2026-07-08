@@ -55,6 +55,8 @@ function suggestBrandsFromTypology(typology: string): string[] {
 
 function parseReferenceBrands(value: string): string[] {
   if (!value.trim()) return [];
+  const normalizedLegacyDefault = value.replace(/\s*\/\s*/g, " / ").trim().toLowerCase();
+  if (normalizedLegacyDefault === "man of parts / collection particulière / de la espada / leo sentou") return [];
   // Any placeholder token (contains a bracketed [example] or leading "e.g.")
   // is treated as empty — it must never be parsed into a selected brand chip.
   if (/\[.*\]|^\s*e\.g\./i.test(value)) return [];
