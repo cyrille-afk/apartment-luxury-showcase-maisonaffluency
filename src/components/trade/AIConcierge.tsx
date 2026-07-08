@@ -3,6 +3,7 @@ import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { X, Send, Loader2, Sparkles, Minus, GripHorizontal, RotateCcw, Maximize2, Minimize2, Expand, Shrink, Palette, Check, Languages, Pencil, Paperclip, FileText, Download, FileDown, Copy, ShieldCheck, ListChecks, Eye, LayoutList } from "lucide-react";
 import { BriefBuilder } from "@/components/trade/concierge/BriefBuilder";
 import { BriefBubble, isBriefContent } from "@/components/trade/concierge/BriefBubble";
+import brandCategoriesRaw from "@/data/brandCategories.json";
 
 const SPEC_BRIEF_TEMPLATE = `Block 1 — Spatial & Project Context
 PROJECT PROFILE: [typology, city/area]
@@ -76,6 +77,35 @@ function extractFurnitureTypology(text: string): string[] {
   const raw = text.match(FURNITURE_TOKEN_RE) || [];
   const normalized = raw.map(normalizeFurnitureToken);
   return collapseFurnitureTokens(Array.from(new Set(normalized)));
+}
+
+const CATALOGUE_BRANDS = Array.from(
+  new Set(Object.values(brandCategoriesRaw).flat().filter((name): name is string => typeof name === "string" && !!name.trim()))
+).sort((a, b) => b.length - a.length);
+
+function normalizeBrandScanText(text: string): string {
+  return text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+}
+
+function escapeBrandRe(text: string): string {
+  return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function extractExplicitReferenceBrands(text: string): string[] {
+  if (!text.trim()) return [];
+  const haystack = normalizeBrandScanText(text);
+  const found: string[] = [];
+  const seen = new Set<string>();
+  for (const brand of CATALOGUE_BRANDS) {
+    const normalizedBrand = normalizeBrandScanText(brand);
+    const re = new RegExp(`(^|[^a-z0-9])${escapeBrandRe(normalizedBrand)}([^a-z0-9]|$)`, "i");
+    if (!re.test(haystack)) continue;
+    const key = normalizedBrand;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    found.push(brand);
+  }
+  return found;
 }
 
 function detectProjectScale(
@@ -1486,6 +1516,7 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
           .filter((t): t is Extract<TimelineItem, { kind: "msg" }> => t.kind === "msg" && t.role === "user")
           .map((t) => t.content || "")
           .join(" \n ");
+        const explicitReferenceBrands = extractExplicitReferenceBrands([text, priorFurnitureText].filter(Boolean).join(" \n "));
         const mergedFurniture = collapseFurnitureTokens(
           Array.from(new Set([...(scale.furniture || []), ...extractFurnitureTypology(priorFurnitureText)])),
         );
@@ -1493,6 +1524,12 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
           prefilled = prefilled.replace(
             "[e.g. sectional + accent chairs]",
             mergedFurniture.join(", "),
+          );
+        }
+        if (explicitReferenceBrands.length) {
+          prefilled = prefilled.replace(
+            "[e.g. Man of Parts / Collection Particulière]",
+            explicitReferenceBrands.join(" / "),
           );
         }
 
