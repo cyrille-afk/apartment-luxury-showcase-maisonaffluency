@@ -158,11 +158,21 @@ export function GlbMaterialRolesEditor({
 
   return (
     <div className="mt-2 rounded-md border border-border/60 bg-background/60 p-3 space-y-2">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-2">
         <div className="font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
           Material roles ({materialNames.length})
         </div>
-        <button
+        <div className="flex items-center gap-1.5">
+          <button
+            type="button"
+            onClick={runAutoDetect}
+            title="Guess base/top/fabric from material names"
+            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded font-body text-[10px] uppercase tracking-[0.12em] transition-colors border border-border text-muted-foreground hover:text-foreground hover:border-foreground/40"
+          >
+            <Wand2 size={11} />
+            Auto-detect
+          </button>
+          <button
           type="button"
           onClick={save}
           disabled={saving || !dirty}
