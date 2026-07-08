@@ -750,13 +750,30 @@ function normalizeText(s: string | null | undefined): string {
     .trim();
 }
 
-const DEFERRED_TYPOLOGY_CONTEXT_RE = /\b(at a later (?:date|stage|time)|later on|later date|another time|down the (?:road|line)|for (?:a )?later|not (?:now|yet|for now)|(?:for|in) a later phase|excluding|except(?:\s+for)?|leaving out|skip(?:ping)?|omit(?:ting)?|will (?:select|pick|choose|source|find|decide|specify)\b[^.?!\n]*\b(later|another time|down the (?:road|line))|(?:pick|choose|select|source|specify|decide)\s+(?:on\s+)?(?:the\s+)?[^.?!\n]*\b(later|another time|down the (?:road|line)))\b/i;
+// Trigger phrases that mark items as deferred / out-of-scope for THIS brief.
+const DEFERRED_TRIGGER_RE = /\b(?:at\s+a\s+later\s+(?:date|stage|time|phase)|later\s+on|later\s+date|another\s+time|down\s+the\s+(?:road|line)|for\s+(?:a\s+)?later(?:\s+phase|\s+stage)?|for\s+later|in\s+(?:a\s+)?(?:later|next|future|second)\s+(?:phase|stage|round)|next\s+(?:phase|stage|round)|phase\s+(?:2|two|ii|3|three|iii)|future\s+phase|not\s+(?:now|yet|for\s+now|in\s+scope|in-scope|part\s+of\s+this)|out\s+of\s+scope|to\s+(?:be\s+)?(?:decided|confirmed|selected|sourced|chosen|specified|added|determined|advised|followed?)\s+(?:later|at\s+a\s+later|separately)?|to\s+follow|tbd|tbc|t\.?b\.?d\.?|t\.?b\.?c\.?|handled\s+separately|(?:sourced|selected|chosen|picked|specified|decided|added)\s+(?:later|separately|elsewhere)|excluding|except(?:\s+for)?|leaving\s+out|skip(?:ping)?|omit(?:ting)?|will\s+(?:select|pick|choose|source|find|decide|specify|handle|add|source)\b[^.?!\n;]*?\b(?:later|another\s+time|down\s+the\s+(?:road|line)|separately)|(?:pick|choose|select|source|specify|decide|add)\s+(?:on\s+)?(?:the\s+)?[^.?!\n;]*?\b(?:later|another\s+time|down\s+the\s+(?:road|line)|separately))\b/i;
+
+// Bare "later" at the end of a short clause, e.g. "rug/chandelier later" or "rug, chandelier — later".
+const TRAILING_LATER_RE = /(?:^|[\s—–:\-\(\[])\s*later\s*[\.\)\]]?\s*$/i;
+
+// Parenthetical / bracketed deferrals stripped in place, e.g. "rug (later)", "chandelier [TBD]".
+const PARENTHETICAL_DEFERRAL_RE = /\s*[\(\[][^)\]]*\b(?:later|tbd|tbc|to\s+follow|to\s+be\s+(?:confirmed|decided|selected|sourced|specified|advised)|not\s+now|out\s+of\s+scope|next\s+phase|phase\s+(?:2|two|ii|3|three|iii))\b[^)\]]*[\)\]]/gi;
+
+function isDeferredClause(part: string): boolean {
+  if (!part) return false;
+  if (DEFERRED_TRIGGER_RE.test(part)) return true;
+  if (TRAILING_LATER_RE.test(part)) return true;
+  return false;
+}
 
 function activeRequirementText(text: string): string {
-  return String(text || "")
-    .split(/(?<=[.?!])\s+|\n+/)
+  const cleaned = String(text || "").replace(PARENTHETICAL_DEFERRAL_RE, " ");
+  // Split on strong sentence boundaries AND on internal separators that commonly
+  // introduce a deferred aside (semicolons, em/en dashes, spaced hyphens, newlines).
+  return cleaned
+    .split(/(?<=[.?!])\s+|\n+|\s*[;]\s*|\s+[—–]\s+|\s+-\s+/)
     .map((part) => part.trim())
-    .filter((part) => part && !DEFERRED_TYPOLOGY_CONTEXT_RE.test(part))
+    .filter((part) => part && !isDeferredClause(part))
     .join("\n");
 }
 
