@@ -24,6 +24,12 @@ interface Props {
 
 type FinishRole = "fabric" | "base" | "top";
 
+const isFabricAxisLabel = (label: string | null | undefined) =>
+  /\b(upholstery|fabric|leather|textile|cover)\b/i.test(String(label || ""));
+
+const isFabricVariantOption = (label: string | null | undefined) =>
+  /\b(com fabric|fabric cat\.?|leather cat\.?|upholstery)\b/i.test(String(label || ""));
+
 /** Classify a swatch into fabric / base (wood · metal) / top (stone · marble ·
  *  glass · ceramic). Category is authoritative; the name regex is only a
  *  fallback when the category is missing. Mirrors the axis split enforced by
@@ -207,6 +213,20 @@ export function PickAssetDrawer({ pickId, title }: Props) {
     };
   }, [pickId]);
 
+  const topAxisIsFabric = useMemo(
+    () =>
+      isFabricAxisLabel(pickAxes.topAxisLabel) ||
+      (pickAxes.topOptions.length > 0 && pickAxes.topOptions.every(isFabricVariantOption)),
+    [pickAxes.topAxisLabel, pickAxes.topOptions],
+  );
+
+  useEffect(() => {
+    // Legacy sessions may have stored an upholstery category as `topId` from
+    // the previous coupled-pair UI. Once a fabric/upholstery axis is detected,
+    // drop that duplicate so fabric labels do not become "Zero · Safire".
+    if (topAxisIsFabric && selectedTopId) setSelectedTopId(null);
+  }, [topAxisIsFabric, selectedTopId]);
+
   const { fabricSwatches, baseSwatches, topSwatches, splitByClassifier } = useMemo(() => {
     const fab: Swatch[] = [];
     const nonFab: Swatch[] = [];
@@ -222,7 +242,7 @@ export function PickAssetDrawer({ pickId, title }: Props) {
     const baseFilter =
       pickAxes.baseOptions.length > 0 ? makeSwatchAxisFilter(pickAxes.baseOptions) : null;
     const topFilter =
-      pickAxes.topOptions.length > 0 ? makeSwatchAxisFilter(pickAxes.topOptions) : null;
+      !topAxisIsFabric && pickAxes.topOptions.length > 0 ? makeSwatchAxisFilter(pickAxes.topOptions) : null;
 
     let base: Swatch[] = [];
     let top: Swatch[] = [];
@@ -262,7 +282,7 @@ export function PickAssetDrawer({ pickId, title }: Props) {
     const splitByClassifier = rescuedTops.length > 0 && !topFilter;
 
     return { fabricSwatches: fab, baseSwatches: base, topSwatches: top, splitByClassifier };
-  }, [swatches, pickAxes.baseOptions, pickAxes.topOptions]);
+  }, [swatches, pickAxes.baseOptions, pickAxes.topOptions, topAxisIsFabric]);
 
   // Build coupled (base, top) combinations from the pick's size_variants,
   // resolving each side to the matching swatch by fuzzy-normalized name.
@@ -270,6 +290,7 @@ export function PickAssetDrawer({ pickId, title }: Props) {
   // switches from independent Base + Top pickers to a single "Finish
   // Combinations" strip so the user can only pick valid pairs.
   const combinations = useMemo(() => {
+    if (topAxisIsFabric) return [];
     if (!pickAxes.pairs.length) return [];
     const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
     const findSwatch = (label: string): Swatch | null => {
@@ -304,10 +325,10 @@ export function PickAssetDrawer({ pickId, title }: Props) {
       out.push({ base: b, top: t, label: `${b.name} · ${t.name}` });
     }
     return out;
-  }, [pickAxes.pairs, swatches]);
+  }, [pickAxes.pairs, swatches, topAxisIsFabric]);
 
   const useCoupled =
-    combinations.length >= 2 && !!pickAxes.baseAxisLabel && !!pickAxes.topAxisLabel;
+    !topAxisIsFabric && combinations.length >= 2 && !!pickAxes.baseAxisLabel && !!pickAxes.topAxisLabel;
 
   const hasGlb = !!glbUrl;
   const hasSwatches = swatches.length > 0;
