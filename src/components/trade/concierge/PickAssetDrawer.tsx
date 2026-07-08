@@ -16,6 +16,7 @@ interface Swatch {
   image_url: string | null;
   supplier: string | null;
   category: string | null;
+  price_tier_label?: string | null;
   sort_order: number | null;
 }
 
@@ -179,7 +180,7 @@ export function PickAssetDrawer({ pickId, title }: Props) {
       const [swRes, glbVarRes] = await Promise.all([
         supabase
           .from("product_fabric_swatches_public")
-          .select("fabric_id, name, image_url, supplier, category, sort_order")
+          .select("fabric_id, name, image_url, supplier, category, price_tier_label, sort_order")
           .eq("pick_id", pickId)
           .eq("is_active", true)
           .order("sort_order", { ascending: true, nullsFirst: false })
@@ -433,7 +434,7 @@ export function PickAssetDrawer({ pickId, title }: Props) {
   };
   const selectedBaseAxis = matchAxisValue(baseSwatch?.name ?? null, axesForPricing.baseOptions);
   const selectedTopAxis = matchAxisValue(
-    topIsFabric ? fabricSwatch?.name ?? null : topSwatch?.name ?? null,
+    topIsFabric ? (fabricSwatch?.price_tier_label || fabricSwatch?.name || null) : topSwatch?.name ?? null,
     axesForPricing.topOptions,
   );
   const selectedDualSize = selectedGlbLabel
