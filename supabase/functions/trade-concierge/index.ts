@@ -2237,6 +2237,66 @@ const EMPTY_BRIEF: ExtractedBrief = {
   plan: [],
 };
 
+function extractStructuredBriefField(text: string, label: string): string | null {
+  const escaped = label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const re = new RegExp(`^[\\s>*\\-–—•]*${escaped}(?:\\s*\\([^\\n)]{0,60}\\))?\\s*[:\\-–—]\\s*(.+)$`, "im");
+  const match = text.match(re);
+  const value = match?.[1]?.replace(/\[[^\]]*\]/g, "").trim();
+  return value || null;
+}
+
+function parseSubmittedArchitecturalBrief(text: string): ExtractedBrief | null {
+  const hasBuilderBrief =
+    /SUBMITTED ARCHITECTURAL BRIEF/i.test(text) ||
+    (/Block\s*1\s*—\s*Spatial\s*&\s*Project\s*Context/i.test(text) &&
+      /Block\s*2\s*—\s*Hard\s*Technical\s*Parameters/i.test(text) &&
+      /Block\s*3\s*—\s*Aesthetic/i.test(text));
+  if (!hasBuilderBrief) return null;
+
+  const zone = extractStructuredBriefField(text, "ZONE");
+  const typology = extractStructuredBriefField(text, "TYPOLOGY");
+  const vibe = extractStructuredBriefField(text, "VIBE");
+  const materialsLine = extractStructuredBriefField(text, "MATERIALS");
+  const referencesLine = extractStructuredBriefField(text, "REFERENCES");
+  const profile = extractStructuredBriefField(text, "PROJECT PROFILE");
+  const tokens = (typology || "")
+    .split(/,|\+|&|\/|\band\b/i)
+    .map((t) => t.trim())
+    .filter(Boolean);
+  const categories = Array.from(new Set([...tokens, ...typologyTokensToCategories(tokens)])).slice(0, 10);
+  const designers = (referencesLine || "")
+    .split(/\/|,|\+|&|\band\b/i)
+    .map((d) => d.replace(/\s*\(.*?\)\s*$/g, "").trim())
+    .filter((d) => d && !/^e\.g\.?$/i.test(d))
+    .slice(0, 8);
+  const materials = (materialsLine || "")
+    .split(/,|\+|&|\/|\band\b/i)
+    .map((m) => m.trim())
+    .filter(Boolean)
+    .slice(0, 8);
+  const room = zone ? zone.split(/[—-]/)[0].trim() || zone : null;
+  const summaryBits = [zone, typology, vibe].filter(Boolean);
+
+  return {
+    intent: "selection",
+    brief: {
+      summary: summaryBits.length ? `Submitted architectural brief: ${summaryBits.join(" · ")}` : (profile || "Submitted architectural brief"),
+      room,
+      style: vibe,
+      materials,
+      categories,
+      designers,
+      qty_hint: null,
+      lead_weeks_max: null,
+      budget_band: null,
+      anchor_role: null,
+      anchor_typology: null,
+      emphasis: [],
+    },
+    plan: ["propose_tearsheet"],
+  };
+}
+
 // ---------------------------------------------------------------------------
 // MATERIAL FIDELITY VALIDATOR
 // ---------------------------------------------------------------------------
@@ -2893,11 +2953,14 @@ function usableConstraintText(value: unknown): string | null {
 type RequestedTypology = "dining_table" | "table";
 
 function inferBudgetCeilingCents(requestText: string): { cents: number; label: string } | null {
-  const text = String(requestText || "");
+  const text = String(requestText || "")
+    .split(/\n+/)
+    .filter((line) => !/^\s*(MAX\s+FOOTPRINT|DIMENSIONS?|CLEARANCE|TIMELINE|LEAD\s*TIME)\s*:/i.test(line))
+    .join("\n");
   if (!text.trim()) return null;
-  const budgetCue = /\b(?:under|below|less\s+than|up\s+to|max(?:imum)?|budget(?:\s+of)?|not\s+over|no\s+more\s+than)\b/i;
+  const budgetCue = /\b(?:under|below|less\s+than|up\s+to|budget(?:\s+of)?|not\s+over|no\s+more\s+than|max(?:imum)?\s+(?:budget|price|spend|cost))\b|[$€£]/i;
   if (!budgetCue.test(text)) return null;
-  const match = text.match(/\b(?:under|below|less\s+than|up\s+to|max(?:imum)?|budget(?:\s+of)?|not\s+over|no\s+more\s+than)\b[^$€£\d]{0,24}(?:[$€£]\s*)?(\d+(?:[.,]\d+)?)(\s*(?:k|m|000))?\s*(?:usd|eur|gbp|dollars?|euros?|pounds?)?/i)
+  const match = text.match(/\b(?:under|below|less\s+than|up\s+to|budget(?:\s+of)?|not\s+over|no\s+more\s+than|max(?:imum)?\s+(?:budget|price|spend|cost))\b[^$€£\d]{0,24}(?:[$€£]\s*)?(\d+(?:[.,]\d+)?)(\s*(?:k|m|000))?\s*(?:usd|eur|gbp|dollars?|euros?|pounds?)?/i)
     || text.match(/(?:[$€£]\s*)(\d+(?:[.,]\d+)?)(\s*(?:k|m|000))?\s*(?:usd|eur|gbp|dollars?|euros?|pounds?)?/i);
   if (!match) return null;
   const raw = Number(match[1].replace(",", "."));
@@ -4116,21 +4179,24 @@ serve(async (req) => {
     const hasExplicitSelectionVerb = /\b(propose|suggest|recommend|show me|pull (?:together|me)|curate|reinterpret|alternatives?|options?|first edit|draft (?:a )?(?:tearsheet|edit|selection)|put together|assemble|i'?d like to see|let'?s see|what do you have|list (?:all|every|the)|which .*(?:do you|are)|everything (?:by|from))\b/.test(lastUserMsgLower);
     const opensWithLookingFor = /^\s*(?:i(?:'m| am)?\s+(?:looking|searching|after|hunting|sourcing|in the market)|we(?:'re| are)?\s+(?:looking|searching|after))\b/.test(lastUserMsgLower);
 
-    let effectiveBrief: ExtractedBrief = shouldActOnAccumulatedBrief && !extractedBrief.plan.length && hasExplicitSelectionVerb
-      ? {
-          intent: "selection",
-          brief: {
-            ...extractedBrief.brief,
-            summary: extractedBrief.brief.summary || "Curate a dining table edit from the accumulated brief.",
-            room: extractedBrief.brief.room || "dining room",
-            style: extractedBrief.brief.style || (/(elegant|refined|not too formal|relaxed|warm|earthy|sophisticated)/.exec(userConversationText)?.[0] ?? null),
-            materials: extractedBrief.brief.materials.length ? extractedBrief.brief.materials : ["wood"].filter(() => /\b(wood|oak|walnut|timber)\b/.test(userConversationText)),
-            categories: extractedBrief.brief.categories.length ? extractedBrief.brief.categories : ["dining table"],
-            qty_hint: extractedBrief.brief.qty_hint || (/\b(12|twelve)\b/.test(userConversationText) ? 12 : null),
-          },
-          plan: ["propose_tearsheet"],
-        }
-      : extractedBrief;
+    const submittedArchitecturalBrief = parseSubmittedArchitecturalBrief(lastUserMsg);
+    let effectiveBrief: ExtractedBrief = submittedArchitecturalBrief
+      ? submittedArchitecturalBrief
+      : shouldActOnAccumulatedBrief && !extractedBrief.plan.length && hasExplicitSelectionVerb
+        ? {
+            intent: "selection",
+            brief: {
+              ...extractedBrief.brief,
+              summary: extractedBrief.brief.summary || "Curate a dining table edit from the accumulated brief.",
+              room: extractedBrief.brief.room || "dining room",
+              style: extractedBrief.brief.style || (/(elegant|refined|not too formal|relaxed|warm|earthy|sophisticated)/.exec(userConversationText)?.[0] ?? null),
+              materials: extractedBrief.brief.materials.length ? extractedBrief.brief.materials : ["wood"].filter(() => /\b(wood|oak|walnut|timber)\b/.test(userConversationText)),
+              categories: extractedBrief.brief.categories.length ? extractedBrief.brief.categories : ["dining table"],
+              qty_hint: extractedBrief.brief.qty_hint || (/\b(12|twelve)\b/.test(userConversationText) ? 12 : null),
+            },
+            plan: ["propose_tearsheet"],
+          }
+        : extractedBrief;
 
     // DISCOVERY GATE — strip any auto-proposed tearsheet/quote plan when the
     // latest user message is an opening brief without an explicit selection

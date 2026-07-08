@@ -1453,6 +1453,14 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
       kind: a.kind,
       previewUrl: a.previewUrl,
     }));
+    const submittedStructuredBrief = isBriefContent(text);
+    const apiText = submittedStructuredBrief
+      ? [
+          "SUBMITTED ARCHITECTURAL BRIEF — this is the active client brief from the Brief Builder. Execute it now; do not reply that no brief was detected.",
+          "Return three layout configurations and a full Architectural Specification Schedule using the structured fields below.",
+          text,
+        ].join("\n\n")
+      : text;
     const displayText = opts?.displayText ?? text;
     const userItem: TimelineItem = {
       kind: "msg",
@@ -1781,7 +1789,7 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
     let currentUserMsg: ChatMessage;
     if (sendingAttachments.length > 0) {
       const parts: ChatContentPart[] = [];
-      parts.push({ type: "text", text: text || "Please review the attached file(s) and tell me what details would help refine your curation." });
+      parts.push({ type: "text", text: apiText || "Please review the attached file(s) and tell me what details would help refine your curation." });
       for (const a of sendingAttachments) {
         if (a.kind === "image") {
           parts.push({ type: "image_url", image_url: { url: a.dataUrl } });
@@ -1791,7 +1799,7 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
       }
       currentUserMsg = { role: "user", content: parts };
     } else {
-      currentUserMsg = { role: "user", content: text };
+      currentUserMsg = { role: "user", content: apiText };
     }
 
     const messagesForApi: ChatMessage[] = [
