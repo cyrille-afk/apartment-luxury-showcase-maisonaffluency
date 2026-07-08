@@ -166,7 +166,7 @@ export function PickAssetDrawer({ pickId, title }: Props) {
     ? baseSwatches.find((s) => s.fabric_id === selectedBaseId) ?? null
     : null;
   const showDraftButton = loading || hasSwatches;
-  const canDraft = !loading && (selectedFabricId || selectedBaseId);
+  const canDraft = !loading && (selectedFabricId || selectedBaseId || selectedTopId);
   const draftParams = new URLSearchParams();
   draftParams.set("product", pickId);
   if (fabricSwatch?.name) draftParams.set("fabric", fabricSwatch.name);
