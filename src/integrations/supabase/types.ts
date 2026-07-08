@@ -776,6 +776,7 @@ export type Database = {
           id: string
           project_id: string | null
           share_token: string
+          source: string
           status: string
           studio_id: string | null
           studio_logo_url: string | null
@@ -794,6 +795,7 @@ export type Database = {
           id?: string
           project_id?: string | null
           share_token?: string
+          source?: string
           status?: string
           studio_id?: string | null
           studio_logo_url?: string | null
@@ -812,6 +814,7 @@ export type Database = {
           id?: string
           project_id?: string | null
           share_token?: string
+          source?: string
           status?: string
           studio_id?: string | null
           studio_logo_url?: string | null

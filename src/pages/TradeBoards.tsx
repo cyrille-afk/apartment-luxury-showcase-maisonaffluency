@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
-import { Plus, Share2, FileText, Trash2, ExternalLink, FolderOpen } from "lucide-react";
+import { Plus, Share2, FileText, Trash2, ExternalLink, FolderOpen, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useProjectFilter } from "@/hooks/useProjectFilter";
 import { useDesignerDisplayName } from "@/hooks/useDesignerDisplayName";
@@ -30,6 +30,7 @@ interface Board {
   client_email: string | null;
   share_token?: string;
   status: string;
+  source?: "manual" | "concierge" | null;
   created_at: string;
   updated_at: string;
   token_expires_at: string | null;
@@ -66,12 +67,13 @@ const TradeBoards = () => {
   const [clientName, setClientName] = useState("");
   const [clientEmail, setClientEmail] = useState("");
   const [creating, setCreating] = useState(false);
+  const [sourceFilter, setSourceFilter] = useState<"all" | "concierge" | "manual">("all");
 
   const fetchBoards = async () => {
     if (!user) return;
     let q = supabase
       .from("client_boards")
-      .select("id, user_id, studio_id, project_id, title, client_name, status, token_expires_at, token_rotated_at, studio_name, studio_logo_url, hide_maison_branding, created_at, updated_at")
+      .select("id, user_id, studio_id, project_id, title, client_name, status, source, token_expires_at, token_rotated_at, studio_name, studio_logo_url, hide_maison_branding, created_at, updated_at")
       .order("updated_at", { ascending: false });
     // Scope to current studio so teammates see each other's boards.
     // Also include legacy boards created before a studio existed (studio_id NULL)
@@ -220,10 +222,45 @@ const TradeBoards = () => {
         <TradeBreadcrumb current="Boards" currentProjectTab="boards" />
         <ActiveFilterChips className="mb-4" confirmClearAll />
 
+        {/* Source filter — separates AI Concierge–built boards from manually created ones */}
+        <div className="mb-4 flex items-center gap-1 border-b border-border">
+          {([
+            { key: "all", label: "All folders" },
+            { key: "concierge", label: "Built by my AI Concierge", icon: true },
+            { key: "manual", label: "Manually created" },
+          ] as const).map((tab) => {
+            const active = sourceFilter === tab.key;
+            const count = tab.key === "all"
+              ? boards.length
+              : boards.filter((b) => (b.source ?? "manual") === tab.key).length;
+            return (
+              <button
+                key={tab.key}
+                type="button"
+                onClick={() => setSourceFilter(tab.key)}
+                className={`inline-flex items-center gap-1.5 px-3 py-2 -mb-px border-b-2 font-body text-[11px] uppercase tracking-[0.14em] transition-colors ${
+                  active
+                    ? "border-foreground text-foreground"
+                    : "border-transparent text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {("icon" in tab && tab.icon) && <Sparkles className="h-3 w-3" />}
+                {tab.label}
+                <span className={`ml-1 rounded px-1 py-0.5 text-[9px] tabular-nums ${active ? "bg-foreground text-background" : "bg-muted text-muted-foreground"}`}>
+                  {count}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
         {(() => {
-          const visibleBoards = designerFilter && matchingBoardIds
+          const designerFiltered = designerFilter && matchingBoardIds
             ? boards.filter((b) => matchingBoardIds.has(b.id))
             : boards;
+          const visibleBoards = sourceFilter === "all"
+            ? designerFiltered
+            : designerFiltered.filter((b) => (b.source ?? "manual") === sourceFilter);
           return loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {[1,2,3].map(i => <div key={i} className="h-40 bg-muted/50 rounded-lg animate-pulse" />)}
@@ -245,12 +282,20 @@ const TradeBoards = () => {
                 className="border border-border rounded-lg p-5 hover:border-foreground/20 transition-colors cursor-pointer group"
                 onClick={() => navigate(`/trade/boards/${board.id}`)}
               >
-                <div className="flex items-start justify-between mb-3">
-                  <div>
+                <div className="flex items-start justify-between mb-3 gap-2">
+                  <div className="min-w-0">
                     <h3 className="font-display text-base text-foreground group-hover:underline underline-offset-4">{board.title}</h3>
                     {board.client_name && <p className="font-body text-xs text-muted-foreground mt-0.5">{board.client_name}</p>}
                   </div>
-                  <Badge variant="secondary" className={statusColors[board.status] || ""}>{board.status}</Badge>
+                  <div className="flex flex-col items-end gap-1 shrink-0">
+                    <Badge variant="secondary" className={statusColors[board.status] || ""}>{board.status}</Badge>
+                    {board.source === "concierge" && (
+                      <span className="inline-flex items-center gap-1 rounded px-1.5 py-0.5 border border-dashed border-foreground/30 font-body text-[9px] uppercase tracking-[0.1em] text-muted-foreground" title="Auto-saved from an AI Concierge session">
+                        <Sparkles className="h-2.5 w-2.5" />
+                        AI Concierge
+                      </span>
+                    )}
+                  </div>
                 </div>
                 {board.project_name && (
                   <button
