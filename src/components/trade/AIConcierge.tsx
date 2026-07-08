@@ -547,8 +547,6 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
 
 
 
-  const PANEL_W = fullscreen ? Math.min(1200, typeof window !== "undefined" ? window.innerWidth - 32 : 1200) : (expanded ? 560 : 380);
-  const PANEL_H_OPEN = expanded ? 760 : 560;
   const PANEL_H_MIN = 52;
   const [pos, setPos] = useState<{ x: number; y: number } | null>(() => {
     try {
@@ -594,6 +592,15 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
   // Modal mode is active only while the welcome is pending AND the user
   // hasn't manually dragged or expanded the panel yet.
   const modalMode = welcomePending && !pos;
+
+  // Panel dimensions. On first-open the concierge renders as a centered
+  // welcome modal — size it like the fullscreen panel so it never covers
+  // the left navigation. Otherwise fall back to fullscreen or the
+  // expanded/compact widget.
+  const PANEL_W = (fullscreen || modalMode)
+    ? Math.min(1200, typeof window !== "undefined" ? window.innerWidth - 32 : 1200)
+    : (expanded ? 560 : 380);
+  const PANEL_H_OPEN = modalMode ? 760 : (expanded ? 760 : 560);
 
   // Brief exit-animation gate: when the welcome modal is dismissed we keep
   // the backdrop + panel mounted for ~280ms so they can fade/scale out
@@ -1972,7 +1979,7 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
               : "bg-background border-border animate-fade-in",
             !modalMode && fullscreen && "left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2",
             !modalMode && !fullscreen && !pos && "bottom-20 md:bottom-6 right-4",
-            minimized ? "h-auto" : (fullscreen ? "h-[calc(100vh-2rem)]" : (expanded ? "h-[760px] max-h-[calc(100vh-4rem)]" : "h-[560px] max-h-[calc(100vh-6rem)]"))
+            minimized ? "h-auto" : ((fullscreen || modalMode) ? "h-[calc(100vh-2rem)]" : (expanded ? "h-[760px] max-h-[calc(100vh-4rem)]" : "h-[560px] max-h-[calc(100vh-6rem)]"))
           )}
         >
           <div
