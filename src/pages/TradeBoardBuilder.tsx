@@ -535,7 +535,26 @@ const TradeBoardBuilder = () => {
                 </span>
               )}
             </div>
-            <div className="mt-3">
+            <div className="mt-3 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+              <div className="flex items-center gap-2">
+                <span className="font-body text-[11px] uppercase tracking-[0.18em] text-muted-foreground">Client</span>
+                <ClientPicker
+                  value={board.client_id}
+                  onChange={async (c: PickedClient | null) => {
+                    const newId = c?.id ?? null;
+                    const newName = c?.name ?? "";
+                    setBoard((prev) => (prev ? { ...prev, client_id: newId, client_name: newName } : prev));
+                    await supabase
+                      .from("client_boards")
+                      .update({ client_id: newId, client_name: newName } as any)
+                      .eq("id", board.id);
+                    toast({ title: newId ? "Client attached" : "Client cleared" });
+                  }}
+                  size="sm"
+                  placeholder="Attach a client…"
+                  disabled={!isEditable}
+                />
+              </div>
               <ProjectPicker
                 value={board.project_id}
                 onChange={async (id) => {
