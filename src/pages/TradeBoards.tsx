@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { copyTextToClipboard } from "@/lib/clipboard";
 import ClientPicker, { type PickedClient } from "@/components/trade/ClientPicker";
 import {
   Dialog,
@@ -181,8 +182,8 @@ const TradeBoards = () => {
       return;
     }
     const url = `${window.location.origin}/board/${data}`;
-    navigator.clipboard.writeText(url);
-    toast({ title: "Link copied", description: "Share this link with your client" });
+    const copied = await copyTextToClipboard(url);
+    toast({ title: copied ? "Link copied" : "Share link ready", description: copied ? "Share this link with your client" : url });
   };
 
   return (
@@ -342,7 +343,7 @@ const TradeBoards = () => {
                 <div className="flex items-center gap-2" onClick={e => e.stopPropagation()}>
                   {board.status !== "draft" && (
                     <Button variant="ghost" size="sm" className="h-8 gap-1.5 text-xs" onClick={() => copyShareLink(board.id)}>
-                      <Share2 className="h-3 w-3" /> Copy Link
+                      <Share2 className="h-3 w-3" /> Copy Current Link
                     </Button>
                   )}
                   {board.status !== "converted" && (
