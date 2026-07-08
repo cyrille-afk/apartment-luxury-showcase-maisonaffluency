@@ -28,10 +28,59 @@ No conversational intro.`;
 // Detect a "project-scale" first-turn brief so the concierge can skip
 // one-question intake and jump straight to the structured Brief Builder.
 // Returns null when the message reads like a single-piece enquiry.
+// Extract furniture typologies (sectional sofa, armchair, side table, etc.)
+// from free-text so we can prefill Block 2 TYPOLOGY when the user has already
+// named the pieces they're researching. Order matters: multi-word tokens
+// ("side table", "floor lamp") must match before their generic parents
+// ("table", "lamp") so plural/singular families are deduped correctly.
+const FURNITURE_TOKEN_RE = /\b(sectional\s+sofas?|sectionals?|sofas?|settees?|loveseats?|accent\s+chairs?|arm\s*chairs?|lounge\s+chairs?|dining\s+chairs?|chairs?|side\s+tables?|coffee\s+tables?|dining\s+tables?|consoles?|desks?|tables?|benches|bench|stools?|ottomans?|poufs?|floor\s+lamps?|table\s+lamps?|pendants?|chandeliers?|sconces?|wall\s+lights?|lamps?|rugs?|mirrors?|cabinets?|sideboards?|credenzas?|shelving|bookcases?|dressers?|chests?|armoires?|beds?|headboards?|nightstands?|bedsides?)\b/gi;
+
+function normalizeFurnitureToken(t: string): string {
+  const s = t.toLowerCase().replace(/\s+/g, " ").trim();
+  // Pluralize to a canonical plural form.
+  if (/^sectional(\s+sofa)?s?$/.test(s)) return "sectional sofas";
+  if (/^arm\s*chairs?$/.test(s)) return "armchairs";
+  if (/^side\s+tables?$/.test(s)) return "side tables";
+  if (/^coffee\s+tables?$/.test(s)) return "coffee tables";
+  if (/^dining\s+tables?$/.test(s)) return "dining tables";
+  if (/^floor\s+lamps?$/.test(s)) return "floor lamps";
+  if (/^table\s+lamps?$/.test(s)) return "table lamps";
+  if (/^accent\s+chairs?$/.test(s)) return "accent chairs";
+  if (/^lounge\s+chairs?$/.test(s)) return "lounge chairs";
+  if (/^dining\s+chairs?$/.test(s)) return "dining chairs";
+  if (/^wall\s+lights?$/.test(s)) return "wall lights";
+  // Generic singular→plural
+  if (s.endsWith("y")) return s.slice(0, -1) + "ies";
+  if (/(s|x|z|ch|sh)$/.test(s)) return s;
+  if (s.endsWith("s")) return s;
+  return s + "s";
+}
+
+// Suppress generic parents when a more specific sibling was already captured
+// (e.g. drop "tables" when "side tables" or "coffee tables" is present).
+function collapseFurnitureTokens(tokens: string[]): string[] {
+  const set = new Set(tokens);
+  const drop = (parent: string, ...children: string[]) => {
+    if (children.some((c) => set.has(c))) set.delete(parent);
+  };
+  drop("tables", "side tables", "coffee tables", "dining tables");
+  drop("chairs", "armchairs", "accent chairs", "lounge chairs", "dining chairs");
+  drop("lamps", "floor lamps", "table lamps");
+  drop("sofas", "sectional sofas");
+  return Array.from(set);
+}
+
+function extractFurnitureTypology(text: string): string[] {
+  if (!text) return [];
+  const raw = text.match(FURNITURE_TOKEN_RE) || [];
+  const normalized = raw.map(normalizeFurnitureToken);
+  return collapseFurnitureTokens(Array.from(new Set(normalized)));
+}
+
 function detectProjectScale(
   message: string,
   priorUserTurns: number = 0,
-): { typology: string; city: string; country: string; zones: string[]; timelineWeeks: number | null } | null {
+): { typology: string; city: string; country: string; zones: string[]; timelineWeeks: number | null; furniture: string[] } | null {
   if (!message) return null;
   const text = message.trim();
 
@@ -98,7 +147,8 @@ function detectProjectScale(
   if (wk) timelineWeeks = parseInt(wk[1], 10);
   else if (mo) timelineWeeks = parseInt(mo[1], 10) * 4;
 
-  return { typology, city, country, zones: zoneMatches, timelineWeeks };
+  const furniture = extractFurnitureTypology(text);
+  return { typology, city, country, zones: zoneMatches, timelineWeeks, furniture };
 }
 
 
@@ -1428,7 +1478,32 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
           );
         }
 
+        // Merge furniture typologies from the current message + every prior
+        // user turn so pieces named earlier ("sectional sofas, armchairs,
+        // side and coffee tables") still land in Block 2 TYPOLOGY.
+        const priorFurnitureText = timeline
+          .filter((t): t is Extract<TimelineItem, { kind: "msg" }> => t.kind === "msg" && t.role === "user")
+          .map((t) => t.content || "")
+          .join(" \n ");
+        const mergedFurniture = collapseFurnitureTokens(
+          Array.from(new Set([...(scale.furniture || []), ...extractFurnitureTypology(priorFurnitureText)])),
+        );
+        if (mergedFurniture.length) {
+          prefilled = prefilled.replace(
+            "[e.g. sectional + accent chairs]",
+            mergedFurniture.join(", "),
+          );
+        }
+
         setInput(prefilled);
+        // Force all three brief-builder sections expanded on auto-open so
+        // the prefilled fields are visible immediately — no hidden Block 2/3.
+        try {
+          const scope = sessionStorage.getItem("trade:lastProjectFilter") || "global";
+          const expanded = JSON.stringify({ block1: true, block2: true, block3: true });
+          localStorage.setItem(`concierge:briefBuilder:expanded:${scope}`, expanded);
+          localStorage.setItem("concierge:briefBuilder:expanded", expanded);
+        } catch {}
         setBriefBuilderOpen(true);
         try { sessionStorage.removeItem("concierge:briefAutoOpened"); } catch {}
 
@@ -1437,6 +1512,7 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
           scale.typology,
           city ? `city: ${city}` : null,
           scale.zones.length ? `zones: ${scale.zones.join(", ")}` : null,
+          mergedFurniture.length ? `pieces: ${mergedFurniture.join(", ")}` : null,
           scale.timelineWeeks ? `${scale.timelineWeeks}-week handover` : null,
         ].filter(Boolean).join(" · ");
 
@@ -2950,8 +3026,9 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
             )}
           </div>
 
-          <div className={cn("border-t border-border p-3 shrink-0 min-h-0", fullscreen && "flex flex-col gap-3 max-h-[45vh] overflow-hidden")}>
+          <div className={cn("border-t border-border p-3 shrink-0 min-h-0", fullscreen && "flex flex-col gap-3 overflow-hidden", fullscreen && (briefBuilderOpen ? "max-h-[78vh]" : "max-h-[45vh]"))}>
             <div className={cn(fullscreen && "flex-1 min-h-0 overflow-y-auto")}>
+
             {/* Correlation-id chip — copy-to-clipboard trace id for the
                 current concierge turn. Matches the server's SSE `event: request_id`
                 and every `concierge_inspector` log line for this run. */}
