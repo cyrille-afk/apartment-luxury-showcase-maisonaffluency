@@ -887,7 +887,7 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
         if (detail.autoSend) {
           const display = detail.displayMessage?.trim() || "…";
           // Fire and forget — send() handles its own streaming state.
-          void send(detail.prefill, { displayText: display });
+          void sendRef.current?.(detail.prefill, { displayText: display });
         } else {
           setInput(detail.prefill);
           setTimeout(() => {
