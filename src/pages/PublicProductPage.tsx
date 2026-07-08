@@ -48,6 +48,8 @@ import {
   shouldSuppressSingleAsFinish,
   makeSwatchAxisFilter,
 } from "@/lib/finishDuplication";
+import { useAuth } from "@/hooks/useAuth";
+import { isCollectibleSlug, collectibleGateRedirect } from "@/lib/collectibleGate";
 
 
 /* ------------------------------------------------------------------ */
