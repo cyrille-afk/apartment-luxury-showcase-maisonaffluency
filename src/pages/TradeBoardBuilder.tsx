@@ -71,6 +71,7 @@ interface BoardItem {
     product_name: string;
     brand_name: string;
     image_url: string | null;
+    source_pick_id?: string | null;
     image_from_hotspot?: boolean;
     materials: string | null;
     dimensions: string | null;
@@ -86,6 +87,31 @@ interface Product {
   category: string;
 }
 
+type SavedPickFinishes = {
+  fabricId?: string | null;
+  baseId?: string | null;
+  topId?: string | null;
+};
+
+const readSavedPickFinishes = (pickId: string): SavedPickFinishes | null => {
+  try {
+    const raw = sessionStorage.getItem(`concierge:pick-finishes:${pickId}`);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === "object" ? parsed : null;
+  } catch {
+    return null;
+  }
+};
+
+const joinFinishLabels = (...labels: Array<string | null | undefined>) =>
+  labels.map((label) => String(label || "").trim()).filter(Boolean).join(" · ") || null;
+
+const isFabricFinishCategory = (category: string | null | undefined) => {
+  const cat = String(category || "").trim().toLowerCase();
+  return ["fabric & leather", "fabric", "leather", "upholstery", "rug finish", "rug finishes", "rug"].includes(cat);
+};
+
 const TradeBoardBuilder = () => {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
@@ -95,23 +121,16 @@ const TradeBoardBuilder = () => {
 
   const openProductSheet = useCallback((item?: BoardItem) => {
     if (!item?.product_id) return;
-    // If the concierge captured finishes for this item, jump straight to the
-    // tearsheet workbench with those finishes pre-applied — the user doesn't
-    // have to reselect them. Otherwise fall back to the raw product page.
-    const hasFinishes = !!(item.variant_label || item.fabric_label || item.wood_label);
-    if (hasFinishes) {
-      const params = new URLSearchParams();
-      params.set("product", item.product_id);
-      if (item.fabric_label) params.set("fabric", item.fabric_label);
-      if (item.wood_label) params.set("wood", item.wood_label);
-      if (item.variant_label) params.set("variant", item.variant_label);
-      params.set("fromBoard", id || "");
-      navigate(`/trade/tearsheets?${params.toString()}`, {
-        state: { from: location.pathname + location.search },
-      });
-      return;
-    }
-    navigate(`/trade/products/${item.product_id}`, {
+    // A board card is a tearsheet item, not a catalog browsing shortcut.
+    // Always reopen the tearsheet workbench and carry any captured finish
+    // labels forward so the printed snapshot reflects the locked row.
+    const params = new URLSearchParams();
+    params.set("product", item.product_id);
+    if (item.fabric_label) params.set("fabric", item.fabric_label);
+    if (item.wood_label) params.set("wood", item.wood_label);
+    if (item.variant_label) params.set("variant", item.variant_label);
+    params.set("fromBoard", id || "");
+    navigate(`/trade/tearsheets?${params.toString()}`, {
       state: { from: location.pathname + location.search },
     });
   }, [navigate, location.pathname, location.search, id]);
@@ -154,7 +173,7 @@ const TradeBoardBuilder = () => {
       const productIds = itemsData.map((i: any) => i.product_id);
       const { data: prods } = await supabase
         .from("trade_products")
-        .select("id, product_name, brand_name, image_url, materials, dimensions")
+        .select("id, product_name, brand_name, image_url, materials, dimensions, source_pick_id")
         .in("id", productIds);
 
       // Fill missing image_url: first from the linked curator pick (the canonical
@@ -168,7 +187,48 @@ const TradeBoardBuilder = () => {
       }
 
       const prodMap = new Map(prodList.map((p: any) => [p.id, p]));
-      setItems(itemsData.map((i: any) => ({ ...i, product: prodMap.get(i.product_id) })));
+      const hydratedItems = itemsData.map((i: any) => ({ ...i, product: prodMap.get(i.product_id) })) as BoardItem[];
+
+      // Recovery for boards created before finish labels were sent to the
+      // commit function in this tab: the row has null labels, but the locked
+      // drawer still has `concierge:pick-finishes:<source_pick_id>` saved.
+      const recoverable = hydratedItems
+        .map((item) => {
+          const sourcePickId = item.product?.source_pick_id;
+          const saved = sourcePickId && !(item.variant_label || item.fabric_label || item.wood_label)
+            ? readSavedPickFinishes(sourcePickId)
+            : null;
+          return sourcePickId && saved && (saved.fabricId || saved.baseId || saved.topId) ? { item, sourcePickId, saved } : null;
+        })
+        .filter(Boolean) as Array<{ item: BoardItem; sourcePickId: string; saved: SavedPickFinishes }>;
+
+      if (recoverable.length > 0) {
+        const swatchIds = Array.from(new Set(recoverable.flatMap(({ saved }) => [saved.fabricId, saved.baseId, saved.topId].filter(Boolean) as string[])));
+        const { data: swatches } = await supabase
+          .from("product_fabric_swatches_public")
+          .select("pick_id, fabric_id, name, category")
+          .in("pick_id", recoverable.map((r) => r.sourcePickId))
+          .in("fabric_id", swatchIds);
+        const swatchByPickAndId = new Map<string, { name: string; category: string | null }>();
+        (swatches || []).forEach((s: any) => swatchByPickAndId.set(`${s.pick_id}::${s.fabric_id}`, { name: s.name, category: s.category ?? null }));
+
+        await Promise.all(recoverable.map(async ({ item, sourcePickId, saved }) => {
+          const rowFor = (id?: string | null) => id ? swatchByPickAndId.get(`${sourcePickId}::${id}`) ?? null : null;
+          const topRow = rowFor(saved.topId);
+          const topIsFabric = isFabricFinishCategory(topRow?.category);
+          const fabricLabel = joinFinishLabels(rowFor(saved.fabricId)?.name ?? null, topIsFabric ? topRow?.name ?? null : null);
+          const woodLabel = joinFinishLabels(rowFor(saved.baseId)?.name ?? null, topIsFabric ? null : topRow?.name ?? null);
+          if (!fabricLabel && !woodLabel) return;
+          item.fabric_label = fabricLabel;
+          item.wood_label = woodLabel;
+          await supabase
+            .from("client_board_items")
+            .update({ fabric_label: fabricLabel, wood_label: woodLabel } as any)
+            .eq("id", item.id);
+        }));
+      }
+
+      setItems(hydratedItems);
       setAddedIds(new Set(itemsData.map((i: any) => i.product_id)));
     } else {
       setItems([]);
