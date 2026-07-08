@@ -1,0 +1,2 @@
+ALTER TABLE public.client_boards ADD COLUMN IF NOT EXISTS client_id uuid REFERENCES public.clients(id) ON DELETE SET NULL;
+CREATE INDEX IF NOT EXISTS idx_client_boards_client_id ON public.client_boards(client_id);
