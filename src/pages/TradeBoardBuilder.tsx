@@ -39,6 +39,7 @@ import { fillHotspotImages } from "@/lib/hotspotImageFallback";
 import { fillTradeProductImageFallbacks } from "@/lib/tradeProductImageFallback";
 import { HotspotImageBadge } from "@/components/trade/HotspotImageBadge";
 import { rememberActiveQuoteId } from "@/lib/activeProjectId";
+import { copyTextToClipboard } from "@/lib/clipboard";
 
 interface Board {
   id: string;
@@ -122,6 +123,8 @@ const TradeBoardBuilder = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [search, setSearch] = useState("");
   const [addedIds, setAddedIds] = useState<Set<string>>(new Set());
+  const [copyButtonLabel, setCopyButtonLabel] = useState("Copy Current Link");
+  const [rotatingLink, setRotatingLink] = useState(false);
 
   // Sub-folder state
   const [subfolderDialogOpen, setSubfolderDialogOpen] = useState(false);
@@ -335,7 +338,7 @@ const TradeBoardBuilder = () => {
       return;
     }
     const url = `${window.location.origin}/board/${token}`;
-    navigator.clipboard.writeText(url);
+    const copied = await copyTextToClipboard(url);
 
     if (wasDraft) {
       try {
@@ -348,16 +351,22 @@ const TradeBoardBuilder = () => {
     }
 
     toast({
-      title: "Link copied!",
+      title: copied ? "Link copied" : "Share link ready",
       description: wasDraft
-        ? "Board shared. Your client will receive an email notification."
-        : "Share link copied to clipboard.",
+        ? copied
+          ? "Board shared. Your client will receive an email notification."
+          : "Board shared. Copy the current link manually from your browser if needed."
+        : copied
+          ? "Current share link copied to clipboard."
+          : url,
     });
   };
 
   const rotateToken = async () => {
     if (!board) return;
+    setRotatingLink(true);
     const { data, error } = await supabase.rpc("rotate_board_token", { _board_id: board.id });
+    setRotatingLink(false);
     if (error) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
       return;
@@ -365,8 +374,15 @@ const TradeBoardBuilder = () => {
     const newToken = data as string;
     setBoard({ ...board, share_token: newToken, token_expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), token_rotated_at: new Date().toISOString() });
     const url = `${window.location.origin}/board/${newToken}`;
-    navigator.clipboard.writeText(url);
-    toast({ title: "Token rotated", description: "New share link copied. The old link no longer works." });
+    const copied = await copyTextToClipboard(url);
+    setCopyButtonLabel("Copy New Link");
+    window.setTimeout(() => setCopyButtonLabel("Copy Current Link"), 8000);
+    toast({
+      title: "Link rotated",
+      description: copied
+        ? "New share link copied. The old link no longer works."
+        : "New share link created. Use Copy New Link to copy it; the old link no longer works.",
+    });
   };
 
   const convertToQuote = async () => {
@@ -576,11 +592,11 @@ const TradeBoardBuilder = () => {
                   <Plus className="h-3.5 w-3.5" /> Add Products
                 </Button>
                 <Button variant="outline" size="sm" className="gap-1.5" onClick={shareBoard}>
-                  <Share2 className="h-3.5 w-3.5" /> {board.status === "draft" ? "Share with Client" : "Copy Link"}
+                  <Share2 className="h-3.5 w-3.5" /> {board.status === "draft" ? "Share with Client" : copyButtonLabel}
                 </Button>
                 {board.status !== "draft" && (
-                  <Button variant="ghost" size="sm" className="gap-1.5 text-xs" onClick={rotateToken} title="Regenerate share link (invalidates old link)">
-                    <RefreshCw className="h-3.5 w-3.5" /> Rotate Link
+                  <Button variant="ghost" size="sm" className="gap-1.5 text-xs" onClick={rotateToken} disabled={rotatingLink} title="Regenerate share link (invalidates old link)">
+                    <RefreshCw className="h-3.5 w-3.5" /> {rotatingLink ? "Rotating…" : "Rotate Link"}
                   </Button>
                 )}
                 {approvedCount > 0 ? (
