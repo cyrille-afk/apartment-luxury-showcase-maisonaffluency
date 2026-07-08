@@ -1,46 +1,37 @@
-## Goal
+Three PDF-only bugs in `src/lib/quotePdf.ts` (line rendering) plus the meta payload built in `src/components/trade/QuoteDetail.tsx` (~L1386-1453). Nothing to change on the on-screen quote — it already matches the desired behavior.
 
-Right now every non-fabric material in a GLB is tagged as **base**, so a single "wood & base" swatch retextures both the base cube and the marble top of the Madison Avenue Side Table (and any similar piece). Introduce a third role, **top**, that is styled by its own swatch stream so the base and the top can be picked independently.
+## 1. Product name overlaps QTY column
 
-No database schema change is needed — `trade_product_glb_variants.material_roles` is already a free-form JSONB map, so `"top"` becomes just another valid value alongside `"fabric" | "base" | "ignore"`.
+Currently `productName` is passed as one string ("Frenchmen Street Lounge Chair by Sebastian Herkner") and `splitTextToSize` wraps mid-phrase, overflowing into QTY.
 
-## Changes
+Fix in `quotePdf.ts` around L925:
+- Before wrap, split `productName` at the last ` by ` (case-insensitive) into `titleMain` + `by Designer`.
+- Wrap each piece separately with `splitTextToSize(..., colDesc - 12)` and stack them (main bold, "by Designer" bold on next line). Keeps the title inside `colDesc` and always breaks at the natural boundary.
+- Adjust `titleHeight` and `metaY` to account for the added line.
 
-**1. `Product3DViewer.tsx`**
-- Extend the `MaterialRole` union to `"fabric" | "base" | "top" | "ignore"`.
-- Add two new props: `topTextureUrl?: string | null` and `topMaterialNameIncludes?: string | string[]`.
-- Filter a third `topMatched` array from the explicit role map (or new keyword group: `top, tabletop, surface, marble, stone, glass`).
-- Apply/restore a third texture layer identical to the fabric/base plumbing.
-- Extend the debug banner to `fabric N · base N · top N / total` so the admin can see the classification.
+## 2. Duplicate finish labels — add a "Finishes:" title block below image
 
-**2. `GlbMaterialRolesEditor.tsx`**
-- Add a fourth button in `ROLE_ORDER`: `top` with label "Top (stone · marble · glass)".
-- Orange for base stays; use a distinct colour (e.g. `bg-sky-700`) for the top button so the two are visually separable.
-- No other behavioural change — the identify flow still repurposes the "fabric" slot for the magenta highlight.
+Currently swatches render as thumbnails only, and `Fabric: Aries Pietra` / `Selected finishes: Mist Oak · Aries Pietra` render as meta text on the right, producing the duplicated "Fabric: Aries Pietra" the user circled.
 
-**3. `TradeProductPage.tsx`**
-- Pass the current top-swatch selection through to `Product3DViewer` as `topTextureUrl`. For the first pass I'll wire it to the existing `selectedWoodPrice` fallback so nothing regresses if no top swatch is chosen yet, and expose a new `selectedTopFinish` state driven by a dedicated "Top finishes" swatch row rendered directly below the existing "Wood & base finishes" row when the resolved variant has any material tagged `"top"`.
-- The new row reuses the existing `product_fabric_swatches_public` swatch UI component — the same picker used for wood/base — filtered to swatches flagged as `role = 'top'` (or, until data is tagged, mirroring the wood swatch list so the admin can start experimenting).
-- Update the `resolvedRoles` type to include the new `"top"` value.
+Fix:
+- In `QuoteDetail.tsx` meta payload (L910-924): drop `finishSwatchLabel` and `fabricLabel` from the `meta` array whenever `finishSwatches[idx]` will render swatches with names (i.e., `variantSwatches.length > 0` or `fabricSwatchUrl` present). Keep `woodFinishLabel` only when `resolveWoodFinishLabel` returns a value that isn't already in the swatch strip (existing logic).
+- In `quotePdf.ts` swatch drawing block (L962-975): after drawing each swatch tile, render a small "Finishes:" caption once above the first swatch row (small caps, muted, 7pt) and the swatch name beneath each tile (7pt, muted, centered under the 20×20 square). This mirrors the on-screen quote (screenshot 2/).
+- Recompute `rowH` to include the caption + label line (adds ~14pt above the swatch grid, ~10pt below each row of tiles).
 
-**4. Admin variant manager (`GlbVariantManager.tsx`)**
-- Update the `MaterialRole` import/type to include `"top"`.
-- No functional change — the identify override still maps a single material into the fabric slot; other materials become `"ignore"` during identify, which is unchanged.
+## 3. Shipping line rendered when user hasn't chosen shipping
 
-**5. Docs / no DB migration**
-- Confirm no migration is needed. The JSONB column already accepts arbitrary strings and no CHECK constraint enforces the current union.
+L920-922 emits `Shipping: …` whenever any of `shipOriginCountry / shipMode / shipCbm / shipWeightKg` is truthy. `shipOriginCountry` falls back to `product.origin` (defaulting to `FR`) so it is essentially always set → the row always prints.
 
-## Technical notes
+Fix:
+- In `QuoteDetail.tsx` (L1449-1452), only pass `shipOrigin*` fields to the PDF line when the user has actually configured shipping for that line — i.e. gate on `item.ship_mode` being explicitly set (user-chosen mode) OR the parent quote having a computed shipping estimate (`shippingEstimateCents > 0`). Otherwise pass `null` for all four fields.
+- Also in `quotePdf.ts` L920, keep the guard as-is; with the caller no longer sending stub values the line naturally disappears.
 
-```text
-GLB material                role (admin)     texture source at runtime
-────────────────────────────────────────────────────────────────────
-9b243aed-e0d... (base cube) base             baseTextureUrl  (wood/base swatch)
-96541480-d12... (marble top) top             topTextureUrl   (top swatch)
-```
+## Files touched
 
-## Out of scope
+- `src/lib/quotePdf.ts` — title wrapping around " by ", swatch caption + labels, height math
+- `src/components/trade/QuoteDetail.tsx` — suppress redundant `fabricLabel`/`finishSwatchLabel` meta when swatches will render; only pass ship fields when a shipping choice has been made
 
-- Auto-classifying which mesh is the top vs the base — still admin-tagged.
-- Adding a dedicated `role` column on `product_fabric_swatches_public` — for now the "Top finishes" row reads the same wood swatches; a follow-up can split the pools once the admin has tagged them.
-- Any tearsheet / quote label change beyond the top's swatch name flowing into the existing `selectedTopDisplay` field.
+## Verification
+
+- Run `TradeTearsheetsPrintParity` and any existing quote PDF tests (`tsgo --noEmit`, `bunx vitest run src/pages/__tests__/TradeTearsheetsPrintParity.test.ts`).
+- Regenerate a live PDF via the running preview for the quote in the screenshot and visually inspect: title wraps on `by Designer`, no `Fabric:` meta duplication, `Finishes:` block with named swatches below image, no `Shipping:` line unless a mode was picked.
