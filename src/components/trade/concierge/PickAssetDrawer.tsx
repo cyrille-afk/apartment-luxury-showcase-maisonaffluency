@@ -117,6 +117,12 @@ export function PickAssetDrawer({ pickId, title }: Props) {
     topAxisLabel: string | null;
     pairs: { base: string; top: string }[];
   }>({ baseOptions: [], topOptions: [], baseAxisLabel: null, topAxisLabel: null, pairs: [] });
+  const [tradeMeta, setTradeMeta] = useState<{
+    tradeProductId: string | null;
+    tradePriceCents: number | null;
+    currency: string | null;
+    leadTime: string | null;
+  }>({ tradeProductId: null, tradePriceCents: null, currency: null, leadTime: null });
 
   // Mirror selections to sessionStorage on every change so a collapse/expand
   // (or an "unlock → re-lock") cycle restores the previous picks verbatim.
