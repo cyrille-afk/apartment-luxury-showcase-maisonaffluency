@@ -125,8 +125,9 @@ export function PickAssetDrawer({ pickId, title }: Props) {
         fabricId: selectedFabricId,
         baseId: selectedBaseId,
         topId: selectedTopId,
+        glbLabel: selectedGlbLabel,
       };
-      if (!selectedFabricId && !selectedBaseId && !selectedTopId) {
+      if (!selectedFabricId && !selectedBaseId && !selectedTopId && !selectedGlbLabel) {
         sessionStorage.removeItem(storageKey);
       } else {
         sessionStorage.setItem(storageKey, JSON.stringify(payload));
@@ -134,7 +135,7 @@ export function PickAssetDrawer({ pickId, title }: Props) {
     } catch {
       /* quota / disabled — ignore */
     }
-  }, [storageKey, selectedFabricId, selectedBaseId, selectedTopId]);
+  }, [storageKey, selectedFabricId, selectedBaseId, selectedTopId, selectedGlbLabel]);
 
   useEffect(() => {
     let cancelled = false;
