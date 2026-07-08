@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Product3DViewer from "@/components/trade/Product3DViewer";
-import { FileText, FolderPlus, Loader2, RotateCcw, Check, Pencil } from "lucide-react";
+import { FileText, FolderPlus, Loader2, RotateCcw, Check, Pencil, ExternalLink } from "lucide-react";
 import { updateConciergeSession, useConciergeSession } from "@/hooks/useConciergeSession";
 import { computeVariantAxes } from "@/lib/parseSizeVariants";
 import { makeSwatchAxisFilter } from "@/lib/finishDuplication";
