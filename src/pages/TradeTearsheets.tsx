@@ -221,10 +221,25 @@ export default function TradeTearsheets() {
       chosenFinishes.wood && `Base / Wood: ${chosenFinishes.wood}`,
       chosenFinishes.fabric && `Fabric: ${chosenFinishes.fabric}`,
     ].filter(Boolean) as string[];
-    if (!finishParts.length) return base || null;
-    if (!base) return finishParts.join(" · ");
-    return `${base} · ${finishParts.join(" · ")}`;
-  }, [selectedProduct?.materials, chosenFinishes.wood, chosenFinishes.fabric]);
+    if (finishParts.length) {
+      return base ? `${base} · ${finishParts.join(" · ")}` : finishParts.join(" · ");
+    }
+    if (base) return base;
+    // Final fallback: derive from size_variants axes so the tearsheet still
+    // shows a meaningful Materials line when the pick has no free-form text
+    // and no finish was selected (e.g. brief-locked picks with only the
+    // variant matrix populated).
+    const variants = (selectedProduct?.size_variants as any[]) || [];
+    if (variants.length) {
+      const bases = Array.from(new Set(variants.map((v) => String(v?.base || "").trim()).filter(Boolean)));
+      const tops = Array.from(new Set(variants.map((v) => String(v?.top || "").trim()).filter(Boolean)));
+      const parts: string[] = [];
+      if (bases.length) parts.push(`Base: ${bases.slice(0, 4).join(" / ")}`);
+      if (tops.length) parts.push(`Top: ${tops.slice(0, 4).join(" / ")}`);
+      if (parts.length) return parts.join(" · ");
+    }
+    return null;
+  }, [selectedProduct?.materials, selectedProduct?.size_variants, chosenFinishes.wood, chosenFinishes.fabric]);
 
 
   // Fetch the set of product IDs (from quotes + boards) belonging to the selected
