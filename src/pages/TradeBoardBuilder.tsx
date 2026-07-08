@@ -107,6 +107,11 @@ const readSavedPickFinishes = (pickId: string): SavedPickFinishes | null => {
 const joinFinishLabels = (...labels: Array<string | null | undefined>) =>
   labels.map((label) => String(label || "").trim()).filter(Boolean).join(" · ") || null;
 
+const isFabricFinishCategory = (category: string | null | undefined) => {
+  const cat = String(category || "").trim().toLowerCase();
+  return ["fabric & leather", "fabric", "leather", "upholstery", "rug finish", "rug finishes", "rug"].includes(cat);
+};
+
 const TradeBoardBuilder = () => {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
@@ -201,16 +206,18 @@ const TradeBoardBuilder = () => {
         const swatchIds = Array.from(new Set(recoverable.flatMap(({ saved }) => [saved.fabricId, saved.baseId, saved.topId].filter(Boolean) as string[])));
         const { data: swatches } = await supabase
           .from("product_fabric_swatches_public")
-          .select("pick_id, fabric_id, name")
+          .select("pick_id, fabric_id, name, category")
           .in("pick_id", recoverable.map((r) => r.sourcePickId))
           .in("fabric_id", swatchIds);
-        const nameByPickAndId = new Map<string, string>();
-        (swatches || []).forEach((s: any) => nameByPickAndId.set(`${s.pick_id}::${s.fabric_id}`, s.name));
+        const swatchByPickAndId = new Map<string, { name: string; category: string | null }>();
+        (swatches || []).forEach((s: any) => swatchByPickAndId.set(`${s.pick_id}::${s.fabric_id}`, { name: s.name, category: s.category ?? null }));
 
         await Promise.all(recoverable.map(async ({ item, sourcePickId, saved }) => {
-          const nameFor = (id?: string | null) => id ? nameByPickAndId.get(`${sourcePickId}::${id}`) ?? null : null;
-          const fabricLabel = nameFor(saved.fabricId);
-          const woodLabel = joinFinishLabels(nameFor(saved.baseId), nameFor(saved.topId));
+          const rowFor = (id?: string | null) => id ? swatchByPickAndId.get(`${sourcePickId}::${id}`) ?? null : null;
+          const topRow = rowFor(saved.topId);
+          const topIsFabric = isFabricFinishCategory(topRow?.category);
+          const fabricLabel = joinFinishLabels(rowFor(saved.fabricId)?.name ?? null, topIsFabric ? topRow?.name ?? null : null);
+          const woodLabel = joinFinishLabels(rowFor(saved.baseId)?.name ?? null, topIsFabric ? null : topRow?.name ?? null);
           if (!fabricLabel && !woodLabel) return;
           item.fabric_label = fabricLabel;
           item.wood_label = woodLabel;

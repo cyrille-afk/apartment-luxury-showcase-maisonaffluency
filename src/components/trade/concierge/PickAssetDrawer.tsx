@@ -338,14 +338,22 @@ export function PickAssetDrawer({ pickId, title }: Props) {
   const baseSwatch = selectedBaseId
     ? baseSwatches.find((s) => s.fabric_id === selectedBaseId) ?? null
     : null;
+  const topSwatch = selectedTopId
+    ? swatches.find((s) => s.fabric_id === selectedTopId) ?? null
+    : null;
+  const topIsFabric = topSwatch ? classifySwatch(topSwatch) === "fabric" : false;
+  const fabricLabel = [fabricSwatch?.name, topIsFabric ? topSwatch?.name : null].filter(Boolean).join(" · ") || null;
+  const fabricImg = fabricSwatch?.image_url ?? (topIsFabric ? topSwatch?.image_url ?? null : null);
+  const woodLabel = [baseSwatch?.name, topIsFabric ? null : topSwatch?.name].filter(Boolean).join(" · ") || null;
+  const woodImg = baseSwatch?.image_url ?? (!topIsFabric ? topSwatch?.image_url ?? null : null);
   const showDraftButton = loading || hasSwatches;
   const canDraft = !loading && (selectedFabricId || selectedBaseId || selectedTopId);
   const draftParams = new URLSearchParams();
   draftParams.set("product", pickId);
-  if (fabricSwatch?.name) draftParams.set("fabric", fabricSwatch.name);
-  if (fabricSwatch?.image_url) draftParams.set("fabricImg", fabricSwatch.image_url);
-  if (baseSwatch?.name) draftParams.set("wood", baseSwatch.name);
-  if (baseSwatch?.image_url) draftParams.set("woodImg", baseSwatch.image_url);
+  if (fabricLabel) draftParams.set("fabric", fabricLabel);
+  if (fabricImg) draftParams.set("fabricImg", fabricImg);
+  if (woodLabel) draftParams.set("wood", woodLabel);
+  if (woodImg) draftParams.set("woodImg", woodImg);
 
   const renderGroup = (
     label: string,
@@ -559,10 +567,10 @@ export function PickAssetDrawer({ pickId, title }: Props) {
               updateConciergeSession({
                 product: { id: pickId, title, source: "curator" },
                 finishes: {
-                  fabric: fabricSwatch?.name ?? null,
-                  fabricImg: fabricSwatch?.image_url ?? null,
-                  wood: baseSwatch?.name ?? null,
-                  woodImg: baseSwatch?.image_url ?? null,
+                  fabric: fabricLabel,
+                  fabricImg,
+                  wood: woodLabel,
+                  woodImg,
                   variant: null,
                 },
                 locked: true,

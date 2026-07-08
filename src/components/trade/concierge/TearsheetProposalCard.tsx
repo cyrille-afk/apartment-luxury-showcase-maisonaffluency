@@ -50,6 +50,11 @@ const readPickFinishes = (pickId: string): PersistedPickFinishes | null => {
 const joinFinishLabels = (...labels: Array<string | null | undefined>) =>
   labels.map((label) => String(label || "").trim()).filter(Boolean).join(" · ") || null;
 
+const isFabricFinishCategory = (category: string | null | undefined) => {
+  const cat = String(category || "").trim().toLowerCase();
+  return ["fabric & leather", "fabric", "leather", "upholstery", "rug finish", "rug finishes", "rug"].includes(cat);
+};
+
 async function resolveCommitFinishes(pickIds: string[]): Promise<CommitFinishSnapshot[]> {
   const persisted = pickIds
     .map((pickId) => ({ pickId, saved: readPickFinishes(pickId) }))
@@ -63,25 +68,27 @@ async function resolveCommitFinishes(pickIds: string[]): Promise<CommitFinishSna
 
   const { data } = await supabase
     .from("product_fabric_swatches_public")
-    .select("pick_id, fabric_id, name")
+    .select("pick_id, fabric_id, name, category")
     .in("pick_id", persisted.map(({ pickId }) => pickId))
     .in("fabric_id", swatchIds);
 
-  const byPickAndId = new Map<string, string>();
+  const byPickAndId = new Map<string, { name: string; category: string | null }>();
   (data || []).forEach((row: any) => {
-    byPickAndId.set(`${row.pick_id}::${row.fabric_id}`, row.name);
+    byPickAndId.set(`${row.pick_id}::${row.fabric_id}`, { name: row.name, category: row.category ?? null });
   });
 
   return persisted.map(({ pickId, saved }) => {
-    const nameFor = (id?: string | null) => id ? byPickAndId.get(`${pickId}::${id}`) ?? null : null;
-    const fabric = nameFor(saved?.fabricId);
-    const base = nameFor(saved?.baseId);
-    const top = nameFor(saved?.topId);
+    const rowFor = (id?: string | null) => id ? byPickAndId.get(`${pickId}::${id}`) ?? null : null;
+    const fabric = rowFor(saved?.fabricId)?.name ?? null;
+    const base = rowFor(saved?.baseId)?.name ?? null;
+    const topRow = rowFor(saved?.topId);
+    const top = topRow?.name ?? null;
+    const topIsFabric = isFabricFinishCategory(topRow?.category);
     return {
       pick_id: pickId,
       variant_label: null,
-      fabric_label: fabric,
-      wood_label: joinFinishLabels(base, top),
+      fabric_label: joinFinishLabels(fabric, topIsFabric ? top : null),
+      wood_label: joinFinishLabels(base, topIsFabric ? null : top),
     };
   }).filter((f) => !!(f.fabric_label || f.wood_label || f.variant_label));
 }
