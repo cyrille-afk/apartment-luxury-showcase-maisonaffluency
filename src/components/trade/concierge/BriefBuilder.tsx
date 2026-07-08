@@ -1087,10 +1087,10 @@ export function BriefBuilder({
               const parsed = parseBrief(t);
               const prose = extractProseFields(t);
               const preview = {
-                Zone: parsed.values.zone || prose.zone || "—",
-                "Max Footprint": parsed.values.maxFootprint || prose.maxFootprint || "—",
-                Typology: parsed.values.typology || prose.typology || "—",
-                Vibe: parsed.values.vibe || prose.vibe || "—",
+                Zone: parsed.values.block1.zone || prose.zone || "—",
+                "Max Footprint": parsed.values.block2.maxFootprint || prose.maxFootprint || "—",
+                Typology: parsed.values.block2.typology || prose.typology || "—",
+                Vibe: parsed.values.block3.vibe || prose.vibe || "—",
               };
               const anyDetected = Object.values(preview).some((v) => v && v !== "—");
               return (
