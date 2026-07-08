@@ -759,9 +759,14 @@ export function BriefBuilder({
               Filled from clipboard
             </span>
           )}
+          {pasteStatus === "notes" && (
+            <span className="font-body text-[10px] uppercase tracking-[0.12em] text-accent">
+              Added as free-form notes
+            </span>
+          )}
           {pasteStatus === "empty" && (
             <span className="font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
-              No brief detected
+              Nothing to apply
             </span>
           )}
           {pasteStatus === "denied" && (
