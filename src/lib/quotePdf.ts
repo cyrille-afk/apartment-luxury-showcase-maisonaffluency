@@ -921,30 +921,47 @@ function drawTable(
     }
 
     const showMaterials = !line.variantLabel;
+    const hasSwatchStrip =
+      (finishSwatches[idx]?.filter(Boolean).length || 0) + (fabricSwatches[idx] ? 1 : 0) > 0;
+    // When the swatch strip renders below the image, it already carries the
+    // finish/fabric labels — suppress the duplicate meta text on the right.
     const meta = [
       variantLabel,
-      finishSwatchLabel,
-      line.fabricLabel ?? null,
-      line.woodFinishLabel ?? null,
+      hasSwatchStrip ? null : finishSwatchLabel,
+      hasSwatchStrip ? null : (line.fabricLabel ?? null),
+      hasSwatchStrip ? null : (line.woodFinishLabel ?? null),
       dimensionsLabel,
       showMaterials ? line.materials : null,
       editionLabel,
       line.leadTime,
-      line.shipOriginCountry || line.shipMode || line.shipCbm || line.shipWeightKg
-        ? `Shipping: ${line.shipOriginCountry || "origin TBC"}${line.shipMode ? ` · ${line.shipMode.replace("_", " ").toUpperCase()}` : ""}${line.shipCbm ? ` · ${line.shipCbm} CBM/unit` : ""}${line.shipWeightKg ? ` · ${line.shipWeightKg} kg/unit` : ""}`
+      // Shipping meta only when the user has explicitly picked a mode.
+      line.shipMode
+        ? `Shipping: ${line.shipOriginCountry || "origin TBC"} · ${line.shipMode.replace("_", " ").toUpperCase()}${line.shipCbm ? ` · ${line.shipCbm} CBM/unit` : ""}${line.shipWeightKg ? ` · ${line.shipWeightKg} kg/unit` : ""}`
         : null,
       line.notes,
     ].filter(Boolean) as string[];
-    const titleWrap = doc.splitTextToSize(line.productName || "—", colDesc - 12);
+
+    // Title: split on the last " by " so the designer credit wraps onto its
+    // own line and the product name never overflows into the QTY column.
+    const rawTitle = line.productName || "—";
+    const byMatch = rawTitle.match(/^(.*?)(\s+by\s+.+)$/i);
+    const titleMain = byMatch ? byMatch[1].trim() : rawTitle;
+    const titleBy = byMatch ? byMatch[2].trim() : null;
+    const titleMainWrap = doc.splitTextToSize(titleMain, colDesc - 12) as string[];
+    const titleByWrap = titleBy ? (doc.splitTextToSize(titleBy, colDesc - 12) as string[]) : [];
+    const titleLines = [...titleMainWrap, ...titleByWrap];
+    const titleHeight = titleLines.length * 12;
+
     // Pre-wrap meta strings so multi-line materials/notes are not truncated.
     const metaWrapped = meta.map((m) => doc.splitTextToSize(m, colDesc - 12) as string[]);
     const metaLineCount = metaWrapped.reduce((sum, w) => sum + w.length, 0);
     const metaHeight = metaLineCount * 10;
-    const titleHeight = titleWrap.length * 12;
     const swatchCount = (finishSwatches[idx]?.filter(Boolean).length || 0) + (fabricSwatches[idx] ? 1 : 0);
     const swatchRows = swatchCount > 0 ? Math.ceil(Math.min(swatchCount, 5) / 2) : 0;
     const hasSwatches = swatchCount > 0;
-    const rowH = Math.max(hasSwatches ? 58 + swatchRows * 24 + 10 : 56, 12 /* brand */ + titleHeight + metaHeight + 14);
+    // Row height accounts for: image (52) + caption (10) + swatch rows (tile 20 + label 10 + gap 4 = 34 per row)
+    const swatchBlockH = hasSwatches ? 10 + swatchRows * 34 : 0;
+    const rowH = Math.max(hasSwatches ? 58 + swatchBlockH : 56, 12 /* brand */ + titleHeight + metaHeight + 14);
 
     // page break
     if (y + rowH > pageH - 90) {
@@ -973,15 +990,31 @@ function drawTable(
     }
 
     const swatches = [...(finishSwatches[idx] || []), fabricSwatches[idx]].filter(Boolean) as NonNullable<Awaited<ReturnType<typeof fetchImageDataUrl>>>[];
+    const swatchNames = finishSwatchNames[idx] || [];
+    if (swatches.length > 0) {
+      // "Finishes:" caption above the swatch grid
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(7);
+      doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
+      doc.text("FINISHES", xImg + 2, y + 62);
+    }
     swatches.slice(0, 5).forEach((swatch, swatchIdx) => {
       try {
         const size = 20;
-        const sx = xImg + 2 + (swatchIdx % 2) * 24;
-        const sy = y + 58 + Math.floor(swatchIdx / 2) * 24;
+        const sx = xImg + 2 + (swatchIdx % 2) * 30;
+        const sy = y + 68 + Math.floor(swatchIdx / 2) * 34;
         doc.setDrawColor(RULE[0], RULE[1], RULE[2]);
         doc.setLineWidth(0.25);
         doc.rect(sx, sy, size, size);
         doc.addImage(swatch.data, "JPEG", sx, sy, size, size);
+        const name = (swatchNames[swatchIdx] || "").trim();
+        if (name) {
+          doc.setFont("helvetica", "normal");
+          doc.setFontSize(6.5);
+          doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
+          const nameWrap = doc.splitTextToSize(name, 28) as string[];
+          doc.text(nameWrap[0], sx, sy + size + 7);
+        }
       } catch {
         /* ignore swatch failures */
       }
@@ -996,11 +1029,11 @@ function drawTable(
       : (line.brandName || "");
     if (brand) doc.text(brand.toUpperCase(), xDesc + 6, y + 8);
 
-    // title
+    // title (main line + optional "by Designer" wrapped below)
     doc.setFont("helvetica", "bold");
     doc.setFontSize(10);
     doc.setTextColor(FG[0], FG[1], FG[2]);
-    doc.text(titleWrap, xDesc + 6, y + 20);
+    doc.text(titleLines, xDesc + 6, y + 20);
 
     // meta lines (full wrap, no truncation)
     let metaY = y + 20 + titleHeight + 2;
