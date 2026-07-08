@@ -19,23 +19,43 @@ interface Props {
   title: string;
 }
 
-/** Classify a swatch as "base" (wood / metal / stone finish) vs "fabric".
- *  Category is authoritative — "Fabric & Leather" and "Rug Finish" are always
- *  fabric-side, everything else (Wood, Metal, Stone, Glass, Ceramic, Cover, …)
- *  is base. Fall back to a name/label regex ONLY when the category is missing.
+type FinishRole = "fabric" | "base" | "top";
+
+/** Classify a swatch into fabric / base (wood · metal) / top (stone · marble ·
+ *  glass · ceramic). Category is authoritative; the name regex is only a
+ *  fallback when the category is missing. Mirrors the axis split enforced by
+ *  the GLB Material Roles editor so the drawer's swatch groups match what the
+ *  3D viewer is actually retexturing.
  */
-function isBaseFinish(s: Swatch): boolean {
+function classifySwatch(s: Swatch): FinishRole {
   const cat = (s.category ?? "").trim().toLowerCase();
-  if (cat) {
-    if (cat === "fabric & leather" || cat === "fabric" || cat === "leather" || cat === "upholstery" || cat === "rug finish" || cat === "rug finishes" || cat === "rug") {
-      return false;
-    }
-    return true;
+  const name = (s.name ?? "").toLowerCase();
+  if (
+    cat === "fabric & leather" ||
+    cat === "fabric" ||
+    cat === "leather" ||
+    cat === "upholstery" ||
+    cat === "rug finish" ||
+    cat === "rug finishes" ||
+    cat === "rug"
+  ) {
+    return "fabric";
   }
-  const hay = (s.name ?? "").toLowerCase();
-  return /(wood|oak|walnut|ash|teak|maple|mahogany|metal|brass|bronze|steel|iron|marble|stone|lacquer|paint|finish|frame|base)/.test(
-    hay,
-  );
+  if (cat === "stone" || cat === "marble" || cat === "glass" || cat === "ceramic") {
+    return "top";
+  }
+  if (cat === "wood" || cat === "metal") {
+    return "base";
+  }
+  if (!cat) {
+    if (/(marble|stone|onyx|onice|travertino|travertine|granite|quartz|glass|ceramic|porcelain)/.test(name)) {
+      return "top";
+    }
+    if (/(wood|oak|walnut|ash|teak|maple|mahogany|metal|brass|bronze|steel|iron|lacquer|paint|frame|base)/.test(name)) {
+      return "base";
+    }
+  }
+  return "base";
 }
 
 /**
@@ -55,6 +75,7 @@ export function PickAssetDrawer({ pickId, title }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [selectedFabricId, setSelectedFabricId] = useState<string | null>(null);
   const [selectedBaseId, setSelectedBaseId] = useState<string | null>(null);
+  const [selectedTopId, setSelectedTopId] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -102,11 +123,17 @@ export function PickAssetDrawer({ pickId, title }: Props) {
     };
   }, [pickId]);
 
-  const { fabricSwatches, baseSwatches } = useMemo(() => {
+  const { fabricSwatches, baseSwatches, topSwatches } = useMemo(() => {
     const base: Swatch[] = [];
+    const top: Swatch[] = [];
     const fab: Swatch[] = [];
-    for (const s of swatches) (isBaseFinish(s) ? base : fab).push(s);
-    return { fabricSwatches: fab, baseSwatches: base };
+    for (const s of swatches) {
+      const role = classifySwatch(s);
+      if (role === "fabric") fab.push(s);
+      else if (role === "top") top.push(s);
+      else base.push(s);
+    }
+    return { fabricSwatches: fab, baseSwatches: base, topSwatches: top };
   }, [swatches]);
 
   const hasGlb = !!glbUrl;
@@ -128,6 +155,9 @@ export function PickAssetDrawer({ pickId, title }: Props) {
   const baseTextureUrl = selectedBaseId
     ? baseSwatches.find((s) => s.fabric_id === selectedBaseId)?.image_url ?? null
     : null;
+  const topTextureUrl = selectedTopId
+    ? topSwatches.find((s) => s.fabric_id === selectedTopId)?.image_url ?? null
+    : null;
 
   const fabricSwatch = selectedFabricId
     ? fabricSwatches.find((s) => s.fabric_id === selectedFabricId) ?? null
@@ -136,7 +166,7 @@ export function PickAssetDrawer({ pickId, title }: Props) {
     ? baseSwatches.find((s) => s.fabric_id === selectedBaseId) ?? null
     : null;
   const showDraftButton = loading || hasSwatches;
-  const canDraft = !loading && (selectedFabricId || selectedBaseId);
+  const canDraft = !loading && (selectedFabricId || selectedBaseId || selectedTopId);
   const draftParams = new URLSearchParams();
   draftParams.set("product", pickId);
   if (fabricSwatch?.name) draftParams.set("fabric", fabricSwatch.name);
@@ -224,13 +254,15 @@ export function PickAssetDrawer({ pickId, title }: Props) {
             poster={poster}
             fabricTextureUrl={fabricTextureUrl}
             baseTextureUrl={baseTextureUrl}
+            topTextureUrl={topTextureUrl}
             materialRoles={materialRoles}
           />
         </div>
       )}
       {hasSwatches && (
         <div className="space-y-2">
-          {renderGroup("Wood & base finishes", baseSwatches, selectedBaseId, setSelectedBaseId)}
+          {renderGroup("Base (wood · metal)", baseSwatches, selectedBaseId, setSelectedBaseId)}
+          {renderGroup("Top (stone · marble · glass)", topSwatches, selectedTopId, setSelectedTopId)}
           {renderGroup("Fabrics", fabricSwatches, selectedFabricId, setSelectedFabricId)}
         </div>
       )}
