@@ -123,6 +123,9 @@ export function PickAssetDrawer({ pickId, title }: Props) {
     currency: string | null;
     leadTime: string | null;
   }>({ tradeProductId: null, tradePriceCents: null, currency: null, leadTime: null });
+  const [sizeVariants, setSizeVariants] = useState<
+    { label?: string; base?: string; top?: string; price_cents?: number }[]
+  >([]);
 
   // Project / client-folder name for this concierge chat. Persisted on the
   // shared concierge session so subsequent items in the same chat auto-reuse
@@ -232,6 +235,7 @@ export function PickAssetDrawer({ pickId, title }: Props) {
         topAxisLabel: pickRow?.top_axis_label ?? null,
         pairs: Array.from(pairSet.values()),
       });
+      setSizeVariants(Array.isArray(sv) ? sv : []);
 
       const prodRow = (prodRes.data as any) || null;
       setTradeMeta({
@@ -410,6 +414,23 @@ export function PickAssetDrawer({ pickId, title }: Props) {
   const woodImg = baseSwatch?.image_url ?? (!topIsFabric ? topSwatch?.image_url ?? null : null);
   const showDraftButton = loading || hasSwatches;
   const canDraft = !loading && (selectedFabricId || selectedBaseId || selectedTopId);
+
+  // Live variant pricing — match the selected Base/Top swatch names to a row
+  // in `size_variants` and prefer that row's `price_cents`. Falls back to the
+  // flat `trade_price_cents` when no variant row matches (single-axis picks,
+  // fabrics-only selection, or an incomplete axis pick).
+  const norm = (s: string | null | undefined) => (s ?? "").trim().toLowerCase();
+  const selBaseName = baseSwatch?.name ?? null;
+  const selTopName = !topIsFabric ? topSwatch?.name ?? null : null;
+  const variantMatch = sizeVariants.find((v) => {
+    const b = norm(v.base);
+    const t = norm(v.top);
+    if (selBaseName && selTopName) return b === norm(selBaseName) && t === norm(selTopName);
+    if (selBaseName && !selTopName) return b === norm(selBaseName) && !t;
+    if (!selBaseName && selTopName) return !b && t === norm(selTopName);
+    return false;
+  }) || null;
+  const livePriceCents = variantMatch?.price_cents ?? tradeMeta.tradePriceCents;
   const draftParams = new URLSearchParams();
   draftParams.set("product", pickId);
   if (fabricLabel) draftParams.set("fabric", fabricLabel);
@@ -651,7 +672,7 @@ export function PickAssetDrawer({ pickId, title }: Props) {
           {canDraft && (
             <div className="mt-1 rounded-md border border-border/60 bg-background/60 px-2.5 py-2 space-y-1">
               <div className="font-display text-[9px] uppercase tracking-widest text-muted-foreground">
-                Locked Selection
+                Current Selection
               </div>
               <dl className="grid grid-cols-[auto,1fr] gap-x-2 gap-y-0.5 font-body text-[10px] leading-tight text-foreground">
                 <dt className="text-muted-foreground">SKU</dt>
@@ -670,12 +691,12 @@ export function PickAssetDrawer({ pickId, title }: Props) {
                 )}
                 <dt className="text-muted-foreground">Trade Price</dt>
                 <dd>
-                  {tradeMeta.tradePriceCents
+                  {livePriceCents
                     ? `${
                         tradeMeta.currency === "USD" ? "$" :
                         tradeMeta.currency === "GBP" ? "£" :
                         tradeMeta.currency === "SGD" ? "S$" : "€"
-                      }${(tradeMeta.tradePriceCents / 100).toLocaleString()}`
+                      }${(livePriceCents / 100).toLocaleString()}${variantMatch ? "" : sizeVariants.some((v) => v.price_cents) ? " (base)" : ""}`
                     : "Price on Request"}
                 </dd>
                 <dt className="text-muted-foreground">Lead Time</dt>
