@@ -200,6 +200,15 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
   const [projectBoardCount, setProjectBoardCount] = useState<number | null>(null);
   const [projectIdForDeck, setProjectIdForDeck] = useState<string | null>(null);
   const [deckBuilding, setDeckBuilding] = useState(false);
+  // Preview modal — architect confirms the slide list before we actually
+  // create the `presentations` row + slides and navigate to the builder.
+  type DeckPreviewSlide = { boardId: string; title: string; productIds: string[] };
+  const [deckPreview, setDeckPreview] = useState<{
+    projectName: string;
+    projectId: string;
+    slides: DeckPreviewSlide[];
+  } | null>(null);
+  const [deckPreviewLoading, setDeckPreviewLoading] = useState(false);
   const navigate = useNavigate();
 
   const isAppend = mode === "append";
