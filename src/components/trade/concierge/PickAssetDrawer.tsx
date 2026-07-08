@@ -357,7 +357,7 @@ export function PickAssetDrawer({ pickId, title }: Props) {
             className="mt-1 flex items-center justify-center gap-1.5 rounded-md border border-foreground/30 bg-foreground text-background px-2.5 py-1.5 font-body text-[10px] uppercase tracking-widest hover:bg-foreground/90 transition-colors"
           >
             <FileText size={11} />
-            Draft Tearsheet with These Finishes
+            Generate Tearsheet
           </Link>
         ) : (
           <button
@@ -370,7 +370,7 @@ export function PickAssetDrawer({ pickId, title }: Props) {
             ) : (
               <FileText size={11} />
             )}
-            {loading ? "Loading finishes…" : "Draft Tearsheet with These Finishes"}
+            {loading ? "Loading finishes…" : "Generate Tearsheet"}
           </button>
         )
       )}
