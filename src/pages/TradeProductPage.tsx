@@ -1267,6 +1267,7 @@ const TradeProductPage: React.FC = () => {
   const pinned = isPinned(product.title, tradeProductId || product.id);
   const favoriteId = tradeProductId || product.id;
   const favorited = isFavorited(favoriteId);
+  const requestedFabricName = new URLSearchParams(location.search).get("fabric");
 
   const { rawSubcategory, normalizedSubcategory } = normalizeCategoryContext(product.subcategory);
 
@@ -2091,6 +2092,7 @@ const TradeProductPage: React.FC = () => {
                   productTitle={product.title}
                   productCategory={product.category}
                   currentGalleryIndex={galleryActiveIndex ?? 0}
+                  preselectFabricName={requestedFabricName}
                   woodLabel={
                     (product as any).wood_label_override
                       || (product.base_axis_label && !baseAxisIsDim
