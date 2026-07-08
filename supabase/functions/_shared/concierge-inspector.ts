@@ -756,8 +756,14 @@ const DEFERRED_TRIGGER_RE = /\b(?:at\s+a\s+later\s+(?:date|stage|time|phase)|lat
 // Bare "later" at the end of a short clause, e.g. "rug/chandelier later" or "rug, chandelier — later".
 const TRAILING_LATER_RE = /(?:^|[\s—–:\-\(\[])\s*later\s*[\.\)\]]?\s*$/i;
 
-// Parenthetical / bracketed deferrals stripped in place, e.g. "rug (later)", "chandelier [TBD]".
-const PARENTHETICAL_DEFERRAL_RE = /\s*[\(\[][^)\]]*\b(?:later|tbd|tbc|to\s+follow|to\s+be\s+(?:confirmed|decided|selected|sourced|specified|advised)|not\s+now|out\s+of\s+scope|next\s+phase|phase\s+(?:2|two|ii|3|three|iii))\b[^)\]]*[\)\]]/gi;
+// Noun + parenthetical deferral eaten together, e.g. "rug (later)", "chandelier [TBD]".
+// We strip the preceding noun phrase too so the bare noun doesn't survive as a required slot.
+const NOUN_PARENTHETICAL_DEFERRAL_RE = /(?:[\w][\w'-]*(?:\s+(?:and|&|\/|,)\s*[\w][\w'-]*)*\s*)?[\(\[][^)\]]*\b(?:later|tbd|tbc|to\s+follow|to\s+be\s+(?:confirmed|decided|selected|sourced|specified|advised)|not\s+now|out\s+of\s+scope|next\s+phase|phase\s+(?:2|two|ii|3|three|iii))\b[^)\]]*[\)\]]/gi;
+
+// Sentence-level "deferred aside" — matches when a full sentence is only a
+// noun list followed by a deferral trigger (dash/colon/space separator).
+// e.g. "Rug and chandelier — not now.", "Rug, chandelier: TBD.", "Rug and chandelier later."
+const DEFERRED_ASIDE_SENTENCE_RE = /^[\w][\w\s,&\/'-]*?\s*(?:[—–\-:]|\s)\s*(?:at\s+a\s+later\s+(?:date|stage|time|phase)|later(?:\s+on)?|another\s+time|down\s+the\s+(?:road|line)|for\s+later|in\s+(?:a\s+)?(?:later|next|future|second)\s+(?:phase|stage|round)|next\s+(?:phase|stage|round)|phase\s+(?:2|two|ii|3|three|iii)|not\s+(?:now|yet|for\s+now)|out\s+of\s+scope|to\s+follow|tbd|tbc|t\.?b\.?d\.?|t\.?b\.?c\.?|handled\s+separately|(?:sourced|selected|chosen|picked|specified|decided|added)\s+(?:later|separately|elsewhere))\s*[\.\!\?]?\s*$/i;
 
 function isDeferredClause(part: string): boolean {
   if (!part) return false;
@@ -767,14 +773,23 @@ function isDeferredClause(part: string): boolean {
 }
 
 function activeRequirementText(text: string): string {
-  const cleaned = String(text || "").replace(PARENTHETICAL_DEFERRAL_RE, " ");
-  // Split on strong sentence boundaries AND on internal separators that commonly
-  // introduce a deferred aside (semicolons, em/en dashes, spaced hyphens, newlines).
-  return cleaned
-    .split(/(?<=[.?!])\s+|\n+|\s*[;]\s*|\s+[—–]\s+|\s+-\s+/)
-    .map((part) => part.trim())
-    .filter((part) => part && !isDeferredClause(part))
-    .join("\n");
+  // 1) Strip noun+parenthetical deferrals ("rug (later)") including the noun.
+  const cleaned = String(text || "").replace(NOUN_PARENTHETICAL_DEFERRAL_RE, " ");
+  // 2) Sentence pass: drop whole sentences that are pure deferred asides.
+  const sentences = cleaned
+    .split(/(?<=[.?!])\s+|\n+/)
+    .map((s) => s.trim())
+    .filter((s) => s && !DEFERRED_ASIDE_SENTENCE_RE.test(s));
+  // 3) Fragment pass: within remaining sentences, split on internal separators
+  // (semicolons, em/en dashes, spaced hyphens) and drop deferred fragments.
+  const out: string[] = [];
+  for (const sentence of sentences) {
+    for (const frag of sentence.split(/\s*[;]\s*|\s+[—–]\s+|\s+-\s+/)) {
+      const f = frag.trim();
+      if (f && !isDeferredClause(f)) out.push(f);
+    }
+  }
+  return out.join("\n");
 }
 
 function parseBudgetFromText(text: string): { cents: number; currency: string } | null {
