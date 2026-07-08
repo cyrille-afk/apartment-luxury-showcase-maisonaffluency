@@ -4339,10 +4339,16 @@ serve(async (req) => {
     // won't see the brief again after turn 1).
     const parsedTypologyCats: string[] = [];
     {
-      const typRe = /typology[^:\n]*:\s*([^\n]+)/gi;
+      // HARDENED: label must lead its own line (allow list markers / block
+      // prefixes), immediately followed by a colon/dash. Prevents matches
+      // inside prose like "the typology of the project profile is loose."
+      const typRe = /^[\s>*\-–—•]*(?:block\s*\d+[\s:.\-–—]*)?typology(?:\s*\([^)\n]{0,40}\))?\s*[:\-–—]\s*(.+)$/gim;
       let tm: RegExpExecArray | null;
       while ((tm = typRe.exec(userConversationText)) !== null) {
-        const raw = tm[1].replace(/[\[\]]/g, "");
+        const raw = tm[1].replace(/[\[\]]/g, "").trim();
+        if (!raw) continue;
+        // Skip payloads that are themselves another block label echo.
+        if (/^(references|materials?|palette|budget|constraints?|block\s*\d+)\b/i.test(raw)) continue;
         // Split on commas, plus, ampersand, slash, and " and "
         const tokens = raw.split(/,|\+|&|\/|\band\b/i).map((t) => t.trim().toLowerCase()).filter(Boolean);
         for (const t of tokens) {
