@@ -564,7 +564,7 @@ export default function TradeTearsheets() {
     if (!win) return;
     win.document.write(
       buildTearsheetPrintHtml({
-        selectedProduct,
+        selectedProduct: { ...selectedProduct, trade_price_cents: snapshotPriceCents },
         chosenFinishes,
         dimensionsDisplay,
         materialsDisplay,
