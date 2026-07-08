@@ -118,6 +118,20 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
   const [title, setTitle] = useState(initialTitle);
   const [editingTitle, setEditingTitle] = useState(false);
 
+  // Project / client-folder name for the concierge session. Rendered as an
+  // inline input directly in the card so the architect can name the project
+  // without typing a chat message. Persisted to the shared concierge session
+  // so every subsequent tearsheet/Add-to-Project in this chat reuses it.
+  const { session: conciergeSession } = useConciergeSession();
+  const projectName = conciergeSession?.projectName ?? "";
+  const [projectDraft, setProjectDraft] = useState<string>(projectName);
+  useEffect(() => { setProjectDraft(projectName); }, [projectName]);
+  const commitProjectName = (raw: string) => {
+    const trimmed = raw.trim();
+    if (trimmed === (conciergeSession?.projectName ?? "")) return;
+    updateConciergeSession({ projectName: trimmed || null });
+  };
+
   // Selected board for append mode (controlled — user can override the AI's pick).
   const [selectedBoardId, setSelectedBoardId] = useState<string | null>(
     proposal.tool === "add_to_tearsheet" ? proposal.args.board_id : null,
