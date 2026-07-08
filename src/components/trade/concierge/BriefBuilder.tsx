@@ -1289,12 +1289,20 @@ export function BriefBuilder({
               if (!t) return null;
               const parsed = parseBrief(t);
               const prose = extractProseFields(t);
-              const clean = (s?: string) => (s && !s.trim().startsWith("[") ? s.trim() : "");
+              const clean = (s?: string, defaultVal?: string) => {
+                if (!s) return "";
+                const t = s.trim();
+                if (!t) return "";
+                if (defaultVal && t === defaultVal.trim()) return "";
+                // Treat unfilled placeholders (any bracketed token like [mm], [N]) as empty
+                if (/\[[^\]]*\]/.test(t)) return "";
+                return t;
+              };
               const preview = {
-                Zone: clean(parsed.values.block1.zone) || clean(prose.zone) || "—",
-                "Max Footprint": clean(parsed.values.block2.maxFootprint) || clean(prose.maxFootprint) || "—",
-                Typology: clean(parsed.values.block2.typology) || clean(prose.typology) || "—",
-                Vibe: clean(parsed.values.block3.vibe) || clean(prose.vibe) || "—",
+                Zone: clean(parsed.values.block1.zone, DEFAULT_VALUES.block1.zone) || clean(prose.zone) || "—",
+                "Max Footprint": clean(parsed.values.block2.maxFootprint, DEFAULT_VALUES.block2.maxFootprint) || clean(prose.maxFootprint) || "—",
+                Typology: clean(parsed.values.block2.typology, DEFAULT_VALUES.block2.typology) || clean(prose.typology) || "—",
+                Vibe: clean(parsed.values.block3.vibe, DEFAULT_VALUES.block3.vibe) || clean(prose.vibe) || "—",
               };
               const anyDetected = Object.values(preview).some((v) => v && v !== "—");
               return (
