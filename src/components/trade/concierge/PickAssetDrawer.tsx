@@ -123,11 +123,17 @@ export function PickAssetDrawer({ pickId, title }: Props) {
     };
   }, [pickId]);
 
-  const { fabricSwatches, baseSwatches } = useMemo(() => {
+  const { fabricSwatches, baseSwatches, topSwatches } = useMemo(() => {
     const base: Swatch[] = [];
+    const top: Swatch[] = [];
     const fab: Swatch[] = [];
-    for (const s of swatches) (isBaseFinish(s) ? base : fab).push(s);
-    return { fabricSwatches: fab, baseSwatches: base };
+    for (const s of swatches) {
+      const role = classifySwatch(s);
+      if (role === "fabric") fab.push(s);
+      else if (role === "top") top.push(s);
+      else base.push(s);
+    }
+    return { fabricSwatches: fab, baseSwatches: base, topSwatches: top };
   }, [swatches]);
 
   const hasGlb = !!glbUrl;
@@ -148,6 +154,9 @@ export function PickAssetDrawer({ pickId, title }: Props) {
     : null;
   const baseTextureUrl = selectedBaseId
     ? baseSwatches.find((s) => s.fabric_id === selectedBaseId)?.image_url ?? null
+    : null;
+  const topTextureUrl = selectedTopId
+    ? topSwatches.find((s) => s.fabric_id === selectedTopId)?.image_url ?? null
     : null;
 
   const fabricSwatch = selectedFabricId
