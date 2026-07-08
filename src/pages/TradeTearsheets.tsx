@@ -448,6 +448,13 @@ export default function TradeTearsheets() {
       if (chosenFinishes.wood) noteLines.push(`Base / Wood: ${chosenFinishes.wood}`);
       if (chosenFinishes.fabric) noteLines.push(`Fabric: ${chosenFinishes.fabric}`);
       const notes = noteLines.length ? noteLines.join("\n") : null;
+
+      // Next sort_order = current item count on the board.
+      const { count } = await supabase
+        .from("client_board_items")
+        .select("id", { count: "exact", head: true })
+        .eq("board_id", boardId);
+
       const insertPayload: any = {
         board_id: boardId,
         product_id: tradeProductId,
@@ -457,12 +464,6 @@ export default function TradeTearsheets() {
         fabric_label: chosenFinishes.fabric || null,
         wood_label: chosenFinishes.wood || null,
       };
-
-      // Next sort_order = current item count on the board.
-      const { count } = await supabase
-        .from("client_board_items")
-        .select("id", { count: "exact", head: true })
-        .eq("board_id", boardId);
 
       const { error } = await supabase
         .from("client_board_items")
