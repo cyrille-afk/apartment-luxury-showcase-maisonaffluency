@@ -193,7 +193,7 @@ const TradeBoardBuilder = () => {
           const saved = sourcePickId && !(item.variant_label || item.fabric_label || item.wood_label)
             ? readSavedPickFinishes(sourcePickId)
             : null;
-          return sourcePickId && saved ? { item, sourcePickId, saved } : null;
+          return sourcePickId && saved && (saved.fabricId || saved.baseId || saved.topId) ? { item, sourcePickId, saved } : null;
         })
         .filter(Boolean) as Array<{ item: BoardItem; sourcePickId: string; saved: SavedPickFinishes }>;
 
