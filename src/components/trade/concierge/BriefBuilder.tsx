@@ -481,6 +481,52 @@ function saveDraft(draft: BriefDraft) {
   }
 }
 
+const PRESETS_STORAGE_KEY = "concierge:briefBuilder:presets";
+
+type BriefPreset = {
+  id: string;
+  name: string;
+  values: BriefValues;
+  prefix: string;
+  suffix: string;
+  savedAt: number;
+};
+
+function loadPresets(): BriefPreset[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = window.localStorage.getItem(PRESETS_STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter(
+      (p) => p && typeof p.id === "string" && typeof p.name === "string" && p.values,
+    ) as BriefPreset[];
+  } catch {
+    return [];
+  }
+}
+
+function savePresets(list: BriefPreset[]) {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(PRESETS_STORAGE_KEY, JSON.stringify(list));
+  } catch {
+    // ignore
+  }
+}
+
+function summarizePreset(p: BriefPreset): string {
+  const parts = [
+    p.values.block1?.zone,
+    p.values.block2?.typology,
+    p.values.block3?.vibe,
+  ]
+    .map((s) => (s && !s.trim().startsWith("[") ? s.trim() : ""))
+    .filter(Boolean);
+  return parts.join(" · ");
+
+
 const EXPANDED_STORAGE_PREFIX = "concierge:briefBuilder:expanded";
 // Legacy global key — read once as fallback so existing users keep their layout
 // the first time they open the builder after this change.
