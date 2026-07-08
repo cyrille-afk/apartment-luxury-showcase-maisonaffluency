@@ -757,7 +757,11 @@ export function PickAssetDrawer({ pickId, title }: Props) {
           <div className="mt-1 flex flex-col sm:flex-row gap-1.5">
             {canDraft ? (
               <Link
-                to={`/trade/tearsheets?${draftParams.toString()}`}
+                to={(() => {
+                  const p = new URLSearchParams(draftParams);
+                  if (projectName) p.set("project", projectName);
+                  return `/trade/tearsheets?${p.toString()}`;
+                })()}
                 onClick={() => {
                   updateConciergeSession({
                     product: { id: pickId, title, source: "curator" },
