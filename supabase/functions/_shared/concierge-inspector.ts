@@ -750,6 +750,16 @@ function normalizeText(s: string | null | undefined): string {
     .trim();
 }
 
+const DEFERRED_TYPOLOGY_CONTEXT_RE = /\b(at a later (?:date|stage|time)|later on|later date|another time|down the (?:road|line)|for (?:a )?later|not (?:now|yet|for now)|(?:for|in) a later phase|excluding|except(?:\s+for)?|leaving out|skip(?:ping)?|omit(?:ting)?|will (?:select|pick|choose|source|find|decide|specify)\b[^.?!\n]*\b(later|another time|down the (?:road|line))|(?:pick|choose|select|source|specify|decide)\s+(?:on\s+)?(?:the\s+)?[^.?!\n]*\b(later|another time|down the (?:road|line)))\b/i;
+
+function activeRequirementText(text: string): string {
+  return String(text || "")
+    .split(/(?<=[.?!])\s+|\n+/)
+    .map((part) => part.trim())
+    .filter((part) => part && !DEFERRED_TYPOLOGY_CONTEXT_RE.test(part))
+    .join("\n");
+}
+
 function parseBudgetFromText(text: string): { cents: number; currency: string } | null {
   const raw = String(text || "");
   const re = /(?:under|below|less\s+than|up\s+to|max(?:imum)?|budget(?:\s+of)?|<=?)\s*(?:about|around|roughly|approx(?:\.)?)?\s*([$€£])?\s*([0-9][0-9,]*(?:\.[0-9]+)?)\s*(k|m|thousand|million)?\s*(usd|eur|gbp|chf|aed|sgd|hkd|jpy|dollars?|euros?|pounds?)?/i;
@@ -844,7 +854,8 @@ const TEXT_TYPOLOGY_PATTERNS: Array<{ re: RegExp; typology: string }> = [
 
 export function deriveRequirementsFromText(text: string): RequirementsInput | null {
   const raw = String(text || "");
-  const hay = normalizeText(raw);
+  const activeRaw = activeRequirementText(raw);
+  const hay = normalizeText(activeRaw);
   const slots: RequirementsSlotInput[] = [];
   const seenTypologies = new Set<string>();
   // Consume matched spans so a later, shorter pattern (e.g. "tables") does not
