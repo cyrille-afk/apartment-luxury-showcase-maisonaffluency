@@ -354,7 +354,8 @@ export function PickAssetDrawer({ pickId, title }: Props) {
   }, [glbVariants, selectedGlbLabel]);
   const glbUrl = activeGlbVariant?.glb_url ?? null;
   const materialRoles = activeGlbVariant?.material_roles || undefined;
-  const hasGlb = !!glbUrl;
+  const hasGlbVariantChoices = glbVariants.length > 1;
+  const hasSwatches = swatches.length > 0;
 
   if (!loading && !hasGlb && !hasSwatches) {
     return (
