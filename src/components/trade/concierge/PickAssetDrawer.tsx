@@ -7,6 +7,7 @@ import { updateConciergeSession, useConciergeSession } from "@/hooks/useConcierg
 import { computeVariantAxes } from "@/lib/parseSizeVariants";
 import { makeSwatchAxisFilter } from "@/lib/finishDuplication";
 import { formatVariantAxisLabel } from "@/lib/variantPlaceholders";
+import { resolveActiveVariant, resolvePartialDualMinCents } from "@/lib/resolveActiveVariant";
 import AddToProjectPopover from "@/components/trade/AddToProjectPopover";
 
 interface Swatch {
@@ -120,9 +121,10 @@ export function PickAssetDrawer({ pickId, title }: Props) {
   const [tradeMeta, setTradeMeta] = useState<{
     tradeProductId: string | null;
     tradePriceCents: number | null;
+    rrpPriceCents: number | null;
     currency: string | null;
     leadTime: string | null;
-  }>({ tradeProductId: null, tradePriceCents: null, currency: null, leadTime: null });
+  }>({ tradeProductId: null, tradePriceCents: null, rrpPriceCents: null, currency: null, leadTime: null });
   const [sizeVariants, setSizeVariants] = useState<
     { label?: string; base?: string; top?: string; price_cents?: number }[]
   >([]);
@@ -162,12 +164,12 @@ export function PickAssetDrawer({ pickId, title }: Props) {
       const [prodRes, pickRes] = await Promise.all([
         supabase
           .from("trade_products")
-          .select("id, glb_url, image_url, trade_price_cents, currency, lead_time")
+          .select("id, glb_url, image_url, trade_price_cents, rrp_price_cents, currency, lead_time")
           .eq("source_pick_id", pickId)
           .maybeSingle(),
         supabase
-          .from("designer_curator_picks_public")
-          .select("size_variants, base_axis_label, top_axis_label, lead_time")
+          .from("designer_curator_picks")
+          .select("size_variants, base_axis_label, top_axis_label, trade_price_cents, currency, lead_time")
           .eq("id", pickId)
           .maybeSingle(),
       ]);
@@ -241,6 +243,7 @@ export function PickAssetDrawer({ pickId, title }: Props) {
       setTradeMeta({
         tradeProductId: prodRow?.id ?? null,
         tradePriceCents: prodRow?.trade_price_cents ?? null,
+        rrpPriceCents: prodRow?.rrp_price_cents ?? pickRow?.trade_price_cents ?? null,
         currency: prodRow?.currency ?? null,
         leadTime: prodRow?.lead_time ?? pickRow?.lead_time ?? null,
       });
@@ -415,22 +418,65 @@ export function PickAssetDrawer({ pickId, title }: Props) {
   const showDraftButton = loading || hasSwatches;
   const canDraft = !loading && (selectedFabricId || selectedBaseId || selectedTopId);
 
-  // Live variant pricing — match the selected Base/Top swatch names to a row
-  // in `size_variants` and prefer that row's `price_cents`. Falls back to the
-  // flat `trade_price_cents` when no variant row matches (single-axis picks,
-  // fabrics-only selection, or an incomplete axis pick).
+  // Live pricing mirrors TradeProductPage: resolve the selected Base × Top row
+  // from full `designer_curator_picks.size_variants` (the public view strips
+  // `price_cents`), then fall back to partial/min/base RRP exactly as the page does.
   const norm = (s: string | null | undefined) => (s ?? "").trim().toLowerCase();
-  const selBaseName = baseSwatch?.name ?? null;
-  const selTopName = !topIsFabric ? topSwatch?.name ?? null : null;
-  const variantMatch = sizeVariants.find((v) => {
-    const b = norm(v.base);
-    const t = norm(v.top);
-    if (selBaseName && selTopName) return b === norm(selBaseName) && t === norm(selTopName);
-    if (selBaseName && !selTopName) return b === norm(selBaseName) && !t;
-    if (!selBaseName && selTopName) return !b && t === norm(selTopName);
-    return false;
-  }) || null;
-  const livePriceCents = variantMatch?.price_cents ?? tradeMeta.tradePriceCents;
+  const axesForPricing = useMemo(() => computeVariantAxes(sizeVariants as any), [sizeVariants]);
+  const matchAxisValue = (candidate: string | null, values: string[]) => {
+    if (!candidate) return null;
+    const c = norm(candidate);
+    return values.find((v) => {
+      const vn = norm(v);
+      return vn === c || vn.includes(c) || c.includes(vn);
+    }) ?? candidate;
+  };
+  const selectedBaseAxis = matchAxisValue(baseSwatch?.name ?? null, axesForPricing.baseOptions);
+  const selectedTopAxis = matchAxisValue(
+    topIsFabric ? fabricSwatch?.name ?? null : topSwatch?.name ?? null,
+    axesForPricing.topOptions,
+  );
+  const selectedDualSize = selectedGlbLabel
+    ? matchAxisValue(selectedGlbLabel, axesForPricing.dualSizeOptions)
+    : null;
+  const hasDualSize = axesForPricing.dualSizeOptions.length > 1;
+  const activeVariantContext = {
+    sizeVariants,
+    isDualAxis: axesForPricing.isDualAxis,
+    isBaseOnly: axesForPricing.isBaseOnly,
+    hasSingleAxisSplit: axesForPricing.hasSingleAxisSplit,
+    hasDualSize,
+    baseOnlyRequiresSize: axesForPricing.isBaseOnly && axesForPricing.baseOptions.length > 1,
+    singleAxisParsed: axesForPricing.singleAxisParsed,
+  };
+  const variantMatch = resolveActiveVariant(
+    {
+      selectedVariantIdx: null,
+      selectedBase: selectedBaseAxis,
+      selectedTop: selectedTopAxis,
+      selectedDualSize,
+      selectedSingleSize: null,
+      selectedSingleMaterial: null,
+    },
+    activeVariantContext,
+  );
+  const variantPriceCents = typeof variantMatch?.price_cents === "number" && variantMatch.price_cents > 0
+    ? variantMatch.price_cents
+    : null;
+  const partialDualMinCents = resolvePartialDualMinCents(
+    { selectedBase: selectedBaseAxis, selectedTop: selectedTopAxis, selectedDualSize },
+    { sizeVariants, isDualAxis: axesForPricing.isDualAxis },
+  );
+  const pricedVariantCents = sizeVariants
+    .map((v) => v.price_cents)
+    .filter((c): c is number => typeof c === "number" && c > 0);
+  const minVariantCents = pricedVariantCents.length ? Math.min(...pricedVariantCents) : null;
+  const dualSelectionMade = axesForPricing.isDualAxis && !!(selectedBaseAxis || selectedTopAxis || selectedDualSize);
+  const dualSelectionUnpriced = dualSelectionMade && !variantPriceCents && partialDualMinCents == null;
+  const livePriceCents = sizeVariants.length
+    ? (variantPriceCents ?? (dualSelectionUnpriced ? null : (partialDualMinCents ?? minVariantCents)))
+    : (tradeMeta.rrpPriceCents ?? tradeMeta.tradePriceCents);
+  const isFromPrice = sizeVariants.length > 0 && !variantPriceCents && !dualSelectionUnpriced && livePriceCents != null;
   const draftParams = new URLSearchParams();
   draftParams.set("product", pickId);
   if (fabricLabel) draftParams.set("fabric", fabricLabel);
@@ -692,11 +738,11 @@ export function PickAssetDrawer({ pickId, title }: Props) {
                 <dt className="text-muted-foreground">Trade Price</dt>
                 <dd>
                   {livePriceCents
-                    ? `${
+                    ? `${isFromPrice ? "From " : ""}${
                         tradeMeta.currency === "USD" ? "$" :
                         tradeMeta.currency === "GBP" ? "£" :
                         tradeMeta.currency === "SGD" ? "S$" : "€"
-                      }${(livePriceCents / 100).toLocaleString()}${variantMatch ? "" : sizeVariants.some((v) => v.price_cents) ? " (base)" : ""}`
+                      }${(livePriceCents / 100).toLocaleString()}`
                     : "Price on Request"}
                 </dd>
                 <dt className="text-muted-foreground">Lead Time</dt>
@@ -844,9 +890,9 @@ export function PickAssetDrawer({ pickId, title }: Props) {
             <Link
               to={(() => {
                 const p = new URLSearchParams();
-                if (baseSwatch?.name) p.set("base", baseSwatch.name);
-                if (!topIsFabric && topSwatch?.name) p.set("top", topSwatch.name);
-                if (topIsFabric && fabricSwatch?.name) p.set("material", fabricSwatch.name);
+                if (selectedBaseAxis) p.set("base", selectedBaseAxis);
+                if (selectedTopAxis) p.set("top", selectedTopAxis);
+                if (selectedDualSize) p.set("size", selectedDualSize);
                 const qs = p.toString();
                 return `/trade/products/${tradeMeta.tradeProductId}${qs ? `?${qs}` : ""}`;
               })()}
