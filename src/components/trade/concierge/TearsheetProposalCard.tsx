@@ -538,10 +538,6 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
             .from("client_boards")
             .update({ project_id: autoProjectId })
             .eq("id", res.board_id);
-          // Persist for downstream components in this chat.
-          try {
-            updateConciergeSession({} as any);
-          } catch { /* noop */ }
         }
       }
     }
