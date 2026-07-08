@@ -30,6 +30,7 @@ interface Board {
   client_email: string | null;
   share_token?: string;
   status: string;
+  source?: "manual" | "concierge" | null;
   created_at: string;
   updated_at: string;
   token_expires_at: string | null;
