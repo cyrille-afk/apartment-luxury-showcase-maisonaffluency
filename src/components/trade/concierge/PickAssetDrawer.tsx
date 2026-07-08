@@ -736,7 +736,9 @@ export function PickAssetDrawer({ pickId, title }: Props) {
                     <dd className="break-words">{fabricLabel}</dd>
                   </>
                 )}
-                <dt className="text-muted-foreground">Trade Price</dt>
+                <dt className="text-muted-foreground">
+                  Trade Price{tradeMeta.currency ? ` (${tradeMeta.currency})` : ""}
+                </dt>
                 <dd>
                   {livePriceCents
                     ? `${isFromPrice ? "From " : ""}${
