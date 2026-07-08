@@ -1,9 +1,46 @@
 import { useEffect, useState } from "react";
-import { Loader2, Check, Eye, EyeOff } from "lucide-react";
+import { Loader2, Check, Eye, EyeOff, Wand2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
 type MaterialRole = "fabric" | "base" | "top" | "ignore";
+
+/**
+ * Heuristic name-based role detection. Returns null when the material name is
+ * opaque (UUID-like, generic "Material_23", etc.) and no confident guess can
+ * be made — in which case the admin must tag it manually.
+ *
+ * Token buckets are ordered by specificity: "tabletop" before "table" before
+ * "top" so a mesh named "table_base" doesn't get mis-tagged as a top.
+ */
+export function autoDetectRoleFromName(rawName: string): MaterialRole | null {
+  const name = rawName.toLowerCase();
+  // Reject opaque CAD IDs (long hex, uuid fragments, "material_23").
+  if (/^[0-9a-f]{8,}(-[0-9a-f]+)*$/i.test(rawName)) return null;
+  if (/^(mesh|material|object|node)[_\-]?\d+$/i.test(rawName)) return null;
+
+  const has = (...tokens: string[]) =>
+    tokens.some((t) => new RegExp(`(^|[^a-z])${t}([^a-z]|$)`, "i").test(name));
+
+  // Fabric first — upholstery is unambiguous.
+  if (has("fabric", "upholstery", "cushion", "seat", "leather", "textile", "cloth")) return "fabric";
+
+  // Top: slab / surface / stone-family keywords.
+  if (
+    has("tabletop", "table_top", "top", "surface", "slab", "worktop", "counter") ||
+    has("marble", "onyx", "stone", "granite", "travertine", "quartz", "glass")
+  )
+    return "top";
+
+  // Base: structural / leg / frame keywords.
+  if (
+    has("base", "frame", "leg", "legs", "plinth", "foot", "footing", "pedestal", "support", "structure", "chassis") ||
+    has("brass", "metal", "steel", "bronze", "iron", "wood", "oak", "walnut", "ash")
+  )
+    return "base";
+
+  return null;
+}
 
 interface Props {
   variantId: string;
@@ -47,13 +84,23 @@ export function GlbMaterialRolesEditor({
 
   // Rebuild the working map whenever the variant / discovered names change.
   useEffect(() => {
+    const hasSaved = !!initialRoles && Object.keys(initialRoles).length > 0;
     const next: Record<string, MaterialRole> = {};
+    let autoTagged = 0;
     for (const name of materialNames) {
       const existing = initialRoles?.[name];
-      next[name] = existing ?? "ignore";
+      if (existing) {
+        next[name] = existing;
+      } else {
+        const guess = autoDetectRoleFromName(name);
+        next[name] = guess ?? "ignore";
+        if (guess) autoTagged += 1;
+      }
     }
     setRoles(next);
-    setDirty(false);
+    // If nothing was ever saved and we auto-tagged at least one mesh, mark
+    // dirty so the admin can just review + hit Save.
+    setDirty(!hasSaved && autoTagged > 0);
     onChange(next);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [variantId, materialNames.join("|")]);
@@ -63,6 +110,26 @@ export function GlbMaterialRolesEditor({
     setRoles(next);
     setDirty(true);
     onChange(next);
+  };
+
+  const runAutoDetect = () => {
+    const next: Record<string, MaterialRole> = { ...roles };
+    let changed = 0;
+    for (const name of materialNames) {
+      const guess = autoDetectRoleFromName(name);
+      if (guess && next[name] !== guess) {
+        next[name] = guess;
+        changed += 1;
+      }
+    }
+    if (changed === 0) {
+      toast.info("No confident matches found — tag manually.");
+      return;
+    }
+    setRoles(next);
+    setDirty(true);
+    onChange(next);
+    toast.success(`Auto-detected ${changed} material${changed === 1 ? "" : "s"} from names`);
   };
 
   const save = async () => {
@@ -91,11 +158,21 @@ export function GlbMaterialRolesEditor({
 
   return (
     <div className="mt-2 rounded-md border border-border/60 bg-background/60 p-3 space-y-2">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-2">
         <div className="font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
           Material roles ({materialNames.length})
         </div>
-        <button
+        <div className="flex items-center gap-1.5">
+          <button
+            type="button"
+            onClick={runAutoDetect}
+            title="Guess base/top/fabric from material names"
+            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded font-body text-[10px] uppercase tracking-[0.12em] transition-colors border border-border text-muted-foreground hover:text-foreground hover:border-foreground/40"
+          >
+            <Wand2 size={11} />
+            Auto-detect
+          </button>
+          <button
           type="button"
           onClick={save}
           disabled={saving || !dirty}
@@ -104,6 +181,7 @@ export function GlbMaterialRolesEditor({
           {saving ? <Loader2 size={11} className="animate-spin" /> : <Check size={11} />}
           {dirty ? "Save" : "Saved"}
         </button>
+        </div>
       </div>
       <div className="space-y-1.5">
         {materialNames.map((name) => {
