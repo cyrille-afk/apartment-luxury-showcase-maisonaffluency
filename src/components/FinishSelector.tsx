@@ -545,8 +545,11 @@ export default function FinishSelector({ pickId, className, productTitle, produc
         // Cover (rattan/cane/wicker) is purely decorative — only update the
         // hero image; do not drive the Frame variant matrix or pricing.
       } else if (isTopGroup) {
-        // Top-axis finish (e.g. diffuser on a pendant) — drive the Top axis.
+        // Top-axis finish (e.g. diffuser on a pendant, marble top on a table)
+        // — drive the Top axis + emit the image_url so the 3D viewer can
+        // retexture the top material.
         onTopFinishChange?.(f.name);
+        onTopFinishSwatchChange?.({ name: f.name, image_url: f.image_url ?? null });
       } else {
         // Wood finish picked — drive the Frame axis on the price matrix.
         onWoodFinishChange?.(f.name);
