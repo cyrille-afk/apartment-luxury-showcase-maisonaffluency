@@ -130,26 +130,35 @@ function detectProjectScale(
   //
   // Also reject explicit negations ("not a GCB", "isn't a villa") which would
   // otherwise trip the keyword regex.
-  const negationRe = /\b(not|isn'?t|aren'?t|no|never|without)\s+(?:a\s+|an\s+|the\s+)?(?:gcb|good class bungalow|bungalow|penthouse|pavilion|villa)\b/i;
+  const negationRe = /\b(not|isn'?t|aren'?t|no|never|without)\s+(?:a\s+|an\s+|the\s+)?(?:gcb|gbc|good class bungalow|bungalow|penthouse|pavilion|villa)\b/i;
   if (negationRe.test(text)) return null;
 
-  const strongTypologyRe = /\b(gcb|good class bungalow|bungalow|penthouse|pavilion|villa)\b/i;
+  // Accept common typo "GBC" as GCB (Good Class Bungalow) — Singapore-only.
+  const strongTypologyRe = /\b(gcb|gbc|good class bungalow|bungalow|penthouse|pavilion|villa)\b/i;
   const hasStrongTypology = strongTypologyRe.test(text);
   const minLen = hasStrongTypology
     ? priorUserTurns >= 2 ? 10 : priorUserTurns >= 1 ? 14 : 25
     : 25;
   if (text.length < minLen) return null;
 
-  const keywordRe = /\b(gcb|good class bungalow|bungalow|penthouse|whole[- ]?home|whole[- ]?house|multi[- ]?room|pavilion|villa|residence|to furnish|full home furnishing|entire (?:home|residence|apartment|villa|house))\b/i;
+  const keywordRe = /\b(gcb|gbc|good class bungalow|bungalow|penthouse|whole[- ]?home|whole[- ]?house|multi[- ]?room|pavilion|villa|residence|to furnish|full home furnishing|entire (?:home|residence|apartment|villa|house))\b/i;
   const projectPhraseRe = /\bi(?:'m| am|'ve| have)\s+(?:got\s+)?(?:a |an )?(?:new\s+)?project\b/i;
   const zoneWords = ["living", "dining", "kitchen", "bedroom", "master", "study", "library", "foyer", "entryway", "powder", "guest", "family", "media", "lounge", "terrace", "garden", "pool", "bar", "home office", "office"];
   const zoneRe = new RegExp(`\\b(${zoneWords.join("|")})\\b`, "gi");
   const zoneMatches = Array.from(new Set((text.match(zoneRe) || []).map((z) => z.toLowerCase())));
   const longMultiZone = text.length > 120 && zoneMatches.length >= 2;
 
-  if (!keywordRe.test(text) && !projectPhraseRe.test(text) && !longMultiZone) return null;
+  // Extra trigger: an explicit room dimension ("6x5m", "6 x 5 m", "6×5m")
+  // paired with either a strong typology keyword OR ≥2 furniture typologies
+  // named in the same message — signals a real furnishing brief even when
+  // only one zone is mentioned.
+  const hasRoomDimensions = /\b\d{1,2}\s*[x×]\s*\d{1,2}\s*m\b/i.test(text);
+  const furnitureCount = extractFurnitureTypology(text).length;
+  const dimensionsBrief = hasRoomDimensions && (hasStrongTypology || furnitureCount >= 2 || zoneMatches.length >= 1);
 
-  const isGCB = /\b(gcb|good class bungalow)\b/i.test(text);
+  if (!keywordRe.test(text) && !projectPhraseRe.test(text) && !longMultiZone && !dimensionsBrief) return null;
+
+  const isGCB = /\b(gcb|gbc|good class bungalow)\b/i.test(text);
   const typology = isGCB ? "GCB (Good Class Bungalow)"
     : /\bpenthouse\b/i.test(text) ? "Penthouse"
     : /\bvilla\b/i.test(text) ? "Villa"
@@ -158,6 +167,7 @@ function detectProjectScale(
     : /\bapartment\b/i.test(text) ? "Apartment"
     : /\btownhouse\b/i.test(text) ? "Townhouse"
     : /\bresidence\b/i.test(text) ? "Private residence"
+    : zoneMatches.length ? `${zoneMatches[0].charAt(0).toUpperCase() + zoneMatches[0].slice(1)} project`
     : "Multi-room residence";
 
   // GCB is a Singapore-only typology — default city/country when the user
