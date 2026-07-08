@@ -593,7 +593,17 @@ export default function TradeTearsheets() {
         {selectedProduct ? (
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <Button variant="ghost" size="sm" onClick={() => setSelectedProduct(null)}>← Back to products</Button>
+              {(() => {
+                const fromBoard = searchParams.get("fromBoard");
+                if (fromBoard) {
+                  return (
+                    <Button variant="ghost" size="sm" onClick={() => navigate(`/trade/boards/${fromBoard}`)}>← Back to board</Button>
+                  );
+                }
+                return (
+                  <Button variant="ghost" size="sm" onClick={() => setSelectedProduct(null)}>← Back to products</Button>
+                );
+              })()}
               <div className="flex items-center gap-2">
                 <Button variant="outline" size="sm" onClick={() => { setPushedBoardIds(new Set()); setBoardPickerOpen(true); }}>
                   <LayoutGrid className="h-4 w-4 mr-2" />Push to Client Board

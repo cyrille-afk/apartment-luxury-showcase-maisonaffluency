@@ -724,31 +724,40 @@ export type Database = {
           approval_status: string
           board_id: string
           created_at: string
+          fabric_label: string | null
           id: string
           notes: string | null
           product_id: string
           sort_order: number
           subfolder: string | null
+          variant_label: string | null
+          wood_label: string | null
         }
         Insert: {
           approval_status?: string
           board_id: string
           created_at?: string
+          fabric_label?: string | null
           id?: string
           notes?: string | null
           product_id: string
           sort_order?: number
           subfolder?: string | null
+          variant_label?: string | null
+          wood_label?: string | null
         }
         Update: {
           approval_status?: string
           board_id?: string
           created_at?: string
+          fabric_label?: string | null
           id?: string
           notes?: string | null
           product_id?: string
           sort_order?: number
           subfolder?: string | null
+          variant_label?: string | null
+          wood_label?: string | null
         }
         Relationships: [
           {

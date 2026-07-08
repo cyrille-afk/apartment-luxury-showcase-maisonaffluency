@@ -754,6 +754,25 @@ serve(async (req) => {
     if (pickIds.length === 0) return json(400, { error: "pick_ids must contain at least one ID" });
     if (pickIds.length > 24) return json(400, { error: "Too many picks (max 24)" });
 
+    // Optional per-pick finish snapshots so the tearsheet item can restore
+    // the exact fabric / base / wood the user had selected when generating.
+    // Shape: [{ pick_id, variant_label?, fabric_label?, wood_label? }]
+    const rawFinishes: any[] = Array.isArray(args.finishes) ? args.finishes : [];
+    const finishByPickId = new Map<string, { variant_label: string | null; fabric_label: string | null; wood_label: string | null }>();
+    for (const f of rawFinishes) {
+      if (!f || typeof f.pick_id !== "string") continue;
+      finishByPickId.set(f.pick_id, {
+        variant_label: typeof f.variant_label === "string" && f.variant_label.trim() ? f.variant_label.trim().slice(0, 200) : null,
+        fabric_label: typeof f.fabric_label === "string" && f.fabric_label.trim() ? f.fabric_label.trim().slice(0, 200) : null,
+        wood_label: typeof f.wood_label === "string" && f.wood_label.trim() ? f.wood_label.trim().slice(0, 200) : null,
+      });
+    }
+    const finishForResolved = (r: { tradeProductId: string; pickId?: string | null }) => {
+      if (r.pickId && finishByPickId.has(r.pickId)) return finishByPickId.get(r.pickId)!;
+      if (finishByPickId.has(r.tradeProductId)) return finishByPickId.get(r.tradeProductId)!;
+      return { variant_label: null, fabric_label: null, wood_label: null };
+    };
+
     // ============================================================
     // TOOL: add_to_tearsheet  → append to existing board
     // ============================================================
@@ -802,12 +821,18 @@ serve(async (req) => {
 
       let added = 0;
       if (newRows.length > 0) {
-        const itemsPayload = newRows.map((r, i) => ({
-          board_id: boardId,
-          product_id: r.tradeProductId,
-          sort_order: startOrder + i,
-          notes: i === 0 && note ? note : null,
-        }));
+        const itemsPayload = newRows.map((r, i) => {
+          const f = finishForResolved(r);
+          return {
+            board_id: boardId,
+            product_id: r.tradeProductId,
+            sort_order: startOrder + i,
+            notes: i === 0 && note ? note : null,
+            variant_label: f.variant_label,
+            fabric_label: f.fabric_label,
+            wood_label: f.wood_label,
+          };
+        });
         const { error: itemsErr } = await supabase
           .from("client_board_items")
           .insert(itemsPayload);
@@ -896,12 +921,18 @@ serve(async (req) => {
         return json(500, { error: "Could not create tearsheet" });
       }
 
-      const itemsPayload = resolved.map((r, i) => ({
-        board_id: board.id,
-        product_id: r.tradeProductId,
-        sort_order: i,
-        notes: i === 0 && note ? note : null,
-      }));
+      const itemsPayload = resolved.map((r, i) => {
+        const f = finishForResolved(r);
+        return {
+          board_id: board.id,
+          product_id: r.tradeProductId,
+          sort_order: i,
+          notes: i === 0 && note ? note : null,
+          variant_label: f.variant_label,
+          fabric_label: f.fabric_label,
+          wood_label: f.wood_label,
+        };
+      });
 
       const { error: itemsErr } = await supabase
         .from("client_board_items")
