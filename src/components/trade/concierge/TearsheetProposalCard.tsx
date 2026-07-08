@@ -1298,6 +1298,59 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
         onApplyRealignment={handleApplyRealignment}
         onFocusRow={focusRow}
       />
+
+      {/* Project Deck preview — confirm slide list before creating the
+          presentation and navigating to the builder. */}
+      <Dialog open={!!deckPreview} onOpenChange={(o) => { if (!o && !deckBuilding) setDeckPreview(null); }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-display text-base">
+              {deckPreview?.projectName || "Project"} — Presentation preview
+            </DialogTitle>
+            <DialogDescription className="font-body text-[11px] text-muted-foreground">
+              One slide per tearsheet in this project. Review the list, then
+              confirm to open it in the presentation builder.
+            </DialogDescription>
+          </DialogHeader>
+          <ol className="max-h-72 overflow-y-auto space-y-1.5 rounded-md border border-border/60 bg-muted/20 p-2">
+            {deckPreview?.slides.map((s, i) => (
+              <li
+                key={s.boardId}
+                className="flex items-start gap-2 rounded-sm bg-background/70 px-2 py-1.5"
+              >
+                <span className="font-body text-[10px] tabular-nums text-muted-foreground w-5 shrink-0">
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                <div className="flex-1 min-w-0">
+                  <p className="font-body text-[12px] text-foreground truncate">{s.title}</p>
+                  <p className="font-body text-[10px] text-muted-foreground">
+                    {s.productIds.length} {s.productIds.length === 1 ? "piece" : "pieces"}
+                  </p>
+                </div>
+              </li>
+            ))}
+          </ol>
+          <DialogFooter className="flex flex-row justify-end gap-2">
+            <button
+              type="button"
+              disabled={deckBuilding}
+              onClick={() => setDeckPreview(null)}
+              className="rounded-md border border-border bg-background px-3 py-1.5 font-body text-[11px] uppercase tracking-widest text-muted-foreground hover:text-foreground disabled:opacity-40"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              disabled={deckBuilding || !deckPreview || deckPreview.slides.length === 0}
+              onClick={confirmBuildProjectDeck}
+              className="flex items-center gap-1.5 rounded-md bg-foreground text-background px-3 py-1.5 font-body text-[11px] uppercase tracking-widest hover:opacity-90 disabled:opacity-40"
+            >
+              {deckBuilding ? <Loader2 className="h-3 w-3 animate-spin" /> : <Sparkles className="h-3 w-3" />}
+              {deckBuilding ? "Building…" : "Confirm & open builder"}
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
