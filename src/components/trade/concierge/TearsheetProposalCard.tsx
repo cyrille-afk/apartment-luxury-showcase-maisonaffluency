@@ -185,10 +185,21 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
 
   const toggleLock = (id: string) => {
     const next = new Set(locked);
-    if (next.has(id)) next.delete(id);
-    else next.add(id);
+    const willLock = !next.has(id);
+    if (willLock) next.add(id);
+    else next.delete(id);
     setLockedLocal(next);
     onLockedChange?.(next);
+    // Auto-expand the 3D + finishes drawer the moment a row is locked so the
+    // architect can pick finishes and generate a tearsheet inline.
+    if (willLock) {
+      setAssetsOpen((prev) => {
+        if (prev.has(id)) return prev;
+        const nxt = new Set(prev);
+        nxt.add(id);
+        return nxt;
+      });
+    }
   };
 
   const lockedVisible = visiblePicks.filter((p) => locked.has(p.id));
