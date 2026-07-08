@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { ChevronDown, ChevronRight, ClipboardPaste, X } from "lucide-react";
 import { BrandPicker } from "@/components/trade/concierge/BrandPicker";
 import { updateConciergeSession } from "@/hooks/useConciergeSession";
