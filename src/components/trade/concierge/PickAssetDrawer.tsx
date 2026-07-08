@@ -225,6 +225,14 @@ export function PickAssetDrawer({ pickId, title }: Props) {
         pairs: Array.from(pairSet.values()),
       });
 
+      const prodRow = (prodRes.data as any) || null;
+      setTradeMeta({
+        tradeProductId: prodRow?.id ?? null,
+        tradePriceCents: prodRow?.trade_price_cents ?? null,
+        currency: prodRow?.currency ?? null,
+        leadTime: prodRow?.lead_time ?? pickRow?.lead_time ?? null,
+      });
+
       setLoading(false);
     })();
     return () => {
