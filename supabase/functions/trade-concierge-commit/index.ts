@@ -886,6 +886,7 @@ serve(async (req) => {
           title,
           client_name: "",
           status: "draft",
+          source: "concierge",
         })
         .select("id, share_token")
         .single();
