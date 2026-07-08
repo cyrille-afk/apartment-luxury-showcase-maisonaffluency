@@ -407,7 +407,7 @@ function extractProseFields(text: string): { zone?: string; maxFootprint?: strin
     out.maxFootprint = `length ≤ ${max}mm, depth ≤ ${min}mm`;
   }
 
-  const vibeM = src.match(/\b(?:in|with)\s+(?:an?\s+)?([a-z][a-z\s-]{2,80}?)\s+(?:manner|style|vibe|atmosphere|aesthetic)\b/i);
+  const vibeM = src.match(/\b(?:in|with)\s+(?:an?\s+)?((?:(?!\b(?:in|with)\b)[a-z-]+\s+){0,6}[a-z-]+)\s+(?:manner|style|vibe|atmosphere|aesthetic)\b/i);
   if (vibeM) out.vibe = vibeM[1].replace(/\s+/g, " ").trim().toLowerCase();
 
   const found = extractProseFurnitureTypology(text);
