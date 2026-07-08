@@ -79,16 +79,29 @@ export function PickAssetDrawer({ pickId, title }: Props) {
   const [selectedFabricId, setSelectedFabricId] = useState<string | null>(null);
   const [selectedBaseId, setSelectedBaseId] = useState<string | null>(null);
   const [selectedTopId, setSelectedTopId] = useState<string | null>(null);
+  const [pickAxes, setPickAxes] = useState<{
+    baseOptions: string[];
+    topOptions: string[];
+    baseAxisLabel: string | null;
+    topAxisLabel: string | null;
+  }>({ baseOptions: [], topOptions: [], baseAxisLabel: null, topAxisLabel: null });
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
       setLoading(true);
-      const prodRes = await supabase
-        .from("trade_products")
-        .select("id, glb_url, image_url")
-        .eq("source_pick_id", pickId)
-        .maybeSingle();
+      const [prodRes, pickRes] = await Promise.all([
+        supabase
+          .from("trade_products")
+          .select("id, glb_url, image_url")
+          .eq("source_pick_id", pickId)
+          .maybeSingle(),
+        supabase
+          .from("designer_curator_picks_public")
+          .select("size_variants, base_axis_label, top_axis_label")
+          .eq("id", pickId)
+          .maybeSingle(),
+      ]);
 
       const tpId = (prodRes.data as any)?.id as string | undefined;
 
@@ -119,6 +132,17 @@ export function PickAssetDrawer({ pickId, title }: Props) {
       setMaterialRoles(defaultVar?.material_roles || undefined);
       setPoster((prodRes.data as any)?.image_url ?? null);
       setSwatches(((swRes.data as any[]) ?? []) as Swatch[]);
+
+      const pickRow = (pickRes.data as any) || null;
+      const sv = (pickRow?.size_variants as any[]) || [];
+      const axes = computeVariantAxes(sv);
+      setPickAxes({
+        baseOptions: axes.baseOptions || [],
+        topOptions: axes.topOptions || [],
+        baseAxisLabel: pickRow?.base_axis_label ?? null,
+        topAxisLabel: pickRow?.top_axis_label ?? null,
+      });
+
       setLoading(false);
     })();
     return () => {
@@ -127,17 +151,48 @@ export function PickAssetDrawer({ pickId, title }: Props) {
   }, [pickId]);
 
   const { fabricSwatches, baseSwatches, topSwatches } = useMemo(() => {
-    const base: Swatch[] = [];
-    const top: Swatch[] = [];
     const fab: Swatch[] = [];
+    const nonFab: Swatch[] = [];
     for (const s of swatches) {
-      const role = classifySwatch(s);
-      if (role === "fabric") fab.push(s);
-      else if (role === "top") top.push(s);
-      else base.push(s);
+      if (classifySwatch(s) === "fabric") fab.push(s);
+      else nonFab.push(s);
     }
+
+    // Prefer the product's own axes (design-editor product sheet) to split
+    // base vs top swatches — matches the axis convention rendered on the
+    // public/trade product pages. Fall back to category-based classification
+    // when the pick has no axes (single-axis or legacy rows).
+    const baseFilter =
+      pickAxes.baseOptions.length > 0 ? makeSwatchAxisFilter(pickAxes.baseOptions) : null;
+    const topFilter =
+      pickAxes.topOptions.length > 0 ? makeSwatchAxisFilter(pickAxes.topOptions) : null;
+
+    let base: Swatch[] = [];
+    let top: Swatch[] = [];
+
+    if (baseFilter || topFilter) {
+      const topMatched = topFilter ? nonFab.filter((s) => topFilter(s.name)) : [];
+      const topIds = new Set(topMatched.map((s) => s.fabric_id));
+      const remaining = nonFab.filter((s) => !topIds.has(s.fabric_id));
+      const baseMatched = baseFilter ? remaining.filter((s) => baseFilter(s.name)) : [];
+      const baseIds = new Set(baseMatched.map((s) => s.fabric_id));
+      const orphans = remaining.filter((s) => !baseIds.has(s.fabric_id));
+      // Orphans fall back to their category classification so nothing is
+      // silently dropped and stones/marbles don't land in the base group.
+      const orphanTop = orphans.filter((s) => classifySwatch(s) === "top");
+      const orphanBase = orphans.filter((s) => classifySwatch(s) !== "top");
+      top = [...topMatched, ...orphanTop];
+      base = [...baseMatched, ...orphanBase];
+    } else {
+      // No axis definition → classify purely by category / name.
+      for (const s of nonFab) {
+        if (classifySwatch(s) === "top") top.push(s);
+        else base.push(s);
+      }
+    }
+
     return { fabricSwatches: fab, baseSwatches: base, topSwatches: top };
-  }, [swatches]);
+  }, [swatches, pickAxes.baseOptions, pickAxes.topOptions]);
 
   const hasGlb = !!glbUrl;
   const hasSwatches = swatches.length > 0;
