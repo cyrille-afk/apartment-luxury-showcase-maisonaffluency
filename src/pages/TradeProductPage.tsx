@@ -519,6 +519,19 @@ const TradeProductPage: React.FC = () => {
   const [galleryJumpNonce, setGalleryJumpNonce] = useState(0);
   const fxRates = useFxRates();
 
+  // Honour `?ccy=<CODE>` from the concierge drawer's deep-link so the product
+  // page opens in the same currency the drawer showed (the pick's base
+  // currency), instead of the user's auto-defaulted display currency.
+  useEffect(() => {
+    const qp = new URLSearchParams(location.search);
+    const raw = (qp.get("ccy") || "").trim().toUpperCase();
+    if (!raw) return;
+    const supported = ["original", "SGD", "EUR", "USD", "GBP", "CHF", "AED", "HKD", "AUD"] as const;
+    const match = supported.find((c) => c.toUpperCase() === raw);
+    if (match && match !== displayCurrency) setDisplayCurrency(match as any);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.search]);
+
   // ── Quote drawer ──
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [activeQuoteId, setActiveQuoteId] = useState<string | null>(null);
