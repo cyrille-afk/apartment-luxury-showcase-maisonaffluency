@@ -1126,13 +1126,19 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
                           </button>
                           <button
                             type="button"
-                            onClick={() => sendConciergePrefill(buildSwapPrompt({
-                              pick_id: p.id,
-                              title: p.title,
-                              designer_name: p.designer_name,
-                              materials: p.materials,
-                              category: (p as any).category ?? null,
-                            }))}
+                            onClick={() => sendConciergePrefill(
+                              buildSwapPrompt({
+                                pick_id: p.id,
+                                title: p.title,
+                                designer_name: p.designer_name,
+                                materials: p.materials,
+                                category: (p as any).category ?? null,
+                              }),
+                              {
+                                autoSend: true,
+                                displayText: `Swap "${p.title}"${p.designer_name ? ` by ${p.designer_name}` : ""} for a similar piece in a darker, richer palette.`,
+                              },
+                            )}
                             className="inline-flex items-center gap-1 text-muted-foreground hover:text-accent text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded border border-border transition-colors"
                             aria-label={`Swap ${p.title || "this pick"} for a similar piece`}
                             title="Swap for a similar piece (darker wood / warmer finish)"

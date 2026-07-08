@@ -548,13 +548,19 @@ export function QuoteProposalCard({ proposal, onResolved }: Props) {
                   </div>
                   <button
                     type="button"
-                    onClick={() => sendConciergePrefill(buildSwapPrompt({
-                      pick_id: l.pick_id,
-                      title: l.title,
-                      designer_name: l.designer_name,
-                      materials: (l as any).materials ?? null,
-                      category: (l as any).category ?? null,
-                    }))}
+                    onClick={() => sendConciergePrefill(
+                      buildSwapPrompt({
+                        pick_id: l.pick_id,
+                        title: l.title,
+                        designer_name: l.designer_name,
+                        materials: (l as any).materials ?? null,
+                        category: (l as any).category ?? null,
+                      }),
+                      {
+                        autoSend: true,
+                        displayText: `Swap "${l.title}"${l.designer_name ? ` by ${l.designer_name}` : ""} for a similar piece in a darker, richer palette.`,
+                      },
+                    )}
                     className="inline-flex items-center gap-1 text-muted-foreground hover:text-accent text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded border border-border transition-colors"
                     aria-label={`Swap ${l.title || "this line"} for a similar piece`}
                     title="Swap for a similar piece (darker wood / warmer finish)"

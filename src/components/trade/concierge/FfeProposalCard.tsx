@@ -252,13 +252,19 @@ export function FfeProposalCard({ proposal, onResolved }: Props) {
                         </div>
                         <button
                           type="button"
-                          onClick={() => sendConciergePrefill(buildSwapPrompt({
-                            pick_id: r.pick_id,
-                            title: r.title,
-                            designer_name: r.designer_name,
-                            materials: (r as any).materials ?? null,
-                            category: (r as any).category ?? null,
-                          }))}
+                          onClick={() => sendConciergePrefill(
+                            buildSwapPrompt({
+                              pick_id: r.pick_id,
+                              title: r.title,
+                              designer_name: r.designer_name,
+                              materials: (r as any).materials ?? null,
+                              category: (r as any).category ?? null,
+                            }),
+                            {
+                              autoSend: true,
+                              displayText: `Swap "${r.title}"${r.designer_name ? ` by ${r.designer_name}` : ""} for a similar piece in a darker, richer palette.`,
+                            },
+                          )}
                           className="inline-flex items-center gap-1 text-muted-foreground hover:text-accent text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded border border-border transition-colors"
                           aria-label={`Swap ${r.title || "this row"} for a similar piece`}
                           title="Swap for a similar piece (darker wood / warmer finish)"
