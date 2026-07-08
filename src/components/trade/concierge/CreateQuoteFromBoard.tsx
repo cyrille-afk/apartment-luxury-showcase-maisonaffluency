@@ -215,17 +215,47 @@ export const CreateQuoteFromBoard = ({ board, items, userId, disabled }: Props) 
       // resolution is best-effort — if it fails we still persist labels via variant_label
     }
 
-    const resolveSwatch = (product_id: string, label: string | null | undefined): string | null => {
-      const l = (label || "").trim().toLowerCase();
-      if (!l) return null;
-      return labelToFabricIdByProduct.get(product_id)?.get(l) ?? null;
+    // A single board label can bundle multiple materials — e.g. the
+    // Madison Avenue Side Table stores `wood_label: "Aged Brass · Pakistani Onyx"`
+    // (metal + stone). Split on `·`, `/`, `,`, `+`, `&` and resolve each
+    // token independently so no swatch is dropped.
+    const splitLabel = (label: string | null | undefined): string[] => {
+      const s = (label || "").trim();
+      if (!s) return [];
+      return s
+        .split(/\s*[·\/,+&]\s*|\s+\band\b\s+/i)
+        .map((t) => t.trim())
+        .filter(Boolean);
+    };
+    const resolveSwatches = (product_id: string, label: string | null | undefined): string[] => {
+      const map = labelToFabricIdByProduct.get(product_id);
+      if (!map) return [];
+      const ids: string[] = [];
+      const seen = new Set<string>();
+      for (const tok of splitLabel(label)) {
+        const id = map.get(tok.toLowerCase());
+        if (id && !seen.has(id)) { seen.add(id); ids.push(id); }
+      }
+      return ids;
     };
 
     const rows = firstSeenList.map((i) => {
       const room = (roomByProductId.get(i.product_id) || "Unassigned").trim() || "Unassigned";
       byRoom[room] = (byRoom[room] || 0) + 1;
-      const fabric_id = resolveSwatch(i.product_id, i.fabric_label);
-      const wood_fabric_id = resolveSwatch(i.product_id, i.wood_label);
+      // Collect all resolved swatch ids from both label columns, then
+      // distribute across the two available quote-line slots (fabric_id,
+      // wood_fabric_id). Priority preserves board authorship: fabric_label
+      // tokens fill the fabric slot first, wood_label tokens fill the wood
+      // slot first; overflow spills into the other slot so nothing is lost.
+      const fabricIds = resolveSwatches(i.product_id, i.fabric_label);
+      const woodIds = resolveSwatches(i.product_id, i.wood_label);
+      let fabric_id: string | null = fabricIds[0] ?? null;
+      let wood_fabric_id: string | null = woodIds[0] ?? null;
+      const overflow = [...fabricIds.slice(1), ...woodIds.slice(1)].filter(
+        (id) => id !== fabric_id && id !== wood_fabric_id,
+      );
+      if (!wood_fabric_id && overflow.length) wood_fabric_id = overflow.shift() ?? null;
+      if (!fabric_id && overflow.length) fabric_id = overflow.shift() ?? null;
       return {
         quote_id: quoteId,
         product_id: i.product_id,
