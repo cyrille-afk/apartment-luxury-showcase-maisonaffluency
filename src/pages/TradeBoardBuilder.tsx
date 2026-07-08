@@ -400,6 +400,19 @@ const TradeBoardBuilder = () => {
     navigate(`/trade/quotes?quote=${quote.id}`);
   };
 
+  const deleteBoard = async () => {
+    if (!board || !user) return;
+    if (!confirm(`Delete "${board.title}"? This also removes all items, comments, and share links.`)) return;
+    const { error } = await supabase.from("client_boards").delete().eq("id", board.id);
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+      return;
+    }
+    window.dispatchEvent(new Event("concierge:artifacts-changed"));
+    toast({ title: "Folder deleted" });
+    navigate("/trade/boards");
+  };
+
   if (loading) return <div className="flex items-center justify-center py-20"><DotCircleLoader size="sm" /></div>;
   if (!board) return <div className="text-center py-20 text-muted-foreground">Board not found</div>;
 
@@ -560,6 +573,15 @@ const TradeBoardBuilder = () => {
                     userId={user!.id}
                   />
                 )}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="gap-1.5 text-xs text-destructive hover:text-destructive"
+                  onClick={deleteBoard}
+                  title="Delete folder"
+                >
+                  <Trash2 className="h-3.5 w-3.5" /> Delete
+                </Button>
               </>
             )}
           </div>
