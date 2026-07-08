@@ -1259,16 +1259,16 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
                 </div>
                 <button
                   type="button"
-                  disabled={deckBuilding}
-                  onClick={() => handleBuildProjectDeck(projectIdForDeck, conciergeSession.projectName || "Project")}
+                  disabled={deckPreviewLoading || deckBuilding}
+                  onClick={() => openDeckPreview(projectIdForDeck, conciergeSession.projectName || "Project")}
                   className="w-full flex items-center justify-center gap-1.5 rounded-md bg-foreground text-background px-2.5 py-1.5 font-body text-[10px] uppercase tracking-widest hover:opacity-90 transition disabled:opacity-40"
                 >
-                  {deckBuilding ? (
+                  {deckPreviewLoading ? (
                     <Loader2 className="h-3 w-3 animate-spin" />
                   ) : (
                     <Sparkles className="h-3 w-3" />
                   )}
-                  {deckBuilding ? "Building deck…" : "Compile Project Presentation"}
+                  {deckPreviewLoading ? "Loading preview…" : "Preview Project Presentation"}
                 </button>
               </div>
             )}
