@@ -254,13 +254,15 @@ export function PickAssetDrawer({ pickId, title }: Props) {
             poster={poster}
             fabricTextureUrl={fabricTextureUrl}
             baseTextureUrl={baseTextureUrl}
+            topTextureUrl={topTextureUrl}
             materialRoles={materialRoles}
           />
         </div>
       )}
       {hasSwatches && (
         <div className="space-y-2">
-          {renderGroup("Wood & base finishes", baseSwatches, selectedBaseId, setSelectedBaseId)}
+          {renderGroup("Base (wood · metal)", baseSwatches, selectedBaseId, setSelectedBaseId)}
+          {renderGroup("Top (stone · marble · glass)", topSwatches, selectedTopId, setSelectedTopId)}
           {renderGroup("Fabrics", fabricSwatches, selectedFabricId, setSelectedFabricId)}
         </div>
       )}
