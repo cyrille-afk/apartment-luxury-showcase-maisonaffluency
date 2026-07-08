@@ -1558,7 +1558,7 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
 
         // Zone line — capitalize + join detected zones (e.g. "Living, Dining, Master")
         const zoneLine = scale.zones.length
-          ? `${scale.zones.map((z) => z.charAt(0).toUpperCase() + z.slice(1)).join(", ")} — ceiling height [mm]`
+          ? `${scale.zones.map((z) => z.charAt(0).toUpperCase() + z.slice(1)).join(", ")}${scale.ceiling ? ` — ${scale.ceiling}` : " — ceiling height [mm]"}`
           : null;
 
         // Timeline line
@@ -1575,6 +1575,12 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
             "Handover in [N] weeks (max lead time [N] weeks).",
             timelineLine,
           );
+        }
+        if (scale.maxFootprint) {
+          prefilled = prefilled.replace("length ≤ [mm], depth ≤ [mm]", scale.maxFootprint);
+        }
+        if (scale.vibe) {
+          prefilled = prefilled.replace("[e.g. Japandi-Luxe, Italian Minimalism]", scale.vibe);
         }
 
         // Merge furniture typologies from the current message + every prior
