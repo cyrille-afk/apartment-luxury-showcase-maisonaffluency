@@ -3,7 +3,7 @@ import { Loader2, Check, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
-type MaterialRole = "fabric" | "base" | "ignore";
+type MaterialRole = "fabric" | "base" | "top" | "ignore";
 
 interface Props {
   variantId: string;
@@ -25,11 +25,12 @@ interface Props {
 
 const ROLE_LABEL: Record<MaterialRole, string> = {
   fabric: "Fabric / Leather",
-  base: "Base (wood · stone · metal)",
+  base: "Base (wood · metal)",
+  top: "Top (stone · marble · glass)",
   ignore: "Ignore",
 };
 
-const ROLE_ORDER: MaterialRole[] = ["fabric", "base", "ignore"];
+const ROLE_ORDER: MaterialRole[] = ["fabric", "base", "top", "ignore"];
 
 export function GlbMaterialRolesEditor({
   variantId,
