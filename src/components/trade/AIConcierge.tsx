@@ -28,10 +28,59 @@ No conversational intro.`;
 // Detect a "project-scale" first-turn brief so the concierge can skip
 // one-question intake and jump straight to the structured Brief Builder.
 // Returns null when the message reads like a single-piece enquiry.
+// Extract furniture typologies (sectional sofa, armchair, side table, etc.)
+// from free-text so we can prefill Block 2 TYPOLOGY when the user has already
+// named the pieces they're researching. Order matters: multi-word tokens
+// ("side table", "floor lamp") must match before their generic parents
+// ("table", "lamp") so plural/singular families are deduped correctly.
+const FURNITURE_TOKEN_RE = /\b(sectional\s+sofas?|sectionals?|sofas?|settees?|loveseats?|accent\s+chairs?|arm\s*chairs?|lounge\s+chairs?|dining\s+chairs?|chairs?|side\s+tables?|coffee\s+tables?|dining\s+tables?|consoles?|desks?|tables?|benches|bench|stools?|ottomans?|poufs?|floor\s+lamps?|table\s+lamps?|pendants?|chandeliers?|sconces?|wall\s+lights?|lamps?|rugs?|mirrors?|cabinets?|sideboards?|credenzas?|shelving|bookcases?|dressers?|chests?|armoires?|beds?|headboards?|nightstands?|bedsides?)\b/gi;
+
+function normalizeFurnitureToken(t: string): string {
+  const s = t.toLowerCase().replace(/\s+/g, " ").trim();
+  // Pluralize to a canonical plural form.
+  if (/^sectional(\s+sofa)?s?$/.test(s)) return "sectional sofas";
+  if (/^arm\s*chairs?$/.test(s)) return "armchairs";
+  if (/^side\s+tables?$/.test(s)) return "side tables";
+  if (/^coffee\s+tables?$/.test(s)) return "coffee tables";
+  if (/^dining\s+tables?$/.test(s)) return "dining tables";
+  if (/^floor\s+lamps?$/.test(s)) return "floor lamps";
+  if (/^table\s+lamps?$/.test(s)) return "table lamps";
+  if (/^accent\s+chairs?$/.test(s)) return "accent chairs";
+  if (/^lounge\s+chairs?$/.test(s)) return "lounge chairs";
+  if (/^dining\s+chairs?$/.test(s)) return "dining chairs";
+  if (/^wall\s+lights?$/.test(s)) return "wall lights";
+  // Generic singular→plural
+  if (s.endsWith("y")) return s.slice(0, -1) + "ies";
+  if (/(s|x|z|ch|sh)$/.test(s)) return s;
+  if (s.endsWith("s")) return s;
+  return s + "s";
+}
+
+// Suppress generic parents when a more specific sibling was already captured
+// (e.g. drop "tables" when "side tables" or "coffee tables" is present).
+function collapseFurnitureTokens(tokens: string[]): string[] {
+  const set = new Set(tokens);
+  const drop = (parent: string, ...children: string[]) => {
+    if (children.some((c) => set.has(c))) set.delete(parent);
+  };
+  drop("tables", "side tables", "coffee tables", "dining tables");
+  drop("chairs", "armchairs", "accent chairs", "lounge chairs", "dining chairs");
+  drop("lamps", "floor lamps", "table lamps");
+  drop("sofas", "sectional sofas");
+  return Array.from(set);
+}
+
+function extractFurnitureTypology(text: string): string[] {
+  if (!text) return [];
+  const raw = text.match(FURNITURE_TOKEN_RE) || [];
+  const normalized = raw.map(normalizeFurnitureToken);
+  return collapseFurnitureTokens(Array.from(new Set(normalized)));
+}
+
 function detectProjectScale(
   message: string,
   priorUserTurns: number = 0,
-): { typology: string; city: string; country: string; zones: string[]; timelineWeeks: number | null } | null {
+): { typology: string; city: string; country: string; zones: string[]; timelineWeeks: number | null; furniture: string[] } | null {
   if (!message) return null;
   const text = message.trim();
 
