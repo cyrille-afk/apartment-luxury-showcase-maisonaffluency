@@ -264,6 +264,51 @@ export function PickAssetDrawer({ pickId, title }: Props) {
     return { fabricSwatches: fab, baseSwatches: base, topSwatches: top, splitByClassifier };
   }, [swatches, pickAxes.baseOptions, pickAxes.topOptions]);
 
+  // Build coupled (base, top) combinations from the pick's size_variants,
+  // resolving each side to the matching swatch by fuzzy-normalized name.
+  // When ≥2 coupled pairs exist AND both axes are populated, the drawer
+  // switches from independent Base + Top pickers to a single "Finish
+  // Combinations" strip so the user can only pick valid pairs.
+  const combinations = useMemo(() => {
+    if (!pickAxes.pairs.length) return [];
+    const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+    const findSwatch = (label: string): Swatch | null => {
+      const target = norm(label);
+      if (!target) return null;
+      let best: { swatch: Swatch; score: number } | null = null;
+      for (const s of swatches) {
+        const n = norm(s.name);
+        if (!n) continue;
+        let score = 0;
+        if (n === target) score = 100;
+        else if (n.includes(target) || target.includes(n)) score = 60 + Math.min(n.length, target.length);
+        else {
+          const tw = target.split(" ").filter(Boolean);
+          const nw = new Set(n.split(" "));
+          const overlap = tw.filter((w) => nw.has(w)).length;
+          if (overlap >= 2) score = 20 + overlap;
+        }
+        if (score > 0 && (!best || score > best.score)) best = { swatch: s, score };
+      }
+      return best?.swatch ?? null;
+    };
+    const out: { base: Swatch; top: Swatch; label: string }[] = [];
+    const seen = new Set<string>();
+    for (const p of pickAxes.pairs) {
+      const b = findSwatch(p.base);
+      const t = findSwatch(p.top);
+      if (!b || !t) continue;
+      const key = `${b.fabric_id}||${t.fabric_id}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      out.push({ base: b, top: t, label: `${b.name} · ${t.name}` });
+    }
+    return out;
+  }, [pickAxes.pairs, swatches]);
+
+  const useCoupled =
+    combinations.length >= 2 && !!pickAxes.baseAxisLabel && !!pickAxes.topAxisLabel;
+
   const hasGlb = !!glbUrl;
   const hasSwatches = swatches.length > 0;
 
