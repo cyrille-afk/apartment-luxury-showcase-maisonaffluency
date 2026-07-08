@@ -106,7 +106,8 @@ export function PickAssetDrawer({ pickId, title }: Props) {
     topOptions: string[];
     baseAxisLabel: string | null;
     topAxisLabel: string | null;
-  }>({ baseOptions: [], topOptions: [], baseAxisLabel: null, topAxisLabel: null });
+    pairs: { base: string; top: string }[];
+  }>({ baseOptions: [], topOptions: [], baseAxisLabel: null, topAxisLabel: null, pairs: [] });
 
   // Mirror selections to sessionStorage on every change so a collapse/expand
   // (or an "unlock → re-lock") cycle restores the previous picks verbatim.
