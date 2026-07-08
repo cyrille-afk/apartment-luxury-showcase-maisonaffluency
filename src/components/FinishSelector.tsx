@@ -363,6 +363,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
       setSelectedWoodId(null);
       onWoodFinishChange?.(null);
       onWoodFinishPricingChange?.(null);
+      onTopFinishSwatchChange?.(null);
 
       setSelectedCoverId(null);
       setSelectedRugComponentIds({});
