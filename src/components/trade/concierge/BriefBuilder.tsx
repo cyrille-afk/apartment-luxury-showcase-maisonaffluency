@@ -525,6 +525,9 @@ function summarizePreset(p: BriefPreset): string {
     .map((s) => (s && !s.trim().startsWith("[") ? s.trim() : ""))
     .filter(Boolean);
   return parts.join(" · ");
+}
+
+
 
 
 const EXPANDED_STORAGE_PREFIX = "concierge:briefBuilder:expanded";
