@@ -660,6 +660,27 @@ export function BriefBuilder({
       merged.block4 = parsed.values.block4;
       filled++;
     }
+
+    // Free-form prose extraction — pulls zone/max footprint/typology out of
+    // sentences like "The Living room is 5x6m with a 4m high ceiling.
+    // Sectional sofas, accent chairs…" so pastes without block headers still
+    // populate the builder fields (not just the free-form notes area).
+    const prose = extractProseFields(text);
+    if (prose.zone && merged.block1.zone === DEFAULT_VALUES.block1.zone) {
+      merged.block1.zone = prose.zone;
+      filled++;
+    }
+    if (prose.maxFootprint && merged.block2.maxFootprint === DEFAULT_VALUES.block2.maxFootprint) {
+      merged.block2.maxFootprint = prose.maxFootprint;
+      filled++;
+    }
+    // Typology from prose ALWAYS overrides — a fresh paste is the user's most
+    // recent intent and should replace any earlier auto-prefill.
+    if (prose.typology) {
+      if (merged.block2.typology !== prose.typology) filled++;
+      merged.block2.typology = prose.typology;
+    }
+
     // When the paste is free-form prose (no recognisable block headers),
     // parseBrief returns prefix=<the whole text>. Merge it with any existing
     // prefix rather than replacing so a previous freeform note isn't wiped.
