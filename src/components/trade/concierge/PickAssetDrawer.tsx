@@ -2,11 +2,12 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Product3DViewer from "@/components/trade/Product3DViewer";
-import { FileText, Loader2, RotateCcw } from "lucide-react";
+import { FileText, FolderPlus, Loader2, RotateCcw } from "lucide-react";
 import { updateConciergeSession } from "@/hooks/useConciergeSession";
 import { computeVariantAxes } from "@/lib/parseSizeVariants";
 import { makeSwatchAxisFilter } from "@/lib/finishDuplication";
 import { formatVariantAxisLabel } from "@/lib/variantPlaceholders";
+import AddToProjectPopover from "@/components/trade/AddToProjectPopover";
 
 interface Swatch {
   fabric_id: string;
@@ -116,6 +117,12 @@ export function PickAssetDrawer({ pickId, title }: Props) {
     topAxisLabel: string | null;
     pairs: { base: string; top: string }[];
   }>({ baseOptions: [], topOptions: [], baseAxisLabel: null, topAxisLabel: null, pairs: [] });
+  const [tradeMeta, setTradeMeta] = useState<{
+    tradeProductId: string | null;
+    tradePriceCents: number | null;
+    currency: string | null;
+    leadTime: string | null;
+  }>({ tradeProductId: null, tradePriceCents: null, currency: null, leadTime: null });
 
   // Mirror selections to sessionStorage on every change so a collapse/expand
   // (or an "unlock → re-lock") cycle restores the previous picks verbatim.
@@ -144,12 +151,12 @@ export function PickAssetDrawer({ pickId, title }: Props) {
       const [prodRes, pickRes] = await Promise.all([
         supabase
           .from("trade_products")
-          .select("id, glb_url, image_url")
+          .select("id, glb_url, image_url, trade_price_cents, currency, lead_time")
           .eq("source_pick_id", pickId)
           .maybeSingle(),
         supabase
           .from("designer_curator_picks_public")
-          .select("size_variants, base_axis_label, top_axis_label")
+          .select("size_variants, base_axis_label, top_axis_label, lead_time")
           .eq("id", pickId)
           .maybeSingle(),
       ]);
@@ -216,6 +223,14 @@ export function PickAssetDrawer({ pickId, title }: Props) {
         baseAxisLabel: pickRow?.base_axis_label ?? null,
         topAxisLabel: pickRow?.top_axis_label ?? null,
         pairs: Array.from(pairSet.values()),
+      });
+
+      const prodRow = (prodRes.data as any) || null;
+      setTradeMeta({
+        tradeProductId: prodRow?.id ?? null,
+        tradePriceCents: prodRow?.trade_price_cents ?? null,
+        currency: prodRow?.currency ?? null,
+        leadTime: prodRow?.lead_time ?? pickRow?.lead_time ?? null,
       });
 
       setLoading(false);
@@ -624,44 +639,103 @@ export function PickAssetDrawer({ pickId, title }: Props) {
         </div>
       )}
       {showDraftButton && (
-        canDraft ? (
-          <Link
-            to={`/trade/tearsheets?${draftParams.toString()}`}
-            onClick={() => {
-              // Persist product + locked finishes into the cross-surface
-              // concierge session so the Tearsheet Builder and Quote flow
-              // can carry them forward even if the URL params are stripped.
-              updateConciergeSession({
-                product: { id: pickId, title, source: "curator" },
-                finishes: {
-                  fabric: fabricLabel,
-                  fabricImg,
-                  wood: woodLabel,
-                  woodImg,
-                  variant: null,
-                },
-                locked: true,
-              });
-            }}
-            className="mt-1 flex items-center justify-center gap-1.5 rounded-md border border-foreground/30 bg-foreground text-background px-2.5 py-1.5 font-body text-[10px] uppercase tracking-widest hover:bg-foreground/90 transition-colors"
-          >
-            <FileText size={11} />
-            Generate Tearsheet
-          </Link>
-        ) : (
-          <button
-            type="button"
-            disabled
-            className="mt-1 flex w-full items-center justify-center gap-1.5 rounded-md border border-foreground/30 bg-foreground text-background px-2.5 py-1.5 font-body text-[10px] uppercase tracking-widest opacity-50 cursor-not-allowed transition-colors"
-          >
-            {loading ? (
-              <Loader2 size={11} className="animate-spin" />
+        <>
+          {canDraft && (
+            <div className="mt-1 rounded-md border border-border/60 bg-background/60 px-2.5 py-2 space-y-1">
+              <div className="font-display text-[9px] uppercase tracking-widest text-muted-foreground">
+                Locked Selection
+              </div>
+              <dl className="grid grid-cols-[auto,1fr] gap-x-2 gap-y-0.5 font-body text-[10px] leading-tight text-foreground">
+                <dt className="text-muted-foreground">SKU</dt>
+                <dd className="tabular-nums">MA-{pickId.replace(/-/g, "").slice(0, 8).toUpperCase()}</dd>
+                {woodLabel && (
+                  <>
+                    <dt className="text-muted-foreground">Frame</dt>
+                    <dd className="break-words">{woodLabel}</dd>
+                  </>
+                )}
+                {fabricLabel && (
+                  <>
+                    <dt className="text-muted-foreground">Seating</dt>
+                    <dd className="break-words">{fabricLabel}</dd>
+                  </>
+                )}
+                <dt className="text-muted-foreground">Trade Price</dt>
+                <dd>
+                  {tradeMeta.tradePriceCents
+                    ? `${
+                        tradeMeta.currency === "USD" ? "$" :
+                        tradeMeta.currency === "GBP" ? "£" :
+                        tradeMeta.currency === "SGD" ? "S$" : "€"
+                      }${(tradeMeta.tradePriceCents / 100).toLocaleString()}`
+                    : "Price on Request"}
+                </dd>
+                <dt className="text-muted-foreground">Lead Time</dt>
+                <dd>{tradeMeta.leadTime || "—"}</dd>
+              </dl>
+            </div>
+          )}
+          <div className="mt-1 flex flex-col sm:flex-row gap-1.5">
+            {canDraft ? (
+              <Link
+                to={`/trade/tearsheets?${draftParams.toString()}`}
+                onClick={() => {
+                  updateConciergeSession({
+                    product: { id: pickId, title, source: "curator" },
+                    finishes: {
+                      fabric: fabricLabel,
+                      fabricImg,
+                      wood: woodLabel,
+                      woodImg,
+                      variant: null,
+                    },
+                    locked: true,
+                  });
+                }}
+                className="flex-1 flex items-center justify-center gap-1.5 rounded-md border border-foreground/30 bg-foreground text-background px-2.5 py-1.5 font-body text-[10px] uppercase tracking-widest hover:bg-foreground/90 transition-colors"
+              >
+                <FileText size={11} />
+                Generate Tearsheet
+              </Link>
             ) : (
-              <FileText size={11} />
+              <button
+                type="button"
+                disabled
+                className="flex-1 flex items-center justify-center gap-1.5 rounded-md border border-foreground/30 bg-foreground text-background px-2.5 py-1.5 font-body text-[10px] uppercase tracking-widest opacity-50 cursor-not-allowed transition-colors"
+              >
+                {loading ? (
+                  <Loader2 size={11} className="animate-spin" />
+                ) : (
+                  <FileText size={11} />
+                )}
+                {loading ? "Loading finishes…" : "Generate Tearsheet"}
+              </button>
             )}
-            {loading ? "Loading finishes…" : "Generate Tearsheet"}
-          </button>
-        )
+            {canDraft && tradeMeta.tradeProductId ? (
+              <AddToProjectPopover
+                productId={tradeMeta.tradeProductId}
+                productName={title}
+              >
+                <button
+                  type="button"
+                  className="flex-1 flex items-center justify-center gap-1.5 rounded-md border border-foreground/30 bg-background text-foreground px-2.5 py-1.5 font-body text-[10px] uppercase tracking-widest hover:bg-foreground/5 transition-colors"
+                >
+                  <FolderPlus size={11} />
+                  Add to Project Board
+                </button>
+              </AddToProjectPopover>
+            ) : (
+              <button
+                type="button"
+                disabled
+                className="flex-1 flex items-center justify-center gap-1.5 rounded-md border border-foreground/30 bg-background text-foreground px-2.5 py-1.5 font-body text-[10px] uppercase tracking-widest opacity-50 cursor-not-allowed transition-colors"
+              >
+                <FolderPlus size={11} />
+                Add to Project Board
+              </button>
+            )}
+          </div>
+        </>
       )}
     </div>
   );
