@@ -604,19 +604,15 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
    * Creates a `presentations` row titled after the project, then one slide per
    * board with `linked_product_ids` seeded from that board's items — the trade
    * user only has to review + publish.
+   *
+   * Two-phase flow:
+   *  1. `openDeckPreview` — fetch boards + items, open the confirmation modal.
+   *  2. `confirmBuildProjectDeck` — create `presentations` + slides, navigate.
    */
-  const handleBuildProjectDeck = async (projectId: string, projectDisplayName: string) => {
-    if (deckBuilding) return;
-    setDeckBuilding(true);
+  const openDeckPreview = async (projectId: string, projectDisplayName: string) => {
+    if (deckPreviewLoading || deckBuilding) return;
+    setDeckPreviewLoading(true);
     try {
-      const { data: userRes } = await supabase.auth.getUser();
-      const uid = userRes.user?.id;
-      if (!uid) {
-        toast.error("Sign in to build a project presentation.");
-        setDeckBuilding(false);
-        return;
-      }
-      // Fetch every board in this project (client_boards) with its items.
       const { data: boards } = await supabase
         .from("client_boards")
         .select("id, title, created_at")
@@ -624,7 +620,6 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
         .order("created_at", { ascending: true });
       if (!boards || boards.length === 0) {
         toast.error("No tearsheets in this project yet.");
-        setDeckBuilding(false);
         return;
       }
       const boardIds = boards.map((b: any) => b.id);
@@ -639,7 +634,31 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
         arr.push(row.product_id);
         itemsByBoard.set(row.board_id, arr);
       });
+      const slides: DeckPreviewSlide[] = boards.map((b: any) => ({
+        boardId: b.id,
+        title: b.title || "Untitled tearsheet",
+        productIds: itemsByBoard.get(b.id) ?? [],
+      }));
+      setDeckPreview({ projectId, projectName: projectDisplayName, slides });
+    } catch (e) {
+      toast.error(`Preview failed: ${(e as Error)?.message || "unknown"}`);
+    } finally {
+      setDeckPreviewLoading(false);
+    }
+  };
 
+  const confirmBuildProjectDeck = async () => {
+    if (!deckPreview || deckBuilding) return;
+    const { projectName: projectDisplayName, slides } = deckPreview;
+    setDeckBuilding(true);
+    try {
+      const { data: userRes } = await supabase.auth.getUser();
+      const uid = userRes.user?.id;
+      if (!uid) {
+        toast.error("Sign in to build a project presentation.");
+        setDeckBuilding(false);
+        return;
+      }
       const { data: pres, error: presErr } = await (supabase as any)
         .from("presentations")
         .insert({
@@ -654,18 +673,18 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
         setDeckBuilding(false);
         return;
       }
-
-      const slides = boards.map((b: any, idx: number) => ({
+      const slideRows = slides.map((s, idx) => ({
         presentation_id: pres.id,
-        title: b.title,
+        title: s.title,
         project_name: projectDisplayName,
         sort_order: idx,
-        linked_product_ids: itemsByBoard.get(b.id) ?? [],
+        linked_product_ids: s.productIds,
       }));
-      if (slides.length > 0) {
-        await (supabase as any).from("presentation_slides").insert(slides);
+      if (slideRows.length > 0) {
+        await (supabase as any).from("presentation_slides").insert(slideRows);
       }
-      toast.success(`Project deck created with ${slides.length} slide${slides.length === 1 ? "" : "s"}.`);
+      toast.success(`Project deck created with ${slideRows.length} slide${slideRows.length === 1 ? "" : "s"}.`);
+      setDeckPreview(null);
       try { window.dispatchEvent(new Event("concierge:close")); } catch {}
       navigate(`/trade/presentations/${pres.id}`);
     } catch (e) {
@@ -674,6 +693,8 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
       setDeckBuilding(false);
     }
   };
+
+
 
 
   const headerLabel = isAppend
