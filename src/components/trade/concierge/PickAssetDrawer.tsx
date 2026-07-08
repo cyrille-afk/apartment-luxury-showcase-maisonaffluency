@@ -370,7 +370,7 @@ export function PickAssetDrawer({ pickId, title }: Props) {
             ) : (
               <FileText size={11} />
             )}
-            {loading ? "Loading finishes…" : "Draft Tearsheet with These Finishes"}
+            {loading ? "Loading finishes…" : "Generate Tearsheet"}
           </button>
         )
       )}
