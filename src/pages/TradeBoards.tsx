@@ -244,7 +244,7 @@ const TradeBoards = () => {
                     : "border-transparent text-muted-foreground hover:text-foreground"
                 }`}
               >
-                {tab.icon && <Sparkles className="h-3 w-3" />}
+                {("icon" in tab && tab.icon) && <Sparkles className="h-3 w-3" />}
                 {tab.label}
                 <span className={`ml-1 rounded px-1 py-0.5 text-[9px] tabular-nums ${active ? "bg-foreground text-background" : "bg-muted text-muted-foreground"}`}>
                   {count}
