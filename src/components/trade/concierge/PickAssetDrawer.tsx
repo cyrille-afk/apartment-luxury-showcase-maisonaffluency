@@ -106,7 +106,8 @@ export function PickAssetDrawer({ pickId, title }: Props) {
     topOptions: string[];
     baseAxisLabel: string | null;
     topAxisLabel: string | null;
-  }>({ baseOptions: [], topOptions: [], baseAxisLabel: null, topAxisLabel: null });
+    pairs: { base: string; top: string }[];
+  }>({ baseOptions: [], topOptions: [], baseAxisLabel: null, topAxisLabel: null, pairs: [] });
 
   // Mirror selections to sessionStorage on every change so a collapse/expand
   // (or an "unlock → re-lock") cycle restores the previous picks verbatim.
@@ -177,11 +178,26 @@ export function PickAssetDrawer({ pickId, title }: Props) {
       const pickRow = (pickRes.data as any) || null;
       const sv = (pickRow?.size_variants as any[]) || [];
       const axes = computeVariantAxes(sv);
+      // Extract unique coupled (base, top) pairs from size_variants. These
+      // are the only valid combinations when the design-editor product sheet
+      // has locked base × top together (e.g. Praia da Granja: Walnut ↔ Pall
+      // Stone, Black Pepper Oak ↔ Nero Marquina). Base and Top can never be
+      // chosen independently for such picks.
+      const pairSet = new Map<string, { base: string; top: string }>();
+      for (const v of sv) {
+        const b = (v?.base ?? "").trim();
+        const t = (v?.top ?? "").trim();
+        if (b && t) {
+          const key = `${b.toLowerCase()}||${t.toLowerCase()}`;
+          if (!pairSet.has(key)) pairSet.set(key, { base: b, top: t });
+        }
+      }
       setPickAxes({
         baseOptions: axes.baseOptions || [],
         topOptions: axes.topOptions || [],
         baseAxisLabel: pickRow?.base_axis_label ?? null,
         topAxisLabel: pickRow?.top_axis_label ?? null,
+        pairs: Array.from(pairSet.values()),
       });
 
       setLoading(false);
@@ -247,6 +263,51 @@ export function PickAssetDrawer({ pickId, title }: Props) {
 
     return { fabricSwatches: fab, baseSwatches: base, topSwatches: top, splitByClassifier };
   }, [swatches, pickAxes.baseOptions, pickAxes.topOptions]);
+
+  // Build coupled (base, top) combinations from the pick's size_variants,
+  // resolving each side to the matching swatch by fuzzy-normalized name.
+  // When ≥2 coupled pairs exist AND both axes are populated, the drawer
+  // switches from independent Base + Top pickers to a single "Finish
+  // Combinations" strip so the user can only pick valid pairs.
+  const combinations = useMemo(() => {
+    if (!pickAxes.pairs.length) return [];
+    const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+    const findSwatch = (label: string): Swatch | null => {
+      const target = norm(label);
+      if (!target) return null;
+      let best: { swatch: Swatch; score: number } | null = null;
+      for (const s of swatches) {
+        const n = norm(s.name);
+        if (!n) continue;
+        let score = 0;
+        if (n === target) score = 100;
+        else if (n.includes(target) || target.includes(n)) score = 60 + Math.min(n.length, target.length);
+        else {
+          const tw = target.split(" ").filter(Boolean);
+          const nw = new Set(n.split(" "));
+          const overlap = tw.filter((w) => nw.has(w)).length;
+          if (overlap >= 2) score = 20 + overlap;
+        }
+        if (score > 0 && (!best || score > best.score)) best = { swatch: s, score };
+      }
+      return best?.swatch ?? null;
+    };
+    const out: { base: Swatch; top: Swatch; label: string }[] = [];
+    const seen = new Set<string>();
+    for (const p of pickAxes.pairs) {
+      const b = findSwatch(p.base);
+      const t = findSwatch(p.top);
+      if (!b || !t) continue;
+      const key = `${b.fabric_id}||${t.fabric_id}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      out.push({ base: b, top: t, label: `${b.name} · ${t.name}` });
+    }
+    return out;
+  }, [pickAxes.pairs, swatches]);
+
+  const useCoupled =
+    combinations.length >= 2 && !!pickAxes.baseAxisLabel && !!pickAxes.topAxisLabel;
 
   const hasGlb = !!glbUrl;
   const hasSwatches = swatches.length > 0;
@@ -397,21 +458,92 @@ export function PickAssetDrawer({ pickId, title }: Props) {
       )}
       {hasSwatches && (
         <div className="space-y-2">
-          {renderGroup(
-            splitByClassifier
-              ? "Base (wood · metal)"
-              : (pickAxes.baseAxisLabel && formatVariantAxisLabel(pickAxes.baseAxisLabel)) || "Base (wood · metal)",
-            baseSwatches,
-            selectedBaseId,
-            setSelectedBaseId,
-          )}
-          {renderGroup(
-            splitByClassifier
-              ? "Top (stone · marble · glass)"
-              : (pickAxes.topAxisLabel && formatVariantAxisLabel(pickAxes.topAxisLabel)) || "Top (stone · marble · glass)",
-            topSwatches,
-            selectedTopId,
-            setSelectedTopId,
+          {useCoupled ? (
+            <div>
+              <div className="mb-1 flex items-center justify-between gap-2">
+                <span className="font-display text-[9px] uppercase tracking-widest text-muted-foreground">
+                  Finish Combinations ({combinations.length})
+                </span>
+                {(selectedBaseId || selectedTopId) && (
+                  <button
+                    type="button"
+                    onClick={() => { setSelectedBaseId(null); setSelectedTopId(null); }}
+                    className="font-body text-[9px] uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    Reset
+                  </button>
+                )}
+              </div>
+              <div className="flex gap-1.5 overflow-x-auto pb-1 -mx-0.5 px-0.5 scrollbar-none">
+                {combinations.map((c) => {
+                  const isSelected =
+                    c.base.fabric_id === selectedBaseId && c.top.fabric_id === selectedTopId;
+                  return (
+                    <button
+                      type="button"
+                      key={`${c.base.fabric_id}-${c.top.fabric_id}`}
+                      onClick={() => {
+                        if (isSelected) {
+                          setSelectedBaseId(null);
+                          setSelectedTopId(null);
+                        } else {
+                          setSelectedBaseId(c.base.fabric_id);
+                          setSelectedTopId(c.top.fabric_id);
+                        }
+                      }}
+                      className="shrink-0 w-24 flex flex-col items-center gap-0.5 group focus:outline-none"
+                      title={c.label}
+                      aria-pressed={isSelected}
+                    >
+                      <div
+                        className={`flex h-11 w-24 overflow-hidden rounded border transition-all ${
+                          isSelected
+                            ? "border-primary ring-2 ring-primary/40"
+                            : "border-border/60 group-hover:border-foreground/40"
+                        }`}
+                      >
+                        {c.base.image_url ? (
+                          <img src={c.base.image_url} alt={c.base.name} loading="lazy" className="h-full w-1/2 object-cover bg-muted" />
+                        ) : (
+                          <div className="h-full w-1/2 bg-muted" />
+                        )}
+                        {c.top.image_url ? (
+                          <img src={c.top.image_url} alt={c.top.name} loading="lazy" className="h-full w-1/2 object-cover bg-muted" />
+                        ) : (
+                          <div className="h-full w-1/2 bg-muted" />
+                        )}
+                      </div>
+                      <span
+                        className={`w-24 truncate text-center font-body text-[8px] leading-tight ${
+                          isSelected ? "text-foreground" : "text-muted-foreground"
+                        }`}
+                      >
+                        {c.label}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ) : (
+            <>
+              {renderGroup(
+                splitByClassifier
+                  ? "Base (wood · metal)"
+                  : (pickAxes.baseAxisLabel && formatVariantAxisLabel(pickAxes.baseAxisLabel)) || "Base (wood · metal)",
+                baseSwatches,
+                selectedBaseId,
+                setSelectedBaseId,
+              )}
+              {renderGroup(
+                splitByClassifier
+                  ? "Top (stone · marble · glass)"
+                  : (pickAxes.topAxisLabel && formatVariantAxisLabel(pickAxes.topAxisLabel)) || "Top (stone · marble · glass)",
+                topSwatches,
+                selectedTopId,
+                setSelectedTopId,
+              )}
+            </>
           )}
           {renderGroup("Fabrics", fabricSwatches, selectedFabricId, setSelectedFabricId)}
         </div>
