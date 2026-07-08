@@ -282,12 +282,20 @@ const TradeBoards = () => {
                 className="border border-border rounded-lg p-5 hover:border-foreground/20 transition-colors cursor-pointer group"
                 onClick={() => navigate(`/trade/boards/${board.id}`)}
               >
-                <div className="flex items-start justify-between mb-3">
-                  <div>
+                <div className="flex items-start justify-between mb-3 gap-2">
+                  <div className="min-w-0">
                     <h3 className="font-display text-base text-foreground group-hover:underline underline-offset-4">{board.title}</h3>
                     {board.client_name && <p className="font-body text-xs text-muted-foreground mt-0.5">{board.client_name}</p>}
                   </div>
-                  <Badge variant="secondary" className={statusColors[board.status] || ""}>{board.status}</Badge>
+                  <div className="flex flex-col items-end gap-1 shrink-0">
+                    <Badge variant="secondary" className={statusColors[board.status] || ""}>{board.status}</Badge>
+                    {board.source === "concierge" && (
+                      <span className="inline-flex items-center gap-1 rounded px-1.5 py-0.5 border border-dashed border-foreground/30 font-body text-[9px] uppercase tracking-[0.1em] text-muted-foreground" title="Auto-saved from an AI Concierge session">
+                        <Sparkles className="h-2.5 w-2.5" />
+                        AI Concierge
+                      </span>
+                    )}
+                  </div>
                 </div>
                 {board.project_name && (
                   <button
