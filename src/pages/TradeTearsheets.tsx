@@ -448,6 +448,15 @@ export default function TradeTearsheets() {
       if (chosenFinishes.wood) noteLines.push(`Base / Wood: ${chosenFinishes.wood}`);
       if (chosenFinishes.fabric) noteLines.push(`Fabric: ${chosenFinishes.fabric}`);
       const notes = noteLines.length ? noteLines.join("\n") : null;
+      const insertPayload: any = {
+        board_id: boardId,
+        product_id: tradeProductId,
+        sort_order: count ?? 0,
+        notes,
+        variant_label: chosenFinishes.variant || null,
+        fabric_label: chosenFinishes.fabric || null,
+        wood_label: chosenFinishes.wood || null,
+      };
 
       // Next sort_order = current item count on the board.
       const { count } = await supabase
@@ -457,7 +466,7 @@ export default function TradeTearsheets() {
 
       const { error } = await supabase
         .from("client_board_items")
-        .insert({ board_id: boardId, product_id: tradeProductId, sort_order: count ?? 0, notes });
+        .insert(insertPayload);
 
       if (error) {
         toast({ title: "Couldn't add to board", description: error.message, variant: "destructive" });
