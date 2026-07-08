@@ -191,7 +191,7 @@ export function PickAssetDrawer({ pickId, title }: Props) {
     };
   }, [pickId]);
 
-  const { fabricSwatches, baseSwatches, topSwatches } = useMemo(() => {
+  const { fabricSwatches, baseSwatches, topSwatches, splitByClassifier } = useMemo(() => {
     const fab: Swatch[] = [];
     const nonFab: Swatch[] = [];
     for (const s of swatches) {
@@ -218,21 +218,34 @@ export function PickAssetDrawer({ pickId, title }: Props) {
       const baseMatched = baseFilter ? remaining.filter((s) => baseFilter(s.name)) : [];
       const baseIds = new Set(baseMatched.map((s) => s.fabric_id));
       const orphans = remaining.filter((s) => !baseIds.has(s.fabric_id));
-      // Orphans fall back to their category classification so nothing is
-      // silently dropped and stones/marbles don't land in the base group.
       const orphanTop = orphans.filter((s) => classifySwatch(s) === "top");
       const orphanBase = orphans.filter((s) => classifySwatch(s) !== "top");
       top = [...topMatched, ...orphanTop];
       base = [...baseMatched, ...orphanBase];
     } else {
-      // No axis definition → classify purely by category / name.
       for (const s of nonFab) {
         if (classifySwatch(s) === "top") top.push(s);
         else base.push(s);
       }
     }
 
-    return { fabricSwatches: fab, baseSwatches: base, topSwatches: top };
+    // Safety net: even when the DB says the product has only one axis, the
+    // swatch strip can still contain both base-family (wood/metal) and
+    // top-family (stone/marble/glass/ceramic) materials — this is common on
+    // dual-material tables like Praia da Granja (walnut legs + stone top) or
+    // Madison Avenue (brass column + onyx base). Rescue any top-family
+    // swatches that were pulled into the base group by the axis filter so
+    // the drawer's groups always match the GLB material roles.
+    const rescuedTops = base.filter((s) => classifySwatch(s) === "top");
+    if (rescuedTops.length && top.length === 0) {
+      const rescueIds = new Set(rescuedTops.map((s) => s.fabric_id));
+      base = base.filter((s) => !rescueIds.has(s.fabric_id));
+      top = rescuedTops;
+    }
+
+    const splitByClassifier = rescuedTops.length > 0 && !topFilter;
+
+    return { fabricSwatches: fab, baseSwatches: base, topSwatches: top, splitByClassifier };
   }, [swatches, pickAxes.baseOptions, pickAxes.topOptions]);
 
   const hasGlb = !!glbUrl;
@@ -385,13 +398,17 @@ export function PickAssetDrawer({ pickId, title }: Props) {
       {hasSwatches && (
         <div className="space-y-2">
           {renderGroup(
-            (pickAxes.baseAxisLabel && formatVariantAxisLabel(pickAxes.baseAxisLabel)) || "Base (wood · metal)",
+            splitByClassifier
+              ? "Base (wood · metal)"
+              : (pickAxes.baseAxisLabel && formatVariantAxisLabel(pickAxes.baseAxisLabel)) || "Base (wood · metal)",
             baseSwatches,
             selectedBaseId,
             setSelectedBaseId,
           )}
           {renderGroup(
-            (pickAxes.topAxisLabel && formatVariantAxisLabel(pickAxes.topAxisLabel)) || "Top (stone · marble · glass)",
+            splitByClassifier
+              ? "Top (stone · marble · glass)"
+              : (pickAxes.topAxisLabel && formatVariantAxisLabel(pickAxes.topAxisLabel)) || "Top (stone · marble · glass)",
             topSwatches,
             selectedTopId,
             setSelectedTopId,
