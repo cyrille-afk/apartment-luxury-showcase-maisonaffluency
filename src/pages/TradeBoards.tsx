@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import ClientPicker, { type PickedClient } from "@/components/trade/ClientPicker";
 import {
   Dialog,
   DialogContent,
