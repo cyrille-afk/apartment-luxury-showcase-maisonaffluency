@@ -12,7 +12,7 @@ import { HotspotImageBadge } from "@/components/trade/HotspotImageBadge";
 import { buildSwapPrompt, buildSuggestOneMorePrompt, buildCritiqueEditsPrompt, sendConciergePrefill, type SwapPromptItem } from "@/lib/conciergePrefill";
 import { RequirementsBadge } from "@/components/trade/concierge/RequirementsBadge";
 import { validateTearsheetEdits, realignUnlocked, type ValidationVerdict, type RealignmentDelta } from "@/lib/tearsheetSyncClient";
-import { getConciergeSession } from "@/hooks/useConciergeSession";
+import { getConciergeSession, updateConciergeSession, useConciergeSession } from "@/hooks/useConciergeSession";
 import { ValidationBanner, RowVerdictPill } from "@/components/trade/concierge/ValidationSummary";
 import { RealignmentDiffPanel, type AppliedRealignment } from "@/components/trade/concierge/RealignmentDiffPanel";
 import { TearsheetInsightsSidebar } from "@/components/trade/concierge/TearsheetInsightsSidebar";
@@ -117,6 +117,20 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
       : proposal.args.board_title || "New tearsheet";
   const [title, setTitle] = useState(initialTitle);
   const [editingTitle, setEditingTitle] = useState(false);
+
+  // Project / client-folder name for the concierge session. Rendered as an
+  // inline input directly in the card so the architect can name the project
+  // without typing a chat message. Persisted to the shared concierge session
+  // so every subsequent tearsheet/Add-to-Project in this chat reuses it.
+  const { session: conciergeSession } = useConciergeSession();
+  const projectName = conciergeSession?.projectName ?? "";
+  const [projectDraft, setProjectDraft] = useState<string>(projectName);
+  useEffect(() => { setProjectDraft(projectName); }, [projectName]);
+  const commitProjectName = (raw: string) => {
+    const trimmed = raw.trim();
+    if (trimmed === (conciergeSession?.projectName ?? "")) return;
+    updateConciergeSession({ projectName: trimmed || null });
+  };
 
   // Selected board for append mode (controlled — user can override the AI's pick).
   const [selectedBoardId, setSelectedBoardId] = useState<string | null>(
@@ -604,6 +618,48 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
           </div>
         )}
       </div>
+
+      {/* Project / client folder — inline input so the architect can name the
+          project without typing a chat message. Reused across every tearsheet
+          in this concierge session. */}
+      {status === "pending" && (
+        <div className="mb-2.5 flex items-center gap-2 rounded-md border border-border/60 bg-background/60 px-2 py-1.5">
+          <label
+            htmlFor={`concierge-project-${proposal.tool_call_id}`}
+            className="font-body text-[10px] uppercase tracking-widest text-muted-foreground shrink-0"
+          >
+            Save to project
+          </label>
+          <input
+            id={`concierge-project-${proposal.tool_call_id}`}
+            type="text"
+            value={projectDraft}
+            onChange={(e) => setProjectDraft(e.target.value)}
+            onBlur={(e) => commitProjectName(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                commitProjectName((e.target as HTMLInputElement).value);
+                (e.target as HTMLInputElement).blur();
+              }
+            }}
+            placeholder="e.g. Apt 4B · Malibu Beach House"
+            maxLength={80}
+            className="flex-1 bg-transparent font-body text-[11px] text-foreground placeholder:text-muted-foreground/70 focus:outline-none"
+          />
+          {projectDraft && (
+            <button
+              type="button"
+              onClick={() => { setProjectDraft(""); commitProjectName(""); }}
+              className="font-body text-[10px] uppercase tracking-widest text-muted-foreground hover:text-foreground shrink-0"
+            >
+              Skip
+            </button>
+          )}
+        </div>
+      )}
+
+
 
       {proposal.args.note && (
         <p className="font-body text-xs text-muted-foreground italic mb-2.5">"{proposal.args.note}"</p>
