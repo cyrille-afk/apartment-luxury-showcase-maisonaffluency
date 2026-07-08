@@ -1086,11 +1086,12 @@ export function BriefBuilder({
               if (!t) return null;
               const parsed = parseBrief(t);
               const prose = extractProseFields(t);
+              const clean = (s?: string) => (s && !s.trim().startsWith("[") ? s.trim() : "");
               const preview = {
-                Zone: parsed.values.block1.zone || prose.zone || "—",
-                "Max Footprint": parsed.values.block2.maxFootprint || prose.maxFootprint || "—",
-                Typology: parsed.values.block2.typology || prose.typology || "—",
-                Vibe: parsed.values.block3.vibe || prose.vibe || "—",
+                Zone: clean(parsed.values.block1.zone) || clean(prose.zone) || "—",
+                "Max Footprint": clean(parsed.values.block2.maxFootprint) || clean(prose.maxFootprint) || "—",
+                Typology: clean(parsed.values.block2.typology) || clean(prose.typology) || "—",
+                Vibe: clean(parsed.values.block3.vibe) || clean(prose.vibe) || "—",
               };
               const anyDetected = Object.values(preview).some((v) => v && v !== "—");
               return (
