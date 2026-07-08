@@ -355,6 +355,13 @@ export default function TradeTearsheets() {
         const key = `${parentBrand.toLowerCase()}::${p.title.toLowerCase()}`;
         if (seen.has(key)) return;
         seen.set(key, true);
+        // Derive a display dimension from size_variants[].label when the
+        // dedicated `dimensions` column is empty (many curator picks store
+        // dimensions only inside the variant matrix).
+        const variantList = (p.size_variants as any[]) || [];
+        const firstVariantDim = variantList
+          .map((v: any) => String(v?.label || "").trim())
+          .find((s: string) => /\d/.test(s) && /(cm|mm|in|["″])/i.test(s)) || null;
         merged.push({
           id: p.id,
           product_name: p.title,
@@ -363,15 +370,15 @@ export default function TradeTearsheets() {
           category: normalizeCategory(p.category, p.subcategory) || null,
           subcategory: normalizeSubcategory(p.subcategory) || null,
           image_url: p.image_url,
-          dimensions: p.dimensions,
+          dimensions: p.dimensions || firstVariantDim,
           materials: p.materials,
           description: p.description,
-          lead_time: null,
+          lead_time: p.lead_time || null,
           trade_price_cents: p.trade_price_cents || null,
           currency: p.currency || "EUR",
           source: "curator",
           source_pick_id: p.id,
-          size_variants: (p.size_variants as any[]) || null,
+          size_variants: variantList,
         });
       });
 
