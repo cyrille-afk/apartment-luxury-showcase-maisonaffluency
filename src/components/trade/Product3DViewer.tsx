@@ -136,6 +136,7 @@ interface DebugInfo {
   all: string[];
   fabric: LayerDebug;
   base: LayerDebug;
+  top: LayerDebug;
 }
 
 const FABRIC_KEYWORDS = [
@@ -155,13 +156,20 @@ const BASE_KEYWORDS = [
   "leg",
   "base",
   "structure",
-  "marble",
-  "stone",
   "metal",
   "brass",
   "steel",
   "bronze",
-  "top", // table tops, cabinet tops
+];
+
+const TOP_KEYWORDS = [
+  "top",
+  "tabletop",
+  "surface",
+  "marble",
+  "stone",
+  "glass",
+  "onyx",
 ];
 
 
