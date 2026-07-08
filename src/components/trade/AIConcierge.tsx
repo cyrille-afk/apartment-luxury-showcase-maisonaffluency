@@ -1269,7 +1269,7 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
       kind: a.kind,
       previewUrl: a.previewUrl,
     }));
-    const displayText = text;
+    const displayText = opts?.displayText ?? text;
     const userItem: TimelineItem = {
       kind: "msg",
       role: "user",
