@@ -195,6 +195,11 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
   // After commit, holds the board's existing project_id (null = no project assigned yet).
   const [existingProjectId, setExistingProjectId] = useState<string | null>(null);
   const [projectStepDone, setProjectStepDone] = useState(false);
+  // "Project Deck" pitch state — surfaces once the auto-grouped project has
+  // 3+ tearsheets ("I see you have 4 items in Malibu Beach House …").
+  const [projectBoardCount, setProjectBoardCount] = useState<number | null>(null);
+  const [projectIdForDeck, setProjectIdForDeck] = useState<string | null>(null);
+  const [deckBuilding, setDeckBuilding] = useState(false);
   const navigate = useNavigate();
 
   const isAppend = mode === "append";
