@@ -1,5 +1,6 @@
 import React, { useMemo } from "react";
 import { Helmet } from "react-helmet-async";
+import { Navigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronUp } from "lucide-react";
 import { useState, useEffect } from "react";
@@ -7,6 +8,8 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import Collectibles, { collectibleDesigners } from "@/components/Collectibles";
 import CollectiblesHoverHero from "@/components/CollectiblesHoverHero";
+import { useAuth } from "@/hooks/useAuth";
+import { collectibleGateRedirect } from "@/lib/collectibleGate";
 
 const CANONICAL = "https://www.maisonaffluency.com/collectibles";
 const OG_IMAGE =
@@ -42,6 +45,10 @@ function BackToTopButton() {
 }
 
 const PublicCollectibles = () => {
+  // Trade-only visibility while Collectible Design is in soft launch.
+  const { isTradeUser, loading } = useAuth();
+  const location = useLocation();
+
   const { title, description, itemListLd, collectionLd } = useMemo(() => {
     const featured = collectibleDesigners
       .filter((d) => d.id && d.curatorPicks?.[0]?.image)
@@ -81,6 +88,12 @@ const PublicCollectibles = () => {
 
     return { title: titleStr, description: descStr, itemListLd: itemList, collectionLd: collection };
   }, []);
+
+  if (loading) return null;
+  if (!isTradeUser) {
+    return <Navigate to={collectibleGateRedirect(location.pathname + location.search)} replace />;
+  }
+
 
   return (
     <>

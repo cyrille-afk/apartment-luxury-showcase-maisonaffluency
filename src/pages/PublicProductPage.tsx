@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate, Link, useLocation } from "react-router-dom";
+import { useParams, useNavigate, Link, useLocation, Navigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { Heart, Scale, ChevronLeft, ChevronRight, ChevronDown, ArrowLeft } from "lucide-react";
 import ShareMenu from "@/components/ShareMenu";
@@ -48,6 +48,8 @@ import {
   shouldSuppressSingleAsFinish,
   makeSwatchAxisFilter,
 } from "@/lib/finishDuplication";
+import { useAuth } from "@/hooks/useAuth";
+import { isCollectibleSlug, collectibleGateRedirect } from "@/lib/collectibleGate";
 
 
 /* ------------------------------------------------------------------ */
@@ -925,6 +927,7 @@ const PublicProductPage: React.FC = () => {
   const { slug: designerSlug, productSlug } = useParams<{ slug: string; productSlug: string }>();
   const navigate = useNavigate();
   const location = useLocation();
+  const { isTradeUser, loading: authLoading } = useAuth();
   const stateFrom = (location.state as { from?: string } | null)?.from;
   const isGridUrl = (p?: string | null) => !!p && /[?&](category|subcategory)=/.test(p);
   const storedFrom = typeof window !== "undefined" ? sessionStorage.getItem("product_from_path") : null;
@@ -989,6 +992,11 @@ const PublicProductPage: React.FC = () => {
     () => buildProductFinishMap((data?.product as any)?.variant_image_map),
     [data]
   );
+
+  // Trade-only visibility for individual collectible product pages.
+  if (isCollectibleSlug(designerSlug) && !authLoading && !isTradeUser) {
+    return <Navigate to={collectibleGateRedirect(location.pathname + location.search)} replace />;
+  }
 
   if (isLoading) {
     return (

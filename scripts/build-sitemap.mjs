@@ -42,7 +42,7 @@ const SUPABASE_KEY =
 const STATIC_ROUTES = [
   { loc: "/", changefreq: "weekly", priority: "1.0" },
   { loc: "/designers", changefreq: "weekly", priority: "0.9" },
-  { loc: "/collectibles", changefreq: "monthly", priority: "0.8" },
+  // /collectibles is trade-gated during soft launch — omit from sitemap.
   { loc: "/gallery", changefreq: "monthly", priority: "0.8" },
   { loc: "/journal", changefreq: "weekly", priority: "0.9" },
   { loc: "/contact", changefreq: "monthly", priority: "0.7" },
