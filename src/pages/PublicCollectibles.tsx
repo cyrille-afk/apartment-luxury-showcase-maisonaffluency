@@ -89,6 +89,12 @@ const PublicCollectibles = () => {
     return { title: titleStr, description: descStr, itemListLd: itemList, collectionLd: collection };
   }, []);
 
+  if (loading) return null;
+  if (!isTradeUser) {
+    return <Navigate to={collectibleGateRedirect(location.pathname + location.search)} replace />;
+  }
+
+
   return (
     <>
       <Helmet>
