@@ -18,6 +18,7 @@ import { RealignmentDiffPanel, type AppliedRealignment } from "@/components/trad
 import { TearsheetInsightsSidebar } from "@/components/trade/concierge/TearsheetInsightsSidebar";
 import { PickAssetDrawer } from "@/components/trade/concierge/PickAssetDrawer";
 import { Box } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 
 
 type Status = "pending" | "committing" | "approved" | "discarded";
