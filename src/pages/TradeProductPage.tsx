@@ -1637,6 +1637,7 @@ const TradeProductPage: React.FC = () => {
                       poster={product.image_url}
                       fabricTextureUrl={selectedFabric?.image_url || previewFabricImg || null}
                       baseTextureUrl={selectedWoodPrice?.image_url || previewWoodImg || null}
+                      topTextureUrl={selectedTopSwatch?.image_url || null}
                       materialRoles={resolvedRoles || undefined}
                       autoOpen
                     />
