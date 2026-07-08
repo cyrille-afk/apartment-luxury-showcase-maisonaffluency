@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { ChevronDown, ChevronRight, ClipboardPaste, X } from "lucide-react";
+import { Bookmark, BookmarkPlus, ChevronDown, ChevronRight, ClipboardPaste, Trash2, X } from "lucide-react";
 import { BrandPicker } from "@/components/trade/concierge/BrandPicker";
 import { updateConciergeSession } from "@/hooks/useConciergeSession";
 import brandCategoriesRaw from "@/data/brandCategories.json";
