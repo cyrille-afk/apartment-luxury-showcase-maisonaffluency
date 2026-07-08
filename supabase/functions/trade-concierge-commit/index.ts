@@ -767,10 +767,8 @@ serve(async (req) => {
         wood_label: typeof f.wood_label === "string" && f.wood_label.trim() ? f.wood_label.trim().slice(0, 200) : null,
       });
     }
-    const finishForResolved = (r: { tradeProductId: string; sourcePickId?: string | null }) => {
-      // Try the source pick_id first (what the LLM passed in), then fall back
-      // to the resolved trade_product id so callers can key either way.
-      if (r.sourcePickId && finishByPickId.has(r.sourcePickId)) return finishByPickId.get(r.sourcePickId)!;
+    const finishForResolved = (r: { tradeProductId: string; pickId?: string | null }) => {
+      if (r.pickId && finishByPickId.has(r.pickId)) return finishByPickId.get(r.pickId)!;
       if (finishByPickId.has(r.tradeProductId)) return finishByPickId.get(r.tradeProductId)!;
       return { variant_label: null, fabric_label: null, wood_label: null };
     };
