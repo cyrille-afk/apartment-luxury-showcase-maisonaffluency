@@ -284,13 +284,21 @@ const TradeBoards = () => {
             <p className="font-body text-sm text-muted-foreground mb-2">
               Your AI Concierge hasn't built a folder yet
             </p>
-            <p className="font-body text-xs text-muted-foreground/80 mb-5 max-w-xs mx-auto">
-              Open the concierge on any product page to generate a complete tearsheet and save it here automatically.
+            <p className="font-body text-xs text-muted-foreground/80 mb-5 max-w-sm mx-auto">
+              Ask the concierge for a scheme — e.g. "Sofa, armchairs, coffee &amp; side table, and floor lamp by Man of Parts for a 5×6 m GCB living room." It builds the tearsheet and saves it here automatically.
             </p>
-            <Button onClick={() => navigate('/trade/showroom')} className="gap-2">
-              <Sparkles className="h-4 w-4" /> Generate First Tearsheet
+            <Button
+              onClick={() => {
+                const btn = document.querySelector<HTMLButtonElement>('[aria-label="Open AI Concierge"]');
+                if (btn) btn.click();
+                else navigate('/trade/showroom');
+              }}
+              className="gap-2"
+            >
+              <Sparkles className="h-4 w-4" /> Ask the AI Concierge
             </Button>
           </div>
+
         ) : visibleBoards.length === 0 ? (
           <div className="text-center py-20">
             <p className="font-body text-sm text-muted-foreground mb-4">
