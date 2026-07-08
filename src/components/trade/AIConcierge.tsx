@@ -1883,6 +1883,13 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
     }
   }, [input, attachments, streaming, timeline, stage, tone, lang, name, openLatestQuote, navigate, clearStallTimer, pushRetry, user]);
 
+  // Keep a ref to the latest `send` so the concierge:stage handler (which
+  // registers once on mount) can auto-send prefills against fresh state
+  // instead of the stale closure captured at mount time.
+  const sendRef = useRef(send);
+  useEffect(() => { sendRef.current = send; }, [send]);
+
+
   const handleProposalResolved = (
     proposalIndex: number,
     outcome: "approved" | "discarded",
