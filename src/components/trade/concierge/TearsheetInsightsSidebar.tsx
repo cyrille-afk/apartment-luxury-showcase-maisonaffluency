@@ -449,3 +449,20 @@ function DecisionButtons({
     </div>
   );
 }
+
+function Thumb({ src, alt }: { src: string | null; alt: string }) {
+  if (!src) {
+    return (
+      <div className="h-10 w-10 shrink-0 rounded border border-border bg-muted" aria-hidden />
+    );
+  }
+  return (
+    <img
+      src={src}
+      alt={alt}
+      loading="lazy"
+      className="h-10 w-10 shrink-0 rounded border border-border object-cover bg-muted"
+    />
+  );
+}
+
