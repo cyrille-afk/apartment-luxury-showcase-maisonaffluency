@@ -736,7 +736,9 @@ export function PickAssetDrawer({ pickId, title }: Props) {
                     <dd className="break-words">{fabricLabel}</dd>
                   </>
                 )}
-                <dt className="text-muted-foreground">Trade Price</dt>
+                <dt className="text-muted-foreground">
+                  Trade Price{tradeMeta.currency ? ` (${tradeMeta.currency})` : ""}
+                </dt>
                 <dd>
                   {livePriceCents
                     ? `${isFromPrice ? "From " : ""}${
@@ -895,6 +897,10 @@ export function PickAssetDrawer({ pickId, title }: Props) {
                 if (selectedTopAxis) p.set("top", selectedTopAxis);
                 if (selectedDualSize) p.set("size", selectedDualSize);
                 if (fabricSwatch?.name) p.set("fabric", fabricSwatch.name);
+                // Preserve the pick's base currency so the product page opens
+                // in the same currency the drawer displayed — never the user's
+                // auto-defaulted display currency.
+                if (tradeMeta.currency) p.set("ccy", tradeMeta.currency);
                 const qs = p.toString();
                 return `/trade/products/${tradeMeta.tradeProductId}${qs ? `?${qs}` : ""}`;
               })()}
