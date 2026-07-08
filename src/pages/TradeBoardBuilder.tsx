@@ -43,6 +43,7 @@ import { rememberActiveQuoteId } from "@/lib/activeProjectId";
 interface Board {
   id: string;
   title: string;
+  client_id: string | null;
   client_name: string;
   share_token?: string;
   status: string;
