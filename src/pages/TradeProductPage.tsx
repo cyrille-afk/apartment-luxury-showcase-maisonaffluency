@@ -2020,6 +2020,7 @@ const TradeProductPage: React.FC = () => {
                   onFinishesMissingImagesChange={setFinishesMissingImages}
                   onFabricChange={setSelectedFabric}
                   onWoodFinishPricingChange={setSelectedWoodPrice}
+                  onTopFinishSwatchChange={setSelectedTopSwatch}
                   onSwatchImagesChange={(indices, meta) => {
                     if (!indices || indices.length === 0) {
                       if (meta?.committed) {
