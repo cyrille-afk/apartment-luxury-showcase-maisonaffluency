@@ -222,10 +222,45 @@ const TradeBoards = () => {
         <TradeBreadcrumb current="Boards" currentProjectTab="boards" />
         <ActiveFilterChips className="mb-4" confirmClearAll />
 
+        {/* Source filter — separates AI Concierge–built boards from manually created ones */}
+        <div className="mb-4 flex items-center gap-1 border-b border-border">
+          {([
+            { key: "all", label: "All folders" },
+            { key: "concierge", label: "Built by my AI Concierge", icon: true },
+            { key: "manual", label: "Manually created" },
+          ] as const).map((tab) => {
+            const active = sourceFilter === tab.key;
+            const count = tab.key === "all"
+              ? boards.length
+              : boards.filter((b) => (b.source ?? "manual") === tab.key).length;
+            return (
+              <button
+                key={tab.key}
+                type="button"
+                onClick={() => setSourceFilter(tab.key)}
+                className={`inline-flex items-center gap-1.5 px-3 py-2 -mb-px border-b-2 font-body text-[11px] uppercase tracking-[0.14em] transition-colors ${
+                  active
+                    ? "border-foreground text-foreground"
+                    : "border-transparent text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {tab.icon && <Sparkles className="h-3 w-3" />}
+                {tab.label}
+                <span className={`ml-1 rounded px-1 py-0.5 text-[9px] tabular-nums ${active ? "bg-foreground text-background" : "bg-muted text-muted-foreground"}`}>
+                  {count}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
         {(() => {
-          const visibleBoards = designerFilter && matchingBoardIds
+          const designerFiltered = designerFilter && matchingBoardIds
             ? boards.filter((b) => matchingBoardIds.has(b.id))
             : boards;
+          const visibleBoards = sourceFilter === "all"
+            ? designerFiltered
+            : designerFiltered.filter((b) => (b.source ?? "manual") === sourceFilter);
           return loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {[1,2,3].map(i => <div key={i} className="h-40 bg-muted/50 rounded-lg animate-pulse" />)}
