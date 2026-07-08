@@ -37,6 +37,43 @@ interface TearsheetProduct {
   trade_price_cents: number | null;
   currency: string;
   source: "curator" | "trade";
+  size_variants?: { label?: string; base?: string; top?: string; price_cents?: number }[] | null;
+}
+
+const normalizeFinishText = (value: string | null | undefined) =>
+  String(value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+
+const splitFinishTokens = (...values: Array<string | null | undefined>) =>
+  values
+    .flatMap((value) => String(value || "").split(/\s+[·•]\s+|\s+\/\s+|\s*,\s*/))
+    .map(normalizeFinishText)
+    .filter(Boolean);
+
+function resolveSnapshotVariantPrice(
+  variants: TearsheetProduct["size_variants"],
+  finishes: { variant: string | null; wood: string | null; fabric: string | null },
+): number | null {
+  if (!Array.isArray(variants) || variants.length === 0) return null;
+  const wanted = splitFinishTokens(finishes.variant, finishes.wood, finishes.fabric);
+  if (wanted.length === 0) return null;
+
+  let best: { cents: number; score: number } | null = null;
+  for (const v of variants) {
+    const cents = Number(v?.price_cents);
+    if (!(cents > 0)) continue;
+    const fields = [v?.label, v?.base, v?.top].map(normalizeFinishText).filter(Boolean);
+    const score = wanted.reduce(
+      (sum, token) => sum + (fields.some((field) => field === token || field.includes(token) || token.includes(field)) ? 1 : 0),
+      0,
+    );
+    if (score > 0 && (!best || score > best.score)) best = { cents, score };
+  }
+  return best?.cents ?? null;
 }
 
 export default function TradeTearsheets() {
@@ -252,11 +289,11 @@ export default function TradeTearsheets() {
       const [curatorRes, tradeRes, designerRes] = await Promise.all([
         supabase
           .from("designer_curator_picks")
-          .select("id, title, designer_id, category, subcategory, image_url, dimensions, materials, description, trade_price_cents, currency, designers!inner(name, founder)")
+          .select("id, title, designer_id, category, subcategory, image_url, dimensions, materials, description, trade_price_cents, currency, size_variants, designers!inner(name, founder)")
           .order("title"),
         supabase
           .from("trade_products")
-          .select("id, product_name, brand_name, category, subcategory, image_url, dimensions, materials, description, lead_time, trade_price_cents, currency")
+          .select("id, product_name, brand_name, category, subcategory, image_url, dimensions, materials, description, lead_time, trade_price_cents, currency, size_variants")
           .eq("is_active", true)
           // Note: we no longer require image_url at the query level — missing
           // hero images are backfilled from the linked curator pick below
@@ -315,6 +352,7 @@ export default function TradeTearsheets() {
           trade_price_cents: p.trade_price_cents || null,
           currency: p.currency || "EUR",
           source: "curator",
+          size_variants: (p.size_variants as any[]) || null,
         });
       });
 
@@ -340,6 +378,7 @@ export default function TradeTearsheets() {
           trade_price_cents: p.trade_price_cents || null,
           currency: p.currency || "EUR",
           source: "trade",
+          size_variants: (p.size_variants as any[]) || null,
         });
       });
 
@@ -536,6 +575,11 @@ export default function TradeTearsheets() {
     win.print();
   };
 
+  const snapshotPriceCents = useMemo(
+    () => resolveSnapshotVariantPrice(selectedProduct?.size_variants, chosenFinishes) ?? selectedProduct?.trade_price_cents ?? null,
+    [selectedProduct?.size_variants, selectedProduct?.trade_price_cents, chosenFinishes],
+  );
+
   return (
     <>
       <Helmet><title>Tearsheet Builder — Trade Portal</title></Helmet>
@@ -678,8 +722,8 @@ export default function TradeTearsheets() {
                   ["Dimensions", dimensionsDisplay],
                   ["Materials", materialsDisplay],
                   ["Lead Time", leadTimeDisplay],
-                  ["Trade Price", selectedProduct.trade_price_cents
-                    ? `${selectedProduct.currency === "USD" ? "$" : selectedProduct.currency === "GBP" ? "£" : selectedProduct.currency === "SGD" ? "S$" : "€"}${(selectedProduct.trade_price_cents / 100).toLocaleString()}`
+                  ["Trade Price", snapshotPriceCents
+                    ? `${selectedProduct.currency === "USD" ? "$" : selectedProduct.currency === "GBP" ? "£" : selectedProduct.currency === "SGD" ? "S$" : "€"}${(snapshotPriceCents / 100).toLocaleString()}`
                     : "Price Upon Request"],
                 ] as const).map(([label, val]) => (
                   <div key={label}>
