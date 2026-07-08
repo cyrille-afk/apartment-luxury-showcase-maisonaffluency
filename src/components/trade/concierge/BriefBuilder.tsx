@@ -317,6 +317,74 @@ function extractFirstField(body: string, labels: string[]): string | null {
   return null;
 }
 
+// Free-form prose extractor. Pulls zone (room + ceiling height), max footprint
+// (from "5x6m" style room dimensions), and typology (furniture terms mentioned)
+// out of ordinary sentences so pastes without "Block N —" or "###" headers
+// still fill the builder fields, not just the free-form notes area.
+function extractProseFields(text: string): { zone?: string; maxFootprint?: string; typology?: string } {
+  const out: { zone?: string; maxFootprint?: string; typology?: string } = {};
+  const src = text.replace(/\s+/g, " ");
+
+  // Zone: <room> + optional ceiling height.
+  const ROOMS = ["living", "dining", "kitchen", "bedroom", "master", "study", "library", "foyer", "entryway", "powder", "guest", "family", "media", "lounge", "office", "home office"];
+  const roomRe = new RegExp(`\\b(${ROOMS.join("|")})(?:\\s*room)?\\b`, "i");
+  const roomM = src.match(roomRe);
+  const ceilRe = /(?:(\d+(?:\.\d+)?)\s*(m|cm|mm|["'])\s*(?:high\s*)?ceiling|ceiling(?:\s*height)?(?:\s*of)?\s*(\d+(?:\.\d+)?)\s*(m|cm|mm|["']))/i;
+  const ceilM = src.match(ceilRe);
+  if (roomM || ceilM) {
+    const parts: string[] = [];
+    if (roomM) {
+      const r = roomM[1].toLowerCase();
+      parts.push(r.charAt(0).toUpperCase() + r.slice(1));
+    }
+    if (ceilM) {
+      const v = ceilM[1] || ceilM[3];
+      const u = (ceilM[2] || ceilM[4] || "m").toLowerCase();
+      parts.push(`${v}${u} ceiling`);
+    }
+    out.zone = parts.join(" — ");
+  }
+
+  // Max footprint from "AxB m" / "A × B cm" style room dimensions.
+  const dimRe = /(\d+(?:\.\d+)?)\s*[x×]\s*(\d+(?:\.\d+)?)\s*(m|cm|mm)?\b/i;
+  const dimM = src.match(dimRe);
+  if (dimM) {
+    const unit = (dimM[3] || "m").toLowerCase();
+    const toMm = (n: number) => unit === "mm" ? n : unit === "cm" ? n * 10 : n * 1000;
+    const a = toMm(parseFloat(dimM[1]));
+    const b = toMm(parseFloat(dimM[2]));
+    const max = Math.max(a, b);
+    const min = Math.min(a, b);
+    out.maxFootprint = `length ≤ ${max}mm, depth ≤ ${min}mm`;
+  }
+
+  // Typology — recognised furniture tokens (longer first so "sectional sofa"
+  // beats "sofa" / "sectional").
+  const FURN = [
+    "sectional sofa", "lounge chair", "accent chair", "dining table", "dining chair",
+    "coffee table", "side table", "bar cart", "bar stool", "floor lamp", "table lamp",
+    "home office desk", "sectional", "sofa", "armchair", "console", "credenza",
+    "sideboard", "bed", "nightstand", "dresser", "desk", "chandelier", "pendant",
+    "rug", "mirror", "bookcase", "bench", "ottoman", "stool", "cabinet", "chair",
+  ];
+  const found: string[] = [];
+  const seen = new Set<string>();
+  for (const t of FURN) {
+    const re = new RegExp(`\\b${t.replace(/\s+/g, "\\s+")}s?\\b`, "i");
+    const m = src.match(re);
+    if (!m) continue;
+    // Skip if a longer already-captured token covers this one.
+    const label = m[0].toLowerCase();
+    const key = t;
+    if (found.some((f) => f.includes(t) || t.includes(f) && f !== t)) continue;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    found.push(label);
+  }
+  if (found.length) out.typology = found.join(", ");
+
+  return out;
+}
 
 type ObjectBlock = "block1" | "block2" | "block3";
 
@@ -660,6 +728,27 @@ export function BriefBuilder({
       merged.block4 = parsed.values.block4;
       filled++;
     }
+
+    // Free-form prose extraction — pulls zone/max footprint/typology out of
+    // sentences like "The Living room is 5x6m with a 4m high ceiling.
+    // Sectional sofas, accent chairs…" so pastes without block headers still
+    // populate the builder fields (not just the free-form notes area).
+    const prose = extractProseFields(text);
+    if (prose.zone && merged.block1.zone === DEFAULT_VALUES.block1.zone) {
+      merged.block1.zone = prose.zone;
+      filled++;
+    }
+    if (prose.maxFootprint && merged.block2.maxFootprint === DEFAULT_VALUES.block2.maxFootprint) {
+      merged.block2.maxFootprint = prose.maxFootprint;
+      filled++;
+    }
+    // Typology from prose ALWAYS overrides — a fresh paste is the user's most
+    // recent intent and should replace any earlier auto-prefill.
+    if (prose.typology) {
+      if (merged.block2.typology !== prose.typology) filled++;
+      merged.block2.typology = prose.typology;
+    }
+
     // When the paste is free-form prose (no recognisable block headers),
     // parseBrief returns prefix=<the whole text>. Merge it with any existing
     // prefix rather than replacing so a previous freeform note isn't wiped.
