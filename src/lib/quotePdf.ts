@@ -245,6 +245,18 @@ export async function buildQuotePdf(args: QuotePdfArgs): Promise<jsPDF> {
   const contentW = pageW - 2 * M;
 
   // Pre-fetch logo + product/finish swatch images in parallel (best-effort)
+  // Parallel array of swatch names aligned with finishSwatchImages, so the
+  // PDF renderer can caption each tile with its finish/fabric label — matches
+  // the on-screen quote row.
+  const finishSwatchNames: string[][] = args.lines.map((l) => {
+    const swatches = (l.finishSwatches?.length
+      ? l.finishSwatches
+      : l.finishSwatchUrl
+        ? [{ imageUrl: l.finishSwatchUrl, name: l.finishSwatchLabel || null }]
+        : []
+    ).filter((s) => s?.imageUrl);
+    return swatches.slice(0, 4).map((s) => (s?.name || "").trim());
+  });
   const [logo, productImages, finishSwatchImages, fabricSwatchImages] = await Promise.all([
     fetchImageDataUrl(affluencyLogoUrl),
     Promise.all(args.lines.map((l) => l.imageUrl ? fetchImageDataUrl(l.imageUrl) : Promise.resolve(null))),
