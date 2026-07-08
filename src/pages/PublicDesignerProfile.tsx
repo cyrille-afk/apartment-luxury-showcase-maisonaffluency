@@ -327,8 +327,13 @@ const SLUG_ALIASES: Record<string, string> = {
 
 const PublicDesignerProfile = () => {
   const { slug } = useParams<{ slug: string }>();
+  const { isTradeUser, loading: authLoading } = useAuth();
   if (slug && SLUG_ALIASES[slug]) {
     return <Navigate to={`/designers/${SLUG_ALIASES[slug]}`} replace />;
+  }
+  // Trade-only visibility for individual collectible designer profiles.
+  if (isCollectibleSlug(slug) && !authLoading && !isTradeUser) {
+    return <Navigate to={collectibleGateRedirect(`/designers/${slug}`)} replace />;
   }
   const [searchParams] = useSearchParams();
   const highlightId = searchParams.get("highlight");
