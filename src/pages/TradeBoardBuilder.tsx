@@ -71,6 +71,7 @@ interface BoardItem {
     product_name: string;
     brand_name: string;
     image_url: string | null;
+    source_pick_id?: string | null;
     image_from_hotspot?: boolean;
     materials: string | null;
     dimensions: string | null;
@@ -85,6 +86,26 @@ interface Product {
   image_from_hotspot?: boolean;
   category: string;
 }
+
+type SavedPickFinishes = {
+  fabricId?: string | null;
+  baseId?: string | null;
+  topId?: string | null;
+};
+
+const readSavedPickFinishes = (pickId: string): SavedPickFinishes | null => {
+  try {
+    const raw = sessionStorage.getItem(`concierge:pick-finishes:${pickId}`);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === "object" ? parsed : null;
+  } catch {
+    return null;
+  }
+};
+
+const joinFinishLabels = (...labels: Array<string | null | undefined>) =>
+  labels.map((label) => String(label || "").trim()).filter(Boolean).join(" · ") || null;
 
 const TradeBoardBuilder = () => {
   const { id } = useParams<{ id: string }>();
@@ -147,7 +168,7 @@ const TradeBoardBuilder = () => {
       const productIds = itemsData.map((i: any) => i.product_id);
       const { data: prods } = await supabase
         .from("trade_products")
-        .select("id, product_name, brand_name, image_url, materials, dimensions")
+        .select("id, product_name, brand_name, image_url, materials, dimensions, source_pick_id")
         .in("id", productIds);
 
       // Fill missing image_url: first from the linked curator pick (the canonical
@@ -161,7 +182,46 @@ const TradeBoardBuilder = () => {
       }
 
       const prodMap = new Map(prodList.map((p: any) => [p.id, p]));
-      setItems(itemsData.map((i: any) => ({ ...i, product: prodMap.get(i.product_id) })));
+      const hydratedItems = itemsData.map((i: any) => ({ ...i, product: prodMap.get(i.product_id) })) as BoardItem[];
+
+      // Recovery for boards created before finish labels were sent to the
+      // commit function in this tab: the row has null labels, but the locked
+      // drawer still has `concierge:pick-finishes:<source_pick_id>` saved.
+      const recoverable = hydratedItems
+        .map((item) => {
+          const sourcePickId = item.product?.source_pick_id;
+          const saved = sourcePickId && !(item.variant_label || item.fabric_label || item.wood_label)
+            ? readSavedPickFinishes(sourcePickId)
+            : null;
+          return sourcePickId && saved ? { item, sourcePickId, saved } : null;
+        })
+        .filter(Boolean) as Array<{ item: BoardItem; sourcePickId: string; saved: SavedPickFinishes }>;
+
+      if (recoverable.length > 0) {
+        const swatchIds = Array.from(new Set(recoverable.flatMap(({ saved }) => [saved.fabricId, saved.baseId, saved.topId].filter(Boolean) as string[])));
+        const { data: swatches } = await supabase
+          .from("product_fabric_swatches_public")
+          .select("pick_id, fabric_id, name")
+          .in("pick_id", recoverable.map((r) => r.sourcePickId))
+          .in("fabric_id", swatchIds);
+        const nameByPickAndId = new Map<string, string>();
+        (swatches || []).forEach((s: any) => nameByPickAndId.set(`${s.pick_id}::${s.fabric_id}`, s.name));
+
+        await Promise.all(recoverable.map(async ({ item, sourcePickId, saved }) => {
+          const nameFor = (id?: string | null) => id ? nameByPickAndId.get(`${sourcePickId}::${id}`) ?? null : null;
+          const fabricLabel = nameFor(saved.fabricId);
+          const woodLabel = joinFinishLabels(nameFor(saved.baseId), nameFor(saved.topId));
+          if (!fabricLabel && !woodLabel) return;
+          item.fabric_label = fabricLabel;
+          item.wood_label = woodLabel;
+          await supabase
+            .from("client_board_items")
+            .update({ fabric_label: fabricLabel, wood_label: woodLabel } as any)
+            .eq("id", item.id);
+        }));
+      }
+
+      setItems(hydratedItems);
       setAddedIds(new Set(itemsData.map((i: any) => i.product_id)));
     } else {
       setItems([]);
