@@ -347,7 +347,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                 </div>
               </div>
               <div className="flex flex-col gap-0 pb-40">
-                {leftNavItems.map((item, index) => (
+                {visibleLeftNavItems.map((item, index) => (
                   <Fragment key={item.href}>
                     <button 
                       onClick={() => handleNavClick(item.href)}
@@ -395,7 +395,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                 <button
                   onClick={() => handleNavClick("/journal")}
                   className="font-body text-[15px] uppercase tracking-wide text-left transition-colors py-2.5 w-full flex items-center justify-between text-foreground hover:text-primary font-semibold animate-fade-in opacity-0"
-                  style={{ animationDelay: `${(leftNavItems.length + 1) * 120}ms`, animationFillMode: 'forwards' }}
+                  style={{ animationDelay: `${(visibleLeftNavItems.length + 1) * 120}ms`, animationFillMode: 'forwards' }}
                 >
                   Journal
                   <ChevronRight className="h-4 w-4" />
@@ -404,7 +404,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                 {/* Favorites & Selection */}
                 <div
                   className="mt-6 pt-4 border-t border-border/50 space-y-0 animate-fade-in opacity-0"
-                  style={{ animationDelay: `${(leftNavItems.length + 1) * 120}ms`, animationFillMode: 'forwards' }}
+                  style={{ animationDelay: `${(visibleLeftNavItems.length + 1) * 120}ms`, animationFillMode: 'forwards' }}
                 >
                   <button
                     onClick={() => { closeMobileMenu(); navigate("/favorites"); }}
@@ -441,7 +441,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                 {/* Trade Program — separated */}
                 <div 
                   className="mt-6 pt-4 border-t border-border/50 animate-fade-in opacity-0"
-                  style={{ animationDelay: `${(leftNavItems.length + 2) * 120}ms`, animationFillMode: 'forwards' }}
+                  style={{ animationDelay: `${(visibleLeftNavItems.length + 2) * 120}ms`, animationFillMode: 'forwards' }}
                 >
                   {rightNavItems.map((item) => (
                     <button 
@@ -461,7 +461,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                 {/* Contact Us — separate section */}
                 <div 
                   className="mt-4 pt-4 border-t border-border/50 animate-fade-in opacity-0"
-                  style={{ animationDelay: `${(leftNavItems.length + 3) * 120}ms`, animationFillMode: 'forwards' }}
+                  style={{ animationDelay: `${(visibleLeftNavItems.length + 3) * 120}ms`, animationFillMode: 'forwards' }}
                 >
                   <button
                     onClick={() => setContactExpanded(!contactExpanded)}
@@ -717,7 +717,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
           </div>
           <div className="flex items-center justify-between w-full pb-3">
             <div className="flex items-center gap-6 lg:gap-10">
-              {leftNavItems.map((item, index) => (
+              {visibleLeftNavItems.map((item, index) => (
                 <React.Fragment key={item.href}>
                   <button 
                     onClick={() => { setMegaMenuOpen(false); handleNavClick(item.href); }} 
