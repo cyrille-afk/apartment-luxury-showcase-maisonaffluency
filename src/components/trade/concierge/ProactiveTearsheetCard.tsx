@@ -115,7 +115,7 @@ export function ProactiveTearsheetCard({ data, resolved, onGenerate, onAddToBoar
               className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded font-body text-[10px] uppercase tracking-[0.14em] bg-foreground text-background hover:opacity-90 transition-opacity"
             >
               <FileDown size={11} />
-              Generate free tearsheet
+              Generate tearsheet
             </button>
             <button
               type="button"
