@@ -135,7 +135,7 @@ const DEFAULT_VALUES: BriefValues = {
   },
   block3: {
     vibe: "[e.g. Japandi-Luxe, Italian Minimalism]",
-    references: "Man of Parts / Collection Particulière / De La Espada / Leo Sentou",
+    references: "[e.g. Man of Parts / Collection Particulière]",
     palette: "[materials + finishes]",
   },
   block4:
