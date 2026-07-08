@@ -1478,7 +1478,32 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
           );
         }
 
+        // Merge furniture typologies from the current message + every prior
+        // user turn so pieces named earlier ("sectional sofas, armchairs,
+        // side and coffee tables") still land in Block 2 TYPOLOGY.
+        const priorFurnitureText = timeline
+          .filter((t): t is Extract<TimelineItem, { kind: "msg" }> => t.kind === "msg" && t.role === "user")
+          .map((t) => t.content || "")
+          .join(" \n ");
+        const mergedFurniture = collapseFurnitureTokens(
+          Array.from(new Set([...(scale.furniture || []), ...extractFurnitureTypology(priorFurnitureText)])),
+        );
+        if (mergedFurniture.length) {
+          prefilled = prefilled.replace(
+            "[e.g. sectional + accent chairs]",
+            mergedFurniture.join(", "),
+          );
+        }
+
         setInput(prefilled);
+        // Force all three brief-builder sections expanded on auto-open so
+        // the prefilled fields are visible immediately — no hidden Block 2/3.
+        try {
+          const scope = sessionStorage.getItem("trade:lastProjectFilter") || "global";
+          const expanded = JSON.stringify({ block1: true, block2: true, block3: true });
+          localStorage.setItem(`concierge:briefBuilder:expanded:${scope}`, expanded);
+          localStorage.setItem("concierge:briefBuilder:expanded", expanded);
+        } catch {}
         setBriefBuilderOpen(true);
         try { sessionStorage.removeItem("concierge:briefAutoOpened"); } catch {}
 
@@ -1487,6 +1512,7 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
           scale.typology,
           city ? `city: ${city}` : null,
           scale.zones.length ? `zones: ${scale.zones.join(", ")}` : null,
+          mergedFurniture.length ? `pieces: ${mergedFurniture.join(", ")}` : null,
           scale.timelineWeeks ? `${scale.timelineWeeks}-week handover` : null,
         ].filter(Boolean).join(" · ");
 
