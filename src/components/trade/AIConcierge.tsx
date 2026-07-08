@@ -72,11 +72,36 @@ function collapseFurnitureTokens(tokens: string[]): string[] {
   return Array.from(set);
 }
 
+// Sentences/clauses that explicitly defer a purchase should NOT contribute
+// their furniture tokens to Typology. Examples:
+//   "I'll select the rug and chandelier at a later date"
+//   "excluding rugs and lighting"
+//   "not the sofa for now"
+//   "we'll pick the dining table later"
+const DEFERRAL_RE = /\b(at a later (?:date|stage|time)|later on|later date|another time|down the (?:road|line)|for (?:a )?later|not (?:now|yet|for now)|(?:for|in) a later phase|excluding|except(?:\s+for)?|leaving out|skip(?:ping)?|omit(?:ting)?|will (?:select|pick|choose|source|find|decide|specify)\b[^.?!\n]*\b(later|another time|down the (?:road|line))|(?:pick|choose|select|source|specify|decide)\s+(?:on\s+)?(?:the\s+)?[^.?!\n]*\b(later|another time|down the (?:road|line)))\b/i;
+
+function splitClauses(text: string): string[] {
+  // Split on sentence terminators and newlines. Good enough for prose briefs.
+  return text.split(/(?<=[.?!])\s+|\n+/).map((s) => s.trim()).filter(Boolean);
+}
+
 function extractFurnitureTypology(text: string): string[] {
   if (!text) return [];
-  const raw = text.match(FURNITURE_TOKEN_RE) || [];
-  const normalized = raw.map(normalizeFurnitureToken);
-  return collapseFurnitureTokens(Array.from(new Set(normalized)));
+  const clauses = splitClauses(text);
+  const kept = new Set<string>();
+  const deferred = new Set<string>();
+  for (const clause of clauses.length ? clauses : [text]) {
+    const raw = clause.match(FURNITURE_TOKEN_RE) || [];
+    const normalized = raw.map(normalizeFurnitureToken);
+    const isDeferred = DEFERRAL_RE.test(clause);
+    for (const tok of normalized) {
+      if (isDeferred) deferred.add(tok);
+      else kept.add(tok);
+    }
+  }
+  // A token confirmed in any non-deferred clause wins over a deferred mention.
+  // A token that appears ONLY in deferred clauses is dropped.
+  return collapseFurnitureTokens(Array.from(kept));
 }
 
 const CATALOGUE_BRANDS = Array.from(
