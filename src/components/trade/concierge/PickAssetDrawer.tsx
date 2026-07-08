@@ -49,7 +49,7 @@ export function PickAssetDrawer({ pickId, title }: Props) {
   const [glbUrl, setGlbUrl] = useState<string | null>(null);
   const [poster, setPoster] = useState<string | null>(null);
   const [materialRoles, setMaterialRoles] = useState<
-    Record<string, "fabric" | "base" | "ignore"> | undefined
+    Record<string, "fabric" | "base" | "top" | "ignore"> | undefined
   >(undefined);
   const [swatches, setSwatches] = useState<Swatch[]>([]);
   const [error, setError] = useState<string | null>(null);
