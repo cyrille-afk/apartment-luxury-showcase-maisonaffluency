@@ -265,6 +265,19 @@ const TradeBoards = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {[1,2,3].map(i => <div key={i} className="h-40 bg-muted/50 rounded-lg animate-pulse" />)}
           </div>
+        ) : visibleBoards.length === 0 && sourceFilter === "concierge" ? (
+          <div className="text-center py-20 border border-dashed border-border rounded-lg bg-muted/20">
+            <Sparkles className="h-8 w-8 mx-auto mb-4 text-muted-foreground" />
+            <p className="font-body text-sm text-muted-foreground mb-2">
+              Your AI Concierge hasn't built a folder yet
+            </p>
+            <p className="font-body text-xs text-muted-foreground/80 mb-5 max-w-xs mx-auto">
+              Open the concierge on any product page to generate a complete tearsheet and save it here automatically.
+            </p>
+            <Button onClick={() => navigate('/trade/products')} className="gap-2">
+              <Sparkles className="h-4 w-4" /> Generate First Tearsheet
+            </Button>
+          </div>
         ) : visibleBoards.length === 0 ? (
           <div className="text-center py-20">
             <p className="font-body text-sm text-muted-foreground mb-4">
