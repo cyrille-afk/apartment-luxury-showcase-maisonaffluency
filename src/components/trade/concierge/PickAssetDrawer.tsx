@@ -840,6 +840,23 @@ export function PickAssetDrawer({ pickId, title }: Props) {
               </button>
             )}
           </div>
+          {tradeMeta.tradeProductId && (
+            <Link
+              to={(() => {
+                const p = new URLSearchParams();
+                if (baseSwatch?.name) p.set("base", baseSwatch.name);
+                if (!topIsFabric && topSwatch?.name) p.set("top", topSwatch.name);
+                if (topIsFabric && fabricSwatch?.name) p.set("material", fabricSwatch.name);
+                const qs = p.toString();
+                return `/trade/products/${tradeMeta.tradeProductId}${qs ? `?${qs}` : ""}`;
+              })()}
+              className="mt-1 flex items-center justify-center gap-1.5 rounded-md border border-border/60 bg-background/60 text-foreground px-2.5 py-1.5 font-body text-[10px] uppercase tracking-widest hover:bg-foreground/5 transition-colors"
+              title="Open the full product page with live pricing for the selected finishes"
+            >
+              <ExternalLink size={11} />
+              View on Product Page
+            </Link>
+          )}
         </>
       )}
     </div>
