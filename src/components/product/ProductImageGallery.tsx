@@ -156,8 +156,8 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
             {images.map((img, i) => (
               <button
                 key={i}
-                onClick={() => goTo(i)}
-                onMouseEnter={() => goTo(i)}
+                onClick={() => goTo(i, { fromThumbStrip: true })}
+                onMouseEnter={() => goTo(i, { fromThumbStrip: true })}
                 className={cn(
                   "aspect-square rounded-md overflow-hidden border-2 transition-all shrink-0",
                   i === activeIndex
