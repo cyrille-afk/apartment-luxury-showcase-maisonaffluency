@@ -990,8 +990,9 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
     return true;
   }, [currentStudio?.id, navigate]);
 
-  const send = useCallback(async (overrideText?: string) => {
+  const send = useCallback(async (overrideText?: string, opts?: { displayText?: string }) => {
     const text = (overrideText ?? input).trim();
+
     // Allow sending with attachments only (no text) — use a tiny default prompt.
     const hasFiles = attachments.length > 0;
     if (!text && !hasFiles) return;
