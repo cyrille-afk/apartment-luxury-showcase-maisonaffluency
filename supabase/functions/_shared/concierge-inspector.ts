@@ -809,14 +809,63 @@ function extractShapes(text: string): string[] {
   return Array.from(new Set(SHAPE_KEYWORDS.filter((s) => hay.includes(s))));
 }
 
+// Ordered scan table: check LONGER phrases first so "coffee table" wins over
+// "table", "side table" wins over "table", "dining chair" wins over "chair".
+// Each entry: [regex, typology-key-in-TYPOLOGY_SYNONYMS].
+const TEXT_TYPOLOGY_PATTERNS: Array<{ re: RegExp; typology: string }> = [
+  { re: /\bdining\s+tables?\b/, typology: "dining_table" },
+  { re: /\bcoffee\s+tables?\b|\bcocktail\s+tables?\b|\blow\s+tables?\b/, typology: "coffee_table" },
+  { re: /\bside\s+tables?\b|\bend\s+tables?\b|\boccasional\s+tables?\b/, typology: "side_table" },
+  { re: /\bconsole\s+tables?\b|\bconsoles?\b/, typology: "console" },
+  { re: /\bwriting\s+desks?\b|\bdesks?\b|\bbureaux?\b/, typology: "desk" },
+  { re: /\bnight\s*stands?\b|\bbedside\s+tables?\b/, typology: "nightstand" },
+  { re: /\bdining\s+chairs?\b|\bside\s+chairs?\b/, typology: "dining_chair" },
+  { re: /\blounge\s+chairs?\b|\bclub\s+chairs?\b/, typology: "lounge_chair" },
+  { re: /\barmchairs?\b|\bfauteuils?\b/, typology: "armchair" },
+  { re: /\bbar\s+stools?\b|\bcounter\s+stools?\b/, typology: "bar_stool" },
+  { re: /\bstools?\b|\btabourets?\b/, typology: "stool" },
+  { re: /\bbenches\b|\bbench\b|\bbanquettes?\b/, typology: "bench" },
+  { re: /\bsofas?\b|\bcanap[ée]s?\b|\bsettees?\b|\bcouches\b|\bcouch\b|\bsectionals?\b/, typology: "sofa" },
+  { re: /\bloveseats?\b/, typology: "loveseat" },
+  { re: /\bdaybeds?\b|\bchaises?\b/, typology: "daybed" },
+  { re: /\bottomans?\b|\bpoufs?\b|\bfootstools?\b/, typology: "ottoman" },
+  { re: /\bsideboards?\b|\bcredenzas?\b|\bbuffets?\b|\benfilades?\b/, typology: "sideboard" },
+  { re: /\bcabinets?\b|\bvitrines?\b|\barmoires?\b/, typology: "cabinet" },
+  { re: /\bbookcases?\b|\bbookshelves?\b|\bbookshelf\b/, typology: "bookcase" },
+  { re: /\bchandeliers?\b|\blustres?\b/, typology: "chandelier" },
+  { re: /\bpendants?\b|\bsuspensions?\b/, typology: "pendant_light" },
+  { re: /\bfloor\s+lamps?\b|\blampadaires?\b/, typology: "floor_lamp" },
+  { re: /\btable\s+lamps?\b/, typology: "table_lamp" },
+  { re: /\bsconces?\b|\bwall\s+lights?\b|\bappliques?\b/, typology: "sconce" },
+  { re: /\brugs?\b|\bcarpets?\b|\bkilims?\b/, typology: "rug" },
+  { re: /\bmirrors?\b/, typology: "mirror" },
+  { re: /\bbeds?\b|\bheadboards?\b/, typology: "bed" },
+];
+
 export function deriveRequirementsFromText(text: string): RequirementsInput | null {
   const raw = String(text || "");
   const hay = normalizeText(raw);
   const slots: RequirementsSlotInput[] = [];
-  if (/\bdining\b/.test(hay) && /\b(table|tables|edit|set)\b/.test(hay)) {
-    slots.push({ typology: "dining_table", qty_min: 1, qty_max: 1 });
-  } else if (/\btables?\b/.test(hay)) {
-    slots.push({ typology: "table", qty_min: 1, qty_max: 1 });
+  const seenTypologies = new Set<string>();
+  // Consume matched spans so a later, shorter pattern (e.g. "tables") does not
+  // double-count a phrase already claimed by a longer one ("coffee tables").
+  let consumable = hay;
+  for (const { re, typology } of TEXT_TYPOLOGY_PATTERNS) {
+    if (seenTypologies.has(typology)) continue;
+    if (re.test(consumable)) {
+      slots.push({ typology, qty_min: 1, qty_max: 1 });
+      seenTypologies.add(typology);
+      consumable = consumable.replace(new RegExp(re.source, re.flags + "g"), " ");
+    }
+  }
+  // Legacy fallback: bare "table" only when no more specific table typology
+  // has been captured — keeps the old dining-inference behaviour alive.
+  if (!seenTypologies.has("dining_table") && !seenTypologies.has("coffee_table") && !seenTypologies.has("side_table") && !seenTypologies.has("console") && !seenTypologies.has("desk") && !seenTypologies.has("nightstand")) {
+    if (/\bdining\b/.test(hay) && /\b(table|tables|edit|set)\b/.test(hay)) {
+      slots.push({ typology: "dining_table", qty_min: 1, qty_max: 1 });
+    } else if (/\btables?\b/.test(consumable)) {
+      slots.push({ typology: "table", qty_min: 1, qty_max: 1 });
+    }
   }
   const materials = Array.from(new Set(MATERIAL_KEYWORDS.filter((m) => hay.includes(normalizeText(m)))));
   const shapes = extractShapes(raw);
