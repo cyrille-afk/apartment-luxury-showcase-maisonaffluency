@@ -756,14 +756,42 @@ const DEFERRED_TRIGGER_RE = /\b(?:at\s+a\s+later\s+(?:date|stage|time|phase)|lat
 // Bare "later" at the end of a short clause, e.g. "rug/chandelier later" or "rug, chandelier — later".
 const TRAILING_LATER_RE = /(?:^|[\s—–:\-\(\[])\s*later\s*[\.\)\]]?\s*$/i;
 
-// Noun + parenthetical deferral eaten together, e.g. "rug (later)", "chandelier [TBD]".
-// We strip the preceding noun phrase too so the bare noun doesn't survive as a required slot.
-const NOUN_PARENTHETICAL_DEFERRAL_RE = /(?:[\w][\w'-]*(?:\s+(?:and|&|\/|,)\s*[\w][\w'-]*)*\s*)?[\(\[][^)\]]*\b(?:later|tbd|tbc|to\s+follow|to\s+be\s+(?:confirmed|decided|selected|sourced|specified|advised)|not\s+now|out\s+of\s+scope|next\s+phase|phase\s+(?:2|two|ii|3|three|iii))\b[^)\]]*[\)\]]/gi;
+// Common trigger tail used in several deferred-detection patterns.
+// Keep in sync with DEFERRED_TRIGGER_RE above (this is the sentence-tail subset
+// that appears AFTER a noun list, not the leading verbal form "will select …").
+const DEFERRED_TAIL = "at\\s+a\\s+later\\s+(?:date|stage|time|phase)|later(?:\\s+on)?|another\\s+time|down\\s+the\\s+(?:road|line)|for\\s+later|in\\s+(?:a\\s+)?(?:later|next|future|second)\\s+(?:phase|stage|round)|next\\s+(?:phase|stage|round)|phase\\s+(?:2|two|ii|3|three|iii)|not\\s+(?:now|yet|for\\s+now)|out\\s+of\\s+scope|to\\s+follow|to\\s+be\\s+(?:confirmed|decided|selected|sourced|specified|advised)(?:\\s+later|\\s+separately)?|tbd|tbc|t\\.?b\\.?d\\.?|t\\.?b\\.?c\\.?|handled\\s+separately|will\\s+(?:be\\s+)?(?:sourced|selected|chosen|picked|specified|decided|added|confirmed)(?:\\s+later|\\s+separately)?|(?:sourced|selected|chosen|picked|specified|decided|added)\\s+(?:later|separately|elsewhere)";
+
+// A) "Rug (later)" / "chandelier [TBD]" — paren wraps ONLY a short trigger.
+//    Strip the noun list AND the parenthetical.
+const NOUN_SHORT_PAREN_DEFERRAL_RE = new RegExp(
+  `\\b[\\w][\\w'-]*(?:\\s*(?:and|&|,|\\/)\\s*[\\w][\\w'-]*)*\\s*[\\(\\[]\\s*(?:${DEFERRED_TAIL})\\s*[\\)\\]]`,
+  "gi",
+);
+
+// B) "(rug and chandelier to follow)" — paren contains items + trigger together.
+//    Strip the parenthetical in place; the surrounding sentence stays intact.
+const LONG_PAREN_DEFERRAL_RE = new RegExp(
+  `\\s*[\\(\\[][^)\\]]*\\b(?:${DEFERRED_TAIL})\\b[^)\\]]*[\\)\\]]`,
+  "gi",
+);
 
 // Sentence-level "deferred aside" — matches when a full sentence is only a
-// noun list followed by a deferral trigger (dash/colon/space separator).
-// e.g. "Rug and chandelier — not now.", "Rug, chandelier: TBD.", "Rug and chandelier later."
-const DEFERRED_ASIDE_SENTENCE_RE = /^[\w][\w\s,&\/'-]*?\s*(?:[—–\-:]|\s)\s*(?:at\s+a\s+later\s+(?:date|stage|time|phase)|later(?:\s+on)?|another\s+time|down\s+the\s+(?:road|line)|for\s+later|in\s+(?:a\s+)?(?:later|next|future|second)\s+(?:phase|stage|round)|next\s+(?:phase|stage|round)|phase\s+(?:2|two|ii|3|three|iii)|not\s+(?:now|yet|for\s+now)|out\s+of\s+scope|to\s+follow|tbd|tbc|t\.?b\.?d\.?|t\.?b\.?c\.?|handled\s+separately|(?:sourced|selected|chosen|picked|specified|decided|added)\s+(?:later|separately|elsewhere))\s*[\.\!\?]?\s*$/i;
+// noun list followed by a deferral trigger.
+// Noun list intentionally excludes dashes/colons/semicolons so we don't swallow
+// a preceding active clause like "sofa, armchair, coffee table - rug later".
+const DEFERRED_ASIDE_SENTENCE_RE = new RegExp(
+  `^[\\w][\\w\\s,&\\/']*?\\s*(?:[—–\\-:]\\s*)?(?:${DEFERRED_TAIL})\\s*[\\.\\!\\?]?\\s*$`,
+  "i",
+);
+
+// Trailing deferred aside within a longer sentence: strip everything from the
+// last internal separator to the end IF the tail matches a deferral trigger.
+// e.g. "Sofa, armchair, coffee table, side table — rug and chandelier TBD." →
+//      "Sofa, armchair, coffee table, side table."
+const TRAILING_DEFERRED_ASIDE_RE = new RegExp(
+  `\\s*[—–\\-:;]\\s+[^—–\\-:;]*?\\b(?:${DEFERRED_TAIL})\\b[^—–\\-:;]*?([\\.\\!\\?])?\\s*$`,
+  "i",
+);
 
 function isDeferredClause(part: string): boolean {
   if (!part) return false;
@@ -773,15 +801,28 @@ function isDeferredClause(part: string): boolean {
 }
 
 function activeRequirementText(text: string): string {
-  // 1) Strip noun+parenthetical deferrals ("rug (later)") including the noun.
-  const cleaned = String(text || "").replace(NOUN_PARENTHETICAL_DEFERRAL_RE, " ");
-  // 2) Sentence pass: drop whole sentences that are pure deferred asides.
-  const sentences = cleaned
-    .split(/(?<=[.?!])\s+|\n+/)
-    .map((s) => s.trim())
-    .filter((s) => s && !DEFERRED_ASIDE_SENTENCE_RE.test(s));
-  // 3) Fragment pass: within remaining sentences, split on internal separators
-  // (semicolons, em/en dashes, spaced hyphens) and drop deferred fragments.
+  // 1) Strip noun+short-trigger parentheticals ("rug (later)") including the noun.
+  let cleaned = String(text || "").replace(NOUN_SHORT_PAREN_DEFERRAL_RE, " ");
+  // 2) Strip long parentheticals that contain items + trigger together.
+  cleaned = cleaned.replace(LONG_PAREN_DEFERRAL_RE, " ");
+  // 3) Sentence pass: drop pure "deferred aside" sentences, and strip trailing
+  //    "— <deferred aside>" tails from mixed sentences.
+  const sentences: string[] = [];
+  for (const raw of cleaned.split(/(?<=[.?!])\s+|\n+/)) {
+    const s = raw.trim();
+    if (!s) continue;
+    if (DEFERRED_ASIDE_SENTENCE_RE.test(s)) continue; // pure aside → drop
+    // Repeatedly strip trailing deferred asides in case there are multiple.
+    let trimmed = s;
+    for (let i = 0; i < 3; i += 1) {
+      const next = trimmed.replace(TRAILING_DEFERRED_ASIDE_RE, (_m, punct) => (punct || ""));
+      if (next === trimmed) break;
+      trimmed = next.trim();
+    }
+    if (trimmed) sentences.push(trimmed);
+  }
+  // 4) Fragment pass: split on internal separators and drop any deferred fragments
+  //    that remain (belt-and-braces for exotic phrasings the sentence pass missed).
   const out: string[] = [];
   for (const sentence of sentences) {
     for (const frag of sentence.split(/\s*[;]\s*|\s+[—–]\s+|\s+-\s+/)) {
