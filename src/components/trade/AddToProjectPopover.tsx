@@ -28,7 +28,7 @@ interface Board {
  * Popover that lets the user add a product to one of their project folders (client_boards).
  * Wraps a trigger element (e.g. a button).
  */
-export default function AddToProjectPopover({ productId, productName, children }: AddToProjectPopoverProps) {
+export default function AddToProjectPopover({ productId, productName, defaultProjectName, children }: AddToProjectPopoverProps) {
   const { user } = useAuth();
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
