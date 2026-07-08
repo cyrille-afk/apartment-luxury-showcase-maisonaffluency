@@ -176,14 +176,64 @@ export const CreateQuoteFromBoard = ({ board, items, userId, disabled }: Props) 
     }
 
     const byRoom: Record<string, number> = {};
-    const rows = Array.from(firstSeen.values()).map((i) => {
+    const firstSeenList = Array.from(firstSeen.values());
+    const productIds = firstSeenList.map((i) => i.product_id);
+
+    // Resolve fabric_label / wood_label (free text stored on the board)
+    // to fabric_id / wood_fabric_id on the quote line, so the tearsheet
+    // continues to render the confirmed swatch after Add-to-Quote.
+    // trade_products.source_pick_id → product_fabrics.pick_id → fabrics.name
+    const labelToFabricIdByProduct = new Map<string, Map<string, string>>();
+    try {
+      const { data: prods } = await supabase
+        .from("trade_products")
+        .select("id, source_pick_id")
+        .in("id", productIds);
+      const pickToProduct = new Map<string, string>();
+      const pickIds: string[] = [];
+      for (const p of (prods || []) as any[]) {
+        if (p?.source_pick_id) {
+          pickToProduct.set(p.source_pick_id, p.id);
+          pickIds.push(p.source_pick_id);
+        }
+      }
+      if (pickIds.length) {
+        const { data: pfs } = await supabase
+          .from("product_fabrics")
+          .select("pick_id, fabric_id, fabrics(name)")
+          .in("pick_id", pickIds);
+        for (const pf of (pfs || []) as any[]) {
+          const pid = pickToProduct.get(pf.pick_id);
+          const name = pf?.fabrics?.name;
+          if (!pid || !name || !pf.fabric_id) continue;
+          let m = labelToFabricIdByProduct.get(pid);
+          if (!m) { m = new Map(); labelToFabricIdByProduct.set(pid, m); }
+          m.set(String(name).trim().toLowerCase(), pf.fabric_id);
+        }
+      }
+    } catch {
+      // resolution is best-effort — if it fails we still persist labels via variant_label
+    }
+
+    const resolveSwatch = (product_id: string, label: string | null | undefined): string | null => {
+      const l = (label || "").trim().toLowerCase();
+      if (!l) return null;
+      return labelToFabricIdByProduct.get(product_id)?.get(l) ?? null;
+    };
+
+    const rows = firstSeenList.map((i) => {
       const room = (roomByProductId.get(i.product_id) || "Unassigned").trim() || "Unassigned";
       byRoom[room] = (byRoom[room] || 0) + 1;
+      const fabric_id = resolveSwatch(i.product_id, i.fabric_label);
+      const wood_fabric_id = resolveSwatch(i.product_id, i.wood_label);
       return {
         quote_id: quoteId,
         product_id: i.product_id,
         quantity: qtyByProduct.get(i.product_id) || 1,
         room,
+        variant_label: i.variant_label ?? null,
+        fabric_id,
+        wood_fabric_id,
       };
     });
 
