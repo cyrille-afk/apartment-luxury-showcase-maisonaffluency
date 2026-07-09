@@ -111,8 +111,11 @@ const DesignersHoverHero = () => {
   );
   const [activeSlug, setActiveSlug] = useState<string | null>(null);
   const [isStandalone, setIsStandalone] = useState(false);
+  const [showPortalCursor, setShowPortalCursor] = useState(false);
   const navRef = useRef<HTMLElement>(null);
   const sectionRef = useRef<HTMLElement>(null);
+  const portalRef = useRef<HTMLAnchorElement>(null);
+  const portalCursorRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
