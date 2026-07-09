@@ -39,7 +39,7 @@ import { priceRugVariantFromLabel } from "@/lib/rugPricing";
 import { computeWeightedDepositPct } from "@/lib/computeDepositPct";
 import BillingModeCard from "@/components/trade/BillingModeCard";
 import { resolveWoodFinishLabel } from "@/lib/resolveWoodFinishLabel";
-import { splitFinishAndDimensions, formatImperialDimensions } from "@/lib/formatDimensions";
+import { splitFinishAndDimensions, formatDimensionsMultiline, formatImperialDimensions } from "@/lib/formatDimensions";
 
 const CURRENCIES = ["SGD", "USD", "EUR", "GBP"] as const;
 type Currency = (typeof CURRENCIES)[number];
