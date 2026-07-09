@@ -347,6 +347,33 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                 </div>
               </div>
               <div className="flex flex-col gap-0 pb-40">
+                {/* New In — first */}
+                <button
+                  onClick={() => handleNavClick("/new-in")}
+                  className="font-body text-[15px] uppercase tracking-wide text-left transition-colors py-2.5 w-full flex items-center justify-between text-[hsl(var(--gold))] hover:text-primary font-bold animate-fade-in opacity-0"
+                  style={{ animationDelay: `0ms`, animationFillMode: 'forwards' }}
+                >
+                  New In
+                  <ChevronRight className="h-4 w-4" />
+                </button>
+
+                {/* All Categories — second */}
+                <div 
+                  className="animate-fade-in opacity-0 border-t border-border/30 pt-2 mb-2"
+                  style={{ animationDelay: `120ms`, animationFillMode: 'forwards' }}
+                >
+                  <button
+                    onClick={() => { setCategoryPanelOpen(true); setExpandedCategory(null); }}
+                    className="font-body text-[15px] uppercase tracking-wide text-left transition-colors py-2.5 w-full flex items-center justify-between text-foreground hover:text-primary font-semibold"
+                  >
+                    <span className="flex items-center gap-1.5">
+                      <LayoutGrid className="h-3.5 w-3.5 text-[hsl(var(--accent))]" />
+                      All Categories
+                    </span>
+                    <ChevronRight className="h-4 w-4" />
+                  </button>
+                </div>
+
                 {visibleLeftNavItems.map((item, index) => (
                   <button 
                     key={item.href}
