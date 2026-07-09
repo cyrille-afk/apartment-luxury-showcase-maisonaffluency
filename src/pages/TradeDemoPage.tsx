@@ -19,6 +19,7 @@ import {
   DEMO_PIECES,
   DEMO_STEP_META,
   fmtEUR,
+  verifyDemoPricesLive,
   type DemoPiece,
   type DemoSteps,
 } from "@/lib/demoSandbox";
