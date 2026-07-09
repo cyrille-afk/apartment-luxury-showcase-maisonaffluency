@@ -959,8 +959,9 @@ function drawTable(
     const swatchCount = (finishSwatches[idx]?.filter(Boolean).length || 0) + (fabricSwatches[idx] ? 1 : 0);
     const swatchRows = swatchCount > 0 ? Math.ceil(Math.min(swatchCount, 5) / 2) : 0;
     const hasSwatches = swatchCount > 0;
-    // Row height accounts for: image (52) + caption (10) + swatch rows (tile 20 + label 10 + gap 4 = 34 per row)
-    const swatchBlockH = hasSwatches ? 10 + swatchRows * 34 : 0;
+    // Row height accounts for: image (52) + caption (10) + swatch rows
+    // (tile 20 + label 2 lines × 7 + gap 4 = 38 per row).
+    const swatchBlockH = hasSwatches ? 10 + swatchRows * 38 : 0;
     const rowH = Math.max(hasSwatches ? 58 + swatchBlockH : 56, 12 /* brand */ + titleHeight + metaHeight + 14);
 
     // page break
