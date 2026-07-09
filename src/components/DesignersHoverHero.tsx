@@ -355,37 +355,61 @@ const DesignersHoverHero = () => {
               aria-label="Featured designers shortcut list"
               className="inline-block"
             >
-              <ul className="flex flex-col gap-0 text-left">
-                {items.map((d) => {
-                  const [first, last] = splitName(d.name);
-                  const isActive = d.slug === activeSlug;
-                  const isDimmed = activeSlug !== null && !isActive;
-                  const childBrand = d.founder && d.founder !== d.name;
-                  return (
-                    <li key={d.slug} className="text-left leading-[1.08] sm:leading-[1.12]">
-                      <Link
-                        to={`/designers/${d.slug}`}
-                        onMouseEnter={() => setActiveSlug(d.slug)}
-                        onFocus={() => setActiveSlug(d.slug)}
-                        className={cn(
-                          "inline-block whitespace-nowrap",
-                          "font-display font-light tracking-tight",
-                          "text-sm sm:text-base md:text-[20px] leading-[1.08] sm:leading-[1.12]",
-                          "transition-colors duration-[1200ms] ease-out",
-                          isDimmed ? "text-white/35" : "text-white/95"
-                        )}
-                      >
-                        <span>
-                          {first}
-                          {last && <span className="italic"> {last}</span>}
-                          {childBrand && (
-                            <span className="opacity-80"> - {d.founder}</span>
-                          )}
-                        </span>
-                      </Link>
-                    </li>
-                  );
-                })}
+              <ul className="flex flex-col text-left">
+                {groupedItems.map((group, groupIdx) => (
+                  <li
+                    key={group.label}
+                    className={cn(
+                      "flex flex-col text-left",
+                      groupIdx > 0 && "mt-5 md:mt-6"
+                    )}
+                  >
+                    <span className="text-[10px] uppercase tracking-[0.3em] font-body text-white/50 mb-2 md:mb-3">
+                      {group.label}
+                    </span>
+                    <ul className="flex flex-col gap-0 text-left">
+                      {group.designers.map((d) => {
+                        const [first, last] = splitName(d.name);
+                        const isActive = d.slug === activeSlug;
+                        const isDimmed = activeSlug !== null && !isActive;
+                        const childBrand = d.founder && d.founder !== d.name;
+                        return (
+                          <li
+                            key={d.slug}
+                            className="text-left leading-[1.3] sm:leading-[1.34]"
+                          >
+                            <Link
+                              to={`/designers/${d.slug}`}
+                              onMouseEnter={() => setActiveSlug(d.slug)}
+                              onFocus={() => setActiveSlug(d.slug)}
+                              className={cn(
+                                "inline-block whitespace-nowrap",
+                                "text-sm sm:text-base md:text-[20px] leading-[1.3] sm:leading-[1.34]",
+                                "transition-colors duration-[1200ms] ease-out",
+                                isDimmed
+                                  ? "font-body font-light tracking-normal text-white/35"
+                                  : "font-display font-light tracking-tight text-white/95"
+                              )}
+                            >
+                              <span>
+                                {first}
+                                {last && (
+                                  <span className={cn(!isDimmed && "italic")}>
+                                    {" "}
+                                    {last}
+                                  </span>
+                                )}
+                                {childBrand && (
+                                  <span className="opacity-80"> - {d.founder}</span>
+                                )}
+                              </span>
+                            </Link>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </li>
+                ))}
               </ul>
             </nav>
           </div>
