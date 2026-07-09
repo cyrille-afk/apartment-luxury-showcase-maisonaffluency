@@ -456,7 +456,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                 {/* Contact Us — separate section */}
                 <div 
                   className="mt-4 pt-4 border-t border-border/50 animate-fade-in opacity-0"
-                  style={{ animationDelay: `${(visibleLeftNavItems.length + 3) * 120}ms`, animationFillMode: 'forwards' }}
+                  style={{ animationDelay: `${(visibleLeftNavItems.length + 4) * 120}ms`, animationFillMode: 'forwards' }}
                 >
                   <button
                     onClick={() => setContactExpanded(!contactExpanded)}
