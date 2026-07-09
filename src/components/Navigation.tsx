@@ -140,6 +140,25 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
   const megaMenuRef = useRef<HTMLDivElement>(null);
   // featuredDoc removed — AD free-download flow discontinued.
 
+  // ── Transparent floating header over the home hero ─────────────────────
+  // On "/" while the user is still within the hero (scroll < ~85vh), the
+  // nav floats transparently over the hero image. Past the hero it condenses
+  // into a frosted white bar for legibility on category content.
+  const isHomeRoute = location.pathname === "/";
+  const [scrolledPastHero, setScrolledPastHero] = useState(false);
+  useEffect(() => {
+    if (!isHomeRoute) { setScrolledPastHero(false); return; }
+    const onScroll = () => {
+      // Trigger a bit before the hero ends so the frosted state locks in
+      // before content collides with the header.
+      setScrolledPastHero(window.scrollY > window.innerHeight * 0.75);
+    };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [isHomeRoute]);
+  const isOverHero = isHomeRoute && !scrolledPastHero && !megaMenuOpen;
+
   const resetMobilePanels = () => {
     setCategoryPanelOpen(false);
     setExpandedCategory(null);
