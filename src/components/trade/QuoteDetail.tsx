@@ -2830,8 +2830,13 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                                 )}
                                 {dimsSource && (
                                   <p className="font-body text-[10px] md:text-[11px] text-muted-foreground mt-1 break-words">
-                                    <span className="text-muted-foreground">Dimensions:</span> {dimsSource}
-                                    {dimsImp ? <span className="text-muted-foreground/80"> | {dimsImp}</span> : null}
+                                    <span className="text-muted-foreground">Dimensions:</span>{" "}
+                                    <span className="whitespace-nowrap">{dimsSource}</span>
+                                    {dimsImp ? (
+                                      <>
+                                        {" "}<span className="text-muted-foreground/80 whitespace-nowrap">| {dimsImp}</span>
+                                      </>
+                                    ) : null}
                                   </p>
                                 )}
                               </>
