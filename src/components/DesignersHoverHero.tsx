@@ -420,6 +420,38 @@ const DesignersHoverHero = () => {
         ))}
       </div>
 
+      {/* Active designer caption — dynamic visual link on hover.
+          Fades in on desktop only so it doesn't crowd the mobile layout. */}
+      {(() => {
+        const active = items.find((d) => d.slug === activeSlug);
+        if (!active) return null;
+        const [first, last] = splitName(active.name);
+        return (
+          <Link
+            key={active.slug}
+            to={`/designers/${active.slug}`}
+            aria-label={`View ${active.name}'s full collection`}
+            className="hidden md:flex absolute right-12 lg:right-28 bottom-40 lg:bottom-56 z-10 flex-col items-end text-right text-white pointer-events-auto group"
+          >
+            <span
+              key={`${active.slug}-title`}
+              className="font-display font-light tracking-tight text-2xl lg:text-3xl animate-in fade-in duration-700"
+            >
+              {first}
+              {last && <span className="italic"> {last}</span>}
+            </span>
+            <span
+              key={`${active.slug}-cta`}
+              className="mt-2 text-[10px] uppercase tracking-[0.35em] font-body text-white/70 group-hover:text-white transition-colors animate-in fade-in duration-1000 delay-200 fill-mode-both"
+            >
+              Click to view full collection
+            </span>
+          </Link>
+        );
+      })()}
+
+
+
 
 
       {/* Vertical wordmark */}
