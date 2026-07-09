@@ -796,10 +796,9 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                       setMegaMenuOpen(false);
                       handleNavClick(item.href);
                     }}
-                    className="font-body text-xs uppercase tracking-[0.2em] font-bold transition-all duration-300 relative whitespace-nowrap flex items-center gap-1.5 bg-accent text-accent-foreground hover:bg-accent/80 px-3 py-1 rounded-full border border-black"
+                    className="font-body text-xs uppercase tracking-[0.2em] font-bold transition-all duration-300 relative whitespace-nowrap flex items-center gap-1.5 bg-accent text-accent-foreground hover:bg-accent/80 px-3 py-1 rounded-full"
                   >
                     {item.label}
-                    <span className="w-1.5 h-1.5 rounded-full bg-accent-foreground/60 animate-pulse" />
                   </button>
                 </div>
               ))}
