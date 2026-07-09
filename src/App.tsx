@@ -22,6 +22,7 @@ const TradePurgeCache = lazy(() => import("./pages/TradePurgeCache"));
 // Trade portal pages
 const TradeLogin = lazy(() => import("./pages/TradeLogin"));
 const TradeLanding = lazy(() => import("./pages/TradeLanding"));
+const TradeDemoPage = lazy(() => import("./pages/TradeDemoPage"));
 const Studios = lazy(() => import("./pages/Studios"));
 const StudioSubmit = lazy(() => import("./pages/StudioSubmit"));
 const StudioProfile = lazy(() => import("./pages/StudioProfile"));
