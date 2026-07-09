@@ -2842,23 +2842,19 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                               </>
                             );
                           })()}
-                          {((item as any).fabric?.name || (item as any).fabric_upcharge_cents) && (() => {
-                            const f: any = (item as any).fabric;
+                          {((item as any).fabric_upcharge_cents) && (() => {
                             const upcharge = (item as any).fabric_upcharge_cents as number | null;
+                            const f: any = (item as any).fabric;
                             const ccy = ((item as any).fabric_currency as string | null) || f?.currency || "EUR";
                             const meters = (item as any).fabric_meters as number | null;
                             const sym = ccy === "EUR" ? "€" : ccy === "USD" ? "$" : ccy === "GBP" ? "£" : ccy === "SGD" ? "S$" : ccy + " ";
+                            if (!upcharge) return null;
                             return (
                               <p className="font-body text-[10px] md:text-[11px] text-foreground/90 mt-1 break-words">
-                                <span className="text-muted-foreground">Fabric:</span> {f?.name || "Selected"}
-                                {f?.tier ? ` · CAT ${f.tier}` : ""}
-                                {upcharge ? (
-                                  <>
-                                    {" — "}
-                                    <span className="text-primary font-medium">+{sym}{(upcharge / 100).toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
-                                    {meters ? <span className="text-muted-foreground"> ({meters} m)</span> : null}
-                                  </>
-                                ) : null}
+                                <span className="text-muted-foreground">Fabric upcharge:</span>{" "}
+                                <span className="text-primary font-medium">+{sym}{(upcharge / 100).toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
+                                {meters ? <span className="text-muted-foreground"> ({meters} m)</span> : null}
+                                {f?.tier ? <span className="text-muted-foreground"> · CAT {f.tier}</span> : null}
                               </p>
                             );
                           })()}
