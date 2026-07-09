@@ -20,7 +20,7 @@ import { optimizeImageUrl } from "@/lib/cloudinary-optimize";
 import { appendHkDapPage, type HkDapPageArgs } from "@/lib/hkDapPdf";
 import { appendUkDdpPage, type UkDdpPageArgs } from "@/lib/ukDdpPdf";
 import { formatFxSnapshotLine } from "@/lib/fxSnapshot";
-import { splitFinishAndDimensions, formatImperialDimensions } from "@/lib/formatDimensions";
+import { splitFinishAndDimensions, formatDimensionsMultiline, formatImperialDimensions } from "@/lib/formatDimensions";
 
 // Maison palette — matches studio-guide / UK DDP PDFs
 const JADE = [12, 49, 47] as const;        // #0C312F
@@ -916,8 +916,9 @@ function drawTable(
     const dimsSource = dimsFromVariant || (line.dimensions ? String(line.dimensions).trim() : "");
     let dimensionsLabel: string | null = null;
     if (dimsSource) {
+      const metric = formatDimensionsMultiline(dimsSource);
       const imp = formatImperialDimensions(dimsSource);
-      dimensionsLabel = imp ? `Dimensions: ${dimsSource} | ${imp}` : `Dimensions: ${dimsSource}`;
+      dimensionsLabel = imp ? `Dimensions: ${metric}\n${imp}` : `Dimensions: ${metric}`;
     }
 
     const showMaterials = !line.variantLabel;
@@ -953,7 +954,11 @@ function drawTable(
     const titleHeight = titleLines.length * 12;
 
     // Pre-wrap meta strings so multi-line materials/notes are not truncated.
-    const metaWrapped = meta.map((m) => doc.splitTextToSize(m, colDesc - 12) as string[]);
+    const metaWrapped = meta.flatMap((m) =>
+      String(m)
+        .split(/\n+/)
+        .map((part) => doc.splitTextToSize(part, colDesc - 12) as string[]),
+    );
     const metaLineCount = metaWrapped.reduce((sum, w) => sum + w.length, 0);
     const metaHeight = metaLineCount * 10;
     const swatchCount = (finishSwatches[idx]?.filter(Boolean).length || 0) + (fabricSwatches[idx] ? 1 : 0);
@@ -961,7 +966,7 @@ function drawTable(
     const hasSwatches = swatchCount > 0;
     // Row height accounts for: image (52) + caption (10) + swatch rows
     // (tile 20 + label 2 lines × 7 + gap 4 = 38 per row).
-    const swatchBlockH = hasSwatches ? 10 + swatchRows * 38 : 0;
+    const swatchBlockH = hasSwatches ? 10 + swatchRows * 38 + 10 : 0;
     const rowH = Math.max(hasSwatches ? 58 + swatchBlockH : 56, 12 /* brand */ + titleHeight + metaHeight + 14);
 
     // page break
