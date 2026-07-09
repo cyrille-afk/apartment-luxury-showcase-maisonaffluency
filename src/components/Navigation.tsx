@@ -634,15 +634,15 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
               </div>
             </div>
             <div className="flex flex-col items-end">
-              {/* Contact Us — aligned with Trade Program */}
-              <div className="pt-1">
+              {/* Contact Us — centered above Trade Program */}
+              <div className="pt-1 mr-[27px]">
                 <DropdownMenu>
                   <DropdownMenuTrigger className="font-body text-xs uppercase tracking-[0.2em] transition-all duration-300 text-foreground data-[state=open]:text-foreground data-[state=open]:[text-shadow:none] flex items-center gap-1 whitespace-nowrap outline-none relative group">
                     Contact Us
                     <ChevronDown className="h-4 w-4" />
                     <span className="absolute -bottom-1 left-0 h-0.5 bg-[hsl(var(--accent))] transition-all duration-300 w-0 group-hover:w-full" />
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" side="bottom" sideOffset={8} className="bg-background border border-border shadow-lg z-50 min-w-[220px]">
+                  <DropdownMenuContent align="end" side="bottom" sideOffset={88} className="bg-background border border-border shadow-lg z-50 min-w-[220px]">
                     {contactOptions.map((option) => (
                       <DropdownMenuItem 
                         key={option.label}
