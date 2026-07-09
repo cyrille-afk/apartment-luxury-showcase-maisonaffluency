@@ -104,6 +104,126 @@ export function fmtEUR(cents: number): string {
   }).format(cents / 100)}`;
 }
 
+// ─────────────────────────────────────────────────────────────
+// Pricing sanity check
+// ─────────────────────────────────────────────────────────────
+// Catches decimal / order-of-magnitude typos in the demo seed
+// (e.g. "€80,100 instead of €8,010" — a 10× error). Runs at
+// module load; a stricter live cross-check against
+// `designer_curator_picks.trade_price_cents` is available via
+// `verifyDemoPricesLive()` and is invoked once from the demo
+// launcher.
+//
+// Bounds are deliberately wide to accommodate every catalogue
+// category (accessory → statement furniture). Anything outside
+// these bounds, or an RRP < trade price, is almost certainly a
+// data-entry error.
+
+const PRICE_MIN_CENTS = 10_000;      // €100
+const PRICE_MAX_CENTS = 5_000_000;   // €50,000
+const MAX_TRADE_DISCOUNT_PCT = 0.5;  // trade should not be < 50% of RRP
+
+type PriceIssue = {
+  pickId: string;
+  title: string;
+  field: "rrpCents" | "tradePriceCents" | "ratio";
+  value: number;
+  reason: string;
+};
+
+export function checkDemoPriceSanity(pieces: DemoPiece[] = DEMO_PIECES): PriceIssue[] {
+  const issues: PriceIssue[] = [];
+  for (const p of pieces) {
+    const bounded = (field: "rrpCents" | "tradePriceCents", v: number) => {
+      if (v < PRICE_MIN_CENTS) {
+        issues.push({ pickId: p.pickId, title: p.title, field, value: v,
+          reason: `below €${PRICE_MIN_CENTS / 100} floor` });
+      } else if (v > PRICE_MAX_CENTS) {
+        issues.push({ pickId: p.pickId, title: p.title, field, value: v,
+          reason: `above €${PRICE_MAX_CENTS / 100} ceiling — likely 10× typo` });
+      }
+    };
+    bounded("rrpCents", p.rrpCents);
+    bounded("tradePriceCents", p.tradePriceCents);
+    if (p.tradePriceCents > p.rrpCents) {
+      issues.push({ pickId: p.pickId, title: p.title, field: "ratio",
+        value: p.tradePriceCents,
+        reason: `trade price (${fmtEUR(p.tradePriceCents)}) exceeds RRP (${fmtEUR(p.rrpCents)})` });
+    } else if (p.tradePriceCents < p.rrpCents * (1 - MAX_TRADE_DISCOUNT_PCT)) {
+      issues.push({ pickId: p.pickId, title: p.title, field: "ratio",
+        value: p.tradePriceCents,
+        reason: `trade discount > ${MAX_TRADE_DISCOUNT_PCT * 100}% off RRP — likely wrong order of magnitude` });
+    }
+  }
+  return issues;
+}
+
+// Runtime warning — logs once when the module loads.
+const _issues = checkDemoPriceSanity();
+if (_issues.length > 0 && typeof console !== "undefined") {
+  console.warn(
+    `[demoSandbox] Pricing sanity check found ${_issues.length} issue(s):`,
+    _issues,
+  );
+}
+
+/**
+ * Cross-check demo seed prices against the live DB values on
+ * `designer_curator_picks.trade_price_cents`. Warns if any seed
+ * differs from the live price by more than 20% or by any factor
+ * of 10 (the classic decimal typo).
+ *
+ * Call this once from the demo launcher — it is intentionally
+ * lazy so it never blocks initial page load.
+ */
+export async function verifyDemoPricesLive(
+  fetchImpl?: (ids: string[]) => Promise<Array<{ id: string; trade_price_cents: number | null }>>,
+): Promise<PriceIssue[]> {
+  const issues: PriceIssue[] = [];
+  try {
+    let rows: Array<{ id: string; trade_price_cents: number | null }> = [];
+    if (fetchImpl) {
+      rows = await fetchImpl(DEMO_PIECES.map((p) => p.pickId));
+    } else {
+      const mod = await import("@/integrations/supabase/client");
+      const { data, error } = await mod.supabase
+        .from("designer_curator_picks")
+        .select("id, trade_price_cents")
+        .in("id", DEMO_PIECES.map((p) => p.pickId));
+      if (error) throw error;
+      rows = (data || []) as Array<{ id: string; trade_price_cents: number | null }>;
+    }
+    const byId = new Map(rows.map((r) => [r.id, r.trade_price_cents]));
+    for (const p of DEMO_PIECES) {
+      const live = byId.get(p.pickId);
+      if (live == null) continue;
+      const ratio = p.tradePriceCents / live;
+      const off10x = ratio >= 9 || ratio <= 1 / 9;
+      const offBand = ratio > 1.2 || ratio < 0.8;
+      if (off10x || offBand) {
+        issues.push({
+          pickId: p.pickId,
+          title: p.title,
+          field: "tradePriceCents",
+          value: p.tradePriceCents,
+          reason: `seed ${fmtEUR(p.tradePriceCents)} vs live ${fmtEUR(live)} — ratio ${ratio.toFixed(2)}${off10x ? " (10× typo)" : ""}`,
+        });
+      }
+    }
+    if (issues.length > 0 && typeof console !== "undefined") {
+      console.warn(
+        `[demoSandbox] Live pricing drift — ${issues.length} piece(s) diverge from DB:`,
+        issues,
+      );
+    }
+  } catch (err) {
+    if (typeof console !== "undefined") {
+      console.warn("[demoSandbox] verifyDemoPricesLive failed:", err);
+    }
+  }
+  return issues;
+}
+
 export type DemoSteps = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
 
 export const DEMO_STEP_META: Record<
