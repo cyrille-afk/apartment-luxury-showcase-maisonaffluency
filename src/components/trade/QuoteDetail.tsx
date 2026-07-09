@@ -2749,11 +2749,11 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                               return !already;
                             })();
                             if (swatchList.length === 0 && !hasFabricTile) return null;
-                            return (
-                              <p className="font-body text-[10px] md:text-[11px] font-medium text-foreground/70">
-                                Finishes:
-                              </p>
-                            );
+                             return (
+                               <p className="font-body text-[10px] text-muted-foreground">
+                                 Finishes:
+                               </p>
+                             );
                           })()}
                           <div className="grid w-28 md:w-36 grid-cols-2 gap-2">
                             {((item as any).variant_swatches?.length
