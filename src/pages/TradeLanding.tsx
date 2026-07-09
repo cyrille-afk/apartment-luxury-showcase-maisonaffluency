@@ -451,6 +451,12 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
                   Sign in
                 </Link>
               </p>
+              <Link
+                to="/trade-demo"
+                className="mt-6 inline-flex items-center gap-2 px-5 py-2.5 border border-white/60 hover:border-white text-white font-body text-[11px] uppercase tracking-[0.2em] rounded-full transition-all duration-300 backdrop-blur-sm bg-white/5 hover:bg-white/10"
+              >
+                See it in action — 8-step demo
+              </Link>
             </div>
           </motion.div>
 
