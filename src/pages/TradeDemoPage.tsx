@@ -52,7 +52,7 @@ const NarrationCard: React.FC<{
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 10 }}
       transition={{ duration: 0.3 }}
-      className="fixed bottom-6 right-6 z-[60] w-[380px] max-w-[calc(100vw-2rem)] rounded-md border border-border bg-background/95 backdrop-blur-md shadow-2xl"
+      className="fixed bottom-6 left-6 z-[10001] w-[380px] max-w-[calc(100vw-2rem)] rounded-md border border-border bg-background/95 backdrop-blur-md shadow-2xl"
     >
       <div className="flex items-start justify-between p-5 pb-3 border-b border-border/50">
         <div>
