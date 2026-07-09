@@ -60,6 +60,21 @@ beforeAll(() => {
     return new Response(makeJpegBlob(), { status: 200 });
   }) as typeof fetch;
 
+  // Patch FileReader.readAsDataURL to synchronously resolve with a known
+  // JPEG data URL. jsdom's default readAsDataURL sometimes yields an empty
+  // base64 body for programmatic Blobs, which makes fetchImageDataUrl bail
+  // and the swatch strip disappear — defeating the very assertions below.
+  const dataUrl = `data:image/jpeg;base64,${TINY_JPEG_B64}`;
+  (FileReader.prototype as unknown as { readAsDataURL: (b: Blob) => void }).readAsDataURL =
+    function (this: FileReader) {
+      queueMicrotask(() => {
+        Object.defineProperty(this, "result", { value: dataUrl, configurable: true });
+        const evt = new Event("load");
+        this.onload?.(evt as ProgressEvent<FileReader>);
+        this.dispatchEvent?.(evt);
+      });
+    };
+
   if (typeof Blob.prototype.arrayBuffer !== "function") {
     (Blob.prototype as unknown as { arrayBuffer: () => Promise<ArrayBuffer> }).arrayBuffer =
       function () {
