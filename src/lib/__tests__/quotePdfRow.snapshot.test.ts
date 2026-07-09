@@ -110,6 +110,7 @@ const BASE_ARGS: QuotePdfArgs = {
       unitPriceCents: 707057,
       lineTotalCents: 707057,
       imageUrl: "https://example.com/chair.jpg",
+      dimensions: "W 220 × D 100 × H 74 cm",
       finishSwatches: [
         { name: "Mist Oak", imageUrl: "https://example.com/mist-oak.jpg" },
         { name: "Aries Pietra", imageUrl: "https://example.com/aries-pietra.jpg" },
@@ -219,6 +220,18 @@ describe("quotePdf row layout — regression guards", () => {
   it("does not render a Shipping meta line when no ship_mode was chosen", () => {
     const shipping = items.find((it) => /^Shipping:/i.test(it.str.trim()));
     expect(shipping, `unexpected shipping meta rendered: ${shipping?.str}`).toBeUndefined();
+  });
+
+  it("renders metric and imperial dimensions on separate PDF lines", () => {
+    const metric = items.find((it) => /Dimensions:\s*W 220 × D 100 × H 74 cm/.test(it.str));
+    const imperial = items.find((it) => /W 86\.6 × D 39\.4 × H 29\.1 in/.test(it.str));
+
+    expect(metric, "metric dimensions line missing").toBeDefined();
+    expect(imperial, "imperial dimensions line missing").toBeDefined();
+    expect(imperial!.y, "imperial dimensions must sit below metric dimensions").toBeGreaterThan(
+      metric!.y,
+    );
+    expect(Math.abs(imperial!.x - metric!.x), "dimension lines should share the same left edge").toBeLessThan(2);
   });
 
   it("does render Shipping meta when the user has picked a mode", async () => {
