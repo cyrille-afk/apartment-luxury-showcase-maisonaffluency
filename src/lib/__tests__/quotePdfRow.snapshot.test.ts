@@ -200,8 +200,11 @@ describe("quotePdf row layout — regression guards", () => {
   it("renders a FINISHES caption plus each swatch name below the image", () => {
     const captions = items.filter((it) => /^FINISHES$/i.test(it.str.trim()));
     expect(captions.length, "FINISHES caption missing above swatch strip").toBeGreaterThan(0);
-    expect(items.some((it) => it.str.trim() === "Mist Oak")).toBe(true);
-    expect(items.some((it) => it.str.trim() === "Aries Pietra")).toBe(true);
+    // pdfjs sometimes splits multi-word text into separate items — join and
+    // regex-search so "Mist Oak" / "Aries Pietra" match either way.
+    const joined = items.map((it) => it.str).join(" ");
+    expect(joined).toMatch(/Mist\s+Oak/);
+    expect(joined).toMatch(/Aries\s+Pietra/);
   });
 
   it("does not duplicate finish/fabric labels as right-side meta when the swatch strip renders", () => {
