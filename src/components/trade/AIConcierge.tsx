@@ -992,7 +992,7 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
   useEffect(() => {
     const handler = (e: Event) => {
       const detail = (e as CustomEvent).detail as
-        | { message?: string; openPanel?: boolean; stage?: Stage; actions?: ConciergeQuickAction[]; resetPanel?: boolean; replaceTimeline?: boolean; onboarding?: boolean; prefill?: string; autoSend?: boolean; displayMessage?: string }
+        | { message?: string; openPanel?: boolean; closeBriefBuilder?: boolean; stage?: Stage; actions?: ConciergeQuickAction[]; resetPanel?: boolean; replaceTimeline?: boolean; onboarding?: boolean; prefill?: string; autoSend?: boolean; displayMessage?: string }
         | undefined;
       const message = detail?.message?.trim();
       if (detail?.resetPanel) {
