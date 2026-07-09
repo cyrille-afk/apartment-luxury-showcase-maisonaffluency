@@ -92,7 +92,7 @@ interface NavigationProps {
 
 const Navigation = ({ borderless = false }: NavigationProps) => {
   const { user, isTradeUser } = useAuth();
-  // Trade-only visibility: hide the "Collectible Design" nav item from public visitors.
+  // Trade-only visibility: hide the "Collectibles" nav item from public visitors.
   const visibleLeftNavItems = isTradeUser
     ? leftNavItems
     : leftNavItems.filter((item) => item.href !== "/collectibles");
