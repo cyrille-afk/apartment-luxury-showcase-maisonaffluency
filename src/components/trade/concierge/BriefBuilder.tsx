@@ -1108,11 +1108,11 @@ export function BriefBuilder({
             type="button"
             onClick={handlePasteBrief}
             className="flex items-center gap-1 rounded-md border border-accent/40 px-2 py-1 font-body text-[11px] text-accent hover:bg-accent/10"
-            aria-label="Paste brief from clipboard"
-            title="Paste brief from clipboard"
+            aria-label="Paste the full architectural brief"
+            title="Paste the full architectural brief from clipboard"
           >
             <ClipboardPaste className="h-3.5 w-3.5" />
-            Paste brief
+            Paste the full architectural brief
           </button>
 
           <button
