@@ -1274,7 +1274,10 @@ export function BriefBuilder({
               </button>
             </div>
             <p className="mb-2 font-body text-[11px] text-muted-foreground">
-              The preview blocks direct clipboard access. Paste your brief here (⌘/Ctrl+V) and hit Apply.
+              Paste the full architectural brief here (⌘/Ctrl+V) and hit Apply. For example:
+              <span className="mt-1 block italic text-muted-foreground/80">
+                "The living room is 5×6m with a 4m high ceiling. I'm looking to furnish it in an understated luxury manner — sofa, armchairs, coffee table and side table. I'll select the rug and chandelier at a later date."
+              </span>
             </p>
             <textarea
               autoFocus
@@ -1282,7 +1285,7 @@ export function BriefBuilder({
               onChange={(e) => setPasteFallbackText(e.target.value)}
               rows={10}
               className="w-full rounded-md border border-accent/30 bg-muted/30 p-2 font-body text-[12px] outline-none focus:border-accent"
-              placeholder="Paste brief text here…"
+              placeholder="e.g. The living room is 5×6m with a 4m high ceiling. Understated luxury — sofa, armchairs, coffee table and side table. Rug and chandelier to be selected later."
             />
             {(() => {
               const t = pasteFallbackText.trim();
