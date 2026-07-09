@@ -30,40 +30,57 @@ interface FeaturedDesigner {
   image_url: string | null;
 }
 
-const FEATURED_SLUGS = [
-  "alexander-lamont",
-  "leo-aerts-alinea",
-  "apparatus-studio",
-  "atelier-demichelis",
-  "christopher-boots",
-  "delcourt-collection",
-  "ecart",
-  "emmanuel-babled",
-  "emmanuel-levet-stenne",
-  "felix-agostini",
-  "hamrei",
-  "kerstens",
-  "kiko-lopez",
-  "ozone",
-  "pierre-bonnefille",
-  "thierry-lemaire",
-  "victoria-magniant",
+const FEATURED_GROUPS = [
+  {
+    label: "Featured Ateliers",
+    slugs: [
+      "alexander-lamont",
+      "apparatus-studio",
+      "pierre-bonnefille",
+      "thierry-lemaire",
+      "delcourt-collection",
+    ],
+  },
+  {
+    label: "Contemporary Talents",
+    slugs: [
+      "emmanuel-babled",
+      "christopher-boots",
+      "kiko-lopez",
+      "ozone",
+      "hamrei",
+      "victoria-magniant",
+    ],
+  },
+  {
+    label: "Architectural Masters",
+    slugs: [
+      "leo-aerts-alinea",
+      "atelier-demichelis",
+      "ecart",
+      "emmanuel-levet-stenne",
+      "felix-agostini",
+      "kerstens",
+    ],
+  },
 ];
+
+const ALL_FEATURED_SLUGS = FEATURED_GROUPS.flatMap((g) => g.slugs);
 
 function useFeaturedDesigners() {
   return useQuery({
-    queryKey: ["designers-hero-featured-v2", FEATURED_SLUGS],
+    queryKey: ["designers-hero-featured-v2", ALL_FEATURED_SLUGS],
     staleTime: 1000 * 60 * 30,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("designers")
         .select("slug, name, founder, hero_image_url, image_url")
-        .in("slug", FEATURED_SLUGS)
+        .in("slug", ALL_FEATURED_SLUGS)
         .eq("is_published", true);
       if (error) throw error;
-      return ((data || []) as FeaturedDesigner[])
-        .filter((d) => d.hero_image_url || d.image_url)
-        .sort((a, b) => a.name.localeCompare(b.name, "en", { sensitivity: "base" }));
+      return ((data || []) as FeaturedDesigner[]).filter(
+        (d) => d.hero_image_url || d.image_url
+      );
     },
   });
 }
