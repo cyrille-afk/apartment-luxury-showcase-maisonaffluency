@@ -717,50 +717,47 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
           </div>
           <div className="flex items-center justify-between w-full pb-3">
             <div className="flex items-center gap-6 lg:gap-10">
-              {visibleLeftNavItems.map((item, index) => (
-                <React.Fragment key={item.href}>
-                  <button 
-                    onClick={() => { setMegaMenuOpen(false); handleNavClick(item.href); }} 
-                    className={cn(
-                      "font-body text-xs uppercase tracking-[0.2em] transition-all duration-300 relative group whitespace-nowrap flex items-center gap-1.5 text-foreground",
-                      (activeSection === item.href || isRouteActive(item.href)) && "font-medium"
-                    )}
-                  >
-                    {item.label}
-                    <span className={cn(
-                      "absolute -bottom-1 left-0 h-0.5 bg-[hsl(var(--accent))] transition-all duration-300",
-                      (activeSection === item.href || isRouteActive(item.href)) ? "w-full" : "w-0 group-hover:w-full"
-                    )} />
-                  </button>
-
-                  {/* Insert All Categories after Gallery (index 0) */}
-                  {index === 0 && (
-                    <button
-                      onClick={() => { setMegaMenuOpen(!megaMenuOpen); setMegaMenuHoverCat(null); }}
-                      className={cn(
-                        "font-body text-xs uppercase tracking-[0.2em] transition-all duration-300 flex items-center gap-1.5 whitespace-nowrap outline-none relative group text-foreground",
-                        (megaMenuOpen || isOnCategoryRoute) && "font-medium"
-                      )}
-                    >
-                      <LayoutGrid className="h-3.5 w-3.5 text-[hsl(var(--accent))]" />
-                      All Categories
-                      <ChevronDown className={`h-3 w-3 transition-transform duration-200 ${megaMenuOpen ? "rotate-180" : ""}`} />
-                      <span className={cn(
-                        "absolute -bottom-1 left-0 h-0.5 bg-[hsl(var(--accent))] transition-all duration-300",
-                        (megaMenuOpen || isOnCategoryRoute) ? "w-full" : "w-0 group-hover:w-full"
-                      )} />
-                    </button>
-                  )}
-                </React.Fragment>
-              ))}
-
-              {/* New In — between Collectible Design and Journal */}
+              {/* New In — first in the left nav */}
               <button
                 onClick={() => { setMegaMenuOpen(false); handleNavClick("/new-in"); }}
                 className="font-body text-xs uppercase tracking-[0.2em] font-bold transition-all duration-300 relative group whitespace-nowrap flex items-center gap-1.5 text-[hsl(var(--gold))] hover:text-foreground after:absolute after:bottom-0 after:left-0 after:w-full after:h-px after:bg-foreground after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-300 after:origin-left pb-0.5"
               >
                 New In
               </button>
+
+              {/* All Categories — second in the left nav */}
+              <button
+                onClick={() => { setMegaMenuOpen(!megaMenuOpen); setMegaMenuHoverCat(null); }}
+                className={cn(
+                  "font-body text-xs uppercase tracking-[0.2em] transition-all duration-300 flex items-center gap-1.5 whitespace-nowrap outline-none relative group text-foreground",
+                  (megaMenuOpen || isOnCategoryRoute) && "font-medium"
+                )}
+              >
+                <LayoutGrid className="h-3.5 w-3.5 text-[hsl(var(--accent))]" />
+                All Categories
+                <ChevronDown className={`h-3 w-3 transition-transform duration-200 ${megaMenuOpen ? "rotate-180" : ""}`} />
+                <span className={cn(
+                  "absolute -bottom-1 left-0 h-0.5 bg-[hsl(var(--accent))] transition-all duration-300",
+                  (megaMenuOpen || isOnCategoryRoute) ? "w-full" : "w-0 group-hover:w-full"
+                )} />
+              </button>
+
+              {visibleLeftNavItems.map((item) => (
+                <button 
+                  key={item.href}
+                  onClick={() => { setMegaMenuOpen(false); handleNavClick(item.href); }} 
+                  className={cn(
+                    "font-body text-xs uppercase tracking-[0.2em] transition-all duration-300 relative group whitespace-nowrap flex items-center gap-1.5 text-foreground",
+                    (activeSection === item.href || isRouteActive(item.href)) && "font-medium"
+                  )}
+                >
+                  {item.label}
+                  <span className={cn(
+                    "absolute -bottom-1 left-0 h-0.5 bg-[hsl(var(--accent))] transition-all duration-300",
+                    (activeSection === item.href || isRouteActive(item.href)) ? "w-full" : "w-0 group-hover:w-full"
+                  )} />
+                </button>
+              ))}
             </div>
 
             <span className="w-px h-3 bg-border/60" aria-hidden="true" />
