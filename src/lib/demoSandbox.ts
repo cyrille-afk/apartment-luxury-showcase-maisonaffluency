@@ -61,7 +61,7 @@ export const DEMO_PIECES: DemoPiece[] = [
     brand: "Man of Parts",
     category: "Lounge Chair",
     imageUrl:
-      "https://res.cloudinary.com/dif1oamtj/image/upload/w_800,c_fill,q_auto:good,f_auto/v1782206599/Frenchmen_a_manofparts.jpg",
+      "https://res.cloudinary.com/dif1oamtj/image/upload/w_800,c_fill,q_auto:good,f_auto/v1782140189/FRENCHMAN_STREE_covera_h34oca.jpg",
     dimensions: "W 88 × D 92 × H 78 cm — SH 40 cm",
     finishes: { base: "Nude Oak", top: "Leather Cat. Sierra" },
     finishOptions: {
