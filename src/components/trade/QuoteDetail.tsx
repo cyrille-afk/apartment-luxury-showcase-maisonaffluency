@@ -715,24 +715,43 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                 if (pd) {
                   dimsFromPick = pd;
                 } else if (Array.isArray(pick.size_variants)) {
-                  const seen = new Set<string>();
-                  const dimLabels: string[] = [];
                   const isDimStr = (s: string) =>
                     /\b(?:cm|mm|in|inches?|")\b/i.test(s) ||
                     /[×xX]\s*\d/.test(s) ||
                     /Ø\s*\d/.test(s);
-                  for (const v of pick.size_variants as Array<{ label?: string | null; base?: string | null; top?: string | null }>) {
-                    // Dims may live in label, base, or top — collect any dim-like tokens.
+                  const extractDims = (v: { label?: string | null; base?: string | null; top?: string | null }) => {
                     for (const field of [v?.label, v?.base, v?.top]) {
                       const { dims } = splitFinishAndDimensions(field);
                       let d = (dims || "").trim();
                       if (!d && field && isDimStr(field)) d = String(field).trim();
-                      // Strip a leading qualifier like "Rectangle - " when dims follow.
                       d = d.replace(/^[^\d×xXØ]*?-\s+(?=.*(?:cm|mm|in|"|×|x|Ø))/i, "").trim();
-                      if (d && !seen.has(d)) { seen.add(d); dimLabels.push(d); }
+                      if (d) return d;
                     }
+                    return "";
+                  };
+                  const variants = pick.size_variants as Array<{ label?: string | null; base?: string | null; top?: string | null }>;
+                  // Prefer variants whose base/top match the item's selected variant_label.
+                  const selLabel = (it.variant_label || "").toLowerCase();
+                  const selParts = selLabel.split(/\s*[·•/]\s*/).map((p) => p.trim()).filter(Boolean);
+                  const matched = selParts.length
+                    ? variants.filter((v) => {
+                        const b = String(v?.base || "").toLowerCase();
+                        const t = String(v?.top || "").toLowerCase();
+                        return selParts.every((p) => b.includes(p) || t.includes(p) || (b + " " + t).includes(p));
+                      })
+                    : variants;
+                  const pool = matched.length > 0 ? matched : variants;
+                  const seen = new Set<string>();
+                  const dimLabels: string[] = [];
+                  for (const v of pool) {
+                    const d = extractDims(v);
+                    if (d && !seen.has(d)) { seen.add(d); dimLabels.push(d); }
                   }
-                  if (dimLabels.length > 0) dimsFromPick = dimLabels.join(" · ");
+                  // When we couldn't narrow by selection, show only the first
+                  // (mirrors tearsheet behavior — one variant per line).
+                  if (dimLabels.length > 0) {
+                    dimsFromPick = matched.length > 0 ? dimLabels.join(" · ") : dimLabels[0];
+                  }
                 }
               }
               const patchedProduct = dimsFromPick && it.trade_products
