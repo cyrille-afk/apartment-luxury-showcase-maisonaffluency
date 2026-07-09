@@ -598,3 +598,15 @@ input, select, textarea {
 /* Inner span (the "A") inherits by default so Tailwind's
    group-hover:text-accent and group-hover:text-primary still apply. */
 .nav-over-hero .font-brand > span { color: inherit; }
+
+/* Keep the "Est. 2017" lockup and its hairline dividers black alongside the
+   wordmark, with a subtle light halo so they stay crisp on the hero image. */
+.nav-over-hero .brand-lockup,
+.nav-over-hero .brand-lockup * {
+  color: hsl(var(--foreground)) !important;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.35) !important;
+}
+.nav-over-hero .brand-lockup .bg-foreground {
+  background-color: hsl(var(--foreground)) !important;
+  box-shadow: 0 1px 2px rgba(255, 255, 255, 0.35);
+}
