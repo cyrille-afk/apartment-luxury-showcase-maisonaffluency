@@ -419,6 +419,12 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
               <p className="font-display text-2xl sm:text-3xl lg:text-5xl text-white mt-3 drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)] tracking-widest font-light">
                 Trade Program
               </p>
+              <Link
+                to="/trade-demo"
+                className="mt-8 inline-flex items-center gap-2 px-7 py-3 bg-white hover:bg-white/90 text-foreground font-body text-xs uppercase tracking-[0.2em] rounded-full transition-all duration-300 font-bold shadow-lg"
+              >
+                ▶ See it in action — 8-step demo
+              </Link>
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
@@ -430,7 +436,7 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
                   }
                   scrollToForm();
                 }}
-                className="flex items-center gap-3 mt-10 w-full max-w-lg px-4"
+                className="flex items-center gap-3 mt-6 w-full max-w-lg px-4"
               >
                 <input
                   type="email"
@@ -451,12 +457,6 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
                   Sign in
                 </Link>
               </p>
-              <Link
-                to="/trade-demo"
-                className="mt-6 inline-flex items-center gap-2 px-5 py-2.5 border border-white/60 hover:border-white text-white font-body text-[11px] uppercase tracking-[0.2em] rounded-full transition-all duration-300 backdrop-blur-sm bg-white/5 hover:bg-white/10"
-              >
-                See it in action — 8-step demo
-              </Link>
             </div>
           </motion.div>
 
