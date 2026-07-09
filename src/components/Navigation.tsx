@@ -786,20 +786,8 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                 <span className="absolute -bottom-1 left-0 h-0.5 bg-[hsl(var(--accent))] transition-all duration-300 w-0 group-hover:w-full" />
               </button>
 
-              {/* Trade Program */}
-              {rightNavItems.map((item) => (
-                <div key={item.href} className="relative group/trade flex items-center gap-2">
-                  <button
-                    onClick={() => {
-                      setMegaMenuOpen(false);
-                      handleNavClick(item.href);
-                    }}
-                    className="font-body text-xs uppercase tracking-[0.2em] font-bold transition-all duration-300 relative whitespace-nowrap flex items-center gap-1.5 bg-accent text-accent-foreground hover:bg-accent/80 px-3 py-1 rounded-full"
-                  >
-                    {item.label}
-                  </button>
-                </div>
-              ))}
+              {/* Trade Program removed from bottom-right nav — accessible via user menu */}
+              {/* {rightNavItems.map((item) => (...))} */}
             </div>
           </div>
 
