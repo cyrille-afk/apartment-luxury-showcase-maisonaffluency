@@ -436,7 +436,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                 {/* Trade Program — separated */}
                 <div 
                   className="mt-6 pt-4 border-t border-border/50 animate-fade-in opacity-0"
-                  style={{ animationDelay: `${(visibleLeftNavItems.length + 2) * 120}ms`, animationFillMode: 'forwards' }}
+                  style={{ animationDelay: `${(visibleLeftNavItems.length + 3) * 120}ms`, animationFillMode: 'forwards' }}
                 >
                   {rightNavItems.map((item) => (
                     <button 
