@@ -312,10 +312,12 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
   };
 
   return <><nav className={cn(
-      "fixed top-0 left-0 right-0 z-50 pt-[env(safe-area-inset-top)]",
-      borderless
-        ? "bg-background border-b border-transparent"
-        : "bg-white backdrop-blur-sm border-b border-border/50"
+      "fixed top-0 left-0 right-0 z-50 pt-[env(safe-area-inset-top)] transition-colors duration-500",
+      isOverHero
+        ? "nav-over-hero bg-transparent border-b border-transparent"
+        : borderless
+          ? "bg-background border-b border-transparent"
+          : "bg-white backdrop-blur-sm border-b border-border/50"
     )}>
       <div className="mx-auto max-w-7xl px-4 md:px-12 lg:px-20">
         {/* Mobile: single row */}
