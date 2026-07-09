@@ -1,7 +1,6 @@
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
-import "@fontsource-variable/montserrat";
 import { startBuildVersionWatcher } from "./lib/buildVersionWatcher";
 import HmrStatusBanner from "./components/dev/HmrStatusBanner";
 import BuildUpdateBanner from "./components/BuildUpdateBanner";

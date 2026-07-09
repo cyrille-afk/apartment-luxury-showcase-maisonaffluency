@@ -104,7 +104,7 @@ const Hero = () => {
           </h1>
 
           <div className="flex w-full max-w-3xl flex-col items-start">
-            <p className="text-base leading-relaxed text-white text-left font-body font-light md:text-xl lg:text-2xl hero-fade-in-delayed-3 tracking-wide">
+            <p className="text-base leading-relaxed text-white text-left font-serif md:text-xl lg:text-2xl font-medium hero-fade-in-delayed-3">
               <span className="hidden md:inline">From Couture Furniture to Collectible Designs Items,
               <br /> Discover Emerging Talents and Design Masters In Our Gallery
               <br /> or Through the Best Ateliers and Designer Workshops We Partner&nbsp;With</span>
