@@ -429,13 +429,6 @@ const TradeLayout = () => {
             {/* Mobile: centered Trade Portal label removed to avoid overlap with studio switcher */}
             {/* Right: project switcher + trade price toggle + notification bell */}
             <div className="ml-auto flex items-center gap-2 md:gap-4">
-              <Link
-                to="/trade-demo"
-                className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 bg-[hsl(var(--gold)/0.12)] hover:bg-[hsl(var(--gold)/0.2)] text-[hsl(var(--gold))] border border-[hsl(var(--gold)/0.4)] font-body text-[10px] uppercase tracking-[0.18em] rounded-full transition-colors"
-                title="8-step interactive demo"
-              >
-                ▶ Demo
-              </Link>
               <StudioSwitcher />
               <GlobalProjectSwitcher />
               <div className="hidden sm:block">
