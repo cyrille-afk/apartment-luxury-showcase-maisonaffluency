@@ -319,7 +319,7 @@ export default function TradeCollectiblesAdmin() {
         <div className="p-8 max-w-xl space-y-3">
           <h1 className="font-display text-xl">Admin access required</h1>
           <p className="text-sm text-muted-foreground font-body">
-            Sign in with an admin account to manage Collectible Design.
+            Sign in with an admin account to manage Collectibles.
           </p>
         </div>
       );
@@ -330,7 +330,7 @@ export default function TradeCollectiblesAdmin() {
   return (
     <>
       <Helmet>
-        <title>Collectible Design Editor — Trade Admin</title>
+        <title>Collectibles Editor — Trade Admin</title>
       </Helmet>
 
       <div className="space-y-6">
@@ -344,7 +344,7 @@ export default function TradeCollectiblesAdmin() {
               Designer Editor
             </Link>
             <h1 className="font-display text-2xl tracking-wide mt-1">
-              Collectible Design Editor
+              Collectibles Editor
             </h1>
             <p className="text-sm text-muted-foreground mt-1 font-body">
               {rows.length} ateliers · {tradeOnlyCount} Trade Only · {editedCount} edited ·
