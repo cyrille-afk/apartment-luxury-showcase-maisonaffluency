@@ -232,7 +232,7 @@ export const DEMO_STEP_META: Record<
 > = {
   1: {
     title: "1 · Start with a city",
-    body: `Open the AI Concierge and mention the market you're working in. It picks up "${DEMO_CITY}" and tailors every recommendation to that context.`,
+    body: `Click on "Open the Concierge Panel" to start an AI-assisted session. The demo is pre-set to ${DEMO_CITY} — every recommendation will be tuned to that market.`,
     cta: "Open the Concierge",
   },
   2: {
