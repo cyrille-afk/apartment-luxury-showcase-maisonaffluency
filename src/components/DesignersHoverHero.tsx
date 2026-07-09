@@ -30,40 +30,57 @@ interface FeaturedDesigner {
   image_url: string | null;
 }
 
-const FEATURED_SLUGS = [
-  "alexander-lamont",
-  "leo-aerts-alinea",
-  "apparatus-studio",
-  "atelier-demichelis",
-  "christopher-boots",
-  "delcourt-collection",
-  "ecart",
-  "emmanuel-babled",
-  "emmanuel-levet-stenne",
-  "felix-agostini",
-  "hamrei",
-  "kerstens",
-  "kiko-lopez",
-  "ozone",
-  "pierre-bonnefille",
-  "thierry-lemaire",
-  "victoria-magniant",
+const FEATURED_GROUPS = [
+  {
+    label: "Featured Ateliers",
+    slugs: [
+      "alexander-lamont",
+      "apparatus-studio",
+      "pierre-bonnefille",
+      "thierry-lemaire",
+      "delcourt-collection",
+    ],
+  },
+  {
+    label: "Contemporary Talents",
+    slugs: [
+      "emmanuel-babled",
+      "christopher-boots",
+      "kiko-lopez",
+      "ozone",
+      "hamrei",
+      "victoria-magniant",
+    ],
+  },
+  {
+    label: "Architectural Masters",
+    slugs: [
+      "leo-aerts-alinea",
+      "atelier-demichelis",
+      "ecart",
+      "emmanuel-levet-stenne",
+      "felix-agostini",
+      "kerstens",
+    ],
+  },
 ];
+
+const ALL_FEATURED_SLUGS = FEATURED_GROUPS.flatMap((g) => g.slugs);
 
 function useFeaturedDesigners() {
   return useQuery({
-    queryKey: ["designers-hero-featured-v2", FEATURED_SLUGS],
+    queryKey: ["designers-hero-featured-v2", ALL_FEATURED_SLUGS],
     staleTime: 1000 * 60 * 30,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("designers")
         .select("slug, name, founder, hero_image_url, image_url")
-        .in("slug", FEATURED_SLUGS)
+        .in("slug", ALL_FEATURED_SLUGS)
         .eq("is_published", true);
       if (error) throw error;
-      return ((data || []) as FeaturedDesigner[])
-        .filter((d) => d.hero_image_url || d.image_url)
-        .sort((a, b) => a.name.localeCompare(b.name, "en", { sensitivity: "base" }));
+      return ((data || []) as FeaturedDesigner[]).filter(
+        (d) => d.hero_image_url || d.image_url
+      );
     },
   });
 }
@@ -111,16 +128,31 @@ const DesignersHoverHero = () => {
     return () => media?.removeEventListener?.("change", update);
   }, []);
 
+  // Preserve the curated group order while still producing a flat list for
+  // wheel/swipe navigation and default-active seeding.
+  const groupedItems = useMemo(() => {
+    const bySlug = new Map((designers || []).map((d) => [d.slug, d]));
+    return FEATURED_GROUPS.map((g) => ({
+      ...g,
+      designers: g.slugs
+        .map((slug) => bySlug.get(slug))
+        .filter((d): d is FeaturedDesigner => Boolean(d)) as FeaturedDesigner[],
+    }));
+  }, [designers]);
+
+  const items = useMemo(
+    () => groupedItems.flatMap((g) => g.designers),
+    [groupedItems]
+  );
+  const hasItems = items.length > 0;
+
   // Pre-seed active on first render once data arrives so the hero is never
   // a void on entry — the first designer acts as default.
   useEffect(() => {
-    if (!activeSlug && designers && designers.length > 0) {
-      setActiveSlug(designers[0].slug);
+    if (!activeSlug && items.length > 0) {
+      setActiveSlug(items[0].slug);
     }
-  }, [designers, activeSlug]);
-
-  const items = designers ?? [];
-  const hasItems = items.length > 0;
+  }, [items, activeSlug]);
 
   // Desktop: wheel over the names list advances through designers.
   useEffect(() => {
@@ -323,37 +355,61 @@ const DesignersHoverHero = () => {
               aria-label="Featured designers shortcut list"
               className="inline-block"
             >
-              <ul className="flex flex-col gap-0 text-left">
-                {items.map((d) => {
-                  const [first, last] = splitName(d.name);
-                  const isActive = d.slug === activeSlug;
-                  const isDimmed = activeSlug !== null && !isActive;
-                  const childBrand = d.founder && d.founder !== d.name;
-                  return (
-                    <li key={d.slug} className="text-left leading-[1.08] sm:leading-[1.12]">
-                      <Link
-                        to={`/designers/${d.slug}`}
-                        onMouseEnter={() => setActiveSlug(d.slug)}
-                        onFocus={() => setActiveSlug(d.slug)}
-                        className={cn(
-                          "inline-block whitespace-nowrap",
-                          "font-display font-light tracking-tight",
-                          "text-sm sm:text-base md:text-[20px] leading-[1.08] sm:leading-[1.12]",
-                          "transition-colors duration-[1200ms] ease-out",
-                          isDimmed ? "text-white/35" : "text-white/95"
-                        )}
-                      >
-                        <span>
-                          {first}
-                          {last && <span className="italic"> {last}</span>}
-                          {childBrand && (
-                            <span className="opacity-80"> - {d.founder}</span>
-                          )}
-                        </span>
-                      </Link>
-                    </li>
-                  );
-                })}
+              <ul className="flex flex-col text-left">
+                {groupedItems.map((group, groupIdx) => (
+                  <li
+                    key={group.label}
+                    className={cn(
+                      "flex flex-col text-left",
+                      groupIdx > 0 && "mt-5 md:mt-6"
+                    )}
+                  >
+                    <span className="text-[10px] uppercase tracking-[0.3em] font-body text-white/50 mb-2 md:mb-3">
+                      {group.label}
+                    </span>
+                    <ul className="flex flex-col gap-0 text-left">
+                      {group.designers.map((d) => {
+                        const [first, last] = splitName(d.name);
+                        const isActive = d.slug === activeSlug;
+                        const isDimmed = activeSlug !== null && !isActive;
+                        const childBrand = d.founder && d.founder !== d.name;
+                        return (
+                          <li
+                            key={d.slug}
+                            className="text-left leading-[1.3] sm:leading-[1.34]"
+                          >
+                            <Link
+                              to={`/designers/${d.slug}`}
+                              onMouseEnter={() => setActiveSlug(d.slug)}
+                              onFocus={() => setActiveSlug(d.slug)}
+                              className={cn(
+                                "inline-block whitespace-nowrap",
+                                "text-sm sm:text-base md:text-[20px] leading-[1.3] sm:leading-[1.34]",
+                                "transition-colors duration-[1200ms] ease-out",
+                                isDimmed
+                                  ? "font-body font-light tracking-normal text-white/35"
+                                  : "font-display font-light tracking-tight text-white/95"
+                              )}
+                            >
+                              <span>
+                                {first}
+                                {last && (
+                                  <span className={cn(!isDimmed && "italic")}>
+                                    {" "}
+                                    {last}
+                                  </span>
+                                )}
+                                {childBrand && (
+                                  <span className="opacity-80"> - {d.founder}</span>
+                                )}
+                              </span>
+                            </Link>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </li>
+                ))}
               </ul>
             </nav>
           </div>
