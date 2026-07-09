@@ -117,6 +117,20 @@ const Index = ({ categoryMode = false }: IndexProps = {}) => {
   // Track scroll depth for GA4 engagement
   useScrollDepthTracking();
 
+  // Lock page scrolling on the homepage hero — gallery is reachable only via nav.
+  useEffect(() => {
+    if (routeIsCategory) return;
+    const prevHtml = document.documentElement.style.overflow;
+    const prevBody = document.body.style.overflow;
+    document.documentElement.style.overflow = "hidden";
+    document.body.style.overflow = "hidden";
+    window.scrollTo(0, 0);
+    return () => {
+      document.documentElement.style.overflow = prevHtml;
+      document.body.style.overflow = prevBody;
+    };
+  }, [routeIsCategory]);
+
   // The homepage must render its below-fold sections deterministically on first
   // load. Delaying these behind `load`/`requestIdleCallback` made production
   // visits look as if Instagram/footer were missing on slower browsers.
