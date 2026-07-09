@@ -84,7 +84,7 @@ export const DEMO_PIECES: DemoPiece[] = [
     brand: "Man of Parts",
     category: "Coffee Table",
     imageUrl:
-      "https://res.cloudinary.com/dif1oamtj/image/upload/w_800,c_fill,q_auto:good,f_auto/v1782206599/PraiaDaGranja_a_manofparts.jpg",
+      "https://res.cloudinary.com/dif1oamtj/image/upload/w_800,c_fill,q_auto:good,f_auto/v1782128425/CoverA_u05lfp.jpg",
     dimensions: "W 120 × D 80 × H 32 cm (Rectangle)",
     finishes: { base: "Travertine Silver", top: "Tobacco Oak Base" },
     finishOptions: {
