@@ -424,32 +424,55 @@ const DesignersHoverHero = () => {
         ))}
       </div>
 
-      {/* Active designer caption — dynamic visual link on hover.
-          Fades in on desktop only so it doesn't crowd the mobile layout. */}
+      {/* Active designer portal — the entire right half of the hero is a
+          clickable link to the active designer's profile. Caption sits in the
+          bottom-right corner and animates in response to hovering anywhere
+          across this region (group). */}
       {(() => {
         const active = items.find((d) => d.slug === activeSlug);
         if (!active) return null;
         const [first, last] = splitName(active.name);
+        // Custom "View" text cursor — small SVG rendered as the mouse pointer
+        // to signal that clicking anywhere on the right image navigates.
+        const viewCursor =
+          "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='72' height='30' viewBox='0 0 72 30'><rect x='0.5' y='0.5' width='71' height='29' rx='14.5' fill='rgba(0,0,0,0.55)' stroke='rgba(255,255,255,0.85)'/><text x='36' y='19' text-anchor='middle' font-family='Georgia,serif' font-size='12' fill='white' letter-spacing='2'>VIEW</text></svg>\") 36 15, pointer";
         return (
           <Link
             key={active.slug}
             to={`/designers/${active.slug}`}
             aria-label={`View ${active.name}'s full collection`}
-            className="hidden md:flex absolute right-12 lg:right-28 bottom-24 lg:bottom-24 z-10 flex-col items-end text-right text-white pointer-events-auto group"
+            className="hidden md:block absolute right-0 top-0 h-full w-1/2 z-10 pointer-events-auto group"
+            style={{ cursor: viewCursor }}
           >
-            <span
-              key={`${active.slug}-title`}
-              className="font-display font-light tracking-tight text-2xl lg:text-3xl animate-in fade-in duration-700"
-            >
-              {first}
-              {last && <span className="italic"> {last}</span>}
-            </span>
-            <span
-              key={`${active.slug}-cta`}
-              className="mt-2 text-[10px] uppercase tracking-[0.35em] font-body text-white/70 group-hover:text-white transition-colors animate-in fade-in duration-1000 delay-200 fill-mode-both"
-            >
-              Click to view full collection
-            </span>
+            <div className="absolute right-12 lg:right-28 bottom-24 lg:bottom-24 flex flex-col items-end text-right text-white">
+              <span
+                key={`${active.slug}-title`}
+                className="font-display font-light tracking-tight text-2xl lg:text-3xl animate-in fade-in duration-700"
+              >
+                {first}
+                {last && <span className="italic"> {last}</span>}
+              </span>
+              <span
+                key={`${active.slug}-cta`}
+                className="mt-2 inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.35em] font-body text-white/70 group-hover:text-white transition-colors animate-in fade-in duration-1000 delay-200 fill-mode-both"
+              >
+                <span className="relative">
+                  Click to view full collection
+                  {/* Sliding underline on hover */}
+                  <span
+                    aria-hidden="true"
+                    className="pointer-events-none absolute left-0 -bottom-0.5 h-px bg-white/80 w-0 group-hover:w-full transition-[width] duration-500 ease-out"
+                  />
+                </span>
+                {/* Arrow reveals + slides on hover */}
+                <span
+                  aria-hidden="true"
+                  className="inline-block translate-x-[-4px] opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all duration-500 ease-out"
+                >
+                  →
+                </span>
+              </span>
+            </div>
           </Link>
         );
       })()}
