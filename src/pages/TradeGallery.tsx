@@ -102,11 +102,13 @@ const TradeGallery = () => {
   }, [designerSlugMap, navigate, location.pathname, location.search]);
 
   // Price lookup from trade_products table
-  const [priceLookup, setPriceLookup] = useState<Map<string, { cents: number; currency: string; price_unit?: string }>>(new Map());
-  const [priceEntries, setPriceEntries] = useState<{ name: string; cents: number; currency: string; price_unit?: string }[]>([]);
+  const [priceLookup, setPriceLookup] = useState<Map<string, { cents: number; currency: string; price_unit?: string; price_prefix?: string | null; brand_name?: string | null }>>(new Map());
+  const [priceEntries, setPriceEntries] = useState<{ name: string; cents: number; currency: string; price_unit?: string; price_prefix?: string | null; brand_name?: string | null }[]>([]);
 
   const normalizeName = (s: string) =>
     s.toLowerCase().replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim();
+  const stripDesignerSuffix = (s: string) =>
+    s.replace(/\s+by\s+[^,–—]+$/i, "").trim();
   const tokenizeName = (s: string) =>
     normalizeName(s).split(" ").filter((t) => t.length > 2);
 
@@ -117,22 +119,27 @@ const TradeGallery = () => {
     // prices from there in the gallery views.
     const { data: cpData } = await supabase
       .from("designer_curator_picks")
-      .select("title, trade_price_cents, currency, price_prefix, size_variants");
+      .select("title, trade_price_cents, currency, price_prefix, size_variants, designers(name, founder)");
 
-    const lookup = new Map<string, { cents: number; currency: string; price_unit?: string; price_prefix?: string | null }>();
-    const entries: { name: string; cents: number; currency: string; price_unit?: string; price_prefix?: string | null }[] = [];
+    const lookup = new Map<string, { cents: number; currency: string; price_unit?: string; price_prefix?: string | null; brand_name?: string | null }>();
+    const entries: { name: string; cents: number; currency: string; price_unit?: string; price_prefix?: string | null; brand_name?: string | null }[] = [];
 
-    const addEntry = (name: string, cents: number, currency: string, price_unit?: string, price_prefix?: string | null) => {
-      const entry = { name, cents, currency, price_unit, price_prefix };
+    const addEntry = (name: string, cents: number, currency: string, price_unit?: string, price_prefix?: string | null, brand_name?: string | null) => {
+      const entry = { name, cents, currency, price_unit, price_prefix, brand_name };
       entries.push(entry);
-      lookup.set(name.trim().toLowerCase(), entry);
-      const norm = normalizeName(name);
-      if (norm) lookup.set(norm, entry);
+      const aliases = new Set([name, stripDesignerSuffix(name)].filter(Boolean));
+      for (const alias of aliases) {
+        lookup.set(alias.trim().toLowerCase(), entry);
+        const norm = normalizeName(alias);
+        if (norm) lookup.set(norm, entry);
+      }
     };
 
     for (const p of cpData ?? []) {
+      const designer = Array.isArray((p as any).designers) ? (p as any).designers[0] : (p as any).designers;
+      const brandName = designer?.name ? normalizeBrandToParent(designer.name) : null;
       if (p.trade_price_cents) {
-        addEntry(p.title, p.trade_price_cents, p.currency, undefined, p.price_prefix);
+        addEntry(p.title, p.trade_price_cents, p.currency, undefined, p.price_prefix, brandName);
         continue;
       }
       // Fallback: derive a "from" price from size_variants when the row-level
@@ -145,7 +152,7 @@ const TradeGallery = () => {
       if (variantPrices.length > 0) {
         const minPrice = Math.min(...variantPrices);
         const prefix = variantPrices.length > 1 ? (p.price_prefix || "from") : p.price_prefix;
-        addEntry(p.title, minPrice, p.currency, undefined, prefix);
+        addEntry(p.title, minPrice, p.currency, undefined, prefix, brandName);
       }
     }
 
@@ -236,9 +243,34 @@ const TradeGallery = () => {
     if (product.subtitle) {
       const comboKey = `${nameKey} ${product.subtitle.trim().toLowerCase()}`;
       if (priceLookup.has(comboKey)) return priceLookup.get(comboKey)!;
+      const byKey = `${nameKey} by ${product.subtitle.trim().toLowerCase()}`;
+      if (priceLookup.has(byKey)) return priceLookup.get(byKey)!;
     }
     const norm = normalizeName(product.product_name);
     if (priceLookup.has(norm)) return priceLookup.get(norm)!;
+
+    // Last-resort match is brand-scoped and token-overlap based. This covers
+    // curated title drift such as "Madison Avenue Cocktail Table" in the grid
+    // versus "Madison Avenue Side Table by Yabu Pushelberg" in Designer Editor,
+    // without reviving broad cross-brand substring leakage.
+    const productBrand = normalizeName(normalizeBrandToParent(product.brand_name));
+    const productTokens = new Set(tokenizeName(product.product_name));
+    if (productTokens.size >= 3) {
+      let best: typeof priceEntries[number] | null = null;
+      let bestScore = 0;
+      for (const entry of priceEntries) {
+        if (!entry.brand_name || normalizeName(entry.brand_name) !== productBrand) continue;
+        const entryTokens = tokenizeName(stripDesignerSuffix(entry.name));
+        if (entryTokens.length < 3) continue;
+        const overlap = entryTokens.filter((t) => productTokens.has(t)).length;
+        const score = overlap / Math.max(productTokens.size, entryTokens.length);
+        if (score >= 0.7 && score > bestScore) {
+          best = entry;
+          bestScore = score;
+        }
+      }
+      if (best) return best;
+    }
     return null;
   };
 
