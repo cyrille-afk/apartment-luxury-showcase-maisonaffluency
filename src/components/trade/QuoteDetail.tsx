@@ -717,10 +717,20 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                 } else if (Array.isArray(pick.size_variants)) {
                   const seen = new Set<string>();
                   const dimLabels: string[] = [];
-                  for (const v of pick.size_variants as Array<{ label?: string | null }>) {
-                    const { dims } = splitFinishAndDimensions(v?.label);
-                    const d = (dims || "").trim();
-                    if (d && !seen.has(d)) { seen.add(d); dimLabels.push(d); }
+                  const isDimStr = (s: string) =>
+                    /\b(?:cm|mm|in|inches?|")\b/i.test(s) ||
+                    /[×xX]\s*\d/.test(s) ||
+                    /Ø\s*\d/.test(s);
+                  for (const v of pick.size_variants as Array<{ label?: string | null; base?: string | null; top?: string | null }>) {
+                    // Dims may live in label, base, or top — collect any dim-like tokens.
+                    for (const field of [v?.label, v?.base, v?.top]) {
+                      const { dims } = splitFinishAndDimensions(field);
+                      let d = (dims || "").trim();
+                      if (!d && field && isDimStr(field)) d = String(field).trim();
+                      // Strip a leading qualifier like "Rectangle - " when dims follow.
+                      d = d.replace(/^[^\d×xXØ]*?-\s+(?=.*(?:cm|mm|in|"|×|x|Ø))/i, "").trim();
+                      if (d && !seen.has(d)) { seen.add(d); dimLabels.push(d); }
+                    }
                   }
                   if (dimLabels.length > 0) dimsFromPick = dimLabels.join(" · ");
                 }
