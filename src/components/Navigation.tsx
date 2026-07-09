@@ -33,8 +33,8 @@ import ShippingDestinationSwitcher from "@/components/ShippingDestinationSwitche
 const logoIcon = cloudinaryUrl("affluency-logo-icon_mpchum", { width: 200, quality: "auto", crop: "fill" });
 
 const leftNavItems = [{
-  label: "Gallery",
-  mobileLabel: "Gallery",
+  label: "Interactive Gallery / Lookbook",
+  mobileLabel: "Interactive Gallery / Lookbook",
   href: "/gallery",
   icon: Image,
 }, {
