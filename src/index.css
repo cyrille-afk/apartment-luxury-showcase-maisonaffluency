@@ -556,8 +556,8 @@ input, select, textarea {
    without touching each nav item individually. Scoped strictly to
    descendants of .nav-over-hero so category pages remain untouched. */
 .nav-over-hero { color: #fff; }
-.nav-over-hero .text-foreground:not(.font-brand):not(.font-brand *),
-.nav-over-hero [class*="text-foreground"]:not(.font-brand) {
+.nav-over-hero .text-foreground:not(.font-brand):not(.font-brand *):not(.brand-lockup):not(.brand-lockup *),
+.nav-over-hero [class*="text-foreground"]:not(.font-brand):not(.brand-lockup):not(.brand-lockup *) {
   color: #fff !important;
   text-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
 }
@@ -571,7 +571,7 @@ input, select, textarea {
   text-shadow: none !important;
 }
 /* Hairline dividers around EST. 2017 lockup */
-.nav-over-hero .bg-foreground { background-color: rgba(255, 255, 255, 0.55) !important; }
+.nav-over-hero .bg-foreground:not(.brand-lockup *) { background-color: rgba(255, 255, 255, 0.55) !important; }
 .nav-over-hero .bg-border\/60 { background-color: rgba(255, 255, 255, 0.35) !important; }
 /* Icons inherit currentColor via stroke */
 .nav-over-hero svg { filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4)); }
