@@ -128,16 +128,31 @@ const DesignersHoverHero = () => {
     return () => media?.removeEventListener?.("change", update);
   }, []);
 
+  // Preserve the curated group order while still producing a flat list for
+  // wheel/swipe navigation and default-active seeding.
+  const groupedItems = useMemo(() => {
+    const bySlug = new Map((designers || []).map((d) => [d.slug, d]));
+    return FEATURED_GROUPS.map((g) => ({
+      ...g,
+      designers: g.slugs
+        .map((slug) => bySlug.get(slug))
+        .filter((d): d is FeaturedDesigner => Boolean(d)) as FeaturedDesigner[],
+    }));
+  }, [designers]);
+
+  const items = useMemo(
+    () => groupedItems.flatMap((g) => g.designers),
+    [groupedItems]
+  );
+  const hasItems = items.length > 0;
+
   // Pre-seed active on first render once data arrives so the hero is never
   // a void on entry — the first designer acts as default.
   useEffect(() => {
-    if (!activeSlug && designers && designers.length > 0) {
-      setActiveSlug(designers[0].slug);
+    if (!activeSlug && items.length > 0) {
+      setActiveSlug(items[0].slug);
     }
-  }, [designers, activeSlug]);
-
-  const items = designers ?? [];
-  const hasItems = items.length > 0;
+  }, [items, activeSlug]);
 
   // Desktop: wheel over the names list advances through designers.
   useEffect(() => {
