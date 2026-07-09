@@ -291,7 +291,7 @@ const TradeDashboard = () => {
         {/* Mobile Essentials */}
         <Link
           to="/trade/guides/pwa-preview-checklist"
-          className="group flex items-center gap-3 md:gap-4 rounded-lg border border-border bg-muted/20 p-3 md:p-4 hover:border-foreground/20 hover:bg-muted/40 transition-colors"
+          className="group flex items-center gap-3 md:gap-4 rounded-lg border border-[hsl(var(--gold))/0.3] bg-muted/20 p-3 md:p-4 hover:border-[hsl(var(--gold))/0.5] hover:bg-muted/40 transition-colors"
         >
           <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border bg-background text-foreground">
             <Smartphone className="h-4 w-4" aria-hidden="true" />
