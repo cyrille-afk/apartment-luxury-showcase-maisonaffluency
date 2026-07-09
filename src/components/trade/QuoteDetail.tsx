@@ -117,6 +117,111 @@ const catalogSourcePriceCents = (item: QuoteItemWithProduct) => {
   return product.trade_price_cents;
 };
 
+const DIMENSION_TEXT_RE = /\b(?:cm|mm|in|inches?|\")\b/i;
+const DIMENSION_SHAPE_RE = /[×xX]\s*\d|Ø\s*\d/i;
+const DIMENSION_STOP_WORDS = new Set([
+  "cat",
+  "category",
+  "fabric",
+  "leather",
+  "finish",
+  "finishes",
+  "wood",
+  "stone",
+  "marble",
+  "base",
+  "top",
+  "com",
+]);
+
+const looksLikeDimensionText = (value: string | null | undefined) => {
+  const text = String(value || "").trim();
+  return DIMENSION_TEXT_RE.test(text) || DIMENSION_SHAPE_RE.test(text);
+};
+
+const extractVariantDimensions = (variant: { label?: string | null; base?: string | null; top?: string | null } | null | undefined) => {
+  for (const field of [variant?.label, variant?.base, variant?.top]) {
+    const value = String(field || "").trim();
+    if (!value) continue;
+    const { dims } = splitFinishAndDimensions(value);
+    let dimension = (dims || "").trim();
+    if (!dimension && looksLikeDimensionText(value)) dimension = value;
+    dimension = dimension
+      .replace(/^[^\d×xXØ]*?[-–—:]\s+(?=.*(?:cm|mm|in|\"|×|x|Ø))/i, "")
+      .trim();
+    if (dimension) return dimension;
+  }
+  return "";
+};
+
+const meaningfulTerms = (value: string | null | undefined) =>
+  String(value || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .split(" ")
+    .map((term) => term.trim())
+    .filter((term) => term.length >= 3 && !/^\d+$/.test(term) && !DIMENSION_STOP_WORDS.has(term));
+
+const labelMatchesVariant = (label: string, haystack: string) => {
+  const terms = meaningfulTerms(label);
+  if (terms.length === 0) return false;
+  return terms.some((term) => haystack.includes(term));
+};
+
+const resolveSelectedVariantDimensions = (
+  item: QuoteItemWithProduct,
+  variants: Array<{ label?: string | null; base?: string | null; top?: string | null; price_cents?: number | null }> | null | undefined,
+) => {
+  if (!Array.isArray(variants) || variants.length === 0) return null;
+
+  const selectedLabels = [
+    ...String(item.variant_label || "")
+      .split(/\s*[·•/]\s*/)
+      .map((part) => part.trim())
+      .filter((part) => part && !looksLikeDimensionText(part)),
+    ...(((item as any).variant_swatches || []) as Array<{ name?: string | null }>)
+      .map((swatch) => swatch?.name)
+      .filter(Boolean) as string[],
+    (item as any).wood_fabric?.name,
+    (item as any).fabric?.name,
+  ]
+    .filter(Boolean)
+    .map((label) => String(label).trim())
+    .filter((label, index, arr) => arr.findIndex((other) => other.toLowerCase() === label.toLowerCase()) === index);
+
+  const variantsWithDims = variants
+    .map((variant) => ({
+      variant,
+      dims: extractVariantDimensions(variant),
+      haystack: meaningfulTerms([variant.base, variant.top, variant.label].filter(Boolean).join(" ")).join(" "),
+    }))
+    .filter((row) => row.dims);
+
+  if (variantsWithDims.length === 0) return null;
+
+  const selectedWithTerms = selectedLabels.filter((label) => meaningfulTerms(label).length > 0);
+  let matches = selectedWithTerms.length > 0
+    ? variantsWithDims.filter((row) => selectedWithTerms.every((label) => labelMatchesVariant(label, row.haystack)))
+    : [];
+
+  if (matches.length === 0 && item.variant_label) {
+    const raw = item.variant_label.toLowerCase();
+    matches = variantsWithDims.filter((row) => raw.includes(row.dims.toLowerCase()) || row.haystack.includes(raw));
+  }
+
+  if (matches.length === 0) return null;
+
+  const targetPrice = item.unit_price_cents ?? item.trade_products?.trade_price_cents ?? null;
+  if (targetPrice != null) {
+    const priceMatches = matches.filter((row) => typeof row.variant.price_cents === "number" && row.variant.price_cents === targetPrice);
+    if (priceMatches.length === 1) return priceMatches[0].dims;
+    if (priceMatches.length > 1) matches = priceMatches;
+  }
+
+  const uniqueDims = Array.from(new Set(matches.map((row) => row.dims)));
+  return uniqueDims[0] || null;
+};
+
 const itemPriceCurrency = (item: QuoteItemWithProduct, quoteCurrency: string) => (
   item.unit_price_cents != null
     ? (item.unit_price_currency || quoteCurrency)
