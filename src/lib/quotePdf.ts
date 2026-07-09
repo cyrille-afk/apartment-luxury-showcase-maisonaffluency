@@ -1012,8 +1012,13 @@ function drawTable(
           doc.setFont("helvetica", "normal");
           doc.setFontSize(6.5);
           doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
-          const nameWrap = doc.splitTextToSize(name, 28) as string[];
-          doc.text(nameWrap[0], sx, sy + size + 7);
+          // Allocate the full column pitch (30pt) so two-word labels like
+          // "Aries Pietra" render on one line under the swatch tile. Fall
+          // back to a second wrapped line if truly necessary.
+          const nameWrap = (doc.splitTextToSize(name, 30) as string[]).slice(0, 2);
+          nameWrap.forEach((ln, lnIdx) => {
+            doc.text(ln, sx, sy + size + 7 + lnIdx * 7);
+          });
         }
       } catch {
         /* ignore swatch failures */
