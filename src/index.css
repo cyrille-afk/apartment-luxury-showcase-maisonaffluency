@@ -556,8 +556,8 @@ input, select, textarea {
    without touching each nav item individually. Scoped strictly to
    descendants of .nav-over-hero so category pages remain untouched. */
 .nav-over-hero { color: #fff; }
-.nav-over-hero .text-foreground,
-.nav-over-hero [class*="text-foreground"] {
+.nav-over-hero .text-foreground:not(.font-brand):not(.font-brand *),
+.nav-over-hero [class*="text-foreground"]:not(.font-brand) {
   color: #fff !important;
   text-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
 }
