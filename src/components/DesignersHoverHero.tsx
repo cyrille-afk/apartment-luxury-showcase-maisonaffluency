@@ -431,7 +431,7 @@ const DesignersHoverHero = () => {
             key={active.slug}
             to={`/designers/${active.slug}`}
             aria-label={`View ${active.name}'s full collection`}
-            className="hidden md:flex absolute right-12 lg:right-24 bottom-28 z-10 flex-col items-end text-right text-white pointer-events-auto group"
+            className="hidden md:flex absolute right-12 lg:right-28 bottom-40 lg:bottom-56 z-10 flex-col items-end text-right text-white pointer-events-auto group"
           >
             <span
               key={`${active.slug}-title`}
