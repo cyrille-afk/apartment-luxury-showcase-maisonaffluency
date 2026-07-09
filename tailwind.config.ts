@@ -83,7 +83,7 @@ export default {
         display: ["Playfair Display", "serif"],
         serif: ["Playfair Display", "serif"],
         brand: ["Cinzel", "Georgia", "serif"],
-        body: ["Lora", "Georgia", "serif"],
+        body: ["Montserrat Variable", "Montserrat", "sans-serif"],
       },
       keyframes: {
         "accordion-down": {
