@@ -2749,13 +2749,13 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                               return !already;
                             })();
                             if (swatchList.length === 0 && !hasFabricTile) return null;
-                            return (
-                              <p className="font-body text-[10px] md:text-[11px] font-medium text-foreground/70">
-                                Finishes:
-                              </p>
-                            );
+                             return (
+                               <p className="font-body text-[10px] text-muted-foreground">
+                                 Finishes:
+                               </p>
+                             );
                           })()}
-                          <div className="grid w-28 md:w-36 grid-cols-2 gap-2">
+                          <div className="grid w-28 md:w-36 grid-cols-2 gap-2 pb-3">
                             {((item as any).variant_swatches?.length
                               ? (item as any).variant_swatches
                               : ((item as any).wood_fabric?.image_url ? [(item as any).wood_fabric] : [])
@@ -2807,12 +2807,12 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                           </div>
                         </div>
                         <div className="min-w-0 flex-1">
-                          <h4 className="font-display text-xs md:text-sm text-foreground leading-tight break-words">
-                            {product?.product_name || "Unknown Product"}
-                          </h4>
-                          <p className="font-body text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5 truncate">
+                          <p className="font-body text-[10px] text-muted-foreground uppercase tracking-wider truncate">
                             {product?.brand_name?.includes(' - ') ? product.brand_name.split(' - ')[0].trim() : product?.brand_name}
                           </p>
+                          <h4 className="font-display text-xs md:text-sm text-foreground leading-tight break-words mt-0.5">
+                            {product?.product_name || "Unknown Product"}
+                          </h4>
                           {(() => {
                             // Split the variant label into finish tokens and
                             // dimension tokens so the legend renders on two
@@ -2830,30 +2830,31 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                                 )}
                                 {dimsSource && (
                                   <p className="font-body text-[10px] md:text-[11px] text-muted-foreground mt-1 break-words">
-                                    <span className="text-muted-foreground">Dimensions:</span> {dimsSource}
-                                    {dimsImp ? <span className="text-muted-foreground/80"> | {dimsImp}</span> : null}
+                                    <span className="text-muted-foreground">Dimensions:</span>{" "}
+                                    <span className="whitespace-nowrap">{dimsSource}</span>
+                                    {dimsImp ? (
+                                      <>
+                                        {" "}<span className="text-muted-foreground/80 whitespace-nowrap">| {dimsImp}</span>
+                                      </>
+                                    ) : null}
                                   </p>
                                 )}
                               </>
                             );
                           })()}
-                          {((item as any).fabric?.name || (item as any).fabric_upcharge_cents) && (() => {
-                            const f: any = (item as any).fabric;
+                          {((item as any).fabric_upcharge_cents) && (() => {
                             const upcharge = (item as any).fabric_upcharge_cents as number | null;
+                            const f: any = (item as any).fabric;
                             const ccy = ((item as any).fabric_currency as string | null) || f?.currency || "EUR";
                             const meters = (item as any).fabric_meters as number | null;
                             const sym = ccy === "EUR" ? "€" : ccy === "USD" ? "$" : ccy === "GBP" ? "£" : ccy === "SGD" ? "S$" : ccy + " ";
+                            if (!upcharge) return null;
                             return (
                               <p className="font-body text-[10px] md:text-[11px] text-foreground/90 mt-1 break-words">
-                                <span className="text-muted-foreground">Fabric:</span> {f?.name || "Selected"}
-                                {f?.tier ? ` · CAT ${f.tier}` : ""}
-                                {upcharge ? (
-                                  <>
-                                    {" — "}
-                                    <span className="text-primary font-medium">+{sym}{(upcharge / 100).toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
-                                    {meters ? <span className="text-muted-foreground"> ({meters} m)</span> : null}
-                                  </>
-                                ) : null}
+                                <span className="text-muted-foreground">Fabric upcharge:</span>{" "}
+                                <span className="text-primary font-medium">+{sym}{(upcharge / 100).toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
+                                {meters ? <span className="text-muted-foreground"> ({meters} m)</span> : null}
+                                {f?.tier ? <span className="text-muted-foreground"> · CAT {f.tier}</span> : null}
                               </p>
                             );
                           })()}
