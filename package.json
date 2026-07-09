@@ -22,6 +22,7 @@
     "audit:meta-descriptions": "node scripts/audit-meta-descriptions.mjs"
   },
   "dependencies": {
+    "@fontsource-variable/montserrat": "^5.2.8",
     "@hookform/resolvers": "^3.10.0",
     "@lovable.dev/cloud-auth-js": "^1.0.0",
     "@radix-ui/react-accordion": "^1.2.11",
