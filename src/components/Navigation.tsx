@@ -777,7 +777,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
 
               {/* Trade Program */}
               {rightNavItems.map((item) => (
-                <div key={item.href} className="relative group/trade">
+                <div key={item.href} className="relative group/trade flex items-center gap-2">
                   <button
                     onClick={() => {
                       setMegaMenuOpen(false);
@@ -787,6 +787,13 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                   >
                     {item.label}
                     <span className="w-1.5 h-1.5 rounded-full bg-[hsl(var(--gold))] animate-pulse" />
+                  </button>
+                  <button
+                    onClick={() => { setMegaMenuOpen(false); handleNavClick("/trade-demo"); }}
+                    className="font-body text-[10px] uppercase tracking-[0.18em] text-foreground/70 hover:text-[hsl(var(--gold))] border border-border/50 hover:border-[hsl(var(--gold))] px-2.5 py-1 rounded-full transition-colors whitespace-nowrap"
+                    title="8-step interactive demo"
+                  >
+                    ▶ Demo
                   </button>
                 </div>
               ))}
