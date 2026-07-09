@@ -305,22 +305,36 @@ const TradeDashboard = () => {
             Add it to your iPhone or Android home screen so it opens like a native app.
           </p>
         </div>
-        <a
-          href="/guides/studio-pwa-preview-checklist.pdf"
-          download
-          onClick={(e) => {
-            e.stopPropagation();
-            trackEvent("guide_pdf_download", {
-              event_category: "Trade Guides",
-              event_label: "pwa-preview-checklist",
-              source: "dashboard_pin",
-            });
-          }}
-          className="hidden sm:inline-flex shrink-0 items-center gap-1.5 rounded-md bg-[hsl(var(--pdf-red))]/10 border border-[hsl(var(--pdf-red))]/30 px-2.5 py-1.5 font-body text-xs text-[hsl(var(--pdf-red))] hover:bg-[hsl(var(--pdf-red))]/20 transition-colors"
-        >
-          <Download className="h-3 w-3" aria-hidden="true" />
-          PDF
-        </a>
+        <div className="hidden sm:flex items-center gap-2 shrink-0">
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              navigate("/trade-demo");
+            }}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[hsl(var(--gold)/0.12)] hover:bg-[hsl(var(--gold)/0.2)] text-[hsl(var(--gold))] border border-[hsl(var(--gold)/0.4)] font-body text-[10px] uppercase tracking-[0.18em] rounded-full transition-colors"
+            title="8-step interactive demo"
+          >
+            ▶ Demo
+          </button>
+          <a
+            href="/guides/studio-pwa-preview-checklist.pdf"
+            download
+            onClick={(e) => {
+              e.stopPropagation();
+              trackEvent("guide_pdf_download", {
+                event_category: "Trade Guides",
+                event_label: "pwa-preview-checklist",
+                source: "dashboard_pin",
+              });
+            }}
+            className="inline-flex shrink-0 items-center gap-1.5 rounded-md bg-[hsl(var(--pdf-red))]/10 border border-[hsl(var(--pdf-red))]/30 px-2.5 py-1.5 font-body text-xs text-[hsl(var(--pdf-red))] hover:bg-[hsl(var(--pdf-red))]/20 transition-colors"
+          >
+            <Download className="h-3 w-3" aria-hidden="true" />
+            PDF
+          </a>
+        </div>
       </Link>
 
       <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
