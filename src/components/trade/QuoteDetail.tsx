@@ -674,7 +674,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
           )
         );
         if (titles.length > 0 || sourcePickIds.length > 0) {
-          const pickSelect = "id, title, edition, image_url, gallery_images, variant_image_map, size_variants";
+          const pickSelect = "id, title, edition, image_url, gallery_images, variant_image_map, size_variants, dimensions";
           const [byTitleRes, byIdRes] = await Promise.all([
             titles.length > 0
               ? supabase.from("designer_curator_picks").select(pickSelect).in("title", titles)
