@@ -727,6 +727,13 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                   </button>
                 </FavoritesHoverPreview>
               </div>
+              {/* Trade Program — accent bordered button, aligned under Contact Us + icons */}
+              <button
+                onClick={() => { setMegaMenuOpen(false); handleNavClick("/trade-program"); }}
+                className="mt-3 w-full font-body text-sm uppercase tracking-[0.25em] whitespace-nowrap px-6 py-2.5 border border-[hsl(var(--accent))] text-[hsl(var(--accent))] rounded-sm transition-all duration-300 hover:bg-[hsl(var(--accent))] hover:text-white"
+              >
+                Trade Program
+              </button>
             </div>
           </div>
           <div className="flex items-center justify-between w-full pb-3">
