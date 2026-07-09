@@ -556,8 +556,8 @@ input, select, textarea {
    without touching each nav item individually. Scoped strictly to
    descendants of .nav-over-hero so category pages remain untouched. */
 .nav-over-hero { color: #fff; }
-.nav-over-hero .text-foreground,
-.nav-over-hero [class*="text-foreground"] {
+.nav-over-hero .text-foreground:not(.font-brand):not(.font-brand *),
+.nav-over-hero [class*="text-foreground"]:not(.font-brand) {
   color: #fff !important;
   text-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
 }
@@ -585,14 +585,10 @@ input, select, textarea {
 /* Preserve the black MAISON AFFLUENCY wordmark + gold "A" hover even when
    the nav is transparent over the hero. The wordmark uses .font-brand and
    sits centered on a light area of the hero, so black remains legible. */
-.nav-over-hero .font-brand,
-.nav-over-hero .font-brand * {
-  color: hsl(var(--foreground)) !important;
+.nav-over-hero .font-brand {
+  color: hsl(var(--foreground));
   text-shadow: 0 1px 2px rgba(255, 255, 255, 0.35);
 }
-.nav-over-hero .group:hover .font-brand {
-  color: hsl(var(--primary)) !important;
-}
-.nav-over-hero .group:hover .font-brand .group-hover\:text-accent {
-  color: hsl(var(--accent)) !important;
-}
+/* Inner span (the "A") inherits by default so Tailwind's
+   group-hover:text-accent and group-hover:text-primary still apply. */
+.nav-over-hero .font-brand > span { color: inherit; }
