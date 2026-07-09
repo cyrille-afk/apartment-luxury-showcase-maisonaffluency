@@ -286,38 +286,27 @@ const TradeDashboard = () => {
         </div>
       </div>
 
-      {/* Install on phone — pinned guide */}
-      <Link
-        to="/trade/guides/pwa-preview-checklist"
-        className="group mb-6 flex items-center gap-3 md:gap-4 rounded-lg border border-border bg-muted/20 p-3 md:p-4 hover:border-foreground/20 hover:bg-muted/40 transition-colors"
-      >
-        <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border bg-background text-foreground">
-          <Smartphone className="h-4 w-4" aria-hidden="true" />
-        </span>
-        <div className="flex-1 min-w-0">
-          <p className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-            New · Mobile essentials
-          </p>
-          <h3 className="font-display text-sm md:text-base text-foreground leading-snug mt-0.5">
-            Install Maison Affluency on your phone
-          </h3>
-          <p className="font-body text-[11px] md:text-xs text-muted-foreground leading-tight mt-0.5">
-            Add it to your iPhone or Android home screen so it opens like a native app.
-          </p>
-        </div>
-        <div className="hidden sm:flex items-center gap-2 shrink-0">
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              e.preventDefault();
-              navigate("/trade-demo");
-            }}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[hsl(var(--gold)/0.12)] hover:bg-[hsl(var(--gold)/0.2)] text-[hsl(var(--gold))] border border-[hsl(var(--gold)/0.4)] font-body text-[10px] uppercase tracking-[0.18em] rounded-full transition-colors"
-            title="8-step interactive demo"
-          >
-            ▶ Demo
-          </button>
+      {/* Mobile Essentials + Live Walkthrough — two distinct pinned sections */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 mb-6">
+        {/* Mobile Essentials */}
+        <Link
+          to="/trade/guides/pwa-preview-checklist"
+          className="group flex items-center gap-3 md:gap-4 rounded-lg border border-border bg-muted/20 p-3 md:p-4 hover:border-foreground/20 hover:bg-muted/40 transition-colors"
+        >
+          <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border bg-background text-foreground">
+            <Smartphone className="h-4 w-4" aria-hidden="true" />
+          </span>
+          <div className="flex-1 min-w-0">
+            <p className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+              New · Mobile essentials
+            </p>
+            <h3 className="font-display text-sm md:text-base text-foreground leading-snug mt-0.5">
+              Install Maison Affluency on your phone
+            </h3>
+            <p className="font-body text-[11px] md:text-xs text-muted-foreground leading-tight mt-0.5">
+              Add it to your iPhone or Android home screen so it opens like a native app.
+            </p>
+          </div>
           <a
             href="/guides/studio-pwa-preview-checklist.pdf"
             download
@@ -334,8 +323,41 @@ const TradeDashboard = () => {
             <Download className="h-3 w-3" aria-hidden="true" />
             PDF
           </a>
-        </div>
-      </Link>
+        </Link>
+
+        {/* Live Walkthrough with AI Concierge */}
+        <Link
+          to="/trade-demo"
+          className="group flex items-center gap-3 md:gap-4 rounded-lg border border-[hsl(var(--gold))/0.3] bg-[hsl(var(--gold)/0.05)] p-3 md:p-4 hover:border-[hsl(var(--gold))/0.5] hover:bg-[hsl(var(--gold)/0.08)] transition-colors"
+        >
+          <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[hsl(var(--gold))/0.4] bg-[hsl(var(--gold)/0.12)] text-[hsl(var(--gold))]">
+            <Sparkles className="h-4 w-4" aria-hidden="true" />
+          </span>
+          <div className="flex-1 min-w-0">
+            <p className="font-body text-[10px] uppercase tracking-[0.18em] text-[hsl(var(--gold))]">
+              Live walkthrough
+            </p>
+            <h3 className="font-display text-sm md:text-base text-foreground leading-snug mt-0.5">
+              Experience the Trade Portal with AI Concierge
+            </h3>
+            <p className="font-body text-[11px] md:text-xs text-muted-foreground leading-tight mt-0.5">
+              8-step interactive demo — see how quotes, concierge, and projects work.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              navigate("/trade-demo");
+            }}
+            className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-[hsl(var(--gold))] border border-[hsl(var(--gold))] px-3 py-1.5 font-body text-[10px] uppercase tracking-[0.18em] text-background hover:bg-[hsl(var(--gold))/0.85] transition-colors"
+            title="8-step interactive demo"
+          >
+            ▶ Start Demo
+          </button>
+        </Link>
+      </div>
 
       <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
         {DASH_CARDS.map((card) => (
