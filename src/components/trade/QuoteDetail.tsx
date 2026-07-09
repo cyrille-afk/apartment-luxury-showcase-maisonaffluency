@@ -730,37 +730,30 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                     return "";
                   };
                   const variants = pick.size_variants as Array<{ label?: string | null; base?: string | null; top?: string | null }>;
-                  // Prefer variants whose base/top match the item's selected variant_label.
+                  // Prefer variants whose base/top/label match the item's
+                  // selected variant_label. If nothing strict-matches, we
+                  // still surface the pick's dims (showing something is far
+                  // better than showing nothing) — dedup keeps the legend
+                  // clean when several variants share the same size.
                   const selLabel = (it.variant_label || "").toLowerCase();
                   const selParts = selLabel.split(/\s*[·•/]\s*/).map((p) => p.trim()).filter(Boolean);
                   const matched = selParts.length
                     ? variants.filter((v) => {
                         const b = String(v?.base || "").toLowerCase();
                         const t = String(v?.top || "").toLowerCase();
-                        return selParts.every((p) => b.includes(p) || t.includes(p) || (b + " " + t).includes(p));
+                        const l = String(v?.label || "").toLowerCase();
+                        const hay = `${b} ${t} ${l}`;
+                        return selParts.every((p) => hay.includes(p));
                       })
                     : variants;
-                  // Only surface dims from variants that specifically matched
-                  // the item's selected variant_label. If nothing matched
-                  // (selParts empty or ambiguous), we do NOT guess — leaving
-                  // dimensions blank is preferable to showing every variant's
-                  // dims and confusing the reader.
-                  const strictMatch = selParts.length > 0 && matched.length > 0;
+                  const pool = matched.length > 0 ? matched : variants;
                   const seen = new Set<string>();
                   const dimLabels: string[] = [];
-                  if (strictMatch) {
-                    for (const v of matched) {
-                      const d = extractDims(v);
-                      if (d && !seen.has(d)) { seen.add(d); dimLabels.push(d); }
-                    }
-                  } else if (selParts.length === 0 && variants.length === 1) {
-                    // Single-variant product with no selection ambiguity.
-                    const d = extractDims(variants[0]);
-                    if (d) dimLabels.push(d);
+                  for (const v of pool) {
+                    const d = extractDims(v);
+                    if (d && !seen.has(d)) { seen.add(d); dimLabels.push(d); }
                   }
                   if (dimLabels.length > 0) {
-                    // Join with " · " so multi-selection line items surface
-                    // every matched variant's dimensions, not just the first.
                     dimsFromPick = dimLabels.join(" · ");
                   }
                 }

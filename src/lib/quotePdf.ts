@@ -916,8 +916,14 @@ function drawTable(
     const dimsSource = dimsFromVariant || (line.dimensions ? String(line.dimensions).trim() : "");
     let dimensionsLabel: string | null = null;
     if (dimsSource) {
-      const metric = formatDimensionsMultiline(dimsSource);
-      const imp = formatImperialDimensions(dimsSource);
+      // Glue the unit token (cm / mm / in) to its preceding number with a
+      // non-breaking space so splitTextToSize never orphans "cm" onto its own
+      // line when the row wraps.
+      const glueUnits = (s: string) =>
+        s.replace(/(\d)\s+(cm|mm|in)\b/gi, "$1\u00A0$2");
+      const metric = glueUnits(formatDimensionsMultiline(dimsSource));
+      const impRaw = formatImperialDimensions(dimsSource);
+      const imp = impRaw ? glueUnits(impRaw) : null;
       dimensionsLabel = imp ? `Dimensions: ${metric}\n${imp}` : `Dimensions: ${metric}`;
     }
 
