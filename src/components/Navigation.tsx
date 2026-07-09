@@ -632,8 +632,8 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
               </div>
             </div>
             <div className="flex flex-col items-end">
-              {/* Contact Us — centered above Trade Program */}
-              <div className="pt-1 mr-[27px]">
+              {/* Contact Us — aligned to right edge (matches Trade Program below) */}
+              <div className="pt-1">
                 <DropdownMenu>
                   <DropdownMenuTrigger className="font-body text-xs uppercase tracking-[0.2em] transition-all duration-300 text-foreground data-[state=open]:text-foreground data-[state=open]:[text-shadow:none] flex items-center gap-1 whitespace-nowrap outline-none relative group">
                     Contact Us
@@ -654,8 +654,8 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
-              {/* Icons centered under Contact Us, 1 line below */}
-              <div className="flex items-center justify-center gap-5 mt-3 self-end pr-8">
+              {/* Icons aligned to right edge */}
+              <div className="flex items-center gap-5 mt-3">
                 <DropdownMenu>
                   <DropdownMenuTrigger className="relative group p-1 transition-colors outline-none">
                     <User className="w-6 h-6 text-foreground group-hover:text-primary transition-colors" />
@@ -774,7 +774,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
               ))}
             </div>
 
-            <span className="w-px h-3 bg-border/60" aria-hidden="true" />
+            <span className="w-px h-3 bg-border/60 mx-6 lg:mx-10" aria-hidden="true" />
 
             <div className="flex items-center gap-6 lg:gap-10">
               {/* Journal */}
