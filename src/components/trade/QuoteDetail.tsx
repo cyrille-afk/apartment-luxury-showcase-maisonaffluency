@@ -740,17 +740,28 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                         return selParts.every((p) => b.includes(p) || t.includes(p) || (b + " " + t).includes(p));
                       })
                     : variants;
-                  const pool = matched.length > 0 ? matched : variants;
+                  // Only surface dims from variants that specifically matched
+                  // the item's selected variant_label. If nothing matched
+                  // (selParts empty or ambiguous), we do NOT guess — leaving
+                  // dimensions blank is preferable to showing every variant's
+                  // dims and confusing the reader.
+                  const strictMatch = selParts.length > 0 && matched.length > 0;
                   const seen = new Set<string>();
                   const dimLabels: string[] = [];
-                  for (const v of pool) {
-                    const d = extractDims(v);
-                    if (d && !seen.has(d)) { seen.add(d); dimLabels.push(d); }
+                  if (strictMatch) {
+                    for (const v of matched) {
+                      const d = extractDims(v);
+                      if (d && !seen.has(d)) { seen.add(d); dimLabels.push(d); }
+                    }
+                  } else if (selParts.length === 0 && variants.length === 1) {
+                    // Single-variant product with no selection ambiguity.
+                    const d = extractDims(variants[0]);
+                    if (d) dimLabels.push(d);
                   }
-                  // Show only the first dimension — the user selects one
-                  // variant per line, and the tearsheet mirrors this behavior.
                   if (dimLabels.length > 0) {
-                    dimsFromPick = dimLabels[0];
+                    // Join with " · " so multi-selection line items surface
+                    // every matched variant's dimensions, not just the first.
+                    dimsFromPick = dimLabels.join(" · ");
                   }
                 }
               }
