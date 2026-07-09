@@ -91,8 +91,8 @@ export const DEMO_PIECES: DemoPiece[] = [
       base: ["Travertine Silver", "Travertine Roman", "Nero Marquina"],
       top: ["Nude Oak Base", "Tobacco Oak Base", "Black Pepper Oak Base"],
     },
-    rrpCents: 9240000,
-    tradePriceCents: 8500000,
+    rrpCents: 924000,
+    tradePriceCents: 850000,
     leadTime: "16–18 weeks",
   },
 ];
