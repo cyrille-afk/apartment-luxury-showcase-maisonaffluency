@@ -2732,7 +2732,29 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                               </div>
                             )}
                           </div>
-                          {/* Swatch thumbnails below main image */}
+                          {/* Swatch thumbnails below main image — mirror the PDF layout */}
+                          {(() => {
+                            const swatchList = (item as any).variant_swatches?.length
+                              ? (item as any).variant_swatches
+                              : ((item as any).wood_fabric?.image_url ? [(item as any).wood_fabric] : []);
+                            const hasFabricTile = (() => {
+                              const fabric: any = (item as any).fabric;
+                              if (!fabric?.image_url) return false;
+                              const already = ((item as any).variant_swatches || []).some(
+                                (s: any) =>
+                                  (s?.image_url && s.image_url === fabric.image_url) ||
+                                  (s?.fabric_id && (item as any).fabric_id && s.fabric_id === (item as any).fabric_id) ||
+                                  (s?.name && fabric?.name && String(s.name).trim().toLowerCase() === String(fabric.name).trim().toLowerCase()),
+                              );
+                              return !already;
+                            })();
+                            if (swatchList.length === 0 && !hasFabricTile) return null;
+                            return (
+                              <p className="font-body text-[10px] md:text-[11px] font-medium text-foreground/70">
+                                Finishes:
+                              </p>
+                            );
+                          })()}
                           <div className="grid w-28 md:w-36 grid-cols-2 gap-2">
                             {((item as any).variant_swatches?.length
                               ? (item as any).variant_swatches
