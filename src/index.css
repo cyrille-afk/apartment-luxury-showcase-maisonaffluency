@@ -581,3 +581,18 @@ input, select, textarea {
   text-shadow: none;
   filter: none;
 }
+
+/* Preserve the black MAISON AFFLUENCY wordmark + gold "A" hover even when
+   the nav is transparent over the hero. The wordmark uses .font-brand and
+   sits centered on a light area of the hero, so black remains legible. */
+.nav-over-hero .font-brand,
+.nav-over-hero .font-brand * {
+  color: hsl(var(--foreground)) !important;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.35);
+}
+.nav-over-hero .group:hover .font-brand {
+  color: hsl(var(--primary)) !important;
+}
+.nav-over-hero .group:hover .font-brand .group-hover\:text-accent {
+  color: hsl(var(--accent)) !important;
+}
