@@ -747,10 +747,10 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                     const d = extractDims(v);
                     if (d && !seen.has(d)) { seen.add(d); dimLabels.push(d); }
                   }
-                  // When we couldn't narrow by selection, show only the first
-                  // (mirrors tearsheet behavior — one variant per line).
+                  // Show only the first dimension — the user selects one
+                  // variant per line, and the tearsheet mirrors this behavior.
                   if (dimLabels.length > 0) {
-                    dimsFromPick = matched.length > 0 ? dimLabels.join(" · ") : dimLabels[0];
+                    dimsFromPick = dimLabels[0];
                   }
                 }
               }
