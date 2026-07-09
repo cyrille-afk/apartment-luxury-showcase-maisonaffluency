@@ -37,7 +37,7 @@ export const DEMO_PIECES: DemoPiece[] = [
     brand: "Man of Parts",
     category: "Sofa",
     imageUrl:
-      "https://res.cloudinary.com/dif1oamtj/image/upload/w_800,c_fill,q_auto:good,f_auto/v1782206599/SandyCove_a_manofparts.jpg",
+      "https://res.cloudinary.com/dif1oamtj/image/upload/w_800,c_fill,q_auto:good,f_auto/v1782188316/SandyCovea_a4lxyy.jpg",
     dimensions: "W 240 × D 98 × H 78 cm — SH 42 cm",
     finishes: { base: "Tobacco Oak", top: "Fabric Cat. Karakorum" },
     finishOptions: {
