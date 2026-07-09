@@ -2755,7 +2755,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                                </p>
                              );
                           })()}
-                          <div className="grid w-28 md:w-36 grid-cols-2 gap-2">
+                          <div className="grid w-28 md:w-36 grid-cols-2 gap-2 pb-3">
                             {((item as any).variant_swatches?.length
                               ? (item as any).variant_swatches
                               : ((item as any).wood_fabric?.image_url ? [(item as any).wood_fabric] : [])
