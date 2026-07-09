@@ -2807,12 +2807,12 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                           </div>
                         </div>
                         <div className="min-w-0 flex-1">
-                          <h4 className="font-display text-xs md:text-sm text-foreground leading-tight break-words">
-                            {product?.product_name || "Unknown Product"}
-                          </h4>
-                          <p className="font-body text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5 truncate">
+                          <p className="font-body text-[10px] text-muted-foreground uppercase tracking-wider truncate">
                             {product?.brand_name?.includes(' - ') ? product.brand_name.split(' - ')[0].trim() : product?.brand_name}
                           </p>
+                          <h4 className="font-display text-xs md:text-sm text-foreground leading-tight break-words mt-0.5">
+                            {product?.product_name || "Unknown Product"}
+                          </h4>
                           {(() => {
                             // Split the variant label into finish tokens and
                             // dimension tokens so the legend renders on two
