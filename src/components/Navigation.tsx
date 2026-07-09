@@ -786,13 +786,12 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                 <span className="absolute -bottom-1 left-0 h-0.5 bg-[hsl(var(--accent))] transition-all duration-300 w-0 group-hover:w-full" />
               </button>
 
-              {/* Trade Program */}
+              {/* Trade Program — accent bordered button */}
               <button
                 onClick={() => { setMegaMenuOpen(false); handleNavClick("/trade-program"); }}
-                className="font-body text-xs uppercase tracking-[0.2em] transition-all duration-300 relative group whitespace-nowrap flex items-center gap-1.5 text-foreground"
+                className="font-body text-xs uppercase tracking-[0.2em] whitespace-nowrap px-4 py-2 border border-[hsl(var(--accent))] text-[hsl(var(--accent))] rounded-sm transition-all duration-300 hover:bg-[hsl(var(--accent))] hover:text-white"
               >
                 Trade Program
-                <span className="absolute -bottom-1 left-0 h-0.5 bg-[hsl(var(--accent))] transition-all duration-300 w-0 group-hover:w-full" />
               </button>
             </div>
           </div>
