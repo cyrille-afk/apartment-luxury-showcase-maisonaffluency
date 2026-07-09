@@ -43,11 +43,12 @@ const leftNavItems = [{
   href: "/gallery",
   icon: Image,
 }, {
-  label: "Collectible Design",
-  mobileLabel: "Collectible Design",
+  label: "Collectibles",
+  mobileLabel: "Collectibles",
   href: "/collectibles",
   icon: Gem,
 }];
+
 
 const rightNavItems = [{
   label: "Trade Program",
@@ -91,7 +92,7 @@ interface NavigationProps {
 
 const Navigation = ({ borderless = false }: NavigationProps) => {
   const { user, isTradeUser } = useAuth();
-  // Trade-only visibility: hide the "Collectible Design" nav item from public visitors.
+  // Trade-only visibility: hide the "Collectibles" nav item from public visitors.
   const visibleLeftNavItems = isTradeUser
     ? leftNavItems
     : leftNavItems.filter((item) => item.href !== "/collectibles");
