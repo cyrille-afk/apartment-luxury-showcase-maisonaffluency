@@ -348,47 +348,15 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
               </div>
               <div className="flex flex-col gap-0 pb-40">
                 {visibleLeftNavItems.map((item, index) => (
-                  <Fragment key={item.href}>
-                    <button 
-                      onClick={() => handleNavClick(item.href)}
-                      className="font-body text-[15px] uppercase tracking-wide text-left transition-colors py-2.5 w-full flex items-center justify-between text-foreground hover:text-primary font-semibold animate-fade-in opacity-0"
-                      style={{ animationDelay: `${index * 120}ms`, animationFillMode: 'forwards' }}
-                    >
-                      {item.mobileLabel}
-                      <ChevronRight className="h-4 w-4" />
-                    </button>
-
-                    {/* Insert All Categories right after Gallery (index 0) */}
-                    {index === 0 && (
-                      <div 
-                        className="animate-fade-in opacity-0 border-t border-border/30 pt-2 mb-2"
-                        style={{ animationDelay: `${index * 120}ms`, animationFillMode: 'forwards' }}
-                      >
-                        <button
-                          onClick={() => { setCategoryPanelOpen(true); setExpandedCategory(null); }}
-                          className="font-body text-[15px] uppercase tracking-wide text-left transition-colors py-2.5 w-full flex items-center justify-between text-foreground hover:text-primary font-semibold"
-                        >
-                          <span className="flex items-center gap-1.5">
-                            <LayoutGrid className="h-3.5 w-3.5 text-[hsl(var(--accent))]" />
-                            All Categories
-                          </span>
-                          <ChevronRight className="h-4 w-4" />
-                        </button>
-                      </div>
-                    )}
-
-                    {/* Insert New In right after Collectible Design (index 2) */}
-                    {index === 2 && (
-                      <button
-                        onClick={() => handleNavClick("/new-in")}
-                        className="font-body text-[15px] uppercase tracking-wide text-left transition-colors py-2.5 w-full flex items-center justify-between text-[hsl(var(--gold))] hover:text-primary font-bold animate-fade-in opacity-0"
-                        style={{ animationDelay: `${(index + 1) * 120}ms`, animationFillMode: 'forwards' }}
-                      >
-                        New In
-                        <ChevronRight className="h-4 w-4" />
-                      </button>
-                    )}
-                  </Fragment>
+                  <button 
+                    key={item.href}
+                    onClick={() => handleNavClick(item.href)}
+                    className="font-body text-[15px] uppercase tracking-wide text-left transition-colors py-2.5 w-full flex items-center justify-between text-foreground hover:text-primary font-semibold animate-fade-in opacity-0"
+                    style={{ animationDelay: `${(index + 2) * 120}ms`, animationFillMode: 'forwards' }}
+                  >
+                    {item.mobileLabel}
+                    <ChevronRight className="h-4 w-4" />
+                  </button>
                 ))}
                 
                 {/* Journal */}
