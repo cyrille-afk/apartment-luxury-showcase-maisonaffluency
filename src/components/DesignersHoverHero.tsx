@@ -111,8 +111,11 @@ const DesignersHoverHero = () => {
   );
   const [activeSlug, setActiveSlug] = useState<string | null>(null);
   const [isStandalone, setIsStandalone] = useState(false);
+  const [showPortalCursor, setShowPortalCursor] = useState(false);
   const navRef = useRef<HTMLElement>(null);
   const sectionRef = useRef<HTMLElement>(null);
+  const portalRef = useRef<HTMLAnchorElement>(null);
+  const portalCursorRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -432,17 +435,25 @@ const DesignersHoverHero = () => {
         const active = items.find((d) => d.slug === activeSlug);
         if (!active) return null;
         const [first, last] = splitName(active.name);
-        // Custom "View" text cursor — small SVG rendered as the mouse pointer
-        // to signal that clicking anywhere on the right image navigates.
-        const viewCursor =
-          "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='72' height='30' viewBox='0 0 72 30'><rect x='0.5' y='0.5' width='71' height='29' rx='14.5' fill='rgba(0,0,0,0.55)' stroke='rgba(255,255,255,0.85)'/><text x='36' y='19' text-anchor='middle' font-family='Georgia,serif' font-size='12' fill='white' letter-spacing='2'>VIEW</text></svg>\") 36 15, pointer";
+
+        const handlePortalMove = (e: React.MouseEvent<HTMLAnchorElement>) => {
+          if (!portalRef.current || !portalCursorRef.current) return;
+          const rect = portalRef.current.getBoundingClientRect();
+          portalCursorRef.current.style.left = `${e.clientX - rect.left}px`;
+          portalCursorRef.current.style.top = `${e.clientY - rect.top}px`;
+        };
+
         return (
           <Link
             key={active.slug}
+            ref={portalRef}
             to={`/designers/${active.slug}`}
             aria-label={`View ${active.name}'s full collection`}
             className="hidden md:block absolute right-0 top-0 h-full w-1/2 z-10 pointer-events-auto group"
-            style={{ cursor: viewCursor }}
+            style={{ cursor: "none" }}
+            onMouseEnter={() => setShowPortalCursor(true)}
+            onMouseLeave={() => setShowPortalCursor(false)}
+            onMouseMove={handlePortalMove}
           >
             <div className="absolute right-12 lg:right-28 bottom-24 lg:bottom-24 flex flex-col items-end text-right text-white">
               <span
@@ -472,6 +483,25 @@ const DesignersHoverHero = () => {
                   →
                 </span>
               </span>
+            </div>
+
+            {/* Kinetic editorial cursor — a glass-blur disc that follows the
+                mouse over the right-half portal, replacing the previous large
+                VIEW button cursor. */}
+            <div
+              ref={portalCursorRef}
+              className={cn(
+                "absolute pointer-events-none z-50 transition-opacity duration-300 ease-out",
+                showPortalCursor ? "opacity-100" : "opacity-0"
+              )}
+              style={{ transform: "translate(-50%, -50%)" }}
+            >
+              <div className="relative w-20 h-20 rounded-full bg-black/25 backdrop-blur-md border border-white/15 flex flex-col items-center justify-center shadow-2xl transition-transform duration-500 ease-out scale-[0.72] group-hover:scale-100">
+                <div className="absolute inset-1.5 rounded-full border border-dashed border-white/10 animate-[spin_20s_linear_infinite]" />
+                <span className="font-serif italic text-white text-[11px] tracking-[0.2em]">View</span>
+                <div className="w-5 h-px bg-white/40 my-1" />
+                <span className="text-white/40 text-[7px] uppercase tracking-[0.3em] font-body">Profile</span>
+              </div>
             </div>
           </Link>
         );
