@@ -562,12 +562,10 @@ input, select, textarea {
   text-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
 }
 .nav-over-hero button,
-.nav-over-hero a,
-.nav-over-hero span {
+.nav-over-hero a {
   text-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
 }
-/* Wordmark is dark-on-light; kill any inherited dark halo so the letters
-   stay crisp instead of appearing blurred on hover. */
+/* Wordmark is dark-on-light; no text shadow/halo so the letters stay crisp. */
 .nav-over-hero .font-brand,
 .nav-over-hero .font-brand * {
   text-shadow: none !important;
@@ -593,20 +591,20 @@ input, select, textarea {
    sits centered on a light area of the hero, so black remains legible. */
 .nav-over-hero .font-brand {
   color: hsl(var(--foreground));
-  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.35);
+  text-shadow: none !important;
 }
 /* Inner span (the "A") inherits by default so Tailwind's
    group-hover:text-accent and group-hover:text-primary still apply. */
 .nav-over-hero .font-brand > span { color: inherit; }
 
 /* Keep the "Est. 2017" lockup and its hairline dividers black alongside the
-   wordmark, with a subtle light halo so they stay crisp on the hero image. */
+   wordmark, with no halo/shadow. */
 .nav-over-hero .brand-lockup,
 .nav-over-hero .brand-lockup * {
   color: hsl(var(--foreground)) !important;
-  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.35) !important;
+  text-shadow: none !important;
 }
 .nav-over-hero .brand-lockup .bg-foreground {
   background-color: hsl(var(--foreground)) !important;
-  box-shadow: 0 1px 2px rgba(255, 255, 255, 0.35);
+  box-shadow: none !important;
 }
