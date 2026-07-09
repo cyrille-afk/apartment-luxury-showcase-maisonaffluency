@@ -123,15 +123,19 @@ const DesignersHoverHero = () => {
     return () => media?.removeEventListener?.("change", update);
   }, []);
 
-  // Preserve the curated group order while still producing a flat list for
-  // wheel/swipe navigation and default-active seeding.
+  // Preserve the curated group membership but render each group alphabetically
+  // by display name so a brand like "Alinea Design Objects" (slug leo-aerts-alinea)
+  // sits under A, not L.
   const groupedItems = useMemo(() => {
     const bySlug = new Map((designers || []).map((d) => [d.slug, d]));
     return FEATURED_GROUPS.map((g) => ({
       ...g,
       designers: g.slugs
         .map((slug) => bySlug.get(slug))
-        .filter((d): d is FeaturedDesigner => Boolean(d)) as FeaturedDesigner[],
+        .filter((d): d is FeaturedDesigner => Boolean(d))
+        .sort((a, b) =>
+          a.name.localeCompare(b.name, "en", { sensitivity: "base" })
+        ) as FeaturedDesigner[],
     }));
   }, [designers]);
 
