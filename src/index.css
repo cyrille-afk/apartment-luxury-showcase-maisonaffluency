@@ -607,12 +607,14 @@ input, select, textarea {
    wordmark, with no halo/shadow. */
 .nav-over-hero .brand-lockup,
 .nav-over-hero .brand-lockup *,
+.nav-over-hero .brand-lockup span,
 .nav-over-hero .brand-lockup [class*="text-foreground"] {
-  color: hsl(var(--foreground)) !important;
+  color: #121616 !important;
   text-shadow: none !important;
 }
 .nav-over-hero .brand-lockup .bg-foreground,
+.nav-over-hero .brand-lockup span[class*="bg-foreground"],
 .nav-over-hero .brand-lockup [class*="bg-foreground"] {
-  background-color: hsl(var(--foreground)) !important;
+  background-color: #121616 !important;
   box-shadow: none !important;
 }
