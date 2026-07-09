@@ -2862,9 +2862,10 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                           {item.edition && <p className="font-body text-[10px] md:text-[11px] text-foreground/80 italic mt-0.5 break-words">Edition: {String(item.edition).replace(/^edition\s*[:\-—]?\s*/i, "").trim()}</p>}
                           {(() => {
                             const ov = getLeadWeeksOverride(item.lead_time_weeks_override);
+                            const cls = "font-body text-[10px] md:text-[11px] text-muted-foreground break-words";
                             if (ov === 0) return <p className="font-body text-[10px] md:text-[11px] text-emerald-700 font-medium break-words">In stock</p>;
-                            if (ov && ov > 0) return <p className="font-body text-[10px] md:text-[11px] text-muted-foreground break-words">{ov} weeks</p>;
-                            return product?.lead_time ? <p className="font-body text-[10px] md:text-[11px] text-muted-foreground break-words">{product.lead_time}</p> : null;
+                            if (ov && ov > 0) return <p className={cls}>Product Lead Time: {ov} weeks</p>;
+                            return product?.lead_time ? <p className={cls}>Product Lead Time: {product.lead_time}</p> : null;
                           })()}
                           {editingNotesId === item.id ? (
                             <div className="mt-1.5" onClick={(e) => e.stopPropagation()}>
