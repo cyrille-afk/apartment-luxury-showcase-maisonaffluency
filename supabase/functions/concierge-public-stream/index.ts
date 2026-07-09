@@ -26,7 +26,8 @@ const SEMANTIC_TIMEOUT_MS = 1500; // never block the stream on retrieval
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type, x-concierge-surface, x-concierge-sid",
+    "authorization, x-client-info, apikey, content-type, x-request-id, x-concierge-surface, x-concierge-sid",
+  "Access-Control-Expose-Headers": "x-request-id",
 };
 
 const sb = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, { auth: { persistSession: false } });
