@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, Fragment } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Menu, X, Crown, Search, ChevronDown, ChevronRight, ChevronLeft, Calendar, MessageCircle, Mail, LayoutGrid, Image, Palette, Gem, Briefcase, BookOpen, Heart, Pin, User, LogIn, UserPlus, LogOut } from "lucide-react";
 import { useCompare } from "@/contexts/CompareContext";
@@ -33,8 +33,8 @@ import ShippingDestinationSwitcher from "@/components/ShippingDestinationSwitche
 const logoIcon = cloudinaryUrl("affluency-logo-icon_mpchum", { width: 200, quality: "auto", crop: "fill" });
 
 const leftNavItems = [{
-  label: "Gallery",
-  mobileLabel: "Gallery",
+  label: "Interactive Gallery / Lookbook",
+  mobileLabel: "Interactive Gallery / Lookbook",
   href: "/gallery",
   icon: Image,
 }, {
@@ -347,55 +347,50 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                 </div>
               </div>
               <div className="flex flex-col gap-0 pb-40">
+                {/* New In — first */}
+                <button
+                  onClick={() => handleNavClick("/new-in")}
+                  className="font-body text-[15px] uppercase tracking-wide text-left transition-colors py-2.5 w-full flex items-center justify-between text-[hsl(var(--gold))] hover:text-primary font-bold animate-fade-in opacity-0"
+                  style={{ animationDelay: `0ms`, animationFillMode: 'forwards' }}
+                >
+                  New In
+                  <ChevronRight className="h-4 w-4" />
+                </button>
+
+                {/* All Categories — second */}
+                <div 
+                  className="animate-fade-in opacity-0 border-t border-border/30 pt-2 mb-2"
+                  style={{ animationDelay: `120ms`, animationFillMode: 'forwards' }}
+                >
+                  <button
+                    onClick={() => { setCategoryPanelOpen(true); setExpandedCategory(null); }}
+                    className="font-body text-[15px] uppercase tracking-wide text-left transition-colors py-2.5 w-full flex items-center justify-between text-foreground hover:text-primary font-semibold"
+                  >
+                    <span className="flex items-center gap-1.5">
+                      <LayoutGrid className="h-3.5 w-3.5 text-[hsl(var(--accent))]" />
+                      All Categories
+                    </span>
+                    <ChevronRight className="h-4 w-4" />
+                  </button>
+                </div>
+
                 {visibleLeftNavItems.map((item, index) => (
-                  <Fragment key={item.href}>
-                    <button 
-                      onClick={() => handleNavClick(item.href)}
-                      className="font-body text-[15px] uppercase tracking-wide text-left transition-colors py-2.5 w-full flex items-center justify-between text-foreground hover:text-primary font-semibold animate-fade-in opacity-0"
-                      style={{ animationDelay: `${index * 120}ms`, animationFillMode: 'forwards' }}
-                    >
-                      {item.mobileLabel}
-                      <ChevronRight className="h-4 w-4" />
-                    </button>
-
-                    {/* Insert All Categories right after Gallery (index 0) */}
-                    {index === 0 && (
-                      <div 
-                        className="animate-fade-in opacity-0 border-t border-border/30 pt-2 mb-2"
-                        style={{ animationDelay: `${index * 120}ms`, animationFillMode: 'forwards' }}
-                      >
-                        <button
-                          onClick={() => { setCategoryPanelOpen(true); setExpandedCategory(null); }}
-                          className="font-body text-[15px] uppercase tracking-wide text-left transition-colors py-2.5 w-full flex items-center justify-between text-foreground hover:text-primary font-semibold"
-                        >
-                          <span className="flex items-center gap-1.5">
-                            <LayoutGrid className="h-3.5 w-3.5 text-[hsl(var(--accent))]" />
-                            All Categories
-                          </span>
-                          <ChevronRight className="h-4 w-4" />
-                        </button>
-                      </div>
-                    )}
-
-                    {/* Insert New In right after Collectible Design (index 2) */}
-                    {index === 2 && (
-                      <button
-                        onClick={() => handleNavClick("/new-in")}
-                        className="font-body text-[15px] uppercase tracking-wide text-left transition-colors py-2.5 w-full flex items-center justify-between text-[hsl(var(--gold))] hover:text-primary font-bold animate-fade-in opacity-0"
-                        style={{ animationDelay: `${(index + 1) * 120}ms`, animationFillMode: 'forwards' }}
-                      >
-                        New In
-                        <ChevronRight className="h-4 w-4" />
-                      </button>
-                    )}
-                  </Fragment>
+                  <button 
+                    key={item.href}
+                    onClick={() => handleNavClick(item.href)}
+                    className="font-body text-[15px] uppercase tracking-wide text-left transition-colors py-2.5 w-full flex items-center justify-between text-foreground hover:text-primary font-semibold animate-fade-in opacity-0"
+                    style={{ animationDelay: `${(index + 2) * 120}ms`, animationFillMode: 'forwards' }}
+                  >
+                    {item.mobileLabel}
+                    <ChevronRight className="h-4 w-4" />
+                  </button>
                 ))}
                 
                 {/* Journal */}
                 <button
                   onClick={() => handleNavClick("/journal")}
                   className="font-body text-[15px] uppercase tracking-wide text-left transition-colors py-2.5 w-full flex items-center justify-between text-foreground hover:text-primary font-semibold animate-fade-in opacity-0"
-                  style={{ animationDelay: `${(visibleLeftNavItems.length + 1) * 120}ms`, animationFillMode: 'forwards' }}
+                  style={{ animationDelay: `${(visibleLeftNavItems.length + 2) * 120}ms`, animationFillMode: 'forwards' }}
                 >
                   Journal
                   <ChevronRight className="h-4 w-4" />
@@ -404,7 +399,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                 {/* Favorites & Selection */}
                 <div
                   className="mt-6 pt-4 border-t border-border/50 space-y-0 animate-fade-in opacity-0"
-                  style={{ animationDelay: `${(visibleLeftNavItems.length + 1) * 120}ms`, animationFillMode: 'forwards' }}
+                  style={{ animationDelay: `${(visibleLeftNavItems.length + 2) * 120}ms`, animationFillMode: 'forwards' }}
                 >
                   <button
                     onClick={() => { closeMobileMenu(); navigate("/favorites"); }}
@@ -441,7 +436,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                 {/* Trade Program — separated */}
                 <div 
                   className="mt-6 pt-4 border-t border-border/50 animate-fade-in opacity-0"
-                  style={{ animationDelay: `${(visibleLeftNavItems.length + 2) * 120}ms`, animationFillMode: 'forwards' }}
+                  style={{ animationDelay: `${(visibleLeftNavItems.length + 3) * 120}ms`, animationFillMode: 'forwards' }}
                 >
                   {rightNavItems.map((item) => (
                     <button 
@@ -461,7 +456,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                 {/* Contact Us — separate section */}
                 <div 
                   className="mt-4 pt-4 border-t border-border/50 animate-fade-in opacity-0"
-                  style={{ animationDelay: `${(visibleLeftNavItems.length + 3) * 120}ms`, animationFillMode: 'forwards' }}
+                  style={{ animationDelay: `${(visibleLeftNavItems.length + 4) * 120}ms`, animationFillMode: 'forwards' }}
                 >
                   <button
                     onClick={() => setContactExpanded(!contactExpanded)}
@@ -717,50 +712,47 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
           </div>
           <div className="flex items-center justify-between w-full pb-3">
             <div className="flex items-center gap-6 lg:gap-10">
-              {visibleLeftNavItems.map((item, index) => (
-                <React.Fragment key={item.href}>
-                  <button 
-                    onClick={() => { setMegaMenuOpen(false); handleNavClick(item.href); }} 
-                    className={cn(
-                      "font-body text-xs uppercase tracking-[0.2em] transition-all duration-300 relative group whitespace-nowrap flex items-center gap-1.5 text-foreground",
-                      (activeSection === item.href || isRouteActive(item.href)) && "font-medium"
-                    )}
-                  >
-                    {item.label}
-                    <span className={cn(
-                      "absolute -bottom-1 left-0 h-0.5 bg-[hsl(var(--accent))] transition-all duration-300",
-                      (activeSection === item.href || isRouteActive(item.href)) ? "w-full" : "w-0 group-hover:w-full"
-                    )} />
-                  </button>
-
-                  {/* Insert All Categories after Gallery (index 0) */}
-                  {index === 0 && (
-                    <button
-                      onClick={() => { setMegaMenuOpen(!megaMenuOpen); setMegaMenuHoverCat(null); }}
-                      className={cn(
-                        "font-body text-xs uppercase tracking-[0.2em] transition-all duration-300 flex items-center gap-1.5 whitespace-nowrap outline-none relative group text-foreground",
-                        (megaMenuOpen || isOnCategoryRoute) && "font-medium"
-                      )}
-                    >
-                      <LayoutGrid className="h-3.5 w-3.5 text-[hsl(var(--accent))]" />
-                      All Categories
-                      <ChevronDown className={`h-3 w-3 transition-transform duration-200 ${megaMenuOpen ? "rotate-180" : ""}`} />
-                      <span className={cn(
-                        "absolute -bottom-1 left-0 h-0.5 bg-[hsl(var(--accent))] transition-all duration-300",
-                        (megaMenuOpen || isOnCategoryRoute) ? "w-full" : "w-0 group-hover:w-full"
-                      )} />
-                    </button>
-                  )}
-                </React.Fragment>
-              ))}
-
-              {/* New In — between Collectible Design and Journal */}
+              {/* New In — first in the left nav */}
               <button
                 onClick={() => { setMegaMenuOpen(false); handleNavClick("/new-in"); }}
                 className="font-body text-xs uppercase tracking-[0.2em] font-bold transition-all duration-300 relative group whitespace-nowrap flex items-center gap-1.5 text-[hsl(var(--gold))] hover:text-foreground after:absolute after:bottom-0 after:left-0 after:w-full after:h-px after:bg-foreground after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-300 after:origin-left pb-0.5"
               >
                 New In
               </button>
+
+              {/* All Categories — second in the left nav */}
+              <button
+                onClick={() => { setMegaMenuOpen(!megaMenuOpen); setMegaMenuHoverCat(null); }}
+                className={cn(
+                  "font-body text-xs uppercase tracking-[0.2em] transition-all duration-300 flex items-center gap-1.5 whitespace-nowrap outline-none relative group text-foreground",
+                  (megaMenuOpen || isOnCategoryRoute) && "font-medium"
+                )}
+              >
+                <LayoutGrid className="h-3.5 w-3.5 text-[hsl(var(--accent))]" />
+                All Categories
+                <ChevronDown className={`h-3 w-3 transition-transform duration-200 ${megaMenuOpen ? "rotate-180" : ""}`} />
+                <span className={cn(
+                  "absolute -bottom-1 left-0 h-0.5 bg-[hsl(var(--accent))] transition-all duration-300",
+                  (megaMenuOpen || isOnCategoryRoute) ? "w-full" : "w-0 group-hover:w-full"
+                )} />
+              </button>
+
+              {visibleLeftNavItems.map((item) => (
+                <button 
+                  key={item.href}
+                  onClick={() => { setMegaMenuOpen(false); handleNavClick(item.href); }} 
+                  className={cn(
+                    "font-body text-xs uppercase tracking-[0.2em] transition-all duration-300 relative group whitespace-nowrap flex items-center gap-1.5 text-foreground",
+                    (activeSection === item.href || isRouteActive(item.href)) && "font-medium"
+                  )}
+                >
+                  {item.label}
+                  <span className={cn(
+                    "absolute -bottom-1 left-0 h-0.5 bg-[hsl(var(--accent))] transition-all duration-300",
+                    (activeSection === item.href || isRouteActive(item.href)) ? "w-full" : "w-0 group-hover:w-full"
+                  )} />
+                </button>
+              ))}
             </div>
 
             <span className="w-px h-3 bg-border/60" aria-hidden="true" />
