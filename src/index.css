@@ -578,6 +578,12 @@ input, select, textarea {
 /* Keep the gold Trade Program pill readable — it already has its own bg,
    just soften the outer border on dark imagery */
 .nav-over-hero .bg-accent { border-color: rgba(255, 255, 255, 0.85) !important; }
+.nav-over-hero button.bg-accent,
+.nav-over-hero a.bg-accent,
+.nav-over-hero .bg-accent {
+  text-shadow: none !important;
+  box-shadow: none !important;
+}
 /* Restore normal text-shadow inside dropdown surfaces so menu content
    stays crisp on white */
 .nav-over-hero [role="menu"] *,
@@ -600,11 +606,13 @@ input, select, textarea {
 /* Keep the "Est. 2017" lockup and its hairline dividers black alongside the
    wordmark, with no halo/shadow. */
 .nav-over-hero .brand-lockup,
-.nav-over-hero .brand-lockup * {
+.nav-over-hero .brand-lockup *,
+.nav-over-hero .brand-lockup [class*="text-foreground"] {
   color: hsl(var(--foreground)) !important;
   text-shadow: none !important;
 }
-.nav-over-hero .brand-lockup .bg-foreground {
+.nav-over-hero .brand-lockup .bg-foreground,
+.nav-over-hero .brand-lockup [class*="bg-foreground"] {
   background-color: hsl(var(--foreground)) !important;
   box-shadow: none !important;
 }
