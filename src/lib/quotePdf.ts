@@ -959,8 +959,9 @@ function drawTable(
     const swatchCount = (finishSwatches[idx]?.filter(Boolean).length || 0) + (fabricSwatches[idx] ? 1 : 0);
     const swatchRows = swatchCount > 0 ? Math.ceil(Math.min(swatchCount, 5) / 2) : 0;
     const hasSwatches = swatchCount > 0;
-    // Row height accounts for: image (52) + caption (10) + swatch rows (tile 20 + label 10 + gap 4 = 34 per row)
-    const swatchBlockH = hasSwatches ? 10 + swatchRows * 34 : 0;
+    // Row height accounts for: image (52) + caption (10) + swatch rows
+    // (tile 20 + label 2 lines × 7 + gap 4 = 38 per row).
+    const swatchBlockH = hasSwatches ? 10 + swatchRows * 38 : 0;
     const rowH = Math.max(hasSwatches ? 58 + swatchBlockH : 56, 12 /* brand */ + titleHeight + metaHeight + 14);
 
     // page break
@@ -992,17 +993,21 @@ function drawTable(
     const swatches = [...(finishSwatches[idx] || []), fabricSwatches[idx]].filter(Boolean) as NonNullable<Awaited<ReturnType<typeof fetchImageDataUrl>>>[];
     const swatchNames = finishSwatchNames[idx] || [];
     if (swatches.length > 0) {
-      // "Finishes:" caption above the swatch grid
+      // "Finishes:" caption above the swatch grid — normal-case, matches
+      // the on-screen quote line so users get parity between the two.
       doc.setFont("helvetica", "bold");
-      doc.setFontSize(7);
+      doc.setFontSize(8);
       doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
-      doc.text("FINISHES", xImg + 2, y + 62);
+      doc.text("Finishes:", xImg + 2, y + 62);
     }
     swatches.slice(0, 5).forEach((swatch, swatchIdx) => {
       try {
         const size = 20;
-        const sx = xImg + 2 + (swatchIdx % 2) * 30;
-        const sy = y + 68 + Math.floor(swatchIdx / 2) * 34;
+        // 24pt column pitch keeps 2 swatches under the 48pt image without
+        // overflowing into the description column. Labels wrap to 2 lines
+        // (width 24pt at 6.5pt helvetica) so "Aries Pietra" isn't clipped.
+        const sx = xImg + 2 + (swatchIdx % 2) * 24;
+        const sy = y + 68 + Math.floor(swatchIdx / 2) * 38;
         doc.setDrawColor(RULE[0], RULE[1], RULE[2]);
         doc.setLineWidth(0.25);
         doc.rect(sx, sy, size, size);
@@ -1012,10 +1017,7 @@ function drawTable(
           doc.setFont("helvetica", "normal");
           doc.setFontSize(6.5);
           doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
-          // Allocate the full column pitch (30pt) so two-word labels like
-          // "Aries Pietra" render on one line under the swatch tile. Fall
-          // back to a second wrapped line if truly necessary.
-          const nameWrap = (doc.splitTextToSize(name, 30) as string[]).slice(0, 2);
+          const nameWrap = (doc.splitTextToSize(name, 24) as string[]).slice(0, 2);
           nameWrap.forEach((ln, lnIdx) => {
             doc.text(ln, sx, sy + size + 7 + lnIdx * 7);
           });

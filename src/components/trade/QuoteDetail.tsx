@@ -1418,7 +1418,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
         variantLabel: item.variant_label ?? null,
         fabricLabel,
         woodFinishLabel,
-        leadTime: product?.lead_time ?? null,
+        leadTime: product?.lead_time ? `Product Lead Time: ${product.lead_time}` : null,
         notes: item.notes ?? null,
         quantity: item.quantity,
         unitPriceCents: unit,
@@ -2732,7 +2732,29 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                               </div>
                             )}
                           </div>
-                          {/* Swatch thumbnails below main image */}
+                          {/* Swatch thumbnails below main image — mirror the PDF layout */}
+                          {(() => {
+                            const swatchList = (item as any).variant_swatches?.length
+                              ? (item as any).variant_swatches
+                              : ((item as any).wood_fabric?.image_url ? [(item as any).wood_fabric] : []);
+                            const hasFabricTile = (() => {
+                              const fabric: any = (item as any).fabric;
+                              if (!fabric?.image_url) return false;
+                              const already = ((item as any).variant_swatches || []).some(
+                                (s: any) =>
+                                  (s?.image_url && s.image_url === fabric.image_url) ||
+                                  (s?.fabric_id && (item as any).fabric_id && s.fabric_id === (item as any).fabric_id) ||
+                                  (s?.name && fabric?.name && String(s.name).trim().toLowerCase() === String(fabric.name).trim().toLowerCase()),
+                              );
+                              return !already;
+                            })();
+                            if (swatchList.length === 0 && !hasFabricTile) return null;
+                            return (
+                              <p className="font-body text-[10px] md:text-[11px] font-medium text-foreground/70">
+                                Finishes:
+                              </p>
+                            );
+                          })()}
                           <div className="grid w-28 md:w-36 grid-cols-2 gap-2">
                             {((item as any).variant_swatches?.length
                               ? (item as any).variant_swatches
@@ -2840,9 +2862,10 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                           {item.edition && <p className="font-body text-[10px] md:text-[11px] text-foreground/80 italic mt-0.5 break-words">Edition: {String(item.edition).replace(/^edition\s*[:\-—]?\s*/i, "").trim()}</p>}
                           {(() => {
                             const ov = getLeadWeeksOverride(item.lead_time_weeks_override);
+                            const cls = "font-body text-[10px] md:text-[11px] text-muted-foreground break-words";
                             if (ov === 0) return <p className="font-body text-[10px] md:text-[11px] text-emerald-700 font-medium break-words">In stock</p>;
-                            if (ov && ov > 0) return <p className="font-body text-[10px] md:text-[11px] text-muted-foreground break-words">{ov} weeks</p>;
-                            return product?.lead_time ? <p className="font-body text-[10px] md:text-[11px] text-muted-foreground break-words">{product.lead_time}</p> : null;
+                            if (ov && ov > 0) return <p className={cls}>Product Lead Time: {ov} weeks</p>;
+                            return product?.lead_time ? <p className={cls}>Product Lead Time: {product.lead_time}</p> : null;
                           })()}
                           {editingNotesId === item.id ? (
                             <div className="mt-1.5" onClick={(e) => e.stopPropagation()}>

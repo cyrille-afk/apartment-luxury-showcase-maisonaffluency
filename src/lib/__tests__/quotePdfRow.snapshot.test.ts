@@ -198,8 +198,8 @@ describe("quotePdf row layout — regression guards", () => {
   });
 
   it("renders a FINISHES caption plus each swatch name below the image", () => {
-    const captions = items.filter((it) => /^FINISHES$/i.test(it.str.trim()));
-    expect(captions.length, "FINISHES caption missing above swatch strip").toBeGreaterThan(0);
+    const captions = items.filter((it) => /^Finishes:?$/i.test(it.str.trim()));
+    expect(captions.length, "'Finishes:' caption missing above swatch strip").toBeGreaterThan(0);
     // pdfjs sometimes splits multi-word text into separate items — join and
     // regex-search so "Mist Oak" / "Aries Pietra" match either way.
     const joined = items.map((it) => it.str).join(" ");
