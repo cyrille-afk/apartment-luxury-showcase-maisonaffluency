@@ -419,12 +419,6 @@ const MobileTestimonials = ({ testimonials }: { testimonials: { quote: string; n
               <p className="font-display text-2xl sm:text-3xl lg:text-5xl text-white mt-3 drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)] tracking-widest font-light">
                 Trade Program
               </p>
-              <Link
-                to="/trade-demo"
-                className="mt-8 inline-flex items-center gap-2 px-7 py-3 bg-white hover:bg-white/90 text-foreground font-body text-xs uppercase tracking-[0.2em] rounded-full transition-all duration-300 font-bold shadow-lg"
-              >
-                ▶ See it in action — 8-step demo
-              </Link>
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
