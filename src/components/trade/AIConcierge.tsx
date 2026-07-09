@@ -992,7 +992,7 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
   useEffect(() => {
     const handler = (e: Event) => {
       const detail = (e as CustomEvent).detail as
-        | { message?: string; openPanel?: boolean; stage?: Stage; actions?: ConciergeQuickAction[]; resetPanel?: boolean; replaceTimeline?: boolean; onboarding?: boolean; prefill?: string; autoSend?: boolean; displayMessage?: string }
+        | { message?: string; openPanel?: boolean; closeBriefBuilder?: boolean; stage?: Stage; actions?: ConciergeQuickAction[]; resetPanel?: boolean; replaceTimeline?: boolean; onboarding?: boolean; prefill?: string; autoSend?: boolean; displayMessage?: string }
         | undefined;
       const message = detail?.message?.trim();
       if (detail?.resetPanel) {
@@ -1025,6 +1025,8 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
       }
       if (detail?.stage) setStageOverride(detail.stage);
       if (detail?.openPanel) setOpen(true);
+      if (detail?.closeBriefBuilder) setBriefBuilderOpen(false);
+
       // Prefill support — used by per-SKU "Swap" buttons on the concierge
       // cards. Two modes:
       //   • default: drop the text into the composer and focus it so the

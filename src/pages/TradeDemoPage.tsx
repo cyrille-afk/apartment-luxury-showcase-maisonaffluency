@@ -143,11 +143,20 @@ const StepConciergeCanvas: React.FC<{ step: 1 | 2 | 3 }> = ({ step }) => {
           onClick={() => {
             const btn = document.querySelector<HTMLButtonElement>('[aria-label="Open AI Concierge"]');
             btn?.click();
+            // Make sure the brief builder isn't left open from an earlier step,
+            // and drop in a short Singapore-context line so the Concierge
+            // visibly acknowledges the market the demo is tuned to.
+            dispatchConcierge({
+              openPanel: true,
+              closeBriefBuilder: true,
+              message: `Working in ${DEMO_CITY} today — mention a room, brand, or vibe and I'll tailor every recommendation to that market.`,
+            });
           }}
           className="mt-6 inline-flex items-center gap-2 rounded-full bg-foreground text-background px-5 py-2.5 font-body text-[11px] uppercase tracking-[0.2em] hover:opacity-90 transition-opacity"
         >
           Open the Concierge Panel
         </button>
+
       </div>
     </div>
   );
