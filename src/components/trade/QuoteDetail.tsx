@@ -39,7 +39,7 @@ import { priceRugVariantFromLabel } from "@/lib/rugPricing";
 import { computeWeightedDepositPct } from "@/lib/computeDepositPct";
 import BillingModeCard from "@/components/trade/BillingModeCard";
 import { resolveWoodFinishLabel } from "@/lib/resolveWoodFinishLabel";
-import { splitFinishAndDimensions, formatImperialDimensions } from "@/lib/formatDimensions";
+import { splitFinishAndDimensions, formatDimensionsMultiline, formatImperialDimensions } from "@/lib/formatDimensions";
 
 const CURRENCIES = ["SGD", "USD", "EUR", "GBP"] as const;
 type Currency = (typeof CURRENCIES)[number];
@@ -79,6 +79,7 @@ interface QuoteItemWithProduct {
     sku: string | null;
     origin: string | null;
     source_pick_id?: string | null;
+    size_variants?: Array<{ label?: string | null; base?: string | null; top?: string | null; price_cents?: number | null }> | null;
   } | null;
   /** Enriched at load time from designer_curator_picks (limited-edition / edition note). */
   edition?: string | null;
@@ -115,6 +116,111 @@ const catalogSourcePriceCents = (item: QuoteItemWithProduct) => {
     return priceRugVariantFromLabel(item.variant_label || product.dimensions, product.price_per_sqm_cents);
   }
   return product.trade_price_cents;
+};
+
+const DIMENSION_TEXT_RE = /\b(?:cm|mm|in|inches?|\")\b/i;
+const DIMENSION_SHAPE_RE = /[×xX]\s*\d|Ø\s*\d/i;
+const DIMENSION_STOP_WORDS = new Set([
+  "cat",
+  "category",
+  "fabric",
+  "leather",
+  "finish",
+  "finishes",
+  "wood",
+  "stone",
+  "marble",
+  "base",
+  "top",
+  "com",
+]);
+
+const looksLikeDimensionText = (value: string | null | undefined) => {
+  const text = String(value || "").trim();
+  return DIMENSION_TEXT_RE.test(text) || DIMENSION_SHAPE_RE.test(text);
+};
+
+const extractVariantDimensions = (variant: { label?: string | null; base?: string | null; top?: string | null } | null | undefined) => {
+  for (const field of [variant?.label, variant?.base, variant?.top]) {
+    const value = String(field || "").trim();
+    if (!value) continue;
+    const { dims } = splitFinishAndDimensions(value);
+    let dimension = (dims || "").trim();
+    if (!dimension && looksLikeDimensionText(value)) dimension = value;
+    dimension = dimension
+      .replace(/^[^\d×xXØ]*?[-–—:]\s+(?=.*(?:cm|mm|in|\"|×|x|Ø))/i, "")
+      .trim();
+    if (dimension) return dimension;
+  }
+  return "";
+};
+
+const meaningfulTerms = (value: string | null | undefined) =>
+  String(value || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .split(" ")
+    .map((term) => term.trim())
+    .filter((term) => term.length >= 3 && !/^\d+$/.test(term) && !DIMENSION_STOP_WORDS.has(term));
+
+const labelMatchesVariant = (label: string, haystack: string) => {
+  const terms = meaningfulTerms(label);
+  if (terms.length === 0) return false;
+  return terms.some((term) => haystack.includes(term));
+};
+
+const resolveSelectedVariantDimensions = (
+  item: QuoteItemWithProduct,
+  variants: Array<{ label?: string | null; base?: string | null; top?: string | null; price_cents?: number | null }> | null | undefined,
+) => {
+  if (!Array.isArray(variants) || variants.length === 0) return null;
+
+  const selectedLabels = [
+    ...String(item.variant_label || "")
+      .split(/\s*[·•/]\s*/)
+      .map((part) => part.trim())
+      .filter((part) => part && !looksLikeDimensionText(part)),
+    ...(((item as any).variant_swatches || []) as Array<{ name?: string | null }>)
+      .map((swatch) => swatch?.name)
+      .filter(Boolean) as string[],
+    (item as any).wood_fabric?.name,
+    (item as any).fabric?.name,
+  ]
+    .filter(Boolean)
+    .map((label) => String(label).trim())
+    .filter((label, index, arr) => arr.findIndex((other) => other.toLowerCase() === label.toLowerCase()) === index);
+
+  const variantsWithDims = variants
+    .map((variant) => ({
+      variant,
+      dims: extractVariantDimensions(variant),
+      haystack: meaningfulTerms([variant.base, variant.top, variant.label].filter(Boolean).join(" ")).join(" "),
+    }))
+    .filter((row) => row.dims);
+
+  if (variantsWithDims.length === 0) return null;
+
+  const selectedWithTerms = selectedLabels.filter((label) => meaningfulTerms(label).length > 0);
+  let matches = selectedWithTerms.length > 0
+    ? variantsWithDims.filter((row) => selectedWithTerms.every((label) => labelMatchesVariant(label, row.haystack)))
+    : [];
+
+  if (matches.length === 0 && item.variant_label) {
+    const raw = item.variant_label.toLowerCase();
+    matches = variantsWithDims.filter((row) => raw.includes(row.dims.toLowerCase()) || row.haystack.includes(raw));
+  }
+
+  if (matches.length === 0) return null;
+
+  const targetPrice = item.unit_price_cents ?? item.trade_products?.trade_price_cents ?? null;
+  if (targetPrice != null) {
+    const priceMatches = matches.filter((row) => typeof row.variant.price_cents === "number" && row.variant.price_cents === targetPrice);
+    if (priceMatches.length === 1) return priceMatches[0].dims;
+    if (priceMatches.length > 1) matches = priceMatches;
+  }
+
+  const uniqueDims = Array.from(new Set(matches.map((row) => row.dims)));
+  return uniqueDims[0] || null;
 };
 
 const itemPriceCurrency = (item: QuoteItemWithProduct, quoteCurrency: string) => (
@@ -526,7 +632,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
       const [itemsRes, quoteRes, profileRes] = await Promise.all([
         supabase
           .from("trade_quote_items")
-          .select("*, trade_products(product_name, brand_name, trade_price_cents, rrp_price_cents, price_per_sqm_cents, price_unit, currency, image_url, dimensions, materials, lead_time, sku, origin, stock_status_override, lead_weeks_min_override, lead_weeks_max_override, source_pick_id), fabric:fabrics!fabric_id(name, tier, price_per_lm_cents, currency, image_url), wood_fabric:fabrics!wood_fabric_id(name, image_url)")
+          .select("*, trade_products(product_name, brand_name, trade_price_cents, rrp_price_cents, price_per_sqm_cents, price_unit, currency, image_url, dimensions, materials, lead_time, sku, origin, stock_status_override, lead_weeks_min_override, lead_weeks_max_override, source_pick_id, size_variants), fabric:fabrics!fabric_id(name, tier, price_per_lm_cents, currency, image_url), wood_fabric:fabrics!wood_fabric_id(name, image_url)")
           .eq("quote_id", quoteId)
           .order("created_at", { ascending: true }),
         supabase.from("trade_quotes").select("currency, client_name, client_id, admin_notes, project_id, insurance_enabled, insurance_tier, insurance_rate_bps, insurance_notes, issue_date, submitted_at, responded_at, confirmed_at, landed_cost_cbm, landed_cost_kg, landed_cost_mode, ship_to_same_as_bill, incoterm, ship_to_name, ship_to_attention, ship_to_address1, ship_to_address2, ship_to_city, ship_to_state, ship_to_postal_code, ship_to_country, ship_to_phone, ship_to_email, ship_to_notes").eq("id", quoteId).single(),
@@ -703,33 +809,29 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
               const pick = (it.trade_products?.source_pick_id && pickById.get(it.trade_products.source_pick_id)) || pickByTitle.get(key);
               const resolvedImage = resolveQuoteLineImageFromPick(it, pick);
 
-              // Fallback dims: when trade_products.dimensions is empty, take
-              // the pick's dimensions column, else derive a unique set of
-              // dim-like size_variants labels (Praia da Granja stores its two
-              // sizes as separate size_variants labels; the trade_products
-              // mirror never received a dimensions value).
+              // Fallback dims: prefer the exact selected size from the saved
+              // variant/finish swatches. Only if no selection can be resolved,
+              // fall back to a generic catalogue dimensions value.
               const currentDims = (it.trade_products?.dimensions || "").trim();
               let dimsFromPick: string | null = null;
-              if (!currentDims && pick) {
+              const productVariants = Array.isArray((it.trade_products as any)?.size_variants)
+                ? ((it.trade_products as any).size_variants as Array<{ label?: string | null; base?: string | null; top?: string | null; price_cents?: number | null }>)
+                : [];
+              const pickVariants = Array.isArray(pick?.size_variants)
+                ? (pick.size_variants as Array<{ label?: string | null; base?: string | null; top?: string | null; price_cents?: number | null }>)
+                : [];
+              const selectedDims = resolveSelectedVariantDimensions(
+                it,
+                productVariants.length > 0 ? productVariants : pickVariants,
+              );
+              if (selectedDims) {
+                dimsFromPick = selectedDims;
+              } else if (!currentDims && pick) {
                 const pd = (pick.dimensions || "").trim();
                 if (pd) {
                   dimsFromPick = pd;
-                } else if (Array.isArray(pick.size_variants)) {
-                  const isDimStr = (s: string) =>
-                    /\b(?:cm|mm|in|inches?|")\b/i.test(s) ||
-                    /[×xX]\s*\d/.test(s) ||
-                    /Ø\s*\d/.test(s);
-                  const extractDims = (v: { label?: string | null; base?: string | null; top?: string | null }) => {
-                    for (const field of [v?.label, v?.base, v?.top]) {
-                      const { dims } = splitFinishAndDimensions(field);
-                      let d = (dims || "").trim();
-                      if (!d && field && isDimStr(field)) d = String(field).trim();
-                      d = d.replace(/^[^\d×xXØ]*?-\s+(?=.*(?:cm|mm|in|"|×|x|Ø))/i, "").trim();
-                      if (d) return d;
-                    }
-                    return "";
-                  };
-                  const variants = pick.size_variants as Array<{ label?: string | null; base?: string | null; top?: string | null }>;
+                } else if (pickVariants.length > 0) {
+                  const variants = pickVariants;
                   // Prefer variants whose base/top/label match the item's
                   // selected variant_label. If nothing strict-matches, we
                   // still surface the pick's dims (showing something is far
@@ -750,7 +852,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                   const seen = new Set<string>();
                   const dimLabels: string[] = [];
                   for (const v of pool) {
-                    const d = extractDims(v);
+                    const d = extractVariantDimensions(v);
                     if (d && !seen.has(d)) { seen.add(d); dimLabels.push(d); }
                   }
                   if (dimLabels.length > 0) {
@@ -2881,6 +2983,7 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                             // the PDF composer.
                             const { finish: finishOnly, dims: dimsFromVariant } = splitFinishAndDimensions(item.variant_label);
                             const dimsSource = dimsFromVariant || (product?.dimensions ? String(product.dimensions).trim() : "");
+                            const dimsMetric = dimsSource ? formatDimensionsMultiline(dimsSource) : "";
                             const dimsImp = dimsSource ? formatImperialDimensions(dimsSource) : null;
                             return (
                               <>
@@ -2889,10 +2992,10 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                                     <span className="text-muted-foreground">Finish:</span> {finishOnly}
                                   </p>
                                 )}
-                                {dimsSource && (
+                                {dimsMetric && (
                                   <p className="font-body text-[10px] md:text-[11px] text-muted-foreground mt-1 break-words">
                                     <span className="text-muted-foreground">Dimensions:</span>{" "}
-                                    <span className="whitespace-nowrap">{dimsSource}</span>
+                                    <span className="whitespace-nowrap">{dimsMetric}</span>
                                     {dimsImp ? (
                                       <>
                                         {" "}<span className="text-muted-foreground/80 whitespace-nowrap">| {dimsImp}</span>
@@ -2924,8 +3027,8 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
                           {item.edition && <p className="font-body text-[10px] md:text-[11px] text-foreground/80 italic mt-0.5 break-words">Edition: {String(item.edition).replace(/^edition\s*[:\-—]?\s*/i, "").trim()}</p>}
                           {(() => {
                             const ov = getLeadWeeksOverride(item.lead_time_weeks_override);
-                            const cls = "font-body text-[10px] md:text-[11px] text-muted-foreground break-words";
-                            if (ov === 0) return <p className="font-body text-[10px] md:text-[11px] text-emerald-700 font-medium break-words">In stock</p>;
+                            const cls = "font-body text-[10px] md:text-[11px] text-muted-foreground break-words mt-2";
+                            if (ov === 0) return <p className="font-body text-[10px] md:text-[11px] text-emerald-700 font-medium break-words mt-2">In stock</p>;
                             if (ov && ov > 0) return <p className={cls}>Product Lead Time: {ov} weeks</p>;
                             return product?.lead_time ? <p className={cls}>Product Lead Time: {product.lead_time}</p> : null;
                           })()}
