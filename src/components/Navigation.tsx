@@ -337,7 +337,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                 <span className="group-hover:text-accent transition-colors duration-300">A</span>FFLUENCY
               </span>
             </button>
-              <div className="flex items-center gap-2 -mt-0.5">
+              <div className="flex items-center gap-2 -mt-0.5 brand-lockup">
                 <span className="h-px w-5 bg-foreground" />
                 <span className="font-body text-[7px] uppercase tracking-[0.3em] text-foreground font-bold">Est. 2017</span>
                 <span className="h-px w-5 bg-foreground" />
@@ -361,7 +361,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                     MAISON <span className="group-hover:text-accent transition-colors duration-300">A</span>FFLUENCY
                   </span>
                 </button>
-                <div className="flex items-center gap-2 mt-0.5">
+                <div className="flex items-center gap-2 mt-0.5 brand-lockup">
                   <span className="h-px w-6 bg-foreground" />
                   <span className="font-body text-[8px] md:text-[7px] uppercase tracking-[0.3em] text-foreground font-bold">Est. 2017</span>
                   <span className="h-px w-6 bg-foreground" />
