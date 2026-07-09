@@ -465,10 +465,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                       onClick={() => handleNavClick(item.href)}
                       className="font-body text-[15px] uppercase tracking-wide text-left transition-colors py-2.5 w-full flex items-center justify-between text-accent-foreground hover:bg-accent/80 font-bold bg-accent px-3 rounded-lg"
                     >
-                      <span className="flex items-center gap-2">
-                        {item.label}
-                        <span className="w-1.5 h-1.5 rounded-full bg-accent-foreground/60 animate-pulse" />
-                      </span>
+                      {item.label}
                       <ChevronRight className="h-4 w-4" />
                     </button>
                   ))}
