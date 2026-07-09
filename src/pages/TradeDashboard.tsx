@@ -77,6 +77,7 @@ const formatRelativeDate = (dateStr: string) => {
 
 const TradeDashboard = () => {
   const { profile, user } = useAuth();
+  const navigate = useNavigate();
   const [brands, setBrands] = useState<BrandFolder[]>([]);
   const [activity, setActivity] = useState<ActivityItem[]>([]);
   const [loading, setLoading] = useState(true);
