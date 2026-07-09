@@ -50,8 +50,8 @@ export const DEMO_PIECES: DemoPiece[] = [
         "Leather Cat. Sierra",
       ],
     },
-    rrpCents: 8010000,
-    tradePriceCents: 7370000,
+    rrpCents: 801000,
+    tradePriceCents: 737000,
     leadTime: "14–16 weeks",
   },
   {
