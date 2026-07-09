@@ -774,7 +774,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
               ))}
             </div>
 
-            <span className="w-px h-3 bg-border/60" aria-hidden="true" />
+            <span className="w-px h-3 bg-border/60 mx-6 lg:mx-10" aria-hidden="true" />
 
             <div className="flex items-center gap-6 lg:gap-10">
               {/* Journal */}
