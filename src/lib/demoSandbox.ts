@@ -50,8 +50,8 @@ export const DEMO_PIECES: DemoPiece[] = [
         "Leather Cat. Sierra",
       ],
     },
-    rrpCents: 8010000,
-    tradePriceCents: 7370000,
+    rrpCents: 801000,
+    tradePriceCents: 737000,
     leadTime: "14–16 weeks",
   },
   {
@@ -73,8 +73,8 @@ export const DEMO_PIECES: DemoPiece[] = [
         "Leather Cat. Cervo",
       ],
     },
-    rrpCents: 5210000,
-    tradePriceCents: 4791000,
+    rrpCents: 521000,
+    tradePriceCents: 479100,
     leadTime: "14–16 weeks",
   },
   {
@@ -91,8 +91,8 @@ export const DEMO_PIECES: DemoPiece[] = [
       base: ["Travertine Silver", "Travertine Roman", "Nero Marquina"],
       top: ["Nude Oak Base", "Tobacco Oak Base", "Black Pepper Oak Base"],
     },
-    rrpCents: 9240000,
-    tradePriceCents: 8500000,
+    rrpCents: 924000,
+    tradePriceCents: 850000,
     leadTime: "16–18 weeks",
   },
 ];
