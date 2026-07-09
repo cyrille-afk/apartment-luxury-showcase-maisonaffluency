@@ -116,7 +116,7 @@ const Hero = () => {
                 onClick={scrollToOverview}
                 className={heroPrimaryCtaClass}
               >
-                Explore Our Curated Collection
+                Explore Our Interactive Gallery
               </button>
 
               <button
