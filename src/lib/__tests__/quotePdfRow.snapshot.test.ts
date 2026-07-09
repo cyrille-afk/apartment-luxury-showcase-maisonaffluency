@@ -55,10 +55,14 @@ beforeAll(() => {
   // @ts-expect-error jsdom override
   globalThis.Image = StubImage;
 
-  // Stub fetch → always return a tiny JPEG blob.
-  globalThis.fetch = (async () => {
-    return new Response(makeJpegBlob(), { status: 200 });
-  }) as typeof fetch;
+  // Stub fetch → return a Response-shaped object with a tiny JPEG blob.
+  // (`new Response(blob)` throws in jsdom because Blob.stream is missing, so
+  // we hand-roll the minimal surface fetchImageDataUrl uses: `.ok` + `.blob()`.)
+  globalThis.fetch = (async () => ({
+    ok: true,
+    status: 200,
+    blob: async () => makeJpegBlob(),
+  })) as unknown as typeof fetch;
 
   // Patch FileReader.readAsDataURL to synchronously resolve with a known
   // JPEG data URL. jsdom's default readAsDataURL sometimes yields an empty
