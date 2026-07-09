@@ -19,6 +19,7 @@ import {
   DEMO_PIECES,
   DEMO_STEP_META,
   fmtEUR,
+  verifyDemoPricesLive,
   type DemoPiece,
   type DemoSteps,
 } from "@/lib/demoSandbox";
@@ -278,6 +279,13 @@ const TradeDemoPage: React.FC = () => {
   useEffect(() => {
     window.scrollTo({ top: 0 });
   }, [step]);
+
+  // One-shot live pricing cross-check against the DB. Runs lazily
+  // so it never blocks initial render; warns via console if any
+  // demo seed drifts from the live catalogue price.
+  useEffect(() => {
+    void verifyDemoPricesLive();
+  }, []);
 
   // Concierge opens on demand (via step 1's CTA or the auto-send on step 2/3).
   // We do NOT auto-open on mount so the narration card stays visible.
