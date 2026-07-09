@@ -702,10 +702,38 @@ const QuoteDetail = ({ quoteId, quoteStatus, quoteCreatedAt, quoteNotes, onBack,
               const ed = editionByTitle.get(key);
               const pick = (it.trade_products?.source_pick_id && pickById.get(it.trade_products.source_pick_id)) || pickByTitle.get(key);
               const resolvedImage = resolveQuoteLineImageFromPick(it, pick);
+
+              // Fallback dims: when trade_products.dimensions is empty, take
+              // the pick's dimensions column, else derive a unique set of
+              // dim-like size_variants labels (Praia da Granja stores its two
+              // sizes as separate size_variants labels; the trade_products
+              // mirror never received a dimensions value).
+              const currentDims = (it.trade_products?.dimensions || "").trim();
+              let dimsFromPick: string | null = null;
+              if (!currentDims && pick) {
+                const pd = (pick.dimensions || "").trim();
+                if (pd) {
+                  dimsFromPick = pd;
+                } else if (Array.isArray(pick.size_variants)) {
+                  const seen = new Set<string>();
+                  const dimLabels: string[] = [];
+                  for (const v of pick.size_variants as Array<{ label?: string | null }>) {
+                    const { dims } = splitFinishAndDimensions(v?.label);
+                    const d = (dims || "").trim();
+                    if (d && !seen.has(d)) { seen.add(d); dimLabels.push(d); }
+                  }
+                  if (dimLabels.length > 0) dimsFromPick = dimLabels.join(" · ");
+                }
+              }
+              const patchedProduct = dimsFromPick && it.trade_products
+                ? { ...it.trade_products, dimensions: dimsFromPick }
+                : it.trade_products;
+
               return {
                 ...it,
                 ...(ed ? { edition: ed } : {}),
                 ...(resolvedImage ? { image_url: resolvedImage } : {}),
+                ...(patchedProduct !== it.trade_products ? { trade_products: patchedProduct } : {}),
               };
             });
           }
