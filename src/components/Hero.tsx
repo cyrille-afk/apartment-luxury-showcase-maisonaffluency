@@ -144,7 +144,7 @@ const Hero = () => {
         </button>
       </div>
 
-      {/* Desktop: bottom-right of hero, next to Chat widget */}
+      {/* Desktop: bottom-right of hero, Book a Viewing only */}
       <div
         className="hidden md:flex absolute bottom-6 z-20 items-center gap-2 hero-fade-in-delayed-4"
         style={{ right: "200px", animationDelay: "1.2s" }}
@@ -155,12 +155,6 @@ const Hero = () => {
         >
           Book a Viewing
         </button>
-        <Link
-          to="/trade-program"
-          className={heroSecondaryCtaClass}
-        >
-          Trade Program
-        </Link>
       </div>
 
     </section>
