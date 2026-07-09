@@ -145,8 +145,8 @@ const Hero = () => {
 
       {/* Desktop: bottom-right of hero, Book a Viewing only */}
       <div
-        className="hidden md:flex absolute bottom-6 z-20 items-center gap-2 hero-fade-in-delayed-4"
-        style={{ right: "200px", animationDelay: "1.2s" }}
+        className="hidden md:flex absolute bottom-6 right-4 z-20 items-center gap-2 hero-fade-in-delayed-4"
+        style={{ animationDelay: "1.2s" }}
       >
         <button
           onClick={() => { trackCTA.bookAppointment("HeroCTA"); scrollToContact(); }}
