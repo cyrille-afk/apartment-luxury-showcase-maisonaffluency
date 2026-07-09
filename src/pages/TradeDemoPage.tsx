@@ -279,18 +279,8 @@ const TradeDemoPage: React.FC = () => {
     window.scrollTo({ top: 0 });
   }, [step]);
 
-  // Auto-open concierge panel when entering steps 1-3.
-  useEffect(() => {
-    if (step === 1) {
-      const t = setTimeout(() => {
-        const btn = document.querySelector<HTMLButtonElement>(
-          '[aria-label="Open AI Concierge"]'
-        );
-        btn?.click();
-      }, 600);
-      return () => clearTimeout(t);
-    }
-  }, [step]);
+  // Concierge opens on demand (via step 1's CTA or the auto-send on step 2/3).
+  // We do NOT auto-open on mount so the narration card stays visible.
 
   const sendIntent = useCallback(() => {
     dispatchConcierge({
