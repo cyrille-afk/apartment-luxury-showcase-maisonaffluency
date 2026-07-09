@@ -32,12 +32,20 @@ interface FeaturedDesigner {
 
 const FEATURED_GROUPS = [
   {
+    label: "Architectural Masters",
+    slugs: [
+      "ecart",
+      "felix-agostini",
+      "thierry-lemaire",
+      "pierre-bonnefille",
+    ],
+  },
+  {
     label: "Featured Ateliers",
     slugs: [
       "alexander-lamont",
       "apparatus-studio",
-      "pierre-bonnefille",
-      "thierry-lemaire",
+      "ozone",
       "delcourt-collection",
     ],
   },
@@ -47,19 +55,11 @@ const FEATURED_GROUPS = [
       "emmanuel-babled",
       "christopher-boots",
       "kiko-lopez",
-      "ozone",
       "hamrei",
       "victoria-magniant",
-    ],
-  },
-  {
-    label: "Architectural Masters",
-    slugs: [
       "leo-aerts-alinea",
       "atelier-demichelis",
-      "ecart",
       "emmanuel-levet-stenne",
-      "felix-agostini",
       "kerstens",
     ],
   },
