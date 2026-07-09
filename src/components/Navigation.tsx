@@ -442,11 +442,11 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                     <button 
                       key={item.href} 
                       onClick={() => handleNavClick(item.href)}
-                      className="font-body text-[15px] uppercase tracking-wide text-left transition-colors py-2.5 w-full flex items-center justify-between text-[hsl(var(--gold))] hover:text-white hover:bg-[hsl(var(--gold))] font-bold bg-[hsl(var(--gold)/0.1)] px-3 rounded-lg"
+                      className="font-body text-[15px] uppercase tracking-wide text-left transition-colors py-2.5 w-full flex items-center justify-between text-accent-foreground hover:bg-accent/80 font-bold bg-accent px-3 rounded-lg"
                     >
                       <span className="flex items-center gap-2">
                         {item.label}
-                        <span className="w-1.5 h-1.5 rounded-full bg-[hsl(var(--gold))] animate-pulse" />
+                        <span className="w-1.5 h-1.5 rounded-full bg-accent-foreground/60 animate-pulse" />
                       </span>
                       <ChevronRight className="h-4 w-4" />
                     </button>
@@ -775,10 +775,10 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                       setMegaMenuOpen(false);
                       handleNavClick(item.href);
                     }}
-                    className="font-body text-xs uppercase tracking-[0.2em] font-bold transition-all duration-300 relative whitespace-nowrap flex items-center gap-1.5 text-[hsl(var(--gold))] hover:text-white bg-[hsl(var(--gold)/0.1)] hover:bg-[hsl(var(--gold))] px-3 py-1 rounded-full"
+                    className="font-body text-xs uppercase tracking-[0.2em] font-bold transition-all duration-300 relative whitespace-nowrap flex items-center gap-1.5 bg-accent text-accent-foreground hover:bg-accent/80 px-3 py-1 rounded-full"
                   >
                     {item.label}
-                    <span className="w-1.5 h-1.5 rounded-full bg-[hsl(var(--gold))] animate-pulse" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-accent-foreground/60 animate-pulse" />
                   </button>
                 </div>
               ))}
