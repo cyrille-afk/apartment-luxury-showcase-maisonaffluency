@@ -43,11 +43,12 @@ const leftNavItems = [{
   href: "/gallery",
   icon: Image,
 }, {
-  label: "Collectible Design",
-  mobileLabel: "Collectible Design",
+  label: "Collectibles",
+  mobileLabel: "Collectibles",
   href: "/collectibles",
   icon: Gem,
 }];
+
 
 const rightNavItems = [{
   label: "Trade Program",
