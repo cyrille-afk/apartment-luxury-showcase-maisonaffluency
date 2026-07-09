@@ -107,6 +107,8 @@ const TradeGallery = () => {
 
   const normalizeName = (s: string) =>
     s.toLowerCase().replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim();
+  const stripDesignerSuffix = (s: string) =>
+    s.replace(/\s+by\s+[^,–—]+$/i, "").trim();
   const tokenizeName = (s: string) =>
     normalizeName(s).split(" ").filter((t) => t.length > 2);
 
@@ -125,9 +127,12 @@ const TradeGallery = () => {
     const addEntry = (name: string, cents: number, currency: string, price_unit?: string, price_prefix?: string | null) => {
       const entry = { name, cents, currency, price_unit, price_prefix };
       entries.push(entry);
-      lookup.set(name.trim().toLowerCase(), entry);
-      const norm = normalizeName(name);
-      if (norm) lookup.set(norm, entry);
+      const aliases = new Set([name, stripDesignerSuffix(name)].filter(Boolean));
+      for (const alias of aliases) {
+        lookup.set(alias.trim().toLowerCase(), entry);
+        const norm = normalizeName(alias);
+        if (norm) lookup.set(norm, entry);
+      }
     };
 
     for (const p of cpData ?? []) {
@@ -236,6 +241,8 @@ const TradeGallery = () => {
     if (product.subtitle) {
       const comboKey = `${nameKey} ${product.subtitle.trim().toLowerCase()}`;
       if (priceLookup.has(comboKey)) return priceLookup.get(comboKey)!;
+      const byKey = `${nameKey} by ${product.subtitle.trim().toLowerCase()}`;
+      if (priceLookup.has(byKey)) return priceLookup.get(byKey)!;
     }
     const norm = normalizeName(product.product_name);
     if (priceLookup.has(norm)) return priceLookup.get(norm)!;
