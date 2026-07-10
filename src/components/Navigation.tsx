@@ -631,7 +631,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                 <span className="h-px w-10 bg-foreground" aria-hidden="true" />
               </div>
             </div>
-            <div className="flex flex-col items-end">
+            <div className="flex flex-col items-end pr-2">
               {/* Contact Us — aligned to right edge (matches Trade Program below) */}
               <div className="pt-1">
                 <DropdownMenu>
