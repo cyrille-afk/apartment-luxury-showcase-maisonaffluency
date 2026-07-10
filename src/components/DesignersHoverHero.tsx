@@ -469,7 +469,7 @@ const DesignersHoverHero = () => {
                                 </span>
                               </Link>
                               {isLast && (
-                                <div className="hidden md:block absolute left-full top-1/2 -translate-y-[44%] ml-12 pointer-events-auto">
+                                <div className="hidden md:block absolute left-full top-1/2 -translate-y-[88%] ml-10 pointer-events-auto">
                                   <DirectoryContent align="left" />
                                 </div>
                               )}
