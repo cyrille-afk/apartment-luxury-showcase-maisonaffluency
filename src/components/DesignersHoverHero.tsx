@@ -469,10 +469,10 @@ const DesignersHoverHero = () => {
         {/* Directory label — pinned to the svh frame bottom so it always
             clears Safari's bottom toolbar; on mobile/PWA it is centered. */}
         {directoryLabels(cn(
-          "absolute flex items-center gap-10 text-white border-t border-white/20 pt-6 w-fit pointer-events-auto",
+          "absolute flex items-center gap-10 text-white pt-6 w-fit pointer-events-auto",
           isMobileOrPwa
-            ? "left-1/2 -translate-x-1/2 w-full justify-center px-6"
-            : "left-6 sm:left-[22rem] md:left-[26rem] lg:left-[28rem]",
+            ? "left-1/2 -translate-x-1/2 justify-center px-6"
+            : "left-6 sm:left-[22rem] md:left-[26rem] lg:left-[28rem] border-t border-white/20",
           isStandalone
             ? "bottom-[calc(6rem+env(safe-area-inset-bottom))] md:bottom-14"
             : "bottom-[calc(1.25rem+env(safe-area-inset-bottom))] md:bottom-24"
