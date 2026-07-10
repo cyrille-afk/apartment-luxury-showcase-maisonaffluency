@@ -21,6 +21,7 @@ import { scrollToSection } from "@/lib/scrollToSection";
 import { cloudinaryUrl } from "@/lib/cloudinary";
 import { useCompare } from "@/contexts/CompareContext";
 import { cn } from "@/lib/utils";
+import { lastNameInitial, sortNameKey } from "@/lib/nameFormat";
 import { warmCuratorPickSet } from "@/lib/curatorPickPreload";
 import { shareProfileOnWhatsApp, buildAtelierOgUrl, buildParentBrandOgUrl, buildDesignerOgUrl, shareOnWhatsApp, withOgCacheBust } from "@/lib/whatsapp-share";
 import WhatsAppShareButton from "./WhatsAppShareButton";
