@@ -472,7 +472,7 @@ const DesignersHoverHero = () => {
           "absolute flex items-center gap-10 text-white border-t border-white/20 pt-6 max-w-md pointer-events-auto",
           isMobileOrPwa
             ? "left-1/2 -translate-x-1/2 w-full justify-center px-6"
-            : "left-6 sm:left-12 md:left-20 lg:left-28",
+            : "right-6 sm:right-12 md:right-20 lg:right-28",
           isStandalone
             ? "bottom-[calc(6rem+env(safe-area-inset-bottom))] md:bottom-14"
             : "bottom-[calc(1.25rem+env(safe-area-inset-bottom))] md:bottom-24"
