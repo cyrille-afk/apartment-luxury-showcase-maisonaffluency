@@ -21,6 +21,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { jumpToDesignerLetter } from "@/lib/jumpToDesignerLetter";
 import { useAllDesigners } from "@/hooks/useDesigner";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { applyCuratorPickOrder } from "@/lib/curatorPickSort";
 
 interface FeaturedDesigner {
   slug: string;
