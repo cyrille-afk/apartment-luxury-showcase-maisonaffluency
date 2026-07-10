@@ -36,6 +36,7 @@ import { categoryUrl } from "@/lib/categorySlugs";
 import { readPendingCategoryFilter } from "@/lib/pendingCategoryFilter";
 import { cleanBrandLine, composeTitle } from "@/lib/curatorPickLegend";
 import { applyCuratorPickOrder, sortCuratorPicks } from "@/lib/curatorPickSort";
+import { lastNameInitial, sortNameKey } from "@/lib/nameFormat";
 import AlphabetDesignerPicker from "@/components/trade/AlphabetDesignerPicker";
 
 const LETTERS = [...("ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("")), "#"];
