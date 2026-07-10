@@ -22,17 +22,6 @@ interface Props {
   className?: string;
 }
 
-const stripAccents = (s: string) =>
-  s.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-
-const initialOf = (label: string): string => {
-  const cleaned = stripAccents(label.trim()).toUpperCase();
-  const stripped = cleaned
-    .replace(/^L['']/, "")
-    .replace(/^(LE |LA |LES |THE )/, "");
-  const first = stripped.charAt(0);
-  return /[A-Z]/.test(first) ? first : "#";
-};
 
 const AlphabetGroupPicker = ({
   items,
