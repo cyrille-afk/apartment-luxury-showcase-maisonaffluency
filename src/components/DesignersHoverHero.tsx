@@ -396,7 +396,7 @@ const DesignersHoverHero = () => {
             Meet Our Designers
           </span>
           <div className="w-full flex flex-col md:flex-row md:items-end md:gap-8 lg:gap-12">
-            <div className="w-full max-w-xs sm:max-w-sm md:max-w-md">
+            <div className="w-full max-w-xs sm:max-w-sm md:w-fit md:max-w-none">
               <div className="relative inline-block">
                 {/* Localized text overlay — separates the typography from the
                     busy background image while keeping the editorial edge soft. */}
