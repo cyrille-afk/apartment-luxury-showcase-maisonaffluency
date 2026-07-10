@@ -40,6 +40,7 @@ const FEATURED_GROUPS = [
     label: "Masters",
     slugs: [
       "alexander-lamont",
+      "emmanuel-babled",
       "felix-agostini",
       "jean-michel-frank",
       "kiko-lopez",
@@ -58,7 +59,6 @@ const FEATURED_GROUPS = [
       "atelier-demichelis",
       "christopher-boots",
       "delcourt-collection",
-      "emmanuel-babled",
       "emmanuel-levet-stenne",
       "hamrei",
       "kerstens",
