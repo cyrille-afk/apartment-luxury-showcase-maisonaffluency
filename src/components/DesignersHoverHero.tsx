@@ -144,6 +144,7 @@ const DesignersHoverHero = () => {
   const [activeSlug, setActiveSlug] = useState<string | null>(null);
   const [isStandalone, setIsStandalone] = useState(false);
   const [showPortalCursor, setShowPortalCursor] = useState(false);
+  const isMobile = useIsMobile();
   const navRef = useRef<HTMLElement>(null);
   const sectionRef = useRef<HTMLElement>(null);
   const portalRef = useRef<HTMLAnchorElement>(null);
