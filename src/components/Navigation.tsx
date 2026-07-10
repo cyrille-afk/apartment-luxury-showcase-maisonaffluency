@@ -743,15 +743,15 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
               <button
                 onClick={() => { setMegaMenuOpen(!megaMenuOpen); setMegaMenuHoverCat(null); }}
                 className={cn(
-                  "font-body text-xs uppercase tracking-[0.2em] transition-all duration-300 flex items-center gap-1.5 whitespace-nowrap outline-none relative group text-foreground",
-                  (megaMenuOpen || isOnCategoryRoute) && "font-medium"
+                  "font-body text-sm uppercase tracking-[0.18em] font-semibold transition-all duration-300 flex items-center gap-1.5 whitespace-nowrap outline-none relative group text-foreground",
+                  (megaMenuOpen || isOnCategoryRoute) && "text-[hsl(var(--gold))]"
                 )}
               >
                 <LayoutGrid className="h-3.5 w-3.5 text-[hsl(var(--accent))]" />
                 All Categories
                 <ChevronDown className={`h-3 w-3 transition-transform duration-200 ${megaMenuOpen ? "rotate-180" : ""}`} />
                 <span className={cn(
-                  "absolute -bottom-1 left-0 h-0.5 bg-[hsl(var(--accent))] transition-all duration-300",
+                  "absolute -bottom-1 left-0 h-0.5 bg-[hsl(var(--gold))] transition-all duration-300",
                   (megaMenuOpen || isOnCategoryRoute) ? "w-full" : "w-0 group-hover:w-full"
                 )} />
               </button>
