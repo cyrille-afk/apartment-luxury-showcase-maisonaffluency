@@ -464,19 +464,27 @@ const DesignersHoverHero = () => {
             </nav>
             </div>
           </div>
+
+          {/* Desktop directory — sits below the list in the content flow. */}
+          <div className="hidden md:block mt-auto">
+            {directoryLabels("flex items-center gap-10 text-white border-t border-white/20 pt-6 max-w-md pointer-events-auto")}
+          </div>
         </div>
 
-        {/* Directory label — pinned to the svh frame bottom so it always
-            clears Safari's bottom toolbar; on mobile/PWA it is centered. */}
-        {directoryLabels(cn(
-          "absolute flex items-center gap-10 text-white border-t border-white/20 pt-6 max-w-md pointer-events-auto",
-          isMobileOrPwa
-            ? "left-1/2 -translate-x-1/2 w-full justify-center px-6"
-            : "left-6 sm:left-12 md:left-20 lg:left-28",
-          isStandalone
-            ? "bottom-[calc(6rem+env(safe-area-inset-bottom))] md:bottom-14"
-            : "bottom-[calc(1.25rem+env(safe-area-inset-bottom))] md:bottom-24"
-        ))}
+        {/* Mobile/PWA directory — centered at the bottom of the safe frame. */}
+        {isMobileOrPwa && (
+          <div
+            className={cn(
+              "absolute flex justify-center text-white border-t border-white/20 pt-6 max-w-md pointer-events-auto md:hidden",
+              "left-1/2 -translate-x-1/2 w-full px-6",
+              isStandalone
+                ? "bottom-[calc(6rem+env(safe-area-inset-bottom))]"
+                : "bottom-[calc(1.25rem+env(safe-area-inset-bottom))]"
+            )}
+          >
+            {directoryLabels("flex items-center gap-10 text-white pointer-events-auto")}
+          </div>
+        )}
 
 
         {/* Mobile/PWA scroll hint — quiet mouse icon above the directory, right-justified.
