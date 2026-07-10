@@ -28,7 +28,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { cloudinaryUrl } from "@/lib/cloudinary";
 import { useCompare } from "@/contexts/CompareContext";
 import { cn } from "@/lib/utils";
-import { formatDesignerName } from "@/lib/nameFormat";
+import { formatDesignerName, lastNameInitial, sortNameKey } from "@/lib/nameFormat";
 import { CATEGORY_ORDER, SUBCATEGORY_MAP, normalizeSubcategory, normalizeCategory } from "@/lib/productTaxonomy";
 import { categoryUrl } from "@/lib/categorySlugs";
 import { readPendingCategoryFilter } from "@/lib/pendingCategoryFilter";
