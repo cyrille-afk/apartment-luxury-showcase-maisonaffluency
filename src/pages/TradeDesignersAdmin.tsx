@@ -2035,7 +2035,7 @@ const TradeDesignersAdmin = () => {
       );
     }
     if (activeLetter) {
-      list = list.filter((d) => d.name[0]?.toUpperCase() === activeLetter);
+      list = list.filter((d) => lastNameInitial(d.display_name || d.name) === activeLetter);
     }
     return list;
   }, [designers, search, activeLetter, pickSearchMap]);
@@ -2043,7 +2043,7 @@ const TradeDesignersAdmin = () => {
   const letterCounts = useMemo(() => {
     const counts: Record<string, number> = {};
     designers.forEach((d) => {
-      const letter = d.name[0]?.toUpperCase();
+      const letter = lastNameInitial(d.display_name || d.name);
       if (letter) counts[letter] = (counts[letter] || 0) + 1;
     });
     return counts;
