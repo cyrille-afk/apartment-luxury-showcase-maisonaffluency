@@ -2909,7 +2909,7 @@ const BrandsAteliers = () => {
     return brands;
   }, [searchQuery, selectedCategory, selectedSubcategory]);
 
-  // Consolidate brands by name, sort alphabetically, then group by first letter
+  // Consolidate brands by name, sort by last name, then group by last-name initial
   const alphaGroups = useMemo(() => {
     const brandMap: Record<string, ConsolidatedBrand> = {};
     
@@ -2938,14 +2938,14 @@ const BrandsAteliers = () => {
     });
     
     const sorted = Object.values(brandMap).sort((a, b) =>
-      (a.name || '').localeCompare(b.name || '')
+      sortNameKey(a.name || '').localeCompare(sortNameKey(b.name || ''))
     );
     
-    // Group by first letter
+    // Group by last-name initial
     const groups: Record<string, ConsolidatedBrand[]> = {};
     sorted.forEach(brand => {
       if (!brand.name) return;
-      const letter = brand.name[0].toUpperCase();
+      const letter = lastNameInitial(brand.name);
       if (!groups[letter]) groups[letter] = [];
       groups[letter].push(brand);
     });
