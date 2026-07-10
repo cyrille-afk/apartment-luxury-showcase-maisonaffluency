@@ -50,6 +50,9 @@ const LETTERS = [...("ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("")), "#"];
 
 function HeroAlphabetBar() {
   const { data: designers = [] } = useAllDesigners();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [hoveredLetter, setHoveredLetter] = useState<string | null>(null);
+  const selectedLetter = searchParams.get("letter") || undefined;
 
   const activeLetters = useMemo(() => {
     const set = new Set<string>();
@@ -66,9 +69,10 @@ function HeroAlphabetBar() {
   const jumpToLetter = useCallback(
     (letter: string) => {
       if (!activeLetters.has(letter)) return;
+      setSearchParams({ letter });
       jumpToDesignerLetter(letter);
     },
-    [activeLetters]
+    [activeLetters, setSearchParams]
   );
 
 
@@ -76,19 +80,26 @@ function HeroAlphabetBar() {
     <div className="hidden md:block absolute bottom-0 left-0 right-0 z-20 pointer-events-none">
       <div className="pointer-events-auto bg-gradient-to-t from-[#0a0a0a]/95 via-[#0a0a0a]/75 to-transparent backdrop-blur-[2px]">
         <div className="flex justify-center pt-3">
-          <div className="h-px w-24 bg-[linear-gradient(90deg,rgba(255,255,255,0.25)_0%,rgba(255,255,255,0.25)_40%,transparent_40%,transparent_60%,rgba(255,255,255,0.25)_60%,rgba(255,255,255,0.25)_100%)]" aria-hidden="true" />
+          <div className="h-px w-24 bg-[linear-gradient(90deg,rgba(255,255,255,0.35)_0%,rgba(255,255,255,0.35)_40%,transparent_40%,transparent_60%,rgba(255,255,255,0.35)_60%,rgba(255,255,255,0.35)_100%)]" aria-hidden="true" />
         </div>
         <div className="px-6 sm:px-12 md:px-20 lg:px-28 py-4 flex items-center justify-between">
           {LETTERS.map((letter) => {
             const isActive = activeLetters.has(letter);
+            const isSelected = selectedLetter === letter;
+            const isHovered = hoveredLetter === letter;
+            const showAccent = isActive && (isSelected || isHovered);
             return (
               <button
                 key={letter}
                 disabled={!isActive}
+                onMouseEnter={() => setHoveredLetter(letter)}
+                onMouseLeave={() => setHoveredLetter(null)}
                 onClick={() => jumpToLetter(letter)}
                 className={`font-serif text-base md:text-lg lg:text-xl leading-none transition-colors duration-200 ${
                   isActive
-                    ? "text-white/95 hover:text-[hsl(var(--gold))] underline decoration-[hsl(var(--gold))] decoration-2 underline-offset-4"
+                    ? showAccent
+                      ? "text-[hsl(var(--gold))] underline decoration-[hsl(var(--gold))] decoration-2 underline-offset-4"
+                      : "text-white/95 hover:text-[hsl(var(--gold))]"
                     : "text-white/40 cursor-default"
                 }`}
                 aria-label={isActive ? `Jump to designers starting with ${letter}` : undefined}
