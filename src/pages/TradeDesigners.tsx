@@ -253,28 +253,28 @@ const TradeDesigners = () => {
       if (aFounder && bFounder && aFounder === bFounder) {
         if (a.designer.isAtelierCard && !b.designer.isAtelierCard) return -1;
         if (!a.designer.isAtelierCard && b.designer.isAtelierCard) return 1;
-        return a.designer.name.localeCompare(b.designer.name);
+        return sortNameKey(a.designer.name).localeCompare(sortNameKey(b.designer.name));
       }
       const aGroup = aFounder || a.designer.name;
       const bGroup = bFounder || b.designer.name;
-      return aGroup.localeCompare(bGroup);
+      return sortNameKey(aGroup).localeCompare(sortNameKey(bGroup));
     });
 
     const letterMap = new Map<string, typeof entries>();
     for (const entry of entries) {
       const d = entry.designer;
       const groupName = d.isAtelierCard ? d.name : (d.founder === selectedBrand ? d.founder : d.name);
-      const letter = initialOf(groupName);
+      const letter = lastNameInitial(groupName);
       if (!letterMap.has(letter)) letterMap.set(letter, []);
       letterMap.get(letter)!.push(entry);
     }
 
-    // Within each letter, sort ateliers first, then alphabetically
+    // Within each letter, sort ateliers first, then alphabetically by last name
     for (const [, group] of letterMap) {
       group.sort((a, b) => {
         if (a.designer.isAtelierCard && !b.designer.isAtelierCard) return -1;
         if (!a.designer.isAtelierCard && b.designer.isAtelierCard) return 1;
-        return a.designer.name.localeCompare(b.designer.name);
+        return sortNameKey(a.designer.name).localeCompare(sortNameKey(b.designer.name));
       });
     }
 
@@ -284,8 +284,8 @@ const TradeDesigners = () => {
   const allLetters = useMemo(() => {
     const letters = new Set<string>();
     for (const b of enriched) {
-      letters.add(initialOf(b.name));
-      if (b.founder) letters.add(initialOf(b.founder));
+      letters.add(lastNameInitial(b.name));
+      if (b.founder) letters.add(lastNameInitial(b.founder));
     }
     return [...letters].sort();
   }, [enriched]);
