@@ -422,8 +422,8 @@ const TradeDesigners = () => {
           {allLetters.map((letter) => {
             const hasResults = grouped.some(([l]) => l === letter);
             const hasAnyResults = enriched.some((d) => {
-              const ch = initialOf(d.name);
-              const fch = d.founder ? initialOf(d.founder) : null;
+              const ch = lastNameInitial(d.name);
+              const fch = d.founder ? lastNameInitial(d.founder) : null;
               return ch === letter || fch === letter;
             });
             return (
