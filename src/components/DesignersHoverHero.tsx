@@ -475,19 +475,20 @@ const DesignersHoverHero = () => {
           </div>
         </div>
 
-        {/* Archives / Directory labels — pinned to the svh frame bottom so
-            they always clear Safari's bottom toolbar; in PWA they sit lower.
-            On mobile/PWA the Archives label is hidden and the Directory is
-            centered at the bottom. */}
-        {directoryLabels(cn(
-          "absolute flex items-center gap-10 text-white pt-6 max-w-md pointer-events-auto",
-          isMobileOrPwa
-            ? "left-1/2 -translate-x-1/2 w-full justify-center px-6"
-            : "left-6 sm:left-12 md:left-20 lg:left-28",
-          isStandalone
-            ? "bottom-[calc(6rem+env(safe-area-inset-bottom))] md:bottom-14"
-            : "bottom-[calc(1.25rem+env(safe-area-inset-bottom))] md:bottom-24"
-        ))}
+        {/* Mobile/PWA directory — centered at the bottom of the safe frame. */}
+        {isMobileOrPwa && (
+          <div
+            className={cn(
+              "absolute flex justify-center text-white pt-6 max-w-md pointer-events-auto md:hidden",
+              "left-1/2 -translate-x-1/2 w-full px-6",
+              isStandalone
+                ? "bottom-[calc(6rem+env(safe-area-inset-bottom))]"
+                : "bottom-[calc(1.25rem+env(safe-area-inset-bottom))]"
+            )}
+          >
+            <DirectoryContent align="center" />
+          </div>
+        )}
 
 
         {/* Mobile/PWA scroll hint — quiet mouse icon above the directory, right-justified.
