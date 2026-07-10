@@ -475,6 +475,22 @@ const DesignersHoverHero = () => {
         ))}
       </div>
 
+      {/* Mobile/PWA scroll hint — lets users know they can scroll down to
+          explore the directory below instead of tapping each designer name. */}
+      {isMobileOrPwa && (
+        <div className="absolute right-5 sm:right-8 top-1/2 -translate-y-1/2 z-20 flex flex-col items-center gap-3 pointer-events-none md:hidden">
+          <span
+            className="text-[9px] uppercase tracking-[0.3em] font-body text-white/60"
+            style={{ writingMode: "vertical-rl" }}
+          >
+            Scroll
+          </span>
+          <div className="relative w-4 h-8 flex items-center justify-center">
+            <ChevronDown className="absolute w-4 h-4 text-white/60 animate-[bounce_2s_infinite]" />
+          </div>
+        </div>
+      )}
+
       {/* Active designer portal — the entire right half of the hero is a
           clickable link to the active designer's profile. Caption sits in the
           bottom-right corner and animates in response to hovering anywhere
