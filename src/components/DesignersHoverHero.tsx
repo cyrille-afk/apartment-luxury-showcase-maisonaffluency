@@ -395,75 +395,82 @@ const DesignersHoverHero = () => {
           <span id="meet-designers-headline" className="inline-block mb-5 md:mb-8 text-[11px] uppercase tracking-[0.3em] font-body text-white/50 scroll-header-offset">
             Meet Our Designers
           </span>
-          <div className="w-full max-w-xs sm:max-w-sm md:max-w-md">
-            <div className="relative inline-block">
-              {/* Localized text overlay — separates the typography from the
-                  busy background image while keeping the editorial edge soft. */}
-              <div className="absolute -inset-3 sm:-inset-4 md:-inset-5 -z-10 rounded-sm bg-gradient-to-r from-black/60 via-black/35 to-transparent" />
-              <nav
-                ref={navRef}
-                aria-label="Featured designers shortcut list"
-                className="relative inline-block"
-              >
-              <ul className="flex flex-col text-left">
-                {groupedItems.map((group, groupIdx) => (
-                  <li
-                    key={group.label}
-                    className={cn(
-                      "flex flex-col text-left",
-                      groupIdx > 0 && "mt-5 md:mt-6"
-                    )}
-                  >
-                    <span className="text-[10px] uppercase tracking-[0.3em] font-body text-white/50 mb-2 md:mb-3">
-                      {group.label}
-                    </span>
-                    <ul className="flex flex-col gap-1 text-left">
-                      {group.designers.map((d) => {
-                        const [first, last] = splitName(d.name);
-                        const isActive = d.slug === activeSlug;
-                        const isDimmed = activeSlug !== null && !isActive;
-                        const childBrand = d.founder && d.founder !== d.name;
-                        return (
-                          <li
-                            key={d.slug}
-                            className="text-left leading-[1.5] sm:leading-[1.55]"
-                          >
-                            <Link
-                              to={`/designers/${d.slug}`}
-                              onMouseEnter={() => setActiveSlug(d.slug)}
-                              onFocus={() => setActiveSlug(d.slug)}
-                              className={cn(
-                                "inline-block whitespace-nowrap relative",
-                                "text-sm sm:text-base md:text-[20px] leading-[1.5] sm:leading-[1.55]",
-                                "font-display font-light tracking-normal",
-                                "transition-all duration-[1200ms] ease-out",
-                                "drop-shadow-[0_1px_3px_rgba(0,0,0,0.7)]",
-                                isDimmed
-                                  ? "text-white/80"
-                                  : "font-bold text-white after:content-[''] after:absolute after:left-0 after:bottom-[-5px] after:h-[1px] after:w-8 after:bg-white/40"
-                              )}
+          <div className="w-full flex flex-col md:flex-row md:items-end md:gap-8 lg:gap-12">
+            <div className="w-full max-w-xs sm:max-w-sm md:max-w-md">
+              <div className="relative inline-block">
+                {/* Localized text overlay — separates the typography from the
+                    busy background image while keeping the editorial edge soft. */}
+                <div className="absolute -inset-3 sm:-inset-4 md:-inset-5 -z-10 rounded-sm bg-gradient-to-r from-black/60 via-black/35 to-transparent" />
+                <nav
+                  ref={navRef}
+                  aria-label="Featured designers shortcut list"
+                  className="relative inline-block"
+                >
+                <ul className="flex flex-col text-left">
+                  {groupedItems.map((group, groupIdx) => (
+                    <li
+                      key={group.label}
+                      className={cn(
+                        "flex flex-col text-left",
+                        groupIdx > 0 && "mt-5 md:mt-6"
+                      )}
+                    >
+                      <span className="text-[10px] uppercase tracking-[0.3em] font-body text-white/50 mb-2 md:mb-3">
+                        {group.label}
+                      </span>
+                      <ul className="flex flex-col gap-1 text-left">
+                        {group.designers.map((d) => {
+                          const [first, last] = splitName(d.name);
+                          const isActive = d.slug === activeSlug;
+                          const isDimmed = activeSlug !== null && !isActive;
+                          const childBrand = d.founder && d.founder !== d.name;
+                          return (
+                            <li
+                              key={d.slug}
+                              className="text-left leading-[1.5] sm:leading-[1.55]"
                             >
-                              <span>
-                                {first}
-                                {last && (
-                                  <span>
-                                    {" "}
-                                    {last}
-                                  </span>
+                              <Link
+                                to={`/designers/${d.slug}`}
+                                onMouseEnter={() => setActiveSlug(d.slug)}
+                                onFocus={() => setActiveSlug(d.slug)}
+                                className={cn(
+                                  "inline-block whitespace-nowrap relative",
+                                  "text-sm sm:text-base md:text-[20px] leading-[1.5] sm:leading-[1.55]",
+                                  "font-display font-light tracking-normal",
+                                  "transition-all duration-[1200ms] ease-out",
+                                  "drop-shadow-[0_1px_3px_rgba(0,0,0,0.7)]",
+                                  isDimmed
+                                    ? "text-white/80"
+                                    : "font-bold text-white after:content-[''] after:absolute after:left-0 after:bottom-[-5px] after:h-[1px] after:w-8 after:bg-white/40"
                                 )}
-                                {childBrand && (
-                                  <span className="opacity-80"> - {d.founder}</span>
-                                )}
-                              </span>
-                            </Link>
-                          </li>
-                        );
-                      })}
-                    </ul>
-                  </li>
-                ))}
-              </ul>
-            </nav>
+                              >
+                                <span>
+                                  {first}
+                                  {last && (
+                                    <span>
+                                      {" "}
+                                      {last}
+                                    </span>
+                                  )}
+                                  {childBrand && (
+                                    <span className="opacity-80"> - {d.founder}</span>
+                                  )}
+                                </span>
+                              </Link>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    </li>
+                  ))}
+                </ul>
+              </nav>
+              </div>
+            </div>
+
+            {/* Desktop directory — sits to the right of the featured names list. */}
+            <div className="hidden md:flex pb-1">
+              <DirectoryContent align="left" />
             </div>
           </div>
         </div>
