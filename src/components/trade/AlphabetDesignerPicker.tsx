@@ -12,6 +12,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ChevronDown, ChevronRight, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { lastNameInitial, sortNameKey } from "@/lib/nameFormat";
 
 interface Props {
   brands: string[];
