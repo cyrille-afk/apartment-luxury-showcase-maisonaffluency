@@ -53,7 +53,7 @@ const AlphabetProductPicker = ({
       }
 
       for (const g of allGroups) {
-        const L = initialOf(g);
+        const L = lastNameInitial(g);
         letterOfGroup.set(g, L);
         if (!byLetter.has(L)) byLetter.set(L, new Map());
         byLetter.get(L)!.set(g, []);
@@ -66,11 +66,7 @@ const AlphabetProductPicker = ({
       // sort products within each group
       for (const [, groups] of byLetter) {
         for (const [, arr] of groups) {
-          arr.sort((a, b) =>
-            stripAccents(a.label).localeCompare(stripAccents(b.label), undefined, {
-              sensitivity: "base",
-            })
-          );
+          arr.sort((a, b) => sortNameKey(a.label).localeCompare(sortNameKey(b.label)));
         }
       }
 
