@@ -25,11 +25,13 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { applyCuratorPickOrder } from "@/lib/curatorPickSort";
 
 interface FeaturedDesigner {
+  id: string;
   slug: string;
   name: string;
   founder: string | null;
   hero_image_url: string | null;
   image_url: string | null;
+  first_pick_image_url: string | null;
 }
 
 const FEATURED_GROUPS = [
@@ -69,18 +71,43 @@ const ALL_FEATURED_SLUGS = FEATURED_GROUPS.flatMap((g) => g.slugs);
 
 function useFeaturedDesigners() {
   return useQuery({
-    queryKey: ["designers-hero-featured-v2", ALL_FEATURED_SLUGS],
+    queryKey: ["designers-hero-featured-v3", ALL_FEATURED_SLUGS],
     staleTime: 1000 * 60 * 30,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("designers")
-        .select("slug, name, founder, hero_image_url, image_url")
+        .select("id, slug, name, founder, hero_image_url, image_url")
         .in("slug", ALL_FEATURED_SLUGS)
         .eq("is_published", true);
       if (error) throw error;
-      return ((data || []) as FeaturedDesigner[]).filter(
+
+      const designers = ((data || []) as FeaturedDesigner[]).filter(
         (d) => d.hero_image_url || d.image_url
       );
+
+      if (designers.length === 0) return [];
+
+      const ids = designers.map((d) => d.id);
+      const { data: picks, error: picksError } = await applyCuratorPickOrder(
+        supabase
+          .from("designer_curator_picks_public" as any)
+          .select("designer_id, image_url")
+          .in("designer_id", ids)
+      );
+      if (picksError) throw picksError;
+
+      const firstPickByDesigner = new Map<string, string>();
+      for (const row of (picks || []) as any[]) {
+        const did = row.designer_id;
+        if (!firstPickByDesigner.has(did) && row.image_url) {
+          firstPickByDesigner.set(did, row.image_url);
+        }
+      }
+
+      return designers.map((d) => ({
+        ...d,
+        first_pick_image_url: firstPickByDesigner.get(d.id) || null,
+      }));
     },
   });
 }
