@@ -475,21 +475,47 @@ const DesignersHoverHero = () => {
         ))}
       </div>
 
-      {/* Mobile/PWA scroll hint — lets users know they can scroll down to
-          explore the directory below instead of tapping each designer name. */}
+      {/* Mobile/PWA scroll hint — quiet mouse icon above the directory, right-justified. */}
       {isMobileOrPwa && (
-        <div className="absolute right-4 sm:right-8 top-1/2 -translate-y-1/2 z-20 flex flex-col items-center gap-3 pointer-events-none md:hidden">
-          <span
-            className="text-[10px] uppercase tracking-[0.3em] font-body font-medium text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]"
-            style={{ writingMode: "vertical-rl" }}
-          >
-            Scroll down
+        <div
+          className={cn(
+            "absolute right-6 sm:right-12 z-20 flex flex-col items-center gap-2 pointer-events-none md:hidden",
+            isStandalone
+              ? "bottom-[calc(9rem+env(safe-area-inset-bottom))]"
+              : "bottom-[calc(4.5rem+env(safe-area-inset-bottom))]"
+          )}
+        >
+          <style>{`
+            @keyframes scroll-pill {
+              0%, 100% { transform: translateY(0); opacity: 0.85; }
+              50% { transform: translateY(5px); opacity: 0.35; }
+            }
+          `}</style>
+          <span className="font-serif text-[9px] uppercase tracking-[0.35em] text-white/60 drop-shadow-[0_1px_2px_rgba(0,0,0,0.4)]">
+            Scroll
           </span>
-          <div className="w-11 h-11 rounded-full border-2 border-white/70 bg-white/15 backdrop-blur-sm flex items-center justify-center shadow-[0_4px_14px_rgba(0,0,0,0.35)]">
-            <ChevronDown className="w-6 h-6 text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)] animate-[bounce_2s_infinite]" />
-          </div>
+          <svg
+            width="20"
+            height="32"
+            viewBox="0 0 20 32"
+            fill="none"
+            aria-hidden="true"
+            className="text-white/60 drop-shadow-[0_1px_2px_rgba(0,0,0,0.4)]"
+          >
+            <rect x="1" y="1" width="18" height="30" rx="9" stroke="currentColor" strokeWidth="1.5" />
+            <rect
+              x="8"
+              y="7"
+              width="4"
+              height="7"
+              rx="2"
+              fill="currentColor"
+              style={{ animation: "scroll-pill 1.8s ease-in-out infinite" }}
+            />
+          </svg>
         </div>
       )}
+
 
       {/* Active designer portal — the entire right half of the hero is a
           clickable link to the active designer's profile. Caption sits in the
