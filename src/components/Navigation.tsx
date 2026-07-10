@@ -320,7 +320,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
           ? "bg-background border-b border-transparent"
           : "bg-white backdrop-blur-sm border-b border-border/50"
     )}>
-      <div className="mx-auto max-w-7xl px-4 md:px-12 lg:px-20">
+      <div className="mx-auto max-w-7xl px-5 md:px-14 lg:px-24">
         {/* Mobile: single row */}
           <div className="flex h-24 items-end pb-2.5 md:hidden relative justify-center">
            <Sheet open={isOpen} onOpenChange={handleMobileMenuOpenChange}>
@@ -616,7 +616,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
         <div className="hidden md:flex flex-col items-center">
           {/* Top row: Trade Program | MAISON AFFLUENCY | Contact Us */}
           <div className="w-full grid grid-cols-[1fr_auto_1fr] items-start pt-6 pb-1">
-            <div className="flex justify-start pt-1">
+            <div className="flex justify-start pt-1 pl-2">
               <ShippingDestinationSwitcher />
             </div>
             <div className="flex flex-col items-center">
@@ -631,14 +631,14 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                 <span className="h-px w-10 bg-foreground" aria-hidden="true" />
               </div>
             </div>
-            <div className="flex flex-col items-end">
+            <div className="flex flex-col items-end pr-2">
               {/* Contact Us — aligned to right edge (matches Trade Program below) */}
               <div className="pt-1">
                 <DropdownMenu>
-                  <DropdownMenuTrigger className="font-body text-xs uppercase tracking-[0.2em] transition-all duration-300 text-foreground data-[state=open]:text-foreground data-[state=open]:[text-shadow:none] flex items-center gap-1 whitespace-nowrap outline-none relative group">
+                  <DropdownMenuTrigger className="font-body text-sm uppercase tracking-[0.18em] transition-all duration-300 text-foreground data-[state=open]:text-foreground data-[state=open]:[text-shadow:none] flex items-center gap-1.5 whitespace-nowrap outline-none relative group font-semibold">
                     Contact Us
                     <ChevronDown className="h-4 w-4" />
-                    <span className="absolute -bottom-1 left-0 h-0.5 bg-[hsl(var(--accent))] transition-all duration-300 w-0 group-hover:w-full" />
+                    <span className="absolute -bottom-1 left-0 h-0.5 bg-[hsl(var(--gold))] transition-all duration-300 w-0 group-hover:w-full" />
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" side="bottom" sideOffset={88} className="bg-background border border-border shadow-lg z-50 min-w-[220px]">
                     {contactOptions.map((option) => (
@@ -734,7 +734,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
               {/* New In — first in the left nav */}
               <button
                 onClick={() => { setMegaMenuOpen(false); handleNavClick("/new-in"); }}
-                className="font-body text-xs uppercase tracking-[0.2em] font-bold transition-all duration-300 relative group whitespace-nowrap flex items-center gap-1.5 text-[hsl(var(--gold))] hover:text-foreground after:absolute after:-bottom-1 after:left-0 after:w-full after:h-0.5 after:bg-[hsl(var(--accent))] after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-300 after:origin-left"
+                className="font-body text-sm uppercase tracking-[0.18em] font-bold transition-all duration-300 relative group whitespace-nowrap flex items-center gap-1.5 text-[hsl(var(--gold))] hover:text-foreground after:absolute after:-bottom-1 after:left-0 after:w-full after:h-0.5 after:bg-[hsl(var(--gold))] after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-300 after:origin-left"
               >
                 New In
               </button>
@@ -743,15 +743,15 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
               <button
                 onClick={() => { setMegaMenuOpen(!megaMenuOpen); setMegaMenuHoverCat(null); }}
                 className={cn(
-                  "font-body text-xs uppercase tracking-[0.2em] transition-all duration-300 flex items-center gap-1.5 whitespace-nowrap outline-none relative group text-foreground",
-                  (megaMenuOpen || isOnCategoryRoute) && "font-medium"
+                  "font-body text-sm uppercase tracking-[0.18em] font-semibold transition-all duration-300 flex items-center gap-1.5 whitespace-nowrap outline-none relative group text-foreground",
+                  (megaMenuOpen || isOnCategoryRoute) && "text-[hsl(var(--gold))]"
                 )}
               >
                 <LayoutGrid className="h-3.5 w-3.5 text-[hsl(var(--accent))]" />
                 All Categories
                 <ChevronDown className={`h-3 w-3 transition-transform duration-200 ${megaMenuOpen ? "rotate-180" : ""}`} />
                 <span className={cn(
-                  "absolute -bottom-1 left-0 h-0.5 bg-[hsl(var(--accent))] transition-all duration-300",
+                  "absolute -bottom-1 left-0 h-0.5 bg-[hsl(var(--gold))] transition-all duration-300",
                   (megaMenuOpen || isOnCategoryRoute) ? "w-full" : "w-0 group-hover:w-full"
                 )} />
               </button>
@@ -761,13 +761,13 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                   key={item.href}
                   onClick={() => { setMegaMenuOpen(false); handleNavClick(item.href); }} 
                   className={cn(
-                    "font-body text-xs uppercase tracking-[0.2em] transition-all duration-300 relative group whitespace-nowrap flex items-center gap-1.5 text-foreground",
-                    (activeSection === item.href || isRouteActive(item.href)) && "font-medium"
+                    "font-body text-sm uppercase tracking-[0.18em] font-semibold transition-all duration-300 relative group whitespace-nowrap flex items-center gap-1.5 text-foreground",
+                    (activeSection === item.href || isRouteActive(item.href)) && "text-[hsl(var(--gold))]"
                   )}
                 >
                   {item.label}
                   <span className={cn(
-                    "absolute -bottom-1 left-0 h-0.5 bg-[hsl(var(--accent))] transition-all duration-300",
+                    "absolute -bottom-1 left-0 h-0.5 bg-[hsl(var(--gold))] transition-all duration-300",
                     (activeSection === item.href || isRouteActive(item.href)) ? "w-full" : "w-0 group-hover:w-full"
                   )} />
                 </button>
@@ -780,10 +780,16 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
               {/* Journal */}
               <button
                 onClick={() => { setMegaMenuOpen(false); handleNavClick("/journal"); }}
-                className="font-body text-xs uppercase tracking-[0.2em] transition-all duration-300 relative group whitespace-nowrap flex items-center gap-1.5 text-foreground"
+                className={cn(
+                  "font-body text-sm uppercase tracking-[0.18em] font-semibold transition-all duration-300 relative group whitespace-nowrap flex items-center gap-1.5 text-foreground",
+                  (activeSection === "/journal" || isRouteActive("/journal")) && "text-[hsl(var(--gold))]"
+                )}
               >
                 Journal
-                <span className="absolute -bottom-1 left-0 h-0.5 bg-[hsl(var(--accent))] transition-all duration-300 w-0 group-hover:w-full" />
+                <span className={cn(
+                  "absolute -bottom-1 left-0 h-0.5 bg-[hsl(var(--gold))] transition-all duration-300",
+                  (activeSection === "/journal" || isRouteActive("/journal")) ? "w-full" : "w-0 group-hover:w-full"
+                )} />
               </button>
 
               {/* Trade Program */}
@@ -794,7 +800,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                       setMegaMenuOpen(false);
                       handleNavClick(item.href);
                     }}
-                    className="font-body text-xs uppercase tracking-[0.2em] font-bold transition-all duration-300 relative whitespace-nowrap flex items-center gap-1.5 bg-accent text-accent-foreground hover:bg-accent/80 px-3 py-1 rounded-full"
+                    className="font-body text-sm uppercase tracking-[0.18em] font-bold transition-all duration-300 relative whitespace-nowrap flex items-center gap-1.5 bg-accent text-accent-foreground hover:bg-accent/80 px-3 py-1 rounded-full"
                   >
                     {item.label}
                   </button>
