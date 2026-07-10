@@ -493,9 +493,17 @@ const DesignersHoverHero = () => {
             )}
           >
             <style>{`
-              @keyframes scroll-pill {
-                0%, 100% { transform: translateY(0); opacity: 0.85; }
-                50% { transform: translateY(5px); opacity: 0.35; }
+              @keyframes scroll-reveal {
+                0%   { clip-path: inset(0 0 100% 0); opacity: 0.4; }
+                40%  { clip-path: inset(0 0 0 0);   opacity: 1;   }
+                80%  { clip-path: inset(0 0 0 0);   opacity: 1;   }
+                100% { clip-path: inset(0 0 100% 0); opacity: 0.4; }
+              }
+              @keyframes scroll-dot {
+                0%   { transform: translateY(0);   opacity: 0.2; }
+                40%  { transform: translateY(9px); opacity: 1;   }
+                80%  { transform: translateY(9px); opacity: 1;   }
+                100% { transform: translateY(0);   opacity: 0.2; }
               }
             `}</style>
             <span className="font-serif text-[10px] uppercase tracking-[0.35em] text-white/85 drop-shadow-[0_1px_3px_rgba(0,0,0,0.6)]">
@@ -507,17 +515,29 @@ const DesignersHoverHero = () => {
               viewBox="0 0 20 32"
               fill="none"
               aria-hidden="true"
-              className="text-white/85 drop-shadow-[0_1px_3px_rgba(0,0,0,0.6)]"
+              className="drop-shadow-[0_1px_3px_rgba(0,0,0,0.6)]"
             >
-              <rect x="1" y="1" width="18" height="30" rx="9" stroke="currentColor" strokeWidth="1.75" />
+              {/* Faint base outline */}
+              <rect x="1" y="1" width="18" height="30" rx="9" stroke="rgba(255,255,255,0.35)" strokeWidth="1.75" />
+              {/* Bright outline that wipes in from top to bottom */}
               <rect
-                x="8"
-                y="7"
-                width="4"
-                height="7"
-                rx="2"
-                fill="currentColor"
-                style={{ animation: "scroll-pill 1.8s ease-in-out infinite" }}
+                x="1"
+                y="1"
+                width="18"
+                height="30"
+                rx="9"
+                stroke="rgba(255,255,255,0.95)"
+                strokeWidth="1.75"
+                fill="none"
+                style={{ animation: "scroll-reveal 2s ease-in-out infinite" }}
+              />
+              {/* Dot descending inside */}
+              <circle
+                cx="10"
+                cy="8"
+                r="1.6"
+                fill="rgba(255,255,255,0.95)"
+                style={{ animation: "scroll-dot 2s ease-in-out infinite" }}
               />
             </svg>
           </div>
