@@ -17,6 +17,37 @@ function abbreviatePersonPart(person: string): string {
   return abbreviateSingle(person);
 }
 
+const stripAccents = (s: string) =>
+  s.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+/**
+ * Return a sortable key for a designer/maker name based on the last name
+ * (or, for brand-only names, the last significant word).
+ *
+ * Examples:
+ * - "Pierre Bonnefille" → "bonnefille"
+ * - "Andrée Putman" → "putman"
+ * - "Made in Kira - Roman Frankel" → "frankel"
+ */
+export function sortNameKey(name: string): string {
+  const full = name.trim();
+  if (!full) return "";
+  // For "Brand - Person" entries, sort by the person part.
+  const personPart = full.includes(" - ")
+    ? full.split(" - ").pop()?.trim() || full
+    : full;
+  const words = personPart.split(/\s+/);
+  const lastWord = words[words.length - 1] || "";
+  return stripAccents(lastWord).toLowerCase().replace(/^[^a-z]+/, "");
+}
+
+/** First-letter of the last-name sort key, for A–Z grouping. */
+export function lastNameInitial(name: string): string {
+  const key = sortNameKey(name);
+  const first = key.charAt(0).toUpperCase();
+  return /[A-Z]/.test(first) ? first : "#";
+}
+
 /**
  * Format a designer display name for card headers.
  *
@@ -26,7 +57,7 @@ function abbreviatePersonPart(person: string): string {
  *
  * @param name      The raw name string
  * @param displayName  Optional override (e.g. "Ecart Paris - Jean-Michel Frank")
- * @returns { brand: string | null, person: string } — brand is null when name = brand
+ * @returns { brand: string | null; person: string } — brand is null when name = brand
  */
 export function formatDesignerName(name: string, displayName?: string): { brand: string | null; person: string } {
   const full = displayName || name;
