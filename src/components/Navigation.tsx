@@ -327,7 +327,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
             {/* Burger — absolute left */}
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" className="h-16 w-16 text-primary absolute left-0 bottom-2" aria-label="Toggle menu">
-                {isOpen ? <X className="h-11 w-11" /> : <Menu className="h-11 w-11" />}
+                {isOpen ? <X className="h-11 w-11" strokeWidth={2.25} /> : <Menu className="h-11 w-11" strokeWidth={2.25} />}
               </Button>
             </SheetTrigger>
 
