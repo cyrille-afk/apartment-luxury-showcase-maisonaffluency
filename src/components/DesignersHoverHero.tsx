@@ -302,12 +302,14 @@ const DesignersHoverHero = () => {
 
   const directoryLabels = (className: string) => (
     <div className={className}>
-      <div className="flex flex-col">
-        <span className="text-[9px] uppercase tracking-[0.3em] mb-1 font-body text-white">
-          Archives
-        </span>
-        <span className="text-xs font-body font-light text-white/85">1920 — Today</span>
-      </div>
+      {!isMobileOrPwa && (
+        <div className="flex flex-col">
+          <span className="text-[9px] uppercase tracking-[0.3em] mb-1 font-body text-white">
+            Archives
+          </span>
+          <span className="text-xs font-body font-light text-white/85">1920 — Today</span>
+        </div>
+      )}
       <div className="flex flex-col">
         <span className="text-[9px] uppercase tracking-[0.3em] mb-1 font-body text-white">
           Directory <span className="text-white/70 normal-case tracking-normal">({designerCount || 95})</span>
@@ -473,9 +475,14 @@ const DesignersHoverHero = () => {
         </div>
 
         {/* Archives / Directory labels — pinned to the svh frame bottom so
-            they always clear Safari's bottom toolbar; in PWA they sit lower. */}
+            they always clear Safari's bottom toolbar; in PWA they sit lower.
+            On mobile/PWA the Archives label is hidden and the Directory is
+            centered at the bottom. */}
         {directoryLabels(cn(
-          "absolute left-6 sm:left-12 md:left-20 lg:left-28 flex items-center gap-10 text-white border-t border-white/20 pt-6 max-w-md pointer-events-auto",
+          "absolute flex items-center gap-10 text-white border-t border-white/20 pt-6 max-w-md pointer-events-auto",
+          isMobileOrPwa
+            ? "left-1/2 -translate-x-1/2 w-full justify-center px-6"
+            : "left-6 sm:left-12 md:left-20 lg:left-28",
           isStandalone
             ? "bottom-[calc(6rem+env(safe-area-inset-bottom))] md:bottom-14"
             : "bottom-[calc(1.25rem+env(safe-area-inset-bottom))] md:bottom-24"
