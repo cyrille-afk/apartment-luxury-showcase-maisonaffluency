@@ -340,7 +340,7 @@ const TradeDesigners = () => {
                   onSelect={(b) => {
                     setSelectedBrand(b);
                     if (b === "all") return;
-                    const letter = initialOf(b);
+                    const letter = lastNameInitial(b);
                     requestAnimationFrame(() => {
                       const el = document.getElementById(`designer-letter-${letter}`);
                       el?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -360,7 +360,7 @@ const TradeDesigners = () => {
                   onSelect={(b) => {
                     setSelectedBrand(b);
                     if (b === "all") return;
-                    const letter = initialOf(b);
+                    const letter = lastNameInitial(b);
                     requestAnimationFrame(() => {
                       const el = document.getElementById(`designer-letter-${letter}`);
                       el?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -406,7 +406,7 @@ const TradeDesigners = () => {
                 onSelect={(b) => {
                   setSelectedBrand(b);
                   if (b === "all") return;
-                  const letter = initialOf(b);
+                  const letter = lastNameInitial(b);
                   requestAnimationFrame(() => {
                     const el = document.getElementById(`designer-letter-${letter}`);
                     el?.scrollIntoView({ behavior: "smooth", block: "start" });
