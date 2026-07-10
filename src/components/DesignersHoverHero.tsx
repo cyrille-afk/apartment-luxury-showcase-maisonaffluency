@@ -302,12 +302,14 @@ const DesignersHoverHero = () => {
 
   const directoryLabels = (className: string) => (
     <div className={className}>
-      <div className="flex flex-col">
-        <span className="text-[9px] uppercase tracking-[0.3em] mb-1 font-body text-white">
-          Archives
-        </span>
-        <span className="text-xs font-body font-light text-white/85">1920 — Today</span>
-      </div>
+      {!isMobileOrPwa && (
+        <div className="flex flex-col">
+          <span className="text-[9px] uppercase tracking-[0.3em] mb-1 font-body text-white">
+            Archives
+          </span>
+          <span className="text-xs font-body font-light text-white/85">1920 — Today</span>
+        </div>
+      )}
       <div className="flex flex-col">
         <span className="text-[9px] uppercase tracking-[0.3em] mb-1 font-body text-white">
           Directory <span className="text-white/70 normal-case tracking-normal">({designerCount || 95})</span>
