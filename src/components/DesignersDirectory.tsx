@@ -1439,8 +1439,8 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
     const groups: Record<string, Designer[]> = {};
     filteredItems.forEach((d) => {
       const { displayName } = parseDesignerDisplayName(d);
-      const firstChar = (displayName || d.name).normalize("NFD").replace(/[\u0300-\u036f]/g, "")[0];
-      const letter = firstChar?.toUpperCase() || "#";
+      const name = displayName || d.name;
+      const letter = lastNameInitial(name);
       if (!groups[letter]) groups[letter] = [];
       groups[letter].push(d);
     });
