@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { scrollToSection } from "@/lib/scrollToSection";
@@ -96,7 +97,7 @@ const Hero = () => {
 
 
       {/* Text overlay — CSS-only animations, no framer-motion needed */}
-      <div className="relative z-10 h-full px-4 pb-32 pt-[62%] md:px-32 md:pb-20 md:pt-[32%] lg:px-52 flex-col border rounded-none opacity-100 shadow-none flex items-start justify-start md:justify-start md:items-start">
+      <div className="relative z-10 h-full px-4 pb-32 pt-[44%] md:px-32 md:pb-20 md:pt-[20%] lg:px-52 flex-col border rounded-none opacity-100 shadow-none flex items-start justify-start md:justify-start md:items-start">
         <div className="max-w-4xl md:text-left">
           <h1 className="mb-8 md:mb-14 text-3xl leading-tight text-white md:text-4xl font-serif lg:text-5xl">
             Discover The World's Best Interior Designers' Iconic Pieces
@@ -130,7 +131,7 @@ const Hero = () => {
         </div>
       </div>
 
-      {/* Mobile: bottom-right of hero, Book a Viewing only */}
+      {/* Mobile: bottom-right of hero, vertical stack, above iOS bar & Chat widget */}
       <div
         className="flex md:hidden absolute right-4 z-20 flex-col items-end gap-2 hero-fade-in-delayed-4"
         style={{ bottom: "max(9.5rem, calc(env(safe-area-inset-bottom) + 9rem))", animationDelay: "1.2s" }}
@@ -141,12 +142,18 @@ const Hero = () => {
         >
           Book a Viewing
         </button>
+        <Link
+          to="/trade-program"
+          className={heroSecondaryCtaClass}
+        >
+          Trade Program
+        </Link>
       </div>
 
-      {/* Desktop: bottom-right of hero, Book a Viewing only */}
+      {/* Desktop: bottom-right of hero, next to Chat widget */}
       <div
-        className="hidden md:flex absolute bottom-6 right-4 z-20 items-center gap-2 hero-fade-in-delayed-4"
-        style={{ animationDelay: "1.2s" }}
+        className="hidden md:flex absolute bottom-6 z-20 items-center gap-2 hero-fade-in-delayed-4"
+        style={{ right: "200px", animationDelay: "1.2s" }}
       >
         <button
           onClick={() => { trackCTA.bookAppointment("HeroCTA"); scrollToContact(); }}
@@ -154,6 +161,12 @@ const Hero = () => {
         >
           Book a Viewing
         </button>
+        <Link
+          to="/trade-program"
+          className={heroSecondaryCtaClass}
+        >
+          Trade Program
+        </Link>
       </div>
 
     </section>

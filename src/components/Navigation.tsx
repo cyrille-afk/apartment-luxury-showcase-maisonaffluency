@@ -631,12 +631,13 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                 <span className="h-px w-10 bg-foreground" aria-hidden="true" />
               </div>
             </div>
-            <div className="flex flex-col items-center justify-self-end w-[clamp(360px,45vw,584px)]">
+            <div className="flex flex-col items-end">
+              {/* Contact Us — aligned to right edge (matches Trade Program below) */}
               <div className="pt-1">
                 <DropdownMenu>
-                  <DropdownMenuTrigger className="font-body text-[clamp(0.9rem,1.7vw,1.5rem)] uppercase tracking-[0.25em] transition-all duration-300 text-foreground data-[state=open]:text-foreground data-[state=open]:[text-shadow:none] flex items-center gap-2 whitespace-nowrap outline-none relative group">
+                  <DropdownMenuTrigger className="font-body text-xs uppercase tracking-[0.2em] transition-all duration-300 text-foreground data-[state=open]:text-foreground data-[state=open]:[text-shadow:none] flex items-center gap-1 whitespace-nowrap outline-none relative group">
                     Contact Us
-                    <ChevronDown className="h-[1.1em] w-[1.1em]" />
+                    <ChevronDown className="h-4 w-4" />
                     <span className="absolute -bottom-1 left-0 h-0.5 bg-[hsl(var(--accent))] transition-all duration-300 w-0 group-hover:w-full" />
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" side="bottom" sideOffset={88} className="bg-background border border-border shadow-lg z-50 min-w-[220px]">
@@ -653,10 +654,11 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
-              <div className="flex items-center justify-center gap-[clamp(2.5rem,6vw,5rem)] mt-[clamp(1.25rem,2.3vw,2rem)]">
+              {/* Icons aligned to right edge */}
+              <div className="flex items-center gap-5 mt-3">
                 <DropdownMenu>
                   <DropdownMenuTrigger className="relative group p-1 transition-colors outline-none">
-                    <User className="w-[clamp(1.75rem,3vw,2.6rem)] h-[clamp(1.75rem,3vw,2.6rem)] text-foreground group-hover:text-primary transition-colors" />
+                    <User className="w-6 h-6 text-foreground group-hover:text-primary transition-colors" />
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="bg-background border border-border shadow-lg z-50 min-w-[200px]">
                     {user ? (
@@ -716,7 +718,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                     aria-label="Wishlist"
                     className="relative group p-1 transition-colors"
                   >
-                    <Heart className="w-[clamp(1.75rem,3vw,2.6rem)] h-[clamp(1.75rem,3vw,2.6rem)] text-foreground group-hover:text-primary transition-colors" />
+                    <Heart className="w-6 h-6 text-foreground group-hover:text-primary transition-colors" />
                     {favCount > 0 && (
                       <span className="absolute -top-1 -right-1 min-w-[16px] h-4 flex items-center justify-center rounded-full bg-primary text-primary-foreground text-[10px] font-bold leading-none px-1">
                         {favCount}
@@ -725,32 +727,9 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                   </button>
                 </FavoritesHoverPreview>
               </div>
-              <button
-                onClick={() => { setMegaMenuOpen(false); handleNavClick("/trade-program"); }}
-                className="mt-[clamp(1.5rem,3vw,2.4rem)] w-full font-body text-[clamp(1rem,2.3vw,1.9rem)] uppercase tracking-[0.35em] whitespace-nowrap px-6 py-[clamp(0.9rem,1.8vw,1.35rem)] border border-[hsl(var(--accent))] text-[hsl(var(--accent))] rounded-[14px] transition-all duration-300 hover:bg-[hsl(var(--accent))] hover:text-background"
-              >
-                Trade Program
-              </button>
-              <div className="mt-3 flex items-center justify-between w-full pb-3">
-                <button
-                  onClick={() => { setMegaMenuOpen(false); handleNavClick("/collectibles"); }}
-                  className="font-body text-[clamp(0.95rem,2vw,1.65rem)] uppercase tracking-[0.32em] transition-all duration-300 relative group whitespace-nowrap text-foreground"
-                >
-                  Collectibles
-                  <span className="absolute -bottom-1 left-0 h-0.5 bg-[hsl(var(--accent))] transition-all duration-300 w-0 group-hover:w-full" />
-                </button>
-                <span className="w-px h-6 bg-border/70" aria-hidden="true" />
-                <button
-                  onClick={() => { setMegaMenuOpen(false); handleNavClick("/journal"); }}
-                  className="font-body text-[clamp(0.95rem,2vw,1.65rem)] uppercase tracking-[0.32em] transition-all duration-300 relative group whitespace-nowrap text-foreground"
-                >
-                  Journal
-                  <span className="absolute -bottom-1 left-0 h-0.5 bg-[hsl(var(--accent))] transition-all duration-300 w-0 group-hover:w-full" />
-                </button>
-              </div>
             </div>
           </div>
-          <div className="flex items-center justify-start w-full pb-3">
+          <div className="flex items-center justify-between w-full pb-3">
             <div className="flex items-center gap-6 lg:gap-10">
               {/* New In — first in the left nav */}
               <button
@@ -777,7 +756,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                 )} />
               </button>
 
-              {visibleLeftNavItems.filter((item) => item.href !== "/collectibles").map((item) => (
+              {visibleLeftNavItems.map((item) => (
                 <button 
                   key={item.href}
                   onClick={() => { setMegaMenuOpen(false); handleNavClick(item.href); }} 
@@ -795,6 +774,33 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
               ))}
             </div>
 
+            <span className="w-px h-3 bg-border/60 mx-6 lg:mx-10" aria-hidden="true" />
+
+            <div className="flex items-center gap-6 lg:gap-10">
+              {/* Journal */}
+              <button
+                onClick={() => { setMegaMenuOpen(false); handleNavClick("/journal"); }}
+                className="font-body text-xs uppercase tracking-[0.2em] transition-all duration-300 relative group whitespace-nowrap flex items-center gap-1.5 text-foreground"
+              >
+                Journal
+                <span className="absolute -bottom-1 left-0 h-0.5 bg-[hsl(var(--accent))] transition-all duration-300 w-0 group-hover:w-full" />
+              </button>
+
+              {/* Trade Program */}
+              {rightNavItems.map((item) => (
+                <div key={item.href} className="relative group/trade flex items-center gap-2">
+                  <button
+                    onClick={() => {
+                      setMegaMenuOpen(false);
+                      handleNavClick(item.href);
+                    }}
+                    className="font-body text-xs uppercase tracking-[0.2em] font-bold transition-all duration-300 relative whitespace-nowrap flex items-center gap-1.5 bg-accent text-accent-foreground hover:bg-accent/80 px-3 py-1 rounded-full"
+                  >
+                    {item.label}
+                  </button>
+                </div>
+              ))}
+            </div>
           </div>
 
           {/* Horizontal mega menu */}
