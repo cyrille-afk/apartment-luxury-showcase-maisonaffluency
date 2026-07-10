@@ -2177,14 +2177,17 @@ const FeaturedDesigners = () => {
     return picks;
   }, [selectedCategory, selectedSubcategory, dbPicks]);
 
-  // Group filtered designers by first letter for A-Z navigation
+  // Group filtered designers by last name for A-Z navigation
   const designerAlphaGroups = useMemo(() => {
     const groups: Record<string, typeof filteredDesigners> = {};
     filteredDesigners.forEach(d => {
-      const letter = (d.displayName || d.name).normalize("NFD").replace(/[\u0300-\u036f]/g, "").charAt(0).toUpperCase();
+      const letter = lastNameInitial(d.displayName || d.name);
       if (!groups[letter]) groups[letter] = [];
       groups[letter].push(d);
     });
+    for (const letter of Object.keys(groups)) {
+      groups[letter].sort((a, b) => sortNameKey(a.displayName || a.name).localeCompare(sortNameKey(b.displayName || b.name)));
+    }
     return Object.entries(groups).sort(([a], [b]) => a.localeCompare(b));
   }, [filteredDesigners]);
 
