@@ -437,14 +437,14 @@ const DesignersHoverHero = () => {
                               onMouseEnter={() => setActiveSlug(d.slug)}
                               onFocus={() => setActiveSlug(d.slug)}
                               className={cn(
-                                "inline-block whitespace-nowrap",
+                                "inline-block whitespace-nowrap relative",
                                 "text-sm sm:text-base md:text-[20px] leading-[1.5] sm:leading-[1.55]",
                                 "font-display font-light tracking-normal",
                                 "transition-all duration-[1200ms] ease-out",
                                 "drop-shadow-[0_1px_3px_rgba(0,0,0,0.7)]",
                                 isDimmed
                                   ? "text-white/80"
-                                  : "font-bold text-white"
+                                  : "font-bold text-white after:content-[''] after:absolute after:left-0 after:bottom-[-5px] after:h-[1px] after:w-8 after:bg-white/40"
                               )}
                             >
                               <span>
