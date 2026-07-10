@@ -32,10 +32,11 @@ function useAllPublishedDesigners() {
         .select("slug, name")
         .eq("is_published", true)
         .eq("trade_only", false)
-        .order("name", { ascending: true })
         .range(0, 1499);
       if (error) throw error;
-      return (data || []) as DesignerLink[];
+      return (data || [])
+        .sort((a, b) => sortNameKey(a.name).localeCompare(sortNameKey(b.name)))
+        .map((d) => ({ slug: d.slug, name: d.name })) as DesignerLink[];
     },
   });
 }
