@@ -381,7 +381,7 @@ const DesignersHoverHero = () => {
         {/* Content */}
         <div
           className={cn(
-          "relative flex flex-col h-full px-6 sm:px-12 md:px-20 lg:px-28 pt-6 md:pt-8 pointer-events-auto",
+          "relative flex flex-col h-full px-6 sm:px-12 md:px-20 lg:px-28 pt-6 md:pt-8 md:-translate-y-12 pointer-events-auto",
             isStandalone
               ? "justify-center pb-44 md:pb-0"
               : // Mobile browser: anchor list near the bottom of the svh frame
