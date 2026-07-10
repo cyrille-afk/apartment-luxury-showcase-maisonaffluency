@@ -436,9 +436,10 @@ const DesignersHoverHero = () => {
                                 "inline-block whitespace-nowrap",
                                 "text-sm sm:text-base md:text-[20px] leading-[1.5] sm:leading-[1.55]",
                                 "transition-colors duration-[1200ms] ease-out",
+                                "drop-shadow-[0_1px_3px_rgba(0,0,0,0.7)]",
                                 isDimmed
-                                  ? "font-body font-light tracking-normal text-white/35"
-                                  : "font-display font-light tracking-tight text-white/95"
+                                  ? "font-body font-light tracking-normal text-white/60"
+                                  : "font-display font-light tracking-tight text-white"
                               )}
                             >
                               <span>
