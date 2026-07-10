@@ -300,38 +300,26 @@ const DesignersHoverHero = () => {
 
   if (!hasItems) return null;
 
-  const directoryLabels = (className: string) => (
-    <div className={className}>
-      {!isMobileOrPwa && (
-        <div className="flex flex-col">
-          <span className="text-[10px] uppercase tracking-[0.3em] mb-1 font-body font-semibold text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]">
-            Archives
-          </span>
-          <span className="text-xs font-body font-medium text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]">1920 — Today</span>
-        </div>
-      )}
-      <div className="flex flex-col">
-        <div className="flex justify-center pb-3">
-          <div
-            className="h-px w-24 bg-[linear-gradient(90deg,rgba(255,255,255,0.35)_0%,rgba(255,255,255,0.35)_40%,transparent_40%,transparent_60%,rgba(255,255,255,0.35)_60%,rgba(255,255,255,0.35)_100%)]"
-            aria-hidden="true"
-          />
-        </div>
-        <span className="text-[10px] uppercase tracking-[0.3em] mb-1 font-body font-semibold text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]">
-          Directory <span className="text-white/90 normal-case tracking-normal font-medium">({designerCount || 95})</span>
-        </span>
+  const DirectoryContent = ({ align = "left" }: { align?: "left" | "center" }) => (
+    <div className={cn("flex flex-col", align === "center" ? "items-center" : "items-start")}>
+      <div
+        className="h-px w-24 bg-[linear-gradient(90deg,rgba(255,255,255,0.35)_0%,rgba(255,255,255,0.35)_40%,transparent_40%,transparent_60%,rgba(255,255,255,0.35)_60%,rgba(255,255,255,0.35)_100%)] mb-3"
+        aria-hidden="true"
+      />
+      <span className="text-[10px] uppercase tracking-[0.3em] mb-1 font-body font-semibold text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]">
+        Directory <span className="text-white/90 normal-case tracking-normal font-medium">({designerCount || 95})</span>
+      </span>
 
-        <Link
-          to="/designers?letter=A"
-          onClick={(e) => {
-            e.preventDefault();
-            jumpToDesignerLetter("A");
-          }}
-          className="text-xs font-body font-medium italic text-white hover:text-white/90 underline-offset-4 hover:underline transition-colors drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]"
-        >
-          Click to Browse A–Z
-        </Link>
-      </div>
+      <Link
+        to="/designers?letter=A"
+        onClick={(e) => {
+          e.preventDefault();
+          jumpToDesignerLetter("A");
+        }}
+        className="text-xs font-body font-medium italic text-white hover:text-white/90 underline-offset-4 hover:underline transition-colors drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]"
+      >
+        Click to Browse A–Z
+      </Link>
     </div>
   );
 
