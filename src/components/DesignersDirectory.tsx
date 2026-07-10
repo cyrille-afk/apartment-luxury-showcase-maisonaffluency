@@ -1393,7 +1393,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
   }, [initialLetter]);
 
   const items = useMemo(
-    () => allDesigners.filter((d) => d.is_published).sort((a, b) => a.name.localeCompare(b.name)),
+    () => allDesigners.filter((d) => d.is_published).sort((a, b) => sortNameKey(a.display_name || a.name).localeCompare(sortNameKey(b.display_name || b.name))),
     [allDesigners]
   );
 
