@@ -311,6 +311,12 @@ const DesignersHoverHero = () => {
         </div>
       )}
       <div className="flex flex-col">
+        <div className="flex justify-center pb-3">
+          <div
+            className="h-px w-24 bg-[linear-gradient(90deg,rgba(255,255,255,0.25)_0%,rgba(255,255,255,0.25)_40%,transparent_40%,transparent_60%,rgba(255,255,255,0.25)_60%,rgba(255,255,255,0.25)_100%)]"
+            aria-hidden="true"
+          />
+        </div>
         <span className="text-[9px] uppercase tracking-[0.3em] mb-1 font-body text-white">
           Directory <span className="text-white/70 normal-case tracking-normal">({designerCount || 95})</span>
         </span>
@@ -479,7 +485,7 @@ const DesignersHoverHero = () => {
             On mobile/PWA the Archives label is hidden and the Directory is
             centered at the bottom. */}
         {directoryLabels(cn(
-          "absolute flex items-center gap-10 text-white border-t border-white/20 pt-6 max-w-md pointer-events-auto",
+          "absolute flex items-center gap-10 text-white pt-6 max-w-md pointer-events-auto",
           isMobileOrPwa
             ? "left-1/2 -translate-x-1/2 w-full justify-center px-6"
             : "left-6 sm:left-12 md:left-20 lg:left-28",
@@ -487,6 +493,7 @@ const DesignersHoverHero = () => {
             ? "bottom-[calc(6rem+env(safe-area-inset-bottom))] md:bottom-14"
             : "bottom-[calc(1.25rem+env(safe-area-inset-bottom))] md:bottom-24"
         ))}
+
 
         {/* Mobile/PWA scroll hint — quiet mouse icon above the directory, right-justified.
             Anchored inside the svh safe frame so it clears Safari's bottom toolbar. */}
