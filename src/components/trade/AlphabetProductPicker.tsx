@@ -149,9 +149,7 @@ const AlphabetProductPicker = ({
               const isExpanded = expandedLetter === L;
               const groups = byLetter.get(L)!;
               const groupNames = [...groups.keys()].sort((a, b) =>
-                stripAccents(a).localeCompare(stripAccents(b), undefined, {
-                  sensitivity: "base",
-                })
+                sortNameKey(a).localeCompare(sortNameKey(b))
               );
               const containsActive =
                 selectedItem && letterOfGroup.get(selectedItem.group) === L;
