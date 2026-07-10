@@ -400,11 +400,15 @@ const DesignersHoverHero = () => {
             Meet Our Designers
           </span>
           <div className="w-full max-w-xs sm:max-w-sm md:max-w-md">
-            <nav
-              ref={navRef}
-              aria-label="Featured designers shortcut list"
-              className="inline-block"
-            >
+            <div className="relative inline-block">
+              {/* Localized text overlay — separates the typography from the
+                  busy background image while keeping the editorial edge soft. */}
+              <div className="absolute -inset-3 sm:-inset-4 md:-inset-5 -z-10 rounded-sm bg-gradient-to-r from-black/75 via-black/55 to-transparent" />
+              <nav
+                ref={navRef}
+                aria-label="Featured designers shortcut list"
+                className="relative inline-block"
+              >
               <ul className="flex flex-col text-left">
                 {groupedItems.map((group, groupIdx) => (
                   <li
@@ -435,17 +439,18 @@ const DesignersHoverHero = () => {
                               className={cn(
                                 "inline-block whitespace-nowrap",
                                 "text-sm sm:text-base md:text-[20px] leading-[1.5] sm:leading-[1.55]",
-                                "transition-colors duration-[1200ms] ease-out",
+                                "font-display font-light tracking-normal",
+                                "transition-all duration-[1200ms] ease-out",
                                 "drop-shadow-[0_1px_3px_rgba(0,0,0,0.7)]",
                                 isDimmed
-                                  ? "font-body font-light tracking-normal text-white/60"
-                                  : "font-display font-light tracking-tight text-white"
+                                  ? "text-white/80"
+                                  : "font-bold text-white"
                               )}
                             >
                               <span>
                                 {first}
                                 {last && (
-                                  <span className={cn(!isDimmed && "italic")}>
+                                  <span>
                                     {" "}
                                     {last}
                                   </span>
@@ -463,6 +468,7 @@ const DesignersHoverHero = () => {
                 ))}
               </ul>
             </nav>
+            </div>
           </div>
         </div>
 
