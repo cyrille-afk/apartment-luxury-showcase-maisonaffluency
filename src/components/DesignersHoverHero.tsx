@@ -16,6 +16,7 @@
  */
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
+import { ChevronDown } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
@@ -473,6 +474,22 @@ const DesignersHoverHero = () => {
             : "bottom-[calc(1.25rem+env(safe-area-inset-bottom))] md:bottom-24"
         ))}
       </div>
+
+      {/* Mobile/PWA scroll hint — lets users know they can scroll down to
+          explore the directory below instead of tapping each designer name. */}
+      {isMobileOrPwa && (
+        <div className="absolute right-5 sm:right-8 top-1/2 -translate-y-1/2 z-20 flex flex-col items-center gap-3 pointer-events-none md:hidden">
+          <span
+            className="text-[9px] uppercase tracking-[0.3em] font-body text-white/80"
+            style={{ writingMode: "vertical-rl" }}
+          >
+            Scroll
+          </span>
+          <div className="relative w-5 h-8 flex items-center justify-center">
+            <ChevronDown className="absolute w-5 h-5 text-white/80 animate-[bounce_2s_infinite]" />
+          </div>
+        </div>
+      )}
 
       {/* Active designer portal — the entire right half of the hero is a
           clickable link to the active designer's profile. Caption sits in the
