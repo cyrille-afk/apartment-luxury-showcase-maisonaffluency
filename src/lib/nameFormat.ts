@@ -37,8 +37,13 @@ export function sortNameKey(name: string): string {
     ? full.split(" - ").pop()?.trim() || full
     : full;
   const words = personPart.split(/\s+/);
-  const lastWord = words[words.length - 1] || "";
-  return stripAccents(lastWord).toLowerCase().replace(/^[^a-z]+/, "");
+  // Use the last alphabetic word (ignore trailing numerics like "1861").
+  let lastWord = words[words.length - 1] || "";
+  if (/^\d+$/.test(lastWord) && words.length > 1) {
+    lastWord = words[words.length - 2] || "";
+  }
+  const key = stripAccents(lastWord).toLowerCase().replace(/^[^a-z]+/, "");
+  return key || sortNameKey(words.slice(0, -1).join(" "));
 }
 
 /** First-letter of the last-name sort key, for A–Z grouping. */
