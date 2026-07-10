@@ -38,17 +38,13 @@ const AlphabetGroupPicker = ({
     const byLetter = new Map<string, GroupItem[]>();
     const letterOfGroup = new Map<string, string>();
     for (const it of items) {
-      const L = initialOf(it.name);
+      const L = lastNameInitial(it.name);
       letterOfGroup.set(it.name, L);
       if (!byLetter.has(L)) byLetter.set(L, []);
       byLetter.get(L)!.push(it);
     }
     for (const [, arr] of byLetter) {
-      arr.sort((a, b) =>
-        stripAccents(a.name).localeCompare(stripAccents(b.name), undefined, {
-          sensitivity: "base",
-        })
-      );
+      arr.sort((a, b) => sortNameKey(a.name).localeCompare(sortNameKey(b.name)));
     }
     const letters = [...byLetter.keys()].sort((a, b) => {
       if (a === "#") return 1;
