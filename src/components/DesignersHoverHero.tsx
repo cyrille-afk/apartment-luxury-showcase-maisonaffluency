@@ -35,7 +35,6 @@ const FEATURED_GROUPS = [
     label: "Masters",
     slugs: [
       "alexander-lamont",
-      "ecart",
       "felix-agostini",
       "jean-michel-frank",
       "pierre-bonnefille",
