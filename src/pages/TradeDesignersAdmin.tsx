@@ -41,6 +41,7 @@ import { variantImageKey } from "@/lib/variantImageMap";
 import BiographyPdfButton from "@/components/BiographyPdfButton";
 import { applyCuratorPickOrder, sortCuratorPicks } from "@/lib/curatorPickSort";
 import { sanitizeBiographyCitations } from "@/lib/sanitizeBiographyCitations";
+import { lastNameInitial, sortNameKey } from "@/lib/nameFormat";
 
 const EditorialBiography = lazy(() => import("@/components/EditorialBiography"));
 
