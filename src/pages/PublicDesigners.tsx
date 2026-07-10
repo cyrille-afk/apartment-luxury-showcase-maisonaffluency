@@ -50,9 +50,9 @@ const LETTERS = [...("ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("")), "#"];
 
 function HeroAlphabetBar() {
   const { data: designers = [] } = useAllDesigners();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const [hoveredLetter, setHoveredLetter] = useState<string | null>(null);
-  const selectedLetter = searchParams.get("letter") || undefined;
+  const [selectedLetter, setSelectedLetter] = useState<string | undefined>(searchParams.get("letter") || undefined);
 
   const activeLetters = useMemo(() => {
     const set = new Set<string>();
@@ -69,10 +69,10 @@ function HeroAlphabetBar() {
   const jumpToLetter = useCallback(
     (letter: string) => {
       if (!activeLetters.has(letter)) return;
-      setSearchParams({ letter });
+      setSelectedLetter(letter);
       jumpToDesignerLetter(letter);
     },
-    [activeLetters, setSearchParams]
+    [activeLetters]
   );
 
 
