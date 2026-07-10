@@ -490,6 +490,11 @@ const DesignersHoverHero = () => {
           </div>
         )}
 
+        {/* Desktop directory — bottom-left of the hero. */}
+        <div className="hidden md:block absolute left-6 sm:left-12 md:left-20 lg:left-28 bottom-12 lg:bottom-16 pointer-events-auto z-10">
+          <DirectoryContent align="left" />
+        </div>
+
 
         {/* Mobile/PWA scroll hint — quiet mouse icon above the directory, right-justified.
             Anchored inside the svh safe frame so it clears Safari's bottom toolbar. */}
