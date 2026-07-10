@@ -475,7 +475,7 @@ const DesignersHoverHero = () => {
             : "left-6 sm:left-12 md:left-20 lg:left-28",
           isStandalone
             ? "bottom-[calc(6rem+env(safe-area-inset-bottom))] md:bottom-14"
-            : "bottom-[calc(1.25rem+env(safe-area-inset-bottom))] md:bottom-28"
+            : "bottom-[calc(1.25rem+env(safe-area-inset-bottom))] md:bottom-40"
         ))}
 
 
