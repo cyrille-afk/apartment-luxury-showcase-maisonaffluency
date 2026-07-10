@@ -300,33 +300,24 @@ const DesignersHoverHero = () => {
 
   if (!hasItems) return null;
 
-  const DirectoryContent = ({ align = "left" }: { align?: "left" | "center" }) => (
-    <div className={cn("flex flex-col md:w-56", align === "center" ? "items-center" : "items-start")}>
-      <div className={cn("flex pb-3 md:pb-5", align === "center" ? "justify-center" : "justify-start md:justify-center", "w-full")}>
-        <div
-          className="h-px w-24 md:w-48 bg-[linear-gradient(90deg,rgba(255,255,255,0.35)_0%,rgba(255,255,255,0.35)_40%,transparent_40%,transparent_60%,rgba(255,255,255,0.35)_60%,rgba(255,255,255,0.35)_100%)]"
-          aria-hidden="true"
-        />
-      </div>
-      <span className="text-[10px] md:text-[19px] uppercase tracking-[0.3em] md:tracking-[0.34em] mb-1 md:mb-2 font-body font-semibold text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]">
-        Directory <span className="text-white/90 normal-case tracking-normal font-medium md:hidden">({designerCount || 95})</span>
-      </span>
-      <span className="hidden md:block mb-2 font-display text-[18px] leading-none text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]">
-        ({designerCount || 95})
-      </span>
+  const directoryLabels = (className: string) => (
+    <div className={className}>
+      <div className="flex flex-col">
+        <span className="text-[9px] uppercase tracking-[0.3em] mb-1 font-body text-white">
+          Directory <span className="text-white/70 normal-case tracking-normal">({designerCount || 95})</span>
+        </span>
 
-      <Link
-        to="/designers?letter=A"
-        onClick={(e) => {
-          e.preventDefault();
-          jumpToDesignerLetter("A");
-        }}
-        className="whitespace-nowrap text-xs md:text-[21px] md:leading-[1.2] font-body md:font-display font-medium italic text-white hover:text-white/90 underline-offset-4 hover:underline transition-colors drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]"
-      >
-        <span className="md:hidden">Click to Browse A–Z</span>
-        <span className="hidden md:block">Click to Browse</span>
-        <span className="hidden md:block not-italic text-[24px] leading-[1.12]">A–Z</span>
-      </Link>
+        <Link
+          to="/designers?letter=A"
+          onClick={(e) => {
+            e.preventDefault();
+            jumpToDesignerLetter("A");
+          }}
+          className="text-xs font-body font-light italic text-white/85 hover:text-white underline-offset-4 hover:underline transition-colors"
+        >
+          Click to Browse A–Z
+        </Link>
+      </div>
     </div>
   );
 
@@ -390,7 +381,7 @@ const DesignersHoverHero = () => {
         {/* Content */}
         <div
           className={cn(
-            "relative flex flex-col h-full px-6 sm:px-12 md:px-20 lg:px-28 pt-6 md:pt-8 md:-translate-y-12 pointer-events-auto",
+          "relative flex flex-col h-full px-6 sm:px-12 md:px-20 lg:px-28 pt-6 md:pt-8 md:-translate-y-12 pointer-events-auto",
             isStandalone
               ? "justify-center pb-44 md:pb-0"
               : // Mobile browser: anchor list near the bottom of the svh frame
@@ -402,7 +393,7 @@ const DesignersHoverHero = () => {
           <span id="meet-designers-headline" className="inline-block mb-5 md:mb-8 text-[11px] uppercase tracking-[0.3em] font-body text-white/50 scroll-header-offset">
             Meet Our Designers
           </span>
-          <div className="w-full max-w-xs sm:max-w-sm md:w-fit md:max-w-none">
+          <div className="w-full max-w-xs sm:max-w-sm md:max-w-md">
             <div className="relative inline-block">
               {/* Localized text overlay — separates the typography from the
                   busy background image while keeping the editorial edge soft. */}
@@ -425,55 +416,44 @@ const DesignersHoverHero = () => {
                       {group.label}
                     </span>
                     <ul className="flex flex-col gap-1 text-left">
-                      {group.designers.map((d, idx) => {
+                      {group.designers.map((d) => {
                         const [first, last] = splitName(d.name);
                         const isActive = d.slug === activeSlug;
                         const isDimmed = activeSlug !== null && !isActive;
                         const childBrand = d.founder && d.founder !== d.name;
-                        const isLast = groupIdx === groupedItems.length - 1 && idx === group.designers.length - 1;
                         return (
                           <li
                             key={d.slug}
-                            className={cn(
-                              "text-left leading-[1.5] sm:leading-[1.55]",
-                              isLast && "relative"
-                            )}
+                            className="text-left leading-[1.5] sm:leading-[1.55]"
                           >
-                            <span className={cn("inline-flex items-center", isLast && "relative")}>
-                              <Link
-                                to={`/designers/${d.slug}`}
-                                onMouseEnter={() => setActiveSlug(d.slug)}
-                                onFocus={() => setActiveSlug(d.slug)}
-                                className={cn(
-                                  "inline-block whitespace-nowrap relative",
-                                  "text-sm sm:text-base md:text-[20px] leading-[1.5] sm:leading-[1.55]",
-                                  "font-display font-light tracking-normal",
-                                  "transition-all duration-[1200ms] ease-out",
-                                  "drop-shadow-[0_1px_3px_rgba(0,0,0,0.7)]",
-                                  isDimmed
-                                    ? "text-white/80"
-                                    : "font-bold text-white after:content-[''] after:absolute after:left-0 after:bottom-[-5px] after:h-[1px] after:w-8 after:bg-white/40"
-                                )}
-                              >
-                                <span>
-                                  {first}
-                                  {last && (
-                                    <span>
-                                      {" "}
-                                      {last}
-                                    </span>
-                                  )}
-                                  {childBrand && (
-                                    <span className="opacity-80"> - {d.founder}</span>
-                                  )}
-                                </span>
-                              </Link>
-                              {isLast && (
-                                <div className="hidden md:block absolute left-full top-1/2 -translate-y-[88%] ml-10 pointer-events-auto">
-                                  <DirectoryContent align="left" />
-                                </div>
+                            <Link
+                              to={`/designers/${d.slug}`}
+                              onMouseEnter={() => setActiveSlug(d.slug)}
+                              onFocus={() => setActiveSlug(d.slug)}
+                              className={cn(
+                                "inline-block whitespace-nowrap relative",
+                                "text-sm sm:text-base md:text-[20px] leading-[1.5] sm:leading-[1.55]",
+                                "font-display font-light tracking-normal",
+                                "transition-all duration-[1200ms] ease-out",
+                                "drop-shadow-[0_1px_3px_rgba(0,0,0,0.7)]",
+                                isDimmed
+                                  ? "text-white/80"
+                                  : "font-bold text-white after:content-[''] after:absolute after:left-0 after:bottom-[-5px] after:h-[1px] after:w-8 after:bg-white/40"
                               )}
-                            </span>
+                            >
+                              <span>
+                                {first}
+                                {last && (
+                                  <span>
+                                    {" "}
+                                    {last}
+                                  </span>
+                                )}
+                                {childBrand && (
+                                  <span className="opacity-80"> - {d.founder}</span>
+                                )}
+                              </span>
+                            </Link>
                           </li>
                         );
                       })}
@@ -486,20 +466,17 @@ const DesignersHoverHero = () => {
           </div>
         </div>
 
-        {/* Mobile/PWA directory — centered at the bottom of the safe frame. */}
-        {isMobileOrPwa && (
-          <div
-            className={cn(
-              "absolute flex justify-center text-white pt-6 max-w-md pointer-events-auto md:hidden",
-              "left-1/2 -translate-x-1/2 w-full px-6",
-              isStandalone
-                ? "bottom-[calc(6rem+env(safe-area-inset-bottom))]"
-                : "bottom-[calc(1.25rem+env(safe-area-inset-bottom))]"
-            )}
-          >
-            <DirectoryContent align="center" />
-          </div>
-        )}
+        {/* Directory label — pinned to the svh frame bottom so it always
+            clears Safari's bottom toolbar; on mobile/PWA it is centered. */}
+        {directoryLabels(cn(
+          "absolute flex items-center gap-10 text-white border-t border-white/20 pt-6 max-w-md pointer-events-auto",
+          isMobileOrPwa
+            ? "left-1/2 -translate-x-1/2 w-full justify-center px-6"
+            : "left-6 sm:left-12 md:left-20 lg:left-28",
+          isStandalone
+            ? "bottom-[calc(6rem+env(safe-area-inset-bottom))] md:bottom-14"
+            : "bottom-[calc(1.25rem+env(safe-area-inset-bottom))] md:bottom-24"
+        ))}
 
 
         {/* Mobile/PWA scroll hint — quiet mouse icon above the directory, right-justified.
