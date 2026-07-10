@@ -188,7 +188,7 @@ const TradeDesigners = () => {
         entries.push({ name: d.name, docCount: 0, imageUrl: d.image_url || undefined, isAtelier: true });
       }
     }
-    return entries.sort((a, b) => a.name.localeCompare(b.name));
+    return entries.sort((a, b) => sortNameKey(a.name).localeCompare(sortNameKey(b.name)));
   }, [enriched]);
 
   const designerCarouselEntries = useMemo(() => {
@@ -200,7 +200,7 @@ const TradeDesigners = () => {
         entries.push({ name: d.name, docCount: 0, imageUrl: d.image_url || undefined });
       }
     }
-    return entries.sort((a, b) => a.name.localeCompare(b.name));
+    return entries.sort((a, b) => sortNameKey(a.name).localeCompare(sortNameKey(b.name)));
   }, [enriched]);
 
   // Unified filtering — all records in one flat list
