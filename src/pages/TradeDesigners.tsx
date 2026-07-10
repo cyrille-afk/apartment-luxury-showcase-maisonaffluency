@@ -6,6 +6,7 @@ import { Search, Users, X, Layers, ArrowUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAllDesigners } from "@/hooks/useDesigner";
 import { useTradeProducts } from "@/hooks/useTradeProducts";
+import { lastNameInitial, sortNameKey } from "@/lib/nameFormat";
 import BrandCarousel from "@/components/trade/BrandCarousel";
 import SectionHero from "@/components/trade/SectionHero";
 
