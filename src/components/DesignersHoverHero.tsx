@@ -417,7 +417,7 @@ const DesignersHoverHero = () => {
                     <span className="text-[10px] uppercase tracking-[0.3em] font-body text-white/50 mb-2 md:mb-3">
                       {group.label}
                     </span>
-                    <ul className="flex flex-col gap-0 text-left">
+                    <ul className="flex flex-col gap-1 text-left">
                       {group.designers.map((d) => {
                         const [first, last] = splitName(d.name);
                         const isActive = d.slug === activeSlug;
@@ -426,7 +426,7 @@ const DesignersHoverHero = () => {
                         return (
                           <li
                             key={d.slug}
-                            className="text-left leading-[1.3] sm:leading-[1.34]"
+                            className="text-left leading-[1.5] sm:leading-[1.55]"
                           >
                             <Link
                               to={`/designers/${d.slug}`}
@@ -434,7 +434,7 @@ const DesignersHoverHero = () => {
                               onFocus={() => setActiveSlug(d.slug)}
                               className={cn(
                                 "inline-block whitespace-nowrap",
-                                "text-sm sm:text-base md:text-[20px] leading-[1.3] sm:leading-[1.34]",
+                                "text-sm sm:text-base md:text-[20px] leading-[1.5] sm:leading-[1.55]",
                                 "transition-colors duration-[1200ms] ease-out",
                                 isDimmed
                                   ? "font-body font-light tracking-normal text-white/35"
