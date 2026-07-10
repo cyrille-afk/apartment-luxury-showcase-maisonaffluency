@@ -490,8 +490,8 @@ const DesignersHoverHero = () => {
           </div>
         )}
 
-        {/* Desktop directory — bottom-left of the hero. */}
-        <div className="hidden md:block absolute left-6 sm:left-12 md:left-20 lg:left-28 bottom-12 lg:bottom-16 pointer-events-auto z-10">
+        {/* Desktop directory — bottom-left of the hero, above the A-Z bar. */}
+        <div className="hidden md:block absolute left-6 sm:left-12 md:left-20 lg:left-28 bottom-28 lg:bottom-32 pointer-events-auto z-10">
           <DirectoryContent align="left" />
         </div>
 
