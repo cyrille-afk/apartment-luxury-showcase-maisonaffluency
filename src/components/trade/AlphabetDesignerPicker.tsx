@@ -44,17 +44,13 @@ const AlphabetDesignerPicker = ({
     const map = new Map<string, string[]>();
     const lookup = new Map<string, string>();
     for (const b of brands) {
-      const L = initialOf(b);
+      const L = lastNameInitial(b);
       lookup.set(b, L);
       if (!map.has(L)) map.set(L, []);
       map.get(L)!.push(b);
     }
     for (const [, arr] of map) {
-      arr.sort((a, b) =>
-        stripAccents(a).localeCompare(stripAccents(b), undefined, {
-          sensitivity: "base",
-        })
-      );
+      arr.sort((a, b) => sortNameKey(a).localeCompare(sortNameKey(b)));
     }
     const letters = Array.from(map.keys()).sort((a, b) => {
       if (a === "#") return 1;
