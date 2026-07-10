@@ -780,10 +780,16 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
               {/* Journal */}
               <button
                 onClick={() => { setMegaMenuOpen(false); handleNavClick("/journal"); }}
-                className="font-body text-xs uppercase tracking-[0.2em] transition-all duration-300 relative group whitespace-nowrap flex items-center gap-1.5 text-foreground"
+                className={cn(
+                  "font-body text-sm uppercase tracking-[0.18em] font-semibold transition-all duration-300 relative group whitespace-nowrap flex items-center gap-1.5 text-foreground",
+                  (activeSection === "/journal" || isRouteActive("/journal")) && "text-[hsl(var(--gold))]"
+                )}
               >
                 Journal
-                <span className="absolute -bottom-1 left-0 h-0.5 bg-[hsl(var(--accent))] transition-all duration-300 w-0 group-hover:w-full" />
+                <span className={cn(
+                  "absolute -bottom-1 left-0 h-0.5 bg-[hsl(var(--gold))] transition-all duration-300",
+                  (activeSection === "/journal" || isRouteActive("/journal")) ? "w-full" : "w-0 group-hover:w-full"
+                )} />
               </button>
 
               {/* Trade Program */}
