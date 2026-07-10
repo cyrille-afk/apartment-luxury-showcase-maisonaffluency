@@ -425,55 +425,44 @@ const DesignersHoverHero = () => {
                       {group.label}
                     </span>
                     <ul className="flex flex-col gap-1 text-left">
-                      {group.designers.map((d, idx) => {
+                      {group.designers.map((d) => {
                         const [first, last] = splitName(d.name);
                         const isActive = d.slug === activeSlug;
                         const isDimmed = activeSlug !== null && !isActive;
                         const childBrand = d.founder && d.founder !== d.name;
-                        const isLast = groupIdx === groupedItems.length - 1 && idx === group.designers.length - 1;
                         return (
                           <li
                             key={d.slug}
-                            className={cn(
-                              "text-left leading-[1.5] sm:leading-[1.55]",
-                              isLast && "relative"
-                            )}
+                            className="text-left leading-[1.5] sm:leading-[1.55]"
                           >
-                            <span className={cn("inline-flex items-center", isLast && "relative")}>
-                              <Link
-                                to={`/designers/${d.slug}`}
-                                onMouseEnter={() => setActiveSlug(d.slug)}
-                                onFocus={() => setActiveSlug(d.slug)}
-                                className={cn(
-                                  "inline-block whitespace-nowrap relative",
-                                  "text-sm sm:text-base md:text-[20px] leading-[1.5] sm:leading-[1.55]",
-                                  "font-display font-light tracking-normal",
-                                  "transition-all duration-[1200ms] ease-out",
-                                  "drop-shadow-[0_1px_3px_rgba(0,0,0,0.7)]",
-                                  isDimmed
-                                    ? "text-white/80"
-                                    : "font-bold text-white after:content-[''] after:absolute after:left-0 after:bottom-[-5px] after:h-[1px] after:w-8 after:bg-white/40"
-                                )}
-                              >
-                                <span>
-                                  {first}
-                                  {last && (
-                                    <span>
-                                      {" "}
-                                      {last}
-                                    </span>
-                                  )}
-                                  {childBrand && (
-                                    <span className="opacity-80"> - {d.founder}</span>
-                                  )}
-                                </span>
-                              </Link>
-                              {isLast && (
-                                <div className="hidden md:block absolute left-full top-1/2 -translate-y-[88%] ml-10 pointer-events-auto">
-                                  <DirectoryContent align="left" />
-                                </div>
+                            <Link
+                              to={`/designers/${d.slug}`}
+                              onMouseEnter={() => setActiveSlug(d.slug)}
+                              onFocus={() => setActiveSlug(d.slug)}
+                              className={cn(
+                                "inline-block whitespace-nowrap relative",
+                                "text-sm sm:text-base md:text-[20px] leading-[1.5] sm:leading-[1.55]",
+                                "font-display font-light tracking-normal",
+                                "transition-all duration-[1200ms] ease-out",
+                                "drop-shadow-[0_1px_3px_rgba(0,0,0,0.7)]",
+                                isDimmed
+                                  ? "text-white/80"
+                                  : "font-bold text-white after:content-[''] after:absolute after:left-0 after:bottom-[-5px] after:h-[1px] after:w-8 after:bg-white/40"
                               )}
-                            </span>
+                            >
+                              <span>
+                                {first}
+                                {last && (
+                                  <span>
+                                    {" "}
+                                    {last}
+                                  </span>
+                                )}
+                                {childBrand && (
+                                  <span className="opacity-80"> - {d.founder}</span>
+                                )}
+                              </span>
+                            </Link>
                           </li>
                         );
                       })}
