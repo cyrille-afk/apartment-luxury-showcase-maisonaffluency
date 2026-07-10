@@ -88,8 +88,8 @@ function HeroAlphabetBar() {
                 onClick={() => jumpToLetter(letter)}
                 className={`font-serif text-base md:text-lg lg:text-xl leading-none transition-colors duration-200 ${
                   isActive
-                    ? "text-white/90 hover:text-white"
-                    : "text-white/25 cursor-default"
+                    ? "text-white/95 hover:text-[hsl(var(--gold))] underline decoration-[hsl(var(--gold))] decoration-2 underline-offset-4"
+                    : "text-white/40 cursor-default"
                 }`}
                 aria-label={isActive ? `Jump to designers starting with ${letter}` : undefined}
               >
