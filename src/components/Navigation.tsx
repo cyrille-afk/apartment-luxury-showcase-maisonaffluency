@@ -800,7 +800,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                       setMegaMenuOpen(false);
                       handleNavClick(item.href);
                     }}
-                    className="font-body text-xs uppercase tracking-[0.2em] font-bold transition-all duration-300 relative whitespace-nowrap flex items-center gap-1.5 bg-accent text-accent-foreground hover:bg-accent/80 px-3 py-1 rounded-full"
+                    className="font-body text-sm uppercase tracking-[0.18em] font-bold transition-all duration-300 relative whitespace-nowrap flex items-center gap-1.5 bg-accent text-accent-foreground hover:bg-accent/80 px-3 py-1 rounded-full"
                   >
                     {item.label}
                   </button>
