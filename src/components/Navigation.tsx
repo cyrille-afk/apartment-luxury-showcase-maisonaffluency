@@ -320,7 +320,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
           ? "bg-background border-b border-transparent"
           : "bg-white backdrop-blur-sm border-b border-border/50"
     )}>
-      <div className="mx-auto max-w-7xl px-4 md:px-12 lg:px-20">
+      <div className="mx-auto max-w-7xl px-5 md:px-14 lg:px-24">
         {/* Mobile: single row */}
           <div className="flex h-24 items-end pb-2.5 md:hidden relative justify-center">
            <Sheet open={isOpen} onOpenChange={handleMobileMenuOpenChange}>
