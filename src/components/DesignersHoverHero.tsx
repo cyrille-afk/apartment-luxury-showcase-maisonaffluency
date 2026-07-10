@@ -304,21 +304,21 @@ const DesignersHoverHero = () => {
     <div className={className}>
       {!isMobileOrPwa && (
         <div className="flex flex-col">
-          <span className="text-[9px] uppercase tracking-[0.3em] mb-1 font-body text-white">
+          <span className="text-[10px] uppercase tracking-[0.3em] mb-1 font-body font-semibold text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]">
             Archives
           </span>
-          <span className="text-xs font-body font-light text-white/85">1920 — Today</span>
+          <span className="text-xs font-body font-medium text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]">1920 — Today</span>
         </div>
       )}
       <div className="flex flex-col">
         <div className="flex justify-center pb-3">
           <div
-            className="h-px w-24 bg-[linear-gradient(90deg,rgba(255,255,255,0.25)_0%,rgba(255,255,255,0.25)_40%,transparent_40%,transparent_60%,rgba(255,255,255,0.25)_60%,rgba(255,255,255,0.25)_100%)]"
+            className="h-px w-24 bg-[linear-gradient(90deg,rgba(255,255,255,0.35)_0%,rgba(255,255,255,0.35)_40%,transparent_40%,transparent_60%,rgba(255,255,255,0.35)_60%,rgba(255,255,255,0.35)_100%)]"
             aria-hidden="true"
           />
         </div>
-        <span className="text-[9px] uppercase tracking-[0.3em] mb-1 font-body text-white">
-          Directory <span className="text-white/70 normal-case tracking-normal">({designerCount || 95})</span>
+        <span className="text-[10px] uppercase tracking-[0.3em] mb-1 font-body font-semibold text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]">
+          Directory <span className="text-white/90 normal-case tracking-normal font-medium">({designerCount || 95})</span>
         </span>
 
         <Link
@@ -327,7 +327,7 @@ const DesignersHoverHero = () => {
             e.preventDefault();
             jumpToDesignerLetter("A");
           }}
-          className="text-xs font-body font-light italic text-white/85 hover:text-white underline-offset-4 hover:underline transition-colors"
+          className="text-xs font-body font-medium italic text-white hover:text-white/90 underline-offset-4 hover:underline transition-colors drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]"
         >
           Click to Browse A–Z
         </Link>
