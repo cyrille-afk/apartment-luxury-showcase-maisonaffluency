@@ -403,7 +403,7 @@ const DesignersHoverHero = () => {
             <div className="relative inline-block">
               {/* Localized text overlay — separates the typography from the
                   busy background image while keeping the editorial edge soft. */}
-              <div className="absolute -inset-3 sm:-inset-4 md:-inset-5 -z-10 rounded-sm bg-gradient-to-r from-black/75 via-black/55 to-transparent" />
+              <div className="absolute -inset-3 sm:-inset-4 md:-inset-5 -z-10 rounded-sm bg-gradient-to-r from-black/60 via-black/35 to-transparent" />
               <nav
                 ref={navRef}
                 aria-label="Featured designers shortcut list"
