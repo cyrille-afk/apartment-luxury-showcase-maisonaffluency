@@ -368,7 +368,7 @@ const DesignersHoverHero = () => {
           );
         })}
         {/* Readability overlay */}
-        <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/45 to-black/20 md:from-black/70 md:via-black/35 md:to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/60 to-black/35 md:from-black/75 md:via-black/45 md:to-black/10" />
       </div>
 
       {/* Safe content frame — on mobile browser it tracks 100svh (toolbar-visible
@@ -436,9 +436,10 @@ const DesignersHoverHero = () => {
                                 "inline-block whitespace-nowrap",
                                 "text-sm sm:text-base md:text-[20px] leading-[1.5] sm:leading-[1.55]",
                                 "transition-colors duration-[1200ms] ease-out",
+                                "drop-shadow-[0_1px_3px_rgba(0,0,0,0.7)]",
                                 isDimmed
-                                  ? "font-body font-light tracking-normal text-white/35"
-                                  : "font-display font-light tracking-tight text-white/95"
+                                  ? "font-body font-light tracking-normal text-white/60"
+                                  : "font-display font-light tracking-tight text-white"
                               )}
                             >
                               <span>
@@ -491,18 +492,18 @@ const DesignersHoverHero = () => {
                 50% { transform: translateY(5px); opacity: 0.35; }
               }
             `}</style>
-            <span className="font-serif text-[9px] uppercase tracking-[0.35em] text-white/60 drop-shadow-[0_1px_2px_rgba(0,0,0,0.4)]">
+            <span className="font-serif text-[10px] uppercase tracking-[0.35em] text-white/85 drop-shadow-[0_1px_3px_rgba(0,0,0,0.6)]">
               Scroll
             </span>
             <svg
-              width="20"
-              height="32"
+              width="22"
+              height="34"
               viewBox="0 0 20 32"
               fill="none"
               aria-hidden="true"
-              className="text-white/60 drop-shadow-[0_1px_2px_rgba(0,0,0,0.4)]"
+              className="text-white/85 drop-shadow-[0_1px_3px_rgba(0,0,0,0.6)]"
             >
-              <rect x="1" y="1" width="18" height="30" rx="9" stroke="currentColor" strokeWidth="1.5" />
+              <rect x="1" y="1" width="18" height="30" rx="9" stroke="currentColor" strokeWidth="1.75" />
               <rect
                 x="8"
                 y="7"
