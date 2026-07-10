@@ -300,33 +300,24 @@ const DesignersHoverHero = () => {
 
   if (!hasItems) return null;
 
-  const DirectoryContent = ({ align = "left" }: { align?: "left" | "center" }) => (
-    <div className={cn("flex flex-col md:w-56", align === "center" ? "items-center" : "items-start")}>
-      <div className={cn("flex pb-3 md:pb-5", align === "center" ? "justify-center" : "justify-start md:justify-center", "w-full")}>
-        <div
-          className="h-px w-24 md:w-48 bg-[linear-gradient(90deg,rgba(255,255,255,0.35)_0%,rgba(255,255,255,0.35)_40%,transparent_40%,transparent_60%,rgba(255,255,255,0.35)_60%,rgba(255,255,255,0.35)_100%)]"
-          aria-hidden="true"
-        />
-      </div>
-      <span className="text-[10px] md:text-[19px] uppercase tracking-[0.3em] md:tracking-[0.34em] mb-1 md:mb-2 font-body font-semibold text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]">
-        Directory <span className="text-white/90 normal-case tracking-normal font-medium md:hidden">({designerCount || 95})</span>
-      </span>
-      <span className="hidden md:block mb-2 font-display text-[18px] leading-none text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]">
-        ({designerCount || 95})
-      </span>
+  const directoryLabels = (className: string) => (
+    <div className={className}>
+      <div className="flex flex-col">
+        <span className="text-[9px] uppercase tracking-[0.3em] mb-1 font-body text-white">
+          Directory <span className="text-white/70 normal-case tracking-normal">({designerCount || 95})</span>
+        </span>
 
-      <Link
-        to="/designers?letter=A"
-        onClick={(e) => {
-          e.preventDefault();
-          jumpToDesignerLetter("A");
-        }}
-        className="whitespace-nowrap text-xs md:text-[21px] md:leading-[1.2] font-body md:font-display font-medium italic text-white hover:text-white/90 underline-offset-4 hover:underline transition-colors drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]"
-      >
-        <span className="md:hidden">Click to Browse A–Z</span>
-        <span className="hidden md:block">Click to Browse</span>
-        <span className="hidden md:block not-italic text-[24px] leading-[1.12]">A–Z</span>
-      </Link>
+        <Link
+          to="/designers?letter=A"
+          onClick={(e) => {
+            e.preventDefault();
+            jumpToDesignerLetter("A");
+          }}
+          className="text-xs font-body font-light italic text-white/85 hover:text-white underline-offset-4 hover:underline transition-colors"
+        >
+          Click to Browse A–Z
+        </Link>
+      </div>
     </div>
   );
 
