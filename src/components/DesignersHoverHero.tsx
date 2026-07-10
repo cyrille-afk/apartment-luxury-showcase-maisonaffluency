@@ -506,9 +506,6 @@ const DesignersHoverHero = () => {
                 100% { transform: translateY(0);   opacity: 0.2; }
               }
             `}</style>
-            <span className="font-serif text-[10px] uppercase tracking-[0.35em] text-white/85 drop-shadow-[0_1px_3px_rgba(0,0,0,0.6)]">
-              Scroll
-            </span>
             <svg
               width="22"
               height="34"
@@ -540,6 +537,9 @@ const DesignersHoverHero = () => {
                 style={{ animation: "scroll-dot 2s ease-in-out infinite" }}
               />
             </svg>
+            <span className="font-serif text-[10px] uppercase tracking-[0.35em] text-white/85 drop-shadow-[0_1px_3px_rgba(0,0,0,0.6)]">
+              Scroll
+            </span>
           </div>
         )}
       </div>
