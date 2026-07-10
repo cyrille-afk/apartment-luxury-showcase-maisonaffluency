@@ -393,7 +393,7 @@ const DesignersHoverHero = () => {
           <span id="meet-designers-headline" className="inline-block mb-5 md:mb-8 text-[11px] uppercase tracking-[0.3em] font-body text-white/50 scroll-header-offset">
             Meet Our Designers
           </span>
-          <div className="w-full max-w-xs sm:max-w-sm md:w-fit md:max-w-none">
+          <div className="w-full max-w-xs sm:max-w-sm md:max-w-md">
             <div className="relative inline-block">
               {/* Localized text overlay — separates the typography from the
                   busy background image while keeping the editorial edge soft. */}
