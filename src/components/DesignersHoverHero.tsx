@@ -480,13 +480,13 @@ const DesignersHoverHero = () => {
       {isMobileOrPwa && (
         <div className="absolute right-5 sm:right-8 top-1/2 -translate-y-1/2 z-20 flex flex-col items-center gap-3 pointer-events-none md:hidden">
           <span
-            className="text-[9px] uppercase tracking-[0.3em] font-body text-white/60"
+            className="text-[9px] uppercase tracking-[0.3em] font-body text-white/80"
             style={{ writingMode: "vertical-rl" }}
           >
             Scroll
           </span>
-          <div className="relative w-4 h-8 flex items-center justify-center">
-            <ChevronDown className="absolute w-4 h-4 text-white/60 animate-[bounce_2s_infinite]" />
+          <div className="relative w-5 h-8 flex items-center justify-center">
+            <ChevronDown className="absolute w-5 h-5 text-white/80 animate-[bounce_2s_infinite]" />
           </div>
         </div>
       )}
