@@ -37,10 +37,6 @@ const normalizeText = (value: string | null | undefined) =>
     .toLowerCase()
     .trim();
 
-const initialOf = (value: string | null | undefined) => {
-  const first = normalizeText(value).charAt(0).toUpperCase();
-  return /[A-Z]/.test(first) ? first : "#";
-};
 
 
 type EnrichedDesigner = {
