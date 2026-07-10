@@ -144,7 +144,19 @@ const DesignersHoverHero = () => {
   const [activeSlug, setActiveSlug] = useState<string | null>(null);
   const [isStandalone, setIsStandalone] = useState(false);
   const [showPortalCursor, setShowPortalCursor] = useState(false);
-  const isMobile = useIsMobile();
+  const isMobileHook = useIsMobile();
+  const [isMobileViewport, setIsMobileViewport] = useState(() =>
+    typeof window !== "undefined" && window.matchMedia("(max-width: 767px)").matches
+  );
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mql = window.matchMedia("(max-width: 767px)");
+    const update = () => setIsMobileViewport(mql.matches);
+    update();
+    mql.addEventListener("change", update);
+    return () => mql.removeEventListener("change", update);
+  }, []);
+  const isMobileOrPwa = isMobileViewport || isMobileHook || isStandalone;
   const navRef = useRef<HTMLElement>(null);
   const sectionRef = useRef<HTMLElement>(null);
   const portalRef = useRef<HTMLAnchorElement>(null);
