@@ -301,11 +301,13 @@ const DesignersHoverHero = () => {
   if (!hasItems) return null;
 
   const DirectoryContent = ({ align = "left" }: { align?: "left" | "center" }) => (
-    <div className={cn("flex flex-col", align === "center" ? "items-center" : "items-start")}>
-      <div
-        className="h-px w-24 bg-[linear-gradient(90deg,rgba(255,255,255,0.35)_0%,rgba(255,255,255,0.35)_40%,transparent_40%,transparent_60%,rgba(255,255,255,0.35)_60%,rgba(255,255,255,0.35)_100%)] mb-3"
-        aria-hidden="true"
-      />
+    <div className={cn("flex w-max min-w-40 flex-col", align === "center" ? "items-center" : "items-start")}>
+      <div className="flex w-full justify-center pb-3">
+        <div
+          className="h-px w-24 bg-[linear-gradient(90deg,rgba(255,255,255,0.35)_0%,rgba(255,255,255,0.35)_40%,transparent_40%,transparent_60%,rgba(255,255,255,0.35)_60%,rgba(255,255,255,0.35)_100%)]"
+          aria-hidden="true"
+        />
+      </div>
       <span className="text-[10px] uppercase tracking-[0.3em] mb-1 font-body font-semibold text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]">
         Directory <span className="text-white/90 normal-case tracking-normal font-medium">({designerCount || 95})</span>
       </span>
@@ -316,7 +318,7 @@ const DesignersHoverHero = () => {
           e.preventDefault();
           jumpToDesignerLetter("A");
         }}
-        className="text-xs font-body font-medium italic text-white hover:text-white/90 underline-offset-4 hover:underline transition-colors drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]"
+        className="whitespace-nowrap text-xs font-body font-medium italic text-white hover:text-white/90 underline-offset-4 hover:underline transition-colors drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]"
       >
         Click to Browse A–Z
       </Link>
@@ -462,7 +464,7 @@ const DesignersHoverHero = () => {
                                 </span>
                               </Link>
                               {isLast && (
-                                <div className="hidden md:block absolute left-full top-1/2 -translate-y-1/2 ml-6 pointer-events-auto">
+                                <div className="hidden md:block absolute left-full top-1/2 -translate-y-1/2 ml-12 pointer-events-auto">
                                   <DirectoryContent align="left" />
                                 </div>
                               )}
