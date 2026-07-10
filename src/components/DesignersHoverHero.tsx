@@ -473,48 +473,50 @@ const DesignersHoverHero = () => {
             ? "bottom-[calc(6rem+env(safe-area-inset-bottom))] md:bottom-14"
             : "bottom-[calc(1.25rem+env(safe-area-inset-bottom))] md:bottom-24"
         ))}
+
+        {/* Mobile/PWA scroll hint — quiet mouse icon above the directory, right-justified.
+            Anchored inside the svh safe frame so it clears Safari's bottom toolbar. */}
+        {isMobileOrPwa && (
+          <div
+            className={cn(
+              "absolute right-6 sm:right-12 z-20 flex flex-col items-center gap-2 pointer-events-none md:hidden",
+              isStandalone
+                ? "bottom-[calc(11rem+env(safe-area-inset-bottom))]"
+                : "bottom-[calc(6.25rem+env(safe-area-inset-bottom))]"
+            )}
+          >
+            <style>{`
+              @keyframes scroll-pill {
+                0%, 100% { transform: translateY(0); opacity: 0.85; }
+                50% { transform: translateY(5px); opacity: 0.35; }
+              }
+            `}</style>
+            <span className="font-serif text-[9px] uppercase tracking-[0.35em] text-white/60 drop-shadow-[0_1px_2px_rgba(0,0,0,0.4)]">
+              Scroll
+            </span>
+            <svg
+              width="20"
+              height="32"
+              viewBox="0 0 20 32"
+              fill="none"
+              aria-hidden="true"
+              className="text-white/60 drop-shadow-[0_1px_2px_rgba(0,0,0,0.4)]"
+            >
+              <rect x="1" y="1" width="18" height="30" rx="9" stroke="currentColor" strokeWidth="1.5" />
+              <rect
+                x="8"
+                y="7"
+                width="4"
+                height="7"
+                rx="2"
+                fill="currentColor"
+                style={{ animation: "scroll-pill 1.8s ease-in-out infinite" }}
+              />
+            </svg>
+          </div>
+        )}
       </div>
 
-      {/* Mobile/PWA scroll hint — quiet mouse icon above the directory, right-justified. */}
-      {isMobileOrPwa && (
-        <div
-          className={cn(
-            "absolute right-6 sm:right-12 z-20 flex flex-col items-center gap-2 pointer-events-none md:hidden",
-            isStandalone
-              ? "bottom-[calc(9rem+env(safe-area-inset-bottom))]"
-              : "bottom-[calc(4.5rem+env(safe-area-inset-bottom))]"
-          )}
-        >
-          <style>{`
-            @keyframes scroll-pill {
-              0%, 100% { transform: translateY(0); opacity: 0.85; }
-              50% { transform: translateY(5px); opacity: 0.35; }
-            }
-          `}</style>
-          <span className="font-serif text-[9px] uppercase tracking-[0.35em] text-white/60 drop-shadow-[0_1px_2px_rgba(0,0,0,0.4)]">
-            Scroll
-          </span>
-          <svg
-            width="20"
-            height="32"
-            viewBox="0 0 20 32"
-            fill="none"
-            aria-hidden="true"
-            className="text-white/60 drop-shadow-[0_1px_2px_rgba(0,0,0,0.4)]"
-          >
-            <rect x="1" y="1" width="18" height="30" rx="9" stroke="currentColor" strokeWidth="1.5" />
-            <rect
-              x="8"
-              y="7"
-              width="4"
-              height="7"
-              rx="2"
-              fill="currentColor"
-              style={{ animation: "scroll-pill 1.8s ease-in-out infinite" }}
-            />
-          </svg>
-        </div>
-      )}
 
 
       {/* Active designer portal — the entire right half of the hero is a
