@@ -2958,8 +2958,7 @@ const BrandsAteliers = () => {
   const totalBrands = alphaGroups.reduce((sum, [, brands]) => sum + brands.length, 0);
 
   // Build a per-letter index of sub-designers re-edited by parent ateliers (e.g. Ecart, Man of Parts).
-  // Lets users locate Jean-Michel Frank under "J", Paul László under "P", etc.,
-  // even though they live nested inside their parent atelier's expandable card.
+  // Uses the sub-designer's last name so Jean-Michel Frank appears under "F" and Paul László under "L".
   const subDesignerIndexByLetter = useMemo(() => {
     const groups: Record<string, Array<{ name: string; parentBrand: string; dbParentName: string }>> = {};
     const q = searchQuery.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -2968,7 +2967,7 @@ const BrandsAteliers = () => {
       subs.forEach((sub) => {
         const norm = sub.name.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
         if (q && !norm.toLowerCase().includes(q) && !cfg.brandName.toLowerCase().includes(q) && !cfg.dbParentName.toLowerCase().includes(q)) return;
-        const letter = norm[0]?.toUpperCase() || "#";
+        const letter = lastNameInitial(sub.name);
         if (!groups[letter]) groups[letter] = [];
         groups[letter].push({ name: sub.name, parentBrand: cfg.brandName, dbParentName: cfg.dbParentName });
       });
