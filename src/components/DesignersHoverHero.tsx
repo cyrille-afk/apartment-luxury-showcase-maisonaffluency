@@ -350,9 +350,9 @@ const DesignersHoverHero = () => {
           )}
         >
 
-          <p id="meet-designers-headline" className="mb-5 md:mb-8 font-body text-sm md:text-lg tracking-wide text-white/75 scroll-header-offset">
-            Meet our Designers
-          </p>
+          <span id="meet-designers-headline" className="inline-block mb-5 md:mb-8 text-[10px] uppercase tracking-[0.3em] font-body text-white/50 scroll-header-offset">
+            Meet Our Designers
+          </span>
           <div className="w-full max-w-xs sm:max-w-sm md:max-w-md">
             <nav
               ref={navRef}
