@@ -345,12 +345,14 @@ const DesignersHoverHero = () => {
       {/* Cross-fading background images */}
       <div className="absolute inset-0 z-0">
         {items.map((d) => {
-          const src = d.hero_image_url || d.image_url;
+          const src = isMobileOrPwa
+            ? d.first_pick_image_url || d.hero_image_url || d.image_url
+            : d.hero_image_url || d.image_url;
           if (!src) return null;
           const isActive = d.slug === activeSlug;
           return (
             <img
-              key={d.slug}
+              key={`${d.slug}-${isMobileOrPwa ? "cur" : "hero"}`}
               src={src}
               alt=""
               aria-hidden="true"
