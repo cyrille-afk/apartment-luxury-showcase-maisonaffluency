@@ -368,7 +368,7 @@ const DesignersHoverHero = () => {
           );
         })}
         {/* Readability overlay */}
-        <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/45 to-black/20 md:from-black/70 md:via-black/35 md:to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/60 to-black/35 md:from-black/75 md:via-black/45 md:to-black/10" />
       </div>
 
       {/* Safe content frame — on mobile browser it tracks 100svh (toolbar-visible
