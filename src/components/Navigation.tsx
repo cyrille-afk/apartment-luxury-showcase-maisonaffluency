@@ -761,13 +761,13 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                   key={item.href}
                   onClick={() => { setMegaMenuOpen(false); handleNavClick(item.href); }} 
                   className={cn(
-                    "font-body text-xs uppercase tracking-[0.2em] transition-all duration-300 relative group whitespace-nowrap flex items-center gap-1.5 text-foreground",
-                    (activeSection === item.href || isRouteActive(item.href)) && "font-medium"
+                    "font-body text-sm uppercase tracking-[0.18em] font-semibold transition-all duration-300 relative group whitespace-nowrap flex items-center gap-1.5 text-foreground",
+                    (activeSection === item.href || isRouteActive(item.href)) && "text-[hsl(var(--gold))]"
                   )}
                 >
                   {item.label}
                   <span className={cn(
-                    "absolute -bottom-1 left-0 h-0.5 bg-[hsl(var(--accent))] transition-all duration-300",
+                    "absolute -bottom-1 left-0 h-0.5 bg-[hsl(var(--gold))] transition-all duration-300",
                     (activeSection === item.href || isRouteActive(item.href)) ? "w-full" : "w-0 group-hover:w-full"
                   )} />
                 </button>
