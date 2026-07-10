@@ -311,6 +311,12 @@ const DesignersHoverHero = () => {
         </div>
       )}
       <div className="flex flex-col">
+        <div className="flex justify-center pb-3">
+          <div
+            className="h-px w-24 bg-[linear-gradient(90deg,rgba(255,255,255,0.25)_0%,rgba(255,255,255,0.25)_40%,transparent_40%,transparent_60%,rgba(255,255,255,0.25)_60%,rgba(255,255,255,0.25)_100%)]"
+            aria-hidden="true"
+          />
+        </div>
         <span className="text-[9px] uppercase tracking-[0.3em] mb-1 font-body text-white">
           Directory <span className="text-white/70 normal-case tracking-normal">({designerCount || 95})</span>
         </span>
