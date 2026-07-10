@@ -10,6 +10,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ChevronDown, ChevronRight, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { lastNameInitial, sortNameKey } from "@/lib/nameFormat";
 
 export interface PickerItem {
   id: string;
@@ -25,17 +26,6 @@ interface Props {
   className?: string;
 }
 
-const stripAccents = (s: string) =>
-  s.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-
-const initialOf = (label: string): string => {
-  const cleaned = stripAccents(label.trim()).toUpperCase();
-  const stripped = cleaned
-    .replace(/^L['']/, "")
-    .replace(/^(LE |LA |LES |THE )/, "");
-  const first = stripped.charAt(0);
-  return /[A-Z]/.test(first) ? first : "#";
-};
 
 const AlphabetProductPicker = ({
   items,
@@ -63,7 +53,7 @@ const AlphabetProductPicker = ({
       }
 
       for (const g of allGroups) {
-        const L = initialOf(g);
+        const L = lastNameInitial(g);
         letterOfGroup.set(g, L);
         if (!byLetter.has(L)) byLetter.set(L, new Map());
         byLetter.get(L)!.set(g, []);
@@ -76,11 +66,7 @@ const AlphabetProductPicker = ({
       // sort products within each group
       for (const [, groups] of byLetter) {
         for (const [, arr] of groups) {
-          arr.sort((a, b) =>
-            stripAccents(a.label).localeCompare(stripAccents(b.label), undefined, {
-              sensitivity: "base",
-            })
-          );
+          arr.sort((a, b) => sortNameKey(a.label).localeCompare(sortNameKey(b.label)));
         }
       }
 
@@ -163,9 +149,7 @@ const AlphabetProductPicker = ({
               const isExpanded = expandedLetter === L;
               const groups = byLetter.get(L)!;
               const groupNames = [...groups.keys()].sort((a, b) =>
-                stripAccents(a).localeCompare(stripAccents(b), undefined, {
-                  sensitivity: "base",
-                })
+                sortNameKey(a).localeCompare(sortNameKey(b))
               );
               const containsActive =
                 selectedItem && letterOfGroup.get(selectedItem.group) === L;

@@ -12,6 +12,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ChevronDown, ChevronRight, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { lastNameInitial, sortNameKey } from "@/lib/nameFormat";
 
 interface Props {
   brands: string[];
@@ -26,17 +27,6 @@ interface Props {
   hideCount?: boolean;
 }
 
-const stripAccents = (s: string) =>
-  s.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-
-const initialOf = (label: string): string => {
-  const cleaned = stripAccents(label.trim()).toUpperCase();
-  const stripped = cleaned
-    .replace(/^L['']/, "")
-    .replace(/^(LE |LA |LES |THE )/, "");
-  const first = stripped.charAt(0);
-  return /[A-Z]/.test(first) ? first : "#";
-};
 
 const AlphabetDesignerPicker = ({
   brands,
@@ -54,17 +44,13 @@ const AlphabetDesignerPicker = ({
     const map = new Map<string, string[]>();
     const lookup = new Map<string, string>();
     for (const b of brands) {
-      const L = initialOf(b);
+      const L = lastNameInitial(b);
       lookup.set(b, L);
       if (!map.has(L)) map.set(L, []);
       map.get(L)!.push(b);
     }
     for (const [, arr] of map) {
-      arr.sort((a, b) =>
-        stripAccents(a).localeCompare(stripAccents(b), undefined, {
-          sensitivity: "base",
-        })
-      );
+      arr.sort((a, b) => sortNameKey(a).localeCompare(sortNameKey(b)));
     }
     const letters = Array.from(map.keys()).sort((a, b) => {
       if (a === "#") return 1;

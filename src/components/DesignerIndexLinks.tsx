@@ -10,6 +10,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { sortNameKey } from "@/lib/nameFormat";
 import designersSeed from "@/data/designersIndex.json";
 
 interface DesignerLink {
@@ -31,10 +32,11 @@ function useAllPublishedDesigners() {
         .select("slug, name")
         .eq("is_published", true)
         .eq("trade_only", false)
-        .order("name", { ascending: true })
         .range(0, 1499);
       if (error) throw error;
-      return (data || []) as DesignerLink[];
+      return (data || [])
+        .sort((a, b) => sortNameKey(a.name).localeCompare(sortNameKey(b.name)))
+        .map((d) => ({ slug: d.slug, name: d.name })) as DesignerLink[];
     },
   });
 }

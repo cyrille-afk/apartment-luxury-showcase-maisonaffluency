@@ -48,7 +48,6 @@ async function main() {
     .eq("is_published", true)
     .eq("trade_only", false)
     .not("slug", "is", null)
-    .order("name", { ascending: true })
     .range(0, 1499);
 
   if (error) {
@@ -57,8 +56,27 @@ async function main() {
     return;
   }
 
+  const stripAccents = (s) =>
+    s.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+  const sortNameKey = (name) => {
+    const full = name.trim();
+    if (!full) return "";
+    const personPart = full.includes(" - ")
+      ? full.split(" - ").pop()?.trim() || full
+      : full;
+    const words = personPart.split(/\s+/);
+    let lastWord = words[words.length - 1] || "";
+    if (/^\d+$/.test(lastWord) && words.length > 1) {
+      lastWord = words[words.length - 2] || "";
+    }
+    const key = stripAccents(lastWord).toLowerCase().replace(/^[^a-z]+/, "");
+    return key || sortNameKey(words.slice(0, -1).join(" "));
+  };
+
   const list = (data || [])
     .filter((d) => d.slug && d.name)
+    .sort((a, b) => sortNameKey(a.name).localeCompare(sortNameKey(b.name)))
     .map((d) => ({ slug: d.slug, name: d.name }));
 
   await writeFile(OUT, JSON.stringify(list, null, 2) + "\n", "utf8");

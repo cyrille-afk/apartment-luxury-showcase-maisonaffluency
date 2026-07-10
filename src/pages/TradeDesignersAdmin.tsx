@@ -41,6 +41,7 @@ import { variantImageKey } from "@/lib/variantImageMap";
 import BiographyPdfButton from "@/components/BiographyPdfButton";
 import { applyCuratorPickOrder, sortCuratorPicks } from "@/lib/curatorPickSort";
 import { sanitizeBiographyCitations } from "@/lib/sanitizeBiographyCitations";
+import { lastNameInitial, sortNameKey } from "@/lib/nameFormat";
 
 const EditorialBiography = lazy(() => import("@/components/EditorialBiography"));
 
@@ -1906,13 +1907,14 @@ const TradeDesignersAdmin = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("designers")
-        .select("id, slug, name, display_name, specialty, biography, philosophy, notable_works, image_url, hero_image_url, source, is_published, trade_only, biography_images, links, instagram_handle, instagram_handle_2, parent_badge_label")
-        .order("name", { ascending: true });
+        .select("id, slug, name, display_name, specialty, biography, philosophy, notable_works, image_url, hero_image_url, source, is_published, trade_only, biography_images, links, instagram_handle, instagram_handle_2, parent_badge_label");
       if (error) throw error;
-      return (data || []).map((row) => ({
-        ...row,
-        biography: sanitizeBiographyCitations(row.biography),
-      })) as DesignerRow[];
+      return (data || [])
+        .map((row) => ({
+          ...row,
+          biography: sanitizeBiographyCitations(row.biography),
+        }))
+        .sort((a, b) => sortNameKey(a.display_name || a.name).localeCompare(sortNameKey(b.display_name || b.name))) as DesignerRow[];
     },
     enabled: !!isAdmin,
     staleTime: 5 * 60 * 1000,
@@ -2033,7 +2035,7 @@ const TradeDesignersAdmin = () => {
       );
     }
     if (activeLetter) {
-      list = list.filter((d) => d.name[0]?.toUpperCase() === activeLetter);
+      list = list.filter((d) => lastNameInitial(d.display_name || d.name) === activeLetter);
     }
     return list;
   }, [designers, search, activeLetter, pickSearchMap]);
@@ -2041,7 +2043,7 @@ const TradeDesignersAdmin = () => {
   const letterCounts = useMemo(() => {
     const counts: Record<string, number> = {};
     designers.forEach((d) => {
-      const letter = d.name[0]?.toUpperCase();
+      const letter = lastNameInitial(d.display_name || d.name);
       if (letter) counts[letter] = (counts[letter] || 0) + 1;
     });
     return counts;

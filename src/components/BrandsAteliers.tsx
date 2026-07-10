@@ -21,6 +21,7 @@ import { scrollToSection } from "@/lib/scrollToSection";
 import { cloudinaryUrl } from "@/lib/cloudinary";
 import { useCompare } from "@/contexts/CompareContext";
 import { cn } from "@/lib/utils";
+import { lastNameInitial, sortNameKey } from "@/lib/nameFormat";
 import { warmCuratorPickSet } from "@/lib/curatorPickPreload";
 import { shareProfileOnWhatsApp, buildAtelierOgUrl, buildParentBrandOgUrl, buildDesignerOgUrl, shareOnWhatsApp, withOgCacheBust } from "@/lib/whatsapp-share";
 import WhatsAppShareButton from "./WhatsAppShareButton";
@@ -2908,7 +2909,7 @@ const BrandsAteliers = () => {
     return brands;
   }, [searchQuery, selectedCategory, selectedSubcategory]);
 
-  // Consolidate brands by name, sort alphabetically, then group by first letter
+  // Consolidate brands by name, sort by last name, then group by last-name initial
   const alphaGroups = useMemo(() => {
     const brandMap: Record<string, ConsolidatedBrand> = {};
     
@@ -2937,14 +2938,14 @@ const BrandsAteliers = () => {
     });
     
     const sorted = Object.values(brandMap).sort((a, b) =>
-      (a.name || '').localeCompare(b.name || '')
+      sortNameKey(a.name || '').localeCompare(sortNameKey(b.name || ''))
     );
     
-    // Group by first letter
+    // Group by last-name initial
     const groups: Record<string, ConsolidatedBrand[]> = {};
     sorted.forEach(brand => {
       if (!brand.name) return;
-      const letter = brand.name[0].toUpperCase();
+      const letter = lastNameInitial(brand.name);
       if (!groups[letter]) groups[letter] = [];
       groups[letter].push(brand);
     });
@@ -2957,8 +2958,7 @@ const BrandsAteliers = () => {
   const totalBrands = alphaGroups.reduce((sum, [, brands]) => sum + brands.length, 0);
 
   // Build a per-letter index of sub-designers re-edited by parent ateliers (e.g. Ecart, Man of Parts).
-  // Lets users locate Jean-Michel Frank under "J", Paul László under "P", etc.,
-  // even though they live nested inside their parent atelier's expandable card.
+  // Uses the sub-designer's last name so Jean-Michel Frank appears under "F" and Paul László under "L".
   const subDesignerIndexByLetter = useMemo(() => {
     const groups: Record<string, Array<{ name: string; parentBrand: string; dbParentName: string }>> = {};
     const q = searchQuery.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -2967,7 +2967,7 @@ const BrandsAteliers = () => {
       subs.forEach((sub) => {
         const norm = sub.name.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
         if (q && !norm.toLowerCase().includes(q) && !cfg.brandName.toLowerCase().includes(q) && !cfg.dbParentName.toLowerCase().includes(q)) return;
-        const letter = norm[0]?.toUpperCase() || "#";
+        const letter = lastNameInitial(sub.name);
         if (!groups[letter]) groups[letter] = [];
         groups[letter].push({ name: sub.name, parentBrand: cfg.brandName, dbParentName: cfg.dbParentName });
       });

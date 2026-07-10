@@ -36,6 +36,7 @@ import { categoryUrl } from "@/lib/categorySlugs";
 import { readPendingCategoryFilter } from "@/lib/pendingCategoryFilter";
 import { cleanBrandLine, composeTitle } from "@/lib/curatorPickLegend";
 import { applyCuratorPickOrder, sortCuratorPicks } from "@/lib/curatorPickSort";
+import { lastNameInitial, sortNameKey } from "@/lib/nameFormat";
 import AlphabetDesignerPicker from "@/components/trade/AlphabetDesignerPicker";
 
 const LETTERS = [...("ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("")), "#"];
@@ -1392,7 +1393,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
   }, [initialLetter]);
 
   const items = useMemo(
-    () => allDesigners.filter((d) => d.is_published).sort((a, b) => a.name.localeCompare(b.name)),
+    () => allDesigners.filter((d) => d.is_published).sort((a, b) => sortNameKey(a.display_name || a.name).localeCompare(sortNameKey(b.display_name || b.name))),
     [allDesigners]
   );
 
@@ -1438,8 +1439,8 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
     const groups: Record<string, Designer[]> = {};
     filteredItems.forEach((d) => {
       const { displayName } = parseDesignerDisplayName(d);
-      const firstChar = (displayName || d.name).normalize("NFD").replace(/[\u0300-\u036f]/g, "")[0];
-      const letter = firstChar?.toUpperCase() || "#";
+      const name = displayName || d.name;
+      const letter = lastNameInitial(name);
       if (!groups[letter]) groups[letter] = [];
       groups[letter].push(d);
     });

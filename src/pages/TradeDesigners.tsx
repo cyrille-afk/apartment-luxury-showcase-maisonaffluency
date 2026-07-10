@@ -6,6 +6,7 @@ import { Search, Users, X, Layers, ArrowUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAllDesigners } from "@/hooks/useDesigner";
 import { useTradeProducts } from "@/hooks/useTradeProducts";
+import { lastNameInitial, sortNameKey } from "@/lib/nameFormat";
 import BrandCarousel from "@/components/trade/BrandCarousel";
 import SectionHero from "@/components/trade/SectionHero";
 
@@ -36,10 +37,6 @@ const normalizeText = (value: string | null | undefined) =>
     .toLowerCase()
     .trim();
 
-const initialOf = (value: string | null | undefined) => {
-  const first = normalizeText(value).charAt(0).toUpperCase();
-  return /[A-Z]/.test(first) ? first : "#";
-};
 
 
 type EnrichedDesigner = {
@@ -191,7 +188,7 @@ const TradeDesigners = () => {
         entries.push({ name: d.name, docCount: 0, imageUrl: d.image_url || undefined, isAtelier: true });
       }
     }
-    return entries.sort((a, b) => a.name.localeCompare(b.name));
+    return entries.sort((a, b) => sortNameKey(a.name).localeCompare(sortNameKey(b.name)));
   }, [enriched]);
 
   const designerCarouselEntries = useMemo(() => {
@@ -203,7 +200,7 @@ const TradeDesigners = () => {
         entries.push({ name: d.name, docCount: 0, imageUrl: d.image_url || undefined });
       }
     }
-    return entries.sort((a, b) => a.name.localeCompare(b.name));
+    return entries.sort((a, b) => sortNameKey(a.name).localeCompare(sortNameKey(b.name)));
   }, [enriched]);
 
   // Unified filtering — all records in one flat list
@@ -256,28 +253,28 @@ const TradeDesigners = () => {
       if (aFounder && bFounder && aFounder === bFounder) {
         if (a.designer.isAtelierCard && !b.designer.isAtelierCard) return -1;
         if (!a.designer.isAtelierCard && b.designer.isAtelierCard) return 1;
-        return a.designer.name.localeCompare(b.designer.name);
+        return sortNameKey(a.designer.name).localeCompare(sortNameKey(b.designer.name));
       }
       const aGroup = aFounder || a.designer.name;
       const bGroup = bFounder || b.designer.name;
-      return aGroup.localeCompare(bGroup);
+      return sortNameKey(aGroup).localeCompare(sortNameKey(bGroup));
     });
 
     const letterMap = new Map<string, typeof entries>();
     for (const entry of entries) {
       const d = entry.designer;
       const groupName = d.isAtelierCard ? d.name : (d.founder === selectedBrand ? d.founder : d.name);
-      const letter = initialOf(groupName);
+      const letter = lastNameInitial(groupName);
       if (!letterMap.has(letter)) letterMap.set(letter, []);
       letterMap.get(letter)!.push(entry);
     }
 
-    // Within each letter, sort ateliers first, then alphabetically
+    // Within each letter, sort ateliers first, then alphabetically by last name
     for (const [, group] of letterMap) {
       group.sort((a, b) => {
         if (a.designer.isAtelierCard && !b.designer.isAtelierCard) return -1;
         if (!a.designer.isAtelierCard && b.designer.isAtelierCard) return 1;
-        return a.designer.name.localeCompare(b.designer.name);
+        return sortNameKey(a.designer.name).localeCompare(sortNameKey(b.designer.name));
       });
     }
 
@@ -287,8 +284,8 @@ const TradeDesigners = () => {
   const allLetters = useMemo(() => {
     const letters = new Set<string>();
     for (const b of enriched) {
-      letters.add(initialOf(b.name));
-      if (b.founder) letters.add(initialOf(b.founder));
+      letters.add(lastNameInitial(b.name));
+      if (b.founder) letters.add(lastNameInitial(b.founder));
     }
     return [...letters].sort();
   }, [enriched]);
@@ -343,7 +340,7 @@ const TradeDesigners = () => {
                   onSelect={(b) => {
                     setSelectedBrand(b);
                     if (b === "all") return;
-                    const letter = initialOf(b);
+                    const letter = lastNameInitial(b);
                     requestAnimationFrame(() => {
                       const el = document.getElementById(`designer-letter-${letter}`);
                       el?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -363,7 +360,7 @@ const TradeDesigners = () => {
                   onSelect={(b) => {
                     setSelectedBrand(b);
                     if (b === "all") return;
-                    const letter = initialOf(b);
+                    const letter = lastNameInitial(b);
                     requestAnimationFrame(() => {
                       const el = document.getElementById(`designer-letter-${letter}`);
                       el?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -409,7 +406,7 @@ const TradeDesigners = () => {
                 onSelect={(b) => {
                   setSelectedBrand(b);
                   if (b === "all") return;
-                  const letter = initialOf(b);
+                  const letter = lastNameInitial(b);
                   requestAnimationFrame(() => {
                     const el = document.getElementById(`designer-letter-${letter}`);
                     el?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -425,8 +422,8 @@ const TradeDesigners = () => {
           {allLetters.map((letter) => {
             const hasResults = grouped.some(([l]) => l === letter);
             const hasAnyResults = enriched.some((d) => {
-              const ch = initialOf(d.name);
-              const fch = d.founder ? initialOf(d.founder) : null;
+              const ch = lastNameInitial(d.name);
+              const fch = d.founder ? lastNameInitial(d.founder) : null;
               return ch === letter || fch === letter;
             });
             return (
