@@ -32,18 +32,20 @@ interface FeaturedDesigner {
 
 const FEATURED_GROUPS = [
   {
-    label: "Architectural Masters",
+    label: "Masters",
     slugs: [
+      "alexander-lamont",
       "ecart",
       "felix-agostini",
+      "jean-michel-frank",
       "pierre-bonnefille",
+      "pierre-chareau",
       "thierry-lemaire",
     ].sort(),
   },
   {
     label: "Contemporary Talents",
     slugs: [
-      "alexander-lamont",
       "apparatus-studio",
       "atelier-demichelis",
       "christopher-boots",
