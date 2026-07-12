@@ -41,6 +41,7 @@ export const slideIsQuoteBearing = (slide: SlideLike | null | undefined): boolea
   if (slide.linked_quote_id) return true;
   if (parseLinkedProducts(slide.linked_product_ids).length > 0) return true;
   if (slide.slide_type && QUOTE_BEARING_TYPE_RE.test(slide.slide_type)) return true;
-  if (slide.quote_id || slide.quote_ref || slide.total_cents || slide.line_items) return true;
+  const extra = slide as Record<string, unknown>;
+  if (extra.quote_id || extra.quote_ref || extra.total_cents || extra.line_items) return true;
   return false;
 };
