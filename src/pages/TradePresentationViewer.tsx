@@ -51,6 +51,7 @@ const TradePresentationViewer = () => {
   const [newComment, setNewComment] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [exportingPdf, setExportingPdf] = useState(false);
+  const [exportingPptx, setExportingPptx] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const commentsEndRef = useRef<HTMLDivElement>(null);
@@ -147,58 +148,61 @@ const TradePresentationViewer = () => {
     setFullscreen(!fullscreen);
   };
 
+  // Shared: convert slide images (main + linked product images) to base64
+  // data URLs so both PDF and PPTX exports embed them without CORS issues.
+  const prepareSlidesWithDataUrls = useCallback(async () => {
+    return Promise.all(
+      slides.map(async (slide) => {
+        let image_url = slide.image_url;
+        try {
+          const res = await fetch(slide.image_url);
+          if (res.ok) {
+            const blob = await res.blob();
+            image_url = await new Promise<string>((resolve, reject) => {
+              const reader = new FileReader();
+              reader.onloadend = () => resolve(reader.result as string);
+              reader.onerror = reject;
+              reader.readAsDataURL(blob);
+            });
+          }
+        } catch (imgErr) {
+          console.warn("Failed to convert slide image to base64:", imgErr);
+        }
+
+        let linked_product_ids = slide.linked_product_ids;
+        if (linked_product_ids && Array.isArray(linked_product_ids)) {
+          linked_product_ids = await Promise.all(
+            linked_product_ids.map(async (p: any) => {
+              if (!p.image_url) return p;
+              try {
+                const res = await fetch(p.image_url);
+                if (!res.ok) return p;
+                const blob = await res.blob();
+                const dataUrl = await new Promise<string>((resolve, reject) => {
+                  const reader = new FileReader();
+                  reader.onloadend = () => resolve(reader.result as string);
+                  reader.onerror = reject;
+                  reader.readAsDataURL(blob);
+                });
+                return { ...p, image_url: dataUrl };
+              } catch {
+                return p;
+              }
+            }),
+          );
+        }
+
+        return { ...slide, image_url, linked_product_ids };
+      }),
+    );
+  }, [slides]);
+
   const handleExportPdf = useCallback(async () => {
     if (!presentation || slides.length === 0) return;
     setExportingPdf(true);
     toast.info("Preparing PDF export…");
     try {
-      // Convert all slide images to base64 to avoid CORS issues in @react-pdf/renderer
-      const slidesWithDataUrls = await Promise.all(
-        slides.map(async (slide) => {
-          // Convert main image to base64
-          let image_url = slide.image_url;
-          try {
-            const res = await fetch(slide.image_url);
-            if (res.ok) {
-              const blob = await res.blob();
-              image_url = await new Promise<string>((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onloadend = () => resolve(reader.result as string);
-                reader.onerror = reject;
-                reader.readAsDataURL(blob);
-              });
-            }
-          } catch (imgErr) {
-            console.warn("Failed to convert slide image to base64:", imgErr);
-          }
-
-          // Convert product images inside linked_product_ids to base64
-          let linked_product_ids = slide.linked_product_ids;
-          if (linked_product_ids && Array.isArray(linked_product_ids)) {
-            linked_product_ids = await Promise.all(
-              linked_product_ids.map(async (p: any) => {
-                if (!p.image_url) return p;
-                try {
-                  const res = await fetch(p.image_url);
-                  if (!res.ok) return p;
-                  const blob = await res.blob();
-                  const dataUrl = await new Promise<string>((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.onloadend = () => resolve(reader.result as string);
-                    reader.onerror = reject;
-                    reader.readAsDataURL(blob);
-                  });
-                  return { ...p, image_url: dataUrl };
-                } catch {
-                  return p;
-                }
-              })
-            );
-          }
-
-          return { ...slide, image_url, linked_product_ids };
-        })
-      );
+      const slidesWithDataUrls = await prepareSlidesWithDataUrls();
 
       const [{ pdf }, { default: PresentationPDF }] = await Promise.all([
         loadPdfRenderer(),
@@ -233,7 +237,31 @@ const TradePresentationViewer = () => {
     } finally {
       setExportingPdf(false);
     }
-  }, [presentation, slides]);
+  }, [presentation, slides, prepareSlidesWithDataUrls]);
+
+  const handleExportPptx = useCallback(async () => {
+    if (!presentation || slides.length === 0) return;
+    setExportingPptx(true);
+    toast.info("Preparing PPTX export…");
+    try {
+      const slidesWithDataUrls = await prepareSlidesWithDataUrls();
+      const { exportPresentationPptx } = await import("@/lib/exportPresentationPptx");
+      await exportPresentationPptx({
+        title: presentation.title || "Presentation",
+        clientName: presentation.client_name || undefined,
+        projectName: presentation.project_name || undefined,
+        createdAt: presentation.created_at || new Date().toISOString(),
+        slides: slidesWithDataUrls,
+      });
+      toast.success("PPTX downloaded — fully editable in PowerPoint or Keynote");
+    } catch (err) {
+      console.error("PPTX export failed:", err);
+      const message = err instanceof Error ? err.message : "Unknown error";
+      toast.error(`PPTX export failed: ${message}`);
+    } finally {
+      setExportingPptx(false);
+    }
+  }, [presentation, slides, prepareSlidesWithDataUrls]);
 
   if (loading) return null;
   if (!user) return <Navigate to="/trade/login" replace />;
@@ -298,11 +326,21 @@ const TradePresentationViewer = () => {
               {slides.length > 0 && (
                 <button
                   onClick={handleExportPdf}
-                  disabled={exportingPdf}
+                  disabled={exportingPdf || exportingPptx}
                   className="p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors disabled:opacity-50"
                   title="Export as PDF"
                 >
                   {exportingPdf ? <DotCircleLoader size="sm" /> : <FileDown className="w-4 h-4" />}
+                </button>
+              )}
+              {slides.length > 0 && (
+                <button
+                  onClick={handleExportPptx}
+                  disabled={exportingPdf || exportingPptx}
+                  className="px-2 py-1 rounded-md text-[10px] font-body uppercase tracking-[0.15em] text-muted-foreground hover:text-foreground hover:bg-muted transition-colors disabled:opacity-50 flex items-center gap-1"
+                  title="Export as editable PowerPoint (.pptx)"
+                >
+                  {exportingPptx ? <DotCircleLoader size="sm" /> : <span>PPTX</span>}
                 </button>
               )}
               {actualSlide?.image_url && (
