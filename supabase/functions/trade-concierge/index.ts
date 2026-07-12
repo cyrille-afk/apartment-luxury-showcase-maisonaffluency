@@ -20,6 +20,11 @@ import {
   type LeadTimeConstraints,
   type BrandLeadTimeEntry,
 } from "../_shared/leadTimeConstraints.ts";
+import {
+  collectAllowedVariants,
+  reconcileVariants,
+  type AllowedVariantSet,
+} from "../_shared/variantFidelity.ts";
 
 // Lazy, per-invocation cache of the brand-level lead-time index. Empty table
 // today, but as it fills the fallback engages automatically.
