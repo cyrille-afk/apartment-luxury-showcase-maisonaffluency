@@ -51,6 +51,9 @@ export default function PresentationQuoteSummary({ optionLabel, quoteRef, produc
           <p className="font-body text-xs text-muted-foreground">
             Payment terms: 60% deposit upon confirmation · 40% balance before delivery.
           </p>
+          <p className="font-body text-[11px] italic text-muted-foreground pt-2 border-t border-border/50 mt-2">
+            Quotes are valid for 30 days based on live manufacturer data. Final verification required before purchase.
+          </p>
           {quoteId && (
             <a
               href={`/trade/quotes`}
