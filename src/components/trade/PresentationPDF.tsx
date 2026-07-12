@@ -252,7 +252,6 @@ const QuoteSummaryPage = ({ slide, pageNum, totalPages }: { slide: PresentationS
 
 /* ---- Default Image Slide ---- */
 const ImageSlidePage = ({ slide, pageNum, totalPages }: { slide: PresentationSlide; pageNum: number; totalPages: number }) => {
-  const products = parseProducts(slide.linked_product_ids);
   const isQuoteBearing = slideIsQuoteBearing(slide);
   return (
     <Page size="A4" orientation="landscape" style={s.page}>
