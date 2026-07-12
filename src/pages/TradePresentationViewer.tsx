@@ -416,6 +416,13 @@ const TradePresentationViewer = () => {
                     />
                   )
                 )}
+                {/* Liability anchor — displayed on any quote-bearing slide,
+                    mirroring the exported deck (PresentationPDF.tsx). */}
+                {!isCoverSlide && !isDisclaimerSlide && slideIsQuoteBearing(actualSlide as any) && (
+                  <p className="absolute bottom-2 left-0 right-0 text-center font-body italic text-[10px] text-muted-foreground/70 px-6 pointer-events-none">
+                    {LIABILITY_ANCHOR}
+                  </p>
+                )}
                 {/* Nav arrows */}
                 <button
                   onClick={() => setCurrentSlide(Math.max(0, currentSlide - 1))}
