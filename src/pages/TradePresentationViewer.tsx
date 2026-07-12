@@ -10,6 +10,7 @@ import { ArrowLeft, ArrowRight, ChevronLeft, Download, Maximize2, Minimize2, Mes
 import { format } from "date-fns";
 import PresentationProductGrid from "@/components/trade/PresentationProductGrid";
 import PresentationQuoteSummary from "@/components/trade/PresentationQuoteSummary";
+import { LIABILITY_ANCHOR, slideIsQuoteBearing } from "@/lib/slideIsQuoteBearing";
 import PresentationProductTooltip from "@/components/trade/PresentationProductTooltip";
 // Lazy-loaded to avoid crash on module init
 const loadPdfRenderer = () => import("@react-pdf/renderer");
@@ -414,6 +415,13 @@ const TradePresentationViewer = () => {
                       className={`max-w-full ${fullscreen ? "max-h-[calc(100vh-180px)]" : "max-h-[60vh]"} object-contain rounded-lg`}
                     />
                   )
+                )}
+                {/* Liability anchor — displayed on any quote-bearing slide,
+                    mirroring the exported deck (PresentationPDF.tsx). */}
+                {!isCoverSlide && !isDisclaimerSlide && slideIsQuoteBearing(actualSlide as any) && (
+                  <p className="absolute bottom-2 left-0 right-0 text-center font-body italic text-[10px] text-muted-foreground/70 px-6 pointer-events-none">
+                    {LIABILITY_ANCHOR}
+                  </p>
                 )}
                 {/* Nav arrows */}
                 <button
