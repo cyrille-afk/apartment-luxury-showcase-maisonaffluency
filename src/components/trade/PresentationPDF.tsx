@@ -156,6 +156,7 @@ const ProductGridPage = ({ slide, pageNum, totalPages }: { slide: PresentationSl
           ))}
         </View>
       </View>
+      <Text style={s.liabilityFooter}>{LIABILITY_ANCHOR}</Text>
       <Text style={s.footerBrand}>Maison Affluency</Text>
       <Text style={s.footer}>{pageNum} / {totalPages}</Text>
     </Page>
