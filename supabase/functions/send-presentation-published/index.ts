@@ -180,8 +180,11 @@ const handler = async (req: Request): Promise<Response> => {
       </a>
     </div>
 
-    <p style="font-size:12px;color:#aaa;line-height:1.5;margin:0;">
+    <p style="font-size:12px;color:#aaa;line-height:1.5;margin:0 0 12px;">
       You can also access all your presentations from the Trade Portal dashboard.
+    </p>
+    <p style="font-size:11px;color:#aaa;line-height:1.5;margin:0;font-style:italic;border-top:1px solid #eee;padding-top:12px;">
+      Quotes are valid for 30 days based on live manufacturer data. Final verification required before purchase.
     </p>
   </div>
 
