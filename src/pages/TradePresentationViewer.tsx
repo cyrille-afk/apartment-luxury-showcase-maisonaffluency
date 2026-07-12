@@ -242,10 +242,13 @@ const TradePresentationViewer = () => {
 
   const handleExportPptx = useCallback(async () => {
     if (!presentation || slides.length === 0) return;
+    if (exportingPptx || exportingPdf) return;
     setExportingPptx(true);
+    setPptxProgress({ ratio: 0.01, label: "Preparing images…" });
     toast.info("Preparing PPTX export…");
     try {
       const slidesWithDataUrls = await prepareSlidesWithDataUrls();
+      setPptxProgress({ ratio: 0.15, label: "Building deck…" });
       const { exportPresentationPptx } = await import("@/lib/exportPresentationPptx");
       await exportPresentationPptx({
         title: presentation.title || "Presentation",
@@ -253,6 +256,7 @@ const TradePresentationViewer = () => {
         projectName: presentation.project_name || undefined,
         createdAt: presentation.created_at || new Date().toISOString(),
         slides: slidesWithDataUrls,
+        onProgress: (p) => setPptxProgress(p),
       });
       toast.success("PPTX downloaded — fully editable in PowerPoint or Keynote");
     } catch (err) {
@@ -261,8 +265,9 @@ const TradePresentationViewer = () => {
       toast.error(`PPTX export failed: ${message}`);
     } finally {
       setExportingPptx(false);
+      setPptxProgress(null);
     }
-  }, [presentation, slides, prepareSlidesWithDataUrls]);
+  }, [presentation, slides, prepareSlidesWithDataUrls, exportingPptx, exportingPdf]);
 
   if (loading) return null;
   if (!user) return <Navigate to="/trade/login" replace />;
