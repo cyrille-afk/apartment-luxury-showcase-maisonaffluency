@@ -50,6 +50,7 @@ const s = StyleSheet.create({
   // Footer
   footer: { position: "absolute", bottom: 12, right: 20, fontFamily: fb, fontSize: 6, color: "#cccccc" },
   footerBrand: { position: "absolute", bottom: 12, left: 20, fontFamily: fd, fontSize: 7, color: "#cccccc", letterSpacing: 1 },
+  liabilityFooter: { position: "absolute", bottom: 26, left: 40, right: 40, fontFamily: fb, fontSize: 6, color: "#999999", fontStyle: "italic", textAlign: "center", lineHeight: 1.4 },
   // Product grid
   gridHeader: { fontFamily: fd, fontSize: 16, color: "#1a1a1a", marginBottom: 4, textAlign: "center" },
   gridSection: { fontFamily: fb, fontSize: 8, color: "#888888", marginBottom: 16, textAlign: "center", textTransform: "uppercase", letterSpacing: 2 },
@@ -125,6 +126,8 @@ const parseProducts = (linked: any): ProductData[] => {
   if (Array.isArray(linked)) return linked;
   try { return JSON.parse(linked); } catch { return []; }
 };
+const LIABILITY_ANCHOR = "Quotes are valid for 30 days based on live manufacturer data. Final verification required before purchase.";
+
 
 /* ---- Product Grid Page ---- */
 const ProductGridPage = ({ slide, pageNum, totalPages }: { slide: PresentationSlide; pageNum: number; totalPages: number }) => {
@@ -153,6 +156,7 @@ const ProductGridPage = ({ slide, pageNum, totalPages }: { slide: PresentationSl
           ))}
         </View>
       </View>
+      <Text style={s.liabilityFooter}>{LIABILITY_ANCHOR}</Text>
       <Text style={s.footerBrand}>Maison Affluency</Text>
       <Text style={s.footer}>{pageNum} / {totalPages}</Text>
     </Page>
@@ -225,26 +229,31 @@ const QuoteSummaryPage = ({ slide, pageNum, totalPages }: { slide: PresentationS
 };
 
 /* ---- Default Image Slide ---- */
-const ImageSlidePage = ({ slide, pageNum, totalPages }: { slide: PresentationSlide; pageNum: number; totalPages: number }) => (
-  <Page size="A4" orientation="landscape" style={s.page}>
-    <View style={s.slideContainer}>
-      {slide.image_url && <Image src={slide.image_url} style={s.slideImage} />}
-    </View>
-    {(slide.title || slide.description) && (
-      <View style={s.slideInfo}>
-        {slide.title && <Text style={s.slideTitle}>{slide.title}</Text>}
-        {slide.description && <Text style={s.slideDesc}>{slide.description}</Text>}
-        {(slide.project_name || slide.style_preset) && (
-          <Text style={s.slideMeta}>
-            {[slide.project_name && `Project: ${slide.project_name}`, slide.style_preset && `Style: ${slide.style_preset}`].filter(Boolean).join("  ·  ")}
-          </Text>
-        )}
+const ImageSlidePage = ({ slide, pageNum, totalPages }: { slide: PresentationSlide; pageNum: number; totalPages: number }) => {
+  const products = parseProducts(slide.linked_product_ids);
+  const isQuoteBearing = Boolean(slide.linked_quote_id) || products.length > 0;
+  return (
+    <Page size="A4" orientation="landscape" style={s.page}>
+      <View style={s.slideContainer}>
+        {slide.image_url && <Image src={slide.image_url} style={s.slideImage} />}
       </View>
-    )}
-    <Text style={s.footerBrand}>Maison Affluency</Text>
-    <Text style={s.footer}>{pageNum} / {totalPages}</Text>
-  </Page>
-);
+      {(slide.title || slide.description) && (
+        <View style={s.slideInfo}>
+          {slide.title && <Text style={s.slideTitle}>{slide.title}</Text>}
+          {slide.description && <Text style={s.slideDesc}>{slide.description}</Text>}
+          {(slide.project_name || slide.style_preset) && (
+            <Text style={s.slideMeta}>
+              {[slide.project_name && `Project: ${slide.project_name}`, slide.style_preset && `Style: ${slide.style_preset}`].filter(Boolean).join("  ·  ")}
+            </Text>
+          )}
+        </View>
+      )}
+      {isQuoteBearing && <Text style={s.liabilityFooter}>{LIABILITY_ANCHOR}</Text>}
+      <Text style={s.footerBrand}>Maison Affluency</Text>
+      <Text style={s.footer}>{pageNum} / {totalPages}</Text>
+    </Page>
+  );
+};
 
 const DISCLAIMER_COVER = "This presentation contains AI-generated visualizations for concept reference only. All imagery is indicative and subject to final design review.";
 
