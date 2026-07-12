@@ -16,12 +16,11 @@ export const LIABILITY_ANCHOR =
 const QUOTE_BEARING_TYPE_RE =
   /(quote|product|pricing|price|spec|schedule|invoice|ffe|tearsheet|line[_-]?item|order)/i;
 
-interface SlideLike {
+type SlideLike = {
   slide_type?: string | null;
   linked_quote_id?: string | null;
   linked_product_ids?: unknown;
-  [key: string]: unknown;
-}
+} & Record<string, unknown>;
 
 const parseLinkedProducts = (linked: unknown): unknown[] => {
   if (!linked) return [];
