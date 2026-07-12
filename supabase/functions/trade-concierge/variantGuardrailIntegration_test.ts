@@ -181,8 +181,10 @@ Deno.test("add_to_quote: Ponza (no choices) + unknown fabric both scrubbed, real
   assertEquals((lines[2] as any).variant_repair, undefined);
 
   assertEquals(repairs.length, 2);
-  const reasons = repairs.map((r) => r.reason).sort();
-  assertEquals(reasons, ["no_choices_offered", "unknown_token"]);
+  // Both rejections are unknown_token: Ponza's DB vocabulary is "COM Fabric" +
+  // a size label, so "cognac"/"leather" are unknown; the marble console has
+  // real fabrics but "Calacatta Viola" is not one of them.
+  for (const r of repairs) assertEquals(r.reason, "unknown_token");
 });
 
 Deno.test("propose_ffe_rows: invalid Barth combo scrubbed while valid rows preserve pricing intent", () => {
