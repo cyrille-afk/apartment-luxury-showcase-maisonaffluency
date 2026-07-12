@@ -87,6 +87,10 @@ const DISCLAIMER =
  * the PDF export).
  */
 export async function exportPresentationPptx(input: PptxExportInput): Promise<void> {
+  const emit = (ratio: number, label: string) => {
+    try { input.onProgress?.({ ratio: Math.max(0, Math.min(1, ratio)), label }); } catch { /* noop */ }
+  };
+  emit(0.02, "Loading PPTX engine…");
   const PptxGenJS = (await import("pptxgenjs")).default;
   const pptx = new PptxGenJS();
 
@@ -100,6 +104,7 @@ export async function exportPresentationPptx(input: PptxExportInput): Promise<vo
 
   const fontHeader = "Cormorant Garamond";
   const fontBody = "Inter";
+  emit(0.08, "Building cover…");
 
   /* ---- Cover slide ---- */
   {
