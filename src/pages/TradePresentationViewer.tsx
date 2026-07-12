@@ -52,6 +52,7 @@ const TradePresentationViewer = () => {
   const [submitting, setSubmitting] = useState(false);
   const [exportingPdf, setExportingPdf] = useState(false);
   const [exportingPptx, setExportingPptx] = useState(false);
+  const [pptxProgress, setPptxProgress] = useState<{ ratio: number; label: string } | null>(null);
   const [linkCopied, setLinkCopied] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const commentsEndRef = useRef<HTMLDivElement>(null);
@@ -241,10 +242,13 @@ const TradePresentationViewer = () => {
 
   const handleExportPptx = useCallback(async () => {
     if (!presentation || slides.length === 0) return;
+    if (exportingPptx || exportingPdf) return;
     setExportingPptx(true);
+    setPptxProgress({ ratio: 0.01, label: "Preparing images…" });
     toast.info("Preparing PPTX export…");
     try {
       const slidesWithDataUrls = await prepareSlidesWithDataUrls();
+      setPptxProgress({ ratio: 0.15, label: "Building deck…" });
       const { exportPresentationPptx } = await import("@/lib/exportPresentationPptx");
       await exportPresentationPptx({
         title: presentation.title || "Presentation",
@@ -252,6 +256,7 @@ const TradePresentationViewer = () => {
         projectName: presentation.project_name || undefined,
         createdAt: presentation.created_at || new Date().toISOString(),
         slides: slidesWithDataUrls,
+        onProgress: (p) => setPptxProgress(p),
       });
       toast.success("PPTX downloaded — fully editable in PowerPoint or Keynote");
     } catch (err) {
@@ -260,8 +265,9 @@ const TradePresentationViewer = () => {
       toast.error(`PPTX export failed: ${message}`);
     } finally {
       setExportingPptx(false);
+      setPptxProgress(null);
     }
-  }, [presentation, slides, prepareSlidesWithDataUrls]);
+  }, [presentation, slides, prepareSlidesWithDataUrls, exportingPptx, exportingPdf]);
 
   if (loading) return null;
   if (!user) return <Navigate to="/trade/login" replace />;
@@ -334,14 +340,50 @@ const TradePresentationViewer = () => {
                 </button>
               )}
               {slides.length > 0 && (
-                <button
-                  onClick={handleExportPptx}
-                  disabled={exportingPdf || exportingPptx}
-                  className="px-2 py-1 rounded-md text-[10px] font-body uppercase tracking-[0.15em] text-muted-foreground hover:text-foreground hover:bg-muted transition-colors disabled:opacity-50 flex items-center gap-1"
-                  title="Export as editable PowerPoint (.pptx)"
-                >
-                  {exportingPptx ? <DotCircleLoader size="sm" /> : <span>PPTX</span>}
-                </button>
+                <div className="relative flex flex-col items-stretch">
+                  <button
+                    onClick={handleExportPptx}
+                    disabled={exportingPdf || exportingPptx}
+                    aria-busy={exportingPptx}
+                    aria-label={
+                      exportingPptx
+                        ? `Exporting PPTX: ${Math.round((pptxProgress?.ratio ?? 0) * 100)}%`
+                        : "Export as editable PowerPoint"
+                    }
+                    className="px-2 py-1 rounded-md text-[10px] font-body uppercase tracking-[0.15em] text-muted-foreground hover:text-foreground hover:bg-muted transition-colors disabled:opacity-50 disabled:cursor-wait flex items-center gap-1.5"
+                    title={
+                      exportingPptx
+                        ? pptxProgress?.label ?? "Exporting…"
+                        : "Export as editable PowerPoint (.pptx)"
+                    }
+                  >
+                    {exportingPptx ? (
+                      <>
+                        <DotCircleLoader size="sm" />
+                        <span className="tabular-nums">
+                          {Math.round((pptxProgress?.ratio ?? 0) * 100)}%
+                        </span>
+                      </>
+                    ) : (
+                      <span>PPTX</span>
+                    )}
+                  </button>
+                  {exportingPptx && (
+                    <div
+                      className="mt-1 h-[2px] w-full bg-foreground/10 overflow-hidden rounded-full"
+                      role="progressbar"
+                      aria-valuenow={Math.round((pptxProgress?.ratio ?? 0) * 100)}
+                      aria-valuemin={0}
+                      aria-valuemax={100}
+                      aria-label="Generating PPTX"
+                    >
+                      <div
+                        className="h-full bg-foreground/70 transition-[width] duration-200 ease-out"
+                        style={{ width: `${Math.round((pptxProgress?.ratio ?? 0) * 100)}%` }}
+                      />
+                    </div>
+                  )}
+                </div>
               )}
               {actualSlide?.image_url && (
                 <button

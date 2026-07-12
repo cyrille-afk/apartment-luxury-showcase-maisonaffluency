@@ -35,12 +35,18 @@ export interface PptxSlide {
   linked_quote_id?: string | null;
 }
 
+export interface PptxProgress {
+  ratio: number; // 0..1
+  label: string;
+}
+
 export interface PptxExportInput {
   title: string;
   clientName?: string;
   projectName?: string;
   createdAt: string;
   slides: PptxSlide[];
+  onProgress?: (p: PptxProgress) => void;
 }
 
 const formatDate = (iso: string) => {
@@ -81,6 +87,10 @@ const DISCLAIMER =
  * the PDF export).
  */
 export async function exportPresentationPptx(input: PptxExportInput): Promise<void> {
+  const emit = (ratio: number, label: string) => {
+    try { input.onProgress?.({ ratio: Math.max(0, Math.min(1, ratio)), label }); } catch { /* noop */ }
+  };
+  emit(0.02, "Loading PPTX engine…");
   const PptxGenJS = (await import("pptxgenjs")).default;
   const pptx = new PptxGenJS();
 
@@ -94,6 +104,7 @@ export async function exportPresentationPptx(input: PptxExportInput): Promise<vo
 
   const fontHeader = "Cormorant Garamond";
   const fontBody = "Inter";
+  emit(0.08, "Building cover…");
 
   /* ---- Cover slide ---- */
   {
@@ -155,7 +166,9 @@ export async function exportPresentationPptx(input: PptxExportInput): Promise<vo
   }
 
   /* ---- Content slides ---- */
+  const total = Math.max(1, input.slides.length);
   input.slides.forEach((slide, idx) => {
+    emit(0.15 + (idx / total) * 0.7, `Rendering slide ${idx + 1} of ${total}…`);
     const s = pptx.addSlide();
     s.background = { color: "FFFFFF" };
 
@@ -302,8 +315,10 @@ export async function exportPresentationPptx(input: PptxExportInput): Promise<vo
     });
   }
 
+  emit(0.92, "Writing file…");
   const safeName =
     (input.title || "Presentation").replace(/[^a-zA-Z0-9 ]/g, "").replace(/\s+/g, "-") ||
     "Presentation";
   await pptx.writeFile({ fileName: `${safeName}.pptx` });
+  emit(1, "Done");
 }
