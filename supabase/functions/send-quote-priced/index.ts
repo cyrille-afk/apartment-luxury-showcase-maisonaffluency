@@ -145,7 +145,11 @@ const handler = async (req: Request): Promise<Response> => {
         </tfoot>
       </table>
 
-      <p style="font-size:11px;color:#aaa;text-align:center;margin-top:32px;border-top:1px solid #e0dcd5;padding-top:16px;">
+      <p style="font-size:12px;color:#666;background:#fafaf7;border-left:3px solid #c9a84c;padding:10px 14px;margin:24px 0 0;font-style:italic;">
+        Quotes are valid for 30 days based on live manufacturer data. Final verification required before purchase.
+      </p>
+
+      <p style="font-size:11px;color:#aaa;text-align:center;margin-top:24px;border-top:1px solid #e0dcd5;padding-top:16px;">
         Maison Affluency · Trade Portal
       </p>
     </div>`;
