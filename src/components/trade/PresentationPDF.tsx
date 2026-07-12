@@ -126,6 +126,8 @@ const parseProducts = (linked: any): ProductData[] => {
   if (Array.isArray(linked)) return linked;
   try { return JSON.parse(linked); } catch { return []; }
 };
+const LIABILITY_ANCHOR = "Quotes are valid for 30 days based on live manufacturer data. Final verification required before purchase.";
+
 
 /* ---- Product Grid Page ---- */
 const ProductGridPage = ({ slide, pageNum, totalPages }: { slide: PresentationSlide; pageNum: number; totalPages: number }) => {
