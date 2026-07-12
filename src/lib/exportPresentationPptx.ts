@@ -315,8 +315,10 @@ export async function exportPresentationPptx(input: PptxExportInput): Promise<vo
     });
   }
 
+  emit(0.92, "Writing file…");
   const safeName =
     (input.title || "Presentation").replace(/[^a-zA-Z0-9 ]/g, "").replace(/\s+/g, "-") ||
     "Presentation";
   await pptx.writeFile({ fileName: `${safeName}.pptx` });
+  emit(1, "Done");
 }
