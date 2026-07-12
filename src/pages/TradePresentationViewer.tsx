@@ -326,11 +326,21 @@ const TradePresentationViewer = () => {
               {slides.length > 0 && (
                 <button
                   onClick={handleExportPdf}
-                  disabled={exportingPdf}
+                  disabled={exportingPdf || exportingPptx}
                   className="p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors disabled:opacity-50"
                   title="Export as PDF"
                 >
                   {exportingPdf ? <DotCircleLoader size="sm" /> : <FileDown className="w-4 h-4" />}
+                </button>
+              )}
+              {slides.length > 0 && (
+                <button
+                  onClick={handleExportPptx}
+                  disabled={exportingPdf || exportingPptx}
+                  className="px-2 py-1 rounded-md text-[10px] font-body uppercase tracking-[0.15em] text-muted-foreground hover:text-foreground hover:bg-muted transition-colors disabled:opacity-50 flex items-center gap-1"
+                  title="Export as editable PowerPoint (.pptx)"
+                >
+                  {exportingPptx ? <DotCircleLoader size="sm" /> : <span>PPTX</span>}
                 </button>
               )}
               {actualSlide?.image_url && (
