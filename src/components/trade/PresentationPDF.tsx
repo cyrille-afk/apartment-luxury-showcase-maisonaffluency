@@ -128,6 +128,28 @@ const parseProducts = (linked: any): ProductData[] => {
 };
 const LIABILITY_ANCHOR = "Quotes are valid for 30 days based on live manufacturer data. Final verification required before purchase.";
 
+/**
+ * Detects whether a slide references quotes or products and therefore must
+ * render the liability anchor footer. Kept intentionally broad so any *new*
+ * slide type that carries quote/product/pricing/spec data automatically
+ * qualifies without requiring code changes here.
+ *
+ * A slide is considered quote-bearing when ANY of the following hold:
+ *  - it has a linked_quote_id
+ *  - it has one or more linked products (linked_product_ids)
+ *  - its slide_type matches a quote/product/pricing/spec/schedule/invoice/ffe token
+ *  - it carries a price/currency/total field (defensive — future schema)
+ */
+const QUOTE_BEARING_TYPE_RE = /(quote|product|pricing|price|spec|schedule|invoice|ffe|tearsheet|line[_-]?item|order)/i;
+export const slideIsQuoteBearing = (slide: PresentationSlide): boolean => {
+  if (slide.linked_quote_id) return true;
+  if (parseProducts(slide.linked_product_ids).length > 0) return true;
+  if (slide.slide_type && QUOTE_BEARING_TYPE_RE.test(slide.slide_type)) return true;
+  const anySlide = slide as unknown as Record<string, unknown>;
+  if (anySlide.quote_id || anySlide.quote_ref || anySlide.total_cents || anySlide.line_items) return true;
+  return false;
+};
+
 
 /* ---- Product Grid Page ---- */
 const ProductGridPage = ({ slide, pageNum, totalPages }: { slide: PresentationSlide; pageNum: number; totalPages: number }) => {
@@ -230,8 +252,7 @@ const QuoteSummaryPage = ({ slide, pageNum, totalPages }: { slide: PresentationS
 
 /* ---- Default Image Slide ---- */
 const ImageSlidePage = ({ slide, pageNum, totalPages }: { slide: PresentationSlide; pageNum: number; totalPages: number }) => {
-  const products = parseProducts(slide.linked_product_ids);
-  const isQuoteBearing = Boolean(slide.linked_quote_id) || products.length > 0;
+  const isQuoteBearing = slideIsQuoteBearing(slide);
   return (
     <Page size="A4" orientation="landscape" style={s.page}>
       <View style={s.slideContainer}>
