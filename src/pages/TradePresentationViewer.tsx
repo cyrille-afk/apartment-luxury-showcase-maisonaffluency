@@ -10,6 +10,7 @@ import { ArrowLeft, ArrowRight, ChevronLeft, Download, Maximize2, Minimize2, Mes
 import { format } from "date-fns";
 import PresentationProductGrid from "@/components/trade/PresentationProductGrid";
 import PresentationQuoteSummary from "@/components/trade/PresentationQuoteSummary";
+import { LIABILITY_ANCHOR, slideIsQuoteBearing } from "@/lib/slideIsQuoteBearing";
 import PresentationProductTooltip from "@/components/trade/PresentationProductTooltip";
 // Lazy-loaded to avoid crash on module init
 const loadPdfRenderer = () => import("@react-pdf/renderer");
