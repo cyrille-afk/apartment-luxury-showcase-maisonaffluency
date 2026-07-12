@@ -1547,6 +1547,7 @@ function drawPaymentTerms(doc: jsPDF, args: QuotePdfArgs, M: number, y: number, 
     "Payment by bank transfer (no fee) or by card via Stripe (processing fee applies).",
     "Lead times start from receipt of cleared deposit and finalised specifications.",
     `Quote valid until ${fmtDate(args.expiryAt)}. Pricing in ${args.currency} unless otherwise stated.`,
+    "Quotes are valid for 30 days based on live manufacturer data. Final verification required before purchase.",
   ];
   terms.forEach((t) => {
     const wrapped = doc.splitTextToSize(`• ${t}`, contentW);
