@@ -50,6 +50,7 @@ const s = StyleSheet.create({
   // Footer
   footer: { position: "absolute", bottom: 12, right: 20, fontFamily: fb, fontSize: 6, color: "#cccccc" },
   footerBrand: { position: "absolute", bottom: 12, left: 20, fontFamily: fd, fontSize: 7, color: "#cccccc", letterSpacing: 1 },
+  liabilityFooter: { position: "absolute", bottom: 26, left: 40, right: 40, fontFamily: fb, fontSize: 6, color: "#999999", fontStyle: "italic", textAlign: "center", lineHeight: 1.4 },
   // Product grid
   gridHeader: { fontFamily: fd, fontSize: 16, color: "#1a1a1a", marginBottom: 4, textAlign: "center" },
   gridSection: { fontFamily: fb, fontSize: 8, color: "#888888", marginBottom: 16, textAlign: "center", textTransform: "uppercase", letterSpacing: 2 },
