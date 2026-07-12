@@ -383,6 +383,17 @@ const TradePresentationViewer = () => {
                       />
                     </div>
                   )}
+                  {/* Live status announced to screen readers as export progresses. */}
+                  <span
+                    role="status"
+                    aria-live="polite"
+                    aria-atomic="true"
+                    className="sr-only"
+                  >
+                    {exportingPptx && pptxProgress
+                      ? `PPTX export ${Math.round(pptxProgress.ratio * 100)}%: ${pptxProgress.label}`
+                      : ""}
+                  </span>
                 </div>
               )}
               {actualSlide?.image_url && (
