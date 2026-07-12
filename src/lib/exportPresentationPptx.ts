@@ -35,12 +35,18 @@ export interface PptxSlide {
   linked_quote_id?: string | null;
 }
 
+export interface PptxProgress {
+  ratio: number; // 0..1
+  label: string;
+}
+
 export interface PptxExportInput {
   title: string;
   clientName?: string;
   projectName?: string;
   createdAt: string;
   slides: PptxSlide[];
+  onProgress?: (p: PptxProgress) => void;
 }
 
 const formatDate = (iso: string) => {
