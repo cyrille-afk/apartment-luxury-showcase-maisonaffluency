@@ -210,6 +210,9 @@ const QuoteSummaryPage = ({ slide, pageNum, totalPages }: { slide: PresentationS
         <Text style={s.quoteNote}>
           This quote is available for review in your Quote Builder with full payment details.
         </Text>
+        <Text style={s.quoteTerms}>
+          Quotes are valid for 30 days based on live manufacturer data. Final verification required before purchase.
+        </Text>
 
         {slide.description && (
           <Text style={{ ...s.quoteTerms, marginTop: 10 }}>{slide.description}</Text>
