@@ -166,7 +166,9 @@ export async function exportPresentationPptx(input: PptxExportInput): Promise<vo
   }
 
   /* ---- Content slides ---- */
+  const total = Math.max(1, input.slides.length);
   input.slides.forEach((slide, idx) => {
+    emit(0.15 + (idx / total) * 0.7, `Rendering slide ${idx + 1} of ${total}…`);
     const s = pptx.addSlide();
     s.background = { color: "FFFFFF" };
 
