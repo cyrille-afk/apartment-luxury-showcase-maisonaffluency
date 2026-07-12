@@ -3908,6 +3908,7 @@ async function hydrateQuotePreview(
       lead_weeks: typeof l.lead_weeks === "number" ? l.lead_weeks : null,
       note: typeof l.note === "string" && l.note.trim() ? l.note.trim() : null,
       variant_options: variant_options.length > 1 ? variant_options : undefined,
+      variant_repair: variantRepairByPick.get(l.pick_id) || undefined,
     };
   });
 }
