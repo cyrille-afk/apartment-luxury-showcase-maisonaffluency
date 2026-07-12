@@ -52,6 +52,7 @@ const TradePresentationViewer = () => {
   const [submitting, setSubmitting] = useState(false);
   const [exportingPdf, setExportingPdf] = useState(false);
   const [exportingPptx, setExportingPptx] = useState(false);
+  const [pptxProgress, setPptxProgress] = useState<{ ratio: number; label: string } | null>(null);
   const [linkCopied, setLinkCopied] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const commentsEndRef = useRef<HTMLDivElement>(null);
