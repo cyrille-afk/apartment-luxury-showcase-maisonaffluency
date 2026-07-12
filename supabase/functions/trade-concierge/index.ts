@@ -20,6 +20,11 @@ import {
   type LeadTimeConstraints,
   type BrandLeadTimeEntry,
 } from "../_shared/leadTimeConstraints.ts";
+import {
+  collectAllowedVariants,
+  reconcileVariants,
+  type AllowedVariantSet,
+} from "../_shared/variantFidelity.ts";
 
 // Lazy, per-invocation cache of the brand-level lead-time index. Empty table
 // today, but as it fills the fallback engages automatically.
@@ -3725,16 +3730,59 @@ async function hydrateQuotePreview(
   // Pricing: curator pick/variant first, then the selected trade_products row. The
   // catalog merge above hides stale near-duplicates, but this keeps old proposal
   // cards from displaying a rogue duplicate price if one is still approved.
-  const [{ data: pickRows }, { data: tradeRows }] = await Promise.all([
+  const [{ data: pickRows }, { data: tradeRows }, { data: productFabricRows }] = await Promise.all([
     supabase
       .from("designer_curator_picks")
-      .select("id, title, designer_id, trade_price_cents, price_per_sqm_cents, currency, size_variants")
+      .select("id, title, designer_id, trade_price_cents, price_per_sqm_cents, currency, size_variants, variant_image_map")
       .in("id", pickIds),
     supabase
       .from("trade_products")
       .select("id, product_name, brand_name, trade_price_cents, rrp_price_cents, currency, price_unit")
       .in("id", pickIds),
+    supabase
+      .from("product_fabrics")
+      .select("pick_id, product_label, fabric:fabric_id(name)")
+      .in("pick_id", pickIds),
   ]);
+
+  // ── Hallucination guardrail ─────────────────────────────────────────────
+  // Build the DB-attested finish/variant vocabulary per pick and reject any
+  // proposed `variant` string the DB cannot execute. Reconciled lines carry
+  // `variant: null` (so pricing/preview fall back to base) plus a
+  // `variant_repair` note that the client card surfaces to the user.
+  const fabricsByPick = new Map<string, Array<{ name: string | null; product_label: string | null }>>();
+  for (const row of (productFabricRows as any[]) || []) {
+    const list = fabricsByPick.get(row.pick_id) || [];
+    list.push({
+      name: (row.fabric && (row.fabric as any).name) || null,
+      product_label: row.product_label || null,
+    });
+    fabricsByPick.set(row.pick_id, list);
+  }
+  const allowedByPick = new Map<string, AllowedVariantSet>();
+  for (const p of (pickRows as any[]) || []) {
+    allowedByPick.set(
+      p.id,
+      collectAllowedVariants({
+        size_variants: Array.isArray(p.size_variants) ? p.size_variants : null,
+        variant_image_map: (p.variant_image_map && typeof p.variant_image_map === "object")
+          ? (p.variant_image_map as Record<string, unknown>)
+          : null,
+        fabrics: fabricsByPick.get(p.id) || null,
+      }),
+    );
+  }
+  const reconciled = reconcileVariants(lines, allowedByPick);
+  if (reconciled.repairs.length) {
+    console.warn("[concierge variant guardrail] rejected variants:", JSON.stringify(reconciled.repairs));
+  }
+  lines = reconciled.lines;
+  const variantRepairByPick = new Map<string, string>();
+  for (const l of lines) {
+    if (l.variant === null && (l as any).variant_repair) {
+      variantRepairByPick.set(l.pick_id, (l as any).variant_repair as string);
+    }
+  }
   const pickPriceById = new Map<string, { cents: number | null; currency: string | null }>();
   (pickRows || []).forEach((p: any) => {
     if (Number(p.trade_price_cents) > 0) {
@@ -3860,6 +3908,7 @@ async function hydrateQuotePreview(
       lead_weeks: typeof l.lead_weeks === "number" ? l.lead_weeks : null,
       note: typeof l.note === "string" && l.note.trim() ? l.note.trim() : null,
       variant_options: variant_options.length > 1 ? variant_options : undefined,
+      variant_repair: variantRepairByPick.get(l.pick_id) || undefined,
     };
   });
 }
