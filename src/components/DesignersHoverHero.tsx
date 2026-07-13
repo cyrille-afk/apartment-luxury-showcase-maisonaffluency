@@ -778,51 +778,43 @@ const DesignersHoverHero = () => {
               </button>
             </div>
             <div className="overflow-y-auto overscroll-contain px-2 py-2 min-h-0">
-              {totalResults === 0 ? (
+              {isSearching && flatResults.length === 0 ? (
                 <p className="px-4 py-8 text-center text-sm font-body text-white/50">
                   No designers match “{searchQuery}”.
                 </p>
-              ) : (
+              ) : isSearching ? (
                 <ul className="flex flex-col divide-y divide-white/[0.06]">
-                  {groupedResults.map(([letter, entries]) => {
-                    const isOpen = effectiveExpanded.has(letter);
-                    return (
-                      <li key={letter} className={cn(isOpen && "bg-white/[0.03]") }>
-                        <button
-                          type="button"
-                          onClick={() => toggleLetter(letter)}
-                          aria-expanded={isOpen}
-                          className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-white/[0.04] transition-colors"
-                        >
-                          <ChevronRight
-                            className={cn(
-                              "h-3.5 w-3.5 text-white/50 transition-transform shrink-0",
-                              isOpen && "rotate-90"
-                            )}
-                            aria-hidden="true"
-                          />
-                          <span className="font-display text-base text-white flex-1">{letter}</span>
-                          <span className="font-body text-xs text-white/50 tabular-nums">{entries.length}</span>
-                        </button>
-                        {isOpen && (
-                          <ul className="pb-1">
-                            {entries.map((d) => (
-                              <li key={d.slug}>
-                                <Link
-                                  to={`/designers/${d.slug}`}
-                                  onClick={() => setSearchOpen(false)}
-                                  className="block pl-11 pr-4 py-2 font-body text-[14px] text-white/80 hover:text-white hover:bg-white/[0.05] transition-colors"
-                                >
-                                  {d.name}
-                                </Link>
-                              </li>
-                            ))}
-                          </ul>
-                        )}
-                      </li>
-                    );
-                  })}
+                  {flatResults.map((d) => (
+                    <li key={d.slug}>
+                      <Link
+                        to={`/designers/${d.slug}`}
+                        onClick={() => setSearchOpen(false)}
+                        className="block px-4 py-3 font-body text-[15px] text-white/85 hover:text-white hover:bg-white/[0.05] transition-colors"
+                      >
+                        {d.name}
+                      </Link>
+                    </li>
+                  ))}
                 </ul>
+              ) : (
+                <div className="flex flex-col">
+                  <div className="px-4 pt-3 pb-2 text-[10px] uppercase tracking-[0.3em] font-body text-white/45">
+                    Featured Masters
+                  </div>
+                  <ul className="flex flex-col divide-y divide-white/[0.06]">
+                    {featuredMasters.map((d) => (
+                      <li key={d.slug}>
+                        <Link
+                          to={`/designers/${d.slug}`}
+                          onClick={() => setSearchOpen(false)}
+                          className="block px-4 py-3 font-body text-[15px] text-white/85 hover:text-white hover:bg-white/[0.05] transition-colors"
+                        >
+                          {d.name}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               )}
             </div>
           </motion.div>
