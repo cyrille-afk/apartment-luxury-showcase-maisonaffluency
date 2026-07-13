@@ -322,7 +322,7 @@ const DesignersHoverHero = () => {
     };
   }, [searchOpen]);
 
-  const searchResults = useMemo(() => {
+  const { groupedResults, totalResults } = useMemo(() => {
     const list = (allDesigners as any[])
       .filter((d) => d.is_published && !d.trade_only)
       .map((d) => ({ slug: d.slug as string, name: d.name as string }));
@@ -330,8 +330,32 @@ const DesignersHoverHero = () => {
     const filtered = q
       ? list.filter((d) => d.name.toLowerCase().includes(q))
       : list;
-    return filtered.sort((a, b) => sortNameKey(a.name).localeCompare(sortNameKey(b.name)));
+    filtered.sort((a, b) => sortNameKey(a.name).localeCompare(sortNameKey(b.name)));
+    const groups = new Map<string, { slug: string; name: string }[]>();
+    for (const d of filtered) {
+      const letter = lastNameInitial(d.name);
+      if (!groups.has(letter)) groups.set(letter, []);
+      groups.get(letter)!.push(d);
+    }
+    const ordered = [...groups.entries()].sort(([a], [b]) => a.localeCompare(b));
+    return { groupedResults: ordered, totalResults: filtered.length };
   }, [allDesigners, searchQuery]);
+
+  // Auto-expand all letters while searching so matches are immediately visible.
+  const isSearching = searchQuery.trim().length > 0;
+  const effectiveExpanded = useMemo(() => {
+    if (isSearching) return new Set(groupedResults.map(([l]) => l));
+    return expandedLetters;
+  }, [isSearching, groupedResults, expandedLetters]);
+
+  const toggleLetter = (letter: string) => {
+    setExpandedLetters((prev) => {
+      const next = new Set(prev);
+      if (next.has(letter)) next.delete(letter);
+      else next.add(letter);
+      return next;
+    });
+  };
 
   if (!hasItems) return null;
 
