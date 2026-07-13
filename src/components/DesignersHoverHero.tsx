@@ -25,7 +25,7 @@ import { cn } from "@/lib/utils";
 import { useAllDesigners } from "@/hooks/useDesigner";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { applyCuratorPickOrder } from "@/lib/curatorPickSort";
-import { sortNameKey, lastNameInitial } from "@/lib/nameFormat";
+import { sortNameKey, lastNameInitial, displayDesignerName } from "@/lib/nameFormat";
 
 interface FeaturedDesigner {
   id: string;
@@ -970,7 +970,7 @@ const DesignersHoverHero = () => {
                             onClick={() => setSearchOpen(false)}
                             className="block px-5 py-2.5 font-body text-[15px] text-white/85 hover:text-white hover:bg-white/[0.04] transition-colors"
                           >
-                            {d.name}
+                            {displayDesignerName(d.name)}
                           </Link>
                         </li>
                       ))}
@@ -998,7 +998,7 @@ const DesignersHoverHero = () => {
                               onClick={() => setSearchOpen(false)}
                               className="block px-5 py-2 font-body text-[14px] text-white/80 hover:text-white hover:bg-white/[0.04] transition-colors"
                             >
-                              {d.name}
+                              {displayDesignerName(d.name)}
                             </Link>
                           </li>
                         ))
@@ -1054,7 +1054,7 @@ const DesignersHoverHero = () => {
                                       onClick={() => setSearchOpen(false)}
                                       className="block pl-12 pr-5 py-1.5 font-body text-[14px] text-white/80 hover:text-white hover:bg-white/[0.04] transition-colors"
                                     >
-                                      {d.name}
+                                      {displayDesignerName(d.name)}
                                     </Link>
                                   </li>
                                 ))}
