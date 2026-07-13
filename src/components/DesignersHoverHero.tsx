@@ -409,6 +409,8 @@ const DesignersHoverHero = () => {
     };
   }, [searchOpen]);
 
+  const isDesktopViewport = !isMobileViewport && !isMobileHook && !isStandalone;
+
   if (!hasItems) return null;
 
   const directoryLabels = (className: string) => (
