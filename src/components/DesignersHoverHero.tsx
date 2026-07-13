@@ -396,10 +396,11 @@ const DesignersHoverHero = () => {
     if (!searchOpen || !directoryRef.current) return;
     const update = () => {
       const rect = directoryRef.current!.getBoundingClientRect();
-      setDropdownPos({
-        left: rect.right + 12,
-        top: rect.top + window.scrollY,
-      });
+      const width = 380;
+      const gap = 12;
+      // Open to the LEFT of the button so the masters list is never covered.
+      const left = Math.max(16, rect.left - width - gap);
+      setDropdownPos({ left, top: rect.top + window.scrollY });
     };
     update();
     window.addEventListener("resize", update);
