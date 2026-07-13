@@ -968,7 +968,7 @@ const DesignersHoverHero = () => {
                 <X className="h-4 w-4" />
               </button>
             </div>
-            <div ref={searchScrollRef} className="overflow-y-auto overscroll-contain px-1 py-1 min-h-0">
+            <div ref={searchScrollRef} className="overflow-y-auto overscroll-contain px-1 pt-0 pb-1 min-h-0">
               {isSearching && groupedResults.length === 0 ? (
                 <p className="px-4 py-8 text-center text-sm font-body text-white/50">
                   No designers match “{searchQuery}”.
