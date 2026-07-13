@@ -29,21 +29,35 @@ const stripAccents = (s: string) =>
  * - "Andrée Putman" → "putman"
  * - "Made in Kira - Roman Frankel" → "frankel"
  */
+// Explicit overrides for studio/brand names where the default "last word"
+// heuristic gives the wrong A–Z bucket. Key = lowercased full name.
+const SORT_KEY_OVERRIDES: Record<string, string> = {
+  "apparatus studio": "apparatus",
+  "lost profile studio": "lost",
+};
+
 export function sortNameKey(name: string): string {
   const full = name.trim();
   if (!full) return "";
+  const overrideKey = full.toLowerCase();
+  if (SORT_KEY_OVERRIDES[overrideKey]) return SORT_KEY_OVERRIDES[overrideKey];
   // For "Brand - Person" entries, sort by the person part.
   const personPart = full.includes(" - ")
     ? full.split(" - ").pop()?.trim() || full
     : full;
   const words = personPart.split(/\s+/);
-  // Use the last alphabetic word (ignore trailing numerics like "1861").
-  let lastWord = words[words.length - 1] || "";
-  if (/^\d+$/.test(lastWord) && words.length > 1) {
-    lastWord = words[words.length - 2] || "";
+  // Use the last alphabetic word (ignore trailing numerics like "1861"
+  // and the generic suffix "Studio"/"Studios").
+  let idx = words.length - 1;
+  while (
+    idx > 0 &&
+    (/^\d+$/.test(words[idx]) || /^studios?$/i.test(words[idx]))
+  ) {
+    idx--;
   }
+  const lastWord = words[idx] || "";
   const key = stripAccents(lastWord).toLowerCase().replace(/^[^a-z]+/, "");
-  return key || sortNameKey(words.slice(0, -1).join(" "));
+  return key || sortNameKey(words.slice(0, idx).join(" "));
 }
 
 /** First-letter of the last-name sort key, for A–Z grouping. */
