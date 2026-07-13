@@ -734,7 +734,7 @@ const DesignersHoverHero = () => {
                 inputMode="search"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder={`Search ${designerCount || searchResults.length} designers…`}
+                placeholder={`Search ${designerCount || totalResults} designers…`}
                 className="flex-1 bg-transparent border-0 outline-none font-body text-sm text-white placeholder:text-white/40"
                 aria-label="Search designers"
               />
