@@ -400,7 +400,16 @@ const DesignersHoverHero = () => {
 
         <button
           type="button"
-          onClick={() => setSearchOpen(true)}
+          onClick={() => {
+            if (directoryRef.current) {
+              const rect = directoryRef.current.getBoundingClientRect();
+              setDropdownPos({
+                left: rect.left,
+                top: rect.bottom + window.scrollY + 8,
+              });
+            }
+            setSearchOpen(true);
+          }}
           aria-expanded={searchOpen}
           aria-controls="designers-search-sheet"
           className="inline-flex items-center gap-2 text-xs font-body font-light italic text-white/85 hover:text-white underline-offset-4 hover:underline transition-colors text-left"
