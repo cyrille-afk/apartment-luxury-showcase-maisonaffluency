@@ -456,13 +456,11 @@ const DesignersHoverHero = () => {
           onClick={() => {
             if (directoryRef.current) {
               const rect = directoryRef.current.getBoundingClientRect();
-              const listRect = navRef.current?.getBoundingClientRect();
               const width = 380;
-              const gap = 32;
-              const anchorRight = Math.max(rect.right, listRect?.right ?? 0);
+              const gap = 12;
               setDropdownPos({
-                left: Math.min(window.innerWidth - width - 16, anchorRight + gap),
-                top: rect.top + window.scrollY,
+                left: Math.max(16, rect.right - width),
+                top: rect.bottom + window.scrollY + gap,
               });
             }
             setSearchOpen(true);
