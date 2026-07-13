@@ -152,7 +152,9 @@ const DesignersHoverHero = () => {
   const [selectedLetter, setSelectedLetter] = useState<string | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const searchScrollRef = useRef<HTMLDivElement>(null);
-  
+  const directoryRef = useRef<HTMLDivElement>(null);
+  const [dropdownPos, setDropdownPos] = useState<{ left: number; top: number } | null>(null);
+
   const isMobileHook = useIsMobile();
   const [isMobileViewport, setIsMobileViewport] = useState(() =>
     typeof window !== "undefined" && window.matchMedia("(max-width: 767px)").matches
@@ -387,10 +389,32 @@ const DesignersHoverHero = () => {
     if (isSearching) setSelectedLetter(null);
   }, [isSearching]);
 
+  // Keep the desktop dropdown anchored to the Directory button as the page
+  // scrolls or the viewport changes.
+  useEffect(() => {
+    if (!searchOpen || !directoryRef.current) return;
+    const update = () => {
+      const rect = directoryRef.current!.getBoundingClientRect();
+      setDropdownPos({
+        left: rect.right + 12,
+        top: rect.top + window.scrollY,
+      });
+    };
+    update();
+    window.addEventListener("resize", update);
+    window.addEventListener("scroll", update, { passive: true });
+    return () => {
+      window.removeEventListener("resize", update);
+      window.removeEventListener("scroll", update);
+    };
+  }, [searchOpen]);
+
+  const isDesktopViewport = !isMobileViewport && !isMobileHook && !isStandalone;
+
   if (!hasItems) return null;
 
-  const directoryLabels = (className: string) => (
-    <div className={className}>
+  const directoryLabels = (className: string, ref?: React.Ref<HTMLDivElement>) => (
+    <div ref={ref} className={className}>
       <div className="flex flex-col">
         <span className="text-[9px] uppercase tracking-[0.3em] mb-1 font-body text-white">
           Directory <span className="text-white/70 normal-case tracking-normal">({designerCount || 95})</span>
@@ -398,7 +422,16 @@ const DesignersHoverHero = () => {
 
         <button
           type="button"
-          onClick={() => setSearchOpen(true)}
+          onClick={() => {
+            if (directoryRef.current) {
+              const rect = directoryRef.current.getBoundingClientRect();
+              setDropdownPos({
+                left: rect.right + 12,
+                top: rect.top + window.scrollY,
+              });
+            }
+            setSearchOpen(true);
+          }}
           aria-expanded={searchOpen}
           aria-controls="designers-search-sheet"
           className="inline-flex items-center gap-2 text-xs font-body font-light italic text-white/85 hover:text-white underline-offset-4 hover:underline transition-colors text-left"
@@ -481,8 +514,8 @@ const DesignersHoverHero = () => {
 
           {/* Desktop: Directory / Find A Designer sits at the top of the list,
               replacing the previous "Meet Our Designers" headline. */}
-          <div className="hidden md:block md:mt-8">
-            {directoryLabels("mb-5 md:mb-8 w-fit")}
+          <div className="hidden md:block md:mt-8 md:ml-6">
+            {directoryLabels("mb-5 md:mb-8 w-fit", directoryRef)}
           </div>
           <div className="w-full max-w-xs sm:max-w-sm md:max-w-md">
             <div className="relative inline-block">
@@ -732,8 +765,8 @@ const DesignersHoverHero = () => {
         <div className="w-px h-28 bg-gradient-to-b from-white/70 to-transparent" />
       </div>
 
-      {/* Bottom-sheet A–Z search — expands upward from the Directory link.
-          Intentionally overlays the hero without changing any top-of-page layout. */}
+      {/* Designer search: mobile bottom-sheet, desktop dropdown beside the
+          Directory button. */}
       <AnimatePresence>
         {searchOpen && (
           <motion.div
@@ -754,18 +787,26 @@ const DesignersHoverHero = () => {
             role="dialog"
             aria-modal="true"
             aria-label="Browse designers A to Z"
-            initial={{ y: "100%", opacity: 0.6 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: "100%", opacity: 0 }}
-            transition={{ type: "tween", ease: [0.16, 1, 0.3, 1], duration: 0.35 }}
+            initial={
+              isDesktopViewport
+                ? { opacity: 0, y: -10, scale: 0.96 }
+                : { y: "100%", opacity: 0.6 }
+            }
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={
+              isDesktopViewport
+                ? { opacity: 0, y: -10, scale: 0.96 }
+                : { y: "100%", opacity: 0 }
+            }
+            transition={{ type: "tween", ease: [0.16, 1, 0.3, 1], duration: 0.25 }}
             className={cn(
               "fixed z-[71] flex flex-col bg-[#0a0a0a] text-white border border-white/10 shadow-2xl overflow-hidden",
               // Mobile: bottom sheet anchored to bottom
               "inset-x-0 bottom-0 max-h-[75vh] rounded-t-2xl pb-[env(safe-area-inset-bottom)]",
-              // Desktop: anchored popover further to the right of the Find A Designer
-              // link so the directory label is never truncated. Nav stays visible.
-              "md:inset-x-auto md:left-[34rem] lg:left-[36rem] md:right-auto md:bottom-20 md:w-[380px] md:max-w-[calc(100vw-34rem)] lg:max-w-[calc(100vw-36rem)] md:max-h-[50vh] md:rounded-xl md:pb-0"
+              // Desktop: dropdown anchored to the Directory button via inline styles.
+              "md:inset-x-auto md:right-auto md:w-[380px] md:max-w-[calc(100vw-2rem)] md:max-h-[50vh] md:rounded-xl md:pb-0"
             )}
+            style={dropdownPos ? { left: dropdownPos.left, top: dropdownPos.top } : undefined}
           >
             <div className="mx-auto mt-2 h-1 w-10 rounded-full bg-white/25 shrink-0" aria-hidden="true" />
             <div className="flex items-center gap-3 px-5 pt-3 pb-3 border-b border-white/10 shrink-0">
