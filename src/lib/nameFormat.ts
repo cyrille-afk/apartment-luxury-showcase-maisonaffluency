@@ -50,6 +50,23 @@ const SORT_KEY_OVERRIDES: Record<string, string> = {
   "made in kira - roman frankel": "made",
   "made in kira": "made",
   "poltrona frau": "poltrona",
+  "bruno moinard editions": "moinard",
+  "marta sala éditions": "marta sala",
+  "marta sala editions": "marta sala",
+  "théorème editions": "theoreme",
+  "theoreme editions": "theoreme",
+  "de la espada": "de la espada",
+  "marcantonio brandolini d'adda": "brandolini",
+  "overgaard & dyrman": "overgaard",
+  "la chance": "la chance",
+  "delcourt collection": "delcourt",
+  "toulemonde bochart": "toulemonde",
+  "atelier pendhapa": "atelier pendhapa",
+  "pierre augustin rose": "pierre augustin rose",
+  "emmanuel levet stenne": "levet stenne",
+  "based upon": "based upon",
+  "le berre vevaud": "le berre",
+  "jeremy maxwell wintrebert": "maxwell wintrebert",
 };
 
 // Display name overrides: strip trailing person suffix for brands that should
