@@ -526,13 +526,15 @@ const DesignersHoverHero = () => {
           )}
         >
 
-          {/* Desktop: Directory sits directly above MASTERS, sharing the list's
-              left edge so it aligns vertically with the first letter of every
-              designer name. */}
+          {/* Desktop: Directory pinned top-right, y-aligned with the MASTERS
+              label (see mastersRef + directoryTop effect below). */}
+          <div
+            className="hidden md:block md:absolute md:right-12 lg:right-20 z-40 pointer-events-auto"
+            style={directoryTop != null ? { top: directoryTop } : undefined}
+          >
+            {directoryLabels("w-fit", directoryRef)}
+          </div>
           <div className="w-full max-w-xs sm:max-w-sm md:max-w-md">
-            <div className="hidden md:block md:mb-6 pointer-events-auto">
-              {directoryLabels("w-fit", directoryRef)}
-            </div>
             <div className="relative inline-block">
               {/* Localized text overlay — separates the typography from the
                   busy background image while keeping the editorial edge soft. */}
