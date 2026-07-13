@@ -479,11 +479,11 @@ const DesignersHoverHero = () => {
       const width = 380;
       const gap = 24;
       const navRight = navRect ? navRect.right : rect.right;
-      // Anchor to the right edge of the list (nav) so the dropdown clears the
-      // designer names entirely, regardless of the Directory label width.
       let left = navRight + gap;
       const maxLeft = window.innerWidth - width - 16;
       if (left > maxLeft) left = maxLeft;
+      // Anchor top to Directory header baseline so the dropdown opens inline
+      // with the navigation group, not floating above or below it.
       const top = rect.top;
       const bottom = navRect ? navRect.bottom : rect.bottom + 400;
       setDropdownPos({
@@ -492,6 +492,7 @@ const DesignersHoverHero = () => {
         height: Math.max(320, bottom - top),
       });
     };
+
     update();
     window.addEventListener("resize", update);
     window.addEventListener("scroll", update, { passive: true });
