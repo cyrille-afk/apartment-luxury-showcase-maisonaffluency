@@ -399,10 +399,15 @@ const DesignersHoverHero = () => {
     if (!searchOpen || !directoryRef.current) return;
     const update = () => {
       const rect = directoryRef.current!.getBoundingClientRect();
+      const listRect = navRef.current?.getBoundingClientRect();
       const width = 380;
-      const gap = 12;
-      // Open to the LEFT of the button so the masters list is never covered.
-      const left = Math.max(16, rect.left - width - gap);
+      const gap = 32;
+      // Open to the right of the list column so the Masters names stay visible.
+      const anchorRight = Math.max(rect.right, listRect?.right ?? 0);
+      const left = Math.min(
+        window.innerWidth - width - 16,
+        anchorRight + gap
+      );
       setDropdownPos({ left, top: rect.top + window.scrollY });
     };
     update();
@@ -430,10 +435,12 @@ const DesignersHoverHero = () => {
           onClick={() => {
             if (directoryRef.current) {
               const rect = directoryRef.current.getBoundingClientRect();
+              const listRect = navRef.current?.getBoundingClientRect();
               const width = 380;
-              const gap = 12;
+              const gap = 32;
+              const anchorRight = Math.max(rect.right, listRect?.right ?? 0);
               setDropdownPos({
-                left: Math.max(16, rect.left - width - gap),
+                left: Math.min(window.innerWidth - width - 16, anchorRight + gap),
                 top: rect.top + window.scrollY,
               });
             }
@@ -519,12 +526,13 @@ const DesignersHoverHero = () => {
           )}
         >
 
-          {/* Desktop: Directory / Find A Designer sits at the top-right so the
-              dropdown never truncates the masters list on the left. */}
-          <div className="hidden md:block md:absolute md:top-28 md:right-12 lg:right-20 z-40 pointer-events-auto">
-            {directoryLabels("w-fit", directoryRef)}
-          </div>
+          {/* Desktop: Directory sits directly above MASTERS, sharing the list's
+              left edge so it aligns vertically with the first letter of every
+              designer name. */}
           <div className="w-full max-w-xs sm:max-w-sm md:max-w-md">
+            <div className="hidden md:block md:mb-6 pointer-events-auto">
+              {directoryLabels("w-fit", directoryRef)}
+            </div>
             <div className="relative inline-block">
               {/* Localized text overlay — separates the typography from the
                   busy background image while keeping the editorial edge soft. */}
