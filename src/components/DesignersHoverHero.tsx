@@ -150,6 +150,7 @@ const DesignersHoverHero = () => {
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedLetter, setSelectedLetter] = useState<string | null>(null);
+  const [expandedLetters, setExpandedLetters] = useState<Set<string>>(new Set());
   const searchInputRef = useRef<HTMLInputElement>(null);
   const searchScrollRef = useRef<HTMLDivElement>(null);
   const directoryRef = useRef<HTMLDivElement>(null);
@@ -383,7 +384,10 @@ const DesignersHoverHero = () => {
   // Reset the mobile letter selection when closing the sheet or when a search
   // query is active (search takes over the list).
   useEffect(() => {
-    if (!searchOpen) setSelectedLetter(null);
+    if (!searchOpen) {
+      setSelectedLetter(null);
+      setExpandedLetters(new Set());
+    }
   }, [searchOpen]);
   useEffect(() => {
     if (isSearching) setSelectedLetter(null);
@@ -395,10 +399,11 @@ const DesignersHoverHero = () => {
     if (!searchOpen || !directoryRef.current) return;
     const update = () => {
       const rect = directoryRef.current!.getBoundingClientRect();
-      setDropdownPos({
-        left: rect.right + 12,
-        top: rect.top + window.scrollY,
-      });
+      const width = 380;
+      const gap = 12;
+      // Open to the LEFT of the button so the masters list is never covered.
+      const left = Math.max(16, rect.left - width - gap);
+      setDropdownPos({ left, top: rect.top + window.scrollY });
     };
     update();
     window.addEventListener("resize", update);
@@ -425,8 +430,10 @@ const DesignersHoverHero = () => {
           onClick={() => {
             if (directoryRef.current) {
               const rect = directoryRef.current.getBoundingClientRect();
+              const width = 380;
+              const gap = 12;
               setDropdownPos({
-                left: rect.right + 12,
+                left: Math.max(16, rect.left - width - gap),
                 top: rect.top + window.scrollY,
               });
             }
@@ -492,7 +499,7 @@ const DesignersHoverHero = () => {
           PWA/desktop keep using the full section height. */}
       <div
         className={cn(
-          "absolute inset-x-0 top-0 z-10 pointer-events-none",
+          "absolute inset-x-0 top-0 z-20 pointer-events-none",
           // Mobile browser: frame height = visible viewport minus the fixed
           // header, so its bottom aligns with the iOS toolbar top (svh excludes
           // the toolbar). Desktop/PWA: full section height.
@@ -512,10 +519,10 @@ const DesignersHoverHero = () => {
           )}
         >
 
-          {/* Desktop: Directory / Find A Designer sits at the top of the list,
-              replacing the previous "Meet Our Designers" headline. */}
-          <div className="hidden md:block md:mt-8 md:ml-6">
-            {directoryLabels("mb-5 md:mb-8 w-fit", directoryRef)}
+          {/* Desktop: Directory / Find A Designer sits at the top-right so the
+              dropdown never truncates the masters list on the left. */}
+          <div className="hidden md:block md:absolute md:top-28 md:right-12 lg:right-20 z-40 pointer-events-auto">
+            {directoryLabels("w-fit", directoryRef)}
           </div>
           <div className="w-full max-w-xs sm:max-w-sm md:max-w-md">
             <div className="relative inline-block">
@@ -882,24 +889,78 @@ const DesignersHoverHero = () => {
                     </ul>
                   </div>
 
-                  {/* Desktop: flat alphabetical list (no A–Z accordion) */}
-                  <ul className="hidden md:flex flex-col py-2">
-                    {flatResults.map((d) => (
-                      <li key={d.slug}>
-                        <Link
-                          to={`/designers/${d.slug}`}
-                          state={{ fromDesignersHero: true }}
-                          onClick={() => setSearchOpen(false)}
-                          className="block px-4 py-2 font-body text-[14px] text-white/80 hover:text-white hover:bg-white/[0.04] transition-colors"
-                        >
-                          {d.name}
-                        </Link>
-                      </li>
-                    ))}
-                    {flatResults.length === 0 && (
-                      <li className="px-4 py-8 text-center text-sm font-body text-white/50">
-                        No designers match “{searchQuery}”.
-                      </li>
+                  {/* Desktop: A–Z accordion with counts, expandable per letter */}
+                  <ul className="hidden md:flex flex-col py-1">
+                    {isSearching ? (
+                      flatResults.length === 0 ? (
+                        <li className="px-4 py-8 text-center text-sm font-body text-white/50">
+                          No designers match “{searchQuery}”.
+                        </li>
+                      ) : (
+                        flatResults.map((d) => (
+                          <li key={d.slug}>
+                            <Link
+                              to={`/designers/${d.slug}`}
+                              state={{ fromDesignersHero: true }}
+                              onClick={() => setSearchOpen(false)}
+                              className="block px-5 py-2 font-body text-[14px] text-white/80 hover:text-white hover:bg-white/[0.04] transition-colors"
+                            >
+                              {d.name}
+                            </Link>
+                          </li>
+                        ))
+                      )
+                    ) : (
+                      groupedResults.map(([letter, items]) => {
+                        const isOpen = expandedLetters.has(letter);
+                        return (
+                          <li key={letter} className="border-b border-white/[0.06] last:border-b-0">
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setExpandedLetters((prev) => {
+                                  const next = new Set(prev);
+                                  if (next.has(letter)) next.delete(letter);
+                                  else next.add(letter);
+                                  return next;
+                                })
+                              }
+                              aria-expanded={isOpen}
+                              className="w-full flex items-center justify-between px-5 py-2.5 text-left hover:bg-white/[0.04] transition-colors"
+                            >
+                              <span className="flex items-center gap-3">
+                                <span
+                                  className={cn(
+                                    "text-white/50 text-xs transition-transform",
+                                    isOpen && "rotate-90"
+                                  )}
+                                  aria-hidden="true"
+                                >
+                                  ›
+                                </span>
+                                <span className="font-serif text-lg text-white">{letter}</span>
+                              </span>
+                              <span className="font-body text-xs text-white/50">{items.length}</span>
+                            </button>
+                            {isOpen && (
+                              <ul className="flex flex-col pb-2">
+                                {items.map((d) => (
+                                  <li key={d.slug}>
+                                    <Link
+                                      to={`/designers/${d.slug}`}
+                                      state={{ fromDesignersHero: true }}
+                                      onClick={() => setSearchOpen(false)}
+                                      className="block pl-12 pr-5 py-1.5 font-body text-[14px] text-white/80 hover:text-white hover:bg-white/[0.04] transition-colors"
+                                    >
+                                      {d.name}
+                                    </Link>
+                                  </li>
+                                ))}
+                              </ul>
+                            )}
+                          </li>
+                        );
+                      })
                     )}
                   </ul>
                 </>
