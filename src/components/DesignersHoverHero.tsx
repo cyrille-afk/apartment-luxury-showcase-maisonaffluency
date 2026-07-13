@@ -886,24 +886,78 @@ const DesignersHoverHero = () => {
                     </ul>
                   </div>
 
-                  {/* Desktop: flat alphabetical list (no A–Z accordion) */}
-                  <ul className="hidden md:flex flex-col py-2">
-                    {flatResults.map((d) => (
-                      <li key={d.slug}>
-                        <Link
-                          to={`/designers/${d.slug}`}
-                          state={{ fromDesignersHero: true }}
-                          onClick={() => setSearchOpen(false)}
-                          className="block px-4 py-2 font-body text-[14px] text-white/80 hover:text-white hover:bg-white/[0.04] transition-colors"
-                        >
-                          {d.name}
-                        </Link>
-                      </li>
-                    ))}
-                    {flatResults.length === 0 && (
-                      <li className="px-4 py-8 text-center text-sm font-body text-white/50">
-                        No designers match “{searchQuery}”.
-                      </li>
+                  {/* Desktop: A–Z accordion with counts, expandable per letter */}
+                  <ul className="hidden md:flex flex-col py-1">
+                    {isSearching ? (
+                      flatResults.length === 0 ? (
+                        <li className="px-4 py-8 text-center text-sm font-body text-white/50">
+                          No designers match “{searchQuery}”.
+                        </li>
+                      ) : (
+                        flatResults.map((d) => (
+                          <li key={d.slug}>
+                            <Link
+                              to={`/designers/${d.slug}`}
+                              state={{ fromDesignersHero: true }}
+                              onClick={() => setSearchOpen(false)}
+                              className="block px-5 py-2 font-body text-[14px] text-white/80 hover:text-white hover:bg-white/[0.04] transition-colors"
+                            >
+                              {d.name}
+                            </Link>
+                          </li>
+                        ))
+                      )
+                    ) : (
+                      groupedResults.map(([letter, items]) => {
+                        const isOpen = expandedLetters.has(letter);
+                        return (
+                          <li key={letter} className="border-b border-white/[0.06] last:border-b-0">
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setExpandedLetters((prev) => {
+                                  const next = new Set(prev);
+                                  if (next.has(letter)) next.delete(letter);
+                                  else next.add(letter);
+                                  return next;
+                                })
+                              }
+                              aria-expanded={isOpen}
+                              className="w-full flex items-center justify-between px-5 py-2.5 text-left hover:bg-white/[0.04] transition-colors"
+                            >
+                              <span className="flex items-center gap-3">
+                                <span
+                                  className={cn(
+                                    "text-white/50 text-xs transition-transform",
+                                    isOpen && "rotate-90"
+                                  )}
+                                  aria-hidden="true"
+                                >
+                                  ›
+                                </span>
+                                <span className="font-serif text-lg text-white">{letter}</span>
+                              </span>
+                              <span className="font-body text-xs text-white/50">{items.length}</span>
+                            </button>
+                            {isOpen && (
+                              <ul className="flex flex-col pb-2">
+                                {items.map((d) => (
+                                  <li key={d.slug}>
+                                    <Link
+                                      to={`/designers/${d.slug}`}
+                                      state={{ fromDesignersHero: true }}
+                                      onClick={() => setSearchOpen(false)}
+                                      className="block pl-12 pr-5 py-1.5 font-body text-[14px] text-white/80 hover:text-white hover:bg-white/[0.04] transition-colors"
+                                    >
+                                      {d.name}
+                                    </Link>
+                                  </li>
+                                ))}
+                              </ul>
+                            )}
+                          </li>
+                        );
+                      })
                     )}
                   </ul>
                 </>
