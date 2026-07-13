@@ -486,11 +486,9 @@ const DesignersHoverHero = () => {
       // with the navigation group, not floating above or below it.
       const top = rect.top;
       const navBottom = navRect ? navRect.bottom : rect.bottom + 400;
-      // Extend to fill available viewport so the full A–Z list is visible
-      // (the dropdown sits to the right of the featured list, so growing
-      // downward past navBottom does not overlap or truncate anything).
-      const available = window.innerHeight - top - 24;
-      const height = Math.max(320, Math.min(available, Math.max(navBottom - top, available)));
+      // Clamp height to the featured designers list so the dropdown never
+      // extends beyond it.
+      const height = Math.max(320, navBottom - top);
       setDropdownPos({
         left,
         top,
@@ -535,8 +533,7 @@ const DesignersHoverHero = () => {
               const gap = 24;
               const navRight = navRect ? navRect.right : rect.right;
               const navBottom = navRect ? navRect.bottom : rect.bottom + 400;
-              const available = window.innerHeight - rect.top - 24;
-              const height = Math.max(320, Math.min(available, Math.max(navBottom - rect.top, available)));
+              const height = Math.max(320, navBottom - rect.top);
               setDropdownPos({
                 left: Math.min(window.innerWidth - width - 16, navRight + gap),
                 top: rect.top,
@@ -971,7 +968,7 @@ const DesignersHoverHero = () => {
                 <X className="h-4 w-4" />
               </button>
             </div>
-            <div ref={searchScrollRef} className="overflow-y-auto overscroll-contain px-1 py-1 min-h-0">
+            <div ref={searchScrollRef} className="overflow-y-auto overscroll-contain px-1 pt-0 pb-1 min-h-0">
               {isSearching && groupedResults.length === 0 ? (
                 <p className="px-4 py-8 text-center text-sm font-body text-white/50">
                   No designers match “{searchQuery}”.
@@ -1079,7 +1076,7 @@ const DesignersHoverHero = () => {
                                 })
                               }
                               aria-expanded={isOpen}
-                              className="w-full flex items-center justify-between px-5 py-2.5 text-left hover:bg-white/[0.04] transition-colors"
+                              className="w-full flex items-center justify-between px-5 py-2 text-left hover:bg-white/[0.04] transition-colors"
                             >
                               <span className="flex items-center gap-3">
                                 <span
