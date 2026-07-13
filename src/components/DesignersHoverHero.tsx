@@ -527,15 +527,18 @@ const DesignersHoverHero = () => {
               const rect = directoryRef.current.getBoundingClientRect();
               const navRect = navRef.current?.getBoundingClientRect();
               const width = 380;
-              const gap = 12;
+              const gap = 24;
+              const navRight = navRect ? navRect.right : rect.right;
+              const bottom = navRect ? navRect.bottom : rect.bottom + 400;
               setDropdownPos({
-                left: Math.max(16, rect.left - width - gap),
-                top: navRect?.top ?? rect.top,
-                height: navRect?.height ?? Math.max(320, window.innerHeight - rect.top - 24),
+                left: Math.min(window.innerWidth - width - 16, navRight + gap),
+                top: rect.top,
+                height: Math.max(320, bottom - rect.top),
               });
             } else {
               setDropdownPos(null);
             }
+
             setSearchOpen(true);
           }}
           aria-expanded={searchOpen}
