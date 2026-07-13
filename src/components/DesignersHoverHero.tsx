@@ -970,7 +970,7 @@ const DesignersHoverHero = () => {
                             onClick={() => setSearchOpen(false)}
                             className="block px-5 py-2.5 font-body text-[15px] text-white/85 hover:text-white hover:bg-white/[0.04] transition-colors"
                           >
-                            {d.name}
+                            {displayDesignerName(d.name)}
                           </Link>
                         </li>
                       ))}
