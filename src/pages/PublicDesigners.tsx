@@ -99,6 +99,7 @@ function ScrollLockedDesigners({
   initialExpand?: string;
 }) {
   const [locked, setLocked] = useState(true);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     if (!locked) return;
@@ -116,6 +117,11 @@ function ScrollLockedDesigners({
       window.removeEventListener("unlockDesignersScroll", unlock);
     };
   }, [locked]);
+
+  // Without the desktop A-Z jump bar, the page should scroll normally on desktop.
+  useEffect(() => {
+    if (!isMobile) setLocked(false);
+  }, [isMobile]);
 
   return (
     <div className="min-h-screen bg-background text-foreground">
