@@ -151,6 +151,7 @@ const DesignersHoverHero = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedLetters, setExpandedLetters] = useState<Set<string>>(new Set());
   const [pendingRevealLetter, setPendingRevealLetter] = useState<string | null>(null);
+  const [selectedLetter, setSelectedLetter] = useState<string | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const searchScrollRef = useRef<HTMLDivElement>(null);
   const letterItemRefs = useRef<Record<string, HTMLLIElement | null>>({});
