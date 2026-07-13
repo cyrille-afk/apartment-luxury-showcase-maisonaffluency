@@ -1014,7 +1014,7 @@ const DesignersHoverHero = () => {
                   </div>
 
                   {/* Desktop: A–Z accordion with counts, expandable per letter */}
-                  <ul className="hidden md:flex flex-col py-1">
+                  <ul className="hidden md:flex flex-col pt-0 pb-1">
                     {isSearching ? (
                       flatResults.length === 0 ? (
                         <li className="px-4 py-8 text-center text-sm font-body text-white/50">
