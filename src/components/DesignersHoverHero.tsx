@@ -466,8 +466,8 @@ const DesignersHoverHero = () => {
     };
   }, [hasItems, items.length]);
 
-  // Desktop dropdown opens to the left of Directory and matches the height of
-  // the left featured-designers list.
+  // Desktop dropdown opens to the RIGHT of the Directory button so it never
+  // overlaps or truncates the featured-designers list underneath.
   useEffect(() => {
     if (!searchOpen || !isDesktopViewport || !directoryRef.current) {
       if (searchOpen && !isDesktopViewport) setDropdownPos(null);
@@ -477,12 +477,19 @@ const DesignersHoverHero = () => {
       const rect = directoryRef.current!.getBoundingClientRect();
       const navRect = navRef.current?.getBoundingClientRect();
       const width = 380;
-      const gap = 12;
-      const left = Math.max(16, rect.left - width - gap);
+      const gap = 24;
+      const navRight = navRect ? navRect.right : rect.right;
+      // Anchor to the right edge of the list (nav) so the dropdown clears the
+      // designer names entirely, regardless of the Directory label width.
+      let left = navRight + gap;
+      const maxLeft = window.innerWidth - width - 16;
+      if (left > maxLeft) left = maxLeft;
+      const top = rect.top;
+      const bottom = navRect ? navRect.bottom : rect.bottom + 400;
       setDropdownPos({
         left,
-        top: navRect?.top ?? rect.top,
-        height: navRect?.height ?? Math.max(320, window.innerHeight - rect.top - 24),
+        top,
+        height: Math.max(320, bottom - top),
       });
     };
     update();
