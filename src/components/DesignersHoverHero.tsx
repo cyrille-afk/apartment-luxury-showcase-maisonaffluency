@@ -389,6 +389,26 @@ const DesignersHoverHero = () => {
     if (isSearching) setSelectedLetter(null);
   }, [isSearching]);
 
+  // Keep the desktop dropdown anchored to the Directory button as the page
+  // scrolls or the viewport changes.
+  useEffect(() => {
+    if (!searchOpen || !directoryRef.current) return;
+    const update = () => {
+      const rect = directoryRef.current!.getBoundingClientRect();
+      setDropdownPos({
+        left: rect.left,
+        top: rect.bottom + window.scrollY + 8,
+      });
+    };
+    update();
+    window.addEventListener("resize", update);
+    window.addEventListener("scroll", update, { passive: true });
+    return () => {
+      window.removeEventListener("resize", update);
+      window.removeEventListener("scroll", update);
+    };
+  }, [searchOpen]);
+
   if (!hasItems) return null;
 
   const directoryLabels = (className: string) => (
