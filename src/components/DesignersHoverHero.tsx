@@ -742,10 +742,10 @@ const DesignersHoverHero = () => {
             role="dialog"
             aria-modal="true"
             aria-label="Browse designers A to Z"
-            initial={{ height: 0, opacity: 0.6 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ type: "tween", ease: [0.16, 1, 0.3, 1], duration: 0.4 }}
+            initial={{ y: "100%", opacity: 0.6 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: "100%", opacity: 0 }}
+            transition={{ type: "tween", ease: [0.16, 1, 0.3, 1], duration: 0.35 }}
             className={cn(
               "fixed z-[71] flex flex-col bg-[#0a0a0a] text-white border border-white/10 shadow-2xl overflow-hidden",
               // Mobile: full-width bottom sheet
