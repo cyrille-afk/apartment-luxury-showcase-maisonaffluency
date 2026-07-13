@@ -614,19 +614,18 @@ const DesignersHoverHero = () => {
           )}
         >
 
-          {/* Desktop: Directory pinned to the right page margin, y-aligned
-              with the MASTERS label (see mastersRef + directoryTop effect below). */}
-          <div
-            className="hidden md:block md:absolute z-40 pointer-events-auto right-6 sm:right-12 md:right-20 lg:right-28"
-            style={directoryTop != null ? { top: directoryTop } : undefined}
-          >
-            {directoryLabels("w-fit", directoryRef, "right")}
-          </div>
           <div className="w-full max-w-xs sm:max-w-sm md:max-w-md">
             <div className="relative inline-block">
               {/* Localized text overlay — separates the typography from the
                   busy background image while keeping the editorial edge soft. */}
               <div className="absolute -inset-3 sm:-inset-4 md:-inset-5 -z-10 rounded-sm bg-gradient-to-r from-black/60 via-black/35 to-transparent" />
+
+              {/* Desktop: Directory sits directly above the designer list to
+                  group navigation (list) with its utility (search) — Proximity. */}
+              <div className="hidden md:block mb-5 lg:mb-6">
+                {directoryLabels("w-fit", directoryRef, "left")}
+              </div>
+
               <nav
                 ref={navRef}
                 aria-label="Featured designers shortcut list"
