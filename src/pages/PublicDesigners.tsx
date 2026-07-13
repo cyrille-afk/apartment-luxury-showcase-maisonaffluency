@@ -70,7 +70,9 @@ function HeroAlphabetBar() {
     (letter: string) => {
       if (!activeLetters.has(letter)) return;
       setSelectedLetter(letter);
-      jumpToDesignerLetter(letter);
+      window.dispatchEvent(new Event("unlockDesignersScroll"));
+      // Wait for scroll-lock release + layout before measuring letter offset.
+      requestAnimationFrame(() => requestAnimationFrame(() => jumpToDesignerLetter(letter)));
     },
     [activeLetters]
   );
