@@ -1,4 +1,4 @@
-import React, { useMemo, useCallback } from "react";
+import React from "react";
 import { useSearchParams, Navigate } from "react-router-dom";
 import { categoryUrl } from "@/lib/categorySlugs";
 import { Helmet } from "react-helmet-async";
@@ -9,8 +9,7 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import DesignersDirectory from "@/components/DesignersDirectory";
 import DesignersHoverHero from "@/components/DesignersHoverHero";
-import { useAllDesigners } from "@/hooks/useDesigner";
-import { jumpToDesignerLetter } from "@/lib/jumpToDesignerLetter";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 
 // ─── Back to Top Button ──────────────────────────────────────────────────────
@@ -43,76 +42,6 @@ function BackToTopButton() {
   );
 }
 
-// ─── A-Z Jump Bar (positioned at the bottom edge of the hero image) ─────────
-const LETTERS = [...("ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("")), "#"];
-
-function HeroAlphabetBar() {
-  const { data: designers = [] } = useAllDesigners();
-  const [searchParams] = useSearchParams();
-  const [hoveredLetter, setHoveredLetter] = useState<string | null>(null);
-  const [selectedLetter, setSelectedLetter] = useState<string | undefined>(searchParams.get("letter") || undefined);
-
-  const activeLetters = useMemo(() => {
-    const set = new Set<string>();
-    designers
-      .filter((d) => d.is_published)
-      .forEach((d) => {
-        const firstChar = d.name.normalize("NFD").replace(/[\u0300-\u036f]/g, "")[0];
-        const letter = firstChar?.toUpperCase() || "#";
-        set.add(letter);
-      });
-    return set;
-  }, [designers]);
-
-  const jumpToLetter = useCallback(
-    (letter: string) => {
-      if (!activeLetters.has(letter)) return;
-      setSelectedLetter(letter);
-      window.dispatchEvent(new Event("unlockDesignersScroll"));
-      // Wait for scroll-lock release + layout before measuring letter offset.
-      requestAnimationFrame(() => requestAnimationFrame(() => jumpToDesignerLetter(letter)));
-    },
-    [activeLetters]
-  );
-
-
-  return (
-    <div className="hidden md:block absolute bottom-0 left-0 right-0 z-20 pointer-events-none">
-      <div className="pointer-events-auto bg-gradient-to-t from-[#0a0a0a]/95 via-[#0a0a0a]/75 to-transparent backdrop-blur-[2px]">
-        <div className="flex justify-center pt-3">
-          <div className="h-px w-24 bg-[linear-gradient(90deg,rgba(255,255,255,0.35)_0%,rgba(255,255,255,0.35)_40%,transparent_40%,transparent_60%,rgba(255,255,255,0.35)_60%,rgba(255,255,255,0.35)_100%)]" aria-hidden="true" />
-        </div>
-        <div className="px-6 sm:px-12 md:px-20 lg:px-28 py-4 flex items-center justify-between">
-          {LETTERS.map((letter) => {
-            const isActive = activeLetters.has(letter);
-            const isSelected = selectedLetter === letter;
-            const isHovered = hoveredLetter === letter;
-            const showAccent = isActive && (isSelected || isHovered);
-            return (
-              <button
-                key={letter}
-                disabled={!isActive}
-                onMouseEnter={() => setHoveredLetter(letter)}
-                onMouseLeave={() => setHoveredLetter(null)}
-                onClick={() => jumpToLetter(letter)}
-                className={`font-serif text-base md:text-lg lg:text-xl leading-none transition-colors duration-200 ${
-                  isActive
-                    ? showAccent
-                      ? "text-[hsl(var(--gold))] underline decoration-[hsl(var(--gold))] decoration-2 underline-offset-4"
-                      : "text-white/95 hover:text-[hsl(var(--gold))]"
-                    : "text-white/40 cursor-default"
-                }`}
-                aria-label={isActive ? `Jump to designers starting with ${letter}` : undefined}
-              >
-                {letter}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-    </div>
-  );
-}
 
 // ─── Main Page ───────────────────────────────────────────────────────────────
 const PublicDesigners = () => {
@@ -157,10 +86,9 @@ const PublicDesigners = () => {
 };
 
 /**
- * The /designers landing is intentionally locked to the viewport: the user
- * must engage the A–Z bar or the "Find A Designer" bottom sheet to browse.
- * Scroll unlocks on the first letter click (custom `unlockDesignersScroll`
- * event) and stays unlocked for the remainder of the session on this page.
+ * The /designers landing is locked to the viewport on mobile only. On desktop
+ * the page scrolls normally so the directory below is reachable, while the
+ * "Find A Designer" sheet still provides quick access.
  */
 function ScrollLockedDesigners({
   initialLetter,
@@ -169,7 +97,10 @@ function ScrollLockedDesigners({
   initialLetter?: string;
   initialExpand?: string;
 }) {
-  const [locked, setLocked] = useState(true);
+  const [locked, setLocked] = useState(() =>
+    typeof window === "undefined" || window.matchMedia("(max-width: 767px)").matches
+  );
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     if (!locked) return;
@@ -188,6 +119,11 @@ function ScrollLockedDesigners({
     };
   }, [locked]);
 
+  // Without the desktop A-Z jump bar, the page should scroll normally on desktop.
+  useEffect(() => {
+    if (!isMobile) setLocked(false);
+  }, [isMobile]);
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Navigation />
@@ -199,7 +135,7 @@ function ScrollLockedDesigners({
           <div className={locked ? "relative md:h-full" : "relative"}>
 
             <DesignersHoverHero />
-            <HeroAlphabetBar />
+            
           </div>
           <DesignersDirectory mode="designers" initialLetter={initialLetter} initialExpand={initialExpand} showHeader={false} showAlphabetBar={false} />
         </div>

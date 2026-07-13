@@ -17,7 +17,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { Search, X, ChevronRight } from "lucide-react";
+import { Search, X } from "lucide-react";
 
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -149,12 +149,10 @@ const DesignersHoverHero = () => {
   const [showPortalCursor, setShowPortalCursor] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [expandedLetters, setExpandedLetters] = useState<Set<string>>(new Set());
-  const [pendingRevealLetter, setPendingRevealLetter] = useState<string | null>(null);
   const [selectedLetter, setSelectedLetter] = useState<string | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const searchScrollRef = useRef<HTMLDivElement>(null);
-  const letterItemRefs = useRef<Record<string, HTMLLIElement | null>>({});
+  
   const isMobileHook = useIsMobile();
   const [isMobileViewport, setIsMobileViewport] = useState(() =>
     typeof window !== "undefined" && window.matchMedia("(max-width: 767px)").matches
@@ -367,60 +365,8 @@ const DesignersHoverHero = () => {
       .sort((a, b) => sortNameKey(a.name).localeCompare(sortNameKey(b.name)));
   }, [allDesigners]);
 
-  // Auto-expand all letters while searching so matches are immediately visible.
   const isSearching = searchQuery.trim().length > 0;
-  const effectiveExpanded = useMemo(() => {
-    if (isSearching) return new Set(groupedResults.map(([l]) => l));
-    return expandedLetters;
-  }, [isSearching, groupedResults, expandedLetters]);
-
-  const toggleLetter = (letter: string) => {
-    setExpandedLetters((prev) => {
-      const next = new Set(prev);
-      if (next.has(letter)) {
-        next.delete(letter);
-      } else {
-        next.add(letter);
-        setPendingRevealLetter(letter);
-      }
-      return next;
-    });
-  };
-
-  // Keep newly opened groups fully visible inside the fixed sheet instead of
-  // making users manually scroll to see the lower names under letters like S.
-  useEffect(() => {
-    if (!searchOpen || !pendingRevealLetter) return;
-    const container = searchScrollRef.current;
-    const item = letterItemRefs.current[pendingRevealLetter];
-    if (!container || !item) return;
-
-    const reveal = () => {
-      const containerRect = container.getBoundingClientRect();
-      const itemRect = item.getBoundingClientRect();
-      const bottomOverflow = itemRect.bottom - containerRect.bottom;
-      const topOverflow = itemRect.top - containerRect.top;
-
-      if (bottomOverflow > 0) {
-        container.scrollBy({ top: bottomOverflow + 16, behavior: "smooth" });
-      } else if (topOverflow < 0) {
-        container.scrollBy({ top: topOverflow - 16, behavior: "smooth" });
-      }
-    };
-
-    const raf = window.requestAnimationFrame(() => {
-      reveal();
-    });
-    const timeout = window.setTimeout(() => {
-      reveal();
-      setPendingRevealLetter(null);
-    }, 260);
-
-    return () => {
-      window.cancelAnimationFrame(raf);
-      window.clearTimeout(timeout);
-    };
-  }, [searchOpen, pendingRevealLetter, expandedLetters]);
+  
 
   // Mobile A–Z compact grid: quick lookup of which letters have designers,
   // and the items for the currently selected letter.
@@ -903,61 +849,25 @@ const DesignersHoverHero = () => {
                     </ul>
                   </div>
 
-                  {/* Desktop: A–Z accordion */}
-                  <ul className="hidden md:flex flex-col">
-                    {groupedResults.map(([letter, items]) => {
-                      const isOpen = effectiveExpanded.has(letter);
-                      return (
-                        <li
-                          key={letter}
-                          ref={(node) => {
-                            letterItemRefs.current[letter] = node;
-                          }}
-                          className="border-b border-white/[0.06] last:border-b-0"
+                  {/* Desktop: flat alphabetical list (no A–Z accordion) */}
+                  <ul className="hidden md:flex flex-col py-2">
+                    {flatResults.map((d) => (
+                      <li key={d.slug}>
+                        <Link
+                          to={`/designers/${d.slug}`}
+                          state={{ fromDesignersHero: true }}
+                          onClick={() => setSearchOpen(false)}
+                          className="block px-4 py-2 font-body text-[14px] text-white/80 hover:text-white hover:bg-white/[0.04] transition-colors"
                         >
-                          <button
-                            type="button"
-                            onClick={() => toggleLetter(letter)}
-                            aria-expanded={isOpen}
-                            className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-white/[0.04] transition-colors"
-                          >
-                            <span className="font-serif text-lg text-white/90">{letter}</span>
-                            <ChevronRight
-                              className={cn(
-                                "h-6 w-6 text-white/60 transition-transform duration-200 shrink-0",
-                                isOpen && "rotate-90"
-                              )}
-                              aria-hidden="true"
-                            />
-                          </button>
-                          <AnimatePresence initial={false}>
-                            {isOpen && (
-                              <motion.ul
-                                key="items"
-                                initial={{ height: 0, opacity: 0 }}
-                                animate={{ height: "auto", opacity: 1 }}
-                                exit={{ height: 0, opacity: 0 }}
-                                transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
-                                className="overflow-hidden"
-                              >
-                                {items.map((d) => (
-                                  <li key={d.slug}>
-                                    <Link
-                                      to={`/designers/${d.slug}`}
-                                      state={{ fromDesignersHero: true }}
-                                      onClick={() => setSearchOpen(false)}
-                                      className="block pl-8 pr-4 py-2 font-body text-[14px] text-white/80 hover:text-white hover:bg-white/[0.04] transition-colors"
-                                    >
-                                      {d.name}
-                                    </Link>
-                                  </li>
-                                ))}
-                              </motion.ul>
-                            )}
-                          </AnimatePresence>
-                        </li>
-                      );
-                    })}
+                          {d.name}
+                        </Link>
+                      </li>
+                    ))}
+                    {flatResults.length === 0 && (
+                      <li className="px-4 py-8 text-center text-sm font-body text-white/50">
+                        No designers match “{searchQuery}”.
+                      </li>
+                    )}
                   </ul>
                 </>
               )}
