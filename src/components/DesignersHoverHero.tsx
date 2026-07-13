@@ -812,11 +812,11 @@ const DesignersHoverHero = () => {
             transition={{ type: "tween", ease: [0.16, 1, 0.3, 1], duration: 0.35 }}
             className={cn(
               "fixed z-[71] flex flex-col bg-[#0a0a0a] text-white border border-white/10 shadow-2xl overflow-hidden",
-              // Mobile: half-height bottom sheet anchored to bottom
-              "inset-x-0 bottom-0 max-h-[50vh] rounded-t-2xl pb-[env(safe-area-inset-bottom)]",
+              // Mobile: bottom sheet anchored to bottom
+              "inset-x-0 bottom-0 max-h-[75vh] rounded-t-2xl pb-[env(safe-area-inset-bottom)]",
               // Desktop: anchored popover further to the right of the Find A Designer
               // link so the directory label is never truncated. Nav stays visible.
-              "md:inset-x-auto md:left-[34rem] lg:left-[36rem] md:right-auto md:bottom-20 md:w-[380px] md:max-w-[calc(100vw-34rem)] lg:max-w-[calc(100vw-36rem)] md:max-h-[calc(100vh-var(--header-h)-6rem)] md:rounded-xl md:pb-0"
+              "md:inset-x-auto md:left-[34rem] lg:left-[36rem] md:right-auto md:bottom-20 md:w-[380px] md:max-w-[calc(100vw-34rem)] lg:max-w-[calc(100vw-36rem)] md:max-h-[50vh] md:rounded-xl md:pb-0"
             )}
           >
             <div className="mx-auto mt-2 h-1 w-10 rounded-full bg-white/25 shrink-0" aria-hidden="true" />
