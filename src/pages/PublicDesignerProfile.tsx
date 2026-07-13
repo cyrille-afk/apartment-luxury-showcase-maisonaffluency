@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, useRef } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
-import { useParams, Link, Navigate, useSearchParams, useNavigate } from "react-router-dom";
+import { useParams, Link, Navigate, useSearchParams, useNavigate, useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Package, FileText, Maximize2, Share2, Check, ChevronDown } from "lucide-react";
@@ -352,6 +352,8 @@ const PublicDesignerProfile = () => {
   const [shareCopied, setShareCopied] = useState(false);
   const isMobile = useIsMobile();
   const navigate = useNavigate();
+  const location = useLocation();
+  const fromDesignersHero = Boolean((location.state as { fromDesignersHero?: boolean } | null)?.fromDesignersHero);
   const picksSectionRef = useRef<HTMLDivElement | null>(null);
   const lightboxOpenRef = useRef(false);
 
@@ -845,6 +847,8 @@ const PublicDesignerProfile = () => {
               <Link
                 to={fromNewIn
                   ? `/new-in?designer=${slug}`
+                  : fromDesignersHero
+                    ? "/designers"
                   : (() => {
                       const isChild = designer?.founder && designer.founder !== designer.name;
                       const baseName = isChild ? designer.founder : designer?.name;
