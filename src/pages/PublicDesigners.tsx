@@ -11,7 +11,6 @@ import DesignersDirectory from "@/components/DesignersDirectory";
 import DesignersHoverHero from "@/components/DesignersHoverHero";
 import { useAllDesigners } from "@/hooks/useDesigner";
 import { getDesignersDirectoryAnchorId } from "@/lib/designersDirectoryAnchors";
-import { scrollToSection } from "@/lib/scrollToSection";
 import { jumpToDesignerLetter } from "@/lib/jumpToDesignerLetter";
 
 
@@ -194,10 +193,10 @@ function ScrollLockedDesigners({
     <div className="min-h-screen bg-background text-foreground">
       <Navigation />
 
-      <div className="pt-20">
+      <div className="pt-[var(--header-h)]">
         <h1 className="sr-only">Designers &amp; Ateliers</h1>
 
-        <div className={locked ? "overflow-hidden md:h-[88vh]" : "pb-20"}>
+        <div className={locked ? "overflow-hidden md:h-[calc(100svh-var(--header-h))]" : "pb-20"}>
           <div className={locked ? "relative md:h-full" : "relative"}>
 
             <DesignersHoverHero />
