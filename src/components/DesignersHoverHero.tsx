@@ -555,7 +555,10 @@ const DesignersHoverHero = () => {
                       groupIdx > 0 && "mt-5 md:mt-6"
                     )}
                   >
-                    <span className="text-[10px] uppercase tracking-[0.3em] font-body text-white/50 mb-2 md:mb-3">
+                    <span
+                      ref={groupIdx === 0 ? mastersRef : undefined}
+                      className="text-[10px] uppercase tracking-[0.3em] font-body text-white/50 mb-2 md:mb-3"
+                    >
                       {group.label}
                     </span>
                     <ul className="flex flex-col gap-1 text-left">
