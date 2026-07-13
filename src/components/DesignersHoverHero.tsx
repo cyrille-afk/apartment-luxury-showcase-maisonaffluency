@@ -601,17 +601,13 @@ const DesignersHoverHero = () => {
           )}
         >
 
-          {/* Desktop: Directory pinned top-right, y-aligned with the MASTERS
-              label (see mastersRef + directoryTop effect below). */}
+          {/* Desktop: Directory pinned to the right page margin, y-aligned
+              with the MASTERS label (see mastersRef + directoryTop effect below). */}
           <div
-            className="hidden md:block md:absolute z-40 pointer-events-auto"
-            style={
-              directoryTop != null && directoryLeft != null
-                ? { top: directoryTop, left: directoryLeft }
-                : undefined
-            }
+            className="hidden md:block md:absolute z-40 pointer-events-auto right-6 sm:right-12 md:right-20 lg:right-28"
+            style={directoryTop != null ? { top: directoryTop } : undefined}
           >
-            {directoryLabels("w-fit", directoryRef)}
+            {directoryLabels("w-fit", directoryRef, "right")}
           </div>
           <div className="w-full max-w-xs sm:max-w-sm md:max-w-md">
             <div className="relative inline-block">
