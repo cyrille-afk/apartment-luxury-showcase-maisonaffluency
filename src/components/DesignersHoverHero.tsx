@@ -442,6 +442,7 @@ const DesignersHoverHero = () => {
       const m = mastersRef.current;
       const s = sectionRef.current;
       const t = activeTitleRef.current;
+      const l = lastItemRef.current;
       if (!m || !s) return;
       const mRect = m.getBoundingClientRect();
       const sRect = s.getBoundingClientRect();
@@ -452,6 +453,13 @@ const DesignersHoverHero = () => {
         const tRect = t.getBoundingClientRect();
         setDirectoryLeft(tRect.left - sRect.left);
         directoryLeftLockedRef.current = true;
+      }
+      // Baseline-align the right-side active title with the last featured
+      // designer (Victoria Magniant): title.bottom = lastItem.bottom.
+      if (l && t) {
+        const lRect = l.getBoundingClientRect();
+        const tH = t.getBoundingClientRect().height;
+        setActiveTitleTop(lRect.bottom - sRect.top - tH);
       }
     };
     update();
