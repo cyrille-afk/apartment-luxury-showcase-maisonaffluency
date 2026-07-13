@@ -97,7 +97,9 @@ function ScrollLockedDesigners({
   initialLetter?: string;
   initialExpand?: string;
 }) {
-  const [locked, setLocked] = useState(true);
+  const [locked, setLocked] = useState(() =>
+    typeof window === "undefined" || window.matchMedia("(max-width: 767px)").matches
+  );
   const isMobile = useIsMobile();
 
   useEffect(() => {
