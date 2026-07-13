@@ -157,9 +157,11 @@ const DesignersHoverHero = () => {
   const directoryRef = useRef<HTMLDivElement>(null);
   const mastersRef = useRef<HTMLSpanElement>(null);
   const activeTitleRef = useRef<HTMLSpanElement>(null);
+  const lastItemRef = useRef<HTMLLIElement>(null);
   const [dropdownPos, setDropdownPos] = useState<{ left: number; top: number; height: number } | null>(null);
   const [directoryTop, setDirectoryTop] = useState<number | null>(null);
   const [directoryLeft, setDirectoryLeft] = useState<number | null>(null);
+  const [activeTitleTop, setActiveTitleTop] = useState<number | null>(null);
 
   const isMobileHook = useIsMobile();
   const [isMobileViewport, setIsMobileViewport] = useState(() =>
