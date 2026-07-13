@@ -303,6 +303,35 @@ const DesignersHoverHero = () => {
     };
   }, [hasItems, items]);
 
+  // Lock body scroll + ESC-to-close + autofocus while the search sheet is open.
+  useEffect(() => {
+    if (!searchOpen) return;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setSearchOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    // Delay focus so the slide-up animation is visible before the keyboard opens.
+    const t = window.setTimeout(() => searchInputRef.current?.focus(), 220);
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      window.removeEventListener("keydown", onKey);
+      window.clearTimeout(t);
+    };
+  }, [searchOpen]);
+
+  const searchResults = useMemo(() => {
+    const list = (allDesigners as any[])
+      .filter((d) => d.is_published && !d.trade_only)
+      .map((d) => ({ slug: d.slug as string, name: d.name as string }));
+    const q = searchQuery.trim().toLowerCase();
+    const filtered = q
+      ? list.filter((d) => d.name.toLowerCase().includes(q))
+      : list;
+    return filtered.sort((a, b) => sortNameKey(a.name).localeCompare(sortNameKey(b.name)));
+  }, [allDesigners, searchQuery]);
+
   if (!hasItems) return null;
 
   const directoryLabels = (className: string) => (
