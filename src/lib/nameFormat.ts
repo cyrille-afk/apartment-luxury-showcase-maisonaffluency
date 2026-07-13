@@ -34,7 +34,36 @@ const stripAccents = (s: string) =>
 const SORT_KEY_OVERRIDES: Record<string, string> = {
   "apparatus studio": "apparatus",
   "lost profile studio": "lost",
+  "collection particulière": "collection",
+  "collection particuliere": "collection",
+  "man of parts": "man",
+  "lazzarini & pickering": "lazzarini",
+  "alinea design objects": "alinea",
+  "herzog & de meuron": "herzog",
+  "garnier & linker": "garnier",
+  "gounot & jähnke": "gounot",
+  "gounot & jahnke": "gounot",
+  "rowin' atelier — rochette frederic & winkler hervé": "rowin",
+  "rowin' atelier - rochette frederic & winkler hervé": "rowin",
+  "rowin' atelier": "rowin",
+  "forest & giaconia": "forest",
+  "made in kira - roman frankel": "made",
+  "made in kira": "made",
+  "poltrona frau": "poltrona",
 };
+
+// Display name overrides: strip trailing person suffix for brands that should
+// only show the atelier name.
+const DISPLAY_NAME_OVERRIDES: Record<string, string> = {
+  "rowin' atelier — rochette frederic & winkler hervé": "RoWin' Atelier",
+  "rowin' atelier - rochette frederic & winkler hervé": "RoWin' Atelier",
+  "made in kira - roman frankel": "Made in Kira",
+};
+
+export function displayDesignerName(name: string): string {
+  const key = name.trim().toLowerCase();
+  return DISPLAY_NAME_OVERRIDES[key] || name;
+}
 
 export function sortNameKey(name: string): string {
   const full = name.trim();
