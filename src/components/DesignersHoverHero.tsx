@@ -434,9 +434,9 @@ const DesignersHoverHero = () => {
             if (directoryRef.current) {
               const rect = directoryRef.current.getBoundingClientRect();
               const width = 380;
-              const gap = 12;
+              const gap = 24;
               setDropdownPos({
-                left: Math.max(16, rect.left - width - gap),
+                left: Math.min(window.innerWidth - width - 16, rect.right + gap),
                 top: rect.top + window.scrollY,
               });
             }
