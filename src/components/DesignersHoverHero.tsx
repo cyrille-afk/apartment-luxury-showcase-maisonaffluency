@@ -750,9 +750,9 @@ const DesignersHoverHero = () => {
               "fixed z-[71] flex flex-col bg-[#0a0a0a] text-white border border-white/10 shadow-2xl overflow-hidden",
               // Mobile: full-width bottom sheet
               "inset-x-0 bottom-0 max-h-[75vh] rounded-t-2xl pb-[env(safe-area-inset-bottom)]",
-              // Desktop: anchored popover to the right of the Find A Designer link,
-              // sliding up from just above the directory label. Nav stays visible.
-              "md:inset-x-auto md:left-[30rem] lg:left-[32rem] md:right-auto md:bottom-20 md:w-[380px] md:max-w-[calc(100vw-32rem)] md:max-h-[60vh] md:rounded-xl md:pb-0"
+              // Desktop: anchored popover further to the right of the Find A Designer
+              // link so the directory label is never truncated. Nav stays visible.
+              "md:inset-x-auto md:left-[34rem] lg:left-[36rem] md:right-auto md:bottom-20 md:w-[380px] md:max-w-[calc(100vw-34rem)] lg:max-w-[calc(100vw-36rem)] md:max-h-[60vh] md:rounded-xl md:pb-0"
             )}
           >
             <div className="mx-auto mt-2 h-1 w-10 rounded-full bg-white/25 shrink-0" aria-hidden="true" />
