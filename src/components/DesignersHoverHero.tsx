@@ -430,32 +430,45 @@ const DesignersHoverHero = () => {
   }, [activeAccordionLetter, expandedLetters, isDesktopViewport, searchOpen]);
 
   // Keep Directory y-aligned with MASTERS and x-aligned with the first letter
-  // of the active designer title at the bottom of the hero.
+  // of the INITIAL active designer title (Alexander Lamont). The x anchor is
+  // locked to the first designer so the Directory does not shift horizontally
+  // when the user hovers other names of varying widths.
+  const directoryLeftLockedRef = useRef(false);
   useEffect(() => {
     if (typeof window === "undefined") return;
     const update = () => {
       const m = mastersRef.current;
       const s = sectionRef.current;
       const t = activeTitleRef.current;
-      if (!m || !s || !t) return;
+      if (!m || !s) return;
       const mRect = m.getBoundingClientRect();
       const sRect = s.getBoundingClientRect();
-      const tRect = t.getBoundingClientRect();
       setDirectoryTop(mRect.top - sRect.top);
-      setDirectoryLeft(tRect.left - sRect.left);
+      // Lock horizontal alignment to the first designer measured (Alexander
+      // Lamont). Never update again on subsequent hovers.
+      if (!directoryLeftLockedRef.current && t) {
+        const tRect = t.getBoundingClientRect();
+        setDirectoryLeft(tRect.left - sRect.left);
+        directoryLeftLockedRef.current = true;
+      }
     };
     update();
     const t1 = window.setTimeout(update, 100);
     const t2 = window.setTimeout(update, 400);
-    window.addEventListener("resize", update);
+    const onResize = () => {
+      // Allow x re-measurement on resize since layout changed.
+      directoryLeftLockedRef.current = false;
+      update();
+    };
+    window.addEventListener("resize", onResize);
     window.addEventListener("scroll", update, { passive: true });
     return () => {
       window.clearTimeout(t1);
       window.clearTimeout(t2);
-      window.removeEventListener("resize", update);
+      window.removeEventListener("resize", onResize);
       window.removeEventListener("scroll", update);
     };
-  }, [hasItems, items.length, activeSlug]);
+  }, [hasItems, items.length]);
 
   // Desktop dropdown opens to the left of Directory and matches the height of
   // the left featured-designers list.
