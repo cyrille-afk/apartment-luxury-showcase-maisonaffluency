@@ -628,15 +628,13 @@ const DesignersHoverHero = () => {
 
           <div className="w-full max-w-xs sm:max-w-sm md:max-w-md">
             <div className="relative inline-block">
-              {/* Localized text overlay — separates the typography from the
-                  busy background image while keeping the editorial edge soft. */}
-              <div className="absolute -inset-3 sm:-inset-4 md:-inset-5 -z-10 rounded-sm bg-gradient-to-r from-black/60 via-black/35 to-transparent" />
-
               {/* Desktop: Directory sits directly above the designer list to
-                  group navigation (list) with its utility (search) — Proximity. */}
+                  group navigation (list) with its utility (search) — Proximity.
+                  All items share the same left edge as the designer names. */}
               <div className="hidden md:block mb-5 lg:mb-6">
                 {directoryLabels("w-fit", directoryRef, "left")}
               </div>
+
 
               <nav
                 ref={navRef}
