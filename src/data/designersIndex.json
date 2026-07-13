@@ -16,6 +16,10 @@
     "name": "Reda Amalou"
   },
   {
+    "slug": "apparatus-studio",
+    "name": "Apparatus Studio"
+  },
+  {
     "slug": "arredoluce",
     "name": "Arredoluce"
   },
@@ -90,6 +94,10 @@
   {
     "slug": "laurent-maugoust-cecile-chenais",
     "name": "Laurent Maugoust & Cécile Chenais"
+  },
+  {
+    "slug": "andrea-claire-studio",
+    "name": "Andrea Claire Studio"
   },
   {
     "slug": "olivia-cognet",
@@ -232,6 +240,10 @@
     "name": "Kiko Lopez"
   },
   {
+    "slug": "lost-profile-studio",
+    "name": "Lost Profile Studio"
+  },
+  {
     "slug": "victoria-magniant",
     "name": "Victoria Magniant"
   },
@@ -332,6 +344,10 @@
     "name": "Saint-Louis"
   },
   {
+    "slug": "eric-schmitt-studio",
+    "name": "Eric Schmitt Studio"
+  },
+  {
     "slug": "leo-sentou",
     "name": "Leo Sentou"
   },
@@ -346,22 +362,6 @@
   {
     "slug": "emmanuel-levet-stenne",
     "name": "Emmanuel Levet Stenne"
-  },
-  {
-    "slug": "lost-profile-studio",
-    "name": "Lost Profile Studio"
-  },
-  {
-    "slug": "andrea-claire-studio",
-    "name": "Andrea Claire Studio"
-  },
-  {
-    "slug": "apparatus-studio",
-    "name": "Apparatus Studio"
-  },
-  {
-    "slug": "eric-schmitt-studio",
-    "name": "Eric Schmitt Studio"
   },
   {
     "slug": "studioilse",
