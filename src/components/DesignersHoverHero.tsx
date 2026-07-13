@@ -765,8 +765,8 @@ const DesignersHoverHero = () => {
         <div className="w-px h-28 bg-gradient-to-b from-white/70 to-transparent" />
       </div>
 
-      {/* Bottom-sheet A–Z search — expands upward from the Directory link.
-          Intentionally overlays the hero without changing any top-of-page layout. */}
+      {/* Designer search: mobile bottom-sheet, desktop dropdown beside the
+          Directory button. */}
       <AnimatePresence>
         {searchOpen && (
           <motion.div
@@ -787,18 +787,26 @@ const DesignersHoverHero = () => {
             role="dialog"
             aria-modal="true"
             aria-label="Browse designers A to Z"
-            initial={{ y: "100%", opacity: 0.6 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: "100%", opacity: 0 }}
-            transition={{ type: "tween", ease: [0.16, 1, 0.3, 1], duration: 0.35 }}
+            initial={
+              isDesktopViewport
+                ? { opacity: 0, y: -10, scale: 0.96 }
+                : { y: "100%", opacity: 0.6 }
+            }
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={
+              isDesktopViewport
+                ? { opacity: 0, y: -10, scale: 0.96 }
+                : { y: "100%", opacity: 0 }
+            }
+            transition={{ type: "tween", ease: [0.16, 1, 0.3, 1], duration: 0.25 }}
             className={cn(
               "fixed z-[71] flex flex-col bg-[#0a0a0a] text-white border border-white/10 shadow-2xl overflow-hidden",
               // Mobile: bottom sheet anchored to bottom
               "inset-x-0 bottom-0 max-h-[75vh] rounded-t-2xl pb-[env(safe-area-inset-bottom)]",
-              // Desktop: anchored popover further to the right of the Find A Designer
-              // link so the directory label is never truncated. Nav stays visible.
-              "md:inset-x-auto md:left-[34rem] lg:left-[36rem] md:right-auto md:bottom-20 md:w-[380px] md:max-w-[calc(100vw-34rem)] lg:max-w-[calc(100vw-36rem)] md:max-h-[50vh] md:rounded-xl md:pb-0"
+              // Desktop: dropdown anchored to the Directory button via inline styles.
+              "md:inset-x-auto md:right-auto md:w-[380px] md:max-w-[calc(100vw-2rem)] md:max-h-[50vh] md:rounded-xl md:pb-0"
             )}
+            style={dropdownPos ? { left: dropdownPos.left, top: dropdownPos.top } : undefined}
           >
             <div className="mx-auto mt-2 h-1 w-10 rounded-full bg-white/25 shrink-0" aria-hidden="true" />
             <div className="flex items-center gap-3 px-5 pt-3 pb-3 border-b border-white/10 shrink-0">
