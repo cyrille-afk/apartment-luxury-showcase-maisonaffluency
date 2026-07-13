@@ -428,7 +428,10 @@ const DesignersHoverHero = () => {
   // Desktop dropdown opens to the left of Directory and matches the height of
   // the left featured-designers list.
   useEffect(() => {
-    if (!searchOpen || !directoryRef.current) return;
+    if (!searchOpen || !isDesktopViewport || !directoryRef.current) {
+      if (searchOpen && !isDesktopViewport) setDropdownPos(null);
+      return;
+    }
     const update = () => {
       const rect = directoryRef.current!.getBoundingClientRect();
       const navRect = navRef.current?.getBoundingClientRect();
@@ -448,7 +451,7 @@ const DesignersHoverHero = () => {
       window.removeEventListener("resize", update);
       window.removeEventListener("scroll", update);
     };
-  }, [searchOpen]);
+  }, [searchOpen, isDesktopViewport]);
 
   const isDesktopViewport = !isMobileViewport && !isMobileHook && !isStandalone;
 
