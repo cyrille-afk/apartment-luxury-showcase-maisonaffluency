@@ -155,8 +155,10 @@ const DesignersHoverHero = () => {
   const searchScrollRef = useRef<HTMLDivElement>(null);
   const directoryRef = useRef<HTMLDivElement>(null);
   const mastersRef = useRef<HTMLSpanElement>(null);
-  const [dropdownPos, setDropdownPos] = useState<{ left: number; top: number } | null>(null);
+  const activeTitleRef = useRef<HTMLSpanElement>(null);
+  const [dropdownPos, setDropdownPos] = useState<{ left: number; top: number; height: number } | null>(null);
   const [directoryTop, setDirectoryTop] = useState<number | null>(null);
+  const [directoryLeft, setDirectoryLeft] = useState<number | null>(null);
 
   const isMobileHook = useIsMobile();
   const [isMobileViewport, setIsMobileViewport] = useState(() =>
@@ -395,18 +397,20 @@ const DesignersHoverHero = () => {
     if (isSearching) setSelectedLetter(null);
   }, [isSearching]);
 
-  // Keep the desktop dropdown anchored to the Directory button as the page
-  // scrolls or the viewport changes.
-  // Keep Directory y-aligned with the MASTERS label.
+  // Keep Directory y-aligned with MASTERS and x-aligned with the first letter
+  // of the active designer title at the bottom of the hero.
   useEffect(() => {
     if (typeof window === "undefined") return;
     const update = () => {
       const m = mastersRef.current;
       const s = sectionRef.current;
-      if (!m || !s) return;
+      const t = activeTitleRef.current;
+      if (!m || !s || !t) return;
       const mRect = m.getBoundingClientRect();
       const sRect = s.getBoundingClientRect();
+      const tRect = t.getBoundingClientRect();
       setDirectoryTop(mRect.top - sRect.top);
+      setDirectoryLeft(tRect.left - sRect.left);
     };
     update();
     const t1 = window.setTimeout(update, 100);
@@ -419,17 +423,28 @@ const DesignersHoverHero = () => {
       window.removeEventListener("resize", update);
       window.removeEventListener("scroll", update);
     };
-  }, [hasItems, items.length]);
+  }, [hasItems, items.length, activeSlug]);
 
-  // Dropdown drops straight down from the Directory button, right-aligned to it.
+  const isDesktopViewport = !isMobileViewport && !isMobileHook && !isStandalone;
+
+  // Desktop dropdown opens to the left of Directory and matches the height of
+  // the left featured-designers list.
   useEffect(() => {
-    if (!searchOpen || !directoryRef.current) return;
+    if (!searchOpen || !isDesktopViewport || !directoryRef.current) {
+      if (searchOpen && !isDesktopViewport) setDropdownPos(null);
+      return;
+    }
     const update = () => {
       const rect = directoryRef.current!.getBoundingClientRect();
+      const navRect = navRef.current?.getBoundingClientRect();
       const width = 380;
       const gap = 12;
-      const left = Math.max(16, rect.right - width);
-      setDropdownPos({ left, top: rect.bottom + window.scrollY + gap });
+      const left = Math.max(16, rect.left - width - gap);
+      setDropdownPos({
+        left,
+        top: navRect?.top ?? rect.top,
+        height: navRect?.height ?? Math.max(320, window.innerHeight - rect.top - 24),
+      });
     };
     update();
     window.addEventListener("resize", update);
@@ -438,9 +453,7 @@ const DesignersHoverHero = () => {
       window.removeEventListener("resize", update);
       window.removeEventListener("scroll", update);
     };
-  }, [searchOpen]);
-
-  const isDesktopViewport = !isMobileViewport && !isMobileHook && !isStandalone;
+  }, [searchOpen, isDesktopViewport]);
 
   if (!hasItems) return null;
 
@@ -454,14 +467,18 @@ const DesignersHoverHero = () => {
         <button
           type="button"
           onClick={() => {
-            if (directoryRef.current) {
+            if (isDesktopViewport && directoryRef.current) {
               const rect = directoryRef.current.getBoundingClientRect();
+              const navRect = navRef.current?.getBoundingClientRect();
               const width = 380;
               const gap = 12;
               setDropdownPos({
-                left: Math.max(16, rect.right - width),
-                top: rect.bottom + window.scrollY + gap,
+                left: Math.max(16, rect.left - width - gap),
+                top: navRect?.top ?? rect.top,
+                height: navRect?.height ?? Math.max(320, window.innerHeight - rect.top - 24),
               });
+            } else {
+              setDropdownPos(null);
             }
             setSearchOpen(true);
           }}
@@ -548,8 +565,12 @@ const DesignersHoverHero = () => {
           {/* Desktop: Directory pinned top-right, y-aligned with the MASTERS
               label (see mastersRef + directoryTop effect below). */}
           <div
-            className="hidden md:block md:absolute md:right-12 lg:right-20 z-40 pointer-events-auto"
-            style={directoryTop != null ? { top: directoryTop } : undefined}
+            className="hidden md:block md:absolute z-40 pointer-events-auto"
+            style={
+              directoryTop != null && directoryLeft != null
+                ? { top: directoryTop, left: directoryLeft }
+                : undefined
+            }
           >
             {directoryLabels("w-fit", directoryRef)}
           </div>
@@ -739,6 +760,7 @@ const DesignersHoverHero = () => {
           >
             <div className="absolute right-12 lg:right-28 bottom-24 lg:bottom-24 flex flex-col items-end text-right text-white">
               <span
+                ref={activeTitleRef}
                 key={`${active.slug}-title`}
                 className="font-display font-light tracking-tight text-2xl lg:text-3xl animate-in fade-in duration-700"
               >
@@ -835,7 +857,16 @@ const DesignersHoverHero = () => {
               // Desktop: dropdown anchored to the Directory button via inline styles.
               "md:inset-x-auto md:right-auto md:w-[380px] md:max-w-[calc(100vw-2rem)] md:max-h-[calc(100vh-var(--header-h)-3rem)] md:rounded-xl md:pb-0"
             )}
-            style={dropdownPos ? { left: dropdownPos.left, top: dropdownPos.top } : undefined}
+            style={
+              dropdownPos
+                ? {
+                    left: dropdownPos.left,
+                    top: dropdownPos.top,
+                    height: isDesktopViewport ? dropdownPos.height : undefined,
+                    maxHeight: isDesktopViewport ? dropdownPos.height : undefined,
+                  }
+                : undefined
+            }
           >
             <div className="mx-auto mt-2 h-1 w-10 rounded-full bg-white/25 shrink-0" aria-hidden="true" />
             <div className="flex items-center gap-3 px-5 pt-3 pb-3 border-b border-white/10 shrink-0">
