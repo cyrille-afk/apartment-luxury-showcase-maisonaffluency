@@ -152,7 +152,9 @@ const DesignersHoverHero = () => {
   const [selectedLetter, setSelectedLetter] = useState<string | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const searchScrollRef = useRef<HTMLDivElement>(null);
-  
+  const directoryRef = useRef<HTMLDivElement>(null);
+  const [dropdownPos, setDropdownPos] = useState<{ left: number; top: number } | null>(null);
+
   const isMobileHook = useIsMobile();
   const [isMobileViewport, setIsMobileViewport] = useState(() =>
     typeof window !== "undefined" && window.matchMedia("(max-width: 767px)").matches
