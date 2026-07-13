@@ -86,10 +86,9 @@ const PublicDesigners = () => {
 };
 
 /**
- * The /designers landing is intentionally locked to the viewport: the user
- * must engage the A–Z bar or the "Find A Designer" bottom sheet to browse.
- * Scroll unlocks on the first letter click (custom `unlockDesignersScroll`
- * event) and stays unlocked for the remainder of the session on this page.
+ * The /designers landing is locked to the viewport on mobile only. On desktop
+ * the page scrolls normally so the directory below is reachable, while the
+ * "Find A Designer" sheet still provides quick access.
  */
 function ScrollLockedDesigners({
   initialLetter,
