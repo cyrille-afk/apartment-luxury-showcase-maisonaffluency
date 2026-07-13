@@ -397,20 +397,39 @@ const DesignersHoverHero = () => {
 
   // Keep the desktop dropdown anchored to the Directory button as the page
   // scrolls or the viewport changes.
+  // Keep Directory y-aligned with the MASTERS label.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const update = () => {
+      const m = mastersRef.current;
+      const s = sectionRef.current;
+      if (!m || !s) return;
+      const mRect = m.getBoundingClientRect();
+      const sRect = s.getBoundingClientRect();
+      setDirectoryTop(mRect.top - sRect.top);
+    };
+    update();
+    const t1 = window.setTimeout(update, 100);
+    const t2 = window.setTimeout(update, 400);
+    window.addEventListener("resize", update);
+    window.addEventListener("scroll", update, { passive: true });
+    return () => {
+      window.clearTimeout(t1);
+      window.clearTimeout(t2);
+      window.removeEventListener("resize", update);
+      window.removeEventListener("scroll", update);
+    };
+  }, [hasItems, items.length]);
+
+  // Dropdown drops straight down from the Directory button, right-aligned to it.
   useEffect(() => {
     if (!searchOpen || !directoryRef.current) return;
     const update = () => {
       const rect = directoryRef.current!.getBoundingClientRect();
-      const listRect = navRef.current?.getBoundingClientRect();
       const width = 380;
-      const gap = 32;
-      // Open to the right of the list column so the Masters names stay visible.
-      const anchorRight = Math.max(rect.right, listRect?.right ?? 0);
-      const left = Math.min(
-        window.innerWidth - width - 16,
-        anchorRight + gap
-      );
-      setDropdownPos({ left, top: rect.top + window.scrollY });
+      const gap = 12;
+      const left = Math.max(16, rect.right - width);
+      setDropdownPos({ left, top: rect.bottom + window.scrollY + gap });
     };
     update();
     window.addEventListener("resize", update);
