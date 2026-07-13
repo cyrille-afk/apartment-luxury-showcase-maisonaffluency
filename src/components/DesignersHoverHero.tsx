@@ -801,7 +801,7 @@ const DesignersHoverHero = () => {
               // Mobile: bottom sheet anchored to bottom
               "inset-x-0 bottom-0 max-h-[75vh] rounded-t-2xl pb-[env(safe-area-inset-bottom)]",
               // Desktop: dropdown anchored to the Directory button via inline styles.
-              "md:inset-x-auto md:right-auto md:w-[380px] md:max-w-[calc(100vw-2rem)] md:max-h-[50vh] md:rounded-xl md:pb-0"
+              "md:inset-x-auto md:right-auto md:w-[380px] md:max-w-[calc(100vw-2rem)] md:max-h-[calc(100vh-var(--header-h)-3rem)] md:rounded-xl md:pb-0"
             )}
             style={dropdownPos ? { left: dropdownPos.left, top: dropdownPos.top } : undefined}
           >
