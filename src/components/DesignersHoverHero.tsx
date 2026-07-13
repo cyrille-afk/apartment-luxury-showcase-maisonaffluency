@@ -817,23 +817,16 @@ const DesignersHoverHero = () => {
               <span
                 ref={activeTitleRef}
                 key={`${active.slug}-title`}
-                className="font-display font-light tracking-tight text-2xl lg:text-3xl animate-in fade-in duration-700"
+                className="font-display font-light tracking-tight text-2xl lg:text-3xl leading-[1.5] animate-in fade-in duration-700"
               >
                 {first}
                 {last && <span className="italic"> {last}</span>}
               </span>
               <span
                 key={`${active.slug}-cta`}
-                className="mt-2 inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.35em] font-body text-white/70 group-hover:text-white transition-colors animate-in fade-in duration-1000 delay-200 fill-mode-both"
+                className="mt-3 inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.35em] font-body font-medium text-white/70 group-hover:text-white underline decoration-white/40 underline-offset-4 group-hover:decoration-white/80 transition-colors animate-in fade-in duration-1000 delay-200 fill-mode-both"
               >
-                <span className="relative">
-                  Click to view full collection
-                  {/* Sliding underline on hover */}
-                  <span
-                    aria-hidden="true"
-                    className="pointer-events-none absolute left-0 -bottom-0.5 h-px bg-white/80 w-0 group-hover:w-full transition-[width] duration-500 ease-out"
-                  />
-                </span>
+                <span>Click to view full collection</span>
                 {/* Arrow reveals + slides on hover */}
                 <span
                   aria-hidden="true"
