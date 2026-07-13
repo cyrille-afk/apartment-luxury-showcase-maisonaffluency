@@ -134,7 +134,7 @@ function ScrollLockedDesigners({
           <div className={locked ? "relative md:h-full" : "relative"}>
 
             <DesignersHoverHero />
-            <HeroAlphabetBar />
+            
           </div>
           <DesignersDirectory mode="designers" initialLetter={initialLetter} initialExpand={initialExpand} showHeader={false} showAlphabetBar={false} />
         </div>
