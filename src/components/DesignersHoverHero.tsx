@@ -399,12 +399,14 @@ const DesignersHoverHero = () => {
     if (!searchOpen || !directoryRef.current) return;
     const update = () => {
       const rect = directoryRef.current!.getBoundingClientRect();
+      const listRect = navRef.current?.getBoundingClientRect();
       const width = 380;
-      const gap = 24;
-      // Open to the RIGHT of the button, into the empty image area.
+      const gap = 32;
+      // Open to the right of the list column so the Masters names stay visible.
+      const anchorRight = Math.max(rect.right, listRect?.right ?? 0);
       const left = Math.min(
         window.innerWidth - width - 16,
-        rect.right + gap
+        anchorRight + gap
       );
       setDropdownPos({ left, top: rect.top + window.scrollY });
     };
