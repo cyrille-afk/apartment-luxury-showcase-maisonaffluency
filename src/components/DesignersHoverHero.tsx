@@ -422,6 +422,25 @@ const DesignersHoverHero = () => {
     };
   }, [searchOpen, pendingRevealLetter, expandedLetters]);
 
+  // Mobile A–Z compact grid: quick lookup of which letters have designers,
+  // and the items for the currently selected letter.
+  const letterMap = useMemo(() => {
+    const map = new Map<string, { slug: string; name: string }[]>();
+    for (const [l, items] of groupedResults) map.set(l, items);
+    return map;
+  }, [groupedResults]);
+  const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+  const selectedLetterItems = selectedLetter ? letterMap.get(selectedLetter) ?? [] : [];
+
+  // Reset the mobile letter selection when closing the sheet or when a search
+  // query is active (search takes over the list).
+  useEffect(() => {
+    if (!searchOpen) setSelectedLetter(null);
+  }, [searchOpen]);
+  useEffect(() => {
+    if (isSearching) setSelectedLetter(null);
+  }, [isSearching]);
+
   if (!hasItems) return null;
 
   const directoryLabels = (className: string) => (
