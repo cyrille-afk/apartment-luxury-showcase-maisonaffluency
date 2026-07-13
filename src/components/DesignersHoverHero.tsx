@@ -430,11 +430,9 @@ const DesignersHoverHero = () => {
     return () => window.cancelAnimationFrame(frame);
   }, [activeAccordionLetter, expandedLetters, isDesktopViewport, searchOpen]);
 
-  // Keep Directory y-aligned with MASTERS and x-aligned with the first letter
-  // of the INITIAL active designer title (Alexander Lamont). The x anchor is
-  // locked to the first designer so the Directory does not shift horizontally
-  // when the user hovers other names of varying widths.
-  const directoryLeftLockedRef = useRef(false);
+  // Keep Directory y-aligned with MASTERS. The Directory is now pinned to the
+  // right page margin (matching the header's right edge) so the left designer
+  // list and right Directory create a strong vertical frame around the hero.
   useEffect(() => {
     if (typeof window === "undefined") return;
     const update = () => {
@@ -446,13 +444,6 @@ const DesignersHoverHero = () => {
       const mRect = m.getBoundingClientRect();
       const sRect = s.getBoundingClientRect();
       setDirectoryTop(mRect.top - sRect.top);
-      // Lock horizontal alignment to the first designer measured (Alexander
-      // Lamont). Never update again on subsequent hovers.
-      if (!directoryLeftLockedRef.current && t) {
-        const tRect = t.getBoundingClientRect();
-        setDirectoryLeft(tRect.left - sRect.left);
-        directoryLeftLockedRef.current = true;
-      }
       // Baseline-align the right-side active title with the last featured
       // designer (Victoria Magniant): title.bottom = lastItem.bottom.
       if (l && t) {
@@ -464,11 +455,7 @@ const DesignersHoverHero = () => {
     update();
     const t1 = window.setTimeout(update, 100);
     const t2 = window.setTimeout(update, 400);
-    const onResize = () => {
-      // Allow x re-measurement on resize since layout changed.
-      directoryLeftLockedRef.current = false;
-      update();
-    };
+    const onResize = () => update();
     window.addEventListener("resize", onResize);
     window.addEventListener("scroll", update, { passive: true });
     return () => {
