@@ -824,7 +824,7 @@ const DesignersHoverHero = () => {
             onMouseMove={handlePortalMove}
           >
             <div
-              className="absolute right-12 lg:right-28 flex flex-col items-end text-right text-white"
+              className="absolute right-20 lg:right-40 flex flex-col items-end text-right text-white"
               style={activeTitleTop != null ? { top: activeTitleTop } : { bottom: 96 }}
             >
               <span
