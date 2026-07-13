@@ -1076,7 +1076,7 @@ const DesignersHoverHero = () => {
                                 })
                               }
                               aria-expanded={isOpen}
-                              className="w-full flex items-center justify-between px-5 py-2.5 text-left hover:bg-white/[0.04] transition-colors"
+                              className="w-full flex items-center justify-between px-5 py-2 text-left hover:bg-white/[0.04] transition-colors"
                             >
                               <span className="flex items-center gap-3">
                                 <span
