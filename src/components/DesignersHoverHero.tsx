@@ -16,14 +16,16 @@
  */
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
+import { AnimatePresence, motion } from "framer-motion";
+import { Search, X } from "lucide-react";
 
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
-import { jumpToDesignerLetter } from "@/lib/jumpToDesignerLetter";
 import { useAllDesigners } from "@/hooks/useDesigner";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { applyCuratorPickOrder } from "@/lib/curatorPickSort";
+import { sortNameKey } from "@/lib/nameFormat";
 
 interface FeaturedDesigner {
   id: string;
@@ -145,6 +147,9 @@ const DesignersHoverHero = () => {
   const [activeSlug, setActiveSlug] = useState<string | null>(null);
   const [isStandalone, setIsStandalone] = useState(false);
   const [showPortalCursor, setShowPortalCursor] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const isMobileHook = useIsMobile();
   const [isMobileViewport, setIsMobileViewport] = useState(() =>
     typeof window !== "undefined" && window.matchMedia("(max-width: 767px)").matches
@@ -298,6 +303,35 @@ const DesignersHoverHero = () => {
     };
   }, [hasItems, items]);
 
+  // Lock body scroll + ESC-to-close + autofocus while the search sheet is open.
+  useEffect(() => {
+    if (!searchOpen) return;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setSearchOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    // Delay focus so the slide-up animation is visible before the keyboard opens.
+    const t = window.setTimeout(() => searchInputRef.current?.focus(), 220);
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      window.removeEventListener("keydown", onKey);
+      window.clearTimeout(t);
+    };
+  }, [searchOpen]);
+
+  const searchResults = useMemo(() => {
+    const list = (allDesigners as any[])
+      .filter((d) => d.is_published && !d.trade_only)
+      .map((d) => ({ slug: d.slug as string, name: d.name as string }));
+    const q = searchQuery.trim().toLowerCase();
+    const filtered = q
+      ? list.filter((d) => d.name.toLowerCase().includes(q))
+      : list;
+    return filtered.sort((a, b) => sortNameKey(a.name).localeCompare(sortNameKey(b.name)));
+  }, [allDesigners, searchQuery]);
+
   if (!hasItems) return null;
 
   const directoryLabels = (className: string) => (
@@ -307,16 +341,15 @@ const DesignersHoverHero = () => {
           Directory <span className="text-white/70 normal-case tracking-normal">({designerCount || 95})</span>
         </span>
 
-        <Link
-          to="/designers?letter=A"
-          onClick={(e) => {
-            e.preventDefault();
-            jumpToDesignerLetter("A");
-          }}
-          className="text-xs font-body font-light italic text-white/85 hover:text-white underline-offset-4 hover:underline transition-colors"
+        <button
+          type="button"
+          onClick={() => setSearchOpen(true)}
+          aria-expanded={searchOpen}
+          aria-controls="designers-search-sheet"
+          className="text-xs font-body font-light italic text-white/85 hover:text-white underline-offset-4 hover:underline transition-colors text-left"
         >
           Click to Browse A–Z
-        </Link>
+        </button>
       </div>
     </div>
   );
@@ -638,6 +671,81 @@ const DesignersHoverHero = () => {
         </span>
         <div className="w-px h-28 bg-gradient-to-b from-white/70 to-transparent" />
       </div>
+
+      {/* Bottom-sheet A–Z search — expands upward from the Directory link.
+          Intentionally overlays the hero without changing any top-of-page layout. */}
+      <AnimatePresence>
+        {searchOpen && (
+          <motion.div
+            key="designers-search-backdrop"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            onClick={() => setSearchOpen(false)}
+            className="fixed inset-0 z-[70] bg-black/60 backdrop-blur-sm"
+            aria-hidden="true"
+          />
+        )}
+        {searchOpen && (
+          <motion.div
+            key="designers-search-sheet"
+            id="designers-search-sheet"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Browse designers A to Z"
+            initial={{ y: "100%" }}
+            animate={{ y: 0 }}
+            exit={{ y: "100%" }}
+            transition={{ type: "tween", ease: [0.16, 1, 0.3, 1], duration: 0.35 }}
+            className="fixed inset-x-0 bottom-0 z-[71] max-h-[80vh] flex flex-col bg-[#0a0a0a] text-white border-t border-white/10 rounded-t-2xl shadow-2xl pb-[env(safe-area-inset-bottom)]"
+          >
+            <div className="mx-auto mt-2 h-1 w-10 rounded-full bg-white/25" aria-hidden="true" />
+            <div className="flex items-center gap-3 px-5 pt-3 pb-3 border-b border-white/10">
+              <Search className="h-4 w-4 text-white/60 shrink-0" aria-hidden="true" />
+              <input
+                ref={searchInputRef}
+                type="search"
+                inputMode="search"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder={`Search ${designerCount || searchResults.length} designers…`}
+                className="flex-1 bg-transparent border-0 outline-none font-body text-sm text-white placeholder:text-white/40"
+                aria-label="Search designers"
+              />
+              <button
+                type="button"
+                onClick={() => setSearchOpen(false)}
+                aria-label="Close search"
+                className="p-1 text-white/60 hover:text-white transition-colors"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="overflow-y-auto overscroll-contain px-2 py-2">
+              {searchResults.length === 0 ? (
+                <p className="px-4 py-8 text-center text-sm font-body text-white/50">
+                  No designers match “{searchQuery}”.
+                </p>
+              ) : (
+                <ul className="flex flex-col">
+                  {searchResults.map((d) => (
+                    <li key={d.slug}>
+                      <Link
+                        to={`/designers/${d.slug}`}
+                        onClick={() => setSearchOpen(false)}
+                        className="block px-4 py-2.5 font-body text-[15px] text-white/85 hover:text-white hover:bg-white/5 rounded-md transition-colors"
+                      >
+                        {d.name}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </section>
   );
 };
