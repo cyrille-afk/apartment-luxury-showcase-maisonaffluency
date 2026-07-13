@@ -479,9 +479,11 @@ const DesignersHoverHero = () => {
           )}
         >
 
-          <span id="meet-designers-headline" className="inline-block mb-5 md:mb-8 text-[11px] uppercase tracking-[0.3em] font-body text-white/50 scroll-header-offset">
-            Meet Our Designers
-          </span>
+          {/* Desktop: Directory / Find A Designer sits at the top of the list,
+              replacing the previous "Meet Our Designers" headline. */}
+          <div className="hidden md:block md:mt-8">
+            {directoryLabels("mb-5 md:mb-8 w-fit")}
+          </div>
           <div className="w-full max-w-xs sm:max-w-sm md:max-w-md">
             <div className="relative inline-block">
               {/* Localized text overlay — separates the typography from the
@@ -556,16 +558,16 @@ const DesignersHoverHero = () => {
           </div>
         </div>
 
-        {/* Directory label — pinned to the svh frame bottom so it always
-            clears Safari's bottom toolbar; on mobile/PWA it is centered. */}
+        {/* Directory label — pinned to the svh frame bottom on mobile only.
+            Desktop version now lives at the top of the featured list. */}
         {directoryLabels(cn(
-          "absolute flex items-center gap-10 text-white pt-6 w-fit pointer-events-auto",
+          "absolute flex items-center gap-10 text-white pt-6 w-fit pointer-events-auto md:hidden",
           isMobileOrPwa
             ? "left-1/2 -translate-x-1/2 justify-center px-6"
             : "left-6 sm:left-[22rem] md:left-[26rem] lg:left-[28rem]",
           isStandalone
-            ? "bottom-[calc(6rem+env(safe-area-inset-bottom))] md:bottom-14"
-            : "bottom-[calc(1.25rem+env(safe-area-inset-bottom))] md:bottom-24"
+            ? "bottom-[calc(6rem+env(safe-area-inset-bottom))]"
+            : "bottom-[calc(1.25rem+env(safe-area-inset-bottom))]"
         ))}
 
 
