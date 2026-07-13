@@ -1732,21 +1732,6 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
               )}
             </button>
             <div className="flex-1" />
-            <div className="relative w-72">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                type="text"
-                placeholder="Search..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9 pr-8 h-10 text-sm bg-background border-border shadow-sm focus:border-primary/60 focus:shadow-md font-body uppercase tracking-[0.12em]"
-              />
-              {searchQuery && (
-                <button onClick={() => setSearchQuery("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
-                  <X className="h-3.5 w-3.5" />
-                </button>
-              )}
-            </div>
           </div>
 
           {/* Desktop: Sidebar + Directory layout */}
