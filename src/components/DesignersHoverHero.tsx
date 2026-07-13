@@ -413,8 +413,8 @@ const DesignersHoverHero = () => {
 
   if (!hasItems) return null;
 
-  const directoryLabels = (className: string) => (
-    <div className={className}>
+  const directoryLabels = (className: string, ref?: React.Ref<HTMLDivElement>) => (
+    <div ref={ref} className={className}>
       <div className="flex flex-col">
         <span className="text-[9px] uppercase tracking-[0.3em] mb-1 font-body text-white">
           Directory <span className="text-white/70 normal-case tracking-normal">({designerCount || 95})</span>
