@@ -485,11 +485,16 @@ const DesignersHoverHero = () => {
       // Anchor top to Directory header baseline so the dropdown opens inline
       // with the navigation group, not floating above or below it.
       const top = rect.top;
-      const bottom = navRect ? navRect.bottom : rect.bottom + 400;
+      const navBottom = navRect ? navRect.bottom : rect.bottom + 400;
+      // Extend to fill available viewport so the full A–Z list is visible
+      // (the dropdown sits to the right of the featured list, so growing
+      // downward past navBottom does not overlap or truncate anything).
+      const available = window.innerHeight - top - 24;
+      const height = Math.max(320, Math.min(available, Math.max(navBottom - top, available)));
       setDropdownPos({
         left,
         top,
-        height: Math.max(320, bottom - top),
+        height,
       });
     };
 
@@ -529,11 +534,13 @@ const DesignersHoverHero = () => {
               const width = 380;
               const gap = 24;
               const navRight = navRect ? navRect.right : rect.right;
-              const bottom = navRect ? navRect.bottom : rect.bottom + 400;
+              const navBottom = navRect ? navRect.bottom : rect.bottom + 400;
+              const available = window.innerHeight - rect.top - 24;
+              const height = Math.max(320, Math.min(available, Math.max(navBottom - rect.top, available)));
               setDropdownPos({
                 left: Math.min(window.innerWidth - width - 16, navRight + gap),
                 top: rect.top,
-                height: Math.max(320, bottom - rect.top),
+                height,
               });
             } else {
               setDropdownPos(null);
