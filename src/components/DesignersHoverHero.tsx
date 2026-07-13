@@ -479,11 +479,11 @@ const DesignersHoverHero = () => {
       const width = 380;
       const gap = 24;
       const navRight = navRect ? navRect.right : rect.right;
-      // Anchor to the right edge of the list (nav) so the dropdown clears the
-      // designer names entirely, regardless of the Directory label width.
       let left = navRight + gap;
       const maxLeft = window.innerWidth - width - 16;
       if (left > maxLeft) left = maxLeft;
+      // Anchor top to Directory header baseline so the dropdown opens inline
+      // with the navigation group, not floating above or below it.
       const top = rect.top;
       const bottom = navRect ? navRect.bottom : rect.bottom + 400;
       setDropdownPos({
@@ -492,6 +492,7 @@ const DesignersHoverHero = () => {
         height: Math.max(320, bottom - top),
       });
     };
+
     update();
     window.addEventListener("resize", update);
     window.addEventListener("scroll", update, { passive: true });
@@ -526,15 +527,18 @@ const DesignersHoverHero = () => {
               const rect = directoryRef.current.getBoundingClientRect();
               const navRect = navRef.current?.getBoundingClientRect();
               const width = 380;
-              const gap = 12;
+              const gap = 24;
+              const navRight = navRect ? navRect.right : rect.right;
+              const bottom = navRect ? navRect.bottom : rect.bottom + 400;
               setDropdownPos({
-                left: Math.max(16, rect.left - width - gap),
-                top: navRect?.top ?? rect.top,
-                height: navRect?.height ?? Math.max(320, window.innerHeight - rect.top - 24),
+                left: Math.min(window.innerWidth - width - 16, navRight + gap),
+                top: rect.top,
+                height: Math.max(320, bottom - rect.top),
               });
             } else {
               setDropdownPos(null);
             }
+
             setSearchOpen(true);
           }}
           aria-expanded={searchOpen}
@@ -594,7 +598,12 @@ const DesignersHoverHero = () => {
         })}
         {/* Readability overlay */}
         <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/45 to-black/20 md:from-black/60 md:via-black/30 md:to-black/5" />
+        {/* Desktop left column backdrop — dedicates the left 32% of the hero to
+            a solid dark panel so the designer list never overlaps furniture
+            imagery on the right. */}
+        <div className="hidden md:block absolute inset-y-0 left-0 w-[32%] bg-gradient-to-r from-[#0a0a0a] via-[#0a0a0a]/95 to-transparent pointer-events-none" />
       </div>
+
 
       {/* Safe content frame — on mobile browser it tracks 100svh (toolbar-visible
           viewport) so list + directory always sit above iOS bottom chrome.
@@ -623,15 +632,13 @@ const DesignersHoverHero = () => {
 
           <div className="w-full max-w-xs sm:max-w-sm md:max-w-md">
             <div className="relative inline-block">
-              {/* Localized text overlay — separates the typography from the
-                  busy background image while keeping the editorial edge soft. */}
-              <div className="absolute -inset-3 sm:-inset-4 md:-inset-5 -z-10 rounded-sm bg-gradient-to-r from-black/60 via-black/35 to-transparent" />
-
               {/* Desktop: Directory sits directly above the designer list to
-                  group navigation (list) with its utility (search) — Proximity. */}
+                  group navigation (list) with its utility (search) — Proximity.
+                  All items share the same left edge as the designer names. */}
               <div className="hidden md:block mb-5 lg:mb-6">
                 {directoryLabels("w-fit", directoryRef, "left")}
               </div>
+
 
               <nav
                 ref={navRef}
@@ -817,7 +824,7 @@ const DesignersHoverHero = () => {
             onMouseMove={handlePortalMove}
           >
             <div
-              className="absolute right-12 lg:right-28 flex flex-col items-end text-right text-white"
+              className="absolute right-20 lg:right-40 flex flex-col items-end text-right text-white"
               style={activeTitleTop != null ? { top: activeTitleTop } : { bottom: 96 }}
             >
               <span
