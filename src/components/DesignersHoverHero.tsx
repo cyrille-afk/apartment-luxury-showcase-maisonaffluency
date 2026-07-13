@@ -496,10 +496,19 @@ const DesignersHoverHero = () => {
 
   if (!hasItems) return null;
 
-  const directoryLabels = (className: string, ref?: React.Ref<HTMLDivElement>) => (
+  const directoryLabels = (
+    className: string,
+    ref?: React.Ref<HTMLDivElement>,
+    align: "left" | "right" = "left"
+  ) => (
     <div ref={ref} className={className}>
-      <div className="flex flex-col">
-        <span className="text-[9px] uppercase tracking-[0.3em] mb-1 font-body text-white">
+      <div className={cn("flex flex-col", align === "right" && "items-end")}>
+        <span
+          className={cn(
+            "text-[9px] uppercase tracking-[0.3em] mb-1 font-body text-white",
+            align === "right" && "text-right"
+          )}
+        >
           Directory <span className="text-white/70 normal-case tracking-normal">({designerCount || 95})</span>
         </span>
 
@@ -523,7 +532,11 @@ const DesignersHoverHero = () => {
           }}
           aria-expanded={searchOpen}
           aria-controls="designers-search-sheet"
-          className="inline-flex items-center gap-2 text-xs font-body font-light italic text-white/85 hover:text-white underline-offset-4 hover:underline transition-colors text-left"
+          className={cn(
+            "inline-flex items-center gap-2 text-xs font-body font-light italic text-white/85 hover:text-white underline-offset-4 hover:underline transition-colors",
+            align === "left" && "text-left",
+            align === "right" && "text-right flex-row-reverse justify-start"
+          )}
         >
           <Search className="h-3.5 w-3.5 not-italic" aria-hidden="true" />
           Find A Designer
