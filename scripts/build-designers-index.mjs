@@ -59,19 +59,30 @@ async function main() {
   const stripAccents = (s) =>
     s.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
+  const SORT_KEY_OVERRIDES = {
+    "apparatus studio": "apparatus",
+    "lost profile studio": "lost",
+  };
+
   const sortNameKey = (name) => {
     const full = name.trim();
     if (!full) return "";
+    const ov = SORT_KEY_OVERRIDES[full.toLowerCase()];
+    if (ov) return ov;
     const personPart = full.includes(" - ")
       ? full.split(" - ").pop()?.trim() || full
       : full;
     const words = personPart.split(/\s+/);
-    let lastWord = words[words.length - 1] || "";
-    if (/^\d+$/.test(lastWord) && words.length > 1) {
-      lastWord = words[words.length - 2] || "";
+    let idx = words.length - 1;
+    while (
+      idx > 0 &&
+      (/^\d+$/.test(words[idx]) || /^studios?$/i.test(words[idx]))
+    ) {
+      idx--;
     }
+    const lastWord = words[idx] || "";
     const key = stripAccents(lastWord).toLowerCase().replace(/^[^a-z]+/, "");
-    return key || sortNameKey(words.slice(0, -1).join(" "));
+    return key || sortNameKey(words.slice(0, idx).join(" "));
   };
 
   const list = (data || [])
