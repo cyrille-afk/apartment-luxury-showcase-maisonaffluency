@@ -792,18 +792,16 @@ const DesignersHoverHero = () => {
                           type="button"
                           onClick={() => toggleLetter(letter)}
                           aria-expanded={isOpen}
-                          className="w-full flex items-center justify-between px-4 py-2.5 text-left hover:bg-white/[0.04] transition-colors"
+                          className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-white/[0.04] transition-colors"
                         >
                           <span className="font-serif text-lg text-white/90">{letter}</span>
-                          <span
+                          <ChevronRight
                             className={cn(
-                              "text-white/40 text-xs transition-transform duration-200",
+                              "h-6 w-6 text-white/60 transition-transform duration-200 shrink-0",
                               isOpen && "rotate-90"
                             )}
                             aria-hidden="true"
-                          >
-                            ›
-                          </span>
+                          />
                         </button>
                         <AnimatePresence initial={false}>
                           {isOpen && (
