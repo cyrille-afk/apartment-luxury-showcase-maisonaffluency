@@ -10,7 +10,6 @@ import Footer from "@/components/Footer";
 import DesignersDirectory from "@/components/DesignersDirectory";
 import DesignersHoverHero from "@/components/DesignersHoverHero";
 import { useAllDesigners } from "@/hooks/useDesigner";
-import { getDesignersDirectoryAnchorId } from "@/lib/designersDirectoryAnchors";
 import { jumpToDesignerLetter } from "@/lib/jumpToDesignerLetter";
 
 
