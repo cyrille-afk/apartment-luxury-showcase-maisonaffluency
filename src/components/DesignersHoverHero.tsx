@@ -384,7 +384,10 @@ const DesignersHoverHero = () => {
   // Reset the mobile letter selection when closing the sheet or when a search
   // query is active (search takes over the list).
   useEffect(() => {
-    if (!searchOpen) setSelectedLetter(null);
+    if (!searchOpen) {
+      setSelectedLetter(null);
+      setExpandedLetters(new Set());
+    }
   }, [searchOpen]);
   useEffect(() => {
     if (isSearching) setSelectedLetter(null);
