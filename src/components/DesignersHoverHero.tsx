@@ -435,10 +435,12 @@ const DesignersHoverHero = () => {
           onClick={() => {
             if (directoryRef.current) {
               const rect = directoryRef.current.getBoundingClientRect();
+              const listRect = navRef.current?.getBoundingClientRect();
               const width = 380;
-              const gap = 24;
+              const gap = 32;
+              const anchorRight = Math.max(rect.right, listRect?.right ?? 0);
               setDropdownPos({
-                left: Math.min(window.innerWidth - width - 16, rect.right + gap),
+                left: Math.min(window.innerWidth - width - 16, anchorRight + gap),
                 top: rect.top + window.scrollY,
               });
             }
