@@ -371,8 +371,9 @@ const DesignersHoverHero = () => {
           onClick={() => setSearchOpen(true)}
           aria-expanded={searchOpen}
           aria-controls="designers-search-sheet"
-          className="text-xs font-body font-light italic text-white/85 hover:text-white underline-offset-4 hover:underline transition-colors text-left"
+          className="inline-flex items-center gap-2 text-xs font-body font-light italic text-white/85 hover:text-white underline-offset-4 hover:underline transition-colors text-left"
         >
+          <Search className="h-3.5 w-3.5 not-italic" aria-hidden="true" />
           Find A Designer
         </button>
       </div>
@@ -708,7 +709,7 @@ const DesignersHoverHero = () => {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
             onClick={() => setSearchOpen(false)}
-            className="fixed inset-0 z-[70] bg-black/60 backdrop-blur-sm"
+            className="fixed left-0 right-0 bottom-0 top-20 z-[70] bg-black/60 backdrop-blur-sm"
             aria-hidden="true"
           />
         )}
@@ -719,11 +720,18 @@ const DesignersHoverHero = () => {
             role="dialog"
             aria-modal="true"
             aria-label="Browse designers A to Z"
-            initial={{ height: 0 }}
-            animate={{ height: "auto" }}
-            exit={{ height: 0 }}
+            initial={{ height: 0, opacity: 0.6 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
             transition={{ type: "tween", ease: [0.16, 1, 0.3, 1], duration: 0.4 }}
-            className="fixed inset-x-0 bottom-0 z-[71] max-h-[80vh] flex flex-col bg-[#0a0a0a] text-white border-t border-white/10 rounded-t-2xl shadow-2xl overflow-hidden pb-[env(safe-area-inset-bottom)]"
+            className={cn(
+              "fixed z-[71] flex flex-col bg-[#0a0a0a] text-white border border-white/10 shadow-2xl overflow-hidden",
+              // Mobile: full-width bottom sheet
+              "inset-x-0 bottom-0 max-h-[75vh] rounded-t-2xl pb-[env(safe-area-inset-bottom)]",
+              // Desktop: anchored popover to the right of the Find A Designer link,
+              // sliding up from just above the directory label. Nav stays visible.
+              "md:inset-x-auto md:left-[30rem] lg:left-[32rem] md:right-auto md:bottom-20 md:w-[380px] md:max-w-[calc(100vw-32rem)] md:max-h-[60vh] md:rounded-xl md:pb-0"
+            )}
           >
             <div className="mx-auto mt-2 h-1 w-10 rounded-full bg-white/25 shrink-0" aria-hidden="true" />
             <div className="flex items-center gap-3 px-5 pt-3 pb-3 border-b border-white/10 shrink-0">

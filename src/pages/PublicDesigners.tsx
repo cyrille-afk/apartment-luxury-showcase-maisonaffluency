@@ -80,11 +80,8 @@ function HeroAlphabetBar() {
 
   return (
     <div className="hidden md:block absolute bottom-0 left-0 right-0 z-20 pointer-events-none">
-      <div className="pointer-events-auto bg-gradient-to-t from-[#0a0a0a]/95 via-[#0a0a0a]/75 to-transparent backdrop-blur-[2px]">
-        <div className="flex justify-center pt-3">
-          <div className="h-px w-24 bg-[linear-gradient(90deg,rgba(255,255,255,0.35)_0%,rgba(255,255,255,0.35)_40%,transparent_40%,transparent_60%,rgba(255,255,255,0.35)_60%,rgba(255,255,255,0.35)_100%)]" aria-hidden="true" />
-        </div>
-        <div className="px-6 sm:px-12 md:px-20 lg:px-28 py-4 flex items-center justify-between">
+      <div className="pointer-events-auto mx-auto w-fit max-w-[min(880px,calc(100%-3rem))] mb-6 rounded-full border border-white/10 bg-[#0a0a0a]/85 backdrop-blur-md shadow-[0_10px_40px_-10px_rgba(0,0,0,0.6)]">
+        <div className="px-6 py-2.5 flex items-center justify-center gap-[0.55rem]">
           {LETTERS.map((letter) => {
             const isActive = activeLetters.has(letter);
             const isSelected = selectedLetter === letter;
@@ -97,7 +94,7 @@ function HeroAlphabetBar() {
                 onMouseEnter={() => setHoveredLetter(letter)}
                 onMouseLeave={() => setHoveredLetter(null)}
                 onClick={() => jumpToLetter(letter)}
-                className={`font-serif text-base md:text-lg lg:text-xl leading-none transition-colors duration-200 ${
+                className={`font-serif text-sm md:text-base leading-none transition-colors duration-200 ${
                   isActive
                     ? showAccent
                       ? "text-[hsl(var(--gold))] underline decoration-[hsl(var(--gold))] decoration-2 underline-offset-4"
