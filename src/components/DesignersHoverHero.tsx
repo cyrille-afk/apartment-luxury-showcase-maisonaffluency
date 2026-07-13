@@ -719,14 +719,14 @@ const DesignersHoverHero = () => {
             role="dialog"
             aria-modal="true"
             aria-label="Browse designers A to Z"
-            initial={{ y: "100%" }}
-            animate={{ y: 0 }}
-            exit={{ y: "100%" }}
-            transition={{ type: "tween", ease: [0.16, 1, 0.3, 1], duration: 0.35 }}
-            className="fixed inset-x-0 bottom-0 z-[71] max-h-[80vh] flex flex-col bg-[#0a0a0a] text-white border-t border-white/10 rounded-t-2xl shadow-2xl pb-[env(safe-area-inset-bottom)]"
+            initial={{ height: 0 }}
+            animate={{ height: "auto" }}
+            exit={{ height: 0 }}
+            transition={{ type: "tween", ease: [0.16, 1, 0.3, 1], duration: 0.4 }}
+            className="fixed inset-x-0 bottom-0 z-[71] max-h-[80vh] flex flex-col bg-[#0a0a0a] text-white border-t border-white/10 rounded-t-2xl shadow-2xl overflow-hidden pb-[env(safe-area-inset-bottom)]"
           >
-            <div className="mx-auto mt-2 h-1 w-10 rounded-full bg-white/25" aria-hidden="true" />
-            <div className="flex items-center gap-3 px-5 pt-3 pb-3 border-b border-white/10">
+            <div className="mx-auto mt-2 h-1 w-10 rounded-full bg-white/25 shrink-0" aria-hidden="true" />
+            <div className="flex items-center gap-3 px-5 pt-3 pb-3 border-b border-white/10 shrink-0">
               <Search className="h-4 w-4 text-white/60 shrink-0" aria-hidden="true" />
               <input
                 ref={searchInputRef}
@@ -747,7 +747,7 @@ const DesignersHoverHero = () => {
                 <X className="h-4 w-4" />
               </button>
             </div>
-            <div className="overflow-y-auto overscroll-contain px-2 py-2">
+            <div className="overflow-y-auto overscroll-contain px-2 py-2 min-h-0">
               {totalResults === 0 ? (
                 <p className="px-4 py-8 text-center text-sm font-body text-white/50">
                   No designers match “{searchQuery}”.
