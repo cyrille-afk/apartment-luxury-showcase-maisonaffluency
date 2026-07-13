@@ -499,7 +499,7 @@ const DesignersHoverHero = () => {
           PWA/desktop keep using the full section height. */}
       <div
         className={cn(
-          "absolute inset-x-0 top-0 z-10 pointer-events-none",
+          "absolute inset-x-0 top-0 z-20 pointer-events-none",
           // Mobile browser: frame height = visible viewport minus the fixed
           // header, so its bottom aligns with the iOS toolbar top (svh excludes
           // the toolbar). Desktop/PWA: full section height.
