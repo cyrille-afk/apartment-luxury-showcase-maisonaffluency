@@ -160,7 +160,6 @@ const DesignersHoverHero = () => {
   const lastItemRef = useRef<HTMLLIElement>(null);
   const [dropdownPos, setDropdownPos] = useState<{ left: number; top: number; height: number } | null>(null);
   const [directoryTop, setDirectoryTop] = useState<number | null>(null);
-  const [directoryLeft, setDirectoryLeft] = useState<number | null>(null);
   const [activeTitleTop, setActiveTitleTop] = useState<number | null>(null);
 
   const isMobileHook = useIsMobile();
@@ -431,11 +430,9 @@ const DesignersHoverHero = () => {
     return () => window.cancelAnimationFrame(frame);
   }, [activeAccordionLetter, expandedLetters, isDesktopViewport, searchOpen]);
 
-  // Keep Directory y-aligned with MASTERS and x-aligned with the first letter
-  // of the INITIAL active designer title (Alexander Lamont). The x anchor is
-  // locked to the first designer so the Directory does not shift horizontally
-  // when the user hovers other names of varying widths.
-  const directoryLeftLockedRef = useRef(false);
+  // Keep Directory y-aligned with MASTERS. The Directory is now pinned to the
+  // right page margin (matching the header's right edge) so the left designer
+  // list and right Directory create a strong vertical frame around the hero.
   useEffect(() => {
     if (typeof window === "undefined") return;
     const update = () => {
@@ -447,13 +444,6 @@ const DesignersHoverHero = () => {
       const mRect = m.getBoundingClientRect();
       const sRect = s.getBoundingClientRect();
       setDirectoryTop(mRect.top - sRect.top);
-      // Lock horizontal alignment to the first designer measured (Alexander
-      // Lamont). Never update again on subsequent hovers.
-      if (!directoryLeftLockedRef.current && t) {
-        const tRect = t.getBoundingClientRect();
-        setDirectoryLeft(tRect.left - sRect.left);
-        directoryLeftLockedRef.current = true;
-      }
       // Baseline-align the right-side active title with the last featured
       // designer (Victoria Magniant): title.bottom = lastItem.bottom.
       if (l && t) {
@@ -465,11 +455,7 @@ const DesignersHoverHero = () => {
     update();
     const t1 = window.setTimeout(update, 100);
     const t2 = window.setTimeout(update, 400);
-    const onResize = () => {
-      // Allow x re-measurement on resize since layout changed.
-      directoryLeftLockedRef.current = false;
-      update();
-    };
+    const onResize = () => update();
     window.addEventListener("resize", onResize);
     window.addEventListener("scroll", update, { passive: true });
     return () => {
@@ -510,10 +496,19 @@ const DesignersHoverHero = () => {
 
   if (!hasItems) return null;
 
-  const directoryLabels = (className: string, ref?: React.Ref<HTMLDivElement>) => (
+  const directoryLabels = (
+    className: string,
+    ref?: React.Ref<HTMLDivElement>,
+    align: "left" | "right" = "left"
+  ) => (
     <div ref={ref} className={className}>
-      <div className="flex flex-col">
-        <span className="text-[9px] uppercase tracking-[0.3em] mb-1 font-body text-white">
+      <div className={cn("flex flex-col", align === "right" && "items-end")}>
+        <span
+          className={cn(
+            "text-[9px] uppercase tracking-[0.3em] mb-1 font-body text-white",
+            align === "right" && "text-right"
+          )}
+        >
           Directory <span className="text-white/70 normal-case tracking-normal">({designerCount || 95})</span>
         </span>
 
@@ -537,7 +532,11 @@ const DesignersHoverHero = () => {
           }}
           aria-expanded={searchOpen}
           aria-controls="designers-search-sheet"
-          className="inline-flex items-center gap-2 text-xs font-body font-light italic text-white/85 hover:text-white underline-offset-4 hover:underline transition-colors text-left"
+          className={cn(
+            "inline-flex items-center gap-2 text-xs font-body font-light italic text-white/85 hover:text-white underline-offset-4 hover:underline transition-colors",
+            align === "left" && "text-left",
+            align === "right" && "text-right flex-row-reverse justify-start"
+          )}
         >
           <Search className="h-3.5 w-3.5 not-italic" aria-hidden="true" />
           Find A Designer
@@ -615,17 +614,13 @@ const DesignersHoverHero = () => {
           )}
         >
 
-          {/* Desktop: Directory pinned top-right, y-aligned with the MASTERS
-              label (see mastersRef + directoryTop effect below). */}
+          {/* Desktop: Directory pinned to the right page margin, y-aligned
+              with the MASTERS label (see mastersRef + directoryTop effect below). */}
           <div
-            className="hidden md:block md:absolute z-40 pointer-events-auto"
-            style={
-              directoryTop != null && directoryLeft != null
-                ? { top: directoryTop, left: directoryLeft }
-                : undefined
-            }
+            className="hidden md:block md:absolute z-40 pointer-events-auto right-6 sm:right-12 md:right-20 lg:right-28"
+            style={directoryTop != null ? { top: directoryTop } : undefined}
           >
-            {directoryLabels("w-fit", directoryRef)}
+            {directoryLabels("w-fit", directoryRef, "right")}
           </div>
           <div className="w-full max-w-xs sm:max-w-sm md:max-w-md">
             <div className="relative inline-block">
@@ -822,23 +817,16 @@ const DesignersHoverHero = () => {
               <span
                 ref={activeTitleRef}
                 key={`${active.slug}-title`}
-                className="font-display font-light tracking-tight text-2xl lg:text-3xl animate-in fade-in duration-700"
+                className="font-display font-light tracking-tight text-2xl lg:text-3xl leading-[1.5] animate-in fade-in duration-700"
               >
                 {first}
                 {last && <span className="italic"> {last}</span>}
               </span>
               <span
                 key={`${active.slug}-cta`}
-                className="mt-2 inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.35em] font-body text-white/70 group-hover:text-white transition-colors animate-in fade-in duration-1000 delay-200 fill-mode-both"
+                className="mt-3 inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.35em] font-body font-medium text-white/70 group-hover:text-white underline decoration-white/40 underline-offset-4 group-hover:decoration-white/80 transition-colors animate-in fade-in duration-1000 delay-200 fill-mode-both"
               >
-                <span className="relative">
-                  Click to view full collection
-                  {/* Sliding underline on hover */}
-                  <span
-                    aria-hidden="true"
-                    className="pointer-events-none absolute left-0 -bottom-0.5 h-px bg-white/80 w-0 group-hover:w-full transition-[width] duration-500 ease-out"
-                  />
-                </span>
+                <span>Click to view full collection</span>
                 {/* Arrow reveals + slides on hover */}
                 <span
                   aria-hidden="true"
