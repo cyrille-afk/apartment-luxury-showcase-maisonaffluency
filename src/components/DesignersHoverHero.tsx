@@ -157,9 +157,11 @@ const DesignersHoverHero = () => {
   const directoryRef = useRef<HTMLDivElement>(null);
   const mastersRef = useRef<HTMLSpanElement>(null);
   const activeTitleRef = useRef<HTMLSpanElement>(null);
+  const lastItemRef = useRef<HTMLLIElement>(null);
   const [dropdownPos, setDropdownPos] = useState<{ left: number; top: number; height: number } | null>(null);
   const [directoryTop, setDirectoryTop] = useState<number | null>(null);
   const [directoryLeft, setDirectoryLeft] = useState<number | null>(null);
+  const [activeTitleTop, setActiveTitleTop] = useState<number | null>(null);
 
   const isMobileHook = useIsMobile();
   const [isMobileViewport, setIsMobileViewport] = useState(() =>
@@ -440,6 +442,7 @@ const DesignersHoverHero = () => {
       const m = mastersRef.current;
       const s = sectionRef.current;
       const t = activeTitleRef.current;
+      const l = lastItemRef.current;
       if (!m || !s) return;
       const mRect = m.getBoundingClientRect();
       const sRect = s.getBoundingClientRect();
@@ -450,6 +453,13 @@ const DesignersHoverHero = () => {
         const tRect = t.getBoundingClientRect();
         setDirectoryLeft(tRect.left - sRect.left);
         directoryLeftLockedRef.current = true;
+      }
+      // Baseline-align the right-side active title with the last featured
+      // designer (Victoria Magniant): title.bottom = lastItem.bottom.
+      if (l && t) {
+        const lRect = l.getBoundingClientRect();
+        const tH = t.getBoundingClientRect().height;
+        setActiveTitleTop(lRect.bottom - sRect.top - tH);
       }
     };
     update();
@@ -643,14 +653,18 @@ const DesignersHoverHero = () => {
                       {group.label}
                     </span>
                     <ul className="flex flex-col gap-1 text-left">
-                      {group.designers.map((d) => {
+                      {group.designers.map((d, dIdx) => {
                         const [first, last] = splitName(d.name);
                         const isActive = d.slug === activeSlug;
                         const isDimmed = activeSlug !== null && !isActive;
                         const childBrand = d.founder && d.founder !== d.name;
+                        const isLastItem =
+                          groupIdx === groupedItems.length - 1 &&
+                          dIdx === group.designers.length - 1;
                         return (
                           <li
                             key={d.slug}
+                            ref={isLastItem ? lastItemRef : undefined}
                             className="text-left leading-[1.5] sm:leading-[1.55]"
                           >
                             <Link
@@ -801,7 +815,10 @@ const DesignersHoverHero = () => {
             onMouseLeave={() => setShowPortalCursor(false)}
             onMouseMove={handlePortalMove}
           >
-            <div className="absolute right-12 lg:right-28 bottom-24 lg:bottom-24 flex flex-col items-end text-right text-white">
+            <div
+              className="absolute right-12 lg:right-28 flex flex-col items-end text-right text-white"
+              style={activeTitleTop != null ? { top: activeTitleTop } : { bottom: 96 }}
+            >
               <span
                 ref={activeTitleRef}
                 key={`${active.slug}-title`}
