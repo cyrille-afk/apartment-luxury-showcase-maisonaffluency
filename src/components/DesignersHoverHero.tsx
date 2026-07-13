@@ -17,7 +17,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { Search, X } from "lucide-react";
+import { Search, X, ChevronRight } from "lucide-react";
 
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -25,7 +25,7 @@ import { cn } from "@/lib/utils";
 import { useAllDesigners } from "@/hooks/useDesigner";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { applyCuratorPickOrder } from "@/lib/curatorPickSort";
-import { sortNameKey } from "@/lib/nameFormat";
+import { sortNameKey, lastNameInitial } from "@/lib/nameFormat";
 
 interface FeaturedDesigner {
   id: string;
@@ -149,6 +149,7 @@ const DesignersHoverHero = () => {
   const [showPortalCursor, setShowPortalCursor] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [expandedLetters, setExpandedLetters] = useState<Set<string>>(new Set());
   const searchInputRef = useRef<HTMLInputElement>(null);
   const isMobileHook = useIsMobile();
   const [isMobileViewport, setIsMobileViewport] = useState(() =>
@@ -321,7 +322,7 @@ const DesignersHoverHero = () => {
     };
   }, [searchOpen]);
 
-  const searchResults = useMemo(() => {
+  const { groupedResults, totalResults } = useMemo(() => {
     const list = (allDesigners as any[])
       .filter((d) => d.is_published && !d.trade_only)
       .map((d) => ({ slug: d.slug as string, name: d.name as string }));
@@ -329,8 +330,32 @@ const DesignersHoverHero = () => {
     const filtered = q
       ? list.filter((d) => d.name.toLowerCase().includes(q))
       : list;
-    return filtered.sort((a, b) => sortNameKey(a.name).localeCompare(sortNameKey(b.name)));
+    filtered.sort((a, b) => sortNameKey(a.name).localeCompare(sortNameKey(b.name)));
+    const groups = new Map<string, { slug: string; name: string }[]>();
+    for (const d of filtered) {
+      const letter = lastNameInitial(d.name);
+      if (!groups.has(letter)) groups.set(letter, []);
+      groups.get(letter)!.push(d);
+    }
+    const ordered = [...groups.entries()].sort(([a], [b]) => a.localeCompare(b));
+    return { groupedResults: ordered, totalResults: filtered.length };
   }, [allDesigners, searchQuery]);
+
+  // Auto-expand all letters while searching so matches are immediately visible.
+  const isSearching = searchQuery.trim().length > 0;
+  const effectiveExpanded = useMemo(() => {
+    if (isSearching) return new Set(groupedResults.map(([l]) => l));
+    return expandedLetters;
+  }, [isSearching, groupedResults, expandedLetters]);
+
+  const toggleLetter = (letter: string) => {
+    setExpandedLetters((prev) => {
+      const next = new Set(prev);
+      if (next.has(letter)) next.delete(letter);
+      else next.add(letter);
+      return next;
+    });
+  };
 
   if (!hasItems) return null;
 
@@ -709,7 +734,7 @@ const DesignersHoverHero = () => {
                 inputMode="search"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder={`Search ${designerCount || searchResults.length} designers…`}
+                placeholder={`Search ${designerCount || totalResults} designers…`}
                 className="flex-1 bg-transparent border-0 outline-none font-body text-sm text-white placeholder:text-white/40"
                 aria-label="Search designers"
               />
@@ -723,23 +748,50 @@ const DesignersHoverHero = () => {
               </button>
             </div>
             <div className="overflow-y-auto overscroll-contain px-2 py-2">
-              {searchResults.length === 0 ? (
+              {totalResults === 0 ? (
                 <p className="px-4 py-8 text-center text-sm font-body text-white/50">
                   No designers match “{searchQuery}”.
                 </p>
               ) : (
-                <ul className="flex flex-col">
-                  {searchResults.map((d) => (
-                    <li key={d.slug}>
-                      <Link
-                        to={`/designers/${d.slug}`}
-                        onClick={() => setSearchOpen(false)}
-                        className="block px-4 py-2.5 font-body text-[15px] text-white/85 hover:text-white hover:bg-white/5 rounded-md transition-colors"
-                      >
-                        {d.name}
-                      </Link>
-                    </li>
-                  ))}
+                <ul className="flex flex-col divide-y divide-white/[0.06]">
+                  {groupedResults.map(([letter, entries]) => {
+                    const isOpen = effectiveExpanded.has(letter);
+                    return (
+                      <li key={letter} className={cn(isOpen && "bg-white/[0.03]") }>
+                        <button
+                          type="button"
+                          onClick={() => toggleLetter(letter)}
+                          aria-expanded={isOpen}
+                          className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-white/[0.04] transition-colors"
+                        >
+                          <ChevronRight
+                            className={cn(
+                              "h-3.5 w-3.5 text-white/50 transition-transform shrink-0",
+                              isOpen && "rotate-90"
+                            )}
+                            aria-hidden="true"
+                          />
+                          <span className="font-display text-base text-white flex-1">{letter}</span>
+                          <span className="font-body text-xs text-white/50 tabular-nums">{entries.length}</span>
+                        </button>
+                        {isOpen && (
+                          <ul className="pb-1">
+                            {entries.map((d) => (
+                              <li key={d.slug}>
+                                <Link
+                                  to={`/designers/${d.slug}`}
+                                  onClick={() => setSearchOpen(false)}
+                                  className="block pl-11 pr-4 py-2 font-body text-[14px] text-white/80 hover:text-white hover:bg-white/[0.05] transition-colors"
+                                >
+                                  {d.name}
+                                </Link>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </li>
+                    );
+                  })}
                 </ul>
               )}
             </div>
