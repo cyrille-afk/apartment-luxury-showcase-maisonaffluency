@@ -154,7 +154,9 @@ const DesignersHoverHero = () => {
   const searchInputRef = useRef<HTMLInputElement>(null);
   const searchScrollRef = useRef<HTMLDivElement>(null);
   const directoryRef = useRef<HTMLDivElement>(null);
+  const mastersRef = useRef<HTMLSpanElement>(null);
   const [dropdownPos, setDropdownPos] = useState<{ left: number; top: number } | null>(null);
+  const [directoryTop, setDirectoryTop] = useState<number | null>(null);
 
   const isMobileHook = useIsMobile();
   const [isMobileViewport, setIsMobileViewport] = useState(() =>
@@ -395,20 +397,39 @@ const DesignersHoverHero = () => {
 
   // Keep the desktop dropdown anchored to the Directory button as the page
   // scrolls or the viewport changes.
+  // Keep Directory y-aligned with the MASTERS label.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const update = () => {
+      const m = mastersRef.current;
+      const s = sectionRef.current;
+      if (!m || !s) return;
+      const mRect = m.getBoundingClientRect();
+      const sRect = s.getBoundingClientRect();
+      setDirectoryTop(mRect.top - sRect.top);
+    };
+    update();
+    const t1 = window.setTimeout(update, 100);
+    const t2 = window.setTimeout(update, 400);
+    window.addEventListener("resize", update);
+    window.addEventListener("scroll", update, { passive: true });
+    return () => {
+      window.clearTimeout(t1);
+      window.clearTimeout(t2);
+      window.removeEventListener("resize", update);
+      window.removeEventListener("scroll", update);
+    };
+  }, [hasItems, items.length]);
+
+  // Dropdown drops straight down from the Directory button, right-aligned to it.
   useEffect(() => {
     if (!searchOpen || !directoryRef.current) return;
     const update = () => {
       const rect = directoryRef.current!.getBoundingClientRect();
-      const listRect = navRef.current?.getBoundingClientRect();
       const width = 380;
-      const gap = 32;
-      // Open to the right of the list column so the Masters names stay visible.
-      const anchorRight = Math.max(rect.right, listRect?.right ?? 0);
-      const left = Math.min(
-        window.innerWidth - width - 16,
-        anchorRight + gap
-      );
-      setDropdownPos({ left, top: rect.top + window.scrollY });
+      const gap = 12;
+      const left = Math.max(16, rect.right - width);
+      setDropdownPos({ left, top: rect.bottom + window.scrollY + gap });
     };
     update();
     window.addEventListener("resize", update);
@@ -435,13 +456,11 @@ const DesignersHoverHero = () => {
           onClick={() => {
             if (directoryRef.current) {
               const rect = directoryRef.current.getBoundingClientRect();
-              const listRect = navRef.current?.getBoundingClientRect();
               const width = 380;
-              const gap = 32;
-              const anchorRight = Math.max(rect.right, listRect?.right ?? 0);
+              const gap = 12;
               setDropdownPos({
-                left: Math.min(window.innerWidth - width - 16, anchorRight + gap),
-                top: rect.top + window.scrollY,
+                left: Math.max(16, rect.right - width),
+                top: rect.bottom + window.scrollY + gap,
               });
             }
             setSearchOpen(true);
@@ -526,13 +545,15 @@ const DesignersHoverHero = () => {
           )}
         >
 
-          {/* Desktop: Directory sits directly above MASTERS, sharing the list's
-              left edge so it aligns vertically with the first letter of every
-              designer name. */}
+          {/* Desktop: Directory pinned top-right, y-aligned with the MASTERS
+              label (see mastersRef + directoryTop effect below). */}
+          <div
+            className="hidden md:block md:absolute md:right-12 lg:right-20 z-40 pointer-events-auto"
+            style={directoryTop != null ? { top: directoryTop } : undefined}
+          >
+            {directoryLabels("w-fit", directoryRef)}
+          </div>
           <div className="w-full max-w-xs sm:max-w-sm md:max-w-md">
-            <div className="hidden md:block md:mb-6 pointer-events-auto">
-              {directoryLabels("w-fit", directoryRef)}
-            </div>
             <div className="relative inline-block">
               {/* Localized text overlay — separates the typography from the
                   busy background image while keeping the editorial edge soft. */}
@@ -551,7 +572,10 @@ const DesignersHoverHero = () => {
                       groupIdx > 0 && "mt-5 md:mt-6"
                     )}
                   >
-                    <span className="text-[10px] uppercase tracking-[0.3em] font-body text-white/50 mb-2 md:mb-3">
+                    <span
+                      ref={groupIdx === 0 ? mastersRef : undefined}
+                      className="text-[10px] uppercase tracking-[0.3em] font-body text-white/50 mb-2 md:mb-3"
+                    >
                       {group.label}
                     </span>
                     <ul className="flex flex-col gap-1 text-left">
