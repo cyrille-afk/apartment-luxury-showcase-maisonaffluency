@@ -811,64 +811,77 @@ const DesignersHoverHero = () => {
         };
 
         return (
-          <Link
-            key={active.slug}
-            ref={portalRef}
-            to={`/designers/${active.slug}`}
-            state={{ fromDesignersHero: true }}
-            aria-label={`View ${active.name}'s full collection`}
-            className="hidden md:block absolute right-0 top-0 h-full w-1/2 z-30 pointer-events-auto group"
-            style={{ cursor: "none" }}
-            onMouseEnter={() => setShowPortalCursor(true)}
-            onMouseLeave={() => setShowPortalCursor(false)}
-            onMouseMove={handlePortalMove}
-          >
-            <div
-              className="absolute right-20 lg:right-40 flex flex-col items-end text-right text-white"
+          <>
+            {/* Profile portal — the right-half image area shows a kinetic
+                "View Profile" cursor and links to the active designer. */}
+            <Link
+              key={`${active.slug}-portal`}
+              ref={portalRef}
+              to={`/designers/${active.slug}`}
+              state={{ fromDesignersHero: true }}
+              aria-label={`View ${active.name}'s profile`}
+              className="hidden md:block absolute right-0 top-0 h-full w-1/2 z-30 pointer-events-auto group"
+              style={{ cursor: "none" }}
+              onMouseEnter={() => setShowPortalCursor(true)}
+              onMouseLeave={() => setShowPortalCursor(false)}
+              onMouseMove={handlePortalMove}
+            >
+              {/* Kinetic editorial cursor — a glass-blur disc that follows the
+                  mouse over the right-half portal, replacing the previous large
+                  VIEW button cursor. */}
+              <div
+                ref={portalCursorRef}
+                className={cn(
+                  "absolute pointer-events-none z-50 transition-opacity duration-300 ease-out",
+                  showPortalCursor ? "opacity-100" : "opacity-0"
+                )}
+                style={{ transform: "translate(-50%, -50%)" }}
+              >
+                <div className="relative w-20 h-20 rounded-full bg-black/25 backdrop-blur-md border border-white/15 flex flex-col items-center justify-center shadow-2xl transition-transform duration-500 ease-out scale-[0.72] group-hover:scale-100">
+                  <div className="absolute inset-1.5 rounded-full border border-dashed border-white/10 animate-[spin_20s_linear_infinite]" />
+                  <span className="font-serif italic text-white text-[11px] tracking-[0.2em]">View</span>
+                  <div className="w-5 h-px bg-white/40 my-1" />
+                  <span className="text-white/40 text-[7px] uppercase tracking-[0.3em] font-body">Profile</span>
+                </div>
+              </div>
+            </Link>
+
+            {/* Caption / CTA — rendered as a separate, higher-stacked link so
+                hovering the bottom-right CTA shows the normal cursor and can be
+                clicked independently of the profile portal. */}
+            <Link
+              key={`${active.slug}-cta`}
+              to={`/designers/${active.slug}`}
+              state={{ fromDesignersHero: true }}
+              aria-label={`View ${active.name}'s full collection`}
+              className="hidden md:block absolute right-20 lg:right-40 z-40 pointer-events-auto cursor-pointer group"
               style={activeTitleTop != null ? { top: activeTitleTop } : { bottom: 96 }}
             >
-              <span
-                ref={activeTitleRef}
-                key={`${active.slug}-title`}
-                className="font-display font-light tracking-tight text-2xl lg:text-3xl leading-[1.5] animate-in fade-in duration-700"
-              >
-                {first}
-                {last && <span className="italic"> {last}</span>}
-              </span>
-              <span
-                key={`${active.slug}-cta`}
-                className="mt-3 inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.35em] font-body font-medium text-white/70 group-hover:text-white underline decoration-white/40 underline-offset-4 group-hover:decoration-white/80 transition-colors animate-in fade-in duration-1000 delay-200 fill-mode-both"
-              >
-                <span>Click to view full collection</span>
-                {/* Arrow reveals + slides on hover */}
+              <div className="flex flex-col items-end text-right text-white">
                 <span
-                  aria-hidden="true"
-                  className="inline-block translate-x-[-4px] opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all duration-500 ease-out"
+                  ref={activeTitleRef}
+                  key={`${active.slug}-title`}
+                  className="font-display font-light tracking-tight text-2xl lg:text-3xl leading-[1.5] animate-in fade-in duration-700"
                 >
-                  →
+                  {first}
+                  {last && <span className="italic"> {last}</span>}
                 </span>
-              </span>
-            </div>
-
-            {/* Kinetic editorial cursor — a glass-blur disc that follows the
-                mouse over the right-half portal, replacing the previous large
-                VIEW button cursor. */}
-            <div
-              ref={portalCursorRef}
-              className={cn(
-                "absolute pointer-events-none z-50 transition-opacity duration-300 ease-out",
-                showPortalCursor ? "opacity-100" : "opacity-0"
-              )}
-              style={{ transform: "translate(-50%, -50%)" }}
-            >
-              <div className="relative w-20 h-20 rounded-full bg-black/25 backdrop-blur-md border border-white/15 flex flex-col items-center justify-center shadow-2xl transition-transform duration-500 ease-out scale-[0.72] group-hover:scale-100">
-                <div className="absolute inset-1.5 rounded-full border border-dashed border-white/10 animate-[spin_20s_linear_infinite]" />
-                <span className="font-serif italic text-white text-[11px] tracking-[0.2em]">View</span>
-                <div className="w-5 h-px bg-white/40 my-1" />
-                <span className="text-white/40 text-[7px] uppercase tracking-[0.3em] font-body">Profile</span>
+                <span
+                  key={`${active.slug}-cta`}
+                  className="mt-3 inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.35em] font-body font-medium text-white/70 group-hover:text-white underline decoration-white/40 underline-offset-4 group-hover:decoration-white/80 transition-colors animate-in fade-in duration-1000 delay-200 fill-mode-both"
+                >
+                  <span>Click to view full collection</span>
+                  {/* Arrow reveals + slides on hover */}
+                  <span
+                    aria-hidden="true"
+                    className="inline-block translate-x-[-4px] opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all duration-500 ease-out"
+                  >
+                    →
+                  </span>
+                </span>
               </div>
-            </div>
-          </Link>
+            </Link>
+          </>
         );
       })()}
 
