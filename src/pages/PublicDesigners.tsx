@@ -153,27 +153,64 @@ const PublicDesigners = () => {
         <meta name="twitter:image" content="https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,h_630,c_fill,q_auto:best,f_jpg/v1774310625/20250822-designer-x-ai-gfx-test-09b_esclp8.jpg" />
       </Helmet>
 
-      <div className="min-h-screen bg-background text-foreground">
-        <Navigation />
+      <ScrollLockedDesigners initialLetter={initialLetter} initialExpand={initialExpand} />
+    </>
+  );
+};
 
-        <div className="pt-20">
-          {/* Visually-hidden H1 retained for SEO/a11y; hero + directory below provide visible headings */}
-          <h1 className="sr-only">Designers &amp; Ateliers</h1>
-          
-          <div className="pb-20">
-            <div className="relative">
-              <DesignersHoverHero />
-              <HeroAlphabetBar />
-            </div>
-            <DesignersDirectory mode="designers" initialLetter={initialLetter} initialExpand={initialExpand} showHeader={false} showAlphabetBar={false} />
+/**
+ * The /designers landing is intentionally locked to the viewport: the user
+ * must engage the A–Z bar or the "Find A Designer" bottom sheet to browse.
+ * Scroll unlocks on the first letter click (custom `unlockDesignersScroll`
+ * event) and stays unlocked for the remainder of the session on this page.
+ */
+function ScrollLockedDesigners({
+  initialLetter,
+  initialExpand,
+}: {
+  initialLetter?: string;
+  initialExpand?: string;
+}) {
+  const [locked, setLocked] = useState(true);
+
+  useEffect(() => {
+    if (!locked) return;
+    const html = document.documentElement;
+    const body = document.body;
+    const prevHtml = html.style.overflow;
+    const prevBody = body.style.overflow;
+    html.style.overflow = "hidden";
+    body.style.overflow = "hidden";
+    const unlock = () => setLocked(false);
+    window.addEventListener("unlockDesignersScroll", unlock);
+    return () => {
+      html.style.overflow = prevHtml;
+      body.style.overflow = prevBody;
+      window.removeEventListener("unlockDesignersScroll", unlock);
+    };
+  }, [locked]);
+
+  return (
+    <div className="min-h-screen bg-background text-foreground">
+      <Navigation />
+
+      <div className="pt-20">
+        <h1 className="sr-only">Designers &amp; Ateliers</h1>
+
+        <div className={locked ? "h-[calc(100vh-5rem)] overflow-hidden" : "pb-20"}>
+          <div className="relative">
+            <DesignersHoverHero />
+            <HeroAlphabetBar />
           </div>
-
-          
+          <DesignersDirectory mode="designers" initialLetter={initialLetter} initialExpand={initialExpand} showHeader={false} showAlphabetBar={false} />
         </div>
-
-        <Footer />
-        <BackToTopButton />
       </div>
+
+      <Footer />
+      <BackToTopButton />
+    </div>
+  );
+}
     </>
   );
 };
