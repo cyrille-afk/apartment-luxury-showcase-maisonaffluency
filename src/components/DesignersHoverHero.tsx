@@ -396,8 +396,8 @@ const DesignersHoverHero = () => {
     const update = () => {
       const rect = directoryRef.current!.getBoundingClientRect();
       setDropdownPos({
-        left: rect.left,
-        top: rect.bottom + window.scrollY + 8,
+        left: rect.right + 12,
+        top: rect.top + window.scrollY,
       });
     };
     update();
