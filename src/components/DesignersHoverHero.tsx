@@ -509,6 +509,7 @@ const DesignersHoverHero = () => {
                           >
                             <Link
                               to={`/designers/${d.slug}`}
+                              state={{ fromDesignersHero: true }}
                               onMouseEnter={() => setActiveSlug(d.slug)}
                               onFocus={() => setActiveSlug(d.slug)}
                               className={cn(
@@ -646,6 +647,7 @@ const DesignersHoverHero = () => {
             key={active.slug}
             ref={portalRef}
             to={`/designers/${active.slug}`}
+            state={{ fromDesignersHero: true }}
             aria-label={`View ${active.name}'s full collection`}
             className="hidden md:block absolute right-0 top-0 h-full w-1/2 z-10 pointer-events-auto group"
             style={{ cursor: "none" }}
@@ -817,6 +819,7 @@ const DesignersHoverHero = () => {
                                 <li key={d.slug}>
                                   <Link
                                     to={`/designers/${d.slug}`}
+                                    state={{ fromDesignersHero: true }}
                                     onClick={() => setSearchOpen(false)}
                                     className="block pl-8 pr-4 py-2 font-body text-[14px] text-white/80 hover:text-white hover:bg-white/[0.04] transition-colors"
                                   >
