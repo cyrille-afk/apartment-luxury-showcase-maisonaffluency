@@ -815,7 +815,10 @@ const DesignersHoverHero = () => {
             onMouseLeave={() => setShowPortalCursor(false)}
             onMouseMove={handlePortalMove}
           >
-            <div className="absolute right-12 lg:right-28 bottom-24 lg:bottom-24 flex flex-col items-end text-right text-white">
+            <div
+              className="absolute right-12 lg:right-28 flex flex-col items-end text-right text-white"
+              style={activeTitleTop != null ? { top: activeTitleTop } : { bottom: 96 }}
+            >
               <span
                 ref={activeTitleRef}
                 key={`${active.slug}-title`}
