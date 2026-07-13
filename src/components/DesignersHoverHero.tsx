@@ -147,6 +147,9 @@ const DesignersHoverHero = () => {
   const [activeSlug, setActiveSlug] = useState<string | null>(null);
   const [isStandalone, setIsStandalone] = useState(false);
   const [showPortalCursor, setShowPortalCursor] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const isMobileHook = useIsMobile();
   const [isMobileViewport, setIsMobileViewport] = useState(() =>
     typeof window !== "undefined" && window.matchMedia("(max-width: 767px)").matches
