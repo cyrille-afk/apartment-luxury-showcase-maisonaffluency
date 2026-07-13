@@ -1,4 +1,4 @@
-import React, { useMemo, useCallback } from "react";
+import React from "react";
 import { useSearchParams, Navigate } from "react-router-dom";
 import { categoryUrl } from "@/lib/categorySlugs";
 import { Helmet } from "react-helmet-async";
@@ -9,8 +9,7 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import DesignersDirectory from "@/components/DesignersDirectory";
 import DesignersHoverHero from "@/components/DesignersHoverHero";
-import { useAllDesigners } from "@/hooks/useDesigner";
-import { jumpToDesignerLetter } from "@/lib/jumpToDesignerLetter";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 
 // ─── Back to Top Button ──────────────────────────────────────────────────────
