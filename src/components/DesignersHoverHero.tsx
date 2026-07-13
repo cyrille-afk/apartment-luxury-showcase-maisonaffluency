@@ -374,6 +374,7 @@ const DesignersHoverHero = () => {
   }, [allDesigners]);
 
   const isSearching = searchQuery.trim().length > 0;
+  const isDesktopViewport = !isMobileViewport && !isMobileHook && !isStandalone;
   
 
   // Mobile A–Z compact grid: quick lookup of which letters have designers,
@@ -455,8 +456,6 @@ const DesignersHoverHero = () => {
       window.removeEventListener("scroll", update);
     };
   }, [hasItems, items.length, activeSlug]);
-
-  const isDesktopViewport = !isMobileViewport && !isMobileHook && !isStandalone;
 
   // Desktop dropdown opens to the left of Directory and matches the height of
   // the left featured-designers list.
