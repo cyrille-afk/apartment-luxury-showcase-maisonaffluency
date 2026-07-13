@@ -533,8 +533,7 @@ const DesignersHoverHero = () => {
               const gap = 24;
               const navRight = navRect ? navRect.right : rect.right;
               const navBottom = navRect ? navRect.bottom : rect.bottom + 400;
-              const available = window.innerHeight - rect.top - 24;
-              const height = Math.max(320, Math.min(available, Math.max(navBottom - rect.top, available)));
+              const height = Math.max(320, navBottom - rect.top);
               setDropdownPos({
                 left: Math.min(window.innerWidth - width - 16, navRight + gap),
                 top: rect.top,
