@@ -516,10 +516,10 @@ const DesignersHoverHero = () => {
           )}
         >
 
-          {/* Desktop: Directory / Find A Designer sits at the top of the list,
-              replacing the previous "Meet Our Designers" headline. */}
-          <div className="hidden md:block md:mt-8 md:ml-6">
-            {directoryLabels("mb-5 md:mb-8 w-fit", directoryRef)}
+          {/* Desktop: Directory / Find A Designer sits at the top-right so the
+              dropdown never truncates the masters list on the left. */}
+          <div className="hidden md:block md:absolute md:top-8 md:right-12 lg:right-20 z-30">
+            {directoryLabels("w-fit", directoryRef)}
           </div>
           <div className="w-full max-w-xs sm:max-w-sm md:max-w-md">
             <div className="relative inline-block">
