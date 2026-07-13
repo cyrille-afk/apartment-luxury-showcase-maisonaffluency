@@ -371,8 +371,9 @@ const DesignersHoverHero = () => {
           onClick={() => setSearchOpen(true)}
           aria-expanded={searchOpen}
           aria-controls="designers-search-sheet"
-          className="text-xs font-body font-light italic text-white/85 hover:text-white underline-offset-4 hover:underline transition-colors text-left"
+          className="inline-flex items-center gap-2 text-xs font-body font-light italic text-white/85 hover:text-white underline-offset-4 hover:underline transition-colors text-left"
         >
+          <Search className="h-3.5 w-3.5 not-italic" aria-hidden="true" />
           Find A Designer
         </button>
       </div>
