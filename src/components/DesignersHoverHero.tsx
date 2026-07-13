@@ -247,7 +247,7 @@ const DesignersHoverHero = () => {
   // Mobile: capture vertical swipes on the hero section to advance through
   // featured designers (with the corresponding background image cross-fading
   // in) instead of scrolling the page. The directory below is only reached
-  // via the "Click to Browse A–Z" link, per editorial intent.
+  // via the "Find A Designer" link, per editorial intent.
   useEffect(() => {
     if (!hasItems) return;
     const section = sectionRef.current;
@@ -373,7 +373,7 @@ const DesignersHoverHero = () => {
           aria-controls="designers-search-sheet"
           className="text-xs font-body font-light italic text-white/85 hover:text-white underline-offset-4 hover:underline transition-colors text-left"
         >
-          Click to Browse A–Z
+          Find A Designer
         </button>
       </div>
     </div>
