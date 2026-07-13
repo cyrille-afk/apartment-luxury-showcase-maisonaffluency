@@ -365,59 +365,7 @@ const DesignersHoverHero = () => {
       .sort((a, b) => sortNameKey(a.name).localeCompare(sortNameKey(b.name)));
   }, [allDesigners]);
 
-  // Auto-expand all letters while searching so matches are immediately visible.
   const isSearching = searchQuery.trim().length > 0;
-  const effectiveExpanded = useMemo(() => {
-    if (isSearching) return new Set(groupedResults.map(([l]) => l));
-    return expandedLetters;
-  }, [isSearching, groupedResults, expandedLetters]);
-
-  const toggleLetter = (letter: string) => {
-    setExpandedLetters((prev) => {
-      const next = new Set(prev);
-      if (next.has(letter)) {
-        next.delete(letter);
-      } else {
-        next.add(letter);
-        setPendingRevealLetter(letter);
-      }
-      return next;
-    });
-  };
-
-  // Keep newly opened groups fully visible inside the fixed sheet instead of
-  // making users manually scroll to see the lower names under letters like S.
-  useEffect(() => {
-    if (!searchOpen || !pendingRevealLetter) return;
-    const container = searchScrollRef.current;
-    const item = letterItemRefs.current[pendingRevealLetter];
-    if (!container || !item) return;
-
-    const reveal = () => {
-      const containerRect = container.getBoundingClientRect();
-      const itemRect = item.getBoundingClientRect();
-      const bottomOverflow = itemRect.bottom - containerRect.bottom;
-      const topOverflow = itemRect.top - containerRect.top;
-
-      if (bottomOverflow > 0) {
-        container.scrollBy({ top: bottomOverflow + 16, behavior: "smooth" });
-      } else if (topOverflow < 0) {
-        container.scrollBy({ top: topOverflow - 16, behavior: "smooth" });
-      }
-    };
-
-    const raf = window.requestAnimationFrame(() => {
-      reveal();
-    });
-    const timeout = window.setTimeout(() => {
-      reveal();
-      setPendingRevealLetter(null);
-    }, 260);
-
-    return () => {
-      window.cancelAnimationFrame(raf);
-      window.clearTimeout(timeout);
-    };
   }, [searchOpen, pendingRevealLetter, expandedLetters]);
 
   // Mobile A–Z compact grid: quick lookup of which letters have designers,
