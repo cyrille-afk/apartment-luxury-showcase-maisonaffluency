@@ -151,6 +151,7 @@ const DesignersHoverHero = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedLetter, setSelectedLetter] = useState<string | null>(null);
   const [expandedLetters, setExpandedLetters] = useState<Set<string>>(new Set());
+  const [activeAccordionLetter, setActiveAccordionLetter] = useState<string | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const searchScrollRef = useRef<HTMLDivElement>(null);
   const directoryRef = useRef<HTMLDivElement>(null);
@@ -396,6 +397,36 @@ const DesignersHoverHero = () => {
   useEffect(() => {
     if (isSearching) setSelectedLetter(null);
   }, [isSearching]);
+
+  // Desktop accordion: when a letter opens, move the sheet viewport so the
+  // expanded designer list is visible instead of being cut off at the bottom.
+  useEffect(() => {
+    if (!searchOpen || !isDesktopViewport || !activeAccordionLetter) return;
+    if (!expandedLetters.has(activeAccordionLetter)) return;
+
+    const frame = window.requestAnimationFrame(() => {
+      const scroller = searchScrollRef.current;
+      const row = scroller?.querySelector<HTMLElement>(
+        `[data-designer-letter="${activeAccordionLetter}"]`
+      );
+      if (!scroller || !row) return;
+
+      const scrollerRect = scroller.getBoundingClientRect();
+      const rowRect = row.getBoundingClientRect();
+      const topOffset = rowRect.top - scrollerRect.top;
+      const bottomOverflow = rowRect.bottom - scrollerRect.bottom;
+
+      if (rowRect.height >= scrollerRect.height) {
+        scroller.scrollTo({ top: scroller.scrollTop + topOffset, behavior: "smooth" });
+      } else if (bottomOverflow > 0) {
+        scroller.scrollBy({ top: bottomOverflow + 12, behavior: "smooth" });
+      } else if (topOffset < 0) {
+        scroller.scrollBy({ top: topOffset - 12, behavior: "smooth" });
+      }
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, [activeAccordionLetter, expandedLetters, isDesktopViewport, searchOpen]);
 
   // Keep Directory y-aligned with MASTERS and x-aligned with the first letter
   // of the active designer title at the bottom of the hero.
@@ -977,14 +1008,23 @@ const DesignersHoverHero = () => {
                       groupedResults.map(([letter, items]) => {
                         const isOpen = expandedLetters.has(letter);
                         return (
-                          <li key={letter} className="border-b border-white/[0.06] last:border-b-0">
+                          <li
+                            key={letter}
+                            data-designer-letter={letter}
+                            className="border-b border-white/[0.06] last:border-b-0 scroll-mt-2"
+                          >
                             <button
                               type="button"
                               onClick={() =>
                                 setExpandedLetters((prev) => {
                                   const next = new Set(prev);
-                                  if (next.has(letter)) next.delete(letter);
-                                  else next.add(letter);
+                                  if (next.has(letter)) {
+                                    next.delete(letter);
+                                    if (activeAccordionLetter === letter) setActiveAccordionLetter(null);
+                                  } else {
+                                    next.add(letter);
+                                    setActiveAccordionLetter(letter);
+                                  }
                                   return next;
                                 })
                               }
