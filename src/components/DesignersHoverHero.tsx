@@ -709,7 +709,7 @@ const DesignersHoverHero = () => {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
             onClick={() => setSearchOpen(false)}
-            className="fixed left-0 right-0 bottom-0 top-20 z-[70] bg-black/60 backdrop-blur-sm"
+            className="fixed left-0 right-0 bottom-0 top-20 z-[70]"
             aria-hidden="true"
           />
         )}
