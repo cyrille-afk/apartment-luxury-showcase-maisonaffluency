@@ -653,14 +653,18 @@ const DesignersHoverHero = () => {
                       {group.label}
                     </span>
                     <ul className="flex flex-col gap-1 text-left">
-                      {group.designers.map((d) => {
+                      {group.designers.map((d, dIdx) => {
                         const [first, last] = splitName(d.name);
                         const isActive = d.slug === activeSlug;
                         const isDimmed = activeSlug !== null && !isActive;
                         const childBrand = d.founder && d.founder !== d.name;
+                        const isLastItem =
+                          groupIdx === groupedItems.length - 1 &&
+                          dIdx === group.designers.length - 1;
                         return (
                           <li
                             key={d.slug}
+                            ref={isLastItem ? lastItemRef : undefined}
                             className="text-left leading-[1.5] sm:leading-[1.55]"
                           >
                             <Link
