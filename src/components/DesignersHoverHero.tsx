@@ -400,9 +400,12 @@ const DesignersHoverHero = () => {
     const update = () => {
       const rect = directoryRef.current!.getBoundingClientRect();
       const width = 380;
-      const gap = 12;
-      // Open to the LEFT of the button so the masters list is never covered.
-      const left = Math.max(16, rect.left - width - gap);
+      const gap = 24;
+      // Open to the RIGHT of the button, into the empty image area.
+      const left = Math.min(
+        window.innerWidth - width - 16,
+        rect.right + gap
+      );
       setDropdownPos({ left, top: rect.top + window.scrollY });
     };
     update();
