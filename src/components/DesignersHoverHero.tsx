@@ -312,16 +312,15 @@ const DesignersHoverHero = () => {
           Directory <span className="text-white/70 normal-case tracking-normal">({designerCount || 95})</span>
         </span>
 
-        <Link
-          to="/designers?letter=A"
-          onClick={(e) => {
-            e.preventDefault();
-            jumpToDesignerLetter("A");
-          }}
-          className="text-xs font-body font-light italic text-white/85 hover:text-white underline-offset-4 hover:underline transition-colors"
+        <button
+          type="button"
+          onClick={() => setSearchOpen(true)}
+          aria-expanded={searchOpen}
+          aria-controls="designers-search-sheet"
+          className="text-xs font-body font-light italic text-white/85 hover:text-white underline-offset-4 hover:underline transition-colors text-left"
         >
           Click to Browse A–Z
-        </Link>
+        </button>
       </div>
     </div>
   );
