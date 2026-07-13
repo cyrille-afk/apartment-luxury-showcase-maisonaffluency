@@ -284,6 +284,8 @@ function PreviewViewContinuity() {
   const location = useLocation();
   const anchorIdRef = useRef<string | undefined>(undefined);
 
+  const isLockedDesignersLanding = location.pathname === "/designers" && !location.search;
+
 
   useEffect(() => {
     if (!isPreviewOrDev()) return;
@@ -316,6 +318,7 @@ function PreviewViewContinuity() {
       save();
     };
     const restoreAnchorAfterResize = () => {
+      if (isLockedDesignersLanding) return;
       const anchorId = anchorIdRef.current;
       if (!anchorId) return;
       window.setTimeout(() => {
@@ -337,6 +340,11 @@ function PreviewViewContinuity() {
 
   useEffect(() => {
     if (!isPreviewOrDev()) return;
+    if (isLockedDesignersLanding) {
+      window.scrollTo({ top: 0, left: 0, behavior: "instant" as ScrollBehavior });
+      try { localStorage.removeItem(PREVIEW_VIEW_STATE_KEY); } catch { /* noop */ }
+      return;
+    }
     try {
       const raw = localStorage.getItem(PREVIEW_VIEW_STATE_KEY);
       if (!raw) return;
