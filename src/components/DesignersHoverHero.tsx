@@ -847,63 +847,122 @@ const DesignersHoverHero = () => {
                   No designers match “{searchQuery}”.
                 </p>
               ) : (
-                <ul className="flex flex-col">
-                  {groupedResults.map(([letter, items]) => {
-                    const isOpen = effectiveExpanded.has(letter);
-                    return (
-                      <li
-                        key={letter}
-                        ref={(node) => {
-                          letterItemRefs.current[letter] = node;
-                        }}
-                        className="border-b border-white/[0.06] last:border-b-0"
-                      >
-                        <button
-                          type="button"
-                          onClick={() => toggleLetter(letter)}
-                          aria-expanded={isOpen}
-                          className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-white/[0.04] transition-colors"
+                <>
+                  {/* Mobile: compact A–Z grid + designers under the selected letter */}
+                  <div className="md:hidden">
+                    {!isSearching && (
+                      <div className="px-3 pt-3 pb-2">
+                        <div className="grid grid-cols-5 gap-1.5">
+                          {ALPHABET.map((l) => {
+                            const has = letterMap.has(l);
+                            const isActive = selectedLetter === l;
+                            return (
+                              <button
+                                key={l}
+                                type="button"
+                                disabled={!has}
+                                onClick={() => setSelectedLetter(isActive ? null : l)}
+                                aria-pressed={isActive}
+                                className={cn(
+                                  "h-11 rounded-md font-serif text-base transition-colors border",
+                                  isActive
+                                    ? "bg-white text-[#0a0a0a] border-white"
+                                    : has
+                                      ? "text-white/85 border-white/15 hover:bg-white/[0.06]"
+                                      : "text-white/20 border-white/[0.06] cursor-not-allowed"
+                                )}
+                              >
+                                {l}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+                    <ul className="flex flex-col pb-2">
+                      {(isSearching
+                        ? groupedResults.flatMap(([, items]) => items)
+                        : selectedLetterItems
+                      ).map((d) => (
+                        <li key={d.slug}>
+                          <Link
+                            to={`/designers/${d.slug}`}
+                            state={{ fromDesignersHero: true }}
+                            onClick={() => setSearchOpen(false)}
+                            className="block px-5 py-2.5 font-body text-[15px] text-white/85 hover:text-white hover:bg-white/[0.04] transition-colors"
+                          >
+                            {d.name}
+                          </Link>
+                        </li>
+                      ))}
+                      {!isSearching && !selectedLetter && (
+                        <li className="px-5 py-6 text-center text-xs font-body text-white/40">
+                          Select a letter to view designers
+                        </li>
+                      )}
+                    </ul>
+                  </div>
+
+                  {/* Desktop: A–Z accordion */}
+                  <ul className="hidden md:flex flex-col">
+                    {groupedResults.map(([letter, items]) => {
+                      const isOpen = effectiveExpanded.has(letter);
+                      return (
+                        <li
+                          key={letter}
+                          ref={(node) => {
+                            letterItemRefs.current[letter] = node;
+                          }}
+                          className="border-b border-white/[0.06] last:border-b-0"
                         >
-                          <span className="font-serif text-lg text-white/90">{letter}</span>
-                          <ChevronRight
-                            className={cn(
-                              "h-6 w-6 text-white/60 transition-transform duration-200 shrink-0",
-                              isOpen && "rotate-90"
+                          <button
+                            type="button"
+                            onClick={() => toggleLetter(letter)}
+                            aria-expanded={isOpen}
+                            className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-white/[0.04] transition-colors"
+                          >
+                            <span className="font-serif text-lg text-white/90">{letter}</span>
+                            <ChevronRight
+                              className={cn(
+                                "h-6 w-6 text-white/60 transition-transform duration-200 shrink-0",
+                                isOpen && "rotate-90"
+                              )}
+                              aria-hidden="true"
+                            />
+                          </button>
+                          <AnimatePresence initial={false}>
+                            {isOpen && (
+                              <motion.ul
+                                key="items"
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: "auto", opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+                                className="overflow-hidden"
+                              >
+                                {items.map((d) => (
+                                  <li key={d.slug}>
+                                    <Link
+                                      to={`/designers/${d.slug}`}
+                                      state={{ fromDesignersHero: true }}
+                                      onClick={() => setSearchOpen(false)}
+                                      className="block pl-8 pr-4 py-2 font-body text-[14px] text-white/80 hover:text-white hover:bg-white/[0.04] transition-colors"
+                                    >
+                                      {d.name}
+                                    </Link>
+                                  </li>
+                                ))}
+                              </motion.ul>
                             )}
-                            aria-hidden="true"
-                          />
-                        </button>
-                        <AnimatePresence initial={false}>
-                          {isOpen && (
-                            <motion.ul
-                              key="items"
-                              initial={{ height: 0, opacity: 0 }}
-                              animate={{ height: "auto", opacity: 1 }}
-                              exit={{ height: 0, opacity: 0 }}
-                              transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
-                              className="overflow-hidden"
-                            >
-                              {items.map((d) => (
-                                <li key={d.slug}>
-                                  <Link
-                                    to={`/designers/${d.slug}`}
-                                    state={{ fromDesignersHero: true }}
-                                    onClick={() => setSearchOpen(false)}
-                                    className="block pl-8 pr-4 py-2 font-body text-[14px] text-white/80 hover:text-white hover:bg-white/[0.04] transition-colors"
-                                  >
-                                    {d.name}
-                                  </Link>
-                                </li>
-                              ))}
-                            </motion.ul>
-                          )}
-                        </AnimatePresence>
-                      </li>
-                    );
-                  })}
-                </ul>
+                          </AnimatePresence>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </>
               )}
             </div>
+
           </motion.div>
         )}
       </AnimatePresence>
