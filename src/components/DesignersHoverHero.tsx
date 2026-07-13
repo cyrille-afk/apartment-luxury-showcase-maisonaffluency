@@ -150,7 +150,10 @@ const DesignersHoverHero = () => {
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedLetters, setExpandedLetters] = useState<Set<string>>(new Set());
+  const [pendingRevealLetter, setPendingRevealLetter] = useState<string | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const searchScrollRef = useRef<HTMLDivElement>(null);
+  const letterItemRefs = useRef<Record<string, HTMLLIElement | null>>({});
   const isMobileHook = useIsMobile();
   const [isMobileViewport, setIsMobileViewport] = useState(() =>
     typeof window !== "undefined" && window.matchMedia("(max-width: 767px)").matches
@@ -373,11 +376,50 @@ const DesignersHoverHero = () => {
   const toggleLetter = (letter: string) => {
     setExpandedLetters((prev) => {
       const next = new Set(prev);
-      if (next.has(letter)) next.delete(letter);
-      else next.add(letter);
+      if (next.has(letter)) {
+        next.delete(letter);
+      } else {
+        next.add(letter);
+        setPendingRevealLetter(letter);
+      }
       return next;
     });
   };
+
+  // Keep newly opened groups fully visible inside the fixed sheet instead of
+  // making users manually scroll to see the lower names under letters like S.
+  useEffect(() => {
+    if (!searchOpen || !pendingRevealLetter) return;
+    const container = searchScrollRef.current;
+    const item = letterItemRefs.current[pendingRevealLetter];
+    if (!container || !item) return;
+
+    const reveal = () => {
+      const containerRect = container.getBoundingClientRect();
+      const itemRect = item.getBoundingClientRect();
+      const bottomOverflow = itemRect.bottom - containerRect.bottom;
+      const topOverflow = itemRect.top - containerRect.top;
+
+      if (bottomOverflow > 0) {
+        container.scrollBy({ top: bottomOverflow + 16, behavior: "smooth" });
+      } else if (topOverflow < 0) {
+        container.scrollBy({ top: topOverflow - 16, behavior: "smooth" });
+      }
+    };
+
+    const raf = window.requestAnimationFrame(() => {
+      reveal();
+    });
+    const timeout = window.setTimeout(() => {
+      reveal();
+      setPendingRevealLetter(null);
+    }, 260);
+
+    return () => {
+      window.cancelAnimationFrame(raf);
+      window.clearTimeout(timeout);
+    };
+  }, [searchOpen, pendingRevealLetter, expandedLetters]);
 
   if (!hasItems) return null;
 
@@ -754,7 +796,7 @@ const DesignersHoverHero = () => {
               "inset-x-0 bottom-0 max-h-[75vh] rounded-t-2xl pb-[env(safe-area-inset-bottom)]",
               // Desktop: anchored popover further to the right of the Find A Designer
               // link so the directory label is never truncated. Nav stays visible.
-              "md:inset-x-auto md:left-[34rem] lg:left-[36rem] md:right-auto md:bottom-20 md:w-[380px] md:max-w-[calc(100vw-34rem)] lg:max-w-[calc(100vw-36rem)] md:max-h-[60vh] md:rounded-xl md:pb-0"
+              "md:inset-x-auto md:left-[34rem] lg:left-[36rem] md:right-auto md:bottom-20 md:w-[380px] md:max-w-[calc(100vw-34rem)] lg:max-w-[calc(100vw-36rem)] md:max-h-[calc(100vh-var(--header-h)-6rem)] md:rounded-xl md:pb-0"
             )}
           >
             <div className="mx-auto mt-2 h-1 w-10 rounded-full bg-white/25 shrink-0" aria-hidden="true" />
@@ -779,7 +821,7 @@ const DesignersHoverHero = () => {
                 <X className="h-4 w-4" />
               </button>
             </div>
-            <div className="overflow-y-auto overscroll-contain px-1 py-1 min-h-0">
+            <div ref={searchScrollRef} className="overflow-y-auto overscroll-contain px-1 py-1 min-h-0">
               {isSearching && groupedResults.length === 0 ? (
                 <p className="px-4 py-8 text-center text-sm font-body text-white/50">
                   No designers match “{searchQuery}”.
@@ -789,7 +831,13 @@ const DesignersHoverHero = () => {
                   {groupedResults.map(([letter, items]) => {
                     const isOpen = effectiveExpanded.has(letter);
                     return (
-                      <li key={letter} className="border-b border-white/[0.06] last:border-b-0">
+                      <li
+                        key={letter}
+                        ref={(node) => {
+                          letterItemRefs.current[letter] = node;
+                        }}
+                        className="border-b border-white/[0.06] last:border-b-0"
+                      >
                         <button
                           type="button"
                           onClick={() => toggleLetter(letter)}
