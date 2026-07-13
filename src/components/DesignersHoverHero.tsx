@@ -810,7 +810,7 @@ const DesignersHoverHero = () => {
             to={`/designers/${active.slug}`}
             state={{ fromDesignersHero: true }}
             aria-label={`View ${active.name}'s full collection`}
-            className="hidden md:block absolute right-0 top-0 h-full w-1/2 z-10 pointer-events-auto group"
+            className="hidden md:block absolute right-0 top-0 h-full w-1/2 z-30 pointer-events-auto group"
             style={{ cursor: "none" }}
             onMouseEnter={() => setShowPortalCursor(true)}
             onMouseLeave={() => setShowPortalCursor(false)}
