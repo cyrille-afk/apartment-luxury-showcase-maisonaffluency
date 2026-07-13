@@ -594,7 +594,12 @@ const DesignersHoverHero = () => {
         })}
         {/* Readability overlay */}
         <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/45 to-black/20 md:from-black/60 md:via-black/30 md:to-black/5" />
+        {/* Desktop left column backdrop — dedicates the left 32% of the hero to
+            a solid dark panel so the designer list never overlaps furniture
+            imagery on the right. */}
+        <div className="hidden md:block absolute inset-y-0 left-0 w-[32%] bg-gradient-to-r from-[#0a0a0a] via-[#0a0a0a]/95 to-transparent pointer-events-none" />
       </div>
+
 
       {/* Safe content frame — on mobile browser it tracks 100svh (toolbar-visible
           viewport) so list + directory always sit above iOS bottom chrome.
