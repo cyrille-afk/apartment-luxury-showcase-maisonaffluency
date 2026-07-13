@@ -777,44 +777,62 @@ const DesignersHoverHero = () => {
                 <X className="h-4 w-4" />
               </button>
             </div>
-            <div className="overflow-y-auto overscroll-contain px-2 py-2 min-h-0">
-              {isSearching && flatResults.length === 0 ? (
+            <div className="overflow-y-auto overscroll-contain px-1 py-1 min-h-0">
+              {isSearching && groupedResults.length === 0 ? (
                 <p className="px-4 py-8 text-center text-sm font-body text-white/50">
                   No designers match “{searchQuery}”.
                 </p>
-              ) : isSearching ? (
-                <ul className="flex flex-col divide-y divide-white/[0.06]">
-                  {flatResults.map((d) => (
-                    <li key={d.slug}>
-                      <Link
-                        to={`/designers/${d.slug}`}
-                        onClick={() => setSearchOpen(false)}
-                        className="block px-4 py-3 font-body text-[15px] text-white/85 hover:text-white hover:bg-white/[0.05] transition-colors"
-                      >
-                        {d.name}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
               ) : (
-                <div className="flex flex-col">
-                  <div className="px-4 pt-3 pb-2 text-[10px] uppercase tracking-[0.3em] font-body text-white/45">
-                    Featured Masters
-                  </div>
-                  <ul className="flex flex-col divide-y divide-white/[0.06]">
-                    {featuredMasters.map((d) => (
-                      <li key={d.slug}>
-                        <Link
-                          to={`/designers/${d.slug}`}
-                          onClick={() => setSearchOpen(false)}
-                          className="block px-4 py-3 font-body text-[15px] text-white/85 hover:text-white hover:bg-white/[0.05] transition-colors"
+                <ul className="flex flex-col">
+                  {groupedResults.map(([letter, items]) => {
+                    const isOpen = effectiveExpanded.has(letter);
+                    return (
+                      <li key={letter} className="border-b border-white/[0.06] last:border-b-0">
+                        <button
+                          type="button"
+                          onClick={() => toggleLetter(letter)}
+                          aria-expanded={isOpen}
+                          className="w-full flex items-center justify-between px-4 py-2.5 text-left hover:bg-white/[0.04] transition-colors"
                         >
-                          {d.name}
-                        </Link>
+                          <span className="font-serif text-lg text-white/90">{letter}</span>
+                          <span
+                            className={cn(
+                              "text-white/40 text-xs transition-transform duration-200",
+                              isOpen && "rotate-90"
+                            )}
+                            aria-hidden="true"
+                          >
+                            ›
+                          </span>
+                        </button>
+                        <AnimatePresence initial={false}>
+                          {isOpen && (
+                            <motion.ul
+                              key="items"
+                              initial={{ height: 0, opacity: 0 }}
+                              animate={{ height: "auto", opacity: 1 }}
+                              exit={{ height: 0, opacity: 0 }}
+                              transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+                              className="overflow-hidden"
+                            >
+                              {items.map((d) => (
+                                <li key={d.slug}>
+                                  <Link
+                                    to={`/designers/${d.slug}`}
+                                    onClick={() => setSearchOpen(false)}
+                                    className="block pl-8 pr-4 py-2 font-body text-[14px] text-white/80 hover:text-white hover:bg-white/[0.04] transition-colors"
+                                  >
+                                    {d.name}
+                                  </Link>
+                                </li>
+                              ))}
+                            </motion.ul>
+                          )}
+                        </AnimatePresence>
                       </li>
-                    ))}
-                  </ul>
-                </div>
+                    );
+                  })}
+                </ul>
               )}
             </div>
           </motion.div>
