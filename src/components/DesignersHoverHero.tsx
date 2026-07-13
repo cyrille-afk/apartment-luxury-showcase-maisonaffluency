@@ -341,6 +341,28 @@ const DesignersHoverHero = () => {
     return { groupedResults: ordered, totalResults: filtered.length };
   }, [allDesigners, searchQuery]);
 
+  // Flat list for the mobile-first bottom sheet: fast visual scan, no A–Z index.
+  const flatResults = useMemo(() => {
+    const list = (allDesigners as any[])
+      .filter((d) => d.is_published && !d.trade_only)
+      .map((d) => ({ slug: d.slug as string, name: d.name as string }));
+    const q = searchQuery.trim().toLowerCase();
+    const filtered = q ? list.filter((d) => d.name.toLowerCase().includes(q)) : list;
+    filtered.sort((a, b) => sortNameKey(a.name).localeCompare(sortNameKey(b.name)));
+    return filtered;
+  }, [allDesigners, searchQuery]);
+
+  // Zero-state: curated "Featured Masters" from the hero groupings, sorted.
+  const featuredMasters = useMemo(() => {
+    const mastersSlugs = new Set(
+      (FEATURED_GROUPS.find((g) => g.label === "Masters")?.slugs ?? [])
+    );
+    return (allDesigners as any[])
+      .filter((d) => d.is_published && mastersSlugs.has(d.slug))
+      .map((d) => ({ slug: d.slug as string, name: d.name as string }))
+      .sort((a, b) => sortNameKey(a.name).localeCompare(sortNameKey(b.name)));
+  }, [allDesigners]);
+
   // Auto-expand all letters while searching so matches are immediately visible.
   const isSearching = searchQuery.trim().length > 0;
   const effectiveExpanded = useMemo(() => {
