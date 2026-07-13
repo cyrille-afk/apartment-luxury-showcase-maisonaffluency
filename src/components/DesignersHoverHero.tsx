@@ -521,7 +521,7 @@ const DesignersHoverHero = () => {
 
           {/* Desktop: Directory / Find A Designer sits at the top-right so the
               dropdown never truncates the masters list on the left. */}
-          <div className="hidden md:block md:absolute md:top-8 md:right-12 lg:right-20 z-30">
+          <div className="hidden md:block md:absolute md:top-8 md:right-12 lg:right-20 z-40 pointer-events-auto">
             {directoryLabels("w-fit", directoryRef)}
           </div>
           <div className="w-full max-w-xs sm:max-w-sm md:max-w-md">
