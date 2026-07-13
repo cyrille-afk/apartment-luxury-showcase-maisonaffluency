@@ -425,6 +425,8 @@ const DesignersHoverHero = () => {
     };
   }, [hasItems, items.length, activeSlug]);
 
+  const isDesktopViewport = !isMobileViewport && !isMobileHook && !isStandalone;
+
   // Desktop dropdown opens to the left of Directory and matches the height of
   // the left featured-designers list.
   useEffect(() => {
@@ -452,8 +454,6 @@ const DesignersHoverHero = () => {
       window.removeEventListener("scroll", update);
     };
   }, [searchOpen, isDesktopViewport]);
-
-  const isDesktopViewport = !isMobileViewport && !isMobileHook && !isStandalone;
 
   if (!hasItems) return null;
 
