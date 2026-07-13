@@ -366,7 +366,7 @@ const DesignersHoverHero = () => {
   }, [allDesigners]);
 
   const isSearching = searchQuery.trim().length > 0;
-  }, [searchOpen, pendingRevealLetter, expandedLetters]);
+  
 
   // Mobile A–Z compact grid: quick lookup of which letters have designers,
   // and the items for the currently selected letter.
