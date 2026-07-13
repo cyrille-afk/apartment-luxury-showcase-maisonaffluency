@@ -211,8 +211,5 @@ function ScrollLockedDesigners({
     </div>
   );
 }
-    </>
-  );
-};
 
 export default PublicDesigners;
