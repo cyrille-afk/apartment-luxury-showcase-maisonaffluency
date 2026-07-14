@@ -220,6 +220,58 @@ const DesignersHoverHero = () => {
     }
   }, [items, activeSlug]);
 
+  // First-visit hover-hint: auto-cycle the first 3 designers on desktop so
+  // users discover that names pair with photos. Fires once per browser,
+  // gated by localStorage. Cancels on any user interaction with the list.
+  const HINT_KEY = "designers-hover-hint-v1";
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (!items.length) return;
+    if (!window.matchMedia("(min-width: 768px)").matches) return;
+    try {
+      if (localStorage.getItem(HINT_KEY)) return;
+    } catch { /* ignore */ }
+
+    const nav = navRef.current;
+    let cancelled = false;
+    const timers: number[] = [];
+    const preview = items.slice(0, Math.min(3, items.length));
+
+    const cancel = () => {
+      if (cancelled) return;
+      cancelled = true;
+      timers.forEach((t) => window.clearTimeout(t));
+      try { localStorage.setItem(HINT_KEY, "1"); } catch { /* ignore */ }
+    };
+
+    // Start after a short delay so the hero settles first.
+    timers.push(window.setTimeout(() => {
+      if (cancelled) return;
+      preview.forEach((d, i) => {
+        timers.push(window.setTimeout(() => {
+          if (cancelled) return;
+          setActiveSlug(d.slug);
+        }, i * 1100));
+      });
+      // Persist that the hint has been shown after the cycle completes.
+      timers.push(window.setTimeout(() => {
+        try { localStorage.setItem(HINT_KEY, "1"); } catch { /* ignore */ }
+      }, preview.length * 1100 + 200));
+    }, 900));
+
+    nav?.addEventListener("mouseenter", cancel, { once: true });
+    nav?.addEventListener("wheel", cancel, { once: true, passive: true });
+    window.addEventListener("keydown", cancel, { once: true });
+    return () => {
+      cancelled = true;
+      timers.forEach((t) => window.clearTimeout(t));
+      nav?.removeEventListener("mouseenter", cancel);
+      nav?.removeEventListener("wheel", cancel);
+      window.removeEventListener("keydown", cancel);
+    };
+  }, [items]);
+
+
   // Desktop: wheel over the names list advances through designers.
   useEffect(() => {
     if (!hasItems) return;
