@@ -316,6 +316,8 @@ const DesignersHoverHero = () => {
     };
   }, [hasItems, items]);
 
+  const isDesktopViewport = !isMobileViewport && !isMobileHook && !isStandalone;
+
   // Lock body scroll + ESC-to-close + autofocus while the search sheet is open.
   // On mobile/PWA we use a custom QWERTY keyboard, so avoid focusing the native
   // input and triggering the system keyboard.
