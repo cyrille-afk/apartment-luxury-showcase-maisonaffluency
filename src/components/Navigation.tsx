@@ -324,17 +324,17 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
         {/* Mobile: single row */}
           <div className="flex h-24 items-end pb-2.5 md:hidden relative justify-center">
            <Sheet open={isOpen} onOpenChange={handleMobileMenuOpenChange}>
-            {/* Burger — absolute left */}
+            {/* Burger — absolute left with generous edge padding */}
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-16 w-16 text-primary absolute left-0 bottom-2" aria-label="Toggle menu">
+              <Button variant="ghost" size="icon" className="h-16 w-16 text-primary absolute left-2 bottom-2" aria-label="Toggle menu">
                 {isOpen ? <X className="h-11 w-11" strokeWidth={2.25} /> : <Menu className="h-11 w-11" strokeWidth={2.25} />}
               </Button>
             </SheetTrigger>
 
-            {/* Brand — centered */}
+            {/* Brand — centered, slightly larger for balance */}
             <div className="flex flex-col items-center pb-0.5">
             <button onClick={scrollToTop} className="group cursor-pointer whitespace-nowrap">
-              <span className="font-brand text-[2rem] font-bold tracking-widest text-foreground transition-all duration-300 group-hover:text-primary">
+              <span className="font-brand text-[2.25rem] font-bold tracking-widest text-foreground transition-all duration-300 group-hover:text-primary">
                 <span className="group-hover:text-accent transition-colors duration-300">A</span>FFLUENCY
               </span>
             </button>
@@ -345,8 +345,8 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
               </div>
             </div>
 
-            {/* Flag — absolute right (mobile), vertically centered with burger */}
-            <div className="absolute right-2 bottom-[26px]">
+            {/* Flag — absolute right (mobile), 44×44 tap target and generous edge padding */}
+            <div className="absolute right-4 bottom-[22px]">
               <ShippingDestinationSwitcher compact />
             </div>
 
