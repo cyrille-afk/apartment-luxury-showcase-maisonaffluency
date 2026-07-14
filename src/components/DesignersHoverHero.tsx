@@ -991,7 +991,7 @@ const DesignersHoverHero = () => {
                 <>
                   {/* Mobile: grouped designer list with sticky letter headers */}
                   <div className="md:hidden">
-                    <ul className="flex flex-col pb-2 pr-12">
+                    <ul className="flex flex-col pb-2">
                       {isSearching ? (
                         groupedResults.flatMap(([, items]) => items).map((d) => (
                           <li key={d.slug}>
