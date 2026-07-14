@@ -331,10 +331,9 @@ const PublicDesignerProfile = () => {
   if (slug && SLUG_ALIASES[slug]) {
     return <Navigate to={`/designers/${SLUG_ALIASES[slug]}`} replace />;
   }
-  // Trade-only visibility for individual collectible designer profiles.
-  if (isCollectibleSlug(slug) && !authLoading && !isTradeUser) {
-    return <Navigate to={collectibleGateRedirect(`/designers/${slug}`)} replace />;
-  }
+  // Collectible designer profiles (bio + curator picks) are public.
+  // Individual product pages remain gated via PublicProductPage.
+  void isCollectibleSlug; void collectibleGateRedirect; void authLoading; void isTradeUser;
   const [searchParams] = useSearchParams();
   const highlightId = searchParams.get("highlight");
   const scrollToSection = searchParams.get("section");
