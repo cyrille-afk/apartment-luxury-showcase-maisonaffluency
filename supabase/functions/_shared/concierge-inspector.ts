@@ -365,62 +365,75 @@ export async function runDiscoveryProseGuard(opts: {
     ALLOWED_PIECE_TITLES: opts.allowedPieceTitles.slice(0, 800),
   };
 
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), DISCOVERY_GUARD_TIMEOUT_MS);
-  try {
-    const resp = await fetch(INSPECTOR_URL, {
-      method: "POST",
-      signal: controller.signal,
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${opts.apiKey}`,
-      },
-      body: JSON.stringify({
-        model: DISCOVERY_GUARD_MODEL,
-        temperature: 0,
-        max_tokens: 900,
-        response_format: { type: "json_object" },
-        messages: [
-          { role: "system", content: DISCOVERY_GUARD_SYSTEM },
-          { role: "user", content: JSON.stringify(userPayload) },
-        ],
-      }),
-    });
-    if (!resp.ok) {
-      return { ok: false, corrected_prose: prose, removed_names: [], ms: Date.now() - t0, reason: `http_${resp.status}` };
-    }
-    const j = await resp.json().catch(() => null);
-    const raw = j?.choices?.[0]?.message?.content;
-    if (typeof raw !== "string") {
-      return { ok: false, corrected_prose: prose, removed_names: [], ms: Date.now() - t0, reason: "no_content" };
-    }
-    let parsed: any;
+  const attempt = async (model: string): Promise<{ result?: DiscoveryGuardResult; retryable?: boolean; reason: string }> => {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), DISCOVERY_GUARD_TIMEOUT_MS);
     try {
-      parsed = JSON.parse(raw);
-    } catch {
-      const fence = raw.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
-      if (fence) {
-        try { parsed = JSON.parse(fence[1]); } catch { /* fall through */ }
+      const resp = await fetch(INSPECTOR_URL, {
+        method: "POST",
+        signal: controller.signal,
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${opts.apiKey}`,
+        },
+        body: JSON.stringify({
+          model,
+          temperature: 0,
+          max_tokens: 900,
+          response_format: { type: "json_object" },
+          messages: [
+            { role: "system", content: DISCOVERY_GUARD_SYSTEM },
+            { role: "user", content: JSON.stringify(userPayload) },
+          ],
+        }),
+      });
+      if (!resp.ok) {
+        return { retryable: true, reason: `http_${resp.status}` };
       }
+      const j = await resp.json().catch(() => null);
+      const raw = j?.choices?.[0]?.message?.content;
+      if (typeof raw !== "string") {
+        return { retryable: true, reason: "no_content" };
+      }
+      const parsed = tolerantJsonParse(raw);
+      if (!parsed || typeof parsed.corrected_prose !== "string") {
+        return { retryable: true, reason: "parse_failed" };
+      }
+      const removed = Array.isArray(parsed.removed_names)
+        ? parsed.removed_names.filter((x: unknown) => typeof x === "string").slice(0, 20).map((s: string) => s.slice(0, 120))
+        : [];
+      return {
+        result: {
+          ok: true,
+          corrected_prose: String(parsed.corrected_prose).slice(0, 4000),
+          removed_names: removed,
+          ms: Date.now() - t0,
+        },
+        reason: "ok",
+      };
+    } catch (e) {
+      const reason = (e as Error)?.name === "AbortError" ? "timeout" : `error:${(e as Error)?.message || "unknown"}`;
+      return { retryable: true, reason };
+    } finally {
+      clearTimeout(timer);
     }
-    if (!parsed || typeof parsed.corrected_prose !== "string") {
-      return { ok: false, corrected_prose: prose, removed_names: [], ms: Date.now() - t0, reason: "parse_failed" };
-    }
-    const removed = Array.isArray(parsed.removed_names)
-      ? parsed.removed_names.filter((x: unknown) => typeof x === "string").slice(0, 20).map((s: string) => s.slice(0, 120))
-      : [];
+  };
+
+  const primary = await attempt(DISCOVERY_GUARD_MODEL);
+  if (primary.result) return primary.result;
+  if (primary.retryable) {
+    console.log("[discovery-guard] primary failed, trying fallback", { primary_reason: primary.reason });
+    const fb = await attempt(DISCOVERY_GUARD_FALLBACK_MODEL);
+    if (fb.result) return fb.result;
     return {
-      ok: true,
-      corrected_prose: String(parsed.corrected_prose).slice(0, 4000),
-      removed_names: removed,
+      ok: false,
+      corrected_prose: prose,
+      removed_names: [],
       ms: Date.now() - t0,
+      reason: `${primary.reason}|fallback_${fb.reason}`,
     };
-  } catch (e) {
-    const reason = (e as Error)?.name === "AbortError" ? "timeout" : `error:${(e as Error)?.message || "unknown"}`;
-    return { ok: false, corrected_prose: prose, removed_names: [], ms: Date.now() - t0, reason };
-  } finally {
-    clearTimeout(timer);
   }
+  return { ok: false, corrected_prose: prose, removed_names: [], ms: Date.now() - t0, reason: primary.reason };
 }
 
 // ---------------------------------------------------------------------------
