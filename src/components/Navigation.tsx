@@ -808,7 +808,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                   {item.label}
                   <span className={cn(
                     "absolute -bottom-1 left-0 h-px bg-[hsl(var(--gold))] transition-all duration-300",
-                    (activeSection === item.href || isRouteActive(item.href)) ? "w-full" : "w-0 group-hover:w-full"
+                    (activeSection === item.href || isRouteActive(item.href)) ? "w-full" : "w-full group-hover:w-full"
                   )} />
                 </button>
               ))}
