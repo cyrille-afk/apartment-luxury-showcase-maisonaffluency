@@ -317,6 +317,8 @@ const DesignersHoverHero = () => {
   }, [hasItems, items]);
 
   // Lock body scroll + ESC-to-close + autofocus while the search sheet is open.
+  // On mobile/PWA we use a custom QWERTY keyboard, so avoid focusing the native
+  // input and triggering the system keyboard.
   useEffect(() => {
     if (!searchOpen) return;
     const prevOverflow = document.body.style.overflow;
@@ -326,13 +328,16 @@ const DesignersHoverHero = () => {
     };
     window.addEventListener("keydown", onKey);
     // Delay focus so the slide-up animation is visible before the keyboard opens.
-    const t = window.setTimeout(() => searchInputRef.current?.focus(), 220);
+    // Only auto-focus on desktop where the native keyboard is desired.
+    const t = window.setTimeout(() => {
+      if (isDesktopViewport) searchInputRef.current?.focus();
+    }, 220);
     return () => {
       document.body.style.overflow = prevOverflow;
       window.removeEventListener("keydown", onKey);
       window.clearTimeout(t);
     };
-  }, [searchOpen]);
+  }, [searchOpen, isDesktopViewport]);
 
   const { groupedResults, totalResults } = useMemo(() => {
     const list = (allDesigners as any[])
