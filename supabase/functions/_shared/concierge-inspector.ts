@@ -37,8 +37,83 @@ export type InspectorResult = {
 };
 
 const INSPECTOR_MODEL = "google/gemini-3.1-flash-lite";
+const INSPECTOR_FALLBACK_MODEL = "google/gemini-2.5-flash-lite";
 const INSPECTOR_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
 const INSPECTOR_TIMEOUT_MS = 2500;
+
+// ---------------------------------------------------------------------------
+// Tolerant JSON parsing shared by Inspector + Discovery Guard.
+//
+// Tries, in order:
+//   1. raw JSON.parse
+//   2. ```json ... ``` fence unwrap
+//   3. first brace-balanced {...} substring
+//   4. field-level regex extraction of `corrected_prose` and array fields
+//
+// Returns null when nothing usable can be recovered — callers should then
+// retry with the fallback model before giving up.
+// ---------------------------------------------------------------------------
+export function tolerantJsonParse(raw: string): any | null {
+  if (typeof raw !== "string" || !raw.trim()) return null;
+  const text = raw.trim();
+
+  // 1. straight parse
+  try { return JSON.parse(text); } catch { /* continue */ }
+
+  // 2. code fence
+  const fence = text.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+  if (fence) {
+    try { return JSON.parse(fence[1]); } catch { /* continue */ }
+  }
+
+  // 3. brace-balanced first object
+  const start = text.indexOf("{");
+  if (start >= 0) {
+    let depth = 0;
+    let inStr = false;
+    let esc = false;
+    for (let i = start; i < text.length; i++) {
+      const ch = text[i];
+      if (inStr) {
+        if (esc) { esc = false; continue; }
+        if (ch === "\\") { esc = true; continue; }
+        if (ch === '"') inStr = false;
+        continue;
+      }
+      if (ch === '"') { inStr = true; continue; }
+      if (ch === "{") depth++;
+      else if (ch === "}") {
+        depth--;
+        if (depth === 0) {
+          const slice = text.slice(start, i + 1);
+          try { return JSON.parse(slice); } catch { break; }
+        }
+      }
+    }
+  }
+
+  // 4. field-level extraction — pull corrected_prose as a JSON string literal
+  //    even if the surrounding object is malformed.
+  const proseMatch = text.match(/"corrected_prose"\s*:\s*("(?:[^"\\]|\\.)*")/);
+  if (proseMatch) {
+    try {
+      const prose = JSON.parse(proseMatch[1]);
+      const arr = (name: string): string[] => {
+        const m = text.match(new RegExp(`"${name}"\\s*:\\s*(\\[[\\s\\S]*?\\])`));
+        if (!m) return [];
+        try { const v = JSON.parse(m[1]); return Array.isArray(v) ? v : []; }
+        catch { return []; }
+      };
+      return {
+        corrected_prose: prose,
+        corrections: arr("corrections"),
+        removed_names: arr("removed_names"),
+      };
+    } catch { /* fall through */ }
+  }
+
+  return null;
+}
 
 const SYSTEM_PROMPT = `You are the Inspector — a factual-compliance auditor for a luxury B2B interior-design concierge.
 
