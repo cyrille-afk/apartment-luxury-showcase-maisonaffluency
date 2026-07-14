@@ -261,6 +261,7 @@ const DesignersHoverHero = () => {
   // in) instead of scrolling the page. The directory below is only reached
   // via the "Find A Designer" link, per editorial intent.
   useEffect(() => {
+    if (searchOpen) return;
     if (!hasItems) return;
     const section = sectionRef.current;
     if (!section) return;
@@ -286,6 +287,7 @@ const DesignersHoverHero = () => {
       accum = 0;
     };
     const onMove = (e: TouchEvent) => {
+      if ((e.target as HTMLElement | null)?.closest?.("#designers-search-sheet")) return;
       if (startY === null) return;
       const y = e.touches[0].clientY;
       accum = startY - y;
@@ -314,7 +316,7 @@ const DesignersHoverHero = () => {
       section.removeEventListener("touchmove", onMove);
       section.removeEventListener("touchend", onEnd);
     };
-  }, [hasItems, items]);
+  }, [hasItems, items, searchOpen]);
 
   const isDesktopViewport = !isMobileViewport && !isMobileHook && !isStandalone;
 
@@ -989,7 +991,7 @@ const DesignersHoverHero = () => {
                 <X className="h-4 w-4" />
               </button>
             </div>
-            <div ref={searchScrollRef} className="overflow-y-auto overscroll-contain px-1 pt-0 pb-1 min-h-0 pr-10 md:pr-1 scroll-smooth relative">
+            <div ref={searchScrollRef} className="flex-1 overflow-y-auto overscroll-contain px-1 pt-0 pb-1 min-h-0 pr-10 md:pr-1 scroll-smooth relative touch-pan-y">
               {/* Mobile A–Z jump strip — slim vertical index along the sheet's
                   right edge, contact-app style. Hidden on desktop. */}
               {!isSearching && groupedResults.length > 0 && (() => {
