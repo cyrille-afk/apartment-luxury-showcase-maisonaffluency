@@ -1163,7 +1163,7 @@ const DesignersHoverHero = () => {
                   aria-label="Jump to letter"
                   onTouchStart={handleTouch}
                   onTouchMove={handleTouch}
-                  className="md:hidden absolute top-[calc(var(--header-h)+3.25rem)] bottom-2 right-0 z-[3] flex flex-col items-stretch gap-0 pr-2 pl-1.5 select-none touch-none rounded-l-md bg-black/25 backdrop-blur-sm overflow-y-auto"
+                  className="md:hidden fixed top-1/2 -translate-y-1/2 right-3 z-[100] flex flex-col items-center gap-0 py-3 px-1.5 select-none touch-none rounded-full bg-white shadow-[0_4px_20px_-4px_rgba(0,0,0,0.25)] overflow-y-auto max-h-[80vh]"
                 >
                   {groupedResults.map(([letter]) => {
                     const isActive = activeMobileLetter === letter;
@@ -1176,12 +1176,12 @@ const DesignersHoverHero = () => {
                         aria-label={`Jump to ${letter}`}
                         aria-current={isActive ? "true" : undefined}
                         className={cn(
-                          "relative font-body text-[15px] leading-none tracking-[0.08em] w-8 flex-1 flex items-center justify-center transition-colors",
-                          isActive ? "text-white font-bold" : "text-white/70"
+                          "relative font-body text-[13px] leading-none tracking-[0.04em] w-7 min-h-[26px] flex items-center justify-center transition-colors rounded-full",
+                          isActive ? "bg-black text-white font-semibold" : "text-black/80 hover:bg-black/5"
                         )}
                         style={{ WebkitTapHighlightColor: "transparent" }}
                       >
-                        <span className="pointer-events-none absolute -inset-y-2 -left-5 -right-2" aria-hidden />
+                        <span className="pointer-events-none absolute -inset-y-1 -left-3 -right-3" aria-hidden />
                         {letter}
                       </button>
                     );
