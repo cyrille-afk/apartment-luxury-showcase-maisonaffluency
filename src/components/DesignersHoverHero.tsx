@@ -648,10 +648,10 @@ const DesignersHoverHero = () => {
           "relative flex flex-col h-full px-6 sm:px-12 md:px-20 lg:px-28 pointer-events-auto md:overflow-visible",
             isStandalone
               ? "justify-center pt-6 md:pt-8 pb-44 md:pb-0"
-              : // Mobile browser: Directory pinned at top, so give list top room
-                // and let the list scroll within the svh frame (which already
-                // excludes the iOS toolbar) so long lists remain fully reachable.
-                "justify-start overflow-y-auto overscroll-contain touch-pan-y pt-[calc(var(--header-h)+3.25rem)] pb-8 md:pt-8 md:justify-center md:pb-0 md:overflow-visible"
+              : // Mobile browser: the section already starts below the fixed
+                // header, so do not add var(--header-h) again here. Keep the
+                // designer list high while leaving room for the Directory link.
+                "justify-start overflow-y-auto overscroll-contain touch-pan-y pt-16 pb-8 md:pt-8 md:justify-center md:pb-0 md:overflow-visible"
           )}
         >
 
@@ -750,8 +750,8 @@ const DesignersHoverHero = () => {
             : "left-6 sm:left-[22rem] md:left-[26rem] lg:left-[28rem]",
           isStandalone
             ? "pt-6 bottom-[calc(6rem+env(safe-area-inset-bottom))]"
-            // Mobile browser: pin to top so it's not hidden by iOS bottom toolbar
-            : "pt-2 top-[calc(var(--header-h)+0.5rem)]"
+            // Mobile browser: the safe frame is already below the fixed header.
+            : "pt-2 top-2"
         ))}
 
 
