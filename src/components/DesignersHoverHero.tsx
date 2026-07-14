@@ -602,13 +602,13 @@ const DesignersHoverHero = () => {
         })}
         {/* Readability overlay */}
         <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/55 to-black/30 md:from-black/60 md:via-black/30 md:to-black/5" />
-        {/* Mobile vignette overlay — deepens edges behind text so headings and
+        {/* Vignette overlay — deepens edges behind text so headings and
             names stay legible over dark, textured furniture imagery. */}
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_35%,rgba(0,0,0,0.55)_100%)] pointer-events-none md:hidden" />
-        {/* Desktop left column backdrop — dedicates the left 32% of the hero to
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_35%,rgba(0,0,0,0.55)_100%)] pointer-events-none" />
+        {/* Desktop left column backdrop — dedicates the left portion of the hero to
             a solid dark panel so the designer list never overlaps furniture
             imagery on the right. */}
-        <div className="hidden md:block absolute inset-y-0 left-0 w-[32%] bg-gradient-to-r from-[#0a0a0a] via-[#0a0a0a]/95 to-transparent pointer-events-none" />
+        <div className="hidden md:block absolute inset-y-0 left-0 w-[38%] bg-gradient-to-r from-black via-black/90 to-transparent pointer-events-none" />
       </div>
 
 
@@ -663,7 +663,7 @@ const DesignersHoverHero = () => {
                   >
                     <span
                       ref={groupIdx === 0 ? mastersRef : undefined}
-                      className="text-[10px] uppercase tracking-[0.3em] font-body font-semibold text-gold drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] mb-2 md:mb-3"
+                      className="text-[11px] uppercase tracking-[0.32em] font-body font-bold text-gold drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)] mb-2 md:mb-3"
                     >
                       {group.label}
                     </span>
