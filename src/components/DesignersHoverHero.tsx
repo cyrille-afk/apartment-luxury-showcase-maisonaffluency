@@ -743,13 +743,14 @@ const DesignersHoverHero = () => {
         {/* Directory label — pinned to the svh frame bottom on mobile only.
             Desktop version now lives at the top of the featured list. */}
         {directoryLabels(cn(
-          "absolute flex items-center gap-10 text-white pt-6 w-fit pointer-events-auto md:hidden",
+          "absolute flex items-center gap-10 text-white w-fit pointer-events-auto md:hidden z-30",
           isMobileOrPwa
             ? "left-1/2 -translate-x-1/2 justify-center px-6"
             : "left-6 sm:left-[22rem] md:left-[26rem] lg:left-[28rem]",
           isStandalone
-            ? "bottom-[calc(6rem+env(safe-area-inset-bottom))]"
-            : "bottom-[calc(1.25rem+env(safe-area-inset-bottom))]"
+            ? "pt-6 bottom-[calc(6rem+env(safe-area-inset-bottom))]"
+            // Mobile browser: pin to top so it's not hidden by iOS bottom toolbar
+            : "pt-2 top-[calc(var(--header-h)+0.5rem)]"
         ))}
 
 
