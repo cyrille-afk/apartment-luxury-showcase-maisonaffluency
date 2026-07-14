@@ -14,7 +14,7 @@
 
 export const MODEL_TIERS = {
   cheap: "google/gemini-3.1-flash-lite-preview", // $0.05 / $0.20
-  balanced: "google/gemini-3-flash-preview",      // $0.075 / $0.30
+  balanced: "google/gemini-2.5-flash",            // stable non-preview; swapped from gemini-3-flash-preview which was timing out at first-byte
   strong: "google/gemini-2.5-pro",                // $1.25 / $5.00
   image: "google/gemini-3.1-flash-image-preview", // flat ~$0.039/image
   imageHi: "google/gemini-3-pro-image-preview",   // flat ~$0.12/image
