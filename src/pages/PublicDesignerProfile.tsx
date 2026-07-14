@@ -333,7 +333,7 @@ const PublicDesignerProfile = () => {
   }
   // Collectible designer profiles (bio + curator picks) are public.
   // Individual product pages remain gated via PublicProductPage.
-  void isCollectibleSlug; void collectibleGateRedirect; void authLoading; void isTradeUser;
+  void authLoading; void isTradeUser;
   const [searchParams] = useSearchParams();
   const highlightId = searchParams.get("highlight");
   const scrollToSection = searchParams.get("section");
