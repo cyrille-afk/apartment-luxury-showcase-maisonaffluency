@@ -184,70 +184,82 @@ export async function runInspectorPass(opts: {
     },
   };
 
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), INSPECTOR_TIMEOUT_MS);
-  try {
-    const resp = await fetch(INSPECTOR_URL, {
-      method: "POST",
-      signal: controller.signal,
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${opts.apiKey}`,
-      },
-      body: JSON.stringify({
-        model: INSPECTOR_MODEL,
-        temperature: 0,
-        max_tokens: 900,
-        response_format: { type: "json_object" },
-        messages: [
-          { role: "system", content: SYSTEM_PROMPT },
-          { role: "user", content: JSON.stringify(userPayload) },
-        ],
-      }),
-    });
-    if (!resp.ok) {
-      return { ok: false, corrected_prose: prose, corrections: [], ms: Date.now() - t0, reason: `http_${resp.status}` };
-    }
-    const j = await resp.json().catch(() => null);
-    const raw = j?.choices?.[0]?.message?.content;
-    if (typeof raw !== "string") {
-      return { ok: false, corrected_prose: prose, corrections: [], ms: Date.now() - t0, reason: "no_content" };
-    }
-    let parsed: any;
+  const attempt = async (model: string): Promise<{ result?: InspectorResult; retryable?: boolean; reason: string }> => {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), INSPECTOR_TIMEOUT_MS);
     try {
-      parsed = JSON.parse(raw);
-    } catch {
-      // Try to unwrap ```json ... ``` fences the model may have added.
-      const fence = raw.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
-      if (fence) {
-        try { parsed = JSON.parse(fence[1]); } catch { /* fall through */ }
+      const resp = await fetch(INSPECTOR_URL, {
+        method: "POST",
+        signal: controller.signal,
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${opts.apiKey}`,
+        },
+        body: JSON.stringify({
+          model,
+          temperature: 0,
+          max_tokens: 900,
+          response_format: { type: "json_object" },
+          messages: [
+            { role: "system", content: SYSTEM_PROMPT },
+            { role: "user", content: JSON.stringify(userPayload) },
+          ],
+        }),
+      });
+      if (!resp.ok) {
+        return { retryable: true, reason: `http_${resp.status}` };
       }
+      const j = await resp.json().catch(() => null);
+      const raw = j?.choices?.[0]?.message?.content;
+      if (typeof raw !== "string") {
+        return { retryable: true, reason: "no_content" };
+      }
+      const parsed = tolerantJsonParse(raw);
+      if (!parsed || typeof parsed.corrected_prose !== "string") {
+        return { retryable: true, reason: "parse_failed" };
+      }
+      const corrections = Array.isArray(parsed.corrections)
+        ? parsed.corrections
+            .filter((c: any) => c && typeof c.original === "string" && typeof c.replacement === "string")
+            .slice(0, 8)
+            .map((c: any) => ({
+              original: String(c.original).slice(0, 500),
+              replacement: String(c.replacement).slice(0, 500),
+              reason: String(c.reason || "").slice(0, 240),
+            }))
+        : [];
+      return {
+        result: {
+          ok: true,
+          corrected_prose: String(parsed.corrected_prose).slice(0, 4000),
+          corrections,
+          ms: Date.now() - t0,
+        },
+        reason: "ok",
+      };
+    } catch (e) {
+      const reason = (e as Error)?.name === "AbortError" ? "timeout" : `error:${(e as Error)?.message || "unknown"}`;
+      return { retryable: true, reason };
+    } finally {
+      clearTimeout(timer);
     }
-    if (!parsed || typeof parsed.corrected_prose !== "string") {
-      return { ok: false, corrected_prose: prose, corrections: [], ms: Date.now() - t0, reason: "parse_failed" };
-    }
-    const corrections = Array.isArray(parsed.corrections)
-      ? parsed.corrections
-          .filter((c: any) => c && typeof c.original === "string" && typeof c.replacement === "string")
-          .slice(0, 8)
-          .map((c: any) => ({
-            original: String(c.original).slice(0, 500),
-            replacement: String(c.replacement).slice(0, 500),
-            reason: String(c.reason || "").slice(0, 240),
-          }))
-      : [];
+  };
+
+  const primary = await attempt(INSPECTOR_MODEL);
+  if (primary.result) return primary.result;
+  if (primary.retryable) {
+    console.log("[inspector] primary failed, trying fallback", { primary_reason: primary.reason });
+    const fb = await attempt(INSPECTOR_FALLBACK_MODEL);
+    if (fb.result) return fb.result;
     return {
-      ok: true,
-      corrected_prose: String(parsed.corrected_prose).slice(0, 4000),
-      corrections,
+      ok: false,
+      corrected_prose: prose,
+      corrections: [],
       ms: Date.now() - t0,
+      reason: `${primary.reason}|fallback_${fb.reason}`,
     };
-  } catch (e) {
-    const reason = (e as Error)?.name === "AbortError" ? "timeout" : `error:${(e as Error)?.message || "unknown"}`;
-    return { ok: false, corrected_prose: prose, corrections: [], ms: Date.now() - t0, reason };
-  } finally {
-    clearTimeout(timer);
   }
+  return { ok: false, corrected_prose: prose, corrections: [], ms: Date.now() - t0, reason: primary.reason };
 }
 
 // ---------------------------------------------------------------------------
