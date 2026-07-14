@@ -1003,9 +1003,20 @@ const DesignersHoverHero = () => {
             </div>
             <div ref={searchScrollRef} className="overflow-y-auto overscroll-contain px-1 pt-0 pb-1 min-h-0">
               {isSearching && groupedResults.length === 0 ? (
-                <p className="px-4 py-8 text-center text-sm font-body text-white/50">
-                  No designers match “{searchQuery}”.
-                </p>
+                <div
+                  role="status"
+                  className="flex flex-col items-center justify-center text-center px-6 py-16 animate-fade-in"
+                >
+                  <div className="text-3xl text-[#a08862] mb-4" aria-hidden="true">☉</div>
+                  <h3 className="font-serif text-xl text-white mb-2 tracking-[0.03em] font-normal">
+                    No Designers Found
+                  </h3>
+                  <p className="font-body text-sm text-white/55 max-w-[280px] leading-relaxed">
+                    We couldn't find a match for “{searchQuery}”. Try checking your
+                    spelling or clear the search to browse the full registry.
+                  </p>
+                </div>
+
               ) : (
                 <>
                   {/* Mobile: grouped designer list with sticky letter headers */}
