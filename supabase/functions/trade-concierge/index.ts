@@ -407,10 +407,12 @@ async function chatFetch(init: RequestInit): Promise<Response> {
   // Primary fetch hard timeout: some upstream calls (esp. Gemini during
   // demand spikes) have been observed to stall for 90–120s before returning
   // headers. The client abandons the SSE stream long before that, leaving
-  // an orphaned request and a broken UX. Cap the primary at 45s and route
-  // to Cloudflare instead. This bounds the "first byte" window; the SSE body
-  // is not aborted by this signal because we clear the timer on response.
-  const PRIMARY_FIRST_BYTE_TIMEOUT_MS = 45_000;
+  // an orphaned request and a broken UX. Cap the primary at 20s and route
+  // to Cloudflare instead — well inside the browser/proxy idle window and
+  // the client-side first-byte watchdog. This bounds the "first byte"
+  // window; the SSE body is not aborted by this signal because we clear
+  // the timer on response.
+  const PRIMARY_FIRST_BYTE_TIMEOUT_MS = 20_000;
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     const ac = new AbortController();
     const timeoutId = setTimeout(() => ac.abort(new Error("primary-first-byte-timeout")), PRIMARY_FIRST_BYTE_TIMEOUT_MS);
