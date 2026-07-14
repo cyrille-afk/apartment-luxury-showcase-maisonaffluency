@@ -1163,7 +1163,7 @@ const DesignersHoverHero = () => {
                   aria-label="Jump to letter"
                   onTouchStart={handleTouch}
                   onTouchMove={handleTouch}
-                  className="md:hidden fixed top-1/2 -translate-y-1/2 right-3 z-[100] flex flex-col items-center gap-0 py-3 px-1.5 select-none touch-none rounded-full bg-white shadow-[0_4px_20px_-4px_rgba(0,0,0,0.25)] overflow-y-auto max-h-[80vh]"
+                  className="md:hidden fixed top-[58%] -translate-y-1/2 right-3 z-[100] flex flex-col items-center gap-0 py-3 px-1.5 select-none touch-none rounded-full bg-white shadow-[0_4px_20px_-4px_rgba(0,0,0,0.25)] overflow-y-auto max-h-[80vh]"
                 >
                   {groupedResults.map(([letter]) => {
                     const isActive = activeMobileLetter === letter;
