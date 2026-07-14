@@ -17,7 +17,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { Search, X } from "lucide-react";
+import { Search, X, ImageIcon } from "lucide-react";
 
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -219,6 +219,58 @@ const DesignersHoverHero = () => {
       setActiveSlug(items[0].slug);
     }
   }, [items, activeSlug]);
+
+  // First-visit hover-hint: auto-cycle the first 3 designers on desktop so
+  // users discover that names pair with photos. Fires once per browser,
+  // gated by localStorage. Cancels on any user interaction with the list.
+  const HINT_KEY = "designers-hover-hint-v1";
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (!items.length) return;
+    if (!window.matchMedia("(min-width: 768px)").matches) return;
+    try {
+      if (localStorage.getItem(HINT_KEY)) return;
+    } catch { /* ignore */ }
+
+    const nav = navRef.current;
+    let cancelled = false;
+    const timers: number[] = [];
+    const preview = items.slice(0, Math.min(3, items.length));
+
+    const cancel = () => {
+      if (cancelled) return;
+      cancelled = true;
+      timers.forEach((t) => window.clearTimeout(t));
+      try { localStorage.setItem(HINT_KEY, "1"); } catch { /* ignore */ }
+    };
+
+    // Start after a short delay so the hero settles first.
+    timers.push(window.setTimeout(() => {
+      if (cancelled) return;
+      preview.forEach((d, i) => {
+        timers.push(window.setTimeout(() => {
+          if (cancelled) return;
+          setActiveSlug(d.slug);
+        }, i * 1100));
+      });
+      // Persist that the hint has been shown after the cycle completes.
+      timers.push(window.setTimeout(() => {
+        try { localStorage.setItem(HINT_KEY, "1"); } catch { /* ignore */ }
+      }, preview.length * 1100 + 200));
+    }, 900));
+
+    nav?.addEventListener("mouseenter", cancel, { once: true });
+    nav?.addEventListener("wheel", cancel, { once: true, passive: true });
+    window.addEventListener("keydown", cancel, { once: true });
+    return () => {
+      cancelled = true;
+      timers.forEach((t) => window.clearTimeout(t));
+      nav?.removeEventListener("mouseenter", cancel);
+      nav?.removeEventListener("wheel", cancel);
+      window.removeEventListener("keydown", cancel);
+    };
+  }, [items]);
+
 
   // Desktop: wheel over the names list advances through designers.
   useEffect(() => {
@@ -730,8 +782,22 @@ const DesignersHoverHero = () => {
                                 {childBrand && (
                                   <span className="opacity-80"> - {d.founder}</span>
                                 )}
+                                {/* Discovery cue: tiny aperture glyph hinting each name has a photo.
+                                    Desktop only; faint by default, brightens on active/hover. */}
+                                <ImageIcon
+                                  aria-hidden="true"
+                                  strokeWidth={1.25}
+                                  className={cn(
+                                    "hidden md:inline-block align-middle ml-2 -translate-y-[1px]",
+                                    "h-[10px] w-[10px] transition-all duration-500",
+                                    isActive
+                                      ? "opacity-90 text-gold"
+                                      : "opacity-30 text-cream/80 group-hover:opacity-70"
+                                  )}
+                                />
                               </span>
                             </Link>
+
                           </li>
                         );
                       })}
