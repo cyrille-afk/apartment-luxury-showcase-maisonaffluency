@@ -384,27 +384,12 @@ const DesignersHoverHero = () => {
 
   
 
-  // Mobile A–Z compact grid: quick lookup of which letters have designers,
-  // and the items for the currently selected letter.
-  const letterMap = useMemo(() => {
-    const map = new Map<string, { slug: string; name: string }[]>();
-    for (const [l, items] of groupedResults) map.set(l, items);
-    return map;
-  }, [groupedResults]);
-  const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
-  const STRIP_LETTERS = letterMap.has("#") ? [...ALPHABET, "#"] : ALPHABET;
-
-  // Reset the mobile letter selection when closing the sheet or when a search
-  // query is active (search takes over the list).
+  // Reset desktop accordion state when closing the search sheet.
   useEffect(() => {
     if (!searchOpen) {
-      setSelectedLetter(null);
       setExpandedLetters(new Set());
     }
   }, [searchOpen]);
-  useEffect(() => {
-    if (isSearching) setSelectedLetter(null);
-  }, [isSearching]);
 
   // Desktop accordion: when a letter opens, move the sheet viewport so the
   // expanded designer list is visible instead of being cut off at the bottom.
