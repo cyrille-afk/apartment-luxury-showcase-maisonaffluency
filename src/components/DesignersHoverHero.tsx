@@ -154,6 +154,7 @@ const DesignersHoverHero = () => {
   const [activeAccordionLetter, setActiveAccordionLetter] = useState<string | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const searchScrollRef = useRef<HTMLDivElement>(null);
+  const letterHeaderRefs = useRef<Record<string, HTMLLIElement | null>>({});
   const directoryRef = useRef<HTMLDivElement>(null);
   const mastersRef = useRef<HTMLSpanElement>(null);
   const activeTitleRef = useRef<HTMLSpanElement>(null);
@@ -386,7 +387,7 @@ const DesignersHoverHero = () => {
     return map;
   }, [groupedResults]);
   const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
-  const selectedLetterItems = selectedLetter ? letterMap.get(selectedLetter) ?? [] : [];
+  const STRIP_LETTERS = letterMap.has("#") ? [...ALPHABET, "#"] : ALPHABET;
 
   // Reset the mobile letter selection when closing the sheet or when a search
   // query is active (search takes over the list).
@@ -954,8 +955,7 @@ const DesignersHoverHero = () => {
               <Search className="h-4 w-4 text-white/60 shrink-0" aria-hidden="true" />
               <input
                 ref={searchInputRef}
-                type="search"
-                inputMode="search"
+                type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder={`Search ${designerCount || totalResults} designers…`}
