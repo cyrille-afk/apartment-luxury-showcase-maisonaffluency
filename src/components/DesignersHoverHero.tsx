@@ -948,10 +948,11 @@ const DesignersHoverHero = () => {
             transition={{ type: "tween", ease: [0.16, 1, 0.3, 1], duration: 0.25 }}
             className={cn(
               "fixed z-[71] flex flex-col bg-[#0a0a0a] text-white border border-white/10 shadow-2xl overflow-hidden",
-              // Mobile: bottom sheet anchored to bottom
-              "inset-x-0 bottom-0 max-h-[75vh] rounded-t-2xl pb-[env(safe-area-inset-bottom)]",
+              // Mobile: full sheet anchored right below the fixed header so the
+              // search field is immediately visible and the list has room to scroll.
+              "inset-x-0 top-[var(--header-h)] bottom-0 rounded-none pb-[env(safe-area-inset-bottom)]",
               // Desktop: dropdown anchored to the Directory button via inline styles.
-              "md:inset-x-auto md:right-auto md:w-[380px] md:max-w-[calc(100vw-2rem)] md:max-h-[calc(100vh-var(--header-h)-3rem)] md:rounded-xl md:pb-0"
+              "md:inset-x-auto md:right-auto md:top-auto md:bottom-auto md:w-[380px] md:max-w-[calc(100vw-2rem)] md:max-h-[calc(100vh-var(--header-h)-3rem)] md:rounded-xl md:pb-0"
             )}
             style={
               dropdownPos
