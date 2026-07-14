@@ -989,7 +989,7 @@ const DesignersHoverHero = () => {
                 <X className="h-4 w-4" />
               </button>
             </div>
-            <div ref={searchScrollRef} className="overflow-y-auto overscroll-contain px-1 pt-0 pb-1 min-h-0 pr-7 md:pr-1 scroll-smooth relative">
+            <div ref={searchScrollRef} className="overflow-y-auto overscroll-contain px-1 pt-0 pb-1 min-h-0 pr-10 md:pr-1 scroll-smooth relative">
               {/* Mobile A–Z jump strip — slim vertical index along the sheet's
                   right edge, contact-app style. Hidden on desktop. */}
               {!isSearching && groupedResults.length > 0 && (() => {
