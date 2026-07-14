@@ -30,7 +30,7 @@ import { toOgImage } from "@/lib/ogImage";
 import { sortCuratorPicks } from "@/lib/curatorPickSort";
 import FloatingScrollNav from "@/components/FloatingScrollNav";
 import { useAuth } from "@/hooks/useAuth";
-import { isCollectibleSlug, collectibleGateRedirect } from "@/lib/collectibleGate";
+// Collectible profiles are public; product-page gating lives in PublicProductPage.
 
 const transition = { duration: 0.6, ease: [0.16, 1, 0.3, 1] as const };
 const reveal = { ...transition, delay: 0.15 };
@@ -331,10 +331,9 @@ const PublicDesignerProfile = () => {
   if (slug && SLUG_ALIASES[slug]) {
     return <Navigate to={`/designers/${SLUG_ALIASES[slug]}`} replace />;
   }
-  // Trade-only visibility for individual collectible designer profiles.
-  if (isCollectibleSlug(slug) && !authLoading && !isTradeUser) {
-    return <Navigate to={collectibleGateRedirect(`/designers/${slug}`)} replace />;
-  }
+  // Collectible designer profiles (bio + curator picks) are public.
+  // Individual product pages remain gated via PublicProductPage.
+  void authLoading; void isTradeUser;
   const [searchParams] = useSearchParams();
   const highlightId = searchParams.get("highlight");
   const scrollToSection = searchParams.get("section");
