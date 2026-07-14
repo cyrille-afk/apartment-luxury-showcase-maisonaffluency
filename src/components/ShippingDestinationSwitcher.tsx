@@ -54,10 +54,11 @@ export default function ShippingDestinationSwitcher({ className, compact }: Prop
         type="button"
         onClick={() => handleOpenChange(true)}
         aria-label={`Change shipping destination. Currently shipping to ${current.name}`}
-        className={
-          "flex items-center gap-1.5 transition-opacity hover:opacity-70 outline-none " +
-          (className ?? "")
-        }
+        className={cn(
+          "flex items-center gap-1.5 transition-opacity hover:opacity-70 outline-none",
+          compact && "min-h-11 min-w-11 justify-center",
+          className
+        )}
       >
         <span
           className={compact ? "text-xl leading-none" : "text-2xl leading-none"}
