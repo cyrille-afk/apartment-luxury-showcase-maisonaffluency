@@ -1155,17 +1155,26 @@ const DesignersHoverHero = () => {
                     ["Z", "X", "C", "V", "B", "N", "M"],
                   ].map((row, rowIdx) => (
                     <div key={rowIdx} className="flex gap-[6px] justify-center">
-                      {row.map((key) => (
-                        <button
-                          key={key}
-                          type="button"
-                          onClick={() => setSearchQuery((q) => q + key)}
-                          className="h-11 min-w-[2.25rem] flex-1 max-w-[3.25rem] rounded-md bg-white/[0.06] border border-white/10 font-body text-sm font-medium text-white active:bg-white/[0.14] transition-colors"
-                          aria-label={`Type ${key}`}
-                        >
-                          {key}
-                        </button>
-                      ))}
+                      {row.map((key) => {
+                        const isDead = !validNextChars.has(key);
+                        return (
+                          <button
+                            key={key}
+                            type="button"
+                            disabled={isDead}
+                            onClick={() => setSearchQuery((q) => q + key)}
+                            className={cn(
+                              "h-11 min-w-[2.25rem] flex-1 max-w-[3.25rem] rounded-md border font-body text-sm font-medium transition-colors",
+                              isDead
+                                ? "bg-[#0f0f0f] border-[#1a1a1a] text-white/25 opacity-30 cursor-not-allowed pointer-events-none"
+                                : "bg-white/[0.06] border-white/10 text-white active:bg-white/[0.14]"
+                            )}
+                            aria-label={`Type ${key}`}
+                          >
+                            {key}
+                          </button>
+                        );
+                      })}
                       {rowIdx === 2 && (
                         <button
                           type="button"
@@ -1189,6 +1198,7 @@ const DesignersHoverHero = () => {
                       <span className="block w-1/2 h-px bg-white/30 mx-auto" />
                     </button>
                   </div>
+
                 </div>
               </div>
             )}
