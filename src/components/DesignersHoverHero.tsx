@@ -691,8 +691,8 @@ const DesignersHoverHero = () => {
                                 "transition-all duration-[1200ms] ease-out",
                                 "drop-shadow-[0_1px_3px_rgba(0,0,0,0.7)]",
                                 isDimmed
-                                  ? "text-white/80"
-                                  : "font-bold text-white after:content-[''] after:absolute after:left-0 after:bottom-[-5px] after:h-[1px] after:w-8 after:bg-white/40"
+                                  ? "text-cream/90"
+                                  : "font-bold text-cream after:content-[''] after:absolute after:left-0 after:bottom-[-5px] after:h-[1px] after:w-8 after:bg-cream/40"
                               )}
                             >
                               <span>
