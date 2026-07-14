@@ -660,7 +660,7 @@ const DesignersHoverHero = () => {
                   >
                     <span
                       ref={groupIdx === 0 ? mastersRef : undefined}
-                      className="text-[10px] uppercase tracking-[0.3em] font-body text-white/50 mb-2 md:mb-3"
+                      className="text-[10px] uppercase tracking-[0.3em] font-body font-semibold text-gold drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] mb-2 md:mb-3"
                     >
                       {group.label}
                     </span>
