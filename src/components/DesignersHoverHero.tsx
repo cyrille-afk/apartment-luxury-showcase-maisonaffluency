@@ -978,57 +978,49 @@ const DesignersHoverHero = () => {
                 </p>
               ) : (
                 <>
-                  {/* Mobile: compact A–Z grid + designers under the selected letter */}
+                  {/* Mobile: grouped designer list with sticky letter headers */}
                   <div className="md:hidden">
-                    {!isSearching && (
-                      <div className="px-3 pt-3 pb-2">
-                        <div className="grid grid-cols-5 gap-1.5">
-                          {ALPHABET.map((l) => {
-                            const has = letterMap.has(l);
-                            const isActive = selectedLetter === l;
-                            return (
-                              <button
-                                key={l}
-                                type="button"
-                                disabled={!has}
-                                onClick={() => setSelectedLetter(isActive ? null : l)}
-                                aria-pressed={isActive}
-                                className={cn(
-                                  "h-11 rounded-md font-serif text-base transition-colors border",
-                                  isActive
-                                    ? "bg-white text-[#0a0a0a] border-white"
-                                    : has
-                                      ? "text-white/85 border-white/15 hover:bg-white/[0.06]"
-                                      : "text-white/20 border-white/[0.06] cursor-not-allowed"
-                                )}
-                              >
-                                {l}
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    )}
-                    <ul className="flex flex-col pb-2">
-                      {(isSearching
-                        ? groupedResults.flatMap(([, items]) => items)
-                        : selectedLetterItems
-                      ).map((d) => (
-                        <li key={d.slug}>
-                          <Link
-                            to={`/designers/${d.slug}`}
-                            state={{ fromDesignersHero: true }}
-                            onClick={() => setSearchOpen(false)}
-                            className="block px-5 py-2.5 font-body text-[15px] text-white/85 hover:text-white hover:bg-white/[0.04] transition-colors"
+                    <ul className="flex flex-col pb-2 pr-10">
+                      {isSearching ? (
+                        groupedResults.flatMap(([, items]) => items).map((d) => (
+                          <li key={d.slug}>
+                            <Link
+                              to={`/designers/${d.slug}`}
+                              state={{ fromDesignersHero: true }}
+                              onClick={() => setSearchOpen(false)}
+                              className="block px-5 py-2.5 font-body text-[15px] text-white/85 hover:text-white hover:bg-white/[0.04] transition-colors"
+                            >
+                              {displayDesignerName(d.name)}
+                            </Link>
+                          </li>
+                        ))
+                      ) : (
+                        groupedResults.map(([letter, items]) => (
+                          <li
+                            key={letter}
+                            ref={(el) => { letterHeaderRefs.current[letter] = el; }}
+                            data-designer-letter={letter}
+                            className="flex flex-col"
                           >
-                            {displayDesignerName(d.name)}
-                          </Link>
-                        </li>
-                      ))}
-                      {!isSearching && !selectedLetter && (
-                        <li className="px-5 py-6 text-center text-xs font-body text-white/40">
-                          Select a letter to view designers
-                        </li>
+                            <div className="sticky top-0 z-[1] px-5 py-1.5 bg-[#0a0a0a]/95 backdrop-blur-sm border-b border-white/10">
+                              <span className="font-serif text-sm text-white/70">{letter}</span>
+                            </div>
+                            <ul className="flex flex-col">
+                              {items.map((d) => (
+                                <li key={d.slug}>
+                                  <Link
+                                    to={`/designers/${d.slug}`}
+                                    state={{ fromDesignersHero: true }}
+                                    onClick={() => setSearchOpen(false)}
+                                    className="block px-5 py-2.5 font-body text-[15px] text-white/85 hover:text-white hover:bg-white/[0.04] transition-colors"
+                                  >
+                                    {displayDesignerName(d.name)}
+                                  </Link>
+                                </li>
+                              ))}
+                            </ul>
+                          </li>
+                        ))
                       )}
                     </ul>
                   </div>
@@ -1119,6 +1111,48 @@ const DesignersHoverHero = () => {
                 </>
               )}
             </div>
+
+            {/* Mobile: slim right-edge A–Z jump strip */}
+            {!isSearching && groupedResults.length > 0 && (
+              <div className="md:hidden absolute right-2 top-24 bottom-8 w-8 z-10 flex flex-col items-center justify-center pointer-events-auto">
+                <div className="flex flex-col items-center gap-[2px]">
+                  {STRIP_LETTERS.map((l) => {
+                    const has = letterMap.has(l);
+                    const isActive = selectedLetter === l;
+                    return (
+                      <button
+                        key={l}
+                        type="button"
+                        disabled={!has}
+                        onClick={() => {
+                          if (!has) return;
+                          setSelectedLetter(l);
+                          const el = letterHeaderRefs.current[l];
+                          const scroller = searchScrollRef.current;
+                          if (el && scroller) {
+                            const scrollerRect = scroller.getBoundingClientRect();
+                            const elRect = el.getBoundingClientRect();
+                            const topOffset = scroller.scrollTop + (elRect.top - scrollerRect.top);
+                            scroller.scrollTo({ top: topOffset, behavior: "smooth" });
+                          }
+                        }}
+                        aria-label={`Jump to designers starting with ${l === "#" ? "0–9" : l}`}
+                        className={cn(
+                          "w-7 h-7 flex items-center justify-center rounded-sm font-body text-[10px] font-medium transition-colors",
+                          isActive
+                            ? "bg-white text-[#0a0a0a]"
+                            : has
+                              ? "text-white/70 hover:text-white hover:bg-white/[0.06]"
+                              : "text-white/20 cursor-not-allowed"
+                        )}
+                      >
+                        {l === "#" ? "0-9" : l}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
           </motion.div>
         )}
