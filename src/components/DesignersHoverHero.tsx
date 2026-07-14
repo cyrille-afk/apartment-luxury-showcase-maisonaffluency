@@ -422,9 +422,32 @@ const DesignersHoverHero = () => {
     return () => window.cancelAnimationFrame(frame);
   }, [activeAccordionLetter, expandedLetters, isDesktopViewport, searchOpen]);
 
-  // Keep Directory y-aligned with MASTERS. The Directory is now pinned to the
-  // right page margin (matching the header's right edge) so the left designer
-  // list and right Directory create a strong vertical frame around the hero.
+  // Track which letter row is currently topmost in the mobile scroller so
+  // the right-edge A–Z strip can highlight it (IntersectionObserver-style).
+  useEffect(() => {
+    if (!searchOpen || isSearching) return;
+    const scroller = searchScrollRef.current;
+    if (!scroller) return;
+    const compute = () => {
+      const rows = Array.from(
+        scroller.querySelectorAll<HTMLElement>("[data-designer-letter]")
+      );
+      if (!rows.length) return;
+      const scrollerTop = scroller.getBoundingClientRect().top;
+      let current = rows[0].dataset.designerLetter ?? null;
+      for (const row of rows) {
+        if (row.getBoundingClientRect().top - scrollerTop <= 8) {
+          current = row.dataset.designerLetter ?? current;
+        } else break;
+      }
+      setActiveMobileLetter((prev) => (prev === current ? prev : current));
+    };
+    compute();
+    scroller.addEventListener("scroll", compute, { passive: true });
+    return () => scroller.removeEventListener("scroll", compute);
+  }, [searchOpen, isSearching, groupedResults]);
+
+  // Keep Directory y-aligned with MASTERS.
   useEffect(() => {
     if (typeof window === "undefined") return;
     const update = () => {
