@@ -992,7 +992,6 @@ const DesignersHoverHero = () => {
                         groupedResults.map(([letter, items]) => (
                           <li
                             key={letter}
-                            ref={(el) => { letterHeaderRefs.current[letter] = el; }}
                             data-designer-letter={letter}
                             className="flex flex-col"
                           >
