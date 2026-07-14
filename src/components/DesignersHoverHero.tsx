@@ -151,6 +151,8 @@ const DesignersHoverHero = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedLetters, setExpandedLetters] = useState<Set<string>>(new Set());
   const [activeAccordionLetter, setActiveAccordionLetter] = useState<string | null>(null);
+  const [activeMobileLetter, setActiveMobileLetter] = useState<string | null>(null);
+  const azTrackRef = useRef<HTMLElement | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const searchScrollRef = useRef<HTMLDivElement>(null);
   const directoryRef = useRef<HTMLDivElement>(null);
@@ -420,9 +422,32 @@ const DesignersHoverHero = () => {
     return () => window.cancelAnimationFrame(frame);
   }, [activeAccordionLetter, expandedLetters, isDesktopViewport, searchOpen]);
 
-  // Keep Directory y-aligned with MASTERS. The Directory is now pinned to the
-  // right page margin (matching the header's right edge) so the left designer
-  // list and right Directory create a strong vertical frame around the hero.
+  // Track which letter row is currently topmost in the mobile scroller so
+  // the right-edge A–Z strip can highlight it (IntersectionObserver-style).
+  useEffect(() => {
+    if (!searchOpen || isSearching) return;
+    const scroller = searchScrollRef.current;
+    if (!scroller) return;
+    const compute = () => {
+      const rows = Array.from(
+        scroller.querySelectorAll<HTMLElement>("[data-designer-letter]")
+      );
+      if (!rows.length) return;
+      const scrollerTop = scroller.getBoundingClientRect().top;
+      let current = rows[0].dataset.designerLetter ?? null;
+      for (const row of rows) {
+        if (row.getBoundingClientRect().top - scrollerTop <= 8) {
+          current = row.dataset.designerLetter ?? current;
+        } else break;
+      }
+      setActiveMobileLetter((prev) => (prev === current ? prev : current));
+    };
+    compute();
+    scroller.addEventListener("scroll", compute, { passive: true });
+    return () => scroller.removeEventListener("scroll", compute);
+  }, [searchOpen, isSearching, groupedResults]);
+
+  // Keep Directory y-aligned with MASTERS.
   useEffect(() => {
     if (typeof window === "undefined") return;
     const update = () => {
@@ -966,32 +991,61 @@ const DesignersHoverHero = () => {
             <div ref={searchScrollRef} className="overflow-y-auto overscroll-contain px-1 pt-0 pb-1 min-h-0 pr-7 md:pr-1 scroll-smooth relative">
               {/* Mobile A–Z jump strip — slim vertical index along the sheet's
                   right edge, contact-app style. Hidden on desktop. */}
-              {!isSearching && groupedResults.length > 0 && (
-                <nav
-                  aria-label="Jump to letter"
-                  className="md:hidden absolute top-1 bottom-1 right-0 z-[2] flex flex-col justify-center items-center gap-[2px] px-1 select-none"
-                >
-                  {groupedResults.map(([letter]) => (
-                    <button
-                      key={letter}
-                      type="button"
-                      onClick={() => {
-                        const scroller = searchScrollRef.current;
-                        const row = scroller?.querySelector<HTMLElement>(
-                          `[data-designer-letter="${letter}"]`
-                        );
-                        if (!scroller || !row) return;
-                        const top = row.offsetTop;
-                        scroller.scrollTo({ top, behavior: "smooth" });
-                      }}
-                      aria-label={`Jump to ${letter}`}
-                      className="font-body text-[10px] leading-none tracking-[0.08em] text-white/55 hover:text-white active:text-white px-1 py-[2px]"
-                    >
-                      {letter}
-                    </button>
-                  ))}
-                </nav>
-              )}
+              {!isSearching && groupedResults.length > 0 && (() => {
+                const jumpTo = (letter: string) => {
+                  const scroller = searchScrollRef.current;
+                  const row = scroller?.querySelector<HTMLElement>(
+                    `[data-designer-letter="${letter}"]`
+                  );
+                  if (!scroller || !row) return;
+                  scroller.scrollTo({ top: row.offsetTop, behavior: "auto" });
+                  setActiveMobileLetter(letter);
+                  if ("vibrate" in navigator) {
+                    try { navigator.vibrate?.(4); } catch {}
+                  }
+                };
+                const handleTouch = (e: React.TouchEvent) => {
+                  e.preventDefault();
+                  const t = e.touches[0];
+                  if (!t) return;
+                  const el = document.elementFromPoint(t.clientX, t.clientY) as HTMLElement | null;
+                  const letter = el?.closest<HTMLElement>("[data-az-letter]")?.dataset.azLetter;
+                  if (letter) jumpTo(letter);
+                };
+                return (
+                  <nav
+                    ref={(n) => { azTrackRef.current = n; }}
+                    aria-label="Jump to letter"
+                    onTouchStart={handleTouch}
+                    onTouchMove={handleTouch}
+                    className="md:hidden absolute top-1 bottom-1 right-0 z-[2] flex flex-col justify-center items-stretch gap-0 px-1 select-none touch-none"
+                  >
+                    {groupedResults.map(([letter]) => {
+                      const isActive = activeMobileLetter === letter;
+                      return (
+                        <button
+                          key={letter}
+                          type="button"
+                          data-az-letter={letter}
+                          onClick={() => jumpTo(letter)}
+                          aria-label={`Jump to ${letter}`}
+                          aria-current={isActive ? "true" : undefined}
+                          className={cn(
+                            "relative font-body text-[11px] leading-none tracking-[0.08em] px-2 py-[3px] transition-colors",
+                            isActive
+                              ? "text-white font-semibold"
+                              : "text-white/55"
+                          )}
+                          style={{ WebkitTapHighlightColor: "transparent" }}
+                        >
+                          <span className="pointer-events-none absolute -inset-y-[3px] -left-3 -right-1" aria-hidden />
+                          {letter}
+                        </button>
+                      );
+                    })}
+                  </nav>
+                );
+              })()}
               {isSearching && groupedResults.length === 0 ? (
                 <p className="px-4 py-8 text-center text-sm font-body text-white/50">
                   No designers match “{searchQuery}”.
