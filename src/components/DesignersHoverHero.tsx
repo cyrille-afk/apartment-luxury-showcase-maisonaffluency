@@ -963,10 +963,14 @@ const DesignersHoverHero = () => {
               <input
                 ref={searchInputRef}
                 type="text"
+                readOnly={!isDesktopViewport}
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => isDesktopViewport && setSearchQuery(e.target.value)}
                 placeholder={`Search ${designerCount || totalResults} designers…`}
-                className="flex-1 bg-transparent border-0 outline-none font-body text-sm text-white placeholder:text-white/40"
+                className={cn(
+                  "flex-1 bg-transparent border-0 outline-none font-body text-sm text-white placeholder:text-white/40",
+                  !isDesktopViewport && "cursor-default"
+                )}
                 aria-label="Search designers"
               />
               <button
