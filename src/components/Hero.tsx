@@ -131,7 +131,7 @@ const Hero = () => {
         </div>
       </div>
 
-      {/* Mobile: bottom-right of hero, vertical stack, above iOS bar & Chat widget */}
+      {/* Mobile: bottom-right of hero, above iOS bar & Chat widget */}
       <div
         className="flex md:hidden absolute right-4 z-20 flex-col items-end gap-2 hero-fade-in-delayed-4"
         style={{ bottom: "max(9.5rem, calc(env(safe-area-inset-bottom) + 9rem))", animationDelay: "1.2s" }}
@@ -142,12 +142,6 @@ const Hero = () => {
         >
           Book a Viewing
         </button>
-        <Link
-          to="/trade-program"
-          className={heroSecondaryCtaClass}
-        >
-          Trade Program
-        </Link>
       </div>
 
       {/* Desktop: bottom-right of hero, next to Chat widget */}
@@ -161,12 +155,6 @@ const Hero = () => {
         >
           Book a Viewing
         </button>
-        <Link
-          to="/trade-program"
-          className={heroSecondaryCtaClass}
-        >
-          Trade Program
-        </Link>
       </div>
 
     </section>
