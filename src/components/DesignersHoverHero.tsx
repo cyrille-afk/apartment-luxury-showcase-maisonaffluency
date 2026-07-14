@@ -601,7 +601,10 @@ const DesignersHoverHero = () => {
           );
         })}
         {/* Readability overlay */}
-        <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/45 to-black/20 md:from-black/60 md:via-black/30 md:to-black/5" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/55 to-black/30 md:from-black/60 md:via-black/30 md:to-black/5" />
+        {/* Mobile vignette overlay — deepens edges behind text so headings and
+            names stay legible over dark, textured furniture imagery. */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_35%,rgba(0,0,0,0.55)_100%)] pointer-events-none md:hidden" />
         {/* Desktop left column backdrop — dedicates the left 32% of the hero to
             a solid dark panel so the designer list never overlaps furniture
             imagery on the right. */}
