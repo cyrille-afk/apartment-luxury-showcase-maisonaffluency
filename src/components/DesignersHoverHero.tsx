@@ -151,6 +151,8 @@ const DesignersHoverHero = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedLetters, setExpandedLetters] = useState<Set<string>>(new Set());
   const [activeAccordionLetter, setActiveAccordionLetter] = useState<string | null>(null);
+  const [activeMobileLetter, setActiveMobileLetter] = useState<string | null>(null);
+  const azTrackRef = useRef<HTMLElement | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const searchScrollRef = useRef<HTMLDivElement>(null);
   const directoryRef = useRef<HTMLDivElement>(null);
