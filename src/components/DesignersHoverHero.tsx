@@ -382,42 +382,6 @@ const DesignersHoverHero = () => {
 
   const isSearching = searchQuery.trim().length > 0;
 
-  // Set of characters that, if appended to the current query, would still
-  // yield at least one matching designer. Powers the dimmed-key UX so users
-  // never tap a "dead-end" letter on the custom keyboard.
-  const validNextChars = useMemo(() => {
-    const q = searchQuery.toLowerCase();
-    const set = new Set<string>();
-    const list = (allDesigners as any[]).filter(
-      (d) => d.is_published && !d.trade_only
-    );
-    for (const d of list) {
-      const name = (d.name as string).toLowerCase();
-      if (q.length === 0) {
-        for (const ch of name) {
-          const up = ch.toUpperCase();
-          if (up >= "A" && up <= "Z") set.add(up);
-        }
-        continue;
-      }
-      let from = 0;
-      while (from <= name.length - q.length) {
-        const idx = name.indexOf(q, from);
-        if (idx === -1) break;
-        const nextCh = name.charAt(idx + q.length);
-        if (nextCh) {
-          const up = nextCh.toUpperCase();
-          if (up >= "A" && up <= "Z") set.add(up);
-          else if (nextCh === " ") set.add(" ");
-        }
-        from = idx + 1;
-      }
-    }
-    return set;
-  }, [allDesigners, searchQuery]);
-
-  
-
   
 
   // Reset desktop accordion state when closing the search sheet.
@@ -1003,20 +967,9 @@ const DesignersHoverHero = () => {
             </div>
             <div ref={searchScrollRef} className="overflow-y-auto overscroll-contain px-1 pt-0 pb-1 min-h-0">
               {isSearching && groupedResults.length === 0 ? (
-                <div
-                  role="status"
-                  className="flex flex-col items-center justify-center text-center px-6 py-16 animate-fade-in"
-                >
-                  <div className="text-3xl text-[#a08862] mb-4" aria-hidden="true">☉</div>
-                  <h3 className="font-serif text-xl text-white mb-2 tracking-[0.03em] font-normal">
-                    No Designers Found
-                  </h3>
-                  <p className="font-body text-sm text-white/55 max-w-[280px] leading-relaxed">
-                    We couldn't find a match for “{searchQuery}”. Try checking your
-                    spelling or clear the search to browse the full registry.
-                  </p>
-                </div>
-
+                <p className="px-4 py-8 text-center text-sm font-body text-white/50">
+                  No designers match “{searchQuery}”.
+                </p>
               ) : (
                 <>
                   {/* Mobile: grouped designer list with sticky letter headers */}
@@ -1166,26 +1119,17 @@ const DesignersHoverHero = () => {
                     ["Z", "X", "C", "V", "B", "N", "M"],
                   ].map((row, rowIdx) => (
                     <div key={rowIdx} className="flex gap-[6px] justify-center">
-                      {row.map((key) => {
-                        const isDead = !validNextChars.has(key);
-                        return (
-                          <button
-                            key={key}
-                            type="button"
-                            disabled={isDead}
-                            onClick={() => setSearchQuery((q) => q + key)}
-                            className={cn(
-                              "h-11 min-w-[2.25rem] flex-1 max-w-[3.25rem] rounded-md border font-body text-sm font-medium transition-colors",
-                              isDead
-                                ? "bg-[#0f0f0f] border-[#1a1a1a] text-white/25 opacity-30 cursor-not-allowed pointer-events-none"
-                                : "bg-white/[0.06] border-white/10 text-white active:bg-white/[0.14]"
-                            )}
-                            aria-label={`Type ${key}`}
-                          >
-                            {key}
-                          </button>
-                        );
-                      })}
+                      {row.map((key) => (
+                        <button
+                          key={key}
+                          type="button"
+                          onClick={() => setSearchQuery((q) => q + key)}
+                          className="h-11 min-w-[2.25rem] flex-1 max-w-[3.25rem] rounded-md bg-white/[0.06] border border-white/10 font-body text-sm font-medium text-white active:bg-white/[0.14] transition-colors"
+                          aria-label={`Type ${key}`}
+                        >
+                          {key}
+                        </button>
+                      ))}
                       {rowIdx === 2 && (
                         <button
                           type="button"
@@ -1209,7 +1153,6 @@ const DesignersHoverHero = () => {
                       <span className="block w-1/2 h-px bg-white/30 mx-auto" />
                     </button>
                   </div>
-
                 </div>
               </div>
             )}
