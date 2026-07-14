@@ -56,21 +56,15 @@ const SENTIMENT_MAX_TOKENS = tokenBudget("classify");
 const CHAT_MAX_TOKENS = tokenBudget("chat");
 const CHAT_MAX_TOKENS_STRONG = tokenBudget("reasoning");
 
-// Route chat completions to Google AI Studio (Gemini direct) when a key is
-// present; otherwise fall back to the Lovable AI Gateway. Embeddings continue
-// to use the Lovable Gateway via `_shared/aiEmbeddings.ts`.
-const GOOGLE_AI_STUDIO_API_KEY = Deno.env.get("GOOGLE_AI_STUDIO_API_KEY");
-const USE_GEMINI_DIRECT = !!GOOGLE_AI_STUDIO_API_KEY;
-const GEMINI_CHAT_URL = "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions";
+// Route Felix through the Lovable AI Gateway only. The previous direct Gemini
+// path rewrote `google/gemini-2.5-flash` to `gemini-2.5-flash`, which Google
+// now rejects as `models/gemini-2.5-flash` 404 before Felix can answer.
 const LOVABLE_CHAT_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
-const CHAT_COMPLETIONS_URL = USE_GEMINI_DIRECT ? GEMINI_CHAT_URL : LOVABLE_CHAT_URL;
 function aiAuthKey(lovableKey: string): string {
-  return USE_GEMINI_DIRECT ? GOOGLE_AI_STUDIO_API_KEY! : lovableKey;
+  return lovableKey;
 }
-// Lovable Gateway model IDs are prefixed `google/`; Google AI Studio expects
-// the bare model name (e.g. `gemini-3-flash-preview`).
 function aiModel(m: string): string {
-  return USE_GEMINI_DIRECT ? m.replace(/^google\//, "") : m;
+  return ensureLovableModel(m);
 }
 
 type ChatBackend = "gemini" | "lovable-gateway";
@@ -103,15 +97,11 @@ function ensureLovableModel(m: string): string {
 }
 
 function selectChatBackend(init: RequestInit): ChatBackend {
-  // Image/PDF turns go through Lovable AI instead of the direct Gemini key.
-  // The direct key is quota-limited and was causing uploaded photos to fall
-  // back to text-only handling before the vision model could read them.
-  if (payloadHasAttachments(init)) return "lovable-gateway";
-  return USE_GEMINI_DIRECT ? "gemini" : "lovable-gateway";
+  return "lovable-gateway";
 }
 
 function chatBackendUrl(backend: ChatBackend): string {
-  return backend === "gemini" ? GEMINI_CHAT_URL : LOVABLE_CHAT_URL;
+  return LOVABLE_CHAT_URL;
 }
 
 function initForChatBackend(init: RequestInit, backend: ChatBackend): RequestInit {
@@ -124,7 +114,7 @@ function initForChatBackend(init: RequestInit, backend: ChatBackend): RequestIni
   try {
     const parsed = JSON.parse(String(init.body ?? "{}"));
     if (typeof parsed.model === "string") {
-      parsed.model = backend === "gemini" ? parsed.model.replace(/^google\//, "") : ensureLovableModel(parsed.model);
+      parsed.model = ensureLovableModel(parsed.model);
     }
     body = JSON.stringify(parsed);
   } catch { /* keep original body */ }
@@ -492,7 +482,7 @@ async function chatFetch(init: RequestInit): Promise<Response> {
 }
 
 
-console.log(`[concierge] chat backend: ${USE_GEMINI_DIRECT ? "google-ai-studio" : "lovable-gateway"}; cloudflare-fallback: ${CLOUDFLARE_ENABLED ? "on" : "off"}`);
+console.log(`[concierge] chat backend: lovable-gateway; cloudflare-fallback: ${CLOUDFLARE_ENABLED ? "on" : "off"}`);
 
 
 
