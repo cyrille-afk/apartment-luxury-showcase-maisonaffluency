@@ -285,6 +285,7 @@ export type DiscoveryGuardResult = {
 };
 
 const DISCOVERY_GUARD_MODEL = "google/gemini-3.1-flash-lite";
+const DISCOVERY_GUARD_FALLBACK_MODEL = "google/gemini-2.5-flash-lite";
 const DISCOVERY_GUARD_TIMEOUT_MS = 2500;
 
 const DISCOVERY_GUARD_SYSTEM = `You are the Discovery Guard — a hallucination scrubber for a luxury B2B interior-design concierge (Felix, Maison Affluency).
