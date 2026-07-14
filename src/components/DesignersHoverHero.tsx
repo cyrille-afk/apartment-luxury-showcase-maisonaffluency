@@ -601,7 +601,10 @@ const DesignersHoverHero = () => {
           );
         })}
         {/* Readability overlay */}
-        <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/45 to-black/20 md:from-black/60 md:via-black/30 md:to-black/5" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/55 to-black/30 md:from-black/60 md:via-black/30 md:to-black/5" />
+        {/* Mobile vignette overlay — deepens edges behind text so headings and
+            names stay legible over dark, textured furniture imagery. */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_35%,rgba(0,0,0,0.55)_100%)] pointer-events-none md:hidden" />
         {/* Desktop left column backdrop — dedicates the left 32% of the hero to
             a solid dark panel so the designer list never overlaps furniture
             imagery on the right. */}
@@ -660,7 +663,7 @@ const DesignersHoverHero = () => {
                   >
                     <span
                       ref={groupIdx === 0 ? mastersRef : undefined}
-                      className="text-[10px] uppercase tracking-[0.3em] font-body text-white/50 mb-2 md:mb-3"
+                      className="text-[10px] uppercase tracking-[0.3em] font-body font-semibold text-gold drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] mb-2 md:mb-3"
                     >
                       {group.label}
                     </span>
@@ -691,8 +694,8 @@ const DesignersHoverHero = () => {
                                 "transition-all duration-[1200ms] ease-out",
                                 "drop-shadow-[0_1px_3px_rgba(0,0,0,0.7)]",
                                 isDimmed
-                                  ? "text-white/80"
-                                  : "font-bold text-white after:content-[''] after:absolute after:left-0 after:bottom-[-5px] after:h-[1px] after:w-8 after:bg-white/40"
+                                  ? "text-cream/90"
+                                  : "font-bold text-cream after:content-[''] after:absolute after:left-0 after:bottom-[-5px] after:h-[1px] after:w-8 after:bg-cream/40"
                               )}
                             >
                               <span>
