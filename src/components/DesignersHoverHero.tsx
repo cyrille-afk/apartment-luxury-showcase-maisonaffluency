@@ -1163,7 +1163,7 @@ const DesignersHoverHero = () => {
                   aria-label="Jump to letter"
                   onTouchStart={handleTouch}
                   onTouchMove={handleTouch}
-                  className="md:hidden absolute top-[calc(var(--header-h)+3.5rem)] bottom-2 right-0 z-[3] flex flex-col items-stretch gap-0 pr-2 pl-1.5 select-none touch-none rounded-l-md bg-black/25 backdrop-blur-sm"
+                  className="md:hidden absolute top-[calc(var(--header-h)+3.5rem)] bottom-2 right-0 z-[3] flex flex-col items-stretch gap-0 pr-2 pl-1.5 select-none touch-none rounded-l-md bg-black/25 backdrop-blur-sm overflow-y-auto"
                 >
                   {groupedResults.map(([letter]) => {
                     const isActive = activeMobileLetter === letter;
@@ -1176,7 +1176,7 @@ const DesignersHoverHero = () => {
                         aria-label={`Jump to ${letter}`}
                         aria-current={isActive ? "true" : undefined}
                         className={cn(
-                          "relative font-body text-[15px] leading-none tracking-[0.08em] w-8 flex-1 min-h-[24px] flex items-center justify-center transition-colors",
+                          "relative font-body text-[15px] leading-none tracking-[0.08em] w-8 flex-1 min-h-[26px] flex items-center justify-center transition-colors",
                           isActive ? "text-white font-bold" : "text-white/70"
                         )}
                         style={{ WebkitTapHighlightColor: "transparent" }}
