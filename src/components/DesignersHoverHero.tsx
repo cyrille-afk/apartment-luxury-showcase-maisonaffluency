@@ -382,6 +382,42 @@ const DesignersHoverHero = () => {
 
   const isSearching = searchQuery.trim().length > 0;
 
+  // Set of characters that, if appended to the current query, would still
+  // yield at least one matching designer. Powers the dimmed-key UX so users
+  // never tap a "dead-end" letter on the custom keyboard.
+  const validNextChars = useMemo(() => {
+    const q = searchQuery.toLowerCase();
+    const set = new Set<string>();
+    const list = (allDesigners as any[]).filter(
+      (d) => d.is_published && !d.trade_only
+    );
+    for (const d of list) {
+      const name = (d.name as string).toLowerCase();
+      if (q.length === 0) {
+        for (const ch of name) {
+          const up = ch.toUpperCase();
+          if (up >= "A" && up <= "Z") set.add(up);
+        }
+        continue;
+      }
+      let from = 0;
+      while (from <= name.length - q.length) {
+        const idx = name.indexOf(q, from);
+        if (idx === -1) break;
+        const nextCh = name.charAt(idx + q.length);
+        if (nextCh) {
+          const up = nextCh.toUpperCase();
+          if (up >= "A" && up <= "Z") set.add(up);
+          else if (nextCh === " ") set.add(" ");
+        }
+        from = idx + 1;
+      }
+    }
+    return set;
+  }, [allDesigners, searchQuery]);
+
+  
+
   
 
   // Reset desktop accordion state when closing the search sheet.
