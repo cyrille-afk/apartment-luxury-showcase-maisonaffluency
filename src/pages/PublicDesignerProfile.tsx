@@ -30,7 +30,7 @@ import { toOgImage } from "@/lib/ogImage";
 import { sortCuratorPicks } from "@/lib/curatorPickSort";
 import FloatingScrollNav from "@/components/FloatingScrollNav";
 import { useAuth } from "@/hooks/useAuth";
-import { isCollectibleSlug, collectibleGateRedirect } from "@/lib/collectibleGate";
+// Collectible profiles are public; product-page gating lives in PublicProductPage.
 
 const transition = { duration: 0.6, ease: [0.16, 1, 0.3, 1] as const };
 const reveal = { ...transition, delay: 0.15 };
