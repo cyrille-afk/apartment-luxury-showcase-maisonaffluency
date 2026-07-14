@@ -611,6 +611,9 @@ const DesignersHoverHero = () => {
               decoding="async"
               className={cn(
                 "absolute inset-0 w-full h-full object-cover transition-opacity ease-out",
+                // Mobile browser only: shift image content upward so featured
+                // pieces sit higher in the visible frame (matches PWA framing).
+                !isStandalone && "object-top md:object-center",
                 isActive ? "opacity-100" : "opacity-0"
               )}
               style={{ transitionDuration: `${IMAGE_TRANSITION_MS}ms` }}
