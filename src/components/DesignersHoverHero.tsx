@@ -1134,9 +1134,63 @@ const DesignersHoverHero = () => {
               )}
             </div>
 
-            {/* Mobile/PWA: native keyboard opens via the standard text input;
-                the right-side A–Z jump strip inside the scroller handles
-                fast navigation without a custom keyboard. */}
+            {/* Mobile A–Z jump strip — pinned to the sheet (outside the scroll
+                container) so it stays visible while the list scrolls. */}
+            {!isSearching && groupedResults.length > 0 && (() => {
+              const jumpTo = (letter: string) => {
+                const scroller = searchScrollRef.current;
+                const row = scroller?.querySelector<HTMLElement>(
+                  `[data-designer-letter="${letter}"]`
+                );
+                if (!scroller || !row) return;
+                scroller.scrollTo({ top: row.offsetTop, behavior: "auto" });
+                setActiveMobileLetter(letter);
+                if ("vibrate" in navigator) {
+                  try { navigator.vibrate?.(4); } catch {}
+                }
+              };
+              const handleTouch = (e: React.TouchEvent) => {
+                e.preventDefault();
+                const t = e.touches[0];
+                if (!t) return;
+                const el = document.elementFromPoint(t.clientX, t.clientY) as HTMLElement | null;
+                const letter = el?.closest<HTMLElement>("[data-az-letter]")?.dataset.azLetter;
+                if (letter) jumpTo(letter);
+              };
+              return (
+                <nav
+                  ref={(n) => { azTrackRef.current = n; }}
+                  aria-label="Jump to letter"
+                  onTouchStart={handleTouch}
+                  onTouchMove={handleTouch}
+                  className="md:hidden absolute top-[calc(var(--header-h)+3.5rem)] bottom-2 right-0 z-[3] flex flex-col justify-center items-stretch gap-0 pr-1.5 pl-1 select-none touch-none rounded-l-md bg-black/25 backdrop-blur-sm"
+                >
+                  {groupedResults.map(([letter]) => {
+                    const isActive = activeMobileLetter === letter;
+                    return (
+                      <button
+                        key={letter}
+                        type="button"
+                        data-az-letter={letter}
+                        onClick={() => jumpTo(letter)}
+                        aria-label={`Jump to ${letter}`}
+                        aria-current={isActive ? "true" : undefined}
+                        className={cn(
+                          "relative font-body text-[13px] leading-none tracking-[0.08em] w-6 h-6 flex items-center justify-center transition-colors",
+                          isActive ? "text-white font-bold" : "text-white/70"
+                        )}
+                        style={{ WebkitTapHighlightColor: "transparent" }}
+                      >
+                        <span className="pointer-events-none absolute -inset-y-1 -left-4 -right-2" aria-hidden />
+                        {letter}
+                      </button>
+                    );
+                  })}
+                </nav>
+              );
+            })()}
+
+
 
           </motion.div>
         )}
