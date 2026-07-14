@@ -1131,57 +1131,9 @@ const DesignersHoverHero = () => {
               )}
             </div>
 
-            {/* Mobile/PWA: luxury QWERTY keyboard
-                Replaces the native keyboard inside the PWA container with a
-                compact, thumb-friendly layout: standard QWERTY rows, a
-                dedicated backspace key, and a wide spacebar. Keys are wider
-                horizontal rectangles with extra clearance below the query field. */}
-            {!isDesktopViewport && (
-              <div className="shrink-0 border-t border-white/10 bg-[#0a0a0a] px-3 pt-5 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
-                <div className="flex flex-col gap-2">
-                  {[
-                    ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"],
-                    ["A", "S", "D", "F", "G", "H", "J", "K", "L"],
-                    ["Z", "X", "C", "V", "B", "N", "M"],
-                  ].map((row, rowIdx) => (
-                    <div key={rowIdx} className="flex gap-[6px] justify-center">
-                      {row.map((key) => (
-                        <button
-                          key={key}
-                          type="button"
-                          onClick={() => setSearchQuery((q) => q + key)}
-                          className="h-11 min-w-[2.25rem] flex-1 max-w-[3.25rem] rounded-md bg-white/[0.06] border border-white/10 font-body text-sm font-medium text-white active:bg-white/[0.14] transition-colors"
-                          aria-label={`Type ${key}`}
-                        >
-                          {key}
-                        </button>
-                      ))}
-                      {rowIdx === 2 && (
-                        <button
-                          type="button"
-                          onClick={() => setSearchQuery((q) => q.slice(0, -1))}
-                          aria-label="Backspace"
-                          className="h-11 flex-[1.6] max-w-[4.5rem] rounded-md bg-white/[0.06] border border-white/10 flex items-center justify-center text-white active:bg-white/[0.14] transition-colors"
-                        >
-                          <span className="font-body text-lg">⌫</span>
-                        </button>
-                      )}
-                    </div>
-                  ))}
-                  {/* Spacebar row */}
-                  <div className="flex gap-2 justify-center pt-1">
-                    <button
-                      type="button"
-                      onClick={() => setSearchQuery((q) => q + " ")}
-                      aria-label="Space"
-                      className="h-11 flex-[4] max-w-[16rem] rounded-md bg-white/[0.06] border border-white/10 active:bg-white/[0.14] transition-colors"
-                    >
-                      <span className="block w-1/2 h-px bg-white/30 mx-auto" />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
+            {/* Mobile/PWA: native keyboard opens via the standard text input;
+                the right-side A–Z jump strip inside the scroller handles
+                fast navigation without a custom keyboard. */}
 
           </motion.div>
         )}
