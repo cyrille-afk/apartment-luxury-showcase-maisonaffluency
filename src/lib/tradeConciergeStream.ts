@@ -475,6 +475,38 @@ export async function streamConcierge({
     let streamDone = false;
     let currentEvent: string | null = null;
 
+    // Stall watchdogs. When the upstream model hangs before emitting a
+    // first byte, or stalls mid-stream between chunks, the reader.read()
+    // promise can sit for 60–120s. That leaves the UI stuck on a spinner
+    // and the user thinks Felix is dead. Force-cancel the reader if:
+    //   - no bytes have arrived within FIRST_BYTE_TIMEOUT_MS, or
+    //   - no bytes have arrived within IDLE_CHUNK_TIMEOUT_MS since the
+    //     last successful read.
+    // A cancel here throws inside `reader.read()`, which the catch below
+    // classifies as `network_error` → the outer retry loop reconnects
+    // (using the resume token when available, so no cards are duplicated).
+    const FIRST_BYTE_TIMEOUT_MS = 25_000;
+    const IDLE_CHUNK_TIMEOUT_MS = 45_000;
+    let sawFirstByte = false;
+    let stallReason: "first_byte" | "idle" | null = null;
+    let stallTimer: ReturnType<typeof setTimeout> | null = null;
+
+    const armStallTimer = (kind: "first_byte" | "idle") => {
+      if (stallTimer) clearTimeout(stallTimer);
+      const ms = kind === "first_byte" ? FIRST_BYTE_TIMEOUT_MS : IDLE_CHUNK_TIMEOUT_MS;
+      stallTimer = setTimeout(() => {
+        stallReason = kind;
+        // Cancelling the reader rejects the pending read() so we exit the loop.
+        try { void reader.cancel(new Error(`stream-${kind}-timeout`)); } catch { /* ignore */ }
+      }, ms);
+    };
+
+    const clearStallTimer = () => {
+      if (stallTimer) { clearTimeout(stallTimer); stallTimer = null; }
+    };
+
+    armStallTimer("first_byte");
+
     const handleDataPayload = (jsonStr: string) => {
       if (jsonStr === "[DONE]") { streamDone = true; return; }
       try {
@@ -536,6 +568,9 @@ export async function streamConcierge({
       while (!streamDone) {
         const { done, value } = await reader.read();
         if (done) break;
+        if (!sawFirstByte) { sawFirstByte = true; }
+        // Reset the idle watchdog on every successful chunk.
+        armStallTimer("idle");
         buffer += decoder.decode(value, { stream: true });
 
         let idx: number;
@@ -547,6 +582,7 @@ export async function streamConcierge({
           if (streamDone) break;
         }
       }
+      clearStallTimer();
       if (buffer.trim()) {
         for (let raw of buffer.split("\n")) {
           if (!raw) continue;
@@ -555,9 +591,17 @@ export async function streamConcierge({
         }
       }
     } catch (e) {
+      clearStallTimer();
       if (signal?.aborted) return { kind: "hard_error", message: "aborted" };
+      if (stallReason) {
+        return {
+          kind: "network_error",
+          message: `STREAM_STALL:${stallReason}${sawFirstByte ? "" : ":no_first_byte"}`,
+        };
+      }
       return { kind: "network_error", message: e instanceof Error ? e.message : "read failed" };
     }
+    clearStallTimer();
 
     if (streamDone) return { kind: "done" };
     return { kind: "truncated" };
