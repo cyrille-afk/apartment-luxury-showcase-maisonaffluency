@@ -963,7 +963,35 @@ const DesignersHoverHero = () => {
                 <X className="h-4 w-4" />
               </button>
             </div>
-            <div ref={searchScrollRef} className="overflow-y-auto overscroll-contain px-1 pt-0 pb-1 min-h-0">
+            <div ref={searchScrollRef} className="overflow-y-auto overscroll-contain px-1 pt-0 pb-1 min-h-0 pr-7 md:pr-1 scroll-smooth relative">
+              {/* Mobile A–Z jump strip — slim vertical index along the sheet's
+                  right edge, contact-app style. Hidden on desktop. */}
+              {!isSearching && groupedResults.length > 0 && (
+                <nav
+                  aria-label="Jump to letter"
+                  className="md:hidden absolute top-1 bottom-1 right-0 z-[2] flex flex-col justify-center items-center gap-[2px] px-1 select-none"
+                >
+                  {groupedResults.map(([letter]) => (
+                    <button
+                      key={letter}
+                      type="button"
+                      onClick={() => {
+                        const scroller = searchScrollRef.current;
+                        const row = scroller?.querySelector<HTMLElement>(
+                          `[data-designer-letter="${letter}"]`
+                        );
+                        if (!scroller || !row) return;
+                        const top = row.offsetTop;
+                        scroller.scrollTo({ top, behavior: "smooth" });
+                      }}
+                      aria-label={`Jump to ${letter}`}
+                      className="font-body text-[10px] leading-none tracking-[0.08em] text-white/55 hover:text-white active:text-white px-1 py-[2px]"
+                    >
+                      {letter}
+                    </button>
+                  ))}
+                </nav>
+              )}
               {isSearching && groupedResults.length === 0 ? (
                 <p className="px-4 py-8 text-center text-sm font-body text-white/50">
                   No designers match “{searchQuery}”.
