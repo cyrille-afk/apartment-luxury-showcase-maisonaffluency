@@ -792,16 +792,27 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                 )} />
               </button>
 
-              {/* Trade Program */}
+              {/* Trade Program — refined monochrome CTA */}
               {rightNavItems.map((item) => (
-                <div key={item.href} className="relative group/trade flex items-center gap-2">
+                <div key={item.href} className="relative group/trade flex items-center">
                   <button
                     onClick={() => {
                       setMegaMenuOpen(false);
                       handleNavClick(item.href);
                     }}
-                    className="font-body text-sm uppercase tracking-[0.18em] font-bold transition-all duration-300 relative whitespace-nowrap flex items-center gap-1.5 bg-accent text-accent-foreground hover:bg-accent/80 px-3 py-1 rounded-full"
+                    className={cn(
+                      "font-mono text-[11px] uppercase tracking-[0.28em] font-semibold whitespace-nowrap",
+                      "flex items-center gap-2 px-5 py-2.5",
+                      "bg-foreground text-background border border-foreground",
+                      "shadow-[0_1px_0_hsl(var(--foreground)/0.9),0_6px_18px_-8px_hsl(var(--foreground)/0.55)]",
+                      "transition-all duration-300 ease-out",
+                      "hover:bg-background hover:text-foreground",
+                      "hover:shadow-[0_2px_0_hsl(var(--gold)),0_10px_24px_-10px_hsl(var(--foreground)/0.5)]",
+                      "hover:-translate-y-[1px] active:translate-y-0 active:shadow-none",
+                      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--gold))] focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                    )}
                   >
+                    <span className="h-1 w-1 rounded-full bg-[hsl(var(--gold))] transition-transform duration-300 group-hover/trade:scale-150" aria-hidden="true" />
                     {item.label}
                   </button>
                 </div>
