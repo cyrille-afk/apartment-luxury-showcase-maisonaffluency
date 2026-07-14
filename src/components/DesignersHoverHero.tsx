@@ -948,10 +948,11 @@ const DesignersHoverHero = () => {
             transition={{ type: "tween", ease: [0.16, 1, 0.3, 1], duration: 0.25 }}
             className={cn(
               "fixed z-[71] flex flex-col bg-[#0a0a0a] text-white border border-white/10 shadow-2xl overflow-hidden",
-              // Mobile: bottom sheet anchored to bottom
-              "inset-x-0 bottom-0 max-h-[75vh] rounded-t-2xl pb-[env(safe-area-inset-bottom)]",
+              // Mobile: full sheet anchored right below the fixed header so the
+              // search field is immediately visible and the list has room to scroll.
+              "inset-x-0 top-[var(--header-h)] bottom-0 rounded-none pb-[env(safe-area-inset-bottom)]",
               // Desktop: dropdown anchored to the Directory button via inline styles.
-              "md:inset-x-auto md:right-auto md:w-[380px] md:max-w-[calc(100vw-2rem)] md:max-h-[calc(100vh-var(--header-h)-3rem)] md:rounded-xl md:pb-0"
+              "md:inset-x-auto md:right-auto md:top-auto md:bottom-auto md:w-[380px] md:max-w-[calc(100vw-2rem)] md:max-h-[calc(100vh-var(--header-h)-3rem)] md:rounded-xl md:pb-0"
             )}
             style={
               dropdownPos
@@ -988,7 +989,7 @@ const DesignersHoverHero = () => {
                 <X className="h-4 w-4" />
               </button>
             </div>
-            <div ref={searchScrollRef} className="overflow-y-auto overscroll-contain px-1 pt-0 pb-1 min-h-0 pr-7 md:pr-1 scroll-smooth relative">
+            <div ref={searchScrollRef} className="overflow-y-auto overscroll-contain px-1 pt-0 pb-1 min-h-0 pr-10 md:pr-1 scroll-smooth relative">
               {/* Mobile A–Z jump strip — slim vertical index along the sheet's
                   right edge, contact-app style. Hidden on desktop. */}
               {!isSearching && groupedResults.length > 0 && (() => {
@@ -1018,7 +1019,7 @@ const DesignersHoverHero = () => {
                     aria-label="Jump to letter"
                     onTouchStart={handleTouch}
                     onTouchMove={handleTouch}
-                    className="md:hidden absolute top-1 bottom-1 right-0 z-[2] flex flex-col justify-center items-stretch gap-0 px-1 select-none touch-none"
+                    className="md:hidden absolute top-2 bottom-2 right-0 z-[2] flex flex-col justify-center items-stretch gap-0 pr-1.5 pl-1 select-none touch-none rounded-l-md bg-black/25 backdrop-blur-sm"
                   >
                     {groupedResults.map(([letter]) => {
                       const isActive = activeMobileLetter === letter;
@@ -1031,14 +1032,14 @@ const DesignersHoverHero = () => {
                           aria-label={`Jump to ${letter}`}
                           aria-current={isActive ? "true" : undefined}
                           className={cn(
-                            "relative font-body text-[11px] leading-none tracking-[0.08em] px-2 py-[3px] transition-colors",
+                            "relative font-body text-[13px] leading-none tracking-[0.08em] w-6 h-6 flex items-center justify-center transition-colors",
                             isActive
-                              ? "text-white font-semibold"
-                              : "text-white/55"
+                              ? "text-white font-bold"
+                              : "text-white/70"
                           )}
                           style={{ WebkitTapHighlightColor: "transparent" }}
                         >
-                          <span className="pointer-events-none absolute -inset-y-[3px] -left-3 -right-1" aria-hidden />
+                          <span className="pointer-events-none absolute -inset-y-1 -left-4 -right-2" aria-hidden />
                           {letter}
                         </button>
                       );
