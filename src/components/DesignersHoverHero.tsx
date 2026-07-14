@@ -645,12 +645,13 @@ const DesignersHoverHero = () => {
         {/* Content */}
         <div
           className={cn(
-          "relative flex flex-col h-full px-6 sm:px-12 md:px-20 lg:px-28 pt-6 md:pt-8 pointer-events-auto",
+          "relative flex flex-col h-full px-6 sm:px-12 md:px-20 lg:px-28 pointer-events-auto",
             isStandalone
-              ? "justify-center pb-44 md:pb-0"
-              : // Mobile browser: anchor list near the bottom of the svh frame
-                // but reserve room for the Directory row + iOS safe-area.
-                "justify-end pb-24 sm:pb-40 md:justify-center md:pb-0"
+              ? "justify-center pt-6 md:pt-8 pb-44 md:pb-0"
+              : // Mobile browser: Directory pinned at top, so give list top room
+                // and let it flow to the bottom of the svh frame (which already
+                // excludes the iOS toolbar).
+                "justify-start pt-[calc(var(--header-h)+3.25rem)] pb-6 md:pt-8 md:justify-center md:pb-0"
           )}
         >
 
