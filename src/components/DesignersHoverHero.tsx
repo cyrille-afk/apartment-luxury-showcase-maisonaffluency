@@ -645,12 +645,13 @@ const DesignersHoverHero = () => {
         {/* Content */}
         <div
           className={cn(
-          "relative flex flex-col h-full px-6 sm:px-12 md:px-20 lg:px-28 pt-6 md:pt-8 pointer-events-auto",
+          "relative flex flex-col h-full px-6 sm:px-12 md:px-20 lg:px-28 pointer-events-auto",
             isStandalone
-              ? "justify-center pb-44 md:pb-0"
-              : // Mobile browser: anchor list near the bottom of the svh frame
-                // but reserve room for the Directory row + iOS safe-area.
-                "justify-end pb-24 sm:pb-40 md:justify-center md:pb-0"
+              ? "justify-center pt-6 md:pt-8 pb-44 md:pb-0"
+              : // Mobile browser: Directory pinned at top, so give list top room
+                // and let it flow to the bottom of the svh frame (which already
+                // excludes the iOS toolbar).
+                "justify-start pt-[calc(var(--header-h)+3.25rem)] pb-6 md:pt-8 md:justify-center md:pb-0"
           )}
         >
 
@@ -743,19 +744,20 @@ const DesignersHoverHero = () => {
         {/* Directory label — pinned to the svh frame bottom on mobile only.
             Desktop version now lives at the top of the featured list. */}
         {directoryLabels(cn(
-          "absolute flex items-center gap-10 text-white pt-6 w-fit pointer-events-auto md:hidden",
+          "absolute flex items-center gap-10 text-white w-fit pointer-events-auto md:hidden z-30",
           isMobileOrPwa
             ? "left-1/2 -translate-x-1/2 justify-center px-6"
             : "left-6 sm:left-[22rem] md:left-[26rem] lg:left-[28rem]",
           isStandalone
-            ? "bottom-[calc(6rem+env(safe-area-inset-bottom))]"
-            : "bottom-[calc(1.25rem+env(safe-area-inset-bottom))]"
+            ? "pt-6 bottom-[calc(6rem+env(safe-area-inset-bottom))]"
+            // Mobile browser: pin to top so it's not hidden by iOS bottom toolbar
+            : "pt-2 top-[calc(var(--header-h)+0.5rem)]"
         ))}
 
 
         {/* Mobile/PWA scroll hint — quiet mouse icon above the directory, right-justified.
             Anchored inside the svh safe frame so it clears Safari's bottom toolbar. */}
-        {isMobileOrPwa && (
+        {isMobileOrPwa && isStandalone && (
           <div
             className={cn(
               "absolute right-6 sm:right-12 z-20 flex flex-col items-center gap-2 pointer-events-none md:hidden",
