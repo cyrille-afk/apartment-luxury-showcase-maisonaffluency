@@ -9,7 +9,9 @@ import { defineMcp } from "npm:@lovable.dev/mcp-js@0.22.0";
 import { defineTool } from "npm:@lovable.dev/mcp-js@0.22.0";
 import { createClient } from "npm:@supabase/supabase-js@^2.108.2";
 import { z } from "npm:zod@^3.25.76";
-var SITE_ORIGIN = "https://www.maisonaffluency.com";
+var CLICK_ORIGIN = `${process.env.SUPABASE_URL}/functions/v1/mcp-click`;
+var trackProductUrl = (slug, pickId) => `${CLICK_ORIGIN}?to=product&slug=${encodeURIComponent(slug)}&pick=${pickId}`;
+var TRADE_SIGNUP_URL = `${CLICK_ORIGIN}?to=signup`;
 function getClient() {
   const url = process.env.SUPABASE_URL;
   const anon = process.env.SUPABASE_PUBLISHABLE_KEY ?? process.env.SUPABASE_ANON_KEY;
@@ -30,12 +32,25 @@ var search_curator_picks_default = defineTool({
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
   handler: async (input) => {
     const supabase = getClient();
+    const startedAt = Date.now();
+    const logCall = (result_count, is_error = false) => {
+      supabase.from("mcp_query_log").insert({
+        tool_name: "search_curator_picks",
+        args: input,
+        result_count,
+        is_error,
+        duration_ms: Date.now() - startedAt
+      }).then(() => {
+      }, () => {
+      });
+    };
     const limit = input.limit ?? 20;
     let designerId = null;
     let designerName = null;
     if (input.designer_slug) {
       const { data: d } = await supabase.from("designers").select("id, name").eq("slug", input.designer_slug).eq("is_published", true).eq("trade_only", false).maybeSingle();
       if (!d) {
+        logCall(0);
         return {
           content: [{ type: "text", text: `No public designer found for slug "${input.designer_slug}".` }],
           structuredContent: { results: [], total: 0 }
@@ -57,6 +72,7 @@ var search_curator_picks_default = defineTool({
     }
     const { data, error } = await q;
     if (error) {
+      logCall(0, true);
       return {
         content: [{ type: "text", text: `Search failed: ${error.message}` }],
         isError: true
@@ -87,13 +103,15 @@ var search_curator_picks_default = defineTool({
         tags: r.tags,
         image_url: r.image_url,
         price: "Price on Request",
-        product_url: `${SITE_ORIGIN}/designers/${designer.slug}?pick=${r.id}`
+        product_url: trackProductUrl(designer.slug, r.id),
+        trade_signup_url: TRADE_SIGNUP_URL
       };
     }).filter((x) => x !== null);
     const summary = results.length === 0 ? `No public curator picks matched${designerName ? ` for ${designerName}` : ""}.` : `Found ${results.length} curator pick${results.length === 1 ? "" : "s"}${designerName ? ` by ${designerName}` : ""}. All prices are Price on Request \u2014 sign in as a trade member on maisonaffluency.com for net pricing and tearsheets.`;
+    logCall(results.length);
     return {
       content: [{ type: "text", text: summary }],
-      structuredContent: { results, total: results.length }
+      structuredContent: { results, total: results.length, trade_signup_url: TRADE_SIGNUP_URL }
     };
   }
 });
@@ -102,7 +120,9 @@ var search_curator_picks_default = defineTool({
 import { defineTool as defineTool2 } from "npm:@lovable.dev/mcp-js@0.22.0";
 import { createClient as createClient2 } from "npm:@supabase/supabase-js@^2.108.2";
 import { z as z2 } from "npm:zod@^3.25.76";
-var SITE_ORIGIN2 = "https://www.maisonaffluency.com";
+var CLICK_ORIGIN2 = `${process.env.SUPABASE_URL}/functions/v1/mcp-click`;
+var trackProductUrl2 = (slug, pickId) => `${CLICK_ORIGIN2}?to=product&slug=${encodeURIComponent(slug)}&pick=${pickId}`;
+var TRADE_SIGNUP_URL2 = `${CLICK_ORIGIN2}?to=signup`;
 function getClient2() {
   const url = process.env.SUPABASE_URL;
   const anon = process.env.SUPABASE_PUBLISHABLE_KEY ?? process.env.SUPABASE_ANON_KEY;
@@ -118,13 +138,27 @@ var get_product_default = defineTool2({
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
   handler: async ({ pick_id }) => {
     const supabase = getClient2();
+    const startedAt = Date.now();
+    const logCall = (result_count, is_error = false) => {
+      supabase.from("mcp_query_log").insert({
+        tool_name: "get_product",
+        args: { pick_id },
+        result_count,
+        is_error,
+        duration_ms: Date.now() - startedAt
+      }).then(() => {
+      }, () => {
+      });
+    };
     const { data, error } = await supabase.from("designer_curator_picks_public").select(
       "id, designer_id, title, subtitle, category, subcategory, materials, materials_description, dimensions, description, edition, edition_number, edition_signing, origin, lead_time, tags, image_url, gallery_images, gallery_captions, photo_credit, is_hidden"
     ).eq("id", pick_id).maybeSingle();
     if (error) {
+      logCall(0, true);
       return { content: [{ type: "text", text: `Lookup failed: ${error.message}` }], isError: true };
     }
     if (!data || data.is_hidden) {
+      logCall(0, true);
       return {
         content: [{ type: "text", text: "Product not found or not publicly available." }],
         isError: true
@@ -132,6 +166,7 @@ var get_product_default = defineTool2({
     }
     const { data: designer } = await supabase.from("designers").select("id, name, slug, is_published, trade_only").eq("id", data.designer_id).maybeSingle();
     if (!designer || !designer.is_published || designer.trade_only) {
+      logCall(0, true);
       return {
         content: [{ type: "text", text: "Product not found or not publicly available." }],
         isError: true
@@ -160,7 +195,8 @@ var get_product_default = defineTool2({
       gallery_captions: data.gallery_captions ?? null,
       photo_credit: data.photo_credit,
       price: "Price on Request",
-      product_url: `${SITE_ORIGIN2}/designers/${designer.slug}?pick=${data.id}`,
+      product_url: trackProductUrl2(designer.slug, data.id),
+      trade_signup_url: TRADE_SIGNUP_URL2,
       tearsheet_note: "Tearsheet PDFs and net trade pricing are available only to registered trade members on maisonaffluency.com."
     };
     const text = [
@@ -174,6 +210,7 @@ var get_product_default = defineTool2({
       `Price: Price on Request`,
       `View: ${product.product_url}`
     ].filter(Boolean).join("\n");
+    logCall(1);
     return {
       content: [{ type: "text", text }],
       structuredContent: { product }

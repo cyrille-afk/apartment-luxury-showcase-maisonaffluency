@@ -9,6 +9,11 @@ import { z } from "zod";
 // the same rule; trade net prices never leave the app over MCP.
 
 const SITE_ORIGIN = "https://www.maisonaffluency.com";
+// Click-tracked redirector. Logs the click server-side then 302s to the real page.
+const CLICK_ORIGIN = `${process.env.SUPABASE_URL}/functions/v1/mcp-click`;
+const trackProductUrl = (slug: string, pickId: string) =>
+  `${CLICK_ORIGIN}?to=product&slug=${encodeURIComponent(slug)}&pick=${pickId}`;
+const TRADE_SIGNUP_URL = `${CLICK_ORIGIN}?to=signup`;
 
 function getClient() {
   const url = process.env.SUPABASE_URL!;
@@ -38,7 +43,22 @@ export default defineTool({
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
   handler: async (input) => {
     const supabase = getClient();
+    const startedAt = Date.now();
+    const logCall = (result_count: number, is_error = false) => {
+      // Fire-and-forget; never let analytics failure break a tool response.
+      supabase
+        .from("mcp_query_log")
+        .insert({
+          tool_name: "search_curator_picks",
+          args: input,
+          result_count,
+          is_error,
+          duration_ms: Date.now() - startedAt,
+        })
+        .then(() => {}, () => {});
+    };
     const limit = input.limit ?? 20;
+
 
     let designerId: string | null = null;
     let designerName: string | null = null;
@@ -51,6 +71,7 @@ export default defineTool({
         .eq("trade_only", false)
         .maybeSingle();
       if (!d) {
+        logCall(0);
         return {
           content: [{ type: "text", text: `No public designer found for slug "${input.designer_slug}".` }],
           structuredContent: { results: [], total: 0 },
@@ -80,6 +101,7 @@ export default defineTool({
 
     const { data, error } = await q;
     if (error) {
+      logCall(0, true);
       return {
         content: [{ type: "text", text: `Search failed: ${error.message}` }],
         isError: true,
@@ -119,7 +141,8 @@ export default defineTool({
           tags: r.tags,
           image_url: r.image_url,
           price: "Price on Request",
-          product_url: `${SITE_ORIGIN}/designers/${designer.slug}?pick=${r.id}`,
+          product_url: trackProductUrl(designer.slug, r.id),
+          trade_signup_url: TRADE_SIGNUP_URL,
         };
       })
       .filter((x): x is NonNullable<typeof x> => x !== null);
@@ -131,9 +154,10 @@ export default defineTool({
             designerName ? ` by ${designerName}` : ""
           }. All prices are Price on Request — sign in as a trade member on maisonaffluency.com for net pricing and tearsheets.`;
 
+    logCall(results.length);
     return {
       content: [{ type: "text", text: summary }],
-      structuredContent: { results, total: results.length },
+      structuredContent: { results, total: results.length, trade_signup_url: TRADE_SIGNUP_URL },
     };
   },
 });

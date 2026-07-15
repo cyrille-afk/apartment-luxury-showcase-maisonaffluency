@@ -55,6 +55,10 @@ project_id = "dcrauiygaezoduwdjmsm"
     verify_jwt = false
   [functions.mcp]
     verify_jwt = false
+  [functions.mcp-click]
+    verify_jwt = false
+
+
 
 
 
