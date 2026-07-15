@@ -575,7 +575,7 @@ function singularizeSub(s: string): string {
                 <img
                   src={item.pick.image}
                   alt={`${item.pick.title} by ${item.designerName} — collectible design furniture`}
-                  className={`max-w-[96%] max-h-[96%] object-contain transition-all duration-500 group-hover:scale-105 ${item.pick.hoverImage ? 'group-hover:opacity-0' : ''}`}
+                  className={`w-full h-full object-contain transition-all duration-500 group-hover:scale-105 ${item.pick.hoverImage ? 'group-hover:opacity-0' : ''}`}
                   loading="lazy"
                 />
                 {item.pick.hoverImage && (
