@@ -23,7 +23,10 @@ const Footer = () => {
            </button>
         </span>
       </div>
-      <footer className="border-t border-border bg-background px-6 py-12 md:px-12 lg:px-20">
+      <footer
+        className="border-t border-border bg-background px-6 py-12 md:px-12 lg:px-20"
+        style={{ paddingBottom: "calc(3rem + env(safe-area-inset-bottom))" }}
+      >
       <div className="mx-auto max-w-7xl">
         <div className="flex flex-col items-center gap-6">
           <div className="flex flex-wrap justify-center gap-x-10 gap-y-4 items-center">
