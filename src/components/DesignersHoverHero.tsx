@@ -190,6 +190,7 @@ const DesignersHoverHero = () => {
   const [azRailRect, setAzRailRect] = useState<{ top: number; height: number } | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const searchScrollRef = useRef<HTMLDivElement>(null);
+  const contentScrollRef = useRef<HTMLDivElement>(null);
   const directoryRef = useRef<HTMLDivElement>(null);
   const mastersRef = useRef<HTMLSpanElement>(null);
   const activeTitleRef = useRef<HTMLSpanElement>(null);
@@ -341,6 +342,11 @@ const DesignersHoverHero = () => {
     const isDesktop = window.matchMedia("(min-width: 768px)").matches;
     if (!isDesktop) return;
 
+    const canUseNativeListScroll = () => {
+      const scroller = contentScrollRef.current;
+      return Boolean(scroller && scroller.scrollHeight > scroller.clientHeight + 2);
+    };
+
     const advance = (dir: 1 | -1) => {
       setActiveSlug((current) => {
         const idx = items.findIndex((d) => d.slug === current);
@@ -421,17 +427,14 @@ const DesignersHoverHero = () => {
     let lastPointerTouchAt = 0;
 
     const handleSwipeDelta = (deltaY: number, prevent: () => void, isPointer = false) => {
+      if (canUseNativeListScroll()) return false;
+
       const idx = items.findIndex((d) => d.slug === activeSlugRef.current);
-      const atLast = idx === items.length - 1;
       const atFirst = idx <= 0;
 
-      if (atLast && deltaY > SWIPE_THRESHOLD) {
-        prevent();
-        handoffToDirectory();
-        return true;
-      }
       if (atFirst && deltaY < -SWIPE_THRESHOLD) {
-        return false;
+        prevent();
+        return true;
       }
 
       prevent();
@@ -454,6 +457,7 @@ const DesignersHoverHero = () => {
     const onPointerDown = (e: PointerEvent) => {
       if (e.pointerType !== "touch") return;
       if ((e.target as HTMLElement | null)?.closest?.("#designers-search-sheet")) return;
+      if (canUseNativeListScroll()) return;
       lastPointerTouchAt = Date.now();
       pointerStartY = e.clientY;
       pointerAccum = 0;
@@ -486,6 +490,7 @@ const DesignersHoverHero = () => {
 
     const onStart = (e: TouchEvent) => {
       if (Date.now() - lastPointerTouchAt < 700) return;
+      if (canUseNativeListScroll()) return;
       startY = e.touches[0].clientY;
       accum = 0;
     };
@@ -529,6 +534,45 @@ const DesignersHoverHero = () => {
       nav.removeEventListener("touchend", onEnd);
     };
   }, [hasItems, items, searchOpen]);
+
+  // When the landing list is taller than the locked mobile/PWA viewport, let it
+  // scroll natively and keep the background photo synced to the visible row.
+  useEffect(() => {
+    if (searchOpen || !isMobileOrPwa) return;
+    const scroller = contentScrollRef.current;
+    if (!scroller) return;
+
+    const updateActiveFromScroll = () => {
+      if (scroller.scrollHeight <= scroller.clientHeight + 2) return;
+      const scrollerRect = scroller.getBoundingClientRect();
+      const targetY = scrollerRect.top + scrollerRect.height * 0.34;
+      const links = Array.from(
+        scroller.querySelectorAll<HTMLAnchorElement>("[data-featured-designer-slug]")
+      );
+      let bestSlug: string | null = null;
+      let bestDistance = Number.POSITIVE_INFINITY;
+
+      for (const link of links) {
+        const rect = link.getBoundingClientRect();
+        const center = rect.top + rect.height / 2;
+        const distance = Math.abs(center - targetY);
+        if (distance < bestDistance) {
+          bestDistance = distance;
+          bestSlug = link.dataset.featuredDesignerSlug ?? null;
+        }
+      }
+
+      if (bestSlug) setActiveSlug((current) => (current === bestSlug ? current : bestSlug));
+    };
+
+    updateActiveFromScroll();
+    scroller.addEventListener("scroll", updateActiveFromScroll, { passive: true });
+    window.addEventListener("resize", updateActiveFromScroll);
+    return () => {
+      scroller.removeEventListener("scroll", updateActiveFromScroll);
+      window.removeEventListener("resize", updateActiveFromScroll);
+    };
+  }, [isMobileOrPwa, searchOpen, items]);
 
 
   const isDesktopViewport = !isMobileViewport && !isMobileHook && !isStandalone;
@@ -889,6 +933,7 @@ const DesignersHoverHero = () => {
 
         {/* Content */}
         <div
+          ref={contentScrollRef}
           className={cn(
           "relative flex flex-col h-full px-6 sm:px-12 md:px-20 lg:px-28 pointer-events-auto md:overflow-visible",
             isStandalone
@@ -913,7 +958,10 @@ const DesignersHoverHero = () => {
               <nav
                 ref={navRef}
                 aria-label="Featured designers shortcut list"
-                className="relative inline-block touch-none select-none"
+                className={cn(
+                  "relative inline-block select-none",
+                  isMobileOrPwa ? "touch-pan-y" : "touch-none"
+                )}
               >
               <ul className="flex flex-col text-left">
                 {groupedItems.map((group, groupIdx) => (
@@ -948,6 +996,7 @@ const DesignersHoverHero = () => {
                           >
                             <Link
                               to={`/designers/${d.slug}`}
+                              data-featured-designer-slug={d.slug}
                               state={{ fromDesignersHero: true }}
                               onMouseEnter={() => setActiveSlug(d.slug)}
                               onFocus={() => setActiveSlug(d.slug)}
