@@ -320,6 +320,7 @@ const HIDE_PARENT_LABEL_SLUGS = new Set<string>([
   "pierre-chareau-mcde",
   "rowin-atelier",
   "sam-baron",
+  "sebastian-herkner-man-of-parts",
   "studio-base-upon",
   "tristan-auer",
   "tristan-auer-veronese",
