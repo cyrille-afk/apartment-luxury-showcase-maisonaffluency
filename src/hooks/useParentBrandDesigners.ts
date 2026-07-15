@@ -25,8 +25,8 @@ export function useParentBrandDesigners(parentName: string | null) {
       if (!parentName) return [];
       const { data, error } = await supabase
         .from("designers")
-        .select("id, name, slug, image_url, links")
-        .eq("founder", parentName)
+        .select("id, name, slug, image_url, links, additional_founders")
+        .or(`founder.eq.${parentName},additional_founders.cs.{"${parentName}"}`)
         .neq("name", parentName)
         .eq("is_published", true)
         .eq("trade_only", false)
