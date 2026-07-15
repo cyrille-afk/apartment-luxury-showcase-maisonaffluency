@@ -17,6 +17,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Checkbox } from "@/components/ui/checkbox";
 import CategorySidebar from "@/components/CategorySidebar";
+import DesignerFacetsSidebar from "@/components/DesignerFacetsSidebar";
 import { trackCTA } from "@/lib/analytics";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -1761,7 +1762,9 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
               sectionLabel="all Designers"
               onOpenChange={setSidebarOpen}
               isOpen={sidebarOpen}
-            />
+            >
+              {mode === "designers" && <DesignerFacetsSidebar designers={topLevelItems} />}
+            </CategorySidebar>
             <div className="flex-1 min-w-0">
               {isLoading && (
                 <div className="flex items-center justify-center py-32">
