@@ -180,6 +180,7 @@ const DesignersHoverHero = () => {
   const isMobileOrPwa = isMobileViewport || isMobileHook || isStandalone;
   const navRef = useRef<HTMLElement>(null);
   const sectionRef = useRef<HTMLElement>(null);
+  const handoffLockRef = useRef(false);
   const portalRef = useRef<HTMLAnchorElement>(null);
   const portalCursorRef = useRef<HTMLDivElement>(null);
   const activeSlugRef = useRef<string | null>(null);
@@ -328,6 +329,27 @@ const DesignersHoverHero = () => {
     const isMobile = window.matchMedia("(max-width: 767px)").matches;
     if (!isMobile) return;
 
+    const handoffToDirectory = () => {
+      if (handoffLockRef.current) return;
+      handoffLockRef.current = true;
+      window.dispatchEvent(new Event("unlockDesignersScroll"));
+
+      const scrollBelowHero = () => {
+        const section = sectionRef.current;
+        if (!section) return;
+        const target = Math.max(0, section.getBoundingClientRect().bottom + window.scrollY - 1);
+        window.scrollTo({ top: target, behavior: "smooth" });
+      };
+
+      window.requestAnimationFrame(() => {
+        scrollBelowHero();
+        window.setTimeout(scrollBelowHero, 120);
+      });
+      window.setTimeout(() => {
+        handoffLockRef.current = false;
+      }, 900);
+    };
+
     const advance = (dir: 1 | -1) => {
       setActiveSlug((current) => {
         const idx = items.findIndex((d) => d.slug === current);
@@ -355,8 +377,13 @@ const DesignersHoverHero = () => {
       const idx = items.findIndex((d) => d.slug === activeSlugRef.current);
       const atLast = idx === items.length - 1;
       const atFirst = idx <= 0;
-      if ((atLast && accum > 0) || (atFirst && accum < 0)) {
-        return; // don't preventDefault; let native scroll take over
+      if (atLast && accum > SWIPE_THRESHOLD) {
+        if (e.cancelable) e.preventDefault();
+        handoffToDirectory();
+        return;
+      }
+      if (atFirst && accum < -SWIPE_THRESHOLD) {
+        return; // already at the top; let native scroll/rubber-band handle it
       }
       if (e.cancelable) e.preventDefault();
       if (lock) return;
