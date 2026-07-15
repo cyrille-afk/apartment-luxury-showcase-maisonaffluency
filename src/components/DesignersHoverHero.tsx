@@ -706,7 +706,7 @@ const DesignersHoverHero = () => {
               : // Mobile browser: the section already starts below the fixed
                 // header, so do not add var(--header-h) again here. Keep the
                 // designer list high while leaving room for the Directory link.
-                "justify-start overflow-y-auto overscroll-contain touch-pan-y pt-16 pb-8 md:pt-8 md:justify-center md:pb-0 md:overflow-visible"
+                "justify-start overflow-y-auto overscroll-contain touch-pan-y pt-12 pb-[calc(2.5rem+env(safe-area-inset-bottom))] md:pt-8 md:justify-center md:pb-0 md:overflow-visible [-webkit-overflow-scrolling:touch]"
           )}
         >
 
