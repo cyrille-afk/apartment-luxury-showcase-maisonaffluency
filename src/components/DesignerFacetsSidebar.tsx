@@ -59,9 +59,11 @@ interface Props {
   activeSubcategory?: string | null;
   /** Map of designer id → set of countries derived from their picks' origins. */
   designerCountriesById?: Map<string, Set<string>>;
+  /** "designers" = aggregate one count per designer; "products" = per pick. */
+  mode?: "designers" | "products";
 }
 
-const DesignerFacetsSidebar: React.FC<Props> = ({ designers, productPicks, activeCategory, activeSubcategory, designerCountriesById }) => {
+const DesignerFacetsSidebar: React.FC<Props> = ({ designers, productPicks, activeCategory, activeSubcategory, designerCountriesById, mode = "designers" }) => {
   const [searchParams] = useSearchParams();
   const location = useLocation();
   const scrollYRef = useRef(0);
