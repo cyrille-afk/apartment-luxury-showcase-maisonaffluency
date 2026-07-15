@@ -365,6 +365,7 @@ const DesignersHoverHero = () => {
     let pointerAccum = 0;
     let lock = false;
     let pointerLock = false;
+    let lastPointerTouchAt = 0;
 
     const handleSwipeDelta = (deltaY: number, prevent: () => void, isPointer = false) => {
       const idx = items.findIndex((d) => d.slug === activeSlugRef.current);
@@ -400,6 +401,7 @@ const DesignersHoverHero = () => {
     const onPointerDown = (e: PointerEvent) => {
       if (e.pointerType !== "touch") return;
       if ((e.target as HTMLElement | null)?.closest?.("#designers-search-sheet")) return;
+      lastPointerTouchAt = Date.now();
       pointerStartY = e.clientY;
       pointerAccum = 0;
       nav.setPointerCapture?.(e.pointerId);
@@ -430,10 +432,12 @@ const DesignersHoverHero = () => {
     };
 
     const onStart = (e: TouchEvent) => {
+      if (Date.now() - lastPointerTouchAt < 700) return;
       startY = e.touches[0].clientY;
       accum = 0;
     };
     const onMove = (e: TouchEvent) => {
+      if (Date.now() - lastPointerTouchAt < 700) return;
       if ((e.target as HTMLElement | null)?.closest?.("#designers-search-sheet")) return;
       if (startY === null) return;
       const y = e.touches[0].clientY;
@@ -456,22 +460,20 @@ const DesignersHoverHero = () => {
       nav.addEventListener("pointermove", onPointerMove, { passive: false });
       nav.addEventListener("pointerup", onPointerEnd, { passive: true });
       nav.addEventListener("pointercancel", onPointerEnd, { passive: true });
-    } else {
-      nav.addEventListener("touchstart", onStart, { passive: true });
-      nav.addEventListener("touchmove", onMove, { passive: false });
-      nav.addEventListener("touchend", onEnd, { passive: true });
     }
+    nav.addEventListener("touchstart", onStart, { passive: true });
+    nav.addEventListener("touchmove", onMove, { passive: false });
+    nav.addEventListener("touchend", onEnd, { passive: true });
     return () => {
       if (supportsPointer) {
         nav.removeEventListener("pointerdown", onPointerDown);
         nav.removeEventListener("pointermove", onPointerMove);
         nav.removeEventListener("pointerup", onPointerEnd);
         nav.removeEventListener("pointercancel", onPointerEnd);
-      } else {
-        nav.removeEventListener("touchstart", onStart);
-        nav.removeEventListener("touchmove", onMove);
-        nav.removeEventListener("touchend", onEnd);
       }
+      nav.removeEventListener("touchstart", onStart);
+      nav.removeEventListener("touchmove", onMove);
+      nav.removeEventListener("touchend", onEnd);
     };
   }, [hasItems, items, searchOpen]);
 
