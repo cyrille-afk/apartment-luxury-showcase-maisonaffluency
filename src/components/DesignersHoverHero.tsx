@@ -583,6 +583,66 @@ const DesignersHoverHero = () => {
     };
   }, [isMobileOrPwa, searchOpen, items]);
 
+  // Mobile/PWA: forward touch/wheel gestures anywhere on the hero (including
+  // the featured photo area outside the list column) to the inner list
+  // scroller, so the user can scroll the designers list from anywhere on the
+  // landing page — not only when their finger is directly on the list.
+  useEffect(() => {
+    if (searchOpen || !isMobileOrPwa) return;
+    const section = sectionRef.current;
+    const scroller = contentScrollRef.current;
+    if (!section || !scroller) return;
+
+    const isInsideScroller = (target: EventTarget | null) => {
+      if (!(target instanceof Node)) return false;
+      return scroller.contains(target);
+    };
+
+    let touchStartY: number | null = null;
+
+    const onTouchStart = (e: TouchEvent) => {
+      if (isInsideScroller(e.target)) return;
+      if ((e.target as HTMLElement | null)?.closest?.("#designers-search-sheet")) return;
+      touchStartY = e.touches[0]?.clientY ?? null;
+    };
+
+    const onTouchMove = (e: TouchEvent) => {
+      if (touchStartY === null) return;
+      if (isInsideScroller(e.target)) return;
+      const y = e.touches[0]?.clientY;
+      if (y === undefined) return;
+      const delta = touchStartY - y;
+      if (Math.abs(delta) < 1) return;
+      scroller.scrollTop += delta;
+      touchStartY = y;
+      if (e.cancelable) e.preventDefault();
+    };
+
+    const onTouchEnd = () => {
+      touchStartY = null;
+    };
+
+    const onWheel = (e: WheelEvent) => {
+      if (isInsideScroller(e.target)) return;
+      if (Math.abs(e.deltaY) < 1) return;
+      scroller.scrollTop += e.deltaY;
+      if (e.cancelable) e.preventDefault();
+    };
+
+    section.addEventListener("touchstart", onTouchStart, { passive: true });
+    section.addEventListener("touchmove", onTouchMove, { passive: false });
+    section.addEventListener("touchend", onTouchEnd, { passive: true });
+    section.addEventListener("touchcancel", onTouchEnd, { passive: true });
+    section.addEventListener("wheel", onWheel, { passive: false });
+    return () => {
+      section.removeEventListener("touchstart", onTouchStart);
+      section.removeEventListener("touchmove", onTouchMove);
+      section.removeEventListener("touchend", onTouchEnd);
+      section.removeEventListener("touchcancel", onTouchEnd);
+      section.removeEventListener("wheel", onWheel);
+    };
+  }, [isMobileOrPwa, searchOpen]);
+
 
   const isDesktopViewport = !isMobileViewport && !isMobileHook && !isStandalone;
 
