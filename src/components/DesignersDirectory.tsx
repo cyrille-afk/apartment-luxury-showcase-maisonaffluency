@@ -1811,6 +1811,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
                 productPicks={mode === "products" ? fullPicks : undefined}
                 activeCategory={selectedCategory}
                 activeSubcategory={selectedSubcategory}
+                designerCountriesById={designerCountriesById}
               />
             </CategorySidebar>
             <div className="flex-1 min-w-0">
