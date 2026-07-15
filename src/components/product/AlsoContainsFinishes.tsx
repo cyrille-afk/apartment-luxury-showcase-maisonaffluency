@@ -36,8 +36,13 @@ const AlsoContainsFinishes: React.FC<Props> = ({ pickId, productId, className })
         .from("product_material_links")
         .select("role, material_taxonomy:material_id(family, is_active)")
         .neq("role", "primary");
-      if (pickId) query = query.eq("pick_id", pickId);
-      else if (productId) query = query.eq("product_id", productId);
+      if (pickId && productId) {
+        query = query.or(`pick_id.eq.${pickId},product_id.eq.${productId}`);
+      } else if (pickId) {
+        query = query.eq("pick_id", pickId);
+      } else if (productId) {
+        query = query.eq("product_id", productId);
+      }
       const { data, error } = await query;
       if (error) throw error;
       const families = new Set<string>();
