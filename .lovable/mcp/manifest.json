@@ -1,0 +1,92 @@
+{
+  "version": 1,
+  "sdk_version": "0.22.0",
+  "path": "/mcp",
+  "auth": {
+    "type": "none"
+  },
+  "mcp": {
+    "server": {
+      "name": "maison-affluency-catalog",
+      "version": "0.1.0",
+      "title": "Maison Affluency Catalog"
+    },
+    "tools": [
+      {
+        "name": "search_curator_picks",
+        "title": "Search curator picks",
+        "description": "Search Maison Affluency's public catalog of curator-picked designer furniture, lighting, and collectibles. Filter by free-text query, designer, category, subcategory, or materials. Returns product cards with a deep link back to the product page. Trade pricing is never returned — every result shows 'Price on Request'.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "query": {
+              "type": "string",
+              "maxLength": 200,
+              "description": "Free-text query matched against title, subtitle, materials, and tags."
+            },
+            "designer_slug": {
+              "type": "string",
+              "maxLength": 120,
+              "description": "Restrict to a specific designer by slug."
+            },
+            "category": {
+              "type": "string",
+              "maxLength": 80,
+              "description": "Top-level category, e.g. 'Seating', 'Lighting', 'Tables'."
+            },
+            "subcategory": {
+              "type": "string",
+              "maxLength": 80,
+              "description": "Subcategory, e.g. 'Sofa', 'Pendant', 'Console'."
+            },
+            "material": {
+              "type": "string",
+              "maxLength": 80,
+              "description": "Material substring, e.g. 'bronze', 'walnut'."
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "description": "Max results, default 20."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_product",
+        "title": "Get product",
+        "description": "Fetch the full public specification for a single curator pick by id: designer, category, materials, dimensions, edition, lead time, gallery images, and a deep link back to the product page. Trade pricing and tearsheet PDFs are never returned — those require signing in as a trade member on maisonaffluency.com.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "pick_id": {
+              "type": "string",
+              "format": "uuid",
+              "description": "The curator pick id returned by search_curator_picks."
+            }
+          },
+          "required": [
+            "pick_id"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}
