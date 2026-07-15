@@ -409,6 +409,11 @@ const DesignersHoverHero = () => {
       }, 900);
     };
 
+    const canUseNativeListScroll = () => {
+      const scroller = contentScrollRef.current;
+      return Boolean(scroller && scroller.scrollHeight > scroller.clientHeight + 2);
+    };
+
     const advance = (dir: 1 | -1) => {
       setActiveSlug((current) => {
         const idx = items.findIndex((d) => d.slug === current);
