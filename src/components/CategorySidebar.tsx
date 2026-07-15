@@ -180,6 +180,7 @@ const CategorySidebar: React.FC<CategorySidebarProps> = ({ activeCategory, activ
           );
         })}
       </nav>
+      {children}
     </aside>
   );
 };
