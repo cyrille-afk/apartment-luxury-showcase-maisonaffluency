@@ -1404,32 +1404,63 @@ const DesignersHoverHero = () => {
                           </li>
                         ))
                       ) : (
-                        groupedResults.map(([letter, items]) => (
-                          <li
-                            key={letter}
-                            data-designer-letter={letter}
-                            className="flex flex-col"
-                          >
-                            <div className="sticky top-0 z-[1] px-5 py-1.5 bg-[#0a0a0a]/95 backdrop-blur-sm border-b border-white/10">
-                              <span className="font-serif text-sm text-white/70">{letter}</span>
-                            </div>
-                            <ul className="flex flex-col">
-                              {items.map((d: any) => (
-                                <li key={d.slug}>
-                                  <Link
-                                    to={`/designers/${d.slug}`}
-                                    state={{ fromDesignersHero: true }}
-                                    onClick={() => setSearchOpen(false)}
-                                    className="flex items-center gap-3 px-5 py-2 font-body text-[15px] text-white/85 hover:text-white hover:bg-white/[0.04] transition-colors"
+                        groupedResults.map(([letter, items]) => {
+                          const isOpen = expandedLetters.has(letter);
+                          return (
+                            <li
+                              key={letter}
+                              data-designer-letter={letter}
+                              className="flex flex-col border-b border-white/[0.06] last:border-b-0"
+                            >
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setExpandedLetters((prev) => {
+                                    if (prev.has(letter)) {
+                                      if (activeAccordionLetter === letter) setActiveAccordionLetter(null);
+                                      return new Set();
+                                    }
+                                    setActiveAccordionLetter(letter);
+                                    return new Set([letter]);
+                                  })
+                                }
+                                aria-expanded={isOpen}
+                                className="w-full flex items-center justify-between px-5 py-2.5 text-left hover:bg-white/[0.04] transition-colors"
+                              >
+                                <span className="flex items-center gap-3">
+                                  <span
+                                    className={cn(
+                                      "text-white/50 text-xs transition-transform",
+                                      isOpen && "rotate-90"
+                                    )}
+                                    aria-hidden="true"
                                   >
-                                    <DesignerRowThumb src={d.image_url || d.hero_image_url} alt={d.name} />
-                                    <span className="truncate">{displayDesignerName(d.name)}</span>
-                                  </Link>
-                                </li>
-                              ))}
-                            </ul>
-                          </li>
-                        ))
+                                    ›
+                                  </span>
+                                  <span className="font-serif text-lg text-white">{letter}</span>
+                                </span>
+                                <span className="font-body text-xs text-white/50">{items.length}</span>
+                              </button>
+                              {isOpen && (
+                                <ul className="flex flex-col pb-2">
+                                  {items.map((d: any) => (
+                                    <li key={d.slug}>
+                                      <Link
+                                        to={`/designers/${d.slug}`}
+                                        state={{ fromDesignersHero: true }}
+                                        onClick={() => setSearchOpen(false)}
+                                        className="flex items-center gap-3 px-5 py-2 font-body text-[15px] text-white/85 hover:text-white hover:bg-white/[0.04] transition-colors"
+                                      >
+                                        <DesignerRowThumb src={d.image_url || d.hero_image_url} alt={d.name} />
+                                        <span className="truncate">{displayDesignerName(d.name)}</span>
+                                      </Link>
+                                    </li>
+                                  ))}
+                                </ul>
+                              )}
+                            </li>
+                          );
+                        })
                       )}
                     </ul>
                   </div>
