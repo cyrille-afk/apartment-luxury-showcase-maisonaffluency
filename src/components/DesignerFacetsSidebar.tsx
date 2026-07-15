@@ -101,7 +101,7 @@ const DesignerFacetsSidebar: React.FC<Props> = ({ designers, productPicks, activ
       .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
       .map(([value, count]) => ({ value, label: value, count }));
     return { finishOptions: finishes, countryOptions: countries };
-  }, [designers, productPicks, activeCategory, activeSubcategory, finishMap]);
+  }, [designers, productPicks, activeCategory, activeSubcategory, finishMap, designerCountriesById]);
 
   if (!finishOptions.length && !countryOptions.length) return null;
 
