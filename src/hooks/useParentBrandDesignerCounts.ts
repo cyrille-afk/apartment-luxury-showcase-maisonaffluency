@@ -43,20 +43,39 @@ export function useParentBrandDesignerCountsFiltered(parentNames: string[]) {
     staleTime: 1000 * 60 * 30,
     queryFn: async () => {
       if (parentNames.length === 0) return {} as Record<string, number>;
-      // Fetch all designers whose founder is in parentNames but name != founder
-      const { data, error } = await supabase
-        .from("designers")
-        .select("founder, name")
-        .in("founder", parentNames)
-        .eq("is_published", true)
-        .eq("trade_only", false);
-      if (error) throw error;
+      const [primary, extra] = await Promise.all([
+        supabase
+          .from("designers")
+          .select("founder, name, additional_founders")
+          .in("founder", parentNames)
+          .eq("is_published", true)
+          .eq("trade_only", false),
+        supabase
+          .from("designers")
+          .select("founder, name, additional_founders")
+          .overlaps("additional_founders", parentNames)
+          .eq("is_published", true)
+          .eq("trade_only", false),
+      ]);
+      if (primary.error) throw primary.error;
+      if (extra.error) throw extra.error;
+      const byId = new Map<string, any>();
+      [...(primary.data || []), ...(extra.data || [])].forEach((d: any) => {
+        byId.set(`${d.name}`, d);
+      });
+      const data = Array.from(byId.values());
       const counts: Record<string, number> = {};
       parentNames.forEach(n => { counts[n] = 0; });
-      (data || []).forEach(d => {
-        if (d.founder && d.name !== d.founder && !HIDDEN_CHILD_DESIGNER_NAMES.has(d.name)) {
-          counts[d.founder] = (counts[d.founder] || 0) + 1;
-        }
+      (data || []).forEach((d: any) => {
+        if (HIDDEN_CHILD_DESIGNER_NAMES.has(d.name)) return;
+        const parents = new Set<string>();
+        if (d.founder && d.name !== d.founder) parents.add(d.founder);
+        (d.additional_founders || []).forEach((f: string) => {
+          if (f && f !== d.name) parents.add(f);
+        });
+        parents.forEach(p => {
+          if (p in counts) counts[p] = (counts[p] || 0) + 1;
+        });
       });
       return counts;
     },
