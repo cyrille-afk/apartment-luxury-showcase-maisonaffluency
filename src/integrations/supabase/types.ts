@@ -3131,6 +3131,69 @@ export type Database = {
         }
         Relationships: []
       }
+      mcp_click_log: {
+        Row: {
+          click_type: string
+          created_at: string
+          designer_slug: string | null
+          id: string
+          ip_hash: string | null
+          pick_id: string | null
+          referer: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          click_type: string
+          created_at?: string
+          designer_slug?: string | null
+          id?: string
+          ip_hash?: string | null
+          pick_id?: string | null
+          referer?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          click_type?: string
+          created_at?: string
+          designer_slug?: string | null
+          id?: string
+          ip_hash?: string | null
+          pick_id?: string | null
+          referer?: string | null
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
+      mcp_query_log: {
+        Row: {
+          args: Json | null
+          created_at: string
+          duration_ms: number | null
+          id: string
+          is_error: boolean
+          result_count: number | null
+          tool_name: string
+        }
+        Insert: {
+          args?: Json | null
+          created_at?: string
+          duration_ms?: number | null
+          id?: string
+          is_error?: boolean
+          result_count?: number | null
+          tool_name: string
+        }
+        Update: {
+          args?: Json | null
+          created_at?: string
+          duration_ms?: number | null
+          id?: string
+          is_error?: boolean
+          result_count?: number | null
+          tool_name?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           created_at: string
