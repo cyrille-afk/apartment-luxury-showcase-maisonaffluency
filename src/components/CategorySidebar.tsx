@@ -179,8 +179,29 @@ const CategorySidebar: React.FC<CategorySidebarProps> = ({ activeCategory, activ
           );
         })}
       </nav>
+      </CategoriesAccordion>
       {children}
     </aside>
+  );
+};
+
+/** Collapsible "CATEGORIES" heading; closed by default so all sidebar sections start collapsed. */
+const CategoriesAccordion: React.FC<{ defaultOpen?: boolean; children: React.ReactNode }> = ({ defaultOpen, children }) => {
+  const [open, setOpen] = useState(!!defaultOpen);
+  return (
+    <div className="flex flex-col">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="flex w-full items-center justify-between py-2 px-1 text-left border-b border-border/20"
+      >
+        <span className="font-body text-[11px] uppercase tracking-[0.2em] text-foreground font-semibold">
+          Categories
+        </span>
+        <ChevronRight className={cn("h-4 w-4 text-muted-foreground transition-transform", open && "rotate-90")} />
+      </button>
+      {open && children}
+    </div>
   );
 };
 
