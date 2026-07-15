@@ -2394,6 +2394,7 @@ const TradeProductPage: React.FC = () => {
                   text={product.materials_description.trim()}
                 />
               )}
+              <AlsoContainsFinishes pickId={product.id} className="mt-1 pl-6" />
 
               {(() => {
                 const handcrafted = formatHandcrafted(product.origin, product.lead_time);
