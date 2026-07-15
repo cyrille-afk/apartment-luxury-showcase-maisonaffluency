@@ -59,9 +59,11 @@ interface Props {
   activeSubcategory?: string | null;
   /** Map of designer id → set of countries derived from their picks' origins. */
   designerCountriesById?: Map<string, Set<string>>;
+  /** "designers" = aggregate one count per designer; "products" = per pick. */
+  mode?: "designers" | "products";
 }
 
-const DesignerFacetsSidebar: React.FC<Props> = ({ designers, productPicks, activeCategory, activeSubcategory, designerCountriesById }) => {
+const DesignerFacetsSidebar: React.FC<Props> = ({ designers, productPicks, activeCategory, activeSubcategory, designerCountriesById, mode = "designers" }) => {
   const [searchParams] = useSearchParams();
   const location = useLocation();
   const scrollYRef = useRef(0);
@@ -74,19 +76,50 @@ const DesignerFacetsSidebar: React.FC<Props> = ({ designers, productPicks, activ
     const countryCounts = new Map<string, number>();
     const finishCounts = new Map<string, number>();
     if (productPicks) {
-      for (const pick of productPicks) {
-        if (!pickMatchesCategoryFilter(pick, activeCategory, activeSubcategory)) continue;
-        for (const country of originToCountries(pick.origin)) {
-          countryCounts.set(country, (countryCounts.get(country) || 0) + 1);
+      // Product mode: count each pick once. Category filter applied.
+      if (mode !== "designers") {
+        for (const pick of productPicks) {
+          if (!pickMatchesCategoryFilter(pick, activeCategory, activeSubcategory)) continue;
+          for (const country of originToCountries(pick.origin)) {
+            countryCounts.set(country, (countryCounts.get(country) || 0) + 1);
+          }
+          finishMap?.byPick.get(pick.id)?.forEach((family) => {
+            finishCounts.set(family, (finishCounts.get(family) || 0) + 1);
+          });
         }
-        finishMap?.byPick.get(pick.id)?.forEach((family) => {
-          finishCounts.set(family, (finishCounts.get(family) || 0) + 1);
+      } else {
+        // Designers mode: count each designer once per country, but ONLY over
+        // picks matching the active category so the count reflects what the
+        // user will actually see after clicking.
+        const byDesigner = new Map<string, Set<string>>();
+        const finishesByDesigner = new Map<string, Set<string>>();
+        for (const pick of productPicks) {
+          if (!pickMatchesCategoryFilter(pick, activeCategory, activeSubcategory)) continue;
+          const countries = originToCountries(pick.origin);
+          if (countries.length) {
+            let s = byDesigner.get(pick.designer_id);
+            if (!s) { s = new Set(); byDesigner.set(pick.designer_id, s); }
+            countries.forEach((c) => s!.add(c));
+          }
+          const fams = finishMap?.byPick.get(pick.id);
+          if (fams && fams.size) {
+            let s = finishesByDesigner.get(pick.designer_id);
+            if (!s) { s = new Set(); finishesByDesigner.set(pick.designer_id, s); }
+            fams.forEach((f) => s!.add(f));
+          }
+        }
+        // Only count designers that are actually visible in the list.
+        const visibleIds = new Set(designers.map((d) => d.id));
+        byDesigner.forEach((set, designerId) => {
+          if (!visibleIds.has(designerId)) return;
+          set.forEach((c) => countryCounts.set(c, (countryCounts.get(c) || 0) + 1));
+        });
+        finishesByDesigner.forEach((set, designerId) => {
+          if (!visibleIds.has(designerId)) return;
+          set.forEach((f) => finishCounts.set(f, (finishCounts.get(f) || 0) + 1));
         });
       }
     } else {
-      // Designers mode: count each designer once per country derived from
-      // their picks' `origin` fields. Falls back to nothing when a designer
-      // has no origin data — accuracy over completeness.
       for (const d of designers) {
         const countries = designerCountriesById?.get(d.id);
         if (!countries) continue;
@@ -94,15 +127,23 @@ const DesignerFacetsSidebar: React.FC<Props> = ({ designers, productPicks, activ
       }
     }
 
+    const usePickFinish = productPicks && mode !== "designers";
+    const useDesignerScopedFinish = productPicks && mode === "designers";
     const finishes: Option[] = FINISH_ORDER
-      .map((k) => ({ value: k, label: FINISH_LABELS[k], count: productPicks ? (finishCounts.get(k) || 0) : (finishMap?.counts.get(k) || 0) }))
+      .map((k) => ({
+        value: k,
+        label: FINISH_LABELS[k],
+        count: usePickFinish || useDesignerScopedFinish
+          ? (finishCounts.get(k) || 0)
+          : (finishMap?.counts.get(k) || 0),
+      }))
       .filter((o) => o.count > 0);
 
     const countries: Option[] = [...countryCounts.entries()]
       .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
       .map(([value, count]) => ({ value, label: value, count }));
     return { finishOptions: finishes, countryOptions: countries };
-  }, [designers, productPicks, activeCategory, activeSubcategory, finishMap, designerCountriesById]);
+  }, [designers, productPicks, activeCategory, activeSubcategory, finishMap, designerCountriesById, mode]);
 
   if (!finishOptions.length && !countryOptions.length) return null;
 
