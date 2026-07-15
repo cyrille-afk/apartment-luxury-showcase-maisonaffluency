@@ -451,7 +451,7 @@ const PublicDesignerProfile = () => {
       ? rawPicks.filter((pick) => !bioUrls.has(pick.image_url))
       : rawPicks;
 
-    return sortCuratorPicks(filtered);
+    return interleaveBySubcategory(sortCuratorPicks(filtered));
   }, [rawPicks, displayBiographyImages, displayBiography, isGrouped]);
 
   useEffect(() => {
