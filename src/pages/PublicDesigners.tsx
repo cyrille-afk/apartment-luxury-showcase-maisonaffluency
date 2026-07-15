@@ -10,6 +10,16 @@ import Footer from "@/components/Footer";
 import DesignersDirectory from "@/components/DesignersDirectory";
 import DesignersHoverHero from "@/components/DesignersHoverHero";
 
+const isStandaloneDisplay = () => {
+  if (typeof window === "undefined") return false;
+  const params = new URLSearchParams(window.location.search);
+  return (
+    params.get("source") === "pwa" ||
+    window.matchMedia?.("(display-mode: standalone)").matches ||
+    (window.navigator as any).standalone === true
+  );
+};
+
 
 // ─── Back to Top Button ──────────────────────────────────────────────────────
 function BackToTopButton() {
@@ -97,10 +107,8 @@ function ScrollLockedDesigners({
   initialExpand?: string;
 }) {
   const hasDeepLink = Boolean(initialLetter || initialExpand);
-  // Landing scroll-lock disabled on all viewports — mobile now mirrors desktop
-  // so first-time users can scroll straight from the hero into the directory.
-  const shouldLockLanding = false;
-  const [locked, setLocked] = useState(false);
+  const [isMobileOrPwa, setIsMobileOrPwa] = useState(false);
+  const locked = isMobileOrPwa && !hasDeepLink;
 
   // Directory only mounts after the landing handoff completes — a deep-link,
   // an explicit unlock event, or the user scrolling past the hero. This
@@ -108,19 +116,19 @@ function ScrollLockedDesigners({
   const [directoryReady, setDirectoryReady] = useState(hasDeepLink);
 
   useEffect(() => {
-    if (!shouldLockLanding) {
-      setLocked(false);
-      return;
-    }
-
     const mql = window.matchMedia("(max-width: 767px)");
+    const standaloneMql = window.matchMedia?.("(display-mode: standalone)");
     const update = () => {
-      setLocked(mql.matches);
+      setIsMobileOrPwa(mql.matches || isStandaloneDisplay());
     };
     update();
     mql.addEventListener("change", update);
-    return () => mql.removeEventListener("change", update);
-  }, [shouldLockLanding]);
+    standaloneMql?.addEventListener?.("change", update);
+    return () => {
+      mql.removeEventListener("change", update);
+      standaloneMql?.removeEventListener?.("change", update);
+    };
+  }, []);
 
   useEffect(() => {
     if (!locked) return;
@@ -133,21 +141,18 @@ function ScrollLockedDesigners({
     // freezes nested overflow-y-auto scrollers when both html+body are hidden.
     body.style.overflow = "hidden";
     (body.style as any).overscrollBehavior = "none";
-    const unlock = () => setLocked(false);
-    window.addEventListener("unlockDesignersScroll", unlock);
     return () => {
       html.style.overflow = prevHtml;
       body.style.overflow = prevBody;
       (body.style as any).overscrollBehavior = prevOverscroll;
-      window.removeEventListener("unlockDesignersScroll", unlock);
     };
   }, [locked]);
 
-  // Handoff: mount the directory once the user commits to exploring below the
-  // hero. Signals: unlock event (from hero CTAs), scroll past the fold, or a
-  // deep-link that arrives after mount (e.g. via popstate).
+  // Desktop handoff only. Mobile/PWA intentionally remains a fixed hero with
+  // the searchable thumbnail directory sheet, not the card directory below.
   useEffect(() => {
     if (directoryReady) return;
+    if (isMobileOrPwa) return;
     if (locked) return; // mobile — stays landing-only until unlocked
 
     const onUnlock = () => setDirectoryReady(true);
@@ -161,7 +166,7 @@ function ScrollLockedDesigners({
       window.removeEventListener("unlockDesignersScroll", onUnlock);
       window.removeEventListener("scroll", onScroll);
     };
-  }, [directoryReady, locked]);
+  }, [directoryReady, isMobileOrPwa, locked]);
 
   useEffect(() => {
     if (hasDeepLink) setDirectoryReady(true);
@@ -182,14 +187,14 @@ function ScrollLockedDesigners({
             <DesignersHoverHero />
             
           </div>
-          {!locked && directoryReady && (
+          {!isMobileOrPwa && !locked && directoryReady && (
             <DesignersDirectory mode="designers" initialLetter={initialLetter} initialExpand={initialExpand} showHeader={false} showAlphabetBar={false} />
           )}
         </div>
       </div>
 
-      <Footer />
-      <BackToTopButton />
+      {!isMobileOrPwa && <Footer />}
+      {!isMobileOrPwa && <BackToTopButton />}
     </div>
   );
 }
