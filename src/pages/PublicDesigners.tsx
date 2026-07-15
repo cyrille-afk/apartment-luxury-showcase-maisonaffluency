@@ -150,4 +150,9 @@ function ScrollLockedDesigners({
   );
 }
 
+function DesignerFacetChipsMount() {
+  const { data: designers = [] } = useAllDesigners();
+  return <DesignerFacetChips designers={designers} />;
+}
+
 export default PublicDesigners;
