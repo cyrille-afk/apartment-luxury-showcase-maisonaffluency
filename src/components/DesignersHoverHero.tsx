@@ -753,7 +753,7 @@ const DesignersHoverHero = () => {
                           <li
                             key={d.slug}
                             ref={isLastItem ? lastItemRef : undefined}
-                            className="text-left leading-[1.5] sm:leading-[1.55]"
+                            className="text-left leading-[1.4] sm:leading-[1.55]"
                           >
                             <Link
                               to={`/designers/${d.slug}`}
@@ -762,7 +762,7 @@ const DesignersHoverHero = () => {
                               onFocus={() => setActiveSlug(d.slug)}
                               className={cn(
                                 "inline-block whitespace-nowrap relative",
-                                "text-sm sm:text-base md:text-[20px] leading-[1.5] sm:leading-[1.55]",
+                                "text-[13px] sm:text-sm md:text-[20px] leading-[1.4] sm:leading-[1.55]",
                                 "font-display font-light tracking-normal",
                                 "transition-all duration-[1200ms] ease-out",
                                 "drop-shadow-[0_1px_3px_rgba(0,0,0,0.7)]",
