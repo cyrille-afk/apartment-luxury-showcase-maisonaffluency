@@ -13,9 +13,10 @@ interface CategorySidebarProps {
   sectionLabel?: string;
   onOpenChange?: (open: boolean) => void;
   isOpen?: boolean;
+  children?: React.ReactNode;
 }
 
-const CategorySidebar: React.FC<CategorySidebarProps> = ({ activeCategory, activeSubcategory, onSelect, className, itemCounts, sectionLabel, onOpenChange, isOpen: controlledOpen }) => {
+const CategorySidebar: React.FC<CategorySidebarProps> = ({ activeCategory, activeSubcategory, onSelect, className, itemCounts, sectionLabel, onOpenChange, isOpen: controlledOpen, children }) => {
   const [expandedCats, setExpandedCats] = useState<Set<string>>(new Set());
   const [internalOpen, setInternalOpen] = useState(false);
   const isOpen = controlledOpen !== undefined ? controlledOpen : internalOpen;
