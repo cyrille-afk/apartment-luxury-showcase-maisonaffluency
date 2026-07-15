@@ -537,13 +537,18 @@ const DesignersHoverHero = () => {
   const { groupedResults, totalResults } = useMemo(() => {
     const list = (allDesigners as any[])
       .filter((d) => d.is_published && !d.trade_only)
-      .map((d) => ({ slug: d.slug as string, name: d.name as string }));
+      .map((d) => ({
+        slug: d.slug as string,
+        name: d.name as string,
+        hero_image_url: (d.hero_image_url as string | null) ?? null,
+        image_url: (d.image_url as string | null) ?? null,
+      }));
     const q = searchQuery.trim().toLowerCase();
     const filtered = q
       ? list.filter((d) => d.name.toLowerCase().includes(q))
       : list;
     filtered.sort((a, b) => sortNameKey(a.name).localeCompare(sortNameKey(b.name)));
-    const groups = new Map<string, { slug: string; name: string }[]>();
+    const groups = new Map<string, typeof filtered>();
     for (const d of filtered) {
       const letter = lastNameInitial(d.name);
       if (!groups.has(letter)) groups.set(letter, []);
