@@ -661,6 +661,7 @@ const VariantSelectors: React.FC<{
             text={product.materials_description.trim()}
           />
         )}
+        <AlsoContainsFinishes pickId={product.id} className="mt-1 pl-6" />
       </div>
 
       {/* Dimensions second on mobile, first on desktop */}
