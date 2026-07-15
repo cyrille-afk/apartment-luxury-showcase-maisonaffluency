@@ -872,7 +872,7 @@ const DesignersHoverHero = () => {
           className={cn(
           "relative flex flex-col h-full px-6 sm:px-12 md:px-20 lg:px-28 pointer-events-auto md:overflow-visible",
             isStandalone
-              ? "justify-center pt-6 md:pt-8 pb-44 md:pb-0"
+              ? "justify-start overflow-y-auto overscroll-contain touch-pan-y pt-6 pb-44 md:pt-8 md:pb-0 md:justify-center md:overflow-visible [-webkit-overflow-scrolling:touch]"
               : // Mobile browser: the section already starts below the fixed
                 // header, so do not add var(--header-h) again here. Keep the
                 // designer list high while leaving room for the Directory link.
