@@ -1820,7 +1820,11 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
                   <DotCircleLoader size="md" />
                 </div>
               )}
-              {!isLoading && filteredPicks ? (
+              {!isLoading && mode === "products" && picksLoading ? (
+                <div className="flex items-center justify-center py-32" aria-label="Loading pieces">
+                  <DotCircleLoader size="md" />
+                </div>
+              ) : !isLoading && filteredPicks ? (
                 filteredPicks.length === 0 ? (
                   <div className="flex flex-col items-center justify-center py-32 text-center">
                     <p className="font-body text-sm text-muted-foreground">No pieces match this filter.</p>
@@ -1871,7 +1875,11 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
                 <DotCircleLoader size="md" />
               </div>
             )}
-              {!isLoading && filteredPicks ? (
+              {!isLoading && mode === "products" && picksLoading ? (
+                <div className="flex items-center justify-center py-32" aria-label="Loading pieces">
+                  <DotCircleLoader size="md" />
+                </div>
+              ) : !isLoading && filteredPicks ? (
               filteredPicks.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-32 text-center">
                   <p className="font-body text-sm text-muted-foreground">No pieces match this filter.</p>
