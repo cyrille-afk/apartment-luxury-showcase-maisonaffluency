@@ -3,6 +3,7 @@ import react from "@vitejs/plugin-react";
 import path from "path";
 import fs from "fs";
 import { componentTagger } from "lovable-tagger";
+import { mcpPlugin } from "@lovable.dev/mcp-js/stacks/supabase/vite";
 
 /**
  * Convert render-blocking CSS <link> tags to non-blocking preloads.
@@ -139,6 +140,7 @@ export default defineConfig(({ mode }) => {
     plugins: [
       react(),
       mode === "development" && componentTagger(),
+      mcpPlugin(),
       optimizeHtmlPlugin(buildId),
       emitVersionPlugin(buildId),
       emitOgManifestPlugin(),
