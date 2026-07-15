@@ -1253,16 +1253,38 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
   const { data: fullPicks = [], isLoading: fullPicksLoading, isFetching: fullPicksFetching } = useFullCuratorPicks(mode === "products" && !!(selectedCategory || selectedSubcategory));
   const picksLoading = fullPicksLoading || (fullPicksFetching && fullPicks.length === 0);
 
+  // URL-driven facets read early so they can narrow `filteredPicks` too.
+  const [searchParams] = useSearchParams();
+  const facetCountry = searchParams.get("country");
+  const facetFinish = searchParams.get("finish");
+  const { data: finishMap } = useDesignerFinishFamilies();
+  const designerCountryById = useMemo(() => {
+    const m = new Map<string, string>();
+    for (const d of allDesigners) {
+      const c = (d as any).country;
+      if (c) m.set(d.id, c);
+    }
+    return m;
+  }, [allDesigners]);
+
   // In "products" mode, when a filter is active we switch to a product grid view.
   // In "designers" mode (default, used on /designers), filteredPicks is always
   // null — the alphabetical designer cards remain and are narrowed via filteredItems.
   const filteredPicks = useMemo<PickItem[] | null>(() => {
     if (mode !== "products") return null;
-    if (!selectedCategory && !selectedSubcategory) return null;
-    return fullPicks.filter((p) =>
-      pickMatchesCategoryFilter(p, selectedCategory, selectedSubcategory),
-    );
-  }, [selectedCategory, selectedSubcategory, fullPicks]);
+    if (!selectedCategory && !selectedSubcategory && !facetCountry && !facetFinish) return null;
+    let base = fullPicks;
+    if (selectedCategory || selectedSubcategory) {
+      base = base.filter((p) => pickMatchesCategoryFilter(p, selectedCategory, selectedSubcategory));
+    }
+    if (facetCountry) {
+      base = base.filter((p) => designerCountryById.get(p.designer_id) === facetCountry);
+    }
+    if (facetFinish && finishMap) {
+      base = base.filter((p) => finishMap.byPick.get(p.id)?.has(facetFinish));
+    }
+    return base;
+  }, [selectedCategory, selectedSubcategory, fullPicks, facetCountry, facetFinish, finishMap, designerCountryById, mode]);
 
   // (Product pages handle detail view — no lightbox needed here)
 
@@ -1419,12 +1441,8 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
   // card; the child card here shows the atelier as its parentLabel for context.
   const topLevelItems = useMemo(() => searchFiltered, [searchFiltered]);
 
-  // URL-driven facet filters (finish / country). Kept in the URL so
-  // every combination is a real, crawlable link.
-  const [searchParams] = useSearchParams();
-  const facetCountry = searchParams.get("country");
-  const facetFinish = searchParams.get("finish");
-  const { data: finishMap } = useDesignerFinishFamilies();
+  // Facet filters read earlier (see filteredPicks) — reused here for `filteredItems`.
+
 
   // Apply category/subcategory filter
   const filteredItems = useMemo(() => {
@@ -1762,7 +1780,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
               onOpenChange={setSidebarOpen}
               isOpen={sidebarOpen}
             >
-              {mode === "designers" && <DesignerFacetsSidebar designers={topLevelItems} />}
+              <DesignerFacetsSidebar designers={topLevelItems} />
             </CategorySidebar>
             <div className="flex-1 min-w-0">
               {isLoading && (

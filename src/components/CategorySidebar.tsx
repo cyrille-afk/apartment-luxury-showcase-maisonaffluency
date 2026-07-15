@@ -62,11 +62,8 @@ const CategorySidebar: React.FC<CategorySidebarProps> = ({ activeCategory, activ
 
   return (
     <aside className={cn("hidden md:flex flex-col shrink-0 pr-1 sticky top-24 self-start max-h-[calc(100vh-7rem)] overflow-y-auto pt-4 w-44 lg:w-48", className)}>
-      {/* Categories heading + Clear All */}
-      <div className="flex items-center justify-between mb-3 pl-1 pr-0.5">
-        <span className="font-body text-[11px] uppercase tracking-[0.2em] text-foreground font-semibold">
-          Categories
-        </span>
+      {/* Clear All (kept out of the Categories accordion so it's always reachable) */}
+      <div className="flex items-center justify-end mb-2 pl-1 pr-0.5">
         <button
           onClick={handleClearAll}
           className={cn(
@@ -80,8 +77,10 @@ const CategorySidebar: React.FC<CategorySidebarProps> = ({ activeCategory, activ
         </button>
       </div>
 
-      {/* Category list */}
+      {/* Categories accordion — closed by default; opens automatically if a category is active */}
+      <CategoriesAccordion defaultOpen={!!hasActiveFilter}>
       <nav className="flex flex-col animate-in slide-in-from-left-2 duration-200">
+
         {CATEGORY_ORDER.map(cat => {
           const isExpanded = expandedCats.has(cat);
           const isActiveCat = activeCategory === cat;
@@ -180,8 +179,29 @@ const CategorySidebar: React.FC<CategorySidebarProps> = ({ activeCategory, activ
           );
         })}
       </nav>
+      </CategoriesAccordion>
       {children}
     </aside>
+  );
+};
+
+/** Collapsible "CATEGORIES" heading; closed by default so all sidebar sections start collapsed. */
+const CategoriesAccordion: React.FC<{ defaultOpen?: boolean; children: React.ReactNode }> = ({ defaultOpen, children }) => {
+  const [open, setOpen] = useState(!!defaultOpen);
+  return (
+    <div className="flex flex-col">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="flex w-full items-center justify-between py-2 px-1 text-left border-b border-border/20"
+      >
+        <span className="font-body text-[11px] uppercase tracking-[0.2em] text-foreground font-semibold">
+          Categories
+        </span>
+        <ChevronRight className={cn("h-4 w-4 text-muted-foreground transition-transform", open && "rotate-90")} />
+      </button>
+      {open && children}
+    </div>
   );
 };
 
