@@ -39,6 +39,7 @@ import { formatHandcrafted } from "@/lib/formatHandcrafted";
 import { rememberProductBackRef } from "@/lib/designerBackRef";
 import { toOgImage } from "@/lib/ogImage";
 import SpecGlyph from "@/components/product/SpecGlyph";
+import AlsoContainsFinishes from "@/components/product/AlsoContainsFinishes";
 import FavoriteFolderPicker from "@/components/FavoriteFolderPicker";
 import { sanitizeBiographyCitations } from "@/lib/sanitizeBiographyCitations";
 import {
