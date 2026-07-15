@@ -23,15 +23,27 @@ export function useParentBrandDesigners(parentName: string | null) {
     staleTime: 1000 * 60 * 30, // 30 min
     queryFn: async () => {
       if (!parentName) return [];
-      const { data, error } = await supabase
-        .from("designers")
-        .select("id, name, slug, image_url, links, additional_founders")
-        .or(`founder.eq.${parentName},additional_founders.cs.{"${parentName}"}`)
-        .neq("name", parentName)
-        .eq("is_published", true)
-        .eq("trade_only", false)
-        .order("name");
-      if (error) throw error;
+      const [primary, extra] = await Promise.all([
+        supabase
+          .from("designers")
+          .select("id, name, slug, image_url, links")
+          .eq("founder", parentName)
+          .neq("name", parentName)
+          .eq("is_published", true)
+          .eq("trade_only", false),
+        supabase
+          .from("designers")
+          .select("id, name, slug, image_url, links")
+          .contains("additional_founders", [parentName])
+          .neq("name", parentName)
+          .eq("is_published", true)
+          .eq("trade_only", false),
+      ]);
+      if (primary.error) throw primary.error;
+      if (extra.error) throw extra.error;
+      const byId = new Map<string, any>();
+      [...(primary.data || []), ...(extra.data || [])].forEach((d: any) => byId.set(d.id, d));
+      const data = Array.from(byId.values()).sort((a, b) => a.name.localeCompare(b.name));
       return (data || []).filter((d) => !HIDDEN_CHILD_DESIGNER_SLUGS.has(d.slug)).map((d) => {
         const linksArr = Array.isArray(d.links) ? d.links : [];
         const igLink = linksArr.find((l: any) => l.type?.toLowerCase() === "instagram");
