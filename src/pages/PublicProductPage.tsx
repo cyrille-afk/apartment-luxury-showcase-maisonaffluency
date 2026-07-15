@@ -39,6 +39,7 @@ import { formatHandcrafted } from "@/lib/formatHandcrafted";
 import { rememberProductBackRef } from "@/lib/designerBackRef";
 import { toOgImage } from "@/lib/ogImage";
 import SpecGlyph from "@/components/product/SpecGlyph";
+import AlsoContainsFinishes from "@/components/product/AlsoContainsFinishes";
 import FavoriteFolderPicker from "@/components/FavoriteFolderPicker";
 import { sanitizeBiographyCitations } from "@/lib/sanitizeBiographyCitations";
 import {
@@ -661,6 +662,7 @@ const VariantSelectors: React.FC<{
             text={product.materials_description.trim()}
           />
         )}
+        <AlsoContainsFinishes pickId={product.id} className="mt-1 pl-6" />
       </div>
 
       {/* Dimensions second on mobile, first on desktop */}
