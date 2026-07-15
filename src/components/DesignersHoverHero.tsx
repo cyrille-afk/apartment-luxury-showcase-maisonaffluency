@@ -972,7 +972,7 @@ const DesignersHoverHero = () => {
 
         {/* Mobile/PWA scroll hint — quiet mouse icon above the directory, right-justified.
             Anchored inside the svh safe frame so it clears Safari's bottom toolbar. */}
-        {isMobileOrPwa && isStandalone && (
+        {isMobileOrPwa && (
           <div
             className={cn(
               "absolute right-6 sm:right-12 z-20 flex flex-col items-center gap-2 pointer-events-none md:hidden",
