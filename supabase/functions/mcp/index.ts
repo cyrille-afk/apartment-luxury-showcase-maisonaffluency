@@ -30,6 +30,18 @@ var search_curator_picks_default = defineTool({
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
   handler: async (input) => {
     const supabase = getClient();
+    const startedAt = Date.now();
+    const logCall = (result_count, is_error = false) => {
+      supabase.from("mcp_query_log").insert({
+        tool_name: "search_curator_picks",
+        args: input,
+        result_count,
+        is_error,
+        duration_ms: Date.now() - startedAt
+      }).then(() => {
+      }, () => {
+      });
+    };
     const limit = input.limit ?? 20;
     let designerId = null;
     let designerName = null;
