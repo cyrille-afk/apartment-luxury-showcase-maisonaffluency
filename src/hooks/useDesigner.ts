@@ -56,6 +56,8 @@ export interface Designer {
   sort_order: number;
   new_in_order: number | null;
   collab_brands: string[] | null;
+  era?: "pre_1950" | "mid_century" | "contemporary" | null;
+  country?: string | null;
 }
 
 export interface DesignerCuratorPick {
