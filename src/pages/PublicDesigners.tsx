@@ -96,11 +96,17 @@ function ScrollLockedDesigners({
   initialLetter?: string;
   initialExpand?: string;
 }) {
-  const shouldLockLanding = !initialLetter && !initialExpand;
+  const hasDeepLink = Boolean(initialLetter || initialExpand);
+  const shouldLockLanding = !hasDeepLink;
   const [locked, setLocked] = useState(() => {
     if (!shouldLockLanding) return false;
     return typeof window === "undefined" || window.matchMedia("(max-width: 767px)").matches;
   });
+
+  // Directory only mounts after the landing handoff completes — a deep-link,
+  // an explicit unlock event, or the user scrolling past the hero. This
+  // eliminates the spinner/cards flash under the hero on first paint.
+  const [directoryReady, setDirectoryReady] = useState(hasDeepLink);
 
   useEffect(() => {
     if (!shouldLockLanding) {
@@ -134,6 +140,30 @@ function ScrollLockedDesigners({
     };
   }, [locked]);
 
+  // Handoff: mount the directory once the user commits to exploring below the
+  // hero. Signals: unlock event (from hero CTAs), scroll past the fold, or a
+  // deep-link that arrives after mount (e.g. via popstate).
+  useEffect(() => {
+    if (directoryReady) return;
+    if (locked) return; // mobile — stays landing-only until unlocked
+
+    const onUnlock = () => setDirectoryReady(true);
+    const onScroll = () => {
+      if (window.scrollY > 120) setDirectoryReady(true);
+    };
+    window.addEventListener("unlockDesignersScroll", onUnlock);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+    return () => {
+      window.removeEventListener("unlockDesignersScroll", onUnlock);
+      window.removeEventListener("scroll", onScroll);
+    };
+  }, [directoryReady, locked]);
+
+  useEffect(() => {
+    if (hasDeepLink) setDirectoryReady(true);
+  }, [hasDeepLink]);
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Navigation />
@@ -147,7 +177,7 @@ function ScrollLockedDesigners({
             <DesignersHoverHero />
             
           </div>
-          {!locked && (
+          {!locked && directoryReady && (
             <DesignersDirectory mode="designers" initialLetter={initialLetter} initialExpand={initialExpand} showHeader={false} showAlphabetBar={false} />
           )}
         </div>
