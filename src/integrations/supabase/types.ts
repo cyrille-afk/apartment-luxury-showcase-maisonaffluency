@@ -2129,6 +2129,7 @@ export type Database = {
       }
       designers: {
         Row: {
+          additional_founders: string[]
           biography: string
           biography_images: string[] | null
           collab_brands: string[]
@@ -2161,6 +2162,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          additional_founders?: string[]
           biography?: string
           biography_images?: string[] | null
           collab_brands?: string[]
@@ -2193,6 +2195,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          additional_founders?: string[]
           biography?: string
           biography_images?: string[] | null
           collab_brands?: string[]

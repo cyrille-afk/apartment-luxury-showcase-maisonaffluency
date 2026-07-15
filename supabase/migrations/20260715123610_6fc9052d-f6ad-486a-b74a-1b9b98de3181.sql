@@ -1,0 +1,2 @@
+ALTER TABLE public.designers ADD COLUMN IF NOT EXISTS additional_founders text[] NOT NULL DEFAULT '{}'::text[];
+UPDATE public.designers SET additional_founders = ARRAY['Pouenat'], trade_only = false WHERE slug = 'damien-langlois-meurinne';
