@@ -647,6 +647,30 @@ const DesignersHoverHero = () => {
     return () => scroller.removeEventListener("scroll", compute);
   }, [searchOpen, isSearching, groupedResults]);
 
+  // Sync mobile A–Z rail bounds to the search list container so the rail
+  // matches the list height exactly (never overlapping the close X above).
+  useEffect(() => {
+    if (!searchOpen) {
+      setAzRailRect(null);
+      return;
+    }
+    const compute = () => {
+      const scroller = searchScrollRef.current;
+      if (!scroller) return;
+      const r = scroller.getBoundingClientRect();
+      setAzRailRect({ top: r.top, height: r.height });
+    };
+    compute();
+    const raf = window.requestAnimationFrame(compute);
+    window.addEventListener("resize", compute);
+    window.addEventListener("scroll", compute, { passive: true });
+    return () => {
+      window.cancelAnimationFrame(raf);
+      window.removeEventListener("resize", compute);
+      window.removeEventListener("scroll", compute);
+    };
+  }, [searchOpen, groupedResults]);
+
   // Keep Directory y-aligned with MASTERS.
   useEffect(() => {
     if (typeof window === "undefined") return;
