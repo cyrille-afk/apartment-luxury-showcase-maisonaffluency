@@ -9,6 +9,8 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import DesignersDirectory from "@/components/DesignersDirectory";
 import DesignersHoverHero from "@/components/DesignersHoverHero";
+import DesignerFacetChips from "@/components/DesignerFacetChips";
+import { useAllDesigners } from "@/hooks/useDesigner";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 
