@@ -37,6 +37,38 @@ interface FeaturedDesigner {
   first_pick_image_url: string | null;
 }
 
+/**
+ * Small square thumbnail for the mobile "Find A Designer" list rows.
+ * Applies a lightweight Cloudinary transform when possible so we don't
+ * download hero-sized assets for a 40px slot.
+ */
+function thumbTransform(src: string | null | undefined): string | undefined {
+  if (!src) return undefined;
+  if (!src.includes("res.cloudinary.com") || !src.includes("/image/upload/")) return src;
+  return src.replace("/image/upload/", "/image/upload/w_120,h_120,c_fill,g_auto,q_auto:good,f_auto/");
+}
+
+function DesignerRowThumb({ src, alt }: { src: string | null | undefined; alt: string }) {
+  const url = thumbTransform(src);
+  return (
+    <span className="relative flex-shrink-0 h-10 w-10 rounded-full overflow-hidden bg-white/[0.06] ring-1 ring-white/10">
+      {url ? (
+        <img
+          src={url}
+          alt=""
+          loading="lazy"
+          decoding="async"
+          className="absolute inset-0 h-full w-full object-cover"
+        />
+      ) : (
+        <span className="absolute inset-0 flex items-center justify-center text-white/30">
+          <ImageIcon className="h-4 w-4" aria-hidden />
+        </span>
+      )}
+    </span>
+  );
+}
+
 const FEATURED_GROUPS = [
   {
     label: "Masters",
@@ -505,13 +537,18 @@ const DesignersHoverHero = () => {
   const { groupedResults, totalResults } = useMemo(() => {
     const list = (allDesigners as any[])
       .filter((d) => d.is_published && !d.trade_only)
-      .map((d) => ({ slug: d.slug as string, name: d.name as string }));
+      .map((d) => ({
+        slug: d.slug as string,
+        name: d.name as string,
+        hero_image_url: (d.hero_image_url as string | null) ?? null,
+        image_url: (d.image_url as string | null) ?? null,
+      }));
     const q = searchQuery.trim().toLowerCase();
     const filtered = q
       ? list.filter((d) => d.name.toLowerCase().includes(q))
       : list;
     filtered.sort((a, b) => sortNameKey(a.name).localeCompare(sortNameKey(b.name)));
-    const groups = new Map<string, { slug: string; name: string }[]>();
+    const groups = new Map<string, typeof filtered>();
     for (const d of filtered) {
       const letter = lastNameInitial(d.name);
       if (!groups.has(letter)) groups.set(letter, []);
@@ -1183,15 +1220,16 @@ const DesignersHoverHero = () => {
                   <div className="md:hidden">
                     <ul className="flex flex-col pb-2">
                       {isSearching ? (
-                        groupedResults.flatMap(([, items]) => items).map((d) => (
+                        groupedResults.flatMap(([, items]) => items).map((d: any) => (
                           <li key={d.slug}>
                             <Link
                               to={`/designers/${d.slug}`}
                               state={{ fromDesignersHero: true }}
                               onClick={() => setSearchOpen(false)}
-                              className="block px-5 py-2.5 font-body text-[15px] text-white/85 hover:text-white hover:bg-white/[0.04] transition-colors"
+                              className="flex items-center gap-3 px-5 py-2 font-body text-[15px] text-white/85 hover:text-white hover:bg-white/[0.04] transition-colors"
                             >
-                              {displayDesignerName(d.name)}
+                              <DesignerRowThumb src={d.hero_image_url || d.image_url} alt={d.name} />
+                              <span className="truncate">{displayDesignerName(d.name)}</span>
                             </Link>
                           </li>
                         ))
@@ -1206,15 +1244,16 @@ const DesignersHoverHero = () => {
                               <span className="font-serif text-sm text-white/70">{letter}</span>
                             </div>
                             <ul className="flex flex-col">
-                              {items.map((d) => (
+                              {items.map((d: any) => (
                                 <li key={d.slug}>
                                   <Link
                                     to={`/designers/${d.slug}`}
                                     state={{ fromDesignersHero: true }}
                                     onClick={() => setSearchOpen(false)}
-                                    className="block px-5 py-2.5 font-body text-[15px] text-white/85 hover:text-white hover:bg-white/[0.04] transition-colors"
+                                    className="flex items-center gap-3 px-5 py-2 font-body text-[15px] text-white/85 hover:text-white hover:bg-white/[0.04] transition-colors"
                                   >
-                                    {displayDesignerName(d.name)}
+                                    <DesignerRowThumb src={d.hero_image_url || d.image_url} alt={d.name} />
+                                    <span className="truncate">{displayDesignerName(d.name)}</span>
                                   </Link>
                                 </li>
                               ))}
