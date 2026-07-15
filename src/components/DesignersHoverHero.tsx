@@ -360,41 +360,94 @@ const DesignersHoverHero = () => {
     };
 
     let startY: number | null = null;
+    let pointerStartY: number | null = null;
     let accum = 0;
+    let pointerAccum = 0;
     let lock = false;
+    let pointerLock = false;
+    let lastPointerTouchAt = 0;
+
+    const handleSwipeDelta = (deltaY: number, prevent: () => void, isPointer = false) => {
+      const idx = items.findIndex((d) => d.slug === activeSlugRef.current);
+      const atLast = idx === items.length - 1;
+      const atFirst = idx <= 0;
+
+      if (atLast && deltaY > SWIPE_THRESHOLD) {
+        prevent();
+        handoffToDirectory();
+        return true;
+      }
+      if (atFirst && deltaY < -SWIPE_THRESHOLD) {
+        return false;
+      }
+
+      prevent();
+      if (isPointer ? pointerLock : lock) return true;
+
+      if (Math.abs(deltaY) > SWIPE_THRESHOLD) {
+        if (isPointer) pointerLock = true;
+        else lock = true;
+        advance(deltaY > 0 ? 1 : -1);
+        window.setTimeout(() => {
+          if (isPointer) pointerLock = false;
+          else lock = false;
+        }, 450);
+      }
+      return true;
+    };
+
+    const supportsPointer = "PointerEvent" in window;
+
+    const onPointerDown = (e: PointerEvent) => {
+      if (e.pointerType !== "touch") return;
+      if ((e.target as HTMLElement | null)?.closest?.("#designers-search-sheet")) return;
+      lastPointerTouchAt = Date.now();
+      pointerStartY = e.clientY;
+      pointerAccum = 0;
+      nav.setPointerCapture?.(e.pointerId);
+    };
+
+    const onPointerMove = (e: PointerEvent) => {
+      if (e.pointerType !== "touch") return;
+      if (pointerStartY === null) return;
+      pointerAccum = pointerStartY - e.clientY;
+      const handled = handleSwipeDelta(
+        pointerAccum,
+        () => {
+          if (e.cancelable) e.preventDefault();
+        },
+        true
+      );
+      if (handled && Math.abs(pointerAccum) > SWIPE_THRESHOLD) {
+        pointerStartY = e.clientY;
+        pointerAccum = 0;
+      }
+    };
+
+    const onPointerEnd = (e: PointerEvent) => {
+      if (e.pointerType !== "touch") return;
+      pointerStartY = null;
+      pointerAccum = 0;
+      nav.releasePointerCapture?.(e.pointerId);
+    };
 
     const onStart = (e: TouchEvent) => {
+      if (Date.now() - lastPointerTouchAt < 700) return;
       startY = e.touches[0].clientY;
       accum = 0;
     };
     const onMove = (e: TouchEvent) => {
+      if (Date.now() - lastPointerTouchAt < 700) return;
       if ((e.target as HTMLElement | null)?.closest?.("#designers-search-sheet")) return;
       if (startY === null) return;
       const y = e.touches[0].clientY;
       accum = startY - y;
-      // At list boundary and swiping past it → release to window so the page
-      // scrolls down into the Directory (or up to the header).
-      const idx = items.findIndex((d) => d.slug === activeSlugRef.current);
-      const atLast = idx === items.length - 1;
-      const atFirst = idx <= 0;
-      if (atLast && accum > SWIPE_THRESHOLD) {
+      const handled = handleSwipeDelta(accum, () => {
         if (e.cancelable) e.preventDefault();
-        handoffToDirectory();
-        return;
-      }
-      if (atFirst && accum < -SWIPE_THRESHOLD) {
-        return; // already at the top; let native scroll/rubber-band handle it
-      }
-      if (e.cancelable) e.preventDefault();
-      if (lock) return;
-      if (Math.abs(accum) > SWIPE_THRESHOLD) {
-        lock = true;
-        advance(accum > 0 ? 1 : -1);
+      });
+      if (handled && Math.abs(accum) > SWIPE_THRESHOLD) {
         startY = y;
         accum = 0;
-        window.setTimeout(() => {
-          lock = false;
-        }, 450);
       }
     };
     const onEnd = () => {
@@ -402,10 +455,22 @@ const DesignersHoverHero = () => {
       accum = 0;
     };
 
+    if (supportsPointer) {
+      nav.addEventListener("pointerdown", onPointerDown, { passive: false });
+      nav.addEventListener("pointermove", onPointerMove, { passive: false });
+      nav.addEventListener("pointerup", onPointerEnd, { passive: true });
+      nav.addEventListener("pointercancel", onPointerEnd, { passive: true });
+    }
     nav.addEventListener("touchstart", onStart, { passive: true });
     nav.addEventListener("touchmove", onMove, { passive: false });
     nav.addEventListener("touchend", onEnd, { passive: true });
     return () => {
+      if (supportsPointer) {
+        nav.removeEventListener("pointerdown", onPointerDown);
+        nav.removeEventListener("pointermove", onPointerMove);
+        nav.removeEventListener("pointerup", onPointerEnd);
+        nav.removeEventListener("pointercancel", onPointerEnd);
+      }
       nav.removeEventListener("touchstart", onStart);
       nav.removeEventListener("touchmove", onMove);
       nav.removeEventListener("touchend", onEnd);
@@ -766,7 +831,7 @@ const DesignersHoverHero = () => {
               <nav
                 ref={navRef}
                 aria-label="Featured designers shortcut list"
-                className="relative inline-block"
+                className="relative inline-block touch-none select-none"
               >
               <ul className="flex flex-col text-left">
                 {groupedItems.map((group, groupIdx) => (
