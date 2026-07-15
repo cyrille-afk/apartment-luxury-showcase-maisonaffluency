@@ -47,6 +47,15 @@ const readConsent = (): string | null => {
   return v;
 };
 
+const shouldDeferOnDesignersMobileHero = (): boolean => {
+  if (typeof window === "undefined") return false;
+  if (window.location.pathname !== "/designers") return false;
+  if (!window.matchMedia?.("(max-width: 767px)").matches) return false;
+  const hero = document.getElementById("designers-hover-hero");
+  if (!hero) return false;
+  return hero.getBoundingClientRect().bottom > 80;
+};
+
 const CookieConsent = () => {
   const [visible, setVisible] = useState(false);
 
@@ -76,16 +85,42 @@ const CookieConsent = () => {
     //   3. Hard ceiling of 12s in case 'load' never fires.
     let cancelled = false;
     const timers: number[] = [];
-    const reveal = () => {
-      if (cancelled) return;
-      cancelled = true;
+    const markMounted = () => {
       try {
         (window as unknown as { __cookieBannerMountedAt?: number }).__cookieBannerMountedAt =
           performance.now();
       } catch {
         /* ignore */
       }
+    };
+
+    const showBanner = () => {
+      if (cancelled) return;
+      cancelled = true;
+      markMounted();
       setVisible(true);
+    };
+
+    const reveal = () => {
+      if (cancelled) return;
+
+      if (shouldDeferOnDesignersMobileHero()) {
+        const release = () => {
+          window.removeEventListener("unlockDesignersScroll", release);
+          window.removeEventListener("scroll", onScroll);
+          window.removeEventListener("resize", onScroll);
+          showBanner();
+        };
+        const onScroll = () => {
+          if (!shouldDeferOnDesignersMobileHero()) release();
+        };
+        window.addEventListener("unlockDesignersScroll", release, { once: true });
+        window.addEventListener("scroll", onScroll, { passive: true });
+        window.addEventListener("resize", onScroll, { passive: true });
+        return;
+      }
+
+      showBanner();
     };
 
     const afterLoad = () => {
