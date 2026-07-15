@@ -58,10 +58,11 @@ export function originToCountries(value?: string | null): string[] {
   if (!cleaned) return [];
   const stripped = stripPrefix(cleaned);
   if (!stripped) return [];
-  return stripped
+  const parts = stripped
     .split(/\s*(?:&|,|\band\b|\+|\/)\s*/i)
     .map((s) => normalizeCountry(s))
     .filter(Boolean);
+  return Array.from(new Set(parts));
 }
 
 /** Back-compat: returns the first country if any. */
