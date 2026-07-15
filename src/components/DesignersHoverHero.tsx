@@ -718,10 +718,11 @@ const DesignersHoverHero = () => {
 
   
 
-  // Reset desktop accordion state when closing the search sheet.
+  // Reset accordion state when closing the search sheet — reopen defaults to "A".
   useEffect(() => {
     if (!searchOpen) {
-      setExpandedLetters(new Set());
+      setExpandedLetters(new Set(["A"]));
+      setActiveAccordionLetter(null);
     }
   }, [searchOpen]);
 
