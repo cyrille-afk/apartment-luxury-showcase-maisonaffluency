@@ -1285,7 +1285,7 @@ const PublicDesignerProfile = () => {
                         {/* Product name — primary (deep link so the URL is shareable/copyable) */}
                         <h3 className="font-display text-[14px] md:text-sm tracking-wide leading-snug mt-2 line-clamp-2">
                           <Link to={productHref} onClick={handleCardClick} className="hover:text-foreground/70 transition-colors">
-                            {pick.title}
+                            {displayTitle}
                           </Link>
                         </h3>
 
