@@ -1104,7 +1104,7 @@ const PublicDesignerProfile = () => {
                     e.preventDefault();
                     setLightboxItem({
                       id: pick.id,
-                      title: pick.title,
+                      title: displayTitle,
                       subtitle: pick.subtitle,
                       image_url: pick.image_url,
                       hover_image_url: pick.hover_image_url,
