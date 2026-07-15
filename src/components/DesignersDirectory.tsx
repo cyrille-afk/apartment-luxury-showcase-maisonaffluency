@@ -1,6 +1,7 @@
 import React, { useMemo, useState, useCallback, useRef, useEffect } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
+import { getDesignerDisciplines } from "@/components/DesignerFacetChips";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence, useInView } from "framer-motion";
 import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Search, X, Layers, Share2, Plus, SlidersHorizontal, Heart } from "lucide-react";
