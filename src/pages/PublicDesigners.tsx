@@ -137,7 +137,6 @@ function ScrollLockedDesigners({
             <DesignersHoverHero />
             
           </div>
-          <DesignerFacetChipsMount />
           <DesignersDirectory mode="designers" initialLetter={initialLetter} initialExpand={initialExpand} showHeader={false} showAlphabetBar={false} />
         </div>
       </div>
@@ -148,9 +147,6 @@ function ScrollLockedDesigners({
   );
 }
 
-function DesignerFacetChipsMount() {
-  const { data: designers = [] } = useAllDesigners();
-  return <DesignerFacetChips designers={designers} />;
-}
+
 
 export default PublicDesigners;
