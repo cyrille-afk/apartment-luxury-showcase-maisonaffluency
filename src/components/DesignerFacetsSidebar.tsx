@@ -3,22 +3,28 @@ import { useSearchParams, useLocation, Link } from "react-router-dom";
 import { ChevronRight, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Designer } from "@/hooks/useDesigner";
+import { useDesignerFinishFamilies } from "@/hooks/useDesignerFinishFamilies";
 
 /**
- * Extra facet sections (Period, Place of Origin) rendered INSIDE the
+ * Extra facet sections (Finishes, Place of Origin) rendered INSIDE the
  * existing CategorySidebar on /designers. Categories are already handled
- * by CategorySidebar itself. Options are real <Link>s so every filter
- * combination stays crawlable.
+ * by CategorySidebar itself.
  *
- * URL params (kept stable): `era`, `country`.
+ * URL params (kept stable): `finish`, `country`.
  */
 
-const ERA_LABELS: Record<string, string> = {
-  pre_1950: "Pre-1950",
-  mid_century: "Mid-Century",
-  contemporary: "Contemporary",
+const FINISH_LABELS: Record<string, string> = {
+  metal: "Metal",
+  wood: "Wood",
+  fabric: "Fabric",
+  glass: "Glass",
+  stone: "Stone",
+  leather: "Leather",
+  composite: "Composite",
+  ceramic: "Ceramic",
+  other: "Other",
 };
-const ERA_ORDER = ["pre_1950", "mid_century", "contemporary"];
+const FINISH_ORDER = ["metal", "wood", "fabric", "glass", "stone", "leather", "composite", "ceramic", "other"];
 
 type Option = { value: string; label: string; count: number };
 
@@ -44,38 +50,37 @@ interface Props {
 const DesignerFacetsSidebar: React.FC<Props> = ({ designers }) => {
   const [searchParams] = useSearchParams();
   const location = useLocation();
-  const activeEra = searchParams.get("era");
+  const activeFinish = searchParams.get("finish");
   const activeCountry = searchParams.get("country");
 
-  const { eraOptions, countryOptions } = useMemo(() => {
-    const eraCounts = new Map<string, number>();
+  const { data: finishMap } = useDesignerFinishFamilies();
+
+  const { finishOptions, countryOptions } = useMemo(() => {
     const countryCounts = new Map<string, number>();
     for (const d of designers) {
-      const era = (d as any).era;
       const country = (d as any).country;
-      if (era) eraCounts.set(era, (eraCounts.get(era) || 0) + 1);
       if (country) countryCounts.set(country, (countryCounts.get(country) || 0) + 1);
     }
-    const eras: Option[] = ERA_ORDER.filter((k) => eraCounts.get(k)).map((k) => ({
-      value: k,
-      label: ERA_LABELS[k],
-      count: eraCounts.get(k)!,
-    }));
+
+    const finishes: Option[] = FINISH_ORDER
+      .filter((k) => finishMap?.counts.get(k))
+      .map((k) => ({ value: k, label: FINISH_LABELS[k], count: finishMap!.counts.get(k)! }));
+
     const countries: Option[] = [...countryCounts.entries()]
       .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
       .map(([value, count]) => ({ value, label: value, count }));
-    return { eraOptions: eras, countryOptions: countries };
-  }, [designers]);
+    return { finishOptions: finishes, countryOptions: countries };
+  }, [designers, finishMap]);
 
-  if (!eraOptions.length && !countryOptions.length) return null;
+  if (!finishOptions.length && !countryOptions.length) return null;
 
   return (
     <div className="mt-6 flex flex-col">
       <Section
-        heading="Period"
-        paramKey="era"
-        options={eraOptions}
-        active={activeEra}
+        heading="Finishes"
+        paramKey="finish"
+        options={finishOptions}
+        active={activeFinish}
         pathname={location.pathname}
         params={searchParams}
         defaultOpen
@@ -90,8 +95,8 @@ const DesignerFacetsSidebar: React.FC<Props> = ({ designers }) => {
       />
       {/* SEO: emit crawlable links to every facet value */}
       <nav aria-hidden="true" className="sr-only">
-        {eraOptions.map((o) => (
-          <Link key={`era-${o.value}`} to={buildHref(location.pathname, searchParams, "era", o.value, false)}>{o.label}</Link>
+        {finishOptions.map((o) => (
+          <Link key={`finish-${o.value}`} to={buildHref(location.pathname, searchParams, "finish", o.value, false)}>{o.label}</Link>
         ))}
         {countryOptions.map((o) => (
           <Link key={`c-${o.value}`} to={buildHref(location.pathname, searchParams, "country", o.value, false)}>{o.label}</Link>
@@ -103,7 +108,7 @@ const DesignerFacetsSidebar: React.FC<Props> = ({ designers }) => {
 
 interface SectionProps {
   heading: string;
-  paramKey: "era" | "country";
+  paramKey: "finish" | "country";
   options: Option[];
   active: string | null;
   pathname: string;

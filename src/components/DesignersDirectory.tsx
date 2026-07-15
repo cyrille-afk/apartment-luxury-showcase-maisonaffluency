@@ -1,7 +1,7 @@
 import React, { useMemo, useState, useCallback, useRef, useEffect } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
-import { getDesignerDisciplines } from "@/components/DesignerFacetChips";
+import { useDesignerFinishFamilies } from "@/hooks/useDesignerFinishFamilies";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence, useInView } from "framer-motion";
 import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Search, X, Layers, Share2, Plus, SlidersHorizontal, Heart } from "lucide-react";
@@ -1419,12 +1419,12 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
   // card; the child card here shows the atelier as its parentLabel for context.
   const topLevelItems = useMemo(() => searchFiltered, [searchFiltered]);
 
-  // URL-driven facet filters (era / country / discipline). Kept in the URL so
-  // every combination is a real, crawlable link — see DesignerFacetChips.
+  // URL-driven facet filters (finish / country). Kept in the URL so
+  // every combination is a real, crawlable link.
   const [searchParams] = useSearchParams();
-  const facetEra = searchParams.get("era");
   const facetCountry = searchParams.get("country");
-  const facetDiscipline = searchParams.get("discipline");
+  const facetFinish = searchParams.get("finish");
+  const { data: finishMap } = useDesignerFinishFamilies();
 
   // Apply category/subcategory filter
   const filteredItems = useMemo(() => {
@@ -1440,14 +1440,13 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
       if (matchingIds) base = base.filter((d) => matchingIds!.has(d.id));
     }
 
-    if (facetEra) base = base.filter((d) => (d as any).era === facetEra);
     if (facetCountry) base = base.filter((d) => (d as any).country === facetCountry);
-    if (facetDiscipline) {
-      base = base.filter((d) => getDesignerDisciplines(d).has(facetDiscipline));
+    if (facetFinish && finishMap) {
+      base = base.filter((d) => finishMap.byDesigner.get(d.id)?.has(facetFinish));
     }
 
     return base;
-  }, [topLevelItems, selectedCategory, selectedSubcategory, designerIdsByCategory, facetEra, facetCountry, facetDiscipline]);
+  }, [topLevelItems, selectedCategory, selectedSubcategory, designerIdsByCategory, facetCountry, facetFinish, finishMap]);
 
   const alphaGroups = useMemo(() => {
     const groups: Record<string, Designer[]> = {};
