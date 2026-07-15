@@ -1376,6 +1376,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
   const designerIdsByCategory = useMemo(() => {
     const map: Record<string, Set<string>> = {};
     const subMap: Record<string, Set<string>> = {};
+    const pickSubCounts: Record<string, number> = {};
 
     for (const pick of curatorPicksData) {
       const did = pick.designer_id;
@@ -1395,20 +1396,27 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
         if (matches) {
           if (!subMap[subName]) subMap[subName] = new Set();
           subMap[subName].add(did);
+          pickSubCounts[subName] = (pickSubCounts[subName] || 0) + 1;
         }
       }
     }
-    return { byCategory: map, bySubcategory: subMap };
+    return { byCategory: map, bySubcategory: subMap, pickSubCounts };
   }, [curatorPicksData]);
 
-  // Subcategory item counts
+  // Subcategory item counts: pieces in products mode, designers in designers mode
   const itemCounts = useMemo(() => {
     const counts: Record<string, number> = {};
-    for (const [sub, ids] of Object.entries(designerIdsByCategory.bySubcategory)) {
-      counts[sub] = ids.size;
+    if (mode === "products") {
+      for (const [sub, n] of Object.entries(designerIdsByCategory.pickSubCounts)) {
+        counts[sub] = n;
+      }
+    } else {
+      for (const [sub, ids] of Object.entries(designerIdsByCategory.bySubcategory)) {
+        counts[sub] = ids.size;
+      }
     }
     return counts;
-  }, [designerIdsByCategory]);
+  }, [designerIdsByCategory, mode]);
 
   const categories = useMemo(() => {
     const ordered = CATEGORY_ORDER.filter(cat => SUBCATEGORY_MAP[cat]);
