@@ -43,14 +43,27 @@ export function useParentBrandDesignerCountsFiltered(parentNames: string[]) {
     staleTime: 1000 * 60 * 30,
     queryFn: async () => {
       if (parentNames.length === 0) return {} as Record<string, number>;
-      // Fetch all designers whose founder OR additional_founders overlaps parentNames
-      const { data, error } = await supabase
-        .from("designers")
-        .select("founder, name, additional_founders")
-        .or(`founder.in.(${parentNames.map(n => `"${n}"`).join(",")}),additional_founders.ov.{${parentNames.map(n => `"${n}"`).join(",")}}`)
-        .eq("is_published", true)
-        .eq("trade_only", false);
-      if (error) throw error;
+      const [primary, extra] = await Promise.all([
+        supabase
+          .from("designers")
+          .select("founder, name, additional_founders")
+          .in("founder", parentNames)
+          .eq("is_published", true)
+          .eq("trade_only", false),
+        supabase
+          .from("designers")
+          .select("founder, name, additional_founders")
+          .overlaps("additional_founders", parentNames)
+          .eq("is_published", true)
+          .eq("trade_only", false),
+      ]);
+      if (primary.error) throw primary.error;
+      if (extra.error) throw extra.error;
+      const byId = new Map<string, any>();
+      [...(primary.data || []), ...(extra.data || [])].forEach((d: any) => {
+        byId.set(`${d.name}`, d);
+      });
+      const data = Array.from(byId.values());
       const counts: Record<string, number> = {};
       parentNames.forEach(n => { counts[n] = 0; });
       (data || []).forEach((d: any) => {
