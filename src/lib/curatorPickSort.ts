@@ -45,3 +45,31 @@ export function compareCuratorPicks(a: SortableCuratorPick, b: SortableCuratorPi
 
   return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
 }
+
+/**
+ * Reorder picks so that no two adjacent items share the same subcategory,
+ * while staying as close as possible to the input order. Greedy: at each
+ * position, if the next item's subcategory matches the previous placed one,
+ * swap in the first later item with a different subcategory.
+ */
+export function interleaveBySubcategory<T extends { subcategory?: string | null; category?: string | null }>(rows: T[]): T[] {
+  if (rows.length < 3) return rows.slice();
+  const keyOf = (r: T) => ((r.subcategory || r.category || "") as string).trim().toLowerCase();
+  const out = rows.slice();
+  for (let i = 1; i < out.length; i++) {
+    if (keyOf(out[i]) !== keyOf(out[i - 1])) continue;
+    // find the next item with a different subcategory
+    let swapIdx = -1;
+    for (let j = i + 1; j < out.length; j++) {
+      if (keyOf(out[j]) !== keyOf(out[i - 1])) {
+        swapIdx = j;
+        break;
+      }
+    }
+    if (swapIdx === -1) break; // remaining items are all the same — nothing to do
+    const tmp = out[i];
+    out[i] = out[swapIdx];
+    out[swapIdx] = tmp;
+  }
+  return out;
+}
