@@ -200,12 +200,12 @@
     "name": "Hamrei"
   },
   {
-    "slug": "rowin-atelier",
-    "name": "RoWin' Atelier — Rochette Frederic & Winkler Hervé"
+    "slug": "sebastian-herkner-man-of-parts",
+    "name": "Sebastian Herkner"
   },
   {
-    "slug": "matthew-hilton",
-    "name": "Matthew Hilton"
+    "slug": "rowin-atelier",
+    "name": "RoWin' Atelier — Rochette Frederic & Winkler Hervé"
   },
   {
     "slug": "iksel",
@@ -328,6 +328,10 @@
     "name": "Alex Proba"
   },
   {
+    "slug": "yabu-pushelberg-man-of-parts",
+    "name": "Yabu Pushelberg"
+  },
+  {
     "slug": "andree-putman",
     "name": "Andrée Putman"
   },
@@ -366,6 +370,10 @@
   {
     "slug": "studioilse",
     "name": "Studioilse"
+  },
+  {
+    "slug": "osvaldo-tenorio-man-of-parts",
+    "name": "Osvaldo Tenório"
   },
   {
     "slug": "based-upon",
