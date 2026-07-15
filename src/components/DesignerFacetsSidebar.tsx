@@ -57,9 +57,11 @@ interface Props {
   }>;
   activeCategory?: string | null;
   activeSubcategory?: string | null;
+  /** Map of designer id → set of countries derived from their picks' origins. */
+  designerCountriesById?: Map<string, Set<string>>;
 }
 
-const DesignerFacetsSidebar: React.FC<Props> = ({ designers, productPicks, activeCategory, activeSubcategory }) => {
+const DesignerFacetsSidebar: React.FC<Props> = ({ designers, productPicks, activeCategory, activeSubcategory, designerCountriesById }) => {
   const [searchParams] = useSearchParams();
   const location = useLocation();
   const scrollYRef = useRef(0);
@@ -81,9 +83,13 @@ const DesignerFacetsSidebar: React.FC<Props> = ({ designers, productPicks, activ
         });
       }
     } else {
+      // Designers mode: count each designer once per country derived from
+      // their picks' `origin` fields. Falls back to nothing when a designer
+      // has no origin data — accuracy over completeness.
       for (const d of designers) {
-        const country = (d as any).country;
-        if (country) countryCounts.set(country, (countryCounts.get(country) || 0) + 1);
+        const countries = designerCountriesById?.get(d.id);
+        if (!countries) continue;
+        countries.forEach((c) => countryCounts.set(c, (countryCounts.get(c) || 0) + 1));
       }
     }
 
@@ -95,7 +101,7 @@ const DesignerFacetsSidebar: React.FC<Props> = ({ designers, productPicks, activ
       .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
       .map(([value, count]) => ({ value, label: value, count }));
     return { finishOptions: finishes, countryOptions: countries };
-  }, [designers, productPicks, activeCategory, activeSubcategory, finishMap]);
+  }, [designers, productPicks, activeCategory, activeSubcategory, finishMap, designerCountriesById]);
 
   if (!finishOptions.length && !countryOptions.length) return null;
 

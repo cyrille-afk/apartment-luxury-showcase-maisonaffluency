@@ -180,7 +180,7 @@ function useDesignerCategories() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("designer_curator_picks_public")
-        .select("designer_id, category, subcategory, tags");
+        .select("designer_id, category, subcategory, tags, origin");
       if (error) throw error;
       return data || [];
     },
@@ -1262,14 +1262,21 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
   const picksLoading = fullPicksLoading || (fullPicksFetching && fullPicks.length === 0);
 
   const { data: finishMap } = useDesignerFinishFamilies();
-  const designerCountryById = useMemo(() => {
-    const m = new Map<string, string>();
-    for (const d of allDesigners) {
-      const c = (d as any).country;
-      if (c) m.set(d.id, c);
+  // Derive each designer's places of origin from the countries where their
+  // curator picks are actually handcrafted — not from designers.country (which
+  // stores studio HQ / nationality and is misleading for a "Place of Origin"
+  // facet).
+  const designerCountriesById = useMemo(() => {
+    const m = new Map<string, Set<string>>();
+    for (const p of curatorPicksData as Array<{ designer_id: string; origin?: string | null }>) {
+      const c = originToCountry(p.origin);
+      if (!c) continue;
+      let set = m.get(p.designer_id);
+      if (!set) { set = new Set(); m.set(p.designer_id, set); }
+      set.add(c);
     }
     return m;
-  }, [allDesigners]);
+  }, [curatorPicksData]);
 
   // In "products" mode, when a filter is active we switch to a product grid view.
   // In "designers" mode (default, used on /designers), filteredPicks is always
@@ -1462,13 +1469,13 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
       if (matchingIds) base = base.filter((d) => matchingIds!.has(d.id));
     }
 
-    if (facetCountry) base = base.filter((d) => (d as any).country === facetCountry);
+    if (facetCountry) base = base.filter((d) => designerCountriesById.get(d.id)?.has(facetCountry));
     if (facetFinish && finishMap) {
       base = base.filter((d) => finishMap.byDesigner.get(d.id)?.has(facetFinish));
     }
 
     return base;
-  }, [topLevelItems, selectedCategory, selectedSubcategory, designerIdsByCategory, facetCountry, facetFinish, finishMap]);
+  }, [topLevelItems, selectedCategory, selectedSubcategory, designerIdsByCategory, facetCountry, facetFinish, finishMap, designerCountriesById]);
 
   const alphaGroups = useMemo(() => {
     const groups: Record<string, Designer[]> = {};
@@ -1804,6 +1811,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
                 productPicks={mode === "products" ? fullPicks : undefined}
                 activeCategory={selectedCategory}
                 activeSubcategory={selectedSubcategory}
+                designerCountriesById={designerCountriesById}
               />
             </CategorySidebar>
             <div className="flex-1 min-w-0">
