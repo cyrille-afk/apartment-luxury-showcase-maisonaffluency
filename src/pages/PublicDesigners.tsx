@@ -31,8 +31,8 @@ function BackToTopButton() {
           exit={{ opacity: 0, scale: 0.8 }}
           transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
           onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-          className="fixed right-6 z-50 w-10 h-10 flex items-center justify-center rounded-full bg-foreground text-background shadow-lg hover:opacity-80 transition-opacity"
-          style={{ bottom: "calc(1.5rem + env(safe-area-inset-bottom))" }}
+          className="fixed bottom-24 md:bottom-6 right-6 z-50 w-10 h-10 flex items-center justify-center rounded-full bg-foreground text-background shadow-lg hover:opacity-80 transition-opacity"
+          style={{ bottom: "calc(env(safe-area-inset-bottom) + 6rem)" }}
           aria-label="Back to top"
         >
           <ChevronUp className="h-5 w-5" />
