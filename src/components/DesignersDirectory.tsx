@@ -39,6 +39,7 @@ import { readPendingCategoryFilter } from "@/lib/pendingCategoryFilter";
 import { cleanBrandLine, composeTitle } from "@/lib/curatorPickLegend";
 import { applyCuratorPickOrder, sortCuratorPicks } from "@/lib/curatorPickSort";
 import { lastNameInitial, sortNameKey } from "@/lib/nameFormat";
+import { originToCountry } from "@/lib/productOrigin";
 import AlphabetDesignerPicker from "@/components/trade/AlphabetDesignerPicker";
 
 const LETTERS = [...("ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("")), "#"];
@@ -246,6 +247,7 @@ type PickItem = {
   description?: string | null;
   pdf_url?: string | null;
   pdf_urls?: any | null;
+  origin?: string | null;
   designer_name?: string;
   designer_slug?: string;
   is_trade_only?: boolean;
@@ -260,7 +262,7 @@ function useFullCuratorPicks(enabled: boolean) {
         applyCuratorPickOrder(
           supabase
             .from("designer_curator_picks_public")
-            .select("id, designer_id, sort_order, created_at, image_url, hover_image_url, title, subtitle, category, subcategory, tags, materials, dimensions, description, pdf_url, pdf_urls")
+            .select("id, designer_id, sort_order, created_at, image_url, hover_image_url, title, subtitle, category, subcategory, tags, materials, dimensions, description, pdf_url, pdf_urls, origin")
         ),
         supabase
           .from("designers")
@@ -1177,6 +1179,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
 }) => {
   const location = useLocation();
   const sectionRef = useRef<HTMLDivElement>(null);
+  const filterScrollYRef = useRef(0);
   const isInView = useInView(sectionRef, { once: true, margin: "-100px" });
 
   const { data: allDesigners = [], isLoading } = useAllDesigners();
@@ -1249,14 +1252,15 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
     };
   }, []);
 
-
-  const { data: fullPicks = [], isLoading: fullPicksLoading, isFetching: fullPicksFetching } = useFullCuratorPicks(mode === "products" && !!(selectedCategory || selectedSubcategory));
-  const picksLoading = fullPicksLoading || (fullPicksFetching && fullPicks.length === 0);
-
   // URL-driven facets read early so they can narrow `filteredPicks` too.
   const [searchParams] = useSearchParams();
   const facetCountry = searchParams.get("country");
   const facetFinish = searchParams.get("finish");
+  const activeFilterCount = (selectedCategory || selectedSubcategory ? 1 : 0) + (facetCountry ? 1 : 0) + (facetFinish ? 1 : 0);
+
+  const { data: fullPicks = [], isLoading: fullPicksLoading, isFetching: fullPicksFetching } = useFullCuratorPicks(mode === "products" && !!(selectedCategory || selectedSubcategory || facetCountry || facetFinish));
+  const picksLoading = fullPicksLoading || (fullPicksFetching && fullPicks.length === 0);
+
   const { data: finishMap } = useDesignerFinishFamilies();
   const designerCountryById = useMemo(() => {
     const m = new Map<string, string>();
@@ -1278,13 +1282,13 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
       base = base.filter((p) => pickMatchesCategoryFilter(p, selectedCategory, selectedSubcategory));
     }
     if (facetCountry) {
-      base = base.filter((p) => designerCountryById.get(p.designer_id) === facetCountry);
+      base = base.filter((p) => originToCountry(p.origin) === facetCountry);
     }
     if (facetFinish && finishMap) {
       base = base.filter((p) => finishMap.byPick.get(p.id)?.has(facetFinish));
     }
     return base;
-  }, [selectedCategory, selectedSubcategory, fullPicks, facetCountry, facetFinish, finishMap, designerCountryById, mode]);
+  }, [selectedCategory, selectedSubcategory, fullPicks, facetCountry, facetFinish, finishMap, mode]);
 
   // (Product pages handle detail view — no lightbox needed here)
 
@@ -1707,7 +1711,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
           </div>
 
           {/* Results count */}
-          {(searchQuery || selectedCategory) && (
+          {(searchQuery || activeFilterCount > 0) && (
             mode === "products" && picksLoading ? (
               <div className="flex items-center gap-2 mb-4 w-64" aria-label="Loading pieces count">
                 <div className="h-3 w-56 rounded bg-muted animate-pulse" />
@@ -1752,14 +1756,22 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
           {/* Desktop: Filter + Search row */}
           <div data-sticky-filter-bar className="hidden md:flex sticky top-[var(--header-h)] z-30 bg-background pt-4 pb-3 items-center gap-3 mb-6">
             <button
-              onClick={() => setSidebarOpen(!sidebarOpen)}
+              onPointerDown={() => {
+                filterScrollYRef.current = window.scrollY;
+              }}
+              onClick={() => {
+                const y = filterScrollYRef.current || window.scrollY;
+                setSidebarOpen(!sidebarOpen);
+                window.setTimeout(() => window.scrollTo({ top: y, left: 0, behavior: "instant" as ScrollBehavior }), 0);
+                window.setTimeout(() => window.scrollTo({ top: y, left: 0, behavior: "instant" as ScrollBehavior }), 120);
+              }}
               className="flex items-center gap-1.5 px-3 h-10 rounded border border-foreground text-foreground transition-colors relative"
               aria-label="Filter"
             >
               <SlidersHorizontal className="h-4 w-4" />
               <span className="text-[11px] font-body uppercase tracking-[0.15em] font-semibold">Filter</span>
-              {selectedCategory && (
-                <span className="absolute -top-1.5 -right-1.5 bg-primary text-primary-foreground text-[9px] w-4 h-4 flex items-center justify-center rounded-full">1</span>
+              {activeFilterCount > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 bg-primary text-primary-foreground text-[9px] w-4 h-4 flex items-center justify-center rounded-full">{activeFilterCount}</span>
               )}
             </button>
             <div className="flex-1" />
@@ -1771,16 +1783,28 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
               activeCategory={selectedCategory}
               activeSubcategory={selectedSubcategory}
               onSelect={(cat, sub) => {
+                if (mode === "products" && !cat && !sub) {
+                  const target = categoryUrl(selectedCategory, selectedSubcategory);
+                  window.history.pushState({}, "", target);
+                  broadcastFilter(selectedCategory, selectedSubcategory);
+                  return;
+                }
                 setSelectedCategoryRaw(cat);
                 setSelectedSubcategoryRaw(sub);
                 broadcastFilter(cat, sub);
+                syncUrlParams(cat, sub);
               }}
               itemCounts={itemCounts}
               sectionLabel="all Designers"
               onOpenChange={setSidebarOpen}
               isOpen={sidebarOpen}
             >
-              <DesignerFacetsSidebar designers={topLevelItems} />
+              <DesignerFacetsSidebar
+                designers={topLevelItems}
+                productPicks={mode === "products" ? fullPicks : undefined}
+                activeCategory={selectedCategory}
+                activeSubcategory={selectedSubcategory}
+              />
             </CategorySidebar>
             <div className="flex-1 min-w-0">
               {isLoading && (

@@ -1,9 +1,11 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useRef } from "react";
 import { useSearchParams, useLocation, Link } from "react-router-dom";
 import { ChevronRight, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Designer } from "@/hooks/useDesigner";
 import { useDesignerFinishFamilies } from "@/hooks/useDesignerFinishFamilies";
+import { pickMatchesCategoryFilter } from "@/lib/pickCategoryFilter";
+import { originToCountry } from "@/lib/productOrigin";
 
 /**
  * Extra facet sections (Finishes, Place of Origin) rendered INSIDE the
@@ -45,11 +47,22 @@ function buildHref(
 
 interface Props {
   designers: Designer[];
+  productPicks?: Array<{
+    id: string;
+    designer_id: string;
+    category?: string | null;
+    subcategory?: string | null;
+    tags?: string[] | null;
+    origin?: string | null;
+  }>;
+  activeCategory?: string | null;
+  activeSubcategory?: string | null;
 }
 
-const DesignerFacetsSidebar: React.FC<Props> = ({ designers }) => {
+const DesignerFacetsSidebar: React.FC<Props> = ({ designers, productPicks, activeCategory, activeSubcategory }) => {
   const [searchParams] = useSearchParams();
   const location = useLocation();
+  const scrollYRef = useRef(0);
   const activeFinish = searchParams.get("finish");
   const activeCountry = searchParams.get("country");
 
@@ -57,20 +70,32 @@ const DesignerFacetsSidebar: React.FC<Props> = ({ designers }) => {
 
   const { finishOptions, countryOptions } = useMemo(() => {
     const countryCounts = new Map<string, number>();
-    for (const d of designers) {
-      const country = (d as any).country;
-      if (country) countryCounts.set(country, (countryCounts.get(country) || 0) + 1);
+    const finishCounts = new Map<string, number>();
+    if (productPicks) {
+      for (const pick of productPicks) {
+        if (!pickMatchesCategoryFilter(pick, activeCategory, activeSubcategory)) continue;
+        const country = originToCountry(pick.origin);
+        if (country) countryCounts.set(country, (countryCounts.get(country) || 0) + 1);
+        finishMap?.byPick.get(pick.id)?.forEach((family) => {
+          finishCounts.set(family, (finishCounts.get(family) || 0) + 1);
+        });
+      }
+    } else {
+      for (const d of designers) {
+        const country = (d as any).country;
+        if (country) countryCounts.set(country, (countryCounts.get(country) || 0) + 1);
+      }
     }
 
     const finishes: Option[] = FINISH_ORDER
-      .filter((k) => finishMap?.counts.get(k))
-      .map((k) => ({ value: k, label: FINISH_LABELS[k], count: finishMap!.counts.get(k)! }));
+      .map((k) => ({ value: k, label: FINISH_LABELS[k], count: productPicks ? (finishCounts.get(k) || 0) : (finishMap?.counts.get(k) || 0) }))
+      .filter((o) => o.count > 0);
 
     const countries: Option[] = [...countryCounts.entries()]
       .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
       .map(([value, count]) => ({ value, label: value, count }));
     return { finishOptions: finishes, countryOptions: countries };
-  }, [designers, finishMap]);
+  }, [designers, productPicks, activeCategory, activeSubcategory, finishMap]);
 
   if (!finishOptions.length && !countryOptions.length) return null;
 
@@ -83,6 +108,7 @@ const DesignerFacetsSidebar: React.FC<Props> = ({ designers }) => {
         active={activeFinish}
         pathname={location.pathname}
         params={searchParams}
+        scrollYRef={scrollYRef}
       />
       <Section
         heading="Place of Origin"
@@ -91,6 +117,7 @@ const DesignerFacetsSidebar: React.FC<Props> = ({ designers }) => {
         active={activeCountry}
         pathname={location.pathname}
         params={searchParams}
+        scrollYRef={scrollYRef}
       />
       {/* SEO: emit crawlable links to every facet value */}
       <nav aria-hidden="true" className="sr-only">
@@ -112,10 +139,11 @@ interface SectionProps {
   active: string | null;
   pathname: string;
   params: URLSearchParams;
+  scrollYRef: React.MutableRefObject<number>;
   defaultOpen?: boolean;
 }
 
-const Section: React.FC<SectionProps> = ({ heading, paramKey, options, active, pathname, params, defaultOpen }) => {
+const Section: React.FC<SectionProps> = ({ heading, paramKey, options, active, pathname, params, scrollYRef, defaultOpen }) => {
   const [open, setOpen] = React.useState(defaultOpen || !!active);
   if (!options.length) return null;
   return (
@@ -141,15 +169,17 @@ const Section: React.FC<SectionProps> = ({ heading, paramKey, options, active, p
               <li key={opt.value}>
                 <Link
                   to={href}
+                  state={{ preserveScroll: true }}
                   rel={isActive ? undefined : "nofollow"}
                   aria-pressed={isActive}
                   preventScrollReset
+                  onPointerDown={() => {
+                    scrollYRef.current = window.scrollY;
+                  }}
                   onClick={() => {
-                    // Keep the user anchored on the results, not the hero above.
-                    requestAnimationFrame(() => {
-                      const bar = document.querySelector('[data-sticky-filter-bar]') as HTMLElement | null;
-                      if (bar) bar.scrollIntoView({ block: "start", behavior: "smooth" });
-                    });
+                    const y = scrollYRef.current || window.scrollY;
+                    window.setTimeout(() => window.scrollTo({ top: y, left: 0, behavior: "instant" as ScrollBehavior }), 0);
+                    window.setTimeout(() => window.scrollTo({ top: y, left: 0, behavior: "instant" as ScrollBehavior }), 120);
                   }}
                   className={cn(
                     "flex items-center justify-between rounded px-2 py-1.5 font-body text-[10px] tracking-[0.15em] transition-colors",

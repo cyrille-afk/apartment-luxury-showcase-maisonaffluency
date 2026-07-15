@@ -259,9 +259,9 @@ function ScrollToTopOnNavigate() {
     const prevKey = prevKeyRef.current;
     prevPathRef.current = location.pathname;
     prevKeyRef.current = location.key;
-    // Allow duplicate-path navigations (fast clicks, re-navigation) to still
-    // scroll — only skip when the location key is identical (true no-op).
-    if (prevPath === location.pathname && prevKey === location.key) return;
+    // Same-route query updates are in-page filters; keep the user at the
+    // directory instead of jumping back to the route hero.
+    if (prevPath === location.pathname) return;
     if (navType === "POP") return;
     if (location.hash) return;
     const state = location.state as { preserveScroll?: boolean; smoothScroll?: boolean } | null;
