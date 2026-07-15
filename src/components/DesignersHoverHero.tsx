@@ -731,12 +731,12 @@ const DesignersHoverHero = () => {
                     key={group.label}
                     className={cn(
                       "flex flex-col text-left",
-                      groupIdx > 0 && "mt-5 md:mt-6"
+                      groupIdx > 0 && "mt-3 md:mt-6"
                     )}
                   >
                     <span
                       ref={groupIdx === 0 ? mastersRef : undefined}
-                      className="text-[11px] uppercase tracking-[0.32em] font-body font-bold text-gold drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)] mb-2 md:mb-3"
+                      className="text-[10px] md:text-[11px] uppercase tracking-[0.32em] font-body font-bold text-gold drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)] mb-1 md:mb-3"
                     >
                       {group.label}
                     </span>
