@@ -1469,13 +1469,13 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
       if (matchingIds) base = base.filter((d) => matchingIds!.has(d.id));
     }
 
-    if (facetCountry) base = base.filter((d) => (d as any).country === facetCountry);
+    if (facetCountry) base = base.filter((d) => designerCountriesById.get(d.id)?.has(facetCountry));
     if (facetFinish && finishMap) {
       base = base.filter((d) => finishMap.byDesigner.get(d.id)?.has(facetFinish));
     }
 
     return base;
-  }, [topLevelItems, selectedCategory, selectedSubcategory, designerIdsByCategory, facetCountry, facetFinish, finishMap]);
+  }, [topLevelItems, selectedCategory, selectedSubcategory, designerIdsByCategory, facetCountry, facetFinish, finishMap, designerCountriesById]);
 
   const alphaGroups = useMemo(() => {
     const groups: Record<string, Designer[]> = {};
