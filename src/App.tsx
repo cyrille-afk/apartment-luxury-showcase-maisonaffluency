@@ -44,6 +44,7 @@ const TradeRagDebug = lazy(() => import("./pages/TradeRagDebug"));
 const TradeAiUsagePrintCheck = lazy(() => import("./pages/TradeAiUsagePrintCheck"));
 const TradeAdminConciergeLeads = lazy(() => import("./pages/TradeAdminConciergeLeads"));
 const TradeAdminInquiries = lazy(() => import("./pages/TradeAdminInquiries"));
+const TradeAdminMcpUsage = lazy(() => import("./pages/TradeAdminMcpUsage"));
 const TradePayoutStatement = lazy(() => import("./pages/TradePayoutStatement"));
 
 const TradeDescriptionWriter = lazy(() => import("./pages/TradeDescriptionWriter"));
@@ -537,6 +538,7 @@ const App = () => {
                     <Route path="admin/rag-debug" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeRagDebug /></Suspense>} />
                     <Route path="admin/concierge-leads" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAdminConciergeLeads /></Suspense>} />
                     <Route path="admin/inquiries" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAdminInquiries /></Suspense>} />
+                    <Route path="admin/mcp-usage" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAdminMcpUsage /></Suspense>} />
 
                     <Route path="registered-users" element={<TradeRegisteredUsers />} />
                     <Route path="description-writer" element={<TradeDescriptionWriter />} />
