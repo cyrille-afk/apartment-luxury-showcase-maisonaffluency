@@ -1139,15 +1139,16 @@ const PublicDesignerProfile = () => {
                             "Théorème Éditions": "Edition by Théorème Éditions",
                             "Ecart Paris": "Re-edition by Ecart Paris",
                             "Ecart": "Re-edition by Ecart",
+                            "Man of Parts": "",
                           };
                           const manualBadge = (designer as any).parent_badge_label?.trim();
                           const editionHouseLabel = parentBrandName
                             ? EDITION_HOUSE_LABELS[parentBrandName]
                             : undefined;
-                          const showParentBadge = !!manualBadge || !!parentBrandName;
                           const parentBadgeText = manualBadge
                             ?? editionHouseLabel
                             ?? (parentBrandName ? `Edition by ${parentBrandName}` : "");
+                          const showParentBadge = !!parentBadgeText.trim();
 
 
 
