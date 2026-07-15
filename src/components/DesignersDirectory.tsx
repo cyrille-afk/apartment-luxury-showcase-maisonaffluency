@@ -39,7 +39,7 @@ import { readPendingCategoryFilter } from "@/lib/pendingCategoryFilter";
 import { cleanBrandLine, composeTitle } from "@/lib/curatorPickLegend";
 import { applyCuratorPickOrder, sortCuratorPicks } from "@/lib/curatorPickSort";
 import { lastNameInitial, sortNameKey } from "@/lib/nameFormat";
-import { originToCountry } from "@/lib/productOrigin";
+import { originToCountry, originToCountries } from "@/lib/productOrigin";
 import AlphabetDesignerPicker from "@/components/trade/AlphabetDesignerPicker";
 
 const LETTERS = [...("ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("")), "#"];
@@ -1269,11 +1269,11 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
   const designerCountriesById = useMemo(() => {
     const m = new Map<string, Set<string>>();
     for (const p of curatorPicksData as Array<{ designer_id: string; origin?: string | null }>) {
-      const c = originToCountry(p.origin);
-      if (!c) continue;
+      const countries = originToCountries(p.origin);
+      if (!countries.length) continue;
       let set = m.get(p.designer_id);
       if (!set) { set = new Set(); m.set(p.designer_id, set); }
-      set.add(c);
+      countries.forEach((c) => set!.add(c));
     }
     return m;
   }, [curatorPicksData]);
@@ -1289,7 +1289,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
       base = base.filter((p) => pickMatchesCategoryFilter(p, selectedCategory, selectedSubcategory));
     }
     if (facetCountry) {
-      base = base.filter((p) => originToCountry(p.origin) === facetCountry);
+      base = base.filter((p) => originToCountries(p.origin).includes(facetCountry));
     }
     if (facetFinish && finishMap) {
       base = base.filter((p) => finishMap.byPick.get(p.id)?.has(facetFinish));
