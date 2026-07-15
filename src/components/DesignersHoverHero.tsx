@@ -235,6 +235,7 @@ const DesignersHoverHero = () => {
   const navRef = useRef<HTMLElement>(null);
   const sectionRef = useRef<HTMLElement>(null);
   const handoffLockRef = useRef(false);
+  const suppressNavClickRef = useRef(false);
   const portalRef = useRef<HTMLAnchorElement>(null);
   const portalCursorRef = useRef<HTMLDivElement>(null);
   const activeSlugRef = useRef<string | null>(null);
@@ -446,6 +447,7 @@ const DesignersHoverHero = () => {
       if (isPointer ? pointerLock : lock) return true;
 
       if (Math.abs(deltaY) > SWIPE_THRESHOLD) {
+        suppressNavClickRef.current = true;
         if (isPointer) pointerLock = true;
         else lock = true;
         advance(deltaY > 0 ? 1 : -1);
@@ -453,6 +455,9 @@ const DesignersHoverHero = () => {
           if (isPointer) pointerLock = false;
           else lock = false;
         }, 450);
+        window.setTimeout(() => {
+          suppressNavClickRef.current = false;
+        }, 650);
       }
       return true;
     };
@@ -963,6 +968,12 @@ const DesignersHoverHero = () => {
               <nav
                 ref={navRef}
                 aria-label="Featured designers shortcut list"
+                onClickCapture={(event) => {
+                  if (!suppressNavClickRef.current) return;
+                  event.preventDefault();
+                  event.stopPropagation();
+                  suppressNavClickRef.current = false;
+                }}
                 className={cn(
                   "relative inline-block select-none",
                   isMobileOrPwa ? "touch-pan-y" : "touch-none"
