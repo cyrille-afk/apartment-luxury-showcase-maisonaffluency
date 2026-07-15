@@ -1808,11 +1808,13 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
             >
               <DesignerFacetsSidebar
                 designers={topLevelItems}
-                productPicks={mode === "products" ? fullPicks : undefined}
+                productPicks={mode === "products" ? fullPicks : (curatorPicksData as any)}
                 activeCategory={selectedCategory}
                 activeSubcategory={selectedSubcategory}
                 designerCountriesById={designerCountriesById}
+                mode={mode}
               />
+
             </CategorySidebar>
             <div className="flex-1 min-w-0">
               {isLoading && (
