@@ -25,19 +25,20 @@ const CategorySidebar: React.FC<CategorySidebarProps> = ({ activeCategory, activ
     onOpenChange?.(open);
   };
 
-  // Expand parent category accordion when a subcategory is selected (don't force sidebar open)
+  // Expand the active category's subcategory list (don't force sidebar open).
   useEffect(() => {
-    if (activeSubcategory) {
-      const parentCat = CATEGORY_ORDER.find(cat => SUBCATEGORY_MAP[cat]?.includes(activeSubcategory));
-      if (parentCat) {
-        setExpandedCats(prev => {
-          const next = new Set(prev);
-          next.add(parentCat);
-          return next;
-        });
-      }
+    const parentCat = activeCategory || (activeSubcategory
+      ? CATEGORY_ORDER.find(cat => SUBCATEGORY_MAP[cat]?.includes(activeSubcategory))
+      : null);
+
+    if (parentCat) {
+      setExpandedCats(prev => {
+        const next = new Set(prev);
+        next.add(parentCat);
+        return next;
+      });
     }
-  }, [activeSubcategory]);
+  }, [activeCategory, activeSubcategory]);
 
   const toggleExpand = (cat: string) => {
     setExpandedCats(prev => {
@@ -162,16 +163,16 @@ const CategorySidebar: React.FC<CategorySidebarProps> = ({ activeCategory, activ
                             }
                           }}
                           className={cn(
-                            "font-body text-[10px] tracking-[0.15em] cursor-pointer transition-colors",
+                            "flex min-w-0 flex-1 items-center justify-between gap-2 font-body text-[10px] tracking-[0.15em] cursor-pointer transition-colors",
                             isActiveSub
                               ? "text-[hsl(var(--accent))] font-semibold"
                               : "text-foreground hover:text-foreground"
                           )}
                         >
-                          {sub}
+                          <span className="min-w-0 truncate">{sub}</span>
                           {itemCounts && itemCounts[sub] !== undefined && (
-                            <span className="ml-1.5 text-[9px] text-muted-foreground/60 font-normal">
-                              ({itemCounts[sub]})
+                            <span className="shrink-0 text-[9px] text-muted-foreground/70 font-normal tabular-nums">
+                              {itemCounts[sub]}
                             </span>
                           )}
                         </span>
