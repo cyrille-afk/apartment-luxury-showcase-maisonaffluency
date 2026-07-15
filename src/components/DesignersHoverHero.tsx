@@ -1468,15 +1468,12 @@ const DesignersHoverHero = () => {
                               type="button"
                               onClick={() =>
                                 setExpandedLetters((prev) => {
-                                  const next = new Set(prev);
-                                  if (next.has(letter)) {
-                                    next.delete(letter);
+                                  if (prev.has(letter)) {
                                     if (activeAccordionLetter === letter) setActiveAccordionLetter(null);
-                                  } else {
-                                    next.add(letter);
-                                    setActiveAccordionLetter(letter);
+                                    return new Set();
                                   }
-                                  return next;
+                                  setActiveAccordionLetter(letter);
+                                  return new Set([letter]);
                                 })
                               }
                               aria-expanded={isOpen}
