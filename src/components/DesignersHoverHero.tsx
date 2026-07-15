@@ -575,7 +575,6 @@ const DesignersHoverHero = () => {
       if (bestSlug) setActiveSlug((current) => (current === bestSlug ? current : bestSlug));
     };
 
-    updateActiveFromScroll();
     scroller.addEventListener("scroll", updateActiveFromScroll, { passive: true });
     window.addEventListener("resize", updateActiveFromScroll);
     return () => {
