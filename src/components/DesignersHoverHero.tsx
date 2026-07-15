@@ -766,7 +766,7 @@ const DesignersHoverHero = () => {
               <nav
                 ref={navRef}
                 aria-label="Featured designers shortcut list"
-                className="relative inline-block"
+                className="relative inline-block touch-none select-none"
               >
               <ul className="flex flex-col text-left">
                 {groupedItems.map((group, groupIdx) => (
