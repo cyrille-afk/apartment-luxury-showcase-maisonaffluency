@@ -76,8 +76,9 @@ const DesignerFacetsSidebar: React.FC<Props> = ({ designers, productPicks, activ
     if (productPicks) {
       for (const pick of productPicks) {
         if (!pickMatchesCategoryFilter(pick, activeCategory, activeSubcategory)) continue;
-        const country = originToCountry(pick.origin);
-        if (country) countryCounts.set(country, (countryCounts.get(country) || 0) + 1);
+        for (const country of originToCountries(pick.origin)) {
+          countryCounts.set(country, (countryCounts.get(country) || 0) + 1);
+        }
         finishMap?.byPick.get(pick.id)?.forEach((family) => {
           finishCounts.set(family, (finishCounts.get(family) || 0) + 1);
         });
