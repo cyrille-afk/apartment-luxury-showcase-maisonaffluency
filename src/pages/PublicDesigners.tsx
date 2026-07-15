@@ -97,11 +97,10 @@ function ScrollLockedDesigners({
   initialExpand?: string;
 }) {
   const hasDeepLink = Boolean(initialLetter || initialExpand);
-  const shouldLockLanding = !hasDeepLink;
-  const [locked, setLocked] = useState(() => {
-    if (!shouldLockLanding) return false;
-    return typeof window === "undefined" || window.matchMedia("(max-width: 767px)").matches;
-  });
+  // Landing scroll-lock disabled on all viewports — mobile now mirrors desktop
+  // so first-time users can scroll straight from the hero into the directory.
+  const shouldLockLanding = false;
+  const [locked, setLocked] = useState(false);
 
   // Directory only mounts after the landing handoff completes — a deep-link,
   // an explicit unlock event, or the user scrolling past the hero. This
