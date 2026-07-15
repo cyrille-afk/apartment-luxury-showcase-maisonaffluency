@@ -1,20 +1,22 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { useSearchParams, useLocation, Link } from "react-router-dom";
-import { X } from "lucide-react";
+import { SlidersHorizontal, X, ChevronDown } from "lucide-react";
 import brandCategories from "@/data/brandCategories.json";
 import type { Designer } from "@/hooks/useDesigner";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 /**
- * Filter chips for the /designers hub.
+ * Filter panel for the /designers hub.
  *
- * Facets:
- *  - era        Pre-1950 · Mid-Century · Contemporary (from designers.era)
- *  - country    France, Italy, … (from designers.country)
- *  - discipline seating, lighting, tables, … (from src/data/brandCategories.json)
+ * Facets (URL params kept stable for crawlability & back-compat):
+ *  - era        → shown as "Period"           (Pre-1950 · Mid-Century · Contemporary)
+ *  - discipline → shown as "Category"         (from src/data/brandCategories.json)
+ *  - country    → shown as "Place of Origin"
  *
- * The chips are rendered as real `<Link>` anchors with a canonical `href` so
- * crawlers can follow every filter combination. Clicking updates the URL via
- * React Router (which back-populates the DesignersDirectory filter state).
+ * Rendered inside a single Filter button (à la 1stdibs) with collapsible
+ * sections. Each option is a real <Link> so crawlers can follow every
+ * filter combination.
  */
 
 const ERA_LABELS: Record<string, string> = {
@@ -43,7 +45,6 @@ const DISCIPLINE_ORDER = [
   "bedroom",
 ];
 
-/** name (or founder) → set of discipline keys */
 function buildDisciplineIndex(): Map<string, Set<string>> {
   const index = new Map<string, Set<string>>();
   for (const [discipline, names] of Object.entries(
@@ -69,7 +70,6 @@ export function getDesignerDisciplines(d: Pick<Designer, "name" | "founder">): S
   return out;
 }
 
-/** Build an `href` that toggles a single facet value. */
 function buildHref(
   pathname: string,
   params: URLSearchParams,
@@ -83,7 +83,6 @@ function buildHref(
   } else {
     next.set(key, value);
   }
-  // Never carry alphabet jump state across facet changes.
   next.delete("letter");
   const qs = next.toString();
   return qs ? `${pathname}?${qs}` : pathname;
@@ -93,16 +92,20 @@ interface Props {
   designers: Designer[];
 }
 
+type Option = { value: string; label: string; count: number };
+
 const DesignerFacetChips: React.FC<Props> = ({ designers }) => {
   const [searchParams] = useSearchParams();
   const location = useLocation();
+  const [open, setOpen] = useState(false);
 
   const activeEra = searchParams.get("era");
   const activeCountry = searchParams.get("country");
   const activeDiscipline = searchParams.get("discipline");
 
-  // Only show chip values that have at least one designer, so the hub never
-  // links to empty result pages.
+  const activeCount =
+    (activeEra ? 1 : 0) + (activeCountry ? 1 : 0) + (activeDiscipline ? 1 : 0);
+
   const { eraOptions, countryOptions, disciplineOptions } = useMemo(() => {
     const eraCounts = new Map<string, number>();
     const countryCounts = new Map<string, number>();
@@ -115,15 +118,15 @@ const DesignerFacetChips: React.FC<Props> = ({ designers }) => {
       disc.forEach((k) => disciplineCounts.set(k, (disciplineCounts.get(k) || 0) + 1));
     }
 
-    const eras = ERA_ORDER.filter((k) => eraCounts.get(k)).map((k) => ({
+    const eras: Option[] = ERA_ORDER.filter((k) => eraCounts.get(k)).map((k) => ({
       value: k,
       label: ERA_LABELS[k],
       count: eraCounts.get(k)!,
     }));
-    const countries = [...countryCounts.entries()]
+    const countries: Option[] = [...countryCounts.entries()]
       .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
       .map(([value, count]) => ({ value, label: value, count }));
-    const disciplines = DISCIPLINE_ORDER.filter((k) => disciplineCounts.get(k)).map((k) => ({
+    const disciplines: Option[] = DISCIPLINE_ORDER.filter((k) => disciplineCounts.get(k)).map((k) => ({
       value: k,
       label: DISCIPLINE_LABELS[k] || k,
       count: disciplineCounts.get(k)!,
@@ -132,84 +135,163 @@ const DesignerFacetChips: React.FC<Props> = ({ designers }) => {
     return { eraOptions: eras, countryOptions: countries, disciplineOptions: disciplines };
   }, [designers]);
 
-  const anyActive = !!(activeEra || activeCountry || activeDiscipline);
-
-  const renderGroup = (
-    heading: string,
-    key: "era" | "country" | "discipline",
-    active: string | null,
-    options: { value: string; label: string; count: number }[],
-  ) => {
-    if (!options.length) return null;
-    return (
-      <div className="flex flex-wrap items-center gap-2">
-        <span className="text-xs uppercase tracking-[0.18em] text-muted-foreground shrink-0 mr-1">
-          {heading}
-        </span>
-        {options.map((opt) => {
-          const isActive = active === opt.value;
-          const href = buildHref(location.pathname, searchParams, key, opt.value, isActive);
-          return (
-            <Link
-              key={opt.value}
-              to={href}
-              rel={isActive ? undefined : "nofollow"}
-              aria-pressed={isActive}
-              className={[
-                "inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs transition-colors",
-                isActive
-                  ? "border-foreground bg-foreground text-background"
-                  : "border-border bg-background text-foreground hover:border-foreground/60",
-              ].join(" ")}
-            >
-              <span>{opt.label}</span>
-              <span
-                className={
-                  isActive ? "opacity-70" : "text-muted-foreground"
-                }
-              >
-                {opt.count}
-              </span>
-              {isActive && <X className="h-3 w-3" aria-hidden />}
-            </Link>
-          );
-        })}
-      </div>
-    );
-  };
-
-  if (
-    !eraOptions.length &&
-    !countryOptions.length &&
-    !disciplineOptions.length
-  ) {
+  if (!eraOptions.length && !countryOptions.length && !disciplineOptions.length) {
     return null;
   }
 
   const clearHref = location.pathname;
+
+  const renderSection = (
+    heading: string,
+    key: "era" | "discipline" | "country",
+    active: string | null,
+    options: Option[],
+    defaultOpen = false,
+  ) => {
+    if (!options.length) return null;
+    const isOpen = defaultOpen || !!active;
+    return (
+      <Collapsible defaultOpen={isOpen} className="border-b border-border last:border-b-0">
+        <CollapsibleTrigger className="group flex w-full items-center justify-between py-3 text-left">
+          <span className="text-xs uppercase tracking-[0.18em] text-foreground">
+            {heading}
+            {active && (
+              <span className="ml-2 inline-block rounded-full bg-foreground text-background px-1.5 py-0.5 text-[10px] leading-none">
+                1
+              </span>
+            )}
+          </span>
+          <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
+        </CollapsibleTrigger>
+        <CollapsibleContent className="pb-3">
+          <ul className="flex flex-col gap-1">
+            {options.map((opt) => {
+              const isActive = active === opt.value;
+              const href = buildHref(location.pathname, searchParams, key, opt.value, isActive);
+              return (
+                <li key={opt.value}>
+                  <Link
+                    to={href}
+                    rel={isActive ? undefined : "nofollow"}
+                    aria-pressed={isActive}
+                    className={[
+                      "flex items-center justify-between rounded-md px-2 py-1.5 text-sm transition-colors",
+                      isActive
+                        ? "bg-foreground text-background"
+                        : "text-foreground hover:bg-muted",
+                    ].join(" ")}
+                  >
+                    <span className="flex items-center gap-2">
+                      {isActive && <X className="h-3 w-3" aria-hidden />}
+                      {opt.label}
+                    </span>
+                    <span className={isActive ? "opacity-70 text-xs" : "text-muted-foreground text-xs"}>
+                      {opt.count}
+                    </span>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </CollapsibleContent>
+      </Collapsible>
+    );
+  };
 
   return (
     <section
       aria-label="Filter designers"
       className="mx-auto w-full max-w-7xl px-4 md:px-8 pt-6 pb-4"
     >
-      <div className="flex flex-col gap-3">
-        {renderGroup("Era", "era", activeEra, eraOptions)}
-        {renderGroup("Discipline", "discipline", activeDiscipline, disciplineOptions)}
-        {renderGroup("Country", "country", activeCountry, countryOptions.slice(0, 14))}
-        {anyActive && (
-          <div>
-            <Link
-              to={clearHref}
-              className="text-xs uppercase tracking-[0.18em] text-muted-foreground underline underline-offset-4 hover:text-foreground"
+      <div className="flex flex-wrap items-center gap-3">
+        <Popover open={open} onOpenChange={setOpen}>
+          <PopoverTrigger asChild>
+            <button
+              type="button"
+              className="inline-flex items-center gap-2 rounded-md border border-border bg-background px-4 py-2 text-xs uppercase tracking-[0.18em] text-foreground hover:border-foreground/60 transition-colors"
             >
-              Clear all filters
-            </Link>
-          </div>
+              <SlidersHorizontal className="h-4 w-4" />
+              Filter
+              {activeCount > 0 && (
+                <span className="ml-1 inline-flex items-center justify-center rounded-full bg-foreground text-background text-[10px] leading-none w-5 h-5">
+                  {activeCount}
+                </span>
+              )}
+            </button>
+          </PopoverTrigger>
+          <PopoverContent align="start" className="w-80 p-4">
+            <div className="flex flex-col">
+              {renderSection("Period", "era", activeEra, eraOptions, true)}
+              {renderSection("Category", "discipline", activeDiscipline, disciplineOptions)}
+              {renderSection("Place of Origin", "country", activeCountry, countryOptions.slice(0, 20))}
+            </div>
+            {activeCount > 0 && (
+              <div className="mt-3 pt-3 border-t border-border">
+                <Link
+                  to={clearHref}
+                  onClick={() => setOpen(false)}
+                  className="text-xs uppercase tracking-[0.18em] text-muted-foreground underline underline-offset-4 hover:text-foreground"
+                >
+                  Clear all filters
+                </Link>
+              </div>
+            )}
+          </PopoverContent>
+        </Popover>
+
+        {/* Active filter summary chips (visible outside the popover) */}
+        {activeEra && (
+          <ActiveChip
+            label={ERA_LABELS[activeEra] || activeEra}
+            href={buildHref(location.pathname, searchParams, "era", activeEra, true)}
+          />
+        )}
+        {activeDiscipline && (
+          <ActiveChip
+            label={DISCIPLINE_LABELS[activeDiscipline] || activeDiscipline}
+            href={buildHref(location.pathname, searchParams, "discipline", activeDiscipline, true)}
+          />
+        )}
+        {activeCountry && (
+          <ActiveChip
+            label={activeCountry}
+            href={buildHref(location.pathname, searchParams, "country", activeCountry, true)}
+          />
         )}
       </div>
+
+      {/* SEO: emit crawlable links to every facet value even when the popover is closed. */}
+      <nav aria-hidden="true" className="sr-only">
+        {eraOptions.map((o) => (
+          <Link key={`era-${o.value}`} to={buildHref(location.pathname, searchParams, "era", o.value, false)}>
+            {o.label}
+          </Link>
+        ))}
+        {disciplineOptions.map((o) => (
+          <Link key={`disc-${o.value}`} to={buildHref(location.pathname, searchParams, "discipline", o.value, false)}>
+            {o.label}
+          </Link>
+        ))}
+        {countryOptions.map((o) => (
+          <Link key={`c-${o.value}`} to={buildHref(location.pathname, searchParams, "country", o.value, false)}>
+            {o.label}
+          </Link>
+        ))}
+      </nav>
     </section>
   );
 };
+
+function ActiveChip({ label, href }: { label: string; href: string }) {
+  return (
+    <Link
+      to={href}
+      className="inline-flex items-center gap-1.5 rounded-full border border-foreground bg-foreground px-3 py-1 text-xs text-background hover:opacity-80 transition-opacity"
+    >
+      <span>{label}</span>
+      <X className="h-3 w-3" aria-hidden />
+    </Link>
+  );
+}
 
 export default DesignerFacetChips;
