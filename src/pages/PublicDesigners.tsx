@@ -139,6 +139,7 @@ function ScrollLockedDesigners({
             <DesignersHoverHero />
             
           </div>
+          <DesignerFacetChipsMount />
           <DesignersDirectory mode="designers" initialLetter={initialLetter} initialExpand={initialExpand} showHeader={false} showAlphabetBar={false} />
         </div>
       </div>
