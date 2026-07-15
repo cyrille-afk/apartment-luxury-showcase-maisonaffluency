@@ -9,6 +9,8 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import DesignersDirectory from "@/components/DesignersDirectory";
 import DesignersHoverHero from "@/components/DesignersHoverHero";
+import DesignerFacetChips from "@/components/DesignerFacetChips";
+import { useAllDesigners } from "@/hooks/useDesigner";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 
@@ -137,6 +139,7 @@ function ScrollLockedDesigners({
             <DesignersHoverHero />
             
           </div>
+          <DesignerFacetChipsMount />
           <DesignersDirectory mode="designers" initialLetter={initialLetter} initialExpand={initialExpand} showHeader={false} showAlphabetBar={false} />
         </div>
       </div>
@@ -145,6 +148,11 @@ function ScrollLockedDesigners({
       <BackToTopButton />
     </div>
   );
+}
+
+function DesignerFacetChipsMount() {
+  const { data: designers = [] } = useAllDesigners();
+  return <DesignerFacetChips designers={designers} />;
 }
 
 export default PublicDesigners;

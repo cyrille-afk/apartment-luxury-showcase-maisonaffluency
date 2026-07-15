@@ -2132,8 +2132,11 @@ export type Database = {
           biography: string
           biography_images: string[] | null
           collab_brands: string[]
+          country: string | null
           created_at: string
           display_name: string | null
+          era: string | null
+          facets_updated_at: string | null
           founder: string | null
           hero_image_url: string | null
           hero_photo_credit: string | null
@@ -2161,8 +2164,11 @@ export type Database = {
           biography?: string
           biography_images?: string[] | null
           collab_brands?: string[]
+          country?: string | null
           created_at?: string
           display_name?: string | null
+          era?: string | null
+          facets_updated_at?: string | null
           founder?: string | null
           hero_image_url?: string | null
           hero_photo_credit?: string | null
@@ -2190,8 +2196,11 @@ export type Database = {
           biography?: string
           biography_images?: string[] | null
           collab_brands?: string[]
+          country?: string | null
           created_at?: string
           display_name?: string | null
+          era?: string | null
+          facets_updated_at?: string | null
           founder?: string | null
           hero_image_url?: string | null
           hero_photo_credit?: string | null
