@@ -252,16 +252,13 @@ function ScrollToTopOnNavigate() {
   const location = useLocation();
   const navType = useNavigationType();
   const prevPathRef = useRef<string | null>(null);
-  const prevKeyRef = useRef<string | null>(null);
 
   useEffect(() => {
     const prevPath = prevPathRef.current;
-    const prevKey = prevKeyRef.current;
     prevPathRef.current = location.pathname;
-    prevKeyRef.current = location.key;
-    // Allow duplicate-path navigations (fast clicks, re-navigation) to still
-    // scroll — only skip when the location key is identical (true no-op).
-    if (prevPath === location.pathname && prevKey === location.key) return;
+    // Same-route query updates are in-page filters; keep the user at the
+    // directory instead of jumping back to the route hero.
+    if (prevPath === location.pathname) return;
     if (navType === "POP") return;
     if (location.hash) return;
     const state = location.state as { preserveScroll?: boolean; smoothScroll?: boolean } | null;
@@ -275,7 +272,7 @@ function ScrollToTopOnNavigate() {
       window.scrollTo({ top: 0, left: 0, behavior });
     });
     return () => window.cancelAnimationFrame(raf);
-  }, [location.pathname, location.hash, location.state, location.key, navType]);
+  }, [location.pathname, location.hash, location.state, navType]);
 
   return null;
 }

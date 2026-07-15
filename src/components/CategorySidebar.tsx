@@ -58,10 +58,15 @@ const CategorySidebar: React.FC<CategorySidebarProps> = ({ activeCategory, activ
   // Count active filters
   const activeCount = activeSubcategory ? 1 : (activeCategory ? 1 : 0);
 
-  if (!isOpen) return null;
-
   return (
-    <aside className={cn("hidden md:flex flex-col shrink-0 pr-1 sticky top-24 self-start max-h-[calc(100vh-7rem)] overflow-y-auto pt-4 w-44 lg:w-48", className)}>
+    <aside
+      aria-hidden={!isOpen}
+      className={cn(
+        "hidden md:flex flex-col shrink-0 sticky top-24 self-start max-h-[calc(100vh-7rem)] pt-4 transition-all duration-200",
+        isOpen ? "w-44 lg:w-48 pr-1 overflow-y-auto opacity-100" : "w-0 pr-0 overflow-hidden opacity-0 pointer-events-none",
+        className,
+      )}
+    >
       {/* Clear All (kept out of the Categories accordion so it's always reachable) */}
       <div className="flex items-center justify-end mb-2 pl-1 pr-0.5">
         <button
