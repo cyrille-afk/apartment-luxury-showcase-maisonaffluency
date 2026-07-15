@@ -1418,23 +1418,35 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
   // card; the child card here shows the atelier as its parentLabel for context.
   const topLevelItems = useMemo(() => searchFiltered, [searchFiltered]);
 
+  // URL-driven facet filters (era / country / discipline). Kept in the URL so
+  // every combination is a real, crawlable link — see DesignerFacetChips.
+  const [searchParams] = useSearchParams();
+  const facetEra = searchParams.get("era");
+  const facetCountry = searchParams.get("country");
+  const facetDiscipline = searchParams.get("discipline");
+
   // Apply category/subcategory filter
   const filteredItems = useMemo(() => {
-    if (!selectedCategory && !selectedSubcategory) return topLevelItems;
+    let base = topLevelItems;
 
-    // Get designer IDs that match
-    let matchingIds: Set<string> | null = null;
-
-    if (selectedSubcategory) {
-      matchingIds = designerIdsByCategory.bySubcategory[selectedSubcategory] || new Set();
-    } else if (selectedCategory) {
-      matchingIds = designerIdsByCategory.byCategory[selectedCategory] || new Set();
+    if (selectedCategory || selectedSubcategory) {
+      let matchingIds: Set<string> | null = null;
+      if (selectedSubcategory) {
+        matchingIds = designerIdsByCategory.bySubcategory[selectedSubcategory] || new Set();
+      } else if (selectedCategory) {
+        matchingIds = designerIdsByCategory.byCategory[selectedCategory] || new Set();
+      }
+      if (matchingIds) base = base.filter((d) => matchingIds!.has(d.id));
     }
 
-    if (!matchingIds) return topLevelItems;
+    if (facetEra) base = base.filter((d) => (d as any).era === facetEra);
+    if (facetCountry) base = base.filter((d) => (d as any).country === facetCountry);
+    if (facetDiscipline) {
+      base = base.filter((d) => getDesignerDisciplines(d).has(facetDiscipline));
+    }
 
-    return topLevelItems.filter((d) => matchingIds!.has(d.id));
-  }, [topLevelItems, selectedCategory, selectedSubcategory, designerIdsByCategory]);
+    return base;
+  }, [topLevelItems, selectedCategory, selectedSubcategory, designerIdsByCategory, facetEra, facetCountry, facetDiscipline]);
 
   const alphaGroups = useMemo(() => {
     const groups: Record<string, Designer[]> = {};
