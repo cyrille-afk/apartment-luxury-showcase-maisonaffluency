@@ -187,6 +187,7 @@ const DesignersHoverHero = () => {
   const [azDragging, setAzDragging] = useState(false);
   const [azMagnifier, setAzMagnifier] = useState<{ letter: string; y: number } | null>(null);
   const azTrackRef = useRef<HTMLElement | null>(null);
+  const [azRailRect, setAzRailRect] = useState<{ top: number; height: number } | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const searchScrollRef = useRef<HTMLDivElement>(null);
   const directoryRef = useRef<HTMLDivElement>(null);
