@@ -51,7 +51,7 @@ function thumbTransform(src: string | null | undefined): string | undefined {
 function DesignerRowThumb({ src, alt }: { src: string | null | undefined; alt: string }) {
   const url = thumbTransform(src);
   return (
-    <span className="relative flex-shrink-0 h-10 w-10 rounded-full overflow-hidden bg-white/[0.06] ring-1 ring-white/10">
+    <span className="relative flex-shrink-0 h-11 w-9 rounded-md overflow-hidden bg-white/[0.06] ring-1 ring-white/10">
       {url ? (
         <img
           src={url}
