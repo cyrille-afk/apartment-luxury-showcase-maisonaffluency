@@ -175,7 +175,9 @@ function ScrollLockedDesigners({
         <h1 className="sr-only">Designers &amp; Ateliers</h1>
 
         <div className={locked ? "h-[calc(100svh-var(--header-h))] overflow-hidden" : "pb-20"}>
-          <div className={locked ? "relative md:h-full" : "relative"}>
+          <div
+            className={locked ? "relative md:h-full" : "relative min-h-[calc(100lvh-var(--header-h))] bg-[#0a0a0a]"}
+          >
 
             <DesignersHoverHero />
             

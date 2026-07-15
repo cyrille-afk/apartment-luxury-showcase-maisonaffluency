@@ -310,15 +310,16 @@ const DesignersHoverHero = () => {
     };
   }, [hasItems, items]);
 
-  // Mobile: capture vertical swipes on the hero section to advance through
-  // featured designers (with the corresponding background image cross-fading
-  // in) instead of scrolling the page. The directory below is only reached
-  // via the "Find A Designer" link, per editorial intent.
+  // Mobile: capture vertical swipes on the designer NAMES list only so users
+  // can advance featured designers by swiping on the list, while swipes on the
+  // rest of the hero still scroll the page into the Directory below. Previously
+  // this was bound to the entire section which blocked window scroll on mobile
+  // and prevented the Directory from ever mounting.
   useEffect(() => {
     if (searchOpen) return;
     if (!hasItems) return;
-    const section = sectionRef.current;
-    if (!section) return;
+    const nav = navRef.current;
+    if (!nav) return;
     if (typeof window === "undefined") return;
     const isMobile = window.matchMedia("(max-width: 767px)").matches;
     if (!isMobile) return;
@@ -362,15 +363,16 @@ const DesignersHoverHero = () => {
       accum = 0;
     };
 
-    section.addEventListener("touchstart", onStart, { passive: true });
-    section.addEventListener("touchmove", onMove, { passive: false });
-    section.addEventListener("touchend", onEnd, { passive: true });
+    nav.addEventListener("touchstart", onStart, { passive: true });
+    nav.addEventListener("touchmove", onMove, { passive: false });
+    nav.addEventListener("touchend", onEnd, { passive: true });
     return () => {
-      section.removeEventListener("touchstart", onStart);
-      section.removeEventListener("touchmove", onMove);
-      section.removeEventListener("touchend", onEnd);
+      nav.removeEventListener("touchstart", onStart);
+      nav.removeEventListener("touchmove", onMove);
+      nav.removeEventListener("touchend", onEnd);
     };
   }, [hasItems, items, searchOpen]);
+
 
   const isDesktopViewport = !isMobileViewport && !isMobileHook && !isStandalone;
 
