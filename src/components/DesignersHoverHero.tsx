@@ -1183,15 +1183,16 @@ const DesignersHoverHero = () => {
                   <div className="md:hidden">
                     <ul className="flex flex-col pb-2">
                       {isSearching ? (
-                        groupedResults.flatMap(([, items]) => items).map((d) => (
+                        groupedResults.flatMap(([, items]) => items).map((d: any) => (
                           <li key={d.slug}>
                             <Link
                               to={`/designers/${d.slug}`}
                               state={{ fromDesignersHero: true }}
                               onClick={() => setSearchOpen(false)}
-                              className="block px-5 py-2.5 font-body text-[15px] text-white/85 hover:text-white hover:bg-white/[0.04] transition-colors"
+                              className="flex items-center gap-3 px-5 py-2 font-body text-[15px] text-white/85 hover:text-white hover:bg-white/[0.04] transition-colors"
                             >
-                              {displayDesignerName(d.name)}
+                              <DesignerRowThumb src={d.hero_image_url || d.image_url} alt={d.name} />
+                              <span className="truncate">{displayDesignerName(d.name)}</span>
                             </Link>
                           </li>
                         ))
@@ -1206,15 +1207,16 @@ const DesignersHoverHero = () => {
                               <span className="font-serif text-sm text-white/70">{letter}</span>
                             </div>
                             <ul className="flex flex-col">
-                              {items.map((d) => (
+                              {items.map((d: any) => (
                                 <li key={d.slug}>
                                   <Link
                                     to={`/designers/${d.slug}`}
                                     state={{ fromDesignersHero: true }}
                                     onClick={() => setSearchOpen(false)}
-                                    className="block px-5 py-2.5 font-body text-[15px] text-white/85 hover:text-white hover:bg-white/[0.04] transition-colors"
+                                    className="flex items-center gap-3 px-5 py-2 font-body text-[15px] text-white/85 hover:text-white hover:bg-white/[0.04] transition-colors"
                                   >
-                                    {displayDesignerName(d.name)}
+                                    <DesignerRowThumb src={d.hero_image_url || d.image_url} alt={d.name} />
+                                    <span className="truncate">{displayDesignerName(d.name)}</span>
                                   </Link>
                                 </li>
                               ))}
