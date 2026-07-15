@@ -37,6 +37,38 @@ interface FeaturedDesigner {
   first_pick_image_url: string | null;
 }
 
+/**
+ * Small square thumbnail for the mobile "Find A Designer" list rows.
+ * Applies a lightweight Cloudinary transform when possible so we don't
+ * download hero-sized assets for a 40px slot.
+ */
+function thumbTransform(src: string | null | undefined): string | undefined {
+  if (!src) return undefined;
+  if (!src.includes("res.cloudinary.com") || !src.includes("/image/upload/")) return src;
+  return src.replace("/image/upload/", "/image/upload/w_120,h_120,c_fill,g_auto,q_auto:good,f_auto/");
+}
+
+function DesignerRowThumb({ src, alt }: { src: string | null | undefined; alt: string }) {
+  const url = thumbTransform(src);
+  return (
+    <span className="relative flex-shrink-0 h-10 w-10 rounded-full overflow-hidden bg-white/[0.06] ring-1 ring-white/10">
+      {url ? (
+        <img
+          src={url}
+          alt=""
+          loading="lazy"
+          decoding="async"
+          className="absolute inset-0 h-full w-full object-cover"
+        />
+      ) : (
+        <span className="absolute inset-0 flex items-center justify-center text-white/30">
+          <ImageIcon className="h-4 w-4" aria-hidden />
+        </span>
+      )}
+    </span>
+  );
+}
+
 const FEATURED_GROUPS = [
   {
     label: "Masters",
