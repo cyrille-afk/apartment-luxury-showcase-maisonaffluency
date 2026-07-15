@@ -9,8 +9,8 @@ import { defineMcp } from "npm:@lovable.dev/mcp-js@0.22.0";
 import { defineTool } from "npm:@lovable.dev/mcp-js@0.22.0";
 import { createClient } from "npm:@supabase/supabase-js@^2.108.2";
 import { z } from "npm:zod@^3.25.76";
-var SITE_ORIGIN = "https://www.maisonaffluency.com";
 var CLICK_ORIGIN = `${process.env.SUPABASE_URL}/functions/v1/mcp-click`;
+var trackProductUrl = (slug, pickId) => `${CLICK_ORIGIN}?to=product&slug=${encodeURIComponent(slug)}&pick=${pickId}`;
 var TRADE_SIGNUP_URL = `${CLICK_ORIGIN}?to=signup`;
 function getClient() {
   const url = process.env.SUPABASE_URL;
@@ -103,13 +103,15 @@ var search_curator_picks_default = defineTool({
         tags: r.tags,
         image_url: r.image_url,
         price: "Price on Request",
-        product_url: `${SITE_ORIGIN}/designers/${designer.slug}?pick=${r.id}`
+        product_url: trackProductUrl(designer.slug, r.id),
+        trade_signup_url: TRADE_SIGNUP_URL
       };
     }).filter((x) => x !== null);
     const summary = results.length === 0 ? `No public curator picks matched${designerName ? ` for ${designerName}` : ""}.` : `Found ${results.length} curator pick${results.length === 1 ? "" : "s"}${designerName ? ` by ${designerName}` : ""}. All prices are Price on Request \u2014 sign in as a trade member on maisonaffluency.com for net pricing and tearsheets.`;
+    logCall(results.length);
     return {
       content: [{ type: "text", text: summary }],
-      structuredContent: { results, total: results.length }
+      structuredContent: { results, total: results.length, trade_signup_url: TRADE_SIGNUP_URL }
     };
   }
 });
@@ -118,7 +120,7 @@ var search_curator_picks_default = defineTool({
 import { defineTool as defineTool2 } from "npm:@lovable.dev/mcp-js@0.22.0";
 import { createClient as createClient2 } from "npm:@supabase/supabase-js@^2.108.2";
 import { z as z2 } from "npm:zod@^3.25.76";
-var SITE_ORIGIN2 = "https://www.maisonaffluency.com";
+var SITE_ORIGIN = "https://www.maisonaffluency.com";
 function getClient2() {
   const url = process.env.SUPABASE_URL;
   const anon = process.env.SUPABASE_PUBLISHABLE_KEY ?? process.env.SUPABASE_ANON_KEY;
@@ -176,7 +178,7 @@ var get_product_default = defineTool2({
       gallery_captions: data.gallery_captions ?? null,
       photo_credit: data.photo_credit,
       price: "Price on Request",
-      product_url: `${SITE_ORIGIN2}/designers/${designer.slug}?pick=${data.id}`,
+      product_url: `${SITE_ORIGIN}/designers/${designer.slug}?pick=${data.id}`,
       tearsheet_note: "Tearsheet PDFs and net trade pricing are available only to registered trade members on maisonaffluency.com."
     };
     const text = [

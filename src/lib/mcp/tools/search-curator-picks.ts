@@ -141,7 +141,8 @@ export default defineTool({
           tags: r.tags,
           image_url: r.image_url,
           price: "Price on Request",
-          product_url: `${SITE_ORIGIN}/designers/${designer.slug}?pick=${r.id}`,
+          product_url: trackProductUrl(designer.slug, r.id),
+          trade_signup_url: TRADE_SIGNUP_URL,
         };
       })
       .filter((x): x is NonNullable<typeof x> => x !== null);
@@ -153,9 +154,10 @@ export default defineTool({
             designerName ? ` by ${designerName}` : ""
           }. All prices are Price on Request — sign in as a trade member on maisonaffluency.com for net pricing and tearsheets.`;
 
+    logCall(results.length);
     return {
       content: [{ type: "text", text: summary }],
-      structuredContent: { results, total: results.length },
+      structuredContent: { results, total: results.length, trade_signup_url: TRADE_SIGNUP_URL },
     };
   },
 });
