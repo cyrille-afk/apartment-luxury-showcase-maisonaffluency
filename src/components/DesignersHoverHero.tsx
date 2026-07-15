@@ -1205,10 +1205,10 @@ const DesignersHoverHero = () => {
               )}
             </div>
 
-            {/* Mobile A–Z jump strip — pinned to the sheet (outside the scroll
+            {/* Mobile A–Z jump rail — pinned to the sheet (outside the scroll
                 container) so it stays visible while the list scrolls. */}
             {!isSearching && groupedResults.length > 0 && (() => {
-              const jumpTo = (letter: string) => {
+              const jumpTo = (letter: string, opts: { haptic?: boolean } = {}) => {
                 const scroller = searchScrollRef.current;
                 const row = scroller?.querySelector<HTMLElement>(
                   `[data-designer-letter="${letter}"]`
@@ -1216,50 +1216,111 @@ const DesignersHoverHero = () => {
                 if (!scroller || !row) return;
                 scroller.scrollTo({ top: row.offsetTop, behavior: "auto" });
                 setActiveMobileLetter(letter);
-                if ("vibrate" in navigator) {
-                  try { navigator.vibrate?.(4); } catch {}
+                if (opts.haptic !== false && "vibrate" in navigator) {
+                  try { navigator.vibrate?.(6); } catch {}
                 }
               };
-              const handleTouch = (e: React.TouchEvent) => {
+              const resolveFromTouch = (t: React.Touch): { letter: string; y: number } | null => {
+                const track = azTrackRef.current;
+                if (!track) return null;
+                const rect = track.getBoundingClientRect();
+                const clampedY = Math.min(rect.bottom - 1, Math.max(rect.top, t.clientY));
+                const el = document.elementFromPoint(rect.left + rect.width / 2, clampedY) as HTMLElement | null;
+                const letter = el?.closest<HTMLElement>("[data-az-letter]")?.dataset.azLetter;
+                if (!letter) return null;
+                return { letter, y: clampedY };
+              };
+              const onTouchStart = (e: React.TouchEvent) => {
                 e.preventDefault();
                 const t = e.touches[0];
                 if (!t) return;
-                const el = document.elementFromPoint(t.clientX, t.clientY) as HTMLElement | null;
-                const letter = el?.closest<HTMLElement>("[data-az-letter]")?.dataset.azLetter;
-                if (letter) jumpTo(letter);
+                setAzDragging(true);
+                const info = resolveFromTouch(t);
+                if (info) {
+                  setAzMagnifier(info);
+                  if (info.letter !== activeMobileLetter) jumpTo(info.letter);
+                }
+              };
+              const onTouchMove = (e: React.TouchEvent) => {
+                e.preventDefault();
+                const t = e.touches[0];
+                if (!t) return;
+                const info = resolveFromTouch(t);
+                if (!info) return;
+                setAzMagnifier(info);
+                if (info.letter !== activeMobileLetter) jumpTo(info.letter);
+              };
+              const onTouchEnd = () => {
+                setAzDragging(false);
+                setAzMagnifier(null);
               };
               return (
-                <nav
-                  ref={(n) => { azTrackRef.current = n; }}
-                  aria-label="Jump to letter"
-                  onTouchStart={handleTouch}
-                  onTouchMove={handleTouch}
-                  className="md:hidden fixed top-[58%] -translate-y-1/2 right-3 z-[100] flex flex-col items-center gap-0 py-3 px-1.5 select-none touch-none rounded-full bg-white shadow-[0_4px_20px_-4px_rgba(0,0,0,0.25)] overflow-y-auto max-h-[80vh]"
-                >
-                  {groupedResults.map(([letter]) => {
-                    const isActive = activeMobileLetter === letter;
-                    return (
-                      <button
-                        key={letter}
-                        type="button"
-                        data-az-letter={letter}
-                        onClick={() => jumpTo(letter)}
-                        aria-label={`Jump to ${letter}`}
-                        aria-current={isActive ? "true" : undefined}
-                        className={cn(
-                          "relative font-body text-[13px] leading-none tracking-[0.04em] w-7 min-h-[26px] flex items-center justify-center transition-colors rounded-full",
-                          isActive ? "bg-black text-white font-semibold" : "text-black/80 hover:bg-black/5"
-                        )}
-                        style={{ WebkitTapHighlightColor: "transparent" }}
-                      >
-                        <span className="pointer-events-none absolute -inset-y-1 -left-3 -right-3" aria-hidden />
-                        {letter}
-                      </button>
-                    );
-                  })}
-                </nav>
+                <>
+                  <nav
+                    ref={(n) => { azTrackRef.current = n; }}
+                    aria-label="Jump to letter"
+                    onTouchStart={onTouchStart}
+                    onTouchMove={onTouchMove}
+                    onTouchEnd={onTouchEnd}
+                    onTouchCancel={onTouchEnd}
+                    className={cn(
+                      "md:hidden fixed top-1/2 -translate-y-1/2 right-1.5 z-[100] flex flex-col items-stretch justify-center gap-0 py-2 px-1 select-none touch-none rounded-full max-h-[86vh] transition-colors duration-150",
+                      azDragging
+                        ? "bg-white/95 shadow-[0_6px_24px_-6px_rgba(0,0,0,0.35)]"
+                        : "bg-white/70 backdrop-blur-sm shadow-[0_2px_10px_-4px_rgba(0,0,0,0.2)]"
+                    )}
+                  >
+                    {groupedResults.map(([letter]) => {
+                      const isActive = activeMobileLetter === letter;
+                      const dim = azDragging && !isActive;
+                      return (
+                        <button
+                          key={letter}
+                          type="button"
+                          data-az-letter={letter}
+                          onClick={() => jumpTo(letter)}
+                          aria-label={`Jump to ${letter}`}
+                          aria-current={isActive ? "true" : undefined}
+                          className={cn(
+                            "relative font-body text-[12px] leading-none tracking-[0.04em] w-7 flex items-center justify-center rounded-full transition-all duration-100",
+                            "min-h-[22px]",
+                            isActive
+                              ? "text-black font-bold scale-110"
+                              : dim
+                              ? "text-black/40"
+                              : "text-black/75"
+                          )}
+                          style={{ WebkitTapHighlightColor: "transparent" }}
+                        >
+                          {/* Enlarged invisible hit target (~40px tall, wider grab zone) */}
+                          <span
+                            className="pointer-events-none absolute -inset-y-2 -left-4 -right-4"
+                            aria-hidden
+                          />
+                          {letter}
+                        </button>
+                      );
+                    })}
+                  </nav>
+
+                  {/* Magnifier pop-out — large bubble to the left of the finger */}
+                  {azMagnifier && (
+                    <div
+                      aria-hidden
+                      className="md:hidden fixed right-14 z-[101] pointer-events-none"
+                      style={{ top: azMagnifier.y, transform: "translateY(-50%)" }}
+                    >
+                      <div className="w-16 h-16 rounded-full bg-white shadow-[0_10px_30px_-6px_rgba(0,0,0,0.45)] flex items-center justify-center border border-black/5">
+                        <span className="font-display text-[28px] font-bold text-black leading-none">
+                          {azMagnifier.letter}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </>
               );
             })()}
+
 
 
 
