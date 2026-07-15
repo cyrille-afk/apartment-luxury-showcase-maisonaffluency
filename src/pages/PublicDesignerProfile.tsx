@@ -27,7 +27,7 @@ import { optimizeImageUrl } from "@/lib/cloudinary-optimize";
 import { consumeProductBackRef } from "@/lib/designerBackRef";
 import { isChildBrandDesigner, isParentBrandDesigner } from "@/lib/designerHierarchy";
 import { toOgImage } from "@/lib/ogImage";
-import { sortCuratorPicks } from "@/lib/curatorPickSort";
+import { sortCuratorPicks, interleaveBySubcategory } from "@/lib/curatorPickSort";
 import FloatingScrollNav from "@/components/FloatingScrollNav";
 import { useAuth } from "@/hooks/useAuth";
 // Collectible profiles are public; product-page gating lives in PublicProductPage.
