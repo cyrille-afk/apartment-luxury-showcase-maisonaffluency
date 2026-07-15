@@ -1762,7 +1762,9 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
               sectionLabel="all Designers"
               onOpenChange={setSidebarOpen}
               isOpen={sidebarOpen}
-            />
+            >
+              {mode === "designers" && <DesignerFacetsSidebar designers={topLevelItems} />}
+            </CategorySidebar>
             <div className="flex-1 min-w-0">
               {isLoading && (
                 <div className="flex items-center justify-center py-32">
