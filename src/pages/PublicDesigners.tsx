@@ -129,13 +129,17 @@ function ScrollLockedDesigners({
     const body = document.body;
     const prevHtml = html.style.overflow;
     const prevBody = body.style.overflow;
-    html.style.overflow = "hidden";
+    const prevOverscroll = (body.style as any).overscrollBehavior;
+    // Only lock body; leaving html scrollable avoids an iOS Chrome quirk that
+    // freezes nested overflow-y-auto scrollers when both html+body are hidden.
     body.style.overflow = "hidden";
+    (body.style as any).overscrollBehavior = "none";
     const unlock = () => setLocked(false);
     window.addEventListener("unlockDesignersScroll", unlock);
     return () => {
       html.style.overflow = prevHtml;
       body.style.overflow = prevBody;
+      (body.style as any).overscrollBehavior = prevOverscroll;
       window.removeEventListener("unlockDesignersScroll", unlock);
     };
   }, [locked]);
