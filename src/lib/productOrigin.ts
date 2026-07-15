@@ -4,15 +4,30 @@
 const COUNTRY_ALIASES: Record<string, string> = {
   portuga: "Portugal",
   portugual: "Portugal",
+  thailande: "Thailand",
   "united states of america": "United States",
   usa: "United States",
   us: "United States",
+  usd: "United States",
   uk: "United Kingdom",
+};
+
+// Regions/cities that should roll up to their parent country so the facet
+// stays a clean list of countries (no "Sicily" and "Italy" side by side).
+const REGION_TO_COUNTRY: Record<string, string> = {
+  sicily: "Italy",
+  lombardy: "Italy",
+  milan: "Italy",
+  murano: "Italy",
+  tuscany: "Italy",
+  verona: "Italy",
+  vallauris: "France",
 };
 
 function normalizeCountry(raw: string): string {
   const trimmed = raw.replace(/[.]+$/, "").trim();
   const key = trimmed.toLowerCase();
+  if (REGION_TO_COUNTRY[key]) return REGION_TO_COUNTRY[key];
   if (COUNTRY_ALIASES[key]) return COUNTRY_ALIASES[key];
   // Title-case fallback so casing stays consistent.
   return trimmed;
@@ -26,6 +41,7 @@ function stripPrefix(value: string): string {
     .replace(/^hancrafted\s+in\s+/i, "")
     .replace(/^handmade\s+in\s+the\s+/i, "")
     .replace(/^handmade\s+in\s+/i, "")
+    .replace(/^handmande\s+in\s+/i, "")
     .replace(/^made\s+in\s+the\s+/i, "")
     .replace(/^made\s+in\s+/i, "")
     .trim();
