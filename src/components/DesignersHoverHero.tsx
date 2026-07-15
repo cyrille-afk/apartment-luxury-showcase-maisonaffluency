@@ -182,6 +182,10 @@ const DesignersHoverHero = () => {
   const sectionRef = useRef<HTMLElement>(null);
   const portalRef = useRef<HTMLAnchorElement>(null);
   const portalCursorRef = useRef<HTMLDivElement>(null);
+  const activeSlugRef = useRef<string | null>(null);
+  useEffect(() => {
+    activeSlugRef.current = activeSlug;
+  });
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -346,6 +350,14 @@ const DesignersHoverHero = () => {
       if (startY === null) return;
       const y = e.touches[0].clientY;
       accum = startY - y;
+      // At list boundary and swiping past it → release to window so the page
+      // scrolls down into the Directory (or up to the header).
+      const idx = items.findIndex((d) => d.slug === activeSlugRef.current);
+      const atLast = idx === items.length - 1;
+      const atFirst = idx <= 0;
+      if ((atLast && accum > 0) || (atFirst && accum < 0)) {
+        return; // don't preventDefault; let native scroll take over
+      }
       if (e.cancelable) e.preventDefault();
       if (lock) return;
       if (Math.abs(accum) > SWIPE_THRESHOLD) {
