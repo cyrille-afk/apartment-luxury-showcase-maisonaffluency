@@ -1269,11 +1269,11 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
   const designerCountriesById = useMemo(() => {
     const m = new Map<string, Set<string>>();
     for (const p of curatorPicksData as Array<{ designer_id: string; origin?: string | null }>) {
-      const c = originToCountry(p.origin);
-      if (!c) continue;
+      const countries = originToCountries(p.origin);
+      if (!countries.length) continue;
       let set = m.get(p.designer_id);
       if (!set) { set = new Set(); m.set(p.designer_id, set); }
-      set.add(c);
+      countries.forEach((c) => set!.add(c));
     }
     return m;
   }, [curatorPicksData]);
