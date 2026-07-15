@@ -48,6 +48,7 @@ var search_curator_picks_default = defineTool({
     if (input.designer_slug) {
       const { data: d } = await supabase.from("designers").select("id, name").eq("slug", input.designer_slug).eq("is_published", true).eq("trade_only", false).maybeSingle();
       if (!d) {
+        logCall(0);
         return {
           content: [{ type: "text", text: `No public designer found for slug "${input.designer_slug}".` }],
           structuredContent: { results: [], total: 0 }

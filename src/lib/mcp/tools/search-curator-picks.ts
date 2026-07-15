@@ -66,6 +66,7 @@ export default defineTool({
         .eq("trade_only", false)
         .maybeSingle();
       if (!d) {
+        logCall(0);
         return {
           content: [{ type: "text", text: `No public designer found for slug "${input.designer_slug}".` }],
           structuredContent: { results: [], total: 0 },
