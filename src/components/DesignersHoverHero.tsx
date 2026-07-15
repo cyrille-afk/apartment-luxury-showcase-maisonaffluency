@@ -1428,8 +1428,8 @@ const DesignersHoverHero = () => {
                           aria-label={`Jump to ${letter}`}
                           aria-current={isActive ? "true" : undefined}
                           className={cn(
-                            "relative font-body text-[12px] leading-none tracking-[0.04em] w-7 flex items-center justify-center rounded-full transition-all duration-100",
-                            "min-h-[22px]",
+                            "relative font-body text-[13px] leading-none tracking-[0.04em] w-7 flex items-center justify-center rounded-full transition-all duration-100",
+                            "flex-1 min-h-[30px]",
                             isActive
                               ? "text-black font-bold scale-110"
                               : dim
