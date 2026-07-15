@@ -1037,7 +1037,7 @@ const PickCard = ({ pick, onFavorite, isFavorited }: { pick: PickItem; onFavorit
           });
         }
       }}
-      className="group block w-full text-left rounded-xl overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background"
+      className="group flex flex-col w-full text-left rounded-xl overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background"
     >
 
       <div className="aspect-[4/5] bg-muted/20 overflow-hidden relative">
