@@ -187,6 +187,7 @@ const DesignersHoverHero = () => {
   const [azDragging, setAzDragging] = useState(false);
   const [azMagnifier, setAzMagnifier] = useState<{ letter: string; y: number } | null>(null);
   const azTrackRef = useRef<HTMLElement | null>(null);
+  const [azRailRect, setAzRailRect] = useState<{ top: number; height: number } | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const searchScrollRef = useRef<HTMLDivElement>(null);
   const directoryRef = useRef<HTMLDivElement>(null);
@@ -645,6 +646,30 @@ const DesignersHoverHero = () => {
     scroller.addEventListener("scroll", compute, { passive: true });
     return () => scroller.removeEventListener("scroll", compute);
   }, [searchOpen, isSearching, groupedResults]);
+
+  // Sync mobile A–Z rail bounds to the search list container so the rail
+  // matches the list height exactly (never overlapping the close X above).
+  useEffect(() => {
+    if (!searchOpen) {
+      setAzRailRect(null);
+      return;
+    }
+    const compute = () => {
+      const scroller = searchScrollRef.current;
+      if (!scroller) return;
+      const r = scroller.getBoundingClientRect();
+      setAzRailRect({ top: r.top, height: r.height });
+    };
+    compute();
+    const raf = window.requestAnimationFrame(compute);
+    window.addEventListener("resize", compute);
+    window.addEventListener("scroll", compute, { passive: true });
+    return () => {
+      window.cancelAnimationFrame(raf);
+      window.removeEventListener("resize", compute);
+      window.removeEventListener("scroll", compute);
+    };
+  }, [searchOpen, groupedResults]);
 
   // Keep Directory y-aligned with MASTERS.
   useEffect(() => {
@@ -1409,8 +1434,14 @@ const DesignersHoverHero = () => {
                     onTouchMove={onTouchMove}
                     onTouchEnd={onTouchEnd}
                     onTouchCancel={onTouchEnd}
+                    style={
+                      azRailRect
+                        ? { top: azRailRect.top, height: azRailRect.height }
+                        : undefined
+                    }
                     className={cn(
-                      "md:hidden fixed top-1/2 -translate-y-1/2 right-3 z-[100] flex flex-col items-stretch justify-center gap-0 py-3 px-1 select-none touch-none rounded-full max-h-[92vh] transition-colors duration-150",
+                      "md:hidden fixed right-3 z-[100] flex flex-col items-stretch justify-center gap-0 py-2 px-1 select-none touch-none rounded-full transition-colors duration-150",
+                      !azRailRect && "top-1/2 -translate-y-1/2 max-h-[92vh]",
                       azDragging
                         ? "bg-white/95 shadow-[0_6px_24px_-6px_rgba(0,0,0,0.35)]"
                         : "bg-white/70 backdrop-blur-sm shadow-[0_2px_10px_-4px_rgba(0,0,0,0.2)]"
