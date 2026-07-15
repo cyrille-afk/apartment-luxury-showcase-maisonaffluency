@@ -10,6 +10,8 @@ import { defineTool } from "npm:@lovable.dev/mcp-js@0.22.0";
 import { createClient } from "npm:@supabase/supabase-js@^2.108.2";
 import { z } from "npm:zod@^3.25.76";
 var SITE_ORIGIN = "https://www.maisonaffluency.com";
+var CLICK_ORIGIN = `${process.env.SUPABASE_URL}/functions/v1/mcp-click`;
+var TRADE_SIGNUP_URL = `${CLICK_ORIGIN}?to=signup`;
 function getClient() {
   const url = process.env.SUPABASE_URL;
   const anon = process.env.SUPABASE_PUBLISHABLE_KEY ?? process.env.SUPABASE_ANON_KEY;

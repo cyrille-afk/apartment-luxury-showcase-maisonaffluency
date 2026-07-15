@@ -9,6 +9,11 @@ import { z } from "zod";
 // the same rule; trade net prices never leave the app over MCP.
 
 const SITE_ORIGIN = "https://www.maisonaffluency.com";
+// Click-tracked redirector. Logs the click server-side then 302s to the real page.
+const CLICK_ORIGIN = `${process.env.SUPABASE_URL}/functions/v1/mcp-click`;
+const trackProductUrl = (slug: string, pickId: string) =>
+  `${CLICK_ORIGIN}?to=product&slug=${encodeURIComponent(slug)}&pick=${pickId}`;
+const TRADE_SIGNUP_URL = `${CLICK_ORIGIN}?to=signup`;
 
 function getClient() {
   const url = process.env.SUPABASE_URL!;
