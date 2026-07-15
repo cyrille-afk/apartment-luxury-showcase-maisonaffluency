@@ -1289,7 +1289,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
       base = base.filter((p) => pickMatchesCategoryFilter(p, selectedCategory, selectedSubcategory));
     }
     if (facetCountry) {
-      base = base.filter((p) => originToCountry(p.origin) === facetCountry);
+      base = base.filter((p) => originToCountries(p.origin).includes(facetCountry));
     }
     if (facetFinish && finishMap) {
       base = base.filter((p) => finishMap.byPick.get(p.id)?.has(facetFinish));
