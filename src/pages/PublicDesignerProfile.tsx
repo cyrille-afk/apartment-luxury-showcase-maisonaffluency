@@ -1147,7 +1147,7 @@ const PublicDesignerProfile = () => {
                       <Link
                         to={productHref}
                         onClick={handleCardClick}
-                        aria-label={`${pick.title}${pick.subtitle ? ` — ${pick.subtitle}` : ""}`}
+                        aria-label={`${displayTitle}${pick.subtitle ? ` — ${pick.subtitle}` : ""}`}
                         className="aspect-square md:aspect-[4/5] bg-muted/30 rounded-xl overflow-hidden mb-2 md:mb-2 relative flex items-center justify-center cursor-pointer"
                       >
                         <img
