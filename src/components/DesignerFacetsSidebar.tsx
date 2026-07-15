@@ -83,7 +83,6 @@ const DesignerFacetsSidebar: React.FC<Props> = ({ designers }) => {
         active={activeFinish}
         pathname={location.pathname}
         params={searchParams}
-        defaultOpen
       />
       <Section
         heading="Place of Origin"
