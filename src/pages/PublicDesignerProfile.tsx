@@ -7,7 +7,7 @@ import { ArrowLeft, Package, FileText, Maximize2, Share2, Check, ChevronDown } f
 import ProductCardDescriptionOverlay from "@/components/ui/ProductCardDescriptionOverlay";
 import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 import SpecSheetButton, { type PdfEntry } from "@/components/trade/SpecSheetButton";
-import { useDesigner, useDesignerByName, useDesignerPicks, useGroupedDesignerPicks } from "@/hooks/useDesigner";
+import { useDesigner, useDesignerByName, useDesignerPicks, useGroupedDesignerPicks, useAllDesigners } from "@/hooks/useDesigner";
 import type { AttributedCuratorPick } from "@/hooks/useDesigner";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -46,6 +46,19 @@ function responsiveCloudinaryUrl(url: string, width: number): string {
 /** Mirrors the slugifier used by PublicProductLightbox + PublicProductPage. */
 const slugifyProduct = (s: string) =>
   s.toLowerCase().replace(/['']/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+
+/**
+ * Cosmetic attribution parser for curator picks whose title encodes the
+ * attributed designer inline (e.g. "Firefly Chandelier by Damien Langlois-Meurinne").
+ * Returns the cleaned title and, when present, the attributed designer name.
+ * Case-insensitive on " by ". Does not touch the underlying pick row.
+ */
+function parseByAttribution(title: string): { cleanTitle: string; attribution?: string } {
+  if (!title) return { cleanTitle: title };
+  const m = title.match(/^(.+?)\s+by\s+(.+)$/i);
+  if (!m) return { cleanTitle: title };
+  return { cleanTitle: m[1].trim(), attribution: m[2].trim() };
+}
 
 function pickSrcSet(url: string): string {
   return [300, 400, 600, 800].map((w) => `${responsiveCloudinaryUrl(url, w)} ${w}w`).join(", ");
@@ -417,6 +430,16 @@ const PublicDesignerProfile = () => {
     { publicOnly: true }
   );
   const { data: ownPicks = [] } = useDesignerPicks(designer?.id, { publicOnly: true });
+  const { data: allDesignersForLookup = [] } = useAllDesigners();
+  // name (lower-case, normalized) -> slug, for parsed "by X" attribution linking.
+  const designerSlugByName = useMemo(() => {
+    const m = new Map<string, string>();
+    const norm = (s: string) => s.toLowerCase().replace(/\s+/g, " ").trim();
+    for (const d of allDesignersForLookup as any[]) {
+      if (d?.name && d?.slug && d?.is_published) m.set(norm(d.name), d.slug);
+    }
+    return m;
+  }, [allDesignersForLookup]);
   const { data: heritageSlides = [] } = useHeritageSlides(designer?.id);
   const { data: instagramPosts = [] } = useDesignerInstagramPosts(designer?.id);
   const isGrouped = isParentBrand && groupedPicks.length > 0;
@@ -1029,8 +1052,30 @@ const PublicDesignerProfile = () => {
 
                 {picks.map((pick) => {
                   const ap = pick as AttributedCuratorPick;
-                  const designerLabel = isGrouped && ap.designer_name && ap.designer_name !== designer.name ? ap.designer_name : undefined;
-                  const designerSlug = isGrouped && ap.designer_slug ? ap.designer_slug : undefined;
+                  // Primary: attribution row on grouped picks (child designer rows).
+                  const rawDesignerLabel = isGrouped && ap.designer_name && ap.designer_name !== designer.name ? ap.designer_name : undefined;
+                  const rawDesignerSlug = isGrouped && ap.designer_slug && ap.designer_slug !== designer.slug ? ap.designer_slug : undefined;
+                  // Cosmetic fallback: for parent-brand picks whose title encodes
+                  // the attributed designer inline (e.g. "Firefly Chandelier by
+                  // Damien Langlois-Meurinne"), parse the "by X" tail and use it
+                  // as the attribution label — even for cross-brand names not in
+                  // the parent's sub-designer set (DLM under Sé Collections, etc.).
+                  const parsed = parseByAttribution(pick.title);
+                  const parsedLabel =
+                    !rawDesignerLabel &&
+                    parsed.attribution &&
+                    parsed.attribution.toLowerCase() !== (designer.name || "").toLowerCase()
+                      ? parsed.attribution
+                      : undefined;
+                  const parsedSlug = parsedLabel
+                    ? designerSlugByName.get(parsedLabel.toLowerCase().replace(/\s+/g, " ").trim())
+                    : undefined;
+                  const designerLabel = rawDesignerLabel || parsedLabel;
+                  const designerSlug = rawDesignerSlug || parsedSlug;
+                  // Only strip the "by X" tail from the displayed title when we
+                  // actually used the parsed attribution — never touch titles
+                  // that already have a proper attribution row.
+                  const displayTitle = parsedLabel ? parsed.cleanTitle : pick.title;
                   const hasMultipleSizes = !!pick.dimensions && pick.dimensions.includes("\n");
                   // Parent brand attribution: show on every child-designer card when a parent designer page exists
                   const showParentBrand =
@@ -1059,7 +1104,7 @@ const PublicDesignerProfile = () => {
                     e.preventDefault();
                     setLightboxItem({
                       id: pick.id,
-                      title: pick.title,
+                      title: displayTitle,
                       subtitle: pick.subtitle,
                       image_url: pick.image_url,
                       hover_image_url: pick.hover_image_url,
@@ -1102,7 +1147,7 @@ const PublicDesignerProfile = () => {
                       <Link
                         to={productHref}
                         onClick={handleCardClick}
-                        aria-label={`${pick.title}${pick.subtitle ? ` — ${pick.subtitle}` : ""}`}
+                        aria-label={`${displayTitle}${pick.subtitle ? ` — ${pick.subtitle}` : ""}`}
                         className="aspect-square md:aspect-[4/5] bg-muted/30 rounded-xl overflow-hidden mb-2 md:mb-2 relative flex items-center justify-center cursor-pointer"
                       >
                         <img
@@ -1240,7 +1285,7 @@ const PublicDesignerProfile = () => {
                         {/* Product name — primary (deep link so the URL is shareable/copyable) */}
                         <h3 className="font-display text-[14px] md:text-sm tracking-wide leading-snug mt-2 line-clamp-2">
                           <Link to={productHref} onClick={handleCardClick} className="hover:text-foreground/70 transition-colors">
-                            {pick.title}
+                            {displayTitle}
                           </Link>
                         </h3>
 
