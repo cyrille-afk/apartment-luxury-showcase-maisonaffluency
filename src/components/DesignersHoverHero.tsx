@@ -1410,7 +1410,7 @@ const DesignersHoverHero = () => {
                     onTouchEnd={onTouchEnd}
                     onTouchCancel={onTouchEnd}
                     className={cn(
-                      "md:hidden fixed top-1/2 -translate-y-1/2 right-1.5 z-[100] flex flex-col items-stretch justify-center gap-0 py-2 px-1 select-none touch-none rounded-full max-h-[86vh] transition-colors duration-150",
+                      "md:hidden fixed top-1/2 -translate-y-1/2 right-3 z-[100] flex flex-col items-stretch justify-center gap-0 py-3 px-1 select-none touch-none rounded-full max-h-[92vh] transition-colors duration-150",
                       azDragging
                         ? "bg-white/95 shadow-[0_6px_24px_-6px_rgba(0,0,0,0.35)]"
                         : "bg-white/70 backdrop-blur-sm shadow-[0_2px_10px_-4px_rgba(0,0,0,0.2)]"
@@ -1428,8 +1428,8 @@ const DesignersHoverHero = () => {
                           aria-label={`Jump to ${letter}`}
                           aria-current={isActive ? "true" : undefined}
                           className={cn(
-                            "relative font-body text-[12px] leading-none tracking-[0.04em] w-7 flex items-center justify-center rounded-full transition-all duration-100",
-                            "min-h-[22px]",
+                            "relative font-body text-[13px] leading-none tracking-[0.04em] w-7 flex items-center justify-center rounded-full transition-all duration-100",
+                            "flex-1 min-h-[30px]",
                             isActive
                               ? "text-black font-bold scale-110"
                               : dim
