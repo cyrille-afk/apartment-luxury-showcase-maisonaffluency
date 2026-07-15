@@ -430,6 +430,16 @@ const PublicDesignerProfile = () => {
     { publicOnly: true }
   );
   const { data: ownPicks = [] } = useDesignerPicks(designer?.id, { publicOnly: true });
+  const { data: allDesignersForLookup = [] } = useAllDesigners();
+  // name (lower-case, normalized) -> slug, for parsed "by X" attribution linking.
+  const designerSlugByName = useMemo(() => {
+    const m = new Map<string, string>();
+    const norm = (s: string) => s.toLowerCase().replace(/\s+/g, " ").trim();
+    for (const d of allDesignersForLookup as any[]) {
+      if (d?.name && d?.slug && d?.is_published) m.set(norm(d.name), d.slug);
+    }
+    return m;
+  }, [allDesignersForLookup]);
   const { data: heritageSlides = [] } = useHeritageSlides(designer?.id);
   const { data: instagramPosts = [] } = useDesignerInstagramPosts(designer?.id);
   const isGrouped = isParentBrand && groupedPicks.length > 0;
