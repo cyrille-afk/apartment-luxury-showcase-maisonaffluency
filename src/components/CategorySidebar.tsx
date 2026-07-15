@@ -62,11 +62,8 @@ const CategorySidebar: React.FC<CategorySidebarProps> = ({ activeCategory, activ
 
   return (
     <aside className={cn("hidden md:flex flex-col shrink-0 pr-1 sticky top-24 self-start max-h-[calc(100vh-7rem)] overflow-y-auto pt-4 w-44 lg:w-48", className)}>
-      {/* Categories heading + Clear All */}
-      <div className="flex items-center justify-between mb-3 pl-1 pr-0.5">
-        <span className="font-body text-[11px] uppercase tracking-[0.2em] text-foreground font-semibold">
-          Categories
-        </span>
+      {/* Clear All (kept out of the Categories accordion so it's always reachable) */}
+      <div className="flex items-center justify-end mb-2 pl-1 pr-0.5">
         <button
           onClick={handleClearAll}
           className={cn(
@@ -80,8 +77,10 @@ const CategorySidebar: React.FC<CategorySidebarProps> = ({ activeCategory, activ
         </button>
       </div>
 
-      {/* Category list */}
+      {/* Categories accordion — closed by default; opens automatically if a category is active */}
+      <CategoriesAccordion defaultOpen={!!hasActiveFilter}>
       <nav className="flex flex-col animate-in slide-in-from-left-2 duration-200">
+
         {CATEGORY_ORDER.map(cat => {
           const isExpanded = expandedCats.has(cat);
           const isActiveCat = activeCategory === cat;
