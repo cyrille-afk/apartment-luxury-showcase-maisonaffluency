@@ -1262,14 +1262,21 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
   const picksLoading = fullPicksLoading || (fullPicksFetching && fullPicks.length === 0);
 
   const { data: finishMap } = useDesignerFinishFamilies();
-  const designerCountryById = useMemo(() => {
-    const m = new Map<string, string>();
-    for (const d of allDesigners) {
-      const c = (d as any).country;
-      if (c) m.set(d.id, c);
+  // Derive each designer's places of origin from the countries where their
+  // curator picks are actually handcrafted — not from designers.country (which
+  // stores studio HQ / nationality and is misleading for a "Place of Origin"
+  // facet).
+  const designerCountriesById = useMemo(() => {
+    const m = new Map<string, Set<string>>();
+    for (const p of curatorPicksData as Array<{ designer_id: string; origin?: string | null }>) {
+      const c = originToCountry(p.origin);
+      if (!c) continue;
+      let set = m.get(p.designer_id);
+      if (!set) { set = new Set(); m.set(p.designer_id, set); }
+      set.add(c);
     }
     return m;
-  }, [allDesigners]);
+  }, [curatorPicksData]);
 
   // In "products" mode, when a filter is active we switch to a product grid view.
   // In "designers" mode (default, used on /designers), filteredPicks is always
