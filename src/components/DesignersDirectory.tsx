@@ -1441,12 +1441,8 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
   // card; the child card here shows the atelier as its parentLabel for context.
   const topLevelItems = useMemo(() => searchFiltered, [searchFiltered]);
 
-  // URL-driven facet filters (finish / country). Kept in the URL so
-  // every combination is a real, crawlable link.
-  const [searchParams] = useSearchParams();
-  const facetCountry = searchParams.get("country");
-  const facetFinish = searchParams.get("finish");
-  const { data: finishMap } = useDesignerFinishFamilies();
+  // Facet filters read earlier (see filteredPicks) — reused here for `filteredItems`.
+
 
   // Apply category/subcategory filter
   const filteredItems = useMemo(() => {
