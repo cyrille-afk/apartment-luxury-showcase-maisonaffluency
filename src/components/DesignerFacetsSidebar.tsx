@@ -144,6 +144,14 @@ const Section: React.FC<SectionProps> = ({ heading, paramKey, options, active, p
                   to={href}
                   rel={isActive ? undefined : "nofollow"}
                   aria-pressed={isActive}
+                  preventScrollReset
+                  onClick={() => {
+                    // Keep the user anchored on the results, not the hero above.
+                    requestAnimationFrame(() => {
+                      const bar = document.querySelector('[data-sticky-filter-bar]') as HTMLElement | null;
+                      if (bar) bar.scrollIntoView({ block: "start", behavior: "smooth" });
+                    });
+                  }}
                   className={cn(
                     "flex items-center justify-between rounded px-2 py-1.5 font-body text-[10px] tracking-[0.15em] transition-colors",
                     isActive ? "text-[hsl(var(--accent))] font-semibold" : "text-foreground hover:bg-muted",
