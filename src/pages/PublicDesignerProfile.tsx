@@ -1052,8 +1052,30 @@ const PublicDesignerProfile = () => {
 
                 {picks.map((pick) => {
                   const ap = pick as AttributedCuratorPick;
-                  const designerLabel = isGrouped && ap.designer_name && ap.designer_name !== designer.name ? ap.designer_name : undefined;
-                  const designerSlug = isGrouped && ap.designer_slug ? ap.designer_slug : undefined;
+                  // Primary: attribution row on grouped picks (child designer rows).
+                  const rawDesignerLabel = isGrouped && ap.designer_name && ap.designer_name !== designer.name ? ap.designer_name : undefined;
+                  const rawDesignerSlug = isGrouped && ap.designer_slug && ap.designer_slug !== designer.slug ? ap.designer_slug : undefined;
+                  // Cosmetic fallback: for parent-brand picks whose title encodes
+                  // the attributed designer inline (e.g. "Firefly Chandelier by
+                  // Damien Langlois-Meurinne"), parse the "by X" tail and use it
+                  // as the attribution label — even for cross-brand names not in
+                  // the parent's sub-designer set (DLM under Sé Collections, etc.).
+                  const parsed = parseByAttribution(pick.title);
+                  const parsedLabel =
+                    !rawDesignerLabel &&
+                    parsed.attribution &&
+                    parsed.attribution.toLowerCase() !== (designer.name || "").toLowerCase()
+                      ? parsed.attribution
+                      : undefined;
+                  const parsedSlug = parsedLabel
+                    ? designerSlugByName.get(parsedLabel.toLowerCase().replace(/\s+/g, " ").trim())
+                    : undefined;
+                  const designerLabel = rawDesignerLabel || parsedLabel;
+                  const designerSlug = rawDesignerSlug || parsedSlug;
+                  // Only strip the "by X" tail from the displayed title when we
+                  // actually used the parsed attribution — never touch titles
+                  // that already have a proper attribution row.
+                  const displayTitle = parsedLabel ? parsed.cleanTitle : pick.title;
                   const hasMultipleSizes = !!pick.dimensions && pick.dimensions.includes("\n");
                   // Parent brand attribution: show on every child-designer card when a parent designer page exists
                   const showParentBrand =
