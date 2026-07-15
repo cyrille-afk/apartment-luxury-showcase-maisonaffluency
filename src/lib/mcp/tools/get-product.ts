@@ -6,7 +6,10 @@ import { z } from "zod";
 // pick. Pricing is always "Price on Request" — trade net prices, tearsheet PDFs,
 // and CAD assets remain gated behind trade registration on the site itself.
 
-const SITE_ORIGIN = "https://www.maisonaffluency.com";
+const CLICK_ORIGIN = `${process.env.SUPABASE_URL}/functions/v1/mcp-click`;
+const trackProductUrl = (slug: string, pickId: string) =>
+  `${CLICK_ORIGIN}?to=product&slug=${encodeURIComponent(slug)}&pick=${pickId}`;
+const TRADE_SIGNUP_URL = `${CLICK_ORIGIN}?to=signup`;
 
 function getClient() {
   const url = process.env.SUPABASE_URL!;
@@ -25,6 +28,20 @@ export default defineTool({
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
   handler: async ({ pick_id }) => {
     const supabase = getClient();
+    const startedAt = Date.now();
+    const logCall = (result_count: number, is_error = false) => {
+      supabase
+        .from("mcp_query_log")
+        .insert({
+          tool_name: "get_product",
+          args: { pick_id },
+          result_count,
+          is_error,
+          duration_ms: Date.now() - startedAt,
+        })
+        .then(() => {}, () => {});
+    };
+
     const { data, error } = await supabase
       .from("designer_curator_picks_public")
       .select(
@@ -34,9 +51,11 @@ export default defineTool({
       .maybeSingle();
 
     if (error) {
+      logCall(0, true);
       return { content: [{ type: "text", text: `Lookup failed: ${error.message}` }], isError: true };
     }
     if (!data || data.is_hidden) {
+      logCall(0, true);
       return {
         content: [{ type: "text", text: "Product not found or not publicly available." }],
         isError: true,
@@ -50,6 +69,7 @@ export default defineTool({
       .maybeSingle();
 
     if (!designer || !designer.is_published || designer.trade_only) {
+      logCall(0, true);
       return {
         content: [{ type: "text", text: "Product not found or not publicly available." }],
         isError: true,
@@ -79,7 +99,8 @@ export default defineTool({
       gallery_captions: data.gallery_captions ?? null,
       photo_credit: data.photo_credit,
       price: "Price on Request",
-      product_url: `${SITE_ORIGIN}/designers/${designer.slug}?pick=${data.id}`,
+      product_url: trackProductUrl(designer.slug, data.id),
+      trade_signup_url: TRADE_SIGNUP_URL,
       tearsheet_note:
         "Tearsheet PDFs and net trade pricing are available only to registered trade members on maisonaffluency.com.",
     };
@@ -98,6 +119,7 @@ export default defineTool({
       .filter(Boolean)
       .join("\n");
 
+    logCall(1);
     return {
       content: [{ type: "text", text }],
       structuredContent: { product },

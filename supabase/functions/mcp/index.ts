@@ -120,7 +120,9 @@ var search_curator_picks_default = defineTool({
 import { defineTool as defineTool2 } from "npm:@lovable.dev/mcp-js@0.22.0";
 import { createClient as createClient2 } from "npm:@supabase/supabase-js@^2.108.2";
 import { z as z2 } from "npm:zod@^3.25.76";
-var SITE_ORIGIN = "https://www.maisonaffluency.com";
+var CLICK_ORIGIN2 = `${process.env.SUPABASE_URL}/functions/v1/mcp-click`;
+var trackProductUrl2 = (slug, pickId) => `${CLICK_ORIGIN2}?to=product&slug=${encodeURIComponent(slug)}&pick=${pickId}`;
+var TRADE_SIGNUP_URL2 = `${CLICK_ORIGIN2}?to=signup`;
 function getClient2() {
   const url = process.env.SUPABASE_URL;
   const anon = process.env.SUPABASE_PUBLISHABLE_KEY ?? process.env.SUPABASE_ANON_KEY;
@@ -136,13 +138,27 @@ var get_product_default = defineTool2({
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
   handler: async ({ pick_id }) => {
     const supabase = getClient2();
+    const startedAt = Date.now();
+    const logCall = (result_count, is_error = false) => {
+      supabase.from("mcp_query_log").insert({
+        tool_name: "get_product",
+        args: { pick_id },
+        result_count,
+        is_error,
+        duration_ms: Date.now() - startedAt
+      }).then(() => {
+      }, () => {
+      });
+    };
     const { data, error } = await supabase.from("designer_curator_picks_public").select(
       "id, designer_id, title, subtitle, category, subcategory, materials, materials_description, dimensions, description, edition, edition_number, edition_signing, origin, lead_time, tags, image_url, gallery_images, gallery_captions, photo_credit, is_hidden"
     ).eq("id", pick_id).maybeSingle();
     if (error) {
+      logCall(0, true);
       return { content: [{ type: "text", text: `Lookup failed: ${error.message}` }], isError: true };
     }
     if (!data || data.is_hidden) {
+      logCall(0, true);
       return {
         content: [{ type: "text", text: "Product not found or not publicly available." }],
         isError: true
@@ -150,6 +166,7 @@ var get_product_default = defineTool2({
     }
     const { data: designer } = await supabase.from("designers").select("id, name, slug, is_published, trade_only").eq("id", data.designer_id).maybeSingle();
     if (!designer || !designer.is_published || designer.trade_only) {
+      logCall(0, true);
       return {
         content: [{ type: "text", text: "Product not found or not publicly available." }],
         isError: true
@@ -178,7 +195,8 @@ var get_product_default = defineTool2({
       gallery_captions: data.gallery_captions ?? null,
       photo_credit: data.photo_credit,
       price: "Price on Request",
-      product_url: `${SITE_ORIGIN}/designers/${designer.slug}?pick=${data.id}`,
+      product_url: trackProductUrl2(designer.slug, data.id),
+      trade_signup_url: TRADE_SIGNUP_URL2,
       tearsheet_note: "Tearsheet PDFs and net trade pricing are available only to registered trade members on maisonaffluency.com."
     };
     const text = [
@@ -192,6 +210,7 @@ var get_product_default = defineTool2({
       `Price: Price on Request`,
       `View: ${product.product_url}`
     ].filter(Boolean).join("\n");
+    logCall(1);
     return {
       content: [{ type: "text", text }],
       structuredContent: { product }
