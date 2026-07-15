@@ -9,7 +9,6 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import DesignersDirectory from "@/components/DesignersDirectory";
 import DesignersHoverHero from "@/components/DesignersHoverHero";
-import { useIsMobile } from "@/hooks/use-mobile";
 
 
 // ─── Back to Top Button ──────────────────────────────────────────────────────
@@ -97,10 +96,26 @@ function ScrollLockedDesigners({
   initialLetter?: string;
   initialExpand?: string;
 }) {
-  const [locked, setLocked] = useState(() =>
-    typeof window === "undefined" || window.matchMedia("(max-width: 767px)").matches
-  );
-  const isMobile = useIsMobile();
+  const shouldLockLanding = !initialLetter && !initialExpand;
+  const [locked, setLocked] = useState(() => {
+    if (!shouldLockLanding) return false;
+    return typeof window === "undefined" || window.matchMedia("(max-width: 767px)").matches;
+  });
+
+  useEffect(() => {
+    if (!shouldLockLanding) {
+      setLocked(false);
+      return;
+    }
+
+    const mql = window.matchMedia("(max-width: 767px)");
+    const update = () => {
+      setLocked(mql.matches);
+    };
+    update();
+    mql.addEventListener("change", update);
+    return () => mql.removeEventListener("change", update);
+  }, [shouldLockLanding]);
 
   useEffect(() => {
     if (!locked) return;
@@ -119,11 +134,6 @@ function ScrollLockedDesigners({
     };
   }, [locked]);
 
-  // Without the desktop A-Z jump bar, the page should scroll normally on desktop.
-  useEffect(() => {
-    if (!isMobile) setLocked(false);
-  }, [isMobile]);
-
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Navigation />
@@ -131,13 +141,15 @@ function ScrollLockedDesigners({
       <div className="pt-[var(--header-h)]">
         <h1 className="sr-only">Designers &amp; Ateliers</h1>
 
-        <div className={locked ? "overflow-hidden md:h-[calc(100svh-var(--header-h))]" : "pb-20"}>
+        <div className={locked ? "h-[calc(100svh-var(--header-h))] overflow-hidden" : "pb-20"}>
           <div className={locked ? "relative md:h-full" : "relative"}>
 
             <DesignersHoverHero />
             
           </div>
-          <DesignersDirectory mode="designers" initialLetter={initialLetter} initialExpand={initialExpand} showHeader={false} showAlphabetBar={false} />
+          {!locked && (
+            <DesignersDirectory mode="designers" initialLetter={initialLetter} initialExpand={initialExpand} showHeader={false} showAlphabetBar={false} />
+          )}
         </div>
       </div>
 
