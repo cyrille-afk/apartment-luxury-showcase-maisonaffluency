@@ -47,6 +47,19 @@ function responsiveCloudinaryUrl(url: string, width: number): string {
 const slugifyProduct = (s: string) =>
   s.toLowerCase().replace(/['']/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 
+/**
+ * Cosmetic attribution parser for curator picks whose title encodes the
+ * attributed designer inline (e.g. "Firefly Chandelier by Damien Langlois-Meurinne").
+ * Returns the cleaned title and, when present, the attributed designer name.
+ * Case-insensitive on " by ". Does not touch the underlying pick row.
+ */
+function parseByAttribution(title: string): { cleanTitle: string; attribution?: string } {
+  if (!title) return { cleanTitle: title };
+  const m = title.match(/^(.+?)\s+by\s+(.+)$/i);
+  if (!m) return { cleanTitle: title };
+  return { cleanTitle: m[1].trim(), attribution: m[2].trim() };
+}
+
 function pickSrcSet(url: string): string {
   return [300, 400, 600, 800].map((w) => `${responsiveCloudinaryUrl(url, w)} ${w}w`).join(", ");
 }
