@@ -182,6 +182,10 @@ const DesignersHoverHero = () => {
   const sectionRef = useRef<HTMLElement>(null);
   const portalRef = useRef<HTMLAnchorElement>(null);
   const portalCursorRef = useRef<HTMLDivElement>(null);
+  const activeSlugRef = useRef<string | null>(null);
+  useEffect(() => {
+    activeSlugRef.current = activeSlug;
+  });
 
   useEffect(() => {
     if (typeof window === "undefined") return;
