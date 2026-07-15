@@ -180,7 +180,7 @@ function useDesignerCategories() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("designer_curator_picks_public")
-        .select("designer_id, category, subcategory, tags");
+        .select("designer_id, category, subcategory, tags, origin");
       if (error) throw error;
       return data || [];
     },
