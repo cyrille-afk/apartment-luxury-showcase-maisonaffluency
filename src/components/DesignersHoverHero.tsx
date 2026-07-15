@@ -152,6 +152,8 @@ const DesignersHoverHero = () => {
   const [expandedLetters, setExpandedLetters] = useState<Set<string>>(new Set());
   const [activeAccordionLetter, setActiveAccordionLetter] = useState<string | null>(null);
   const [activeMobileLetter, setActiveMobileLetter] = useState<string | null>(null);
+  const [azDragging, setAzDragging] = useState(false);
+  const [azMagnifier, setAzMagnifier] = useState<{ letter: string; y: number } | null>(null);
   const azTrackRef = useRef<HTMLElement | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const searchScrollRef = useRef<HTMLDivElement>(null);
