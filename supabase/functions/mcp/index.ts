@@ -70,6 +70,7 @@ var search_curator_picks_default = defineTool({
     }
     const { data, error } = await q;
     if (error) {
+      logCall(0, true);
       return {
         content: [{ type: "text", text: `Search failed: ${error.message}` }],
         isError: true
