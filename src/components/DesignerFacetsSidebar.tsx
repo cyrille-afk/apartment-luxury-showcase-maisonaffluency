@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 import type { Designer } from "@/hooks/useDesigner";
 import { useDesignerFinishFamilies } from "@/hooks/useDesignerFinishFamilies";
 import { pickMatchesCategoryFilter } from "@/lib/pickCategoryFilter";
-import { originToCountry } from "@/lib/productOrigin";
+import { originToCountries } from "@/lib/productOrigin";
 
 /**
  * Extra facet sections (Finishes, Place of Origin) rendered INSIDE the
