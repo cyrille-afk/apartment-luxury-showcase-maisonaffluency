@@ -38,7 +38,7 @@ export function useParentBrandDesignerCounts(parentNames: string[]) {
 
 export function useParentBrandDesignerCountsFiltered(parentNames: string[]) {
   return useQuery({
-    queryKey: ["parent-brand-designer-counts-filtered", parentNames],
+    queryKey: ["parent-brand-designer-counts-filtered-v2", parentNames],
     enabled: parentNames.length > 0,
     staleTime: 1000 * 60 * 30,
     queryFn: async () => {
