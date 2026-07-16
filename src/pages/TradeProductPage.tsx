@@ -1803,7 +1803,7 @@ const TradeProductPage: React.FC = () => {
                   onClick={() => {
                     if (designer.slug) rememberProductBackRef(designer.slug, location.pathname + location.search);
                   }}
-                  className="font-body text-[10px] uppercase tracking-[0.15em] text-[hsl(var(--gold))] hover:text-primary hover:underline underline-offset-2 transition-colors"
+                  className="font-body text-[11px] uppercase tracking-[0.15em] text-[hsl(var(--gold))] hover:text-primary hover:underline underline-offset-2 transition-colors"
                 >
                   {designerDisplay}
                 </Link>
