@@ -407,7 +407,7 @@ const VariantSelectors: React.FC<{
           woodLabel={
             (product as any).wood_label_override
               || (product.base_axis_label && !baseAxisIsDim
-                ? `Select Your ${formatVariantAxisLabel(product.base_axis_label) || product.base_axis_label}`
+                ? getBasePlaceholder({ base_axis_label: product.base_axis_label })
                 : null)
           }
           woodFilter={
@@ -426,7 +426,7 @@ const VariantSelectors: React.FC<{
 
           topLabel={
             product.top_axis_label
-              ? `Select Your ${formatVariantAxisLabel(product.top_axis_label) || product.top_axis_label}`
+              ? getTopPlaceholder({ top_axis_label: product.top_axis_label })
               : null
           }
           topFilter={
