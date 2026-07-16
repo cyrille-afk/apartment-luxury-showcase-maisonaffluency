@@ -96,19 +96,36 @@ export default defineTool({
     if (input.subcategory) q = q.ilike("subcategory", input.subcategory);
     if (input.material) q = q.ilike("materials", `%${input.material}%`);
     if (input.query) {
-      const like = `%${input.query.replace(/[%_]/g, "")}%`;
-      // Also treat the query as a possible brand / parent-brand name so that
-      // "CC-Tapis rug" or "Marta Sala" surfaces picks attributed to child
-      // designers whose `founder` matches the parent brand. We resolve those
-      // designer ids up front and OR them into the filter.
+      const cleanQuery = input.query.replace(/[%_]/g, "").trim();
+      const like = `%${cleanQuery}%`;
+      // Brand resolution: match the FULL query and each significant token
+      // against designer name + founder so "CC-Tapis rug", "Marta Sala coffee
+      // table", or "Théorème console" surface picks attributed to child
+      // designers whose `founder` equals the parent brand.
+      const STOP = new Set([
+        "the","and","for","with","by","of","a","an","in","on","to",
+        "rug","rugs","sofa","chair","table","lamp","light","lighting","pendant",
+        "console","cabinet","desk","chest","stool","bench","mirror","vase",
+        "bar","side","coffee","dining","armchair","seat","seating","piece","pieces",
+      ]);
+      const tokens = Array.from(
+        new Set(
+          [cleanQuery, ...cleanQuery.split(/\s+/)]
+            .map((t) => t.trim())
+            .filter((t) => t.length >= 3 && !STOP.has(t.toLowerCase())),
+        ),
+      );
       let brandFilter = "";
-      if (!designerId) {
+      if (!designerId && tokens.length) {
+        const orClauses = tokens
+          .flatMap((t) => [`name.ilike.%${t}%`, `founder.ilike.%${t}%`])
+          .join(",");
         const { data: brandMatches } = await supabase
           .from("designers")
           .select("id")
           .eq("is_published", true)
           .eq("trade_only", false)
-          .or(`name.ilike.${like},founder.ilike.${like}`)
+          .or(orClauses)
           .limit(200);
         const brandIds = (brandMatches ?? []).map((r) => r.id).filter(Boolean);
         if (brandIds.length) {
@@ -117,6 +134,7 @@ export default defineTool({
       }
       q = q.or(`title.ilike.${like},subtitle.ilike.${like},materials.ilike.${like}${brandFilter}`);
     }
+
 
     const { data, error } = await q;
     if (error) {

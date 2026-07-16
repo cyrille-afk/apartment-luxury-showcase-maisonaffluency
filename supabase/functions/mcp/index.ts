@@ -68,10 +68,56 @@ var search_curator_picks_default = defineTool({
     if (input.subcategory) q = q.ilike("subcategory", input.subcategory);
     if (input.material) q = q.ilike("materials", `%${input.material}%`);
     if (input.query) {
-      const like = `%${input.query.replace(/[%_]/g, "")}%`;
+      const cleanQuery = input.query.replace(/[%_]/g, "").trim();
+      const like = `%${cleanQuery}%`;
+      const STOP = /* @__PURE__ */ new Set([
+        "the",
+        "and",
+        "for",
+        "with",
+        "by",
+        "of",
+        "a",
+        "an",
+        "in",
+        "on",
+        "to",
+        "rug",
+        "rugs",
+        "sofa",
+        "chair",
+        "table",
+        "lamp",
+        "light",
+        "lighting",
+        "pendant",
+        "console",
+        "cabinet",
+        "desk",
+        "chest",
+        "stool",
+        "bench",
+        "mirror",
+        "vase",
+        "bar",
+        "side",
+        "coffee",
+        "dining",
+        "armchair",
+        "seat",
+        "seating",
+        "piece",
+        "pieces"
+      ]);
+      const tokens = Array.from(
+        new Set(
+          [cleanQuery, ...cleanQuery.split(/\s+/)].map((t) => t.trim()).filter((t) => t.length >= 3 && !STOP.has(t.toLowerCase()))
+        )
+      );
       let brandFilter = "";
-      if (!designerId) {
-        const { data: brandMatches } = await supabase.from("designers").select("id").eq("is_published", true).eq("trade_only", false).or(`name.ilike.${like},founder.ilike.${like}`).limit(200);
+      if (!designerId && tokens.length) {
+        const orClauses = tokens.flatMap((t) => [`name.ilike.%${t}%`, `founder.ilike.%${t}%`]).join(",");
+        const { data: brandMatches } = await supabase.from("designers").select("id").eq("is_published", true).eq("trade_only", false).or(orClauses).limit(200);
         const brandIds = (brandMatches ?? []).map((r) => r.id).filter(Boolean);
         if (brandIds.length) {
           brandFilter = `,designer_id.in.(${brandIds.join(",")})`;
