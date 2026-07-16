@@ -597,10 +597,10 @@ const DesignersHoverHero = () => {
     const section = sectionRef.current;
     if (!section) return;
 
-    const isInsideScroller = (target: EventTarget | null) => {
+    const isInsideFeaturedNav = (target: EventTarget | null) => {
       if (!(target instanceof Node)) return false;
-      const scroller = contentScrollRef.current;
-      return Boolean(scroller && scroller.contains(target));
+      const nav = navRef.current;
+      return Boolean(nav && nav.contains(target));
     };
     const isInsideSearchSheet = (target: EventTarget | null) =>
       Boolean((target as HTMLElement | null)?.closest?.("#designers-search-sheet"));
@@ -681,14 +681,14 @@ const DesignersHoverHero = () => {
     };
 
     const onTouchStart = (e: TouchEvent) => {
-      if (isInsideScroller(e.target) || isInsideSearchSheet(e.target)) return;
+      if (isInsideFeaturedNav(e.target) || isInsideSearchSheet(e.target)) return;
       touchStartY = e.touches[0]?.clientY ?? null;
       touchLastY = touchStartY;
     };
 
     const onTouchMove = (e: TouchEvent) => {
       if (touchStartY === null) return;
-      if (isInsideScroller(e.target) || isInsideSearchSheet(e.target)) return;
+      if (isInsideFeaturedNav(e.target) || isInsideSearchSheet(e.target)) return;
       const y = e.touches[0]?.clientY;
       if (y === undefined) return;
       touchLastY = y;
@@ -716,7 +716,7 @@ const DesignersHoverHero = () => {
     };
 
     const onWheel = (e: WheelEvent) => {
-      if (isInsideScroller(e.target) || isInsideSearchSheet(e.target)) return;
+      if (isInsideFeaturedNav(e.target) || isInsideSearchSheet(e.target)) return;
       if (Math.abs(e.deltaY) < 1) return;
       stepFromDelta(e.deltaY, () => { if (e.cancelable) e.preventDefault(); }, false);
     };
