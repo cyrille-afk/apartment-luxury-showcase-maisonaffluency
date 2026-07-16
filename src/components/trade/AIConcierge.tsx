@@ -269,7 +269,7 @@ import { buildSpecSchedule, type SpecScheduleItem } from "@/lib/specScheduleBuil
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { MatchBadge, parseMatchTail } from "@/components/trade/concierge/MatchBadge";
+import { MatchBadge, parseMatchTail, inlineSignalsIntoMatchLines } from "@/components/trade/concierge/MatchBadge";
 import { buildSeedDirective } from "@/lib/conciergePrefill";
 import {
   conciergeCopy,
