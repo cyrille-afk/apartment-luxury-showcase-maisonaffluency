@@ -269,6 +269,24 @@ export type AppliedConstraintsEvent = {
 };
 
 /**
+ * Emitted once per turn when the user attached an image and the vision
+ * extractor produced any structured signals. The client renders this as a
+ * "Detected from your upload" card so the architect can confirm the
+ * attachment was actually read — and see WHICH cues drove the curation.
+ */
+export type MoodboardSignalsEvent = {
+  kind: "mood_board" | "floor_plan" | "product_photo" | "tearsheet";
+  style: string[];
+  palette: string[];
+  materials: string[];
+  categories: string[];
+  subcategories: string[];
+  room_type: string | null;
+  designer_hints: string[];
+  notes: string;
+};
+
+/**
  * Emitted the first time the model starts streaming a card-producing tool
  * call (`propose_tearsheet`, `add_to_tearsheet`, `draft_quote`,
  * `add_to_quote`, `propose_ffe_rows`, `prepare_visualization_brief`),
