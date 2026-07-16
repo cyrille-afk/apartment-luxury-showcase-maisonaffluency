@@ -144,7 +144,7 @@ export default function TradeDescriptionWriter() {
     queryFn: async () => {
       const { data } = await supabase
         .from("designer_curator_picks")
-        .select("id, title, description, designer_id, designers(display_name, name, founder)")
+        .select("id, title, description, meta_description, designer_id, designers(display_name, name, founder)")
         .order("title")
         .limit(2000);
       return (data || []) as any[];
