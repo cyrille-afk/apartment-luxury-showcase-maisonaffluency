@@ -2022,6 +2022,22 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
             return copy;
           });
         },
+        onMoodboardSignals: (ev) => {
+          turnMoodboardSignals = ev;
+          setTimeline((prev) => {
+            const idx = [...prev].reverse().findIndex((t) => t.kind === "msg" && t.role === "assistant");
+            if (idx === -1) {
+              // No assistant msg yet — inject a placeholder so the card renders immediately.
+              return [...prev, { kind: "msg", role: "assistant", content: "", moodboardSignals: ev, appliedConstraints: turnConstraints ?? undefined }];
+            }
+            const realIdx = prev.length - 1 - idx;
+            const item = prev[realIdx];
+            if (item.kind !== "msg" || item.role !== "assistant") return prev;
+            const copy = prev.slice();
+            copy[realIdx] = { ...item, moodboardSignals: ev };
+            return copy;
+          });
+        },
         onReconnect: (ev) => {
           armStall();
           toast.message("Reconnecting to the concierge…", {
