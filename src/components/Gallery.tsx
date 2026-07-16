@@ -849,7 +849,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
       setTimeout(() => {
         const element = document.getElementById(externalSourceId);
         if (element) {
-          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          element.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
         setExternalSourceId(null);
         setFilterDesigner(null);
