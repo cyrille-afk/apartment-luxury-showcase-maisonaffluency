@@ -368,6 +368,8 @@ export async function streamConcierge({
   onInspector?: (event: InspectorEvent) => void;
   /** Fires once near the start with the hard-constraint pre-filters applied to catalog retrieval. */
   onAppliedConstraints?: (event: AppliedConstraintsEvent) => void;
+  /** Fires once when the vision extractor surfaces detected signals from the current-turn upload. */
+  onMoodboardSignals?: (event: MoodboardSignalsEvent) => void;
   /** Fires when the stream drops mid-turn and we're about to auto-reconnect. */
   onReconnect?: (event: ReconnectEvent) => void;
   onDone: () => void;
