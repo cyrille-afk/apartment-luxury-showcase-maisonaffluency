@@ -1931,12 +1931,9 @@ const TradeProductPage: React.FC = () => {
                   ? variantSizeText!
                   : formatDimensionsMultiline(product.dimensions);
                 if (!looksLikeDimension(sizeText)) return null;
-                // Render the imperial conversion inside parentheses after the
-                // metric value, e.g. "Concept 1: Ø 244 cm (Ø 96.1 in)".
-                const formatted = withImperialPerLine(sizeText)
-                  .split("\n")
-                  .map((line) => line.replace(/\s\|\s([^|]+?)(\s-\s.+)?$/, " ($1)$2"))
-                  .join("\n");
+                // Keep the same "<cm> | <in>" format used for single-dim
+                // products so axis labels (W × H × D) show on both sides.
+                const formatted = withImperialPerLine(sizeText);
                 const interactive = variantsAreDimensional && hasVariants;
                 return (
                   <ExpandableSpec

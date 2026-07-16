@@ -769,10 +769,7 @@ const VariantSelectors: React.FC<{
           // in a misleading "Select Your Size" picker.
           const dimCount = labels.filter(looksLikeDimension).length;
           const labelsAreDims = dimCount >= 2 && dimCount >= Math.ceil(labels.length / 2);
-          const formatted = withImperialPerLine(labels.join("\n"))
-            .split("\n")
-            .map((line) => line.replace(/\s\|\s([^|]+?)(\s-\s.+)?$/, " ($1)$2"))
-            .join("\n");
+          const formatted = withImperialPerLine(labels.join("\n"));
           return labels.length > 1 && labelsAreDims ? (
             <ExpandableSpec
               icon={specIcon("📐")}

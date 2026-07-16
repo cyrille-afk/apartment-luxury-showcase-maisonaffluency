@@ -168,12 +168,19 @@ export const withImperialPerLine = (raw: string | null | undefined): string => {
       // imperial parenthetical doesn't repeat "Sofa Double Depth" etc.
       const metricWords = t.split(/\s+/);
       const impWords = imp.split(/\s+/);
+      // Preserve axis labels (W / H / D / L / Dia / Ø / ⌀) on the imperial
+      // side by refusing to strip them as "shared prefix" words. Otherwise
+      // "Small W 12 × H 12.5 cm" collapses to "4.7 × H 4.9 in" instead of
+      // "W 4.7 × H 4.9 in".
+      const isAxisMarker = (w: string) =>
+        /^(?:[WHDLwhdl]|Dia|dia|Ø|⌀)$/.test(w);
       let i = 0;
       while (
         i < metricWords.length &&
         i < impWords.length &&
         metricWords[i] === impWords[i] &&
-        !/[\d"Ø⌀×x]/.test(impWords[i])
+        !/[\d"Ø⌀×x]/.test(impWords[i]) &&
+        !isAxisMarker(impWords[i])
       ) {
         i++;
       }
