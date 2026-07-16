@@ -1,0 +1,1 @@
+UPDATE public.fabrics SET category = 'Wood' WHERE name ILIKE 'Straw Marquetry%';
