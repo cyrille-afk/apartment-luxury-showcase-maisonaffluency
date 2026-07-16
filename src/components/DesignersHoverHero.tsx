@@ -584,49 +584,141 @@ const DesignersHoverHero = () => {
   }, [isMobileOrPwa, searchOpen, items]);
 
   // Mobile/PWA: forward touch/wheel gestures anywhere on the hero (including
-  // the featured photo area outside the list column) to the inner list
-  // scroller, so the user can scroll the designers list from anywhere on the
-  // landing page — not only when their finger is directly on the list.
+  // the featured photo area outside the list column) so the user can advance
+  // through featured designers from anywhere on the hero — not only when their
+  // finger is directly on the list. If the list is short enough that its inner
+  // scroller has no overflow, we advance the active designer via the same
+  // step-advance logic used by swipes on the list itself. At the last item,
+  // an upward swipe/wheel hands off to page scroll so the Directory can be
+  // reached from outside the list too.
   useEffect(() => {
     if (searchOpen || !isMobileOrPwa) return;
+    if (!hasItems) return;
     const section = sectionRef.current;
-    const scroller = contentScrollRef.current;
-    if (!section || !scroller) return;
+    if (!section) return;
 
     const isInsideScroller = (target: EventTarget | null) => {
       if (!(target instanceof Node)) return false;
-      return scroller.contains(target);
+      const scroller = contentScrollRef.current;
+      return Boolean(scroller && scroller.contains(target));
+    };
+    const isInsideSearchSheet = (target: EventTarget | null) =>
+      Boolean((target as HTMLElement | null)?.closest?.("#designers-search-sheet"));
+
+    const canUseNativeListScroll = () => {
+      const scroller = contentScrollRef.current;
+      return Boolean(scroller && scroller.scrollHeight > scroller.clientHeight + 2);
+    };
+
+    const advance = (dir: 1 | -1) => {
+      setActiveSlug((current) => {
+        const idx = items.findIndex((d) => d.slug === current);
+        const base = idx === -1 ? 0 : idx;
+        const nextIdx = Math.min(items.length - 1, Math.max(0, base + dir));
+        return items[nextIdx].slug;
+      });
+    };
+
+    const handoffToDirectory = () => {
+      if (handoffLockRef.current) return;
+      handoffLockRef.current = true;
+      window.dispatchEvent(new Event("unlockDesignersScroll"));
+      const scrollBelowHero = () => {
+        const s = sectionRef.current;
+        if (!s) return;
+        const target = Math.max(0, s.getBoundingClientRect().bottom + window.scrollY - 1);
+        window.scrollTo({ top: target, behavior: "smooth" });
+      };
+      window.requestAnimationFrame(() => {
+        scrollBelowHero();
+        window.setTimeout(scrollBelowHero, 120);
+      });
+      window.setTimeout(() => {
+        handoffLockRef.current = false;
+      }, 900);
     };
 
     let touchStartY: number | null = null;
+    let touchLastY: number | null = null;
+    let touchLock = false;
+    let wheelLock = false;
+
+    const stepFromDelta = (deltaY: number, prevent: () => void, isTouch: boolean) => {
+      // If the inner list is scrollable, forward pixels rather than stepping.
+      if (canUseNativeListScroll()) {
+        const scroller = contentScrollRef.current;
+        if (scroller) {
+          scroller.scrollTop += deltaY;
+          prevent();
+        }
+        return;
+      }
+      if (Math.abs(deltaY) < SWIPE_THRESHOLD) return;
+      const idx = items.findIndex((d) => d.slug === activeSlugRef.current);
+      const atLast = idx >= items.length - 1;
+      const atFirst = idx <= 0;
+      // Boundary handoff: at last item swiping/wheeling up → page scroll to Directory.
+      if (atLast && deltaY > 0) {
+        handoffToDirectory();
+        return;
+      }
+      // At first item swiping down → let page/native handle (no-op for hero).
+      if (atFirst && deltaY < 0) {
+        return;
+      }
+      if (isTouch ? touchLock : wheelLock) {
+        prevent();
+        return;
+      }
+      prevent();
+      if (isTouch) touchLock = true;
+      else wheelLock = true;
+      advance(deltaY > 0 ? 1 : -1);
+      window.setTimeout(() => {
+        if (isTouch) touchLock = false;
+        else wheelLock = false;
+      }, 450);
+    };
 
     const onTouchStart = (e: TouchEvent) => {
-      if (isInsideScroller(e.target)) return;
-      if ((e.target as HTMLElement | null)?.closest?.("#designers-search-sheet")) return;
+      if (isInsideScroller(e.target) || isInsideSearchSheet(e.target)) return;
       touchStartY = e.touches[0]?.clientY ?? null;
+      touchLastY = touchStartY;
     };
 
     const onTouchMove = (e: TouchEvent) => {
       if (touchStartY === null) return;
-      if (isInsideScroller(e.target)) return;
+      if (isInsideScroller(e.target) || isInsideSearchSheet(e.target)) return;
       const y = e.touches[0]?.clientY;
       if (y === undefined) return;
+      touchLastY = y;
       const delta = touchStartY - y;
-      if (Math.abs(delta) < 1) return;
-      scroller.scrollTop += delta;
-      touchStartY = y;
-      if (e.cancelable) e.preventDefault();
+      // If overflow scroller exists, forward incremental pixels smoothly.
+      if (canUseNativeListScroll()) {
+        const scroller = contentScrollRef.current;
+        if (scroller && Math.abs(delta) >= 1) {
+          scroller.scrollTop += delta;
+          touchStartY = y;
+          if (e.cancelable) e.preventDefault();
+        }
+        return;
+      }
+      // Otherwise, step-advance on threshold and reset baseline.
+      if (Math.abs(delta) >= SWIPE_THRESHOLD) {
+        stepFromDelta(delta, () => { if (e.cancelable) e.preventDefault(); }, true);
+        touchStartY = y;
+      }
     };
 
     const onTouchEnd = () => {
       touchStartY = null;
+      touchLastY = null;
     };
 
     const onWheel = (e: WheelEvent) => {
-      if (isInsideScroller(e.target)) return;
+      if (isInsideScroller(e.target) || isInsideSearchSheet(e.target)) return;
       if (Math.abs(e.deltaY) < 1) return;
-      scroller.scrollTop += e.deltaY;
-      if (e.cancelable) e.preventDefault();
+      stepFromDelta(e.deltaY, () => { if (e.cancelable) e.preventDefault(); }, false);
     };
 
     section.addEventListener("touchstart", onTouchStart, { passive: true });
@@ -641,7 +733,7 @@ const DesignersHoverHero = () => {
       section.removeEventListener("touchcancel", onTouchEnd);
       section.removeEventListener("wheel", onWheel);
     };
-  }, [isMobileOrPwa, searchOpen]);
+  }, [isMobileOrPwa, searchOpen, hasItems, items]);
 
 
   const isDesktopViewport = !isMobileViewport && !isMobileHook && !isStandalone;
