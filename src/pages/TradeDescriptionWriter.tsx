@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 import AlphabetProductPicker, { type PickerItem } from "@/components/trade/AlphabetProductPicker";
 import AlphabetGroupPicker from "@/components/trade/AlphabetGroupPicker";
 
-type Tone = "editorial" | "technical" | "seo";
+type Tone = "editorial" | "technical" | "seo" | "seo_long";
 type Source = "curator_picks" | "trade_products";
 type Mode = "single" | "bulk";
 type RowStatus = "pending" | "generating" | "saved" | "skipped" | "failed";
@@ -28,7 +28,8 @@ interface BulkRow {
 const TONES: { value: Tone; label: string; desc: string }[] = [
   { value: "editorial", label: "Editorial", desc: "Evocative storytelling for journals & social" },
   { value: "technical", label: "Technical", desc: "Precise specs for trade sheets & quotes" },
-  { value: "seo", label: "SEO", desc: "Keyword-rich copy for product pages" },
+  { value: "seo", label: "SEO Meta", desc: "≤160 chars for Google snippet" },
+  { value: "seo_long", label: "SEO Long-form", desc: "On-page product copy, 180–260 words" },
 ];
 
 async function callDescriptionWriter(productId: string, source: Source, tone: Tone): Promise<{ description: string; length: number; seoWarning: string | null }> {
