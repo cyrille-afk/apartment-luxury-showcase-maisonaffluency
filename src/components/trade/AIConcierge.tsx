@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { X, Send, Loader2, Sparkles, Minus, GripHorizontal, RotateCcw, Maximize2, Minimize2, Expand, Shrink, Palette, Check, Languages, Pencil, Paperclip, FileText, Download, FileDown, Copy, ShieldCheck, ListChecks, Eye, LayoutList } from "lucide-react";
 import { BriefBuilder } from "@/components/trade/concierge/BriefBuilder";
@@ -269,6 +269,7 @@ import { buildSpecSchedule, type SpecScheduleItem } from "@/lib/specScheduleBuil
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { MatchBadge, parseMatchTail } from "@/components/trade/concierge/MatchBadge";
 import { buildSeedDirective } from "@/lib/conciergePrefill";
 import {
   conciergeCopy,
@@ -2707,7 +2708,33 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
                           <ReactMarkdown
                             remarkPlugins={[remarkGfm]}
                             components={{
-                              p: ({ node, ...props }) => <p className="my-0" {...props} />,
+                              p: ({ node, children, ...props }) => {
+                                // Detect the "**Match:** Band · NN% — rationale"
+                                // line emitted for each Private Exhibition piece
+                                // and render it as a badge + rationale card.
+                                const arr = React.Children.toArray(children);
+                                const first: any = arr[0];
+                                const firstIsMatchStrong =
+                                  first &&
+                                  typeof first === "object" &&
+                                  (first.type === "strong" || first.props?.node?.tagName === "strong") &&
+                                  /^\s*match\s*:?\s*$/i.test(
+                                    String(
+                                      (first.props?.children ?? "")
+                                        .toString()
+                                    )
+                                  );
+                                if (firstIsMatchStrong) {
+                                  const tail = arr
+                                    .slice(1)
+                                    .map((c: any) => (typeof c === "string" ? c : c?.props?.children ?? ""))
+                                    .join("")
+                                    .toString();
+                                  const parsed = parseMatchTail(tail);
+                                  if (parsed) return <MatchBadge parsed={parsed} />;
+                                }
+                                return <p className="my-0" {...props}>{children}</p>;
+                              },
                               ul: ({ node, ...props }) => <ul className="list-disc pl-5 space-y-2 my-1" {...props} />,
                               ol: ({ node, ...props }) => <ol className="list-decimal pl-5 space-y-2 my-1" {...props} />,
                               li: ({ node, ...props }) => <li className="leading-relaxed [&>p]:my-0" {...props} />,
