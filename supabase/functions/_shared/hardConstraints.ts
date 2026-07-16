@@ -34,13 +34,24 @@ function normalize(v: string | null | undefined): string {
   return (v || "").toLowerCase().replace(/[^a-z0-9\s&/-]/g, " ").replace(/\s+/g, " ").trim();
 }
 
+function escapeForRegex(v: string): string {
+  return v.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 function extractTokens(haystack: string, dictionary: string[]): string[] {
-  const norm = ` ${normalize(haystack)} `;
+  const norm = normalize(haystack);
   const hits = new Set<string>();
   // Prefer longer phrases first so "forest green" wins over "green".
   const sorted = [...dictionary].sort((a, b) => b.length - a.length);
   for (const token of sorted) {
-    if (norm.includes(` ${token} `) || norm.includes(token)) hits.add(token);
+    // Word-boundary match only. A plain substring match would catch "brown"
+    // inside "brownstone", "stone" inside "brownstone" / "limestone", "oak"
+    // inside "oakland", etc. — leading to false-positive hard filters that
+    // wipe out the curated shortlist. Compound tokens like "forest green"
+    // use \s+ between words so extra whitespace still matches.
+    const parts = token.split(/\s+/).map(escapeForRegex);
+    const re = new RegExp(`\\b${parts.join("\\s+")}\\b`, "i");
+    if (re.test(norm)) hits.add(token);
   }
   return [...hits];
 }
