@@ -2104,11 +2104,18 @@ const TradeProductPage: React.FC = () => {
                   productCategory={product.category}
                   currentGalleryIndex={galleryActiveIndex ?? 0}
                   preselectFabricName={requestedFabricName}
+                  upholsteryLabel={
+                    product.base_axis_label && !baseAxisIsDim
+                      ? getBasePlaceholder({ base_axis_label: product.base_axis_label })
+                      : null
+                  }
                   woodLabel={
                     (product as any).wood_label_override
-                      || (product.base_axis_label && !baseAxisIsDim
-                          ? `Select Your ${formatVariantAxisLabel(product.base_axis_label) || product.base_axis_label}`
-                          : null)
+                      || (product.base_axis_label && !baseAxisIsDim && product.top_axis_label
+                            ? getTopPlaceholder({ top_axis_label: product.top_axis_label })
+                            : (product.base_axis_label && !baseAxisIsDim
+                                ? getBasePlaceholder({ base_axis_label: product.base_axis_label })
+                                : null))
                   }
                   woodFilter={
                     // Dual-axis: only show base swatches in the Base section
@@ -2122,7 +2129,7 @@ const TradeProductPage: React.FC = () => {
                   }
                   topLabel={
                     product.top_axis_label
-                      ? `Select Your ${formatVariantAxisLabel(product.top_axis_label) || product.top_axis_label}`
+                      ? getTopPlaceholder({ top_axis_label: product.top_axis_label })
                       : null
                   }
                   topFilter={

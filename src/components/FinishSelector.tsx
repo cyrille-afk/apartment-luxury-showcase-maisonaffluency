@@ -107,6 +107,8 @@ interface FinishSelectorProps {
    * When omitted, falls back to "Select the Wood Finish of the Frame".
    */
   woodLabel?: string | null;
+  /** Per-product override for the upholstery (fabric/leather) accordion label. */
+  upholsteryLabel?: string | null;
   /**
    * When false, the upholstery (fabric/leather + COM/COL) accordion is hidden
    * and only the wood/finish swatch picker is rendered. Used on non-upholstered
@@ -246,7 +248,7 @@ const pickFinishGlyph = (
  * (Trade + Public). Tiles are grouped by category (Upholstery, Wood, …)
  * with a COM ("Customer's Own Material") tile always offered.
  */
-export default function FinishSelector({ pickId, className, productTitle, productCategory, onUpholsteryTierChange, onFabricChange, onHasFabricsChange, onWoodFinishChange, onWoodFinishPricingChange, onWoodFinishesAvailable, onPreviewSwatchesResolved, includePricing = false, onSwatchImagesChange, woodLabel, showUpholsterySection = true, showWoodSection = true, hideBaseAccordion = false, woodFilter, topFilter, topLabel, onTopFinishChange, onTopFinishSwatchChange, onFinishesMissingImagesChange, currentGalleryIndex, preselectFabricName }: FinishSelectorProps) {
+export default function FinishSelector({ pickId, className, productTitle, productCategory, onUpholsteryTierChange, onFabricChange, onHasFabricsChange, onWoodFinishChange, onWoodFinishPricingChange, onWoodFinishesAvailable, onPreviewSwatchesResolved, includePricing = false, onSwatchImagesChange, woodLabel, upholsteryLabel, showUpholsterySection = true, showWoodSection = true, hideBaseAccordion = false, woodFilter, topFilter, topLabel, onTopFinishChange, onTopFinishSwatchChange, onFinishesMissingImagesChange, currentGalleryIndex, preselectFabricName }: FinishSelectorProps) {
 
   const isRugProduct = /\brugs?\b/i.test(`${productTitle || ""} ${productCategory || ""}`);
   const isRugComponentSwatch = (fabric: Pick<Fabric, "name" | "category">) => {
@@ -858,7 +860,9 @@ export default function FinishSelector({ pickId, className, productTitle, produc
         onToggle: () => setOpen((v) => !v),
         label: isRugProduct
           ? "Select Your Rug Finish"
-          : "Select Your Fabric / Leather",
+          : (upholsteryLabel && upholsteryLabel.trim()
+              ? upholsteryLabel.trim()
+              : "Select Your Fabric / Leather"),
         selectedName: selectedFabricItem?.name ?? null,
         tiles: visibleFabricTiles,
         glyph: "fabric",
