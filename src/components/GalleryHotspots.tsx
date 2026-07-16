@@ -536,11 +536,11 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
                               {formatPrice(price.cents, price.currency, price.price_unit)}
                             </p>
                           ) : (
-                            <p className="font-body text-[10px] uppercase tracking-[0.1em] text-muted-foreground/70 mt-1.5 italic">Price on request</p>
+                            <p className="font-body text-[10px] uppercase tracking-[0.1em] text-muted-foreground/70 mt-1.5 italic">Price Upon Request</p>
                           );
                         })()}
                         {!onAddToQuote && (
-                          <p className="font-body text-[10px] uppercase tracking-[0.1em] text-muted-foreground/70 mt-1.5 italic">Price on request</p>
+                          <p className="font-body text-[10px] uppercase tracking-[0.1em] text-muted-foreground/70 mt-1.5 italic">Price Upon Request</p>
                         )}
                         {hotspot.link_url && !onAddToQuote && !onRequestQuote && (
                           <button
