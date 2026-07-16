@@ -1851,12 +1851,12 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
           const last = prev[idx];
           if (last?.kind === "msg" && last.role === "assistant") {
             const copy = prev.slice();
-            copy[idx] = { ...last, content: assistantSoFar, appliedConstraints: turnConstraints ?? last.appliedConstraints };
+            copy[idx] = { ...last, content: assistantSoFar, appliedConstraints: turnConstraints ?? last.appliedConstraints, moodboardSignals: turnMoodboardSignals ?? last.moodboardSignals };
             return copy;
           }
         }
         assistantStarted = true;
-        return [...prev, { kind: "msg", role: "assistant", content: assistantSoFar, appliedConstraints: turnConstraints ?? undefined }];
+        return [...prev, { kind: "msg", role: "assistant", content: assistantSoFar, appliedConstraints: turnConstraints ?? undefined, moodboardSignals: turnMoodboardSignals ?? undefined }];
       });
     };
 
