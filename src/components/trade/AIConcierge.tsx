@@ -2861,6 +2861,95 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
                       )
                     )}
                     {/* Curated-selection empty-state card intentionally removed per product decision. */}
+                    {item.role === "assistant" && (item.moodboardSignals || item.appliedConstraints?.empty) && (() => {
+                      const s = item.moodboardSignals;
+                      const ac = item.appliedConstraints;
+                      const detected = {
+                        style: s?.style ?? [],
+                        palette: [...new Set([...(s?.palette ?? []), ...((ac?.colors) ?? [])])],
+                        material: [...new Set([...(s?.materials ?? []), ...((ac?.materials) ?? [])])],
+                        typology: [...new Set([...(s?.subcategories ?? []), ...(s?.categories ?? []), ...((ac?.categories) ?? [])])],
+                        room: s?.room_type ? [s.room_type] : [],
+                      };
+                      const axes: Array<{ key: keyof typeof detected; label: string }> = [
+                        { key: "style", label: "Style" },
+                        { key: "palette", label: "Palette" },
+                        { key: "material", label: "Material" },
+                        { key: "typology", label: "Typology" },
+                        { key: "room", label: "Room" },
+                      ];
+                      const hasAny = axes.some((a) => detected[a.key].length > 0);
+                      const buildDraft = (only?: keyof typeof detected) => {
+                        const lines: string[] = ["Refine my constraints:"];
+                        for (const a of axes) {
+                          const vals = detected[a.key];
+                          if (vals.length === 0) continue;
+                          if (only && a.key !== only) {
+                            lines.push(`- ${a.label}: keep ${vals.join(", ")}`);
+                          } else {
+                            lines.push(`- ${a.label} (${vals.join(", ")}) → `);
+                          }
+                        }
+                        if (!only && !hasAny) {
+                          lines.push("- Style → ", "- Palette → ", "- Material → ", "- Typology → ", "- Room → ");
+                        }
+                        return lines.join("\n");
+                      };
+                      const prefill = (only?: keyof typeof detected) => {
+                        const draft = buildDraft(only);
+                        setInput(draft);
+                        setTimeout(() => {
+                          const el = inputRef.current;
+                          if (el) {
+                            el.focus();
+                            const pos = el.value.length;
+                            try { el.setSelectionRange(pos, pos); } catch { /* noop */ }
+                          }
+                        }, 30);
+                      };
+                      return (
+                        <div
+                          className={cn(
+                            "rounded-lg border border-border/70 bg-muted/20 p-3 space-y-2",
+                            expanded ? "max-w-[92%]" : "max-w-[88%]",
+                          )}
+                        >
+                          <div className="flex items-start gap-2">
+                            <span className="text-base leading-none mt-0.5">◈</span>
+                            <div className="text-xs font-body text-foreground/85 leading-relaxed">
+                              {ac?.empty
+                                ? "These are the closest matches — not exact. Refine any axis to steer the edit."
+                                : "Want to steer the edit? Refine any axis of the detected brief."}
+                            </div>
+                          </div>
+                          <div className="flex flex-wrap gap-1.5 pt-1">
+                            <button
+                              type="button"
+                              disabled={streaming}
+                              onClick={() => prefill()}
+                              className="rounded-full border border-foreground/70 bg-foreground text-background hover:opacity-90 px-3 py-1 text-[11px] font-body disabled:opacity-40"
+                            >
+                              Refine my constraints
+                            </button>
+                            {axes.map((a) => (
+                              <button
+                                key={`refine-${a.key}`}
+                                type="button"
+                                disabled={streaming}
+                                onClick={() => prefill(a.key)}
+                                className="rounded-full border border-border bg-background hover:bg-accent/10 hover:border-accent/40 px-3 py-1 text-[11px] font-body text-foreground disabled:opacity-40"
+                                title={detected[a.key].length ? `Currently: ${detected[a.key].join(", ")}` : `Add a ${a.label.toLowerCase()} constraint`}
+                              >
+                                {a.label}
+                                {detected[a.key].length > 0 && (
+                                  <span className="ml-1 text-foreground/50">· {detected[a.key].slice(0, 2).join(", ")}{detected[a.key].length > 2 ? "…" : ""}</span>
+                                )}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })()}
                     {item.role === "assistant" && item.actions && item.actions.length > 0 && (
                       <div className={cn("flex flex-wrap gap-1.5", expanded ? "max-w-[92%]" : "max-w-[88%]")}>
                         {item.actions.map((a, idx) => (
