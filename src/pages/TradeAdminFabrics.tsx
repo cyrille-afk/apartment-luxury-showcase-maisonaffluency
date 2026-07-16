@@ -144,18 +144,46 @@ export default function TradeAdminFabrics() {
   const { toast } = useToast();
   const qc = useQueryClient();
 
-  const [search, setSearch] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState<string>("");
-  const [supplierFilter, setSupplierFilter] = useState<string>("");
-  const [designerFilter, setDesignerFilter] = useState<string>("");
-  const [productFilter, setProductFilter] = useState<"all" | "picks" | "labels">("all");
+  // Persist in-progress edits/filters to sessionStorage so navigating away
+  // (e.g. to check a product page) and coming back restores the exact draft.
+  // Without this, React Router unmounts this page and every useState resets.
+  const STORAGE_KEY = "trade-admin-fabrics:draft-v1";
+  const persisted = useRef<any>(null);
+  if (persisted.current === null) {
+    try {
+      const raw = typeof window !== "undefined" ? window.sessionStorage.getItem(STORAGE_KEY) : null;
+      persisted.current = raw ? JSON.parse(raw) : {};
+    } catch {
+      persisted.current = {};
+    }
+  }
+  const p = persisted.current || {};
 
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editDraft, setEditDraft] = useState<Partial<Fabric>>({});
-  const [adding, setAdding] = useState(false);
-  const [newRow, setNewRow] = useState<Partial<Fabric>>(blankDraft());
-  const [linkingId, setLinkingId] = useState<string | null>(null);
-  const [pickSearch, setPickSearch] = useState("");
+  const [search, setSearch] = useState<string>(p.search ?? "");
+  const [categoryFilter, setCategoryFilter] = useState<string>(p.categoryFilter ?? "");
+  const [supplierFilter, setSupplierFilter] = useState<string>(p.supplierFilter ?? "");
+  const [designerFilter, setDesignerFilter] = useState<string>(p.designerFilter ?? "");
+  const [productFilter, setProductFilter] = useState<"all" | "picks" | "labels">(p.productFilter ?? "all");
+
+  const [editingId, setEditingId] = useState<string | null>(p.editingId ?? null);
+  const [editDraft, setEditDraft] = useState<Partial<Fabric>>(p.editDraft ?? {});
+  const [adding, setAdding] = useState<boolean>(p.adding ?? false);
+  const [newRow, setNewRow] = useState<Partial<Fabric>>(p.newRow ?? blankDraft());
+  const [linkingId, setLinkingId] = useState<string | null>(p.linkingId ?? null);
+  const [pickSearch, setPickSearch] = useState<string>(p.pickSearch ?? "");
+
+  useEffect(() => {
+    try {
+      window.sessionStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify({
+          search, categoryFilter, supplierFilter, designerFilter, productFilter,
+          editingId, editDraft, adding, newRow, linkingId, pickSearch,
+        }),
+      );
+    } catch { /* quota — ignore */ }
+  }, [search, categoryFilter, supplierFilter, designerFilter, productFilter,
+      editingId, editDraft, adding, newRow, linkingId, pickSearch]);
 
   const { data: fabrics = [], isLoading } = useQuery({
     queryKey: ["admin-fabrics"],
