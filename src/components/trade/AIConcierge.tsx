@@ -441,6 +441,12 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
   const stallTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const STALL_MS = 45_000; // no delta/proposal in 45s ⇒ treat stream as stalled
 
+  // Edit-mode state for the "Detected from your upload" signals card. Keyed
+  // by timeline index. `signalsDraft` holds the in-progress edits so the user
+  // can correct materials / colors / style before re-matching.
+  const [editingSignalsIdx, setEditingSignalsIdx] = useState<number | null>(null);
+  const [signalsDraft, setSignalsDraft] = useState<MoodboardSignalsEvent | null>(null);
+
   const clearStallTimer = useCallback(() => {
     if (stallTimerRef.current) {
       clearTimeout(stallTimerRef.current);
