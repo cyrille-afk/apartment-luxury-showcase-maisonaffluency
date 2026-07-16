@@ -2748,7 +2748,7 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
                               code: ({ node, ...props }) => <code className="rounded bg-background/60 px-1 py-0.5 text-[0.85em]" {...props} />,
                             }}
                           >
-                            {item.content}
+                            {inlineSignalsIntoMatchLines(item.content)}
                           </ReactMarkdown>
                         </div>
                       ) : (
