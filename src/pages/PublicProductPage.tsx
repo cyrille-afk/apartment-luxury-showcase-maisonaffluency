@@ -1060,10 +1060,21 @@ const PublicProductPage: React.FC = () => {
   // If admin has set gallery_images, use them as the sole source of truth (admin controls order & count).
   // Otherwise fall back to image_url + hover_image_url.
   const galleryFromAdmin = (product.gallery_images || []).filter(Boolean) as string[];
-  const images = (galleryFromAdmin.length > 0
+  const baseImages = (galleryFromAdmin.length > 0
     ? galleryFromAdmin
     : Array.from(new Set([product.image_url, product.hover_image_url].filter(Boolean)))
   ) as string[];
+
+  // Append the brand logo as the last thumbnail for Apparatus Studio products.
+  const APPARATUS_LOGO_URL =
+    "https://res.cloudinary.com/dif1oamtj/image/upload/v1784168321/Screenshot_2026-07-16_at_10.01.05_AM_jprigp.png";
+  const isApparatus =
+    designerSlug === "apparatus-studio" ||
+    /apparatus/i.test(designerDisplay || "") ||
+    /apparatus/i.test(designer.name || "");
+  const images = isApparatus && !baseImages.includes(APPARATUS_LOGO_URL)
+    ? [...baseImages, APPARATUS_LOGO_URL]
+    : baseImages;
 
   const subtitleEchoesTitle =
     !!product.subtitle &&
