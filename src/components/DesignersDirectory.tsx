@@ -491,9 +491,43 @@ function ParentBrandCard({ item, isOpen, onToggle, designerCount, hasIgPosts }: 
   const displayName = item.display_name || item.name;
   const cardImageUrl = item.image_url || item.hero_image_url;
   const instagramLink = hasIgPosts ? undefined : (INSTAGRAM_LINKS[item.slug] || (item.links as any[])?.find((l: any) => l.type === "Instagram" || l.type === "instagram")?.url);
+  const cardRef = useRef<HTMLDivElement>(null);
+  const prevOpenRef = useRef(isOpen);
+
+  useEffect(() => {
+    const wasOpen = prevOpenRef.current;
+    prevOpenRef.current = isOpen;
+    if (isOpen && !wasOpen && cardRef.current) {
+      // Align card top under nav + sticky bars whenever the user opens a new parent.
+      const scrollCardToTop = () => {
+        const el = cardRef.current;
+        if (!el) return;
+        // Resolve --header-h via a probe so calc()/env() are computed by the browser.
+        const probe = document.createElement("div");
+        probe.style.position = "absolute";
+        probe.style.visibility = "hidden";
+        probe.style.height = "var(--header-h)";
+        probe.style.pointerEvents = "none";
+        document.body.appendChild(probe);
+        const headerHeight = probe.getBoundingClientRect().height || 96;
+        probe.remove();
+        const stickyHeight = Array.from(
+          document.querySelectorAll<HTMLElement>("[data-sticky-filter-bar]")
+        )
+          .filter((n) => n.offsetParent !== null)
+          .reduce((sum, n) => sum + n.getBoundingClientRect().height, 0);
+        const y = Math.max(0, el.getBoundingClientRect().top + window.scrollY - headerHeight - stickyHeight - 8);
+        window.scrollTo({ top: y, behavior: "smooth" });
+      };
+      // Wait a frame so the previously-open card can start collapsing and layout shifts settle.
+      requestAnimationFrame(() => requestAnimationFrame(scrollCardToTop));
+      // Re-align after the expand animation finishes.
+      setTimeout(scrollCardToTop, 320);
+    }
+  }, [isOpen]);
 
   return (
-    <div data-card-kind="parent" data-designer-slug={item.slug} className="col-span-2 group self-start flex flex-col rounded-xl overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background cursor-pointer">
+    <div ref={cardRef} data-card-kind="parent" data-designer-slug={item.slug} className="col-span-2 group self-start flex flex-col rounded-xl overflow-hidden border border-border hover:border-foreground/30 transition-all hover:shadow-xl bg-background cursor-pointer">
       <div className="aspect-[5/4] md:aspect-[17/10] bg-muted/20 overflow-hidden relative">
         {item.name === 'Apparatus' ? (
           <div className="w-full h-full bg-black" />
