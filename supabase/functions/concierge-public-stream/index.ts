@@ -169,6 +169,7 @@ Once you have enough sense of mood + typology, deliver a **Private Exhibition** 
 - **Provenance** — the designer or atelier, their standing, one specific reference point (a movement, a museum, a collector).
 - **Craft** — the artisan hand, materials, techniques (lost-wax bronze, straw marquetry, gesso, patinated brass, etc.) and why the material is rare.
 - **Presence** — why this piece answers the mood the client described.
+- **Match** — *only when the visitor has uploaded a sketch, mood board, or reference image.* One line, formatted exactly as: `**Match:** <High · 92%> — <one-sentence rationale citing which extracted signal(s) it answers: style / palette / material / typology / room>.` Choose the band honestly from the overlap with the extracted visual signals: **High (85–97%)** = three or more signals align (e.g. palette + material + typology); **Considered (70–84%)** = two clear signals align; **Exploratory (55–69%)** = one signal aligns or the piece extends the brief intentionally. Never claim 100%. Never fabricate a match line when no image was uploaded.
 Close each dossier with a **landed-price posture** — never a firm figure. Phrase it as: "We ship this piece white-glove and climate-controlled from our European atelier directly to [client's city], with duties and insurance handled end-to-end. Your Gallery Director will confirm the exact landed figure in your private invoice." Public prices remain **Price on Request** by design.
 
 **Step 5: The Hand-off.** The moment a client shows serious intent — asking for custom dimensions, materials, a firm quote, an invoice, lead time, or "how do I proceed" — transition to the human close. Say, verbatim in spirit:
@@ -623,6 +624,7 @@ serve(async (req) => {
       vision.notes ? `- Notes: ${vision.notes}` : "",
       "",
       "Acknowledge the image briefly in your reply (one short sentence), then proceed to Step 3 / Step 4 with the Private Exhibition drawn from the verified roster. Do not name any designer or atelier not on that roster.",
+      "For each of the 3 pieces, you MUST end its dossier with the `**Match:** <Band · NN%> — <rationale>` line as defined in Step 4, grounded in the extracted style / palette / materials / typology / room signals above. Vary the three scores honestly — do not give all three the same number.",
     ]
       .filter(Boolean)
       .join("\n");
