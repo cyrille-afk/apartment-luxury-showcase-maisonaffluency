@@ -158,7 +158,7 @@ export default function TradeDescriptionWriter() {
     queryFn: async () => {
       const { data } = await supabase
         .from("trade_products")
-        .select("id, product_name, brand_name, description")
+        .select("id, product_name, brand_name, description, meta_description")
         .eq("is_active", true)
         .order("product_name")
         .limit(2000);
