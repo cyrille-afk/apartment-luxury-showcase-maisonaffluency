@@ -26,7 +26,7 @@ export default defineTool({
   name: "search_curator_picks",
   title: "Search curator picks",
   description:
-    "Search Maison Affluency's public catalog of curator-picked designer furniture, lighting, and collectibles. Filter by free-text query, designer, category, subcategory, or materials. Returns product cards with a deep link back to the product page. Trade pricing is never returned — every result shows 'Price on Request'.",
+    "Search Maison Affluency's public catalog of curator-picked designer furniture, lighting, and collectibles. Filter by free-text query, designer, category, subcategory, or materials. Returns product cards with a deep link back to the product page. Trade pricing is never returned — every result shows 'Price on Request'. Always returns at least 10 results when available; default 20, max 50.",
   inputSchema: {
     query: z
       .string()

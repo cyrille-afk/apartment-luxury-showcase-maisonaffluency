@@ -20,7 +20,7 @@ function getClient() {
 var search_curator_picks_default = defineTool({
   name: "search_curator_picks",
   title: "Search curator picks",
-  description: "Search Maison Affluency's public catalog of curator-picked designer furniture, lighting, and collectibles. Filter by free-text query, designer, category, subcategory, or materials. Returns product cards with a deep link back to the product page. Trade pricing is never returned \u2014 every result shows 'Price on Request'.",
+  description: "Search Maison Affluency's public catalog of curator-picked designer furniture, lighting, and collectibles. Filter by free-text query, designer, category, subcategory, or materials. Returns product cards with a deep link back to the product page. Trade pricing is never returned \u2014 every result shows 'Price on Request'. Always returns at least 10 results when available; default 20, max 50.",
   inputSchema: {
     query: z.string().trim().max(200).optional().describe("Free-text query matched against title, subtitle, materials, and tags."),
     designer_slug: z.string().trim().max(120).optional().describe("Restrict to a specific designer by slug."),
