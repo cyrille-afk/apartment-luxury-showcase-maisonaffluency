@@ -404,11 +404,18 @@ const VariantSelectors: React.FC<{
           pickId={product.id}
           productTitle={product.title}
           productCategory={product.category}
+          upholsteryLabel={
+            product.base_axis_label && !baseAxisIsDim
+              ? getBasePlaceholder({ base_axis_label: product.base_axis_label })
+              : null
+          }
           woodLabel={
             (product as any).wood_label_override
-              || (product.base_axis_label && !baseAxisIsDim
-                ? getBasePlaceholder({ base_axis_label: product.base_axis_label })
-                : null)
+              || (isProductUpholstered(product) && product.top_axis_label
+                    ? getTopPlaceholder({ top_axis_label: product.top_axis_label })
+                    : (product.base_axis_label && !baseAxisIsDim
+                        ? getBasePlaceholder({ base_axis_label: product.base_axis_label })
+                        : null))
           }
           woodFilter={
             // Dual-axis: restrict the wood/base swatch group to swatches whose
