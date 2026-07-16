@@ -275,8 +275,9 @@ serve(async (req) => {
 
   // Trim history + sanitize roles/content. The CURRENT user turn may carry
   // multimodal parts (text + image_url) — mood boards, sketches, product
-  // photos the visitor wants matched against the roster. Prior turns are
-  // flattened to text to avoid re-sending image bytes every request.
+  // photos, floor plans, or PDF/CAD tearsheets the visitor wants matched
+  // against the roster. Prior turns are flattened to text to avoid
+  // re-sending image bytes every request.
   type PartText = { type: "text"; text: string };
   type PartImage = { type: "image_url"; image_url: { url: string } };
   type Part = PartText | PartImage;
@@ -298,6 +299,8 @@ serve(async (req) => {
   const historyIdx = trimmedRaw.length - 1;
   const trimmed: ChatMsg[] = [];
   let latestImages: string[] = []; // urls (https or data:) on the current turn
+  let latestPdfBase64: string | null = null; // first PDF attachment (base64, no data: prefix)
+  let latestPdfName: string | null = null;
 
   trimmedRaw.forEach((m: any, idx: number) => {
     const role: "user" | "assistant" = m?.role === "assistant" ? "assistant" : "user";
@@ -314,13 +317,36 @@ serve(async (req) => {
         ) {
           imgs.push(p.image_url.url);
           if (imgs.length >= MAX_INLINE_IMAGES) break;
+        } else if (
+          !latestPdfBase64 &&
+          p?.type === "file" &&
+          typeof p?.file?.file_data === "string" &&
+          /^data:application\/pdf;base64,/i.test(p.file.file_data)
+        ) {
+          const b64 = p.file.file_data.replace(/^data:application\/pdf;base64,/i, "");
+          // Cap decoded size to ~10MB (base64 is ~4/3 of decoded size).
+          if (b64.length > 0 && b64.length < 15_000_000) {
+            latestPdfBase64 = b64;
+            latestPdfName = typeof p.file.filename === "string" ? p.file.filename.slice(0, 200) : null;
+          }
         }
       }
       latestImages = imgs;
+      const fallbackPromptWithMedia =
+        imgs.length && latestPdfBase64
+          ? "Please review the attached image(s) and PDF and use them to curate the Private Exhibition."
+          : imgs.length
+            ? "Please review the attached image(s) and use them to curate the Private Exhibition."
+            : latestPdfBase64
+              ? "Please review the attached PDF and use it to curate the Private Exhibition."
+              : "";
       if (imgs.length === 0) {
-        if (text) trimmed.push({ role, content: text });
+        // No image parts, but we may still want the text row.
+        if (text || fallbackPromptWithMedia) {
+          trimmed.push({ role, content: text || fallbackPromptWithMedia });
+        }
       } else {
-        const parts: Part[] = [{ type: "text", text: text || "Please review the attached image(s) and use them to curate the Private Exhibition." }];
+        const parts: Part[] = [{ type: "text", text: text || fallbackPromptWithMedia }];
         for (const url of imgs) parts.push({ type: "image_url", image_url: { url } });
         trimmed.push({ role, content: parts });
       }
@@ -331,11 +357,12 @@ serve(async (req) => {
   });
 
   // Validate the latest user message (the one that just arrived). When only
-  // images were attached with no meaningful text, the client sends a short
-  // helper prompt — allow that path by skipping the min-length check.
+  // images/PDF were attached with no meaningful text, the client sends a
+  // short helper prompt — allow that path by skipping the min-length check.
   const latestUser = trimmed.slice().reverse().find((m) => m.role === "user");
   const latestUserText = latestUser ? flattenToText(latestUser.content) : "";
-  if (latestUser && latestImages.length === 0) {
+  const hasMedia = latestImages.length > 0 || !!latestPdfBase64;
+  if (latestUser && !hasMedia) {
     const v = validateMessage(latestUserText);
     if (!v.ok) {
       return new Response(JSON.stringify({ error: v.reason }), {
@@ -348,21 +375,31 @@ serve(async (req) => {
     });
   }
 
-  // -------- Vision extraction (mood board / sketch / product photo) --------
-  // When the current turn carries images, extract style / palette / materials
-  // so we can (a) enrich the roster-retrieval embedding query and (b) inject
-  // an authoritative context note so the model's Private Exhibition responds
-  // to the visual reference — not just any text the visitor typed.
+  // -------- Vision extraction (mood board OR floor plan / CAD) --------
+  // Route by intent: keywords + PDF attachments strongly suggest a floor
+  // plan / CAD / spec drawing. Floor-plan extraction uses Gemini 2.5 Pro
+  // (spatial reasoning) and yields a room envelope in cm.
   //
-  // Bounded (VISION_TIMEOUT_MS) and fully fault-tolerant: on failure we fall
-  // through to text-only retrieval unchanged.
+  // A floor plan is a spatial document, not a mood signal — we do NOT
+  // forward it to the chat model as an image. The extracted envelope is
+  // injected as an authoritative system note instead.
+  const FLOOR_PLAN_HINT_RE =
+    /\b(floor\s?plan|floorplan|blue\s?print|blueprint|site\s?plan|room\s?plan|elevation|layout|dwg|cad|dxf|drawing set|as[-\s]?built|space\s?plan)\b/i;
+  const roomMentionsDims = /(\d+(?:[.,]\d+)?\s?(?:m|metres?|meters?|cm|centimetres?|centimeters?)\b.*\b(?:x|by|×)\b)/i;
+  const isFloorPlanIntent =
+    !!latestPdfBase64 ||
+    FLOOR_PLAN_HINT_RE.test(latestUserText) ||
+    (latestImages.length > 0 && roomMentionsDims.test(latestUserText));
+
   let vision: ExtractedVision | null = null;
-  if (latestImages.length > 0) {
+  if (hasMedia) {
     try {
+      const kind: "mood_board" | "floor_plan" = isFloorPlanIntent ? "floor_plan" : "mood_board";
       const visionPromise = extractFromMedia({
         apiKey: LOVABLE_API_KEY,
-        kind: "mood_board",
+        kind,
         imageUrl: latestImages[0],
+        pdfBase64: !latestImages.length && latestPdfBase64 ? latestPdfBase64 : undefined,
         userText: latestUserText.slice(0, 500),
       });
       vision = await Promise.race([
@@ -372,6 +409,21 @@ serve(async (req) => {
     } catch (e) {
       console.warn("[concierge-public-stream] vision extraction skipped", e);
       vision = null;
+    }
+  }
+
+  // If the current turn is a floor-plan / CAD, strip the image from the
+  // chat parts. The model doesn't need to look at the plan itself; it
+  // needs the extracted envelope + the pre-filtered fit shortlist below.
+  if (isFloorPlanIntent && trimmed.length > 0) {
+    const last = trimmed[trimmed.length - 1];
+    if (last.role === "user" && Array.isArray(last.content)) {
+      const textOnly = last.content
+        .filter((p): p is PartText => p.type === "text")
+        .map((p) => p.text)
+        .join(" ")
+        .trim();
+      last.content = textOnly || "Please curate a Private Exhibition sized for the room I described.";
     }
   }
 
