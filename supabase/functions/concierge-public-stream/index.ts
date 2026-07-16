@@ -10,6 +10,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
 import { buildGroundingBlock } from "./_grounding.ts";
+import { extractFromMedia, toEmbeddingQuery, type ExtractedVision } from "../_shared/visionExtract.ts";
 
 const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY")!;
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
@@ -22,6 +23,8 @@ const EMBED_DIMS = 1536;
 const SEMANTIC_MIN_CHARS = 20; // skip retrieval for tiny "hi", "?", etc.
 const SEMANTIC_TOP_K = 6;
 const SEMANTIC_TIMEOUT_MS = 1500; // never block the stream on retrieval
+const VISION_TIMEOUT_MS = 6000;   // bounded, fault-tolerant vision extraction
+const MAX_INLINE_IMAGES = 3;      // per turn — token/cost cap
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -270,53 +273,123 @@ serve(async (req) => {
     });
   }
 
-  // Trim history + sanitize roles/content.
-  const trimmed = messages.slice(-10).map((m: any) => ({
-    role: m?.role === "assistant" ? "assistant" : "user",
-    content: typeof m?.content === "string" ? m.content.slice(0, 4000) : "",
-  })).filter((m: any) => m.content);
+  // Trim history + sanitize roles/content. The CURRENT user turn may carry
+  // multimodal parts (text + image_url) — mood boards, sketches, product
+  // photos the visitor wants matched against the roster. Prior turns are
+  // flattened to text to avoid re-sending image bytes every request.
+  type PartText = { type: "text"; text: string };
+  type PartImage = { type: "image_url"; image_url: { url: string } };
+  type Part = PartText | PartImage;
+  type ChatMsg = { role: "user" | "assistant"; content: string | Part[] };
 
-  // Validate the latest user message (the one that just arrived).
-  const latestUser = trimmed.slice().reverse().find((m: any) => m.role === "user");
-  if (latestUser) {
-    const v = validateMessage(latestUser.content);
+  const flattenToText = (raw: any): string => {
+    if (typeof raw === "string") return raw.slice(0, 4000);
+    if (Array.isArray(raw)) {
+      return raw
+        .filter((p) => p && p.type === "text" && typeof p.text === "string")
+        .map((p) => p.text as string)
+        .join(" ")
+        .slice(0, 4000);
+    }
+    return "";
+  };
+
+  const trimmedRaw = messages.slice(-10);
+  const historyIdx = trimmedRaw.length - 1;
+  const trimmed: ChatMsg[] = [];
+  let latestImages: string[] = []; // urls (https or data:) on the current turn
+
+  trimmedRaw.forEach((m: any, idx: number) => {
+    const role: "user" | "assistant" = m?.role === "assistant" ? "assistant" : "user";
+    // Only the latest (current) user turn is allowed to carry image parts.
+    if (idx === historyIdx && role === "user" && Array.isArray(m?.content)) {
+      const text = flattenToText(m.content);
+      const imgs: string[] = [];
+      for (const p of m.content) {
+        if (
+          p?.type === "image_url" &&
+          p?.image_url?.url &&
+          typeof p.image_url.url === "string" &&
+          (/^https?:\/\//i.test(p.image_url.url) || /^data:image\//i.test(p.image_url.url))
+        ) {
+          imgs.push(p.image_url.url);
+          if (imgs.length >= MAX_INLINE_IMAGES) break;
+        }
+      }
+      latestImages = imgs;
+      if (imgs.length === 0) {
+        if (text) trimmed.push({ role, content: text });
+      } else {
+        const parts: Part[] = [{ type: "text", text: text || "Please review the attached image(s) and use them to curate the Private Exhibition." }];
+        for (const url of imgs) parts.push({ type: "image_url", image_url: { url } });
+        trimmed.push({ role, content: parts });
+      }
+    } else {
+      const text = flattenToText(m?.content);
+      if (text) trimmed.push({ role, content: text });
+    }
+  });
+
+  // Validate the latest user message (the one that just arrived). When only
+  // images were attached with no meaningful text, the client sends a short
+  // helper prompt — allow that path by skipping the min-length check.
+  const latestUser = trimmed.slice().reverse().find((m) => m.role === "user");
+  const latestUserText = latestUser ? flattenToText(latestUser.content) : "";
+  if (latestUser && latestImages.length === 0) {
+    const v = validateMessage(latestUserText);
     if (!v.ok) {
       return new Response(JSON.stringify({ error: v.reason }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+  } else if (latestUserText.length > 4000) {
+    return new Response(JSON.stringify({ error: "Message too long." }), {
+      status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   }
 
-  // Build the grounding block from the latest user message so the model gets
-  // an authoritative allow-list of designer/atelier names plus any specialty
-  // facts relevant to this turn. Sent as a second system message so it stays
-  // above the conversation and inside the same cache prefix.
+  // -------- Vision extraction (mood board / sketch / product photo) --------
+  // When the current turn carries images, extract style / palette / materials
+  // so we can (a) enrich the roster-retrieval embedding query and (b) inject
+  // an authoritative context note so the model's Private Exhibition responds
+  // to the visual reference — not just any text the visitor typed.
   //
-  // Tier B: for non-trivial queries, embed the user message and pull the
-  // top-K most semantically similar roster entries from
-  // concierge_roster_embeddings. This surfaces designers the visitor never
-  // named directly (e.g. "art-deco lighting" → Arredoluce, Angelo Lelii)
-  // without letting the model roam outside the roster — the allow-list block
-  // still constrains what it can name.
-  //
-  // Retrieval is bounded (SEMANTIC_TIMEOUT_MS) and fully fault-tolerant: on
-  // any error, empty result, or timeout we fall back to Tier A grounding
-  // (bare allow-list + lexical hits). No user-visible failure path.
-  const queryText = latestUser?.content ?? "";
+  // Bounded (VISION_TIMEOUT_MS) and fully fault-tolerant: on failure we fall
+  // through to text-only retrieval unchanged.
+  let vision: ExtractedVision | null = null;
+  if (latestImages.length > 0) {
+    try {
+      const visionPromise = extractFromMedia({
+        apiKey: LOVABLE_API_KEY,
+        kind: "mood_board",
+        imageUrl: latestImages[0],
+        userText: latestUserText.slice(0, 500),
+      });
+      vision = await Promise.race([
+        visionPromise,
+        new Promise<null>((resolve) => setTimeout(() => resolve(null), VISION_TIMEOUT_MS)),
+      ]);
+    } catch (e) {
+      console.warn("[concierge-public-stream] vision extraction skipped", e);
+      vision = null;
+    }
+  }
+
+  // Compose the query used for embedding + roster retrieval. Merge visual
+  // signals so a wordless sketch upload still finds relevant designers.
+  const queryText = latestUserText;
+  const retrievalQueryText = vision
+    ? toEmbeddingQuery(vision, queryText).slice(0, 2000)
+    : queryText;
+
   let semanticHits: Array<{ name: string; specialty: string }> = [];
-  // "unavailable" = embed or RPC failed / timed out; caller can't distinguish
-  //   low-signal query from infrastructure failure, so we must not treat an
-  //   empty result as an authoritative "no match".
-  // "low_confidence" = retrieval ran but no hit cleared the strict floor (0.45)
-  //   — the block asks the model to offer any hits as gentle suggestions only.
-  // "ok" = at least one hit above the strict floor, or retrieval was skipped
-  //   because the query is too short (in which case Tier A lexical is the
-  //   authoritative source and we keep the strong "quote these" instruction).
   let retrievalStatus: "ok" | "low_confidence" | "unavailable" = "ok";
-  const SIM_FLOOR = 0.25;         // absolute minimum to include a hit at all
-  const SIM_STRICT_FLOOR = 0.45;  // minimum for the "quote these" strong prompt
-  if (queryText.length >= SEMANTIC_MIN_CHARS) {
-    retrievalStatus = "unavailable"; // flipped to ok/low_confidence on success
+  const SIM_FLOOR = 0.25;
+  const SIM_STRICT_FLOOR = 0.45;
+  // Run retrieval when we have either enough text OR a vision signal.
+  const hasRetrievalSignal = queryText.length >= SEMANTIC_MIN_CHARS || !!vision;
+  if (hasRetrievalSignal) {
+    retrievalStatus = "unavailable";
     try {
       const ac = new AbortController();
       const timer = setTimeout(() => ac.abort(), SEMANTIC_TIMEOUT_MS);
@@ -329,7 +402,7 @@ serve(async (req) => {
         },
         body: JSON.stringify({
           model: EMBED_MODEL,
-          input: queryText.slice(0, 2000),
+          input: retrievalQueryText.slice(0, 2000),
           dimensions: EMBED_DIMS,
         }),
       }).finally(() => clearTimeout(timer));
@@ -338,7 +411,7 @@ serve(async (req) => {
         const vec = embedJson?.data?.[0]?.embedding;
         if (Array.isArray(vec) && vec.length === EMBED_DIMS) {
           const { data: matches, error: matchErr } = await sb.rpc("match_roster_public", {
-            query_embedding: vec as unknown as string, // supabase-js stringifies
+            query_embedding: vec as unknown as string,
             match_count: SEMANTIC_TOP_K,
           });
           if (!matchErr && Array.isArray(matches)) {
@@ -360,12 +433,42 @@ serve(async (req) => {
         console.warn("[concierge-public-stream] embed non-ok", embedResp.status);
       }
     } catch (e) {
-      // AbortError, network, JSON parse — all fall back to Tier A + refusal.
       console.warn("[concierge-public-stream] semantic retrieval skipped", e);
     }
   }
   const groundingBlock = buildGroundingBlock(queryText, semanticHits, { retrievalStatus });
 
+  // Build a visual-context system note when vision extraction succeeded, so
+  // the model treats the uploaded image as an authoritative brief.
+  const visionNote = vision
+    ? [
+        "## Visual reference uploaded by the visitor",
+        "The visitor attached an image (mood board, sketch, or reference photo). Treat the following extracted signals as their brief; respond to the mood and materials in the image, not only to their typed words.",
+        vision.style.length ? `- Style vocabulary: ${vision.style.join(", ")}` : "",
+        vision.palette.length ? `- Palette: ${vision.palette.join(", ")}` : "",
+        vision.materials.length ? `- Materials read: ${vision.materials.join(", ")}` : "",
+        vision.subcategories.length
+          ? `- Furniture typology suggested: ${vision.subcategories.join(", ")}`
+          : vision.categories.length
+            ? `- Furniture typology suggested: ${vision.categories.join(", ")}`
+            : "",
+        vision.room_type ? `- Room type: ${vision.room_type}` : "",
+        vision.designer_hints.length
+          ? `- Designer resonances (hints only — only cite if present in the verified roster): ${vision.designer_hints.join(", ")}`
+          : "",
+        vision.notes ? `- Notes: ${vision.notes}` : "",
+        "",
+        "Acknowledge the image briefly in your reply (one short sentence), then proceed to Step 3 / Step 4 with the Private Exhibition drawn from the verified roster. Do not name any designer or atelier not on that roster.",
+      ]
+        .filter(Boolean)
+        .join("\n")
+    : "";
+
+  const systemMessages: Array<{ role: "system"; content: string }> = [
+    { role: "system", content: SYSTEM_PROMPT },
+    { role: "system", content: groundingBlock },
+  ];
+  if (visionNote) systemMessages.push({ role: "system", content: visionNote });
 
   const upstream = await fetch(LOVABLE_CHAT_URL, {
     method: "POST",
@@ -376,8 +479,7 @@ serve(async (req) => {
     body: JSON.stringify({
       model: MODEL,
       messages: [
-        { role: "system", content: SYSTEM_PROMPT },
-        { role: "system", content: groundingBlock },
+        ...systemMessages,
         ...trimmed,
       ],
       stream: true,
@@ -408,9 +510,17 @@ serve(async (req) => {
   const decoder = new TextDecoder();
   const encoder = new TextEncoder();
   const sid = (req.headers.get("x-concierge-sid") || "").slice(0, 128) || "no-sid";
-  // Build a compact transcript for the hand-off email.
+  // Build a compact transcript for the hand-off email. Flatten multimodal
+  // parts (image uploads) back to text so the email is readable.
   const transcript = trimmed
-    .map((m) => `${m.role === "assistant" ? "Concierge" : "Visitor"}: ${m.content}`)
+    .map((m) => {
+      const text = typeof m.content === "string"
+        ? m.content
+        : m.content
+            .map((p) => (p.type === "text" ? p.text : "[image attached]"))
+            .join(" ");
+      return `${m.role === "assistant" ? "Concierge" : "Visitor"}: ${text}`;
+    })
     .join("\n\n");
 
   const fireHandoff = async () => {
