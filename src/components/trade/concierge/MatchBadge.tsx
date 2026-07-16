@@ -1,9 +1,10 @@
 import React from "react";
 
 /**
- * Renders the "**Match:** <Band · NN%> — <rationale>" line the concierge
- * emits for each of the 3 Private Exhibition pieces, as a distinct badge +
- * rationale card so trade clients can scan match quality at a glance.
+ * Renders the "**Match:** <Band · NN%> — <rationale>" line (+ optional
+ * "**Signals:**" attribute breakdown) the concierge emits for each of the 3
+ * Private Exhibition pieces, as a distinct badge card so trade clients can
+ * scan match quality at a glance.
  *
  * Bands (from concierge-public-stream/index.ts):
  *   High         85–97%   3+ signals align
@@ -11,11 +12,20 @@ import React from "react";
  *   Exploratory  55–69%   1 signal / intentionally extends brief
  */
 export type MatchBand = "High" | "Considered" | "Exploratory";
+export type SignalAxis = "style" | "palette" | "material" | "typology" | "room";
+export type SignalState = "match" | "partial" | "miss" | "n/a";
+
+export interface SignalRow {
+  axis: SignalAxis;
+  state: SignalState;
+  note: string;
+}
 
 export interface ParsedMatch {
   band: MatchBand;
   percent: number;
   rationale: string;
+  signals?: SignalRow[];
 }
 
 const MATCH_RE = /^\s*[·•\-–—]?\s*(High|Considered|Exploratory)\s*[·•\-–—]\s*(\d{1,3})\s*%\s*[—–-]\s*(.+)$/i;
@@ -28,6 +38,35 @@ export function parseMatchTail(tail: string): ParsedMatch | null {
   const percent = Math.max(0, Math.min(100, parseInt(m[2], 10)));
   const rationale = m[3].trim().replace(/^["'“”‘’]|["'“”‘’]$/g, "");
   return { band, percent, rationale };
+}
+
+const AXIS_ORDER: SignalAxis[] = ["style", "palette", "material", "typology", "room"];
+const VALID_STATES: SignalState[] = ["match", "partial", "miss", "n/a"];
+
+/**
+ * Parse the tail of the "**Signals:**" line, e.g.
+ *   " style=match:warm minimal; palette=partial:oak+cream; material=miss:...; typology=match:low sofa; room=n/a:no plan"
+ */
+export function parseSignalsTail(tail: string): SignalRow[] | null {
+  if (!tail) return null;
+  const parts = tail.split(/[;\n]/).map((s) => s.trim()).filter(Boolean);
+  const rows: SignalRow[] = [];
+  for (const part of parts) {
+    // Match: axis=state:note   OR   axis: state — note   (be forgiving)
+    const m = /^\s*(style|palette|material|typology|room)\s*[:=]\s*(match|partial|miss|n\/?a)\s*[:—–\-]\s*(.+)$/i.exec(part);
+    if (!m) continue;
+    const axis = m[1].toLowerCase() as SignalAxis;
+    let state = m[2].toLowerCase().replace(/\s+/g, "") as SignalState;
+    if ((state as string) === "na") state = "n/a";
+    if (!VALID_STATES.includes(state)) continue;
+    const note = m[3].trim().replace(/^["'“”‘’]|["'“”‘’.]$/g, "");
+    rows.push({ axis, state, note });
+  }
+  if (!rows.length) return null;
+  // Sort into canonical order; keep last value per axis if duplicated.
+  const byAxis = new Map<SignalAxis, SignalRow>();
+  for (const r of rows) byAxis.set(r.axis, r);
+  return AXIS_ORDER.filter((a) => byAxis.has(a)).map((a) => byAxis.get(a)!);
 }
 
 const bandStyles: Record<MatchBand, { chip: string; bar: string; dot: string }> = {
@@ -48,8 +87,24 @@ const bandStyles: Record<MatchBand, { chip: string; bar: string; dot: string }> 
   },
 };
 
+const stateStyles: Record<SignalState, { icon: string; label: string; cls: string }> = {
+  match:   { icon: "✓", label: "Aligns",   cls: "text-emerald-700 dark:text-emerald-300" },
+  partial: { icon: "≈", label: "Partial",  cls: "text-amber-700 dark:text-amber-300" },
+  miss:    { icon: "→", label: "Extends",  cls: "text-sky-700 dark:text-sky-300" },
+  "n/a":   { icon: "—", label: "No signal", cls: "text-muted-foreground" },
+};
+
+const axisLabel: Record<SignalAxis, string> = {
+  style: "Style",
+  palette: "Palette",
+  material: "Material",
+  typology: "Typology",
+  room: "Room",
+};
+
 export const MatchBadge: React.FC<{ parsed: ParsedMatch }> = ({ parsed }) => {
   const s = bandStyles[parsed.band];
+  const signals = parsed.signals ?? [];
   return (
     <div className="my-2 rounded-md border border-border/60 bg-background/60 p-2.5">
       <div className="flex items-center gap-2">
@@ -79,6 +134,32 @@ export const MatchBadge: React.FC<{ parsed: ParsedMatch }> = ({ parsed }) => {
       <p className="mt-1.5 font-body text-[12px] italic leading-relaxed text-muted-foreground">
         {parsed.rationale}
       </p>
+      {signals.length > 0 && (
+        <ul className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-x-3 gap-y-1 border-t border-border/50 pt-2">
+          {signals.map((row) => {
+            const st = stateStyles[row.state];
+            return (
+              <li
+                key={row.axis}
+                className="flex items-baseline gap-1.5 font-body text-[11px] leading-snug"
+              >
+                <span
+                  aria-label={st.label}
+                  className={`inline-flex w-3.5 shrink-0 justify-center font-semibold ${st.cls}`}
+                >
+                  {st.icon}
+                </span>
+                <span className="uppercase tracking-[0.1em] text-[9px] text-muted-foreground w-14 shrink-0">
+                  {axisLabel[row.axis]}
+                </span>
+                <span className="text-foreground/90 truncate" title={row.note}>
+                  {row.note}
+                </span>
+              </li>
+            );
+          })}
+        </ul>
+      )}
     </div>
   );
 };
