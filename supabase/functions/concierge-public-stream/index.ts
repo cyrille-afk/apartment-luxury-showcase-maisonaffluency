@@ -408,7 +408,7 @@ serve(async (req) => {
   const decoder = new TextDecoder();
   const encoder = new TextEncoder();
   const sid = (req.headers.get("x-concierge-sid") || "").slice(0, 128) || "no-sid";
-  const lastUserMessage = latestUser?.content ?? "";
+  // Build a compact transcript for the hand-off email.
   const transcript = trimmed
     .map((m) => `${m.role === "assistant" ? "Concierge" : "Visitor"}: ${m.content}`)
     .join("\n\n");
