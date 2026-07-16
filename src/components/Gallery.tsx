@@ -849,7 +849,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
       setTimeout(() => {
         const element = document.getElementById(externalSourceId);
         if (element) {
-          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          element.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
         setExternalSourceId(null);
         setFilterDesigner(null);
@@ -858,7 +858,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
       setTimeout(() => {
         const element = document.getElementById(`gallery-item-${sourceItemKey}`);
         if (element) {
-          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          element.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
       }, 100);
     }
