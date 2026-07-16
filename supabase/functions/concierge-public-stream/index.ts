@@ -510,9 +510,17 @@ serve(async (req) => {
   const decoder = new TextDecoder();
   const encoder = new TextEncoder();
   const sid = (req.headers.get("x-concierge-sid") || "").slice(0, 128) || "no-sid";
-  // Build a compact transcript for the hand-off email.
+  // Build a compact transcript for the hand-off email. Flatten multimodal
+  // parts (image uploads) back to text so the email is readable.
   const transcript = trimmed
-    .map((m) => `${m.role === "assistant" ? "Concierge" : "Visitor"}: ${m.content}`)
+    .map((m) => {
+      const text = typeof m.content === "string"
+        ? m.content
+        : m.content
+            .map((p) => (p.type === "text" ? p.text : "[image attached]"))
+            .join(" ");
+      return `${m.role === "assistant" ? "Concierge" : "Visitor"}: ${text}`;
+    })
     .join("\n\n");
 
   const fireHandoff = async () => {
