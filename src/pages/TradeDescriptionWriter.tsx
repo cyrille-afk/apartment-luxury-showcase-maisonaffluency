@@ -234,15 +234,24 @@ export default function TradeDescriptionWriter() {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  // For SEO tones, bulk generates BOTH the long-form (→ description) and the
+  // meta snippet (→ meta_description) per product in a single pass.
+  const isSeoBundle = tone === "seo" || tone === "seo_long";
+
   const prepareBulk = () => {
     const group = designerGroups.find((g) => g.name === bulkDesigner);
     if (!group) return;
-    const rows: BulkRow[] = group.items.map((p) => ({
-      id: p.id,
-      label: source === "curator_picks" ? p.title : p.product_name,
-      hasExisting: !!(p.description && String(p.description).trim().length > 0),
-      status: "pending",
-    }));
+    const rows: BulkRow[] = group.items.map((p) => {
+      const hasLong = !!(p.description && String(p.description).trim().length > 0);
+      const hasMeta = !!(p.meta_description && String(p.meta_description).trim().length > 0);
+      const hasExisting = isSeoBundle ? (hasLong && hasMeta) : hasLong;
+      return {
+        id: p.id,
+        label: source === "curator_picks" ? p.title : p.product_name,
+        hasExisting,
+        status: "pending" as RowStatus,
+      };
+    });
     setBulkRows(rows);
     setBulkProgress({ done: 0, total: rows.length });
   };
@@ -270,9 +279,21 @@ export default function TradeDescriptionWriter() {
       setBulkRows((rows) => rows.map((r, idx) => (idx === i ? { ...r, status: "generating" } : r)));
 
       try {
-        const { description, seoWarning } = await callDescriptionWriter(row.id, source, tone);
-        await saveDescription(row.id, source, description);
-        setBulkRows((rows) => rows.map((r, idx) => (idx === i ? { ...r, status: "saved", warning: seoWarning || undefined } : r)));
+        if (isSeoBundle) {
+          // Generate long-form + meta snippet in the same bulk pass.
+          const longRes = await callDescriptionWriter(row.id, source, "seo_long");
+          await saveDescription(row.id, source, longRes.description);
+          // small spacing between the two calls to be polite to the gateway
+          await new Promise((r) => setTimeout(r, 300));
+          const metaRes = await callDescriptionWriter(row.id, source, "seo");
+          await saveMetaDescription(row.id, source, metaRes.description);
+          const warning = metaRes.seoWarning || longRes.seoWarning || undefined;
+          setBulkRows((rows) => rows.map((r, idx) => (idx === i ? { ...r, status: "saved", warning } : r)));
+        } else {
+          const { description, seoWarning } = await callDescriptionWriter(row.id, source, tone);
+          await saveDescription(row.id, source, description);
+          setBulkRows((rows) => rows.map((r, idx) => (idx === i ? { ...r, status: "saved", warning: seoWarning || undefined } : r)));
+        }
       } catch (err: any) {
         const msg = err?.message || "Failed";
         setBulkRows((rows) => rows.map((r, idx) => (idx === i ? { ...r, status: "failed", error: msg } : r)));
@@ -289,7 +310,6 @@ export default function TradeDescriptionWriter() {
     }
 
     setBulkRunning(false);
-    const saved = bulkRows.filter((r) => r.status === "saved").length;
     toast.success(`Bulk run complete — ${done}/${total} processed`);
   };
 
