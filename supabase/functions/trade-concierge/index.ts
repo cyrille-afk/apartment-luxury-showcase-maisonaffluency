@@ -5454,6 +5454,45 @@ serve(async (req) => {
         };
         controller.enqueue(encoder.encode(`event: applied_constraints\ndata: ${JSON.stringify(appliedConstraintsPayload)}\n\n`));
 
+        // Surface the detected moodboard / floor-plan signals so the UI can
+        // render a "Detected from your upload" card — confirmation to the
+        // architect that the attachment was actually read. Fire-and-forget:
+        // we don't block the LLM stream on this promise.
+        visionSignalsPromise
+          .then((v) => {
+            if (!v) return;
+            const hasAnySignal =
+              v.style.length +
+                v.palette.length +
+                v.materials.length +
+                v.categories.length +
+                v.subcategories.length +
+                v.designer_hints.length >
+                0 || !!v.room_type;
+            if (!hasAnySignal) return;
+            const payload = {
+              kind: v.kind,
+              style: v.style,
+              palette: v.palette,
+              materials: v.materials,
+              categories: v.categories,
+              subcategories: v.subcategories,
+              room_type: v.room_type,
+              designer_hints: v.designer_hints,
+              notes: v.notes,
+            };
+            try {
+              controller.enqueue(
+                encoder.encode(`event: moodboard_signals\ndata: ${JSON.stringify(payload)}\n\n`),
+              );
+            } catch (e) {
+              console.warn("[trade-concierge] moodboard_signals enqueue failed:", e instanceof Error ? e.message : e);
+            }
+          })
+          .catch((e) => console.warn("[trade-concierge] visionSignalsPromise rejected:", e));
+
+
+
         // Emit escalation event up-front when the classifier flagged it.
         if (sentiment.escalate) {
           const payload = {
