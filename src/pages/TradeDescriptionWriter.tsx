@@ -520,6 +520,11 @@ export default function TradeDescriptionWriter() {
         {/* BULK mode */}
         {mode === "bulk" && (
           <div className="space-y-4">
+            {isSeoBundle && (
+              <div className="rounded-md border border-border bg-muted/30 px-3 py-2 font-body text-xs text-muted-foreground">
+                SEO bundle: each product will get <strong className="text-foreground">both</strong> an on-page long-form description and a ≤160-char meta snippet, saved to <code>description</code> and <code>meta_description</code> respectively.
+              </div>
+            )}
             <div className="flex flex-wrap items-center gap-3">
               <button
                 onClick={prepareBulk}
