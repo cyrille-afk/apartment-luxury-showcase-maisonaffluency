@@ -397,8 +397,99 @@ serve(async (req) => {
     });
   }
 
-  // Pass the upstream SSE stream straight through with CORS headers.
-  return new Response(upstream.body, {
+  // Tee the upstream SSE so we can watch for the Step-5 hand-off phrase
+  // without buffering (the client still sees a real-time stream). When the
+  // assistant announces the hand-off to Cyrille, notify the Gallery Director
+  // by email in the background.
+  const CYRILLE_EMAIL = "cyrille@maisonaffluency.com";
+  const handoffRegex = /handing you (?:over |off )?to (?:\*\*)?cyrille/i;
+  let accumulated = "";
+  let handoffFired = false;
+  const decoder = new TextDecoder();
+  const encoder = new TextEncoder();
+  const sid = (req.headers.get("x-concierge-sid") || "").slice(0, 128) || "no-sid";
+  const lastUserMessage = latestUser?.content ?? "";
+  const transcript = trimmed
+    .map((m) => `${m.role === "assistant" ? "Concierge" : "Visitor"}: ${m.content}`)
+    .join("\n\n");
+
+  const fireHandoff = async () => {
+    if (handoffFired) return;
+    handoffFired = true;
+    try {
+      const subject = "Concierge hand-off — client ready to close";
+      const message = [
+        `A concierge visitor has reached serious intent and been handed to you.`,
+        ``,
+        `Session: ${sid}`,
+        `Path: ${req.headers.get("referer") || "—"}`,
+        ``,
+        `— Conversation —`,
+        transcript,
+        ``,
+        `— Assistant hand-off response —`,
+        accumulated.slice(-2000),
+      ].join("\n");
+      await sb.functions.invoke("send-transactional-email", {
+        body: {
+          templateName: "inquiry-notification",
+          recipientEmail: CYRILLE_EMAIL,
+          idempotencyKey: `concierge-handoff-${sid}-${Date.now()}`,
+          templateData: {
+            name: "Concierge visitor",
+            firm: "",
+            company: "",
+            email: "(private concierge session)",
+            phone: "",
+            message,
+            subject,
+          },
+        },
+      });
+    } catch (e) {
+      console.error("[concierge-public-stream] handoff notify failed", e);
+    }
+  };
+
+  const teed = new ReadableStream({
+    async start(controller) {
+      const reader = upstream.body!.getReader();
+      try {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          controller.enqueue(value);
+          const chunk = decoder.decode(value, { stream: true });
+          // Extract assistant text deltas from OpenAI-style SSE frames.
+          for (const line of chunk.split("\n")) {
+            const trimmedLine = line.trim();
+            if (!trimmedLine.startsWith("data:")) continue;
+            const payload = trimmedLine.slice(5).trim();
+            if (!payload || payload === "[DONE]") continue;
+            try {
+              const j = JSON.parse(payload);
+              const delta = j?.choices?.[0]?.delta?.content;
+              if (typeof delta === "string" && delta) {
+                accumulated += delta;
+                if (!handoffFired && handoffRegex.test(accumulated)) {
+                  // fire-and-forget; don't block the stream
+                  fireHandoff();
+                }
+              }
+            } catch {
+              // ignore non-JSON keep-alives
+            }
+          }
+        }
+      } catch (e) {
+        console.warn("[concierge-public-stream] tee error", e);
+      } finally {
+        controller.close();
+      }
+    },
+  });
+
+  return new Response(teed, {
     status: 200,
     headers: {
       ...corsHeaders,
@@ -408,3 +499,4 @@ serve(async (req) => {
     },
   });
 });
+
