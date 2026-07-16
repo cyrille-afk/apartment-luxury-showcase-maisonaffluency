@@ -25,6 +25,7 @@ import {
   reconcileVariants,
   type AllowedVariantSet,
 } from "../_shared/variantFidelity.ts";
+import { extractFromMedia, type ExtractedVision } from "../_shared/visionExtract.ts";
 
 // Lazy, per-invocation cache of the brand-level lead-time index. Empty table
 // today, but as it fills the fallback engages automatically.
@@ -4110,6 +4111,43 @@ serve(async (req) => {
         Array.isArray(m.content) &&
         m.content.some((p: any) => p?.type === "image_url" || p?.type === "file"),
     );
+
+    // Kick off vision-signal extraction on the latest user turn's first image
+    // so we can surface "detected signals" (style / palette / material /
+    // typology / room) to the UI as confirmation the upload was actually
+    // understood. Fire-and-forget with an internal timeout — we never block
+    // the LLM reply on this.
+    let visionSignalsPromise: Promise<ExtractedVision | null> = Promise.resolve(null);
+    {
+      const lovableKey = Deno.env.get("LOVABLE_API_KEY");
+      const lastUser = [...messages].reverse().find((m: any) => m?.role === "user");
+      const parts = Array.isArray(lastUser?.content) ? lastUser.content : [];
+      const firstImage = parts.find(
+        (p: any) => p?.type === "image_url" && typeof p.image_url?.url === "string" && p.image_url.url.length > 0,
+      );
+      const latestText = parts
+        .filter((p: any) => p?.type === "text")
+        .map((p: any) => (typeof p?.text === "string" ? p.text : ""))
+        .join(" ")
+        .trim();
+      const FLOOR_PLAN_HINT_RE =
+        /\b(floor\s?plan|floorplan|blue\s?print|blueprint|site\s?plan|room\s?plan|elevation|layout|dwg|cad|dxf|drawing set|as[-\s]?built|space\s?plan)\b/i;
+      if (lovableKey && firstImage) {
+        const kind: "mood_board" | "floor_plan" = FLOOR_PLAN_HINT_RE.test(latestText) ? "floor_plan" : "mood_board";
+        visionSignalsPromise = Promise.race<ExtractedVision | null>([
+          extractFromMedia({
+            apiKey: lovableKey,
+            kind,
+            imageUrl: firstImage.image_url.url,
+            userText: latestText.slice(0, 500),
+          }).catch((e) => {
+            console.warn("[trade-concierge] vision extraction failed:", e);
+            return null;
+          }),
+          new Promise<null>((resolve) => setTimeout(() => resolve(null), 6000)),
+        ]);
+      }
+    }
     const userConversationText = messages
       .filter((m: any) => m?.role === "user")
       .map((m: any) => extractText(m.content))
@@ -5415,6 +5453,45 @@ serve(async (req) => {
           empty_source: constraintsEmptySource,
         };
         controller.enqueue(encoder.encode(`event: applied_constraints\ndata: ${JSON.stringify(appliedConstraintsPayload)}\n\n`));
+
+        // Surface the detected moodboard / floor-plan signals so the UI can
+        // render a "Detected from your upload" card — confirmation to the
+        // architect that the attachment was actually read. Fire-and-forget:
+        // we don't block the LLM stream on this promise.
+        visionSignalsPromise
+          .then((v) => {
+            if (!v) return;
+            const hasAnySignal =
+              v.style.length +
+                v.palette.length +
+                v.materials.length +
+                v.categories.length +
+                v.subcategories.length +
+                v.designer_hints.length >
+                0 || !!v.room_type;
+            if (!hasAnySignal) return;
+            const payload = {
+              kind: v.kind,
+              style: v.style,
+              palette: v.palette,
+              materials: v.materials,
+              categories: v.categories,
+              subcategories: v.subcategories,
+              room_type: v.room_type,
+              designer_hints: v.designer_hints,
+              notes: v.notes,
+            };
+            try {
+              controller.enqueue(
+                encoder.encode(`event: moodboard_signals\ndata: ${JSON.stringify(payload)}\n\n`),
+              );
+            } catch (e) {
+              console.warn("[trade-concierge] moodboard_signals enqueue failed:", e instanceof Error ? e.message : e);
+            }
+          })
+          .catch((e) => console.warn("[trade-concierge] visionSignalsPromise rejected:", e));
+
+
 
         // Emit escalation event up-front when the classifier flagged it.
         if (sentiment.escalate) {

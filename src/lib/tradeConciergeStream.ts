@@ -269,6 +269,24 @@ export type AppliedConstraintsEvent = {
 };
 
 /**
+ * Emitted once per turn when the user attached an image and the vision
+ * extractor produced any structured signals. The client renders this as a
+ * "Detected from your upload" card so the architect can confirm the
+ * attachment was actually read — and see WHICH cues drove the curation.
+ */
+export type MoodboardSignalsEvent = {
+  kind: "mood_board" | "floor_plan" | "product_photo" | "tearsheet";
+  style: string[];
+  palette: string[];
+  materials: string[];
+  categories: string[];
+  subcategories: string[];
+  room_type: string | null;
+  designer_hints: string[];
+  notes: string;
+};
+
+/**
  * Emitted the first time the model starts streaming a card-producing tool
  * call (`propose_tearsheet`, `add_to_tearsheet`, `draft_quote`,
  * `add_to_quote`, `propose_ffe_rows`, `prepare_visualization_brief`),
@@ -316,6 +334,7 @@ export async function streamConcierge({
   onStreamStart,
   onInspector,
   onAppliedConstraints,
+  onMoodboardSignals,
   onReconnect,
   onDone,
   onError,
@@ -350,6 +369,8 @@ export async function streamConcierge({
   onInspector?: (event: InspectorEvent) => void;
   /** Fires once near the start with the hard-constraint pre-filters applied to catalog retrieval. */
   onAppliedConstraints?: (event: AppliedConstraintsEvent) => void;
+  /** Fires once when the vision extractor surfaces detected signals from the current-turn upload. */
+  onMoodboardSignals?: (event: MoodboardSignalsEvent) => void;
   /** Fires when the stream drops mid-turn and we're about to auto-reconnect. */
   onReconnect?: (event: ReconnectEvent) => void;
   onDone: () => void;
@@ -539,6 +560,7 @@ export async function streamConcierge({
         }
         if (currentEvent === "inspector") { if (onInspector) onInspector(parsed as InspectorEvent); return; }
         if (currentEvent === "applied_constraints") { if (onAppliedConstraints) onAppliedConstraints(parsed as AppliedConstraintsEvent); return; }
+        if (currentEvent === "moodboard_signals") { if (onMoodboardSignals) onMoodboardSignals(parsed as MoodboardSignalsEvent); return; }
         if (currentEvent === "proposal") { hasStructuredOutput = true; if (onProposal) onProposal(parsed as ConciergeProposal); return; }
         if (currentEvent === "tool_start") { hasStructuredOutput = true; if (onToolStart) onToolStart(parsed as ToolStartEvent); return; }
         if (currentEvent === "escalation") { hasStructuredOutput = true; if (onEscalation) onEscalation(parsed as EscalationEvent); return; }
