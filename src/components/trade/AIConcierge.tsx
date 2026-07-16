@@ -269,7 +269,7 @@ import { buildSpecSchedule, type SpecScheduleItem } from "@/lib/specScheduleBuil
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { MatchBadge, parseMatchTail } from "@/components/trade/concierge/MatchBadge";
+import { MatchBadge, parseMatchTail, inlineSignalsIntoMatchLines } from "@/components/trade/concierge/MatchBadge";
 import { buildSeedDirective } from "@/lib/conciergePrefill";
 import {
   conciergeCopy,
@@ -2714,16 +2714,21 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
                                 // and render it as a badge + rationale card.
                                 const arr = React.Children.toArray(children);
                                 const first: any = arr[0];
-                                const firstIsMatchStrong =
+                                const firstStrongText = first && typeof first === "object"
+                                  ? String((first.props?.children ?? "").toString())
+                                  : "";
+                                const firstIsStrong =
                                   first &&
                                   typeof first === "object" &&
-                                  (first.type === "strong" || first.props?.node?.tagName === "strong") &&
-                                  /^\s*match\s*:?\s*$/i.test(
-                                    String(
-                                      (first.props?.children ?? "")
-                                        .toString()
-                                    )
-                                  );
+                                  (first.type === "strong" || first.props?.node?.tagName === "strong");
+                                const firstIsMatchStrong =
+                                  firstIsStrong && /^\s*match\s*:?\s*$/i.test(firstStrongText);
+                                const firstIsSignalsStrong =
+                                  firstIsStrong && /^\s*signals\s*:?\s*$/i.test(firstStrongText);
+                                // Suppress bare "**Signals:** …" paragraphs — they
+                                // should have been folded into the Match line by
+                                // inlineSignalsIntoMatchLines(); this is the fallback.
+                                if (firstIsSignalsStrong) return null;
                                 if (firstIsMatchStrong) {
                                   const tail = arr
                                     .slice(1)
@@ -2748,7 +2753,7 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
                               code: ({ node, ...props }) => <code className="rounded bg-background/60 px-1 py-0.5 text-[0.85em]" {...props} />,
                             }}
                           >
-                            {item.content}
+                            {inlineSignalsIntoMatchLines(item.content)}
                           </ReactMarkdown>
                         </div>
                       ) : (
