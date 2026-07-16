@@ -65,6 +65,12 @@ async function saveDescription(productId: string, source: Source, description: s
   if (error) throw error;
 }
 
+async function saveMetaDescription(productId: string, source: Source, metaDescription: string) {
+  const table = source === "curator_picks" ? "designer_curator_picks" : "trade_products";
+  const { error } = await supabase.from(table).update({ meta_description: metaDescription }).eq("id", productId);
+  if (error) throw error;
+}
+
 const PERSIST_KEY = "trade-description-writer:v1";
 
 type PersistedState = {
