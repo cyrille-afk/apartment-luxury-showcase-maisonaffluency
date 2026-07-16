@@ -23,6 +23,8 @@ const EMBED_DIMS = 1536;
 const SEMANTIC_MIN_CHARS = 20; // skip retrieval for tiny "hi", "?", etc.
 const SEMANTIC_TOP_K = 6;
 const SEMANTIC_TIMEOUT_MS = 1500; // never block the stream on retrieval
+const VISION_TIMEOUT_MS = 6000;   // bounded, fault-tolerant vision extraction
+const MAX_INLINE_IMAGES = 3;      // per turn — token/cost cap
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
