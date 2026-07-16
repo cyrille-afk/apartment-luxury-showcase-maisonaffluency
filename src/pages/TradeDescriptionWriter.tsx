@@ -65,6 +65,12 @@ async function saveDescription(productId: string, source: Source, description: s
   if (error) throw error;
 }
 
+async function saveMetaDescription(productId: string, source: Source, metaDescription: string) {
+  const table = source === "curator_picks" ? "designer_curator_picks" : "trade_products";
+  const { error } = await supabase.from(table).update({ meta_description: metaDescription }).eq("id", productId);
+  if (error) throw error;
+}
+
 const PERSIST_KEY = "trade-description-writer:v1";
 
 type PersistedState = {
@@ -138,7 +144,7 @@ export default function TradeDescriptionWriter() {
     queryFn: async () => {
       const { data } = await supabase
         .from("designer_curator_picks")
-        .select("id, title, description, designer_id, designers(display_name, name, founder)")
+        .select("id, title, description, meta_description, designer_id, designers(display_name, name, founder)")
         .order("title")
         .limit(2000);
       return (data || []) as any[];
@@ -152,7 +158,7 @@ export default function TradeDescriptionWriter() {
     queryFn: async () => {
       const { data } = await supabase
         .from("trade_products")
-        .select("id, product_name, brand_name, description")
+        .select("id, product_name, brand_name, description, meta_description")
         .eq("is_active", true)
         .order("product_name")
         .limit(2000);
@@ -228,15 +234,24 @@ export default function TradeDescriptionWriter() {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  // For SEO tones, bulk generates BOTH the long-form (→ description) and the
+  // meta snippet (→ meta_description) per product in a single pass.
+  const isSeoBundle = tone === "seo" || tone === "seo_long";
+
   const prepareBulk = () => {
     const group = designerGroups.find((g) => g.name === bulkDesigner);
     if (!group) return;
-    const rows: BulkRow[] = group.items.map((p) => ({
-      id: p.id,
-      label: source === "curator_picks" ? p.title : p.product_name,
-      hasExisting: !!(p.description && String(p.description).trim().length > 0),
-      status: "pending",
-    }));
+    const rows: BulkRow[] = group.items.map((p) => {
+      const hasLong = !!(p.description && String(p.description).trim().length > 0);
+      const hasMeta = !!(p.meta_description && String(p.meta_description).trim().length > 0);
+      const hasExisting = isSeoBundle ? (hasLong && hasMeta) : hasLong;
+      return {
+        id: p.id,
+        label: source === "curator_picks" ? p.title : p.product_name,
+        hasExisting,
+        status: "pending" as RowStatus,
+      };
+    });
     setBulkRows(rows);
     setBulkProgress({ done: 0, total: rows.length });
   };
@@ -264,9 +279,21 @@ export default function TradeDescriptionWriter() {
       setBulkRows((rows) => rows.map((r, idx) => (idx === i ? { ...r, status: "generating" } : r)));
 
       try {
-        const { description, seoWarning } = await callDescriptionWriter(row.id, source, tone);
-        await saveDescription(row.id, source, description);
-        setBulkRows((rows) => rows.map((r, idx) => (idx === i ? { ...r, status: "saved", warning: seoWarning || undefined } : r)));
+        if (isSeoBundle) {
+          // Generate long-form + meta snippet in the same bulk pass.
+          const longRes = await callDescriptionWriter(row.id, source, "seo_long");
+          await saveDescription(row.id, source, longRes.description);
+          // small spacing between the two calls to be polite to the gateway
+          await new Promise((r) => setTimeout(r, 300));
+          const metaRes = await callDescriptionWriter(row.id, source, "seo");
+          await saveMetaDescription(row.id, source, metaRes.description);
+          const warning = metaRes.seoWarning || longRes.seoWarning || undefined;
+          setBulkRows((rows) => rows.map((r, idx) => (idx === i ? { ...r, status: "saved", warning } : r)));
+        } else {
+          const { description, seoWarning } = await callDescriptionWriter(row.id, source, tone);
+          await saveDescription(row.id, source, description);
+          setBulkRows((rows) => rows.map((r, idx) => (idx === i ? { ...r, status: "saved", warning: seoWarning || undefined } : r)));
+        }
       } catch (err: any) {
         const msg = err?.message || "Failed";
         setBulkRows((rows) => rows.map((r, idx) => (idx === i ? { ...r, status: "failed", error: msg } : r)));
@@ -283,7 +310,6 @@ export default function TradeDescriptionWriter() {
     }
 
     setBulkRunning(false);
-    const saved = bulkRows.filter((r) => r.status === "saved").length;
     toast.success(`Bulk run complete — ${done}/${total} processed`);
   };
 
@@ -494,6 +520,11 @@ export default function TradeDescriptionWriter() {
         {/* BULK mode */}
         {mode === "bulk" && (
           <div className="space-y-4">
+            {isSeoBundle && (
+              <div className="rounded-md border border-border bg-muted/30 px-3 py-2 font-body text-xs text-muted-foreground">
+                SEO bundle: each product will get <strong className="text-foreground">both</strong> an on-page long-form description and a ≤160-char meta snippet, saved to <code>description</code> and <code>meta_description</code> respectively.
+              </div>
+            )}
             <div className="flex flex-wrap items-center gap-3">
               <button
                 onClick={prepareBulk}
