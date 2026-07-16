@@ -26,7 +26,7 @@ export default defineTool({
   name: "search_curator_picks",
   title: "Search curator picks",
   description:
-    "Search Maison Affluency's public catalog of curator-picked designer furniture, lighting, and collectibles. Filter by free-text query, designer, category, subcategory, or materials. Returns product cards with a deep link back to the product page. Trade pricing is never returned — every result shows 'Price on Request'.",
+    "Search Maison Affluency's public catalog of curator-picked designer furniture, lighting, and collectibles. Filter by free-text query, designer, category, subcategory, or materials. Returns product cards with a deep link back to the product page. Trade pricing is never returned — every result shows 'Price on Request'. Always returns at least 10 results when available; default 20, max 50.",
   inputSchema: {
     query: z
       .string()
@@ -38,7 +38,7 @@ export default defineTool({
     category: z.string().trim().max(80).optional().describe("Top-level category, e.g. 'Seating', 'Lighting', 'Tables'."),
     subcategory: z.string().trim().max(80).optional().describe("Subcategory, e.g. 'Sofa', 'Pendant', 'Console'."),
     material: z.string().trim().max(80).optional().describe("Material substring, e.g. 'bronze', 'walnut'."),
-    limit: z.number().int().min(1).max(50).optional().describe("Max results, default 20."),
+    limit: z.number().int().min(1).max(50).optional().describe("Max results. Server enforces a minimum of 10; default 20."),
   },
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
   handler: async (input) => {
@@ -57,7 +57,8 @@ export default defineTool({
         })
         .then(() => {}, () => {});
     };
-    const limit = input.limit ?? 20;
+    const MIN_LIMIT = 10;
+    const limit = Math.max(MIN_LIMIT, input.limit ?? 20);
 
 
     let designerId: string | null = null;
