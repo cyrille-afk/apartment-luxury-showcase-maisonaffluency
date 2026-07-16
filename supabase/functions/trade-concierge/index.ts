@@ -2710,14 +2710,21 @@ async function loadRelevantPieces(
       console.log(`[concierge RAG lead] pre=${filtered.length} kept=${leadRes.kept.length} dropped=${leadRes.dropped} unknownDropped=${leadRes.unknownDropped} fellBack=${leadRes.fellBack} constraints=${JSON.stringify(leadConstraints)}`);
       filtered = leadRes.kept as any[];
     }
-    const data = filtered.slice(0, k);
-    if (data.length < 5) {
-      // Filter too strict — fall back to unfiltered top-K rather than blank.
-      console.warn("[concierge RAG] hard constraints filtered <5 rows; falling back", {
+    let data = filtered.slice(0, k);
+    let usedFallback = false;
+    if (data.length < 3) {
+      // Filter too strict — fall back to the unfiltered top-K so the UI still
+      // renders a curated Private Exhibition set rather than looking empty.
+      console.warn("[concierge RAG] hard constraints filtered <3 rows; falling back to unfiltered top-K", {
         constraints: hardConstraints,
         dimConstraints,
         preFilter: rawData.length,
+        postFilter: filtered.length,
       });
+      data = (rawData as any[]).slice(0, k);
+      usedFallback = true;
+    }
+    if (data.length === 0) {
       return { contextText: "", rows: [] };
     }
     const fmtLead = (r: any) => (r.lead_time ? String(r.lead_time).trim() : "");
