@@ -155,6 +155,20 @@ Output a SINGLE paragraph. No line breaks, no bullet points, no multiple paragra
 Do NOT mention dimensions, measurements, sizes, depth, width, height, lead times, production time, delivery, or made-to-order timing — these are shown elsewhere on the product card.
 Do NOT list finish options or material variants exhaustively — reference materials evocatively, not as a spec sheet.
 Do NOT use keyword stuffing — keep it elegant, scannable, and informative.`,
+
+  seo_long: `Write a long-form, SEO-optimized on-page product description for a luxury furniture website.
+This is the description shown on the product page itself, NOT the <meta name="description"> snippet — so there is NO 160-character limit. Aim for 180–260 words across 2–3 short paragraphs.
+
+Naturally incorporate the designer name, brand, key materials, category, and one or two evocative period/style references where the data supports it. Weave in searchable terms without stuffing.
+
+Structure:
+- Paragraph 1: a compelling opening that names the piece, the designer/atelier, and the defining material or silhouette.
+- Paragraph 2: craftsmanship, materials, and finish — sensory, precise, drawn only from the PRODUCT DATA.
+- Paragraph 3 (optional): the designer's or atelier's context and how the piece fits their body of work.
+
+Do NOT include dimensions, measurements, lead times, delivery, or pricing — those live elsewhere on the page.
+Do NOT list finish options exhaustively; reference materials evocatively.
+Output plain paragraphs separated by a single blank line — no headings, no bullet points, no markdown.`,
 };
 
 serve(async (req) => {
