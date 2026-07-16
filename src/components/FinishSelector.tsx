@@ -108,6 +108,12 @@ interface FinishSelectorProps {
    */
   woodLabel?: string | null;
   /**
+   * Per-product override for the upholstery (fabric/leather) accordion label.
+   * When omitted, falls back to "Select Your Fabric / Leather".
+   */
+  upholsteryLabel?: string | null;
+  // placeholder to preserve line numbering
+  /**
    * When false, the upholstery (fabric/leather + COM/COL) accordion is hidden
    * and only the wood/finish swatch picker is rendered. Used on non-upholstered
    * products (e.g. wood/rattan benches) that still have linked frame finishes.
