@@ -149,8 +149,8 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
             style={{
               scrollbarWidth: "none",
               msOverflowStyle: "none",
-              // Exactly 5 thumbnails (6rem each) + 4 gaps (0.5rem each) = 32rem
-              maxHeight: "32rem",
+              // Exactly 4 thumbnails (6rem each) + 3 gaps (0.5rem each) = 25.5rem
+              maxHeight: "25.5rem",
             }}
           >
             {images.map((img, i) => (
