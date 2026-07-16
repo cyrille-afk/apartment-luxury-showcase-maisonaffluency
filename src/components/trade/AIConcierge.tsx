@@ -1839,6 +1839,7 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
     // this turn. Emitted by the edge function once, near the start of the
     // SSE stream. Attached to the assistant msg so the UI can show chips.
     let turnConstraints: AppliedConstraintsEvent | null = null;
+    let turnMoodboardSignals: MoodboardSignalsEvent | null = null;
 
     const upsertAssistant = (chunk: string) => {
       armStall();
