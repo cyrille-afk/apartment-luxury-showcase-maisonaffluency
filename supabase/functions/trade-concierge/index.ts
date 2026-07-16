@@ -2802,7 +2802,9 @@ async function loadRelevantPieces(
     ].filter(Boolean);
 
     const contextText = [
-      "Note: the lines below are the curated pieces most semantically relevant to the user's latest query (top-K retrieval, not the full Curation). If the user asks for a broad scan and nothing here matches, say so plainly and ask whether to broaden typology/material constraints inside the Maison Affluency Curation.",
+      usedFallback
+        ? "Note: the user's hard constraints (colour / material / typology) yielded zero exact matches, so the lines below are the CLOSEST curated pieces by semantic relevance — offered as a fallback Private Exhibition so the client never sees an empty edit. When you present them, acknowledge in one short sentence that these are the nearest matches (not exact) and invite the user to relax one axis for a tighter fit. Never claim they satisfy every stated constraint."
+        : "Note: the lines below are the curated pieces most semantically relevant to the user's latest query (top-K retrieval, not the full Curation). If the user asks for a broad scan and nothing here matches, say so plainly and ask whether to broaden typology/material constraints inside the Maison Affluency Curation.",
       "",
       `Collective context (reason across the whole set, not just individual items): ${summaryBits.join(" · ")}. Use this to make holistic statements when relevant (e.g. "all of these ship within 4 weeks", "the whole edit is European-made", "most pieces share an oak / brass palette"). Only assert a collective fact when it truly holds for every item you propose.`,
       "",
