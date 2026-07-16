@@ -215,11 +215,23 @@ export default function TradeAdminFabrics() {
   const { data: links = [] } = useQuery({
     queryKey: ["admin-fabrics-links"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("product_fabrics")
-        .select("*");
-      if (error) throw error;
-      return (data as ProductFabric[]) || [];
+      // Paginate — PostgREST caps a single response at 1000 rows and this
+      // table has >2000 links. Without pagination the "linked" counts are
+      // wrong and INSERTs collide with the (pick_id, fabric_id) unique
+      // constraint even though the UI shows "0 linked".
+      const all: ProductFabric[] = [];
+      const pageSize = 1000;
+      for (let from = 0; ; from += pageSize) {
+        const { data, error } = await supabase
+          .from("product_fabrics")
+          .select("*")
+          .range(from, from + pageSize - 1);
+        if (error) throw error;
+        const batch = (data as ProductFabric[]) || [];
+        all.push(...batch);
+        if (batch.length < pageSize) break;
+      }
+      return all;
     },
     enabled: isAdmin,
   });
