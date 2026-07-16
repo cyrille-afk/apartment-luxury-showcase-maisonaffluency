@@ -2714,16 +2714,21 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
                                 // and render it as a badge + rationale card.
                                 const arr = React.Children.toArray(children);
                                 const first: any = arr[0];
-                                const firstIsMatchStrong =
+                                const firstStrongText = first && typeof first === "object"
+                                  ? String((first.props?.children ?? "").toString())
+                                  : "";
+                                const firstIsStrong =
                                   first &&
                                   typeof first === "object" &&
-                                  (first.type === "strong" || first.props?.node?.tagName === "strong") &&
-                                  /^\s*match\s*:?\s*$/i.test(
-                                    String(
-                                      (first.props?.children ?? "")
-                                        .toString()
-                                    )
-                                  );
+                                  (first.type === "strong" || first.props?.node?.tagName === "strong");
+                                const firstIsMatchStrong =
+                                  firstIsStrong && /^\s*match\s*:?\s*$/i.test(firstStrongText);
+                                const firstIsSignalsStrong =
+                                  firstIsStrong && /^\s*signals\s*:?\s*$/i.test(firstStrongText);
+                                // Suppress bare "**Signals:** …" paragraphs — they
+                                // should have been folded into the Match line by
+                                // inlineSignalsIntoMatchLines(); this is the fallback.
+                                if (firstIsSignalsStrong) return null;
                                 if (firstIsMatchStrong) {
                                   const tail = arr
                                     .slice(1)
