@@ -490,31 +490,143 @@ serve(async (req) => {
   }
   const groundingBlock = buildGroundingBlock(queryText, semanticHits, { retrievalStatus });
 
-  // Build a visual-context system note when vision extraction succeeded, so
-  // the model treats the uploaded image as an authoritative brief.
-  const visionNote = vision
-    ? [
-        "## Visual reference uploaded by the visitor",
-        "The visitor attached an image (mood board, sketch, or reference photo). Treat the following extracted signals as their brief; respond to the mood and materials in the image, not only to their typed words.",
-        vision.style.length ? `- Style vocabulary: ${vision.style.join(", ")}` : "",
-        vision.palette.length ? `- Palette: ${vision.palette.join(", ")}` : "",
-        vision.materials.length ? `- Materials read: ${vision.materials.join(", ")}` : "",
-        vision.subcategories.length
-          ? `- Furniture typology suggested: ${vision.subcategories.join(", ")}`
-          : vision.categories.length
-            ? `- Furniture typology suggested: ${vision.categories.join(", ")}`
-            : "",
-        vision.room_type ? `- Room type: ${vision.room_type}` : "",
-        vision.designer_hints.length
-          ? `- Designer resonances (hints only — only cite if present in the verified roster): ${vision.designer_hints.join(", ")}`
+  // -------- Floor-plan fit check (Step 4 of the CAD flow) --------
+  // When floor-plan extraction produced a room envelope, pre-filter the
+  // curator library to pieces that physically fit that envelope, plus (when
+  // extracted) the requested category. The model then selects the Private
+  // Exhibition ONLY from this shortlist — no hallucinated dimensions.
+  //
+  // Uses the service-role client (bypasses RLS), reads structured
+  // width_mm/depth_mm/height_mm from designer_curator_picks, joins to
+  // designers for the display name. Bounded to 12 rows so the injected
+  // system note stays compact.
+  type FitCandidate = {
+    id: string;
+    title: string | null;
+    subtitle: string | null;
+    category: string | null;
+    subcategory: string | null;
+    width_mm: number | null;
+    depth_mm: number | null;
+    height_mm: number | null;
+    designer_name: string | null;
+  };
+  let fitShortlist: FitCandidate[] = [];
+  let fitEnvelopeUsed: { w_cm: number | null; d_cm: number | null; h_cm: number | null } | null = null;
+  if (isFloorPlanIntent && vision && (vision.max_width_cm || vision.max_depth_cm)) {
+    try {
+      const wMm = vision.max_width_cm ? Math.round(vision.max_width_cm * 10) : null;
+      const dMm = vision.max_depth_cm ? Math.round(vision.max_depth_cm * 10) : null;
+      const hMm = vision.max_height_cm ? Math.round(vision.max_height_cm * 10) : null;
+      fitEnvelopeUsed = {
+        w_cm: vision.max_width_cm ?? null,
+        d_cm: vision.max_depth_cm ?? null,
+        h_cm: vision.max_height_cm ?? null,
+      };
+
+      // Build the query. We want pieces where every populated axis fits
+      // under the envelope; leave the axis unconstrained when the visitor's
+      // plan didn't give us that dimension.
+      let q = sb
+        .from("designer_curator_picks")
+        .select("id, title, subtitle, category, subcategory, width_mm, depth_mm, height_mm, designer:designers(name, display_name)")
+        .not("width_mm", "is", null)
+        .not("depth_mm", "is", null);
+      if (wMm) q = q.lte("width_mm", wMm);
+      if (dMm) q = q.lte("depth_mm", dMm);
+      if (hMm) q = q.lte("height_mm", hMm);
+      // Category filter — case-insensitive, only when confidently extracted.
+      const cat = vision.categories[0]?.toLowerCase().trim();
+      if (cat && cat.length >= 3 && cat.length <= 40) {
+        q = q.ilike("category", cat);
+      }
+      const { data: rows, error: fitErr } = await q.limit(24);
+      if (fitErr) {
+        console.warn("[concierge-public-stream] fit-check query error", fitErr);
+      } else if (Array.isArray(rows)) {
+        fitShortlist = rows.slice(0, 12).map((r: any) => ({
+          id: r.id,
+          title: r.title ?? null,
+          subtitle: r.subtitle ?? null,
+          category: r.category ?? null,
+          subcategory: r.subcategory ?? null,
+          width_mm: r.width_mm ?? null,
+          depth_mm: r.depth_mm ?? null,
+          height_mm: r.height_mm ?? null,
+          designer_name:
+            (r.designer?.display_name as string | undefined) ??
+            (r.designer?.name as string | undefined) ??
+            null,
+        }));
+      }
+    } catch (e) {
+      console.warn("[concierge-public-stream] fit-check skipped", e);
+    }
+  }
+
+  const fmtDims = (w: number | null, d: number | null, h: number | null) => {
+    const parts: string[] = [];
+    if (w) parts.push(`W ${Math.round(w / 10)}cm`);
+    if (d) parts.push(`D ${Math.round(d / 10)}cm`);
+    if (h) parts.push(`H ${Math.round(h / 10)}cm`);
+    return parts.join(" · ");
+  };
+
+  // Compose the vision / floor-plan context system note.
+  let visionNote = "";
+  if (isFloorPlanIntent && vision) {
+    const envelopeParts: string[] = [];
+    if (fitEnvelopeUsed?.w_cm) envelopeParts.push(`max width ${fitEnvelopeUsed.w_cm} cm`);
+    if (fitEnvelopeUsed?.d_cm) envelopeParts.push(`max depth ${fitEnvelopeUsed.d_cm} cm`);
+    if (fitEnvelopeUsed?.h_cm) envelopeParts.push(`max height ${fitEnvelopeUsed.h_cm} cm`);
+    const envelope = envelopeParts.length ? envelopeParts.join(" × ") : "envelope not readable from the drawing";
+    const lines: string[] = [
+      "## Floor plan / CAD attached",
+      `The visitor uploaded a ${latestPdfBase64 ? "PDF drawing" : "floor plan image"}${latestPdfName ? ` (${latestPdfName})` : ""}. Extracted room envelope: ${envelope}.`,
+      vision.room_type ? `- Room type: ${vision.room_type}` : "",
+      vision.categories.length ? `- Furniture requested: ${vision.categories.join(", ")}` : "",
+      "",
+    ];
+    if (fitShortlist.length > 0) {
+      lines.push("### Room-fit shortlist (pieces that physically fit the envelope)");
+      lines.push("Select your Private Exhibition (exactly 3 pieces) ONLY from this shortlist. Never propose a piece whose dimensions exceed the room envelope.");
+      lines.push("");
+      for (const c of fitShortlist) {
+        const dims = fmtDims(c.width_mm, c.depth_mm, c.height_mm);
+        const label = [c.title, c.subtitle].filter(Boolean).join(" · ");
+        const designer = c.designer_name ? ` — ${c.designer_name}` : "";
+        const cat = [c.category, c.subcategory].filter(Boolean).join(" · ");
+        lines.push(`- ${label || "Untitled"}${designer}${cat ? ` (${cat})` : ""} — ${dims || "dimensions on file"}`);
+      }
+    } else {
+      lines.push("No shortlist could be built from the structured catalogue (dimensions not on file for the matching subset). Fall back to the verified roster in the grounding block above and explicitly confirm each proposed piece will be dimension-checked by Cyrille in the private invoice.");
+    }
+    lines.push("");
+    lines.push("Acknowledge the drawing in one short sentence, state the room envelope you read, then deliver Step 3 / Step 4.");
+    visionNote = lines.filter(Boolean).join("\n");
+  } else if (vision) {
+    visionNote = [
+      "## Visual reference uploaded by the visitor",
+      "The visitor attached an image (mood board, sketch, or reference photo). Treat the following extracted signals as their brief; respond to the mood and materials in the image, not only to their typed words.",
+      vision.style.length ? `- Style vocabulary: ${vision.style.join(", ")}` : "",
+      vision.palette.length ? `- Palette: ${vision.palette.join(", ")}` : "",
+      vision.materials.length ? `- Materials read: ${vision.materials.join(", ")}` : "",
+      vision.subcategories.length
+        ? `- Furniture typology suggested: ${vision.subcategories.join(", ")}`
+        : vision.categories.length
+          ? `- Furniture typology suggested: ${vision.categories.join(", ")}`
           : "",
-        vision.notes ? `- Notes: ${vision.notes}` : "",
-        "",
-        "Acknowledge the image briefly in your reply (one short sentence), then proceed to Step 3 / Step 4 with the Private Exhibition drawn from the verified roster. Do not name any designer or atelier not on that roster.",
-      ]
-        .filter(Boolean)
-        .join("\n")
-    : "";
+      vision.room_type ? `- Room type: ${vision.room_type}` : "",
+      vision.designer_hints.length
+        ? `- Designer resonances (hints only — only cite if present in the verified roster): ${vision.designer_hints.join(", ")}`
+        : "",
+      vision.notes ? `- Notes: ${vision.notes}` : "",
+      "",
+      "Acknowledge the image briefly in your reply (one short sentence), then proceed to Step 3 / Step 4 with the Private Exhibition drawn from the verified roster. Do not name any designer or atelier not on that roster.",
+    ]
+      .filter(Boolean)
+      .join("\n");
+  }
 
   const systemMessages: Array<{ role: "system"; content: string }> = [
     { role: "system", content: SYSTEM_PROMPT },
