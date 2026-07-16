@@ -275,8 +275,9 @@ serve(async (req) => {
 
   // Trim history + sanitize roles/content. The CURRENT user turn may carry
   // multimodal parts (text + image_url) — mood boards, sketches, product
-  // photos the visitor wants matched against the roster. Prior turns are
-  // flattened to text to avoid re-sending image bytes every request.
+  // photos, floor plans, or PDF/CAD tearsheets the visitor wants matched
+  // against the roster. Prior turns are flattened to text to avoid
+  // re-sending image bytes every request.
   type PartText = { type: "text"; text: string };
   type PartImage = { type: "image_url"; image_url: { url: string } };
   type Part = PartText | PartImage;
@@ -298,6 +299,8 @@ serve(async (req) => {
   const historyIdx = trimmedRaw.length - 1;
   const trimmed: ChatMsg[] = [];
   let latestImages: string[] = []; // urls (https or data:) on the current turn
+  let latestPdfBase64: string | null = null; // first PDF attachment (base64, no data: prefix)
+  let latestPdfName: string | null = null;
 
   trimmedRaw.forEach((m: any, idx: number) => {
     const role: "user" | "assistant" = m?.role === "assistant" ? "assistant" : "user";
@@ -314,13 +317,36 @@ serve(async (req) => {
         ) {
           imgs.push(p.image_url.url);
           if (imgs.length >= MAX_INLINE_IMAGES) break;
+        } else if (
+          !latestPdfBase64 &&
+          p?.type === "file" &&
+          typeof p?.file?.file_data === "string" &&
+          /^data:application\/pdf;base64,/i.test(p.file.file_data)
+        ) {
+          const b64 = p.file.file_data.replace(/^data:application\/pdf;base64,/i, "");
+          // Cap decoded size to ~10MB (base64 is ~4/3 of decoded size).
+          if (b64.length > 0 && b64.length < 15_000_000) {
+            latestPdfBase64 = b64;
+            latestPdfName = typeof p.file.filename === "string" ? p.file.filename.slice(0, 200) : null;
+          }
         }
       }
       latestImages = imgs;
+      const fallbackPromptWithMedia =
+        imgs.length && latestPdfBase64
+          ? "Please review the attached image(s) and PDF and use them to curate the Private Exhibition."
+          : imgs.length
+            ? "Please review the attached image(s) and use them to curate the Private Exhibition."
+            : latestPdfBase64
+              ? "Please review the attached PDF and use it to curate the Private Exhibition."
+              : "";
       if (imgs.length === 0) {
-        if (text) trimmed.push({ role, content: text });
+        // No image parts, but we may still want the text row.
+        if (text || fallbackPromptWithMedia) {
+          trimmed.push({ role, content: text || fallbackPromptWithMedia });
+        }
       } else {
-        const parts: Part[] = [{ type: "text", text: text || "Please review the attached image(s) and use them to curate the Private Exhibition." }];
+        const parts: Part[] = [{ type: "text", text: text || fallbackPromptWithMedia }];
         for (const url of imgs) parts.push({ type: "image_url", image_url: { url } });
         trimmed.push({ role, content: parts });
       }
@@ -331,11 +357,12 @@ serve(async (req) => {
   });
 
   // Validate the latest user message (the one that just arrived). When only
-  // images were attached with no meaningful text, the client sends a short
-  // helper prompt — allow that path by skipping the min-length check.
+  // images/PDF were attached with no meaningful text, the client sends a
+  // short helper prompt — allow that path by skipping the min-length check.
   const latestUser = trimmed.slice().reverse().find((m) => m.role === "user");
   const latestUserText = latestUser ? flattenToText(latestUser.content) : "";
-  if (latestUser && latestImages.length === 0) {
+  const hasMedia = latestImages.length > 0 || !!latestPdfBase64;
+  if (latestUser && !hasMedia) {
     const v = validateMessage(latestUserText);
     if (!v.ok) {
       return new Response(JSON.stringify({ error: v.reason }), {
@@ -348,21 +375,31 @@ serve(async (req) => {
     });
   }
 
-  // -------- Vision extraction (mood board / sketch / product photo) --------
-  // When the current turn carries images, extract style / palette / materials
-  // so we can (a) enrich the roster-retrieval embedding query and (b) inject
-  // an authoritative context note so the model's Private Exhibition responds
-  // to the visual reference — not just any text the visitor typed.
+  // -------- Vision extraction (mood board OR floor plan / CAD) --------
+  // Route by intent: keywords + PDF attachments strongly suggest a floor
+  // plan / CAD / spec drawing. Floor-plan extraction uses Gemini 2.5 Pro
+  // (spatial reasoning) and yields a room envelope in cm.
   //
-  // Bounded (VISION_TIMEOUT_MS) and fully fault-tolerant: on failure we fall
-  // through to text-only retrieval unchanged.
+  // A floor plan is a spatial document, not a mood signal — we do NOT
+  // forward it to the chat model as an image. The extracted envelope is
+  // injected as an authoritative system note instead.
+  const FLOOR_PLAN_HINT_RE =
+    /\b(floor\s?plan|floorplan|blue\s?print|blueprint|site\s?plan|room\s?plan|elevation|layout|dwg|cad|dxf|drawing set|as[-\s]?built|space\s?plan)\b/i;
+  const roomMentionsDims = /(\d+(?:[.,]\d+)?\s?(?:m|metres?|meters?|cm|centimetres?|centimeters?)\b.*\b(?:x|by|×)\b)/i;
+  const isFloorPlanIntent =
+    !!latestPdfBase64 ||
+    FLOOR_PLAN_HINT_RE.test(latestUserText) ||
+    (latestImages.length > 0 && roomMentionsDims.test(latestUserText));
+
   let vision: ExtractedVision | null = null;
-  if (latestImages.length > 0) {
+  if (hasMedia) {
     try {
+      const kind: "mood_board" | "floor_plan" = isFloorPlanIntent ? "floor_plan" : "mood_board";
       const visionPromise = extractFromMedia({
         apiKey: LOVABLE_API_KEY,
-        kind: "mood_board",
+        kind,
         imageUrl: latestImages[0],
+        pdfBase64: !latestImages.length && latestPdfBase64 ? latestPdfBase64 : undefined,
         userText: latestUserText.slice(0, 500),
       });
       vision = await Promise.race([
@@ -372,6 +409,21 @@ serve(async (req) => {
     } catch (e) {
       console.warn("[concierge-public-stream] vision extraction skipped", e);
       vision = null;
+    }
+  }
+
+  // If the current turn is a floor-plan / CAD, strip the image from the
+  // chat parts. The model doesn't need to look at the plan itself; it
+  // needs the extracted envelope + the pre-filtered fit shortlist below.
+  if (isFloorPlanIntent && trimmed.length > 0) {
+    const last = trimmed[trimmed.length - 1];
+    if (last.role === "user" && Array.isArray(last.content)) {
+      const textOnly = last.content
+        .filter((p): p is PartText => p.type === "text")
+        .map((p) => p.text)
+        .join(" ")
+        .trim();
+      last.content = textOnly || "Please curate a Private Exhibition sized for the room I described.";
     }
   }
 
@@ -438,31 +490,143 @@ serve(async (req) => {
   }
   const groundingBlock = buildGroundingBlock(queryText, semanticHits, { retrievalStatus });
 
-  // Build a visual-context system note when vision extraction succeeded, so
-  // the model treats the uploaded image as an authoritative brief.
-  const visionNote = vision
-    ? [
-        "## Visual reference uploaded by the visitor",
-        "The visitor attached an image (mood board, sketch, or reference photo). Treat the following extracted signals as their brief; respond to the mood and materials in the image, not only to their typed words.",
-        vision.style.length ? `- Style vocabulary: ${vision.style.join(", ")}` : "",
-        vision.palette.length ? `- Palette: ${vision.palette.join(", ")}` : "",
-        vision.materials.length ? `- Materials read: ${vision.materials.join(", ")}` : "",
-        vision.subcategories.length
-          ? `- Furniture typology suggested: ${vision.subcategories.join(", ")}`
-          : vision.categories.length
-            ? `- Furniture typology suggested: ${vision.categories.join(", ")}`
-            : "",
-        vision.room_type ? `- Room type: ${vision.room_type}` : "",
-        vision.designer_hints.length
-          ? `- Designer resonances (hints only — only cite if present in the verified roster): ${vision.designer_hints.join(", ")}`
+  // -------- Floor-plan fit check (Step 4 of the CAD flow) --------
+  // When floor-plan extraction produced a room envelope, pre-filter the
+  // curator library to pieces that physically fit that envelope, plus (when
+  // extracted) the requested category. The model then selects the Private
+  // Exhibition ONLY from this shortlist — no hallucinated dimensions.
+  //
+  // Uses the service-role client (bypasses RLS), reads structured
+  // width_mm/depth_mm/height_mm from designer_curator_picks, joins to
+  // designers for the display name. Bounded to 12 rows so the injected
+  // system note stays compact.
+  type FitCandidate = {
+    id: string;
+    title: string | null;
+    subtitle: string | null;
+    category: string | null;
+    subcategory: string | null;
+    width_mm: number | null;
+    depth_mm: number | null;
+    height_mm: number | null;
+    designer_name: string | null;
+  };
+  let fitShortlist: FitCandidate[] = [];
+  let fitEnvelopeUsed: { w_cm: number | null; d_cm: number | null; h_cm: number | null } | null = null;
+  if (isFloorPlanIntent && vision && (vision.max_width_cm || vision.max_depth_cm)) {
+    try {
+      const wMm = vision.max_width_cm ? Math.round(vision.max_width_cm * 10) : null;
+      const dMm = vision.max_depth_cm ? Math.round(vision.max_depth_cm * 10) : null;
+      const hMm = vision.max_height_cm ? Math.round(vision.max_height_cm * 10) : null;
+      fitEnvelopeUsed = {
+        w_cm: vision.max_width_cm ?? null,
+        d_cm: vision.max_depth_cm ?? null,
+        h_cm: vision.max_height_cm ?? null,
+      };
+
+      // Build the query. We want pieces where every populated axis fits
+      // under the envelope; leave the axis unconstrained when the visitor's
+      // plan didn't give us that dimension.
+      let q = sb
+        .from("designer_curator_picks")
+        .select("id, title, subtitle, category, subcategory, width_mm, depth_mm, height_mm, designer:designers(name, display_name)")
+        .not("width_mm", "is", null)
+        .not("depth_mm", "is", null);
+      if (wMm) q = q.lte("width_mm", wMm);
+      if (dMm) q = q.lte("depth_mm", dMm);
+      if (hMm) q = q.lte("height_mm", hMm);
+      // Category filter — case-insensitive, only when confidently extracted.
+      const cat = vision.categories[0]?.toLowerCase().trim();
+      if (cat && cat.length >= 3 && cat.length <= 40) {
+        q = q.ilike("category", cat);
+      }
+      const { data: rows, error: fitErr } = await q.limit(24);
+      if (fitErr) {
+        console.warn("[concierge-public-stream] fit-check query error", fitErr);
+      } else if (Array.isArray(rows)) {
+        fitShortlist = rows.slice(0, 12).map((r: any) => ({
+          id: r.id,
+          title: r.title ?? null,
+          subtitle: r.subtitle ?? null,
+          category: r.category ?? null,
+          subcategory: r.subcategory ?? null,
+          width_mm: r.width_mm ?? null,
+          depth_mm: r.depth_mm ?? null,
+          height_mm: r.height_mm ?? null,
+          designer_name:
+            (r.designer?.display_name as string | undefined) ??
+            (r.designer?.name as string | undefined) ??
+            null,
+        }));
+      }
+    } catch (e) {
+      console.warn("[concierge-public-stream] fit-check skipped", e);
+    }
+  }
+
+  const fmtDims = (w: number | null, d: number | null, h: number | null) => {
+    const parts: string[] = [];
+    if (w) parts.push(`W ${Math.round(w / 10)}cm`);
+    if (d) parts.push(`D ${Math.round(d / 10)}cm`);
+    if (h) parts.push(`H ${Math.round(h / 10)}cm`);
+    return parts.join(" · ");
+  };
+
+  // Compose the vision / floor-plan context system note.
+  let visionNote = "";
+  if (isFloorPlanIntent && vision) {
+    const envelopeParts: string[] = [];
+    if (fitEnvelopeUsed?.w_cm) envelopeParts.push(`max width ${fitEnvelopeUsed.w_cm} cm`);
+    if (fitEnvelopeUsed?.d_cm) envelopeParts.push(`max depth ${fitEnvelopeUsed.d_cm} cm`);
+    if (fitEnvelopeUsed?.h_cm) envelopeParts.push(`max height ${fitEnvelopeUsed.h_cm} cm`);
+    const envelope = envelopeParts.length ? envelopeParts.join(" × ") : "envelope not readable from the drawing";
+    const lines: string[] = [
+      "## Floor plan / CAD attached",
+      `The visitor uploaded a ${latestPdfBase64 ? "PDF drawing" : "floor plan image"}${latestPdfName ? ` (${latestPdfName})` : ""}. Extracted room envelope: ${envelope}.`,
+      vision.room_type ? `- Room type: ${vision.room_type}` : "",
+      vision.categories.length ? `- Furniture requested: ${vision.categories.join(", ")}` : "",
+      "",
+    ];
+    if (fitShortlist.length > 0) {
+      lines.push("### Room-fit shortlist (pieces that physically fit the envelope)");
+      lines.push("Select your Private Exhibition (exactly 3 pieces) ONLY from this shortlist. Never propose a piece whose dimensions exceed the room envelope.");
+      lines.push("");
+      for (const c of fitShortlist) {
+        const dims = fmtDims(c.width_mm, c.depth_mm, c.height_mm);
+        const label = [c.title, c.subtitle].filter(Boolean).join(" · ");
+        const designer = c.designer_name ? ` — ${c.designer_name}` : "";
+        const cat = [c.category, c.subcategory].filter(Boolean).join(" · ");
+        lines.push(`- ${label || "Untitled"}${designer}${cat ? ` (${cat})` : ""} — ${dims || "dimensions on file"}`);
+      }
+    } else {
+      lines.push("No shortlist could be built from the structured catalogue (dimensions not on file for the matching subset). Fall back to the verified roster in the grounding block above and explicitly confirm each proposed piece will be dimension-checked by Cyrille in the private invoice.");
+    }
+    lines.push("");
+    lines.push("Acknowledge the drawing in one short sentence, state the room envelope you read, then deliver Step 3 / Step 4.");
+    visionNote = lines.filter(Boolean).join("\n");
+  } else if (vision) {
+    visionNote = [
+      "## Visual reference uploaded by the visitor",
+      "The visitor attached an image (mood board, sketch, or reference photo). Treat the following extracted signals as their brief; respond to the mood and materials in the image, not only to their typed words.",
+      vision.style.length ? `- Style vocabulary: ${vision.style.join(", ")}` : "",
+      vision.palette.length ? `- Palette: ${vision.palette.join(", ")}` : "",
+      vision.materials.length ? `- Materials read: ${vision.materials.join(", ")}` : "",
+      vision.subcategories.length
+        ? `- Furniture typology suggested: ${vision.subcategories.join(", ")}`
+        : vision.categories.length
+          ? `- Furniture typology suggested: ${vision.categories.join(", ")}`
           : "",
-        vision.notes ? `- Notes: ${vision.notes}` : "",
-        "",
-        "Acknowledge the image briefly in your reply (one short sentence), then proceed to Step 3 / Step 4 with the Private Exhibition drawn from the verified roster. Do not name any designer or atelier not on that roster.",
-      ]
-        .filter(Boolean)
-        .join("\n")
-    : "";
+      vision.room_type ? `- Room type: ${vision.room_type}` : "",
+      vision.designer_hints.length
+        ? `- Designer resonances (hints only — only cite if present in the verified roster): ${vision.designer_hints.join(", ")}`
+        : "",
+      vision.notes ? `- Notes: ${vision.notes}` : "",
+      "",
+      "Acknowledge the image briefly in your reply (one short sentence), then proceed to Step 3 / Step 4 with the Private Exhibition drawn from the verified roster. Do not name any designer or atelier not on that roster.",
+    ]
+      .filter(Boolean)
+      .join("\n");
+  }
 
   const systemMessages: Array<{ role: "system"; content: string }> = [
     { role: "system", content: SYSTEM_PROMPT },
