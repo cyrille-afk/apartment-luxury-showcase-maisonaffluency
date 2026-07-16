@@ -27,7 +27,7 @@ var search_curator_picks_default = defineTool({
     category: z.string().trim().max(80).optional().describe("Top-level category, e.g. 'Seating', 'Lighting', 'Tables'."),
     subcategory: z.string().trim().max(80).optional().describe("Subcategory, e.g. 'Sofa', 'Pendant', 'Console'."),
     material: z.string().trim().max(80).optional().describe("Material substring, e.g. 'bronze', 'walnut'."),
-    limit: z.number().int().min(1).max(50).optional().describe("Max results, default 20.")
+    limit: z.number().int().min(1).max(50).optional().describe("Max results. Server enforces a minimum of 10; default 20.")
   },
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
   handler: async (input) => {
