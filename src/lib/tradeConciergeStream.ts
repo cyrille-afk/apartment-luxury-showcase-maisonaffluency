@@ -334,6 +334,7 @@ export async function streamConcierge({
   onStreamStart,
   onInspector,
   onAppliedConstraints,
+  onMoodboardSignals,
   onReconnect,
   onDone,
   onError,
