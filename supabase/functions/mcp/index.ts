@@ -44,7 +44,8 @@ var search_curator_picks_default = defineTool({
       }, () => {
       });
     };
-    const limit = input.limit ?? 20;
+    const MIN_LIMIT = 10;
+    const limit = Math.max(MIN_LIMIT, input.limit ?? 20);
     let designerId = null;
     let designerName = null;
     if (input.designer_slug) {

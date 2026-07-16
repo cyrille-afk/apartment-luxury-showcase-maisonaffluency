@@ -57,7 +57,8 @@ export default defineTool({
         })
         .then(() => {}, () => {});
     };
-    const limit = input.limit ?? 20;
+    const MIN_LIMIT = 10;
+    const limit = Math.max(MIN_LIMIT, input.limit ?? 20);
 
 
     let designerId: string | null = null;
