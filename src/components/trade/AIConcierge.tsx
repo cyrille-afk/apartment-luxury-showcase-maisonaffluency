@@ -441,6 +441,12 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
   const stallTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const STALL_MS = 45_000; // no delta/proposal in 45s ⇒ treat stream as stalled
 
+  // Edit-mode state for the "Detected from your upload" signals card. Keyed
+  // by timeline index. `signalsDraft` holds the in-progress edits so the user
+  // can correct materials / colors / style before re-matching.
+  const [editingSignalsIdx, setEditingSignalsIdx] = useState<number | null>(null);
+  const [signalsDraft, setSignalsDraft] = useState<MoodboardSignalsEvent | null>(null);
+
   const clearStallTimer = useCallback(() => {
     if (stallTimerRef.current) {
       clearTimeout(stallTimerRef.current);
@@ -2780,51 +2786,180 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
                       )
                     )}
                     {item.role === "assistant" && item.moodboardSignals && (() => {
-                      const s = item.moodboardSignals;
-                      const groups: Array<{ label: string; values: string[] }> = [
-                        { label: "Style", values: s.style },
-                        { label: "Palette", values: s.palette },
-                        { label: "Materials", values: s.materials },
-                        { label: "Typology", values: (s.subcategories.length ? s.subcategories : s.categories) },
-                        { label: "Room", values: s.room_type ? [s.room_type] : [] },
-                        { label: "Designers", values: s.designer_hints },
-                      ].filter((g) => g.values.length > 0);
-                      if (groups.length === 0) return null;
+                      const isEditing = editingSignalsIdx === i;
+                      const s: MoodboardSignalsEvent = (isEditing && signalsDraft) ? signalsDraft : item.moodboardSignals!;
                       const isFloorPlan = s.kind === "floor_plan";
+                      const groups: Array<{ label: string; key: "style" | "palette" | "materials" | "typology" | "room" | "designers"; values: string[] }> = [
+                        { label: "Style", key: "style", values: s.style },
+                        { label: "Palette", key: "palette", values: s.palette },
+                        { label: "Materials", key: "materials", values: s.materials },
+                        { label: "Typology", key: "typology", values: (s.subcategories.length ? s.subcategories : s.categories) },
+                        { label: "Room", key: "room", values: s.room_type ? [s.room_type] : [] },
+                        { label: "Designers", key: "designers", values: s.designer_hints },
+                      ];
+                      const visibleGroups = isEditing ? groups : groups.filter((g) => g.values.length > 0);
+                      if (visibleGroups.length === 0 && !isEditing) return null;
+
+                      const startEdit = () => {
+                        setSignalsDraft({ ...item.moodboardSignals! });
+                        setEditingSignalsIdx(i);
+                      };
+                      const cancelEdit = () => {
+                        setEditingSignalsIdx(null);
+                        setSignalsDraft(null);
+                      };
+                      const updateDraft = (key: typeof groups[number]["key"], nextValues: string[]) => {
+                        setSignalsDraft((prev) => {
+                          const base = prev ?? { ...item.moodboardSignals! };
+                          if (key === "style") return { ...base, style: nextValues };
+                          if (key === "palette") return { ...base, palette: nextValues };
+                          if (key === "materials") return { ...base, materials: nextValues };
+                          if (key === "typology") return { ...base, subcategories: nextValues, categories: [] };
+                          if (key === "room") return { ...base, room_type: nextValues[0] ?? null };
+                          if (key === "designers") return { ...base, designer_hints: nextValues };
+                          return base;
+                        });
+                      };
+                      const removeChip = (key: typeof groups[number]["key"], value: string) => {
+                        const current = groups.find((g) => g.key === key)?.values ?? [];
+                        updateDraft(key, current.filter((v) => v !== value));
+                      };
+                      const addChip = (key: typeof groups[number]["key"], raw: string) => {
+                        const trimmed = raw.trim();
+                        if (!trimmed) return;
+                        const current = groups.find((g) => g.key === key)?.values ?? [];
+                        if (current.some((v) => v.toLowerCase() === trimmed.toLowerCase())) return;
+                        if (key === "room") {
+                          updateDraft("room", [trimmed]);
+                        } else {
+                          updateDraft(key, [...current, trimmed].slice(0, 12));
+                        }
+                      };
+                      const rematch = () => {
+                        const draft = signalsDraft ?? item.moodboardSignals!;
+                        // Patch the timeline item so the display + refine card reflect the correction.
+                        setTimeline((prev) => {
+                          const copy = prev.slice();
+                          const target = copy[i];
+                          if (target && target.kind === "msg" && target.role === "assistant") {
+                            copy[i] = { ...target, moodboardSignals: draft };
+                          }
+                          return copy;
+                        });
+                        setEditingSignalsIdx(null);
+                        setSignalsDraft(null);
+                        const parts: string[] = [];
+                        if (draft.style.length) parts.push(`style: ${draft.style.join(", ")}`);
+                        if (draft.palette.length) parts.push(`palette: ${draft.palette.join(", ")}`);
+                        if (draft.materials.length) parts.push(`materials: ${draft.materials.join(", ")}`);
+                        const typology = draft.subcategories.length ? draft.subcategories : draft.categories;
+                        if (typology.length) parts.push(`typology: ${typology.join(", ")}`);
+                        if (draft.room_type) parts.push(`room: ${draft.room_type}`);
+                        if (draft.designer_hints.length) parts.push(`designers: ${draft.designer_hints.join(", ")}`);
+                        const msg = parts.length
+                          ? `I corrected the signals I want you to use for matching — ignore your earlier detection and re-curate strictly on these:\n${parts.map((p) => `• ${p}`).join("\n")}`
+                          : "I've cleared all detected signals — re-curate without those constraints.";
+                        void send(msg);
+                      };
+
                       return (
                         <div
                           className={cn(
                             "rounded-lg border border-accent/30 bg-accent/5 p-3 space-y-2",
                             expanded ? "max-w-[92%]" : "max-w-[88%]",
                           )}
-                          title="Signals the concierge detected from your upload — these drive curation for this turn."
                         >
-                          <div className="flex items-center gap-2">
-                            <span className="text-base leading-none">{isFloorPlan ? "⌐" : "◇"}</span>
-                            <div className="text-[10px] font-body uppercase tracking-[0.16em] text-foreground/70">
-                              Detected from your upload · {isFloorPlan ? "Floor plan" : "Moodboard"}
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-2">
+                              <span className="text-base leading-none">{isFloorPlan ? "⌐" : "◇"}</span>
+                              <div className="text-[10px] font-body uppercase tracking-[0.16em] text-foreground/70">
+                                Detected from your upload · {isFloorPlan ? "Floor plan" : "Moodboard"}
+                                {isEditing && <span className="ml-2 normal-case tracking-normal text-muted-foreground">(editing)</span>}
+                              </div>
                             </div>
+                            {!isEditing && (
+                              <button
+                                type="button"
+                                disabled={streaming}
+                                onClick={startEdit}
+                                className="rounded-full border border-border bg-background hover:bg-accent/10 hover:border-accent/40 px-2.5 py-0.5 text-[10px] font-body uppercase tracking-[0.14em] text-foreground/70 disabled:opacity-40"
+                              >
+                                Edit
+                              </button>
+                            )}
                           </div>
                           <div className="space-y-1.5">
-                            {groups.map((g) => (
+                            {visibleGroups.map((g) => (
                               <div key={g.label} className="flex flex-wrap items-center gap-1.5">
                                 <span className="text-[10px] font-body uppercase tracking-[0.14em] text-muted-foreground min-w-[64px]">
                                   {g.label}
                                 </span>
-                                {g.values.slice(0, 8).map((v) => (
+                                {g.values.slice(0, isEditing ? 20 : 8).map((v) => (
                                   <span
                                     key={`${g.label}-${v}`}
-                                    className="inline-flex items-center rounded-full border border-border/70 bg-background/70 px-2 py-0.5 text-[11px] font-body text-foreground/85"
+                                    className="inline-flex items-center gap-1 rounded-full border border-border/70 bg-background/70 px-2 py-0.5 text-[11px] font-body text-foreground/85"
                                   >
                                     {v}
+                                    {isEditing && (
+                                      <button
+                                        type="button"
+                                        onClick={() => removeChip(g.key, v)}
+                                        className="text-muted-foreground hover:text-foreground"
+                                        aria-label={`Remove ${v}`}
+                                      >
+                                        ×
+                                      </button>
+                                    )}
                                   </span>
                                 ))}
+                                {isEditing && (g.key !== "room" || g.values.length === 0) && (
+                                  <input
+                                    type="text"
+                                    placeholder={g.key === "room" ? "e.g. dining room" : "add…"}
+                                    onKeyDown={(e) => {
+                                      if (e.key === "Enter") {
+                                        e.preventDefault();
+                                        addChip(g.key, (e.currentTarget as HTMLInputElement).value);
+                                        (e.currentTarget as HTMLInputElement).value = "";
+                                      }
+                                    }}
+                                    onBlur={(e) => {
+                                      if (e.currentTarget.value.trim()) {
+                                        addChip(g.key, e.currentTarget.value);
+                                        e.currentTarget.value = "";
+                                      }
+                                    }}
+                                    className="min-w-[100px] flex-1 rounded-full border border-dashed border-border/60 bg-background/40 px-2 py-0.5 text-[11px] font-body text-foreground/85 placeholder:text-muted-foreground/70 focus:outline-none focus:border-accent/60"
+                                  />
+                                )}
                               </div>
                             ))}
                           </div>
-                          {s.notes && (
+                          {s.notes && !isEditing && (
                             <div className="pt-1 text-[11px] font-body italic text-muted-foreground leading-relaxed">
                               {s.notes.length > 220 ? `${s.notes.slice(0, 217)}…` : s.notes}
+                            </div>
+                          )}
+                          {isEditing && (
+                            <div className="flex flex-wrap gap-1.5 pt-1">
+                              <button
+                                type="button"
+                                disabled={streaming}
+                                onClick={rematch}
+                                className="rounded-full border border-foreground/70 bg-foreground text-background hover:opacity-90 px-3 py-1 text-[11px] font-body disabled:opacity-40"
+                              >
+                                Re-match with these signals
+                              </button>
+                              <button
+                                type="button"
+                                onClick={cancelEdit}
+                                className="rounded-full border border-border bg-background hover:bg-accent/10 hover:border-accent/40 px-3 py-1 text-[11px] font-body text-foreground"
+                              >
+                                Cancel
+                              </button>
+                              <span className="ml-auto self-center text-[10px] font-body italic text-muted-foreground">
+                                Press Enter to add · × to remove
+                              </span>
                             </div>
                           )}
                         </div>
