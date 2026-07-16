@@ -858,7 +858,9 @@ export default function FinishSelector({ pickId, className, productTitle, produc
         onToggle: () => setOpen((v) => !v),
         label: isRugProduct
           ? "Select Your Rug Finish"
-          : "Select Your Fabric / Leather",
+          : (woodLabel && woodLabel.trim()
+              ? woodLabel.trim()
+              : "Select Your Fabric / Leather"),
         selectedName: selectedFabricItem?.name ?? null,
         tiles: visibleFabricTiles,
         glyph: "fabric",
