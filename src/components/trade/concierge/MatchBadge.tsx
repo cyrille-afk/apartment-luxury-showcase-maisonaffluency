@@ -30,15 +30,60 @@ export interface ParsedMatch {
 
 const MATCH_RE = /^\s*[·•\-–—]?\s*(High|Considered|Exploratory)\s*[·•\-–—]\s*(\d{1,3})\s*%\s*[—–-]\s*(.+)$/i;
 
+const SIGNALS_MARKER_RE = /\s*⟦SIGNALS:([^⟧]+)⟧\s*$/;
+
 /** Parse the text tail that follows the "Match:" strong tag. */
 export function parseMatchTail(tail: string): ParsedMatch | null {
-  const m = MATCH_RE.exec(tail);
+  let signals: SignalRow[] | undefined;
+  let cleaned = tail;
+  const mark = SIGNALS_MARKER_RE.exec(tail);
+  if (mark) {
+    try {
+      const decoded = decodeURIComponent(mark[1]);
+      const parsed = parseSignalsTail(decoded);
+      if (parsed) signals = parsed;
+    } catch { /* ignore */ }
+    cleaned = tail.replace(SIGNALS_MARKER_RE, "");
+  }
+  const m = MATCH_RE.exec(cleaned);
   if (!m) return null;
   const band = (m[1][0].toUpperCase() + m[1].slice(1).toLowerCase()) as MatchBand;
   const percent = Math.max(0, Math.min(100, parseInt(m[2], 10)));
   const rationale = m[3].trim().replace(/^["'“”‘’]|["'“”‘’]$/g, "");
-  return { band, percent, rationale };
+  return { band, percent, rationale, signals };
 }
+
+/**
+ * Pre-transform assistant markdown: for each `**Match:** …` paragraph,
+ * find the immediately-following `**Signals:** …` paragraph, encode the
+ * signals tail into an inline marker on the Match line, and delete the
+ * Signals paragraph. This lets the ReactMarkdown `p` renderer swap in a
+ * single MatchBadge with an attribute breakdown.
+ */
+export function inlineSignalsIntoMatchLines(md: string): string {
+  if (!md || md.indexOf("**Signals:") === -1) return md;
+  // Split on blank-line paragraph boundaries but keep separators so we can
+  // reassemble faithfully.
+  const parts = md.split(/(\n{2,})/);
+  for (let i = 0; i < parts.length; i++) {
+    const p = parts[i];
+    if (!/^\s*\*\*Match:\*\*/i.test(p)) continue;
+    // Look ahead through blank separators for the next non-empty paragraph.
+    let j = i + 1;
+    while (j < parts.length && /^\s*$|^\n+$/.test(parts[j])) j++;
+    const next = parts[j];
+    if (!next) continue;
+    const sm = /^\s*\*\*Signals:\*\*\s*([\s\S]+?)\s*$/i.exec(next);
+    if (!sm) continue;
+    const tail = sm[1].replace(/\s+/g, " ").trim();
+    parts[i] = p.replace(/\s*$/, "") + " ⟦SIGNALS:" + encodeURIComponent(tail) + "⟧";
+    // Drop the Signals paragraph AND the preceding blank separator.
+    parts[j] = "";
+    if (j - 1 > i) parts[j - 1] = "";
+  }
+  return parts.join("");
+}
+
 
 const AXIS_ORDER: SignalAxis[] = ["style", "palette", "material", "typology", "room"];
 const VALID_STATES: SignalState[] = ["match", "partial", "miss", "n/a"];
