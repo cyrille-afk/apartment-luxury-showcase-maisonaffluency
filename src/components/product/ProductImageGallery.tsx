@@ -330,7 +330,7 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
                   aria-current={i === activeIndex}
                   className={cn(
                     "relative shrink-0 snap-center rounded-md overflow-hidden border-2 transition-all",
-                    "w-[23%] aspect-[4/3]",
+                    "w-[28%] aspect-[4/3]",
                     i === activeIndex
                       ? "border-[hsl(var(--gold))] shadow-[0_0_0_1px_hsl(var(--gold)/0.5)]"
                       : "border-border/60 opacity-80"
