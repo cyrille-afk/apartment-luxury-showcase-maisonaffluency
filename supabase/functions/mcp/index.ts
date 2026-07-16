@@ -69,7 +69,15 @@ var search_curator_picks_default = defineTool({
     if (input.material) q = q.ilike("materials", `%${input.material}%`);
     if (input.query) {
       const like = `%${input.query.replace(/[%_]/g, "")}%`;
-      q = q.or(`title.ilike.${like},subtitle.ilike.${like},materials.ilike.${like}`);
+      let brandFilter = "";
+      if (!designerId) {
+        const { data: brandMatches } = await supabase.from("designers").select("id").eq("is_published", true).eq("trade_only", false).or(`name.ilike.${like},founder.ilike.${like}`).limit(200);
+        const brandIds = (brandMatches ?? []).map((r) => r.id).filter(Boolean);
+        if (brandIds.length) {
+          brandFilter = `,designer_id.in.(${brandIds.join(",")})`;
+        }
+      }
+      q = q.or(`title.ilike.${like},subtitle.ilike.${like},materials.ilike.${like}${brandFilter}`);
     }
     const { data, error } = await q;
     if (error) {

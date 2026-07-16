@@ -97,7 +97,25 @@ export default defineTool({
     if (input.material) q = q.ilike("materials", `%${input.material}%`);
     if (input.query) {
       const like = `%${input.query.replace(/[%_]/g, "")}%`;
-      q = q.or(`title.ilike.${like},subtitle.ilike.${like},materials.ilike.${like}`);
+      // Also treat the query as a possible brand / parent-brand name so that
+      // "CC-Tapis rug" or "Marta Sala" surfaces picks attributed to child
+      // designers whose `founder` matches the parent brand. We resolve those
+      // designer ids up front and OR them into the filter.
+      let brandFilter = "";
+      if (!designerId) {
+        const { data: brandMatches } = await supabase
+          .from("designers")
+          .select("id")
+          .eq("is_published", true)
+          .eq("trade_only", false)
+          .or(`name.ilike.${like},founder.ilike.${like}`)
+          .limit(200);
+        const brandIds = (brandMatches ?? []).map((r) => r.id).filter(Boolean);
+        if (brandIds.length) {
+          brandFilter = `,designer_id.in.(${brandIds.join(",")})`;
+        }
+      }
+      q = q.or(`title.ilike.${like},subtitle.ilike.${like},materials.ilike.${like}${brandFilter}`);
     }
 
     const { data, error } = await q;
