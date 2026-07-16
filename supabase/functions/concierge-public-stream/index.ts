@@ -624,6 +624,7 @@ serve(async (req) => {
       vision.notes ? `- Notes: ${vision.notes}` : "",
       "",
       "Acknowledge the image briefly in your reply (one short sentence), then proceed to Step 3 / Step 4 with the Private Exhibition drawn from the verified roster. Do not name any designer or atelier not on that roster.",
+      "For each of the 3 pieces, you MUST end its dossier with the `**Match:** <Band · NN%> — <rationale>` line as defined in Step 4, grounded in the extracted style / palette / materials / typology / room signals above. Vary the three scores honestly — do not give all three the same number.",
     ]
       .filter(Boolean)
       .join("\n");
