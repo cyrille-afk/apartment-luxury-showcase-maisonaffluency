@@ -560,6 +560,7 @@ export async function streamConcierge({
         }
         if (currentEvent === "inspector") { if (onInspector) onInspector(parsed as InspectorEvent); return; }
         if (currentEvent === "applied_constraints") { if (onAppliedConstraints) onAppliedConstraints(parsed as AppliedConstraintsEvent); return; }
+        if (currentEvent === "moodboard_signals") { if (onMoodboardSignals) onMoodboardSignals(parsed as MoodboardSignalsEvent); return; }
         if (currentEvent === "proposal") { hasStructuredOutput = true; if (onProposal) onProposal(parsed as ConciergeProposal); return; }
         if (currentEvent === "tool_start") { hasStructuredOutput = true; if (onToolStart) onToolStart(parsed as ToolStartEvent); return; }
         if (currentEvent === "escalation") { hasStructuredOutput = true; if (onEscalation) onEscalation(parsed as EscalationEvent); return; }
