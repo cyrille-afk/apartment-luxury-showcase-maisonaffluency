@@ -2779,6 +2779,57 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
                     </div>
                       )
                     )}
+                    {item.role === "assistant" && item.moodboardSignals && (() => {
+                      const s = item.moodboardSignals;
+                      const groups: Array<{ label: string; values: string[] }> = [
+                        { label: "Style", values: s.style },
+                        { label: "Palette", values: s.palette },
+                        { label: "Materials", values: s.materials },
+                        { label: "Typology", values: (s.subcategories.length ? s.subcategories : s.categories) },
+                        { label: "Room", values: s.room_type ? [s.room_type] : [] },
+                        { label: "Designers", values: s.designer_hints },
+                      ].filter((g) => g.values.length > 0);
+                      if (groups.length === 0) return null;
+                      const isFloorPlan = s.kind === "floor_plan";
+                      return (
+                        <div
+                          className={cn(
+                            "rounded-lg border border-accent/30 bg-accent/5 p-3 space-y-2",
+                            expanded ? "max-w-[92%]" : "max-w-[88%]",
+                          )}
+                          title="Signals the concierge detected from your upload — these drive curation for this turn."
+                        >
+                          <div className="flex items-center gap-2">
+                            <span className="text-base leading-none">{isFloorPlan ? "⌐" : "◇"}</span>
+                            <div className="text-[10px] font-body uppercase tracking-[0.16em] text-foreground/70">
+                              Detected from your upload · {isFloorPlan ? "Floor plan" : "Moodboard"}
+                            </div>
+                          </div>
+                          <div className="space-y-1.5">
+                            {groups.map((g) => (
+                              <div key={g.label} className="flex flex-wrap items-center gap-1.5">
+                                <span className="text-[10px] font-body uppercase tracking-[0.14em] text-muted-foreground min-w-[64px]">
+                                  {g.label}
+                                </span>
+                                {g.values.slice(0, 8).map((v) => (
+                                  <span
+                                    key={`${g.label}-${v}`}
+                                    className="inline-flex items-center rounded-full border border-border/70 bg-background/70 px-2 py-0.5 text-[11px] font-body text-foreground/85"
+                                  >
+                                    {v}
+                                  </span>
+                                ))}
+                              </div>
+                            ))}
+                          </div>
+                          {s.notes && (
+                            <div className="pt-1 text-[11px] font-body italic text-muted-foreground leading-relaxed">
+                              {s.notes.length > 220 ? `${s.notes.slice(0, 217)}…` : s.notes}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })()}
                     {item.role === "assistant" && item.appliedConstraints && (
                       (item.appliedConstraints.colors.length +
                         item.appliedConstraints.materials.length +
