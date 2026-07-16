@@ -5248,7 +5248,37 @@ serve(async (req) => {
       body: JSON.stringify({
         model: aiModel(chosenModel),
         temperature: 0,
-        messages: [{ role: "system", content: languageDirective + systemPrompt }, ...trimmedMessages],
+        messages: [
+          { role: "system", content: languageDirective + systemPrompt },
+          ...(() => {
+            // If the current user turn carries image / file parts (mood
+            // board, sketch, floor plan, reference photo, PDF), inject a
+            // hard directive so the model cannot silently ignore the
+            // attachment. Without this, Felix has been replying to a mood
+            // board with a generic "share a floor plan or reference photo"
+            // ask — as if nothing was attached.
+            const lastUser = [...trimmedMessages].reverse().find((m: any) => m?.role === "user");
+            const parts = Array.isArray(lastUser?.content) ? lastUser.content : [];
+            const imgCount = parts.filter((p: any) => p?.type === "image_url").length;
+            const fileCount = parts.filter((p: any) => p?.type === "file").length;
+            if (imgCount + fileCount === 0) return [] as any[];
+            const kinds: string[] = [];
+            if (imgCount) kinds.push(`${imgCount} image${imgCount > 1 ? "s" : ""}`);
+            if (fileCount) kinds.push(`${fileCount} PDF/file${fileCount > 1 ? "s" : ""}`);
+            return [{
+              role: "system" as const,
+              content:
+                `## ATTACHMENT PRESENT — MANDATORY ACKNOWLEDGEMENT\n` +
+                `The user's most recent turn includes ${kinds.join(" and ")}. You CAN see it — the image / file parts are attached to that user message. ` +
+                `You MUST:\n` +
+                `1. Silently classify each attachment (mood_board / floor_plan_or_technical_drawing / reference_photo_of_a_specific_piece / other) per the INTERNAL IMAGE INGESTION PROTOCOLS above.\n` +
+                `2. Briefly acknowledge the attachment in the FIRST sentence of your reply — cite one concrete visual detail you actually see (a specific palette token, a material, a silhouette, an architectural cue). Never reply as if no image was uploaded, and never ask the user to "share a photo, sketch, or floor plan" when one is already attached in this turn.\n` +
+                `3. Feed the extracted style / palette / material / typology / room signals into curation for THIS turn.\n` +
+                `4. Do NOT narrate the classification, do NOT dump raw extraction JSON in chat, and do NOT emit a spec-schedule block.`,
+            }];
+          })(),
+          ...trimmedMessages,
+        ],
         tools: finalTools,
         tool_choice: toolChoice,
         max_completion_tokens: chosenModel === modelFor("strong") ? CHAT_MAX_TOKENS_STRONG : CHAT_MAX_TOKENS,
