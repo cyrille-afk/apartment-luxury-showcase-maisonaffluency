@@ -4111,6 +4111,43 @@ serve(async (req) => {
         Array.isArray(m.content) &&
         m.content.some((p: any) => p?.type === "image_url" || p?.type === "file"),
     );
+
+    // Kick off vision-signal extraction on the latest user turn's first image
+    // so we can surface "detected signals" (style / palette / material /
+    // typology / room) to the UI as confirmation the upload was actually
+    // understood. Fire-and-forget with an internal timeout — we never block
+    // the LLM reply on this.
+    let visionSignalsPromise: Promise<ExtractedVision | null> = Promise.resolve(null);
+    {
+      const lovableKey = Deno.env.get("LOVABLE_API_KEY");
+      const lastUser = [...messages].reverse().find((m: any) => m?.role === "user");
+      const parts = Array.isArray(lastUser?.content) ? lastUser.content : [];
+      const firstImage = parts.find(
+        (p: any) => p?.type === "image_url" && typeof p.image_url?.url === "string" && p.image_url.url.length > 0,
+      );
+      const latestText = parts
+        .filter((p: any) => p?.type === "text")
+        .map((p: any) => (typeof p?.text === "string" ? p.text : ""))
+        .join(" ")
+        .trim();
+      const FLOOR_PLAN_HINT_RE =
+        /\b(floor\s?plan|floorplan|blue\s?print|blueprint|site\s?plan|room\s?plan|elevation|layout|dwg|cad|dxf|drawing set|as[-\s]?built|space\s?plan)\b/i;
+      if (lovableKey && firstImage) {
+        const kind: "mood_board" | "floor_plan" = FLOOR_PLAN_HINT_RE.test(latestText) ? "floor_plan" : "mood_board";
+        visionSignalsPromise = Promise.race<ExtractedVision | null>([
+          extractFromMedia({
+            apiKey: lovableKey,
+            kind,
+            imageUrl: firstImage.image_url.url,
+            userText: latestText.slice(0, 500),
+          }).catch((e) => {
+            console.warn("[trade-concierge] vision extraction failed:", e);
+            return null;
+          }),
+          new Promise<null>((resolve) => setTimeout(() => resolve(null), 6000)),
+        ]);
+      }
+    }
     const userConversationText = messages
       .filter((m: any) => m?.role === "user")
       .map((m: any) => extractText(m.content))
