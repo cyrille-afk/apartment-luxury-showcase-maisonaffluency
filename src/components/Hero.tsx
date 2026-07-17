@@ -133,7 +133,7 @@ const Hero = () => {
       {/* Mobile: bottom-right of hero, above iOS bar & Chat widget */}
       <div
         className="flex md:hidden absolute right-4 z-20 flex-col items-end gap-2 hero-fade-in-delayed-4"
-        style={{ bottom: "max(11rem, calc(env(safe-area-inset-bottom) + 10.5rem))", animationDelay: "1.2s" }}
+        style={{ bottom: "max(13rem, calc(env(safe-area-inset-bottom) + 12.5rem))", animationDelay: "1.2s" }}
       >
         <button
           onClick={() => { trackCTA.bookAppointment("HeroCTA"); scrollToContact(); }}
