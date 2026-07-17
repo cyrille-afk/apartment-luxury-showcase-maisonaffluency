@@ -1278,7 +1278,10 @@ const DesignersHoverHero = () => {
                               to={`/designers/${d.slug}`}
                               data-featured-designer-slug={d.slug}
                               state={{ fromDesignersHero: true }}
-                              onMouseEnter={() => setActiveSlug(d.slug)}
+                              onMouseEnter={() => {
+                                setActiveSlug(d.slug);
+                                setHoveredSlug(d.slug);
+                              }}
                               onFocus={() => setActiveSlug(d.slug)}
                               className={cn(
                                 "inline-block whitespace-nowrap relative",
