@@ -248,6 +248,7 @@ const DesignersHoverHero = () => {
     [allDesigners]
   );
   const [activeSlug, setActiveSlug] = useState<string | null>(null);
+  const [hoveredSlug, setHoveredSlug] = useState<string | null>(null);
   const [isStandalone, setIsStandalone] = useState(false);
   const [showPortalCursor, setShowPortalCursor] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
