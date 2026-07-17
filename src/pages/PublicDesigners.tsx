@@ -160,6 +160,9 @@ function ScrollLockedDesigners({
       body.style.overflow = prevBody;
       (body.style as any).overscrollBehavior = prevOverscroll;
       body.style.backgroundColor = prevBodyBg;
+      try { (window.history as any).scrollRestoration = prevRestoration ?? "auto"; } catch { /* ignore */ }
+      cancelAnimationFrame(raf1);
+      cancelAnimationFrame(raf2);
     };
   }, [locked]);
 
