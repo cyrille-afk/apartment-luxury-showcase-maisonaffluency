@@ -58,7 +58,9 @@ function gridImageTransform(src: string | null | undefined): string | undefined 
  * photo when it is hosted on Cloudinary; otherwise fall back to a Cloudinary
  * image_url so we avoid broken external hotlinks on large cards.
  */
-function pickGridImage(d: { hero_image_url: string | null; image_url: string | null }): string | null {
+function pickGridImage(d: { first_pick_image_url?: string | null; hero_image_url: string | null; image_url: string | null }): string | null {
+  if (isCloudinaryUpload(d.first_pick_image_url)) return d.first_pick_image_url!;
+  if (d.first_pick_image_url) return d.first_pick_image_url;
   if (isCloudinaryUpload(d.hero_image_url)) return d.hero_image_url;
   if (isCloudinaryUpload(d.image_url)) return d.image_url;
   return d.hero_image_url || d.image_url;
