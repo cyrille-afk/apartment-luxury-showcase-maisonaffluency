@@ -1707,7 +1707,7 @@ const DesignersHoverHero = () => {
                           ))}
                         </div>
                       ) : (
-                        groupedResults.map(([letter, items]) => {
+                        groupedResults.map(([letter, items], letterIdx) => {
                           const isOpen = expandedLetters.has(letter);
                           return (
                             <div
