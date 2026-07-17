@@ -69,17 +69,31 @@ function DesignerRowThumb({ src, alt }: { src: string | null | undefined; alt: s
   );
 }
 
+const isCloudinaryUpload = (src: string | null | undefined) =>
+  !!src && src.includes("res.cloudinary.com") && src.includes("/image/upload/");
+
 /**
  * Rectangular image transform for the mobile A–Z grid cards.
  * Serves a portrait-cropped, high-quality image that fills a 2-column card.
  */
 function gridImageTransform(src: string | null | undefined): string | undefined {
   if (!src) return undefined;
-  if (!src.includes("res.cloudinary.com") || !src.includes("/image/upload/")) return src;
+  if (!isCloudinaryUpload(src)) return src;
   return src.replace(
     "/image/upload/",
     "/image/upload/w_600,h_800,c_fill,g_auto,q_auto:good,f_auto/"
   );
+}
+
+/**
+ * Choose the most reliable image for the mobile grid. Prefer the hero/work
+ * photo when it is hosted on Cloudinary; otherwise fall back to a Cloudinary
+ * image_url so we avoid broken external hotlinks on large cards.
+ */
+function pickGridImage(d: { hero_image_url: string | null; image_url: string | null }): string | null {
+  if (isCloudinaryUpload(d.hero_image_url)) return d.hero_image_url;
+  if (isCloudinaryUpload(d.image_url)) return d.image_url;
+  return d.hero_image_url || d.image_url;
 }
 
 /**
