@@ -1720,16 +1720,30 @@ const DesignersHoverHero = () => {
                           >
                             <button
                               type="button"
-                              onClick={() =>
+                              onClick={() => {
+                                let willOpen = false;
                                 setExpandedLetters((prev) => {
                                   if (prev.has(letter)) {
                                     if (activeAccordionLetter === letter) setActiveAccordionLetter(null);
                                     return new Set();
                                   }
                                   setActiveAccordionLetter(letter);
+                                  willOpen = true;
                                   return new Set([letter]);
-                                })
-                              }
+                                });
+                                if (willOpen) {
+                                  requestAnimationFrame(() => {
+                                    const scroller = searchScrollRef.current;
+                                    const row = scroller?.querySelector<HTMLElement>(
+                                      `[data-designer-letter="${letter}"]`
+                                    );
+                                    if (row && scroller) {
+                                      const top = row.getBoundingClientRect().top - scroller.getBoundingClientRect().top + scroller.scrollTop - 4;
+                                      scroller.scrollTo({ top, behavior: "smooth" });
+                                    }
+                                  });
+                                }
+                              }}
                               aria-expanded={isOpen}
                               className="w-full flex items-center justify-between px-5 py-2 text-left hover:bg-white/[0.04] transition-colors"
                             >
