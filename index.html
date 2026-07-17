@@ -162,6 +162,29 @@
       fetchpriority="high"
     />
 
+    <!-- /designers route LCP preload — gated by inline script below so it only
+         fires when the pathname matches. Uses the exact widths/quality that
+         DesignersHoverHero requests via cldResponsiveImg so bytes are cache-hits. -->
+    <script>
+      (function(){
+        if (!/^\/designers(\/|$|\?|#)/.test(window.location.pathname)) return;
+        var base = "https://res.cloudinary.com/dif1oamtj/image/upload";
+        var id = "v1772160681/Casque-Bar-Cabinet_10_alexander-lamont_1_ydnjp2.jpg";
+        var isMobile = window.matchMedia("(max-width: 767px)").matches;
+        var widths = isMobile ? [480,720,960,1280] : [960,1280,1600,1920];
+        var srcset = widths.map(function(w){ return base+"/w_"+w+",q_auto:eco,f_auto/"+id+" "+w+"w"; }).join(", ");
+        var href = base+"/w_"+widths[2]+",q_auto:eco,f_auto/"+id;
+        var l = document.createElement("link");
+        l.rel = "preload"; l.as = "image"; l.href = href;
+        l.setAttribute("imagesrcset", srcset);
+        l.setAttribute("imagesizes", "100vw");
+        l.setAttribute("fetchpriority", "high");
+        document.head.appendChild(l);
+      })();
+    </script>
+
+
+
 
 
 
