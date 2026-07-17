@@ -1671,7 +1671,7 @@ const DesignersHoverHero = () => {
                                 <span className="font-body text-[11px] tracking-wide text-white/45 pl-3">{items.length}</span>
                               </button>
                               {isOpen && (
-                                <div className="grid grid-cols-2 gap-1.5 px-3 pt-1 pb-3">
+                                <div className="grid grid-cols-2 gap-x-3 gap-y-4 px-0 pt-2 pb-4">
                                   {items.map((d: any) => (
                                     <DesignerGridCard
                                       key={d.slug}
