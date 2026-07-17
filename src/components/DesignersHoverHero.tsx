@@ -26,6 +26,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { applyCuratorPickOrder } from "@/lib/curatorPickSort";
 import { sortNameKey, lastNameInitial, displayDesignerName } from "@/lib/nameFormat";
 import { cldResponsiveImg } from "@/lib/cloudinary";
+import featuredDesignersSeed from "@/data/featuredDesigners.json";
 
 interface FeaturedDesigner {
   id: string;
