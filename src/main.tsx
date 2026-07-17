@@ -5,6 +5,7 @@ import { startBuildVersionWatcher } from "./lib/buildVersionWatcher";
 import HmrStatusBanner from "./components/dev/HmrStatusBanner";
 import BuildUpdateBanner from "./components/BuildUpdateBanner";
 import { initRum } from "./lib/rum";
+import { registerAppServiceWorker } from "./lib/registerSW";
 
 const CACHE_RESET_KEY = "__ma_frontend_cache_reset_v2";
 
