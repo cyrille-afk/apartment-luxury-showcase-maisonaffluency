@@ -1157,6 +1157,29 @@ const DesignersHoverHero = () => {
             />
           );
         })}
+        {/* Desktop hover overlay — first curator pick fades in over the portrait
+            when a name is hovered, keeping the hero image as the default view. */}
+        {!isMobileOrPwa &&
+          items.map((d) => {
+            const src = d.first_pick_image_url;
+            if (!src) return null;
+            const isHovered = d.slug === hoveredSlug;
+            return (
+              <img
+                key={`${d.slug}-pick-overlay`}
+                src={src}
+                alt=""
+                aria-hidden="true"
+                loading="lazy"
+                decoding="async"
+                className={cn(
+                  "absolute inset-0 w-full h-full object-cover transition-opacity ease-out",
+                  isHovered ? "opacity-100" : "opacity-0"
+                )}
+                style={{ transitionDuration: "700ms" }}
+              />
+            );
+          })}
         {/* Readability overlay */}
         <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/55 to-black/30 md:from-black/60 md:via-black/30 md:to-black/5" />
         {/* Vignette overlay — deepens edges behind text so headings and
