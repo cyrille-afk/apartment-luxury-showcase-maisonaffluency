@@ -1266,7 +1266,7 @@ const DesignersHoverHero = () => {
     >
       {/* Cross-fading background images */}
       <div className="absolute inset-0 z-0">
-        {items.map((d) => {
+        {items.map((d, i) => {
           // Per-designer mobile/PWA background overrides. Keeps desktop hero art
           // intact while giving small-screen framing a hand-picked image.
           const MOBILE_BG_OVERRIDES: Record<string, string> = {
@@ -1280,6 +1280,7 @@ const DesignersHoverHero = () => {
             : d.hero_image_url || d.image_url;
           if (!src) return null;
           const isActive = d.slug === activeSlug;
+          const isFirst = i === 0;
           const heroImgProps = cldResponsiveImg(src, {
             widths: isMobileOrPwa ? [480, 720, 960, 1280] : [960, 1280, 1600, 1920],
             sizes: "100vw",
@@ -1290,8 +1291,9 @@ const DesignersHoverHero = () => {
               {...heroImgProps}
               alt=""
               aria-hidden="true"
-              loading="lazy"
-              decoding="async"
+              loading={isFirst ? "eager" : "lazy"}
+              decoding={isFirst ? "sync" : "async"}
+              {...(isFirst ? { fetchPriority: "high" as const } : {})}
               className={cn(
                 "absolute inset-0 w-full h-full object-cover transition-opacity ease-out",
                 // Mobile browser only: shift image content upward so featured
