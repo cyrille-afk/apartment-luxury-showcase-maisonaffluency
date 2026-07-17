@@ -102,6 +102,10 @@ const FEATURED_GROUPS = [
   },
 ];
 
+const DISPLAY_NAME_OVERRIDES: Record<string, string> = {
+  ozone: "Michel Boyer - Ozone",
+};
+
 const ALL_FEATURED_SLUGS = FEATURED_GROUPS.flatMap((g) => g.slugs);
 
 function useFeaturedDesigners() {
