@@ -69,6 +69,66 @@ function DesignerRowThumb({ src, alt }: { src: string | null | undefined; alt: s
   );
 }
 
+/**
+ * Rectangular image transform for the mobile A–Z grid cards.
+ * Serves a portrait-cropped, high-quality image that fills a 2-column card.
+ */
+function gridImageTransform(src: string | null | undefined): string | undefined {
+  if (!src) return undefined;
+  if (!src.includes("res.cloudinary.com") || !src.includes("/image/upload/")) return src;
+  return src.replace(
+    "/image/upload/",
+    "/image/upload/w_600,h_800,c_fill,g_auto,q_auto:good,f_auto/"
+  );
+}
+
+/**
+ * Mobile grid card: large rectangular photo of the designer's work with the
+ * name overlaid at the bottom. Replaces the small circular-avatar list rows
+ * for a more visual, touch-friendly A–Z browse.
+ */
+function DesignerGridCard({
+  designer,
+  onNavigate,
+}: {
+  designer: { slug: string; name: string; hero_image_url: string | null; image_url: string | null };
+  onNavigate?: () => void;
+}) {
+  const url = gridImageTransform(designer.hero_image_url || designer.image_url);
+  const displayName = displayDesignerName(designer.name);
+  return (
+    <Link
+      to={`/designers/${designer.slug}`}
+      state={{ fromDesignersHero: true }}
+      onClick={onNavigate}
+      className="group relative block w-full aspect-[4/5] rounded-xl overflow-hidden bg-white/[0.06] ring-1 ring-white/10 focus:outline-none focus:ring-2 focus:ring-gold/60"
+      aria-label={`View ${displayName}`}
+    >
+      {url ? (
+        <img
+          src={url}
+          alt=""
+          loading="lazy"
+          decoding="async"
+          className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+        />
+      ) : (
+        <span className="absolute inset-0 flex items-center justify-center text-white/30">
+          <ImageIcon className="h-8 w-8" aria-hidden />
+        </span>
+      )}
+      {/* Bottom gradient for text legibility */}
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/80 via-black/35 to-transparent" />
+      {/* Name overlay */}
+      <div className="absolute inset-x-0 bottom-0 p-3.5">
+        <span className="block font-serif text-sm leading-tight text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)]">
+          {displayName}
+        </span>
+      </div>
+    </Link>
+  );
+}
+
 const FEATURED_GROUPS = [
   {
     label: "Masters",
