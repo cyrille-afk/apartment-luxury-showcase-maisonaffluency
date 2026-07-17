@@ -920,18 +920,6 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
             )}
           </motion.div>
 
-          {/* Mobile: Interactive Gallery badge — outside section loop so it stays visible */}
-          <div className="md:hidden pt-6">
-            <div className="flex justify-start mb-4">
-              <span className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.12em] text-foreground font-body font-light">
-                <span className="relative flex items-center justify-center w-5 h-5 rounded-full bg-black/70 border border-primary/70">
-                  <span className="absolute inset-0 rounded-full border border-primary/30 animate-ping" style={{ animationDuration: "2.2s" }} />
-                  <Plus className="relative h-2.5 w-2.5 text-white" />
-                </span>
-                Interactive Gallery
-              </span>
-            </div>
-          </div>
 
           {(() => {
             const firstHotspotSectionIdx = galleryExperiences.findIndex(s => !s.items.some(i => i.description));
