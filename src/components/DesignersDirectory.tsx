@@ -693,8 +693,8 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts, 
         )}
 
 
-        <div className="pointer-events-none absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 px-3">
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-white/40 bg-white/10 backdrop-blur-sm text-white font-body text-[9px] uppercase tracking-[0.15em]">View Portrait</span>
+        <div className={`pointer-events-none absolute inset-0 z-10 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 px-3 ${hasHoverPick ? 'bg-black/20' : 'bg-black/50'}`}>
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-white/40 bg-white/10 backdrop-blur-sm text-white font-body text-[9px] uppercase tracking-[0.15em]">{hasHoverPick ? 'View Designer' : 'View Portrait'}</span>
         </div>
       </div>
       {/* Editorial caption block — sits below the image like a monograph plate */}
