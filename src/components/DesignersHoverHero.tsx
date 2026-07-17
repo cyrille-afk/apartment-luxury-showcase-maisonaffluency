@@ -101,11 +101,11 @@ function DesignerGridCard({
           <ImageIcon className="h-8 w-8" aria-hidden />
         </span>
       )}
-      {/* Bottom gradient for text legibility */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/80 via-black/35 to-transparent" />
+      {/* Bottom gradient for text legibility — strong enough to hold white serif over light imagery */}
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-3/4 bg-gradient-to-t from-black/95 via-black/60 to-transparent" />
       {/* Name overlay */}
-      <div className="absolute inset-x-0 bottom-0 p-3.5">
-        <span className="block font-serif text-sm leading-tight text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)]">
+      <div className="absolute inset-x-0 bottom-0 p-3">
+        <span className="block font-serif text-sm leading-tight text-white drop-shadow-[0_1px_4px_rgba(0,0,0,1)]">
           {displayName}
         </span>
       </div>
@@ -1533,8 +1533,8 @@ const DesignersHoverHero = () => {
                 : undefined
             }
           >
-            <div className="mx-auto mt-2 h-1 w-10 rounded-full bg-white/25 shrink-0" aria-hidden="true" />
-            <div className="flex items-center gap-3 px-5 pt-3 pb-3 border-b border-white/10 shrink-0">
+            <div className="mx-auto mt-1.5 h-1 w-9 rounded-full bg-white/25 shrink-0" aria-hidden="true" />
+            <div className="flex items-center gap-2.5 px-4 pt-2 pb-2 border-b border-white/10 shrink-0">
               <Search className="h-4 w-4 text-white/60 shrink-0" aria-hidden="true" />
               <input
                 ref={searchInputRef}
@@ -1557,6 +1557,46 @@ const DesignersHoverHero = () => {
                 <X className="h-4 w-4" />
               </button>
             </div>
+            {/* Sticky horizontal A–Z quick-jump (mobile only, hidden while searching) */}
+            {!isSearching && (
+              <div className="md:hidden shrink-0 border-b border-white/[0.06] bg-[#0a0a0a]/95 backdrop-blur">
+                <div
+                  className="flex items-center gap-0.5 overflow-x-auto no-scrollbar px-3 py-1.5"
+                  style={{ scrollbarWidth: "none" }}
+                >
+                  {groupedResults.map(([letter]) => {
+                    const isActive = activeMobileLetter === letter;
+                    return (
+                      <button
+                        key={letter}
+                        type="button"
+                        onClick={() => {
+                          setExpandedLetters(new Set([letter]));
+                          setActiveAccordionLetter(letter);
+                          requestAnimationFrame(() => {
+                            const row = searchScrollRef.current?.querySelector<HTMLElement>(
+                              `[data-designer-letter="${letter}"]`
+                            );
+                            const scroller = searchScrollRef.current;
+                            if (row && scroller) {
+                              const top = row.getBoundingClientRect().top - scroller.getBoundingClientRect().top + scroller.scrollTop - 4;
+                              scroller.scrollTo({ top, behavior: "smooth" });
+                            }
+                          });
+                        }}
+                        className={cn(
+                          "shrink-0 w-7 h-7 flex items-center justify-center rounded-full font-serif text-[13px] transition-colors",
+                          isActive ? "bg-white text-black" : "text-white/70 hover:text-white"
+                        )}
+                        aria-label={`Jump to ${letter}`}
+                      >
+                        {letter}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
             <div ref={searchScrollRef} className="flex-1 overflow-y-auto overscroll-contain px-1 pt-0 pb-1 min-h-0 pr-10 md:pr-1 scroll-smooth relative touch-pan-y">
 
               {isSearching && groupedResults.length === 0 ? (
@@ -1569,7 +1609,7 @@ const DesignersHoverHero = () => {
                   <div className="md:hidden">
                     <div className="flex flex-col pb-2">
                       {isSearching ? (
-                        <div className="grid grid-cols-2 gap-2 pt-2 pb-4">
+                        <div className="grid grid-cols-2 gap-1.5 px-3 pt-2 pb-4">
                           {groupedResults.flatMap(([, items]) => items).map((d: any) => (
                             <DesignerGridCard
                               key={d.slug}
@@ -1600,9 +1640,9 @@ const DesignersHoverHero = () => {
                                   })
                                 }
                                 aria-expanded={isOpen}
-                                className="w-full flex items-center justify-between px-5 py-2.5 text-left hover:bg-white/[0.04] transition-colors"
+                                className="w-full flex items-center justify-between px-4 py-1.5 text-left hover:bg-white/[0.04] transition-colors"
                               >
-                                <span className="flex items-center gap-3">
+                                <span className="flex items-center gap-2.5">
                                   <span
                                     className={cn(
                                       "text-white/50 text-xs transition-transform",
@@ -1612,12 +1652,12 @@ const DesignersHoverHero = () => {
                                   >
                                     ›
                                   </span>
-                                  <span className="font-serif text-lg text-white">{letter}</span>
+                                  <span className="font-serif text-base text-white">{letter}</span>
                                 </span>
-                                <span className="font-body text-xs text-white/50">{items.length}</span>
+                                <span className="font-body text-[11px] tracking-wide text-white/45 pl-3">{items.length}</span>
                               </button>
                               {isOpen && (
-                                <div className="grid grid-cols-2 gap-2 pt-1 pb-4">
+                                <div className="grid grid-cols-2 gap-1.5 px-3 pt-1 pb-3">
                                   {items.map((d: any) => (
                                     <DesignerGridCard
                                       key={d.slug}
