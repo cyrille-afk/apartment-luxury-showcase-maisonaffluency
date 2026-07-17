@@ -845,6 +845,7 @@ const DesignersHoverHero = () => {
         name: d.name as string,
         hero_image_url: (d.hero_image_url as string | null) ?? null,
         image_url: (d.image_url as string | null) ?? null,
+        first_pick_image_url: firstPickMap?.get(d.id) ?? null,
       }));
     const q = searchQuery.trim().toLowerCase();
     const filtered = q
@@ -859,7 +860,7 @@ const DesignersHoverHero = () => {
     }
     const ordered = [...groups.entries()].sort(([a], [b]) => a.localeCompare(b));
     return { groupedResults: ordered, totalResults: filtered.length };
-  }, [allDesigners, searchQuery]);
+  }, [allDesigners, searchQuery, firstPickMap]);
 
   // Flat list for the mobile-first bottom sheet: fast visual scan, no A–Z index.
   const flatResults = useMemo(() => {
