@@ -1533,8 +1533,8 @@ const DesignersHoverHero = () => {
                 : undefined
             }
           >
-            <div className="mx-auto mt-2 h-1 w-10 rounded-full bg-white/25 shrink-0" aria-hidden="true" />
-            <div className="flex items-center gap-3 px-5 pt-3 pb-3 border-b border-white/10 shrink-0">
+            <div className="mx-auto mt-1.5 h-1 w-9 rounded-full bg-white/25 shrink-0" aria-hidden="true" />
+            <div className="flex items-center gap-2.5 px-4 pt-2 pb-2 border-b border-white/10 shrink-0">
               <Search className="h-4 w-4 text-white/60 shrink-0" aria-hidden="true" />
               <input
                 ref={searchInputRef}
@@ -1557,6 +1557,46 @@ const DesignersHoverHero = () => {
                 <X className="h-4 w-4" />
               </button>
             </div>
+            {/* Sticky horizontal A–Z quick-jump (mobile only, hidden while searching) */}
+            {!isSearching && (
+              <div className="md:hidden shrink-0 border-b border-white/[0.06] bg-[#0a0a0a]/95 backdrop-blur">
+                <div
+                  className="flex items-center gap-0.5 overflow-x-auto no-scrollbar px-3 py-1.5"
+                  style={{ scrollbarWidth: "none" }}
+                >
+                  {groupedResults.map(([letter]) => {
+                    const isActive = activeMobileLetter === letter;
+                    return (
+                      <button
+                        key={letter}
+                        type="button"
+                        onClick={() => {
+                          setExpandedLetters(new Set([letter]));
+                          setActiveAccordionLetter(letter);
+                          requestAnimationFrame(() => {
+                            const row = searchScrollRef.current?.querySelector<HTMLElement>(
+                              `[data-designer-letter="${letter}"]`
+                            );
+                            const scroller = searchScrollRef.current;
+                            if (row && scroller) {
+                              const top = row.getBoundingClientRect().top - scroller.getBoundingClientRect().top + scroller.scrollTop - 4;
+                              scroller.scrollTo({ top, behavior: "smooth" });
+                            }
+                          });
+                        }}
+                        className={cn(
+                          "shrink-0 w-7 h-7 flex items-center justify-center rounded-full font-serif text-[13px] transition-colors",
+                          isActive ? "bg-white text-black" : "text-white/70 hover:text-white"
+                        )}
+                        aria-label={`Jump to ${letter}`}
+                      >
+                        {letter}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
             <div ref={searchScrollRef} className="flex-1 overflow-y-auto overscroll-contain px-1 pt-0 pb-1 min-h-0 pr-10 md:pr-1 scroll-smooth relative touch-pan-y">
 
               {isSearching && groupedResults.length === 0 ? (
