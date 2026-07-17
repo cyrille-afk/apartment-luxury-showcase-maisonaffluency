@@ -137,14 +137,19 @@ function ScrollLockedDesigners({
     const prevHtml = html.style.overflow;
     const prevBody = body.style.overflow;
     const prevOverscroll = (body.style as any).overscrollBehavior;
+    const prevBodyBg = body.style.backgroundColor;
     // Only lock body; leaving html scrollable avoids an iOS Chrome quirk that
     // freezes nested overflow-y-auto scrollers when both html+body are hidden.
     body.style.overflow = "hidden";
     (body.style as any).overscrollBehavior = "none";
+    // Match body background to the hero so the iOS toolbar blur shows the
+    // dark image instead of the default cream page background.
+    body.style.backgroundColor = "#0a0a0a";
     return () => {
       html.style.overflow = prevHtml;
       body.style.overflow = prevBody;
       (body.style as any).overscrollBehavior = prevOverscroll;
+      body.style.backgroundColor = prevBodyBg;
     };
   }, [locked]);
 
@@ -179,7 +184,7 @@ function ScrollLockedDesigners({
       <div className="pt-[var(--header-h)]">
         <h1 className="sr-only">Designers &amp; Ateliers</h1>
 
-        <div className={locked ? "h-[calc(100svh-var(--header-h))] overflow-hidden" : "pb-20"}>
+        <div className={locked ? "h-[calc(100lvh-var(--header-h))] overflow-hidden" : "pb-20"}>
           <div
             className={locked ? "relative md:h-full" : "relative min-h-[calc(100lvh-var(--header-h))] bg-[#0a0a0a]"}
           >

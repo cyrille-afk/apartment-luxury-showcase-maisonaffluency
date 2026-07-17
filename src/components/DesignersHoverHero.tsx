@@ -1166,7 +1166,7 @@ const DesignersHoverHero = () => {
                         const [first, last] = splitName(d.name);
                         const isActive = d.slug === activeSlug;
                         const isDimmed = activeSlug !== null && !isActive;
-                        const HIDE_FOUNDER_SUFFIX = new Set(["Man of Parts", "Pouenat"]);
+                        const HIDE_FOUNDER_SUFFIX = new Set(["Man of Parts", "Pouenat", "Ozone"]);
                         const childBrand = d.founder && d.founder !== d.name && !HIDE_FOUNDER_SUFFIX.has(d.founder);
                         const isLastItem =
                           groupIdx === groupedItems.length - 1 &&
