@@ -85,6 +85,23 @@ function gridImageSrcSet(src: string | null | undefined): string | undefined {
 }
 
 /**
+ * Low-quality image placeholder (LQIP): a 20px-wide blurred variant used as a
+ * background so users see a soft color hint instead of a black card while the
+ * full image is streaming in.
+ */
+function gridImageLqip(src: string | null | undefined): string | undefined {
+  if (!src) return undefined;
+  if (isCloudinaryUpload(src)) {
+    return src.replace(
+      "/image/upload/",
+      "/image/upload/w_24,h_30,c_fill,g_auto,q_auto:low,e_blur:400,f_auto/"
+    );
+  }
+  if (isSupabaseObject(src)) return supabaseTransform(src, 24, 30);
+  return undefined;
+}
+
+/**
  * Choose the most reliable image for the mobile grid. Prefer the hero/work
  * photo when it is hosted on Cloudinary; otherwise fall back to a Cloudinary
  * image_url so we avoid broken external hotlinks on large cards.
@@ -105,21 +122,33 @@ function pickGridImage(d: { first_pick_image_url?: string | null; hero_image_url
 function DesignerGridCard({
   designer,
   onNavigate,
+  priority = false,
 }: {
   designer: { slug: string; name: string; first_pick_image_url?: string | null; hero_image_url: string | null; image_url: string | null };
   onNavigate?: () => void;
+  priority?: boolean;
 }) {
   const rawSrc = pickGridImage(designer);
   const url = gridImageTransform(rawSrc);
   const srcSet = gridImageSrcSet(rawSrc);
+  const lqip = gridImageLqip(rawSrc);
   const displayName = displayDesignerName(designer.name);
   return (
     <Link
       to={`/designers/${designer.slug}`}
       state={{ fromDesignersHero: true }}
       onClick={onNavigate}
-      className="group relative block w-full aspect-[4/5] rounded-xl overflow-hidden bg-white/[0.06] ring-1 ring-white/10 focus:outline-none focus:ring-2 focus:ring-gold/60"
+      className="group relative block w-full aspect-[4/5] rounded-xl overflow-hidden bg-neutral-800 ring-1 ring-white/10 focus:outline-none focus:ring-2 focus:ring-gold/60"
       aria-label={`View ${displayName}`}
+      style={
+        lqip
+          ? {
+              backgroundImage: `url("${lqip}")`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+            }
+          : undefined
+      }
     >
       {url ? (
         <img
@@ -129,7 +158,8 @@ function DesignerGridCard({
           width={600}
           height={750}
           alt=""
-          loading="lazy"
+          loading={priority ? "eager" : "lazy"}
+          {...(priority ? { fetchpriority: "high" as any } : {})}
           decoding="async"
           className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
         />
@@ -1682,6 +1712,19 @@ const DesignersHoverHero = () => {
                                     return new Set([letter]);
                                   });
                                   if (willOpen) {
+                                    // Preload the letter's card images immediately so the
+                                    // browser starts fetching before React paints the grid.
+                                    try {
+                                      for (const d of items as any[]) {
+                                        const raw = pickGridImage(d);
+                                        const u = gridImageTransform(raw, 600);
+                                        if (u) {
+                                          const img = new Image();
+                                          img.decoding = "async";
+                                          img.src = u;
+                                        }
+                                      }
+                                    } catch {}
                                     requestAnimationFrame(() => {
                                       const scroller = searchScrollRef.current;
                                       const row = scroller?.querySelector<HTMLElement>(
@@ -1713,10 +1756,11 @@ const DesignersHoverHero = () => {
                               </button>
                               {isOpen && (
                                 <div className="grid grid-cols-2 gap-x-3 gap-y-4 px-0 pt-2 pb-4">
-                                  {items.map((d: any) => (
+                                  {items.map((d: any, i: number) => (
                                     <DesignerGridCard
                                       key={d.slug}
                                       designer={d}
+                                      priority={i < 4}
                                       onNavigate={() => setSearchOpen(false)}
                                     />
                                   ))}
