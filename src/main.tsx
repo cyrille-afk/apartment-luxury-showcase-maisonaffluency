@@ -5,7 +5,6 @@ import { startBuildVersionWatcher } from "./lib/buildVersionWatcher";
 import HmrStatusBanner from "./components/dev/HmrStatusBanner";
 import BuildUpdateBanner from "./components/BuildUpdateBanner";
 import { initRum } from "./lib/rum";
-import { registerAppServiceWorker } from "./lib/registerSW";
 
 const CACHE_RESET_KEY = "__ma_frontend_cache_reset_v2";
 
@@ -77,10 +76,8 @@ async function clearStaleFrontendCachesOnce() {
 }
 
 void clearStaleFrontendCachesOnce().then(() => {
-  // Register the offline image-caching service worker AFTER any one-time
-  // cleanup so we don't get immediately unregistered on first visit. The
-  // wrapper itself refuses to register in Lovable preview / dev / iframes.
-  void registerAppServiceWorker();
+  // Do not register an app-shell service worker. The published /sw.js is now
+  // a one-release cleanup worker so stale installed PWAs fetch the current UI.
 });
 pinStandaloneHomeLaunchToHero();
 

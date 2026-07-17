@@ -965,8 +965,8 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
             duration: 0.6,
             delay: originalSectionIndex * 0.2
           }} className="mb-4 md:mb-6">
-                {/* Desktop-only: Interactive Gallery badge for first section */}
-                {originalSectionIndex === 0 ? (
+                {/* Desktop/tablet only: mobile/PWA uses the accordion header as the section title. */}
+                {!isMobile && originalSectionIndex === 0 ? (
                   <>
                     {/* Row 1: Interactive Gallery (left) with icon on right */}
                     <div className="hidden md:block mt-1" />
@@ -1034,13 +1034,9 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                         </div>
                       </div>
                     </div>
-                    {/* Mobile: title/subtitle removed — accordion header already shows title */}
-
                   </>
-                ) : (
+                ) : !isMobile ? (
                   <>
-                    {/* Mobile: title/subtitle removed — accordion header already shows title */}
-
                     {/* Desktop: centred title + share, centred subtitle */}
                     <div className="hidden md:flex flex-col items-center text-center mb-3">
                       <div className="flex items-center gap-3">
@@ -1073,7 +1069,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                       </p>
                     </div>
                   </>
-                )}
+                ) : null}
               </motion.div>
 
               {/* Mobile: swipeable carousel like Instagram */}
