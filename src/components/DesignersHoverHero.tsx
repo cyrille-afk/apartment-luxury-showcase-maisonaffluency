@@ -471,6 +471,37 @@ const DesignersHoverHero = () => {
     }
   }, [items, activeSlug]);
 
+  // Preload the initial (items[0]) hero image as soon as the query resolves,
+  // so it lands well before React commits the <img> — cuts LCP on Slow-4G by
+  // starting the download in parallel with the JS chunk parse. Route-scoped
+  // (injected only on /designers via this component), and cleaned up on unmount.
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    if (!items.length) return;
+    const d = items[0];
+    const src = isMobileOrPwa
+      ? (d.first_pick_image_url || d.hero_image_url || d.image_url)
+      : (d.hero_image_url || d.image_url);
+    if (!src) return;
+    const widths = isMobileOrPwa ? [480, 720, 960, 1280] : [960, 1280, 1600, 1920];
+    const { src: href, srcSet } = cldResponsiveImg(src, { widths, sizes: "100vw" });
+    if (!href) return;
+    const link = document.createElement("link");
+    link.rel = "preload";
+    link.as = "image";
+    link.href = href;
+    if (srcSet) link.setAttribute("imagesrcset", srcSet);
+    link.setAttribute("imagesizes", "100vw");
+    link.setAttribute("fetchpriority", "high");
+    link.dataset.designersHeroPreload = "1";
+    // Preconnect is already declared sitewide in index.html, so we don't
+    // duplicate it here.
+    document.head.appendChild(link);
+    return () => {
+      link.parentNode?.removeChild(link);
+    };
+  }, [items, isMobileOrPwa]);
+
   // First-visit hover-hint: auto-cycle the first 3 designers on desktop so
   // users discover that names pair with photos. Fires once per browser,
   // gated by localStorage. Cancels on any user interaction with the list.
@@ -1235,7 +1266,7 @@ const DesignersHoverHero = () => {
     >
       {/* Cross-fading background images */}
       <div className="absolute inset-0 z-0">
-        {items.map((d) => {
+        {items.map((d, i) => {
           // Per-designer mobile/PWA background overrides. Keeps desktop hero art
           // intact while giving small-screen framing a hand-picked image.
           const MOBILE_BG_OVERRIDES: Record<string, string> = {
@@ -1249,6 +1280,7 @@ const DesignersHoverHero = () => {
             : d.hero_image_url || d.image_url;
           if (!src) return null;
           const isActive = d.slug === activeSlug;
+          const isFirst = i === 0;
           const heroImgProps = cldResponsiveImg(src, {
             widths: isMobileOrPwa ? [480, 720, 960, 1280] : [960, 1280, 1600, 1920],
             sizes: "100vw",
@@ -1259,8 +1291,9 @@ const DesignersHoverHero = () => {
               {...heroImgProps}
               alt=""
               aria-hidden="true"
-              loading="lazy"
-              decoding="async"
+              loading={isFirst ? "eager" : "lazy"}
+              decoding={isFirst ? "sync" : "async"}
+              {...(isFirst ? { fetchPriority: "high" as const } : {})}
               className={cn(
                 "absolute inset-0 w-full h-full object-cover transition-opacity ease-out",
                 // Mobile browser only: shift image content upward so featured
