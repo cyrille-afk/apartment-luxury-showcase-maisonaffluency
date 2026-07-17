@@ -2028,6 +2028,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
     </div>
       <AuthGateDialog open={gateOpen} onClose={closeGate} action={gateAction} />
     </>
+    </FirstPickImageContext.Provider>
   );
 };
 
