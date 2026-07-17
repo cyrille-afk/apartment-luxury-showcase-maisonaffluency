@@ -210,7 +210,10 @@ export default defineConfig(({ mode }) => {
     rollupOptions: {
       output: {
         manualChunks: {
-          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+          // Keep jsx-runtime with React so Rollup doesn't hoist it into
+          // vendor-motion, which would force every JSX-using chunk to
+          // statically import framer-motion (critical-path bloat).
+          'vendor-react': ['react', 'react-dom', 'react-router-dom', 'react/jsx-runtime'],
           'vendor-motion': ['framer-motion'],
           'vendor-query': ['@tanstack/react-query'],
           'vendor-radix': [
