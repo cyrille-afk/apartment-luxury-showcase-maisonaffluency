@@ -1743,10 +1743,11 @@ const DesignersHoverHero = () => {
                               </button>
                               {isOpen && (
                                 <div className="grid grid-cols-2 gap-x-3 gap-y-4 px-0 pt-2 pb-4">
-                                  {items.map((d: any) => (
+                                  {items.map((d: any, i: number) => (
                                     <DesignerGridCard
                                       key={d.slug}
                                       designer={d}
+                                      priority={i < 4}
                                       onNavigate={() => setSearchOpen(false)}
                                     />
                                   ))}
