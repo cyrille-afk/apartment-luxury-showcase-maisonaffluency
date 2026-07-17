@@ -400,33 +400,6 @@ const DesignersHoverHero = () => {
     activeSlugRef.current = activeSlug;
   });
 
-  // The locked mobile /designers landing can be restored from browser history
-  // with its inner hero scroller midway down even when window.scrollY is 0.
-  // Reset both the nested scrollers and the active hero image whenever the
-  // route-level lock asks for a top reset.
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    if (!isMobileOrPwa) return;
-
-    const resetHeroScroll = () => {
-      contentScrollRef.current?.scrollTo({ top: 0, left: 0, behavior: "instant" as ScrollBehavior });
-      searchScrollRef.current?.scrollTo({ top: 0, left: 0, behavior: "instant" as ScrollBehavior });
-      if (items.length > 0) setActiveSlug(items[0].slug);
-    };
-
-    resetHeroScroll();
-    const raf = window.requestAnimationFrame(resetHeroScroll);
-    const timers = [80, 180, 360].map((ms) => window.setTimeout(resetHeroScroll, ms));
-    window.addEventListener("designersLandingResetScroll", resetHeroScroll);
-    window.addEventListener("pageshow", resetHeroScroll);
-    return () => {
-      window.cancelAnimationFrame(raf);
-      timers.forEach((timer) => window.clearTimeout(timer));
-      window.removeEventListener("designersLandingResetScroll", resetHeroScroll);
-      window.removeEventListener("pageshow", resetHeroScroll);
-    };
-  }, [isMobileOrPwa, items]);
-
   useEffect(() => {
     if (typeof window === "undefined") return;
     const media = window.matchMedia?.("(display-mode: standalone)");
@@ -462,6 +435,33 @@ const DesignersHoverHero = () => {
     [groupedItems]
   );
   const hasItems = items.length > 0;
+
+  // The locked mobile /designers landing can be restored from browser history
+  // with its inner hero scroller midway down even when window.scrollY is 0.
+  // Reset both the nested scrollers and the active hero image whenever the
+  // route-level lock asks for a top reset.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (!isMobileOrPwa) return;
+
+    const resetHeroScroll = () => {
+      contentScrollRef.current?.scrollTo({ top: 0, left: 0, behavior: "instant" as ScrollBehavior });
+      searchScrollRef.current?.scrollTo({ top: 0, left: 0, behavior: "instant" as ScrollBehavior });
+      if (items.length > 0) setActiveSlug(items[0].slug);
+    };
+
+    resetHeroScroll();
+    const raf = window.requestAnimationFrame(resetHeroScroll);
+    const timers = [80, 180, 360].map((ms) => window.setTimeout(resetHeroScroll, ms));
+    window.addEventListener("designersLandingResetScroll", resetHeroScroll);
+    window.addEventListener("pageshow", resetHeroScroll);
+    return () => {
+      window.cancelAnimationFrame(raf);
+      timers.forEach((timer) => window.clearTimeout(timer));
+      window.removeEventListener("designersLandingResetScroll", resetHeroScroll);
+      window.removeEventListener("pageshow", resetHeroScroll);
+    };
+  }, [isMobileOrPwa, items]);
 
   // Pre-seed active on first render once data arrives so the hero is never
   // a void on entry — the first designer acts as default.
