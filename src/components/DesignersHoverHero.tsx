@@ -104,7 +104,7 @@ function DesignerGridCard({
       {/* Bottom gradient for text legibility — strong enough to hold white serif over light imagery */}
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-3/4 bg-gradient-to-t from-black/95 via-black/60 to-transparent" />
       {/* Name overlay */}
-      <div className="absolute inset-x-0 bottom-0 p-3">
+      <div className="absolute inset-x-0 bottom-0 p-4">
         <span className="block font-serif text-sm leading-tight text-white drop-shadow-[0_1px_4px_rgba(0,0,0,1)]">
           {displayName}
         </span>
@@ -1534,7 +1534,7 @@ const DesignersHoverHero = () => {
             }
           >
             <div className="mx-auto mt-1.5 h-1 w-9 rounded-full bg-white/25 shrink-0" aria-hidden="true" />
-            <div className="flex items-center gap-2.5 px-4 pt-2 pb-2 border-b border-white/10 shrink-0">
+            <div className="flex items-center gap-2.5 px-4 pt-2 pb-3 border-b border-white/10 shrink-0 mb-2">
               <Search className="h-4 w-4 text-white/60 shrink-0" aria-hidden="true" />
               <input
                 ref={searchInputRef}
@@ -1559,7 +1559,7 @@ const DesignersHoverHero = () => {
             </div>
             {/* Sticky horizontal A–Z quick-jump (mobile only, hidden while searching) */}
             {!isSearching && (
-              <div className="md:hidden shrink-0 border-b border-white/[0.06] bg-[#0a0a0a]/95 backdrop-blur">
+              <div className="md:hidden shrink-0 border-b border-white/[0.06] bg-[#0a0a0a]/95 backdrop-blur mb-3">
                 <div
                   className="flex items-center gap-0.5 overflow-x-auto no-scrollbar px-3 py-1.5"
                   style={{ scrollbarWidth: "none" }}
@@ -1597,7 +1597,7 @@ const DesignersHoverHero = () => {
                 </div>
               </div>
             )}
-            <div ref={searchScrollRef} className="flex-1 overflow-y-auto overscroll-contain px-1 pt-0 pb-1 min-h-0 pr-10 md:pr-1 scroll-smooth relative touch-pan-y">
+            <div ref={searchScrollRef} className="flex-1 overflow-y-auto overscroll-contain px-4 pt-2 pb-4 min-h-0 scroll-smooth relative touch-pan-y">
 
               {isSearching && groupedResults.length === 0 ? (
                 <p className="px-4 py-8 text-center text-sm font-body text-white/50">
@@ -1609,7 +1609,7 @@ const DesignersHoverHero = () => {
                   <div className="md:hidden">
                     <div className="flex flex-col pb-2">
                       {isSearching ? (
-                        <div className="grid grid-cols-2 gap-1.5 px-3 pt-2 pb-4">
+                        <div className="grid grid-cols-2 gap-x-3 gap-y-4 px-0 pt-2 pb-4">
                           {groupedResults.flatMap(([, items]) => items).map((d: any) => (
                             <DesignerGridCard
                               key={d.slug}
@@ -1671,7 +1671,7 @@ const DesignersHoverHero = () => {
                                 <span className="font-body text-[11px] tracking-wide text-white/45 pl-3">{items.length}</span>
                               </button>
                               {isOpen && (
-                                <div className="grid grid-cols-2 gap-1.5 px-3 pt-1 pb-3">
+                                <div className="grid grid-cols-2 gap-x-3 gap-y-4 px-0 pt-2 pb-4">
                                   {items.map((d: any) => (
                                     <DesignerGridCard
                                       key={d.slug}
