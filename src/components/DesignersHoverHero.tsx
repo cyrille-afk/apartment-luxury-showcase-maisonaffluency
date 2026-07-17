@@ -237,10 +237,15 @@ const DISPLAY_NAME_OVERRIDES: Record<string, string> = {
 
 const ALL_FEATURED_SLUGS = FEATURED_GROUPS.flatMap((g) => g.slugs);
 
+// Build-time seed so the first hero image URL is available synchronously on
+// module parse — avoids the Supabase round-trip blocking LCP on Slow-4G.
+const FEATURED_SEED = (featuredDesignersSeed as FeaturedDesigner[]) || [];
+
 function useFeaturedDesigners() {
   return useQuery({
     queryKey: ["designers-hero-featured-v3", ALL_FEATURED_SLUGS],
     staleTime: 1000 * 60 * 30,
+    initialData: FEATURED_SEED.length ? FEATURED_SEED : undefined,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("designers")
