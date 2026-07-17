@@ -1097,7 +1097,7 @@ const DesignersHoverHero = () => {
           className={cn(
           "relative flex flex-col h-full px-6 sm:px-12 md:px-20 lg:px-28 pointer-events-auto md:overflow-visible",
             isStandalone
-              ? "justify-start overflow-y-auto overscroll-contain touch-pan-y pt-10 pb-44 md:pt-8 md:pb-0 md:justify-center md:overflow-visible [-webkit-overflow-scrolling:touch]"
+              ? "justify-start overflow-y-auto overscroll-contain touch-pan-y pt-16 pb-44 md:pt-8 md:pb-0 md:justify-center md:overflow-visible [-webkit-overflow-scrolling:touch]"
               : // Mobile browser: the section already starts below the fixed
                 // header, so do not add var(--header-h) again here. Keep the
                 // designer list high while leaving room for the Directory link.
@@ -1224,7 +1224,7 @@ const DesignersHoverHero = () => {
             ? "left-1/2 -translate-x-1/2 justify-center px-6"
             : "left-6 sm:left-[22rem] md:left-[26rem] lg:left-[28rem]",
           isStandalone
-            ? "pt-6 bottom-[calc(6rem+env(safe-area-inset-bottom))]"
+            ? "pt-6 bottom-[calc(8.5rem+env(safe-area-inset-bottom))]"
             // Mobile browser: the safe frame is already below the fixed header.
             : "pt-2 top-2"
         ))}
