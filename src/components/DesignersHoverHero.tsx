@@ -1597,7 +1597,7 @@ const DesignersHoverHero = () => {
                 </div>
               </div>
             )}
-            <div ref={searchScrollRef} className="flex-1 overflow-y-auto overscroll-contain px-1 pt-0 pb-1 min-h-0 pr-10 md:pr-1 scroll-smooth relative touch-pan-y">
+            <div ref={searchScrollRef} className="flex-1 overflow-y-auto overscroll-contain px-4 pt-2 pb-4 min-h-0 scroll-smooth relative touch-pan-y">
 
               {isSearching && groupedResults.length === 0 ? (
                 <p className="px-4 py-8 text-center text-sm font-body text-white/50">
