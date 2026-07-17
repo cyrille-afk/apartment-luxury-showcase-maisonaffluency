@@ -68,13 +68,31 @@ function shouldSkipUpdateUi(): boolean {
   return false;
 }
 
-function hardReload() {
+async function hardReload() {
   if (hasFabricWorkInProgress()) return;
   if (isProtectedPath()) return;
+
+  // Purge service workers + Cache Storage so the new build's HTML/JS is
+  // actually fetched from the network on the next navigation. Without this,
+  // a precached shell can keep serving the old bundle even after reload.
   try {
-    window.location.replace(
-      window.location.pathname + window.location.search + window.location.hash,
-    );
+    if ("serviceWorker" in navigator) {
+      const regs = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(regs.map((r) => r.unregister().catch(() => {})));
+    }
+  } catch { /* noop */ }
+  try {
+    if ("caches" in window) {
+      const keys = await caches.keys();
+      await Promise.all(keys.map((k) => caches.delete(k).catch(() => false)));
+    }
+  } catch { /* noop */ }
+
+  // Cache-bust the navigation so intermediaries don't hand us the stale HTML.
+  try {
+    const url = new URL(window.location.href);
+    url.searchParams.set("v", Date.now().toString());
+    window.location.replace(url.toString());
   } catch {
     window.location.reload();
   }
