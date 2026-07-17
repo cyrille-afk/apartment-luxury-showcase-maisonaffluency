@@ -1640,9 +1640,9 @@ const DesignersHoverHero = () => {
                                   })
                                 }
                                 aria-expanded={isOpen}
-                                className="w-full flex items-center justify-between px-5 py-2.5 text-left hover:bg-white/[0.04] transition-colors"
+                                className="w-full flex items-center justify-between px-4 py-1.5 text-left hover:bg-white/[0.04] transition-colors"
                               >
-                                <span className="flex items-center gap-3">
+                                <span className="flex items-center gap-2.5">
                                   <span
                                     className={cn(
                                       "text-white/50 text-xs transition-transform",
@@ -1652,12 +1652,12 @@ const DesignersHoverHero = () => {
                                   >
                                     ›
                                   </span>
-                                  <span className="font-serif text-lg text-white">{letter}</span>
+                                  <span className="font-serif text-base text-white">{letter}</span>
                                 </span>
-                                <span className="font-body text-xs text-white/50">{items.length}</span>
+                                <span className="font-body text-[11px] tracking-wide text-white/45 pl-3">{items.length}</span>
                               </button>
                               {isOpen && (
-                                <div className="grid grid-cols-2 gap-2 pt-1 pb-4">
+                                <div className="grid grid-cols-2 gap-1.5 px-3 pt-1 pb-3">
                                   {items.map((d: any) => (
                                     <DesignerGridCard
                                       key={d.slug}
