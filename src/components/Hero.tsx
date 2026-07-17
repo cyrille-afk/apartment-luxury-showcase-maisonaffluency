@@ -123,7 +123,7 @@ const Hero = () => {
                 onClick={() => { trackEvent("click_meet_designers", { event_category: "CTA", event_label: "HeroCTA" }); navigate("/designers"); }}
                 className={heroPrimaryCtaClass}
               >
-                Meet our Designers
+                Discover Our Talents
               </button>
             </div>
           </div>
