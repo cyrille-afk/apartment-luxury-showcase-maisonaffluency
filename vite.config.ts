@@ -4,6 +4,7 @@ import path from "path";
 import fs from "fs";
 import { componentTagger } from "lovable-tagger";
 import { mcpPlugin } from "@lovable.dev/mcp-js/stacks/supabase/vite";
+import { VitePWA } from "vite-plugin-pwa";
 
 /**
  * Convert render-blocking CSS <link> tags to non-blocking preloads.
