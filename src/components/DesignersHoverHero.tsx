@@ -133,6 +133,7 @@ function DesignerGridCard({
   const srcSet = gridImageSrcSet(rawSrc);
   const lqip = gridImageLqip(rawSrc);
   const displayName = displayDesignerName(designer.name);
+  const [loaded, setLoaded] = useState(false);
   return (
     <Link
       to={`/designers/${designer.slug}`}
@@ -150,6 +151,16 @@ function DesignerGridCard({
           : undefined
       }
     >
+      {/* Shimmering skeleton — visible until the image finishes loading */}
+      {url && !loaded && (
+        <div
+          className="pointer-events-none absolute inset-0 overflow-hidden"
+          aria-hidden="true"
+        >
+          <div className="absolute inset-0 bg-neutral-800/60" />
+          <div className="absolute inset-y-0 -left-1/2 w-1/2 animate-card-shimmer bg-gradient-to-r from-transparent via-white/15 to-transparent" />
+        </div>
+      )}
       {url ? (
         <img
           src={url}
@@ -161,7 +172,13 @@ function DesignerGridCard({
           loading={priority ? "eager" : "lazy"}
           {...(priority ? { fetchpriority: "high" as any } : {})}
           decoding="async"
-          className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+          onLoad={() => setLoaded(true)}
+          onError={() => setLoaded(true)}
+          className={cn(
+            "absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105",
+            "transition-opacity",
+            loaded ? "opacity-100" : "opacity-0"
+          )}
         />
       ) : (
         <span className="absolute inset-0 flex items-center justify-center text-white/30">
