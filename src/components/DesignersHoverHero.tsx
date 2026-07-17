@@ -195,6 +195,28 @@ function useFeaturedDesigners() {
   });
 }
 
+// Fetches the first curator-pick image for every designer, keyed by designer id.
+function useAllFirstPickImages() {
+  return useQuery({
+    queryKey: ["designers-all-first-pick-images-v1"],
+    staleTime: 1000 * 60 * 30,
+    queryFn: async () => {
+      const { data, error } = await applyCuratorPickOrder(
+        supabase
+          .from("designer_curator_picks_public" as any)
+          .select("designer_id, image_url")
+      );
+      if (error) throw error;
+      const map = new Map<string, string>();
+      for (const row of (data || []) as any[]) {
+        if (!row?.designer_id || !row?.image_url) continue;
+        if (!map.has(row.designer_id)) map.set(row.designer_id, row.image_url as string);
+      }
+      return map;
+    },
+  });
+}
+
 // Split a name into ["First", "Last"] for the italic-on-last typographic move.
 function splitName(name: string): [string, string] {
   const parts = name.trim().split(/\s+/);
@@ -220,6 +242,7 @@ const isStandaloneDisplay = () => {
 const DesignersHoverHero = () => {
   const { data: designers } = useFeaturedDesigners();
   const { data: allDesigners = [] } = useAllDesigners();
+  const { data: firstPickMap } = useAllFirstPickImages();
   const designerCount = useMemo(
     () => allDesigners.filter((d: any) => d.is_published).length,
     [allDesigners]
@@ -822,6 +845,7 @@ const DesignersHoverHero = () => {
         name: d.name as string,
         hero_image_url: (d.hero_image_url as string | null) ?? null,
         image_url: (d.image_url as string | null) ?? null,
+        first_pick_image_url: firstPickMap?.get(d.id) ?? null,
       }));
     const q = searchQuery.trim().toLowerCase();
     const filtered = q
@@ -836,7 +860,7 @@ const DesignersHoverHero = () => {
     }
     const ordered = [...groups.entries()].sort(([a], [b]) => a.localeCompare(b));
     return { groupedResults: ordered, totalResults: filtered.length };
-  }, [allDesigners, searchQuery]);
+  }, [allDesigners, searchQuery, firstPickMap]);
 
   // Flat list for the mobile-first bottom sheet: fast visual scan, no A–Z index.
   const flatResults = useMemo(() => {
