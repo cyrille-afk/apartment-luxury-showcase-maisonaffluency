@@ -145,11 +145,24 @@ function ScrollLockedDesigners({
     // Match body background to the hero so the iOS toolbar blur shows the
     // dark image instead of the default cream page background.
     body.style.backgroundColor = "#0a0a0a";
+    // Force scroll to top: on back-navigation the browser restores the previous
+    // window.scrollY, but with body overflow locked the hero can't be scrolled
+    // back — leaving the top half cut off and the bottom half empty.
+    // Disable browser scroll restoration for this route while locked, and reset.
+    const prevRestoration = (window.history as any).scrollRestoration;
+    try { (window.history as any).scrollRestoration = "manual"; } catch { /* ignore */ }
+    window.scrollTo(0, 0);
+    // Run again on the next frames in case the browser re-applies scroll after paint.
+    const raf1 = requestAnimationFrame(() => window.scrollTo(0, 0));
+    const raf2 = requestAnimationFrame(() => requestAnimationFrame(() => window.scrollTo(0, 0)));
     return () => {
       html.style.overflow = prevHtml;
       body.style.overflow = prevBody;
       (body.style as any).overscrollBehavior = prevOverscroll;
       body.style.backgroundColor = prevBodyBg;
+      try { (window.history as any).scrollRestoration = prevRestoration ?? "auto"; } catch { /* ignore */ }
+      cancelAnimationFrame(raf1);
+      cancelAnimationFrame(raf2);
     };
   }, [locked]);
 
