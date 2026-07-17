@@ -1046,6 +1046,8 @@ const DesignersHoverHero = () => {
           const MOBILE_BG_OVERRIDES: Record<string, string> = {
             "jean-michel-frank":
               "https://res.cloudinary.com/dif1oamtj/image/upload/v1777428180/JMF_1935_Round_Table__02_Portrait_BD_1_aozicg.jpg",
+            "hamrei":
+              "https://res.cloudinary.com/dif1oamtj/image/upload/v1784262044/Screenshot_2026-07-17_at_12.19.46_PM_fzvmvb.png",
           };
           const src = isMobileOrPwa
             ? MOBILE_BG_OVERRIDES[d.slug] || d.first_pick_image_url || d.hero_image_url || d.image_url
