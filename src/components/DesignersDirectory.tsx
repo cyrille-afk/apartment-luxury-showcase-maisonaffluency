@@ -652,7 +652,7 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts }
         {item.name === 'Apparatus' ? (
           <div className="w-full h-full bg-black" />
         ) : cardImageUrl ? (
-          <img src={cardImageUrl} alt={item.name} draggable={false} className="w-full h-full object-cover scale-105 group-hover:scale-100 transition-transform duration-[1100ms] ease-out" loading="eager" decoding="async" />
+          <img {...cldResponsiveImg(cardImageUrl, { widths: [320, 480, 640, 960], sizes: "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 320px" })} alt={item.name} draggable={false} className="w-full h-full object-cover scale-105 group-hover:scale-100 transition-transform duration-[1100ms] ease-out" loading="eager" decoding="async" />
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-muted/10 group-hover:bg-muted/20 transition-colors">
             <span className="font-display text-3xl text-muted-foreground/20">{item.name.charAt(0)}</span>
