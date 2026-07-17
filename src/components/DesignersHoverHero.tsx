@@ -109,7 +109,9 @@ function DesignerGridCard({
   designer: { slug: string; name: string; first_pick_image_url?: string | null; hero_image_url: string | null; image_url: string | null };
   onNavigate?: () => void;
 }) {
-  const url = gridImageTransform(pickGridImage(designer));
+  const rawSrc = pickGridImage(designer);
+  const url = gridImageTransform(rawSrc);
+  const srcSet = gridImageSrcSet(rawSrc);
   const displayName = displayDesignerName(designer.name);
   return (
     <Link
@@ -122,6 +124,10 @@ function DesignerGridCard({
       {url ? (
         <img
           src={url}
+          srcSet={srcSet}
+          sizes="(max-width: 640px) 50vw, 300px"
+          width={600}
+          height={750}
           alt=""
           loading="lazy"
           decoding="async"
