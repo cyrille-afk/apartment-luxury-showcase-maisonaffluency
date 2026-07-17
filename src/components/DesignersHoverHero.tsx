@@ -705,9 +705,13 @@ const DesignersHoverHero = () => {
       const idx = items.findIndex((d) => d.slug === activeSlugRef.current);
       const atLast = idx >= items.length - 1;
       const atFirst = idx <= 0;
-      // Boundary handoff: at last item swiping/wheeling up → page scroll to Directory.
+      // At last item swiping/wheeling up: stop here on mobile/PWA. The mobile
+      // landing has no card directory below the hero (see PublicDesigners),
+      // so the previous handoff would scroll the window past the locked hero
+      // and leave a white gap while pulling the list up under the fixed
+      // header — visible as a "jump" when reaching Victoria Magniant.
       if (atLast && deltaY > 0) {
-        handoffToDirectory();
+        prevent();
         return;
       }
       // At first item swiping down → let page/native handle (no-op for hero).
