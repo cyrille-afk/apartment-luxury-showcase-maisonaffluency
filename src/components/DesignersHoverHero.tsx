@@ -58,7 +58,9 @@ function gridImageTransform(src: string | null | undefined): string | undefined 
  * photo when it is hosted on Cloudinary; otherwise fall back to a Cloudinary
  * image_url so we avoid broken external hotlinks on large cards.
  */
-function pickGridImage(d: { hero_image_url: string | null; image_url: string | null }): string | null {
+function pickGridImage(d: { first_pick_image_url?: string | null; hero_image_url: string | null; image_url: string | null }): string | null {
+  if (isCloudinaryUpload(d.first_pick_image_url)) return d.first_pick_image_url!;
+  if (d.first_pick_image_url) return d.first_pick_image_url;
   if (isCloudinaryUpload(d.hero_image_url)) return d.hero_image_url;
   if (isCloudinaryUpload(d.image_url)) return d.image_url;
   return d.hero_image_url || d.image_url;
@@ -73,7 +75,7 @@ function DesignerGridCard({
   designer,
   onNavigate,
 }: {
-  designer: { slug: string; name: string; hero_image_url: string | null; image_url: string | null };
+  designer: { slug: string; name: string; first_pick_image_url?: string | null; hero_image_url: string | null; image_url: string | null };
   onNavigate?: () => void;
 }) {
   const url = gridImageTransform(pickGridImage(designer));
@@ -1543,7 +1545,7 @@ const DesignersHoverHero = () => {
                   <div className="md:hidden">
                     <div className="flex flex-col pb-2">
                       {isSearching ? (
-                        <div className="grid grid-cols-2 gap-3 px-4 pt-2 pb-4">
+                        <div className="grid grid-cols-2 gap-2 pt-2 pb-4">
                           {groupedResults.flatMap(([, items]) => items).map((d: any) => (
                             <DesignerGridCard
                               key={d.slug}
@@ -1591,7 +1593,7 @@ const DesignersHoverHero = () => {
                                 <span className="font-body text-xs text-white/50">{items.length}</span>
                               </button>
                               {isOpen && (
-                                <div className="grid grid-cols-2 gap-3 px-4 pt-1 pb-4">
+                                <div className="grid grid-cols-2 gap-2 pt-1 pb-4">
                                   {items.map((d: any) => (
                                     <DesignerGridCard
                                       key={d.slug}
