@@ -1294,7 +1294,6 @@ const DesignersHoverHero = () => {
                               state={{ fromDesignersHero: true }}
                               onMouseEnter={() => {
                                 setActiveSlug(d.slug);
-                                setHoveredSlug(d.slug);
                               }}
                               onFocus={() => setActiveSlug(d.slug)}
                               className={cn(
