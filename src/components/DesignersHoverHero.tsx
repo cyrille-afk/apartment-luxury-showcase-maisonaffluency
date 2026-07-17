@@ -244,8 +244,37 @@ const FEATURED_SEED = (featuredDesignersSeed as FeaturedDesigner[]) || [];
 function useFeaturedDesigners() {
   return useQuery({
     queryKey: ["designers-hero-featured-v3", ALL_FEATURED_SLUGS],
+    // Stale-while-revalidate: paint from build-time seed immediately, then
+    // silently refetch in the background. `initialDataUpdatedAt: 0` marks the
+    // seed as already-stale so react-query kicks off a background refresh on
+    // mount without blocking the first paint.
     staleTime: 1000 * 60 * 30,
     initialData: FEATURED_SEED.length ? FEATURED_SEED : undefined,
+    initialDataUpdatedAt: 0,
+    refetchOnWindowFocus: false,
+    // Pin the first designer's hero image URL to the seed so the background
+    // refetch cannot swap the LCP <img> src and trigger a second LCP paint.
+    // Non-visual fields (ids, names, curator picks for later cards) still
+    // update from the network.
+    select: (data) => {
+      if (!data || !FEATURED_SEED.length) return data;
+      const seedBySlug = new Map(FEATURED_SEED.map((d) => [d.slug, d]));
+      return data.map((d, i) => {
+        const seed = seedBySlug.get(d.slug);
+        if (!seed) return d;
+        // Only pin the visible hero URLs for the first seeded designer — the
+        // LCP element. Other cards can accept fresh URLs since they are
+        // offscreen and won't be reported as LCP.
+        if (i === 0 || seed.slug === FEATURED_SEED[0]?.slug) {
+          return {
+            ...d,
+            hero_image_url: seed.hero_image_url ?? d.hero_image_url,
+            image_url: seed.image_url ?? d.image_url,
+          };
+        }
+        return d;
+      });
+    },
     queryFn: async () => {
       const { data, error } = await supabase
         .from("designers")
@@ -277,7 +306,14 @@ function useFeaturedDesigners() {
         }
       }
 
-      return designers.map((d) => ({
+      // Preserve seed ordering so the first painted card stays first after
+      // revalidation — reordering would otherwise remount the LCP image.
+      const seedOrder = new Map(ALL_FEATURED_SLUGS.map((s, i) => [s, i]));
+      const ordered = designers.slice().sort(
+        (a, b) => (seedOrder.get(a.slug) ?? 999) - (seedOrder.get(b.slug) ?? 999)
+      );
+
+      return ordered.map((d) => ({
         ...d,
         first_pick_image_url: firstPickByDesigner.get(d.id) || null,
       }));
