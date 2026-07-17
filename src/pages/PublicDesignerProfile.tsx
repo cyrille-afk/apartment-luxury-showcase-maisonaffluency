@@ -869,6 +869,8 @@ const PublicDesignerProfile = () => {
               <Link
                 to={fromNewIn
                   ? `/new-in?designer=${slug}`
+                  : isMobile
+                    ? "/designers"
                   : fromDesignersHero
                     ? "/designers"
                   : (() => {
