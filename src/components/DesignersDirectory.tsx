@@ -1265,6 +1265,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
   const { data: allDesigners = [], isLoading } = useAllDesigners();
   const { data: curatorPicksData = [] } = useDesignerCategories();
   const { data: fallbackGalleryIndexByDesigner = {} } = useDesignerHotspotFallbacks();
+  const { data: firstPickImageByDesigner = {} } = useDesignerFirstPickImage();
   const { data: designersWithIgPosts = new Set<string>() } = useQuery({
     queryKey: ["designers-with-ig-posts"],
     queryFn: async () => {
