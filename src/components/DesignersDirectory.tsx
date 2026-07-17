@@ -616,11 +616,13 @@ function ParentBrandCard({ item, isOpen, onToggle, designerCount, hasIgPosts }: 
 }
 
 // ─── Single Designer Card ────────────────────────────────────────────────────
-function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts, firstPickImageUrl }: { item: Designer; fallbackGalleryIndexByDesigner?: Record<string, number[]>; hasIgPosts?: boolean; firstPickImageUrl?: string | null }) {
+function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts }: { item: Designer; fallbackGalleryIndexByDesigner?: Record<string, number[]>; hasIgPosts?: boolean }) {
   const { displayName, parentLabel } = parseDesignerDisplayName(item);
   const { toast } = useToast();
   const navigate = useNavigate();
   const cardImageUrl = item.image_url || item.hero_image_url;
+  const firstPickMap = useContext(FirstPickImageContext);
+  const firstPickImageUrl = firstPickMap[item.id] || null;
   const thumbs = CARD_THUMBNAILS[item.slug] || [];
   const instagramLinks: string[] = hasIgPosts ? [] : (() => {
     const hardcoded = INSTAGRAM_LINKS[item.slug];
