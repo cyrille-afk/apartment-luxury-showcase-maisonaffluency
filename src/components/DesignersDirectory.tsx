@@ -613,7 +613,7 @@ function ParentBrandCard({ item, isOpen, onToggle, designerCount, hasIgPosts }: 
 }
 
 // ─── Single Designer Card ────────────────────────────────────────────────────
-function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts }: { item: Designer; fallbackGalleryIndexByDesigner?: Record<string, number[]>; hasIgPosts?: boolean }) {
+function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts, firstPickImageUrl }: { item: Designer; fallbackGalleryIndexByDesigner?: Record<string, number[]>; hasIgPosts?: boolean; firstPickImageUrl?: string | null }) {
   const { displayName, parentLabel } = parseDesignerDisplayName(item);
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -629,6 +629,7 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts }
   const firstLetter = (displayName || item.name).normalize("NFD").replace(/[\u0300-\u036f]/g, "").charAt(0).toUpperCase();
 
   const isLetterA = true; // bottom-anchored vignette applied to every designer card
+  const hasHoverPick = !!firstPickImageUrl && firstPickImageUrl !== cardImageUrl;
 
 
   return (
@@ -649,6 +650,18 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts }
           <div className="w-full h-full flex items-center justify-center bg-muted/10 group-hover:bg-muted/20 transition-colors">
             <span className="font-display text-3xl text-muted-foreground/20">{item.name.charAt(0)}</span>
           </div>
+        )}
+        {/* Hover reveal — first curator pick fades in over the portrait on desktop hover */}
+        {hasHoverPick && (
+          <img
+            src={firstPickImageUrl!}
+            alt=""
+            aria-hidden="true"
+            draggable={false}
+            loading="lazy"
+            decoding="async"
+            className="pointer-events-none absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-700 ease-out"
+          />
         )}
         {!isLetterA && (
           <>
