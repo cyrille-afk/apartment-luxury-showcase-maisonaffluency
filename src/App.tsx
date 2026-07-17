@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
-import { BrowserRouter, Routes, Route, useLocation, useNavigationType } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation, useNavigate, useNavigationType } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import Index from "./pages/Index";
 import { CompareProvider } from "@/contexts/CompareContext";
@@ -394,6 +394,46 @@ function restorePreviewLocationBeforeRouter() {
   }
 }
 
+function SameOriginLinkGuard() {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const onClick = (event: MouseEvent) => {
+      if (event.defaultPrevented || event.button !== 0) return;
+      if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+
+      const target = event.target as Element | null;
+      const anchor = target?.closest?.("a[href]") as HTMLAnchorElement | null;
+      if (!anchor) return;
+      if (anchor.target && anchor.target !== "_self") return;
+      if (anchor.hasAttribute("download")) return;
+
+      const href = anchor.getAttribute("href") || "";
+      if (!href || href.startsWith("#") || href.startsWith("mailto:") || href.startsWith("tel:")) return;
+
+      let url: URL;
+      try {
+        url = new URL(anchor.href, window.location.href);
+      } catch {
+        return;
+      }
+      if (url.origin !== window.location.origin) return;
+
+      const next = `${url.pathname}${url.search}${url.hash}`;
+      const current = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+      if (next === current) return;
+
+      event.preventDefault();
+      navigate(next);
+    };
+
+    document.addEventListener("click", onClick, true);
+    return () => document.removeEventListener("click", onClick, true);
+  }, [navigate]);
+
+  return null;
+}
+
 const App = () => {
   restorePreviewLocationBeforeRouter();
   const [showDeferredUi, setShowDeferredUi] = useState(false);
@@ -478,6 +518,7 @@ const App = () => {
           <QueryClientProvider client={queryClient}>
             <BrowserRouter>
               <HomeRouteSync />
+              <SameOriginLinkGuard />
               <ScrollToTopOnNavigate />
               <PreviewViewContinuity />
 
