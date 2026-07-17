@@ -1553,32 +1553,27 @@ const DesignersHoverHero = () => {
                 </p>
               ) : (
                 <>
-                  {/* Mobile: grouped designer list with sticky letter headers */}
+                  {/* Mobile: grouped designer grid with sticky letter headers */}
                   <div className="md:hidden">
-                    <ul className="flex flex-col pb-2">
+                    <div className="flex flex-col pb-2">
                       {isSearching ? (
-                        groupedResults.flatMap(([, items]) => items).map((d: any) => (
-                          <li key={d.slug}>
-                            <Link
-                              to={`/designers/${d.slug}`}
-                              state={{ fromDesignersHero: true }}
-                              onClick={() => setSearchOpen(false)}
-                              className="flex items-center gap-3 px-5 py-2 font-body text-[15px] text-white/85 hover:text-white hover:bg-white/[0.04] transition-colors"
-                            >
-                              <DesignerRowThumb src={d.image_url || d.hero_image_url} alt={d.name} />
-
-                              <span className="truncate">{displayDesignerName(d.name)}</span>
-                            </Link>
-                          </li>
-                        ))
+                        <div className="grid grid-cols-2 gap-3 px-4 pt-2 pb-4">
+                          {groupedResults.flatMap(([, items]) => items).map((d: any) => (
+                            <DesignerGridCard
+                              key={d.slug}
+                              designer={d}
+                              onNavigate={() => setSearchOpen(false)}
+                            />
+                          ))}
+                        </div>
                       ) : (
                         groupedResults.map(([letter, items]) => {
                           const isOpen = expandedLetters.has(letter);
                           return (
-                            <li
+                            <div
                               key={letter}
                               data-designer-letter={letter}
-                              className="flex flex-col border-b border-white/[0.06] last:border-b-0"
+                              className="border-b border-white/[0.06] last:border-b-0"
                             >
                               <button
                                 type="button"
@@ -1610,27 +1605,21 @@ const DesignersHoverHero = () => {
                                 <span className="font-body text-xs text-white/50">{items.length}</span>
                               </button>
                               {isOpen && (
-                                <ul className="flex flex-col pb-2">
+                                <div className="grid grid-cols-2 gap-3 px-4 pt-1 pb-4">
                                   {items.map((d: any) => (
-                                    <li key={d.slug}>
-                                      <Link
-                                        to={`/designers/${d.slug}`}
-                                        state={{ fromDesignersHero: true }}
-                                        onClick={() => setSearchOpen(false)}
-                                        className="flex items-center gap-3 px-5 py-2 font-body text-[15px] text-white/85 hover:text-white hover:bg-white/[0.04] transition-colors"
-                                      >
-                                        <DesignerRowThumb src={d.image_url || d.hero_image_url} alt={d.name} />
-                                        <span className="truncate">{displayDesignerName(d.name)}</span>
-                                      </Link>
-                                    </li>
+                                    <DesignerGridCard
+                                      key={d.slug}
+                                      designer={d}
+                                      onNavigate={() => setSearchOpen(false)}
+                                    />
                                   ))}
-                                </ul>
+                                </div>
                               )}
-                            </li>
+                            </div>
                           );
                         })
                       )}
-                    </ul>
+                    </div>
                   </div>
 
                   {/* Desktop: A–Z accordion with counts, expandable per letter */}
