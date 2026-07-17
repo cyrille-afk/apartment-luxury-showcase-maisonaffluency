@@ -211,6 +211,9 @@ function useDesignerFirstPickImage() {
   });
 }
 
+// Context so nested cards can access the first-pick map without prop drilling.
+const FirstPickImageContext = createContext<Record<string, string>>({});
+
 // ─── Hook: fetch fallback gallery indices per designer from gallery hotspots ──
 function useDesignerHotspotFallbacks() {
   return useQuery({
