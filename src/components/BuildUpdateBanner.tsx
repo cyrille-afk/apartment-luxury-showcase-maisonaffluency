@@ -125,7 +125,10 @@ export default function BuildUpdateBanner() {
         duration: 12_000,
         action: {
           label: "Refresh now",
-          onClick: hardReload,
+          onClick: (e) => {
+            e?.preventDefault?.();
+            void hardReload();
+          },
         },
       });
     };
