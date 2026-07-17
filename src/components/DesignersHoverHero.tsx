@@ -242,6 +242,7 @@ const isStandaloneDisplay = () => {
 const DesignersHoverHero = () => {
   const { data: designers } = useFeaturedDesigners();
   const { data: allDesigners = [] } = useAllDesigners();
+  const { data: firstPickMap } = useAllFirstPickImages();
   const designerCount = useMemo(
     () => allDesigners.filter((d: any) => d.is_published).length,
     [allDesigners]
