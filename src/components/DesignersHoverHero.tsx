@@ -264,7 +264,12 @@ const DesignersHoverHero = () => {
     return FEATURED_GROUPS.map((g) => ({
       ...g,
       designers: g.slugs
-        .map((slug) => bySlug.get(slug))
+        .map((slug) => {
+          const d = bySlug.get(slug);
+          if (!d) return undefined;
+          const override = DISPLAY_NAME_OVERRIDES[slug];
+          return override ? { ...d, name: override } : d;
+        })
         .filter((d): d is FeaturedDesigner => Boolean(d))
         .sort((a, b) =>
           a.name.localeCompare(b.name, "en", { sensitivity: "base" })
