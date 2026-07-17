@@ -201,7 +201,7 @@ export default function TradeAdminFabrics() {
   const [linkingId, setLinkingId] = useState<string | null>(p.linkingId ?? null);
   const [pickSearch, setPickSearch] = useState<string>(p.pickSearch ?? "");
 
-  const currentDraftStateRef = useRef<PersistedFabricAdminState>({});
+  const currentDraftStateRef = useRef<PersistedFabricAdminState>(p);
 
   useEffect(() => {
     const state = {
@@ -218,7 +218,6 @@ export default function TradeAdminFabrics() {
     window.addEventListener("pagehide", flushDraftState);
     window.addEventListener("beforeunload", flushDraftState);
     return () => {
-      flushDraftState();
       window.removeEventListener("pagehide", flushDraftState);
       window.removeEventListener("beforeunload", flushDraftState);
     };
