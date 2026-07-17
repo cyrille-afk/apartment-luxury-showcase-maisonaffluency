@@ -470,6 +470,16 @@ const DesignersHoverHero = () => {
     }
   }, [items, activeSlug]);
 
+  // Hide the inlined static /designers hero (in index.html) once React has
+  // committed this component — the DB-driven <img>s take over from here.
+  useEffect(() => {
+    const p = document.getElementById("static-designers-hero");
+    const o = document.getElementById("static-designers-hero-overlay");
+    if (p) p.style.display = "none";
+    if (o) o.style.display = "none";
+  }, []);
+
+
   // Preload the initial (items[0]) hero image as soon as the query resolves,
   // so it lands well before React commits the <img> — cuts LCP on Slow-4G by
   // starting the download in parallel with the JS chunk parse. Route-scoped

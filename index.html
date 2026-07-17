@@ -162,6 +162,29 @@
       fetchpriority="high"
     />
 
+    <!-- /designers route LCP preload — gated by inline script below so it only
+         fires when the pathname matches. Uses the exact widths/quality that
+         DesignersHoverHero requests via cldResponsiveImg so bytes are cache-hits. -->
+    <script>
+      (function(){
+        if (!/^\/designers(\/|$|\?|#)/.test(window.location.pathname)) return;
+        var base = "https://res.cloudinary.com/dif1oamtj/image/upload";
+        var id = "v1772160681/Casque-Bar-Cabinet_10_alexander-lamont_1_ydnjp2.jpg";
+        var isMobile = window.matchMedia("(max-width: 767px)").matches;
+        var widths = isMobile ? [480,720,960,1280] : [960,1280,1600,1920];
+        var srcset = widths.map(function(w){ return base+"/w_"+w+",q_auto:eco,f_auto/"+id+" "+w+"w"; }).join(", ");
+        var href = base+"/w_"+widths[2]+",q_auto:eco,f_auto/"+id;
+        var l = document.createElement("link");
+        l.rel = "preload"; l.as = "image"; l.href = href;
+        l.setAttribute("imagesrcset", srcset);
+        l.setAttribute("imagesizes", "100vw");
+        l.setAttribute("fetchpriority", "high");
+        document.head.appendChild(l);
+      })();
+    </script>
+
+
+
 
 
 
@@ -186,6 +209,7 @@
     <script>
       // Apply FOUC guard + persistent-skeleton marker only on homepage.
       var __isHome = (window.location.pathname === '/' || window.location.pathname === '');
+      var __isDesigners = /^\/designers(\/|$|\?|#)/.test(window.location.pathname);
       if (__isHome) {
         document.documentElement.classList.add('home-fouc');
         // Homepage content is rendered by React; no inline hero skeleton is used.
@@ -195,9 +219,11 @@
         // crawlers that execute JS will still index the React-rendered content,
         // and the <noscript> block below remains for non-JS crawlers.
         var __css = document.createElement('style');
-        __css.textContent = '#seo-content{display:none !important;}#static-hero{display:none !important;}#static-hero-copy{display:none !important;}';
+        var __hideStaticDesigners = __isDesigners ? '' : '#static-designers-hero{display:none !important;}';
+        __css.textContent = '#seo-content{display:none !important;}#static-hero{display:none !important;}#static-hero-copy{display:none !important;}' + __hideStaticDesigners;
         document.head.appendChild(__css);
       }
+
       setTimeout(function(){ document.documentElement.classList.add('css-ready'); }, 3000);
     </script>
 
@@ -281,7 +307,38 @@
       }
     </style>
 
+    <!--
+      Static /designers hero — inlined so the LCP element paints from the
+      preloaded bytes before React hydrates DesignersHoverHero. Hidden by
+      default; the inline route-gating script above reveals it only when
+      pathname matches /designers. DesignersHoverHero removes it after mount.
+    -->
+    <picture id="static-designers-hero" style="display:none;position:absolute;top:0;left:0;width:100vw;height:100lvh;z-index:0;background:#0a0a0a;pointer-events:none;">
+      <source media="(max-width: 767px)" srcset="https://res.cloudinary.com/dif1oamtj/image/upload/w_960/q_auto:eco/f_auto/v1772160681/Casque-Bar-Cabinet_10_alexander-lamont_1_ydnjp2.jpg" />
+      <img
+        src="https://res.cloudinary.com/dif1oamtj/image/upload/w_1600/q_auto:eco/f_auto/v1772160681/Casque-Bar-Cabinet_10_alexander-lamont_1_ydnjp2.jpg"
+        alt=""
+        aria-hidden="true"
+        fetchpriority="high"
+        decoding="sync"
+        loading="eager"
+        style="width:100%;height:100%;object-fit:cover;object-position:center 70%;"
+      />
+    </picture>
+
+    <div id="static-designers-hero-overlay" aria-hidden="true" style="display:none;position:absolute;top:0;left:0;width:100vw;height:100lvh;z-index:1;pointer-events:none;background:linear-gradient(to right,rgba(0,0,0,0.80),rgba(0,0,0,0.55) 40%,rgba(0,0,0,0.30));"></div>
+    <script>
+      (function(){
+        if (!/^\/designers(\/|$|\?|#)/.test(window.location.pathname)) return;
+        var p = document.getElementById('static-designers-hero');
+        var o = document.getElementById('static-designers-hero-overlay');
+        if (p) p.style.display = 'block';
+        if (o) o.style.display = 'block';
+      })();
+    </script>
+
     <div id="root">
+
       <!-- SEO content: indexable by crawlers but visually hidden (off-flow) so it
            contributes ZERO layout to the user paint. Keeping it in normal flow
            caused a large CLS on mobile when React mounted and replaced #root. -->
