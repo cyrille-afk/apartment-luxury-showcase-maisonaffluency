@@ -4,6 +4,7 @@ import path from "path";
 import fs from "fs";
 import { componentTagger } from "lovable-tagger";
 import { mcpPlugin } from "@lovable.dev/mcp-js/stacks/supabase/vite";
+import { VitePWA } from "vite-plugin-pwa";
 
 /**
  * Convert render-blocking CSS <link> tags to non-blocking preloads.
@@ -144,6 +145,61 @@ export default defineConfig(({ mode }) => {
       optimizeHtmlPlugin(buildId),
       emitVersionPlugin(buildId),
       emitOgManifestPlugin(),
+      VitePWA({
+        strategies: "generateSW",
+        registerType: "autoUpdate",
+        injectRegister: null,
+        filename: "sw.js",
+        devOptions: { enabled: false },
+        workbox: {
+          navigateFallback: "/index.html",
+          navigateFallbackDenylist: [/^\/~oauth/, /^\/api\//, /^\/functions\//],
+          globPatterns: ["index.html", "manifest.json", "version.json"],
+          globIgnores: ["**/assets/**"],
+          runtimeCaching: [
+            // HTML navigations — always try network first so new deploys reach users.
+            {
+              urlPattern: ({ request }) => request.mode === "navigate",
+              handler: "NetworkFirst",
+              options: {
+                cacheName: "html-nav",
+                networkTimeoutSeconds: 4,
+                expiration: { maxEntries: 32, maxAgeSeconds: 60 * 60 * 24 },
+              },
+            },
+            // Cloudinary + Supabase images — CacheFirst so designer cards persist
+            // offline and reappear instantly on return visits.
+            {
+              urlPattern: ({ url }) =>
+                url.hostname === "res.cloudinary.com" ||
+                url.hostname.endsWith(".supabase.co"),
+              handler: "CacheFirst",
+              options: {
+                cacheName: "images-v1",
+                expiration: {
+                  maxEntries: 400,
+                  maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
+                  purgeOnQuotaError: true,
+                },
+                cacheableResponse: { statuses: [0, 200] },
+              },
+            },
+            // Same-origin hashed build assets.
+            {
+              urlPattern: ({ url, sameOrigin }) =>
+                sameOrigin && /\/assets\/.+\.(js|css|woff2|svg|png|jpg|jpeg|webp|avif)$/.test(url.pathname),
+              handler: "CacheFirst",
+              options: {
+                cacheName: "static-assets-v1",
+                expiration: { maxEntries: 200, maxAgeSeconds: 60 * 60 * 24 * 30 },
+              },
+            },
+          ],
+          cleanupOutdatedCaches: true,
+          clientsClaim: true,
+          skipWaiting: true,
+        },
+      }),
     ].filter(Boolean),
   resolve: {
     alias: {
