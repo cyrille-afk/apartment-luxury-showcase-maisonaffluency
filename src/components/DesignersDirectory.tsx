@@ -188,6 +188,29 @@ function useDesignerCategories() {
   });
 }
 
+// ─── Hook: fetch first curator pick image per designer (for hover reveal) ────
+function useDesignerFirstPickImage() {
+  return useQuery({
+    queryKey: ["designer-first-pick-image"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("designer_curator_picks_public")
+        .select("designer_id, image_url, sort_order, created_at")
+        .not("image_url", "is", null)
+        .order("sort_order", { ascending: true, nullsFirst: false })
+        .order("created_at", { ascending: true });
+      if (error) throw error;
+      const map: Record<string, string> = {};
+      for (const row of (data || []) as Array<{ designer_id: string; image_url: string | null }>) {
+        if (!row.designer_id || !row.image_url) continue;
+        if (!map[row.designer_id]) map[row.designer_id] = row.image_url;
+      }
+      return map;
+    },
+    staleTime: 10 * 60 * 1000,
+  });
+}
+
 // ─── Hook: fetch fallback gallery indices per designer from gallery hotspots ──
 function useDesignerHotspotFallbacks() {
   return useQuery({
