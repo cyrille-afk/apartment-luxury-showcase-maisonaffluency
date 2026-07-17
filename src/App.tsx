@@ -1,7 +1,10 @@
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { BrowserRouter, Routes, Route, useLocation, useNavigate, useNavigationType } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import Index from "./pages/Index";
+// Index is the homepage. Lazy-loading it keeps ~200KB of homepage-only code
+// (Hero, Index shell, and its transitive imports) out of the initial bundle
+// on every non-home route (e.g. /designers), where it is dead weight.
+const Index = lazy(() => import("./pages/Index"));
 import { CompareProvider } from "@/contexts/CompareContext";
 import { AuthProvider } from "@/hooks/useAuth";
 import { StudioProvider } from "@/hooks/useStudio";
