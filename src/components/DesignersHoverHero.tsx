@@ -108,7 +108,7 @@ function DesignerGridCard({
   designer: { slug: string; name: string; hero_image_url: string | null; image_url: string | null };
   onNavigate?: () => void;
 }) {
-  const url = gridImageTransform(designer.hero_image_url || designer.image_url);
+  const url = gridImageTransform(pickGridImage(designer));
   const displayName = displayDesignerName(designer.name);
   return (
     <Link
