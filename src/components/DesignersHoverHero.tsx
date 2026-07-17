@@ -1202,16 +1202,16 @@ const DesignersHoverHero = () => {
                                   <span className="opacity-80"> - {d.founder}</span>
                                 )}
                                 {/* Discovery cue: tiny aperture glyph hinting each name has a photo.
-                                    Desktop only; faint by default, brightens on active/hover. */}
+                                    Shown on every viewport; faint by default, brightens when active. */}
                                 <ImageIcon
                                   aria-hidden="true"
                                   strokeWidth={1.25}
                                   className={cn(
-                                    "hidden md:inline-block align-middle ml-2 -translate-y-[1px]",
+                                    "inline-block align-middle ml-2 -translate-y-[1px]",
                                     "h-[10px] w-[10px] transition-all duration-500",
                                     isActive
                                       ? "opacity-90 text-gold"
-                                      : "opacity-30 text-cream/80 group-hover:opacity-70"
+                                      : "opacity-30 text-cream/80 md:group-hover:opacity-70"
                                   )}
                                 />
                               </span>
