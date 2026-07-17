@@ -1146,7 +1146,7 @@ const DesignersHoverHero = () => {
       ref={sectionRef}
       id="designers-hover-hero"
       aria-label="Featured designers"
-      onMouseLeave={() => setHoveredSlug(null)}
+      onMouseLeave={() => {}}
       className={cn(
         "relative w-full bg-[#0a0a0a] text-foreground overflow-hidden touch-pan-y",
         isStandalone
