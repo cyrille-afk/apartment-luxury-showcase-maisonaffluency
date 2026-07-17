@@ -16,7 +16,6 @@
  */
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { AnimatePresence, motion } from "framer-motion";
 import { Search, X, ImageIcon } from "lucide-react";
 
 import { useQuery } from "@tanstack/react-query";
@@ -1635,40 +1634,25 @@ const DesignersHoverHero = () => {
 
       {/* Designer search: mobile bottom-sheet, desktop dropdown beside the
           Directory button. */}
-      <AnimatePresence>
-        {searchOpen && (
-          <motion.div
+      {searchOpen && (
+        <>
+          <div
             key="designers-search-backdrop"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
             onClick={() => setSearchOpen(false)}
-            className="fixed left-0 right-0 bottom-0 top-20 z-[70]"
+            className="fixed left-0 right-0 bottom-0 top-20 z-[70] animate-fade-in"
+            style={{ animationDuration: "200ms" }}
             aria-hidden="true"
           />
-        )}
-        {searchOpen && (
-          <motion.div
+          <div
             key="designers-search-sheet"
             id="designers-search-sheet"
             role="dialog"
             aria-modal="true"
             aria-label="Browse designers A to Z"
-            initial={
-              isDesktopViewport
-                ? { opacity: 0, y: -10, scale: 0.96 }
-                : { y: "100%", opacity: 0.6 }
-            }
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={
-              isDesktopViewport
-                ? { opacity: 0, y: -10, scale: 0.96 }
-                : { y: "100%", opacity: 0 }
-            }
-            transition={{ type: "tween", ease: [0.16, 1, 0.3, 1], duration: 0.25 }}
             className={cn(
               "fixed z-[71] flex flex-col bg-[#0a0a0a] text-white border border-white/10 shadow-2xl overflow-hidden",
+              // Enter animation — dropped exit for critical-path perf.
+              isDesktopViewport ? "animate-scale-in" : "animate-slide-in-right",
               // Mobile: full sheet anchored right below the fixed header so the
               // search field is immediately visible and the list has room to scroll.
               "inset-x-0 top-[var(--header-h)] bottom-0 rounded-none pb-[env(safe-area-inset-bottom)]",
@@ -1969,9 +1953,9 @@ const DesignersHoverHero = () => {
 
 
 
-          </motion.div>
-        )}
-      </AnimatePresence>
+          </div>
+        </>
+      )}
     </section>
   );
 };
