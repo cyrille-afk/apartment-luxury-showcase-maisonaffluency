@@ -209,6 +209,7 @@
     <script>
       // Apply FOUC guard + persistent-skeleton marker only on homepage.
       var __isHome = (window.location.pathname === '/' || window.location.pathname === '');
+      var __isDesigners = /^\/designers(\/|$|\?|#)/.test(window.location.pathname);
       if (__isHome) {
         document.documentElement.classList.add('home-fouc');
         // Homepage content is rendered by React; no inline hero skeleton is used.
@@ -218,9 +219,11 @@
         // crawlers that execute JS will still index the React-rendered content,
         // and the <noscript> block below remains for non-JS crawlers.
         var __css = document.createElement('style');
-        __css.textContent = '#seo-content{display:none !important;}#static-hero{display:none !important;}#static-hero-copy{display:none !important;}';
+        var __hideStaticDesigners = __isDesigners ? '' : '#static-designers-hero{display:none !important;}';
+        __css.textContent = '#seo-content{display:none !important;}#static-hero{display:none !important;}#static-hero-copy{display:none !important;}' + __hideStaticDesigners;
         document.head.appendChild(__css);
       }
+
       setTimeout(function(){ document.documentElement.classList.add('css-ready'); }, 3000);
     </script>
 
