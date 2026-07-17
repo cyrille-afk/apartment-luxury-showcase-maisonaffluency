@@ -458,7 +458,7 @@ function ParentSubGrid({ parentName, onClose, autoScroll }: { parentName: string
                 >
                   <div className="aspect-[4/5] relative bg-muted/10 overflow-hidden">
                     {d.image ? (
-                      <img src={d.image} alt={d.name} className="w-full h-full object-cover transition-transform duration-500 group-hover/sub:scale-110" loading="eager" decoding="async" />
+                      <img {...cldResponsiveImg(d.image, { widths: [160, 240, 320, 480], sizes: "(max-width: 640px) 33vw, (max-width: 1024px) 25vw, 14vw" })} alt={d.name} className="w-full h-full object-cover transition-transform duration-500 group-hover/sub:scale-110" loading="eager" decoding="async" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center bg-muted/5">
                         <span className="font-display text-xl text-muted-foreground/20">{d.name.charAt(0)}</span>
