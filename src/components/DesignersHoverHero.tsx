@@ -195,6 +195,28 @@ function useFeaturedDesigners() {
   });
 }
 
+// Fetches the first curator-pick image for every designer, keyed by designer id.
+function useAllFirstPickImages() {
+  return useQuery({
+    queryKey: ["designers-all-first-pick-images-v1"],
+    staleTime: 1000 * 60 * 30,
+    queryFn: async () => {
+      const { data, error } = await applyCuratorPickOrder(
+        supabase
+          .from("designer_curator_picks_public" as any)
+          .select("designer_id, image_url")
+      );
+      if (error) throw error;
+      const map = new Map<string, string>();
+      for (const row of (data || []) as any[]) {
+        if (!row?.designer_id || !row?.image_url) continue;
+        if (!map.has(row.designer_id)) map.set(row.designer_id, row.image_url as string);
+      }
+      return map;
+    },
+  });
+}
+
 // Split a name into ["First", "Last"] for the italic-on-last typographic move.
 function splitName(name: string): [string, string] {
   const parts = name.trim().split(/\s+/);
