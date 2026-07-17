@@ -1707,7 +1707,7 @@ const DesignersHoverHero = () => {
                           ))}
                         </div>
                       ) : (
-                        groupedResults.map(([letter, items]) => {
+                        groupedResults.map(([letter, items], letterIdx) => {
                           const isOpen = expandedLetters.has(letter);
                           return (
                             <div
@@ -1731,16 +1731,26 @@ const DesignersHoverHero = () => {
                                   if (willOpen) {
                                     // Preload the letter's card images immediately so the
                                     // browser starts fetching before React paints the grid.
+                                    // Also prefetch the previous/next letters' images at
+                                    // lower priority so navigating between letters feels
+                                    // instant.
                                     try {
-                                      for (const d of items as any[]) {
-                                        const raw = pickGridImage(d);
-                                        const u = gridImageTransform(raw, 600);
-                                        if (u) {
+                                      const preloadItems = (arr: any[], eager: boolean) => {
+                                        for (const d of arr) {
+                                          const raw = pickGridImage(d);
+                                          const u = gridImageTransform(raw, 600);
+                                          if (!u) continue;
                                           const img = new Image();
                                           img.decoding = "async";
+                                          if (!eager) (img as any).fetchPriority = "low";
                                           img.src = u;
                                         }
-                                      }
+                                      };
+                                      preloadItems(items as any[], true);
+                                      const prev = groupedResults[letterIdx - 1];
+                                      const next = groupedResults[letterIdx + 1];
+                                      if (prev) preloadItems(prev[1] as any[], false);
+                                      if (next) preloadItems(next[1] as any[], false);
                                     } catch {}
                                     requestAnimationFrame(() => {
                                       const scroller = searchScrollRef.current;
