@@ -4,7 +4,7 @@ import { categoryUrl } from "@/lib/categorySlugs";
 import { Helmet } from "react-helmet-async";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronUp } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useLayoutEffect } from "react";
 import Navigation from "@/components/Navigation";
 import DesignersHoverHero from "@/components/DesignersHoverHero";
 
@@ -111,7 +111,10 @@ function ScrollLockedDesigners({
   initialExpand?: string;
 }) {
   const hasDeepLink = Boolean(initialLetter || initialExpand);
-  const [isMobileOrPwa, setIsMobileOrPwa] = useState(false);
+  const [isMobileOrPwa, setIsMobileOrPwa] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return window.matchMedia("(max-width: 767px)").matches || isStandaloneDisplay();
+  });
   const locked = isMobileOrPwa && !hasDeepLink;
 
   // Directory only mounts after the landing handoff completes — a deep-link,
@@ -134,7 +137,7 @@ function ScrollLockedDesigners({
     };
   }, []);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!locked) return;
     const html = document.documentElement;
     const body = document.body;
@@ -155,18 +158,42 @@ function ScrollLockedDesigners({
     // Disable browser scroll restoration for this route while locked, and reset.
     const prevRestoration = (window.history as any).scrollRestoration;
     try { (window.history as any).scrollRestoration = "manual"; } catch { /* ignore */ }
-    window.scrollTo(0, 0);
-    // Run again on the next frames in case the browser re-applies scroll after paint.
-    const raf1 = requestAnimationFrame(() => window.scrollTo(0, 0));
-    const raf2 = requestAnimationFrame(() => requestAnimationFrame(() => window.scrollTo(0, 0)));
+    let userInteracted = false;
+    const stopReset = () => { userInteracted = true; };
+    const forceTop = () => {
+      if (userInteracted) return;
+      window.scrollTo({ top: 0, left: 0, behavior: "instant" as ScrollBehavior });
+      window.dispatchEvent(new Event("designersLandingResetScroll"));
+    };
+
+    forceTop();
+    let frameCount = 0;
+    let raf = 0;
+    const onFrame = () => {
+      forceTop();
+      frameCount += 1;
+      if (frameCount < 8) raf = requestAnimationFrame(onFrame);
+    };
+    raf = requestAnimationFrame(onFrame);
+    const timers = [80, 180, 360, 720].map((ms) => window.setTimeout(forceTop, ms));
+    window.addEventListener("pageshow", forceTop);
+    window.addEventListener("touchstart", stopReset, { once: true, passive: true });
+    window.addEventListener("pointerdown", stopReset, { once: true, passive: true });
+    window.addEventListener("wheel", stopReset, { once: true, passive: true });
+    window.addEventListener("keydown", stopReset, { once: true });
     return () => {
       html.style.overflow = prevHtml;
       body.style.overflow = prevBody;
       (body.style as any).overscrollBehavior = prevOverscroll;
       body.style.backgroundColor = prevBodyBg;
       try { (window.history as any).scrollRestoration = prevRestoration ?? "auto"; } catch { /* ignore */ }
-      cancelAnimationFrame(raf1);
-      cancelAnimationFrame(raf2);
+      cancelAnimationFrame(raf);
+      timers.forEach((timer) => window.clearTimeout(timer));
+      window.removeEventListener("pageshow", forceTop);
+      window.removeEventListener("touchstart", stopReset);
+      window.removeEventListener("pointerdown", stopReset);
+      window.removeEventListener("wheel", stopReset);
+      window.removeEventListener("keydown", stopReset);
     };
   }, [locked]);
 
