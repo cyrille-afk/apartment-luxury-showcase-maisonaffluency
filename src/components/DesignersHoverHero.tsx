@@ -1545,7 +1545,7 @@ const DesignersHoverHero = () => {
                   <div className="md:hidden">
                     <div className="flex flex-col pb-2">
                       {isSearching ? (
-                        <div className="grid grid-cols-2 gap-3 px-4 pt-2 pb-4">
+                        <div className="grid grid-cols-2 gap-2 pt-2 pb-4">
                           {groupedResults.flatMap(([, items]) => items).map((d: any) => (
                             <DesignerGridCard
                               key={d.slug}
