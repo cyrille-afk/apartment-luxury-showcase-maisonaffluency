@@ -113,3 +113,91 @@ export const presets = {
     placeholder: cloudinaryBlurPlaceholder(publicId),
   }),
 } as const;
+
+// ─── Runtime URL rewriter ─────────────────────────────────────────────
+// Rewrites ANY Cloudinary delivery URL (whether it already has a
+// transform segment or not) to inject width + quality + f_auto so the
+// browser never downloads a raw original. Non-Cloudinary URLs pass
+// through unchanged.
+
+const CLD_RE = /^(https?:\/\/res\.cloudinary\.com\/[^/]+\/image\/(?:upload|fetch))\/(.+)$/i;
+
+function isTransformSegment(seg: string): boolean {
+  // A transform segment is a comma-separated list of key_value tokens
+  // like `w_800,c_fill,q_auto:good,f_auto`. Version segments start
+  // with `v<digits>`, and public IDs generally don't contain `_`
+  // adjacent to a single-letter prefix followed by `_`.
+  if (!seg) return false;
+  if (/^v\d+$/.test(seg)) return false;
+  // Any comma-separated `x_y` pair is a transform.
+  return /(?:^|,)[a-z]{1,3}_[^,/]+/i.test(seg);
+}
+
+export interface ResponsiveOptions {
+  /** Target rendered width in CSS px (mobile). Default 640. */
+  width?: number;
+  /** Cloudinary quality. Default "auto:eco". */
+  quality?: CloudinaryTransform["quality"];
+  /** Crop mode when the source lacks one. Default undefined (no crop). */
+  crop?: CloudinaryTransform["crop"];
+}
+
+/**
+ * Return a Cloudinary URL rewritten with a mobile-friendly width and
+ * quality. If the URL already has a transform segment, `w_` and `q_`
+ * are replaced; otherwise a fresh transform segment is inserted right
+ * after `/upload/` or `/fetch/`.
+ */
+export function toResponsiveCloudinary(url: string, opts: ResponsiveOptions = {}): string {
+  if (!url) return url;
+  const m = url.match(CLD_RE);
+  if (!m) return url;
+  const [, base, rest] = m;
+  const width = opts.width ?? 640;
+  const quality = opts.quality ?? "auto:eco";
+  const parts = rest.split("/");
+  const first = parts[0] ?? "";
+  if (isTransformSegment(first)) {
+    // Replace or add w_ / q_ / f_ inside the existing transform, and
+    // drop any hardcoded h_ so overriding the width doesn't distort
+    // the aspect ratio when the source pinned both dimensions.
+    let tokens = first.split(",").filter(Boolean);
+    tokens = tokens.filter((t) => !t.startsWith("h_"));
+    const has = (k: string) => tokens.some((t) => t.startsWith(k + "_"));
+    const set = (k: string, v: string) => {
+      const idx = tokens.findIndex((t) => t.startsWith(k + "_"));
+      if (idx >= 0) tokens[idx] = `${k}_${v}`;
+      else tokens.push(`${k}_${v}`);
+    };
+    set("w", String(width));
+    set("q", String(quality));
+    if (!has("f")) tokens.push("f_auto");
+    parts[0] = tokens.join(",");
+    return `${base}/${parts.join("/")}`;
+  }
+  // No transform segment — inject one.
+  const injected = [`w_${width}`, `q_${quality}`, `f_auto`];
+  if (opts.crop) injected.splice(1, 0, `c_${opts.crop}`);
+  return `${base}/${injected.join(",")}/${rest}`;
+}
+
+/**
+ * Build responsive `<img>` props for any Cloudinary URL, safe for
+ * arbitrary DB-stored values. Falls back to the raw URL when the
+ * source isn't a Cloudinary URL.
+ */
+export function cldResponsiveImg(
+  url: string | undefined | null,
+  opts: { widths?: number[]; sizes?: string; quality?: CloudinaryTransform["quality"] } = {}
+): { src: string; srcSet?: string; sizes?: string } {
+  if (!url) return { src: "" };
+  if (!CLD_RE.test(url)) return { src: url };
+  const widths = opts.widths ?? [320, 480, 640, 960, 1280];
+  const quality = opts.quality ?? "auto:eco";
+  const src = toResponsiveCloudinary(url, { width: widths[Math.min(2, widths.length - 1)], quality });
+  const srcSet = widths
+    .map((w) => `${toResponsiveCloudinary(url, { width: w, quality })} ${w}w`)
+    .join(", ");
+  return { src, srcSet, sizes: opts.sizes };
+}
+
