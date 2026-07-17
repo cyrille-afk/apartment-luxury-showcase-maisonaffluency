@@ -1151,13 +1151,6 @@ const DesignersHoverHero = () => {
                       className="inline-flex items-center gap-1.5 text-[10px] md:text-[11px] uppercase tracking-[0.32em] font-body font-bold text-gold drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)] mb-1 md:mb-3"
                     >
                       {group.label}
-                      {isMobileOrPwa && (
-                        <ImageIcon
-                          aria-hidden="true"
-                          strokeWidth={1.5}
-                          className="inline-block h-[11px] w-[11px] text-gold/85 -translate-y-[0.5px] animate-pulse"
-                        />
-                      )}
                     </span>
                     <ul className="flex flex-col gap-1 text-left">
                       {group.designers.map((d, dIdx) => {
