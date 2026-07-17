@@ -154,7 +154,8 @@ export default defineConfig(({ mode }) => {
         workbox: {
           navigateFallback: "/index.html",
           navigateFallbackDenylist: [/^\/~oauth/, /^\/api\//, /^\/functions\//],
-          globPatterns: ["**/*.{js,css,html,svg,woff2}"],
+          globPatterns: ["index.html", "manifest.json", "version.json"],
+          globIgnores: ["**/assets/**"],
           runtimeCaching: [
             // HTML navigations — always try network first so new deploys reach users.
             {
