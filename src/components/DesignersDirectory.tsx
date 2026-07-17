@@ -25,6 +25,7 @@ import { CATEGORY_ORDER, SUBCATEGORY_MAP, normalizeCategory, normalizeSubcategor
 import { pickMatchesCategoryFilter } from "@/lib/pickCategoryFilter";
 import ProductCardDescriptionOverlay from "@/components/ui/ProductCardDescriptionOverlay";
 import { withOgCacheBust } from "@/lib/whatsapp-share";
+import { cldResponsiveImg } from "@/lib/cloudinary";
 
 import { GALLERY } from "@/constants/galleryIndex";
 import { scrollToSection } from "@/lib/scrollToSection";
