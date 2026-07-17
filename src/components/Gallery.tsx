@@ -920,18 +920,6 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
             )}
           </motion.div>
 
-          {/* Mobile: Interactive Gallery badge — outside section loop so it stays visible */}
-          <div className="md:hidden pt-6">
-            <div className="flex justify-start mb-4">
-              <span className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.12em] text-foreground font-body font-light">
-                <span className="relative flex items-center justify-center w-5 h-5 rounded-full bg-black/70 border border-primary/70">
-                  <span className="absolute inset-0 rounded-full border border-primary/30 animate-ping" style={{ animationDuration: "2.2s" }} />
-                  <Plus className="relative h-2.5 w-2.5 text-white" />
-                </span>
-                Interactive Gallery
-              </span>
-            </div>
-          </div>
 
           {(() => {
             const firstHotspotSectionIdx = galleryExperiences.findIndex(s => !s.items.some(i => i.description));
@@ -1046,53 +1034,13 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                         </div>
                       </div>
                     </div>
-                    {/* Mobile: title + subtitle centred with share */}
-                    <div className="md:hidden flex flex-col items-center text-center mb-2">
-                      <div className="flex items-center gap-2">
-                        <p className="text-xl font-serif text-foreground" aria-hidden="true">{section.experience}</p>
-                        <button
-                          onClick={() => {
-                            const firstItem = galleryExperiences[originalSectionIndex].items[0];
-                            const titleSlug = slugify(firstItem?.title || '');
-                            const url = `https://www.maisonaffluency.com/gallery/${titleSlug}.html`;
-                            const text = `${section.experience} — Maison Affluency`;
-                            window.open(`https://wa.me/?text=${encodeURIComponent(`${text}\n${url}`)}`, '_blank');
-                          }}
-                          className="p-1.5 text-foreground hover:text-primary transition-colors"
-                          aria-label={`Share ${section.experience}`}
-                        >
-                          <Share2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                      {section.subtitle && (
-                        <p className="text-sm text-muted-foreground font-body italic mt-0.5">{section.subtitle}</p>
-                      )}
-                    </div>
+                    {/* Mobile: title/subtitle removed — accordion header already shows title */}
+
                   </>
                 ) : (
                   <>
-                    {/* Mobile: title + subtitle centred with share */}
-                    <div className="md:hidden flex flex-col items-center text-center mb-2">
-                      <div className="flex items-center gap-2">
-                        <p className="text-xl font-serif text-foreground" aria-hidden="true">{section.experience}</p>
-                        <button
-                          onClick={() => {
-                            const firstItem = galleryExperiences[originalSectionIndex].items[0];
-                            const titleSlug = slugify(firstItem?.title || '');
-                            const url = `https://www.maisonaffluency.com/gallery/${titleSlug}.html`;
-                            const text = `${section.experience} — Maison Affluency`;
-                            window.open(`https://wa.me/?text=${encodeURIComponent(`${text}\n${url}`)}`, '_blank');
-                          }}
-                          className="p-1.5 text-foreground hover:text-primary transition-colors"
-                          aria-label={`Share ${section.experience}`}
-                        >
-                          <Share2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                      {section.subtitle && (
-                        <p className="text-sm text-muted-foreground font-body italic mt-0.5">{section.subtitle}</p>
-                      )}
-                    </div>
+                    {/* Mobile: title/subtitle removed — accordion header already shows title */}
+
                     {/* Desktop: centred title + share, centred subtitle */}
                     <div className="hidden md:flex flex-col items-center text-center mb-3">
                       <div className="flex items-center gap-3">
