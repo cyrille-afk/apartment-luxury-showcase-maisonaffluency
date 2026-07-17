@@ -1222,10 +1222,14 @@ const DesignersHoverHero = () => {
             : d.hero_image_url || d.image_url;
           if (!src) return null;
           const isActive = d.slug === activeSlug;
+          const heroImgProps = cldResponsiveImg(src, {
+            widths: isMobileOrPwa ? [480, 720, 960, 1280] : [960, 1280, 1600, 1920],
+            sizes: "100vw",
+          });
           return (
             <img
               key={`${d.slug}-${isMobileOrPwa ? "cur" : "hero"}`}
-              src={src}
+              {...heroImgProps}
               alt=""
               aria-hidden="true"
               loading="lazy"
