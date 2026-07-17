@@ -1,6 +1,8 @@
 import { useEffect, useRef } from "react";
 import { toast } from "sonner";
 
+const FABRICS_DRAFT_KEY = "trade-admin-fabrics:draft-v1";
+
 const DO_NOT_INTERRUPT = [
   "/trade/axonometric",
   "/trade/visualiser",
@@ -16,6 +18,29 @@ const DO_NOT_INTERRUPT = [
 
 const isProtectedPath = (p = typeof window !== "undefined" ? window.location.pathname : "") =>
   DO_NOT_INTERRUPT.some((r) => p === r || p.startsWith(r + "/"));
+
+function hasFabricWorkInProgress(): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    const raw = window.sessionStorage.getItem(FABRICS_DRAFT_KEY) || window.localStorage.getItem(FABRICS_DRAFT_KEY);
+    if (!raw) return false;
+    const draft = JSON.parse(raw) as {
+      adding?: boolean;
+      editingId?: string | null;
+      linkingId?: string | null;
+      editDraft?: Record<string, unknown>;
+      newRow?: Record<string, unknown>;
+    };
+    const hasText = (obj?: Record<string, unknown>) =>
+      !!obj && ["name", "supplier", "description", "image_url", "tier", "price_per_lm_cents"].some((key) => {
+        const value = obj[key];
+        return typeof value === "string" ? value.trim().length > 0 : value !== null && value !== undefined;
+      });
+    return !!draft.adding || !!draft.editingId || !!draft.linkingId || hasText(draft.editDraft) || hasText(draft.newRow);
+  } catch {
+    return false;
+  }
+}
 
 function shouldSkipUpdateUi(): boolean {
   if (import.meta.env.DEV) return true;
@@ -44,6 +69,7 @@ function shouldSkipUpdateUi(): boolean {
 }
 
 function hardReload() {
+  if (hasFabricWorkInProgress()) return;
   if (isProtectedPath()) return;
   try {
     window.location.replace(
@@ -55,13 +81,11 @@ function hardReload() {
 }
 
 /**
- * Silent auto-update on next navigation, with a discreet toast fallback
- * for users who stay on the same page.
+ * Discreet build-update notice.
  *
  * - Listens for `app:build-update-available` from buildVersionWatcher.
- * - Reloads automatically on the next route change (pushState/replaceState/popstate)
- *   so the user never sees an "update available" prompt mid-flow.
- * - Shows a single sonner toast with a "Refresh now" action as a fallback.
+ * - Never reloads automatically on route changes; editors must remain intact.
+ * - Shows a single sonner toast with a manual "Refresh now" action only when safe.
  */
 export default function BuildUpdateBanner() {
   const armed = useRef(false);
@@ -69,68 +93,17 @@ export default function BuildUpdateBanner() {
   useEffect(() => {
     if (shouldSkipUpdateUi()) return;
 
-    // Patch history.pushState once so we can detect real SPA navigations.
-    // We deliberately skip replaceState (used for in-page query-param updates
-    // like filters/selections) and only treat path changes as navigations —
-    // otherwise pages that sync state into the URL would reload mid-interaction.
-    const w = window as unknown as { __mafBuildNavPatched?: boolean };
-    if (!w.__mafBuildNavPatched) {
-      w.__mafBuildNavPatched = true;
-      let lastPath = window.location.pathname;
-      const fireIfPathChanged = () => {
-        const p = window.location.pathname;
-        if (p !== lastPath) {
-          lastPath = p;
-          window.dispatchEvent(new Event("app:spa-navigation"));
-        }
-      };
-      const origPush = history.pushState;
-      history.pushState = function (...args) {
-        const r = origPush.apply(this, args as Parameters<typeof origPush>);
-        fireIfPathChanged();
-        return r;
-      };
-      window.addEventListener("popstate", fireIfPathChanged);
-    }
-
-    const hasUnsavedTyping = () => {
-      try {
-        const ae = document.activeElement as HTMLElement | null;
-        if (ae) {
-          const tag = ae.tagName;
-          if (tag === "TEXTAREA" || tag === "INPUT" || ae.isContentEditable) return true;
-        }
-        const fields = document.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>("textarea, input");
-        for (const f of Array.from(fields)) {
-          if ((f as HTMLInputElement).value && (f as HTMLInputElement).value.trim().length > 0) return true;
-        }
-      } catch {}
-      return false;
-    };
-
-    const onNav = () => {
-      if (!armed.current) return;
-      if (hasUnsavedTyping()) return;
-      // Skip reload if the user is still inside a long-running creative tool
-      // (axonometric studio, visualiser, etc). We'll catch the next navigation.
-      if (isProtectedPath(window.location.pathname)) return;
-      // Reload on next macrotask so the navigation commits first.
-      setTimeout(hardReload, 0);
-    };
-
     const onAvailable = () => {
       if (armed.current) return;
       armed.current = true;
 
-      window.addEventListener("app:spa-navigation", onNav);
-
       // In creative tools, never surface a refresh action mid-work. The update
-      // remains armed and will load only after the user leaves the protected tool.
-      if (isProtectedPath()) return;
+      // remains pending until the user hard-refreshes manually when ready.
+      if (isProtectedPath() || hasFabricWorkInProgress()) return;
 
       // Discreet toast fallback (no centered black pill).
       toast("A new version is available", {
-        description: "It will load on your next page change.",
+        description: "Refresh when you're ready.",
         duration: 12_000,
         action: {
           label: "Refresh now",
@@ -142,7 +115,6 @@ export default function BuildUpdateBanner() {
     window.addEventListener("app:build-update-available", onAvailable);
     return () => {
       window.removeEventListener("app:build-update-available", onAvailable);
-      window.removeEventListener("app:spa-navigation", onNav);
     };
   }, []);
 
