@@ -37,35 +37,77 @@ interface FeaturedDesigner {
   first_pick_image_url: string | null;
 }
 
+const isCloudinaryUpload = (src: string | null | undefined) =>
+  !!src && src.includes("res.cloudinary.com") && src.includes("/image/upload/");
+
 /**
- * Small square thumbnail for the mobile "Find A Designer" list rows.
- * Applies a lightweight Cloudinary transform when possible so we don't
- * download hero-sized assets for a 40px slot.
+ * Rectangular image transform for the mobile A–Z grid cards.
+ * Serves a portrait-cropped, high-quality image that fills a 2-column card.
  */
-function thumbTransform(src: string | null | undefined): string | undefined {
+function gridImageTransform(src: string | null | undefined): string | undefined {
   if (!src) return undefined;
-  if (!src.includes("res.cloudinary.com") || !src.includes("/image/upload/")) return src;
-  return src.replace("/image/upload/", "/image/upload/w_120,h_120,c_fill,g_auto,q_auto:good,f_auto/");
+  if (!isCloudinaryUpload(src)) return src;
+  return src.replace(
+    "/image/upload/",
+    "/image/upload/w_600,h_800,c_fill,g_auto,q_auto:good,f_auto/"
+  );
 }
 
-function DesignerRowThumb({ src, alt }: { src: string | null | undefined; alt: string }) {
-  const url = thumbTransform(src);
+/**
+ * Choose the most reliable image for the mobile grid. Prefer the hero/work
+ * photo when it is hosted on Cloudinary; otherwise fall back to a Cloudinary
+ * image_url so we avoid broken external hotlinks on large cards.
+ */
+function pickGridImage(d: { hero_image_url: string | null; image_url: string | null }): string | null {
+  if (isCloudinaryUpload(d.hero_image_url)) return d.hero_image_url;
+  if (isCloudinaryUpload(d.image_url)) return d.image_url;
+  return d.hero_image_url || d.image_url;
+}
+
+/**
+ * Mobile grid card: large rectangular photo of the designer's work with the
+ * name overlaid at the bottom. Replaces the small circular-avatar list rows
+ * for a more visual, touch-friendly A–Z browse.
+ */
+function DesignerGridCard({
+  designer,
+  onNavigate,
+}: {
+  designer: { slug: string; name: string; hero_image_url: string | null; image_url: string | null };
+  onNavigate?: () => void;
+}) {
+  const url = gridImageTransform(pickGridImage(designer));
+  const displayName = displayDesignerName(designer.name);
   return (
-    <span className="relative flex-shrink-0 h-11 w-9 rounded-md overflow-hidden bg-white/[0.06] ring-1 ring-white/10">
+    <Link
+      to={`/designers/${designer.slug}`}
+      state={{ fromDesignersHero: true }}
+      onClick={onNavigate}
+      className="group relative block w-full aspect-[4/5] rounded-xl overflow-hidden bg-white/[0.06] ring-1 ring-white/10 focus:outline-none focus:ring-2 focus:ring-gold/60"
+      aria-label={`View ${displayName}`}
+    >
       {url ? (
         <img
           src={url}
           alt=""
           loading="lazy"
           decoding="async"
-          className="absolute inset-0 h-full w-full object-cover"
+          className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
         />
       ) : (
         <span className="absolute inset-0 flex items-center justify-center text-white/30">
-          <ImageIcon className="h-4 w-4" aria-hidden />
+          <ImageIcon className="h-8 w-8" aria-hidden />
         </span>
       )}
-    </span>
+      {/* Bottom gradient for text legibility */}
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/80 via-black/35 to-transparent" />
+      {/* Name overlay */}
+      <div className="absolute inset-x-0 bottom-0 p-3.5">
+        <span className="block font-serif text-sm leading-tight text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)]">
+          {displayName}
+        </span>
+      </div>
+    </Link>
   );
 }
 
@@ -1493,32 +1535,27 @@ const DesignersHoverHero = () => {
                 </p>
               ) : (
                 <>
-                  {/* Mobile: grouped designer list with sticky letter headers */}
+                  {/* Mobile: grouped designer grid with sticky letter headers */}
                   <div className="md:hidden">
-                    <ul className="flex flex-col pb-2">
+                    <div className="flex flex-col pb-2">
                       {isSearching ? (
-                        groupedResults.flatMap(([, items]) => items).map((d: any) => (
-                          <li key={d.slug}>
-                            <Link
-                              to={`/designers/${d.slug}`}
-                              state={{ fromDesignersHero: true }}
-                              onClick={() => setSearchOpen(false)}
-                              className="flex items-center gap-3 px-5 py-2 font-body text-[15px] text-white/85 hover:text-white hover:bg-white/[0.04] transition-colors"
-                            >
-                              <DesignerRowThumb src={d.image_url || d.hero_image_url} alt={d.name} />
-
-                              <span className="truncate">{displayDesignerName(d.name)}</span>
-                            </Link>
-                          </li>
-                        ))
+                        <div className="grid grid-cols-2 gap-3 px-4 pt-2 pb-4">
+                          {groupedResults.flatMap(([, items]) => items).map((d: any) => (
+                            <DesignerGridCard
+                              key={d.slug}
+                              designer={d}
+                              onNavigate={() => setSearchOpen(false)}
+                            />
+                          ))}
+                        </div>
                       ) : (
                         groupedResults.map(([letter, items]) => {
                           const isOpen = expandedLetters.has(letter);
                           return (
-                            <li
+                            <div
                               key={letter}
                               data-designer-letter={letter}
-                              className="flex flex-col border-b border-white/[0.06] last:border-b-0"
+                              className="border-b border-white/[0.06] last:border-b-0"
                             >
                               <button
                                 type="button"
@@ -1550,27 +1587,21 @@ const DesignersHoverHero = () => {
                                 <span className="font-body text-xs text-white/50">{items.length}</span>
                               </button>
                               {isOpen && (
-                                <ul className="flex flex-col pb-2">
+                                <div className="grid grid-cols-2 gap-3 px-4 pt-1 pb-4">
                                   {items.map((d: any) => (
-                                    <li key={d.slug}>
-                                      <Link
-                                        to={`/designers/${d.slug}`}
-                                        state={{ fromDesignersHero: true }}
-                                        onClick={() => setSearchOpen(false)}
-                                        className="flex items-center gap-3 px-5 py-2 font-body text-[15px] text-white/85 hover:text-white hover:bg-white/[0.04] transition-colors"
-                                      >
-                                        <DesignerRowThumb src={d.image_url || d.hero_image_url} alt={d.name} />
-                                        <span className="truncate">{displayDesignerName(d.name)}</span>
-                                      </Link>
-                                    </li>
+                                    <DesignerGridCard
+                                      key={d.slug}
+                                      designer={d}
+                                      onNavigate={() => setSearchOpen(false)}
+                                    />
                                   ))}
-                                </ul>
+                                </div>
                               )}
-                            </li>
+                            </div>
                           );
                         })
                       )}
-                    </ul>
+                    </div>
                   </div>
 
                   {/* Desktop: A–Z accordion with counts, expandable per letter */}
