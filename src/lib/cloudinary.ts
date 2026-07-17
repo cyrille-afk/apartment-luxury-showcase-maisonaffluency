@@ -158,8 +158,11 @@ export function toResponsiveCloudinary(url: string, opts: ResponsiveOptions = {}
   const parts = rest.split("/");
   const first = parts[0] ?? "";
   if (isTransformSegment(first)) {
-    // Replace or add w_ / q_ / f_ inside the existing transform.
-    const tokens = first.split(",").filter(Boolean);
+    // Replace or add w_ / q_ / f_ inside the existing transform, and
+    // drop any hardcoded h_ so overriding the width doesn't distort
+    // the aspect ratio when the source pinned both dimensions.
+    let tokens = first.split(",").filter(Boolean);
+    tokens = tokens.filter((t) => !t.startsWith("h_"));
     const has = (k: string) => tokens.some((t) => t.startsWith(k + "_"));
     const set = (k: string, v: string) => {
       const idx = tokens.findIndex((t) => t.startsWith(k + "_"));
