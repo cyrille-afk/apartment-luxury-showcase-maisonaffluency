@@ -1041,8 +1041,14 @@ const DesignersHoverHero = () => {
       {/* Cross-fading background images */}
       <div className="absolute inset-0 z-0">
         {items.map((d) => {
+          // Per-designer mobile/PWA background overrides. Keeps desktop hero art
+          // intact while giving small-screen framing a hand-picked image.
+          const MOBILE_BG_OVERRIDES: Record<string, string> = {
+            "jean-michel-frank":
+              "https://res.cloudinary.com/dif1oamtj/image/upload/v1777428180/JMF_1935_Round_Table__02_Portrait_BD_1_aozicg.jpg",
+          };
           const src = isMobileOrPwa
-            ? d.first_pick_image_url || d.hero_image_url || d.image_url
+            ? MOBILE_BG_OVERRIDES[d.slug] || d.first_pick_image_url || d.hero_image_url || d.image_url
             : d.hero_image_url || d.image_url;
           if (!src) return null;
           const isActive = d.slug === activeSlug;
