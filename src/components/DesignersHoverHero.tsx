@@ -1953,9 +1953,9 @@ const DesignersHoverHero = () => {
 
 
 
-          </motion.div>
-        )}
-      </AnimatePresence>
+          </div>
+        </>
+      )}
     </section>
   );
 };
