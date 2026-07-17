@@ -102,6 +102,10 @@ const FEATURED_GROUPS = [
   },
 ];
 
+const DISPLAY_NAME_OVERRIDES: Record<string, string> = {
+  ozone: "Michel Boyer - Ozone",
+};
+
 const ALL_FEATURED_SLUGS = FEATURED_GROUPS.flatMap((g) => g.slugs);
 
 function useFeaturedDesigners() {
@@ -260,7 +264,12 @@ const DesignersHoverHero = () => {
     return FEATURED_GROUPS.map((g) => ({
       ...g,
       designers: g.slugs
-        .map((slug) => bySlug.get(slug))
+        .map((slug) => {
+          const d = bySlug.get(slug);
+          if (!d) return undefined;
+          const override = DISPLAY_NAME_OVERRIDES[slug];
+          return override ? { ...d, name: override } : d;
+        })
         .filter((d): d is FeaturedDesigner => Boolean(d))
         .sort((a, b) =>
           a.name.localeCompare(b.name, "en", { sensitivity: "base" })
