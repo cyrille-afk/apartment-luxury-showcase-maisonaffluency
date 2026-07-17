@@ -210,12 +210,18 @@ function ScrollLockedDesigners({
             
           </div>
           {!isMobileOrPwa && !locked && directoryReady && (
-            <DesignersDirectory mode="designers" initialLetter={initialLetter} initialExpand={initialExpand} showHeader={false} showAlphabetBar={false} />
+            <Suspense fallback={<div className="min-h-[40vh]" aria-hidden="true" />}>
+              <DesignersDirectory mode="designers" initialLetter={initialLetter} initialExpand={initialExpand} showHeader={false} showAlphabetBar={false} />
+            </Suspense>
           )}
         </div>
       </div>
 
-      {!isMobileOrPwa && <Footer />}
+      {!isMobileOrPwa && (
+        <Suspense fallback={null}>
+          <Footer />
+        </Suspense>
+      )}
       {!isMobileOrPwa && <BackToTopButton />}
     </div>
   );
