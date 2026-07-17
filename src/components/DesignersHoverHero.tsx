@@ -1534,7 +1534,7 @@ const DesignersHoverHero = () => {
             }
           >
             <div className="mx-auto mt-1.5 h-1 w-9 rounded-full bg-white/25 shrink-0" aria-hidden="true" />
-            <div className="flex items-center gap-2.5 px-4 pt-2 pb-2 border-b border-white/10 shrink-0">
+            <div className="flex items-center gap-2.5 px-4 pt-2 pb-3 border-b border-white/10 shrink-0 mb-2">
               <Search className="h-4 w-4 text-white/60 shrink-0" aria-hidden="true" />
               <input
                 ref={searchInputRef}
