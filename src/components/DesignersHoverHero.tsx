@@ -1057,8 +1057,9 @@ const DesignersHoverHero = () => {
               className={cn(
                 "absolute inset-0 w-full h-full object-cover transition-opacity ease-out",
                 // Mobile browser only: shift image content upward so featured
-                // pieces sit higher in the visible frame (matches PWA framing).
-                !isStandalone && "object-top md:object-center",
+                // pieces (e.g. the Alexander Lamont cabinet) sit higher in the
+                // visible frame, while PWA and desktop framing stay unchanged.
+                !isStandalone && "object-[center_70%] md:object-center",
                 isActive ? "opacity-100" : "opacity-0"
               )}
               style={{ transitionDuration: `${IMAGE_TRANSITION_MS}ms` }}
