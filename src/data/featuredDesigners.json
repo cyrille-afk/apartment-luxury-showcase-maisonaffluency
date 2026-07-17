@@ -1,0 +1,182 @@
+[
+  {
+    "id": "a794e420-dc7e-485c-8436-d3413196d8b9",
+    "slug": "victoria-magniant",
+    "name": "Victoria Magniant",
+    "founder": null,
+    "hero_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1782272896/Screen_Shot_2026-06-24_at_11.47.36_AM_uyr1oi.png",
+    "image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1782275778/Screen_Shot_2026-06-24_at_12.35.44_PM_yowbue.png",
+    "first_pick_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772688897/Screen_Shot_2026-03-05_at_1.33.31_PM_srdpp4.png"
+  },
+  {
+    "id": "86483e10-0001-4000-8000-000000000001",
+    "slug": "leo-aerts-alinea",
+    "name": "Alinea Design Objects",
+    "founder": null,
+    "hero_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1782089969/Side_tables_AngeloM_Workshop_1_pery0y.jpg",
+    "image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/w_800,q_auto,f_auto/leo-aerts-alinea_f9oogs",
+    "first_pick_image_url": "https://www.alineadesignobjects.com/wp-content/uploads/2010/11/Alinea-Design-Objects_Angelo-M-design-table_Twin-armchair-2-822x554.jpg"
+  },
+  {
+    "id": "1623338d-5883-48c4-93a9-5f13dcb7a54b",
+    "slug": "pierre-chareau",
+    "name": "Pierre Chareau",
+    "founder": "Ecart",
+    "hero_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1781105509/35509056135-9d2f8a9369-o-1532681019_yiqjws.avif",
+    "image_url": "https://res.cloudinary.com/dif1oamtj/image/fetch/w_800,q_auto,f_auto/https://ecart.paris/cdn/shop/files/Ecart-Pierre_Chareau.jpg",
+    "first_pick_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1777527907/Pierre_Chareau_Pierre_Chareau__1930__Table_Eventail__03_A4__1_df1hoe.jpg"
+  },
+  {
+    "id": "c36132de-1314-4013-9fe6-c3dd9a92ac4d",
+    "slug": "emmanuel-levet-stenne",
+    "name": "Emmanuel Levet Stenne",
+    "founder": null,
+    "hero_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1781526786/473105142_904836898402412_800418100092485523_n_mk7ghp.jpg",
+    "image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/w_800,q_auto,c_fill,f_auto/emanuelle-levet-stenne_kuwbex",
+    "first_pick_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/Screen_Shot_2026-03-12_at_8.35.20_PM_ryh6fo.png"
+  },
+  {
+    "id": "334658d1-59cb-47e9-ac6c-a5e6dc2bab8d",
+    "slug": "ozone",
+    "name": "Ozone",
+    "founder": "Ozone",
+    "hero_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1784046893/Ozone_MonsieurBleu_Galerie_2_T-HERO_qfilj0.webp",
+    "image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/w_800,q_auto,c_fill,f_auto/ozone-light-bg_v2zneb",
+    "first_pick_image_url": null
+  },
+  {
+    "id": "e454bc02-a1e0-4e2a-93bc-4ba9fe8df00f",
+    "slug": "christopher-boots",
+    "name": "Christopher Boots",
+    "founder": null,
+    "hero_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1774868373/PHOTO-2023-04-10-19-35-04_fbgrj3.jpg",
+    "image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1774867825/Screen_Shot_2026-03-30_at_6.50.02_PM_ilziod.png",
+    "first_pick_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1780831504/SugarBomb-2_fn0q2n.jpg"
+  },
+  {
+    "id": "c1b52294-48c9-4773-aa62-cb07d4120fff",
+    "slug": "tristan-auer",
+    "name": "Tristan Auer",
+    "founder": "Pouenat",
+    "hero_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1782832726/Screen_Shot_2026-06-30_at_11.16.56_PM_a7cjar.png",
+    "image_url": "https://www.veronese.fr/wp-content/uploads/2016/04/tristan-auer-portrait-veronese.jpg",
+    "first_pick_image_url": "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/curators-picks/tristan-auer-ysa-wall-light-h.jpg"
+  },
+  {
+    "id": "bb08e592-73ca-4abc-9c25-cd60dd7458dc",
+    "slug": "felix-agostini",
+    "name": "Felix Agostini",
+    "founder": "Maison Charles",
+    "hero_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1781586995/image-047_x662rl.jpg",
+    "image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/w_800,q_auto,c_fill,f_auto/felix-agostini_oe5jxg",
+    "first_pick_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1780758735/A-033-02-cover_ovz8na.jpg"
+  },
+  {
+    "id": "de46d314-2935-4aca-9a82-b014971614c8",
+    "slug": "alexander-lamont",
+    "name": "Alexander Lamont",
+    "founder": null,
+    "hero_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,q_auto:good,f_auto/v1772160681/Casque-Bar-Cabinet_10_alexander-lamont_1_ydnjp2.jpg",
+    "image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/w_800,q_auto,c_fill,f_auto/alexander-lamont_t5j1nw",
+    "first_pick_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1780453180/Casque-Bar-Cabinet_1500x1500_v9cq04.jpg"
+  },
+  {
+    "id": "7a13d2f8-07a2-40cc-82ec-4292ceb633b5",
+    "slug": "kerstens",
+    "name": "Kerstens",
+    "founder": null,
+    "hero_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1780135078/Screenshot_2026-05-30_at_5.57.26_PM_kayx9j.png",
+    "image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/w_800,q_auto,c_fill,g_face,f_auto/kerstens_j3vvky",
+    "first_pick_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1780484028/kerstens_mono_2702-2702_b8dsj1.jpg"
+  },
+  {
+    "id": "09e3e002-6c7e-4eab-aba1-e3d1b3c0270c",
+    "slug": "hamrei",
+    "name": "Hamrei",
+    "founder": null,
+    "hero_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1781694148/HAMREI_Studio_Showroom_swb9ic.webp",
+    "image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/w_800,q_auto,c_fill,f_auto/hamrei",
+    "first_pick_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1777776530/Screen_Shot_2026-05-03_at_10.42.55_AM_flskhj.png"
+  },
+  {
+    "id": "c9d289d6-5b47-4305-94b1-799f9b3f1f9a",
+    "slug": "lazzarini-pickering",
+    "name": "Lazzarini & Pickering",
+    "founder": "Marta Sala Éditions",
+    "hero_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1781929908/as_is_wgubge.jpg",
+    "image_url": "https://lazzarinipickering.com/wp-content/uploads/2024/11/02-Lazzarini-Pickering-Architetti-2-683x1024.jpg",
+    "first_pick_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1776464746/Screen_Shot_2026-04-18_at_6.24.46_AM_dm9lgc.png"
+  },
+  {
+    "id": "e91f75d3-0001-4000-8000-000000000001",
+    "slug": "atelier-demichelis",
+    "name": "Atelier Demichelis",
+    "founder": null,
+    "hero_image_url": "https://static-assets.artlogic.net/w_1200,c_limit,f_auto,fl_lossy,q_auto/ws-studiotashtego/usr/images/artists/group_images_override/items/10/10541d24e04242f080b6445044490b40/hd-reportage-atelier-demichelis-_-emmanuelle-braun-photographe-17.jpg",
+    "image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/w_800,q_auto,f_auto/Screen_Shot_2025-12-11_at_11.44.20_PM_bj90pt",
+    "first_pick_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1780565552/Lampe-Babel-bois-de-chene-bronze-champagne-Atelier-Demichelis-Emmanuelle-Braun01_cvxtd5.webp"
+  },
+  {
+    "id": "e49eb791-5564-435d-bd2c-662f0b5d4029",
+    "slug": "thierry-lemaire",
+    "name": "Thierry Lemaire",
+    "founder": null,
+    "hero_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1775599941/Screen_Shot_2026-04-08_at_6.11.59_AM_o6nbyo.png",
+    "image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/w_800,q_auto,c_fill,f_auto/thierry-lemaire_heyrtj",
+    "first_pick_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1779968319/PEO-1_uw60hu.png"
+  },
+  {
+    "id": "2de0def0-92ce-44a6-bb2e-f91d0eb76285",
+    "slug": "emmanuel-babled",
+    "name": "Emmanuel Babled",
+    "founder": null,
+    "hero_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1781151474/about-babled-office3_ojhqu5.webp",
+    "image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1780311518/Screenshot_2026-06-01_at_6.11.35_PM_yiybde.png",
+    "first_pick_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1781167377/Pyros_IV_fqnjvx.jpg"
+  },
+  {
+    "id": "f519e68e-c87f-41e7-baf1-7d5f51aadac6",
+    "slug": "delcourt-collection",
+    "name": "Delcourt Collection",
+    "founder": null,
+    "hero_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1776345884/SYD-Sofa-SYD-cover-cropped_jtfx9r.jpg",
+    "image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,c_fill,q_auto:good,f_auto/delcourt-bg_whop7p",
+    "first_pick_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1775836403/ORS_Bookshelf-2_i39enz.jpg"
+  },
+  {
+    "id": "c86a4c71-6f61-4de8-81ea-cc910e8978f0",
+    "slug": "kiko-lopez",
+    "name": "Kiko Lopez",
+    "founder": null,
+    "hero_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1781872797/Hero_dxlcbb.jpg",
+    "image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/w_800,q_auto,c_fill,f_auto/Screen_Shot_2025-12-12_at_1.08.35_AM_uzbbxd",
+    "first_pick_image_url": "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/curators-picks/kiko-lopez-mirror.jpg"
+  },
+  {
+    "id": "e637fe48-0001-4000-8000-000000000001",
+    "slug": "apparatus-studio",
+    "name": "Apparatus Studio",
+    "founder": null,
+    "hero_image_url": "https://hips.hearstapps.com/hmg-prod/images/apparatus-studio-ed-skj-03-1650415302.jpg",
+    "image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/w_800,q_auto,f_auto/gabriel-hendifar-apparatus-studio",
+    "first_pick_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1779698535/Lantern_Cover_tikr2a.png"
+  },
+  {
+    "id": "f44b5dca-5009-4b87-9b3d-7a1b7eb50604",
+    "slug": "jean-michel-frank",
+    "name": "Jean-Michel Frank",
+    "founder": "Ecart",
+    "hero_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1781089566/design-focus-jean-michel-frank-and-his-creative-journey-3303-6_jmni5m.webp",
+    "image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/w_1000,h_1200,q_auto,c_fit,f_auto/jean-michel-frank-new_toifde",
+    "first_pick_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1777428154/JMF_1935_Round_Table__01_Portrait_BD_1_lzdylf.jpg"
+  },
+  {
+    "id": "3efb1180-115f-4188-a3b1-95d36cc289f9",
+    "slug": "pierre-bonnefille",
+    "name": "Pierre Bonnefille",
+    "founder": null,
+    "hero_image_url": "https://s30964.pcdn.co/introspective-magazine/wp-content/uploads/2019/12/hero-2-1024x512.jpg",
+    "image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1775045300/Screen_Shot_2026-04-01_at_8.07.17_PM_mnsidx.png",
+    "first_pick_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1777550230/Screen_Shot_2026-04-30_at_7.41.54_PM_rbtppn.png"
+  }
+]
