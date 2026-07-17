@@ -1712,6 +1712,19 @@ const DesignersHoverHero = () => {
                                     return new Set([letter]);
                                   });
                                   if (willOpen) {
+                                    // Preload the letter's card images immediately so the
+                                    // browser starts fetching before React paints the grid.
+                                    try {
+                                      for (const d of items as any[]) {
+                                        const raw = pickGridImage(d);
+                                        const u = gridImageTransform(raw, 600);
+                                        if (u) {
+                                          const img = new Image();
+                                          img.decoding = "async";
+                                          img.src = u;
+                                        }
+                                      }
+                                    } catch {}
                                     requestAnimationFrame(() => {
                                       const scroller = searchScrollRef.current;
                                       const row = scroller?.querySelector<HTMLElement>(
