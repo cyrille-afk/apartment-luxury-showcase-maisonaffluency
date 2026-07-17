@@ -85,6 +85,23 @@ function gridImageSrcSet(src: string | null | undefined): string | undefined {
 }
 
 /**
+ * Low-quality image placeholder (LQIP): a 20px-wide blurred variant used as a
+ * background so users see a soft color hint instead of a black card while the
+ * full image is streaming in.
+ */
+function gridImageLqip(src: string | null | undefined): string | undefined {
+  if (!src) return undefined;
+  if (isCloudinaryUpload(src)) {
+    return src.replace(
+      "/image/upload/",
+      "/image/upload/w_24,h_30,c_fill,g_auto,q_auto:low,e_blur:400,f_auto/"
+    );
+  }
+  if (isSupabaseObject(src)) return supabaseTransform(src, 24, 30);
+  return undefined;
+}
+
+/**
  * Choose the most reliable image for the mobile grid. Prefer the hero/work
  * photo when it is hosted on Cloudinary; otherwise fall back to a Cloudinary
  * image_url so we avoid broken external hotlinks on large cards.
