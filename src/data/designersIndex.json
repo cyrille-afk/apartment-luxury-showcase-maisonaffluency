@@ -84,6 +84,10 @@
     "name": "Stéphane CG"
   },
   {
+    "slug": "francois-champsaur",
+    "name": "François Champsaur"
+  },
+  {
     "slug": "la-chance",
     "name": "La Chance"
   },
@@ -224,6 +228,10 @@
     "name": "Alexander Lamont"
   },
   {
+    "slug": "damien-langlois-meurinne",
+    "name": "Damien Langlois-Meurinne"
+  },
+  {
     "slug": "paul-laszlo",
     "name": "Paul László"
   },
@@ -234,6 +242,10 @@
   {
     "slug": "garnier-linker",
     "name": "Garnier & Linker"
+  },
+  {
+    "slug": "oa-london",
+    "name": "OA London"
   },
   {
     "slug": "kiko-lopez",
@@ -300,6 +312,10 @@
     "name": "Ozone"
   },
   {
+    "slug": "stephane-parmentier",
+    "name": "Stéphane Parmentier"
+  },
+  {
     "slug": "collection-particuliere",
     "name": "Collection Particulière"
   },
@@ -322,6 +338,10 @@
   {
     "slug": "pouenat",
     "name": "Pouenat"
+  },
+  {
+    "slug": "humbert-poyet",
+    "name": "Humbert & Poyet"
   },
   {
     "slug": "alex-proba",
