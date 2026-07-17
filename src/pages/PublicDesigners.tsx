@@ -1,4 +1,4 @@
-import React from "react";
+import React, { lazy, Suspense } from "react";
 import { useSearchParams, Navigate } from "react-router-dom";
 import { categoryUrl } from "@/lib/categorySlugs";
 import { Helmet } from "react-helmet-async";
@@ -6,9 +6,13 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ChevronUp } from "lucide-react";
 import { useState, useEffect } from "react";
 import Navigation from "@/components/Navigation";
-import Footer from "@/components/Footer";
-import DesignersDirectory from "@/components/DesignersDirectory";
 import DesignersHoverHero from "@/components/DesignersHoverHero";
+
+// Route-split heavy sub-components so they don't land in the initial
+// /designers JS chunk. The hero is what first paint depends on; the
+// directory + footer only mount after desktop handoff / scroll.
+const DesignersDirectory = lazy(() => import("@/components/DesignersDirectory"));
+const Footer = lazy(() => import("@/components/Footer"));
 
 const isStandaloneDisplay = () => {
   if (typeof window === "undefined") return false;
@@ -206,12 +210,18 @@ function ScrollLockedDesigners({
             
           </div>
           {!isMobileOrPwa && !locked && directoryReady && (
-            <DesignersDirectory mode="designers" initialLetter={initialLetter} initialExpand={initialExpand} showHeader={false} showAlphabetBar={false} />
+            <Suspense fallback={<div className="min-h-[40vh]" aria-hidden="true" />}>
+              <DesignersDirectory mode="designers" initialLetter={initialLetter} initialExpand={initialExpand} showHeader={false} showAlphabetBar={false} />
+            </Suspense>
           )}
         </div>
       </div>
 
-      {!isMobileOrPwa && <Footer />}
+      {!isMobileOrPwa && (
+        <Suspense fallback={null}>
+          <Footer />
+        </Suspense>
+      )}
       {!isMobileOrPwa && <BackToTopButton />}
     </div>
   );
