@@ -40,17 +40,48 @@ interface FeaturedDesigner {
 const isCloudinaryUpload = (src: string | null | undefined) =>
   !!src && src.includes("res.cloudinary.com") && src.includes("/image/upload/");
 
+const isSupabaseObject = (src: string | null | undefined) =>
+  !!src && src.includes("/storage/v1/object/public/");
+
+/**
+ * Rewrite a Supabase public object URL to go through the image
+ * transformation endpoint so mobile A–Z cards download a right-sized,
+ * re-encoded image instead of the full original.
+ */
+function supabaseTransform(src: string, width: number, quality = 65): string {
+  const rendered = src.replace(
+    "/storage/v1/object/public/",
+    "/storage/v1/render/image/public/"
+  );
+  const sep = rendered.includes("?") ? "&" : "?";
+  return `${rendered}${sep}width=${width}&quality=${quality}&resize=cover`;
+}
+
 /**
  * Rectangular image transform for the mobile A–Z grid cards.
- * Serves a portrait-cropped, high-quality image that fills a 2-column card.
+ * Serves a portrait-cropped, right-sized image for a 2-col card.
  */
-function gridImageTransform(src: string | null | undefined): string | undefined {
+function gridImageTransform(src: string | null | undefined, width = 600): string | undefined {
   if (!src) return undefined;
-  if (!isCloudinaryUpload(src)) return src;
-  return src.replace(
-    "/image/upload/",
-    "/image/upload/w_600,h_800,c_fill,g_auto,q_auto:good,f_auto/"
-  );
+  if (isCloudinaryUpload(src)) {
+    const h = Math.round((width * 4) / 3);
+    return src.replace(
+      "/image/upload/",
+      `/image/upload/w_${width},h_${h},c_fill,g_auto,q_auto:eco,f_auto/`
+    );
+  }
+  if (isSupabaseObject(src)) return supabaseTransform(src, width, 65);
+  return src;
+}
+
+function gridImageSrcSet(src: string | null | undefined): string | undefined {
+  if (!src) return undefined;
+  if (!isCloudinaryUpload(src) && !isSupabaseObject(src)) return undefined;
+  const a = gridImageTransform(src, 300);
+  const b = gridImageTransform(src, 600);
+  const c = gridImageTransform(src, 900);
+  if (!a || !b || !c) return undefined;
+  return `${a} 300w, ${b} 600w, ${c} 900w`;
 }
 
 /**
@@ -78,7 +109,9 @@ function DesignerGridCard({
   designer: { slug: string; name: string; first_pick_image_url?: string | null; hero_image_url: string | null; image_url: string | null };
   onNavigate?: () => void;
 }) {
-  const url = gridImageTransform(pickGridImage(designer));
+  const rawSrc = pickGridImage(designer);
+  const url = gridImageTransform(rawSrc);
+  const srcSet = gridImageSrcSet(rawSrc);
   const displayName = displayDesignerName(designer.name);
   return (
     <Link
@@ -91,6 +124,10 @@ function DesignerGridCard({
       {url ? (
         <img
           src={url}
+          srcSet={srcSet}
+          sizes="(max-width: 640px) 50vw, 300px"
+          width={600}
+          height={750}
           alt=""
           loading="lazy"
           decoding="async"
