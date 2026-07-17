@@ -5,9 +5,13 @@ const DO_NOT_INTERRUPT = [
   "/trade/axonometric",
   "/trade/visualiser",
   "/trade/mood-board",
-  
   "/trade/tearsheet",
   "/trade/presentations",
+  // Admin editors: reloading mid-edit loses in-progress work (designer
+  // editor + product/curator-pick editor live under /trade/admin/designers,
+  // fabrics library under /trade/admin/fabrics, etc.). Block auto-reload
+  // across all admin surfaces.
+  "/trade/admin",
 ];
 
 const isProtectedPath = (p = typeof window !== "undefined" ? window.location.pathname : "") =>

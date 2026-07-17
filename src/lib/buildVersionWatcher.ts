@@ -15,9 +15,12 @@ const DO_NOT_INTERRUPT = [
   "/trade/axonometric",
   "/trade/visualiser",
   "/trade/mood-board",
-  
   "/trade/tearsheet",
   "/trade/presentations",
+  // Admin editors: never auto-reload mid-edit — losing an in-progress
+  // designer/product edit or fabric draft is worse than showing a stale
+  // build. Users can hard-refresh manually when they're done.
+  "/trade/admin",
 ];
 
 let started = false;
