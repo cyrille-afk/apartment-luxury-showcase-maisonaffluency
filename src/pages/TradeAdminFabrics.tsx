@@ -139,6 +139,41 @@ const blankDraft = (): Partial<Fabric> => ({
   currency: "EUR",
 });
 
+const STORAGE_KEY = "trade-admin-fabrics:draft-v1";
+
+type PersistedFabricAdminState = {
+  search?: string;
+  categoryFilter?: string;
+  supplierFilter?: string;
+  designerFilter?: string;
+  productFilter?: "all" | "picks" | "labels";
+  editingId?: string | null;
+  editDraft?: Partial<Fabric>;
+  adding?: boolean;
+  newRow?: Partial<Fabric>;
+  linkingId?: string | null;
+  pickSearch?: string;
+};
+
+const readPersistedFabricAdminState = (): PersistedFabricAdminState => {
+  if (typeof window === "undefined") return {};
+  try {
+    const raw = window.sessionStorage.getItem(STORAGE_KEY) || window.localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch {
+    return {};
+  }
+};
+
+const writePersistedFabricAdminState = (state: PersistedFabricAdminState) => {
+  if (typeof window === "undefined") return;
+  try {
+    const raw = JSON.stringify(state);
+    window.sessionStorage.setItem(STORAGE_KEY, raw);
+    window.localStorage.setItem(STORAGE_KEY, raw);
+  } catch { /* quota — ignore */ }
+};
+
 export default function TradeAdminFabrics() {
   const { isAdmin, loading } = useAuth();
   const { toast } = useToast();
@@ -147,15 +182,9 @@ export default function TradeAdminFabrics() {
   // Persist in-progress edits/filters to sessionStorage so navigating away
   // (e.g. to check a product page) and coming back restores the exact draft.
   // Without this, React Router unmounts this page and every useState resets.
-  const STORAGE_KEY = "trade-admin-fabrics:draft-v1";
-  const persisted = useRef<any>(null);
+  const persisted = useRef<PersistedFabricAdminState | null>(null);
   if (persisted.current === null) {
-    try {
-      const raw = typeof window !== "undefined" ? window.sessionStorage.getItem(STORAGE_KEY) : null;
-      persisted.current = raw ? JSON.parse(raw) : {};
-    } catch {
-      persisted.current = {};
-    }
+    persisted.current = readPersistedFabricAdminState();
   }
   const p = persisted.current || {};
 
@@ -172,18 +201,28 @@ export default function TradeAdminFabrics() {
   const [linkingId, setLinkingId] = useState<string | null>(p.linkingId ?? null);
   const [pickSearch, setPickSearch] = useState<string>(p.pickSearch ?? "");
 
+  const currentDraftStateRef = useRef<PersistedFabricAdminState>({});
+
   useEffect(() => {
-    try {
-      window.sessionStorage.setItem(
-        STORAGE_KEY,
-        JSON.stringify({
-          search, categoryFilter, supplierFilter, designerFilter, productFilter,
-          editingId, editDraft, adding, newRow, linkingId, pickSearch,
-        }),
-      );
-    } catch { /* quota — ignore */ }
+    const state = {
+      search, categoryFilter, supplierFilter, designerFilter, productFilter,
+      editingId, editDraft, adding, newRow, linkingId, pickSearch,
+    };
+    currentDraftStateRef.current = state;
+    writePersistedFabricAdminState(state);
   }, [search, categoryFilter, supplierFilter, designerFilter, productFilter,
       editingId, editDraft, adding, newRow, linkingId, pickSearch]);
+
+  useEffect(() => {
+    const flushDraftState = () => writePersistedFabricAdminState(currentDraftStateRef.current);
+    window.addEventListener("pagehide", flushDraftState);
+    window.addEventListener("beforeunload", flushDraftState);
+    return () => {
+      flushDraftState();
+      window.removeEventListener("pagehide", flushDraftState);
+      window.removeEventListener("beforeunload", flushDraftState);
+    };
+  }, []);
 
   const { data: fabrics = [], isLoading } = useQuery({
     queryKey: ["admin-fabrics"],
