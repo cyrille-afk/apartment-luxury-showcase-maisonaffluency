@@ -1918,8 +1918,8 @@ const DesignersHoverHero = () => {
                             <Link
                               to={`/designers/${d.slug}`}
                               state={{ fromDesignersHero: true, fromDesignersAZ: true }}
+                              data-nav-state={JSON.stringify({ fromDesignersHero: true, fromDesignersAZ: true })}
                               onClick={() => setSearchOpen(false)}
-
                               className="block px-5 py-2 font-body text-[14px] text-white/80 hover:text-white hover:bg-white/[0.04] transition-colors"
                             >
                               {displayDesignerName(d.name)}
