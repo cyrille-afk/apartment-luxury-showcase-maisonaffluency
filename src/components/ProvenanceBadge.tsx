@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Award, Clock, MapPin, Gem, TrendingUp, ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { GatedContent } from "@/components/GatedContent";
 
 interface ProvenanceEvent {
   id: string;
