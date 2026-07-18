@@ -490,6 +490,11 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const moodInputRef = useRef<HTMLInputElement>(null);
 
+  // Mandarin director hand-off state.
+  const [cnViewingOpen, setCnViewingOpen] = useState(false);
+  const cnBriefFiredRef = useRef(false);
+  const cnLastBriefUserTurnRef = useRef(0);
+
   const readFileAsDataUrl = (file: File): Promise<string> =>
     new Promise((resolve, reject) => {
       const reader = new FileReader();
