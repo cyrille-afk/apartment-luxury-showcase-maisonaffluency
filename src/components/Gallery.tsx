@@ -943,7 +943,9 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                       const el = sectionRefs.current[originalSectionIndex];
                       if (el) {
                         const top = el.getBoundingClientRect().top + window.scrollY - 100;
-                        window.scrollTo({ top, behavior: 'smooth' });
+                        // Instant scroll on mobile prevents iOS Safari from
+                        // toggling its URL/nav bar during smooth-scroll animations.
+                        window.scrollTo({ top, behavior: 'auto' });
                       }
                     });
                   }
