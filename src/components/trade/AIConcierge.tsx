@@ -1191,6 +1191,22 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
     if (!text && !hasFiles) return;
     if (streaming) return;
 
+    // Prompt-detect Mandarin: if the user writes in Chinese, auto-switch the
+    // concierge reply language to zh. Threshold ~4 Han chars OR ≥30% of the
+    // message so short mixed-language phrases don't false-positive. Persist so
+    // subsequent turns stay in Mandarin until the user changes the picker.
+    let effectiveLang: Lang = lang;
+    if (text) {
+      const han = text.match(/\p{Script=Han}/gu)?.length ?? 0;
+      const letters = text.replace(/\s/g, "").length;
+      const zhDetected = han >= 4 || (letters > 0 && han / letters >= 0.3);
+      if (zhDetected && lang !== "zh") {
+        effectiveLang = "zh" as Lang;
+        setLang(effectiveLang);
+        try { saveLang(effectiveLang); } catch {}
+      }
+    }
+
     // Server-side concierge endpoints require an authenticated Maison Affluency
     // member. Block the stream client-side too so the UI never fires a request
     // that will 401.
