@@ -2,6 +2,7 @@ import { scrollToSection } from "@/lib/scrollToSection";
 import InstallAppDialog from "@/components/InstallAppDialog";
 
 const Footer = () => {
+  const currentYear = new Date().getFullYear();
   return (
     <>
       <div className="border-t border-accent/20 bg-foreground/95 backdrop-blur-sm px-6 py-3 text-center">
