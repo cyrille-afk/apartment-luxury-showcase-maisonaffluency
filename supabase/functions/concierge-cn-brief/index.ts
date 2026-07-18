@@ -64,7 +64,10 @@ serve(async (req) => {
     });
   }
 
-  const sessionKey = body.session_id || "no-session";
+  // session_id column is uuid + FK; only forward when it looks like a uuid.
+  const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  const sessionUuid = body.session_id && UUID_RE.test(body.session_id) ? body.session_id : null;
+  const sessionKey = sessionUuid || "no-session";
   const invitedName = (body.invited_name || "").slice(0, 120) || null;
 
   // 24h dedupe unless force=true.
