@@ -302,6 +302,9 @@ const DesktopCarouselStrip = ({
               alt={`${item.title} — ${section.experience}`}
               className="h-full w-full object-cover brightness-[1.05] contrast-[1.08] saturate-[1.05] transition-all duration-700 group-hover:scale-110 group-hover:brightness-[0.92] rounded-sm"
               loading="lazy"
+              decoding="async"
+              width={1600}
+              height={1000}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/5 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100 rounded-sm" />
             {/* Title overlay on hover */}
