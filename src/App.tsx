@@ -50,6 +50,7 @@ const TradeAdminConciergeLeads = lazy(() => import("./pages/TradeAdminConciergeL
 const TradeAdminInquiries = lazy(() => import("./pages/TradeAdminInquiries"));
 const TradeAdminCollectorApplications = lazy(() => import("./pages/TradeAdminCollectorApplications"));
 const TradeAdminPortalInvites = lazy(() => import("./pages/TradeAdminPortalInvites"));
+const TradeAdminCnBriefs = lazy(() => import("./pages/TradeAdminCnBriefs"));
 const PortalCN = lazy(() => import("./pages/PortalCN"));
 const TradeAdminMcpUsage = lazy(() => import("./pages/TradeAdminMcpUsage"));
 const TradePayoutStatement = lazy(() => import("./pages/TradePayoutStatement"));
