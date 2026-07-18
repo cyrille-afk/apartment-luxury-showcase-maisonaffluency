@@ -1292,6 +1292,32 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
             </React.Fragment>;
           });
           })()}
+
+          {/* Private tour CTA */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.8 }}
+            className="mt-10 md:mt-16 py-10 md:py-14 border-t border-border text-center"
+          >
+            <p className="font-body text-xs uppercase tracking-[0.3em] text-primary mb-3">
+              By Appointment
+            </p>
+            <h3 className="font-display text-2xl md:text-3xl text-foreground mb-4">
+              Experience the Apartment in Person
+            </h3>
+            <p className="font-body text-sm text-muted-foreground max-w-xl mx-auto mb-6">
+              Our Singapore showroom is open for private viewings. Arrange a guided tour with our curators.
+            </p>
+            <button
+              onClick={() => setTourDialogOpen(true)}
+              className="inline-flex items-center gap-2 px-8 py-3.5 bg-background text-foreground font-body text-sm uppercase tracking-[0.2em] border border-[hsl(var(--accent))] rounded-full shadow-[0_0_8px_hsl(var(--accent)/0.3)] hover:shadow-[0_0_14px_hsl(var(--accent)/0.5)] transition-all duration-300"
+            >
+              <CalendarDays className="h-4 w-4" />
+              Request a Private Tour
+            </button>
+          </motion.div>
         </div>
       </section>
 
