@@ -202,6 +202,7 @@ export const ProvenanceBadge = ({ designerId, pieceTitle, className }: Provenanc
             )}
           </div>
         </div>
+        </GatedContent>
       )}
     </div>
   );
