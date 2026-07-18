@@ -419,6 +419,9 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
   const [quoteDialogOpen, setQuoteDialogOpen] = useState(false);
   const [quoteProduct, setQuoteProduct] = useState<{ name: string; designer: string }>({ name: "", designer: "" });
 
+  // Private tour dialog state
+  const [tourDialogOpen, setTourDialogOpen] = useState(false);
+
   const handleHotspotQuoteRequest = useCallback((productName: string, designerName: string) => {
     setQuoteProduct({ name: productName, designer: designerName });
     setQuoteDialogOpen(true);
