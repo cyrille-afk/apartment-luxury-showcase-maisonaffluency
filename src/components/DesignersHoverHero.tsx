@@ -1110,12 +1110,18 @@ const DesignersHoverHero = () => {
 
   
 
-  // Reset accordion state when closing the search sheet — reopen defaults to "A".
+  // Reset accordion state only on close (open→closed). Preserves any letter
+  // restored from the back-nav sessionStorage on initial mount.
+  const prevSearchOpenRef = useRef(searchOpen);
   useEffect(() => {
-    if (!searchOpen) {
+    if (prevSearchOpenRef.current && !searchOpen) {
       setExpandedLetters(new Set(["A"]));
       setActiveAccordionLetter(null);
-    } else {
+      try { sessionStorage.removeItem("designers_az_last_letter"); } catch {}
+    }
+    prevSearchOpenRef.current = searchOpen;
+    if (!searchOpen) return;
+    {
       // Warm the PublicDesignerProfile chunk as soon as the A-Z opens so tapping
       // a card doesn't flash the Suspense fallback (which reads visually like
       // the designers landing page while the JS chunk downloads).
