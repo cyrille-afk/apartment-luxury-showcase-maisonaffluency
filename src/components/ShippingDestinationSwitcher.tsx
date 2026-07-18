@@ -32,9 +32,10 @@ import {
 interface Props {
   className?: string;
   compact?: boolean;
+  flagClassName?: string;
 }
 
-export default function ShippingDestinationSwitcher({ className, compact }: Props) {
+export default function ShippingDestinationSwitcher({ className, compact, flagClassName }: Props) {
   const current = useShippingDestination();
   const [open, setOpen] = useState(false);
   const [pendingIso, setPendingIso] = useState(current.iso);
