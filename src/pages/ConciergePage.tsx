@@ -7,8 +7,12 @@ import Footer from "@/components/Footer";
 import ContactInquiry from "@/components/ContactInquiry";
 import { AIConcierge } from "@/components/trade/AIConcierge";
 import { useAuth } from "@/hooks/useAuth";
+import { readPortalSession } from "@/hooks/usePortalSession";
+import { saveLang } from "@/components/trade/conciergeGreeting";
 
-const PublicConciergeMount: React.FC = () => <AIConcierge surface="public" />;
+const PublicConciergeMount: React.FC<{ initialGreeting?: string }> = ({ initialGreeting }) => (
+  <AIConcierge surface="public" initialGreeting={initialGreeting} />
+);
 const AutoOpenConcierge: React.FC = () => {
   useEffect(() => {
     const t = setTimeout(() => {
@@ -18,6 +22,11 @@ const AutoOpenConcierge: React.FC = () => {
     return () => clearTimeout(t);
   }, []);
   return null;
+};
+
+const buildMandarinGreeting = (name?: string | null) => {
+  const salutation = name && name.trim() ? name.trim() : "贵宾";
+  return `尊敬的 ${salutation}，欢迎。我是您的专属礼宾。\n\n了解您时间珍贵，只需一句话告诉我您目前最紧急的豪宅项目风格、空间尺度或缺失的核心孤品（支持语音或图片），我将立即为您从全球 300 多位设计大师中进行定向筛选。`;
 };
 
 /**
