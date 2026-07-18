@@ -1091,8 +1091,14 @@ const DesignersHoverHero = () => {
     if (!searchOpen) {
       setExpandedLetters(new Set(["A"]));
       setActiveAccordionLetter(null);
+    } else {
+      // Warm the PublicDesignerProfile chunk as soon as the A-Z opens so tapping
+      // a card doesn't flash the Suspense fallback (which reads visually like
+      // the designers landing page while the JS chunk downloads).
+      import("../pages/PublicDesignerProfile").catch(() => {});
     }
   }, [searchOpen]);
+
 
   // Desktop accordion: when a letter opens, move the sheet viewport so the
   // expanded designer list is visible instead of being cut off at the bottom.
