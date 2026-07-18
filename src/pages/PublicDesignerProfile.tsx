@@ -366,6 +366,8 @@ const PublicDesignerProfile = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const fromDesignersHero = Boolean((location.state as { fromDesignersHero?: boolean } | null)?.fromDesignersHero);
+  const fromDesignersAZ = Boolean((location.state as { fromDesignersAZ?: boolean } | null)?.fromDesignersAZ);
+
   const picksSectionRef = useRef<HTMLDivElement | null>(null);
   const lightboxOpenRef = useRef(false);
 
@@ -869,6 +871,8 @@ const PublicDesignerProfile = () => {
               <Link
                 to={fromNewIn
                   ? `/new-in?designer=${slug}`
+                  : fromDesignersAZ
+                    ? "/designers?find=1"
                   : isMobile
                     ? "/designers"
                   : fromDesignersHero
@@ -880,6 +884,7 @@ const PublicDesignerProfile = () => {
                       const expandParam = isChild ? `&expand=${encodeURIComponent(designer.founder)}` : "";
                       return `/designers?letter=${letter}${expandParam}`;
                     })()}
+
                 className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors font-body text-[11px] uppercase tracking-[0.15em]"
               >
                 <ArrowLeft className="h-3.5 w-3.5" />

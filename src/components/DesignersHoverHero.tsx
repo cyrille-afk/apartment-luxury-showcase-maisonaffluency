@@ -138,10 +138,13 @@ function DesignerGridCard({
   return (
     <Link
       to={`/designers/${designer.slug}`}
-      state={{ fromDesignersHero: true }}
+      state={{ fromDesignersHero: true, fromDesignersAZ: true }}
+      data-nav-state={JSON.stringify({ fromDesignersHero: true, fromDesignersAZ: true })}
       onClick={onNavigate}
       className="group relative block w-full aspect-[4/5] rounded-xl overflow-hidden bg-neutral-800 ring-1 ring-white/10 focus:outline-none focus:ring-2 focus:ring-gold/60"
       aria-label={`View ${displayName}`}
+
+
       style={
         lqip
           ? {
@@ -1455,6 +1458,7 @@ const DesignersHoverHero = () => {
                               to={`/designers/${d.slug}`}
                               data-featured-designer-slug={d.slug}
                               state={{ fromDesignersHero: true }}
+                              data-nav-state={JSON.stringify({ fromDesignersHero: true })}
                               onMouseEnter={() => {
                                 setActiveSlug(d.slug);
                               }}
@@ -1613,6 +1617,7 @@ const DesignersHoverHero = () => {
               ref={portalRef}
               to={`/designers/${active.slug}`}
               state={{ fromDesignersHero: true }}
+              data-nav-state={JSON.stringify({ fromDesignersHero: true })}
               aria-label={`View ${active.name}'s profile`}
               className="hidden md:block absolute right-0 top-0 h-full w-1/2 z-30 pointer-events-auto group"
               style={{ cursor: "none" }}
@@ -1647,6 +1652,7 @@ const DesignersHoverHero = () => {
               key={`${active.slug}-cta`}
               to={`/designers/${active.slug}`}
               state={{ fromDesignersHero: true }}
+              data-nav-state={JSON.stringify({ fromDesignersHero: true })}
               aria-label={`View ${active.name}'s full collection`}
               className="hidden md:block absolute right-20 lg:right-40 z-40 pointer-events-auto cursor-pointer group"
               style={activeTitleTop != null ? { top: activeTitleTop } : { bottom: 96 }}
@@ -1913,7 +1919,8 @@ const DesignersHoverHero = () => {
                           <li key={d.slug}>
                             <Link
                               to={`/designers/${d.slug}`}
-                              state={{ fromDesignersHero: true }}
+                              state={{ fromDesignersHero: true, fromDesignersAZ: true }}
+                              data-nav-state={JSON.stringify({ fromDesignersHero: true, fromDesignersAZ: true })}
                               onClick={() => setSearchOpen(false)}
                               className="block px-5 py-2 font-body text-[14px] text-white/80 hover:text-white hover:bg-white/[0.04] transition-colors"
                             >
@@ -1980,7 +1987,8 @@ const DesignersHoverHero = () => {
                                   <li key={d.slug}>
                                     <Link
                                       to={`/designers/${d.slug}`}
-                                      state={{ fromDesignersHero: true }}
+                                      state={{ fromDesignersHero: true, fromDesignersAZ: true }}
+                                      data-nav-state={JSON.stringify({ fromDesignersHero: true, fromDesignersAZ: true })}
                                       onClick={() => setSearchOpen(false)}
                                       className="block pl-12 pr-5 py-1.5 font-body text-[14px] text-white/80 hover:text-white hover:bg-white/[0.04] transition-colors"
                                     >

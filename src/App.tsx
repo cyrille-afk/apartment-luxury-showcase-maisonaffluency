@@ -427,7 +427,11 @@ function SameOriginLinkGuard() {
       if (next === current) return;
 
       event.preventDefault();
-      navigate(next);
+      const navStateRaw = anchor.getAttribute("data-nav-state");
+      const navState = navStateRaw ? (() => {
+        try { return JSON.parse(navStateRaw); } catch { return undefined; }
+      })() : undefined;
+      navigate(next, navState !== undefined ? { state: navState } : undefined);
     };
 
     document.addEventListener("click", onClick, true);
