@@ -153,7 +153,7 @@ ${transcript}`;
 
   // Insert brief.
   const insertPayload = {
-    session_id: body.session_id || null,
+    session_id: sessionUuid,
     invited_name: invitedName,
     contact_email: body.contact_email || null,
     contact_phone: body.contact_phone || null,
