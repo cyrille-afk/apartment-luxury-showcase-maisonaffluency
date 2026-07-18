@@ -328,6 +328,7 @@ import {
   DEFAULT_NAME,
 } from "./conciergeGreeting";
 import { supabase } from "@/integrations/supabase/client";
+import { CnBriefViewingModal } from "@/components/trade/CnBriefViewingModal";
 import { useStudio } from "@/hooks/useStudio";
 import { useAuth } from "@/hooks/useAuth";
 import { getConciergeSession } from "@/hooks/useConciergeSession";
@@ -488,6 +489,11 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
   const [attachments, setAttachments] = useState<StagedAttachment[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const moodInputRef = useRef<HTMLInputElement>(null);
+
+  // Mandarin director hand-off state.
+  const [cnViewingOpen, setCnViewingOpen] = useState(false);
+  const cnBriefFiredRef = useRef(false);
+  const cnLastBriefUserTurnRef = useRef(0);
 
   const readFileAsDataUrl = (file: File): Promise<string> =>
     new Promise((resolve, reject) => {
@@ -2152,6 +2158,33 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
   const sendRef = useRef(send);
   useEffect(() => { sendRef.current = send; }, [send]);
 
+  // Mandarin auto-hand-off: after each completed assistant turn on lang=zh,
+  // ask the CN brief endpoint to classify intent. Server-side dedupe keeps
+  // a single session to one brief per 24h (unless the viewing CTA forces it).
+  useEffect(() => {
+    if (lang !== "zh" || streaming) return;
+    const chatMsgs = timeline.filter((t) => t.kind === "msg") as any[];
+    const userTurns = chatMsgs.filter((t) => t.role === "user").length;
+    if (userTurns < 2) return;
+    if (userTurns === cnLastBriefUserTurnRef.current) return;
+    cnLastBriefUserTurnRef.current = userTurns;
+    const sessionId = typeof window !== "undefined"
+      ? sessionStorage.getItem("cn_portal:session_id")
+      : null;
+    const invitedName = typeof window !== "undefined"
+      ? sessionStorage.getItem("cn_portal:invited_name")
+      : null;
+    const payload = {
+      session_id: sessionId,
+      invited_name: invitedName,
+      messages: chatMsgs.map((t) => ({ role: t.role, content: t.content })),
+    };
+    supabase.functions
+      .invoke("concierge-cn-brief", { body: payload })
+      .catch((e) => console.warn("[cn-brief]", e));
+  }, [timeline, streaming, lang]);
+
+
 
   const handleProposalResolved = (
     proposalIndex: number,
@@ -2440,6 +2473,16 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
               >
                 🇨🇳 中文
               </button>
+              {lang === "zh" ? (
+                <button
+                  onPointerDown={(e) => e.stopPropagation()}
+                  onClick={() => setCnViewingOpen(true)}
+                  className="text-[11px] px-2 py-1 rounded-md border border-accent/60 text-accent bg-accent/5 hover:bg-accent/10 transition-colors font-body whitespace-nowrap"
+                  title="Book Singapore District 9 viewing"
+                >
+                  预约鉴赏
+                </button>
+              ) : null}
               <div className="relative">
                 <button
                   onPointerDown={(e) => e.stopPropagation()}
@@ -3816,6 +3859,13 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
         </div>
         </>
       )}
+      <CnBriefViewingModal
+        open={cnViewingOpen}
+        onOpenChange={setCnViewingOpen}
+        sessionId={typeof window !== "undefined" ? sessionStorage.getItem("cn_portal:session_id") : null}
+        invitedName={typeof window !== "undefined" ? sessionStorage.getItem("cn_portal:invited_name") : null}
+        messages={timeline.filter((t) => t.kind === "msg").map((t: any) => ({ role: t.role, content: t.content }))}
+      />
     </>
   );
 }

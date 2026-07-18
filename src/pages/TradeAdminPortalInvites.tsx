@@ -102,11 +102,19 @@ export default function TradeAdminPortalInvites() {
     <div className="p-6 md:p-8 space-y-8">
       <Helmet><title>Portal Invites · Admin</title></Helmet>
 
-      <div>
-        <h1 className="font-serif text-2xl text-foreground">China Portal · Invitation Codes</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Issue single-use codes for individual recipients or campaign codes with a redemption cap.
-        </p>
+      <div className="flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <h1 className="font-serif text-2xl text-foreground">China Portal · Invitation Codes</h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Issue single-use codes for individual recipients or campaign codes with a redemption cap.
+          </p>
+        </div>
+        <a
+          href="/trade/admin/cn-briefs"
+          className="text-xs px-3 py-1.5 rounded-md border border-accent/60 text-accent bg-accent/5 hover:bg-accent/10 transition-colors font-body whitespace-nowrap"
+        >
+          → Director Briefs
+        </a>
       </div>
 
       {/* Create form */}

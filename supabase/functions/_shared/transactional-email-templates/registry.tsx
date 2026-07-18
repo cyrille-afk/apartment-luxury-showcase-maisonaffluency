@@ -20,6 +20,7 @@ import { template as manualShippingQuoteRequest } from './manual-shipping-quote-
 import { template as tradeVerificationChecklist } from './trade-verification-checklist.tsx'
 import { template as collectorApproval } from './collector-approval.tsx'
 import { template as collectorRejection } from './collector-rejection.tsx'
+import { template as cnDirectorBrief } from './cn-director-brief.tsx'
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'trade-approval': tradeApproval,
@@ -33,4 +34,5 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'trade-verification-checklist': tradeVerificationChecklist,
   'collector-approval': collectorApproval,
   'collector-rejection': collectorRejection,
+  'cn-director-brief': cnDirectorBrief,
 }

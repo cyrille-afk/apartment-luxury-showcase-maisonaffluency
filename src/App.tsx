@@ -50,6 +50,7 @@ const TradeAdminConciergeLeads = lazy(() => import("./pages/TradeAdminConciergeL
 const TradeAdminInquiries = lazy(() => import("./pages/TradeAdminInquiries"));
 const TradeAdminCollectorApplications = lazy(() => import("./pages/TradeAdminCollectorApplications"));
 const TradeAdminPortalInvites = lazy(() => import("./pages/TradeAdminPortalInvites"));
+const TradeAdminCnBriefs = lazy(() => import("./pages/TradeAdminCnBriefs"));
 const PortalCN = lazy(() => import("./pages/PortalCN"));
 const TradeAdminMcpUsage = lazy(() => import("./pages/TradeAdminMcpUsage"));
 const TradePayoutStatement = lazy(() => import("./pages/TradePayoutStatement"));
@@ -594,6 +595,8 @@ const App = () => {
                     <Route path="admin/inquiries" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAdminInquiries /></Suspense>} />
                     <Route path="admin/collector-applications" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAdminCollectorApplications /></Suspense>} />
                     <Route path="admin/portal-invites" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAdminPortalInvites /></Suspense>} />
+                    <Route path="admin/cn-briefs" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAdminCnBriefs /></Suspense>} />
+
                     <Route path="admin/mcp-usage" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAdminMcpUsage /></Suspense>} />
 
                     <Route path="registered-users" element={<TradeRegisteredUsers />} />
