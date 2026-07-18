@@ -1,6 +1,10 @@
 import { Instagram } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import {
+  supabaseImageSrcSet,
+  supabaseImageTransform,
+} from "@/lib/supabaseImage";
 
 const InstagramFeed = () => {
   const { data: posts = [] } = useQuery({
@@ -51,9 +55,12 @@ const InstagramFeed = () => {
               className="group relative aspect-square overflow-hidden bg-muted rounded-sm"
             >
               <img
-                src={post.image_url!}
+                src={supabaseImageTransform(post.image_url!, { width: 400 })}
+                srcSet={supabaseImageSrcSet(post.image_url!, [200, 400, 600])}
+                sizes="(max-width: 768px) 33vw, 16vw"
                 alt={post.caption?.substring(0, 80) || "Instagram post"}
                 loading="lazy"
+                decoding="async"
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
               />
               <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/20 transition-colors duration-300 flex items-center justify-center">
