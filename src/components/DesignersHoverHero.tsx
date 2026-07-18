@@ -1652,6 +1652,7 @@ const DesignersHoverHero = () => {
               key={`${active.slug}-cta`}
               to={`/designers/${active.slug}`}
               state={{ fromDesignersHero: true }}
+              data-nav-state={JSON.stringify({ fromDesignersHero: true })}
               aria-label={`View ${active.name}'s full collection`}
               className="hidden md:block absolute right-20 lg:right-40 z-40 pointer-events-auto cursor-pointer group"
               style={activeTitleTop != null ? { top: activeTitleTop } : { bottom: 96 }}
