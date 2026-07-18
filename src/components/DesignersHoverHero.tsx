@@ -1126,6 +1126,24 @@ const DesignersHoverHero = () => {
       // a card doesn't flash the Suspense fallback (which reads visually like
       // the designers landing page while the JS chunk downloads).
       import("../pages/PublicDesignerProfile").catch(() => {});
+      // If we're restoring from back-nav, scroll the sheet to the remembered letter.
+      const restored = restoredLetterRef.current;
+      if (restored) {
+        restoredLetterRef.current = null;
+        const scrollToLetter = () => {
+          const scroller = searchScrollRef.current;
+          const row = scroller?.querySelector<HTMLElement>(
+            `[data-designer-letter="${restored}"]`
+          );
+          if (row && scroller) {
+            const top = row.getBoundingClientRect().top - scroller.getBoundingClientRect().top + scroller.scrollTop - 4;
+            scroller.scrollTo({ top, behavior: "auto" });
+          }
+        };
+        requestAnimationFrame(() => requestAnimationFrame(scrollToLetter));
+        setTimeout(scrollToLetter, 220);
+        try { sessionStorage.removeItem("designers_az_last_letter"); } catch {}
+      }
     }
   }, [searchOpen]);
 
