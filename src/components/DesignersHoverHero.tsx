@@ -1457,8 +1457,8 @@ const DesignersHoverHero = () => {
                             <Link
                               to={`/designers/${d.slug}`}
                               data-featured-designer-slug={d.slug}
-                              state={{ fromDesignersHero: true, fromDesignersAZ: true }}
-
+                              state={{ fromDesignersHero: true }}
+                              data-nav-state={JSON.stringify({ fromDesignersHero: true })}
                               onMouseEnter={() => {
                                 setActiveSlug(d.slug);
                               }}
