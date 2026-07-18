@@ -4,6 +4,7 @@ import { Helmet } from "react-helmet-async";
 import Hero from "@/components/Hero";
 import useScrollDepthTracking from "@/hooks/useScrollDepthTracking";
 import { scrollToSection } from "@/lib/scrollToSection";
+import LazyOnVisible from "@/components/LazyOnVisible";
 
 // Retry wrapper for dynamic imports — handles stale Vite chunks after HMR
 function lazyRetry(factory: () => Promise<{ default: React.ComponentType<any> }>) {
@@ -421,16 +422,16 @@ const Index = ({ categoryMode = false }: IndexProps = {}) => {
           <>
             {!routeIsCategory && (
               <div className="bg-white">
-                <section id="overview" className="scroll-header-offset">
+                <LazyOnVisible id="overview" className="scroll-header-offset" minHeight="60vh" rootMargin="400px 0px">
                   <Suspense fallback={null}>
                     <ApartmentTourInterlude compact />
                   </Suspense>
-                </section>
-                <section id="gallery" className="scroll-header-offset">
+                </LazyOnVisible>
+                <LazyOnVisible id="gallery" className="scroll-header-offset" minHeight="100vh" rootMargin="600px 0px">
                   <Suspense fallback={<SectionFallback />}>
                     <Gallery />
                   </Suspense>
-                </section>
+                </LazyOnVisible>
               </div>
             )}
 
@@ -441,14 +442,18 @@ const Index = ({ categoryMode = false }: IndexProps = {}) => {
             )}
 
             {!routeIsCategory && (
-              <Suspense fallback={null}>
-                <InstagramFeed />
-              </Suspense>
+              <LazyOnVisible minHeight="40vh" rootMargin="600px 0px">
+                <Suspense fallback={null}>
+                  <InstagramFeed />
+                </Suspense>
+              </LazyOnVisible>
             )}
 
-            <Suspense fallback={null}>
-              <Footer />
-            </Suspense>
+            <LazyOnVisible minHeight="200px" rootMargin="400px 0px">
+              <Suspense fallback={null}>
+                <Footer />
+              </Suspense>
+            </LazyOnVisible>
           </>
         ) : null}
       </main>
