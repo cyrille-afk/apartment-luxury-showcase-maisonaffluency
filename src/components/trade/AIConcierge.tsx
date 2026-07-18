@@ -1974,7 +1974,7 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
         messages: messagesForApi,
         projectId,
         surface,
-        lang,
+        lang: effectiveLang,
         onDelta: upsertAssistant,
         onProposal: handleProposal,
         onStreamStart: (streamId) => {
