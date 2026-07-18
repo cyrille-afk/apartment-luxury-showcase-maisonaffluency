@@ -52,22 +52,39 @@ const ConciergePage: React.FC = () => {
   const designer = params.get("designer")?.trim() || "";
   const page = params.get("page")?.trim() || "";
 
+  // Portal (invite-only) session — UHNW/Mandarin visitors reach /concierge
+  // via /cn without a Supabase auth account. A valid portal session grants
+  // access and, when lang=zh, injects the bespoke Mandarin opening.
+  const portalSession = useMemo(() => readPortalSession(), []);
+  const langParam = params.get("lang");
+  const isMandarin = langParam === "zh" || !!portalSession;
+
+  // Persist Mandarin choice so the concierge keeps replying in Chinese on
+  // subsequent turns and tab reloads.
+  useEffect(() => {
+    if (langParam === "zh") saveLang("zh");
+  }, [langParam]);
+
+  const bespokeGreeting = useMemo(() => {
+    if (!isMandarin) return undefined;
+    return buildMandarinGreeting(portalSession?.invitedName ?? null);
+  }, [isMandarin, portalSession?.invitedName]);
+
   // Auth gate — unauthenticated visitors are redirected to the landing page
-  // with an "access restricted" notice. Latch `authorized` once we've seen a
-  // user so subsequent auth loading spikes (token refresh) don't unmount the
-  // concierge mid-stream and abort the in-flight SSE request.
+  // with an "access restricted" notice. A valid portal session bypasses the
+  // Supabase auth check.
   const { user, loading: authLoading } = useAuth();
   const wasAuthorizedRef = useRef(false);
-  if (user) wasAuthorizedRef.current = true;
+  if (user || portalSession) wasAuthorizedRef.current = true;
   const authorized = wasAuthorizedRef.current;
 
   useEffect(() => {
-    if (!authLoading && !user && !wasAuthorizedRef.current) {
+    if (!authLoading && !user && !portalSession && !wasAuthorizedRef.current) {
       toast.error("Access restricted", {
         description: "The Concierge is available to Maison Affluency members only.",
       });
     }
-  }, [authLoading, user]);
+  }, [authLoading, user, portalSession]);
 
 
   useEffect(() => {
