@@ -60,9 +60,19 @@ const PrivateTourDialog = ({ open, onOpenChange }: PrivateTourDialogProps) => {
     setIsSubmitting(true);
 
     try {
+      // Compose a message that meets send-inquiry min-length (10 chars)
+      // and surfaces preferred date/time to the concierge inbox + inquiries log.
+      const parts: string[] = ["Private tour request."];
+      if (result.data.preferredDate) parts.push(`Preferred date/time: ${result.data.preferredDate}.`);
+      if (result.data.message) parts.push(result.data.message);
+      const composedMessage = parts.join("\n\n");
+
       const { error } = await supabase.functions.invoke("send-inquiry", {
         body: {
-          ...result.data,
+          name: result.data.name,
+          email: result.data.email,
+          phone: result.data.phone,
+          message: composedMessage,
           turnstileToken,
           subject: "Request a Private Tour",
           source: "contact_form",
