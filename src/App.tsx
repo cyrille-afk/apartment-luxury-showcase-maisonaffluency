@@ -31,6 +31,7 @@ const StudioSubmit = lazy(() => import("./pages/StudioSubmit"));
 const StudioProfile = lazy(() => import("./pages/StudioProfile"));
 const StudioInsights = lazy(() => import("./pages/StudioInsights"));
 const TradeRegister = lazy(() => import("./pages/TradeRegister"));
+const CollectorSignup = lazy(() => import("./pages/CollectorSignup"));
 const TradeApplicationEdit = lazy(() => import("./pages/TradeApplicationEdit"));
 const TradeLayout = lazy(() => import("./pages/TradeLayout"));
 const TradeGuides = lazy(() => import("./pages/TradeGuides"));
