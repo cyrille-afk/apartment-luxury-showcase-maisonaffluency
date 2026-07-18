@@ -111,7 +111,12 @@ export const ProvenanceBadge = ({ designerId, pieceTitle, className }: Provenanc
 
       {/* Expanded Certificate */}
       {expanded && certificate && (
-        <div className="mt-3 border border-primary/15 rounded-lg bg-background overflow-hidden animate-in slide-in-from-top-2 duration-300">
+        <GatedContent
+          className="mt-3"
+          label="Provenance — Verified Access"
+          description="Full historical provenance, edition, and estimated value are reserved for verified trade professionals and approved private collectors."
+        >
+        <div className="border border-primary/15 rounded-lg bg-background overflow-hidden animate-in slide-in-from-top-2 duration-300">
           {/* Header */}
           <div className="px-4 py-3 bg-primary/5 border-b border-primary/10">
             <div className="flex items-center gap-2">
