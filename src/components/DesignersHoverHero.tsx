@@ -1848,7 +1848,17 @@ const DesignersHoverHero = () => {
             )}
             <div ref={searchScrollRef} className="flex-1 overflow-y-auto overscroll-contain px-4 pt-2 pb-4 min-h-0 scroll-smooth relative touch-pan-y">
 
-              {isSearching && groupedResults.length === 0 ? (
+              {!isSearching && groupedResults.length === 0 ? (
+                <div className="px-4 py-10 flex flex-col items-center gap-3" aria-live="polite">
+                  <div className="h-6 w-6 rounded-full border-2 border-white/20 border-t-white/70 animate-spin" aria-hidden="true" />
+                  <p className="text-xs font-body text-white/50 uppercase tracking-[0.2em]">Loading directory…</p>
+                  <div className="grid grid-cols-2 gap-3 w-full mt-4 md:hidden">
+                    {Array.from({ length: 6 }).map((_, i) => (
+                      <div key={i} className="aspect-[4/5] rounded-xl bg-white/[0.04] animate-pulse" />
+                    ))}
+                  </div>
+                </div>
+              ) : isSearching && groupedResults.length === 0 ? (
                 <p className="px-4 py-8 text-center text-sm font-body text-white/50">
                   No designers match “{searchQuery}”.
                 </p>
