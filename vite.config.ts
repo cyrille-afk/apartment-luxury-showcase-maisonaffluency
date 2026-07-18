@@ -52,7 +52,13 @@ function optimizeHtmlPlugin(buildId: string): Plugin {
         // (motion, radix) to low-priority <link rel="prefetch"> so they
         // don't compete with the hero image or block the main thread
         // during boot. This is the single biggest mobile TBT win.
-        const DEFER = /(vendor-motion|vendor-radix)/;
+        // Demote ALL vendor chunks to prefetch. The homepage LCP element is
+        // the static <picture> in index.html — it paints from pure HTML +
+        // inline styles and does NOT need React to be loaded. Letting the
+        // hero image win the bandwidth race on throttled PSI mobile runs
+        // is worth ~200-400ms of LCP. React still loads (main entry imports
+        // it) — just at lower priority so it doesn't compete with the LCP image.
+        const DEFER = /(vendor-motion|vendor-radix|vendor-react|vendor-query)/;
         const eager = modulepreloads.filter(h => !DEFER.test(h));
         const deferred = modulepreloads.filter(h => DEFER.test(h));
         const hints = [
