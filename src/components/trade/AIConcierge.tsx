@@ -328,6 +328,7 @@ import {
   DEFAULT_NAME,
 } from "./conciergeGreeting";
 import { supabase } from "@/integrations/supabase/client";
+import { CnBriefViewingModal } from "@/components/trade/CnBriefViewingModal";
 import { useStudio } from "@/hooks/useStudio";
 import { useAuth } from "@/hooks/useAuth";
 import { getConciergeSession } from "@/hooks/useConciergeSession";
