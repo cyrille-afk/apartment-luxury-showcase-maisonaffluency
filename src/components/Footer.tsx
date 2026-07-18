@@ -62,6 +62,7 @@ const Footer = () => {
         </div>
       </div>
     </footer>
+    <PrivateTourDialog open={tourOpen} onOpenChange={setTourOpen} />
     </>
   );
 };
