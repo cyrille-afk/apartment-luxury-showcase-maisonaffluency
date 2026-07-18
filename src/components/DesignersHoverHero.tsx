@@ -138,8 +138,9 @@ function DesignerGridCard({
   return (
     <Link
       to={`/designers/${designer.slug}`}
-      state={{ fromDesignersHero: true }}
+      state={{ fromDesignersHero: true, fromDesignersAZ: true }}
       onClick={onNavigate}
+
       className="group relative block w-full aspect-[4/5] rounded-xl overflow-hidden bg-neutral-800 ring-1 ring-white/10 focus:outline-none focus:ring-2 focus:ring-gold/60"
       aria-label={`View ${displayName}`}
       style={
@@ -1454,7 +1455,8 @@ const DesignersHoverHero = () => {
                             <Link
                               to={`/designers/${d.slug}`}
                               data-featured-designer-slug={d.slug}
-                              state={{ fromDesignersHero: true }}
+                              state={{ fromDesignersHero: true, fromDesignersAZ: true }}
+
                               onMouseEnter={() => {
                                 setActiveSlug(d.slug);
                               }}
@@ -1913,8 +1915,9 @@ const DesignersHoverHero = () => {
                           <li key={d.slug}>
                             <Link
                               to={`/designers/${d.slug}`}
-                              state={{ fromDesignersHero: true }}
+                              state={{ fromDesignersHero: true, fromDesignersAZ: true }}
                               onClick={() => setSearchOpen(false)}
+
                               className="block px-5 py-2 font-body text-[14px] text-white/80 hover:text-white hover:bg-white/[0.04] transition-colors"
                             >
                               {displayDesignerName(d.name)}
@@ -1980,8 +1983,9 @@ const DesignersHoverHero = () => {
                                   <li key={d.slug}>
                                     <Link
                                       to={`/designers/${d.slug}`}
-                                      state={{ fromDesignersHero: true }}
+                                      state={{ fromDesignersHero: true, fromDesignersAZ: true }}
                                       onClick={() => setSearchOpen(false)}
+
                                       className="block pl-12 pr-5 py-1.5 font-body text-[14px] text-white/80 hover:text-white hover:bg-white/[0.04] transition-colors"
                                     >
                                       {displayDesignerName(d.name)}
