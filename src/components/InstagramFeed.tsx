@@ -61,6 +61,8 @@ const InstagramFeed = () => {
                 alt={post.caption?.substring(0, 80) || "Instagram post"}
                 loading="lazy"
                 decoding="async"
+                width={400}
+                height={400}
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
               />
               <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/20 transition-colors duration-300 flex items-center justify-center">
