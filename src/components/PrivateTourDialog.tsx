@@ -30,6 +30,9 @@ const PrivateTourDialog = ({ open, onOpenChange }: PrivateTourDialogProps) => {
   const [turnstileToken, setTurnstileToken] = useState<string>("");
   const [interacted, setInteracted] = useState(false);
   const [phonePlaceholder] = useState(() => getPhonePlaceholder(inferCountryFromBrowser()));
+  // Honeypot (bots fill hidden fields) + timing trap (bots submit instantly)
+  const [website, setWebsite] = useState("");
+  const [mountedAt] = useState(() => Date.now());
 
   const EMPTY_FORM = { name: "", email: "", phone: "", preferredDate: "", message: "" };
   const [formData, setFormData] = useState(EMPTY_FORM);
@@ -43,6 +46,19 @@ const PrivateTourDialog = ({ open, onOpenChange }: PrivateTourDialogProps) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
+
+    // Honeypot: silently drop if hidden field is filled
+    if (website.trim() !== "") {
+      toast({ title: "Request Sent", description: "Our concierge will contact you shortly to confirm your appointment." });
+      onOpenChange(false);
+      return;
+    }
+    // Timing trap: reject sub-3s submissions (humans can't fill this fast)
+    if (Date.now() - mountedAt < 3000) {
+      toast({ title: "Please review your request", description: "Take a moment to complete the form, then submit again.", variant: "destructive" });
+      return;
+    }
+
 
     const result = tourSchema.safeParse(formData);
     if (!result.success) {
@@ -130,6 +146,19 @@ const PrivateTourDialog = ({ open, onOpenChange }: PrivateTourDialogProps) => {
           </p>
 
           <div className="space-y-5">
+            {/* Honeypot: hidden from humans, tempting to bots */}
+            <div aria-hidden="true" style={{ position: "absolute", left: "-10000px", top: "auto", width: 1, height: 1, overflow: "hidden" }}>
+              <label htmlFor="website">Website</label>
+              <input
+                id="website"
+                type="text"
+                tabIndex={-1}
+                autoComplete="off"
+                value={website}
+                onChange={(e) => setWebsite(e.target.value)}
+              />
+            </div>
+
             <div>
               <label htmlFor="name" className="mb-2 block font-body text-sm uppercase tracking-wider text-foreground">
                 Name<span className="text-destructive">*</span>
