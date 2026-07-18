@@ -81,6 +81,7 @@ const PublicGallery = () => {
 
         <Footer />
         <BackToTopButton />
+        <FloatingScrollNav openMainMenu menuLabel="Open menu" />
       </div>
     </>
   );
