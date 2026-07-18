@@ -1617,6 +1617,7 @@ const DesignersHoverHero = () => {
               ref={portalRef}
               to={`/designers/${active.slug}`}
               state={{ fromDesignersHero: true }}
+              data-nav-state={JSON.stringify({ fromDesignersHero: true })}
               aria-label={`View ${active.name}'s profile`}
               className="hidden md:block absolute right-0 top-0 h-full w-1/2 z-30 pointer-events-auto group"
               style={{ cursor: "none" }}
