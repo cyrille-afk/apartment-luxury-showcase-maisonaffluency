@@ -349,7 +349,7 @@ const sanitizeTimelineForAttachments = (items: TimelineItem[]) =>
 
 export type ConciergeSurface = "trade" | "public";
 
-export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface } = {}) {
+export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: ConciergeSurface; initialGreeting?: string } = {}) {
   const { pathname, search } = useLocation();
   const navigate = useNavigate();
   const { currentStudio } = useStudio();
@@ -388,7 +388,7 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
       }
     } catch {}
     return [
-      { kind: "msg", role: "assistant", content: surface === "public" ? PUBLIC_GREETING : greetingForContext(stageFromPath(pathname), pathname, loadTone(), loadLang()).replace(/{concierge_name}/g, name) },
+      { kind: "msg", role: "assistant", content: surface === "public" ? (initialGreeting || PUBLIC_GREETING) : greetingForContext(stageFromPath(pathname), pathname, loadTone(), loadLang()).replace(/{concierge_name}/g, name) },
     ];
   });
   const [input, setInput] = useState<string>(() => {
@@ -432,9 +432,9 @@ export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface 
   const stage: Stage = stageOverride ?? contextualRouteStage;
   const currentGreeting = useCallback((targetLang: Lang = lang) => (
     surface === "public"
-      ? PUBLIC_GREETING
+      ? (initialGreeting || PUBLIC_GREETING)
       : greetingForContext(stage, contextualPath, tone, targetLang).replace(/{concierge_name}/g, name)
-  ), [surface, stage, contextualPath, tone, lang, name]);
+  ), [surface, initialGreeting, stage, contextualPath, tone, lang, name]);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const abortRef = useRef<AbortController | null>(null);
