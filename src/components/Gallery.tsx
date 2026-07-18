@@ -410,7 +410,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
   const [sourceItemKey, setSourceItemKey] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [gridCols, setGridCols] = useState<GalleryGridCols>(3);
-  const [activeMobilePill, setActiveMobilePill] = useState(0);
+  const [activeMobilePill, setActiveMobilePill] = useState(-1);
   const pillBarRef = useRef<HTMLDivElement>(null);
   const sectionRefs = useRef<(HTMLDivElement | null)[]>([]);
 
