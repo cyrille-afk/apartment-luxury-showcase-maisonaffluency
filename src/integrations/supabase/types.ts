@@ -1114,6 +1114,74 @@ export type Database = {
           },
         ]
       }
+      cn_director_briefs: {
+        Row: {
+          admin_notes: string | null
+          aesthetic: string | null
+          budget_band: string | null
+          contact_email: string | null
+          contact_phone: string | null
+          created_at: string
+          id: string
+          invited_name: string | null
+          last_email_sent_at: string | null
+          pieces_of_interest: Json
+          project_summary: string | null
+          sentiment: string | null
+          session_id: string | null
+          status: string
+          updated_at: string
+          user_id: string | null
+          viewing_requested_at: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          aesthetic?: string | null
+          budget_band?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          id?: string
+          invited_name?: string | null
+          last_email_sent_at?: string | null
+          pieces_of_interest?: Json
+          project_summary?: string | null
+          sentiment?: string | null
+          session_id?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+          viewing_requested_at?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          aesthetic?: string | null
+          budget_band?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          id?: string
+          invited_name?: string | null
+          last_email_sent_at?: string | null
+          pieces_of_interest?: Json
+          project_summary?: string | null
+          sentiment?: string | null
+          session_id?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+          viewing_requested_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cn_director_briefs_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "portal_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       collectible_atelier_gallery: {
         Row: {
           caption: string | null
@@ -6335,7 +6403,9 @@ export type Database = {
       }
       trade_products: {
         Row: {
+          asia_lead_time_days: number | null
           available_finishes: string[]
+          available_from: string | null
           base_axis_label: string | null
           brand_name: string
           category: string
@@ -6355,6 +6425,7 @@ export type Database = {
           hs_code: string | null
           id: string
           image_url: string | null
+          in_situ_sg: boolean
           is_active: boolean
           is_contract_grade: boolean
           is_hidden: boolean
@@ -6379,6 +6450,7 @@ export type Database = {
           price_prefix: string | null
           price_unit: string
           product_name: string
+          provenance_cn: string | null
           rrp_price_cents: number | null
           seat_height_mm: number | null
           size_variants: Json | null
@@ -6396,7 +6468,9 @@ export type Database = {
           wood_label_override: string | null
         }
         Insert: {
+          asia_lead_time_days?: number | null
           available_finishes?: string[]
+          available_from?: string | null
           base_axis_label?: string | null
           brand_name: string
           category?: string
@@ -6416,6 +6490,7 @@ export type Database = {
           hs_code?: string | null
           id?: string
           image_url?: string | null
+          in_situ_sg?: boolean
           is_active?: boolean
           is_contract_grade?: boolean
           is_hidden?: boolean
@@ -6440,6 +6515,7 @@ export type Database = {
           price_prefix?: string | null
           price_unit?: string
           product_name: string
+          provenance_cn?: string | null
           rrp_price_cents?: number | null
           seat_height_mm?: number | null
           size_variants?: Json | null
@@ -6457,7 +6533,9 @@ export type Database = {
           wood_label_override?: string | null
         }
         Update: {
+          asia_lead_time_days?: number | null
           available_finishes?: string[]
+          available_from?: string | null
           base_axis_label?: string | null
           brand_name?: string
           category?: string
@@ -6477,6 +6555,7 @@ export type Database = {
           hs_code?: string | null
           id?: string
           image_url?: string | null
+          in_situ_sg?: boolean
           is_active?: boolean
           is_contract_grade?: boolean
           is_hidden?: boolean
@@ -6501,6 +6580,7 @@ export type Database = {
           price_prefix?: string | null
           price_unit?: string
           product_name?: string
+          provenance_cn?: string | null
           rrp_price_cents?: number | null
           seat_height_mm?: number | null
           size_variants?: Json | null
