@@ -176,6 +176,15 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
     setIsOpen(open);
   };
 
+  // Allow other components (e.g. FloatingScrollNav on Gallery) to open the
+  // mobile menu via a custom event.
+  useEffect(() => {
+    const openMenu = () => setIsOpen(true);
+    window.addEventListener("open-main-menu", openMenu);
+    return () => window.removeEventListener("open-main-menu", openMenu);
+  }, []);
+
+
   useEffect(() => {
     // All page section IDs in order
     const allSectionIds = ["home", "overview", "gallery", "curating-team", "designers", "collectibles", "brands", "details", "contact"];
