@@ -3832,6 +3832,13 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
         </div>
         </>
       )}
+      <CnBriefViewingModal
+        open={cnViewingOpen}
+        onOpenChange={setCnViewingOpen}
+        sessionId={typeof window !== "undefined" ? sessionStorage.getItem("cn_portal:session_id") : null}
+        invitedName={typeof window !== "undefined" ? sessionStorage.getItem("cn_portal:invited_name") : null}
+        messages={timeline.filter((t) => t.kind === "msg").map((t: any) => ({ role: t.role, content: t.content }))}
+      />
     </>
   );
 }
