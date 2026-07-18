@@ -1807,6 +1807,7 @@ const DesignersHoverHero = () => {
                             <DesignerGridCard
                               key={d.slug}
                               designer={d}
+                              onNavigate={() => setSearchOpen(false)}
                             />
                           ))}
                         </div>
