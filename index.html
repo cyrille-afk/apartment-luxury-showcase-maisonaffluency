@@ -198,6 +198,15 @@
         l.href = base + "/w_" + w + ",q_auto:good,c_fill,g_auto,f_auto/" + id;
         l.setAttribute("fetchpriority", "low");
         document.head.appendChild(l);
+        // Founders portraits (below-fold) — low priority preload
+        ["IMG_2542_1_kc4fvs", "Screen_Shot_2026-02-26_at_9.59.00_PM_wivwhs"].forEach(function(fid){
+          var fl = document.createElement("link");
+          fl.rel = "preload";
+          fl.as = "image";
+          fl.href = base + "/w_800,c_fill,q_auto,f_auto/" + fid;
+          fl.setAttribute("fetchpriority", "low");
+          document.head.appendChild(fl);
+        });
       })();
     </script>
 
