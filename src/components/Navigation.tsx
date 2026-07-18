@@ -322,17 +322,17 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
     )}>
       <div className="mx-auto max-w-7xl px-5 md:px-14 lg:px-24">
         {/* Mobile: single row */}
-          <div className="flex h-24 items-end pb-2.5 md:hidden relative justify-center">
+          <div className="flex h-24 items-center md:hidden relative justify-between px-4">
            <Sheet open={isOpen} onOpenChange={handleMobileMenuOpenChange}>
-            {/* Burger — absolute left with generous edge padding */}
+            {/* Burger — left edge, vertically centered with flag */}
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-12 w-12 text-primary absolute left-3 bottom-3" aria-label="Toggle menu">
+              <Button variant="ghost" size="icon" className="h-11 w-11 text-primary" aria-label="Toggle menu">
                 {isOpen ? <X className="h-9 w-9" strokeWidth={2.75} /> : <Menu className="h-9 w-9" strokeWidth={2.75} />}
               </Button>
             </SheetTrigger>
 
-            {/* Brand — centered, slightly larger for balance */}
-            <div className="flex flex-col items-center pb-0.5">
+            {/* Brand — centered horizontally */}
+            <div className="absolute left-1/2 -translate-x-1/2 flex flex-col items-center">
             <button onClick={scrollToTop} className="group cursor-pointer whitespace-nowrap">
               <span className="font-brand text-[2.25rem] font-bold tracking-widest text-foreground transition-all duration-300 group-hover:text-primary">
                 <span className="group-hover:text-accent transition-colors duration-300">A</span>FFLUENCY
@@ -345,10 +345,9 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
               </div>
             </div>
 
-            {/* Flag — absolute right (mobile), larger emoji for visual balance */}
-            <div className="absolute right-4 bottom-[22px]">
-              <ShippingDestinationSwitcher compact flagClassName="text-2xl" />
-            </div>
+            {/* Flag — right edge, vertically centered with burger */}
+            <ShippingDestinationSwitcher compact flagClassName="text-2xl" />
+
 
 
             <SheetContent side="left" className="w-full overflow-y-auto flex flex-col" aria-describedby={undefined}>
