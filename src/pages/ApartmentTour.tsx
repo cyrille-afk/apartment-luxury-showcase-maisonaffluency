@@ -5,7 +5,8 @@ import { APARTMENT_TOUR_VIDEO_URL } from "@/lib/apartmentTourVideo";
 import { trackVideoEvent, attachMilestoneTracking } from "@/lib/videoTracking";
 import ShareMenu from "@/components/ShareMenu";
 
-const CANONICAL_URL = "https://maisonaffluency.com/apartment-tour";
+const CANONICAL_URL = "https://www.maisonaffluency.com/apartment-tour";
+const SITE_URL = "https://www.maisonaffluency.com";
 
 const VIDEO_URL = APARTMENT_TOUR_VIDEO_URL;
 const OG_IMAGE = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,h_630,c_fill,g_auto,q_auto,f_jpg/bespoke-sofa_gxidtx.jpg";
@@ -57,6 +58,7 @@ const ApartmentTour = () => {
         <meta name="description" content="Cinematic tour of a bespoke Singapore apartment by Maison Affluency — collectible furniture, artisan craft, panoramic skyline views." />
         <link rel="canonical" href={CANONICAL_URL} />
         <meta name="twitter:card" content="player" />
+        <meta name="twitter:site" content="@maisonaffluency" />
         <meta name="twitter:title" content="A Private Apartment Tour — Maison Affluency" />
         <meta name="twitter:description" content="An exclusive cinematic tour of a bespoke Singapore apartment." />
         <meta name="twitter:image" content={OG_IMAGE} />
@@ -65,17 +67,63 @@ const ApartmentTour = () => {
         <meta name="twitter:player:height" content="1080" />
         <script type="application/ld+json">{JSON.stringify({
           "@context": "https://schema.org",
-          "@type": "VideoObject",
-          name: "A Private Apartment Tour — Maison Affluency",
-          description: "A cinematic tour of a bespoke Singapore apartment curated by Maison Affluency, showcasing collectible furniture, artisan craftsmanship and panoramic skyline views.",
-          thumbnailUrl: [OG_IMAGE],
-          contentUrl: VIDEO_URL,
-          uploadDate: "2025-01-01",
-          publisher: {
-            "@type": "Organization",
-            name: "Maison Affluency",
-            url: "https://www.maisonaffluency.com",
-          },
+          "@graph": [
+            {
+              "@type": "VideoObject",
+              "@id": `${CANONICAL_URL}#video`,
+              name: "A Private Apartment Tour — Maison Affluency",
+              description: "A cinematic tour of a bespoke Singapore apartment curated by Maison Affluency, showcasing collectible furniture, artisan craftsmanship and panoramic skyline views.",
+              thumbnailUrl: [OG_IMAGE],
+              contentUrl: VIDEO_URL,
+              embedUrl: CANONICAL_URL,
+              uploadDate: "2025-01-01",
+              inLanguage: "en",
+              isFamilyFriendly: true,
+              publisher: {
+                "@type": "Organization",
+                name: "Maison Affluency",
+                url: SITE_URL,
+                logo: {
+                  "@type": "ImageObject",
+                  url: `${SITE_URL}/favicon.png`,
+                },
+              },
+            },
+            {
+              "@type": "Residence",
+              "@id": `${CANONICAL_URL}#residence`,
+              name: "A Private Singapore Apartment by Maison Affluency",
+              description: "A bespoke private residence in Singapore curated by Maison Affluency, featuring collectible design furniture, artisan craftsmanship and panoramic skyline views.",
+              image: OG_IMAGE,
+              url: CANONICAL_URL,
+              address: {
+                "@type": "PostalAddress",
+                addressLocality: "Singapore",
+                addressCountry: "SG",
+              },
+            },
+            {
+              "@type": "BreadcrumbList",
+              itemListElement: [
+                { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
+                { "@type": "ListItem", position: 2, name: "A Private Apartment Tour", item: CANONICAL_URL },
+              ],
+            },
+            {
+              "@type": "WebPage",
+              "@id": CANONICAL_URL,
+              url: CANONICAL_URL,
+              name: "A Private Apartment Tour — Maison Affluency Singapore",
+              description: "Cinematic tour of a bespoke Singapore apartment by Maison Affluency — collectible furniture, artisan craft, panoramic skyline views.",
+              primaryImageOfPage: OG_IMAGE,
+              inLanguage: "en",
+              isPartOf: {
+                "@type": "WebSite",
+                name: "Maison Affluency",
+                url: SITE_URL,
+              },
+            },
+          ],
         })}</script>
       </Helmet>
 
