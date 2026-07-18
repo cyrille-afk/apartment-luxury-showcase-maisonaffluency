@@ -78,15 +78,48 @@ export default function TradeAdminCollectorApplications() {
   const selected = filtered.find((r) => r.id === selectedId) ?? null;
 
   const updateStatus = useMutation({
-    mutationFn: async ({ id, status }: { id: string; status: "approved" | "rejected" | "pending" }) => {
+    mutationFn: async ({
+      id,
+      status,
+      row,
+    }: {
+      id: string;
+      status: "approved" | "rejected" | "pending";
+      row: ApplicationRow;
+    }) => {
       const { error } = await supabase
         .from("collector_applications")
         .update({ status, reviewed_by: user!.id, reviewed_at: new Date().toISOString() })
         .eq("id", id);
       if (error) throw error;
+
+      // Notify applicant on approve/reject (best-effort; do not block on failure).
+      if (status === "approved" || status === "rejected") {
+        const templateName =
+          status === "approved" ? "collector-approval" : "collector-rejection";
+        const firstName = row.full_name.split(/\s+/)[0] || row.full_name;
+        try {
+          await supabase.functions.invoke("send-transactional-email", {
+            body: {
+              templateName,
+              recipientEmail: row.email,
+              idempotencyKey: `collector-${status}-${id}`,
+              templateData: { name: firstName },
+            },
+          });
+        } catch (e) {
+          console.error("Collector notification email failed", e);
+        }
+      }
     },
     onSuccess: (_, vars) => {
-      toast({ title: `Application ${vars.status}` });
+      const suffix =
+        vars.status === "approved"
+          ? " — notification email sent"
+          : vars.status === "rejected"
+          ? " — notification email sent"
+          : "";
+      toast({ title: `Application ${vars.status}${suffix}` });
       queryClient.invalidateQueries({ queryKey: ["admin-collector-apps"] });
     },
     onError: (e: any) => {
