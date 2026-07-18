@@ -388,7 +388,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
       }
     } catch {}
     return [
-      { kind: "msg", role: "assistant", content: surface === "public" ? PUBLIC_GREETING : greetingForContext(stageFromPath(pathname), pathname, loadTone(), loadLang()).replace(/{concierge_name}/g, name) },
+      { kind: "msg", role: "assistant", content: surface === "public" ? (initialGreeting || PUBLIC_GREETING) : greetingForContext(stageFromPath(pathname), pathname, loadTone(), loadLang()).replace(/{concierge_name}/g, name) },
     ];
   });
   const [input, setInput] = useState<string>(() => {
