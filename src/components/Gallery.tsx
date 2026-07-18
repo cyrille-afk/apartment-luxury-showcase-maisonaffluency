@@ -1104,6 +1104,9 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                             sizes="100vw"
                             className={`h-full w-full object-cover brightness-[1.05] contrast-[1.08] saturate-[1.05] ${item.image === bespokeSofaImage ? "object-[center_35%]" : ""}`}
                             loading="lazy"
+                            decoding="async"
+                            width={isHotspotSection ? 800 : 900}
+                            height={isHotspotSection ? 1000 : 1200}
                           />
                           {!isHotspotSection && (
                             <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
