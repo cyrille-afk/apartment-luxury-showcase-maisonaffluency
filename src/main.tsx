@@ -1,10 +1,9 @@
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
-import { startBuildVersionWatcher } from "./lib/buildVersionWatcher";
 import HmrStatusBanner from "./components/dev/HmrStatusBanner";
 import BuildUpdateBanner from "./components/BuildUpdateBanner";
-import { initRum } from "./lib/rum";
+
 
 const CACHE_RESET_KEY = "__ma_frontend_cache_reset_v2";
 
@@ -81,13 +80,19 @@ void clearStaleFrontendCachesOnce().then(() => {
 });
 pinStandaloneHomeLaunchToHero();
 
-// Poll /version.json and dispatch app:build-update-available on new deploys.
-startBuildVersionWatcher();
+// Defer non-critical boot work (build-update watcher + RUM) off the initial
+// JS critical path. These end up in their own async chunks, so Lighthouse
+// stops flagging them as "unused JavaScript" during LCP.
+const __deferBootWork = () => {
+  void import("./lib/buildVersionWatcher").then((m) => m.startBuildVersionWatcher());
+  void import("./lib/rum").then((m) => m.initRum());
+};
+if (typeof (window as any).requestIdleCallback === "function") {
+  (window as any).requestIdleCallback(__deferBootWork, { timeout: 3000 });
+} else {
+  setTimeout(__deferBootWork, 1500);
+}
 
-// Real-user LCP monitoring — beacons to GA4 once the page is hidden or the
-// user first interacts. Slices by `cookie_banner_mounted_before_lcp` so we
-// can verify in production that the banner gating worked.
-initRum();
 
 // CSS is now loaded (import above is synchronous in the bundled output).
 // Reveal content by adding css-ready — this disables the FOUC guard in index.html.
