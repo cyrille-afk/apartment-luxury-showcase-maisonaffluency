@@ -25,10 +25,14 @@ function optimizeHtmlPlugin(buildId: string): Plugin {
         `    <meta name="app-build-id" content="${buildId}" />`;
       html = html.replace('<meta charset="UTF-8" />', metaInject);
 
-      // 1. Convert render-blocking CSS to async preload
+      // 1. Convert render-blocking CSS to non-blocking load.
+      //    The media="print" → media="all" swap is the only pattern current
+      //    Lighthouse credits as "not render-blocking" (preload+onload still
+      //    shows up in the critical waterfall). An inline <style> block in
+      //    index.html covers above-the-fold styles so there's no FOUC.
       html = html.replace(
         /<link rel="stylesheet" crossorigin href="(\/assets\/[^"]+\.css)">/g,
-        '<link rel="preload" as="style" href="$1" onload="this.onload=null;this.rel=\'stylesheet\';document.documentElement.classList.add(\'css-ready\')">' +
+        '<link rel="stylesheet" href="$1" media="print" onload="this.media=\'all\';this.onload=null;document.documentElement.classList.add(\'css-ready\')">' +
         '<noscript><link rel="stylesheet" href="$1"></noscript>'
       );
 
