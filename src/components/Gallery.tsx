@@ -1533,6 +1533,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
           designerName={quoteProduct.designer}
         />
       )}
+      <PrivateTourDialog open={tourDialogOpen} onOpenChange={setTourDialogOpen} />
       {/* Render outside Dialog for non-lightbox hotspot views */}
       {!onHotspotAddToQuote && !lightboxOpen && (
         <PublicProductLightbox
