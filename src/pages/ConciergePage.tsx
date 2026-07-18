@@ -130,9 +130,10 @@ const ConciergePage: React.FC = () => {
   // While the very first auth check resolves, render nothing.
   if (authLoading && !authorized) return null;
 
-  // Unauthenticated (and never was) → bounce to landing page. The toast is
-  // fired by the effect above so it survives the redirect.
-  if (!user && !authorized) {
+  // Unauthenticated (and never was, and no portal session) → bounce to
+  // landing page. The toast is fired by the effect above so it survives the
+  // redirect.
+  if (!user && !portalSession && !authorized) {
     return <Navigate to="/" replace />;
   }
 
