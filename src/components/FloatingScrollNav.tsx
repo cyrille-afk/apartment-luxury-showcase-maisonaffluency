@@ -5,15 +5,23 @@ import { useNavigate } from "react-router-dom";
 interface Props {
   /** Optional path for the menu button. Defaults to /designers */
   menuHref?: string;
+  /** If true, the menu button opens the main site navigation menu instead of navigating. */
+  openMainMenu?: boolean;
+  /** ARIA label for the menu button. */
+  menuLabel?: string;
   /** Show after scrolling this many px. */
   threshold?: number;
 }
 
 /**
- * Mobile/PWA-only floating helpers: scroll-to-top + quick nav back.
- * Useful on long curator-pick pages.
+ * Mobile/PWA-only floating helpers: scroll-to-top + quick nav / menu.
  */
-export default function FloatingScrollNav({ menuHref = "/designers", threshold = 600 }: Props) {
+export default function FloatingScrollNav({
+  menuHref = "/designers",
+  openMainMenu = false,
+  menuLabel,
+  threshold = 600,
+}: Props) {
   const [visible, setVisible] = useState(false);
   const navigate = useNavigate();
 
@@ -26,14 +34,22 @@ export default function FloatingScrollNav({ menuHref = "/designers", threshold =
 
   if (!visible) return null;
 
+  const onMenuClick = () => {
+    if (openMainMenu) {
+      window.dispatchEvent(new Event("open-main-menu"));
+    } else {
+      navigate(menuHref);
+    }
+  };
+
   return (
     <div
       className="fixed z-40 right-3 md:hidden flex flex-col gap-2 print:hidden"
       style={{ bottom: "calc(env(safe-area-inset-bottom, 0px) + 1rem)" }}
     >
       <button
-        onClick={() => navigate(menuHref)}
-        aria-label="Back to designers"
+        onClick={onMenuClick}
+        aria-label={menuLabel ?? (openMainMenu ? "Open menu" : "Back to designers")}
         className="h-11 w-11 rounded-full bg-foreground text-background shadow-lg flex items-center justify-center active:scale-95 transition-transform"
       >
         <Menu className="h-5 w-5" />

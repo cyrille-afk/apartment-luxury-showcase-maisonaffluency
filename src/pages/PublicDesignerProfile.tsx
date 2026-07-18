@@ -1331,7 +1331,7 @@ const PublicDesignerProfile = () => {
         <Footer />
       </div>
 
-      <FloatingScrollNav menuHref={fromDesignersHero ? "/designers?find=1" : "/designers"} />
+      <FloatingScrollNav menuHref="/designers?find=1" menuLabel="Back to A–Z directory" />
 
       <PublicProductLightbox
         product={lightboxItem}
