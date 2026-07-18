@@ -2446,6 +2446,16 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
               >
                 🇨🇳 中文
               </button>
+              {lang === "zh" ? (
+                <button
+                  onPointerDown={(e) => e.stopPropagation()}
+                  onClick={() => setCnViewingOpen(true)}
+                  className="text-[11px] px-2 py-1 rounded-md border border-accent/60 text-accent bg-accent/5 hover:bg-accent/10 transition-colors font-body whitespace-nowrap"
+                  title="Book Singapore District 9 viewing"
+                >
+                  预约鉴赏
+                </button>
+              ) : null}
               <div className="relative">
                 <button
                   onPointerDown={(e) => e.stopPropagation()}
