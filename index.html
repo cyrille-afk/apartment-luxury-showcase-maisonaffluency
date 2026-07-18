@@ -183,6 +183,24 @@
       })();
     </script>
 
+    <!-- Homepage: preload "Tour Our Gallery" video poster at low priority so
+         it lands after the hero LCP but before the user scrolls to it. -->
+    <script>
+      (function(){
+        if (window.location.pathname !== "/") return;
+        var base = "https://res.cloudinary.com/dif1oamtj/image/upload";
+        var id = "bespoke-sofa_gxidtx";
+        var isMobile = window.matchMedia("(max-width: 767px)").matches;
+        var w = isMobile ? 780 : 1600;
+        var l = document.createElement("link");
+        l.rel = "preload";
+        l.as = "image";
+        l.href = base + "/w_" + w + ",q_auto:good,c_fill,g_auto,f_auto/" + id;
+        l.setAttribute("fetchpriority", "low");
+        document.head.appendChild(l);
+      })();
+    </script>
+
 
 
 
