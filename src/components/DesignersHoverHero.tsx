@@ -139,10 +139,11 @@ function DesignerGridCard({
     <Link
       to={`/designers/${designer.slug}`}
       state={{ fromDesignersHero: true, fromDesignersAZ: true }}
+      data-nav-state={JSON.stringify({ fromDesignersHero: true, fromDesignersAZ: true })}
       onClick={onNavigate}
-      data-from-az="true"
       className="group relative block w-full aspect-[4/5] rounded-xl overflow-hidden bg-neutral-800 ring-1 ring-white/10 focus:outline-none focus:ring-2 focus:ring-gold/60"
       aria-label={`View ${displayName}`}
+
 
       style={
         lqip
