@@ -117,19 +117,29 @@ const Index = ({ categoryMode = false }: IndexProps = {}) => {
   // Track scroll depth for GA4 engagement
   useScrollDepthTracking();
 
-  // Lock page scrolling on the homepage hero — gallery is reachable only via nav.
+  const unlockPageScroll = useCallback(() => {
+    document.documentElement.style.overflow = "";
+    document.body.style.overflow = "";
+  }, []);
+
+  // Lock page scrolling only on the first hero view. Once the user enters a
+  // below-fold section, vertical scrolling must be restored for gallery/Instagram.
   useEffect(() => {
     if (routeIsCategory) return;
     const prevHtml = document.documentElement.style.overflow;
     const prevBody = document.body.style.overflow;
-    document.documentElement.style.overflow = "hidden";
-    document.body.style.overflow = "hidden";
-    window.scrollTo(0, 0);
+    if (!parseSectionHash(window.location.hash) || window.location.hash === "#home") {
+      document.documentElement.style.overflow = "hidden";
+      document.body.style.overflow = "hidden";
+      window.scrollTo(0, 0);
+    } else {
+      unlockPageScroll();
+    }
     return () => {
       document.documentElement.style.overflow = prevHtml;
       document.body.style.overflow = prevBody;
     };
-  }, [routeIsCategory]);
+  }, [routeIsCategory, unlockPageScroll]);
 
   // The homepage must render its below-fold sections deterministically on first
   // load. Delaying these behind `load`/`requestIdleCallback` made production
@@ -184,6 +194,7 @@ const Index = ({ categoryMode = false }: IndexProps = {}) => {
     const revealBelowFold = () => {
       skipNextScrollRestore.current = true;
       sessionStorage.removeItem("__scroll_y");
+      unlockPageScroll();
       setShowNavigation(true);
       setShowScrollProgress(true);
       setShowBelowFoldSections(true);
@@ -201,7 +212,7 @@ const Index = ({ categoryMode = false }: IndexProps = {}) => {
       window.removeEventListener("wheel", revealBelowFold);
       window.removeEventListener("touchmove", revealBelowFold);
     };
-  }, []);
+  }, [unlockPageScroll]);
 
   // On mount: restore exact scroll position OR scroll to section hash
   useEffect(() => {
@@ -220,6 +231,7 @@ const Index = ({ categoryMode = false }: IndexProps = {}) => {
     // Explicit section hash should always win over any stored scroll position.
     if (sectionId && sectionId !== "home") {
       sessionStorage.removeItem("__scroll_y");
+      unlockPageScroll();
       let attempts = 0;
       const tryScroll = () => {
         const el = document.getElementById(sectionId);
@@ -277,7 +289,7 @@ const Index = ({ categoryMode = false }: IndexProps = {}) => {
       };
       setTimeout(tryRestore, 100);
     }
-  }, [showBelowFoldSections]);
+  }, [showBelowFoldSections, unlockPageScroll]);
 
   // Track which section is in view without mutating the URL.
   useEffect(() => {
