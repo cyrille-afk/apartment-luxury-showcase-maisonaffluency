@@ -250,7 +250,7 @@ const ConciergePage: React.FC = () => {
             </p>
           </section>
           <AutoOpenConcierge />
-          <PublicConciergeMount />
+          <PublicConciergeMount initialGreeting={bespokeGreeting} />
 
           {/* Written brief fallback */}
           <section className="mt-16 border-t border-border/60 pt-4">
