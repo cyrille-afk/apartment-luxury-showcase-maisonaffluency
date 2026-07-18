@@ -349,7 +349,7 @@ const sanitizeTimelineForAttachments = (items: TimelineItem[]) =>
 
 export type ConciergeSurface = "trade" | "public";
 
-export function AIConcierge({ surface = "trade" }: { surface?: ConciergeSurface } = {}) {
+export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: ConciergeSurface; initialGreeting?: string } = {}) {
   const { pathname, search } = useLocation();
   const navigate = useNavigate();
   const { currentStudio } = useStudio();
