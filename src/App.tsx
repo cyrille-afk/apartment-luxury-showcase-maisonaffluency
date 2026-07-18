@@ -49,6 +49,8 @@ const TradeAiUsagePrintCheck = lazy(() => import("./pages/TradeAiUsagePrintCheck
 const TradeAdminConciergeLeads = lazy(() => import("./pages/TradeAdminConciergeLeads"));
 const TradeAdminInquiries = lazy(() => import("./pages/TradeAdminInquiries"));
 const TradeAdminCollectorApplications = lazy(() => import("./pages/TradeAdminCollectorApplications"));
+const TradeAdminPortalInvites = lazy(() => import("./pages/TradeAdminPortalInvites"));
+const PortalCN = lazy(() => import("./pages/PortalCN"));
 const TradeAdminMcpUsage = lazy(() => import("./pages/TradeAdminMcpUsage"));
 const TradePayoutStatement = lazy(() => import("./pages/TradePayoutStatement"));
 
