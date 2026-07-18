@@ -31,6 +31,7 @@ const StudioSubmit = lazy(() => import("./pages/StudioSubmit"));
 const StudioProfile = lazy(() => import("./pages/StudioProfile"));
 const StudioInsights = lazy(() => import("./pages/StudioInsights"));
 const TradeRegister = lazy(() => import("./pages/TradeRegister"));
+const CollectorSignup = lazy(() => import("./pages/CollectorSignup"));
 const TradeApplicationEdit = lazy(() => import("./pages/TradeApplicationEdit"));
 const TradeLayout = lazy(() => import("./pages/TradeLayout"));
 const TradeGuides = lazy(() => import("./pages/TradeGuides"));
@@ -545,6 +546,7 @@ const App = () => {
                   <Route path="/trade-program" element={<Suspense fallback={null}><TradeLanding /></Suspense>} />
                   <Route path="/trade-demo" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeDemoPage /></Suspense>} />
                   <Route path="/trade/register" element={<Suspense fallback={null}><TradeRegister /></Suspense>} />
+                  <Route path="/collector-signup" element={<Suspense fallback={null}><CollectorSignup /></Suspense>} />
                   <Route path="/trade/apply/complete/:token" element={<Suspense fallback={null}><TradeApplicationEdit /></Suspense>} />
                   <Route path="/reset-password" element={<Suspense fallback={null}><ResetPassword /></Suspense>} />
                   <Route path="/product/:id" element={<Suspense fallback={<PageLoadingSkeleton />}><ProductPage /></Suspense>} />

@@ -1207,6 +1207,51 @@ export type Database = {
         }
         Relationships: []
       }
+      collector_applications: {
+        Row: {
+          collecting_interests: string | null
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          occupation: string | null
+          reference_notes: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          collecting_interests?: string | null
+          created_at?: string
+          email: string
+          full_name: string
+          id?: string
+          occupation?: string | null
+          reference_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          collecting_interests?: string | null
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          occupation?: string | null
+          reference_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       competitor_designers: {
         Row: {
           created_at: string
@@ -7285,6 +7330,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      has_verified_access: { Args: { _user_id: string }; Returns: boolean }
       invoke_scrape_products_with_retry: { Args: never; Returns: undefined }
       is_client_trade_approved: {
         Args: { _client_id: string }
@@ -7462,7 +7508,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "trade_user" | "super_admin"
+      app_role: "admin" | "trade_user" | "super_admin" | "collector"
       axonometric_request_status:
         | "pending"
         | "in_progress"
@@ -7630,7 +7676,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "trade_user", "super_admin"],
+      app_role: ["admin", "trade_user", "super_admin", "collector"],
       axonometric_request_status: [
         "pending",
         "in_progress",
