@@ -63,7 +63,10 @@ export default function ShippingDestinationSwitcher({ className, compact, flagCl
         )}
       >
         <span
-          className={compact ? "text-xl leading-none" : "text-2xl leading-none"}
+          className={cn(
+            compact ? "text-xl leading-none" : "text-2xl leading-none",
+            flagClassName
+          )}
           aria-hidden="true"
         >
           {isoToFlag(current.iso)}
