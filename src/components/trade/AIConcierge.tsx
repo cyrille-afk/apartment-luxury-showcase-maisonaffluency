@@ -2158,6 +2158,33 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
   const sendRef = useRef(send);
   useEffect(() => { sendRef.current = send; }, [send]);
 
+  // Mandarin auto-hand-off: after each completed assistant turn on lang=zh,
+  // ask the CN brief endpoint to classify intent. Server-side dedupe keeps
+  // a single session to one brief per 24h (unless the viewing CTA forces it).
+  useEffect(() => {
+    if (lang !== "zh" || streaming) return;
+    const chatMsgs = timeline.filter((t) => t.kind === "msg") as any[];
+    const userTurns = chatMsgs.filter((t) => t.role === "user").length;
+    if (userTurns < 2) return;
+    if (userTurns === cnLastBriefUserTurnRef.current) return;
+    cnLastBriefUserTurnRef.current = userTurns;
+    const sessionId = typeof window !== "undefined"
+      ? sessionStorage.getItem("cn_portal:session_id")
+      : null;
+    const invitedName = typeof window !== "undefined"
+      ? sessionStorage.getItem("cn_portal:invited_name")
+      : null;
+    const payload = {
+      session_id: sessionId,
+      invited_name: invitedName,
+      messages: chatMsgs.map((t) => ({ role: t.role, content: t.content })),
+    };
+    supabase.functions
+      .invoke("concierge-cn-brief", { body: payload })
+      .catch((e) => console.warn("[cn-brief]", e));
+  }, [timeline, streaming, lang]);
+
+
 
   const handleProposalResolved = (
     proposalIndex: number,
