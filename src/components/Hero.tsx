@@ -39,7 +39,7 @@ const revealAndScrollTo = (sectionId: string) => {
 };
 
 const scrollToOverview = () => {
-  revealAndScrollTo("gallery");
+  revealAndScrollTo("apartment-tour");
 };
 
 const scrollToMeetDesigners = () => {
