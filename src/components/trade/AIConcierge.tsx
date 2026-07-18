@@ -2418,6 +2418,28 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                   </div>
                 )}
               </div>
+              <button
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={() => {
+                  const next: Lang = lang === "zh" ? "en" : "zh";
+                  setLang(next);
+                  try { saveLang(next); } catch {}
+                  if (next === "zh") {
+                    const greeting = `尊敬的 测试贵宾，欢迎。我是您的专属礼宾。\n\n了解您时间珍贵，只需一句话告诉我您目前最紧急的豪宅项目风格、空间尺度或缺失的核心孤品（支持语音或图片），我将立即为您从全球 300 多位设计大师中进行定向筛选。`;
+                    setTimeline((prev) => [...prev, { kind: "msg", role: "assistant", content: greeting }]);
+                  }
+                }}
+                className={cn(
+                  "text-[11px] px-2 py-1 rounded-md border transition-colors font-body",
+                  lang === "zh"
+                    ? "border-accent text-accent bg-accent/10"
+                    : "border-border text-muted-foreground hover:text-foreground hover:bg-muted"
+                )}
+                aria-pressed={lang === "zh"}
+                title="Toggle Mandarin (QA)"
+              >
+                🇨🇳 中文
+              </button>
               <div className="relative">
                 <button
                   onPointerDown={(e) => e.stopPropagation()}
