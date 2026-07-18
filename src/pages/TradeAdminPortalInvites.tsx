@@ -264,12 +264,23 @@ export default function TradeAdminPortalInvites() {
                     )}
                   </td>
                   <td className="px-4 py-3 text-right">
-                    <button
-                      onClick={() => toggleMut.mutate(r)}
-                      className="text-xs px-2 py-1 border border-border rounded hover:bg-muted"
-                    >
-                      {r.is_active ? "Disable" : "Enable"}
-                    </button>
+                    <div className="inline-flex items-center gap-2">
+                      <a
+                        href={`/concierge?lang=zh&preview=1&name=${encodeURIComponent(r.invited_name || "测试贵宾")}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-xs px-2 py-1 border border-border rounded hover:bg-muted"
+                        title="Open the Mandarin concierge with this invite's name (does not consume the code)"
+                      >
+                        Preview CN
+                      </a>
+                      <button
+                        onClick={() => toggleMut.mutate(r)}
+                        className="text-xs px-2 py-1 border border-border rounded hover:bg-muted"
+                      >
+                        {r.is_active ? "Disable" : "Enable"}
+                      </button>
+                    </div>
                   </td>
                 </tr>
               );
