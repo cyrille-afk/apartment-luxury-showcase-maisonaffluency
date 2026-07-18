@@ -32,9 +32,10 @@ import {
 interface Props {
   className?: string;
   compact?: boolean;
+  flagClassName?: string;
 }
 
-export default function ShippingDestinationSwitcher({ className, compact }: Props) {
+export default function ShippingDestinationSwitcher({ className, compact, flagClassName }: Props) {
   const current = useShippingDestination();
   const [open, setOpen] = useState(false);
   const [pendingIso, setPendingIso] = useState(current.iso);
@@ -62,7 +63,10 @@ export default function ShippingDestinationSwitcher({ className, compact }: Prop
         )}
       >
         <span
-          className={compact ? "text-xl leading-none" : "text-2xl leading-none"}
+          className={cn(
+            compact ? "text-xl leading-none" : "text-2xl leading-none",
+            flagClassName
+          )}
           aria-hidden="true"
         >
           {isoToFlag(current.iso)}

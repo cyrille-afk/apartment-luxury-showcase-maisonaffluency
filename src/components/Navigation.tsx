@@ -326,8 +326,8 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
            <Sheet open={isOpen} onOpenChange={handleMobileMenuOpenChange}>
             {/* Burger — absolute left with generous edge padding */}
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-16 w-16 text-primary absolute left-2 bottom-2" aria-label="Toggle menu">
-                {isOpen ? <X className="h-11 w-11" strokeWidth={2.25} /> : <Menu className="h-11 w-11" strokeWidth={2.25} />}
+              <Button variant="ghost" size="icon" className="h-12 w-12 text-primary absolute left-3 bottom-3" aria-label="Toggle menu">
+                {isOpen ? <X className="h-9 w-9" strokeWidth={2.75} /> : <Menu className="h-9 w-9" strokeWidth={2.75} />}
               </Button>
             </SheetTrigger>
 
@@ -345,9 +345,9 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
               </div>
             </div>
 
-            {/* Flag — absolute right (mobile), 44×44 tap target and generous edge padding */}
+            {/* Flag — absolute right (mobile), larger emoji for visual balance */}
             <div className="absolute right-4 bottom-[22px]">
-              <ShippingDestinationSwitcher compact />
+              <ShippingDestinationSwitcher compact flagClassName="text-2xl" />
             </div>
 
 
