@@ -5,7 +5,8 @@ import { APARTMENT_TOUR_VIDEO_URL } from "@/lib/apartmentTourVideo";
 import { trackVideoEvent, attachMilestoneTracking } from "@/lib/videoTracking";
 import ShareMenu from "@/components/ShareMenu";
 
-const CANONICAL_URL = "https://maisonaffluency.com/apartment-tour";
+const CANONICAL_URL = "https://www.maisonaffluency.com/apartment-tour";
+const SITE_URL = "https://www.maisonaffluency.com";
 
 const VIDEO_URL = APARTMENT_TOUR_VIDEO_URL;
 const OG_IMAGE = "https://res.cloudinary.com/dif1oamtj/image/upload/w_1200,h_630,c_fill,g_auto,q_auto,f_jpg/bespoke-sofa_gxidtx.jpg";
