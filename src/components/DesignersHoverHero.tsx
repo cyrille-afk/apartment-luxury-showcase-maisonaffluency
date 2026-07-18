@@ -141,6 +141,8 @@ function DesignerGridCard({
       state={{ fromDesignersHero: true, fromDesignersAZ: true }}
       data-nav-state={JSON.stringify({ fromDesignersHero: true, fromDesignersAZ: true })}
       onClick={onNavigate}
+      onTouchStart={() => { import("../pages/PublicDesignerProfile").catch(() => {}); }}
+      onMouseEnter={() => { import("../pages/PublicDesignerProfile").catch(() => {}); }}
       className="group relative block w-full aspect-[4/5] rounded-xl overflow-hidden bg-neutral-800 ring-1 ring-white/10 focus:outline-none focus:ring-2 focus:ring-gold/60"
       aria-label={`View ${displayName}`}
 
@@ -1091,8 +1093,14 @@ const DesignersHoverHero = () => {
     if (!searchOpen) {
       setExpandedLetters(new Set(["A"]));
       setActiveAccordionLetter(null);
+    } else {
+      // Warm the PublicDesignerProfile chunk as soon as the A-Z opens so tapping
+      // a card doesn't flash the Suspense fallback (which reads visually like
+      // the designers landing page while the JS chunk downloads).
+      import("../pages/PublicDesignerProfile").catch(() => {});
     }
   }, [searchOpen]);
+
 
   // Desktop accordion: when a letter opens, move the sheet viewport so the
   // expanded designer list is visible instead of being cut off at the bottom.
