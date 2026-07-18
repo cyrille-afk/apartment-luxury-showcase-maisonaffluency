@@ -415,6 +415,18 @@ const TradeAdmin = () => {
         <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
       </Link>
 
+      <Link
+        to="/trade/admin/portal-invites"
+        className="flex items-center gap-2 px-4 py-3 rounded-lg border border-border hover:border-foreground/30 transition-all group"
+      >
+        <Inbox className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+        <div className="flex-1">
+          <span className="font-display text-sm text-foreground">China Portal Invites</span>
+          <p className="font-body text-[10px] text-muted-foreground">Issue single-use or campaign invitation codes for the /cn invite-only portal. Track usage and revoke access.</p>
+        </div>
+        <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+      </Link>
+
 
 
 

@@ -49,6 +49,8 @@ const TradeAiUsagePrintCheck = lazy(() => import("./pages/TradeAiUsagePrintCheck
 const TradeAdminConciergeLeads = lazy(() => import("./pages/TradeAdminConciergeLeads"));
 const TradeAdminInquiries = lazy(() => import("./pages/TradeAdminInquiries"));
 const TradeAdminCollectorApplications = lazy(() => import("./pages/TradeAdminCollectorApplications"));
+const TradeAdminPortalInvites = lazy(() => import("./pages/TradeAdminPortalInvites"));
+const PortalCN = lazy(() => import("./pages/PortalCN"));
 const TradeAdminMcpUsage = lazy(() => import("./pages/TradeAdminMcpUsage"));
 const TradePayoutStatement = lazy(() => import("./pages/TradePayoutStatement"));
 
@@ -548,6 +550,7 @@ const App = () => {
                   <Route path="/trade-demo" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeDemoPage /></Suspense>} />
                   <Route path="/trade/register" element={<Suspense fallback={null}><TradeRegister /></Suspense>} />
                   <Route path="/collector-signup" element={<Suspense fallback={null}><CollectorSignup /></Suspense>} />
+                  <Route path="/cn" element={<Suspense fallback={null}><PortalCN /></Suspense>} />
                   <Route path="/trade/apply/complete/:token" element={<Suspense fallback={null}><TradeApplicationEdit /></Suspense>} />
                   <Route path="/reset-password" element={<Suspense fallback={null}><ResetPassword /></Suspense>} />
                   <Route path="/product/:id" element={<Suspense fallback={<PageLoadingSkeleton />}><ProductPage /></Suspense>} />
@@ -590,6 +593,7 @@ const App = () => {
                     <Route path="admin/concierge-leads" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAdminConciergeLeads /></Suspense>} />
                     <Route path="admin/inquiries" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAdminInquiries /></Suspense>} />
                     <Route path="admin/collector-applications" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAdminCollectorApplications /></Suspense>} />
+                    <Route path="admin/portal-invites" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAdminPortalInvites /></Suspense>} />
                     <Route path="admin/mcp-usage" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeAdminMcpUsage /></Suspense>} />
 
                     <Route path="registered-users" element={<TradeRegisteredUsers />} />

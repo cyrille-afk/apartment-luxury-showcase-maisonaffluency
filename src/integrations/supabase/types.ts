@@ -3611,6 +3611,149 @@ export type Database = {
           },
         ]
       }
+      portal_invites: {
+        Row: {
+          campaign_name: string | null
+          code: string
+          code_type: string
+          created_at: string
+          created_by: string | null
+          expires_at: string | null
+          id: string
+          invited_company: string | null
+          invited_name: string | null
+          is_active: boolean
+          max_uses: number
+          notes: string | null
+          updated_at: string
+          uses_count: number
+        }
+        Insert: {
+          campaign_name?: string | null
+          code: string
+          code_type?: string
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          id?: string
+          invited_company?: string | null
+          invited_name?: string | null
+          is_active?: boolean
+          max_uses?: number
+          notes?: string | null
+          updated_at?: string
+          uses_count?: number
+        }
+        Update: {
+          campaign_name?: string | null
+          code?: string
+          code_type?: string
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          id?: string
+          invited_company?: string | null
+          invited_name?: string | null
+          is_active?: boolean
+          max_uses?: number
+          notes?: string | null
+          updated_at?: string
+          uses_count?: number
+        }
+        Relationships: []
+      }
+      portal_redemptions: {
+        Row: {
+          corporate_id: string
+          id: string
+          invite_id: string
+          ip_address: unknown
+          redeemed_at: string
+          session_id: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          corporate_id: string
+          id?: string
+          invite_id: string
+          ip_address?: unknown
+          redeemed_at?: string
+          session_id?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          corporate_id?: string
+          id?: string
+          invite_id?: string
+          ip_address?: unknown
+          redeemed_at?: string
+          session_id?: string | null
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "portal_redemptions_invite_id_fkey"
+            columns: ["invite_id"]
+            isOneToOne: false
+            referencedRelation: "portal_invites"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "portal_redemptions_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "portal_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      portal_sessions: {
+        Row: {
+          corporate_id: string
+          created_at: string
+          expires_at: string
+          id: string
+          invite_id: string
+          ip_address: unknown
+          last_seen_at: string
+          revoked_at: string | null
+          token: string
+          user_agent: string | null
+        }
+        Insert: {
+          corporate_id: string
+          created_at?: string
+          expires_at: string
+          id?: string
+          invite_id: string
+          ip_address?: unknown
+          last_seen_at?: string
+          revoked_at?: string | null
+          token?: string
+          user_agent?: string | null
+        }
+        Update: {
+          corporate_id?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          invite_id?: string
+          ip_address?: unknown
+          last_seen_at?: string
+          revoked_at?: string | null
+          token?: string
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "portal_sessions_invite_id_fkey"
+            columns: ["invite_id"]
+            isOneToOne: false
+            referencedRelation: "portal_invites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       presentation_comments: {
         Row: {
           content: string
@@ -7475,6 +7618,15 @@ export type Database = {
         }
         Returns: string
       }
+      redeem_portal_invite: {
+        Args: {
+          _code: string
+          _corporate_id: string
+          _ip?: unknown
+          _user_agent?: string
+        }
+        Returns: Json
+      }
       remap_product_descriptors: { Args: never; Returns: number }
       rotate_board_token: { Args: { _board_id: string }; Returns: string }
       sanitize_biography_citations: { Args: { input: string }; Returns: string }
@@ -7506,9 +7658,15 @@ export type Database = {
         }
         Returns: string
       }
+      validate_portal_session: { Args: { _token: string }; Returns: Json }
     }
     Enums: {
-      app_role: "admin" | "trade_user" | "super_admin" | "collector"
+      app_role:
+        | "admin"
+        | "trade_user"
+        | "super_admin"
+        | "collector"
+        | "affluency_member"
       axonometric_request_status:
         | "pending"
         | "in_progress"
@@ -7676,7 +7834,13 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "trade_user", "super_admin", "collector"],
+      app_role: [
+        "admin",
+        "trade_user",
+        "super_admin",
+        "collector",
+        "affluency_member",
+      ],
       axonometric_request_status: [
         "pending",
         "in_progress",
