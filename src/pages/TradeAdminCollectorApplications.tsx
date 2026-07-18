@@ -305,7 +305,7 @@ export default function TradeAdminCollectorApplications() {
                 <div className="flex flex-wrap items-center gap-2 pt-3 border-t border-border">
                   <button
                     disabled={updateStatus.isPending || selected.status === "approved"}
-                    onClick={() => updateStatus.mutate({ id: selected.id, status: "approved" })}
+                    onClick={() => updateStatus.mutate({ id: selected.id, status: "approved", row: selected })}
                     className="inline-flex items-center gap-1.5 px-4 py-2 rounded-md bg-emerald-600 text-white font-body text-xs uppercase tracking-[0.1em] hover:bg-emerald-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     <CheckCircle2 className="h-3.5 w-3.5" />
@@ -313,7 +313,7 @@ export default function TradeAdminCollectorApplications() {
                   </button>
                   <button
                     disabled={updateStatus.isPending || selected.status === "rejected"}
-                    onClick={() => updateStatus.mutate({ id: selected.id, status: "rejected" })}
+                    onClick={() => updateStatus.mutate({ id: selected.id, status: "rejected", row: selected })}
                     className="inline-flex items-center gap-1.5 px-4 py-2 rounded-md border border-destructive/40 text-destructive font-body text-xs uppercase tracking-[0.1em] hover:bg-destructive/10 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     <XCircle className="h-3.5 w-3.5" />
@@ -322,7 +322,7 @@ export default function TradeAdminCollectorApplications() {
                   {selected.status !== "pending" && (
                     <button
                       disabled={updateStatus.isPending}
-                      onClick={() => updateStatus.mutate({ id: selected.id, status: "pending" })}
+                      onClick={() => updateStatus.mutate({ id: selected.id, status: "pending", row: selected })}
                       className="inline-flex items-center gap-1.5 px-3 py-2 rounded-md border border-border text-muted-foreground font-body text-xs uppercase tracking-[0.1em] hover:text-foreground transition-colors disabled:opacity-40"
                     >
                       Reset to pending
