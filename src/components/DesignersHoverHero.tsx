@@ -389,8 +389,25 @@ const DesignersHoverHero = () => {
   const [showPortalCursor, setShowPortalCursor] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [expandedLetters, setExpandedLetters] = useState<Set<string>>(new Set(["A"]));
-  const [activeAccordionLetter, setActiveAccordionLetter] = useState<string | null>(null);
+  const restoredLetterRef = useRef<string | null>(null);
+  const [expandedLetters, setExpandedLetters] = useState<Set<string>>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const p = new URLSearchParams(window.location.search);
+        if (p.get("find") === "1") {
+          const l = sessionStorage.getItem("designers_az_last_letter");
+          if (l) {
+            restoredLetterRef.current = l;
+            return new Set([l]);
+          }
+        }
+      } catch {}
+    }
+    return new Set(["A"]);
+  });
+  const [activeAccordionLetter, setActiveAccordionLetter] = useState<string | null>(
+    () => restoredLetterRef.current
+  );
   const [activeMobileLetter, setActiveMobileLetter] = useState<string | null>(null);
   const [azDragging, setAzDragging] = useState(false);
   const [azMagnifier, setAzMagnifier] = useState<{ letter: string; y: number } | null>(null);
