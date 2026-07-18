@@ -135,12 +135,17 @@ function DesignerGridCard({
   const lqip = gridImageLqip(rawSrc);
   const displayName = displayDesignerName(designer.name);
   const [loaded, setLoaded] = useState(false);
+  const rememberLetter = () => {
+    try {
+      sessionStorage.setItem("designers_az_last_letter", lastNameInitial(designer.name));
+    } catch {}
+  };
   return (
     <Link
       to={`/designers/${designer.slug}`}
       state={{ fromDesignersHero: true, fromDesignersAZ: true }}
       data-nav-state={JSON.stringify({ fromDesignersHero: true, fromDesignersAZ: true })}
-      onClick={onNavigate}
+      onClick={() => { rememberLetter(); onNavigate?.(); }}
       onTouchStart={() => { import("../pages/PublicDesignerProfile").catch(() => {}); }}
       onMouseEnter={() => { import("../pages/PublicDesignerProfile").catch(() => {}); }}
       className="group relative block w-full aspect-[4/5] rounded-xl overflow-hidden bg-neutral-800 ring-1 ring-white/10 focus:outline-none focus:ring-2 focus:ring-gold/60"
@@ -384,8 +389,25 @@ const DesignersHoverHero = () => {
   const [showPortalCursor, setShowPortalCursor] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [expandedLetters, setExpandedLetters] = useState<Set<string>>(new Set(["A"]));
-  const [activeAccordionLetter, setActiveAccordionLetter] = useState<string | null>(null);
+  const restoredLetterRef = useRef<string | null>(null);
+  const [expandedLetters, setExpandedLetters] = useState<Set<string>>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const p = new URLSearchParams(window.location.search);
+        if (p.get("find") === "1") {
+          const l = sessionStorage.getItem("designers_az_last_letter");
+          if (l) {
+            restoredLetterRef.current = l;
+            return new Set([l]);
+          }
+        }
+      } catch {}
+    }
+    return new Set(["A"]);
+  });
+  const [activeAccordionLetter, setActiveAccordionLetter] = useState<string | null>(
+    () => restoredLetterRef.current
+  );
   const [activeMobileLetter, setActiveMobileLetter] = useState<string | null>(null);
   const [azDragging, setAzDragging] = useState(false);
   const [azMagnifier, setAzMagnifier] = useState<{ letter: string; y: number } | null>(null);
@@ -1088,16 +1110,40 @@ const DesignersHoverHero = () => {
 
   
 
-  // Reset accordion state when closing the search sheet — reopen defaults to "A".
+  // Reset accordion state only on close (open→closed). Preserves any letter
+  // restored from the back-nav sessionStorage on initial mount.
+  const prevSearchOpenRef = useRef(searchOpen);
   useEffect(() => {
-    if (!searchOpen) {
+    if (prevSearchOpenRef.current && !searchOpen) {
       setExpandedLetters(new Set(["A"]));
       setActiveAccordionLetter(null);
-    } else {
+      try { sessionStorage.removeItem("designers_az_last_letter"); } catch {}
+    }
+    prevSearchOpenRef.current = searchOpen;
+    if (!searchOpen) return;
+    {
       // Warm the PublicDesignerProfile chunk as soon as the A-Z opens so tapping
       // a card doesn't flash the Suspense fallback (which reads visually like
       // the designers landing page while the JS chunk downloads).
       import("../pages/PublicDesignerProfile").catch(() => {});
+      // If we're restoring from back-nav, scroll the sheet to the remembered letter.
+      const restored = restoredLetterRef.current;
+      if (restored) {
+        restoredLetterRef.current = null;
+        const scrollToLetter = () => {
+          const scroller = searchScrollRef.current;
+          const row = scroller?.querySelector<HTMLElement>(
+            `[data-designer-letter="${restored}"]`
+          );
+          if (row && scroller) {
+            const top = row.getBoundingClientRect().top - scroller.getBoundingClientRect().top + scroller.scrollTop - 4;
+            scroller.scrollTo({ top, behavior: "auto" });
+          }
+        };
+        requestAnimationFrame(() => requestAnimationFrame(scrollToLetter));
+        setTimeout(scrollToLetter, 220);
+        try { sessionStorage.removeItem("designers_az_last_letter"); } catch {}
+      }
     }
   }, [searchOpen]);
 
