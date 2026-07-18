@@ -7462,7 +7462,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "trade_user" | "super_admin"
+      app_role: "admin" | "trade_user" | "super_admin" | "collector"
       axonometric_request_status:
         | "pending"
         | "in_progress"
@@ -7630,7 +7630,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "trade_user", "super_admin"],
+      app_role: ["admin", "trade_user", "super_admin", "collector"],
       axonometric_request_status: [
         "pending",
         "in_progress",
