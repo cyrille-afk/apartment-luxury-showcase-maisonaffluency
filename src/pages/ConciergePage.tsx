@@ -59,6 +59,12 @@ const ConciergePage: React.FC = () => {
   const langParam = params.get("lang");
   const isMandarin = langParam === "zh" || !!portalSession;
 
+  // Admin-only preview mode: `?preview=1&name=...&lang=zh` lets admins QA the
+  // Mandarin bespoke greeting without burning an invite code. Auth is still
+  // required (admin's own Supabase session) — see gate below.
+  const isPreview = params.get("preview") === "1";
+  const previewName = params.get("name")?.trim() || "";
+
   // Persist Mandarin choice so the concierge keeps replying in Chinese on
   // subsequent turns and tab reloads.
   useEffect(() => {
@@ -67,8 +73,9 @@ const ConciergePage: React.FC = () => {
 
   const bespokeGreeting = useMemo(() => {
     if (!isMandarin) return undefined;
-    return buildMandarinGreeting(portalSession?.invitedName ?? null);
-  }, [isMandarin, portalSession?.invitedName]);
+    const name = isPreview ? previewName : (portalSession?.invitedName ?? null);
+    return buildMandarinGreeting(name);
+  }, [isMandarin, isPreview, previewName, portalSession?.invitedName]);
 
   // Auth gate — unauthenticated visitors are redirected to the landing page
   // with an "access restricted" notice. A valid portal session bypasses the
