@@ -146,6 +146,19 @@ const PrivateTourDialog = ({ open, onOpenChange }: PrivateTourDialogProps) => {
           </p>
 
           <div className="space-y-5">
+            {/* Honeypot: hidden from humans, tempting to bots */}
+            <div aria-hidden="true" style={{ position: "absolute", left: "-10000px", top: "auto", width: 1, height: 1, overflow: "hidden" }}>
+              <label htmlFor="website">Website</label>
+              <input
+                id="website"
+                type="text"
+                tabIndex={-1}
+                autoComplete="off"
+                value={website}
+                onChange={(e) => setWebsite(e.target.value)}
+              />
+            </div>
+
             <div>
               <label htmlFor="name" className="mb-2 block font-body text-sm uppercase tracking-wider text-foreground">
                 Name<span className="text-destructive">*</span>
