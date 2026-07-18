@@ -4,6 +4,7 @@ import { Helmet } from "react-helmet-async";
 import Hero from "@/components/Hero";
 import useScrollDepthTracking from "@/hooks/useScrollDepthTracking";
 import { scrollToSection } from "@/lib/scrollToSection";
+import LazyOnVisible from "@/components/LazyOnVisible";
 
 // Retry wrapper for dynamic imports — handles stale Vite chunks after HMR
 function lazyRetry(factory: () => Promise<{ default: React.ComponentType<any> }>) {
