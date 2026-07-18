@@ -135,12 +135,17 @@ function DesignerGridCard({
   const lqip = gridImageLqip(rawSrc);
   const displayName = displayDesignerName(designer.name);
   const [loaded, setLoaded] = useState(false);
+  const rememberLetter = () => {
+    try {
+      sessionStorage.setItem("designers_az_last_letter", lastNameInitial(designer.name));
+    } catch {}
+  };
   return (
     <Link
       to={`/designers/${designer.slug}`}
       state={{ fromDesignersHero: true, fromDesignersAZ: true }}
       data-nav-state={JSON.stringify({ fromDesignersHero: true, fromDesignersAZ: true })}
-      onClick={onNavigate}
+      onClick={() => { rememberLetter(); onNavigate?.(); }}
       onTouchStart={() => { import("../pages/PublicDesignerProfile").catch(() => {}); }}
       onMouseEnter={() => { import("../pages/PublicDesignerProfile").catch(() => {}); }}
       className="group relative block w-full aspect-[4/5] rounded-xl overflow-hidden bg-neutral-800 ring-1 ring-white/10 focus:outline-none focus:ring-2 focus:ring-gold/60"
