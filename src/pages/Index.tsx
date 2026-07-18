@@ -422,16 +422,16 @@ const Index = ({ categoryMode = false }: IndexProps = {}) => {
           <>
             {!routeIsCategory && (
               <div className="bg-white">
-                <section id="overview" className="scroll-header-offset">
+                <LazyOnVisible id="overview" className="scroll-header-offset" minHeight="60vh" rootMargin="1200px 0px">
                   <Suspense fallback={null}>
                     <ApartmentTourInterlude compact />
                   </Suspense>
-                </section>
-                <section id="gallery" className="scroll-header-offset">
+                </LazyOnVisible>
+                <LazyOnVisible id="gallery" className="scroll-header-offset" minHeight="100vh" rootMargin="1000px 0px">
                   <Suspense fallback={<SectionFallback />}>
                     <Gallery />
                   </Suspense>
-                </section>
+                </LazyOnVisible>
               </div>
             )}
 
@@ -442,14 +442,18 @@ const Index = ({ categoryMode = false }: IndexProps = {}) => {
             )}
 
             {!routeIsCategory && (
-              <Suspense fallback={null}>
-                <InstagramFeed />
-              </Suspense>
+              <LazyOnVisible minHeight="40vh" rootMargin="800px 0px">
+                <Suspense fallback={null}>
+                  <InstagramFeed />
+                </Suspense>
+              </LazyOnVisible>
             )}
 
-            <Suspense fallback={null}>
-              <Footer />
-            </Suspense>
+            <LazyOnVisible minHeight="200px" rootMargin="400px 0px">
+              <Suspense fallback={null}>
+                <Footer />
+              </Suspense>
+            </LazyOnVisible>
           </>
         ) : null}
       </main>
