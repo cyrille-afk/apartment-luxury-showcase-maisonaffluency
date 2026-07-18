@@ -2,6 +2,7 @@ import { scrollToSection } from "@/lib/scrollToSection";
 import InstallAppDialog from "@/components/InstallAppDialog";
 
 const Footer = () => {
+  const currentYear = new Date().getFullYear();
   return (
     <>
       <div className="border-t border-accent/20 bg-foreground/95 backdrop-blur-sm px-6 py-3 text-center">
@@ -45,7 +46,7 @@ const Footer = () => {
         
         <div className="mt-8 border-t border-border pt-8 flex flex-col items-center gap-3">
           <p className="font-body text-xs text-muted-foreground text-center">
-            <span className="block">© 2026 Affluency ETC Pte Ltd.</span>
+            <span className="block">© {currentYear} Affluency ETC Pte Ltd.</span>
             <span className="block">All rights reserved.</span>
             <span className="block">For professional use only.</span>
           </p>
