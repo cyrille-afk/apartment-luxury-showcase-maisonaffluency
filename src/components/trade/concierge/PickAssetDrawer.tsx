@@ -162,26 +162,38 @@ export function PickAssetDrawer({ pickId, title }: Props) {
     let cancelled = false;
     (async () => {
       setLoading(true);
-      const [prodRes, pickRes] = await Promise.all([
-        supabase
+
+      // `pickId` can actually be either a designer_curator_picks.id (common)
+      // OR a trade_products.id — the concierge preview falls back to the
+      // trade catalog for pieces not present in designer_curator_picks (see
+      // trade-concierge/index.ts:3540). Resolve to the canonical trade
+      // product row + underlying pick id so GLB/swatch queries always hit.
+      let prodRes = await supabase
+        .from("trade_products")
+        .select("id, source_pick_id, glb_url, image_url, trade_price_cents, rrp_price_cents, currency, lead_time")
+        .eq("source_pick_id", pickId)
+        .maybeSingle();
+      if (!prodRes.data && !prodRes.error) {
+        prodRes = await supabase
           .from("trade_products")
-          .select("id, glb_url, image_url, trade_price_cents, rrp_price_cents, currency, lead_time")
-          .eq("source_pick_id", pickId)
-          .maybeSingle(),
+          .select("id, source_pick_id, glb_url, image_url, trade_price_cents, rrp_price_cents, currency, lead_time")
+          .eq("id", pickId)
+          .maybeSingle();
+      }
+      const tpId = (prodRes.data as any)?.id as string | undefined;
+      const resolvedPickId =
+        ((prodRes.data as any)?.source_pick_id as string | undefined) || pickId;
+
+      const [pickRes, swRes, glbVarRes] = await Promise.all([
         supabase
           .from("designer_curator_picks")
           .select("size_variants, base_axis_label, top_axis_label, trade_price_cents, currency, lead_time")
-          .eq("id", pickId)
+          .eq("id", resolvedPickId)
           .maybeSingle(),
-      ]);
-
-      const tpId = (prodRes.data as any)?.id as string | undefined;
-
-      const [swRes, glbVarRes] = await Promise.all([
         supabase
           .from("product_fabric_swatches_public")
           .select("fabric_id, name, image_url, supplier, category, price_tier_label, sort_order")
-          .eq("pick_id", pickId)
+          .eq("pick_id", resolvedPickId)
           .eq("is_active", true)
           .order("sort_order", { ascending: true, nullsFirst: false })
           .order("name", { ascending: true }),
