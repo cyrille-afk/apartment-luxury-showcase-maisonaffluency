@@ -272,8 +272,14 @@ function ScrollToTopOnNavigate() {
     if (location.hash) return;
     const state = location.state as { preserveScroll?: boolean; smoothScroll?: boolean } | null;
     if (state?.preserveScroll) return;
+    const isLockedDesignersLanding =
+      location.pathname === "/designers" &&
+      !location.search &&
+      (window.matchMedia?.("(max-width: 767px)").matches ||
+        window.matchMedia?.("(display-mode: standalone)").matches ||
+        (window.navigator as any).standalone === true);
     const prefersReduced = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-    const smooth = state?.smoothScroll !== false && !prefersReduced;
+    const smooth = !isLockedDesignersLanding && state?.smoothScroll !== false && !prefersReduced;
     const behavior: ScrollBehavior = smooth ? "smooth" : "instant";
     // Defer one frame so the new route mounts before we animate — prevents the
     // browser from snapping mid-transition when React commits the new tree.
