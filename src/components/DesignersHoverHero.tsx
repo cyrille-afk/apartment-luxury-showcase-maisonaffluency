@@ -506,8 +506,14 @@ const DesignersHoverHero = () => {
 
   // The locked mobile /designers landing can be restored from browser history
   // with its inner hero scroller midway down even when window.scrollY is 0.
-  // Reset both the nested scrollers and the active hero image whenever the
-  // route-level lock asks for a top reset.
+  // Reset both the nested scrollers and the active hero image ONLY on initial
+  // mount or when the route-level lock asks for a top reset — never in
+  // response to `items` refetching mid-scroll (that caused the list to jump
+  // back to the top while the user was scrolling Masters / Contemporary
+  // Talents, which also skipped a name because activeSlug was forced back to
+  // items[0]).
+  const itemsRef = useRef(items);
+  useEffect(() => { itemsRef.current = items; }, [items]);
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (!isMobileOrPwa) return;
@@ -515,21 +521,22 @@ const DesignersHoverHero = () => {
     const resetHeroScroll = () => {
       contentScrollRef.current?.scrollTo({ top: 0, left: 0, behavior: "instant" as ScrollBehavior });
       searchScrollRef.current?.scrollTo({ top: 0, left: 0, behavior: "instant" as ScrollBehavior });
-      if (items.length > 0) setActiveSlug(items[0].slug);
+      const list = itemsRef.current;
+      if (list.length > 0) setActiveSlug(list[0].slug);
     };
 
     resetHeroScroll();
     const raf = window.requestAnimationFrame(resetHeroScroll);
     const timers = [80, 180, 360].map((ms) => window.setTimeout(resetHeroScroll, ms));
     window.addEventListener("designersLandingResetScroll", resetHeroScroll);
-    window.addEventListener("pageshow", resetHeroScroll);
+    // NOTE: intentionally NOT listening to `pageshow` — bfcache restores fire
+    // it after the user has already scrolled, snapping the hero back to top.
     return () => {
       window.cancelAnimationFrame(raf);
       timers.forEach((timer) => window.clearTimeout(timer));
       window.removeEventListener("designersLandingResetScroll", resetHeroScroll);
-      window.removeEventListener("pageshow", resetHeroScroll);
     };
-  }, [isMobileOrPwa, items]);
+  }, [isMobileOrPwa]);
 
   // Pre-seed active on first render once data arrives so the hero is never
   // a void on entry — the first designer acts as default.
