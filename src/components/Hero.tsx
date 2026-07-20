@@ -67,6 +67,7 @@ const heroPrimaryCtaClass =
 const heroGhostCtaClass =
   "inline-flex min-h-11 items-center justify-center rounded-full border border-white/75 bg-transparent px-6 py-3 text-center text-white text-sm md:text-base font-body font-medium tracking-wide transition-all hover:bg-white/10 hover:border-white focus:outline-none focus:ring-2 focus:ring-white/70 focus:ring-offset-2 focus:ring-offset-transparent hero-fade-in-delayed-4 [text-shadow:_0_1px_3px_rgba(0,0,0,0.55)]";
 
+
 const Hero = () => {
   const navigate = useNavigate();
   const [tradeOpen, setTradeOpen] = useState(false);
@@ -91,78 +92,58 @@ const Hero = () => {
           before React boots). We intentionally do NOT re-render the image
           here — a second <picture> creates a duplicate LCP candidate and
           extra decode work that pushes LCP later on throttled CPUs. */}
-      {/* Subtle readability scrim: focused just behind the text block on mobile,
-          keeps the room's grandeur visible everywhere else. */}
+      {/* Very light editorial scrim — just enough to keep the headline legible
+          without dulling the showroom's warmth. */}
       <div
         className="absolute inset-0 pointer-events-none md:hidden"
         style={{
-          background: `
-            radial-gradient(ellipse at 30% 68%, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.18) 45%, transparent 75%),
-            linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0) 45%, rgba(0,0,0,0.35) 100%)
-          `,
+          background: `linear-gradient(to bottom, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0) 40%, rgba(0,0,0,0) 70%, rgba(0,0,0,0.35) 100%)`,
         }}
       />
-      {/* Desktop: soft left-side wash so headline reads without dulling the image */}
       <div
         className="absolute inset-0 pointer-events-none hidden md:block"
         style={{
-          background: `
-            radial-gradient(ellipse at 22% 40%, rgba(0,0,0,0.40) 0%, rgba(0,0,0,0.16) 50%, transparent 78%),
-            linear-gradient(to right, rgba(0,0,0,0.30) 0%, rgba(0,0,0,0.05) 50%, transparent 75%)
-          `,
+          background: `linear-gradient(to right, rgba(0,0,0,0.22) 0%, rgba(0,0,0,0.06) 40%, rgba(0,0,0,0) 70%)`,
         }}
       />
 
-
-      {/* Text overlay — CSS-only animations, no framer-motion needed */}
-      <div className="relative z-10 h-full px-4 pb-32 pt-[44%] md:px-32 md:pb-20 md:pt-[20%] lg:px-52 flex-col rounded-none opacity-100 shadow-none flex items-start justify-start md:justify-start md:items-start">
-        <div className="max-w-4xl md:text-left">
-          <h1 className="mb-6 md:mb-10 text-3xl leading-tight text-white md:text-4xl font-serif font-semibold lg:text-5xl [text-shadow:_0_2px_10px_rgba(0,0,0,0.55)]">
-            Discover The World's Best Interior Designers' Iconic Pieces
+      {/* Editorial asymmetric layout: headline top-left, CTAs bottom-right */}
+      <div className="relative z-10 h-full px-4 md:px-16 lg:px-24 pt-[28%] md:pt-[14%] pb-10 md:pb-16 flex flex-col justify-between">
+        {/* Top-left: title only */}
+        <div className="max-w-4xl">
+          <h1 className="text-3xl leading-[1.05] text-white md:text-5xl lg:text-6xl font-serif font-semibold uppercase tracking-[0.06em] [text-shadow:_0_2px_10px_rgba(0,0,0,0.5)]">
+            The World's Finest<br />Collectible Design
           </h1>
+        </div>
 
-          <div className="flex w-full max-w-3xl flex-col items-start">
-            <p className="text-base leading-relaxed text-white text-left font-serif md:text-xl lg:text-2xl font-medium hero-fade-in-delayed-3 [text-shadow:_0_2px_10px_rgba(0,0,0,0.6)]">
-              <span className="hidden md:inline">
-                Sourcing elite, collectible design items for global interior architecture.
-                <br />
-                Tailored trade pricing, dedicated logistics, and emerging global talents.
-              </span>
-              <span className="md:hidden leading-relaxed text-left">
-                Sourcing elite, collectible design items for global interior architecture. Tailored trade pricing, dedicated logistics, and emerging global talents.
-              </span>
-            </p>
+        {/* Bottom-right: CTAs */}
+        <div className="flex justify-start md:justify-end">
+          <div className="flex flex-col items-start md:items-end gap-3 md:gap-4">
+            <button
+              type="button"
+              onClick={() => {
+                trackEvent("click_trade_access", { event_category: "CTA", event_label: "HeroCTA" });
+                setTradeOpen(true);
+              }}
+              className={heroPrimaryCtaClass}
+            >
+              Apply for Trade Access
+            </button>
 
-            <div className="mt-8 md:mt-10 flex flex-col items-start gap-3 md:gap-4">
-              <button
-                type="button"
-                onClick={() => {
-                  trackEvent("click_trade_access", { event_category: "CTA", event_label: "HeroCTA" });
-                  setTradeOpen(true);
-                }}
-                className={heroPrimaryCtaClass}
-              >
-                Apply for Trade Access
-              </button>
-
-              <p className="max-w-md text-[11px] md:text-xs uppercase tracking-[0.18em] text-white/90 font-body [text-shadow:_0_1px_4px_rgba(0,0,0,0.6)] hero-fade-in-delayed-4">
-                Exclusive Trade Pricing • Dedicated Account Management • Custom Sizing Available
-              </p>
-
-              <button
-                type="button"
-                onClick={() => {
-                  trackEvent("click_explore_collection", { event_category: "CTA", event_label: "HeroCTA" });
-                  navigate("/designers");
-                }}
-                className={heroGhostCtaClass}
-              >
-                Explore the Collection
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={() => {
+                trackEvent("click_explore_collection", { event_category: "CTA", event_label: "HeroCTA" });
+                navigate("/designers");
+              }}
+              className={heroGhostCtaClass}
+            >
+              Explore the Collection
+            </button>
           </div>
         </div>
       </div>
+
 
       <Suspense fallback={null}>
         {tradeOpen && <TradeAccessDialog open={tradeOpen} onOpenChange={setTradeOpen} />}
