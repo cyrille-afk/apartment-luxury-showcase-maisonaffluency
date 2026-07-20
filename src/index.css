@@ -755,7 +755,7 @@ input, select, textarea {
 
 @media (max-width: 768px) and (display-mode: standalone) {
   .hero-editorial-sidebar {
-    bottom: calc(32% + env(safe-area-inset-bottom, 0px)) !important;
+    bottom: calc(28% + env(safe-area-inset-bottom, 0px)) !important;
   }
 }
 
