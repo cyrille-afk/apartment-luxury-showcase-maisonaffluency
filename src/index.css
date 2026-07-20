@@ -554,7 +554,7 @@ input, select, textarea {
 /* ============ Hero — Editorial Sidebar ============ */
 .hero-editorial-sidebar {
   position: absolute;
-  top: 48%;
+  top: 54%;
   bottom: clamp(48px, 8vh, 92px);
   transform: none;
   right: 6%;
