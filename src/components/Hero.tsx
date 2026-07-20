@@ -83,15 +83,15 @@ const Hero = () => {
 
           <div className="mt-8 md:mt-10 flex w-full max-w-3xl flex-col items-start">
             <p className="text-base leading-relaxed text-white text-left font-serif md:text-xl lg:text-2xl font-medium hero-fade-in-delayed-3">
-              <span className="hidden md:inline">A curated collection of masterworks<br />re-editions and contemporary design<br />for global architectural projects.</span>
-              <span className="md:hidden leading-relaxed text-left">A curated collection of masterworks<br />re-editions and contemporary design<br />for global architectural projects.</span>
+              <span className="hidden md:inline">A curated collection of masterworks<br />reeditions and contemporary design<br />for global architectural projects.</span>
+              <span className="md:hidden leading-relaxed text-left">A curated collection of masterworks<br />reeditions and contemporary design<br />for global architectural projects.</span>
             </p>
           </div>
         </div>
       </div>
 
       {/* CTA anchored over the sofa at the lower-right of the hero image */}
-      <div className="absolute z-20 bottom-6 right-4 md:bottom-10 md:right-10 lg:bottom-14 lg:right-14">
+      <div className="absolute z-20 bottom-28 right-4 md:bottom-32 md:right-10 lg:bottom-36 lg:right-14">
         <button
           type="button"
           onClick={() => { trackEvent("click_meet_designers", { event_category: "CTA", event_label: "HeroCTA" }); navigate("/designers"); }}
