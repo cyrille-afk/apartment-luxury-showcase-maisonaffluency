@@ -87,17 +87,18 @@ const Hero = () => {
               <span className="md:hidden leading-relaxed text-left">A curated collection of masterworks<br />re-editions and contemporary design<br />for global architectural projects.</span>
             </p>
           </div>
-
-          <div className="mt-8 flex flex-col items-start gap-4 md:pl-[0.08em]">
-            <button
-              type="button"
-              onClick={() => { trackEvent("click_meet_designers", { event_category: "CTA", event_label: "HeroCTA" }); navigate("/designers"); }}
-              className={heroPrimaryCtaClass}
-            >
-              EXPLORE THE COLLECTION
-            </button>
-          </div>
         </div>
+      </div>
+
+      {/* CTA anchored over the sofa at the lower-right of the hero image */}
+      <div className="absolute z-20 bottom-6 right-4 md:bottom-10 md:right-10 lg:bottom-14 lg:right-14">
+        <button
+          type="button"
+          onClick={() => { trackEvent("click_meet_designers", { event_category: "CTA", event_label: "HeroCTA" }); navigate("/designers"); }}
+          className={heroPrimaryCtaClass}
+        >
+          EXPLORE THE COLLECTION
+        </button>
       </div>
 
     </section>
