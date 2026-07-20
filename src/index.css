@@ -561,8 +561,8 @@ input, select, textarea {
   width: 340px;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  gap: 22px;
+  justify-content: flex-start;
+  gap: 14px;
   text-align: left;
   z-index: 10;
 }
@@ -581,7 +581,7 @@ input, select, textarea {
   font-family: 'Garamond', 'Baskerville', 'Lora', serif;
   font-size: 1.05rem;
   font-weight: 400;
-  line-height: 1.6;
+  line-height: 1.55;
   color: rgba(255, 255, 255, 0.9);
   margin: 0;
   text-shadow: 0px 2px 8px rgba(0, 0, 0, 0.4);
@@ -589,8 +589,8 @@ input, select, textarea {
 .hero-actions-vertical {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  margin-top: 0;
+  gap: 12px;
+  margin-top: auto;
 }
 .cta-primary-trade {
   font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
@@ -637,7 +637,7 @@ input, select, textarea {
     bottom: clamp(44px, 7vh, 76px);
     right: 5%;
     width: 300px;
-    gap: 20px;
+    gap: 12px;
   }
 }
 @media (max-width: 768px) {
@@ -648,9 +648,9 @@ input, select, textarea {
     right: 5%;
     left: auto;
     width: min(72vw, 300px);
-    gap: 16px;
+    gap: 10px;
   }
-  .hero-actions-vertical { gap: 14px; margin-top: 0; }
+  .hero-actions-vertical { gap: 10px; margin-top: auto; }
   .hero-title { font-size: 1.15rem; letter-spacing: 0.2em; }
   .hero-subtext { font-size: 0.95rem; }
 }
