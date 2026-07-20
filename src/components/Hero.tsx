@@ -97,23 +97,26 @@ const Hero = () => {
       <div
         className="absolute inset-0 pointer-events-none md:hidden"
         style={{
-          background: `linear-gradient(to bottom, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0) 40%, rgba(0,0,0,0) 70%, rgba(0,0,0,0.35) 100%)`,
+          background: `linear-gradient(to bottom, rgba(0,0,0,0.20) 0%, rgba(0,0,0,0) 45%, rgba(0,0,0,0) 65%, rgba(0,0,0,0.30) 100%)`,
         }}
       />
       <div
         className="absolute inset-0 pointer-events-none hidden md:block"
         style={{
-          background: `linear-gradient(to right, rgba(0,0,0,0.22) 0%, rgba(0,0,0,0.06) 40%, rgba(0,0,0,0) 70%)`,
+          background: `radial-gradient(ellipse at 50% 45%, rgba(0,0,0,0.18) 0%, rgba(0,0,0,0) 60%)`,
         }}
       />
 
-      {/* Editorial asymmetric layout: headline top-left, CTAs bottom-right */}
-      <div className="relative z-10 h-full px-4 md:px-16 lg:px-24 pt-[28%] md:pt-[14%] pb-10 md:pb-16 flex flex-col justify-between">
-        {/* Top-left: title only */}
-        <div className="max-w-4xl">
-          <h1 className="text-3xl leading-[1.05] text-white md:text-5xl lg:text-6xl font-serif font-semibold uppercase tracking-[0.06em] [text-shadow:_0_2px_10px_rgba(0,0,0,0.5)]">
-            The World's Finest<br />Collectible Design
+      {/* Editorial, centered caption layout with generous whitespace */}
+      <div className="relative z-10 h-full px-6 md:px-16 lg:px-24 pt-[22vh] md:pt-[20vh] pb-10 md:pb-16 flex flex-col justify-between">
+        {/* Centered: refined headline + sub-text */}
+        <div className="w-full max-w-3xl mx-auto text-center">
+          <h1 className="text-2xl leading-[1.2] text-white md:text-4xl lg:text-5xl font-serif font-light tracking-[0.04em] [text-shadow:_0_1px_8px_rgba(0,0,0,0.45)]">
+            The Architecture of Interiors
           </h1>
+          <p className="mt-5 md:mt-6 text-sm md:text-base lg:text-lg font-body font-normal text-white/90 leading-[1.7] max-w-2xl mx-auto [text-shadow:_0_1px_6px_rgba(0,0,0,0.35)]">
+            Sourcing iconic furniture designs and masterwork re-editions for international trade projects and private collectors.
+          </p>
         </div>
 
         {/* Bottom-right: CTAs */}
