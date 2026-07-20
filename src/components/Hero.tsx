@@ -1,7 +1,9 @@
-import { useEffect } from "react";
+import { useEffect, useState, lazy, Suspense } from "react";
 import { useNavigate } from "react-router-dom";
 import { scrollToSection } from "@/lib/scrollToSection";
-import { trackCTA, trackEvent } from "@/lib/analytics";
+import { trackEvent } from "@/lib/analytics";
+
+const TradeAccessDialog = lazy(() => import("@/components/TradeAccessDialog"));
 
 const HERO_BASE = "https://res.cloudinary.com/dif1oamtj/image/upload";
 const HERO_ID = "v1781920000/AffluencySG_194-22.jpg_macpwj";
