@@ -351,7 +351,7 @@
 
       />
     </picture>
-    <div id="static-hero-copy" aria-hidden="true" style="position:absolute;inset:0;z-index:0;pointer-events:none;display:flex;align-items:flex-start;justify-content:flex-start;padding:24vh 10rem 8rem;color:#fff;font-family:'Playfair Display',Georgia,serif;">
+    <div id="static-hero-copy" aria-hidden="true" style="position:absolute;inset:0;z-index:0;pointer-events:none;display:flex;align-items:flex-start;justify-content:flex-start;padding:24vh 6rem 8rem;color:#fff;font-family:'Playfair Display',Georgia,serif;">
       <div style="max-width:56rem;">
         <div style="font-size:clamp(2rem,3.6vw,3.25rem);line-height:1.08;margin:0 0 3.5rem;text-shadow:0 2px 12px rgba(0,0,0,.45);">
           <span class="static-hero-desktop">Modern Masters. Iconic Design.</span>
@@ -362,6 +362,12 @@
     </div>
     <style>
       .static-hero-mobile { display: none; }
+      @media (min-width: 768px) and (max-width: 1023px) {
+        #static-hero-copy { padding: 24vh 3.5rem 8rem !important; }
+      }
+      @media (min-width: 1024px) {
+        #static-hero-copy { padding: 24vh 6rem 8rem !important; }
+      }
       @media (max-width: 767px) {
         #static-hero-copy { padding: 46vh 0.5rem 8rem !important; }
         #static-hero-copy > div > div { font-size: 1.875rem !important; line-height: 1.2 !important; }
