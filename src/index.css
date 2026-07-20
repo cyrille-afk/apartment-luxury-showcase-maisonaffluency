@@ -553,16 +553,16 @@ input, select, textarea {
 
 /* ============ Hero — Editorial Sidebar ============ */
 
-/* The Right-Side Dark Vignette Canvas */
+/* 1. The Clean Right-Side Vignette (STRICTLY NO BLUR FILTERS HERE) */
 .hero-editorial-overlay-right {
   position: absolute;
   top: 0;
   right: 0;
-  width: 40vw;
+  width: 42vw;
   height: 100%;
   background: linear-gradient(to left,
-    rgba(0, 0, 0, 0.85) 0%,
-    rgba(0, 0, 0, 0.6) 40%,
+    rgba(0, 0, 0, 0.88) 0%,
+    rgba(0, 0, 0, 0.65) 45%,
     rgba(0, 0, 0, 0.2) 75%,
     rgba(0, 0, 0, 0) 100%
   );
@@ -570,10 +570,11 @@ input, select, textarea {
   z-index: 5;
 }
 
+/* 2. The Repositioned Text Block Column */
 .hero-editorial-sidebar {
   position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
+  /* CHANGED: Swapped top:50% for a strict bottom constraint to lower the block */
+  bottom: 25%;
   right: 6%;
   width: 360px;
   display: flex;
@@ -583,23 +584,29 @@ input, select, textarea {
   z-index: 10;
 }
 
+/* 3. Razor-Sharp Editorial Title Typography */
 .hero-title {
-  font-family: 'Didot', 'Bodoni MT', 'Cinzel', 'Playfair Display', serif;
-  font-size: 1.6rem;
+  font-family: 'Didot', 'Bodoni MT', serif;
+  font-size: 1.65rem;
   font-weight: 300;
   text-transform: uppercase;
   letter-spacing: 0.24em;
   line-height: 1.6;
+  /* CRITICAL FOR SHARPNESS: Pure solid white, zero text-shadows or filter blurs */
   color: #ffffff;
-  margin: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
+
+/* 4. Crisp Editorial Subtext Paragraph */
 .hero-subtext {
-  font-family: 'Garamond', 'Baskerville', 'Lora', serif;
+  font-family: 'Garamond', 'Baskerville', serif;
   font-size: 1.05rem;
   font-weight: 400;
-  line-height: 1.75;
-  color: rgba(255, 255, 255, 0.85);
-  margin: 0;
+  line-height: 1.8;
+  /* Solid off-white for crisp, high-contrast readability */
+  color: rgba(255, 255, 255, 0.95);
+  -webkit-font-smoothing: antialiased;
 }
 /* Container for the actions */
 .hero-actions-vertical {
@@ -667,7 +674,7 @@ input, select, textarea {
 }
 @media (max-width: 1024px) {
   .hero-editorial-sidebar {
-    top: 50%;
+    bottom: 22%;
     right: 5%;
     width: 320px;
     gap: 24px;
@@ -678,8 +685,7 @@ input, select, textarea {
 @media (max-width: 768px) {
   .hero-editorial-overlay-right { width: 60vw; }
   .hero-editorial-sidebar {
-    top: 50%;
-    transform: translateY(-50%);
+    bottom: 18%;
     right: 5%;
     left: auto;
     width: min(72vw, 300px);
