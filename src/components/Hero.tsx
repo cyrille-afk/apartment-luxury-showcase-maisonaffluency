@@ -61,11 +61,9 @@ const scrollToContact = () => {
   revealAndScrollTo("contact");
 };
 
-const heroPrimaryCtaClass =
-  "inline-flex min-h-10 items-center justify-center border border-white bg-transparent px-7 py-2.5 text-center text-white text-[11px] md:text-xs font-body font-normal uppercase tracking-[0.22em] transition-all hover:bg-white hover:text-[hsl(var(--foreground))] focus:outline-none focus:ring-1 focus:ring-white/70 hero-fade-in-delayed-4 [text-shadow:_0_1px_3px_rgba(0,0,0,0.45)]";
-
-const heroGhostCtaClass =
-  "inline-flex items-center justify-center bg-transparent px-1 pb-1 text-center text-white text-[11px] md:text-xs font-body font-normal uppercase tracking-[0.22em] border-b border-white/60 hover:border-white transition-all focus:outline-none hero-fade-in-delayed-4 [text-shadow:_0_1px_3px_rgba(0,0,0,0.45)]";
+// Hairline underlined text-links — Inter, uppercase, 0.15em kerning.
+const heroCtaLinkClass =
+  "hero-cta-link hero-fade-in-delayed-4 [text-shadow:_0_1px_3px_rgba(0,0,0,0.45)]";
 
 
 const Hero = () => {
