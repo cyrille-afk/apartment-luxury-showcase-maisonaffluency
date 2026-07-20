@@ -112,9 +112,9 @@ const Hero = () => {
           </p>
         </div>
 
-        {/* Bottom-right: minimal CTAs */}
-        <div className="flex justify-start md:justify-end">
-          <div className="flex flex-col items-start md:items-end gap-4 md:gap-5">
+        {/* Bottom-right quadrant: micro-underlined action nodes */}
+        <div className="flex justify-end">
+          <div className="flex flex-col items-end gap-4 md:gap-5">
             <button
               type="button"
               onClick={() => {
