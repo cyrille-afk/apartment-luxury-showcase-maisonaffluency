@@ -80,7 +80,7 @@ const Hero = () => {
 
           <div className="mt-8 md:mt-10 flex w-full max-w-3xl flex-col items-start">
             <p className="text-base leading-relaxed text-white text-left font-serif md:text-xl lg:text-2xl font-medium hero-fade-in-delayed-3">
-              A curated collection of masterworks<br />reeditions and contemporary design<br />for global architectural projects.
+              A curated collection of masterworks,<br />reeditions, and contemporary design<br />for global architectural projects.
             </p>
             <div className="mt-12 md:mt-14 w-full flex justify-end">
               <button
