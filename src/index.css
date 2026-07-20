@@ -676,7 +676,7 @@ input, select, textarea {
 }
 
 @media (max-width: 768px) {
-  .hero-editorial-overlay-right { width: 55vw; }
+  .hero-editorial-overlay-right { display: none !important; }
   .hero-editorial-sidebar {
     bottom: 18%;
     right: 5%;
