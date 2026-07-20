@@ -604,49 +604,69 @@ input, select, textarea {
     0 2px 4px rgba(0, 0, 0, 0.2),
     0 4px 12px rgba(0, 0, 0, 0.3);
 }
+/* Container for the actions */
 .hero-actions-vertical {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 20px; /* Aligns with the enhanced line-height spacing above */
+  margin-top: 16px;
 }
+
+/* Primary Button: Solid Luxury Rectangle */
 .cta-primary-trade {
-  font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
   font-size: 0.8rem;
   font-weight: 500;
   text-transform: uppercase;
-  letter-spacing: 0.15em;
+
+  /* Wide letter spacing to match the elegant title kerning */
+  letter-spacing: 0.18em;
   color: #000000;
   background-color: #ffffff;
+
+  text-decoration: none;
   text-align: center;
-  padding: 14px 0;
+
+  /* Precision Padding: Tight top/bottom with wide left/right to look sleek */
+  padding: 16px 36px;
+  width: fit-content; /* Shrinks the button to snugly fit its text instead of stretching */
+  min-width: 240px;   /* Guarantees a clean, architectural width on desktop screens */
+
   border: 1px solid #ffffff;
-  cursor: pointer;
-  transition: all 0.3s ease;
+  box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.15); /* Soft shadow to detach from the cream couch */
+  transition: all 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* Smooth luxury easing */
 }
+
+/* Subtle, premium hover state */
 .cta-primary-trade:hover {
   background-color: transparent;
   color: #ffffff;
+  box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.0);
 }
+
+/* Secondary Button: Hairline Underline Link */
 .cta-secondary-collection {
-  font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
-  font-size: 0.8rem;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-size: 0.78rem;
   font-weight: 400;
   text-transform: uppercase;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.15em;
   color: #ffffff;
-  background: transparent;
-  text-align: center;
-  padding: 4px 0 2px;
-  opacity: 0.8;
-  border: none;
-  border-bottom: 1px solid transparent;
-  align-self: center;
-  cursor: pointer;
-  transition: opacity 0.3s ease, border-color 0.3s ease;
+  text-decoration: none;
+
+  /* Aligns cleanly under the primary button */
+  align-self: flex-start;
+  margin-left: 4px; /* Tiny adjustment to align perfectly with the text above it */
+  padding-bottom: 2px;
+
+  /* Hairline border that simulates a premium underline */
+  border-bottom: 1px solid rgba(255, 255, 255, 0.35);
+  text-shadow: 0px 2px 4px rgba(0, 0, 0, 0.3);
+  transition: border-color 0.3s ease, opacity 0.3s ease;
 }
+
 .cta-secondary-collection:hover {
-  opacity: 1;
-  border-bottom-color: rgba(255, 255, 255, 0.6);
+  border-bottom-color: rgba(255, 255, 255, 1);
 }
 @media (max-width: 1024px) {
   .hero-editorial-sidebar {
@@ -667,7 +687,8 @@ input, select, textarea {
     width: min(72vw, 300px);
     gap: 18px;
   }
-  .hero-actions-vertical { gap: 10px; }
+  .hero-actions-vertical { gap: 14px; }
+  .cta-primary-trade { min-width: 200px; padding: 14px 28px; }
   .hero-title { font-size: 1.15rem; letter-spacing: 0.2em; line-height: 1.55; }
   .hero-subtext { font-size: 0.95rem; line-height: 1.65; }
 }
