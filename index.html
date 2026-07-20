@@ -351,31 +351,31 @@
 
       />
     </picture>
-    <div id="static-hero-copy" aria-hidden="true" style="position:absolute;inset:0;z-index:0;pointer-events:none;display:flex;align-items:flex-end;color:#fff;font-family:'Playfair Display',Georgia,serif;">
-      <div style="width:100%;padding:60px 80px;box-sizing:border-box;background:linear-gradient(to top, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.2) 60%, rgba(0,0,0,0) 100%);display:grid;grid-template-columns:1.5fr 2fr 1fr;gap:40px;align-items:start;">
-        <div style="font-family:'Didot','Bodoni MT','Playfair Display',serif;font-size:1.6rem;font-weight:300;line-height:1.15;letter-spacing:0.2em;text-transform:uppercase;text-shadow:0 1px 6px rgba(0,0,0,.4);margin:0;">
+    <div id="static-hero-copy" aria-hidden="true" style="position:absolute;inset:0;z-index:0;pointer-events:none;color:#fff;font-family:'Playfair Display',Georgia,serif;">
+      <div style="position:absolute;top:52%;transform:translateY(-50%);right:6%;width:360px;display:flex;flex-direction:column;gap:32px;text-align:left;">
+        <div style="font-family:'Didot','Bodoni MT','Playfair Display',serif;font-size:1.6rem;font-weight:300;line-height:1.6;letter-spacing:0.24em;text-transform:uppercase;text-shadow:0 2px 4px rgba(0,0,0,0.2), 0 4px 12px rgba(0,0,0,0.35), 0 10px 30px rgba(0,0,0,0.2);margin:0;">
           <span style="display:block;">Modern Masters.</span>
           <span style="display:block;">Iconic Design.</span>
         </div>
-        <p style="font-family:'Garamond','Baskerville','Lora',serif;font-size:1.05rem;font-weight:400;line-height:1.6;letter-spacing:0.02em;margin:0;padding-top:4px;color:rgba(255,255,255,0.9);text-shadow:0 1px 5px rgba(0,0,0,.35);">
+        <p style="font-family:'Garamond','Baskerville','Lora',serif;font-size:1.05rem;font-weight:400;line-height:1.75;letter-spacing:0.02em;margin:0;color:rgba(255,255,255,0.95);text-shadow:0 2px 4px rgba(0,0,0,0.2), 0 4px 12px rgba(0,0,0,0.3);">
           A curated collection of masterworks, re-editions and contemporary design for global architectural projects
         </p>
-        <div style="display:flex;flex-direction:column;gap:16px;align-items:flex-end;">
-          <span style="font-family:'Inter',sans-serif;font-size:0.8rem;font-weight:400;text-transform:uppercase;letter-spacing:0.15em;color:#fff;text-decoration:none;text-align:center;width:180px;padding:12px 0;border:1px solid rgba(255,255,255,0.5);box-sizing:border-box;">Apply for Trade Access</span>
-          <span style="font-family:'Inter',sans-serif;font-size:0.8rem;font-weight:400;text-transform:uppercase;letter-spacing:0.15em;color:#fff;text-decoration:none;text-align:center;width:180px;padding:12px 0;border:1px solid rgba(255,255,255,0.5);box-sizing:border-box;">Explore the Collection</span>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <span style="font-family:'Inter',sans-serif;font-size:0.8rem;font-weight:500;text-transform:uppercase;letter-spacing:0.15em;color:#000;background:#fff;text-align:center;padding:14px 0;border:1px solid #fff;box-sizing:border-box;">Apply for Trade Access</span>
+          <span style="font-family:'Inter',sans-serif;font-size:0.8rem;font-weight:400;text-transform:uppercase;letter-spacing:0.12em;color:#fff;text-align:center;padding:4px 0 2px;opacity:0.8;border-bottom:1px solid rgba(255,255,255,0.4);box-sizing:border-box;">Explore the Collection</span>
         </div>
       </div>
     </div>
     <style>
       @media (max-width: 1024px) {
-        #static-hero-copy > div { padding: 48px 40px !important; gap: 32px !important; }
+        #static-hero-copy > div { right: 5% !important; width: 320px !important; gap: 24px !important; }
+        #static-hero-copy > div > div { font-size: 1.4rem !important; letter-spacing: 0.22em !important; }
+        #static-hero-copy > div > p { font-size: 1rem !important; }
       }
       @media (max-width: 767px) {
-        #static-hero-copy > div { padding: 40px 24px 5rem !important; grid-template-columns: 1fr !important; gap: 20px !important; }
-        #static-hero-copy > div > div { font-size: 1.25rem !important; letter-spacing: 0.18em !important; }
-        #static-hero-copy > div > p { font-size: 0.95rem !important; }
-        #static-hero-copy > div > div:last-child { flex-direction: row !important; flex-wrap: wrap !important; align-items: flex-start !important; gap: 12px !important; }
-        #static-hero-copy > div > div:last-child > span { width: auto !important; padding: 12px 24px !important; }
+        #static-hero-copy > div { right: 5% !important; width: min(72vw, 300px) !important; gap: 18px !important; }
+        #static-hero-copy > div > div { font-size: 1.15rem !important; letter-spacing: 0.2em !important; line-height: 1.55 !important; }
+        #static-hero-copy > div > p { font-size: 0.95rem !important; line-height: 1.65 !important; }
       }
     </style>
 
