@@ -61,19 +61,14 @@ const scrollToContact = () => {
   revealAndScrollTo("contact");
 };
 
-// Hairline underlined text-links — Inter, uppercase, 0.15em kerning.
-const heroCtaLinkClass =
-  "hero-cta-link hero-fade-in-delayed-4 [text-shadow:_0_1px_3px_rgba(0,0,0,0.45)]";
-
-
 const Hero = () => {
   const navigate = useNavigate();
   const [tradeOpen, setTradeOpen] = useState(false);
   // The pre-React static hero <picture> in index.html stays in place permanently
   // as the LCP candidate. The static copy overlay (#static-hero-copy) however
-  // duplicates this section's <h1>, so we hide it as soon as React mounts.
+  // duplicates this section's content, so we hide it as soon as React mounts.
   useEffect(() => {
-    // Hide the static copy overlay (React's <h1> below replaces it).
+    // Hide the static copy overlay (React's content below replaces it).
     const copy = document.getElementById("static-hero-copy");
     if (copy) copy.style.display = "none";
     // Force the static hero <picture> visible. The inline script in index.html
@@ -90,57 +85,44 @@ const Hero = () => {
           before React boots). We intentionally do NOT re-render the image
           here — a second <picture> creates a duplicate LCP candidate and
           extra decode work that pushes LCP later on throttled CPUs. */}
-      {/* Soft digital scrim — concentrated at the very bottom edge so the top
-          70% of the Singapore showroom photo (cranes, wallpaper, ceiling) stays
-          completely untouched, while the lower third frame remains legible. */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          background: `linear-gradient(to top, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0) 70%)`,
-        }}
-      />
 
-      {/* Editorial frame: all content aligned to a single horizontal baseline
-          across the lower third of the viewport. */}
-      <div className="relative z-10 h-full flex flex-col">
-        <div className="flex-1" />
-        <div className="flex-none px-6 md:px-16 lg:px-24 pb-[max(2.5rem,env(safe-area-inset-bottom))] md:pb-16">
-          <div className="max-w-7xl mx-auto w-full flex flex-col md:flex-row md:items-baseline md:justify-between gap-6 md:gap-12">
-            {/* Column 1 */}
-            <h1 className="hero-title [text-shadow:_0_1px_6px_rgba(0,0,0,0.4)] max-w-[20rem] lg:max-w-[24rem]">
-              Modern Masters. Iconic Design.
-            </h1>
+      {/* Editorial footer: three architectural columns anchored to the bottom.
+          The gradient only darkens the lower band so the showroom photo above
+          remains fully visible. */}
+      <div className="hero-editorial-footer">
+        {/* Column 1: Title */}
+        <h1 className="hero-title [text-shadow:_0_1px_6px_rgba(0,0,0,0.4)]">
+          Modern Masters. Iconic Design.
+        </h1>
 
-            {/* Column 2: subtext + CTAs */}
-            <div className="max-w-lg flex flex-col items-start gap-5 md:gap-6">
-              <p className="hero-subtext [text-shadow:_0_1px_5px_rgba(0,0,0,0.35)]">
-                A curated collection of re-editions and masterworks for global architectural projects.
-              </p>
-              <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-6">
-                <button
-                  type="button"
-                  onClick={() => {
-                    trackEvent("click_trade_access", { event_category: "CTA", event_label: "HeroCTA" });
-                    setTradeOpen(true);
-                  }}
-                  className={heroCtaLinkClass}
-                >
-                  Apply for Trade Access
-                </button>
+        {/* Column 2: Descriptive subtext */}
+        <p className="hero-subtext [text-shadow:_0_1px_5px_rgba(0,0,0,0.35)]">
+          A curated collection of re-editions and masterworks for global architectural projects.
+        </p>
 
-                <button
-                  type="button"
-                  onClick={() => {
-                    trackEvent("click_explore_collection", { event_category: "CTA", event_label: "HeroCTA" });
-                    navigate("/designers");
-                  }}
-                  className={heroCtaLinkClass}
-                >
-                  View the Collection
-                </button>
-              </div>
-            </div>
-          </div>
+        {/* Column 3: Action links */}
+        <div className="hero-actions-wrapper">
+          <button
+            type="button"
+            onClick={() => {
+              trackEvent("click_trade_access", { event_category: "CTA", event_label: "HeroCTA" });
+              setTradeOpen(true);
+            }}
+            className="hero-cta-button"
+          >
+            Apply for Trade Access
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              trackEvent("click_explore_collection", { event_category: "CTA", event_label: "HeroCTA" });
+              navigate("/designers");
+            }}
+            className="hero-cta-button"
+          >
+            View the Collection
+          </button>
         </div>
       </div>
 
