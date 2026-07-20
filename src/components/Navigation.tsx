@@ -356,9 +356,10 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
             </div>
 
             {/* Flag — right edge, vertically centered with wordmark */}
-            <div className="self-center">
+            <div className="self-center -translate-y-1.5">
               <ShippingDestinationSwitcher compact flagClassName="text-2xl" />
             </div>
+
 
 
 
