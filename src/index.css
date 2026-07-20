@@ -566,38 +566,49 @@ input, select, textarea {
   z-index: 10;
 }
 
-/* Crisp White Typography with an Ambient Text Matrix (No Background Tint Needed) */
-.hero-title {
-  font-family: 'Didot', 'Bodoni MT', serif;
-  font-size: 1.65rem;
-  font-weight: 300;
-  text-transform: uppercase;
-  letter-spacing: 0.24em;
-  line-height: 1.55;
+/* 1. FORCE THE TEXT TO BE CRISP STARK WHITE AND SOLID */
+.hero-title,
+.hero-title * {
+  font-family: 'Didot', 'Bodoni MT', serif !important;
+  font-size: 1.65rem !important;
+  font-weight: 300 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.24em !important;
+  line-height: 1.55 !important;
+
+  /* CRITICAL OVERRIDES: Eliminates transparency and dark color inheritance */
   color: #ffffff !important;
-  opacity: 1 !important;
+  opacity: 1.0 !important;
+  visibility: visible !important;
+
+  /* Deep velvet shadow directly cast from the crisp vector shapes of the text */
   text-shadow:
-    0px 2px 4px rgba(0, 0, 0, 0.4),
-    0px 8px 24px rgba(0, 0, 0, 0.6),
-    0px 16px 48px rgba(0, 0, 0, 0.4);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
-  white-space: nowrap;
+    0px 2px 4px rgba(0, 0, 0, 0.5),
+    0px 8px 24px rgba(0, 0, 0, 0.7),
+    0px 16px 48px rgba(0, 0, 0, 0.5) !important;
+
+  -webkit-font-smoothing: antialiased !important;
+  -moz-osx-font-smoothing: grayscale !important;
+  text-rendering: optimizeLegibility !important;
+  white-space: nowrap !important;
 }
 
-/* Crisp Secondary Narrative Text */
-.hero-subtext {
-  font-family: 'Garamond', 'Baskerville', serif;
-  font-size: 1.05rem;
-  font-weight: 400;
-  line-height: 1.75;
+.hero-subtext,
+.hero-subtext * {
+  font-family: 'Garamond', 'Baskerville', serif !important;
+  font-size: 1.05rem !important;
+  font-weight: 400 !important;
+  line-height: 1.75 !important;
+
+  /* FORCE CRISP OFF-WHITE FOR MAXIMUM LEGIBILITY OVER THE CURTAINS */
   color: rgba(255, 255, 255, 0.95) !important;
-  opacity: 1 !important;
+  opacity: 1.0 !important;
+
   text-shadow:
-    0px 2px 4px rgba(0, 0, 0, 0.4),
-    0px 6px 20px rgba(0, 0, 0, 0.6);
-  -webkit-font-smoothing: antialiased;
+    0px 2px 4px rgba(0, 0, 0, 0.5),
+    0px 6px 20px rgba(0, 0, 0, 0.6) !important;
+
+  -webkit-font-smoothing: antialiased !important;
 }
 
 /* Container for the actions */
@@ -608,40 +619,51 @@ input, select, textarea {
   margin-top: 16px;
 }
 
-/* Crisp, Solid Action Anchor */
+/* 2. TAILOR THE PRIMARY BUTTON PROPORTIONS */
 .cta-primary-trade {
-  font-family: 'Inter', sans-serif;
-  font-size: 0.8rem;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.18em;
+  font-family: 'Inter', sans-serif !important;
+  font-size: 0.8rem !important;
+  font-weight: 500 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.18em !important;
+
+  /* Force solid black text on a pure solid white brick */
   color: #000000 !important;
   background-color: #ffffff !important;
-  opacity: 1 !important;
-  text-decoration: none;
-  text-align: center;
-  padding: 16px 36px;
-  width: fit-content;
-  min-width: 240px;
-  border: 1px solid #ffffff;
-  display: inline-block;
-  box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.25);
+  opacity: 1.0 !important;
+
+  text-decoration: none !important;
+  text-align: center !important;
+
+  /* TAILORING FIX: Keeps the button structurally contained and elegant */
+  display: inline-block !important;
+  width: auto !important;
+  min-width: 260px !important;
+  padding: 16px 40px !important;
+  margin: 12px 0 4px 0 !important;
+
+  border: 1px solid #ffffff !important;
+  box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.3) !important;
 }
 
-/* Secondary Button: Hairline Underline Link */
+/* 3. RE-POLISH THE SECONDARY LINK LINKAGE */
 .cta-secondary-collection {
-  font-family: 'Inter', sans-serif;
-  font-size: 0.78rem;
-  font-weight: 400;
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
+  font-family: 'Inter', sans-serif !important;
+  font-size: 0.78rem !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.15em !important;
+
   color: #ffffff !important;
   opacity: 0.85 !important;
-  text-decoration: none;
-  align-self: flex-start;
-  margin-left: 4px;
-  padding-bottom: 2px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.4);
+  text-decoration: none !important;
+
+  /* Snaps perfectly along the left alignment vector of the button */
+  display: inline-block !important;
+  align-self: flex-start !important;
+  margin-left: 4px !important;
+  padding-bottom: 2px !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.4) !important;
+  text-shadow: 0px 2px 4px rgba(0, 0, 0, 0.4) !important;
 }
 
 @media (max-width: 1024px) {
@@ -651,8 +673,11 @@ input, select, textarea {
     width: 320px;
     gap: 24px;
   }
-  .hero-title { font-size: 1.4rem; letter-spacing: 0.22em; }
-  .hero-subtext { font-size: 1rem; }
+  .hero-title,
+  .hero-title * { font-size: 1.4rem !important; letter-spacing: 0.22em !important; }
+  .hero-subtext,
+  .hero-subtext * { font-size: 1rem !important; }
+  .cta-primary-trade { min-width: 240px !important; padding: 15px 36px !important; }
 }
 
 @media (max-width: 768px) {
@@ -664,9 +689,11 @@ input, select, textarea {
     gap: 18px;
   }
   .hero-actions-vertical { gap: 14px; }
-  .cta-primary-trade { min-width: 200px; padding: 14px 28px; }
-  .hero-title { font-size: 1.15rem; letter-spacing: 0.2em; line-height: 1.55; }
-  .hero-subtext { font-size: 0.95rem; line-height: 1.65; }
+  .cta-primary-trade { min-width: 220px !important; padding: 14px 28px !important; }
+  .hero-title,
+  .hero-title * { font-size: 1.15rem !important; letter-spacing: 0.2em !important; line-height: 1.55 !important; }
+  .hero-subtext,
+  .hero-subtext * { font-size: 0.95rem !important; line-height: 1.65 !important; }
 }
 
 
