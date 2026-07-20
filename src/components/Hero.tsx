@@ -91,74 +91,67 @@ const Hero = () => {
           before React boots). We intentionally do NOT re-render the image
           here — a second <picture> creates a duplicate LCP candidate and
           extra decode work that pushes LCP later on throttled CPUs. */}
+      {/* Base wash for image warmth */}
       <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-black/10 via-transparent to-black/20" />
-
-
-
-
+      {/* Readability scrim behind the text block — stronger on mobile where the crane/foliage pattern is denser */}
+      <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-black/55 via-black/30 to-black/60 md:from-black/40 md:via-black/10 md:to-black/40" />
 
       {/* Text overlay — CSS-only animations, no framer-motion needed */}
-      <div className="relative z-10 h-full px-4 pb-32 pt-[44%] md:px-32 md:pb-20 md:pt-[20%] lg:px-52 flex-col border rounded-none opacity-100 shadow-none flex items-start justify-start md:justify-start md:items-start">
+      <div className="relative z-10 h-full px-4 pb-32 pt-[44%] md:px-32 md:pb-20 md:pt-[20%] lg:px-52 flex-col rounded-none opacity-100 shadow-none flex items-start justify-start md:justify-start md:items-start">
         <div className="max-w-4xl md:text-left">
-          <h1 className="mb-8 md:mb-14 text-3xl leading-tight text-white md:text-4xl font-serif lg:text-5xl">
+          <h1 className="mb-6 md:mb-10 text-3xl leading-tight text-white md:text-4xl font-serif lg:text-5xl [text-shadow:_0_2px_10px_rgba(0,0,0,0.55)]">
             Discover The World's Best Interior Designers' Iconic Pieces
           </h1>
 
           <div className="flex w-full max-w-3xl flex-col items-start">
-            <p className="text-base leading-relaxed text-white text-left font-serif md:text-xl lg:text-2xl font-medium hero-fade-in-delayed-3">
-              <span className="hidden md:inline">From Couture Furniture to Collectible Designs Items,
-              <br /> Discover Emerging Talents and Design Masters In Our Gallery
-              <br /> or Through the Best Ateliers and Designer Workshops We Partner&nbsp;With</span>
-              <span className="md:hidden leading-relaxed text-left">From Couture Furniture to Collectible Designs Items, Discover Emerging Talents and Design Masters In Our Gallery or Through the Best Ateliers and Designer Workshops We Partner&nbsp;With</span>
+            <p className="text-base leading-relaxed text-white text-left font-serif md:text-xl lg:text-2xl font-medium hero-fade-in-delayed-3 [text-shadow:_0_2px_10px_rgba(0,0,0,0.6)]">
+              <span className="hidden md:inline">
+                Sourcing elite, collectible design items for global interior architecture.
+                <br />
+                Tailored trade pricing, dedicated logistics, and emerging global talents.
+              </span>
+              <span className="md:hidden leading-relaxed text-left">
+                Sourcing elite, collectible design items for global interior architecture. Tailored trade pricing, dedicated logistics, and emerging global talents.
+              </span>
             </p>
 
-            <div className="mt-8 md:mt-10 flex flex-col items-start gap-4">
+            <div className="mt-8 md:mt-10 flex flex-col items-start gap-3 md:gap-4">
               <button
-                onClick={scrollToOverview}
+                type="button"
+                onClick={() => {
+                  trackEvent("click_trade_access", { event_category: "CTA", event_label: "HeroCTA" });
+                  setTradeOpen(true);
+                }}
                 className={heroPrimaryCtaClass}
               >
-                Explore Our Interactive Gallery
+                Apply for Trade Access
               </button>
+
+              <p className="max-w-md text-[11px] md:text-xs uppercase tracking-[0.18em] text-white/90 font-body [text-shadow:_0_1px_4px_rgba(0,0,0,0.6)] hero-fade-in-delayed-4">
+                Exclusive Trade Pricing • Dedicated Account Management • Custom Sizing Available
+              </p>
 
               <button
                 type="button"
-                onClick={() => { trackEvent("click_meet_designers", { event_category: "CTA", event_label: "HeroCTA" }); navigate("/designers"); }}
-                className={heroPrimaryCtaClass}
+                onClick={() => {
+                  trackEvent("click_explore_collection", { event_category: "CTA", event_label: "HeroCTA" });
+                  navigate("/designers");
+                }}
+                className={heroGhostCtaClass}
               >
-                Discover Our Talents
+                Explore the Collection
               </button>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Mobile: bottom-right of hero, above iOS bar & Chat widget */}
-      <div
-        className="flex md:hidden absolute right-4 z-20 flex-col items-end gap-2 hero-fade-in-delayed-4"
-        style={{ bottom: "max(13rem, calc(env(safe-area-inset-bottom) + 12.5rem))", animationDelay: "1.2s" }}
-      >
-        <button
-          onClick={() => { trackCTA.bookAppointment("HeroCTA"); scrollToContact(); }}
-          className={heroSecondaryCtaClass}
-        >
-          Book a Viewing
-        </button>
-      </div>
-
-      {/* Desktop: bottom-right of hero, next to Chat widget */}
-      <div
-        className="hidden md:flex absolute bottom-6 z-20 items-center gap-2 hero-fade-in-delayed-4"
-        style={{ right: "200px", animationDelay: "1.2s" }}
-      >
-        <button
-          onClick={() => { trackCTA.bookAppointment("HeroCTA"); scrollToContact(); }}
-          className={heroSecondaryCtaClass}
-        >
-          Book a Viewing
-        </button>
-      </div>
+      <Suspense fallback={null}>
+        {tradeOpen && <TradeAccessDialog open={tradeOpen} onOpenChange={setTradeOpen} />}
+      </Suspense>
 
     </section>
   );
 };
+export default Hero;
 export default Hero;
