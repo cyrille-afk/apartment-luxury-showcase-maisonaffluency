@@ -685,12 +685,12 @@ input, select, textarea {
     left: 0;
     right: 0;
     bottom: 0;
-    height: 62%;
+    height: 70%;
     background: linear-gradient(
       180deg,
       rgba(0, 0, 0, 0.00) 0%,
-      rgba(0, 0, 0, 0.25) 45%,
-      rgba(0, 0, 0, 0.65) 100%
+      rgba(0, 0, 0, 0.40) 40%,
+      rgba(0, 0, 0, 0.72) 100%
     );
     pointer-events: none;
     z-index: 1;
@@ -711,22 +711,26 @@ input, select, textarea {
   }
   .hero-actions-vertical {
     gap: 14px !important;
-    margin-top: 16px !important;
+    margin-top: 20px !important;
     align-items: center !important;
     width: 100% !important;
   }
   .hero-title,
   .hero-title * {
-    font-size: 1.15rem !important;
+    font-size: 1.2rem !important;
     letter-spacing: 0.2em !important;
-    line-height: 1.55 !important;
+    line-height: 1.5 !important;
+    font-weight: 400 !important;
+    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.55) !important;
   }
   .hero-subtext,
   .hero-subtext * {
-    font-size: 0.95rem !important;
-    line-height: 1.65 !important;
+    font-size: 0.98rem !important;
+    line-height: 1.6 !important;
+    font-weight: 500 !important;
     color: #ffffff !important;
-    opacity: 0.95 !important;
+    opacity: 1 !important;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5) !important;
   }
 
   .cta-primary-trade {
@@ -738,19 +742,20 @@ input, select, textarea {
     width: 100% !important;
     max-width: 300px !important;
     text-align: center !important;
-    padding: 16px 24px !important;
-    border: 1px solid #ffffff !important;
-    background-color: #ffffff !important;
-    color: #000000 !important;
+    padding: 20px 28px !important;
+    border: 1px solid #111111 !important;
+    background-color: #111111 !important;
+    color: #ffffff !important;
     opacity: 1 !important;
-    font-size: 0.8rem !important;
-    font-weight: 500 !important;
-    letter-spacing: 0.18em !important;
-    min-height: 48px !important;
+    font-size: 0.82rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.22em !important;
+    min-height: 56px !important;
     align-self: center !important;
     text-decoration: none !important;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35) !important;
   }
-}
+  }
 
 @media (max-width: 768px) and (display-mode: standalone) {
   .hero-editorial-sidebar {
