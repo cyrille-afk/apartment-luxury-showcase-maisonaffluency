@@ -71,7 +71,7 @@ const Hero = () => {
 
 
       {/* Text overlay — CSS-only animations, no framer-motion needed */}
-      <div className="relative z-10 mx-auto h-full max-w-7xl flex-col border rounded-none opacity-100 shadow-none flex items-start justify-start px-6 pb-32 pt-[42%] md:items-start md:justify-start md:px-14 md:pb-20 md:pt-[20%] lg:px-24">
+      <div className="relative z-10 mx-auto h-full max-w-7xl flex-col border rounded-none opacity-100 shadow-none flex items-start justify-start px-6 pb-32 pt-[42%] md:items-start md:justify-start md:px-14 md:pb-20 md:pt-[20%] lg:px-24 md:-ml-1.5 lg:-ml-2">
         <div className="max-w-4xl md:text-left">
           <h1 className="text-3xl leading-tight text-white md:text-4xl font-serif lg:text-5xl">
             Modern Masters.<br />
