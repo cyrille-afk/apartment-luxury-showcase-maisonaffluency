@@ -665,11 +665,13 @@ input, select, textarea {
     right: 5%;
     width: 320px;
     gap: 24px;
+    text-align: right !important;
   }
   .hero-title,
-  .hero-title * { font-size: 1.4rem !important; letter-spacing: 0.22em !important; }
+  .hero-title * { font-size: 1.4rem !important; letter-spacing: 0.22em !important; line-height: 1.35 !important; }
   .hero-subtext,
   .hero-subtext * { font-size: 1rem !important; }
+  .hero-actions-vertical { align-items: flex-end !important; }
   .cta-primary-trade { min-width: 240px !important; padding: 15px 36px !important; }
 }
 
