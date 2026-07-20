@@ -351,24 +351,30 @@
 
       />
     </picture>
-    <div id="static-hero-copy" aria-hidden="true" style="position:absolute;inset:0;z-index:0;pointer-events:none;display:flex;align-items:flex-end;justify-content:center;padding:0 1.5rem 6rem;color:#fff;font-family:'Playfair Display',Georgia,serif;">
-      <div style="width:100%;max-width:1280px;display:flex;flex-direction:column;gap:1.5rem;">
-        <div style="display:flex;flex-direction:row;align-items:baseline;justify-content:space-between;gap:2rem;">
-          <div style="font-size:clamp(1rem,1.4vw,1.25rem);line-height:1.5;margin:0;font-weight:300;letter-spacing:0.22em;text-transform:uppercase;text-shadow:0 1px 6px rgba(0,0,0,.4);max-width:22rem;">
-            Modern Masters. Iconic Design.
-          </div>
-          <p style="font-family:'Lora',Georgia,serif;font-size:clamp(0.75rem,1vw,0.875rem);line-height:1.7;letter-spacing:0.02em;margin:0;max-width:26rem;color:rgba(255,255,255,0.9);text-shadow:0 1px 5px rgba(0,0,0,.35);">
-            A curated collection of re-editions and masterworks for global architectural projects.
-          </p>
+    <div id="static-hero-copy" aria-hidden="true" style="position:absolute;inset:0;z-index:0;pointer-events:none;display:flex;align-items:flex-end;color:#fff;font-family:'Playfair Display',Georgia,serif;">
+      <div style="width:100%;padding:60px 80px;box-sizing:border-box;background:linear-gradient(to top, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.2) 60%, rgba(0,0,0,0) 100%);display:grid;grid-template-columns:1.5fr 2fr 1fr;gap:40px;align-items:start;">
+        <div style="font-family:'Didot','Bodoni MT','Playfair Display',serif;font-size:1.6rem;font-weight:300;line-height:1.3;letter-spacing:0.2em;text-transform:uppercase;text-shadow:0 1px 6px rgba(0,0,0,.4);margin:0;">
+          Modern Masters. Iconic Design.
+        </div>
+        <p style="font-family:'Garamond','Baskerville','Lora',serif;font-size:1.05rem;font-weight:400;line-height:1.6;letter-spacing:0.02em;margin:0;padding-top:4px;color:rgba(255,255,255,0.9);text-shadow:0 1px 5px rgba(0,0,0,.35);">
+          A curated collection of re-editions and masterworks for global architectural projects.
+        </p>
+        <div style="display:flex;flex-direction:column;gap:16px;align-items:flex-end;">
+          <span style="font-family:'Inter',sans-serif;font-size:0.8rem;font-weight:400;text-transform:uppercase;letter-spacing:0.15em;color:#fff;text-decoration:none;text-align:center;width:180px;padding:12px 0;border:1px solid rgba(255,255,255,0.5);box-sizing:border-box;">Apply for Trade Access</span>
+          <span style="font-family:'Inter',sans-serif;font-size:0.8rem;font-weight:400;text-transform:uppercase;letter-spacing:0.15em;color:#fff;text-decoration:none;text-align:center;width:180px;padding:12px 0;border:1px solid rgba(255,255,255,0.5);box-sizing:border-box;">View the Collection</span>
         </div>
       </div>
     </div>
     <style>
+      @media (max-width: 1024px) {
+        #static-hero-copy > div { padding: 48px 40px !important; gap: 32px !important; }
+      }
       @media (max-width: 767px) {
-        #static-hero-copy { padding: 0 1.5rem 5rem !important; }
-        #static-hero-copy > div > div { flex-direction: column !important; align-items: flex-start !important; gap: 1rem !important; }
-        #static-hero-copy > div > div > div { font-size: 1rem !important; max-width: none !important; }
-        #static-hero-copy > div > div > p { font-size: 0.8125rem !important; }
+        #static-hero-copy > div { padding: 40px 24px 5rem !important; grid-template-columns: 1fr !important; gap: 20px !important; }
+        #static-hero-copy > div > div { font-size: 1.25rem !important; letter-spacing: 0.18em !important; }
+        #static-hero-copy > div > p { font-size: 0.95rem !important; }
+        #static-hero-copy > div > div:last-child { flex-direction: row !important; flex-wrap: wrap !important; align-items: flex-start !important; gap: 12px !important; }
+        #static-hero-copy > div > div:last-child > span { width: auto !important; padding: 12px 24px !important; }
       }
     </style>
 
