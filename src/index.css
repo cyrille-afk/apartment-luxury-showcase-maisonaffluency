@@ -638,19 +638,17 @@ input, select, textarea {
 }
 @media (max-width: 768px) {
   .hero-editorial-sidebar {
-    top: auto;
-    transform: none;
-    right: 0;
-    left: 0;
-    width: auto;
-    padding: 0 24px calc(14vh + env(safe-area-inset-bottom));
-    bottom: 0;
-    gap: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    right: 5%;
+    left: auto;
+    width: min(72vw, 300px);
+    gap: 20px;
   }
   .hero-actions-vertical { gap: 14px; margin-top: 8px; }
-  .cta-secondary-collection { align-self: flex-start; text-align: left; }
-  .hero-title { font-size: 1.25rem; letter-spacing: 0.18em; }
+  .hero-title { font-size: 1.15rem; letter-spacing: 0.2em; }
   .hero-subtext { font-size: 0.95rem; }
 }
+
 
 
