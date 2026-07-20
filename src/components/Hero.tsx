@@ -62,7 +62,7 @@ const scrollToContact = () => {
 };
 
 const heroPrimaryCtaClass =
-  "inline-flex min-h-11 items-center justify-center rounded-full border border-[hsl(var(--accent))] bg-[hsl(var(--accent))] px-6 py-3 text-center text-[hsl(var(--accent-foreground))] text-sm md:text-base font-body font-semibold tracking-wide shadow-[0_10px_32px_rgba(0,0,0,0.35)] transition-all hover:brightness-110 focus:outline-none focus:ring-2 focus:ring-white/70 focus:ring-offset-2 focus:ring-offset-transparent hero-fade-in-delayed-4";
+  "inline-flex min-h-11 items-center justify-center rounded-full bg-white px-7 py-3 text-center text-[hsl(var(--foreground))] text-sm md:text-base font-body font-semibold tracking-wide shadow-[0_12px_36px_rgba(0,0,0,0.35)] transition-all hover:bg-[hsl(var(--accent))] hover:text-white focus:outline-none focus:ring-2 focus:ring-white/70 focus:ring-offset-2 focus:ring-offset-transparent hero-fade-in-delayed-4";
 
 const heroGhostCtaClass =
   "inline-flex min-h-11 items-center justify-center rounded-full border border-white/75 bg-transparent px-6 py-3 text-center text-white text-sm md:text-base font-body font-medium tracking-wide transition-all hover:bg-white/10 hover:border-white focus:outline-none focus:ring-2 focus:ring-white/70 focus:ring-offset-2 focus:ring-offset-transparent hero-fade-in-delayed-4 [text-shadow:_0_1px_3px_rgba(0,0,0,0.55)]";
