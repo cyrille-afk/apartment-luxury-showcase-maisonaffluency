@@ -119,7 +119,7 @@ const Hero = () => {
             }}
             className="cta-secondary-collection"
           >
-            View the Collection
+            Explore the Collection
           </button>
 
         </div>
