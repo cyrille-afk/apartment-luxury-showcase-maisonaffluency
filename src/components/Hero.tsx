@@ -92,7 +92,8 @@ const Hero = () => {
       <div className="hero-editorial-footer">
         {/* Column 1: Title */}
         <h1 className="hero-title [text-shadow:_0_1px_6px_rgba(0,0,0,0.4)]">
-          Modern Masters. Iconic Design.
+          <span className="block">Modern Masters</span>
+          <span className="block">Iconic Designers</span>
         </h1>
 
         {/* Column 2: Descriptive subtext */}
