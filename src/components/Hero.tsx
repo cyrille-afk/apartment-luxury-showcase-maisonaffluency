@@ -73,13 +73,16 @@ const Hero = () => {
       {/* Text overlay — CSS-only animations, no framer-motion needed */}
       <div className="relative z-10 h-full px-4 pb-32 pt-[44%] md:px-32 md:pb-20 md:pt-[20%] lg:px-52 flex-col border rounded-none opacity-100 shadow-none flex items-start justify-start md:justify-start md:items-start">
         <div className="max-w-4xl md:text-left">
-          <div className="flex flex-col items-start gap-6 md:flex-row md:items-center md:gap-8 lg:gap-10">
+          <div className="flex flex-col items-start gap-6">
             <h1 className="text-3xl leading-tight text-white md:text-4xl font-serif lg:text-5xl">
-              <span className="hidden md:inline">Modern Masters. Iconic Design.</span>
+              <span className="hidden md:inline">
+                Modern Masters.<br />
+                Iconic Design.
+              </span>
               <span className="md:hidden">Discover The World's Best Interior Designers' Iconic Pieces</span>
             </h1>
 
-            <div className="flex flex-col items-start gap-4">
+            <div className="flex flex-col items-start gap-4 md:pl-[0.08em]">
               <button
                 type="button"
                 onClick={() => { trackEvent("click_meet_designers", { event_category: "CTA", event_label: "HeroCTA" }); navigate("/designers"); }}
