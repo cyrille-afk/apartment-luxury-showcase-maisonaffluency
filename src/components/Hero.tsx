@@ -1,9 +1,7 @@
-import { useEffect, useState, lazy, Suspense } from "react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { scrollToSection } from "@/lib/scrollToSection";
-import { trackEvent } from "@/lib/analytics";
-
-const TradeAccessDialog = lazy(() => import("@/components/TradeAccessDialog"));
+import { trackCTA, trackEvent } from "@/lib/analytics";
 
 const HERO_BASE = "https://res.cloudinary.com/dif1oamtj/image/upload";
 const HERO_ID = "v1781920000/AffluencySG_194-22.jpg_macpwj";
@@ -61,14 +59,19 @@ const scrollToContact = () => {
   revealAndScrollTo("contact");
 };
 
+const heroPrimaryCtaClass =
+  "inline-flex min-h-11 items-center justify-center rounded-full border border-white/75 bg-white/15 px-6 py-3 text-center text-white text-sm md:text-base font-body font-semibold tracking-wide shadow-[0_8px_30px_rgba(0,0,0,0.22)] backdrop-blur-md transition-all hover:border-white hover:bg-white/25 focus:outline-none focus:ring-2 focus:ring-white/70 focus:ring-offset-2 focus:ring-offset-transparent hero-fade-in-delayed-4 [text-shadow:_0_1px_3px_rgba(0,0,0,0.45)]";
+
+const heroSecondaryCtaClass =
+  "inline-flex min-h-9 items-center justify-center rounded-full border border-white/70 bg-white/15 px-4 py-2 text-center text-white text-xs lg:text-sm font-body font-bold tracking-wide shadow-[0_8px_24px_rgba(0,0,0,0.2)] backdrop-blur-md transition-all hover:border-white hover:bg-white/25 focus:outline-none focus:ring-2 focus:ring-white/70 focus:ring-offset-2 focus:ring-offset-transparent [text-shadow:_0_1px_3px_rgba(0,0,0,0.55)]";
+
 const Hero = () => {
   const navigate = useNavigate();
-  const [tradeOpen, setTradeOpen] = useState(false);
   // The pre-React static hero <picture> in index.html stays in place permanently
   // as the LCP candidate. The static copy overlay (#static-hero-copy) however
-  // duplicates this section's content, so we hide it as soon as React mounts.
+  // duplicates this section's <h1>, so we hide it as soon as React mounts.
   useEffect(() => {
-    // Hide the static copy overlay (React's content below replaces it).
+    // Hide the static copy overlay (React's <h1> below replaces it).
     const copy = document.getElementById("static-hero-copy");
     if (copy) copy.style.display = "none";
     // Force the static hero <picture> visible. The inline script in index.html
@@ -85,55 +88,72 @@ const Hero = () => {
           before React boots). We intentionally do NOT re-render the image
           here — a second <picture> creates a duplicate LCP candidate and
           extra decode work that pushes LCP later on throttled CPUs. */}
+      <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-black/10 via-transparent to-black/20" />
 
-      {/* Editorial overlay: crisp right-side vignette, no blur filters */}
-      <div className="hero-editorial-overlay-right" aria-hidden="true" />
 
-      {/* Editorial sidebar: narrow vertical column anchored to the right,
-          vertically centered over the neutral side of the showroom photo. */}
 
-      <div className="hero-editorial-sidebar">
-        <h1 className="hero-title">
-          <span className="block">Modern Masters.</span>
-          <span className="block">Iconic Design.</span>
-        </h1>
 
-        <p className="hero-subtext">
-          A curated collection of masterworks, re-editions and contemporary design for global architectural projects
-        </p>
 
-        <div className="hero-actions-vertical">
+      {/* Text overlay — CSS-only animations, no framer-motion needed */}
+      <div className="relative z-10 h-full px-4 pb-32 pt-[44%] md:px-32 md:pb-20 md:pt-[20%] lg:px-52 flex-col border rounded-none opacity-100 shadow-none flex items-start justify-start md:justify-start md:items-start">
+        <div className="max-w-4xl md:text-left">
+          <h1 className="mb-8 md:mb-14 text-3xl leading-tight text-white md:text-4xl font-serif lg:text-5xl">
+            Discover The World's Best Interior Designers' Iconic Pieces
+          </h1>
 
-          <button
-            type="button"
-            onClick={() => {
-              trackEvent("click_trade_access", { event_category: "CTA", event_label: "HeroCTA" });
-              setTradeOpen(true);
-            }}
-            className="cta-primary-trade"
-          >
-            Apply for Trade Access
-          </button>
+          <div className="flex w-full max-w-3xl flex-col items-start">
+            <p className="text-base leading-relaxed text-white text-left font-serif md:text-xl lg:text-2xl font-medium hero-fade-in-delayed-3">
+              <span className="hidden md:inline">From Couture Furniture to Collectible Designs Items,
+              <br /> Discover Emerging Talents and Design Masters In Our Gallery
+              <br /> or Through the Best Ateliers and Designer Workshops We Partner&nbsp;With</span>
+              <span className="md:hidden leading-relaxed text-left">From Couture Furniture to Collectible Designs Items, Discover Emerging Talents and Design Masters In Our Gallery or Through the Best Ateliers and Designer Workshops We Partner&nbsp;With</span>
+            </p>
 
-          <button
-            type="button"
-            onClick={() => {
-              trackEvent("click_explore_collection", { event_category: "CTA", event_label: "HeroCTA" });
-              navigate("/designers");
-            }}
-            className="cta-secondary-collection"
-          >
-            Explore the Collection
-          </button>
+            <div className="mt-8 md:mt-10 flex flex-col items-start gap-4">
+              <button
+                onClick={scrollToOverview}
+                className={heroPrimaryCtaClass}
+              >
+                Explore Our Interactive Gallery
+              </button>
 
+              <button
+                type="button"
+                onClick={() => { trackEvent("click_meet_designers", { event_category: "CTA", event_label: "HeroCTA" }); navigate("/designers"); }}
+                className={heroPrimaryCtaClass}
+              >
+                Discover Our Talents
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
+      {/* Mobile: bottom-right of hero, above iOS bar & Chat widget */}
+      <div
+        className="flex md:hidden absolute right-4 z-20 flex-col items-end gap-2 hero-fade-in-delayed-4"
+        style={{ bottom: "max(13rem, calc(env(safe-area-inset-bottom) + 12.5rem))", animationDelay: "1.2s" }}
+      >
+        <button
+          onClick={() => { trackCTA.bookAppointment("HeroCTA"); scrollToContact(); }}
+          className={heroSecondaryCtaClass}
+        >
+          Book a Viewing
+        </button>
+      </div>
 
-
-      <Suspense fallback={null}>
-        {tradeOpen && <TradeAccessDialog open={tradeOpen} onOpenChange={setTradeOpen} />}
-      </Suspense>
+      {/* Desktop: bottom-right of hero, next to Chat widget */}
+      <div
+        className="hidden md:flex absolute bottom-6 z-20 items-center gap-2 hero-fade-in-delayed-4"
+        style={{ right: "200px", animationDelay: "1.2s" }}
+      >
+        <button
+          onClick={() => { trackCTA.bookAppointment("HeroCTA"); scrollToContact(); }}
+          className={heroSecondaryCtaClass}
+        >
+          Book a Viewing
+        </button>
+      </div>
 
     </section>
   );
