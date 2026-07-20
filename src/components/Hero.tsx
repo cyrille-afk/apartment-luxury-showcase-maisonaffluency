@@ -90,52 +90,56 @@ const Hero = () => {
           before React boots). We intentionally do NOT re-render the image
           here — a second <picture> creates a duplicate LCP candidate and
           extra decode work that pushes LCP later on throttled CPUs. */}
-      {/* Soft digital scrim — heavier only at the bottom edge to protect the
-          lower-right CTAs, transparent above the midpoint so the showroom imagery
-          (green crane wallpaper, warm woods) remains vivid and unbothered. */}
+      {/* Soft digital scrim — concentrated at the very bottom edge so the top
+          70% of the Singapore showroom photo (cranes, wallpaper, ceiling) stays
+          completely untouched, while the lower third frame remains legible. */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
-          background: `linear-gradient(to top, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0) 50%)`,
+          background: `linear-gradient(to top, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0) 70%)`,
         }}
       />
 
-      {/* Editorial asymmetric layout: top-left headline, bottom-right CTAs */}
-      <div className="relative z-10 h-full px-6 md:px-16 lg:px-24 pt-[26vh] md:pt-[22vh] pb-10 md:pb-16 flex flex-col justify-between">
-        {/* Top-left: whispered headline + sub-text */}
-        <div className="max-w-xl">
-          <h1 className="hero-title [text-shadow:_0_1px_6px_rgba(0,0,0,0.4)]">
-            Modern Masters. Iconic Design.
-          </h1>
-          <p className="hero-subtext max-w-md [text-shadow:_0_1px_5px_rgba(0,0,0,0.35)]">
-            Authentic re-editions and luxury furniture for global architecture projects.
-          </p>
-        </div>
+      {/* Editorial frame: all content aligned to a single horizontal baseline
+          across the lower third of the viewport. */}
+      <div className="relative z-10 h-full flex flex-col">
+        <div className="flex-1" />
+        <div className="flex-none px-6 md:px-16 lg:px-24 pb-[max(2.5rem,env(safe-area-inset-bottom))] md:pb-16">
+          <div className="max-w-7xl mx-auto w-full flex flex-col md:flex-row md:items-baseline md:justify-between gap-6 md:gap-12">
+            {/* Column 1 */}
+            <h1 className="hero-title [text-shadow:_0_1px_6px_rgba(0,0,0,0.4)] max-w-[20rem] lg:max-w-[24rem]">
+              Modern Masters. Iconic Design.
+            </h1>
 
-        {/* Bottom-right quadrant: micro-underlined action nodes */}
-        <div className="flex justify-end">
-          <div className="flex flex-col items-end gap-4 md:gap-5">
-            <button
-              type="button"
-              onClick={() => {
-                trackEvent("click_trade_access", { event_category: "CTA", event_label: "HeroCTA" });
-                setTradeOpen(true);
-              }}
-              className={heroCtaLinkClass}
-            >
-              Apply for Trade Access
-            </button>
+            {/* Column 2: subtext + CTAs */}
+            <div className="max-w-lg flex flex-col items-start gap-5 md:gap-6">
+              <p className="hero-subtext [text-shadow:_0_1px_5px_rgba(0,0,0,0.35)]">
+                A curated collection of re-editions and masterworks for global architectural projects.
+              </p>
+              <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-6">
+                <button
+                  type="button"
+                  onClick={() => {
+                    trackEvent("click_trade_access", { event_category: "CTA", event_label: "HeroCTA" });
+                    setTradeOpen(true);
+                  }}
+                  className={heroCtaLinkClass}
+                >
+                  Apply for Trade Access
+                </button>
 
-            <button
-              type="button"
-              onClick={() => {
-                trackEvent("click_explore_collection", { event_category: "CTA", event_label: "HeroCTA" });
-                navigate("/designers");
-              }}
-              className={heroCtaLinkClass}
-            >
-              View the Collection
-            </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    trackEvent("click_explore_collection", { event_category: "CTA", event_label: "HeroCTA" });
+                    navigate("/designers");
+                  }}
+                  className={heroCtaLinkClass}
+                >
+                  View the Collection
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
