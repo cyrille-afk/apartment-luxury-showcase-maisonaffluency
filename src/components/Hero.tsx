@@ -91,29 +91,28 @@ const Hero = () => {
           before React boots). We intentionally do NOT re-render the image
           here — a second <picture> creates a duplicate LCP candidate and
           extra decode work that pushes LCP later on throttled CPUs. */}
-      {/* Base warmth wash */}
-      <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-black/10 via-transparent to-black/20" />
-      {/* Radical readability scrim: darkens the bottom/center where the text block lives,
-          stays transparent at the top so the room keeps its grandeur. */}
+      {/* Subtle readability scrim: focused just behind the text block on mobile,
+          keeps the room's grandeur visible everywhere else. */}
       <div
-        className="absolute inset-0 pointer-events-none"
+        className="absolute inset-0 pointer-events-none md:hidden"
         style={{
           background: `
-            radial-gradient(ellipse at 30% 62%, rgba(0,0,0,0.74) 0%, rgba(0,0,0,0.42) 42%, transparent 76%),
-            linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.22) 50%, rgba(0,0,0,0.72) 100%)
+            radial-gradient(ellipse at 30% 68%, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.18) 45%, transparent 75%),
+            linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0) 45%, rgba(0,0,0,0.35) 100%)
           `,
         }}
       />
-      {/* Desktop: text sits higher and more left; shift the dark vignette accordingly */}
+      {/* Desktop: soft left-side wash so headline reads without dulling the image */}
       <div
         className="absolute inset-0 pointer-events-none hidden md:block"
         style={{
           background: `
-            radial-gradient(ellipse at 22% 36%, rgba(0,0,0,0.70) 0%, rgba(0,0,0,0.34) 48%, transparent 80%),
-            linear-gradient(to right, rgba(0,0,0,0.58) 0%, rgba(0,0,0,0.18) 48%, transparent 72%)
+            radial-gradient(ellipse at 22% 40%, rgba(0,0,0,0.40) 0%, rgba(0,0,0,0.16) 50%, transparent 78%),
+            linear-gradient(to right, rgba(0,0,0,0.30) 0%, rgba(0,0,0,0.05) 50%, transparent 75%)
           `,
         }}
       />
+
 
       {/* Text overlay — CSS-only animations, no framer-motion needed */}
       <div className="relative z-10 h-full px-4 pb-32 pt-[44%] md:px-32 md:pb-20 md:pt-[20%] lg:px-52 flex-col rounded-none opacity-100 shadow-none flex items-start justify-start md:justify-start md:items-start">
