@@ -95,7 +95,7 @@ const Hero = () => {
         </h1>
 
         <p className="hero-subtext">
-          A curated collection of re-editions and masterworks for global architectural projects.
+          A curated collection of masterworks, re-editions and contemporary design for global architectural projects
         </p>
 
         <div className="hero-actions-vertical">
