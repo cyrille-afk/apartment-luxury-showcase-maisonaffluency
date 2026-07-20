@@ -639,8 +639,8 @@ input, select, textarea {
   /* TAILORING FIX: Keeps the button structurally contained and elegant */
   display: inline-block !important;
   width: auto !important;
-  min-width: 260px !important;
-  padding: 16px 40px !important;
+  min-width: 220px !important;
+  padding: 16px 28px !important;
   margin: 12px 0 4px 0 !important;
 
   border: 1px solid #ffffff !important;
