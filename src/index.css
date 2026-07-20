@@ -697,7 +697,7 @@ input, select, textarea {
   }
 
   .hero-editorial-sidebar {
-    bottom: calc(26% + env(safe-area-inset-bottom, 0px)) !important;
+    bottom: calc(22% + env(safe-area-inset-bottom, 0px)) !important;
     right: 10% !important;
     left: 10% !important;
     width: auto !important;
