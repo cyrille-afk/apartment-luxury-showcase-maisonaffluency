@@ -553,33 +553,33 @@ input, select, textarea {
 
 /* ============ Hero — Editorial Sidebar ============ */
 
-/* 1. The Clean Right-Side Vignette (STRICTLY NO BLUR FILTERS HERE) */
+/* 1. The Localized Shadow Field (Removes the heavy dark linear wall effect) */
 .hero-editorial-overlay-right {
   position: absolute;
   top: 0;
   right: 0;
-  width: 42vw;
+  width: 45vw;
   height: 100%;
-  background: linear-gradient(to left,
-    rgba(0, 0, 0, 0.88) 0%,
-    rgba(0, 0, 0, 0.65) 45%,
-    rgba(0, 0, 0, 0.2) 75%,
-    rgba(0, 0, 0, 0) 100%
+  background: radial-gradient(
+    ellipse at 85% 65%,
+    rgba(0, 0, 0, 0.78) 0%,
+    rgba(0, 0, 0, 0.50) 35%,
+    rgba(0, 0, 0, 0.15) 65%,
+    rgba(0, 0, 0, 0.00) 100%
   );
   pointer-events: none;
   z-index: 5;
 }
 
-/* 2. The Repositioned Text Block Column */
+/* 2. Sharp Typography Alignment Matrix */
 .hero-editorial-sidebar {
   position: absolute;
-  /* CHANGED: Swapped top:50% for a strict bottom constraint to lower the block */
-  bottom: 25%;
+  bottom: 22%;
   right: 6%;
   width: 360px;
   display: flex;
   flex-direction: column;
-  gap: 32px;
+  gap: 28px;
   text-align: left;
   z-index: 10;
 }
@@ -591,8 +591,8 @@ input, select, textarea {
   font-weight: 300;
   text-transform: uppercase;
   letter-spacing: 0.24em;
-  line-height: 1.6;
-  /* CRITICAL FOR SHARPNESS: Pure solid white, zero text-shadows or filter blurs */
+  line-height: 1.55;
+  /* Pushes absolute clarity to the thin font curves */
   color: #ffffff !important;
   opacity: 1 !important;
   -webkit-font-smoothing: antialiased;
@@ -606,9 +606,8 @@ input, select, textarea {
   font-family: 'Garamond', 'Baskerville', serif;
   font-size: 1.05rem;
   font-weight: 400;
-  line-height: 1.8;
-  /* Brightened off-white for crisp, high-contrast readability */
-  color: rgba(255, 255, 255, 0.9) !important;
+  line-height: 1.75;
+  color: rgba(255, 255, 255, 0.90) !important;
   opacity: 1 !important;
   -webkit-font-smoothing: antialiased;
 }
