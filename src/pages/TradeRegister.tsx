@@ -297,29 +297,17 @@ const TradeRegister = () => {
                   professionals — architecture and interior design studios,
                   hospitality groups, yacht designers, art consultants and
                   procurement specialists. Approved members receive confidential
-                  trade pricing across our full European catalogue, a dedicated
-                  advisor who knows the makers personally, and access to
-                  workshops that rarely list publicly — from Parisian bronziers
-                  and Florentine lacquer ateliers to Milanese rug-makers and
-                  Murano glass studios.
-                </p>
-                <p>
-                  Membership unlocks the full toolkit: white-labeled tearsheets
-                  and PDF presentations for your clients, multi-currency landed
-                  cost estimators, mood boards, CAD and 3D downloads, sample
-                  ordering, order timelines, and consolidated insured freight
-                  from multiple workshops into a single delivery. Custom
-                  commissions — non-standard dimensions, bespoke finishes,
-                  client COM upholstery — are handled quietly through your
-                  advisor.
+                  trade pricing across our full catalogue, a dedicated advisor
+                  who knows the makers personally and has access to a variety of
+                  specialist workshops.
                 </p>
                 <p>
                   Applications are reviewed within two working days. We ask for
                   a few details about your studio and current projects so we can
                   match you with the right advisor and the right level of
                   pricing tier. There is no membership fee, no minimum order,
-                  and no obligation to commit before you have seen samples and
-                  a full landed-cost estimate.
+                  and no obligation to commit before you have seen a full
+                  landed-cost estimate.
                 </p>
               </>
             )}
