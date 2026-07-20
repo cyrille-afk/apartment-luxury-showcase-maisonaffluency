@@ -86,6 +86,9 @@ const Hero = () => {
           here — a second <picture> creates a duplicate LCP candidate and
           extra decode work that pushes LCP later on throttled CPUs. */}
 
+      {/* Right-side dark vignette canvas — seamless vertical shadow used on the designers page */}
+      <div className="hero-editorial-overlay-right" aria-hidden="true" />
+
       {/* Editorial sidebar: narrow vertical column anchored to the right,
           vertically centered over the neutral side of the showroom photo. */}
       <div className="hero-editorial-sidebar">

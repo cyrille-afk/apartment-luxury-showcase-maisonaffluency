@@ -552,9 +552,27 @@ input, select, textarea {
 
 
 /* ============ Hero — Editorial Sidebar ============ */
+
+/* The Right-Side Dark Vignette Canvas */
+.hero-editorial-overlay-right {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 40vw;
+  height: 100%;
+  background: linear-gradient(to left,
+    rgba(0, 0, 0, 0.85) 0%,
+    rgba(0, 0, 0, 0.6) 40%,
+    rgba(0, 0, 0, 0.2) 75%,
+    rgba(0, 0, 0, 0) 100%
+  );
+  pointer-events: none;
+  z-index: 5;
+}
+
 .hero-editorial-sidebar {
   position: absolute;
-  top: 52%;
+  top: 50%;
   transform: translateY(-50%);
   right: 6%;
   width: 360px;
@@ -563,20 +581,6 @@ input, select, textarea {
   gap: 32px;
   text-align: left;
   z-index: 10;
-}
-
-/* Subtle localized scrim behind the text for luxury legibility */
-.hero-editorial-sidebar::before {
-  content: '';
-  position: absolute;
-  top: -10%;
-  left: -10%;
-  right: -10%;
-  bottom: -10%;
-  z-index: -1;
-  background: radial-gradient(circle closest-side at center, rgba(0, 0, 0, 0.25) 0%, rgba(0, 0, 0, 0) 80%);
-  filter: blur(20px);
-  pointer-events: none;
 }
 
 .hero-title {
@@ -588,21 +592,14 @@ input, select, textarea {
   line-height: 1.6;
   color: #ffffff;
   margin: 0;
-  text-shadow:
-    0 2px 4px rgba(0, 0, 0, 0.2),
-    0 4px 12px rgba(0, 0, 0, 0.35),
-    0 10px 30px rgba(0, 0, 0, 0.2);
 }
 .hero-subtext {
   font-family: 'Garamond', 'Baskerville', 'Lora', serif;
   font-size: 1.05rem;
   font-weight: 400;
   line-height: 1.75;
-  color: rgba(255, 255, 255, 0.95);
+  color: rgba(255, 255, 255, 0.85);
   margin: 0;
-  text-shadow:
-    0 2px 4px rgba(0, 0, 0, 0.2),
-    0 4px 12px rgba(0, 0, 0, 0.3);
 }
 /* Container for the actions */
 .hero-actions-vertical {
@@ -670,7 +667,7 @@ input, select, textarea {
 }
 @media (max-width: 1024px) {
   .hero-editorial-sidebar {
-    top: 52%;
+    top: 50%;
     right: 5%;
     width: 320px;
     gap: 24px;
@@ -679,8 +676,9 @@ input, select, textarea {
   .hero-subtext { font-size: 1rem; }
 }
 @media (max-width: 768px) {
+  .hero-editorial-overlay-right { width: 60vw; }
   .hero-editorial-sidebar {
-    top: 52%;
+    top: 50%;
     transform: translateY(-50%);
     right: 5%;
     left: auto;
