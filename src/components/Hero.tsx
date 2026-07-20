@@ -83,8 +83,8 @@ const Hero = () => {
 
           <div className="mt-8 md:mt-10 flex w-full max-w-3xl flex-col items-start">
             <p className="text-base leading-relaxed text-white text-left font-serif md:text-xl lg:text-2xl font-medium hero-fade-in-delayed-3">
-              <span className="hidden md:inline">A curated collection of masterworks, re-editions and contemporary design for global architectural projects.</span>
-              <span className="md:hidden leading-relaxed text-left">A curated collection of masterworks, re-editions and contemporary design for global architectural projects.</span>
+              <span className="hidden md:inline">A curated collection of masterworks<br />re-editions and contemporary design<br />for global architectural projects.</span>
+              <span className="md:hidden leading-relaxed text-left">A curated collection of masterworks<br />re-editions and contemporary design<br />for global architectural projects.</span>
             </p>
           </div>
 
