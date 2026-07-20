@@ -90,8 +90,8 @@ const Hero = () => {
           vertically centered over the neutral side of the showroom photo. */}
       <div className="hero-editorial-sidebar">
         <h1 className="hero-title">
-          <span className="block">Modern Masters</span>
-          <span className="block">Iconic Designers</span>
+          <span className="block">Modern Masters.</span>
+          <span className="block">Iconic Design.</span>
         </h1>
 
         <p className="hero-subtext">
