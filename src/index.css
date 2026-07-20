@@ -670,27 +670,27 @@ input, select, textarea {
 @media (max-width: 1024px) {
   .hero-editorial-sidebar {
     bottom: 22%;
-    right: 2%;
-    width: 240px;
+    right: 6%;
+    width: 320px;
     gap: 24px;
   }
   .hero-title,
   .hero-title * { font-size: 1.4rem !important; letter-spacing: 0.22em !important; }
   .hero-subtext,
   .hero-subtext * { font-size: 1rem !important; }
-  .cta-primary-trade { min-width: 220px !important; padding: 15px 28px !important; }
+  .cta-primary-trade { min-width: 240px !important; padding: 15px 36px !important; }
 }
 
 @media (max-width: 768px) {
   .hero-editorial-sidebar {
     bottom: 18%;
-    right: 4%;
+    right: 5%;
     left: auto;
-    width: min(64vw, 260px);
+    width: min(72vw, 300px);
     gap: 18px;
   }
   .hero-actions-vertical { gap: 14px; }
-  .cta-primary-trade { min-width: 200px !important; padding: 14px 24px !important; }
+  .cta-primary-trade { min-width: 220px !important; padding: 14px 28px !important; }
   .hero-title,
   .hero-title * { font-size: 1.15rem !important; letter-spacing: 0.2em !important; line-height: 1.55 !important; }
   .hero-subtext,
