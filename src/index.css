@@ -632,7 +632,7 @@ input, select, textarea {
 }
 @media (max-width: 1024px) {
   .hero-editorial-sidebar {
-    top: 46%;
+    top: 52%;
     bottom: clamp(44px, 7vh, 76px);
     right: 5%;
     width: 300px;
