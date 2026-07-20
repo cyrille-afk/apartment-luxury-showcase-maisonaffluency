@@ -354,14 +354,18 @@
     <div id="static-hero-copy" aria-hidden="true" style="position:absolute;inset:0;z-index:0;pointer-events:none;display:flex;align-items:flex-start;justify-content:flex-start;padding:20vh 13rem 8rem;color:#fff;font-family:'Playfair Display',Georgia,serif;">
       <div style="max-width:56rem;">
         <div style="font-size:clamp(2rem,3.6vw,3.25rem);line-height:1.08;margin:0 0 3.5rem;text-shadow:0 2px 12px rgba(0,0,0,.45);">
-          Discover The World's Best Interior Designers' Iconic Pieces
+          <span class="static-hero-desktop">Modern Masters. Iconic Design.</span>
+          <span class="static-hero-mobile">Discover The World's Best Interior Designers' Iconic Pieces</span>
         </div>
       </div>
     </div>
     <style>
+      .static-hero-mobile { display: none; }
       @media (max-width: 767px) {
         #static-hero-copy { padding: 44vh 1rem 8rem !important; }
         #static-hero-copy > div > div { font-size: 1.875rem !important; line-height: 1.2 !important; }
+        .static-hero-desktop { display: none; }
+        .static-hero-mobile { display: inline; }
       }
     </style>
 
