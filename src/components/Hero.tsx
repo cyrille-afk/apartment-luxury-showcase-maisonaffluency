@@ -90,12 +90,13 @@ const Hero = () => {
           before React boots). We intentionally do NOT re-render the image
           here — a second <picture> creates a duplicate LCP candidate and
           extra decode work that pushes LCP later on throttled CPUs. */}
-      {/* Minimal scrim — a soft dark wash only at top and bottom edges to
-          protect the header/CTA legibility, letting the showroom breathe. */}
+      {/* Soft digital scrim — heavier only at the bottom edge to protect the
+          lower-right CTAs, transparent above the midpoint so the showroom imagery
+          (green crane wallpaper, warm woods) remains vivid and unbothered. */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
-          background: `linear-gradient(to bottom, rgba(0,0,0,0.18) 0%, rgba(0,0,0,0) 22%, rgba(0,0,0,0) 70%, rgba(0,0,0,0.22) 100%)`,
+          background: `linear-gradient(to top, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0) 50%)`,
         }}
       />
 
@@ -111,9 +112,9 @@ const Hero = () => {
           </p>
         </div>
 
-        {/* Bottom-right: minimal CTAs */}
-        <div className="flex justify-start md:justify-end">
-          <div className="flex flex-col items-start md:items-end gap-4 md:gap-5">
+        {/* Bottom-right quadrant: micro-underlined action nodes */}
+        <div className="flex justify-end">
+          <div className="flex flex-col items-end gap-4 md:gap-5">
             <button
               type="button"
               onClick={() => {
