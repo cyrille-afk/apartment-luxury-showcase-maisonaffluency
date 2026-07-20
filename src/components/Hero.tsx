@@ -67,6 +67,7 @@ const heroPrimaryCtaClass =
 const heroGhostCtaClass =
   "inline-flex min-h-11 items-center justify-center rounded-full border border-white/75 bg-transparent px-6 py-3 text-center text-white text-sm md:text-base font-body font-medium tracking-wide transition-all hover:bg-white/10 hover:border-white focus:outline-none focus:ring-2 focus:ring-white/70 focus:ring-offset-2 focus:ring-offset-transparent hero-fade-in-delayed-4 [text-shadow:_0_1px_3px_rgba(0,0,0,0.55)]";
 
+
 const Hero = () => {
   const navigate = useNavigate();
   const [tradeOpen, setTradeOpen] = useState(false);
