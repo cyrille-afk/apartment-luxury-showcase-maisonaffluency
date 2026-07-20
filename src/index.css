@@ -596,6 +596,7 @@ input, select, textarea {
   color: #ffffff;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  white-space: nowrap;
 }
 
 /* 4. Crisp Editorial Subtext Paragraph */
