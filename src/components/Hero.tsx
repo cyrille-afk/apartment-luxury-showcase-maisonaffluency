@@ -62,10 +62,10 @@ const scrollToContact = () => {
 };
 
 const heroPrimaryCtaClass =
-  "inline-flex min-h-11 items-center justify-center rounded-full bg-white px-7 py-3 text-center text-[hsl(var(--foreground))] text-sm md:text-base font-body font-semibold tracking-wide shadow-[0_12px_36px_rgba(0,0,0,0.35)] transition-all hover:bg-[hsl(var(--accent))] hover:text-white focus:outline-none focus:ring-2 focus:ring-white/70 focus:ring-offset-2 focus:ring-offset-transparent hero-fade-in-delayed-4";
+  "inline-flex min-h-10 items-center justify-center border border-white bg-transparent px-7 py-2.5 text-center text-white text-[11px] md:text-xs font-body font-normal uppercase tracking-[0.22em] transition-all hover:bg-white hover:text-[hsl(var(--foreground))] focus:outline-none focus:ring-1 focus:ring-white/70 hero-fade-in-delayed-4 [text-shadow:_0_1px_3px_rgba(0,0,0,0.45)]";
 
 const heroGhostCtaClass =
-  "inline-flex min-h-11 items-center justify-center rounded-full border border-white/75 bg-transparent px-6 py-3 text-center text-white text-sm md:text-base font-body font-medium tracking-wide transition-all hover:bg-white/10 hover:border-white focus:outline-none focus:ring-2 focus:ring-white/70 focus:ring-offset-2 focus:ring-offset-transparent hero-fade-in-delayed-4 [text-shadow:_0_1px_3px_rgba(0,0,0,0.55)]";
+  "inline-flex items-center justify-center bg-transparent px-1 pb-1 text-center text-white text-[11px] md:text-xs font-body font-normal uppercase tracking-[0.22em] border-b border-white/60 hover:border-white transition-all focus:outline-none hero-fade-in-delayed-4 [text-shadow:_0_1px_3px_rgba(0,0,0,0.45)]";
 
 
 const Hero = () => {
