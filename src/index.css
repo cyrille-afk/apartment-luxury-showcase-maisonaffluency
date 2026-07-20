@@ -557,8 +557,8 @@ input, select, textarea {
 .hero-editorial-sidebar {
   position: absolute;
   bottom: 24%;
-  right: 4.5% !important;
-  width: 360px !important;
+  right: 1.5% !important;
+  width: 240px !important;
   display: flex;
   flex-direction: column;
   gap: 28px !important;
