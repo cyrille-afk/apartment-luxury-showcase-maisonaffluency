@@ -641,7 +641,7 @@ input, select, textarea {
 }
 @media (max-width: 768px) {
   .hero-editorial-sidebar {
-    top: 46%;
+    top: 52%;
     bottom: max(5.5rem, env(safe-area-inset-bottom));
     transform: none;
     right: 5%;
@@ -649,7 +649,7 @@ input, select, textarea {
     width: min(72vw, 300px);
     gap: 10px;
   }
-  .hero-actions-vertical { gap: 10px; margin-top: auto; }
+  .hero-actions-vertical { gap: 10px; }
   .hero-title { font-size: 1.15rem; letter-spacing: 0.2em; }
   .hero-subtext { font-size: 0.95rem; }
 }
