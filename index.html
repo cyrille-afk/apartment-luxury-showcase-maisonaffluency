@@ -351,21 +351,24 @@
 
       />
     </picture>
-    <div id="static-hero-copy" aria-hidden="true" style="position:absolute;inset:0;z-index:0;pointer-events:none;display:flex;align-items:flex-start;justify-content:flex-start;padding:26vh 1.5rem 6rem;color:#fff;font-family:'Playfair Display',Georgia,serif;">
-      <div style="max-width:36rem;text-align:left;padding-left:clamp(0px,4vw,4rem);">
-        <div style="font-size:clamp(1rem,1.4vw,1.25rem);line-height:1.5;margin:0 0 1.25rem;font-weight:300;letter-spacing:0.22em;text-transform:uppercase;text-shadow:0 1px 6px rgba(0,0,0,.4);">
-          Modern Masters. Iconic Design.
+    <div id="static-hero-copy" aria-hidden="true" style="position:absolute;inset:0;z-index:0;pointer-events:none;display:flex;align-items:flex-end;justify-content:center;padding:0 1.5rem 6rem;color:#fff;font-family:'Playfair Display',Georgia,serif;">
+      <div style="width:100%;max-width:1280px;display:flex;flex-direction:column;gap:1.5rem;">
+        <div style="display:flex;flex-direction:row;align-items:baseline;justify-content:space-between;gap:2rem;">
+          <div style="font-size:clamp(1rem,1.4vw,1.25rem);line-height:1.5;margin:0;font-weight:300;letter-spacing:0.22em;text-transform:uppercase;text-shadow:0 1px 6px rgba(0,0,0,.4);max-width:22rem;">
+            Modern Masters. Iconic Design.
+          </div>
+          <p style="font-family:'Lora',Georgia,serif;font-size:clamp(0.75rem,1vw,0.875rem);line-height:1.7;letter-spacing:0.02em;margin:0;max-width:26rem;color:rgba(255,255,255,0.9);text-shadow:0 1px 5px rgba(0,0,0,.35);">
+            A curated collection of re-editions and masterworks for global architectural projects.
+          </p>
         </div>
-        <p style="font-family:'Lora',Georgia,serif;font-size:clamp(0.75rem,1vw,0.875rem);line-height:1.7;letter-spacing:0.02em;margin:0;max-width:26rem;color:rgba(255,255,255,0.9);text-shadow:0 1px 5px rgba(0,0,0,.35);">
-          Authentic re-editions and luxury furniture for global architecture projects.
-        </p>
       </div>
     </div>
     <style>
       @media (max-width: 767px) {
-        #static-hero-copy { padding: 26vh 1.5rem 6rem !important; }
-        #static-hero-copy > div > div { font-size: 1rem !important; }
-        #static-hero-copy > div > p { font-size: 0.8125rem !important; }
+        #static-hero-copy { padding: 0 1.5rem 5rem !important; }
+        #static-hero-copy > div > div { flex-direction: column !important; align-items: flex-start !important; gap: 1rem !important; }
+        #static-hero-copy > div > div > div { font-size: 1rem !important; max-width: none !important; }
+        #static-hero-copy > div > div > p { font-size: 0.8125rem !important; }
       }
     </style>
 
