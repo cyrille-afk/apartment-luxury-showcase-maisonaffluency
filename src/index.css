@@ -561,9 +561,9 @@ input, select, textarea {
   width: 40vw;
   height: 100%;
   background: linear-gradient(to left,
-    rgba(0, 0, 0, 0.55) 0%,
-    rgba(0, 0, 0, 0.35) 45%,
-    rgba(0, 0, 0, 0.08) 75%,
+    rgba(0, 0, 0, 0.80) 0%,
+    rgba(0, 0, 0, 0.55) 40%,
+    rgba(0, 0, 0, 0.20) 75%,
     rgba(0, 0, 0, 0.00) 100%
   );
   pointer-events: none;
