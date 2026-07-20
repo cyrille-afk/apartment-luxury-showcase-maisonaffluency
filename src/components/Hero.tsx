@@ -71,20 +71,16 @@ const Hero = () => {
 
 
       {/* Text overlay — CSS-only animations, no framer-motion needed */}
-      <div className="relative z-10 h-full px-3 pb-32 pt-[46%] md:px-24 md:pb-20 md:pt-[24%] lg:px-40 flex-col border rounded-none opacity-100 shadow-none flex items-start justify-start md:justify-start md:items-start">
+      <div className="relative z-10 h-full px-6 pb-32 pt-[42%] md:px-32 md:pb-20 md:pt-[20%] lg:px-48 flex-col border rounded-none opacity-100 shadow-none flex items-start justify-start md:justify-start md:items-start">
         <div className="max-w-4xl md:text-left">
           <h1 className="text-3xl leading-tight text-white md:text-4xl font-serif lg:text-5xl">
-            <span className="hidden md:inline">
-              Modern Masters.<br />
-              Iconic Design.
-            </span>
-            <span className="md:hidden">Discover The World's Best Interior Designers' Iconic Pieces</span>
+            Modern Masters.<br />
+            Iconic Design.
           </h1>
 
           <div className="mt-8 md:mt-10 flex w-full max-w-3xl flex-col items-start">
             <p className="text-base leading-relaxed text-white text-left font-serif md:text-xl lg:text-2xl font-medium hero-fade-in-delayed-3">
-              <span className="hidden md:inline">A curated collection of masterworks<br />reeditions and contemporary design<br />for global architectural projects.</span>
-              <span className="md:hidden leading-relaxed text-left">A curated collection of masterworks<br />reeditions and contemporary design<br />for global architectural projects.</span>
+              A curated collection of masterworks<br />reeditions and contemporary design<br />for global architectural projects.
             </p>
             <div className="mt-8 md:mt-10 w-full flex justify-end">
               <button
