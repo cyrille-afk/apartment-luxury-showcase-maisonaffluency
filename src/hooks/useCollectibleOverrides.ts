@@ -30,12 +30,17 @@ let galleryPromise: Promise<Map<string, AtelierGalleryItem[]>> | null = null;
 async function loadTradeOnlySlugs(): Promise<Set<string>> {
   if (!tradeOnlyPromise) {
     tradeOnlyPromise = (async () => {
-      const { data, error } = await supabase
-        .from("collectible_overrides" as any)
-        .select("slug, trade_only");
+      // Uses a SECURITY DEFINER RPC so anonymous visitors can still learn which
+      // slugs to hide without being able to read the full collectible_overrides table.
+      const { data, error } = await supabase.rpc(
+        "get_trade_only_collectible_slugs" as any
+      );
       if (error || !data) return new Set<string>();
+      const rows = Array.isArray(data) ? data : [];
       return new Set(
-        (data as any[]).filter((r) => r.trade_only).map((r) => String(r.slug))
+        rows
+          .map((r: any) => (typeof r === "string" ? r : r?.slug ?? r?.get_trade_only_collectible_slugs))
+          .filter((s: any): s is string => typeof s === "string" && s.length > 0)
       );
     })();
   }

@@ -7537,6 +7537,7 @@ export type Database = {
           updated_at: string
         }[]
       }
+      get_trade_only_collectible_slugs: { Args: never; Returns: string[] }
       get_user_studio_ids: { Args: { _user_id: string }; Returns: string[] }
       has_role: {
         Args: {
