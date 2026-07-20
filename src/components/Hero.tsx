@@ -86,23 +86,20 @@ const Hero = () => {
           here — a second <picture> creates a duplicate LCP candidate and
           extra decode work that pushes LCP later on throttled CPUs. */}
 
-      {/* Editorial footer: three architectural columns anchored to the bottom.
-          The gradient only darkens the lower band so the showroom photo above
-          remains fully visible. */}
-      <div className="hero-editorial-footer">
-        {/* Column 1: Title */}
-        <h1 className="hero-title [text-shadow:_0_1px_6px_rgba(0,0,0,0.4)]">
+      {/* Editorial sidebar: narrow vertical column anchored to the right,
+          vertically centered over the neutral side of the showroom photo. */}
+      <div className="hero-editorial-sidebar">
+        <h1 className="hero-title">
           <span className="block">Modern Masters</span>
           <span className="block">Iconic Designers</span>
         </h1>
 
-        {/* Column 2: Descriptive subtext */}
-        <p className="hero-subtext [text-shadow:_0_1px_5px_rgba(0,0,0,0.35)]">
+        <p className="hero-subtext">
           A curated collection of re-editions and masterworks for global architectural projects.
         </p>
 
-        {/* Column 3: Action links */}
-        <div className="hero-actions-wrapper">
+        <div className="hero-actions-vertical">
+
           <button
             type="button"
             onClick={() => {
