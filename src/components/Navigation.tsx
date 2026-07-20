@@ -324,38 +324,43 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
   return <><nav className={cn(
       "fixed top-0 left-0 right-0 z-50 pt-[env(safe-area-inset-top)] transition-colors duration-500",
       isOverHero
-        ? "bg-white backdrop-blur-sm border-b border-border/50"
+        ? "bg-white backdrop-blur-sm border-b border-border/50 shadow-[0_1px_8px_rgba(0,0,0,0.06)]"
         : borderless
           ? "bg-background border-b border-transparent"
-          : "bg-white backdrop-blur-sm border-b border-border/50"
+          : "bg-white backdrop-blur-sm border-b border-border/50 shadow-[0_1px_8px_rgba(0,0,0,0.06)]"
     )}>
       <div className="mx-auto max-w-7xl px-5 md:px-14 lg:px-24">
         {/* Mobile: single row */}
           <div className="flex h-28 items-center md:hidden relative justify-between px-6 py-3">
            <Sheet open={isOpen} onOpenChange={handleMobileMenuOpenChange}>
-            {/* Burger — left edge, vertically centered with flag */}
+            {/* Burger — left edge, vertically centered with wordmark */}
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-11 w-11 text-primary" aria-label="Toggle menu">
+              <Button variant="ghost" size="icon" className="h-11 w-11 text-primary self-center -translate-y-1.5" aria-label="Toggle menu">
                 {isOpen ? <X className="h-9 w-9" strokeWidth={2.75} /> : <Menu className="h-9 w-9" strokeWidth={2.75} />}
               </Button>
             </SheetTrigger>
 
-            {/* Brand — centered horizontally */}
-            <div className="absolute left-1/2 -translate-x-1/2 flex flex-col items-center">
-            <button onClick={scrollToTop} className="group cursor-pointer whitespace-nowrap">
-              <span className="font-brand text-[2.25rem] font-bold tracking-widest text-foreground transition-all duration-300 group-hover:text-primary">
+            {/* Brand — centered horizontally; Est.2017 floats below wordmark so
+                the wordmark itself is the vertical anchor for burger and flag */}
+            <div className="absolute left-1/2 -translate-x-1/2 flex flex-col items-center leading-none">
+            <button onClick={scrollToTop} className="group cursor-pointer whitespace-nowrap leading-none">
+              <span className="font-brand text-[2.25rem] font-bold tracking-widest text-foreground transition-all duration-300 group-hover:text-primary leading-none">
                 <span className="group-hover:text-accent transition-colors duration-300">A</span>FFLUENCY
               </span>
             </button>
-              <div className="flex items-center gap-2 -mt-0.5 brand-lockup">
+              <div className="flex items-center gap-2 mt-1 brand-lockup">
                 <span className="h-px w-5 bg-foreground" />
                 <span className="font-body text-[7px] uppercase tracking-[0.3em] text-foreground font-bold">Est. 2017</span>
                 <span className="h-px w-5 bg-foreground" />
               </div>
             </div>
 
-            {/* Flag — right edge, vertically centered with burger */}
-            <ShippingDestinationSwitcher compact flagClassName="text-2xl" />
+            {/* Flag — right edge, vertically centered with wordmark */}
+            <div className="self-center -translate-y-1.5">
+              <ShippingDestinationSwitcher compact flagClassName="text-2xl" />
+            </div>
+
+
 
 
 
