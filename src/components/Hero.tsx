@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { scrollToSection } from "@/lib/scrollToSection";
-import { trackCTA, trackEvent } from "@/lib/analytics";
+import { trackEvent } from "@/lib/analytics";
 
 const HERO_BASE = "https://res.cloudinary.com/dif1oamtj/image/upload";
 const HERO_ID = "v1781920000/AffluencySG_194-22.jpg_macpwj";
@@ -24,23 +24,6 @@ const revealBelowFold = () => {
   window.dispatchEvent(new CustomEvent("ma:reveal-below-fold"));
 };
 
-const revealAndScrollTo = (sectionId: string) => {
-  revealBelowFold();
-
-  // The reveal event mounts the fixed nav + below-fold sections. Wait for that
-  // commit before measuring offsets, otherwise CTA landings get hidden/truncated
-  // under the header on real devices.
-  requestAnimationFrame(() => {
-    requestAnimationFrame(() => {
-      scrollToSection(sectionId);
-    });
-  });
-};
-
-const scrollToOverview = () => {
-  revealAndScrollTo("apartment-tour");
-};
-
 const scrollToMeetDesigners = () => {
   revealBelowFold();
   requestAnimationFrame(() => {
@@ -55,15 +38,8 @@ const scrollToMeetDesigners = () => {
   });
 };
 
-const scrollToContact = () => {
-  revealAndScrollTo("contact");
-};
-
 const heroPrimaryCtaClass =
   "inline-flex min-h-11 items-center justify-center rounded-full border border-white/75 bg-white/15 px-6 py-3 text-center text-white text-sm md:text-base font-body font-semibold tracking-wide shadow-[0_8px_30px_rgba(0,0,0,0.22)] backdrop-blur-md transition-all hover:border-white hover:bg-white/25 focus:outline-none focus:ring-2 focus:ring-white/70 focus:ring-offset-2 focus:ring-offset-transparent hero-fade-in-delayed-4 [text-shadow:_0_1px_3px_rgba(0,0,0,0.45)]";
-
-const heroSecondaryCtaClass =
-  "inline-flex min-h-9 items-center justify-center rounded-full border border-white/70 bg-white/15 px-4 py-2 text-center text-white text-xs lg:text-sm font-body font-bold tracking-wide shadow-[0_8px_24px_rgba(0,0,0,0.2)] backdrop-blur-md transition-all hover:border-white hover:bg-white/25 focus:outline-none focus:ring-2 focus:ring-white/70 focus:ring-offset-2 focus:ring-offset-transparent [text-shadow:_0_1px_3px_rgba(0,0,0,0.55)]";
 
 const Hero = () => {
   const navigate = useNavigate();
@@ -111,13 +87,6 @@ const Hero = () => {
 
             <div className="mt-8 md:mt-10 flex flex-col items-start gap-4">
               <button
-                onClick={scrollToOverview}
-                className={heroPrimaryCtaClass}
-              >
-                Explore Our Interactive Gallery
-              </button>
-
-              <button
                 type="button"
                 onClick={() => { trackEvent("click_meet_designers", { event_category: "CTA", event_label: "HeroCTA" }); navigate("/designers"); }}
                 className={heroPrimaryCtaClass}
@@ -127,32 +96,6 @@ const Hero = () => {
             </div>
           </div>
         </div>
-      </div>
-
-      {/* Mobile: bottom-right of hero, above iOS bar & Chat widget */}
-      <div
-        className="flex md:hidden absolute right-4 z-20 flex-col items-end gap-2 hero-fade-in-delayed-4"
-        style={{ bottom: "max(13rem, calc(env(safe-area-inset-bottom) + 12.5rem))", animationDelay: "1.2s" }}
-      >
-        <button
-          onClick={() => { trackCTA.bookAppointment("HeroCTA"); scrollToContact(); }}
-          className={heroSecondaryCtaClass}
-        >
-          Book a Viewing
-        </button>
-      </div>
-
-      {/* Desktop: bottom-right of hero, next to Chat widget */}
-      <div
-        className="hidden md:flex absolute bottom-6 z-20 items-center gap-2 hero-fade-in-delayed-4"
-        style={{ right: "200px", animationDelay: "1.2s" }}
-      >
-        <button
-          onClick={() => { trackCTA.bookAppointment("HeroCTA"); scrollToContact(); }}
-          className={heroSecondaryCtaClass}
-        >
-          Book a Viewing
-        </button>
       </div>
 
     </section>
