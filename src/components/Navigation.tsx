@@ -331,7 +331,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
     )}>
       <div className="mx-auto max-w-7xl px-5 md:px-14 lg:px-24">
         {/* Mobile: single row */}
-          <div className="flex h-24 items-center md:hidden relative justify-between px-4">
+          <div className="flex h-28 items-center md:hidden relative justify-between px-6 py-3">
            <Sheet open={isOpen} onOpenChange={handleMobileMenuOpenChange}>
             {/* Burger — left edge, vertically centered with flag */}
             <SheetTrigger asChild>
