@@ -111,13 +111,6 @@ const Hero = () => {
 
             <div className="mt-8 md:mt-10 flex flex-col items-start gap-4">
               <button
-                onClick={scrollToOverview}
-                className={heroPrimaryCtaClass}
-              >
-                Explore Our Interactive Gallery
-              </button>
-
-              <button
                 type="button"
                 onClick={() => { trackEvent("click_meet_designers", { event_category: "CTA", event_label: "HeroCTA" }); navigate("/designers"); }}
                 className={heroPrimaryCtaClass}
@@ -127,32 +120,6 @@ const Hero = () => {
             </div>
           </div>
         </div>
-      </div>
-
-      {/* Mobile: bottom-right of hero, above iOS bar & Chat widget */}
-      <div
-        className="flex md:hidden absolute right-4 z-20 flex-col items-end gap-2 hero-fade-in-delayed-4"
-        style={{ bottom: "max(13rem, calc(env(safe-area-inset-bottom) + 12.5rem))", animationDelay: "1.2s" }}
-      >
-        <button
-          onClick={() => { trackCTA.bookAppointment("HeroCTA"); scrollToContact(); }}
-          className={heroSecondaryCtaClass}
-        >
-          Book a Viewing
-        </button>
-      </div>
-
-      {/* Desktop: bottom-right of hero, next to Chat widget */}
-      <div
-        className="hidden md:flex absolute bottom-6 z-20 items-center gap-2 hero-fade-in-delayed-4"
-        style={{ right: "200px", animationDelay: "1.2s" }}
-      >
-        <button
-          onClick={() => { trackCTA.bookAppointment("HeroCTA"); scrollToContact(); }}
-          className={heroSecondaryCtaClass}
-        >
-          Book a Viewing
-        </button>
       </div>
 
     </section>
