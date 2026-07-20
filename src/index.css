@@ -683,11 +683,12 @@ input, select, textarea {
     left: auto;
     width: min(72vw, 300px);
     gap: 18px;
+    text-align: right !important;
   }
-  .hero-actions-vertical { gap: 14px; }
+  .hero-actions-vertical { gap: 14px; align-items: flex-end !important; }
   .cta-primary-trade { min-width: 220px !important; padding: 14px 28px !important; }
   .hero-title,
-  .hero-title * { font-size: 1.15rem !important; letter-spacing: 0.2em !important; line-height: 1.55 !important; }
+  .hero-title * { font-size: 1.15rem !important; letter-spacing: 0.2em !important; line-height: 1.35 !important; }
   .hero-subtext,
   .hero-subtext * { font-size: 0.95rem !important; line-height: 1.65 !important; }
 }
