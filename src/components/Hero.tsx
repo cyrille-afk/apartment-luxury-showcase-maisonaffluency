@@ -80,10 +80,8 @@ const Hero = () => {
 
           <div className="flex w-full max-w-3xl flex-col items-start">
             <p className="text-base leading-relaxed text-white text-left font-serif md:text-xl lg:text-2xl font-medium hero-fade-in-delayed-3">
-              <span className="hidden md:inline">From Couture Furniture to Collectible Designs Items,
-              <br /> Discover Emerging Talents and Design Masters In Our Gallery
-              <br /> or Through the Best Ateliers and Designer Workshops We Partner&nbsp;With</span>
-              <span className="md:hidden leading-relaxed text-left">From Couture Furniture to Collectible Designs Items, Discover Emerging Talents and Design Masters In Our Gallery or Through the Best Ateliers and Designer Workshops We Partner&nbsp;With</span>
+              <span className="hidden md:inline">A curated collection of masterworks, re-editions and contemporary design for global architectural projects.</span>
+              <span className="md:hidden leading-relaxed text-left">A curated collection of masterworks, re-editions and contemporary design for global architectural projects.</span>
             </p>
 
             <div className="mt-8 md:mt-10 flex flex-col items-start gap-4">
