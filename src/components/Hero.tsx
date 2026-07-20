@@ -99,8 +99,8 @@ const Hero = () => {
         className="absolute inset-0 pointer-events-none"
         style={{
           background: `
-            radial-gradient(ellipse at 30% 80%, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.40) 40%, transparent 72%),
-            linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.25) 55%, rgba(0,0,0,0.70) 100%)
+            radial-gradient(ellipse at 30% 62%, rgba(0,0,0,0.74) 0%, rgba(0,0,0,0.42) 42%, transparent 76%),
+            linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.22) 50%, rgba(0,0,0,0.72) 100%)
           `,
         }}
       />
@@ -109,8 +109,8 @@ const Hero = () => {
         className="absolute inset-0 pointer-events-none hidden md:block"
         style={{
           background: `
-            radial-gradient(ellipse at 22% 42%, rgba(0,0,0,0.68) 0%, rgba(0,0,0,0.32) 45%, transparent 78%),
-            linear-gradient(to right, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.15) 45%, transparent 70%)
+            radial-gradient(ellipse at 22% 36%, rgba(0,0,0,0.70) 0%, rgba(0,0,0,0.34) 48%, transparent 80%),
+            linear-gradient(to right, rgba(0,0,0,0.58) 0%, rgba(0,0,0,0.18) 48%, transparent 72%)
           `,
         }}
       />
