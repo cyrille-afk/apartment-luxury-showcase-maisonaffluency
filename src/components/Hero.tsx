@@ -92,36 +92,30 @@ const Hero = () => {
           before React boots). We intentionally do NOT re-render the image
           here — a second <picture> creates a duplicate LCP candidate and
           extra decode work that pushes LCP later on throttled CPUs. */}
-      {/* Very light editorial scrim — just enough to keep the headline legible
-          without dulling the showroom's warmth. */}
+      {/* Minimal scrim — a soft dark wash only at top and bottom edges to
+          protect the header/CTA legibility, letting the showroom breathe. */}
       <div
-        className="absolute inset-0 pointer-events-none md:hidden"
+        className="absolute inset-0 pointer-events-none"
         style={{
-          background: `linear-gradient(to bottom, rgba(0,0,0,0.20) 0%, rgba(0,0,0,0) 45%, rgba(0,0,0,0) 65%, rgba(0,0,0,0.30) 100%)`,
-        }}
-      />
-      <div
-        className="absolute inset-0 pointer-events-none hidden md:block"
-        style={{
-          background: `radial-gradient(ellipse at 50% 45%, rgba(0,0,0,0.18) 0%, rgba(0,0,0,0) 60%)`,
+          background: `linear-gradient(to bottom, rgba(0,0,0,0.18) 0%, rgba(0,0,0,0) 22%, rgba(0,0,0,0) 70%, rgba(0,0,0,0.22) 100%)`,
         }}
       />
 
-      {/* Editorial, centered caption layout with generous whitespace */}
-      <div className="relative z-10 h-full px-6 md:px-16 lg:px-24 pt-[22vh] md:pt-[20vh] pb-10 md:pb-16 flex flex-col justify-between">
-        {/* Centered: refined headline + sub-text */}
-        <div className="w-full max-w-3xl mx-auto text-center">
-          <h1 className="text-2xl leading-[1.2] text-white md:text-4xl lg:text-5xl font-serif font-light tracking-[0.04em] [text-shadow:_0_1px_8px_rgba(0,0,0,0.45)]">
-            The Architecture of Interiors
+      {/* Editorial asymmetric layout: top-left headline, bottom-right CTAs */}
+      <div className="relative z-10 h-full px-6 md:px-16 lg:px-24 pt-[26vh] md:pt-[22vh] pb-10 md:pb-16 flex flex-col justify-between">
+        {/* Top-left: whispered headline + sub-text */}
+        <div className="max-w-xl">
+          <h1 className="text-white text-base md:text-lg lg:text-xl font-serif font-light uppercase tracking-[0.22em] leading-[1.5] [text-shadow:_0_1px_6px_rgba(0,0,0,0.4)]">
+            Modern Masters. Iconic Design.
           </h1>
-          <p className="mt-5 md:mt-6 text-sm md:text-base lg:text-lg font-body font-normal text-white/90 leading-[1.7] max-w-2xl mx-auto [text-shadow:_0_1px_6px_rgba(0,0,0,0.35)]">
-            Sourcing iconic furniture designs and masterwork re-editions for international trade projects and private collectors.
+          <p className="mt-5 md:mt-6 text-white/90 text-xs md:text-sm font-body font-normal tracking-[0.02em] leading-[1.7] max-w-md [text-shadow:_0_1px_5px_rgba(0,0,0,0.35)]">
+            Authentic re-editions and luxury furniture for global architecture projects.
           </p>
         </div>
 
-        {/* Bottom-right: CTAs */}
+        {/* Bottom-right: minimal CTAs */}
         <div className="flex justify-start md:justify-end">
-          <div className="flex flex-col items-start md:items-end gap-3 md:gap-4">
+          <div className="flex flex-col items-start md:items-end gap-4 md:gap-5">
             <button
               type="button"
               onClick={() => {
@@ -141,7 +135,7 @@ const Hero = () => {
               }}
               className={heroGhostCtaClass}
             >
-              Explore the Collection
+              View the Collection
             </button>
           </div>
         </div>
