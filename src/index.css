@@ -674,7 +674,7 @@ input, select, textarea {
 }
 @media (max-width: 1024px) {
   .hero-editorial-sidebar {
-    top: 50%;
+    bottom: 22%;
     right: 5%;
     width: 320px;
     gap: 24px;
@@ -685,8 +685,7 @@ input, select, textarea {
 @media (max-width: 768px) {
   .hero-editorial-overlay-right { width: 60vw; }
   .hero-editorial-sidebar {
-    top: 50%;
-    transform: translateY(-50%);
+    bottom: 18%;
     right: 5%;
     left: auto;
     width: min(72vw, 300px);
