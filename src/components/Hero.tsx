@@ -103,10 +103,10 @@ const Hero = () => {
       <div className="relative z-10 h-full px-6 md:px-16 lg:px-24 pt-[26vh] md:pt-[22vh] pb-10 md:pb-16 flex flex-col justify-between">
         {/* Top-left: whispered headline + sub-text */}
         <div className="max-w-xl">
-          <h1 className="text-white text-base md:text-lg lg:text-xl font-serif font-light uppercase tracking-[0.22em] leading-[1.5] [text-shadow:_0_1px_6px_rgba(0,0,0,0.4)]">
+          <h1 className="hero-title [text-shadow:_0_1px_6px_rgba(0,0,0,0.4)]">
             Modern Masters. Iconic Design.
           </h1>
-          <p className="mt-5 md:mt-6 text-white/90 text-xs md:text-sm font-body font-normal tracking-[0.02em] leading-[1.7] max-w-md [text-shadow:_0_1px_5px_rgba(0,0,0,0.35)]">
+          <p className="hero-subtext max-w-md [text-shadow:_0_1px_5px_rgba(0,0,0,0.35)]">
             Authentic re-editions and luxury furniture for global architecture projects.
           </p>
         </div>
@@ -120,7 +120,7 @@ const Hero = () => {
                 trackEvent("click_trade_access", { event_category: "CTA", event_label: "HeroCTA" });
                 setTradeOpen(true);
               }}
-              className={heroPrimaryCtaClass}
+              className={heroCtaLinkClass}
             >
               Apply for Trade Access
             </button>
@@ -131,13 +131,14 @@ const Hero = () => {
                 trackEvent("click_explore_collection", { event_category: "CTA", event_label: "HeroCTA" });
                 navigate("/designers");
               }}
-              className={heroGhostCtaClass}
+              className={heroCtaLinkClass}
             >
               View the Collection
             </button>
           </div>
         </div>
       </div>
+
 
 
       <Suspense fallback={null}>
