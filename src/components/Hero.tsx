@@ -109,7 +109,7 @@ const Hero = () => {
               trackEvent("click_trade_access", { event_category: "CTA", event_label: "HeroCTA" });
               setTradeOpen(true);
             }}
-            className="hero-cta-button"
+            className="cta-primary-trade"
           >
             Apply for Trade Access
           </button>
@@ -120,10 +120,11 @@ const Hero = () => {
               trackEvent("click_explore_collection", { event_category: "CTA", event_label: "HeroCTA" });
               navigate("/designers");
             }}
-            className="hero-cta-button"
+            className="cta-secondary-collection"
           >
             View the Collection
           </button>
+
         </div>
       </div>
 

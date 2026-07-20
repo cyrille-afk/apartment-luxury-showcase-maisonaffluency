@@ -554,16 +554,17 @@ input, select, textarea {
 /* ============ Hero — Editorial Footer ============ */
 .hero-editorial-footer {
   position: absolute;
-  bottom: 0;
+  /* Lift the copy off the furniture into the negative space above */
+  bottom: 22vh;
   left: 0;
   width: 100%;
-  padding: 60px 80px;
+  padding: 0 80px;
   box-sizing: border-box;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0.2) 60%, rgba(0, 0, 0, 0) 100%);
+  background: none;
   display: grid;
-  grid-template-columns: 1.5fr 2fr 1fr;
-  gap: 40px;
-  align-items: start;
+  grid-template-columns: 1.5fr 2fr 1.2fr;
+  gap: 60px;
+  align-items: center;
   z-index: 10;
 }
 .hero-title {
@@ -575,65 +576,88 @@ input, select, textarea {
   line-height: 1.3;
   color: #ffffff;
   margin: 0;
+  text-shadow: 0px 2px 10px rgba(0, 0, 0, 0.5);
 }
 .hero-subtext {
   font-family: 'Garamond', 'Baskerville', 'Lora', serif;
   font-size: 1.05rem;
   font-weight: 400;
   line-height: 1.6;
-  color: rgba(255, 255, 255, 0.85);
+  color: rgba(255, 255, 255, 0.9);
   margin: 0;
   padding-top: 4px;
+  text-shadow: 0px 2px 10px rgba(0, 0, 0, 0.5);
 }
 .hero-actions-wrapper {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 18px;
   align-items: flex-end;
 }
-.hero-cta-button {
+/* Primary — solid anchor for Trade Access */
+.cta-primary-trade {
+  font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: #000000;
+  background-color: #ffffff;
+  text-align: center;
+  width: 220px;
+  padding: 14px 0;
+  border: 1px solid #ffffff;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
+}
+.cta-primary-trade:hover {
+  background-color: transparent;
+  color: #ffffff;
+}
+/* Secondary — elegant text link */
+.cta-secondary-collection {
   font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
   font-size: 0.8rem;
   font-weight: 400;
   text-transform: uppercase;
-  letter-spacing: 0.15em;
+  letter-spacing: 0.12em;
   color: #ffffff;
-  text-decoration: none;
-  text-align: center;
-  width: 180px;
-  padding: 12px 0;
-  border: 1px solid rgba(255, 255, 255, 0.5);
   background: transparent;
+  border: none;
+  padding: 0 4px 4px;
+  margin-top: 4px;
+  text-align: right;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.4);
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: border-color 0.3s ease, color 0.3s ease;
 }
-.hero-cta-button:hover {
-  background-color: #ffffff;
-  color: #000000;
-  border-color: #ffffff;
+.cta-secondary-collection:hover {
+  border-bottom-color: rgba(255, 255, 255, 1);
 }
 @media (max-width: 1024px) {
   .hero-editorial-footer {
-    padding: 48px 40px;
+    padding: 0 40px;
     gap: 32px;
+    bottom: 20vh;
   }
 }
 @media (max-width: 768px) {
   .hero-editorial-footer {
-    padding: 40px 24px calc(40px + env(safe-area-inset-bottom));
+    padding: 0 24px;
+    bottom: calc(14vh + env(safe-area-inset-bottom));
     grid-template-columns: 1fr;
-    gap: 20px;
+    gap: 18px;
+    align-items: start;
   }
   .hero-actions-wrapper {
     align-items: flex-start;
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: 12px;
+    flex-direction: column;
+    gap: 14px;
   }
-  .hero-cta-button {
-    width: auto;
-    padding: 12px 24px;
-  }
+  .cta-primary-trade { width: auto; padding: 12px 28px; }
+  .cta-secondary-collection { text-align: left; align-self: flex-start; }
   .hero-title { font-size: 1.25rem; letter-spacing: 0.18em; }
   .hero-subtext { font-size: 0.95rem; }
 }
+
