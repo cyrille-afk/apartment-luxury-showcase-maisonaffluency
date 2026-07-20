@@ -62,13 +62,14 @@ const scrollToContact = () => {
 };
 
 const heroPrimaryCtaClass =
-  "inline-flex min-h-11 items-center justify-center rounded-full border border-white/75 bg-white/15 px-6 py-3 text-center text-white text-sm md:text-base font-body font-semibold tracking-wide shadow-[0_8px_30px_rgba(0,0,0,0.22)] backdrop-blur-md transition-all hover:border-white hover:bg-white/25 focus:outline-none focus:ring-2 focus:ring-white/70 focus:ring-offset-2 focus:ring-offset-transparent hero-fade-in-delayed-4 [text-shadow:_0_1px_3px_rgba(0,0,0,0.45)]";
+  "inline-flex min-h-11 items-center justify-center rounded-full border border-[hsl(var(--accent))] bg-[hsl(var(--accent))] px-6 py-3 text-center text-[hsl(var(--accent-foreground))] text-sm md:text-base font-body font-semibold tracking-wide shadow-[0_10px_32px_rgba(0,0,0,0.35)] transition-all hover:brightness-110 focus:outline-none focus:ring-2 focus:ring-white/70 focus:ring-offset-2 focus:ring-offset-transparent hero-fade-in-delayed-4";
 
-const heroSecondaryCtaClass =
-  "inline-flex min-h-9 items-center justify-center rounded-full border border-white/70 bg-white/15 px-4 py-2 text-center text-white text-xs lg:text-sm font-body font-bold tracking-wide shadow-[0_8px_24px_rgba(0,0,0,0.2)] backdrop-blur-md transition-all hover:border-white hover:bg-white/25 focus:outline-none focus:ring-2 focus:ring-white/70 focus:ring-offset-2 focus:ring-offset-transparent [text-shadow:_0_1px_3px_rgba(0,0,0,0.55)]";
+const heroGhostCtaClass =
+  "inline-flex min-h-11 items-center justify-center rounded-full border border-white/75 bg-transparent px-6 py-3 text-center text-white text-sm md:text-base font-body font-medium tracking-wide transition-all hover:bg-white/10 hover:border-white focus:outline-none focus:ring-2 focus:ring-white/70 focus:ring-offset-2 focus:ring-offset-transparent hero-fade-in-delayed-4 [text-shadow:_0_1px_3px_rgba(0,0,0,0.55)]";
 
 const Hero = () => {
   const navigate = useNavigate();
+  const [tradeOpen, setTradeOpen] = useState(false);
   // The pre-React static hero <picture> in index.html stays in place permanently
   // as the LCP candidate. The static copy overlay (#static-hero-copy) however
   // duplicates this section's <h1>, so we hide it as soon as React mounts.
