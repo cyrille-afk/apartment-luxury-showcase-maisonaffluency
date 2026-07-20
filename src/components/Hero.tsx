@@ -73,26 +73,28 @@ const Hero = () => {
       {/* Text overlay — CSS-only animations, no framer-motion needed */}
       <div className="relative z-10 h-full px-4 pb-32 pt-[44%] md:px-32 md:pb-20 md:pt-[20%] lg:px-52 flex-col border rounded-none opacity-100 shadow-none flex items-start justify-start md:justify-start md:items-start">
         <div className="max-w-4xl md:text-left">
-          <h1 className="mb-8 md:mb-14 text-3xl leading-tight text-white md:text-4xl font-serif lg:text-5xl">
-            <span className="hidden md:inline">Modern Masters. Iconic Design.</span>
-            <span className="md:hidden">Discover The World's Best Interior Designers' Iconic Pieces</span>
-          </h1>
+          <div className="flex flex-col items-start gap-6 md:flex-row md:items-center md:gap-8 lg:gap-10">
+            <h1 className="text-3xl leading-tight text-white md:text-4xl font-serif lg:text-5xl">
+              <span className="hidden md:inline">Modern Masters. Iconic Design.</span>
+              <span className="md:hidden">Discover The World's Best Interior Designers' Iconic Pieces</span>
+            </h1>
 
-          <div className="flex w-full max-w-3xl flex-col items-start">
-            <p className="text-base leading-relaxed text-white text-left font-serif md:text-xl lg:text-2xl font-medium hero-fade-in-delayed-3">
-              <span className="hidden md:inline">A curated collection of masterworks, re-editions and contemporary design for global architectural projects.</span>
-              <span className="md:hidden leading-relaxed text-left">A curated collection of masterworks, re-editions and contemporary design for global architectural projects.</span>
-            </p>
-
-            <div className="mt-8 md:mt-10 flex flex-col items-start gap-4">
+            <div className="flex flex-col items-start gap-4">
               <button
                 type="button"
                 onClick={() => { trackEvent("click_meet_designers", { event_category: "CTA", event_label: "HeroCTA" }); navigate("/designers"); }}
                 className={heroPrimaryCtaClass}
               >
-                Discover Our Talents
+                EXPLORE THE COLLECTION
               </button>
             </div>
+          </div>
+
+          <div className="mt-8 md:mt-10 flex w-full max-w-3xl flex-col items-start">
+            <p className="text-base leading-relaxed text-white text-left font-serif md:text-xl lg:text-2xl font-medium hero-fade-in-delayed-3">
+              <span className="hidden md:inline">A curated collection of masterworks, re-editions and contemporary design for global architectural projects.</span>
+              <span className="md:hidden leading-relaxed text-left">A curated collection of masterworks, re-editions and contemporary design for global architectural projects.</span>
+            </p>
           </div>
         </div>
       </div>
