@@ -554,7 +554,7 @@ input, select, textarea {
 /* ============ Hero — Editorial Sidebar ============ */
 .hero-editorial-sidebar {
   position: absolute;
-  top: 48%;
+  top: 54%;
   bottom: clamp(48px, 8vh, 92px);
   transform: none;
   right: 6%;
@@ -590,7 +590,6 @@ input, select, textarea {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  margin-top: auto;
 }
 .cta-primary-trade {
   font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
@@ -633,7 +632,7 @@ input, select, textarea {
 }
 @media (max-width: 1024px) {
   .hero-editorial-sidebar {
-    top: 46%;
+    top: 52%;
     bottom: clamp(44px, 7vh, 76px);
     right: 5%;
     width: 300px;
@@ -642,7 +641,7 @@ input, select, textarea {
 }
 @media (max-width: 768px) {
   .hero-editorial-sidebar {
-    top: 46%;
+    top: 52%;
     bottom: max(5.5rem, env(safe-area-inset-bottom));
     transform: none;
     right: 5%;
@@ -650,7 +649,7 @@ input, select, textarea {
     width: min(72vw, 300px);
     gap: 10px;
   }
-  .hero-actions-vertical { gap: 10px; margin-top: auto; }
+  .hero-actions-vertical { gap: 10px; }
   .hero-title { font-size: 1.15rem; letter-spacing: 0.2em; }
   .hero-subtext { font-size: 0.95rem; }
 }
