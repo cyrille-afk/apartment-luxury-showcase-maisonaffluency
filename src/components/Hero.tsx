@@ -86,6 +86,9 @@ const Hero = () => {
           here — a second <picture> creates a duplicate LCP candidate and
           extra decode work that pushes LCP later on throttled CPUs. */}
 
+      {/* Editorial overlay: crisp right-side vignette, no blur filters */}
+      <div className="hero-editorial-overlay-right" aria-hidden="true" />
+
       {/* Editorial sidebar: narrow vertical column anchored to the right,
           vertically centered over the neutral side of the showroom photo. */}
 
