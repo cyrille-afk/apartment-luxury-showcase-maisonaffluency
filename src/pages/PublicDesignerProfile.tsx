@@ -373,6 +373,15 @@ const PublicDesignerProfile = () => {
 
   // Desktop lightbox: push a history entry on open so browser Back closes
   // the lightbox and keeps the user on the designer profile.
+  // Safety unlock: previous route (mobile /designers landing) may leave body
+  // overflow:hidden if a scroll-lock cleanup didn't run cleanly. Reset here so
+  // designer bios are always scrollable on mobile / PWA.
+  useEffect(() => {
+    document.body.style.overflow = "";
+    document.documentElement.style.overflow = "";
+    (document.body.style as any).overscrollBehavior = "";
+  }, []);
+
   useEffect(() => {
     const wasOpen = lightboxOpenRef.current;
     const isOpen = !!lightboxItem;
