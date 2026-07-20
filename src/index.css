@@ -687,7 +687,8 @@ input, select, textarea {
     width: min(72vw, 300px);
     gap: 18px;
   }
-  .hero-actions-vertical { gap: 10px; }
+  .hero-actions-vertical { gap: 14px; }
+  .cta-primary-trade { min-width: 200px; padding: 14px 28px; }
   .hero-title { font-size: 1.15rem; letter-spacing: 0.2em; line-height: 1.55; }
   .hero-subtext { font-size: 0.95rem; line-height: 1.65; }
 }
