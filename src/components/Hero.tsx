@@ -71,7 +71,7 @@ const Hero = () => {
 
 
       {/* Text overlay — CSS-only animations, no framer-motion needed */}
-      <div className="relative z-10 mx-auto h-full max-w-7xl flex-col border rounded-none opacity-100 shadow-none flex items-start justify-start px-6 pb-32 pt-[42%] md:items-start md:justify-start md:px-14 md:pb-20 md:pt-[20%] lg:px-24 md:-ml-1.5 lg:-ml-2">
+      <div className="relative z-10 h-full px-6 pb-32 pt-[42%] md:px-32 md:pb-20 md:pt-[20%] lg:px-48 flex-col border rounded-none opacity-100 shadow-none flex items-start justify-start md:justify-start md:items-start">
         <div className="max-w-4xl md:text-left">
           <h1 className="text-3xl leading-tight text-white md:text-4xl font-serif lg:text-5xl">
             Modern Masters.<br />
@@ -80,7 +80,7 @@ const Hero = () => {
 
           <div className="mt-8 md:mt-10 flex w-full max-w-3xl flex-col items-start">
             <p className="text-base leading-relaxed text-white text-left font-serif md:text-xl lg:text-2xl font-medium hero-fade-in-delayed-3">
-              A curated collection of masterworks,<br />reeditions, and contemporary design<br />for global architectural projects.
+              A curated collection of masterworks<br />reeditions and contemporary design<br />for global architectural projects.
             </p>
             <div className="mt-12 md:mt-14 w-full flex justify-end">
               <button
