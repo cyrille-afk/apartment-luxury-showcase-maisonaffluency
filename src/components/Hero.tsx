@@ -91,15 +91,34 @@ const Hero = () => {
           before React boots). We intentionally do NOT re-render the image
           here — a second <picture> creates a duplicate LCP candidate and
           extra decode work that pushes LCP later on throttled CPUs. */}
-      {/* Base wash for image warmth */}
+      {/* Base warmth wash */}
       <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-black/10 via-transparent to-black/20" />
-      {/* Readability scrim behind the text block — stronger on mobile where the crane/foliage pattern is denser */}
-      <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-black/55 via-black/30 to-black/60 md:from-black/40 md:via-black/10 md:to-black/40" />
+      {/* Radical readability scrim: darkens the bottom/center where the text block lives,
+          stays transparent at the top so the room keeps its grandeur. */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background: `
+            radial-gradient(ellipse at 30% 80%, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.40) 40%, transparent 72%),
+            linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.25) 55%, rgba(0,0,0,0.70) 100%)
+          `,
+        }}
+      />
+      {/* Desktop: text sits higher and more left; shift the dark vignette accordingly */}
+      <div
+        className="absolute inset-0 pointer-events-none hidden md:block"
+        style={{
+          background: `
+            radial-gradient(ellipse at 22% 42%, rgba(0,0,0,0.68) 0%, rgba(0,0,0,0.32) 45%, transparent 78%),
+            linear-gradient(to right, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.15) 45%, transparent 70%)
+          `,
+        }}
+      />
 
       {/* Text overlay — CSS-only animations, no framer-motion needed */}
       <div className="relative z-10 h-full px-4 pb-32 pt-[44%] md:px-32 md:pb-20 md:pt-[20%] lg:px-52 flex-col rounded-none opacity-100 shadow-none flex items-start justify-start md:justify-start md:items-start">
         <div className="max-w-4xl md:text-left">
-          <h1 className="mb-6 md:mb-10 text-3xl leading-tight text-white md:text-4xl font-serif lg:text-5xl [text-shadow:_0_2px_10px_rgba(0,0,0,0.55)]">
+          <h1 className="mb-6 md:mb-10 text-3xl leading-tight text-white md:text-4xl font-serif font-semibold lg:text-5xl [text-shadow:_0_2px_10px_rgba(0,0,0,0.55)]">
             Discover The World's Best Interior Designers' Iconic Pieces
           </h1>
 
