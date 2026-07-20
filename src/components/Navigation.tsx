@@ -38,8 +38,8 @@ const leftNavItems = [{
   href: "/designers",
   icon: Palette,
 }, {
-  label: "Interactive Gallery / Lookbook",
-  mobileLabel: "Interactive Gallery / Lookbook",
+  label: "Interactive Gallery",
+  mobileLabel: "Interactive Gallery",
   href: "/gallery",
   icon: Image,
 }, {
