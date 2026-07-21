@@ -4,6 +4,7 @@ import { resolveCuratorPickDescription } from "@/lib/curatorPickDescription";
 import { applyCuratorPickOrder, sortCuratorPicks } from "@/lib/curatorPickSort";
 import { formatEditionLabel } from "@/lib/editionLabel";
 import { sanitizeBiographyCitations } from "@/lib/sanitizeBiographyCitations";
+import { queryKeys } from "@/lib/queryKeys";
 
 const HIDDEN_DESIGNER_SLUGS = new Set(["gabriel-hendifar"]);
 
