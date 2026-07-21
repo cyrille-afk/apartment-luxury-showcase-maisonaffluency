@@ -1061,8 +1061,8 @@ const DesignersHoverHero = () => {
   // keyboard opens as usual — no custom keyboard.
   useEffect(() => {
     if (!searchOpen) return;
-    const prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+    const wasAlreadyHidden = document.body.style.overflow === "hidden";
+    if (!wasAlreadyHidden) document.body.style.overflow = "hidden";
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") setSearchOpen(false);
     };
@@ -1072,7 +1072,9 @@ const DesignersHoverHero = () => {
       searchInputRef.current?.focus();
     }, 220);
     return () => {
-      document.body.style.overflow = prevOverflow;
+      // Only clear if we set it. Never restore a stale "hidden" captured from
+      // PublicDesigners' body lock — that would pin the next page's scroll.
+      if (!wasAlreadyHidden) document.body.style.overflow = "";
       window.removeEventListener("keydown", onKey);
       window.clearTimeout(t);
     };
