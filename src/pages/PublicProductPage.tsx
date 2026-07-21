@@ -104,7 +104,7 @@ interface ProductRow {
 
 function useProductBySlug(designerSlug: string | undefined, productSlug: string | undefined) {
   return useQuery({
-    queryKey: ["public-product-page", designerSlug, productSlug],
+    queryKey: queryKeys.publicProductPage(designerSlug, productSlug),
     queryFn: async () => {
       if (!designerSlug || !productSlug) return null;
 
