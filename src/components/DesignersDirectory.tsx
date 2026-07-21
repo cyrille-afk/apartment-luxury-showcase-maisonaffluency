@@ -290,7 +290,7 @@ function useFullCuratorPicks(enabled: boolean) {
         applyCuratorPickOrder(
           supabase
             .from("designer_curator_picks_public")
-            .select("id, designer_id, sort_order, created_at, image_url, hover_image_url, title, subtitle, category, subcategory, tags, materials, dimensions, description, pdf_url, pdf_urls, origin")
+            .select("id, designer_id, sort_order, created_at, image_url, hover_image_url, title, subtitle, category, subcategory, tags, materials, dimensions, pdf_url, origin")
         ),
         supabase
           .from("designers")
