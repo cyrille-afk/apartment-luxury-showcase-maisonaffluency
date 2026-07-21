@@ -1171,7 +1171,7 @@ const PublicProductPage: React.FC = () => {
   };
 
   return (
-    <>
+    <div className="motion-safe:animate-fade-in">
       {(() => {
         const canonical = `https://www.maisonaffluency.com/designers/${designer.slug}/${productSlug}`;
         const ogImg = toOgImage(product.image_url || images[0] || null);
@@ -1669,7 +1669,7 @@ const PublicProductPage: React.FC = () => {
       </div>
 
       <AuthGateDialog open={gateOpen} onClose={closeGate} action={gateAction} />
-    </>
+    </div>
   );
 };
 

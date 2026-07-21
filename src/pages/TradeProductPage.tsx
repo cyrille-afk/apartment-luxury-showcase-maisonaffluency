@@ -1666,7 +1666,7 @@ const TradeProductPage: React.FC = () => {
   const sampleRequestUrl = `/trade/samples?product=${encodeURIComponent(product.title)}&brand=${encodeURIComponent(designerDisplay)}&productId=${encodeURIComponent(product.id)}`;
 
   return (
-    <>
+    <div className="motion-safe:animate-fade-in">
       <Helmet>
         <title>{pageTitle} — Trade — Maison Affluency</title>
       </Helmet>
@@ -2794,7 +2794,7 @@ const TradeProductPage: React.FC = () => {
           brand_name: designerDisplay || null,
         }}
       />
-    </>
+     </div>
   );
 };
 

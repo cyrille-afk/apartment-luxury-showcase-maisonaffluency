@@ -27,9 +27,10 @@ const ProductDetailSkeleton = ({ variant = "page", heroImage }: ProductDetailSke
       aria-live="polite"
       aria-label="Loading product details"
       className={
-        isModal
+        (isModal
           ? "w-full max-w-6xl mx-auto px-4 md:px-8 py-6"
-          : "w-full max-w-7xl mx-auto px-4 md:px-8 pt-8 md:pt-12 pb-16"
+          : "w-full max-w-7xl mx-auto px-4 md:px-8 pt-8 md:pt-12 pb-16") +
+        " motion-safe:animate-fade-in motion-reduce:animate-none"
       }
     >
       <style>{`@keyframes shimmer { 100% { transform: translateX(100%); } }`}</style>
