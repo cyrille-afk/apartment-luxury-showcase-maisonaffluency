@@ -98,7 +98,7 @@ const Hero = () => {
               </button>
 
               {isPWA && (
-                <div className="flex flex-col items-end gap-2 hero-fade-in-delayed-5">
+                <div className="flex flex-col items-center gap-2 hero-fade-in-delayed-5">
                   <span className="font-body text-[10px] tracking-[0.18em] text-white/80 [text-shadow:_0_1px_2px_rgba(0,0,0,0.4)]">
                     Singapore Gallery Preview
                   </span>
