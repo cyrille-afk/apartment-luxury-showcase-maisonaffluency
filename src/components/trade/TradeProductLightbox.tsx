@@ -1,4 +1,4 @@
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { X, Scale, ShoppingCart, Check, FileDown, Heart, FolderOpen } from "lucide-react";
 import LightboxDescriptionDropdown from "@/components/ui/LightboxDescriptionDropdown";
@@ -84,6 +84,21 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
   // Single-axis split (variants encode "size — material" in one label).
   const [singleSplitMatIdx, setSingleSplitMatIdx] = useState<number | null>(null);
   const [singleSplitSizeIdx, setSingleSplitSizeIdx] = useState<number | null>(null);
+  const prefersReducedMotion = useReducedMotion();
+  const [visible, setVisible] = useState(true);
+  const requestClose = () => setVisible(false);
+  const overlayMotion = prefersReducedMotion
+    ? { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 }, transition: { duration: 0.12, ease: "linear" as const } }
+    : { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 }, transition: { duration: 0.25 } };
+  const panelMotion = prefersReducedMotion
+    ? { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 }, transition: { duration: 0.12, ease: "linear" as const } }
+    : {
+        initial: { opacity: 0, y: 40, scale: 0.98 },
+        animate: { opacity: 1, y: 0, scale: 1 },
+        exit: { opacity: 0, y: 20, scale: 0.98 },
+        transition: { duration: 0.3, type: "spring" as const, stiffness: 300, damping: 30 },
+      };
+
 
   // Reset image + variant states when product changes
   useEffect(() => {
@@ -263,20 +278,16 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
   };
 
   return createPortal(
-    <AnimatePresence>
+    <AnimatePresence onExitComplete={onClose}>
+      {visible && (
       <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.25 }}
+        key="tp-lightbox-overlay"
+        {...overlayMotion}
         className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-stretch md:items-center justify-center md:p-8"
-        onClick={onClose}
+        onClick={requestClose}
       >
         <motion.div
-          initial={{ opacity: 0, y: 40, scale: 0.98 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: 40, scale: 0.98 }}
-          transition={{ duration: 0.3, type: "spring", stiffness: 300, damping: 30 }}
+          {...panelMotion}
           className="relative max-w-4xl w-full h-[100dvh] md:h-auto md:max-h-[90vh] flex flex-col md:flex-row bg-background/85 backdrop-blur-xl md:rounded-xl rounded-none shadow-2xl overflow-hidden"
           onClick={(e) => e.stopPropagation()}
         >
@@ -285,7 +296,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
             <div className="w-8" />
             <div className="w-10 h-1 rounded-full bg-muted-foreground/30" />
             <button
-              onClick={onClose}
+              onClick={requestClose}
               className="p-2 rounded-full bg-foreground/15 text-foreground hover:bg-foreground/25 transition-all"
               aria-label="Close"
             >
