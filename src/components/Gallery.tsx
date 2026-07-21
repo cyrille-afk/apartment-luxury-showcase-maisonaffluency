@@ -1300,13 +1300,13 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
           });
           })()}
 
-          {/* Private tour CTA */}
+          {/* Private tour CTA — desktop only (hidden on mobile & PWA) */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.8 }}
-            className="mt-10 md:mt-16 py-10 md:py-14 border-t border-border text-center"
+            className="hidden md:block mt-10 md:mt-16 py-10 md:py-14 border-t border-border text-center"
           >
             <p className="font-body text-xs uppercase tracking-[0.3em] text-primary mb-3">
               By Appointment
