@@ -2794,7 +2794,7 @@ const TradeProductPage: React.FC = () => {
           brand_name: designerDisplay || null,
         }}
       />
-    </>
+     </div>
   );
 };
 
