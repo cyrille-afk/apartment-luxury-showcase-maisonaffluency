@@ -394,13 +394,10 @@ const DesignersHoverHero = () => {
   const [expandedLetters, setExpandedLetters] = useState<Set<string>>(() => {
     if (typeof window !== "undefined") {
       try {
-        const p = new URLSearchParams(window.location.search);
-        if (p.get("find") === "1") {
-          const l = sessionStorage.getItem("designers_az_last_letter");
-          if (l) {
-            restoredLetterRef.current = l;
-            return new Set([l]);
-          }
+        const l = sessionStorage.getItem("designers_az_last_letter");
+        if (l) {
+          restoredLetterRef.current = l;
+          return new Set([l]);
         }
       } catch {}
     }
