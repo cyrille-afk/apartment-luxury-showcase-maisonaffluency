@@ -574,7 +574,11 @@ function singularizeSub(s: string): string {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: Math.min(idx * 0.04, 0.4) }}
               className="group cursor-pointer"
+              tabIndex={0}
               onClick={() => handleCardClick(item, idx)}
+              onMouseEnter={() => prefetchPickDetail(item.pick.id)}
+              onFocus={() => prefetchPickDetail(item.pick.id)}
+              onTouchStart={() => prefetchPickDetail(item.pick.id)}
             >
               <div className="relative aspect-square overflow-hidden rounded-sm bg-[#f0eeeb] mb-3 flex items-center justify-center">
                 {(() => {
