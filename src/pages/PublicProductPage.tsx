@@ -17,6 +17,7 @@ import { useAuthGate } from "@/hooks/useAuthGate";
 import AuthGateDialog from "@/components/AuthGateDialog";
 import { cn } from "@/lib/utils";
 import PageLoadingSkeleton from "@/components/PageLoadingSkeleton";
+import ProductDetailSkeleton from "@/components/product/ProductDetailSkeleton";
 import LightboxDescriptionDropdown from "@/components/ui/LightboxDescriptionDropdown";
 import { normalizeCategoryContext } from "@/lib/categoryNormalization";
 import { formatEditionLabel } from "@/lib/editionLabel";
@@ -1009,7 +1010,9 @@ const PublicProductPage: React.FC = () => {
     return (
       <div className="min-h-screen bg-background">
         <Navigation />
-        <div className="pt-32 md:pt-[12rem]"><PageLoadingSkeleton /></div>
+        <div className="pt-32 md:pt-[12rem]">
+          <ProductDetailSkeleton variant="page" />
+        </div>
       </div>
     );
   }
