@@ -46,6 +46,7 @@ import CurrencyToggle, { type DisplayCurrency, formatPriceConverted, useFxRates,
 import { useTradeDisplayCurrency } from "@/hooks/useTradeDisplayCurrency";
 import { formatEditionLabel } from "@/lib/editionLabel";
 import PageLoadingSkeleton from "@/components/PageLoadingSkeleton";
+import ProductDetailSkeleton from "@/components/product/ProductDetailSkeleton";
 import { sanitizeBiographyCitations } from "@/lib/sanitizeBiographyCitations";
 import ExpandableSpec from "@/components/ExpandableSpec";
 import LegendDisclosure from "@/components/LegendDisclosure";
@@ -1240,7 +1241,7 @@ const TradeProductPage: React.FC = () => {
 
 
   if (isLoading) {
-    return <div className="pt-8"><PageLoadingSkeleton /></div>;
+    return <div className="pt-8"><ProductDetailSkeleton variant="page" /></div>;
   }
 
   if (!data) {
