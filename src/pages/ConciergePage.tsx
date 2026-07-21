@@ -277,7 +277,7 @@ const ConciergePage: React.FC = () => {
               Prefer to visit?{" "}
               <Link
                 to="/contact"
-                className="underline underline-offset-2 hover:text-foreground transition-colors"
+                className="inline-flex min-h-12 items-center underline underline-offset-2 hover:text-foreground transition-colors"
               >
                 Book an appointment at our Singapore studio
               </Link>

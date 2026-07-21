@@ -35,7 +35,7 @@ const Footer = () => {
         <div className="flex flex-col items-center gap-6">
           <button
             onClick={() => setTourOpen(true)}
-            className="px-8 py-3.5 bg-background text-foreground font-body text-sm uppercase tracking-[0.2em] border border-[hsl(var(--accent))] rounded-full shadow-[0_0_8px_hsl(var(--accent)/0.3)] hover:shadow-[0_0_14px_hsl(var(--accent)/0.5)] transition-all duration-300"
+            className="min-h-12 px-8 py-3.5 bg-background text-foreground font-body text-sm uppercase tracking-[0.2em] border border-[hsl(var(--accent))] rounded-full shadow-[0_0_8px_hsl(var(--accent)/0.3)] hover:shadow-[0_0_14px_hsl(var(--accent)/0.5)] transition-all duration-300"
           >
             Request a Private Tour
           </button>
