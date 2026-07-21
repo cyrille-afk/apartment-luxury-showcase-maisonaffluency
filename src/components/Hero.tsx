@@ -92,7 +92,7 @@ const Hero = () => {
               <button
                 type="button"
                 onClick={() => { trackEvent("click_meet_designers", { event_category: "CTA", event_label: "HeroCTA" }); navigate("/designers"); }}
-                className={heroPrimaryCtaClass}
+                className={`${heroPrimaryCtaClass}${isPWA ? " self-center" : ""}`}
               >
                 EXPLORE THE COLLECTION
               </button>
