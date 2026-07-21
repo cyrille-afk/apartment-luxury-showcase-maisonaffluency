@@ -840,6 +840,76 @@ function MobileLetterRow({
   );
 }
 
+// Session-wide record of which letter sections have already mounted their
+// heavy children. Once revealed, a letter stays "revealed" for the lifetime of
+// the SPA session — this prevents scroll-restoration and route re-entry from
+// exposing an unrendered placeholder where content used to be.
+const revealedLettersGlobal = new Set<string>();
+
+// ─── Letter Group Body ───────────────────────────────────────────────────────
+// Extracted so it only mounts (and its images only start downloading) after
+// the surrounding LetterGroup has been revealed by the intersection observer.
+function LetterGroupBody({
+  letter,
+  designers,
+  parentDesignerCountByName,
+  fallbackGalleryIndexByDesigner,
+  initialExpand,
+  designersWithIgPosts,
+}: {
+  letter: string;
+  designers: Designer[];
+  parentDesignerCountByName: Record<string, number>;
+  fallbackGalleryIndexByDesigner: Record<string, number[]>;
+  initialExpand?: string;
+  designersWithIgPosts?: Set<string>;
+}) {
+  const matchesExpand = initialExpand && designers.some((d) => d.name === initialExpand || d.founder === initialExpand);
+  const [openParent, setOpenParent] = useState<string | null>(matchesExpand ? initialExpand! : null);
+  const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+  const needsCarousel = designers.length > (isMobile ? 2 : 5);
+
+  return (
+    <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}>
+      {needsCarousel ? (
+        <LetterCarousel
+          letter={letter}
+          designers={designers}
+          openParent={openParent}
+          setOpenParent={setOpenParent}
+          parentDesignerCountByName={parentDesignerCountByName}
+          fallbackGalleryIndexByDesigner={fallbackGalleryIndexByDesigner}
+          designersWithIgPosts={designersWithIgPosts}
+          initialExpand={initialExpand}
+        />
+      ) : (
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 grid-flow-dense items-start gap-4 md:gap-6 lg:gap-8">
+          {designers.map((item) => {
+            const designerCount = parentDesignerCountByName[item.name] ?? 0;
+            const isParentBrand = item.founder === item.name && designerCount > 0;
+            if (isParentBrand) {
+              const isOpen = openParent === item.name;
+              return (
+                <React.Fragment key={item.slug}>
+                  <ParentBrandCard item={item} isOpen={isOpen} onToggle={() => setOpenParent(isOpen ? null : item.name)} designerCount={designerCount} hasIgPosts={designersWithIgPosts?.has(item.id)} />
+                  <AnimatePresence>
+                    {isOpen && (
+                      <div className="col-span-full">
+                        <ParentSubGrid key={item.name} parentName={item.name} onClose={() => setOpenParent(null)} autoScroll={!!matchesExpand && item.name === initialExpand} />
+                      </div>
+                    )}
+                  </AnimatePresence>
+                </React.Fragment>
+              );
+            }
+            return <SingleDesignerCard key={item.slug} item={item} fallbackGalleryIndexByDesigner={fallbackGalleryIndexByDesigner} hasIgPosts={designersWithIgPosts?.has(item.id)} />;
+          })}
+        </div>
+      )}
+    </motion.div>
+  );
+}
+
 // ─── Letter Group ────────────────────────────────────────────────────────────
 function LetterGroup({
   letter,
@@ -861,14 +931,82 @@ function LetterGroup({
   designersWithIgPosts?: Set<string>;
 }) {
   const sentinelRef = useRef<HTMLDivElement>(null);
-  // Render every desktop letter group immediately. The previous intersection-
-  // based reveal could miss after scroll restoration, leaving blank placeholder
-  // rows and unloaded portraits when scrolling away and back.
-  const isRevealed = true;
-  const matchesExpand = initialExpand && designers.some((d) => d.name === initialExpand || d.founder === initialExpand);
-  const [openParent, setOpenParent] = useState<string | null>(matchesExpand ? initialExpand! : null);
+  // Lazy-mount each letter group's heavy child cards + images. Once revealed,
+  // the letter stays mounted for the rest of the session so scroll restoration,
+  // route re-entry, and A–Z jumps never expose an unrendered placeholder.
+  const [isRevealed, setIsRevealed] = useState<boolean>(() => {
+    if (forceOpen) return true;
+    if (revealedLettersGlobal.has(letter)) return true;
+    if (typeof window === "undefined") return false;
+    // Reveal synchronously if the URL hash already targets this letter
+    // (deep-link / A–Z jump landing directly on this section).
+    if (window.location.hash && window.location.hash === `#${anchorId}`) return true;
+    return false;
+  });
   const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
-  const needsCarousel = designers.length > (isMobile ? 2 : 5);
+  const cols = isMobile ? 2 : 5;
+  const rowHeight = isMobile ? 260 : 340;
+  const placeholderHeight = Math.max(rowHeight, Math.ceil(designers.length / cols) * rowHeight);
+
+  useEffect(() => {
+    if (isRevealed) {
+      revealedLettersGlobal.add(letter);
+      return;
+    }
+    const el = sentinelRef.current;
+    if (!el) return;
+
+    // Immediate bounding-rect check — covers scroll restoration, deep-link
+    // navigation, and back/forward where IntersectionObserver may fire late.
+    const rect = el.getBoundingClientRect();
+    const vh = typeof window !== "undefined" ? window.innerHeight : 0;
+    if (rect.top < vh + 1200 && rect.bottom > -1200) {
+      setIsRevealed(true);
+      revealedLettersGlobal.add(letter);
+      return;
+    }
+
+    if (typeof IntersectionObserver === "undefined") {
+      setIsRevealed(true);
+      return;
+    }
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            setIsRevealed(true);
+            revealedLettersGlobal.add(letter);
+            io.disconnect();
+            break;
+          }
+        }
+      },
+      { rootMargin: "1200px 0px", threshold: 0 },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [isRevealed, letter]);
+
+  // React to A–Z jumps: when a jump targets this letter, reveal immediately
+  // so `scrollIntoView` lands on real content, not a placeholder.
+  useEffect(() => {
+    if (isRevealed) return;
+    const onHash = () => {
+      if (window.location.hash === `#${anchorId}`) {
+        setIsRevealed(true);
+        revealedLettersGlobal.add(letter);
+      }
+    };
+    window.addEventListener("hashchange", onHash);
+    return () => window.removeEventListener("hashchange", onHash);
+  }, [anchorId, isRevealed, letter]);
+
+  const matchesExpand = initialExpand && designers.some((d) => d.name === initialExpand || d.founder === initialExpand);
+  if (matchesExpand && !isRevealed) {
+    // Deep-link is expanding a parent inside this letter — reveal synchronously.
+    setIsRevealed(true);
+    revealedLettersGlobal.add(letter);
+  }
 
   return (
     <div id={anchorId} data-alpha-letter={letter} className="scroll-header-offset mb-8 md:mb-10">
@@ -878,52 +1016,26 @@ function LetterGroup({
         <div className="flex-1 h-px bg-border/40" />
         <span className="font-body text-[10px] text-muted-foreground/50 tracking-widest uppercase">{designers.reduce((sum, d) => sum + (d.founder === d.name && (parentDesignerCountByName[d.name] ?? 0) > 0 ? (parentDesignerCountByName[d.name] ?? 0) + 1 : 1), 0)}</span>
       </div>
-      <AnimatePresence>
-        {isRevealed ? (
-          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}>
-            {needsCarousel ? (
-              <LetterCarousel
-                letter={letter}
-                designers={designers}
-                openParent={openParent}
-                setOpenParent={setOpenParent}
-                parentDesignerCountByName={parentDesignerCountByName}
-                fallbackGalleryIndexByDesigner={fallbackGalleryIndexByDesigner}
-                designersWithIgPosts={designersWithIgPosts}
-                initialExpand={initialExpand}
-              />
-            ) : (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 grid-flow-dense items-start gap-4 md:gap-6 lg:gap-8">
+      {isRevealed ? (
+        <LetterGroupBody
+          letter={letter}
+          designers={designers}
+          parentDesignerCountByName={parentDesignerCountByName}
+          fallbackGalleryIndexByDesigner={fallbackGalleryIndexByDesigner}
+          initialExpand={initialExpand}
+          designersWithIgPosts={designersWithIgPosts}
+        />
+      ) : (
+        <div
+          aria-hidden="true"
+          className="flex items-center justify-center text-muted-foreground/30"
+          style={{ minHeight: `${placeholderHeight}px` }}
+        >
+          <span className="font-body text-xs tracking-widest uppercase">{designers.length} designer{designers.length !== 1 ? "s" : ""}</span>
+        </div>
+      )}
 
-                {designers.map((item) => {
-                  const designerCount = parentDesignerCountByName[item.name] ?? 0;
-                  const isParentBrand = item.founder === item.name && designerCount > 0;
-                  if (isParentBrand) {
-                    const isOpen = openParent === item.name;
-                    return (
-                      <React.Fragment key={item.slug}>
-                        <ParentBrandCard item={item} isOpen={isOpen} onToggle={() => setOpenParent(isOpen ? null : item.name)} designerCount={designerCount} hasIgPosts={designersWithIgPosts?.has(item.id)} />
-                        <AnimatePresence>
-                          {isOpen && (
-                            <div className="col-span-full">
-                              <ParentSubGrid key={item.name} parentName={item.name} onClose={() => setOpenParent(null)} autoScroll={!!matchesExpand && item.name === initialExpand} />
-                            </div>
-                          )}
-                        </AnimatePresence>
-                      </React.Fragment>
-                    );
-                  }
-                  return <SingleDesignerCard key={item.slug} item={item} fallbackGalleryIndexByDesigner={fallbackGalleryIndexByDesigner} hasIgPosts={designersWithIgPosts?.has(item.id)} />;
-                })}
-              </div>
-            )}
-          </motion.div>
-        ) : (
-          <div className="flex items-center justify-center py-12 text-muted-foreground/30" style={{ minHeight: `${Math.ceil(designers.length / (typeof window !== "undefined" && window.innerWidth < 768 ? 2 : 5)) * 280}px` }}>
-            <span className="font-body text-xs tracking-widest uppercase">{designers.length} designer{designers.length !== 1 ? "s" : ""}</span>
-          </div>
-        )}
-      </AnimatePresence>
+
     </div>
   );
 }
