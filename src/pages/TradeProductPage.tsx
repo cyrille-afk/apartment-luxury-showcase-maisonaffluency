@@ -199,7 +199,7 @@ function useTradeProductBySlug(
   productSlug: string | undefined,
 ) {
   return useQuery({
-    queryKey: ["trade-product-page", tradeProductIdParam, designerSlug, productSlug],
+    queryKey: queryKeys.tradeProductPage(tradeProductIdParam, designerSlug, productSlug),
     queryFn: async () => {
       if (tradeProductIdParam) {
         const { data: tradeProduct } = await supabase
