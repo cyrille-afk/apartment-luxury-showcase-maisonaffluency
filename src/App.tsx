@@ -186,6 +186,12 @@ const queryClient = new QueryClient({
     queries: {
       refetchOnWindowFocus: false,
       refetchOnReconnect: false,
+      refetchOnMount: false,
+      // Reuse cached data across `/`, `/designers`, category pages, etc.
+      // Individual hooks can still override with a longer staleTime.
+      staleTime: 5 * 60_000, // 5 min — data is considered fresh
+      gcTime: 30 * 60_000, // 30 min — kept in memory after unmount
+      retry: 1,
     },
   },
 });
