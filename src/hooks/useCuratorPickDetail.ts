@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { queryKeys } from "@/lib/queryKeys";
 
 /**
  * Fetches the heavy fields (description, gallery_images, size_variants,
@@ -9,7 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
  */
 export function useCuratorPickDetail(pickId: string | null | undefined, enabled = true) {
   return useQuery({
-    queryKey: ["curator-pick-detail", pickId],
+    queryKey: queryKeys.curatorPickDetail(pickId ?? undefined),
     enabled: !!pickId && enabled,
     staleTime: 10 * 60_000,
     gcTime: 30 * 60_000,
