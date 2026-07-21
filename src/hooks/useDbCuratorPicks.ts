@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { CuratorPick } from "@/components/FeaturedDesigners";
 import { applyCuratorPickOrder, sortCuratorPicks } from "@/lib/curatorPickSort";
+import { queryKeys } from "@/lib/queryKeys";
 
 export interface DbProductItem {
   pick: CuratorPick;
