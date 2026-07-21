@@ -13,6 +13,9 @@ import { useCompare, type CompareItem } from "@/contexts/CompareContext";
 import { useAuthGate } from "@/hooks/useAuthGate";
 import AuthGateDialog from "@/components/AuthGateDialog";
 import { useDbCuratorPicks } from "@/hooks/useDbCuratorPicks";
+import { useQueryClient } from "@tanstack/react-query";
+import { queryKeys } from "@/lib/queryKeys";
+import { supabase } from "@/integrations/supabase/client";
 import { readPendingCategoryFilter } from "@/lib/pendingCategoryFilter";
 import { inferSubcategory, normalizeCategory } from "@/lib/productTaxonomy";
 import Breadcrumbs, { type Crumb } from "@/components/Breadcrumbs";
@@ -236,6 +239,25 @@ const ProductGrid = ({ sectionScope }: { sectionScope?: "designers" | "collectib
   const { isPinned, togglePin, items: compareItems } = useCompare();
   const { requireAuth, gateOpen, gateAction, closeGate } = useAuthGate();
   const { data: dbPicks, isLoading: dbPicksLoading } = useDbCuratorPicks();
+  const queryClient = useQueryClient();
+
+  /** Warm the curator-pick detail cache so opening the card feels instant. */
+  const prefetchPickDetail = useCallback((pickId?: string) => {
+    if (!pickId) return;
+    queryClient.prefetchQuery({
+      queryKey: queryKeys.curatorPickDetail(pickId),
+      staleTime: 10 * 60_000,
+      queryFn: async () => {
+        const { data, error } = await supabase
+          .from("designer_curator_picks_public" as any)
+          .select("id, description, gallery_images, size_variants, variant_placeholder, base_axis_label, top_axis_label, variant_image_map")
+          .eq("id", pickId)
+          .maybeSingle();
+        if (error) throw error;
+        return data as any;
+      },
+    });
+  }, [queryClient]);
   const [category, setCategory] = useState<string | null>(null);
   const [subcategory, setSubcategory] = useState<string | null>(null);
   const [filterSource, setFilterSource] = useState<string | null>(null);
@@ -552,7 +574,11 @@ function singularizeSub(s: string): string {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: Math.min(idx * 0.04, 0.4) }}
               className="group cursor-pointer"
+              tabIndex={0}
               onClick={() => handleCardClick(item, idx)}
+              onMouseEnter={() => prefetchPickDetail(item.pick.id)}
+              onFocus={() => prefetchPickDetail(item.pick.id)}
+              onTouchStart={() => prefetchPickDetail(item.pick.id)}
             >
               <div className="relative aspect-square overflow-hidden rounded-sm bg-[#f0eeeb] mb-3 flex items-center justify-center">
                 {(() => {
