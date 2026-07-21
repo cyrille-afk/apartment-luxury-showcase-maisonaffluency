@@ -99,16 +99,16 @@ const Hero = () => {
 
               {isPWA && (
                 <div className="flex flex-col items-center gap-2 hero-fade-in-delayed-5">
-                  <span className="font-body text-[10px] tracking-[0.18em] text-white/80 [text-shadow:_0_1px_2px_rgba(0,0,0,0.4)]">
+                  <span className="font-body text-[10px] tracking-[0.18em] text-white [text-shadow:_0_1px_3px_rgba(0,0,0,0.7)]">
                     Singapore Gallery Preview
                   </span>
-                  <span className="font-body text-[10px] tracking-[0.18em] text-white/80 [text-shadow:_0_1px_2px_rgba(0,0,0,0.4)]">
+                  <span className="font-body text-[10px] tracking-[0.18em] text-white [text-shadow:_0_1px_3px_rgba(0,0,0,0.7)]">
                     Exclusively for the Trade
                   </span>
                   <button
                     type="button"
                     onClick={openTour}
-                    className="inline-flex items-center font-body text-xs tracking-[0.15em] text-white underline underline-offset-4 decoration-white/60 hover:decoration-white transition-colors [text-shadow:_0_1px_2px_rgba(0,0,0,0.4)]"
+                    className="inline-flex items-center font-body text-xs tracking-[0.15em] text-white underline underline-offset-4 decoration-white hover:decoration-white transition-colors [text-shadow:_0_1px_3px_rgba(0,0,0,0.7)]"
                   >
                     Book Private Appointment
                   </button>
