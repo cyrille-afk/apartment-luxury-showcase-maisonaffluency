@@ -19,6 +19,7 @@ import { Link } from "react-router-dom";
 import { Search, X, ImageIcon } from "lucide-react";
 
 import { useQuery } from "@tanstack/react-query";
+import { queryKeys } from "@/lib/queryKeys";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { useAllDesigners } from "@/hooks/useDesigner";
@@ -253,7 +254,7 @@ const FEATURED_SEED = (featuredDesignersSeed as FeaturedDesigner[]) || [];
 
 function useFeaturedDesigners() {
   return useQuery({
-    queryKey: ["designers-hero-featured-v3", ALL_FEATURED_SLUGS],
+    queryKey: queryKeys.designersHeroFeatured(ALL_FEATURED_SLUGS),
     // Stale-while-revalidate: paint from build-time seed immediately, then
     // silently refetch in the background. `initialDataUpdatedAt: 0` marks the
     // seed as already-stale so react-query kicks off a background refresh on
@@ -334,7 +335,7 @@ function useFeaturedDesigners() {
 // Fetches the first curator-pick image for every designer, keyed by designer id.
 function useAllFirstPickImages() {
   return useQuery({
-    queryKey: ["designers-all-first-pick-images-v1"],
+    queryKey: queryKeys.designersAllFirstPickImages(),
     staleTime: 1000 * 60 * 30,
     queryFn: async () => {
       const { data, error } = await applyCuratorPickOrder(

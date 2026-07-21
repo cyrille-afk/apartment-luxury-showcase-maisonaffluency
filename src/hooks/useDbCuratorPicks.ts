@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { CuratorPick } from "@/components/FeaturedDesigners";
 import { applyCuratorPickOrder, sortCuratorPicks } from "@/lib/curatorPickSort";
+import { queryKeys } from "@/lib/queryKeys";
 
 export interface DbProductItem {
   pick: CuratorPick;
@@ -16,7 +17,7 @@ export interface DbProductItem {
  */
 export function useDbCuratorPicks() {
   return useQuery({
-    queryKey: ["db-curator-picks-for-grid"],
+    queryKey: queryKeys.curatorPicksGrid(),
     queryFn: async (): Promise<DbProductItem[]> => {
       // Fetch published designers (incl. founder to resolve parent hierarchy)
       const { data: designers } = await supabase

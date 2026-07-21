@@ -7,6 +7,7 @@ import { motion, AnimatePresence, useInView } from "framer-motion";
 import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Search, X, Layers, Share2, Plus, SlidersHorizontal, Heart } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
+import { queryKeys } from "@/lib/queryKeys";
 import { useAllDesigners, type Designer } from "@/hooks/useDesigner";
 import { useAuth } from "@/hooks/useAuth";
 import { useAuthGate } from "@/hooks/useAuthGate";
@@ -177,7 +178,7 @@ const INSTAGRAM_LINKS: Record<string, string> = {
 // ─── Hook: fetch designer→category mapping from curator picks ────────────────
 function useDesignerCategories() {
   return useQuery({
-    queryKey: ["designer-category-map"],
+    queryKey: queryKeys.designerCategoryMap(),
     queryFn: async () => {
       const { data, error } = await supabase
         .from("designer_curator_picks_public")
@@ -192,7 +193,7 @@ function useDesignerCategories() {
 // ─── Hook: fetch first curator pick image per designer (for hover reveal) ────
 function useDesignerFirstPickImage() {
   return useQuery({
-    queryKey: ["designer-first-pick-image"],
+    queryKey: queryKeys.designerFirstPickImage(),
     queryFn: async () => {
       const { data, error } = await supabase
         .from("designer_curator_picks_public")
@@ -218,7 +219,7 @@ const FirstPickImageContext = createContext<Record<string, string>>({});
 // ─── Hook: fetch fallback gallery indices per designer from gallery hotspots ──
 function useDesignerHotspotFallbacks() {
   return useQuery({
-    queryKey: ["designer-hotspot-fallbacks"],
+    queryKey: queryKeys.designerHotspotFallbacks(),
     queryFn: async () => {
       const { data, error } = await supabase
         .from("gallery_hotspots")
@@ -283,7 +284,7 @@ type PickItem = {
 
 function useFullCuratorPicks(enabled: boolean) {
   return useQuery({
-    queryKey: ["full-curator-picks-directory"],
+    queryKey: queryKeys.curatorPicksDirectory(),
     queryFn: async () => {
       const [{ data: picks }, { data: designers }] = await Promise.all([
         applyCuratorPickOrder(
@@ -388,7 +389,7 @@ function parseDesignerDisplayName(item: Designer): { displayName: string; parent
 function ParentSubGrid({ parentName, onClose, autoScroll }: { parentName: string; onClose: () => void; autoScroll?: boolean }) {
   const { data: designers = [] } = useParentBrandDesigners(parentName);
   const { data: designersWithIgPosts = new Set<string>() } = useQuery({
-    queryKey: ["designers-with-ig-posts"],
+    queryKey: queryKeys.designersWithIgPosts(),
     queryFn: async () => {
       const { data } = await supabase
         .from("designer_instagram_posts")
@@ -1275,7 +1276,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
   const { data: fallbackGalleryIndexByDesigner = {} } = useDesignerHotspotFallbacks();
   const { data: firstPickImageByDesigner = {} } = useDesignerFirstPickImage();
   const { data: designersWithIgPosts = new Set<string>() } = useQuery({
-    queryKey: ["designers-with-ig-posts"],
+    queryKey: queryKeys.designersWithIgPosts(),
     queryFn: async () => {
       const { data } = await supabase
         .from("designer_instagram_posts")
