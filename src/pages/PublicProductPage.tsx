@@ -8,6 +8,7 @@ import { cloudinaryUrl } from "@/lib/cloudinary";
 import ProductImageGallery from "@/components/product/ProductImageGallery";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { queryKeys } from "@/lib/queryKeys";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import SpecSheetButton, { type PdfEntry } from "@/components/trade/SpecSheetButton";
