@@ -108,7 +108,7 @@ const Hero = () => {
                   <button
                     type="button"
                     onClick={openTour}
-                    className="mt-4 inline-flex min-h-12 items-center justify-center font-body text-xs font-semibold tracking-[0.15em] text-white underline underline-offset-4 decoration-white hover:decoration-white transition-colors [text-shadow:_0_2px_4px_rgba(0,0,0,0.85)]"
+                    className="mt-2 inline-flex min-h-12 items-center justify-center font-body text-xs font-semibold tracking-[0.15em] text-white underline underline-offset-4 decoration-white hover:decoration-white transition-colors [text-shadow:_0_2px_4px_rgba(0,0,0,0.85)]"
                   >
                     Book Private Appointment
                   </button>
