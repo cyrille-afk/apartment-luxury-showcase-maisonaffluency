@@ -57,6 +57,8 @@ project_id = "dcrauiygaezoduwdjmsm"
     verify_jwt = false
   [functions.mcp-click]
     verify_jwt = false
+  [functions.catalog-manifest]
+    verify_jwt = false
 
 
 

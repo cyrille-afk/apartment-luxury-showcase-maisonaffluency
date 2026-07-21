@@ -21,6 +21,7 @@ import { cloudinaryUrl, cloudinarySrcSet } from "@/lib/cloudinary";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/queryKeys";
+import { fetchCatalogManifest } from "@/lib/catalogManifest";
 import { resolveCuratorPickDescription } from "@/lib/curatorPickDescription";
 
 const g = (id: string) => cloudinaryUrl(id, { width: 1200, quality: "auto:good", crop: "fill" });
@@ -437,26 +438,17 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
 
   // Shared cache: reused across `/`, `/designers`, and category pages via the
   // query-key factory so navigating back to Home does NOT refetch.
-  const { data: picksRaw } = useQuery({
+  // Single edge-cached manifest replaces two direct Postgres reads.
+  // Cache-Control: public, s-maxage=300, stale-while-revalidate=86400 — served
+  // from the CDN for repeat visitors and reused across `/`, `/designers`, and
+  // category pages via the shared query-key factory.
+  const { data: manifest } = useQuery({
     queryKey: queryKeys.curatorPicksLightbox(),
-    queryFn: async () => {
-      const { data } = await supabase
-        .from("designer_curator_picks_public" as any)
-        .select("id,title,subtitle,image_url,hover_image_url,materials,dimensions,lead_time,origin,category,subcategory,pdf_url,designer_id,variant_placeholder,base_axis_label,top_axis_label")
-        .not("image_url", "is", null);
-      return (data as any[]) || [];
-    },
+    queryFn: fetchCatalogManifest,
+    staleTime: 5 * 60 * 1000,
   });
-
-  const { data: designersBasic } = useQuery({
-    queryKey: queryKeys.designersBasic(),
-    queryFn: async () => {
-      const { data } = await supabase
-        .from("designers")
-        .select("id, name, slug");
-      return (data as any[]) || [];
-    },
-  });
+  const picksRaw = manifest?.picks;
+  const designersBasic = manifest?.designers;
 
   const dbCuratorPicks = useMemo<PublicLightboxItem[]>(() => {
     if (!picksRaw || !designersBasic) return [];
