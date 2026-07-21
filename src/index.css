@@ -215,6 +215,7 @@ All colors MUST be HSL.
 .hero-fade-in-delayed-2 { animation: heroFadeIn 0.8s ease-out 0.6s both; }
 .hero-fade-in-delayed-3 { animation: heroFadeIn 0.6s ease-out 0.8s both; }
 .hero-fade-in-delayed-4 { animation: heroFadeIn 0.6s ease-out 1.0s both; }
+.hero-fade-in-delayed-5 { animation: heroFadeIn 0.6s ease-out 1.2s both; }
 
 /* Mobile LCP optimization: paint hero text immediately */
 @media (max-width: 767px) {
@@ -226,7 +227,8 @@ All colors MUST be HSL.
   .hero-fade-in-delayed-1,
   .hero-fade-in-delayed-2,
   .hero-fade-in-delayed-3,
-  .hero-fade-in-delayed-4 {
+  .hero-fade-in-delayed-4,
+  .hero-fade-in-delayed-5 {
     animation: none !important;
     opacity: 1 !important;
     transform: none !important;
