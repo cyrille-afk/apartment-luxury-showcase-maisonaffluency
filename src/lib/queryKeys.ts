@@ -26,6 +26,10 @@ export const queryKeys = {
   curatorPicksGrid: () => ["db-curator-picks-for-grid"] as const,
   /** Full curator picks used by the A–Z directory. */
   curatorPicksDirectory: () => ["full-curator-picks-directory"] as const,
+  /** Curator picks payload used by the homepage Gallery hotspot → lightbox mapping. */
+  curatorPicksLightbox: () => ["curator-picks-lightbox"] as const,
+  /** Minimal designers lookup (id / name / slug). Shared across Home + Gallery. */
+  designersBasic: () => ["designers-basic"] as const,
   curatorPickDetail: (pickId: string | undefined) =>
     ["curator-pick-detail", pickId] as const,
   designerPicks: (designerId: string | undefined, publicOnly = false) =>
