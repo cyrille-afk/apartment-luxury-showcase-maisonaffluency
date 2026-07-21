@@ -1669,7 +1669,7 @@ const PublicProductPage: React.FC = () => {
       </div>
 
       <AuthGateDialog open={gateOpen} onClose={closeGate} action={gateAction} />
-    </>
+    </div>
   );
 };
 
