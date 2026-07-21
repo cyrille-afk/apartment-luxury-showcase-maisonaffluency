@@ -21,6 +21,7 @@ import {
 import { renderParagraph } from "@/components/EditorialBiography";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { queryKeys } from "@/lib/queryKeys";
 import ShareMenu from "@/components/ShareMenu";
 import { buildPieceOgUrl } from "@/lib/whatsapp-share";
 import ProductImageGallery from "@/components/product/ProductImageGallery";
@@ -199,7 +200,7 @@ function useTradeProductBySlug(
   productSlug: string | undefined,
 ) {
   return useQuery({
-    queryKey: ["trade-product-page", tradeProductIdParam, designerSlug, productSlug],
+    queryKey: queryKeys.tradeProductPage(tradeProductIdParam, designerSlug, productSlug),
     queryFn: async () => {
       if (tradeProductIdParam) {
         const { data: tradeProduct } = await supabase

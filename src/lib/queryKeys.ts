@@ -51,4 +51,13 @@ export const queryKeys = {
     ["designers-hero-featured-v3", slugs] as const,
   designersAllFirstPickImages: () =>
     ["designers-all-first-pick-images-v1"] as const,
+
+  // ── Product detail pages ─────────────────────────────────────────────────
+  publicProductPage: (designerSlug: string | undefined, productSlug: string | undefined) =>
+    ["public-product-page", designerSlug, productSlug] as const,
+  tradeProductPage: (
+    tradeProductIdParam: string | undefined,
+    designerSlug: string | undefined,
+    productSlug: string | undefined,
+  ) => ["trade-product-page", tradeProductIdParam, designerSlug, productSlug] as const,
 } as const;

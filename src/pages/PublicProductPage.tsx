@@ -8,6 +8,7 @@ import { cloudinaryUrl } from "@/lib/cloudinary";
 import ProductImageGallery from "@/components/product/ProductImageGallery";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { queryKeys } from "@/lib/queryKeys";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import SpecSheetButton, { type PdfEntry } from "@/components/trade/SpecSheetButton";
@@ -104,7 +105,7 @@ interface ProductRow {
 
 function useProductBySlug(designerSlug: string | undefined, productSlug: string | undefined) {
   return useQuery({
-    queryKey: ["public-product-page", designerSlug, productSlug],
+    queryKey: queryKeys.publicProductPage(designerSlug, productSlug),
     queryFn: async () => {
       if (!designerSlug || !productSlug) return null;
 
