@@ -38,7 +38,8 @@ export const getPhonePlaceholder = (country?: string | null): string => {
   if (country && DIAL_CODES[country]) {
     return `${DIAL_CODES[country]} …`;
   }
-  return "+44 / +1 / +65 …";
+  return "+65 …";
+
 };
 
 export const getDialCode = (country?: string | null): string | null =>
