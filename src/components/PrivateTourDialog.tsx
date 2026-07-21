@@ -29,7 +29,7 @@ const PrivateTourDialog = ({ open, onOpenChange }: PrivateTourDialogProps) => {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [turnstileToken, setTurnstileToken] = useState<string>("");
   const [interacted, setInteracted] = useState(false);
-  const [phonePlaceholder] = useState(() => getPhonePlaceholder(inferCountryFromBrowser()));
+  const [phonePlaceholder] = useState(() => getPhonePlaceholder(inferCountryFromBrowser() || "Singapore"));
   // Honeypot (bots fill hidden fields) + timing trap (bots submit instantly)
   const [website, setWebsite] = useState("");
   const [mountedAt] = useState(() => Date.now());
