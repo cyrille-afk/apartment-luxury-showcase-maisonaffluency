@@ -138,6 +138,20 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
   const { isFavorited, toggleFavorite } = useLocalFavorites();
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageFailed, setImageFailed] = useState(false);
+  const prefersReducedMotion = useReducedMotion();
+  const [visible, setVisible] = useState(true);
+  const requestClose = useCallback(() => setVisible(false), []);
+  const overlayMotion = prefersReducedMotion
+    ? { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 }, transition: { duration: 0.12, ease: "linear" as const } }
+    : { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 }, transition: { duration: 0.25 } };
+  const panelMotion = prefersReducedMotion
+    ? { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 }, transition: { duration: 0.12, ease: "linear" as const } }
+    : {
+        initial: { opacity: 0, y: 40, scale: 0.98 },
+        animate: { opacity: 1, y: 0, scale: 1 },
+        exit: { opacity: 0, y: 20, scale: 0.98 },
+        transition: { duration: 0.3, type: "spring" as const, stiffness: 300, damping: 30 },
+      };
   const [showHoverImage, setShowHoverImage] = useState(false);
   const [hoverImageLoaded, setHoverImageLoaded] = useState(false);
   const [variantPayload, setVariantPayload] = useState<Partial<PublicLightboxItem> | null>(null);
