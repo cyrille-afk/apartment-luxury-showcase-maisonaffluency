@@ -239,6 +239,25 @@ const ProductGrid = ({ sectionScope }: { sectionScope?: "designers" | "collectib
   const { isPinned, togglePin, items: compareItems } = useCompare();
   const { requireAuth, gateOpen, gateAction, closeGate } = useAuthGate();
   const { data: dbPicks, isLoading: dbPicksLoading } = useDbCuratorPicks();
+  const queryClient = useQueryClient();
+
+  /** Warm the curator-pick detail cache so opening the card feels instant. */
+  const prefetchPickDetail = useCallback((pickId?: string) => {
+    if (!pickId) return;
+    queryClient.prefetchQuery({
+      queryKey: queryKeys.curatorPickDetail(pickId),
+      staleTime: 10 * 60_000,
+      queryFn: async () => {
+        const { data, error } = await supabase
+          .from("designer_curator_picks_public" as any)
+          .select("id, description, gallery_images, size_variants, variant_placeholder, base_axis_label, top_axis_label, variant_image_map")
+          .eq("id", pickId)
+          .maybeSingle();
+        if (error) throw error;
+        return data as any;
+      },
+    });
+  }, [queryClient]);
   const [category, setCategory] = useState<string | null>(null);
   const [subcategory, setSubcategory] = useState<string | null>(null);
   const [filterSource, setFilterSource] = useState<string | null>(null);
