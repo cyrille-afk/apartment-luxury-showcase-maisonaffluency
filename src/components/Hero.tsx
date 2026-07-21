@@ -98,17 +98,17 @@ const Hero = () => {
               </button>
 
               {isPWA && (
-                <div className="mt-[18svh] flex flex-col items-center gap-2 hero-fade-in-delayed-5">
-                  <span className="font-body text-[10px] tracking-[0.18em] text-white [text-shadow:_0_1px_3px_rgba(0,0,0,0.7)]">
+                <div className="mt-[18svh] flex flex-col items-center gap-2 hero-fade-in-delayed-5 rounded-2xl bg-black/35 px-5 py-4 shadow-[0_8px_30px_rgba(0,0,0,0.35)] backdrop-blur-sm">
+                  <span className="font-body text-[10px] font-semibold tracking-[0.18em] text-white [text-shadow:_0_2px_4px_rgba(0,0,0,0.85)]">
                     Singapore Gallery Preview
                   </span>
-                  <span className="font-body text-[10px] tracking-[0.18em] text-white [text-shadow:_0_1px_3px_rgba(0,0,0,0.7)]">
+                  <span className="font-body text-[10px] font-semibold tracking-[0.18em] text-white [text-shadow:_0_2px_4px_rgba(0,0,0,0.85)]">
                     Exclusively for the Trade
                   </span>
                   <button
                     type="button"
                     onClick={openTour}
-                    className="mt-4 inline-flex items-center font-body text-xs tracking-[0.15em] text-white underline underline-offset-4 decoration-white hover:decoration-white transition-colors [text-shadow:_0_1px_3px_rgba(0,0,0,0.7)]"
+                    className="mt-4 inline-flex items-center font-body text-xs font-semibold tracking-[0.15em] text-white underline underline-offset-4 decoration-white hover:decoration-white transition-colors [text-shadow:_0_2px_4px_rgba(0,0,0,0.85)]"
                   >
                     Book Private Appointment
                   </button>
