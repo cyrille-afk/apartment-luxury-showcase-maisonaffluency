@@ -305,7 +305,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
           </div>
           {/* Desktop close button */}
           <button
-            onClick={onClose}
+            onClick={requestClose}
             className="hidden md:flex absolute top-3 right-3 z-20 p-2 rounded-full bg-foreground/10 text-foreground hover:bg-foreground/20 transition-all"
             aria-label="Close"
           >
