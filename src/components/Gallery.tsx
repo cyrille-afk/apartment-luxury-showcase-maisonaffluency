@@ -442,7 +442,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
     queryFn: async () => {
       const { data } = await supabase
         .from("designer_curator_picks_public" as any)
-        .select("id,title,subtitle,image_url,hover_image_url,materials,materials_description,dimensions,lead_time,origin,description,category,subcategory,pdf_url,pdf_urls,designer_id,size_variants,variant_placeholder,base_axis_label,top_axis_label,gallery_images,variant_image_map")
+        .select("id,title,subtitle,image_url,hover_image_url,materials,dimensions,lead_time,origin,category,subcategory,pdf_url,designer_id,variant_placeholder,base_axis_label,top_axis_label")
         .not("image_url", "is", null);
       return (data as any[]) || [];
     },
