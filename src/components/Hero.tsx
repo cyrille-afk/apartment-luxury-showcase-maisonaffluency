@@ -44,6 +44,8 @@ const heroPrimaryCtaClass =
 
 const Hero = () => {
   const navigate = useNavigate();
+  const [tourOpen, setTourOpen] = useState(false);
+
   // The pre-React static hero <picture> in index.html stays in place permanently
   // as the LCP candidate. The static copy overlay (#static-hero-copy) however
   // duplicates this section's <h1>, so we hide it as soon as React mounts.
@@ -58,6 +60,12 @@ const Hero = () => {
     const pic = document.getElementById("static-hero");
     if (pic) pic.style.setProperty("display", "block", "important");
   }, []);
+
+  const openTour = () => {
+    trackCTA.bookAppointment("Hero Secondary CTA");
+    setTourOpen(true);
+  };
+
   return (
     <section className="relative h-screen w-full overflow-hidden">
       {/* Hero image is rendered by the static <picture id="static-hero"> in
@@ -66,10 +74,6 @@ const Hero = () => {
           here — a second <picture> creates a duplicate LCP candidate and
           extra decode work that pushes LCP later on throttled CPUs. */}
       <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-black/10 via-transparent to-black/20" />
-
-
-
-
 
       {/* Text overlay — CSS-only animations, no framer-motion needed */}
       <div className="ma-home-hero-copy relative z-10 h-full px-6 pb-32 pt-[var(--home-hero-mobile-pad-top)] md:px-32 md:pb-20 md:pt-[16rem] lg:px-48 flex-col border rounded-none opacity-100 shadow-none flex items-start justify-start md:justify-start md:items-start">
@@ -83,7 +87,7 @@ const Hero = () => {
             <p className="text-base leading-relaxed text-white text-left font-serif md:text-xl lg:text-2xl font-medium hero-fade-in-delayed-3">
               A curated collection of masterworks<br />reeditions and contemporary design<br />for global architectural projects.
             </p>
-            <div className="mt-14 md:mt-20 w-full flex justify-end">
+            <div className="mt-14 md:mt-20 w-full flex flex-col items-end gap-4">
               <button
                 type="button"
                 onClick={() => { trackEvent("click_meet_designers", { event_category: "CTA", event_label: "HeroCTA" }); navigate("/designers"); }}
@@ -91,11 +95,25 @@ const Hero = () => {
               >
                 EXPLORE THE COLLECTION
               </button>
+
+              <div className="flex flex-col items-end gap-1.5 hero-fade-in-delayed-5">
+                <span className="font-body text-[10px] md:text-xs uppercase tracking-[0.18em] text-white/80 [text-shadow:_0_1px_2px_rgba(0,0,0,0.4)]">
+                  Singapore Gallery | By Appointment for Trade Professionals
+                </span>
+                <button
+                  type="button"
+                  onClick={openTour}
+                  className="inline-flex items-center font-body text-xs md:text-sm uppercase tracking-[0.15em] text-white underline underline-offset-4 decoration-white/60 hover:decoration-white transition-colors [text-shadow:_0_1px_2px_rgba(0,0,0,0.4)]"
+                >
+                  Book Private Appointment
+                </button>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
+      <PrivateTourDialog open={tourOpen} onOpenChange={setTourOpen} />
     </section>
   );
 };
