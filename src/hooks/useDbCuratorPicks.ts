@@ -17,7 +17,7 @@ export interface DbProductItem {
  */
 export function useDbCuratorPicks() {
   return useQuery({
-    queryKey: ["db-curator-picks-for-grid"],
+    queryKey: queryKeys.curatorPicksGrid(),
     queryFn: async (): Promise<DbProductItem[]> => {
       // Fetch published designers (incl. founder to resolve parent hierarchy)
       const { data: designers } = await supabase
