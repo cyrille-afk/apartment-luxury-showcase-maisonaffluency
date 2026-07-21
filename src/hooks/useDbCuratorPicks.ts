@@ -31,7 +31,9 @@ export function useDbCuratorPicks() {
       const { data: picksRaw } = await applyCuratorPickOrder(
         supabase
           .from("designer_curator_picks_public" as any)
-          .select("id, title, subtitle, image_url, hover_image_url, materials, dimensions, description, category, subcategory, tags, photo_credit, edition, pdf_url, pdf_filename, pdf_urls, designer_id, sort_order, created_at, size_variants, variant_placeholder, base_axis_label, top_axis_label, gallery_images, variant_image_map")
+          // Slim listing fetch: no description / gallery_images / size_variants /
+          // variant_* — those are lazily fetched on card open (lightbox / product page).
+          .select("id, title, subtitle, image_url, hover_image_url, materials, dimensions, category, subcategory, tags, photo_credit, edition, pdf_url, pdf_filename, pdf_urls, designer_id, sort_order, created_at")
       );
 
       // Defensive client-side sort using identical rules (in case the view drops ORDER BY through joins).
