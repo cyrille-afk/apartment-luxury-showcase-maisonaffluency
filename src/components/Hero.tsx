@@ -87,7 +87,7 @@ const Hero = () => {
             <p className="text-base leading-relaxed text-white text-left font-serif md:text-xl lg:text-2xl font-medium hero-fade-in-delayed-3">
               A curated collection of masterworks<br />reeditions and contemporary design<br />for global architectural projects.
             </p>
-            <div className="mt-14 md:mt-20 w-full flex flex-col items-end gap-4">
+            <div className="mt-14 md:mt-20 w-full flex flex-col items-end gap-6">
               <button
                 type="button"
                 onClick={() => { trackEvent("click_meet_designers", { event_category: "CTA", event_label: "HeroCTA" }); navigate("/designers"); }}
@@ -96,9 +96,12 @@ const Hero = () => {
                 EXPLORE THE COLLECTION
               </button>
 
-              <div className="flex flex-col items-end gap-1.5 hero-fade-in-delayed-5">
+              <div className="flex flex-col items-end gap-2 hero-fade-in-delayed-5">
                 <span className="font-body text-[10px] md:text-xs uppercase tracking-[0.18em] text-white/80 [text-shadow:_0_1px_2px_rgba(0,0,0,0.4)]">
-                  Singapore Gallery | By Appointment for Trade Professionals
+                  Singapore Gallery Preview
+                </span>
+                <span className="font-body text-[10px] md:text-xs uppercase tracking-[0.18em] text-white/80 [text-shadow:_0_1px_2px_rgba(0,0,0,0.4)]">
+                  Exclusively for the Trade
                 </span>
                 <button
                   type="button"
