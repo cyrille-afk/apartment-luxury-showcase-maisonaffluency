@@ -98,7 +98,7 @@ const Hero = () => {
               </button>
 
               {isPWA && (
-                <div className="mt-[18svh] mb-3 flex flex-col items-center gap-2 hero-fade-in-delayed-5 rounded-2xl bg-black/35 px-4 py-3 shadow-[0_8px_30px_rgba(0,0,0,0.35)] backdrop-blur-sm">
+                <div className="mt-[18svh] mb-3 flex flex-col items-center gap-1 hero-fade-in-delayed-5 rounded-2xl bg-black/35 px-3 py-2 shadow-[0_8px_30px_rgba(0,0,0,0.35)] backdrop-blur-sm">
                   <span className="font-body text-[10px] font-semibold tracking-[0.18em] text-white [text-shadow:_0_2px_4px_rgba(0,0,0,0.85)]">
                     Singapore Gallery Preview
                   </span>
@@ -108,7 +108,7 @@ const Hero = () => {
                   <button
                     type="button"
                     onClick={openTour}
-                    className="mt-2 inline-flex min-h-12 items-center justify-center font-body text-xs font-semibold tracking-[0.15em] text-white underline underline-offset-4 decoration-white hover:decoration-white transition-colors [text-shadow:_0_2px_4px_rgba(0,0,0,0.85)]"
+                    className="mt-1 inline-flex min-h-12 items-center justify-center font-body text-xs font-semibold tracking-[0.15em] text-white underline underline-offset-4 decoration-white hover:decoration-white transition-colors [text-shadow:_0_2px_4px_rgba(0,0,0,0.85)]"
                   >
                     Book Private Appointment
                   </button>
