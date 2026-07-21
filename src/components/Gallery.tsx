@@ -434,60 +434,63 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
 
   // ── Hotspot → PublicProductLightbox matching ──
   const [hotspotLightboxProduct, setHotspotLightboxProduct] = useState<PublicLightboxItem | null>(null);
-  const [dbCuratorPicks, setDbCuratorPicks] = useState<PublicLightboxItem[]>([]);
 
-  useEffect(() => {
-    const fetchDbCuratorPicks = async () => {
-      const [{ data: picks }, { data: designers }] = await Promise.all([
-        supabase
-          .from("designer_curator_picks_public")
-          .select("id,title,subtitle,image_url,hover_image_url,materials,materials_description,dimensions,lead_time,origin,description,category,subcategory,pdf_url,pdf_urls,designer_id,size_variants,variant_placeholder,base_axis_label,top_axis_label,gallery_images,variant_image_map")
-          .not("image_url", "is", null),
-        supabase
-          .from("designers")
-          .select("id, name, slug")
-      ]);
+  // Shared cache: reused across `/`, `/designers`, and category pages via the
+  // query-key factory so navigating back to Home does NOT refetch.
+  const { data: picksRaw } = useQuery({
+    queryKey: queryKeys.curatorPicksLightbox(),
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("designer_curator_picks_public" as any)
+        .select("id,title,subtitle,image_url,hover_image_url,materials,materials_description,dimensions,lead_time,origin,description,category,subcategory,pdf_url,pdf_urls,designer_id,size_variants,variant_placeholder,base_axis_label,top_axis_label,gallery_images,variant_image_map")
+        .not("image_url", "is", null);
+      return (data as any[]) || [];
+    },
+  });
 
-      if (!picks) return;
+  const { data: designersBasic } = useQuery({
+    queryKey: queryKeys.designersBasic(),
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("designers")
+        .select("id, name, slug");
+      return (data as any[]) || [];
+    },
+  });
 
-      const designerMap = new Map((designers || []).map((d: any) => [d.id, { name: d.name, slug: d.slug }]));
-
-      const mapped: PublicLightboxItem[] = (picks as any[]).map((p) => {
-        const designerInfo = designerMap.get(p.designer_id);
-        const brandName = designerInfo?.name || "Unknown";
-
-        return {
-          id: p.id,
-          title: p.title,
-          subtitle: p.subtitle || null,
-          image_url: p.image_url,
-          hover_image_url: p.hover_image_url || null,
-          brand_name: brandName,
-          materials: p.materials || null,
-          materials_description: p.materials_description || null,
-          dimensions: p.dimensions || null,
-          lead_time: p.lead_time || null,
-          origin: p.origin || null,
-          description: resolveCuratorPickDescription({ description: p.description }),
-          category: p.category || null,
-          subcategory: p.subcategory || null,
-          pdf_url: p.pdf_url || null,
-          pdf_urls: (p.pdf_urls as any) || null,
-          designer_slug: designerInfo?.slug || null,
-          size_variants: (p.size_variants as any) || null,
-          variant_placeholder: p.variant_placeholder || null,
-          base_axis_label: p.base_axis_label || null,
-          top_axis_label: p.top_axis_label || null,
-          gallery_images: (p.gallery_images as any) || null,
-          variant_image_map: (p.variant_image_map as any) || null,
-        };
-      });
-
-      setDbCuratorPicks(mapped);
-    };
-
-    fetchDbCuratorPicks();
-  }, []);
+  const dbCuratorPicks = useMemo<PublicLightboxItem[]>(() => {
+    if (!picksRaw || !designersBasic) return [];
+    const designerMap = new Map(designersBasic.map((d: any) => [d.id, { name: d.name, slug: d.slug }]));
+    return picksRaw.map((p: any) => {
+      const designerInfo = designerMap.get(p.designer_id);
+      const brandName = designerInfo?.name || "Unknown";
+      return {
+        id: p.id,
+        title: p.title,
+        subtitle: p.subtitle || null,
+        image_url: p.image_url,
+        hover_image_url: p.hover_image_url || null,
+        brand_name: brandName,
+        materials: p.materials || null,
+        materials_description: p.materials_description || null,
+        dimensions: p.dimensions || null,
+        lead_time: p.lead_time || null,
+        origin: p.origin || null,
+        description: resolveCuratorPickDescription({ description: p.description }),
+        category: p.category || null,
+        subcategory: p.subcategory || null,
+        pdf_url: p.pdf_url || null,
+        pdf_urls: (p.pdf_urls as any) || null,
+        designer_slug: designerInfo?.slug || null,
+        size_variants: (p.size_variants as any) || null,
+        variant_placeholder: p.variant_placeholder || null,
+        base_axis_label: p.base_axis_label || null,
+        top_axis_label: p.top_axis_label || null,
+        gallery_images: (p.gallery_images as any) || null,
+        variant_image_map: (p.variant_image_map as any) || null,
+      };
+    });
+  }, [picksRaw, designersBasic]);
 
   const allCuratorPicks = useMemo((): PublicLightboxItem[] => {
     const staticPicks = getAllTradeProducts()
