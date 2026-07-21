@@ -965,7 +965,7 @@ function LetterGroup({
         </div>
       )}
 
-      </AnimatePresence>
+
     </div>
   );
 }
