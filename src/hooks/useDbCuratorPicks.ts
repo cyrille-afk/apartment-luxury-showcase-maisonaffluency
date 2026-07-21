@@ -62,18 +62,13 @@ export function useDbCuratorPicks() {
           tags: row.tags || undefined,
           materials: row.materials || undefined,
           dimensions: row.dimensions || undefined,
-          description: row.description || undefined,
           photoCredit: row.photo_credit || undefined,
           edition: row.edition || undefined,
           pdfUrl: row.pdf_url || undefined,
           pdfFilename: row.pdf_filename || undefined,
           pdfUrls: row.pdf_urls || undefined,
-          size_variants: row.size_variants || undefined,
-          variant_placeholder: row.variant_placeholder || undefined,
-          base_axis_label: row.base_axis_label || undefined,
-          top_axis_label: row.top_axis_label || undefined,
-          gallery_images: row.gallery_images || undefined,
-          variant_image_map: row.variant_image_map || undefined,
+          // description / gallery_images / size_variants / variant_* are intentionally
+          // omitted from the listing payload — fetched via useCuratorPickDetail on open.
         };
 
         if (!pick.image) continue;
