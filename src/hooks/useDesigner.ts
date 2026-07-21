@@ -100,7 +100,7 @@ export function useDesigner(
   { includeTradeOnly = false }: { includeTradeOnly?: boolean } = {},
 ) {
   return useQuery({
-    queryKey: ["designer", slug, includeTradeOnly],
+    queryKey: queryKeys.designer(slug, includeTradeOnly),
     queryFn: async () => {
       if (!slug) return null;
       if (HIDDEN_DESIGNER_SLUGS.has(slug)) return null;
@@ -126,7 +126,7 @@ export function useDesignerByName(
   { includeTradeOnly = false }: { includeTradeOnly?: boolean } = {},
 ) {
   return useQuery({
-    queryKey: ["designer-by-name", name, includeTradeOnly],
+    queryKey: queryKeys.designerByName(name, includeTradeOnly),
     queryFn: async () => {
       if (!name) return null;
       if (name.trim().toLowerCase() === "gabriel hendifar") return null;
@@ -149,7 +149,7 @@ export function useDesignerByName(
 /** Fetch curator picks for a designer */
 export function useDesignerPicks(designerId: string | undefined, { publicOnly = false }: { publicOnly?: boolean } = {}) {
   return useQuery({
-    queryKey: ["designer-picks", designerId, publicOnly],
+    queryKey: queryKeys.designerPicks(designerId, publicOnly),
     queryFn: async () => {
       if (!designerId) return [];
       if (publicOnly) {
@@ -197,7 +197,7 @@ export interface AttributedCuratorPick extends DesignerCuratorPick {
 /** Fetch curator picks for a parent brand and its sub-designers, with attribution */
 export function useGroupedDesignerPicks(designer: Designer | null | undefined, { publicOnly = false }: { publicOnly?: boolean } = {}) {
   return useQuery({
-    queryKey: ["designer-grouped-picks", designer?.id, designer?.name, publicOnly],
+    queryKey: queryKeys.designerGroupedPicks(designer?.id, designer?.name, publicOnly),
     queryFn: async () => {
       if (!designer) return [];
       const isParentBrand = !!designer.founder && [designer.name, designer.display_name].includes(designer.founder);
@@ -273,7 +273,7 @@ export function useAllDesigners(
   { includeTradeOnly = false }: { includeTradeOnly?: boolean } = {},
 ) {
   return useQuery({
-    queryKey: ["designers-all", includeTradeOnly],
+    queryKey: queryKeys.designersAll(includeTradeOnly),
     queryFn: async () => {
       let q = supabase.from("designers").select("*").order("name", { ascending: true });
       if (!includeTradeOnly) q = q.eq("trade_only", false);
@@ -291,7 +291,7 @@ export function useAllDesigners(
 /** Fetch designers marked as "New In", ordered by new_in_order */
 export function useNewInDesigners() {
   return useQuery({
-    queryKey: ["designers-new-in"],
+    queryKey: queryKeys.designersNewIn(),
     queryFn: async () => {
       const { data, error } = await supabase
         .from("designers")
@@ -314,7 +314,7 @@ export function useRelatedDesigners(
   count = 3
 ) {
   return useQuery({
-    queryKey: ["designers-related", currentSlug, source],
+    queryKey: queryKeys.designersRelated(currentSlug, source),
     queryFn: async () => {
       if (!currentSlug) return [];
       const { data, error } = await supabase
