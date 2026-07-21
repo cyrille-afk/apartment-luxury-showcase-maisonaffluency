@@ -795,6 +795,7 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
           </div>
         </motion.div>
       </motion.div>
+      )}
     </AnimatePresence>,
     document.body
   );
