@@ -21,6 +21,7 @@ import { useState, useMemo, useEffect } from "react";
 import { useTradeProducts } from "@/hooks/useTradeProducts";
 import { useIsMobile } from "@/hooks/use-mobile";
 import SpecGlyph from "@/components/product/SpecGlyph";
+import { FadeInImage } from "@/components/ui/FadeInImage";
 
 const specIcon = (symbol: string, className = "") => (
   <SpecGlyph symbol={symbol} className={className} />
