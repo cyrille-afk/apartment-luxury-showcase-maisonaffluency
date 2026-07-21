@@ -408,20 +408,16 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
   const pinned = isPinned(product.title, product.id);
 
   const content = (
-    <AnimatePresence>
+    <AnimatePresence onExitComplete={onClose}>
+      {visible && (
       <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.25 }}
+        key="pp-lightbox-overlay"
+        {...overlayMotion}
         className="fixed inset-0 z-[10000] bg-black/60 backdrop-blur-sm flex items-stretch md:items-center justify-center md:p-8"
-        onClick={onClose}
+        onClick={requestClose}
       >
         <motion.div
-          initial={{ opacity: 0, y: 40, scale: 0.98 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: 40, scale: 0.98 }}
-          transition={{ duration: 0.3, type: "spring", stiffness: 300, damping: 30 }}
+          {...panelMotion}
           className="relative max-w-4xl w-full h-dvh max-h-dvh md:h-auto md:max-h-[90vh] md:flex-row bg-background/85 backdrop-blur-xl md:rounded-xl rounded-none shadow-2xl overflow-hidden flex flex-col min-h-0"
           onClick={(e) => e.stopPropagation()}
         >
@@ -438,7 +434,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
             <div className="w-10" />
             <div className="w-10 h-1 rounded-full bg-muted-foreground/30" />
             <button
-              onClick={onClose}
+              onClick={requestClose}
               className="p-2.5 rounded-full bg-foreground/15 text-foreground hover:bg-foreground/25 active:bg-foreground/30 transition-all"
               aria-label="Close"
             >
@@ -448,7 +444,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
 
           {/* Desktop close */}
           <button
-            onClick={onClose}
+            onClick={requestClose}
             className="hidden md:flex absolute z-20 p-2 rounded-full bg-foreground/10 text-foreground hover:bg-foreground/20 transition-all"
             style={{
               top: "max(0.75rem, env(safe-area-inset-top))",
