@@ -219,7 +219,7 @@ All colors MUST be HSL.
 /* Mobile LCP optimization: paint hero text immediately */
 @media (max-width: 767px) {
   :root {
-    --home-hero-mobile-pad-top: 11rem;
+    --home-hero-mobile-pad-top: 18rem;
   }
 
   .hero-fade-in,
