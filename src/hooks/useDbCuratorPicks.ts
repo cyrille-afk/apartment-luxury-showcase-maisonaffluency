@@ -54,6 +54,7 @@ export function useDbCuratorPicks() {
         if (!designer) continue;
 
         const pick: CuratorPick = {
+          id: row.id,
           image: row.image_url || undefined,
           hoverImage: row.hover_image_url || undefined,
           title: row.title || "",
