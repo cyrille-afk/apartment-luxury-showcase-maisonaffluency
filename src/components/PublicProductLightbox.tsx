@@ -26,6 +26,7 @@ import { rememberProductBackRef } from "@/lib/designerBackRef";
 import { computeVariantAxes } from "@/lib/parseSizeVariants";
 import { supabase } from "@/integrations/supabase/client";
 import SpecGlyph from "@/components/product/SpecGlyph";
+import { FadeInImage } from "@/components/ui/FadeInImage";
 
 /** Mirrors the slugifier used by FeaturedDesigners + PublicProductPage. */
 const slugifyProduct = (s: string) =>
@@ -852,14 +853,13 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                       onClick={() => onSelectRelated?.(rp)}
                       className="shrink-0 w-20 group snap-start"
                     >
-                      <div className="aspect-square rounded-md overflow-hidden bg-muted/30 border border-border group-hover:border-foreground/30 transition-colors">
-                        <img
-                          src={rp.image_url}
-                          alt={rp.title}
-                          className="w-full h-full object-cover"
-                          loading="lazy"
-                        />
-                      </div>
+                      <FadeInImage
+                        wrapperClassName="aspect-square rounded-md bg-muted/30 border border-border group-hover:border-foreground/30 transition-colors"
+                        src={rp.image_url}
+                        alt={rp.title}
+                        className="object-cover"
+                        loading="lazy"
+                      />
                       <p className="font-body text-[9px] text-muted-foreground mt-1 truncate group-hover:text-foreground transition-colors">
                         {rp.title}
                       </p>

@@ -21,6 +21,7 @@ import { useState, useMemo, useEffect } from "react";
 import { useTradeProducts } from "@/hooks/useTradeProducts";
 import { useIsMobile } from "@/hooks/use-mobile";
 import SpecGlyph from "@/components/product/SpecGlyph";
+import { FadeInImage } from "@/components/ui/FadeInImage";
 
 const specIcon = (symbol: string, className = "") => (
   <SpecGlyph symbol={symbol} className={className} />
@@ -775,14 +776,13 @@ const TradeProductLightbox = ({ product, onClose, onAddToQuote, isAdding, isAdde
                         onClick={() => onSelectRelated?.(rp)}
                         className="shrink-0 w-20 group"
                       >
-                        <div className="aspect-square rounded-md overflow-hidden bg-muted/30 border border-border group-hover:border-foreground/30 transition-colors">
-                          <img
-                            src={rp.image_url!}
-                            alt={rp.product_name}
-                            className="w-full h-full object-cover"
-                            loading="lazy"
-                          />
-                        </div>
+                        <FadeInImage
+                          wrapperClassName="aspect-square rounded-md bg-muted/30 border border-border group-hover:border-foreground/30 transition-colors"
+                          src={rp.image_url!}
+                          alt={rp.product_name}
+                          className="object-cover"
+                          loading="lazy"
+                        />
                         <p className="font-body text-[9px] text-muted-foreground mt-1 truncate group-hover:text-foreground transition-colors">
                           {rp.product_name}
                         </p>
