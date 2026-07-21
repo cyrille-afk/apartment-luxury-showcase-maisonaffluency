@@ -1,7 +1,8 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { scrollToSection } from "@/lib/scrollToSection";
-import { trackEvent } from "@/lib/analytics";
+import { trackEvent, trackCTA } from "@/lib/analytics";
+import PrivateTourDialog from "@/components/PrivateTourDialog";
 
 const HERO_BASE = "https://res.cloudinary.com/dif1oamtj/image/upload";
 const HERO_ID = "v1781920000/AffluencySG_194-22.jpg_macpwj";
