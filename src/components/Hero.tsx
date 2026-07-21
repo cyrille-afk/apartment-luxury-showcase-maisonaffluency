@@ -45,20 +45,21 @@ const heroPrimaryCtaClass =
 const Hero = () => {
   const navigate = useNavigate();
   const [tourOpen, setTourOpen] = useState(false);
+  const [isPWA, setIsPWA] = useState(false);
 
-  // The pre-React static hero <picture> in index.html stays in place permanently
-  // as the LCP candidate. The static copy overlay (#static-hero-copy) however
-  // duplicates this section's <h1>, so we hide it as soon as React mounts.
   useEffect(() => {
-    // Hide the static copy overlay (React's <h1> below replaces it).
     const copy = document.getElementById("static-hero-copy");
     if (copy) copy.style.display = "none";
-    // Force the static hero <picture> visible. The inline script in index.html
-    // appends a stylesheet that hides #static-hero on non-home first-loads to
-    // prevent a flash on subpages; after SPA-navigation back to /, that
-    // stylesheet persists and would otherwise leave the hero image blank.
     const pic = document.getElementById("static-hero");
     if (pic) pic.style.setProperty("display", "block", "important");
+
+    // Detect PWA standalone mode (installed app)
+    const mql = window.matchMedia("(display-mode: standalone)");
+    const check = () =>
+      setIsPWA(mql.matches || (window.navigator as any).standalone === true);
+    check();
+    mql.addEventListener?.("change", check);
+    return () => mql.removeEventListener?.("change", check);
   }, []);
 
   const openTour = () => {
@@ -96,21 +97,23 @@ const Hero = () => {
                 EXPLORE THE COLLECTION
               </button>
 
-              <div className="flex flex-col items-end gap-2 hero-fade-in-delayed-5">
-                <span className="font-body text-[10px] md:text-xs uppercase tracking-[0.18em] text-white/80 [text-shadow:_0_1px_2px_rgba(0,0,0,0.4)]">
-                  Singapore Gallery Preview
-                </span>
-                <span className="font-body text-[10px] md:text-xs uppercase tracking-[0.18em] text-white/80 [text-shadow:_0_1px_2px_rgba(0,0,0,0.4)]">
-                  Exclusively for the Trade
-                </span>
-                <button
-                  type="button"
-                  onClick={openTour}
-                  className="inline-flex items-center font-body text-xs md:text-sm uppercase tracking-[0.15em] text-white underline underline-offset-4 decoration-white/60 hover:decoration-white transition-colors [text-shadow:_0_1px_2px_rgba(0,0,0,0.4)]"
-                >
-                  Book Private Appointment
-                </button>
-              </div>
+              {isPWA && (
+                <div className="flex flex-col items-end gap-2 hero-fade-in-delayed-5">
+                  <span className="font-body text-[10px] uppercase tracking-[0.18em] text-white/80 [text-shadow:_0_1px_2px_rgba(0,0,0,0.4)]">
+                    Singapore Gallery Preview
+                  </span>
+                  <span className="font-body text-[10px] uppercase tracking-[0.18em] text-white/80 [text-shadow:_0_1px_2px_rgba(0,0,0,0.4)]">
+                    Exclusively for the Trade
+                  </span>
+                  <button
+                    type="button"
+                    onClick={openTour}
+                    className="inline-flex items-center font-body text-xs uppercase tracking-[0.15em] text-white underline underline-offset-4 decoration-white/60 hover:decoration-white transition-colors [text-shadow:_0_1px_2px_rgba(0,0,0,0.4)]"
+                  >
+                    Book Private Appointment
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>
