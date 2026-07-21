@@ -881,6 +881,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
           </div> {/* end scrollable mobile body */}
         </motion.div>
       </motion.div>
+      )}
     </AnimatePresence>
   );
 
