@@ -218,6 +218,10 @@ All colors MUST be HSL.
 
 /* Mobile LCP optimization: paint hero text immediately */
 @media (max-width: 767px) {
+  :root {
+    --home-hero-mobile-pad-top: 11rem;
+  }
+
   .hero-fade-in,
   .hero-fade-in-delayed-1,
   .hero-fade-in-delayed-2,
@@ -226,6 +230,12 @@ All colors MUST be HSL.
     animation: none !important;
     opacity: 1 !important;
     transform: none !important;
+  }
+}
+
+@media (min-width: 768px) {
+  :root {
+    --home-hero-mobile-pad-top: 24svh;
   }
 }
 

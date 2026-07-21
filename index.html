@@ -363,7 +363,8 @@
     <style>
       .static-hero-mobile { display: none; }
       @media (max-width: 767px) {
-        #static-hero-copy { padding: 24svh 1.5rem 8rem !important; }
+        :root { --home-hero-mobile-pad-top: 11rem; }
+        #static-hero-copy { padding: var(--home-hero-mobile-pad-top) 1.5rem 8rem !important; }
         #static-hero-copy > div > div { font-size: 1.875rem !important; line-height: 1.2 !important; }
         .static-hero-desktop { display: none; }
         .static-hero-mobile { display: inline; }
