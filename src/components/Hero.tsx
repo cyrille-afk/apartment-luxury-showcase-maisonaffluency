@@ -98,7 +98,8 @@ const Hero = () => {
                   EXPLORE THE COLLECTION
                 </button>
 
-                <div className="mb-3 flex flex-col items-center gap-2 hero-fade-in-delayed-5 rounded-2xl bg-black/35 px-4 py-3 shadow-[0_8px_30px_rgba(0,0,0,0.22)] backdrop-blur-sm">
+                {/* Mobile/PWA: stacked dark block */}
+                <div className="mb-3 flex flex-col items-center gap-2 hero-fade-in-delayed-5 rounded-2xl bg-black/35 px-4 py-3 shadow-[0_8px_30px_rgba(0,0,0,0.22)] backdrop-blur-sm md:hidden">
                   <div className="flex flex-col items-center gap-0.5">
                     <span className="text-center font-body text-[10px] font-semibold tracking-[0.18em] text-white [text-shadow:_0_2px_4px_rgba(0,0,0,0.85)]">
                       Singapore Gallery Preview
@@ -111,6 +112,29 @@ const Hero = () => {
                     type="button"
                     onClick={openTour}
                     className="inline-flex min-h-12 items-center justify-center font-body text-xs font-semibold tracking-[0.15em] text-white underline underline-offset-4 decoration-white hover:decoration-white transition-colors [text-shadow:_0_2px_4px_rgba(0,0,0,0.85)]"
+                  >
+                    Book Private Appointment
+                  </button>
+                </div>
+
+                {/* Desktop: inline editorial links */}
+                <div className="hidden md:flex items-center gap-4 hero-fade-in-delayed-5">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      trackEvent("click_singapore_gallery_preview", { event_category: "CTA", event_label: "HeroSecondary" });
+                      const el = document.getElementById("apartment-tour");
+                      if (el) el.scrollIntoView({ behavior: "smooth" });
+                    }}
+                    className="font-body text-xs font-medium tracking-[0.15em] text-white underline-offset-4 decoration-white/70 hover:underline transition-all [text-shadow:_0_2px_4px_rgba(0,0,0,0.85)]"
+                  >
+                    Singapore Gallery Preview
+                  </button>
+                  <span className="text-white/60 [text-shadow:_0_2px_4px_rgba(0,0,0,0.85)]">|</span>
+                  <button
+                    type="button"
+                    onClick={openTour}
+                    className="font-body text-xs font-medium tracking-[0.15em] text-white underline-offset-4 decoration-white/70 hover:underline transition-all [text-shadow:_0_2px_4px_rgba(0,0,0,0.85)]"
                   >
                     Book Private Appointment
                   </button>
