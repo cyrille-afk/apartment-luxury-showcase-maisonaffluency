@@ -19,6 +19,7 @@ export function SyncToMobileButton() {
   const [modalOpen, setModalOpen] = useState(false);
   const [state, setState] = useState<"idle" | "loading" | "ready" | "error">("idle");
   const [dataUrl, setDataUrl] = useState<string | null>(null);
+  const [errMsg, setErrMsg] = useState<string | null>(null);
   const lastPathRef = useRef<string | null>(null);
 
   const redirectTo = useMemo(() => {
@@ -28,12 +29,15 @@ export function SyncToMobileButton() {
 
   const mint = async () => {
     setState("loading");
+    setErrMsg(null);
     try {
       const { data, error } = await supabase.functions.invoke("trade-mobile-magic-link", {
         body: { redirectTo },
       });
       if (error) throw error;
-      const link = (data as any)?.url as string;
+      const link = (data as any)?.url as string | undefined;
+      const errFromBody = (data as any)?.error as string | undefined;
+      if (!link) throw new Error(errFromBody || "No link returned");
       const png = await QRCode.toDataURL(link, {
         margin: 1,
         width: 220,
@@ -42,7 +46,9 @@ export function SyncToMobileButton() {
       });
       setDataUrl(png);
       setState("ready");
-    } catch {
+    } catch (e) {
+      console.error("[sync-to-phone] mint failed", e);
+      setErrMsg((e as Error).message || "Failed");
       setState("error");
     }
   };
