@@ -29,6 +29,19 @@ function safeRedirect(input: unknown): string | null {
   return url.toString();
 }
 
+/**
+ * Wrap the caller-requested destination in a clean deep-link handoff route
+ * (`/trade/launch?next=<path>`). That page waits for the Supabase session to
+ * hydrate, invites installable-PWA install, then forwards to the real path.
+ */
+function buildHandoffUrl(target: string): string {
+  const url = new URL(target);
+  const nextPath = `${url.pathname}${url.search}${url.hash}` || "/trade";
+  const launch = new URL("/trade/launch", url.origin);
+  launch.searchParams.set("next", nextPath);
+  return launch.toString();
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
