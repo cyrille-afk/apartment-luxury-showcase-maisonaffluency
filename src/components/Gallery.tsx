@@ -1212,6 +1212,9 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                         </div>
                       );
                     })()}
+                    {originalSectionIndex === galleryExperiences.length - 1 && (
+                      <GalleryDetailsFloatingNav />
+                    )}
                   </div>
                 );
               })()}
@@ -1320,8 +1323,6 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
           </motion.div>
         </div>
       </section>
-      <GalleryDetailsFloatingNav targetId="gallery-section-6" />
-
       {/* Lightbox - using Radix Dialog (react-remove-scroll blocks browser gestures, enabling PinchZoomImage) */}
       <Dialog
         open={lightboxOpen}
