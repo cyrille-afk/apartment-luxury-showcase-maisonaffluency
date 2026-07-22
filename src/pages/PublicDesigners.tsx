@@ -138,13 +138,29 @@ function ScrollLockedDesigners({
     const html = document.documentElement;
     const body = document.body;
     const prevHtml = html.style.overflow;
+    const prevHtmlOverscroll = (html.style as any).overscrollBehavior;
     const prevBody = body.style.overflow;
     const prevOverscroll = (body.style as any).overscrollBehavior;
     const prevBodyBg = body.style.backgroundColor;
-    // Only lock body; leaving html scrollable avoids an iOS Chrome quirk that
-    // freezes nested overflow-y-auto scrollers when both html+body are hidden.
+    const prevPosition = body.style.position;
+    const prevTop = body.style.top;
+    const prevLeft = body.style.left;
+    const prevRight = body.style.right;
+    const prevWidth = body.style.width;
+    const prevHeight = body.style.height;
+    // iOS ignores body overflow alone during toolbar/rubber-band gestures. Pin
+    // the body itself while /designers is in the locked mobile/PWA landing so
+    // the hero cannot visually lift under the fixed header.
+    html.style.overflow = "hidden";
+    (html.style as any).overscrollBehavior = "none";
     body.style.overflow = "hidden";
     (body.style as any).overscrollBehavior = "none";
+    body.style.position = "fixed";
+    body.style.top = "0";
+    body.style.left = "0";
+    body.style.right = "0";
+    body.style.width = "100%";
+    body.style.height = "100dvh";
     // Match body background to the hero so the iOS toolbar blur shows the
     // dark image instead of the default cream page background.
     body.style.backgroundColor = "#0a0a0a";
@@ -179,10 +195,18 @@ function ScrollLockedDesigners({
     window.addEventListener("keydown", stopReset, { once: true });
     return () => {
       html.style.overflow = prevHtml;
+      (html.style as any).overscrollBehavior = prevHtmlOverscroll;
       body.style.overflow = prevBody;
       (body.style as any).overscrollBehavior = prevOverscroll;
       body.style.backgroundColor = prevBodyBg;
+      body.style.position = prevPosition;
+      body.style.top = prevTop;
+      body.style.left = prevLeft;
+      body.style.right = prevRight;
+      body.style.width = prevWidth;
+      body.style.height = prevHeight;
       try { (window.history as any).scrollRestoration = prevRestoration ?? "auto"; } catch { /* ignore */ }
+      window.scrollTo({ top: 0, left: 0, behavior: "instant" as ScrollBehavior });
       cancelAnimationFrame(raf);
       timers.forEach((timer) => window.clearTimeout(timer));
       window.removeEventListener("pageshow", forceTop);
