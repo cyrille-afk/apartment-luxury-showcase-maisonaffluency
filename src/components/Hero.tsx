@@ -40,7 +40,7 @@ const scrollToMeetDesigners = () => {
 };
 
 const heroPrimaryCtaClass =
-  "inline-flex min-h-11 items-center justify-center rounded-full border border-white/0 bg-white px-6 py-3 text-center text-[#1A1A1A] text-sm md:text-base font-body font-semibold tracking-wide shadow-[0_8px_30px_rgba(0,0,0,0.22)] backdrop-blur-md transition-[background-color,color,border-color] duration-[400ms] ease-[cubic-bezier(0.25,1,0.5,1)] hover:bg-white/10 hover:text-white hover:border-white focus:outline-none focus:ring-2 focus:ring-white/40 focus:ring-offset-2 focus:ring-offset-transparent hero-fade-in-delayed-4";
+  "inline-flex min-h-11 items-center justify-center rounded-full border border-white/0 bg-white px-6 py-3 text-center text-[#1A1A1A] text-sm md:text-base font-body font-semibold tracking-wide shadow-[0_10px_28px_rgba(0,0,0,0.45),0_2px_6px_rgba(0,0,0,0.35)] md:shadow-[0_8px_30px_rgba(0,0,0,0.22)] backdrop-blur-md transition-[background-color,color,border-color] duration-[400ms] ease-[cubic-bezier(0.25,1,0.5,1)] hover:bg-white/10 hover:text-white hover:border-white focus:outline-none focus:ring-2 focus:ring-white/40 focus:ring-offset-2 focus:ring-offset-transparent hero-fade-in-delayed-4";
 
 const Hero = () => {
   const navigate = useNavigate();
@@ -85,7 +85,7 @@ const Hero = () => {
           </h1>
 
           <div className="mt-8 md:mt-10 flex w-full max-w-3xl flex-col items-start">
-            <p className="text-base leading-relaxed text-white text-left font-serif md:text-xl lg:text-2xl font-medium hero-fade-in-delayed-3">
+            <p className="relative inline-block text-base leading-relaxed text-white text-left font-serif md:text-xl lg:text-2xl font-medium hero-fade-in-delayed-3 before:content-[''] before:absolute before:-inset-x-3 before:-inset-y-2 before:-z-10 before:rounded-sm before:bg-black/30 before:backdrop-blur-[1px] before:[mask-image:radial-gradient(ellipse_at_center,black_60%,transparent_100%)]">
               A curated collection of masterworks<br />reeditions and contemporary design<br />for global architectural projects.
             </p>
             <div className="hero-mobile-cta-stack w-screen -translate-x-6 items-center md:w-full md:translate-x-0 md:items-start mt-[5.5rem] md:mt-20 flex flex-col gap-6">
@@ -104,13 +104,11 @@ const Hero = () => {
                     type="button"
                     onClick={() => {
                       trackEvent("click_singapore_gallery_preview", { event_category: "CTA", event_label: "HeroSecondary" });
-                      const el = document.getElementById("apartment-tour");
-                      if (el) el.scrollIntoView({ behavior: "smooth" });
+                      scrollToSection("apartment-tour");
                     }}
                     className="group py-3 text-center font-body text-[11px] font-medium tracking-[0.15em] text-white transition-colors [text-shadow:_0_2px_4px_rgba(0,0,0,0.85)] md:py-0 md:text-xs"
                   >
                     <span className="link-underline-grow">Singapore Gallery Preview</span>
-                    <span className="font-medium text-white">{" "}(Trade Only)</span>
                   </button>
                   <span className="mx-auto h-px w-8 bg-white/50 md:mx-3 md:inline-block md:h-3 md:w-px md:bg-white/50" aria-hidden="true" />
                   <button
@@ -119,6 +117,7 @@ const Hero = () => {
                     className="group py-3 text-center font-body text-[11px] font-medium tracking-[0.15em] text-white transition-colors hover:text-[#E5E5E5] [text-shadow:_0_2px_4px_rgba(0,0,0,0.85)] md:py-0 md:text-xs"
                   >
                     <span className="link-underline-grow">Book Private Appointment</span>
+                    <span className="font-medium text-white">{" "}(Trade Only)</span>
                   </button>
                 </div>
 

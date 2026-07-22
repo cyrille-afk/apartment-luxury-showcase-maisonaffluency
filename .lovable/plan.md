@@ -1,85 +1,32 @@
-# CN Concierge — Phases 2 → 4
+## Changes
 
-Builds bespoke Mandarin intake, curated response, and human hand-off on top of the existing `/concierge?lang=zh` flow.
+### 1. Drop shadow on Explore CTA (Mobile/PWA only)
+`src/components/Hero.tsx` — `heroPrimaryCtaClass` currently uses `shadow-[0_8px_30px_rgba(0,0,0,0.22)]` on all breakpoints. Strengthen it on mobile only by adding a more pronounced layered shadow that resets at `md:` back to the current desktop value, e.g. `shadow-[0_10px_28px_rgba(0,0,0,0.45),0_2px_6px_rgba(0,0,0,0.35)] md:shadow-[0_8px_30px_rgba(0,0,0,0.22)]`. Desktop appearance unchanged.
 
-## Phase 2 — Multimodal intake
+### 2. Increase dimming behind the subhead paragraph
+Target: the subhead `<p>` "A curated collection of masterworks / reeditions and contemporary design / for global architectural projects." in `src/components/Hero.tsx`.
 
-**Frontend (`src/components/trade/AIConcierge.tsx`)**
-- Add attach button (paperclip) next to the composer, active when `lang === "zh"` (and non-CN by default too — no reason to hide it).
-- Accept: images (`image/*`), PDFs (`application/pdf`), audio recordings.
-- Voice input: reuse Web Audio → WAV recorder pattern (per `ai-speech-to-text`). Small mic pill; on stop, POST to a new `concierge-transcribe-audio` edge function, insert the returned transcript into the composer for review, then send.
-- Images/PDFs: attach as thumbnails in the composer; on send, upload to a private Supabase Storage bucket (`concierge-uploads`, 60s signed URLs), then include signed URLs in the user message payload sent to the concierge stream.
+Rather than darkening the whole hero gradient (which would affect the headline), wrap the subhead in a subtle localized dim: add a soft radial/linear backdrop behind just this paragraph via a `::before` or wrapping div using `bg-black/25` with `backdrop-blur-[1px]` and generous padding + `rounded-sm`, feathered with a slight gradient mask so it doesn't read as a hard rectangle. Net effect: 5–10% more darkening under the paragraph text on mobile/PWA. Keep desktop as-is (or apply same, since it improves legibility identically) — will apply on all breakpoints since the request is purely for readability.
 
-**Backend**
-- New edge function `concierge-transcribe-audio` — proxies to Lovable AI `/v1/audio/transcriptions` with `openai/gpt-4o-mini-transcribe`, streams SSE back.
-- Extend `concierge-stream` / `concierge-public-stream`: when the user message includes `attachments: [{ kind: "image"|"pdf", signed_url, mime }]`, forward them as chat-completions multimodal content blocks (`image_url` for images, `file` for PDFs). Prepend an "Intent Deciphering" system instruction to the CN prompt so Gemini extracts style, spatial constraints, lighting, aesthetic gaps into a structured JSON preamble before curating.
+### 3. Refine mobile header margins (burger + flag away from logo)
+`src/components/Navigation.tsx` line 334: the mobile row is `justify-between px-4` inside a parent that already has `px-5`. The burger uses `h-11 w-11` with a 9×9 icon, so its visual edge sits close to the centered logo on narrow screens.
 
-**Storage**
-- New bucket `concierge-uploads` (private). RLS: authenticated users can insert into their own `{uid}/…` prefix; portal-session anon uploads go through a signed-upload URL minted by the edge function.
+Fix: reduce the burger icon size from `h-9 w-9` to `h-7 w-7` (still tappable via the 44px button box) and tighten button box to `h-11 w-11` unchanged, plus reduce the flag's compact rendering. Additionally, drop the extra inner `px-4` on line 334 so the outer container's `px-5` is the sole horizontal inset — this pulls burger and flag to the outer edges, increasing distance from the centered logo. Verify visually via Playwright on 390-wide viewport.
 
-## Phase 3 — Curated Mandarin delivery
+### 4. Move "(Trade Only)" tag
+`src/components/Hero.tsx`:
+- Remove the `<span className="font-medium text-white">{" "}(Trade Only)</span>` from the "Singapore Gallery Preview" button (line ~113).
+- Append the same span to the "Book Private Appointment" button (line ~121), rendered after `<span className="link-underline-grow">Book Private Appointment</span>`.
 
-**Data model (single migration)**
-- `trade_products` add:
-  - `in_situ_sg boolean not null default false`
-  - `available_from date null` (null = immediately available if `in_situ_sg`)
-  - `provenance_cn text null` (Mandarin provenance snippet override)
-  - `asia_lead_time_days int null` (override; falls back to global brand table)
+### 5. "Singapore Gallery Preview" scrolls precisely to the Tour Our Gallery section
+`src/components/Hero.tsx` line ~107 currently uses raw `document.getElementById("apartment-tour")?.scrollIntoView({ behavior: "smooth" })`, which ignores the fixed nav offset and can undershoot on mobile.
 
-**Frontend**
-- New CN response card component `CnCuratedPacket.tsx` rendered inside the concierge message stream when the assistant returns a `<curated_packet>` JSON block.
-- Card contents (Mandarin, editorial styling matching existing concierge cards):
-  - Piece name, designer, provenance line
-  - `即刻可提` badge when `in_situ_sg = true` (with `available_from` if set)
-  - Localized Asia lead time
-  - Climate/adaptability line (from `descriptor_taxonomy` or model-generated fallback)
-  - CTA button: `预约新加坡第九区鉴赏` → opens the Phase-4 viewing modal
+Replace with `scrollToSection("apartment-tour")` (already imported), which measures the nav + sticky bars and settles the target correctly under the header. This ensures the "Tour Our Gallery" heading lands directly under the header on both mobile and desktop.
 
-**Concierge prompt (CN)**
-- Extend the Mandarin system prompt to instruct: after intent parsing, retrieve up to 6 curated picks from the existing catalog RAG, and emit them as `<curated_packet>{items:[...]}</curated_packet>` — one JSON tag the client parses and renders as the card. Text outside the tag stays conversational.
+## Verification
+Run Playwright at 390×844 and 1280×800:
+- Screenshot the hero — confirm CTA shadow is stronger on mobile, subhead has visibly higher contrast, `(Trade Only)` now sits with "Book Private Appointment".
+- Confirm burger/flag are further from the centered logo on mobile.
+- Click "Singapore Gallery Preview" and screenshot after scroll — confirm the "Tour Our Gallery" heading sits just below the fixed header.
 
-## Phase 4 — Hand-off
-
-**Data model (same migration)**
-- New table `cn_director_briefs`:
-  - `session_id` (fk `portal_sessions.id`, nullable for authenticated users)
-  - `user_id` (nullable)
-  - `invited_name text`
-  - `project_summary text`, `aesthetic text`, `budget_band text`, `sentiment text`
-  - `pieces_of_interest jsonb` (array of `{product_id, name, reason}`)
-  - `viewing_requested_at timestamptz null`
-  - `status text` default `'new'` — `new | contacted | booked | closed`
-  - `admin_notes text`
-  - standard timestamps
-
-**Trigger logic (in `concierge-stream`)**
-- After each assistant turn on `lang=zh`, run a lightweight "intent classifier" pass (Gemini flash, JSON output): does the user express deep interest / viewing intent / concrete project spec?
-- If yes AND no brief exists for this session in the last 24h, insert a row into `cn_director_briefs` with the model's structured summary, then invoke `send-transactional-email` with a new template `cn-director-brief` to the concierge inbox (configured via `CN_DIRECTOR_EMAIL` secret).
-
-**Viewing CTA**
-- Clicking the `预约新加坡第九区鉴赏` button opens a small modal: prefilled name/date-range, "白手套专车 24小时" copy. Submit sets `viewing_requested_at` on the latest brief row (or creates one) and re-fires the email with subject prefixed `[VIEWING REQUEST]`.
-
-**Admin surface (`/trade/admin/cn-briefs`)**
-- New page: split view (list + detail) styled like `/trade/admin/collector-applications`.
-- List: status pill, invited name, updated_at, viewing badge.
-- Detail: full brief JSON pretty-printed, pieces of interest as product cards linking to the trade product page, status dropdown, notes textarea, "Reply via email" mailto shortcut.
-- RLS: admins/super_admins only.
-- Add a nav link on `/trade/admin/portal-invites` page header.
-
-## Rollout order
-
-1. Migration (schema + bucket + RLS).
-2. Edge functions (transcribe, extend stream, brief insert + email).
-3. `send-transactional-email` template `cn-director-brief`.
-4. Frontend concierge: attach + voice + curated card + viewing modal.
-5. Admin page + nav link.
-6. Verify end-to-end via `?lang=zh&preview=1` flow, then via a real portal invite redemption.
-
-## Technical notes (not user-facing)
-
-- Keep everything additive — no changes to existing EN concierge behavior, no changes to `AIConcierge.tsx` public API.
-- All model calls go through Lovable AI Gateway (`google/gemini-3-flash-preview` for chat + JSON intent classifier; `google/gemini-2.5-pro` only if the flash preview refuses images with spatial constraints — fall back on 400).
-- Voice STT uses `openai/gpt-4o-mini-transcribe` with `stream: "true"`.
-- PDF/image size caps: 8MB image, 15MB PDF, 5MB audio (WAV, 16kHz mono).
-- Reuse `concierge_rate_limits` for anon-session throttling on the transcribe endpoint.
-- No changes to `src/integrations/supabase/client.ts`.
+No business logic changes; all edits are presentational.
