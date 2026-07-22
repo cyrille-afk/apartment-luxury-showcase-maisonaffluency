@@ -88,7 +88,7 @@ const Hero = () => {
             <p className="text-base leading-relaxed text-white text-left font-serif md:text-xl lg:text-2xl font-medium hero-fade-in-delayed-3">
               A curated collection of masterworks<br />reeditions and contemporary design<br />for global architectural projects.
             </p>
-            <div className="w-screen -translate-x-6 items-center md:w-full md:translate-x-0 md:items-end mt-14 md:mt-20 flex flex-col gap-6">
+            <div className="w-screen -translate-x-6 items-center md:w-full md:translate-x-0 md:items-end mt-[5.5rem] md:mt-20 flex flex-col gap-6">
               <button
                 type="button"
                 onClick={() => { trackEvent("click_meet_designers", { event_category: "CTA", event_label: "HeroCTA" }); navigate("/designers"); }}
