@@ -118,7 +118,7 @@ const Hero = () => {
                 </div>
 
                 {/* Desktop: inline editorial links */}
-                <div className="hidden md:flex items-center gap-4 hero-fade-in-delayed-5">
+                <div className="hidden md:flex items-center gap-5 mt-5 hero-fade-in-delayed-5">
                   <button
                     type="button"
                     onClick={() => {
@@ -129,9 +129,12 @@ const Hero = () => {
                     className="font-body text-xs font-medium tracking-[0.15em] text-white underline-offset-4 decoration-white/70 hover:underline transition-all [text-shadow:_0_2px_4px_rgba(0,0,0,0.85)]"
                   >
                     <span>Singapore Gallery Preview</span>
-                    <span className="font-light italic text-white/80">{" "}(Trade Only)</span>
+                    <span className="font-light italic text-white/90">{" "}(Trade Only)</span>
                   </button>
-                  <span className="text-white/60 [text-shadow:_0_2px_4px_rgba(0,0,0,0.85)]">|</span>
+                  <span
+                    aria-hidden="true"
+                    className="inline-block w-px bg-white/50 h-[0.72em] [text-shadow:_0_2px_4px_rgba(0,0,0,0.85)]"
+                  />
                   <button
                     type="button"
                     onClick={openTour}
