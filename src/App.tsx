@@ -34,6 +34,7 @@ const TradeRegister = lazy(() => import("./pages/TradeRegister"));
 const CollectorSignup = lazy(() => import("./pages/CollectorSignup"));
 const TradeApplicationEdit = lazy(() => import("./pages/TradeApplicationEdit"));
 const TradeLayout = lazy(() => import("./pages/TradeLayout"));
+const TradeMobileLaunch = lazy(() => import("./pages/TradeMobileLaunch"));
 const TradeGuides = lazy(() => import("./pages/TradeGuides"));
 const TradeGuideDetail = lazy(() => import("./pages/TradeGuideDetail"));
 const TradeGuidesAnalytics = lazy(() => import("./pages/TradeGuidesAnalytics"));
