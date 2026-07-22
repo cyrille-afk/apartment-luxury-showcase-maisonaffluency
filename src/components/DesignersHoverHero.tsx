@@ -1008,8 +1008,9 @@ const DesignersHoverHero = () => {
       const restored = restoredLetterRef.current;
       if (restored) {
         let cancelled = false;
+        setIsRestoringLetter(true);
         const scrollToLetter = () => {
-          if (cancelled) return true;
+          if (cancelled) return false;
           const scroller = searchScrollRef.current;
           const row = scroller?.querySelector<HTMLElement>(
             `[data-designer-letter="${restored}"]`
@@ -1023,22 +1024,30 @@ const DesignersHoverHero = () => {
         };
         let attempts = 0;
         const retryScrollToLetter = () => {
-          if (scrollToLetter()) return;
+          if (cancelled) return;
+          if (scrollToLetter()) {
+            // Do one more pass on next frame in case row height shifted, then reveal.
+            requestAnimationFrame(() => {
+              scrollToLetter();
+              if (!cancelled) setIsRestoringLetter(false);
+            });
+            return;
+          }
           attempts += 1;
-          if (attempts < 20) window.setTimeout(retryScrollToLetter, 50);
+          if (attempts < 40) window.setTimeout(retryScrollToLetter, 25);
+          else setIsRestoringLetter(false);
         };
         requestAnimationFrame(() => requestAnimationFrame(retryScrollToLetter));
-        const settleTimers = [260, 520, 900, 1300].map((ms) =>
-          window.setTimeout(scrollToLetter, ms)
-        );
         const clearTimer = window.setTimeout(() => {
           restoredLetterRef.current = null;
           try { sessionStorage.removeItem(DESIGNERS_AZ_LAST_LETTER_KEY); } catch {}
         }, 1500);
+        const failsafe = window.setTimeout(() => setIsRestoringLetter(false), 1500);
         return () => {
           cancelled = true;
-          settleTimers.forEach((timer) => window.clearTimeout(timer));
           window.clearTimeout(clearTimer);
+          window.clearTimeout(failsafe);
+          setIsRestoringLetter(false);
         };
       }
     }
