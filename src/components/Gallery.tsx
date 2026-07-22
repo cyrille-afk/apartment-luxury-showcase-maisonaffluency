@@ -310,12 +310,6 @@ const DesktopCarouselStrip = ({
               height={1000}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/5 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100 rounded-sm" />
-            {/* Title overlay on hover */}
-            <div className="absolute bottom-0 left-0 right-0 px-6 pb-10 translate-y-4 opacity-0 transition-all duration-500 group-hover:translate-y-0 group-hover:opacity-100 pointer-events-none z-10">
-              <p className="font-display text-white text-sm tracking-widest uppercase drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]">
-                {item.title}
-              </p>
-            </div>
             {/* Pulsating hotspot — first card */}
             {index === 0 && (
               <div className="absolute top-3 left-3 z-20 pointer-events-none">
@@ -1248,12 +1242,6 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                       >
                         <img src={item.image} alt={`${item.title} — ${section.experience} | Maison Affluency curated luxury interiors`} sizes={gridCols === 3 ? "(max-width: 1024px) 50vw, 33vw" : "(max-width: 1024px) 50vw, 25vw"} className="h-full w-full object-cover brightness-[1.05] contrast-[1.08] saturate-[1.05] transition-all duration-700 group-hover:scale-110 group-hover:brightness-[0.92]" loading="lazy" decoding="async" width={800} height={1000} />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/5 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-                        {/* Cinematic title overlay on hover */}
-                        <div className="absolute bottom-0 left-0 right-0 px-4 pb-10 translate-y-4 opacity-0 transition-all duration-500 group-hover:translate-y-0 group-hover:opacity-100 pointer-events-none z-10">
-                          <p className="font-display text-white text-sm tracking-widest uppercase drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]">
-                            {item.title}
-                          </p>
-                        </div>
                         {/* Pulsating hotspot hint — first card of every section */}
                         {index === 0 && (
                           <div className="absolute top-3 left-3 z-20 pointer-events-none">
