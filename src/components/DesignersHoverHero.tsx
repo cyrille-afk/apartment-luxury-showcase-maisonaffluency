@@ -422,6 +422,7 @@ const DesignersHoverHero = () => {
   const searchInputRef = useRef<HTMLInputElement>(null);
   const searchScrollRef = useRef<HTMLDivElement>(null);
   const [isRestoringLetter, setIsRestoringLetter] = useState(false);
+  const [restoredOnlyLetter, setRestoredOnlyLetter] = useState<string | null>(() => restoredLetterRef.current);
   const contentScrollRef = useRef<HTMLDivElement>(null);
   const directoryRef = useRef<HTMLDivElement>(null);
   const mastersRef = useRef<HTMLSpanElement>(null);
@@ -1009,6 +1010,7 @@ const DesignersHoverHero = () => {
       const restored = restoredLetterRef.current;
       if (restored) {
         let cancelled = false;
+        setRestoredOnlyLetter(restored);
         setIsRestoringLetter(true);
         const scrollToLetter = () => {
           if (cancelled) return false;
@@ -1034,25 +1036,35 @@ const DesignersHoverHero = () => {
             // Do one more pass on next frame in case row height shifted, then reveal.
             requestAnimationFrame(() => {
               scrollToLetter();
-              if (!cancelled) setIsRestoringLetter(false);
+              if (!cancelled) {
+                setIsRestoringLetter(false);
+                window.setTimeout(() => setRestoredOnlyLetter(null), 120);
+              }
             });
             return;
           }
           attempts += 1;
           if (attempts < 40) window.setTimeout(retryScrollToLetter, 25);
-          else setIsRestoringLetter(false);
+          else {
+            setIsRestoringLetter(false);
+            setRestoredOnlyLetter(null);
+          }
         };
         requestAnimationFrame(() => requestAnimationFrame(retryScrollToLetter));
         const clearTimer = window.setTimeout(() => {
           restoredLetterRef.current = null;
           try { sessionStorage.removeItem(DESIGNERS_AZ_LAST_LETTER_KEY); } catch {}
         }, 1500);
-        const failsafe = window.setTimeout(() => setIsRestoringLetter(false), 1500);
+        const failsafe = window.setTimeout(() => {
+          setIsRestoringLetter(false);
+          setRestoredOnlyLetter(null);
+        }, 1500);
         return () => {
           cancelled = true;
           window.clearTimeout(clearTimer);
           window.clearTimeout(failsafe);
           setIsRestoringLetter(false);
+          setRestoredOnlyLetter(null);
         };
       }
     }
@@ -1727,7 +1739,7 @@ const DesignersHoverHero = () => {
                   )}
                   style={{ scrollbarWidth: "none" }}
                 >
-                  {groupedResults.map(([letter]) => {
+                  {(restoredOnlyLetter ? groupedResults.filter(([letter]) => letter === restoredOnlyLetter) : groupedResults).map(([letter]) => {
                     const isActive = activeMobileLetter === letter;
                     return (
                       <button
@@ -1793,7 +1805,7 @@ const DesignersHoverHero = () => {
                           ))}
                         </div>
                       ) : (
-                        groupedResults.map(([letter, items], letterIdx) => {
+                        (restoredOnlyLetter ? groupedResults.filter(([letter]) => letter === restoredOnlyLetter) : groupedResults).map(([letter, items], letterIdx) => {
                           const isOpen = expandedLetters.has(letter);
                           return (
                             <div
