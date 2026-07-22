@@ -203,7 +203,7 @@ const ApartmentTourInterlude = ({ compact = false }: { compact?: boolean }) => {
                   className={`w-full h-full object-cover ${!isPlaying ? "invisible" : ""}`}
                 />
               </div>
-              <div className="flex justify-end w-full mt-2 md:mt-0 md:w-auto">
+              <div className="hidden md:flex justify-end w-full mt-2 md:mt-0 md:w-auto">
                 <button
                   onClick={handleShare}
                   className="flex flex-col items-center gap-1 text-xs font-body text-foreground hover:text-primary transition-colors md:mt-1"
@@ -213,6 +213,7 @@ const ApartmentTourInterlude = ({ compact = false }: { compact?: boolean }) => {
                   <span>Share</span>
                 </button>
               </div>
+
             </div>
           </motion.div>
         </div>
