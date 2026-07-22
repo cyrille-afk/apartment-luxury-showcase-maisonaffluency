@@ -421,6 +421,7 @@ const DesignersHoverHero = () => {
   const [azRailRect, setAzRailRect] = useState<{ top: number; height: number } | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const searchScrollRef = useRef<HTMLDivElement>(null);
+  const [isRestoringLetter, setIsRestoringLetter] = useState(false);
   const contentScrollRef = useRef<HTMLDivElement>(null);
   const directoryRef = useRef<HTMLDivElement>(null);
   const mastersRef = useRef<HTMLSpanElement>(null);
