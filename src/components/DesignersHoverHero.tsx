@@ -1104,7 +1104,7 @@ const DesignersHoverHero = () => {
     const compute = () => {
       const rows = Array.from(
         scroller.querySelectorAll<HTMLElement>("[data-designer-letter]")
-      );
+      ).filter((row) => row.offsetParent !== null); // skip hidden desktop rows on mobile
       if (!rows.length) return;
       const scrollerTop = scroller.getBoundingClientRect().top;
       let current = rows[0].dataset.designerLetter ?? null;
