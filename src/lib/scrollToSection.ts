@@ -101,7 +101,7 @@ export function scrollToSection(id: string, behavior: ScrollBehavior = "smooth",
     // Use the ORIGINAL scroll position to decide if lead-in is warranted,
     // since the settle loop has already jumped us to the target.
     if (behavior === "smooth") {
-      const directScrollTargets = new Set(["gallery", "meet-designers", "contact"]);
+      const directScrollTargets = new Set(["gallery", "meet-designers", "contact", "overview", "apartment-tour"]);
       if (directScrollTargets.has(id)) {
         const duration = isMobile ? 900 : 1100;
         animateScroll(originY, nextTop, duration);
