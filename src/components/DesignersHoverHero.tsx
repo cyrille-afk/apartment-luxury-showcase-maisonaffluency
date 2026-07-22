@@ -1011,6 +1011,7 @@ const DesignersHoverHero = () => {
       if (restored) {
         let cancelled = false;
         setRestoredOnlyLetter(restored);
+        setActiveMobileLetter(restored);
         setIsRestoringLetter(true);
         const scrollToLetter = () => {
           if (cancelled) return false;
