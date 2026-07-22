@@ -98,27 +98,8 @@ const Hero = () => {
                   EXPLORE THE COLLECTION
                 </button>
 
-                {/* Mobile/PWA: stacked dark block */}
-                <div className={`hero-mobile-micro-block mb-3 flex flex-col items-center gap-2 hero-fade-in-delayed-5 rounded-2xl bg-black/35 px-4 py-3 shadow-[0_8px_30px_rgba(0,0,0,0.22)] backdrop-blur-sm md:hidden ${isPWA ? "is-pwa" : ""}`}>
-                  <div className="flex flex-col items-center gap-0.5">
-                    <span className="text-center font-body text-[10px] font-semibold tracking-[0.18em] text-white [text-shadow:_0_2px_4px_rgba(0,0,0,0.85)]">
-                      Singapore Gallery Preview
-                    </span>
-                    <span className="text-center font-body text-[10px] font-semibold tracking-[0.18em] text-white [text-shadow:_0_2px_4px_rgba(0,0,0,0.85)]">
-                      Exclusively for the Trade
-                    </span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={openTour}
-                    className="inline-flex min-h-12 items-center justify-center font-body text-xs font-semibold tracking-[0.15em] text-white underline underline-offset-4 decoration-white hover:decoration-white transition-colors [text-shadow:_0_2px_4px_rgba(0,0,0,0.85)]"
-                  >
-                    Book Private Appointment
-                  </button>
-                </div>
-
-                {/* Desktop: inline editorial links */}
-                <div className="hidden md:flex items-center gap-5 mt-6 hero-fade-in-delayed-5">
+                {/* Inline editorial links — same display on mobile, PWA, and desktop */}
+                <div className="flex items-center gap-4 md:gap-5 mt-6 hero-fade-in-delayed-5">
                   <button
                     type="button"
                     onClick={() => {
@@ -126,7 +107,7 @@ const Hero = () => {
                       const el = document.getElementById("apartment-tour");
                       if (el) el.scrollIntoView({ behavior: "smooth" });
                     }}
-                    className="group font-body text-xs font-medium tracking-[0.15em] text-white transition-colors [text-shadow:_0_2px_4px_rgba(0,0,0,0.85)]"
+                    className="group font-body text-[11px] md:text-xs font-medium tracking-[0.15em] text-white transition-colors [text-shadow:_0_2px_4px_rgba(0,0,0,0.85)]"
                   >
                     <span className="link-underline-grow">Singapore Gallery Preview</span>
                     <span className="font-light italic text-white/75">{" "}(Trade Only)</span>
@@ -138,11 +119,12 @@ const Hero = () => {
                   <button
                     type="button"
                     onClick={openTour}
-                    className="group font-body text-xs font-medium tracking-[0.15em] text-white transition-colors hover:text-[#E5E5E5] [text-shadow:_0_2px_4px_rgba(0,0,0,0.85)]"
+                    className="group font-body text-[11px] md:text-xs font-medium tracking-[0.15em] text-white transition-colors hover:text-[#E5E5E5] [text-shadow:_0_2px_4px_rgba(0,0,0,0.85)]"
                   >
                     <span className="link-underline-grow">Book Private Appointment</span>
                   </button>
                 </div>
+
               </div>
             </div>
           </div>
