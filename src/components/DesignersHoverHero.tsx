@@ -925,7 +925,7 @@ const DesignersHoverHero = () => {
     window.addEventListener("keydown", onKey);
     // Delay focus so the slide-up animation is visible before the keyboard opens.
     const t = window.setTimeout(() => {
-      searchInputRef.current?.focus();
+      if (!restoredLetterRef.current) searchInputRef.current?.focus();
     }, 220);
     return () => {
       // Only clear if we set it. Never restore a stale "hidden" captured from
@@ -1017,8 +1017,6 @@ const DesignersHoverHero = () => {
           if (row && scroller) {
             const top = row.getBoundingClientRect().top - scroller.getBoundingClientRect().top + scroller.scrollTop - 4;
             scroller.scrollTo({ top, behavior: "auto" });
-            restoredLetterRef.current = null;
-            try { sessionStorage.removeItem(DESIGNERS_AZ_LAST_LETTER_KEY); } catch {}
             return true;
           }
           return false;
@@ -1030,7 +1028,18 @@ const DesignersHoverHero = () => {
           if (attempts < 20) window.setTimeout(retryScrollToLetter, 50);
         };
         requestAnimationFrame(() => requestAnimationFrame(retryScrollToLetter));
-        return () => { cancelled = true; };
+        const settleTimers = [260, 520, 900, 1300].map((ms) =>
+          window.setTimeout(scrollToLetter, ms)
+        );
+        const clearTimer = window.setTimeout(() => {
+          restoredLetterRef.current = null;
+          try { sessionStorage.removeItem(DESIGNERS_AZ_LAST_LETTER_KEY); } catch {}
+        }, 1500);
+        return () => {
+          cancelled = true;
+          settleTimers.forEach((timer) => window.clearTimeout(timer));
+          window.clearTimeout(clearTimer);
+        };
       }
     }
   }, [searchOpen, groupedResults.length]);
