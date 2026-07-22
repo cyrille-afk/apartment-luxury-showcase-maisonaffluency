@@ -1,5 +1,6 @@
-import { useEffect, useRef, useState } from "react";
-import { ArrowUp, Share2, MessageCircle, ChevronDown, ChevronUp, MoreHorizontal } from "lucide-react";
+import { useEffect, useState } from "react";
+import { LayoutGrid, ArrowDownAZ, MessageCircle, ChevronDown, MoreHorizontal } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const WHATSAPP_URL = "https://wa.me/6591393850";
 
@@ -10,13 +11,13 @@ interface Props {
 
 /**
  * Floating action panel that appears when the user scrolls into the last
- * gallery section. Manual chevron toggles between expanded row (top • share • whatsapp)
- * and a single collapsed FAB at the bottom-right.
+ * gallery section. Starts collapsed (single FAB) so it never overlaps the
+ * section thumbnails; user taps to expand the pill of quick actions.
  */
 export default function GalleryDetailsFloatingNav({ targetId }: Props) {
   const [visible, setVisible] = useState(false);
-  const [expanded, setExpanded] = useState(true);
-  const autoCollapsedRef = useRef(false);
+  const [expanded, setExpanded] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const el = document.getElementById(targetId);
@@ -26,11 +27,8 @@ export default function GalleryDetailsFloatingNav({ targetId }: Props) {
         for (const e of entries) {
           if (e.isIntersecting) {
             setVisible(true);
-            // First reveal: keep expanded so the user notices the affordances,
-            // then leave collapse control to them.
-          } else {
-            // Only hide entirely when the section has fully left the viewport upward.
-            if (e.boundingClientRect.top > 0) setVisible(false);
+          } else if (e.boundingClientRect.top > 0) {
+            setVisible(false);
           }
         }
       },
@@ -40,40 +38,16 @@ export default function GalleryDetailsFloatingNav({ targetId }: Props) {
     return () => io.disconnect();
   }, [targetId]);
 
-  // Auto-collapse to FAB once user starts scrolling within the section
-  useEffect(() => {
-    if (!visible || autoCollapsedRef.current) return;
-    const onScroll = () => {
-      autoCollapsedRef.current = true;
-      setExpanded(false);
-      window.removeEventListener("scroll", onScroll);
-    };
-    const t = window.setTimeout(() => {
-      window.addEventListener("scroll", onScroll, { passive: true });
-    }, 2500);
-    return () => {
-      window.clearTimeout(t);
-      window.removeEventListener("scroll", onScroll);
-    };
-  }, [visible]);
-
   if (!visible) return null;
 
-  const handleShare = async () => {
-    const url = `${window.location.origin}/gallery`;
-    const text = "The Details Make The Design — Maison Affluency";
-    try {
-      if (navigator.share) {
-        await navigator.share({ title: text, url });
-      } else {
-        await navigator.clipboard.writeText(url);
-      }
-    } catch {
-      /* user dismissed */
-    }
+  const handleAllCategories = () => {
+    setExpanded(false);
+    navigate("/collectibles");
   };
-
-  const handleTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
+  const handleDesigners = () => {
+    setExpanded(false);
+    navigate("/designers");
+  };
   const handleWhatsApp = () =>
     window.open(WHATSAPP_URL, "_blank", "noopener,noreferrer");
 
@@ -81,8 +55,9 @@ export default function GalleryDetailsFloatingNav({ targetId }: Props) {
     <div
       className="fixed right-4 z-[60] print:hidden"
       style={{
-        // Sit above iOS safe-area and above the mobile StickyBottomNav (~64px)
-        bottom: "calc(env(safe-area-inset-bottom, 0px) + 5rem)",
+        // Sit above iOS safe-area, mobile StickyBottomNav (~64px), and the
+        // gallery thumbnails row so it never overlaps the image tiles.
+        bottom: "calc(env(safe-area-inset-bottom, 0px) + 7.5rem)",
       }}
     >
       {expanded ? (
@@ -92,18 +67,18 @@ export default function GalleryDetailsFloatingNav({ targetId }: Props) {
           aria-label="Gallery quick actions"
         >
           <button
-            onClick={handleTop}
-            aria-label="Back to top"
+            onClick={handleAllCategories}
+            aria-label="Browse all categories"
             className="h-10 w-10 rounded-full flex items-center justify-center hover:bg-background/10 transition-colors active:scale-95"
           >
-            <ArrowUp className="h-4 w-4" />
+            <LayoutGrid className="h-4 w-4" />
           </button>
           <button
-            onClick={handleShare}
-            aria-label="Share gallery"
+            onClick={handleDesigners}
+            aria-label="Browse designers A–Z"
             className="h-10 w-10 rounded-full flex items-center justify-center hover:bg-background/10 transition-colors active:scale-95"
           >
-            <Share2 className="h-4 w-4" />
+            <ArrowDownAZ className="h-4 w-4" />
           </button>
           <button
             onClick={handleWhatsApp}
