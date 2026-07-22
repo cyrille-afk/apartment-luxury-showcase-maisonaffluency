@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import QRCode from "qrcode";
-import { Loader2, RefreshCw, Smartphone, Share, Plus, MoreVertical, Download } from "lucide-react";
+import { Loader2, RefreshCw, Download } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { MobileHandoffDialog } from "./MobileHandoffDialog";
 import { trackEvent } from "@/lib/analytics";
