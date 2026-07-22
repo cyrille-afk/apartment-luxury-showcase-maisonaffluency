@@ -2048,16 +2048,10 @@ export type Database = {
           materials: string | null
           materials_description: string | null
           origin: string | null
-          pack_carton_count: number | null
-          pack_cbm: number | null
-          pack_weight_kg: number | null
           pdf_filename: string | null
           pdf_url: string | null
           pdf_urls: Json | null
           photo_credit: string | null
-          pickup_address: string | null
-          pickup_country: string | null
-          pickup_postcode: string | null
           price_prefix: string | null
           size_variants: Json | null
           sort_order: number | null
@@ -2094,16 +2088,10 @@ export type Database = {
           materials?: string | null
           materials_description?: string | null
           origin?: string | null
-          pack_carton_count?: number | null
-          pack_cbm?: number | null
-          pack_weight_kg?: number | null
           pdf_filename?: string | null
           pdf_url?: string | null
           pdf_urls?: Json | null
           photo_credit?: string | null
-          pickup_address?: string | null
-          pickup_country?: string | null
-          pickup_postcode?: string | null
           price_prefix?: string | null
           size_variants?: Json | null
           sort_order?: number | null
@@ -2140,16 +2128,10 @@ export type Database = {
           materials?: string | null
           materials_description?: string | null
           origin?: string | null
-          pack_carton_count?: number | null
-          pack_cbm?: number | null
-          pack_weight_kg?: number | null
           pdf_filename?: string | null
           pdf_url?: string | null
           pdf_urls?: Json | null
           photo_credit?: string | null
-          pickup_address?: string | null
-          pickup_country?: string | null
-          pickup_postcode?: string | null
           price_prefix?: string | null
           size_variants?: Json | null
           sort_order?: number | null
