@@ -15,10 +15,22 @@ interface PrivateTourDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
+const PROFESSION_OPTIONS = [
+  "Interior Designer",
+  "Architect",
+  "Property Developer",
+  "Private Client / Collector",
+  "Hospitality / F&B",
+  "Press / Media",
+  "Other",
+] as const;
+
 const tourSchema = z.object({
   name: z.string().trim().min(1, "Name is required").max(100, "Max 100 characters"),
   email: z.string().trim().email("Please enter a valid email").max(255, "Max 255 characters"),
   phone: z.string().trim().max(30, "Max 30 characters"),
+  profession: z.string().trim().min(1, "Please select your profession").max(100, "Max 100 characters"),
+  company: z.string().trim().max(150, "Max 150 characters").optional(),
   preferredDate: z.string().trim().max(100, "Max 100 characters").optional(),
   message: z.string().trim().max(2000, "Max 2000 characters").optional(),
 });
@@ -34,10 +46,11 @@ const PrivateTourDialog = ({ open, onOpenChange }: PrivateTourDialogProps) => {
   const [website, setWebsite] = useState("");
   const [mountedAt] = useState(() => Date.now());
 
-  const EMPTY_FORM = { name: "", email: "", phone: "", preferredDate: "", message: "" };
+  const EMPTY_FORM = { name: "", email: "", phone: "", profession: "", company: "", preferredDate: "", message: "" };
   const [formData, setFormData] = useState(EMPTY_FORM);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+
     const { id, value } = e.target;
     setFormData(prev => ({ ...prev, [id]: value }));
     if (errors[id]) setErrors(prev => { const next = { ...prev }; delete next[id]; return next; });
@@ -79,9 +92,12 @@ const PrivateTourDialog = ({ open, onOpenChange }: PrivateTourDialogProps) => {
       // Compose a message that meets send-inquiry min-length (10 chars)
       // and surfaces preferred date/time to the concierge inbox + inquiries log.
       const parts: string[] = ["Private tour request."];
+      parts.push(`Profession: ${result.data.profession}.`);
+      if (result.data.company) parts.push(`Company / Firm: ${result.data.company}.`);
       if (result.data.preferredDate) parts.push(`Preferred date/time: ${result.data.preferredDate}.`);
       if (result.data.message) parts.push(result.data.message);
       const composedMessage = parts.join("\n\n");
+
 
       const { error } = await supabase.functions.invoke("send-inquiry", {
         body: {
@@ -204,6 +220,42 @@ const PrivateTourDialog = ({ open, onOpenChange }: PrivateTourDialogProps) => {
                 {errors.phone && <p className="font-body text-[10px] text-destructive mt-1">{errors.phone}</p>}
               </div>
             </div>
+
+            <div className="grid gap-5 md:grid-cols-2">
+              <div>
+                <label htmlFor="profession" className="mb-2 block font-body text-sm uppercase tracking-wider text-foreground">
+                  Profession<span className="text-destructive">*</span>
+                </label>
+                <select
+                  id="profession"
+                  value={formData.profession}
+                  onChange={handleChange}
+                  className={`w-full px-0 py-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-none focus:border-foreground transition-colors text-[16px] ${errors.profession ? "border-destructive" : ""} ${!formData.profession ? "text-muted-foreground/60" : ""}`}
+                >
+                  <option value="" disabled>Select your profession</option>
+                  {PROFESSION_OPTIONS.map((p) => (
+                    <option key={p} value={p} className="text-foreground bg-background">{p}</option>
+                  ))}
+                </select>
+                {errors.profession && <p className="font-body text-[10px] text-destructive mt-1">{errors.profession}</p>}
+              </div>
+              <div>
+                <label htmlFor="company" className="mb-2 block font-body text-sm uppercase tracking-wider text-foreground">
+                  Company / Firm
+                </label>
+                <input
+                  id="company"
+                  type="text"
+                  value={formData.company}
+                  onChange={handleChange}
+                  className={`w-full px-0 py-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-none focus:border-foreground transition-colors text-[16px] ${errors.company ? "border-destructive" : ""}`}
+                  placeholder="Studio or firm name"
+                />
+                {errors.company && <p className="font-body text-[10px] text-destructive mt-1">{errors.company}</p>}
+              </div>
+            </div>
+
+
 
             <div>
               <label htmlFor="preferredDate" className="mb-2 block font-body text-sm uppercase tracking-wider text-foreground">
