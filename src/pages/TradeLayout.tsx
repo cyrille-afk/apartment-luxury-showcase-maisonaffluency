@@ -19,6 +19,8 @@ import { StudioSwitcher } from "@/components/trade/StudioSwitcher";
 
 import { ConciergeHeaderButton } from "@/components/trade/ConciergeHeaderButton";
 import { MobilePreviewHeaderButton } from "@/components/trade/MobilePreviewHeaderButton";
+import { SyncToMobileButton } from "@/components/trade/SyncToMobileButton";
+import { markMobileSeen } from "@/components/trade/MobileHandoffDialog";
 
 
 const CompareFab = lazy(() => import("@/components/CompareFab"));
@@ -435,6 +437,7 @@ const TradeLayout = () => {
                 <PriceModeSelector />
               </div>
               <NotificationBell />
+              <SyncToMobileButton />
               <MobilePreviewHeaderButton />
               <ConciergeHeaderButton />
             </div>

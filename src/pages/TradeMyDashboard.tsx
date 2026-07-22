@@ -10,6 +10,7 @@ import { PendingInvitesBanner } from "@/components/trade/PendingInvitesBanner";
 import { FfeUnlockTile } from "@/components/trade/FfeUnlockTile";
 import { useTradeCredits } from "@/hooks/useTradeCredits";
 import { useToast } from "@/hooks/use-toast";
+import { MobileHandoffWidget } from "@/components/trade/MobileHandoffWidget";
 
 interface FavPreview {
   favoriteId: string;
@@ -279,6 +280,7 @@ export default function TradeMyDashboard() {
                 </Link>
               </>
             )}
+            {!isImpersonating && <MobileHandoffWidget />}
           </div>
         </div>
       </div>
