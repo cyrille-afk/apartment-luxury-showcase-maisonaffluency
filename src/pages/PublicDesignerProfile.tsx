@@ -30,6 +30,7 @@ import { toOgImage } from "@/lib/ogImage";
 import { sortCuratorPicks, interleaveBySubcategory } from "@/lib/curatorPickSort";
 import FloatingScrollNav from "@/components/FloatingScrollNav";
 import { useAuth } from "@/hooks/useAuth";
+import { lastNameInitial } from "@/lib/nameFormat";
 // Collectible profiles are public; product-page gating lives in PublicProductPage.
 
 const transition = { duration: 0.6, ease: [0.16, 1, 0.3, 1] as const };
@@ -367,6 +368,18 @@ const PublicDesignerProfile = () => {
   const location = useLocation();
   const fromDesignersHero = Boolean((location.state as { fromDesignersHero?: boolean } | null)?.fromDesignersHero);
   const fromDesignersAZ = Boolean((location.state as { fromDesignersAZ?: boolean } | null)?.fromDesignersAZ);
+  const designerAzBackHref = useMemo(() => {
+    const storedLetter = (() => {
+      try { return sessionStorage.getItem("designers_az_last_letter"); } catch { return null; }
+    })();
+    const letter = designer?.name ? lastNameInitial(designer.name) : storedLetter;
+    const safeLetter = letter && /^[A-Z]$/.test(letter) ? letter : "A";
+    return `/designers?find=1&letter=${encodeURIComponent(safeLetter)}`;
+  }, [designer?.name]);
+  const rememberDesignerAzLetter = () => {
+    if (!designer?.name) return;
+    try { sessionStorage.setItem("designers_az_last_letter", lastNameInitial(designer.name)); } catch {}
+  };
 
   const picksSectionRef = useRef<HTMLDivElement | null>(null);
   const lightboxOpenRef = useRef(false);
@@ -872,7 +885,7 @@ const PublicDesignerProfile = () => {
                 to={fromNewIn
                   ? `/new-in?designer=${slug}`
                   : fromDesignersAZ
-                    ? "/designers?find=1"
+                    ? designerAzBackHref
                   : isMobile
                     ? "/designers"
                   : fromDesignersHero
@@ -884,6 +897,8 @@ const PublicDesignerProfile = () => {
                       const expandParam = isChild ? `&expand=${encodeURIComponent(designer.founder)}` : "";
                       return `/designers?letter=${letter}${expandParam}`;
                     })()}
+
+                onClick={rememberDesignerAzLetter}
 
                 className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors font-body text-[11px] uppercase tracking-[0.15em]"
               >
@@ -1336,7 +1351,7 @@ const PublicDesignerProfile = () => {
         <Footer />
       </div>
 
-      <FloatingScrollNav menuHref="/designers?find=1" menuLabel="Back to A–Z directory" />
+      <FloatingScrollNav menuHref={designerAzBackHref} menuLabel="Back to A–Z directory" onMenuClick={rememberDesignerAzLetter} />
 
       <PublicProductLightbox
         product={lightboxItem}

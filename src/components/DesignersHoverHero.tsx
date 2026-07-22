@@ -428,10 +428,18 @@ const DesignersHoverHero = () => {
   useEffect(() => {
     if (typeof window === "undefined") return;
     const params = new URLSearchParams(window.location.search);
+    const requestedLetter = params.get("letter")?.trim().toUpperCase().slice(0, 1);
+    if (requestedLetter && /^[A-Z]$/.test(requestedLetter)) {
+      restoredLetterRef.current = requestedLetter;
+      setExpandedLetters(new Set([requestedLetter]));
+      setActiveAccordionLetter(requestedLetter);
+      try { sessionStorage.setItem("designers_az_last_letter", requestedLetter); } catch {}
+    }
     if (params.get("find") === "1") {
       setSearchOpen(true);
       // Clean the URL so a refresh doesn't keep re-opening it.
       params.delete("find");
+      params.delete("letter");
       const qs = params.toString();
       window.history.replaceState(
         {},
@@ -661,8 +669,10 @@ const DesignersHoverHero = () => {
     if (!isDesktop) return;
 
     const canUseNativeListScroll = () => {
-      const scroller = contentScrollRef.current;
-      return Boolean(scroller && scroller.scrollHeight > scroller.clientHeight + 2);
+      // On the locked mobile/PWA landing, native inner scrolling makes the
+      // whole hero visually lift and can expose the white page edge at the end
+      // of the featured list. Gestures should only step designer-by-designer.
+      return false;
     };
 
     const advance = (dir: 1 | -1) => {
@@ -691,178 +701,6 @@ const DesignersHoverHero = () => {
       nav.removeEventListener("wheel", onWheel);
     };
   }, [hasItems, items]);
-
-  // Mobile: capture vertical swipes on the designer NAMES list only so users
-  // can advance featured designers by swiping on the list, while swipes on the
-  // rest of the hero still scroll the page into the Directory below. Previously
-  // this was bound to the entire section which blocked window scroll on mobile
-  // and prevented the Directory from ever mounting.
-  useEffect(() => {
-    if (searchOpen) return;
-    if (!hasItems) return;
-    const nav = navRef.current;
-    if (!nav) return;
-    if (typeof window === "undefined") return;
-    const isMobile = window.matchMedia("(max-width: 767px)").matches;
-    if (!isMobile) return;
-
-    const handoffToDirectory = () => {
-      if (handoffLockRef.current) return;
-      handoffLockRef.current = true;
-      window.dispatchEvent(new Event("unlockDesignersScroll"));
-
-      const scrollBelowHero = () => {
-        const section = sectionRef.current;
-        if (!section) return;
-        const target = Math.max(0, section.getBoundingClientRect().bottom + window.scrollY - 1);
-        window.scrollTo({ top: target, behavior: "smooth" });
-      };
-
-      window.requestAnimationFrame(() => {
-        scrollBelowHero();
-        window.setTimeout(scrollBelowHero, 120);
-      });
-      window.setTimeout(() => {
-        handoffLockRef.current = false;
-      }, 900);
-    };
-
-    const canUseNativeListScroll = () => {
-      const scroller = contentScrollRef.current;
-      return Boolean(scroller && scroller.scrollHeight > scroller.clientHeight + 2);
-    };
-
-    const advance = (dir: 1 | -1) => {
-      setActiveSlug((current) => {
-        const idx = items.findIndex((d) => d.slug === current);
-        const base = idx === -1 ? 0 : idx;
-        const nextIdx = Math.min(items.length - 1, Math.max(0, base + dir));
-        return items[nextIdx].slug;
-      });
-    };
-
-    let startY: number | null = null;
-    let pointerStartY: number | null = null;
-    let accum = 0;
-    let pointerAccum = 0;
-    let lock = false;
-    let pointerLock = false;
-    let lastPointerTouchAt = 0;
-
-    const handleSwipeDelta = (deltaY: number, prevent: () => void, isPointer = false) => {
-      if (canUseNativeListScroll()) return false;
-
-      const idx = items.findIndex((d) => d.slug === activeSlugRef.current);
-      const atFirst = idx <= 0;
-
-      if (atFirst && deltaY < -SWIPE_THRESHOLD) {
-        prevent();
-        return true;
-      }
-
-      prevent();
-      if (isPointer ? pointerLock : lock) return true;
-
-      if (Math.abs(deltaY) > SWIPE_THRESHOLD) {
-        suppressNavClickRef.current = true;
-        if (isPointer) pointerLock = true;
-        else lock = true;
-        advance(deltaY > 0 ? 1 : -1);
-        window.setTimeout(() => {
-          if (isPointer) pointerLock = false;
-          else lock = false;
-        }, 450);
-        window.setTimeout(() => {
-          suppressNavClickRef.current = false;
-        }, 650);
-      }
-      return true;
-    };
-
-    const supportsPointer = "PointerEvent" in window;
-
-    const onPointerDown = (e: PointerEvent) => {
-      if (e.pointerType !== "touch") return;
-      if ((e.target as HTMLElement | null)?.closest?.("#designers-search-sheet")) return;
-      if (canUseNativeListScroll()) return;
-      lastPointerTouchAt = Date.now();
-      pointerStartY = e.clientY;
-      pointerAccum = 0;
-      nav.setPointerCapture?.(e.pointerId);
-    };
-
-    const onPointerMove = (e: PointerEvent) => {
-      if (e.pointerType !== "touch") return;
-      if (pointerStartY === null) return;
-      pointerAccum = pointerStartY - e.clientY;
-      const handled = handleSwipeDelta(
-        pointerAccum,
-        () => {
-          if (e.cancelable) e.preventDefault();
-          e.stopPropagation();
-        },
-        true
-      );
-      if (handled && Math.abs(pointerAccum) > SWIPE_THRESHOLD) {
-        pointerStartY = e.clientY;
-        pointerAccum = 0;
-      }
-    };
-
-    const onPointerEnd = (e: PointerEvent) => {
-      if (e.pointerType !== "touch") return;
-      pointerStartY = null;
-      pointerAccum = 0;
-      nav.releasePointerCapture?.(e.pointerId);
-    };
-
-    const onStart = (e: TouchEvent) => {
-      if (Date.now() - lastPointerTouchAt < 700) return;
-      if (canUseNativeListScroll()) return;
-      startY = e.touches[0].clientY;
-      accum = 0;
-    };
-    const onMove = (e: TouchEvent) => {
-      if (Date.now() - lastPointerTouchAt < 700) return;
-      if ((e.target as HTMLElement | null)?.closest?.("#designers-search-sheet")) return;
-      if (startY === null) return;
-      const y = e.touches[0].clientY;
-      accum = startY - y;
-      const handled = handleSwipeDelta(accum, () => {
-        if (e.cancelable) e.preventDefault();
-        e.stopPropagation();
-      });
-      if (handled && Math.abs(accum) > SWIPE_THRESHOLD) {
-        startY = y;
-        accum = 0;
-      }
-    };
-    const onEnd = () => {
-      startY = null;
-      accum = 0;
-    };
-
-    if (supportsPointer) {
-      nav.addEventListener("pointerdown", onPointerDown, { passive: false });
-      nav.addEventListener("pointermove", onPointerMove, { passive: false });
-      nav.addEventListener("pointerup", onPointerEnd, { passive: true });
-      nav.addEventListener("pointercancel", onPointerEnd, { passive: true });
-    }
-    nav.addEventListener("touchstart", onStart, { passive: true });
-    nav.addEventListener("touchmove", onMove, { passive: false });
-    nav.addEventListener("touchend", onEnd, { passive: true });
-    return () => {
-      if (supportsPointer) {
-        nav.removeEventListener("pointerdown", onPointerDown);
-        nav.removeEventListener("pointermove", onPointerMove);
-        nav.removeEventListener("pointerup", onPointerEnd);
-        nav.removeEventListener("pointercancel", onPointerEnd);
-      }
-      nav.removeEventListener("touchstart", onStart);
-      nav.removeEventListener("touchmove", onMove);
-      nav.removeEventListener("touchend", onEnd);
-    };
-  }, [hasItems, items, searchOpen]);
 
   // When the landing list is taller than the locked mobile/PWA viewport, let it
   // scroll natively and keep the background photo synced to the visible row.
@@ -918,6 +756,11 @@ const DesignersHoverHero = () => {
 
     const isInsideSearchSheet = (target: EventTarget | null) =>
       Boolean((target as HTMLElement | null)?.closest?.("#designers-search-sheet"));
+
+    const isInsideContentScroller = (target: EventTarget | null) => {
+      const scroller = contentScrollRef.current;
+      return Boolean(scroller && target instanceof Node && scroller.contains(target));
+    };
 
     const canUseNativeListScroll = () => {
       const scroller = contentScrollRef.current;
@@ -980,8 +823,10 @@ const DesignersHoverHero = () => {
         prevent();
         return;
       }
-      // At first item swiping down → let page/native handle (no-op for hero).
+      // At first item swiping down → hold the locked hero in place instead of
+      // letting iOS rubber-band/lift the page.
       if (atFirst && deltaY < 0) {
+        prevent();
         return;
       }
       if (isTouch ? touchLock : wheelLock) {
@@ -1000,6 +845,7 @@ const DesignersHoverHero = () => {
 
     const onTouchStart = (e: TouchEvent) => {
       if (isInsideSearchSheet(e.target)) return;
+      if (canUseNativeListScroll() && isInsideContentScroller(e.target)) return;
       touchStartY = e.touches[0]?.clientY ?? null;
       touchLastY = touchStartY;
     };
@@ -1007,6 +853,7 @@ const DesignersHoverHero = () => {
     const onTouchMove = (e: TouchEvent) => {
       if (touchStartY === null) return;
       if (isInsideSearchSheet(e.target)) return;
+      if (canUseNativeListScroll() && isInsideContentScroller(e.target)) return;
       const y = e.touches[0]?.clientY;
       if (y === undefined) return;
       touchLastY = y;
@@ -1035,6 +882,7 @@ const DesignersHoverHero = () => {
 
     const onWheel = (e: WheelEvent) => {
       if (isInsideSearchSheet(e.target)) return;
+      if (canUseNativeListScroll() && isInsideContentScroller(e.target)) return;
       if (Math.abs(e.deltaY) < 1) return;
       stepFromDelta(e.deltaY, () => { if (e.cancelable) e.preventDefault(); }, false);
     };
@@ -1148,10 +996,13 @@ const DesignersHoverHero = () => {
       // the designers landing page while the JS chunk downloads).
       import("../pages/PublicDesignerProfile").catch(() => {});
       // If we're restoring from back-nav, scroll the sheet to the remembered letter.
+      // The A-Z grid can render after the sheet opens, so retry until the row
+      // exists instead of clearing the saved letter too early.
       const restored = restoredLetterRef.current;
       if (restored) {
-        restoredLetterRef.current = null;
+        let cancelled = false;
         const scrollToLetter = () => {
+          if (cancelled) return true;
           const scroller = searchScrollRef.current;
           const row = scroller?.querySelector<HTMLElement>(
             `[data-designer-letter="${restored}"]`
@@ -1159,14 +1010,23 @@ const DesignersHoverHero = () => {
           if (row && scroller) {
             const top = row.getBoundingClientRect().top - scroller.getBoundingClientRect().top + scroller.scrollTop - 4;
             scroller.scrollTo({ top, behavior: "auto" });
+            restoredLetterRef.current = null;
+            try { sessionStorage.removeItem("designers_az_last_letter"); } catch {}
+            return true;
           }
+          return false;
         };
-        requestAnimationFrame(() => requestAnimationFrame(scrollToLetter));
-        setTimeout(scrollToLetter, 220);
-        try { sessionStorage.removeItem("designers_az_last_letter"); } catch {}
+        let attempts = 0;
+        const retryScrollToLetter = () => {
+          if (scrollToLetter()) return;
+          attempts += 1;
+          if (attempts < 20) window.setTimeout(retryScrollToLetter, 50);
+        };
+        requestAnimationFrame(() => requestAnimationFrame(retryScrollToLetter));
+        return () => { cancelled = true; };
       }
     }
-  }, [searchOpen]);
+  }, [searchOpen, groupedResults.length]);
 
 
   // Desktop accordion: when a letter opens, move the sheet viewport so the
@@ -1464,13 +1324,13 @@ const DesignersHoverHero = () => {
         <div
           ref={contentScrollRef}
           className={cn(
-          "relative flex flex-col h-full px-6 sm:px-12 md:px-20 lg:px-28 pointer-events-auto md:overflow-visible",
+          "relative flex flex-col h-full px-6 sm:px-12 md:px-20 lg:px-28 pointer-events-auto overflow-hidden md:overflow-visible",
             isStandalone
-              ? "justify-start overflow-y-auto overscroll-contain touch-pan-y pt-16 pb-44 md:pt-8 md:pb-0 md:justify-center md:overflow-visible [-webkit-overflow-scrolling:touch]"
+              ? "justify-start overscroll-contain touch-pan-y pt-16 pb-44 md:pt-8 md:pb-0 md:justify-center [-webkit-overflow-scrolling:touch]"
               : // Mobile browser: the section already starts below the fixed
                 // header, so do not add var(--header-h) again here. Keep the
                 // designer list high while leaving room for the Directory link.
-                "justify-start overflow-y-auto overscroll-contain touch-pan-y pt-12 pb-[calc(2.5rem+env(safe-area-inset-bottom))] md:pt-8 md:justify-center md:pb-0 md:overflow-visible [-webkit-overflow-scrolling:touch]"
+                "justify-start overscroll-contain touch-pan-y pt-12 pb-[calc(2.5rem+env(safe-area-inset-bottom))] md:pt-8 md:justify-center md:pb-0 [-webkit-overflow-scrolling:touch]"
           )}
         >
 
@@ -2006,7 +1866,10 @@ const DesignersHoverHero = () => {
                               to={`/designers/${d.slug}`}
                               state={{ fromDesignersHero: true, fromDesignersAZ: true }}
                               data-nav-state={JSON.stringify({ fromDesignersHero: true, fromDesignersAZ: true })}
-                              onClick={() => setSearchOpen(false)}
+                              onClick={() => {
+                                try { sessionStorage.setItem("designers_az_last_letter", lastNameInitial(d.name)); } catch {}
+                                setSearchOpen(false);
+                              }}
                               className="block px-5 py-2 font-body text-[14px] text-white/80 hover:text-white hover:bg-white/[0.04] transition-colors"
                             >
                               {displayDesignerName(d.name)}
@@ -2074,7 +1937,10 @@ const DesignersHoverHero = () => {
                                       to={`/designers/${d.slug}`}
                                       state={{ fromDesignersHero: true, fromDesignersAZ: true }}
                                       data-nav-state={JSON.stringify({ fromDesignersHero: true, fromDesignersAZ: true })}
-                                      onClick={() => setSearchOpen(false)}
+                                      onClick={() => {
+                                        try { sessionStorage.setItem("designers_az_last_letter", lastNameInitial(d.name)); } catch {}
+                                        setSearchOpen(false);
+                                      }}
                                       className="block pl-12 pr-5 py-1.5 font-body text-[14px] text-white/80 hover:text-white hover:bg-white/[0.04] transition-colors"
                                     >
                                       {displayDesignerName(d.name)}
