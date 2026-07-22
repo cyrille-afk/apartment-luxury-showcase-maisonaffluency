@@ -221,6 +221,42 @@ const PrivateTourDialog = ({ open, onOpenChange }: PrivateTourDialogProps) => {
               </div>
             </div>
 
+            <div className="grid gap-5 md:grid-cols-2">
+              <div>
+                <label htmlFor="profession" className="mb-2 block font-body text-sm uppercase tracking-wider text-foreground">
+                  Profession<span className="text-destructive">*</span>
+                </label>
+                <select
+                  id="profession"
+                  value={formData.profession}
+                  onChange={handleChange}
+                  className={`w-full px-0 py-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-none focus:border-foreground transition-colors text-[16px] ${errors.profession ? "border-destructive" : ""} ${!formData.profession ? "text-muted-foreground/60" : ""}`}
+                >
+                  <option value="" disabled>Select your profession</option>
+                  {PROFESSION_OPTIONS.map((p) => (
+                    <option key={p} value={p} className="text-foreground bg-background">{p}</option>
+                  ))}
+                </select>
+                {errors.profession && <p className="font-body text-[10px] text-destructive mt-1">{errors.profession}</p>}
+              </div>
+              <div>
+                <label htmlFor="company" className="mb-2 block font-body text-sm uppercase tracking-wider text-foreground">
+                  Company / Firm
+                </label>
+                <input
+                  id="company"
+                  type="text"
+                  value={formData.company}
+                  onChange={handleChange}
+                  className={`w-full px-0 py-2 border-b border-border bg-transparent font-body text-sm text-foreground outline-none focus:border-foreground transition-colors text-[16px] ${errors.company ? "border-destructive" : ""}`}
+                  placeholder="Studio or firm name"
+                />
+                {errors.company && <p className="font-body text-[10px] text-destructive mt-1">{errors.company}</p>}
+              </div>
+            </div>
+
+
+
             <div>
               <label htmlFor="preferredDate" className="mb-2 block font-body text-sm uppercase tracking-wider text-foreground">
                 Preferred Date / Time
