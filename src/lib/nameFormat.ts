@@ -67,6 +67,7 @@ const SORT_KEY_OVERRIDES: Record<string, string> = {
   "based upon": "based upon",
   "le berre vevaud": "le berre",
   "jeremy maxwell wintrebert": "maxwell wintrebert",
+  "dagmar london": "dagmar",
 };
 
 // Display name overrides: strip trailing person suffix for brands that should
