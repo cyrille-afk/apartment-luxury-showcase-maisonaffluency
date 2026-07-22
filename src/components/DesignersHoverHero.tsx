@@ -414,7 +414,7 @@ const DesignersHoverHero = () => {
   const [activeAccordionLetter, setActiveAccordionLetter] = useState<string | null>(
     () => restoredLetterRef.current
   );
-  const [activeMobileLetter, setActiveMobileLetter] = useState<string | null>(null);
+  const [activeMobileLetter, setActiveMobileLetter] = useState<string | null>(() => restoredLetterRef.current);
   const [azDragging, setAzDragging] = useState(false);
   const [azMagnifier, setAzMagnifier] = useState<{ letter: string; y: number } | null>(null);
   const azTrackRef = useRef<HTMLElement | null>(null);
