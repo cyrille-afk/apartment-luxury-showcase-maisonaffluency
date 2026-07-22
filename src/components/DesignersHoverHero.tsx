@@ -39,6 +39,16 @@ interface FeaturedDesigner {
   first_pick_image_url: string | null;
 }
 
+const DESIGNERS_AZ_LAST_LETTER_KEY = "designers_az_last_letter";
+
+function rememberDesignersAzLetter(letter: string | null | undefined) {
+  const safeLetter = letter?.trim().toUpperCase().slice(0, 1);
+  if (!safeLetter || !/^[A-Z]$/.test(safeLetter)) return;
+  try {
+    sessionStorage.setItem(DESIGNERS_AZ_LAST_LETTER_KEY, safeLetter);
+  } catch {}
+}
+
 const isCloudinaryUpload = (src: string | null | undefined) =>
   !!src && src.includes("res.cloudinary.com") && src.includes("/image/upload/");
 
@@ -137,9 +147,7 @@ function DesignerGridCard({
   const displayName = displayDesignerName(designer.name);
   const [loaded, setLoaded] = useState(false);
   const rememberLetter = () => {
-    try {
-      sessionStorage.setItem("designers_az_last_letter", lastNameInitial(designer.name));
-    } catch {}
+    rememberDesignersAzLetter(lastNameInitial(designer.name));
   };
   return (
     <Link
@@ -394,7 +402,7 @@ const DesignersHoverHero = () => {
   const [expandedLetters, setExpandedLetters] = useState<Set<string>>(() => {
     if (typeof window !== "undefined") {
       try {
-        const l = sessionStorage.getItem("designers_az_last_letter");
+        const l = sessionStorage.getItem(DESIGNERS_AZ_LAST_LETTER_KEY);
         if (l) {
           restoredLetterRef.current = l;
           return new Set([l]);
@@ -433,7 +441,7 @@ const DesignersHoverHero = () => {
       restoredLetterRef.current = requestedLetter;
       setExpandedLetters(new Set([requestedLetter]));
       setActiveAccordionLetter(requestedLetter);
-      try { sessionStorage.setItem("designers_az_last_letter", requestedLetter); } catch {}
+      rememberDesignersAzLetter(requestedLetter);
     }
     if (params.get("find") === "1") {
       setSearchOpen(true);
@@ -986,7 +994,6 @@ const DesignersHoverHero = () => {
     if (prevSearchOpenRef.current && !searchOpen) {
       setExpandedLetters(new Set(["A"]));
       setActiveAccordionLetter(null);
-      try { sessionStorage.removeItem("designers_az_last_letter"); } catch {}
     }
     prevSearchOpenRef.current = searchOpen;
     if (!searchOpen) return;
@@ -1011,7 +1018,7 @@ const DesignersHoverHero = () => {
             const top = row.getBoundingClientRect().top - scroller.getBoundingClientRect().top + scroller.scrollTop - 4;
             scroller.scrollTo({ top, behavior: "auto" });
             restoredLetterRef.current = null;
-            try { sessionStorage.removeItem("designers_az_last_letter"); } catch {}
+            try { sessionStorage.removeItem(DESIGNERS_AZ_LAST_LETTER_KEY); } catch {}
             return true;
           }
           return false;
@@ -1701,6 +1708,7 @@ const DesignersHoverHero = () => {
                         key={letter}
                         type="button"
                         onClick={() => {
+                          rememberDesignersAzLetter(letter);
                           setExpandedLetters(new Set([letter]));
                           setActiveAccordionLetter(letter);
                           requestAnimationFrame(() => {
@@ -1777,6 +1785,7 @@ const DesignersHoverHero = () => {
                                       return new Set();
                                     }
                                     setActiveAccordionLetter(letter);
+                                    rememberDesignersAzLetter(letter);
                                     willOpen = true;
                                     return new Set([letter]);
                                   });
@@ -1867,7 +1876,7 @@ const DesignersHoverHero = () => {
                               state={{ fromDesignersHero: true, fromDesignersAZ: true }}
                               data-nav-state={JSON.stringify({ fromDesignersHero: true, fromDesignersAZ: true })}
                               onClick={() => {
-                                try { sessionStorage.setItem("designers_az_last_letter", lastNameInitial(d.name)); } catch {}
+                                rememberDesignersAzLetter(lastNameInitial(d.name));
                                 setSearchOpen(false);
                               }}
                               className="block px-5 py-2 font-body text-[14px] text-white/80 hover:text-white hover:bg-white/[0.04] transition-colors"
@@ -1896,6 +1905,7 @@ const DesignersHoverHero = () => {
                                     return new Set();
                                   }
                                   setActiveAccordionLetter(letter);
+                                  rememberDesignersAzLetter(letter);
                                   willOpen = true;
                                   return new Set([letter]);
                                 });
@@ -1938,7 +1948,7 @@ const DesignersHoverHero = () => {
                                       state={{ fromDesignersHero: true, fromDesignersAZ: true }}
                                       data-nav-state={JSON.stringify({ fromDesignersHero: true, fromDesignersAZ: true })}
                                       onClick={() => {
-                                        try { sessionStorage.setItem("designers_az_last_letter", lastNameInitial(d.name)); } catch {}
+                                        rememberDesignersAzLetter(lastNameInitial(d.name));
                                         setSearchOpen(false);
                                       }}
                                       className="block pl-12 pr-5 py-1.5 font-body text-[14px] text-white/80 hover:text-white hover:bg-white/[0.04] transition-colors"
