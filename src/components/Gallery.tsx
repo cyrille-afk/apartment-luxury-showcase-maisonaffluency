@@ -929,19 +929,20 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
               {/* Mobile accordion header — always visible */}
               <button
                 type="button"
-                onClick={() => {
+                onClick={(e) => {
                   const next = isMobilePillActive ? -1 : originalSectionIndex;
+                  const btn = e.currentTarget as HTMLButtonElement;
                   setActiveMobilePill(next);
                   if (next !== -1) {
-                    requestAnimationFrame(() => {
-                      const el = sectionRefs.current[originalSectionIndex];
-                      if (el) {
-                        const top = el.getBoundingClientRect().top + window.scrollY - 100;
-                        // Instant scroll on mobile prevents iOS Safari from
-                        // toggling its URL/nav bar during smooth-scroll animations.
-                        window.scrollTo({ top, behavior: 'auto' });
-                      }
-                    });
+                    // Anchor on the always-visible header button — the section
+                    // content is display:none until React re-renders, so
+                    // getBoundingClientRect() on it returns 0 and scrolls to
+                    // the wrong position (truncated at bottom of viewport).
+                    // Double rAF ensures layout has settled after the state update.
+                    requestAnimationFrame(() => requestAnimationFrame(() => {
+                      const top = btn.getBoundingClientRect().top + window.scrollY - 88;
+                      window.scrollTo({ top, behavior: 'auto' });
+                    }));
                   }
                 }}
                 className="md:hidden w-full flex items-center justify-between gap-3 py-4 border-b border-border/60 text-left"
