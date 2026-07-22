@@ -622,9 +622,9 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
 
         {/* Desktop: stacked layout */}
         <div className="hidden md:flex flex-col items-center">
-          {/* Top row: Trade Program | MAISON AFFLUENCY | Contact Us */}
-          <div className="w-full grid grid-cols-[1fr_auto_1fr] items-center pt-6 pb-1">
-            <div className="flex justify-start pt-1 pl-2">
+          {/* Top row: Flag | MAISON AFFLUENCY | Contact Us */}
+          <div className="w-full grid grid-cols-[1fr_auto_1fr] items-start pt-4 pb-1">
+            <div className="flex justify-start pl-4">
               <ShippingDestinationSwitcher />
             </div>
             <div className="flex flex-col items-center">
@@ -639,9 +639,9 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                 <span className="h-px w-10 bg-foreground" aria-hidden="true" />
               </div>
             </div>
-            <div className="flex flex-col items-end pr-2">
-              {/* Contact Us — aligned to right edge (matches Trade Program below) */}
-              <div className="pt-1">
+            <div className="flex flex-col items-end pr-4">
+              {/* Contact Us — aligned to top-right, level with the flag */}
+              <div>
                 <DropdownMenu>
                   <DropdownMenuTrigger className="font-body text-sm uppercase tracking-[0.18em] transition-all duration-300 text-foreground data-[state=open]:text-foreground data-[state=open]:[text-shadow:none] flex items-center gap-1.5 whitespace-nowrap outline-none relative group font-semibold">
                     Contact Us
