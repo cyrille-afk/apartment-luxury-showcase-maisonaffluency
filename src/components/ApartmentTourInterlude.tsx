@@ -97,10 +97,10 @@ const ApartmentTourInterlude = ({ compact = false }: { compact?: boolean }) => {
               </div>
 
               {/* The Curating Team — inline */}
-              <h3 id="curating-team" className="font-serif text-base md:text-lg text-foreground font-light tracking-wide mt-4 text-center md:text-left scroll-header-offset">
+              <h3 id="curating-team" className="font-serif text-base md:text-lg text-foreground font-light tracking-wide mt-4 text-center scroll-header-offset">
                 & Meet the Curating Team
               </h3>
-              <p className="text-xs md:text-sm font-body text-muted-foreground/60 italic tracking-wide mt-0.5 mb-3 text-center md:text-left">
+              <p className="text-xs md:text-sm font-body text-muted-foreground italic tracking-wide mt-0.5 mb-3 text-center">
                 The heart and soul of the gallery and designers selection
               </p>
               <div className="flex items-start gap-8 justify-center md:justify-start">
@@ -118,7 +118,7 @@ const ApartmentTourInterlude = ({ compact = false }: { compact?: boolean }) => {
                     bio: "After attending the Ecole du Louvre, Elsa opened her gallery in Paris Carré Rive Gauche where she curated a unique design collection with prominent designers such as Ron Arad. As Affluency co-founder, her mission is to seek out and select exceptional design, art and collectible pieces around the world, showcasing exceptional craftsmanship.",
                   },
                 ].map((member) => (
-                  <Dialog key={member.name}>
+                <Dialog key={member.name}>
                     <DialogTrigger asChild>
                       <button className="flex flex-col items-center text-center group cursor-pointer">
                         <div className="relative">
@@ -127,19 +127,21 @@ const ApartmentTourInterlude = ({ compact = false }: { compact?: boolean }) => {
                             alt={member.name}
                             className="w-20 h-20 rounded-full object-cover border-2 border-[hsl(var(--gold))] shadow-sm group-hover:scale-110 transition-transform duration-300"
                           />
-                          <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-background border border-[hsl(var(--gold))]/40 flex items-center justify-center">
+                          <div className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-background border border-[hsl(var(--gold))]/40 flex items-center justify-center shadow-sm">
                             <Search className="w-2.5 h-2.5 text-muted-foreground" />
                           </div>
-                          <div className="absolute -bottom-0.5 -left-0.5 w-4 h-4 rounded-full overflow-hidden border border-[hsl(var(--gold))]/40 shadow-sm" aria-label="French">
-                            <svg viewBox="0 0 3 2" preserveAspectRatio="none" className="w-full h-full block" aria-hidden="true">
+                        </div>
+                        <span className="text-[10px] font-body text-foreground mt-1 tracking-wide group-hover:text-primary transition-colors inline-flex items-center gap-1">
+                          {member.name}
+                          <span className="inline-block w-3 h-2 rounded-[1px] overflow-hidden shadow-sm" role="img" aria-label="French">
+                            <svg viewBox="0 0 3 2" preserveAspectRatio="none" className="w-full h-full block">
                               <rect x="0" y="0" width="1" height="2" fill="#002395" />
                               <rect x="1" y="0" width="1" height="2" fill="#FFFFFF" />
                               <rect x="2" y="0" width="1" height="2" fill="#ED2939" />
                             </svg>
-                          </div>
-                        </div>
-                        <span className="text-[10px] font-body text-foreground mt-1 tracking-wide group-hover:text-primary transition-colors">{member.name}</span>
-                        <span className="text-[9px] font-body text-muted-foreground/70 tracking-wider uppercase">{member.role}</span>
+                          </span>
+                        </span>
+                        <span className="text-[9px] font-body text-muted-foreground tracking-wider uppercase">{member.role}</span>
                       </button>
                     </DialogTrigger>
                     <DialogContent className="max-w-md p-0 overflow-hidden rounded-xl bg-background border-primary/20 [&>button]:absolute [&>button]:top-3 [&>button]:right-3 [&>button]:z-50 [&>button]:bg-background/80 [&>button]:backdrop-blur-sm [&>button]:rounded-full [&>button]:w-9 [&>button]:h-9 [&>button]:flex [&>button]:items-center [&>button]:justify-center [&>button]:shadow-md [&>button]:border [&>button]:border-primary/20 [&>button]:text-foreground">
@@ -278,7 +280,7 @@ const ApartmentTourInterlude = ({ compact = false }: { compact?: boolean }) => {
 
           {/* Curating Team */}
           <div className="flex flex-col items-center mt-8 md:mt-12">
-            <p className="text-xs md:text-sm font-body text-muted-foreground/60 italic tracking-wide mb-4 text-center">
+            <p className="text-xs md:text-sm font-body text-muted-foreground italic tracking-wide mb-4 text-center">
               The heart and soul of the gallery and designers selection
             </p>
             <div className="flex items-start gap-8 justify-center">
@@ -305,19 +307,21 @@ const ApartmentTourInterlude = ({ compact = false }: { compact?: boolean }) => {
                           alt={member.name}
                           className="w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-2 border-[hsl(var(--gold))] shadow-sm group-hover:scale-110 transition-transform duration-300"
                         />
-                        <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-background border border-[hsl(var(--gold))]/40 flex items-center justify-center">
+                        <div className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-background border border-[hsl(var(--gold))]/40 flex items-center justify-center shadow-sm">
                           <Search className="w-2.5 h-2.5 text-muted-foreground" />
                         </div>
-                        <div className="absolute -bottom-0.5 -left-0.5 w-4 h-4 rounded-full overflow-hidden border border-[hsl(var(--gold))]/40 shadow-sm" aria-label="French">
-                          <svg viewBox="0 0 3 2" preserveAspectRatio="none" className="w-full h-full block" aria-hidden="true">
+                      </div>
+                      <span className="text-[11px] md:text-xs font-body text-foreground mt-2 tracking-wide group-hover:text-primary transition-colors inline-flex items-center gap-1">
+                        {member.name}
+                        <span className="inline-block w-3.5 h-2.5 rounded-[1px] overflow-hidden shadow-sm" role="img" aria-label="French">
+                          <svg viewBox="0 0 3 2" preserveAspectRatio="none" className="w-full h-full block">
                             <rect x="0" y="0" width="1" height="2" fill="#002395" />
                             <rect x="1" y="0" width="1" height="2" fill="#FFFFFF" />
                             <rect x="2" y="0" width="1" height="2" fill="#ED2939" />
                           </svg>
-                        </div>
-                      </div>
-                      <span className="text-[11px] md:text-xs font-body text-foreground mt-2 tracking-wide group-hover:text-primary transition-colors">{member.name}</span>
-                      <span className="text-[9px] md:text-[10px] font-body text-muted-foreground/70 tracking-wider uppercase">{member.role}</span>
+                        </span>
+                      </span>
+                      <span className="text-[9px] md:text-[10px] font-body text-muted-foreground tracking-wider uppercase">{member.role}</span>
                     </button>
                   </DialogTrigger>
                   <DialogContent className="max-w-md p-0 overflow-hidden rounded-xl bg-background border-primary/20 [&>button]:absolute [&>button]:top-3 [&>button]:right-3 [&>button]:z-50 [&>button]:bg-background/80 [&>button]:backdrop-blur-sm [&>button]:rounded-full [&>button]:w-9 [&>button]:h-9 [&>button]:flex [&>button]:items-center [&>button]:justify-center [&>button]:shadow-md [&>button]:border [&>button]:border-primary/20 [&>button]:text-foreground">
