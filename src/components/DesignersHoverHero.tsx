@@ -443,6 +443,7 @@ const DesignersHoverHero = () => {
       restoredLetterRef.current = requestedLetter;
       setExpandedLetters(new Set([requestedLetter]));
       setActiveAccordionLetter(requestedLetter);
+      setActiveMobileLetter(requestedLetter);
       rememberDesignersAzLetter(requestedLetter);
     }
     if (params.get("find") === "1") {
