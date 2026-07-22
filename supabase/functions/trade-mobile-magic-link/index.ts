@@ -14,6 +14,7 @@ const ALLOWED_ORIGINS = [
   "https://www.maisonaffluency.com",
   "https://apartment-luxury-showcase-maisonaffluency.lovable.app",
   "https://id-preview--02208d51-b513-401f-a97f-9e38a2a4260f.lovable.app",
+  "https://02208d51-b513-401f-a97f-9e38a2a4260f.lovableproject.com",
 ];
 
 function safeRedirect(input: unknown): string | null {
