@@ -86,9 +86,14 @@ export function SyncToMobileButton() {
               {state === "ready" && dataUrl ? (
                 <img src={dataUrl} alt="Scan to open on phone" className="w-full h-full" />
               ) : state === "error" ? (
-                <button onClick={mint} className="inline-flex items-center gap-1 text-xs font-body text-foreground hover:underline">
-                  <RefreshCw className="h-3 w-3" /> Try again
-                </button>
+                <div className="text-center px-2">
+                  {errMsg && (
+                    <p className="font-body text-[10px] text-destructive mb-1.5 leading-snug">{errMsg}</p>
+                  )}
+                  <button onClick={mint} className="inline-flex items-center gap-1 text-xs font-body text-foreground hover:underline">
+                    <RefreshCw className="h-3 w-3" /> Try again
+                  </button>
+                </div>
               ) : (
                 <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
               )}
