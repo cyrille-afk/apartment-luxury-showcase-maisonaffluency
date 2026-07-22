@@ -10,7 +10,9 @@
  */
 
 /** Custom eased scroll with controllable duration */
-function animateScroll(from: number, to: number, duration: number) {
+let activeScrollSequence = 0;
+
+function animateScroll(from: number, to: number, duration: number, shouldContinue: () => boolean = () => true) {
   const start = performance.now();
 
   // Ease-in-out cubic for a natural feel
@@ -18,6 +20,7 @@ function animateScroll(from: number, to: number, duration: number) {
     t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 
   const step = (now: number) => {
+    if (!shouldContinue()) return;
     const elapsed = now - start;
     const progress = Math.min(elapsed / duration, 1);
     const value = from + (to - from) * ease(progress);
@@ -31,6 +34,30 @@ function animateScroll(from: number, to: number, duration: number) {
 }
 
 export function scrollToSection(id: string, behavior: ScrollBehavior = "smooth", retryUntil = performance.now() + 2500) {
+  const scrollSequence = ++activeScrollSequence;
+  let cancelledByUser = false;
+  let cleanupUserCancel = () => {};
+  const shouldContinue = () => scrollSequence === activeScrollSequence && !cancelledByUser;
+
+  if (behavior === "smooth") {
+    const cancel = () => {
+      cancelledByUser = true;
+      activeScrollSequence += 1;
+      cleanupUserCancel();
+    };
+    const opts: AddEventListenerOptions = { once: true, passive: true };
+    window.addEventListener("wheel", cancel, opts);
+    window.addEventListener("touchstart", cancel, opts);
+    window.addEventListener("pointerdown", cancel, opts);
+    window.addEventListener("keydown", cancel, { once: true });
+    cleanupUserCancel = () => {
+      window.removeEventListener("wheel", cancel);
+      window.removeEventListener("touchstart", cancel);
+      window.removeEventListener("pointerdown", cancel);
+      window.removeEventListener("keydown", cancel);
+    };
+  }
+
   // Measure actual fixed header height (nav + any fixed banners like Featured Read)
   const nav = document.querySelector("nav");
   const banner = document.querySelector("[data-featured-read-banner]");
@@ -91,6 +118,7 @@ export function scrollToSection(id: string, behavior: ScrollBehavior = "smooth",
     previousTop = nextTop;
 
     if (delta > settleThreshold && passes < maxPasses) {
+      if (!shouldContinue()) return;
       window.scrollTo({ top: nextTop, behavior: instant });
       passes += 1;
       setTimeout(() => requestAnimationFrame(refine), 60);
@@ -104,16 +132,18 @@ export function scrollToSection(id: string, behavior: ScrollBehavior = "smooth",
       const directScrollTargets = new Set(["gallery", "meet-designers", "contact", "overview", "apartment-tour"]);
       if (directScrollTargets.has(id)) {
         const duration = isMobile ? 900 : 1100;
-        animateScroll(originY, nextTop, duration);
+        animateScroll(originY, nextTop, duration, shouldContinue);
 
         let correctionPasses = 0;
         const correctAfterLazyLayout = () => {
+          if (!shouldContinue()) return;
           const correctedTop = getTargetTop();
           if (correctedTop !== null && Math.abs(window.scrollY - correctedTop) > 4) {
             window.scrollTo({ top: correctedTop, behavior: instant });
           }
           correctionPasses += 1;
           if (correctionPasses < 20) window.setTimeout(correctAfterLazyLayout, 120);
+          else cleanupUserCancel();
         };
         window.setTimeout(correctAfterLazyLayout, duration + 80);
         return;
@@ -125,14 +155,17 @@ export function scrollToSection(id: string, behavior: ScrollBehavior = "smooth",
         const leadInY = Math.max(0, nextTop - LEAD_IN_DISTANCE);
         window.scrollTo({ top: leadInY, behavior: instant });
         requestAnimationFrame(() => {
-          animateScroll(leadInY, nextTop, SCROLL_DURATION);
+          animateScroll(leadInY, nextTop, SCROLL_DURATION, shouldContinue);
+          window.setTimeout(cleanupUserCancel, SCROLL_DURATION + 120);
         });
       } else {
         // Short distance — proportionally shorter animation
-        animateScroll(originY, nextTop, 800);
+        animateScroll(originY, nextTop, 800, shouldContinue);
+        window.setTimeout(cleanupUserCancel, 920);
       }
     } else {
       window.scrollTo({ top: nextTop, behavior });
+      cleanupUserCancel();
     }
   };
 
