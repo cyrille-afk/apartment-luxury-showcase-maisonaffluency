@@ -1140,12 +1140,6 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                         )}
                       </div>
                     )}
-                    {/* Photo title below carousel */}
-                    <div className="flex items-center justify-center mt-3 px-1">
-                      <h4 className="font-serif text-foreground text-base text-center">
-                        {section.items[activeIdx]?.title}
-                      </h4>
-                    </div>
                     {/* Thumbnail strip with arrows — like product sheet */}
                     {section.items.length > 1 && (() => {
                       const goToPhoto = (idx: number) => {
@@ -1156,7 +1150,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                       };
                       const clamped = Math.max(0, Math.min(section.items.length - 1, activeIdx));
                       return (
-                        <div className="relative mt-3">
+                        <div className="relative mt-2">
                           <button
                             type="button"
                             onClick={() => goToPhoto(clamped - 1)}
