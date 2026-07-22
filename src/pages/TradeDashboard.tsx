@@ -12,6 +12,7 @@ import { ActivityRowSkeleton, BrandFolderSkeleton } from "@/components/trade/ske
 import { MostPopularProducts } from "@/components/trade/MostPopularProducts";
 import { BoardRecommendations } from "@/components/trade/BoardRecommendations";
 import { MobileContinuityBanner } from "@/components/trade/MobileContinuityBanner";
+import { InstallNativeAppCard } from "@/components/trade/InstallNativeAppCard";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { cloudinaryUrl } from "@/lib/cloudinary";
