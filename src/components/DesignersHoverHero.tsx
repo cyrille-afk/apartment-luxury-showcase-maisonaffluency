@@ -669,8 +669,10 @@ const DesignersHoverHero = () => {
     if (!isDesktop) return;
 
     const canUseNativeListScroll = () => {
-      const scroller = contentScrollRef.current;
-      return Boolean(scroller && scroller.scrollHeight > scroller.clientHeight + 2);
+      // On the locked mobile/PWA landing, native inner scrolling makes the
+      // whole hero visually lift and can expose the white page edge at the end
+      // of the featured list. Gestures should only step designer-by-designer.
+      return false;
     };
 
     const advance = (dir: 1 | -1) => {
@@ -821,8 +823,10 @@ const DesignersHoverHero = () => {
         prevent();
         return;
       }
-      // At first item swiping down → let page/native handle (no-op for hero).
+      // At first item swiping down → hold the locked hero in place instead of
+      // letting iOS rubber-band/lift the page.
       if (atFirst && deltaY < 0) {
+        prevent();
         return;
       }
       if (isTouch ? touchLock : wheelLock) {
@@ -1320,13 +1324,13 @@ const DesignersHoverHero = () => {
         <div
           ref={contentScrollRef}
           className={cn(
-          "relative flex flex-col h-full px-6 sm:px-12 md:px-20 lg:px-28 pointer-events-auto md:overflow-visible",
+          "relative flex flex-col h-full px-6 sm:px-12 md:px-20 lg:px-28 pointer-events-auto overflow-hidden md:overflow-visible",
             isStandalone
-              ? "justify-start overflow-y-auto overscroll-contain touch-pan-y pt-16 pb-44 md:pt-8 md:pb-0 md:justify-center md:overflow-visible [-webkit-overflow-scrolling:touch]"
+              ? "justify-start overscroll-contain touch-pan-y pt-16 pb-44 md:pt-8 md:pb-0 md:justify-center [-webkit-overflow-scrolling:touch]"
               : // Mobile browser: the section already starts below the fixed
                 // header, so do not add var(--header-h) again here. Keep the
                 // designer list high while leaving room for the Directory link.
-                "justify-start overflow-y-auto overscroll-contain touch-pan-y pt-12 pb-[calc(2.5rem+env(safe-area-inset-bottom))] md:pt-8 md:justify-center md:pb-0 md:overflow-visible [-webkit-overflow-scrolling:touch]"
+                "justify-start overscroll-contain touch-pan-y pt-12 pb-[calc(2.5rem+env(safe-area-inset-bottom))] md:pt-8 md:justify-center md:pb-0 [-webkit-overflow-scrolling:touch]"
           )}
         >
 
@@ -1930,7 +1934,10 @@ const DesignersHoverHero = () => {
                                       to={`/designers/${d.slug}`}
                                       state={{ fromDesignersHero: true, fromDesignersAZ: true }}
                                       data-nav-state={JSON.stringify({ fromDesignersHero: true, fromDesignersAZ: true })}
-                                      onClick={() => setSearchOpen(false)}
+                                      onClick={() => {
+                                        try { sessionStorage.setItem("designers_az_last_letter", lastNameInitial(d.name)); } catch {}
+                                        setSearchOpen(false);
+                                      }}
                                       className="block pl-12 pr-5 py-1.5 font-body text-[14px] text-white/80 hover:text-white hover:bg-white/[0.04] transition-colors"
                                     >
                                       {displayDesignerName(d.name)}
