@@ -242,11 +242,15 @@ function HomeRouteSync() {
     const isHome = location.pathname === "/" || location.pathname === "";
     const staticHero = document.getElementById("static-hero");
     const staticHeroCopy = document.getElementById("static-hero-copy");
+    const staticDesignersHero = document.getElementById("static-designers-hero");
+    const staticDesignersOverlay = document.getElementById("static-designers-hero-overlay");
 
     if (isHome) {
       document.body.setAttribute("data-home", "");
       staticHero?.style.setProperty("display", "block", "important");
       staticHeroCopy?.style.setProperty("display", "none", "important");
+      if (staticDesignersHero) staticDesignersHero.style.display = "none";
+      if (staticDesignersOverlay) staticDesignersOverlay.style.display = "none";
     } else {
       document.body.removeAttribute("data-home");
       staticHero?.style.setProperty("display", "none", "important");
