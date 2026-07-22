@@ -22,7 +22,7 @@ export default function FloatingScrollNav({
   menuHref = "/designers",
   openMainMenu = false,
   menuLabel,
-  onMenuClick,
+  onMenuClick: beforeMenuClick,
   threshold = 600,
 }: Props) {
   const [visible, setVisible] = useState(false);
@@ -37,8 +37,8 @@ export default function FloatingScrollNav({
 
   if (!visible) return null;
 
-  const onMenuClick = () => {
-    onMenuClick?.();
+  const handleMenuClick = () => {
+    beforeMenuClick?.();
     if (openMainMenu) {
       window.dispatchEvent(new Event("open-main-menu"));
     } else {
@@ -52,7 +52,7 @@ export default function FloatingScrollNav({
       style={{ bottom: "calc(env(safe-area-inset-bottom, 0px) + 1rem)" }}
     >
       <button
-        onClick={onMenuClick}
+        onClick={handleMenuClick}
         aria-label={menuLabel ?? (openMainMenu ? "Open menu" : "Back to designers")}
         className="h-11 w-11 rounded-full bg-foreground text-background shadow-lg flex items-center justify-center active:scale-95 transition-transform"
       >
