@@ -31,7 +31,7 @@ const TradeFloatingCTA = () => {
 
   return (
     <div
-      className="fixed left-1/2 -translate-x-1/2 z-[100] hidden animate-in slide-in-from-bottom-4 fade-in duration-500 sm:block sm:bottom-24"
+      className="fixed right-4 sm:right-6 z-[100] hidden animate-in slide-in-from-bottom-4 fade-in duration-500 sm:block sm:bottom-24"
       role="banner"
     >
       <div className="relative bg-foreground/95 backdrop-blur-sm text-background px-7 py-4 rounded-full shadow-lg border border-accent/20 max-w-[92vw]">
