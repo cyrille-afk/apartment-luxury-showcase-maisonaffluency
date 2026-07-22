@@ -1328,7 +1328,7 @@ const DesignersHoverHero = () => {
                 // so the artwork sits behind the full lower browser/PWA chrome
                 // instead of resolving to a dark/empty band.
                 isMobileOrPwa
-                  ? "top-[-13%] h-[116%] object-center md:inset-0 md:h-full"
+                  ? "top-[-28%] h-[132%] object-center md:inset-0 md:h-full"
                   : "inset-0 h-full",
                 isActive ? "opacity-100" : "opacity-0"
               )}
