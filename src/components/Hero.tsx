@@ -40,7 +40,7 @@ const scrollToMeetDesigners = () => {
 };
 
 const heroPrimaryCtaClass =
-  "inline-flex min-h-11 items-center justify-center rounded-full border border-black/80 bg-white/25 px-6 py-3 text-center text-black text-sm md:text-base font-body font-semibold tracking-wide shadow-[0_8px_30px_rgba(0,0,0,0.22)] backdrop-blur-md transition-all hover:bg-white/40 hover:border-black focus:outline-none focus:ring-2 focus:ring-black/40 focus:ring-offset-2 focus:ring-offset-transparent hero-fade-in-delayed-4 [text-shadow:_0_1px_3px_rgba(255,255,255,0.55)]";
+  "inline-flex min-h-11 items-center justify-center rounded-full border border-black/80 bg-white/40 px-6 py-3 text-center text-black text-sm md:text-base font-body font-semibold tracking-wide shadow-[0_8px_30px_rgba(0,0,0,0.22)] backdrop-blur-md transition-all hover:bg-white/55 hover:border-black focus:outline-none focus:ring-2 focus:ring-black/40 focus:ring-offset-2 focus:ring-offset-transparent hero-fade-in-delayed-4 [text-shadow:_0_1px_3px_rgba(255,255,255,0.65)]";
 
 const Hero = () => {
   const navigate = useNavigate();
