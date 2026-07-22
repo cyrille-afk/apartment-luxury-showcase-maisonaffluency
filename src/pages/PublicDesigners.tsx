@@ -142,12 +142,14 @@ function ScrollLockedDesigners({
     const prevBody = body.style.overflow;
     const prevOverscroll = (body.style as any).overscrollBehavior;
     const prevBodyBg = body.style.backgroundColor;
+    const prevHtmlHeight = html.style.height;
     const prevPosition = body.style.position;
     const prevTop = body.style.top;
     const prevLeft = body.style.left;
     const prevRight = body.style.right;
     const prevWidth = body.style.width;
     const prevHeight = body.style.height;
+    const prevMinHeight = body.style.minHeight;
     // iOS ignores body overflow alone during toolbar/rubber-band gestures. Pin
     // the body itself while /designers is in the locked mobile/PWA landing so
     // the hero cannot visually lift under the fixed header.
@@ -160,9 +162,14 @@ function ScrollLockedDesigners({
     body.style.left = "0";
     body.style.right = "0";
     body.style.width = "100%";
-    body.style.height = "100dvh";
-    // Match body background to the hero so the iOS toolbar blur shows the
-    // dark image instead of the default cream page background.
+    html.style.height = "100lvh";
+    // Use the large viewport, not 100dvh: iOS browser chrome sits outside the
+    // dynamic viewport, and clipping the fixed body to dvh leaves the bottom
+    // toolbar sampling only the black fallback instead of the hero image.
+    body.style.height = "100lvh";
+    body.style.minHeight = "100lvh";
+    // Keep only a fallback color; the fixed body now extends far enough for the
+    // hero image itself to paint behind the iOS toolbar.
     body.style.backgroundColor = "#0a0a0a";
     // Force scroll to top: on back-navigation the browser restores the previous
     // window.scrollY, but with body overflow locked the hero can't be scrolled
@@ -199,12 +206,14 @@ function ScrollLockedDesigners({
       body.style.overflow = prevBody;
       (body.style as any).overscrollBehavior = prevOverscroll;
       body.style.backgroundColor = prevBodyBg;
+      html.style.height = prevHtmlHeight;
       body.style.position = prevPosition;
       body.style.top = prevTop;
       body.style.left = prevLeft;
       body.style.right = prevRight;
       body.style.width = prevWidth;
       body.style.height = prevHeight;
+      body.style.minHeight = prevMinHeight;
       try { (window.history as any).scrollRestoration = prevRestoration ?? "auto"; } catch { /* ignore */ }
       window.scrollTo({ top: 0, left: 0, behavior: "instant" as ScrollBehavior });
       cancelAnimationFrame(raf);
