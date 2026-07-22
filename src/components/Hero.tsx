@@ -112,6 +112,23 @@ const Hero = () => {
                   Book Private Appointment
                 </button>
               </div>
+
+              {/* Desktop: micro block anchored to lower-right corner */}
+              <div className="hidden md:flex fixed bottom-8 right-8 lg:bottom-12 lg:right-12 z-20 flex-col items-end gap-1 hero-fade-in-delayed-5 rounded-2xl bg-black/35 px-4 py-3 shadow-[0_8px_30px_rgba(0,0,0,0.35)] backdrop-blur-sm">
+                <span className="font-body text-[10px] font-semibold tracking-[0.18em] text-white [text-shadow:_0_2px_4px_rgba(0,0,0,0.85)]">
+                  Singapore Gallery Preview
+                </span>
+                <span className="font-body text-[10px] font-semibold tracking-[0.18em] text-white [text-shadow:_0_2px_4px_rgba(0,0,0,0.85)]">
+                  Exclusively for the Trade
+                </span>
+                <button
+                  type="button"
+                  onClick={openTour}
+                  className="mt-1 inline-flex min-h-12 items-center justify-center font-body text-xs font-semibold tracking-[0.15em] text-white underline underline-offset-4 decoration-white hover:decoration-white transition-colors [text-shadow:_0_2px_4px_rgba(0,0,0,0.85)]"
+                >
+                  Book Private Appointment
+                </button>
+              </div>
             </div>
           </div>
         </div>
