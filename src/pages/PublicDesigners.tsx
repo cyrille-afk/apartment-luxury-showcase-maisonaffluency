@@ -254,10 +254,10 @@ function ScrollLockedDesigners({
     <div className="min-h-screen bg-background text-foreground">
       <Navigation />
 
-      <div className="pt-[var(--header-h)]">
+      <div className={locked ? "pt-[var(--header-h)] h-[100lvh] overflow-hidden" : "pt-[var(--header-h)]"}>
         <h1 className="sr-only">Designers &amp; Ateliers</h1>
 
-        <div className={locked ? "h-[100lvh] overflow-hidden" : "pb-20"}>
+        <div className={locked ? "h-[calc(100lvh-var(--header-h))] overflow-hidden" : "pb-20"}>
           <div
             className={locked ? "relative md:h-full" : "relative min-h-[calc(100lvh-var(--header-h))] bg-[#0a0a0a]"}
           >
