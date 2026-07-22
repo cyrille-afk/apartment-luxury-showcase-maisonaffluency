@@ -355,7 +355,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
             </div>
 
             {/* Flag — right edge, vertically centered with burger */}
-            <ShippingDestinationSwitcher compact flagClassName="text-2xl" />
+            <ShippingDestinationSwitcher compact flagClassName="text-2xl" className="-mr-1" />
 
 
 
