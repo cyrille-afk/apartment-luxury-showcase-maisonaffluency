@@ -449,6 +449,9 @@ const TradeLayout = () => {
                 <PriceModeSelector />
               </div>
               <NotificationBell />
+              <div className="hidden md:block">
+                <SyncToMobileButton />
+              </div>
               <MobilePreviewHeaderButton />
               <ConciergeHeaderButton />
             </div>
