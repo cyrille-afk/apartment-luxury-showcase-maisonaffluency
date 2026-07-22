@@ -357,7 +357,7 @@ const PublicDesignerProfile = () => {
     () => searchParams.get("from_product") || consumeProductBackRef(slug),
     [searchParams, slug]
   );
-  const { data: designer, isLoading } = useDesigner(slug);
+  const { data: designer, isLoading } = useDesigner(slug, { includeTradeOnly: isTradeUser });
   const isParentBrand = isParentBrandDesigner(designer);
   const isChildDesigner = isChildBrandDesigner(designer);
   const { data: parentDesigner } = useDesignerByName(isChildDesigner ? designer?.founder : undefined);
