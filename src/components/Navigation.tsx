@@ -331,12 +331,12 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
     )}>
       <div className="mx-auto max-w-7xl px-5 md:px-14 lg:px-24">
         {/* Mobile: single row */}
-          <div className="flex h-24 items-center md:hidden relative justify-between px-4">
+          <div className="flex h-24 items-center md:hidden relative justify-between">
            <Sheet open={isOpen} onOpenChange={handleMobileMenuOpenChange}>
             {/* Burger — left edge, vertically centered with flag */}
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-11 w-11 text-primary" aria-label="Toggle menu">
-                {isOpen ? <X className="h-9 w-9" strokeWidth={2.75} /> : <Menu className="h-9 w-9" strokeWidth={2.75} />}
+              <Button variant="ghost" size="icon" className="h-11 w-11 -ml-2 text-primary" aria-label="Toggle menu">
+                {isOpen ? <X className="h-7 w-7" strokeWidth={2.5} /> : <Menu className="h-7 w-7" strokeWidth={2.5} />}
               </Button>
             </SheetTrigger>
 
