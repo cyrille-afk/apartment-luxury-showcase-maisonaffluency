@@ -1050,20 +1050,13 @@ const DesignersHoverHero = () => {
           }
         };
         requestAnimationFrame(() => requestAnimationFrame(retryScrollToLetter));
-        const clearTimer = window.setTimeout(() => {
-          restoredLetterRef.current = null;
-          try { sessionStorage.removeItem(DESIGNERS_AZ_LAST_LETTER_KEY); } catch {}
-        }, 1500);
         const failsafe = window.setTimeout(() => {
           setIsRestoringLetter(false);
-          setRestoredOnlyLetter(null);
         }, 1500);
         return () => {
           cancelled = true;
-          window.clearTimeout(clearTimer);
           window.clearTimeout(failsafe);
           setIsRestoringLetter(false);
-          setRestoredOnlyLetter(null);
         };
       }
     }
