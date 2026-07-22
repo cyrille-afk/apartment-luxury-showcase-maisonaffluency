@@ -249,8 +249,16 @@ function HomeRouteSync() {
       document.body.setAttribute("data-home", "");
       staticHero?.style.setProperty("display", "block", "important");
       staticHeroCopy?.style.setProperty("display", "none", "important");
-      if (staticDesignersHero) staticDesignersHero.style.display = "none";
-      if (staticDesignersOverlay) staticDesignersOverlay.style.display = "none";
+      staticDesignersHero?.style.setProperty("display", "none", "important");
+      staticDesignersOverlay?.style.setProperty("display", "none", "important");
+      document.documentElement.style.removeProperty("background-image");
+      document.documentElement.style.removeProperty("background-size");
+      document.documentElement.style.removeProperty("background-position");
+      document.documentElement.style.removeProperty("background-repeat");
+      document.body.style.removeProperty("background-image");
+      document.body.style.removeProperty("background-size");
+      document.body.style.removeProperty("background-position");
+      document.body.style.removeProperty("background-repeat");
     } else {
       document.body.removeAttribute("data-home");
       staticHero?.style.setProperty("display", "none", "important");
