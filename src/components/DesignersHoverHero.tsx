@@ -1164,10 +1164,13 @@ const DesignersHoverHero = () => {
       // the designers landing page while the JS chunk downloads).
       import("../pages/PublicDesignerProfile").catch(() => {});
       // If we're restoring from back-nav, scroll the sheet to the remembered letter.
+      // The A-Z grid can render after the sheet opens, so retry until the row
+      // exists instead of clearing the saved letter too early.
       const restored = restoredLetterRef.current;
       if (restored) {
-        restoredLetterRef.current = null;
+        let cancelled = false;
         const scrollToLetter = () => {
+          if (cancelled) return true;
           const scroller = searchScrollRef.current;
           const row = scroller?.querySelector<HTMLElement>(
             `[data-designer-letter="${restored}"]`
@@ -1175,14 +1178,23 @@ const DesignersHoverHero = () => {
           if (row && scroller) {
             const top = row.getBoundingClientRect().top - scroller.getBoundingClientRect().top + scroller.scrollTop - 4;
             scroller.scrollTo({ top, behavior: "auto" });
+            restoredLetterRef.current = null;
+            try { sessionStorage.removeItem("designers_az_last_letter"); } catch {}
+            return true;
           }
+          return false;
         };
-        requestAnimationFrame(() => requestAnimationFrame(scrollToLetter));
-        setTimeout(scrollToLetter, 220);
-        try { sessionStorage.removeItem("designers_az_last_letter"); } catch {}
+        let attempts = 0;
+        const retryScrollToLetter = () => {
+          if (scrollToLetter()) return;
+          attempts += 1;
+          if (attempts < 20) window.setTimeout(retryScrollToLetter, 50);
+        };
+        requestAnimationFrame(() => requestAnimationFrame(retryScrollToLetter));
+        return () => { cancelled = true; };
       }
     }
-  }, [searchOpen]);
+  }, [searchOpen, groupedResults.length]);
 
 
   // Desktop accordion: when a letter opens, move the sheet viewport so the
