@@ -1320,11 +1320,16 @@ const DesignersHoverHero = () => {
               decoding={isFirst ? "sync" : "async"}
               {...(isFirst ? { fetchPriority: "high" as const } : {})}
               className={cn(
-                "absolute inset-0 w-full h-full object-cover transition-opacity ease-out",
-                // Mobile browser only: shift image content upward so featured
-                // pieces (e.g. the Alexander Lamont cabinet) sit higher in the
-                // visible frame, while PWA and desktop framing stay unchanged.
-                !isStandalone && "object-[center_35%] md:object-center",
+                "absolute left-0 w-full object-cover transition-opacity ease-out",
+                // Many of the mobile hero sources are square; object-position
+                // cannot lift a square image inside a tall phone frame because
+                // there is no vertical overflow to reposition. Give mobile/PWA
+                // images real vertical overflow, then pull that overflow upward
+                // so the artwork sits behind the full lower browser/PWA chrome
+                // instead of resolving to a dark/empty band.
+                isMobileOrPwa
+                  ? "top-[-52%] h-[158%] object-center md:inset-0 md:h-full"
+                  : "inset-0 h-full",
                 isActive ? "opacity-100" : "opacity-0"
               )}
               style={{ transitionDuration: `${IMAGE_TRANSITION_MS}ms` }}
