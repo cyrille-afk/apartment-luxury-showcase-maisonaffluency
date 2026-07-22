@@ -99,7 +99,7 @@ const Hero = () => {
                 </button>
 
                 {/* Inline editorial links — vertical stack on mobile/PWA, horizontal on desktop */}
-                <div className="mt-6 flex flex-col items-center gap-5 hero-fade-in-delayed-5 md:mt-6 md:flex-row md:gap-0">
+                <div className="hero-mobile-links-inner mt-6 flex flex-col items-center gap-4 hero-fade-in-delayed-5 md:mt-6 md:flex-row md:gap-0">
                   <button
                     type="button"
                     onClick={() => {
@@ -107,7 +107,7 @@ const Hero = () => {
                       const el = document.getElementById("apartment-tour");
                       if (el) el.scrollIntoView({ behavior: "smooth" });
                     }}
-                    className="group py-2 text-center font-body text-[11px] font-medium tracking-[0.15em] text-white transition-colors [text-shadow:_0_2px_4px_rgba(0,0,0,0.85)] md:text-xs"
+                    className="group py-3 text-center font-body text-[11px] font-medium tracking-[0.15em] text-white transition-colors [text-shadow:_0_2px_4px_rgba(0,0,0,0.85)] md:py-0 md:text-xs"
                   >
                     <span className="link-underline-grow">Singapore Gallery Preview</span>
                     <span className="font-medium text-white">{" "}(Trade Only)</span>
@@ -116,7 +116,7 @@ const Hero = () => {
                   <button
                     type="button"
                     onClick={openTour}
-                    className="group py-2 text-center font-body text-[11px] font-medium tracking-[0.15em] text-white transition-colors hover:text-[#E5E5E5] [text-shadow:_0_2px_4px_rgba(0,0,0,0.85)] md:text-xs"
+                    className="group py-3 text-center font-body text-[11px] font-medium tracking-[0.15em] text-white transition-colors hover:text-[#E5E5E5] [text-shadow:_0_2px_4px_rgba(0,0,0,0.85)] md:py-0 md:text-xs"
                   >
                     <span className="link-underline-grow">Book Private Appointment</span>
                   </button>
