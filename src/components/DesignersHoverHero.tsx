@@ -421,6 +421,7 @@ const DesignersHoverHero = () => {
   const [azRailRect, setAzRailRect] = useState<{ top: number; height: number } | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const searchScrollRef = useRef<HTMLDivElement>(null);
+  const [isRestoringLetter, setIsRestoringLetter] = useState(false);
   const contentScrollRef = useRef<HTMLDivElement>(null);
   const directoryRef = useRef<HTMLDivElement>(null);
   const mastersRef = useRef<HTMLSpanElement>(null);
@@ -1008,8 +1009,9 @@ const DesignersHoverHero = () => {
       const restored = restoredLetterRef.current;
       if (restored) {
         let cancelled = false;
+        setIsRestoringLetter(true);
         const scrollToLetter = () => {
-          if (cancelled) return true;
+          if (cancelled) return false;
           const scroller = searchScrollRef.current;
           const row = scroller?.querySelector<HTMLElement>(
             `[data-designer-letter="${restored}"]`
@@ -1023,22 +1025,30 @@ const DesignersHoverHero = () => {
         };
         let attempts = 0;
         const retryScrollToLetter = () => {
-          if (scrollToLetter()) return;
+          if (cancelled) return;
+          if (scrollToLetter()) {
+            // Do one more pass on next frame in case row height shifted, then reveal.
+            requestAnimationFrame(() => {
+              scrollToLetter();
+              if (!cancelled) setIsRestoringLetter(false);
+            });
+            return;
+          }
           attempts += 1;
-          if (attempts < 20) window.setTimeout(retryScrollToLetter, 50);
+          if (attempts < 40) window.setTimeout(retryScrollToLetter, 25);
+          else setIsRestoringLetter(false);
         };
         requestAnimationFrame(() => requestAnimationFrame(retryScrollToLetter));
-        const settleTimers = [260, 520, 900, 1300].map((ms) =>
-          window.setTimeout(scrollToLetter, ms)
-        );
         const clearTimer = window.setTimeout(() => {
           restoredLetterRef.current = null;
           try { sessionStorage.removeItem(DESIGNERS_AZ_LAST_LETTER_KEY); } catch {}
         }, 1500);
+        const failsafe = window.setTimeout(() => setIsRestoringLetter(false), 1500);
         return () => {
           cancelled = true;
-          settleTimers.forEach((timer) => window.clearTimeout(timer));
           window.clearTimeout(clearTimer);
+          window.clearTimeout(failsafe);
+          setIsRestoringLetter(false);
         };
       }
     }
@@ -1744,7 +1754,7 @@ const DesignersHoverHero = () => {
                 </div>
               </div>
             )}
-            <div ref={searchScrollRef} className="flex-1 overflow-y-auto overscroll-contain px-4 pt-2 pb-4 min-h-0 scroll-smooth relative touch-pan-y">
+            <div ref={searchScrollRef} className={`flex-1 overflow-y-auto overscroll-contain px-4 pt-2 pb-4 min-h-0 scroll-smooth relative touch-pan-y transition-opacity duration-150 ${isRestoringLetter ? "opacity-0" : "opacity-100"}`}>
 
               {!isSearching && groupedResults.length === 0 ? (
                 <div className="px-4 py-10 flex flex-col items-center gap-3" aria-live="polite">
