@@ -106,7 +106,7 @@ const Hero = () => {
                       trackEvent("click_singapore_gallery_preview", { event_category: "CTA", event_label: "HeroSecondary" });
                       scrollToSection("apartment-tour");
                     }}
-                    className="group py-3 text-center font-body text-[11px] font-medium tracking-[0.15em] text-white transition-colors [text-shadow:_0_2px_4px_rgba(0,0,0,0.85)] md:py-0 md:text-xs"
+                    className="group py-3 text-center font-body text-[13px] font-medium leading-relaxed tracking-[0.12em] text-white antialiased transition-colors md:py-0 md:text-sm"
                   >
                     <span className="link-underline-grow">Singapore Gallery Preview</span>
                   </button>
@@ -114,10 +114,10 @@ const Hero = () => {
                   <button
                     type="button"
                     onClick={openTour}
-                    className="group py-3 text-center font-body text-[11px] font-medium tracking-[0.15em] text-white transition-colors hover:text-[#E5E5E5] [text-shadow:_0_2px_4px_rgba(0,0,0,0.85)] md:py-0 md:text-xs"
+                    className="group py-3 text-center font-body text-[13px] font-medium leading-relaxed tracking-[0.12em] text-white antialiased transition-colors hover:text-[#E5E5E5] md:py-0 md:text-sm"
                   >
                     <span className="link-underline-grow">Book Private Appointment</span>
-                    <span className="font-medium text-white">{" "}(Trade Only)</span>
+                    <span className="font-light italic text-white/90">{" "}(Trade Only)</span>
                   </button>
                 </div>
 
