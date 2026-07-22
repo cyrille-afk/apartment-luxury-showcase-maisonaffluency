@@ -52,6 +52,8 @@ const Hero = () => {
     if (copy) copy.style.display = "none";
     const pic = document.getElementById("static-hero");
     if (pic) pic.style.setProperty("display", "block", "important");
+    document.getElementById("static-designers-hero")?.style.setProperty("display", "none", "important");
+    document.getElementById("static-designers-hero-overlay")?.style.setProperty("display", "none", "important");
 
     // Detect PWA standalone mode (installed app)
     const mql = window.matchMedia("(display-mode: standalone)");

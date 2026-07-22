@@ -56,6 +56,23 @@ const galleryCategories = ["Lighting", "Seating", "Storage", "Tables", "Rugs", "
 
 const slugify = (s: string) => s.toLowerCase().replace(/&/g, 'and').replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 
+const getFixedHeaderOffset = () => {
+  const nav = document.querySelector("nav");
+  const navHeight = nav?.getBoundingClientRect().height ?? 96;
+  return Math.ceil(navHeight + 8);
+};
+
+const pinElementBelowHeader = (element: HTMLElement, maxPasses = 8) => {
+  let passes = 0;
+  const pin = () => {
+    const top = element.getBoundingClientRect().top + window.scrollY - getFixedHeaderOffset();
+    window.scrollTo({ top: Math.max(0, top), behavior: "auto" });
+    passes += 1;
+    if (passes < maxPasses) window.setTimeout(pin, 80);
+  };
+  requestAnimationFrame(() => requestAnimationFrame(pin));
+};
+
 const galleryExperiences = [{
   experience: "A Sociable Environment",
   subtitle: "Bespoke sofa, hand-knotted artisan rug, sculptural lighting and collectible furniture",
@@ -934,15 +951,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                   const btn = e.currentTarget as HTMLButtonElement;
                   setActiveMobilePill(next);
                   if (next !== -1) {
-                    // Anchor on the always-visible header button — the section
-                    // content is display:none until React re-renders, so
-                    // getBoundingClientRect() on it returns 0 and scrolls to
-                    // the wrong position (truncated at bottom of viewport).
-                    // Double rAF ensures layout has settled after the state update.
-                    requestAnimationFrame(() => requestAnimationFrame(() => {
-                      const top = btn.getBoundingClientRect().top + window.scrollY - 88;
-                      window.scrollTo({ top, behavior: 'auto' });
-                    }));
+                    pinElementBelowHeader(btn);
                   }
                 }}
                 className="md:hidden w-full flex items-center justify-between gap-3 py-4 border-b border-border/60 text-left"

@@ -176,7 +176,7 @@
          DesignersHoverHero requests via cldResponsiveImg so bytes are cache-hits. -->
     <script>
       (function(){
-        if (!/^\/designers(\/|$|\?|#)/.test(window.location.pathname)) return;
+        if (!/^\/designers(\/)?($|\?|#)/.test(window.location.pathname)) return;
         var base = "https://res.cloudinary.com/dif1oamtj/image/upload";
         var id = "v1772160681/Casque-Bar-Cabinet_10_alexander-lamont_1_ydnjp2.jpg";
         var isMobile = window.matchMedia("(max-width: 767px)").matches;
@@ -245,7 +245,7 @@
     <script>
       // Apply FOUC guard + persistent-skeleton marker only on homepage.
       var __isHome = (window.location.pathname === '/' || window.location.pathname === '');
-      var __isDesigners = /^\/designers(\/|$|\?|#)/.test(window.location.pathname);
+      var __isDesigners = /^\/designers(\/)?($|\?|#)/.test(window.location.pathname);
       if (__isHome) {
         document.documentElement.classList.add('home-fouc');
         // Homepage content is rendered by React; no inline hero skeleton is used.
@@ -393,7 +393,7 @@
     <div id="static-designers-hero-overlay" aria-hidden="true" style="display:none;position:absolute;top:0;left:0;width:100vw;height:100lvh;z-index:1;pointer-events:none;background:linear-gradient(to right,rgba(0,0,0,0.80),rgba(0,0,0,0.55) 40%,rgba(0,0,0,0.30));"></div>
     <script>
       (function(){
-        if (!/^\/designers(\/|$|\?|#)/.test(window.location.pathname)) return;
+        if (!/^\/designers(\/)?($|\?|#)/.test(window.location.pathname)) return;
         var p = document.getElementById('static-designers-hero');
         var o = document.getElementById('static-designers-hero-overlay');
         if (p) p.style.display = 'block';
