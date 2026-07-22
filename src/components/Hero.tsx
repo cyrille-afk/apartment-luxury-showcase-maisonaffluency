@@ -128,7 +128,8 @@ const Hero = () => {
                     }}
                     className="font-body text-xs font-medium tracking-[0.15em] text-white underline-offset-4 decoration-white/70 hover:underline transition-all [text-shadow:_0_2px_4px_rgba(0,0,0,0.85)]"
                   >
-                    Singapore Gallery Preview
+                    <span>Singapore Gallery Preview</span>
+                    <span className="ml-1 font-light italic text-white/80">(Trade Only)</span>
                   </button>
                   <span className="text-white/60 [text-shadow:_0_2px_4px_rgba(0,0,0,0.85)]">|</span>
                   <button
