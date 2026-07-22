@@ -89,30 +89,32 @@ const Hero = () => {
               A curated collection of masterworks<br />reeditions and contemporary design<br />for global architectural projects.
             </p>
             <div className="w-screen -translate-x-6 items-center md:w-full md:translate-x-0 md:items-start mt-[5.5rem] md:mt-20 flex flex-col gap-6">
-              <button
-                type="button"
-                onClick={() => { trackEvent("click_meet_designers", { event_category: "CTA", event_label: "HeroCTA" }); navigate("/designers"); }}
-                className={heroPrimaryCtaClass}
-              >
-                EXPLORE THE COLLECTION
-              </button>
-
-              <div className="mb-3 flex flex-col items-center gap-2 hero-fade-in-delayed-5 rounded-2xl bg-black/35 px-4 py-3 shadow-[0_8px_30px_rgba(0,0,0,0.35)] backdrop-blur-sm">
-                <div className="flex flex-col items-center gap-0.5">
-                  <span className="text-center font-body text-[10px] font-semibold tracking-[0.18em] text-white [text-shadow:_0_2px_4px_rgba(0,0,0,0.85)]">
-                    Singapore Gallery Preview
-                  </span>
-                  <span className="text-center font-body text-[10px] font-semibold tracking-[0.18em] text-white [text-shadow:_0_2px_4px_rgba(0,0,0,0.85)]">
-                    Exclusively for the Trade
-                  </span>
-                </div>
+              <div className="flex flex-col items-center gap-6 md:inline-flex">
                 <button
                   type="button"
-                  onClick={openTour}
-                  className="inline-flex min-h-12 items-center justify-center font-body text-xs font-semibold tracking-[0.15em] text-white underline underline-offset-4 decoration-white hover:decoration-white transition-colors [text-shadow:_0_2px_4px_rgba(0,0,0,0.85)]"
+                  onClick={() => { trackEvent("click_meet_designers", { event_category: "CTA", event_label: "HeroCTA" }); navigate("/designers"); }}
+                  className={heroPrimaryCtaClass}
                 >
-                  Book Private Appointment
+                  EXPLORE THE COLLECTION
                 </button>
+
+                <div className="mb-3 flex flex-col items-center gap-2 hero-fade-in-delayed-5 rounded-2xl bg-black/35 px-4 py-3 shadow-[0_8px_30px_rgba(0,0,0,0.22)] backdrop-blur-sm">
+                  <div className="flex flex-col items-center gap-0.5">
+                    <span className="text-center font-body text-[10px] font-semibold tracking-[0.18em] text-white [text-shadow:_0_2px_4px_rgba(0,0,0,0.85)]">
+                      Singapore Gallery Preview
+                    </span>
+                    <span className="text-center font-body text-[10px] font-semibold tracking-[0.18em] text-white [text-shadow:_0_2px_4px_rgba(0,0,0,0.85)]">
+                      Exclusively for the Trade
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={openTour}
+                    className="inline-flex min-h-12 items-center justify-center font-body text-xs font-semibold tracking-[0.15em] text-white underline underline-offset-4 decoration-white hover:decoration-white transition-colors [text-shadow:_0_2px_4px_rgba(0,0,0,0.85)]"
+                  >
+                    Book Private Appointment
+                  </button>
+                </div>
               </div>
             </div>
           </div>
