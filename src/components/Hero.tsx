@@ -98,8 +98,8 @@ const Hero = () => {
                   EXPLORE THE COLLECTION
                 </button>
 
-                {/* Inline editorial links — same display on mobile, PWA, and desktop */}
-                <div className="flex items-center gap-4 md:gap-5 mt-6 hero-fade-in-delayed-5">
+                {/* Inline editorial links — vertical stack centered under the CTA */}
+                <div className="flex flex-col items-center gap-3 mt-6 hero-fade-in-delayed-5">
                   <button
                     type="button"
                     onClick={() => {
@@ -107,19 +107,15 @@ const Hero = () => {
                       const el = document.getElementById("apartment-tour");
                       if (el) el.scrollIntoView({ behavior: "smooth" });
                     }}
-                    className="group font-body text-[11px] md:text-xs font-medium tracking-[0.15em] text-white transition-colors [text-shadow:_0_2px_4px_rgba(0,0,0,0.85)]"
+                    className="group text-center font-body text-[11px] md:text-xs font-medium tracking-[0.15em] text-white transition-colors [text-shadow:_0_2px_4px_rgba(0,0,0,0.85)]"
                   >
                     <span className="link-underline-grow">Singapore Gallery Preview</span>
                     <span className="font-light italic text-white/75">{" "}(Trade Only)</span>
                   </button>
-                  <span
-                    aria-hidden="true"
-                    className="inline-block w-px bg-white/50 h-[0.72em] [text-shadow:_0_2px_4px_rgba(0,0,0,0.85)]"
-                  />
                   <button
                     type="button"
                     onClick={openTour}
-                    className="group font-body text-[11px] md:text-xs font-medium tracking-[0.15em] text-white transition-colors hover:text-[#E5E5E5] [text-shadow:_0_2px_4px_rgba(0,0,0,0.85)]"
+                    className="group text-center font-body text-[11px] md:text-xs font-medium tracking-[0.15em] text-white transition-colors hover:text-[#E5E5E5] [text-shadow:_0_2px_4px_rgba(0,0,0,0.85)]"
                   >
                     <span className="link-underline-grow">Book Private Appointment</span>
                   </button>
