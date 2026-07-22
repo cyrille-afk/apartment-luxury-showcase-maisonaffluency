@@ -594,6 +594,8 @@ const App = () => {
                   <Route path="/journal/:slug" element={<Suspense fallback={<PageLoadingSkeleton />}><JournalArticle /></Suspense>} />
                   <Route path="/spec-sheets/:slug" element={<Suspense fallback={null}><SpecSheetRedirect /></Suspense>} />
                   <Route path="/trade/spec-sheet" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeSpecSheet /></Suspense>} />
+                  <Route path="/trade/launch" element={<Suspense fallback={null}><TradeMobileLaunch /></Suspense>} />
+                  <Route path="/trade/mobile-launch" element={<Suspense fallback={null}><TradeMobileLaunch /></Suspense>} />
                   <Route path="/trade" element={<Suspense fallback={null}><TradeErrorBoundary><TradeLayout /></TradeErrorBoundary></Suspense>}>
                     <Route index element={<TradeDashboard />} />
                     <Route path="dashboard" element={<TradeDashboard />} />
