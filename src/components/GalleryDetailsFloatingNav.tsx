@@ -42,7 +42,7 @@ export default function GalleryDetailsFloatingNav({ targetId }: Props) {
 
   const handleAllCategories = () => {
     setExpanded(false);
-    navigate("/collectibles");
+    window.dispatchEvent(new CustomEvent("open-all-categories"));
   };
   const handleDesigners = () => {
     setExpanded(false);
