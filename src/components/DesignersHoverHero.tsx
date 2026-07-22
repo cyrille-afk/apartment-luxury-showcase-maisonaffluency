@@ -1286,7 +1286,7 @@ const DesignersHoverHero = () => {
             // toolbar-collapse zone (no white strip). Content frame inside is
             // constrained to 100svh so the Directory clears the iOS toolbar
             // when it is visible.
-            "h-[100lvh] min-h-[640px] md:h-[calc(100svh-var(--header-h))]"
+            "h-[calc(100lvh-var(--header-h))] min-h-[calc(640px-var(--header-h))] md:h-[calc(100svh-var(--header-h))]"
       )}
     >
       {/* Cross-fading background images */}
