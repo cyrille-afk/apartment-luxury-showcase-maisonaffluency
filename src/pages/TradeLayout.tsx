@@ -19,6 +19,8 @@ import { StudioSwitcher } from "@/components/trade/StudioSwitcher";
 
 import { ConciergeHeaderButton } from "@/components/trade/ConciergeHeaderButton";
 import { MobilePreviewHeaderButton } from "@/components/trade/MobilePreviewHeaderButton";
+import { SyncToMobileButton } from "@/components/trade/SyncToMobileButton";
+import { markMobileSeen } from "@/components/trade/MobileHandoffDialog";
 
 
 const CompareFab = lazy(() => import("@/components/CompareFab"));
@@ -300,6 +302,18 @@ const TradeLayout = () => {
     }
   }, [location.pathname, location.search, location.hash]);
 
+  // If the trade portal opens on a mobile viewport (or as a standalone PWA),
+  // remember it — this suppresses the desktop continuity banner.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const isMobile = window.matchMedia("(max-width: 767px)").matches;
+    const isStandalone = window.matchMedia("(display-mode: standalone)").matches
+      || (window.navigator as any).standalone === true;
+    if (isMobile || isStandalone) markMobileSeen();
+  }, []);
+
+
+
 
   const pageTitle = useMemo(() => {
     const path = location.pathname;
@@ -435,6 +449,7 @@ const TradeLayout = () => {
                 <PriceModeSelector />
               </div>
               <NotificationBell />
+              <SyncToMobileButton />
               <MobilePreviewHeaderButton />
               <ConciergeHeaderButton />
             </div>
