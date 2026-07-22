@@ -73,17 +73,27 @@ const ApartmentTourInterlude = ({ compact = false }: { compact?: boolean }) => {
             initial={{ opacity: 0, y: 20 }}
             animate={isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.6 }}
-            className="flex flex-col md:flex-row gap-4 md:gap-8 items-stretch md:items-start"
+            className="flex flex-col md:flex-row gap-2 md:gap-8 items-stretch md:items-start"
           >
             {/* Title — above video on mobile, left side on desktop */}
             <div className="flex flex-col text-center md:text-left order-1 md:order-none md:hidden">
-              <p className="font-serif text-base md:text-lg text-foreground font-light tracking-wide" aria-hidden="true">
-                Tour Our Gallery
-              </p>
+              <div className="inline-flex items-center justify-center gap-2">
+                <p className="font-serif text-base md:text-lg text-foreground font-light tracking-wide" aria-hidden="true">
+                  Tour Our Gallery
+                </p>
+                <button
+                  onClick={handleShare}
+                  className="inline-flex items-center text-foreground hover:text-primary transition-colors"
+                  aria-label="Share apartment tour"
+                >
+                  <Share2 className="w-4 h-4" />
+                </button>
+              </div>
               <p className="text-xs md:text-sm font-body text-muted-foreground/60 italic tracking-wide mt-0.5">
                 An exclusive cinematic tour of a bespoke Singapore apartment — collectible furniture, artisan craftsmanship,{' '}and panoramic cityscape views.
               </p>
             </div>
+
 
             {/* Text — compact, left side (desktop only for title; team section always here) */}
             <div className="flex-1 flex flex-col items-center md:items-start justify-center order-3 md:order-1">
@@ -97,7 +107,7 @@ const ApartmentTourInterlude = ({ compact = false }: { compact?: boolean }) => {
               </div>
 
               {/* The Curating Team — inline */}
-              <h3 id="curating-team" className="font-serif text-base md:text-lg text-foreground font-light tracking-wide mt-4 text-center scroll-header-offset">
+              <h3 id="curating-team" className="font-serif text-base md:text-lg text-foreground font-light tracking-wide mt-1 md:mt-4 text-center scroll-header-offset">
                 & Meet the Curating Team
               </h3>
               <p className="text-xs md:text-sm font-body text-muted-foreground italic tracking-wide mt-0.5 mb-3 text-center">
@@ -193,7 +203,7 @@ const ApartmentTourInterlude = ({ compact = false }: { compact?: boolean }) => {
                   className={`w-full h-full object-cover ${!isPlaying ? "invisible" : ""}`}
                 />
               </div>
-              <div className="flex justify-end w-full mt-2 md:mt-0 md:w-auto">
+              <div className="hidden md:flex justify-end w-full mt-2 md:mt-0 md:w-auto">
                 <button
                   onClick={handleShare}
                   className="flex flex-col items-center gap-1 text-xs font-body text-foreground hover:text-primary transition-colors md:mt-1"
@@ -203,6 +213,7 @@ const ApartmentTourInterlude = ({ compact = false }: { compact?: boolean }) => {
                   <span>Share</span>
                 </button>
               </div>
+
             </div>
           </motion.div>
         </div>
