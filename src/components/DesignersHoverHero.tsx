@@ -414,7 +414,7 @@ const DesignersHoverHero = () => {
   const [activeAccordionLetter, setActiveAccordionLetter] = useState<string | null>(
     () => restoredLetterRef.current
   );
-  const [activeMobileLetter, setActiveMobileLetter] = useState<string | null>(null);
+  const [activeMobileLetter, setActiveMobileLetter] = useState<string | null>(() => restoredLetterRef.current);
   const [azDragging, setAzDragging] = useState(false);
   const [azMagnifier, setAzMagnifier] = useState<{ letter: string; y: number } | null>(null);
   const azTrackRef = useRef<HTMLElement | null>(null);
@@ -443,6 +443,7 @@ const DesignersHoverHero = () => {
       restoredLetterRef.current = requestedLetter;
       setExpandedLetters(new Set([requestedLetter]));
       setActiveAccordionLetter(requestedLetter);
+      setActiveMobileLetter(requestedLetter);
       rememberDesignersAzLetter(requestedLetter);
     }
     if (params.get("find") === "1") {
@@ -1011,6 +1012,7 @@ const DesignersHoverHero = () => {
       if (restored) {
         let cancelled = false;
         setRestoredOnlyLetter(restored);
+        setActiveMobileLetter(restored);
         setIsRestoringLetter(true);
         const scrollToLetter = () => {
           if (cancelled) return false;
@@ -1102,7 +1104,7 @@ const DesignersHoverHero = () => {
     const compute = () => {
       const rows = Array.from(
         scroller.querySelectorAll<HTMLElement>("[data-designer-letter]")
-      );
+      ).filter((row) => row.offsetParent !== null); // skip hidden desktop rows on mobile
       if (!rows.length) return;
       const scrollerTop = scroller.getBoundingClientRect().top;
       let current = rows[0].dataset.designerLetter ?? null;
