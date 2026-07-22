@@ -1328,7 +1328,9 @@ const DesignersHoverHero = () => {
                 // creates real vertical overflow at the bottom and the subject
                 // is lifted up into the visible frame without heavy zoom.
                 isMobileOrPwa
-                  ? "top-0 left-0 h-[118%] object-top md:top-0 md:h-full md:object-center"
+                  ? isStandalone
+                    ? "top-0 left-0 h-[118%] object-top md:top-0 md:h-full md:object-center"
+                    : "top-[-7.5rem] left-0 h-[calc(118%+7.5rem)] object-top md:top-0 md:h-full md:object-center"
                   : "inset-0 h-full",
                 isActive ? "opacity-100" : "opacity-0"
               )}
