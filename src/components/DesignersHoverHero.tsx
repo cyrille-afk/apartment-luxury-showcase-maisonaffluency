@@ -1038,7 +1038,6 @@ const DesignersHoverHero = () => {
               scrollToLetter();
               if (!cancelled) {
                 setIsRestoringLetter(false);
-                window.setTimeout(() => setRestoredOnlyLetter(null), 120);
               }
             });
             return;
@@ -1739,7 +1738,7 @@ const DesignersHoverHero = () => {
                   )}
                   style={{ scrollbarWidth: "none" }}
                 >
-                  {(restoredOnlyLetter ? groupedResults.filter(([letter]) => letter === restoredOnlyLetter) : groupedResults).map(([letter]) => {
+                  {groupedResults.map(([letter]) => {
                     const isActive = activeMobileLetter === letter;
                     return (
                       <button
@@ -1747,6 +1746,7 @@ const DesignersHoverHero = () => {
                         type="button"
                         onClick={() => {
                           rememberDesignersAzLetter(letter);
+                          setRestoredOnlyLetter(null);
                           setExpandedLetters(new Set([letter]));
                           setActiveAccordionLetter(letter);
                           requestAnimationFrame(() => {
