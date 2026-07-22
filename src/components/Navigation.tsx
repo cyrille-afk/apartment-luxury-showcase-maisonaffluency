@@ -180,8 +180,17 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
   // mobile menu via a custom event.
   useEffect(() => {
     const openMenu = () => setIsOpen(true);
+    const openCategories = () => {
+      setIsOpen(true);
+      setCategoryPanelOpen(true);
+      setExpandedCategory(null);
+    };
     window.addEventListener("open-main-menu", openMenu);
-    return () => window.removeEventListener("open-main-menu", openMenu);
+    window.addEventListener("open-all-categories", openCategories);
+    return () => {
+      window.removeEventListener("open-main-menu", openMenu);
+      window.removeEventListener("open-all-categories", openCategories);
+    };
   }, []);
 
 
