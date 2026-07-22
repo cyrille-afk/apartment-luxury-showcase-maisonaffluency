@@ -9,6 +9,8 @@ interface Props {
   openMainMenu?: boolean;
   /** ARIA label for the menu button. */
   menuLabel?: string;
+  /** Optional callback before menu navigation. */
+  onMenuClick?: () => void;
   /** Show after scrolling this many px. */
   threshold?: number;
 }
@@ -20,6 +22,7 @@ export default function FloatingScrollNav({
   menuHref = "/designers",
   openMainMenu = false,
   menuLabel,
+  onMenuClick,
   threshold = 600,
 }: Props) {
   const [visible, setVisible] = useState(false);
@@ -35,6 +38,7 @@ export default function FloatingScrollNav({
   if (!visible) return null;
 
   const onMenuClick = () => {
+    onMenuClick?.();
     if (openMainMenu) {
       window.dispatchEvent(new Event("open-main-menu"));
     } else {
