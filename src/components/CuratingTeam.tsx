@@ -87,6 +87,14 @@ const CuratingTeam = () => {
                       </div>
                     )}
                   </button>
+                  {/* French flag badge at bottom-left corner */}
+                  <div className="absolute bottom-1 left-1 md:bottom-0 md:left-0 w-6 h-6 md:w-7 md:h-7 rounded-full overflow-hidden shadow-md border-2 border-background" aria-label="French">
+                    <svg viewBox="0 0 3 2" className="w-full h-full" aria-hidden="true">
+                      <rect x="0" y="0" width="1" height="2" fill="#002395" />
+                      <rect x="1" y="0" width="1" height="2" fill="#FFFFFF" />
+                      <rect x="2" y="0" width="1" height="2" fill="#ED2939" />
+                    </svg>
+                  </div>
                   {/* Magnifying glass icon at bottom-right corner */}
                   <div className="absolute bottom-1 right-1 md:bottom-0 md:right-0 bg-background/90 p-1.5 rounded-full shadow-md text-primary/70 group-hover:text-primary transition-colors duration-300" aria-hidden="true">
                     <Search className="w-3.5 h-3.5 md:w-4 md:h-4" aria-hidden="true" />
