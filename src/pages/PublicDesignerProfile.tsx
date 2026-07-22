@@ -376,6 +376,10 @@ const PublicDesignerProfile = () => {
     const safeLetter = letter && /^[A-Z]$/.test(letter) ? letter : "A";
     return `/designers?find=1&letter=${encodeURIComponent(safeLetter)}`;
   }, [designer?.name]);
+  const rememberDesignerAzLetter = () => {
+    if (!designer?.name) return;
+    try { sessionStorage.setItem("designers_az_last_letter", lastNameInitial(designer.name)); } catch {}
+  };
 
   const picksSectionRef = useRef<HTMLDivElement | null>(null);
   const lightboxOpenRef = useRef(false);
@@ -894,6 +898,8 @@ const PublicDesignerProfile = () => {
                       return `/designers?letter=${letter}${expandParam}`;
                     })()}
 
+                onClick={rememberDesignerAzLetter}
+
                 className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors font-body text-[11px] uppercase tracking-[0.15em]"
               >
                 <ArrowLeft className="h-3.5 w-3.5" />
@@ -1345,7 +1351,7 @@ const PublicDesignerProfile = () => {
         <Footer />
       </div>
 
-      <FloatingScrollNav menuHref={designerAzBackHref} menuLabel="Back to A–Z directory" />
+      <FloatingScrollNav menuHref={designerAzBackHref} menuLabel="Back to A–Z directory" onMenuClick={rememberDesignerAzLetter} />
 
       <PublicProductLightbox
         product={lightboxItem}
