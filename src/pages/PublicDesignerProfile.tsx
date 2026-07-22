@@ -374,7 +374,7 @@ const PublicDesignerProfile = () => {
     })();
     const letter = designer?.name ? lastNameInitial(designer.name) : storedLetter;
     const safeLetter = letter && /^[A-Z]$/.test(letter) ? letter : "A";
-    return `/designers?find=1&letter=${encodeURIComponent(safeLetter)}`;
+    return `/designers?letter=${encodeURIComponent(safeLetter)}`;
   }, [designer?.name]);
   const rememberDesignerAzLetter = () => {
     if (!designer?.name) return;
