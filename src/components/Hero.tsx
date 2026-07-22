@@ -97,7 +97,7 @@ const Hero = () => {
                 EXPLORE THE COLLECTION
               </button>
 
-              <div className="md:hidden mt-[18svh] mb-3 flex flex-col items-center gap-1 hero-fade-in-delayed-5 rounded-2xl bg-black/35 px-3 py-2 shadow-[0_8px_30px_rgba(0,0,0,0.35)] backdrop-blur-sm">
+              <div className={`md:hidden mb-3 flex flex-col items-center gap-1 hero-fade-in-delayed-5 rounded-2xl bg-black/35 px-3 py-2 shadow-[0_8px_30px_rgba(0,0,0,0.35)] backdrop-blur-sm ${isPWA ? "mt-[18svh]" : "mt-6"}`}>
                 <span className="font-body text-[10px] font-semibold tracking-[0.18em] text-white [text-shadow:_0_2px_4px_rgba(0,0,0,0.85)]">
                   Singapore Gallery Preview
                 </span>
