@@ -99,7 +99,7 @@ const Hero = () => {
                 </button>
 
                 {/* Mobile/PWA: stacked dark block */}
-                <div className="mb-3 flex flex-col items-center gap-2 hero-fade-in-delayed-5 rounded-2xl bg-black/35 px-4 py-3 shadow-[0_8px_30px_rgba(0,0,0,0.22)] backdrop-blur-sm md:hidden">
+                <div className={`mb-3 flex flex-col items-center gap-2 hero-fade-in-delayed-5 rounded-2xl bg-black/35 px-4 py-3 shadow-[0_8px_30px_rgba(0,0,0,0.22)] backdrop-blur-sm md:hidden ${isPWA ? "mt-[18svh]" : ""}`}>
                   <div className="flex flex-col items-center gap-0.5">
                     <span className="text-center font-body text-[10px] font-semibold tracking-[0.18em] text-white [text-shadow:_0_2px_4px_rgba(0,0,0,0.85)]">
                       Singapore Gallery Preview
