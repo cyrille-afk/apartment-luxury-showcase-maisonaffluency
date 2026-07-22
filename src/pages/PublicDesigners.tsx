@@ -149,6 +149,7 @@ function ScrollLockedDesigners({
     const prevRight = body.style.right;
     const prevWidth = body.style.width;
     const prevHeight = body.style.height;
+    const prevMinHeight = body.style.minHeight;
     // iOS ignores body overflow alone during toolbar/rubber-band gestures. Pin
     // the body itself while /designers is in the locked mobile/PWA landing so
     // the hero cannot visually lift under the fixed header.
@@ -212,7 +213,7 @@ function ScrollLockedDesigners({
       body.style.right = prevRight;
       body.style.width = prevWidth;
       body.style.height = prevHeight;
-      body.style.minHeight = "";
+      body.style.minHeight = prevMinHeight;
       try { (window.history as any).scrollRestoration = prevRestoration ?? "auto"; } catch { /* ignore */ }
       window.scrollTo({ top: 0, left: 0, behavior: "instant" as ScrollBehavior });
       cancelAnimationFrame(raf);
