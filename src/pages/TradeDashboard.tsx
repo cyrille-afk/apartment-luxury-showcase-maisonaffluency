@@ -11,6 +11,7 @@ import { trackEvent } from "@/lib/analytics";
 import { ActivityRowSkeleton, BrandFolderSkeleton } from "@/components/trade/skeletons";
 import { MostPopularProducts } from "@/components/trade/MostPopularProducts";
 import { BoardRecommendations } from "@/components/trade/BoardRecommendations";
+import { MobileContinuityBanner } from "@/components/trade/MobileContinuityBanner";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { cloudinaryUrl } from "@/lib/cloudinary";
@@ -285,6 +286,10 @@ const TradeDashboard = () => {
 
         </div>
       </div>
+
+      <MobileContinuityBanner />
+
+
 
       {/* Mobile Essentials + Live Walkthrough — two distinct pinned sections */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 mb-6">
