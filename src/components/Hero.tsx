@@ -75,6 +75,15 @@ const Hero = () => {
           here — a second <picture> creates a duplicate LCP candidate and
           extra decode work that pushes LCP later on throttled CPUs. */}
       <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-black/10 via-transparent to-black/20" />
+      {/* Mobile/PWA only: soft dark radial gradient across bottom half for text contrast */}
+      <div
+        className="absolute inset-x-0 bottom-0 h-1/2 pointer-events-none md:hidden"
+        style={{
+          background:
+            "radial-gradient(ellipse 120% 100% at 50% 100%, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.35) 40%, rgba(0,0,0,0) 100%)",
+        }}
+        aria-hidden="true"
+      />
 
       {/* Text overlay — CSS-only animations, no framer-motion needed */}
       <div className="ma-home-hero-copy relative z-10 h-full px-6 pb-32 pt-[var(--home-hero-mobile-pad-top)] md:px-32 md:pb-20 md:pt-[16rem] lg:px-48 flex-col border rounded-none opacity-100 shadow-none flex items-start justify-start md:justify-start md:items-start">
