@@ -15,10 +15,22 @@ interface PrivateTourDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
+const PROFESSION_OPTIONS = [
+  "Interior Designer",
+  "Architect",
+  "Property Developer",
+  "Private Client / Collector",
+  "Hospitality / F&B",
+  "Press / Media",
+  "Other",
+] as const;
+
 const tourSchema = z.object({
   name: z.string().trim().min(1, "Name is required").max(100, "Max 100 characters"),
   email: z.string().trim().email("Please enter a valid email").max(255, "Max 255 characters"),
   phone: z.string().trim().max(30, "Max 30 characters"),
+  profession: z.string().trim().min(1, "Please select your profession").max(100, "Max 100 characters"),
+  company: z.string().trim().max(150, "Max 150 characters").optional(),
   preferredDate: z.string().trim().max(100, "Max 100 characters").optional(),
   message: z.string().trim().max(2000, "Max 2000 characters").optional(),
 });
@@ -34,10 +46,11 @@ const PrivateTourDialog = ({ open, onOpenChange }: PrivateTourDialogProps) => {
   const [website, setWebsite] = useState("");
   const [mountedAt] = useState(() => Date.now());
 
-  const EMPTY_FORM = { name: "", email: "", phone: "", preferredDate: "", message: "" };
+  const EMPTY_FORM = { name: "", email: "", phone: "", profession: "", company: "", preferredDate: "", message: "" };
   const [formData, setFormData] = useState(EMPTY_FORM);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+
     const { id, value } = e.target;
     setFormData(prev => ({ ...prev, [id]: value }));
     if (errors[id]) setErrors(prev => { const next = { ...prev }; delete next[id]; return next; });
