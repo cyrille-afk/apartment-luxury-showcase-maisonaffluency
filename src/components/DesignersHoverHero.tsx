@@ -1017,9 +1017,13 @@ const DesignersHoverHero = () => {
             `[data-designer-letter="${restored}"]`
           );
           if (row && scroller) {
-            const top = row.getBoundingClientRect().top - scroller.getBoundingClientRect().top + scroller.scrollTop - 4;
-            scroller.scrollTo({ top, behavior: "auto" });
-            return true;
+            const top = Math.max(0, row.offsetTop - 4);
+            const previousBehavior = scroller.style.scrollBehavior;
+            scroller.style.scrollBehavior = "auto";
+            scroller.scrollTop = top;
+            void scroller.offsetHeight;
+            scroller.style.scrollBehavior = previousBehavior;
+            return Math.abs(scroller.scrollTop - top) < 2;
           }
           return false;
         };
@@ -1717,7 +1721,10 @@ const DesignersHoverHero = () => {
             {!isSearching && (
               <div className="md:hidden shrink-0 border-b border-white/[0.06] bg-[#0a0a0a]/95 backdrop-blur mb-3">
                 <div
-                  className="flex items-center gap-0.5 overflow-x-auto no-scrollbar px-3 py-1.5"
+                  className={cn(
+                    "flex items-center gap-0.5 overflow-x-auto no-scrollbar px-3 py-1.5 transition-opacity duration-150",
+                    isRestoringLetter ? "opacity-0" : "opacity-100"
+                  )}
                   style={{ scrollbarWidth: "none" }}
                 >
                   {groupedResults.map(([letter]) => {
@@ -1754,7 +1761,7 @@ const DesignersHoverHero = () => {
                 </div>
               </div>
             )}
-            <div ref={searchScrollRef} className={`flex-1 overflow-y-auto overscroll-contain px-4 pt-2 pb-4 min-h-0 scroll-smooth relative touch-pan-y transition-opacity duration-150 ${isRestoringLetter ? "opacity-0" : "opacity-100"}`}>
+            <div ref={searchScrollRef} className={`flex-1 overflow-y-auto overscroll-contain px-4 pt-2 pb-4 min-h-0 relative touch-pan-y transition-opacity duration-150 ${isRestoringLetter ? "opacity-0" : "opacity-100"}`}>
 
               {!isSearching && groupedResults.length === 0 ? (
                 <div className="px-4 py-10 flex flex-col items-center gap-3" aria-live="polite">
