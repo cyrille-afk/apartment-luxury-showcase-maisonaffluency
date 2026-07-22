@@ -29,6 +29,19 @@ function safeRedirect(input: unknown): string | null {
   return url.toString();
 }
 
+/**
+ * Wrap the caller-requested destination in a clean deep-link handoff route
+ * (`/trade/launch?next=<path>`). That page waits for the Supabase session to
+ * hydrate, invites installable-PWA install, then forwards to the real path.
+ */
+function buildHandoffUrl(target: string): string {
+  const url = new URL(target);
+  const nextPath = `${url.pathname}${url.search}${url.hash}` || "/trade";
+  const launch = new URL("/trade/launch", url.origin);
+  launch.searchParams.set("next", nextPath);
+  return launch.toString();
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
@@ -58,10 +71,11 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
     );
+    const handoffUrl = buildHandoffUrl(redirectTo);
     const { data, error } = await admin.auth.admin.generateLink({
       type: "magiclink",
       email,
-      options: { redirectTo },
+      options: { redirectTo: handoffUrl },
     });
     if (error || !data?.properties?.action_link) {
       return json({ error: error?.message ?? "Failed to mint link" }, 500);
@@ -71,7 +85,7 @@ Deno.serve(async (req) => {
     return json({
       url: data.properties.action_link,
       expiresIn: 3600,
-      redirectTo,
+      redirectTo: handoffUrl,
     });
   } catch (err) {
     return json({ error: (err as Error).message }, 500);
