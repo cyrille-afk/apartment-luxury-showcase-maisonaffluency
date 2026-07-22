@@ -1324,7 +1324,7 @@ const DesignersHoverHero = () => {
                 // Mobile browser only: shift image content upward so featured
                 // pieces (e.g. the Alexander Lamont cabinet) sit higher in the
                 // visible frame, while PWA and desktop framing stay unchanged.
-                !isStandalone && "object-[center_70%] md:object-center",
+                !isStandalone && "object-[center_35%] md:object-center",
                 isActive ? "opacity-100" : "opacity-0"
               )}
               style={{ transitionDuration: `${IMAGE_TRANSITION_MS}ms` }}
