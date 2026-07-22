@@ -48,7 +48,7 @@ export default function FloatingScrollNav({
 
   return (
     <div
-      className="fixed z-40 right-3 md:hidden flex flex-col gap-2 print:hidden"
+      className="fixed z-[10000] right-3 md:hidden flex flex-col gap-2 print:hidden"
       style={{ bottom: "calc(env(safe-area-inset-bottom, 0px) + 1rem)" }}
     >
       <button
