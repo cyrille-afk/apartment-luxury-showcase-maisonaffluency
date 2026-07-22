@@ -119,10 +119,14 @@ export default function BuildUpdateBanner() {
       // remains pending until the user hard-refreshes manually when ready.
       if (isProtectedPath() || hasFabricWorkInProgress()) return;
 
-      // Discreet toast fallback (no centered black pill).
+      // Show at top-center so mobile/PWA users see it above the iOS home
+      // indicator (default bottom-right sits under the system nav bar and is
+      // effectively invisible on installed PWAs).
+      const isNarrow = typeof window !== "undefined" && window.matchMedia("(max-width: 767px)").matches;
       toast("A new version is available", {
         description: "Refresh when you're ready.",
-        duration: 12_000,
+        duration: 20_000,
+        position: isNarrow ? "top-center" : "bottom-right",
         action: {
           label: "Refresh now",
           onClick: (e) => {
