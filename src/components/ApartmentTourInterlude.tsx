@@ -130,6 +130,13 @@ const ApartmentTourInterlude = ({ compact = false }: { compact?: boolean }) => {
                           <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-background border border-[hsl(var(--gold))]/40 flex items-center justify-center">
                             <Search className="w-2.5 h-2.5 text-muted-foreground" />
                           </div>
+                          <div className="absolute -bottom-0.5 -left-0.5 w-4 h-4 rounded-full overflow-hidden border border-[hsl(var(--gold))]/40 shadow-sm" aria-label="French">
+                            <svg viewBox="0 0 3 2" preserveAspectRatio="none" className="w-full h-full block" aria-hidden="true">
+                              <rect x="0" y="0" width="1" height="2" fill="#002395" />
+                              <rect x="1" y="0" width="1" height="2" fill="#FFFFFF" />
+                              <rect x="2" y="0" width="1" height="2" fill="#ED2939" />
+                            </svg>
+                          </div>
                         </div>
                         <span className="text-[10px] font-body text-foreground mt-1 tracking-wide group-hover:text-primary transition-colors">{member.name}</span>
                         <span className="text-[9px] font-body text-muted-foreground/70 tracking-wider uppercase">{member.role}</span>
@@ -300,6 +307,13 @@ const ApartmentTourInterlude = ({ compact = false }: { compact?: boolean }) => {
                         />
                         <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-background border border-[hsl(var(--gold))]/40 flex items-center justify-center">
                           <Search className="w-2.5 h-2.5 text-muted-foreground" />
+                        </div>
+                        <div className="absolute -bottom-0.5 -left-0.5 w-4 h-4 rounded-full overflow-hidden border border-[hsl(var(--gold))]/40 shadow-sm" aria-label="French">
+                          <svg viewBox="0 0 3 2" preserveAspectRatio="none" className="w-full h-full block" aria-hidden="true">
+                            <rect x="0" y="0" width="1" height="2" fill="#002395" />
+                            <rect x="1" y="0" width="1" height="2" fill="#FFFFFF" />
+                            <rect x="2" y="0" width="1" height="2" fill="#ED2939" />
+                          </svg>
                         </div>
                       </div>
                       <span className="text-[11px] md:text-xs font-body text-foreground mt-2 tracking-wide group-hover:text-primary transition-colors">{member.name}</span>
