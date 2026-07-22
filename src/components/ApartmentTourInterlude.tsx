@@ -77,13 +77,23 @@ const ApartmentTourInterlude = ({ compact = false }: { compact?: boolean }) => {
           >
             {/* Title — above video on mobile, left side on desktop */}
             <div className="flex flex-col text-center md:text-left order-1 md:order-none md:hidden">
-              <p className="font-serif text-base md:text-lg text-foreground font-light tracking-wide" aria-hidden="true">
-                Tour Our Gallery
-              </p>
+              <div className="inline-flex items-center justify-center gap-2">
+                <p className="font-serif text-base md:text-lg text-foreground font-light tracking-wide" aria-hidden="true">
+                  Tour Our Gallery
+                </p>
+                <button
+                  onClick={handleShare}
+                  className="inline-flex items-center text-foreground hover:text-primary transition-colors"
+                  aria-label="Share apartment tour"
+                >
+                  <Share2 className="w-4 h-4" />
+                </button>
+              </div>
               <p className="text-xs md:text-sm font-body text-muted-foreground/60 italic tracking-wide mt-0.5">
                 An exclusive cinematic tour of a bespoke Singapore apartment — collectible furniture, artisan craftsmanship,{' '}and panoramic cityscape views.
               </p>
             </div>
+
 
             {/* Text — compact, left side (desktop only for title; team section always here) */}
             <div className="flex-1 flex flex-col items-center md:items-start justify-center order-3 md:order-1">
