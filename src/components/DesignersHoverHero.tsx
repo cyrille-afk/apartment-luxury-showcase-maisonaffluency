@@ -1321,14 +1321,14 @@ const DesignersHoverHero = () => {
               {...(isFirst ? { fetchPriority: "high" as const } : {})}
               className={cn(
                 "absolute left-0 w-full object-cover transition-opacity ease-out",
-                // Many of the mobile hero sources are square; object-position
-                // cannot lift a square image inside a tall phone frame because
-                // there is no vertical overflow to reposition. Give mobile/PWA
-                // images real vertical overflow, then pull that overflow upward
-                // so the artwork sits behind the full lower browser/PWA chrome
-                // instead of resolving to a dark/empty band.
+                // Mobile/PWA sources are typically square. With `h-full` and a
+                // portrait container, object-cover produces horizontal overflow
+                // only, so `object-position` cannot lift the subject vertically.
+                // Give the image ~18% extra height (top-anchored) so cover-fit
+                // creates real vertical overflow at the bottom and the subject
+                // is lifted up into the visible frame without heavy zoom.
                 isMobileOrPwa
-                  ? "inset-0 h-full object-top md:object-center"
+                  ? "top-0 left-0 h-[118%] object-top md:top-0 md:h-full md:object-center"
                   : "inset-0 h-full",
                 isActive ? "opacity-100" : "opacity-0"
               )}
