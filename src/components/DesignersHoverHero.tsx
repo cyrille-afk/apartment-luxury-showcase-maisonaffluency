@@ -474,6 +474,7 @@ const DesignersHoverHero = () => {
     return () => mql.removeEventListener("change", update);
   }, []);
   const isMobileOrPwa = isMobileViewport || isMobileHook || isStandalone;
+  const isMobileBrowser = (isMobileViewport || isMobileHook) && !isStandalone;
   const navRef = useRef<HTMLElement>(null);
   const sectionRef = useRef<HTMLElement>(null);
   const handoffLockRef = useRef(false);
@@ -568,6 +569,59 @@ const DesignersHoverHero = () => {
       window.removeEventListener("keydown", markUserInteracted);
     };
   }, [isMobileOrPwa]);
+
+  // iOS Safari paints the bottom browser chrome from the document/body backdrop,
+  // not always from fixed-position children. Mirror the active mobile hero image
+  // onto the page fallback so the area behind the toolbar stays photographic.
+  // PWA/standalone is intentionally excluded.
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    if (!isMobileBrowser || !items.length) return;
+    const activeDesigner = items.find((d) => d.slug === activeSlug) || items[0];
+    const src = activeDesigner.first_pick_image_url || activeDesigner.hero_image_url || activeDesigner.image_url;
+    if (!src) return;
+
+    const { src: backgroundSrc } = cldResponsiveImg(src, {
+      widths: [720, 960, 1280],
+      sizes: "100vw",
+    });
+    if (!backgroundSrc) return;
+
+    const html = document.documentElement;
+    const body = document.body;
+    const previousHtmlBgImage = html.style.backgroundImage;
+    const previousHtmlBgSize = html.style.backgroundSize;
+    const previousHtmlBgPosition = html.style.backgroundPosition;
+    const previousHtmlBgRepeat = html.style.backgroundRepeat;
+    const previousHtmlBgColor = html.style.backgroundColor;
+    const previousBodyBgImage = body.style.backgroundImage;
+    const previousBodyBgSize = body.style.backgroundSize;
+    const previousBodyBgPosition = body.style.backgroundPosition;
+    const previousBodyBgRepeat = body.style.backgroundRepeat;
+
+    const image = `linear-gradient(rgba(0,0,0,0.22), rgba(0,0,0,0.22)), url("${backgroundSrc}")`;
+    html.style.backgroundImage = image;
+    html.style.backgroundSize = "cover";
+    html.style.backgroundPosition = "center top";
+    html.style.backgroundRepeat = "no-repeat";
+    html.style.backgroundColor = "#0a0a0a";
+    body.style.backgroundImage = image;
+    body.style.backgroundSize = "cover";
+    body.style.backgroundPosition = "center top";
+    body.style.backgroundRepeat = "no-repeat";
+
+    return () => {
+      html.style.backgroundImage = previousHtmlBgImage;
+      html.style.backgroundSize = previousHtmlBgSize;
+      html.style.backgroundPosition = previousHtmlBgPosition;
+      html.style.backgroundRepeat = previousHtmlBgRepeat;
+      html.style.backgroundColor = previousHtmlBgColor;
+      body.style.backgroundImage = previousBodyBgImage;
+      body.style.backgroundSize = previousBodyBgSize;
+      body.style.backgroundPosition = previousBodyBgPosition;
+      body.style.backgroundRepeat = previousBodyBgRepeat;
+    };
+  }, [activeSlug, isMobileBrowser, items]);
 
   // Pre-seed active on first render once data arrives so the hero is never
   // a void on entry — the first designer acts as default.
@@ -1286,7 +1340,7 @@ const DesignersHoverHero = () => {
             // toolbar-collapse zone (no white strip). Content frame inside is
             // constrained to 100svh so the Directory clears the iOS toolbar
             // when it is visible.
-            "h-[100lvh] min-h-[640px] md:h-[calc(100svh-var(--header-h))]"
+            "h-[calc(100lvh-var(--header-h))] min-h-[calc(640px-var(--header-h))] md:h-[calc(100svh-var(--header-h))]"
       )}
     >
       {/* Cross-fading background images */}
