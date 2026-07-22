@@ -163,18 +163,18 @@ export default defineConfig(({ mode }) => {
   build: {
     rollupOptions: {
       output: {
-        manualChunks: {
-          // Keep jsx-runtime with React so Rollup doesn't hoist it into
-          // vendor-motion, which would force every JSX-using chunk to
-          // statically import framer-motion (critical-path bloat).
-          'vendor-react': ['react', 'react-dom', 'react-router-dom', 'react/jsx-runtime'],
-          'vendor-motion': ['framer-motion'],
-          'vendor-query': ['@tanstack/react-query'],
-          'vendor-radix': [
-            '@radix-ui/react-accordion',
-            '@radix-ui/react-dialog',
-            '@radix-ui/react-popover',
-          ],
+        manualChunks: (id) => {
+          // Bundle every lucide icon into one chunk. Otherwise each icon
+          // ships as its own 500-1500 byte file and a mobile page opens
+          // 15+ additional HTTP round-trips just for icons — the single
+          // biggest source of "takes forever to load" on 4G/PWA.
+          if (id.includes('node_modules/lucide-react/')) return 'vendor-icons';
+          if (id.includes('node_modules/react-router')) return 'vendor-react';
+          if (id.includes('node_modules/react-dom')) return 'vendor-react';
+          if (id.includes('node_modules/react/')) return 'vendor-react';
+          if (id.includes('node_modules/framer-motion')) return 'vendor-motion';
+          if (id.includes('node_modules/@tanstack/react-query')) return 'vendor-query';
+          if (id.includes('node_modules/@radix-ui/')) return 'vendor-radix';
         },
       },
     },
