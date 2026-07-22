@@ -71,10 +71,11 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
     );
+    const handoffUrl = buildHandoffUrl(redirectTo);
     const { data, error } = await admin.auth.admin.generateLink({
       type: "magiclink",
       email,
-      options: { redirectTo },
+      options: { redirectTo: handoffUrl },
     });
     if (error || !data?.properties?.action_link) {
       return json({ error: error?.message ?? "Failed to mint link" }, 500);
@@ -84,7 +85,7 @@ Deno.serve(async (req) => {
     return json({
       url: data.properties.action_link,
       expiresIn: 3600,
-      redirectTo,
+      redirectTo: handoffUrl,
     });
   } catch (err) {
     return json({ error: (err as Error).message }, 500);
