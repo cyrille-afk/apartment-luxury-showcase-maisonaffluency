@@ -310,12 +310,6 @@ const DesktopCarouselStrip = ({
               height={1000}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/5 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100 rounded-sm" />
-            {/* Title overlay on hover */}
-            <div className="absolute bottom-0 left-0 right-0 px-6 pb-10 translate-y-4 opacity-0 transition-all duration-500 group-hover:translate-y-0 group-hover:opacity-100 pointer-events-none z-10">
-              <p className="font-display text-white text-sm tracking-widest uppercase drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]">
-                {item.title}
-              </p>
-            </div>
             {/* Pulsating hotspot — first card */}
             {index === 0 && (
               <div className="absolute top-3 left-3 z-20 pointer-events-none">
