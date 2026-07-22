@@ -23,6 +23,7 @@ import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/queryKeys";
 import { fetchCatalogManifest } from "@/lib/catalogManifest";
 import { resolveCuratorPickDescription } from "@/lib/curatorPickDescription";
+import GalleryDetailsFloatingNav from "./GalleryDetailsFloatingNav";
 
 const g = (id: string) => cloudinaryUrl(id, { width: 1200, quality: "auto:good", crop: "fill" });
 const gSet = (id: string) => cloudinarySrcSet(id, [400, 600, 800, 1200, 1600], { quality: "auto:good", crop: "fill" });
@@ -1319,6 +1320,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
           </motion.div>
         </div>
       </section>
+      <GalleryDetailsFloatingNav targetId="gallery-section-6" />
 
       {/* Lightbox - using Radix Dialog (react-remove-scroll blocks browser gestures, enabling PinchZoomImage) */}
       <Dialog
