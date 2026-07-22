@@ -19,6 +19,7 @@ export function SyncToMobileButton() {
   const [modalOpen, setModalOpen] = useState(false);
   const [state, setState] = useState<"idle" | "loading" | "ready" | "error">("idle");
   const [dataUrl, setDataUrl] = useState<string | null>(null);
+  const [errMsg, setErrMsg] = useState<string | null>(null);
   const lastPathRef = useRef<string | null>(null);
 
   const redirectTo = useMemo(() => {
@@ -28,12 +29,15 @@ export function SyncToMobileButton() {
 
   const mint = async () => {
     setState("loading");
+    setErrMsg(null);
     try {
       const { data, error } = await supabase.functions.invoke("trade-mobile-magic-link", {
         body: { redirectTo },
       });
       if (error) throw error;
-      const link = (data as any)?.url as string;
+      const link = (data as any)?.url as string | undefined;
+      const errFromBody = (data as any)?.error as string | undefined;
+      if (!link) throw new Error(errFromBody || "No link returned");
       const png = await QRCode.toDataURL(link, {
         margin: 1,
         width: 220,
@@ -42,7 +46,9 @@ export function SyncToMobileButton() {
       });
       setDataUrl(png);
       setState("ready");
-    } catch {
+    } catch (e) {
+      console.error("[sync-to-phone] mint failed", e);
+      setErrMsg((e as Error).message || "Failed");
       setState("error");
     }
   };
@@ -80,9 +86,14 @@ export function SyncToMobileButton() {
               {state === "ready" && dataUrl ? (
                 <img src={dataUrl} alt="Scan to open on phone" className="w-full h-full" />
               ) : state === "error" ? (
-                <button onClick={mint} className="inline-flex items-center gap-1 text-xs font-body text-foreground hover:underline">
-                  <RefreshCw className="h-3 w-3" /> Try again
-                </button>
+                <div className="text-center px-2">
+                  {errMsg && (
+                    <p className="font-body text-[10px] text-destructive mb-1.5 leading-snug">{errMsg}</p>
+                  )}
+                  <button onClick={mint} className="inline-flex items-center gap-1 text-xs font-body text-foreground hover:underline">
+                    <RefreshCw className="h-3 w-3" /> Try again
+                  </button>
+                </div>
               ) : (
                 <Loader2 className="h-5 w-5 text-muted-foreground animate-spin" />
               )}
