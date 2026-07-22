@@ -88,7 +88,7 @@ const Hero = () => {
             <p className="text-base leading-relaxed text-white text-left font-serif md:text-xl lg:text-2xl font-medium hero-fade-in-delayed-3">
               A curated collection of masterworks<br />reeditions and contemporary design<br />for global architectural projects.
             </p>
-            <div className="w-screen -translate-x-6 items-center md:w-full md:translate-x-0 md:items-start mt-[5.5rem] md:mt-20 flex flex-col gap-6">
+            <div className="hero-mobile-cta-stack w-screen -translate-x-6 items-center md:w-full md:translate-x-0 md:items-start mt-[5.5rem] md:mt-20 flex flex-col gap-6">
               <div className="flex flex-col items-center gap-6 md:inline-flex">
                 <button
                   type="button"
@@ -99,7 +99,7 @@ const Hero = () => {
                 </button>
 
                 {/* Mobile/PWA: stacked dark block */}
-                <div className={`mb-3 flex flex-col items-center gap-2 hero-fade-in-delayed-5 rounded-2xl bg-black/35 px-4 py-3 shadow-[0_8px_30px_rgba(0,0,0,0.22)] backdrop-blur-sm md:hidden ${isPWA ? "mt-[18svh]" : ""}`}>
+                <div className={`hero-mobile-micro-block mb-3 flex flex-col items-center gap-2 hero-fade-in-delayed-5 rounded-2xl bg-black/35 px-4 py-3 shadow-[0_8px_30px_rgba(0,0,0,0.22)] backdrop-blur-sm md:hidden ${isPWA ? "is-pwa" : ""}`}>
                   <div className="flex flex-col items-center gap-0.5">
                     <span className="text-center font-body text-[10px] font-semibold tracking-[0.18em] text-white [text-shadow:_0_2px_4px_rgba(0,0,0,0.85)]">
                       Singapore Gallery Preview
