@@ -623,7 +623,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
         {/* Desktop: stacked layout */}
         <div className="hidden md:flex flex-col items-center">
           {/* Top row: Trade Program | MAISON AFFLUENCY | Contact Us */}
-          <div className="w-full grid grid-cols-[1fr_auto_1fr] items-start pt-6 pb-1">
+          <div className="w-full grid grid-cols-[1fr_auto_1fr] items-center pt-6 pb-1">
             <div className="flex justify-start pt-1 pl-2">
               <ShippingDestinationSwitcher />
             </div>
