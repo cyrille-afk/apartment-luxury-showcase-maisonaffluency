@@ -1330,7 +1330,7 @@ const DesignersHoverHero = () => {
                 isMobileOrPwa
                   ? isStandalone
                     ? "top-0 left-0 h-[118%] object-top md:top-0 md:h-full md:object-center"
-                    : "top-[-3.25rem] left-0 h-[calc(118%+3.25rem)] object-top md:top-0 md:h-full md:object-center"
+                    : "top-[-7rem] left-0 h-[calc(118%+3.25rem)] object-top md:top-0 md:h-full md:object-center"
                   : "inset-0 h-full",
                 isActive ? "opacity-100" : "opacity-0"
               )}
