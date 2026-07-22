@@ -428,10 +428,18 @@ const DesignersHoverHero = () => {
   useEffect(() => {
     if (typeof window === "undefined") return;
     const params = new URLSearchParams(window.location.search);
+    const requestedLetter = params.get("letter")?.trim().toUpperCase().slice(0, 1);
+    if (requestedLetter && /^[A-Z]$/.test(requestedLetter)) {
+      restoredLetterRef.current = requestedLetter;
+      setExpandedLetters(new Set([requestedLetter]));
+      setActiveAccordionLetter(requestedLetter);
+      try { sessionStorage.setItem("designers_az_last_letter", requestedLetter); } catch {}
+    }
     if (params.get("find") === "1") {
       setSearchOpen(true);
       // Clean the URL so a refresh doesn't keep re-opening it.
       params.delete("find");
+      params.delete("letter");
       const qs = params.toString();
       window.history.replaceState(
         {},
@@ -919,6 +927,11 @@ const DesignersHoverHero = () => {
     const isInsideSearchSheet = (target: EventTarget | null) =>
       Boolean((target as HTMLElement | null)?.closest?.("#designers-search-sheet"));
 
+    const isInsideContentScroller = (target: EventTarget | null) => {
+      const scroller = contentScrollRef.current;
+      return Boolean(scroller && target instanceof Node && scroller.contains(target));
+    };
+
     const canUseNativeListScroll = () => {
       const scroller = contentScrollRef.current;
       return Boolean(scroller && scroller.scrollHeight > scroller.clientHeight + 2);
@@ -1000,6 +1013,7 @@ const DesignersHoverHero = () => {
 
     const onTouchStart = (e: TouchEvent) => {
       if (isInsideSearchSheet(e.target)) return;
+      if (canUseNativeListScroll() && isInsideContentScroller(e.target)) return;
       touchStartY = e.touches[0]?.clientY ?? null;
       touchLastY = touchStartY;
     };
@@ -1007,6 +1021,7 @@ const DesignersHoverHero = () => {
     const onTouchMove = (e: TouchEvent) => {
       if (touchStartY === null) return;
       if (isInsideSearchSheet(e.target)) return;
+      if (canUseNativeListScroll() && isInsideContentScroller(e.target)) return;
       const y = e.touches[0]?.clientY;
       if (y === undefined) return;
       touchLastY = y;
@@ -1035,6 +1050,7 @@ const DesignersHoverHero = () => {
 
     const onWheel = (e: WheelEvent) => {
       if (isInsideSearchSheet(e.target)) return;
+      if (canUseNativeListScroll() && isInsideContentScroller(e.target)) return;
       if (Math.abs(e.deltaY) < 1) return;
       stepFromDelta(e.deltaY, () => { if (e.cancelable) e.preventDefault(); }, false);
     };
