@@ -738,7 +738,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
             </div>
           </div>
           <div className="flex items-center justify-between w-full pb-3">
-            <div className="flex items-center gap-6 lg:gap-10">
+            <div className="flex items-center gap-8 lg:gap-14">
               {/* New In — first in the left nav */}
               <button
                 onClick={() => { setMegaMenuOpen(false); handleNavClick("/new-in"); }}
@@ -782,9 +782,9 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
               ))}
             </div>
 
-            <span className="w-px h-3 bg-border/60 mx-6 lg:mx-10" aria-hidden="true" />
+            <span className="w-px h-3 bg-border/60 mx-8 lg:mx-14" aria-hidden="true" />
 
-            <div className="flex items-center gap-6 lg:gap-10">
+            <div className="flex items-center gap-8 lg:gap-14">
               {/* Journal */}
               <button
                 onClick={() => { setMegaMenuOpen(false); handleNavClick("/journal"); }}
