@@ -88,7 +88,7 @@ const Hero = () => {
             <p className="text-base leading-relaxed text-white text-left font-serif md:text-xl lg:text-2xl font-medium hero-fade-in-delayed-3">
               A curated collection of masterworks<br />reeditions and contemporary design<br />for global architectural projects.
             </p>
-            <div className="w-screen -translate-x-6 items-center md:w-full md:translate-x-0 md:items-end mt-[5.5rem] md:mt-20 flex flex-col gap-6">
+            <div className="w-screen -translate-x-6 items-center md:w-full md:translate-x-0 md:items-start mt-[5.5rem] md:mt-20 flex flex-col gap-6">
               <button
                 type="button"
                 onClick={() => { trackEvent("click_meet_designers", { event_category: "CTA", event_label: "HeroCTA" }); navigate("/designers"); }}
@@ -97,17 +97,19 @@ const Hero = () => {
                 EXPLORE THE COLLECTION
               </button>
 
-              <div className={`md:hidden mb-3 flex flex-col items-center gap-1 hero-fade-in-delayed-5 rounded-2xl bg-black/35 px-3 py-2 shadow-[0_8px_30px_rgba(0,0,0,0.35)] backdrop-blur-sm ${isPWA ? "mt-[18svh]" : "mt-6"}`}>
-                <span className="font-body text-[10px] font-semibold tracking-[0.18em] text-white [text-shadow:_0_2px_4px_rgba(0,0,0,0.85)]">
-                  Singapore Gallery Preview
-                </span>
-                <span className="font-body text-[10px] font-semibold tracking-[0.18em] text-white [text-shadow:_0_2px_4px_rgba(0,0,0,0.85)]">
-                  Exclusively for the Trade
-                </span>
+              <div className="mb-3 flex flex-col items-center gap-2 hero-fade-in-delayed-5 rounded-2xl bg-black/35 px-4 py-3 shadow-[0_8px_30px_rgba(0,0,0,0.35)] backdrop-blur-sm">
+                <div className="flex flex-col items-center gap-0.5">
+                  <span className="text-center font-body text-[10px] font-semibold tracking-[0.18em] text-white [text-shadow:_0_2px_4px_rgba(0,0,0,0.85)]">
+                    Singapore Gallery Preview
+                  </span>
+                  <span className="text-center font-body text-[10px] font-semibold tracking-[0.18em] text-white [text-shadow:_0_2px_4px_rgba(0,0,0,0.85)]">
+                    Exclusively for the Trade
+                  </span>
+                </div>
                 <button
                   type="button"
                   onClick={openTour}
-                  className="mt-1 inline-flex min-h-12 items-center justify-center font-body text-xs font-semibold tracking-[0.15em] text-white underline underline-offset-4 decoration-white hover:decoration-white transition-colors [text-shadow:_0_2px_4px_rgba(0,0,0,0.85)]"
+                  className="inline-flex min-h-12 items-center justify-center font-body text-xs font-semibold tracking-[0.15em] text-white underline underline-offset-4 decoration-white hover:decoration-white transition-colors [text-shadow:_0_2px_4px_rgba(0,0,0,0.85)]"
                 >
                   Book Private Appointment
                 </button>
@@ -115,23 +117,6 @@ const Hero = () => {
             </div>
           </div>
         </div>
-      </div>
-
-      {/* Desktop: micro block anchored to lower-right corner of the hero */}
-      <div className="hidden md:flex absolute bottom-8 right-8 lg:bottom-12 lg:right-12 z-20 flex-col items-end gap-1 hero-fade-in-delayed-5 rounded-2xl bg-black/35 px-4 py-3 shadow-[0_8px_30px_rgba(0,0,0,0.35)] backdrop-blur-sm">
-        <span className="font-body text-[10px] font-semibold tracking-[0.18em] text-white [text-shadow:_0_2px_4px_rgba(0,0,0,0.85)]">
-          Singapore Gallery Preview
-        </span>
-        <span className="font-body text-[10px] font-semibold tracking-[0.18em] text-white [text-shadow:_0_2px_4px_rgba(0,0,0,0.85)]">
-          Exclusively for the Trade
-        </span>
-        <button
-          type="button"
-          onClick={openTour}
-          className="mt-1 inline-flex min-h-12 items-center justify-center font-body text-xs font-semibold tracking-[0.15em] text-white underline underline-offset-4 decoration-white hover:decoration-white transition-colors [text-shadow:_0_2px_4px_rgba(0,0,0,0.85)]"
-        >
-          Book Private Appointment
-        </button>
       </div>
 
       <PrivateTourDialog open={tourOpen} onOpenChange={setTourOpen} />
