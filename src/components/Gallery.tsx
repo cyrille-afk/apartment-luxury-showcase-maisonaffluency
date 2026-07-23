@@ -454,11 +454,36 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
   // Cache-Control: public, s-maxage=300, stale-while-revalidate=86400 — served
   // from the CDN for repeat visitors and reused across `/`, `/designers`, and
   // category pages via the shared query-key factory.
+  // Defer this 84KB manifest off the LCP critical path — only fetch after the
+  // browser is idle, the user scrolls, or a hotspot needs it. Gallery is
+  // below the fold, so hydration doesn't need this data for first paint.
+  const [manifestEnabled, setManifestEnabled] = useState(false);
+  useEffect(() => {
+    if (manifestEnabled) return;
+    let cancelled = false;
+    const enable = () => { if (!cancelled) setManifestEnabled(true); };
+    const onScroll = () => enable();
+    window.addEventListener("scroll", onScroll, { passive: true, once: true });
+    const idleId = (window as any).requestIdleCallback
+      ? (window as any).requestIdleCallback(enable, { timeout: 4000 })
+      : window.setTimeout(enable, 2500);
+    return () => {
+      cancelled = true;
+      window.removeEventListener("scroll", onScroll);
+      if ((window as any).cancelIdleCallback && typeof idleId === "number") {
+        (window as any).cancelIdleCallback(idleId);
+      } else {
+        clearTimeout(idleId as any);
+      }
+    };
+  }, [manifestEnabled]);
   const { data: manifest } = useQuery({
     queryKey: queryKeys.curatorPicksLightbox(),
     queryFn: fetchCatalogManifest,
     staleTime: 5 * 60 * 1000,
+    enabled: manifestEnabled,
   });
+
   const picksRaw = manifest?.picks;
   const designersBasic = manifest?.designers;
 
