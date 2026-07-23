@@ -81,7 +81,8 @@ const PublicGallery = () => {
 
         <Footer />
         <BackToTopButton />
-        <FloatingScrollNav openMainMenu menuLabel="Open menu" />
+        <GalleryDetailsFloatingNav threshold={800} />
+
       </div>
     </>
   );
