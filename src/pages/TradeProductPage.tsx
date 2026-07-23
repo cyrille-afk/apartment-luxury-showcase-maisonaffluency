@@ -63,6 +63,7 @@ import { formatHandcrafted } from "@/lib/formatHandcrafted";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { useTradePriceMode } from "@/components/trade/TradePriceToggle";
 import { rememberProductBackRef } from "@/lib/designerBackRef";
+import GalleryDetailsFloatingNav from "@/components/GalleryDetailsFloatingNav";
 import { priceRugVariantFromLabel, isRugCategory, looksLikeDimension } from "@/lib/rugPricing";
 import { resolveActiveVariant, resolvePartialDualMinCents } from "@/lib/resolveActiveVariant";
 import { findQuoteFinishSwatch } from "@/lib/quoteFinishSwatches";
@@ -1692,7 +1693,7 @@ const TradeProductPage: React.FC = () => {
         <button
           type="button"
           onClick={() => navigate(fromPath || fallbackPath)}
-          className="mb-4 inline-flex items-center gap-1.5 font-body text-[11px] uppercase tracking-[0.12em] text-muted-foreground hover:text-foreground transition-colors"
+          className="mb-4 hidden md:inline-flex items-center gap-1.5 font-body text-[11px] uppercase tracking-[0.12em] text-muted-foreground hover:text-foreground transition-colors"
         >
           <ArrowLeft className="h-3.5 w-3.5" /> Back
         </button>
@@ -2811,6 +2812,7 @@ const TradeProductPage: React.FC = () => {
           brand_name: designerDisplay || null,
         }}
       />
+      <GalleryDetailsFloatingNav showImmediately azHref="/designers" />
      </div>
   );
 };
