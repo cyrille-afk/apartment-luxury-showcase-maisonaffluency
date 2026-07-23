@@ -4,6 +4,7 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import DesignersDirectory from "@/components/DesignersDirectory";
 import CategorySeo from "@/components/seo/CategorySeo";
+import GalleryDetailsFloatingNav from "@/components/GalleryDetailsFloatingNav";
 import { categoryFromSlug, subcategoryFromSlugs } from "@/lib/categorySlugs";
 import {
   setPendingCategoryFilter,
@@ -67,6 +68,7 @@ const CategoryRoute = () => {
           </section>
           <Footer />
         </main>
+        <GalleryDetailsFloatingNav showImmediately azHref="/designers" />
       </div>
     </>
   );
