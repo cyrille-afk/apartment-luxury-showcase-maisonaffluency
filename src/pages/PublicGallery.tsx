@@ -54,7 +54,7 @@ const PublicGallery = () => {
         </div>
 
         <Footer />
-        <GalleryDetailsFloatingNav threshold={1200} />
+        <GalleryDetailsFloatingNav showAfterElementId="gallery-section-6" forceDisplay />
 
       </div>
     </>

@@ -22,6 +22,10 @@ interface Props {
   threshold?: number;
   /** Show immediately, used on scroll-locked mobile/PWA landings. */
   showImmediately?: boolean;
+  /** Show once this element reaches the viewport, used for gallery final-section entry. */
+  showAfterElementId?: string;
+  /** Bypass mobile/PWA viewport gating for routes that need this on wider previews. */
+  forceDisplay?: boolean;
 }
 
 /**
@@ -35,6 +39,8 @@ export default function GalleryDetailsFloatingNav({
   azLabel = "Browse designers A–Z",
   threshold = 600,
   showImmediately = false,
+  showAfterElementId,
+  forceDisplay = false,
 }: Props) {
   const [expanded, setExpanded] = useState(showImmediately);
   const [visible, setVisible] = useState(showImmediately);
@@ -66,13 +72,32 @@ export default function GalleryDetailsFloatingNav({
       setExpanded(true);
       return;
     }
+
+    if (showAfterElementId) {
+      const onScroll = () => {
+        const target = document.getElementById(showAfterElementId);
+        if (!target) {
+          setVisible(false);
+          return;
+        }
+        setVisible(target.getBoundingClientRect().top <= window.innerHeight * 0.72);
+      };
+      onScroll();
+      window.addEventListener("scroll", onScroll, { passive: true });
+      window.addEventListener("resize", onScroll);
+      return () => {
+        window.removeEventListener("scroll", onScroll);
+        window.removeEventListener("resize", onScroll);
+      };
+    }
+
     const onScroll = () => setVisible(window.scrollY > threshold);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
-  }, [showImmediately, threshold]);
+  }, [showImmediately, showAfterElementId, threshold]);
 
-  if (!showImmediately && !isMobileOrPwa) return null;
+  if (!forceDisplay && !showImmediately && !isMobileOrPwa) return null;
   if (!visible) return null;
 
 
