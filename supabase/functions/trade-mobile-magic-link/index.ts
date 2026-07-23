@@ -15,7 +15,15 @@ const ALLOWED_ORIGINS = [
   "https://apartment-luxury-showcase-maisonaffluency.lovable.app",
   "https://id-preview--02208d51-b513-401f-a97f-9e38a2a4260f.lovable.app",
   "https://02208d51-b513-401f-a97f-9e38a2a4260f.lovableproject.com",
+  "https://id-preview--02208d51-b513-401f-a97f-9e38a2a4260f.lovableproject.com",
+  "http://localhost:8080",
 ];
+
+function isThisProjectPreviewOrigin(url: URL): boolean {
+  const host = url.hostname;
+  if (!host.includes("02208d51-b513-401f-a97f-9e38a2a4260f")) return false;
+  return host.endsWith(".lovable.app") || host.endsWith(".lovableproject.com") || host.endsWith(".lovableproject-dev.com");
+}
 
 function safeRedirect(input: unknown): string | null {
   if (typeof input !== "string" || !input) return null;
@@ -25,7 +33,7 @@ function safeRedirect(input: unknown): string | null {
   } catch {
     return null;
   }
-  if (!ALLOWED_ORIGINS.includes(url.origin)) return null;
+  if (!ALLOWED_ORIGINS.includes(url.origin) && !isThisProjectPreviewOrigin(url)) return null;
   if (!url.pathname.startsWith("/trade") && url.pathname !== "/") return null;
   return url.toString();
 }
