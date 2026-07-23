@@ -29,7 +29,7 @@ const FeaturedReadBanner = lazyRetry(() => import("@/components/FeaturedReadBann
 
 const Gallery = lazyRetry(() => import("@/components/Gallery"));
 const ScrollProgress = lazyRetry(() => import("@/components/ScrollProgress"));
-const QuickJumpMenu = lazyRetry(() => import("@/components/QuickJumpMenu"));
+const GalleryDetailsFloatingNav = lazyRetry(() => import("@/components/GalleryDetailsFloatingNav"));
 const Footer = lazyRetry(() => import("@/components/Footer"));
 const InstagramFeed = lazyRetry(() => import("@/components/InstagramFeed"));
 const ProductGrid = lazyRetry(() => import("@/components/ProductGrid"));
@@ -453,7 +453,7 @@ const Index = ({ categoryMode = false }: IndexProps = {}) => {
 
       {showBelowFoldSections ? (
         <Suspense fallback={null}>
-          <QuickJumpMenu />
+          <GalleryDetailsFloatingNav showImmediately />
         </Suspense>
       ) : null}
 
