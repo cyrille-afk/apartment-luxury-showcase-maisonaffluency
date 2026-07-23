@@ -265,7 +265,7 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
             })}
           </div>
 
-        {/* Prev / Next arrows — desktop only on the main image (mobile uses arrows next to the thumb strip) */}
+        {/* Prev / Next arrows — desktop reveals on hover; mobile always visible */}
         {images.length > 1 && (
           <>
             <button
@@ -273,22 +273,22 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
               disabled={activeIndex === 0}
               aria-label="Previous image"
               className={cn(
-                "hidden md:flex absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 items-center justify-center transition-opacity",
-                activeIndex === 0 ? "opacity-0 pointer-events-none" : "opacity-0 group-hover:opacity-100"
+                "absolute left-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 flex items-center justify-center transition-opacity",
+                activeIndex === 0 ? "opacity-0 pointer-events-none" : "opacity-100 md:opacity-0 md:group-hover:opacity-100"
               )}
             >
-              <ChevronLeft size={18} className="text-foreground" />
+              <ChevronLeft size={20} className="text-foreground" />
             </button>
             <button
               onClick={() => goTo(activeIndex + 1)}
               disabled={activeIndex === images.length - 1}
               aria-label="Next image"
               className={cn(
-                "hidden md:flex absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 items-center justify-center transition-opacity",
-                activeIndex === images.length - 1 ? "opacity-0 pointer-events-none" : "opacity-0 group-hover:opacity-100"
+                "absolute right-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 flex items-center justify-center transition-opacity",
+                activeIndex === images.length - 1 ? "opacity-0 pointer-events-none" : "opacity-100 md:opacity-0 md:group-hover:opacity-100"
               )}
             >
-              <ChevronRight size={18} className="text-foreground" />
+              <ChevronRight size={20} className="text-foreground" />
             </button>
           </>
         )}
@@ -311,73 +311,7 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
           </p>
         )}
 
-        {/* Mobile horizontal thumb strip — Sotheby's-style peek carousel:
-          ~4 visible landscape thumbs, edges clipped (peek), with overlaid
-          prev/next arrows. */}
-      {images.length > 1 && (
-        <div className="md:hidden relative">
-          <div
-            className="overflow-x-auto scrollbar-hide snap-x snap-mandatory scroll-smooth -mx-4 px-4"
-            style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-          >
-            <div className="flex gap-2">
-              {images.map((img, i) => (
-                <button
-                  key={i}
-                  type="button"
-                  onClick={() => goTo(i)}
-                  aria-label={`View image ${i + 1}`}
-                  aria-current={i === activeIndex}
-                  className={cn(
-                    "relative shrink-0 snap-center rounded-md overflow-hidden border-2 transition-all",
-                    "w-[28%] aspect-[4/3]",
-                    i === activeIndex
-                      ? "border-[hsl(var(--gold))] shadow-[0_0_0_1px_hsl(var(--gold)/0.5)]"
-                      : "border-border/60 opacity-80"
-                  )}
-                >
-                  <img
-                    src={img}
-                    alt=""
-                    className="w-full h-full object-cover"
-                    loading="lazy"
-                    decoding="async"
-                  />
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="pointer-events-none absolute inset-y-0 left-[-1rem] z-10 w-12 bg-gradient-to-r from-background/95 via-background/65 to-background/0 backdrop-blur-[2px]" />
-          <div className="pointer-events-none absolute inset-y-0 right-[-1rem] z-10 w-12 bg-gradient-to-l from-background/95 via-background/65 to-background/0 backdrop-blur-[2px]" />
-
-          {/* Bare edge chevrons — no circular button chrome */}
-          <button
-            type="button"
-            onClick={() => goTo(activeIndex - 1)}
-            disabled={activeIndex === 0}
-            aria-label="Previous image"
-            className={cn(
-              "absolute left-[-0.75rem] top-1/2 z-20 flex h-full w-10 -translate-y-1/2 items-center justify-center border-0 bg-transparent p-0 shadow-none transition-opacity",
-              activeIndex === 0 ? "opacity-35 pointer-events-none" : "opacity-100"
-            )}
-          >
-            <ChevronLeft size={22} strokeWidth={1.75} className="text-foreground drop-shadow-sm" />
-          </button>
-          <button
-            type="button"
-            onClick={() => goTo(activeIndex + 1)}
-            disabled={activeIndex === images.length - 1}
-            aria-label="Next image"
-            className={cn(
-              "absolute right-[-0.75rem] top-1/2 z-20 flex h-full w-10 -translate-y-1/2 items-center justify-center border-0 bg-transparent p-0 shadow-none transition-opacity",
-              activeIndex === images.length - 1 ? "opacity-35 pointer-events-none" : "opacity-100"
-            )}
-          >
-            <ChevronRight size={22} strokeWidth={1.75} className="text-foreground drop-shadow-sm" />
-          </button>
-        </div>
-      )}
+        {/* Mobile thumb strip removed — arrows on the main image + swipe handle navigation. */}
       </div>
 
       {/* Fullscreen lightbox */}
