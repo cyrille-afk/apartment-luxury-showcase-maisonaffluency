@@ -963,6 +963,20 @@ const PublicProductPage: React.FC = () => {
   // Currently-selected wood/top finish swatches that lack mapped images —
   // appended to the bespoke concierge message so they aren't overlooked.
   const [finishesMissingImages, setFinishesMissingImages] = useState<string[]>([]);
+  const galleryScrollRef = React.useRef<HTMLDivElement | null>(null);
+  // On mobile/PWA, when a finish selection updates the gallery image, scroll
+  // the product image back into view so the user can actually see the change
+  // instead of it happening off-screen above the finish dropdown.
+  useEffect(() => {
+    if (galleryJumpNonce === 0) return;
+    if (typeof window === "undefined") return;
+    if (window.matchMedia("(min-width: 1024px)").matches) return;
+    const el = galleryScrollRef.current;
+    if (!el) return;
+    const headerOffset = 80;
+    const y = el.getBoundingClientRect().top + window.scrollY - headerOffset;
+    window.scrollTo({ top: Math.max(0, y), behavior: "smooth" });
+  }, [galleryJumpNonce]);
 
 
 
@@ -1255,7 +1269,7 @@ const PublicProductPage: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16">
-            <div className="relative">
+            <div className="relative" ref={galleryScrollRef}>
               <ProductImageGallery
                 images={images}
                 alt={product.title}
