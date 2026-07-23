@@ -462,11 +462,7 @@ const Index = ({ categoryMode = false }: IndexProps = {}) => {
       ) : null}
 
 
-      {showBanner && (
-        <Suspense fallback={null}>
-          <ExitIntentBanner />
-        </Suspense>
-      )}
+      {/* ExitIntentBanner "Chat with us" pill removed per user request. */}
 
       {showBelowFoldSections && (
         <Suspense fallback={null}>
