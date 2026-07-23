@@ -535,29 +535,8 @@ const TradeProductPage: React.FC = () => {
     window.scrollTo({ top: Math.max(0, y), behavior: "smooth" });
   }, [galleryJumpNonce]);
 
-  // Mobile/PWA: pin the product image gallery from the very first scroll pixel.
-  // Set sticky `top` to the wrapper's initial document offset so sticking
-  // engages immediately (no "slip" before pinning).
-  useLayoutEffect(() => {
-    if (typeof window === "undefined") return;
-    const apply = () => {
-      const el = galleryScrollRef.current;
-      if (!el) return;
-      if (window.matchMedia("(min-width: 1024px)").matches) {
-        el.style.top = "";
-        return;
-      }
-      const docTop = el.getBoundingClientRect().top + window.scrollY;
-      el.style.top = `${Math.max(0, docTop)}px`;
-    };
-    apply();
-    const t = window.setTimeout(apply, 250);
-    window.addEventListener("resize", apply);
-    return () => {
-      window.clearTimeout(t);
-      window.removeEventListener("resize", apply);
-    };
-  });
+
+
   const fxRates = useFxRates();
 
   // Honour `?ccy=<CODE>` from the concierge drawer's deep-link so the product
