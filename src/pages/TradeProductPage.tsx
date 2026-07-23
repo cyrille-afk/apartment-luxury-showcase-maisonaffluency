@@ -1713,7 +1713,7 @@ const TradeProductPage: React.FC = () => {
         />
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16">
-          <div className="relative" ref={galleryScrollRef}>
+          <div className="relative md:relative sticky top-16 md:top-0 self-start z-30 bg-background" ref={galleryScrollRef}>
             <ProductImageGallery
               images={images}
               alt={product.title}

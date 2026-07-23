@@ -202,7 +202,7 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
       {/* Main image + (mobile) thumb strip below */}
       <div className="flex-1 flex flex-col gap-3 min-w-0">
       <div className="relative group" ref={inlineSwipeRef}>
-        <div className="aspect-square bg-muted/10 rounded-2xl overflow-hidden relative touch-pan-y">
+        <div className="md:aspect-square h-[42vh] md:h-auto bg-muted/10 rounded-2xl overflow-hidden relative touch-pan-y">
           <button
             type="button"
             onClick={() => setZoomOpen(true)}
