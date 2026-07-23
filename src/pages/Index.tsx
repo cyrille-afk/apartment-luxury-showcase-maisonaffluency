@@ -453,7 +453,7 @@ const Index = ({ categoryMode = false }: IndexProps = {}) => {
 
       {showBelowFoldSections && !routeIsCategory && (
         <Suspense fallback={null}>
-          <GalleryDetailsFloatingNav showAfterElementId="gallery-section-6" alwaysExpanded />
+          <GalleryDetailsFloatingNav showAfterElementId="gallery-section-6" />
         </Suspense>
       )}
 
