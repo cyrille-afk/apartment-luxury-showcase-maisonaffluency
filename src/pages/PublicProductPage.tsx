@@ -1685,6 +1685,7 @@ const PublicProductPage: React.FC = () => {
 
         <Footer />
       </div>
+      <GalleryDetailsFloatingNav showImmediately azHref="/designers" />
 
       <AuthGateDialog open={gateOpen} onClose={closeGate} action={gateAction} />
     </div>
