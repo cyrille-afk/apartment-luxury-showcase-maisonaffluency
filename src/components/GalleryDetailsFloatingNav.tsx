@@ -47,6 +47,7 @@ export default function GalleryDetailsFloatingNav({
 }: Props) {
   const [expanded, setExpanded] = useState(showImmediately);
   const [visible, setVisible] = useState(showImmediately);
+  const [revealedByElement, setRevealedByElement] = useState(showImmediately);
   const [isMobileOrPwa, setIsMobileOrPwa] = useState(false);
   const navigate = useNavigate();
 
@@ -73,30 +74,47 @@ export default function GalleryDetailsFloatingNav({
     if (showImmediately) {
       setVisible(true);
       setExpanded(true);
+      setRevealedByElement(true);
       return;
     }
 
     if (showAfterElementId) {
       const getTriggerElement = () => {
         const target = document.getElementById(showAfterElementId);
+        const controller = document.querySelector<HTMLElement>(`[aria-controls="${showAfterElementId}"]`);
+        const controllerRect = controller?.getBoundingClientRect();
+        const controllerVisible =
+          !!controller &&
+          !!controllerRect &&
+          controllerRect.width > 0 &&
+          controllerRect.height > 0 &&
+          window.getComputedStyle(controller).display !== "none";
+        if (controllerVisible) return controller;
         if (!target) return null;
 
         const rects = target.getClientRects();
         const isRendered = rects.length > 0 && window.getComputedStyle(target).display !== "none";
         if (isRendered) return target;
 
-        return document.querySelector<HTMLElement>(`[aria-controls="${showAfterElementId}"]`) ?? target;
+        return controller ?? target;
       };
 
       const onScroll = () => {
         const target = getTriggerElement();
         if (!target) {
-          setVisible(false);
+          if (!revealedByElement) setVisible(false);
           return;
         }
-        const shouldShow = target.getBoundingClientRect().top <= window.innerHeight * 0.72;
+        const rect = target.getBoundingClientRect();
+        const bottomSafeArea = 112;
+        const reachedTrigger = rect.top <= window.innerHeight - bottomSafeArea;
+        const reachedPageEnd = window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - bottomSafeArea;
+        const shouldShow = revealedByElement || reachedTrigger || reachedPageEnd;
         setVisible(shouldShow);
-        if (shouldShow && alwaysExpanded) setExpanded(true);
+        if (shouldShow) {
+          setRevealedByElement(true);
+          if (alwaysExpanded) setExpanded(true);
+        }
       };
       onScroll();
       window.addEventListener("scroll", onScroll, { passive: true });
@@ -111,7 +129,7 @@ export default function GalleryDetailsFloatingNav({
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
-  }, [showImmediately, showAfterElementId, threshold, alwaysExpanded]);
+  }, [showImmediately, showAfterElementId, threshold, alwaysExpanded, revealedByElement]);
 
   if (!forceDisplay && !showImmediately && !isMobileOrPwa) return null;
   if (!visible) return null;
