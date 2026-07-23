@@ -7,7 +7,7 @@ import { ChevronUp } from "lucide-react";
 import { useState, useEffect, useLayoutEffect } from "react";
 import Navigation from "@/components/Navigation";
 import DesignersHoverHero from "@/components/DesignersHoverHero";
-import GalleryDetailsFloatingNav from "@/components/GalleryDetailsFloatingNav";
+
 
 // Route-split heavy sub-components so they don't land in the initial
 // /designers JS chunk. The hero is what first paint depends on; the
