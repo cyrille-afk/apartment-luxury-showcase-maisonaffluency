@@ -36,7 +36,7 @@ export default function GalleryDetailsFloatingNav({
   threshold = 600,
   showImmediately = false,
 }: Props) {
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(showImmediately);
   const [visible, setVisible] = useState(showImmediately);
   const [isMobileOrPwa, setIsMobileOrPwa] = useState(false);
   const navigate = useNavigate();
@@ -63,6 +63,7 @@ export default function GalleryDetailsFloatingNav({
   useEffect(() => {
     if (showImmediately) {
       setVisible(true);
+      setExpanded(true);
       return;
     }
     const onScroll = () => setVisible(window.scrollY > threshold);
@@ -97,7 +98,7 @@ export default function GalleryDetailsFloatingNav({
   return (
     <div
       className="fixed right-3 z-[10000] print:hidden"
-      style={{ bottom: "calc(env(safe-area-inset-bottom, 0px) + 1rem)" }}
+      style={{ bottom: "calc(env(safe-area-inset-bottom, 0px) + 4.75rem)" }}
     >
       {expanded ? (
         <div
