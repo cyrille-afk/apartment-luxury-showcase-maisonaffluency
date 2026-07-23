@@ -68,6 +68,7 @@ const CategoryRoute = () => {
           </section>
           <Footer />
         </main>
+        <GalleryDetailsFloatingNav showImmediately azHref="/designers" />
       </div>
     </>
   );
