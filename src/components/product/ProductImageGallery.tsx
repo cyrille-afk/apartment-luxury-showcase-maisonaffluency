@@ -386,7 +386,7 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
           hideClose
           className="max-w-[100vw] w-screen h-screen p-0 bg-background/95 backdrop-blur-sm border-0 rounded-none flex items-center justify-center sm:rounded-none touch-pan-y"
         >
-          <div ref={lightboxSwipeRef} className="absolute inset-0" aria-hidden="true" />
+          <div ref={lightboxSwipeRef} onClick={() => setZoomOpen(false)} className="absolute inset-0 cursor-zoom-out" aria-hidden="true" />
           <VisuallyHidden>
             <DialogTitle>{alt}</DialogTitle>
           </VisuallyHidden>
