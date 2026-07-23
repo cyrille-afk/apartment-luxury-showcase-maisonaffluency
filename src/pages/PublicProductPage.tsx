@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { queryKeys } from "@/lib/queryKeys";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
+import GalleryDetailsFloatingNav from "@/components/GalleryDetailsFloatingNav";
 import SpecSheetButton, { type PdfEntry } from "@/components/trade/SpecSheetButton";
 import { useCompare, type CompareItem } from "@/contexts/CompareContext";
 import { useAuthGate } from "@/hooks/useAuthGate";
@@ -1253,7 +1254,7 @@ const PublicProductPage: React.FC = () => {
           <button
             type="button"
             onClick={() => navigate(fromPath || fallbackGridPath)}
-            className="mb-4 inline-flex items-center gap-1.5 font-body text-[11px] uppercase tracking-[0.12em] text-muted-foreground hover:text-foreground transition-colors"
+            className="mb-4 hidden md:inline-flex items-center gap-1.5 font-body text-[11px] uppercase tracking-[0.12em] text-muted-foreground hover:text-foreground transition-colors"
           >
             <ArrowLeft className="h-3.5 w-3.5" /> Back
 
@@ -1684,6 +1685,7 @@ const PublicProductPage: React.FC = () => {
 
         <Footer />
       </div>
+      <GalleryDetailsFloatingNav showImmediately azHref="/designers" />
 
       <AuthGateDialog open={gateOpen} onClose={closeGate} action={gateAction} />
     </div>
