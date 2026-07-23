@@ -978,29 +978,8 @@ const PublicProductPage: React.FC = () => {
     window.scrollTo({ top: Math.max(0, y), behavior: "smooth" });
   }, [galleryJumpNonce]);
 
-  // Mobile/PWA: pin the product image gallery from the very first scroll pixel.
-  // Set the sticky `top` equal to the wrapper's initial document offset so
-  // sticking engages at scrollY = 0 (no "slip" before pinning).
-  React.useLayoutEffect(() => {
-    if (typeof window === "undefined") return;
-    const apply = () => {
-      const el = galleryScrollRef.current;
-      if (!el) return;
-      if (window.matchMedia("(min-width: 1024px)").matches) {
-        el.style.top = "";
-        return;
-      }
-      const docTop = el.getBoundingClientRect().top + window.scrollY;
-      el.style.top = `${Math.max(0, docTop)}px`;
-    };
-    apply();
-    const t = window.setTimeout(apply, 250);
-    window.addEventListener("resize", apply);
-    return () => {
-      window.clearTimeout(t);
-      window.removeEventListener("resize", apply);
-    };
-  });
+
+
 
 
 
