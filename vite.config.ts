@@ -174,8 +174,17 @@ export default defineConfig(({ mode }) => {
           if (id.includes('node_modules/react/')) return 'vendor-react';
           if (id.includes('node_modules/framer-motion')) return 'vendor-motion';
           if (id.includes('node_modules/@tanstack/react-query')) return 'vendor-query';
-          if (id.includes('node_modules/@radix-ui/')) return 'vendor-radix';
+          // Split @radix-ui per primitive so pages that don't use Dialog,
+          // Popover, Select, etc. don't drag in the entire 170KB radix
+          // bundle on first paint. Each primitive becomes its own small
+          // chunk (~5-20KB) loaded on demand with the component that
+          // consumes it. Directly cuts Lighthouse "Reduce unused JS".
+          if (id.includes('node_modules/@radix-ui/')) {
+            const m = id.match(/node_modules\/@radix-ui\/([^/]+)/);
+            return m ? `vendor-radix-${m[1].replace(/^react-/, '')}` : 'vendor-radix';
+          }
         },
+
       },
     },
     assetsInlineLimit: 1024,
