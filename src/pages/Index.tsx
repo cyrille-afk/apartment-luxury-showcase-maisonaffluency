@@ -2,6 +2,7 @@ import { useEffect, useState, useRef, useCallback, lazy, Suspense } from "react"
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { Helmet } from "react-helmet-async";
 import Hero from "@/components/Hero";
+import Navigation from "@/components/Navigation";
 import useScrollDepthTracking from "@/hooks/useScrollDepthTracking";
 import { scrollToSection } from "@/lib/scrollToSection";
 import LazyOnVisible from "@/components/LazyOnVisible";
@@ -19,9 +20,9 @@ function lazyRetry(factory: () => Promise<{ default: React.ComponentType<any> }>
   );
 }
 
-// Lazy-load FeaturedReadBanner & Navigation to keep lucide-react out of the initial chunk
+// Keep Navigation in the first React paint so the mobile/PWA hero does not show
+// the image alone before the header arrives. Below-fold UI remains lazy.
 const FeaturedReadBanner = lazyRetry(() => import("@/components/FeaturedReadBanner"));
-const Navigation = lazyRetry(() => import("@/components/Navigation"));
 
 
 // Lazy-load everything below the fold to reduce initial JS
@@ -393,11 +394,7 @@ const Index = ({ categoryMode = false }: IndexProps = {}) => {
         </Suspense>
       )}
 
-      {showNavigation && (
-        <Suspense fallback={null}>
-          <Navigation />
-        </Suspense>
-      )}
+      {showNavigation && <Navigation />}
 
       {showBelowFoldSections && (
         <Suspense fallback={null}>

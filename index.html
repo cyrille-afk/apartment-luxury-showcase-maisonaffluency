@@ -351,13 +351,15 @@
 
       />
     </picture>
-    <div id="static-hero-copy" aria-hidden="true" style="display:none;position:absolute;inset:0;z-index:0;pointer-events:none;align-items:flex-start;justify-content:flex-start;padding:16rem 10rem 8rem;color:#fff;font-family:'Playfair Display',Georgia,serif;">
+    <div id="static-hero-copy" aria-hidden="true" style="display:flex;position:absolute;inset:0;z-index:0;pointer-events:none;align-items:flex-start;justify-content:flex-start;padding:24rem 10rem 8rem;color:#fff;font-family:'Playfair Display',Georgia,serif;">
       <div style="max-width:56rem;">
-        <div style="font-size:clamp(2rem,3.6vw,3.25rem);line-height:1.08;margin:0 0 3.5rem;text-shadow:0 2px 12px rgba(0,0,0,.45);">
+        <div style="font-size:clamp(2rem,3.6vw,3.25rem);line-height:1.08;margin:0 0 2rem;text-shadow:0 2px 12px rgba(0,0,0,.45);">
           <span class="static-hero-desktop">Modern Masters. Iconic Design.</span>
           <span class="static-hero-mobile">Modern Masters.<br />Iconic Design.</span>
-
         </div>
+        <p style="display:inline-block;margin:0;font-size:clamp(1rem,2vw,1.5rem);line-height:1.45;font-weight:500;text-shadow:0 1px 3px rgba(0,0,0,.55);background:radial-gradient(ellipse at center,rgba(0,0,0,.38) 60%,transparent 100%);padding:.35rem .6rem;">
+          A curated collection of masterworks<br />reeditions and contemporary design<br />for global architectural projects.
+        </p>
       </div>
     </div>
     <style>
@@ -366,6 +368,7 @@
         :root { --home-hero-mobile-pad-top: 16rem; }
         #static-hero-copy { padding: var(--home-hero-mobile-pad-top) 1.5rem 8rem !important; }
         #static-hero-copy > div > div { font-size: 1.875rem !important; line-height: 1.2 !important; }
+        #static-hero-copy p { font-size: 1rem !important; line-height: 1.625 !important; }
         .static-hero-desktop { display: none; }
         .static-hero-mobile { display: inline; }
       }
