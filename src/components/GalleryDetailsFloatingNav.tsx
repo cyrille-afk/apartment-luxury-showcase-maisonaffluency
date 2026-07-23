@@ -71,7 +71,9 @@ export default function GalleryDetailsFloatingNav({
     return () => window.removeEventListener("scroll", onScroll);
   }, [showImmediately, threshold]);
 
-  if (!isMobileOrPwa || !visible) return null;
+  if (!showImmediately && !isMobileOrPwa) return null;
+  if (!visible) return null;
+
 
   const handleAllCategories = () => {
     setExpanded(false);
