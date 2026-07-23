@@ -203,11 +203,13 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
       <div className="flex-1 flex flex-col gap-3 min-w-0">
       <div className="relative group" ref={inlineSwipeRef}>
         <div className="md:aspect-square h-[42vh] md:h-auto bg-muted/10 rounded-2xl overflow-hidden relative touch-pan-y">
+          {/* Desktop: whole image is a zoom trigger. Mobile: plain image so
+              stray taps near the chevrons don't accidentally open the lightbox. */}
           <button
             type="button"
             onClick={() => setZoomOpen(true)}
             aria-label="Expand image"
-            className="absolute inset-0 flex items-center justify-center overflow-hidden rounded-[inherit] p-0 cursor-zoom-in"
+            className="hidden md:flex absolute inset-0 items-center justify-center overflow-hidden rounded-[inherit] p-0 cursor-zoom-in"
           >
             <img
               src={images[activeIndex]}
@@ -215,13 +217,25 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
               className="max-w-full max-h-full object-contain rounded-2xl"
             />
           </button>
+          <div className="md:hidden absolute inset-0 flex items-center justify-center overflow-hidden rounded-[inherit]">
+            <img
+              src={images[activeIndex]}
+              alt={alt}
+              className="max-w-full max-h-full object-contain rounded-2xl pointer-events-none"
+            />
+          </div>
           {/* Hover-to-navigate now lives on the vertical thumbnail strip (see above). */}
 
-          {/* Expand affordance */}
-          <div className="absolute bottom-3 right-3 z-10 pointer-events-none">
-            <div className="w-8 h-8 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+          {/* Expand affordance — hover-only on desktop, dedicated tap target on mobile. */}
+          <div className="absolute bottom-3 right-3 z-20">
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); setZoomOpen(true); }}
+              aria-label="Expand image"
+              className="w-9 h-9 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 flex items-center justify-center transition-opacity opacity-100 md:opacity-0 md:group-hover:opacity-100 touch-manipulation"
+            >
               <Maximize2 size={14} className="text-foreground" />
-            </div>
+            </button>
           </div>
           {overlay && (
             <div className="absolute top-3 right-3 z-20 pointer-events-none">
