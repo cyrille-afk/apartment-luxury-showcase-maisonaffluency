@@ -599,16 +599,22 @@ const DesignersHoverHero = () => {
     const previousBodyBgPosition = body.style.backgroundPosition;
     const previousBodyBgRepeat = body.style.backgroundRepeat;
 
-    // Use a solid dark color for html/body so the browser chrome (iOS URL bar,
-    // bottom nav) never flashes black or reveals a partial background image.
-    // Previously we mirrored the hero image here, which caused a partial photo
-    // to bleed above the header and below the fold on mobile scroll.
-    html.style.backgroundImage = "none";
+    // Mirror the active hero image onto html + body so the iOS browser chrome
+    // (URL bar, bottom toolbar) is painted photographically rather than as a
+    // solid black band. Safe now because /designers locks body scroll
+    // (position:fixed, overflow:hidden) — there is no scroll bleed to worry
+    // about. #0a0a0a stays as fallback under the image.
+    const bgUrl = `url("${backgroundSrc}")`;
+    html.style.backgroundImage = bgUrl;
+    html.style.backgroundSize = "cover";
+    html.style.backgroundPosition = "center";
+    html.style.backgroundRepeat = "no-repeat";
     html.style.backgroundColor = "#0a0a0a";
-    body.style.backgroundImage = "none";
-    body.style.backgroundSize = "";
-    body.style.backgroundPosition = "";
-    body.style.backgroundRepeat = "";
+    body.style.backgroundImage = bgUrl;
+    body.style.backgroundSize = "cover";
+    body.style.backgroundPosition = "center";
+    body.style.backgroundRepeat = "no-repeat";
+
 
     return () => {
       html.style.backgroundImage = previousHtmlBgImage;
