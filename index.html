@@ -144,9 +144,13 @@
     <link rel="preconnect" href="https://dcrauiygaezoduwdjmsm.supabase.co" crossorigin />
     <link rel="dns-prefetch" href="https://dcrauiygaezoduwdjmsm.supabase.co" />
 
-    <!-- Preload critical above-the-fold woff2 fonts (self-hosted, cached 1yr) -->
-    <link rel="preload" as="font" type="font/woff2" href="/fonts/PlayfairDisplay-500.woff2" crossorigin />
-    <link rel="preload" as="font" type="font/woff2" href="/fonts/Lora-Regular.woff2" crossorigin />
+    <!-- Preload critical above-the-fold woff2 fonts (self-hosted, cached 1yr, font-display: swap).
+         Only the primary faces visible on first paint are preloaded — italic/600 weights load on demand
+         to keep the critical path lean on mobile. -->
+    <link rel="preload" as="font" type="font/woff2" href="/fonts/PlayfairDisplay-500.woff2" crossorigin fetchpriority="high" />
+    <link rel="preload" as="font" type="font/woff2" href="/fonts/Lora-Regular.woff2" crossorigin fetchpriority="high" />
+    <link rel="preload" as="font" type="font/woff2" href="/fonts/Cinzel-Bold.woff2" crossorigin fetchpriority="high" />
+
 
     <!-- Mobile portrait preload — AVIF for capable browsers; others fall through to <picture> WebP source -->
     <link
