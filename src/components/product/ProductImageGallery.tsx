@@ -386,17 +386,19 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
           hideClose
           className="max-w-[100vw] w-screen h-screen p-0 bg-background/95 backdrop-blur-sm border-0 rounded-none flex items-center justify-center sm:rounded-none touch-pan-y"
         >
-          <div ref={lightboxSwipeRef} className="absolute inset-0" aria-hidden="true" />
+          <div ref={lightboxSwipeRef} onClick={() => setZoomOpen(false)} className="absolute inset-0 cursor-zoom-out" aria-hidden="true" />
           <VisuallyHidden>
             <DialogTitle>{alt}</DialogTitle>
           </VisuallyHidden>
           <button
             type="button"
             onClick={() => setZoomOpen(false)}
+            onTouchEnd={(e) => { e.preventDefault(); e.stopPropagation(); setZoomOpen(false); }}
             aria-label="Close"
-            className="absolute top-4 right-4 z-50 w-10 h-10 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 flex items-center justify-center hover:bg-background transition-colors"
+            style={{ top: 'max(1rem, env(safe-area-inset-top))', right: 'max(1rem, env(safe-area-inset-right))' }}
+            className="absolute z-[100] w-12 h-12 rounded-full bg-background/90 backdrop-blur-sm border border-border/50 flex items-center justify-center hover:bg-background transition-colors touch-manipulation"
           >
-            <X size={18} className="text-foreground" />
+            <X size={20} className="text-foreground" />
           </button>
           <img
             src={images[activeIndex]}
