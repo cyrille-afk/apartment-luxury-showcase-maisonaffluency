@@ -20,6 +20,8 @@ interface Props {
   azLabel?: string;
   /** Scroll offset (px) after which the panel becomes visible. */
   threshold?: number;
+  /** Show immediately, used on scroll-locked mobile/PWA landings. */
+  showImmediately?: boolean;
 }
 
 /**
@@ -32,19 +34,44 @@ export default function GalleryDetailsFloatingNav({
   onAzClick,
   azLabel = "Browse designers A–Z",
   threshold = 600,
+  showImmediately = false,
 }: Props) {
   const [expanded, setExpanded] = useState(false);
-  const [visible, setVisible] = useState(false);
+  const [visible, setVisible] = useState(showImmediately);
+  const [isMobileOrPwa, setIsMobileOrPwa] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
+    const mobileMql = window.matchMedia("(max-width: 767px)");
+    const standaloneMql = window.matchMedia?.("(display-mode: standalone)");
+    const updateMode = () => {
+      const isStandalone =
+        standaloneMql?.matches ||
+        (window.navigator as any).standalone === true ||
+        new URLSearchParams(window.location.search).get("source") === "pwa";
+      setIsMobileOrPwa(mobileMql.matches || isStandalone);
+    };
+    updateMode();
+    mobileMql.addEventListener("change", updateMode);
+    standaloneMql?.addEventListener?.("change", updateMode);
+    return () => {
+      mobileMql.removeEventListener("change", updateMode);
+      standaloneMql?.removeEventListener?.("change", updateMode);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (showImmediately) {
+      setVisible(true);
+      return;
+    }
     const onScroll = () => setVisible(window.scrollY > threshold);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
-  }, [threshold]);
+  }, [showImmediately, threshold]);
 
-  if (!visible) return null;
+  if (!isMobileOrPwa || !visible) return null;
 
   const handleAllCategories = () => {
     setExpanded(false);
@@ -67,7 +94,7 @@ export default function GalleryDetailsFloatingNav({
 
   return (
     <div
-      className="fixed right-3 z-[10000] md:hidden print:hidden"
+      className="fixed right-3 z-[10000] print:hidden"
       style={{ bottom: "calc(env(safe-area-inset-bottom, 0px) + 1rem)" }}
     >
       {expanded ? (

@@ -281,7 +281,7 @@ function ScrollLockedDesigners({
       )}
       {!isMobileOrPwa && <BackToTopButton />}
       {/* Mobile/PWA: same 4-icon floating quick-actions panel as biographies + gallery. */}
-      <GalleryDetailsFloatingNav threshold={400} />
+      <GalleryDetailsFloatingNav threshold={400} showImmediately={isMobileOrPwa} />
     </div>
   );
 }
