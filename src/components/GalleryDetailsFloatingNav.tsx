@@ -99,6 +99,13 @@ export default function GalleryDetailsFloatingNav({
       };
 
       const onScroll = () => {
+        // Hide when back near the top of the page.
+        if (window.scrollY < 200) {
+          setRevealedByElement(false);
+          setVisible(false);
+          setExpanded(false);
+          return;
+        }
         const target = getTriggerElement();
         if (!target) {
           if (!revealedByElement) setVisible(false);
