@@ -27,23 +27,37 @@ const FeaturedReadBanner = () => {
   const isDesigners = location.pathname.startsWith("/designers");
 
   useEffect(() => {
+    // Defer the featured-article fetch off the LCP critical path — the banner
+    // sits at the top but is not the LCP element, and holding this off idle
+    // removes ~2s from Lighthouse's critical request chain.
+    let cancelled = false;
     const load = async () => {
-      // Only show an explicitly admin-selected featured article.
-      // If none is starred, the banner stays hidden.
       const { data: featured } = await supabase
         .from("journal_articles")
         .select("slug, title, category, author")
         .eq("is_published", true)
         .eq("is_featured", true)
         .limit(1);
-
+      if (cancelled) return;
       if (featured && featured.length > 0) {
         setArticle(featured[0] as FeaturedArticle);
         setVisible(true);
       }
     };
-    void load();
+    const kick = () => { void load(); };
+    const idleId = (window as any).requestIdleCallback
+      ? (window as any).requestIdleCallback(kick, { timeout: 4000 })
+      : window.setTimeout(kick, 2000);
+    return () => {
+      cancelled = true;
+      if ((window as any).cancelIdleCallback && typeof idleId === "number") {
+        (window as any).cancelIdleCallback(idleId);
+      } else {
+        clearTimeout(idleId as any);
+      }
+    };
   }, []);
+
 
   // Measure the fixed nav height (homepage only)
   const measureNav = useCallback(() => {
