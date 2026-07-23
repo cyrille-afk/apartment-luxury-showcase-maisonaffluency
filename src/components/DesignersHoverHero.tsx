@@ -599,16 +599,16 @@ const DesignersHoverHero = () => {
     const previousBodyBgPosition = body.style.backgroundPosition;
     const previousBodyBgRepeat = body.style.backgroundRepeat;
 
-    const image = `linear-gradient(rgba(0,0,0,0.22), rgba(0,0,0,0.22)), url("${backgroundSrc}")`;
-    html.style.backgroundImage = image;
-    html.style.backgroundSize = "cover";
-    html.style.backgroundPosition = "center top";
-    html.style.backgroundRepeat = "no-repeat";
+    // Use a solid dark color for html/body so the browser chrome (iOS URL bar,
+    // bottom nav) never flashes black or reveals a partial background image.
+    // Previously we mirrored the hero image here, which caused a partial photo
+    // to bleed above the header and below the fold on mobile scroll.
+    html.style.backgroundImage = "none";
     html.style.backgroundColor = "#0a0a0a";
-    body.style.backgroundImage = image;
-    body.style.backgroundSize = "cover";
-    body.style.backgroundPosition = "center top";
-    body.style.backgroundRepeat = "no-repeat";
+    body.style.backgroundImage = "none";
+    body.style.backgroundSize = "";
+    body.style.backgroundPosition = "";
+    body.style.backgroundRepeat = "";
 
     return () => {
       html.style.backgroundImage = previousHtmlBgImage;
