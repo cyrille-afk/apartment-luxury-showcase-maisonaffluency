@@ -117,7 +117,7 @@ const Hero = () => {
                       trackEvent("click_singapore_gallery_preview", { event_category: "CTA", event_label: "HeroSecondary" });
                       scrollToSection("overview");
                     }}
-                    className="group py-3 text-center font-body text-[14px] font-medium leading-relaxed tracking-[0.12em] text-white antialiased transition-colors md:py-0 md:text-[15px]"
+                    className="group py-3 text-center font-body text-[15px] font-semibold leading-relaxed tracking-[0.12em] text-[#FFFFFF] antialiased [text-shadow:0_1px_3px_rgba(0,0,0,0.55)] transition-colors md:py-0 md:text-[16px]"
                   >
                     <span className="link-underline-grow">Singapore Gallery Preview</span>
                   </button>
@@ -125,11 +125,11 @@ const Hero = () => {
                   <button
                     type="button"
                     onClick={openTour}
-                    className="group py-3 text-center font-body text-[14px] font-medium leading-relaxed tracking-[0.12em] text-white antialiased transition-colors hover:text-[#E5E5E5] md:py-0 md:text-[15px]"
+                    className="group py-3 text-center font-body text-[15px] font-semibold leading-relaxed tracking-[0.12em] text-[#FFFFFF] antialiased [text-shadow:0_1px_3px_rgba(0,0,0,0.55)] transition-colors hover:text-[#E5E5E5] md:py-0 md:text-[16px]"
                   >
                     <span className="link-underline-grow">
                       Book Private Appointment
-                      <span className="font-light italic text-white/80 transition-colors group-hover:text-[#E5E5E5]">{" "}(Trade Only)</span>
+                      <span className="font-light italic text-[#FFFFFF] transition-colors group-hover:text-[#E5E5E5]">{" "}(Trade Only)</span>
                     </span>
                   </button>
                 </div>
