@@ -28,7 +28,7 @@ import { consumeProductBackRef } from "@/lib/designerBackRef";
 import { isChildBrandDesigner, isParentBrandDesigner } from "@/lib/designerHierarchy";
 import { toOgImage } from "@/lib/ogImage";
 import { sortCuratorPicks, interleaveBySubcategory } from "@/lib/curatorPickSort";
-import FloatingScrollNav from "@/components/FloatingScrollNav";
+import GalleryDetailsFloatingNav from "@/components/GalleryDetailsFloatingNav";
 import { useAuth } from "@/hooks/useAuth";
 import { lastNameInitial } from "@/lib/nameFormat";
 // Collectible profiles are public; product-page gating lives in PublicProductPage.
@@ -1351,7 +1351,7 @@ const PublicDesignerProfile = () => {
         <Footer />
       </div>
 
-      <FloatingScrollNav menuHref={designerAzBackHref} menuLabel="Back to A–Z directory" onMenuClick={rememberDesignerAzLetter} />
+      <GalleryDetailsFloatingNav azHref={designerAzBackHref} azLabel="Back to A–Z directory" onAzClick={rememberDesignerAzLetter} />
 
       <PublicProductLightbox
         product={lightboxItem}

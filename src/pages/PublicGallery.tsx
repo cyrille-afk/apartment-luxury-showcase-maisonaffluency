@@ -7,7 +7,7 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import Gallery from "@/components/Gallery";
 import ApartmentTourInterlude from "@/components/ApartmentTourInterlude";
-import FloatingScrollNav from "@/components/FloatingScrollNav";
+import GalleryDetailsFloatingNav from "@/components/GalleryDetailsFloatingNav";
 
 function BackToTopButton() {
   const [visible, setVisible] = useState(false);
@@ -81,7 +81,8 @@ const PublicGallery = () => {
 
         <Footer />
         <BackToTopButton />
-        <FloatingScrollNav openMainMenu menuLabel="Open menu" />
+        <GalleryDetailsFloatingNav threshold={800} />
+
       </div>
     </>
   );

@@ -1,35 +1,80 @@
-import { useState } from "react";
-import { LayoutGrid, ArrowDownAZ, MessageCircle, ChevronDown, MoreHorizontal } from "lucide-react";
+import { useEffect, useState } from "react";
+import {
+  LayoutGrid,
+  ArrowDownAZ,
+  MessageCircle,
+  ChevronDown,
+  MoreHorizontal,
+  ArrowUp,
+} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const WHATSAPP_URL = "https://wa.me/6591393850";
 
+interface Props {
+  /** Path used by the A–Z button. Defaults to /designers. */
+  azHref?: string;
+  /** Optional callback fired before A–Z navigation (e.g. remember letter). */
+  onAzClick?: () => void;
+  /** ARIA label for the A–Z button. */
+  azLabel?: string;
+  /** Scroll offset (px) after which the panel becomes visible. */
+  threshold?: number;
+}
+
 /**
- * Inline quick-actions panel for the final gallery section. It lives below
- * the thumbnail strip, right-aligned, so it never covers the thumbnails.
+ * Mobile/PWA-only floating quick-actions panel. Fixed to the bottom-right of
+ * the viewport once the user scrolls past `threshold`. Used on the public
+ * Gallery (final section) and Designer biography pages.
  */
-export default function GalleryDetailsFloatingNav() {
+export default function GalleryDetailsFloatingNav({
+  azHref = "/designers",
+  onAzClick,
+  azLabel = "Browse designers A–Z",
+  threshold = 600,
+}: Props) {
   const [expanded, setExpanded] = useState(false);
+  const [visible, setVisible] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const onScroll = () => setVisible(window.scrollY > threshold);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [threshold]);
+
+  if (!visible) return null;
 
   const handleAllCategories = () => {
     setExpanded(false);
+    window.dispatchEvent(new Event("open-main-menu"));
     window.dispatchEvent(new CustomEvent("open-all-categories"));
   };
-  const handleDesigners = () => {
+  const handleAz = () => {
     setExpanded(false);
-    navigate("/designers");
+    onAzClick?.();
+    navigate(azHref);
   };
-  const handleWhatsApp = () =>
+  const handleWhatsApp = () => {
+    setExpanded(false);
     window.open(WHATSAPP_URL, "_blank", "noopener,noreferrer");
+  };
+  const handleTop = () => {
+    setExpanded(false);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   return (
-    <div className="md:hidden mt-3 mb-2 flex justify-end pr-1 print:hidden">
+    <div
+      className="fixed right-3 z-[10000] md:hidden print:hidden"
+      style={{ bottom: "calc(env(safe-area-inset-bottom, 0px) + 1rem)" }}
+    >
       {expanded ? (
         <div
-          className="flex items-center gap-2 rounded-full bg-foreground/95 backdrop-blur-md text-background shadow-xl pl-2 pr-1 py-1.5 animate-in fade-in slide-in-from-top-1 duration-300"
+          className="flex items-center gap-2 rounded-full bg-foreground/95 backdrop-blur-md text-background shadow-xl pl-2 pr-1 py-1.5 animate-in fade-in slide-in-from-bottom-1 duration-300"
           role="toolbar"
-          aria-label="Gallery quick actions"
+          aria-label="Quick actions"
         >
           <button
             onClick={handleAllCategories}
@@ -39,8 +84,8 @@ export default function GalleryDetailsFloatingNav() {
             <LayoutGrid className="h-4 w-4" />
           </button>
           <button
-            onClick={handleDesigners}
-            aria-label="Browse designers A–Z"
+            onClick={handleAz}
+            aria-label={azLabel}
             className="h-10 w-10 rounded-full flex items-center justify-center hover:bg-background/10 transition-colors active:scale-95"
           >
             <ArrowDownAZ className="h-4 w-4" />
@@ -51,6 +96,13 @@ export default function GalleryDetailsFloatingNav() {
             className="h-10 w-10 rounded-full flex items-center justify-center hover:bg-background/10 transition-colors active:scale-95"
           >
             <MessageCircle className="h-4 w-4" />
+          </button>
+          <button
+            onClick={handleTop}
+            aria-label="Back to top"
+            className="h-10 w-10 rounded-full flex items-center justify-center hover:bg-background/10 transition-colors active:scale-95"
+          >
+            <ArrowUp className="h-4 w-4" />
           </button>
           <span className="w-px h-6 bg-background/20 mx-0.5" aria-hidden />
           <button
