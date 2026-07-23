@@ -173,7 +173,7 @@ const ApartmentTourInterlude = ({ compact = false }: { compact?: boolean }) => {
 
             {/* Video — compact, right side */}
             <div className="flex flex-col items-center w-full md:flex-row md:items-start md:gap-5 md:w-[55%] order-2 md:order-2">
-              <div className="relative w-full md:flex-1 overflow-hidden rounded-sm shadow-[0_30px_70px_-10px_rgba(0,0,0,0.5)]" style={{ aspectRatio: "16/9" }}>
+              <div className="relative w-full md:flex-1 overflow-hidden rounded-sm shadow-none md:shadow-[0_30px_70px_-10px_rgba(0,0,0,0.5)]" style={{ aspectRatio: "16/9" }}>
                 {!isPlaying ? (
                   <button
                     onClick={handlePlay}
@@ -252,7 +252,7 @@ const ApartmentTourInterlude = ({ compact = false }: { compact?: boolean }) => {
           </div>
 
           {/* Video player */}
-          <div className="relative w-full overflow-hidden rounded-sm shadow-2xl" style={{ aspectRatio: "16/9" }}>
+          <div className="relative w-full overflow-hidden rounded-sm shadow-none md:shadow-2xl" style={{ aspectRatio: "16/9" }}>
             {!isPlaying ? (
               <button
                 onClick={handlePlay}
