@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   LayoutGrid,
   ArrowDownAZ,
@@ -26,8 +26,6 @@ interface Props {
   showAfterElementId?: string;
   /** Bypass mobile/PWA viewport gating for routes that need this on wider previews. */
   forceDisplay?: boolean;
-  /** Keep the four actions visible instead of allowing the compact ellipsis state. */
-  alwaysExpanded?: boolean;
 }
 
 /**
@@ -43,12 +41,11 @@ export default function GalleryDetailsFloatingNav({
   showImmediately = false,
   showAfterElementId,
   forceDisplay = false,
-  alwaysExpanded = false,
 }: Props) {
   const [expanded, setExpanded] = useState(false);
   const [visible, setVisible] = useState(showImmediately);
-  const [revealedByElement, setRevealedByElement] = useState(showImmediately);
   const [isMobileOrPwa, setIsMobileOrPwa] = useState(false);
+  const revealedByElementRef = useRef(showImmediately);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -73,7 +70,8 @@ export default function GalleryDetailsFloatingNav({
   useEffect(() => {
     if (showImmediately) {
       setVisible(true);
-      setRevealedByElement(true);
+      setExpanded(false);
+      revealedByElementRef.current = true;
       return;
     }
 
@@ -101,25 +99,29 @@ export default function GalleryDetailsFloatingNav({
       const onScroll = () => {
         // Hide when back near the top of the page.
         if (window.scrollY < 200) {
-          setRevealedByElement(false);
+          revealedByElementRef.current = false;
           setVisible(false);
           setExpanded(false);
           return;
         }
         const target = getTriggerElement();
         if (!target) {
-          if (!revealedByElement) setVisible(false);
+          if (!revealedByElementRef.current) {
+            setVisible(false);
+            setExpanded(false);
+          }
           return;
         }
         const rect = target.getBoundingClientRect();
         const bottomSafeArea = 112;
         const reachedTrigger = rect.top <= window.innerHeight - bottomSafeArea;
         const reachedPageEnd = window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - bottomSafeArea;
-        const shouldShow = revealedByElement || reachedTrigger || reachedPageEnd;
+        const shouldShow = revealedByElementRef.current || reachedTrigger || reachedPageEnd;
         setVisible(shouldShow);
         if (shouldShow) {
-          setRevealedByElement(true);
-          if (alwaysExpanded) setExpanded(true);
+          revealedByElementRef.current = true;
+        } else {
+          setExpanded(false);
         }
       };
       onScroll();
@@ -131,16 +133,20 @@ export default function GalleryDetailsFloatingNav({
       };
     }
 
-    const onScroll = () => setVisible(window.scrollY > threshold);
+    const onScroll = () => {
+      const shouldShow = window.scrollY > threshold;
+      setVisible(shouldShow);
+      if (!shouldShow) setExpanded(false);
+    };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
-  }, [showImmediately, showAfterElementId, threshold, alwaysExpanded, revealedByElement]);
+  }, [showImmediately, showAfterElementId, threshold]);
 
   if (!forceDisplay && !showImmediately && !isMobileOrPwa) return null;
   if (!visible) return null;
 
-  const isExpanded = alwaysExpanded || expanded;
+  const isExpanded = expanded;
 
 
   const handleAllCategories = () => {
@@ -202,15 +208,13 @@ export default function GalleryDetailsFloatingNav({
             <ArrowUp className="h-4 w-4" />
           </button>
           <span className="w-px h-6 bg-background/20 mx-0.5" aria-hidden />
-          {!alwaysExpanded && (
-            <button
-              onClick={() => setExpanded(false)}
-              aria-label="Collapse quick actions"
-              className="h-10 w-10 rounded-full flex items-center justify-center hover:bg-background/10 transition-colors active:scale-95"
-            >
-              <ChevronDown className="h-4 w-4" />
-            </button>
-          )}
+          <button
+            onClick={() => setExpanded(false)}
+            aria-label="Collapse quick actions"
+            className="h-10 w-10 rounded-full flex items-center justify-center hover:bg-background/10 transition-colors active:scale-95"
+          >
+            <ChevronDown className="h-4 w-4" />
+          </button>
         </div>
       ) : (
         <button
