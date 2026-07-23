@@ -1212,9 +1212,6 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                         </div>
                       );
                     })()}
-                    {originalSectionIndex === galleryExperiences.length - 1 && (
-                      <GalleryDetailsFloatingNav />
-                    )}
                   </div>
                 );
               })()}
