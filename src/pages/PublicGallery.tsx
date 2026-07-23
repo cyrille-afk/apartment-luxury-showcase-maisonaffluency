@@ -54,7 +54,7 @@ const PublicGallery = () => {
         </div>
 
         <Footer />
-        <GalleryDetailsFloatingNav threshold={400} />
+        <GalleryDetailsFloatingNav showImmediately />
 
       </div>
     </>
