@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { queryKeys } from "@/lib/queryKeys";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
+import GalleryDetailsFloatingNav from "@/components/GalleryDetailsFloatingNav";
 import SpecSheetButton, { type PdfEntry } from "@/components/trade/SpecSheetButton";
 import { useCompare, type CompareItem } from "@/contexts/CompareContext";
 import { useAuthGate } from "@/hooks/useAuthGate";
