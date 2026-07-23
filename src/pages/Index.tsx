@@ -36,10 +36,6 @@ const ProductGrid = lazyRetry(() => import("@/components/ProductGrid"));
 const TradeFloatingCTA = lazy(() => import("@/components/TradeFloatingCTA"));
 const ApartmentTourInterlude = lazyRetry(() => import("@/components/ApartmentTourInterlude"));
 
-
-// ExitIntentBanner is deferred — not even fetched until 5s after load to avoid
-// competing for bandwidth with LCP-critical resources on mobile.
-const ExitIntentBanner = lazyRetry(() => import("@/components/ExitIntentBanner"));
 const CompareFab = lazyRetry(() => import("@/components/CompareFab"));
 const CompareDrawer = lazyRetry(() => import("@/components/CompareDrawer"));
 
