@@ -979,8 +979,8 @@ const PublicProductPage: React.FC = () => {
   }, [galleryJumpNonce]);
 
   // Mobile/PWA: pin the product image gallery from the very first scroll pixel.
-  // We measure the wrapper's viewport-top at scroll=0 and set that as the
-  // sticky `top` so nothing "slips" before pinning.
+  // Set the sticky `top` equal to the wrapper's initial document offset so
+  // sticking engages at scrollY = 0 (no "slip" before pinning).
   React.useLayoutEffect(() => {
     if (typeof window === "undefined") return;
     const apply = () => {
@@ -990,16 +990,16 @@ const PublicProductPage: React.FC = () => {
         el.style.top = "";
         return;
       }
-      const prevScroll = window.scrollY;
-      const rectTop = el.getBoundingClientRect().top + prevScroll;
-      // distance from the top of the document to the wrapper's top edge
-      el.style.top = `${Math.max(0, rectTop - prevScroll - (prevScroll === 0 ? 0 : 0))}px`;
-      // Simpler & robust: use the wrapper's offset from document top when at scroll 0
-      el.style.top = `${rectTop}px`;
+      const docTop = el.getBoundingClientRect().top + window.scrollY;
+      el.style.top = `${Math.max(0, docTop)}px`;
     };
     apply();
+    const t = window.setTimeout(apply, 250);
     window.addEventListener("resize", apply);
-    return () => window.removeEventListener("resize", apply);
+    return () => {
+      window.clearTimeout(t);
+      window.removeEventListener("resize", apply);
+    };
   });
 
 
