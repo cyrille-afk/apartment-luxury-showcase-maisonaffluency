@@ -77,8 +77,19 @@ export default function GalleryDetailsFloatingNav({
     }
 
     if (showAfterElementId) {
-      const onScroll = () => {
+      const getTriggerElement = () => {
         const target = document.getElementById(showAfterElementId);
+        if (!target) return null;
+
+        const rects = target.getClientRects();
+        const isRendered = rects.length > 0 && window.getComputedStyle(target).display !== "none";
+        if (isRendered) return target;
+
+        return document.querySelector<HTMLElement>(`[aria-controls="${showAfterElementId}"]`) ?? target;
+      };
+
+      const onScroll = () => {
+        const target = getTriggerElement();
         if (!target) {
           setVisible(false);
           return;
@@ -100,7 +111,7 @@ export default function GalleryDetailsFloatingNav({
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
-  }, [showImmediately, showAfterElementId, threshold]);
+  }, [showImmediately, showAfterElementId, threshold, alwaysExpanded]);
 
   if (!forceDisplay && !showImmediately && !isMobileOrPwa) return null;
   if (!visible) return null;
