@@ -1351,7 +1351,7 @@ const PublicDesignerProfile = () => {
         <Footer />
       </div>
 
-      <FloatingScrollNav menuHref={designerAzBackHref} menuLabel="Back to A–Z directory" onMenuClick={rememberDesignerAzLetter} />
+      <GalleryDetailsFloatingNav azHref={designerAzBackHref} azLabel="Back to A–Z directory" onAzClick={rememberDesignerAzLetter} />
 
       <PublicProductLightbox
         product={lightboxItem}
