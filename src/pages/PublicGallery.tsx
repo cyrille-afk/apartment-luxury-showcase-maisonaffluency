@@ -54,7 +54,7 @@ const PublicGallery = () => {
         </div>
 
         <Footer />
-        <GalleryDetailsFloatingNav showAfterElementId="gallery-section-6" forceDisplay alwaysExpanded />
+        <GalleryDetailsFloatingNav showAfterElementId="gallery-section-6" forceDisplay />
 
       </div>
     </>

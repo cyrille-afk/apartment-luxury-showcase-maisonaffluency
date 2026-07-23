@@ -45,7 +45,7 @@ export default function GalleryDetailsFloatingNav({
   forceDisplay = false,
   alwaysExpanded = false,
 }: Props) {
-  const [expanded, setExpanded] = useState(showImmediately);
+  const [expanded, setExpanded] = useState(false);
   const [visible, setVisible] = useState(showImmediately);
   const [revealedByElement, setRevealedByElement] = useState(showImmediately);
   const [isMobileOrPwa, setIsMobileOrPwa] = useState(false);
@@ -73,7 +73,6 @@ export default function GalleryDetailsFloatingNav({
   useEffect(() => {
     if (showImmediately) {
       setVisible(true);
-      setExpanded(true);
       setRevealedByElement(true);
       return;
     }
