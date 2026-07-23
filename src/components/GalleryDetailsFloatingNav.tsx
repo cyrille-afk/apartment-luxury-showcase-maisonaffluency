@@ -22,6 +22,12 @@ interface Props {
   threshold?: number;
   /** Show immediately, used on scroll-locked mobile/PWA landings. */
   showImmediately?: boolean;
+  /** Show once this element reaches the viewport, used for gallery final-section entry. */
+  showAfterElementId?: string;
+  /** Bypass mobile/PWA viewport gating for routes that need this on wider previews. */
+  forceDisplay?: boolean;
+  /** Keep the four actions visible instead of allowing the compact ellipsis state. */
+  alwaysExpanded?: boolean;
 }
 
 /**
@@ -35,6 +41,9 @@ export default function GalleryDetailsFloatingNav({
   azLabel = "Browse designers A–Z",
   threshold = 600,
   showImmediately = false,
+  showAfterElementId,
+  forceDisplay = false,
+  alwaysExpanded = false,
 }: Props) {
   const [expanded, setExpanded] = useState(showImmediately);
   const [visible, setVisible] = useState(showImmediately);
@@ -66,14 +75,37 @@ export default function GalleryDetailsFloatingNav({
       setExpanded(true);
       return;
     }
+
+    if (showAfterElementId) {
+      const onScroll = () => {
+        const target = document.getElementById(showAfterElementId);
+        if (!target) {
+          setVisible(false);
+          return;
+        }
+        const shouldShow = target.getBoundingClientRect().top <= window.innerHeight * 0.72;
+        setVisible(shouldShow);
+        if (shouldShow && alwaysExpanded) setExpanded(true);
+      };
+      onScroll();
+      window.addEventListener("scroll", onScroll, { passive: true });
+      window.addEventListener("resize", onScroll);
+      return () => {
+        window.removeEventListener("scroll", onScroll);
+        window.removeEventListener("resize", onScroll);
+      };
+    }
+
     const onScroll = () => setVisible(window.scrollY > threshold);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
-  }, [showImmediately, threshold]);
+  }, [showImmediately, showAfterElementId, threshold]);
 
-  if (!showImmediately && !isMobileOrPwa) return null;
+  if (!forceDisplay && !showImmediately && !isMobileOrPwa) return null;
   if (!visible) return null;
+
+  const isExpanded = alwaysExpanded || expanded;
 
 
   const handleAllCategories = () => {
@@ -100,7 +132,7 @@ export default function GalleryDetailsFloatingNav({
       className="fixed right-3 z-[10000] print:hidden"
       style={{ bottom: "calc(env(safe-area-inset-bottom, 0px) + 4.75rem)" }}
     >
-      {expanded ? (
+      {isExpanded ? (
         <div
           className="flex items-center gap-2 rounded-full bg-foreground/95 backdrop-blur-md text-background shadow-xl pl-2 pr-1 py-1.5 animate-in fade-in slide-in-from-bottom-1 duration-300"
           role="toolbar"
@@ -135,13 +167,15 @@ export default function GalleryDetailsFloatingNav({
             <ArrowUp className="h-4 w-4" />
           </button>
           <span className="w-px h-6 bg-background/20 mx-0.5" aria-hidden />
-          <button
-            onClick={() => setExpanded(false)}
-            aria-label="Collapse quick actions"
-            className="h-10 w-10 rounded-full flex items-center justify-center hover:bg-background/10 transition-colors active:scale-95"
-          >
-            <ChevronDown className="h-4 w-4" />
-          </button>
+          {!alwaysExpanded && (
+            <button
+              onClick={() => setExpanded(false)}
+              aria-label="Collapse quick actions"
+              className="h-10 w-10 rounded-full flex items-center justify-center hover:bg-background/10 transition-colors active:scale-95"
+            >
+              <ChevronDown className="h-4 w-4" />
+            </button>
+          )}
         </div>
       ) : (
         <button
