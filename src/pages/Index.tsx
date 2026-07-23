@@ -451,11 +451,9 @@ const Index = ({ categoryMode = false }: IndexProps = {}) => {
         ) : null}
       </main>
 
-      {showBelowFoldSections ? (
-        <Suspense fallback={null}>
-          <GalleryDetailsFloatingNav showImmediately />
-        </Suspense>
-      ) : null}
+      {/* Floating quick-actions panel intentionally NOT rendered on the homepage.
+          It only belongs on /gallery (after the last gallery section), category
+          pages, and designer biographies. */}
 
 
       {/* ExitIntentBanner "Chat with us" pill removed per user request. */}
