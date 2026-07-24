@@ -2813,7 +2813,15 @@ const TradeProductPage: React.FC = () => {
           brand_name: designerDisplay || null,
         }}
       />
-      <GalleryDetailsFloatingNav showImmediately azHref="/designers" />
+      <GalleryDetailsFloatingNav
+        showImmediately
+        azHref="/designers"
+        allCategoriesHref={
+          product?.category
+            ? categoryUrl(product.category, product.subcategory ?? null)
+            : undefined
+        }
+      />
      </div>
   );
 };
