@@ -154,6 +154,10 @@ export default function GalleryDetailsFloatingNav({
 
   const handleAllCategories = () => {
     setExpanded(false);
+    if (allCategoriesHref) {
+      navigate(allCategoriesHref);
+      return;
+    }
     window.dispatchEvent(new Event("open-main-menu"));
     window.dispatchEvent(new CustomEvent("open-all-categories"));
   };
