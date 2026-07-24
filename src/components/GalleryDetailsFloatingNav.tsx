@@ -26,6 +26,8 @@ interface Props {
   showAfterElementId?: string;
   /** Bypass mobile/PWA viewport gating for routes that need this on wider previews. */
   forceDisplay?: boolean;
+  /** Override "All Categories" behavior: navigate to this href instead of opening the main menu. */
+  allCategoriesHref?: string;
 }
 
 /**
@@ -41,6 +43,7 @@ export default function GalleryDetailsFloatingNav({
   showImmediately = false,
   showAfterElementId,
   forceDisplay = false,
+  allCategoriesHref,
 }: Props) {
   const [expanded, setExpanded] = useState(false);
   const [visible, setVisible] = useState(showImmediately);
@@ -151,6 +154,10 @@ export default function GalleryDetailsFloatingNav({
 
   const handleAllCategories = () => {
     setExpanded(false);
+    if (allCategoriesHref) {
+      navigate(allCategoriesHref);
+      return;
+    }
     window.dispatchEvent(new Event("open-main-menu"));
     window.dispatchEvent(new CustomEvent("open-all-categories"));
   };
