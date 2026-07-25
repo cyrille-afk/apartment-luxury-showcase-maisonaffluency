@@ -551,8 +551,8 @@ const DesignersHoverHero = () => {
     const forceResetHeroScroll = () => resetHeroScroll(true);
 
     resetHeroScroll();
-    const raf = window.requestAnimationFrame(resetHeroScroll);
-    const timers = [80, 180, 360].map((ms) => window.setTimeout(resetHeroScroll, ms));
+    const raf = window.requestAnimationFrame(() => resetHeroScroll());
+    const timers = [80, 180, 360].map((ms) => window.setTimeout(() => resetHeroScroll(), ms));
     window.addEventListener("designersLandingResetScroll", forceResetHeroScroll);
     window.addEventListener("pageshow", forceResetHeroScroll);
     window.addEventListener("focus", forceResetHeroScroll);
