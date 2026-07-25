@@ -138,6 +138,10 @@ function ScrollLockedDesigners({
     if (!locked) return;
     const html = document.documentElement;
     const body = document.body;
+    const updateLockedViewport = () => {
+      const viewportHeight = window.visualViewport?.height || window.innerHeight;
+      html.style.setProperty("--designers-landing-vh", `${Math.round(viewportHeight)}px`);
+    };
     const prevHtml = html.style.overflow;
     const prevHtmlOverscroll = (html.style as any).overscrollBehavior;
     const prevBody = body.style.overflow;
@@ -154,6 +158,7 @@ function ScrollLockedDesigners({
     // iOS ignores body overflow alone during toolbar/rubber-band gestures. Pin
     // the body itself while /designers is in the locked mobile/PWA landing so
     // the hero cannot visually lift under the fixed header.
+    updateLockedViewport();
     html.style.overflow = "hidden";
     (html.style as any).overscrollBehavior = "none";
     body.style.overflow = "hidden";
@@ -163,12 +168,12 @@ function ScrollLockedDesigners({
     body.style.left = "0";
     body.style.right = "0";
     body.style.width = "100%";
-    html.style.height = "100lvh";
+    html.style.height = "var(--designers-landing-vh, 100lvh)";
     // Use the large viewport, not 100dvh: iOS browser chrome sits outside the
     // dynamic viewport, and clipping the fixed body to dvh leaves the bottom
     // toolbar sampling only the black fallback instead of the hero image.
-    body.style.height = "100lvh";
-    body.style.minHeight = "100lvh";
+    body.style.height = "var(--designers-landing-vh, 100lvh)";
+    body.style.minHeight = "var(--designers-landing-vh, 100lvh)";
     // Keep only a fallback color; the fixed body now extends far enough for the
     // hero image itself to paint behind the iOS toolbar.
     body.style.backgroundColor = "#0a0a0a";
@@ -181,9 +186,9 @@ function ScrollLockedDesigners({
     let userInteracted = false;
     const stopReset = () => { userInteracted = true; };
     const forceTop = () => {
-      if (userInteracted) return;
+      updateLockedViewport();
       window.scrollTo({ top: 0, left: 0, behavior: "instant" as ScrollBehavior });
-      window.dispatchEvent(new Event("designersLandingResetScroll"));
+      if (!userInteracted) window.dispatchEvent(new Event("designersLandingResetScroll"));
     };
 
     forceTop();
@@ -197,6 +202,9 @@ function ScrollLockedDesigners({
     raf = requestAnimationFrame(onFrame);
     const timers = [80, 180, 360, 720].map((ms) => window.setTimeout(forceTop, ms));
     window.addEventListener("pageshow", forceTop);
+    window.addEventListener("resize", updateLockedViewport);
+    window.visualViewport?.addEventListener("resize", updateLockedViewport);
+    window.visualViewport?.addEventListener("scroll", updateLockedViewport);
     window.addEventListener("touchstart", stopReset, { once: true, passive: true });
     window.addEventListener("pointerdown", stopReset, { once: true, passive: true });
     window.addEventListener("wheel", stopReset, { once: true, passive: true });
@@ -215,11 +223,15 @@ function ScrollLockedDesigners({
       body.style.width = prevWidth;
       body.style.height = prevHeight;
       body.style.minHeight = prevMinHeight;
+      html.style.removeProperty("--designers-landing-vh");
       try { (window.history as any).scrollRestoration = prevRestoration ?? "auto"; } catch { /* ignore */ }
       window.scrollTo({ top: 0, left: 0, behavior: "instant" as ScrollBehavior });
       cancelAnimationFrame(raf);
       timers.forEach((timer) => window.clearTimeout(timer));
       window.removeEventListener("pageshow", forceTop);
+      window.removeEventListener("resize", updateLockedViewport);
+      window.visualViewport?.removeEventListener("resize", updateLockedViewport);
+      window.visualViewport?.removeEventListener("scroll", updateLockedViewport);
       window.removeEventListener("touchstart", stopReset);
       window.removeEventListener("pointerdown", stopReset);
       window.removeEventListener("wheel", stopReset);
@@ -255,10 +267,10 @@ function ScrollLockedDesigners({
     <div className="min-h-screen bg-background text-foreground">
       <Navigation />
 
-      <div className={locked ? "pt-[var(--header-h)] h-[100lvh] overflow-hidden" : "pt-[var(--header-h)]"}>
+      <div className={locked ? "pt-[var(--header-h)] h-[var(--designers-landing-vh,100lvh)] overflow-hidden" : "pt-[var(--header-h)]"}>
         <h1 className="sr-only">Designers &amp; Ateliers</h1>
 
-        <div className={locked ? "h-[calc(100lvh-var(--header-h))] overflow-hidden" : "pb-20"}>
+        <div className={locked ? "h-[calc(var(--designers-landing-vh,100lvh)-var(--header-h))] overflow-hidden" : "pb-20"}>
           <div
             className={locked ? "relative md:h-full" : "relative min-h-[calc(100lvh-var(--header-h))] bg-[#0a0a0a]"}
           >

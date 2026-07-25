@@ -541,28 +541,31 @@ const DesignersHoverHero = () => {
       userInteracted = true;
     };
 
-    const resetHeroScroll = () => {
-      if (userInteracted) return;
+    const resetHeroScroll = (force = false) => {
+      if (userInteracted && !force) return;
       contentScrollRef.current?.scrollTo({ top: 0, left: 0, behavior: "instant" as ScrollBehavior });
       searchScrollRef.current?.scrollTo({ top: 0, left: 0, behavior: "instant" as ScrollBehavior });
       const list = itemsRef.current;
       if (list.length > 0) setActiveSlug(list[0].slug);
     };
+    const forceResetHeroScroll = () => resetHeroScroll(true);
 
     resetHeroScroll();
-    const raf = window.requestAnimationFrame(resetHeroScroll);
-    const timers = [80, 180, 360].map((ms) => window.setTimeout(resetHeroScroll, ms));
-    window.addEventListener("designersLandingResetScroll", resetHeroScroll);
+    const raf = window.requestAnimationFrame(() => resetHeroScroll());
+    const timers = [80, 180, 360].map((ms) => window.setTimeout(() => resetHeroScroll(), ms));
+    window.addEventListener("designersLandingResetScroll", forceResetHeroScroll);
+    window.addEventListener("pageshow", forceResetHeroScroll);
+    window.addEventListener("focus", forceResetHeroScroll);
     window.addEventListener("touchstart", markUserInteracted, { once: true, passive: true });
     window.addEventListener("pointerdown", markUserInteracted, { once: true, passive: true });
     window.addEventListener("wheel", markUserInteracted, { once: true, passive: true });
     window.addEventListener("keydown", markUserInteracted, { once: true });
-    // NOTE: intentionally NOT listening to `pageshow` — bfcache restores fire
-    // it after the user has already scrolled, snapping the hero back to top.
     return () => {
       window.cancelAnimationFrame(raf);
       timers.forEach((timer) => window.clearTimeout(timer));
-      window.removeEventListener("designersLandingResetScroll", resetHeroScroll);
+      window.removeEventListener("designersLandingResetScroll", forceResetHeroScroll);
+      window.removeEventListener("pageshow", forceResetHeroScroll);
+      window.removeEventListener("focus", forceResetHeroScroll);
       window.removeEventListener("touchstart", markUserInteracted);
       window.removeEventListener("pointerdown", markUserInteracted);
       window.removeEventListener("wheel", markUserInteracted);
@@ -1341,12 +1344,12 @@ const DesignersHoverHero = () => {
       className={cn(
         "relative w-full bg-[#0a0a0a] text-foreground overflow-hidden touch-pan-y",
         isStandalone
-          ? "h-[calc(100svh-var(--header-h)+6rem)] min-h-[680px] md:h-[calc(100svh-var(--header-h))] md:min-h-[640px]"
+          ? "h-[calc(var(--designers-landing-vh,100svh)-var(--header-h))] md:h-[calc(100svh-var(--header-h))] md:min-h-[640px]"
           : // Background frame uses 100lvh so dark hero always covers Safari's
             // toolbar-collapse zone (no white strip). Content frame inside is
             // constrained to 100svh so the Directory clears the iOS toolbar
             // when it is visible.
-            "h-[calc(100lvh-var(--header-h))] min-h-[calc(640px-var(--header-h))] md:h-[calc(100svh-var(--header-h))]"
+            "h-[calc(var(--designers-landing-vh,100lvh)-var(--header-h))] md:h-[calc(100svh-var(--header-h))]"
       )}
     >
       {/* Cross-fading background images */}
@@ -1419,7 +1422,7 @@ const DesignersHoverHero = () => {
           // Mobile browser: frame height = visible viewport minus the fixed
           // header, so its bottom aligns with the iOS toolbar top (svh excludes
           // the toolbar). Desktop/PWA: full section height.
-          isStandalone ? "h-full" : "h-[calc(100svh-var(--header-h))] md:h-full"
+          isStandalone ? "h-full" : "h-[calc(var(--designers-landing-vh,100svh)-var(--header-h))] md:h-full"
         )}
       >
 
@@ -1429,11 +1432,11 @@ const DesignersHoverHero = () => {
           className={cn(
           "relative flex flex-col h-full px-6 sm:px-12 md:px-20 lg:px-28 pointer-events-auto overflow-hidden md:overflow-visible",
             isStandalone
-              ? "justify-start overscroll-contain touch-pan-y pt-16 pb-44 md:pt-8 md:pb-0 md:justify-center [-webkit-overflow-scrolling:touch]"
+              ? "justify-start overscroll-contain touch-pan-y pt-8 pb-[calc(7rem+env(safe-area-inset-bottom))] md:pt-8 md:pb-0 md:justify-center [-webkit-overflow-scrolling:touch]"
               : // Mobile browser: the section already starts below the fixed
                 // header, so do not add var(--header-h) again here. Keep the
                 // designer list high while leaving room for the Directory link.
-                "justify-start overscroll-contain touch-pan-y pt-12 pb-[calc(2.5rem+env(safe-area-inset-bottom))] md:pt-8 md:justify-center md:pb-0 [-webkit-overflow-scrolling:touch]"
+                "justify-start overscroll-contain touch-pan-y pt-6 pb-[calc(5rem+env(safe-area-inset-bottom))] md:pt-8 md:justify-center md:pb-0 [-webkit-overflow-scrolling:touch]"
           )}
         >
 
@@ -1559,9 +1562,9 @@ const DesignersHoverHero = () => {
             ? "left-1/2 -translate-x-1/2 justify-center px-6"
             : "left-6 sm:left-[22rem] md:left-[26rem] lg:left-[28rem]",
           isStandalone
-            ? "pt-6 bottom-[calc(8.5rem+env(safe-area-inset-bottom))]"
+            ? "bottom-[calc(1.75rem+env(safe-area-inset-bottom))]"
             // Mobile browser: the safe frame is already below the fixed header.
-            : "pt-2 top-2"
+            : "bottom-[calc(1.25rem+env(safe-area-inset-bottom))]"
         ))}
 
 
@@ -1572,8 +1575,8 @@ const DesignersHoverHero = () => {
             className={cn(
               "absolute right-6 sm:right-12 z-20 flex flex-col items-center gap-2 pointer-events-none md:hidden",
               isStandalone
-                ? "bottom-[calc(11rem+env(safe-area-inset-bottom))]"
-                : "bottom-[calc(6.25rem+env(safe-area-inset-bottom))]"
+                ? "bottom-[calc(4.5rem+env(safe-area-inset-bottom))]"
+                : "bottom-[calc(4rem+env(safe-area-inset-bottom))]"
             )}
           >
             <style>{`
