@@ -541,28 +541,31 @@ const DesignersHoverHero = () => {
       userInteracted = true;
     };
 
-    const resetHeroScroll = () => {
-      if (userInteracted) return;
+    const resetHeroScroll = (force = false) => {
+      if (userInteracted && !force) return;
       contentScrollRef.current?.scrollTo({ top: 0, left: 0, behavior: "instant" as ScrollBehavior });
       searchScrollRef.current?.scrollTo({ top: 0, left: 0, behavior: "instant" as ScrollBehavior });
       const list = itemsRef.current;
       if (list.length > 0) setActiveSlug(list[0].slug);
     };
+    const forceResetHeroScroll = () => resetHeroScroll(true);
 
     resetHeroScroll();
     const raf = window.requestAnimationFrame(resetHeroScroll);
     const timers = [80, 180, 360].map((ms) => window.setTimeout(resetHeroScroll, ms));
-    window.addEventListener("designersLandingResetScroll", resetHeroScroll);
+    window.addEventListener("designersLandingResetScroll", forceResetHeroScroll);
+    window.addEventListener("pageshow", forceResetHeroScroll);
+    window.addEventListener("focus", forceResetHeroScroll);
     window.addEventListener("touchstart", markUserInteracted, { once: true, passive: true });
     window.addEventListener("pointerdown", markUserInteracted, { once: true, passive: true });
     window.addEventListener("wheel", markUserInteracted, { once: true, passive: true });
     window.addEventListener("keydown", markUserInteracted, { once: true });
-    // NOTE: intentionally NOT listening to `pageshow` — bfcache restores fire
-    // it after the user has already scrolled, snapping the hero back to top.
     return () => {
       window.cancelAnimationFrame(raf);
       timers.forEach((timer) => window.clearTimeout(timer));
-      window.removeEventListener("designersLandingResetScroll", resetHeroScroll);
+      window.removeEventListener("designersLandingResetScroll", forceResetHeroScroll);
+      window.removeEventListener("pageshow", forceResetHeroScroll);
+      window.removeEventListener("focus", forceResetHeroScroll);
       window.removeEventListener("touchstart", markUserInteracted);
       window.removeEventListener("pointerdown", markUserInteracted);
       window.removeEventListener("wheel", markUserInteracted);
