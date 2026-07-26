@@ -8,6 +8,7 @@ import {
   ArrowUp,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { cn } from "@/lib/utils";
 
 const WHATSAPP_URL = "https://wa.me/6591393850";
 
