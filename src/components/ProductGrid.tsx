@@ -425,12 +425,18 @@ function singularizeSub(s: string): string {
     }, 150);
   }, []);
 
+  // Mobile/PWA: first tap reveals a "Discover the Product" pill; second tap opens the lightbox.
+  const [mobileRevealedIdx, setMobileRevealedIdx] = useState<number | null>(null);
   const handleCardClick = useCallback((_item: ProductItem, index: number) => {
+    if (typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches && mobileRevealedIdx !== index) {
+      setMobileRevealedIdx(index);
+      return;
+    }
     setLightboxIndex(index);
     setIsLightboxImageLoaded(false);
     setLightboxOpen(true);
     setIsZoomed(false);
-  }, []);
+  }, [mobileRevealedIdx]);
 
   const handleClearFilter = useCallback(() => {
     setCategory(null);
