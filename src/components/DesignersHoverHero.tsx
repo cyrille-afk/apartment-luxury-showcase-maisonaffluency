@@ -141,10 +141,9 @@ function DesignerGridCard({
   onNavigate?: () => void;
   priority?: boolean;
 }) {
-  // Base = portrait (hero); reveal overlay = first curator pick.
-  // Mirrors the desktop DesignersDirectory tap-to-reveal UX.
-  const baseRaw = designer.hero_image_url || designer.image_url || null;
-  const pickRaw = designer.first_pick_image_url || null;
+  // Base = first curator pick (original mobile/PWA behavior); reveal overlay = hero portrait.
+  const baseRaw = designer.first_pick_image_url || designer.hero_image_url || designer.image_url || null;
+  const pickRaw = designer.hero_image_url || null;
   const hasPickReveal = !!pickRaw && pickRaw !== baseRaw;
   const url = gridImageTransform(baseRaw);
   const srcSet = gridImageSrcSet(baseRaw);
