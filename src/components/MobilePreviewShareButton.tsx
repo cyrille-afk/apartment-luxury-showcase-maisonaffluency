@@ -144,7 +144,6 @@ const MobilePreviewShareButton = () => {
   const frameH = orientation === "portrait" ? dims.h : dims.w;
   const isIOS = device !== "pixel";
   const homeBarH = isIOS && orientation === "portrait" ? dims.homeBarH : 0;
-  const usableH = frameH - homeBarH;
 
   // Floating trigger removed — opening is handled exclusively by the
   // MobilePreviewHeaderButton in the trade header (and `open-mobile-preview`
@@ -183,17 +182,20 @@ const MobilePreviewShareButton = () => {
           className="bg-background rounded-[1.75rem] block transition-all"
           style={{
             width: frameW,
-            height: usableH,
+            height: frameH,
             maxHeight: variant === "split" ? "calc(100vh - 9rem)" : "calc(100vh - 7rem)",
             maxWidth: variant === "split" ? "calc((100vw - 5rem) / 2)" : "calc(100vw - 3rem)",
           }}
         />
 
-        {/* iOS home-indicator strip */}
+        {/* iOS home-indicator overlay */}
         {homeBarH > 0 && (
           <div
-            className="absolute bottom-3 left-3 right-3 bg-black/90 rounded-b-[1.75rem] flex items-start justify-center pt-2 pointer-events-none"
-            style={{ height: homeBarH }}
+            className="absolute bottom-3 left-3 right-3 rounded-b-[1.75rem] flex items-end justify-center pb-1.5 pointer-events-none"
+            style={{
+              height: homeBarH,
+              background: "linear-gradient(to top, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0) 100%)",
+            }}
           >
             <div className="w-[120px] h-[5px] bg-white/80 rounded-full" />
           </div>
