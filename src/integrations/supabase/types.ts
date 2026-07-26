@@ -2791,6 +2791,7 @@ export type Database = {
       gallery_hotspots: {
         Row: {
           created_at: string
+          designer_id: string | null
           designer_name: string | null
           dimensions: string | null
           id: string
@@ -2805,6 +2806,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          designer_id?: string | null
           designer_name?: string | null
           dimensions?: string | null
           id?: string
@@ -2819,6 +2821,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          designer_id?: string | null
           designer_name?: string | null
           dimensions?: string | null
           id?: string
@@ -2832,6 +2835,13 @@ export type Database = {
           y_percent?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "gallery_hotspots_designer_id_fkey"
+            columns: ["designer_id"]
+            isOneToOne: false
+            referencedRelation: "designers"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "gallery_hotspots_mapped_pick_id_fkey"
             columns: ["mapped_pick_id"]
@@ -7242,6 +7252,7 @@ export type Database = {
       }
     }
     Functions: {
+      _norm_designer_name: { Args: { txt: string }; Returns: string }
       accept_studio_invite: { Args: { _invite_id: string }; Returns: Json }
       add_board_comment_by_token: {
         Args: {
