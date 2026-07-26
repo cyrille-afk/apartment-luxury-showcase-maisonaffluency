@@ -316,9 +316,8 @@ function RouteScrollLockFailsafe() {
   const location = useLocation();
 
   useLayoutEffect(() => {
-    const isDesignersLanding = location.pathname === "/designers" && !location.search;
-    if (!isDesignersLanding) releaseDesignersLandingScrollLock();
-  }, [location.pathname, location.search]);
+    if (location.pathname !== "/designers") releaseDesignersLandingScrollLock();
+  }, [location.pathname]);
 
   return null;
 }
