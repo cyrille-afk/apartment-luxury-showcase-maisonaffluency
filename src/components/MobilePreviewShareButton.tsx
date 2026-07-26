@@ -119,7 +119,10 @@ const MobilePreviewShareButton = () => {
   if (typeof window !== "undefined") {
     const host = window.location.hostname;
     const isLocalDev = import.meta.env.DEV && (host === "localhost" || host === "127.0.0.1");
-    const isEditorSandbox = /(^|\.)lovableproject\.com$/.test(host);
+    const isEditorSandbox =
+      /(^|\.)lovableproject\.com$/.test(host) ||
+      /(^|\.)lovableproject-dev\.com$/.test(host) ||
+      host.startsWith("id-preview--");
     if (!isLocalDev && !isEditorSandbox) return null;
   }
 
