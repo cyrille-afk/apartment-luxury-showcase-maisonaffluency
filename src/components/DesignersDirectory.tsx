@@ -638,6 +638,8 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts }
 
   const isLetterA = true; // bottom-anchored vignette applied to every designer card
   const hasHoverPick = !!firstPickImageUrl && firstPickImageUrl !== cardImageUrl;
+  // Mobile/PWA: first tap reveals the curator pick + "Discover the Product" pill; second tap navigates.
+  const [mobileRevealed, setMobileRevealed] = React.useState(false);
 
 
   return (
@@ -659,17 +661,16 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts }
             <span className="font-display text-3xl text-muted-foreground/20">{item.name.charAt(0)}</span>
           </div>
         )}
-        {/* Hover reveal — first curator pick fades in over the portrait on desktop hover */}
+        {/* Hover/tap reveal — first curator pick fades in over the portrait (desktop: hover; mobile/PWA: tap) */}
         {hasHoverPick && (
           <img
             {...cldResponsiveImg(firstPickImageUrl!, { widths: [320, 480, 640, 960], sizes: "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 320px" })}
-
             alt=""
             aria-hidden="true"
             draggable={false}
             loading="lazy"
             decoding="async"
-            className="pointer-events-none absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-700 ease-out"
+            className={`pointer-events-none absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ease-out md:opacity-0 md:group-hover:opacity-100 ${mobileRevealed ? 'opacity-100' : 'opacity-0'}`}
           />
         )}
         {!isLetterA && (
@@ -683,6 +684,13 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts }
           to={`/designers/${item.slug}`}
           className="absolute inset-0 z-[5] cursor-pointer"
           aria-label={`View ${displayName} portrait`}
+          onClick={(e) => {
+            // Mobile/PWA only: first tap reveals the pick + pill, second tap navigates.
+            if (hasHoverPick && typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches && !mobileRevealed) {
+              e.preventDefault();
+              setMobileRevealed(true);
+            }
+          }}
         />
         {thumbs.length === 0 && (
           <>
@@ -701,10 +709,12 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts }
           </>
         )}
 
-
-        <div className={`pointer-events-none absolute inset-0 z-10 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 px-3 ${hasHoverPick ? 'bg-black/20' : 'bg-black/50'}`}>
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-white/40 bg-white/10 backdrop-blur-sm text-white font-body text-[9px] uppercase tracking-[0.15em]">{hasHoverPick ? 'Discover the Product' : 'View Portrait'}</span>
-        </div>
+        {/* "Discover the Product" pill — mobile/PWA only, shown once tap reveals the pick */}
+        {hasHoverPick && (
+          <div className={`md:hidden pointer-events-none absolute inset-0 z-10 flex flex-col items-center justify-center transition-opacity duration-300 px-3 bg-black/20 ${mobileRevealed ? 'opacity-100' : 'opacity-0'}`}>
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-white/40 bg-white/10 backdrop-blur-sm text-white font-body text-[9px] uppercase tracking-[0.15em]">Discover the Product</span>
+          </div>
+        )}
       </div>
       {/* Editorial caption block — sits below the image like a monograph plate */}
       <Link
