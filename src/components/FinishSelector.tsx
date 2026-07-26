@@ -694,6 +694,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
   const [openTop, setOpenTop] = useState(false);
   const [openCover, setOpenCover] = useState(false);
   const isMobile = useIsMobile();
+  const isPwa = isPwaStandaloneDisplay();
   const fabricTiles = isRugProduct
     ? fabrics.filter(isRugComponentSwatch)
     : (grouped["Fabric & Leather"] || []);
