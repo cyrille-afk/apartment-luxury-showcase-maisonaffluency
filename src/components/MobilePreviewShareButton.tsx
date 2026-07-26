@@ -142,10 +142,65 @@ const MobilePreviewShareButton = () => {
   const dims = DEVICES[device];
   const frameW = orientation === "portrait" ? dims.w : dims.h;
   const frameH = orientation === "portrait" ? dims.h : dims.w;
+  const isIOS = device !== "pixel";
+  const homeBarH = isIOS && orientation === "portrait" ? dims.homeBarH : 0;
+  const usableH = frameH - homeBarH;
 
   // Floating trigger removed — opening is handled exclusively by the
   // MobilePreviewHeaderButton in the trade header (and `open-mobile-preview`
   // event listener above) so it never overlaps page content.
+
+  const PhoneFrame = ({
+    src,
+    label,
+    variant,
+  }: {
+    src: string;
+    label?: string;
+    variant: "split" | "single";
+  }) => (
+    <div className="flex flex-col items-center">
+      {label && (
+        <span className="font-body text-[10px] uppercase tracking-[0.15em] text-background/80 mb-2">
+          {label}
+        </span>
+      )}
+      <div
+        className="relative bg-neutral-900 rounded-[2.5rem] p-3 shadow-2xl overflow-hidden"
+        style={{
+          maxHeight: variant === "split" ? "calc(100vh - 8rem)" : "calc(100vh - 6rem)",
+        }}
+      >
+        {/* Dynamic Island — iPhone Pro Max portrait only */}
+        {isIOS && orientation === "portrait" && dims.hasDynamicIsland && (
+          <div className="absolute top-3 left-1/2 -translate-x-1/2 z-10 w-[84px] h-[26px] bg-black rounded-full pointer-events-none" />
+        )}
+
+        <iframe
+          key={src}
+          src={src}
+          title={`Mobile preview · ${label || side}`}
+          className="bg-background rounded-[1.75rem] block transition-all"
+          style={{
+            width: frameW,
+            height: usableH,
+            maxHeight: variant === "split" ? "calc(100vh - 9rem)" : "calc(100vh - 7rem)",
+            maxWidth: variant === "split" ? "calc((100vw - 5rem) / 2)" : "calc(100vw - 3rem)",
+          }}
+        />
+
+        {/* iOS home-indicator strip */}
+        {homeBarH > 0 && (
+          <div
+            className="absolute bottom-3 left-3 right-3 bg-black/90 rounded-b-[1.75rem] flex items-start justify-center pt-2 pointer-events-none"
+            style={{ height: homeBarH }}
+          >
+            <div className="w-[120px] h-[5px] bg-white/80 rounded-full" />
+          </div>
+        )}
+      </div>
+    </div>
+  );
 
   return (
     <>
