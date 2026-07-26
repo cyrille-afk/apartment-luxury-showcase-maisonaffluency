@@ -3,6 +3,7 @@ import { useSearchParams, Navigate } from "react-router-dom";
 import { categoryUrl } from "@/lib/categorySlugs";
 import { Helmet } from "react-helmet-async";
 import { isPwaStandaloneDisplay } from "@/lib/pwaMode";
+import { markDesignersLandingScrollLock, releaseDesignersLandingScrollLock } from "@/lib/designersScrollLock";
 
 import { ChevronUp } from "lucide-react";
 import { useState, useEffect, useLayoutEffect } from "react";
@@ -125,26 +126,16 @@ function ScrollLockedDesigners({
   }, []);
 
   useLayoutEffect(() => {
-    if (!locked) return;
+    if (!locked) {
+      releaseDesignersLandingScrollLock();
+      return;
+    }
     const html = document.documentElement;
     const body = document.body;
     const updateLockedViewport = () => {
       const viewportHeight = window.visualViewport?.height || window.innerHeight;
       html.style.setProperty("--designers-landing-vh", `${Math.round(viewportHeight)}px`);
     };
-    const prevHtml = html.style.overflow;
-    const prevHtmlOverscroll = (html.style as any).overscrollBehavior;
-    const prevBody = body.style.overflow;
-    const prevOverscroll = (body.style as any).overscrollBehavior;
-    const prevBodyBg = body.style.backgroundColor;
-    const prevHtmlHeight = html.style.height;
-    const prevPosition = body.style.position;
-    const prevTop = body.style.top;
-    const prevLeft = body.style.left;
-    const prevRight = body.style.right;
-    const prevWidth = body.style.width;
-    const prevHeight = body.style.height;
-    const prevMinHeight = body.style.minHeight;
     // iOS ignores body overflow alone during toolbar/rubber-band gestures. Pin
     // the body itself while /designers is in the locked mobile/PWA landing so
     // the hero cannot visually lift under the fixed header.
@@ -171,7 +162,7 @@ function ScrollLockedDesigners({
     // window.scrollY, but with body overflow locked the hero can't be scrolled
     // back — leaving the top half cut off and the bottom half empty.
     // Disable browser scroll restoration for this route while locked, and reset.
-    const prevRestoration = (window.history as any).scrollRestoration;
+    markDesignersLandingScrollLock();
     try { (window.history as any).scrollRestoration = "manual"; } catch { /* ignore */ }
     let userInteracted = false;
     const stopReset = () => { userInteracted = true; };
@@ -200,22 +191,7 @@ function ScrollLockedDesigners({
     window.addEventListener("wheel", stopReset, { once: true, passive: true });
     window.addEventListener("keydown", stopReset, { once: true });
     return () => {
-      html.style.overflow = prevHtml;
-      (html.style as any).overscrollBehavior = prevHtmlOverscroll;
-      body.style.overflow = prevBody;
-      (body.style as any).overscrollBehavior = prevOverscroll;
-      body.style.backgroundColor = prevBodyBg;
-      html.style.height = prevHtmlHeight;
-      body.style.position = prevPosition;
-      body.style.top = prevTop;
-      body.style.left = prevLeft;
-      body.style.right = prevRight;
-      body.style.width = prevWidth;
-      body.style.height = prevHeight;
-      body.style.minHeight = prevMinHeight;
-      html.style.removeProperty("--designers-landing-vh");
-      try { (window.history as any).scrollRestoration = prevRestoration ?? "auto"; } catch { /* ignore */ }
-      window.scrollTo({ top: 0, left: 0, behavior: "instant" as ScrollBehavior });
+      releaseDesignersLandingScrollLock();
       cancelAnimationFrame(raf);
       timers.forEach((timer) => window.clearTimeout(timer));
       window.removeEventListener("pageshow", forceTop);
