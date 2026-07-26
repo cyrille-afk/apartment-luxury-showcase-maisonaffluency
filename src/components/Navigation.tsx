@@ -674,6 +674,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
               </div>
               {/* Icons aligned to right edge */}
               <div className="flex items-center gap-5 mt-3">
+                <MobilePreviewHeaderButton />
                 <DropdownMenu>
                   <DropdownMenuTrigger className="relative group p-1 transition-colors outline-none">
                     <User className="w-6 h-6 text-foreground group-hover:text-primary transition-colors" />
