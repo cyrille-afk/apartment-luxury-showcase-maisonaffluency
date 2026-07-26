@@ -113,6 +113,9 @@ const MobilePreviewShareButton = () => {
     const lovableToken = currentSearch.get("__lovable_token");
     if (lovableToken) url.searchParams.set("__lovable_token", lovableToken);
     url.searchParams.set("mobile_preview", "1");
+    // Simulate the installed PWA experience so the preview shows the iOS home
+    // indicator and PWA-specific layouts rather than mobile-Safari chrome.
+    url.searchParams.set("source", "pwa");
     return `${url.pathname}${url.search}${url.hash}`;
   };
 
