@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import SpecGlyph from "@/components/product/SpecGlyph";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { isPwaStandaloneDisplay } from "@/lib/pwaMode";
 import {
   Tooltip,
   TooltipContent,
