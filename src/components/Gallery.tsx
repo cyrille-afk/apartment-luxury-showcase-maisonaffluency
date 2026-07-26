@@ -648,17 +648,28 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
   // Pulsing hotspot hint — always visible on first card of each section
   const showHotspotHint = true;
 
-  // ── Hotspot piece counts per image ──
+  // ── Hotspot positions per image ──
   const [hotspotCounts, setHotspotCounts] = useState<Record<string, number>>({});
+  const [hotspotPositions, setHotspotPositions] = useState<Record<string, Array<{ x: number; y: number; label: string }>>>({});
   useEffect(() => {
     const fetchCounts = async () => {
-      const { data } = await supabase.from("gallery_hotspots").select("image_identifier");
+      const { data } = await supabase
+        .from("gallery_hotspots")
+        .select("image_identifier, x_percent, y_percent, product_name");
       if (data) {
         const counts: Record<string, number> = {};
+        const positions: Record<string, Array<{ x: number; y: number; label: string }>> = {};
         for (const row of data) {
           counts[row.image_identifier] = (counts[row.image_identifier] || 0) + 1;
+          if (!positions[row.image_identifier]) positions[row.image_identifier] = [];
+          positions[row.image_identifier].push({
+            x: Number(row.x_percent),
+            y: Number(row.y_percent),
+            label: row.product_name || "hotspot",
+          });
         }
         setHotspotCounts(counts);
+        setHotspotPositions(positions);
       }
     };
     fetchCounts();
@@ -1119,38 +1130,42 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                       onScroll={() => handleStripScroll(originalSectionIndex)}
                       className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide rounded-2xl"
                     >
-                      {section.items.map((item, index) => (
-                        <div
-                          key={`${item.title}-${index}-mobile`}
-                          className={`relative flex-none w-full snap-center overflow-hidden rounded-2xl ${isHotspotSection ? 'aspect-[4/5]' : 'aspect-[3/4]'}`}
-                        >
-                          <img
-                            src={item.image}
-                            alt={item.title}
-                            sizes="100vw"
-                            className={`h-full w-full object-cover brightness-[1.05] contrast-[1.08] saturate-[1.05] ${item.image === bespokeSofaImage ? "object-[center_35%]" : ""}`}
-                            loading="lazy"
-                            decoding="async"
-                            width={isHotspotSection ? 800 : 900}
-                            height={isHotspotSection ? 1000 : 1200}
-                          />
-                          {!isHotspotSection && (
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
-                          )}
-                          {/* Mobile/PWA hotspot trigger — intentionally high-contrast and large enough to notice/tap */}
-                          <button
-                            type="button"
-                            onClick={(e) => { e.stopPropagation(); openLightbox(originalSectionIndex, index); }}
-                            aria-label="Explore hotspots"
-                            className="absolute left-3 top-3 z-30 flex h-11 w-11 items-center justify-center rounded-full bg-background/95 text-foreground shadow-[0_8px_24px_-6px_hsl(var(--foreground)/0.45)] ring-2 ring-primary/80 ring-offset-2 ring-offset-background/60"
+                      {section.items.map((item, index) => {
+                        const itemHotspots = hotspotPositions[item.title] || [];
+                        return (
+                          <div
+                            key={`${item.title}-${index}-mobile`}
+                            className={`relative flex-none w-full snap-center overflow-hidden rounded-2xl ${isHotspotSection ? 'aspect-[4/5]' : 'aspect-[3/4]'}`}
                           >
-                            <span className="absolute inset-0 rounded-full border-2 border-primary/70 animate-ping" style={{ animationDuration: "1.6s" }} />
-                            <span className="relative flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-md">
-                              <MapPin className="h-4 w-4" />
-                            </span>
-                          </button>
-                        </div>
-                      ))}
+                            <img
+                              src={item.image}
+                              alt={item.title}
+                              sizes="100vw"
+                              className={`h-full w-full object-cover brightness-[1.05] contrast-[1.08] saturate-[1.05] ${item.image === bespokeSofaImage ? "object-[center_35%]" : ""}`}
+                              loading="lazy"
+                              decoding="async"
+                              width={isHotspotSection ? 800 : 900}
+                              height={isHotspotSection ? 1000 : 1200}
+                            />
+                            {!isHotspotSection && (
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+                            )}
+                            {itemHotspots.map((hotspot, hotspotIndex) => (
+                              <button
+                                key={`${item.title}-hotspot-${hotspotIndex}`}
+                                type="button"
+                                onClick={(e) => { e.stopPropagation(); openLightbox(originalSectionIndex, index); }}
+                                aria-label={`Explore hotspot: ${hotspot.label}`}
+                                className="absolute z-30 flex h-8 w-8 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-background/95 shadow-[0_8px_24px_-8px_hsl(var(--foreground)/0.55)] ring-2 ring-primary/90"
+                                style={{ left: `${hotspot.x}%`, top: `${hotspot.y}%` }}
+                              >
+                                <span className="absolute inset-0 rounded-full border-2 border-primary animate-ping" style={{ animationDuration: "1.35s" }} />
+                                <span className="relative h-3.5 w-3.5 rounded-full bg-primary shadow-[0_0_12px_hsl(var(--primary)/0.9)]" />
+                              </button>
+                            ))}
+                          </div>
+                        );
+                      })}
                     </div>
                     {/* Instagram-style indicator — top right */}
                     {section.items.length > 1 && (
