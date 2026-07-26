@@ -724,48 +724,10 @@ const DesignersHoverHero = () => {
   }, [items]);
 
 
-  // Desktop: wheel over the names list advances through designers.
-  useEffect(() => {
-    if (!hasItems) return;
-    const nav = navRef.current;
-    if (!nav) return;
-    if (typeof window === "undefined") return;
-    const isDesktop = window.matchMedia("(min-width: 768px)").matches;
-    if (!isDesktop) return;
-
-    const canUseNativeListScroll = () => {
-      // On the locked mobile/PWA landing, native inner scrolling makes the
-      // whole hero visually lift and can expose the white page edge at the end
-      // of the featured list. Gestures should only step designer-by-designer.
-      return false;
-    };
-
-    const advance = (dir: 1 | -1) => {
-      setActiveSlug((current) => {
-        const idx = items.findIndex((d) => d.slug === current);
-        const base = idx === -1 ? 0 : idx;
-        const nextIdx = (base + dir + items.length) % items.length;
-        return items[nextIdx].slug;
-      });
-    };
-
-    let transitionLock = false;
-    const onWheel = (e: WheelEvent) => {
-      if (Math.abs(e.deltaY) < 8) return;
-      e.preventDefault();
-      if (transitionLock) return;
-      transitionLock = true;
-      advance(e.deltaY > 0 ? 1 : -1);
-      window.setTimeout(() => {
-        transitionLock = false;
-      }, LOCK_MS);
-    };
-
-    nav.addEventListener("wheel", onWheel, { passive: false });
-    return () => {
-      nav.removeEventListener("wheel", onWheel);
-    };
-  }, [hasItems, items]);
+  // Desktop: names list no longer hijacks the wheel — page scrolls natively
+  // so the Directory below is reachable from anywhere on the hero, including
+  // while the cursor is over the names column. Hover on a name still swaps
+  // the background photo.
 
   // When the landing list is taller than the locked mobile/PWA viewport, let it
   // scroll natively and keep the background photo synced to the visible row.
