@@ -638,7 +638,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
             {isCom ? "COM" : isCol ? "COL" : "—"}
           </div>
         )}
-        {f.image_url && (
+        {f.image_url && !isMobile && !isPwa && (
           <span
             onClick={(e) => {
               e.stopPropagation();
