@@ -1738,6 +1738,8 @@ const TradeProductPage: React.FC = () => {
               activeIndexNonce={galleryJumpNonce}
               onIndexChange={setGalleryActiveIndex}
               caption={product.gallery_captions?.[String(galleryActiveIndex ?? 0)] || null}
+              compact={galleryCompact}
+
               firstImageBadge={
                 (() => {
                   const editionLabel = formatEditionLabel(product);
