@@ -24,9 +24,12 @@ interface ProductImageGalleryProps {
   onIndexChange?: (index: number) => void;
   /** Optional caption displayed below the active image. */
   caption?: string | null;
+  /** When true, shrinks the mobile main image height (used while user scrolls past the gallery). */
+  compact?: boolean;
 }
 
-const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, overlay, firstImageBadge, activeIndex: controlledIndex, activeIndexNonce, onIndexChange, caption }) => {
+const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, overlay, firstImageBadge, activeIndex: controlledIndex, activeIndexNonce, onIndexChange, caption, compact }) => {
+
   const [activeIndex, setActiveIndex] = useState(controlledIndex ?? 0);
 
   // Sync with external controlled index. Re-runs whenever the index *or* the
