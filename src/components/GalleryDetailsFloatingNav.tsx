@@ -227,7 +227,7 @@ export default function GalleryDetailsFloatingNav({
         <button
           onClick={() => setExpanded(true)}
           aria-label="Open quick actions"
-          className="h-12 w-12 rounded-full bg-foreground text-background shadow-xl flex items-center justify-center active:scale-95 transition-transform animate-in fade-in duration-200"
+          className="h-12 w-12 rounded-full bg-muted text-background shadow-xl flex items-center justify-center active:scale-95 transition-transform animate-in fade-in duration-200"
         >
           <MoreHorizontal className="h-5 w-5" />
         </button>
