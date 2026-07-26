@@ -984,7 +984,7 @@ const PublicProductPage: React.FC = () => {
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (window.matchMedia("(min-width: 1024px)").matches) return;
-    const onScroll = () => setGalleryCompact(window.scrollY > 140);
+    const onScroll = () => setGalleryCompact(window.scrollY > 40);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
