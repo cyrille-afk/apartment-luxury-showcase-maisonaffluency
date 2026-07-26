@@ -1781,7 +1781,7 @@ const DesignersDirectory: React.FC<DesignersDirectoryProps> = ({
   return (
     <FirstPickImageContext.Provider value={firstPickImageByDesigner}>
     <>
-    <div ref={sectionRef} data-testid="designers-directory" className="relative py-12 px-4 md:py-20 md:px-8 lg:py-24 lg:px-12 xl:px-20 bg-background scroll-header-offset">
+    <div ref={sectionRef} data-testid="designers-directory" className={`relative px-4 md:px-8 lg:px-12 xl:px-20 bg-background scroll-header-offset ${showHeader ? 'py-12 md:py-20 lg:py-24' : 'pt-2 pb-12 md:pt-4 md:pb-20 lg:pb-24'}`}>
 
 
 

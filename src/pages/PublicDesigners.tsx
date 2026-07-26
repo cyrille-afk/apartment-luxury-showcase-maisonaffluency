@@ -230,7 +230,7 @@ function ScrollLockedDesigners({
   }, [hasDeepLink]);
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-[#0a0a0a] text-foreground">
       <Navigation />
 
       <div className={locked ? "pt-[var(--header-h)] h-[var(--designers-landing-vh,100lvh)] overflow-hidden" : "pt-[var(--header-h)]"}>
