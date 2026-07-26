@@ -1316,7 +1316,9 @@ const PublicProductPage: React.FC = () => {
                   ) : null
                 }
               />
-              <ActiveSwatchCaption pickId={product.id} activeIndex={galleryActiveIndex ?? 0} />
+              <div className="md:border-0 md:shadow-none border-b border-border/60 shadow-[0_6px_10px_-8px_rgba(0,0,0,0.35)] pb-2">
+                <ActiveSwatchCaption pickId={product.id} activeIndex={galleryActiveIndex ?? 0} />
+              </div>
             </div>
 
             <div className="relative flex flex-col gap-4">
