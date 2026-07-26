@@ -1122,8 +1122,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                       {section.items.map((item, index) => (
                         <div
                           key={`${item.title}-${index}-mobile`}
-                          className={`relative flex-none w-full snap-center cursor-pointer overflow-hidden rounded-2xl ${isHotspotSection ? 'aspect-[4/5]' : 'aspect-[3/4]'}`}
-                          onClick={() => openLightbox(originalSectionIndex, activeIdx)}
+                          className={`relative flex-none w-full snap-center overflow-hidden rounded-2xl ${isHotspotSection ? 'aspect-[4/5]' : 'aspect-[3/4]'}`}
                         >
                           <img
                             src={item.image}
@@ -1138,28 +1137,20 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                           {!isHotspotSection && (
                             <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
                           )}
-                          {/* Pulsating hotspot icon — first card only */}
-                          {isHotspotSection && index === 0 && hotspotCounts[item.title] > 0 && (
-                            <span className="absolute top-3 left-3 z-20 pointer-events-none">
-                              <span className="relative flex items-center justify-center w-5 h-5 rounded-full bg-black/70 border border-primary/70">
+                          {/* Pulsating hotspot icon — shown on every image that has hotspots; tap opens interactive view */}
+                          {isHotspotSection && hotspotCounts[item.title] > 0 && (
+                            <button
+                              type="button"
+                              onClick={(e) => { e.stopPropagation(); openLightbox(originalSectionIndex, index); }}
+                              aria-label="Explore hotspots"
+                              className="absolute top-3 left-3 z-20"
+                            >
+                              <span className="relative flex items-center justify-center w-6 h-6 rounded-full bg-black/70 border border-primary/70 shadow-lg">
                                 <span className="absolute inset-0 rounded-full border border-primary/30 animate-ping" style={{ animationDuration: "2.2s" }} />
-                                <Plus className="relative h-2.5 w-2.5 text-white" />
+                                <Plus className="relative h-3 w-3 text-white" />
                               </span>
-                            </span>
+                            </button>
                           )}
-                          {/* Expand icon - bottom left */}
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              openLightbox(originalSectionIndex, activeIdx);
-                            }}
-                            className="absolute bottom-2 left-2 z-10"
-                            aria-label="View full image"
-                          >
-                            <span className="bg-black/60 text-white p-1.5 rounded-full shadow-lg backdrop-blur-sm flex items-center justify-center">
-                              <Maximize2 className="w-3 h-3" />
-                            </span>
-                          </button>
                         </div>
                       ))}
                     </div>
