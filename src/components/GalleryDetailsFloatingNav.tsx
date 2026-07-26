@@ -28,6 +28,10 @@ interface Props {
   forceDisplay?: boolean;
   /** Override "All Categories" behavior: navigate to this href instead of opening the main menu. */
   allCategoriesHref?: string;
+  /** Optional callback replacing the default "All Categories" open-menu behavior. */
+  onAllCategoriesClick?: () => void;
+  /** Optional extra classes for the fixed container. */
+  className?: string;
 }
 
 /**
