@@ -425,12 +425,18 @@ function singularizeSub(s: string): string {
     }, 150);
   }, []);
 
+  // Mobile/PWA: first tap reveals a "Discover the Product" pill; second tap opens the lightbox.
+  const [mobileRevealedIdx, setMobileRevealedIdx] = useState<number | null>(null);
   const handleCardClick = useCallback((_item: ProductItem, index: number) => {
+    if (typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches && mobileRevealedIdx !== index) {
+      setMobileRevealedIdx(index);
+      return;
+    }
     setLightboxIndex(index);
     setIsLightboxImageLoaded(false);
     setLightboxOpen(true);
     setIsZoomed(false);
-  }, []);
+  }, [mobileRevealedIdx]);
 
   const handleClearFilter = useCallback(() => {
     setCategory(null);
@@ -629,6 +635,10 @@ function singularizeSub(s: string): string {
                 >
                   <Scale size={14} />
                 </button>
+                {/* "Discover the Product" pill — mobile/PWA only, shown once tap reveals the card */}
+                <div className={`md:hidden pointer-events-none absolute inset-0 z-10 flex items-center justify-center transition-opacity duration-300 bg-black/25 ${mobileRevealedIdx === idx ? 'opacity-100' : 'opacity-0'}`}>
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-white/40 bg-white/10 backdrop-blur-sm text-white font-body text-[9px] uppercase tracking-[0.15em]">Discover the Product</span>
+                </div>
               </div>
               <div className="text-center mt-1">
                 <p className="font-body text-[9px] md:text-[10px] uppercase tracking-[0.15em] text-foreground/80 font-semibold">
