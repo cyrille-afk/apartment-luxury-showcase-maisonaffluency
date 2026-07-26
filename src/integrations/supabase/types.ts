@@ -7252,6 +7252,14 @@ export type Database = {
       }
     }
     Functions: {
+      _hotspot_designer_public: {
+        Args: { _designer_id: string; _designer_name: string }
+        Returns: boolean
+      }
+      _hotspot_mapped_pick_public: {
+        Args: { _pick_id: string }
+        Returns: boolean
+      }
       _norm_designer_name: { Args: { txt: string }; Returns: string }
       accept_studio_invite: { Args: { _invite_id: string }; Returns: Json }
       add_board_comment_by_token: {
