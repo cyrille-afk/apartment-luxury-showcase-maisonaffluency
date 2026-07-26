@@ -1156,11 +1156,12 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                                 type="button"
                                 onClick={(e) => { e.stopPropagation(); openLightbox(originalSectionIndex, index); }}
                                 aria-label={`Explore hotspot: ${hotspot.label}`}
-                                className="absolute z-30 flex h-9 w-9 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-black/80 text-white shadow-[0_8px_24px_-8px_hsl(var(--foreground)/0.65)] ring-1 ring-background/70 backdrop-blur-sm transition-transform active:scale-95"
+                                className="absolute z-30 flex h-5 w-5 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-black/70 backdrop-blur-sm border-2 border-primary/70 text-white shadow-[0_0_8px_hsl(var(--primary)/0.4)] active:scale-95 transition-transform"
                                 style={{ left: `${hotspot.x}%`, top: `${hotspot.y}%` }}
                               >
-                                <span className="absolute inset-0 rounded-full border-2 border-black/70 animate-ping" style={{ animationDuration: "1.6s" }} />
-                                <Plus className="relative h-3.5 w-3.5" strokeWidth={2.5} />
+                                <span className="absolute inset-0 rounded-full border border-black/20 animate-ping" style={{ animationDuration: "2s" }} />
+                                <Plus className="relative w-2.5 h-2.5" strokeWidth={2.5} />
+
                               </button>
                             ))}
                           </div>
