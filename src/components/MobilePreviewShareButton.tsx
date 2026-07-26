@@ -6,10 +6,20 @@ import { useIsMobile } from "@/hooks/use-mobile";
 type Device = "se" | "pro_max" | "pixel";
 type Side = "trade" | "public" | "split";
 
-const DEVICES: Record<Device, { label: string; w: number; h: number }> = {
-  se:      { label: "iPhone SE",        w: 375, h: 667 },
-  pro_max: { label: "iPhone 16 Pro Max", w: 440, h: 956 },
-  pixel:   { label: "Pixel",            w: 412, h: 915 },
+type DeviceMeta = {
+  label: string;
+  w: number;
+  h: number;
+  /** iOS home-indicator / bottom safe-area height in CSS px */
+  homeBarH: number;
+  /** True for devices with a Dynamic Island / centre notch */
+  hasDynamicIsland: boolean;
+};
+
+const DEVICES: Record<Device, DeviceMeta> = {
+  se:      { label: "iPhone SE",         w: 375, h: 667, homeBarH: 20, hasDynamicIsland: false },
+  pro_max: { label: "iPhone 16 Pro Max", w: 440, h: 956, homeBarH: 34, hasDynamicIsland: true },
+  pixel:   { label: "Pixel",             w: 412, h: 915, homeBarH: 0,  hasDynamicIsland: false },
 };
 
 /**
