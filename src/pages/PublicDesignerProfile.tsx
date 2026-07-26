@@ -362,6 +362,7 @@ const PublicDesignerProfile = () => {
   const isChildDesigner = isChildBrandDesigner(designer);
   const { data: parentDesigner } = useDesignerByName(isChildDesigner ? designer?.founder : undefined);
   const [lightboxItem, setLightboxItem] = useState<PublicLightboxItem | null>(null);
+  const [mobileRevealedPickId, setMobileRevealedPickId] = useState<string | null>(null);
   const [shareCopied, setShareCopied] = useState(false);
   const isMobile = useIsMobile();
   const navigate = useNavigate();
@@ -413,6 +414,10 @@ const PublicDesignerProfile = () => {
       setLightboxItem(null);
     }
   };
+
+  useEffect(() => {
+    setMobileRevealedPickId(null);
+  }, [slug]);
 
   useEffect(() => {
     // Prevent browser from restoring previous scroll position
@@ -1114,12 +1119,17 @@ const PublicDesignerProfile = () => {
                     pick.title + (pick.subtitle ? `-${pick.subtitle}` : "")
                   );
                   const productHref = `/designers/${targetDesignerSlug}/${productSlug}`;
+                  const isMobilePickRevealed = mobileRevealedPickId === pick.id;
                   const handleCardClick = (e: React.MouseEvent) => {
                     if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || (e as any).button === 1) {
                       return;
                     }
                     if (isMobile) {
-                      // Mobile + PWA: let the Link navigate to the deep product URL.
+                      // Mobile + PWA: first tap reveals the product CTA pill; second tap follows the deep product URL.
+                      if (!isMobilePickRevealed) {
+                        e.preventDefault();
+                        setMobileRevealedPickId(pick.id);
+                      }
                       return;
                     }
                     // Desktop: intercept the deep link and open the lightbox instead.
@@ -1262,6 +1272,14 @@ const PublicDesignerProfile = () => {
                           <div className="p-1.5 bg-black/40 rounded-md text-white/90 backdrop-blur-sm">
                             <Maximize2 className="h-3 w-3" />
                           </div>
+                        </div>
+                        <div className={cn(
+                          "md:hidden pointer-events-none absolute inset-0 z-20 flex items-center justify-center px-3 bg-black/25 transition-opacity duration-300",
+                          isMobilePickRevealed ? "opacity-100" : "opacity-0"
+                        )}>
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-white/40 bg-white/10 backdrop-blur-sm text-white font-body text-[9px] uppercase tracking-[0.15em] shadow-lg">
+                            Discover the Product
+                          </span>
                         </div>
                         {/* Description overlay removed on curators' picks per design */}
                         {(pick.pdf_url || (pick.pdf_urls as any[] | null)?.length) && (
