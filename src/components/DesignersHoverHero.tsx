@@ -27,6 +27,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { applyCuratorPickOrder } from "@/lib/curatorPickSort";
 import { sortNameKey, lastNameInitial, displayDesignerName } from "@/lib/nameFormat";
 import { cldResponsiveImg } from "@/lib/cloudinary";
+import { isPwaStandaloneDisplay } from "@/lib/pwaMode";
 import featuredDesignersSeed from "@/data/featuredDesigners.json";
 
 interface FeaturedDesigner {
@@ -374,16 +375,6 @@ const SWIPE_THRESHOLD = 50;
 const IMAGE_TRANSITION_MS = 3500;
 const LOCK_MS = 1200;
 
-const isStandaloneDisplay = () => {
-  if (typeof window === "undefined") return false;
-  const params = new URLSearchParams(window.location.search);
-  return (
-    params.get("source") === "pwa" ||
-    window.matchMedia?.("(display-mode: standalone)").matches ||
-    (window.navigator as any).standalone === true
-  );
-};
-
 const DesignersHoverHero = () => {
   const { data: designers } = useFeaturedDesigners();
   const { data: allDesigners = [] } = useAllDesigners();
@@ -394,7 +385,7 @@ const DesignersHoverHero = () => {
   );
   const [activeSlug, setActiveSlug] = useState<string | null>(null);
   
-  const [isStandalone, setIsStandalone] = useState(false);
+  const [isStandalone, setIsStandalone] = useState(() => isPwaStandaloneDisplay());
   const [showPortalCursor, setShowPortalCursor] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -489,7 +480,7 @@ const DesignersHoverHero = () => {
   useEffect(() => {
     if (typeof window === "undefined") return;
     const media = window.matchMedia?.("(display-mode: standalone)");
-    const update = () => setIsStandalone(isStandaloneDisplay());
+    const update = () => setIsStandalone(isPwaStandaloneDisplay());
     update();
     media?.addEventListener?.("change", update);
     return () => media?.removeEventListener?.("change", update);
