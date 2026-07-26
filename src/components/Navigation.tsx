@@ -26,6 +26,7 @@ import { cloudinaryUrl } from "@/lib/cloudinary";
 import { CATEGORY_ORDER, SUBCATEGORY_MAP } from "@/lib/productTaxonomy";
 import { categoryUrl } from "@/lib/categorySlugs";
 import AuthGateDialog from "@/components/AuthGateDialog";
+import { MobilePreviewHeaderButton } from "@/components/trade/MobilePreviewHeaderButton";
 import { supabase } from "@/integrations/supabase/client";
 // useFeaturedPublicDocument import removed — AD free-download flow discontinued.
 import FavoritesHoverPreview from "@/components/FavoritesHoverPreview";
