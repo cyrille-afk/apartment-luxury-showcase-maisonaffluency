@@ -2132,7 +2132,7 @@ const TradeProductPage: React.FC = () => {
                   }
                   woodLabel={
                     (product as any).wood_label_override
-                      || (product.base_axis_label && !baseAxisIsDim && product.top_axis_label
+                      || (isProductUpholstered(product as any) && product.top_axis_label
                             ? getTopPlaceholder({ top_axis_label: product.top_axis_label })
                             : (product.base_axis_label && !baseAxisIsDim
                                 ? getBasePlaceholder({ base_axis_label: product.base_axis_label })
