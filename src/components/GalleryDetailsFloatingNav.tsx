@@ -182,7 +182,7 @@ export default function GalleryDetailsFloatingNav({
     >
       {isExpanded ? (
         <div
-          className="flex items-center gap-2 rounded-full bg-foreground/95 backdrop-blur-md text-background shadow-xl pl-2 pr-1 py-1.5 animate-in fade-in slide-in-from-bottom-1 duration-300"
+          className="flex items-center gap-2 rounded-full bg-muted/95 backdrop-blur-md text-background shadow-xl pl-2 pr-1 py-1.5 animate-in fade-in slide-in-from-bottom-1 duration-300"
           role="toolbar"
           aria-label="Quick actions"
         >
