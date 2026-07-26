@@ -141,15 +141,13 @@ function DesignerGridCard({
   onNavigate?: () => void;
   priority?: boolean;
 }) {
-  // Base = first curator pick (original mobile/PWA behavior); reveal overlay = hero portrait.
+  // Base = first curator pick (approved mobile/PWA behavior). First tap only
+  // reveals the product CTA pill; it must not swap the card photo.
   const baseRaw = designer.first_pick_image_url || designer.hero_image_url || designer.image_url || null;
-  const pickRaw = designer.hero_image_url || null;
-  const hasPickReveal = !!pickRaw && pickRaw !== baseRaw;
+  const hasProductPill = !!designer.first_pick_image_url;
   const url = gridImageTransform(baseRaw);
   const srcSet = gridImageSrcSet(baseRaw);
   const lqip = gridImageLqip(baseRaw);
-  const pickUrl = gridImageTransform(pickRaw);
-  const pickSrcSet = gridImageSrcSet(pickRaw);
   const displayName = displayDesignerName(designer.name);
   const [loaded, setLoaded] = useState(false);
   const [revealed, setRevealed] = useState(false);
@@ -158,13 +156,14 @@ function DesignerGridCard({
   };
   return (
     <Link
-      to={`/designers/${designer.slug}`}
+      to={hasProductPill && !revealed ? "#" : `/designers/${designer.slug}`}
       state={{ fromDesignersHero: true, fromDesignersAZ: true }}
       data-nav-state={JSON.stringify({ fromDesignersHero: true, fromDesignersAZ: true })}
       onClick={(e) => {
-        // First tap reveals the curator pick + pill; second tap navigates.
-        if (hasPickReveal && !revealed) {
+        // First tap reveals the product pill; second tap navigates.
+        if (hasProductPill && !revealed) {
           e.preventDefault();
+          e.stopPropagation();
           setRevealed(true);
           return;
         }
@@ -219,26 +218,10 @@ function DesignerGridCard({
           <ImageIcon className="h-8 w-8" aria-hidden />
         </span>
       )}
-      {/* Tap-to-reveal — first curator pick fades in on first tap */}
-      {hasPickReveal && pickUrl && (
-        <img
-          src={pickUrl}
-          srcSet={pickSrcSet}
-          sizes="(max-width: 640px) 50vw, 300px"
-          alt=""
-          aria-hidden="true"
-          loading="lazy"
-          decoding="async"
-          className={cn(
-            "pointer-events-none absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ease-out",
-            revealed ? "opacity-100" : "opacity-0"
-          )}
-        />
-      )}
       {/* Bottom gradient for text legibility — strong enough to hold white serif over light imagery */}
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-3/4 bg-gradient-to-t from-black/95 via-black/60 to-transparent" />
-      {/* "Discover the Product" pill — shown once tap reveals the pick */}
-      {hasPickReveal && (
+      {/* "Discover the Product" pill — mobile/PWA, shown once the curator-pick photo is tapped */}
+      {hasProductPill && (
         <div
           className={cn(
             "pointer-events-none absolute inset-0 z-10 flex items-center justify-center px-3 bg-black/20 transition-opacity duration-300",
