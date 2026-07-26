@@ -156,13 +156,14 @@ function DesignerGridCard({
   };
   return (
     <Link
-      to={`/designers/${designer.slug}`}
+      to={hasProductPill && !revealed ? "#" : `/designers/${designer.slug}`}
       state={{ fromDesignersHero: true, fromDesignersAZ: true }}
       data-nav-state={JSON.stringify({ fromDesignersHero: true, fromDesignersAZ: true })}
       onClick={(e) => {
         // First tap reveals the product pill; second tap navigates.
         if (hasProductPill && !revealed) {
           e.preventDefault();
+          e.stopPropagation();
           setRevealed(true);
           return;
         }
