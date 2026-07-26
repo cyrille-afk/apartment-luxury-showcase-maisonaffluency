@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { BrowserRouter, Routes, Route, useLocation, useNavigate, useNavigationType } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 // Index is the homepage. Lazy-loading it keeps ~200KB of homepage-only code
@@ -9,6 +9,7 @@ import { CompareProvider } from "@/contexts/CompareContext";
 import { AuthProvider } from "@/hooks/useAuth";
 import { StudioProvider } from "@/hooks/useStudio";
 import PageLoadingSkeleton from "@/components/PageLoadingSkeleton";
+import { releaseDesignersLandingScrollLock } from "@/lib/designersScrollLock";
 
 // Defer react-helmet-async — all critical meta tags are already in index.html
 const LazyHelmetProvider = lazy(() =>
@@ -311,6 +312,17 @@ function ScrollToTopOnNavigate() {
   return null;
 }
 
+function RouteScrollLockFailsafe() {
+  const location = useLocation();
+
+  useLayoutEffect(() => {
+    const isDesignersLanding = location.pathname === "/designers" && !location.search;
+    if (!isDesignersLanding) releaseDesignersLandingScrollLock();
+  }, [location.pathname, location.search]);
+
+  return null;
+}
+
 function PreviewViewContinuity() {
   const location = useLocation();
   const anchorIdRef = useRef<string | undefined>(undefined);
@@ -556,6 +568,7 @@ const App = () => {
             <BrowserRouter>
               <HomeRouteSync />
               <SameOriginLinkGuard />
+              <RouteScrollLockFailsafe />
               <ScrollToTopOnNavigate />
               <PreviewViewContinuity />
 
