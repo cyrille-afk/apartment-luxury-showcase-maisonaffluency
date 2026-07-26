@@ -160,6 +160,10 @@ export default function GalleryDetailsFloatingNav({
 
   const handleAllCategories = () => {
     setExpanded(false);
+    if (onAllCategoriesClick) {
+      onAllCategoriesClick();
+      return;
+    }
     if (allCategoriesHref) {
       navigate(allCategoriesHref);
       return;
