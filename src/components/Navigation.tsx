@@ -576,19 +576,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                 </div>
 
                 {/* Category list */}
-                <div className="flex-1 overflow-y-auto px-6 py-4">
-                  <div className="flex justify-end mb-4">
-                    <button
-                      onClick={() => {
-                        window.dispatchEvent(new CustomEvent('setDesignerCategory', { detail: { category: null, subcategory: null } }));
-                        closeMobileMenu();
-                      }}
-                      className="font-body text-[10px] uppercase tracking-[0.15em] transition-all duration-300 px-4 py-1.5 rounded-full bg-background border border-border hover:border-foreground text-muted-foreground hover:text-foreground"
-                    >
-                      Clear All
-                    </button>
-                  </div>
-
+                <div className="flex-1 overflow-y-auto px-6 py-4 pb-24">
                   {CATEGORY_ORDER.map(cat => (
                     <div key={cat} className="border-b border-border/30">
                       <button
@@ -625,7 +613,27 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                       )}
                     </div>
                   ))}
+                  <div className="flex justify-end mt-6 mb-2">
+                    <button
+                      onClick={() => {
+                        window.dispatchEvent(new CustomEvent('setDesignerCategory', { detail: { category: null, subcategory: null } }));
+                        closeMobileMenu();
+                      }}
+                      className="font-body text-[10px] uppercase tracking-[0.15em] transition-all duration-300 px-4 py-1.5 rounded-full bg-background border border-border hover:border-foreground text-muted-foreground hover:text-foreground"
+                    >
+                      Clear All
+                    </button>
+                  </div>
                 </div>
+
+                {/* Floating quick-actions — bottom-right of the categories panel */}
+                <GalleryDetailsFloatingNav
+                  showImmediately
+                  forceDisplay
+                  azHref="/designers"
+                  onAllCategoriesClick={closeMobileMenu}
+                  className="md:hidden"
+                />
               </div>
             </SheetContent>
           </Sheet>
