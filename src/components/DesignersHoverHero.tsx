@@ -141,32 +141,21 @@ function DesignerGridCard({
   onNavigate?: () => void;
   priority?: boolean;
 }) {
-  // Base = first curator pick (approved mobile/PWA behavior). First tap only
-  // reveals the product CTA pill; it must not swap the card photo.
   const baseRaw = designer.first_pick_image_url || designer.hero_image_url || designer.image_url || null;
-  const hasProductPill = !!designer.first_pick_image_url;
   const url = gridImageTransform(baseRaw);
   const srcSet = gridImageSrcSet(baseRaw);
   const lqip = gridImageLqip(baseRaw);
   const displayName = displayDesignerName(designer.name);
   const [loaded, setLoaded] = useState(false);
-  const [revealed, setRevealed] = useState(false);
   const rememberLetter = () => {
     rememberDesignersAzLetter(lastNameInitial(designer.name));
   };
   return (
     <Link
-      to={hasProductPill && !revealed ? "#" : `/designers/${designer.slug}`}
+      to={`/designers/${designer.slug}`}
       state={{ fromDesignersHero: true, fromDesignersAZ: true }}
       data-nav-state={JSON.stringify({ fromDesignersHero: true, fromDesignersAZ: true })}
-      onClick={(e) => {
-        // First tap reveals the product pill; second tap navigates.
-        if (hasProductPill && !revealed) {
-          e.preventDefault();
-          e.stopPropagation();
-          setRevealed(true);
-          return;
-        }
+      onClick={() => {
         rememberLetter();
         onNavigate?.();
       }}
