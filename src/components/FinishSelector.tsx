@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import SpecGlyph from "@/components/product/SpecGlyph";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { isPwaStandaloneDisplay } from "@/lib/pwaMode";
 import {
   Tooltip,
   TooltipContent,
@@ -637,7 +638,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
             {isCom ? "COM" : isCol ? "COL" : "—"}
           </div>
         )}
-        {f.image_url && (
+        {f.image_url && !isMobile && !isPwa && (
           <span
             onClick={(e) => {
               e.stopPropagation();
@@ -693,6 +694,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
   const [openTop, setOpenTop] = useState(false);
   const [openCover, setOpenCover] = useState(false);
   const isMobile = useIsMobile();
+  const isPwa = isPwaStandaloneDisplay();
   const fabricTiles = isRugProduct
     ? fabrics.filter(isRugComponentSwatch)
     : (grouped["Fabric & Leather"] || []);
