@@ -26,6 +26,7 @@ import { cloudinaryUrl } from "@/lib/cloudinary";
 import { CATEGORY_ORDER, SUBCATEGORY_MAP } from "@/lib/productTaxonomy";
 import { categoryUrl } from "@/lib/categorySlugs";
 import AuthGateDialog from "@/components/AuthGateDialog";
+import { MobilePreviewHeaderButton } from "@/components/trade/MobilePreviewHeaderButton";
 import { supabase } from "@/integrations/supabase/client";
 // useFeaturedPublicDocument import removed — AD free-download flow discontinued.
 import FavoritesHoverPreview from "@/components/FavoritesHoverPreview";
@@ -673,6 +674,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
               </div>
               {/* Icons aligned to right edge */}
               <div className="flex items-center gap-5 mt-3">
+                <MobilePreviewHeaderButton />
                 <DropdownMenu>
                   <DropdownMenuTrigger className="relative group p-1 transition-colors outline-none">
                     <User className="w-6 h-6 text-foreground group-hover:text-primary transition-colors" />
