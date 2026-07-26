@@ -182,7 +182,7 @@ export default function GalleryDetailsFloatingNav({
     >
       {isExpanded ? (
         <div
-          className="flex items-center gap-2 rounded-full bg-foreground/95 backdrop-blur-md text-background shadow-xl pl-2 pr-1 py-1.5 animate-in fade-in slide-in-from-bottom-1 duration-300"
+          className="flex items-center gap-2 rounded-full bg-muted/95 backdrop-blur-md text-background shadow-xl pl-2 pr-1 py-1.5 animate-in fade-in slide-in-from-bottom-1 duration-300"
           role="toolbar"
           aria-label="Quick actions"
         >
@@ -227,7 +227,7 @@ export default function GalleryDetailsFloatingNav({
         <button
           onClick={() => setExpanded(true)}
           aria-label="Open quick actions"
-          className="h-12 w-12 rounded-full bg-foreground text-background shadow-xl flex items-center justify-center active:scale-95 transition-transform animate-in fade-in duration-200"
+          className="h-12 w-12 rounded-full bg-muted text-background shadow-xl flex items-center justify-center active:scale-95 transition-transform animate-in fade-in duration-200"
         >
           <MoreHorizontal className="h-5 w-5" />
         </button>
