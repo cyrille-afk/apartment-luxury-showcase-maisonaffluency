@@ -270,51 +270,16 @@ const MobilePreviewShareButton = () => {
                 { label: "Trade", src: tradeSrc },
                 { label: "Public", src: publicSrc },
               ] as const).map((pane) => (
-                <div key={pane.label} className="flex flex-col items-center">
-                  <span className="font-body text-[10px] uppercase tracking-[0.15em] text-background/80 mb-2">
-                    {pane.label}
-                  </span>
-                  <div
-                    className="relative bg-neutral-900 rounded-[2.5rem] p-3 shadow-2xl overflow-hidden"
-                    style={{ maxHeight: "calc(100vh - 8rem)" }}
-                  >
-                    <iframe
-                      key={pane.src}
-                      src={pane.src}
-                      title={`Mobile preview · ${pane.label}`}
-                      className="bg-background rounded-[1.75rem] block transition-all"
-                      style={{
-                        width: frameW,
-                        height: frameH,
-                        maxHeight: "calc(100vh - 9rem)",
-                        maxWidth: "calc((100vw - 5rem) / 2)",
-                      }}
-                    />
-                  </div>
-                </div>
+                <PhoneFrame
+                  key={pane.label}
+                  src={pane.src}
+                  label={pane.label}
+                  variant="split"
+                />
               ))}
             </div>
           ) : (
-            <div
-              className="relative bg-neutral-900 rounded-[2.5rem] p-3 shadow-2xl overflow-hidden"
-              style={{
-                maxHeight: "calc(100vh - 6rem)",
-                maxWidth: "calc(100vw - 2rem)",
-              }}
-            >
-              <iframe
-                key={previewSrc}
-                src={previewSrc}
-                title={`Mobile preview · ${side}`}
-                className="bg-background rounded-[1.75rem] block transition-all"
-                style={{
-                  width: frameW,
-                  height: frameH,
-                  maxHeight: "calc(100vh - 7rem)",
-                  maxWidth: "calc(100vw - 3rem)",
-                }}
-              />
-            </div>
+            <PhoneFrame src={previewSrc} variant="single" />
           )}
         </div>
       )}
