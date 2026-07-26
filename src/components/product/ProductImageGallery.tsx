@@ -204,7 +204,7 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
 
       {/* Main image + (mobile) thumb strip below */}
       <div className="flex-1 flex flex-col gap-3 min-w-0">
-      <div className="relative group md:border-b-0 md:shadow-none border-b border-border/60 shadow-[0_6px_10px_-8px_rgba(0,0,0,0.35)]" ref={inlineSwipeRef}>
+      <div className="relative group" ref={inlineSwipeRef}>
         <div className={cn("md:aspect-square md:h-auto bg-muted/10 rounded-2xl overflow-hidden relative touch-pan-y transition-[height] duration-300 ease-out", compact ? "h-[22vh]" : "h-[42vh]")}>
           {/* Desktop: whole image is a zoom trigger. Mobile: plain image so
               stray taps near the chevrons don't accidentally open the lightbox. */}
