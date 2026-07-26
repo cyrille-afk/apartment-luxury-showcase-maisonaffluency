@@ -2,6 +2,7 @@ import React, { lazy, Suspense } from "react";
 import { useSearchParams, Navigate } from "react-router-dom";
 import { categoryUrl } from "@/lib/categorySlugs";
 import { Helmet } from "react-helmet-async";
+import { isPwaStandaloneDisplay } from "@/lib/pwaMode";
 
 import { ChevronUp } from "lucide-react";
 import { useState, useEffect, useLayoutEffect } from "react";
@@ -14,17 +15,6 @@ import DesignersHoverHero from "@/components/DesignersHoverHero";
 // directory + footer only mount after desktop handoff / scroll.
 const DesignersDirectory = lazy(() => import("@/components/DesignersDirectory"));
 const Footer = lazy(() => import("@/components/Footer"));
-
-const isStandaloneDisplay = () => {
-  if (typeof window === "undefined") return false;
-  const params = new URLSearchParams(window.location.search);
-  return (
-    params.get("source") === "pwa" ||
-    window.matchMedia?.("(display-mode: standalone)").matches ||
-    (window.navigator as any).standalone === true
-  );
-};
-
 
 // ─── Back to Top Button ──────────────────────────────────────────────────────
 function BackToTopButton() {
@@ -110,7 +100,7 @@ function ScrollLockedDesigners({
   const hasDeepLink = Boolean(initialLetter || initialExpand);
   const [isMobileOrPwa, setIsMobileOrPwa] = useState(() => {
     if (typeof window === "undefined") return false;
-    return window.matchMedia("(max-width: 767px)").matches || isStandaloneDisplay();
+    return window.matchMedia("(max-width: 767px)").matches || isPwaStandaloneDisplay();
   });
   const locked = isMobileOrPwa && !hasDeepLink;
 
@@ -123,7 +113,7 @@ function ScrollLockedDesigners({
     const mql = window.matchMedia("(max-width: 767px)");
     const standaloneMql = window.matchMedia?.("(display-mode: standalone)");
     const update = () => {
-      setIsMobileOrPwa(mql.matches || isStandaloneDisplay());
+      setIsMobileOrPwa(mql.matches || isPwaStandaloneDisplay());
     };
     update();
     mql.addEventListener("change", update);

@@ -3,17 +3,14 @@ import App from "./App.tsx";
 import "./index.css";
 import HmrStatusBanner from "./components/dev/HmrStatusBanner";
 import BuildUpdateBanner from "./components/BuildUpdateBanner";
+import { isPwaStandaloneDisplay } from "./lib/pwaMode";
 
 
 const CACHE_RESET_KEY = "__ma_frontend_cache_reset_v2";
 
 function isStandaloneHomeLaunch(): boolean {
   if (typeof window === "undefined") return false;
-  const params = new URLSearchParams(window.location.search);
-  const isStandalone =
-    params.get("source") === "pwa" ||
-    window.matchMedia?.("(display-mode: standalone)").matches ||
-    (window.navigator as any).standalone === true;
+  const isStandalone = isPwaStandaloneDisplay();
 
   return isStandalone && window.location.pathname === "/" && !window.location.hash;
 }
@@ -98,10 +95,13 @@ if (typeof (window as any).requestIdleCallback === "function") {
 // Reveal content by adding css-ready — this disables the FOUC guard in index.html.
 document.documentElement.classList.add("css-ready");
 
-createRoot(document.getElementById("root")!).render(
-  <>
-    <App />
-    <BuildUpdateBanner />
-    <HmrStatusBanner />
-  </>
-);
+const rootElement = document.getElementById("root");
+if (rootElement) {
+  createRoot(rootElement).render(
+    <>
+      <App />
+      <BuildUpdateBanner />
+      <HmrStatusBanner />
+    </>
+  );
+}
