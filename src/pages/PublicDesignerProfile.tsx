@@ -365,6 +365,10 @@ const PublicDesignerProfile = () => {
   const [mobileRevealedPickId, setMobileRevealedPickId] = useState<string | null>(null);
   const [shareCopied, setShareCopied] = useState(false);
   const isMobile = useIsMobile();
+  const isMobileProductPickMode = isMobile || (
+    typeof window !== "undefined" &&
+    (window.matchMedia("(max-width: 767px)").matches || window.matchMedia("(pointer: coarse)").matches)
+  );
   const navigate = useNavigate();
   const location = useLocation();
   const fromDesignersHero = Boolean((location.state as { fromDesignersHero?: boolean } | null)?.fromDesignersHero);
@@ -1124,10 +1128,11 @@ const PublicDesignerProfile = () => {
                     if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || (e as any).button === 1) {
                       return;
                     }
-                    if (isMobile) {
+                    if (isMobileProductPickMode) {
                       // Mobile + PWA: first tap reveals the product CTA pill; second tap follows the deep product URL.
                       if (!isMobilePickRevealed) {
                         e.preventDefault();
+                        e.stopPropagation();
                         setMobileRevealedPickId(pick.id);
                       }
                       return;
@@ -1177,7 +1182,7 @@ const PublicDesignerProfile = () => {
                       )}
                     >
                       <Link
-                        to={productHref}
+                        to={isMobileProductPickMode && !isMobilePickRevealed ? "#" : productHref}
                         onClick={handleCardClick}
                         aria-label={`${displayTitle}${pick.subtitle ? ` — ${pick.subtitle}` : ""}`}
                         className="aspect-square md:aspect-[4/5] bg-muted/30 rounded-xl overflow-hidden mb-2 md:mb-2 relative flex items-center justify-center cursor-pointer"
