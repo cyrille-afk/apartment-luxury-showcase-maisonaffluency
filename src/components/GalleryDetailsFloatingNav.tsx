@@ -48,6 +48,8 @@ export default function GalleryDetailsFloatingNav({
   showAfterElementId,
   forceDisplay = false,
   allCategoriesHref,
+  onAllCategoriesClick,
+  className,
 }: Props) {
   const [expanded, setExpanded] = useState(false);
   const [visible, setVisible] = useState(showImmediately);
