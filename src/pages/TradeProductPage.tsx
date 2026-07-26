@@ -537,6 +537,18 @@ const TradeProductPage: React.FC = () => {
     window.scrollTo({ top: Math.max(0, y), behavior: "smooth" });
   }, [galleryJumpNonce]);
 
+  // Mobile/PWA: shrink the product image once the user scrolls past a small threshold.
+  const [galleryCompact, setGalleryCompact] = useState(false);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (window.matchMedia("(min-width: 1024px)").matches) return;
+    const onScroll = () => setGalleryCompact(window.scrollY > 140);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+
 
 
   const fxRates = useFxRates();
@@ -1726,6 +1738,8 @@ const TradeProductPage: React.FC = () => {
               activeIndexNonce={galleryJumpNonce}
               onIndexChange={setGalleryActiveIndex}
               caption={product.gallery_captions?.[String(galleryActiveIndex ?? 0)] || null}
+              compact={galleryCompact}
+
               firstImageBadge={
                 (() => {
                   const editionLabel = formatEditionLabel(product);

@@ -24,9 +24,12 @@ interface ProductImageGalleryProps {
   onIndexChange?: (index: number) => void;
   /** Optional caption displayed below the active image. */
   caption?: string | null;
+  /** When true, shrinks the mobile main image height (used while user scrolls past the gallery). */
+  compact?: boolean;
 }
 
-const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, overlay, firstImageBadge, activeIndex: controlledIndex, activeIndexNonce, onIndexChange, caption }) => {
+const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, overlay, firstImageBadge, activeIndex: controlledIndex, activeIndexNonce, onIndexChange, caption, compact }) => {
+
   const [activeIndex, setActiveIndex] = useState(controlledIndex ?? 0);
 
   // Sync with external controlled index. Re-runs whenever the index *or* the
@@ -202,7 +205,7 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
       {/* Main image + (mobile) thumb strip below */}
       <div className="flex-1 flex flex-col gap-3 min-w-0">
       <div className="relative group" ref={inlineSwipeRef}>
-        <div className="md:aspect-square h-[42vh] md:h-auto bg-muted/10 rounded-2xl overflow-hidden relative touch-pan-y">
+        <div className={cn("md:aspect-square md:h-auto bg-muted/10 rounded-2xl overflow-hidden relative touch-pan-y transition-[height] duration-300 ease-out", compact ? "h-[22vh]" : "h-[42vh]")}>
           {/* Desktop: whole image is a zoom trigger. Mobile: plain image so
               stray taps near the chevrons don't accidentally open the lightbox. */}
           <button
