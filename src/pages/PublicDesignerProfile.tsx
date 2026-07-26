@@ -1129,12 +1129,11 @@ const PublicDesignerProfile = () => {
                       return;
                     }
                     if (isMobileProductPickMode) {
-                      // Mobile + PWA: first tap reveals the product CTA pill; second tap follows the deep product URL.
-                      if (!isMobilePickRevealed) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        setMobileRevealedPickId(pick.id);
-                      }
+                      // Mobile + PWA: the image tap reveals the alternate image and CTA together.
+                      // Product navigation is then handled by the visible CTA pill, not a hidden second image tap.
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setMobileRevealedPickId(pick.id);
                       return;
                     }
                     // Desktop: intercept the deep link and open the lightbox instead.
@@ -1181,9 +1180,15 @@ const PublicDesignerProfile = () => {
                         highlightId === pick.id && "ring-2 ring-primary rounded-xl ring-offset-2 ring-offset-background animate-pulse"
                       )}
                     >
-                      <Link
-                        to={isMobileProductPickMode && !isMobilePickRevealed ? "#" : productHref}
+                      <div
+                        role="link"
+                        tabIndex={0}
                         onClick={handleCardClick}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            handleCardClick(e as unknown as React.MouseEvent);
+                          }
+                        }}
                         aria-label={`${displayTitle}${pick.subtitle ? ` — ${pick.subtitle}` : ""}`}
                         className="aspect-square md:aspect-[4/5] bg-muted/30 rounded-xl overflow-hidden mb-2 md:mb-2 relative flex items-center justify-center cursor-pointer"
                       >
@@ -1194,7 +1199,11 @@ const PublicDesignerProfile = () => {
                           alt={pick.title}
                           className={cn(
                             "absolute inset-0 w-full h-full transition-all duration-700 rounded-xl object-cover",
-                            pick.hover_image_url ? "opacity-100 group-hover:opacity-0 group-hover:scale-105" : "group-hover:scale-105"
+                            pick.hover_image_url
+                              ? isMobilePickRevealed
+                                ? "opacity-0 scale-105 md:opacity-100 md:group-hover:opacity-0"
+                                : "opacity-100 group-hover:opacity-0 group-hover:scale-105"
+                              : "group-hover:scale-105"
                           )}
                           loading="lazy"
                         />
@@ -1205,7 +1214,12 @@ const PublicDesignerProfile = () => {
                               srcSet={pickSrcSet(pick.hover_image_url)}
                           sizes="(max-width: 640px) 90vw, (max-width: 768px) 45vw, (max-width: 1024px) 30vw, 25vw"
                               alt={`${pick.title} alternate finish`}
-                              className="absolute inset-0 w-full h-full object-cover rounded-xl opacity-0 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700"
+                              className={cn(
+                                "absolute inset-0 w-full h-full object-cover rounded-xl transition-all duration-700",
+                                isMobilePickRevealed
+                                  ? "opacity-100 scale-105 md:opacity-0 md:group-hover:opacity-100"
+                                  : "opacity-0 group-hover:opacity-100 group-hover:scale-105"
+                              )}
                               style={(() => { const t = pick.tags?.find((t) => t.startsWith("hover-pos:")); return t ? { objectPosition: t.replace("hover-pos:", "") } : undefined; })()}
                               loading="lazy"
                             />
@@ -1279,12 +1293,19 @@ const PublicDesignerProfile = () => {
                           </div>
                         </div>
                         <div className={cn(
-                          "md:hidden pointer-events-none absolute inset-0 z-20 flex items-center justify-center px-3 bg-black/25 transition-opacity duration-300",
+                          "md:hidden absolute inset-0 z-20 flex items-center justify-center px-3 bg-black/25 transition-opacity duration-300",
                           isMobilePickRevealed ? "opacity-100" : "opacity-0"
                         )}>
-                          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-white/40 bg-white/10 backdrop-blur-sm text-white font-body text-[9px] uppercase tracking-[0.15em] shadow-lg">
+                          <Link
+                            to={productHref}
+                            onClick={(e) => e.stopPropagation()}
+                            className={cn(
+                              "inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-white/40 bg-white/10 backdrop-blur-sm text-white font-body text-[9px] uppercase tracking-[0.15em] shadow-lg",
+                              !isMobilePickRevealed && "pointer-events-none"
+                            )}
+                          >
                             Discover the Product
-                          </span>
+                          </Link>
                         </div>
                         {/* Description overlay removed on curators' picks per design */}
                         {(pick.pdf_url || (pick.pdf_urls as any[] | null)?.length) && (
@@ -1299,7 +1320,7 @@ const PublicDesignerProfile = () => {
                             />
                           </div>
                         )}
-                      </Link>
+                      </div>
 
                       {/* Editorial text block — quiet, uniform, line-clamped */}
                       <div className="flex flex-col flex-1 px-0.5 md:px-0 text-center">
