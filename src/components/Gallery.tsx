@@ -1137,20 +1137,18 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                           {!isHotspotSection && (
                             <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
                           )}
-                          {/* Pulsating hotspot icon — shown on every image that has hotspots; tap opens interactive view */}
-                          {isHotspotSection && hotspotCounts[item.title] > 0 && (
-                            <button
-                              type="button"
-                              onClick={(e) => { e.stopPropagation(); openLightbox(originalSectionIndex, index); }}
-                              aria-label="Explore hotspots"
-                              className="absolute top-3 left-3 z-20"
-                            >
-                              <span className="relative flex items-center justify-center w-6 h-6 rounded-full bg-black/70 border border-primary/70 shadow-lg">
-                                <span className="absolute inset-0 rounded-full border border-primary/30 animate-ping" style={{ animationDuration: "2.2s" }} />
-                                <Plus className="relative h-3 w-3 text-white" />
-                              </span>
-                            </button>
-                          )}
+                          {/* Pulsating hotspot icon — shown on every image; tap opens interactive view */}
+                          <button
+                            type="button"
+                            onClick={(e) => { e.stopPropagation(); openLightbox(originalSectionIndex, index); }}
+                            aria-label="Explore hotspots"
+                            className="absolute top-3 left-3 z-20"
+                          >
+                            <span className="relative flex items-center justify-center w-6 h-6 rounded-full bg-black/70 border border-primary/70 shadow-lg">
+                              <span className="absolute inset-0 rounded-full border border-primary/30 animate-ping" style={{ animationDuration: "2.2s" }} />
+                              <Plus className="relative h-3 w-3 text-white" />
+                            </span>
+                          </button>
                         </div>
                       ))}
                     </div>
