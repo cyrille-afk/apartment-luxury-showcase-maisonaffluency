@@ -1137,16 +1137,16 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                           {!isHotspotSection && (
                             <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
                           )}
-                          {/* Pulsating hotspot icon — shown on every image; tap opens interactive view */}
+                          {/* Mobile/PWA hotspot trigger — intentionally high-contrast and large enough to notice/tap */}
                           <button
                             type="button"
                             onClick={(e) => { e.stopPropagation(); openLightbox(originalSectionIndex, index); }}
                             aria-label="Explore hotspots"
-                            className="absolute top-3 left-3 z-20"
+                            className="absolute left-3 top-3 z-30 flex h-11 w-11 items-center justify-center rounded-full bg-background/95 text-foreground shadow-[0_8px_24px_-6px_hsl(var(--foreground)/0.45)] ring-2 ring-primary/80 ring-offset-2 ring-offset-background/60"
                           >
-                            <span className="relative flex items-center justify-center w-6 h-6 rounded-full bg-black/70 border border-primary/70 shadow-lg">
-                              <span className="absolute inset-0 rounded-full border border-primary/30 animate-ping" style={{ animationDuration: "2.2s" }} />
-                              <Plus className="relative h-3 w-3 text-white" />
+                            <span className="absolute inset-0 rounded-full border-2 border-primary/70 animate-ping" style={{ animationDuration: "1.6s" }} />
+                            <span className="relative flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-md">
+                              <MapPin className="h-4 w-4" />
                             </span>
                           </button>
                         </div>
