@@ -229,13 +229,13 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
           </div>
           {/* Hover-to-navigate now lives on the vertical thumbnail strip (see above). */}
 
-          {/* Expand affordance — hover-only on desktop, dedicated tap target on mobile. */}
-          <div className="absolute bottom-3 right-3 z-20">
+          {/* Expand affordance — desktop only (mobile/PWA images are already full-screen sized). */}
+          <div className="absolute bottom-3 right-3 z-20 hidden md:block">
             <button
               type="button"
               onClick={(e) => { e.stopPropagation(); setZoomOpen(true); }}
               aria-label="Expand image"
-              className="w-9 h-9 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 flex items-center justify-center transition-opacity opacity-100 md:opacity-0 md:group-hover:opacity-100 touch-manipulation"
+              className="w-9 h-9 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 flex items-center justify-center transition-opacity opacity-0 group-hover:opacity-100 touch-manipulation"
             >
               <Maximize2 size={14} className="text-foreground" />
             </button>
