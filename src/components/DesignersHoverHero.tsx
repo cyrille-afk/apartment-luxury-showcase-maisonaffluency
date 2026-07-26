@@ -141,32 +141,21 @@ function DesignerGridCard({
   onNavigate?: () => void;
   priority?: boolean;
 }) {
-  // Base = first curator pick (approved mobile/PWA behavior). First tap only
-  // reveals the product CTA pill; it must not swap the card photo.
   const baseRaw = designer.first_pick_image_url || designer.hero_image_url || designer.image_url || null;
-  const hasProductPill = !!designer.first_pick_image_url;
   const url = gridImageTransform(baseRaw);
   const srcSet = gridImageSrcSet(baseRaw);
   const lqip = gridImageLqip(baseRaw);
   const displayName = displayDesignerName(designer.name);
   const [loaded, setLoaded] = useState(false);
-  const [revealed, setRevealed] = useState(false);
   const rememberLetter = () => {
     rememberDesignersAzLetter(lastNameInitial(designer.name));
   };
   return (
     <Link
-      to={hasProductPill && !revealed ? "#" : `/designers/${designer.slug}`}
+      to={`/designers/${designer.slug}`}
       state={{ fromDesignersHero: true, fromDesignersAZ: true }}
       data-nav-state={JSON.stringify({ fromDesignersHero: true, fromDesignersAZ: true })}
-      onClick={(e) => {
-        // First tap reveals the product pill; second tap navigates.
-        if (hasProductPill && !revealed) {
-          e.preventDefault();
-          e.stopPropagation();
-          setRevealed(true);
-          return;
-        }
+      onClick={() => {
         rememberLetter();
         onNavigate?.();
       }}
@@ -220,19 +209,6 @@ function DesignerGridCard({
       )}
       {/* Bottom gradient for text legibility — strong enough to hold white serif over light imagery */}
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-3/4 bg-gradient-to-t from-black/95 via-black/60 to-transparent" />
-      {/* "Discover the Product" pill — mobile/PWA, shown once the curator-pick photo is tapped */}
-      {hasProductPill && (
-        <div
-          className={cn(
-            "pointer-events-none absolute inset-0 z-10 flex items-center justify-center px-3 bg-black/20 transition-opacity duration-300",
-            revealed ? "opacity-100" : "opacity-0"
-          )}
-        >
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-white/40 bg-white/10 backdrop-blur-sm text-white font-body text-[9px] uppercase tracking-[0.15em]">
-            Discover the Product
-          </span>
-        </div>
-      )}
       {/* Name overlay */}
       <div className="absolute inset-x-0 bottom-0 p-4 z-20">
         <span className="block font-serif text-sm leading-tight text-white drop-shadow-[0_1px_4px_rgba(0,0,0,1)]">
