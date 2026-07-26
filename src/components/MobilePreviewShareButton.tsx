@@ -6,10 +6,20 @@ import { useIsMobile } from "@/hooks/use-mobile";
 type Device = "se" | "pro_max" | "pixel";
 type Side = "trade" | "public" | "split";
 
-const DEVICES: Record<Device, { label: string; w: number; h: number }> = {
-  se:      { label: "iPhone SE",        w: 375, h: 667 },
-  pro_max: { label: "iPhone 16 Pro Max", w: 440, h: 956 },
-  pixel:   { label: "Pixel",            w: 412, h: 915 },
+type DeviceMeta = {
+  label: string;
+  w: number;
+  h: number;
+  /** iOS home-indicator / bottom safe-area height in CSS px */
+  homeBarH: number;
+  /** True for devices with a Dynamic Island / centre notch */
+  hasDynamicIsland: boolean;
+};
+
+const DEVICES: Record<Device, DeviceMeta> = {
+  se:      { label: "iPhone SE",         w: 375, h: 667, homeBarH: 20, hasDynamicIsland: false },
+  pro_max: { label: "iPhone 16 Pro Max", w: 440, h: 956, homeBarH: 34, hasDynamicIsland: true },
+  pixel:   { label: "Pixel",             w: 412, h: 915, homeBarH: 0,  hasDynamicIsland: false },
 };
 
 /**
@@ -103,6 +113,9 @@ const MobilePreviewShareButton = () => {
     const lovableToken = currentSearch.get("__lovable_token");
     if (lovableToken) url.searchParams.set("__lovable_token", lovableToken);
     url.searchParams.set("mobile_preview", "1");
+    // Simulate the installed PWA experience so the preview shows the iOS home
+    // indicator and PWA-specific layouts rather than mobile-Safari chrome.
+    url.searchParams.set("source", "pwa");
     return `${url.pathname}${url.search}${url.hash}`;
   };
 
@@ -129,10 +142,67 @@ const MobilePreviewShareButton = () => {
   const dims = DEVICES[device];
   const frameW = orientation === "portrait" ? dims.w : dims.h;
   const frameH = orientation === "portrait" ? dims.h : dims.w;
+  const isIOS = device !== "pixel";
+  const homeBarH = isIOS && orientation === "portrait" ? dims.homeBarH : 0;
 
   // Floating trigger removed — opening is handled exclusively by the
   // MobilePreviewHeaderButton in the trade header (and `open-mobile-preview`
   // event listener above) so it never overlaps page content.
+
+  const PhoneFrame = ({
+    src,
+    label,
+    variant,
+  }: {
+    src: string;
+    label?: string;
+    variant: "split" | "single";
+  }) => (
+    <div className="flex flex-col items-center">
+      {label && (
+        <span className="font-body text-[10px] uppercase tracking-[0.15em] text-background/80 mb-2">
+          {label}
+        </span>
+      )}
+      <div
+        className="relative bg-neutral-900 rounded-[2.5rem] p-3 shadow-2xl overflow-hidden"
+        style={{
+          maxHeight: variant === "split" ? "calc(100vh - 8rem)" : "calc(100vh - 6rem)",
+        }}
+      >
+        {/* Dynamic Island — iPhone Pro Max portrait only */}
+        {isIOS && orientation === "portrait" && dims.hasDynamicIsland && (
+          <div className="absolute top-3 left-1/2 -translate-x-1/2 z-10 w-[84px] h-[26px] bg-black rounded-full pointer-events-none" />
+        )}
+
+        <iframe
+          key={src}
+          src={src}
+          title={`Mobile preview · ${label || side}`}
+          className="bg-background rounded-[1.75rem] block transition-all"
+          style={{
+            width: frameW,
+            height: frameH,
+            maxHeight: variant === "split" ? "calc(100vh - 9rem)" : "calc(100vh - 7rem)",
+            maxWidth: variant === "split" ? "calc((100vw - 5rem) / 2)" : "calc(100vw - 3rem)",
+          }}
+        />
+
+        {/* iOS home-indicator overlay */}
+        {homeBarH > 0 && (
+          <div
+            className="absolute bottom-3 left-3 right-3 rounded-b-[1.75rem] flex items-end justify-center pb-1.5 pointer-events-none"
+            style={{
+              height: homeBarH,
+              background: "linear-gradient(to top, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0) 100%)",
+            }}
+          >
+            <div className="w-[120px] h-[5px] bg-white/80 rounded-full" />
+          </div>
+        )}
+      </div>
+    </div>
+  );
 
   return (
     <>
@@ -202,51 +272,16 @@ const MobilePreviewShareButton = () => {
                 { label: "Trade", src: tradeSrc },
                 { label: "Public", src: publicSrc },
               ] as const).map((pane) => (
-                <div key={pane.label} className="flex flex-col items-center">
-                  <span className="font-body text-[10px] uppercase tracking-[0.15em] text-background/80 mb-2">
-                    {pane.label}
-                  </span>
-                  <div
-                    className="relative bg-neutral-900 rounded-[2.5rem] p-3 shadow-2xl overflow-hidden"
-                    style={{ maxHeight: "calc(100vh - 8rem)" }}
-                  >
-                    <iframe
-                      key={pane.src}
-                      src={pane.src}
-                      title={`Mobile preview · ${pane.label}`}
-                      className="bg-background rounded-[1.75rem] block transition-all"
-                      style={{
-                        width: frameW,
-                        height: frameH,
-                        maxHeight: "calc(100vh - 9rem)",
-                        maxWidth: "calc((100vw - 5rem) / 2)",
-                      }}
-                    />
-                  </div>
-                </div>
+                <PhoneFrame
+                  key={pane.label}
+                  src={pane.src}
+                  label={pane.label}
+                  variant="split"
+                />
               ))}
             </div>
           ) : (
-            <div
-              className="relative bg-neutral-900 rounded-[2.5rem] p-3 shadow-2xl overflow-hidden"
-              style={{
-                maxHeight: "calc(100vh - 6rem)",
-                maxWidth: "calc(100vw - 2rem)",
-              }}
-            >
-              <iframe
-                key={previewSrc}
-                src={previewSrc}
-                title={`Mobile preview · ${side}`}
-                className="bg-background rounded-[1.75rem] block transition-all"
-                style={{
-                  width: frameW,
-                  height: frameH,
-                  maxHeight: "calc(100vh - 7rem)",
-                  maxWidth: "calc(100vw - 3rem)",
-                }}
-              />
-            </div>
+            <PhoneFrame src={previewSrc} variant="single" />
           )}
         </div>
       )}
