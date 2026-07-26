@@ -715,6 +715,11 @@ function SingleDesignerCard({ item, fallbackGalleryIndexByDesigner, hasIgPosts }
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-white/40 bg-white/10 backdrop-blur-sm text-white font-body text-[9px] uppercase tracking-[0.15em]">Discover the Product</span>
           </div>
         )}
+
+        {/* "View Profile" pill — desktop hover only */}
+        <div className="hidden md:flex pointer-events-none absolute inset-0 z-10 items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 px-3">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-white/40 bg-white/10 backdrop-blur-sm text-white font-body text-[9px] uppercase tracking-[0.15em]">View Profile</span>
+        </div>
       </div>
       {/* Editorial caption block — sits below the image like a monograph plate */}
       <Link
