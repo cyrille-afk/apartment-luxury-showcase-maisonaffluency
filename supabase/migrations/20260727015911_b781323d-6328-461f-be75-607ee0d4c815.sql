@@ -1,0 +1,3 @@
+UPDATE public.onboarding_flow_config
+SET greeting_template = $$Welcome to Maison Affluency Atelier{first_name_comma} - I'm {concierge_name}, a proprietary Gen-AI powered digital assistant built exclusively for members of the Maison Affluency Trade Program. I will act as your curatorial guide, instantly map matching design items and collectible pieces across our entire portfolio when you upload a project mood board or enter a specific prompt, generate one click client ready tear sheets, automate FF&E Schedules, calculate global white-glove shipping estimates, whilst applying your trade pricing in real-time. To tailor what I'm about to show you, may I know in what city your project is located?$$
+WHERE id = 'default';
