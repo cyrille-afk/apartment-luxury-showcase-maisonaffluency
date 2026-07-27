@@ -156,7 +156,7 @@ const EN: Record<Tone, ToneMap> = {
     quote: "Allow me to assist you in reviewing this quote. I can clarify trade pricing, lead times and deposits, and propose alternatives where appropriate.",
     order: "Allow me to assist you in following this order. I can outline production timelines, shipping milestones, and current status.",
     project: "Allow me to assist you in advancing this project. I can build tearsheets, draft quotes, or pull references against the brief.",
-    discover: "Welcome to Maison Affluency Atelier - I'm {concierge_name}, a proprietary Gen-AI powered digital assistant built exclusively for members of the Maison Affluency Trade Program. I will act as your curatorial guide, instantly map matching design items and collectible pieces across our entire portfolio when you upload a project mood board or enter a specific prompt, generate one click client ready tear sheets, automate FF&E Schedules, calculate global white-glove shipping estimates, whilst applying your trade pricing in real-time. To tailor what I'm about to show you, may I know in what city your project is located?",
+    discover: "Welcome to the Maison Affluency Atelier. I am Felix, your curatorial guide across our portfolio of 300 artisan workshops.\n\nHow may I assist your studio today?\n\nSource by mood board upload or bespoke text prompt.\n\nGenerate client-ready tear sheets and instant PDF quotes.\n\nAutomate FF&E scheduling with real-time trade pricing.\n\nTo begin, in what city is your project located?",
   },
   luxury: {
     mood: "Allow me to help you fine-tune your mood board — suggesting complementary pieces grounded in what's already pinned (palette, scale, materiality) and explaining why each fits. Tell me the direction you'd like to push and I'll refine.",
@@ -164,7 +164,7 @@ const EN: Record<Tone, ToneMap> = {
     quote: "Allow me to help you refine this quote — clarifying trade pricing, lead times, and deposits, or proposing alternatives where it makes sense. Tell me what you'd like to review.",
     order: "Allow me to help you follow this order — production timelines, shipping milestones, and status updates. Tell me what you'd like to check.",
     project: "Allow me to help you advance this project — building tearsheets, drafting quotes, or pulling references against the brief. Tell me where you'd like to start.",
-    discover: "Welcome to Maison Affluency Atelier - I'm {concierge_name}, a proprietary Gen-AI powered digital assistant built exclusively for members of the Maison Affluency Trade Program. I will act as your curatorial guide, instantly map matching design items and collectible pieces across our entire portfolio when you upload a project mood board or enter a specific prompt, generate one click client ready tear sheets, automate FF&E Schedules, calculate global white-glove shipping estimates, whilst applying your trade pricing in real-time. To tailor what I'm about to show you, may I know in what city your project is located?",
+    discover: "Welcome to the Maison Affluency Atelier. I am Felix, your curatorial guide across our portfolio of 300 artisan workshops.\n\nHow may I assist your studio today?\n\nSource by mood board upload or bespoke text prompt.\n\nGenerate client-ready tear sheets and instant PDF quotes.\n\nAutomate FF&E scheduling with real-time trade pricing.\n\nTo begin, in what city is your project located?",
   },
   concise: {
     mood: "Mood board mode. I'll suggest complements based on palette, scale and materiality. Tell me the direction.",
@@ -172,7 +172,7 @@ const EN: Record<Tone, ToneMap> = {
     quote: "Quote mode. Pricing, lead times, deposits, alternatives. What to review?",
     order: "Order mode. Production, shipping, status. What to check?",
     project: "Project mode. Tearsheets, quotes, references. Where to start?",
-    discover: "Welcome to Maison Affluency Atelier - I'm {concierge_name}, a proprietary Gen-AI powered digital assistant built exclusively for members of the Maison Affluency Trade Program. I will act as your curatorial guide, instantly map matching design items and collectible pieces across our entire portfolio when you upload a project mood board or enter a specific prompt, generate one click client ready tear sheets, automate FF&E Schedules, calculate global white-glove shipping estimates, whilst applying your trade pricing in real-time. To tailor what I'm about to show you, may I know in what city your project is located?",
+    discover: "Welcome to the Maison Affluency Atelier. I am Felix, your curatorial guide across our portfolio of 300 artisan workshops.\n\nHow may I assist your studio today?\n\nSource by mood board upload or bespoke text prompt.\n\nGenerate client-ready tear sheets and instant PDF quotes.\n\nAutomate FF&E scheduling with real-time trade pricing.\n\nTo begin, in what city is your project located?",
   },
   designer: {
     mood: "Let's tune this board. I'll riff on what's pinned — palette, scale, materiality — and flag pieces that work. Tell me the move (warmer, more sculptural, lighter…) and I'll pull options.",
@@ -180,7 +180,7 @@ const EN: Record<Tone, ToneMap> = {
     quote: "Let's work this quote. I can break down pricing, lead times and deposits, or propose swaps. What do you want to look at?",
     order: "Let's track this order. Production, shipping milestones, status — what do you need to know?",
     project: "Let's push this project forward. Tearsheets, quotes, references — where do we start?",
-    discover: "Welcome to Maison Affluency Atelier - I'm {concierge_name}, a proprietary Gen-AI powered digital assistant built exclusively for members of the Maison Affluency Trade Program. I will act as your curatorial guide, instantly map matching design items and collectible pieces across our entire portfolio when you upload a project mood board or enter a specific prompt, generate one click client ready tear sheets, automate FF&E Schedules, calculate global white-glove shipping estimates, whilst applying your trade pricing in real-time. To tailor what I'm about to show you, may I know in what city your project is located?",
+    discover: "Welcome to the Maison Affluency Atelier. I am Felix, your curatorial guide across our portfolio of 300 artisan workshops.\n\nHow may I assist your studio today?\n\nSource by mood board upload or bespoke text prompt.\n\nGenerate client-ready tear sheets and instant PDF quotes.\n\nAutomate FF&E scheduling with real-time trade pricing.\n\nTo begin, in what city is your project located?",
   },
 };
 
