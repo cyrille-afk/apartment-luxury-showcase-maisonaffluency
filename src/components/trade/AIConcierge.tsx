@@ -388,6 +388,9 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
   const [conciergeStatus, setConciergeStatus] = useState<
     null | "pending_review" | "assigning_curator" | "curator_assigned" | "human_notified" | "appointment_requested"
   >(null);
+  // Ticket metadata surfaced under the "Human Team Notified" badge so the
+  // designer can quote a real reference ID and see exactly what we forwarded.
+  const [handoffTicket, setHandoffTicket] = useState<{ id: string; summary: string } | null>(null);
 
   const [timeline, setTimeline] = useState<TimelineItem[]>(() => {
     try {
