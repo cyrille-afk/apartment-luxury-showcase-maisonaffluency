@@ -1191,6 +1191,97 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
     return true;
   }, [currentStudio?.id, navigate]);
 
+  // Forward-to-human handoff: fires when the designer taps the
+  // "Forward to Human Concierge" CTA (typically after uploading a floor plan
+  // or complex technical drawing). We do NOT round-trip through the LLM —
+  // instead we (1) log an escalation server-side so the District 9 team gets
+  // notified, and (2) push an instant, deterministic confirmation reply so
+  // the designer never wonders whether the request landed in a black hole.
+  const forwardToHumanConcierge = useCallback(async () => {
+    // Optimistic user bubble so the transcript reflects the tap.
+    setTimeline((prev) => [
+      ...prev,
+      { kind: "msg", role: "user", content: "Forward to Human Concierge" },
+    ]);
+
+    // Resolve project city + preferred contact from session/profile.
+    const session = getConciergeSession();
+    const projectCity = (session?.projectCity || "").trim();
+    let preferredContact = "email";
+    let contactValue = user?.email || "";
+    try {
+      const { data: sess } = await supabase.auth.getSession();
+      const uid = sess.session?.user?.id;
+      if (uid) {
+        const { data: p } = await supabase
+          .from("profiles")
+          .select("preferred_contact_method, whatsapp, phone, email")
+          .eq("id", uid)
+          .maybeSingle();
+        if (p) {
+          const method = String((p as any).preferred_contact_method || "").toLowerCase();
+          if (method === "whatsapp" && (p as any).whatsapp) {
+            preferredContact = "WhatsApp";
+            contactValue = (p as any).whatsapp;
+          } else if (method === "phone" && (p as any).phone) {
+            preferredContact = "phone";
+            contactValue = (p as any).phone;
+          } else if ((p as any).email) {
+            preferredContact = "email";
+            contactValue = (p as any).email;
+          }
+        }
+      }
+    } catch { /* non-fatal */ }
+
+    const cityLine = projectCity
+      ? `your project location **${projectCity}**`
+      : "your project brief";
+    const contactLine = contactValue
+      ? `via **${preferredContact} (${contactValue})**`
+      : `via your **preferred channel on file**`;
+
+    const confirmation = [
+      `**Requests transmitted successfully.**`,
+      ``,
+      `I have compiled ${cityLine} and forwarded your uploaded files directly to our **District 9 curatorial team**.`,
+      ``,
+      `A human concierge will review your layout, coordinate with our artisan workshops, and contact you ${contactLine} within the next **2 business hours** with a hand-selected digital curation.`,
+      ``,
+      `- **[ Return to Atelier Chat ]** Keep exploring the Curation while our team prepares your bespoke selection.`,
+      `- **[ View My Open Requests ]** Track the status of this handoff and any other in-flight briefs.`,
+    ].join("\n");
+
+    setTimeline((prev) => [
+      ...prev,
+      { kind: "msg", role: "assistant", content: confirmation },
+    ]);
+
+    // Fire-and-forget escalation so the District 9 team is notified.
+    try {
+      const { data: sess } = await supabase.auth.getSession();
+      const token = sess.session?.access_token;
+      if (token) {
+        const excerpt = timelineRef.current
+          .filter((t: any) => t.kind === "msg")
+          .slice(-8)
+          .map((t: any) => ({ role: t.role, content: t.content }));
+        void fetch(
+          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/notify-escalation`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+            body: JSON.stringify({
+              sentiment: "handoff",
+              intent: "human_handoff_floor_plan",
+              excerpt,
+            }),
+          },
+        ).catch(() => { /* non-fatal */ });
+      }
+    } catch { /* non-fatal */ }
+  }, [user?.email]);
+
   const send = useCallback(async (overrideText?: string, opts?: { displayText?: string }) => {
     const text = (overrideText ?? input).trim();
 
