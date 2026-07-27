@@ -1671,6 +1671,36 @@ export type Database = {
         }
         Relationships: []
       }
+      concierge_threads: {
+        Row: {
+          created_at: string
+          id: string
+          last_active_at: string
+          timeline: Json
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          last_active_at?: string
+          timeline?: Json
+          title?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          last_active_at?: string
+          timeline?: Json
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       content_audit_log: {
         Row: {
           changed_by: string | null
