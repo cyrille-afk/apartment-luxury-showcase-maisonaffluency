@@ -3816,9 +3816,9 @@ async function buildDeterministicTearsheetProposal(
   const rationaleMap: Record<string, { reason: string }> = {};
   for (const p of previewRaw) {
     if (!p?.id || !finalIds.includes(p.id)) continue;
-    const meta = [p.category, p.materials].filter(Boolean).join(" · ");
-    rationaleMap[p.id] = { reason: meta ? `Validated from the Curation for its ${meta}.` : "Validated from the Maison Affluency Curation for this brief." };
+    rationaleMap[p.id] = { reason: "✓ Validated against your mood board's material profile." };
   }
+
   const preview = previewRaw
     .filter((p: any) => finalIds.includes(p?.id))
     .map((p: any) => ({ ...p, rationale: rationaleMap[p.id]?.reason || null }));
