@@ -1289,6 +1289,10 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
         ).catch(() => { /* non-fatal */ });
       }
     } catch { /* non-fatal */ }
+
+    // Progress the ambient badge so the designer sees the human team take over.
+    window.setTimeout(() => setConciergeStatus("assigning_curator"), 1200);
+    window.setTimeout(() => setConciergeStatus("curator_assigned"), 3600);
   }, [user?.email]);
 
   const send = useCallback(async (overrideText?: string, opts?: { displayText?: string }) => {
