@@ -8,6 +8,7 @@ import { withSemanticCache } from "../_shared/aiCache.ts";
 import { coerceClearance, classifyResultFailure, countDimensionNumbers } from "../_shared/spatialFitValidation.ts";
 import { canAccessProject } from "../_shared/tenantAccess.ts";
 import { runInspectorPass, buildInspectorGroundTruth, buildInspectorLogRecord, logInspectorRun, validateRequirementsCoverage, mergeRequirementsWithText, runDiscoveryProseGuard, deterministicRedact, SAFE_FALLBACK_PROSE } from "../_shared/concierge-inspector.ts";
+import { resolveProjectCity, looksLikeCityAssertion, buildCityLockSystemNote } from "../_shared/cityResolver.ts";
 import { installFramePersistence, serveResume } from "./_resume.ts";
 import { deriveHardConstraints, applyHardConstraints, filterRowsByHardConstraints, type HardConstraints } from "../_shared/hardConstraints.ts";
 import { inferDimensionConstraints, filterRowsByDimensionConstraints, type DimensionConstraints } from "../_shared/dimensionConstraints.ts";
@@ -5317,6 +5318,23 @@ serve(async (req) => {
 
     mark("pre_llm", { model: chosenModel, tools: finalTools.length, toolChoice: typeof toolChoice === "string" ? toolChoice : (toolChoice?.function?.name ?? "forced") });
     flushTrace("pre_llm");
+
+    // ----- CITY LOCK — silent geocoding + fallback-hub resolution -----
+    // If the most recent user turn looks like a project-location assertion,
+    // resolve it into a canonical city + primary logistics hub and inject a
+    // system note so Felix produces the elite TIER 1 / TIER 2 lock-in reply
+    // (never a blunt "city not found").
+    let cityLockNote = "";
+    try {
+      if (looksLikeCityAssertion(lastUserMsg)) {
+        const resolution = await resolveProjectCity(lastUserMsg);
+        cityLockNote = "\n\n" + buildCityLockSystemNote(resolution);
+        mark("cityLock", { input: lastUserMsg.slice(0, 40), hub: resolution.hub, match: resolution.matchType });
+      }
+    } catch (err) {
+      console.warn("[concierge cityLock] resolver failed", err);
+    }
+
     const llmT0 = performance.now();
     const upstream = await chatFetch({
       method: "POST",
@@ -5328,7 +5346,7 @@ serve(async (req) => {
         model: aiModel(chosenModel),
         temperature: 0,
         messages: [
-          { role: "system", content: languageDirective + systemPrompt },
+          { role: "system", content: languageDirective + systemPrompt + cityLockNote },
           ...(() => {
             // If the current user turn carries image / file parts (mood
             // board, sketch, floor plan, reference photo, PDF), inject a
