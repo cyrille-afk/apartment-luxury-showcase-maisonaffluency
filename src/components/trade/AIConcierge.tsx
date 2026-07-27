@@ -262,6 +262,7 @@ import { VisualizationBriefCard, VIZ_BRIEF_INCOMING_KEY } from "@/components/tra
 import { PendingProposalSkeleton } from "@/components/trade/concierge/PendingProposalSkeleton";
 import { EscalationCard } from "@/components/trade/concierge/EscalationCard";
 import { SpecScheduleBlock } from "@/components/trade/concierge/SpecScheduleBlock";
+import { DesignDirectorCtaButton } from "@/components/trade/concierge/DesignDirectorCtaButton";
 import { parseSlashCommand, SLASH_COMMAND_HELP } from "@/lib/conciergeSlashCommands";
 import { openHandoffChannel } from "@/lib/conciergeHandoff";
 import { useConciergeSession } from "@/hooks/useConciergeSession";
@@ -3236,115 +3237,113 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                                     "Upload A Visual Mood Board Instead": "I'd like to upload a visual mood board instead of the floor plan — please prompt me to attach a reference image or Pinterest-style collage via the paperclip, and then run the Design Director scaffold on that image.",
                                   };
 
+                                  const handleCtaClick = () => {
+                                    if (label === "Forward To Human Concierge") {
+                                      void forwardToHumanConcierge();
+                                      return;
+                                    }
+                                    if (label === "Return To Atelier Chat") {
+                                      // Keep the chat open so the designer can keep sourcing while the
+                                      // human team processes their handoff. Reset the ambient status
+                                      // once they resume the conversation.
+                                      setMinimized(false);
+                                      setConciergeStatus(null);
+                                      setHandoffTicket(null);
+                                      return;
+                                    }
+                                    if (label === "View My Open Requests") {
+                                      navigate("/trade/custom-requests");
+                                      return;
+                                    }
+                                    if (label === "Yes, Schedule Morning Call" || label === "No, Standard Updates Are Fine") {
+                                      let ack: string;
+                                      if (label.startsWith("Yes")) {
+                                        // Resolve project city → timezone short label for the confirmation.
+                                        const CITY_TZ: Record<string, string> = {
+                                          london: "Europe/London", paris: "Europe/Paris", milan: "Europe/Rome", rome: "Europe/Rome",
+                                          geneva: "Europe/Zurich", zurich: "Europe/Zurich", monaco: "Europe/Monaco", madrid: "Europe/Madrid",
+                                          barcelona: "Europe/Madrid", berlin: "Europe/Berlin", amsterdam: "Europe/Amsterdam",
+                                          "new york": "America/New_York", nyc: "America/New_York", miami: "America/New_York",
+                                          boston: "America/New_York", toronto: "America/Toronto", chicago: "America/Chicago",
+                                          "los angeles": "America/Los_Angeles", la: "America/Los_Angeles", "san francisco": "America/Los_Angeles",
+                                          dubai: "Asia/Dubai", "abu dhabi": "Asia/Dubai", doha: "Asia/Qatar", riyadh: "Asia/Riyadh",
+                                          istanbul: "Europe/Istanbul", mumbai: "Asia/Kolkata", delhi: "Asia/Kolkata",
+                                          "hong kong": "Asia/Hong_Kong", shanghai: "Asia/Shanghai", beijing: "Asia/Shanghai",
+                                          tokyo: "Asia/Tokyo", seoul: "Asia/Seoul", sydney: "Australia/Sydney", melbourne: "Australia/Melbourne",
+                                          bangkok: "Asia/Bangkok", jakarta: "Asia/Jakarta", "kuala lumpur": "Asia/Kuala_Lumpur",
+                                        };
+                                        const session = getConciergeSession();
+                                        const projectCity = String(session?.projectCity || "").trim();
+                                        const tz = CITY_TZ[projectCity.toLowerCase()] || Intl.DateTimeFormat().resolvedOptions().timeZone;
+                                        const tzShort = new Intl.DateTimeFormat("en-US", { timeZone: tz, timeZoneName: "short" })
+                                          .formatToParts(new Date()).find((p) => p.type === "timeZoneName")?.value || tz.split("/").pop();
+                                        // "tomorrow morning" if the user is currently in their own daytime; else "your next local morning".
+                                        const localHour = Number(new Intl.DateTimeFormat("en-GB", { timeZone: tz, hour: "2-digit", hour12: false }).formatToParts(new Date()).find(p => p.type === "hour")?.value ?? "0");
+                                        const whenLabel = localHour >= 11 ? "**tomorrow morning between 9:00 AM and 11:00 AM your local time**"
+                                          : localHour < 9 ? "**later this morning between 9:00 AM and 11:00 AM your local time**"
+                                          : "**your next local morning between 9:00 AM and 11:00 AM**";
+                                        ack = [
+                                          `**Preference saved.** Our team will review your project details during our day and schedule your dedicated curatorial call for ${whenLabel} (${tzShort}).`,
+                                          ``,
+                                          `A calendar invitation has been sent to your registered email address.`,
+                                          ``,
+                                          `- **[ Return to Atelier Chat ]** Keep exploring the Curation while our team prepares your bespoke selection.`,
+                                        ].join("\n");
+                                      } else {
+                                        ack = "Noted — we'll keep to the standard update cadence via your preferred channel.";
+                                      }
+                                      setTimeline((prev) => [
+                                        ...prev,
+                                        { kind: "msg", role: "user", content: label },
+                                        { kind: "msg", role: "assistant", content: ack },
+                                      ]);
+                                      // Fire-and-forget: notify the human team that a local-morning slot is requested.
+                                      if (label.startsWith("Yes")) {
+                                        void (async () => {
+                                          try {
+                                            const { data: sess } = await supabase.auth.getSession();
+                                            const authHeader = sess.session?.access_token
+                                              ? { Authorization: `Bearer ${sess.session.access_token}` }
+                                              : undefined;
+                                            const projectCity = getConciergeSession()?.projectCity || null;
+                                            await supabase.functions.invoke("notify-escalation", {
+                                              body: {
+                                                intent: "schedule_local_morning_call",
+                                                project_city: projectCity,
+                                              },
+                                              headers: authHeader,
+                                            });
+                                            setConciergeStatus("appointment_requested");
+                                            // Placeholder hook for automatic Calendly invite + HubSpot
+                                            // meeting log. See supabase/functions/schedule-calendly-invite
+                                            // for the full endpoint map. Fire-and-forget.
+                                            void supabase.functions.invoke("schedule-calendly-invite", {
+                                              body: {
+                                                project_city: projectCity,
+                                                local_tz: (typeof Intl !== "undefined"
+                                                  ? Intl.DateTimeFormat().resolvedOptions().timeZone
+                                                  : null),
+                                                local_window: "09:00-11:00",
+                                                contact_email: user?.email ?? null,
+                                              },
+                                              headers: authHeader,
+                                            }).catch(() => { /* non-fatal */ });
+                                          } catch { /* non-fatal */ }
+                                        })();
+                                      }
+                                      return;
+                                    }
+
+                                    void send(prompts[label], { displayText: label });
+                                  };
+
                                   return (
                                     <li className="list-none -ml-5 my-1.5" {...props}>
-                                      <button
-                                        type="button"
-                                        onClick={() => {
-                                          if (label === "Forward To Human Concierge") {
-                                            void forwardToHumanConcierge();
-                                            return;
-                                          }
-                                          if (label === "Return To Atelier Chat") {
-                                            // Keep the chat open so the designer can keep sourcing while the
-                                            // human team processes their handoff. Reset the ambient status
-                                            // once they resume the conversation.
-                                            setMinimized(false);
-                                            setConciergeStatus(null);
-                                            setHandoffTicket(null);
-                                            return;
-                                          }
-                                          if (label === "View My Open Requests") {
-                                            navigate("/trade/custom-requests");
-                                            return;
-                                          }
-                                          if (label === "Yes, Schedule Morning Call" || label === "No, Standard Updates Are Fine") {
-                                            let ack: string;
-                                            if (label.startsWith("Yes")) {
-                                              // Resolve project city → timezone short label for the confirmation.
-                                              const CITY_TZ: Record<string, string> = {
-                                                london: "Europe/London", paris: "Europe/Paris", milan: "Europe/Rome", rome: "Europe/Rome",
-                                                geneva: "Europe/Zurich", zurich: "Europe/Zurich", monaco: "Europe/Monaco", madrid: "Europe/Madrid",
-                                                barcelona: "Europe/Madrid", berlin: "Europe/Berlin", amsterdam: "Europe/Amsterdam",
-                                                "new york": "America/New_York", nyc: "America/New_York", miami: "America/New_York",
-                                                boston: "America/New_York", toronto: "America/Toronto", chicago: "America/Chicago",
-                                                "los angeles": "America/Los_Angeles", la: "America/Los_Angeles", "san francisco": "America/Los_Angeles",
-                                                dubai: "Asia/Dubai", "abu dhabi": "Asia/Dubai", doha: "Asia/Qatar", riyadh: "Asia/Riyadh",
-                                                istanbul: "Europe/Istanbul", mumbai: "Asia/Kolkata", delhi: "Asia/Kolkata",
-                                                "hong kong": "Asia/Hong_Kong", shanghai: "Asia/Shanghai", beijing: "Asia/Shanghai",
-                                                tokyo: "Asia/Tokyo", seoul: "Asia/Seoul", sydney: "Australia/Sydney", melbourne: "Australia/Melbourne",
-                                                bangkok: "Asia/Bangkok", jakarta: "Asia/Jakarta", "kuala lumpur": "Asia/Kuala_Lumpur",
-                                              };
-                                              const session = getConciergeSession();
-                                              const projectCity = String(session?.projectCity || "").trim();
-                                              const tz = CITY_TZ[projectCity.toLowerCase()] || Intl.DateTimeFormat().resolvedOptions().timeZone;
-                                              const tzShort = new Intl.DateTimeFormat("en-US", { timeZone: tz, timeZoneName: "short" })
-                                                .formatToParts(new Date()).find((p) => p.type === "timeZoneName")?.value || tz.split("/").pop();
-                                              // "tomorrow morning" if the user is currently in their own daytime; else "your next local morning".
-                                              const localHour = Number(new Intl.DateTimeFormat("en-GB", { timeZone: tz, hour: "2-digit", hour12: false }).formatToParts(new Date()).find(p => p.type === "hour")?.value ?? "0");
-                                              const whenLabel = localHour >= 11 ? "**tomorrow morning between 9:00 AM and 11:00 AM your local time**"
-                                                : localHour < 9 ? "**later this morning between 9:00 AM and 11:00 AM your local time**"
-                                                : "**your next local morning between 9:00 AM and 11:00 AM**";
-                                              ack = [
-                                                `**Preference saved.** Our team will review your project details during our day and schedule your dedicated curatorial call for ${whenLabel} (${tzShort}).`,
-                                                ``,
-                                                `A calendar invitation has been sent to your registered email address.`,
-                                                ``,
-                                                `- **[ Return to Atelier Chat ]** Keep exploring the Curation while our team prepares your bespoke selection.`,
-                                              ].join("\n");
-                                            } else {
-                                              ack = "Noted — we'll keep to the standard update cadence via your preferred channel.";
-                                            }
-                                            setTimeline((prev) => [
-                                              ...prev,
-                                              { kind: "msg", role: "user", content: label },
-                                              { kind: "msg", role: "assistant", content: ack },
-                                            ]);
-                                            // Fire-and-forget: notify the human team that a local-morning slot is requested.
-                                            if (label.startsWith("Yes")) {
-                                              void (async () => {
-                                                try {
-                                                  const { data: sess } = await supabase.auth.getSession();
-                                                  const authHeader = sess.session?.access_token
-                                                    ? { Authorization: `Bearer ${sess.session.access_token}` }
-                                                    : undefined;
-                                                  const projectCity = getConciergeSession()?.projectCity || null;
-                                                  await supabase.functions.invoke("notify-escalation", {
-                                                    body: {
-                                                      intent: "schedule_local_morning_call",
-                                                      project_city: projectCity,
-                                                    },
-                                                    headers: authHeader,
-                                                  });
-                                                  setConciergeStatus("appointment_requested");
-                                                  // Placeholder hook for automatic Calendly invite + HubSpot
-                                                  // meeting log. See supabase/functions/schedule-calendly-invite
-                                                  // for the full endpoint map. Fire-and-forget.
-                                                  void supabase.functions.invoke("schedule-calendly-invite", {
-                                                    body: {
-                                                      project_city: projectCity,
-                                                      local_tz: (typeof Intl !== "undefined"
-                                                        ? Intl.DateTimeFormat().resolvedOptions().timeZone
-                                                        : null),
-                                                      local_window: "09:00-11:00",
-                                                      contact_email: user?.email ?? null,
-                                                    },
-                                                    headers: authHeader,
-                                                  }).catch(() => { /* non-fatal */ });
-                                                } catch { /* non-fatal */ }
-                                              })();
-                                            }
-                                            return;
-                                          }
-
-
-                                          void send(prompts[label], { displayText: label });
-                                        }}
-                                        className="group flex flex-col items-start rounded-xl border border-foreground/20 bg-background/70 px-3.5 py-2 text-left shadow-sm transition-all duration-200 ease-out hover:-translate-y-0.5 hover:border-foreground/40 hover:bg-background hover:shadow-md hover:shadow-foreground/5 active:translate-y-0 active:scale-[0.99] focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent/30"
-                                      >
-                                        <span className="text-sm font-semibold text-foreground">{label}</span>
-                                        {tail ? <span className="text-xs italic text-muted-foreground leading-snug">{tail}</span> : null}
-                                      </button>
+                                      <DesignDirectorCtaButton
+                                        label={label}
+                                        description={tail || undefined}
+                                        onClick={handleCtaClick}
+                                      />
                                     </li>
                                   );
                                 }
