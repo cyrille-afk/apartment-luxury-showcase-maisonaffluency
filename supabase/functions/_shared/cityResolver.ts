@@ -294,6 +294,32 @@ async function geocodeViaGateway(input: string): Promise<{ country?: string; reg
  * Runs the dictionary + fuzzy path first (instant, no external call); only
  * falls through to silent Google Maps geocoding for genuinely unknown input.
  */
+/**
+ * Detect obvious gibberish/keyboard-mash so we don't fabricate a freight hub
+ * for it. Runs BEFORE the dictionary/fuzzy path so that inputs like
+ * "asdfg123", "qwerty", "xxxxx" are flagged and Felix asks for clarification
+ * instead of guessing London/EMEA. This is deliberately conservative — real
+ * short city names (NYC, LA, HK) and typo'd cities still resolve normally.
+ */
+export function looksLikeGibberish(rawInput: string): boolean {
+  const raw = (rawInput || "").trim();
+  if (!raw) return false;
+  const t = raw.toLowerCase();
+  // Contains digits mixed into a single alphanumeric token → not a city.
+  if (/^[a-z0-9]+$/i.test(t) && /\d/.test(t) && /[a-z]/i.test(t)) return true;
+  // Pure digits.
+  if (/^\d+$/.test(t)) return true;
+  // Long single unbroken alphabetic string with no vowels (e.g. "xckdfgh") —
+  // real city names virtually always contain at least one vowel.
+  if (/^[a-z]{5,}$/i.test(t) && !/[aeiouy]/i.test(t)) return true;
+  // Common keyboard-mash rows.
+  const KEYBOARD_ROWS = ["qwerty", "asdfgh", "zxcvbn", "qwertyui", "asdfghjkl", "zxcvbnm"];
+  if (KEYBOARD_ROWS.some((row) => t.startsWith(row.slice(0, Math.min(row.length, t.length))) && t.length >= 5)) return true;
+  // Same character repeated 4+ times ("xxxxx", "aaaa1").
+  if (/^(.)\1{3,}$/i.test(t.replace(/\d+$/, ""))) return true;
+  return false;
+}
+
 export async function resolveProjectCity(rawInput: string): Promise<CityResolution> {
   const input = (rawInput || "").trim();
   const key = norm(input);
@@ -307,6 +333,19 @@ export async function resolveProjectCity(rawInput: string): Promise<CityResoluti
       matchType: "unknown",
       rationale: HUB_RATIONALES[hub],
       alternatives: pickAlternatives("Global", hub),
+    };
+  }
+
+  // 0) Gibberish / keyboard-mash guard — refuse to invent a hub for this.
+  if (looksLikeGibberish(input)) {
+    return {
+      input,
+      resolvedCity: null,
+      hub: "",
+      region: "Global",
+      matchType: "gibberish",
+      rationale: "input could not be mapped to a real location",
+      alternatives: [],
     };
   }
 
