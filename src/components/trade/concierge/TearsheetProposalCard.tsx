@@ -828,35 +828,37 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
         <p className="font-body text-xs text-muted-foreground italic mb-2.5">"{proposal.args.note}"</p>
       )}
 
-      {/* Workflow hint — tells the architect to review each piece, select
-          finishes in the 3D drawer, and Lock before approving. Without this
-          guidance the tearsheet gets created with default finishes and
-          architects miss the per-piece configurator entirely. */}
+      {/* Workflow hint — concise concierge-style guidance. The lock-count
+          badge carries most of the state weight so the copy stays minimal. */}
       {status === "pending" && (
-        <div className="mb-2.5 rounded-lg border border-accent/30 bg-accent/[0.05] px-2.5 py-2">
-          <div className="flex items-center gap-1.5 mb-1">
-            <Sparkles className="h-3 w-3 text-accent shrink-0" />
-            <span className="font-display text-[10px] uppercase tracking-widest text-accent">
-              Before approving — configure each piece
-            </span>
+        <div className="mb-3 rounded-lg border border-accent/30 bg-accent/[0.05] px-3 py-2.5">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5 mb-0.5">
+                <Sparkles className="h-3 w-3 text-accent shrink-0" />
+                <span className="font-display text-[10px] uppercase tracking-widest text-accent">
+                  Configure before approving
+                </span>
+              </div>
+              <p className="font-body text-[10.5px] text-foreground/70 leading-snug">
+                Preview each piece, choose finishes, then lock your selections.
+              </p>
+            </div>
+            <div className={cn(
+              "flex shrink-0 items-center gap-1 rounded-full border px-2 py-1 font-display text-[10px] uppercase tracking-wider",
+              lockedVisible.length === visiblePicks.length && visiblePicks.length > 0
+                ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300"
+                : "border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-300"
+            )}>
+              <Lock className="h-3 w-3" />
+              <span>{lockedVisible.length}/{visiblePicks.length}</span>
+            </div>
           </div>
-          <ol className="font-body text-[10.5px] text-foreground/75 leading-relaxed space-y-0.5 pl-4 list-decimal">
-            <li>
-              Tap <span className="inline-flex items-center gap-0.5 font-medium text-foreground"><Box className="h-2.5 w-2.5" />3D</span> on each row to preview the model and pick your Base / Top / fabric finishes — trade pricing updates live.
-            </li>
-            <li>
-              Tap <span className="inline-flex items-center gap-0.5 font-medium text-foreground"><Lock className="h-2.5 w-2.5" />Lock</span> to freeze your selection so re-align never overwrites it.
-            </li>
-            <li>
-              Then <span className="font-medium text-foreground">{approveLabel}</span> — locked finishes are carried into the tearsheet and project folder.
-            </li>
-          </ol>
-          <div className="mt-1.5 flex items-center gap-3 font-body text-[10px] text-muted-foreground">
-            <span>{lockedVisible.length}/{visiblePicks.length} locked</span>
-            {lockedVisible.length === 0 && visiblePicks.length > 0 && (
-              <span className="text-accent/80">Nothing locked yet — finishes will default to the concierge's suggestion.</span>
-            )}
-          </div>
+          {lockedVisible.length === 0 && visiblePicks.length > 0 && (
+            <p className="mt-1.5 font-body text-[10px] text-accent/80">
+              Nothing locked yet — finishes will default to the concierge's suggestion.
+            </p>
+          )}
         </div>
       )}
 
