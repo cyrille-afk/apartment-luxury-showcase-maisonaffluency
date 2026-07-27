@@ -3033,7 +3033,22 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                                     <li className="list-none -ml-5 my-1.5" {...props}>
                                       <button
                                         type="button"
-                                        onClick={() => { void send(prompts[label], { displayText: label }); }}
+                                        onClick={() => {
+                                          if (label === "Forward To Human Concierge") {
+                                            void forwardToHumanConcierge();
+                                            return;
+                                          }
+                                          if (label === "Return To Atelier Chat") {
+                                            // No-op: user is already in the chat. Just close any minimized state.
+                                            setMinimized(false);
+                                            return;
+                                          }
+                                          if (label === "View My Open Requests") {
+                                            navigate("/trade/inbox");
+                                            return;
+                                          }
+                                          void send(prompts[label], { displayText: label });
+                                        }}
                                         className="group inline-flex items-start gap-2 rounded-xl border border-foreground/20 bg-background/70 px-3.5 py-2 text-left text-sm font-medium text-foreground shadow-sm transition hover:border-foreground/50 hover:bg-background focus:outline-none focus:ring-2 focus:ring-foreground/30"
                                       >
                                         <span className="mt-[2px] inline-block h-1.5 w-1.5 rounded-full bg-foreground/70 group-hover:bg-foreground" />
