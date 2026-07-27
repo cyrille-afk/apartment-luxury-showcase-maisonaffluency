@@ -4,6 +4,7 @@
 // under each thumbnail in Felix's tearsheet proposal, e.g.:
 //   • "Available for White-Glove Delivery to Singapore in 2 Weeks"
 //   • "Handcrafted to Order · 10-Week Lead Time to Singapore"
+//   • "Express Shipping Available to Miami" (urgency + short lead)
 //
 // If we can't confidently classify the piece we return null so the card stays
 // silent rather than fabricating a lead time.
@@ -16,12 +17,15 @@ export type LogisticsInput = {
 };
 
 export type LogisticsTag = {
-  kind: "in_stock" | "made_to_order";
+  kind: "in_stock" | "made_to_order" | "express";
   label: string;
 };
 
 // Default white-glove transit — matches what the concierge preamble promises.
 const DEFAULT_WHITE_GLOVE_WEEKS = 2;
+// Rush-project ceiling: pieces at or below this weekly lead time can be
+// promoted to the "Express Shipping" badge when the session is urgency-locked.
+const EXPRESS_LEAD_WEEKS_MAX = 4;
 
 function isInStock(s: LogisticsInput): boolean {
   const stock = String(s.stock_status || "").toLowerCase();
@@ -48,18 +52,35 @@ function parseLeadWeeks(raw: string | null | undefined): { min: number; max: num
   return null;
 }
 
-export function buildLogisticsTag(pick: LogisticsInput, projectCity: string | null): LogisticsTag | null {
+export function buildLogisticsTag(
+  pick: LogisticsInput,
+  projectCity: string | null,
+  opts?: { urgent?: boolean },
+): LogisticsTag | null {
   const cityLabel = projectCity && projectCity.trim() ? projectCity.trim() : null;
   const cityFragment = cityLabel ? ` to ${cityLabel}` : "";
+  const urgent = !!opts?.urgent;
 
-  if (isInStock(pick)) {
+  const inStock = isInStock(pick);
+  const parsed = parseLeadWeeks(pick.lead_time);
+  const eligibleForExpress =
+    urgent &&
+    (inStock || (parsed !== null && parsed.max <= EXPRESS_LEAD_WEEKS_MAX));
+
+  if (eligibleForExpress) {
+    return {
+      kind: "express",
+      label: `Express Shipping Available${cityFragment}`,
+    };
+  }
+
+  if (inStock) {
     return {
       kind: "in_stock",
       label: `Available for White-Glove Delivery${cityFragment} in ${DEFAULT_WHITE_GLOVE_WEEKS} Weeks`,
     };
   }
 
-  const parsed = parseLeadWeeks(pick.lead_time);
   if (parsed) {
     const weeks = parsed.min === parsed.max
       ? `${Math.round(parsed.max)}-Week`

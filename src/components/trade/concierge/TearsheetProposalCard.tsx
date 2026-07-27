@@ -1031,24 +1031,43 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
                           </div>
                         )}
                         {(() => {
-                          const tag = buildLogisticsTag(p as any, conciergeSession?.projectCity ?? null);
+                          const tag = buildLogisticsTag(
+                            p as any,
+                            conciergeSession?.projectCity ?? null,
+                            { urgent: !!conciergeSession?.urgencyFlag },
+                          );
                           if (!tag) return null;
                           const isStock = tag.kind === "in_stock";
+                          const isExpress = tag.kind === "express";
                           return (
                             <div
                               className={cn(
                                 "mt-1 inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-body text-[9px] tracking-wide",
-                                isStock
+                                isExpress
+                                  ? "bg-sky-500/10 text-sky-700 dark:text-sky-400 ring-1 ring-sky-500/30"
+                                  : isStock
                                   ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 ring-1 ring-emerald-500/20"
                                   : "bg-amber-500/10 text-amber-700 dark:text-amber-400 ring-1 ring-amber-500/20",
                               )}
-                              title={isStock ? "Ready for immediate white-glove dispatch" : "Made-to-order — lead time from workshop"}
+                              title={
+                                isExpress
+                                  ? "Rush-eligible: in-stock or ≤4-week lead — prioritised white-glove dispatch"
+                                  : isStock
+                                  ? "Ready for immediate white-glove dispatch"
+                                  : "Made-to-order — lead time from workshop"
+                              }
                             >
-                              <span className={cn("h-1.5 w-1.5 rounded-full", isStock ? "bg-emerald-500" : "bg-amber-500")} />
+                              <span
+                                className={cn(
+                                  "h-1.5 w-1.5 rounded-full",
+                                  isExpress ? "bg-sky-500 animate-pulse" : isStock ? "bg-emerald-500" : "bg-amber-500",
+                                )}
+                              />
                               {tag.label}
                             </div>
                           );
                         })()}
+
                         {showRationale && (
                           <>
                             <div className="font-body text-[10px] text-foreground/70 italic mt-0.5 leading-snug">

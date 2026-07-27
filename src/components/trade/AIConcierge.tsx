@@ -333,6 +333,8 @@ import { useStudio } from "@/hooks/useStudio";
 import { useAuth } from "@/hooks/useAuth";
 import { getConciergeSession, updateConciergeSession } from "@/hooks/useConciergeSession";
 import { extractProjectCityFromAssistant } from "@/lib/projectCityDetect";
+import { detectUrgency } from "@/lib/urgencyDetect";
+
 
 const hasWelcomeActions = (actions: ConciergeQuickAction[] | undefined) =>
   !!actions?.some((action) => isOnboardingActionPrompt(action.prompt));
@@ -1438,6 +1440,18 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
     const hasFiles = attachments.length > 0;
     if (!text && !hasFiles) return;
     if (streaming) return;
+
+    // Rush detection: mirror the RUSH / URGENCY ACKNOWLEDGMENT PROTOCOL in
+    // the trade-concierge system prompt so tearsheet cards can flip to the
+    // "Express Shipping Available to <City>" badge the instant the user
+    // submits a rush turn — no round-trip to the LLM required. Sticky for
+    // the session once true.
+    try {
+      if (detectUrgency(text) && !getConciergeSession()?.urgencyFlag) {
+        updateConciergeSession({ urgencyFlag: true });
+      }
+    } catch { /* non-fatal */ }
+
 
     // Prompt-detect Mandarin: if the user writes in Chinese, auto-switch the
     // concierge reply language to zh. Threshold ~4 Han chars OR ≥30% of the

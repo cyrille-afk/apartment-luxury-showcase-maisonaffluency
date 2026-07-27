@@ -657,12 +657,23 @@ const TOOLS = [
             description:
               "Free-form 1-2 sentence summary of any qualitative constraints not captured above (lighting temperature, sustainability, wheelchair access, delivery deadline, etc.). Empty string if none.",
           },
+          urgency_flag: {
+            type: "boolean",
+            description:
+              "TRUE if the user's brief contains temporal-urgency signals ('huge rush', 'tight deadline', 'ASAP', 'needed yesterday', 'fast track', 'timeline crunch', 'we need it by <date within ~10 weeks>', 'installation next month'). Otherwise FALSE. Once TRUE for a project, keep it TRUE on subsequent turns unless the user explicitly relaxes the deadline. Consumed by the UI to render an 'Express Shipping Available to <City>' badge on eligible cards.",
+          },
+          deadline_weeks: {
+            type: "integer",
+            description:
+              "Best estimate of the maximum acceptable lead time in weeks when the user stated a hard deadline (e.g. 'installation in 6 weeks' → 6). Omit the field entirely if no numeric deadline was given.",
+          },
         },
-        required: ["slots", "style", "materials", "brands", "room", "scale", "era", "notes"],
+        required: ["slots", "style", "materials", "brands", "room", "scale", "era", "notes", "urgency_flag"],
         additionalProperties: false,
       },
     },
   },
+
   {
     type: "function",
     function: {
