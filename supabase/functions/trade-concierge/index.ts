@@ -8,7 +8,7 @@ import { withSemanticCache } from "../_shared/aiCache.ts";
 import { coerceClearance, classifyResultFailure, countDimensionNumbers } from "../_shared/spatialFitValidation.ts";
 import { canAccessProject } from "../_shared/tenantAccess.ts";
 import { runInspectorPass, buildInspectorGroundTruth, buildInspectorLogRecord, logInspectorRun, validateRequirementsCoverage, mergeRequirementsWithText, runDiscoveryProseGuard, deterministicRedact, SAFE_FALLBACK_PROSE, parseBudgetFromText } from "../_shared/concierge-inspector.ts";
-import { resolveProjectCity, looksLikeCityAssertion, buildCityLockSystemNote } from "../_shared/cityResolver.ts";
+import { resolveProjectCity, looksLikeCityAssertion, buildCityLockSystemNote, findLatestCityAssertion } from "../_shared/cityResolver.ts";
 import { installFramePersistence, serveResume } from "./_resume.ts";
 import { deriveHardConstraints, applyHardConstraints, filterRowsByHardConstraints, type HardConstraints } from "../_shared/hardConstraints.ts";
 import { inferDimensionConstraints, filterRowsByDimensionConstraints, type DimensionConstraints } from "../_shared/dimensionConstraints.ts";
