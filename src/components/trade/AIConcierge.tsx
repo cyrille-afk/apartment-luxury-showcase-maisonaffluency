@@ -2881,7 +2881,48 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                               },
                               ul: ({ node, ...props }) => <ul className="list-disc pl-5 space-y-2 my-1" {...props} />,
                               ol: ({ node, ...props }) => <ol className="list-decimal pl-5 space-y-2 my-1" {...props} />,
-                              li: ({ node, ...props }) => <li className="leading-relaxed [&>p]:my-0" {...props} />,
+                              li: ({ node, children, ...props }: any) => {
+                                // Detect the three fixed Design Director CTAs
+                                // ("[ Source Similar Pieces ]" / "[ Generate Custom Quote ]"
+                                // / "[ Match Finishes ]") and render them as real
+                                // buttons that route to the correct next-turn action.
+                                const arr = React.Children.toArray(children);
+                                const first: any = arr[0];
+                                const firstIsStrong =
+                                  first && typeof first === "object" &&
+                                  (first.type === "strong" || first.props?.node?.tagName === "strong");
+                                const firstText = firstIsStrong
+                                  ? String((first.props?.children ?? "").toString()).trim()
+                                  : "";
+                                const ctaMatch = firstText.match(/^\[?\s*(Source Similar Pieces|Generate Custom Quote|Match Finishes)\s*\]?$/i);
+                                if (ctaMatch) {
+                                  const label = ctaMatch[1].replace(/\b\w/g, (c) => c.toUpperCase());
+                                  const tail = arr.slice(1)
+                                    .map((c: any) => (typeof c === "string" ? c : c?.props?.children ?? ""))
+                                    .join("").toString().trim().replace(/^[—–\-:\s]+/, "");
+                                  const prompts: Record<string, string> = {
+                                    "Source Similar Pieces": "Source similar pieces — please propose a tearsheet of on-brief collectible items from the Maison Affluency Curation matching the style, palette and typology tokens you just detected.",
+                                    "Generate Custom Quote": "Generate a custom quote — draft a bespoke specification sheet based on the design concept you just detected (style, palette, typology tokens).",
+                                    "Match Finishes": "Match finishes — shortlist textile and material references from the available_finishes of on-palette pieces in the Curation that complement this palette.",
+                                  };
+                                  return (
+                                    <li className="list-none -ml-5 my-1.5" {...props}>
+                                      <button
+                                        type="button"
+                                        onClick={() => { void send(prompts[label], { displayText: label }); }}
+                                        className="group inline-flex items-start gap-2 rounded-xl border border-foreground/20 bg-background/70 px-3.5 py-2 text-left text-sm font-medium text-foreground shadow-sm transition hover:border-foreground/50 hover:bg-background focus:outline-none focus:ring-2 focus:ring-foreground/30"
+                                      >
+                                        <span className="mt-[2px] inline-block h-1.5 w-1.5 rounded-full bg-foreground/70 group-hover:bg-foreground" />
+                                        <span className="flex-1">
+                                          <span className="font-semibold">{label}</span>
+                                          {tail ? <span className="ml-1.5 font-normal text-foreground/70">{tail}</span> : null}
+                                        </span>
+                                      </button>
+                                    </li>
+                                  );
+                                }
+                                return <li className="leading-relaxed [&>p]:my-0" {...props}>{children}</li>;
+                              },
                               strong: ({ node, ...props }) => <strong className="font-semibold text-foreground" {...props} />,
                               em: ({ node, ...props }) => <em className="italic" {...props} />,
                               a: ({ node, ...props }) => <a className="underline hover:text-accent" target="_blank" rel="noreferrer" {...props} />,
