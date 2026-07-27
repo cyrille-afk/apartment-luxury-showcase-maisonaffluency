@@ -2915,7 +2915,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                                 const firstText = firstIsStrong
                                   ? String((first.props?.children ?? "").toString()).trim()
                                   : "";
-                                const ctaMatch = firstText.match(/^\[?\s*(Source Similar Pieces|Generate Custom Quote|Match Finishes)\s*\]?$/i);
+                                const ctaMatch = firstText.match(/^\[?\s*(Source Similar Pieces|Generate Custom Quote|Match Finishes|Forward to Human Concierge|Upload a Visual Mood Board Instead)\s*\]?$/i);
                                 if (ctaMatch) {
                                   const label = ctaMatch[1].replace(/\b\w/g, (c) => c.toUpperCase());
                                   const tail = arr.slice(1)
@@ -2925,7 +2925,10 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                                     "Source Similar Pieces": "Source similar pieces — please propose a tearsheet of on-brief collectible items from the Maison Affluency Curation matching the style, palette and typology tokens you just detected.",
                                     "Generate Custom Quote": "Generate a custom quote — draft a bespoke specification sheet based on the design concept you just detected (style, palette, typology tokens).",
                                     "Match Finishes": "Match finishes — shortlist textile and material references from the available_finishes of on-palette pieces in the Curation that complement this palette.",
+                                    "Forward To Human Concierge": "Please forward the floor plan / technical drawing I just uploaded to the Maison Affluency human concierge team at the District 9 studio so a curator can hand-select a bespoke digital curation for this project. Confirm the handoff in one warm line and let me know the expected turnaround.",
+                                    "Upload A Visual Mood Board Instead": "I'd like to upload a visual mood board instead of the floor plan — please prompt me to attach a reference image or Pinterest-style collage via the paperclip, and then run the Design Director scaffold on that image.",
                                   };
+
                                   return (
                                     <li className="list-none -ml-5 my-1.5" {...props}>
                                       <button
