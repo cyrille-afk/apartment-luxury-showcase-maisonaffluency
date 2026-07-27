@@ -333,6 +333,8 @@ import { useStudio } from "@/hooks/useStudio";
 import { useAuth } from "@/hooks/useAuth";
 import { getConciergeSession, updateConciergeSession } from "@/hooks/useConciergeSession";
 import { extractProjectCityFromAssistant } from "@/lib/projectCityDetect";
+import { detectUrgency } from "@/lib/urgencyDetect";
+
 
 const hasWelcomeActions = (actions: ConciergeQuickAction[] | undefined) =>
   !!actions?.some((action) => isOnboardingActionPrompt(action.prompt));
