@@ -3720,6 +3720,50 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
               );
             })()}
             </div>
+
+            {/* Quick-action chips: visual entry points so designers know how to interact with Felix without reading the full welcome text. */}
+            <div className={cn("flex flex-wrap items-center justify-center gap-2", fullscreen && "shrink-0")}>
+              <button
+                type="button"
+                onClick={() => moodInputRef.current?.click()}
+                disabled={streaming || attachments.length >= MAX_ATTACHMENTS}
+                className="rounded-full border border-border/80 bg-muted/30 px-3 py-1.5 font-body text-[11px] text-muted-foreground hover:bg-muted hover:text-foreground disabled:opacity-40 transition-colors"
+                aria-label="Upload mood board"
+                title="Upload a mood board image to Block 3"
+              >
+                [ Upload Moodboard ]
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (!/Block\s+1\s*—/i.test(input)) {
+                    const current = input.trim();
+                    const next = current
+                      ? `${input.replace(/\s+$/, "")}\n\n${SPEC_BRIEF_TEMPLATE}`
+                      : SPEC_BRIEF_TEMPLATE;
+                    setInput(next);
+                  }
+                  setBriefBuilderOpen(true);
+                }}
+                disabled={streaming}
+                className="rounded-full border border-border/80 bg-muted/30 px-3 py-1.5 font-body text-[11px] text-muted-foreground hover:bg-muted hover:text-foreground disabled:opacity-40 transition-colors"
+                aria-label="Request custom quote"
+                title="Open the Architectural Brief Builder for a custom quote"
+              >
+                [ Request Custom Quote ]
+              </button>
+              <button
+                type="button"
+                onClick={() => send("What are the current lead times for your pieces?")}
+                disabled={streaming}
+                className="rounded-full border border-border/80 bg-muted/30 px-3 py-1.5 font-body text-[11px] text-muted-foreground hover:bg-muted hover:text-foreground disabled:opacity-40 transition-colors"
+                aria-label="Check lead times"
+                title="Ask Felix about current lead times"
+              >
+                [ Check Lead Times ]
+              </button>
+            </div>
+
             <div className={cn("flex items-end gap-2", fullscreen && "shrink-0")}>
               <input
                 ref={fileInputRef}
