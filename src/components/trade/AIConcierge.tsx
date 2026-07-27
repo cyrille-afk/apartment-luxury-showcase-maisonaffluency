@@ -965,7 +965,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
         .insert({
           user_id: user.id,
           title: legacyTimeline ? deriveThreadTitle(sanitizeTimelineForAttachments(legacyTimeline)) : "New conversation",
-          timeline: legacyTimeline ? sanitizeTimelineForAttachments(legacyTimeline) : [],
+          timeline: (legacyTimeline ? sanitizeTimelineForAttachments(legacyTimeline) : []) as any,
         })
         .select("id,title,last_active_at")
         .single();
