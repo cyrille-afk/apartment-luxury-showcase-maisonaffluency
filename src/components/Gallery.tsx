@@ -1157,7 +1157,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                               <button
                                 key={`${item.title}-hotspot-${hotspotIndex}`}
                                 type="button"
-                                onClick={(e) => { e.stopPropagation(); openLightbox(originalSectionIndex, index); }}
+                                onClick={(e) => { e.stopPropagation(); handleHotspotViewProduct(hotspot.label, hotspot.designer, hotspot.linkUrl, hotspot.mappedPickId); }}
                                 aria-label={`Explore hotspot: ${hotspot.label}`}
                                 className="absolute z-30 flex h-5 w-5 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-black/70 backdrop-blur-sm border-2 border-primary/70 text-white shadow-[0_0_8px_hsl(var(--primary)/0.4)] active:scale-95 transition-transform"
                                 style={{ left: `${hotspot.x}%`, top: `${hotspot.y}%` }}
