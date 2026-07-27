@@ -1523,7 +1523,7 @@ const DesignersHoverHero = () => {
                                   )}
                                 />
                               </span>
-                            </Link>
+                            </SilentLink>
 
                           </li>
                         );
