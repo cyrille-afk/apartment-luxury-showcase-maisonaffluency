@@ -3243,16 +3243,32 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                                               void (async () => {
                                                 try {
                                                   const { data: sess } = await supabase.auth.getSession();
+                                                  const authHeader = sess.session?.access_token
+                                                    ? { Authorization: `Bearer ${sess.session.access_token}` }
+                                                    : undefined;
+                                                  const projectCity = getConciergeSession()?.projectCity || null;
                                                   await supabase.functions.invoke("notify-escalation", {
                                                     body: {
                                                       intent: "schedule_local_morning_call",
-                                                      project_city: getConciergeSession()?.projectCity || null,
+                                                      project_city: projectCity,
                                                     },
-                                                    headers: sess.session?.access_token
-                                                      ? { Authorization: `Bearer ${sess.session.access_token}` }
-                                                      : undefined,
+                                                    headers: authHeader,
                                                   });
                                                   setConciergeStatus("appointment_requested");
+                                                  // Placeholder hook for automatic Calendly invite + HubSpot
+                                                  // meeting log. See supabase/functions/schedule-calendly-invite
+                                                  // for the full endpoint map. Fire-and-forget.
+                                                  void supabase.functions.invoke("schedule-calendly-invite", {
+                                                    body: {
+                                                      project_city: projectCity,
+                                                      local_tz: (typeof Intl !== "undefined"
+                                                        ? Intl.DateTimeFormat().resolvedOptions().timeZone
+                                                        : null),
+                                                      local_window: "09:00-11:00",
+                                                      contact_email: user?.email ?? null,
+                                                    },
+                                                    headers: authHeader,
+                                                  }).catch(() => { /* non-fatal */ });
                                                 } catch { /* non-fatal */ }
                                               })();
                                             }
