@@ -1267,18 +1267,23 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
 
     // Next-opening label ("first thing in the morning" / "Monday morning" / "later this morning").
     const nextOpeningLabel = (() => {
-      if (isWeekend) return "Monday morning";
+      if (isWeekend) return "first thing Monday morning";
       if (sgtHour < 9) return "later this morning";
       return "first thing in the morning";
     })();
+    const callbackDayLabel = isWeekend ? "on Monday" : "";
+    const closedReason = isWeekend
+      ? `Our **Singapore studio is currently closed for the weekend**.`
+      : `Our **Singapore studio is currently closed** (outside 09:00–18:00 SGT).`;
 
     const slaLine = isBusinessHours
       ? `A human concierge will review your layout, coordinate with our artisan workshops, and contact you ${contactLine} within the next **2 business hours** with a hand-selected digital curation.`
       : [
-          `Our **Singapore studio is currently closed** (outside 09:00–18:00 SGT).`,
+          closedReason,
           ``,
-          `A human concierge will personally review your layout **${nextOpeningLabel}** and contact you ${contactLine} by **11:00 AM SGT** with a hand-selected digital curation.`,
+          `A human concierge will personally review your layout **${nextOpeningLabel}** and contact you ${contactLine} by **11:00 AM SGT${callbackDayLabel ? " " + callbackDayLabel : ""}** with a hand-selected digital curation.`,
         ].join("\n");
+
 
     const confirmation = [
       `**Request transmitted successfully.**`,
