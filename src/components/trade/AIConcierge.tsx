@@ -1250,12 +1250,42 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
       ? `via **${preferredContact} (${contactValue})**`
       : `via your **preferred channel on file**`;
 
+    // Time-aware response — Singapore studio hours are 09:00–18:00 SGT,
+    // Mon–Fri. Outside those hours we set expectations to the next opening
+    // rather than promising "2 business hours" at 2am.
+    const sgtParts = new Intl.DateTimeFormat("en-GB", {
+      timeZone: "Asia/Singapore",
+      weekday: "short",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    }).formatToParts(new Date());
+    const sgtHour = Number(sgtParts.find((p) => p.type === "hour")?.value ?? "0");
+    const sgtWeekday = String(sgtParts.find((p) => p.type === "weekday")?.value ?? "");
+    const isWeekend = sgtWeekday === "Sat" || sgtWeekday === "Sun";
+    const isBusinessHours = !isWeekend && sgtHour >= 9 && sgtHour < 18;
+
+    // Next-opening label ("first thing in the morning" / "Monday morning" / "later this morning").
+    const nextOpeningLabel = (() => {
+      if (isWeekend) return "Monday morning";
+      if (sgtHour < 9) return "later this morning";
+      return "first thing in the morning";
+    })();
+
+    const slaLine = isBusinessHours
+      ? `A human concierge will review your layout, coordinate with our artisan workshops, and contact you ${contactLine} within the next **2 business hours** with a hand-selected digital curation.`
+      : [
+          `Our **Singapore studio is currently closed** (outside 09:00–18:00 SGT).`,
+          ``,
+          `A human concierge will personally review your layout **${nextOpeningLabel}** and contact you ${contactLine} by **11:00 AM SGT** with a hand-selected digital curation.`,
+        ].join("\n");
+
     const confirmation = [
-      `**Requests transmitted successfully.**`,
+      `**Request transmitted successfully.**`,
       ``,
       `I have compiled ${cityLine} and forwarded your uploaded files directly to our **District 9 curatorial team**.`,
       ``,
-      `A human concierge will review your layout, coordinate with our artisan workshops, and contact you ${contactLine} within the next **2 business hours** with a hand-selected digital curation.`,
+      slaLine,
       ``,
       `- **[ Return to Atelier Chat ]** Keep exploring the Curation while our team prepares your bespoke selection.`,
       `- **[ View My Open Requests ]** Track the status of this handoff and any other in-flight briefs.`,
