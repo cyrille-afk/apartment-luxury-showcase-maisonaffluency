@@ -3066,6 +3066,23 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
               </button>
               </div>
             </div>
+            {handoffTicket && (conciergeStatus === "human_notified" || conciergeStatus === "assigning_curator" || conciergeStatus === "curator_assigned" || conciergeStatus === "appointment_requested") && (
+              <div
+                className={cn(
+                  "flex items-center gap-2 pl-6 font-body text-[10px] tracking-wide",
+                  modalMode ? "text-cream/80" : "text-muted-foreground",
+                )}
+                title={`Ticket ${handoffTicket.id} · ${handoffTicket.summary}`}
+              >
+                <span className={cn(
+                  "inline-flex items-center rounded-md border px-1.5 py-0.5 font-mono uppercase tracking-[0.08em]",
+                  modalMode ? "border-cream/25 bg-cream/10 text-cream" : "border-border bg-muted/60 text-foreground",
+                )}>
+                  Ticket #{handoffTicket.id}
+                </span>
+                <span className="truncate">{handoffTicket.summary}</span>
+              </div>
+            )}
             {!minimized && (
               <div className="flex items-center gap-2 flex-wrap pl-6">
                 <span
