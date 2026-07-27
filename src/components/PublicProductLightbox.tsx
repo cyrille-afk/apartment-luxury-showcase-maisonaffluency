@@ -141,9 +141,43 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
   const [imageFailed, setImageFailed] = useState(false);
   const prefersReducedMotion = useReducedMotion();
   const [visible, setVisible] = useState(true);
-  const requestClose = useCallback(() => setVisible(false), []);
-  // If the parent swaps in a new product while we're still mounted, reopen.
-  useEffect(() => { if (propProduct?.id) setVisible(true); }, [propProduct?.id]);
+  const closeTimerRef = useRef<number | null>(null);
+  const closeStartedRef = useRef(false);
+  const closedRef = useRef(false);
+  const finishClose = useCallback(() => {
+    if (closedRef.current) return;
+    closedRef.current = true;
+    if (closeTimerRef.current) {
+      window.clearTimeout(closeTimerRef.current);
+      closeTimerRef.current = null;
+    }
+    onClose();
+  }, [onClose]);
+  const requestClose = useCallback(() => {
+    if (closeStartedRef.current) return;
+    closeStartedRef.current = true;
+    setVisible(false);
+    closeTimerRef.current = window.setTimeout(finishClose, prefersReducedMotion ? 180 : 420);
+  }, [finishClose, prefersReducedMotion]);
+  // If the parent swaps in a new product while we're still mounted, reopen and
+  // reset the close lifecycle. iOS/PWA occasionally misses framer-motion's exit
+  // callback; the timeout above guarantees the invisible overlay is unmounted.
+  useEffect(() => {
+    if (!propProduct?.id) return;
+    closeStartedRef.current = false;
+    closedRef.current = false;
+    if (closeTimerRef.current) {
+      window.clearTimeout(closeTimerRef.current);
+      closeTimerRef.current = null;
+    }
+    setVisible(true);
+    return () => {
+      if (closeTimerRef.current) {
+        window.clearTimeout(closeTimerRef.current);
+        closeTimerRef.current = null;
+      }
+    };
+  }, [propProduct?.id]);
   const overlayMotion = prefersReducedMotion
     ? { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 }, transition: { duration: 0.12, ease: "linear" as const } }
     : { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 }, transition: { duration: 0.25 } };
@@ -411,7 +445,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
   const pinned = isPinned(product.title, product.id);
 
   const content = (
-    <AnimatePresence onExitComplete={onClose}>
+    <AnimatePresence onExitComplete={finishClose}>
       {visible && (
       <motion.div
         key="pp-lightbox-overlay"

@@ -398,10 +398,25 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
         >
           {/* Marker */}
           <button
+            onPointerDown={(e) => {
+              if (e.pointerType === "mouse") return;
+              e.stopPropagation();
+              if (editMode) return;
+              if (isMobile && onViewProduct) {
+                e.preventDefault();
+                onViewProduct(hotspot.product_name, hotspot.designer_name || "", hotspot.link_url, hotspot.mapped_pick_id);
+                setActiveId(null);
+              }
+            }}
             onClick={(e) => {
               e.stopPropagation();
               // In edit mode, only toggle popup if we didn't drag
               if (editMode) return; // handled by onMouseUp
+              if (isMobile && onViewProduct) {
+                onViewProduct(hotspot.product_name, hotspot.designer_name || "", hotspot.link_url, hotspot.mapped_pick_id);
+                setActiveId(null);
+                return;
+              }
               setActiveId(activeId === hotspot.id ? null : hotspot.id);
             }}
             onMouseDown={(e) => {
@@ -420,7 +435,7 @@ const GalleryHotspots = ({ imageIdentifier, visible, onCloseLightbox, onAddToQuo
                 setActiveId(activeId === hotspot.id ? null : hotspot.id);
               }
             }}
-            className={`relative w-5 h-5 rounded-full bg-black/70 backdrop-blur-sm border-2 border-primary/70 flex items-center justify-center text-white hover:bg-black/80 hover:border-primary hover:scale-110 transition-all duration-200 shadow-[0_0_8px_hsl(var(--primary)/0.4)] ${editMode ? "cursor-grab active:cursor-grabbing" : "cursor-pointer"}`}
+            className={`relative w-5 h-5 touch-manipulation rounded-full bg-black/70 backdrop-blur-sm border-2 border-primary/70 flex items-center justify-center text-white hover:bg-black/80 hover:border-primary hover:scale-110 transition-all duration-200 shadow-[0_0_8px_hsl(var(--primary)/0.4)] ${editMode ? "cursor-grab active:cursor-grabbing" : "cursor-pointer"}`}
             aria-label={`View details for ${hotspot.product_name}`}
           >
             <AnimatePresence mode="wait">
