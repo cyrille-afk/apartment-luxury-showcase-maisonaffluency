@@ -454,6 +454,16 @@ export function buildCityLockSystemNote(r: CityResolution): string {
       `Do NOT surface the misspelling, do NOT ask the user to re-type the city, then proceed to the next contextual step (invite the piece, mood, or brief).`
     );
   }
+  if (r.matchType === "gibberish") {
+    return (
+      `## CITY LOCK — INVALID INPUT (LOCATION VALIDATION FAILED)\n` +
+      `User typed: "${r.input}" — this is not a real geographic location (random characters, numbers, or keyboard-mash).\n\n` +
+      `CRITICAL: Do NOT guess a primary hub. Do NOT assume a geographic region. Do NOT propose London, Dubai, Hong Kong or any other city as a fallback. Do NOT continue the onboarding flow until a valid location is provided.\n\n` +
+      `Reply with EXACTLY this text, substituting the user's input verbatim in place of [User's Input] and nothing else:\n\n` +
+      `"I want to ensure your shipping quotes and lead times are completely accurate, but I am unable to map '${r.input}' to a valid location or freight network.\n\n` +
+      `Could you please provide the nearest major city or global design hub for this project?"`
+    );
+  }
   if (r.matchType === "fallback") {
     return (
       `## CITY LOCK — TIER 2 FALLBACK (regional hint)\n` +
@@ -463,10 +473,10 @@ export function buildCityLockSystemNote(r: CityResolution): string {
       `Reply in Felix's voice with the TIER 2 shape: acknowledge without judgement, propose ${r.hub} with the one-line "why this hub" reason, and explicitly invite an override with ${alt} or any other city. Never say "city not found".`
     );
   }
-  // unknown
+  // unknown — real place but too obscure to map
   return (
-    `## CITY LOCK — TIER 2 FALLBACK (unrecognised)\n` +
-    `User typed: "${r.input}" — genuinely unrecognised or too obscure to map.\n` +
+    `## CITY LOCK — TIER 2 FALLBACK (unrecognised real location)\n` +
+    `User typed: "${r.input}" — appears to be a real but obscure location too small to map directly.\n` +
     `Default suggested hub: ${r.hub} — ${r.rationale}.\n` +
     `Offer alternatives: ${alt}.\n\n` +
     `Reply in Felix's voice with the TIER 2 shape: acknowledge without judgement, propose ${r.hub} with a one-line "why this hub" reason (proximity, customs corridor, or established white-glove route), and explicitly invite an override with ${alt} or any other city they name. Never say "city not found" or surface any technical error.`
