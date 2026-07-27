@@ -1204,6 +1204,9 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
   // notified, and (2) push an instant, deterministic confirmation reply so
   // the designer never wonders whether the request landed in a black hole.
   const forwardToHumanConcierge = useCallback(async () => {
+    // Kick the ambient status to "Pending Gallery Review" the moment the tap
+    // registers — the designer must feel the interface itself change hands.
+    setConciergeStatus("pending_review");
     // Optimistic user bubble so the transcript reflects the tap.
     setTimeline((prev) => [
       ...prev,
