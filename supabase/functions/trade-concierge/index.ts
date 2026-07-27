@@ -5094,8 +5094,19 @@ serve(async (req) => {
         // proposal card is pre-filtered instead of shipping all 10 when the
         // user asked us to leave some out.
         const excludedIds = parseUserExclusions(lastUserMsg || "", previewRawAll);
-        const previewRaw = previewRawAll.filter((p: any) => p?.id && !excludedIds.has(p.id));
-        const finalIds = pickIds.filter((id: string) => validIds.has(id) && !excludedIds.has(id));
+        const previewRawFiltered = previewRawAll.filter((p: any) => p?.id && !excludedIds.has(p.id));
+        let finalIdsUncapped = pickIds.filter((id: string) => validIds.has(id) && !excludedIds.has(id));
+        // ENUMERATION CAP — unless the user explicitly asks to "show me all" /
+        // "list every" / "the full set" / "everything", cap the returned edit at
+        // 12 pieces so the first card feels curated rather than a data dump.
+        // Incremental "one more" requests are routed to add_to_tearsheet elsewhere
+        // and never hit this branch.
+        const wantsFullSet = /\b(show\s+me\s+all|list\s+all|list\s+every|show\s+every|the\s+full\s+set|the\s+entire\s+set|everything\s+(?:you|by|from)|all\s+of\s+(?:them|the))\b/i.test(lastUserMsg || "");
+        const ENUM_CAP = 12;
+        const previewRaw = wantsFullSet
+          ? previewRawFiltered
+          : previewRawFiltered.filter((p: any) => finalIdsUncapped.slice(0, ENUM_CAP).includes(p.id));
+        const finalIds = wantsFullSet ? finalIdsUncapped : finalIdsUncapped.slice(0, ENUM_CAP);
         if (finalIds.length === 0) {
           console.warn("[concierge finalIds=0]", JSON.stringify({
             designerLabel,
