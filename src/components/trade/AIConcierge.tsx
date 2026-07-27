@@ -1668,16 +1668,12 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
           );
         }
 
-        setInput(prefilled);
-        // Force all three brief-builder sections expanded on auto-open so
-        // the prefilled fields are visible immediately — no hidden Block 2/3.
-        try {
-          const scope = sessionStorage.getItem("trade:lastProjectFilter") || "global";
-          const expanded = JSON.stringify({ block1: true, block2: true, block3: true });
-          localStorage.setItem(`concierge:briefBuilder:expanded:${scope}`, expanded);
-          localStorage.setItem("concierge:briefBuilder:expanded", expanded);
-        } catch {}
-        setBriefBuilderOpen(true);
+        // Stash the prefilled brief but DO NOT auto-open the builder or
+        // populate the composer — the announcement message below carries an
+        // "Open Architectural Brief" CTA so the user opens it deliberately,
+        // avoiding the builder appearing on-screen at the same time as the
+        // assistant's text (which was confusing).
+        pendingBriefPrefillRef.current = prefilled;
         try { sessionStorage.removeItem("concierge:briefAutoOpened"); } catch {}
 
 
@@ -1694,7 +1690,10 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
           {
             kind: "msg",
             role: "assistant",
-            content: `A project of this scale deserves a structured brief${noted ? ` — noted **${noted}**` : ""}. I've opened the Architectural Brief Builder and prefilled what I picked up. Fill in footprint, materials, and aesthetic direction, then send it back and I'll return three layout configurations with a full Architectural Specification Schedule.`,
+            content: `A project of this scale deserves a structured brief${noted ? ` — noted **${noted}**` : ""}. I've prefilled what I picked up — tap **Open Architectural Brief** below to review the four blocks (Spatial & Project Context · Hard Technical Parameters · Aesthetic & Visual DNA · Output Execution Protocol), complete footprint, materials, and aesthetic direction, then send it back and I'll return three layout configurations with a full Architectural Specification Schedule.`,
+            actions: [
+              { label: "Open Architectural Brief", prompt: "__OPEN_BRIEF_BUILDER__", primary: true },
+            ],
           },
         ]);
         setStreaming(false);
