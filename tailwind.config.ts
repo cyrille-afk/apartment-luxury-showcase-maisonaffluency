@@ -181,6 +181,7 @@ export default {
         "text-glow-pulse": "text-glow-pulse 16s ease-in-out infinite",
         "expand-hint": "expand-hint 1s ease-in-out 3",
         "card-shimmer": "card-shimmer 1.6s ease-in-out infinite",
+        "cta-shimmer": "cta-shimmer 1.2s ease-in-out both",
       },
     },
   },
