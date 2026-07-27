@@ -1262,7 +1262,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
       const { data: sess } = await supabase.auth.getSession();
       const token = sess.session?.access_token;
       if (token) {
-        const excerpt = timelineRef.current
+        const excerpt = timeline
           .filter((t: any) => t.kind === "msg")
           .slice(-8)
           .map((t: any) => ({ role: t.role, content: t.content }));
