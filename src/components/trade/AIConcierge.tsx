@@ -3052,8 +3052,11 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                                             return;
                                           }
                                           if (label === "Return To Atelier Chat") {
-                                            // No-op: user is already in the chat. Just close any minimized state.
+                                            // Keep the chat open so the designer can keep sourcing while the
+                                            // human team processes their handoff. Reset the ambient status
+                                            // once they resume the conversation.
                                             setMinimized(false);
+                                            setConciergeStatus(null);
                                             return;
                                           }
                                           if (label === "View My Open Requests") {
