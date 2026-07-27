@@ -650,22 +650,25 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
 
   // ── Hotspot positions per image ──
   const [hotspotCounts, setHotspotCounts] = useState<Record<string, number>>({});
-  const [hotspotPositions, setHotspotPositions] = useState<Record<string, Array<{ x: number; y: number; label: string }>>>({});
+  const [hotspotPositions, setHotspotPositions] = useState<Record<string, Array<{ x: number; y: number; label: string; designer: string; linkUrl: string | null; mappedPickId: string | null }>>>({});
   useEffect(() => {
     const fetchCounts = async () => {
       const { data } = await supabase
         .from("gallery_hotspots")
-        .select("image_identifier, x_percent, y_percent, product_name");
+        .select("image_identifier, x_percent, y_percent, product_name, designer_name, link_url, mapped_pick_id");
       if (data) {
         const counts: Record<string, number> = {};
-        const positions: Record<string, Array<{ x: number; y: number; label: string }>> = {};
-        for (const row of data) {
+        const positions: Record<string, Array<{ x: number; y: number; label: string; designer: string; linkUrl: string | null; mappedPickId: string | null }>> = {};
+        for (const row of data as any[]) {
           counts[row.image_identifier] = (counts[row.image_identifier] || 0) + 1;
           if (!positions[row.image_identifier]) positions[row.image_identifier] = [];
           positions[row.image_identifier].push({
             x: Number(row.x_percent),
             y: Number(row.y_percent),
             label: row.product_name || "hotspot",
+            designer: row.designer_name || "",
+            linkUrl: row.link_url ?? null,
+            mappedPickId: row.mapped_pick_id ?? null,
           });
         }
         setHotspotCounts(counts);
