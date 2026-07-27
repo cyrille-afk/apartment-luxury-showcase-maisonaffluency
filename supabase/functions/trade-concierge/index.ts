@@ -6598,6 +6598,24 @@ serve(async (req) => {
             const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
             const rawPickIds: string[] = Array.isArray(parsed.pick_ids) ? parsed.pick_ids : [];
             let pickIds: string[] = rawPickIds.filter((x) => typeof x === "string" && UUID_RE.test(x));
+            const incrementalAddMatch = String(lastUserMsg || "").match(/\b(?:one\s+more|1\s+more|another\s+(?:piece|item|option)|add\s+(one|1|two|2|three|3|four|4|five|5|a)\s+(?:more\s+)?(?:piece|item|option)|suggest\s+(one|1|two|2|three|3|four|4|five|5)\s+more)\b/i);
+            if (tc.name === "add_to_tearsheet" && incrementalAddMatch) {
+              const requestedWord = (incrementalAddMatch[1] || incrementalAddMatch[2] || "one").toLowerCase();
+              const requestedAddCount = ({ one: 1, "1": 1, a: 1, two: 2, "2": 2, three: 3, "3": 3, four: 4, "4": 4, five: 5, "5": 5 } as Record<string, number>)[requestedWord] || 1;
+              const currentDraftIds = new Set<string>();
+              const currentDraftRe = /\[Current tearsheet draft state[\s\S]*?(?=\n\s*(?:\[|user:|assistant:)|$)/gi;
+              const idRe = /\[id:\s*([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\]/gi;
+              let draftMatch: RegExpExecArray | null;
+              while ((draftMatch = currentDraftRe.exec(userConversationText)) !== null) {
+                let idMatch: RegExpExecArray | null;
+                while ((idMatch = idRe.exec(draftMatch[0])) !== null) currentDraftIds.add(idMatch[1]);
+              }
+              const stripped = currentDraftIds.size > 0 ? pickIds.filter((id) => !currentDraftIds.has(id)) : pickIds;
+              if (stripped.length !== pickIds.length || pickIds.length > requestedAddCount) {
+                console.log(`[concierge incremental-add] clamped add_to_tearsheet from ${pickIds.length} to ${Math.min(stripped.length, requestedAddCount)} new pick(s)`);
+              }
+              pickIds = stripped.slice(0, requestedAddCount);
+            }
             if (pickIds.length === 0) {
               console.warn(`[concierge] dropping ${tc.name} — no valid UUID pick_ids (got: ${JSON.stringify(rawPickIds).slice(0, 200)})`);
               const fallback = "Forgive me — I caught myself reaching for placeholders rather than actual pieces. Tell me a little more about the room or the mood you have in mind, and I'll pull from the Maison Affluency Curation properly.";
