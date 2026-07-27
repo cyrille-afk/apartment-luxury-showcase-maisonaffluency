@@ -82,9 +82,10 @@ export function buildRegenerateUnlockedPrompt(locked: SwapPromptItem[], unlocked
 // injected on every turn) to know what "harmonises" means for THIS draft.
 export function buildSuggestOneMorePrompt(kept: SwapPromptItem[], gapHint?: string): string {
   const anchorLines = kept.slice(0, 8).map((it) => {
+    const sku = shortSku(it.pick_id);
     const title = String(it.title || "piece").trim();
     const designer = it.designer_name ? ` — ${it.designer_name}` : "";
-    return `  • "${title}"${designer}`;
+    return `  • "${title}"${designer} (SKU ${sku}) [id: ${it.pick_id}]`;
   });
   const anchorBlock = anchorLines.length ? anchorLines.join("\n") : "  (none)";
   const hint = gapHint?.trim()
@@ -93,7 +94,7 @@ export function buildSuggestOneMorePrompt(kept: SwapPromptItem[], gapHint?: stri
   return [
     `Add ONE more piece to the current tearsheet draft that harmonises with what I've kept.${hint}`,
     `\n\nCURRENT SELECTION (retain all of these verbatim):\n${anchorBlock}`,
-    `\n\nCall \`add_to_tearsheet\` on the ACTIVE board with pick_ids = ALL kept ids + your ONE new pick_id from CURATED PIECES. Include a \`pick_rationales\` entry for the new pick explaining why it fills the gap.`,
+    `\n\nCall \`add_to_tearsheet\` on the ACTIVE board with pick_ids = ONLY your ONE new pick_id from CURATED PIECES. Do NOT include the kept ids in pick_ids; they are already on the current draft. Include a \`pick_rationales\` entry for the new pick explaining why it fills the gap.`,
   ].join("");
 }
 
