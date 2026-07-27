@@ -7005,7 +7005,7 @@ serve(async (req) => {
           try {
             const nudge = [
               "You just told the user you would draft a tearsheet, but you did NOT call the propose_tearsheet tool.",
-              "Call `propose_tearsheet` NOW with 4-8 pick_ids drawn ONLY from the CURATED PIECES section of the system prompt (exact UUIDs in square brackets).",
+              "Call `propose_tearsheet` NOW with 6-8 pick_ids (default target: 7) drawn ONLY from the CURATED PIECES section of the system prompt (exact UUIDs in square brackets).",
               "Include a short `title`, `pick_rationales` (one short reason per pick_id), and optional `note`.",
               "Do not output any prose — only the tool call.",
             ].join("\n");
