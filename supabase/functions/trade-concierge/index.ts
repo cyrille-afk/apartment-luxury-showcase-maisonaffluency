@@ -4921,7 +4921,7 @@ serve(async (req) => {
           args: {
             title: budgetCeiling ? `${typologyLabel(requestedTypology)} ${budgetCeiling.label}` : `${typologyLabel(requestedTypology)} edit`,
             pick_ids: dedupedIds,
-            note: specSheetBlock ? `${baseNote}\n\n${specSheetBlock}` : baseNote,
+            note: baseNote,
             pick_rationales: rationaleMap,
             spec_sheet: specSheetRows.length ? specSheetRows : undefined,
           },
@@ -5186,7 +5186,7 @@ serve(async (req) => {
           args: {
             title: `${multiLabel} — curated edit`,
             pick_ids: finalIds,
-            note: specSheetBlock ? `${baseNote}\n\n${specSheetBlock}` : baseNote,
+            note: baseNote,
             pick_rationales: rationaleMap,
             spec_sheet: specSheetRows.length ? specSheetRows : undefined,
           },
