@@ -382,6 +382,12 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
   const [showBriefPreview, setShowBriefPreview] = useState(false);
   const [briefBuilderOpen, setBriefBuilderOpen] = useState(false);
   const pendingBriefPrefillRef = useRef<string | null>(null);
+  // Ambient status shown as a small badge next to the concierge name. Switches
+  // through discrete phases during a human-handoff so the designer feels the
+  // curatorial team take over, then returns to null once they resume chatting.
+  const [conciergeStatus, setConciergeStatus] = useState<
+    null | "pending_review" | "assigning_curator" | "curator_assigned"
+  >(null);
   const [timeline, setTimeline] = useState<TimelineItem[]>(() => {
     try {
       const raw = sessionStorage.getItem("concierge:timeline");
