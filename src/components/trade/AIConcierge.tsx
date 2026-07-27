@@ -386,8 +386,9 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
   // through discrete phases during a human-handoff so the designer feels the
   // curatorial team take over, then returns to null once they resume chatting.
   const [conciergeStatus, setConciergeStatus] = useState<
-    null | "pending_review" | "assigning_curator" | "curator_assigned"
+    null | "pending_review" | "assigning_curator" | "curator_assigned" | "human_notified" | "appointment_requested"
   >(null);
+
   const [timeline, setTimeline] = useState<TimelineItem[]>(() => {
     try {
       const raw = sessionStorage.getItem("concierge:timeline");
