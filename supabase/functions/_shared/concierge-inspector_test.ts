@@ -608,6 +608,23 @@ Deno.test("runDiscoveryProseGuard returns ok:false on HTTP error (caller must ha
   } finally { restoreFetch(); }
 });
 
+Deno.test("requirements validator does NOT infer budget from dimension lines in structured brief", () => {
+  const brief = [
+    "Block 1 — Spatial & Project Context",
+    "PROJECT PROFILE: GCB (Good Class Bungalow), Singapore",
+    "ZONE: Living, Dining — ceiling height [4000mm]",
+    "Block 2 — Hard Technical Parameters",
+    "MAX FOOTPRINT: length ≤ [5000mm], depth ≤ [6000mm]",
+    "CLEARANCE: min [1000mm] perimeter pathway",
+    "TIMELINE: Handover in [30] weeks (max lead time [24] weeks).",
+    "Block 3 — Aesthetic & Visual DNA",
+    "PALETTE: off white bronze patina",
+  ].join("\n");
+  const requirements = deriveRequirementsFromText(brief);
+  assertEquals(requirements?.budget_cents, undefined, `budget should not be inferred from dimensions, got ${requirements?.budget_cents}`);
+  assertEquals(requirements?.budget_currency, undefined);
+});
+
 Deno.test("requirements validator derives budget + material + shape + seats from raw prompt and blocks unverifiable cards", () => {
   const requirements = deriveRequirementsFromText("Draft a dining edit — 8 seats, walnut, rectangular, under $12k");
   const gt = buildInspectorGroundTruth([{
