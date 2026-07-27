@@ -1548,6 +1548,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
           {/* Product lightbox inside Dialog so it's within focus-trap scope */}
           {!onHotspotAddToQuote && hotspotLightboxProduct && (
             <PublicProductLightbox
+              key={`hotspot-inline-${hotspotLightboxProduct.id}`}
               product={hotspotLightboxProduct}
               allPicks={allCuratorPicks.filter(p => p.brand_name === hotspotLightboxProduct?.brand_name)}
               onClose={() => setHotspotLightboxProduct(null)}
