@@ -26,7 +26,7 @@ import {
   reconcileVariants,
   type AllowedVariantSet,
 } from "../_shared/variantFidelity.ts";
-import { extractFromMedia, type ExtractedVision } from "../_shared/visionExtract.ts";
+import { extractFromMedia, toEmbeddingQuery, type ExtractedVision } from "../_shared/visionExtract.ts";
 
 // Lazy, per-invocation cache of the brand-level lead-time index. Empty table
 // today, but as it fills the fallback engages automatically.
@@ -4418,8 +4418,30 @@ serve(async (req) => {
         throw e;
       }
     };
+    // If the latest turn has a moodboard/reference image, briefly await the
+    // vision extractor (capped at 2.5s) and mix its style/palette/materials
+    // tokens into the embedding query. Without this, two different mood
+    // boards paired with the same Brief Builder text produce identical
+    // embeddings → identical CURATED PIECES → identical picks. Text-only
+    // turns skip the wait entirely.
+    const buildRagQuery = async (): Promise<string> => {
+      const lastUser = [...messages].reverse().find((m: any) => m?.role === "user");
+      const hasImage = Array.isArray(lastUser?.content) &&
+        lastUser.content.some((p: any) => p?.type === "image_url" || p?.type === "file");
+      if (!hasImage) return lastUserMsg;
+      const vision = await Promise.race<ExtractedVision | null>([
+        visionSignalsPromise,
+        new Promise<null>((resolve) => setTimeout(() => resolve(null), 2500)),
+      ]).catch(() => null);
+      if (!vision) return lastUserMsg;
+      const augmented = toEmbeddingQuery(vision, lastUserMsg);
+      console.log(`[concierge RAG] vision-augmented query: ${augmented.slice(0, 240)}`);
+      return augmented || lastUserMsg;
+    };
     const ragPromise = (heuristicNeedsPieces || lastUserMsg.length > 40)
-      ? loadRelevantPieces(supabase, LOVABLE_API_KEY, lastUserMsg, userId, 40, hasAnyPreConstraint ? preRequestConstraints : undefined)
+      ? buildRagQuery().then((q) =>
+          loadRelevantPieces(supabase, LOVABLE_API_KEY, q, userId, 40, hasAnyPreConstraint ? preRequestConstraints : undefined),
+        )
       : Promise.resolve(null);
     const bundleT0 = performance.now();
     const [sentiment, extractedBrief, ragResult, userBoards, userSignals, userMemory, mentionedProjectId, openQuotes, discountRow, cadDocuments, productCadAssets] = await Promise.all([
