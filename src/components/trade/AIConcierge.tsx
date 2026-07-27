@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
-import { X, Send, Loader2, Sparkles, Minus, GripHorizontal, RotateCcw, Maximize2, Minimize2, Expand, Shrink, Palette, Check, Languages, Pencil, Paperclip, FileText, Download, FileDown, Copy, ShieldCheck, ListChecks, Eye, LayoutList } from "lucide-react";
+import { X, Send, Loader2, Sparkles, Minus, GripHorizontal, RotateCcw, Maximize2, Minimize2, Expand, Shrink, Palette, Check, Languages, Pencil, Paperclip, FileText, Download, FileDown, Copy, ShieldCheck, ListChecks, Eye, LayoutList, MessagesSquare, Plus, Trash2 } from "lucide-react";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { BriefBuilder } from "@/components/trade/concierge/BriefBuilder";
 import { BriefBubble, isBriefContent } from "@/components/trade/concierge/BriefBubble";
 import brandCategoriesRaw from "@/data/brandCategories.json";
@@ -860,62 +861,157 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
     });
   }, []);
 
-  // --- Lovable Cloud persistence (per-user) --------------------------------
-  // sessionStorage is per-tab and gets wiped when the preview iframe is torn
-  // down or the tab is closed. For authenticated concierge users we mirror
-  // the timeline to `public.concierge_sessions` (one row per auth.uid) so the
-  // conversation survives reloads, tab closes, and device switches.
-  const hydratedFromCloudRef = useRef(false);
+  // --- Lovable Cloud persistence: per-user multi-thread ------------------
+  // Each conversation is a row in `public.concierge_threads` (RLS-scoped to
+  // auth.uid). We keep a lightweight thread list in state for the drawer and
+  // upsert the active thread's timeline on every change.
+  type ConciergeThread = { id: string; title: string; last_active_at: string };
+  const [threads, setThreads] = useState<ConciergeThread[]>([]);
+  const [activeThreadId, setActiveThreadId] = useState<string | null>(null);
+  const [threadsOpen, setThreadsOpen] = useState(false);
+  const hydratedThreadRef = useRef<string | null>(null);
   const cloudSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const cloudLastPayloadRef = useRef<string>("");
 
-  // Hydrate from cloud on first mount once we have a user.
+  const activeThreadKey = user?.id ? `concierge:activeThread:${user.id}` : null;
+
+  const buildInitialTimeline = useCallback((): TimelineItem[] => [
+    { kind: "msg", role: "assistant", content: surface === "public" ? (initialGreeting || PUBLIC_GREETING) : greetingForContext(stageFromPath(pathname), pathname, loadTone(), loadLang()).replace(/{concierge_name}/g, name) },
+  ], [surface, initialGreeting, pathname, name]);
+
+  const deriveThreadTitle = useCallback((items: TimelineItem[]): string => {
+    const firstUser = items.find((t) => t.kind === "msg" && t.role === "user");
+    const raw = (firstUser as any)?.content?.trim?.() || "";
+    if (!raw) return "New conversation";
+    const cleaned = raw.replace(/\s+/g, " ").slice(0, 60);
+    return cleaned.length < raw.length ? cleaned + "…" : cleaned;
+  }, []);
+
+  const refreshThreads = useCallback(async (uid: string) => {
+    const { data } = await supabase
+      .from("concierge_threads")
+      .select("id,title,last_active_at")
+      .eq("user_id", uid)
+      .order("last_active_at", { ascending: false })
+      .limit(50);
+    if (data) setThreads(data as ConciergeThread[]);
+    return (data as ConciergeThread[]) || [];
+  }, []);
+
+  const createNewThread = useCallback(async (): Promise<string | null> => {
+    if (!user?.id) return null;
+    const { data, error } = await supabase
+      .from("concierge_threads")
+      .insert({ user_id: user.id, title: "New conversation", timeline: [] })
+      .select("id,title,last_active_at")
+      .single();
+    if (error || !data) return null;
+    setThreads((prev) => [data as ConciergeThread, ...prev]);
+    hydratedThreadRef.current = data.id;
+    cloudLastPayloadRef.current = "";
+    setActiveThreadId(data.id);
+    if (activeThreadKey) try { localStorage.setItem(activeThreadKey, data.id); } catch {}
+    setTimeline(buildInitialTimeline());
+    return data.id;
+  }, [user?.id, activeThreadKey, buildInitialTimeline]);
+
+  const selectThread = useCallback(async (threadId: string) => {
+    if (!user?.id || threadId === activeThreadId) { setThreadsOpen(false); return; }
+    setActiveThreadId(threadId);
+    if (activeThreadKey) try { localStorage.setItem(activeThreadKey, threadId); } catch {}
+    setThreadsOpen(false);
+  }, [user?.id, activeThreadId, activeThreadKey]);
+
+  const deleteThread = useCallback(async (threadId: string) => {
+    if (!user?.id) return;
+    await supabase.from("concierge_threads").delete().eq("id", threadId).eq("user_id", user.id);
+    setThreads((prev) => prev.filter((t) => t.id !== threadId));
+    if (threadId === activeThreadId) {
+      const remaining = threads.filter((t) => t.id !== threadId);
+      if (remaining.length > 0) {
+        setActiveThreadId(remaining[0].id);
+        if (activeThreadKey) try { localStorage.setItem(activeThreadKey, remaining[0].id); } catch {}
+      } else {
+        await createNewThread();
+      }
+    }
+  }, [user?.id, activeThreadId, threads, activeThreadKey, createNewThread]);
+
+  // Bootstrap: on first sign-in, load thread list, pick active thread, and
+  // migrate legacy single-row `concierge_sessions.timeline` into a first
+  // thread if the user has no threads yet.
   useEffect(() => {
     if (!user?.id) return;
-    if (hydratedFromCloudRef.current) return;
     let cancelled = false;
     (async () => {
-      try {
-        const { data, error } = await supabase
-          .from("concierge_sessions")
-          .select("timeline")
-          .eq("user_id", user.id)
-          .maybeSingle();
-        if (cancelled) return;
-        hydratedFromCloudRef.current = true;
-        if (error || !data?.timeline) return;
-        const remote = data.timeline as unknown;
-        if (!Array.isArray(remote) || remote.length === 0) return;
-        // Only replace the local timeline if it's still the pristine
-        // greeting-only state; otherwise the user has already typed in this
-        // tab and their in-flight turns must win.
-        setTimeline((prev) => {
-          const hasUserMsg = prev.some((t) => t.kind === "msg" && t.role === "user");
-          if (hasUserMsg) return prev;
-          const cleaned = sanitizeTimelineForAttachments(remote as TimelineItem[]);
-          return cleaned.length > 0 ? cleaned : prev;
-        });
-      } catch {
-        hydratedFromCloudRef.current = true;
+      const list = await refreshThreads(user.id);
+      if (cancelled) return;
+      let stored: string | null = null;
+      if (activeThreadKey) try { stored = localStorage.getItem(activeThreadKey); } catch {}
+      const preferred = stored && list.some((t) => t.id === stored) ? stored : (list[0]?.id ?? null);
+      if (preferred) {
+        setActiveThreadId(preferred);
+        return;
+      }
+      // No threads yet — try to migrate legacy single-session row.
+      const { data: legacy } = await supabase
+        .from("concierge_sessions")
+        .select("timeline")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      const legacyTimeline = Array.isArray((legacy as any)?.timeline) ? (legacy as any).timeline as TimelineItem[] : null;
+      const { data: created } = await supabase
+        .from("concierge_threads")
+        .insert({
+          user_id: user.id,
+          title: legacyTimeline ? deriveThreadTitle(sanitizeTimelineForAttachments(legacyTimeline)) : "New conversation",
+          timeline: (legacyTimeline ? sanitizeTimelineForAttachments(legacyTimeline) : []) as any,
+        })
+        .select("id,title,last_active_at")
+        .single();
+      if (created) {
+        setThreads([created as ConciergeThread]);
+        setActiveThreadId(created.id);
+        if (activeThreadKey) try { localStorage.setItem(activeThreadKey, created.id); } catch {}
       }
     })();
     return () => { cancelled = true; };
-  }, [user?.id]);
+  }, [user?.id, activeThreadKey, refreshThreads, deriveThreadTitle]);
 
-  // Debounced upsert of the timeline to cloud on every change. Only runs once
-  // the user has actually engaged (avoids writing an empty greeting row for
-  // every visitor) and only after hydration to prevent clobbering the cloud
-  // copy with an empty pre-hydration state.
+  // Hydrate timeline whenever the active thread changes.
   useEffect(() => {
-    if (!user?.id) return;
-    if (!hydratedFromCloudRef.current) return;
+    if (!user?.id || !activeThreadId) return;
+    if (hydratedThreadRef.current === activeThreadId) return;
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from("concierge_threads")
+        .select("timeline")
+        .eq("id", activeThreadId)
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (cancelled) return;
+      hydratedThreadRef.current = activeThreadId;
+      cloudLastPayloadRef.current = "";
+      const remote = (data as any)?.timeline;
+      if (Array.isArray(remote) && remote.length > 0) {
+        setTimeline(sanitizeTimelineForAttachments(remote as TimelineItem[]));
+      } else {
+        setTimeline(buildInitialTimeline());
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [user?.id, activeThreadId, buildInitialTimeline]);
+
+  // Debounced upsert of the active thread's timeline on every change.
+  useEffect(() => {
+    if (!user?.id || !activeThreadId) return;
+    if (hydratedThreadRef.current !== activeThreadId) return;
     const hasUserMsg = timeline.some((t) => t.kind === "msg" && t.role === "user");
     if (!hasUserMsg) return;
     if (cloudSaveTimerRef.current) clearTimeout(cloudSaveTimerRef.current);
     cloudSaveTimerRef.current = setTimeout(async () => {
       try {
-        // Strip large attachment previews before shipping to the DB to keep
-        // rows small; the original files live in storage / vision extract.
         const compact = timeline.map((t) =>
           t.kind === "msg" && t.attachments?.length
             ? { ...t, attachments: t.attachments.map(({ previewUrl: _omit, ...rest }) => rest) }
@@ -924,12 +1020,18 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
         const payload = JSON.stringify(compact);
         if (payload === cloudLastPayloadRef.current) return;
         cloudLastPayloadRef.current = payload;
+        const title = deriveThreadTitle(compact as TimelineItem[]);
+        const nowIso = new Date().toISOString();
         await supabase
-          .from("concierge_sessions")
-          .upsert(
-            { user_id: user.id, timeline: compact as any, last_active_at: new Date().toISOString() },
-            { onConflict: "user_id" },
-          );
+          .from("concierge_threads")
+          .update({ timeline: compact as any, title, last_active_at: nowIso })
+          .eq("id", activeThreadId)
+          .eq("user_id", user.id);
+        setThreads((prev) => {
+          const next = prev.map((t) => t.id === activeThreadId ? { ...t, title, last_active_at: nowIso } : t);
+          next.sort((a, b) => b.last_active_at.localeCompare(a.last_active_at));
+          return next;
+        });
       } catch {
         // Non-fatal: sessionStorage still holds the in-tab copy.
       }
@@ -937,7 +1039,8 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
     return () => {
       if (cloudSaveTimerRef.current) clearTimeout(cloudSaveTimerRef.current);
     };
-  }, [timeline, user?.id]);
+  }, [timeline, user?.id, activeThreadId, deriveThreadTitle]);
+
 
   // If the user deletes all project folders/tearsheets and quotes, the trade
   // tools routes should no longer keep Felix in a stale tearsheet/quote mode.
@@ -2751,6 +2854,17 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                 })()}
               </div>
               <div className="flex items-center gap-1 shrink-0 relative">
+              {surface === "trade" && user?.id && (
+                <button
+                  onPointerDown={(e) => e.stopPropagation()}
+                  onClick={() => setThreadsOpen(true)}
+                  className="text-muted-foreground hover:text-foreground transition-colors p-1 rounded-md hover:bg-muted"
+                  aria-label="Past conversations"
+                  title="Past conversations"
+                >
+                  <MessagesSquare className="h-3.5 w-3.5" />
+                </button>
+              )}
               <div className="relative">
                 <button
                   onPointerDown={(e) => e.stopPropagation()}
@@ -4505,6 +4619,57 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
         invitedName={typeof window !== "undefined" ? sessionStorage.getItem("cn_portal:invited_name") : null}
         messages={timeline.filter((t) => t.kind === "msg").map((t: any) => ({ role: t.role, content: t.content }))}
       />
+      <Sheet open={threadsOpen} onOpenChange={setThreadsOpen}>
+        <SheetContent side="left" className="w-[320px] sm:w-[360px] p-0 flex flex-col z-[10020]" aria-describedby={undefined}>
+          <div className="sr-only"><h2>Past conversations</h2></div>
+          <div className="px-4 py-3 border-b border-border flex items-center justify-between shrink-0">
+            <div className="font-display text-[11px] uppercase tracking-[0.15em] text-muted-foreground">Conversations</div>
+            <button
+              type="button"
+              onClick={async () => { await createNewThread(); setThreadsOpen(false); }}
+              className="inline-flex items-center gap-1.5 rounded-md bg-foreground text-background px-2.5 py-1 font-body text-[11px] hover:opacity-90"
+              aria-label="Start a new conversation"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              New
+            </button>
+          </div>
+          <div className="flex-1 overflow-y-auto">
+            {threads.length === 0 && (
+              <div className="p-4 font-body text-xs text-muted-foreground">
+                No past conversations yet.
+              </div>
+            )}
+            <ul className="flex flex-col">
+              {threads.map((t) => {
+                const active = t.id === activeThreadId;
+                const when = (() => { try { return new Date(t.last_active_at).toLocaleString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }); } catch { return ""; } })();
+                return (
+                  <li key={t.id} className={cn("group flex items-center gap-2 px-3 py-2 border-b border-border/60 hover:bg-muted/40 transition-colors", active && "bg-muted/50")}>
+                    <button
+                      type="button"
+                      onClick={() => selectThread(t.id)}
+                      className="flex-1 min-w-0 text-left"
+                    >
+                      <div className="font-body text-[13px] text-foreground truncate">{t.title || "New conversation"}</div>
+                      <div className="font-body text-[10px] uppercase tracking-[0.1em] text-muted-foreground mt-0.5">{when}</div>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(e) => { e.stopPropagation(); if (confirm("Delete this conversation?")) void deleteThread(t.id); }}
+                      className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive p-1 rounded-md transition-all"
+                      aria-label="Delete conversation"
+                      title="Delete conversation"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        </SheetContent>
+      </Sheet>
     </>
   );
 }
