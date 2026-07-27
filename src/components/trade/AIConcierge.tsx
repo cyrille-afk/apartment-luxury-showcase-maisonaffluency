@@ -3909,7 +3909,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  placeholder={copy.ask}
+                  placeholder={composerPlaceholder}
                   rows={1}
                   className="flex-1 resize-none rounded-xl border border-border bg-muted/50 px-3 py-2 font-body text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-accent"
                   disabled={streaming}
