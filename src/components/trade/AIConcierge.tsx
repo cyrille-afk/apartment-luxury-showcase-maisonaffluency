@@ -380,6 +380,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
   const [langMenuOpen, setLangMenuOpen] = useState(false);
   const [showBriefPreview, setShowBriefPreview] = useState(false);
   const [briefBuilderOpen, setBriefBuilderOpen] = useState(false);
+  const pendingBriefPrefillRef = useRef<string | null>(null);
   const [timeline, setTimeline] = useState<TimelineItem[]>(() => {
     try {
       const raw = sessionStorage.getItem("concierge:timeline");
