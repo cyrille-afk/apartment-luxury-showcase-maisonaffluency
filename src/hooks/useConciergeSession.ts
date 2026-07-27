@@ -58,7 +58,18 @@ export type ConciergeSession = {
    * "White-Glove Delivery to Singapore in 2 Weeks").
    */
   projectCity?: string | null;
+  /**
+   * True once the user's brief has surfaced a temporal-urgency signal
+   * (huge rush, tight deadline, ASAP, ...). Detected client-side in
+   * `send()` via `detectUrgency()`; consumed by `buildLogisticsTag()` to
+   * upgrade the per-piece badge to "Express Shipping Available to <City>"
+   * for in-stock or ≤4-week-lead pieces. Sticky for the session — once
+   * true, subsequent turns keep the express treatment unless the session
+   * is reset.
+   */
+  urgencyFlag?: boolean | null;
 };
+
 
 const STORAGE_KEY = "concierge:session";
 const EVENT_NAME = "concierge:session:changed";
