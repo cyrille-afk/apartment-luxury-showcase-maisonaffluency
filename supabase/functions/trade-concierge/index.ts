@@ -354,7 +354,7 @@ async function callCloudflare(init: RequestInit, reason: string, primaryCtx: { s
       if (charBudget <= 0) break;
     }
     parsed.messages = [slimSystem, ...kept];
-    parsed.max_tokens = Math.min(parsed.max_tokens ?? 800, 800);
+    parsed.max_tokens = Math.max(parsed.max_tokens ?? 1200, 1200);
     cfBodyStr = JSON.stringify(parsed);
   } catch (_) {
     cfBodyStr = String(init.body ?? "{}");
