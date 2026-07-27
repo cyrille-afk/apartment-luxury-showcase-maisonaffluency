@@ -650,22 +650,25 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
 
   // ── Hotspot positions per image ──
   const [hotspotCounts, setHotspotCounts] = useState<Record<string, number>>({});
-  const [hotspotPositions, setHotspotPositions] = useState<Record<string, Array<{ x: number; y: number; label: string }>>>({});
+  const [hotspotPositions, setHotspotPositions] = useState<Record<string, Array<{ x: number; y: number; label: string; designer: string; linkUrl: string | null; mappedPickId: string | null }>>>({});
   useEffect(() => {
     const fetchCounts = async () => {
       const { data } = await supabase
         .from("gallery_hotspots")
-        .select("image_identifier, x_percent, y_percent, product_name");
+        .select("image_identifier, x_percent, y_percent, product_name, designer_name, link_url, mapped_pick_id");
       if (data) {
         const counts: Record<string, number> = {};
-        const positions: Record<string, Array<{ x: number; y: number; label: string }>> = {};
-        for (const row of data) {
+        const positions: Record<string, Array<{ x: number; y: number; label: string; designer: string; linkUrl: string | null; mappedPickId: string | null }>> = {};
+        for (const row of data as any[]) {
           counts[row.image_identifier] = (counts[row.image_identifier] || 0) + 1;
           if (!positions[row.image_identifier]) positions[row.image_identifier] = [];
           positions[row.image_identifier].push({
             x: Number(row.x_percent),
             y: Number(row.y_percent),
             label: row.product_name || "hotspot",
+            designer: row.designer_name || "",
+            linkUrl: row.link_url ?? null,
+            mappedPickId: row.mapped_pick_id ?? null,
           });
         }
         setHotspotCounts(counts);
@@ -1154,7 +1157,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                               <button
                                 key={`${item.title}-hotspot-${hotspotIndex}`}
                                 type="button"
-                                onClick={(e) => { e.stopPropagation(); openLightbox(originalSectionIndex, index); }}
+                                onClick={(e) => { e.stopPropagation(); handleHotspotViewProduct(hotspot.label, hotspot.designer, hotspot.linkUrl, hotspot.mappedPickId); }}
                                 aria-label={`Explore hotspot: ${hotspot.label}`}
                                 className="absolute z-30 flex h-5 w-5 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-black/70 backdrop-blur-sm border-2 border-primary/70 text-white shadow-[0_0_8px_hsl(var(--primary)/0.4)] active:scale-95 transition-transform"
                                 style={{ left: `${hotspot.x}%`, top: `${hotspot.y}%` }}
