@@ -26,7 +26,7 @@ import {
   reconcileVariants,
   type AllowedVariantSet,
 } from "../_shared/variantFidelity.ts";
-import { extractFromMedia, type ExtractedVision } from "../_shared/visionExtract.ts";
+import { extractFromMedia, toEmbeddingQuery, type ExtractedVision } from "../_shared/visionExtract.ts";
 
 // Lazy, per-invocation cache of the brand-level lead-time index. Empty table
 // today, but as it fills the fallback engages automatically.
