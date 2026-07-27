@@ -207,6 +207,32 @@ function detectProjectScale(
 
   if (!keywordRe.test(text) && !projectPhraseRe.test(text) && !longMultiZone && !dimensionsBrief) return null;
 
+  // Bare location reply guard — messages that are essentially just a city or
+  // "in <city>" fragment must NEVER open the Brief Builder, even if a prior
+  // turn contained a typology keyword. `detectProjectScale` runs on the
+  // current turn's text; short location-only replies have no independent
+  // brief signal and should stay in conversational qualification.
+  const bareLocationRe = /^\s*(?:in |at |located in |from |it'?s (?:in|at) )?[A-Z][a-zA-Z' -]+(?:,\s*[A-Z][a-zA-Z' -]+)?[.!?]?\s*$/;
+  if (text.length < 40 && bareLocationRe.test(text) && !hasStrongTypology && zoneMatches.length === 0 && furnitureCount === 0 && !hasRoomDimensions) {
+    return null;
+  }
+
+  // Multi-signal gate — even when a strong typology keyword matches, require
+  // at least two independent signals so a terse "a villa" or "villa in Miami"
+  // reply doesn't auto-open the Architectural Brief. `projectPhraseRe`,
+  // `longMultiZone`, and `dimensionsBrief` are already strong composite
+  // signals and bypass this gate.
+  const wkMatch = /(\d{1,3})\s*(?:-|\s)?\s*week/i.test(text);
+  const moMatch = /(\d{1,2})\s*month/i.test(text);
+  const signalCount =
+    (hasStrongTypology ? 1 : 0) +
+    (zoneMatches.length >= 1 ? 1 : 0) +
+    (furnitureCount >= 1 ? 1 : 0) +
+    (hasRoomDimensions ? 1 : 0) +
+    (wkMatch || moMatch ? 1 : 0);
+  const strongComposite = projectPhraseRe.test(text) || longMultiZone || dimensionsBrief;
+  if (!strongComposite && signalCount < 2) return null;
+
   const isGCB = /\b(gcb|gbc|good class bungalow)\b/i.test(text);
   const typology = isGCB ? "GCB (Good Class Bungalow)"
     : /\bpenthouse\b/i.test(text) ? "Penthouse"
