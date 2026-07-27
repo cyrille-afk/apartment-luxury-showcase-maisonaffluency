@@ -2592,6 +2592,18 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                       text: modalMode ? "text-cream/90" : "text-emerald-700",
                       ring: modalMode ? "border-cream/25 bg-cream/10" : "border-emerald-500/30 bg-emerald-500/10",
                     },
+                    human_notified: {
+                      label: "Human Team Notified",
+                      dot: "bg-emerald-500",
+                      text: modalMode ? "text-cream/90" : "text-emerald-700",
+                      ring: modalMode ? "border-cream/25 bg-cream/10" : "border-emerald-500/30 bg-emerald-500/10",
+                    },
+                    appointment_requested: {
+                      label: "Appointment Requested",
+                      dot: "bg-sky-500 animate-pulse",
+                      text: modalMode ? "text-cream/90" : "text-sky-700",
+                      ring: modalMode ? "border-cream/25 bg-cream/10" : "border-sky-500/30 bg-sky-500/10",
+                    },
                   };
                   const m = statusMeta[conciergeStatus];
                   return (
