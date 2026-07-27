@@ -104,6 +104,10 @@ const TradeDashboard = () => {
   // can edit the flow at /trade/admin/onboarding without touching code.
   useEffect(() => {
     if (!user) return;
+    // Gate the proprietary Trade Program greeting behind verified membership.
+    // Non-members (pending/rejected applicants, admins without trade_user role,
+    // or any signed-in visitor) never see Felix's Atelier welcome.
+    if (!isTradeUser) return;
     let cancelled = false;
     (async () => {
       // The DB flag `profiles.has_seen_trade_intro` is the single source of
