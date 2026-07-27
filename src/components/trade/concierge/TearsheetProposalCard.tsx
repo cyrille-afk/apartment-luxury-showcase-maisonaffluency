@@ -1130,15 +1130,15 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
                         )}
                       </div>
                       {status === "pending" && (
-                        <div className="flex items-center gap-1 self-center shrink-0">
+                        <div className="flex items-center gap-1.5 self-center shrink-0">
                           <button
                             type="button"
                             onClick={() => toggleAssets(p.id)}
                             className={cn(
-                              "inline-flex items-center gap-1 text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded border transition-colors",
+                              "inline-flex items-center gap-1 text-[10px] uppercase tracking-wider px-2 py-1 rounded border transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent/60",
                               assetsOpen.has(p.id)
                                 ? "border-accent/50 bg-accent/10 text-accent"
-                                : "border-border text-muted-foreground hover:text-foreground",
+                                : "border-border text-muted-foreground hover:text-foreground hover:border-foreground/30",
                             )}
                             aria-label={assetsOpen.has(p.id) ? `Hide 3D and finishes for ${p.title || "this pick"}` : `Show 3D and finishes for ${p.title || "this pick"}`}
                             aria-pressed={assetsOpen.has(p.id)}
@@ -1152,17 +1152,17 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
                             onClick={() => toggleLock(p.id)}
                             disabled={isExcluded}
                             className={cn(
-                              "inline-flex items-center gap-1 text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded border transition-colors",
+                              "inline-flex items-center gap-1 text-[10px] uppercase tracking-wider px-2 py-1 rounded border transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent/60",
                               isLocked
-                                ? "border-accent/50 bg-accent/15 text-accent hover:bg-accent/25"
-                                : "border-border text-muted-foreground hover:text-foreground",
+                                ? "bg-slate-700 text-amber-300 border-slate-600 hover:bg-slate-600"
+                                : "border-border text-muted-foreground hover:text-foreground hover:border-foreground/30",
                               isExcluded && "opacity-40 cursor-not-allowed",
                             )}
                             aria-label={isLocked ? `Unlock ${p.title || "this pick"}` : `Lock ${p.title || "this pick"} so re-generation keeps it`}
                             aria-pressed={isLocked}
                             title={isLocked ? "Locked — re-generation will keep this piece" : "Lock this piece so re-generation keeps it"}
                           >
-                            {isLocked ? <Lock className="h-2.5 w-2.5" /> : <Unlock className="h-2.5 w-2.5" />}
+                            {isLocked ? <Check className="h-2.5 w-2.5" /> : <Unlock className="h-2.5 w-2.5" />}
                             {isLocked ? "Locked" : "Lock"}
                           </button>
                           <button
@@ -1180,7 +1180,7 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
                                 displayText: `Swap "${p.title}"${p.designer_name ? ` by ${p.designer_name}` : ""} for a similar piece in a darker, richer palette.`,
                               },
                             )}
-                            className="inline-flex items-center gap-1 text-muted-foreground hover:text-accent text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded border border-border transition-colors"
+                            className="inline-flex items-center gap-1 text-muted-foreground hover:text-accent text-[10px] uppercase tracking-wider px-2 py-1 rounded border border-border transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent/60 hover:border-foreground/30"
                             aria-label={`Swap ${p.title || "this pick"} for a similar piece`}
                             title="Swap for a similar piece (darker wood / warmer finish)"
                           >
@@ -1189,13 +1189,19 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
                           </button>
                           <button
                             onClick={() => togglePick(p.id)}
-                            className="text-muted-foreground hover:text-foreground text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded border border-border"
+                            className={cn(
+                              "text-[10px] uppercase tracking-wider px-2 py-1 rounded border transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent/60",
+                              isExcluded
+                                ? "border-border text-foreground hover:text-accent hover:border-accent/40"
+                                : "border-border text-muted-foreground hover:text-foreground hover:border-foreground/30",
+                            )}
                             aria-label={isExcluded ? "Include" : "Exclude"}
                           >
                             {isExcluded ? "Add" : "Skip"}
                           </button>
                         </div>
                       )}
+
                     </li>
                   );
                 })}
