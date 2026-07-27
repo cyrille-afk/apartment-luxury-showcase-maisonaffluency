@@ -5507,14 +5507,28 @@ serve(async (req) => {
     // (never a blunt "city not found").
     let cityLockNote = "";
     try {
-      if (looksLikeCityAssertion(lastUserMsg)) {
-        const resolution = await resolveProjectCity(lastUserMsg);
-        cityLockNote = "\n\n" + buildCityLockSystemNote(resolution);
-        mark("cityLock", { input: lastUserMsg.slice(0, 40), hub: resolution.hub, match: resolution.matchType });
+      // Re-resolve the project location on EVERY turn using the latest
+      // user assertion found anywhere in the thread — so a follow-up like
+      // "actually Brooklyn Heights" replaces the earlier "NYC" in the
+      // Brief Builder prefill instead of Felix echoing the stale city.
+      const latestAssertion = findLatestCityAssertion(trimmedMessages) ?? (looksLikeCityAssertion(lastUserMsg) ? lastUserMsg : null);
+      if (latestAssertion) {
+        const resolution = await resolveProjectCity(latestAssertion);
+        const isRefinement = latestAssertion !== lastUserMsg || /\b(actually|instead|update|change|make it|correction|neighou?rhood|borough|brownstone|townhouse|penthouse)\b/i.test(lastUserMsg);
+        const overrideNote = isRefinement
+          ? `\n\n## PROJECT LOCATION — LATEST TURN WINS (OVERRIDE)\n` +
+            `The user has narrowed or corrected the project location to: "${latestAssertion}" → resolved city: ${resolution.resolvedCity} (hub: ${resolution.hub}).\n` +
+            `You MUST replace any previously mentioned city / neighborhood / borough (including any earlier "prefilled with your <old city> location" phrasing) with this latest value everywhere in your reply and in any Brief Builder prefill you describe. ` +
+            `Do NOT say the Brief Builder is prefilled with the old city. If you reference the Brief Builder, state it is now prefilled with "${resolution.resolvedCity}" (and cite the specific neighborhood the user gave, verbatim, when they gave one). Never echo the superseded city.`
+          : "";
+        cityLockNote = "\n\n" + buildCityLockSystemNote(resolution) + overrideNote;
+        mark("cityLock", { input: latestAssertion.slice(0, 40), hub: resolution.hub, match: resolution.matchType, refinement: isRefinement });
       }
     } catch (err) {
       console.warn("[concierge cityLock] resolver failed", err);
     }
+
+
 
     const llmT0 = performance.now();
     const upstream = await chatFetch({
