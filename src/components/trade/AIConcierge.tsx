@@ -331,7 +331,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { CnBriefViewingModal } from "@/components/trade/CnBriefViewingModal";
 import { useStudio } from "@/hooks/useStudio";
 import { useAuth } from "@/hooks/useAuth";
-import { getConciergeSession } from "@/hooks/useConciergeSession";
+import { getConciergeSession, updateConciergeSession } from "@/hooks/useConciergeSession";
+import { extractProjectCityFromAssistant } from "@/lib/projectCityDetect";
 
 const hasWelcomeActions = (actions: ConciergeQuickAction[] | undefined) =>
   !!actions?.some((action) => isOnboardingActionPrompt(action.prompt));
@@ -2112,6 +2113,14 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
           // Drop any skeleton placeholders that never resolved into a real
           // proposal (e.g. Inspector fail-closed → `proposal_blocked`).
           setTimeline((prev) => prev.filter((t) => t.kind !== "pending_proposal"));
+          // Detect the destination city from Felix's just-completed reply so
+          // tearsheet cards can render logistics micro-tags (e.g. "White-Glove
+          // Delivery to Singapore in 2 Weeks"). Matches the phrasing used by
+          // the LOCALIZED SHIPPING FILTER preamble and the CITY LOCK reply.
+          try {
+            const city = extractProjectCityFromAssistant(assistantSoFar);
+            if (city) updateConciergeSession({ projectCity: city });
+          } catch { /* non-fatal */ }
         },
         onError: (msg) => {
           clearStallTimer();

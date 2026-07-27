@@ -51,6 +51,13 @@ export type ConciergeSession = {
    * chat so the AI can say "Add this to the Apt 4B folder as well?".
    */
   projectName?: string | null;
+  /**
+   * Project city (destination) most recently confirmed with the concierge,
+   * parsed from Felix's own city-lock reply / delivery preamble. Used by
+   * tearsheet cards to render per-product logistics micro-tags (e.g.
+   * "White-Glove Delivery to Singapore in 2 Weeks").
+   */
+  projectCity?: string | null;
 };
 
 const STORAGE_KEY = "concierge:session";
@@ -92,6 +99,7 @@ function readSession(): ConciergeSession | null {
       quoteId: parsed.quoteId ?? null,
       streamId: parsed.streamId ?? null,
       projectName: parsed.projectName ?? null,
+      projectCity: parsed.projectCity ?? null,
     };
   } catch {
     return null;
@@ -125,6 +133,7 @@ function ensureSession(existing: ConciergeSession | null): ConciergeSession {
     quoteId: null,
     streamId: null,
     projectName: null,
+    projectCity: null,
   };
 }
 

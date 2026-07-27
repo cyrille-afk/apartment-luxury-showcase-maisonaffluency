@@ -3,6 +3,7 @@ import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { Loader2, Check, X, Pencil, ExternalLink, Plus, ChevronDown, Copy, Repeat, Lock, Unlock, RefreshCw, PlusCircle, MessageSquare, ShieldCheck, Sparkles } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { commitProposal, type TearsheetProposal, type PickPreview } from "@/lib/tradeConciergeStream";
+import { buildLogisticsTag } from "@/lib/logisticsTag";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -1029,6 +1030,25 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
                             {p.materials}
                           </div>
                         )}
+                        {(() => {
+                          const tag = buildLogisticsTag(p as any, conciergeSession?.projectCity ?? null);
+                          if (!tag) return null;
+                          const isStock = tag.kind === "in_stock";
+                          return (
+                            <div
+                              className={cn(
+                                "mt-1 inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-body text-[9px] tracking-wide",
+                                isStock
+                                  ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 ring-1 ring-emerald-500/20"
+                                  : "bg-amber-500/10 text-amber-700 dark:text-amber-400 ring-1 ring-amber-500/20",
+                              )}
+                              title={isStock ? "Ready for immediate white-glove dispatch" : "Made-to-order — lead time from workshop"}
+                            >
+                              <span className={cn("h-1.5 w-1.5 rounded-full", isStock ? "bg-emerald-500" : "bg-amber-500")} />
+                              {tag.label}
+                            </div>
+                          );
+                        })()}
                         {showRationale && (
                           <>
                             <div className="font-body text-[10px] text-foreground/70 italic mt-0.5 leading-snug">

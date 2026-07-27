@@ -216,6 +216,9 @@ export type PickPreview = {
   materials: string | null;
   category: string | null;
   designer_name: string | null;
+  brand_name?: string | null;
+  lead_time?: string | null;
+  stock_status?: string | null;
   rationale?: string;
   rationale_detail?: string | null;
 };
