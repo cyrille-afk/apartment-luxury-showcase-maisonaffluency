@@ -1047,7 +1047,7 @@ function activeRequirementText(text: string): string {
   return out.join("\n");
 }
 
-function parseBudgetFromText(text: string): { cents: number; currency: string } | null {
+export function parseBudgetFromText(text: string): { cents: number; currency: string } | null {
   const raw = String(text || "");
   // Strip structured brief lines that contain dimensions / technical params —
   // otherwise "MAX FOOTPRINT: length ≤ [5000mm]" is read as a $5,000 budget.
@@ -1056,21 +1056,28 @@ function parseBudgetFromText(text: string): { cents: number; currency: string } 
     .filter((line) => !/^\s*(MAX\s+FOOTPRINT|DIMENSIONS?|CLEARANCE|TIMELINE|LEAD\s*TIME)\s*:/i.test(line))
     .join("\n");
 
-  const re = /(?:under|below|less\s+than|up\s+to|max(?:imum)?|budget(?:\s+of)?|<=?)\s*(?:about|around|roughly|approx(?:\.)?)?\s*([$€£])?\s*([0-9][0-9,]*(?:\.[0-9]+)?)\s*(k|m|thousand|million)?\s*(usd|eur|gbp|chf|aed|sgd|hkd|jpy|dollars?|euros?|pounds?)?/i;
+  const re = /(?:under|below|less\s+than|up\s+to|max(?:imum)?|budget(?:\s+of)?|<=?)\s*(?:about|around|roughly|approx(?:\.)?)?\s*(?:([$€£])|(usd|eur|gbp|chf|aed|sgd|hkd|jpy))?\s*([0-9][0-9,]*(?:\.[0-9]+)?)\s*(k|m|thousand|million)?\s*(usd|eur|gbp|chf|aed|sgd|hkd|jpy|dollars?|euros?|pounds?)?/i;
   const m = withoutDimensionLines.match(re);
   if (!m) return null;
+
+  // A number is a budget ONLY when paired with an explicit currency signal.
+  // "under 8000" or "max 5000" can be dimensions / lead-time / capacity in
+  // project briefs, and must never trigger budget enforcement by default.
+  const sym = m[1] || "";
+  const leadingCcy = String(m[2] || "").toLowerCase();
+  const trailingCcy = String(m[5] || "").toLowerCase();
+  if (!sym && !leadingCcy && !trailingCcy) return null;
 
   // Reject numbers immediately followed by dimension units (e.g. 5000mm, 120cm).
   const endIndex = (m.index ?? 0) + m[0].length;
   const tail = withoutDimensionLines.slice(endIndex, endIndex + 12);
   if (/^\s*(?:mm|cm|m\b|in\b|inches?|ft|feet|'|\"|sq\s*m|m²|m2)/i.test(tail)) return null;
 
-  const sym = m[1] || "";
-  const n = Number(String(m[2] || "").replace(/,/g, ""));
+  const n = Number(String(m[3] || "").replace(/,/g, ""));
   if (!Number.isFinite(n) || n <= 0) return null;
-  const multWord = String(m[3] || "").toLowerCase();
+  const multWord = String(m[4] || "").toLowerCase();
   const mult = multWord === "m" || multWord === "million" ? 1_000_000 : multWord === "k" || multWord === "thousand" ? 1_000 : 1;
-  const ccyWord = String(m[4] || "").toLowerCase();
+  const ccyWord = leadingCcy || trailingCcy;
   const currency = sym === "$" || /usd|dollar/.test(ccyWord)
     ? "USD"
     : sym === "£" || /gbp|pound/.test(ccyWord)

@@ -7,7 +7,7 @@ import { embedQuery } from "../_shared/aiEmbeddings.ts";
 import { withSemanticCache } from "../_shared/aiCache.ts";
 import { coerceClearance, classifyResultFailure, countDimensionNumbers } from "../_shared/spatialFitValidation.ts";
 import { canAccessProject } from "../_shared/tenantAccess.ts";
-import { runInspectorPass, buildInspectorGroundTruth, buildInspectorLogRecord, logInspectorRun, validateRequirementsCoverage, mergeRequirementsWithText, runDiscoveryProseGuard, deterministicRedact, SAFE_FALLBACK_PROSE } from "../_shared/concierge-inspector.ts";
+import { runInspectorPass, buildInspectorGroundTruth, buildInspectorLogRecord, logInspectorRun, validateRequirementsCoverage, mergeRequirementsWithText, runDiscoveryProseGuard, deterministicRedact, SAFE_FALLBACK_PROSE, parseBudgetFromText } from "../_shared/concierge-inspector.ts";
 import { resolveProjectCity, looksLikeCityAssertion, buildCityLockSystemNote } from "../_shared/cityResolver.ts";
 import { installFramePersistence, serveResume } from "./_resume.ts";
 import { deriveHardConstraints, applyHardConstraints, filterRowsByHardConstraints, type HardConstraints } from "../_shared/hardConstraints.ts";
@@ -93,6 +93,22 @@ type RequirementsPayload = {
   era: string;
   notes: string;
 };
+
+function enforceExplicitBudgetOnly<T extends Record<string, any> | null | undefined>(
+  requirements: T,
+  explicitBudget: { cents: number; currency: string } | null,
+): T {
+  if (!requirements) return requirements;
+  const sanitized = { ...requirements };
+  if (!explicitBudget) {
+    delete sanitized.budget_cents;
+    delete sanitized.budget_currency;
+    return sanitized as T;
+  }
+  sanitized.budget_cents = explicitBudget.cents;
+  sanitized.budget_currency = explicitBudget.currency;
+  return sanitized as T;
+}
 
 function ensureLovableModel(m: string): string {
   return m.startsWith("google/") || m.startsWith("openai/") ? m : `google/${m}`;
@@ -3388,7 +3404,10 @@ function validateProposalAgainstBrief(
   requestText: string,
   explicitRequirements?: RequirementsPayload | null,
 ) {
-  const requirements = mergeRequirementsWithText(explicitRequirements as any, requestText);
+  const requirements = enforceExplicitBudgetOnly(
+    mergeRequirementsWithText(explicitRequirements as any, requestText) as any,
+    parseBudgetFromText(requestText),
+  );
   const previews = Array.isArray(proposal?.preview) ? proposal.preview : [];
   const gt = buildInspectorGroundTruth([{ tool: String(proposal?.tool || "unknown"), pickIds: [], previews }]);
   return { requirements, validation: validateRequirementsCoverage(requirements as any, gt) };
@@ -4227,6 +4246,7 @@ serve(async (req) => {
       .map((m: any) => extractText(m.content))
       .join("\n")
       .toLowerCase();
+    const explicitConversationBudget = parseBudgetFromText(userConversationText);
     const stickyFactPatterns = [
       /\b(dining(?: room)?|dining table|table)\b/,
       /\b(12\s*(?:pax|people|persons?|seater|seats?)|twelve\s*(?:pax|people|persons?|seater|seats?)|seat(?:ing)?\s*(?:capacity\s*)?(?:for\s*)?(?:12|twelve))\b/,
@@ -5638,7 +5658,10 @@ serve(async (req) => {
               const gtOne = buildInspectorGroundTruth([
                 { tool: cardTool, pickIds: [], previews: Array.isArray(previewRows) ? previewRows : [] },
               ]);
-              const effectiveRequirements = mergeRequirementsWithText(capturedRequirements as any, userConversationText);
+              const effectiveRequirements = enforceExplicitBudgetOnly(
+                mergeRequirementsWithText(capturedRequirements as any, userConversationText) as any,
+                explicitConversationBudget,
+              );
               const v = validateRequirementsCoverage(effectiveRequirements as any, gtOne);
               proposal.requirements_validation = {
                 ok: v.ok,
@@ -5753,11 +5776,9 @@ serve(async (req) => {
                 era: typeof parsed.era === "string" ? parsed.era.slice(0, 80) : "",
                 notes: typeof parsed.notes === "string" ? parsed.notes.slice(0, 480) : "",
               };
-              if (Number.isFinite(Number(parsed.budget_cents)) && Number(parsed.budget_cents) > 0) {
-                payload.budget_cents = Math.floor(Number(parsed.budget_cents));
-              }
-              if (typeof parsed.budget_currency === "string" && /^[A-Z]{3}$/.test(parsed.budget_currency)) {
-                payload.budget_currency = parsed.budget_currency;
+              if (explicitConversationBudget) {
+                payload.budget_cents = explicitConversationBudget.cents;
+                payload.budget_currency = explicitConversationBudget.currency;
               }
               capturedRequirements = payload;
               // Structured log so a run's requirements can be joined to the
@@ -7313,7 +7334,7 @@ serve(async (req) => {
               if (groundTruthCards.length && proseText.length > 0) {
                 const gt = buildInspectorGroundTruth(groundTruthCards);
                 const reqValidation = validateRequirementsCoverage(
-                  capturedRequirements as any,
+                  enforceExplicitBudgetOnly(capturedRequirements as any, explicitConversationBudget) as any,
                   gt,
                 );
                 if (!reqValidation.ok) {
