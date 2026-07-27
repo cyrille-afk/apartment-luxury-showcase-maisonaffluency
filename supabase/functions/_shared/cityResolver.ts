@@ -12,7 +12,7 @@
 // geocoder itself fails or nothing sensible comes back, we degrade to the
 // dictionary/fallback path — Felix always gets a lock-in.
 
-export type CityMatchType = "exact" | "alias" | "fuzzy" | "geocoded" | "fallback" | "unknown";
+export type CityMatchType = "exact" | "alias" | "fuzzy" | "geocoded" | "fallback" | "unknown" | "gibberish";
 
 export interface CityResolution {
   input: string;
