@@ -1352,6 +1352,25 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
       { kind: "msg", role: "assistant", content: confirmation },
     ]);
 
+    // Build a concise "what we sent" summary for the ticket meta line under
+    // the Human Team Notified badge. We derive it from the most recent user
+    // upload in the timeline + the resolved project city + preferred channel.
+    const lastUpload = [...timeline].reverse().find(
+      (t: any) => t.kind === "msg" && t.role === "user" && t.attachments?.length,
+    ) as any;
+    const uploadCount: number = lastUpload?.attachments?.length ?? 0;
+    const uploadLabel = uploadCount
+      ? `${uploadCount} file${uploadCount === 1 ? "" : "s"}`
+      : "brief";
+    const summary = [
+      uploadLabel,
+      projectCity ? `→ ${projectCity}` : null,
+      `reply via ${preferredContact}`,
+    ].filter(Boolean).join(" · ");
+    // Optimistic ticket so the ID appears even before the server responds.
+    const provisionalId = `MA-${Date.now().toString(36).slice(-6).toUpperCase()}`;
+    setHandoffTicket({ id: provisionalId, summary });
+
     // Fire-and-forget escalation so the District 9 team is notified.
     try {
       const { data: sess } = await supabase.auth.getSession();
@@ -1373,7 +1392,15 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
             }),
           },
         )
-          .then(() => { setConciergeStatus("human_notified"); })
+          .then(async (r) => {
+            let realId: string | null = null;
+            try {
+              const j = await r.json();
+              if (j?.escalation_id) realId = `MA-${String(j.escalation_id).replace(/-/g, "").slice(0, 6).toUpperCase()}`;
+            } catch { /* ignore */ }
+            setHandoffTicket({ id: realId || provisionalId, summary });
+            setConciergeStatus("human_notified");
+          })
           .catch(() => { /* non-fatal */ });
       }
     } catch { /* non-fatal */ }
