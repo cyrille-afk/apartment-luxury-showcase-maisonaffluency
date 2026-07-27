@@ -1441,6 +1441,18 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
     if (!text && !hasFiles) return;
     if (streaming) return;
 
+    // Rush detection: mirror the RUSH / URGENCY ACKNOWLEDGMENT PROTOCOL in
+    // the trade-concierge system prompt so tearsheet cards can flip to the
+    // "Express Shipping Available to <City>" badge the instant the user
+    // submits a rush turn — no round-trip to the LLM required. Sticky for
+    // the session once true.
+    try {
+      if (detectUrgency(text) && !getConciergeSession()?.urgencyFlag) {
+        updateConciergeSession({ urgencyFlag: true });
+      }
+    } catch { /* non-fatal */ }
+
+
     // Prompt-detect Mandarin: if the user writes in Chinese, auto-switch the
     // concierge reply language to zh. Threshold ~4 Han chars OR ≥30% of the
     // message so short mixed-language phrases don't false-positive. Persist so
