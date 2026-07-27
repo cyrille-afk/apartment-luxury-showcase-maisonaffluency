@@ -4619,6 +4619,57 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
         invitedName={typeof window !== "undefined" ? sessionStorage.getItem("cn_portal:invited_name") : null}
         messages={timeline.filter((t) => t.kind === "msg").map((t: any) => ({ role: t.role, content: t.content }))}
       />
+      <Sheet open={threadsOpen} onOpenChange={setThreadsOpen}>
+        <SheetContent side="left" className="w-[320px] sm:w-[360px] p-0 flex flex-col z-[10020]" aria-describedby={undefined}>
+          <div className="sr-only"><h2>Past conversations</h2></div>
+          <div className="px-4 py-3 border-b border-border flex items-center justify-between shrink-0">
+            <div className="font-display text-[11px] uppercase tracking-[0.15em] text-muted-foreground">Conversations</div>
+            <button
+              type="button"
+              onClick={async () => { await createNewThread(); setThreadsOpen(false); }}
+              className="inline-flex items-center gap-1.5 rounded-md bg-foreground text-background px-2.5 py-1 font-body text-[11px] hover:opacity-90"
+              aria-label="Start a new conversation"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              New
+            </button>
+          </div>
+          <div className="flex-1 overflow-y-auto">
+            {threads.length === 0 && (
+              <div className="p-4 font-body text-xs text-muted-foreground">
+                No past conversations yet.
+              </div>
+            )}
+            <ul className="flex flex-col">
+              {threads.map((t) => {
+                const active = t.id === activeThreadId;
+                const when = (() => { try { return new Date(t.last_active_at).toLocaleString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }); } catch { return ""; } })();
+                return (
+                  <li key={t.id} className={cn("group flex items-center gap-2 px-3 py-2 border-b border-border/60 hover:bg-muted/40 transition-colors", active && "bg-muted/50")}>
+                    <button
+                      type="button"
+                      onClick={() => selectThread(t.id)}
+                      className="flex-1 min-w-0 text-left"
+                    >
+                      <div className="font-body text-[13px] text-foreground truncate">{t.title || "New conversation"}</div>
+                      <div className="font-body text-[10px] uppercase tracking-[0.1em] text-muted-foreground mt-0.5">{when}</div>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(e) => { e.stopPropagation(); if (confirm("Delete this conversation?")) void deleteThread(t.id); }}
+                      className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive p-1 rounded-md transition-all"
+                      aria-label="Delete conversation"
+                      title="Delete conversation"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        </SheetContent>
+      </Sheet>
     </>
   );
 }
