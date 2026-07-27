@@ -34,8 +34,8 @@ export const OUTPUT_LIMITS = {
   extract: 768,       // shipment docs, structured tool outputs
   rewrite: 600,       // product descriptions
   translate: 800,     // i18n strings
-  chat: 1200,         // concierge replies
-  reasoning: 2048,    // strong-tier planning (FFE, multi-room briefs)
+  chat: 2400,         // concierge replies — doubled so Brief Builder preface + tool preamble never truncate mid-sentence
+  reasoning: 3600,    // strong-tier planning (FFE, multi-room briefs) — headroom for long structured replies
   tasteProfile: 1024, // user persona JSON
 } as const;
 
