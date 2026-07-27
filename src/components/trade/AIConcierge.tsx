@@ -388,6 +388,9 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
   const [conciergeStatus, setConciergeStatus] = useState<
     null | "pending_review" | "assigning_curator" | "curator_assigned" | "human_notified" | "appointment_requested"
   >(null);
+  // Ticket metadata surfaced under the "Human Team Notified" badge so the
+  // designer can quote a real reference ID and see exactly what we forwarded.
+  const [handoffTicket, setHandoffTicket] = useState<{ id: string; summary: string } | null>(null);
 
   const [timeline, setTimeline] = useState<TimelineItem[]>(() => {
     try {
@@ -1349,6 +1352,25 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
       { kind: "msg", role: "assistant", content: confirmation },
     ]);
 
+    // Build a concise "what we sent" summary for the ticket meta line under
+    // the Human Team Notified badge. We derive it from the most recent user
+    // upload in the timeline + the resolved project city + preferred channel.
+    const lastUpload = [...timeline].reverse().find(
+      (t: any) => t.kind === "msg" && t.role === "user" && t.attachments?.length,
+    ) as any;
+    const uploadCount: number = lastUpload?.attachments?.length ?? 0;
+    const uploadLabel = uploadCount
+      ? `${uploadCount} file${uploadCount === 1 ? "" : "s"}`
+      : "brief";
+    const summary = [
+      uploadLabel,
+      projectCity ? `→ ${projectCity}` : null,
+      `reply via ${preferredContact}`,
+    ].filter(Boolean).join(" · ");
+    // Optimistic ticket so the ID appears even before the server responds.
+    const provisionalId = `MA-${Date.now().toString(36).slice(-6).toUpperCase()}`;
+    setHandoffTicket({ id: provisionalId, summary });
+
     // Fire-and-forget escalation so the District 9 team is notified.
     try {
       const { data: sess } = await supabase.auth.getSession();
@@ -1370,7 +1392,15 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
             }),
           },
         )
-          .then(() => { setConciergeStatus("human_notified"); })
+          .then(async (r) => {
+            let realId: string | null = null;
+            try {
+              const j = await r.json();
+              if (j?.escalation_id) realId = `MA-${String(j.escalation_id).replace(/-/g, "").slice(0, 6).toUpperCase()}`;
+            } catch { /* ignore */ }
+            setHandoffTicket({ id: realId || provisionalId, summary });
+            setConciergeStatus("human_notified");
+          })
           .catch(() => { /* non-fatal */ });
       }
     } catch { /* non-fatal */ }
@@ -3036,6 +3066,23 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
               </button>
               </div>
             </div>
+            {handoffTicket && (conciergeStatus === "human_notified" || conciergeStatus === "assigning_curator" || conciergeStatus === "curator_assigned" || conciergeStatus === "appointment_requested") && (
+              <div
+                className={cn(
+                  "flex items-center gap-2 pl-6 font-body text-[10px] tracking-wide",
+                  modalMode ? "text-cream/80" : "text-muted-foreground",
+                )}
+                title={`Ticket ${handoffTicket.id} · ${handoffTicket.summary}`}
+              >
+                <span className={cn(
+                  "inline-flex items-center rounded-md border px-1.5 py-0.5 font-mono uppercase tracking-[0.08em]",
+                  modalMode ? "border-cream/25 bg-cream/10 text-cream" : "border-border bg-muted/60 text-foreground",
+                )}>
+                  Ticket #{handoffTicket.id}
+                </span>
+                <span className="truncate">{handoffTicket.summary}</span>
+              </div>
+            )}
             {!minimized && (
               <div className="flex items-center gap-2 flex-wrap pl-6">
                 <span
@@ -3190,6 +3237,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                                             // once they resume the conversation.
                                             setMinimized(false);
                                             setConciergeStatus(null);
+                                            setHandoffTicket(null);
                                             return;
                                           }
                                           if (label === "View My Open Requests") {
