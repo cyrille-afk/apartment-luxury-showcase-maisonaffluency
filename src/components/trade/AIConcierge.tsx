@@ -1369,7 +1369,9 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
               excerpt,
             }),
           },
-        ).catch(() => { /* non-fatal */ });
+        )
+          .then(() => { setConciergeStatus("human_notified"); })
+          .catch(() => { /* non-fatal */ });
       }
     } catch { /* non-fatal */ }
 
