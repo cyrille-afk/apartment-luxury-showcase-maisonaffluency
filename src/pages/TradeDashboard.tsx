@@ -78,7 +78,7 @@ const formatRelativeDate = (dateStr: string) => {
 };
 
 const TradeDashboard = () => {
-  const { profile, user } = useAuth();
+  const { profile, user, isTradeUser } = useAuth();
   const navigate = useNavigate();
   const [brands, setBrands] = useState<BrandFolder[]>([]);
   const [activity, setActivity] = useState<ActivityItem[]>([]);
@@ -104,6 +104,10 @@ const TradeDashboard = () => {
   // can edit the flow at /trade/admin/onboarding without touching code.
   useEffect(() => {
     if (!user) return;
+    // Gate the proprietary Trade Program greeting behind verified membership.
+    // Non-members (pending/rejected applicants, admins without trade_user role,
+    // or any signed-in visitor) never see Felix's Atelier welcome.
+    if (!isTradeUser) return;
     let cancelled = false;
     (async () => {
       // The DB flag `profiles.has_seen_trade_intro` is the single source of
@@ -149,7 +153,7 @@ const TradeDashboard = () => {
       await supabase.from("profiles").update({ has_seen_trade_intro: true }).eq("id", user.id);
     })();
     return () => { cancelled = true; };
-  }, [user, profile?.first_name]);
+  }, [user, profile?.first_name, isTradeUser]);
 
   useEffect(() => {
     const fetchData = async () => {
