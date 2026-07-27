@@ -147,6 +147,8 @@ function ensureSession(existing: ConciergeSession | null): ConciergeSession {
     streamId: null,
     projectName: null,
     projectCity: null,
+    urgencyFlag: null,
+
   };
 }
 
