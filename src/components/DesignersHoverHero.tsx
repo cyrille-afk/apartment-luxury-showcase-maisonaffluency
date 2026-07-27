@@ -1478,7 +1478,7 @@ const DesignersHoverHero = () => {
                             ref={isLastItem ? lastItemRef : undefined}
                             className="text-left leading-[1.4] sm:leading-[1.55]"
                           >
-                            <Link
+                            <SilentLink
                               to={`/designers/${d.slug}`}
                               data-featured-designer-slug={d.slug}
                               state={{ fromDesignersHero: true }}
