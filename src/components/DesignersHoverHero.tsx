@@ -1114,6 +1114,8 @@ const DesignersHoverHero = () => {
 
   // Track which letter row is currently topmost in the mobile scroller so
   // the right-edge A–Z strip can highlight it (IntersectionObserver-style).
+  // Also clears `restoredOnlyLetter` as soon as the user scrolls, so the
+  // remaining letters render below the restored one instead of being hidden.
   useEffect(() => {
     if (!searchOpen || isSearching) return;
     const scroller = searchScrollRef.current;
@@ -1131,11 +1133,38 @@ const DesignersHoverHero = () => {
         } else break;
       }
       setActiveMobileLetter((prev) => (prev === current ? prev : current));
+
+      // Unfilter once the user starts scrolling so remaining letters render
+      // below. Compensate scrollTop by the offset of the restored letter's
+      // row so the viewport doesn't jump when earlier letters are inserted.
+      if (restoredOnlyLetter && scroller.scrollTop > 4) {
+        const restored = restoredOnlyLetter;
+        const restoredRow = scroller.querySelector<HTMLElement>(
+          `[data-designer-letter="${restored}"]`
+        );
+        const currentOffset = restoredRow
+          ? restoredRow.getBoundingClientRect().top - scrollerTop
+          : 0;
+        setRestoredOnlyLetter(null);
+        requestAnimationFrame(() => {
+          const s = searchScrollRef.current;
+          if (!s) return;
+          const row = s.querySelector<HTMLElement>(
+            `[data-designer-letter="${restored}"]`
+          );
+          if (!row) return;
+          const prev = s.style.scrollBehavior;
+          s.style.scrollBehavior = "auto";
+          s.scrollTop = Math.max(0, row.offsetTop - currentOffset);
+          void s.offsetHeight;
+          s.style.scrollBehavior = prev;
+        });
+      }
     };
     compute();
     scroller.addEventListener("scroll", compute, { passive: true });
     return () => scroller.removeEventListener("scroll", compute);
-  }, [searchOpen, isSearching, groupedResults]);
+  }, [searchOpen, isSearching, groupedResults, restoredOnlyLetter]);
 
   // Sync mobile A–Z rail bounds to the search list container so the rail
   // matches the list height exactly (never overlapping the close X above).
