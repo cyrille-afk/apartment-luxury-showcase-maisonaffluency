@@ -1287,18 +1287,61 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
           `A human concierge will personally review your layout **${nextOpeningLabel}** and contact you ${contactLine} by **11:00 AM SGT${callbackDayLabel}** with a hand-selected digital curation.`,
         ].join("\n");
 
-
+    // International scheduling block — if the designer's project city sits in
+    // a materially different timezone than Singapore (SGT, +8), offer an
+    // elegant morning-call alignment so the callback lands in THEIR local AM.
+    const CITY_TZ: Record<string, string> = {
+      london: "Europe/London", paris: "Europe/Paris", milan: "Europe/Rome", rome: "Europe/Rome",
+      geneva: "Europe/Zurich", zurich: "Europe/Zurich", monaco: "Europe/Monaco", madrid: "Europe/Madrid",
+      barcelona: "Europe/Madrid", berlin: "Europe/Berlin", amsterdam: "Europe/Amsterdam",
+      "new york": "America/New_York", nyc: "America/New_York", miami: "America/New_York",
+      boston: "America/New_York", toronto: "America/Toronto", chicago: "America/Chicago",
+      "los angeles": "America/Los_Angeles", la: "America/Los_Angeles", "san francisco": "America/Los_Angeles",
+      dubai: "Asia/Dubai", "abu dhabi": "Asia/Dubai", doha: "Asia/Qatar", riyadh: "Asia/Riyadh",
+      istanbul: "Europe/Istanbul", mumbai: "Asia/Kolkata", delhi: "Asia/Kolkata",
+      "hong kong": "Asia/Hong_Kong", shanghai: "Asia/Shanghai", beijing: "Asia/Shanghai",
+      tokyo: "Asia/Tokyo", seoul: "Asia/Seoul", sydney: "Australia/Sydney", melbourne: "Australia/Melbourne",
+      bangkok: "Asia/Bangkok", jakarta: "Asia/Jakarta", "kuala lumpur": "Asia/Kuala_Lumpur",
+    };
+    const tzOffsetMinutes = (tz: string): number => {
+      const d = new Date();
+      const dtf = new Intl.DateTimeFormat("en-US", {
+        timeZone: tz, hour12: false, year: "numeric", month: "2-digit", day: "2-digit",
+        hour: "2-digit", minute: "2-digit", second: "2-digit",
+      });
+      const parts = Object.fromEntries(dtf.formatToParts(d).filter(p => p.type !== "literal").map(p => [p.type, p.value]));
+      const asUTC = Date.UTC(+parts.year, +parts.month - 1, +parts.day, +parts.hour, +parts.minute, +parts.second);
+      return Math.round((asUTC - d.getTime()) / 60000);
+    };
+    const projectTz = CITY_TZ[projectCity.toLowerCase()];
+    let internationalBlock = "";
+    if (projectTz) {
+      const diffHours = Math.round((tzOffsetMinutes(projectTz) - tzOffsetMinutes("Asia/Singapore")) / 60);
+      if (Math.abs(diffHours) >= 3) {
+        const tzShort = new Intl.DateTimeFormat("en-US", { timeZone: projectTz, timeZoneName: "short" })
+          .formatToParts(new Date()).find(p => p.type === "timeZoneName")?.value || projectTz.split("/").pop();
+        internationalBlock = [
+          ``,
+          `Because you are working in a different time zone, our team can align with your local calendar. Would you prefer a review call during **your local morning**?`,
+          ``,
+          `- **[ Yes, Schedule Morning Call ]** We'll call you during your local morning (${tzShort}).`,
+          `- **[ No, Standard Updates Are Fine ]** Continue with ${preferredContact} updates on the schedule above.`,
+        ].join("\n");
+      }
+    }
 
     const confirmation = [
       `**Request transmitted successfully.**`,
       ``,
-      `I have compiled ${cityLine} and forwarded your uploaded files directly to our **District 9 curatorial team**.`,
+      `I have compiled ${cityLine} and forwarded your uploaded files to our **District 9 curatorial team**.`,
       ``,
       slaLine,
+      internationalBlock,
       ``,
       `- **[ Return to Atelier Chat ]** Keep exploring the Curation while our team prepares your bespoke selection.`,
       `- **[ View My Open Requests ]** Track the status of this handoff and any other in-flight briefs.`,
     ].join("\n");
+
 
     setTimeline((prev) => [
       ...prev,
