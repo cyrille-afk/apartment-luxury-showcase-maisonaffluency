@@ -3044,7 +3044,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                                             return;
                                           }
                                           if (label === "View My Open Requests") {
-                                            navigate("/trade/inbox");
+                                            navigate("/trade/custom-requests");
                                             return;
                                           }
                                           void send(prompts[label], { displayText: label });
