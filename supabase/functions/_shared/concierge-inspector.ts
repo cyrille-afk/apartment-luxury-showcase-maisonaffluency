@@ -1256,6 +1256,14 @@ export function validateRequirementsCoverage(
   }
 
   // ---- Palette / materials check (hard when materials specified) --------
+  //
+  // Palette tokens rarely appear literally in a catalog title. A brief that
+  // says PALETTE: "bronze, beige" needs to match pieces whose finishes are
+  // patinated bronze / brushed brass / gilded metal, or whose textiles are
+  // ecru linen / bouclé / oat mohair — none of which contain the substring
+  // "bronze" or "beige". We resolve each requested token into a family of
+  // material + color synonyms and count a hit when ANY synonym is present in
+  // the piece's title/category/materials/finishes/dimensions haystack.
   let palette: PaletteCheck | null = null;
   let palette_ok = true;
   const requestedPalette = Array.from(
@@ -1267,12 +1275,13 @@ export function validateRequirementsCoverage(
     ),
   );
   if (requestedPalette.length > 0 && allItems.length > 0) {
+    const expanded = requestedPalette.map((tok) => ({ tok, syns: expandPaletteToken(tok) }));
     const matched: string[] = [];
     const offending: string[] = [];
     const offendingTitles: string[] = [];
     for (const it of allItems) {
       const hay = itemText.get(it.id) || "";
-      const hit = requestedPalette.some((tok) => tok && hay.includes(tok));
+      const hit = expanded.some(({ syns }) => syns.some((s) => s && hay.includes(s)));
       if (hit) matched.push(it.id);
       else {
         offending.push(it.id);
