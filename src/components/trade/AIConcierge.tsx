@@ -3252,6 +3252,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                                                       ? { Authorization: `Bearer ${sess.session.access_token}` }
                                                       : undefined,
                                                   });
+                                                  setConciergeStatus("appointment_requested");
                                                 } catch { /* non-fatal */ }
                                               })();
                                             }
