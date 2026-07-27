@@ -2246,6 +2246,36 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
   const showTypingDots = streaming && (!lastItem || lastItem.kind !== "msg" || lastItem.role !== "assistant");
   const copy = conciergeCopy(lang);
 
+  // Dynamic composer placeholder: before the user has told Felix a project
+  // city, prompt for it; after a city is locked in (via concierge-capture or
+  // the synchronous quickClientProfile qualifier), invite the next action.
+  const cityKnown = React.useMemo(() => {
+    try {
+      const raw = sessionStorage.getItem("concierge:profile");
+      if (raw) {
+        const q = JSON.parse(raw);
+        if (typeof q?.city === "string" && q.city.trim().length > 0) return true;
+      }
+    } catch { /* ignore */ }
+    for (const t of timeline) {
+      if (t.kind === "msg" && t.role === "user") {
+        const q = quickClientProfile(t.content);
+        if (q?.city) return true;
+      }
+    }
+    return false;
+  }, [timeline]);
+  const composerPlaceholder = cityKnown
+    ? (lang === "zh" ? "描述一件家具、上传图片，或请我起草报价…"
+      : lang === "th" ? "อธิบายชิ้นงาน อัปโหลดภาพ หรือขอให้ร่างใบเสนอราคา…"
+      : lang === "id" ? "Deskripsikan sebuah karya, unggah gambar, atau minta draf penawaran…"
+      : "Describe a piece, upload an image, or ask for a quote…")
+    : (lang === "zh" ? "输入您的项目所在城市…"
+      : lang === "th" ? "พิมพ์เมืองของโปรเจกต์ของคุณ…"
+      : lang === "id" ? "Ketik kota proyek Anda…"
+      : "Type your project city…");
+
+
   return (
     <>
       {/* Hidden trigger — clicked by the global ConciergeHeaderButton in TradeLayout.
