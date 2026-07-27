@@ -5749,7 +5749,9 @@ serve(async (req) => {
           const emitProposalWithRequirementsDiff = (
             proposal: Record<string, any>,
             previewRows: any[],
+            opts?: { softValidation?: boolean },
           ) => {
+
             let validationFailed = false;
             try {
               const cardTool = String(proposal?.tool || "unknown");
