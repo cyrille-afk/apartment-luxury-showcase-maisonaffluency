@@ -1703,7 +1703,12 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
         ? [{
             role: "user",
             content:
-              "[Discover-stage rule] The greeting invited the user to share a project city. If their reply does not answer that (e.g. they name a specific piece, a designer, a room, a style, a question, or anything else), DO NOT re-ask the city as a blocking gate and DO NOT reply with a scripted fallback. Instead: (1) acknowledge what they actually said and act on it — if they named a piece, discuss that piece; if they named a style/room, engage with it; (2) if the city (or another key qualifier like room or typology) is still unknown, weave ONE short, single-sentence confirmation into the same reply — e.g. \"— and, so I can tailor shipping and pricing, which city is the project in?\" — never as a standalone re-prompt; (3) keep moving the brief forward on the next turn even if the user still hasn't answered the qualifier. Never ask the same qualifier twice.",
+              "[Discover-stage rule] The greeting invited the user to share a project city. If their reply does not answer that (e.g. they name a specific piece, a designer, a room, a style, a question, or anything else), DO NOT re-ask the city as a blocking gate and DO NOT reply with a scripted fallback. Instead: (1) acknowledge what they actually said and act on it — if they named a piece, discuss that piece; if they named a style/room, engage with it; (2) if the city (or another key qualifier like room or typology) is still unknown, weave ONE short, single-sentence confirmation into the same reply — e.g. \"— and, so I can tailor shipping and pricing, which city is the project in?\" — never as a standalone re-prompt; (3) keep moving the brief forward on the next turn even if the user still hasn't answered the qualifier. Never ask the same qualifier twice.\n\n" +
+              "[City acknowledgment script] When the user's reply DOES name a project city (either alone, e.g. \"Singapore\" / \"London\" / \"New York\", or embedded in a sentence, e.g. \"it's for a penthouse in Miami, need it fast\"), your response MUST follow this exact 3-part structure and nothing else:\n" +
+              "  Line 1 — Acknowledge & lock: \"Perfect. I have localized our network's white-glove shipping routes and regional trade multipliers for {CITY}.\" If the user added a nuance (timeline, typology, urgency, budget signal), append ONE short clause referencing it — e.g. \"— prioritizing workshops with the most efficient transit lines to match your timeline.\"\n" +
+              "  Line 2 (blank line, then): \"Your generated quotes and PDF tear sheets will now reflect these precise details.\"\n" +
+              "  Line 3 (blank line, then a single question, choose the most contextual): \"What piece or artisan workshop are we exploring for this project?\" — or, if a mood board is clearly relevant — \"You can drop a mood board image here, or tell me exactly what specifications you are looking for.\"\n" +
+              "Do NOT add extra paragraphs, extra bullets, extra questions, or restate the welcome. Keep it under 60 words. Substitute {CITY} with the exact city the user named, preserving their spelling/casing.",
           }]
         : [];
 
@@ -2240,6 +2245,36 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
   const lastItem = timeline[timeline.length - 1];
   const showTypingDots = streaming && (!lastItem || lastItem.kind !== "msg" || lastItem.role !== "assistant");
   const copy = conciergeCopy(lang);
+
+  // Dynamic composer placeholder: before the user has told Felix a project
+  // city, prompt for it; after a city is locked in (via concierge-capture or
+  // the synchronous quickClientProfile qualifier), invite the next action.
+  const cityKnown = React.useMemo(() => {
+    try {
+      const raw = sessionStorage.getItem("concierge:profile");
+      if (raw) {
+        const q = JSON.parse(raw);
+        if (typeof q?.city === "string" && q.city.trim().length > 0) return true;
+      }
+    } catch { /* ignore */ }
+    for (const t of timeline) {
+      if (t.kind === "msg" && t.role === "user") {
+        const q = quickClientProfile(t.content);
+        if (q?.city) return true;
+      }
+    }
+    return false;
+  }, [timeline]);
+  const composerPlaceholder = cityKnown
+    ? (lang === "zh" ? "描述一件家具、上传图片，或请我起草报价…"
+      : lang === "th" ? "อธิบายชิ้นงาน อัปโหลดภาพ หรือขอให้ร่างใบเสนอราคา…"
+      : lang === "id" ? "Deskripsikan sebuah karya, unggah gambar, atau minta draf penawaran…"
+      : "Describe a piece, upload an image, or ask for a quote…")
+    : (lang === "zh" ? "输入您的项目所在城市…"
+      : lang === "th" ? "พิมพ์เมืองของโปรเจกต์ของคุณ…"
+      : lang === "id" ? "Ketik kota proyek Anda…"
+      : "Type your project city…");
+
 
   return (
     <>
@@ -3874,7 +3909,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  placeholder={copy.ask}
+                  placeholder={composerPlaceholder}
                   rows={1}
                   className="flex-1 resize-none rounded-xl border border-border bg-muted/50 px-3 py-2 font-body text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-accent"
                   disabled={streaming}
