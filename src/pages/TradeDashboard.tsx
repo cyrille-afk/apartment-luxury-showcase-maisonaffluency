@@ -153,7 +153,7 @@ const TradeDashboard = () => {
       await supabase.from("profiles").update({ has_seen_trade_intro: true }).eq("id", user.id);
     })();
     return () => { cancelled = true; };
-  }, [user, profile?.first_name]);
+  }, [user, profile?.first_name, isTradeUser]);
 
   useEffect(() => {
     const fetchData = async () => {
