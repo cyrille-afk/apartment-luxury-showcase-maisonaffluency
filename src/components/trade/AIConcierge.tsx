@@ -2854,6 +2854,17 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                 })()}
               </div>
               <div className="flex items-center gap-1 shrink-0 relative">
+              {surface === "trade" && user?.id && (
+                <button
+                  onPointerDown={(e) => e.stopPropagation()}
+                  onClick={() => setThreadsOpen(true)}
+                  className="text-muted-foreground hover:text-foreground transition-colors p-1 rounded-md hover:bg-muted"
+                  aria-label="Past conversations"
+                  title="Past conversations"
+                >
+                  <MessagesSquare className="h-3.5 w-3.5" />
+                </button>
+              )}
               <div className="relative">
                 <button
                   onPointerDown={(e) => e.stopPropagation()}
