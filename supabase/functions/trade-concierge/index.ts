@@ -28,6 +28,9 @@ import {
 } from "../_shared/variantFidelity.ts";
 import { extractFromMedia, toEmbeddingQuery, type ExtractedVision } from "../_shared/visionExtract.ts";
 
+const VISION_SIGNAL_TIMEOUT_MS = 7000;
+const RAG_VISION_WAIT_MS = 7000;
+
 // Lazy, per-invocation cache of the brand-level lead-time index. Empty table
 // today, but as it fills the fallback engages automatically.
 let _brandLeadIndex: Map<string, BrandLeadTimeEntry> | null = null;
@@ -2275,79 +2278,84 @@ async function persistInferredMemory(
 async function classifySentiment(
   apiKey: string,
   latestUserMessage: string,
+  opts: { bypassSemanticCache?: boolean } = {},
 ): Promise<{ sentiment: string; intent: string; escalate: boolean; needs_catalog: boolean }> {
   const fallback = { sentiment: "neutral", intent: "question", escalate: false, needs_catalog: false };
   if (!latestUserMessage || latestUserMessage.length < 2) return fallback;
+
+  const produce = async () => {
+    const resp = await chatFetch( {
+      method: "POST",
+      headers: { Authorization: `Bearer ${aiAuthKey(apiKey)}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: aiModel(SENTIMENT_MODEL),
+        temperature: 0,
+        max_completion_tokens: SENTIMENT_MAX_TOKENS,
+        messages: [
+          {
+            role: "system",
+            content:
+              "Classify the user's latest message in a luxury B2B furniture concierge chat. Return JSON only via the tool call. Set needs_catalog=true ONLY when the user asks about specific pieces, materials, designers, categories, or product recommendations — false for greetings, navigation, FAQs, or pricing-only questions. Be conservative on escalate.",
+          },
+          { role: "user", content: latestUserMessage.slice(0, 1500) },
+        ],
+        tools: [
+          {
+            type: "function",
+            function: {
+              name: "classify",
+              description: "Return sentiment + intent + escalation flag + catalog need.",
+              parameters: {
+                type: "object",
+                properties: {
+                  sentiment: { type: "string", enum: ["neutral", "delighted", "curious", "frustrated", "confused", "anxious"] },
+                  intent: { type: "string", enum: ["question", "request", "complaint", "compliment", "smalltalk", "spec_help", "pricing", "lead_time"] },
+                  escalate: { type: "boolean", description: "True when a human concierge should step in." },
+                  needs_catalog: { type: "boolean", description: "True when the response requires loading catalog pieces (designer/material/category/recommendation)." },
+                },
+                required: ["sentiment", "intent", "escalate", "needs_catalog"],
+                additionalProperties: false,
+              },
+            },
+          },
+        ],
+        tool_choice: { type: "function", function: { name: "classify" } },
+      }),
+    });
+    if (!resp.ok) throw new Error(`classifier http ${resp.status}`);
+    const data = await resp.json();
+    const args = data?.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments;
+    if (!args) throw new Error("classifier missing tool_call");
+    const parsed = JSON.parse(args);
+    return {
+      value: {
+        sentiment: parsed.sentiment || "neutral",
+        intent: parsed.intent || "question",
+        escalate: !!parsed.escalate,
+        needs_catalog: !!parsed.needs_catalog,
+      },
+      usage: data?.usage,
+    };
+  };
 
   // Semantic cache: paraphrased classifier inputs ("show me sofas" /
   // "what sofas do you have" / "any sofas?") collapse to the same answer.
   // Threshold 0.93 is intentionally strict — wrong intent flips the whole
   // downstream pipeline (catalog load vs. smalltalk).
   try {
-    const result = await withSemanticCache(
-      {
-        feature: "trade-concierge-sentiment",
-        model: SENTIMENT_MODEL,
-        apiKey,
-        prompt: latestUserMessage.slice(0, 1500),
-        threshold: 0.93,
-        ttlSec: 60 * 60 * 24 * 14, // 14d — intents are stable
-      },
-      async () => {
-        const resp = await chatFetch( {
-          method: "POST",
-          headers: { Authorization: `Bearer ${aiAuthKey(apiKey)}`, "Content-Type": "application/json" },
-          body: JSON.stringify({
-            model: aiModel(SENTIMENT_MODEL),
-            temperature: 0,
-            max_completion_tokens: SENTIMENT_MAX_TOKENS,
-            messages: [
-              {
-                role: "system",
-                content:
-                  "Classify the user's latest message in a luxury B2B furniture concierge chat. Return JSON only via the tool call. Set needs_catalog=true ONLY when the user asks about specific pieces, materials, designers, categories, or product recommendations — false for greetings, navigation, FAQs, or pricing-only questions. Be conservative on escalate.",
-              },
-              { role: "user", content: latestUserMessage.slice(0, 1500) },
-            ],
-            tools: [
-              {
-                type: "function",
-                function: {
-                  name: "classify",
-                  description: "Return sentiment + intent + escalation flag + catalog need.",
-                  parameters: {
-                    type: "object",
-                    properties: {
-                      sentiment: { type: "string", enum: ["neutral", "delighted", "curious", "frustrated", "confused", "anxious"] },
-                      intent: { type: "string", enum: ["question", "request", "complaint", "compliment", "smalltalk", "spec_help", "pricing", "lead_time"] },
-                      escalate: { type: "boolean", description: "True when a human concierge should step in." },
-                      needs_catalog: { type: "boolean", description: "True when the response requires loading catalog pieces (designer/material/category/recommendation)." },
-                    },
-                    required: ["sentiment", "intent", "escalate", "needs_catalog"],
-                    additionalProperties: false,
-                  },
-                },
-              },
-            ],
-            tool_choice: { type: "function", function: { name: "classify" } },
-          }),
-        });
-        if (!resp.ok) throw new Error(`classifier http ${resp.status}`);
-        const data = await resp.json();
-        const args = data?.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments;
-        if (!args) throw new Error("classifier missing tool_call");
-        const parsed = JSON.parse(args);
-        return {
-          value: {
-            sentiment: parsed.sentiment || "neutral",
-            intent: parsed.intent || "question",
-            escalate: !!parsed.escalate,
-            needs_catalog: !!parsed.needs_catalog,
+    const result = opts.bypassSemanticCache
+      ? { ...(await produce()), cached: false, promptHash: null }
+      : await withSemanticCache(
+          {
+            feature: "trade-concierge-sentiment",
+            model: SENTIMENT_MODEL,
+            apiKey,
+            prompt: latestUserMessage.slice(0, 1500),
+            threshold: 0.93,
+            ttlSec: 60 * 60 * 24 * 14, // 14d — intents are stable
           },
-          usage: data?.usage,
-        };
-      },
-    );
+          produce,
+        );
 
     logAiUsage({
       feature: "trade-concierge-sentiment",
@@ -2644,7 +2652,11 @@ export function reconcileMaterialsWithSource(
   return { materials: out.slice(0, 12), repair };
 }
 
-async function extractBrief(apiKey: string, latestUserMessage: string): Promise<ExtractedBrief> {
+async function extractBrief(
+  apiKey: string,
+  latestUserMessage: string,
+  opts: { bypassSemanticCache?: boolean } = {},
+): Promise<ExtractedBrief> {
   if (!latestUserMessage || latestUserMessage.length < 4) return EMPTY_BRIEF;
   try {
     const result = await withSemanticCache(
@@ -2655,6 +2667,7 @@ async function extractBrief(apiKey: string, latestUserMessage: string): Promise<
         prompt: latestUserMessage.slice(0, 1800),
         threshold: 0.93,
         ttlSec: 60 * 60 * 24 * 7,
+        bypass: opts.bypassSemanticCache,
       },
       async () => {
         const resp = await chatFetch( {
@@ -4291,6 +4304,9 @@ serve(async (req) => {
         Array.isArray(m.content) &&
         m.content.some((p: any) => p?.type === "image_url" || p?.type === "file"),
     );
+    const latestUserTurn = [...messages].reverse().find((m: any) => m?.role === "user");
+    const latestUserParts = Array.isArray(latestUserTurn?.content) ? latestUserTurn.content : [];
+    const latestTurnHasAttachments = latestUserParts.some((p: any) => p?.type === "image_url" || p?.type === "file");
 
     // Kick off vision-signal extraction on the latest user turn's first image
     // so we can surface "detected signals" (style / palette / material /
@@ -4300,12 +4316,10 @@ serve(async (req) => {
     let visionSignalsPromise: Promise<ExtractedVision | null> = Promise.resolve(null);
     {
       const lovableKey = Deno.env.get("LOVABLE_API_KEY");
-      const lastUser = [...messages].reverse().find((m: any) => m?.role === "user");
-      const parts = Array.isArray(lastUser?.content) ? lastUser.content : [];
-      const firstImage = parts.find(
+      const firstImage = latestUserParts.find(
         (p: any) => p?.type === "image_url" && typeof p.image_url?.url === "string" && p.image_url.url.length > 0,
       );
-      const latestText = parts
+      const latestText = latestUserParts
         .filter((p: any) => p?.type === "text")
         .map((p: any) => (typeof p?.text === "string" ? p.text : ""))
         .join(" ")
@@ -4324,7 +4338,7 @@ serve(async (req) => {
             console.warn("[trade-concierge] vision extraction failed:", e);
             return null;
           }),
-          new Promise<null>((resolve) => setTimeout(() => resolve(null), 6000)),
+          new Promise<null>((resolve) => setTimeout(() => resolve(null), VISION_SIGNAL_TIMEOUT_MS)),
         ]);
       }
     }
@@ -4389,7 +4403,7 @@ serve(async (req) => {
     // planner round-trips entirely — they were dominating latency on replies
     // like "London", "yes", "go on". Defaults match each helper's own fallback.
     const wordCount = lastUserMsg.trim().split(/\s+/).filter(Boolean).length;
-    const isShortFollowUp = wordCount <= 4 && !heuristicNeedsPieces;
+    const isShortFollowUp = wordCount <= 4 && !heuristicNeedsPieces && !latestTurnHasAttachments;
 
     const mentionedProjectIdPromise = activeProjectId ? Promise.resolve(null) : resolveMentionedProjectId(supabase, userId, lastUserMsg);
     // Hard-constraint pre-filter derived from the user's latest message:
@@ -4418,27 +4432,24 @@ serve(async (req) => {
         throw e;
       }
     };
-    // If the latest turn has a moodboard/reference image, briefly await the
-    // vision extractor (capped at 2.5s) and mix its style/palette/materials
+    // If the latest turn has a moodboard/reference image, await the vision
+    // extractor long enough to actually use its style/palette/materials
     // tokens into the embedding query. Without this, two different mood
     // boards paired with the same Brief Builder text produce identical
     // embeddings → identical CURATED PIECES → identical picks. Text-only
     // turns skip the wait entirely.
     const buildRagQuery = async (): Promise<string> => {
-      const lastUser = [...messages].reverse().find((m: any) => m?.role === "user");
-      const hasImage = Array.isArray(lastUser?.content) &&
-        lastUser.content.some((p: any) => p?.type === "image_url" || p?.type === "file");
-      if (!hasImage) return lastUserMsg;
+      if (!latestTurnHasAttachments) return lastUserMsg;
       const vision = await Promise.race<ExtractedVision | null>([
         visionSignalsPromise,
-        new Promise<null>((resolve) => setTimeout(() => resolve(null), 2500)),
+        new Promise<null>((resolve) => setTimeout(() => resolve(null), RAG_VISION_WAIT_MS)),
       ]).catch(() => null);
       if (!vision) return lastUserMsg;
       const augmented = toEmbeddingQuery(vision, lastUserMsg);
       console.log(`[concierge RAG] vision-augmented query: ${augmented.slice(0, 240)}`);
       return augmented || lastUserMsg;
     };
-    const ragPromise = (heuristicNeedsPieces || lastUserMsg.length > 40)
+    const ragPromise = (latestTurnHasAttachments || heuristicNeedsPieces || lastUserMsg.length > 40)
       ? buildRagQuery().then((q) =>
           loadRelevantPieces(supabase, LOVABLE_API_KEY, q, userId, 40, hasAnyPreConstraint ? preRequestConstraints : undefined),
         )
@@ -4447,8 +4458,8 @@ serve(async (req) => {
     const [sentiment, extractedBrief, ragResult, userBoards, userSignals, userMemory, mentionedProjectId, openQuotes, discountRow, cadDocuments, productCadAssets] = await Promise.all([
       isShortFollowUp
         ? Promise.resolve({ sentiment: "neutral", intent: "question", escalate: false, needs_catalog: false })
-        : timed("classifySentiment", classifySentiment(LOVABLE_API_KEY, lastUserMsg)),
-      isShortFollowUp ? Promise.resolve(EMPTY_BRIEF) : timed("extractBrief", extractBrief(LOVABLE_API_KEY, lastUserMsg)),
+        : timed("classifySentiment", classifySentiment(LOVABLE_API_KEY, lastUserMsg, { bypassSemanticCache: latestTurnHasAttachments })),
+      isShortFollowUp ? Promise.resolve(EMPTY_BRIEF) : timed("extractBrief", extractBrief(LOVABLE_API_KEY, lastUserMsg, { bypassSemanticCache: latestTurnHasAttachments })),
       timed("rag", ragPromise),
       timed("userBoards", loadUserBoards(supabase, userId)),
       timed("userSignals", loadUserSignals(supabase, userId)),
@@ -4537,7 +4548,7 @@ serve(async (req) => {
     const userSignalsBlock = userMemory ? `${userSignals}\n\n${userMemory}` : userSignals;
 
     // Decide final catalog mode: classifier wins, heuristic is the fallback. RAG replaces full load when it returned anything.
-    const includePieces = sentiment.needs_catalog || heuristicNeedsPieces || effectiveBrief.plan.includes("propose_tearsheet") || visualizationNeedsCatalogPicks;
+    const includePieces = latestTurnHasAttachments || sentiment.needs_catalog || heuristicNeedsPieces || effectiveBrief.plan.includes("propose_tearsheet") || visualizationNeedsCatalogPicks;
     // If the user names a specific designer, load ONLY that designer's rows
     // (full for them, nothing else) — top-K RAG can miss items, and shipping
     // the whole catalog is wasteful when the question is scoped to one name.

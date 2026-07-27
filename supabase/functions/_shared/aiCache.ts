@@ -111,6 +111,8 @@ export interface SemanticCacheArgs extends CacheArgs {
   apiKey: string;
   /** Cosine similarity required to count as a hit. Default 0.92. */
   threshold?: number;
+  /** Skip exact + semantic lookup and do not persist this response. */
+  bypass?: boolean;
 }
 
 export interface SemanticCacheResult<T> extends CacheResult<T> {
@@ -129,6 +131,18 @@ export async function withSemanticCache<T>(
   const threshold = args.threshold ?? 0.92;
   const ttl = args.ttlSec ?? 60 * 60 * 24 * 30;
   const sb = client();
+
+  if (args.bypass) {
+    const produced = await produce();
+    return {
+      value: produced.value,
+      cached: false,
+      promptHash,
+      similarity: 0,
+      source: "miss",
+      usage: produced.usage,
+    };
+  }
 
   // 1. Exact-hash fast path (free, no embedding needed).
   if (sb) {
