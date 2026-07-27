@@ -3343,7 +3343,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                                         className="group flex flex-col items-start rounded-xl border border-foreground/20 bg-background/70 px-3.5 py-2 text-left shadow-sm transition hover:border-foreground/50 hover:bg-background focus:outline-none focus:ring-2 focus:ring-foreground/30"
                                       >
                                         <span className="text-sm font-semibold text-foreground">{label}</span>
-                                        {tail ? <span className="text-xs text-muted-foreground leading-snug">{tail}</span> : null}
+                                        {tail ? <span className="text-xs italic text-muted-foreground leading-snug">{tail}</span> : null}
                                       </button>
                                     </li>
                                   );
