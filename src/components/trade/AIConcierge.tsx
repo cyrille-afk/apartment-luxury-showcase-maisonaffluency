@@ -1263,26 +1263,30 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
     const sgtHour = Number(sgtParts.find((p) => p.type === "hour")?.value ?? "0");
     const sgtWeekday = String(sgtParts.find((p) => p.type === "weekday")?.value ?? "");
     const isWeekend = sgtWeekday === "Sat" || sgtWeekday === "Sun";
-    const isBusinessHours = !isWeekend && sgtHour >= 9 && sgtHour < 18;
+    // Standard "2 business hours" window: Mon–Fri 09:00–16:00 SGT.
+    // After 16:00 we can no longer honor a 2-hour turnaround before close.
+    const isBusinessHours = !isWeekend && sgtHour >= 9 && sgtHour < 16;
+    // Variation B applies Fri after 16:00 SGT and all weekend — next contact is Monday 11:00 AM SGT.
+    const rollsToMonday = isWeekend || (sgtWeekday === "Fri" && sgtHour >= 16);
 
-    // Next-opening label ("first thing in the morning" / "Monday morning" / "later this morning").
     const nextOpeningLabel = (() => {
-      if (isWeekend) return "first thing Monday morning";
+      if (rollsToMonday) return "first thing Monday morning";
       if (sgtHour < 9) return "later this morning";
-      return "first thing in the morning";
+      return "first thing tomorrow morning";
     })();
-    const callbackDayLabel = isWeekend ? "on Monday" : "";
-    const closedReason = isWeekend
+    const callbackDayLabel = rollsToMonday ? " on Monday" : "";
+    const closedReason = rollsToMonday
       ? `Our **Singapore studio is currently closed for the weekend**.`
-      : `Our **Singapore studio is currently closed** (outside 09:00–18:00 SGT).`;
+      : `Our **Singapore studio is currently closed** (outside 09:00–16:00 SGT).`;
 
     const slaLine = isBusinessHours
       ? `A human concierge will review your layout, coordinate with our artisan workshops, and contact you ${contactLine} within the next **2 business hours** with a hand-selected digital curation.`
       : [
           closedReason,
           ``,
-          `A human concierge will personally review your layout **${nextOpeningLabel}** and contact you ${contactLine} by **11:00 AM SGT${callbackDayLabel ? " " + callbackDayLabel : ""}** with a hand-selected digital curation.`,
+          `A human concierge will personally review your layout **${nextOpeningLabel}** and contact you ${contactLine} by **11:00 AM SGT${callbackDayLabel}** with a hand-selected digital curation.`,
         ].join("\n");
+
 
 
     const confirmation = [
