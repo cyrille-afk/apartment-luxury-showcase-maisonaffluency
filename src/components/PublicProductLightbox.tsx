@@ -142,6 +142,8 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
   const prefersReducedMotion = useReducedMotion();
   const [visible, setVisible] = useState(true);
   const requestClose = useCallback(() => setVisible(false), []);
+  // If the parent swaps in a new product while we're still mounted, reopen.
+  useEffect(() => { if (propProduct?.id) setVisible(true); }, [propProduct?.id]);
   const overlayMotion = prefersReducedMotion
     ? { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 }, transition: { duration: 0.12, ease: "linear" as const } }
     : { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 }, transition: { duration: 0.25 } };

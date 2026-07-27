@@ -1548,6 +1548,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
           {/* Product lightbox inside Dialog so it's within focus-trap scope */}
           {!onHotspotAddToQuote && hotspotLightboxProduct && (
             <PublicProductLightbox
+              key={`hotspot-inline-${hotspotLightboxProduct.id}`}
               product={hotspotLightboxProduct}
               allPicks={allCuratorPicks.filter(p => p.brand_name === hotspotLightboxProduct?.brand_name)}
               onClose={() => setHotspotLightboxProduct(null)}
@@ -1567,8 +1568,9 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
       )}
       <PrivateTourDialog open={tourDialogOpen} onOpenChange={setTourDialogOpen} />
       {/* Render outside Dialog for non-lightbox hotspot views */}
-      {!onHotspotAddToQuote && !lightboxOpen && (
+      {!onHotspotAddToQuote && !lightboxOpen && hotspotLightboxProduct && (
         <PublicProductLightbox
+          key={`hotspot-portal-${hotspotLightboxProduct.id}`}
           product={hotspotLightboxProduct}
           allPicks={allCuratorPicks.filter(p => p.brand_name === hotspotLightboxProduct?.brand_name)}
           onClose={() => setHotspotLightboxProduct(null)}
