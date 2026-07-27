@@ -426,13 +426,36 @@ export async function resolveProjectCity(rawInput: string): Promise<CityResoluti
 export function looksLikeCityAssertion(text: string): boolean {
   const t = (text || "").trim();
   if (!t) return false;
-  if (t.length > 120) return false;
-  if (/\b(project (is )?in|based in|located in|our project (is )?in|city[:\s]|location[:\s])\b/i.test(t)) return true;
-  // Short, no sentence punctuation, no digits, few words → probably a city.
+  if (t.length > 160) return false;
+  // Explicit location framing (incl. corrections and neighborhood narrows).
+  if (/\b(project (is )?in|based in|located in|our project (is )?in|city[:\s]|location[:\s]|actually (it'?s )?(in )?|it'?s (actually )?in|make (it|that) |change (it|that) to|update (the )?(city|location) to|neighou?rhood|borough|district|arrondissement|zip|postcode|brownstone|townhouse|penthouse|apartment|villa|bungalow) /i.test(t + " ")) return true;
+  // Short place phrases (allow up to 6 words for "Brooklyn Heights, New York").
   const wordCount = t.split(/\s+/).length;
-  if (wordCount <= 4 && !/[.!?]/.test(t) && !/\d/.test(t)) return true;
+  if (wordCount <= 6 && !/[.!?]/.test(t) && !/\d/.test(t)) return true;
   return false;
 }
+
+/**
+ * Walk the full message history newest → oldest and return the most recent
+ * user turn that looks like a project-location assertion. This is what makes
+ * "actually Brooklyn Heights" replace the earlier "NYC" — latest wins.
+ */
+export function findLatestCityAssertion(messages: Array<{ role: string; content: unknown }>): string | null {
+  for (let i = messages.length - 1; i >= 0; i--) {
+    const m = messages[i];
+    if (m.role !== "user") continue;
+    let text = "";
+    if (typeof m.content === "string") text = m.content;
+    else if (Array.isArray(m.content)) {
+      text = (m.content as Array<{ type?: string; text?: string }>)
+        .filter((p) => p?.type === "text" && typeof p.text === "string")
+        .map((p) => p.text as string).join(" ");
+    }
+    if (looksLikeCityAssertion(text)) return text.trim();
+  }
+  return null;
+}
+
 
 /**
  * Build the system-note lock-in that we prepend to the LLM call. Felix reads
