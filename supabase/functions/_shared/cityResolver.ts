@@ -12,7 +12,7 @@
 // geocoder itself fails or nothing sensible comes back, we degrade to the
 // dictionary/fallback path — Felix always gets a lock-in.
 
-export type CityMatchType = "exact" | "alias" | "fuzzy" | "geocoded" | "fallback" | "unknown";
+export type CityMatchType = "exact" | "alias" | "fuzzy" | "geocoded" | "fallback" | "unknown" | "gibberish";
 
 export interface CityResolution {
   input: string;
@@ -294,6 +294,32 @@ async function geocodeViaGateway(input: string): Promise<{ country?: string; reg
  * Runs the dictionary + fuzzy path first (instant, no external call); only
  * falls through to silent Google Maps geocoding for genuinely unknown input.
  */
+/**
+ * Detect obvious gibberish/keyboard-mash so we don't fabricate a freight hub
+ * for it. Runs BEFORE the dictionary/fuzzy path so that inputs like
+ * "asdfg123", "qwerty", "xxxxx" are flagged and Felix asks for clarification
+ * instead of guessing London/EMEA. This is deliberately conservative — real
+ * short city names (NYC, LA, HK) and typo'd cities still resolve normally.
+ */
+export function looksLikeGibberish(rawInput: string): boolean {
+  const raw = (rawInput || "").trim();
+  if (!raw) return false;
+  const t = raw.toLowerCase();
+  // Contains digits mixed into a single alphanumeric token → not a city.
+  if (/^[a-z0-9]+$/i.test(t) && /\d/.test(t) && /[a-z]/i.test(t)) return true;
+  // Pure digits.
+  if (/^\d+$/.test(t)) return true;
+  // Long single unbroken alphabetic string with no vowels (e.g. "xckdfgh") —
+  // real city names virtually always contain at least one vowel.
+  if (/^[a-z]{5,}$/i.test(t) && !/[aeiouy]/i.test(t)) return true;
+  // Common keyboard-mash rows.
+  const KEYBOARD_ROWS = ["qwerty", "asdfgh", "zxcvbn", "qwertyui", "asdfghjkl", "zxcvbnm"];
+  if (KEYBOARD_ROWS.some((row) => t.startsWith(row.slice(0, Math.min(row.length, t.length))) && t.length >= 5)) return true;
+  // Same character repeated 4+ times ("xxxxx", "aaaa1").
+  if (/^(.)\1{3,}$/i.test(t.replace(/\d+$/, ""))) return true;
+  return false;
+}
+
 export async function resolveProjectCity(rawInput: string): Promise<CityResolution> {
   const input = (rawInput || "").trim();
   const key = norm(input);
@@ -307,6 +333,19 @@ export async function resolveProjectCity(rawInput: string): Promise<CityResoluti
       matchType: "unknown",
       rationale: HUB_RATIONALES[hub],
       alternatives: pickAlternatives("Global", hub),
+    };
+  }
+
+  // 0) Gibberish / keyboard-mash guard — refuse to invent a hub for this.
+  if (looksLikeGibberish(input)) {
+    return {
+      input,
+      resolvedCity: null,
+      hub: "",
+      region: "Global",
+      matchType: "gibberish",
+      rationale: "input could not be mapped to a real location",
+      alternatives: [],
     };
   }
 
@@ -415,6 +454,16 @@ export function buildCityLockSystemNote(r: CityResolution): string {
       `Do NOT surface the misspelling, do NOT ask the user to re-type the city, then proceed to the next contextual step (invite the piece, mood, or brief).`
     );
   }
+  if (r.matchType === "gibberish") {
+    return (
+      `## CITY LOCK — INVALID INPUT (LOCATION VALIDATION FAILED)\n` +
+      `User typed: "${r.input}" — this is not a real geographic location (random characters, numbers, or keyboard-mash).\n\n` +
+      `CRITICAL: Do NOT guess a primary hub. Do NOT assume a geographic region. Do NOT propose London, Dubai, Hong Kong or any other city as a fallback. Do NOT continue the onboarding flow until a valid location is provided.\n\n` +
+      `Reply with EXACTLY this text, substituting the user's input verbatim in place of [User's Input] and nothing else:\n\n` +
+      `"I want to ensure your shipping quotes and lead times are completely accurate, but I am unable to map '${r.input}' to a valid location or freight network.\n\n` +
+      `Could you please provide the nearest major city or global design hub for this project?"`
+    );
+  }
   if (r.matchType === "fallback") {
     return (
       `## CITY LOCK — TIER 2 FALLBACK (regional hint)\n` +
@@ -424,10 +473,10 @@ export function buildCityLockSystemNote(r: CityResolution): string {
       `Reply in Felix's voice with the TIER 2 shape: acknowledge without judgement, propose ${r.hub} with the one-line "why this hub" reason, and explicitly invite an override with ${alt} or any other city. Never say "city not found".`
     );
   }
-  // unknown
+  // unknown — real place but too obscure to map
   return (
-    `## CITY LOCK — TIER 2 FALLBACK (unrecognised)\n` +
-    `User typed: "${r.input}" — genuinely unrecognised or too obscure to map.\n` +
+    `## CITY LOCK — TIER 2 FALLBACK (unrecognised real location)\n` +
+    `User typed: "${r.input}" — appears to be a real but obscure location too small to map directly.\n` +
     `Default suggested hub: ${r.hub} — ${r.rationale}.\n` +
     `Offer alternatives: ${alt}.\n\n` +
     `Reply in Felix's voice with the TIER 2 shape: acknowledge without judgement, propose ${r.hub} with a one-line "why this hub" reason (proximity, customs corridor, or established white-glove route), and explicitly invite an override with ${alt} or any other city they name. Never say "city not found" or surface any technical error.`
