@@ -860,6 +860,85 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
     });
   }, []);
 
+  // --- Lovable Cloud persistence (per-user) --------------------------------
+  // sessionStorage is per-tab and gets wiped when the preview iframe is torn
+  // down or the tab is closed. For authenticated concierge users we mirror
+  // the timeline to `public.concierge_sessions` (one row per auth.uid) so the
+  // conversation survives reloads, tab closes, and device switches.
+  const hydratedFromCloudRef = useRef(false);
+  const cloudSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const cloudLastPayloadRef = useRef<string>("");
+
+  // Hydrate from cloud on first mount once we have a user.
+  useEffect(() => {
+    if (!user?.id) return;
+    if (hydratedFromCloudRef.current) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const { data, error } = await supabase
+          .from("concierge_sessions")
+          .select("timeline")
+          .eq("user_id", user.id)
+          .maybeSingle();
+        if (cancelled) return;
+        hydratedFromCloudRef.current = true;
+        if (error || !data?.timeline) return;
+        const remote = data.timeline as unknown;
+        if (!Array.isArray(remote) || remote.length === 0) return;
+        // Only replace the local timeline if it's still the pristine
+        // greeting-only state; otherwise the user has already typed in this
+        // tab and their in-flight turns must win.
+        setTimeline((prev) => {
+          const hasUserMsg = prev.some((t) => t.kind === "msg" && t.role === "user");
+          if (hasUserMsg) return prev;
+          const cleaned = sanitizeTimelineForAttachments(remote as TimelineItem[]);
+          return cleaned.length > 0 ? cleaned : prev;
+        });
+      } catch {
+        hydratedFromCloudRef.current = true;
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [user?.id]);
+
+  // Debounced upsert of the timeline to cloud on every change. Only runs once
+  // the user has actually engaged (avoids writing an empty greeting row for
+  // every visitor) and only after hydration to prevent clobbering the cloud
+  // copy with an empty pre-hydration state.
+  useEffect(() => {
+    if (!user?.id) return;
+    if (!hydratedFromCloudRef.current) return;
+    const hasUserMsg = timeline.some((t) => t.kind === "msg" && t.role === "user");
+    if (!hasUserMsg) return;
+    if (cloudSaveTimerRef.current) clearTimeout(cloudSaveTimerRef.current);
+    cloudSaveTimerRef.current = setTimeout(async () => {
+      try {
+        // Strip large attachment previews before shipping to the DB to keep
+        // rows small; the original files live in storage / vision extract.
+        const compact = timeline.map((t) =>
+          t.kind === "msg" && t.attachments?.length
+            ? { ...t, attachments: t.attachments.map(({ previewUrl: _omit, ...rest }) => rest) }
+            : t,
+        );
+        const payload = JSON.stringify(compact);
+        if (payload === cloudLastPayloadRef.current) return;
+        cloudLastPayloadRef.current = payload;
+        await supabase
+          .from("concierge_sessions")
+          .upsert(
+            { user_id: user.id, timeline: compact as any, last_active_at: new Date().toISOString() },
+            { onConflict: "user_id" },
+          );
+      } catch {
+        // Non-fatal: sessionStorage still holds the in-tab copy.
+      }
+    }, 800);
+    return () => {
+      if (cloudSaveTimerRef.current) clearTimeout(cloudSaveTimerRef.current);
+    };
+  }, [timeline, user?.id]);
+
   // If the user deletes all project folders/tearsheets and quotes, the trade
   // tools routes should no longer keep Felix in a stale tearsheet/quote mode.
   useEffect(() => {
