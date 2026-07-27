@@ -1192,6 +1192,27 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
   const send = useCallback(async (overrideText?: string, opts?: { displayText?: string }) => {
     const text = (overrideText ?? input).trim();
 
+    // Sentinel: user clicked the "Open Architectural Brief" CTA. Load the
+    // prefilled brief into the composer and open the Brief Builder — do NOT
+    // send anything to the LLM. This keeps the auto-open deferred to an
+    // explicit user action so the builder never appears at the same time as
+    // the assistant's announcement.
+    if (text === "__OPEN_BRIEF_BUILDER__") {
+      const prefill = pendingBriefPrefillRef.current;
+      if (prefill) {
+        setInput(prefill);
+        try {
+          const scope = sessionStorage.getItem("trade:lastProjectFilter") || "global";
+          const expanded = JSON.stringify({ block1: true, block2: true, block3: true });
+          localStorage.setItem(`concierge:briefBuilder:expanded:${scope}`, expanded);
+          localStorage.setItem("concierge:briefBuilder:expanded", expanded);
+        } catch {}
+        pendingBriefPrefillRef.current = null;
+      }
+      setBriefBuilderOpen(true);
+      return;
+    }
+
     // Allow sending with attachments only (no text) — use a tiny default prompt.
     const hasFiles = attachments.length > 0;
     if (!text && !hasFiles) return;
