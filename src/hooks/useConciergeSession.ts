@@ -133,7 +133,7 @@ function ensureSession(existing: ConciergeSession | null): ConciergeSession {
     quoteId: null,
     streamId: null,
     projectName: null,
-  };
+    projectCity: null,
 }
 
 // Module-level mutators — usable from event handlers without needing the hook.
