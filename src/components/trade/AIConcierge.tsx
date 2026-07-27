@@ -2489,6 +2489,42 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                 >
                   {name}
                 </span>
+                {conciergeStatus && (() => {
+                  const statusMeta: Record<NonNullable<typeof conciergeStatus>, { label: string; dot: string; text: string; ring: string }> = {
+                    pending_review: {
+                      label: "Pending Gallery Review",
+                      dot: "bg-amber-400",
+                      text: modalMode ? "text-cream/90" : "text-amber-700",
+                      ring: modalMode ? "border-cream/25 bg-cream/10" : "border-amber-500/30 bg-amber-500/10",
+                    },
+                    assigning_curator: {
+                      label: "Assigning Curator",
+                      dot: "bg-amber-500 animate-pulse",
+                      text: modalMode ? "text-cream/90" : "text-amber-700",
+                      ring: modalMode ? "border-cream/25 bg-cream/10" : "border-amber-500/30 bg-amber-500/10",
+                    },
+                    curator_assigned: {
+                      label: "Curator Assigned",
+                      dot: "bg-emerald-500",
+                      text: modalMode ? "text-cream/90" : "text-emerald-700",
+                      ring: modalMode ? "border-cream/25 bg-cream/10" : "border-emerald-500/30 bg-emerald-500/10",
+                    },
+                  };
+                  const m = statusMeta[conciergeStatus];
+                  return (
+                    <span
+                      className={cn(
+                        "hidden sm:inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 font-body text-[10px] uppercase tracking-[0.1em]",
+                        m.ring,
+                        m.text,
+                      )}
+                      title={m.label}
+                    >
+                      <span className={cn("h-1.5 w-1.5 rounded-full", m.dot)} />
+                      {m.label}
+                    </span>
+                  );
+                })()}
               </div>
               <div className="flex items-center gap-1 shrink-0 relative">
               <div className="relative">
