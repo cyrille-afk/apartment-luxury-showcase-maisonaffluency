@@ -6723,7 +6723,8 @@ serve(async (req) => {
                 },
                 preview,
               };
-              emitProposalWithRequirementsDiff(proposal, preview);
+              emitProposalWithRequirementsDiff(proposal, preview, { softValidation: !!incrementalAddMatch });
+
             } else {
               const proposal = {
                 tool: "propose_tearsheet",
