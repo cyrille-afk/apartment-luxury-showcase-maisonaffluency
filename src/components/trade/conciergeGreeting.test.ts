@@ -72,9 +72,9 @@ describe("greetingForContext", () => {
     }
   });
 
-  it("uses a Maison Affluency curation opener for Discover stage", () => {
+  it("uses a Maison Affluency Atelier opener for Discover stage", () => {
     const msg = greetingForContext("Discover", "/trade/dashboard");
-    expect(msg).toMatch(/^Welcome to Maison Affluency/);
+    expect(msg).toMatch(/^Welcome to the Maison Affluency Atelier/);
   });
 
   it("composes correctly when stageFromPath feeds greetingForContext", () => {
@@ -154,7 +154,7 @@ describe("language selector", () => {
   it("falls back to English when lang missing entirely", () => {
     // @ts-expect-error invalid lang
     const msg = greetingForContext("Discover", "/trade", "luxury", "ja");
-    expect(msg).toMatch(/Welcome to Maison Affluency/);
+    expect(msg).toMatch(/Welcome to the Maison Affluency Atelier/);
   });
 
   it("persists and reloads lang via localStorage", () => {
