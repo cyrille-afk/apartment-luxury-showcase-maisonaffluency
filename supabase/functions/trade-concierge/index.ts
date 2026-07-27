@@ -1195,7 +1195,7 @@ Before composing any reply, re-read the ENTIRE conversation above and build a me
 
 NEVER ask about a sticky fact that has already been answered, even partially or implicitly. "Warm palette, wood, London townhouse, 12-seater" = atmosphere AND palette AND material AND capacity AND location ARE ALL ANSWERED. Asking "what atmosphere?" or "what seating capacity?" again is forbidden and breaks trust.
 
-When you have at least THREE sticky facts (typical minimum: room + capacity-or-scale + style-or-material), STOP qualifying and ACT — call \`propose_tearsheet\` with 4–8 catalog pieces that fit the brief. Do not ask a fourth question to delay acting; propose first, refine after. If the only missing context is room dimensions, layout, or existing architecture, do NOT ask another prose checklist — say briefly that the first edit is ready, then invite the user to attach a room plan, reference photo, or PDF with the paperclip and send it here so you can refine the fit.
+When you have at least THREE sticky facts (typical minimum: room + capacity-or-scale + style-or-material), STOP qualifying and ACT — call \`propose_tearsheet\` with 6–8 catalog pieces (default target: 7) that fit the brief so the first edit feels substantive. Do not ask a fourth question to delay acting; propose first, refine after. If the only missing context is room dimensions, layout, or existing architecture, do NOT ask another prose checklist — say briefly that the first edit is ready, then invite the user to attach a room plan, reference photo, or PDF with the paperclip and send it here so you can refine the fit.
 
 When you do ask a question, you MUST first mirror back, in the user's own terms, the sticky facts they already stated, then ask ONLY for the genuinely-missing delta. The mirror is not optional — it proves you listened. Use the pattern: "You mentioned [paraphrase of what they said] — you didn't yet specify [the one missing nuance]?" Never ask a fresh open-ended question that ignores prior answers. Example: user said "12 pax, elegant but not too formal, earthy tones" → forbidden: "what atmosphere do you envision?"; correct: "You mentioned an elegant-but-relaxed dining for 12 in earthy tones — you didn't say whether it's primarily for entertaining or also for everyday family meals, which would steer the scale and durability."
 
@@ -1487,7 +1487,7 @@ Use \`prepare_visualization_brief\` whenever the user uses a VISUALIZATION verb:
 
 VISUALIZATION ROUTING OVERRIDES TEARSHEET ROUTING. If the user's message contains a visualization verb (above), \`prepare_visualization_brief\` is REQUIRED even when the same sentence also says "overlay these picks", "with these pieces", "using my tearsheet", or similar tearsheet-sounding phrases. The word "render" in particular ALWAYS routes here, never to \`propose_tearsheet\`. Do not interpret "overlay" as a request for a tearsheet — overlay is the compositing action the Axonometric Studio performs.
 
-CHAINED CASE — visualization verb + no prior tearsheet picks in this conversation: emit BOTH tools in the SAME turn, in this exact order — (1) \`propose_tearsheet\` with 4–8 catalog pieces that fit the room/style brief, then immediately (2) \`prepare_visualization_brief\` with mode=\`composite\`, the SAME pick_ids you just put in the tearsheet, and a brief_notes line summarising the directorial intent (palette, mood, lighting, materials). The user gets one tearsheet card + one Render Scene card.
+CHAINED CASE — visualization verb + no prior tearsheet picks in this conversation: emit BOTH tools in the SAME turn, in this exact order — (1) \`propose_tearsheet\` with 6–8 catalog pieces (default target: 7) that fit the room/style brief, then immediately (2) \`prepare_visualization_brief\` with mode=\`composite\`, the SAME pick_ids you just put in the tearsheet, and a brief_notes line summarising the directorial intent (palette, mood, lighting, materials). The user gets one tearsheet card + one Render Scene card.
 
 SOLO CASE — visualization verb + the user already has visible picks (e.g. they say "render this tearsheet", "show me these in a Belgravia drawing-room", or they reference a previously approved tearsheet): emit ONLY \`prepare_visualization_brief\` with the existing pick_ids. Do NOT redraft the tearsheet.
 
@@ -5094,8 +5094,19 @@ serve(async (req) => {
         // proposal card is pre-filtered instead of shipping all 10 when the
         // user asked us to leave some out.
         const excludedIds = parseUserExclusions(lastUserMsg || "", previewRawAll);
-        const previewRaw = previewRawAll.filter((p: any) => p?.id && !excludedIds.has(p.id));
-        const finalIds = pickIds.filter((id: string) => validIds.has(id) && !excludedIds.has(id));
+        const previewRawFiltered = previewRawAll.filter((p: any) => p?.id && !excludedIds.has(p.id));
+        let finalIdsUncapped = pickIds.filter((id: string) => validIds.has(id) && !excludedIds.has(id));
+        // ENUMERATION CAP — unless the user explicitly asks to "show me all" /
+        // "list every" / "the full set" / "everything", cap the returned edit at
+        // 12 pieces so the first card feels curated rather than a data dump.
+        // Incremental "one more" requests are routed to add_to_tearsheet elsewhere
+        // and never hit this branch.
+        const wantsFullSet = /\b(show\s+me\s+all|list\s+all|list\s+every|show\s+every|the\s+full\s+set|the\s+entire\s+set|everything\s+(?:you|by|from)|all\s+of\s+(?:them|the))\b/i.test(lastUserMsg || "");
+        const ENUM_CAP = 12;
+        const previewRaw = wantsFullSet
+          ? previewRawFiltered
+          : previewRawFiltered.filter((p: any) => finalIdsUncapped.slice(0, ENUM_CAP).includes(p.id));
+        const finalIds = wantsFullSet ? finalIdsUncapped : finalIdsUncapped.slice(0, ENUM_CAP);
         if (finalIds.length === 0) {
           console.warn("[concierge finalIds=0]", JSON.stringify({
             designerLabel,
@@ -7005,7 +7016,7 @@ serve(async (req) => {
           try {
             const nudge = [
               "You just told the user you would draft a tearsheet, but you did NOT call the propose_tearsheet tool.",
-              "Call `propose_tearsheet` NOW with 4-8 pick_ids drawn ONLY from the CURATED PIECES section of the system prompt (exact UUIDs in square brackets).",
+              "Call `propose_tearsheet` NOW with 6-8 pick_ids (default target: 7) drawn ONLY from the CURATED PIECES section of the system prompt (exact UUIDs in square brackets).",
               "Include a short `title`, `pick_rationales` (one short reason per pick_id), and optional `note`.",
               "Do not output any prose — only the tool call.",
             ].join("\n");
