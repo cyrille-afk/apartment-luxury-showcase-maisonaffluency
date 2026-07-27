@@ -2004,8 +2004,11 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
           removed.map(fmt).join("\n"),
         );
       }
+      const isIncrementalAddRequest = /\b(?:one\s+more|1\s+more|another\s+(?:piece|item|option)|add\s+(?:one|1|a)\s+(?:more\s+)?(?:piece|item|option)|suggest\s+(?:one|1)\s+more)\b/i.test(currentTextLower);
       lines.push(
-        `When the user asks for a replacement or a new search, build the next proposal as: KEPT ids + the NEW pieces you suggest. Do not silently drop kept items, do not re-introduce removed items.`,
+        isIncrementalAddRequest
+          ? `INCREMENTAL ADD: the kept ids are already on the current draft. For add_to_tearsheet, return ONLY the new pick_id(s) in pick_ids — do NOT include KEPT ids again, do NOT regenerate the full draft, and do NOT re-introduce removed items.`
+          : `When the user asks for a replacement or a new search, build the next proposal as: KEPT ids + the NEW pieces you suggest. Do not silently drop kept items, do not re-introduce removed items.`,
       );
       proposalContext.push({ role: "user", content: lines.join("\n") });
 
