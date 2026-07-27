@@ -5811,7 +5811,7 @@ serve(async (req) => {
                   }));
                 } catch { /* best-effort */ }
 
-                if (REQUIREMENTS_ENFORCEMENT === "closed") {
+                if (REQUIREMENTS_ENFORCEMENT === "closed" && !opts?.softValidation) {
                   // FAIL-CLOSED: swallow the card. Emit a `proposal_blocked`
                   // frame so the UI can render a refusal + retry affordance.
                   controller.enqueue(encoder.encode(
@@ -5829,7 +5829,11 @@ serve(async (req) => {
                   controller.enqueue(encoder.encode(`data: ${JSON.stringify(frame)}\n\n`));
                   return;
                 }
+                if (opts?.softValidation) {
+                  console.log(`[concierge requirements-diff] soft-pass on incremental add — emitting card despite violations`);
+                }
               }
+
             } catch (e) {
               // Validator itself blew up — always fail-open regardless of
               // enforcement mode. A broken validator must never take down
