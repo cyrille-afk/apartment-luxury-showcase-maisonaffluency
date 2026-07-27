@@ -382,6 +382,12 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
   const [showBriefPreview, setShowBriefPreview] = useState(false);
   const [briefBuilderOpen, setBriefBuilderOpen] = useState(false);
   const pendingBriefPrefillRef = useRef<string | null>(null);
+  // Ambient status shown as a small badge next to the concierge name. Switches
+  // through discrete phases during a human-handoff so the designer feels the
+  // curatorial team take over, then returns to null once they resume chatting.
+  const [conciergeStatus, setConciergeStatus] = useState<
+    null | "pending_review" | "assigning_curator" | "curator_assigned"
+  >(null);
   const [timeline, setTimeline] = useState<TimelineItem[]>(() => {
     try {
       const raw = sessionStorage.getItem("concierge:timeline");
@@ -1198,6 +1204,9 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
   // notified, and (2) push an instant, deterministic confirmation reply so
   // the designer never wonders whether the request landed in a black hole.
   const forwardToHumanConcierge = useCallback(async () => {
+    // Kick the ambient status to "Pending Gallery Review" the moment the tap
+    // registers — the designer must feel the interface itself change hands.
+    setConciergeStatus("pending_review");
     // Optimistic user bubble so the transcript reflects the tap.
     setTimeline((prev) => [
       ...prev,
@@ -1280,6 +1289,10 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
         ).catch(() => { /* non-fatal */ });
       }
     } catch { /* non-fatal */ }
+
+    // Progress the ambient badge so the designer sees the human team take over.
+    window.setTimeout(() => setConciergeStatus("assigning_curator"), 1200);
+    window.setTimeout(() => setConciergeStatus("curator_assigned"), 3600);
   }, [user?.email]);
 
   const send = useCallback(async (overrideText?: string, opts?: { displayText?: string }) => {
@@ -2476,6 +2489,42 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                 >
                   {name}
                 </span>
+                {conciergeStatus && (() => {
+                  const statusMeta: Record<NonNullable<typeof conciergeStatus>, { label: string; dot: string; text: string; ring: string }> = {
+                    pending_review: {
+                      label: "Pending Gallery Review",
+                      dot: "bg-amber-400",
+                      text: modalMode ? "text-cream/90" : "text-amber-700",
+                      ring: modalMode ? "border-cream/25 bg-cream/10" : "border-amber-500/30 bg-amber-500/10",
+                    },
+                    assigning_curator: {
+                      label: "Assigning Curator",
+                      dot: "bg-amber-500 animate-pulse",
+                      text: modalMode ? "text-cream/90" : "text-amber-700",
+                      ring: modalMode ? "border-cream/25 bg-cream/10" : "border-amber-500/30 bg-amber-500/10",
+                    },
+                    curator_assigned: {
+                      label: "Curator Assigned",
+                      dot: "bg-emerald-500",
+                      text: modalMode ? "text-cream/90" : "text-emerald-700",
+                      ring: modalMode ? "border-cream/25 bg-cream/10" : "border-emerald-500/30 bg-emerald-500/10",
+                    },
+                  };
+                  const m = statusMeta[conciergeStatus];
+                  return (
+                    <span
+                      className={cn(
+                        "hidden sm:inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 font-body text-[10px] uppercase tracking-[0.1em]",
+                        m.ring,
+                        m.text,
+                      )}
+                      title={m.label}
+                    >
+                      <span className={cn("h-1.5 w-1.5 rounded-full", m.dot)} />
+                      {m.label}
+                    </span>
+                  );
+                })()}
               </div>
               <div className="flex items-center gap-1 shrink-0 relative">
               <div className="relative">
@@ -3039,8 +3088,11 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                                             return;
                                           }
                                           if (label === "Return To Atelier Chat") {
-                                            // No-op: user is already in the chat. Just close any minimized state.
+                                            // Keep the chat open so the designer can keep sourcing while the
+                                            // human team processes their handoff. Reset the ambient status
+                                            // once they resume the conversation.
                                             setMinimized(false);
+                                            setConciergeStatus(null);
                                             return;
                                           }
                                           if (label === "View My Open Requests") {
