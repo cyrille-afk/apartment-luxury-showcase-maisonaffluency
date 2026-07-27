@@ -3146,7 +3146,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                                 const firstText = firstIsStrong
                                   ? String((first.props?.children ?? "").toString()).trim()
                                   : "";
-                                const ctaMatch = firstText.match(/^\[?\s*(Source Similar Pieces|Generate Custom Quote|Match Finishes|Forward to Human Concierge|Upload a Visual Mood Board Instead|Return to Atelier Chat|View My Open Requests)\s*\]?$/i);
+                                const ctaMatch = firstText.match(/^\[?\s*(Source Similar Pieces|Generate Custom Quote|Match Finishes|Forward to Human Concierge|Upload a Visual Mood Board Instead|Return to Atelier Chat|View My Open Requests|Yes, Schedule Morning Call|No, Standard Updates Are Fine)\s*\]?$/i);
                                 if (ctaMatch) {
                                   const label = ctaMatch[1].replace(/\b\w/g, (c) => c.toUpperCase());
                                   const tail = arr.slice(1)
