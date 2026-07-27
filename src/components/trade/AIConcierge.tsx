@@ -3340,13 +3340,10 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
 
                                           void send(prompts[label], { displayText: label });
                                         }}
-                                        className="group inline-flex items-start gap-2 rounded-xl border border-foreground/20 bg-background/70 px-3.5 py-2 text-left text-sm font-medium text-foreground shadow-sm transition hover:border-foreground/50 hover:bg-background focus:outline-none focus:ring-2 focus:ring-foreground/30"
+                                        className="group flex flex-col items-start rounded-xl border border-foreground/20 bg-background/70 px-3.5 py-2 text-left shadow-sm transition hover:border-foreground/50 hover:bg-background focus:outline-none focus:ring-2 focus:ring-foreground/30"
                                       >
-                                        <span className="mt-[2px] inline-block h-1.5 w-1.5 rounded-full bg-foreground/70 group-hover:bg-foreground" />
-                                        <span className="flex-1">
-                                          <span className="font-semibold">{label}</span>
-                                          {tail ? <span className="ml-1.5 font-normal text-foreground/70">{tail}</span> : null}
-                                        </span>
+                                        <span className="text-sm font-semibold text-foreground">{label}</span>
+                                        {tail ? <span className="text-xs text-muted-foreground leading-snug">{tail}</span> : null}
                                       </button>
                                     </li>
                                   );
