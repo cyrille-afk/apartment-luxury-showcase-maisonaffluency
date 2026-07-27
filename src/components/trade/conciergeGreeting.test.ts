@@ -57,6 +57,9 @@ describe("greetingForContext", () => {
 
   it("falls back to discover greeting for Discover stage", () => {
     expect(greetingForContext("Discover", "/trade/dashboard")).toBe(DEFAULT_GREETING);
+    expect(DEFAULT_GREETING).toMatch(/- \*\*Source\*\*/);
+    expect(DEFAULT_GREETING).toMatch(/- \*\*Generate\*\*/);
+    expect(DEFAULT_GREETING).toMatch(/- \*\*Automate\*\*/);
   });
 
   it("uses consistent 'Allow me to help' phrasing across all stages except Discover", () => {
