@@ -1585,6 +1585,30 @@ export type Database = {
         }
         Relationships: []
       }
+      concierge_sessions: {
+        Row: {
+          created_at: string
+          last_active_at: string
+          timeline: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          last_active_at?: string
+          timeline?: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          last_active_at?: string
+          timeline?: Json
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       concierge_stream_frames: {
         Row: {
           chunk: string
