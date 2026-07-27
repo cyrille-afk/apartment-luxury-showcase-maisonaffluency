@@ -3220,6 +3220,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                                             // once they resume the conversation.
                                             setMinimized(false);
                                             setConciergeStatus(null);
+                                            setHandoffTicket(null);
                                             return;
                                           }
                                           if (label === "View My Open Requests") {
