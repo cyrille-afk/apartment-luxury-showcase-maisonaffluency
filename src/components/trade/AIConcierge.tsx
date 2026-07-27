@@ -331,7 +331,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { CnBriefViewingModal } from "@/components/trade/CnBriefViewingModal";
 import { useStudio } from "@/hooks/useStudio";
 import { useAuth } from "@/hooks/useAuth";
-import { getConciergeSession } from "@/hooks/useConciergeSession";
+import { getConciergeSession, updateConciergeSession } from "@/hooks/useConciergeSession";
+import { extractProjectCityFromAssistant } from "@/lib/projectCityDetect";
 
 const hasWelcomeActions = (actions: ConciergeQuickAction[] | undefined) =>
   !!actions?.some((action) => isOnboardingActionPrompt(action.prompt));
