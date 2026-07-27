@@ -851,6 +851,119 @@ function normalizeText(s: string | null | undefined): string {
     .trim();
 }
 
+// ---------------------------------------------------------------------------
+// Palette / material synonym expansion.
+//
+// A brief that names PALETTE: "bronze, beige" or MATERIALS: "wood, marble"
+// almost never matches a catalog title literally — the atelier metadata
+// speaks in specific finishes (patinated bronze, brushed brass, ecru linen,
+// bouclé, honed travertine, cerused oak) and material families (metal, stone,
+// wood, fabric). We resolve each requested token to a family of synonyms and
+// count a hit when ANY synonym is present in the piece's normalized haystack
+// (category + title + materials + finishes + dimensions).
+//
+// Keys and values MUST already be normalizeText()-shaped (lowercase, ASCII,
+// no diacritics, punctuation collapsed to spaces).
+// ---------------------------------------------------------------------------
+const PALETTE_SYNONYMS: Record<string, string[]> = {
+  // --- Colors that map to warm metal finishes -----------------------------
+  bronze: ["bronze", "brass", "brushed brass", "antique brass", "patinated bronze", "burnished bronze", "gunmetal", "copper", "gilded", "gilt", "gold", "ormolu", "metal"],
+  brass: ["brass", "bronze", "gold", "gilt", "gilded", "ormolu", "metal"],
+  gold: ["gold", "gilt", "gilded", "brass", "ormolu", "bronze"],
+  copper: ["copper", "bronze", "brass"],
+  silver: ["silver", "chrome", "nickel", "steel", "platinum", "polished steel"],
+  chrome: ["chrome", "nickel", "steel", "silver", "polished steel"],
+  nickel: ["nickel", "chrome", "silver", "steel"],
+
+  // --- Warm neutrals (textiles + light stones) ----------------------------
+  beige: ["beige", "ecru", "sand", "sandstone", "taupe", "oat", "oatmeal", "ivory", "greige", "natural linen", "linen", "boucle", "cream", "camel", "wheat", "stone", "travertine", "limestone", "natural"],
+  ecru: ["ecru", "beige", "ivory", "cream", "natural"],
+  ivory: ["ivory", "beige", "cream", "alabaster", "chalk"],
+  cream: ["cream", "ivory", "beige", "off white"],
+  taupe: ["taupe", "greige", "beige", "stone"],
+  sand: ["sand", "sandstone", "beige", "oat"],
+  oat: ["oat", "oatmeal", "beige", "linen"],
+  greige: ["greige", "taupe", "beige", "grey", "gray", "stone"],
+  camel: ["camel", "tan", "cognac", "beige"],
+  neutral: ["beige", "ecru", "ivory", "taupe", "greige", "sand", "oat", "linen", "cream"],
+  neutrals: ["beige", "ecru", "ivory", "taupe", "greige", "sand", "oat", "linen", "cream"],
+  "warm neutrals": ["beige", "ecru", "ivory", "taupe", "sand", "oat", "linen", "cream", "camel"],
+  "cool neutrals": ["grey", "gray", "dove", "ash", "greige", "stone"],
+
+  // --- Whites / blacks ----------------------------------------------------
+  white: ["white", "ivory", "alabaster", "chalk", "plaster", "cream", "off white"],
+  black: ["black", "ebony", "jet", "anthracite", "charcoal", "noir"],
+  grey: ["grey", "gray", "dove", "ash", "smoke", "charcoal", "greige", "cement", "stone"],
+  gray: ["grey", "gray", "dove", "ash", "smoke", "charcoal", "greige", "cement", "stone"],
+  charcoal: ["charcoal", "anthracite", "grey", "gray", "smoke"],
+
+  // --- Browns / woods -----------------------------------------------------
+  brown: ["brown", "walnut", "cognac", "chocolate", "chestnut", "mahogany", "tobacco", "cedar"],
+  walnut: ["walnut", "brown", "wood"],
+  oak: ["oak", "cerused oak", "fumed oak", "wood"],
+  cognac: ["cognac", "tan", "camel", "brown", "leather"],
+  chestnut: ["chestnut", "brown", "walnut"],
+
+  // --- Greens / blues / reds ---------------------------------------------
+  green: ["green", "moss", "forest", "olive", "sage", "emerald", "malachite", "jade", "verdigris"],
+  blue: ["blue", "navy", "indigo", "teal", "cobalt", "lapis", "azure"],
+  navy: ["navy", "blue", "indigo"],
+  red: ["red", "oxblood", "burgundy", "crimson", "garnet", "rust", "brick"],
+  oxblood: ["oxblood", "burgundy", "red", "wine"],
+  burgundy: ["burgundy", "oxblood", "wine", "red"],
+  pink: ["pink", "blush", "rose", "salmon"],
+  yellow: ["yellow", "ochre", "mustard", "saffron", "amber"],
+  orange: ["orange", "terracotta", "rust", "amber", "sienna", "ochre"],
+  purple: ["purple", "aubergine", "plum", "violet"],
+
+  // --- Material families --------------------------------------------------
+  wood: ["wood", "oak", "walnut", "ash", "teak", "cedar", "mahogany", "ebony", "maple", "cherry", "birch", "rosewood", "pine", "elm", "veneer"],
+  stone: ["stone", "marble", "travertine", "onyx", "limestone", "granite", "quartzite", "alabaster", "slate", "sandstone"],
+  marble: ["marble", "travertine", "onyx", "limestone", "alabaster", "quartzite", "stone"],
+  travertine: ["travertine", "limestone", "marble", "stone"],
+  onyx: ["onyx", "marble", "alabaster", "stone"],
+  limestone: ["limestone", "travertine", "stone"],
+  metal: ["metal", "brass", "bronze", "steel", "iron", "nickel", "chrome", "aluminum", "aluminium", "copper", "gunmetal"],
+  steel: ["steel", "iron", "metal", "chrome"],
+  iron: ["iron", "steel", "metal"],
+  leather: ["leather", "hide", "suede", "nubuck", "shearling"],
+  hide: ["hide", "leather"],
+  suede: ["suede", "leather", "nubuck"],
+  fabric: ["fabric", "linen", "wool", "cotton", "silk", "mohair", "velvet", "boucle", "cashmere", "textile", "upholstery"],
+  textile: ["textile", "fabric", "linen", "wool", "cotton", "silk", "mohair", "velvet", "boucle"],
+  upholstery: ["upholstery", "fabric", "linen", "wool", "cotton", "mohair", "velvet", "boucle", "leather"],
+  linen: ["linen", "flax", "natural linen"],
+  wool: ["wool", "mohair", "cashmere", "felt"],
+  velvet: ["velvet", "mohair"],
+  mohair: ["mohair", "wool", "velvet"],
+  boucle: ["boucle", "wool", "fabric"],
+  cotton: ["cotton", "fabric"],
+  silk: ["silk", "fabric"],
+  glass: ["glass", "crystal", "murano"],
+  crystal: ["crystal", "glass"],
+  ceramic: ["ceramic", "porcelain", "raku", "terracotta", "stoneware"],
+  porcelain: ["porcelain", "ceramic", "china"],
+  rattan: ["rattan", "cane", "wicker"],
+  cane: ["cane", "rattan", "wicker"],
+  plaster: ["plaster", "gesso", "alabaster"],
+};
+
+function expandPaletteToken(tok: string): string[] {
+  const key = tok.trim();
+  if (!key) return [];
+  const direct = PALETTE_SYNONYMS[key];
+  if (direct && direct.length) return Array.from(new Set([key, ...direct]));
+  // Multi-word fallback: expand each significant word, so "brushed bronze"
+  // still matches via the "bronze" synonyms even without a full-phrase entry.
+  const parts = key.split(" ").filter((p) => p.length >= 3);
+  const combined = new Set<string>([key]);
+  for (const part of parts) {
+    combined.add(part);
+    for (const syn of PALETTE_SYNONYMS[part] || []) combined.add(syn);
+  }
+  return Array.from(combined);
+}
+
 // Trigger phrases that mark items as deferred / out-of-scope for THIS brief.
 const DEFERRED_TRIGGER_RE = /\b(?:at\s+a\s+later\s+(?:date|stage|time|phase)|later\s+on|later\s+date|another\s+time|down\s+the\s+(?:road|line)|for\s+(?:a\s+)?later(?:\s+phase|\s+stage)?|for\s+later|in\s+(?:a\s+)?(?:later|next|future|second)\s+(?:phase|stage|round)|next\s+(?:phase|stage|round)|phase\s+(?:2|two|ii|3|three|iii)|future\s+phase|not\s+(?:now|yet|for\s+now|in\s+scope|in-scope|part\s+of\s+this)|out\s+of\s+scope|to\s+(?:be\s+)?(?:decided|confirmed|selected|sourced|chosen|specified|added|determined|advised|followed?)\s+(?:later|at\s+a\s+later|separately)?|to\s+follow|tbd|tbc|t\.?b\.?d\.?|t\.?b\.?c\.?|handled\s+separately|(?:sourced|selected|chosen|picked|specified|decided|added)\s+(?:later|separately|elsewhere)|excluding|except(?:\s+for)?|leaving\s+out|skip(?:ping)?|omit(?:ting)?|will\s+(?:select|pick|choose|source|find|decide|specify|handle|add|source)\b[^.?!\n;]*?\b(?:later|another\s+time|down\s+the\s+(?:road|line)|separately)|(?:pick|choose|select|source|specify|decide|add)\s+(?:on\s+)?(?:the\s+)?[^.?!\n;]*?\b(?:later|another\s+time|down\s+the\s+(?:road|line)|separately))\b/i;
 
