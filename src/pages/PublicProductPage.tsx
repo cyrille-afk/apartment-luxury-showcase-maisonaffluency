@@ -1389,12 +1389,14 @@ const PublicProductPage: React.FC = () => {
                         url={shareUrl}
                         message={`${product.title} by ${designerDisplay} — Maison Affluency: ${shareUrl}`}
                         className="flex items-center justify-center w-10 h-10 rounded-full bg-background/90 backdrop-blur-sm border border-border shadow-sm text-foreground"
-                        iconSize="w-4 h-4"
+                        iconSize="w-[18px] h-[18px]"
+                        iconVariant="ios"
                         showLabel={false}
                       />
                     );
                   })()}
                 </div>
+
                 <div className="absolute bottom-3 right-3 pointer-events-auto">
                   <FavoriteFolderPicker pickId={product.id} align="end" side="top">
                     <button
