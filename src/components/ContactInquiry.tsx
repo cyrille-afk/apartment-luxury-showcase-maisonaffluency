@@ -257,6 +257,9 @@ const ContactInquiry = () => {
               <p className="mt-4 font-body text-lg text-muted-foreground max-w-2xl mx-auto">
                 To get started, please fill out the form below to help us get to know you and your studio.
               </p>
+              <p className="mt-4 font-body text-sm italic text-muted-foreground max-w-2xl mx-auto">
+                We reserve Trade Accounts for interior design and architect studios, showrooms and FF&amp;E procurement contractors.
+              </p>
             </>
           ) : (
             <>
