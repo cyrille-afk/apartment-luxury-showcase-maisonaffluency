@@ -391,7 +391,7 @@ const buildVisualSourcingContext = (ev: MoodboardSignalsEvent): string => {
     ev.style?.length ? `style: ${ev.style.join(", ")}` : null,
     ev.palette?.length ? `palette: ${ev.palette.join(", ")}` : null,
     ev.materials?.length ? `materials: ${ev.materials.join(", ")}` : null,
-    ev.subcategories?.length ? `typologies: ${ev.subcategories.join(", ")}` : ev.categories?.length ? `categories: ${ev.categories.join(", ")}` : null,
+    ev.subcategories?.length ? `visible object cues, not required typologies: ${ev.subcategories.join(", ")}` : ev.categories?.length ? `visible object cues, not required categories: ${ev.categories.join(", ")}` : null,
     ev.designer_hints?.length ? `designer hints: ${ev.designer_hints.join(", ")}` : null,
     ev.notes ? `notes: ${ev.notes}` : null,
   ].filter(Boolean);
@@ -3476,7 +3476,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                                     .map((c: any) => (typeof c === "string" ? c : c?.props?.children ?? ""))
                                     .join("").toString().trim().replace(/^[—–\-:\s]+/, "");
                                   const prompts: Record<string, string> = {
-                                    "Source Similar Pieces": "Source similar pieces — please propose a tearsheet of on-brief collectible items from the Maison Affluency Curation matching the visual sourcing context from my latest upload.",
+                                    "Source Similar Pieces": "Source similar pieces — propose a harmonised mixed-room tearsheet from the Maison Affluency Curation based on the uploaded moodboard's atmosphere, palette, materials, and forms. Do not restrict the edit to one product typology unless I explicitly ask for that typology.",
                                     "Generate Custom Quote": "Generate a custom quote — draft a bespoke specification sheet based on the design concept you just detected (style, palette, typology tokens).",
                                     "Match Finishes": "Match finishes — shortlist textile and material references from the available_finishes of on-palette pieces in the Curation that complement this palette.",
                                     "Forward To Human Concierge": "Please forward the floor plan / technical drawing I just uploaded to the Maison Affluency human concierge team at the District 9 studio so a curator can hand-select a bespoke digital curation for this project. Confirm the handoff in one warm line and let me know the expected turnaround.",

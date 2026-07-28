@@ -3762,9 +3762,10 @@ async function buildDeterministicTearsheetProposal(
   ragRows: any[],
   brief: ExtractedBrief["brief"],
   requestText: string,
+  options?: { mixedRoom?: boolean },
 ): Promise<any | null> {
   const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-  const requestedTypology = inferRequestedTypology(brief, requestText);
+  const requestedTypology = options?.mixedRoom ? null : inferRequestedTypology(brief, requestText);
   const dimConstraints = inferDimensionConstraints(requestText);
   // Combine any inferred lead-time constraint with the brief's stored ceiling.
   const inferredLead = inferLeadTimeConstraints(requestText);
@@ -3781,9 +3782,9 @@ async function buildDeterministicTearsheetProposal(
   const scoreRow = (r: any) => {
     const hay = `${r?.title || ""} ${r?.category || ""} ${r?.subcategory || ""} ${r?.materials || ""}`.toLowerCase();
     let score = Number(r?.similarity || 0);
-    if (/\bdining\b/.test(hay)) score += 3;
-    if (/\btable\b/.test(hay)) score += 2;
-    if (/\b(oak|walnut|wood|timber)\b/.test(hay)) score += 1;
+    if (requestedTypology === "dining_table" && /\bdining\b/.test(hay)) score += 3;
+    if (requestedTypology && /\btable\b/.test(hay)) score += 2;
+    if ((brief.materials || []).some((m) => /\b(oak|walnut|wood|timber)\b/i.test(String(m))) && /\b(oak|walnut|wood|timber)\b/.test(hay)) score += 1;
     return score;
   };
   let candidateRows = (ragRows || [])
@@ -3809,10 +3810,36 @@ async function buildDeterministicTearsheetProposal(
       .filter((r: any) => r && typeof r.id === "string" && UUID_RE.test(r.id))
       .sort((a: any, b: any) => scoreRow(b) - scoreRow(a));
   }
-  const pickIds = Array.from(new Set(candidateRows
-    .sort((a: any, b: any) => scoreRow(b) - scoreRow(a))
-    .map((r: any) => r.id)
-  )).slice(0, 8);
+  const sortedCandidates = candidateRows.sort((a: any, b: any) => scoreRow(b) - scoreRow(a));
+  const diversifyMixedRoomRows = (rows: any[], limit: number) => {
+    const familyOf = (r: any) => {
+      const hay = `${r?.title || ""} ${r?.category || ""} ${r?.subcategory || ""}`.toLowerCase();
+      if (/\b(sofa|chair|armchair|bench|stool|ottoman|seating)\b/.test(hay)) return "seating";
+      if (/\b(table|desk|console)\b/.test(hay)) return "tables";
+      if (/\b(chandelier|pendant|lamp|sconce|lighting)\b/.test(hay)) return "lighting";
+      if (/\b(rug|carpet)\b/.test(hay)) return "rugs";
+      if (/\b(cabinet|sideboard|credenza|bookcase|shelf|storage)\b/.test(hay)) return "storage";
+      if (/\b(mirror|artwork|screen|vase|accessor)\b/.test(hay)) return "decor";
+      return normalizeLoose(r?.subcategory || r?.category || "other") || "other";
+    };
+    const picked: any[] = [];
+    const counts = new Map<string, number>();
+    for (const row of rows) {
+      const family = familyOf(row);
+      if ((counts.get(family) || 0) >= 2) continue;
+      picked.push(row);
+      counts.set(family, (counts.get(family) || 0) + 1);
+      if (picked.length >= limit) return picked;
+    }
+    for (const row of rows) {
+      if (picked.some((p) => p.id === row.id)) continue;
+      picked.push(row);
+      if (picked.length >= limit) return picked;
+    }
+    return picked;
+  };
+  const pickSource = options?.mixedRoom ? diversifyMixedRoomRows(sortedCandidates, 8) : sortedCandidates;
+  const pickIds = Array.from(new Set(pickSource.map((r: any) => r.id))).slice(0, 8);
   if (pickIds.length < 2) return null;
   const hydratedRaw = await hydratePickPreview(supabase, pickIds);
   const validIds = new Set(hydratedRaw.map((p: any) => p?.id).filter(Boolean));
@@ -4265,6 +4292,12 @@ serve(async (req) => {
     };
     const latestVisualSourcingContext = extractLatestVisualContext(lastUserMsg);
     const hasVisualSourcingContext = latestVisualSourcingContext.length > 0;
+    const stripVisualSourcingMarkers = (text: string): string => {
+      const raw = String(text || "");
+      const idx = raw.indexOf(VISUAL_CONTEXT_MARKER);
+      if (idx < 0) return raw.trim();
+      return raw.slice(0, idx).trim();
+    };
 
     // ── Skip/exclude confirmation gate ────────────────────────────────────
     // When the user asks us to skip items, we don't build the tearsheet
@@ -4356,6 +4389,12 @@ serve(async (req) => {
       .map((m: any) => extractText(m.content))
       .join("\n")
       .toLowerCase();
+    const hardValidationText = hasVisualSourcingContext
+      ? stripVisualSourcingMarkers(userConversationText)
+      : userConversationText;
+    const plannerInputText = hasVisualSourcingContext
+      ? stripVisualSourcingMarkers(lastUserMsg)
+      : lastUserMsg;
     const explicitConversationBudget = parseBudgetFromText(userConversationText);
     const stickyFactPatterns = [
       /\b(dining(?: room)?|dining table|table)\b/,
@@ -4366,7 +4405,7 @@ serve(async (req) => {
       /\b(handmade|one[- ]of[- ]a[- ]kind|designer|brand|edition|open(?:ed)? to both|both)\b/,
     ];
     const stickyFactCount = stickyFactPatterns.filter((re) => re.test(userConversationText)).length;
-    const shouldActOnAccumulatedBrief = /\b(dining(?: room)?|dining table|table)\b/.test(userConversationText) && stickyFactCount >= 3;
+    const shouldActOnAccumulatedBrief = !hasVisualSourcingContext && /\b(dining(?: room)?|dining table|table)\b/.test(userConversationText) && stickyFactCount >= 3;
     const lacksUploadedRoomContext = !hasAttachments && !/\b(room plan|floor plan|layout|pdf|photo|image|drawing|elevation|attached|uploaded|paperclip|\d+(?:\.\d+)?\s*(?:m|metres?|meters?|ft|feet|sqm|sq\.?\s*m|square))\b/.test(userConversationText);
 
     // Ultra-fast deterministic path for one-word location follow-ups like
@@ -4420,9 +4459,9 @@ serve(async (req) => {
     // dining table"). Applied to BOTH the pgvector RAG shortlist and the
     // bulk SQL catalog load so the AI never sees candidates that violate
     // a stated constraint. Empty on discovery turns → no filtering.
-    const preRequestConstraints = deriveHardConstraints(
-      [{ title: lastUserMsg }],
-    );
+    const preRequestConstraints = hasVisualSourcingContext
+      ? ({ materials: [], colors: [] } as HardConstraints)
+      : deriveHardConstraints([{ title: lastUserMsg }]);
     const hasAnyPreConstraint =
       (preRequestConstraints.materials?.length || 0) +
       (preRequestConstraints.colors?.length || 0) > 0;
@@ -4449,7 +4488,10 @@ serve(async (req) => {
     const buildRagQuery = async (): Promise<string> => {
       if (hasVisualSourcingContext) {
         console.log(`[concierge RAG] cached visual-context query: ${latestVisualSourcingContext.slice(0, 240)}`);
-        return latestVisualSourcingContext;
+        return [
+          "mixed-room collectible edit; source across seating, tables, lighting, storage, rugs, mirrors, and accessories as relevant; do not narrow to a single typology unless the user explicitly requested it",
+          latestVisualSourcingContext,
+        ].join(" · ");
       }
       if (!latestTurnHasAttachments) return lastUserMsg;
       const vision = await Promise.race<ExtractedVision | null>([
@@ -4471,8 +4513,8 @@ serve(async (req) => {
     const [sentiment, extractedBrief, ragResult, userBoards, userSignals, userMemory, mentionedProjectId, openQuotes, discountRow, cadDocuments, productCadAssets] = await Promise.all([
       isShortFollowUp
         ? Promise.resolve({ sentiment: "neutral", intent: "question", escalate: false, needs_catalog: false })
-        : timed("classifySentiment", classifySentiment(LOVABLE_API_KEY, lastUserMsg, { bypassSemanticCache: shouldBypassSemanticCache })),
-      isShortFollowUp ? Promise.resolve(EMPTY_BRIEF) : timed("extractBrief", extractBrief(LOVABLE_API_KEY, lastUserMsg, { bypassSemanticCache: shouldBypassSemanticCache })),
+        : timed("classifySentiment", classifySentiment(LOVABLE_API_KEY, plannerInputText, { bypassSemanticCache: shouldBypassSemanticCache })),
+      isShortFollowUp ? Promise.resolve(EMPTY_BRIEF) : timed("extractBrief", extractBrief(LOVABLE_API_KEY, plannerInputText, { bypassSemanticCache: shouldBypassSemanticCache })),
       timed("rag", ragPromise),
       timed("userBoards", loadUserBoards(supabase, userId)),
       timed("userSignals", loadUserSignals(supabase, userId)),
@@ -4546,7 +4588,7 @@ serve(async (req) => {
     // Deterministic opening-brief reply removed — it hardcoded "dining table"
     // and ignored actual user content (room type, seat count, shape, etc.).
     // The LLM handles discovery turns directly now.
-    const requestedTypology = inferRequestedTypology(effectiveBrief.brief, userConversationText);
+    const requestedTypology = hasVisualSourcingContext ? null : inferRequestedTypology(effectiveBrief.brief, userConversationText);
 
     if (shouldActOnAccumulatedBrief && breaker.state() === "open" && CLOUDFLARE_ENABLED) {
       return sseTextResponse(
@@ -5254,7 +5296,7 @@ serve(async (req) => {
           ? `Draft tear sheet with ${countPhrase} (skipped ${excludedIds.size} per your request). Review the list above and click **Approve & Create** to save it into a project folder — or **Discard** to cancel.`
           : `Draft tear sheet with ${countPhrase} in the Maison Affluency Curation, with trade pricing. Review the list above and click **Approve & Create** to save it into a project folder — or **Discard** to cancel.`)
           + unmetSuffix;
-        const { validation } = validateProposalAgainstBrief(proposal, userConversationText, null);
+        const { validation } = validateProposalAgainstBrief(proposal, hardValidationText, null);
         if (!validation.ok) {
           console.warn("[concierge deterministic-enumeration] blocked proposal", JSON.stringify({ requestId, violations: validation.violations }));
           return sseTextResponse(buildRequirementsBlockedMessage(validation.violations));
@@ -5371,7 +5413,8 @@ serve(async (req) => {
             supabase,
             Array.isArray((ragResult as any)?.rows) ? (ragResult as any).rows : [],
             effectiveBrief.brief,
-            userConversationText,
+            hardValidationText,
+            { mixedRoom: hasVisualSourcingContext },
           )
         : null;
       const vizProposal = buildVisualizationBriefProposal({
@@ -5386,7 +5429,7 @@ serve(async (req) => {
       });
       const proposals = tearsheetProposal ? [tearsheetProposal, vizProposal] : [vizProposal];
       if (tearsheetProposal) {
-        const { validation } = validateProposalAgainstBrief(tearsheetProposal, userConversationText, null);
+        const { validation } = validateProposalAgainstBrief(tearsheetProposal, hardValidationText, null);
         if (!validation.ok) {
           console.warn("[concierge deterministic-visualization] blocked tearsheet proposal", JSON.stringify({ requestId, violations: validation.violations }));
           return sseTextResponse(buildRequirementsBlockedMessage(validation.violations));
@@ -5503,13 +5546,17 @@ serve(async (req) => {
         supabase,
         Array.isArray((ragResult as any)?.rows) ? (ragResult as any).rows : [],
         effectiveBrief.brief,
-        userConversationText,
+        hardValidationText,
+        { mixedRoom: hasVisualSourcingContext },
       );
       if (deterministicProposal) {
-        const { validation } = validateProposalAgainstBrief(deterministicProposal, userConversationText, null);
-        if (!validation.ok) {
+        const { validation } = validateProposalAgainstBrief(deterministicProposal, hardValidationText, null);
+        if (!validation.ok && !hasVisualSourcingContext) {
           console.warn("[concierge deterministic-plan] blocked proposal", JSON.stringify({ requestId, violations: validation.violations }));
           return sseTextResponse(buildRequirementsBlockedMessage(validation.violations));
+        }
+        if (!validation.ok && hasVisualSourcingContext) {
+          console.log("[concierge deterministic-plan] soft-pass visual sourcing proposal", JSON.stringify({ requestId, violations: validation.violations }));
         }
         return sseProposalThenTextResponse(
           deterministicProposal,
@@ -5819,7 +5866,7 @@ serve(async (req) => {
                 { tool: cardTool, pickIds: [], previews: Array.isArray(previewRows) ? previewRows : [] },
               ]);
               const effectiveRequirements = enforceExplicitBudgetOnly(
-                mergeRequirementsWithText(capturedRequirements as any, userConversationText) as any,
+                mergeRequirementsWithText(capturedRequirements as any, hardValidationText) as any,
                 explicitConversationBudget,
               );
               const v = validateRequirementsCoverage(effectiveRequirements as any, gtOne);
@@ -6864,10 +6911,11 @@ serve(async (req) => {
             supabase,
             Array.isArray((ragResult as any)?.rows) ? (ragResult as any).rows : [],
             effectiveBrief.brief,
-            userConversationText,
+            hardValidationText,
+            { mixedRoom: hasVisualSourcingContext },
           );
           if (!proposal) return false;
-          const { validation } = validateProposalAgainstBrief(proposal, userConversationText, capturedRequirements);
+          const { validation } = validateProposalAgainstBrief(proposal, hardValidationText, capturedRequirements);
           if (!validation.ok) {
             controller.enqueue(encoder.encode(
               `event: proposal_blocked\ndata: ${JSON.stringify({
@@ -7024,7 +7072,7 @@ serve(async (req) => {
               },
               preview,
             };
-            const { validation } = validateProposalAgainstBrief(proposal, userConversationText, capturedRequirements);
+            const { validation } = validateProposalAgainstBrief(proposal, hardValidationText, capturedRequirements);
             if (!validation.ok) {
               controller.enqueue(encoder.encode(
                 `event: proposal_blocked\ndata: ${JSON.stringify({
@@ -7161,7 +7209,7 @@ serve(async (req) => {
               },
               preview,
             };
-            const { validation } = validateProposalAgainstBrief(proposal, userConversationText, capturedRequirements);
+            const { validation } = validateProposalAgainstBrief(proposal, hardValidationText, capturedRequirements);
             if (!validation.ok) {
               controller.enqueue(encoder.encode(
                 `event: proposal_blocked\ndata: ${JSON.stringify({
