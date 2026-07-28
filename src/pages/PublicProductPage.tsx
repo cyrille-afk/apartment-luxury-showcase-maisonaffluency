@@ -988,12 +988,21 @@ const PublicProductPage: React.FC = () => {
     const onScroll = () => {
       const y = window.scrollY;
       setGalleryCompact(y > 40);
-      setShowStickyBar(y > 360);
+      // Show mini-bar only once the product image has fully scrolled past the header.
+      const el = galleryScrollRef.current;
+      const headerBottom = 96; // nav h-24
+      if (el) {
+        const rect = el.getBoundingClientRect();
+        setShowStickyBar(rect.bottom < headerBottom);
+      } else {
+        setShowStickyBar(false);
+      }
     };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
 
 
 
