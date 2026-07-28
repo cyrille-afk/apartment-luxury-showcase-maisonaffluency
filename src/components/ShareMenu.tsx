@@ -59,7 +59,7 @@ const ShareMenu = ({ url, message, className = "", iconSize = "w-3.5 h-3.5", sho
         className={className}
         aria-label="Share"
       >
-        <Share2 className={iconSize} />
+        <Icon className={iconSize} />
         {showLabel && <span className={`font-body ${labelSize} uppercase tracking-[0.15em]`}>Share</span>}
       </button>
       {open && !isMobile && (
