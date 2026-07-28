@@ -988,12 +988,21 @@ const PublicProductPage: React.FC = () => {
     const onScroll = () => {
       const y = window.scrollY;
       setGalleryCompact(y > 40);
-      setShowStickyBar(y > 360);
+      // Show mini-bar only once the product image has fully scrolled past the header.
+      const el = galleryScrollRef.current;
+      const headerBottom = 96; // nav h-24
+      if (el) {
+        const rect = el.getBoundingClientRect();
+        setShowStickyBar(rect.bottom < headerBottom);
+      } else {
+        setShowStickyBar(false);
+      }
     };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
 
 
 
@@ -1273,7 +1282,7 @@ const PublicProductPage: React.FC = () => {
             "md:hidden fixed left-0 right-0 z-40 bg-background/95 backdrop-blur-md border-b border-border shadow-sm transition-transform duration-300 ease-out",
             showStickyBar ? "translate-y-0" : "-translate-y-full pointer-events-none"
           )}
-          style={{ top: "calc(env(safe-area-inset-top, 0px) + 6.25rem)" }}
+          style={{ top: "calc(env(safe-area-inset-top, 0px) + 6rem)" }}
           aria-hidden={!showStickyBar}
         >
           <div className="flex items-center gap-3 px-3 py-2">
