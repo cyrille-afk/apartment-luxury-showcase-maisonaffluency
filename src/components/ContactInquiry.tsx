@@ -161,7 +161,7 @@ const ContactInquiry = () => {
     navigate(`${location.pathname}?${next.toString()}`, { replace: true });
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { id, value } = e.target;
     setFormData(prev => ({ ...prev, [id]: value }));
     if (errors[id]) setErrors(prev => { const n = { ...prev }; delete n[id]; return n; });
