@@ -3581,7 +3581,9 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                                     }
 
                                     const basePrompt = prompts[label];
-                                    const visualContext = label === "Source Similar Pieces" ? getStoredVisualSourcingContext() : "";
+                                    const visualContext = label === "Source Similar Pieces"
+                                      ? (getStoredVisualSourcingContext() || String(item.content || "").replace(/\s+/g, " ").slice(0, 1200))
+                                      : "";
                                     const contextualPrompt = visualContext
                                       ? `${basePrompt}\n\n[Latest upload visual sourcing context — use this as the retrieval brief, not the button label]\n${visualContext}`
                                       : basePrompt;
