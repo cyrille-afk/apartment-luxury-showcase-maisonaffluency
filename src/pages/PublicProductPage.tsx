@@ -1289,6 +1289,18 @@ const PublicProductPage: React.FC = () => {
             />
           </div>
 
+          {/* Mobile breadcrumbs — compact, above the gallery */}
+          <div className="md:hidden -mt-2 mb-3">
+            <Breadcrumbs
+              items={buildProductBreadcrumbs({
+                root: { label: "Home", to: "/" },
+                category: product.category,
+                subcategory: product.subcategory,
+                title: product.title,
+              })}
+            />
+          </div>
+
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16">
             <div className="relative md:relative sticky top-[calc(6rem+env(safe-area-inset-top))] md:top-0 self-start z-30 bg-background" ref={galleryScrollRef}>
               <ProductImageGallery
@@ -1303,8 +1315,9 @@ const PublicProductPage: React.FC = () => {
                 firstImageBadge={
                   (() => {
                     const editionLabel = formatEditionLabel(product as any);
+                    // Mobile/PWA: hide the edition pill (matches 1stdibs layout).
                     return editionLabel ? (
-                      <span className="inline-block px-2 py-0.5 text-[10px] uppercase tracking-wider font-body bg-black/50 text-white/90 rounded-full border border-black/20 backdrop-blur-sm">
+                      <span className="hidden md:inline-block px-2 py-0.5 text-[10px] uppercase tracking-wider font-body bg-black/50 text-white/90 rounded-full border border-black/20 backdrop-blur-sm">
                         {editionLabel}
                       </span>
                     ) : null;
@@ -1321,6 +1334,36 @@ const PublicProductPage: React.FC = () => {
                   ) : null
                 }
               />
+
+              {/* Mobile-only image overlays: share (top-right) + favorite (bottom-right) */}
+              <div className="md:hidden pointer-events-none absolute inset-x-0 top-0 z-40" style={{ height: galleryCompact ? "22vh" : "42vh" }}>
+                <div className="absolute top-3 right-3 pointer-events-auto">
+                  {(() => {
+                    const shareUrl = buildPieceOgUrl(designerDisplay, product.title, product.subtitle);
+                    return (
+                      <ShareMenu
+                        url={shareUrl}
+                        message={`${product.title} by ${designerDisplay} — Maison Affluency: ${shareUrl}`}
+                        className="flex items-center justify-center w-10 h-10 rounded-full bg-background/90 backdrop-blur-sm border border-border shadow-sm text-foreground"
+                        iconSize="w-4 h-4"
+                        showLabel={false}
+                      />
+                    );
+                  })()}
+                </div>
+                <div className="absolute bottom-3 right-3 pointer-events-auto">
+                  <FavoriteFolderPicker pickId={product.id} align="end" side="top">
+                    <button
+                      onClick={(e) => e.stopPropagation()}
+                      aria-label={favorited ? "Saved to favorites" : "Add to favorites"}
+                      className="flex items-center justify-center w-10 h-10 rounded-full bg-background/90 backdrop-blur-sm border border-border shadow-sm"
+                    >
+                      <Heart size={16} className={cn(favorited ? "fill-destructive text-destructive" : "text-foreground")} />
+                    </button>
+                  </FavoriteFolderPicker>
+                </div>
+              </div>
+
               <div className="md:border-0 md:shadow-none border-b border-border/60 shadow-[0_6px_10px_-8px_rgba(0,0,0,0.35)] pb-2">
                 <ActiveSwatchCaption pickId={product.id} activeIndex={galleryActiveIndex ?? 0} />
               </div>
