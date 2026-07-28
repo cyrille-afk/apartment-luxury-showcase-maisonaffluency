@@ -1416,38 +1416,23 @@ const PublicProductPage: React.FC = () => {
             </div>
 
             <div className="relative flex flex-col gap-4">
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <Link
-                    to={`/designers/${designer.slug}`}
-                    onClick={() => rememberProductBackRef(designer.slug, location.pathname + location.search)}
-                    className="font-body text-[11px] uppercase tracking-[0.15em] text-[hsl(var(--gold))] hover:text-primary hover:underline underline-offset-2 transition-colors"
-                  >
-                    {designerDisplay}
-                  </Link>
-                  <h1 className="font-display text-2xl md:text-3xl mt-1 leading-tight">
-                    {product.title}
-                    {product.subtitle &&
-                      !product.title.toLowerCase().includes(product.subtitle.toLowerCase()) &&
-                      !product.subtitle.toLowerCase().includes(product.title.toLowerCase()) &&
-                      ` by ${product.subtitle}`}
-                  </h1>
-                </div>
-                <div className="shrink-0 mt-1">
-                  {(() => {
-                    const shareUrl = buildPieceOgUrl(designerDisplay, product.title, product.subtitle);
-                    return (
-                      <ShareMenu
-                        url={shareUrl}
-                        message={`${product.title} by ${designerDisplay} — Maison Affluency: ${shareUrl}`}
-                        className="flex items-center justify-center w-9 h-9 rounded-full border border-border bg-background/80 backdrop-blur-sm text-foreground/80 hover:text-foreground hover:border-foreground/40 transition-colors"
-                        iconSize="w-4 h-4"
-                        showLabel={false}
-                      />
-                    );
-                  })()}
-                </div>
+              <div className="min-w-0">
+                <Link
+                  to={`/designers/${designer.slug}`}
+                  onClick={() => rememberProductBackRef(designer.slug, location.pathname + location.search)}
+                  className="font-body text-[11px] uppercase tracking-[0.15em] text-[hsl(var(--gold))] hover:text-primary hover:underline underline-offset-2 transition-colors"
+                >
+                  {designerDisplay}
+                </Link>
+                <h1 className="font-display text-2xl md:text-3xl mt-1 leading-tight">
+                  {product.title}
+                  {product.subtitle &&
+                    !product.title.toLowerCase().includes(product.subtitle.toLowerCase()) &&
+                    !product.subtitle.toLowerCase().includes(product.title.toLowerCase()) &&
+                    ` by ${product.subtitle}`}
+                </h1>
               </div>
+
 
               {/* Materials & dimensions with gold icons — shared parsing with TradeProductPage */}
               <div className="flex flex-col gap-2">
