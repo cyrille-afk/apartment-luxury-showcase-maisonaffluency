@@ -178,6 +178,10 @@ const ContactInquiry = () => {
       setErrors(errs);
       return;
     }
+    if (urlProductId && !result.data.profession) {
+      setErrors({ profession: "Please select your profession" });
+      return;
+    }
 
     if (!turnstileToken) {
       toast({
