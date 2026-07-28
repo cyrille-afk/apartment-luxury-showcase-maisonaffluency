@@ -1311,7 +1311,7 @@ const PublicProductPage: React.FC = () => {
               }).toString()}#contact`}
               className="shrink-0 px-3 py-2 rounded-md bg-foreground text-background font-body text-[10px] uppercase tracking-[0.12em] whitespace-nowrap"
             >
-              Price Upon Request
+              Inquire for Pricing
             </Link>
           </div>
         </div>
