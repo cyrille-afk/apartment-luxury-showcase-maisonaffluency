@@ -1612,7 +1612,7 @@ const PublicProductPage: React.FC = () => {
           )}
 
           {relatedPicks.length > 0 && (
-            <div className="mt-16 pt-8 border-t border-border">
+            <div className="mt-6 pt-6 border-t border-border">
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10">
                 {/* Mobile-only heading: shown above the carousel */}
                 <div className="lg:hidden order-1">
