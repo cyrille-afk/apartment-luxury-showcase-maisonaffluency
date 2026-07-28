@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Share2, Copy, MessageCircle } from "lucide-react";
+import { Share2, Copy, MessageCircle, Share as ShareIos, type LucideIcon } from "lucide-react";
 import { toast } from "sonner";
 
 interface ShareMenuProps {
@@ -9,9 +9,11 @@ interface ShareMenuProps {
   iconSize?: string;
   showLabel?: boolean;
   labelSize?: string;
+  iconVariant?: "share2" | "ios";
 }
 
-const ShareMenu = ({ url, message, className = "", iconSize = "w-3.5 h-3.5", showLabel = true, labelSize = "text-[9px]" }: ShareMenuProps) => {
+const ShareMenu = ({ url, message, className = "", iconSize = "w-3.5 h-3.5", showLabel = true, labelSize = "text-[9px]", iconVariant = "share2" }: ShareMenuProps) => {
+  const Icon: LucideIcon = iconVariant === "ios" ? ShareIos : Share2;
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
@@ -57,7 +59,7 @@ const ShareMenu = ({ url, message, className = "", iconSize = "w-3.5 h-3.5", sho
         className={className}
         aria-label="Share"
       >
-        <Share2 className={iconSize} />
+        <Icon className={iconSize} />
         {showLabel && <span className={`font-body ${labelSize} uppercase tracking-[0.15em]`}>Share</span>}
       </button>
       {open && !isMobile && (
