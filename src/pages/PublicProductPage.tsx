@@ -988,9 +988,12 @@ const PublicProductPage: React.FC = () => {
     const onScroll = () => {
       const y = window.scrollY;
       setGalleryCompact(y > 40);
-      // Show mini-bar only once the product image has fully scrolled past the header.
+      // Show mini-bar only once the product image has fully scrolled past the
+      // real fixed header. Measure the nav live so PWA (safe-area-inset-top)
+      // triggers at the correct scroll position instead of a hardcoded 96px.
       const el = galleryScrollRef.current;
-      const headerBottom = 96; // nav h-24
+      const navEl = document.querySelector("nav.fixed, header.fixed") as HTMLElement | null;
+      const headerBottom = navEl?.getBoundingClientRect().bottom ?? 96;
       if (el) {
         const rect = el.getBoundingClientRect();
         setShowStickyBar(rect.bottom < headerBottom);
@@ -1317,7 +1320,7 @@ const PublicProductPage: React.FC = () => {
         </div>
 
 
-        <div className="pt-28 md:pt-[12rem] pb-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="pt-[calc(env(safe-area-inset-top,0px)+7rem)] md:pt-[12rem] pb-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <button
             type="button"
             onClick={() => navigate(fromPath || fallbackGridPath)}
