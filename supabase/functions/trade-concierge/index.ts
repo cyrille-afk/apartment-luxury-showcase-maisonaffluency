@@ -3781,9 +3781,9 @@ async function buildDeterministicTearsheetProposal(
   const scoreRow = (r: any) => {
     const hay = `${r?.title || ""} ${r?.category || ""} ${r?.subcategory || ""} ${r?.materials || ""}`.toLowerCase();
     let score = Number(r?.similarity || 0);
-    if (/\bdining\b/.test(hay)) score += 3;
-    if (/\btable\b/.test(hay)) score += 2;
-    if (/\b(oak|walnut|wood|timber)\b/.test(hay)) score += 1;
+    if (requestedTypology === "dining_table" && /\bdining\b/.test(hay)) score += 3;
+    if (requestedTypology && /\btable\b/.test(hay)) score += 2;
+    if ((brief.materials || []).some((m) => /\b(oak|walnut|wood|timber)\b/i.test(String(m))) && /\b(oak|walnut|wood|timber)\b/.test(hay)) score += 1;
     return score;
   };
   let candidateRows = (ragRows || [])
@@ -4265,6 +4265,23 @@ serve(async (req) => {
     };
     const latestVisualSourcingContext = extractLatestVisualContext(lastUserMsg);
     const hasVisualSourcingContext = latestVisualSourcingContext.length > 0;
+    const stripVisualSourcingMarkers = (text: string): string => {
+      const lines = String(text || "").split(/\n/);
+      const kept: string[] = [];
+      let skipNext = false;
+      for (const line of lines) {
+        if (skipNext) {
+          skipNext = false;
+          continue;
+        }
+        if (line.includes(VISUAL_CONTEXT_MARKER)) {
+          skipNext = true;
+          continue;
+        }
+        kept.push(line);
+      }
+      return kept.join("\n").trim();
+    };
 
     // ── Skip/exclude confirmation gate ────────────────────────────────────
     // When the user asks us to skip items, we don't build the tearsheet
@@ -4356,6 +4373,9 @@ serve(async (req) => {
       .map((m: any) => extractText(m.content))
       .join("\n")
       .toLowerCase();
+    const hardValidationText = hasVisualSourcingContext
+      ? stripVisualSourcingMarkers(userConversationText)
+      : userConversationText;
     const explicitConversationBudget = parseBudgetFromText(userConversationText);
     const stickyFactPatterns = [
       /\b(dining(?: room)?|dining table|table)\b/,
