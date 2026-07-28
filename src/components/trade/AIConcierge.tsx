@@ -2512,32 +2512,32 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
           // If the assistant msg already exists, patch it so chips render
           // even before the next delta arrives.
           setTimeline((prev) => {
-            const idx = [...prev].reverse().findIndex((t) => t.kind === "msg" && t.role === "assistant");
-            if (idx === -1) return prev;
-            const realIdx = prev.length - 1 - idx;
-            const item = prev[realIdx];
-            if (item.kind !== "msg" || item.role !== "assistant") return prev;
+            const last = prev[prev.length - 1];
+            // Only patch if the tail is the current turn's assistant msg.
+            // If a user msg is tail (upload just sent, no assistant delta yet),
+            // do nothing — the assistant msg will pick up `turnConstraints`
+            // when it is created.
+            if (!last || last.kind !== "msg" || last.role !== "assistant") return prev;
             const copy = prev.slice();
-            copy[realIdx] = { ...item, appliedConstraints: ev };
+            copy[prev.length - 1] = { ...last, appliedConstraints: ev };
             return copy;
           });
         },
         onMoodboardSignals: (ev) => {
           turnMoodboardSignals = ev;
           setTimeline((prev) => {
-            const idx = [...prev].reverse().findIndex((t) => t.kind === "msg" && t.role === "assistant");
-            if (idx === -1) {
-              // No assistant msg yet — inject a placeholder so the card renders immediately.
+            const last = prev[prev.length - 1];
+            if (!last || last.kind !== "msg" || last.role !== "assistant") {
+              // No current-turn assistant msg yet — inject a placeholder so
+              // the card renders immediately, BELOW the user's upload.
               return [...prev, { kind: "msg", role: "assistant", content: "", moodboardSignals: ev, appliedConstraints: turnConstraints ?? undefined }];
             }
-            const realIdx = prev.length - 1 - idx;
-            const item = prev[realIdx];
-            if (item.kind !== "msg" || item.role !== "assistant") return prev;
             const copy = prev.slice();
-            copy[realIdx] = { ...item, moodboardSignals: ev };
+            copy[prev.length - 1] = { ...last, moodboardSignals: ev };
             return copy;
           });
         },
+
         onReconnect: (ev) => {
           armStall();
           toast.message("Reconnecting to the concierge…", {
