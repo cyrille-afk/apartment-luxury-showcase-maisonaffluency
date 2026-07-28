@@ -1508,7 +1508,8 @@ const PublicProductPage: React.FC = () => {
               })()}
 
               {/* Secondary actions: Favorite / Pin / Spec Sheet */}
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                <div className="hidden md:block">
                 <FavoriteFolderPicker pickId={product.id} align="start" side="top">
                   <button
                     onClick={(e) => e.stopPropagation()}
