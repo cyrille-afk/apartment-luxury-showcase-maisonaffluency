@@ -1267,6 +1267,47 @@ const PublicProductPage: React.FC = () => {
       <div className="min-h-screen bg-background text-foreground">
         <Navigation borderless />
 
+        {/* Mobile sticky mini bar — shows on scroll (mirrors 1stdibs pattern) */}
+        <div
+          className={cn(
+            "md:hidden fixed left-0 right-0 z-[70] bg-background/95 backdrop-blur-md border-b border-border shadow-sm transition-transform duration-300 ease-out",
+            showStickyBar ? "translate-y-0" : "-translate-y-full pointer-events-none"
+          )}
+          style={{ top: "calc(env(safe-area-inset-top, 0px))" }}
+          aria-hidden={!showStickyBar}
+        >
+          <div className="flex items-center gap-3 px-3 py-2">
+            {images[0] && (
+              <img
+                src={images[0]}
+                alt=""
+                className="w-11 h-11 rounded-md object-cover shrink-0 border border-border"
+              />
+            )}
+            <div className="min-w-0 flex-1">
+              <p className="font-display text-[13px] leading-tight text-foreground truncate">
+                {product.title}
+              </p>
+              <p className="font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground truncate">
+                {designerDisplay}
+              </p>
+            </div>
+            <Link
+              to={`/contact?${new URLSearchParams({
+                subject: `Price on Request — ${product.title} by ${designerDisplay}`,
+                productId: product.id,
+                productSlug: productSlug || "",
+                productName: product.title || "",
+                designerName: designerDisplay || "",
+              }).toString()}#contact`}
+              className="shrink-0 px-3 py-2 rounded-md bg-foreground text-background font-body text-[10px] uppercase tracking-[0.12em] whitespace-nowrap"
+            >
+              Price Request
+            </Link>
+          </div>
+        </div>
+
+
         <div className="pt-28 md:pt-[12rem] pb-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <button
             type="button"
