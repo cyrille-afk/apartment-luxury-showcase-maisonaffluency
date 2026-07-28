@@ -382,6 +382,26 @@ const sanitizeTimelineForAttachments = (items: TimelineItem[]) =>
     return cleanItem;
   });
 
+const VISUAL_SOURCING_CONTEXT_KEY = "concierge:lastVisualSourcingContext";
+
+const buildVisualSourcingContext = (ev: MoodboardSignalsEvent): string => {
+  const lines = [
+    ev.kind ? `upload kind: ${ev.kind.replace(/_/g, " ")}` : null,
+    ev.room_type ? `room: ${ev.room_type}` : null,
+    ev.style?.length ? `style: ${ev.style.join(", ")}` : null,
+    ev.palette?.length ? `palette: ${ev.palette.join(", ")}` : null,
+    ev.materials?.length ? `materials: ${ev.materials.join(", ")}` : null,
+    ev.subcategories?.length ? `typologies: ${ev.subcategories.join(", ")}` : ev.categories?.length ? `categories: ${ev.categories.join(", ")}` : null,
+    ev.designer_hints?.length ? `designer hints: ${ev.designer_hints.join(", ")}` : null,
+    ev.notes ? `notes: ${ev.notes}` : null,
+  ].filter(Boolean);
+  return lines.join(" · ").slice(0, 1200);
+};
+
+const getStoredVisualSourcingContext = (): string => {
+  try { return sessionStorage.getItem(VISUAL_SOURCING_CONTEXT_KEY)?.trim() || ""; } catch { return ""; }
+};
+
 
 export type ConciergeSurface = "trade" | "public";
 
