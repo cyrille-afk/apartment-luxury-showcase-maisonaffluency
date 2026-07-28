@@ -179,25 +179,11 @@ export default function GalleryDetailsFloatingNav({
           aria-label="Quick actions"
         >
           <button
-            onClick={handleAllCategories}
-            aria-label="Browse all categories"
-            className="h-10 w-10 rounded-full flex items-center justify-center hover:bg-foreground/10 transition-colors active:scale-95"
-          >
-            <LayoutGrid className="h-4 w-4" />
-          </button>
-          <button
             onClick={handleAz}
             aria-label={azLabel}
             className="h-10 w-10 rounded-full flex items-center justify-center hover:bg-foreground/10 transition-colors active:scale-95"
           >
             <ArrowDownAZ className="h-4 w-4" />
-          </button>
-          <button
-            onClick={handleWhatsApp}
-            aria-label="Contact via WhatsApp"
-            className="h-10 w-10 rounded-full flex items-center justify-center hover:bg-foreground/10 transition-colors active:scale-95"
-          >
-            <MessageCircle className="h-4 w-4" />
           </button>
           <button
             onClick={handleTop}
