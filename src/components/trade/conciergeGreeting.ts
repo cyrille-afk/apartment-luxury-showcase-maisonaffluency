@@ -435,7 +435,14 @@ export const fuzzyCityMatch = (
 };
 
 export const quickClientProfile = (text: string): QuickProfile | null => {
-  if (!text || text.trim().length < 4) return null;
+  if (!text) return null;
+  const trimmed = text.trim();
+  const shortCityToken = trimmed.toLowerCase().replace(/[.!?]+$/g, "");
+  if (
+    trimmed.length < 4 &&
+    !HV_CITY_EXPANSIONS[shortCityToken] &&
+    !HV_CITIES.includes(shortCityToken)
+  ) return null;
   const lc = text.toLowerCase();
   const signals: string[] = [];
   let city: string | null = null;
