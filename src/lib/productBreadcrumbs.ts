@@ -27,8 +27,8 @@ export interface ProductBreadcrumbInput {
   category?: string | null;
   /** Raw subcategory from the product row (may be empty / non-canonical). */
   subcategory?: string | null;
-  /** Product title — rendered as the final, non-linked crumb. */
-  title: string;
+  /** Product title — rendered as the final, non-linked crumb. Omit to render category-only breadcrumbs. */
+  title?: string;
   /**
    * Optional URL builder for the Category and Subcategory crumbs.
    * Defaults to the public CategoryRoute (`/products-category/...`).
