@@ -1311,7 +1311,7 @@ const PublicProductPage: React.FC = () => {
               }).toString()}#contact`}
               className="shrink-0 px-3 py-2 rounded-md bg-foreground text-background font-body text-[10px] uppercase tracking-[0.12em] whitespace-nowrap"
             >
-              Price Upon Request
+              Inquire for Pricing
             </Link>
           </div>
         </div>
@@ -1496,7 +1496,7 @@ const PublicProductPage: React.FC = () => {
               </div>
 
 
-              {/* Primary CTA — Price on Request.
+              {/* Primary CTAs — Login for Pricing (trade) + Inquire for Pricing (trade-account form).
                   Passes product context so the admin inbox can pre-fill a draft quote. */}
               {(() => {
                 const q = new URLSearchParams({
@@ -1506,13 +1506,22 @@ const PublicProductPage: React.FC = () => {
                   productName: product.title || "",
                   designerName: designerDisplay || "",
                 });
+                const returnTo = typeof window !== "undefined" ? location.pathname + location.search : "";
                 return (
-                  <Link
-                    to={`/contact?${q.toString()}#contact`}
-                    className="mt-2 flex items-center justify-center gap-2 px-5 py-3.5 rounded-md font-body text-xs uppercase tracking-[0.12em] transition-all w-full bg-foreground text-background hover:bg-foreground/90"
-                  >
-                    Price Upon Request
-                  </Link>
+                  <div className="mt-2 grid grid-cols-2 gap-2">
+                    <Link
+                      to={`/trade/login${returnTo ? `?redirect=${encodeURIComponent(returnTo)}` : ""}`}
+                      className="flex items-center justify-center gap-2 px-4 py-3.5 rounded-md font-body text-[11px] md:text-xs uppercase tracking-[0.12em] transition-all w-full border border-foreground text-foreground hover:bg-foreground hover:text-background text-center"
+                    >
+                      Login for Pricing
+                    </Link>
+                    <Link
+                      to={`/contact?${q.toString()}#contact`}
+                      className="flex items-center justify-center gap-2 px-4 py-3.5 rounded-md font-body text-[11px] md:text-xs uppercase tracking-[0.12em] transition-all w-full bg-foreground text-background hover:bg-foreground/90 text-center"
+                    >
+                      Inquire for Pricing
+                    </Link>
+                  </div>
                 );
               })()}
 

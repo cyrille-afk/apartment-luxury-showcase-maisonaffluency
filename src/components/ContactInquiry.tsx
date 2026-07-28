@@ -38,12 +38,22 @@ const buildStudioPrefill = (s: PickerStudio) => {
   return { subject, message: messageLines.join("\n") };
 };
 
+const PROFESSION_OPTIONS = [
+  "Interior Designer",
+  "Architect",
+  "Showroom",
+  "FF&E Procurement Contractor",
+  "Property Developer",
+  "Other",
+] as const;
+
 const inquirySchema = z.object({
   name: z.string().trim().min(1, "Name is required").max(100, "Max 100 characters"),
   firm: z.string().trim().max(200, "Max 200 characters"),
   email: z.string().trim().email("Please enter a valid email").max(255, "Max 255 characters"),
   phone: z.string().trim().max(30, "Max 30 characters"),
-  message: z.string().trim().min(1, "Message is required").max(2000, "Max 2000 characters"),
+  profession: z.string().trim().max(100, "Max 100 characters"),
+  message: z.string().trim().min(1, "This field is required").max(2000, "Max 2000 characters"),
 });
 
 const ContactInquiry = () => {
@@ -59,7 +69,7 @@ const ContactInquiry = () => {
   // Defer Turnstile script load until the user actually engages with the form
   // (saves ~21KB of third-party JS on initial LCP for visitors who never submit).
   const [interacted, setInteracted] = useState(false);
-  const EMPTY_FORM = { name: "", firm: "", email: "", phone: "", message: "" };
+  const EMPTY_FORM = { name: "", firm: "", email: "", phone: "", profession: "", message: "" };
   const [formData, setFormData] = useState(EMPTY_FORM);
   // Phone placeholder reflects the visitor's likely region (e.g. "+44 …" for UK)
   // so the form doesn't read as Singapore-only. Falls back to a multi-region hint.
@@ -151,7 +161,7 @@ const ContactInquiry = () => {
     navigate(`${location.pathname}?${next.toString()}`, { replace: true });
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { id, value } = e.target;
     setFormData(prev => ({ ...prev, [id]: value }));
     if (errors[id]) setErrors(prev => { const n = { ...prev }; delete n[id]; return n; });
@@ -166,6 +176,10 @@ const ContactInquiry = () => {
       const errs: Record<string, string> = {};
       result.error.issues.forEach((i) => { errs[i.path[0] as string] = i.message; });
       setErrors(errs);
+      return;
+    }
+    if (urlProductId && !result.data.profession) {
+      setErrors({ profession: "Please select your profession" });
       return;
     }
 
@@ -246,6 +260,9 @@ const ContactInquiry = () => {
               </p>
               <p className="mt-4 font-body text-lg text-muted-foreground max-w-2xl mx-auto">
                 To get started, please fill out the form below to help us get to know you and your studio.
+              </p>
+              <p className="mt-4 font-body text-sm italic text-muted-foreground max-w-2xl mx-auto">
+                We reserve Trade Accounts for interior design and architect studios, showrooms and FF&amp;E procurement contractors.
               </p>
             </>
           ) : (
@@ -363,17 +380,47 @@ const ContactInquiry = () => {
             </div>
           )}
 
+          {urlProductId && (
+            <div>
+              <label htmlFor="profession" className="mb-2 block font-body text-sm uppercase tracking-wider text-foreground">
+                Profession<span className="text-destructive">*</span>
+              </label>
+              <select
+                id="profession"
+                value={formData.profession}
+                onChange={handleInputChange}
+                className={`w-full h-11 px-3 rounded-lg border bg-background font-body text-sm text-foreground outline-none focus:border-foreground transition-colors ${errors.profession ? "border-destructive" : "border-border"} ${!formData.profession ? "text-muted-foreground/70" : ""}`}
+              >
+                <option value="" disabled>Select your profession</option>
+                {PROFESSION_OPTIONS.map((p) => (
+                  <option key={p} value={p} className="text-foreground bg-background">{p}</option>
+                ))}
+              </select>
+              {errors.profession && <p className="font-body text-[10px] text-destructive mt-1">{errors.profession}</p>}
+            </div>
+          )}
+
           <div>
             <label htmlFor="message" className="mb-2 block font-body text-sm uppercase tracking-wider text-foreground">
-              Message
+              {urlProductId ? "Project Name" : "Message"}
             </label>
-            <Textarea
-              id="message"
-              placeholder="Please share details about your inquiry..."
-              className={`min-h-[150px] border-border bg-background font-body rounded-lg ${errors.message ? "border-destructive" : ""}`}
-              value={formData.message}
-              onChange={handleInputChange}
-            />
+            {urlProductId ? (
+              <Input
+                id="message"
+                placeholder="e.g. Villa Serena — Bali residence"
+                className={`border-border bg-background font-body rounded-lg ${errors.message ? "border-destructive" : ""}`}
+                value={formData.message}
+                onChange={handleInputChange}
+              />
+            ) : (
+              <Textarea
+                id="message"
+                placeholder="Please share details about your inquiry..."
+                className={`min-h-[150px] border-border bg-background font-body rounded-lg ${errors.message ? "border-destructive" : ""}`}
+                value={formData.message}
+                onChange={handleInputChange}
+              />
+            )}
             {errors.message && <p className="font-body text-[10px] text-destructive mt-1">{errors.message}</p>}
           </div>
 
