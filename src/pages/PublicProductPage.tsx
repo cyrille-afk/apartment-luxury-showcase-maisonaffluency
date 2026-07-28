@@ -1524,12 +1524,13 @@ const PublicProductPage: React.FC = () => {
                     {favorited ? "Saved" : "Favorite"}
                   </button>
                 </FavoriteFolderPicker>
+                </div>
 
 
                 <button
                   onClick={() => togglePin(compareItem)}
                   className={cn(
-                    "flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-md font-body text-[11px] uppercase tracking-[0.12em] transition-all border",
+                    "hidden md:flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-md font-body text-[11px] uppercase tracking-[0.12em] transition-all border",
                     pinned
                       ? "bg-[hsl(var(--gold))]/10 border-[hsl(var(--gold))] text-[hsl(var(--gold))]"
                       : "border-border text-muted-foreground hover:text-foreground hover:border-foreground/30",
