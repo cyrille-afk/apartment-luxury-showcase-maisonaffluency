@@ -1273,7 +1273,7 @@ const PublicProductPage: React.FC = () => {
             "md:hidden fixed left-0 right-0 z-[70] bg-background/95 backdrop-blur-md border-b border-border shadow-sm transition-transform duration-300 ease-out",
             showStickyBar ? "translate-y-0" : "-translate-y-full pointer-events-none"
           )}
-          style={{ top: "calc(env(safe-area-inset-top, 0px))" }}
+          style={{ top: "calc(env(safe-area-inset-top, 0px) + 6rem)" }}
           aria-hidden={!showStickyBar}
         >
           <div className="flex items-center gap-3 px-3 py-2">
@@ -1508,7 +1508,8 @@ const PublicProductPage: React.FC = () => {
               })()}
 
               {/* Secondary actions: Favorite / Pin / Spec Sheet */}
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                <div className="hidden md:block">
                 <FavoriteFolderPicker pickId={product.id} align="start" side="top">
                   <button
                     onClick={(e) => e.stopPropagation()}
@@ -1523,12 +1524,13 @@ const PublicProductPage: React.FC = () => {
                     {favorited ? "Saved" : "Favorite"}
                   </button>
                 </FavoriteFolderPicker>
+                </div>
 
 
                 <button
                   onClick={() => togglePin(compareItem)}
                   className={cn(
-                    "flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-md font-body text-[11px] uppercase tracking-[0.12em] transition-all border",
+                    "hidden md:flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-md font-body text-[11px] uppercase tracking-[0.12em] transition-all border",
                     pinned
                       ? "bg-[hsl(var(--gold))]/10 border-[hsl(var(--gold))] text-[hsl(var(--gold))]"
                       : "border-border text-muted-foreground hover:text-foreground hover:border-foreground/30",
