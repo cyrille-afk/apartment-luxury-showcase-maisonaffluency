@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate, Link, useLocation, Navigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { Heart, Scale, ChevronLeft, ChevronRight, ChevronDown, ArrowLeft } from "lucide-react";
+import { Heart, Scale, ChevronLeft, ChevronRight, ChevronDown, ArrowLeft, Truck } from "lucide-react";
 import ShareMenu from "@/components/ShareMenu";
 import { buildPieceOgUrl } from "@/lib/whatsapp-share";
 import { cloudinaryUrl } from "@/lib/cloudinary";
@@ -1516,6 +1516,19 @@ const PublicProductPage: React.FC = () => {
                 );
               })()}
 
+              {/* Mobile/PWA-only: Ships-from row directly under the Price CTA. */}
+              {product.origin && (
+                <div className="md:hidden mt-2 flex items-center gap-2 px-3 py-2.5 rounded-md border border-border/70">
+                  <Truck size={16} className="shrink-0 text-foreground" />
+                  <span className="font-body text-[13px] text-foreground">
+                    <span className="font-medium">Ships from</span>{" "}
+                    <span className="text-muted-foreground">
+                      {product.origin.replace(/^\s*Handcrafted\s+in\s+/i, "").trim()}
+                    </span>
+                  </span>
+                </div>
+              )}
+
               {/* Secondary actions: Favorite / Pin / Spec Sheet */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                 <div className="hidden md:block">
@@ -1551,22 +1564,24 @@ const PublicProductPage: React.FC = () => {
                 </button>
 
                 {(product.pdf_url || (product.pdf_urls && product.pdf_urls.length > 0)) ? (
-                  <SpecSheetButton
-                    pdfUrl={product.pdf_url}
-                    pdfUrls={product.pdf_urls}
-                    brandName={designerDisplay}
-                    productName={product.title}
-                    variant="button"
-                    onBeforeOpen={() => {
-                      let allowed = false;
-                      requireAuth(() => { allowed = true; }, "download this spec sheet");
-                      return allowed;
-                    }}
-                  />
+                  <div className="hidden md:block">
+                    <SpecSheetButton
+                      pdfUrl={product.pdf_url}
+                      pdfUrls={product.pdf_urls}
+                      brandName={designerDisplay}
+                      productName={product.title}
+                      variant="button"
+                      onBeforeOpen={() => {
+                        let allowed = false;
+                        requireAuth(() => { allowed = true; }, "download this spec sheet");
+                        return allowed;
+                      }}
+                    />
+                  </div>
                 ) : (
                   <Link
                     to="/contact"
-                    className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-md font-body text-[11px] uppercase tracking-[0.12em] transition-all border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30"
+                    className="hidden md:flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-md font-body text-[11px] uppercase tracking-[0.12em] transition-all border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30"
                   >
                     Contact Us
                   </Link>
