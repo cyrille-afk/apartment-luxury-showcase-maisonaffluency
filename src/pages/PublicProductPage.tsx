@@ -1525,18 +1525,6 @@ const PublicProductPage: React.FC = () => {
                 );
               })()}
 
-              {/* Mobile/PWA-only: Ships-from row directly under the Price CTA. */}
-              {product.origin && (
-                <div className="md:hidden mt-2 flex items-center gap-2 px-3 py-2.5 rounded-md border border-border/70">
-                  <Truck size={16} className="shrink-0 text-foreground" />
-                  <span className="font-body text-[13px] text-foreground">
-                    <span className="font-medium">Ships from</span>{" "}
-                    <span className="text-muted-foreground">
-                      {product.origin.replace(/^\s*Handcrafted\s+in\s+/i, "").trim()}
-                    </span>
-                  </span>
-                </div>
-              )}
 
               {/* Secondary actions: Favorite / Pin / Spec Sheet */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
