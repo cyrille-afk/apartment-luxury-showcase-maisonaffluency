@@ -38,12 +38,22 @@ const buildStudioPrefill = (s: PickerStudio) => {
   return { subject, message: messageLines.join("\n") };
 };
 
+const PROFESSION_OPTIONS = [
+  "Interior Designer",
+  "Architect",
+  "Showroom",
+  "FF&E Procurement Contractor",
+  "Property Developer",
+  "Other",
+] as const;
+
 const inquirySchema = z.object({
   name: z.string().trim().min(1, "Name is required").max(100, "Max 100 characters"),
   firm: z.string().trim().max(200, "Max 200 characters"),
   email: z.string().trim().email("Please enter a valid email").max(255, "Max 255 characters"),
   phone: z.string().trim().max(30, "Max 30 characters"),
-  message: z.string().trim().min(1, "Message is required").max(2000, "Max 2000 characters"),
+  profession: z.string().trim().max(100, "Max 100 characters"),
+  message: z.string().trim().min(1, "This field is required").max(2000, "Max 2000 characters"),
 });
 
 const ContactInquiry = () => {
