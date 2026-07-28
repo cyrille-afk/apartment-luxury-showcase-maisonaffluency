@@ -382,6 +382,26 @@ const sanitizeTimelineForAttachments = (items: TimelineItem[]) =>
     return cleanItem;
   });
 
+const VISUAL_SOURCING_CONTEXT_KEY = "concierge:lastVisualSourcingContext";
+
+const buildVisualSourcingContext = (ev: MoodboardSignalsEvent): string => {
+  const lines = [
+    ev.kind ? `upload kind: ${ev.kind.replace(/_/g, " ")}` : null,
+    ev.room_type ? `room: ${ev.room_type}` : null,
+    ev.style?.length ? `style: ${ev.style.join(", ")}` : null,
+    ev.palette?.length ? `palette: ${ev.palette.join(", ")}` : null,
+    ev.materials?.length ? `materials: ${ev.materials.join(", ")}` : null,
+    ev.subcategories?.length ? `typologies: ${ev.subcategories.join(", ")}` : ev.categories?.length ? `categories: ${ev.categories.join(", ")}` : null,
+    ev.designer_hints?.length ? `designer hints: ${ev.designer_hints.join(", ")}` : null,
+    ev.notes ? `notes: ${ev.notes}` : null,
+  ].filter(Boolean);
+  return lines.join(" · ").slice(0, 1200);
+};
+
+const getStoredVisualSourcingContext = (): string => {
+  try { return sessionStorage.getItem(VISUAL_SOURCING_CONTEXT_KEY)?.trim() || ""; } catch { return ""; }
+};
+
 
 export type ConciergeSurface = "trade" | "public";
 
@@ -2524,7 +2544,10 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
           // The upload signal event is for backend retrieval only. Do not add
           // a visible transcript card or placeholder; it duplicated the moodboard
           // turn and sometimes appeared above the user's upload.
-          void ev;
+          const context = buildVisualSourcingContext(ev);
+          if (context) {
+            try { sessionStorage.setItem(VISUAL_SOURCING_CONTEXT_KEY, context); } catch { /* non-fatal */ }
+          }
           armStall();
         },
 
@@ -3453,7 +3476,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                                     .map((c: any) => (typeof c === "string" ? c : c?.props?.children ?? ""))
                                     .join("").toString().trim().replace(/^[—–\-:\s]+/, "");
                                   const prompts: Record<string, string> = {
-                                    "Source Similar Pieces": "Source similar pieces — please propose a tearsheet of on-brief collectible items from the Maison Affluency Curation matching the style, palette and typology tokens you just detected.",
+                                    "Source Similar Pieces": "Source similar pieces — please propose a tearsheet of on-brief collectible items from the Maison Affluency Curation matching the visual sourcing context from my latest upload.",
                                     "Generate Custom Quote": "Generate a custom quote — draft a bespoke specification sheet based on the design concept you just detected (style, palette, typology tokens).",
                                     "Match Finishes": "Match finishes — shortlist textile and material references from the available_finishes of on-palette pieces in the Curation that complement this palette.",
                                     "Forward To Human Concierge": "Please forward the floor plan / technical drawing I just uploaded to the Maison Affluency human concierge team at the District 9 studio so a curator can hand-select a bespoke digital curation for this project. Confirm the handoff in one warm line and let me know the expected turnaround.",
@@ -3557,7 +3580,14 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                                       return;
                                     }
 
-                                    void send(prompts[label], { displayText: label });
+                                    const basePrompt = prompts[label];
+                                    const visualContext = label === "Source Similar Pieces"
+                                      ? (getStoredVisualSourcingContext() || String(item.content || "").replace(/\s+/g, " ").slice(0, 1200))
+                                      : "";
+                                    const contextualPrompt = visualContext
+                                      ? `${basePrompt}\n\n[Latest upload visual sourcing context — use this as the retrieval brief, not the button label]\n${visualContext}`
+                                      : basePrompt;
+                                    void send(contextualPrompt, { displayText: label });
                                   };
 
                                   return (
