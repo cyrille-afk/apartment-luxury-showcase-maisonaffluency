@@ -4257,6 +4257,15 @@ serve(async (req) => {
       [...messages].reverse().find((m: any) => m.role === "user")?.content,
     );
 
+    const VISUAL_CONTEXT_MARKER = "[Latest upload visual sourcing context — use this as the retrieval brief, not the button label]";
+    const extractLatestVisualContext = (text: string): string => {
+      const idx = text.indexOf(VISUAL_CONTEXT_MARKER);
+      if (idx < 0) return "";
+      return text.slice(idx + VISUAL_CONTEXT_MARKER.length).trim().slice(0, 1200);
+    };
+    const latestVisualSourcingContext = extractLatestVisualContext(lastUserMsg);
+    const hasVisualSourcingContext = latestVisualSourcingContext.length > 0;
+
     // ── Skip/exclude confirmation gate ────────────────────────────────────
     // When the user asks us to skip items, we don't build the tearsheet
     // right away — we first echo the skip/keep breakdown and wait for
@@ -4396,14 +4405,14 @@ serve(async (req) => {
     const designerNames = (designerNamesRows || [])
       .flatMap((d: any) => [d.name, d.display_name])
       .filter(Boolean) as string[];
-    const heuristicNeedsPieces = needsFullCatalog(lastUserMsg, designerNames);
+    const heuristicNeedsPieces = hasVisualSourcingContext || needsFullCatalog(lastUserMsg, designerNames);
     mark("designers_query", { count: designerNames.length, needsPieces: heuristicNeedsPieces });
 
     // Short follow-ups (≤4 words, no catalog keywords) skip the classifier +
     // planner round-trips entirely — they were dominating latency on replies
     // like "London", "yes", "go on". Defaults match each helper's own fallback.
     const wordCount = lastUserMsg.trim().split(/\s+/).filter(Boolean).length;
-    const isShortFollowUp = wordCount <= 4 && !heuristicNeedsPieces && !latestTurnHasAttachments;
+    const isShortFollowUp = wordCount <= 4 && !heuristicNeedsPieces && !latestTurnHasAttachments && !hasVisualSourcingContext;
 
     const mentionedProjectIdPromise = activeProjectId ? Promise.resolve(null) : resolveMentionedProjectId(supabase, userId, lastUserMsg);
     // Hard-constraint pre-filter derived from the user's latest message:
@@ -4432,13 +4441,16 @@ serve(async (req) => {
         throw e;
       }
     };
-    // If the latest turn has a moodboard/reference image, await the vision
-    // extractor long enough to actually use its style/palette/materials
-    // tokens into the embedding query. Without this, two different mood
-    // boards paired with the same Brief Builder text produce identical
-    // embeddings → identical CURATED PIECES → identical picks. Text-only
-    // turns skip the wait entirely.
+    // If the latest turn has a moodboard/reference image OR a CTA follow-up
+    // carrying cached visual tokens, use those concrete style/palette/material
+    // signals as the embedding query. Without this, text-only CTA clicks like
+    // "Source Similar Pieces" embed the same generic phrase every time and
+    // retrieve the same products for different moodboards.
     const buildRagQuery = async (): Promise<string> => {
+      if (hasVisualSourcingContext) {
+        console.log(`[concierge RAG] cached visual-context query: ${latestVisualSourcingContext.slice(0, 240)}`);
+        return latestVisualSourcingContext;
+      }
       if (!latestTurnHasAttachments) return lastUserMsg;
       const vision = await Promise.race<ExtractedVision | null>([
         visionSignalsPromise,
@@ -4449,7 +4461,8 @@ serve(async (req) => {
       console.log(`[concierge RAG] vision-augmented query: ${augmented.slice(0, 240)}`);
       return augmented || lastUserMsg;
     };
-    const ragPromise = (latestTurnHasAttachments || heuristicNeedsPieces || lastUserMsg.length > 40)
+    const shouldBypassSemanticCache = latestTurnHasAttachments || hasVisualSourcingContext;
+    const ragPromise = (latestTurnHasAttachments || hasVisualSourcingContext || heuristicNeedsPieces || lastUserMsg.length > 40)
       ? buildRagQuery().then((q) =>
           loadRelevantPieces(supabase, LOVABLE_API_KEY, q, userId, 40, hasAnyPreConstraint ? preRequestConstraints : undefined),
         )
@@ -4458,8 +4471,8 @@ serve(async (req) => {
     const [sentiment, extractedBrief, ragResult, userBoards, userSignals, userMemory, mentionedProjectId, openQuotes, discountRow, cadDocuments, productCadAssets] = await Promise.all([
       isShortFollowUp
         ? Promise.resolve({ sentiment: "neutral", intent: "question", escalate: false, needs_catalog: false })
-        : timed("classifySentiment", classifySentiment(LOVABLE_API_KEY, lastUserMsg, { bypassSemanticCache: latestTurnHasAttachments })),
-      isShortFollowUp ? Promise.resolve(EMPTY_BRIEF) : timed("extractBrief", extractBrief(LOVABLE_API_KEY, lastUserMsg, { bypassSemanticCache: latestTurnHasAttachments })),
+        : timed("classifySentiment", classifySentiment(LOVABLE_API_KEY, lastUserMsg, { bypassSemanticCache: shouldBypassSemanticCache })),
+      isShortFollowUp ? Promise.resolve(EMPTY_BRIEF) : timed("extractBrief", extractBrief(LOVABLE_API_KEY, lastUserMsg, { bypassSemanticCache: shouldBypassSemanticCache })),
       timed("rag", ragPromise),
       timed("userBoards", loadUserBoards(supabase, userId)),
       timed("userSignals", loadUserSignals(supabase, userId)),
