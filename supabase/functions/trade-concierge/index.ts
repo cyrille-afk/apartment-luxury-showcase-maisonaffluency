@@ -3762,9 +3762,10 @@ async function buildDeterministicTearsheetProposal(
   ragRows: any[],
   brief: ExtractedBrief["brief"],
   requestText: string,
+  options?: { mixedRoom?: boolean },
 ): Promise<any | null> {
   const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-  const requestedTypology = inferRequestedTypology(brief, requestText);
+  const requestedTypology = options?.mixedRoom ? null : inferRequestedTypology(brief, requestText);
   const dimConstraints = inferDimensionConstraints(requestText);
   // Combine any inferred lead-time constraint with the brief's stored ceiling.
   const inferredLead = inferLeadTimeConstraints(requestText);
@@ -3809,10 +3810,36 @@ async function buildDeterministicTearsheetProposal(
       .filter((r: any) => r && typeof r.id === "string" && UUID_RE.test(r.id))
       .sort((a: any, b: any) => scoreRow(b) - scoreRow(a));
   }
-  const pickIds = Array.from(new Set(candidateRows
-    .sort((a: any, b: any) => scoreRow(b) - scoreRow(a))
-    .map((r: any) => r.id)
-  )).slice(0, 8);
+  const sortedCandidates = candidateRows.sort((a: any, b: any) => scoreRow(b) - scoreRow(a));
+  const diversifyMixedRoomRows = (rows: any[], limit: number) => {
+    const familyOf = (r: any) => {
+      const hay = `${r?.title || ""} ${r?.category || ""} ${r?.subcategory || ""}`.toLowerCase();
+      if (/\b(sofa|chair|armchair|bench|stool|ottoman|seating)\b/.test(hay)) return "seating";
+      if (/\b(table|desk|console)\b/.test(hay)) return "tables";
+      if (/\b(chandelier|pendant|lamp|sconce|lighting)\b/.test(hay)) return "lighting";
+      if (/\b(rug|carpet)\b/.test(hay)) return "rugs";
+      if (/\b(cabinet|sideboard|credenza|bookcase|shelf|storage)\b/.test(hay)) return "storage";
+      if (/\b(mirror|artwork|screen|vase|accessor)\b/.test(hay)) return "decor";
+      return normalizeLoose(r?.subcategory || r?.category || "other") || "other";
+    };
+    const picked: any[] = [];
+    const counts = new Map<string, number>();
+    for (const row of rows) {
+      const family = familyOf(row);
+      if ((counts.get(family) || 0) >= 2) continue;
+      picked.push(row);
+      counts.set(family, (counts.get(family) || 0) + 1);
+      if (picked.length >= limit) return picked;
+    }
+    for (const row of rows) {
+      if (picked.some((p) => p.id === row.id)) continue;
+      picked.push(row);
+      if (picked.length >= limit) return picked;
+    }
+    return picked;
+  };
+  const pickSource = options?.mixedRoom ? diversifyMixedRoomRows(sortedCandidates, 8) : sortedCandidates;
+  const pickIds = Array.from(new Set(pickSource.map((r: any) => r.id))).slice(0, 8);
   if (pickIds.length < 2) return null;
   const hydratedRaw = await hydratePickPreview(supabase, pickIds);
   const validIds = new Set(hydratedRaw.map((p: any) => p?.id).filter(Boolean));
@@ -4376,6 +4403,9 @@ serve(async (req) => {
     const hardValidationText = hasVisualSourcingContext
       ? stripVisualSourcingMarkers(userConversationText)
       : userConversationText;
+    const plannerInputText = hasVisualSourcingContext
+      ? stripVisualSourcingMarkers(lastUserMsg)
+      : lastUserMsg;
     const explicitConversationBudget = parseBudgetFromText(userConversationText);
     const stickyFactPatterns = [
       /\b(dining(?: room)?|dining table|table)\b/,
@@ -4494,8 +4524,8 @@ serve(async (req) => {
     const [sentiment, extractedBrief, ragResult, userBoards, userSignals, userMemory, mentionedProjectId, openQuotes, discountRow, cadDocuments, productCadAssets] = await Promise.all([
       isShortFollowUp
         ? Promise.resolve({ sentiment: "neutral", intent: "question", escalate: false, needs_catalog: false })
-        : timed("classifySentiment", classifySentiment(LOVABLE_API_KEY, lastUserMsg, { bypassSemanticCache: shouldBypassSemanticCache })),
-      isShortFollowUp ? Promise.resolve(EMPTY_BRIEF) : timed("extractBrief", extractBrief(LOVABLE_API_KEY, lastUserMsg, { bypassSemanticCache: shouldBypassSemanticCache })),
+        : timed("classifySentiment", classifySentiment(LOVABLE_API_KEY, plannerInputText, { bypassSemanticCache: shouldBypassSemanticCache })),
+      isShortFollowUp ? Promise.resolve(EMPTY_BRIEF) : timed("extractBrief", extractBrief(LOVABLE_API_KEY, plannerInputText, { bypassSemanticCache: shouldBypassSemanticCache })),
       timed("rag", ragPromise),
       timed("userBoards", loadUserBoards(supabase, userId)),
       timed("userSignals", loadUserSignals(supabase, userId)),
@@ -5395,6 +5425,7 @@ serve(async (req) => {
             Array.isArray((ragResult as any)?.rows) ? (ragResult as any).rows : [],
             effectiveBrief.brief,
             hardValidationText,
+            { mixedRoom: hasVisualSourcingContext },
           )
         : null;
       const vizProposal = buildVisualizationBriefProposal({
@@ -5527,6 +5558,7 @@ serve(async (req) => {
         Array.isArray((ragResult as any)?.rows) ? (ragResult as any).rows : [],
         effectiveBrief.brief,
         hardValidationText,
+        { mixedRoom: hasVisualSourcingContext },
       );
       if (deterministicProposal) {
         const { validation } = validateProposalAgainstBrief(deterministicProposal, hardValidationText, null);
@@ -6888,6 +6920,7 @@ serve(async (req) => {
             Array.isArray((ragResult as any)?.rows) ? (ragResult as any).rows : [],
             effectiveBrief.brief,
             hardValidationText,
+            { mixedRoom: hasVisualSourcingContext },
           );
           if (!proposal) return false;
           const { validation } = validateProposalAgainstBrief(proposal, hardValidationText, capturedRequirements);
