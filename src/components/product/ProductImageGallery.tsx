@@ -282,7 +282,7 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
             })}
           </div>
 
-        {/* Prev / Next arrows — desktop reveals on hover; mobile always visible */}
+        {/* Prev / Next arrows — desktop only, revealed on hover */}
         {images.length > 1 && (
           <>
             <button
@@ -290,7 +290,7 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
               disabled={activeIndex === 0}
               aria-label="Previous image"
               className={cn(
-                "absolute left-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 flex items-center justify-center transition-opacity",
+                "hidden md:flex absolute left-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 items-center justify-center transition-opacity",
                 activeIndex === 0 ? "opacity-0 pointer-events-none" : "opacity-100 md:opacity-0 md:group-hover:opacity-100"
               )}
             >
@@ -301,7 +301,7 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
               disabled={activeIndex === images.length - 1}
               aria-label="Next image"
               className={cn(
-                "absolute right-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 flex items-center justify-center transition-opacity",
+                "hidden md:flex absolute right-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 items-center justify-center transition-opacity",
                 activeIndex === images.length - 1 ? "opacity-0 pointer-events-none" : "opacity-100 md:opacity-0 md:group-hover:opacity-100"
               )}
             >
@@ -310,7 +310,7 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
           </>
         )}
 
-        {/* Dot indicators (desktop only — mobile uses the thumb strip below) */}
+        {/* Dot indicators (desktop only) */}
           <SliderDots
             count={images.length}
             activeIndex={activeIndex}
@@ -319,6 +319,26 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
             ariaPrefix="View image"
             className="hidden md:flex absolute bottom-3 left-1/2 -translate-x-1/2"
           />
+
+        {/* Mobile/PWA horizontal progress line — 1stdibs-style swipe indicator */}
+        {images.length > 1 && (
+          <div className="md:hidden absolute bottom-0 left-0 right-0 z-20 flex items-center gap-2 px-5 pb-4">
+            {images.map((_, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={() => goTo(i)}
+                aria-label={`View image ${i + 1} of ${images.length}`}
+                className={cn(
+                  "flex-1 rounded-full transition-all duration-200",
+                  i === activeIndex
+                    ? "h-[3px] bg-foreground"
+                    : "h-px bg-foreground/25"
+                )}
+              />
+            ))}
+          </div>
+        )}
         </div>
 
         {/* Caption */}
