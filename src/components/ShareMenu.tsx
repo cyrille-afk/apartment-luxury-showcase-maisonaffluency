@@ -9,9 +9,11 @@ interface ShareMenuProps {
   iconSize?: string;
   showLabel?: boolean;
   labelSize?: string;
+  iconVariant?: "share2" | "ios";
 }
 
-const ShareMenu = ({ url, message, className = "", iconSize = "w-3.5 h-3.5", showLabel = true, labelSize = "text-[9px]" }: ShareMenuProps) => {
+const ShareMenu = ({ url, message, className = "", iconSize = "w-3.5 h-3.5", showLabel = true, labelSize = "text-[9px]", iconVariant = "share2" }: ShareMenuProps) => {
+  const Icon: LucideIcon = iconVariant === "ios" ? ShareIos : Share2;
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
