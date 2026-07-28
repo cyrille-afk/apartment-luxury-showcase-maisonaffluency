@@ -4366,7 +4366,7 @@ serve(async (req) => {
       /\b(handmade|one[- ]of[- ]a[- ]kind|designer|brand|edition|open(?:ed)? to both|both)\b/,
     ];
     const stickyFactCount = stickyFactPatterns.filter((re) => re.test(userConversationText)).length;
-    const shouldActOnAccumulatedBrief = /\b(dining(?: room)?|dining table|table)\b/.test(userConversationText) && stickyFactCount >= 3;
+    const shouldActOnAccumulatedBrief = !hasVisualSourcingContext && /\b(dining(?: room)?|dining table|table)\b/.test(userConversationText) && stickyFactCount >= 3;
     const lacksUploadedRoomContext = !hasAttachments && !/\b(room plan|floor plan|layout|pdf|photo|image|drawing|elevation|attached|uploaded|paperclip|\d+(?:\.\d+)?\s*(?:m|metres?|meters?|ft|feet|sqm|sq\.?\s*m|square))\b/.test(userConversationText);
 
     // Ultra-fast deterministic path for one-word location follow-ups like
@@ -4449,7 +4449,10 @@ serve(async (req) => {
     const buildRagQuery = async (): Promise<string> => {
       if (hasVisualSourcingContext) {
         console.log(`[concierge RAG] cached visual-context query: ${latestVisualSourcingContext.slice(0, 240)}`);
-        return latestVisualSourcingContext;
+        return [
+          "mixed-room collectible edit; source across seating, tables, lighting, storage, rugs, mirrors, and accessories as relevant; do not narrow to a single typology unless the user explicitly requested it",
+          latestVisualSourcingContext,
+        ].join(" · ");
       }
       if (!latestTurnHasAttachments) return lastUserMsg;
       const vision = await Promise.race<ExtractedVision | null>([
@@ -4546,7 +4549,7 @@ serve(async (req) => {
     // Deterministic opening-brief reply removed — it hardcoded "dining table"
     // and ignored actual user content (room type, seat count, shape, etc.).
     // The LLM handles discovery turns directly now.
-    const requestedTypology = inferRequestedTypology(effectiveBrief.brief, userConversationText);
+    const requestedTypology = hasVisualSourcingContext ? null : inferRequestedTypology(effectiveBrief.brief, userConversationText);
 
     if (shouldActOnAccumulatedBrief && breaker.state() === "open" && CLOUDFLARE_ENABLED) {
       return sseTextResponse(
