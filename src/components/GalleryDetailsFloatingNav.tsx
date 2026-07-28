@@ -8,7 +8,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
-const WHATSAPP_URL = "https://wa.me/6591393850";
+
 
 interface Props {
   /** Path used by the A–Z button. Defaults to /designers. */
