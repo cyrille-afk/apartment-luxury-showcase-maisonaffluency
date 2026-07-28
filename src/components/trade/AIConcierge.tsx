@@ -887,9 +887,10 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
   useEffect(() => {
     setTimeline((prev) => {
       const cleaned = sanitizeTimelineForAttachments(prev);
-      return cleaned.length === prev.length ? prev : cleaned;
+      const unchanged = cleaned.length === prev.length && cleaned.every((item, idx) => item === prev[idx]);
+      return unchanged ? prev : cleaned;
     });
-  }, []);
+  });
 
   // --- Lovable Cloud persistence: per-user multi-thread ------------------
   // Each conversation is a row in `public.concierge_threads` (RLS-scoped to
