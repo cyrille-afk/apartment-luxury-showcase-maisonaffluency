@@ -74,6 +74,6 @@ export function buildProductBreadcrumbs({
     }
   }
 
-  crumbs.push({ label: title });
+  if (title && title.trim()) crumbs.push({ label: title });
   return crumbs;
 }
