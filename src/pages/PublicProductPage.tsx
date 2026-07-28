@@ -981,10 +981,15 @@ const PublicProductPage: React.FC = () => {
 
   // Mobile/PWA: shrink the product image once the user scrolls past a small threshold.
   const [galleryCompact, setGalleryCompact] = useState(false);
+  const [showStickyBar, setShowStickyBar] = useState(false);
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (window.matchMedia("(min-width: 1024px)").matches) return;
-    const onScroll = () => setGalleryCompact(window.scrollY > 40);
+    const onScroll = () => {
+      const y = window.scrollY;
+      setGalleryCompact(y > 40);
+      setShowStickyBar(y > 360);
+    };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
