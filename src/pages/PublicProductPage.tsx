@@ -1330,17 +1330,19 @@ const PublicProductPage: React.FC = () => {
             />
           </div>
 
-          {/* Mobile breadcrumbs — compact, above the gallery */}
+          {/* Mobile breadcrumbs — 1stdibs style: single line, "/" separators, no product title */}
           <div className="md:hidden -mt-2 mb-3">
             <Breadcrumbs
               items={buildProductBreadcrumbs({
                 root: { label: "Home", to: "/" },
                 category: product.category,
                 subcategory: product.subcategory,
-                title: product.title,
+                // omit title on mobile
               })}
+              variant="compact"
             />
           </div>
+
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16">
             <div className="relative md:relative sticky top-[calc(6rem+env(safe-area-inset-top))] md:top-0 self-start z-30 bg-background" ref={galleryScrollRef}>
