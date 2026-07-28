@@ -2754,10 +2754,10 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
     return false;
   }, [timeline]);
   const composerPlaceholder = cityKnown
-    ? (lang === "zh" ? "描述一件家具、上传图片，或请我起草报价…"
-      : lang === "th" ? "อธิบายชิ้นงาน อัปโหลดภาพ หรือขอให้ร่างใบเสนอราคา…"
-      : lang === "id" ? "Deskripsikan sebuah karya, unggah gambar, atau minta draf penawaran…"
-      : "Describe a piece, upload an image, or ask for a quote…")
+    ? (lang === "zh" ? "描述您的项目或需求…"
+      : lang === "th" ? "อธิบายโครงการหรือบรีฟของคุณ…"
+      : lang === "id" ? "Jelaskan proyek atau brief Anda…"
+      : "Describe your project or brief…")
     : (lang === "zh" ? "输入您的项目所在城市…"
       : lang === "th" ? "พิมพ์เมืองของโปรเจกต์ของคุณ…"
       : lang === "id" ? "Ketik kota proyek Anda…"
