@@ -157,27 +157,10 @@ export default function GalleryDetailsFloatingNav({
   const isExpanded = expanded;
 
 
-  const handleAllCategories = () => {
-    setExpanded(false);
-    if (onAllCategoriesClick) {
-      onAllCategoriesClick();
-      return;
-    }
-    if (allCategoriesHref) {
-      navigate(allCategoriesHref);
-      return;
-    }
-    window.dispatchEvent(new Event("open-main-menu"));
-    window.dispatchEvent(new CustomEvent("open-all-categories"));
-  };
   const handleAz = () => {
     setExpanded(false);
     onAzClick?.();
     navigate(azHref);
-  };
-  const handleWhatsApp = () => {
-    setExpanded(false);
-    window.open(WHATSAPP_URL, "_blank", "noopener,noreferrer");
   };
   const handleTop = () => {
     setExpanded(false);
