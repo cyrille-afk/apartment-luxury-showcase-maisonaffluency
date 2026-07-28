@@ -233,19 +233,38 @@ const ContactInquiry = () => {
           transition={{ duration: 0.8 }}
           className="text-center mb-12"
         >
-          <p className="mb-3 font-body text-sm uppercase tracking-[0.3em] text-primary">
-            Professional Inquiries
-          </p>
-          <h2 className="mb-6 font-display text-4xl text-foreground md:text-5xl">
-            Visit Us By Appointment
-          </h2>
-          <p className="font-body text-sm text-muted-foreground mb-4">
-            1 Grange Garden, Singapore 249631
-          </p>
-          <p className="font-body text-lg text-muted-foreground max-w-2xl mx-auto text-justify">
-            For architects, interior designers, and design connoisseurs interested
-            in detailed and custom specifications, material sourcing, and/or collaborative opportunities.
-          </p>
+          {urlProductId ? (
+            <>
+              <p className="mb-3 font-body text-sm uppercase tracking-[0.3em] text-primary">
+                Trade Account Inquiry
+              </p>
+              <h2 className="mb-6 font-display text-4xl text-foreground md:text-5xl">
+                Open a Trade Account
+              </h2>
+              <p className="font-body text-lg text-muted-foreground max-w-2xl mx-auto">
+                Thank you for your interest in establishing a Trade Account with us. We love working with new design partners.
+              </p>
+              <p className="mt-4 font-body text-lg text-muted-foreground max-w-2xl mx-auto">
+                To get started, please fill out the form below to help us get to know you and your studio.
+              </p>
+            </>
+          ) : (
+            <>
+              <p className="mb-3 font-body text-sm uppercase tracking-[0.3em] text-primary">
+                Professional Inquiries
+              </p>
+              <h2 className="mb-6 font-display text-4xl text-foreground md:text-5xl">
+                Visit Us By Appointment
+              </h2>
+              <p className="font-body text-sm text-muted-foreground mb-4">
+                1 Grange Garden, Singapore 249631
+              </p>
+              <p className="font-body text-lg text-muted-foreground max-w-2xl mx-auto text-justify">
+                For architects, interior designers, and design connoisseurs interested
+                in detailed and custom specifications, material sourcing, and/or collaborative opportunities.
+              </p>
+            </>
+          )}
         </motion.div>
 
         <motion.form

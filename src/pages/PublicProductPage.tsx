@@ -1311,7 +1311,7 @@ const PublicProductPage: React.FC = () => {
               }).toString()}#contact`}
               className="shrink-0 px-3 py-2 rounded-md bg-foreground text-background font-body text-[10px] uppercase tracking-[0.12em] whitespace-nowrap"
             >
-              Price Request
+              Price Upon Request
             </Link>
           </div>
         </div>
@@ -1511,7 +1511,7 @@ const PublicProductPage: React.FC = () => {
                     to={`/contact?${q.toString()}#contact`}
                     className="mt-2 flex items-center justify-center gap-2 px-5 py-3.5 rounded-md font-body text-xs uppercase tracking-[0.12em] transition-all w-full bg-foreground text-background hover:bg-foreground/90"
                   >
-                    Price on Request
+                    Price Upon Request
                   </Link>
                 );
               })()}
