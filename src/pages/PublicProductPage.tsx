@@ -1368,7 +1368,7 @@ const PublicProductPage: React.FC = () => {
                 }
                 overlay={
                   product.description ? (
-                    <div className="flex flex-col items-end gap-2">
+                    <div className="hidden md:flex flex-col items-end gap-2">
                       <LightboxDescriptionDropdown
                         description={product.description}
                         ariaDescribedBy="product-description-hidden"
@@ -1377,6 +1377,7 @@ const PublicProductPage: React.FC = () => {
                   ) : null
                 }
               />
+
 
               {/* Mobile-only image overlays: share (top-right) + favorite (bottom-right) */}
               <div className="md:hidden pointer-events-none absolute inset-x-0 top-0 z-40" style={{ height: galleryCompact ? "22vh" : "42vh" }}>
