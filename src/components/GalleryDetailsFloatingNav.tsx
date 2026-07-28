@@ -1,8 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import {
-  LayoutGrid,
   ArrowDownAZ,
-  MessageCircle,
   ChevronDown,
   MoreHorizontal,
   ArrowUp,
