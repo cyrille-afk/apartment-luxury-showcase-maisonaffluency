@@ -255,13 +255,13 @@ const ContactInquiry = () => {
               <h2 className="mb-6 font-display text-4xl text-foreground md:text-5xl">
                 Open a Trade Account
               </h2>
-              <p className="font-body text-lg text-muted-foreground max-w-2xl mx-auto">
+              <p className="font-body text-sm text-muted-foreground max-w-2xl mx-auto">
                 Thank you for your interest in establishing a Trade Account with us. We love working with new design partners.
               </p>
-              <p className="mt-4 font-body text-lg text-muted-foreground max-w-2xl mx-auto">
+              <p className="mt-4 font-body text-sm text-muted-foreground max-w-2xl mx-auto">
                 To get started, please fill out the form below to help us get to know you and your studio.
               </p>
-              <p className="mt-4 font-body text-sm italic text-muted-foreground max-w-2xl mx-auto">
+              <p className="mt-4 font-body text-sm text-muted-foreground max-w-2xl mx-auto">
                 We reserve Trade Accounts for interior design and architect studios, showrooms and FF&amp;E procurement contractors.
               </p>
             </>
