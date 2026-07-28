@@ -990,7 +990,18 @@ const PublicProductPage: React.FC = () => {
       setGalleryCompact(y > 40);
       // Show mini-bar only once the product image has fully scrolled past the header.
       const el = galleryScrollRef.current;
-      const headerBottom = 96; // nav h-24
+      // Header = safe-area-inset-top + h-24 (96px). Read the inset live so PWA
+      // (which reports a real inset) triggers at the correct scroll position.
+      const inset = parseFloat(
+        getComputedStyle(document.documentElement).getPropertyValue("--sat-top") || "0",
+      ) || (window.visualViewport ? 0 : 0);
+      const safeTop =
+        Number.parseFloat(
+          getComputedStyle(document.documentElement).getPropertyValue("padding-top"),
+        ) || 0;
+      // Fallback: measure the fixed nav directly.
+      const navEl = document.querySelector("header, nav[data-site-nav]") as HTMLElement | null;
+      const headerBottom = navEl?.getBoundingClientRect().bottom ?? (96 + inset + safeTop);
       if (el) {
         const rect = el.getBoundingClientRect();
         setShowStickyBar(rect.bottom < headerBottom);
