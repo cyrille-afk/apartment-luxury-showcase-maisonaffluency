@@ -4293,21 +4293,10 @@ serve(async (req) => {
     const latestVisualSourcingContext = extractLatestVisualContext(lastUserMsg);
     const hasVisualSourcingContext = latestVisualSourcingContext.length > 0;
     const stripVisualSourcingMarkers = (text: string): string => {
-      const lines = String(text || "").split(/\n/);
-      const kept: string[] = [];
-      let skipNext = false;
-      for (const line of lines) {
-        if (skipNext) {
-          skipNext = false;
-          continue;
-        }
-        if (line.includes(VISUAL_CONTEXT_MARKER)) {
-          skipNext = true;
-          continue;
-        }
-        kept.push(line);
-      }
-      return kept.join("\n").trim();
+      const raw = String(text || "");
+      const idx = raw.indexOf(VISUAL_CONTEXT_MARKER);
+      if (idx < 0) return raw.trim();
+      return raw.slice(0, idx).trim();
     };
 
     // ── Skip/exclude confirmation gate ────────────────────────────────────
@@ -5562,9 +5551,12 @@ serve(async (req) => {
       );
       if (deterministicProposal) {
         const { validation } = validateProposalAgainstBrief(deterministicProposal, hardValidationText, null);
-        if (!validation.ok) {
+        if (!validation.ok && !hasVisualSourcingContext) {
           console.warn("[concierge deterministic-plan] blocked proposal", JSON.stringify({ requestId, violations: validation.violations }));
           return sseTextResponse(buildRequirementsBlockedMessage(validation.violations));
+        }
+        if (!validation.ok && hasVisualSourcingContext) {
+          console.log("[concierge deterministic-plan] soft-pass visual sourcing proposal", JSON.stringify({ requestId, violations: validation.violations }));
         }
         return sseProposalThenTextResponse(
           deterministicProposal,
