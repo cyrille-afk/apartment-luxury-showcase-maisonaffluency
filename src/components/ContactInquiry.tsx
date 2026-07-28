@@ -69,11 +69,20 @@ const ContactInquiry = () => {
   // Defer Turnstile script load until the user actually engages with the form
   // (saves ~21KB of third-party JS on initial LCP for visitors who never submit).
   const [interacted, setInteracted] = useState(false);
-  const EMPTY_FORM = { name: "", firm: "", email: "", phone: "", profession: "", message: "" };
+  const inferredCountry = inferCountryFromBrowser();
+  const inferredDialCode = getDialCode(inferredCountry);
+  const EMPTY_FORM = {
+    name: "",
+    firm: "",
+    email: "",
+    phone: inferredDialCode ? `${inferredDialCode} ` : "",
+    profession: "",
+    message: "",
+  };
   const [formData, setFormData] = useState(EMPTY_FORM);
   // Phone placeholder reflects the visitor's likely region (e.g. "+44 …" for UK)
   // so the form doesn't read as Singapore-only. Falls back to a multi-region hint.
-  const [phonePlaceholder] = useState(() => getPhonePlaceholder(inferCountryFromBrowser()));
+  const [phonePlaceholder] = useState(() => getPhonePlaceholder(inferredCountry));
 
   // Stable draft key per inquiry context — keyed by `studio` param when present
   // so different studio introductions don't share a draft, otherwise by the
