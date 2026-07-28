@@ -376,6 +376,10 @@ const sanitizeTimelineForAttachments = (items: TimelineItem[]) =>
     if (item.role === "user" && legacyAttachmentPlaceholderRe.test(item.content || "")) return false;
     if (item.role === "assistant" && attachmentFailureReplyRe.test(item.content || "")) return false;
     return true;
+  }).map((item) => {
+    if (item?.kind !== "msg" || item.role !== "assistant" || !item.moodboardSignals) return item;
+    const { moodboardSignals: _hiddenUploadSignals, ...cleanItem } = item;
+    return cleanItem;
   });
 
 
@@ -2339,8 +2343,6 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
     // this turn. Emitted by the edge function once, near the start of the
     // SSE stream. Attached to the assistant msg so the UI can show chips.
     let turnConstraints: AppliedConstraintsEvent | null = null;
-    let turnMoodboardSignals: MoodboardSignalsEvent | null = null;
-
     const upsertAssistant = (chunk: string) => {
       armStall();
       assistantSoFar += chunk;
@@ -2351,12 +2353,12 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
           const last = prev[idx];
           if (last?.kind === "msg" && last.role === "assistant") {
             const copy = prev.slice();
-            copy[idx] = { ...last, content: assistantSoFar, appliedConstraints: turnConstraints ?? last.appliedConstraints, moodboardSignals: turnMoodboardSignals ?? last.moodboardSignals };
+            copy[idx] = { ...last, content: assistantSoFar, appliedConstraints: turnConstraints ?? last.appliedConstraints };
             return copy;
           }
         }
         assistantStarted = true;
-        return [...prev, { kind: "msg", role: "assistant", content: assistantSoFar, appliedConstraints: turnConstraints ?? undefined, moodboardSignals: turnMoodboardSignals ?? undefined }];
+        return [...prev, { kind: "msg", role: "assistant", content: assistantSoFar, appliedConstraints: turnConstraints ?? undefined }];
       });
     };
 
@@ -2524,18 +2526,11 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
           });
         },
         onMoodboardSignals: (ev) => {
-          turnMoodboardSignals = ev;
-          setTimeline((prev) => {
-            const last = prev[prev.length - 1];
-            if (!last || last.kind !== "msg" || last.role !== "assistant") {
-              // No current-turn assistant msg yet — inject a placeholder so
-              // the card renders immediately, BELOW the user's upload.
-              return [...prev, { kind: "msg", role: "assistant", content: "", moodboardSignals: ev, appliedConstraints: turnConstraints ?? undefined }];
-            }
-            const copy = prev.slice();
-            copy[prev.length - 1] = { ...last, moodboardSignals: ev };
-            return copy;
-          });
+          // The upload signal event is for backend retrieval only. Do not add
+          // a visible transcript card or placeholder; it duplicated the moodboard
+          // turn and sometimes appeared above the user's upload.
+          void ev;
+          armStall();
         },
 
         onReconnect: (ev) => {
