@@ -1589,21 +1589,6 @@ const PublicProductPage: React.FC = () => {
               </div>
 
 
-              <p className="hidden md:block font-body text-[11px] text-muted-foreground text-center">
-                For pricing and availability, please{" "}
-                <Link to="/trade-program" className="underline underline-offset-2 hover:text-foreground transition-colors">
-                  join our Trade Program
-                </Link>.
-              </p>
-              <p className="hidden md:block font-body text-[11px] text-muted-foreground text-center mt-1">
-                Looking for a bespoke version?{" "}
-                <Link
-                  to={`/contact?subject=${encodeURIComponent(`Bespoke inquiry — ${product.title} by ${designerDisplay}`)}&message=${encodeURIComponent(`Hello, I'd like to inquire about a bespoke version of:\n\n• ${product.title}${product.subtitle ? ` (${product.subtitle})` : ""}\n• Designer: ${designerDisplay}\n• Page: https://www.maisonaffluency.com${location.pathname}\n${finishesMissingImages.length > 0 ? `\nNote: No reference image on file for the selected finish${finishesMissingImages.length > 1 ? "es" : ""}: ${finishesMissingImages.join(", ")}. Please share visuals before confirming.\n` : ""}\nPlease share customisation possibilities (materials, dimensions, finishes), lead time, and pricing.`)}#contact`}
-                  className="underline underline-offset-2 hover:text-foreground transition-colors"
-                >
-                  Contact our concierge →
-                </Link>
-              </p>
             </div>
           </div>
 
@@ -1627,7 +1612,7 @@ const PublicProductPage: React.FC = () => {
           )}
 
           {relatedPicks.length > 0 && (
-            <div className="mt-16 pt-8 border-t border-border">
+            <div className="mt-6 pt-6 border-t border-border">
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10">
                 {/* Mobile-only heading: shown above the carousel */}
                 <div className="lg:hidden order-1">
