@@ -376,17 +376,47 @@ const ContactInquiry = () => {
             </div>
           )}
 
+          {urlProductId && (
+            <div>
+              <label htmlFor="profession" className="mb-2 block font-body text-sm uppercase tracking-wider text-foreground">
+                Profession<span className="text-destructive">*</span>
+              </label>
+              <select
+                id="profession"
+                value={formData.profession}
+                onChange={handleInputChange}
+                className={`w-full h-11 px-3 rounded-lg border bg-background font-body text-sm text-foreground outline-none focus:border-foreground transition-colors ${errors.profession ? "border-destructive" : "border-border"} ${!formData.profession ? "text-muted-foreground/70" : ""}`}
+              >
+                <option value="" disabled>Select your profession</option>
+                {PROFESSION_OPTIONS.map((p) => (
+                  <option key={p} value={p} className="text-foreground bg-background">{p}</option>
+                ))}
+              </select>
+              {errors.profession && <p className="font-body text-[10px] text-destructive mt-1">{errors.profession}</p>}
+            </div>
+          )}
+
           <div>
             <label htmlFor="message" className="mb-2 block font-body text-sm uppercase tracking-wider text-foreground">
-              Message
+              {urlProductId ? "Project Name" : "Message"}
             </label>
-            <Textarea
-              id="message"
-              placeholder="Please share details about your inquiry..."
-              className={`min-h-[150px] border-border bg-background font-body rounded-lg ${errors.message ? "border-destructive" : ""}`}
-              value={formData.message}
-              onChange={handleInputChange}
-            />
+            {urlProductId ? (
+              <Input
+                id="message"
+                placeholder="e.g. Villa Serena — Bali residence"
+                className={`border-border bg-background font-body rounded-lg ${errors.message ? "border-destructive" : ""}`}
+                value={formData.message}
+                onChange={handleInputChange}
+              />
+            ) : (
+              <Textarea
+                id="message"
+                placeholder="Please share details about your inquiry..."
+                className={`min-h-[150px] border-border bg-background font-body rounded-lg ${errors.message ? "border-destructive" : ""}`}
+                value={formData.message}
+                onChange={handleInputChange}
+              />
+            )}
             {errors.message && <p className="font-body text-[10px] text-destructive mt-1">{errors.message}</p>}
           </div>
 
