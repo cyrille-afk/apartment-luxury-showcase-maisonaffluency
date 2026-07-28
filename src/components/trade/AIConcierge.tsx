@@ -1983,6 +1983,15 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
       content: displayText,
       ...(timelineAttachments.length ? { attachments: timelineAttachments } : {}),
     };
+    const immediateProfile = quickClientProfile(displayText);
+    if (immediateProfile?.city) {
+      try {
+        const raw = sessionStorage.getItem("concierge:profile");
+        const existing = raw ? JSON.parse(raw) : {};
+        sessionStorage.setItem("concierge:profile", JSON.stringify({ ...existing, ...immediateProfile }));
+      } catch { /* non-fatal */ }
+      updateConciergeSession({ projectCity: immediateProfile.city });
+    }
     const nextTimeline = [...timeline, userItem];
     setTimeline(nextTimeline);
     setInput("");
@@ -2738,6 +2747,8 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
   // city, prompt for it; after a city is locked in (via concierge-capture or
   // the synchronous quickClientProfile qualifier), invite the next action.
   const cityKnown = React.useMemo(() => {
+    const sessionCity = getConciergeSession()?.projectCity;
+    if (typeof sessionCity === "string" && sessionCity.trim().length > 0) return true;
     try {
       const raw = sessionStorage.getItem("concierge:profile");
       if (raw) {
