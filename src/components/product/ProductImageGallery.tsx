@@ -320,9 +320,12 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
             className="hidden md:flex absolute bottom-3 left-1/2 -translate-x-1/2"
           />
 
-        {/* Mobile/PWA horizontal progress line — 1stdibs-style swipe indicator */}
+        </div>
+
+        {/* Mobile/PWA horizontal progress line — rendered BELOW the image so it
+            doesn't overlap the photo or the favorite/share icons. */}
         {images.length > 1 && (
-          <div className="md:hidden absolute bottom-0 left-0 right-0 z-20 flex items-center gap-2 px-5 pb-4">
+          <div className="md:hidden mt-2 flex items-center gap-2 px-2">
             {images.map((_, i) => (
               <button
                 key={i}
@@ -339,7 +342,6 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
             ))}
           </div>
         )}
-        </div>
 
         {/* Caption */}
         {caption && (

@@ -1525,18 +1525,6 @@ const PublicProductPage: React.FC = () => {
                 );
               })()}
 
-              {/* Mobile/PWA-only: Ships-from row directly under the Price CTA. */}
-              {product.origin && (
-                <div className="md:hidden mt-2 flex items-center gap-2 px-3 py-2.5 rounded-md border border-border/70">
-                  <Truck size={16} className="shrink-0 text-foreground" />
-                  <span className="font-body text-[13px] text-foreground">
-                    <span className="font-medium">Ships from</span>{" "}
-                    <span className="text-muted-foreground">
-                      {product.origin.replace(/^\s*Handcrafted\s+in\s+/i, "").trim()}
-                    </span>
-                  </span>
-                </div>
-              )}
 
               {/* Secondary actions: Favorite / Pin / Spec Sheet */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
@@ -1598,13 +1586,13 @@ const PublicProductPage: React.FC = () => {
               </div>
 
 
-              <p className="font-body text-[11px] text-muted-foreground text-center">
+              <p className="hidden md:block font-body text-[11px] text-muted-foreground text-center">
                 For pricing and availability, please{" "}
                 <Link to="/trade-program" className="underline underline-offset-2 hover:text-foreground transition-colors">
                   join our Trade Program
                 </Link>.
               </p>
-              <p className="font-body text-[11px] text-muted-foreground text-center mt-1">
+              <p className="hidden md:block font-body text-[11px] text-muted-foreground text-center mt-1">
                 Looking for a bespoke version?{" "}
                 <Link
                   to={`/contact?subject=${encodeURIComponent(`Bespoke inquiry — ${product.title} by ${designerDisplay}`)}&message=${encodeURIComponent(`Hello, I'd like to inquire about a bespoke version of:\n\n• ${product.title}${product.subtitle ? ` (${product.subtitle})` : ""}\n• Designer: ${designerDisplay}\n• Page: https://www.maisonaffluency.com${location.pathname}\n${finishesMissingImages.length > 0 ? `\nNote: No reference image on file for the selected finish${finishesMissingImages.length > 1 ? "es" : ""}: ${finishesMissingImages.join(", ")}. Please share visuals before confirming.\n` : ""}\nPlease share customisation possibilities (materials, dimensions, finishes), lead time, and pricing.`)}#contact`}
