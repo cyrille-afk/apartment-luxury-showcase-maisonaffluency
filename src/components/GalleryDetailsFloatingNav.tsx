@@ -170,7 +170,7 @@ export default function GalleryDetailsFloatingNav({
   return (
     <div
       className={cn("fixed right-3 z-[10000] print:hidden", className)}
-      style={{ bottom: "calc(env(safe-area-inset-bottom, 0px) + 4.75rem)" }}
+      style={{ bottom: "calc(env(safe-area-inset-bottom, 0px) + 1rem)" }}
     >
       {isExpanded ? (
         <div
