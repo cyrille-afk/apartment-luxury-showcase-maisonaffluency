@@ -1564,22 +1564,24 @@ const PublicProductPage: React.FC = () => {
                 </button>
 
                 {(product.pdf_url || (product.pdf_urls && product.pdf_urls.length > 0)) ? (
-                  <SpecSheetButton
-                    pdfUrl={product.pdf_url}
-                    pdfUrls={product.pdf_urls}
-                    brandName={designerDisplay}
-                    productName={product.title}
-                    variant="button"
-                    onBeforeOpen={() => {
-                      let allowed = false;
-                      requireAuth(() => { allowed = true; }, "download this spec sheet");
-                      return allowed;
-                    }}
-                  />
+                  <div className="hidden md:block">
+                    <SpecSheetButton
+                      pdfUrl={product.pdf_url}
+                      pdfUrls={product.pdf_urls}
+                      brandName={designerDisplay}
+                      productName={product.title}
+                      variant="button"
+                      onBeforeOpen={() => {
+                        let allowed = false;
+                        requireAuth(() => { allowed = true; }, "download this spec sheet");
+                        return allowed;
+                      }}
+                    />
+                  </div>
                 ) : (
                   <Link
                     to="/contact"
-                    className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-md font-body text-[11px] uppercase tracking-[0.12em] transition-all border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30"
+                    className="hidden md:flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-md font-body text-[11px] uppercase tracking-[0.12em] transition-all border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30"
                   >
                     Contact Us
                   </Link>
