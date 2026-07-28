@@ -4440,9 +4440,9 @@ serve(async (req) => {
     // dining table"). Applied to BOTH the pgvector RAG shortlist and the
     // bulk SQL catalog load so the AI never sees candidates that violate
     // a stated constraint. Empty on discovery turns → no filtering.
-    const preRequestConstraints = deriveHardConstraints(
-      [{ title: lastUserMsg }],
-    );
+    const preRequestConstraints = hasVisualSourcingContext
+      ? ({ materials: [], colors: [] } as HardConstraints)
+      : deriveHardConstraints([{ title: lastUserMsg }]);
     const hasAnyPreConstraint =
       (preRequestConstraints.materials?.length || 0) +
       (preRequestConstraints.colors?.length || 0) > 0;
@@ -5277,7 +5277,7 @@ serve(async (req) => {
           ? `Draft tear sheet with ${countPhrase} (skipped ${excludedIds.size} per your request). Review the list above and click **Approve & Create** to save it into a project folder — or **Discard** to cancel.`
           : `Draft tear sheet with ${countPhrase} in the Maison Affluency Curation, with trade pricing. Review the list above and click **Approve & Create** to save it into a project folder — or **Discard** to cancel.`)
           + unmetSuffix;
-        const { validation } = validateProposalAgainstBrief(proposal, userConversationText, null);
+        const { validation } = validateProposalAgainstBrief(proposal, hardValidationText, null);
         if (!validation.ok) {
           console.warn("[concierge deterministic-enumeration] blocked proposal", JSON.stringify({ requestId, violations: validation.violations }));
           return sseTextResponse(buildRequirementsBlockedMessage(validation.violations));
@@ -5394,7 +5394,7 @@ serve(async (req) => {
             supabase,
             Array.isArray((ragResult as any)?.rows) ? (ragResult as any).rows : [],
             effectiveBrief.brief,
-            userConversationText,
+            hardValidationText,
           )
         : null;
       const vizProposal = buildVisualizationBriefProposal({
@@ -5409,7 +5409,7 @@ serve(async (req) => {
       });
       const proposals = tearsheetProposal ? [tearsheetProposal, vizProposal] : [vizProposal];
       if (tearsheetProposal) {
-        const { validation } = validateProposalAgainstBrief(tearsheetProposal, userConversationText, null);
+        const { validation } = validateProposalAgainstBrief(tearsheetProposal, hardValidationText, null);
         if (!validation.ok) {
           console.warn("[concierge deterministic-visualization] blocked tearsheet proposal", JSON.stringify({ requestId, violations: validation.violations }));
           return sseTextResponse(buildRequirementsBlockedMessage(validation.violations));
@@ -5526,10 +5526,10 @@ serve(async (req) => {
         supabase,
         Array.isArray((ragResult as any)?.rows) ? (ragResult as any).rows : [],
         effectiveBrief.brief,
-        userConversationText,
+        hardValidationText,
       );
       if (deterministicProposal) {
-        const { validation } = validateProposalAgainstBrief(deterministicProposal, userConversationText, null);
+        const { validation } = validateProposalAgainstBrief(deterministicProposal, hardValidationText, null);
         if (!validation.ok) {
           console.warn("[concierge deterministic-plan] blocked proposal", JSON.stringify({ requestId, violations: validation.violations }));
           return sseTextResponse(buildRequirementsBlockedMessage(validation.violations));
@@ -5842,7 +5842,7 @@ serve(async (req) => {
                 { tool: cardTool, pickIds: [], previews: Array.isArray(previewRows) ? previewRows : [] },
               ]);
               const effectiveRequirements = enforceExplicitBudgetOnly(
-                mergeRequirementsWithText(capturedRequirements as any, userConversationText) as any,
+                mergeRequirementsWithText(capturedRequirements as any, hardValidationText) as any,
                 explicitConversationBudget,
               );
               const v = validateRequirementsCoverage(effectiveRequirements as any, gtOne);
@@ -6887,10 +6887,10 @@ serve(async (req) => {
             supabase,
             Array.isArray((ragResult as any)?.rows) ? (ragResult as any).rows : [],
             effectiveBrief.brief,
-            userConversationText,
+            hardValidationText,
           );
           if (!proposal) return false;
-          const { validation } = validateProposalAgainstBrief(proposal, userConversationText, capturedRequirements);
+          const { validation } = validateProposalAgainstBrief(proposal, hardValidationText, capturedRequirements);
           if (!validation.ok) {
             controller.enqueue(encoder.encode(
               `event: proposal_blocked\ndata: ${JSON.stringify({
@@ -7047,7 +7047,7 @@ serve(async (req) => {
               },
               preview,
             };
-            const { validation } = validateProposalAgainstBrief(proposal, userConversationText, capturedRequirements);
+            const { validation } = validateProposalAgainstBrief(proposal, hardValidationText, capturedRequirements);
             if (!validation.ok) {
               controller.enqueue(encoder.encode(
                 `event: proposal_blocked\ndata: ${JSON.stringify({
@@ -7184,7 +7184,7 @@ serve(async (req) => {
               },
               preview,
             };
-            const { validation } = validateProposalAgainstBrief(proposal, userConversationText, capturedRequirements);
+            const { validation } = validateProposalAgainstBrief(proposal, hardValidationText, capturedRequirements);
             if (!validation.ok) {
               controller.enqueue(encoder.encode(
                 `event: proposal_blocked\ndata: ${JSON.stringify({
