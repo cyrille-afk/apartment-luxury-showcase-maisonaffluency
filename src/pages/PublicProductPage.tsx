@@ -1270,10 +1270,10 @@ const PublicProductPage: React.FC = () => {
         {/* Mobile sticky mini bar — shows on scroll (mirrors 1stdibs pattern) */}
         <div
           className={cn(
-            "md:hidden fixed left-0 right-0 z-[70] bg-background/95 backdrop-blur-md border-b border-border shadow-sm transition-transform duration-300 ease-out",
+            "md:hidden fixed left-0 right-0 z-40 bg-background/95 backdrop-blur-md border-b border-border shadow-sm transition-transform duration-300 ease-out",
             showStickyBar ? "translate-y-0" : "-translate-y-full pointer-events-none"
           )}
-          style={{ top: "calc(env(safe-area-inset-top, 0px) + 6rem)" }}
+          style={{ top: "calc(env(safe-area-inset-top, 0px) + 6.25rem)" }}
           aria-hidden={!showStickyBar}
         >
           <div className="flex items-center gap-3 px-3 py-2">
