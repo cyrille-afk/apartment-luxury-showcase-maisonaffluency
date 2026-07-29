@@ -3194,7 +3194,41 @@ function usableConstraintText(value: unknown): string | null {
   return raw;
 }
 
-type RequestedTypology = "dining_table" | "table";
+type RequestedTypology =
+  | "dining_table"
+  | "table"
+  | "seating"
+  | "lighting"
+  | "storage"
+  | "bedroom_furniture"
+  | "rugs"
+  | "decor";
+
+function normalizeRequestedTypologies(input: RequestedTypology | RequestedTypology[] | null | undefined): RequestedTypology[] {
+  const values = Array.isArray(input) ? input : input ? [input] : [];
+  return Array.from(new Set(values));
+}
+
+function inferRequestedTypology(brief: ExtractedBrief["brief"], requestText: string): RequestedTypology[] | null {
+  const hay = normalizeLoose([
+    requestText,
+    brief.summary,
+    brief.room,
+    brief.style,
+    ...(brief.categories || []),
+  ].filter(Boolean).join(" "));
+  const tableHay = hay.replace(/\btable\s+(?:lamps?|lights?)\b/g, " ");
+  const hits: RequestedTypology[] = [];
+  if (/\b(sectional|sofas?|settee|loveseat|accent chairs?|armchairs?|lounge chairs?|dining chairs?|chairs?|benches|bench|stools?|ottomans?|poufs?|banquettes?|daybeds?|chaises?|seating)\b/.test(hay)) hits.push("seating");
+  if (/\bdining\b/.test(tableHay) && /\btables?\b/.test(tableHay)) hits.push("dining_table");
+  else if (/\b(coffee tables?|side tables?|dining tables?|console tables?|consoles?|desks?|tables?)\b/.test(tableHay)) hits.push("table");
+  if (/\b(floor lamps?|floor lights?|table lamps?|table lights?|pendants?|ceiling lights?|chandeliers?|sconces?|wall lights?|lanterns?|lighting|lamps?)\b/.test(hay)) hits.push("lighting");
+  if (/\b(cabinets?|sideboards?|credenzas?|shelving|bookcases?|dressers?|chests?|armoires?|storage)\b/.test(hay)) hits.push("storage");
+  if (/\b(beds?|headboards?|nightstands?|bedside|bedroom furniture)\b/.test(hay)) hits.push("bedroom_furniture");
+  if (/\b(rugs?|carpets?|kilims?|dhurries)\b/.test(hay)) hits.push("rugs");
+  if (/\b(vases?|sculptures?|objects?|screens?|mirrors?|artworks?|decor|decorative)\b/.test(hay)) hits.push("decor");
+  return hits.length ? Array.from(new Set(hits)) : null;
+}
 
 function inferBudgetCeilingCents(requestText: string): { cents: number; label: string } | null {
   const text = String(requestText || "")
@@ -3219,31 +3253,33 @@ function inferBudgetCeilingCents(requestText: string): { cents: number; label: s
   return { cents: Math.round(raw * units * 100), label: match[0].trim() };
 }
 
-function inferRequestedTypology(brief: ExtractedBrief["brief"], requestText: string): RequestedTypology | null {
-  const hay = normalizeLoose([
-    requestText,
-    brief.summary,
-    brief.room,
-    brief.style,
-    ...(brief.categories || []),
-  ].filter(Boolean).join(" "));
-  if (/\bdining\b/.test(hay) && /\btables?\b/.test(hay)) return "dining_table";
-  if (/\btables?\b/.test(hay)) return "table";
-  return null;
-}
-
-function rowMatchesRequestedTypology(row: any, typology: RequestedTypology | null): boolean {
-  if (!typology) return true;
+function rowMatchesSingleRequestedTypology(row: any, typology: RequestedTypology): boolean {
   const title = normalizeLoose(row?.title || row?.product_name);
   const category = normalizeLoose(row?.category);
   const subcategory = normalizeLoose(row?.subcategory);
   const hay = `${title} ${category} ${subcategory}`;
-  const isLightingOrLamp = /\b(table\s+lights?|table\s+lamps?|lamp|lamps|lighting|sconce|sconces|chandelier|chandeliers)\b/.test(hay);
-  if (isLightingOrLamp) return false;
+  const isLightingOrLamp = /\b(table\s+lights?|table\s+lamps?|floor\s+lamps?|lamp|lamps|lighting|sconce|sconces|chandelier|chandeliers|pendants?|wall\s+lights?|ceiling\s+lights?)\b/.test(hay);
   if (typology === "dining_table") {
+    if (isLightingOrLamp) return false;
     return /\bdining\b/.test(hay) && /\btables?\b/.test(hay);
   }
-  return /\btables?\b/.test(hay) && !/\b(sideboard|cabinet|bookshelf|bookcase|shelf|shelving)\b/.test(hay);
+  if (typology === "table") {
+    if (isLightingOrLamp) return false;
+    return /\b(dining\s+tables?|coffee\s+tables?|side\s+tables?|console\s+tables?|consoles?|desks?|tables?)\b/.test(hay) && !/\b(sideboard|cabinet|bookshelf|bookcase|shelf|shelving)\b/.test(hay);
+  }
+  if (typology === "seating") return /\b(sectional|sofas?|settee|loveseat|accent\s+chairs?|armchairs?|lounge\s+chairs?|dining\s+chairs?|chairs?|benches|bench|stools?|ottomans?|poufs?|banquettes?|daybeds?|chaises?|seating)\b/.test(hay);
+  if (typology === "lighting") return isLightingOrLamp || /\b(pendants?|lanterns?)\b/.test(hay);
+  if (typology === "storage") return /\b(cabinets?|sideboards?|credenzas?|shelving|bookcases?|dressers?|chests?|armoires?|storage)\b/.test(hay);
+  if (typology === "bedroom_furniture") return /\b(beds?|headboards?|nightstands?|bedside|bedroom)\b/.test(hay);
+  if (typology === "rugs") return /\b(rugs?|carpets?|kilims?|dhurries)\b/.test(hay);
+  if (typology === "decor") return /\b(vases?|sculptures?|objects?|screens?|mirrors?|artworks?|decor|decorative)\b/.test(hay);
+  return false;
+}
+
+function rowMatchesRequestedTypology(row: any, typology: RequestedTypology | RequestedTypology[] | null): boolean {
+  const requested = normalizeRequestedTypologies(typology);
+  if (!requested.length) return true;
+  return requested.some((t) => rowMatchesSingleRequestedTypology(row, t));
 }
 
 function dedupePreviewRows(previewRaw: any[], pickIds: string[]): { previewRaw: any[]; pickIds: string[] } {
