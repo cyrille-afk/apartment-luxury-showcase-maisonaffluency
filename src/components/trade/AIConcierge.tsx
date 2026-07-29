@@ -3758,11 +3758,30 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                         (() => {
                            const raw = String(item.sourceContent || item.content || "");
                             const extractedCtas = extractDesignDirectorCtas(raw);
-                             const found = item.designDirectorCtas && item.designDirectorCtas.length > 0 ? item.designDirectorCtas : extractedCtas.labels;
-                             // Always render from the cleaned body — even when `sourceContent`
-                             // is set, older persisted `content` values may still contain the
-                             // CTA lines and would otherwise leak into the bubble.
-                              const markdownBody = stripRedundantInterfaceActionsFromText(extractDesignDirectorCtas(String(item.content || "")).body);
+                             const foundRaw = item.designDirectorCtas && item.designDirectorCtas.length > 0 ? item.designDirectorCtas : extractedCtas.labels;
+                             // Only surface "Generate Custom Quote" once the user
+                             // has actively added or locked curated pieces into
+                             // the project spec (an approved tearsheet proposal
+                             // OR any locked pick prior to this assistant turn).
+                             // Otherwise swap it for "Save Palette to Project".
+                             const hasCuratedPieces = timeline.slice(0, i).some((t) =>
+                               t.kind === "proposal" &&
+                               (t.resolved === "approved" || (t.locked && t.locked.length > 0))
+                             );
+                             const found = (() => {
+                               const arr: string[] = [...foundRaw];
+                               if (!hasCuratedPieces) {
+                                 const idx = arr.indexOf("Generate Custom Quote");
+                                 if (idx !== -1) {
+                                   arr.splice(idx, 1, "Save Palette to Project");
+                                 }
+                               }
+                               return arr;
+                             })();
+                              // Always render from the cleaned body — even when `sourceContent`
+                              // is set, older persisted `content` values may still contain the
+                              // CTA lines and would otherwise leak into the bubble.
+                               const markdownBody = stripRedundantInterfaceActionsFromText(extractDesignDirectorCtas(String(item.content || "")).body);
 
                           const dispatchCta = (label: string) => {
                             if (label === "Forward to Human Concierge") { void forwardToHumanConcierge(); return; }
@@ -3774,6 +3793,13 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                               void runGenerateCustomQuote();
                               return;
                             }
+                            if (label === "Save Palette to Project") {
+                              void send(
+                                "Save this palette (materials, tones, and aesthetic direction) to my active project so I can reference it later when I curate pieces.",
+                                { displayText: "Save Palette to Project" },
+                              );
+                              return;
+                            }
                             if (label === "Source Similar Pieces" || label === "Match Finishes") {
                               const kind: NextStepKind =
                                 label === "Source Similar Pieces" ? "source" : "match";
@@ -3781,6 +3807,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                               setNextStepPanel(kind);
                               return;
                             }
+
                             const prompts: Record<string, string> = {
                               "Upload a Visual Mood Board Instead": "I'd like to upload a visual mood board instead of the floor plan — please prompt me to attach a reference image or Pinterest-style collage via the paperclip, and then run the Design Director scaffold on that image.",
                               "Yes, Schedule Morning Call": "Yes, schedule a morning call.",
