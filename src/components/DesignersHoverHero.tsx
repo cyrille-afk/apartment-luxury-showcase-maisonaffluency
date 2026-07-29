@@ -805,7 +805,10 @@ const DesignersHoverHero = () => {
     // inner list free-scroll as a whole block. Native list-scroll mode is
     // reserved for desktop; on mobile the featured photo is bound 1:1 to the
     // active designer, so free-scroll would decouple the two.
-    const canUseNativeListScroll = () => false;
+    // PWA keeps discrete step-advance (works as intended). Mobile browser
+    // uses native scroll so the list moves designer-by-designer naturally
+    // instead of inverting.
+    const canUseNativeListScroll = () => isMobileBrowser;
 
     const advance = (dir: 1 | -1) => {
       setActiveSlug((current) => {
