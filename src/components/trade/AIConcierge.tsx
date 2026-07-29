@@ -3588,10 +3588,13 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                     >
                       {item.role === "assistant" ? (
                         (() => {
-                          const raw = String(item.sourceContent || item.content || "");
-                           const extractedCtas = extractDesignDirectorCtas(raw);
-                            const found = item.designDirectorCtas && item.designDirectorCtas.length > 0 ? item.designDirectorCtas : extractedCtas.labels;
-                            const markdownBody = item.sourceContent ? String(item.content || "") : extractedCtas.body;
+                           const raw = String(item.sourceContent || item.content || "");
+                            const extractedCtas = extractDesignDirectorCtas(raw);
+                             const found = item.designDirectorCtas && item.designDirectorCtas.length > 0 ? item.designDirectorCtas : extractedCtas.labels;
+                             // Always render from the cleaned body — even when `sourceContent`
+                             // is set, older persisted `content` values may still contain the
+                             // CTA lines and would otherwise leak into the bubble.
+                             const markdownBody = extractDesignDirectorCtas(String(item.content || "")).body;
 
                           const dispatchCta = (label: string) => {
                             if (label === "Forward to Human Concierge") { void forwardToHumanConcierge(); return; }
