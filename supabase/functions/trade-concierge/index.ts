@@ -3292,6 +3292,103 @@ function rowsCoverRequestedTypologies(rows: any[], typology: RequestedTypology |
   return requested.every((t) => rows.some((row) => rowMatchesSingleRequestedTypology(row, t)));
 }
 
+function rowPaletteHaystack(row: any): string {
+  const variantText = Array.isArray(row?.size_variants)
+    ? row.size_variants.map((v: any) => variantLabel(v)).filter(Boolean).join(" ")
+    : "";
+  const arrayText = [row?.tags, row?.available_finishes, row?.fabric_options]
+    .map((v) => Array.isArray(v) ? v.join(" ") : "")
+    .join(" ");
+  return normalizeLoose([
+    row?.title,
+    row?.product_name,
+    row?.category,
+    row?.subcategory,
+    row?.materials,
+    row?.materials_description,
+    row?.description,
+    row?.meta_description,
+    row?.variant_placeholder,
+    variantText,
+    arrayText,
+  ].filter(Boolean).join(" "));
+}
+
+function paletteTokensForMatching(constraints: HardConstraints | null | undefined): string[] {
+  const raw = [...(constraints?.materials || []), ...(constraints?.colors || [])]
+    .map((t) => normalizeLoose(String(t || "")))
+    .filter(Boolean);
+  const tokens = new Set<string>();
+  for (const token of raw) {
+    tokens.add(token);
+    for (const part of token.split(/\s+/)) {
+      if (part.length >= 3) tokens.add(part);
+    }
+  }
+  if (tokens.has("boucle") || tokens.has("bouclé")) {
+    tokens.add("boucle");
+    tokens.add("bouclé");
+    tokens.add("fabric");
+    tokens.add("textile");
+    tokens.add("upholstery");
+    tokens.add("com fabric");
+  }
+  if (tokens.has("ivory")) {
+    tokens.add("cream");
+    tokens.add("off white");
+    tokens.add("offwhite");
+    tokens.add("white");
+  }
+  tokens.delete("warm");
+  tokens.delete("patinated");
+  return Array.from(tokens).filter((t) => t.length >= 3);
+}
+
+function paletteMatchScore(row: any, constraints: HardConstraints | null | undefined): number {
+  const tokens = paletteTokensForMatching(constraints);
+  if (!tokens.length) return 0;
+  const hay = rowPaletteHaystack(row);
+  let score = 0;
+  for (const token of tokens) {
+    const escaped = token.replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace(/\s+/g, "\\s+");
+    if (new RegExp(`\\b${escaped}\\b`, "i").test(hay)) score += token.includes(" ") ? 2 : 1;
+  }
+  return score;
+}
+
+function applyPalettePreferenceByTypology(
+  rows: any[],
+  constraints: HardConstraints | null | undefined,
+  typology: RequestedTypology | RequestedTypology[] | null,
+): any[] {
+  const tokens = paletteTokensForMatching(constraints);
+  if (!tokens.length || !rows.length) return rows;
+  const requested = normalizeRequestedTypologies(typology);
+  const sortByPalette = (items: any[]) => [...items].sort((a, b) => paletteMatchScore(b, constraints) - paletteMatchScore(a, constraints));
+  if (!requested.length) return sortByPalette(rows);
+
+  const kept: any[] = [];
+  const keptIds = new Set<string>();
+  for (const t of requested) {
+    const bucket = rows.filter((row) => rowMatchesSingleRequestedTypology(row, t));
+    const matched = bucket.filter((row) => paletteMatchScore(row, constraints) > 0);
+    const source = matched.length >= 1 ? matched : bucket;
+    for (const row of sortByPalette(source)) {
+      const id = String(row?.id || "");
+      if (!id || keptIds.has(id)) continue;
+      kept.push(row);
+      keptIds.add(id);
+    }
+  }
+  for (const row of sortByPalette(rows)) {
+    const id = String(row?.id || "");
+    if (!id || keptIds.has(id)) continue;
+    kept.push(row);
+    keptIds.add(id);
+  }
+  return kept;
+}
+
 function pickRowsForRequestedTypologyCoverage(
   rows: any[],
   typology: RequestedTypology | RequestedTypology[] | null,
