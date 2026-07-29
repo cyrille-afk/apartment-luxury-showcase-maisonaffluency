@@ -3194,7 +3194,41 @@ function usableConstraintText(value: unknown): string | null {
   return raw;
 }
 
-type RequestedTypology = "dining_table" | "table";
+type RequestedTypology =
+  | "dining_table"
+  | "table"
+  | "seating"
+  | "lighting"
+  | "storage"
+  | "bedroom_furniture"
+  | "rugs"
+  | "decor";
+
+function normalizeRequestedTypologies(input: RequestedTypology | RequestedTypology[] | null | undefined): RequestedTypology[] {
+  const values = Array.isArray(input) ? input : input ? [input] : [];
+  return Array.from(new Set(values));
+}
+
+function inferRequestedTypology(brief: ExtractedBrief["brief"], requestText: string): RequestedTypology[] | null {
+  const hay = normalizeLoose([
+    requestText,
+    brief.summary,
+    brief.room,
+    brief.style,
+    ...(brief.categories || []),
+  ].filter(Boolean).join(" "));
+  const tableHay = hay.replace(/\btable\s+(?:lamps?|lights?)\b/g, " ");
+  const hits: RequestedTypology[] = [];
+  if (/\b(sectional|sofas?|settee|loveseat|accent chairs?|armchairs?|lounge chairs?|dining chairs?|chairs?|benches|bench|stools?|ottomans?|poufs?|banquettes?|daybeds?|chaises?|seating)\b/.test(hay)) hits.push("seating");
+  if (/\bdining\b/.test(tableHay) && /\btables?\b/.test(tableHay)) hits.push("dining_table");
+  else if (/\b(coffee tables?|side tables?|dining tables?|console tables?|consoles?|desks?|tables?)\b/.test(tableHay)) hits.push("table");
+  if (/\b(floor lamps?|floor lights?|table lamps?|table lights?|pendants?|ceiling lights?|chandeliers?|sconces?|wall lights?|lanterns?|lighting|lamps?)\b/.test(hay)) hits.push("lighting");
+  if (/\b(cabinets?|sideboards?|credenzas?|shelving|bookcases?|dressers?|chests?|armoires?|storage)\b/.test(hay)) hits.push("storage");
+  if (/\b(beds?|headboards?|nightstands?|bedside|bedroom furniture)\b/.test(hay)) hits.push("bedroom_furniture");
+  if (/\b(rugs?|carpets?|kilims?|dhurries)\b/.test(hay)) hits.push("rugs");
+  if (/\b(vases?|sculptures?|objects?|screens?|mirrors?|artworks?|decor|decorative)\b/.test(hay)) hits.push("decor");
+  return hits.length ? Array.from(new Set(hits)) : null;
+}
 
 function inferBudgetCeilingCents(requestText: string): { cents: number; label: string } | null {
   const text = String(requestText || "")
@@ -3219,31 +3253,79 @@ function inferBudgetCeilingCents(requestText: string): { cents: number; label: s
   return { cents: Math.round(raw * units * 100), label: match[0].trim() };
 }
 
-function inferRequestedTypology(brief: ExtractedBrief["brief"], requestText: string): RequestedTypology | null {
-  const hay = normalizeLoose([
-    requestText,
-    brief.summary,
-    brief.room,
-    brief.style,
-    ...(brief.categories || []),
-  ].filter(Boolean).join(" "));
-  if (/\bdining\b/.test(hay) && /\btables?\b/.test(hay)) return "dining_table";
-  if (/\btables?\b/.test(hay)) return "table";
-  return null;
-}
-
-function rowMatchesRequestedTypology(row: any, typology: RequestedTypology | null): boolean {
-  if (!typology) return true;
+function rowMatchesSingleRequestedTypology(row: any, typology: RequestedTypology): boolean {
   const title = normalizeLoose(row?.title || row?.product_name);
   const category = normalizeLoose(row?.category);
   const subcategory = normalizeLoose(row?.subcategory);
   const hay = `${title} ${category} ${subcategory}`;
-  const isLightingOrLamp = /\b(table\s+lights?|table\s+lamps?|lamp|lamps|lighting|sconce|sconces|chandelier|chandeliers)\b/.test(hay);
-  if (isLightingOrLamp) return false;
+  const isLightingOrLamp = /\b(table\s+lights?|table\s+lamps?|floor\s+lamps?|lamp|lamps|lighting|sconce|sconces|chandelier|chandeliers|pendants?|wall\s+lights?|ceiling\s+lights?)\b/.test(hay);
   if (typology === "dining_table") {
+    if (isLightingOrLamp) return false;
     return /\bdining\b/.test(hay) && /\btables?\b/.test(hay);
   }
-  return /\btables?\b/.test(hay) && !/\b(sideboard|cabinet|bookshelf|bookcase|shelf|shelving)\b/.test(hay);
+  if (typology === "table") {
+    if (isLightingOrLamp) return false;
+    return /\b(dining\s+tables?|coffee\s+tables?|side\s+tables?|console\s+tables?|consoles?|desks?|tables?)\b/.test(hay) && !/\b(sideboard|cabinet|bookshelf|bookcase|shelf|shelving)\b/.test(hay);
+  }
+  if (typology === "seating") return /\b(sectional|sofas?|settee|loveseat|accent\s+chairs?|armchairs?|lounge\s+chairs?|dining\s+chairs?|chairs?|benches|bench|stools?|ottomans?|poufs?|banquettes?|daybeds?|chaises?|seating)\b/.test(hay);
+  if (typology === "lighting") return isLightingOrLamp || /\b(pendants?|lanterns?)\b/.test(hay);
+  if (typology === "storage") return /\b(cabinets?|sideboards?|credenzas?|shelving|bookcases?|dressers?|chests?|armoires?|storage)\b/.test(hay);
+  if (typology === "bedroom_furniture") return /\b(beds?|headboards?|nightstands?|bedside|bedroom)\b/.test(hay);
+  if (typology === "rugs") return /\b(rugs?|carpets?|kilims?|dhurries)\b/.test(hay);
+  if (typology === "decor") return /\b(vases?|sculptures?|objects?|screens?|mirrors?|artworks?|decor|decorative)\b/.test(hay);
+  return false;
+}
+
+function rowMatchesRequestedTypology(row: any, typology: RequestedTypology | RequestedTypology[] | null): boolean {
+  const requested = normalizeRequestedTypologies(typology);
+  if (!requested.length) return true;
+  return requested.some((t) => rowMatchesSingleRequestedTypology(row, t));
+}
+
+function rowMatchedRequestedTypologies(row: any, typology: RequestedTypology | RequestedTypology[] | null): RequestedTypology[] {
+  return normalizeRequestedTypologies(typology).filter((t) => rowMatchesSingleRequestedTypology(row, t));
+}
+
+function rowsCoverRequestedTypologies(rows: any[], typology: RequestedTypology | RequestedTypology[] | null): boolean {
+  const requested = normalizeRequestedTypologies(typology);
+  if (requested.length <= 1) return true;
+  return requested.every((t) => rows.some((row) => rowMatchesSingleRequestedTypology(row, t)));
+}
+
+function pickRowsForRequestedTypologyCoverage(
+  rows: any[],
+  typology: RequestedTypology | RequestedTypology[] | null,
+  limit: number,
+): any[] {
+  const requested = normalizeRequestedTypologies(typology);
+  if (requested.length <= 1) return rows.slice(0, limit);
+  const picked: any[] = [];
+  const used = new Set<string>();
+  const buckets = requested.map((t) => rows.filter((row) => rowMatchesSingleRequestedTypology(row, t)));
+  const cursors = buckets.map(() => 0);
+  let progressed = true;
+  while (picked.length < limit && progressed) {
+    progressed = false;
+    for (let b = 0; b < buckets.length && picked.length < limit; b++) {
+      while (cursors[b] < buckets[b].length) {
+        const row = buckets[b][cursors[b]++];
+        const id = String(row?.id || "");
+        if (!id || used.has(id)) continue;
+        picked.push(row);
+        used.add(id);
+        progressed = true;
+        break;
+      }
+    }
+  }
+  for (const row of rows) {
+    if (picked.length >= limit) break;
+    const id = String(row?.id || "");
+    if (!id || used.has(id)) continue;
+    picked.push(row);
+    used.add(id);
+  }
+  return picked;
 }
 
 function dedupePreviewRows(previewRaw: any[], pickIds: string[]): { previewRaw: any[]; pickIds: string[] } {
@@ -3300,23 +3382,40 @@ function buildOpeningBriefDiscoveryReply(latestUserMessage: string, langCode = "
 
 async function fetchStrictTypologyCandidates(
   supabase: ConciergeDbClient,
-  typology: RequestedTypology,
+  typology: RequestedTypology | RequestedTypology[],
   dimConstraints?: DimensionConstraints | null,
   leadConstraints?: LeadTimeConstraints | null,
 ): Promise<any[]> {
-  const term = typology === "dining_table" ? "dining" : "table";
+  const requested = normalizeRequestedTypologies(typology);
+  const searchTerms = Array.from(new Set(requested.flatMap((t) => {
+    if (t === "dining_table") return ["dining", "table"];
+    if (t === "table") return ["table", "console", "desk"];
+    if (t === "seating") return ["seating", "chair", "sofa", "bench", "stool", "ottoman", "banquette", "daybed"];
+    if (t === "lighting") return ["lamp", "lighting", "chandelier", "sconce", "pendant", "lantern"];
+    if (t === "storage") return ["cabinet", "sideboard", "credenza", "shelving", "bookcase", "storage"];
+    if (t === "bedroom_furniture") return ["bed", "headboard", "nightstand", "bedside"];
+    if (t === "rugs") return ["rug", "carpet", "kilim", "dhurrie"];
+    if (t === "decor") return ["vase", "sculpture", "object", "screen", "mirror", "art"];
+    return [];
+  })));
+  const pickOr = searchTerms.map((term) => `title.ilike.%${term}%,subcategory.ilike.%${term}%,category.ilike.%${term}%`).join(",");
+  const tradeOr = searchTerms.map((term) => `product_name.ilike.%${term}%,subcategory.ilike.%${term}%,category.ilike.%${term}%`).join(",");
   const [pickRes, tradeRes] = await Promise.all([
-    supabase
+    (pickOr
+      ? supabase
       .from("designer_curator_picks")
       .select("id, title, materials, category, subcategory, dimensions, trade_price_cents, currency, lead_time, stock_status, designer_id")
-      .or(`title.ilike.%${term}%,subcategory.ilike.%${term}%,category.ilike.%${term}%`)
-      .limit(160),
-    supabase
+        .or(pickOr)
+        .limit(240)
+      : supabase.from("designer_curator_picks").select("id, title, materials, category, subcategory, dimensions, trade_price_cents, currency, lead_time, stock_status, designer_id").limit(240)),
+    (tradeOr
+      ? supabase
       .from("trade_products")
       .select("id, product_name, materials, category, subcategory, dimensions, trade_price_cents, rrp_price_cents, currency, lead_time, stock_status_override, brand_name")
       .eq("is_active", true)
-      .or(`product_name.ilike.%${term}%,subcategory.ilike.%${term}%,category.ilike.%${term}%`)
-      .limit(160),
+        .or(tradeOr)
+        .limit(240)
+      : supabase.from("trade_products").select("id, product_name, materials, category, subcategory, dimensions, trade_price_cents, rrp_price_cents, currency, lead_time, stock_status_override, brand_name").eq("is_active", true).limit(240)),
   ]);
   let typologyFiltered = [
     ...(pickRes.data || []),
@@ -3329,13 +3428,13 @@ async function fetchStrictTypologyCandidates(
   ].filter((r: any) => rowMatchesRequestedTypology(r, typology));
   if (dimConstraints) {
     const dimRes = filterRowsByDimensionConstraints(typologyFiltered, dimConstraints);
-    console.log(`[concierge strict-typology dim] typology=${typology} pre=${typologyFiltered.length} strict=${dimRes.strictKept.length} kept=${dimRes.kept.length} dropped=${dimRes.dropped} unknownDropped=${dimRes.unknownDropped} fellBack=${dimRes.fellBack} constraints=${JSON.stringify(dimConstraints)}`);
+    console.log(`[concierge strict-typology dim] typology=${typologyLabel(typology)} pre=${typologyFiltered.length} strict=${dimRes.strictKept.length} kept=${dimRes.kept.length} dropped=${dimRes.dropped} unknownDropped=${dimRes.unknownDropped} fellBack=${dimRes.fellBack} constraints=${JSON.stringify(dimConstraints)}`);
     typologyFiltered = dimRes.kept;
   }
   if (leadConstraints) {
     const brandIdx = await getBrandLeadTimeIndex(supabase);
     const leadRes = filterRowsByLeadTimeConstraints(typologyFiltered, leadConstraints, brandIdx);
-    console.log(`[concierge strict-typology lead] typology=${typology} pre=${typologyFiltered.length} kept=${leadRes.kept.length} dropped=${leadRes.dropped} unknownDropped=${leadRes.unknownDropped} fellBack=${leadRes.fellBack} constraints=${JSON.stringify(leadConstraints)}`);
+    console.log(`[concierge strict-typology lead] typology=${typologyLabel(typology)} pre=${typologyFiltered.length} kept=${leadRes.kept.length} dropped=${leadRes.dropped} unknownDropped=${leadRes.unknownDropped} fellBack=${leadRes.fellBack} constraints=${JSON.stringify(leadConstraints)}`);
     typologyFiltered = leadRes.kept;
   }
   return typologyFiltered;
@@ -3646,11 +3745,11 @@ async function hydratePickPreview(
   const [{ data: picks }, { data: trades }] = await Promise.all([
     supabase
       .from("designer_curator_picks")
-      .select("id, title, image_url, materials, materials_description, description, meta_description, variant_placeholder, tags, category, dimensions, designer_id, trade_price_cents, currency, lead_time, size_variants")
+      .select("id, title, image_url, materials, materials_description, description, meta_description, variant_placeholder, tags, category, subcategory, dimensions, designer_id, trade_price_cents, currency, lead_time, size_variants")
       .in("id", pickIds),
     supabase
       .from("trade_products")
-      .select("id, product_name, brand_name, image_url, materials, materials_description, description, meta_description, variant_placeholder, available_finishes, fabric_options, category, dimensions, trade_price_cents, rrp_price_cents, currency, lead_time, stock_status_override")
+      .select("id, product_name, brand_name, image_url, materials, materials_description, description, meta_description, variant_placeholder, available_finishes, fabric_options, category, subcategory, dimensions, trade_price_cents, rrp_price_cents, currency, lead_time, stock_status_override")
       .in("id", pickIds),
   ]);
 
@@ -3772,6 +3871,7 @@ async function hydratePickPreview(
           tags: Array.isArray(p.tags) ? p.tags : null,
           size_variants: Array.isArray(p.size_variants) ? p.size_variants : null,
           category: p.category,
+          subcategory: p.subcategory || null,
           dimensions: p.dimensions || null,
           designer_name: designer,
           brand_name: designer,
@@ -3801,6 +3901,7 @@ async function hydratePickPreview(
           available_finishes: Array.isArray(t.available_finishes) ? t.available_finishes : null,
           fabric_options: Array.isArray(t.fabric_options) ? t.fabric_options : null,
           category: t.category,
+          subcategory: t.subcategory || null,
           dimensions: t.dimensions || null,
           designer_name: baseBrand || null,
           brand_name: rawBrand || null,
@@ -3830,6 +3931,7 @@ async function buildDeterministicTearsheetProposal(
 ): Promise<any | null> {
   const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
   const requestedTypology = options?.mixedRoom ? null : inferRequestedTypology(brief, requestText);
+  const requestedTypologies = normalizeRequestedTypologies(requestedTypology);
   const dimConstraints = inferDimensionConstraints(requestText);
   // Combine any inferred lead-time constraint with the brief's stored ceiling.
   const inferredLead = inferLeadTimeConstraints(requestText);
@@ -3846,8 +3948,10 @@ async function buildDeterministicTearsheetProposal(
   const scoreRow = (r: any) => {
     const hay = `${r?.title || ""} ${r?.category || ""} ${r?.subcategory || ""} ${r?.materials || ""}`.toLowerCase();
     let score = Number(r?.similarity || 0);
-    if (requestedTypology === "dining_table" && /\bdining\b/.test(hay)) score += 3;
-    if (requestedTypology && /\btable\b/.test(hay)) score += 2;
+    const rowTypes = rowMatchedRequestedTypologies(r, requestedTypologies);
+    score += rowTypes.length * 2;
+    if (rowTypes.includes("dining_table") && /\bdining\b/.test(hay)) score += 3;
+    if ((rowTypes.includes("table") || rowTypes.includes("dining_table")) && /\btable\b/.test(hay)) score += 2;
     if ((brief.materials || []).some((m) => /\b(oak|walnut|wood|timber)\b/i.test(String(m))) && /\b(oak|walnut|wood|timber)\b/.test(hay)) score += 1;
     return score;
   };
@@ -3869,8 +3973,8 @@ async function buildDeterministicTearsheetProposal(
     console.log(`[concierge tearsheet lead] pre=${candidateRows.length} kept=${leadRes.kept.length} dropped=${leadRes.dropped} unknownDropped=${leadRes.unknownDropped} fellBack=${leadRes.fellBack} constraints=${JSON.stringify(leadConstraints)}`);
     candidateRows = leadRes.kept;
   }
-  if (candidateRows.length < 2 && requestedTypology) {
-    candidateRows = (await fetchStrictTypologyCandidates(supabase, requestedTypology, dimConstraints, leadConstraints))
+  if (requestedTypologies.length && (candidateRows.length < 2 || !rowsCoverRequestedTypologies(candidateRows, requestedTypologies))) {
+    candidateRows = (await fetchStrictTypologyCandidates(supabase, requestedTypologies, dimConstraints, leadConstraints))
       .filter((r: any) => r && typeof r.id === "string" && UUID_RE.test(r.id))
       .sort((a: any, b: any) => scoreRow(b) - scoreRow(a));
   }
@@ -3902,7 +4006,11 @@ async function buildDeterministicTearsheetProposal(
     }
     return picked;
   };
-  const pickSource = options?.mixedRoom ? diversifyMixedRoomRows(sortedCandidates, 8) : sortedCandidates;
+  const pickSource = requestedTypologies.length > 1
+    ? pickRowsForRequestedTypologyCoverage(sortedCandidates, requestedTypologies, 8)
+    : options?.mixedRoom
+      ? diversifyMixedRoomRows(sortedCandidates, 8)
+      : sortedCandidates;
   const pickIds = Array.from(new Set(pickSource.map((r: any) => r.id))).slice(0, 8);
   if (pickIds.length < 2) return null;
   const hydratedRaw = await hydratePickPreview(supabase, pickIds);
@@ -3918,6 +4026,7 @@ async function buildDeterministicTearsheetProposal(
     validPickIds,
   );
   if (finalIds.length < 2) return null;
+  if (requestedTypologies.length > 1 && !rowsCoverRequestedTypologies(previewRaw, requestedTypologies)) return null;
   const rationaleMap: Record<string, { reason: string }> = {};
   for (const p of previewRaw) {
     if (!p?.id || !finalIds.includes(p.id)) continue;
@@ -5084,6 +5193,7 @@ serve(async (req) => {
 
 
     if (hasExplicitSelectionVerb && requestedTypology && !mentionsKnownDesigner) {
+      const branchRequestedTypologies = normalizeRequestedTypologies(requestedTypology);
       const budgetCeiling = inferBudgetCeilingCents(lastUserMsg || "");
       const dimCeiling = inferDimensionConstraints(lastUserMsg || "");
       const inferredLead = inferLeadTimeConstraints(lastUserMsg || "");
@@ -5103,13 +5213,16 @@ serve(async (req) => {
       const budgetedCandidates = budgetCeiling
         ? allTypeCandidates.filter((r: any) => Number(r?.trade_price_cents || 0) > 0 && Number(r.trade_price_cents) <= budgetCeiling.cents)
         : allTypeCandidates;
-      const candidateRows = budgetedCandidates
+      const sortedBudgetedCandidates = budgetedCandidates
         .sort((a: any, b: any) => {
           const ap = Number(a?.trade_price_cents || Number.MAX_SAFE_INTEGER);
           const bp = Number(b?.trade_price_cents || Number.MAX_SAFE_INTEGER);
           return ap - bp || String(a?.title || "").localeCompare(String(b?.title || ""));
-        })
-        .slice(0, Math.min(8, Math.max(2, effectiveBrief.brief.qty_hint || 6)));
+        });
+      const candidateLimit = Math.min(8, Math.max(2, effectiveBrief.brief.qty_hint || 6));
+      const candidateRows = branchRequestedTypologies.length > 1
+        ? pickRowsForRequestedTypologyCoverage(sortedBudgetedCandidates, branchRequestedTypologies, candidateLimit)
+        : sortedBudgetedCandidates.slice(0, candidateLimit);
 
       if (allTypeCandidates.length > 0 && candidateRows.length === 0 && budgetCeiling) {
         return sseTextResponse(
@@ -5128,7 +5241,7 @@ serve(async (req) => {
           previewRaw,
           candidateIds.filter((id: string) => previewRaw.some((p: any) => p?.id === id)),
         );
-        if (dedupedIds.length === 0) {
+        if (dedupedIds.length === 0 || !rowsCoverRequestedTypologies(dedupedPreview, branchRequestedTypologies)) {
           return sseTextResponse(buildNoStrictTypologyReply(requestedTypology));
         }
         const rationaleMap: Record<string, { reason: string }> = {};
@@ -6934,6 +7047,7 @@ serve(async (req) => {
             // "Scala 300 Dining Table" sharing the same brand + image)
             // regardless of whether a typology was inferred.
             ({ previewRaw, pickIds } = dedupePreviewRows(previewRaw, pickIds));
+            const streamRequestedTypologies = normalizeRequestedTypologies(requestedTypology);
             // Honour in-chat "skip / exclude / omit …" instructions from the
             // latest user message so the proposal card ships pre-filtered.
             const streamExcludedIds = parseUserExclusions(lastUserMsg || "", previewRaw);
@@ -6953,8 +7067,8 @@ serve(async (req) => {
               controller.enqueue(encoder.encode(`data: ${JSON.stringify(frame)}\n\n`));
               continue;
             }
-            if (requestedTypology && pickIds.length < 2) {
-              console.warn(`[concierge] blocked ${tc.name} — insufficient true ${requestedTypology} picks after typology validation`);
+            if (requestedTypology && (pickIds.length < 2 || !rowsCoverRequestedTypologies(previewRaw, streamRequestedTypologies))) {
+              console.warn(`[concierge] blocked ${tc.name} — insufficient true ${typologyLabel(requestedTypology)} coverage after typology validation`);
               const releaseFrame = { choices: [{ delta: { content: buildNoStrictTypologyReply(requestedTypology) } }] };
               controller.enqueue(encoder.encode(`data: ${JSON.stringify(releaseFrame)}\n\n`));
               continue;
@@ -7352,8 +7466,8 @@ serve(async (req) => {
             if (requestedTypology) {
               previewRaw = previewRaw.filter((p: any) => rowMatchesRequestedTypology(p, requestedTypology));
               ({ previewRaw, pickIds } = dedupePreviewRows(previewRaw, pickIds));
-              if (pickIds.length < 2) {
-                console.warn(`[concierge promise-recovery] blocked — insufficient true ${requestedTypology} picks after typology validation`);
+              if (pickIds.length < 2 || !rowsCoverRequestedTypologies(previewRaw, requestedTypology)) {
+                console.warn(`[concierge promise-recovery] blocked — insufficient true ${typologyLabel(requestedTypology)} coverage after typology validation`);
                 const releaseFrame = { choices: [{ delta: { content: buildNoStrictTypologyReply(requestedTypology) } }] };
                 controller.enqueue(encoder.encode(`data: ${JSON.stringify(releaseFrame)}\n\n`));
                 return;
