@@ -3459,7 +3459,65 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                       )}
                     >
                       {item.role === "assistant" ? (
+                        (() => {
+                          const CTA_LABELS = [
+                            "Source Similar Pieces",
+                            "Generate Custom Quote",
+                            "Match Finishes",
+                            "Forward to Human Concierge",
+                            "Upload a Visual Mood Board Instead",
+                            "Return to Atelier Chat",
+                            "View My Open Requests",
+                            "Yes, Schedule Morning Call",
+                            "No, Standard Updates Are Fine",
+                          ];
+                          const labelRegex = CTA_LABELS.map((l) => l.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|");
+                          // Match a full list line like "- **[ Label ]** — description"
+                          // (also plain "[ Label ]" / "**[ Label ]**" without bullet).
+                          const lineRe = new RegExp(
+                            `^[ \\t]*(?:[-*+][ \\t]+)?(?:\\*\\*)?\\[?[ \\t]*(${labelRegex})[ \\t]*\\]?(?:\\*\\*)?[ \\t]*(?:[—–\\-:][^\\n]*)?[ \\t]*$`,
+                            "gim",
+                          );
+                          const raw = String(item.content || "");
+                          const found: string[] = [];
+                          const seen = new Set<string>();
+                          let m: RegExpExecArray | null;
+                          while ((m = lineRe.exec(raw)) !== null) {
+                            const canon = CTA_LABELS.find((l) => l.toLowerCase() === m![1].toLowerCase());
+                            if (canon && !seen.has(canon)) { seen.add(canon); found.push(canon); }
+                          }
+                          const stripped = raw
+                            .replace(lineRe, "")
+                            // Collapse the blank lines left behind by removed items.
+                            .replace(/\n{3,}/g, "\n\n")
+                            .trim();
+
+                          const dispatchCta = (label: string) => {
+                            if (label === "Forward to Human Concierge") { void forwardToHumanConcierge(); return; }
+                            if (label === "Return to Atelier Chat") {
+                              setMinimized(false); setConciergeStatus(null); setHandoffTicket(null); return;
+                            }
+                            if (label === "View My Open Requests") { navigate("/trade/custom-requests"); return; }
+                            if (label === "Source Similar Pieces" || label === "Generate Custom Quote" || label === "Match Finishes") {
+                              const kind: NextStepKind =
+                                label === "Source Similar Pieces" ? "source"
+                                : label === "Generate Custom Quote" ? "quote"
+                                : "match";
+                              setNextStepFields({});
+                              setNextStepPanel(kind);
+                              return;
+                            }
+                            const prompts: Record<string, string> = {
+                              "Upload a Visual Mood Board Instead": "I'd like to upload a visual mood board instead of the floor plan — please prompt me to attach a reference image or Pinterest-style collage via the paperclip, and then run the Design Director scaffold on that image.",
+                              "Yes, Schedule Morning Call": "Yes, schedule a morning call.",
+                              "No, Standard Updates Are Fine": "No, standard updates are fine.",
+                            };
+                            void send(prompts[label] || label, { displayText: label });
+                          };
+
+                          return (
                         <div className="concierge-md space-y-2.5">
+
                           <ReactMarkdown
                             remarkPlugins={[remarkGfm]}
                             components={{
