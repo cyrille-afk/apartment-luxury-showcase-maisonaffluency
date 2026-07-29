@@ -13,6 +13,7 @@ import { inferCountryFromBrowser } from "@/lib/inferCountry";
 import { getPhonePlaceholder, getDialCode } from "@/lib/phonePlaceholder";
 import { z } from "zod";
 import Turnstile from "@/components/Turnstile";
+import { X } from "lucide-react";
 
 type PickerStudio = {
   id: string;
