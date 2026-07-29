@@ -1510,10 +1510,14 @@ const PublicProductPage: React.FC = () => {
                   designerName: designerDisplay || "",
                 });
                 const returnTo = typeof window !== "undefined" ? location.pathname + location.search : "";
+                const backTo = fromPath || fallbackGridPath;
+                const loginQuery = new URLSearchParams();
+                if (returnTo) loginQuery.set("redirect", returnTo);
+                if (backTo) loginQuery.set("back", backTo);
                 return (
                   <div className="mt-2 grid grid-cols-2 gap-2">
                     <Link
-                      to={`/trade/login${returnTo ? `?redirect=${encodeURIComponent(returnTo)}` : ""}`}
+                      to={`/trade/login${loginQuery.toString() ? `?${loginQuery.toString()}` : ""}`}
                       className="flex items-center justify-center gap-2 px-4 py-3.5 rounded-md font-body text-[11px] md:text-xs uppercase tracking-[0.12em] transition-all w-full border border-foreground text-foreground hover:bg-foreground hover:text-background text-center"
                     >
                       Login for Pricing
