@@ -3541,6 +3541,12 @@ function buildRequirementsBlockedMessage(violations: any[]): string {
   return "I’m going to hold the tearsheet rather than show a draft that does not satisfy the brief. I need to refine the constraints first.";
 }
 
+function shouldSoftPassPaletteAdvisory(validation: any, paletteAdvisory: boolean): boolean {
+  if (!paletteAdvisory || validation?.ok) return false;
+  const violations = Array.isArray(validation?.violations) ? validation.violations : [];
+  return violations.length > 0 && violations.every((v: any) => v?.kind === "palette_mismatch");
+}
+
 function validateProposalAgainstBrief(
   proposal: any,
   requestText: string,
@@ -5422,7 +5428,7 @@ serve(async (req) => {
           : `Draft tear sheet with ${countPhrase} in the Maison Affluency Curation, with trade pricing. Review the list above and click **Approve & Create** to save it into a project folder — or **Discard** to cancel.`)
           + unmetSuffix;
         const { validation } = validateProposalAgainstBrief(proposal, hardValidationText, null);
-        if (!validation.ok) {
+        if (!validation.ok && !shouldSoftPassPaletteAdvisory(validation, paletteAdvisory)) {
           console.warn("[concierge deterministic-enumeration] blocked proposal", JSON.stringify({ requestId, violations: validation.violations }));
           return sseTextResponse(buildRequirementsBlockedMessage(validation.violations));
         }
