@@ -41,8 +41,19 @@ export function CuratedInventoryGrid({
   className,
 }: CuratedInventoryGridProps) {
   const navigate = useNavigate();
+  const { discountPct, tierLabel } = useTradeDiscount();
 
-  if (!items?.length) return null;
+  const fmtPrice = (cents: number, currency: string) => {
+    try {
+      return new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: currency || "EUR",
+        maximumFractionDigits: 0,
+      }).format(cents / 100);
+    } catch {
+      return `${(cents / 100).toLocaleString()} ${currency || ""}`.trim();
+    }
+  };
 
   return (
     <div className={cn("w-full max-w-[92%] self-start", className)}>
