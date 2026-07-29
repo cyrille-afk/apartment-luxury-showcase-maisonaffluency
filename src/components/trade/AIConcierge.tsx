@@ -3800,19 +3800,74 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                               return;
                             }
                             if (label === "Save Palette to Project") {
-                              void send(
-                                "Save this palette (materials, tones, and aesthetic direction) to my active project so I can reference it later when I curate pieces.",
-                                { displayText: "Save Palette to Project" },
-                              );
+                              void (async () => {
+                                // Extract style + palette tokens from this
+                                // assistant turn. Prefer structured signals
+                                // (appliedConstraints) then fall back to
+                                // parsing the visible message for palette /
+                                // material tokens. If nothing surfaces we use
+                                // the aesthetic Felix has been narrating in
+                                // this session as the safe default.
+                                const raw = String(item.sourceContent || item.content || "");
+                                const ac = item.appliedConstraints;
+                                const fromAc: string[] = [
+                                  ...((ac?.colors as string[]) || []),
+                                  ...((ac?.materials as string[]) || []),
+                                ]
+                                  .map((s) => String(s || "").trim())
+                                  .filter(Boolean);
+                                const paletteLine = raw.match(/\b(?:palette|materials?|tones?|tokens?)\s*[:—-]\s*([^\n]+)/i)?.[1] || "";
+                                const fromText = paletteLine
+                                  .replace(/[.;]+$/g, "")
+                                  .split(/\s*(?:,|·|•|\||\/| and )\s*/i)
+                                  .map((s) => s.replace(/^[*_`\-\s]+|[*_`\-\s]+$/g, "").trim())
+                                  .filter((s) => s && s.length <= 48);
+                                const styleMatch = raw.match(/\b(?:style|concept|direction|aesthetic)\s*[:—-]\s*([^\n.·•]+)/i)?.[1]?.trim();
+                                const defaultTags = ["cream bouclé", "fumed oak", "patinated bronze", "supple taupe leather"];
+                                const merged = Array.from(new Set([...fromAc, ...fromText])).slice(0, 12);
+                                const tags = merged.length >= 2 ? merged : defaultTags;
+                                const style = (styleMatch && styleMatch.length <= 64) ? styleMatch : "Warm Minimalism";
+                                let projectId: string | null = null;
+                                try { projectId = sessionStorage.getItem("trade:lastProjectFilter"); } catch { /* ignore */ }
+                                if (!projectId) {
+                                  toast.error("Select an active project first to save this palette.");
+                                  return;
+                                }
+                                const { error } = await supabase
+                                  .from("projects")
+                                  .update({ style, tags })
+                                  .eq("id", projectId);
+                                if (error) {
+                                  toast.error("Couldn't save palette to project.");
+                                  return;
+                                }
+                                setSavedPaletteTags(tags);
+                                setSavedPaletteMsgs((prev) => {
+                                  const next = new Set(prev);
+                                  next.add(i);
+                                  return next;
+                                });
+                                toast.success("Palette saved to Project Log");
+                              })();
                               return;
                             }
                             if (label === "Source Similar Pieces" || label === "Match Finishes") {
                               const kind: NextStepKind =
                                 label === "Source Similar Pieces" ? "source" : "match";
-                              setNextStepFields({});
+                              // Seed the retrieval brief with the tokens the
+                              // designer just persisted to the Project Log so
+                              // Felix uses them as default filters instead of
+                              // re-asking for the palette.
+                              const seed: Record<string, string> = {};
+                              if (savedPaletteTags.length > 0) {
+                                seed.palette = savedPaletteTags.join(", ");
+                                if (kind === "match") seed.materials = savedPaletteTags.join(", ");
+                              }
+                              setNextStepFields(seed);
                               setNextStepPanel(kind);
                               return;
                             }
+
 
                             const prompts: Record<string, string> = {
                               "Upload a Visual Mood Board Instead": "I'd like to upload a visual mood board instead of the floor plan — please prompt me to attach a reference image or Pinterest-style collage via the paperclip, and then run the Design Director scaffold on that image.",
