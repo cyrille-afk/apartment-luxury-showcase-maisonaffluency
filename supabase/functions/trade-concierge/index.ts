@@ -3375,7 +3375,7 @@ function paletteMatchScore(row: any, constraints: HardConstraints | null | undef
   const tokens = paletteTokensForMatching(constraints);
   if (!tokens.length) return 0;
   const hay = rowPaletteHaystack(row);
-  const finishHay = rowFinishHaystack(row) || hay;
+  const finishHay = rowFinishHaystack(row);
   let score = 0;
   const hasIvorySignal = /\b(ivory|cream|off\s+white|offwhite|white)\b/i.test(finishHay);
   const hasFabricSignal = /\b(boucle|bouclé|fabric|textile|upholstery|com\s+fabric|ecart\s+fabric)\b/i.test(finishHay);
@@ -3886,7 +3886,7 @@ async function hydratePickPreview(
       .in("id", pickIds),
     supabase
       .from("trade_products")
-      .select("id, product_name, brand_name, image_url, materials, materials_description, description, meta_description, variant_placeholder, available_finishes, fabric_options, category, subcategory, dimensions, trade_price_cents, rrp_price_cents, currency, lead_time, stock_status_override")
+      .select("id, product_name, brand_name, image_url, materials, materials_description, description, meta_description, variant_placeholder, available_finishes, fabric_options, category, subcategory, dimensions, trade_price_cents, rrp_price_cents, currency, lead_time, stock_status_override, size_variants")
       .in("id", pickIds),
   ]);
 
@@ -4037,6 +4037,7 @@ async function hydratePickPreview(
           variant_placeholder: t.variant_placeholder || null,
           available_finishes: Array.isArray(t.available_finishes) ? t.available_finishes : null,
           fabric_options: Array.isArray(t.fabric_options) ? t.fabric_options : null,
+          size_variants: Array.isArray(t.size_variants) ? t.size_variants : null,
           category: t.category,
           subcategory: t.subcategory || null,
           dimensions: t.dimensions || null,
