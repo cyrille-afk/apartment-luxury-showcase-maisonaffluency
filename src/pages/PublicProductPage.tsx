@@ -1669,7 +1669,7 @@ const PublicProductPage: React.FC = () => {
                     {visibleRelated.map((rp) => (
                       <Link
                         key={rp.id}
-                        to={`/designers/${designer.slug}/${slugify(rp.title + (rp.subtitle ? `-${rp.subtitle}` : ""))}`}
+                        to={`/designers/${designer.slug}/${rp.slug || slugify(rp.title + (rp.subtitle ? `-${rp.subtitle}` : ""))}`}
                         state={{ from: location.pathname + location.search }}
                         className="group block"
                       >
