@@ -1311,6 +1311,7 @@ const PublicProductPage: React.FC = () => {
                 productSlug: productSlug || "",
                 productName: product.title || "",
                 designerName: designerDisplay || "",
+                back: (typeof window !== "undefined" ? location.pathname + location.search : "") || "",
               }).toString()}#contact`}
               className="shrink-0 px-3 py-2 rounded-md bg-foreground text-background font-body text-[10px] uppercase tracking-[0.12em] whitespace-nowrap"
             >
