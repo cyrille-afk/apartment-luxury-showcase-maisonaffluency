@@ -746,6 +746,9 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
   type NextStepKind = "source" | "quote" | "match";
   const [nextStepPanel, setNextStepPanel] = useState<NextStepKind | null>(null);
   const [nextStepFields, setNextStepFields] = useState<Record<string, string>>({});
+  // When the designer submits the "Source Similar Pieces" panel, tag the
+  // next incoming tearsheet proposal so it renders as CuratedInventoryGrid.
+  const pendingSourceOriginRef = useRef<boolean>(false);
   // Track "Save Palette to Project" confirmations per message index and the
   // most recently persisted tags so a follow-up "Source Similar Pieces" turn
   // can seed the retrieval brief with those exact tokens.
