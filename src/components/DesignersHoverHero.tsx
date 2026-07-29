@@ -1731,7 +1731,7 @@ const DesignersHoverHero = () => {
               isDesktopViewport ? "animate-scale-in" : "animate-slide-in-right",
               // Mobile: full sheet anchored right below the fixed header so the
               // search field is immediately visible and the list has room to scroll.
-              "inset-x-0 top-[var(--header-h)] bottom-0 rounded-none pb-[env(safe-area-inset-bottom)]",
+              "inset-x-0 top-[var(--header-h)] bottom-0 rounded-none",
               // Desktop: dropdown anchored to the Directory button via inline styles.
               "md:inset-x-auto md:right-auto md:top-auto md:bottom-auto md:w-[380px] md:max-w-[calc(100vw-2rem)] md:max-h-[calc(100vh-var(--header-h)-3rem)] md:rounded-xl md:pb-0"
             )}
@@ -1775,7 +1775,7 @@ const DesignersHoverHero = () => {
               <div className="md:hidden shrink-0 border-b border-white/[0.06] bg-[#0a0a0a]/95 backdrop-blur mb-3">
                 <div
                   className={cn(
-                    "flex items-center gap-0.5 overflow-x-auto no-scrollbar px-3 py-1.5 transition-opacity duration-150",
+                    "flex items-center justify-center gap-0.5 overflow-x-auto no-scrollbar px-3 py-1.5 transition-opacity duration-150",
                     isRestoringLetter ? "opacity-0" : "opacity-100"
                   )}
                   style={{ scrollbarWidth: "none" }}
@@ -1815,7 +1815,7 @@ const DesignersHoverHero = () => {
                 </div>
               </div>
             )}
-            <div ref={searchScrollRef} className={`flex-1 overflow-y-auto overscroll-contain px-4 pt-2 pb-4 min-h-0 relative touch-pan-y transition-opacity duration-150 ${isRestoringLetter ? "opacity-0" : "opacity-100"}`}>
+            <div ref={searchScrollRef} className={`flex-1 overflow-y-auto overscroll-contain px-4 pt-2 pb-[calc(2rem+env(safe-area-inset-bottom))] min-h-0 relative touch-pan-y transition-opacity duration-150 ${isRestoringLetter ? "opacity-0" : "opacity-100"}`}>
 
               {!isSearching && groupedResults.length === 0 ? (
                 <div className="px-4 py-10 flex flex-col items-center gap-3" aria-live="polite">
