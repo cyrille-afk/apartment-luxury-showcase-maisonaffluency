@@ -379,6 +379,75 @@ interface GalleryProps {
   hideIntro?: boolean;
 }
 
+type GalleryHotspotPosition = {
+  x: number;
+  y: number;
+  label: string;
+  designer: string;
+  linkUrl: string | null;
+  mappedPickId: string | null;
+};
+
+type MobileGalleryImageCardProps = {
+  item: typeof galleryExperiences[number]["items"][number];
+  isHotspotSection: boolean;
+  hotspots: GalleryHotspotPosition[];
+  onHotspotActivate: (hotspot: GalleryHotspotPosition) => void;
+};
+
+const MobileGalleryImageCard = ({ item, isHotspotSection, hotspots, onHotspotActivate }: MobileGalleryImageCardProps) => {
+  const [naturalAspect, setNaturalAspect] = useState(16 / 10);
+
+  const handleImageLoad = useCallback((event: React.SyntheticEvent<HTMLImageElement>) => {
+    const img = event.currentTarget;
+    if (img.naturalWidth > 0 && img.naturalHeight > 0) {
+      setNaturalAspect(img.naturalWidth / img.naturalHeight);
+    }
+  }, []);
+
+  return (
+    <div
+      className={`relative flex-none w-full snap-center overflow-hidden rounded-2xl ${isHotspotSection ? '' : 'aspect-[3/4]'}`}
+      style={isHotspotSection ? { aspectRatio: naturalAspect } : undefined}
+    >
+      <img
+        src={item.image}
+        alt={item.title}
+        sizes="100vw"
+        className={`${isHotspotSection ? 'absolute inset-0 h-full w-full object-fill' : 'h-full w-full object-cover'} brightness-[1.05] contrast-[1.08] saturate-[1.05] ${item.image === bespokeSofaImage && !isHotspotSection ? "object-[center_35%]" : ""}`}
+        loading="lazy"
+        decoding="async"
+        width={isHotspotSection ? 1600 : 900}
+        height={isHotspotSection ? Math.round(1600 / naturalAspect) : 1200}
+        onLoad={handleImageLoad}
+      />
+
+      {!isHotspotSection && (
+        <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+      )}
+      {hotspots.map((hotspot, hotspotIndex) => (
+        <button
+          key={`${item.title}-hotspot-${hotspotIndex}`}
+          type="button"
+          onPointerDown={(e) => {
+            if (e.pointerType === "mouse") return;
+            e.stopPropagation();
+            e.preventDefault();
+            onHotspotActivate(hotspot);
+          }}
+          onClick={(e) => { e.stopPropagation(); onHotspotActivate(hotspot); }}
+          aria-label={`Explore hotspot: ${hotspot.label}`}
+          className="absolute z-30 flex h-5 w-5 touch-manipulation -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-black/70 backdrop-blur-sm border-2 border-primary/70 text-white shadow-[0_0_8px_hsl(var(--primary)/0.4)] active:scale-95 transition-transform"
+          style={{ left: `${hotspot.x}%`, top: `${hotspot.y}%` }}
+        >
+          <span className="absolute inset-0 rounded-full border border-black/20 animate-ping" style={{ animationDuration: "2s" }} />
+          <Plus className="relative w-2.5 h-2.5" strokeWidth={2.5} />
+        </button>
+      ))}
+    </div>
+  );
+};
+
 const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
   const isMobile = useIsMobile();
   const ref = useRef(null);
@@ -650,7 +719,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
 
   // ── Hotspot positions per image ──
   const [hotspotCounts, setHotspotCounts] = useState<Record<string, number>>({});
-  const [hotspotPositions, setHotspotPositions] = useState<Record<string, Array<{ x: number; y: number; label: string; designer: string; linkUrl: string | null; mappedPickId: string | null }>>>({});
+  const [hotspotPositions, setHotspotPositions] = useState<Record<string, GalleryHotspotPosition[]>>({});
   useEffect(() => {
     const fetchCounts = async () => {
       const { data } = await supabase
@@ -658,7 +727,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
         .select("image_identifier, x_percent, y_percent, product_name, designer_name, link_url, mapped_pick_id");
       if (data) {
         const counts: Record<string, number> = {};
-        const positions: Record<string, Array<{ x: number; y: number; label: string; designer: string; linkUrl: string | null; mappedPickId: string | null }>> = {};
+          const positions: Record<string, GalleryHotspotPosition[]> = {};
         for (const row of data as any[]) {
           counts[row.image_identifier] = (counts[row.image_identifier] || 0) + 1;
           if (!positions[row.image_identifier]) positions[row.image_identifier] = [];
@@ -1136,45 +1205,13 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                       {section.items.map((item, index) => {
                         const itemHotspots = hotspotPositions[item.title] || [];
                         return (
-                          <div
+                          <MobileGalleryImageCard
                             key={`${item.title}-${index}-mobile`}
-                            className={`relative flex-none w-full snap-center overflow-hidden rounded-2xl ${isHotspotSection ? '' : 'aspect-[3/4]'}`}
-                          >
-                            <img
-                              src={item.image}
-                              alt={item.title}
-                              sizes="100vw"
-                              className={`${isHotspotSection ? 'block w-full h-auto' : 'h-full w-full object-cover'} brightness-[1.05] contrast-[1.08] saturate-[1.05] ${item.image === bespokeSofaImage && !isHotspotSection ? "object-[center_35%]" : ""}`}
-                              loading="lazy"
-                              decoding="async"
-                              width={isHotspotSection ? 800 : 900}
-                              height={isHotspotSection ? 1000 : 1200}
-                            />
-
-                            {!isHotspotSection && (
-                              <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
-                            )}
-                            {itemHotspots.map((hotspot, hotspotIndex) => (
-                              <button
-                                key={`${item.title}-hotspot-${hotspotIndex}`}
-                                type="button"
-                                onPointerDown={(e) => {
-                                  if (e.pointerType === "mouse") return;
-                                  e.stopPropagation();
-                                  e.preventDefault();
-                                  handleHotspotViewProduct(hotspot.label, hotspot.designer, hotspot.linkUrl, hotspot.mappedPickId);
-                                }}
-                                onClick={(e) => { e.stopPropagation(); handleHotspotViewProduct(hotspot.label, hotspot.designer, hotspot.linkUrl, hotspot.mappedPickId); }}
-                                aria-label={`Explore hotspot: ${hotspot.label}`}
-                                className="absolute z-30 flex h-5 w-5 touch-manipulation -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-black/70 backdrop-blur-sm border-2 border-primary/70 text-white shadow-[0_0_8px_hsl(var(--primary)/0.4)] active:scale-95 transition-transform"
-                                style={{ left: `${hotspot.x}%`, top: `${hotspot.y}%` }}
-                              >
-                                <span className="absolute inset-0 rounded-full border border-black/20 animate-ping" style={{ animationDuration: "2s" }} />
-                                <Plus className="relative w-2.5 h-2.5" strokeWidth={2.5} />
-
-                              </button>
-                            ))}
-                          </div>
+                            item={item}
+                            isHotspotSection={isHotspotSection}
+                            hotspots={itemHotspots}
+                            onHotspotActivate={(hotspot) => handleHotspotViewProduct(hotspot.label, hotspot.designer, hotspot.linkUrl, hotspot.mappedPickId)}
+                          />
                         );
                       })}
                     </div>
