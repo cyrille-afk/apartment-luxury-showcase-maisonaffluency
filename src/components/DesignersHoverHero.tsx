@@ -1775,7 +1775,7 @@ const DesignersHoverHero = () => {
               <div className="md:hidden shrink-0 border-b border-white/[0.06] bg-[#0a0a0a]/95 backdrop-blur mb-3">
                 <div
                   className={cn(
-                    "flex items-center gap-0.5 overflow-x-auto no-scrollbar px-3 py-1.5 transition-opacity duration-150",
+                    "flex items-center justify-center gap-0.5 overflow-x-auto no-scrollbar px-3 py-1.5 transition-opacity duration-150",
                     isRestoringLetter ? "opacity-0" : "opacity-100"
                   )}
                   style={{ scrollbarWidth: "none" }}
