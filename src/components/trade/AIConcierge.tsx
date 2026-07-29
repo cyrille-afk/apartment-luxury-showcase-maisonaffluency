@@ -3474,10 +3474,19 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                           const labelRegex = CTA_LABELS.map((l) => l.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|");
                           // Match a full list line like "- **[ Label ]** — description"
                           // (also plain "[ Label ]" / "**[ Label ]**" without bullet).
-                          const lineRe = new RegExp(
-                            `^[ \\t]*(?:[-*+][ \\t]+)?(?:\\*\\*)?\\[?[ \\t]*(${labelRegex})[ \\t]*\\]?(?:\\*\\*)?[ \\t]*(?:[—–\\-:][^\\n]*)?[ \\t]*$`,
-                            "gim",
-                          );
+                           // Accepts: "- [ Label ]", "* **[ Label ]**", "1. [ Label ]",
+                           // "[ Label ]", "**[ Label ]**", with optional " — description" tail,
+                           // and also blockquote/indent noise ("> ", spaces, tabs).
+                           const lineRe = new RegExp(
+                             `^[ \\t>]*(?:(?:[-*+]|\\d+[.)])[ \\t]+)?(?:\\*\\*)?\\[?[ \\t]*(${labelRegex})[ \\t]*\\]?(?:\\*\\*)?[ \\t]*(?:[—–\\-:][^\\n]*)?[ \\t]*$`,
+                             "gim",
+                           );
+                           // Also match "**Label**" / "**[ Label ]**" appearing inline as their own paragraph
+                           // (no brackets, no bullet) — some model turns emit that shape.
+                           const bareRe = new RegExp(
+                             `^[ \\t>]*\\*\\*\\[?[ \\t]*(${labelRegex})[ \\t]*\\]?\\*\\*[ \\t]*$`,
+                             "gim",
+                           );
                           const raw = String(item.content || "");
                           const found: string[] = [];
                           const seen = new Set<string>();
