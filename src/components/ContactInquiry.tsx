@@ -249,7 +249,30 @@ const ContactInquiry = () => {
   };
 
   return (
-    <section id="contact" ref={ref} className="py-12 px-4 md:py-24 md:px-12 lg:px-20 bg-muted/30 scroll-header-offset">
+    <section id="contact" ref={ref} className="relative py-12 px-4 md:py-24 md:px-12 lg:px-20 bg-muted/30 scroll-header-offset">
+      {urlProductId && (
+        <button
+          type="button"
+          aria-label="Close and return to product"
+          onClick={() => {
+            const backParam = params.get("back");
+            if (backParam && backParam.startsWith("/") && !backParam.startsWith("//")) {
+              navigate(backParam);
+              return;
+            }
+            if (window.history.length > 1) {
+              navigate(-1);
+            } else if (urlProductSlug && urlDesignerName) {
+              navigate("/");
+            } else {
+              navigate("/");
+            }
+          }}
+          className="absolute top-4 right-4 md:top-6 md:right-6 z-10 h-9 w-9 md:h-10 md:w-10 rounded-full bg-background border border-border shadow-sm flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+        >
+          <X className="h-4 w-4" />
+        </button>
+      )}
       <div className="mx-auto max-w-4xl">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
