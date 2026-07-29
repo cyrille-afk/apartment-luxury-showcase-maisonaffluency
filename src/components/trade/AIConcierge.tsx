@@ -3726,12 +3726,29 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                               code: ({ node, ...props }) => <code className="rounded bg-background/60 px-1 py-0.5 text-[0.85em]" {...props} />,
                             }}
                           >
-                            {inlineSignalsIntoMatchLines(item.content)}
+                            {inlineSignalsIntoMatchLines(stripped)}
                           </ReactMarkdown>
+                          {found.length > 0 && (
+                            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 pt-1">
+                              {found.map((label) => (
+                                <button
+                                  key={label}
+                                  type="button"
+                                  onClick={() => dispatchCta(label)}
+                                  className="inline-flex items-center whitespace-nowrap rounded-full border border-border/80 bg-background/80 px-3 py-1.5 font-body text-[11px] sm:text-xs leading-none text-foreground hover:bg-muted hover:border-foreground/30 transition-colors"
+                                >
+                                  [ {label} ]
+                                </button>
+                              ))}
+                            </div>
+                          )}
                         </div>
+                          );
+                        })()
                       ) : (
                         <span className="whitespace-pre-wrap">{(item as any).__display ?? item.content}</span>
                       )}
+
                     </div>
                       )
                     )}
