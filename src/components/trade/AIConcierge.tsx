@@ -5087,6 +5087,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                 ? `${cfg.displayLabel}\n${detailLines.join("\n")}`
                 : cfg.displayLabel;
               setNextStepPanel(null);
+              if (nextStepPanel === "source") pendingSourceOriginRef.current = true;
               void send(prompt, { displayText });
             };
             return (
