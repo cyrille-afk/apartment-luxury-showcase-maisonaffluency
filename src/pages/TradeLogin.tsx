@@ -7,6 +7,12 @@ import { useToast } from "@/hooks/use-toast";
 
 const TradeLogin = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const backHref = (() => {
+    const raw = searchParams.get("back") || searchParams.get("redirect") || "/";
+    // Only permit same-origin absolute paths to prevent open-redirect.
+    return raw.startsWith("/") && !raw.startsWith("//") ? raw : "/";
+  })();
   const { toast } = useToast();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
