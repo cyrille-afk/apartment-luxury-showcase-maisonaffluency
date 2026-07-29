@@ -4404,6 +4404,8 @@ export type Database = {
           notes: string | null
           status: string
           studio_id: string | null
+          style: string | null
+          tags: string[]
           target_completion_date: string | null
           trade_multiplier: number
           updated_at: string
@@ -4423,6 +4425,8 @@ export type Database = {
           notes?: string | null
           status?: string
           studio_id?: string | null
+          style?: string | null
+          tags?: string[]
           target_completion_date?: string | null
           trade_multiplier?: number
           updated_at?: string
@@ -4442,6 +4446,8 @@ export type Database = {
           notes?: string | null
           status?: string
           studio_id?: string | null
+          style?: string | null
+          tags?: string[]
           target_completion_date?: string | null
           trade_multiplier?: number
           updated_at?: string
