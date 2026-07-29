@@ -136,10 +136,19 @@ const TradeDashboard = () => {
       // welcome modal during this first-login session, do not re-open on refresh.
       let dismissed = false;
       try { dismissed = localStorage.getItem("ma:welcome-dismissed") === "1"; } catch {}
+      let hasExistingConciergeTranscript = false;
+      try {
+        const rawTimeline = sessionStorage.getItem("concierge:timeline");
+        const parsedTimeline = rawTimeline ? JSON.parse(rawTimeline) : null;
+        hasExistingConciergeTranscript = Array.isArray(parsedTimeline) && parsedTimeline.some(
+          (item) => item?.kind === "msg" && !item?.onboarding && typeof item?.content === "string" && item.content.trim().length > 0,
+        );
+      } catch {}
       if (dismissed) {
         await supabase.from("profiles").update({ has_seen_trade_intro: true }).eq("id", user.id);
         return;
       }
+      if (hasExistingConciergeTranscript) return;
 
       try { localStorage.setItem("ma:welcome-pending", "1"); } catch {}
       window.dispatchEvent(new CustomEvent("ma:welcome-pending"));

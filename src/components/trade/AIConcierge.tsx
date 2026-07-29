@@ -319,7 +319,7 @@ type PendingProposalTool =
   | "propose_ffe_rows"
   | "prepare_visualization_brief";
 type TimelineItem =
-  | { kind: "msg"; role: "user" | "assistant"; content: string; actions?: ConciergeQuickAction[]; onboarding?: boolean; sourceContent?: string; sourceActions?: ConciergeQuickAction[]; attachments?: TimelineAttachment[]; appliedConstraints?: AppliedConstraintsEvent; moodboardSignals?: MoodboardSignalsEvent }
+  | { kind: "msg"; role: "user" | "assistant"; content: string; actions?: ConciergeQuickAction[]; onboarding?: boolean; sourceContent?: string; sourceActions?: ConciergeQuickAction[]; designDirectorCtas?: DesignDirectorCtaLabel[]; attachments?: TimelineAttachment[]; appliedConstraints?: AppliedConstraintsEvent; moodboardSignals?: MoodboardSignalsEvent }
   | { kind: "proposal"; proposal: TearsheetProposal; resolved?: "approved" | "discarded"; excluded?: string[]; locked?: string[]; newPickIds?: string[] }
   | { kind: "quote_proposal"; proposal: QuoteProposal; resolved?: "approved" | "discarded" }
   | { kind: "ffe_proposal"; proposal: FfeProposal; resolved?: "approved" | "discarded" }
@@ -401,7 +401,7 @@ type DesignDirectorCtaLabel = typeof DESIGN_DIRECTOR_CTA_LABELS[number];
 const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 const DESIGN_DIRECTOR_CTA_PATTERN = DESIGN_DIRECTOR_CTA_LABELS.map(escapeRegExp).join("|");
 const DESIGN_DIRECTOR_CTA_START_RE = new RegExp(
-  `^[\\s>]*(?:(?:[-*+]|\\d+[.)])[\\s]+)?(?:\\*\\*|__)?[\\s]*\\[?[\\s]*(${DESIGN_DIRECTOR_CTA_PATTERN})[\\s]*\\]?(?:[\\s]*(?:\\*\\*|__))?(?:[\\s]*(?:[—–\\-:|].*)?)?$`,
+  `^[\\s>]*(?:(?:[-*+]|\\d+[.)])[\\s]+)?(?:\\*{1,3}|_{1,3})?[\\s]*\\\\?[\\[(]?[\\s]*(${DESIGN_DIRECTOR_CTA_PATTERN})[\\s]*\\\\?[\\])]?(?:[\\s]*(?:\\*{1,3}|_{1,3}))?(?:[\\s]+.*)?$`,
   "i",
 );
 const DESIGN_DIRECTOR_CTA_ANY_RE = new RegExp(`(${DESIGN_DIRECTOR_CTA_PATTERN})`, "gi");
@@ -411,34 +411,91 @@ function canonicalDesignDirectorCtaLabel(value: string): DesignDirectorCtaLabel 
   return DESIGN_DIRECTOR_CTA_LABELS.find((label) => label.toLowerCase() === normalized) ?? null;
 }
 
+function collectDesignDirectorCtaLabels(raw: string): DesignDirectorCtaLabel[] {
+  const labels: DesignDirectorCtaLabel[] = [];
+  const seen = new Set<DesignDirectorCtaLabel>();
+  DESIGN_DIRECTOR_CTA_ANY_RE.lastIndex = 0;
+  let match: RegExpExecArray | null;
+  while ((match = DESIGN_DIRECTOR_CTA_ANY_RE.exec(raw)) !== null) {
+    const canonical = canonicalDesignDirectorCtaLabel(match[1]);
+    if (canonical && !seen.has(canonical)) {
+      seen.add(canonical);
+      labels.push(canonical);
+    }
+  }
+  return labels;
+}
+
+function isDesignDirectorCtaText(value: string): boolean {
+  const normalized = value
+    .replace(/[\u00a0\u200b]/g, " ")
+    .replace(/\\([\[\]()])/g, "$1")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (!normalized) return false;
+  DESIGN_DIRECTOR_CTA_START_RE.lastIndex = 0;
+  if (DESIGN_DIRECTOR_CTA_START_RE.test(normalized)) return true;
+
+  const withoutLabels = normalized
+    .replace(DESIGN_DIRECTOR_CTA_ANY_RE, "")
+    .replace(/(?:^|\s)(?:[-*+]|\d+[.)])(?=\s|$)/g, " ")
+    .replace(/[\[\](){}*_`>•·,.;:|—–\-\s]/g, "")
+    .trim();
+  return collectDesignDirectorCtaLabels(normalized).length > 0 && withoutLabels.length === 0;
+}
+
 function extractDesignDirectorCtas(raw: string): { body: string; labels: DesignDirectorCtaLabel[] } {
   const labels: DesignDirectorCtaLabel[] = [];
-  const seen = new Set<string>();
+  const seen = new Set<DesignDirectorCtaLabel>();
   const bodyLines: string[] = [];
 
   for (const line of raw.split(/\r?\n/)) {
-    DESIGN_DIRECTOR_CTA_START_RE.lastIndex = 0;
-    const isCtaLine = DESIGN_DIRECTOR_CTA_START_RE.test(line);
+    const normalizedLine = line.replace(/[\u00a0\u200b]/g, " ");
+    const isCtaLine = isDesignDirectorCtaText(normalizedLine);
     if (!isCtaLine) {
       bodyLines.push(line);
       continue;
     }
 
-    DESIGN_DIRECTOR_CTA_ANY_RE.lastIndex = 0;
-    let match: RegExpExecArray | null;
-    while ((match = DESIGN_DIRECTOR_CTA_ANY_RE.exec(line)) !== null) {
-      const canonical = canonicalDesignDirectorCtaLabel(match[1]);
-      if (canonical && !seen.has(canonical)) {
+    for (const canonical of collectDesignDirectorCtaLabels(normalizedLine)) {
+      if (!seen.has(canonical)) {
         seen.add(canonical);
         labels.push(canonical);
       }
     }
   }
 
+  // Final fallback: if Markdown parsing or server formatting put escaped
+  // bracket CTAs in a single paragraph, keep the body clean and still expose
+  // the actions as chips below the response.
+  for (const canonical of collectDesignDirectorCtaLabels(raw)) {
+    if (!seen.has(canonical)) {
+      seen.add(canonical);
+      labels.push(canonical);
+    }
+  }
+
   return {
-    body: bodyLines.join("\n").replace(/\n{3,}/g, "\n\n").trim(),
+    body: bodyLines
+      .filter((line) => !isDesignDirectorCtaText(line))
+      .join("\n")
+      .replace(/\n{3,}/g, "\n\n")
+      .trim(),
     labels,
   };
+}
+
+function stripDesignDirectorCtasFromTimeline(items: TimelineItem[]): TimelineItem[] {
+  let changed = false;
+  const next = items.map((item) => {
+    if (item.kind !== "msg" || item.role !== "assistant" || !item.content) return item;
+    const sourceContent = item.sourceContent || item.content;
+    const extracted = extractDesignDirectorCtas(sourceContent);
+    if (extracted.labels.length === 0 || extracted.body === item.content) return item;
+    changed = true;
+    return { ...item, content: extracted.body, sourceContent, designDirectorCtas: extracted.labels };
+  });
+  return changed ? next : items;
 }
 
 function markdownTextFromChildren(children: React.ReactNode): string {
@@ -519,7 +576,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
       const raw = sessionStorage.getItem("concierge:timeline");
       if (raw) {
         const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed) && parsed.length > 0) return sanitizeTimelineForAttachments(parsed as TimelineItem[]);
+        if (Array.isArray(parsed) && parsed.length > 0) return stripDesignDirectorCtasFromTimeline(sanitizeTimelineForAttachments(parsed as TimelineItem[]));
       }
     } catch {}
     return [
@@ -977,7 +1034,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
   }, [timeline]);
   useEffect(() => {
     setTimeline((prev) => {
-      const cleaned = sanitizeTimelineForAttachments(prev);
+      const cleaned = stripDesignDirectorCtasFromTimeline(sanitizeTimelineForAttachments(prev));
       const unchanged = cleaned.length === prev.length && cleaned.every((item, idx) => item === prev[idx]);
       return unchanged ? prev : cleaned;
     });
@@ -1117,7 +1174,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
       cloudLastPayloadRef.current = "";
       const remote = (data as any)?.timeline;
       if (Array.isArray(remote) && remote.length > 0) {
-        setTimeline(sanitizeTimelineForAttachments(remote as TimelineItem[]));
+        setTimeline(stripDesignDirectorCtasFromTimeline(sanitizeTimelineForAttachments(remote as TimelineItem[])));
       } else {
         setTimeline(buildInitialTimeline());
       }
@@ -1233,6 +1290,9 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
       if (prev.length !== 1) return prev;
       const only = prev[0];
       if (only.kind !== "msg" || only.role !== "assistant") return prev;
+      if (only.sourceContent || only.designDirectorCtas?.length || extractDesignDirectorCtas(only.content).labels.length > 0) {
+        return stripDesignDirectorCtasFromTimeline(prev);
+      }
       const contextGreeting = currentGreeting(lang);
       if (only.onboarding || hasWelcomeActions(only.actions)) {
         const sourceContent = only.sourceContent ?? only.content;
@@ -3528,59 +3588,10 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                     >
                       {item.role === "assistant" ? (
                         (() => {
-                          const CTA_LABELS = [
-                            "Source Similar Pieces",
-                            "Generate Custom Quote",
-                            "Match Finishes",
-                            "Forward to Human Concierge",
-                            "Upload a Visual Mood Board Instead",
-                            "Return to Atelier Chat",
-                            "View My Open Requests",
-                            "Yes, Schedule Morning Call",
-                            "No, Standard Updates Are Fine",
-                          ];
-                          const labelRegex = CTA_LABELS.map((l) => l.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|");
-                          // Match a full list line like "- **[ Label ]** — description"
-                          // (also plain "[ Label ]" / "**[ Label ]**" without bullet).
-                           // Accepts: "- [ Label ]", "* **[ Label ]**", "1. [ Label ]",
-                           // "[ Label ]", "**[ Label ]**", with optional " — description" tail,
-                           // and also blockquote/indent noise ("> ", spaces, tabs).
-                           const lineRe = new RegExp(
-                             `^[ \\t>]*(?:(?:[-*+]|\\d+[.)])[ \\t]+)?(?:\\*\\*)?\\[?[ \\t]*(${labelRegex})[ \\t]*\\]?(?:\\*\\*)?[ \\t]*(?:[—–\\-:][^\\n]*)?[ \\t]*$`,
-                             "gim",
-                           );
-                           // Also match "**Label**" / "**[ Label ]**" appearing inline as their own paragraph
-                           // (no brackets, no bullet) — some model turns emit that shape.
-                           const bareRe = new RegExp(
-                             `^[ \\t>]*\\*\\*\\[?[ \\t]*(${labelRegex})[ \\t]*\\]?\\*\\*[ \\t]*$`,
-                             "gim",
-                           );
-                          const raw = String(item.content || "");
-                          const found: string[] = [];
-                          const seen = new Set<string>();
-                          let m: RegExpExecArray | null;
-                           while ((m = lineRe.exec(raw)) !== null) {
-                             const canon = CTA_LABELS.find((l) => l.toLowerCase() === m![1].toLowerCase());
-                             if (canon && !seen.has(canon)) { seen.add(canon); found.push(canon); }
-                           }
-                           while ((m = bareRe.exec(raw)) !== null) {
-                             const canon = CTA_LABELS.find((l) => l.toLowerCase() === m![1].toLowerCase());
-                             if (canon && !seen.has(canon)) { seen.add(canon); found.push(canon); }
-                           }
-                           const stripped = raw
-                             .replace(lineRe, "")
-                             .replace(bareRe, "")
-                             // Collapse the blank lines left behind by removed items.
-                             .replace(/\n{3,}/g, "\n\n")
-                             .trim();
+                          const raw = String(item.sourceContent || item.content || "");
                            const extractedCtas = extractDesignDirectorCtas(raw);
-                           extractedCtas.labels.forEach((label) => {
-                             if (!seen.has(label)) {
-                               seen.add(label);
-                               found.push(label);
-                             }
-                           });
-                           const markdownBody = extractedCtas.labels.length > 0 ? extractedCtas.body : stripped;
+                            const found = item.designDirectorCtas && item.designDirectorCtas.length > 0 ? item.designDirectorCtas : extractedCtas.labels;
+                            const markdownBody = item.sourceContent ? String(item.content || "") : extractedCtas.body;
 
                           const dispatchCta = (label: string) => {
                             if (label === "Forward to Human Concierge") { void forwardToHumanConcierge(); return; }
@@ -3612,7 +3623,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                             remarkPlugins={[remarkGfm]}
                             components={{
                               p: ({ node, children, ...props }) => {
-                                if (DESIGN_DIRECTOR_CTA_START_RE.test(markdownTextFromChildren(children))) return null;
+                                if (isDesignDirectorCtaText(markdownTextFromChildren(children))) return null;
                                 // Detect the "**Match:** Band · NN% — rationale"
                                 // line emitted for each Private Exhibition piece
                                 // and render it as a badge + rationale card.
@@ -3645,167 +3656,11 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                                 return <p className="my-0" {...props}>{children}</p>;
                               },
                               ul: ({ node, ...props }) => {
-                                const ctaLabels = "(Source Similar Pieces|Generate Custom Quote|Match Finishes|Forward to Human Concierge|Upload a Visual Mood Board Instead|Return to Atelier Chat|View My Open Requests|Yes, Schedule Morning Call|No, Standard Updates Are Fine)";
-                                const hasCtaList = new RegExp(`^\\s*[-*]\\s*\\[?\\s*${ctaLabels}\\s*\\]?`, "im").test(item.content || "");
-                                if (hasCtaList) {
-                                  return <ul className="flex flex-wrap items-stretch gap-1.5 sm:gap-2 my-2 list-none pl-0" {...props} />;
-                                }
                                 return <ul className="list-disc pl-5 space-y-2 my-1" {...props} />;
                               },
                               ol: ({ node, ...props }) => <ol className="list-decimal pl-5 space-y-2 my-1" {...props} />,
                               li: ({ node, children, ...props }: any) => {
-                                if (DESIGN_DIRECTOR_CTA_START_RE.test(markdownTextFromChildren(children))) return null;
-                                // Detect the three fixed Design Director CTAs
-                                // ("[ Source Similar Pieces ]" / "[ Generate Custom Quote ]"
-                                // / "[ Match Finishes ]") and render them as real
-                                // buttons that route to the correct next-turn action.
-                                const arr = React.Children.toArray(children);
-                                const first: any = arr[0];
-                                const firstIsStrong =
-                                  first && typeof first === "object" &&
-                                  (first.type === "strong" || first.props?.node?.tagName === "strong");
-                                const firstText = firstIsStrong
-                                  ? String((first.props?.children ?? "").toString()).trim()
-                                  : "";
-                                const ctaMatch = firstText.match(/^\[?\s*(Source Similar Pieces|Generate Custom Quote|Match Finishes|Forward to Human Concierge|Upload a Visual Mood Board Instead|Return to Atelier Chat|View My Open Requests|Yes, Schedule Morning Call|No, Standard Updates Are Fine)\s*\]?$/i);
-                                if (ctaMatch) {
-                                  const label = ctaMatch[1].replace(/\b\w/g, (c) => c.toUpperCase());
-                                  const tail = arr.slice(1)
-                                    .map((c: any) => (typeof c === "string" ? c : c?.props?.children ?? ""))
-                                    .join("").toString().trim().replace(/^[—–\-:\s]+/, "");
-                                  const prompts: Record<string, string> = {
-                                    "Source Similar Pieces": "Source similar pieces — propose a harmonised mixed-room tearsheet from the Maison Affluency Curation based on the uploaded moodboard's atmosphere, palette, materials, and forms. Do not restrict the edit to one product typology unless I explicitly ask for that typology.",
-                                    "Generate Custom Quote": "Generate a custom quote — draft a bespoke specification sheet based on the design concept you just detected (style, palette, typology tokens).",
-                                    "Match Finishes": "Match finishes — shortlist textile and material references from the available_finishes of on-palette pieces in the Curation that complement this palette.",
-                                    "Forward To Human Concierge": "Please forward the floor plan / technical drawing I just uploaded to the Maison Affluency human concierge team at the District 9 studio so a curator can hand-select a bespoke digital curation for this project. Confirm the handoff in one warm line and let me know the expected turnaround.",
-                                    "Upload A Visual Mood Board Instead": "I'd like to upload a visual mood board instead of the floor plan — please prompt me to attach a reference image or Pinterest-style collage via the paperclip, and then run the Design Director scaffold on that image.",
-                                  };
-
-                                  const handleCtaClick = () => {
-                                    if (label === "Forward To Human Concierge") {
-                                      void forwardToHumanConcierge();
-                                      return;
-                                    }
-                                    if (label === "Return To Atelier Chat") {
-                                      // Keep the chat open so the designer can keep sourcing while the
-                                      // human team processes their handoff. Reset the ambient status
-                                      // once they resume the conversation.
-                                      setMinimized(false);
-                                      setConciergeStatus(null);
-                                      setHandoffTicket(null);
-                                      return;
-                                    }
-                                    if (label === "View My Open Requests") {
-                                      navigate("/trade/custom-requests");
-                                      return;
-                                    }
-                                    if (label === "Yes, Schedule Morning Call" || label === "No, Standard Updates Are Fine") {
-                                      let ack: string;
-                                      if (label.startsWith("Yes")) {
-                                        // Resolve project city → timezone short label for the confirmation.
-                                        const CITY_TZ: Record<string, string> = {
-                                          london: "Europe/London", paris: "Europe/Paris", milan: "Europe/Rome", rome: "Europe/Rome",
-                                          geneva: "Europe/Zurich", zurich: "Europe/Zurich", monaco: "Europe/Monaco", madrid: "Europe/Madrid",
-                                          barcelona: "Europe/Madrid", berlin: "Europe/Berlin", amsterdam: "Europe/Amsterdam",
-                                          "new york": "America/New_York", nyc: "America/New_York", miami: "America/New_York",
-                                          boston: "America/New_York", toronto: "America/Toronto", chicago: "America/Chicago",
-                                          "los angeles": "America/Los_Angeles", la: "America/Los_Angeles", "san francisco": "America/Los_Angeles",
-                                          dubai: "Asia/Dubai", "abu dhabi": "Asia/Dubai", doha: "Asia/Qatar", riyadh: "Asia/Riyadh",
-                                          istanbul: "Europe/Istanbul", mumbai: "Asia/Kolkata", delhi: "Asia/Kolkata",
-                                          "hong kong": "Asia/Hong_Kong", shanghai: "Asia/Shanghai", beijing: "Asia/Shanghai",
-                                          tokyo: "Asia/Tokyo", seoul: "Asia/Seoul", sydney: "Australia/Sydney", melbourne: "Australia/Melbourne",
-                                          bangkok: "Asia/Bangkok", jakarta: "Asia/Jakarta", "kuala lumpur": "Asia/Kuala_Lumpur",
-                                        };
-                                        const session = getConciergeSession();
-                                        const projectCity = String(session?.projectCity || "").trim();
-                                        const tz = CITY_TZ[projectCity.toLowerCase()] || Intl.DateTimeFormat().resolvedOptions().timeZone;
-                                        const tzShort = new Intl.DateTimeFormat("en-US", { timeZone: tz, timeZoneName: "short" })
-                                          .formatToParts(new Date()).find((p) => p.type === "timeZoneName")?.value || tz.split("/").pop();
-                                        // "tomorrow morning" if the user is currently in their own daytime; else "your next local morning".
-                                        const localHour = Number(new Intl.DateTimeFormat("en-GB", { timeZone: tz, hour: "2-digit", hour12: false }).formatToParts(new Date()).find(p => p.type === "hour")?.value ?? "0");
-                                        const whenLabel = localHour >= 11 ? "**tomorrow morning between 9:00 AM and 11:00 AM your local time**"
-                                          : localHour < 9 ? "**later this morning between 9:00 AM and 11:00 AM your local time**"
-                                          : "**your next local morning between 9:00 AM and 11:00 AM**";
-                                        ack = [
-                                          `**Preference saved.** Our team will review your project details during our day and schedule your dedicated curatorial call for ${whenLabel} (${tzShort}).`,
-                                          ``,
-                                          `A calendar invitation has been sent to your registered email address.`,
-                                          ``,
-                                          `- **[ Return to Atelier Chat ]** Keep exploring the Curation while our team prepares your bespoke selection.`,
-                                        ].join("\n");
-                                      } else {
-                                        ack = "Noted — we'll keep to the standard update cadence via your preferred channel.";
-                                      }
-                                      setTimeline((prev) => [
-                                        ...prev,
-                                        { kind: "msg", role: "user", content: label },
-                                        { kind: "msg", role: "assistant", content: ack },
-                                      ]);
-                                      // Fire-and-forget: notify the human team that a local-morning slot is requested.
-                                      if (label.startsWith("Yes")) {
-                                        void (async () => {
-                                          try {
-                                            const { data: sess } = await supabase.auth.getSession();
-                                            const authHeader = sess.session?.access_token
-                                              ? { Authorization: `Bearer ${sess.session.access_token}` }
-                                              : undefined;
-                                            const projectCity = getConciergeSession()?.projectCity || null;
-                                            await supabase.functions.invoke("notify-escalation", {
-                                              body: {
-                                                intent: "schedule_local_morning_call",
-                                                project_city: projectCity,
-                                              },
-                                              headers: authHeader,
-                                            });
-                                            setConciergeStatus("appointment_requested");
-                                            // Placeholder hook for automatic Calendly invite + HubSpot
-                                            // meeting log. See supabase/functions/schedule-calendly-invite
-                                            // for the full endpoint map. Fire-and-forget.
-                                            void supabase.functions.invoke("schedule-calendly-invite", {
-                                              body: {
-                                                project_city: projectCity,
-                                                local_tz: (typeof Intl !== "undefined"
-                                                  ? Intl.DateTimeFormat().resolvedOptions().timeZone
-                                                  : null),
-                                                local_window: "09:00-11:00",
-                                                contact_email: user?.email ?? null,
-                                              },
-                                              headers: authHeader,
-                                            }).catch(() => { /* non-fatal */ });
-                                          } catch { /* non-fatal */ }
-                                        })();
-                                      }
-                                      return;
-                                    }
-
-                                    if (label === "Source Similar Pieces" || label === "Generate Custom Quote" || label === "Match Finishes") {
-                                      const kind: NextStepKind =
-                                        label === "Source Similar Pieces" ? "source"
-                                        : label === "Generate Custom Quote" ? "quote"
-                                        : "match";
-                                      setNextStepFields({});
-                                      setNextStepPanel(kind);
-                                      return;
-                                    }
-                                    const basePrompt = prompts[label];
-                                    void send(basePrompt, { displayText: label });
-
-                                  };
-
-                                  return (
-                                    <li className="list-none flex" {...props}>
-                                      <button
-                                        type="button"
-                                        onClick={handleCtaClick}
-                                        title={tail || undefined}
-                                        className="inline-flex items-center justify-center text-center rounded-full border border-border/80 bg-background px-3 py-1.5 font-body text-[11px] sm:text-xs leading-snug text-foreground hover:bg-muted hover:text-foreground hover:border-foreground/30 transition-colors whitespace-normal break-words max-w-full"
-                                      >
-                                        [ {label} ]
-                                      </button>
-                                    </li>
-
-                                  );
-                                }
+                                if (isDesignDirectorCtaText(markdownTextFromChildren(children))) return null;
                                 return <li className="leading-relaxed [&>p]:my-0" {...props}>{children}</li>;
                               },
                               strong: ({ node, ...props }) => <strong className="font-semibold text-foreground" {...props} />,
