@@ -4247,6 +4247,46 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                   />
                 );
               }
+              if (item.kind === "quote_summary") {
+                const resolveSummary = (outcome: "downloaded" | "sent") => {
+                  setTimeline((prev) => prev.map((t) => (t.kind === "quote_summary" && t.id === item.id ? { ...t, resolved: outcome } : t)));
+                };
+                return (
+                  <div
+                    key={i}
+                    className={cn(
+                      "self-start w-full",
+                      expanded ? "max-w-[92%]" : "max-w-[88%]",
+                    )}
+                  >
+                    <QuoteSummaryCardContainer
+                      projectId={item.projectId}
+                      baseItems={item.baseItems}
+                      onDownloadPdf={() => {
+                        if (item.resolved) return;
+                        resolveSummary("downloaded");
+                        void sendRef.current?.(
+                          `Please generate and email me the official PDF tear sheet for the ${item.projectName} custom quote above.`,
+                          { displayText: "Download Official PDF Tear Sheet" },
+                        );
+                      }}
+                      onSendToClient={() => {
+                        if (item.resolved) return;
+                        resolveSummary("sent");
+                        void sendRef.current?.(
+                          `Send the ${item.projectName} custom quote above to my client for approval — use the client on file for this project.`,
+                          { displayText: "Send to Client for Approval" },
+                        );
+                      }}
+                    />
+                    {item.resolved && (
+                      <div className="mt-1 px-1 text-[11px] text-muted-foreground italic">
+                        {item.resolved === "downloaded" ? "PDF requested — Felix is preparing it." : "Sent — Felix will confirm delivery."}
+                      </div>
+                    )}
+                  </div>
+                );
+              }
               if (item.kind === "quote_card") {
                 const fmt = (n: number) =>
                   new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(n);
