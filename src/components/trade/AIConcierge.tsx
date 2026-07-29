@@ -3643,16 +3643,17 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                                   };
 
                                   return (
-                                    <li className="list-none" {...props}>
+                                    <li className="list-none flex" {...props}>
                                       <button
                                         type="button"
                                         onClick={handleCtaClick}
                                         title={tail || undefined}
-                                        className="rounded-full border border-border/80 bg-background px-3 py-1.5 font-body text-xs text-foreground hover:bg-muted hover:text-foreground hover:border-foreground/30 transition-colors"
+                                        className="inline-flex items-center justify-center text-center rounded-full border border-border/80 bg-background px-3 py-1.5 font-body text-[11px] sm:text-xs leading-snug text-foreground hover:bg-muted hover:text-foreground hover:border-foreground/30 transition-colors whitespace-normal break-words max-w-full"
                                       >
                                         [ {label} ]
                                       </button>
                                     </li>
+
                                   );
                                 }
                                 return <li className="leading-relaxed [&>p]:my-0" {...props}>{children}</li>;
