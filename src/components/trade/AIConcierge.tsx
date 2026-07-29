@@ -3774,16 +3774,24 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                                t.kind === "proposal" &&
                                (t.resolved === "approved" || (t.locked && t.locked.length > 0))
                              );
-                             const found = (() => {
-                               const arr: string[] = [...foundRaw];
-                               if (!hasCuratedPieces) {
-                                 const idx = arr.indexOf("Generate Custom Quote");
-                                 if (idx !== -1) {
-                                   arr.splice(idx, 1, "Save Palette to Project");
-                                 }
-                               }
-                               return arr;
-                             })();
+                              const found = (() => {
+                                const arr: string[] = [...foundRaw];
+                                if (!hasCuratedPieces) {
+                                  const idx = arr.indexOf("Generate Custom Quote");
+                                  if (idx !== -1) {
+                                    arr.splice(idx, 1, "Save Palette to Project");
+                                  }
+                                }
+                                const rank: Record<string, number> = {
+                                  "Source Similar Pieces": 1,
+                                  "Match Finishes": 2,
+                                  "Save Palette to Project": 3,
+                                  "Generate Custom Quote": 4,
+                                };
+                                return arr
+                                  .filter((label) => label in rank)
+                                  .sort((a, b) => (rank[a] ?? 99) - (rank[b] ?? 99));
+                              })();
                               // Always render from the cleaned body — even when `sourceContent`
                               // is set, older persisted `content` values may still contain the
                               // CTA lines and would otherwise leak into the bubble.
