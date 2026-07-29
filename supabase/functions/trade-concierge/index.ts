@@ -4911,8 +4911,16 @@ serve(async (req) => {
           "Reply in ONE short warm paragraph: acknowledge that nothing in the curated selection currently matches that exact combination, name the specific constraint(s) that eliminated the results, and invite the architect to relax ONE constraint (e.g. widen the palette from 'forest green' to 'muted greens', drop the material filter, or broaden the typology). Do not apologise, self-correct, mention external archives, or imply there is a hidden search source.",
           "",
         ].join("\n")
+    const paletteAdvisoryNote = paletteAdvisory && paletteAdvisoryReason
+      ? [
+          "",
+          "⚠️ PALETTE ADVISORY MODE ⚠️",
+          `The catalog's \`materials\` column is sparse for the scoped brand(s) ${paletteAdvisoryReason.brands.join(", ")} (${Math.round(paletteAdvisoryReason.nullRatio * 100)}% of rows have no structured material data). The palette / material constraint(s) [${[...paletteAdvisoryReason.droppedMaterials, ...paletteAdvisoryReason.droppedColors].join(", ") || "—"}] have been dropped from retrieval so typology + brand still return matches.`,
+          "When you propose the tearsheet, append a single italic advisory line beneath it: *Palette shown as reference; confirm finish availability with the atelier.* Do NOT claim the pieces are guaranteed to be available in the requested finish, and do NOT hold or refuse the tearsheet on palette grounds this turn.",
+          "",
+        ].join("\n")
       : "";
-    const piecesList = (useRag ? (ragResult as { contextText: string })?.contextText || "" : fullPiecesList) + emptyConstraintNote;
+    const piecesList = (useRag ? (ragResult as { contextText: string })?.contextText || "" : fullPiecesList) + emptyConstraintNote + paletteAdvisoryNote;
 
     // Deterministic designer-enumeration shortcut: when the user asks to list
     // / show / see everything by a specific named designer, bypass the LLM
