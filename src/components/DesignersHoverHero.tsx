@@ -1731,7 +1731,7 @@ const DesignersHoverHero = () => {
               isDesktopViewport ? "animate-scale-in" : "animate-slide-in-right",
               // Mobile: full sheet anchored right below the fixed header so the
               // search field is immediately visible and the list has room to scroll.
-              "inset-x-0 top-[var(--header-h)] bottom-0 rounded-none pb-[env(safe-area-inset-bottom)]",
+              "inset-x-0 top-[var(--header-h)] bottom-0 rounded-none",
               // Desktop: dropdown anchored to the Directory button via inline styles.
               "md:inset-x-auto md:right-auto md:top-auto md:bottom-auto md:w-[380px] md:max-w-[calc(100vw-2rem)] md:max-h-[calc(100vh-var(--header-h)-3rem)] md:rounded-xl md:pb-0"
             )}
