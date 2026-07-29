@@ -384,6 +384,74 @@ const sanitizeTimelineForAttachments = (items: TimelineItem[]) =>
 
 const VISUAL_SOURCING_CONTEXT_KEY = "concierge:lastVisualSourcingContext";
 
+const DESIGN_DIRECTOR_CTA_LABELS = [
+  "Source Similar Pieces",
+  "Generate Custom Quote",
+  "Match Finishes",
+  "Forward to Human Concierge",
+  "Upload a Visual Mood Board Instead",
+  "Return to Atelier Chat",
+  "View My Open Requests",
+  "Yes, Schedule Morning Call",
+  "No, Standard Updates Are Fine",
+] as const;
+
+type DesignDirectorCtaLabel = typeof DESIGN_DIRECTOR_CTA_LABELS[number];
+
+const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+const DESIGN_DIRECTOR_CTA_PATTERN = DESIGN_DIRECTOR_CTA_LABELS.map(escapeRegExp).join("|");
+const DESIGN_DIRECTOR_CTA_START_RE = new RegExp(
+  `^[\\s>]*(?:(?:[-*+]|\\d+[.)])[\\s]+)?(?:\\*\\*|__)?[\\s]*\\[?[\\s]*(${DESIGN_DIRECTOR_CTA_PATTERN})[\\s]*\\]?(?:[\\s]*(?:\\*\\*|__))?(?:[\\s]*(?:[—–\\-:|].*)?)?$`,
+  "i",
+);
+const DESIGN_DIRECTOR_CTA_ANY_RE = new RegExp(`(${DESIGN_DIRECTOR_CTA_PATTERN})`, "gi");
+
+function canonicalDesignDirectorCtaLabel(value: string): DesignDirectorCtaLabel | null {
+  const normalized = value.toLowerCase().replace(/\s+/g, " ").trim();
+  return DESIGN_DIRECTOR_CTA_LABELS.find((label) => label.toLowerCase() === normalized) ?? null;
+}
+
+function extractDesignDirectorCtas(raw: string): { body: string; labels: DesignDirectorCtaLabel[] } {
+  const labels: DesignDirectorCtaLabel[] = [];
+  const seen = new Set<string>();
+  const bodyLines: string[] = [];
+
+  for (const line of raw.split(/\r?\n/)) {
+    DESIGN_DIRECTOR_CTA_START_RE.lastIndex = 0;
+    const isCtaLine = DESIGN_DIRECTOR_CTA_START_RE.test(line);
+    if (!isCtaLine) {
+      bodyLines.push(line);
+      continue;
+    }
+
+    DESIGN_DIRECTOR_CTA_ANY_RE.lastIndex = 0;
+    let match: RegExpExecArray | null;
+    while ((match = DESIGN_DIRECTOR_CTA_ANY_RE.exec(line)) !== null) {
+      const canonical = canonicalDesignDirectorCtaLabel(match[1]);
+      if (canonical && !seen.has(canonical)) {
+        seen.add(canonical);
+        labels.push(canonical);
+      }
+    }
+  }
+
+  return {
+    body: bodyLines.join("\n").replace(/\n{3,}/g, "\n\n").trim(),
+    labels,
+  };
+}
+
+function markdownTextFromChildren(children: React.ReactNode): string {
+  return React.Children.toArray(children)
+    .map((child: any) => {
+      if (typeof child === "string" || typeof child === "number") return String(child);
+      if (child?.props?.children) return markdownTextFromChildren(child.props.children);
+      return "";
+    })
+    .join("")
+    .trim();
+}
+
 const buildVisualSourcingContext = (ev: MoodboardSignalsEvent): string => {
   const lines = [
     ev.kind ? `upload kind: ${ev.kind.replace(/_/g, " ")}` : null,
