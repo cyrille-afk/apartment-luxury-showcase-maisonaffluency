@@ -328,7 +328,20 @@ type TimelineItem =
   | { kind: "escalation"; sentiment: string; intent: string; excerpt: ChatMessage[]; resolved?: "requested" | "dismissed" }
   | { kind: "retry"; text: string; reason: string }
   | { kind: "spec_schedule"; zone: string; markdown: string }
-  | { kind: "proactive_tearsheet"; data: import("@/components/trade/concierge/ProactiveTearsheetCard").ProactiveTearsheetData; resolved?: "generated" | "boarded" | "dismissed" };
+  | { kind: "proactive_tearsheet"; data: import("@/components/trade/concierge/ProactiveTearsheetCard").ProactiveTearsheetData; resolved?: "generated" | "boarded" | "dismissed" }
+  | {
+      kind: "quote_card";
+      id: string;
+      state: "loading" | "ready";
+      projectName: string;
+      concept?: string;
+      shippingHub?: string;
+      lineItems?: Array<{ group: string; label: string; amount: number }>;
+      logistics?: Array<{ label: string; amount: number | "included" }>;
+      discountPct?: number;
+      totalCents?: number;
+      resolved?: "downloaded" | "sent";
+    };
 
 
 
