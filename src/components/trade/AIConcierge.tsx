@@ -384,6 +384,74 @@ const sanitizeTimelineForAttachments = (items: TimelineItem[]) =>
 
 const VISUAL_SOURCING_CONTEXT_KEY = "concierge:lastVisualSourcingContext";
 
+const DESIGN_DIRECTOR_CTA_LABELS = [
+  "Source Similar Pieces",
+  "Generate Custom Quote",
+  "Match Finishes",
+  "Forward to Human Concierge",
+  "Upload a Visual Mood Board Instead",
+  "Return to Atelier Chat",
+  "View My Open Requests",
+  "Yes, Schedule Morning Call",
+  "No, Standard Updates Are Fine",
+] as const;
+
+type DesignDirectorCtaLabel = typeof DESIGN_DIRECTOR_CTA_LABELS[number];
+
+const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+const DESIGN_DIRECTOR_CTA_PATTERN = DESIGN_DIRECTOR_CTA_LABELS.map(escapeRegExp).join("|");
+const DESIGN_DIRECTOR_CTA_START_RE = new RegExp(
+  `^[\\s>]*(?:(?:[-*+]|\\d+[.)])[\\s]+)?(?:\\*\\*|__)?[\\s]*\\[?[\\s]*(${DESIGN_DIRECTOR_CTA_PATTERN})[\\s]*\\]?(?:[\\s]*(?:\\*\\*|__))?(?:[\\s]*(?:[—–\\-:|].*)?)?$`,
+  "i",
+);
+const DESIGN_DIRECTOR_CTA_ANY_RE = new RegExp(`(${DESIGN_DIRECTOR_CTA_PATTERN})`, "gi");
+
+function canonicalDesignDirectorCtaLabel(value: string): DesignDirectorCtaLabel | null {
+  const normalized = value.toLowerCase().replace(/\s+/g, " ").trim();
+  return DESIGN_DIRECTOR_CTA_LABELS.find((label) => label.toLowerCase() === normalized) ?? null;
+}
+
+function extractDesignDirectorCtas(raw: string): { body: string; labels: DesignDirectorCtaLabel[] } {
+  const labels: DesignDirectorCtaLabel[] = [];
+  const seen = new Set<string>();
+  const bodyLines: string[] = [];
+
+  for (const line of raw.split(/\r?\n/)) {
+    DESIGN_DIRECTOR_CTA_START_RE.lastIndex = 0;
+    const isCtaLine = DESIGN_DIRECTOR_CTA_START_RE.test(line);
+    if (!isCtaLine) {
+      bodyLines.push(line);
+      continue;
+    }
+
+    DESIGN_DIRECTOR_CTA_ANY_RE.lastIndex = 0;
+    let match: RegExpExecArray | null;
+    while ((match = DESIGN_DIRECTOR_CTA_ANY_RE.exec(line)) !== null) {
+      const canonical = canonicalDesignDirectorCtaLabel(match[1]);
+      if (canonical && !seen.has(canonical)) {
+        seen.add(canonical);
+        labels.push(canonical);
+      }
+    }
+  }
+
+  return {
+    body: bodyLines.join("\n").replace(/\n{3,}/g, "\n\n").trim(),
+    labels,
+  };
+}
+
+function markdownTextFromChildren(children: React.ReactNode): string {
+  return React.Children.toArray(children)
+    .map((child: any) => {
+      if (typeof child === "string" || typeof child === "number") return String(child);
+      if (child?.props?.children) return markdownTextFromChildren(child.props.children);
+      return "";
+    })
+    .join("")
+    .trim();
+}
+
 const buildVisualSourcingContext = (ev: MoodboardSignalsEvent): string => {
   const lines = [
     ev.kind ? `upload kind: ${ev.kind.replace(/_/g, " ")}` : null,
@@ -3505,6 +3573,14 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                              // Collapse the blank lines left behind by removed items.
                              .replace(/\n{3,}/g, "\n\n")
                              .trim();
+                           const extractedCtas = extractDesignDirectorCtas(raw);
+                           extractedCtas.labels.forEach((label) => {
+                             if (!seen.has(label)) {
+                               seen.add(label);
+                               found.push(label);
+                             }
+                           });
+                           const markdownBody = extractedCtas.labels.length > 0 ? extractedCtas.body : stripped;
 
                           const dispatchCta = (label: string) => {
                             if (label === "Forward to Human Concierge") { void forwardToHumanConcierge(); return; }
@@ -3536,6 +3612,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                             remarkPlugins={[remarkGfm]}
                             components={{
                               p: ({ node, children, ...props }) => {
+                                if (DESIGN_DIRECTOR_CTA_START_RE.test(markdownTextFromChildren(children))) return null;
                                 // Detect the "**Match:** Band · NN% — rationale"
                                 // line emitted for each Private Exhibition piece
                                 // and render it as a badge + rationale card.
@@ -3577,6 +3654,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                               },
                               ol: ({ node, ...props }) => <ol className="list-decimal pl-5 space-y-2 my-1" {...props} />,
                               li: ({ node, children, ...props }: any) => {
+                                if (DESIGN_DIRECTOR_CTA_START_RE.test(markdownTextFromChildren(children))) return null;
                                 // Detect the three fixed Design Director CTAs
                                 // ("[ Source Similar Pieces ]" / "[ Generate Custom Quote ]"
                                 // / "[ Match Finishes ]") and render them as real
@@ -3740,7 +3818,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                               code: ({ node, ...props }) => <code className="rounded bg-background/60 px-1 py-0.5 text-[0.85em]" {...props} />,
                             }}
                           >
-                            {inlineSignalsIntoMatchLines(stripped)}
+                            {inlineSignalsIntoMatchLines(markdownBody)}
                           </ReactMarkdown>
                           {found.length > 0 && (
                             <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 pt-1">
