@@ -2950,7 +2950,7 @@ async function loadRelevantPieces(
     }
     let data = filtered.slice(0, k);
     let usedFallback = false;
-    if (data.length < 3) {
+    if (data.length < 3 && !wantsConstraintFilter) {
       // Filter too strict — fall back to the unfiltered top-K so the UI still
       // renders a curated Private Exhibition set rather than looking empty.
       console.warn("[concierge RAG] hard constraints filtered <3 rows; falling back to unfiltered top-K", {
@@ -2961,6 +2961,13 @@ async function loadRelevantPieces(
       });
       data = (rawData as any[]).slice(0, k);
       usedFallback = true;
+    } else if (data.length < 3 && wantsConstraintFilter) {
+      console.warn("[concierge RAG] hard constraints filtered <3 rows; keeping strict shortlist", {
+        constraints: hardConstraints,
+        dimConstraints,
+        preFilter: rawData.length,
+        postFilter: filtered.length,
+      });
     }
     if (data.length === 0) {
       return { contextText: "", rows: [] };
@@ -3501,18 +3508,18 @@ async function fetchStrictTypologyCandidates(
     (pickOr
       ? supabase
       .from("designer_curator_picks")
-      .select("id, title, materials, category, subcategory, dimensions, trade_price_cents, currency, lead_time, stock_status, designer_id")
+      .select("id, title, materials, materials_description, description, meta_description, variant_placeholder, tags, category, subcategory, dimensions, trade_price_cents, currency, lead_time, stock_status, designer_id, size_variants")
         .or(pickOr)
         .limit(240)
-      : supabase.from("designer_curator_picks").select("id, title, materials, category, subcategory, dimensions, trade_price_cents, currency, lead_time, stock_status, designer_id").limit(240)),
+      : supabase.from("designer_curator_picks").select("id, title, materials, materials_description, description, meta_description, variant_placeholder, tags, category, subcategory, dimensions, trade_price_cents, currency, lead_time, stock_status, designer_id, size_variants").limit(240)),
     (tradeOr
       ? supabase
       .from("trade_products")
-      .select("id, product_name, materials, category, subcategory, dimensions, trade_price_cents, rrp_price_cents, currency, lead_time, stock_status_override, brand_name")
+      .select("id, product_name, materials, materials_description, description, meta_description, variant_placeholder, available_finishes, fabric_options, category, subcategory, dimensions, trade_price_cents, rrp_price_cents, currency, lead_time, stock_status_override, brand_name, size_variants")
       .eq("is_active", true)
         .or(tradeOr)
         .limit(240)
-      : supabase.from("trade_products").select("id, product_name, materials, category, subcategory, dimensions, trade_price_cents, rrp_price_cents, currency, lead_time, stock_status_override, brand_name").eq("is_active", true).limit(240)),
+      : supabase.from("trade_products").select("id, product_name, materials, materials_description, description, meta_description, variant_placeholder, available_finishes, fabric_options, category, subcategory, dimensions, trade_price_cents, rrp_price_cents, currency, lead_time, stock_status_override, brand_name, size_variants").eq("is_active", true).limit(240)),
   ]);
   let typologyFiltered = [
     ...(pickRes.data || []),
@@ -4027,8 +4034,15 @@ async function buildDeterministicTearsheetProposal(
   options?: { mixedRoom?: boolean },
 ): Promise<any | null> {
   const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-  const requestedTypology = options?.mixedRoom ? null : inferRequestedTypology(brief, requestText);
+  const requestedTypology = inferRequestedTypology(brief, requestText);
   const requestedTypologies = normalizeRequestedTypologies(requestedTypology);
+  const paletteConstraints = deriveHardConstraints([
+    {
+      title: requestText,
+      materials: (brief.materials || []).join(" "),
+      category: (brief.categories || []).join(" "),
+    },
+  ]);
   const dimConstraints = inferDimensionConstraints(requestText);
   // Combine any inferred lead-time constraint with the brief's stored ceiling.
   const inferredLead = inferLeadTimeConstraints(requestText);
@@ -4052,10 +4066,10 @@ async function buildDeterministicTearsheetProposal(
     if ((brief.materials || []).some((m) => /\b(oak|walnut|wood|timber)\b/i.test(String(m))) && /\b(oak|walnut|wood|timber)\b/.test(hay)) score += 1;
     return score;
   };
-  let candidateRows = (ragRows || [])
+  let candidateRows = applyPalettePreferenceByTypology((ragRows || [])
     .filter((r: any) => r && typeof r.id === "string" && UUID_RE.test(r.id))
     .filter((r: any) => rowMatchesRequestedTypology(r, requestedTypology))
-    .sort((a: any, b: any) => scoreRow(b) - scoreRow(a));
+    .sort((a: any, b: any) => scoreRow(b) - scoreRow(a)), paletteConstraints, requestedTypology);
   // Apply hard dimension constraints to the RAG shortlist (rows carry
   // `dimensions` from match_catalog). Unknown-dim rows drop in strict mode.
   if (dimConstraints && candidateRows.length) {
@@ -4071,11 +4085,11 @@ async function buildDeterministicTearsheetProposal(
     candidateRows = leadRes.kept;
   }
   if (requestedTypologies.length && (candidateRows.length < 2 || !rowsCoverRequestedTypologies(candidateRows, requestedTypologies))) {
-    candidateRows = (await fetchStrictTypologyCandidates(supabase, requestedTypologies, dimConstraints, leadConstraints))
+    candidateRows = applyPalettePreferenceByTypology((await fetchStrictTypologyCandidates(supabase, requestedTypologies, dimConstraints, leadConstraints))
       .filter((r: any) => r && typeof r.id === "string" && UUID_RE.test(r.id))
-      .sort((a: any, b: any) => scoreRow(b) - scoreRow(a));
+      .sort((a: any, b: any) => scoreRow(b) - scoreRow(a)), paletteConstraints, requestedTypology);
   }
-  const sortedCandidates = candidateRows.sort((a: any, b: any) => scoreRow(b) - scoreRow(a));
+  const sortedCandidates = candidateRows.sort((a: any, b: any) => (paletteMatchScore(b, paletteConstraints) - paletteMatchScore(a, paletteConstraints)) || scoreRow(b) - scoreRow(a));
   const diversifyMixedRoomRows = (rows: any[], limit: number) => {
     const familyOf = (r: any) => {
       const hay = `${r?.title || ""} ${r?.category || ""} ${r?.subcategory || ""}`.toLowerCase();
@@ -4555,18 +4569,23 @@ serve(async (req) => {
     );
 
     const VISUAL_CONTEXT_MARKER = "[Latest upload visual sourcing context — use this as the retrieval brief, not the button label]";
+    const VISUAL_CONTEXT_MARKER_ALT = "[Latest upload visual sourcing context — atmosphere reference only; do NOT let it broaden the typology or palette below]";
     const extractLatestVisualContext = (text: string): string => {
       const idx = text.indexOf(VISUAL_CONTEXT_MARKER);
-      if (idx < 0) return "";
-      return text.slice(idx + VISUAL_CONTEXT_MARKER.length).trim().slice(0, 1200);
+      if (idx >= 0) return text.slice(idx + VISUAL_CONTEXT_MARKER.length).trim().slice(0, 1200);
+      const altIdx = text.indexOf(VISUAL_CONTEXT_MARKER_ALT);
+      if (altIdx >= 0) return text.slice(altIdx + VISUAL_CONTEXT_MARKER_ALT.length).trim().slice(0, 1200);
+      return "";
     };
     const latestVisualSourcingContext = extractLatestVisualContext(lastUserMsg);
     const hasVisualSourcingContext = latestVisualSourcingContext.length > 0;
     const stripVisualSourcingMarkers = (text: string): string => {
       const raw = String(text || "");
       const idx = raw.indexOf(VISUAL_CONTEXT_MARKER);
-      if (idx < 0) return raw.trim();
-      return raw.slice(0, idx).trim();
+      if (idx >= 0) return raw.slice(0, idx).trim();
+      const altIdx = raw.indexOf(VISUAL_CONTEXT_MARKER_ALT);
+      if (altIdx >= 0) return raw.slice(0, altIdx).trim();
+      return raw.trim();
     };
 
     // ── Skip/exclude confirmation gate ────────────────────────────────────
@@ -4808,7 +4827,7 @@ serve(async (req) => {
     const lastUserMsgLower = lastUserMsg.toLowerCase();
     const hasVisualizationVerb = /\b(render|visualise|visualize|mock up|picture it|see it in situ|generate (?:a )?(?:view|scene|axonometric|render)|show me (?:how this would look|in (?:the )?(?:room|space))|image of the room|let me see the space)\b/.test(lastUserMsgLower);
     const visualizationNeedsCatalogPicks = hasVisualizationVerb && /\b(overlay|picks?|pieces?|selection|tearsheet|catalog|bronze|mohair|velvet|leather|walnut|oak|brass|marble|stone|glass|silk|wool|linen|bouclé|drawing-room|drawing room|dining room|bedroom|salon|library)\b/.test(lastUserMsgLower);
-    const hasExplicitSelectionVerb = /\b(propose|suggest|recommend|show me|pull (?:together|me)|curate|reinterpret|alternatives?|options?|first edit|draft (?:a )?(?:tearsheet|edit|selection)|put together|assemble|i'?d like to see|let'?s see|what do you have|list (?:all|every|the)|which .*(?:do you|are)|everything (?:by|from))\b/.test(lastUserMsgLower);
+    const hasExplicitSelectionVerb = /\b(source|sourcing|propose|suggest|recommend|show me|pull (?:together|me)|curate|reinterpret|alternatives?|options?|first edit|draft (?:a )?(?:tearsheet|edit|selection)|put together|assemble|i'?d like to see|let'?s see|what do you have|list (?:all|every|the)|which .*(?:do you|are)|everything (?:by|from))\b/.test(lastUserMsgLower);
     const opensWithLookingFor = /^\s*(?:i(?:'m| am)?\s+(?:looking|searching|after|hunting|sourcing|in the market)|we(?:'re| are)?\s+(?:looking|searching|after))\b/.test(lastUserMsgLower);
 
     const submittedArchitecturalBrief = parseSubmittedArchitecturalBrief(lastUserMsg);
@@ -4858,7 +4877,7 @@ serve(async (req) => {
     // Deterministic opening-brief reply removed — it hardcoded "dining table"
     // and ignored actual user content (room type, seat count, shape, etc.).
     // The LLM handles discovery turns directly now.
-    const requestedTypology = hasVisualSourcingContext ? null : inferRequestedTypology(effectiveBrief.brief, userConversationText);
+    const requestedTypology = inferRequestedTypology(effectiveBrief.brief, hardValidationText);
 
     if (shouldActOnAccumulatedBrief && breaker.state() === "open" && CLOUDFLARE_ENABLED) {
       return sseTextResponse(
