@@ -283,6 +283,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { streamConcierge, type ChatMessage, type ChatContentPart, type TearsheetProposal, type QuoteProposal, type FfeProposal, type VisualizationBriefProposal, type ConciergeProposal, type AppliedConstraintsEvent, type MoodboardSignalsEvent } from "@/lib/tradeConciergeStream";
 import { TearsheetProposalCard } from "@/components/trade/concierge/TearsheetProposalCard";
+import { CuratedInventoryGrid } from "@/components/trade/CuratedInventoryGrid";
 import { ProactiveTearsheetCard, type ProactiveTearsheetData } from "@/components/trade/concierge/ProactiveTearsheetCard";
 import { QuoteProposalCard } from "@/components/trade/concierge/QuoteProposalCard";
 import { FfeProposalCard } from "@/components/trade/concierge/FfeProposalCard";
