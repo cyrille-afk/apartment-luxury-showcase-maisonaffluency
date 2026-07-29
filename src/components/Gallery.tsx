@@ -1138,18 +1138,19 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                         return (
                           <div
                             key={`${item.title}-${index}-mobile`}
-                            className={`relative flex-none w-full snap-center overflow-hidden rounded-2xl ${isHotspotSection ? 'aspect-[4/5]' : 'aspect-[3/4]'}`}
+                            className={`relative flex-none w-full snap-center overflow-hidden rounded-2xl ${isHotspotSection ? '' : 'aspect-[3/4]'}`}
                           >
                             <img
                               src={item.image}
                               alt={item.title}
                               sizes="100vw"
-                              className={`h-full w-full object-cover brightness-[1.05] contrast-[1.08] saturate-[1.05] ${item.image === bespokeSofaImage ? "object-[center_35%]" : ""}`}
+                              className={`${isHotspotSection ? 'block w-full h-auto' : 'h-full w-full object-cover'} brightness-[1.05] contrast-[1.08] saturate-[1.05] ${item.image === bespokeSofaImage && !isHotspotSection ? "object-[center_35%]" : ""}`}
                               loading="lazy"
                               decoding="async"
                               width={isHotspotSection ? 800 : 900}
                               height={isHotspotSection ? 1000 : 1200}
                             />
+
                             {!isHotspotSection && (
                               <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
                             )}
