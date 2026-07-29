@@ -161,10 +161,18 @@ export function filterRowsByHardConstraints<
 >(
   rows: R[],
   constraints: HardConstraints,
-  columns: { text?: string[]; brand?: string; category?: string } = {},
+  columns: { text?: string[]; arrayText?: string[]; brand?: string; category?: string } = {},
 ): R[] {
   const textCols = columns.text ?? [
-    "title", "product_name", "materials", "category", "subcategory",
+    "title", "product_name", "materials", "materials_description",
+    "description", "meta_description", "variant_placeholder",
+    "category", "subcategory",
+  ];
+  // Array-of-text columns (e.g. tags, available_finishes, fabric_options) —
+  // joined into the haystack so palette / material tokens still match when
+  // `materials` is null but the finish lives in an upholstery variant list.
+  const arrayTextCols = columns.arrayText ?? [
+    "tags", "available_finishes", "fabric_options",
   ];
   const brandCol = columns.brand ?? "brand_name";
   const categoryCol = columns.category ?? "category";
@@ -174,8 +182,16 @@ export function filterRowsByHardConstraints<
   const cats = (constraints.categories || []).map((c) => c.toLowerCase()).filter(Boolean);
   const excl = (constraints.excludeBrands || []).map((b) => b.toLowerCase()).filter(Boolean);
 
-  const rowText = (r: R): string =>
-    textCols.map((c) => String(r[c] ?? "")).join(" ").toLowerCase();
+  const rowText = (r: R): string => {
+    const scalar = textCols.map((c) => String(r[c] ?? "")).join(" ");
+    const arr = arrayTextCols
+      .map((c) => {
+        const v = r[c];
+        return Array.isArray(v) ? v.join(" ") : "";
+      })
+      .join(" ");
+    return `${scalar} ${arr}`.toLowerCase();
+  };
 
   return rows.filter((r) => {
     const hay = rowText(r);
