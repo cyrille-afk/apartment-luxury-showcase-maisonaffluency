@@ -1200,7 +1200,7 @@ const Gallery = ({ onHotspotAddToQuote, hideIntro }: GalleryProps = {}) => {
                     <div
                       ref={el => { scrollStripRefs.current[originalSectionIndex] = el; }}
                       onScroll={() => handleStripScroll(originalSectionIndex)}
-                      className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide rounded-2xl"
+                      className="flex items-start overflow-x-auto snap-x snap-mandatory scrollbar-hide rounded-2xl"
                     >
                       {section.items.map((item, index) => {
                         const itemHotspots = hotspotPositions[item.title] || [];
