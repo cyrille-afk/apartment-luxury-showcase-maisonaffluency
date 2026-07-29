@@ -289,7 +289,7 @@ import { VisualizationBriefCard, VIZ_BRIEF_INCOMING_KEY } from "@/components/tra
 import { PendingProposalSkeleton } from "@/components/trade/concierge/PendingProposalSkeleton";
 import { EscalationCard } from "@/components/trade/concierge/EscalationCard";
 import { SpecScheduleBlock } from "@/components/trade/concierge/SpecScheduleBlock";
-import { DesignDirectorCtaButton } from "@/components/trade/concierge/DesignDirectorCtaButton";
+
 import { parseSlashCommand, SLASH_COMMAND_HELP } from "@/lib/conciergeSlashCommands";
 import { openHandoffChannel } from "@/lib/conciergeHandoff";
 import { useConciergeSession } from "@/hooks/useConciergeSession";
