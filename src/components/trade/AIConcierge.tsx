@@ -3415,17 +3415,28 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                       </div>
                     )}
                     {item.content && (() => {
-                      // Suppress the auto-generated moodboard stub
-                      // ("Block 3 — Aesthetic & Visual DNA\nMOOD BOARD REFERENCE: …")
-                      // — the attached image thumbnail already conveys it.
+                      // Suppress the auto-generated moodboard stub — the
+                      // attached image thumbnail already conveys it. Handles
+                      // both the pure stub ("Block 3 — Aesthetic…\nMOOD BOARD
+                      // REFERENCE: …") and a longer user preamble that also
+                      // contains the reference line.
                       if (item.role === "user") {
                         const stripped = item.content.trim();
-                        const isMoodboardStub =
+                        const pureStub =
                           /^Block\s*3\s*—\s*Aesthetic[^\n]*\n\s*MOOD BOARD REFERENCE[S]?:[^\n]*\s*$/i.test(stripped);
-                        if (isMoodboardStub) return null;
+                        if (pureStub) return { visible: false as const, text: "" };
+                        // Strip the reference line + its optional Block 3
+                        // header line from anywhere inside the message.
+                        const cleaned = stripped
+                          .replace(/^\s*Block\s*3\s*—\s*Aesthetic[^\n]*\n\s*MOOD BOARD REFERENCE[S]?:[^\n]*$/gim, "")
+                          .replace(/^\s*MOOD BOARD REFERENCE[S]?:[^\n]*$/gim, "")
+                          .replace(/\n{3,}/g, "\n\n")
+                          .trim();
+                        if (!cleaned) return { visible: false as const, text: "" };
+                        return { visible: true as const, text: cleaned };
                       }
-                      return true;
-                    })() && (
+                      return { visible: true as const, text: item.content };
+                    })().visible && (
                       item.role === "user" && isBriefContent(item.content) ? (
                         <div className={cn(expanded ? "max-w-[92%]" : "max-w-[88%]", "w-full flex justify-end")}>
                           <BriefBubble content={item.content} />
