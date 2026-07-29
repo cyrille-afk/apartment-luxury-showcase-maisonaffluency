@@ -801,9 +801,10 @@ const DesignersHoverHero = () => {
       return Boolean(scroller && target instanceof Node && scroller.contains(target));
     };
 
-    // Mobile browser + PWA must step one designer at a time. Allowing the
-    // nested list to free-scroll on mobile Safari makes the names column slide
-    // upward as a block instead of advancing the active designer/photo pair.
+      // Mobile browser must step one designer at a time. Allowing native panning
+      // before the swipe threshold lets Safari physically drag the names column
+      // upward, so the browser branch blocks native scroll from the first move.
+      // PWA keeps its existing step behavior untouched.
     const canUseNativeListScroll = () => false;
 
     const keepActiveDesignerVisible = (slug: string) => {
@@ -920,6 +921,9 @@ const DesignersHoverHero = () => {
       if (y === undefined) return;
       touchLastY = y;
       const delta = touchStartY - y;
+      if (isMobileBrowser && e.cancelable) {
+        e.preventDefault();
+      }
       // If overflow scroller exists, forward incremental pixels smoothly.
       if (canUseNativeListScroll()) {
         const scroller = contentScrollRef.current;
@@ -932,7 +936,7 @@ const DesignersHoverHero = () => {
       }
       // Otherwise, step-advance on threshold and reset baseline.
       if (Math.abs(delta) >= SWIPE_THRESHOLD) {
-        stepFromDelta(delta, () => { if (e.cancelable) e.preventDefault(); }, true);
+        stepFromDelta(delta, () => { if (!isMobileBrowser && e.cancelable) e.preventDefault(); }, true);
         touchStartY = y;
       }
     };
@@ -1365,7 +1369,8 @@ const DesignersHoverHero = () => {
       aria-label="Featured designers"
       onMouseLeave={() => {}}
       className={cn(
-        "relative w-full bg-[#0a0a0a] text-foreground overflow-hidden touch-pan-y",
+        "relative w-full bg-[#0a0a0a] text-foreground overflow-hidden",
+        isMobileBrowser ? "touch-none" : "touch-pan-y",
         isStandalone
           ? "h-[calc(var(--designers-landing-vh,100svh)-var(--header-h))] md:h-[calc(100svh-var(--header-h))] md:min-h-[640px]"
           : // Background frame uses 100lvh so dark hero always covers Safari's
@@ -1445,13 +1450,13 @@ const DesignersHoverHero = () => {
         <div
           ref={contentScrollRef}
           className={cn(
-          "relative flex flex-col h-full px-6 sm:px-12 md:px-20 lg:px-28 pointer-events-auto overflow-y-auto md:overflow-visible",
+          "relative flex flex-col h-full px-6 sm:px-12 md:px-20 lg:px-28 pointer-events-auto md:overflow-visible",
             isStandalone
-              ? "justify-start overscroll-contain touch-pan-y pt-8 pb-[calc(10rem+env(safe-area-inset-bottom))] md:pt-8 md:pb-0 md:justify-center [-webkit-overflow-scrolling:touch]"
+              ? "overflow-y-auto justify-start overscroll-contain touch-pan-y pt-8 pb-[calc(10rem+env(safe-area-inset-bottom))] md:pt-8 md:pb-0 md:justify-center [-webkit-overflow-scrolling:touch]"
               : // Mobile browser: the section already starts below the fixed
                 // header, so do not add var(--header-h) again here. Keep the
                 // designer list high while leaving room for the Directory link.
-                "justify-start overscroll-contain touch-pan-y pt-[5.25rem] pb-[calc(8.5rem+env(safe-area-inset-bottom))] md:pt-8 md:justify-center md:pb-0 [-webkit-overflow-scrolling:touch]"
+                "overflow-y-hidden justify-start overscroll-contain touch-none pt-[5.25rem] pb-[calc(8.5rem+env(safe-area-inset-bottom))] md:pt-8 md:justify-center md:pb-0"
           )}
         >
 
@@ -1476,7 +1481,7 @@ const DesignersHoverHero = () => {
                 }}
                 className={cn(
                   "relative inline-block select-none",
-                  isMobileOrPwa ? "touch-pan-y" : "touch-none"
+                  isMobileBrowser ? "touch-none" : isMobileOrPwa ? "touch-pan-y" : "touch-none"
                 )}
               >
               <ul className="flex flex-col text-left">
