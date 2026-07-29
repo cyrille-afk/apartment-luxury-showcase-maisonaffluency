@@ -3940,18 +3940,35 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                           </ReactMarkdown>
                           {found.length > 0 && (
                             <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 pt-1">
-                              {found.map((label) => (
-                                <button
-                                  key={label}
-                                  type="button"
-                                  onClick={() => dispatchCta(label)}
-                                  className="inline-flex items-center whitespace-nowrap rounded-full border border-border/80 bg-background/80 px-3 py-1.5 font-body text-[11px] sm:text-xs leading-none text-foreground hover:bg-muted hover:border-foreground/30 transition-colors"
-                                >
-                                  [ {label} ]
-                                </button>
-                              ))}
+                              {found.map((label) => {
+                                const isSavedConfirm =
+                                  label === "Save Palette to Project" && savedPaletteMsgs.has(i);
+                                if (isSavedConfirm) {
+                                  return (
+                                    <span
+                                      key={label}
+                                      className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border border-emerald-600/40 bg-emerald-50 px-3 py-1.5 font-body text-[11px] sm:text-xs leading-none text-emerald-800"
+                                      aria-live="polite"
+                                    >
+                                      <Check className="h-3 w-3" strokeWidth={2.5} />
+                                      Saved to Project Log
+                                    </span>
+                                  );
+                                }
+                                return (
+                                  <button
+                                    key={label}
+                                    type="button"
+                                    onClick={() => dispatchCta(label)}
+                                    className="inline-flex items-center whitespace-nowrap rounded-full border border-border/80 bg-background/80 px-3 py-1.5 font-body text-[11px] sm:text-xs leading-none text-foreground hover:bg-muted hover:border-foreground/30 transition-colors"
+                                  >
+                                    [ {label} ]
+                                  </button>
+                                );
+                              })}
                             </div>
                           )}
+
                         </div>
                           );
                         })()
