@@ -1779,7 +1779,7 @@ async function loadCatalogContext(
   // scoped to a single named designer.
   let picksQuery = supabase
     .from("designer_curator_picks")
-    .select("id, title, materials, category, subcategory, designer_id, trade_price_cents, price_per_sqm_cents, currency, size_variants")
+    .select("id, title, materials, materials_description, description, meta_description, variant_placeholder, tags, category, subcategory, designer_id, trade_price_cents, price_per_sqm_cents, currency, size_variants")
     .order("designer_id", { ascending: true })
     .order("title", { ascending: true })
     .limit(2000);
@@ -1788,7 +1788,7 @@ async function loadCatalogContext(
   }
   if (hardConstraints) {
     picksQuery = applyHardConstraints(picksQuery as any, hardConstraints, {
-      text: ["title", "materials", "category", "subcategory"],
+      text: ["title", "materials", "materials_description", "description", "meta_description", "variant_placeholder", "category", "subcategory"],
       category: "category",
     }) as typeof picksQuery;
   }
@@ -1797,7 +1797,7 @@ async function loadCatalogContext(
   // Trade products — same designer-scoping when a filter is active.
   let tradeQuery = supabase
     .from("trade_products")
-    .select("id, product_name, brand_name, materials, category, subcategory, trade_price_cents, rrp_price_cents, currency, price_unit")
+    .select("id, product_name, brand_name, materials, materials_description, description, meta_description, variant_placeholder, available_finishes, fabric_options, category, subcategory, trade_price_cents, rrp_price_cents, currency, price_unit")
     .eq("is_active", true)
     .not("image_url", "is", null)
     .order("brand_name", { ascending: true })
@@ -1808,7 +1808,7 @@ async function loadCatalogContext(
   }
   if (hardConstraints) {
     tradeQuery = applyHardConstraints(tradeQuery as any, hardConstraints, {
-      text: ["product_name", "materials", "category", "subcategory"],
+      text: ["product_name", "materials", "materials_description", "description", "meta_description", "variant_placeholder", "category", "subcategory"],
       brand: "brand_name",
       category: "category",
     }) as typeof tradeQuery;
