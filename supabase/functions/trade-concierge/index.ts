@@ -4911,6 +4911,7 @@ serve(async (req) => {
           "Reply in ONE short warm paragraph: acknowledge that nothing in the curated selection currently matches that exact combination, name the specific constraint(s) that eliminated the results, and invite the architect to relax ONE constraint (e.g. widen the palette from 'forest green' to 'muted greens', drop the material filter, or broaden the typology). Do not apologise, self-correct, mention external archives, or imply there is a hidden search source.",
           "",
         ].join("\n")
+      : "";
     const paletteAdvisoryNote = paletteAdvisory && paletteAdvisoryReason
       ? [
           "",
