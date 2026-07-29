@@ -1286,25 +1286,10 @@ const PublicDesignerProfile = () => {
                             </>
                           );
                         })()}
-                        <div className="absolute bottom-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="hidden md:block absolute bottom-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity">
                           <div className="p-1.5 bg-black/40 rounded-md text-white/90 backdrop-blur-sm">
                             <Maximize2 className="h-3 w-3" />
                           </div>
-                        </div>
-                        <div className={cn(
-                          "md:hidden absolute inset-0 z-20 flex items-center justify-center px-3 bg-black/25 transition-opacity duration-300",
-                          isMobilePickRevealed ? "opacity-100" : "opacity-0"
-                        )}>
-                          <Link
-                            to={productHref}
-                            onClick={(e) => e.stopPropagation()}
-                            className={cn(
-                              "inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-white/40 bg-white/10 backdrop-blur-sm text-white font-body text-[9px] uppercase tracking-[0.15em] shadow-lg",
-                              !isMobilePickRevealed && "pointer-events-none"
-                            )}
-                          >
-                            Discover the Product
-                          </Link>
                         </div>
                         {/* Description overlay removed on curators' picks per design */}
                         {(pick.pdf_url || (pick.pdf_urls as any[] | null)?.length) && (
