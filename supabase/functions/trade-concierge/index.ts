@@ -3360,10 +3360,20 @@ function paletteMatchScore(row: any, constraints: HardConstraints | null | undef
   if (!tokens.length) return 0;
   const hay = rowPaletteHaystack(row);
   let score = 0;
+  const hasIvorySignal = /\b(ivory|cream|off\s+white|offwhite|white)\b/i.test(hay);
+  const hasFabricSignal = /\b(boucle|bouclé|fabric|textile|upholstery|com\s+fabric|ecart\s+fabric)\b/i.test(hay);
+  const hasWoodSignal = /\b(oak|wood|timber|walnut|ash)\b/i.test(hay);
+  const hasBrassSignal = /\b(brass|bronze|metal)\b/i.test(hay);
   for (const token of tokens) {
     const escaped = token.replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace(/\s+/g, "\\s+");
     if (new RegExp(`\\b${escaped}\\b`, "i").test(hay)) score += token.includes(" ") ? 2 : 1;
   }
+  if (tokens.some((t) => ["ivory", "cream", "off white", "offwhite", "white"].includes(t)) && hasIvorySignal) score += 4;
+  if (tokens.some((t) => ["boucle", "bouclé", "fabric", "textile", "upholstery", "com fabric"].includes(t)) && hasFabricSignal) score += 3;
+  if (tokens.some((t) => ["ivory", "cream", "off white", "offwhite", "white"].includes(t)) && hasFabricSignal) score += 2;
+  if (tokens.some((t) => ["oak", "wood", "timber", "walnut", "ash"].includes(t)) && hasWoodSignal) score += 2;
+  if (tokens.some((t) => ["brass", "bronze", "metal"].includes(t)) && hasBrassSignal) score += 2;
+  if (hasIvorySignal && hasFabricSignal) score += 6;
   return score;
 }
 
