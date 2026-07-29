@@ -283,6 +283,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { streamConcierge, type ChatMessage, type ChatContentPart, type TearsheetProposal, type QuoteProposal, type FfeProposal, type VisualizationBriefProposal, type ConciergeProposal, type AppliedConstraintsEvent, type MoodboardSignalsEvent } from "@/lib/tradeConciergeStream";
 import { TearsheetProposalCard } from "@/components/trade/concierge/TearsheetProposalCard";
+import { CuratedInventoryGrid } from "@/components/trade/CuratedInventoryGrid";
 import { ProactiveTearsheetCard, type ProactiveTearsheetData } from "@/components/trade/concierge/ProactiveTearsheetCard";
 import { QuoteProposalCard } from "@/components/trade/concierge/QuoteProposalCard";
 import { FfeProposalCard } from "@/components/trade/concierge/FfeProposalCard";
@@ -321,7 +322,7 @@ type PendingProposalTool =
   | "prepare_visualization_brief";
 type TimelineItem =
   | { kind: "msg"; role: "user" | "assistant"; content: string; actions?: ConciergeQuickAction[]; onboarding?: boolean; sourceContent?: string; sourceActions?: ConciergeQuickAction[]; designDirectorCtas?: DesignDirectorCtaLabel[]; attachments?: TimelineAttachment[]; appliedConstraints?: AppliedConstraintsEvent; moodboardSignals?: MoodboardSignalsEvent }
-  | { kind: "proposal"; proposal: TearsheetProposal; resolved?: "approved" | "discarded"; excluded?: string[]; locked?: string[]; newPickIds?: string[] }
+  | { kind: "proposal"; proposal: TearsheetProposal; resolved?: "approved" | "discarded"; excluded?: string[]; locked?: string[]; newPickIds?: string[]; sourceOrigin?: "source" }
   | { kind: "quote_proposal"; proposal: QuoteProposal; resolved?: "approved" | "discarded" }
   | { kind: "ffe_proposal"; proposal: FfeProposal; resolved?: "approved" | "discarded" }
   | { kind: "viz_brief"; proposal: VisualizationBriefProposal; resolved?: "opened" | "discarded" }
@@ -745,6 +746,9 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
   type NextStepKind = "source" | "quote" | "match";
   const [nextStepPanel, setNextStepPanel] = useState<NextStepKind | null>(null);
   const [nextStepFields, setNextStepFields] = useState<Record<string, string>>({});
+  // When the designer submits the "Source Similar Pieces" panel, tag the
+  // next incoming tearsheet proposal so it renders as CuratedInventoryGrid.
+  const pendingSourceOriginRef = useRef<boolean>(false);
   // Track "Save Palette to Project" confirmations per message index and the
   // most recently persisted tags so a follow-up "Source Similar Pieces" turn
   // can seed the retrieval brief with those exact tokens.
@@ -2785,7 +2789,9 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
           .filter((id) => proposal.preview.some((p) => p.id === id));
       }
 
-      setTimeline((prev) => swapPendingWithReal(prev, tcid, proposal.tool, { kind: "proposal", proposal, newPickIds, locked: carriedLocked }));
+      const sourceOrigin = pendingSourceOriginRef.current ? ("source" as const) : undefined;
+      if (sourceOrigin) pendingSourceOriginRef.current = false;
+      setTimeline((prev) => swapPendingWithReal(prev, tcid, proposal.tool, { kind: "proposal", proposal, newPickIds, locked: carriedLocked, sourceOrigin }));
     };
 
 
@@ -4560,35 +4566,49 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                 );
               }
               if (item.kind !== "proposal") return null;
+              const excludedSet = new Set(item.excluded || []);
+              const visibleForGrid = item.proposal.preview.filter((p) => !excludedSet.has(p.id));
               return (
-                <TearsheetProposalCard
-                  key={i}
-                  proposal={item.proposal}
-                  excluded={new Set(item.excluded || [])}
-                  locked={new Set(item.locked || [])}
-                  newPickIds={item.newPickIds}
-                  onExcludedChange={(next) => {
-                    setTimeline((prev) => {
-                      const copy = prev.slice();
-                      const t = copy[i];
-                      if (t?.kind === "proposal") {
-                        copy[i] = { ...t, excluded: Array.from(next) };
-                      }
-                      return copy;
-                    });
-                  }}
-                  onLockedChange={(next) => {
-                    setTimeline((prev) => {
-                      const copy = prev.slice();
-                      const t = copy[i];
-                      if (t?.kind === "proposal") {
-                        copy[i] = { ...t, locked: Array.from(next) };
-                      }
-                      return copy;
-                    });
-                  }}
-                  onResolved={(outcome, info) => handleProposalResolved(i, outcome, info)}
-                />
+                <div key={i} className="flex w-full flex-col gap-3">
+                  {item.sourceOrigin === "source" && visibleForGrid.length > 0 && (
+                    <CuratedInventoryGrid
+                      items={visibleForGrid}
+                      onAddToBoard={(pick) => {
+                        void sendRef.current?.(
+                          `Add "${pick.title}"${pick.designer_name ? ` by ${pick.designer_name}` : ""} to my current project board.`,
+                          { displayText: `+ Add to Board · ${pick.title}` },
+                        );
+                      }}
+                    />
+                  )}
+                  <TearsheetProposalCard
+                    proposal={item.proposal}
+                    excluded={new Set(item.excluded || [])}
+                    locked={new Set(item.locked || [])}
+                    newPickIds={item.newPickIds}
+                    onExcludedChange={(next) => {
+                      setTimeline((prev) => {
+                        const copy = prev.slice();
+                        const t = copy[i];
+                        if (t?.kind === "proposal") {
+                          copy[i] = { ...t, excluded: Array.from(next) };
+                        }
+                        return copy;
+                      });
+                    }}
+                    onLockedChange={(next) => {
+                      setTimeline((prev) => {
+                        const copy = prev.slice();
+                        const t = copy[i];
+                        if (t?.kind === "proposal") {
+                          copy[i] = { ...t, locked: Array.from(next) };
+                        }
+                        return copy;
+                      });
+                    }}
+                    onResolved={(outcome, info) => handleProposalResolved(i, outcome, info)}
+                  />
+                </div>
               );
             })}
             {showTypingDots && (
@@ -5081,6 +5101,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                 ? `${cfg.displayLabel}\n${detailLines.join("\n")}`
                 : cfg.displayLabel;
               setNextStepPanel(null);
+              if (nextStepPanel === "source") pendingSourceOriginRef.current = true;
               void send(prompt, { displayText });
             };
             return (
