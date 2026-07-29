@@ -428,6 +428,44 @@ const DESIGN_DIRECTOR_CTA_START_RE = new RegExp(
 );
 const DESIGN_DIRECTOR_CTA_ANY_RE = new RegExp(`(${DESIGN_DIRECTOR_CTA_PATTERN})`, "gi");
 
+const REDUNDANT_INTERFACE_ACTION_PATTERNS = [
+  /^generate\s+(?:official\s+)?(?:pdf\s+)?tear\s*sheet$/i,
+  /^download\s+(?:official\s+)?pdf\s+tear\s*sheet$/i,
+  /^(?:open|view|launch)\s+(?:the\s+)?(?:interactive\s+)?3d(?:\s+model|\s+viewer)?$/i,
+  /^make\s+(?:the\s+)?selection\s+dynamic$/i,
+  /^(?:lock|unlock|swap)\s+(?:selection|item|piece)$/i,
+  /^add\s+to\s+project\s+board$/i,
+];
+
+function normalizeActionLabel(value: string): string {
+  return value
+    .replace(/[\u00a0\u200b]/g, " ")
+    .replace(new RegExp("\\\\([\\[\\]\\(\\)])", "g"), "$1")
+    .replace(/^[\s>]*(?:(?:[-*+]|\d+[.)])\s+)?/, "")
+    .replace(/[*_`]/g, "")
+    .replace(new RegExp("[\\[\\]\\(\\){}]", "g"), " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function isRedundantInterfaceActionText(value: string): boolean {
+  const raw = value.replace(/[\u00a0\u200b]/g, " ").trim();
+  if (!raw) return false;
+  const bracketLabels = Array.from(raw.matchAll(/\[\s*([^\]]{2,80})\s*\]/g)).map((m) => normalizeActionLabel(m[1]));
+  if (bracketLabels.some((label) => REDUNDANT_INTERFACE_ACTION_PATTERNS.some((re) => re.test(label)))) return true;
+  const normalized = normalizeActionLabel(raw);
+  return REDUNDANT_INTERFACE_ACTION_PATTERNS.some((re) => re.test(normalized));
+}
+
+function stripRedundantInterfaceActionsFromText(raw: string): string {
+  return raw
+    .split(/\r?\n/)
+    .filter((line) => !isRedundantInterfaceActionText(line))
+    .join("\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
 function canonicalDesignDirectorCtaLabel(value: string): DesignDirectorCtaLabel | null {
   const normalized = value.toLowerCase().replace(/\s+/g, " ").trim();
   return DESIGN_DIRECTOR_CTA_LABELS.find((label) => label.toLowerCase() === normalized) ?? null;
@@ -513,9 +551,10 @@ function stripDesignDirectorCtasFromTimeline(items: TimelineItem[]): TimelineIte
     if (item.kind !== "msg" || item.role !== "assistant" || !item.content) return item;
     const sourceContent = item.sourceContent || item.content;
     const extracted = extractDesignDirectorCtas(sourceContent);
-    if (extracted.labels.length === 0 || extracted.body === item.content) return item;
+    const cleanBody = stripRedundantInterfaceActionsFromText(extracted.body);
+    if (extracted.labels.length === 0 && cleanBody === item.content) return item;
     changed = true;
-    return { ...item, content: extracted.body, sourceContent, designDirectorCtas: extracted.labels };
+    return { ...item, content: cleanBody, sourceContent, designDirectorCtas: extracted.labels };
   });
   return changed ? next : items;
 }
@@ -2455,7 +2494,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
     // always references the user's current workflow stage.
     const stageContext: ChatMessage = {
       role: "user",
-      content: `[Workflow context] Current stage: ${stage}. Tailor guidance to this stage and reference it explicitly when helpful.`,
+      content: `[Workflow context] Current stage: ${stage}. Tailor guidance to this stage and reference it explicitly when helpful. Existing interface actions are already live: tearsheet cards include 3D model/finish controls, Lock/Swap, Generate/Open tearsheet, and PDF export paths. Do NOT offer these as bracketed chat CTAs, future setup tasks, or "make dynamic" work; use the existing card controls/tools only.`,
     };
 
     // Discover-stage tolerance: the greeting asks for the project city, but
@@ -3723,7 +3762,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                              // Always render from the cleaned body — even when `sourceContent`
                              // is set, older persisted `content` values may still contain the
                              // CTA lines and would otherwise leak into the bubble.
-                             const markdownBody = extractDesignDirectorCtas(String(item.content || "")).body;
+                              const markdownBody = stripRedundantInterfaceActionsFromText(extractDesignDirectorCtas(String(item.content || "")).body);
 
                           const dispatchCta = (label: string) => {
                             if (label === "Forward to Human Concierge") { void forwardToHumanConcierge(); return; }
@@ -3758,6 +3797,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                             components={{
                               p: ({ node, children, ...props }) => {
                                 if (isDesignDirectorCtaText(markdownTextFromChildren(children))) return null;
+                                if (isRedundantInterfaceActionText(markdownTextFromChildren(children))) return null;
                                 // Detect the "**Match:** Band · NN% — rationale"
                                 // line emitted for each Private Exhibition piece
                                 // and render it as a badge + rationale card.
@@ -3795,6 +3835,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                               ol: ({ node, ...props }) => <ol className="list-decimal pl-5 space-y-2 my-1" {...props} />,
                               li: ({ node, children, ...props }: any) => {
                                 if (isDesignDirectorCtaText(markdownTextFromChildren(children))) return null;
+                                if (isRedundantInterfaceActionText(markdownTextFromChildren(children))) return null;
                                 return <li className="leading-relaxed [&>p]:my-0" {...props}>{children}</li>;
                               },
                               strong: ({ node, ...props }) => <strong className="font-semibold text-foreground" {...props} />,
