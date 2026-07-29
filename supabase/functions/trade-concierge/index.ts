@@ -3974,7 +3974,7 @@ async function buildDeterministicTearsheetProposal(
     candidateRows = leadRes.kept;
   }
   if (requestedTypologies.length && (candidateRows.length < 2 || !rowsCoverRequestedTypologies(candidateRows, requestedTypologies))) {
-    candidateRows = (await fetchStrictTypologyCandidates(supabase, requestedTypology, dimConstraints, leadConstraints))
+    candidateRows = (await fetchStrictTypologyCandidates(supabase, requestedTypologies, dimConstraints, leadConstraints))
       .filter((r: any) => r && typeof r.id === "string" && UUID_RE.test(r.id))
       .sort((a: any, b: any) => scoreRow(b) - scoreRow(a));
   }
