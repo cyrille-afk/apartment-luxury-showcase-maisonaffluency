@@ -55,6 +55,8 @@ export function CuratedInventoryGrid({
     }
   };
 
+  if (!items?.length) return null;
+
   return (
     <div className={cn("w-full max-w-[92%] self-start", className)}>
       <div className="mb-2 flex items-baseline justify-between gap-3">
