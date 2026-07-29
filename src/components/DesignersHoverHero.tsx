@@ -1815,7 +1815,7 @@ const DesignersHoverHero = () => {
                 </div>
               </div>
             )}
-            <div ref={searchScrollRef} className={`flex-1 overflow-y-auto overscroll-contain px-4 pt-2 pb-4 min-h-0 relative touch-pan-y transition-opacity duration-150 ${isRestoringLetter ? "opacity-0" : "opacity-100"}`}>
+            <div ref={searchScrollRef} className={`flex-1 overflow-y-auto overscroll-contain px-4 pt-2 pb-[calc(2rem+env(safe-area-inset-bottom))] min-h-0 relative touch-pan-y transition-opacity duration-150 ${isRestoringLetter ? "opacity-0" : "opacity-100"}`}>
 
               {!isSearching && groupedResults.length === 0 ? (
                 <div className="px-4 py-10 flex flex-col items-center gap-3" aria-live="polite">
