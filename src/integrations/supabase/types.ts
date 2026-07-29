@@ -4398,11 +4398,14 @@ export type Database = {
           created_at: string
           id: string
           location: string
+          location_city: string | null
+          location_neighborhood: string | null
           name: string
           notes: string | null
           status: string
           studio_id: string | null
           target_completion_date: string | null
+          trade_multiplier: number
           updated_at: string
           user_id: string
         }
@@ -4414,11 +4417,14 @@ export type Database = {
           created_at?: string
           id?: string
           location?: string
+          location_city?: string | null
+          location_neighborhood?: string | null
           name?: string
           notes?: string | null
           status?: string
           studio_id?: string | null
           target_completion_date?: string | null
+          trade_multiplier?: number
           updated_at?: string
           user_id: string
         }
@@ -4430,11 +4436,14 @@ export type Database = {
           created_at?: string
           id?: string
           location?: string
+          location_city?: string | null
+          location_neighborhood?: string | null
           name?: string
           notes?: string | null
           status?: string
           studio_id?: string | null
           target_completion_date?: string | null
+          trade_multiplier?: number
           updated_at?: string
           user_id?: string
         }
@@ -4652,6 +4661,36 @@ export type Database = {
           id?: string
           image_url?: string
           mode?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      regional_logistics_rules: {
+        Row: {
+          city: string
+          created_at: string
+          id: number
+          multiplier: number
+          neighborhood: string | null
+          shipping_tier: string
+          updated_at: string
+        }
+        Insert: {
+          city: string
+          created_at?: string
+          id?: number
+          multiplier: number
+          neighborhood?: string | null
+          shipping_tier: string
+          updated_at?: string
+        }
+        Update: {
+          city?: string
+          created_at?: string
+          id?: number
+          multiplier?: number
+          neighborhood?: string | null
+          shipping_tier?: string
           updated_at?: string
         }
         Relationships: []
