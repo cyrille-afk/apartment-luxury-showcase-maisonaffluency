@@ -3374,7 +3374,6 @@ function paletteTokensForMatching(constraints: HardConstraints | null | undefine
 function paletteMatchScore(row: any, constraints: HardConstraints | null | undefined): number {
   const tokens = paletteTokensForMatching(constraints);
   if (!tokens.length) return 0;
-  const hay = rowPaletteHaystack(row);
   const finishHay = rowFinishHaystack(row);
   let score = 0;
   const hasIvorySignal = /\b(ivory|cream|off\s+white|offwhite|white)\b/i.test(finishHay);
@@ -3385,7 +3384,6 @@ function paletteMatchScore(row: any, constraints: HardConstraints | null | undef
     const escaped = token.replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace(/\s+/g, "\\s+");
     const re = new RegExp(`\\b${escaped}\\b`, "i");
     if (re.test(finishHay)) score += token.includes(" ") ? 4 : 2;
-    else if (re.test(hay)) score += token.includes(" ") ? 2 : 1;
   }
   if (tokens.some((t) => ["ivory", "cream", "off white", "offwhite", "white"].includes(t)) && hasIvorySignal) score += 4;
   if (tokens.some((t) => ["boucle", "bouclé", "fabric", "textile", "upholstery", "com fabric"].includes(t)) && hasFabricSignal) score += 3;
