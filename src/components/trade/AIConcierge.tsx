@@ -3499,7 +3499,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                                 const ctaLabels = "(Source Similar Pieces|Generate Custom Quote|Match Finishes|Forward to Human Concierge|Upload a Visual Mood Board Instead|Return to Atelier Chat|View My Open Requests|Yes, Schedule Morning Call|No, Standard Updates Are Fine)";
                                 const hasCtaList = new RegExp(`^\\s*[-*]\\s*\\[?\\s*${ctaLabels}\\s*\\]?`, "im").test(item.content || "");
                                 if (hasCtaList) {
-                                  return <ul className="flex flex-wrap gap-2 my-2" {...props} />;
+                                  return <ul className="flex flex-wrap items-stretch gap-1.5 sm:gap-2 my-2 list-none pl-0" {...props} />;
                                 }
                                 return <ul className="list-disc pl-5 space-y-2 my-1" {...props} />;
                               },
@@ -3643,16 +3643,17 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                                   };
 
                                   return (
-                                    <li className="list-none" {...props}>
+                                    <li className="list-none flex" {...props}>
                                       <button
                                         type="button"
                                         onClick={handleCtaClick}
                                         title={tail || undefined}
-                                        className="rounded-full border border-border/80 bg-background px-3 py-1.5 font-body text-xs text-foreground hover:bg-muted hover:text-foreground hover:border-foreground/30 transition-colors"
+                                        className="inline-flex items-center justify-center text-center rounded-full border border-border/80 bg-background px-3 py-1.5 font-body text-[11px] sm:text-xs leading-snug text-foreground hover:bg-muted hover:text-foreground hover:border-foreground/30 transition-colors whitespace-normal break-words max-w-full"
                                       >
                                         [ {label} ]
                                       </button>
                                     </li>
+
                                   );
                                 }
                                 return <li className="leading-relaxed [&>p]:my-0" {...props}>{children}</li>;
