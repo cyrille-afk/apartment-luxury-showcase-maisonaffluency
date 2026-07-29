@@ -143,6 +143,7 @@ function resolveGalleryImageByFinishFilename(heroList: string[], labels: Array<s
 
 interface ProductRow {
   id: string;
+  slug?: string | null;
   title: string;
   subtitle: string | null;
   image_url: string | null;
@@ -234,7 +235,7 @@ function useTradeProductBySlug(
         if (designer) {
           const { data: picks } = await supabase
             .from("designer_curator_picks")
-            .select("id, title, subtitle, image_url, hover_image_url, gallery_images, materials, materials_description, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, trade_price_cents, price_per_sqm_cents, currency, price_prefix, size_variants, variant_placeholder, base_axis_label, top_axis_label, wood_label_override, variant_image_map, edition, edition_number, edition_signing, gallery_captions, is_upholstered, com_meters")
+            .select("id, slug, title, subtitle, image_url, hover_image_url, gallery_images, materials, materials_description, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, trade_price_cents, price_per_sqm_cents, currency, price_prefix, size_variants, variant_placeholder, base_axis_label, top_axis_label, wood_label_override, variant_image_map, edition, edition_number, edition_signing, gallery_captions, is_upholstered, com_meters")
             .eq("designer_id", (designer as any).id)
             .order("sort_order", { ascending: true });
           const tradeName = ((tradeProduct as any).product_name || "").trim().toLowerCase();
@@ -245,6 +246,7 @@ function useTradeProductBySlug(
         const publicVariantDimension = firstPublicVariantDimensionLabel(curatorPick?.size_variants);
         const product: ProductRow = {
           id: curatorPick?.id || (tradeProduct as any).id,
+          slug: curatorPick?.slug || null,
           title: curatorPick?.title || (tradeProduct as any).product_name,
           subtitle: curatorPick?.subtitle || null,
           image_url: curatorPick?.image_url || (tradeProduct as any).image_url || null,
@@ -328,7 +330,7 @@ function useTradeProductBySlug(
 
       const { data: picks } = await supabase
         .from("designer_curator_picks")
-        .select("id, title, subtitle, image_url, hover_image_url, gallery_images, materials, materials_description, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, trade_price_cents, price_per_sqm_cents, currency, price_prefix, size_variants, variant_placeholder, base_axis_label, top_axis_label, wood_label_override, variant_image_map, edition, edition_number, edition_signing, gallery_captions, is_upholstered, com_meters")
+        .select("id, slug, title, subtitle, image_url, hover_image_url, gallery_images, materials, materials_description, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, trade_price_cents, price_per_sqm_cents, currency, price_prefix, size_variants, variant_placeholder, base_axis_label, top_axis_label, wood_label_override, variant_image_map, edition, edition_number, edition_signing, gallery_captions, is_upholstered, com_meters")
         .eq("designer_id", designer.id)
         .order("sort_order", { ascending: true });
 
@@ -345,8 +347,10 @@ function useTradeProductBySlug(
         return targetTokens.reduce((n, t) => n + (ts.has(t) ? 1 : 0), 0);
       };
       let product: any =
+        picks.find((p: any) => p.slug === productSlug) ||
         picks.find((p: any) => slugify(p.title + (p.subtitle ? `-${p.subtitle}` : "")) === productSlug) ||
         picks.find((p: any) => slugify(p.title) === productSlug) ||
+        picks.find((p: any) => slugify(String(p.title).replace(/\s+by\s+.+$/i, "")) === productSlug) ||
         picks.find((p: any) => slugify(p.title).startsWith(productSlug!)) ||
         picks.find((p: any) => slugify(p.title).includes(productSlug!));
 
