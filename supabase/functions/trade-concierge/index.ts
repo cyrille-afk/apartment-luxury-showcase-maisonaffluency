@@ -4748,9 +4748,7 @@ serve(async (req) => {
     // dining table"). Applied to BOTH the pgvector RAG shortlist and the
     // bulk SQL catalog load so the AI never sees candidates that violate
     // a stated constraint. Empty on discovery turns → no filtering.
-    const preRequestConstraints = hasVisualSourcingContext
-      ? ({ materials: [], colors: [] } as HardConstraints)
-      : deriveHardConstraints([{ title: lastUserMsg }]);
+    const preRequestConstraints = deriveHardConstraints([{ title: hardValidationText || lastUserMsg }]);
     const hasAnyPreConstraint =
       (preRequestConstraints.materials?.length || 0) +
       (preRequestConstraints.colors?.length || 0) > 0;
@@ -5326,11 +5324,20 @@ serve(async (req) => {
         }
       }
       const allTypeCandidates = await fetchStrictTypologyCandidates(supabase, requestedTypology, dimCeiling, leadCeiling);
+      const branchPaletteConstraints = deriveHardConstraints([
+        {
+          title: hardValidationText || lastUserMsg,
+          materials: (effectiveBrief.brief.materials || []).join(" "),
+          category: (effectiveBrief.brief.categories || []).join(" "),
+        },
+      ]);
       const budgetedCandidates = budgetCeiling
         ? allTypeCandidates.filter((r: any) => Number(r?.trade_price_cents || 0) > 0 && Number(r.trade_price_cents) <= budgetCeiling.cents)
         : allTypeCandidates;
-      const sortedBudgetedCandidates = budgetedCandidates
+      const sortedBudgetedCandidates = applyPalettePreferenceByTypology(budgetedCandidates, branchPaletteConstraints, requestedTypology)
         .sort((a: any, b: any) => {
+          const paletteDelta = paletteMatchScore(b, branchPaletteConstraints) - paletteMatchScore(a, branchPaletteConstraints);
+          if (paletteDelta !== 0) return paletteDelta;
           const ap = Number(a?.trade_price_cents || Number.MAX_SAFE_INTEGER);
           const bp = Number(b?.trade_price_cents || Number.MAX_SAFE_INTEGER);
           return ap - bp || String(a?.title || "").localeCompare(String(b?.title || ""));
