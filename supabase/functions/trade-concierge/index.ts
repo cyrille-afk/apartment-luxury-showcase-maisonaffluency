@@ -3217,8 +3217,12 @@ function normalizeRequestedTypologies(input: RequestedTypology | RequestedTypolo
 }
 
 function inferRequestedTypology(brief: ExtractedBrief["brief"], requestText: string): RequestedTypology[] | null {
+  const sanitizedRequestText = String(requestText || "")
+    .replace(/\bno\s+(?:case\s+goods?|lighting|lights?|lamps?|accessories|decor|tables?|seating|chairs?|sofas?|rugs?|storage)\b/gi, " ")
+    .replace(/\bdo\s+not\s+include\s+[^.\n]+/gi, " ")
+    .replace(/\boutside\s+that\s+field\b/gi, " ");
   const hay = normalizeLoose([
-    requestText,
+    sanitizedRequestText,
     brief.summary,
     brief.room,
     brief.style,
