@@ -801,10 +801,11 @@ const DesignersHoverHero = () => {
       return Boolean(scroller && target instanceof Node && scroller.contains(target));
     };
 
-    const canUseNativeListScroll = () => {
-      const scroller = contentScrollRef.current;
-      return Boolean(scroller && scroller.scrollHeight > scroller.clientHeight + 2);
-    };
+    // Mobile/PWA hero must always step one designer at a time — never let the
+    // inner list free-scroll as a whole block. Native list-scroll mode is
+    // reserved for desktop; on mobile the featured photo is bound 1:1 to the
+    // active designer, so free-scroll would decouple the two.
+    const canUseNativeListScroll = () => false;
 
     const advance = (dir: 1 | -1) => {
       setActiveSlug((current) => {
