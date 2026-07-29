@@ -4219,6 +4219,123 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                   />
                 );
               }
+              if (item.kind === "quote_card") {
+                const fmt = (n: number) =>
+                  new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(n);
+                const groupOrder: Array<"Seating" | "Casegoods" | "Lighting" | "Textiles"> = ["Seating", "Casegoods", "Lighting", "Textiles"];
+                const grouped = (item.lineItems || []).reduce<Record<string, Array<{ label: string; amount: number }>>>((acc, li) => {
+                  (acc[li.group] ||= []).push({ label: li.label, amount: li.amount });
+                  return acc;
+                }, {});
+                if (item.state === "loading") {
+                  return (
+                    <div
+                      key={i}
+                      className={cn(
+                        "self-start rounded-2xl border border-border/70 bg-muted/40 px-4 py-3 font-body text-sm text-foreground flex items-center gap-2.5",
+                        expanded ? "max-w-[92%]" : "max-w-[88%]",
+                      )}
+                      role="status"
+                      aria-live="polite"
+                    >
+                      <DotCircleLoader size="sm" className="text-muted-foreground" />
+                      <span className="italic text-muted-foreground">
+                        Compiling {item.projectName} trade specifications…
+                      </span>
+                    </div>
+                  );
+                }
+                const resolveQuoteCard = (outcome: "downloaded" | "sent") => {
+                  setTimeline((prev) => prev.map((t) => (t.kind === "quote_card" && t.id === item.id ? { ...t, resolved: outcome } : t)));
+                };
+                return (
+                  <div
+                    key={i}
+                    className={cn(
+                      "self-start w-full rounded-2xl border border-border bg-background shadow-sm overflow-hidden",
+                      expanded ? "max-w-[92%]" : "max-w-[88%]",
+                    )}
+                  >
+                    <div className="px-4 py-3 border-b border-border/60">
+                      <div className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground">Project</div>
+                      <div className="font-display text-base text-foreground leading-tight mt-0.5">{item.projectName}</div>
+                      {item.concept && (
+                        <div className="text-xs text-muted-foreground mt-1">
+                          <span className="uppercase tracking-[0.14em] text-[10px]">Concept</span> · {item.concept}
+                        </div>
+                      )}
+                    </div>
+                    <div className="px-4 py-3 space-y-3">
+                      <div className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground">Sourcing Allocation</div>
+                      {groupOrder.filter((g) => grouped[g]?.length).map((g) => (
+                        <div key={g} className="space-y-1">
+                          <div className="text-[11px] font-medium text-foreground/80 uppercase tracking-wide">{g}</div>
+                          {grouped[g].map((li, idx) => (
+                            <div key={idx} className="flex items-baseline justify-between gap-3 text-sm">
+                              <span className="text-foreground/90 leading-snug">{li.label}</span>
+                              <span className="tabular-nums text-foreground shrink-0">{fmt(li.amount)}</span>
+                            </div>
+                          ))}
+                        </div>
+                      ))}
+                    </div>
+                    {item.logistics && item.logistics.length > 0 && (
+                      <div className="px-4 py-3 border-t border-border/60 space-y-1.5">
+                        <div className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground mb-1">Logistics &amp; Delivery</div>
+                        {item.logistics.map((l, idx) => (
+                          <div key={idx} className="flex items-baseline justify-between gap-3 text-sm">
+                            <span className="text-foreground/90 leading-snug">{l.label}</span>
+                            <span className="tabular-nums text-foreground shrink-0">
+                              {l.amount === "included" ? <em className="not-italic text-muted-foreground">Included</em> : fmt(l.amount)}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    {typeof item.totalCents === "number" && (
+                      <div className="px-4 py-3 border-t border-border/60 flex items-baseline justify-between gap-3 bg-muted/30">
+                        <span className="font-display text-sm uppercase tracking-[0.14em] text-foreground">Estimated Total Specification</span>
+                        <span className="font-display text-lg tabular-nums text-foreground">{fmt(item.totalCents / 100)}</span>
+                      </div>
+                    )}
+                    <div className="px-4 py-3 border-t border-border/60 flex flex-wrap items-center gap-2">
+                      <button
+                        type="button"
+                        disabled={item.resolved === "downloaded"}
+                        onClick={() => {
+                          resolveQuoteCard("downloaded");
+                          void sendRef.current?.(
+                            `Please generate and email me the official PDF tear sheet for the ${item.projectName} custom quote above.`,
+                            { displayText: "Download Official PDF Tear Sheet" },
+                          );
+                        }}
+                        className="inline-flex items-center whitespace-nowrap rounded-full bg-foreground text-background px-3.5 py-1.5 font-body text-xs hover:bg-foreground/90 transition-colors disabled:opacity-60"
+                      >
+                        [ Download Official PDF Tear Sheet ]
+                      </button>
+                      <button
+                        type="button"
+                        disabled={item.resolved === "sent"}
+                        onClick={() => {
+                          resolveQuoteCard("sent");
+                          void sendRef.current?.(
+                            `Send the ${item.projectName} custom quote above to my client for approval — use the client on file for this project.`,
+                            { displayText: "Send to Client for Approval" },
+                          );
+                        }}
+                        className="inline-flex items-center whitespace-nowrap rounded-full bg-foreground text-background px-3.5 py-1.5 font-body text-xs hover:bg-foreground/90 transition-colors disabled:opacity-60"
+                      >
+                        [ Send to Client for Approval ]
+                      </button>
+                      {item.resolved && (
+                        <span className="text-[11px] text-muted-foreground italic ml-1">
+                          {item.resolved === "downloaded" ? "PDF requested — Felix is preparing it." : "Sent — Felix will confirm delivery."}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                );
+              }
               if (item.kind !== "proposal") return null;
               return (
                 <TearsheetProposalCard
