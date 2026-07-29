@@ -3628,14 +3628,18 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                                       return;
                                     }
 
+                                    if (label === "Source Similar Pieces" || label === "Generate Custom Quote" || label === "Match Finishes") {
+                                      const kind: NextStepKind =
+                                        label === "Source Similar Pieces" ? "source"
+                                        : label === "Generate Custom Quote" ? "quote"
+                                        : "match";
+                                      setNextStepFields({});
+                                      setNextStepPanel(kind);
+                                      return;
+                                    }
                                     const basePrompt = prompts[label];
-                                    const visualContext = label === "Source Similar Pieces"
-                                      ? (getStoredVisualSourcingContext() || String(item.content || "").replace(/\s+/g, " ").slice(0, 1200))
-                                      : "";
-                                    const contextualPrompt = visualContext
-                                      ? `${basePrompt}\n\n[Latest upload visual sourcing context — use this as the retrieval brief, not the button label]\n${visualContext}`
-                                      : basePrompt;
-                                    void send(contextualPrompt, { displayText: label });
+                                    void send(basePrompt, { displayText: label });
+
                                   };
 
                                   return (
