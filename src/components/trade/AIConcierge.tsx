@@ -1683,6 +1683,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
   }, [timeline]);
 
 
+  const forwardToHumanConcierge = useCallback(async () => {
     // Kick the ambient status to "Pending Gallery Review" the moment the tap
     // registers — the designer must feel the interface itself change hands.
     setConciergeStatus("pending_review");
