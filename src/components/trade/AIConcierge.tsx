@@ -883,8 +883,11 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
   }, [minimized]);
   useEffect(() => {
     try {
-      // previewUrl is now a downscaled JPEG thumbnail (~<60KB), safe to persist.
-      // If serialization fails (quota), retry once with thumbnails stripped.
+      // previewUrl is a downscaled JPEG thumbnail (~<60KB), safe to persist so
+      // moodboard / reference images stay visible in the transcript after a
+      // reload or rehydration. If serialization fails (quota), first drop
+      // previewUrls for non-image attachments (there are none today, but future
+      // pdf previews would be heavier), then as a last resort drop all.
       const payload = JSON.stringify(timeline);
       try {
         sessionStorage.setItem("concierge:timeline", payload);
@@ -1057,9 +1060,18 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
     if (cloudSaveTimerRef.current) clearTimeout(cloudSaveTimerRef.current);
     cloudSaveTimerRef.current = setTimeout(async () => {
       try {
+        // Keep previewUrl thumbnails on IMAGE attachments so uploaded mood
+        // boards / reference photos remain visible in the transcript after
+        // rehydration from the cloud. Thumbnails are downscaled JPEGs (~<60KB)
+        // and easily fit inside the JSONB column.
         const compact = timeline.map((t) =>
           t.kind === "msg" && t.attachments?.length
-            ? { ...t, attachments: t.attachments.map(({ previewUrl: _omit, ...rest }) => rest) }
+            ? {
+                ...t,
+                attachments: t.attachments.map((a) =>
+                  a.kind === "image" ? a : (({ previewUrl: _omit, ...rest }) => rest)(a),
+                ),
+              }
             : t,
         );
         const payload = JSON.stringify(compact);
@@ -3402,18 +3414,30 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                         ))}
                       </div>
                     )}
-                    {item.content && (() => {
-                      // Suppress the auto-generated moodboard stub
-                      // ("Block 3 — Aesthetic & Visual DNA\nMOOD BOARD REFERENCE: …")
-                      // — the attached image thumbnail already conveys it.
-                      if (item.role === "user") {
-                        const stripped = item.content.trim();
-                        const isMoodboardStub =
+                    {(() => {
+                      // Suppress the auto-generated moodboard stub — the
+                      // attached image thumbnail already conveys it. Handles
+                      // both the pure stub and a longer user preamble that
+                      // also contains the reference line.
+                      let displayText = item.content ?? "";
+                      if (item.role === "user" && displayText) {
+                        const stripped = displayText.trim();
+                        const pureStub =
                           /^Block\s*3\s*—\s*Aesthetic[^\n]*\n\s*MOOD BOARD REFERENCE[S]?:[^\n]*\s*$/i.test(stripped);
-                        if (isMoodboardStub) return null;
+                        if (pureStub) {
+                          displayText = "";
+                        } else {
+                          displayText = stripped
+                            .replace(/^\s*Block\s*3\s*—\s*Aesthetic[^\n]*\n\s*MOOD BOARD REFERENCE[S]?:[^\n]*$/gim, "")
+                            .replace(/^\s*MOOD BOARD REFERENCE[S]?:[^\n]*$/gim, "")
+                            .replace(/\n{3,}/g, "\n\n")
+                            .trim();
+                        }
                       }
-                      return true;
-                    })() && (
+                      (item as any).__display = displayText;
+                      return null;
+                    })()}
+                    {(item as any).__display && (
                       item.role === "user" && isBriefContent(item.content) ? (
                         <div className={cn(expanded ? "max-w-[92%]" : "max-w-[88%]", "w-full flex justify-end")}>
                           <BriefBubble content={item.content} />
@@ -3627,7 +3651,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                           </ReactMarkdown>
                         </div>
                       ) : (
-                        <span className="whitespace-pre-wrap">{item.content}</span>
+                        <span className="whitespace-pre-wrap">{(item as any).__display ?? item.content}</span>
                       )}
                     </div>
                       )
