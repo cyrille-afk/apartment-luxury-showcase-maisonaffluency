@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { Plus, ExternalLink } from "lucide-react";
 import type { PickPreview } from "@/lib/tradeConciergeStream";
+import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { cn } from "@/lib/utils";
 
 export type CuratedInventoryItem = PickPreview;
