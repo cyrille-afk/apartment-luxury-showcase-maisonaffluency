@@ -1311,6 +1311,7 @@ const PublicProductPage: React.FC = () => {
                 productSlug: productSlug || "",
                 productName: product.title || "",
                 designerName: designerDisplay || "",
+                back: (typeof window !== "undefined" ? location.pathname + location.search : "") || "",
               }).toString()}#contact`}
               className="shrink-0 px-3 py-2 rounded-md bg-foreground text-background font-body text-[10px] uppercase tracking-[0.12em] whitespace-nowrap"
             >
@@ -1502,18 +1503,23 @@ const PublicProductPage: React.FC = () => {
               {/* Primary CTAs — Login for Pricing (trade) + Inquire for Pricing (trade-account form).
                   Passes product context so the admin inbox can pre-fill a draft quote. */}
               {(() => {
+                const returnTo = typeof window !== "undefined" ? location.pathname + location.search : "";
+                const backTo = fromPath || fallbackGridPath;
                 const q = new URLSearchParams({
                   subject: `Price on Request — ${product.title} by ${designerDisplay}`,
                   productId: product.id,
                   productSlug: productSlug || "",
                   productName: product.title || "",
                   designerName: designerDisplay || "",
+                  back: returnTo || "",
                 });
-                const returnTo = typeof window !== "undefined" ? location.pathname + location.search : "";
+                const loginQuery = new URLSearchParams();
+                if (returnTo) loginQuery.set("redirect", returnTo);
+                if (backTo) loginQuery.set("back", backTo);
                 return (
                   <div className="mt-2 grid grid-cols-2 gap-2">
                     <Link
-                      to={`/trade/login${returnTo ? `?redirect=${encodeURIComponent(returnTo)}` : ""}`}
+                      to={`/trade/login${loginQuery.toString() ? `?${loginQuery.toString()}` : ""}`}
                       className="flex items-center justify-center gap-2 px-4 py-3.5 rounded-md font-body text-[11px] md:text-xs uppercase tracking-[0.12em] transition-all w-full border border-foreground text-foreground hover:bg-foreground hover:text-background text-center"
                     >
                       Login for Pricing

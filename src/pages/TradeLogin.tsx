@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
@@ -7,6 +7,12 @@ import { useToast } from "@/hooks/use-toast";
 
 const TradeLogin = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const backHref = (() => {
+    const raw = searchParams.get("back") || searchParams.get("redirect") || "/";
+    // Only permit same-origin absolute paths to prevent open-redirect.
+    return raw.startsWith("/") && !raw.startsWith("//") ? raw : "/";
+  })();
   const { toast } = useToast();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -248,10 +254,11 @@ const TradeLogin = () => {
             Browse curators' picks, save favourites, download spec sheets, and request quotes.
           </p>
           <p className="font-body text-sm md:text-xs text-muted-foreground mt-2">
-            <Link to="/" className="hover:text-foreground transition-colors">
+            <Link to={backHref} className="hover:text-foreground transition-colors">
               ← Back to Maison Affluency
             </Link>
           </p>
+
         </div>
 
       </div>
