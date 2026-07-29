@@ -4829,7 +4829,12 @@ serve(async (req) => {
       // HARDENED: label must lead its own line (allow list markers / block
       // prefixes), immediately followed by a colon/dash. Prevents matches
       // inside prose like "the typology of the project profile is loose."
-      const typRe = /^[\s>*\-–—•]*(?:block\s*\d+[\s:.\-–—]*)?typology(?:\s*\([^)\n]{0,40}\))?\s*[:\-–—]\s*(.+)$/gim;
+      // Match block-labelled lines ("Typology: …", "Block 2 - Typology: …")
+      // AND the CTA input line ("Focus typology (optional): …" / "Focus
+      // typology: …"). Anything before the word "typology" on the same line
+      // must be short (< ~24 chars) so we don't grab prose like
+      // "the typology of the project profile is loose."
+      const typRe = /^[\s>*\-–—•]*(?:(?:block\s*\d+[\s:.\-–—]*)|(?:[a-z][a-z ]{0,22}\s+))?typology(?:\s*\([^)\n]{0,40}\))?\s*[:\-–—]\s*(.+)$/gim;
       let tm: RegExpExecArray | null;
       while ((tm = typRe.exec(userConversationText)) !== null) {
         const raw = tm[1].replace(/[\[\]]/g, "").trim();
