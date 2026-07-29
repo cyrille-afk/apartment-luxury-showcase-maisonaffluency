@@ -3745,11 +3745,11 @@ async function hydratePickPreview(
   const [{ data: picks }, { data: trades }] = await Promise.all([
     supabase
       .from("designer_curator_picks")
-      .select("id, title, image_url, materials, materials_description, description, meta_description, variant_placeholder, tags, category, dimensions, designer_id, trade_price_cents, currency, lead_time, size_variants")
+      .select("id, title, image_url, materials, materials_description, description, meta_description, variant_placeholder, tags, category, subcategory, dimensions, designer_id, trade_price_cents, currency, lead_time, size_variants")
       .in("id", pickIds),
     supabase
       .from("trade_products")
-      .select("id, product_name, brand_name, image_url, materials, materials_description, description, meta_description, variant_placeholder, available_finishes, fabric_options, category, dimensions, trade_price_cents, rrp_price_cents, currency, lead_time, stock_status_override")
+      .select("id, product_name, brand_name, image_url, materials, materials_description, description, meta_description, variant_placeholder, available_finishes, fabric_options, category, subcategory, dimensions, trade_price_cents, rrp_price_cents, currency, lead_time, stock_status_override")
       .in("id", pickIds),
   ]);
 
@@ -3871,6 +3871,7 @@ async function hydratePickPreview(
           tags: Array.isArray(p.tags) ? p.tags : null,
           size_variants: Array.isArray(p.size_variants) ? p.size_variants : null,
           category: p.category,
+          subcategory: p.subcategory || null,
           dimensions: p.dimensions || null,
           designer_name: designer,
           brand_name: designer,
@@ -3900,6 +3901,7 @@ async function hydratePickPreview(
           available_finishes: Array.isArray(t.available_finishes) ? t.available_finishes : null,
           fabric_options: Array.isArray(t.fabric_options) ? t.fabric_options : null,
           category: t.category,
+          subcategory: t.subcategory || null,
           dimensions: t.dimensions || null,
           designer_name: baseBrand || null,
           brand_name: rawBrand || null,
@@ -5191,6 +5193,7 @@ serve(async (req) => {
 
 
     if (hasExplicitSelectionVerb && requestedTypology && !mentionsKnownDesigner) {
+      const branchRequestedTypologies = normalizeRequestedTypologies(requestedTypology);
       const budgetCeiling = inferBudgetCeilingCents(lastUserMsg || "");
       const dimCeiling = inferDimensionConstraints(lastUserMsg || "");
       const inferredLead = inferLeadTimeConstraints(lastUserMsg || "");
@@ -5210,13 +5213,16 @@ serve(async (req) => {
       const budgetedCandidates = budgetCeiling
         ? allTypeCandidates.filter((r: any) => Number(r?.trade_price_cents || 0) > 0 && Number(r.trade_price_cents) <= budgetCeiling.cents)
         : allTypeCandidates;
-      const candidateRows = budgetedCandidates
+      const sortedBudgetedCandidates = budgetedCandidates
         .sort((a: any, b: any) => {
           const ap = Number(a?.trade_price_cents || Number.MAX_SAFE_INTEGER);
           const bp = Number(b?.trade_price_cents || Number.MAX_SAFE_INTEGER);
           return ap - bp || String(a?.title || "").localeCompare(String(b?.title || ""));
-        })
-        .slice(0, Math.min(8, Math.max(2, effectiveBrief.brief.qty_hint || 6)));
+        });
+      const candidateLimit = Math.min(8, Math.max(2, effectiveBrief.brief.qty_hint || 6));
+      const candidateRows = branchRequestedTypologies.length > 1
+        ? pickRowsForRequestedTypologyCoverage(sortedBudgetedCandidates, branchRequestedTypologies, candidateLimit)
+        : sortedBudgetedCandidates.slice(0, candidateLimit);
 
       if (allTypeCandidates.length > 0 && candidateRows.length === 0 && budgetCeiling) {
         return sseTextResponse(
@@ -5235,7 +5241,7 @@ serve(async (req) => {
           previewRaw,
           candidateIds.filter((id: string) => previewRaw.some((p: any) => p?.id === id)),
         );
-        if (dedupedIds.length === 0) {
+        if (dedupedIds.length === 0 || !rowsCoverRequestedTypologies(dedupedPreview, branchRequestedTypologies)) {
           return sseTextResponse(buildNoStrictTypologyReply(requestedTypology));
         }
         const rationaleMap: Record<string, { reason: string }> = {};
@@ -7041,6 +7047,7 @@ serve(async (req) => {
             // "Scala 300 Dining Table" sharing the same brand + image)
             // regardless of whether a typology was inferred.
             ({ previewRaw, pickIds } = dedupePreviewRows(previewRaw, pickIds));
+            const streamRequestedTypologies = normalizeRequestedTypologies(requestedTypology);
             // Honour in-chat "skip / exclude / omit …" instructions from the
             // latest user message so the proposal card ships pre-filtered.
             const streamExcludedIds = parseUserExclusions(lastUserMsg || "", previewRaw);
@@ -7060,8 +7067,8 @@ serve(async (req) => {
               controller.enqueue(encoder.encode(`data: ${JSON.stringify(frame)}\n\n`));
               continue;
             }
-            if (requestedTypology && pickIds.length < 2) {
-              console.warn(`[concierge] blocked ${tc.name} — insufficient true ${requestedTypology} picks after typology validation`);
+            if (requestedTypology && (pickIds.length < 2 || !rowsCoverRequestedTypologies(previewRaw, streamRequestedTypologies))) {
+              console.warn(`[concierge] blocked ${tc.name} — insufficient true ${typologyLabel(requestedTypology)} coverage after typology validation`);
               const releaseFrame = { choices: [{ delta: { content: buildNoStrictTypologyReply(requestedTypology) } }] };
               controller.enqueue(encoder.encode(`data: ${JSON.stringify(releaseFrame)}\n\n`));
               continue;
@@ -7459,8 +7466,8 @@ serve(async (req) => {
             if (requestedTypology) {
               previewRaw = previewRaw.filter((p: any) => rowMatchesRequestedTypology(p, requestedTypology));
               ({ previewRaw, pickIds } = dedupePreviewRows(previewRaw, pickIds));
-              if (pickIds.length < 2) {
-                console.warn(`[concierge promise-recovery] blocked — insufficient true ${requestedTypology} picks after typology validation`);
+              if (pickIds.length < 2 || !rowsCoverRequestedTypologies(previewRaw, requestedTypology)) {
+                console.warn(`[concierge promise-recovery] blocked — insufficient true ${typologyLabel(requestedTypology)} coverage after typology validation`);
                 const releaseFrame = { choices: [{ delta: { content: buildNoStrictTypologyReply(requestedTypology) } }] };
                 controller.enqueue(encoder.encode(`data: ${JSON.stringify(releaseFrame)}\n\n`));
                 return;
