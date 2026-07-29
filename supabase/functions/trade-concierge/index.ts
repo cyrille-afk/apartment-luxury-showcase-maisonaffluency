@@ -7782,7 +7782,33 @@ serve(async (req) => {
                 // curation allowlist) so pure discovery prose gets the same
                 // fact-checking rigor as card-bearing turns.
                 const proseTextForGuard = assistantTextBuf.trim();
-                if (proseTextForGuard.length > 0) {
+                // DUAL-TRACK BYPASS: when the user attached an image this
+                // turn (mood board / sketch / reference photo), the reply
+                // is the prompt-controlled four-step Design Director
+                // scaffold. That scaffold intentionally names the user's
+                // city, neighbourhood, hub, and project typology
+                // ("Brooklyn Heights", "Brownstone", "New York hub"…),
+                // and the system prompt already forbids naming any
+                // catalog piece on that turn. Running the deterministic
+                // redactor over it strips those legitimate proper nouns
+                // as suspected designer namedrops, trips the "gutted"
+                // threshold, and swaps in SAFE_FALLBACK_PROSE — the
+                // generic "Let me pause before naming anything…" reply
+                // that erases the dual-track location lock-in. Skip
+                // guard + inspector on this specific turn shape.
+                if (latestTurnHasAttachments && proseTextForGuard.length > 0) {
+                  try {
+                    console.log(JSON.stringify({
+                      tag: "concierge_dual_track_guard_bypass",
+                      request_id: requestId,
+                      ts: new Date().toISOString(),
+                      reason: "user_turn_has_image_attachment_scaffold_reply",
+                      prose_len: proseTextForGuard.length,
+                    }));
+                  } catch { /* best-effort */ }
+                  const frame = { choices: [{ delta: { content: proseTextForGuard } }] };
+                  controller.enqueue(encoder.encode(`data: ${JSON.stringify(frame)}\n\n`));
+                } else if (proseTextForGuard.length > 0) {
                   // Stage 1: Discovery Guard — strips obvious namedrops fast.
                   const guard = await runDiscoveryProseGuard({
                     prose: proseTextForGuard,
