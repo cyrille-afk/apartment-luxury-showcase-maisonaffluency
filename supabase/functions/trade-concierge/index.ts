@@ -3325,6 +3325,22 @@ function rowPaletteHaystack(row: any): string {
   ].filter(Boolean).join(" "));
 }
 
+function rowFinishHaystack(row: any): string {
+  const variantText = Array.isArray(row?.size_variants)
+    ? row.size_variants.map((v: any) => variantLabel(v)).filter(Boolean).join(" ")
+    : "";
+  const arrayText = [row?.available_finishes, row?.fabric_options]
+    .map((v) => Array.isArray(v) ? v.join(" ") : "")
+    .join(" ");
+  return normalizeLoose([
+    row?.materials,
+    row?.materials_description,
+    row?.variant_placeholder,
+    variantText,
+    arrayText,
+  ].filter(Boolean).join(" "));
+}
+
 function paletteTokensForMatching(constraints: HardConstraints | null | undefined): string[] {
   const raw = [...(constraints?.materials || []), ...(constraints?.colors || [])]
     .map((t) => normalizeLoose(String(t || "")))
@@ -3359,14 +3375,17 @@ function paletteMatchScore(row: any, constraints: HardConstraints | null | undef
   const tokens = paletteTokensForMatching(constraints);
   if (!tokens.length) return 0;
   const hay = rowPaletteHaystack(row);
+  const finishHay = rowFinishHaystack(row) || hay;
   let score = 0;
-  const hasIvorySignal = /\b(ivory|cream|off\s+white|offwhite|white)\b/i.test(hay);
-  const hasFabricSignal = /\b(boucle|bouclé|fabric|textile|upholstery|com\s+fabric|ecart\s+fabric)\b/i.test(hay);
-  const hasWoodSignal = /\b(oak|wood|timber|walnut|ash)\b/i.test(hay);
-  const hasBrassSignal = /\b(brass|bronze|metal)\b/i.test(hay);
+  const hasIvorySignal = /\b(ivory|cream|off\s+white|offwhite|white)\b/i.test(finishHay);
+  const hasFabricSignal = /\b(boucle|bouclé|fabric|textile|upholstery|com\s+fabric|ecart\s+fabric)\b/i.test(finishHay);
+  const hasWoodSignal = /\b(oak|wood|timber|walnut|ash)\b/i.test(finishHay);
+  const hasBrassSignal = /\b(brass|bronze|metal)\b/i.test(finishHay);
   for (const token of tokens) {
     const escaped = token.replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace(/\s+/g, "\\s+");
-    if (new RegExp(`\\b${escaped}\\b`, "i").test(hay)) score += token.includes(" ") ? 2 : 1;
+    const re = new RegExp(`\\b${escaped}\\b`, "i");
+    if (re.test(finishHay)) score += token.includes(" ") ? 4 : 2;
+    else if (re.test(hay)) score += token.includes(" ") ? 2 : 1;
   }
   if (tokens.some((t) => ["ivory", "cream", "off white", "offwhite", "white"].includes(t)) && hasIvorySignal) score += 4;
   if (tokens.some((t) => ["boucle", "bouclé", "fabric", "textile", "upholstery", "com fabric"].includes(t)) && hasFabricSignal) score += 3;
