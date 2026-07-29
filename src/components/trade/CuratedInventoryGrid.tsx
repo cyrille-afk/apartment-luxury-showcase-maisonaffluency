@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { Plus, ExternalLink } from "lucide-react";
 import type { PickPreview } from "@/lib/tradeConciergeStream";
+import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { cn } from "@/lib/utils";
 
 export type CuratedInventoryItem = PickPreview;
@@ -40,6 +41,19 @@ export function CuratedInventoryGrid({
   className,
 }: CuratedInventoryGridProps) {
   const navigate = useNavigate();
+  const { discountPct, tierLabel } = useTradeDiscount();
+
+  const fmtPrice = (cents: number, currency: string) => {
+    try {
+      return new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: currency || "EUR",
+        maximumFractionDigits: 0,
+      }).format(cents / 100);
+    } catch {
+      return `${(cents / 100).toLocaleString()} ${currency || ""}`.trim();
+    }
+  };
 
   if (!items?.length) return null;
 
@@ -107,9 +121,20 @@ export function CuratedInventoryGrid({
                 </div>
 
                 <div className="mt-3 flex items-center justify-between gap-2">
-                  <div className="font-body text-[12px] text-foreground/80">
-                    Trade Price on Request
-                  </div>
+                  {typeof item.price_cents === "number" && item.price_cents > 0 ? (
+                    <div className="flex flex-col leading-tight">
+                      <span className="font-display text-[14px] font-semibold text-foreground">
+                        {fmtPrice(Math.round(item.price_cents * (1 - discountPct)), item.currency || "EUR")}
+                      </span>
+                      <span className="font-body text-[10px] uppercase tracking-[0.1em] text-muted-foreground">
+                        {tierLabel} net · RRP {fmtPrice(item.price_cents, item.currency || "EUR")}
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="font-body text-[12px] text-foreground/80">
+                      Trade Price on Request
+                    </div>
+                  )}
                   <span
                     className={cn(
                       "inline-flex items-center rounded-sm border px-1.5 py-0.5 text-[10px] uppercase tracking-[0.1em]",

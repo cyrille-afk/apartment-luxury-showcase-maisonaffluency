@@ -221,6 +221,8 @@ export type PickPreview = {
   stock_status?: string | null;
   rationale?: string;
   rationale_detail?: string | null;
+  price_cents?: number | null;
+  currency?: string | null;
 };
 
 export type VariantOption = {
