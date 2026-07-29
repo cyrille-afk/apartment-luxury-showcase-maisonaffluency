@@ -4840,23 +4840,29 @@ serve(async (req) => {
     ) {
       try {
         const scopedBrandList = Array.from(
-          new Set(
-            scopedDesigners.flatMap((n) => [n, n.toLowerCase()]).filter(Boolean),
-          ),
+          new Set(scopedDesigners.filter(Boolean)),
         );
+        // Resolve scoped names → designer ids for the picks probe.
+        const { data: probeDesigners } = await supabase
+          .from("designers")
+          .select("id, name, display_name")
+          .or(scopedBrandList.map((n) => `name.ilike.${n},display_name.ilike.${n}`).join(","));
+        const probeDesignerIds = (probeDesigners || []).map((d: any) => d.id).filter(Boolean);
+        const idsForProbe = probeDesignerIds.length ? probeDesignerIds : ["00000000-0000-0000-0000-000000000000"];
+        const brandsForProbe = scopedBrandList.length ? scopedBrandList : ["__none__"];
         // Cheap sparsity probe — count nulls vs total for the scoped brands.
         const [picksTotal, picksWithMat, tradeTotal, tradeWithMat] = await Promise.all([
           supabase.from("designer_curator_picks").select("id", { count: "exact", head: true })
-            .in("designer_id", filteredDesignerIds.length ? filteredDesignerIds : ["00000000-0000-0000-0000-000000000000"]),
+            .in("designer_id", idsForProbe),
           supabase.from("designer_curator_picks").select("id", { count: "exact", head: true })
-            .in("designer_id", filteredDesignerIds.length ? filteredDesignerIds : ["00000000-0000-0000-0000-000000000000"])
+            .in("designer_id", idsForProbe)
             .not("materials", "is", null),
           supabase.from("trade_products").select("id", { count: "exact", head: true })
             .eq("is_active", true)
-            .in("brand_name", filteredBrandNames.size ? Array.from(filteredBrandNames) : scopedBrandList),
+            .in("brand_name", brandsForProbe),
           supabase.from("trade_products").select("id", { count: "exact", head: true })
             .eq("is_active", true)
-            .in("brand_name", filteredBrandNames.size ? Array.from(filteredBrandNames) : scopedBrandList)
+            .in("brand_name", brandsForProbe)
             .not("materials", "is", null),
         ]);
         const total = (picksTotal.count || 0) + (tradeTotal.count || 0);
