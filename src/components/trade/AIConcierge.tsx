@@ -341,6 +341,14 @@ type TimelineItem =
       discountPct?: number;
       totalCents?: number;
       resolved?: "downloaded" | "sent";
+    }
+  | {
+      kind: "quote_summary";
+      id: string;
+      projectId: string;
+      projectName: string;
+      baseItems: Array<{ name: string; price: number }>;
+      resolved?: "downloaded" | "sent";
     };
 
 
