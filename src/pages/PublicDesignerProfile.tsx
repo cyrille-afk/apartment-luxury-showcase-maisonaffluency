@@ -1129,11 +1129,10 @@ const PublicDesignerProfile = () => {
                       return;
                     }
                     if (isMobileProductPickMode) {
-                      // Mobile + PWA: the image tap reveals the alternate image and CTA together.
-                      // Product navigation is then handled by the visible CTA pill, not a hidden second image tap.
+                      // Mobile + PWA: go straight to the product page on first tap.
                       e.preventDefault();
                       e.stopPropagation();
-                      setMobileRevealedPickId(pick.id);
+                      navigate(productHref);
                       return;
                     }
                     // Desktop: intercept the deep link and open the lightbox instead.
