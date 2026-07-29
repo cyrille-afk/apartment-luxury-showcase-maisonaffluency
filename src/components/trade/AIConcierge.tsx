@@ -1228,7 +1228,54 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
     return () => { cancelled = true; };
   }, [user?.id, activeThreadKey, refreshThreads, deriveThreadTitle]);
 
-  // Hydrate timeline whenever the active thread changes.
+  // Build the compact, JSONB-safe timeline payload we upsert to the cloud.
+  // Kept as a callable so both the debounced save and the pagehide flush use
+  // an identical shape.
+  const buildCompactTimeline = useCallback((items: TimelineItem[]) => (
+    items.map((t) =>
+      t.kind === "msg" && t.attachments?.length
+        ? {
+            ...t,
+            attachments: t.attachments.map((a) =>
+              a.kind === "image" ? a : (({ previewUrl: _omit, ...rest }) => rest)(a),
+            ),
+          }
+        : t,
+    )
+  ), []);
+
+  const saveActiveThreadNow = useCallback(async (items: TimelineItem[]) => {
+    if (!user?.id || !activeThreadId) return;
+    if (hydratedThreadRef.current !== activeThreadId) return;
+    const hasUserMsg = items.some((t) => t.kind === "msg" && t.role === "user");
+    if (!hasUserMsg) return;
+    const compact = buildCompactTimeline(items);
+    const payload = JSON.stringify(compact);
+    if (payload === cloudLastPayloadRef.current) return;
+    cloudLastPayloadRef.current = payload;
+    const title = deriveThreadTitle(compact as TimelineItem[]);
+    const nowIso = new Date().toISOString();
+    try {
+      await supabase
+        .from("concierge_threads")
+        .update({ timeline: compact as any, title, last_active_at: nowIso })
+        .eq("id", activeThreadId)
+        .eq("user_id", user.id);
+      setThreads((prev) => {
+        const next = prev.map((t) => t.id === activeThreadId ? { ...t, title, last_active_at: nowIso } : t);
+        next.sort((a, b) => b.last_active_at.localeCompare(a.last_active_at));
+        return next;
+      });
+    } catch {
+      // Non-fatal: sessionStorage still holds the in-tab copy.
+    }
+  }, [user?.id, activeThreadId, buildCompactTimeline, deriveThreadTitle]);
+
+  // Hydrate timeline whenever the active thread changes. If the in-memory
+  // timeline (restored from sessionStorage on refresh) has MORE messages than
+  // the remote row, prefer local and immediately push it up — otherwise a
+  // refresh that lands before the 400ms debounce has flushed silently loses
+  // the last turn.
   useEffect(() => {
     if (!user?.id || !activeThreadId) return;
     if (hydratedThreadRef.current === activeThreadId) return;
@@ -1244,14 +1291,22 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
       hydratedThreadRef.current = activeThreadId;
       cloudLastPayloadRef.current = "";
       const remote = (data as any)?.timeline;
-      if (Array.isArray(remote) && remote.length > 0) {
-        setTimeline(stripDesignDirectorCtasFromTimeline(sanitizeTimelineForAttachments(remote as TimelineItem[])));
-      } else {
+      const remoteArr = Array.isArray(remote) ? (remote as TimelineItem[]) : [];
+      const localHasUser = timeline.some((t) => t.kind === "msg" && t.role === "user");
+      if (localHasUser && timeline.length > remoteArr.length) {
+        // sessionStorage-restored timeline is fresher than DB — keep it and
+        // flush upstream so the DB catches up.
+        void saveActiveThreadNow(timeline);
+        return;
+      }
+      if (remoteArr.length > 0) {
+        setTimeline(stripDesignDirectorCtasFromTimeline(sanitizeTimelineForAttachments(remoteArr)));
+      } else if (!localHasUser) {
         setTimeline(buildInitialTimeline());
       }
     })();
     return () => { cancelled = true; };
-  }, [user?.id, activeThreadId, buildInitialTimeline]);
+  }, [user?.id, activeThreadId, buildInitialTimeline, saveActiveThreadNow, timeline]);
 
   // Debounced upsert of the active thread's timeline on every change.
   useEffect(() => {
@@ -1260,45 +1315,37 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
     const hasUserMsg = timeline.some((t) => t.kind === "msg" && t.role === "user");
     if (!hasUserMsg) return;
     if (cloudSaveTimerRef.current) clearTimeout(cloudSaveTimerRef.current);
-    cloudSaveTimerRef.current = setTimeout(async () => {
-      try {
-        // Keep previewUrl thumbnails on IMAGE attachments so uploaded mood
-        // boards / reference photos remain visible in the transcript after
-        // rehydration from the cloud. Thumbnails are downscaled JPEGs (~<60KB)
-        // and easily fit inside the JSONB column.
-        const compact = timeline.map((t) =>
-          t.kind === "msg" && t.attachments?.length
-            ? {
-                ...t,
-                attachments: t.attachments.map((a) =>
-                  a.kind === "image" ? a : (({ previewUrl: _omit, ...rest }) => rest)(a),
-                ),
-              }
-            : t,
-        );
-        const payload = JSON.stringify(compact);
-        if (payload === cloudLastPayloadRef.current) return;
-        cloudLastPayloadRef.current = payload;
-        const title = deriveThreadTitle(compact as TimelineItem[]);
-        const nowIso = new Date().toISOString();
-        await supabase
-          .from("concierge_threads")
-          .update({ timeline: compact as any, title, last_active_at: nowIso })
-          .eq("id", activeThreadId)
-          .eq("user_id", user.id);
-        setThreads((prev) => {
-          const next = prev.map((t) => t.id === activeThreadId ? { ...t, title, last_active_at: nowIso } : t);
-          next.sort((a, b) => b.last_active_at.localeCompare(a.last_active_at));
-          return next;
-        });
-      } catch {
-        // Non-fatal: sessionStorage still holds the in-tab copy.
-      }
-    }, 800);
+    cloudSaveTimerRef.current = setTimeout(() => {
+      void saveActiveThreadNow(timeline);
+    }, 400);
     return () => {
       if (cloudSaveTimerRef.current) clearTimeout(cloudSaveTimerRef.current);
     };
-  }, [timeline, user?.id, activeThreadId, deriveThreadTitle]);
+  }, [timeline, user?.id, activeThreadId, saveActiveThreadNow]);
+
+  // Flush pending save immediately when the tab is hidden or unloaded, so a
+  // refresh in the test environment can never lose the most recent turn.
+  useEffect(() => {
+    if (!user?.id || !activeThreadId) return;
+    const flush = () => {
+      if (cloudSaveTimerRef.current) {
+        clearTimeout(cloudSaveTimerRef.current);
+        cloudSaveTimerRef.current = null;
+      }
+      void saveActiveThreadNow(timeline);
+    };
+    const onVis = () => { if (document.visibilityState === "hidden") flush(); };
+    window.addEventListener("pagehide", flush);
+    window.addEventListener("beforeunload", flush);
+    document.addEventListener("visibilitychange", onVis);
+    return () => {
+      window.removeEventListener("pagehide", flush);
+      window.removeEventListener("beforeunload", flush);
+      document.removeEventListener("visibilitychange", onVis);
+    };
+  }, [user?.id, activeThreadId, timeline, saveActiveThreadNow]);
+
+
 
 
   // If the user deletes all project folders/tearsheets and quotes, the trade
