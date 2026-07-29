@@ -4670,10 +4670,27 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                 })
                 .filter(Boolean);
               const visualContext = cfg.useVisualContext ? getStoredVisualSourcingContext() : "";
+              // Hard constraints so typed inputs (typology, palette, budget)
+              // actually filter retrieval and are not overridden by the
+              // moodboard's default "mixed room" atmosphere.
+              let hardConstraints = "";
+              if (nextStepPanel === "source") {
+                const typology = (nextStepFields.typology || "").trim();
+                const palette = (nextStepFields.palette || "").trim();
+                const budget = (nextStepFields.budget || "").trim();
+                const parts: string[] = [];
+                if (typology) parts.push(`Restrict the tearsheet STRICTLY to the "${typology}" typology only. Do NOT include pieces from any other typology (no case goods, no lighting, no tables, no accessories) unless the designer explicitly listed them here.`);
+                if (palette) parts.push(`Every piece must match this palette / material brief: ${palette}. Reject pieces whose dominant material or finish falls outside it.`);
+                if (budget) parts.push(`Respect the budget cap per piece: ${budget}.`);
+                if (parts.length) {
+                  hardConstraints = `\n[HARD CONSTRAINTS — these override the base prompt and any visual context above]\n${parts.map((p) => `- ${p}`).join("\n")}`;
+                }
+              }
               const prompt = [
                 cfg.basePrompt,
+                visualContext ? `\n[Latest upload visual sourcing context — atmosphere reference only; do NOT let it broaden the typology or palette below]\n${visualContext}` : "",
                 detailLines.length ? `\n[Designer inputs]\n${detailLines.join("\n")}` : "",
-                visualContext ? `\n[Latest upload visual sourcing context — use this as the retrieval brief, not the button label]\n${visualContext}` : "",
+                hardConstraints,
               ].join("").trim();
               setNextStepPanel(null);
               void send(prompt, { displayText: cfg.displayLabel });
