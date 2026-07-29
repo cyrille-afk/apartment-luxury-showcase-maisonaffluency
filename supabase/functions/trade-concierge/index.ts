@@ -3282,6 +3282,52 @@ function rowMatchesRequestedTypology(row: any, typology: RequestedTypology | Req
   return requested.some((t) => rowMatchesSingleRequestedTypology(row, t));
 }
 
+function rowMatchedRequestedTypologies(row: any, typology: RequestedTypology | RequestedTypology[] | null): RequestedTypology[] {
+  return normalizeRequestedTypologies(typology).filter((t) => rowMatchesSingleRequestedTypology(row, t));
+}
+
+function rowsCoverRequestedTypologies(rows: any[], typology: RequestedTypology | RequestedTypology[] | null): boolean {
+  const requested = normalizeRequestedTypologies(typology);
+  if (requested.length <= 1) return true;
+  return requested.every((t) => rows.some((row) => rowMatchesSingleRequestedTypology(row, t)));
+}
+
+function pickRowsForRequestedTypologyCoverage(
+  rows: any[],
+  typology: RequestedTypology | RequestedTypology[] | null,
+  limit: number,
+): any[] {
+  const requested = normalizeRequestedTypologies(typology);
+  if (requested.length <= 1) return rows.slice(0, limit);
+  const picked: any[] = [];
+  const used = new Set<string>();
+  const buckets = requested.map((t) => rows.filter((row) => rowMatchesSingleRequestedTypology(row, t)));
+  const cursors = buckets.map(() => 0);
+  let progressed = true;
+  while (picked.length < limit && progressed) {
+    progressed = false;
+    for (let b = 0; b < buckets.length && picked.length < limit; b++) {
+      while (cursors[b] < buckets[b].length) {
+        const row = buckets[b][cursors[b]++];
+        const id = String(row?.id || "");
+        if (!id || used.has(id)) continue;
+        picked.push(row);
+        used.add(id);
+        progressed = true;
+        break;
+      }
+    }
+  }
+  for (const row of rows) {
+    if (picked.length >= limit) break;
+    const id = String(row?.id || "");
+    if (!id || used.has(id)) continue;
+    picked.push(row);
+    used.add(id);
+  }
+  return picked;
+}
+
 function dedupePreviewRows(previewRaw: any[], pickIds: string[]): { previewRaw: any[]; pickIds: string[] } {
   const seenTitleKey = new Set<string>();
   const seenImageKey = new Set<string>();
@@ -3336,23 +3382,40 @@ function buildOpeningBriefDiscoveryReply(latestUserMessage: string, langCode = "
 
 async function fetchStrictTypologyCandidates(
   supabase: ConciergeDbClient,
-  typology: RequestedTypology,
+  typology: RequestedTypology | RequestedTypology[],
   dimConstraints?: DimensionConstraints | null,
   leadConstraints?: LeadTimeConstraints | null,
 ): Promise<any[]> {
-  const term = typology === "dining_table" ? "dining" : "table";
+  const requested = normalizeRequestedTypologies(typology);
+  const searchTerms = Array.from(new Set(requested.flatMap((t) => {
+    if (t === "dining_table") return ["dining", "table"];
+    if (t === "table") return ["table", "console", "desk"];
+    if (t === "seating") return ["seating", "chair", "sofa", "bench", "stool", "ottoman", "banquette", "daybed"];
+    if (t === "lighting") return ["lamp", "lighting", "chandelier", "sconce", "pendant", "lantern"];
+    if (t === "storage") return ["cabinet", "sideboard", "credenza", "shelving", "bookcase", "storage"];
+    if (t === "bedroom_furniture") return ["bed", "headboard", "nightstand", "bedside"];
+    if (t === "rugs") return ["rug", "carpet", "kilim", "dhurrie"];
+    if (t === "decor") return ["vase", "sculpture", "object", "screen", "mirror", "art"];
+    return [];
+  })));
+  const pickOr = searchTerms.map((term) => `title.ilike.%${term}%,subcategory.ilike.%${term}%,category.ilike.%${term}%`).join(",");
+  const tradeOr = searchTerms.map((term) => `product_name.ilike.%${term}%,subcategory.ilike.%${term}%,category.ilike.%${term}%`).join(",");
   const [pickRes, tradeRes] = await Promise.all([
-    supabase
+    (pickOr
+      ? supabase
       .from("designer_curator_picks")
       .select("id, title, materials, category, subcategory, dimensions, trade_price_cents, currency, lead_time, stock_status, designer_id")
-      .or(`title.ilike.%${term}%,subcategory.ilike.%${term}%,category.ilike.%${term}%`)
-      .limit(160),
-    supabase
+        .or(pickOr)
+        .limit(240)
+      : supabase.from("designer_curator_picks").select("id, title, materials, category, subcategory, dimensions, trade_price_cents, currency, lead_time, stock_status, designer_id").limit(240)),
+    (tradeOr
+      ? supabase
       .from("trade_products")
       .select("id, product_name, materials, category, subcategory, dimensions, trade_price_cents, rrp_price_cents, currency, lead_time, stock_status_override, brand_name")
       .eq("is_active", true)
-      .or(`product_name.ilike.%${term}%,subcategory.ilike.%${term}%,category.ilike.%${term}%`)
-      .limit(160),
+        .or(tradeOr)
+        .limit(240)
+      : supabase.from("trade_products").select("id, product_name, materials, category, subcategory, dimensions, trade_price_cents, rrp_price_cents, currency, lead_time, stock_status_override, brand_name").eq("is_active", true).limit(240)),
   ]);
   let typologyFiltered = [
     ...(pickRes.data || []),
@@ -3365,13 +3428,13 @@ async function fetchStrictTypologyCandidates(
   ].filter((r: any) => rowMatchesRequestedTypology(r, typology));
   if (dimConstraints) {
     const dimRes = filterRowsByDimensionConstraints(typologyFiltered, dimConstraints);
-    console.log(`[concierge strict-typology dim] typology=${typology} pre=${typologyFiltered.length} strict=${dimRes.strictKept.length} kept=${dimRes.kept.length} dropped=${dimRes.dropped} unknownDropped=${dimRes.unknownDropped} fellBack=${dimRes.fellBack} constraints=${JSON.stringify(dimConstraints)}`);
+    console.log(`[concierge strict-typology dim] typology=${typologyLabel(typology)} pre=${typologyFiltered.length} strict=${dimRes.strictKept.length} kept=${dimRes.kept.length} dropped=${dimRes.dropped} unknownDropped=${dimRes.unknownDropped} fellBack=${dimRes.fellBack} constraints=${JSON.stringify(dimConstraints)}`);
     typologyFiltered = dimRes.kept;
   }
   if (leadConstraints) {
     const brandIdx = await getBrandLeadTimeIndex(supabase);
     const leadRes = filterRowsByLeadTimeConstraints(typologyFiltered, leadConstraints, brandIdx);
-    console.log(`[concierge strict-typology lead] typology=${typology} pre=${typologyFiltered.length} kept=${leadRes.kept.length} dropped=${leadRes.dropped} unknownDropped=${leadRes.unknownDropped} fellBack=${leadRes.fellBack} constraints=${JSON.stringify(leadConstraints)}`);
+    console.log(`[concierge strict-typology lead] typology=${typologyLabel(typology)} pre=${typologyFiltered.length} kept=${leadRes.kept.length} dropped=${leadRes.dropped} unknownDropped=${leadRes.unknownDropped} fellBack=${leadRes.fellBack} constraints=${JSON.stringify(leadConstraints)}`);
     typologyFiltered = leadRes.kept;
   }
   return typologyFiltered;
