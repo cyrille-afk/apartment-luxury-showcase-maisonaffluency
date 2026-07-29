@@ -3491,15 +3491,20 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                           const found: string[] = [];
                           const seen = new Set<string>();
                           let m: RegExpExecArray | null;
-                          while ((m = lineRe.exec(raw)) !== null) {
-                            const canon = CTA_LABELS.find((l) => l.toLowerCase() === m![1].toLowerCase());
-                            if (canon && !seen.has(canon)) { seen.add(canon); found.push(canon); }
-                          }
-                          const stripped = raw
-                            .replace(lineRe, "")
-                            // Collapse the blank lines left behind by removed items.
-                            .replace(/\n{3,}/g, "\n\n")
-                            .trim();
+                           while ((m = lineRe.exec(raw)) !== null) {
+                             const canon = CTA_LABELS.find((l) => l.toLowerCase() === m![1].toLowerCase());
+                             if (canon && !seen.has(canon)) { seen.add(canon); found.push(canon); }
+                           }
+                           while ((m = bareRe.exec(raw)) !== null) {
+                             const canon = CTA_LABELS.find((l) => l.toLowerCase() === m![1].toLowerCase());
+                             if (canon && !seen.has(canon)) { seen.add(canon); found.push(canon); }
+                           }
+                           const stripped = raw
+                             .replace(lineRe, "")
+                             .replace(bareRe, "")
+                             // Collapse the blank lines left behind by removed items.
+                             .replace(/\n{3,}/g, "\n\n")
+                             .trim();
 
                           const dispatchCta = (label: string) => {
                             if (label === "Forward to Human Concierge") { void forwardToHumanConcierge(); return; }
