@@ -4591,6 +4591,119 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
           </div>
         </SheetContent>
       </Sheet>
+
+      <Sheet open={nextStepPanel !== null} onOpenChange={(o) => { if (!o) setNextStepPanel(null); }}>
+        <SheetContent side="right" className="w-full sm:max-w-md p-0 flex flex-col">
+          {nextStepPanel && (() => {
+            const config: Record<NextStepKind, { title: string; blurb: string; fields: { key: string; label: string; placeholder: string; type?: "textarea" }[]; basePrompt: string; displayLabel: string; useVisualContext?: boolean }> = {
+              source: {
+                title: "Source Similar Pieces",
+                blurb: "Refine the retrieval brief before Felix drafts the tearsheet.",
+                displayLabel: "Source Similar Pieces",
+                useVisualContext: true,
+                basePrompt: "Source similar pieces — propose a harmonised mixed-room tearsheet from the Maison Affluency Curation based on the uploaded moodboard's atmosphere, palette, materials, and forms. Do not restrict the edit to one product typology unless I explicitly ask for that typology.",
+                fields: [
+                  { key: "typology", label: "Focus typology (optional)", placeholder: "e.g. seating, lighting, case goods — leave blank for mixed room" },
+                  { key: "palette", label: "Palette / material accents", placeholder: "e.g. warm oak, patinated brass, ivory bouclé" },
+                  { key: "budget", label: "Budget cap per piece (optional)", placeholder: "e.g. up to €12,000" },
+                  { key: "notes", label: "Additional brief", placeholder: "Anything else Felix should weigh (mood, era, must-avoid)…", type: "textarea" },
+                ],
+              },
+              quote: {
+                title: "Generate Custom Quote",
+                blurb: "Give Felix the specifics for the bespoke specification sheet.",
+                displayLabel: "Generate Custom Quote",
+                basePrompt: "Generate a custom quote — draft a bespoke specification sheet based on the design concept you just detected (style, palette, typology tokens).",
+                fields: [
+                  { key: "piece", label: "Piece(s) to quote", placeholder: "e.g. Alexander Lamont Sirocco console — bespoke length" },
+                  { key: "quantity", label: "Quantity", placeholder: "e.g. 2" },
+                  { key: "finishes", label: "Preferred finishes", placeholder: "e.g. straw marquetry, aged bronze base" },
+                  { key: "dimensions", label: "Target dimensions", placeholder: "e.g. L 2200 × D 420 × H 900 mm" },
+                  { key: "notes", label: "Site / delivery notes", placeholder: "Ship-to city, deadline, install constraints…", type: "textarea" },
+                ],
+              },
+              match: {
+                title: "Match Finishes",
+                blurb: "Anchor the shortlist to the reference you want Felix to harmonise with.",
+                displayLabel: "Match Finishes",
+                basePrompt: "Match finishes — shortlist textile and material references from the available_finishes of on-palette pieces in the Curation that complement this palette.",
+                fields: [
+                  { key: "reference", label: "Anchor piece or reference", placeholder: "e.g. Studio Van den Akker Winslow armchair" },
+                  { key: "palette", label: "Palette to match", placeholder: "e.g. dune, oyster, aged brass" },
+                  { key: "materials", label: "Preferred materials", placeholder: "e.g. bouclé, silk velvet, hand-loomed linen" },
+                  { key: "notes", label: "Additional context", placeholder: "Room, lighting, adjacent finishes…", type: "textarea" },
+                ],
+              },
+            };
+            const cfg = config[nextStepPanel];
+            const submit = () => {
+              const detailLines = cfg.fields
+                .map((f) => {
+                  const v = (nextStepFields[f.key] || "").trim();
+                  return v ? `- ${f.label}: ${v}` : "";
+                })
+                .filter(Boolean);
+              const visualContext = cfg.useVisualContext ? getStoredVisualSourcingContext() : "";
+              const prompt = [
+                cfg.basePrompt,
+                detailLines.length ? `\n[Designer inputs]\n${detailLines.join("\n")}` : "",
+                visualContext ? `\n[Latest upload visual sourcing context — use this as the retrieval brief, not the button label]\n${visualContext}` : "",
+              ].join("").trim();
+              setNextStepPanel(null);
+              void send(prompt, { displayText: cfg.displayLabel });
+            };
+            return (
+              <>
+                <div className="px-6 pt-6 pb-4 border-b border-border/60">
+                  <div className="font-display text-lg text-foreground">{cfg.title}</div>
+                  <p className="font-body text-xs text-muted-foreground mt-1 leading-relaxed">{cfg.blurb}</p>
+                </div>
+                <div className="flex-1 overflow-y-auto px-6 py-5 space-y-4">
+                  {cfg.fields.map((f) => (
+                    <div key={f.key} className="space-y-1.5">
+                      <label className="font-body text-[11px] uppercase tracking-[0.14em] text-muted-foreground">{f.label}</label>
+                      {f.type === "textarea" ? (
+                        <textarea
+                          value={nextStepFields[f.key] || ""}
+                          onChange={(e) => setNextStepFields((prev) => ({ ...prev, [f.key]: e.target.value }))}
+                          placeholder={f.placeholder}
+                          rows={3}
+                          className="w-full rounded-md border border-border bg-background px-3 py-2 font-body text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-foreground/30 resize-none"
+                        />
+                      ) : (
+                        <input
+                          type="text"
+                          value={nextStepFields[f.key] || ""}
+                          onChange={(e) => setNextStepFields((prev) => ({ ...prev, [f.key]: e.target.value }))}
+                          placeholder={f.placeholder}
+                          className="w-full rounded-md border border-border bg-background px-3 py-2 font-body text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-foreground/30"
+                        />
+                      )}
+                    </div>
+                  ))}
+                </div>
+                <div className="px-6 py-4 border-t border-border/60 flex items-center justify-end gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setNextStepPanel(null)}
+                    className="rounded-full border border-border/80 bg-background px-4 py-2 font-body text-xs text-foreground hover:bg-muted transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={submit}
+                    className="rounded-full bg-foreground text-background px-4 py-2 font-body text-xs hover:bg-foreground/90 transition-colors"
+                  >
+                    Send to Felix
+                  </button>
+                </div>
+              </>
+            );
+          })()}
+        </SheetContent>
+      </Sheet>
     </>
   );
+
 }
