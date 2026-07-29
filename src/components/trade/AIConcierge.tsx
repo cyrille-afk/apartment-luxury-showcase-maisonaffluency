@@ -2789,7 +2789,9 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
           .filter((id) => proposal.preview.some((p) => p.id === id));
       }
 
-      setTimeline((prev) => swapPendingWithReal(prev, tcid, proposal.tool, { kind: "proposal", proposal, newPickIds, locked: carriedLocked }));
+      const sourceOrigin = pendingSourceOriginRef.current ? ("source" as const) : undefined;
+      if (sourceOrigin) pendingSourceOriginRef.current = false;
+      setTimeline((prev) => swapPendingWithReal(prev, tcid, proposal.tool, { kind: "proposal", proposal, newPickIds, locked: carriedLocked, sourceOrigin }));
     };
 
 
