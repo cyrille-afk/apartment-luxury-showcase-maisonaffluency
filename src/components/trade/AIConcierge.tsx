@@ -3615,11 +3615,13 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                               setMinimized(false); setConciergeStatus(null); setHandoffTicket(null); return;
                             }
                             if (label === "View My Open Requests") { navigate("/trade/custom-requests"); return; }
-                            if (label === "Source Similar Pieces" || label === "Generate Custom Quote" || label === "Match Finishes") {
+                            if (label === "Generate Custom Quote") {
+                              void runGenerateCustomQuote();
+                              return;
+                            }
+                            if (label === "Source Similar Pieces" || label === "Match Finishes") {
                               const kind: NextStepKind =
-                                label === "Source Similar Pieces" ? "source"
-                                : label === "Generate Custom Quote" ? "quote"
-                                : "match";
+                                label === "Source Similar Pieces" ? "source" : "match";
                               setNextStepFields({});
                               setNextStepPanel(kind);
                               return;
