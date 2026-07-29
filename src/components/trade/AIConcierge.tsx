@@ -5078,7 +5078,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                 const budget = (nextStepFields.budget || "").trim();
                 const parts: string[] = [];
                 if (typology) {
-                  parts.push(`Restrict the tearsheet STRICTLY to the "${typology}" typology only. Do NOT include pieces from any other typology (no case goods, no lighting, no tables, no accessories) unless the designer explicitly listed them here. If the previously proposed tearsheet contained pieces outside this typology, DISCARD it and propose a fresh tearsheet limited to "${typology}".`);
+                  parts.push(`Restrict the tearsheet STRICTLY to the typology field the designer entered: "${typology}". Do NOT include any category outside that field or adjacent categories unless they are explicitly listed inside "${typology}". If a previously proposed tearsheet violated this, DISCARD it and propose a fresh tearsheet limited to the entered typologies.`);
                   dropVisualContext = true;
                 }
                 if (palette) parts.push(`Every piece must match this palette / material brief: ${palette}. Reject pieces whose dominant material or finish falls outside it.`);

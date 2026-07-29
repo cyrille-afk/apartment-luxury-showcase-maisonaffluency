@@ -2950,7 +2950,7 @@ async function loadRelevantPieces(
     }
     let data = filtered.slice(0, k);
     let usedFallback = false;
-    if (data.length < 3) {
+    if (data.length < 3 && !wantsConstraintFilter) {
       // Filter too strict — fall back to the unfiltered top-K so the UI still
       // renders a curated Private Exhibition set rather than looking empty.
       console.warn("[concierge RAG] hard constraints filtered <3 rows; falling back to unfiltered top-K", {
@@ -2961,6 +2961,13 @@ async function loadRelevantPieces(
       });
       data = (rawData as any[]).slice(0, k);
       usedFallback = true;
+    } else if (data.length < 3 && wantsConstraintFilter) {
+      console.warn("[concierge RAG] hard constraints filtered <3 rows; keeping strict shortlist", {
+        constraints: hardConstraints,
+        dimConstraints,
+        preFilter: rawData.length,
+        postFilter: filtered.length,
+      });
     }
     if (data.length === 0) {
       return { contextText: "", rows: [] };
@@ -3210,8 +3217,12 @@ function normalizeRequestedTypologies(input: RequestedTypology | RequestedTypolo
 }
 
 function inferRequestedTypology(brief: ExtractedBrief["brief"], requestText: string): RequestedTypology[] | null {
+  const sanitizedRequestText = String(requestText || "")
+    .replace(/\bno\s+(?:case\s+goods?|lighting|lights?|lamps?|accessories|decor|tables?|seating|chairs?|sofas?|rugs?|storage)\b/gi, " ")
+    .replace(/\bdo\s+not\s+include\s+[^.\n]+/gi, " ")
+    .replace(/\boutside\s+that\s+field\b/gi, " ");
   const hay = normalizeLoose([
-    requestText,
+    sanitizedRequestText,
     brief.summary,
     brief.room,
     brief.style,
@@ -3290,6 +3301,130 @@ function rowsCoverRequestedTypologies(rows: any[], typology: RequestedTypology |
   const requested = normalizeRequestedTypologies(typology);
   if (requested.length <= 1) return true;
   return requested.every((t) => rows.some((row) => rowMatchesSingleRequestedTypology(row, t)));
+}
+
+function rowPaletteHaystack(row: any): string {
+  const variantText = Array.isArray(row?.size_variants)
+    ? row.size_variants.map((v: any) => variantLabel(v)).filter(Boolean).join(" ")
+    : "";
+  const arrayText = [row?.tags, row?.available_finishes, row?.fabric_options]
+    .map((v) => Array.isArray(v) ? v.join(" ") : "")
+    .join(" ");
+  return normalizeLoose([
+    row?.title,
+    row?.product_name,
+    row?.category,
+    row?.subcategory,
+    row?.materials,
+    row?.materials_description,
+    row?.description,
+    row?.meta_description,
+    row?.variant_placeholder,
+    variantText,
+    arrayText,
+  ].filter(Boolean).join(" "));
+}
+
+function rowFinishHaystack(row: any): string {
+  const variantText = Array.isArray(row?.size_variants)
+    ? row.size_variants.map((v: any) => variantLabel(v)).filter(Boolean).join(" ")
+    : "";
+  const arrayText = [row?.available_finishes, row?.fabric_options]
+    .map((v) => Array.isArray(v) ? v.join(" ") : "")
+    .join(" ");
+  return normalizeLoose([
+    row?.materials,
+    row?.materials_description,
+    row?.variant_placeholder,
+    variantText,
+    arrayText,
+  ].filter(Boolean).join(" "));
+}
+
+function paletteTokensForMatching(constraints: HardConstraints | null | undefined): string[] {
+  const raw = [...(constraints?.materials || []), ...(constraints?.colors || [])]
+    .map((t) => normalizeLoose(String(t || "")))
+    .filter(Boolean);
+  const tokens = new Set<string>();
+  for (const token of raw) {
+    tokens.add(token);
+    for (const part of token.split(/\s+/)) {
+      if (part.length >= 3) tokens.add(part);
+    }
+  }
+  if (tokens.has("boucle") || tokens.has("bouclé")) {
+    tokens.add("boucle");
+    tokens.add("bouclé");
+    tokens.add("fabric");
+    tokens.add("textile");
+    tokens.add("upholstery");
+    tokens.add("com fabric");
+  }
+  if (tokens.has("ivory")) {
+    tokens.add("cream");
+    tokens.add("off white");
+    tokens.add("offwhite");
+    tokens.add("white");
+  }
+  tokens.delete("warm");
+  tokens.delete("patinated");
+  return Array.from(tokens).filter((t) => t.length >= 3);
+}
+
+function paletteMatchScore(row: any, constraints: HardConstraints | null | undefined): number {
+  const tokens = paletteTokensForMatching(constraints);
+  if (!tokens.length) return 0;
+  const finishHay = rowFinishHaystack(row);
+  let score = 0;
+  const hasIvorySignal = /\b(ivory|cream|off\s+white|offwhite|white)\b/i.test(finishHay);
+  const hasFabricSignal = /\b(boucle|bouclé|fabric|textile|upholstery|com\s+fabric|ecart\s+fabric)\b/i.test(finishHay);
+  const hasWoodSignal = /\b(oak|wood|timber|walnut|ash)\b/i.test(finishHay);
+  const hasBrassSignal = /\b(brass|bronze|metal)\b/i.test(finishHay);
+  for (const token of tokens) {
+    const escaped = token.replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace(/\s+/g, "\\s+");
+    const re = new RegExp(`\\b${escaped}\\b`, "i");
+    if (re.test(finishHay)) score += token.includes(" ") ? 4 : 2;
+  }
+  if (tokens.some((t) => ["ivory", "cream", "off white", "offwhite", "white"].includes(t)) && hasIvorySignal) score += 4;
+  if (tokens.some((t) => ["boucle", "bouclé", "fabric", "textile", "upholstery", "com fabric"].includes(t)) && hasFabricSignal) score += 3;
+  if (tokens.some((t) => ["ivory", "cream", "off white", "offwhite", "white"].includes(t)) && hasFabricSignal) score += 2;
+  if (tokens.some((t) => ["oak", "wood", "timber", "walnut", "ash"].includes(t)) && hasWoodSignal) score += 2;
+  if (tokens.some((t) => ["brass", "bronze", "metal"].includes(t)) && hasBrassSignal) score += 2;
+  if (hasIvorySignal && hasFabricSignal) score += 6;
+  return score;
+}
+
+function applyPalettePreferenceByTypology(
+  rows: any[],
+  constraints: HardConstraints | null | undefined,
+  typology: RequestedTypology | RequestedTypology[] | null,
+): any[] {
+  const tokens = paletteTokensForMatching(constraints);
+  if (!tokens.length || !rows.length) return rows;
+  const requested = normalizeRequestedTypologies(typology);
+  const sortByPalette = (items: any[]) => [...items].sort((a, b) => paletteMatchScore(b, constraints) - paletteMatchScore(a, constraints));
+  if (!requested.length) return sortByPalette(rows);
+
+  const kept: any[] = [];
+  const keptIds = new Set<string>();
+  for (const t of requested) {
+    const bucket = rows.filter((row) => rowMatchesSingleRequestedTypology(row, t));
+    const matched = bucket.filter((row) => paletteMatchScore(row, constraints) > 0);
+    const source = matched.length >= 1 ? matched : bucket;
+    for (const row of sortByPalette(source)) {
+      const id = String(row?.id || "");
+      if (!id || keptIds.has(id)) continue;
+      kept.push(row);
+      keptIds.add(id);
+    }
+  }
+  for (const row of sortByPalette(rows)) {
+    const id = String(row?.id || "");
+    if (!id || keptIds.has(id)) continue;
+    kept.push(row);
+    keptIds.add(id);
+  }
+  return kept;
 }
 
 function pickRowsForRequestedTypologyCoverage(
@@ -3404,18 +3539,18 @@ async function fetchStrictTypologyCandidates(
     (pickOr
       ? supabase
       .from("designer_curator_picks")
-      .select("id, title, materials, category, subcategory, dimensions, trade_price_cents, currency, lead_time, stock_status, designer_id")
+      .select("id, title, materials, materials_description, description, meta_description, variant_placeholder, tags, category, subcategory, dimensions, trade_price_cents, currency, lead_time, stock_status, designer_id, size_variants")
         .or(pickOr)
-        .limit(240)
-      : supabase.from("designer_curator_picks").select("id, title, materials, category, subcategory, dimensions, trade_price_cents, currency, lead_time, stock_status, designer_id").limit(240)),
+        .limit(1000)
+      : supabase.from("designer_curator_picks").select("id, title, materials, materials_description, description, meta_description, variant_placeholder, tags, category, subcategory, dimensions, trade_price_cents, currency, lead_time, stock_status, designer_id, size_variants").limit(1000)),
     (tradeOr
       ? supabase
       .from("trade_products")
-      .select("id, product_name, materials, category, subcategory, dimensions, trade_price_cents, rrp_price_cents, currency, lead_time, stock_status_override, brand_name")
+      .select("id, product_name, materials, materials_description, description, meta_description, variant_placeholder, available_finishes, fabric_options, category, subcategory, dimensions, trade_price_cents, rrp_price_cents, currency, lead_time, stock_status_override, brand_name, size_variants")
       .eq("is_active", true)
         .or(tradeOr)
-        .limit(240)
-      : supabase.from("trade_products").select("id, product_name, materials, category, subcategory, dimensions, trade_price_cents, rrp_price_cents, currency, lead_time, stock_status_override, brand_name").eq("is_active", true).limit(240)),
+        .limit(1000)
+      : supabase.from("trade_products").select("id, product_name, materials, materials_description, description, meta_description, variant_placeholder, available_finishes, fabric_options, category, subcategory, dimensions, trade_price_cents, rrp_price_cents, currency, lead_time, stock_status_override, brand_name, size_variants").eq("is_active", true).limit(1000)),
   ]);
   let typologyFiltered = [
     ...(pickRes.data || []),
@@ -3749,7 +3884,7 @@ async function hydratePickPreview(
       .in("id", pickIds),
     supabase
       .from("trade_products")
-      .select("id, product_name, brand_name, image_url, materials, materials_description, description, meta_description, variant_placeholder, available_finishes, fabric_options, category, subcategory, dimensions, trade_price_cents, rrp_price_cents, currency, lead_time, stock_status_override")
+      .select("id, product_name, brand_name, image_url, materials, materials_description, description, meta_description, variant_placeholder, available_finishes, fabric_options, category, subcategory, dimensions, trade_price_cents, rrp_price_cents, currency, lead_time, stock_status_override, size_variants")
       .in("id", pickIds),
   ]);
 
@@ -3900,6 +4035,7 @@ async function hydratePickPreview(
           variant_placeholder: t.variant_placeholder || null,
           available_finishes: Array.isArray(t.available_finishes) ? t.available_finishes : null,
           fabric_options: Array.isArray(t.fabric_options) ? t.fabric_options : null,
+          size_variants: Array.isArray(t.size_variants) ? t.size_variants : null,
           category: t.category,
           subcategory: t.subcategory || null,
           dimensions: t.dimensions || null,
@@ -3930,8 +4066,15 @@ async function buildDeterministicTearsheetProposal(
   options?: { mixedRoom?: boolean },
 ): Promise<any | null> {
   const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-  const requestedTypology = options?.mixedRoom ? null : inferRequestedTypology(brief, requestText);
+  const requestedTypology = inferRequestedTypology(brief, requestText);
   const requestedTypologies = normalizeRequestedTypologies(requestedTypology);
+  const paletteConstraints = deriveHardConstraints([
+    {
+      title: requestText,
+      materials: (brief.materials || []).join(" "),
+      category: (brief.categories || []).join(" "),
+    },
+  ]);
   const dimConstraints = inferDimensionConstraints(requestText);
   // Combine any inferred lead-time constraint with the brief's stored ceiling.
   const inferredLead = inferLeadTimeConstraints(requestText);
@@ -3955,10 +4098,10 @@ async function buildDeterministicTearsheetProposal(
     if ((brief.materials || []).some((m) => /\b(oak|walnut|wood|timber)\b/i.test(String(m))) && /\b(oak|walnut|wood|timber)\b/.test(hay)) score += 1;
     return score;
   };
-  let candidateRows = (ragRows || [])
+  let candidateRows = applyPalettePreferenceByTypology((ragRows || [])
     .filter((r: any) => r && typeof r.id === "string" && UUID_RE.test(r.id))
     .filter((r: any) => rowMatchesRequestedTypology(r, requestedTypology))
-    .sort((a: any, b: any) => scoreRow(b) - scoreRow(a));
+    .sort((a: any, b: any) => scoreRow(b) - scoreRow(a)), paletteConstraints, requestedTypology);
   // Apply hard dimension constraints to the RAG shortlist (rows carry
   // `dimensions` from match_catalog). Unknown-dim rows drop in strict mode.
   if (dimConstraints && candidateRows.length) {
@@ -3974,11 +4117,11 @@ async function buildDeterministicTearsheetProposal(
     candidateRows = leadRes.kept;
   }
   if (requestedTypologies.length && (candidateRows.length < 2 || !rowsCoverRequestedTypologies(candidateRows, requestedTypologies))) {
-    candidateRows = (await fetchStrictTypologyCandidates(supabase, requestedTypologies, dimConstraints, leadConstraints))
+    candidateRows = applyPalettePreferenceByTypology((await fetchStrictTypologyCandidates(supabase, requestedTypologies, dimConstraints, leadConstraints))
       .filter((r: any) => r && typeof r.id === "string" && UUID_RE.test(r.id))
-      .sort((a: any, b: any) => scoreRow(b) - scoreRow(a));
+      .sort((a: any, b: any) => scoreRow(b) - scoreRow(a)), paletteConstraints, requestedTypology);
   }
-  const sortedCandidates = candidateRows.sort((a: any, b: any) => scoreRow(b) - scoreRow(a));
+  const sortedCandidates = candidateRows.sort((a: any, b: any) => (paletteMatchScore(b, paletteConstraints) - paletteMatchScore(a, paletteConstraints)) || scoreRow(b) - scoreRow(a));
   const diversifyMixedRoomRows = (rows: any[], limit: number) => {
     const familyOf = (r: any) => {
       const hay = `${r?.title || ""} ${r?.category || ""} ${r?.subcategory || ""}`.toLowerCase();
@@ -4458,18 +4601,23 @@ serve(async (req) => {
     );
 
     const VISUAL_CONTEXT_MARKER = "[Latest upload visual sourcing context — use this as the retrieval brief, not the button label]";
+    const VISUAL_CONTEXT_MARKER_ALT = "[Latest upload visual sourcing context — atmosphere reference only; do NOT let it broaden the typology or palette below]";
     const extractLatestVisualContext = (text: string): string => {
       const idx = text.indexOf(VISUAL_CONTEXT_MARKER);
-      if (idx < 0) return "";
-      return text.slice(idx + VISUAL_CONTEXT_MARKER.length).trim().slice(0, 1200);
+      if (idx >= 0) return text.slice(idx + VISUAL_CONTEXT_MARKER.length).trim().slice(0, 1200);
+      const altIdx = text.indexOf(VISUAL_CONTEXT_MARKER_ALT);
+      if (altIdx >= 0) return text.slice(altIdx + VISUAL_CONTEXT_MARKER_ALT.length).trim().slice(0, 1200);
+      return "";
     };
     const latestVisualSourcingContext = extractLatestVisualContext(lastUserMsg);
     const hasVisualSourcingContext = latestVisualSourcingContext.length > 0;
     const stripVisualSourcingMarkers = (text: string): string => {
       const raw = String(text || "");
       const idx = raw.indexOf(VISUAL_CONTEXT_MARKER);
-      if (idx < 0) return raw.trim();
-      return raw.slice(0, idx).trim();
+      if (idx >= 0) return raw.slice(0, idx).trim();
+      const altIdx = raw.indexOf(VISUAL_CONTEXT_MARKER_ALT);
+      if (altIdx >= 0) return raw.slice(0, altIdx).trim();
+      return raw.trim();
     };
 
     // ── Skip/exclude confirmation gate ────────────────────────────────────
@@ -4632,9 +4780,7 @@ serve(async (req) => {
     // dining table"). Applied to BOTH the pgvector RAG shortlist and the
     // bulk SQL catalog load so the AI never sees candidates that violate
     // a stated constraint. Empty on discovery turns → no filtering.
-    const preRequestConstraints = hasVisualSourcingContext
-      ? ({ materials: [], colors: [] } as HardConstraints)
-      : deriveHardConstraints([{ title: lastUserMsg }]);
+    const preRequestConstraints = deriveHardConstraints([{ title: hardValidationText || lastUserMsg }]);
     const hasAnyPreConstraint =
       (preRequestConstraints.materials?.length || 0) +
       (preRequestConstraints.colors?.length || 0) > 0;
@@ -4711,7 +4857,7 @@ serve(async (req) => {
     const lastUserMsgLower = lastUserMsg.toLowerCase();
     const hasVisualizationVerb = /\b(render|visualise|visualize|mock up|picture it|see it in situ|generate (?:a )?(?:view|scene|axonometric|render)|show me (?:how this would look|in (?:the )?(?:room|space))|image of the room|let me see the space)\b/.test(lastUserMsgLower);
     const visualizationNeedsCatalogPicks = hasVisualizationVerb && /\b(overlay|picks?|pieces?|selection|tearsheet|catalog|bronze|mohair|velvet|leather|walnut|oak|brass|marble|stone|glass|silk|wool|linen|bouclé|drawing-room|drawing room|dining room|bedroom|salon|library)\b/.test(lastUserMsgLower);
-    const hasExplicitSelectionVerb = /\b(propose|suggest|recommend|show me|pull (?:together|me)|curate|reinterpret|alternatives?|options?|first edit|draft (?:a )?(?:tearsheet|edit|selection)|put together|assemble|i'?d like to see|let'?s see|what do you have|list (?:all|every|the)|which .*(?:do you|are)|everything (?:by|from))\b/.test(lastUserMsgLower);
+    const hasExplicitSelectionVerb = /\b(source|sourcing|propose|suggest|recommend|show me|pull (?:together|me)|curate|reinterpret|alternatives?|options?|first edit|draft (?:a )?(?:tearsheet|edit|selection)|put together|assemble|i'?d like to see|let'?s see|what do you have|list (?:all|every|the)|which .*(?:do you|are)|everything (?:by|from))\b/.test(lastUserMsgLower);
     const opensWithLookingFor = /^\s*(?:i(?:'m| am)?\s+(?:looking|searching|after|hunting|sourcing|in the market)|we(?:'re| are)?\s+(?:looking|searching|after))\b/.test(lastUserMsgLower);
 
     const submittedArchitecturalBrief = parseSubmittedArchitecturalBrief(lastUserMsg);
@@ -4761,7 +4907,7 @@ serve(async (req) => {
     // Deterministic opening-brief reply removed — it hardcoded "dining table"
     // and ignored actual user content (room type, seat count, shape, etc.).
     // The LLM handles discovery turns directly now.
-    const requestedTypology = hasVisualSourcingContext ? null : inferRequestedTypology(effectiveBrief.brief, userConversationText);
+    const requestedTypology = inferRequestedTypology(effectiveBrief.brief, hardValidationText);
 
     if (shouldActOnAccumulatedBrief && breaker.state() === "open" && CLOUDFLARE_ENABLED) {
       return sseTextResponse(
@@ -5210,11 +5356,20 @@ serve(async (req) => {
         }
       }
       const allTypeCandidates = await fetchStrictTypologyCandidates(supabase, requestedTypology, dimCeiling, leadCeiling);
+      const branchPaletteConstraints = deriveHardConstraints([
+        {
+          title: hardValidationText || lastUserMsg,
+          materials: (effectiveBrief.brief.materials || []).join(" "),
+          category: (effectiveBrief.brief.categories || []).join(" "),
+        },
+      ]);
       const budgetedCandidates = budgetCeiling
         ? allTypeCandidates.filter((r: any) => Number(r?.trade_price_cents || 0) > 0 && Number(r.trade_price_cents) <= budgetCeiling.cents)
         : allTypeCandidates;
-      const sortedBudgetedCandidates = budgetedCandidates
+      const sortedBudgetedCandidates = applyPalettePreferenceByTypology(budgetedCandidates, branchPaletteConstraints, requestedTypology)
         .sort((a: any, b: any) => {
+          const paletteDelta = paletteMatchScore(b, branchPaletteConstraints) - paletteMatchScore(a, branchPaletteConstraints);
+          if (paletteDelta !== 0) return paletteDelta;
           const ap = Number(a?.trade_price_cents || Number.MAX_SAFE_INTEGER);
           const bp = Number(b?.trade_price_cents || Number.MAX_SAFE_INTEGER);
           return ap - bp || String(a?.title || "").localeCompare(String(b?.title || ""));
