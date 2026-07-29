@@ -3612,6 +3612,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                             remarkPlugins={[remarkGfm]}
                             components={{
                               p: ({ node, children, ...props }) => {
+                                if (DESIGN_DIRECTOR_CTA_START_RE.test(markdownTextFromChildren(children))) return null;
                                 // Detect the "**Match:** Band · NN% — rationale"
                                 // line emitted for each Private Exhibition piece
                                 // and render it as a badge + rationale card.
@@ -3653,6 +3654,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                               },
                               ol: ({ node, ...props }) => <ol className="list-decimal pl-5 space-y-2 my-1" {...props} />,
                               li: ({ node, children, ...props }: any) => {
+                                if (DESIGN_DIRECTOR_CTA_START_RE.test(markdownTextFromChildren(children))) return null;
                                 // Detect the three fixed Design Director CTAs
                                 // ("[ Source Similar Pieces ]" / "[ Generate Custom Quote ]"
                                 // / "[ Match Finishes ]") and render them as real
@@ -3816,7 +3818,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                               code: ({ node, ...props }) => <code className="rounded bg-background/60 px-1 py-0.5 text-[0.85em]" {...props} />,
                             }}
                           >
-                            {inlineSignalsIntoMatchLines(stripped)}
+                            {inlineSignalsIntoMatchLines(markdownBody)}
                           </ReactMarkdown>
                           {found.length > 0 && (
                             <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 pt-1">
