@@ -4821,6 +4821,69 @@ serve(async (req) => {
         ...parsedTypologyCats,
       ].filter(Boolean),
     };
+    // Palette advisory: when a scoped brand's `materials` column is sparse
+    // (>=50% null across curator picks + trade products), a strict palette
+    // pre-filter would silently wipe otherwise-qualifying pieces. In that
+    // case, drop palette/material tokens from the SQL pre-filter (typology +
+    // brand still bind) and tell Felix to render the shortlist with a
+    // "palette shown as reference; confirm finish availability" advisory.
+    let paletteAdvisory = false;
+    let paletteAdvisoryReason: {
+      brands: string[];
+      droppedMaterials: string[];
+      droppedColors: string[];
+      nullRatio: number;
+    } | null = null;
+    if (
+      hasScopedDesigners &&
+      ((sqlLoadConstraints.materials?.length || 0) + (sqlLoadConstraints.colors?.length || 0) > 0)
+    ) {
+      try {
+        const scopedBrandList = Array.from(
+          new Set(scopedDesigners.filter(Boolean)),
+        );
+        // Resolve scoped names → designer ids for the picks probe.
+        const { data: probeDesigners } = await supabase
+          .from("designers")
+          .select("id, name, display_name")
+          .or(scopedBrandList.map((n) => `name.ilike.${n},display_name.ilike.${n}`).join(","));
+        const probeDesignerIds = (probeDesigners || []).map((d: any) => d.id).filter(Boolean);
+        const idsForProbe = probeDesignerIds.length ? probeDesignerIds : ["00000000-0000-0000-0000-000000000000"];
+        const brandsForProbe = scopedBrandList.length ? scopedBrandList : ["__none__"];
+        // Cheap sparsity probe — count nulls vs total for the scoped brands.
+        const [picksTotal, picksWithMat, tradeTotal, tradeWithMat] = await Promise.all([
+          supabase.from("designer_curator_picks").select("id", { count: "exact", head: true })
+            .in("designer_id", idsForProbe),
+          supabase.from("designer_curator_picks").select("id", { count: "exact", head: true })
+            .in("designer_id", idsForProbe)
+            .not("materials", "is", null),
+          supabase.from("trade_products").select("id", { count: "exact", head: true })
+            .eq("is_active", true)
+            .in("brand_name", brandsForProbe),
+          supabase.from("trade_products").select("id", { count: "exact", head: true })
+            .eq("is_active", true)
+            .in("brand_name", brandsForProbe)
+            .not("materials", "is", null),
+        ]);
+        const total = (picksTotal.count || 0) + (tradeTotal.count || 0);
+        const withMat = (picksWithMat.count || 0) + (tradeWithMat.count || 0);
+        const nullRatio = total > 0 ? 1 - withMat / total : 0;
+        if (total >= 3 && nullRatio >= 0.5) {
+          paletteAdvisory = true;
+          paletteAdvisoryReason = {
+            brands: scopedDesigners,
+            droppedMaterials: [...(sqlLoadConstraints.materials || [])],
+            droppedColors: [...(sqlLoadConstraints.colors || [])],
+            nullRatio: Math.round(nullRatio * 100) / 100,
+          };
+          sqlLoadConstraints.materials = [];
+          sqlLoadConstraints.colors = [];
+          console.log("[concierge palette-advisory]", paletteAdvisoryReason);
+        }
+      } catch (e) {
+        console.warn("[concierge palette-advisory probe failed]", (e as Error).message);
+      }
+    }
     const hasSqlConstraint =
       (sqlLoadConstraints.materials?.length || 0) +
       (sqlLoadConstraints.colors?.length || 0) +
@@ -4855,7 +4918,16 @@ serve(async (req) => {
           "",
         ].join("\n")
       : "";
-    const piecesList = (useRag ? (ragResult as { contextText: string })?.contextText || "" : fullPiecesList) + emptyConstraintNote;
+    const paletteAdvisoryNote = paletteAdvisory && paletteAdvisoryReason
+      ? [
+          "",
+          "⚠️ PALETTE ADVISORY MODE ⚠️",
+          `The catalog's \`materials\` column is sparse for the scoped brand(s) ${paletteAdvisoryReason.brands.join(", ")} (${Math.round(paletteAdvisoryReason.nullRatio * 100)}% of rows have no structured material data). The palette / material constraint(s) [${[...paletteAdvisoryReason.droppedMaterials, ...paletteAdvisoryReason.droppedColors].join(", ") || "—"}] have been dropped from retrieval so typology + brand still return matches.`,
+          "When you propose the tearsheet, append a single italic advisory line beneath it: *Palette shown as reference; confirm finish availability with the atelier.* Do NOT claim the pieces are guaranteed to be available in the requested finish, and do NOT hold or refuse the tearsheet on palette grounds this turn.",
+          "",
+        ].join("\n")
+      : "";
+    const piecesList = (useRag ? (ragResult as { contextText: string })?.contextText || "" : fullPiecesList) + emptyConstraintNote + paletteAdvisoryNote;
 
     // Deterministic designer-enumeration shortcut: when the user asks to list
     // / show / see everything by a specific named designer, bypass the LLM
