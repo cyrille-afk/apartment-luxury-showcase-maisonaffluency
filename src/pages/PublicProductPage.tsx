@@ -79,6 +79,7 @@ function slugify(s: string) {
 /* ------------------------------------------------------------------ */
 interface ProductRow {
   id: string;
+  slug?: string | null;
   title: string;
   subtitle: string | null;
   image_url: string | null;
