@@ -253,6 +253,17 @@ const FEATURED_GROUPS = [
   },
 ];
 
+const MOBILE_BG_OVERRIDES: Record<string, string> = {
+  "jean-michel-frank":
+    "https://res.cloudinary.com/dif1oamtj/image/upload/v1777428180/JMF_1935_Round_Table__02_Portrait_BD_1_aozicg.jpg",
+  "hamrei":
+    "https://res.cloudinary.com/dif1oamtj/image/upload/v1784262044/Screenshot_2026-07-17_at_12.19.46_PM_fzvmvb.png",
+};
+
+function mobileHeroBackgroundSrc(d: Pick<FeaturedDesigner, "slug" | "first_pick_image_url" | "hero_image_url" | "image_url">) {
+  return MOBILE_BG_OVERRIDES[d.slug] || d.first_pick_image_url || d.hero_image_url || d.image_url;
+}
+
 const DISPLAY_NAME_OVERRIDES: Record<string, string> = {
   ozone: "Michel Boyer - Ozone",
 };
@@ -566,15 +577,14 @@ const DesignersHoverHero = () => {
     };
   }, [isMobileOrPwa]);
 
-  // iOS Safari paints the bottom browser chrome from the document/body backdrop,
-  // not always from fixed-position children. Mirror the active mobile hero image
-  // onto the page fallback so the area behind the toolbar stays photographic.
-  // PWA/standalone is intentionally excluded.
+  // iOS Safari/PWA paints the bottom chrome/home-indicator area from the
+  // document/body backdrop, not always from fixed-position children. Mirror the
+  // active mobile hero image onto that backdrop so the bottom stays photographic.
   useEffect(() => {
     if (typeof document === "undefined") return;
-    if (!isMobileBrowser || !items.length) return;
+    if (!isMobileOrPwa || !items.length) return;
     const activeDesigner = items.find((d) => d.slug === activeSlug) || items[0];
-    const src = activeDesigner.first_pick_image_url || activeDesigner.hero_image_url || activeDesigner.image_url;
+    const src = mobileHeroBackgroundSrc(activeDesigner);
     if (!src) return;
 
     const { src: backgroundSrc } = cldResponsiveImg(src, {
@@ -623,7 +633,7 @@ const DesignersHoverHero = () => {
       body.style.backgroundPosition = previousBodyBgPosition;
       body.style.backgroundRepeat = previousBodyBgRepeat;
     };
-  }, [activeSlug, isMobileBrowser, items]);
+  }, [activeSlug, isMobileOrPwa, items]);
 
   // Pre-seed active on first render once data arrives so the hero is never
   // a void on entry — the first designer acts as default.
@@ -1269,13 +1279,18 @@ const DesignersHoverHero = () => {
   const directoryLabels = (
     className: string,
     ref?: React.Ref<HTMLDivElement>,
-    align: "left" | "right" = "left"
+    align: "left" | "center" | "right" = "left"
   ) => (
     <div ref={ref} className={className}>
-      <div className={cn("flex flex-col", align === "right" && "items-end")}>
+      <div className={cn(
+        "flex flex-col",
+        align === "center" && "items-center text-center",
+        align === "right" && "items-end"
+      )}>
         <span
           className={cn(
             "text-[9px] uppercase tracking-[0.3em] mb-1 font-body text-white",
+            align === "center" && "text-center",
             align === "right" && "text-right"
           )}
         >
@@ -1309,6 +1324,7 @@ const DesignersHoverHero = () => {
           className={cn(
             "inline-flex items-center gap-2 text-xs font-body font-light italic text-white/85 hover:text-white underline-offset-4 hover:underline transition-colors",
             align === "left" && "text-left",
+            align === "center" && "text-center justify-center",
             align === "right" && "text-right flex-row-reverse justify-start"
           )}
         >
@@ -1339,16 +1355,8 @@ const DesignersHoverHero = () => {
       {/* Cross-fading background images */}
       <div className="absolute inset-0 z-0">
         {items.map((d, i) => {
-          // Per-designer mobile/PWA background overrides. Keeps desktop hero art
-          // intact while giving small-screen framing a hand-picked image.
-          const MOBILE_BG_OVERRIDES: Record<string, string> = {
-            "jean-michel-frank":
-              "https://res.cloudinary.com/dif1oamtj/image/upload/v1777428180/JMF_1935_Round_Table__02_Portrait_BD_1_aozicg.jpg",
-            "hamrei":
-              "https://res.cloudinary.com/dif1oamtj/image/upload/v1784262044/Screenshot_2026-07-17_at_12.19.46_PM_fzvmvb.png",
-          };
           const src = isMobileOrPwa
-            ? MOBILE_BG_OVERRIDES[d.slug] || d.first_pick_image_url || d.hero_image_url || d.image_url
+            ? mobileHeroBackgroundSrc(d)
             : d.hero_image_url || d.image_url;
           if (!src) return null;
           const isActive = d.slug === activeSlug;
@@ -1414,13 +1422,13 @@ const DesignersHoverHero = () => {
         <div
           ref={contentScrollRef}
           className={cn(
-          "relative flex flex-col h-full px-6 sm:px-12 md:px-20 lg:px-28 pointer-events-auto overflow-hidden md:overflow-visible",
+          "relative flex flex-col h-full px-6 sm:px-12 md:px-20 lg:px-28 pointer-events-auto overflow-y-auto md:overflow-visible",
             isStandalone
-              ? "justify-start overscroll-contain touch-pan-y pt-8 pb-[calc(7rem+env(safe-area-inset-bottom))] md:pt-8 md:pb-0 md:justify-center [-webkit-overflow-scrolling:touch]"
+              ? "justify-start overscroll-contain touch-pan-y pt-8 pb-[calc(10rem+env(safe-area-inset-bottom))] md:pt-8 md:pb-0 md:justify-center [-webkit-overflow-scrolling:touch]"
               : // Mobile browser: the section already starts below the fixed
                 // header, so do not add var(--header-h) again here. Keep the
                 // designer list high while leaving room for the Directory link.
-                "justify-start overscroll-contain touch-pan-y pt-6 pb-[calc(5rem+env(safe-area-inset-bottom))] md:pt-8 md:justify-center md:pb-0 [-webkit-overflow-scrolling:touch]"
+                "justify-start overscroll-contain touch-pan-y pt-[5.25rem] pb-[calc(8.5rem+env(safe-area-inset-bottom))] md:pt-8 md:justify-center md:pb-0 [-webkit-overflow-scrolling:touch]"
           )}
         >
 
@@ -1429,7 +1437,7 @@ const DesignersHoverHero = () => {
               {/* Desktop: Directory sits directly above the designer list to
                   group navigation (list) with its utility (search) — Proximity.
                   All items share the same left edge as the designer names. */}
-              <div className={cn("mb-5 lg:mb-6", isMobileBrowser ? "block md:hidden" : "hidden md:block")}>
+              <div className={cn("mb-5 lg:mb-6", isMobileBrowser ? "hidden" : "hidden md:block")}>
                 {directoryLabels("w-fit", directoryRef, "left")}
               </div>
 
@@ -1540,9 +1548,13 @@ const DesignersHoverHero = () => {
 
         {/* Directory label — pinned to the svh frame bottom on mobile only.
             Desktop version now lives at the top of the featured list. */}
+        {isMobileBrowser && directoryLabels(cn(
+          "absolute top-6 left-1/2 -translate-x-1/2 flex items-center gap-10 text-white w-fit pointer-events-auto md:hidden z-30 justify-center px-6"
+        ), directoryRef, "center")}
+
         {isStandalone && directoryLabels(cn(
           "absolute flex items-center gap-10 text-white w-fit pointer-events-auto md:hidden z-30 left-1/2 -translate-x-1/2 justify-center px-6 bottom-[calc(1.75rem+env(safe-area-inset-bottom))]"
-        ))}
+        ), directoryRef, "center")}
 
 
         {/* Mobile/PWA scroll hint — quiet mouse icon above the directory, right-justified.
@@ -1772,10 +1784,10 @@ const DesignersHoverHero = () => {
             </div>
             {/* Sticky horizontal A–Z quick-jump (mobile only, hidden while searching) */}
             {!isSearching && (
-              <div className="md:hidden shrink-0 border-b border-white/[0.06] bg-[#0a0a0a]/95 backdrop-blur mb-3">
+              <div className="md:hidden shrink-0 border-b border-white/[0.06] bg-[#0a0a0a]/95 backdrop-blur mb-3 overflow-x-auto no-scrollbar px-3">
                 <div
                   className={cn(
-                    "flex items-center justify-center gap-0.5 overflow-x-auto no-scrollbar px-3 py-1.5 transition-opacity duration-150",
+                    "mx-auto flex w-max min-w-full items-center justify-center gap-0.5 py-1.5 transition-opacity duration-150",
                     isRestoringLetter ? "opacity-0" : "opacity-100"
                   )}
                   style={{ scrollbarWidth: "none" }}
