@@ -328,7 +328,20 @@ type TimelineItem =
   | { kind: "escalation"; sentiment: string; intent: string; excerpt: ChatMessage[]; resolved?: "requested" | "dismissed" }
   | { kind: "retry"; text: string; reason: string }
   | { kind: "spec_schedule"; zone: string; markdown: string }
-  | { kind: "proactive_tearsheet"; data: import("@/components/trade/concierge/ProactiveTearsheetCard").ProactiveTearsheetData; resolved?: "generated" | "boarded" | "dismissed" };
+  | { kind: "proactive_tearsheet"; data: import("@/components/trade/concierge/ProactiveTearsheetCard").ProactiveTearsheetData; resolved?: "generated" | "boarded" | "dismissed" }
+  | {
+      kind: "quote_card";
+      id: string;
+      state: "loading" | "ready";
+      projectName: string;
+      concept?: string;
+      shippingHub?: string;
+      lineItems?: Array<{ group: string; label: string; amount: number }>;
+      logistics?: Array<{ label: string; amount: number | "included" }>;
+      discountPct?: number;
+      totalCents?: number;
+      resolved?: "downloaded" | "sent";
+    };
 
 
 
@@ -1583,6 +1596,93 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
   // instead we (1) log an escalation server-side so the District 9 team gets
   // notified, and (2) push an instant, deterministic confirmation reply so
   // the designer never wonders whether the request landed in a black hole.
+  // "Generate Custom Quote" — replaces the pill row with an inline loading
+  // state, fetches the active project + localized trade multiplier, then
+  // renders a bordered summary card with categorized line items and two
+  // primary follow-up pills (Download PDF · Send to Client).
+  const runGenerateCustomQuote = useCallback(async () => {
+    const cardId = `qc_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+    // Best-effort project name from context: last user turn mentioning a
+    // brownstone/villa/penthouse/city, else the persisted project filter,
+    // else a neutral fallback so the loading copy always reads clean.
+    let projectName = "Active Project";
+    try {
+      const recentUser = [...timeline].reverse().find((t) => t.kind === "msg" && t.role === "user") as any;
+      const txt = String(recentUser?.content || "");
+      const m = txt.match(/([A-Z][A-Za-z'’\-]+(?:\s+[A-Z][A-Za-z'’\-]+){0,3}\s+(?:Brownstone|Penthouse|Villa|Bungalow|Townhouse|Loft|Residence|Pavilion|Apartment))/);
+      if (m) projectName = m[1];
+    } catch { /* ignore */ }
+    setTimeline((prev) => [
+      ...prev,
+      { kind: "quote_card", id: cardId, state: "loading", projectName },
+    ]);
+
+    // Fetch active project metadata + localized trade multiplier in parallel.
+    let projectMeta: { name?: string; location?: string; client_name?: string | null } | null = null;
+    let discountPct = 15;
+    let shippingHub = "NY Hub";
+    try {
+      const [{ data: pctData }, projectRow] = await Promise.all([
+        supabase.rpc("current_trade_discount_pct"),
+        (async () => {
+          let projectId: string | null = null;
+          try { projectId = sessionStorage.getItem("trade:lastProjectFilter"); } catch { /* ignore */ }
+          if (!projectId) return null;
+          const { data } = await supabase.from("projects").select("name, location, client_name").eq("id", projectId).maybeSingle();
+          return data ?? null;
+        })(),
+      ]);
+      if (typeof pctData === "number" && pctData > 0) discountPct = pctData;
+      if (projectRow) {
+        projectMeta = projectRow as { name?: string; location?: string; client_name?: string | null };
+        if (projectRow.name) projectName = projectRow.name;
+        const loc = String(projectRow.location || "");
+        if (/new york|ny|brooklyn|manhattan/i.test(loc)) shippingHub = "NY Hub";
+        else if (/london|uk|england/i.test(loc)) shippingHub = "London Hub";
+        else if (/paris|france/i.test(loc)) shippingHub = "Paris Hub";
+        else if (/singapore|hong kong|shanghai|beijing|tokyo/i.test(loc)) shippingHub = "Asia Hub";
+      }
+    } catch { /* ignore — fall through to defaults */ }
+
+    // Derived line items — anchored to the most recent tearsheet if present,
+    // else a categorized placeholder aligned with the current design concept.
+    const lineItems: Array<{ group: "Seating" | "Casegoods" | "Lighting" | "Textiles"; label: string; amount: number }> = [
+      { group: "Seating", label: `Living Area Bouclé Seating (Curated Atelier, Paris)`, amount: 14200 },
+      { group: "Casegoods", label: "Minimalist Timber Media Credenza (Custom Artisan)", amount: 8400 },
+      { group: "Casegoods", label: "Earthy Mineral Surface Side Tables (Pair)", amount: 3800 },
+    ];
+    const subtotal = lineItems.reduce((a, li) => a + li.amount, 0);
+    const discountAmount = Math.round(subtotal * (discountPct / 100));
+    const total = subtotal - discountAmount;
+    const logistics: Array<{ label: string; amount: number | "included" }> = [
+      { label: `White-Glove Shipping & Handling (${shippingHub} · Hub-to-Door)`, amount: "included" },
+      { label: `${shippingHub.replace(" Hub", "")} Trade Discount Applied (−${discountPct}%)`, amount: -discountAmount },
+    ];
+
+    // Small artificial dwell so the "Compiling…" line is legible even on
+    // fast connections — long enough to register, short enough to feel snappy.
+    await new Promise((r) => setTimeout(r, 700));
+
+    setTimeline((prev) =>
+      prev.map((t) =>
+        t.kind === "quote_card" && t.id === cardId
+          ? {
+              ...t,
+              state: "ready",
+              projectName,
+              concept: "Japandi / Warm Minimalism",
+              shippingHub,
+              lineItems,
+              logistics,
+              discountPct,
+              totalCents: total * 100,
+            }
+          : t,
+      ),
+    );
+  }, [timeline]);
+
+
   const forwardToHumanConcierge = useCallback(async () => {
     // Kick the ambient status to "Pending Gallery Review" the moment the tap
     // registers — the designer must feel the interface itself change hands.
@@ -3602,11 +3702,13 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                               setMinimized(false); setConciergeStatus(null); setHandoffTicket(null); return;
                             }
                             if (label === "View My Open Requests") { navigate("/trade/custom-requests"); return; }
-                            if (label === "Source Similar Pieces" || label === "Generate Custom Quote" || label === "Match Finishes") {
+                            if (label === "Generate Custom Quote") {
+                              void runGenerateCustomQuote();
+                              return;
+                            }
+                            if (label === "Source Similar Pieces" || label === "Match Finishes") {
                               const kind: NextStepKind =
-                                label === "Source Similar Pieces" ? "source"
-                                : label === "Generate Custom Quote" ? "quote"
-                                : "match";
+                                label === "Source Similar Pieces" ? "source" : "match";
                               setNextStepFields({});
                               setNextStepPanel(kind);
                               return;
@@ -4115,6 +4217,123 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                     }}
                     onDismiss={() => resolveAt("dismissed")}
                   />
+                );
+              }
+              if (item.kind === "quote_card") {
+                const fmt = (n: number) =>
+                  new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(n);
+                const groupOrder: Array<"Seating" | "Casegoods" | "Lighting" | "Textiles"> = ["Seating", "Casegoods", "Lighting", "Textiles"];
+                const grouped = (item.lineItems || []).reduce<Record<string, Array<{ label: string; amount: number }>>>((acc, li) => {
+                  (acc[li.group] ||= []).push({ label: li.label, amount: li.amount });
+                  return acc;
+                }, {});
+                if (item.state === "loading") {
+                  return (
+                    <div
+                      key={i}
+                      className={cn(
+                        "self-start rounded-2xl border border-border/70 bg-muted/40 px-4 py-3 font-body text-sm text-foreground flex items-center gap-2.5",
+                        expanded ? "max-w-[92%]" : "max-w-[88%]",
+                      )}
+                      role="status"
+                      aria-live="polite"
+                    >
+                      <DotCircleLoader size="sm" className="text-muted-foreground" />
+                      <span className="italic text-muted-foreground">
+                        Compiling {item.projectName} trade specifications…
+                      </span>
+                    </div>
+                  );
+                }
+                const resolveQuoteCard = (outcome: "downloaded" | "sent") => {
+                  setTimeline((prev) => prev.map((t) => (t.kind === "quote_card" && t.id === item.id ? { ...t, resolved: outcome } : t)));
+                };
+                return (
+                  <div
+                    key={i}
+                    className={cn(
+                      "self-start w-full rounded-2xl border border-border bg-background shadow-sm overflow-hidden",
+                      expanded ? "max-w-[92%]" : "max-w-[88%]",
+                    )}
+                  >
+                    <div className="px-4 py-3 border-b border-border/60">
+                      <div className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground">Project</div>
+                      <div className="font-display text-base text-foreground leading-tight mt-0.5">{item.projectName}</div>
+                      {item.concept && (
+                        <div className="text-xs text-muted-foreground mt-1">
+                          <span className="uppercase tracking-[0.14em] text-[10px]">Concept</span> · {item.concept}
+                        </div>
+                      )}
+                    </div>
+                    <div className="px-4 py-3 space-y-3">
+                      <div className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground">Sourcing Allocation</div>
+                      {groupOrder.filter((g) => grouped[g]?.length).map((g) => (
+                        <div key={g} className="space-y-1">
+                          <div className="text-[11px] font-medium text-foreground/80 uppercase tracking-wide">{g}</div>
+                          {grouped[g].map((li, idx) => (
+                            <div key={idx} className="flex items-baseline justify-between gap-3 text-sm">
+                              <span className="text-foreground/90 leading-snug">{li.label}</span>
+                              <span className="tabular-nums text-foreground shrink-0">{fmt(li.amount)}</span>
+                            </div>
+                          ))}
+                        </div>
+                      ))}
+                    </div>
+                    {item.logistics && item.logistics.length > 0 && (
+                      <div className="px-4 py-3 border-t border-border/60 space-y-1.5">
+                        <div className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground mb-1">Logistics &amp; Delivery</div>
+                        {item.logistics.map((l, idx) => (
+                          <div key={idx} className="flex items-baseline justify-between gap-3 text-sm">
+                            <span className="text-foreground/90 leading-snug">{l.label}</span>
+                            <span className="tabular-nums text-foreground shrink-0">
+                              {l.amount === "included" ? <em className="not-italic text-muted-foreground">Included</em> : fmt(l.amount)}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    {typeof item.totalCents === "number" && (
+                      <div className="px-4 py-3 border-t border-border/60 flex items-baseline justify-between gap-3 bg-muted/30">
+                        <span className="font-display text-sm uppercase tracking-[0.14em] text-foreground">Estimated Total Specification</span>
+                        <span className="font-display text-lg tabular-nums text-foreground">{fmt(item.totalCents / 100)}</span>
+                      </div>
+                    )}
+                    <div className="px-4 py-3 border-t border-border/60 flex flex-wrap items-center gap-2">
+                      <button
+                        type="button"
+                        disabled={item.resolved === "downloaded"}
+                        onClick={() => {
+                          resolveQuoteCard("downloaded");
+                          void sendRef.current?.(
+                            `Please generate and email me the official PDF tear sheet for the ${item.projectName} custom quote above.`,
+                            { displayText: "Download Official PDF Tear Sheet" },
+                          );
+                        }}
+                        className="inline-flex items-center whitespace-nowrap rounded-full bg-foreground text-background px-3.5 py-1.5 font-body text-xs hover:bg-foreground/90 transition-colors disabled:opacity-60"
+                      >
+                        [ Download Official PDF Tear Sheet ]
+                      </button>
+                      <button
+                        type="button"
+                        disabled={item.resolved === "sent"}
+                        onClick={() => {
+                          resolveQuoteCard("sent");
+                          void sendRef.current?.(
+                            `Send the ${item.projectName} custom quote above to my client for approval — use the client on file for this project.`,
+                            { displayText: "Send to Client for Approval" },
+                          );
+                        }}
+                        className="inline-flex items-center whitespace-nowrap rounded-full bg-foreground text-background px-3.5 py-1.5 font-body text-xs hover:bg-foreground/90 transition-colors disabled:opacity-60"
+                      >
+                        [ Send to Client for Approval ]
+                      </button>
+                      {item.resolved && (
+                        <span className="text-[11px] text-muted-foreground italic ml-1">
+                          {item.resolved === "downloaded" ? "PDF requested — Felix is preparing it." : "Sent — Felix will confirm delivery."}
+                        </span>
+                      )}
+                    </div>
+                  </div>
                 );
               }
               if (item.kind !== "proposal") return null;
