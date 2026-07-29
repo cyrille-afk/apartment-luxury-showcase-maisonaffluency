@@ -3499,7 +3499,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                                 const ctaLabels = "(Source Similar Pieces|Generate Custom Quote|Match Finishes|Forward to Human Concierge|Upload a Visual Mood Board Instead|Return to Atelier Chat|View My Open Requests|Yes, Schedule Morning Call|No, Standard Updates Are Fine)";
                                 const hasCtaList = new RegExp(`^\\s*[-*]\\s*\\[?\\s*${ctaLabels}\\s*\\]?`, "im").test(item.content || "");
                                 if (hasCtaList) {
-                                  return <ul className="flex flex-wrap gap-2 my-2" {...props} />;
+                                  return <ul className="flex flex-wrap items-stretch gap-1.5 sm:gap-2 my-2 list-none pl-0" {...props} />;
                                 }
                                 return <ul className="list-disc pl-5 space-y-2 my-1" {...props} />;
                               },
