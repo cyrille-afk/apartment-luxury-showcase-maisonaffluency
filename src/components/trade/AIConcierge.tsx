@@ -3651,7 +3651,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                           </ReactMarkdown>
                         </div>
                       ) : (
-                        <span className="whitespace-pre-wrap">{item.content}</span>
+                        <span className="whitespace-pre-wrap">{(item as any).__display ?? item.content}</span>
                       )}
                     </div>
                       )
