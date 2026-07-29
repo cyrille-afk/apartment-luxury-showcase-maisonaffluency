@@ -79,6 +79,7 @@ function slugify(s: string) {
 /* ------------------------------------------------------------------ */
 interface ProductRow {
   id: string;
+  slug?: string | null;
   title: string;
   subtitle: string | null;
   image_url: string | null;
@@ -120,7 +121,7 @@ function useProductBySlug(designerSlug: string | undefined, productSlug: string 
         .maybeSingle();
       if (!designer) return null;
 
-      const publicPickFields = "id, title, subtitle, image_url, hover_image_url, gallery_images, materials, materials_description, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, size_variants, variant_placeholder, base_axis_label, top_axis_label, wood_label_override, variant_image_map, edition, edition_number, edition_signing, gallery_captions, is_upholstered";
+      const publicPickFields = "id, slug, title, subtitle, image_url, hover_image_url, gallery_images, materials, materials_description, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, size_variants, variant_placeholder, base_axis_label, top_axis_label, wood_label_override, variant_image_map, edition, edition_number, edition_signing, gallery_captions, is_upholstered";
 
       const { data: picks } = await supabase
         .from("designer_curator_picks_public" as any)
@@ -130,19 +131,17 @@ function useProductBySlug(designerSlug: string | undefined, productSlug: string 
 
       if (!picks || picks.length === 0) return null;
 
-      // Prefer exact matches (full title+subtitle or title alone) before the
-      // prefix fallback, otherwise "Byron Bar Stool" (byron-bar-stool) would
-      // greedily match the "Byron" chair (byron-) which appears earlier.
-      const exact = picks.find((p: any) => {
-        const titleSlug = slugify(p.title);
-        const shortSlug = slugify(String(p.title).replace(/\s+by\s+.+$/i, ""));
-        const fullSlug = slugify(p.title + (p.subtitle ? `-${p.subtitle}` : ""));
-        return fullSlug === productSlug || titleSlug === productSlug || shortSlug === productSlug;
-      });
-      const product = exact || picks.find((p: any) => {
-        const titleSlug = slugify(p.title);
-        return productSlug.startsWith(`${titleSlug}-`);
-      });
+      // Canonical match on the stored slug column. Fall back to legacy
+      // title-derived slugs so any bookmarked/shared URLs keep resolving.
+      const product =
+        picks.find((p: any) => p.slug === productSlug) ||
+        picks.find((p: any) => {
+          const titleSlug = slugify(p.title);
+          const shortSlug = slugify(String(p.title).replace(/\s+by\s+.+$/i, ""));
+          const fullSlug = slugify(p.title + (p.subtitle ? `-${p.subtitle}` : ""));
+          return fullSlug === productSlug || titleSlug === productSlug || shortSlug === productSlug;
+        }) ||
+        picks.find((p: any) => productSlug.startsWith(`${slugify(p.title)}-`));
 
       if (!product) return null;
 
@@ -1645,7 +1644,7 @@ const PublicProductPage: React.FC = () => {
                       {relatedPicks.map((rp) => (
                         <Link
                           key={rp.id}
-                          to={`/designers/${designer.slug}/${slugify(rp.title + (rp.subtitle ? `-${rp.subtitle}` : ""))}`}
+                          to={`/designers/${designer.slug}/${rp.slug || slugify(rp.title + (rp.subtitle ? `-${rp.subtitle}` : ""))}`}
                           state={{ from: location.pathname + location.search }}
                           className="group block shrink-0 basis-[70%] snap-start"
                         >
@@ -1670,7 +1669,7 @@ const PublicProductPage: React.FC = () => {
                     {visibleRelated.map((rp) => (
                       <Link
                         key={rp.id}
-                        to={`/designers/${designer.slug}/${slugify(rp.title + (rp.subtitle ? `-${rp.subtitle}` : ""))}`}
+                        to={`/designers/${designer.slug}/${rp.slug || slugify(rp.title + (rp.subtitle ? `-${rp.subtitle}` : ""))}`}
                         state={{ from: location.pathname + location.search }}
                         className="group block"
                       >

@@ -1933,6 +1933,7 @@ export type Database = {
           price_prefix: string | null
           seat_height_mm: number | null
           size_variants: Json | null
+          slug: string | null
           sort_order: number
           subcategory: string | null
           subtitle: string | null
@@ -1994,6 +1995,7 @@ export type Database = {
           price_prefix?: string | null
           seat_height_mm?: number | null
           size_variants?: Json | null
+          slug?: string | null
           sort_order?: number
           subcategory?: string | null
           subtitle?: string | null
@@ -2055,6 +2057,7 @@ export type Database = {
           price_prefix?: string | null
           seat_height_mm?: number | null
           size_variants?: Json | null
+          slug?: string | null
           sort_order?: number
           subcategory?: string | null
           subtitle?: string | null
@@ -2108,6 +2111,7 @@ export type Database = {
           photo_credit: string | null
           price_prefix: string | null
           size_variants: Json | null
+          slug: string | null
           sort_order: number | null
           subcategory: string | null
           subtitle: string | null
@@ -2148,6 +2152,7 @@ export type Database = {
           photo_credit?: string | null
           price_prefix?: string | null
           size_variants?: Json | null
+          slug?: string | null
           sort_order?: number | null
           subcategory?: string | null
           subtitle?: string | null
@@ -2188,6 +2193,7 @@ export type Database = {
           photo_credit?: string | null
           price_prefix?: string | null
           size_variants?: Json | null
+          slug?: string | null
           sort_order?: number | null
           subcategory?: string | null
           subtitle?: string | null
@@ -7393,6 +7399,10 @@ export type Database = {
         Args: { _studio_id: string; _user_id: string }
         Returns: boolean
       }
+      compute_curator_pick_slug: {
+        Args: { _subtitle: string; _title: string }
+        Returns: string
+      }
       concierge_check_rate_limit: {
         Args: { _key: string; _limit: number; _window_seconds: number }
         Returns: {
@@ -7767,6 +7777,7 @@ export type Database = {
       rotate_board_token: { Args: { _board_id: string }; Returns: string }
       sanitize_biography_citations: { Args: { input: string }; Returns: string }
       scan_sec_query: { Args: { _sql: string }; Returns: Json[] }
+      slugify_text: { Args: { input: string }; Returns: string }
       strip_public_variant_prices: { Args: { _variants: Json }; Returns: Json }
       studio_has_resale_cert_for_state: {
         Args: { _state: string; _studio_id: string }
