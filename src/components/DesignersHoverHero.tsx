@@ -801,21 +801,40 @@ const DesignersHoverHero = () => {
       return Boolean(scroller && target instanceof Node && scroller.contains(target));
     };
 
-    // Mobile/PWA hero must always step one designer at a time — never let the
-    // inner list free-scroll as a whole block. Native list-scroll mode is
-    // reserved for desktop; on mobile the featured photo is bound 1:1 to the
-    // active designer, so free-scroll would decouple the two.
-    // PWA keeps discrete step-advance (works as intended). Mobile browser
-    // uses native scroll so the list moves designer-by-designer naturally
-    // instead of inverting.
-    const canUseNativeListScroll = () => isMobileBrowser;
+    // Mobile browser + PWA must step one designer at a time. Allowing the
+    // nested list to free-scroll on mobile Safari makes the names column slide
+    // upward as a block instead of advancing the active designer/photo pair.
+    const canUseNativeListScroll = () => false;
+
+    const keepActiveDesignerVisible = (slug: string) => {
+      if (!isMobileBrowser) return;
+      window.requestAnimationFrame(() => {
+        const scroller = contentScrollRef.current;
+        const link = scroller?.querySelector<HTMLElement>(
+          `[data-featured-designer-slug="${slug}"]`
+        );
+        if (!scroller || !link) return;
+        const scrollerRect = scroller.getBoundingClientRect();
+        const linkRect = link.getBoundingClientRect();
+        const topLimit = scrollerRect.top + scrollerRect.height * 0.22;
+        const bottomLimit = scrollerRect.top + scrollerRect.height * 0.62;
+
+        if (linkRect.top < topLimit) {
+          scroller.scrollBy({ top: linkRect.top - topLimit, behavior: "smooth" });
+        } else if (linkRect.bottom > bottomLimit) {
+          scroller.scrollBy({ top: linkRect.bottom - bottomLimit, behavior: "smooth" });
+        }
+      });
+    };
 
     const advance = (dir: 1 | -1) => {
       setActiveSlug((current) => {
         const idx = items.findIndex((d) => d.slug === current);
         const base = idx === -1 ? 0 : idx;
         const nextIdx = Math.min(items.length - 1, Math.max(0, base + dir));
-        return items[nextIdx].slug;
+        const nextSlug = items[nextIdx].slug;
+        keepActiveDesignerVisible(nextSlug);
+        return nextSlug;
       });
     };
 
