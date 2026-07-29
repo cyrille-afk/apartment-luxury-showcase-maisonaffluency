@@ -142,6 +142,46 @@ function expandConstraintTokens(tokens: string[]): string[] {
   return [...expanded].filter(Boolean);
 }
 
+function expandCategoryConstraintTokens(tokens: string[]): string[] {
+  const expanded = new Set<string>();
+  for (const raw of tokens || []) {
+    const normalized = normalize(String(raw || ""));
+    if (!normalized) continue;
+    expanded.add(normalized);
+    if (normalized === "seating") {
+      ["seating", "sectional", "sofa", "settee", "loveseat", "chair", "armchair", "lounge chair", "dining chair", "bench", "stool", "ottoman", "pouf", "banquette", "daybed", "chaise"].forEach((t) => expanded.add(t));
+    } else if (normalized === "table" || normalized === "tables" || normalized === "dining table") {
+      ["tables", "dining table", "coffee table", "side table", "console", "desk", "table"].forEach((t) => expanded.add(t));
+    } else if (normalized === "lighting") {
+      ["lighting", "floor lamp", "floor light", "table lamp", "table light", "pendant", "ceiling light", "chandelier", "sconce", "wall light", "lantern", "lamp"].forEach((t) => expanded.add(t));
+    } else if (normalized === "storage") {
+      ["storage", "cabinet", "sideboard", "credenza", "shelving", "bookcase", "dresser", "chest", "armoire"].forEach((t) => expanded.add(t));
+    } else if (normalized === "bedroom furniture") {
+      ["bedroom furniture", "bed", "headboard", "nightstand", "bedside"].forEach((t) => expanded.add(t));
+    } else if (normalized === "rugs") {
+      ["rugs", "rug", "carpet", "kilim", "dhurrie"].forEach((t) => expanded.add(t));
+    } else if (normalized === "decor" || normalized === "décor") {
+      ["decor", "décor", "vase", "sculpture", "object", "screen", "mirror", "art"].forEach((t) => expanded.add(t));
+    }
+  }
+  return [...expanded].filter(Boolean);
+}
+
+function categoryTokenMatches(rowText: string, token: string): boolean {
+  if (!token) return false;
+  if (rowText.includes(token)) return true;
+  if (token === "seating") return /\b(sectional|sofa|settee|loveseat|chair|armchair|bench|stool|ottoman|pouf|banquette|daybed|chaise)\b/.test(rowText);
+  if (token === "table" || token === "tables" || token === "dining table") {
+    return /\b(dining table|coffee table|side table|console|desk|tables?)\b/.test(rowText) && !/\b(table lamp|table light)\b/.test(rowText);
+  }
+  if (token === "lighting") return /\b(floor lamp|floor light|table lamp|table light|pendant|ceiling light|chandelier|sconce|wall light|lantern|lighting|lamp)\b/.test(rowText);
+  if (token === "storage") return /\b(cabinet|sideboard|credenza|shelving|bookcase|dresser|chest|armoire|storage)\b/.test(rowText);
+  if (token === "bedroom furniture") return /\b(bed|headboard|nightstand|bedside|bedroom)\b/.test(rowText);
+  if (token === "rugs") return /\b(rug|carpet|kilim|dhurrie)\b/.test(rowText);
+  if (token === "decor" || token === "décor") return /\b(vase|sculpture|object|screen|mirror|art|decor)\b/.test(rowText);
+  return false;
+}
+
 /**
  * Build a PostgREST `.or(...)` expression that requires the row to match
  * AT LEAST ONE token across the given text columns via ILIKE.
@@ -180,7 +220,7 @@ export function applyHardConstraints<Q extends {
   if (col) q = q.or(col);
   if (constraints.categories?.length && columns.category) {
     const categoryColumns = Array.from(new Set([columns.category, ...columns.text]));
-    const cat = buildIlikeOr(constraints.categories, categoryColumns);
+    const cat = buildIlikeOr(expandCategoryConstraintTokens(constraints.categories), categoryColumns);
     if (cat) q = q.or(cat);
   }
   if (constraints.excludeBrands?.length && columns.brand) {
@@ -221,7 +261,7 @@ export function filterRowsByHardConstraints<
 
   const matTokens = expandConstraintTokens(constraints.materials || []).map(normalize).filter(Boolean);
   const colorTokens = expandConstraintTokens(constraints.colors || []).map(normalize).filter(Boolean);
-  const cats = expandConstraintTokens(constraints.categories || []).map(normalize).filter(Boolean);
+  const cats = expandCategoryConstraintTokens(constraints.categories || []).map(normalize).filter(Boolean);
   const excl = (constraints.excludeBrands || []).map((b) => b.toLowerCase()).filter(Boolean);
 
   const rowText = (r: R): string => {
@@ -241,7 +281,7 @@ export function filterRowsByHardConstraints<
     if (colorTokens.length && !colorTokens.some((t) => hay.includes(t))) return false;
     if (cats.length) {
       const rc = normalize(`${String(r[categoryCol] ?? "")} ${hay}`);
-      if (!cats.some((c) => rc.includes(c))) return false;
+      if (!cats.some((c) => categoryTokenMatches(rc, c))) return false;
     }
     if (excl.length) {
       const rb = String(r[brandCol] ?? "").toLowerCase();
