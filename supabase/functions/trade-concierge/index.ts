@@ -3929,6 +3929,7 @@ async function buildDeterministicTearsheetProposal(
 ): Promise<any | null> {
   const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
   const requestedTypology = options?.mixedRoom ? null : inferRequestedTypology(brief, requestText);
+  const requestedTypologies = normalizeRequestedTypologies(requestedTypology);
   const dimConstraints = inferDimensionConstraints(requestText);
   // Combine any inferred lead-time constraint with the brief's stored ceiling.
   const inferredLead = inferLeadTimeConstraints(requestText);
@@ -3945,8 +3946,10 @@ async function buildDeterministicTearsheetProposal(
   const scoreRow = (r: any) => {
     const hay = `${r?.title || ""} ${r?.category || ""} ${r?.subcategory || ""} ${r?.materials || ""}`.toLowerCase();
     let score = Number(r?.similarity || 0);
-    if (requestedTypology === "dining_table" && /\bdining\b/.test(hay)) score += 3;
-    if (requestedTypology && /\btable\b/.test(hay)) score += 2;
+    const rowTypes = rowMatchedRequestedTypologies(r, requestedTypologies);
+    score += rowTypes.length * 2;
+    if (rowTypes.includes("dining_table") && /\bdining\b/.test(hay)) score += 3;
+    if ((rowTypes.includes("table") || rowTypes.includes("dining_table")) && /\btable\b/.test(hay)) score += 2;
     if ((brief.materials || []).some((m) => /\b(oak|walnut|wood|timber)\b/i.test(String(m))) && /\b(oak|walnut|wood|timber)\b/.test(hay)) score += 1;
     return score;
   };
@@ -3968,7 +3971,7 @@ async function buildDeterministicTearsheetProposal(
     console.log(`[concierge tearsheet lead] pre=${candidateRows.length} kept=${leadRes.kept.length} dropped=${leadRes.dropped} unknownDropped=${leadRes.unknownDropped} fellBack=${leadRes.fellBack} constraints=${JSON.stringify(leadConstraints)}`);
     candidateRows = leadRes.kept;
   }
-  if (candidateRows.length < 2 && requestedTypology) {
+  if (requestedTypologies.length && (candidateRows.length < 2 || !rowsCoverRequestedTypologies(candidateRows, requestedTypologies))) {
     candidateRows = (await fetchStrictTypologyCandidates(supabase, requestedTypology, dimConstraints, leadConstraints))
       .filter((r: any) => r && typeof r.id === "string" && UUID_RE.test(r.id))
       .sort((a: any, b: any) => scoreRow(b) - scoreRow(a));
@@ -4001,7 +4004,11 @@ async function buildDeterministicTearsheetProposal(
     }
     return picked;
   };
-  const pickSource = options?.mixedRoom ? diversifyMixedRoomRows(sortedCandidates, 8) : sortedCandidates;
+  const pickSource = requestedTypologies.length > 1
+    ? pickRowsForRequestedTypologyCoverage(sortedCandidates, requestedTypologies, 8)
+    : options?.mixedRoom
+      ? diversifyMixedRoomRows(sortedCandidates, 8)
+      : sortedCandidates;
   const pickIds = Array.from(new Set(pickSource.map((r: any) => r.id))).slice(0, 8);
   if (pickIds.length < 2) return null;
   const hydratedRaw = await hydratePickPreview(supabase, pickIds);
@@ -4017,6 +4024,7 @@ async function buildDeterministicTearsheetProposal(
     validPickIds,
   );
   if (finalIds.length < 2) return null;
+  if (requestedTypologies.length > 1 && !rowsCoverRequestedTypologies(previewRaw, requestedTypologies)) return null;
   const rationaleMap: Record<string, { reason: string }> = {};
   for (const p of previewRaw) {
     if (!p?.id || !finalIds.includes(p.id)) continue;
