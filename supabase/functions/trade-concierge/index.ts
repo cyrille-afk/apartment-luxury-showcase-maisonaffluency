@@ -3514,16 +3514,16 @@ async function fetchStrictTypologyCandidates(
       .from("designer_curator_picks")
       .select("id, title, materials, materials_description, description, meta_description, variant_placeholder, tags, category, subcategory, dimensions, trade_price_cents, currency, lead_time, stock_status, designer_id, size_variants")
         .or(pickOr)
-        .limit(240)
-      : supabase.from("designer_curator_picks").select("id, title, materials, materials_description, description, meta_description, variant_placeholder, tags, category, subcategory, dimensions, trade_price_cents, currency, lead_time, stock_status, designer_id, size_variants").limit(240)),
+        .limit(1000)
+      : supabase.from("designer_curator_picks").select("id, title, materials, materials_description, description, meta_description, variant_placeholder, tags, category, subcategory, dimensions, trade_price_cents, currency, lead_time, stock_status, designer_id, size_variants").limit(1000)),
     (tradeOr
       ? supabase
       .from("trade_products")
       .select("id, product_name, materials, materials_description, description, meta_description, variant_placeholder, available_finishes, fabric_options, category, subcategory, dimensions, trade_price_cents, rrp_price_cents, currency, lead_time, stock_status_override, brand_name, size_variants")
       .eq("is_active", true)
         .or(tradeOr)
-        .limit(240)
-      : supabase.from("trade_products").select("id, product_name, materials, materials_description, description, meta_description, variant_placeholder, available_finishes, fabric_options, category, subcategory, dimensions, trade_price_cents, rrp_price_cents, currency, lead_time, stock_status_override, brand_name, size_variants").eq("is_active", true).limit(240)),
+        .limit(1000)
+      : supabase.from("trade_products").select("id, product_name, materials, materials_description, description, meta_description, variant_placeholder, available_finishes, fabric_options, category, subcategory, dimensions, trade_price_cents, rrp_price_cents, currency, lead_time, stock_status_override, brand_name, size_variants").eq("is_active", true).limit(1000)),
   ]);
   let typologyFiltered = [
     ...(pickRes.data || []),
