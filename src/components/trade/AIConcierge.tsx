@@ -4566,35 +4566,49 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                 );
               }
               if (item.kind !== "proposal") return null;
+              const excludedSet = new Set(item.excluded || []);
+              const visibleForGrid = item.proposal.preview.filter((p) => !excludedSet.has(p.id));
               return (
-                <TearsheetProposalCard
-                  key={i}
-                  proposal={item.proposal}
-                  excluded={new Set(item.excluded || [])}
-                  locked={new Set(item.locked || [])}
-                  newPickIds={item.newPickIds}
-                  onExcludedChange={(next) => {
-                    setTimeline((prev) => {
-                      const copy = prev.slice();
-                      const t = copy[i];
-                      if (t?.kind === "proposal") {
-                        copy[i] = { ...t, excluded: Array.from(next) };
-                      }
-                      return copy;
-                    });
-                  }}
-                  onLockedChange={(next) => {
-                    setTimeline((prev) => {
-                      const copy = prev.slice();
-                      const t = copy[i];
-                      if (t?.kind === "proposal") {
-                        copy[i] = { ...t, locked: Array.from(next) };
-                      }
-                      return copy;
-                    });
-                  }}
-                  onResolved={(outcome, info) => handleProposalResolved(i, outcome, info)}
-                />
+                <div key={i} className="flex w-full flex-col gap-3">
+                  {item.sourceOrigin === "source" && visibleForGrid.length > 0 && (
+                    <CuratedInventoryGrid
+                      items={visibleForGrid}
+                      onAddToBoard={(pick) => {
+                        void sendRef.current?.(
+                          `Add "${pick.title}"${pick.designer_name ? ` by ${pick.designer_name}` : ""} to my current project board.`,
+                          { displayText: `+ Add to Board · ${pick.title}` },
+                        );
+                      }}
+                    />
+                  )}
+                  <TearsheetProposalCard
+                    proposal={item.proposal}
+                    excluded={new Set(item.excluded || [])}
+                    locked={new Set(item.locked || [])}
+                    newPickIds={item.newPickIds}
+                    onExcludedChange={(next) => {
+                      setTimeline((prev) => {
+                        const copy = prev.slice();
+                        const t = copy[i];
+                        if (t?.kind === "proposal") {
+                          copy[i] = { ...t, excluded: Array.from(next) };
+                        }
+                        return copy;
+                      });
+                    }}
+                    onLockedChange={(next) => {
+                      setTimeline((prev) => {
+                        const copy = prev.slice();
+                        const t = copy[i];
+                        if (t?.kind === "proposal") {
+                          copy[i] = { ...t, locked: Array.from(next) };
+                        }
+                        return copy;
+                      });
+                    }}
+                    onResolved={(outcome, info) => handleProposalResolved(i, outcome, info)}
+                  />
+                </div>
               );
             })}
             {showTypingDots && (
