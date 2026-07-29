@@ -3573,6 +3573,14 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                              // Collapse the blank lines left behind by removed items.
                              .replace(/\n{3,}/g, "\n\n")
                              .trim();
+                           const extractedCtas = extractDesignDirectorCtas(raw);
+                           extractedCtas.labels.forEach((label) => {
+                             if (!seen.has(label)) {
+                               seen.add(label);
+                               found.push(label);
+                             }
+                           });
+                           const markdownBody = extractedCtas.labels.length > 0 ? extractedCtas.body : stripped;
 
                           const dispatchCta = (label: string) => {
                             if (label === "Forward to Human Concierge") { void forwardToHumanConcierge(); return; }
