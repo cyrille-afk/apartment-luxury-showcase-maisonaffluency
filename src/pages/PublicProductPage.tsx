@@ -135,8 +135,9 @@ function useProductBySlug(designerSlug: string | undefined, productSlug: string 
       // greedily match the "Byron" chair (byron-) which appears earlier.
       const exact = picks.find((p: any) => {
         const titleSlug = slugify(p.title);
+        const shortSlug = slugify(String(p.title).replace(/\s+by\s+.+$/i, ""));
         const fullSlug = slugify(p.title + (p.subtitle ? `-${p.subtitle}` : ""));
-        return fullSlug === productSlug || titleSlug === productSlug;
+        return fullSlug === productSlug || titleSlug === productSlug || shortSlug === productSlug;
       });
       const product = exact || picks.find((p: any) => {
         const titleSlug = slugify(p.title);
