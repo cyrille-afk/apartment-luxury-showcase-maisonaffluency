@@ -31,7 +31,13 @@ export const MATERIAL_KEYWORDS: string[] = [
 ];
 
 function normalize(v: string | null | undefined): string {
-  return (v || "").toLowerCase().replace(/[^a-z0-9\s&/-]/g, " ").replace(/\s+/g, " ").trim();
+  return (v || "")
+    .toLowerCase()
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9\s&/-]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 function escapeForRegex(v: string): string {
@@ -102,13 +108,47 @@ function escapeIlike(token: string): string {
   return token.replace(/[,()*]/g, " ").trim();
 }
 
+function expandConstraintTokens(tokens: string[]): string[] {
+  const dictionary = new Set([...COLOR_KEYWORDS, ...MATERIAL_KEYWORDS].map(normalize));
+  const expanded = new Set<string>();
+
+  for (const raw of tokens || []) {
+    const original = String(raw || "").toLowerCase().trim();
+    const normalized = normalize(original);
+    if (!original && !normalized) continue;
+
+    if (original) expanded.add(original);
+    if (normalized) expanded.add(normalized);
+
+    // Multi-word brief tokens often arrive as "warm oak", "patinated brass",
+    // or "ivory bouclé". Search the material/color nouns as well; otherwise a
+    // literal phrase pre-filter can wipe valid rows whose metadata says simply
+    // "oak" / "brass" / "bouclé".
+    for (const part of normalized.split(/\s+/)) {
+      if (dictionary.has(part)) expanded.add(part);
+    }
+  }
+
+  if (expanded.has("boucle")) expanded.add("bouclé");
+  if (expanded.has("bouclé")) expanded.add("boucle");
+  if (expanded.has("boucle") || expanded.has("bouclé") || expanded.has("ivory")) {
+    expanded.add("fabric");
+    expanded.add("textile");
+    expanded.add("upholstery");
+    expanded.add("com fabric");
+    expanded.add("fabric cat");
+  }
+
+  return [...expanded].filter(Boolean);
+}
+
 /**
  * Build a PostgREST `.or(...)` expression that requires the row to match
  * AT LEAST ONE token across the given text columns via ILIKE.
  * Returns null when there are no tokens (caller should skip .or()).
  */
 export function buildIlikeOr(tokens: string[], columns: string[]): string | null {
-  const safe = tokens.map(escapeIlike).filter(Boolean);
+  const safe = expandConstraintTokens(tokens).map(escapeIlike).filter(Boolean);
   if (safe.length === 0 || columns.length === 0) return null;
   const parts: string[] = [];
   for (const col of columns) {
@@ -139,7 +179,9 @@ export function applyHardConstraints<Q extends {
   const col = buildIlikeOr(constraints.colors || [], columns.text);
   if (col) q = q.or(col);
   if (constraints.categories?.length && columns.category) {
-    q = q.in(columns.category, constraints.categories);
+    const categoryColumns = Array.from(new Set([columns.category, ...columns.text]));
+    const cat = buildIlikeOr(constraints.categories, categoryColumns);
+    if (cat) q = q.or(cat);
   }
   if (constraints.excludeBrands?.length && columns.brand) {
     for (const brand of constraints.excludeBrands) {
@@ -177,9 +219,9 @@ export function filterRowsByHardConstraints<
   const brandCol = columns.brand ?? "brand_name";
   const categoryCol = columns.category ?? "category";
 
-  const matTokens = (constraints.materials || []).map((m) => m.toLowerCase()).filter(Boolean);
-  const colorTokens = (constraints.colors || []).map((c) => c.toLowerCase()).filter(Boolean);
-  const cats = (constraints.categories || []).map((c) => c.toLowerCase()).filter(Boolean);
+  const matTokens = expandConstraintTokens(constraints.materials || []).map(normalize).filter(Boolean);
+  const colorTokens = expandConstraintTokens(constraints.colors || []).map(normalize).filter(Boolean);
+  const cats = expandConstraintTokens(constraints.categories || []).map(normalize).filter(Boolean);
   const excl = (constraints.excludeBrands || []).map((b) => b.toLowerCase()).filter(Boolean);
 
   const rowText = (r: R): string => {
@@ -190,7 +232,7 @@ export function filterRowsByHardConstraints<
         return Array.isArray(v) ? v.join(" ") : "";
       })
       .join(" ");
-    return `${scalar} ${arr}`.toLowerCase();
+    return normalize(`${scalar} ${arr}`);
   };
 
   return rows.filter((r) => {
@@ -198,7 +240,7 @@ export function filterRowsByHardConstraints<
     if (matTokens.length && !matTokens.some((t) => hay.includes(t))) return false;
     if (colorTokens.length && !colorTokens.some((t) => hay.includes(t))) return false;
     if (cats.length) {
-      const rc = String(r[categoryCol] ?? "").toLowerCase();
+      const rc = normalize(`${String(r[categoryCol] ?? "")} ${hay}`);
       if (!cats.some((c) => rc.includes(c))) return false;
     }
     if (excl.length) {

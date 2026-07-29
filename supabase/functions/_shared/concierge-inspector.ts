@@ -21,6 +21,7 @@ export type InspectorGroundTruth = {
       designer: string | null;
       category: string | null;
       materials: string | null;
+      search_text?: string | null;
       dimensions?: string | null;
       price_cents: number | null;
       currency: string | null;
@@ -601,6 +602,19 @@ export function buildInspectorGroundTruth(
         designer: p.designer_name ? String(p.designer_name) : null,
         category: p.category ? String(p.category) : null,
         materials: p.materials ? String(p.materials) : null,
+        search_text: [
+          p.materials_description,
+          p.description,
+          p.meta_description,
+          p.variant_placeholder,
+          p.tags,
+          p.available_finishes,
+          p.fabric_options,
+          p.size_variants,
+        ]
+          .map((v) => Array.isArray(v) ? v.join(" ") : typeof v === "object" && v ? JSON.stringify(v) : String(v || ""))
+          .filter(Boolean)
+          .join(" ") || null,
         dimensions: p.dimensions ? String(p.dimensions) : null,
         price_cents:
           typeof p.price_cents === "number"
@@ -763,6 +777,8 @@ export type PaletteCheck = {
   ok: boolean;
   matched_ids: string[];
   offending_ids: string[];
+  covered_tokens?: string[];
+  missing_tokens?: string[];
 };
 
 export type RequirementsViolation =
@@ -772,7 +788,7 @@ export type RequirementsViolation =
   | { kind: "budget_over"; requested_cents: number; total_cents: number; currency: string; over_by_cents: number }
   | { kind: "budget_currency_mismatch"; requested: string; found: string[] }
   | { kind: "budget_unpriced"; requested_cents: number; currency: string; unpriced_items: number; unpriced_titles: string[] }
-  | { kind: "palette_mismatch"; requested: string[]; offending_ids: string[]; offending_titles: string[] }
+  | { kind: "palette_mismatch"; requested: string[]; offending_ids: string[]; offending_titles: string[]; missing_tokens?: string[] }
   | { kind: "shape_unverified"; requested: string[]; offending_ids: string[]; offending_titles: string[] }
   | { kind: "capacity_unverified"; requested_seats: number; offending_ids: string[]; offending_titles: string[] }
   | { kind: "no_slots" };
@@ -878,7 +894,7 @@ const PALETTE_SYNONYMS: Record<string, string[]> = {
   // --- Warm neutrals (textiles + light stones) ----------------------------
   beige: ["beige", "ecru", "sand", "sandstone", "taupe", "oat", "oatmeal", "ivory", "greige", "natural linen", "linen", "boucle", "cream", "camel", "wheat", "stone", "travertine", "limestone", "natural"],
   ecru: ["ecru", "beige", "ivory", "cream", "natural"],
-  ivory: ["ivory", "beige", "cream", "alabaster", "chalk"],
+  ivory: ["ivory", "beige", "cream", "alabaster", "chalk", "fabric", "textile", "upholstery", "com fabric", "fabric cat"],
   cream: ["cream", "ivory", "beige", "off white"],
   taupe: ["taupe", "greige", "beige", "stone"],
   sand: ["sand", "sandstone", "beige", "oat"],
@@ -936,7 +952,7 @@ const PALETTE_SYNONYMS: Record<string, string[]> = {
   wool: ["wool", "mohair", "cashmere", "felt"],
   velvet: ["velvet", "mohair"],
   mohair: ["mohair", "wool", "velvet"],
-  boucle: ["boucle", "wool", "fabric"],
+  boucle: ["boucle", "wool", "fabric", "textile", "upholstery", "com fabric", "fabric cat"],
   cotton: ["cotton", "fabric"],
   silk: ["silk", "fabric"],
   glass: ["glass", "crystal", "murano"],
@@ -1281,7 +1297,7 @@ export function validateRequirementsCoverage(
   for (const it of allItems) {
     itemText.set(
       it.id,
-      normalizeText(`${it.category || ""} ${it.title || ""} ${it.materials || ""} ${it.dimensions || ""}`),
+      normalizeText(`${it.category || ""} ${it.title || ""} ${it.materials || ""} ${it.dimensions || ""} ${it.search_text || ""}`),
     );
   }
 
@@ -1410,31 +1426,40 @@ export function validateRequirementsCoverage(
   if (requestedPalette.length > 0 && allItems.length > 0) {
     const expanded = requestedPalette.map((tok) => ({ tok, syns: expandPaletteToken(tok) }));
     const matched: string[] = [];
-    const offending: string[] = [];
-    const offendingTitles: string[] = [];
+    const coveredTokens = new Set<string>();
+    const itemHits = new Map<string, string[]>();
     for (const it of allItems) {
       const hay = itemText.get(it.id) || "";
-      const hit = expanded.some(({ syns }) => syns.some((s) => s && hay.includes(s)));
-      if (hit) matched.push(it.id);
-      else {
-        offending.push(it.id);
-        if (offendingTitles.length < 8) offendingTitles.push(it.title || it.id);
+      const hits = expanded
+        .filter(({ syns }) => syns.some((s) => s && hay.includes(s)))
+        .map(({ tok }) => tok);
+      if (hits.length) {
+        matched.push(it.id);
+        itemHits.set(it.id, hits);
+        hits.forEach((tok) => coveredTokens.add(tok));
       }
     }
-    const ok = offending.length === 0;
+    const missingTokens = expanded.filter(({ tok }) => !coveredTokens.has(tok)).map(({ tok }) => tok);
+    const ok = missingTokens.length === 0;
     palette = {
       requested: requestedPalette,
       ok,
       matched_ids: matched,
-      offending_ids: offending,
+      offending_ids: [],
+      covered_tokens: Array.from(coveredTokens),
+      missing_tokens: missingTokens,
     };
     if (!ok) {
       palette_ok = false;
       violations.push({
         kind: "palette_mismatch",
         requested: requestedPalette,
-        offending_ids: offending,
-        offending_titles: offendingTitles,
+        offending_ids: [],
+        offending_titles: allItems
+          .filter((it) => !(itemHits.get(it.id) || []).length)
+          .slice(0, 8)
+          .map((it) => it.title || it.id),
+        missing_tokens: missingTokens,
       });
     }
   }

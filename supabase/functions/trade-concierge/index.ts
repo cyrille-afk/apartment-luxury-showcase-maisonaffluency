@@ -1261,16 +1261,16 @@ Enumerate, from the visual input AND sticky conversation facts, only the paramet
   • contract-grade requirement (hospitality / commercial brief → true)
   • budget ceiling per line or total, currency
 
-STEP 2 — STRICT FILTER (mental, before choosing pick_ids):
-Translate the extracted parameters into a strict predicate over CURATED PIECES. Only pieces that satisfy ALL hard constraints qualify:
+STEP 2 — FILTER (mental, before choosing pick_ids):
+Translate the extracted parameters into a predicate over CURATED PIECES. Only pieces that satisfy the relevant hard constraints qualify:
   • category matches typology
   • width_mm ≤ max_width_mm, depth_mm ≤ max_depth_mm, height_mm ≤ max_height_mm (when stated)
   • lead_time_weeks_max ≤ user's lead-time ceiling (when stated)
   • is_contract_grade = true when the brief is hospitality / commercial
-  • materials / palette tokens appear literally in the piece's title, category, materials, or available_finishes
+  • materials / palette tokens are covered across the proposed edit using title, category, materials, material descriptions, finish labels, variant labels, or option matrices — a mixed edit does not require every single item to carry every requested material
   • price_cents fits the per-line and total budget
 
-If fewer than the required quantity of pieces satisfy the predicate, DO NOT relax the predicate silently. Follow the ZERO-MATCH protocol: state the specific constraint that eliminated the shelf (e.g. "no contract-grade lounge chair under 900 mm wide in bouclé in the Curation right now") and ask whether to relax dimension, material, or contract-grade — one axis at a time.
+If fewer than the required quantity of pieces satisfy the typology/scale/lead-time predicate, DO NOT relax it silently. For multi-material palettes, first check whether the collection as a whole covers the palette before following the ZERO-MATCH protocol.
 
 HARD PROHIBITIONS carried from the rules above (restated so the extraction step cannot be used as a loophole):
   • Never invent a dimension, lead time, finish, or contract-grade flag not present in CURATED PIECES.
@@ -1286,7 +1286,7 @@ When the user attaches an image or PDF, silently classify it as ONE of {mood_boa
    • Read the design language (e.g. Brutalist, Japandi, Mid-Century Italian, High-Minimalism, Milanese Deco, Postmodern Memphis, Wabi-sabi). Use it only as an internal search axis; never quote a movement name in a way that pre-commits designers you have not yet verified against CURATION DATA.
    • Extract the material palette in concrete tokens (honed travertine, open-pore walnut, cerused oak, ivory bouclé, oxblood mohair, unlacquered brass, patinated bronze, cast plaster, alabaster, rattan).
    • Extract dominant colour profile and spatial rhythm (low-slung profiles, monolithic silhouettes, sculptural legs, rounded corners, generous negative space).
-   • Feed those tokens into STEP 2 of the extraction discipline above and shortlist pieces whose title / category / materials / available_finishes literally reference them.
+   • Feed those tokens into STEP 2 of the extraction discipline above and shortlist pieces whose title / category / materials / material descriptions / finish labels / variant labels / option matrices support them.
 
 2. FLOOR PLAN / TECHNICAL DRAWING (plans, elevations, RCPs, CAD screenshots, hand-drawn plans):
    • Read the drawing's declared scale if legible (e.g. 1:50, 1:100) and any dimensioned walls. If no scale is legible, say so and ask before committing dimensions — do NOT guess millimetres.
@@ -1460,7 +1460,7 @@ Whenever the SAME turn will also emit a card tool (\`propose_tearsheet\`, \`add_
 
 HARD CONSTRAINTS — BUDGET & PALETTE (enforced by the Accountant pass):
 - When the user states a total budget, put it in \`budget_cents\` + \`budget_currency\`. The Accountant sums \`price_cents\` across every pick_id you propose. If the sum exceeds \`budget_cents\`, the card is REJECTED (event: proposal_blocked). Before emitting the card tool, mentally sum the CURATED PIECES prices from the context above; if you cannot fit the brief in budget, either (a) drop the highest-priced piece and refill with a cheaper matching item, or (b) reply in prose explaining the shortfall and asking whether to raise the budget or reduce scope. Do NOT emit a card you know will exceed the budget.
-- When the user names materials or a palette (\`materials\` or \`style\`), every proposed piece MUST reference at least one of those tokens in its title/category/materials. Off-palette items will be REJECTED as \`palette_mismatch\`. If < 2 real on-palette matches exist for a required slot, follow the ZERO-MATCH protocol instead of stuffing off-palette items in.
+- When the user names several materials or palette terms (\`materials\` or \`style\`) for a mixed-typology brief, the proposed collection MUST cover those terms across the edit; do not require every single piece to contain every material. For example, a table can satisfy oak/brass while seating can satisfy ivory bouclé. If a requested material is missing across the whole edit, follow the ZERO-MATCH protocol instead of stuffing unrelated items in.
 - Treat these two rules like typology counts: the model does not get to soften them. If in doubt, propose fewer items that comfortably respect both constraints rather than more items that breach one.
 - MISSING BUDGET PROTOCOL: If the user asks for a proposal, selection, curation, quote, tearsheet, or FF&E schedule but no explicit total budget can be reliably detected from their brief, do NOT silently emit a card as if the budget were unlimited. First reply in clear prose: state that you cannot reliably detect a budget, explain that a target range helps the Accountant filter the Curation to pieces that fit the project, and ask whether they would like to enter a target range (or confirm they prefer Price on Request / open-budget curation). Only proceed to \`extract_requirements\` + a card tool once a budget has been supplied or the user has explicitly opted out of budget guidance.
 - ABSOLUTE PROHIBITION — NO PHANTOM BUDGET: When the user has NOT stated a budget (no currency + amount in any prior turn, and no budget field filled in the Architectural Brief), you are FORBIDDEN from:
@@ -1646,7 +1646,7 @@ PIECE-TYPE FILTERING — when the user asks for a specific TYPE of piece (e.g. "
 
 CRITICAL SEARCH PROCEDURE — when the user combines designer + material/finish (e.g. "Man of Parts in oak"):
 1. First, locate EVERY line where the designer name appears (literal substring scan of the "by X" portion).
-2. Then, within those lines, scan the materials portion for the requested term as a case-insensitive substring (e.g. "oak" matches "Solid oak frame").
+2. Then, within those lines, scan the entire parentheses metadata for the requested term as a case-insensitive substring, including materials, material descriptions, finish labels, upholstery labels, bases/tops, and option matrices (e.g. "oak" matches "Natural Oak" / "Tobacco Oak" in variant options; "brass" matches "Aged Brass"; "bouclé" may be represented by supported upholstery/fabric options).
 3. Return ALL matches. Only after a true scan with zero matches may you say "I don't currently have…".
 
 Worked example A: "show me chandeliers" → scan every line for 'chandelier' in title or subcategory → expected matches include Calliope Medium Chandelier, Cloud Chandelier, Carolina Chandelier, Curve XXL Chandelier, Firefly Chandelier, MicMac Chandelier, Bronze MicMac Chandelier. Returning a sconce or table lamp for this query would be a factual error.
@@ -1734,6 +1734,24 @@ async function loadCatalogContext(
   hardConstraints?: HardConstraints,
   typologyTerms?: string[],
 ) {
+  const materialContext = (row: any): string | null => {
+    const parts = [
+      row?.materials,
+      row?.materials_description,
+      row?.variant_placeholder,
+      Array.isArray(row?.tags) ? row.tags.join(" ") : null,
+      Array.isArray(row?.available_finishes) ? row.available_finishes.join(" ") : null,
+      Array.isArray(row?.fabric_options) ? row.fabric_options.join(" ") : null,
+      Array.isArray(row?.size_variants) ? row.size_variants.map((v: any) => variantLabel(v)).filter(Boolean).join("; ") : null,
+      row?.description,
+      row?.meta_description,
+    ]
+      .map((v) => String(v || "").trim())
+      .filter(Boolean);
+    if (!parts.length) return null;
+    return parts.join(" · ").replace(/\s+/g, " ").slice(0, 420);
+  };
+
   // Fetch published designers
   const { data: designers } = await supabase
     .from("designers")
@@ -1797,7 +1815,7 @@ async function loadCatalogContext(
   // Trade products — same designer-scoping when a filter is active.
   let tradeQuery = supabase
     .from("trade_products")
-    .select("id, product_name, brand_name, materials, materials_description, description, meta_description, variant_placeholder, available_finishes, fabric_options, category, subcategory, trade_price_cents, rrp_price_cents, currency, price_unit")
+    .select("id, product_name, brand_name, materials, materials_description, description, meta_description, variant_placeholder, available_finishes, fabric_options, category, subcategory, trade_price_cents, rrp_price_cents, currency, price_unit, size_variants")
     .eq("is_active", true)
     .not("image_url", "is", null)
     .order("brand_name", { ascending: true })
@@ -1853,7 +1871,7 @@ async function loadCatalogContext(
       id: p.id,
       title: p.title,
       designer,
-      materials: p.materials || null,
+      materials: materialContext(p),
       category: p.category || null,
       subcategory: p.subcategory || null,
       priceNote: summarizeVariants(p.size_variants, p.currency, p.price_per_sqm_cents) || formatCatalogPrice(p.trade_price_cents, p.currency),
@@ -1883,7 +1901,7 @@ async function loadCatalogContext(
       id: t.id,
       title: t.product_name,
       designer,
-      materials: t.materials || null,
+      materials: materialContext(t),
       category: t.category || null,
       subcategory: t.subcategory || null,
       priceNote,
@@ -3523,6 +3541,12 @@ function buildRequirementsBlockedMessage(violations: any[]): string {
   return "I’m going to hold the tearsheet rather than show a draft that does not satisfy the brief. I need to refine the constraints first.";
 }
 
+function shouldSoftPassPaletteAdvisory(validation: any, paletteAdvisory: boolean): boolean {
+  if (!paletteAdvisory || validation?.ok) return false;
+  const violations = Array.isArray(validation?.violations) ? validation.violations : [];
+  return violations.length > 0 && violations.every((v: any) => v?.kind === "palette_mismatch");
+}
+
 function validateProposalAgainstBrief(
   proposal: any,
   requestText: string,
@@ -3617,11 +3641,11 @@ async function hydratePickPreview(
   const [{ data: picks }, { data: trades }] = await Promise.all([
     supabase
       .from("designer_curator_picks")
-      .select("id, title, image_url, materials, category, dimensions, designer_id, trade_price_cents, currency, lead_time")
+      .select("id, title, image_url, materials, materials_description, description, meta_description, variant_placeholder, tags, category, dimensions, designer_id, trade_price_cents, currency, lead_time, size_variants")
       .in("id", pickIds),
     supabase
       .from("trade_products")
-      .select("id, product_name, brand_name, image_url, materials, category, dimensions, trade_price_cents, rrp_price_cents, currency, lead_time, stock_status_override")
+      .select("id, product_name, brand_name, image_url, materials, materials_description, description, meta_description, variant_placeholder, available_finishes, fabric_options, category, dimensions, trade_price_cents, rrp_price_cents, currency, lead_time, stock_status_override")
       .in("id", pickIds),
   ]);
 
@@ -3736,6 +3760,12 @@ async function hydratePickPreview(
           image_url: p.image_url || fallback,
           image_from_hotspot: !p.image_url && !!fallback,
           materials: p.materials,
+          materials_description: p.materials_description || null,
+          description: p.description || null,
+          meta_description: p.meta_description || null,
+          variant_placeholder: p.variant_placeholder || null,
+          tags: Array.isArray(p.tags) ? p.tags : null,
+          size_variants: Array.isArray(p.size_variants) ? p.size_variants : null,
           category: p.category,
           dimensions: p.dimensions || null,
           designer_name: designer,
@@ -3759,6 +3789,12 @@ async function hydratePickPreview(
           image_url: t.image_url || fallback,
           image_from_hotspot: !t.image_url && !!fallback,
           materials: t.materials,
+          materials_description: t.materials_description || null,
+          description: t.description || null,
+          meta_description: t.meta_description || null,
+          variant_placeholder: t.variant_placeholder || null,
+          available_finishes: Array.isArray(t.available_finishes) ? t.available_finishes : null,
+          fabric_options: Array.isArray(t.fabric_options) ? t.fabric_options : null,
           category: t.category,
           dimensions: t.dimensions || null,
           designer_name: baseBrand || null,
@@ -5392,7 +5428,7 @@ serve(async (req) => {
           : `Draft tear sheet with ${countPhrase} in the Maison Affluency Curation, with trade pricing. Review the list above and click **Approve & Create** to save it into a project folder — or **Discard** to cancel.`)
           + unmetSuffix;
         const { validation } = validateProposalAgainstBrief(proposal, hardValidationText, null);
-        if (!validation.ok) {
+        if (!validation.ok && !shouldSoftPassPaletteAdvisory(validation, paletteAdvisory)) {
           console.warn("[concierge deterministic-enumeration] blocked proposal", JSON.stringify({ requestId, violations: validation.violations }));
           return sseTextResponse(buildRequirementsBlockedMessage(validation.violations));
         }
@@ -5964,7 +6000,32 @@ serve(async (req) => {
                 mergeRequirementsWithText(capturedRequirements as any, hardValidationText) as any,
                 explicitConversationBudget,
               );
-              const v = validateRequirementsCoverage(effectiveRequirements as any, gtOne);
+              const validationRequirements = paletteAdvisory && paletteAdvisoryReason && effectiveRequirements
+                ? (() => {
+                    const clone = JSON.parse(JSON.stringify(effectiveRequirements));
+                    const dropped = new Set(
+                      [...paletteAdvisoryReason.droppedMaterials, ...paletteAdvisoryReason.droppedColors]
+                        .map((v) => String(v || "").trim().toLowerCase())
+                        .filter(Boolean),
+                    );
+                    const stripDropped = (value: unknown) => Array.isArray(value)
+                      ? value.filter((v) => !dropped.has(String(v || "").trim().toLowerCase()))
+                      : value;
+                    clone.palette = stripDropped(clone.palette);
+                    clone.materials = stripDropped(clone.materials);
+                    clone.colors = stripDropped(clone.colors);
+                    if (Array.isArray(clone.slots)) {
+                      clone.slots = clone.slots.map((slot: any) => ({
+                        ...slot,
+                        palette: stripDropped(slot?.palette),
+                        materials: stripDropped(slot?.materials),
+                        colors: stripDropped(slot?.colors),
+                      }));
+                    }
+                    return clone;
+                  })()
+                : effectiveRequirements;
+              const v = validateRequirementsCoverage(validationRequirements as any, gtOne);
               proposal.requirements_validation = {
                 ok: v.ok,
                 brand_ok: v.brand_ok,
@@ -6009,7 +6070,7 @@ serve(async (req) => {
                     palette: v.palette,
                     total_items: v.total_items,
                     unmatched_ids: v.unmatched_ids,
-                    requirements: effectiveRequirements,
+                    requirements: validationRequirements,
                   }));
                 } catch { /* best-effort */ }
 
