@@ -440,10 +440,10 @@ const REDUNDANT_INTERFACE_ACTION_PATTERNS = [
 function normalizeActionLabel(value: string): string {
   return value
     .replace(/[\u00a0\u200b]/g, " ")
-    .replace(/\\([][()])/g, "$1")
+    .replace(new RegExp("\\\\([\\[\\]\\(\\)])", "g"), "$1")
     .replace(/^[\s>]*(?:(?:[-*+]|\d+[.)])\s+)?/, "")
     .replace(/[*_`]/g, "")
-    .replace(/[][(){}]/g, " ")
+    .replace(new RegExp("[\\[\\]\\(\\){}]", "g"), " ")
     .replace(/\s+/g, " ")
     .trim();
 }
