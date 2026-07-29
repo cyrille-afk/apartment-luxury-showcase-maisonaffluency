@@ -555,6 +555,12 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
   const cnBriefFiredRef = useRef(false);
   const cnLastBriefUserTurnRef = useRef(0);
 
+  // Compact side panel for Design Director next-step CTAs.
+  type NextStepKind = "source" | "quote" | "match";
+  const [nextStepPanel, setNextStepPanel] = useState<NextStepKind | null>(null);
+  const [nextStepFields, setNextStepFields] = useState<Record<string, string>>({});
+
+
   const readFileAsDataUrl = (file: File): Promise<string> =>
     new Promise((resolve, reject) => {
       const reader = new FileReader();
