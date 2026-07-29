@@ -1060,9 +1060,18 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
     if (cloudSaveTimerRef.current) clearTimeout(cloudSaveTimerRef.current);
     cloudSaveTimerRef.current = setTimeout(async () => {
       try {
+        // Keep previewUrl thumbnails on IMAGE attachments so uploaded mood
+        // boards / reference photos remain visible in the transcript after
+        // rehydration from the cloud. Thumbnails are downscaled JPEGs (~<60KB)
+        // and easily fit inside the JSONB column.
         const compact = timeline.map((t) =>
           t.kind === "msg" && t.attachments?.length
-            ? { ...t, attachments: t.attachments.map(({ previewUrl: _omit, ...rest }) => rest) }
+            ? {
+                ...t,
+                attachments: t.attachments.map((a) =>
+                  a.kind === "image" ? a : (({ previewUrl: _omit, ...rest }) => rest)(a),
+                ),
+              }
             : t,
         );
         const payload = JSON.stringify(compact);
