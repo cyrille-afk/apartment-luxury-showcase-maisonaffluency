@@ -883,8 +883,11 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
   }, [minimized]);
   useEffect(() => {
     try {
-      // previewUrl is now a downscaled JPEG thumbnail (~<60KB), safe to persist.
-      // If serialization fails (quota), retry once with thumbnails stripped.
+      // previewUrl is a downscaled JPEG thumbnail (~<60KB), safe to persist so
+      // moodboard / reference images stay visible in the transcript after a
+      // reload or rehydration. If serialization fails (quota), first drop
+      // previewUrls for non-image attachments (there are none today, but future
+      // pdf previews would be heavier), then as a last resort drop all.
       const payload = JSON.stringify(timeline);
       try {
         sessionStorage.setItem("concierge:timeline", payload);
