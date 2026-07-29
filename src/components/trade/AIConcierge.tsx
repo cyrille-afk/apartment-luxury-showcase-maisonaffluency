@@ -3489,7 +3489,14 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                                 }
                                 return <p className="my-0" {...props}>{children}</p>;
                               },
-                              ul: ({ node, ...props }) => <ul className="list-disc pl-5 space-y-2 my-1" {...props} />,
+                              ul: ({ node, ...props }) => {
+                                const ctaLabels = "(Source Similar Pieces|Generate Custom Quote|Match Finishes|Forward to Human Concierge|Upload a Visual Mood Board Instead|Return to Atelier Chat|View My Open Requests|Yes, Schedule Morning Call|No, Standard Updates Are Fine)";
+                                const hasCtaList = new RegExp(`^\\s*[-*]\\s*\\[?\\s*${ctaLabels}\\s*\\]?`, "im").test(item.content || "");
+                                if (hasCtaList) {
+                                  return <ul className="flex flex-wrap gap-2 my-2" {...props} />;
+                                }
+                                return <ul className="list-disc pl-5 space-y-2 my-1" {...props} />;
+                              },
                               ol: ({ node, ...props }) => <ol className="list-decimal pl-5 space-y-2 my-1" {...props} />,
                               li: ({ node, children, ...props }: any) => {
                                 // Detect the three fixed Design Director CTAs
@@ -3626,12 +3633,15 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                                   };
 
                                   return (
-                                    <li className="list-none -ml-5 my-1.5" {...props}>
-                                      <DesignDirectorCtaButton
-                                        label={label}
-                                        description={tail || undefined}
+                                    <li className="list-none" {...props}>
+                                      <button
+                                        type="button"
                                         onClick={handleCtaClick}
-                                      />
+                                        title={tail || undefined}
+                                        className="rounded-full border border-border/80 bg-background px-3 py-1.5 font-body text-xs text-foreground hover:bg-muted hover:text-foreground hover:border-foreground/30 transition-colors"
+                                      >
+                                        [ {label} ]
+                                      </button>
                                     </li>
                                   );
                                 }
