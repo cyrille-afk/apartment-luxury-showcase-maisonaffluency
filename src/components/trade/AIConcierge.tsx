@@ -3,6 +3,7 @@ import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { X, Send, Loader2, Sparkles, Minus, GripHorizontal, RotateCcw, Maximize2, Minimize2, Expand, Shrink, Palette, Check, Languages, Pencil, Paperclip, FileText, Download, FileDown, Copy, ShieldCheck, ListChecks, Eye, LayoutList, MessagesSquare, Plus, Trash2 } from "lucide-react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { BriefBuilder } from "@/components/trade/concierge/BriefBuilder";
+import { QuoteSummaryCardContainer } from "@/components/trade/QuoteSummaryCard";
 import { BriefBubble, isBriefContent } from "@/components/trade/concierge/BriefBubble";
 import brandCategoriesRaw from "@/data/brandCategories.json";
 
@@ -340,6 +341,14 @@ type TimelineItem =
       logistics?: Array<{ label: string; amount: number | "included" }>;
       discountPct?: number;
       totalCents?: number;
+      resolved?: "downloaded" | "sent";
+    }
+  | {
+      kind: "quote_summary";
+      id: string;
+      projectId: string;
+      projectName: string;
+      baseItems: Array<{ name: string; price: number }>;
       resolved?: "downloaded" | "sent";
     };
 
@@ -1612,40 +1621,62 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
       const m = txt.match(/([A-Z][A-Za-z'’\-]+(?:\s+[A-Z][A-Za-z'’\-]+){0,3}\s+(?:Brownstone|Penthouse|Villa|Bungalow|Townhouse|Loft|Residence|Pavilion|Apartment))/);
       if (m) projectName = m[1];
     } catch { /* ignore */ }
+
+    // Resolve the active project id from the persisted trade filter.
+    let projectId: string | null = null;
+    try { projectId = sessionStorage.getItem("trade:lastProjectFilter"); } catch { /* ignore */ }
+
+    // Derive base items from the most recent tearsheet proposal in the
+    // timeline if present, else fall back to a categorized placeholder that
+    // matches the current design concept.
+    const derivedBaseItems: Array<{ name: string; price: number }> = (() => {
+      const lastProposal = [...timeline].reverse().find((t: any) => t.kind === "proposal") as any;
+      const picks: any[] = lastProposal?.proposal?.picks || [];
+      const out = picks
+        .map((p) => ({
+          name: String(p?.name || p?.title || "Selected piece"),
+          price: Number(p?.trade_price_cents ? p.trade_price_cents / 100 : p?.price ?? 0),
+        }))
+        .filter((li) => li.price > 0);
+      if (out.length > 0) return out;
+      return [
+        { name: "Living Area Bouclé Seating (Curated Atelier, Paris)", price: 14200 },
+        { name: "Minimalist Timber Media Credenza (Custom Artisan)", price: 8400 },
+        { name: "Earthy Mineral Surface Side Tables (Pair)", price: 3800 },
+      ];
+    })();
+
+    // Preferred path: bind to the live `useProjectQuote` hook via a
+    // `quote_summary` timeline entry. Requires an active project id so the
+    // edge function can apply the regional trade multiplier.
+    if (projectId) {
+      // Try to enrich the project name from the DB row before mounting.
+      try {
+        const { data: projectRow } = await supabase
+          .from("projects").select("name").eq("id", projectId).maybeSingle();
+        if (projectRow?.name) projectName = projectRow.name;
+      } catch { /* non-fatal */ }
+      setTimeline((prev) => [
+        ...prev,
+        { kind: "quote_summary", id: cardId, projectId, projectName, baseItems: derivedBaseItems },
+      ]);
+      return;
+    }
+
+    // Fallback (no active project): keep the legacy inline card so the
+    // designer still sees a coherent summary rather than an error.
     setTimeline((prev) => [
       ...prev,
       { kind: "quote_card", id: cardId, state: "loading", projectName },
     ]);
 
-    // Fetch active project metadata + localized trade multiplier in parallel.
-    let projectMeta: { name?: string; location?: string; client_name?: string | null } | null = null;
     let discountPct = 15;
     let shippingHub = "NY Hub";
     try {
-      const [{ data: pctData }, projectRow] = await Promise.all([
-        supabase.rpc("current_trade_discount_pct"),
-        (async () => {
-          let projectId: string | null = null;
-          try { projectId = sessionStorage.getItem("trade:lastProjectFilter"); } catch { /* ignore */ }
-          if (!projectId) return null;
-          const { data } = await supabase.from("projects").select("name, location, client_name").eq("id", projectId).maybeSingle();
-          return data ?? null;
-        })(),
-      ]);
+      const { data: pctData } = await supabase.rpc("current_trade_discount_pct");
       if (typeof pctData === "number" && pctData > 0) discountPct = pctData;
-      if (projectRow) {
-        projectMeta = projectRow as { name?: string; location?: string; client_name?: string | null };
-        if (projectRow.name) projectName = projectRow.name;
-        const loc = String(projectRow.location || "");
-        if (/new york|ny|brooklyn|manhattan/i.test(loc)) shippingHub = "NY Hub";
-        else if (/london|uk|england/i.test(loc)) shippingHub = "London Hub";
-        else if (/paris|france/i.test(loc)) shippingHub = "Paris Hub";
-        else if (/singapore|hong kong|shanghai|beijing|tokyo/i.test(loc)) shippingHub = "Asia Hub";
-      }
-    } catch { /* ignore — fall through to defaults */ }
+    } catch { /* ignore */ }
 
-    // Derived line items — anchored to the most recent tearsheet if present,
-    // else a categorized placeholder aligned with the current design concept.
     const lineItems: Array<{ group: "Seating" | "Casegoods" | "Lighting" | "Textiles"; label: string; amount: number }> = [
       { group: "Seating", label: `Living Area Bouclé Seating (Curated Atelier, Paris)`, amount: 14200 },
       { group: "Casegoods", label: "Minimalist Timber Media Credenza (Custom Artisan)", amount: 8400 },
@@ -1659,8 +1690,6 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
       { label: `${shippingHub.replace(" Hub", "")} Trade Discount Applied (−${discountPct}%)`, amount: -discountAmount },
     ];
 
-    // Small artificial dwell so the "Compiling…" line is legible even on
-    // fast connections — long enough to register, short enough to feel snappy.
     await new Promise((r) => setTimeout(r, 700));
 
     setTimeline((prev) =>
@@ -4217,6 +4246,46 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                     }}
                     onDismiss={() => resolveAt("dismissed")}
                   />
+                );
+              }
+              if (item.kind === "quote_summary") {
+                const resolveSummary = (outcome: "downloaded" | "sent") => {
+                  setTimeline((prev) => prev.map((t) => (t.kind === "quote_summary" && t.id === item.id ? { ...t, resolved: outcome } : t)));
+                };
+                return (
+                  <div
+                    key={i}
+                    className={cn(
+                      "self-start w-full",
+                      expanded ? "max-w-[92%]" : "max-w-[88%]",
+                    )}
+                  >
+                    <QuoteSummaryCardContainer
+                      projectId={item.projectId}
+                      baseItems={item.baseItems}
+                      onDownloadPdf={() => {
+                        if (item.resolved) return;
+                        resolveSummary("downloaded");
+                        void sendRef.current?.(
+                          `Please generate and email me the official PDF tear sheet for the ${item.projectName} custom quote above.`,
+                          { displayText: "Download Official PDF Tear Sheet" },
+                        );
+                      }}
+                      onSendToClient={() => {
+                        if (item.resolved) return;
+                        resolveSummary("sent");
+                        void sendRef.current?.(
+                          `Send the ${item.projectName} custom quote above to my client for approval — use the client on file for this project.`,
+                          { displayText: "Send to Client for Approval" },
+                        );
+                      }}
+                    />
+                    {item.resolved && (
+                      <div className="mt-1 px-1 text-[11px] text-muted-foreground italic">
+                        {item.resolved === "downloaded" ? "PDF requested — Felix is preparing it." : "Sent — Felix will confirm delivery."}
+                      </div>
+                    )}
+                  </div>
                 );
               }
               if (item.kind === "quote_card") {
