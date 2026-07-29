@@ -745,6 +745,12 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
   type NextStepKind = "source" | "quote" | "match";
   const [nextStepPanel, setNextStepPanel] = useState<NextStepKind | null>(null);
   const [nextStepFields, setNextStepFields] = useState<Record<string, string>>({});
+  // Track "Save Palette to Project" confirmations per message index and the
+  // most recently persisted tags so a follow-up "Source Similar Pieces" turn
+  // can seed the retrieval brief with those exact tokens.
+  const [savedPaletteMsgs, setSavedPaletteMsgs] = useState<Set<number>>(new Set());
+  const [savedPaletteTags, setSavedPaletteTags] = useState<string[]>([]);
+
 
 
   const readFileAsDataUrl = (file: File): Promise<string> =>
