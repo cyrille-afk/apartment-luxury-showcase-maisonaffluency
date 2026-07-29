@@ -1503,15 +1503,16 @@ const PublicProductPage: React.FC = () => {
               {/* Primary CTAs — Login for Pricing (trade) + Inquire for Pricing (trade-account form).
                   Passes product context so the admin inbox can pre-fill a draft quote. */}
               {(() => {
+                const returnTo = typeof window !== "undefined" ? location.pathname + location.search : "";
+                const backTo = fromPath || fallbackGridPath;
                 const q = new URLSearchParams({
                   subject: `Price on Request — ${product.title} by ${designerDisplay}`,
                   productId: product.id,
                   productSlug: productSlug || "",
                   productName: product.title || "",
                   designerName: designerDisplay || "",
+                  back: returnTo || "",
                 });
-                const returnTo = typeof window !== "undefined" ? location.pathname + location.search : "";
-                const backTo = fromPath || fallbackGridPath;
                 const loginQuery = new URLSearchParams();
                 if (returnTo) loginQuery.set("redirect", returnTo);
                 if (backTo) loginQuery.set("back", backTo);
