@@ -254,10 +254,11 @@ const TradeLogin = () => {
             Browse curators' picks, save favourites, download spec sheets, and request quotes.
           </p>
           <p className="font-body text-sm md:text-xs text-muted-foreground mt-2">
-            <Link to="/" className="hover:text-foreground transition-colors">
+            <Link to={backHref} className="hover:text-foreground transition-colors">
               ← Back to Maison Affluency
             </Link>
           </p>
+
         </div>
 
       </div>
