@@ -4821,6 +4821,63 @@ serve(async (req) => {
         ...parsedTypologyCats,
       ].filter(Boolean),
     };
+    // Palette advisory: when a scoped brand's `materials` column is sparse
+    // (>=50% null across curator picks + trade products), a strict palette
+    // pre-filter would silently wipe otherwise-qualifying pieces. In that
+    // case, drop palette/material tokens from the SQL pre-filter (typology +
+    // brand still bind) and tell Felix to render the shortlist with a
+    // "palette shown as reference; confirm finish availability" advisory.
+    let paletteAdvisory = false;
+    let paletteAdvisoryReason: {
+      brands: string[];
+      droppedMaterials: string[];
+      droppedColors: string[];
+      nullRatio: number;
+    } | null = null;
+    if (
+      hasScopedDesigners &&
+      ((sqlLoadConstraints.materials?.length || 0) + (sqlLoadConstraints.colors?.length || 0) > 0)
+    ) {
+      try {
+        const scopedBrandList = Array.from(
+          new Set(
+            scopedDesigners.flatMap((n) => [n, n.toLowerCase()]).filter(Boolean),
+          ),
+        );
+        // Cheap sparsity probe — count nulls vs total for the scoped brands.
+        const [picksTotal, picksWithMat, tradeTotal, tradeWithMat] = await Promise.all([
+          supabase.from("designer_curator_picks").select("id", { count: "exact", head: true })
+            .in("designer_id", filteredDesignerIds.length ? filteredDesignerIds : ["00000000-0000-0000-0000-000000000000"]),
+          supabase.from("designer_curator_picks").select("id", { count: "exact", head: true })
+            .in("designer_id", filteredDesignerIds.length ? filteredDesignerIds : ["00000000-0000-0000-0000-000000000000"])
+            .not("materials", "is", null),
+          supabase.from("trade_products").select("id", { count: "exact", head: true })
+            .eq("is_active", true)
+            .in("brand_name", filteredBrandNames.size ? Array.from(filteredBrandNames) : scopedBrandList),
+          supabase.from("trade_products").select("id", { count: "exact", head: true })
+            .eq("is_active", true)
+            .in("brand_name", filteredBrandNames.size ? Array.from(filteredBrandNames) : scopedBrandList)
+            .not("materials", "is", null),
+        ]);
+        const total = (picksTotal.count || 0) + (tradeTotal.count || 0);
+        const withMat = (picksWithMat.count || 0) + (tradeWithMat.count || 0);
+        const nullRatio = total > 0 ? 1 - withMat / total : 0;
+        if (total >= 3 && nullRatio >= 0.5) {
+          paletteAdvisory = true;
+          paletteAdvisoryReason = {
+            brands: scopedDesigners,
+            droppedMaterials: [...(sqlLoadConstraints.materials || [])],
+            droppedColors: [...(sqlLoadConstraints.colors || [])],
+            nullRatio: Math.round(nullRatio * 100) / 100,
+          };
+          sqlLoadConstraints.materials = [];
+          sqlLoadConstraints.colors = [];
+          console.log("[concierge palette-advisory]", paletteAdvisoryReason);
+        }
+      } catch (e) {
+        console.warn("[concierge palette-advisory probe failed]", (e as Error).message);
+      }
+    }
     const hasSqlConstraint =
       (sqlLoadConstraints.materials?.length || 0) +
       (sqlLoadConstraints.colors?.length || 0) +
