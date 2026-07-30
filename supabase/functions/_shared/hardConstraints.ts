@@ -303,10 +303,17 @@ export function filterRowsByHardConstraints<
     return normalize(`${scalar} ${arr}`);
   };
 
+  const anyMode = constraints.matchMode === "any";
+  const pooledTokens = anyMode ? [...matTokens, ...colorTokens] : [];
+
   return rows.filter((r) => {
     const hay = rowText(r);
-    if (matTokens.length && !matTokens.some((t) => hay.includes(t))) return false;
-    if (colorTokens.length && !colorTokens.some((t) => hay.includes(t))) return false;
+    if (anyMode) {
+      if (pooledTokens.length && !pooledTokens.some((t) => hay.includes(t))) return false;
+    } else {
+      if (matTokens.length && !matTokens.some((t) => hay.includes(t))) return false;
+      if (colorTokens.length && !colorTokens.some((t) => hay.includes(t))) return false;
+    }
     if (cats.length) {
       const rc = normalize(`${String(r[categoryCol] ?? "")} ${hay}`);
       if (!cats.some((c) => categoryTokenMatches(rc, c))) return false;
