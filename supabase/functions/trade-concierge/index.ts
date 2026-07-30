@@ -4780,7 +4780,13 @@ serve(async (req) => {
     // dining table"). Applied to BOTH the pgvector RAG shortlist and the
     // bulk SQL catalog load so the AI never sees candidates that violate
     // a stated constraint. Empty on discovery turns → no filtering.
-    const preRequestConstraints = deriveHardConstraints([{ title: hardValidationText || lastUserMsg }]);
+    // IMPORTANT: derive from the CURRENT user turn only. Deriving from the
+    // whole joined transcript made palette/material tokens sticky forever —
+    // once "white" or "fabric" appeared in any earlier message (or in a
+    // refine prompt), every later turn was silently hard-filtered by it, so
+    // the UI showed "Filtered by: white · fabric" on turns where the user had
+    // stated no such constraint.
+    const preRequestConstraints = deriveHardConstraints([{ title: plannerInputText || lastUserMsg }]);
     const hasAnyPreConstraint =
       (preRequestConstraints.materials?.length || 0) +
       (preRequestConstraints.colors?.length || 0) > 0;
