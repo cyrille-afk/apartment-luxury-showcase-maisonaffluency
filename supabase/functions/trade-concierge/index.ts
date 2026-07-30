@@ -3499,12 +3499,46 @@ function extractDesignerAffinityTerms(brief: ExtractedBrief["brief"], requestTex
   return Array.from(expanded);
 }
 
+// Accents are DATA, not signal: "Léo Sentou" and "leo sentou" must both match.
+// Postgres `ilike` is accent-sensitive, so we swap accent-capable letters for
+// the single-char wildcard `_` when building server-side patterns.
+const ACCENTABLE_LETTERS = /[aeiouycn]/g;
+function accentInsensitiveIlike(term: string): string {
+  return normalizeLoose(term).replace(/\s+/g, "%").replace(ACCENTABLE_LETTERS, "_");
+}
+
+// Loose designer-name equality: accent-insensitive, punctuation-insensitive,
+// and tolerant of surname-only / initial-form variants ("l. sentou", "sentou").
+function designerNameMatchesTerm(name: string | null | undefined, term: string): boolean {
+  const n = normalizeLoose(name);
+  const t = normalizeLoose(term);
+  if (!n || !t) return false;
+  if (n === t || n.includes(t) || t.includes(n)) return true;
+  const nParts = n.split(" ").filter(Boolean);
+  const tParts = t.split(" ").filter(Boolean);
+  if (!nParts.length || !tParts.length) return false;
+  const nSurname = nParts[nParts.length - 1];
+  const tSurname = tParts[tParts.length - 1];
+  if (nSurname.length < 4 || tSurname.length < 4) return false;
+  if (nSurname !== tSurname) return false;
+  // Same surname → accept when the given names agree, or one side is initials.
+  const nGiven = nParts.slice(0, -1).join(" ");
+  const tGiven = tParts.slice(0, -1).join(" ");
+  if (!nGiven || !tGiven) return true;
+  return nGiven === tGiven || nGiven[0] === tGiven[0];
+}
+
 function designerAffinityScore(row: any, terms: string[]): number {
   if (!terms.length) return 0;
   const hay = normalizeLoose(rowRelevanceHaystack(row));
+  const rowNames = [row?.designer_name, row?.designer, row?.brand_name]
+    .filter(Boolean)
+    .flatMap((v: any) => String(v).split(" - "));
   let score = 0;
   for (const term of terms) {
-    if (term && hay.includes(term)) score += 10;
+    if (!term) continue;
+    if (hay.includes(term)) score += 10;
+    else if (rowNames.some((n) => designerNameMatchesTerm(n, term))) score += 10;
   }
   return score;
 }
