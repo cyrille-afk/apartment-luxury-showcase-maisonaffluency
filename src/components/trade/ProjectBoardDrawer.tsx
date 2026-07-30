@@ -215,28 +215,28 @@ export function ProjectBoardDrawer({
               <dt className="font-body text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
                 Maximum Lead Time Projected
               </dt>
-              <dd className="font-body text-[11.5px] text-foreground">
-                {maxLead ? `${maxLead} Weeks` : "On request"}
+              <dd className="font-body text-[11.5px] uppercase tracking-[0.08em] text-foreground">
+                {maxLeadLabel}
               </dd>
             </div>
           </dl>
         </div>
 
-        {/* Footer actions */}
-        <footer className="flex items-center gap-2 px-5 pb-5">
+        {/* Footer actions — same pill language as the main viewport footer */}
+        <footer className="flex flex-wrap items-center justify-center gap-2 px-5 pb-5">
           <button
             type="button"
             onClick={onReviewLog}
-            className="flex-1 rounded-sm border border-border bg-background px-3 py-2 font-body text-[10.5px] uppercase tracking-[0.12em] text-foreground transition-colors hover:bg-foreground hover:text-background"
+            className="rounded-full border border-border/80 bg-muted/30 px-3 py-1.5 font-body text-[11px] text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
           >
-            Review Procurement Log
+            [ Review Procurement Log ]
           </button>
           <button
             type="button"
             onClick={onExportTearsheets}
-            className="flex-1 rounded-sm bg-foreground px-3 py-2 font-body text-[10.5px] uppercase tracking-[0.12em] text-background transition-opacity hover:opacity-90"
+            className="rounded-full border border-border/80 bg-muted/30 px-3 py-1.5 font-body text-[11px] text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
           >
-            Export Final PDF Tearsheets
+            [ Export Final PDF Tearsheets ]
           </button>
         </footer>
       </aside>
