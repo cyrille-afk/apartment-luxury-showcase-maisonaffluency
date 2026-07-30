@@ -3394,6 +3394,106 @@ function paletteMatchScore(row: any, constraints: HardConstraints | null | undef
   return score;
 }
 
+function rowRelevanceHaystack(row: any): string {
+  return [
+    row?.title,
+    row?.product_name,
+    row?.category,
+    row?.subcategory,
+    row?.materials,
+    row?.materials_description,
+    row?.description,
+    row?.meta_description,
+    row?.variant_placeholder,
+    row?.designer,
+    row?.designer_name,
+    row?.brand_name,
+    row?.slug,
+    Array.isArray(row?.tags) ? row.tags.join(" ") : row?.tags,
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+}
+
+function hasArtDecoSignal(brief: ExtractedBrief["brief"], requestText: string): boolean {
+  return /\b(art[\s-]?deco|deco|interwar|luxe\s+pauvre|1920s|1930s)\b/i.test(
+    `${requestText || ""} ${brief?.style || ""} ${(brief?.emphasis || []).join(" ")} ${brief?.summary || ""}`,
+  );
+}
+
+function extractDesignerAffinityTerms(brief: ExtractedBrief["brief"], requestText: string): string[] {
+  const raw = new Set<string>((brief?.designers || []).map((d) => String(d || "")).filter(Boolean));
+  const text = requestText || "";
+  const watched = [
+    /\b(?:j\.?\s*m\.?|jm|jean[-\s]?michel)\s+frank\b/gi,
+    /\becart\b/gi,
+    /\bl[eé]o\s+sentou\b/gi,
+    /\bl[eé]o\s+aerts\b/gi,
+    /\balinea\b/gi,
+  ];
+  for (const re of watched) {
+    for (const match of text.matchAll(re)) raw.add(match[0]);
+  }
+
+  const expanded = new Set<string>();
+  for (const term of raw) {
+    const n = normalizeLoose(term);
+    if (!n) continue;
+    expanded.add(n);
+    if (/\b(j\s*m|jm|jean\s+michel)\s+frank\b/.test(n)) {
+      expanded.add("jean michel frank");
+      expanded.add("ecart");
+    }
+    if (/\becart\b/.test(n)) {
+      expanded.add("ecart");
+      expanded.add("jean michel frank");
+    }
+    if (/\b(l[eé]o|leo)\s+sentou\b/.test(n)) {
+      expanded.add("leo sentou");
+      expanded.add("léo sentou");
+    }
+    if (/\b(l[eé]o|leo)\s+aerts\b/.test(n) || /\balinea\b/.test(n)) {
+      expanded.add("leo aerts");
+      expanded.add("léo aerts");
+      expanded.add("alinea");
+    }
+  }
+  return Array.from(expanded);
+}
+
+function designerAffinityScore(row: any, terms: string[]): number {
+  if (!terms.length) return 0;
+  const hay = normalizeLoose(rowRelevanceHaystack(row));
+  let score = 0;
+  for (const term of terms) {
+    if (term && hay.includes(term)) score += 10;
+  }
+  return score;
+}
+
+function artDecoAffinityScore(row: any, active: boolean): number {
+  if (!active) return 0;
+  const hay = rowRelevanceHaystack(row);
+  let score = 0;
+  if (/\b(jean[-\s]?michel\s+frank|ecart|l[eé]o\s+sentou|l[eé]o\s+aerts|alinea)\b/i.test(hay)) score += 12;
+  if (/\b(art[\s-]?deco|interwar|luxe\s+pauvre|192\d|193\d|minimalist\s+luxury)\b/i.test(hay)) score += 6;
+  if (/\b(parchment|shagreen|straw\s+marquetry|marquetry|lacquer|sandblasted\s+oak|varnished\s+oak|bronze|patinated\s+brass|plaster|gypsum)\b/i.test(hay)) score += 4;
+  return score;
+}
+
+function mergeCandidateRows(primary: any[], additions: any[]): any[] {
+  const merged = [...(primary || [])];
+  const seen = new Set(merged.map((row) => String(row?.id || "")).filter(Boolean));
+  for (const row of additions || []) {
+    const id = String(row?.id || "");
+    if (!id || seen.has(id)) continue;
+    merged.push(row);
+    seen.add(id);
+  }
+  return merged;
+}
+
 function applyPalettePreferenceByTypology(
   rows: any[],
   constraints: HardConstraints | null | undefined,
