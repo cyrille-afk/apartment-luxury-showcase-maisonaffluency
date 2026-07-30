@@ -5069,7 +5069,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
             </div>
 
             {/* Quick-action chips: visual entry points so designers know how to interact with Felix without reading the full welcome text. */}
-            <div className={cn("flex flex-wrap sm:flex-nowrap items-center justify-center gap-2", fullscreen && "shrink-0")}>
+            <div className={cn("flex flex-wrap lg:flex-nowrap items-center justify-center gap-2", fullscreen && "shrink-0")}>
               <button
                 type="button"
                 onClick={() => moodInputRef.current?.click()}
