@@ -257,7 +257,7 @@ export function CuratedInventoryGrid({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-8">
         {visible.map(renderCard)}
       </div>
 
@@ -265,13 +265,16 @@ export function CuratedInventoryGrid({
         <>
           <div
             className={cn(
-              "grid grid-cols-1 md:grid-cols-2 gap-x-6 overflow-hidden transition-all duration-500 ease-out",
-              expanded ? "mt-8 max-h-[6000px] gap-y-8 opacity-100" : "mt-0 max-h-0 gap-y-0 opacity-0",
+              "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-4 overflow-hidden transition-all duration-500 ease-out",
+              expanded
+                ? "mt-8 max-h-[6000px] gap-y-8 translate-y-0 opacity-100"
+                : "mt-0 max-h-0 gap-y-0 -translate-y-2 opacity-0",
             )}
             aria-hidden={!expanded}
           >
             {hidden.map(renderCard)}
           </div>
+
 
           <div className="my-8 flex justify-center">
             <button
