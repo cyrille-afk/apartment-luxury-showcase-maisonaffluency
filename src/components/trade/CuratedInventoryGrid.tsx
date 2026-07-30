@@ -217,12 +217,12 @@ export function CuratedInventoryGrid({
                   type="button"
                   onClick={handleView}
                     disabled={openingSpecId === item.id}
-                  className="mt-0.5 text-left font-display text-[15px] leading-snug font-semibold text-foreground line-clamp-2 hover:underline underline-offset-2 decoration-foreground/30"
+                  className="mt-0.5 w-full text-left font-display text-[15px] leading-snug font-semibold text-foreground line-clamp-2 break-words hover:underline underline-offset-2 decoration-foreground/30"
                 >
                   {item.title}
                 </button>
 
-                <div className="mt-0.5 font-body text-[11px] text-muted-foreground/80 line-clamp-1">
+                <div className="mt-0.5 w-full font-body text-[11px] text-muted-foreground/80 line-clamp-2 break-words">
                   {material}
                 </div>
 
@@ -274,7 +274,7 @@ export function CuratedInventoryGrid({
   const hidden = items.slice(4);
 
   return (
-    <div ref={rootRef} className={cn("w-full max-w-[92%] lg:max-w-full self-start", className)}>
+    <div ref={rootRef} className={cn("w-full max-w-[92%] lg:max-w-full mx-auto", className)}>
 
       <div className="mb-2 flex items-baseline justify-between gap-3">
         <div className="font-body text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
