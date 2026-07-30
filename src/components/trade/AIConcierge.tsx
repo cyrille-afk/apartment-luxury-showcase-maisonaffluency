@@ -692,6 +692,9 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
       : greetingForContext(stage, contextualPath, tone, targetLang).replace(/{concierge_name}/g, name)
   ), [surface, initialGreeting, stage, contextualPath, tone, lang, name]);
   const scrollRef = useRef<HTMLDivElement>(null);
+  // Two-step workflow: discovery grid (step 1) ⇄ procurement draft (step 2).
+  const [configView, setConfigView] = useState(false);
+  const gridScrollTopRef = useRef(0);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const abortRef = useRef<AbortController | null>(null);
   const stallTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -3185,6 +3188,39 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
       : lang === "id" ? "Ketik kota proyek Anda…"
       : "Type your project city…");
 
+  // --- Stepped workflow (discovery grid ⇄ procurement draft) -------------
+  // A "source" proposal renders a discovery grid AND a procurement draft.
+  // We show one at a time; the floating bar below the transcript switches.
+  const steppedProposal = [...timeline].reverse().find(
+    (t): t is Extract<TimelineItem, { kind: "proposal" }> =>
+      t.kind === "proposal" && t.sourceOrigin === "source" && !t.resolved,
+  );
+  const matchedCount = steppedProposal
+    ? steppedProposal.proposal.preview.filter(
+        (p) => !new Set(steppedProposal.excluded || []).has(p.id),
+      ).length
+    : 0;
+  const steppedActive = matchedCount > 0;
+
+  // A freshly-generated proposal always lands the user back on the grid.
+  const steppedKey = steppedProposal?.proposal.preview.map((p) => p.id).join("|") ?? "";
+  useEffect(() => {
+    setConfigView(false);
+  }, [steppedKey]);
+
+  const openConfigView = () => {
+    gridScrollTopRef.current = scrollRef.current?.scrollTop ?? 0;
+    setConfigView(true);
+    requestAnimationFrame(() => {
+      scrollRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+    });
+  };
+  const backToGrid = () => {
+    setConfigView(false);
+    requestAnimationFrame(() => {
+      scrollRef.current?.scrollTo({ top: gridScrollTopRef.current, behavior: "smooth" });
+    });
+  };
 
   return (
     <>
@@ -4658,44 +4694,79 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
               if (item.kind !== "proposal") return null;
               const excludedSet = new Set(item.excluded || []);
               const visibleForGrid = item.proposal.preview.filter((p) => !excludedSet.has(p.id));
+              // Stepped mode only applies to the live "source" proposal that
+              // owns the discovery grid; everything else renders as before.
+              const stepped = item.sourceOrigin === "source" && visibleForGrid.length > 0 && !item.resolved;
+              const showGrid = !stepped || !configView;
+              const showDraft = !stepped || configView;
               return (
                 <div key={i} className="flex w-full flex-col gap-3">
                   {item.sourceOrigin === "source" && visibleForGrid.length > 0 && (
-                    <CuratedInventoryGrid
-                      items={visibleForGrid}
-                      onAddToBoard={(pick) => {
-                        void openBoardWith(pick);
-                      }}
-
-                    />
+                    <div
+                      className={cn(
+                        "transition-all duration-300 ease-out",
+                        showGrid
+                          ? "opacity-100 translate-y-0"
+                          : "pointer-events-none absolute h-0 overflow-hidden opacity-0 -translate-y-10",
+                      )}
+                      aria-hidden={!showGrid}
+                    >
+                      <CuratedInventoryGrid
+                        items={visibleForGrid}
+                        onAddToBoard={(pick) => {
+                          void openBoardWith(pick);
+                        }}
+                      />
+                    </div>
                   )}
-                  <TearsheetProposalCard
-                    proposal={item.proposal}
-                    excluded={new Set(item.excluded || [])}
-                    locked={new Set(item.locked || [])}
-                    newPickIds={item.newPickIds}
-                    onExcludedChange={(next) => {
-                      setTimeline((prev) => {
-                        const copy = prev.slice();
-                        const t = copy[i];
-                        if (t?.kind === "proposal") {
-                          copy[i] = { ...t, excluded: Array.from(next) };
-                        }
-                        return copy;
-                      });
-                    }}
-                    onLockedChange={(next) => {
-                      setTimeline((prev) => {
-                        const copy = prev.slice();
-                        const t = copy[i];
-                        if (t?.kind === "proposal") {
-                          copy[i] = { ...t, locked: Array.from(next) };
-                        }
-                        return copy;
-                      });
-                    }}
-                    onResolved={(outcome, info) => handleProposalResolved(i, outcome, info)}
-                  />
+                  <div
+                    className={cn(
+                      "transition-all duration-300 ease-out",
+                      showDraft
+                        ? "opacity-100 translate-y-0"
+                        : "pointer-events-none absolute h-0 overflow-hidden opacity-0 translate-y-10",
+                    )}
+                    aria-hidden={!showDraft}
+                  >
+                    {stepped && configView && (
+                      <div className="mb-2 flex justify-end">
+                        <button
+                          type="button"
+                          onClick={backToGrid}
+                          className="inline-flex items-center whitespace-nowrap rounded-full border border-border bg-background px-3.5 py-1.5 font-body text-xs uppercase tracking-[0.14em] text-foreground hover:bg-muted transition-colors"
+                        >
+                          [ Back to Grid ]
+                        </button>
+                      </div>
+                    )}
+                    <TearsheetProposalCard
+                      proposal={item.proposal}
+                      excluded={new Set(item.excluded || [])}
+                      locked={new Set(item.locked || [])}
+                      newPickIds={item.newPickIds}
+                      onExcludedChange={(next) => {
+                        setTimeline((prev) => {
+                          const copy = prev.slice();
+                          const t = copy[i];
+                          if (t?.kind === "proposal") {
+                            copy[i] = { ...t, excluded: Array.from(next) };
+                          }
+                          return copy;
+                        });
+                      }}
+                      onLockedChange={(next) => {
+                        setTimeline((prev) => {
+                          const copy = prev.slice();
+                          const t = copy[i];
+                          if (t?.kind === "proposal") {
+                            copy[i] = { ...t, locked: Array.from(next) };
+                          }
+                          return copy;
+                        });
+                      }}
+                      onResolved={(outcome, info) => handleProposalResolved(i, outcome, info)}
+                    />
+                  </div>
                 </div>
               );
             })}
@@ -4708,6 +4779,23 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
             )}
           </div>
 
+          {steppedActive && (
+            <div className="shrink-0 px-3 pb-1 pt-1">
+              <div className="flex items-center justify-between gap-3 rounded-full border border-accent/40 bg-background/90 backdrop-blur-sm px-4 py-2 shadow-sm">
+                <span className="flex items-center gap-2 font-body text-[11px] uppercase tracking-[0.16em] text-foreground">
+                  <Sparkles className="h-3.5 w-3.5 text-accent" aria-hidden="true" />
+                  {matchedCount} {matchedCount === 1 ? "Item" : "Items"} Matched
+                </span>
+                <button
+                  type="button"
+                  onClick={configView ? backToGrid : openConfigView}
+                  className="inline-flex items-center whitespace-nowrap rounded-full bg-foreground px-3.5 py-1.5 font-body text-[11px] uppercase tracking-[0.14em] text-background hover:bg-foreground/90 transition-colors"
+                >
+                  {configView ? "[ Back to Grid ]" : "[ View Draft & Configure ↓ ]"}
+                </button>
+              </div>
+            </div>
+          )}
           <div className={cn("border-t border-border p-3 shrink-0 min-h-0", fullscreen && "flex flex-col gap-3 overflow-hidden", fullscreen && (briefBuilderOpen ? "max-h-[78vh]" : "max-h-[45vh]"))}>
             <div className={cn(fullscreen && "flex-1 min-h-0 overflow-y-auto")}>
 
