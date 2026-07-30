@@ -1214,16 +1214,25 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
     cloudLastPayloadRef.current = "";
     setActiveThreadId(data.id);
     if (activeThreadKey) try { localStorage.setItem(activeThreadKey, data.id); } catch {}
+    stampTimelineThread(data.id);
     setTimeline(buildInitialTimeline());
     return data.id;
-  }, [user?.id, activeThreadKey, buildInitialTimeline]);
+  }, [user?.id, activeThreadKey, buildInitialTimeline, stampTimelineThread]);
 
   const selectThread = useCallback(async (threadId: string) => {
     if (!user?.id || threadId === activeThreadId) { setThreadsOpen(false); return; }
+    // Drop the previous conversation from memory *before* switching, so the
+    // hydration effect can never mistake it for a fresher copy of the thread
+    // being opened (that used to blank/overwrite the selected history).
+    stampTimelineThread(null);
+    hydratedThreadRef.current = null;
+    cloudLastPayloadRef.current = "";
+    setTimeline([]);
     setActiveThreadId(threadId);
     if (activeThreadKey) try { localStorage.setItem(activeThreadKey, threadId); } catch {}
     setThreadsOpen(false);
-  }, [user?.id, activeThreadId, activeThreadKey]);
+  }, [user?.id, activeThreadId, activeThreadKey, stampTimelineThread]);
+
 
   const deleteThread = useCallback(async (threadId: string) => {
     if (!user?.id) return;
