@@ -53,7 +53,7 @@ import LegendDisclosure from "@/components/LegendDisclosure";
 import FinishSelector from "@/components/FinishSelector";
 import { isProductUpholstered } from "@/lib/upholstery";
 import Breadcrumbs, { type Crumb } from "@/components/Breadcrumbs";
-import { getBasePlaceholder, getTopPlaceholder, formatVariantAxisLabel, isDimensionAxisLabel } from "@/lib/variantPlaceholders";
+import { getBasePlaceholder, getTopPlaceholder, formatVariantAxisLabel, isDimensionAxisLabel, resolveFinishSectionLabels } from "@/lib/variantPlaceholders";
 import { formatDimensionsMultiline, formatImperialDimensions, withImperialPerLine } from "@/lib/formatDimensions";
 import { computeVariantAxes, parseMaterialsFallback } from "@/lib/parseSizeVariants";
 import { makeSwatchAxisFilter } from "@/lib/finishDuplication";
