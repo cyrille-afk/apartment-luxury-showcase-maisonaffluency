@@ -1935,6 +1935,7 @@ export type Database = {
           size_variants: Json | null
           slug: string | null
           sort_order: number
+          style_tags: string[]
           subcategory: string | null
           subtitle: string | null
           tags: string[] | null
@@ -1997,6 +1998,7 @@ export type Database = {
           size_variants?: Json | null
           slug?: string | null
           sort_order?: number
+          style_tags?: string[]
           subcategory?: string | null
           subtitle?: string | null
           tags?: string[] | null
@@ -2059,6 +2061,7 @@ export type Database = {
           size_variants?: Json | null
           slug?: string | null
           sort_order?: number
+          style_tags?: string[]
           subcategory?: string | null
           subtitle?: string | null
           tags?: string[] | null
@@ -6555,6 +6558,7 @@ export type Database = {
           source_pick_id: string | null
           spec_sheet_url: string | null
           stock_status_override: string | null
+          style_tags: string[]
           subcategory: string | null
           top_axis_label: string | null
           trade_price_cents: number | null
@@ -6620,6 +6624,7 @@ export type Database = {
           source_pick_id?: string | null
           spec_sheet_url?: string | null
           stock_status_override?: string | null
+          style_tags?: string[]
           subcategory?: string | null
           top_axis_label?: string | null
           trade_price_cents?: number | null
@@ -6685,6 +6690,7 @@ export type Database = {
           source_pick_id?: string | null
           spec_sheet_url?: string | null
           stock_status_override?: string | null
+          style_tags?: string[]
           subcategory?: string | null
           top_axis_label?: string | null
           trade_price_cents?: number | null

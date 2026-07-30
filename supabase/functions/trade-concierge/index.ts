@@ -1802,7 +1802,7 @@ async function loadCatalogContext(
   // scoped to a single named designer.
   let picksQuery = supabase
     .from("designer_curator_picks")
-    .select("id, title, materials, materials_description, description, meta_description, variant_placeholder, tags, category, subcategory, designer_id, trade_price_cents, price_per_sqm_cents, currency, size_variants")
+    .select("id, title, materials, materials_description, description, meta_description, variant_placeholder, tags, style_tags, category, subcategory, designer_id, trade_price_cents, price_per_sqm_cents, currency, size_variants")
     .order("designer_id", { ascending: true })
     .order("title", { ascending: true })
     .limit(2000);
@@ -1820,7 +1820,7 @@ async function loadCatalogContext(
   // Trade products — same designer-scoping when a filter is active.
   let tradeQuery = supabase
     .from("trade_products")
-    .select("id, product_name, brand_name, materials, materials_description, description, meta_description, variant_placeholder, available_finishes, fabric_options, category, subcategory, trade_price_cents, rrp_price_cents, currency, price_unit, size_variants")
+    .select("id, product_name, brand_name, materials, materials_description, description, meta_description, variant_placeholder, available_finishes, fabric_options, style_tags, category, subcategory, trade_price_cents, rrp_price_cents, currency, price_unit, size_variants")
     .eq("is_active", true)
     .not("image_url", "is", null)
     .order("brand_name", { ascending: true })
@@ -3416,10 +3416,47 @@ function rowRelevanceHaystack(row: any): string {
     .toLowerCase();
 }
 
+// ── Style-tag detection ────────────────────────────────────────────────
+// Movement membership is DATA, not prose. Curator picks / trade products carry
+// `style_tags` (e.g. "art-deco"); the concierge matches on that column and only
+// falls back to text heuristics for rows that have not been tagged yet.
+const STYLE_TAG_MATCHERS: { tag: string; re: RegExp }[] = [
+  { tag: "art-deco", re: /\b(art[\s-]?deco|deco|interwar|luxe\s+pauvre|1920s|1930s)\b/i },
+];
+
+function briefStyleText(brief: ExtractedBrief["brief"], requestText: string): string {
+  return `${requestText || ""} ${brief?.style || ""} ${(brief?.emphasis || []).join(" ")} ${brief?.summary || ""}`;
+}
+
+/** Style tags requested by the user (matched against the controlled vocabulary). */
+function detectRequestedStyleTags(brief: ExtractedBrief["brief"], requestText: string): string[] {
+  const hay = briefStyleText(brief, requestText);
+  return STYLE_TAG_MATCHERS.filter((m) => m.re.test(hay)).map((m) => m.tag);
+}
+
+function rowStyleTags(row: any): string[] {
+  const raw = row?.style_tags;
+  if (Array.isArray(raw)) return raw.map((t) => String(t || "").toLowerCase().trim()).filter(Boolean);
+  if (typeof raw === "string") return raw.split(/[,;]/).map((t) => t.toLowerCase().trim()).filter(Boolean);
+  return [];
+}
+
+function rowHasStyleTag(row: any, tag: string): boolean {
+  return rowStyleTags(row).includes(tag);
+}
+
+/** Primary ranking signal: explicit style-tag membership on the row. */
+function styleTagAffinityScore(row: any, requestedTags: string[]): number {
+  if (!requestedTags.length) return 0;
+  const tags = rowStyleTags(row);
+  if (!tags.length) return 0;
+  let score = 0;
+  for (const tag of requestedTags) if (tags.includes(tag)) score += 14;
+  return score;
+}
+
 function hasArtDecoSignal(brief: ExtractedBrief["brief"], requestText: string): boolean {
-  return /\b(art[\s-]?deco|deco|interwar|luxe\s+pauvre|1920s|1930s)\b/i.test(
-    `${requestText || ""} ${brief?.style || ""} ${(brief?.emphasis || []).join(" ")} ${brief?.summary || ""}`,
-  );
+  return detectRequestedStyleTags(brief || EMPTY_BRIEF.brief, requestText).includes("art-deco");
 }
 
 function extractDesignerAffinityTerms(brief: ExtractedBrief["brief"], requestText: string): string[] {
@@ -3474,6 +3511,11 @@ function designerAffinityScore(row: any, terms: string[]): number {
 
 function artDecoAffinityScore(row: any, active: boolean): number {
   if (!active) return 0;
+  // Tagged rows win outright — no prose guessing needed.
+  if (rowHasStyleTag(row, "art-deco")) return 18;
+  const tags = rowStyleTags(row);
+  // Row IS tagged but not as deco → trust the curation, don't rescue it via prose.
+  if (tags.length) return 0;
   const hay = rowRelevanceHaystack(row);
   let score = 0;
   if (/\b(jean[-\s]?michel\s+frank|ecart|l[eé]o\s+sentou|l[eé]o\s+aerts|alinea)\b/i.test(hay)) score += 12;
@@ -3643,23 +3685,23 @@ async function fetchStrictTypologyCandidates(
     (pickOr
       ? supabase
       .from("designer_curator_picks")
-      .select("id, title, materials, materials_description, description, meta_description, variant_placeholder, tags, category, subcategory, dimensions, trade_price_cents, currency, lead_time, stock_status, designer_id, size_variants")
+      .select("id, title, materials, materials_description, description, meta_description, variant_placeholder, tags, style_tags, category, subcategory, dimensions, trade_price_cents, currency, lead_time, stock_status, designer_id, size_variants")
         .or(pickOr)
         .limit(1000)
-      : supabase.from("designer_curator_picks").select("id, title, materials, materials_description, description, meta_description, variant_placeholder, tags, category, subcategory, dimensions, trade_price_cents, currency, lead_time, stock_status, designer_id, size_variants").limit(1000)),
+      : supabase.from("designer_curator_picks").select("id, title, materials, materials_description, description, meta_description, variant_placeholder, tags, style_tags, category, subcategory, dimensions, trade_price_cents, currency, lead_time, stock_status, designer_id, size_variants").limit(1000)),
     (tradeOr
       ? supabase
       .from("trade_products")
-      .select("id, product_name, materials, materials_description, description, meta_description, variant_placeholder, available_finishes, fabric_options, category, subcategory, dimensions, trade_price_cents, rrp_price_cents, currency, lead_time, stock_status_override, brand_name, size_variants")
+      .select("id, product_name, materials, materials_description, description, meta_description, variant_placeholder, available_finishes, fabric_options, style_tags, category, subcategory, dimensions, trade_price_cents, rrp_price_cents, currency, lead_time, stock_status_override, brand_name, size_variants")
       .eq("is_active", true)
         .or(tradeOr)
         .limit(1000)
-      : supabase.from("trade_products").select("id, product_name, materials, materials_description, description, meta_description, variant_placeholder, available_finishes, fabric_options, category, subcategory, dimensions, trade_price_cents, rrp_price_cents, currency, lead_time, stock_status_override, brand_name, size_variants").eq("is_active", true).limit(1000)),
+      : supabase.from("trade_products").select("id, product_name, materials, materials_description, description, meta_description, variant_placeholder, available_finishes, fabric_options, style_tags, category, subcategory, dimensions, trade_price_cents, rrp_price_cents, currency, lead_time, stock_status_override, brand_name, size_variants").eq("is_active", true).limit(1000)),
   ]);
-  const affinityTerms = Array.from(new Set([
-    ...designerTerms,
-    ...(artDecoActive ? ["jean michel frank", "ecart", "leo sentou", "leo aerts", "alinea"] : []),
-  ])).filter((term) => term.length >= 4);
+  // Style membership is resolved from `style_tags` (see the style-tag recovery
+  // query below), so the affinity term list stays purely designer-driven.
+  const requestedStyleTags = detectRequestedStyleTags(brief || EMPTY_BRIEF.brief, requestText);
+  const affinityTerms = Array.from(new Set(designerTerms)).filter((term) => term.length >= 4);
   const affinityPickOr = affinityTerms.length
     ? affinityTerms.map((term) => {
       const sqlTerm = term.replace(/\s+/g, "%");
@@ -3676,14 +3718,31 @@ async function fetchStrictTypologyCandidates(
     ? await Promise.all([
       supabase
         .from("designer_curator_picks")
-        .select("id, title, materials, materials_description, description, meta_description, variant_placeholder, tags, category, subcategory, dimensions, trade_price_cents, currency, lead_time, stock_status, designer_id, size_variants")
+        .select("id, title, materials, materials_description, description, meta_description, variant_placeholder, tags, style_tags, category, subcategory, dimensions, trade_price_cents, currency, lead_time, stock_status, designer_id, size_variants")
         .or(affinityPickOr)
         .limit(500),
       supabase
         .from("trade_products")
-        .select("id, product_name, materials, materials_description, description, meta_description, variant_placeholder, available_finishes, fabric_options, category, subcategory, dimensions, trade_price_cents, rrp_price_cents, currency, lead_time, stock_status_override, brand_name, size_variants")
+        .select("id, product_name, materials, materials_description, description, meta_description, variant_placeholder, available_finishes, fabric_options, style_tags, category, subcategory, dimensions, trade_price_cents, rrp_price_cents, currency, lead_time, stock_status_override, brand_name, size_variants")
         .eq("is_active", true)
         .or(affinityTradeOr)
+        .limit(500),
+    ])
+    : [{ data: [] }, { data: [] }];
+  // Style-tag recovery: pull every piece explicitly tagged with a requested
+  // movement so tagged designers can never be filtered out by prose scoring.
+  const [stylePickRes, styleTradeRes] = requestedStyleTags.length
+    ? await Promise.all([
+      supabase
+        .from("designer_curator_picks")
+        .select("id, title, materials, materials_description, description, meta_description, variant_placeholder, tags, style_tags, category, subcategory, dimensions, trade_price_cents, currency, lead_time, stock_status, designer_id, size_variants")
+        .overlaps("style_tags", requestedStyleTags)
+        .limit(500),
+      supabase
+        .from("trade_products")
+        .select("id, product_name, materials, materials_description, description, meta_description, variant_placeholder, available_finishes, fabric_options, style_tags, category, subcategory, dimensions, trade_price_cents, rrp_price_cents, currency, lead_time, stock_status_override, brand_name, size_variants")
+        .eq("is_active", true)
+        .overlaps("style_tags", requestedStyleTags)
         .limit(500),
     ])
     : [{ data: [] }, { data: [] }];
@@ -3702,10 +3761,17 @@ async function fetchStrictTypologyCandidates(
       trade_price_cents: r.trade_price_cents ?? r.rrp_price_cents ?? null,
       stock_status: r.stock_status_override ?? null,
     })),
+    ...(stylePickRes.data || []),
+    ...(styleTradeRes.data || []).map((r: any) => ({
+      ...r,
+      title: r.product_name,
+      trade_price_cents: r.trade_price_cents ?? r.rrp_price_cents ?? null,
+      stock_status: r.stock_status_override ?? null,
+    })),
   ].filter((r: any) => rowMatchesRequestedTypology(r, typology));
   typologyFiltered = mergeCandidateRows([], typologyFiltered).sort((a: any, b: any) =>
-    (designerAffinityScore(b, designerTerms) + artDecoAffinityScore(b, artDecoActive)) -
-    (designerAffinityScore(a, designerTerms) + artDecoAffinityScore(a, artDecoActive))
+    (designerAffinityScore(b, designerTerms) + styleTagAffinityScore(b, requestedStyleTags) + artDecoAffinityScore(b, artDecoActive)) -
+    (designerAffinityScore(a, designerTerms) + styleTagAffinityScore(a, requestedStyleTags) + artDecoAffinityScore(a, artDecoActive))
   );
   if (dimConstraints) {
     const dimRes = filterRowsByDimensionConstraints(typologyFiltered, dimConstraints);
@@ -4026,11 +4092,11 @@ async function hydratePickPreview(
   const [{ data: picks }, { data: trades }] = await Promise.all([
     supabase
       .from("designer_curator_picks")
-      .select("id, title, image_url, materials, materials_description, description, meta_description, variant_placeholder, tags, category, subcategory, dimensions, designer_id, trade_price_cents, currency, lead_time, size_variants")
+      .select("id, title, image_url, materials, materials_description, description, meta_description, variant_placeholder, tags, style_tags, category, subcategory, dimensions, designer_id, trade_price_cents, currency, lead_time, size_variants")
       .in("id", pickIds),
     supabase
       .from("trade_products")
-      .select("id, product_name, brand_name, image_url, materials, materials_description, description, meta_description, variant_placeholder, available_finishes, fabric_options, category, subcategory, dimensions, trade_price_cents, rrp_price_cents, currency, lead_time, stock_status_override, size_variants")
+      .select("id, product_name, brand_name, image_url, materials, materials_description, description, meta_description, variant_placeholder, available_finishes, fabric_options, style_tags, category, subcategory, dimensions, trade_price_cents, rrp_price_cents, currency, lead_time, stock_status_override, size_variants")
       .in("id", pickIds),
   ]);
 
@@ -4215,6 +4281,7 @@ async function buildDeterministicTearsheetProposal(
   const requestedTypology = inferRequestedTypology(brief, requestText);
   const requestedTypologies = normalizeRequestedTypologies(requestedTypology);
   const artDecoActive = hasArtDecoSignal(brief, requestText);
+  const requestedStyleTags = detectRequestedStyleTags(brief, requestText);
   const designerTerms = extractDesignerAffinityTerms(brief, requestText);
   const paletteConstraints = deriveHardConstraints([
     {
@@ -4245,6 +4312,7 @@ async function buildDeterministicTearsheetProposal(
     if ((rowTypes.includes("table") || rowTypes.includes("dining_table")) && /\btable\b/.test(hay)) score += 2;
     if ((brief.materials || []).some((m) => /\b(oak|walnut|wood|timber)\b/i.test(String(m))) && /\b(oak|walnut|wood|timber)\b/.test(hay)) score += 1;
     score += designerAffinityScore(r, designerTerms);
+    score += styleTagAffinityScore(r, requestedStyleTags);
     score += artDecoAffinityScore(r, artDecoActive);
     return score;
   };
@@ -4252,7 +4320,7 @@ async function buildDeterministicTearsheetProposal(
     .filter((r: any) => r && typeof r.id === "string" && UUID_RE.test(r.id))
     .filter((r: any) => rowMatchesRequestedTypology(r, requestedTypology))
     .sort((a: any, b: any) => scoreRow(b) - scoreRow(a)), paletteConstraints, requestedTypology);
-  if (requestedTypologies.length && (artDecoActive || designerTerms.length)) {
+  if (requestedTypologies.length && (requestedStyleTags.length || artDecoActive || designerTerms.length)) {
     const affinityRows = await fetchStrictTypologyCandidates(supabase, requestedTypologies, null, null, brief, requestText);
     candidateRows = mergeCandidateRows(
       affinityRows.filter((r: any) => r && typeof r.id === "string" && UUID_RE.test(r.id)),
