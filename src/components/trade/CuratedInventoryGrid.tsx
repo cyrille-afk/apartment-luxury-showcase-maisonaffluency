@@ -179,7 +179,7 @@ export function CuratedInventoryGrid({
               </button>
 
               {/* Body */}
-              <div className="relative flex flex-1 flex-col pt-2.5">
+              <div className="relative flex min-h-[140px] flex-1 flex-col pt-2.5">
                 <div className="font-body text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
                   {brand}
                 </div>
@@ -196,7 +196,7 @@ export function CuratedInventoryGrid({
                   {material}
                 </div>
 
-                <div className="mt-2 flex items-baseline justify-between gap-3">
+                <div className="mt-2 flex flex-col gap-0.5">
                   {typeof item.price_cents === "number" && item.price_cents > 0 ? (
                     <div className="leading-tight">
                       <span className="font-display text-[15px] font-semibold text-foreground">
@@ -209,16 +209,13 @@ export function CuratedInventoryGrid({
                   ) : (
                     <div className="font-body text-[12px] text-foreground/80">Trade Price on Request</div>
                   )}
-                  <span className="whitespace-nowrap font-body text-[10px] uppercase tracking-[0.16em] text-muted-foreground/70">
+                  <span className="font-body text-[10px] uppercase tracking-[0.16em] text-muted-foreground/70">
                     {status}
                   </span>
                 </div>
 
-
-
-
                 {/* Actions */}
-                <div className="mt-2.5 flex items-center gap-5">
+                <div className="mt-auto flex flex-col gap-1 pt-2.5">
                   <button
                     type="button"
                     onClick={() => onAddToBoard?.(item)}
