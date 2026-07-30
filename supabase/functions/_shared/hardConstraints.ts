@@ -101,11 +101,20 @@ export function deriveHardConstraints(
     .map((c) => c.toLowerCase().trim())
     .filter(Boolean);
 
+  const uniqueMaterials = [...new Set(materials)];
+  const uniqueColors = [...new Set(colors)];
+  // Three or more distinct palette/material tokens reads as an ACCENT LIST
+  // ("oak, brass, ivory"), not three simultaneous requirements — match any.
+  const distinctTokens = new Set([...uniqueMaterials, ...uniqueColors]).size;
+  const matchMode: "all" | "any" =
+    explicit?.matchMode ?? (distinctTokens >= 3 ? "any" : "all");
+
   return {
-    materials: [...new Set(materials)],
-    colors: [...new Set(colors)],
+    materials: uniqueMaterials,
+    colors: uniqueColors,
     categories: explicit?.categories?.map((c) => c.toLowerCase().trim()).filter(Boolean),
     excludeBrands: explicit?.excludeBrands?.map((b) => b.toLowerCase().trim()).filter(Boolean),
+    matchMode,
   };
 }
 
