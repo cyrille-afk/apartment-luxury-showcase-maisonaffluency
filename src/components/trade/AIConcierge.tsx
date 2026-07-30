@@ -281,9 +281,11 @@ function detectProjectScale(
 
 import { useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { streamConcierge, type ChatMessage, type ChatContentPart, type TearsheetProposal, type QuoteProposal, type FfeProposal, type VisualizationBriefProposal, type ConciergeProposal, type AppliedConstraintsEvent, type MoodboardSignalsEvent } from "@/lib/tradeConciergeStream";
+import { streamConcierge, type ChatMessage, type ChatContentPart, type TearsheetProposal, type QuoteProposal, type FfeProposal, type VisualizationBriefProposal, type ConciergeProposal, type AppliedConstraintsEvent, type MoodboardSignalsEvent, type PickPreview } from "@/lib/tradeConciergeStream";
 import { TearsheetProposalCard } from "@/components/trade/concierge/TearsheetProposalCard";
 import { CuratedInventoryGrid } from "@/components/trade/CuratedInventoryGrid";
+import { ProjectBoardDrawer } from "@/components/trade/ProjectBoardDrawer";
+
 import { ProactiveTearsheetCard, type ProactiveTearsheetData } from "@/components/trade/concierge/ProactiveTearsheetCard";
 import { QuoteProposalCard } from "@/components/trade/concierge/QuoteProposalCard";
 import { FfeProposalCard } from "@/components/trade/concierge/FfeProposalCard";
@@ -754,6 +756,26 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
   // can seed the retrieval brief with those exact tokens.
   const [savedPaletteMsgs, setSavedPaletteMsgs] = useState<Set<number>>(new Set());
   const [savedPaletteTags, setSavedPaletteTags] = useState<string[]>([]);
+
+  // Project board drawer (populated by "+ Add to Board" on inventory cards).
+  const [boardOpen, setBoardOpen] = useState(false);
+  const [boardItems, setBoardItems] = useState<PickPreview[]>([]);
+  const [boardProjectName, setBoardProjectName] = useState<string>("Active Project");
+
+  /** Add a curated pick to the board drawer and open it. */
+  const openBoardWith = useCallback(async (pick: PickPreview) => {
+    setBoardItems((prev) => (prev.some((p) => p.id === pick.id) ? prev : [...prev, pick]));
+    setBoardOpen(true);
+    let projectId: string | null = null;
+    try { projectId = sessionStorage.getItem("trade:lastProjectFilter"); } catch { /* ignore */ }
+    if (projectId) {
+      const { data } = await supabase.from("projects").select("name").eq("id", projectId).maybeSingle();
+      if (data?.name) setBoardProjectName(data.name);
+    }
+  }, []);
+
+
+
 
 
 
@@ -4642,11 +4664,9 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                     <CuratedInventoryGrid
                       items={visibleForGrid}
                       onAddToBoard={(pick) => {
-                        void sendRef.current?.(
-                          `Add "${pick.title}"${pick.designer_name ? ` by ${pick.designer_name}` : ""} to my current project board.`,
-                          { displayText: `+ Add to Board · ${pick.title}` },
-                        );
+                        void openBoardWith(pick);
                       }}
+
                     />
                   )}
                   <TearsheetProposalCard
@@ -5298,7 +5318,29 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
         </SheetContent>
       </Sheet>
 
+      <ProjectBoardDrawer
+        open={boardOpen}
+        onClose={() => setBoardOpen(false)}
+        items={boardItems}
+        projectName={boardProjectName}
+        onRemove={(id) => setBoardItems((prev) => prev.filter((p) => p.id !== id))}
+        onReviewLog={() => {
+          setBoardOpen(false);
+          void sendRef.current?.(
+            "Review the procurement log for my current project board and confirm the specification.",
+            { displayText: "Review Procurement Log" },
+          );
+        }}
+        onExportTearsheets={() => {
+          setBoardOpen(false);
+          void sendRef.current?.(
+            `Generate the final PDF tearsheets for these board items: ${boardItems.map((i) => i.title).join(", ")}.`,
+            { displayText: "Export Final PDF Tearsheets" },
+          );
+        }}
+      />
     </>
+
   );
 
 }
