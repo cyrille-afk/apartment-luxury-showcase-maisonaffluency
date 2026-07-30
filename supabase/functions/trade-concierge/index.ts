@@ -4252,6 +4252,13 @@ async function buildDeterministicTearsheetProposal(
     .filter((r: any) => r && typeof r.id === "string" && UUID_RE.test(r.id))
     .filter((r: any) => rowMatchesRequestedTypology(r, requestedTypology))
     .sort((a: any, b: any) => scoreRow(b) - scoreRow(a)), paletteConstraints, requestedTypology);
+  if (requestedTypologies.length && (artDecoActive || designerTerms.length)) {
+    const affinityRows = await fetchStrictTypologyCandidates(supabase, requestedTypologies, null, null, brief, requestText);
+    candidateRows = mergeCandidateRows(
+      affinityRows.filter((r: any) => r && typeof r.id === "string" && UUID_RE.test(r.id)),
+      candidateRows,
+    ).sort((a: any, b: any) => scoreRow(b) - scoreRow(a));
+  }
   // Apply hard dimension constraints to the RAG shortlist (rows carry
   // `dimensions` from match_catalog). Unknown-dim rows drop in strict mode.
   if (dimConstraints && candidateRows.length) {
