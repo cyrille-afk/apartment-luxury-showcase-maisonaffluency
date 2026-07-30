@@ -5021,12 +5021,12 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
             </div>
 
             {/* Quick-action chips: visual entry points so designers know how to interact with Felix without reading the full welcome text. */}
-            <div className={cn("flex flex-wrap items-center justify-center gap-2", fullscreen && "shrink-0")}>
+            <div className={cn("flex flex-wrap sm:flex-nowrap items-center justify-center gap-2", fullscreen && "shrink-0")}>
               <button
                 type="button"
                 onClick={() => moodInputRef.current?.click()}
                 disabled={streaming || attachments.length >= MAX_ATTACHMENTS}
-                className="rounded-md border border-[#E5E5E2] bg-[#F5F4F1] px-3 py-1.5 text-left font-body text-[10px] uppercase tracking-[0.14em] text-[#4A4A46] transition-colors duration-200 hover:bg-[#ECEAE4] hover:text-[#1A1A1A] disabled:opacity-40 cursor-pointer"
+                className="cursor-pointer whitespace-nowrap rounded-full border border-[#E5E5E5] bg-[#FAFAFA] px-4 py-1.5 text-center font-body text-[10px] uppercase tracking-[0.14em] text-[#4A4A46] transition-all duration-200 ease-in-out hover:bg-[#F0F0F0] hover:text-[#1A1A1A] disabled:cursor-not-allowed disabled:opacity-40"
                 aria-label="Upload mood board"
                 title="Upload a mood board image to Block 3"
               >
@@ -5045,7 +5045,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                   setBriefBuilderOpen(true);
                 }}
                 disabled={streaming}
-                className="rounded-md border border-[#E5E5E2] bg-[#F5F4F1] px-3 py-1.5 text-left font-body text-[10px] uppercase tracking-[0.14em] text-[#4A4A46] transition-colors duration-200 hover:bg-[#ECEAE4] hover:text-[#1A1A1A] disabled:opacity-40 cursor-pointer"
+                className="cursor-pointer whitespace-nowrap rounded-full border border-[#E5E5E5] bg-[#FAFAFA] px-4 py-1.5 text-center font-body text-[10px] uppercase tracking-[0.14em] text-[#4A4A46] transition-all duration-200 ease-in-out hover:bg-[#F0F0F0] hover:text-[#1A1A1A] disabled:cursor-not-allowed disabled:opacity-40"
                 aria-label="Request custom quote"
                 title="Open the Architectural Brief Builder for a custom quote"
               >
@@ -5055,13 +5055,14 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                 type="button"
                 onClick={() => send("What are the current lead times for your pieces?")}
                 disabled={streaming}
-                className="rounded-md border border-[#E5E5E2] bg-[#F5F4F1] px-3 py-1.5 text-left font-body text-[10px] uppercase tracking-[0.14em] text-[#4A4A46] transition-colors duration-200 hover:bg-[#ECEAE4] hover:text-[#1A1A1A] disabled:opacity-40 cursor-pointer"
+                className="cursor-pointer whitespace-nowrap rounded-full border border-[#E5E5E5] bg-[#FAFAFA] px-4 py-1.5 text-center font-body text-[10px] uppercase tracking-[0.14em] text-[#4A4A46] transition-all duration-200 ease-in-out hover:bg-[#F0F0F0] hover:text-[#1A1A1A] disabled:cursor-not-allowed disabled:opacity-40"
                 aria-label="Check lead times"
                 title="Ask Felix about current lead times"
               >
                 [ Check Lead Times ]
               </button>
             </div>
+
 
             <div className={cn("flex items-end gap-2", fullscreen && "shrink-0")}>
               <input
