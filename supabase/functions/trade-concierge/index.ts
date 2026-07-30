@@ -1802,7 +1802,7 @@ async function loadCatalogContext(
   // scoped to a single named designer.
   let picksQuery = supabase
     .from("designer_curator_picks")
-    .select("id, title, materials, materials_description, description, meta_description, variant_placeholder, tags, category, subcategory, designer_id, trade_price_cents, price_per_sqm_cents, currency, size_variants")
+    .select("id, title, materials, materials_description, description, meta_description, variant_placeholder, tags, style_tags, category, subcategory, designer_id, trade_price_cents, price_per_sqm_cents, currency, size_variants")
     .order("designer_id", { ascending: true })
     .order("title", { ascending: true })
     .limit(2000);
@@ -1820,7 +1820,7 @@ async function loadCatalogContext(
   // Trade products — same designer-scoping when a filter is active.
   let tradeQuery = supabase
     .from("trade_products")
-    .select("id, product_name, brand_name, materials, materials_description, description, meta_description, variant_placeholder, available_finishes, fabric_options, category, subcategory, trade_price_cents, rrp_price_cents, currency, price_unit, size_variants")
+    .select("id, product_name, brand_name, materials, materials_description, description, meta_description, variant_placeholder, available_finishes, fabric_options, style_tags, category, subcategory, trade_price_cents, rrp_price_cents, currency, price_unit, size_variants")
     .eq("is_active", true)
     .not("image_url", "is", null)
     .order("brand_name", { ascending: true })
@@ -3643,18 +3643,18 @@ async function fetchStrictTypologyCandidates(
     (pickOr
       ? supabase
       .from("designer_curator_picks")
-      .select("id, title, materials, materials_description, description, meta_description, variant_placeholder, tags, category, subcategory, dimensions, trade_price_cents, currency, lead_time, stock_status, designer_id, size_variants")
+      .select("id, title, materials, materials_description, description, meta_description, variant_placeholder, tags, style_tags, category, subcategory, dimensions, trade_price_cents, currency, lead_time, stock_status, designer_id, size_variants")
         .or(pickOr)
         .limit(1000)
-      : supabase.from("designer_curator_picks").select("id, title, materials, materials_description, description, meta_description, variant_placeholder, tags, category, subcategory, dimensions, trade_price_cents, currency, lead_time, stock_status, designer_id, size_variants").limit(1000)),
+      : supabase.from("designer_curator_picks").select("id, title, materials, materials_description, description, meta_description, variant_placeholder, tags, style_tags, category, subcategory, dimensions, trade_price_cents, currency, lead_time, stock_status, designer_id, size_variants").limit(1000)),
     (tradeOr
       ? supabase
       .from("trade_products")
-      .select("id, product_name, materials, materials_description, description, meta_description, variant_placeholder, available_finishes, fabric_options, category, subcategory, dimensions, trade_price_cents, rrp_price_cents, currency, lead_time, stock_status_override, brand_name, size_variants")
+      .select("id, product_name, materials, materials_description, description, meta_description, variant_placeholder, available_finishes, fabric_options, style_tags, category, subcategory, dimensions, trade_price_cents, rrp_price_cents, currency, lead_time, stock_status_override, brand_name, size_variants")
       .eq("is_active", true)
         .or(tradeOr)
         .limit(1000)
-      : supabase.from("trade_products").select("id, product_name, materials, materials_description, description, meta_description, variant_placeholder, available_finishes, fabric_options, category, subcategory, dimensions, trade_price_cents, rrp_price_cents, currency, lead_time, stock_status_override, brand_name, size_variants").eq("is_active", true).limit(1000)),
+      : supabase.from("trade_products").select("id, product_name, materials, materials_description, description, meta_description, variant_placeholder, available_finishes, fabric_options, style_tags, category, subcategory, dimensions, trade_price_cents, rrp_price_cents, currency, lead_time, stock_status_override, brand_name, size_variants").eq("is_active", true).limit(1000)),
   ]);
   const affinityTerms = Array.from(new Set([
     ...designerTerms,
@@ -3676,12 +3676,12 @@ async function fetchStrictTypologyCandidates(
     ? await Promise.all([
       supabase
         .from("designer_curator_picks")
-        .select("id, title, materials, materials_description, description, meta_description, variant_placeholder, tags, category, subcategory, dimensions, trade_price_cents, currency, lead_time, stock_status, designer_id, size_variants")
+        .select("id, title, materials, materials_description, description, meta_description, variant_placeholder, tags, style_tags, category, subcategory, dimensions, trade_price_cents, currency, lead_time, stock_status, designer_id, size_variants")
         .or(affinityPickOr)
         .limit(500),
       supabase
         .from("trade_products")
-        .select("id, product_name, materials, materials_description, description, meta_description, variant_placeholder, available_finishes, fabric_options, category, subcategory, dimensions, trade_price_cents, rrp_price_cents, currency, lead_time, stock_status_override, brand_name, size_variants")
+        .select("id, product_name, materials, materials_description, description, meta_description, variant_placeholder, available_finishes, fabric_options, style_tags, category, subcategory, dimensions, trade_price_cents, rrp_price_cents, currency, lead_time, stock_status_override, brand_name, size_variants")
         .eq("is_active", true)
         .or(affinityTradeOr)
         .limit(500),
@@ -4026,11 +4026,11 @@ async function hydratePickPreview(
   const [{ data: picks }, { data: trades }] = await Promise.all([
     supabase
       .from("designer_curator_picks")
-      .select("id, title, image_url, materials, materials_description, description, meta_description, variant_placeholder, tags, category, subcategory, dimensions, designer_id, trade_price_cents, currency, lead_time, size_variants")
+      .select("id, title, image_url, materials, materials_description, description, meta_description, variant_placeholder, tags, style_tags, category, subcategory, dimensions, designer_id, trade_price_cents, currency, lead_time, size_variants")
       .in("id", pickIds),
     supabase
       .from("trade_products")
-      .select("id, product_name, brand_name, image_url, materials, materials_description, description, meta_description, variant_placeholder, available_finishes, fabric_options, category, subcategory, dimensions, trade_price_cents, rrp_price_cents, currency, lead_time, stock_status_override, size_variants")
+      .select("id, product_name, brand_name, image_url, materials, materials_description, description, meta_description, variant_placeholder, available_finishes, fabric_options, style_tags, category, subcategory, dimensions, trade_price_cents, rrp_price_cents, currency, lead_time, stock_status_override, size_variants")
       .in("id", pickIds),
   ]);
 
