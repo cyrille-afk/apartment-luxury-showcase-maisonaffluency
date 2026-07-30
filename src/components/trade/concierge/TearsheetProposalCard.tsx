@@ -844,14 +844,20 @@ export function TearsheetProposalCard({ proposal, onResolved, excluded: excluded
                 Preview each piece, choose finishes, then lock your selections.
               </p>
             </div>
-            <div className={cn(
-              "flex shrink-0 items-center gap-1 rounded-full border px-2 py-1 font-display text-[10px] uppercase tracking-wider",
-              lockedVisible.length === visiblePicks.length && visiblePicks.length > 0
-                ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300"
-                : "border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-300"
-            )}>
-              <Lock className="h-3 w-3" />
-              <span>{lockedVisible.length}/{visiblePicks.length}</span>
+            <div className="flex shrink-0 flex-col items-end gap-1">
+              <div className={cn(
+                "flex items-center gap-1 rounded-full border px-2 py-1 font-display text-[10px] uppercase tracking-wider",
+                lockedVisible.length === visiblePicks.length && visiblePicks.length > 0
+                  ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300"
+                  : "border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-300"
+              )}>
+                <Lock className="h-3 w-3" />
+                <span>{lockedVisible.length}/{visiblePicks.length}</span>
+              </div>
+              <div className="flex items-center gap-1 rounded-full border border-accent/30 bg-accent/[0.05] px-2 py-1 font-display text-[10px] uppercase tracking-wider text-accent">
+                <Sparkles className="h-3 w-3" />
+                <span>{visiblePicks.length} {visiblePicks.length === 1 ? "Item" : "Items"} Matched</span>
+              </div>
             </div>
           </div>
           {lockedVisible.length === 0 && visiblePicks.length > 0 && (
