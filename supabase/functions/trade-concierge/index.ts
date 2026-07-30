@@ -3465,7 +3465,7 @@ function extractDesignerAffinityTerms(brief: ExtractedBrief["brief"], requestTex
   const watched = [
     /\b(?:j\.?\s*m\.?|jm|jean[-\s]?michel)\s+frank\b/gi,
     /\becart\b/gi,
-    /\bl[eé]o\s+sentou\b/gi,
+    /\bl?[eé]?o?\.?\s*sentou\b/gi,
     /\bl[eé]o\s+aerts\b/gi,
     /\balinea\b/gi,
   ];
@@ -3486,25 +3486,61 @@ function extractDesignerAffinityTerms(brief: ExtractedBrief["brief"], requestTex
       expanded.add("ecart");
       expanded.add("jean michel frank");
     }
-    if (/\b(l[eé]o|leo)\s+sentou\b/.test(n)) {
+    if (/\b(l[eé]o|leo)\s+sentou\b/.test(n) || /\bsentou\b/.test(n)) {
       expanded.add("leo sentou");
-      expanded.add("léo sentou");
+      expanded.add("sentou");
     }
     if (/\b(l[eé]o|leo)\s+aerts\b/.test(n) || /\balinea\b/.test(n)) {
       expanded.add("leo aerts");
-      expanded.add("léo aerts");
+      expanded.add("aerts");
       expanded.add("alinea");
     }
   }
-  return Array.from(expanded);
+  // Accents are stripped by normalizeLoose, so every emitted term is ASCII —
+  // matching stays accent-insensitive on both the SQL and scoring sides.
+  return Array.from(expanded).filter(Boolean);
+}
+
+// Accents are DATA, not signal: "Léo Sentou" and "leo sentou" must both match.
+// Postgres `ilike` is accent-sensitive, so we swap accent-capable letters for
+// the single-char wildcard `_` when building server-side patterns.
+const ACCENTABLE_LETTERS = /[aeiouycn]/g;
+function accentInsensitiveIlike(term: string): string {
+  return normalizeLoose(term).replace(/\s+/g, "%").replace(ACCENTABLE_LETTERS, "_");
+}
+
+// Loose designer-name equality: accent-insensitive, punctuation-insensitive,
+// and tolerant of surname-only / initial-form variants ("l. sentou", "sentou").
+function designerNameMatchesTerm(name: string | null | undefined, term: string): boolean {
+  const n = normalizeLoose(name);
+  const t = normalizeLoose(term);
+  if (!n || !t) return false;
+  if (n === t || n.includes(t) || t.includes(n)) return true;
+  const nParts = n.split(" ").filter(Boolean);
+  const tParts = t.split(" ").filter(Boolean);
+  if (!nParts.length || !tParts.length) return false;
+  const nSurname = nParts[nParts.length - 1];
+  const tSurname = tParts[tParts.length - 1];
+  if (nSurname.length < 4 || tSurname.length < 4) return false;
+  if (nSurname !== tSurname) return false;
+  // Same surname → accept when the given names agree, or one side is initials.
+  const nGiven = nParts.slice(0, -1).join(" ");
+  const tGiven = tParts.slice(0, -1).join(" ");
+  if (!nGiven || !tGiven) return true;
+  return nGiven === tGiven || nGiven[0] === tGiven[0];
 }
 
 function designerAffinityScore(row: any, terms: string[]): number {
   if (!terms.length) return 0;
   const hay = normalizeLoose(rowRelevanceHaystack(row));
+  const rowNames = [row?.designer_name, row?.designer, row?.brand_name]
+    .filter(Boolean)
+    .flatMap((v: any) => String(v).split(" - "));
   let score = 0;
   for (const term of terms) {
-    if (term && hay.includes(term)) score += 10;
+    if (!term) continue;
+    if (hay.includes(term)) score += 10;
+    else if (rowNames.some((n) => designerNameMatchesTerm(n, term))) score += 10;
   }
   return score;
 }
@@ -3702,19 +3738,34 @@ async function fetchStrictTypologyCandidates(
   // query below), so the affinity term list stays purely designer-driven.
   const requestedStyleTags = detectRequestedStyleTags(brief || EMPTY_BRIEF.brief, requestText);
   const affinityTerms = Array.from(new Set(designerTerms)).filter((term) => term.length >= 4);
+  // Resolve the terms against the designer roster first — picks carry only a
+  // designer_id, so name/accent variants ("Léo Sentou") are matched here and
+  // turned into concrete ids instead of hoping the name appears in prose.
+  const affinityDesignerRows = affinityTerms.length
+    ? (await supabase.from("designers").select("id, name, display_name")).data || []
+    : [];
+  const affinityDesignerIds = affinityDesignerRows
+    .filter((d: any) => affinityTerms.some((term) =>
+      designerNameMatchesTerm(d?.name, term) || designerNameMatchesTerm(d?.display_name, term)
+    ))
+    .map((d: any) => d.id)
+    .filter(Boolean);
+  const affinityDesignerNameById = new Map<string, string>(
+    affinityDesignerRows.map((d: any) => [d.id, d.display_name || d.name]),
+  );
   const affinityPickOr = affinityTerms.length
     ? affinityTerms.map((term) => {
-      const sqlTerm = term.replace(/\s+/g, "%");
+      const sqlTerm = accentInsensitiveIlike(term);
       return `title.ilike.%${sqlTerm}%,description.ilike.%${sqlTerm}%,meta_description.ilike.%${sqlTerm}%,materials.ilike.%${sqlTerm}%`;
     }).join(",")
     : "";
   const affinityTradeOr = affinityTerms.length
     ? affinityTerms.map((term) => {
-      const sqlTerm = term.replace(/\s+/g, "%");
+      const sqlTerm = accentInsensitiveIlike(term);
       return `product_name.ilike.%${sqlTerm}%,brand_name.ilike.%${sqlTerm}%,description.ilike.%${sqlTerm}%,meta_description.ilike.%${sqlTerm}%,materials.ilike.%${sqlTerm}%`;
     }).join(",")
     : "";
-  const [affinityPickRes, affinityTradeRes] = affinityTerms.length
+  const [affinityPickRes, affinityTradeRes, affinityByDesignerRes] = affinityTerms.length
     ? await Promise.all([
       supabase
         .from("designer_curator_picks")
@@ -3727,8 +3778,15 @@ async function fetchStrictTypologyCandidates(
         .eq("is_active", true)
         .or(affinityTradeOr)
         .limit(500),
+      affinityDesignerIds.length
+        ? supabase
+          .from("designer_curator_picks")
+          .select("id, title, materials, materials_description, description, meta_description, variant_placeholder, tags, style_tags, category, subcategory, dimensions, trade_price_cents, currency, lead_time, stock_status, designer_id, size_variants")
+          .in("designer_id", affinityDesignerIds)
+          .limit(500)
+        : Promise.resolve({ data: [] as any[] }),
     ])
-    : [{ data: [] }, { data: [] }];
+    : [{ data: [] }, { data: [] }, { data: [] }];
   // Style-tag recovery: pull every piece explicitly tagged with a requested
   // movement so tagged designers can never be filtered out by prose scoring.
   const [stylePickRes, styleTradeRes] = requestedStyleTags.length
@@ -3761,6 +3819,7 @@ async function fetchStrictTypologyCandidates(
       trade_price_cents: r.trade_price_cents ?? r.rrp_price_cents ?? null,
       stock_status: r.stock_status_override ?? null,
     })),
+    ...(affinityByDesignerRes.data || []),
     ...(stylePickRes.data || []),
     ...(styleTradeRes.data || []).map((r: any) => ({
       ...r,
@@ -3768,7 +3827,13 @@ async function fetchStrictTypologyCandidates(
       trade_price_cents: r.trade_price_cents ?? r.rrp_price_cents ?? null,
       stock_status: r.stock_status_override ?? null,
     })),
-  ].filter((r: any) => rowMatchesRequestedTypology(r, typology));
+  ]
+    // Stamp the resolved designer name onto pick rows so accent/name-variant
+    // affinity scoring can see who made the piece.
+    .map((r: any) => (r?.designer_id && !r?.designer_name && affinityDesignerNameById.has(r.designer_id)
+      ? { ...r, designer_name: affinityDesignerNameById.get(r.designer_id) }
+      : r))
+    .filter((r: any) => rowMatchesRequestedTypology(r, typology));
   typologyFiltered = mergeCandidateRows([], typologyFiltered).sort((a: any, b: any) =>
     (designerAffinityScore(b, designerTerms) + styleTagAffinityScore(b, requestedStyleTags) + artDecoAffinityScore(b, artDecoActive)) -
     (designerAffinityScore(a, designerTerms) + styleTagAffinityScore(a, requestedStyleTags) + artDecoAffinityScore(a, artDecoActive))
