@@ -207,14 +207,29 @@ function useTradeProductBySlug(
     queryKey: queryKeys.tradeProductPage(tradeProductIdParam, designerSlug, productSlug),
     queryFn: async () => {
       if (tradeProductIdParam) {
-        const { data: tradeProduct } = await supabase
+        const selectCols = "id, product_name, brand_name, image_url, gallery_images, materials, dimensions, description, category, subcategory, lead_time, origin, trade_price_cents, rrp_price_cents, currency, price_unit, price_prefix, spec_sheet_url, glb_url";
+        let { data: tradeProduct } = await supabase
           .from("trade_products")
-          .select("id, product_name, brand_name, image_url, gallery_images, materials, dimensions, description, category, subcategory, lead_time, origin, trade_price_cents, rrp_price_cents, currency, price_unit, price_prefix, spec_sheet_url, glb_url")
+          .select(selectCols)
           .eq("id", tradeProductIdParam)
           .eq("is_active", true)
           .maybeSingle();
 
+        // The concierge (and some board flows) pass a *curator pick* id rather
+        // than a trade_products id. Fall back to the mirrored twin so those
+        // deep links resolve instead of rendering "Product not found".
+        if (!tradeProduct) {
+          const { data: twin } = await supabase
+            .from("trade_products")
+            .select(selectCols)
+            .eq("source_pick_id", tradeProductIdParam)
+            .eq("is_active", true)
+            .maybeSingle();
+          tradeProduct = twin as any;
+        }
+
         if (!tradeProduct) return null;
+
 
         const brand = (tradeProduct as any).brand_name as string;
         const brandBase = brand.includes(" - ") ? brand.split(" - ")[0].trim() : brand;
