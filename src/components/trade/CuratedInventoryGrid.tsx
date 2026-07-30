@@ -246,7 +246,7 @@ export function CuratedInventoryGrid({
                 </div>
 
                 {/* Actions */}
-                <div className="mt-auto flex flex-col gap-1 pt-2.5">
+                <div className="flex w-full min-w-0 flex-col gap-1 pt-2.5">
                   <button
                     type="button"
                     onClick={() => onAddToBoard?.(item)}
