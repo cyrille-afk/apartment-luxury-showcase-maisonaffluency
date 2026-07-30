@@ -1,5 +1,4 @@
 import { useEffect, useMemo } from "react";
-import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 import type { PickPreview } from "@/lib/tradeConciergeStream";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
