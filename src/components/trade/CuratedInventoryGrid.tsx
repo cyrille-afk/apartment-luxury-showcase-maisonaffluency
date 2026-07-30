@@ -273,11 +273,11 @@ export function CuratedInventoryGrid({
             {hidden.map(renderCard)}
           </div>
 
-          <div className="mt-5 flex justify-center">
+          <div className="my-8 flex justify-center">
             <button
               type="button"
               onClick={() => setExpanded((v) => !v)}
-              className="font-body text-[11px] uppercase tracking-[0.16em] text-foreground/70 transition-colors hover:text-foreground"
+              className="inline-flex cursor-pointer items-center rounded-full border border-[#E5E5E5] bg-[#FAFAFA] px-5 py-2.5 font-body text-[11px] font-medium uppercase tracking-[0.16em] text-[#333333] transition-all duration-200 ease-in-out hover:border-[#D8D8D8] hover:bg-[#F0F0F0] hover:text-[#1A1A1A]"
             >
               {expanded ? "Collapse Options −" : `+ View More Curated Options (${hidden.length})`}
             </button>
