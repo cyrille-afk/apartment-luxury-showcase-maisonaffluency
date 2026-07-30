@@ -3738,19 +3738,34 @@ async function fetchStrictTypologyCandidates(
   // query below), so the affinity term list stays purely designer-driven.
   const requestedStyleTags = detectRequestedStyleTags(brief || EMPTY_BRIEF.brief, requestText);
   const affinityTerms = Array.from(new Set(designerTerms)).filter((term) => term.length >= 4);
+  // Resolve the terms against the designer roster first — picks carry only a
+  // designer_id, so name/accent variants ("Léo Sentou") are matched here and
+  // turned into concrete ids instead of hoping the name appears in prose.
+  const affinityDesignerRows = affinityTerms.length
+    ? (await supabase.from("designers").select("id, name, display_name")).data || []
+    : [];
+  const affinityDesignerIds = affinityDesignerRows
+    .filter((d: any) => affinityTerms.some((term) =>
+      designerNameMatchesTerm(d?.name, term) || designerNameMatchesTerm(d?.display_name, term)
+    ))
+    .map((d: any) => d.id)
+    .filter(Boolean);
+  const affinityDesignerNameById = new Map<string, string>(
+    affinityDesignerRows.map((d: any) => [d.id, d.display_name || d.name]),
+  );
   const affinityPickOr = affinityTerms.length
     ? affinityTerms.map((term) => {
-      const sqlTerm = term.replace(/\s+/g, "%");
+      const sqlTerm = accentInsensitiveIlike(term);
       return `title.ilike.%${sqlTerm}%,description.ilike.%${sqlTerm}%,meta_description.ilike.%${sqlTerm}%,materials.ilike.%${sqlTerm}%`;
     }).join(",")
     : "";
   const affinityTradeOr = affinityTerms.length
     ? affinityTerms.map((term) => {
-      const sqlTerm = term.replace(/\s+/g, "%");
+      const sqlTerm = accentInsensitiveIlike(term);
       return `product_name.ilike.%${sqlTerm}%,brand_name.ilike.%${sqlTerm}%,description.ilike.%${sqlTerm}%,meta_description.ilike.%${sqlTerm}%,materials.ilike.%${sqlTerm}%`;
     }).join(",")
     : "";
-  const [affinityPickRes, affinityTradeRes] = affinityTerms.length
+  const [affinityPickRes, affinityTradeRes, affinityByDesignerRes] = affinityTerms.length
     ? await Promise.all([
       supabase
         .from("designer_curator_picks")
@@ -3763,8 +3778,15 @@ async function fetchStrictTypologyCandidates(
         .eq("is_active", true)
         .or(affinityTradeOr)
         .limit(500),
+      affinityDesignerIds.length
+        ? supabase
+          .from("designer_curator_picks")
+          .select("id, title, materials, materials_description, description, meta_description, variant_placeholder, tags, style_tags, category, subcategory, dimensions, trade_price_cents, currency, lead_time, stock_status, designer_id, size_variants")
+          .in("designer_id", affinityDesignerIds)
+          .limit(500)
+        : Promise.resolve({ data: [] as any[] }),
     ])
-    : [{ data: [] }, { data: [] }];
+    : [{ data: [] }, { data: [] }, { data: [] }];
   // Style-tag recovery: pull every piece explicitly tagged with a requested
   // movement so tagged designers can never be filtered out by prose scoring.
   const [stylePickRes, styleTradeRes] = requestedStyleTags.length
