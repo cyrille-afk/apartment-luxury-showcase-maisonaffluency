@@ -755,6 +755,13 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
   const [savedPaletteMsgs, setSavedPaletteMsgs] = useState<Set<number>>(new Set());
   const [savedPaletteTags, setSavedPaletteTags] = useState<string[]>([]);
 
+  // Project board drawer (populated by "+ Add to Board" on inventory cards).
+  const [boardOpen, setBoardOpen] = useState(false);
+  const [boardItems, setBoardItems] = useState<PickPreview[]>([]);
+  const [boardProjectName, setBoardProjectName] = useState<string>("Active Project");
+
+
+
 
 
   const readFileAsDataUrl = (file: File): Promise<string> =>
