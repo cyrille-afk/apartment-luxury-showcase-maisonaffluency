@@ -18,45 +18,11 @@ type CuratedInventoryGridProps = {
 
 type HoverDetail = {
   hoverImage: string | null;
-  dimensions: string | null;
-  finishes: string[];
 };
 
 function statusLabel(status?: string | null): string {
   const s = String(status || "").trim();
   return s || "By Request";
-}
-
-function formatDimensions(row: any): string | null {
-  if (row?.dimensions) return String(row.dimensions);
-  const parts: string[] = [];
-  if (row?.height_mm) parts.push(`H ${row.height_mm}mm`);
-  if (row?.width_mm) parts.push(`W ${row.width_mm}mm`);
-  if (row?.depth_mm) parts.push(`D ${row.depth_mm}mm`);
-  return parts.length ? parts.join(" x ") : null;
-}
-
-function extractFinishes(row: any): string[] {
-  const out: string[] = [];
-  const sv = row?.size_variants;
-  const push = (v: unknown) => {
-    const s = String(v || "").trim();
-    if (s && !out.includes(s)) out.push(s);
-  };
-  if (Array.isArray(sv)) {
-    for (const v of sv) {
-      if (typeof v === "string") push(v);
-      else if (v && typeof v === "object") push((v as any).label ?? (v as any).base ?? (v as any).top);
-    }
-  }
-  if (!out.length && row?.wood_label_override) push(row.wood_label_override);
-  if (!out.length && row?.materials) {
-    String(row.materials)
-      .split(/[,/·]|\band\b/i)
-      .slice(0, 3)
-      .forEach(push);
-  }
-  return out.slice(0, 4);
 }
 
 /**
@@ -83,9 +49,7 @@ export function CuratedInventoryGrid({
     requested.current.add(id);
     const { data } = await supabase
       .from("designer_curator_picks")
-      .select(
-        "hover_image_url, gallery_images, dimensions, height_mm, width_mm, depth_mm, size_variants, wood_label_override, materials",
-      )
+      .select("hover_image_url, gallery_images")
       .eq("id", id)
       .maybeSingle();
     if (!data) return;
@@ -94,8 +58,6 @@ export function CuratedInventoryGrid({
       ...prev,
       [id]: {
         hoverImage: row.hover_image_url || row.gallery_images?.[0] || null,
-        dimensions: formatDimensions(row),
-        finishes: extractFinishes(row),
       },
     }));
   }, []);
