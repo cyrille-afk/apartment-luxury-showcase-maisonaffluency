@@ -3191,17 +3191,11 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
 
   // --- Stepped workflow (discovery grid ⇄ procurement draft) -------------
   // A "source" proposal renders a discovery grid AND a procurement draft.
-  // We show one at a time; the floating bar below the transcript switches.
+  // We show one at a time; the light text button at the top right switches.
   const steppedProposal = [...timeline].reverse().find(
     (t): t is Extract<TimelineItem, { kind: "proposal" }> =>
       t.kind === "proposal" && t.sourceOrigin === "source" && !t.resolved,
   );
-  const matchedCount = steppedProposal
-    ? steppedProposal.proposal.preview.filter(
-        (p) => !new Set(steppedProposal.excluded || []).has(p.id),
-      ).length
-    : 0;
-  const steppedActive = matchedCount > 0;
 
   // A freshly-generated proposal always lands the user back on the grid.
   const steppedKey = steppedProposal?.proposal.preview.map((p) => p.id).join("|") ?? "";
