@@ -247,7 +247,7 @@ export function CuratedInventoryGrid({
   const hidden = items.slice(4);
 
   return (
-    <div className={cn("w-full max-w-[92%] self-start", className)}>
+    <div className={cn("w-full max-w-[92%] lg:max-w-full self-start", className)}>
       <div className="mb-2 flex items-baseline justify-between gap-3">
         <div className="font-body text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
           {title}
