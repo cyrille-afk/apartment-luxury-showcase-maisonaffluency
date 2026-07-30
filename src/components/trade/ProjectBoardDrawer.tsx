@@ -30,7 +30,7 @@ function leadWeeks(item: ProjectBoardItem): number {
 function leadLabel(item: ProjectBoardItem): string {
   const w = leadWeeks(item);
   if (w) return `${w} Weeks`;
-  return item.lead_time || item.stock_status || "Lead time on request";
+  return "By Request";
 }
 
 export function ProjectBoardDrawer({
@@ -67,7 +67,7 @@ export function ProjectBoardDrawer({
     }
   };
 
-  const { subtotal, multiplierCut, total, maxLead } = useMemo(() => {
+  const { subtotal, multiplierCut, total, maxLeadLabel } = useMemo(() => {
     const sub = items.reduce((acc, i) => {
       const net =
         typeof i.price_cents === "number" && i.price_cents > 0
@@ -76,8 +76,11 @@ export function ProjectBoardDrawer({
       return acc + net;
     }, 0);
     const cut = Math.round(sub * NY_TRADE_MULTIPLIER_PCT);
+    // "By Request" is the ceiling: an unquantified lead time outranks any week count.
+    const hasByRequest = items.some((i) => leadWeeks(i) === 0);
     const max = items.reduce((acc, i) => Math.max(acc, leadWeeks(i)), 0);
-    return { subtotal: sub, multiplierCut: cut, total: sub - cut, maxLead: max };
+    const label = items.length === 0 ? "—" : hasByRequest ? "By Request" : `${max} Weeks`;
+    return { subtotal: sub, multiplierCut: cut, total: sub - cut, maxLeadLabel: label };
   }, [items, discountPct]);
 
   if (typeof document === "undefined") return null;
@@ -90,11 +93,11 @@ export function ProjectBoardDrawer({
       )}
       aria-hidden={!open}
     >
-      {/* Overlay */}
+      {/* Blur-filtered backdrop */}
       <div
         onClick={onClose}
         className={cn(
-          "absolute inset-0 bg-foreground/30 backdrop-blur-[1px] transition-opacity duration-300",
+          "absolute inset-0 bg-foreground/25 backdrop-blur-md transition-opacity duration-300",
           open ? "opacity-100" : "opacity-0",
         )}
       />
@@ -105,7 +108,7 @@ export function ProjectBoardDrawer({
         aria-modal="true"
         aria-label="Project board"
         className={cn(
-          "absolute right-0 top-0 flex h-full w-[92vw] max-w-[380px] flex-col bg-[hsl(38_28%_96%)] dark:bg-muted shadow-[-24px_0_48px_-32px_hsl(var(--foreground)/0.45)] transition-transform duration-300 ease-out",
+          "fixed right-0 top-0 flex h-screen w-[380px] max-w-[92vw] flex-col bg-[hsl(38_28%_96%)] dark:bg-muted shadow-[-24px_0_48px_-32px_hsl(var(--foreground)/0.45)] transition-transform duration-300 ease-out",
           open ? "translate-x-0" : "translate-x-full",
         )}
       >
@@ -123,11 +126,12 @@ export function ProjectBoardDrawer({
             type="button"
             onClick={onClose}
             aria-label="Close project board"
-            className="mt-0.5 rounded-sm p-1 text-muted-foreground transition-colors hover:text-foreground"
+            className="mt-0.5 shrink-0 font-body text-[10px] uppercase tracking-[0.16em] text-muted-foreground transition-colors hover:text-foreground"
           >
-            <X className="h-4 w-4" />
+            [ <X className="mb-px inline h-3 w-3" /> Close ]
           </button>
         </header>
+
 
         {/* Items */}
         <div className="flex-1 overflow-y-auto px-5">
@@ -173,9 +177,9 @@ export function ProjectBoardDrawer({
                         <button
                           type="button"
                           onClick={() => onRemove(item.id)}
-                          className="mt-1 font-body text-[10px] uppercase tracking-[0.14em] text-muted-foreground underline-offset-2 transition-colors hover:text-foreground hover:underline"
+                          className="mt-1 font-body text-[10px] uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:text-foreground"
                         >
-                          Remove
+                          [ Remove ]
                         </button>
                       )}
                     </div>
@@ -211,28 +215,28 @@ export function ProjectBoardDrawer({
               <dt className="font-body text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
                 Maximum Lead Time Projected
               </dt>
-              <dd className="font-body text-[11.5px] text-foreground">
-                {maxLead ? `${maxLead} Weeks` : "On request"}
+              <dd className="font-body text-[11.5px] uppercase tracking-[0.08em] text-foreground">
+                {maxLeadLabel}
               </dd>
             </div>
           </dl>
         </div>
 
-        {/* Footer actions */}
-        <footer className="flex items-center gap-2 px-5 pb-5">
+        {/* Footer actions — same pill language as the main viewport footer */}
+        <footer className="flex flex-wrap items-center justify-center gap-2 px-5 pb-5">
           <button
             type="button"
             onClick={onReviewLog}
-            className="flex-1 rounded-sm border border-border bg-background px-3 py-2 font-body text-[10.5px] uppercase tracking-[0.12em] text-foreground transition-colors hover:bg-foreground hover:text-background"
+            className="rounded-full border border-border/80 bg-muted/30 px-3 py-1.5 font-body text-[11px] text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
           >
-            Review Procurement Log
+            [ Review Procurement Log ]
           </button>
           <button
             type="button"
             onClick={onExportTearsheets}
-            className="flex-1 rounded-sm bg-foreground px-3 py-2 font-body text-[10.5px] uppercase tracking-[0.12em] text-background transition-opacity hover:opacity-90"
+            className="rounded-full border border-border/80 bg-muted/30 px-3 py-1.5 font-body text-[11px] text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
           >
-            Export Final PDF Tearsheets
+            [ Export Final PDF Tearsheets ]
           </button>
         </footer>
       </aside>
