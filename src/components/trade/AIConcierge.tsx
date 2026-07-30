@@ -3202,6 +3202,12 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
     : 0;
   const steppedActive = matchedCount > 0;
 
+  // A freshly-generated proposal always lands the user back on the grid.
+  const steppedKey = steppedProposal?.proposal.preview.map((p) => p.id).join("|") ?? "";
+  useEffect(() => {
+    setConfigView(false);
+  }, [steppedKey]);
+
   const openConfigView = () => {
     gridScrollTopRef.current = scrollRef.current?.scrollTop ?? 0;
     setConfigView(true);
