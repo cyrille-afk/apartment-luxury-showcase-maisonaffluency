@@ -3231,7 +3231,10 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
   // We show one at a time; the light text button at the top right switches.
   const steppedProposal = [...timeline].reverse().find(
     (t): t is Extract<TimelineItem, { kind: "proposal" }> =>
-      t.kind === "proposal" && t.sourceOrigin === "source" && !t.resolved,
+      t.kind === "proposal" &&
+      (t.sourceOrigin === "source" || t.proposal.tool === "propose_tearsheet") &&
+      !t.resolved,
+
   );
 
   // A freshly-generated proposal always lands the user back on the grid.
