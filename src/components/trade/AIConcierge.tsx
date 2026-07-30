@@ -5133,7 +5133,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                   parts.push(`Restrict the tearsheet STRICTLY to the typology field the designer entered: "${typology}". Do NOT include any category outside that field or adjacent categories unless they are explicitly listed inside "${typology}". If a previously proposed tearsheet violated this, DISCARD it and propose a fresh tearsheet limited to the entered typologies.`);
                   dropVisualContext = true;
                 }
-                if (palette) parts.push(`Every piece must match this palette / material brief: ${palette}. Reject pieces whose dominant material or finish falls outside it.`);
+                if (palette) parts.push(`Treat this as an ACCENT palette / material list, not three simultaneous requirements: ${palette}. A piece qualifies if it carries ANY of these accents (or a close tonal cousin) in its material, finish, or upholstery options — rank pieces carrying several of them highest. Do NOT reject a piece merely because it lacks one of the listed accents.`);
                 if (budget) parts.push(`Respect the budget cap per piece: ${budget}.`);
                 if (parts.length) {
                   hardConstraints = `\n[HARD CONSTRAINTS — these override the base prompt and any visual context above. Any prior tearsheet violating these must be replaced, not amended.]\n${parts.map((p) => `- ${p}`).join("\n")}`;
