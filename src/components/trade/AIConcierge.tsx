@@ -291,6 +291,7 @@ import { QuoteProposalCard } from "@/components/trade/concierge/QuoteProposalCar
 import { FfeProposalCard } from "@/components/trade/concierge/FfeProposalCard";
 import { VisualizationBriefCard, VIZ_BRIEF_INCOMING_KEY } from "@/components/trade/concierge/VisualizationBriefCard";
 import { PendingProposalSkeleton } from "@/components/trade/concierge/PendingProposalSkeleton";
+import { CuratedGridSkeleton } from "@/components/trade/concierge/CuratedGridSkeleton";
 import { EscalationCard } from "@/components/trade/concierge/EscalationCard";
 import { SpecScheduleBlock } from "@/components/trade/concierge/SpecScheduleBlock";
 
@@ -4472,6 +4473,11 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                 );
               }
               if (item.kind === "pending_proposal") {
+                // Discovery ("Source Similar Pieces") gets the editorial
+                // gallery-canvas skeleton that mirrors CuratedInventoryGrid.
+                if (pendingSourceOriginRef.current) {
+                  return <CuratedGridSkeleton key={i} count={4} />;
+                }
                 return <PendingProposalSkeleton key={i} tool={item.tool} />;
               }
               if (item.kind === "proactive_tearsheet") {

@@ -170,6 +170,11 @@ export default {
           "0%": { transform: "translateX(-100%)" },
           "100%": { transform: "translateX(100%)" },
         },
+        // Slow, low-contrast sweep for the curatorial skeleton canvas.
+        "curator-sweep": {
+          "0%": { transform: "translateX(-120%)" },
+          "100%": { transform: "translateX(120%)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.3s ease-out",
@@ -182,6 +187,7 @@ export default {
         "expand-hint": "expand-hint 1s ease-in-out 3",
         "card-shimmer": "card-shimmer 1.6s ease-in-out infinite",
         "cta-shimmer": "cta-shimmer 1.2s ease-in-out both",
+        "curator-sweep": "curator-sweep 2.2s ease-in-out infinite",
       },
     },
   },
