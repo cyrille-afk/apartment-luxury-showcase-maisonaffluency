@@ -88,7 +88,7 @@ export function ProjectBoardDrawer({
   return createPortal(
     <div
       className={cn(
-        "fixed inset-0 z-[120]",
+        "fixed inset-0 z-[10030]",
         open ? "pointer-events-auto" : "pointer-events-none",
       )}
       aria-hidden={!open}
