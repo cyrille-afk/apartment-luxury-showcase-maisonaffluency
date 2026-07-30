@@ -4688,44 +4688,79 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
               if (item.kind !== "proposal") return null;
               const excludedSet = new Set(item.excluded || []);
               const visibleForGrid = item.proposal.preview.filter((p) => !excludedSet.has(p.id));
+              // Stepped mode only applies to the live "source" proposal that
+              // owns the discovery grid; everything else renders as before.
+              const stepped = item.sourceOrigin === "source" && visibleForGrid.length > 0 && !item.resolved;
+              const showGrid = !stepped || !configView;
+              const showDraft = !stepped || configView;
               return (
                 <div key={i} className="flex w-full flex-col gap-3">
                   {item.sourceOrigin === "source" && visibleForGrid.length > 0 && (
-                    <CuratedInventoryGrid
-                      items={visibleForGrid}
-                      onAddToBoard={(pick) => {
-                        void openBoardWith(pick);
-                      }}
-
-                    />
+                    <div
+                      className={cn(
+                        "transition-all duration-300 ease-out",
+                        showGrid
+                          ? "opacity-100 translate-y-0"
+                          : "pointer-events-none absolute h-0 overflow-hidden opacity-0 -translate-y-10",
+                      )}
+                      aria-hidden={!showGrid}
+                    >
+                      <CuratedInventoryGrid
+                        items={visibleForGrid}
+                        onAddToBoard={(pick) => {
+                          void openBoardWith(pick);
+                        }}
+                      />
+                    </div>
                   )}
-                  <TearsheetProposalCard
-                    proposal={item.proposal}
-                    excluded={new Set(item.excluded || [])}
-                    locked={new Set(item.locked || [])}
-                    newPickIds={item.newPickIds}
-                    onExcludedChange={(next) => {
-                      setTimeline((prev) => {
-                        const copy = prev.slice();
-                        const t = copy[i];
-                        if (t?.kind === "proposal") {
-                          copy[i] = { ...t, excluded: Array.from(next) };
-                        }
-                        return copy;
-                      });
-                    }}
-                    onLockedChange={(next) => {
-                      setTimeline((prev) => {
-                        const copy = prev.slice();
-                        const t = copy[i];
-                        if (t?.kind === "proposal") {
-                          copy[i] = { ...t, locked: Array.from(next) };
-                        }
-                        return copy;
-                      });
-                    }}
-                    onResolved={(outcome, info) => handleProposalResolved(i, outcome, info)}
-                  />
+                  <div
+                    className={cn(
+                      "transition-all duration-300 ease-out",
+                      showDraft
+                        ? "opacity-100 translate-y-0"
+                        : "pointer-events-none absolute h-0 overflow-hidden opacity-0 translate-y-10",
+                    )}
+                    aria-hidden={!showDraft}
+                  >
+                    {stepped && configView && (
+                      <div className="mb-2 flex justify-end">
+                        <button
+                          type="button"
+                          onClick={backToGrid}
+                          className="inline-flex items-center whitespace-nowrap rounded-full border border-border bg-background px-3.5 py-1.5 font-body text-xs uppercase tracking-[0.14em] text-foreground hover:bg-muted transition-colors"
+                        >
+                          [ Back to Grid ]
+                        </button>
+                      </div>
+                    )}
+                    <TearsheetProposalCard
+                      proposal={item.proposal}
+                      excluded={new Set(item.excluded || [])}
+                      locked={new Set(item.locked || [])}
+                      newPickIds={item.newPickIds}
+                      onExcludedChange={(next) => {
+                        setTimeline((prev) => {
+                          const copy = prev.slice();
+                          const t = copy[i];
+                          if (t?.kind === "proposal") {
+                            copy[i] = { ...t, excluded: Array.from(next) };
+                          }
+                          return copy;
+                        });
+                      }}
+                      onLockedChange={(next) => {
+                        setTimeline((prev) => {
+                          const copy = prev.slice();
+                          const t = copy[i];
+                          if (t?.kind === "proposal") {
+                            copy[i] = { ...t, locked: Array.from(next) };
+                          }
+                          return copy;
+                        });
+                      }}
+                      onResolved={(outcome, info) => handleProposalResolved(i, outcome, info)}
+                    />
+                  </div>
                 </div>
               );
             })}
