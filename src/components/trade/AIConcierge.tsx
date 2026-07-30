@@ -656,6 +656,17 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
       { kind: "msg", role: "assistant", content: surface === "public" ? (initialGreeting || PUBLIC_GREETING) : greetingForContext(stageFromPath(pathname), pathname, loadTone(), loadLang()).replace(/{concierge_name}/g, name) },
     ];
   });
+  /** Thread the in-memory transcript belongs to (null = unknown/foreign). */
+  const timelineThreadRef = useRef<string | null>(cachedTimelineThreadId);
+  const stampTimelineThread = useCallback((id: string | null) => {
+    timelineThreadRef.current = id;
+    try {
+      if (id) sessionStorage.setItem("concierge:timelineThread", id);
+      else sessionStorage.removeItem("concierge:timelineThread");
+    } catch {}
+  }, []);
+
+
 
   const [input, setInput] = useState<string>(() => {
     try { return sessionStorage.getItem("concierge:draft") || ""; } catch { return ""; }
