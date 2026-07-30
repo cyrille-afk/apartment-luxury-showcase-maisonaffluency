@@ -1122,6 +1122,13 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
   const hydratedThreadRef = useRef<string | null>(null);
   const cloudSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const cloudLastPayloadRef = useRef<string>("");
+  // Always-current mirror of `timeline`. The hydration effect reads this
+  // instead of depending on `timeline` — depending on it made every message
+  // re-trigger the hydration fetch, which loops (it calls setTimeline) and
+  // floods the backend until every request in the tab fails with
+  // "Failed to fetch".
+  const timelineRef = useRef<TimelineItem[]>(timeline);
+  useEffect(() => { timelineRef.current = timeline; }, [timeline]);
 
   const activeThreadKey = user?.id ? `concierge:activeThread:${user.id}` : null;
 
@@ -1279,24 +1286,33 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
   useEffect(() => {
     if (!user?.id || !activeThreadId) return;
     if (hydratedThreadRef.current === activeThreadId) return;
+    // Claim the thread SYNCHRONOUSLY, before the await. Claiming it after the
+    // round-trip left a window in which any re-render could fire a second
+    // (third, hundredth) identical fetch.
+    hydratedThreadRef.current = activeThreadId;
+    cloudLastPayloadRef.current = "";
     let cancelled = false;
     (async () => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("concierge_threads")
         .select("timeline")
         .eq("id", activeThreadId)
         .eq("user_id", user.id)
         .maybeSingle();
       if (cancelled) return;
-      hydratedThreadRef.current = activeThreadId;
-      cloudLastPayloadRef.current = "";
+      if (error) {
+        // Release the claim so a later render can retry once.
+        hydratedThreadRef.current = null;
+        return;
+      }
       const remote = (data as any)?.timeline;
       const remoteArr = Array.isArray(remote) ? (remote as TimelineItem[]) : [];
-      const localHasUser = timeline.some((t) => t.kind === "msg" && t.role === "user");
-      if (localHasUser && timeline.length > remoteArr.length) {
+      const current = timelineRef.current;
+      const localHasUser = current.some((t) => t.kind === "msg" && t.role === "user");
+      if (localHasUser && current.length > remoteArr.length) {
         // sessionStorage-restored timeline is fresher than DB — keep it and
         // flush upstream so the DB catches up.
-        void saveActiveThreadNow(timeline);
+        void saveActiveThreadNow(current);
         return;
       }
       if (remoteArr.length > 0) {
@@ -1306,7 +1322,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
       }
     })();
     return () => { cancelled = true; };
-  }, [user?.id, activeThreadId, buildInitialTimeline, saveActiveThreadNow, timeline]);
+  }, [user?.id, activeThreadId, buildInitialTimeline, saveActiveThreadNow]);
 
   // Debounced upsert of the active thread's timeline on every change.
   useEffect(() => {
