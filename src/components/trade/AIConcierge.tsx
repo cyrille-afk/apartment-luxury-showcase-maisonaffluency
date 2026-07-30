@@ -1364,20 +1364,25 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
       const remoteArr = Array.isArray(remote) ? (remote as TimelineItem[]) : [];
       const current = timelineRef.current;
       const localHasUser = current.some((t) => t.kind === "msg" && t.role === "user");
-      if (localHasUser && current.length > remoteArr.length) {
+      // Only prefer the in-memory copy when it actually belongs to THIS thread
+      // (same-tab refresh). A transcript from another thread must never win.
+      const localBelongsHere = timelineThreadRef.current === activeThreadId;
+      if (localBelongsHere && localHasUser && current.length > remoteArr.length) {
         // sessionStorage-restored timeline is fresher than DB — keep it and
         // flush upstream so the DB catches up.
         void saveActiveThreadNow(current);
         return;
       }
+      stampTimelineThread(activeThreadId);
       if (remoteArr.length > 0) {
         setTimeline(stripDesignDirectorCtasFromTimeline(sanitizeTimelineForAttachments(remoteArr)));
-      } else if (!localHasUser) {
+      } else {
         setTimeline(buildInitialTimeline());
       }
     })();
     return () => { cancelled = true; };
-  }, [user?.id, activeThreadId, buildInitialTimeline, saveActiveThreadNow]);
+  }, [user?.id, activeThreadId, buildInitialTimeline, saveActiveThreadNow, stampTimelineThread]);
+
 
   // Debounced upsert of the active thread's timeline on every change.
   useEffect(() => {
