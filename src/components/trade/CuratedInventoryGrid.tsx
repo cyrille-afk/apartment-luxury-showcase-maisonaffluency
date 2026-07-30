@@ -286,7 +286,7 @@ export function CuratedInventoryGrid({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-8">
+      <div className="grid items-stretch grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-8">
         {visible.map(renderCard)}
       </div>
 
@@ -294,7 +294,7 @@ export function CuratedInventoryGrid({
         <>
           <div
             className={cn(
-              "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-4 overflow-hidden transition-all duration-500 ease-in-out",
+              "grid items-stretch grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-4 overflow-hidden transition-all duration-500 ease-in-out",
               expanded
                 ? "mt-8 max-h-[6000px] gap-y-8 translate-y-0 opacity-100"
                 : "mt-0 max-h-0 gap-y-0 -translate-y-2 opacity-0",
