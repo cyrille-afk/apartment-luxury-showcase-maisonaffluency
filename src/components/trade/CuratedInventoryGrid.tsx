@@ -26,6 +26,34 @@ function statusLabel(status?: string | null): string {
 }
 
 /**
+ * Editorial finish line for a card. Prefers real material/finish data and only
+ * falls back to the category (e.g. "Tables") when nothing else is on file —
+ * finishes stored as size_variants base/top axes are surfaced here so the card
+ * matches the product sheet ("Deep Sandblasted Oak · Sandblasted Oak Marquetry").
+ */
+function finishLabel(item: CuratedInventoryItem): string {
+  const clean = (v?: string | null) => String(v || "").trim();
+  const direct = clean(item.materials) || clean(item.materials_description) || clean(item.variant_placeholder);
+  if (direct) return direct;
+
+  const fromVariants = new Set<string>();
+  for (const v of item.size_variants || []) {
+    for (const part of [v?.base, v?.top, v?.label]) {
+      const s = clean(part);
+      // Skip pure size labels (Ø 150 × H 75 cm) — keep material-style labels.
+      if (s && !/^[\sØ⌀0-9x×.,'"/-]+(cm|mm|in|")?$/i.test(s)) fromVariants.add(s);
+    }
+  }
+  for (const f of [...(item.available_finishes || []), ...(item.fabric_options || [])]) {
+    const s = clean(f);
+    if (s) fromVariants.add(s);
+  }
+  if (fromVariants.size) return [...fromVariants].slice(0, 3).join(" · ");
+
+  return clean(item.subcategory) || clean(item.category) || "Material on request";
+}
+
+/**
  * CuratedInventoryGrid
  *
  * Borderless editorial result grid rendered after "[ Source Similar Pieces ]".
@@ -129,7 +157,7 @@ export function CuratedInventoryGrid({
 
   const renderCard = (item: CuratedInventoryItem) => {
           const brand = item.brand_name || item.designer_name || "Maison Affluency";
-          const material = item.materials || item.category || "Material on request";
+          const material = finishLabel(item);
           const status = statusLabel(item.stock_status || item.lead_time);
           const detail = details[item.id];
           const handleView = () => {
