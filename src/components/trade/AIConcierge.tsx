@@ -3804,12 +3804,24 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
             {!minimized && (
               <div className="flex items-center gap-2 flex-wrap pl-6">
                 <span
-                  className="inline-flex items-center gap-1 rounded-full border border-border bg-muted/60 px-2 py-0.5 font-body text-[10px] uppercase tracking-widest text-muted-foreground"
-                  title={`Current workflow stage: ${stage}`}
+                  className={cn(
+                    "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 font-body text-[10px] uppercase tracking-widest transition-colors duration-300",
+                    configView
+                      ? "border-foreground/40 bg-foreground/[0.06] text-foreground"
+                      : "border-border bg-muted/60 text-muted-foreground",
+                  )}
+                  title={`Current workflow stage: ${configView ? "Specify & Review" : stage}`}
                 >
-                  <span className="h-1.5 w-1.5 rounded-full bg-accent" aria-hidden="true" />
-                  {copy.stage}: {stage}
+                  <span
+                    className={cn(
+                      "h-1.5 w-1.5 rounded-full transition-colors duration-300",
+                      configView ? "bg-foreground" : "bg-accent",
+                    )}
+                    aria-hidden="true"
+                  />
+                  {copy.stage}: {configView ? "Specify & Review" : stage}
                 </span>
+
                 {briefBuilderOpen && (
                   <span
                     className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 font-body text-[10px] uppercase tracking-widest ${
