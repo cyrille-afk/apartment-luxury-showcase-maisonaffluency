@@ -1,5 +1,4 @@
 import { useEffect, useMemo } from "react";
-import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 import type { PickPreview } from "@/lib/tradeConciergeStream";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
@@ -83,12 +82,12 @@ export function ProjectBoardDrawer({
     return { subtotal: sub, multiplierCut: cut, total: sub - cut, maxLeadLabel: label };
   }, [items, discountPct]);
 
-  if (typeof document === "undefined") return null;
-
-  return createPortal(
+  // Rendered inline inside the concierge panel (its nearest positioned
+  // ancestor) so the blur stays contained in the chat, not the whole viewport.
+  return (
     <div
       className={cn(
-        "fixed inset-0 z-[10030]",
+        "absolute inset-0 z-40 overflow-hidden rounded-2xl",
         open ? "pointer-events-auto" : "pointer-events-none",
       )}
       aria-hidden={!open}
@@ -108,7 +107,7 @@ export function ProjectBoardDrawer({
         aria-modal="true"
         aria-label="Project board"
         className={cn(
-          "fixed right-0 top-0 flex h-screen w-[380px] max-w-[92vw] flex-col bg-[hsl(38_28%_96%)] dark:bg-muted shadow-[-24px_0_48px_-32px_hsl(var(--foreground)/0.45)] transition-transform duration-300 ease-out",
+          "absolute right-0 top-0 flex h-full w-[380px] max-w-full flex-col bg-[hsl(38_28%_96%)] dark:bg-muted shadow-[-24px_0_48px_-32px_hsl(var(--foreground)/0.45)] transition-transform duration-300 ease-out",
           open ? "translate-x-0" : "translate-x-full",
         )}
       >
@@ -240,8 +239,7 @@ export function ProjectBoardDrawer({
           </button>
         </footer>
       </aside>
-    </div>,
-    document.body,
+    </div>
   );
 }
 
