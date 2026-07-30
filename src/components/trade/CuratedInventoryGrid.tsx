@@ -168,7 +168,7 @@ export function CuratedInventoryGrid({
           return (
             <article
               key={item.id}
-              className="group relative flex flex-col"
+              className="group relative flex h-full min-w-0 flex-col"
               onMouseEnter={() => loadDetail(item.id)}
               onFocus={() => loadDetail(item.id)}
             >
@@ -209,24 +209,25 @@ export function CuratedInventoryGrid({
               </button>
 
               {/* Body */}
-              <div className="relative flex min-h-[140px] flex-1 flex-col pt-2.5">
-                <div className="font-body text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
+              <div className="relative flex min-h-[140px] w-full min-w-0 flex-1 flex-col pt-2.5">
+                <div className="w-full min-w-0 break-words font-body text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
                   {brand}
                 </div>
                 <button
                   type="button"
                   onClick={handleView}
                     disabled={openingSpecId === item.id}
-                  className="mt-0.5 w-full text-left font-display text-[15px] leading-snug font-semibold text-foreground line-clamp-2 break-words hover:underline underline-offset-2 decoration-foreground/30"
+                  className="mt-0.5 block w-full min-w-0 max-w-full overflow-hidden text-left font-display text-[15px] leading-snug font-semibold text-foreground line-clamp-2 [overflow-wrap:anywhere] hover:underline underline-offset-2 decoration-foreground/30"
                 >
                   {item.title}
                 </button>
 
-                <div className="mt-0.5 w-full font-body text-[11px] text-muted-foreground/80 line-clamp-2 break-words">
+                <div className="mt-0.5 w-full min-w-0 max-w-full overflow-hidden whitespace-normal font-body text-[11px] text-muted-foreground/80 line-clamp-2 [overflow-wrap:anywhere]">
                   {material}
                 </div>
 
-                <div className="mt-2 flex flex-col gap-0.5">
+                <div className="mt-auto flex w-full min-w-0 flex-col gap-0.5 pt-3">
+
                   {typeof item.price_cents === "number" && item.price_cents > 0 ? (
                     <div className="leading-tight">
                       <span className="font-display text-[15px] font-semibold text-foreground">
@@ -245,7 +246,7 @@ export function CuratedInventoryGrid({
                 </div>
 
                 {/* Actions */}
-                <div className="mt-auto flex flex-col gap-1 pt-2.5">
+                <div className="flex w-full min-w-0 flex-col gap-1 pt-2.5">
                   <button
                     type="button"
                     onClick={() => onAddToBoard?.(item)}
@@ -285,7 +286,7 @@ export function CuratedInventoryGrid({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-8">
+      <div className="grid items-stretch grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-8">
         {visible.map(renderCard)}
       </div>
 
@@ -293,7 +294,7 @@ export function CuratedInventoryGrid({
         <>
           <div
             className={cn(
-              "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-4 overflow-hidden transition-all duration-500 ease-in-out",
+              "grid items-stretch grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-4 overflow-hidden transition-all duration-500 ease-in-out",
               expanded
                 ? "mt-8 max-h-[6000px] gap-y-8 translate-y-0 opacity-100"
                 : "mt-0 max-h-0 gap-y-0 -translate-y-2 opacity-0",
