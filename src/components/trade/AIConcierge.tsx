@@ -636,6 +636,14 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
   // designer can quote a real reference ID and see exactly what we forwarded.
   const [handoffTicket, setHandoffTicket] = useState<{ id: string; summary: string } | null>(null);
 
+  // The in-tab cached transcript is scoped to the thread it belongs to.
+  // Without the thread stamp, switching conversations (or reloading after a
+  // switch) let one thread's transcript be treated as "fresher" than the
+  // thread you actually opened — which both hid the selected history and
+  // overwrote its row on the next save.
+  const cachedTimelineThreadId = (() => {
+    try { return sessionStorage.getItem("concierge:timelineThread"); } catch { return null; }
+  })();
   const [timeline, setTimeline] = useState<TimelineItem[]>(() => {
     try {
       const raw = sessionStorage.getItem("concierge:timeline");
@@ -648,6 +656,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
       { kind: "msg", role: "assistant", content: surface === "public" ? (initialGreeting || PUBLIC_GREETING) : greetingForContext(stageFromPath(pathname), pathname, loadTone(), loadLang()).replace(/{concierge_name}/g, name) },
     ];
   });
+
   const [input, setInput] = useState<string>(() => {
     try { return sessionStorage.getItem("concierge:draft") || ""; } catch { return ""; }
   });
