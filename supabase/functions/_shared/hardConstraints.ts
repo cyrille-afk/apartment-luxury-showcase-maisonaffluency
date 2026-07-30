@@ -7,6 +7,16 @@ export interface HardConstraints {
   colors?: string[];    // e.g. ["forest green", "black"]
   categories?: string[]; // canonical category slugs to intersect
   excludeBrands?: string[];
+  /**
+   * How the material + color buckets combine.
+   * - "all" (default): row must match a material token AND a color token.
+   * - "any": row must match at least ONE token from the merged pool. Used for
+   *   accent briefs like "oak, brass, ivory", where the designer is listing
+   *   an accent palette, not three simultaneous requirements. AND-ing those
+   *   buckets wiped out whole ateliers (e.g. Ecart / Jean-Michel Frank oak
+   *   pieces were rejected purely for lacking the word "ivory").
+   */
+  matchMode?: "all" | "any";
 }
 
 export const COLOR_KEYWORDS: string[] = [
