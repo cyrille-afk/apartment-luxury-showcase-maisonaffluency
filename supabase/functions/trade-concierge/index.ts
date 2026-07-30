@@ -4214,6 +4214,8 @@ async function buildDeterministicTearsheetProposal(
   const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
   const requestedTypology = inferRequestedTypology(brief, requestText);
   const requestedTypologies = normalizeRequestedTypologies(requestedTypology);
+  const artDecoActive = hasArtDecoSignal(brief, requestText);
+  const designerTerms = extractDesignerAffinityTerms(brief, requestText);
   const paletteConstraints = deriveHardConstraints([
     {
       title: requestText,
@@ -4235,13 +4237,15 @@ async function buildDeterministicTearsheetProposal(
     }
   }
   const scoreRow = (r: any) => {
-    const hay = `${r?.title || ""} ${r?.category || ""} ${r?.subcategory || ""} ${r?.materials || ""}`.toLowerCase();
+    const hay = rowRelevanceHaystack(r);
     let score = Number(r?.similarity || 0);
     const rowTypes = rowMatchedRequestedTypologies(r, requestedTypologies);
     score += rowTypes.length * 2;
     if (rowTypes.includes("dining_table") && /\bdining\b/.test(hay)) score += 3;
     if ((rowTypes.includes("table") || rowTypes.includes("dining_table")) && /\btable\b/.test(hay)) score += 2;
     if ((brief.materials || []).some((m) => /\b(oak|walnut|wood|timber)\b/i.test(String(m))) && /\b(oak|walnut|wood|timber)\b/.test(hay)) score += 1;
+    score += designerAffinityScore(r, designerTerms);
+    score += artDecoAffinityScore(r, artDecoActive);
     return score;
   };
   let candidateRows = applyPalettePreferenceByTypology((ragRows || [])
@@ -4263,11 +4267,11 @@ async function buildDeterministicTearsheetProposal(
     candidateRows = leadRes.kept;
   }
   if (requestedTypologies.length && (candidateRows.length < 2 || !rowsCoverRequestedTypologies(candidateRows, requestedTypologies))) {
-    candidateRows = applyPalettePreferenceByTypology((await fetchStrictTypologyCandidates(supabase, requestedTypologies, dimConstraints, leadConstraints))
+    candidateRows = applyPalettePreferenceByTypology((await fetchStrictTypologyCandidates(supabase, requestedTypologies, dimConstraints, leadConstraints, brief, requestText))
       .filter((r: any) => r && typeof r.id === "string" && UUID_RE.test(r.id))
       .sort((a: any, b: any) => scoreRow(b) - scoreRow(a)), paletteConstraints, requestedTypology);
   }
-  const sortedCandidates = candidateRows.sort((a: any, b: any) => (paletteMatchScore(b, paletteConstraints) - paletteMatchScore(a, paletteConstraints)) || scoreRow(b) - scoreRow(a));
+  const sortedCandidates = candidateRows.sort((a: any, b: any) => scoreRow(b) - scoreRow(a) || (paletteMatchScore(b, paletteConstraints) - paletteMatchScore(a, paletteConstraints)));
   const diversifyMixedRoomRows = (rows: any[], limit: number) => {
     const familyOf = (r: any) => {
       const hay = `${r?.title || ""} ${r?.category || ""} ${r?.subcategory || ""}`.toLowerCase();
