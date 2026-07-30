@@ -67,7 +67,7 @@ export function ProjectBoardDrawer({
     }
   };
 
-  const { subtotal, multiplierCut, total, maxLead } = useMemo(() => {
+  const { subtotal, multiplierCut, total, maxLeadLabel } = useMemo(() => {
     const sub = items.reduce((acc, i) => {
       const net =
         typeof i.price_cents === "number" && i.price_cents > 0
@@ -76,8 +76,11 @@ export function ProjectBoardDrawer({
       return acc + net;
     }, 0);
     const cut = Math.round(sub * NY_TRADE_MULTIPLIER_PCT);
+    // "By Request" is the ceiling: an unquantified lead time outranks any week count.
+    const hasByRequest = items.some((i) => leadWeeks(i) === 0);
     const max = items.reduce((acc, i) => Math.max(acc, leadWeeks(i)), 0);
-    return { subtotal: sub, multiplierCut: cut, total: sub - cut, maxLead: max };
+    const label = items.length === 0 ? "—" : hasByRequest ? "By Request" : `${max} Weeks`;
+    return { subtotal: sub, multiplierCut: cut, total: sub - cut, maxLeadLabel: label };
   }, [items, discountPct]);
 
   if (typeof document === "undefined") return null;
