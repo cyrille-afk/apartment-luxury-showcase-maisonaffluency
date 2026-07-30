@@ -5072,6 +5072,30 @@ serve(async (req) => {
     // The LLM handles discovery turns directly now.
     const requestedTypology = inferRequestedTypology(effectiveBrief.brief, hardValidationText);
 
+    const isSourceSimilarPanelTurn = /\bsource\s+similar\s+pieces\b/i.test(lastUserMsg) ||
+      /\bfocus\s+typology\b/i.test(lastUserMsg) ||
+      /\bpalette\s*\/\s*material\s+accents\b/i.test(lastUserMsg) ||
+      /\badditional\s+brief\b/i.test(lastUserMsg);
+    if (isSourceSimilarPanelTurn && hasExplicitSelectionVerb) {
+      const deterministicProposal = await buildDeterministicTearsheetProposal(
+        supabase,
+        Array.isArray((ragResult as any)?.rows) ? (ragResult as any).rows : [],
+        effectiveBrief.brief,
+        hardValidationText,
+        { mixedRoom: true },
+      );
+      if (deterministicProposal) {
+        console.log("[concierge source-similar deterministic]", JSON.stringify({
+          requestId,
+          titles: (deterministicProposal.preview || []).map((p: any) => `${p.designer_name || p.brand_name || ""}::${p.title || ""}`).slice(0, 8),
+        }));
+        return sseProposalThenTextResponse(
+          deterministicProposal,
+          "I’ve rebuilt the edit directly from the requested typologies, accents, and style notes.",
+        );
+      }
+    }
+
     if (shouldActOnAccumulatedBrief && breaker.state() === "open" && CLOUDFLARE_ENABLED) {
       return sseTextResponse(
         "You’ve already given me the essentials: a 12-seat dining table for a refined, elegant-but-not-too-formal Belgravia townhouse, with warm wood tones in oak or walnut. I’ll draft the first edit as soon as the Maison Affluency Curation tool is available; meanwhile, if you have a room plan, reference photo, or PDF, attach it with the paperclip and send it here so I can refine scale and placement.",
