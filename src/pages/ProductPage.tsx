@@ -47,16 +47,32 @@ const ProductPage = () => {
   useEffect(() => {
     if (!id) return;
     const fetchProduct = async () => {
-      const { data, error } = await supabase
+      const cols = "id, product_name, brand_name, category, subcategory, description, image_url, gallery_images, materials, dimensions, lead_time, is_active";
+      let { data } = await supabase
         .from("trade_products")
-        .select("id, product_name, brand_name, category, subcategory, description, image_url, gallery_images, materials, dimensions, lead_time, is_active")
+        .select(cols)
         .eq("id", id)
         .eq("is_active", true)
         .eq("is_hidden", false)
-        .single();
-      if (error || !data) {
+        .maybeSingle();
+
+      // Some surfaces (concierge, boards, lightbox) link with a curator pick id.
+      // Fall back to the mirrored trade product twin before 404-ing.
+      if (!data) {
+        const { data: twin } = await supabase
+          .from("trade_products")
+          .select(cols)
+          .eq("source_pick_id", id)
+          .eq("is_active", true)
+          .eq("is_hidden", false)
+          .maybeSingle();
+        data = twin as any;
+      }
+
+      if (!data) {
         setNotFound(true);
       } else {
+
         // Check if product appears in showroom gallery hotspots
         const { count } = await supabase
           .from("gallery_hotspots")
