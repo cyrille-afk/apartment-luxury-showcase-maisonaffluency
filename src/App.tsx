@@ -22,6 +22,7 @@ const MobilePreviewShareButton = lazy(() => import("./components/MobilePreviewSh
 const ComingSoon = lazy(() => import("./pages/ComingSoon"));
 const DesignerUpload = lazy(() => import("./pages/DesignerUpload"));
 const TradePurgeCache = lazy(() => import("./pages/TradePurgeCache"));
+const BoardDrawerPreview = lazy(() => import("./pages/dev/BoardDrawerPreview"));
 
 // Trade portal pages
 const TradeLogin = lazy(() => import("./pages/TradeLogin"));
@@ -583,6 +584,7 @@ const App = () => {
                   <Route path="/products-category/:categorySlug/:subcategorySlug" element={<Suspense fallback={<PageLoadingSkeleton />}><CategoryRoute /></Suspense>} />
 
                   {/* Trade Portal */}
+                  <Route path="/dev/board-drawer" element={<Suspense fallback={null}><BoardDrawerPreview /></Suspense>} />
                   <Route path="/trade/login" element={<Suspense fallback={null}><TradeLogin /></Suspense>} />
                   <Route path="/trade-program" element={<Suspense fallback={null}><TradeLanding /></Suspense>} />
                   <Route path="/trade-demo" element={<Suspense fallback={<PageLoadingSkeleton />}><TradeDemoPage /></Suspense>} />
