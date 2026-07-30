@@ -7,6 +7,16 @@ export interface HardConstraints {
   colors?: string[];    // e.g. ["forest green", "black"]
   categories?: string[]; // canonical category slugs to intersect
   excludeBrands?: string[];
+  /**
+   * How the material + color buckets combine.
+   * - "all" (default): row must match a material token AND a color token.
+   * - "any": row must match at least ONE token from the merged pool. Used for
+   *   accent briefs like "oak, brass, ivory", where the designer is listing
+   *   an accent palette, not three simultaneous requirements. AND-ing those
+   *   buckets wiped out whole ateliers (e.g. Ecart / Jean-Michel Frank oak
+   *   pieces were rejected purely for lacking the word "ivory").
+   */
+  matchMode?: "all" | "any";
 }
 
 export const COLOR_KEYWORDS: string[] = [
@@ -91,11 +101,20 @@ export function deriveHardConstraints(
     .map((c) => c.toLowerCase().trim())
     .filter(Boolean);
 
+  const uniqueMaterials = [...new Set(materials)];
+  const uniqueColors = [...new Set(colors)];
+  // Three or more distinct palette/material tokens reads as an ACCENT LIST
+  // ("oak, brass, ivory"), not three simultaneous requirements — match any.
+  const distinctTokens = new Set([...uniqueMaterials, ...uniqueColors]).size;
+  const matchMode: "all" | "any" =
+    explicit?.matchMode ?? (distinctTokens >= 3 ? "any" : "all");
+
   return {
-    materials: [...new Set(materials)],
-    colors: [...new Set(colors)],
+    materials: uniqueMaterials,
+    colors: uniqueColors,
     categories: explicit?.categories?.map((c) => c.toLowerCase().trim()).filter(Boolean),
     excludeBrands: explicit?.excludeBrands?.map((b) => b.toLowerCase().trim()).filter(Boolean),
+    matchMode,
   };
 }
 
@@ -169,11 +188,14 @@ function expandCategoryConstraintTokens(tokens: string[]): string[] {
 
 function categoryTokenMatches(rowText: string, token: string): boolean {
   if (!token) return false;
+  // Table tokens are checked BEFORE the naive substring test: "Yoshiko Table
+  // Lamp" contains "table" and would otherwise pass a "tables" brief.
+  if (token === "table" || token === "tables" || token === "dining table" || token === "coffee table" || token === "side table") {
+    if (/\b(table lamp|table light|bedside lamp)\b/.test(rowText)) return false;
+    return /\b(dining table|coffee table|side table|console|desk|tables?)\b/.test(rowText);
+  }
   if (rowText.includes(token)) return true;
   if (token === "seating") return /\b(sectional|sofa|settee|loveseat|chair|armchair|bench|stool|ottoman|pouf|banquette|daybed|chaise)\b/.test(rowText);
-  if (token === "table" || token === "tables" || token === "dining table") {
-    return /\b(dining table|coffee table|side table|console|desk|tables?)\b/.test(rowText) && !/\b(table lamp|table light)\b/.test(rowText);
-  }
   if (token === "lighting") return /\b(floor lamp|floor light|table lamp|table light|pendant|ceiling light|chandelier|sconce|wall light|lantern|lighting|lamp)\b/.test(rowText);
   if (token === "storage") return /\b(cabinet|sideboard|credenza|shelving|bookcase|dresser|chest|armoire|storage)\b/.test(rowText);
   if (token === "bedroom furniture") return /\b(bed|headboard|nightstand|bedside|bedroom)\b/.test(rowText);
@@ -214,10 +236,19 @@ export function applyHardConstraints<Q extends {
   columns: { text: string[]; brand?: string; category?: string },
 ): Q {
   let q = query;
-  const mat = buildIlikeOr(constraints.materials || [], columns.text);
-  if (mat) q = q.or(mat);
-  const col = buildIlikeOr(constraints.colors || [], columns.text);
-  if (col) q = q.or(col);
+  if (constraints.matchMode === "any") {
+    // Accent-list brief: one merged OR pool instead of two AND groups.
+    const pool = buildIlikeOr(
+      [...(constraints.materials || []), ...(constraints.colors || [])],
+      columns.text,
+    );
+    if (pool) q = q.or(pool);
+  } else {
+    const mat = buildIlikeOr(constraints.materials || [], columns.text);
+    if (mat) q = q.or(mat);
+    const col = buildIlikeOr(constraints.colors || [], columns.text);
+    if (col) q = q.or(col);
+  }
   if (constraints.categories?.length && columns.category) {
     const categoryColumns = Array.from(new Set([columns.category, ...columns.text]));
     const cat = buildIlikeOr(expandCategoryConstraintTokens(constraints.categories), categoryColumns);
@@ -275,10 +306,17 @@ export function filterRowsByHardConstraints<
     return normalize(`${scalar} ${arr}`);
   };
 
+  const anyMode = constraints.matchMode === "any";
+  const pooledTokens = anyMode ? [...matTokens, ...colorTokens] : [];
+
   return rows.filter((r) => {
     const hay = rowText(r);
-    if (matTokens.length && !matTokens.some((t) => hay.includes(t))) return false;
-    if (colorTokens.length && !colorTokens.some((t) => hay.includes(t))) return false;
+    if (anyMode) {
+      if (pooledTokens.length && !pooledTokens.some((t) => hay.includes(t))) return false;
+    } else {
+      if (matTokens.length && !matTokens.some((t) => hay.includes(t))) return false;
+      if (colorTokens.length && !colorTokens.some((t) => hay.includes(t))) return false;
+    }
     if (cats.length) {
       const rc = normalize(`${String(r[categoryCol] ?? "")} ${hay}`);
       if (!cats.some((c) => categoryTokenMatches(rc, c))) return false;
