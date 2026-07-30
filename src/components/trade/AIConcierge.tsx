@@ -4040,7 +4040,12 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                     </div>
                       )
                     )}
-                    {item.role === "assistant" && item.appliedConstraints && (
+                    {/* Only surface the filter chips when the pre-filter was
+                        actually applied to a retrieval path this turn. Without
+                        this guard the rail rendered on pure discovery turns
+                        (e.g. a moodboard upload) and implied constraints the
+                        architect never stated. */}
+                    {item.role === "assistant" && item.appliedConstraints && (item.appliedConstraints.applied_to?.length ?? 0) > 0 && (
                       (item.appliedConstraints.colors.length +
                         item.appliedConstraints.materials.length +
                         item.appliedConstraints.categories.length) > 0 && (
