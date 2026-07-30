@@ -4649,11 +4649,9 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                     <CuratedInventoryGrid
                       items={visibleForGrid}
                       onAddToBoard={(pick) => {
-                        void sendRef.current?.(
-                          `Add "${pick.title}"${pick.designer_name ? ` by ${pick.designer_name}` : ""} to my current project board.`,
-                          { displayText: `+ Add to Board · ${pick.title}` },
-                        );
+                        void openBoardWith(pick);
                       }}
+
                     />
                   )}
                   <TearsheetProposalCard
