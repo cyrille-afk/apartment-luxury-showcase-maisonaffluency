@@ -177,9 +177,9 @@ export function ProjectBoardDrawer({
                         <button
                           type="button"
                           onClick={() => onRemove(item.id)}
-                          className="mt-1 font-body text-[10px] uppercase tracking-[0.14em] text-muted-foreground underline-offset-2 transition-colors hover:text-foreground hover:underline"
+                          className="mt-1 font-body text-[10px] uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:text-foreground"
                         >
-                          Remove
+                          [ Remove ]
                         </button>
                       )}
                     </div>
