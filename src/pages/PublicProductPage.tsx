@@ -29,7 +29,7 @@ import LegendDisclosure from "@/components/LegendDisclosure";
 import Breadcrumbs, { type Crumb } from "@/components/Breadcrumbs";
 import { categoryUrl } from "@/lib/categorySlugs";
 import { buildProductBreadcrumbs } from "@/lib/productBreadcrumbs";
-import { getBasePlaceholder, getTopPlaceholder, getMaterialPlaceholder, formatVariantAxisLabel, isDimensionAxisLabel } from "@/lib/variantPlaceholders";
+import { getBasePlaceholder, getTopPlaceholder, getMaterialPlaceholder, formatVariantAxisLabel, isDimensionAxisLabel, resolveFinishSectionLabels } from "@/lib/variantPlaceholders";
 import { computeVariantAxes, parseMaterialsFallback } from "@/lib/parseSizeVariants";
 import { isRugCategory, parseRugDims, looksLikeDimension } from "@/lib/rugPricing";
 import FinishSelector from "@/components/FinishSelector";
@@ -408,17 +408,22 @@ const VariantSelectors: React.FC<{
           productTitle={product.title}
           productCategory={product.category}
           upholsteryLabel={
-            product.base_axis_label && !baseAxisIsDim
-              ? getBasePlaceholder({ base_axis_label: product.base_axis_label })
-              : null
+            resolveFinishSectionLabels({
+              baseAxisLabel: product.base_axis_label,
+              topAxisLabel: product.top_axis_label,
+              baseAxisIsDimension: baseAxisIsDim,
+              isUpholstered: isProductUpholstered(product),
+              woodLabelOverride: (product as any).wood_label_override,
+            }).upholsteryLabel
           }
           woodLabel={
-            (product as any).wood_label_override
-              || (isProductUpholstered(product) && product.top_axis_label
-                    ? getTopPlaceholder({ top_axis_label: product.top_axis_label })
-                    : (product.base_axis_label && !baseAxisIsDim
-                        ? getBasePlaceholder({ base_axis_label: product.base_axis_label })
-                        : null))
+            resolveFinishSectionLabels({
+              baseAxisLabel: product.base_axis_label,
+              topAxisLabel: product.top_axis_label,
+              baseAxisIsDimension: baseAxisIsDim,
+              isUpholstered: isProductUpholstered(product),
+              woodLabelOverride: (product as any).wood_label_override,
+            }).woodLabel
           }
           woodFilter={
             // Dual-axis: restrict the wood/base swatch group to swatches whose

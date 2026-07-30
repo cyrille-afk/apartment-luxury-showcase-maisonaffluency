@@ -53,7 +53,7 @@ import LegendDisclosure from "@/components/LegendDisclosure";
 import FinishSelector from "@/components/FinishSelector";
 import { isProductUpholstered } from "@/lib/upholstery";
 import Breadcrumbs, { type Crumb } from "@/components/Breadcrumbs";
-import { getBasePlaceholder, getTopPlaceholder, formatVariantAxisLabel, isDimensionAxisLabel } from "@/lib/variantPlaceholders";
+import { getBasePlaceholder, getTopPlaceholder, formatVariantAxisLabel, isDimensionAxisLabel, resolveFinishSectionLabels } from "@/lib/variantPlaceholders";
 import { formatDimensionsMultiline, formatImperialDimensions, withImperialPerLine } from "@/lib/formatDimensions";
 import { computeVariantAxes, parseMaterialsFallback } from "@/lib/parseSizeVariants";
 import { makeSwatchAxisFilter } from "@/lib/finishDuplication";
@@ -2146,17 +2146,22 @@ const TradeProductPage: React.FC = () => {
                   currentGalleryIndex={galleryActiveIndex ?? 0}
                   preselectFabricName={requestedFabricName}
                   upholsteryLabel={
-                    product.base_axis_label && !baseAxisIsDim
-                      ? getBasePlaceholder({ base_axis_label: product.base_axis_label })
-                      : null
+                    resolveFinishSectionLabels({
+                      baseAxisLabel: product.base_axis_label,
+                      topAxisLabel: product.top_axis_label,
+                      baseAxisIsDimension: baseAxisIsDim,
+                      isUpholstered: isProductUpholstered(product as any),
+                      woodLabelOverride: (product as any).wood_label_override,
+                    }).upholsteryLabel
                   }
                   woodLabel={
-                    (product as any).wood_label_override
-                      || (isProductUpholstered(product as any) && product.top_axis_label
-                            ? getTopPlaceholder({ top_axis_label: product.top_axis_label })
-                            : (product.base_axis_label && !baseAxisIsDim
-                                ? getBasePlaceholder({ base_axis_label: product.base_axis_label })
-                                : null))
+                    resolveFinishSectionLabels({
+                      baseAxisLabel: product.base_axis_label,
+                      topAxisLabel: product.top_axis_label,
+                      baseAxisIsDimension: baseAxisIsDim,
+                      isUpholstered: isProductUpholstered(product as any),
+                      woodLabelOverride: (product as any).wood_label_override,
+                    }).woodLabel
                   }
                   woodFilter={
                     // Dual-axis: only show base swatches in the Base section

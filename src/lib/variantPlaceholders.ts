@@ -92,3 +92,57 @@ export function getMaterialPlaceholder(p: VariantPlaceholderInput): string {
   const override = clean(p.variant_placeholder);
   return override ? normalizePlaceholder(override) : DEFAULT_MATERIAL_PLACEHOLDER;
 }
+
+/** True when an axis label describes a soft/upholstery axis (fabric, leather, hide…). */
+export function isUpholsteryAxisLabel(label: string | null | undefined): boolean {
+  const axis = clean(label)?.toLowerCase();
+  if (!axis) return false;
+  return /(uphol|uphost|fabric|leather|hide|textile|shearling|boucl|linen|velvet|cover|cushion|seat pad)/i.test(axis);
+}
+
+/**
+ * Resolves which FinishSelector section each variant axis labels.
+ *
+ * Curators enter axes as Base/Top, but the semantic meaning varies: some
+ * products put the wood on the base axis and the leather on the top axis
+ * (e.g. Overgaard & Dyrman), others do the reverse. Assigning purely by
+ * position inverted "Select Your Wood Finish" / "Select Your Upholstery
+ * Finish" on those products, so classify by the label text first and fall
+ * back to the positional convention.
+ */
+export function resolveFinishSectionLabels(input: {
+  baseAxisLabel?: string | null;
+  topAxisLabel?: string | null;
+  baseAxisIsDimension?: boolean;
+  isUpholstered?: boolean;
+  woodLabelOverride?: string | null;
+}): { upholsteryLabel: string | null; woodLabel: string | null } {
+  const baseUsable = !!clean(input.baseAxisLabel) && !input.baseAxisIsDimension;
+  const basePlaceholder = baseUsable
+    ? getBasePlaceholder({ base_axis_label: input.baseAxisLabel })
+    : null;
+  const topPlaceholder = clean(input.topAxisLabel)
+    ? getTopPlaceholder({ top_axis_label: input.topAxisLabel })
+    : null;
+
+  const baseIsUphol = baseUsable && isUpholsteryAxisLabel(input.baseAxisLabel);
+  const topIsUphol = !!topPlaceholder && isUpholsteryAxisLabel(input.topAxisLabel);
+
+  const override = clean(input.woodLabelOverride);
+
+  // Wood on base, upholstery on top → swap out of the positional default.
+  if (topIsUphol && !baseIsUphol) {
+    return {
+      upholsteryLabel: topPlaceholder,
+      woodLabel: override || basePlaceholder,
+    };
+  }
+
+  // Positional default: base labels the upholstery picker, top labels wood.
+  return {
+    upholsteryLabel: basePlaceholder,
+    woodLabel:
+      override ||
+      (input.isUpholstered && topPlaceholder ? topPlaceholder : basePlaceholder),
+  };
+}
