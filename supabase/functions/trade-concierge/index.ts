@@ -3465,7 +3465,7 @@ function extractDesignerAffinityTerms(brief: ExtractedBrief["brief"], requestTex
   const watched = [
     /\b(?:j\.?\s*m\.?|jm|jean[-\s]?michel)\s+frank\b/gi,
     /\becart\b/gi,
-    /\bl[eé]o\s+sentou\b/gi,
+    /\bl?[eé]?o?\.?\s*sentou\b/gi,
     /\bl[eé]o\s+aerts\b/gi,
     /\balinea\b/gi,
   ];
