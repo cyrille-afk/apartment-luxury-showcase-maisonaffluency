@@ -4789,7 +4789,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
             )}
           </div>
 
-          {steppedActive && (
+          {steppedActive && !showTypingDots && (
             <div className="shrink-0 px-3 pb-1 pt-1">
               <div className="flex items-center justify-between gap-3 rounded-full border border-accent/40 bg-background/90 backdrop-blur-sm px-4 py-2 shadow-sm">
                 <span className="flex items-center gap-2 font-body text-[11px] uppercase tracking-[0.16em] text-foreground">
@@ -4799,7 +4799,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                 <button
                   type="button"
                   onClick={configView ? backToGrid : openConfigView}
-                  className="inline-flex items-center whitespace-nowrap rounded-full bg-foreground px-3.5 py-1.5 font-body text-[11px] uppercase tracking-[0.14em] text-background hover:bg-foreground/90 transition-colors"
+                  className="inline-flex cursor-pointer items-center whitespace-nowrap rounded-full bg-foreground px-3.5 py-1.5 font-body text-[11px] uppercase tracking-[0.14em] text-background shadow-sm transition-all duration-200 ease-out hover:bg-foreground/90 hover:scale-[1.02] active:scale-[0.99]"
                 >
                   {configView ? "[ Back to Grid ]" : "[ View Draft & Configure ↓ ]"}
                 </button>
