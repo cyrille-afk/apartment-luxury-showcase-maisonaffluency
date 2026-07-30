@@ -44,15 +44,32 @@ export function CuratedInventoryGrid({
   const [details, setDetails] = useState<Record<string, HoverDetail>>({});
   const requested = useRef<Set<string>>(new Set());
   const [expanded, setExpanded] = useState(false);
+  const [openingSpecId, setOpeningSpecId] = useState<string | null>(null);
 
   const loadDetail = useCallback(async (id: string) => {
     if (requested.current.has(id)) return;
     requested.current.add(id);
-    const { data } = await supabase
+    let { data } = await supabase
       .from("designer_curator_picks")
       .select("hover_image_url, gallery_images")
       .eq("id", id)
       .maybeSingle();
+    if (!data) {
+      const { data: tradeTwin } = await supabase
+        .from("trade_products")
+        .select("source_pick_id")
+        .eq("id", id)
+        .maybeSingle();
+      const sourcePickId = (tradeTwin as { source_pick_id?: string | null } | null)?.source_pick_id;
+      if (sourcePickId) {
+        const { data: sourcePick } = await supabase
+          .from("designer_curator_picks")
+          .select("hover_image_url, gallery_images")
+          .eq("id", sourcePickId)
+          .maybeSingle();
+        data = sourcePick as typeof data;
+      }
+    }
     if (!data) return;
     const row = data as any;
     setDetails((prev) => ({
@@ -62,6 +79,39 @@ export function CuratedInventoryGrid({
       },
     }));
   }, []);
+
+  const openSpec = useCallback(async (item: CuratedInventoryItem) => {
+    if (onViewSpec) {
+      onViewSpec(item);
+      return;
+    }
+
+    setOpeningSpecId(item.id);
+    try {
+      const { data: directTrade } = await supabase
+        .from("trade_products")
+        .select("id")
+        .eq("id", item.id)
+        .eq("is_active", true)
+        .maybeSingle();
+
+      if (directTrade?.id) {
+        navigate(`/trade/products/${directTrade.id}`);
+        return;
+      }
+
+      const { data: mirroredTrade } = await supabase
+        .from("trade_products")
+        .select("id")
+        .eq("source_pick_id", item.id)
+        .eq("is_active", true)
+        .maybeSingle();
+
+      navigate(`/trade/products/${mirroredTrade?.id || item.id}`);
+    } finally {
+      setOpeningSpecId(null);
+    }
+  }, [navigate, onViewSpec]);
 
   const fmtPrice = (cents: number, currency: string) => {
     try {
@@ -83,8 +133,7 @@ export function CuratedInventoryGrid({
           const status = statusLabel(item.stock_status || item.lead_time);
           const detail = details[item.id];
           const handleView = () => {
-            if (onViewSpec) return onViewSpec(item);
-            navigate(`/trade/products/${item.id}`);
+            void openSpec(item);
           };
           return (
             <article
@@ -97,6 +146,7 @@ export function CuratedInventoryGrid({
               <button
                 type="button"
                 onClick={handleView}
+                disabled={openingSpecId === item.id}
                 className="relative block aspect-[4/3] w-full overflow-hidden rounded-md bg-[hsl(30_8%_94%)] dark:bg-muted/30"
                 aria-label={`Open spec for ${item.title}`}
               >
@@ -136,6 +186,7 @@ export function CuratedInventoryGrid({
                 <button
                   type="button"
                   onClick={handleView}
+                    disabled={openingSpecId === item.id}
                   className="mt-0.5 text-left font-display text-[15px] leading-snug font-semibold text-foreground line-clamp-2 hover:underline underline-offset-2 decoration-foreground/30"
                 >
                   {item.title}
@@ -180,6 +231,7 @@ export function CuratedInventoryGrid({
                   <button
                     type="button"
                     onClick={handleView}
+                    disabled={openingSpecId === item.id}
                     className="inline-flex items-center gap-1 font-body text-[11px] uppercase tracking-[0.12em] text-foreground/60 transition-colors hover:text-foreground"
                   >
                     <ExternalLink className="h-3 w-3" />
