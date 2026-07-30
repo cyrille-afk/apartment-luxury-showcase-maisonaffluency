@@ -33,7 +33,7 @@ function Block({ className, delay = 0 }: { className?: string; delay?: number })
   );
 }
 
-export function CuratedGridSkeleton({ count = 4, count: _c, className }: Props) {
+export function CuratedGridSkeleton({ count = 4, className }: Props) {
   const cards = Array.from({ length: Math.min(Math.max(count, 3), 4) });
   return (
     <div
