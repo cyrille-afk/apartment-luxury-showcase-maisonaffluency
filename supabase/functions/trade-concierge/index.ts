@@ -3620,8 +3620,12 @@ async function fetchStrictTypologyCandidates(
   typology: RequestedTypology | RequestedTypology[],
   dimConstraints?: DimensionConstraints | null,
   leadConstraints?: LeadTimeConstraints | null,
+  brief?: ExtractedBrief["brief"] | null,
+  requestText = "",
 ): Promise<any[]> {
   const requested = normalizeRequestedTypologies(typology);
+  const designerTerms = extractDesignerAffinityTerms(brief || EMPTY_BRIEF.brief, requestText);
+  const artDecoActive = hasArtDecoSignal(brief || EMPTY_BRIEF.brief, requestText);
   const searchTerms = Array.from(new Set(requested.flatMap((t) => {
     if (t === "dining_table") return ["dining", "table"];
     if (t === "table") return ["table", "console", "desk"];
@@ -3652,6 +3656,37 @@ async function fetchStrictTypologyCandidates(
         .limit(1000)
       : supabase.from("trade_products").select("id, product_name, materials, materials_description, description, meta_description, variant_placeholder, available_finishes, fabric_options, category, subcategory, dimensions, trade_price_cents, rrp_price_cents, currency, lead_time, stock_status_override, brand_name, size_variants").eq("is_active", true).limit(1000)),
   ]);
+  const affinityTerms = Array.from(new Set([
+    ...designerTerms,
+    ...(artDecoActive ? ["jean michel frank", "ecart", "leo sentou", "leo aerts", "alinea"] : []),
+  ])).filter((term) => term.length >= 4);
+  const affinityPickOr = affinityTerms.length
+    ? affinityTerms.map((term) => {
+      const sqlTerm = term.replace(/\s+/g, "%");
+      return `title.ilike.%${sqlTerm}%,description.ilike.%${sqlTerm}%,meta_description.ilike.%${sqlTerm}%,materials.ilike.%${sqlTerm}%`;
+    }).join(",")
+    : "";
+  const affinityTradeOr = affinityTerms.length
+    ? affinityTerms.map((term) => {
+      const sqlTerm = term.replace(/\s+/g, "%");
+      return `product_name.ilike.%${sqlTerm}%,brand_name.ilike.%${sqlTerm}%,description.ilike.%${sqlTerm}%,meta_description.ilike.%${sqlTerm}%,materials.ilike.%${sqlTerm}%`;
+    }).join(",")
+    : "";
+  const [affinityPickRes, affinityTradeRes] = affinityTerms.length
+    ? await Promise.all([
+      supabase
+        .from("designer_curator_picks")
+        .select("id, title, materials, materials_description, description, meta_description, variant_placeholder, tags, category, subcategory, dimensions, trade_price_cents, currency, lead_time, stock_status, designer_id, size_variants")
+        .or(affinityPickOr)
+        .limit(500),
+      supabase
+        .from("trade_products")
+        .select("id, product_name, materials, materials_description, description, meta_description, variant_placeholder, available_finishes, fabric_options, category, subcategory, dimensions, trade_price_cents, rrp_price_cents, currency, lead_time, stock_status_override, brand_name, size_variants")
+        .eq("is_active", true)
+        .or(affinityTradeOr)
+        .limit(500),
+    ])
+    : [{ data: [] }, { data: [] }];
   let typologyFiltered = [
     ...(pickRes.data || []),
     ...(tradeRes.data || []).map((r: any) => ({
@@ -3660,7 +3695,18 @@ async function fetchStrictTypologyCandidates(
       trade_price_cents: r.trade_price_cents ?? r.rrp_price_cents ?? null,
       stock_status: r.stock_status_override ?? null,
     })),
+    ...(affinityPickRes.data || []),
+    ...(affinityTradeRes.data || []).map((r: any) => ({
+      ...r,
+      title: r.product_name,
+      trade_price_cents: r.trade_price_cents ?? r.rrp_price_cents ?? null,
+      stock_status: r.stock_status_override ?? null,
+    })),
   ].filter((r: any) => rowMatchesRequestedTypology(r, typology));
+  typologyFiltered = mergeCandidateRows([], typologyFiltered).sort((a: any, b: any) =>
+    (designerAffinityScore(b, designerTerms) + artDecoAffinityScore(b, artDecoActive)) -
+    (designerAffinityScore(a, designerTerms) + artDecoAffinityScore(a, artDecoActive))
+  );
   if (dimConstraints) {
     const dimRes = filterRowsByDimensionConstraints(typologyFiltered, dimConstraints);
     console.log(`[concierge strict-typology dim] typology=${typologyLabel(typology)} pre=${typologyFiltered.length} strict=${dimRes.strictKept.length} kept=${dimRes.kept.length} dropped=${dimRes.dropped} unknownDropped=${dimRes.unknownDropped} fellBack=${dimRes.fellBack} constraints=${JSON.stringify(dimConstraints)}`);
