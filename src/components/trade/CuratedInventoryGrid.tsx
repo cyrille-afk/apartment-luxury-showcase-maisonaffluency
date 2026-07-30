@@ -43,6 +43,7 @@ export function CuratedInventoryGrid({
   const { discountPct, tierLabel } = useTradeDiscount();
   const [details, setDetails] = useState<Record<string, HoverDetail>>({});
   const requested = useRef<Set<string>>(new Set());
+  const [expanded, setExpanded] = useState(false);
 
   const loadDetail = useCallback(async (id: string) => {
     if (requested.current.has(id)) return;
@@ -76,19 +77,7 @@ export function CuratedInventoryGrid({
 
   if (!items?.length) return null;
 
-  return (
-    <div className={cn("w-full max-w-[92%] self-start", className)}>
-      <div className="mb-2 flex items-baseline justify-between gap-3">
-        <div className="font-body text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
-          {title}
-        </div>
-        <div className="font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground/80">
-          {items.length} {items.length === 1 ? "piece" : "pieces"}
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-8">
-        {items.map((item) => {
+  const renderCard = (item: CuratedInventoryItem) => {
           const brand = item.brand_name || item.designer_name || "Maison Affluency";
           const material = item.materials || item.category || "Material on request";
           const status = statusLabel(item.stock_status || item.lead_time);
@@ -200,8 +189,49 @@ export function CuratedInventoryGrid({
               </div>
             </article>
           );
-        })}
+  };
+
+  const visible = items.slice(0, 4);
+  const hidden = items.slice(4);
+
+  return (
+    <div className={cn("w-full max-w-[92%] self-start", className)}>
+      <div className="mb-2 flex items-baseline justify-between gap-3">
+        <div className="font-body text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+          {title}
+        </div>
+        <div className="font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground/80">
+          {items.length} {items.length === 1 ? "piece" : "pieces"}
+        </div>
       </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-8">
+        {visible.map(renderCard)}
+      </div>
+
+      {hidden.length > 0 && (
+        <>
+          <div
+            className={cn(
+              "grid grid-cols-1 md:grid-cols-2 gap-x-6 overflow-hidden transition-all duration-500 ease-out",
+              expanded ? "mt-8 max-h-[6000px] gap-y-8 opacity-100" : "mt-0 max-h-0 gap-y-0 opacity-0",
+            )}
+            aria-hidden={!expanded}
+          >
+            {hidden.map(renderCard)}
+          </div>
+
+          <div className="mt-5 flex justify-center">
+            <button
+              type="button"
+              onClick={() => setExpanded((v) => !v)}
+              className="font-body text-[11px] uppercase tracking-[0.16em] text-foreground/70 transition-colors hover:text-foreground"
+            >
+              {expanded ? "Collapse Options −" : `+ View More Curated Options (${hidden.length})`}
+            </button>
+          </div>
+        </>
+      )}
     </div>
   );
 }
