@@ -5317,28 +5317,6 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
           </div>
         </SheetContent>
       </Sheet>
-
-      <ProjectBoardDrawer
-        open={boardOpen}
-        onClose={() => setBoardOpen(false)}
-        items={boardItems}
-        projectName={boardProjectName}
-        onRemove={(id) => setBoardItems((prev) => prev.filter((p) => p.id !== id))}
-        onReviewLog={() => {
-          setBoardOpen(false);
-          void sendRef.current?.(
-            "Review the procurement log for my current project board and confirm the specification.",
-            { displayText: "Review Procurement Log" },
-          );
-        }}
-        onExportTearsheets={() => {
-          setBoardOpen(false);
-          void sendRef.current?.(
-            `Generate the final PDF tearsheets for these board items: ${boardItems.map((i) => i.title).join(", ")}.`,
-            { displayText: "Export Final PDF Tearsheets" },
-          );
-        }}
-      />
     </>
 
   );
