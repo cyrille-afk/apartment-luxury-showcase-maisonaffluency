@@ -1122,6 +1122,13 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
   const hydratedThreadRef = useRef<string | null>(null);
   const cloudSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const cloudLastPayloadRef = useRef<string>("");
+  // Always-current mirror of `timeline`. The hydration effect reads this
+  // instead of depending on `timeline` — depending on it made every message
+  // re-trigger the hydration fetch, which loops (it calls setTimeline) and
+  // floods the backend until every request in the tab fails with
+  // "Failed to fetch".
+  const timelineRef = useRef<TimelineItem[]>(timeline);
+  useEffect(() => { timelineRef.current = timeline; }, [timeline]);
 
   const activeThreadKey = user?.id ? `concierge:activeThread:${user.id}` : null;
 
