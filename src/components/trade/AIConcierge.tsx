@@ -3188,6 +3188,33 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
       : lang === "id" ? "Ketik kota proyek Anda…"
       : "Type your project city…");
 
+  // --- Stepped workflow (discovery grid ⇄ procurement draft) -------------
+  // A "source" proposal renders a discovery grid AND a procurement draft.
+  // We show one at a time; the floating bar below the transcript switches.
+  const steppedProposal = [...timeline].reverse().find(
+    (t): t is Extract<TimelineItem, { kind: "proposal" }> =>
+      t.kind === "proposal" && t.sourceOrigin === "source" && !t.resolved,
+  );
+  const matchedCount = steppedProposal
+    ? steppedProposal.proposal.preview.filter(
+        (p) => !new Set(steppedProposal.excluded || []).has(p.id),
+      ).length
+    : 0;
+  const steppedActive = matchedCount > 0;
+
+  const openConfigView = () => {
+    gridScrollTopRef.current = scrollRef.current?.scrollTop ?? 0;
+    setConfigView(true);
+    requestAnimationFrame(() => {
+      scrollRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+    });
+  };
+  const backToGrid = () => {
+    setConfigView(false);
+    requestAnimationFrame(() => {
+      scrollRef.current?.scrollTo({ top: gridScrollTopRef.current, behavior: "smooth" });
+    });
+  };
 
   return (
     <>
