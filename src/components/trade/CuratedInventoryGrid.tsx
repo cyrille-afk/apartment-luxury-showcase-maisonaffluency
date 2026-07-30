@@ -1,7 +1,9 @@
+import { useCallback, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Plus, ExternalLink } from "lucide-react";
 import type { PickPreview } from "@/lib/tradeConciergeStream";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
+import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 
 export type CuratedInventoryItem = PickPreview;
@@ -14,24 +16,55 @@ type CuratedInventoryGridProps = {
   className?: string;
 };
 
-function statusTone(status?: string | null): { label: string; tone: string } {
-  const s = String(status || "").toLowerCase();
-  if (!s) return { label: "By Request", tone: "bg-muted text-muted-foreground border-border" };
-  if (/in\s*stock|available|ready/.test(s))
-    return { label: status!, tone: "bg-emerald-50 text-emerald-700 border-emerald-200" };
-  if (/lead|made\s*to\s*order|order|weeks?/.test(s))
-    return { label: status!, tone: "bg-amber-50 text-amber-800 border-amber-200" };
-  if (/sold|unavailable|hold/.test(s))
-    return { label: status!, tone: "bg-rose-50 text-rose-700 border-rose-200" };
-  return { label: status!, tone: "bg-muted text-muted-foreground border-border" };
+type HoverDetail = {
+  hoverImage: string | null;
+  dimensions: string | null;
+  finishes: string[];
+};
+
+function statusLabel(status?: string | null): string {
+  const s = String(status || "").trim();
+  return s || "By Request";
+}
+
+function formatDimensions(row: any): string | null {
+  if (row?.dimensions) return String(row.dimensions);
+  const parts: string[] = [];
+  if (row?.height_mm) parts.push(`H ${row.height_mm}mm`);
+  if (row?.width_mm) parts.push(`W ${row.width_mm}mm`);
+  if (row?.depth_mm) parts.push(`D ${row.depth_mm}mm`);
+  return parts.length ? parts.join(" x ") : null;
+}
+
+function extractFinishes(row: any): string[] {
+  const out: string[] = [];
+  const sv = row?.size_variants;
+  const push = (v: unknown) => {
+    const s = String(v || "").trim();
+    if (s && !out.includes(s)) out.push(s);
+  };
+  if (Array.isArray(sv)) {
+    for (const v of sv) {
+      if (typeof v === "string") push(v);
+      else if (v && typeof v === "object") push((v as any).label ?? (v as any).base ?? (v as any).top);
+    }
+  }
+  if (!out.length && row?.wood_label_override) push(row.wood_label_override);
+  if (!out.length && row?.materials) {
+    String(row.materials)
+      .split(/[,/·]|\band\b/i)
+      .slice(0, 3)
+      .forEach(push);
+  }
+  return out.slice(0, 4);
 }
 
 /**
  * CuratedInventoryGrid
  *
- * Compact result grid rendered after the "[ Source Similar Pieces ]" pill.
- * Premium minimalist palette: warm-tinted gray card, 1px border, rounded-sm.
- * Responsive: 1 col on mobile, 2 cols on desktop.
+ * Borderless editorial result grid rendered after "[ Source Similar Pieces ]".
+ * Hover reveals a secondary image cross-fade and an absolutely-positioned
+ * specification block that never affects grid height.
  */
 export function CuratedInventoryGrid({
   items,
@@ -42,6 +75,30 @@ export function CuratedInventoryGrid({
 }: CuratedInventoryGridProps) {
   const navigate = useNavigate();
   const { discountPct, tierLabel } = useTradeDiscount();
+  const [details, setDetails] = useState<Record<string, HoverDetail>>({});
+  const requested = useRef<Set<string>>(new Set());
+
+  const loadDetail = useCallback(async (id: string) => {
+    if (requested.current.has(id)) return;
+    requested.current.add(id);
+    const { data } = await supabase
+      .from("designer_curator_picks")
+      .select(
+        "hover_image_url, gallery_images, dimensions, height_mm, width_mm, depth_mm, size_variants, wood_label_override, materials",
+      )
+      .eq("id", id)
+      .maybeSingle();
+    if (!data) return;
+    const row = data as any;
+    setDetails((prev) => ({
+      ...prev,
+      [id]: {
+        hoverImage: row.hover_image_url || row.gallery_images?.[0] || null,
+        dimensions: formatDimensions(row),
+        finishes: extractFinishes(row),
+      },
+    }));
+  }, []);
 
   const fmtPrice = (cents: number, currency: string) => {
     try {
@@ -72,14 +129,20 @@ export function CuratedInventoryGrid({
         {items.map((item) => {
           const brand = item.brand_name || item.designer_name || "Maison Affluency";
           const material = item.materials || item.category || "Material on request";
-          const status = statusTone(item.stock_status || item.lead_time);
+          const status = statusLabel(item.stock_status || item.lead_time);
+          const detail = details[item.id];
           const handleView = () => {
             if (onViewSpec) return onViewSpec(item);
             navigate(`/trade/products/${item.id}`);
           };
           return (
-            <article key={item.id} className="group flex flex-col">
-              {/* Image */}
+            <article
+              key={item.id}
+              className="group relative flex flex-col"
+              onMouseEnter={() => loadDetail(item.id)}
+              onFocus={() => loadDetail(item.id)}
+            >
+              {/* Image with cross-fade */}
               <button
                 type="button"
                 onClick={handleView}
@@ -87,12 +150,26 @@ export function CuratedInventoryGrid({
                 aria-label={`Open spec for ${item.title}`}
               >
                 {item.image_url ? (
-                  <img
-                    src={item.image_url}
-                    alt={item.title}
-                    loading="lazy"
-                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
-                  />
+                  <>
+                    <img
+                      src={item.image_url}
+                      alt={item.title}
+                      loading="lazy"
+                      className={cn(
+                        "h-full w-full object-cover transition-opacity duration-300 ease-out",
+                        detail?.hoverImage && "group-hover:opacity-0 group-focus-within:opacity-0",
+                      )}
+                    />
+                    {detail?.hoverImage && (
+                      <img
+                        src={detail.hoverImage}
+                        alt=""
+                        aria-hidden="true"
+                        loading="lazy"
+                        className="absolute inset-0 h-full w-full object-cover opacity-0 transition-opacity duration-300 ease-out group-hover:opacity-100 group-focus-within:opacity-100"
+                      />
+                    )}
+                  </>
                 ) : (
                   <div className="grid h-full w-full place-items-center text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
                     Image on request
@@ -101,7 +178,7 @@ export function CuratedInventoryGrid({
               </button>
 
               {/* Body */}
-              <div className="flex flex-1 flex-col pt-2.5">
+              <div className="relative flex flex-1 flex-col pt-2.5">
                 <div className="font-body text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
                   {brand}
                 </div>
@@ -123,19 +200,35 @@ export function CuratedInventoryGrid({
                       <span className="font-display text-[15px] font-semibold text-foreground">
                         {fmtPrice(Math.round(item.price_cents * (1 - discountPct)), item.currency || "EUR")}
                       </span>
-                      <span className="block font-body text-[9px] uppercase tracking-[0.12em] text-muted-foreground/0 group-hover:text-muted-foreground/70 transition-colors">
+                      <span className="block font-body text-[9px] uppercase tracking-[0.12em] text-muted-foreground/0 transition-colors group-hover:text-muted-foreground/70 group-focus-within:text-muted-foreground/70">
                         {tierLabel} net · RRP {fmtPrice(item.price_cents, item.currency || "EUR")}
                       </span>
                     </div>
                   ) : (
-                    <div className="font-body text-[12px] text-foreground/80">
-                      Trade Price on Request
-                    </div>
+                    <div className="font-body text-[12px] text-foreground/80">Trade Price on Request</div>
                   )}
-                  <span className="font-body text-[10px] uppercase tracking-[0.16em] text-muted-foreground/70 whitespace-nowrap">
-                    {status.label}
+                  <span className="whitespace-nowrap font-body text-[10px] uppercase tracking-[0.16em] text-muted-foreground/70">
+                    {status}
                   </span>
                 </div>
+
+                {/* Hover spec extension — absolutely positioned, zero layout impact */}
+                {(detail?.dimensions || detail?.finishes.length) && (
+                  <div
+                    aria-hidden="true"
+                    className="pointer-events-none absolute inset-x-0 top-full z-10 translate-y-1 rounded-sm bg-[hsl(30_10%_97%)]/95 dark:bg-muted/90 px-2 py-2 opacity-0 shadow-[0_8px_24px_-18px_hsl(var(--foreground)/0.35)] backdrop-blur-[2px] transition-all duration-300 ease-out group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:translate-y-0 group-focus-within:opacity-100"
+                  >
+                    <div className="font-body text-[9px] uppercase tracking-[0.16em] text-muted-foreground">
+                      Alternate Finishes Available
+                    </div>
+                    <ul className="mt-1 space-y-0.5 font-body text-[10.5px] leading-relaxed text-foreground/75">
+                      {detail?.dimensions && <li>· {detail.dimensions}</li>}
+                      {detail?.finishes.map((f) => (
+                        <li key={f}>· {f}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
 
                 {/* Actions */}
                 <div className="mt-2.5 flex items-center gap-5">
@@ -143,7 +236,7 @@ export function CuratedInventoryGrid({
                     type="button"
                     onClick={() => onAddToBoard?.(item)}
                     disabled={!onAddToBoard}
-                    className="inline-flex items-center gap-1 font-body text-[11px] uppercase tracking-[0.12em] text-foreground/70 hover:text-foreground transition-colors disabled:opacity-40"
+                    className="inline-flex items-center gap-1 font-body text-[11px] uppercase tracking-[0.12em] text-foreground/60 transition-all duration-200 group-hover:font-semibold group-hover:text-foreground group-focus-within:font-semibold group-focus-within:text-foreground hover:text-foreground disabled:opacity-40"
                   >
                     <Plus className="h-3 w-3" />
                     Add to Board
@@ -151,7 +244,7 @@ export function CuratedInventoryGrid({
                   <button
                     type="button"
                     onClick={handleView}
-                    className="inline-flex items-center gap-1 font-body text-[11px] uppercase tracking-[0.12em] text-foreground/70 hover:text-foreground transition-colors"
+                    className="inline-flex items-center gap-1 font-body text-[11px] uppercase tracking-[0.12em] text-foreground/60 transition-colors hover:text-foreground"
                   >
                     <ExternalLink className="h-3 w-3" />
                     View Spec
@@ -162,7 +255,6 @@ export function CuratedInventoryGrid({
           );
         })}
       </div>
-
     </div>
   );
 }
