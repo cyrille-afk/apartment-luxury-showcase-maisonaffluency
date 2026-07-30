@@ -301,15 +301,28 @@ export function CuratedInventoryGrid({
           </div>
 
 
-          <div className="my-8 flex justify-center">
+          <div className="my-8 flex justify-center transition-all duration-500 ease-out">
             <button
               type="button"
-              onClick={() => setExpanded((v) => !v)}
+              onClick={() => {
+                setExpanded((v) => {
+                  const next = !v;
+                  if (!next) {
+                    // Collapsing: ease the user back to the top-row baseline.
+                    requestAnimationFrame(() => {
+                      rootRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+                    });
+                  }
+                  return next;
+                });
+              }}
+              aria-expanded={expanded}
               className="inline-flex cursor-pointer items-center rounded-full border border-[#E5E5E5] bg-[#FAFAFA] px-5 py-2.5 font-body text-[11px] font-medium uppercase tracking-[0.16em] text-[#333333] transition-all duration-200 ease-in-out hover:border-[#D8D8D8] hover:bg-[#F0F0F0] hover:text-[#1A1A1A]"
             >
-              {expanded ? "Collapse Options −" : `+ View More Curated Options (${hidden.length})`}
+              {expanded ? "Collapse Revealed Options −" : `+ View More Curated Options (${hidden.length})`}
             </button>
           </div>
+
         </>
       )}
     </div>
