@@ -214,6 +214,12 @@ export type PickPreview = {
   image_url: string | null;
   image_from_hotspot?: boolean;
   materials: string | null;
+  materials_description?: string | null;
+  variant_placeholder?: string | null;
+  available_finishes?: string[] | null;
+  fabric_options?: string[] | null;
+  size_variants?: Array<{ label?: string | null; base?: string | null; top?: string | null }> | null;
+  subcategory?: string | null;
   category: string | null;
   designer_name: string | null;
   brand_name?: string | null;
