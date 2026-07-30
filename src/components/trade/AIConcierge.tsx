@@ -3231,7 +3231,10 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
   // We show one at a time; the light text button at the top right switches.
   const steppedProposal = [...timeline].reverse().find(
     (t): t is Extract<TimelineItem, { kind: "proposal" }> =>
-      t.kind === "proposal" && t.sourceOrigin === "source" && !t.resolved,
+      t.kind === "proposal" &&
+      (t.sourceOrigin === "source" || t.proposal.tool === "propose_tearsheet") &&
+      !t.resolved,
+
   );
 
   // A freshly-generated proposal always lands the user back on the grid.
@@ -4752,14 +4755,22 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
               if (item.kind !== "proposal") return null;
               const excludedSet = new Set(item.excluded || []);
               const visibleForGrid = item.proposal.preview.filter((p) => !excludedSet.has(p.id));
-              // Stepped mode only applies to the live "source" proposal that
-              // owns the discovery grid; everything else renders as before.
-              const stepped = item.sourceOrigin === "source" && visibleForGrid.length > 0 && !item.resolved;
+              // Any fresh tearsheet proposal IS a discovery run — whether the
+              // designer used the "Source Similar Pieces" panel or just typed
+              // the brief in chat. Relying solely on the panel flag meant typed
+              // sourcing runs (and rehydrated threads) fell back to the old
+              // draft-only layout.
+              const isDiscovery =
+                item.sourceOrigin === "source" || item.proposal.tool === "propose_tearsheet";
+              // Stepped mode only applies to the live discovery proposal that
+              // owns the grid; everything else renders as before.
+              const stepped = isDiscovery && visibleForGrid.length > 0 && !item.resolved;
               const showGrid = !stepped || !configView;
               const showDraft = !stepped || configView;
               return (
                 <div key={i} className="flex w-full flex-col gap-3">
-                  {item.sourceOrigin === "source" && visibleForGrid.length > 0 && (
+                  {isDiscovery && visibleForGrid.length > 0 && (
+
                     <div
                       className={cn(
                         "transition-all duration-300 ease-out",
