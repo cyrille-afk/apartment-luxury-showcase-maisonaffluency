@@ -3211,8 +3211,17 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
   const openConfigView = () => {
     gridScrollTopRef.current = scrollRef.current?.scrollTop ?? 0;
     setConfigView(true);
+    // Wait for the draft canvas to mount, then bring IT into view (not the
+    // top of the transcript, which felt like being thrown back up the chat).
     requestAnimationFrame(() => {
-      scrollRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+      requestAnimationFrame(() => {
+        const container = scrollRef.current;
+        const draft = container?.querySelector<HTMLElement>('[data-draft-canvas="true"]');
+        if (container && draft) {
+          const top = draft.offsetTop - container.offsetTop - 12;
+          container.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+        }
+      });
     });
   };
   const backToGrid = () => {
@@ -4720,8 +4729,9 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                     </div>
                   )}
                   <div
+                    data-draft-canvas={stepped ? "true" : undefined}
                     className={cn(
-                      "transition-all duration-300 ease-out",
+                      "transition-all duration-300 ease-out scroll-mt-4",
                       showDraft
                         ? "opacity-100 translate-y-0"
                         : "pointer-events-none absolute h-0 overflow-hidden opacity-0 translate-y-10",
