@@ -692,6 +692,9 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
       : greetingForContext(stage, contextualPath, tone, targetLang).replace(/{concierge_name}/g, name)
   ), [surface, initialGreeting, stage, contextualPath, tone, lang, name]);
   const scrollRef = useRef<HTMLDivElement>(null);
+  // Two-step workflow: discovery grid (step 1) ⇄ procurement draft (step 2).
+  const [configView, setConfigView] = useState(false);
+  const gridScrollTopRef = useRef(0);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const abortRef = useRef<AbortController | null>(null);
   const stallTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
