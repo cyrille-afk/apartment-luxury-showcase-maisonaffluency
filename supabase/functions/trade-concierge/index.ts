@@ -3819,6 +3819,7 @@ async function fetchStrictTypologyCandidates(
       trade_price_cents: r.trade_price_cents ?? r.rrp_price_cents ?? null,
       stock_status: r.stock_status_override ?? null,
     })),
+    ...(affinityByDesignerRes.data || []),
     ...(stylePickRes.data || []),
     ...(styleTradeRes.data || []).map((r: any) => ({
       ...r,
@@ -3826,7 +3827,13 @@ async function fetchStrictTypologyCandidates(
       trade_price_cents: r.trade_price_cents ?? r.rrp_price_cents ?? null,
       stock_status: r.stock_status_override ?? null,
     })),
-  ].filter((r: any) => rowMatchesRequestedTypology(r, typology));
+  ]
+    // Stamp the resolved designer name onto pick rows so accent/name-variant
+    // affinity scoring can see who made the piece.
+    .map((r: any) => (r?.designer_id && !r?.designer_name && affinityDesignerNameById.has(r.designer_id)
+      ? { ...r, designer_name: affinityDesignerNameById.get(r.designer_id) }
+      : r))
+    .filter((r: any) => rowMatchesRequestedTypology(r, typology));
   typologyFiltered = mergeCandidateRows([], typologyFiltered).sort((a: any, b: any) =>
     (designerAffinityScore(b, designerTerms) + styleTagAffinityScore(b, requestedStyleTags) + artDecoAffinityScore(b, artDecoActive)) -
     (designerAffinityScore(a, designerTerms) + styleTagAffinityScore(a, requestedStyleTags) + artDecoAffinityScore(a, artDecoActive))
