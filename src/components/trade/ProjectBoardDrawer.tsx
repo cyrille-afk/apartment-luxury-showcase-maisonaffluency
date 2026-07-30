@@ -240,8 +240,7 @@ export function ProjectBoardDrawer({
           </button>
         </footer>
       </aside>
-    </div>,
-    document.body,
+    </div>
   );
 }
 
