@@ -157,7 +157,7 @@ export function CuratedInventoryGrid({
 
   const renderCard = (item: CuratedInventoryItem) => {
           const brand = item.brand_name || item.designer_name || "Maison Affluency";
-          const material = item.materials || item.category || "Material on request";
+          const material = finishLabel(item);
           const status = statusLabel(item.stock_status || item.lead_time);
           const detail = details[item.id];
           const handleView = () => {
