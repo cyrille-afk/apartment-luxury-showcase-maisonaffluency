@@ -1309,6 +1309,9 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
   const saveActiveThreadNow = useCallback(async (items: TimelineItem[]) => {
     if (!user?.id || !activeThreadId) return;
     if (hydratedThreadRef.current !== activeThreadId) return;
+    // Never write another conversation's transcript over this thread's row.
+    if (timelineThreadRef.current && timelineThreadRef.current !== activeThreadId) return;
+
     const hasUserMsg = items.some((t) => t.kind === "msg" && t.role === "user");
     if (!hasUserMsg) return;
     const compact = buildCompactTimeline(items);
