@@ -3394,6 +3394,106 @@ function paletteMatchScore(row: any, constraints: HardConstraints | null | undef
   return score;
 }
 
+function rowRelevanceHaystack(row: any): string {
+  return [
+    row?.title,
+    row?.product_name,
+    row?.category,
+    row?.subcategory,
+    row?.materials,
+    row?.materials_description,
+    row?.description,
+    row?.meta_description,
+    row?.variant_placeholder,
+    row?.designer,
+    row?.designer_name,
+    row?.brand_name,
+    row?.slug,
+    Array.isArray(row?.tags) ? row.tags.join(" ") : row?.tags,
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+}
+
+function hasArtDecoSignal(brief: ExtractedBrief["brief"], requestText: string): boolean {
+  return /\b(art[\s-]?deco|deco|interwar|luxe\s+pauvre|1920s|1930s)\b/i.test(
+    `${requestText || ""} ${brief?.style || ""} ${(brief?.emphasis || []).join(" ")} ${brief?.summary || ""}`,
+  );
+}
+
+function extractDesignerAffinityTerms(brief: ExtractedBrief["brief"], requestText: string): string[] {
+  const raw = new Set<string>((brief?.designers || []).map((d) => String(d || "")).filter(Boolean));
+  const text = requestText || "";
+  const watched = [
+    /\b(?:j\.?\s*m\.?|jm|jean[-\s]?michel)\s+frank\b/gi,
+    /\becart\b/gi,
+    /\bl[eé]o\s+sentou\b/gi,
+    /\bl[eé]o\s+aerts\b/gi,
+    /\balinea\b/gi,
+  ];
+  for (const re of watched) {
+    for (const match of text.matchAll(re)) raw.add(match[0]);
+  }
+
+  const expanded = new Set<string>();
+  for (const term of raw) {
+    const n = normalizeLoose(term);
+    if (!n) continue;
+    expanded.add(n);
+    if (/\b(j\s*m|jm|jean\s+michel)\s+frank\b/.test(n)) {
+      expanded.add("jean michel frank");
+      expanded.add("ecart");
+    }
+    if (/\becart\b/.test(n)) {
+      expanded.add("ecart");
+      expanded.add("jean michel frank");
+    }
+    if (/\b(l[eé]o|leo)\s+sentou\b/.test(n)) {
+      expanded.add("leo sentou");
+      expanded.add("léo sentou");
+    }
+    if (/\b(l[eé]o|leo)\s+aerts\b/.test(n) || /\balinea\b/.test(n)) {
+      expanded.add("leo aerts");
+      expanded.add("léo aerts");
+      expanded.add("alinea");
+    }
+  }
+  return Array.from(expanded);
+}
+
+function designerAffinityScore(row: any, terms: string[]): number {
+  if (!terms.length) return 0;
+  const hay = normalizeLoose(rowRelevanceHaystack(row));
+  let score = 0;
+  for (const term of terms) {
+    if (term && hay.includes(term)) score += 10;
+  }
+  return score;
+}
+
+function artDecoAffinityScore(row: any, active: boolean): number {
+  if (!active) return 0;
+  const hay = rowRelevanceHaystack(row);
+  let score = 0;
+  if (/\b(jean[-\s]?michel\s+frank|ecart|l[eé]o\s+sentou|l[eé]o\s+aerts|alinea)\b/i.test(hay)) score += 12;
+  if (/\b(art[\s-]?deco|interwar|luxe\s+pauvre|192\d|193\d|minimalist\s+luxury)\b/i.test(hay)) score += 6;
+  if (/\b(parchment|shagreen|straw\s+marquetry|marquetry|lacquer|sandblasted\s+oak|varnished\s+oak|bronze|patinated\s+brass|plaster|gypsum)\b/i.test(hay)) score += 4;
+  return score;
+}
+
+function mergeCandidateRows(primary: any[], additions: any[]): any[] {
+  const merged = [...(primary || [])];
+  const seen = new Set(merged.map((row) => String(row?.id || "")).filter(Boolean));
+  for (const row of additions || []) {
+    const id = String(row?.id || "");
+    if (!id || seen.has(id)) continue;
+    merged.push(row);
+    seen.add(id);
+  }
+  return merged;
+}
+
 function applyPalettePreferenceByTypology(
   rows: any[],
   constraints: HardConstraints | null | undefined,
@@ -3520,8 +3620,12 @@ async function fetchStrictTypologyCandidates(
   typology: RequestedTypology | RequestedTypology[],
   dimConstraints?: DimensionConstraints | null,
   leadConstraints?: LeadTimeConstraints | null,
+  brief?: ExtractedBrief["brief"] | null,
+  requestText = "",
 ): Promise<any[]> {
   const requested = normalizeRequestedTypologies(typology);
+  const designerTerms = extractDesignerAffinityTerms(brief || EMPTY_BRIEF.brief, requestText);
+  const artDecoActive = hasArtDecoSignal(brief || EMPTY_BRIEF.brief, requestText);
   const searchTerms = Array.from(new Set(requested.flatMap((t) => {
     if (t === "dining_table") return ["dining", "table"];
     if (t === "table") return ["table", "console", "desk"];
@@ -3552,6 +3656,37 @@ async function fetchStrictTypologyCandidates(
         .limit(1000)
       : supabase.from("trade_products").select("id, product_name, materials, materials_description, description, meta_description, variant_placeholder, available_finishes, fabric_options, category, subcategory, dimensions, trade_price_cents, rrp_price_cents, currency, lead_time, stock_status_override, brand_name, size_variants").eq("is_active", true).limit(1000)),
   ]);
+  const affinityTerms = Array.from(new Set([
+    ...designerTerms,
+    ...(artDecoActive ? ["jean michel frank", "ecart", "leo sentou", "leo aerts", "alinea"] : []),
+  ])).filter((term) => term.length >= 4);
+  const affinityPickOr = affinityTerms.length
+    ? affinityTerms.map((term) => {
+      const sqlTerm = term.replace(/\s+/g, "%");
+      return `title.ilike.%${sqlTerm}%,description.ilike.%${sqlTerm}%,meta_description.ilike.%${sqlTerm}%,materials.ilike.%${sqlTerm}%`;
+    }).join(",")
+    : "";
+  const affinityTradeOr = affinityTerms.length
+    ? affinityTerms.map((term) => {
+      const sqlTerm = term.replace(/\s+/g, "%");
+      return `product_name.ilike.%${sqlTerm}%,brand_name.ilike.%${sqlTerm}%,description.ilike.%${sqlTerm}%,meta_description.ilike.%${sqlTerm}%,materials.ilike.%${sqlTerm}%`;
+    }).join(",")
+    : "";
+  const [affinityPickRes, affinityTradeRes] = affinityTerms.length
+    ? await Promise.all([
+      supabase
+        .from("designer_curator_picks")
+        .select("id, title, materials, materials_description, description, meta_description, variant_placeholder, tags, category, subcategory, dimensions, trade_price_cents, currency, lead_time, stock_status, designer_id, size_variants")
+        .or(affinityPickOr)
+        .limit(500),
+      supabase
+        .from("trade_products")
+        .select("id, product_name, materials, materials_description, description, meta_description, variant_placeholder, available_finishes, fabric_options, category, subcategory, dimensions, trade_price_cents, rrp_price_cents, currency, lead_time, stock_status_override, brand_name, size_variants")
+        .eq("is_active", true)
+        .or(affinityTradeOr)
+        .limit(500),
+    ])
+    : [{ data: [] }, { data: [] }];
   let typologyFiltered = [
     ...(pickRes.data || []),
     ...(tradeRes.data || []).map((r: any) => ({
@@ -3560,7 +3695,18 @@ async function fetchStrictTypologyCandidates(
       trade_price_cents: r.trade_price_cents ?? r.rrp_price_cents ?? null,
       stock_status: r.stock_status_override ?? null,
     })),
+    ...(affinityPickRes.data || []),
+    ...(affinityTradeRes.data || []).map((r: any) => ({
+      ...r,
+      title: r.product_name,
+      trade_price_cents: r.trade_price_cents ?? r.rrp_price_cents ?? null,
+      stock_status: r.stock_status_override ?? null,
+    })),
   ].filter((r: any) => rowMatchesRequestedTypology(r, typology));
+  typologyFiltered = mergeCandidateRows([], typologyFiltered).sort((a: any, b: any) =>
+    (designerAffinityScore(b, designerTerms) + artDecoAffinityScore(b, artDecoActive)) -
+    (designerAffinityScore(a, designerTerms) + artDecoAffinityScore(a, artDecoActive))
+  );
   if (dimConstraints) {
     const dimRes = filterRowsByDimensionConstraints(typologyFiltered, dimConstraints);
     console.log(`[concierge strict-typology dim] typology=${typologyLabel(typology)} pre=${typologyFiltered.length} strict=${dimRes.strictKept.length} kept=${dimRes.kept.length} dropped=${dimRes.dropped} unknownDropped=${dimRes.unknownDropped} fellBack=${dimRes.fellBack} constraints=${JSON.stringify(dimConstraints)}`);
@@ -4068,6 +4214,8 @@ async function buildDeterministicTearsheetProposal(
   const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
   const requestedTypology = inferRequestedTypology(brief, requestText);
   const requestedTypologies = normalizeRequestedTypologies(requestedTypology);
+  const artDecoActive = hasArtDecoSignal(brief, requestText);
+  const designerTerms = extractDesignerAffinityTerms(brief, requestText);
   const paletteConstraints = deriveHardConstraints([
     {
       title: requestText,
@@ -4089,19 +4237,28 @@ async function buildDeterministicTearsheetProposal(
     }
   }
   const scoreRow = (r: any) => {
-    const hay = `${r?.title || ""} ${r?.category || ""} ${r?.subcategory || ""} ${r?.materials || ""}`.toLowerCase();
+    const hay = rowRelevanceHaystack(r);
     let score = Number(r?.similarity || 0);
     const rowTypes = rowMatchedRequestedTypologies(r, requestedTypologies);
     score += rowTypes.length * 2;
     if (rowTypes.includes("dining_table") && /\bdining\b/.test(hay)) score += 3;
     if ((rowTypes.includes("table") || rowTypes.includes("dining_table")) && /\btable\b/.test(hay)) score += 2;
     if ((brief.materials || []).some((m) => /\b(oak|walnut|wood|timber)\b/i.test(String(m))) && /\b(oak|walnut|wood|timber)\b/.test(hay)) score += 1;
+    score += designerAffinityScore(r, designerTerms);
+    score += artDecoAffinityScore(r, artDecoActive);
     return score;
   };
   let candidateRows = applyPalettePreferenceByTypology((ragRows || [])
     .filter((r: any) => r && typeof r.id === "string" && UUID_RE.test(r.id))
     .filter((r: any) => rowMatchesRequestedTypology(r, requestedTypology))
     .sort((a: any, b: any) => scoreRow(b) - scoreRow(a)), paletteConstraints, requestedTypology);
+  if (requestedTypologies.length && (artDecoActive || designerTerms.length)) {
+    const affinityRows = await fetchStrictTypologyCandidates(supabase, requestedTypologies, null, null, brief, requestText);
+    candidateRows = mergeCandidateRows(
+      affinityRows.filter((r: any) => r && typeof r.id === "string" && UUID_RE.test(r.id)),
+      candidateRows,
+    ).sort((a: any, b: any) => scoreRow(b) - scoreRow(a));
+  }
   // Apply hard dimension constraints to the RAG shortlist (rows carry
   // `dimensions` from match_catalog). Unknown-dim rows drop in strict mode.
   if (dimConstraints && candidateRows.length) {
@@ -4117,11 +4274,11 @@ async function buildDeterministicTearsheetProposal(
     candidateRows = leadRes.kept;
   }
   if (requestedTypologies.length && (candidateRows.length < 2 || !rowsCoverRequestedTypologies(candidateRows, requestedTypologies))) {
-    candidateRows = applyPalettePreferenceByTypology((await fetchStrictTypologyCandidates(supabase, requestedTypologies, dimConstraints, leadConstraints))
+    candidateRows = applyPalettePreferenceByTypology((await fetchStrictTypologyCandidates(supabase, requestedTypologies, dimConstraints, leadConstraints, brief, requestText))
       .filter((r: any) => r && typeof r.id === "string" && UUID_RE.test(r.id))
       .sort((a: any, b: any) => scoreRow(b) - scoreRow(a)), paletteConstraints, requestedTypology);
   }
-  const sortedCandidates = candidateRows.sort((a: any, b: any) => (paletteMatchScore(b, paletteConstraints) - paletteMatchScore(a, paletteConstraints)) || scoreRow(b) - scoreRow(a));
+  const sortedCandidates = candidateRows.sort((a: any, b: any) => scoreRow(b) - scoreRow(a) || (paletteMatchScore(b, paletteConstraints) - paletteMatchScore(a, paletteConstraints)));
   const diversifyMixedRoomRows = (rows: any[], limit: number) => {
     const familyOf = (r: any) => {
       const hay = `${r?.title || ""} ${r?.category || ""} ${r?.subcategory || ""}`.toLowerCase();
@@ -4914,6 +5071,30 @@ serve(async (req) => {
     // and ignored actual user content (room type, seat count, shape, etc.).
     // The LLM handles discovery turns directly now.
     const requestedTypology = inferRequestedTypology(effectiveBrief.brief, hardValidationText);
+
+    const isSourceSimilarPanelTurn = /\bsource\s+similar\s+pieces\b/i.test(lastUserMsg) ||
+      /\bfocus\s+typology\b/i.test(lastUserMsg) ||
+      /\bpalette\s*\/\s*material\s+accents\b/i.test(lastUserMsg) ||
+      /\badditional\s+brief\b/i.test(lastUserMsg);
+    if (isSourceSimilarPanelTurn && hasExplicitSelectionVerb) {
+      const deterministicProposal = await buildDeterministicTearsheetProposal(
+        supabase,
+        Array.isArray((ragResult as any)?.rows) ? (ragResult as any).rows : [],
+        effectiveBrief.brief,
+        hardValidationText,
+        { mixedRoom: true },
+      );
+      if (deterministicProposal) {
+        console.log("[concierge source-similar deterministic]", JSON.stringify({
+          requestId,
+          titles: (deterministicProposal.preview || []).map((p: any) => `${p.designer_name || p.brand_name || ""}::${p.title || ""}`).slice(0, 8),
+        }));
+        return sseProposalThenTextResponse(
+          deterministicProposal,
+          "I’ve rebuilt the edit directly from the requested typologies, accents, and style notes.",
+        );
+      }
+    }
 
     if (shouldActOnAccumulatedBrief && breaker.state() === "open" && CLOUDFLARE_ENABLED) {
       return sseTextResponse(
