@@ -3191,17 +3191,11 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
 
   // --- Stepped workflow (discovery grid ⇄ procurement draft) -------------
   // A "source" proposal renders a discovery grid AND a procurement draft.
-  // We show one at a time; the floating bar below the transcript switches.
+  // We show one at a time; the light text button at the top right switches.
   const steppedProposal = [...timeline].reverse().find(
     (t): t is Extract<TimelineItem, { kind: "proposal" }> =>
       t.kind === "proposal" && t.sourceOrigin === "source" && !t.resolved,
   );
-  const matchedCount = steppedProposal
-    ? steppedProposal.proposal.preview.filter(
-        (p) => !new Set(steppedProposal.excluded || []).has(p.id),
-      ).length
-    : 0;
-  const steppedActive = matchedCount > 0;
 
   // A freshly-generated proposal always lands the user back on the grid.
   const steppedKey = steppedProposal?.proposal.preview.map((p) => p.id).join("|") ?? "";
@@ -4807,23 +4801,6 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
             )}
           </div>
 
-          {steppedActive && !showTypingDots && (
-            <div className="shrink-0 px-3 pb-1 pt-1">
-              <div className="flex items-center justify-between gap-3 rounded-full border border-accent/40 bg-background/90 backdrop-blur-sm px-4 py-2 shadow-sm">
-                <span className="flex items-center gap-2 font-body text-[11px] uppercase tracking-[0.16em] text-foreground">
-                  <Sparkles className="h-3.5 w-3.5 text-accent" aria-hidden="true" />
-                  {matchedCount} {matchedCount === 1 ? "Item" : "Items"} Matched
-                </span>
-                <button
-                  type="button"
-                  onClick={configView ? backToGrid : openConfigView}
-                  className="inline-flex cursor-pointer items-center whitespace-nowrap rounded-full bg-foreground px-3.5 py-1.5 font-body text-[11px] uppercase tracking-[0.14em] text-background shadow-sm transition-all duration-200 ease-out hover:bg-foreground/90 hover:scale-[1.02] active:scale-[0.99]"
-                >
-                  {configView ? "[ Back to Grid ]" : "[ View Draft & Configure ↓ ]"}
-                </button>
-              </div>
-            </div>
-          )}
           <div className={cn("border-t border-border p-3 shrink-0 min-h-0", fullscreen && "flex flex-col gap-3 overflow-hidden", fullscreen && (briefBuilderOpen ? "max-h-[78vh]" : "max-h-[45vh]"))}>
             <div className={cn(fullscreen && "flex-1 min-h-0 overflow-y-auto")}>
 
