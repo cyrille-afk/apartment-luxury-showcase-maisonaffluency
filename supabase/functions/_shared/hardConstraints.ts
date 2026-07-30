@@ -233,10 +233,19 @@ export function applyHardConstraints<Q extends {
   columns: { text: string[]; brand?: string; category?: string },
 ): Q {
   let q = query;
-  const mat = buildIlikeOr(constraints.materials || [], columns.text);
-  if (mat) q = q.or(mat);
-  const col = buildIlikeOr(constraints.colors || [], columns.text);
-  if (col) q = q.or(col);
+  if (constraints.matchMode === "any") {
+    // Accent-list brief: one merged OR pool instead of two AND groups.
+    const pool = buildIlikeOr(
+      [...(constraints.materials || []), ...(constraints.colors || [])],
+      columns.text,
+    );
+    if (pool) q = q.or(pool);
+  } else {
+    const mat = buildIlikeOr(constraints.materials || [], columns.text);
+    if (mat) q = q.or(mat);
+    const col = buildIlikeOr(constraints.colors || [], columns.text);
+    if (col) q = q.or(col);
+  }
   if (constraints.categories?.length && columns.category) {
     const categoryColumns = Array.from(new Set([columns.category, ...columns.text]));
     const cat = buildIlikeOr(expandCategoryConstraintTokens(constraints.categories), categoryColumns);
