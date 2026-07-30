@@ -40,7 +40,7 @@ export function CuratedGridSkeleton({ count = 4, className }: Props) {
       role="status"
       aria-live="polite"
       aria-label="Curating pieces"
-      className={cn("w-full max-w-[92%] self-start animate-fade-in", className)}
+      className={cn("w-full max-w-[92%] lg:max-w-full self-start animate-fade-in", className)}
     >
       <div className="mb-2 flex items-baseline justify-between gap-3">
         <div className="font-body text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
@@ -49,7 +49,8 @@ export function CuratedGridSkeleton({ count = 4, className }: Props) {
         <Block className="h-2 w-16 rounded-sm" delay={200} />
       </div>
 
-      <div className="grid grid-cols-1 gap-x-6 gap-y-8 md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2 lg:grid-cols-4">
+
         {cards.map((_, i) => (
           <div key={i} className="flex flex-col">
             {/* Image plate — asymmetrical heights keep the canvas hand-sketched. */}
