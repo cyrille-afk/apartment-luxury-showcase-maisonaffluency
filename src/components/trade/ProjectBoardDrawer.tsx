@@ -93,11 +93,11 @@ export function ProjectBoardDrawer({
       )}
       aria-hidden={!open}
     >
-      {/* Overlay */}
+      {/* Blur-filtered backdrop */}
       <div
         onClick={onClose}
         className={cn(
-          "absolute inset-0 bg-foreground/30 backdrop-blur-[1px] transition-opacity duration-300",
+          "absolute inset-0 bg-foreground/25 backdrop-blur-md transition-opacity duration-300",
           open ? "opacity-100" : "opacity-0",
         )}
       />
@@ -108,7 +108,7 @@ export function ProjectBoardDrawer({
         aria-modal="true"
         aria-label="Project board"
         className={cn(
-          "absolute right-0 top-0 flex h-full w-[92vw] max-w-[380px] flex-col bg-[hsl(38_28%_96%)] dark:bg-muted shadow-[-24px_0_48px_-32px_hsl(var(--foreground)/0.45)] transition-transform duration-300 ease-out",
+          "fixed right-0 top-0 flex h-screen w-[380px] max-w-[92vw] flex-col bg-[hsl(38_28%_96%)] dark:bg-muted shadow-[-24px_0_48px_-32px_hsl(var(--foreground)/0.45)] transition-transform duration-300 ease-out",
           open ? "translate-x-0" : "translate-x-full",
         )}
       >
@@ -126,11 +126,12 @@ export function ProjectBoardDrawer({
             type="button"
             onClick={onClose}
             aria-label="Close project board"
-            className="mt-0.5 rounded-sm p-1 text-muted-foreground transition-colors hover:text-foreground"
+            className="mt-0.5 shrink-0 font-body text-[10px] uppercase tracking-[0.16em] text-muted-foreground transition-colors hover:text-foreground"
           >
-            <X className="h-4 w-4" />
+            [ <X className="mb-px inline h-3 w-3" /> Close ]
           </button>
         </header>
+
 
         {/* Items */}
         <div className="flex-1 overflow-y-auto px-5">
