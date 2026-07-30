@@ -5037,7 +5037,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                 type="button"
                 onClick={() => moodInputRef.current?.click()}
                 disabled={streaming || attachments.length >= MAX_ATTACHMENTS}
-                className="rounded-full border border-border/80 bg-muted/30 px-3 py-1.5 font-body text-[11px] text-muted-foreground hover:bg-muted hover:text-foreground disabled:opacity-40 transition-colors"
+                className="rounded-md border border-[#E5E5E2] bg-[#F5F4F1] px-3 py-1.5 text-left font-body text-[10px] uppercase tracking-[0.14em] text-[#4A4A46] transition-colors duration-200 hover:bg-[#ECEAE4] hover:text-[#1A1A1A] disabled:opacity-40 cursor-pointer"
                 aria-label="Upload mood board"
                 title="Upload a mood board image to Block 3"
               >
@@ -5056,7 +5056,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                   setBriefBuilderOpen(true);
                 }}
                 disabled={streaming}
-                className="rounded-full border border-border/80 bg-muted/30 px-3 py-1.5 font-body text-[11px] text-muted-foreground hover:bg-muted hover:text-foreground disabled:opacity-40 transition-colors"
+                className="rounded-md border border-[#E5E5E2] bg-[#F5F4F1] px-3 py-1.5 text-left font-body text-[10px] uppercase tracking-[0.14em] text-[#4A4A46] transition-colors duration-200 hover:bg-[#ECEAE4] hover:text-[#1A1A1A] disabled:opacity-40 cursor-pointer"
                 aria-label="Request custom quote"
                 title="Open the Architectural Brief Builder for a custom quote"
               >
@@ -5066,7 +5066,7 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
                 type="button"
                 onClick={() => send("What are the current lead times for your pieces?")}
                 disabled={streaming}
-                className="rounded-full border border-border/80 bg-muted/30 px-3 py-1.5 font-body text-[11px] text-muted-foreground hover:bg-muted hover:text-foreground disabled:opacity-40 transition-colors"
+                className="rounded-md border border-[#E5E5E2] bg-[#F5F4F1] px-3 py-1.5 text-left font-body text-[10px] uppercase tracking-[0.14em] text-[#4A4A46] transition-colors duration-200 hover:bg-[#ECEAE4] hover:text-[#1A1A1A] disabled:opacity-40 cursor-pointer"
                 aria-label="Check lead times"
                 title="Ask Felix about current lead times"
               >
