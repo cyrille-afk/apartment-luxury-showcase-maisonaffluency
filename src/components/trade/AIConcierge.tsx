@@ -636,6 +636,14 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
   // designer can quote a real reference ID and see exactly what we forwarded.
   const [handoffTicket, setHandoffTicket] = useState<{ id: string; summary: string } | null>(null);
 
+  // The in-tab cached transcript is scoped to the thread it belongs to.
+  // Without the thread stamp, switching conversations (or reloading after a
+  // switch) let one thread's transcript be treated as "fresher" than the
+  // thread you actually opened — which both hid the selected history and
+  // overwrote its row on the next save.
+  const cachedTimelineThreadId = (() => {
+    try { return sessionStorage.getItem("concierge:timelineThread"); } catch { return null; }
+  })();
   const [timeline, setTimeline] = useState<TimelineItem[]>(() => {
     try {
       const raw = sessionStorage.getItem("concierge:timeline");
@@ -648,6 +656,18 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
       { kind: "msg", role: "assistant", content: surface === "public" ? (initialGreeting || PUBLIC_GREETING) : greetingForContext(stageFromPath(pathname), pathname, loadTone(), loadLang()).replace(/{concierge_name}/g, name) },
     ];
   });
+  /** Thread the in-memory transcript belongs to (null = unknown/foreign). */
+  const timelineThreadRef = useRef<string | null>(cachedTimelineThreadId);
+  const stampTimelineThread = useCallback((id: string | null) => {
+    timelineThreadRef.current = id;
+    try {
+      if (id) sessionStorage.setItem("concierge:timelineThread", id);
+      else sessionStorage.removeItem("concierge:timelineThread");
+    } catch {}
+  }, []);
+
+
+
   const [input, setInput] = useState<string>(() => {
     try { return sessionStorage.getItem("concierge:draft") || ""; } catch { return ""; }
   });
@@ -1194,16 +1214,25 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
     cloudLastPayloadRef.current = "";
     setActiveThreadId(data.id);
     if (activeThreadKey) try { localStorage.setItem(activeThreadKey, data.id); } catch {}
+    stampTimelineThread(data.id);
     setTimeline(buildInitialTimeline());
     return data.id;
-  }, [user?.id, activeThreadKey, buildInitialTimeline]);
+  }, [user?.id, activeThreadKey, buildInitialTimeline, stampTimelineThread]);
 
   const selectThread = useCallback(async (threadId: string) => {
     if (!user?.id || threadId === activeThreadId) { setThreadsOpen(false); return; }
+    // Drop the previous conversation from memory *before* switching, so the
+    // hydration effect can never mistake it for a fresher copy of the thread
+    // being opened (that used to blank/overwrite the selected history).
+    stampTimelineThread(null);
+    hydratedThreadRef.current = null;
+    cloudLastPayloadRef.current = "";
+    setTimeline([]);
     setActiveThreadId(threadId);
     if (activeThreadKey) try { localStorage.setItem(activeThreadKey, threadId); } catch {}
     setThreadsOpen(false);
-  }, [user?.id, activeThreadId, activeThreadKey]);
+  }, [user?.id, activeThreadId, activeThreadKey, stampTimelineThread]);
+
 
   const deleteThread = useCallback(async (threadId: string) => {
     if (!user?.id) return;
@@ -1280,6 +1309,9 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
   const saveActiveThreadNow = useCallback(async (items: TimelineItem[]) => {
     if (!user?.id || !activeThreadId) return;
     if (hydratedThreadRef.current !== activeThreadId) return;
+    // Never write another conversation's transcript over this thread's row.
+    if (timelineThreadRef.current && timelineThreadRef.current !== activeThreadId) return;
+
     const hasUserMsg = items.some((t) => t.kind === "msg" && t.role === "user");
     if (!hasUserMsg) return;
     const compact = buildCompactTimeline(items);
@@ -1335,20 +1367,25 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
       const remoteArr = Array.isArray(remote) ? (remote as TimelineItem[]) : [];
       const current = timelineRef.current;
       const localHasUser = current.some((t) => t.kind === "msg" && t.role === "user");
-      if (localHasUser && current.length > remoteArr.length) {
+      // Only prefer the in-memory copy when it actually belongs to THIS thread
+      // (same-tab refresh). A transcript from another thread must never win.
+      const localBelongsHere = timelineThreadRef.current === activeThreadId;
+      if (localBelongsHere && localHasUser && current.length > remoteArr.length) {
         // sessionStorage-restored timeline is fresher than DB — keep it and
         // flush upstream so the DB catches up.
         void saveActiveThreadNow(current);
         return;
       }
+      stampTimelineThread(activeThreadId);
       if (remoteArr.length > 0) {
         setTimeline(stripDesignDirectorCtasFromTimeline(sanitizeTimelineForAttachments(remoteArr)));
-      } else if (!localHasUser) {
+      } else {
         setTimeline(buildInitialTimeline());
       }
     })();
     return () => { cancelled = true; };
-  }, [user?.id, activeThreadId, buildInitialTimeline, saveActiveThreadNow]);
+  }, [user?.id, activeThreadId, buildInitialTimeline, saveActiveThreadNow, stampTimelineThread]);
+
 
   // Debounced upsert of the active thread's timeline on every change.
   useEffect(() => {
