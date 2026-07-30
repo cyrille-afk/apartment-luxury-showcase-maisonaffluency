@@ -68,7 +68,7 @@ export function CuratedInventoryGrid({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-8">
         {items.map((item) => {
           const brand = item.brand_name || item.designer_name || "Maison Affluency";
           const material = item.materials || item.category || "Material on request";
@@ -78,15 +78,12 @@ export function CuratedInventoryGrid({
             navigate(`/trade/products/${item.id}`);
           };
           return (
-            <article
-              key={item.id}
-              className="group flex flex-col rounded-sm border border-border bg-[hsl(30_10%_97%)] dark:bg-muted/40 overflow-hidden transition-shadow hover:shadow-[0_1px_0_hsl(var(--border)),0_8px_24px_-16px_hsl(var(--foreground)/0.18)]"
-            >
+            <article key={item.id} className="group flex flex-col">
               {/* Image */}
               <button
                 type="button"
                 onClick={handleView}
-                className="relative block aspect-[4/3] w-full overflow-hidden bg-[hsl(30_8%_92%)]"
+                className="relative block aspect-[4/3] w-full overflow-hidden bg-[hsl(30_8%_94%)] dark:bg-muted/30"
                 aria-label={`Open spec for ${item.title}`}
               >
                 {item.image_url ? (
@@ -104,8 +101,8 @@ export function CuratedInventoryGrid({
               </button>
 
               {/* Body */}
-              <div className="flex flex-1 flex-col px-3.5 pt-3 pb-3">
-                <div className="font-body text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+              <div className="flex flex-1 flex-col pt-2.5">
+                <div className="font-body text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
                   {brand}
                 </div>
                 <button
@@ -116,17 +113,17 @@ export function CuratedInventoryGrid({
                   {item.title}
                 </button>
 
-                <div className="mt-1.5 font-body text-[12px] text-muted-foreground line-clamp-2">
+                <div className="mt-0.5 font-body text-[11px] text-muted-foreground/80 line-clamp-1">
                   {material}
                 </div>
 
-                <div className="mt-3 flex items-center justify-between gap-2">
+                <div className="mt-2 flex items-baseline justify-between gap-3">
                   {typeof item.price_cents === "number" && item.price_cents > 0 ? (
-                    <div className="flex flex-col leading-tight">
-                      <span className="font-display text-[14px] font-semibold text-foreground">
+                    <div className="leading-tight">
+                      <span className="font-display text-[15px] font-semibold text-foreground">
                         {fmtPrice(Math.round(item.price_cents * (1 - discountPct)), item.currency || "EUR")}
                       </span>
-                      <span className="font-body text-[10px] uppercase tracking-[0.1em] text-muted-foreground">
+                      <span className="block font-body text-[9px] uppercase tracking-[0.12em] text-muted-foreground/0 group-hover:text-muted-foreground/70 transition-colors">
                         {tierLabel} net · RRP {fmtPrice(item.price_cents, item.currency || "EUR")}
                       </span>
                     </div>
@@ -135,23 +132,18 @@ export function CuratedInventoryGrid({
                       Trade Price on Request
                     </div>
                   )}
-                  <span
-                    className={cn(
-                      "inline-flex items-center rounded-sm border px-1.5 py-0.5 text-[10px] uppercase tracking-[0.1em]",
-                      status.tone,
-                    )}
-                  >
+                  <span className="font-body text-[10px] uppercase tracking-[0.16em] text-muted-foreground/70 whitespace-nowrap">
                     {status.label}
                   </span>
                 </div>
 
                 {/* Actions */}
-                <div className="mt-3 flex items-center gap-2 border-t border-border/60 pt-2.5">
+                <div className="mt-2.5 flex items-center gap-5">
                   <button
                     type="button"
                     onClick={() => onAddToBoard?.(item)}
                     disabled={!onAddToBoard}
-                    className="inline-flex items-center gap-1 rounded-sm border border-border bg-background px-2 py-1 font-body text-[11px] text-foreground hover:bg-foreground hover:text-background transition-colors disabled:opacity-50 disabled:hover:bg-background disabled:hover:text-foreground"
+                    className="inline-flex items-center gap-1 font-body text-[11px] uppercase tracking-[0.12em] text-foreground/70 hover:text-foreground transition-colors disabled:opacity-40"
                   >
                     <Plus className="h-3 w-3" />
                     Add to Board
@@ -159,7 +151,7 @@ export function CuratedInventoryGrid({
                   <button
                     type="button"
                     onClick={handleView}
-                    className="inline-flex items-center gap-1 rounded-sm border border-border bg-background px-2 py-1 font-body text-[11px] text-foreground hover:bg-foreground hover:text-background transition-colors"
+                    className="inline-flex items-center gap-1 font-body text-[11px] uppercase tracking-[0.12em] text-foreground/70 hover:text-foreground transition-colors"
                   >
                     <ExternalLink className="h-3 w-3" />
                     View Spec
@@ -170,6 +162,7 @@ export function CuratedInventoryGrid({
           );
         })}
       </div>
+
     </div>
   );
 }
