@@ -3416,10 +3416,47 @@ function rowRelevanceHaystack(row: any): string {
     .toLowerCase();
 }
 
+// ── Style-tag detection ────────────────────────────────────────────────
+// Movement membership is DATA, not prose. Curator picks / trade products carry
+// `style_tags` (e.g. "art-deco"); the concierge matches on that column and only
+// falls back to text heuristics for rows that have not been tagged yet.
+const STYLE_TAG_MATCHERS: { tag: string; re: RegExp }[] = [
+  { tag: "art-deco", re: /\b(art[\s-]?deco|deco|interwar|luxe\s+pauvre|1920s|1930s)\b/i },
+];
+
+function briefStyleText(brief: ExtractedBrief["brief"], requestText: string): string {
+  return `${requestText || ""} ${brief?.style || ""} ${(brief?.emphasis || []).join(" ")} ${brief?.summary || ""}`;
+}
+
+/** Style tags requested by the user (matched against the controlled vocabulary). */
+function detectRequestedStyleTags(brief: ExtractedBrief["brief"], requestText: string): string[] {
+  const hay = briefStyleText(brief, requestText);
+  return STYLE_TAG_MATCHERS.filter((m) => m.re.test(hay)).map((m) => m.tag);
+}
+
+function rowStyleTags(row: any): string[] {
+  const raw = row?.style_tags;
+  if (Array.isArray(raw)) return raw.map((t) => String(t || "").toLowerCase().trim()).filter(Boolean);
+  if (typeof raw === "string") return raw.split(/[,;]/).map((t) => t.toLowerCase().trim()).filter(Boolean);
+  return [];
+}
+
+function rowHasStyleTag(row: any, tag: string): boolean {
+  return rowStyleTags(row).includes(tag);
+}
+
+/** Primary ranking signal: explicit style-tag membership on the row. */
+function styleTagAffinityScore(row: any, requestedTags: string[]): number {
+  if (!requestedTags.length) return 0;
+  const tags = rowStyleTags(row);
+  if (!tags.length) return 0;
+  let score = 0;
+  for (const tag of requestedTags) if (tags.includes(tag)) score += 14;
+  return score;
+}
+
 function hasArtDecoSignal(brief: ExtractedBrief["brief"], requestText: string): boolean {
-  return /\b(art[\s-]?deco|deco|interwar|luxe\s+pauvre|1920s|1930s)\b/i.test(
-    `${requestText || ""} ${brief?.style || ""} ${(brief?.emphasis || []).join(" ")} ${brief?.summary || ""}`,
-  );
+  return detectRequestedStyleTags(brief || EMPTY_BRIEF.brief, requestText).includes("art-deco");
 }
 
 function extractDesignerAffinityTerms(brief: ExtractedBrief["brief"], requestText: string): string[] {
@@ -3474,6 +3511,11 @@ function designerAffinityScore(row: any, terms: string[]): number {
 
 function artDecoAffinityScore(row: any, active: boolean): number {
   if (!active) return 0;
+  // Tagged rows win outright — no prose guessing needed.
+  if (rowHasStyleTag(row, "art-deco")) return 18;
+  const tags = rowStyleTags(row);
+  // Row IS tagged but not as deco → trust the curation, don't rescue it via prose.
+  if (tags.length) return 0;
   const hay = rowRelevanceHaystack(row);
   let score = 0;
   if (/\b(jean[-\s]?michel\s+frank|ecart|l[eé]o\s+sentou|l[eé]o\s+aerts|alinea)\b/i.test(hay)) score += 12;
