@@ -760,6 +760,19 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
   const [boardItems, setBoardItems] = useState<PickPreview[]>([]);
   const [boardProjectName, setBoardProjectName] = useState<string>("Active Project");
 
+  /** Add a curated pick to the board drawer and open it. */
+  const openBoardWith = useCallback(async (pick: PickPreview) => {
+    setBoardItems((prev) => (prev.some((p) => p.id === pick.id) ? prev : [...prev, pick]));
+    setBoardOpen(true);
+    let projectId: string | null = null;
+    try { projectId = sessionStorage.getItem("trade:lastProjectFilter"); } catch { /* ignore */ }
+    if (projectId) {
+      const { data } = await supabase.from("projects").select("name").eq("id", projectId).maybeSingle();
+      if (data?.name) setBoardProjectName(data.name);
+    }
+  }, []);
+
+
 
 
 
