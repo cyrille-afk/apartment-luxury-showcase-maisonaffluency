@@ -188,11 +188,14 @@ function expandCategoryConstraintTokens(tokens: string[]): string[] {
 
 function categoryTokenMatches(rowText: string, token: string): boolean {
   if (!token) return false;
+  // Table tokens are checked BEFORE the naive substring test: "Yoshiko Table
+  // Lamp" contains "table" and would otherwise pass a "tables" brief.
+  if (token === "table" || token === "tables" || token === "dining table" || token === "coffee table" || token === "side table") {
+    if (/\b(table lamp|table light|bedside lamp)\b/.test(rowText)) return false;
+    return /\b(dining table|coffee table|side table|console|desk|tables?)\b/.test(rowText);
+  }
   if (rowText.includes(token)) return true;
   if (token === "seating") return /\b(sectional|sofa|settee|loveseat|chair|armchair|bench|stool|ottoman|pouf|banquette|daybed|chaise)\b/.test(rowText);
-  if (token === "table" || token === "tables" || token === "dining table") {
-    return /\b(dining table|coffee table|side table|console|desk|tables?)\b/.test(rowText) && !/\b(table lamp|table light)\b/.test(rowText);
-  }
   if (token === "lighting") return /\b(floor lamp|floor light|table lamp|table light|pendant|ceiling light|chandelier|sconce|wall light|lantern|lighting|lamp)\b/.test(rowText);
   if (token === "storage") return /\b(cabinet|sideboard|credenza|shelving|bookcase|dresser|chest|armoire|storage)\b/.test(rowText);
   if (token === "bedroom furniture") return /\b(bed|headboard|nightstand|bedside|bedroom)\b/.test(rowText);
