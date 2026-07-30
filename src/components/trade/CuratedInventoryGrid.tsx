@@ -108,7 +108,7 @@ export function CuratedInventoryGrid({
               <button
                 type="button"
                 onClick={handleView}
-                className="relative block aspect-[4/3] w-full overflow-hidden bg-[hsl(30_8%_94%)] dark:bg-muted/30"
+                className="relative block aspect-[4/3] w-full overflow-hidden rounded-md bg-[hsl(30_8%_94%)] dark:bg-muted/30"
                 aria-label={`Open spec for ${item.title}`}
               >
                 {item.image_url ? (
