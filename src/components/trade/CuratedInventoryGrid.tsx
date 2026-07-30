@@ -72,6 +72,8 @@ export function CuratedInventoryGrid({
   const [details, setDetails] = useState<Record<string, HoverDetail>>({});
   const requested = useRef<Set<string>>(new Set());
   const [expanded, setExpanded] = useState(false);
+  const rootRef = useRef<HTMLDivElement | null>(null);
+
   const [openingSpecId, setOpeningSpecId] = useState<string | null>(null);
 
   const loadDetail = useCallback(async (id: string) => {
