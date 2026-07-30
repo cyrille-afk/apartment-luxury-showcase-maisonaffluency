@@ -3486,17 +3486,19 @@ function extractDesignerAffinityTerms(brief: ExtractedBrief["brief"], requestTex
       expanded.add("ecart");
       expanded.add("jean michel frank");
     }
-    if (/\b(l[eé]o|leo)\s+sentou\b/.test(n)) {
+    if (/\b(l[eé]o|leo)\s+sentou\b/.test(n) || /\bsentou\b/.test(n)) {
       expanded.add("leo sentou");
-      expanded.add("léo sentou");
+      expanded.add("sentou");
     }
     if (/\b(l[eé]o|leo)\s+aerts\b/.test(n) || /\balinea\b/.test(n)) {
       expanded.add("leo aerts");
-      expanded.add("léo aerts");
+      expanded.add("aerts");
       expanded.add("alinea");
     }
   }
-  return Array.from(expanded);
+  // Accents are stripped by normalizeLoose, so every emitted term is ASCII —
+  // matching stays accent-insensitive on both the SQL and scoring sides.
+  return Array.from(expanded).filter(Boolean);
 }
 
 // Accents are DATA, not signal: "Léo Sentou" and "leo sentou" must both match.
