@@ -54,7 +54,7 @@ export const ApplicationCardSkeleton = () => (
       <Bone className="h-4 w-16 rounded-full" />
     </div>
     <Bone className="h-3 w-56" />
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+    <div className="grid grid-cols-2 xl:grid-cols-4 gap-2">
       <Bone className="h-3 w-full" />
       <Bone className="h-3 w-full" />
       <Bone className="h-3 w-full" />
