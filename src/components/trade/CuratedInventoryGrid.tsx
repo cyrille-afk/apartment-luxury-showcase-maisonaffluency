@@ -212,23 +212,8 @@ export function CuratedInventoryGrid({
                   </span>
                 </div>
 
-                {/* Hover spec extension — absolutely positioned, zero layout impact */}
-                {(detail?.dimensions || detail?.finishes.length) && (
-                  <div
-                    aria-hidden="true"
-                    className="pointer-events-none absolute inset-x-0 top-full z-10 translate-y-1 rounded-sm bg-[hsl(30_10%_97%)]/95 dark:bg-muted/90 px-2 py-2 opacity-0 shadow-[0_8px_24px_-18px_hsl(var(--foreground)/0.35)] backdrop-blur-[2px] transition-all duration-300 ease-out group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:translate-y-0 group-focus-within:opacity-100"
-                  >
-                    <div className="font-body text-[9px] uppercase tracking-[0.16em] text-muted-foreground">
-                      Alternate Finishes Available
-                    </div>
-                    <ul className="mt-1 space-y-0.5 font-body text-[10.5px] leading-relaxed text-foreground/75">
-                      {detail?.dimensions && <li>· {detail.dimensions}</li>}
-                      {detail?.finishes.map((f) => (
-                        <li key={f}>· {f}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
+
+
 
                 {/* Actions */}
                 <div className="mt-2.5 flex items-center gap-5">
