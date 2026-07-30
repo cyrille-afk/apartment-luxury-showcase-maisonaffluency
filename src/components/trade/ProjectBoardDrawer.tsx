@@ -30,7 +30,7 @@ function leadWeeks(item: ProjectBoardItem): number {
 function leadLabel(item: ProjectBoardItem): string {
   const w = leadWeeks(item);
   if (w) return `${w} Weeks`;
-  return item.lead_time || item.stock_status || "Lead time on request";
+  return "By Request";
 }
 
 export function ProjectBoardDrawer({
