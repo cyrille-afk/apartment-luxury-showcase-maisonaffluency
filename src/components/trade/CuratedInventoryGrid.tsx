@@ -168,7 +168,7 @@ export function CuratedInventoryGrid({
           return (
             <article
               key={item.id}
-              className="group relative flex flex-col"
+              className="group relative flex h-full min-w-0 flex-col"
               onMouseEnter={() => loadDetail(item.id)}
               onFocus={() => loadDetail(item.id)}
             >
