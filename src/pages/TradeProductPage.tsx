@@ -207,7 +207,7 @@ function useTradeProductBySlug(
     queryKey: queryKeys.tradeProductPage(tradeProductIdParam, designerSlug, productSlug),
     queryFn: async () => {
       if (tradeProductIdParam) {
-        const selectCols = "id, product_name, brand_name, image_url, gallery_images, materials, dimensions, description, category, subcategory, lead_time, origin, trade_price_cents, rrp_price_cents, currency, price_unit, price_prefix, spec_sheet_url, glb_url";
+        const selectCols = "id, product_name, brand_name, image_url, gallery_images, materials, dimensions, description, category, subcategory, lead_time, origin, trade_price_cents, rrp_price_cents, currency, price_unit, price_prefix, spec_sheet_url, glb_url, source_pick_id";
         let { data: tradeProduct } = await supabase
           .from("trade_products")
           .select(selectCols)
@@ -257,6 +257,23 @@ function useTradeProductBySlug(
           curatorPick = (picks || []).find((p: any) => (p.title || "").trim().toLowerCase() === tradeName) || null;
           relatedPicks = ((picks || []) as unknown as ProductRow[]).filter((p) => p.id !== curatorPick?.id);
         }
+
+        // Fallback: the designer lookup above only sees PUBLISHED designers,
+        // so picks belonging to an unpublished brand (e.g. Dagmar London)
+        // resolved to null and the page fell back to the trade_products id —
+        // which broke every pick-scoped feature (finish swatches live in
+        // product_fabrics.pick_id). Resolve the twin directly via
+        // trade_products.source_pick_id when the name join found nothing.
+        if (!curatorPick && (tradeProduct as any).source_pick_id) {
+          const { data: pickById } = await supabase
+            .from("designer_curator_picks")
+            .select("id, slug, title, subtitle, image_url, hover_image_url, gallery_images, materials, materials_description, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, trade_price_cents, price_per_sqm_cents, currency, price_prefix, size_variants, variant_placeholder, base_axis_label, top_axis_label, wood_label_override, variant_image_map, edition, edition_number, edition_signing, gallery_captions, is_upholstered, com_meters")
+            .eq("id", (tradeProduct as any).source_pick_id)
+            .maybeSingle();
+          curatorPick = pickById || null;
+        }
+
+
 
         const publicVariantDimension = firstPublicVariantDimensionLabel(curatorPick?.size_variants);
         const product: ProductRow = {
