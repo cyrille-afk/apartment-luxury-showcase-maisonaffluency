@@ -207,7 +207,7 @@ function useTradeProductBySlug(
     queryKey: queryKeys.tradeProductPage(tradeProductIdParam, designerSlug, productSlug),
     queryFn: async () => {
       if (tradeProductIdParam) {
-        const selectCols = "id, product_name, brand_name, image_url, gallery_images, materials, dimensions, description, category, subcategory, lead_time, origin, trade_price_cents, rrp_price_cents, currency, price_unit, price_prefix, spec_sheet_url, glb_url";
+        const selectCols = "id, product_name, brand_name, image_url, gallery_images, materials, dimensions, description, category, subcategory, lead_time, origin, trade_price_cents, rrp_price_cents, currency, price_unit, price_prefix, spec_sheet_url, glb_url, source_pick_id";
         let { data: tradeProduct } = await supabase
           .from("trade_products")
           .select(selectCols)
