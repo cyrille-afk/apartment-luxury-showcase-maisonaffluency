@@ -1149,13 +1149,23 @@ export function AIConcierge({ surface = "trade", initialGreeting }: { surface?: 
       }
     } catch {}
   }, [timeline]);
+  // Sanitize the timeline only when it actually changes. This used to run on
+  // every render (no dep array) and, because the sanitizer returns fresh
+  // objects, it re-triggered itself — an infinite setState loop that froze
+  // every page rendering the concierge (including /trade/admin-dashboard).
+  const sanitizedTimelineRef = useRef<TimelineItem[] | null>(null);
   useEffect(() => {
-    setTimeline((prev) => {
-      const cleaned = stripDesignDirectorCtasFromTimeline(sanitizeTimelineForAttachments(prev));
-      const unchanged = cleaned.length === prev.length && cleaned.every((item, idx) => item === prev[idx]);
-      return unchanged ? prev : cleaned;
-    });
-  });
+    if (sanitizedTimelineRef.current === timeline) return;
+    const cleaned = stripDesignDirectorCtasFromTimeline(sanitizeTimelineForAttachments(timeline));
+    const unchanged = cleaned.length === timeline.length && cleaned.every((item, idx) => item === timeline[idx]);
+    if (unchanged) {
+      sanitizedTimelineRef.current = timeline;
+      return;
+    }
+    sanitizedTimelineRef.current = cleaned;
+    setTimeline(cleaned);
+  }, [timeline]);
+
 
   // --- Lovable Cloud persistence: per-user multi-thread ------------------
   // Each conversation is a row in `public.concierge_threads` (RLS-scoped to
