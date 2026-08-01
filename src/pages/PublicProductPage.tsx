@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate, Link, useLocation, Navigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { Heart, Scale, ChevronLeft, ChevronRight, ChevronDown, ArrowLeft, Truck } from "lucide-react";
@@ -63,7 +63,7 @@ import {
 import TradeWorkspace from "@/components/product/TradeWorkspace";
 import TradePendingReviewCard from "@/components/product/TradePendingReviewCard";
 import CustomizationRequest from "@/components/product/CustomizationRequest";
-import { usePublicRrp, formatPublicRrp } from "@/hooks/usePublicRrp";
+import { usePublicRrp, formatPublicRrp, formatPublicRrpCents } from "@/hooks/usePublicRrp";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 
@@ -968,7 +968,22 @@ const PublicProductPage: React.FC = () => {
   }, [stateFrom, storedFrom]);
   const { data, isLoading } = useProductBySlug(designerSlug, productSlug);
   const { data: publicRrpRow } = usePublicRrp(data?.product?.id);
-  const publicRrpLabel = formatPublicRrp(publicRrpRow);
+  const catalogueRrpLabel = formatPublicRrp(publicRrpRow);
+  // Price of the size/finish combination the visitor has currently selected.
+  // `exact` = a single variant matched, so we drop the "From" prefix.
+  const [selectedRrp, setSelectedRrp] = useState<{ cents: number; exact: boolean } | null>(null);
+  const rrpSelectionRef = useRef<{ base: string | null; top: string | null; size: string | null }>({
+    base: null,
+    top: null,
+    size: null,
+  });
+  const publicRrpLabel = catalogueRrpLabel
+    ? (selectedRrp
+        ? formatPublicRrpCents(selectedRrp.cents, publicRrpRow, selectedRrp.exact ? "" : undefined) ||
+          catalogueRrpLabel
+        : catalogueRrpLabel)
+    : null;
+
   const { isPinned, togglePin, items: compareItems } = useCompare();
   const { requireAuth, gateOpen, gateAction, closeGate } = useAuthGate();
 
@@ -1192,14 +1207,60 @@ const PublicProductPage: React.FC = () => {
     if (isClear) {
       // Snap the gallery back to the primary product image (index 0) so the
       // hero visibly resets when the user clears their finish/material choice.
+      rrpSelectionRef.current = { base: null, top: null, size: null };
+      setSelectedRrp(null);
       setGalleryActiveIndex(0);
       setGalleryJumpNonce((n) => n + 1);
       return;
     }
     const variantsForAxes = product.size_variants || [];
+    // Public RRP follows the selection: match every chosen axis value against
+    // the variant's base/top/label, then show that variant's price (exact when
+    // one variant matches, "From <min>" while the selection is still partial).
+    {
+      const norm = (s: any) => String(s ?? "").trim().toLowerCase();
+      // The size dropdown and the finish swatches keep independent state, so a
+      // swatch event carries a stale size. Merge selections in the parent and
+      // let the swatch only update base/top.
+      const prev = rrpSelectionRef.current;
+      const merged = {
+        base: opts?.base ? String(opts.base) : prev.base,
+        top: opts?.top ? String(opts.top) : prev.top,
+        size: opts?.fromSwatch ? (prev.size ?? (opts?.size ? String(opts.size) : null)) : (opts?.size ? String(opts.size) : prev.size),
+      };
+      if (!opts?.base && !opts?.top && !opts?.size && label) merged.size = String(label);
+      rrpSelectionRef.current = merged;
+
+      const rrpVariants = (publicRrpRow?.rrp_size_variants || []) as any[];
+      const keySets = [
+        [merged.size, merged.base, merged.top],
+        [merged.size, merged.top],
+        [merged.size],
+      ];
+      let uniquePrices: number[] = [];
+      for (const set of keySets) {
+        const keys = set.map((v) => (v ? norm(v) : "")).filter(Boolean);
+        if (!keys.length) continue;
+        const matches = rrpVariants.filter((v) => {
+          const fields = [v?.base, v?.top, v?.label].map(norm);
+          return keys.every((k) => fields.includes(k));
+        });
+        const priced = matches
+          .map((v) => Number(v?.price_cents))
+          .filter((c) => Number.isFinite(c) && c > 0);
+        uniquePrices = Array.from(new Set(priced));
+        if (uniquePrices.length) break;
+      }
+      setSelectedRrp(
+        uniquePrices.length
+          ? { cents: Math.min(...uniquePrices), exact: uniquePrices.length === 1 }
+          : null,
+      );
+    }
     const requiresBaseAndTopSelection =
       variantsForAxes.some((v: any) => v.base && String(v.base).trim()) &&
       variantsForAxes.some((v: any) => v.top && String(v.top).trim());
+
     // If the Base axis only offers one distinct value, treat it as implicitly
     // selected so picking just the Top still resolves the composite key.
     const distinctBases = Array.from(
