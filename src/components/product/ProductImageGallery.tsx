@@ -154,10 +154,13 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
 
           <div
             ref={thumbsRef}
-            className="overflow-y-auto flex flex-col gap-2 scrollbar-hide scroll-smooth"
+            onMouseMove={handleThumbHoverMove}
+            onMouseLeave={stopHoverScroll}
+            className="overflow-y-scroll overscroll-contain flex flex-col gap-2 scrollbar-hide [&::-webkit-scrollbar]:hidden"
             style={{
               scrollbarWidth: "none",
               msOverflowStyle: "none",
+              WebkitOverflowScrolling: "touch",
               // Exactly 4 thumbnails (6rem each) + 3 gaps (0.5rem each) = 25.5rem
               maxHeight: "25.5rem",
               // Luxury fade-out on the bottom-most visible thumbnail
