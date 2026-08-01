@@ -35,6 +35,12 @@ export function TradeSidebar() {
   const [submittedQuotes, setSubmittedQuotes] = useState(0);
   const [pendingApps, setPendingApps] = useState(0);
   const [pendingSamples, setPendingSamples] = useState(0);
+  // Mobile → desktop bridge: gold pulsing dot over Project Folders.
+  const [bridgeOpen, setBridgeOpen] = useState(false);
+  const { count: flaggedCount } = useStudioBridge();
+  const { count: alertCount } = useStudioAlerts();
+  const bridgeCount = flaggedCount + alertCount;
+
 
   useEffect(() => {
     if (!user) return;
