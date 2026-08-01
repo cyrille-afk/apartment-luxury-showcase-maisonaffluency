@@ -3789,6 +3789,21 @@ export type Database = {
           },
         ]
       }
+      personal_email_domains: {
+        Row: {
+          created_at: string
+          domain: string
+        }
+        Insert: {
+          created_at?: string
+          domain: string
+        }
+        Update: {
+          created_at?: string
+          domain?: string
+        }
+        Relationships: []
+      }
       portal_invites: {
         Row: {
           campaign_name: string | null
@@ -7810,6 +7825,7 @@ export type Database = {
           contact_email: string
         }[]
       }
+      is_personal_email_domain: { Args: { _email: string }; Returns: boolean }
       is_studio_owner: {
         Args: { _studio_id: string; _user_id: string }
         Returns: boolean
