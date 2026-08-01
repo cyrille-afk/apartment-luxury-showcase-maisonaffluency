@@ -1029,6 +1029,49 @@ const PublicProductPage: React.FC = () => {
         : catalogueRrpLabel)
     : null;
 
+  // On landing, the price should describe the finish shown in the first
+  // gallery photo (the same swatch surfaced by the "Shown in" caption) rather
+  // than the catalogue-wide minimum. Resolved once per product and abandoned
+  // as soon as the visitor makes their own selection.
+  const productId = data?.product?.id;
+  useEffect(() => {
+    const sel = rrpSelectionRef.current;
+    if (!productId || sel.base || sel.top || sel.size) return;
+    const rrpVariants = (publicRrpRow?.rrp_size_variants || []) as any[];
+    if (!rrpVariants.length) return;
+    let cancelled = false;
+    (async () => {
+      const { data: rows, error } = await (supabase as any)
+        .from("product_fabric_swatches_public")
+        .select("name, image_indices, is_active")
+        .eq("pick_id", productId);
+      if (cancelled || error || !rows?.length) return;
+      const first = rows.find(
+        (r: any) =>
+          r?.is_active !== false &&
+          Array.isArray(r.image_indices) &&
+          r.image_indices.includes(1),
+      );
+      if (!first?.name) return;
+      const priced = rrpVariants
+        .filter((v) =>
+          [v?.base, v?.top, v?.label].filter(Boolean).some((f) => sameFinishName(f, first.name)),
+        )
+        .map((v) => Number(v?.price_cents))
+        .filter((c) => Number.isFinite(c) && c > 0);
+      const unique = Array.from(new Set(priced));
+      if (!unique.length) return;
+      const stillUntouched = !rrpSelectionRef.current.base && !rrpSelectionRef.current.top && !rrpSelectionRef.current.size;
+      if (!stillUntouched) return;
+      setSelectedRrp({ cents: Math.min(...unique), exact: unique.length === 1 });
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [productId, publicRrpRow]);
+
+
+
   const { isPinned, togglePin, items: compareItems } = useCompare();
   const { requireAuth, gateOpen, gateAction, closeGate } = useAuthGate();
 
