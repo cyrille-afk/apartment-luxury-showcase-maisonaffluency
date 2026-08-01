@@ -873,6 +873,15 @@ const VariantSelectors: React.FC<{
           <ExpandableSpec icon={specIcon("📐")} text={withImperialPerLine(product.dimensions)} />
         )}
 
+        {/* Base-only variants that are finishes (not sizes): the product still has
+            one fixed dimension string — render it above the finish swatches. */}
+        {hasVariants && isBaseOnly && !baseAxisIsDim
+          && !(baseOptions.length > 0 && baseOptions.every(looksLikeDimension))
+          && product.dimensions && looksLikeDimension(product.dimensions) && (
+          <ExpandableSpec icon={specIcon("📐")} text={withImperialPerLine(product.dimensions)} />
+        )}
+
+
         {isBaseOnly && baseAxisIsDim && (
           <ExpandableSpec
             icon={specIcon("📐")}
