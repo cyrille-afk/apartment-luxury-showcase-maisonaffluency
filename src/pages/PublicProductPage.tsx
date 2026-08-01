@@ -1639,16 +1639,27 @@ const PublicProductPage: React.FC = () => {
                 </div>
 
                 <div className="absolute bottom-3 right-3 pointer-events-auto">
-                  <FavoriteFolderPicker pickId={product.id} align="end" side="top">
-                    <button
-                      onClick={(e) => e.stopPropagation()}
-                      aria-label={favorited ? "Saved to favorites" : "Add to favorites"}
-                      className="flex items-center justify-center w-10 h-10 rounded-full bg-background/90 backdrop-blur-sm border border-border shadow-sm"
-                    >
-                      <Heart size={16} className={cn(favorited ? "fill-destructive text-destructive" : "text-foreground")} />
-                    </button>
-                  </FavoriteFolderPicker>
+                  {user && (isTradeUser || tradeStatus === "approved") ? (
+                    // Trade members get the studio "drop" anchor instead of the
+                    // retail heart: one tap → bottom sheet → project.
+                    <StudioSaveButton
+                      pickId={product.id}
+                      productTitle={product.title}
+                      finishes={selectedFinishes}
+                    />
+                  ) : (
+                    <FavoriteFolderPicker pickId={product.id} align="end" side="top">
+                      <button
+                        onClick={(e) => e.stopPropagation()}
+                        aria-label={favorited ? "Saved to favorites" : "Add to favorites"}
+                        className="flex items-center justify-center w-10 h-10 rounded-full bg-background/90 backdrop-blur-sm border border-border shadow-sm"
+                      >
+                        <Heart size={16} className={cn(favorited ? "fill-destructive text-destructive" : "text-foreground")} />
+                      </button>
+                    </FavoriteFolderPicker>
+                  )}
                 </div>
+
               </div>
 
               <div className="md:border-0 md:shadow-none border-b border-border/60 shadow-[0_6px_10px_-8px_rgba(0,0,0,0.35)] pb-2">
