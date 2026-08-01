@@ -84,6 +84,51 @@ function slugify(s: string) {
   return s.toLowerCase().replace(/['']/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 }
 
+/* ------------------------------------------------------------------ */
+/*  Finish-name matching (swatch labels vs catalogue variant axes)      */
+/* ------------------------------------------------------------------ */
+const normFinish = (s: any) => String(s ?? "").trim().toLowerCase();
+
+// Swatch labels ("Apparatus — Marble - Nero Portoro") and variant axis values
+// ("Nero Portoro Marble") describe the same finish with different word order
+// and a brand prefix, so compare them as token sets.
+const finishTokenSet = (s: any) => {
+  let t = String(s ?? "").toLowerCase();
+  const dashIdx = t.indexOf("—");
+  if (dashIdx !== -1) t = t.slice(dashIdx + 1);
+  return new Set(t.split(/[^a-z0-9]+/).filter((w) => w.length > 1));
+};
+
+// Tolerate a single-character spelling drift between catalogue and swatch
+// naming (e.g. "Nero Kinitra" vs "Nero Kinatra").
+const nearFinishWord = (a: string, b: string) => {
+  if (a === b) return true;
+  if (Math.abs(a.length - b.length) > 1 || Math.min(a.length, b.length) < 4) return false;
+  let i = 0, j = 0, diff = 0;
+  while (i < a.length && j < b.length) {
+    if (a[i] === b[j]) { i++; j++; continue; }
+    if (++diff > 1) return false;
+    if (a.length > b.length) i++;
+    else if (b.length > a.length) j++;
+    else { i++; j++; }
+  }
+  return diff + (a.length - i) + (b.length - j) <= 1;
+};
+
+const sameFinishName = (a: any, b: any) => {
+  if (!a || !b) return false;
+  if (normFinish(a) === normFinish(b)) return true;
+  const A = finishTokenSet(a);
+  const B = finishTokenSet(b);
+  if (!A.size || !B.size) return false;
+  const small = A.size <= B.size ? A : B;
+  const large = A.size <= B.size ? B : A;
+  for (const w of small) {
+    if (![...large].some((x) => nearFinishWord(w, x))) return false;
+  }
+  return small.size >= 2;
+};
+
 
 /* ------------------------------------------------------------------ */
 /*  Data fetching                                                      */
@@ -984,6 +1029,49 @@ const PublicProductPage: React.FC = () => {
         : catalogueRrpLabel)
     : null;
 
+  // On landing, the price should describe the finish shown in the first
+  // gallery photo (the same swatch surfaced by the "Shown in" caption) rather
+  // than the catalogue-wide minimum. Resolved once per product and abandoned
+  // as soon as the visitor makes their own selection.
+  const productId = data?.product?.id;
+  useEffect(() => {
+    const sel = rrpSelectionRef.current;
+    if (!productId || sel.base || sel.top || sel.size) return;
+    const rrpVariants = (publicRrpRow?.rrp_size_variants || []) as any[];
+    if (!rrpVariants.length) return;
+    let cancelled = false;
+    (async () => {
+      const { data: rows, error } = await (supabase as any)
+        .from("product_fabric_swatches_public")
+        .select("name, image_indices, is_active")
+        .eq("pick_id", productId);
+      if (cancelled || error || !rows?.length) return;
+      const first = rows.find(
+        (r: any) =>
+          r?.is_active !== false &&
+          Array.isArray(r.image_indices) &&
+          r.image_indices.includes(1),
+      );
+      if (!first?.name) return;
+      const priced = rrpVariants
+        .filter((v) =>
+          [v?.base, v?.top, v?.label].filter(Boolean).some((f) => sameFinishName(f, first.name)),
+        )
+        .map((v) => Number(v?.price_cents))
+        .filter((c) => Number.isFinite(c) && c > 0);
+      const unique = Array.from(new Set(priced));
+      if (!unique.length) return;
+      const stillUntouched = !rrpSelectionRef.current.base && !rrpSelectionRef.current.top && !rrpSelectionRef.current.size;
+      if (!stillUntouched) return;
+      setSelectedRrp({ cents: Math.min(...unique), exact: unique.length === 1 });
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [productId, publicRrpRow]);
+
+
+
   const { isPinned, togglePin, items: compareItems } = useCompare();
   const { requireAuth, gateOpen, gateAction, closeGate } = useAuthGate();
 
@@ -1218,49 +1306,9 @@ const PublicProductPage: React.FC = () => {
     // the variant's base/top/label, then show that variant's price (exact when
     // one variant matches, "From <min>" while the selection is still partial).
     {
-      const norm = (s: any) => String(s ?? "").trim().toLowerCase();
-      // Swatch labels ("Apparatus — Marble - Nero Portoro") and variant axis
-      // values ("Nero Portoro Marble") describe the same finish with different
-      // word order and a brand prefix, so compare them as token sets.
-      const tokenSet = (s: any) => {
-        let t = String(s ?? "").toLowerCase();
-        const dashIdx = t.indexOf("—");
-        if (dashIdx !== -1) t = t.slice(dashIdx + 1);
-        return new Set(
-          t
-            .split(/[^a-z0-9]+/)
-            .filter((w) => w.length > 1)
-        );
-      };
-      // Tolerate a single-character spelling drift between catalogue and
-      // swatch naming (e.g. "Nero Kinitra" vs "Nero Kinatra").
-      const nearWord = (a: string, b: string) => {
-        if (a === b) return true;
-        if (Math.abs(a.length - b.length) > 1 || Math.min(a.length, b.length) < 4) return false;
-        let i = 0, j = 0, diff = 0;
-        while (i < a.length && j < b.length) {
-          if (a[i] === b[j]) { i++; j++; continue; }
-          if (++diff > 1) return false;
-          if (a.length > b.length) i++;
-          else if (b.length > a.length) j++;
-          else { i++; j++; }
-        }
-        return diff + (a.length - i) + (b.length - j) <= 1;
-      };
-      const sameFinish = (a: any, b: any) => {
-        if (!a || !b) return false;
-        if (norm(a) === norm(b)) return true;
-        const A = tokenSet(a);
-        const B = tokenSet(b);
-        if (!A.size || !B.size) return false;
-        const small = A.size <= B.size ? A : B;
-        const large = A.size <= B.size ? B : A;
-        // Every word of the shorter label must appear in the longer one.
-        for (const w of small) {
-          if (![...large].some((x) => nearWord(w, x))) return false;
-        }
-        return small.size >= 2;
-      };
+      const norm = normFinish;
+      const sameFinish = sameFinishName;
+
 
 
       // The size dropdown and the finish swatches keep independent state, so a
