@@ -7846,6 +7846,18 @@ export type Database = {
           width_mm: number
         }[]
       }
+      profile_privileged_fields_unchanged: {
+        Args: {
+          _id: string
+          _trade_status: string
+          _trade_tier: Database["public"]["Enums"]["trade_tier"]
+          _trade_tier_12mo_spend_cents: number
+          _trade_tier_computed_at: string
+          _trade_tier_locked_by_admin: boolean
+          _trade_tier_suggested: Database["public"]["Enums"]["trade_tier"]
+        }
+        Returns: boolean
+      }
       purge_stale_concierge_streams: { Args: never; Returns: undefined }
       read_email_batch: {
         Args: { batch_size: number; queue_name: string; vt: number }
