@@ -1445,7 +1445,7 @@ const DesignersHoverHero = () => {
               : // Mobile browser: the section already starts below the fixed
                 // header, so do not add var(--header-h) again here. Keep the
                 // designer list high while leaving room for the Directory link.
-                "overflow-y-hidden justify-start overscroll-contain touch-none pt-[5.25rem] pb-[calc(8.5rem+env(safe-area-inset-bottom))] md:pt-8 md:justify-center md:pb-0"
+                "overflow-y-hidden justify-start overscroll-contain touch-none pt-[3.25rem] short:pt-[2.5rem] pb-[calc(4.5rem+env(safe-area-inset-bottom))] md:pt-8 md:justify-center md:pb-0"
           )}
         >
 
@@ -1479,7 +1479,7 @@ const DesignersHoverHero = () => {
                     key={group.label}
                     className={cn(
                       "flex flex-col text-left",
-                      groupIdx > 0 && "mt-3 md:mt-6"
+                      groupIdx > 0 && "mt-2 short:mt-1 md:mt-6"
                     )}
                   >
                     <span
@@ -1488,7 +1488,7 @@ const DesignersHoverHero = () => {
                     >
                       {group.label}
                     </span>
-                    <ul className="flex flex-col gap-1 text-left">
+                    <ul className="flex flex-col gap-[2px] short:gap-0 md:gap-1 text-left">
                       {group.designers.map((d, dIdx) => {
                         const [first, last] = splitName(d.name);
                         const isActive = d.slug === activeSlug;
@@ -1502,7 +1502,7 @@ const DesignersHoverHero = () => {
                           <li
                             key={d.slug}
                             ref={isLastItem ? lastItemRef : undefined}
-                            className="text-left leading-[1.4] sm:leading-[1.55]"
+                            className="text-left leading-[1.25] short:leading-[1.15] sm:leading-[1.55]"
                           >
                             <SilentLink
                               to={`/designers/${d.slug}`}
@@ -1515,7 +1515,7 @@ const DesignersHoverHero = () => {
                               onFocus={() => setActiveSlug(d.slug)}
                               className={cn(
                                 "inline-block whitespace-nowrap relative",
-                                "text-[13px] sm:text-sm md:text-[20px] leading-[1.4] sm:leading-[1.55]",
+                                "text-[13px] short:text-[12px] sm:text-sm md:text-[20px] leading-[1.25] short:leading-[1.15] sm:leading-[1.55]",
                                 "font-display font-light tracking-normal",
                                 "transition-all duration-[1200ms] ease-out",
                                 "drop-shadow-[0_1px_3px_rgba(0,0,0,0.7)]",
