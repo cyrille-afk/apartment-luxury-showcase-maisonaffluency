@@ -1420,7 +1420,7 @@ const PublicProductPage: React.FC = () => {
         </div>
 
 
-        <div className="pt-[calc(env(safe-area-inset-top,0px)+7rem)] md:pt-[12rem] pb-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="pt-[calc(env(safe-area-inset-top,0px)+7rem)] md:pt-36 pb-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <button
             type="button"
             onClick={() => navigate(fromPath || fallbackGridPath)}
@@ -1857,10 +1857,7 @@ const PublicProductPage: React.FC = () => {
               source of truth on desktop, mobile and PWA; we avoid duplicating
               the paragraph below it. */}
           {product.description && product.description.trim().length > 0 && (
-            <section
-              aria-label="Related links"
-              className="mt-16 pt-8 border-t border-border max-w-3xl"
-            >
+            <section aria-label="Related links" className="sr-only">
               {/* Visually hidden full description for crawlers that don't
                   expand collapsed regions. Keeps the page free of visible
                   duplication while preserving SEO coverage. */}

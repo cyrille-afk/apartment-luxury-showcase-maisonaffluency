@@ -152,8 +152,8 @@ export function TradeExclusiveCard({
       <p className="font-body text-xs md:text-sm text-muted-foreground leading-relaxed max-w-sm mx-auto">
         {rrpLabel ? (
           <>
-            Public retail price <span className="text-foreground">{rrpLabel}</span> is shown above.
-            Unlock trade pricing, projects & client management tools, logistical data, and AI curatorial guide.
+            The Public retail price is shown above. Unlock Your Trade pricing, access projects &
+            client management tools, logistical data, and your own AI curatorial guide.
           </>
         ) : (
           "View pricing, access projects & client management tools, logistical data, and AI curatorial guide."
