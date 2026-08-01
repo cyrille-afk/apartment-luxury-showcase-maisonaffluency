@@ -1227,6 +1227,8 @@ const PublicProductPage: React.FC = () => {
         .map((v) => Number(v?.price_cents))
         .filter((c) => Number.isFinite(c) && c > 0);
       const uniquePrices = Array.from(new Set(priced));
+      // eslint-disable-next-line no-console
+      console.log("[rrpdbg]", JSON.stringify({ label, opts, keys, matches: matches.length, uniquePrices }));
       setSelectedRrp(
         uniquePrices.length
           ? { cents: Math.min(...uniquePrices), exact: uniquePrices.length === 1 }
