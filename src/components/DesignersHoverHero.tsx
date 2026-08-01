@@ -613,7 +613,7 @@ const DesignersHoverHero = () => {
       body.style.backgroundColor = previousBodyBgColor;
     };
 
-  }, [activeSlug, isMobileOrPwa, items]);
+  }, [isMobileOrPwa]);
 
   // Pre-seed active on first render once data arrives so the hero is never
   // a void on entry — the first designer acts as default.
