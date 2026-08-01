@@ -1439,13 +1439,27 @@ const PublicProductPage: React.FC = () => {
       );
       return;
     }
+    // Finish shown on the cart line: the user's explicit selection first, then
+    // the piece's implicit finish (single-variant products never fire a change
+    // event), then the materials line as a last resort.
+    const variants = (product.size_variants || []) as Array<{ label?: string; base?: string; top?: string }>;
+    const implicitVariant =
+      variants.length === 1
+        ? [variants[0].base, variants[0].top, variants[0].label].filter(Boolean).join(" / ")
+        : "";
+    const finishLabel =
+      (selectedFinishes.length ? selectedFinishes.join(" / ") : "") ||
+      implicitVariant ||
+      (product.materials || "").trim() ||
+      null;
+
     addToCart({
       pickId: product.id,
       productSlug: productSlug || "",
       designerSlug: designer.slug,
       title: product.title,
       designerName: designerDisplay,
-      finishLabel: selectedFinishes.length ? selectedFinishes.join(" / ") : null,
+      finishLabel,
       imageUrl: images[galleryActiveIndex ?? 0] || images[0] || product.image_url || null,
       leadTime: product.lead_time || null,
       unitPriceCents: unit,

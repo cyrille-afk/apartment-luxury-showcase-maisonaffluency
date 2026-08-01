@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { Minus, Plus, Loader2 } from "lucide-react";
+import { Minus, Plus, Loader2, Heart } from "lucide-react";
 import Navigation from "@/components/Navigation";
+import FavoriteFolderPicker from "@/components/FavoriteFolderPicker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -41,6 +42,12 @@ export default function Cart() {
   const subtotal = useMemo(() => cartSubtotalCents(items), [items]);
   const shipping = cartShippingCents(subtotal);
   const total = subtotal + shipping;
+
+  // "Continue Selection" returns to the curator's picks of the designer whose
+  // piece was added last, rather than the generic designers landing page.
+  const continueHref = items.length
+    ? `/designers/${items[items.length - 1].designerSlug}`
+    : "/designers";
 
   const checkout = async (method: "card" | "bank_transfer") => {
     if (!items.length) return;
@@ -97,10 +104,10 @@ export default function Cart() {
         <div className="flex items-baseline justify-between border-b border-border pb-4">
           <h1 className="font-display font-normal text-[1.6rem] md:text-[2rem] tracking-[-0.01em]">Your Cart</h1>
           <Link
-            to="/designers"
+            to={continueHref}
             className="font-body text-[10px] uppercase tracking-[0.22em] text-muted-foreground hover:text-foreground transition-colors"
           >
-            Continue Shopping
+            Continue Selection
           </Link>
         </div>
 
@@ -179,13 +186,24 @@ export default function Cart() {
                     </p>
                   )}
 
-                  <button
-                    type="button"
-                    onClick={() => removeFromCart(item.key)}
-                    className="mt-4 font-body text-[10px] uppercase tracking-[0.22em] text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    Remove
-                  </button>
+                  <div className="mt-4 flex items-center gap-6">
+                    <FavoriteFolderPicker pickId={item.pickId} align="start">
+                      <button
+                        type="button"
+                        className="inline-flex items-center gap-2 font-body text-[10px] uppercase tracking-[0.22em] text-muted-foreground hover:text-foreground transition-colors"
+                      >
+                        <Heart className="h-3.5 w-3.5" />
+                        Add to Wishlist
+                      </button>
+                    </FavoriteFolderPicker>
+                    <button
+                      type="button"
+                      onClick={() => removeFromCart(item.key)}
+                      className="font-body text-[10px] uppercase tracking-[0.22em] text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      Remove
+                    </button>
+                  </div>
                 </li>
               ))}
             </ul>
