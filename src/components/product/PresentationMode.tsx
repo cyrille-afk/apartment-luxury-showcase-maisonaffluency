@@ -140,43 +140,45 @@ const PresentationMode: React.FC<PresentationModeProps> = ({
         )}
       </div>
 
-      {/* Discreet exit — auto-hides */}
-      <button
-        type="button"
-        onClick={(e) => { e.stopPropagation(); onClose(); }}
-        aria-label="Exit presentation mode"
-        style={{ top: "max(1rem, env(safe-area-inset-top))", right: "max(1rem, env(safe-area-inset-right))" }}
+      {/* Bottom control rail: progress markers + counter + close (mirrors the expanded image view) */}
+      <div
         className={cn(
-          "absolute z-10 w-11 h-11 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center text-white/85 transition-opacity duration-300 touch-manipulation",
+          "absolute left-0 right-0 z-10 flex items-center gap-4 px-5 transition-opacity duration-300",
           chromeVisible ? "opacity-100" : "opacity-0 pointer-events-none"
         )}
+        style={{ bottom: "max(1.25rem, calc(env(safe-area-inset-bottom) + 0.5rem))" }}
       >
-        <X size={19} />
-      </button>
-
-      {/* Frame markers only — no titles, no pricing */}
-      {images.length > 1 && (
-        <div
-          className={cn(
-            "absolute left-1/2 -translate-x-1/2 flex items-center gap-1.5 transition-opacity duration-300",
-            chromeVisible ? "opacity-100" : "opacity-0"
-          )}
-          style={{ bottom: "max(1.5rem, calc(env(safe-area-inset-bottom) + 0.75rem))" }}
+        {images.length > 1 && (
+          <div className="flex-1 flex items-center gap-2">
+            {images.map((_, i) => (
+              <button
+                key={i}
+                type="button"
+                aria-label={`View image ${i + 1} of ${images.length}`}
+                onClick={(e) => { e.stopPropagation(); revealChrome(); go(i); }}
+                className={cn(
+                  "flex-1 rounded-full transition-all duration-200",
+                  i === index ? "h-[3px] bg-white/85" : "h-px bg-white/30"
+                )}
+              />
+            ))}
+          </div>
+        )}
+        {images.length > 1 && (
+          <span className="font-body text-[10px] font-light uppercase tracking-[0.18em] text-white/60 tabular-nums shrink-0">
+            {String(index + 1).padStart(2, "0")} / {String(images.length).padStart(2, "0")}
+          </span>
+        )}
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); onClose(); }}
+          onTouchEnd={(e) => { e.preventDefault(); e.stopPropagation(); onClose(); }}
+          aria-label="Exit presentation mode"
+          className="shrink-0 w-9 h-9 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center text-white/85 touch-manipulation ml-auto"
         >
-          {images.map((_, i) => (
-            <button
-              key={i}
-              type="button"
-              aria-label={`Frame ${i + 1}`}
-              onClick={(e) => { e.stopPropagation(); revealChrome(); go(i); }}
-              className={cn(
-                "h-1 rounded-full transition-all duration-300",
-                i === index ? "w-6 bg-white/85" : "w-1 bg-white/35"
-              )}
-            />
-          ))}
-        </div>
-      )}
+          <X size={18} strokeWidth={1.5} />
+        </button>
+      </div>
     </div>,
     document.body
   );
