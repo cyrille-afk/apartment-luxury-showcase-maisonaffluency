@@ -28,6 +28,88 @@ interface ProductImageGalleryProps {
   compact?: boolean;
 }
 
+/**
+ * Main-image renderer with a smooth cross-dissolve between sources.
+ * Selecting a new finish/size swaps the hero photo by fading the incoming
+ * frame over the outgoing one (never a hard jump), mirroring native
+ * iOS/Android transition feel. The incoming image is decoded before the
+ * fade starts so the dissolve never flashes an empty frame.
+ */
+const CrossfadeImage: React.FC<{ src: string; alt: string; pointerEventsNone?: boolean }> = ({
+  src,
+  alt,
+  pointerEventsNone,
+}) => {
+  const [current, setCurrent] = useState(src);
+  const [incoming, setIncoming] = useState<string | null>(null);
+  const [fading, setFading] = useState(false);
+
+  useEffect(() => {
+    if (src === current) {
+      setIncoming(null);
+      return;
+    }
+    let cancelled = false;
+    setIncoming(src);
+    setFading(false);
+    const start = () => {
+      if (cancelled) return;
+      requestAnimationFrame(() => !cancelled && setFading(true));
+    };
+    const preload = new Image();
+    preload.src = src;
+    if (preload.decode) preload.decode().then(start).catch(start);
+    else {
+      preload.onload = start;
+      preload.onerror = start;
+    }
+    // Safety net if neither decode nor load resolves promptly.
+    const t = window.setTimeout(start, 400);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(t);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [src]);
+
+  const settle = () => {
+    if (incoming && fading) {
+      setCurrent(incoming);
+      setIncoming(null);
+      setFading(false);
+    }
+  };
+
+  const base = cn(
+    "max-w-full max-h-full object-contain rounded-none",
+    pointerEventsNone && "pointer-events-none"
+  );
+
+  return (
+    <span className="absolute inset-0 flex items-center justify-center">
+      <img
+        src={current}
+        alt={alt}
+        className={cn(base, "transition-opacity duration-500 ease-out", fading ? "opacity-0" : "opacity-100")}
+      />
+      {incoming && (
+        <img
+          src={incoming}
+          alt=""
+          aria-hidden="true"
+          onTransitionEnd={settle}
+          className={cn(
+            base,
+            "absolute transition-opacity duration-500 ease-out",
+            fading ? "opacity-100" : "opacity-0"
+          )}
+        />
+      )}
+    </span>
+  );
+};
+
+
 const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, overlay, firstImageBadge, activeIndex: controlledIndex, activeIndexNonce, onIndexChange, caption, compact }) => {
 
   const [activeIndex, setActiveIndex] = useState(controlledIndex ?? 0);
