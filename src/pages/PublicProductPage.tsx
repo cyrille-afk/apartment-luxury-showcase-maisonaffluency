@@ -64,6 +64,7 @@ import {
 import TradeWorkspace from "@/components/product/TradeWorkspace";
 import TradePendingReviewCard from "@/components/product/TradePendingReviewCard";
 import CustomizationRequest from "@/components/product/CustomizationRequest";
+import { addToCart } from "@/lib/cart";
 import { usePublicRrp, formatPublicRrp, formatPublicRrpCents } from "@/hooks/usePublicRrp";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
@@ -1419,6 +1420,42 @@ const PublicProductPage: React.FC = () => {
     }
   };
 
+  /**
+   * "Place an Order" — publicly priced pieces go straight into the cart, the
+   * rest fall back to the concierge enquiry flow (price on request).
+   */
+  const handlePlaceOrder = () => {
+    const unit = selectedRrp?.cents || Number(publicRrpRow?.rrp_price_cents) || 0;
+    if (!unit) {
+      navigate(
+        `/contact?${new URLSearchParams({
+          subject: `Place an Order — ${product.title} by ${designerDisplay}`,
+          productId: product.id,
+          productSlug: productSlug || "",
+          productName: product.title || "",
+          designerName: designerDisplay || "",
+          back: location.pathname + location.search,
+        }).toString()}#contact`,
+      );
+      return;
+    }
+    addToCart({
+      pickId: product.id,
+      productSlug: productSlug || "",
+      designerSlug: designer.slug,
+      title: product.title,
+      designerName: designerDisplay,
+      finishLabel: selectedFinishes.length ? selectedFinishes.join(" / ") : null,
+      imageUrl: images[galleryActiveIndex ?? 0] || images[0] || product.image_url || null,
+      leadTime: product.lead_time || null,
+      unitPriceCents: unit,
+      currency: (publicRrpRow?.currency || "USD").toUpperCase(),
+    });
+    navigate("/cart");
+  };
+
+
+
   return (
     <div className="motion-safe:animate-fade-in">
       {(() => {
@@ -1511,19 +1548,13 @@ const PublicProductPage: React.FC = () => {
             </div>
 
             <div className="mt-2 grid grid-cols-2 gap-2">
-              <Link
-                to={`/contact?${new URLSearchParams({
-                  subject: `Place an Order — ${product.title} by ${designerDisplay}`,
-                  productId: product.id,
-                  productSlug: productSlug || "",
-                  productName: product.title || "",
-                  designerName: designerDisplay || "",
-                  back: (typeof window !== "undefined" ? location.pathname + location.search : "") || "",
-                }).toString()}#contact`}
+              <button
+                type="button"
+                onClick={handlePlaceOrder}
                 className="flex items-center justify-center px-3 py-2.5 rounded-md bg-foreground text-background font-body text-[10px] uppercase tracking-[0.12em] whitespace-nowrap"
               >
                 Place an Order
-              </Link>
+              </button>
               <Link
                 to={`/contact?${new URLSearchParams({
                   subject: `Request a Quote — ${product.title} by ${designerDisplay}`,

@@ -1,0 +1,1 @@
+DELETE FROM public.shop_orders WHERE email = 'test+cart@maisonaffluency.com';
