@@ -460,8 +460,8 @@ const VariantSelectors: React.FC<{
 
   return (
     <div className="flex flex-col">
-    {/* Dimensions first, then finishes */}
-    <div className="order-1 flex flex-col gap-2">
+      {/* Dimensions first, then finishes */}
+      <div className="order-1 flex flex-col gap-2">
         {/* Size dropdown — shown first */}
         {isBaseOnly && !baseAxisIsDim && baseOnlySizeOptions.length > 1 ? (
           <ExpandableSpec
