@@ -1498,36 +1498,54 @@ const PublicProductPage: React.FC = () => {
           style={{ top: "calc(env(safe-area-inset-top, 0px) + 6rem)" }}
           aria-hidden={!showStickyBar}
         >
-          <div className="flex items-center gap-3 px-3 py-2">
-            {images[0] && (
-              <img
-                src={images[0]}
-                alt=""
-                className="w-11 h-11 rounded-md object-cover shrink-0 border border-border"
-              />
-            )}
-            <div className="min-w-0 flex-1">
-              <p className="font-display text-[13px] leading-tight text-foreground truncate">
-                {product.title}
-              </p>
-              <p className="font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground truncate">
-                {designerDisplay}
-              </p>
+          <div className="px-3 pt-2 pb-2.5">
+            <div className="flex items-center gap-3">
+              {images[0] && (
+                <img
+                  src={images[0]}
+                  alt=""
+                  className="w-11 h-11 rounded-md object-cover shrink-0 border border-border"
+                />
+              )}
+              <div className="min-w-0 flex-1">
+                <p className="font-display text-[13px] leading-tight text-foreground truncate">
+                  {product.title}
+                </p>
+                <p className="font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground truncate">
+                  {designerDisplay}
+                </p>
+              </div>
             </div>
-            <Link
-              to={`/contact?${new URLSearchParams({
-                subject: `Price on Request — ${product.title} by ${designerDisplay}`,
-                productId: product.id,
-                productSlug: productSlug || "",
-                productName: product.title || "",
-                designerName: designerDisplay || "",
-                back: (typeof window !== "undefined" ? location.pathname + location.search : "") || "",
-              }).toString()}#contact`}
-              className="shrink-0 px-3 py-2 rounded-md bg-foreground text-background font-body text-[10px] uppercase tracking-[0.12em] whitespace-nowrap"
-            >
-              Inquire for Pricing
-            </Link>
+            <div className="mt-2 grid grid-cols-2 gap-2">
+              <Link
+                to={`/contact?${new URLSearchParams({
+                  subject: `Place an Order — ${product.title} by ${designerDisplay}`,
+                  productId: product.id,
+                  productSlug: productSlug || "",
+                  productName: product.title || "",
+                  designerName: designerDisplay || "",
+                  back: (typeof window !== "undefined" ? location.pathname + location.search : "") || "",
+                }).toString()}#contact`}
+                className="flex items-center justify-center px-3 py-2.5 rounded-md bg-foreground text-background font-body text-[10px] uppercase tracking-[0.12em] whitespace-nowrap"
+              >
+                Place an Order
+              </Link>
+              <Link
+                to={`/contact?${new URLSearchParams({
+                  subject: `Request a Quote — ${product.title} by ${designerDisplay}`,
+                  productId: product.id,
+                  productSlug: productSlug || "",
+                  productName: product.title || "",
+                  designerName: designerDisplay || "",
+                  back: (typeof window !== "undefined" ? location.pathname + location.search : "") || "",
+                }).toString()}#contact`}
+                className="flex items-center justify-center px-3 py-2.5 rounded-md border border-foreground/30 text-foreground font-body text-[10px] uppercase tracking-[0.12em] whitespace-nowrap"
+              >
+                Request a Quote
+              </Link>
+            </div>
           </div>
+
         </div>
 
 
