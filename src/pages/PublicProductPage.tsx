@@ -1653,7 +1653,8 @@ const PublicProductPage: React.FC = () => {
                 </button>
 
                 {(product.pdf_url || (product.pdf_urls && product.pdf_urls.length > 0)) ? (
-                  <div className="hidden md:block">
+                  // Trade members already have the spec sheet inside the workspace.
+                  <div className={cn("hidden", !isTradeUser && "md:block")}>
                     <SpecSheetButton
                       pdfUrl={product.pdf_url}
                       pdfUrls={product.pdf_urls}
@@ -1661,6 +1662,11 @@ const PublicProductPage: React.FC = () => {
                       productName={product.title}
                       variant="button"
                       onBeforeOpen={() => {
+                        if (!user) {
+                          // Signed out: never load gated data — explain instead.
+                          setSpecSheetLocked(true);
+                          return false;
+                        }
                         let allowed = false;
                         requireAuth(() => { allowed = true; }, "download this spec sheet");
                         return allowed;
@@ -1676,6 +1682,34 @@ const PublicProductPage: React.FC = () => {
                   </Link>
                 )}
               </div>
+
+              {/* Signed-out spec sheet explainer — points back to the trade card. */}
+              <Dialog open={specSheetLocked} onOpenChange={setSpecSheetLocked}>
+                <DialogContent className="max-w-md">
+                  <DialogHeader>
+                    <DialogTitle className="font-display text-xl">Spec sheets are trade access</DialogTitle>
+                    <DialogDescription className="font-body text-sm leading-relaxed">
+                      Technical documentation for the {product.title} is reserved for verified trade
+                      members. Sign in above, or apply for trade access — approval takes a day or two.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="flex flex-wrap gap-2 pt-2">
+                    <Link
+                      to={`/trade/login?redirect=${encodeURIComponent(location.pathname + location.search)}`}
+                      className="inline-flex items-center justify-center px-5 py-3 rounded-md bg-foreground text-background font-body text-[11px] uppercase tracking-[0.12em] hover:bg-foreground/90 transition-colors"
+                    >
+                      Sign in to view
+                    </Link>
+                    <Link
+                      to="/trade/register"
+                      className="inline-flex items-center justify-center px-5 py-3 rounded-md border border-foreground/40 text-foreground font-body text-[11px] uppercase tracking-[0.12em] hover:bg-foreground/5 transition-colors"
+                    >
+                      Apply for trade access
+                    </Link>
+                  </div>
+                </DialogContent>
+              </Dialog>
+
 
 
             </div>
