@@ -775,6 +775,27 @@ export default function FinishSelector({ pickId, className, productTitle, produc
   const visibleTopTiles    = topTiles;
   const visibleCoverTiles  = coverTiles;
 
+  // Display-only highlight for wood/stone/top/cover swatches: frame the swatch
+  // whose mapped image_indices include the image currently shown in the hero
+  // gallery, so the closed accordion header reads the same finish as the
+  // "Shown in" caption on landing. No pricing/selection callbacks fire here.
+  useEffect(() => {
+    if (isRugProduct) return;
+    if (currentGalleryIndex === undefined || currentGalleryIndex === null) return;
+    const oneBased = currentGalleryIndex + 1;
+    const hit = (list: Fabric[]) =>
+      list.find((f) => Array.isArray(f.image_indices) && f.image_indices.includes(oneBased)) || null;
+    const woodHit = hit(visibleWoodTiles);
+    if (woodHit && selectedWoodId !== woodHit.id) setSelectedWoodId(woodHit.id);
+    const topHit = hit(visibleTopTiles);
+    if (topHit && selectedTopId !== topHit.id) setSelectedTopId(topHit.id);
+    const coverHit = hit(visibleCoverTiles);
+    if (coverHit && selectedCoverId !== coverHit.id) setSelectedCoverId(coverHit.id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentGalleryIndex, fabrics]);
+
+
+
 
   const renderAccordion = (args: {
     isOpen: boolean;
