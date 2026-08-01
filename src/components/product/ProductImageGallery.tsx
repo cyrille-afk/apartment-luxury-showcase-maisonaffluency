@@ -157,7 +157,7 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
             onMouseMove={handleThumbHoverMove}
             onMouseLeave={stopHoverScroll}
             className={cn(
-              "h-full min-h-0 overflow-y-scroll overscroll-contain flex flex-col scrollbar-hide [&::-webkit-scrollbar]:hidden",
+              "absolute inset-0 overflow-y-scroll overscroll-contain flex flex-col scrollbar-hide [&::-webkit-scrollbar]:hidden",
               images.length > 4 ? "justify-start gap-3" : "justify-between gap-2"
             )}
             style={{
