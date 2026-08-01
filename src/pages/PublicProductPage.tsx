@@ -60,6 +60,8 @@ import {
   parseDimensions,
   quantitativeValue,
 } from "@/components/product/PublicSpecTable";
+import TradeWorkspace from "@/components/product/TradeWorkspace";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 
 /* ------------------------------------------------------------------ */
