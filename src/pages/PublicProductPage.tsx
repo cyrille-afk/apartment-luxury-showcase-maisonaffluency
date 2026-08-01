@@ -968,7 +968,17 @@ const PublicProductPage: React.FC = () => {
   }, [stateFrom, storedFrom]);
   const { data, isLoading } = useProductBySlug(designerSlug, productSlug);
   const { data: publicRrpRow } = usePublicRrp(data?.product?.id);
-  const publicRrpLabel = formatPublicRrp(publicRrpRow);
+  const catalogueRrpLabel = formatPublicRrp(publicRrpRow);
+  // Price of the size/finish combination the visitor has currently selected.
+  // `exact` = a single variant matched, so we drop the "From" prefix.
+  const [selectedRrp, setSelectedRrp] = useState<{ cents: number; exact: boolean } | null>(null);
+  const publicRrpLabel = catalogueRrpLabel
+    ? (selectedRrp
+        ? formatPublicRrpCents(selectedRrp.cents, publicRrpRow, selectedRrp.exact ? "" : undefined) ||
+          catalogueRrpLabel
+        : catalogueRrpLabel)
+    : null;
+
   const { isPinned, togglePin, items: compareItems } = useCompare();
   const { requireAuth, gateOpen, gateAction, closeGate } = useAuthGate();
 
