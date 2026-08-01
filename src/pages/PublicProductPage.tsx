@@ -941,7 +941,7 @@ const PublicProductPage: React.FC = () => {
   const { slug: designerSlug, productSlug } = useParams<{ slug: string; productSlug: string }>();
   const navigate = useNavigate();
   const location = useLocation();
-  const { isTradeUser, loading: authLoading } = useAuth();
+  const { user, isTradeUser, loading: authLoading } = useAuth();
   const stateFrom = (location.state as { from?: string } | null)?.from;
   const isGridUrl = (p?: string | null) => !!p && /[?&](category|subcategory)=/.test(p);
   const storedFrom = typeof window !== "undefined" ? sessionStorage.getItem("product_from_path") : null;
