@@ -54,6 +54,12 @@ import {
 } from "@/lib/finishDuplication";
 import { useAuth } from "@/hooks/useAuth";
 import { isCollectibleSlug, collectibleGateRedirect } from "@/lib/collectibleGate";
+import {
+  PublicSpecTable,
+  TradeExclusiveCard,
+  parseDimensions,
+  quantitativeValue,
+} from "@/components/product/PublicSpecTable";
 
 
 /* ------------------------------------------------------------------ */
@@ -941,7 +947,7 @@ const PublicProductPage: React.FC = () => {
   const { slug: designerSlug, productSlug } = useParams<{ slug: string; productSlug: string }>();
   const navigate = useNavigate();
   const location = useLocation();
-  const { isTradeUser, loading: authLoading } = useAuth();
+  const { user, isTradeUser, loading: authLoading } = useAuth();
   const stateFrom = (location.state as { from?: string } | null)?.from;
   const isGridUrl = (p?: string | null) => !!p && /[?&](category|subcategory)=/.test(p);
   const storedFrom = typeof window !== "undefined" ? sessionStorage.getItem("product_from_path") : null;
@@ -1230,6 +1236,7 @@ const PublicProductPage: React.FC = () => {
         const desc =
           (product.description?.replace(/\s+/g, " ").trim().slice(0, 155)) ||
           `${product.title} by ${designerDisplay}. ${product.materials || "Collectible design at Maison Affluency."}`.slice(0, 155);
+        const ldDims = parseDimensions(product.dimensions);
         const productLd = {
           "@context": "https://schema.org",
           "@type": "Product",
@@ -1238,8 +1245,15 @@ const PublicProductPage: React.FC = () => {
           image: images.length ? images : [ogImg],
           brand: { "@type": "Brand", name: designerDisplay },
           category: product.subcategory || product.category || undefined,
-          material: product.materials || undefined,
+          material: product.materials || product.materials_description || undefined,
+          sku: product.id,
+          mpn: product.id,
           url: canonical,
+          width: quantitativeValue(ldDims?.width, ldDims?.unit || "CMT"),
+          depth: quantitativeValue(ldDims?.depth, ldDims?.unit || "CMT"),
+          height: quantitativeValue(ldDims?.height, ldDims?.unit || "CMT"),
+          // Never expose pricing to unauthenticated crawlers — the Offer stays
+          // price-free and simply points at the enquiry flow.
           offers: {
             "@type": "Offer",
             availability: "https://schema.org/InStock",
@@ -1247,6 +1261,7 @@ const PublicProductPage: React.FC = () => {
             seller: { "@type": "Organization", name: "Maison Affluency" },
           },
         };
+
         const crumbsLd = {
           "@context": "https://schema.org",
           "@type": "BreadcrumbList",
@@ -1496,13 +1511,41 @@ const PublicProductPage: React.FC = () => {
                       {specIcon("✦", "mt-0.5")}
                       <div className="font-body text-sm leading-relaxed text-muted-foreground font-normal">
                         <p>{originLine}</p>
-                        {leadLine && <p className="mt-0.5">{leadLine}</p>}
+                        {/* Lead times are trade-sensitive — signed-out visitors see the
+                            Trade Exclusive card below instead. */}
+                        {leadLine && user && <p className="mt-0.5">{leadLine}</p>}
                       </div>
                     </div>
                   );
                 })()}
 
+                {/* Public, crawlable specification table (no session required) */}
+                {(() => {
+                  const variants = (product.size_variants || []) as any[];
+                  const upholstery = Array.from(
+                    new Set(
+                      variants
+                        .map((v) => String(v?.top || v?.label || "").trim())
+                        .filter(Boolean)
+                    )
+                  ).slice(0, 24);
+                  return (
+                    <PublicSpecTable
+                      dimensions={product.dimensions}
+                      materials={product.materials}
+                      materialsDescription={(product as any).materials_description}
+                      upholsteryOptions={product.is_upholstered ? upholstery : []}
+                      sku={product.id}
+                    />
+                  );
+                })()}
+
+                {!user && !authLoading && (
+                  <TradeExclusiveCard redirectTo={location.pathname + location.search} />
+                )}
+
               </div>
+
 
 
               {/* Primary CTAs — Login for Pricing (trade) + Inquire for Pricing (trade-account form).
