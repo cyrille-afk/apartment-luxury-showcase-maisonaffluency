@@ -135,6 +135,8 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
   }, [controlledIndex, activeIndexNonce]);
 
   const [zoomOpen, setZoomOpen] = useState(false);
+  const [presentOpen, setPresentOpen] = useState(false);
+
   const thumbsRef = useRef<HTMLDivElement>(null);
 
   // Swipe support — wired to both the inline main image and the fullscreen lightbox.
