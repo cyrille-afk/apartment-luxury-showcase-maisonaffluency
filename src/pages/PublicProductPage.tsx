@@ -460,8 +460,8 @@ const VariantSelectors: React.FC<{
 
   return (
     <div className="flex flex-col">
-      {/* Finishes first on mobile, second on desktop */}
-      <div className="order-1 md:order-2 flex flex-col gap-2">
+      {/* Dimensions first, then finishes */}
+      <div className="order-2 flex flex-col gap-2">
         <FinishSelector
           pickId={product.id}
           productTitle={product.title}
