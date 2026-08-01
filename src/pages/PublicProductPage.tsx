@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate, Link, useLocation, Navigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { Heart, Scale, ChevronLeft, ChevronRight, ChevronDown, ArrowLeft, Truck } from "lucide-react";
