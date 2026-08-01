@@ -1511,19 +1511,13 @@ const PublicProductPage: React.FC = () => {
             </div>
 
             <div className="mt-2 grid grid-cols-2 gap-2">
-              <Link
-                to={`/contact?${new URLSearchParams({
-                  subject: `Place an Order — ${product.title} by ${designerDisplay}`,
-                  productId: product.id,
-                  productSlug: productSlug || "",
-                  productName: product.title || "",
-                  designerName: designerDisplay || "",
-                  back: (typeof window !== "undefined" ? location.pathname + location.search : "") || "",
-                }).toString()}#contact`}
+              <button
+                type="button"
+                onClick={handlePlaceOrder}
                 className="flex items-center justify-center px-3 py-2.5 rounded-md bg-foreground text-background font-body text-[10px] uppercase tracking-[0.12em] whitespace-nowrap"
               >
                 Place an Order
-              </Link>
+              </button>
               <Link
                 to={`/contact?${new URLSearchParams({
                   subject: `Request a Quote — ${product.title} by ${designerDisplay}`,
