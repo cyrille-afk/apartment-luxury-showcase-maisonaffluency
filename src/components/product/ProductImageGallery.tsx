@@ -147,22 +147,23 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
   if (images.length === 0) return null;
 
   return (
-    <div className="flex gap-4">
-      {/* Vertical thumbnails — scrollable carousel (cap at 5 visible) */}
+    <div className="flex gap-4 items-stretch">
+      {/* Vertical thumbnails — height-matched to the main image frame */}
       {images.length > 1 && (
-        <div className="hidden md:block w-24 shrink-0 self-start relative">
+        <div className="hidden md:block w-24 shrink-0 self-stretch relative">
 
           <div
             ref={thumbsRef}
             onMouseMove={handleThumbHoverMove}
             onMouseLeave={stopHoverScroll}
-            className="overflow-y-scroll overscroll-contain flex flex-col gap-2 scrollbar-hide [&::-webkit-scrollbar]:hidden"
+            className={cn(
+              "h-full min-h-0 overflow-y-scroll overscroll-contain flex flex-col scrollbar-hide [&::-webkit-scrollbar]:hidden",
+              images.length > 4 ? "justify-start gap-3" : "justify-between gap-2"
+            )}
             style={{
               scrollbarWidth: "none",
               msOverflowStyle: "none",
               WebkitOverflowScrolling: "touch",
-              // Exactly 4 thumbnails (6rem each) + 3 gaps (0.5rem each) = 25.5rem
-              maxHeight: "25.5rem",
               // Luxury fade-out on the bottom-most visible thumbnail
               ...(images.length > 4
                 ? {
@@ -174,6 +175,7 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
                 : {}),
             }}
           >
+
 
             {images.map((img, i) => (
               <button
