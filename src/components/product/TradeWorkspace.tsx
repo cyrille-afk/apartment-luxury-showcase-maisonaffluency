@@ -109,11 +109,14 @@ export default function TradeWorkspace({
           <p className="font-body text-[10px] uppercase tracking-[0.18em] text-[hsl(var(--gold))]">
             Trade Workspace
           </p>
-          {tierLabel && (
-            <span className="font-body text-[9px] uppercase tracking-[0.16em] text-muted-foreground border border-border rounded-full px-2 py-0.5">
-              {tierLabel}
-            </span>
-          )}
+          <div className="flex items-center gap-2">
+            <ClientSafeToggle />
+            {tierLabel && !clientSafe && (
+              <span className="font-body text-[9px] uppercase tracking-[0.16em] text-muted-foreground border border-border rounded-full px-2 py-0.5">
+                {tierLabel}
+              </span>
+            )}
+          </div>
         </div>
 
         <div className="mt-4">
@@ -121,6 +124,14 @@ export default function TradeWorkspace({
             <div className="flex items-center gap-2 text-muted-foreground font-body text-xs">
               <Loader2 className="h-3.5 w-3.5 animate-spin" /> Loading trade pricing…
             </div>
+          ) : clientSafe ? (
+            /* Client-safe: retail only, never net or margin. */
+            <>
+              <p className="font-display text-2xl leading-none">{rrpLabel || "Price on Request"}</p>
+              <p className="font-body text-[11px] text-muted-foreground mt-1.5">
+                {rrpLabel ? "Recommended retail" : "Available on request"}
+              </p>
+            </>
           ) : netLabel ? (
             <>
               <p className="font-display text-2xl leading-none">{netLabel}</p>
@@ -138,6 +149,7 @@ export default function TradeWorkspace({
             <p className="font-display text-xl leading-none">Price on Request</p>
           )}
         </div>
+
 
         <dl className="mt-5 space-y-2.5">
           <div className="flex items-baseline gap-4">
