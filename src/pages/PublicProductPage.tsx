@@ -61,6 +61,7 @@ import {
   quantitativeValue,
 } from "@/components/product/PublicSpecTable";
 import TradeWorkspace from "@/components/product/TradeWorkspace";
+import TradePendingReviewCard from "@/components/product/TradePendingReviewCard";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 
@@ -949,7 +950,7 @@ const PublicProductPage: React.FC = () => {
   const { slug: designerSlug, productSlug } = useParams<{ slug: string; productSlug: string }>();
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, isTradeUser, loading: authLoading } = useAuth();
+  const { user, isTradeUser, tradeStatus, loading: authLoading } = useAuth();
   const stateFrom = (location.state as { from?: string } | null)?.from;
   const isGridUrl = (p?: string | null) => !!p && /[?&](category|subcategory)=/.test(p);
   const storedFrom = typeof window !== "undefined" ? sessionStorage.getItem("product_from_path") : null;
@@ -1584,7 +1585,15 @@ const PublicProductPage: React.FC = () => {
                 });
                 const inquireHref = `/contact?${q.toString()}#contact`;
 
-                if (isTradeUser) {
+                // Vetting gate: an admin-granted trade role always counts as
+                // approved; otherwise profiles.trade_status must be 'approved'.
+                const tradeApproved = isTradeUser || tradeStatus === "approved";
+
+                if (!tradeApproved && tradeStatus === "pending_review") {
+                  return <TradePendingReviewCard />;
+                }
+
+                if (tradeApproved) {
                   return (
                     <TradeWorkspace
                       productId={product.id}

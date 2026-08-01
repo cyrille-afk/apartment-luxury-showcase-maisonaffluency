@@ -8,7 +8,9 @@ interface AuthContextType {
   isTradeUser: boolean;
   isAdmin: boolean;
   isSuperAdmin: boolean;
-  profile: { first_name: string; last_name: string; company: string; email: string } | null;
+  profile: { first_name: string; last_name: string; company: string; email: string; trade_status?: string | null } | null;
+  /** Vetting state from public.profiles.trade_status: approved | pending_review | rejected */
+  tradeStatus: "approved" | "pending_review" | "rejected" | null;
   applicationStatus: "none" | "pending" | "approved" | "rejected";
   signOut: () => Promise<void>;
   refreshRoles: () => Promise<void>;
@@ -37,6 +39,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [profile, setProfile] = useState<AuthContextType["profile"]>(null);
   const [applicationStatus, setApplicationStatus] = useState<AuthContextType["applicationStatus"]>("none");
+  const [tradeStatus, setTradeStatus] = useState<AuthContextType["tradeStatus"]>(null);
   // Hold a reference to the dynamically-imported supabase client
   const [sbClient, setSbClient] = useState<any>(null);
 
@@ -48,7 +51,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       [rolesRes, profileRes, appRes] = await Promise.all([
         client.from("user_roles").select("role").eq("user_id", userId),
-        client.from("profiles").select("first_name, last_name, company, email").eq("id", userId).single(),
+        client.from("profiles").select("first_name, last_name, company, email, trade_status").eq("id", userId).single(),
         client.from("trade_applications").select("status").eq("user_id", userId).order("created_at", { ascending: false }).limit(1),
       ]);
     } catch (error) {
@@ -70,6 +73,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     if (profileRes.data) {
       setProfile(profileRes.data);
+      setTradeStatus((profileRes.data.trade_status as AuthContextType["tradeStatus"]) ?? null);
     }
 
     if (appRes.data && appRes.data.length > 0) {
@@ -208,6 +212,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setIsAdmin(false);
         setIsSuperAdmin(false);
         setProfile(null);
+        setTradeStatus(null);
         setApplicationStatus("none");
 
         if (event === "SIGNED_OUT") {
@@ -235,7 +240,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, [user, sbClient, fetchUserData]);
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, isTradeUser, isAdmin, isSuperAdmin, profile, applicationStatus, signOut, refreshRoles }}>
+    <AuthContext.Provider value={{ user, session, loading, isTradeUser, isAdmin, isSuperAdmin, profile, tradeStatus, applicationStatus, signOut, refreshRoles }}>
       {children}
     </AuthContext.Provider>
   );
