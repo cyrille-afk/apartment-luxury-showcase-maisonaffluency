@@ -53,6 +53,7 @@ import {
   makeSwatchAxisFilter,
 } from "@/lib/finishDuplication";
 import { useAuth } from "@/hooks/useAuth";
+import StudioSaveButton from "@/components/product/StudioSaveButton";
 import { isCollectibleSlug, collectibleGateRedirect } from "@/lib/collectibleGate";
 import {
   PublicSpecTable,
