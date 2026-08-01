@@ -1,6 +1,12 @@
 import React, { useState, useCallback, useRef, useEffect } from "react";
-import { ChevronLeft, ChevronRight, X, Maximize2, Expand } from "lucide-react";
+import { ChevronLeft, ChevronRight, X, Maximize2, Expand, MoreHorizontal } from "lucide-react";
 import { cn } from "@/lib/utils";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import SliderDots from "@/components/ui/SliderDots";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
@@ -28,7 +34,10 @@ interface ProductImageGalleryProps {
   caption?: string | null;
   /** When true, shrinks the mobile main image height (used while user scrolls past the gallery). */
   compact?: boolean;
+  /** Extra items appended to the mobile "more" menu (e.g. Share). */
+  mobileMenuItems?: React.ReactNode;
 }
+
 
 /**
  * Main-image renderer with a smooth cross-dissolve between sources.
@@ -134,7 +143,7 @@ const CrossfadeImage: React.FC<{ src: string; alt: string; pointerEventsNone?: b
 
 
 
-const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, overlay, firstImageBadge, activeIndex: controlledIndex, activeIndexNonce, onIndexChange, caption, compact }) => {
+const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, overlay, firstImageBadge, activeIndex: controlledIndex, activeIndexNonce, onIndexChange, caption, compact, mobileMenuItems }) => {
 
   const [activeIndex, setActiveIndex] = useState(controlledIndex ?? 0);
 
@@ -321,7 +330,7 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
       {/* Main image + (mobile) thumb strip below */}
       <div className="flex-1 flex flex-col gap-3 min-w-0">
       <div className="relative group" ref={inlineSwipeRef}>
-        <div className={cn("md:aspect-square md:h-auto bg-foreground/95 rounded-luxury-sharp overflow-hidden relative touch-pan-y transition-[height] duration-300 ease-out", compact ? "h-[34vh]" : "h-[60vh]")}>
+        <div className={cn("md:aspect-square md:h-auto bg-foreground/95 rounded-luxury-sharp overflow-hidden relative touch-pan-y transition-[height] duration-300 ease-out", compact ? "h-[32vh]" : "h-[48vh]")}>
           {/* Desktop: whole image is a zoom trigger. Mobile: plain image so
               stray taps near the chevrons don't accidentally open the lightbox. */}
           <button
@@ -339,17 +348,27 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
             <CrossfadeImage src={images[activeIndex]} alt={alt} />
           </div>
 
-          {/* Presentation Mode — hand the phone to the client and the platform
-              disappears: pure, full-bleed photography, no pricing or controls. */}
-          <div className="md:hidden absolute top-3 left-3 z-30">
-            <button
-              type="button"
-              onClick={(e) => { e.stopPropagation(); setPresentOpen(true); }}
-              aria-label="Presentation mode"
-              className="w-10 h-10 rounded-full bg-background/90 backdrop-blur-sm border border-border shadow-sm flex items-center justify-center touch-manipulation"
-            >
-              <Expand size={17} className="text-foreground" />
-            </button>
+          {/* Mobile secondary actions live behind a single discreet "more" menu:
+              presentation mode, expand and share — no competing circular chips. */}
+          <div className="md:hidden absolute top-4 left-4 z-30">
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                aria-label="More actions"
+                className="w-9 h-9 rounded-full bg-background/25 backdrop-blur-md border border-border/25 flex items-center justify-center touch-manipulation"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <MoreHorizontal size={20} strokeWidth={1.5} className="text-foreground/80" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="min-w-[190px]">
+                <DropdownMenuItem onSelect={() => setPresentOpen(true)} className="gap-2.5 font-body text-[11px] uppercase tracking-[0.16em]">
+                  <Expand size={16} strokeWidth={1.5} /> Presentation
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setZoomOpen(true)} className="gap-2.5 font-body text-[11px] uppercase tracking-[0.16em]">
+                  <Maximize2 size={16} strokeWidth={1.5} /> Expand image
+                </DropdownMenuItem>
+                {mobileMenuItems}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
 
 
@@ -363,14 +382,14 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
               aria-label="Expand image"
               className="w-9 h-9 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 flex items-center justify-center transition-opacity opacity-0 group-hover:opacity-100 touch-manipulation"
             >
-              <Maximize2 size={14} className="text-foreground" />
+              <Maximize2 size={14} strokeWidth={1.5} className="text-foreground" />
             </button>
           </div>
-          {/* Fractional gallery counter — discreet, bottom-right on desktop,
-              bottom-left on mobile/PWA so it doesn't overlap the favorite heart. */}
+          {/* Fractional gallery counter — bottom-centre on mobile (fully detached
+              from the floating controls), bottom-right on desktop. */}
           {images.length > 1 && (
-            <div className="absolute bottom-3 left-3 md:left-auto md:right-3 z-20 pointer-events-none">
-              <span className="inline-block px-2.5 py-1 rounded-luxury-micro bg-background/70 backdrop-blur-sm font-body text-[10px] md:text-[11px] font-light uppercase tracking-[0.18em] text-foreground/70 tabular-nums">
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 md:left-auto md:translate-x-0 md:bottom-3 md:right-3 z-20 pointer-events-none">
+              <span className="inline-block px-2.5 py-1 rounded-luxury-micro bg-background/60 backdrop-blur-md font-body text-[10px] md:text-[11px] font-light uppercase tracking-[0.18em] text-foreground/70 tabular-nums">
                 {String(activeIndex + 1).padStart(2, "0")} / {String(images.length).padStart(2, "0")}
               </span>
             </div>
