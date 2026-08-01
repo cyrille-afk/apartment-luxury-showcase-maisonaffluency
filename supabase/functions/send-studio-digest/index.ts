@@ -190,7 +190,9 @@ Deno.serve(async (req) => {
       }
       if (!unsubscribeToken) continue
 
-      const messageId = `studio-digest-${today}-${userId}`
+      // Unique per run: a provider-side failure poisons the idempotency key,
+      // so a same-day retry must not reuse it.
+      const messageId = `studio-digest-${today}-${userId}-${Date.now().toString(36)}`
 
       await supabase.rpc('enqueue_email', {
         queue_name: 'transactional_emails',
