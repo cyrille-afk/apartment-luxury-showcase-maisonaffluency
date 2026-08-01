@@ -5,6 +5,8 @@ import SliderDots from "@/components/ui/SliderDots";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { useLightboxSwipe } from "@/hooks/useLightboxSwipe";
+import PresentationMode from "@/components/product/PresentationMode";
+
 
 interface ProductImageGalleryProps {
   images: string[];
