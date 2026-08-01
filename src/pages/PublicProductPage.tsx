@@ -1656,16 +1656,16 @@ const PublicProductPage: React.FC = () => {
               </div>
             </div>
 
-            <div className="relative flex flex-col gap-4">
+            <div className="relative flex flex-col gap-6">
               <div className="min-w-0">
                 <Link
                   to={`/designers/${designer.slug}`}
                   onClick={() => rememberProductBackRef(designer.slug, location.pathname + location.search)}
-                  className="font-body text-[11px] uppercase tracking-[0.15em] text-[hsl(var(--gold))] hover:text-primary hover:underline underline-offset-2 transition-colors"
+                  className="font-body font-light text-[10px] uppercase tracking-[0.28em] text-[hsl(var(--gold))] hover:text-primary transition-colors"
                 >
                   {designerDisplay}
                 </Link>
-                <h1 className="font-display text-2xl md:text-3xl mt-1 leading-tight">
+                <h1 className="font-display font-normal text-[1.75rem] md:text-[2.15rem] mt-3 leading-[1.15] tracking-[-0.01em]">
                   {product.title}
                   {product.subtitle &&
                     !product.title.toLowerCase().includes(product.subtitle.toLowerCase()) &&
@@ -1675,8 +1675,8 @@ const PublicProductPage: React.FC = () => {
 
                 {/* Publicly disclosed RRP (currently Apparatus only) */}
                 {publicRrpLabel && (
-                  <div className="mt-3">
-                    <p className="font-display text-lg md:text-xl">
+                  <div className="mt-6">
+                    <p className="font-body font-light text-base md:text-lg tabular-nums tracking-[0.01em]">
                       {(() => {
                         const spaceIdx = publicRrpLabel.indexOf(" ");
                         if (spaceIdx === -1) return <span className="text-foreground">{publicRrpLabel}</span>;
@@ -1684,18 +1684,19 @@ const PublicProductPage: React.FC = () => {
                         const rest = publicRrpLabel.slice(spaceIdx + 1);
                         return (
                           <>
-                            <span className="text-muted-foreground">{prefix}</span>{" "}
-                            <span className="text-foreground">{rest}</span>
+                            <span className="text-muted-foreground text-[11px] uppercase tracking-[0.22em] align-middle mr-2">{prefix}</span>
+                            <span className="text-foreground align-middle">{rest}</span>
                           </>
                         );
                       })()}
                     </p>
-                    <p className="font-body text-[10px] uppercase tracking-[0.16em] text-muted-foreground mt-1">
+                    <p className="font-body font-light text-[9px] uppercase tracking-[0.28em] text-muted-foreground/80 mt-2">
                       excl. shipping &amp; duties
                     </p>
                   </div>
                 )}
               </div>
+
 
 
               {/* Materials & dimensions with gold icons — shared parsing with TradeProductPage */}
