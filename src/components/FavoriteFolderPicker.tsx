@@ -90,7 +90,7 @@ const FavoriteFolderPicker = ({ pickId, children, align = "end", side = "bottom"
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger
         asChild
-        onClick={(e) => { e.stopPropagation(); e.preventDefault(); }}
+        onClick={(e) => { e.stopPropagation(); }}
       >
         {children}
       </PopoverTrigger>

@@ -35,7 +35,7 @@ const CompareFab = () => {
         >
           <Scale size={16} />
           <span>Selection</span>
-          <span className="flex items-center justify-center w-5 h-5 rounded-full bg-[hsl(var(--gold))] text-foreground text-[10px] font-bold">
+          <span className="flex items-center justify-center w-5 h-5 rounded-full bg-[hsl(var(--gold))] text-foreground text-[10px] font-bold border border-black">
             {items.length}
           </span>
         </button>
