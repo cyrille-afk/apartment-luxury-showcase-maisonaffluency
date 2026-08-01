@@ -132,20 +132,6 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
       {images.length > 1 && (
         <div className="hidden md:flex flex-col w-24 shrink-0 relative">
 
-          {/* Up arrow */}
-          <button
-            type="button"
-            onClick={() => scrollThumbs("up")}
-            disabled={!canScrollUp}
-            aria-label="Scroll thumbnails up"
-            className={cn(
-              "h-7 w-full flex items-center justify-center rounded-md bg-background/80 backdrop-blur-sm border border-border/50 mb-1 transition-opacity",
-              canScrollUp ? "opacity-100 hover:bg-background" : "opacity-0 pointer-events-none"
-            )}
-          >
-            <ChevronUp size={16} className="text-foreground" />
-          </button>
-
           <div
             ref={thumbsRef}
             className="overflow-y-auto flex flex-col gap-2 scrollbar-hide scroll-smooth"
@@ -186,19 +172,6 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
             ))}
           </div>
 
-          {/* Down arrow */}
-          <button
-            type="button"
-            onClick={() => scrollThumbs("down")}
-            disabled={!canScrollDown}
-            aria-label="Scroll thumbnails down"
-            className={cn(
-              "h-7 w-full flex items-center justify-center rounded-md bg-background/80 backdrop-blur-sm border border-border/50 mt-1 transition-opacity",
-              canScrollDown ? "opacity-100 hover:bg-background" : "opacity-0 pointer-events-none"
-            )}
-          >
-            <ChevronDown size={16} className="text-foreground" />
-          </button>
         </div>
       )}
 
@@ -230,7 +203,7 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
           {/* Hover-to-navigate now lives on the vertical thumbnail strip (see above). */}
 
           {/* Expand affordance — desktop only (mobile/PWA images are already full-screen sized). */}
-          <div className="absolute bottom-3 right-3 z-20 hidden md:block">
+          <div className="absolute bottom-3 left-3 z-20 hidden md:block">
             <button
               type="button"
               onClick={(e) => { e.stopPropagation(); setZoomOpen(true); }}
@@ -240,6 +213,14 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
               <Maximize2 size={14} className="text-foreground" />
             </button>
           </div>
+          {/* Fractional gallery counter — discreet, bottom-right of the frame */}
+          {images.length > 1 && (
+            <div className="absolute bottom-3 right-3 z-20 pointer-events-none">
+              <span className="inline-block px-2.5 py-1 rounded-full bg-background/70 backdrop-blur-sm font-body text-[10px] md:text-[11px] font-light uppercase tracking-[0.18em] text-foreground/70 tabular-nums">
+                {String(activeIndex + 1).padStart(2, "0")} / {String(images.length).padStart(2, "0")}
+              </span>
+            </div>
+          )}
           {overlay && (
             <div className="absolute top-3 right-3 z-20 pointer-events-none">
               <div className="pointer-events-auto">{overlay}</div>
@@ -309,16 +290,6 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
             </button>
           </>
         )}
-
-        {/* Dot indicators (desktop only) */}
-          <SliderDots
-            count={images.length}
-            activeIndex={activeIndex}
-            onSelect={goTo}
-            variant="light"
-            ariaPrefix="View image"
-            className="hidden md:flex absolute bottom-3 left-1/2 -translate-x-1/2"
-          />
 
         </div>
 
