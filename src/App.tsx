@@ -604,6 +604,8 @@ const App = () => {
                   <Route path="/gallery" element={<Suspense fallback={<PageLoadingSkeleton />}><PublicGallery /></Suspense>} />
                   <Route path="/designers-hero-lock" element={<Suspense fallback={<PageLoadingSkeleton />}><ScreenshotGallery /></Suspense>} />
                   <Route path="/contact" element={<Suspense fallback={<PageLoadingSkeleton />}><ContactPage /></Suspense>} />
+                  <Route path="/cart" element={<Suspense fallback={<PageLoadingSkeleton />}><CartPage /></Suspense>} />
+                  <Route path="/order-confirmation" element={<Suspense fallback={<PageLoadingSkeleton />}><OrderConfirmationPage /></Suspense>} />
                   <Route path="/concierge" element={<Suspense fallback={<PageLoadingSkeleton />}><ConciergePage /></Suspense>} />
                    <Route path="/apartment-tour" element={<Suspense fallback={<PageLoadingSkeleton />}><ApartmentTour /></Suspense>} />
                   <Route path="/studios" element={<Suspense fallback={<PageLoadingSkeleton />}><Studios /></Suspense>} />
