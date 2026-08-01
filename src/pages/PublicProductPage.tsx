@@ -64,6 +64,7 @@ import {
 import TradeWorkspace from "@/components/product/TradeWorkspace";
 import TradePendingReviewCard from "@/components/product/TradePendingReviewCard";
 import CustomizationRequest from "@/components/product/CustomizationRequest";
+import QuoteRequestDialog from "@/components/QuoteRequestDialog";
 import { addToCart } from "@/lib/cart";
 import { usePublicRrp, formatPublicRrp, formatPublicRrpCents } from "@/hooks/usePublicRrp";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -1119,6 +1120,7 @@ const PublicProductPage: React.FC = () => {
   // Mobile/PWA: shrink the product image once the user scrolls past a small threshold.
   const [galleryCompact, setGalleryCompact] = useState(false);
   const [showStickyBar, setShowStickyBar] = useState(false);
+  const [quoteRequestOpen, setQuoteRequestOpen] = useState(false);
   // Finish/size selection surfaced in the authenticated Trade Workspace and
   // injected into Felix's product context.
   const [selectedFinishes, setSelectedFinishes] = useState<string[]>([]);
@@ -1569,19 +1571,13 @@ const PublicProductPage: React.FC = () => {
               >
                 Place an Order
               </button>
-              <Link
-                to={`/contact?${new URLSearchParams({
-                  subject: `Request a Quote — ${product.title} by ${designerDisplay}`,
-                  productId: product.id,
-                  productSlug: productSlug || "",
-                  productName: product.title || "",
-                  designerName: designerDisplay || "",
-                  back: (typeof window !== "undefined" ? location.pathname + location.search : "") || "",
-                }).toString()}#contact`}
+              <button
+                type="button"
+                onClick={() => setQuoteRequestOpen(true)}
                 className="flex items-center justify-center px-3 py-2.5 rounded-luxury-micro border border-foreground/30 text-foreground font-body text-[10px] uppercase tracking-[0.12em] whitespace-nowrap"
               >
                 Request a Quote
-              </Link>
+              </button>
             </div>
           </div>
 
@@ -1828,14 +1824,7 @@ const PublicProductPage: React.FC = () => {
                   <TradeExclusiveCard
                     redirectTo={location.pathname + location.search}
                     rrpLabel={publicRrpLabel}
-                    inquireHref={`/contact?${new URLSearchParams({
-                      subject: `Price on Request — ${product.title} by ${designerDisplay}`,
-                      productId: product.id,
-                      productSlug: productSlug || "",
-                      productName: product.title || "",
-                      designerName: designerDisplay || "",
-                      back: (typeof window !== "undefined" ? location.pathname + location.search : "") || "",
-                    }).toString()}#contact`}
+                    onRequestQuote={() => setQuoteRequestOpen(true)}
                   />
                 )}
 
@@ -1887,12 +1876,13 @@ const PublicProductPage: React.FC = () => {
 
                 return (
                   <div className="mt-2 space-y-2">
-                    <Link
-                      to={inquireHref}
+                    <button
+                      type="button"
+                      onClick={() => setQuoteRequestOpen(true)}
                       className="flex items-center justify-center gap-2 px-4 py-3.5 rounded-luxury-micro font-body text-[11px] md:text-xs uppercase tracking-[0.12em] transition-all w-full text-center bg-foreground text-background hover:bg-foreground/90"
                     >
                       Inquire for Pricing
-                    </Link>
+                    </button>
                   </div>
                 );
               })()}
@@ -1907,6 +1897,13 @@ const PublicProductPage: React.FC = () => {
                 productTitle={product.title}
                 designerDisplay={designerDisplay}
                 tradeApproved={!!user && (isTradeUser || tradeStatus === "approved")}
+              />
+
+              <QuoteRequestDialog
+                open={quoteRequestOpen}
+                onOpenChange={setQuoteRequestOpen}
+                productName={product.title}
+                designerName={designerDisplay}
               />
 
               {/* Secondary actions: Favorite / Pin / Spec Sheet.
