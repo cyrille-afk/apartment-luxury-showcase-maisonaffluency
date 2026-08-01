@@ -1551,7 +1551,7 @@ const PublicProductPage: React.FC = () => {
               <button
                 type="button"
                 onClick={handlePlaceOrder}
-                className="flex items-center justify-center px-3 py-2.5 rounded-control bg-foreground text-background font-body text-[10px] uppercase tracking-[0.12em] whitespace-nowrap"
+                className="flex items-center justify-center px-3 py-2.5 rounded-luxury-micro bg-foreground text-background font-body text-[10px] uppercase tracking-[0.12em] whitespace-nowrap"
               >
                 Place an Order
               </button>
@@ -1564,7 +1564,7 @@ const PublicProductPage: React.FC = () => {
                   designerName: designerDisplay || "",
                   back: (typeof window !== "undefined" ? location.pathname + location.search : "") || "",
                 }).toString()}#contact`}
-                className="flex items-center justify-center px-3 py-2.5 rounded-control border border-foreground/30 text-foreground font-body text-[10px] uppercase tracking-[0.12em] whitespace-nowrap"
+                className="flex items-center justify-center px-3 py-2.5 rounded-luxury-micro border border-foreground/30 text-foreground font-body text-[10px] uppercase tracking-[0.12em] whitespace-nowrap"
               >
                 Request a Quote
               </Link>
