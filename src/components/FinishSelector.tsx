@@ -265,6 +265,21 @@ export default function FinishSelector({ pickId, className, productTitle, produc
   const [selectedTopId, setSelectedTopId] = useState<string | null>(null);
   const [selectedCoverId, setSelectedCoverId] = useState<string | null>(null);
   const [selectedRugComponentIds, setSelectedRugComponentIds] = useState<Record<string, string>>({});
+  // Images the gallery is *locked* onto (last clicked swatch). Hover previews
+  // are transient; leaving the selector restores this locked view.
+  const lockedPreviewRef = useRef<{ indices: number[] | null; name: string } | null>(null);
+  const hoverActiveRef = useRef(false);
+  const restoreLockedPreview = () => {
+    if (isMobile) return;
+    if (!hoverActiveRef.current) return;
+    hoverActiveRef.current = false;
+    const locked = lockedPreviewRef.current;
+    onSwatchImagesChange?.(locked?.indices ?? null, {
+      committed: false,
+      swatchName: locked?.name,
+    });
+  };
+
   const [zoomed, setZoomed] = useState<Fabric | null>(null);
   const [allowComCol, setAllowComCol] = useState<boolean>(true);
 
