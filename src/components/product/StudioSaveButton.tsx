@@ -180,7 +180,7 @@ export default function StudioSaveButton({
         onClick={(e) => { e.stopPropagation(); haptic(8); setSavedLabel(null); setOpen(true); }}
         aria-label="Save to studio dashboard"
         className={cn(
-          "flex items-center justify-center w-10 h-10 rounded-[2px] bg-background/90 backdrop-blur-sm border border-border shadow-sm text-foreground active:scale-95 transition-transform",
+          "flex items-center justify-center w-10 h-10 rounded-control bg-background/90 backdrop-blur-sm border border-border shadow-sm text-foreground active:scale-95 transition-transform",
           className,
         )}
       >
@@ -188,7 +188,7 @@ export default function StudioSaveButton({
       </button>
 
       <Drawer open={open} onOpenChange={setOpen}>
-        <DrawerContent className="rounded-t-[2px] border-t border-border">
+        <DrawerContent className="rounded-t-sheet border-t border-border">
           <DrawerTitle className="sr-only">Save {productTitle} to a project</DrawerTitle>
           <div className="px-5 pt-1 pb-[calc(1rem+env(safe-area-inset-bottom))]">
             {savedLabel ? (

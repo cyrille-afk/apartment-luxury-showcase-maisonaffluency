@@ -197,7 +197,7 @@ export function StudioBridgeSidebar({
           <div className="flex gap-2">
             <Button
               variant="outline"
-              className="flex-1 rounded-none font-body text-xs uppercase tracking-wider"
+              className="flex-1 rounded-control font-body text-xs uppercase tracking-wider"
               onClick={() => {
                 onOpenChange(false);
                 navigate("/trade/boards");
@@ -206,7 +206,7 @@ export function StudioBridgeSidebar({
               Open project folders
             </Button>
             <Button
-              className="flex-1 rounded-none font-body text-xs uppercase tracking-wider"
+              className="flex-1 rounded-control font-body text-xs uppercase tracking-wider"
               disabled={items.length === 0}
               onClick={async () => {
                 await markAllSeen();

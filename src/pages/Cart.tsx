@@ -219,13 +219,13 @@ export default function Cart() {
                     placeholder="Email address"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="rounded-none"
+                    className="rounded-control"
                   />
                   <Input
                     placeholder="Full name (optional)"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
-                    className="rounded-none"
+                    className="rounded-control"
                   />
                 </div>
               )}
@@ -234,7 +234,7 @@ export default function Cart() {
                 <Button
                   onClick={() => checkout("card")}
                   disabled={pending !== null}
-                  className="w-full rounded-none h-12 bg-foreground text-background hover:bg-foreground/90 font-body text-[11px] uppercase tracking-[0.22em]"
+                  className="w-full rounded-control h-12 bg-foreground text-background hover:bg-foreground/90 font-body text-[11px] uppercase tracking-[0.22em]"
                 >
                   {pending === "card" ? <Loader2 className="h-4 w-4 animate-spin" /> : "Proceed to Checkout"}
                 </Button>
@@ -245,7 +245,7 @@ export default function Cart() {
                   variant="outline"
                   onClick={() => checkout("bank_transfer")}
                   disabled={pending !== null}
-                  className="w-full rounded-none h-12 border-foreground/40 font-body text-[11px] uppercase tracking-[0.22em]"
+                  className="w-full rounded-control h-12 border-foreground/40 font-body text-[11px] uppercase tracking-[0.22em]"
                 >
                   {pending === "bank_transfer" ? <Loader2 className="h-4 w-4 animate-spin" /> : "Pay by Bank Transfer"}
                 </Button>

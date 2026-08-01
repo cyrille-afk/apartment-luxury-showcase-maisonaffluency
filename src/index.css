@@ -37,6 +37,13 @@ All colors MUST be HSL.
     --ring: 168 45% 30%;
 
     --radius: 0.75rem;
+
+    /* Micro-radius for functional controls: enough to read as "tappable"
+       without softening the editorial, sharp-cornered layout language. */
+    --radius-control: 3px;
+    /* Native-feeling overlay sheets (bottom trays, toasts). */
+    --radius-sheet: 12px;
+
     
     /* Custom Design Tokens */
     --jade: 168 45% 30%;
