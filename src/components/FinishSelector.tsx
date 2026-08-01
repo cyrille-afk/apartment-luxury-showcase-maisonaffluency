@@ -604,6 +604,11 @@ export default function FinishSelector({ pickId, className, productTitle, produc
 
       }
 
+      // Clicking locks the gallery onto this finish: any later hover preview
+      // that isn't clicked reverts here on mouse-leave.
+      lockedPreviewRef.current = { indices, name: f.name };
+      hoverActiveRef.current = false;
+
       // Notify product page of mapped gallery images LAST so the swatch's
       // image jump wins over any gallery reset triggered by the tier/variant
       // sync above (e.g. handleMaterialChange's partial-pair fallback to
@@ -615,6 +620,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
         onSwatchImagesChange?.(null, { committed: true, swatchName: f.name });
       }
     };
+
 
     const tierCaption = isFabricGroup && !isCom && !isCol && (f.tier || f.price_per_lm_cents)
       ? [
