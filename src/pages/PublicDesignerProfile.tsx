@@ -1176,7 +1176,7 @@ const PublicDesignerProfile = () => {
                       }}
                       className={cn(
                         "group flex flex-col transition-all duration-700",
-                        highlightId === pick.id && "ring-2 ring-primary rounded-xl ring-offset-2 ring-offset-background animate-pulse"
+                        highlightId === pick.id && "ring-2 ring-primary rounded-luxury-sharp ring-offset-2 ring-offset-background animate-pulse"
                       )}
                     >
                       <div
@@ -1189,7 +1189,7 @@ const PublicDesignerProfile = () => {
                           }
                         }}
                         aria-label={`${displayTitle}${pick.subtitle ? ` — ${pick.subtitle}` : ""}`}
-                        className="aspect-square md:aspect-[4/5] bg-muted/30 rounded-xl overflow-hidden mb-2 md:mb-2 relative flex items-center justify-center cursor-pointer"
+                        className="aspect-square md:aspect-[4/5] bg-muted/30 rounded-luxury-sharp overflow-hidden mb-2 md:mb-2 relative flex items-center justify-center cursor-pointer"
                       >
                         <img
                           src={responsiveCloudinaryUrl(pick.image_url, 600)}
@@ -1197,7 +1197,7 @@ const PublicDesignerProfile = () => {
                           sizes="(max-width: 640px) 90vw, (max-width: 768px) 45vw, (max-width: 1024px) 30vw, 25vw"
                           alt={pick.title}
                           className={cn(
-                            "absolute inset-0 w-full h-full transition-all duration-700 rounded-xl object-cover",
+                            "absolute inset-0 w-full h-full transition-all duration-700 rounded-luxury-sharp object-cover",
                             pick.hover_image_url
                               ? isMobilePickRevealed
                                 ? "opacity-0 scale-105 md:opacity-100 md:group-hover:opacity-0"
@@ -1214,7 +1214,7 @@ const PublicDesignerProfile = () => {
                           sizes="(max-width: 640px) 90vw, (max-width: 768px) 45vw, (max-width: 1024px) 30vw, 25vw"
                               alt={`${pick.title} alternate finish`}
                               className={cn(
-                                "absolute inset-0 w-full h-full object-cover rounded-xl transition-all duration-700",
+                                "absolute inset-0 w-full h-full object-cover rounded-luxury-sharp transition-all duration-700",
                                 isMobilePickRevealed
                                   ? "opacity-100 scale-105 md:opacity-0 md:group-hover:opacity-100"
                                   : "opacity-0 group-hover:opacity-100 group-hover:scale-105"

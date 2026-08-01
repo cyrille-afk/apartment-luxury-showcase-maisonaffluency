@@ -120,7 +120,7 @@ const NewInSpotlight = ({ designer }: NewInSpotlightProps) => {
             transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
             className="w-full md:w-[38%] flex-shrink-0"
           >
-            <div className="aspect-[3/2] md:aspect-[4/5] overflow-hidden rounded-sm bg-muted relative">
+            <div className="aspect-[3/2] md:aspect-[4/5] overflow-hidden rounded-luxury-sharp bg-muted relative">
               <img
                 src={portraitImage}
                 alt={`${displayName} portrait`}
@@ -318,7 +318,7 @@ const NewInSpotlight = ({ designer }: NewInSpotlightProps) => {
                   if (item) setLightboxItem(item);
                 }}
               >
-                <div className="aspect-[4/5] bg-muted/20 rounded-xl overflow-hidden mb-2 relative flex items-center justify-center">
+                <div className="aspect-[4/5] bg-muted/20 rounded-luxury-sharp overflow-hidden mb-2 relative flex items-center justify-center">
                   <img
                     src={responsiveCloudinaryUrl(pick.image_url, 600)}
                     srcSet={pickSrcSet(pick.image_url)}

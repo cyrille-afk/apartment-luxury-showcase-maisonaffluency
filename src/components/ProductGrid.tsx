@@ -586,7 +586,7 @@ function singularizeSub(s: string): string {
               onFocus={() => prefetchPickDetail(item.pick.id)}
               onTouchStart={() => prefetchPickDetail(item.pick.id)}
             >
-              <div className="relative aspect-square overflow-hidden rounded-sm bg-[#f0eeeb] mb-3 flex items-center justify-center">
+              <div className="relative aspect-square overflow-hidden rounded-luxury-sharp bg-[#f0eeeb] mb-3 flex items-center justify-center">
                 {(() => {
                   const tags: string[] = item.pick.tags || [];
                    const specialTags = tags.filter(t => /couture|edition|limited|re-edition|unique|modern scholar|unesco|good design award|genesis collection/i.test(t));
