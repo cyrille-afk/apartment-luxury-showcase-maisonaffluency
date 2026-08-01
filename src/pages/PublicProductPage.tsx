@@ -2111,8 +2111,13 @@ const PublicProductPage: React.FC = () => {
                     let preview = brandSummary;
                     if (needsToggle) {
                       const slice = brandSummary.slice(0, PREVIEW_LEN);
+                      // End the preview at the last complete sentence so dangling
+                      // fragments like "Guided by the…" are hidden below Read more.
+                      const sentenceMatch = slice.match(/.*[.!?](?=\s|$)/);
+                      const lastSentenceEnd = sentenceMatch ? sentenceMatch[0].length : -1;
                       const lastSpace = slice.lastIndexOf(" ");
-                      preview = (lastSpace > 0 ? slice.slice(0, lastSpace) : slice).trim() + "…";
+                      const cutIndex = lastSentenceEnd > 0 ? lastSentenceEnd : lastSpace > 0 ? lastSpace : PREVIEW_LEN;
+                      preview = slice.slice(0, cutIndex).trim() + "…";
                     }
                     const shown = bioExpanded || !needsToggle ? brandSummary : preview;
                     return (
