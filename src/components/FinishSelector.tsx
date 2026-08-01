@@ -611,7 +611,11 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     const hoverPreview = () => {
       if (isMobile) return;
       const indices = Array.isArray(f.image_indices) && f.image_indices.length > 0 ? f.image_indices : null;
-      if (indices) onSwatchImagesChange?.(indices, { committed: false, swatchName: f.name });
+      // Hover is a preview only — never committed, so pricing never moves.
+      if (indices) {
+        hoverActiveRef.current = true;
+        onSwatchImagesChange?.(indices, { committed: false, swatchName: f.name });
+      }
     };
     const tileButton = (
       <button
@@ -620,12 +624,21 @@ export default function FinishSelector({ pickId, className, productTitle, produc
         onMouseEnter={hoverPreview}
         onFocus={hoverPreview}
         className={cn(
-          "relative aspect-square w-full overflow-hidden rounded-md bg-muted/30 ring-1 ring-border/60 transition",
-          isSelected ? "ring-2 ring-foreground" : "hover:ring-foreground/40"
+          "group relative aspect-square w-full overflow-hidden rounded-md bg-muted/30 ring-1 ring-border/60 transition",
+          isSelected
+            ? "ring-2 ring-foreground ring-offset-2 ring-offset-background"
+            : "hover:ring-foreground/40"
         )}
         aria-label={`Select ${f.name}`}
-
+        aria-pressed={isSelected}
       >
+        {!isSelected && (
+          <span
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 z-[1] bg-foreground/0 group-hover:bg-foreground/10 transition-colors duration-200"
+          />
+        )}
+
         {f.image_url ? (
           <img
             src={f.image_url}
