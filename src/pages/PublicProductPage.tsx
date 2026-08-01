@@ -1265,12 +1265,15 @@ const PublicProductPage: React.FC = () => {
       ];
       let uniquePrices: number[] = [];
       for (const set of keySets) {
-        const keys = set.map((v) => (v ? norm(v) : "")).filter(Boolean);
+        const keys = set.filter(Boolean) as string[];
         if (!keys.length) continue;
         const matches = rrpVariants.filter((v) => {
-          const fields = [v?.base, v?.top, v?.label].map(norm);
-          return keys.every((k) => fields.includes(k));
+          const fields = [v?.base, v?.top, v?.label].filter(Boolean);
+          return keys.every((k) =>
+            fields.some((f) => norm(f) === norm(k) || sameFinish(f, k))
+          );
         });
+
         const priced = matches
           .map((v) => Number(v?.price_cents))
           .filter((c) => Number.isFinite(c) && c > 0);
