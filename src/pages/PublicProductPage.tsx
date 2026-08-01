@@ -1508,6 +1508,29 @@ const PublicProductPage: React.FC = () => {
                 )}
 
 
+                {/* Publicly disclosed RRP (currently Apparatus only) */}
+                {publicRrpLabel && (
+                  <div className="border-b border-border/60 pb-3">
+                    <p className="font-display text-lg md:text-xl">
+                      {(() => {
+                        const spaceIdx = publicRrpLabel.indexOf(" ");
+                        if (spaceIdx === -1) return <span className="text-foreground">{publicRrpLabel}</span>;
+                        const prefix = publicRrpLabel.slice(0, spaceIdx);
+                        const rest = publicRrpLabel.slice(spaceIdx + 1);
+                        return (
+                          <>
+                            <span className="text-muted-foreground">{prefix}</span>{" "}
+                            <span className="text-foreground">{rest}</span>
+                          </>
+                        );
+                      })()}
+                    </p>
+                    <p className="font-body text-[10px] uppercase tracking-[0.16em] text-muted-foreground mt-1">
+                      excl. shipping &amp; duties
+                    </p>
+                  </div>
+                )}
+
                 {(() => {
                   const handcrafted = formatHandcrafted(product.origin, product.lead_time);
                   if (!handcrafted) return null;
@@ -1534,16 +1557,6 @@ const PublicProductPage: React.FC = () => {
                     </div>
                   );
                 })()}
-
-                {/* Publicly disclosed RRP (currently Apparatus only) */}
-                {publicRrpLabel && (
-                  <div className="border-b border-border/60 pb-3">
-                    <p className="font-display text-lg md:text-xl text-foreground">{publicRrpLabel}</p>
-                    <p className="font-body text-[10px] uppercase tracking-[0.16em] text-muted-foreground mt-1">
-                      Recommended retail price · excl. shipping &amp; duties
-                    </p>
-                  </div>
-                )}
 
                 {/* Public, crawlable specification table (no session required) */}
                 {(() => {
