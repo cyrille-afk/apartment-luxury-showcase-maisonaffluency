@@ -994,8 +994,8 @@ const VariantSelectors: React.FC<{
             text={product.materials_description.trim()}
           />
         )}
-      <AlsoContainsFinishes pickId={product.id} className="mt-1 pl-6" />
-    </div>
+        <AlsoContainsFinishes pickId={product.id} className="mt-1 pl-6" />
+      </div>
     </div>
   );
 };
