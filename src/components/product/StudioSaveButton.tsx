@@ -150,6 +150,9 @@ export default function StudioSaveButton({
         sort_order: count ?? 0,
         notes: chosen.length ? `Finishes: ${chosen.join(", ")}` : null,
         variant_label: chosen[0] || null,
+        // Flags the item for the desktop bridge: gold dot + morning digest.
+        saved_via: "mobile",
+        added_by: user.id,
       } as any);
       if (error) { toast.error("Couldn't save", { description: error.message }); return; }
 
