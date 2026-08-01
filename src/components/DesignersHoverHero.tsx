@@ -578,20 +578,12 @@ const DesignersHoverHero = () => {
   }, [isMobileOrPwa]);
 
   // iOS Safari/PWA paints the bottom chrome/home-indicator area from the
-  // document/body backdrop, not always from fixed-position children. Mirror the
-  // active mobile hero image onto that backdrop so the bottom stays photographic.
+  // document/body backdrop. Keep that backdrop solid black — no full-bleed
+  // hero image behind the iOS navigation panel.
   useEffect(() => {
     if (typeof document === "undefined") return;
-    if (!isMobileOrPwa || !items.length) return;
-    const activeDesigner = items.find((d) => d.slug === activeSlug) || items[0];
-    const src = mobileHeroBackgroundSrc(activeDesigner);
-    if (!src) return;
+    if (!isMobileOrPwa) return;
 
-    const { src: backgroundSrc } = cldResponsiveImg(src, {
-      widths: [720, 960, 1280],
-      sizes: "100vw",
-    });
-    if (!backgroundSrc) return;
 
     const html = document.documentElement;
     const body = document.body;
