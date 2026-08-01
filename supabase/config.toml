@@ -15,6 +15,11 @@ project_id = "dcrauiygaezoduwdjmsm"
     verify_jwt = false
   [functions.send-weekly-digest]
     verify_jwt = true
+  [functions.send-studio-digest]
+    verify_jwt = false
+  [functions.dispatch-studio-push]
+    verify_jwt = false
+
   [functions.board-recommendations]
     verify_jwt = false
   [functions.og-image]
