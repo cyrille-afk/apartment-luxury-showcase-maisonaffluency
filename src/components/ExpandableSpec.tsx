@@ -169,10 +169,17 @@ export default function ExpandableSpec({
     };
     const pick = (i: number) => {
       if (disabledSet.has(i)) return;
+      // Native-feeling confirmation: a whisper-light haptic tick on selection.
+      try {
+        (navigator as any)?.vibrate?.(8);
+      } catch {
+        /* haptics unsupported — silent */
+      }
       setInternalIdx(i);
       if (onChange) onChange(i);
       closeList();
     };
+
     const clear = () => {
       setInternalIdx(null);
       if (onChange) onChange(-1);
