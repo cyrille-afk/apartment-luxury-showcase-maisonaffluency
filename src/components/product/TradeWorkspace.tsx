@@ -77,6 +77,27 @@ export default function TradeWorkspace({
 }: Props) {
   const { data: pricing, isLoading } = useTradeProductPricing(productId);
   const { discountPct, tierLabel } = useTradeDiscount();
+  const { clientSafe } = useClientSafeMode();
+  const [sending, setSending] = useState(false);
+  const [sent, setSent] = useState(false);
+
+  const sendToDesktop = async () => {
+    setSending(true);
+    try {
+      const { error } = await supabase.functions.invoke("send-to-desktop", {
+        body: { product_id: productId, title, designer: designerDisplay, finishes: selectedFinishes },
+      });
+      if (error) throw error;
+      if (navigator.vibrate) navigator.vibrate(15);
+      setSent(true);
+      toast.success("Sent to your desktop workspace");
+    } catch (e) {
+      toast.error("Could not reach your desktop — please try again");
+    } finally {
+      setSending(false);
+    }
+  };
+
 
   const rrpCents = pricing?.rrp_price_cents ?? pricing?.trade_price_cents ?? null;
   const netCents =
