@@ -1566,11 +1566,11 @@ const DesignersHoverHero = () => {
         {/* Directory label — pinned to the svh frame bottom on mobile only.
             Desktop version now lives at the top of the featured list. */}
         {isMobileBrowser && directoryLabels(cn(
-          "absolute top-6 left-1/2 -translate-x-1/2 flex items-center gap-10 text-white w-fit pointer-events-auto md:hidden z-30 justify-center px-6"
+          "absolute flex items-center gap-10 text-white w-fit pointer-events-auto md:hidden z-30 left-1/2 -translate-x-1/2 justify-center px-6 bottom-[calc(2.75rem+env(safe-area-inset-bottom))]"
         ), directoryRef, "center")}
 
         {isStandalone && directoryLabels(cn(
-          "absolute flex items-center gap-10 text-white w-fit pointer-events-auto md:hidden z-30 left-1/2 -translate-x-1/2 justify-center px-6 bottom-[calc(1.75rem+env(safe-area-inset-bottom))]"
+          "absolute flex items-center gap-10 text-white w-fit pointer-events-auto md:hidden z-30 left-1/2 -translate-x-1/2 justify-center px-6 bottom-[calc(2rem+env(safe-area-inset-bottom))]"
         ), directoryRef, "center")}
 
 
