@@ -50,6 +50,8 @@ export function formatPublicRrp(row: PublicRrpRow | null | undefined): string | 
   const symbol = SYMBOLS[currency] || "";
   const amount = Math.round(row.rrp_price_cents / 100).toLocaleString("en-US");
   const prefix = row.price_prefix?.trim() || "From";
-  const unit = row.price_unit?.trim() ? ` / ${row.price_unit.trim()}` : "";
+  const rawUnit = (row.price_unit || "").trim().toLowerCase().replace(/_/g, " ");
+  const genericUnit = ["", "per piece", "piece", "each", "unit", "per unit", "item"].includes(rawUnit);
+  const unit = genericUnit ? "" : ` / ${rawUnit}`;
   return `${prefix} ${symbol}${amount}${symbol ? "" : ` ${currency}`}${unit}`;
 }
