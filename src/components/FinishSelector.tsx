@@ -274,10 +274,12 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     if (!hoverActiveRef.current) return;
     hoverActiveRef.current = false;
     const locked = lockedPreviewRef.current;
-    onSwatchImagesChange?.(locked?.indices ?? null, {
+    // No committed finish yet → fall back to the default hero image.
+    onSwatchImagesChange?.(locked?.indices ?? [1], {
       committed: false,
       swatchName: locked?.name,
     });
+
   };
 
   const [zoomed, setZoomed] = useState<Fabric | null>(null);
