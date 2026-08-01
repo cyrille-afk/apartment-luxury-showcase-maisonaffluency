@@ -12,6 +12,9 @@ import {
   SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem,
   SidebarFooter, useSidebar,
 } from "@/components/ui/sidebar";
+import { useStudioBridge, useStudioAlerts } from "@/hooks/useStudioBridge";
+import { StudioBridgeSidebar } from "@/components/trade/StudioBridgeSidebar";
+
 
 const coreItems = [
   { title: "Dashboard", url: "/trade", icon: LayoutDashboard, end: true },
