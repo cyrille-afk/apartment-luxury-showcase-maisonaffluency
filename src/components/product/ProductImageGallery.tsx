@@ -183,7 +183,7 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
                 onClick={() => goTo(i, { fromThumbStrip: true })}
                 onMouseEnter={() => goTo(i, { fromThumbStrip: true })}
                 className={cn(
-                  "aspect-square rounded-md overflow-hidden border-2 transition-all shrink-0",
+                  "aspect-square w-full max-h-24 rounded-md overflow-hidden border-2 transition-all shrink-0 grow-0",
                   i === activeIndex
                     ? "border-foreground"
                     : "border-border hover:border-foreground/30"
