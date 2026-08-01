@@ -148,7 +148,7 @@ export function TradeExclusiveCard({
         </span>
       </div>
       <p className="font-body text-xs md:text-sm text-muted-foreground leading-relaxed max-w-sm mx-auto">
-        Sign in or apply for a trade account to view pricing.
+        View pricing, access projects & client management tools, logistical data, and AI curatorial guide.
       </p>
       <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
         <Link
