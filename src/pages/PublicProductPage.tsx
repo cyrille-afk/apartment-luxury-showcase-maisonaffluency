@@ -1263,49 +1263,9 @@ const PublicProductPage: React.FC = () => {
     // the variant's base/top/label, then show that variant's price (exact when
     // one variant matches, "From <min>" while the selection is still partial).
     {
-      const norm = (s: any) => String(s ?? "").trim().toLowerCase();
-      // Swatch labels ("Apparatus — Marble - Nero Portoro") and variant axis
-      // values ("Nero Portoro Marble") describe the same finish with different
-      // word order and a brand prefix, so compare them as token sets.
-      const tokenSet = (s: any) => {
-        let t = String(s ?? "").toLowerCase();
-        const dashIdx = t.indexOf("—");
-        if (dashIdx !== -1) t = t.slice(dashIdx + 1);
-        return new Set(
-          t
-            .split(/[^a-z0-9]+/)
-            .filter((w) => w.length > 1)
-        );
-      };
-      // Tolerate a single-character spelling drift between catalogue and
-      // swatch naming (e.g. "Nero Kinitra" vs "Nero Kinatra").
-      const nearWord = (a: string, b: string) => {
-        if (a === b) return true;
-        if (Math.abs(a.length - b.length) > 1 || Math.min(a.length, b.length) < 4) return false;
-        let i = 0, j = 0, diff = 0;
-        while (i < a.length && j < b.length) {
-          if (a[i] === b[j]) { i++; j++; continue; }
-          if (++diff > 1) return false;
-          if (a.length > b.length) i++;
-          else if (b.length > a.length) j++;
-          else { i++; j++; }
-        }
-        return diff + (a.length - i) + (b.length - j) <= 1;
-      };
-      const sameFinish = (a: any, b: any) => {
-        if (!a || !b) return false;
-        if (norm(a) === norm(b)) return true;
-        const A = tokenSet(a);
-        const B = tokenSet(b);
-        if (!A.size || !B.size) return false;
-        const small = A.size <= B.size ? A : B;
-        const large = A.size <= B.size ? B : A;
-        // Every word of the shorter label must appear in the longer one.
-        for (const w of small) {
-          if (![...large].some((x) => nearWord(w, x))) return false;
-        }
-        return small.size >= 2;
-      };
+      const norm = normFinish;
+      const sameFinish = sameFinishName;
+
 
 
       // The size dropdown and the finish swatches keep independent state, so a
