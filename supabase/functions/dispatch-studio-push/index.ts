@@ -11,8 +11,15 @@ const corsHeaders = {
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders })
 
+  // Cron-only. Accepts either the shared CRON_SECRET header or a service-role
+  // bearer (the scheduler reads the service-role key from the vault).
+  const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+  const cronSecretEnv = Deno.env.get('CRON_SECRET')
   const cronSecret = req.headers.get('x-cron-secret')
-  if (!cronSecret || cronSecret !== Deno.env.get('CRON_SECRET')) {
+  const bearer = (req.headers.get('authorization') || '').replace(/^Bearer\s+/i, '')
+  const authorised =
+    (!!cronSecretEnv && cronSecret === cronSecretEnv) || (!!serviceKey && bearer === serviceKey)
+  if (!authorised) {
     return new Response(JSON.stringify({ error: 'Unauthorized' }), {
       status: 401,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
