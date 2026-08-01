@@ -62,6 +62,7 @@ import {
 } from "@/components/product/PublicSpecTable";
 import TradeWorkspace from "@/components/product/TradeWorkspace";
 import TradePendingReviewCard from "@/components/product/TradePendingReviewCard";
+import CustomizationRequest from "@/components/product/CustomizationRequest";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 
@@ -1626,6 +1627,15 @@ const PublicProductPage: React.FC = () => {
 
 
 
+
+              {/* Bespoke customization — public guests get the inquiry modal,
+                  approved trade members are routed into Felix instead. */}
+              <CustomizationRequest
+                productId={product.id}
+                productTitle={product.title}
+                designerDisplay={designerDisplay}
+                tradeApproved={!!user && (isTradeUser || tradeStatus === "approved")}
+              />
 
               {/* Secondary actions: Favorite / Pin / Spec Sheet */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
