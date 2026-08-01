@@ -95,6 +95,55 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
     child?.scrollIntoView({ block: "nearest", behavior: "smooth" });
   }, [activeIndex]);
 
+  // ---- Hover-triggered micro-scrolling on the vertical thumbnail column ----
+  const hoverScrollRafRef = useRef<number | null>(null);
+  const hoverScrollDirRef = useRef(0); // -1 up, 1 down, 0 idle
+
+  const stopHoverScroll = useCallback(() => {
+    hoverScrollDirRef.current = 0;
+    if (hoverScrollRafRef.current != null) {
+      cancelAnimationFrame(hoverScrollRafRef.current);
+      hoverScrollRafRef.current = null;
+    }
+  }, []);
+
+  const runHoverScroll = useCallback(() => {
+    const el = thumbsRef.current;
+    const dir = hoverScrollDirRef.current;
+    if (!el || dir === 0) {
+      hoverScrollRafRef.current = null;
+      return;
+    }
+    el.scrollTop += dir * 1.6; // slow, fluid drift
+    hoverScrollRafRef.current = requestAnimationFrame(runHoverScroll);
+  }, []);
+
+  const handleThumbHoverMove = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      const el = thumbsRef.current;
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      if (rect.height === 0) return;
+      const y = e.clientY - rect.top;
+      const zone = rect.height * 0.2;
+      let dir = 0;
+      if (y <= zone && el.scrollTop > 0) dir = -1;
+      else if (y >= rect.height - zone && el.scrollTop < el.scrollHeight - el.clientHeight) dir = 1;
+
+      if (dir === 0) {
+        stopHoverScroll();
+        return;
+      }
+      hoverScrollDirRef.current = dir;
+      if (hoverScrollRafRef.current == null) {
+        hoverScrollRafRef.current = requestAnimationFrame(runHoverScroll);
+      }
+    },
+    [runHoverScroll, stopHoverScroll]
+  );
+
+  useEffect(() => stopHoverScroll, [stopHoverScroll]);
+
   if (images.length === 0) return null;
 
   return (
