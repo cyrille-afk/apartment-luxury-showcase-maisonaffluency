@@ -151,10 +151,9 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
                 />
               </button>
             ))}
-
-
-
+          </div>
         </div>
+
       )}
 
       {/* Main image + (mobile) thumb strip below */}
