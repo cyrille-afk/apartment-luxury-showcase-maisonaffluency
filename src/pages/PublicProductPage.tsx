@@ -1569,8 +1569,8 @@ const PublicProductPage: React.FC = () => {
 
 
 
-              {/* Signed-in visitors. Verified trade users get a direct route to
-                  the trade product sheet (net pricing, lead times, CAD);
+              {/* Signed-in visitors. Verified trade members get the full
+                  workspace (net pricing, availability, spec sheet + Felix);
                   everyone else signed in keeps the enquiry CTA. */}
               {user && (() => {
                 const returnTo = typeof window !== "undefined" ? location.pathname + location.search : "";
@@ -1582,24 +1582,32 @@ const PublicProductPage: React.FC = () => {
                   designerName: designerDisplay || "",
                   back: returnTo || "",
                 });
+                const inquireHref = `/contact?${q.toString()}#contact`;
+
+                if (isTradeUser) {
+                  return (
+                    <TradeWorkspace
+                      productId={product.id}
+                      title={product.title}
+                      designerDisplay={designerDisplay}
+                      dimensions={product.dimensions}
+                      materials={product.materials || (product as any).materials_description}
+                      originLine={product.origin}
+                      leadTime={product.lead_time}
+                      selectedFinishes={selectedFinishes}
+                      pdfUrl={product.pdf_url}
+                      pdfUrls={product.pdf_urls}
+                      inquireHref={inquireHref}
+                      felixUrl={typeof window !== "undefined" ? window.location.href : undefined}
+                    />
+                  );
+                }
+
                 return (
                   <div className="mt-2 space-y-2">
-                    {isTradeUser && (
-                      <Link
-                        to={`/trade/products/${product.id}`}
-                        className="flex items-center justify-center gap-2 px-4 py-3.5 rounded-md font-body text-[11px] md:text-xs uppercase tracking-[0.12em] transition-all w-full bg-foreground text-background hover:bg-foreground/90 text-center"
-                      >
-                        View Trade Pricing
-                      </Link>
-                    )}
                     <Link
-                      to={`/contact?${q.toString()}#contact`}
-                      className={cn(
-                        "flex items-center justify-center gap-2 px-4 py-3.5 rounded-md font-body text-[11px] md:text-xs uppercase tracking-[0.12em] transition-all w-full text-center",
-                        isTradeUser
-                          ? "border border-foreground/40 text-foreground hover:bg-foreground/5"
-                          : "bg-foreground text-background hover:bg-foreground/90"
-                      )}
+                      to={inquireHref}
+                      className="flex items-center justify-center gap-2 px-4 py-3.5 rounded-md font-body text-[11px] md:text-xs uppercase tracking-[0.12em] transition-all w-full text-center bg-foreground text-background hover:bg-foreground/90"
                     >
                       Inquire for Pricing
                     </Link>
