@@ -967,6 +967,8 @@ const PublicProductPage: React.FC = () => {
     }
   }, [stateFrom, storedFrom]);
   const { data, isLoading } = useProductBySlug(designerSlug, productSlug);
+  const { data: publicRrpRow } = usePublicRrp(data?.product?.id);
+  const publicRrpLabel = formatPublicRrp(publicRrpRow);
   const { isPinned, togglePin, items: compareItems } = useCompare();
   const { requireAuth, gateOpen, gateAction, closeGate } = useAuthGate();
 
