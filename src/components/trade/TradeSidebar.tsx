@@ -91,24 +91,56 @@ export function TradeSidebar() {
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
-              {coreItems.map((item) => (
-                <SidebarMenuItem key={item.url}>
-                  <SidebarMenuButton asChild>
-                    <NavLink
-                      to={item.url}
-                      end={item.end}
-                      className="flex items-center gap-3 px-3 py-2 rounded-md font-body text-sm text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-colors"
-                      activeClassName="bg-muted text-foreground font-medium"
-                    >
-                      <item.icon className="h-4 w-4 shrink-0" />
-                      {!collapsed && <span>{item.title}</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              {coreItems.map((item) => {
+                const isBoards = item.url === "/trade/boards";
+                const showDot = isBoards && bridgeCount > 0;
+                return (
+                  <SidebarMenuItem key={item.url}>
+                    <SidebarMenuButton asChild>
+                      <NavLink
+                        to={item.url}
+                        end={item.end}
+                        className="flex items-center gap-3 px-3 py-2 rounded-md font-body text-sm text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-colors"
+                        activeClassName="bg-muted text-foreground font-medium"
+                      >
+                        <span className="relative shrink-0">
+                          <item.icon className="h-4 w-4 shrink-0" />
+                          {showDot && (
+                            <span
+                              role="button"
+                              tabIndex={0}
+                              aria-label={`${bridgeCount} item${bridgeCount > 1 ? "s" : ""} flagged from mobile`}
+                              onClick={(e) => { e.preventDefault(); e.stopPropagation(); setBridgeOpen(true); }}
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.stopPropagation(); setBridgeOpen(true); }
+                              }}
+                              className="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full bg-amber-500 ring-2 ring-background animate-pulse cursor-pointer"
+                            />
+                          )}
+                        </span>
+                        {!collapsed && (
+                          <span className="flex items-center gap-2">
+                            <span>{item.title}</span>
+                            {showDot && (
+                              <button
+                                type="button"
+                                onClick={(e) => { e.preventDefault(); e.stopPropagation(); setBridgeOpen(true); }}
+                                className="inline-flex items-center px-1.5 py-0.5 rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-400 text-[9px] font-medium leading-none"
+                              >
+                                {bridgeCount} from mobile
+                              </button>
+                            )}
+                          </span>
+                        )}
+                      </NavLink>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+
 
         {isAdmin && (
           <SidebarGroup>
