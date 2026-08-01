@@ -995,6 +995,11 @@ const PublicProductPage: React.FC = () => {
   // Mobile/PWA: shrink the product image once the user scrolls past a small threshold.
   const [galleryCompact, setGalleryCompact] = useState(false);
   const [showStickyBar, setShowStickyBar] = useState(false);
+  // Finish/size selection surfaced in the authenticated Trade Workspace and
+  // injected into Felix's product context.
+  const [selectedFinishes, setSelectedFinishes] = useState<string[]>([]);
+  // Signed-out visitors get an elegant explainer instead of the gated PDF.
+  const [specSheetLocked, setSpecSheetLocked] = useState(false);
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (window.matchMedia("(min-width: 1024px)").matches) return;
