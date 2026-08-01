@@ -316,9 +316,13 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
           >
             <CrossfadeImage src={images[activeIndex]} alt={alt} />
           </button>
+          {/* Mobile: no tap-to-zoom handler, but the image itself keeps pointer
+              events so a tap-and-hold offers "Save to Photos" (designers treat
+              their camera roll as an extension of the studio library). */}
           <div className="md:hidden absolute inset-0 flex items-center justify-center overflow-hidden rounded-[inherit]">
-            <CrossfadeImage src={images[activeIndex]} alt={alt} pointerEventsNone />
+            <CrossfadeImage src={images[activeIndex]} alt={alt} />
           </div>
+
 
           {/* Hover-to-navigate now lives on the vertical thumbnail strip (see above). */}
 
