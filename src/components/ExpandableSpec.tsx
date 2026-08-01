@@ -98,7 +98,9 @@ export default function ExpandableSpec({
     }
   }
 
+  const isMobile = useIsMobile();
   const [internalIdx, setInternalIdx] = useState<number | null>(null);
+
   const [open, setOpen] = useState(false);
   const [activeIdx, setActiveIdx] = useState<number>(0);
   const triggerRef = useRef<HTMLButtonElement>(null);
