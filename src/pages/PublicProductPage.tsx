@@ -1637,43 +1637,68 @@ const PublicProductPage: React.FC = () => {
                 tradeApproved={!!user && (isTradeUser || tradeStatus === "approved")}
               />
 
-              {/* Secondary actions: Favorite / Pin / Spec Sheet */}
+              {/* Secondary actions: Favorite / Pin / Spec Sheet.
+                  Always visible. Guests get the Sign In modal on click;
+                  approved trade members get the spec sheet un-gated. */}
+              {(() => {
+                const tradeApprovedFooter = !!user && (isTradeUser || tradeStatus === "approved");
+                const hasSheet = !!(product.pdf_url || (product.pdf_urls && product.pdf_urls.length > 0));
+                const baseBtn =
+                  "w-full flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-md font-body text-[11px] uppercase tracking-[0.12em] transition-all border";
+                const idleBtn =
+                  "border-border text-muted-foreground hover:text-foreground hover:border-foreground/30";
+
+                return (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                 <div className="hidden md:block">
+                {user ? (
                 <FavoriteFolderPicker pickId={product.id} align="start" side="top">
                   <button
                     onClick={(e) => e.stopPropagation()}
                     className={cn(
-                      "w-full flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-md font-body text-[11px] uppercase tracking-[0.12em] transition-all border",
+                      baseBtn,
                       favorited
                         ? "border-destructive/30 text-destructive bg-destructive/10"
-                        : "border-border text-muted-foreground hover:text-foreground hover:border-foreground/30"
+                        : idleBtn
                     )}
                   >
                     <Heart size={13} className={cn(favorited && "fill-current")} />
                     {favorited ? "Saved" : "Favorite"}
                   </button>
                 </FavoriteFolderPicker>
+                ) : (
+                  <button
+                    onClick={() => requireAuth(() => {}, "save this piece to your favourites")}
+                    className={cn(baseBtn, idleBtn)}
+                  >
+                    <Heart size={13} />
+                    Favorite
+                  </button>
+                )}
                 </div>
 
-
                 <button
-                  onClick={() => togglePin(compareItem)}
+                  onClick={() => {
+                    if (!user) {
+                      requireAuth(() => {}, "pin this piece to your selection");
+                      return;
+                    }
+                    togglePin(compareItem);
+                  }}
                   className={cn(
                     "hidden md:flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-md font-body text-[11px] uppercase tracking-[0.12em] transition-all border",
                     pinned
                       ? "bg-[hsl(var(--gold))]/10 border-[hsl(var(--gold))] text-[hsl(var(--gold))]"
-                      : "border-border text-muted-foreground hover:text-foreground hover:border-foreground/30",
-                    compareItems.length >= 3 && !pinned && "opacity-40 pointer-events-none"
+                      : idleBtn,
+                    user && compareItems.length >= 3 && !pinned && "opacity-40 pointer-events-none"
                   )}
                 >
                   <Scale size={13} />
                   {pinned ? "Pinned" : "Pin to Selection"}
                 </button>
 
-                {(product.pdf_url || (product.pdf_urls && product.pdf_urls.length > 0)) ? (
-                  // Trade members already have the spec sheet inside the workspace.
-                  <div className={cn("hidden", !isTradeUser && "md:block")}>
+                {hasSheet ? (
+                  <div className="hidden md:block">
                     <SpecSheetButton
                       pdfUrl={product.pdf_url}
                       pdfUrls={product.pdf_urls}
@@ -1681,9 +1706,10 @@ const PublicProductPage: React.FC = () => {
                       productName={product.title}
                       variant="button"
                       onBeforeOpen={() => {
+                        // Verified trade: open immediately, no gate.
+                        if (tradeApprovedFooter) return true;
                         if (!user) {
-                          // Signed out: never load gated data — explain instead.
-                          setSpecSheetLocked(true);
+                          requireAuth(() => {}, "open this spec sheet");
                           return false;
                         }
                         let allowed = false;
@@ -1701,6 +1727,8 @@ const PublicProductPage: React.FC = () => {
                   </Link>
                 )}
               </div>
+                );
+              })()}
 
               {/* Signed-out spec sheet explainer — points back to the trade card. */}
               <Dialog open={specSheetLocked} onOpenChange={setSpecSheetLocked}>
