@@ -54,6 +54,12 @@ import {
 } from "@/lib/finishDuplication";
 import { useAuth } from "@/hooks/useAuth";
 import { isCollectibleSlug, collectibleGateRedirect } from "@/lib/collectibleGate";
+import {
+  PublicSpecTable,
+  TradeExclusiveCard,
+  parseDimensions,
+  quantitativeValue,
+} from "@/components/product/PublicSpecTable";
 
 
 /* ------------------------------------------------------------------ */
