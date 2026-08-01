@@ -853,7 +853,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
 
   return (
     <TooltipProvider>
-      <div className={className}>
+      <div className={className} onMouseLeave={restoreLockedPreview}>
       {isRugProduct && visibleFabricTiles.length > 0 ? (
         <div className="border-t border-border/60">
           <button
