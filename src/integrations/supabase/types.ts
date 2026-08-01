@@ -1844,6 +1844,54 @@ export type Database = {
         }
         Relationships: []
       }
+      custom_inquiries: {
+        Row: {
+          company: string | null
+          created_at: string
+          designer_name: string | null
+          email: string
+          id: string
+          name: string
+          page_url: string | null
+          product_id: string | null
+          product_title: string | null
+          requirements: string
+          status: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          company?: string | null
+          created_at?: string
+          designer_name?: string | null
+          email: string
+          id?: string
+          name: string
+          page_url?: string | null
+          product_id?: string | null
+          product_title?: string | null
+          requirements: string
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          company?: string | null
+          created_at?: string
+          designer_name?: string | null
+          email?: string
+          id?: string
+          name?: string
+          page_url?: string | null
+          product_id?: string | null
+          product_title?: string | null
+          requirements?: string
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       descriptor_taxonomy: {
         Row: {
           category: string
