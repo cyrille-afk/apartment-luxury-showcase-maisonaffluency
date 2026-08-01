@@ -166,6 +166,30 @@ Deno.serve(async (req) => {
         `Open your studio dashboard: ${siteUrl}/trade/boards`,
       ].join('\n')
 
+      // One unsubscribe token per address — required by the send API.
+      const normalizedEmail = profile.email.toLowerCase()
+      let unsubscribeToken: string | null = null
+      const { data: existingToken } = await supabase
+        .from('email_unsubscribe_tokens')
+        .select('token, used_at')
+        .eq('email', normalizedEmail)
+        .maybeSingle()
+      if (existingToken && !existingToken.used_at) {
+        unsubscribeToken = existingToken.token as string
+      } else if (!existingToken) {
+        const fresh = crypto.randomUUID().replace(/-/g, '') + crypto.randomUUID().replace(/-/g, '')
+        await supabase
+          .from('email_unsubscribe_tokens')
+          .upsert({ token: fresh, email: normalizedEmail }, { onConflict: 'email', ignoreDuplicates: true })
+        const { data: stored } = await supabase
+          .from('email_unsubscribe_tokens')
+          .select('token')
+          .eq('email', normalizedEmail)
+          .maybeSingle()
+        unsubscribeToken = (stored?.token as string) || fresh
+      }
+      if (!unsubscribeToken) continue
+
       const messageId = `studio-digest-${today}-${userId}`
 
       await supabase.rpc('enqueue_email', {
@@ -177,6 +201,7 @@ Deno.serve(async (req) => {
           subject: `Studio Sourcing Digest — ${userItems.length} piece${userItems.length > 1 ? 's' : ''} saved`,
           html,
           text,
+          unsubscribe_token: unsubscribeToken,
           purpose: 'transactional',
           label: 'studio-digest',
           message_id: messageId,
