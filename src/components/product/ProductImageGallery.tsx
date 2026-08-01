@@ -42,15 +42,23 @@ const CrossfadeImage: React.FC<{ src: string; alt: string; pointerEventsNone?: b
   alt,
   pointerEventsNone,
 }) => {
+  // The outgoing frame stays fully opaque underneath; only the incoming frame
+  // fades in on top. Cross-dissolving *both* layers made the dark backdrop
+  // show through mid-transition, which read as a flicker on each swipe.
   const [current, setCurrent] = useState(src);
   const [incoming, setIncoming] = useState<string | null>(null);
   const [fading, setFading] = useState(false);
+  const settleRef = useRef<() => void>(() => {});
 
   useEffect(() => {
     if (src === current) {
       setIncoming(null);
+      setFading(false);
       return;
     }
+    // A new source arriving mid-fade: commit the in-flight frame first so we
+    // never stack three layers or snap back to a stale photo.
+    settleRef.current();
     let cancelled = false;
     setIncoming(src);
     setFading(false);
@@ -82,12 +90,13 @@ const CrossfadeImage: React.FC<{ src: string; alt: string; pointerEventsNone?: b
       return null;
     });
   }, []);
+  settleRef.current = settle;
 
   // `transitionend` never fires for a hidden container (the desktop layer on a
   // phone, and vice-versa), so also settle on a timer matching the fade.
   useEffect(() => {
     if (!incoming || !fading) return;
-    const t = window.setTimeout(settle, 560);
+    const t = window.setTimeout(settle, 400);
     return () => window.clearTimeout(t);
   }, [incoming, fading, settle]);
 
@@ -102,17 +111,19 @@ const CrossfadeImage: React.FC<{ src: string; alt: string; pointerEventsNone?: b
       <img
         src={current}
         alt={alt}
-        className={cn(base, "transition-opacity duration-500 ease-out", fading ? "opacity-0" : "opacity-100")}
+        draggable={false}
+        className={cn(base, "opacity-100")}
       />
       {incoming && (
         <img
           src={incoming}
           alt=""
           aria-hidden="true"
+          draggable={false}
           onTransitionEnd={settle}
           className={cn(
             base,
-            "absolute transition-opacity duration-500 ease-out",
+            "absolute transition-opacity duration-300 ease-out",
             fading ? "opacity-100" : "opacity-0"
           )}
         />
@@ -120,6 +131,7 @@ const CrossfadeImage: React.FC<{ src: string; alt: string; pointerEventsNone?: b
     </span>
   );
 };
+
 
 
 const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, overlay, firstImageBadge, activeIndex: controlledIndex, activeIndexNonce, onIndexChange, caption, compact }) => {
