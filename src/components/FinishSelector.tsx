@@ -647,7 +647,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
         onMouseEnter={hoverPreview}
         onFocus={hoverPreview}
         className={cn(
-          "group relative aspect-square w-full overflow-hidden rounded-md bg-muted/30 ring-1 ring-border/60 transition",
+          "group relative aspect-square w-full overflow-hidden rounded-control bg-muted/30 ring-1 ring-border/60 transition",
           isSelected
             ? "ring-2 ring-foreground ring-offset-2 ring-offset-background"
             : "hover:ring-foreground/40"
@@ -1116,7 +1116,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
                             type="button"
                             onClick={() => setZoomed(f)}
                             className={cn(
-                              "shrink-0 w-16 h-16 rounded-md overflow-hidden bg-muted/30 ring-1 transition",
+                              "shrink-0 w-16 h-16 rounded-control overflow-hidden bg-muted/30 ring-1 transition",
                               isActive
                                 ? "ring-2 ring-foreground"
                                 : "ring-border/60 hover:ring-foreground/40"
