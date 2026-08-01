@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useRef, useEffect } from "react";
-import { ChevronLeft, ChevronRight, X, Maximize2, Expand, MoreHorizontal } from "lucide-react";
+import { ChevronLeft, ChevronRight, X, Maximize2, Expand, Images } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   DropdownMenu,
@@ -357,7 +357,7 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
                 className="w-9 h-9 rounded-full bg-background/25 backdrop-blur-md border border-border/25 flex items-center justify-center touch-manipulation"
                 onClick={(e) => e.stopPropagation()}
               >
-                <MoreHorizontal size={20} strokeWidth={1.5} className="text-foreground/80" />
+                <Images size={20} strokeWidth={1.5} className="text-foreground/80" />
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="min-w-[190px]">
                 <DropdownMenuItem onSelect={() => setPresentOpen(true)} className="gap-2.5 font-body text-[11px] uppercase tracking-[0.16em]">
@@ -385,14 +385,6 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
               <Maximize2 size={14} strokeWidth={1.5} className="text-foreground" />
             </button>
           </div>
-          <button
-            type="button"
-            onClick={(e) => { e.stopPropagation(); setZoomOpen(true); }}
-            aria-label="Expand image"
-            className="md:hidden absolute bottom-3 right-3 z-30 w-8 h-8 rounded-full bg-background/25 backdrop-blur-md border border-border/25 flex items-center justify-center touch-manipulation"
-          >
-            <Maximize2 size={16} strokeWidth={1.5} className="text-foreground/80" />
-          </button>
           {/* Fractional gallery counter — bottom-centre on mobile, bottom-right on desktop. */}
           {images.length > 1 && (
             <div className="absolute bottom-4 left-1/2 -translate-x-1/2 md:left-auto md:translate-x-0 md:bottom-3 md:right-3 z-20 pointer-events-none">
@@ -515,51 +507,47 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
           <VisuallyHidden>
             <DialogTitle>{alt}</DialogTitle>
           </VisuallyHidden>
-          <button
-            type="button"
-            onClick={() => setZoomOpen(false)}
-            onTouchEnd={(e) => { e.preventDefault(); e.stopPropagation(); setZoomOpen(false); }}
-            aria-label="Close"
-            style={{ top: 'max(1rem, env(safe-area-inset-top))', right: 'max(1rem, env(safe-area-inset-right))' }}
-            className="absolute z-[100] w-12 h-12 rounded-full bg-background/90 backdrop-blur-sm border border-border/50 flex items-center justify-center hover:bg-background transition-colors touch-manipulation"
-          >
-            <X size={20} className="text-foreground" />
-          </button>
           <img
             src={images[activeIndex]}
             alt={alt}
-            className="max-w-[95vw] max-h-[92vh] object-contain"
+            className="max-w-[95vw] max-h-[86vh] object-contain"
           />
-          {images.length > 1 && (
-            <>
-              <button
-                type="button"
-                onClick={(e) => { e.stopPropagation(); goTo(activeIndex - 1); }}
-                disabled={activeIndex === 0}
-                aria-label="Previous image"
-                className="absolute left-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 flex items-center justify-center hover:bg-background disabled:opacity-30 disabled:pointer-events-none transition-colors"
-              >
-                <ChevronLeft size={20} className="text-foreground" />
-              </button>
-              <button
-                type="button"
-                onClick={(e) => { e.stopPropagation(); goTo(activeIndex + 1); }}
-                disabled={activeIndex === images.length - 1}
-                aria-label="Next image"
-                className="absolute right-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 flex items-center justify-center hover:bg-background disabled:opacity-30 disabled:pointer-events-none transition-colors"
-              >
-                <ChevronRight size={20} className="text-foreground" />
-              </button>
-              <SliderDots
-                count={images.length}
-                activeIndex={activeIndex}
-                onSelect={goTo}
-                variant="dark"
-                ariaPrefix="View image"
-                className="absolute bottom-6 left-1/2 -translate-x-1/2"
-              />
-            </>
-          )}
+          {/* Bottom control rail: progress markers + counter + close */}
+          <div
+            className="absolute left-0 right-0 z-[100] flex items-center gap-4 px-5"
+            style={{ bottom: 'max(1.25rem, env(safe-area-inset-bottom))' }}
+          >
+            {images.length > 1 && (
+              <div className="flex-1 flex items-center gap-2">
+                {images.map((_, i) => (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); goTo(i); }}
+                    aria-label={`View image ${i + 1} of ${images.length}`}
+                    className={cn(
+                      "flex-1 rounded-full transition-all duration-200",
+                      i === activeIndex ? "h-[3px] bg-foreground" : "h-px bg-foreground/25"
+                    )}
+                  />
+                ))}
+              </div>
+            )}
+            {images.length > 1 && (
+              <span className="font-body text-[10px] font-light uppercase tracking-[0.18em] text-foreground/60 tabular-nums shrink-0">
+                {String(activeIndex + 1).padStart(2, "0")} / {String(images.length).padStart(2, "0")}
+              </span>
+            )}
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); setZoomOpen(false); }}
+              onTouchEnd={(e) => { e.preventDefault(); e.stopPropagation(); setZoomOpen(false); }}
+              aria-label="Close"
+              className="shrink-0 w-9 h-9 rounded-full bg-background/25 backdrop-blur-md border border-border/25 flex items-center justify-center touch-manipulation ml-auto"
+            >
+              <X size={18} strokeWidth={1.5} className="text-foreground/80" />
+            </button>
+          </div>
         </DialogContent>
       </Dialog>
 
