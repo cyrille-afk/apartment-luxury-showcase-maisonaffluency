@@ -1,11 +1,16 @@
-import React, { Suspense, lazy } from "react";
+import React, { Suspense, lazy, useState } from "react";
 import { Link } from "react-router-dom";
-import { FileDown, Loader2 } from "lucide-react";
+import { FileDown, Loader2, Laptop, Check } from "lucide-react";
+import { toast } from "sonner";
 import SpecSheetButton from "@/components/trade/SpecSheetButton";
+import ClientSafeToggle from "@/components/trade/ClientSafeToggle";
+import { useClientSafeMode } from "@/lib/clientSafeMode";
+import { supabase } from "@/integrations/supabase/client";
 import { useTradeProductPricing } from "@/hooks/useTradeProductPricing";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { cn } from "@/lib/utils";
 import type { FelixProductContext } from "@/components/product/ProductFelixPanel";
+
 
 // Felix (and its whole runtime) is code-split and only ever requested inside
 // this authenticated workspace — never for signed-out visitors.
