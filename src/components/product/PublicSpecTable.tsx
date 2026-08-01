@@ -107,16 +107,14 @@ export function PublicSpecTable({
   if (frame) rows.push({ label: "Frame Material", value: frame });
   if (upholsteryOptions.length)
     rows.push({ label: "Upholstery Options", value: upholsteryOptions.join(" · ") });
-  if (sku) rows.push({ label: "Reference", value: sku });
-
   if (!rows.length) return null;
 
+  // Kept in the DOM for crawlers/AI search, but visually hidden: dimensions and
+  // finishes are already surfaced in the page header and finish selector.
   return (
-    <section aria-label="Specifications" className="mt-6">
-      <h2 className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-2">
-        Specifications
-      </h2>
-      <dl className="rounded-md border border-border/60 px-4 py-1">
+    <section aria-label="Specifications" className="sr-only">
+      <h2>Specifications</h2>
+      <dl>
         {rows.map((r) => (
           <Row key={r.label} label={r.label} value={r.value} />
         ))}
