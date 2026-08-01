@@ -127,11 +127,19 @@ export function PublicSpecTable({
 
 /**
  * Signed-out paywall shown in place of trade price, lead times and CAD files.
+ * `inquireHref` routes to the same enquiry form used by "Inquire for Pricing".
  */
-export function TradeExclusiveCard({ redirectTo }: { redirectTo?: string }) {
+export function TradeExclusiveCard({
+  redirectTo,
+  inquireHref,
+}: {
+  redirectTo?: string;
+  inquireHref?: string;
+}) {
   const q = new URLSearchParams();
   if (redirectTo) q.set("redirect", redirectTo);
   const loginHref = `/trade/login${q.toString() ? `?${q.toString()}` : ""}`;
+  const applyHref = inquireHref || "/trade/register";
 
   return (
     <section className="mt-4 rounded-md border border-[hsl(var(--gold))]/30 bg-card/40 px-5 py-5 text-center">
@@ -152,7 +160,7 @@ export function TradeExclusiveCard({ redirectTo }: { redirectTo?: string }) {
           Sign in to view
         </Link>
         <Link
-          to="/trade/register"
+          to={applyHref}
           className="inline-flex items-center justify-center px-5 py-3 rounded-md border border-foreground/40 text-foreground font-body text-[11px] uppercase tracking-[0.12em] hover:bg-foreground/5 transition-colors"
         >
           Apply for trade access
@@ -161,5 +169,6 @@ export function TradeExclusiveCard({ redirectTo }: { redirectTo?: string }) {
     </section>
   );
 }
+
 
 export default PublicSpecTable;
