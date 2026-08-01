@@ -63,7 +63,7 @@ import {
 import TradeWorkspace from "@/components/product/TradeWorkspace";
 import TradePendingReviewCard from "@/components/product/TradePendingReviewCard";
 import CustomizationRequest from "@/components/product/CustomizationRequest";
-import { usePublicRrp, formatPublicRrp } from "@/hooks/usePublicRrp";
+import { usePublicRrp, formatPublicRrp, formatPublicRrpCents } from "@/hooks/usePublicRrp";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 
