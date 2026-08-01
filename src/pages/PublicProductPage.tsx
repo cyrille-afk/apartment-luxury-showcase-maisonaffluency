@@ -1138,10 +1138,15 @@ const PublicProductPage: React.FC = () => {
   // therefore allowed only after a fresh gesture starts while already compact.
   const galleryCompactRef = useRef(false);
   const compactCanExpandRef = useRef(false);
+  // Never collapse before the visitor has actually interacted: on landing the
+  // browser can restore a previous scroll offset (or fire a transient scroll),
+  // which would show the image already shrunken.
+  const hasInteractedRef = useRef(false);
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (window.matchMedia("(min-width: 1024px)").matches) return;
     const armExpansion = () => {
+      hasInteractedRef.current = true;
       if (galleryCompactRef.current) compactCanExpandRef.current = true;
     };
     const onScroll = () => {
@@ -1153,7 +1158,8 @@ const PublicProductPage: React.FC = () => {
         if (prev && Date.now() < compactLockUntilRef.current) return true;
         const next = prev
           ? !(compactCanExpandRef.current && y <= 2)
-          : y > 140;
+          : hasInteractedRef.current && y > 140;
+
         if (!prev && next) {
           const frame = document.querySelector(".product-image-frame") as HTMLElement | null;
           galleryHeightRef.current = frame?.getBoundingClientRect().height ?? 0;
