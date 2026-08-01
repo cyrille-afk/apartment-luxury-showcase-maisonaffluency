@@ -143,7 +143,7 @@ const CrossfadeImage: React.FC<{ src: string; alt: string; pointerEventsNone?: b
 
 
 
-const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, overlay, firstImageBadge, activeIndex: controlledIndex, activeIndexNonce, onIndexChange, caption, compact }) => {
+const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, overlay, firstImageBadge, activeIndex: controlledIndex, activeIndexNonce, onIndexChange, caption, compact, mobileMenuItems }) => {
 
   const [activeIndex, setActiveIndex] = useState(controlledIndex ?? 0);
 
