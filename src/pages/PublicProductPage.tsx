@@ -1134,9 +1134,16 @@ const PublicProductPage: React.FC = () => {
   // full size. Lock the collapsed state for a moment so momentum scrolling and
   // the compensation itself cannot re-expand it.
   const compactLockUntilRef = useRef(0);
+  // iOS may briefly report scrollY = 0 when momentum settles. Expansion is
+  // therefore allowed only after a fresh gesture starts while already compact.
+  const galleryCompactRef = useRef(false);
+  const compactCanExpandRef = useRef(false);
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (window.matchMedia("(min-width: 1024px)").matches) return;
+    const armExpansion = () => {
+      if (galleryCompactRef.current) compactCanExpandRef.current = true;
+    };
     const onScroll = () => {
       const y = window.scrollY;
       const el = galleryScrollRef.current;
@@ -1144,11 +1151,17 @@ const PublicProductPage: React.FC = () => {
       // expand again only right at the very top of the page.
       setGalleryCompact((prev) => {
         if (prev && Date.now() < compactLockUntilRef.current) return true;
-        const next = prev ? y > 2 : y > 140;
+        const next = prev
+          ? !(compactCanExpandRef.current && y <= 2)
+          : y > 140;
         if (!prev && next) {
           const frame = document.querySelector(".product-image-frame") as HTMLElement | null;
           galleryHeightRef.current = frame?.getBoundingClientRect().height ?? 0;
+          compactCanExpandRef.current = false;
+        } else if (prev && !next) {
+          compactCanExpandRef.current = false;
         }
+        galleryCompactRef.current = next;
         return next;
       });
       const navEl = document.querySelector("nav.fixed, header.fixed") as HTMLElement | null;
@@ -1162,7 +1175,13 @@ const PublicProductPage: React.FC = () => {
     };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    window.addEventListener("touchstart", armExpansion, { passive: true });
+    window.addEventListener("wheel", armExpansion, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("touchstart", armExpansion);
+      window.removeEventListener("wheel", armExpansion);
+    };
   }, []);
 
   // When the image collapses, the whole page shifts up by the height it lost.
