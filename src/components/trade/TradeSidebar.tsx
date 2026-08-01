@@ -243,6 +243,8 @@ export function TradeSidebar() {
           {!collapsed && <span>Sign Out</span>}
         </button>
       </SidebarFooter>
+      <StudioBridgeSidebar open={bridgeOpen} onOpenChange={setBridgeOpen} />
     </Sidebar>
   );
 }
+
