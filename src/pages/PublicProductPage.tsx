@@ -1174,6 +1174,12 @@ const PublicProductPage: React.FC = () => {
     label: string | null,
     opts?: { base?: string | null; top?: string | null; size?: string | null; fromSwatch?: boolean }
   ) => {
+    // Mirror the selection into the trade workspace / Felix context.
+    setSelectedFinishes(
+      [opts?.base, opts?.top, opts?.size, !opts?.base && !opts?.top ? label : null]
+        .map((v) => (v ? String(v).trim() : ""))
+        .filter(Boolean)
+    );
     // Detect a "clear selection" call: no label and no axis values.
     const isClear =
       !label &&
