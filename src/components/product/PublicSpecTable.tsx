@@ -142,7 +142,7 @@ export function TradeExclusiveCard({
   const applyHref = inquireHref || "/trade/register";
 
   return (
-    <section className="mt-4 rounded-md border border-[hsl(var(--gold))]/30 bg-card/40 px-5 py-5 text-center">
+    <section className="mt-4 rounded-none border border-[hsl(var(--gold))]/30 bg-card/40 px-5 py-5 text-center">
       <div className="inline-flex items-center gap-1.5 mb-2">
         <Lock className="h-3 w-3 text-[hsl(var(--gold))]" aria-hidden="true" />
         <span className="font-body text-[10px] uppercase tracking-[0.18em] text-[hsl(var(--gold))]">
@@ -162,13 +162,13 @@ export function TradeExclusiveCard({
       <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
         <Link
           to={loginHref}
-          className="inline-flex items-center justify-center px-5 py-3 rounded-md bg-foreground text-background font-body text-[11px] uppercase tracking-[0.12em] hover:bg-foreground/90 transition-colors"
+          className="inline-flex items-center justify-center px-5 py-3 rounded-[2px] bg-foreground text-background font-body text-[11px] uppercase tracking-[0.12em] hover:bg-foreground/90 transition-colors"
         >
           Sign in to view
         </Link>
         <Link
           to={applyHref}
-          className="inline-flex items-center justify-center px-5 py-3 rounded-md border border-foreground/40 text-foreground font-body text-[11px] uppercase tracking-[0.12em] hover:bg-foreground/5 transition-colors"
+          className="inline-flex items-center justify-center px-5 py-3 rounded-[2px] border border-foreground/40 text-foreground font-body text-[11px] uppercase tracking-[0.12em] hover:bg-foreground/5 transition-colors"
         >
           Apply for trade access
         </Link>
