@@ -1666,7 +1666,7 @@ const PublicProductPage: React.FC = () => {
                   })()}
                 </div>
 
-                <div className="absolute bottom-3 right-3 pointer-events-auto">
+                <div className="absolute bottom-3 left-3 md:left-auto md:right-3 pointer-events-auto">
                   {user && (isTradeUser || tradeStatus === "approved") ? (
                     // Trade members get the studio "drop" anchor instead of the
                     // retail heart: one tap → bottom sheet → project.
