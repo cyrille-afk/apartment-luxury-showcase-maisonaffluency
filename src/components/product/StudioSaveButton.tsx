@@ -31,13 +31,14 @@ function haptic(pattern: number | number[] = 12) {
 export default function StudioSaveButton({
   pickId,
   productTitle,
-  selectedFinishes,
+  finishes,
   className,
 }: {
   /** designer_curator_picks.id (or trade_products.id) for the product on screen */
   pickId: string;
   productTitle: string;
-  selectedFinishes?: { variant?: string | null; wood?: string | null; fabric?: string | null };
+  /** Currently chosen finish labels, stored alongside the saved item */
+  finishes?: string[];
   className?: string;
 }) {
   const { user } = useAuth();
@@ -141,19 +142,14 @@ export default function StudioSaveButton({
         .select("id", { count: "exact", head: true })
         .eq("board_id", boardId);
 
-      const noteLines: string[] = [];
-      if (selectedFinishes?.variant) noteLines.push(`Variant: ${selectedFinishes.variant}`);
-      if (selectedFinishes?.wood) noteLines.push(`Base / Wood: ${selectedFinishes.wood}`);
-      if (selectedFinishes?.fabric) noteLines.push(`Fabric: ${selectedFinishes.fabric}`);
+      const chosen = (finishes || []).filter(Boolean);
 
       const { error } = await supabase.from("client_board_items").insert({
         board_id: boardId,
         product_id: tradeProductId,
         sort_order: count ?? 0,
-        notes: noteLines.length ? noteLines.join("\n") : null,
-        variant_label: selectedFinishes?.variant || null,
-        wood_label: selectedFinishes?.wood || null,
-        fabric_label: selectedFinishes?.fabric || null,
+        notes: chosen.length ? `Finishes: ${chosen.join(", ")}` : null,
+        variant_label: chosen[0] || null,
       } as any);
       if (error) { toast.error("Couldn't save", { description: error.message }); return; }
 
