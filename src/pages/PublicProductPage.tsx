@@ -1537,12 +1537,12 @@ const PublicProductPage: React.FC = () => {
           aria-hidden={!showStickyBar}
         >
           <div className="px-3 pt-2 pb-2.5">
-            <div className="flex items-baseline gap-2 min-w-0">
-              <p className="font-display text-[13px] leading-tight text-foreground truncate shrink">
+            <div className="flex items-center justify-center gap-1.5 min-w-0 text-center">
+              <p className="font-display text-[13px] leading-tight text-foreground truncate">
                 {product.title}
               </p>
-              <span className="text-muted-foreground/50 text-[11px] shrink-0">·</span>
-              <p className="font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground truncate shrink-0 max-w-[45%]">
+              <span className="text-muted-foreground/60 text-[11px] shrink-0">by</span>
+              <p className="font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground truncate max-w-[45%]">
                 {designerDisplay}
               </p>
             </div>
