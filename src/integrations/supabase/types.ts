@@ -721,39 +721,51 @@ export type Database = {
       }
       client_board_items: {
         Row: {
+          added_by: string | null
           approval_status: string
           board_id: string
           created_at: string
+          digest_sent_at: string | null
           fabric_label: string | null
           id: string
           notes: string | null
           product_id: string
+          saved_via: string
+          seen_on_desktop_at: string | null
           sort_order: number
           subfolder: string | null
           variant_label: string | null
           wood_label: string | null
         }
         Insert: {
+          added_by?: string | null
           approval_status?: string
           board_id: string
           created_at?: string
+          digest_sent_at?: string | null
           fabric_label?: string | null
           id?: string
           notes?: string | null
           product_id: string
+          saved_via?: string
+          seen_on_desktop_at?: string | null
           sort_order?: number
           subfolder?: string | null
           variant_label?: string | null
           wood_label?: string | null
         }
         Update: {
+          added_by?: string | null
           approval_status?: string
           board_id?: string
           created_at?: string
+          digest_sent_at?: string | null
           fabric_label?: string | null
           id?: string
           notes?: string | null
           product_id?: string
+          saved_via?: string
+          seen_on_desktop_at?: string | null
           sort_order?: number
           subfolder?: string | null
           variant_label?: string | null
@@ -4693,6 +4705,42 @@ export type Database = {
           },
         ]
       }
+      push_subscriptions: {
+        Row: {
+          auth: string
+          created_at: string
+          endpoint: string
+          id: string
+          last_success_at: string | null
+          p256dh: string
+          updated_at: string
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          auth: string
+          created_at?: string
+          endpoint: string
+          id?: string
+          last_success_at?: string | null
+          p256dh: string
+          updated_at?: string
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          auth?: string
+          created_at?: string
+          endpoint?: string
+          id?: string
+          last_success_at?: string | null
+          p256dh?: string
+          updated_at?: string
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       quote_email_log: {
         Row: {
           client_id: string | null
@@ -5407,6 +5455,54 @@ export type Database = {
         Update: {
           id?: string
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      studio_alerts: {
+        Row: {
+          board_id: string | null
+          body: string
+          created_at: string
+          id: string
+          kind: string
+          product_id: string | null
+          project_name: string | null
+          pushed_at: string | null
+          read_at: string | null
+          title: string
+          updated_at: string
+          url: string | null
+          user_id: string
+        }
+        Insert: {
+          board_id?: string | null
+          body: string
+          created_at?: string
+          id?: string
+          kind?: string
+          product_id?: string | null
+          project_name?: string | null
+          pushed_at?: string | null
+          read_at?: string | null
+          title: string
+          updated_at?: string
+          url?: string | null
+          user_id: string
+        }
+        Update: {
+          board_id?: string | null
+          body?: string
+          created_at?: string
+          id?: string
+          kind?: string
+          product_id?: string | null
+          project_name?: string | null
+          pushed_at?: string | null
+          read_at?: string | null
+          title?: string
+          updated_at?: string
+          url?: string | null
+          user_id?: string
         }
         Relationships: []
       }
