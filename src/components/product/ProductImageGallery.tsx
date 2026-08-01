@@ -523,6 +523,16 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
           )}
         </DialogContent>
       </Dialog>
+
+      <PresentationMode
+        open={presentOpen}
+        images={images}
+        alt={alt}
+        index={activeIndex}
+        onIndexChange={goTo}
+        onClose={() => setPresentOpen(false)}
+      />
+
     </div>
   );
 };
