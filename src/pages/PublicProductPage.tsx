@@ -84,6 +84,51 @@ function slugify(s: string) {
   return s.toLowerCase().replace(/['']/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 }
 
+/* ------------------------------------------------------------------ */
+/*  Finish-name matching (swatch labels vs catalogue variant axes)      */
+/* ------------------------------------------------------------------ */
+const normFinish = (s: any) => String(s ?? "").trim().toLowerCase();
+
+// Swatch labels ("Apparatus — Marble - Nero Portoro") and variant axis values
+// ("Nero Portoro Marble") describe the same finish with different word order
+// and a brand prefix, so compare them as token sets.
+const finishTokenSet = (s: any) => {
+  let t = String(s ?? "").toLowerCase();
+  const dashIdx = t.indexOf("—");
+  if (dashIdx !== -1) t = t.slice(dashIdx + 1);
+  return new Set(t.split(/[^a-z0-9]+/).filter((w) => w.length > 1));
+};
+
+// Tolerate a single-character spelling drift between catalogue and swatch
+// naming (e.g. "Nero Kinitra" vs "Nero Kinatra").
+const nearFinishWord = (a: string, b: string) => {
+  if (a === b) return true;
+  if (Math.abs(a.length - b.length) > 1 || Math.min(a.length, b.length) < 4) return false;
+  let i = 0, j = 0, diff = 0;
+  while (i < a.length && j < b.length) {
+    if (a[i] === b[j]) { i++; j++; continue; }
+    if (++diff > 1) return false;
+    if (a.length > b.length) i++;
+    else if (b.length > a.length) j++;
+    else { i++; j++; }
+  }
+  return diff + (a.length - i) + (b.length - j) <= 1;
+};
+
+const sameFinishName = (a: any, b: any) => {
+  if (!a || !b) return false;
+  if (normFinish(a) === normFinish(b)) return true;
+  const A = finishTokenSet(a);
+  const B = finishTokenSet(b);
+  if (!A.size || !B.size) return false;
+  const small = A.size <= B.size ? A : B;
+  const large = A.size <= B.size ? B : A;
+  for (const w of small) {
+    if (![...large].some((x) => nearFinishWord(w, x))) return false;
+  }
+  return small.size >= 2;
+};
+
 
 /* ------------------------------------------------------------------ */
 /*  Data fetching                                                      */
