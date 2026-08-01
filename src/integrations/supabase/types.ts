@@ -774,6 +774,13 @@ export type Database = {
             referencedRelation: "trade_products"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "client_board_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "trade_products_public_rrp"
+            referencedColumns: ["id"]
+          },
         ]
       }
       client_boards: {
@@ -4213,6 +4220,13 @@ export type Database = {
             referencedRelation: "trade_products"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "product_descriptor_links_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "trade_products_public_rrp"
+            referencedColumns: ["id"]
+          },
         ]
       }
       product_fabric_swatches_public: {
@@ -4375,6 +4389,13 @@ export type Database = {
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "trade_products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_material_links_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "trade_products_public_rrp"
             referencedColumns: ["id"]
           },
         ]
@@ -6214,6 +6235,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "trade_custom_requests_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "trade_products_public_rrp"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "trade_custom_requests_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
@@ -6353,6 +6381,13 @@ export type Database = {
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "trade_products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trade_favorites_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "trade_products_public_rrp"
             referencedColumns: ["id"]
           },
         ]
@@ -6518,6 +6553,13 @@ export type Database = {
             referencedRelation: "trade_products"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "trade_product_glb_variants_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "trade_products_public_rrp"
+            referencedColumns: ["id"]
+          },
         ]
       }
       trade_product_pricing: {
@@ -6602,6 +6644,7 @@ export type Database = {
           price_unit: string
           product_name: string
           provenance_cn: string | null
+          public_rrp_visible: boolean
           rrp_price_cents: number | null
           seat_height_mm: number | null
           size_variants: Json | null
@@ -6668,6 +6711,7 @@ export type Database = {
           price_unit?: string
           product_name: string
           provenance_cn?: string | null
+          public_rrp_visible?: boolean
           rrp_price_cents?: number | null
           seat_height_mm?: number | null
           size_variants?: Json | null
@@ -6734,6 +6778,7 @@ export type Database = {
           price_unit?: string
           product_name?: string
           provenance_cn?: string | null
+          public_rrp_visible?: boolean
           rrp_price_cents?: number | null
           seat_height_mm?: number | null
           size_variants?: Json | null
@@ -6910,6 +6955,13 @@ export type Database = {
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "trade_products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trade_quote_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "trade_products_public_rrp"
             referencedColumns: ["id"]
           },
           {
@@ -7240,6 +7292,13 @@ export type Database = {
             referencedRelation: "trade_products"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "trade_sample_requests_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "trade_products_public_rrp"
+            referencedColumns: ["id"]
+          },
         ]
       }
       trade_tier_config: {
@@ -7411,6 +7470,41 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      trade_products_public_rrp: {
+        Row: {
+          currency: string | null
+          id: string | null
+          price_prefix: string | null
+          price_unit: string | null
+          rrp_price_cents: number | null
+          source_pick_id: string | null
+        }
+        Insert: {
+          currency?: string | null
+          id?: string | null
+          price_prefix?: string | null
+          price_unit?: string | null
+          rrp_price_cents?: number | null
+          source_pick_id?: string | null
+        }
+        Update: {
+          currency?: string | null
+          id?: string | null
+          price_prefix?: string | null
+          price_unit?: string | null
+          rrp_price_cents?: number | null
+          source_pick_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trade_products_source_pick_id_fkey"
+            columns: ["source_pick_id"]
+            isOneToOne: false
+            referencedRelation: "designer_curator_picks"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Functions: {

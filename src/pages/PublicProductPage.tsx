@@ -63,6 +63,7 @@ import {
 import TradeWorkspace from "@/components/product/TradeWorkspace";
 import TradePendingReviewCard from "@/components/product/TradePendingReviewCard";
 import CustomizationRequest from "@/components/product/CustomizationRequest";
+import { usePublicRrp, formatPublicRrp } from "@/hooks/usePublicRrp";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 
@@ -966,6 +967,8 @@ const PublicProductPage: React.FC = () => {
     }
   }, [stateFrom, storedFrom]);
   const { data, isLoading } = useProductBySlug(designerSlug, productSlug);
+  const { data: publicRrpRow } = usePublicRrp(data?.product?.id);
+  const publicRrpLabel = formatPublicRrp(publicRrpRow);
   const { isPinned, togglePin, items: compareItems } = useCompare();
   const { requireAuth, gateOpen, gateAction, closeGate } = useAuthGate();
 
@@ -1531,6 +1534,16 @@ const PublicProductPage: React.FC = () => {
                     </div>
                   );
                 })()}
+
+                {/* Publicly disclosed RRP (currently Apparatus only) */}
+                {publicRrpLabel && (
+                  <div className="border-b border-border/60 pb-3">
+                    <p className="font-display text-lg md:text-xl text-foreground">{publicRrpLabel}</p>
+                    <p className="font-body text-[10px] uppercase tracking-[0.16em] text-muted-foreground mt-1">
+                      Recommended retail price · excl. shipping &amp; duties
+                    </p>
+                  </div>
+                )}
 
                 {/* Public, crawlable specification table (no session required) */}
                 {(() => {
