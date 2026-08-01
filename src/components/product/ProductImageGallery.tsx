@@ -102,7 +102,7 @@ const CrossfadeImage: React.FC<{ src: string; alt: string; pointerEventsNone?: b
 
 
   const base = cn(
-    "max-w-full max-h-full object-contain rounded-none",
+    "max-w-full max-h-full object-contain rounded-luxury-sharp",
     pointerEventsNone && "pointer-events-none"
   );
 
@@ -291,7 +291,7 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
                 onClick={() => goTo(i, { fromThumbStrip: true })}
                 onMouseEnter={() => goTo(i, { fromThumbStrip: true })}
                 className={cn(
-                  "aspect-square w-full max-h-24 rounded-none overflow-hidden border-2 transition-all shrink-0 grow-0",
+                  "aspect-square w-full max-h-24 rounded-luxury-sharp overflow-hidden border-2 transition-all shrink-0 grow-0",
                   i === activeIndex
                     ? "border-foreground"
                     : "border-border hover:border-foreground/30"
@@ -321,7 +321,7 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
       {/* Main image + (mobile) thumb strip below */}
       <div className="flex-1 flex flex-col gap-3 min-w-0">
       <div className="relative group" ref={inlineSwipeRef}>
-        <div className={cn("md:aspect-square md:h-auto bg-foreground/95 rounded-none overflow-hidden relative touch-pan-y transition-[height] duration-300 ease-out", compact ? "h-[34vh]" : "h-[60vh]")}>
+        <div className={cn("md:aspect-square md:h-auto bg-foreground/95 rounded-luxury-sharp overflow-hidden relative touch-pan-y transition-[height] duration-300 ease-out", compact ? "h-[34vh]" : "h-[60vh]")}>
           {/* Desktop: whole image is a zoom trigger. Mobile: plain image so
               stray taps near the chevrons don't accidentally open the lightbox. */}
           <button
@@ -370,7 +370,7 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
               bottom-left on mobile/PWA so it doesn't overlap the favorite heart. */}
           {images.length > 1 && (
             <div className="absolute bottom-3 left-3 md:left-auto md:right-3 z-20 pointer-events-none">
-              <span className="inline-block px-2.5 py-1 rounded-[2px] bg-background/70 backdrop-blur-sm font-body text-[10px] md:text-[11px] font-light uppercase tracking-[0.18em] text-foreground/70 tabular-nums">
+              <span className="inline-block px-2.5 py-1 rounded-luxury-micro bg-background/70 backdrop-blur-sm font-body text-[10px] md:text-[11px] font-light uppercase tracking-[0.18em] text-foreground/70 tabular-nums">
                 {String(activeIndex + 1).padStart(2, "0")} / {String(images.length).padStart(2, "0")}
               </span>
             </div>
@@ -482,7 +482,7 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
       <Dialog open={zoomOpen} onOpenChange={setZoomOpen}>
         <DialogContent
           hideClose
-          className="max-w-[100vw] w-screen h-screen p-0 bg-background/95 backdrop-blur-sm border-0 rounded-none flex items-center justify-center sm:rounded-none touch-pan-y"
+          className="max-w-[100vw] w-screen h-screen p-0 bg-background/95 backdrop-blur-sm border-0 rounded-luxury-sharp flex items-center justify-center sm:rounded-luxury-sharp touch-pan-y"
         >
           <div ref={lightboxSwipeRef} onClick={() => setZoomOpen(false)} className="absolute inset-0 cursor-zoom-out" aria-hidden="true" />
           <VisuallyHidden>
