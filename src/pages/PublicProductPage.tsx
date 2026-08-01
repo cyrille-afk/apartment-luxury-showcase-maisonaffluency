@@ -1163,22 +1163,21 @@ const PublicProductPage: React.FC = () => {
   // Compensate the scroll offset by that delta so the designer name, product
   // title and price land directly under the collapsed image instead of being
   // skipped over.
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (typeof window === "undefined") return;
     if (!galleryCompact) return;
-    const el = galleryScrollRef.current;
     const before = galleryHeightRef.current;
-    if (!el || !before) return;
-    const raf = requestAnimationFrame(() => {
-      const after = el.getBoundingClientRect().height;
-      const delta = after - before; // negative when it shrank
-      galleryHeightRef.current = 0;
-      if (delta < -4) {
-        window.scrollTo({ top: Math.max(0, window.scrollY + delta) });
-      }
-    });
-    return () => cancelAnimationFrame(raf);
+    galleryHeightRef.current = 0;
+    if (!before) return;
+    const frame = document.querySelector(".product-image-frame") as HTMLElement | null;
+    if (!frame) return;
+    const after = frame.getBoundingClientRect().height;
+    const delta = after - before; // negative when it shrank
+    if (delta < -4) {
+      window.scrollTo({ top: Math.max(0, window.scrollY + delta) });
+    }
   }, [galleryCompact]);
+
 
 
 
