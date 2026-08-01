@@ -972,6 +972,11 @@ const PublicProductPage: React.FC = () => {
   // Price of the size/finish combination the visitor has currently selected.
   // `exact` = a single variant matched, so we drop the "From" prefix.
   const [selectedRrp, setSelectedRrp] = useState<{ cents: number; exact: boolean } | null>(null);
+  const rrpSelectionRef = useRef<{ base: string | null; top: string | null; size: string | null }>({
+    base: null,
+    top: null,
+    size: null,
+  });
   const publicRrpLabel = catalogueRrpLabel
     ? (selectedRrp
         ? formatPublicRrpCents(selectedRrp.cents, publicRrpRow, selectedRrp.exact ? "" : undefined) ||
@@ -1202,6 +1207,7 @@ const PublicProductPage: React.FC = () => {
     if (isClear) {
       // Snap the gallery back to the primary product image (index 0) so the
       // hero visibly resets when the user clears their finish/material choice.
+      rrpSelectionRef.current = { base: null, top: null, size: null };
       setSelectedRrp(null);
       setGalleryActiveIndex(0);
       setGalleryJumpNonce((n) => n + 1);
@@ -1213,22 +1219,38 @@ const PublicProductPage: React.FC = () => {
     // one variant matches, "From <min>" while the selection is still partial).
     {
       const norm = (s: any) => String(s ?? "").trim().toLowerCase();
-      const wanted = [opts?.base, opts?.top, opts?.size]
-        .map((v) => (v ? norm(v) : ""))
-        .filter(Boolean);
-      const keys = wanted.length ? wanted : (label ? [norm(label)] : []);
+      // The size dropdown and the finish swatches keep independent state, so a
+      // swatch event carries a stale size. Merge selections in the parent and
+      // let the swatch only update base/top.
+      const prev = rrpSelectionRef.current;
+      const merged = {
+        base: opts?.base ? String(opts.base) : prev.base,
+        top: opts?.top ? String(opts.top) : prev.top,
+        size: opts?.fromSwatch ? (prev.size ?? (opts?.size ? String(opts.size) : null)) : (opts?.size ? String(opts.size) : prev.size),
+      };
+      if (!opts?.base && !opts?.top && !opts?.size && label) merged.size = String(label);
+      rrpSelectionRef.current = merged;
+
       const rrpVariants = (publicRrpRow?.rrp_size_variants || []) as any[];
-      const matches = keys.length
-        ? rrpVariants.filter((v) => {
-            const fields = [v?.base, v?.top, v?.label].map(norm);
-            return keys.every((k) => fields.includes(k));
-          })
-        : [];
-      const priced = matches
-        .map((v) => Number(v?.price_cents))
-        .filter((c) => Number.isFinite(c) && c > 0);
-      const uniquePrices = Array.from(new Set(priced));
-      console.log("[rrpdbg]", JSON.stringify({ label, opts, keys, m: matches.length, uniquePrices }));
+      const keySets = [
+        [merged.size, merged.base, merged.top],
+        [merged.size, merged.top],
+        [merged.size],
+      ];
+      let uniquePrices: number[] = [];
+      for (const set of keySets) {
+        const keys = set.map((v) => (v ? norm(v) : "")).filter(Boolean);
+        if (!keys.length) continue;
+        const matches = rrpVariants.filter((v) => {
+          const fields = [v?.base, v?.top, v?.label].map(norm);
+          return keys.every((k) => fields.includes(k));
+        });
+        const priced = matches
+          .map((v) => Number(v?.price_cents))
+          .filter((c) => Number.isFinite(c) && c > 0);
+        uniquePrices = Array.from(new Set(priced));
+        if (uniquePrices.length) break;
+      }
       setSelectedRrp(
         uniquePrices.length
           ? { cents: Math.min(...uniquePrices), exact: uniquePrices.length === 1 }
