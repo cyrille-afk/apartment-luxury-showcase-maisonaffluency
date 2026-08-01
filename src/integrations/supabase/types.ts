@@ -7478,23 +7478,8 @@ export type Database = {
           price_prefix: string | null
           price_unit: string | null
           rrp_price_cents: number | null
+          rrp_size_variants: Json | null
           source_pick_id: string | null
-        }
-        Insert: {
-          currency?: string | null
-          id?: string | null
-          price_prefix?: string | null
-          price_unit?: string | null
-          rrp_price_cents?: number | null
-          source_pick_id?: string | null
-        }
-        Update: {
-          currency?: string | null
-          id?: string | null
-          price_prefix?: string | null
-          price_unit?: string | null
-          rrp_price_cents?: number | null
-          source_pick_id?: string | null
         }
         Relationships: [
           {
