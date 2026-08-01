@@ -158,7 +158,10 @@ export default function StudioSaveButton({
 
       if (project) pushRecentProject(project.id);
       window.dispatchEvent(new Event("concierge:artifacts-changed"));
-      haptic([10, 30, 14]);
+      haptic([10, 30, 15]);
+      toast.success("Successfully saved to project board.", {
+        description: project ? project.name : GENERAL_LIBRARY_TITLE,
+      });
       setSavedLabel(project ? project.name : GENERAL_LIBRARY_TITLE);
       dismissTimer.current = window.setTimeout(() => {
         setOpen(false);
