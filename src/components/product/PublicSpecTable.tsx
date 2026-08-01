@@ -125,7 +125,7 @@ export function PublicSpecTable({
 
 /**
  * Signed-out paywall shown in place of trade price, lead times and CAD files.
- * `inquireHref` routes to the same enquiry form used by "Inquire for Pricing".
+ * `onRequestQuote` opens the dedicated product quote/customisation form.
  */
 export function TradeExclusiveCard({
   redirectTo,
