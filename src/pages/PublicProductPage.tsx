@@ -1199,7 +1199,7 @@ const PublicProductPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-[100dvh] bg-background">
         <Navigation />
         <div className="pt-32 md:pt-[12rem]">
           <ProductDetailSkeleton variant="page" />
@@ -1210,7 +1210,7 @@ const PublicProductPage: React.FC = () => {
 
   if (!data) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-[100dvh] bg-background">
         <Navigation />
         <div className="flex flex-col items-center justify-center py-32 gap-4">
           <p className="font-body text-sm text-muted-foreground">Product not found.</p>
@@ -1540,7 +1540,7 @@ const PublicProductPage: React.FC = () => {
         );
       })()}
 
-      <div className="min-h-screen bg-background text-foreground">
+      <div className="min-h-[100dvh] bg-background text-foreground">
         <Navigation borderless />
 
         {/* Mobile sticky mini bar — shows on scroll (mirrors 1stdibs pattern) */}
