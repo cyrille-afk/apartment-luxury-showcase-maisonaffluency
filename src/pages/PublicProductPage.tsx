@@ -1658,7 +1658,10 @@ const PublicProductPage: React.FC = () => {
                         iconSize="w-[18px] h-[18px]"
                         iconVariant="ios"
                         showLabel={false}
+                        imageUrl={images?.[galleryActiveIndex ?? 0] || images?.[0]}
+                        imageName={`${product.title}-${designerDisplay}`}
                       />
+
                     );
                   })()}
                 </div>

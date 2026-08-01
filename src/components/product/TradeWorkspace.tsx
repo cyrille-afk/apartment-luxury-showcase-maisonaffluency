@@ -1,11 +1,16 @@
-import React, { Suspense, lazy } from "react";
+import React, { Suspense, lazy, useState } from "react";
 import { Link } from "react-router-dom";
-import { FileDown, Loader2 } from "lucide-react";
+import { FileDown, Loader2, Laptop, Check } from "lucide-react";
+import { toast } from "sonner";
 import SpecSheetButton from "@/components/trade/SpecSheetButton";
+import ClientSafeToggle from "@/components/trade/ClientSafeToggle";
+import { useClientSafeMode } from "@/lib/clientSafeMode";
+import { supabase } from "@/integrations/supabase/client";
 import { useTradeProductPricing } from "@/hooks/useTradeProductPricing";
 import { useTradeDiscount } from "@/hooks/useTradeDiscount";
 import { cn } from "@/lib/utils";
 import type { FelixProductContext } from "@/components/product/ProductFelixPanel";
+
 
 // Felix (and its whole runtime) is code-split and only ever requested inside
 // this authenticated workspace — never for signed-out visitors.
@@ -72,6 +77,27 @@ export default function TradeWorkspace({
 }: Props) {
   const { data: pricing, isLoading } = useTradeProductPricing(productId);
   const { discountPct, tierLabel } = useTradeDiscount();
+  const { clientSafe } = useClientSafeMode();
+  const [sending, setSending] = useState(false);
+  const [sent, setSent] = useState(false);
+
+  const sendToDesktop = async () => {
+    setSending(true);
+    try {
+      const { error } = await supabase.functions.invoke("send-to-desktop", {
+        body: { product_id: productId, title, designer: designerDisplay, finishes: selectedFinishes },
+      });
+      if (error) throw error;
+      if (navigator.vibrate) navigator.vibrate(15);
+      setSent(true);
+      toast.success("Sent to your desktop workspace");
+    } catch (e) {
+      toast.error("Could not reach your desktop — please try again");
+    } finally {
+      setSending(false);
+    }
+  };
+
 
   const rrpCents = pricing?.rrp_price_cents ?? pricing?.trade_price_cents ?? null;
   const netCents =
@@ -109,11 +135,14 @@ export default function TradeWorkspace({
           <p className="font-body text-[10px] uppercase tracking-[0.18em] text-[hsl(var(--gold))]">
             Trade Workspace
           </p>
-          {tierLabel && (
-            <span className="font-body text-[9px] uppercase tracking-[0.16em] text-muted-foreground border border-border rounded-full px-2 py-0.5">
-              {tierLabel}
-            </span>
-          )}
+          <div className="flex items-center gap-2">
+            <ClientSafeToggle />
+            {tierLabel && !clientSafe && (
+              <span className="font-body text-[9px] uppercase tracking-[0.16em] text-muted-foreground border border-border rounded-full px-2 py-0.5">
+                {tierLabel}
+              </span>
+            )}
+          </div>
         </div>
 
         <div className="mt-4">
@@ -121,6 +150,14 @@ export default function TradeWorkspace({
             <div className="flex items-center gap-2 text-muted-foreground font-body text-xs">
               <Loader2 className="h-3.5 w-3.5 animate-spin" /> Loading trade pricing…
             </div>
+          ) : clientSafe ? (
+            /* Client-safe: retail only, never net or margin. */
+            <>
+              <p className="font-display text-2xl leading-none">{rrpLabel || "Price on Request"}</p>
+              <p className="font-body text-[11px] text-muted-foreground mt-1.5">
+                {rrpLabel ? "Recommended retail" : "Available on request"}
+              </p>
+            </>
           ) : netLabel ? (
             <>
               <p className="font-display text-2xl leading-none">{netLabel}</p>
@@ -138,6 +175,7 @@ export default function TradeWorkspace({
             <p className="font-display text-xl leading-none">Price on Request</p>
           )}
         </div>
+
 
         <dl className="mt-5 space-y-2.5">
           <div className="flex items-baseline gap-4">
@@ -173,6 +211,24 @@ export default function TradeWorkspace({
         </dl>
 
         <div className="mt-5 flex flex-col gap-2">
+          {/* Mobile → desktop continuity: pushes this piece (with the chosen
+              finishes) to the studio desktop, ready for the next session. */}
+          <button
+            type="button"
+            onClick={sendToDesktop}
+            disabled={sending || sent}
+            className="flex items-center justify-center gap-1.5 px-4 py-3 rounded-md border border-[hsl(var(--gold))]/50 text-[hsl(var(--gold))] font-body text-[11px] uppercase tracking-[0.12em] transition-colors hover:bg-[hsl(var(--gold))]/5 disabled:opacity-70 touch-manipulation"
+          >
+            {sending ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : sent ? (
+              <Check className="h-3.5 w-3.5" />
+            ) : (
+              <Laptop className="h-3.5 w-3.5" />
+            )}
+            {sent ? "Waiting on your desktop" : "Send to Desktop"}
+          </button>
+
           <Link
             to={`/trade/products/${productId}`}
             className="flex items-center justify-center px-4 py-3 rounded-md bg-foreground text-background font-body text-[11px] uppercase tracking-[0.12em] hover:bg-foreground/90 transition-colors"

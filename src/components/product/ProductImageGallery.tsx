@@ -1,10 +1,12 @@
 import React, { useState, useCallback, useRef, useEffect } from "react";
-import { ChevronLeft, ChevronRight, X, Maximize2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, X, Maximize2, Expand } from "lucide-react";
 import { cn } from "@/lib/utils";
 import SliderDots from "@/components/ui/SliderDots";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { useLightboxSwipe } from "@/hooks/useLightboxSwipe";
+import PresentationMode from "@/components/product/PresentationMode";
+
 
 interface ProductImageGalleryProps {
   images: string[];
@@ -135,6 +137,8 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
   }, [controlledIndex, activeIndexNonce]);
 
   const [zoomOpen, setZoomOpen] = useState(false);
+  const [presentOpen, setPresentOpen] = useState(false);
+
   const thumbsRef = useRef<HTMLDivElement>(null);
 
   // Swipe support — wired to both the inline main image and the fullscreen lightbox.
@@ -316,9 +320,26 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
           >
             <CrossfadeImage src={images[activeIndex]} alt={alt} />
           </button>
+          {/* Mobile: no tap-to-zoom handler, but the image itself keeps pointer
+              events so a tap-and-hold offers "Save to Photos" (designers treat
+              their camera roll as an extension of the studio library). */}
           <div className="md:hidden absolute inset-0 flex items-center justify-center overflow-hidden rounded-[inherit]">
-            <CrossfadeImage src={images[activeIndex]} alt={alt} pointerEventsNone />
+            <CrossfadeImage src={images[activeIndex]} alt={alt} />
           </div>
+
+          {/* Presentation Mode — hand the phone to the client and the platform
+              disappears: pure, full-bleed photography, no pricing or controls. */}
+          <div className="md:hidden absolute top-3 left-3 z-30">
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); setPresentOpen(true); }}
+              aria-label="Presentation mode"
+              className="w-10 h-10 rounded-full bg-background/90 backdrop-blur-sm border border-border shadow-sm flex items-center justify-center touch-manipulation"
+            >
+              <Expand size={17} className="text-foreground" />
+            </button>
+          </div>
+
 
           {/* Hover-to-navigate now lives on the vertical thumbnail strip (see above). */}
 
@@ -502,6 +523,16 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
           )}
         </DialogContent>
       </Dialog>
+
+      <PresentationMode
+        open={presentOpen}
+        images={images}
+        alt={alt}
+        index={activeIndex}
+        onIndexChange={goTo}
+        onClose={() => setPresentOpen(false)}
+      />
+
     </div>
   );
 };

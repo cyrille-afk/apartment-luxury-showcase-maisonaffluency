@@ -10,9 +10,17 @@ interface ShareMenuProps {
   showLabel?: boolean;
   labelSize?: string;
   iconVariant?: "share2" | "ios";
+  /**
+   * High-resolution, uncropped image exported through the native share sheet
+   * (AirDrop, Messages, Keynote, Canva…) alongside the referral link.
+   */
+  imageUrl?: string;
+  /** File name used for the exported image. */
+  imageName?: string;
 }
 
-const ShareMenu = ({ url, message, className = "", iconSize = "w-3.5 h-3.5", showLabel = true, labelSize = "text-[9px]", iconVariant = "share2" }: ShareMenuProps) => {
+const ShareMenu = ({ url, message, className = "", iconSize = "w-3.5 h-3.5", showLabel = true, labelSize = "text-[9px]", iconVariant = "share2", imageUrl, imageName }: ShareMenuProps) => {
+
   const Icon: LucideIcon = iconVariant === "ios" ? ShareIos : Share2;
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -42,8 +50,25 @@ const ShareMenu = ({ url, message, className = "", iconSize = "w-3.5 h-3.5", sho
   const handleClick = async (e: React.MouseEvent) => {
     e.stopPropagation();
     if (isMobile && navigator.share) {
+      const title = message.split(":")[0] || "Share";
+      // Try a high-resolution image export first so the piece lands in
+      // AirDrop / Messages / Keynote at full fidelity, link included.
+      if (imageUrl) {
+        try {
+          const res = await fetch(imageUrl, { mode: "cors" });
+          const blob = await res.blob();
+          const ext = (blob.type.split("/")[1] || "jpg").replace("jpeg", "jpg");
+          const file = new File([blob], `${(imageName || title).replace(/[^\w\-]+/g, "-")}.${ext}`, { type: blob.type });
+          if (navigator.canShare?.({ files: [file] })) {
+            await navigator.share({ title, text: message, url, files: [file] });
+            return;
+          }
+        } catch {
+          /* fall through to link-only share */
+        }
+      }
       try {
-        await navigator.share({ title: message.split(":")[0] || "Share", url });
+        await navigator.share({ title, url });
       } catch {}
     } else if (isMobile) {
       copyLink();
@@ -51,6 +76,7 @@ const ShareMenu = ({ url, message, className = "", iconSize = "w-3.5 h-3.5", sho
       setOpen(!open);
     }
   };
+
 
   return (
     <div ref={ref} className="relative">
