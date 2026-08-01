@@ -628,3 +628,31 @@ input, select, textarea {
   }
 }
 
+
+/* Product image frame — responsive aspect ratio (mobile/PWA only).
+   Short screens keep a 1:1 square so title/designer/price stay above the fold;
+   tall flagship screens get an elegant 3:4 portrait capped at 50vh. */
+.product-image-frame {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  max-height: 52vh;
+}
+@media screen and (min-width: 410px) and (min-height: 850px) {
+  .product-image-frame {
+    aspect-ratio: 3 / 4;
+    max-height: 50vh;
+  }
+}
+.product-image-frame--compact {
+  aspect-ratio: auto;
+  height: 32vh;
+  max-height: 32vh;
+}
+@media (min-width: 768px) {
+  .product-image-frame,
+  .product-image-frame--compact {
+    aspect-ratio: 1 / 1;
+    height: auto;
+    max-height: none;
+  }
+}
