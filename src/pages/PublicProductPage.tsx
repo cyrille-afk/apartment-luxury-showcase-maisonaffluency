@@ -1652,29 +1652,27 @@ const PublicProductPage: React.FC = () => {
                     </div>
                   ) : null
                 }
-                mobileMenuItems={(() => {
-                  const shareUrl = buildPieceOgUrl(designerDisplay, product.title, product.subtitle);
-                  return (
-                    <div className="px-2 py-1.5">
-                      <ShareMenu
-                        url={shareUrl}
-                        message={`${product.title} by ${designerDisplay} — Maison Affluency: ${shareUrl}`}
-                        className="flex items-center gap-2.5 text-foreground"
-                        iconSize="w-4 h-4"
-                        iconVariant="ios"
-                        labelSize="text-[11px]"
-                        imageUrl={images?.[galleryActiveIndex ?? 0] || images?.[0]}
-                        imageName={`${product.title}-${designerDisplay}`}
-                      />
-                    </div>
-                  );
-                })()}
               />
 
 
-              {/* Mobile-only image overlay: favorite / studio save, top-right */}
-              <div className="md:hidden pointer-events-none absolute inset-x-0 top-0 z-40" style={{ height: galleryCompact ? "32vh" : "48vh" }}>
-                <div className="absolute top-4 right-4 pointer-events-auto">
+              {/* Mobile-only image overlay: share + favorite / studio save, top-right */}
+              <div className="md:hidden pointer-events-none absolute inset-x-0 top-0 z-40" style={{ height: galleryCompact ? "20vh" : "45vh" }}>
+                <div className="absolute top-4 right-4 flex items-center gap-3 pointer-events-auto">
+                  {(() => {
+                    const shareUrl = buildPieceOgUrl(designerDisplay, product.title, product.subtitle);
+                    return (
+                      <ShareMenu
+                        url={shareUrl}
+                        message={`${product.title} by ${designerDisplay} — Maison Affluency: ${shareUrl}`}
+                        className="flex items-center justify-center w-9 h-9 rounded-full bg-background/25 backdrop-blur-md border border-border/25 text-foreground/80"
+                        iconSize="w-[18px] h-[18px]"
+                        iconVariant="ios"
+                        showLabel={false}
+                        imageUrl={images?.[galleryActiveIndex ?? 0] || images?.[0]}
+                        imageName={`${product.title}-${designerDisplay}`}
+                      />
+                    );
+                  })()}
                   {user && (isTradeUser || tradeStatus === "approved") ? (
                     // Trade members get the studio "drop" anchor instead of the
                     // retail heart: one tap → bottom sheet → project.
