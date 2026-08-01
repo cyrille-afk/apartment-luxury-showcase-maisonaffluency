@@ -39,6 +39,22 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
+    // ===== Cart order handler =====
+    if (paymentType === "cart_order") {
+      const orderId = session.metadata?.order_id;
+      if (orderId && session.payment_status === "paid") {
+        const { error: orderErr } = await supabase
+          .from("shop_orders")
+          .update({ status: "paid", updated_at: new Date().toISOString() })
+          .eq("id", orderId);
+        if (orderErr) console.error("[STRIPE-WEBHOOK] shop order update failed:", orderErr);
+        else console.log(`[STRIPE-WEBHOOK] Shop order ${orderId} marked as paid`);
+      }
+      return new Response(JSON.stringify({ received: true }), {
+        headers: { "Content-Type": "application/json" }, status: 200,
+      });
+    }
+
     // ===== FF&E unlock handler =====
     if (paymentType === "ffe_unlock" && session.payment_status === "paid" && userIdMeta) {
       console.log(`[STRIPE-WEBHOOK] FF&E unlock paid for user ${userIdMeta}, session ${session.id}`);
