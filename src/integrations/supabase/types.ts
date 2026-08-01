@@ -5443,6 +5443,119 @@ export type Database = {
           },
         ]
       }
+      shop_order_items: {
+        Row: {
+          created_at: string
+          designer_name: string | null
+          designer_slug: string | null
+          finish_label: string | null
+          id: string
+          image_url: string | null
+          lead_time: string | null
+          line_total_cents: number
+          order_id: string
+          pick_id: string | null
+          product_slug: string | null
+          quantity: number
+          title: string
+          unit_price_cents: number
+        }
+        Insert: {
+          created_at?: string
+          designer_name?: string | null
+          designer_slug?: string | null
+          finish_label?: string | null
+          id?: string
+          image_url?: string | null
+          lead_time?: string | null
+          line_total_cents?: number
+          order_id: string
+          pick_id?: string | null
+          product_slug?: string | null
+          quantity?: number
+          title: string
+          unit_price_cents?: number
+        }
+        Update: {
+          created_at?: string
+          designer_name?: string | null
+          designer_slug?: string | null
+          finish_label?: string | null
+          id?: string
+          image_url?: string | null
+          lead_time?: string | null
+          line_total_cents?: number
+          order_id?: string
+          pick_id?: string | null
+          product_slug?: string | null
+          quantity?: number
+          title?: string
+          unit_price_cents?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shop_order_items_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "shop_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shop_orders: {
+        Row: {
+          created_at: string
+          currency: string
+          email: string | null
+          full_name: string | null
+          id: string
+          notes: string | null
+          order_ref: string
+          payment_method: string
+          shipping_cents: number
+          status: string
+          stripe_session_id: string | null
+          subtotal_cents: number
+          total_cents: number
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          currency?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          notes?: string | null
+          order_ref: string
+          payment_method?: string
+          shipping_cents?: number
+          status?: string
+          stripe_session_id?: string | null
+          subtotal_cents?: number
+          total_cents?: number
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          currency?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          notes?: string | null
+          order_ref?: string
+          payment_method?: string
+          shipping_cents?: number
+          status?: string
+          stripe_session_id?: string | null
+          subtotal_cents?: number
+          total_cents?: number
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       sitemap_products: {
         Row: {
           id: string
