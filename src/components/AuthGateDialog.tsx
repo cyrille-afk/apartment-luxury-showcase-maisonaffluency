@@ -58,11 +58,26 @@ export default function AuthGateDialog({ open, onClose, action = "download this 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    const domain = email.split("@")[1]?.trim().toLowerCase() || "";
+    const isPersonalDomain = PERSONAL_EMAIL_DOMAINS.has(domain);
     const { data: signUpData, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        data: { first_name: firstName, last_name: lastName, is_designer: isDesigner, newsletter },
+        data: {
+          first_name: firstName,
+          last_name: lastName,
+          is_designer: isDesigner,
+          newsletter,
+          // Trade gating: every new account starts unverified. Personal
+          // mailboxes are never eligible for fast-track approval so
+          // competitors can't self-serve into the Felix workspace — a human
+          // still vets every trade upgrade server-side.
+          account_status: "pending_verification",
+          email_domain: domain,
+          email_domain_type: isPersonalDomain ? "personal" : "corporate",
+          auto_approval_eligible: !isPersonalDomain && isDesigner,
+        },
         emailRedirectTo: window.location.origin,
       },
     });
