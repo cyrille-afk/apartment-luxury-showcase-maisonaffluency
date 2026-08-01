@@ -170,7 +170,7 @@ export function useStudioAlerts() {
     load();
     if (!user) return;
     const channel = supabase
-      .channel(`studio-alerts-${user.id}`)
+      .channel(`studio-alerts-${user.id}-${Math.random().toString(36).slice(2)}`)
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "studio_alerts", filter: `user_id=eq.${user.id}` },
