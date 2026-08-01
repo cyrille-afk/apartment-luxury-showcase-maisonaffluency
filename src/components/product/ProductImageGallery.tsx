@@ -72,13 +72,23 @@ const CrossfadeImage: React.FC<{ src: string; alt: string; pointerEventsNone?: b
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [src]);
 
-  const settle = () => {
-    if (incoming && fading) {
-      setCurrent(incoming);
-      setIncoming(null);
+  const settle = useCallback(() => {
+    setIncoming((inc) => {
+      if (!inc) return null;
+      setCurrent(inc);
       setFading(false);
-    }
-  };
+      return null;
+    });
+  }, []);
+
+  // `transitionend` never fires for a hidden container (the desktop layer on a
+  // phone, and vice-versa), so also settle on a timer matching the fade.
+  useEffect(() => {
+    if (!incoming || !fading) return;
+    const t = window.setTimeout(settle, 560);
+    return () => window.clearTimeout(t);
+  }, [incoming, fading, settle]);
+
 
   const base = cn(
     "max-w-full max-h-full object-contain rounded-none",
