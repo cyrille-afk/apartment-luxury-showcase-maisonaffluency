@@ -101,7 +101,7 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
     <div className="flex gap-4">
       {/* Vertical thumbnails — scrollable carousel (cap at 5 visible) */}
       {images.length > 1 && (
-        <div className="hidden md:flex flex-col w-24 shrink-0 relative">
+        <div className="hidden md:block w-24 shrink-0 self-start relative">
 
           <div
             ref={thumbsRef}
@@ -111,8 +111,18 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
               msOverflowStyle: "none",
               // Exactly 4 thumbnails (6rem each) + 3 gaps (0.5rem each) = 25.5rem
               maxHeight: "25.5rem",
+              // Luxury fade-out on the bottom-most visible thumbnail
+              ...(images.length > 4
+                ? {
+                    WebkitMaskImage:
+                      "linear-gradient(to bottom, #000 0%, #000 78%, rgba(0,0,0,0.25) 93%, transparent 100%)",
+                    maskImage:
+                      "linear-gradient(to bottom, #000 0%, #000 78%, rgba(0,0,0,0.25) 93%, transparent 100%)",
+                  }
+                : {}),
             }}
           >
+
             {images.map((img, i) => (
               <button
                 key={i}
