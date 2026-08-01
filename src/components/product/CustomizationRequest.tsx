@@ -52,7 +52,7 @@ export default function CustomizationRequest({
       new CustomEvent("concierge:stage", {
         detail: {
           openPanel: true,
-          prefill: `Felix, I want to customize the dimensions/finishes of the ${productTitle} for a project. Can you help me draft the structural request?`,
+          prefill: `Bespoke customization request — ${productTitle} by ${designerDisplay}.\n\nFelix, act as my curatorial guide on a made-to-order variation of this piece: bespoke dimensions, alternative finishes/materials, and any structural adaptation. Ask me what I need, then draft the atelier request with feasibility and indicative lead time.`,
         },
       })
     );
@@ -140,15 +140,10 @@ export default function CustomizationRequest({
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
               />
-              <Input
-                placeholder="Studio / Company (optional)"
-                value={form.company}
-                onChange={(e) => setForm({ ...form, company: e.target.value })}
-              />
               <Textarea
                 required
                 rows={4}
-                placeholder="Custom dimensions or finish requirements"
+                placeholder="Custom requests — dimensions, finishes, materials"
                 value={form.requirements}
                 onChange={(e) => setForm({ ...form, requirements: e.target.value })}
               />
