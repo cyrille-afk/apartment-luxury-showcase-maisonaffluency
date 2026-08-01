@@ -6,6 +6,25 @@ import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { useToast } from "@/hooks/use-toast";
 
+/**
+ * Consumer mailboxes that must never be fast-tracked into trade access.
+ * Applications from these domains always route through manual vetting.
+ */
+const PERSONAL_EMAIL_DOMAINS = new Set([
+  "gmail.com",
+  "googlemail.com",
+  "yahoo.com",
+  "yahoo.co.uk",
+  "outlook.com",
+  "hotmail.com",
+  "live.com",
+  "icloud.com",
+  "me.com",
+  "aol.com",
+  "proton.me",
+  "protonmail.com",
+]);
+
 interface AuthGateDialogProps {
   open: boolean;
   onClose: () => void;
