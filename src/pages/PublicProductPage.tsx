@@ -1621,7 +1621,7 @@ const PublicProductPage: React.FC = () => {
 
 
               {/* Mobile-only image overlays: share (top-right) + favorite (bottom-right) */}
-              <div className="md:hidden pointer-events-none absolute inset-x-0 top-0 z-40" style={{ height: galleryCompact ? "22vh" : "42vh" }}>
+              <div className="md:hidden pointer-events-none absolute inset-x-0 top-0 z-40" style={{ height: galleryCompact ? "34vh" : "60vh" }}>
                 <div className="absolute top-3 right-3 pointer-events-auto">
                   {(() => {
                     const shareUrl = buildPieceOgUrl(designerDisplay, product.title, product.subtitle);
@@ -1700,7 +1700,7 @@ const PublicProductPage: React.FC = () => {
 
 
               {/* Materials & dimensions with gold icons — shared parsing with TradeProductPage */}
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-5">
                 <VariantSelectors
                   product={product}
                   onMaterialChange={handleMaterialChange}
