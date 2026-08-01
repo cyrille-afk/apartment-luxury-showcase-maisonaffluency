@@ -736,11 +736,11 @@ const VariantSelectors: React.FC<{
             text={product.materials_description.trim()}
           />
         )}
-        <AlsoContainsFinishes pickId={product.id} className="mt-1 pl-6" />
-      </div>
+      <AlsoContainsFinishes pickId={product.id} className="mt-1 pl-6" />
+    </div>
 
-      {/* Dimensions second on mobile, first on desktop */}
-      <div className="order-2 md:order-1 flex flex-col gap-2">
+    {/* Dimensions first, then finishes */}
+    <div className="order-1 flex flex-col gap-2">
         {/* Size dropdown — shown before finishes on desktop */}
         {isBaseOnly && !baseAxisIsDim && baseOnlySizeOptions.length > 1 ? (
           <ExpandableSpec
