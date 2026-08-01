@@ -6,6 +6,8 @@ export interface PublicRrpRow {
   currency: string | null;
   price_unit: string | null;
   price_prefix: string | null;
+  /** Per-size/finish RRP list, only exposed for publicly priced products. */
+  rrp_size_variants?: Array<{ base?: string | null; top?: string | null; label?: string | null; price_cents?: number | null }> | null;
 }
 
 /**
@@ -24,7 +26,7 @@ export function usePublicRrp(pickId: string | null | undefined) {
       if (!pickId) return null;
       const bySource = await supabase
         .from("trade_products_public_rrp" as any)
-        .select("rrp_price_cents, currency, price_unit, price_prefix")
+        .select("rrp_price_cents, currency, price_unit, price_prefix, rrp_size_variants")
         .eq("source_pick_id", pickId)
         .limit(1)
         .maybeSingle();
@@ -32,7 +34,7 @@ export function usePublicRrp(pickId: string | null | undefined) {
 
       const byId = await supabase
         .from("trade_products_public_rrp" as any)
-        .select("rrp_price_cents, currency, price_unit, price_prefix")
+        .select("rrp_price_cents, currency, price_unit, price_prefix, rrp_size_variants")
         .eq("id", pickId)
         .limit(1)
         .maybeSingle();
