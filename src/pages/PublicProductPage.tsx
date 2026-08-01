@@ -1511,13 +1511,41 @@ const PublicProductPage: React.FC = () => {
                       {specIcon("✦", "mt-0.5")}
                       <div className="font-body text-sm leading-relaxed text-muted-foreground font-normal">
                         <p>{originLine}</p>
-                        {leadLine && <p className="mt-0.5">{leadLine}</p>}
+                        {/* Lead times are trade-sensitive — signed-out visitors see the
+                            Trade Exclusive card below instead. */}
+                        {leadLine && user && <p className="mt-0.5">{leadLine}</p>}
                       </div>
                     </div>
                   );
                 })()}
 
+                {/* Public, crawlable specification table (no session required) */}
+                {(() => {
+                  const variants = (product.size_variants || []) as any[];
+                  const upholstery = Array.from(
+                    new Set(
+                      variants
+                        .map((v) => String(v?.top || v?.label || "").trim())
+                        .filter(Boolean)
+                    )
+                  ).slice(0, 24);
+                  return (
+                    <PublicSpecTable
+                      dimensions={product.dimensions}
+                      materials={product.materials}
+                      materialsDescription={(product as any).materials_description}
+                      upholsteryOptions={product.is_upholstered ? upholstery : []}
+                      sku={product.id}
+                    />
+                  );
+                })()}
+
+                {!user && !authLoading && (
+                  <TradeExclusiveCard redirectTo={location.pathname + location.search} />
+                )}
+
               </div>
+
 
 
               {/* Primary CTAs — Login for Pricing (trade) + Inquire for Pricing (trade-account form).
