@@ -1126,16 +1126,22 @@ const PublicProductPage: React.FC = () => {
   const [selectedFinishes, setSelectedFinishes] = useState<string[]>([]);
   // Signed-out visitors get an elegant explainer instead of the gated PDF.
   const [specSheetLocked, setSpecSheetLocked] = useState(false);
+  // Height of the gallery column captured before the collapse, so we can keep
+  // the reading position visually stable when the image shrinks.
+  const galleryHeightRef = useRef<number>(0);
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (window.matchMedia("(min-width: 1024px)").matches) return;
     const onScroll = () => {
       const y = window.scrollY;
-      setGalleryCompact(y > 40);
-      // Show mini-bar only once the product image has fully scrolled past the
-      // real fixed header. Measure the nav live so PWA (safe-area-inset-top)
-      // triggers at the correct scroll position instead of a hardcoded 96px.
       const el = galleryScrollRef.current;
+      // Hysteresis: collapse once the user has genuinely started reading,
+      // expand again only right at the top of the page.
+      setGalleryCompact((prev) => {
+        const next = prev ? y > 8 : y > 140;
+        if (!prev && next && el) galleryHeightRef.current = el.getBoundingClientRect().height;
+        return next;
+      });
       const navEl = document.querySelector("nav.fixed, header.fixed") as HTMLElement | null;
       const headerBottom = navEl?.getBoundingClientRect().bottom ?? 96;
       if (el) {
@@ -1149,6 +1155,29 @@ const PublicProductPage: React.FC = () => {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  // When the image collapses, the whole page shifts up by the height it lost.
+  // Compensate the scroll offset by that delta so the designer name, product
+  // title and price land directly under the collapsed image instead of being
+  // skipped over.
+  useLayoutEffect(() => {
+    if (typeof window === "undefined") return;
+    if (!galleryCompact) return;
+    const el = galleryScrollRef.current;
+    const before = galleryHeightRef.current;
+    if (!el || !before) return;
+    const raf = requestAnimationFrame(() => {
+      const after = el.getBoundingClientRect().height;
+      const delta = after - before; // negative when it shrank
+      galleryHeightRef.current = 0;
+      if (delta < -4) {
+        window.scrollTo({ top: Math.max(0, window.scrollY + delta) });
+      }
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [galleryCompact]);
+
+
 
 
 
