@@ -6,6 +6,25 @@ import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { useToast } from "@/hooks/use-toast";
 
+/**
+ * Consumer mailboxes that must never be fast-tracked into trade access.
+ * Applications from these domains always route through manual vetting.
+ */
+const PERSONAL_EMAIL_DOMAINS = new Set([
+  "gmail.com",
+  "googlemail.com",
+  "yahoo.com",
+  "yahoo.co.uk",
+  "outlook.com",
+  "hotmail.com",
+  "live.com",
+  "icloud.com",
+  "me.com",
+  "aol.com",
+  "proton.me",
+  "protonmail.com",
+]);
+
 interface AuthGateDialogProps {
   open: boolean;
   onClose: () => void;
@@ -58,11 +77,26 @@ export default function AuthGateDialog({ open, onClose, action = "download this 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    const domain = email.split("@")[1]?.trim().toLowerCase() || "";
+    const isPersonalDomain = PERSONAL_EMAIL_DOMAINS.has(domain);
     const { data: signUpData, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        data: { first_name: firstName, last_name: lastName, is_designer: isDesigner, newsletter },
+        data: {
+          first_name: firstName,
+          last_name: lastName,
+          is_designer: isDesigner,
+          newsletter,
+          // Trade gating: every new account starts unverified. Personal
+          // mailboxes are never eligible for fast-track approval so
+          // competitors can't self-serve into the Felix workspace — a human
+          // still vets every trade upgrade server-side.
+          account_status: "pending_verification",
+          email_domain: domain,
+          email_domain_type: isPersonalDomain ? "personal" : "corporate",
+          auto_approval_eligible: !isPersonalDomain && isDesigner,
+        },
         emailRedirectTo: window.location.origin,
       },
     });
@@ -152,7 +186,8 @@ export default function AuthGateDialog({ open, onClose, action = "download this 
               </div>
               <h2 className="font-display text-lg text-foreground">Create an Account</h2>
               <p className="font-body text-xs text-muted-foreground mt-1.5 leading-relaxed">
-                Sign in or create a free account to {action}.
+                Sign in or request a trade account to unlock full specification sheets, CAD files,
+                and our AI design workspace.
               </p>
             </div>
 
@@ -171,13 +206,18 @@ export default function AuthGateDialog({ open, onClose, action = "download this 
                 onClick={() => setMode("login")}
                 className="w-full py-2.5 font-body text-xs text-muted-foreground hover:text-foreground transition-colors"
               >
-                Already have an account? <span className="underline underline-offset-2">Sign in</span>
+                Existing Trade Member? <span className="underline underline-offset-2">Sign in</span>
               </button>
             </div>
 
             <p className="font-body text-[10px] text-muted-foreground/60 text-center mt-4 leading-relaxed">
               Are you an architect or interior designer?{" "}
-              <button onClick={() => navigate("/trade/register")} className="underline underline-offset-2 hover:text-foreground transition-colors">
+              {/* Full professional vetting form — deliberately distinct from
+                  the quick consumer account above. */}
+              <button
+                onClick={() => { onClose(); navigate("/trade/register?intent=trade_vetting&source=spec_sheet_gate"); }}
+                className="underline underline-offset-2 hover:text-foreground transition-colors"
+              >
                 Apply for trade access
               </button>
             </p>
