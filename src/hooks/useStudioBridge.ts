@@ -114,7 +114,10 @@ export function useStudioBridge() {
     load();
     if (!user) return;
     const channel = supabase
-      .channel(`studio-bridge-${user.id}`)
+      // Unique topic per mount: StrictMode remounts would otherwise reuse a
+      // subscribed channel and throw on `.on()`.
+      .channel(`studio-bridge-${user.id}-${Math.random().toString(36).slice(2)}`)
+
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "client_board_items" }, () => load())
       .subscribe();
     return () => {
