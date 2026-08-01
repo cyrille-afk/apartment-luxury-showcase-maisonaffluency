@@ -915,9 +915,16 @@ export default function FinishSelector({ pickId, className, productTitle, produc
                   <p className="font-body text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
                     {component}
                   </p>
-                  <div className="grid grid-cols-5 sm:grid-cols-3 md:grid-cols-5 gap-2 sm:gap-3 md:gap-4">
+                  <div
+                    className={cn(
+                      "flex gap-2 overflow-x-auto snap-x snap-mandatory scroll-px-1 -mx-1 px-1 pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
+                      "[&>*]:shrink-0 [&>*]:w-[21%] [&>*]:snap-start",
+                      "sm:grid sm:grid-cols-3 md:grid-cols-5 sm:gap-3 md:gap-4 sm:overflow-visible sm:mx-0 sm:px-0 sm:[&>*]:w-auto"
+                    )}
+                  >
                     {tiles.map((f) => renderTile(f, "rug", component))}
                   </div>
+
                 </div>
               ))}
             </div>
