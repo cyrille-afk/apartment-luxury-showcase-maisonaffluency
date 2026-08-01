@@ -330,7 +330,7 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
       {/* Main image + (mobile) thumb strip below */}
       <div className="flex-1 flex flex-col gap-3 min-w-0">
       <div className="relative group" ref={inlineSwipeRef}>
-        <div className={cn("md:aspect-square md:h-auto bg-foreground/95 rounded-luxury-sharp overflow-hidden relative touch-pan-y transition-[height] duration-300 ease-out", compact ? "h-[32vh]" : "h-[48vh]")}>
+        <div className={cn("product-image-frame md:aspect-square md:h-auto bg-foreground/95 rounded-luxury-sharp overflow-hidden relative touch-pan-y transition-[height,aspect-ratio] duration-300 ease-out", compact && "product-image-frame--compact")}>
           {/* Desktop: whole image is a zoom trigger. Mobile: plain image so
               stray taps near the chevrons don't accidentally open the lightbox. */}
           <button
