@@ -1232,6 +1232,21 @@ const PublicProductPage: React.FC = () => {
             .filter((w) => w.length > 1)
         );
       };
+      // Tolerate a single-character spelling drift between catalogue and
+      // swatch naming (e.g. "Nero Kinitra" vs "Nero Kinatra").
+      const nearWord = (a: string, b: string) => {
+        if (a === b) return true;
+        if (Math.abs(a.length - b.length) > 1 || Math.min(a.length, b.length) < 4) return false;
+        let i = 0, j = 0, diff = 0;
+        while (i < a.length && j < b.length) {
+          if (a[i] === b[j]) { i++; j++; continue; }
+          if (++diff > 1) return false;
+          if (a.length > b.length) i++;
+          else if (b.length > a.length) j++;
+          else { i++; j++; }
+        }
+        return diff + (a.length - i) + (b.length - j) <= 1;
+      };
       const sameFinish = (a: any, b: any) => {
         if (!a || !b) return false;
         if (norm(a) === norm(b)) return true;
@@ -1241,9 +1256,12 @@ const PublicProductPage: React.FC = () => {
         const small = A.size <= B.size ? A : B;
         const large = A.size <= B.size ? B : A;
         // Every word of the shorter label must appear in the longer one.
-        for (const w of small) if (!large.has(w)) return false;
+        for (const w of small) {
+          if (![...large].some((x) => nearWord(w, x))) return false;
+        }
         return small.size >= 2;
       };
+
 
       // The size dropdown and the finish swatches keep independent state, so a
       // swatch event carries a stale size. Merge selections in the parent and
