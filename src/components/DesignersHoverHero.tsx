@@ -578,20 +578,12 @@ const DesignersHoverHero = () => {
   }, [isMobileOrPwa]);
 
   // iOS Safari/PWA paints the bottom chrome/home-indicator area from the
-  // document/body backdrop, not always from fixed-position children. Mirror the
-  // active mobile hero image onto that backdrop so the bottom stays photographic.
+  // document/body backdrop. Keep that backdrop solid black — no full-bleed
+  // hero image behind the iOS navigation panel.
   useEffect(() => {
     if (typeof document === "undefined") return;
-    if (!isMobileOrPwa || !items.length) return;
-    const activeDesigner = items.find((d) => d.slug === activeSlug) || items[0];
-    const src = mobileHeroBackgroundSrc(activeDesigner);
-    if (!src) return;
+    if (!isMobileOrPwa) return;
 
-    const { src: backgroundSrc } = cldResponsiveImg(src, {
-      widths: [720, 960, 1280],
-      sizes: "100vw",
-    });
-    if (!backgroundSrc) return;
 
     const html = document.documentElement;
     const body = document.body;
@@ -601,26 +593,15 @@ const DesignersHoverHero = () => {
     const previousHtmlBgRepeat = html.style.backgroundRepeat;
     const previousHtmlBgColor = html.style.backgroundColor;
     const previousBodyBgImage = body.style.backgroundImage;
-    const previousBodyBgSize = body.style.backgroundSize;
-    const previousBodyBgPosition = body.style.backgroundPosition;
-    const previousBodyBgRepeat = body.style.backgroundRepeat;
+    const previousBodyBgColor = body.style.backgroundColor;
 
-    // Mirror the active hero image onto html + body so the iOS browser chrome
-    // (URL bar, bottom toolbar) is painted photographically rather than as a
-    // solid black band. Safe now because /designers locks body scroll
-    // (position:fixed, overflow:hidden) — there is no scroll bleed to worry
-    // about. #0a0a0a stays as fallback under the image.
-    const bgUrl = `url("${backgroundSrc}")`;
-    html.style.backgroundImage = bgUrl;
-    html.style.backgroundSize = "cover";
-    html.style.backgroundPosition = "center";
-    html.style.backgroundRepeat = "no-repeat";
-    html.style.backgroundColor = "#0a0a0a";
-    body.style.backgroundImage = bgUrl;
-    body.style.backgroundSize = "cover";
-    body.style.backgroundPosition = "center";
-    body.style.backgroundRepeat = "no-repeat";
-
+    // No full-bleed image behind the browser chrome: the iOS navigation panel
+    // (URL bar / bottom toolbar) sits on a solid black backdrop instead of a
+    // stretched copy of the hero photo.
+    html.style.backgroundImage = "none";
+    html.style.backgroundColor = "#000000";
+    body.style.backgroundImage = "none";
+    body.style.backgroundColor = "#000000";
 
     return () => {
       html.style.backgroundImage = previousHtmlBgImage;
@@ -629,11 +610,10 @@ const DesignersHoverHero = () => {
       html.style.backgroundRepeat = previousHtmlBgRepeat;
       html.style.backgroundColor = previousHtmlBgColor;
       body.style.backgroundImage = previousBodyBgImage;
-      body.style.backgroundSize = previousBodyBgSize;
-      body.style.backgroundPosition = previousBodyBgPosition;
-      body.style.backgroundRepeat = previousBodyBgRepeat;
+      body.style.backgroundColor = previousBodyBgColor;
     };
-  }, [activeSlug, isMobileOrPwa, items]);
+
+  }, [isMobileOrPwa]);
 
   // Pre-seed active on first render once data arrives so the hero is never
   // a void on entry — the first designer acts as default.
