@@ -149,6 +149,23 @@ Deno.serve(async (req) => {
         </table>
       </body></html>`
 
+      // The send API rejects payloads without a plain-text alternative.
+      const text = [
+        'Studio Sourcing Digest — Maison Affluency',
+        '',
+        `You flagged ${userItems.length} piece${userItems.length > 1 ? 's' : ''} from your phone.`,
+        '',
+        ...userItems.map((item) => {
+          const p = prodMap.get(item.product_id) as { product_name?: string; brand_name?: string | null } | undefined
+          const board = boardMap.get(item.board_id)
+          const finishes = [item.variant_label, item.fabric_label, item.wood_label].filter(Boolean).join(' / ')
+          return `- ${[p?.brand_name, p?.product_name || 'Saved piece'].filter(Boolean).join(' — ')}` +
+            ` (${board?.title || 'Project folder'}${finishes ? ', ' + finishes : ''})`
+        }),
+        '',
+        `Open your studio dashboard: ${siteUrl}/trade/boards`,
+      ].join('\n')
+
       const messageId = `studio-digest-${today}-${userId}`
 
       await supabase.rpc('enqueue_email', {
@@ -159,6 +176,7 @@ Deno.serve(async (req) => {
           sender_domain: 'notify.www.maisonaffluency.com',
           subject: `Studio Sourcing Digest — ${userItems.length} piece${userItems.length > 1 ? 's' : ''} saved`,
           html,
+          text,
           purpose: 'transactional',
           label: 'studio-digest',
           message_id: messageId,
