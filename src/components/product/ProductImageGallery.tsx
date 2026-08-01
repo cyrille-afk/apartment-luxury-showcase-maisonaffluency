@@ -246,9 +246,10 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
               <Maximize2 size={14} className="text-foreground" />
             </button>
           </div>
-          {/* Fractional gallery counter — discreet, bottom-right of the frame */}
+          {/* Fractional gallery counter — discreet, bottom-right on desktop,
+              bottom-left on mobile/PWA so it doesn't overlap the favorite heart. */}
           {images.length > 1 && (
-            <div className="absolute bottom-3 right-3 z-20 pointer-events-none">
+            <div className="absolute bottom-3 left-3 md:left-auto md:right-3 z-20 pointer-events-none">
               <span className="inline-block px-2.5 py-1 rounded-full bg-background/70 backdrop-blur-sm font-body text-[10px] md:text-[11px] font-light uppercase tracking-[0.18em] text-foreground/70 tabular-nums">
                 {String(activeIndex + 1).padStart(2, "0")} / {String(images.length).padStart(2, "0")}
               </span>
