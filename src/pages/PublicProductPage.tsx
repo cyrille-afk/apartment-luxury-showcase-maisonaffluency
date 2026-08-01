@@ -1219,6 +1219,50 @@ const PublicProductPage: React.FC = () => {
     // one variant matches, "From <min>" while the selection is still partial).
     {
       const norm = (s: any) => String(s ?? "").trim().toLowerCase();
+      // Swatch labels ("Apparatus — Marble - Nero Portoro") and variant axis
+      // values ("Nero Portoro Marble") describe the same finish with different
+      // word order and a brand prefix, so compare them as token sets.
+      const tokenSet = (s: any) => {
+        let t = String(s ?? "").toLowerCase();
+        const dashIdx = t.indexOf("—");
+        if (dashIdx !== -1) t = t.slice(dashIdx + 1);
+        return new Set(
+          t
+            .split(/[^a-z0-9]+/)
+            .filter((w) => w.length > 1)
+        );
+      };
+      // Tolerate a single-character spelling drift between catalogue and
+      // swatch naming (e.g. "Nero Kinitra" vs "Nero Kinatra").
+      const nearWord = (a: string, b: string) => {
+        if (a === b) return true;
+        if (Math.abs(a.length - b.length) > 1 || Math.min(a.length, b.length) < 4) return false;
+        let i = 0, j = 0, diff = 0;
+        while (i < a.length && j < b.length) {
+          if (a[i] === b[j]) { i++; j++; continue; }
+          if (++diff > 1) return false;
+          if (a.length > b.length) i++;
+          else if (b.length > a.length) j++;
+          else { i++; j++; }
+        }
+        return diff + (a.length - i) + (b.length - j) <= 1;
+      };
+      const sameFinish = (a: any, b: any) => {
+        if (!a || !b) return false;
+        if (norm(a) === norm(b)) return true;
+        const A = tokenSet(a);
+        const B = tokenSet(b);
+        if (!A.size || !B.size) return false;
+        const small = A.size <= B.size ? A : B;
+        const large = A.size <= B.size ? B : A;
+        // Every word of the shorter label must appear in the longer one.
+        for (const w of small) {
+          if (![...large].some((x) => nearWord(w, x))) return false;
+        }
+        return small.size >= 2;
+      };
+
+
       // The size dropdown and the finish swatches keep independent state, so a
       // swatch event carries a stale size. Merge selections in the parent and
       // let the swatch only update base/top.
@@ -1232,6 +1276,8 @@ const PublicProductPage: React.FC = () => {
       rrpSelectionRef.current = merged;
 
       const rrpVariants = (publicRrpRow?.rrp_size_variants || []) as any[];
+      
+
       const keySets = [
         [merged.size, merged.base, merged.top],
         [merged.size, merged.top],
@@ -1239,12 +1285,15 @@ const PublicProductPage: React.FC = () => {
       ];
       let uniquePrices: number[] = [];
       for (const set of keySets) {
-        const keys = set.map((v) => (v ? norm(v) : "")).filter(Boolean);
+        const keys = set.filter(Boolean) as string[];
         if (!keys.length) continue;
         const matches = rrpVariants.filter((v) => {
-          const fields = [v?.base, v?.top, v?.label].map(norm);
-          return keys.every((k) => fields.includes(k));
+          const fields = [v?.base, v?.top, v?.label].filter(Boolean);
+          return keys.every((k) =>
+            fields.some((f) => norm(f) === norm(k) || sameFinish(f, k))
+          );
         });
+
         const priced = matches
           .map((v) => Number(v?.price_cents))
           .filter((c) => Number.isFinite(c) && c > 0);
