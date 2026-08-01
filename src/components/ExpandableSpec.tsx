@@ -3,6 +3,9 @@ import { ChevronDown } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { parseMaterialsFallback } from "@/lib/parseSizeVariants";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { Drawer, DrawerContent } from "@/components/ui/drawer";
+
 
 interface ExpandableSpecProps {
   icon: ReactNode;
