@@ -13,8 +13,15 @@ const esc = (s: string) =>
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders })
 
+  // Cron-only. Accepts either the shared CRON_SECRET header or a service-role
+  // bearer (the scheduler reads the service-role key from the vault).
+  const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+  const cronSecretEnv = Deno.env.get('CRON_SECRET')
   const cronSecret = req.headers.get('x-cron-secret')
-  if (!cronSecret || cronSecret !== Deno.env.get('CRON_SECRET')) {
+  const bearer = (req.headers.get('authorization') || '').replace(/^Bearer\s+/i, '')
+  const authorised =
+    (!!cronSecretEnv && cronSecret === cronSecretEnv) || (!!serviceKey && bearer === serviceKey)
+  if (!authorised) {
     return new Response(JSON.stringify({ error: 'Unauthorized' }), {
       status: 401,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -142,7 +149,50 @@ Deno.serve(async (req) => {
         </table>
       </body></html>`
 
-      const messageId = `studio-digest-${today}-${userId}`
+      // The send API rejects payloads without a plain-text alternative.
+      const text = [
+        'Studio Sourcing Digest — Maison Affluency',
+        '',
+        `You flagged ${userItems.length} piece${userItems.length > 1 ? 's' : ''} from your phone.`,
+        '',
+        ...userItems.map((item) => {
+          const p = prodMap.get(item.product_id) as { product_name?: string; brand_name?: string | null } | undefined
+          const board = boardMap.get(item.board_id)
+          const finishes = [item.variant_label, item.fabric_label, item.wood_label].filter(Boolean).join(' / ')
+          return `- ${[p?.brand_name, p?.product_name || 'Saved piece'].filter(Boolean).join(' — ')}` +
+            ` (${board?.title || 'Project folder'}${finishes ? ', ' + finishes : ''})`
+        }),
+        '',
+        `Open your studio dashboard: ${siteUrl}/trade/boards`,
+      ].join('\n')
+
+      // One unsubscribe token per address — required by the send API.
+      const normalizedEmail = profile.email.toLowerCase()
+      let unsubscribeToken: string | null = null
+      const { data: existingToken } = await supabase
+        .from('email_unsubscribe_tokens')
+        .select('token, used_at')
+        .eq('email', normalizedEmail)
+        .maybeSingle()
+      if (existingToken && !existingToken.used_at) {
+        unsubscribeToken = existingToken.token as string
+      } else if (!existingToken) {
+        const fresh = crypto.randomUUID().replace(/-/g, '') + crypto.randomUUID().replace(/-/g, '')
+        await supabase
+          .from('email_unsubscribe_tokens')
+          .upsert({ token: fresh, email: normalizedEmail }, { onConflict: 'email', ignoreDuplicates: true })
+        const { data: stored } = await supabase
+          .from('email_unsubscribe_tokens')
+          .select('token')
+          .eq('email', normalizedEmail)
+          .maybeSingle()
+        unsubscribeToken = (stored?.token as string) || fresh
+      }
+      if (!unsubscribeToken) continue
+
+      // Unique per run: a provider-side failure poisons the idempotency key,
+      // so a same-day retry must not reuse it.
+      const messageId = `studio-digest-${today}-${userId}-${Date.now().toString(36)}`
 
       await supabase.rpc('enqueue_email', {
         queue_name: 'transactional_emails',
@@ -152,6 +202,8 @@ Deno.serve(async (req) => {
           sender_domain: 'notify.www.maisonaffluency.com',
           subject: `Studio Sourcing Digest — ${userItems.length} piece${userItems.length > 1 ? 's' : ''} saved`,
           html,
+          text,
+          unsubscribe_token: unsubscribeToken,
           purpose: 'transactional',
           label: 'studio-digest',
           message_id: messageId,
