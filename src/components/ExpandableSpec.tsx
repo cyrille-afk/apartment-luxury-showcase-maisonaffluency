@@ -3,6 +3,9 @@ import { ChevronDown } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { parseMaterialsFallback } from "@/lib/parseSizeVariants";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { Drawer, DrawerContent, DrawerTitle } from "@/components/ui/drawer";
+
 
 interface ExpandableSpecProps {
   icon: ReactNode;
@@ -95,7 +98,9 @@ export default function ExpandableSpec({
     }
   }
 
+  const isMobile = useIsMobile();
   const [internalIdx, setInternalIdx] = useState<number | null>(null);
+
   const [open, setOpen] = useState(false);
   const [activeIdx, setActiveIdx] = useState<number>(0);
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -169,10 +174,17 @@ export default function ExpandableSpec({
     };
     const pick = (i: number) => {
       if (disabledSet.has(i)) return;
+      // Native-feeling confirmation: a whisper-light haptic tick on selection.
+      try {
+        (navigator as any)?.vibrate?.(8);
+      } catch {
+        /* haptics unsupported — silent */
+      }
       setInternalIdx(i);
       if (onChange) onChange(i);
       closeList();
     };
+
     const clear = () => {
       setInternalIdx(null);
       if (onChange) onChange(-1);
@@ -213,7 +225,54 @@ export default function ExpandableSpec({
       }
     };
 
+    // Shared option rows — rendered inline on desktop, inside the bottom sheet
+    // on mobile/PWA so selection feels like a native picker.
+    const optionNodes = (
+      <>
+        {hasSelection && (
+          <li>
+            <button
+              type="button"
+              onClick={clear}
+              className="w-full text-left font-body text-xs md:text-sm py-3 md:py-2 text-muted-foreground italic hover:text-foreground transition-colors"
+            >
+              Clear selection
+            </button>
+          </li>
+        )}
+        {lines.map((line, i) => {
+          const isDisabled = disabledSet.has(i);
+          const isSelected = i === selectedIdx;
+          return (
+            <li key={i}>
+              <button
+                ref={(el) => (optionRefs.current[i] = el)}
+                type="button"
+                role="option"
+                aria-selected={isSelected}
+                aria-disabled={isDisabled}
+                tabIndex={i === activeIdx ? 0 : -1}
+                onClick={() => pick(i)}
+                className={cn(
+                  "w-full text-left font-body text-xs md:text-sm py-3 md:py-2 leading-relaxed whitespace-normal transition-colors active:opacity-60",
+                  "focus:outline-none focus-visible:bg-muted/40",
+                  "md:border-0 border-b border-border/40 last:border-0",
+                  isDisabled
+                    ? "line-through text-muted-foreground/50 cursor-not-allowed"
+                    : "hover:text-foreground",
+                  isSelected ? "text-foreground font-medium" : "text-muted-foreground"
+                )}
+              >
+                {line}
+              </button>
+            </li>
+          );
+        })}
+      </>
+    );
+
     return (
+
       <div className="border-b border-border/60 first:border-t">
         <button
           ref={triggerRef}
@@ -246,53 +305,45 @@ export default function ExpandableSpec({
             )}
           />
         </button>
-        {open && (
+        {/* Desktop: inline expanding list (pushes rows below downward). */}
+        {open && !isMobile && (
           <ul
             role="listbox"
             tabIndex={-1}
             onKeyDown={onListKey}
             className="pb-3 pl-[44px] pr-2 flex flex-col focus:outline-none"
           >
-            {hasSelection && (
-              <li>
-                <button
-                  type="button"
-                  onClick={clear}
-                  className="w-full text-left font-body text-xs md:text-sm py-2 text-muted-foreground italic hover:text-foreground transition-colors"
-                >
-                  Clear selection
-                </button>
-              </li>
-            )}
-            {lines.map((line, i) => {
-              const isDisabled = disabledSet.has(i);
-              const isSelected = i === selectedIdx;
-              return (
-                <li key={i}>
-                  <button
-                    ref={(el) => (optionRefs.current[i] = el)}
-                    type="button"
-                    role="option"
-                    aria-selected={isSelected}
-                    aria-disabled={isDisabled}
-                    tabIndex={i === activeIdx ? 0 : -1}
-                    onClick={() => pick(i)}
-                    className={cn(
-                      "w-full text-left font-body text-xs md:text-sm py-2 leading-relaxed whitespace-normal transition-colors",
-                      "focus:outline-none focus-visible:bg-muted/40",
-                      isDisabled
-                        ? "line-through text-muted-foreground/50 cursor-not-allowed"
-                        : "hover:text-foreground",
-                      isSelected ? "text-foreground font-medium" : "text-muted-foreground"
-                    )}
-                  >
-                    {line}
-                  </button>
-                </li>
-              );
-            })}
+            {optionNodes}
           </ul>
         )}
+
+        {/* Mobile / PWA: native-feeling bottom sheet. */}
+        {isMobile && (
+          <Drawer
+            open={open}
+            onOpenChange={(o) => {
+              if (!o) closeList(false);
+            }}
+          >
+            <DrawerContent className="rounded-t-[14px] border-border/60">
+              <DrawerTitle className="sr-only">{placeholder}</DrawerTitle>
+              <div className="px-5 pt-2 pb-[max(1.25rem,env(safe-area-inset-bottom))]">
+                <p className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground pb-3">
+                  {placeholder}
+                </p>
+
+                <ul
+                  role="listbox"
+                  tabIndex={-1}
+                  className="flex flex-col max-h-[58vh] overflow-y-auto overscroll-contain focus:outline-none"
+                >
+                  {optionNodes}
+                </ul>
+              </div>
+            </DrawerContent>
+          </Drawer>
+        )}
+
         {showAutoHint && (
           <p
             className="font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground/70 pb-3 pl-[44px]"
