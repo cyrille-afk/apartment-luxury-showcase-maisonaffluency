@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useRef, useEffect } from "react";
-import { ChevronLeft, ChevronRight, ChevronUp, ChevronDown, X, Maximize2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, X, Maximize2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import SliderDots from "@/components/ui/SliderDots";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
@@ -44,8 +44,6 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
 
   const [zoomOpen, setZoomOpen] = useState(false);
   const thumbsRef = useRef<HTMLDivElement>(null);
-  const [canScrollUp, setCanScrollUp] = useState(false);
-  const [canScrollDown, setCanScrollDown] = useState(false);
 
   // Swipe support — wired to both the inline main image and the fullscreen lightbox.
   const inlineSwipeRef = useRef<HTMLDivElement>(null);
@@ -82,26 +80,6 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
     onSwipeRight: () => goTo(activeIndex - 1),
   });
 
-  const updateScrollState = useCallback(() => {
-    const el = thumbsRef.current;
-    if (!el) return;
-    setCanScrollUp(el.scrollTop > 2);
-    setCanScrollDown(el.scrollTop + el.clientHeight < el.scrollHeight - 2);
-  }, []);
-
-  useEffect(() => {
-    updateScrollState();
-    const el = thumbsRef.current;
-    if (!el) return;
-    el.addEventListener("scroll", updateScrollState, { passive: true });
-    const ro = new ResizeObserver(updateScrollState);
-    ro.observe(el);
-    return () => {
-      el.removeEventListener("scroll", updateScrollState);
-      ro.disconnect();
-    };
-  }, [updateScrollState, images.length]);
-
   // Keep active thumbnail in view when navigating with arrows/swipes/dots.
   // Skip when the change originated from clicking/hovering a thumbnail — the
   // user is already looking at that thumb, and scrolling it would create a
@@ -116,13 +94,6 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
     const child = el.children[activeIndex] as HTMLElement | undefined;
     child?.scrollIntoView({ block: "nearest", behavior: "smooth" });
   }, [activeIndex]);
-
-  const scrollThumbs = (dir: "up" | "down") => {
-    const el = thumbsRef.current;
-    if (!el) return;
-    const delta = (el.clientHeight * 0.8) * (dir === "up" ? -1 : 1);
-    el.scrollBy({ top: delta, behavior: "smooth" });
-  };
 
   if (images.length === 0) return null;
 
