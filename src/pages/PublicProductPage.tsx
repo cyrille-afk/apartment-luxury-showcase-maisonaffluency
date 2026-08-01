@@ -718,8 +718,8 @@ const VariantSelectors: React.FC<{
           />
         )}
       </div>
-      {/* Dimensions first, then finishes */}
-      <div className="order-2 flex flex-col gap-2">
+      {/* Desktop: dimensions first, then finishes. Mobile/PWA: finishes first, then dimensions. */}
+      <div className="order-1 md:order-2 flex flex-col gap-2">
         <FinishSelector
           pickId={product.id}
           productTitle={product.title}
