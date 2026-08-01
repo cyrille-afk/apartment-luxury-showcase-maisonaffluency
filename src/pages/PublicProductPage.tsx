@@ -1541,18 +1541,27 @@ const PublicProductPage: React.FC = () => {
                 })()}
 
                 {!user && !authLoading && (
-                  <TradeExclusiveCard redirectTo={location.pathname + location.search} />
+                  <TradeExclusiveCard
+                    redirectTo={location.pathname + location.search}
+                    inquireHref={`/contact?${new URLSearchParams({
+                      subject: `Price on Request — ${product.title} by ${designerDisplay}`,
+                      productId: product.id,
+                      productSlug: productSlug || "",
+                      productName: product.title || "",
+                      designerName: designerDisplay || "",
+                      back: (typeof window !== "undefined" ? location.pathname + location.search : "") || "",
+                    }).toString()}#contact`}
+                  />
                 )}
 
               </div>
 
 
 
-              {/* Primary CTAs — Login for Pricing (trade) + Inquire for Pricing (trade-account form).
-                  Passes product context so the admin inbox can pre-fill a draft quote. */}
-              {(() => {
+              {/* Primary CTA — signed-in visitors only; signed-out users get the
+                  Trade Exclusive Access card above (which carries both CTAs). */}
+              {user && (() => {
                 const returnTo = typeof window !== "undefined" ? location.pathname + location.search : "";
-                const backTo = fromPath || fallbackGridPath;
                 const q = new URLSearchParams({
                   subject: `Price on Request — ${product.title} by ${designerDisplay}`,
                   productId: product.id,
@@ -1561,17 +1570,8 @@ const PublicProductPage: React.FC = () => {
                   designerName: designerDisplay || "",
                   back: returnTo || "",
                 });
-                const loginQuery = new URLSearchParams();
-                if (returnTo) loginQuery.set("redirect", returnTo);
-                if (backTo) loginQuery.set("back", backTo);
                 return (
-                  <div className="mt-2 grid grid-cols-2 gap-2">
-                    <Link
-                      to={`/trade/login${loginQuery.toString() ? `?${loginQuery.toString()}` : ""}`}
-                      className="flex items-center justify-center gap-2 px-4 py-3.5 rounded-md font-body text-[11px] md:text-xs uppercase tracking-[0.12em] transition-all w-full border border-foreground text-foreground hover:bg-foreground hover:text-background text-center"
-                    >
-                      Login for Pricing
-                    </Link>
+                  <div className="mt-2">
                     <Link
                       to={`/contact?${q.toString()}#contact`}
                       className="flex items-center justify-center gap-2 px-4 py-3.5 rounded-md font-body text-[11px] md:text-xs uppercase tracking-[0.12em] transition-all w-full bg-foreground text-background hover:bg-foreground/90 text-center"
@@ -1581,6 +1581,7 @@ const PublicProductPage: React.FC = () => {
                   </div>
                 );
               })()}
+
 
 
               {/* Secondary actions: Favorite / Pin / Spec Sheet */}
