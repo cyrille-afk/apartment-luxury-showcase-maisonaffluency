@@ -35,6 +35,17 @@ const ShareMenu = ({ url, message, className = "", iconSize = "w-3.5 h-3.5", sho
     return () => document.removeEventListener("mousedown", handler);
   }, [open]);
 
+  // Strip cache-busting query params for the human-readable share text.
+  // The full cache-busted url is still used for copy/link previews.
+  const cleanUrl = url.split("?")[0];
+
+  // Extract a body line without the trailing URL so native share sheets don't
+  // duplicate the link (iOS appends the separate `url` field to `text`).
+  const bodyText = message
+    .replace(url, cleanUrl)
+    .replace(new RegExp(`\\s*[:—-]\\s*${cleanUrl.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*$`), "")
+    .trim();
+
   const copyLink = () => {
     navigator.clipboard.writeText(url);
     toast.success("Link copied to clipboard");
@@ -42,7 +53,7 @@ const ShareMenu = ({ url, message, className = "", iconSize = "w-3.5 h-3.5", sho
   };
 
   const openWhatsApp = () => {
-    const waUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+    const waUrl = `https://wa.me/?text=${encodeURIComponent(`${bodyText} ${cleanUrl}`)}`;
     window.location.href = waUrl;
     setOpen(false);
   };
@@ -60,7 +71,7 @@ const ShareMenu = ({ url, message, className = "", iconSize = "w-3.5 h-3.5", sho
           const ext = (blob.type.split("/")[1] || "jpg").replace("jpeg", "jpg");
           const file = new File([blob], `${(imageName || title).replace(/[^\w\-]+/g, "-")}.${ext}`, { type: blob.type });
           if (navigator.canShare?.({ files: [file] })) {
-            await navigator.share({ title, text: message, url, files: [file] });
+            await navigator.share({ title, text: bodyText, url: cleanUrl, files: [file] });
             return;
           }
         } catch {
@@ -68,7 +79,7 @@ const ShareMenu = ({ url, message, className = "", iconSize = "w-3.5 h-3.5", sho
         }
       }
       try {
-        await navigator.share({ title, url });
+        await navigator.share({ title, text: bodyText, url: cleanUrl });
       } catch {}
     } else if (isMobile) {
       copyLink();
