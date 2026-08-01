@@ -222,19 +222,12 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
             aria-label="Expand image"
             className="hidden md:flex absolute inset-0 items-center justify-center overflow-hidden rounded-[inherit] p-0 cursor-zoom-in"
           >
-            <img
-              src={images[activeIndex]}
-              alt={alt}
-              className="max-w-full max-h-full object-contain rounded-none"
-            />
+            <CrossfadeImage src={images[activeIndex]} alt={alt} />
           </button>
           <div className="md:hidden absolute inset-0 flex items-center justify-center overflow-hidden rounded-[inherit]">
-            <img
-              src={images[activeIndex]}
-              alt={alt}
-              className="max-w-full max-h-full object-contain rounded-none pointer-events-none"
-            />
+            <CrossfadeImage src={images[activeIndex]} alt={alt} pointerEventsNone />
           </div>
+
           {/* Hover-to-navigate now lives on the vertical thumbnail strip (see above). */}
 
           {/* Expand affordance — desktop only (mobile/PWA images are already full-screen sized). */}
