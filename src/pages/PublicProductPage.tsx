@@ -1558,8 +1558,9 @@ const PublicProductPage: React.FC = () => {
 
 
 
-              {/* Primary CTA — signed-in visitors only; signed-out users get the
-                  Trade Exclusive Access card above (which carries both CTAs). */}
+              {/* Signed-in visitors. Verified trade users get a direct route to
+                  the trade product sheet (net pricing, lead times, CAD);
+                  everyone else signed in keeps the enquiry CTA. */}
               {user && (() => {
                 const returnTo = typeof window !== "undefined" ? location.pathname + location.search : "";
                 const q = new URLSearchParams({
@@ -1571,16 +1572,30 @@ const PublicProductPage: React.FC = () => {
                   back: returnTo || "",
                 });
                 return (
-                  <div className="mt-2">
+                  <div className="mt-2 space-y-2">
+                    {isTradeUser && (
+                      <Link
+                        to={`/trade/products/${product.id}`}
+                        className="flex items-center justify-center gap-2 px-4 py-3.5 rounded-md font-body text-[11px] md:text-xs uppercase tracking-[0.12em] transition-all w-full bg-foreground text-background hover:bg-foreground/90 text-center"
+                      >
+                        View Trade Pricing
+                      </Link>
+                    )}
                     <Link
                       to={`/contact?${q.toString()}#contact`}
-                      className="flex items-center justify-center gap-2 px-4 py-3.5 rounded-md font-body text-[11px] md:text-xs uppercase tracking-[0.12em] transition-all w-full bg-foreground text-background hover:bg-foreground/90 text-center"
+                      className={cn(
+                        "flex items-center justify-center gap-2 px-4 py-3.5 rounded-md font-body text-[11px] md:text-xs uppercase tracking-[0.12em] transition-all w-full text-center",
+                        isTradeUser
+                          ? "border border-foreground/40 text-foreground hover:bg-foreground/5"
+                          : "bg-foreground text-background hover:bg-foreground/90"
+                      )}
                     >
                       Inquire for Pricing
                     </Link>
                   </div>
                 );
               })()}
+
 
 
 
