@@ -206,13 +206,18 @@ export default function AuthGateDialog({ open, onClose, action = "download this 
                 onClick={() => setMode("login")}
                 className="w-full py-2.5 font-body text-xs text-muted-foreground hover:text-foreground transition-colors"
               >
-                Already have an account? <span className="underline underline-offset-2">Sign in</span>
+                Existing Trade Member? <span className="underline underline-offset-2">Sign in</span>
               </button>
             </div>
 
             <p className="font-body text-[10px] text-muted-foreground/60 text-center mt-4 leading-relaxed">
               Are you an architect or interior designer?{" "}
-              <button onClick={() => navigate("/trade/register")} className="underline underline-offset-2 hover:text-foreground transition-colors">
+              {/* Full professional vetting form — deliberately distinct from
+                  the quick consumer account above. */}
+              <button
+                onClick={() => { onClose(); navigate("/trade/register?intent=trade_vetting&source=spec_sheet_gate"); }}
+                className="underline underline-offset-2 hover:text-foreground transition-colors"
+              >
                 Apply for trade access
               </button>
             </p>
