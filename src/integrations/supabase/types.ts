@@ -4344,6 +4344,7 @@ export type Database = {
           id: string
           last_name: string
           phone: string
+          trade_status: string | null
           trade_tier: Database["public"]["Enums"]["trade_tier"]
           trade_tier_12mo_spend_cents: number
           trade_tier_computed_at: string | null
@@ -4362,6 +4363,7 @@ export type Database = {
           id: string
           last_name?: string
           phone?: string
+          trade_status?: string | null
           trade_tier?: Database["public"]["Enums"]["trade_tier"]
           trade_tier_12mo_spend_cents?: number
           trade_tier_computed_at?: string | null
@@ -4382,6 +4384,7 @@ export type Database = {
           id?: string
           last_name?: string
           phone?: string
+          trade_status?: string | null
           trade_tier?: Database["public"]["Enums"]["trade_tier"]
           trade_tier_12mo_spend_cents?: number
           trade_tier_computed_at?: string | null
