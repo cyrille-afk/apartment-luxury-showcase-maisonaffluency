@@ -1219,6 +1219,32 @@ const PublicProductPage: React.FC = () => {
     // one variant matches, "From <min>" while the selection is still partial).
     {
       const norm = (s: any) => String(s ?? "").trim().toLowerCase();
+      // Swatch labels ("Apparatus — Marble - Nero Portoro") and variant axis
+      // values ("Nero Portoro Marble") describe the same finish with different
+      // word order and a brand prefix, so compare them as token sets.
+      const tokenSet = (s: any) => {
+        let t = String(s ?? "").toLowerCase();
+        const dashIdx = t.indexOf("—");
+        if (dashIdx !== -1) t = t.slice(dashIdx + 1);
+        return new Set(
+          t
+            .split(/[^a-z0-9]+/)
+            .filter((w) => w.length > 1)
+        );
+      };
+      const sameFinish = (a: any, b: any) => {
+        if (!a || !b) return false;
+        if (norm(a) === norm(b)) return true;
+        const A = tokenSet(a);
+        const B = tokenSet(b);
+        if (!A.size || !B.size) return false;
+        const small = A.size <= B.size ? A : B;
+        const large = A.size <= B.size ? B : A;
+        // Every word of the shorter label must appear in the longer one.
+        for (const w of small) if (!large.has(w)) return false;
+        return small.size >= 2;
+      };
+
       // The size dropdown and the finish swatches keep independent state, so a
       // swatch event carries a stale size. Merge selections in the parent and
       // let the swatch only update base/top.
