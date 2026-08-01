@@ -374,7 +374,7 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
 
           {/* Hover-to-navigate now lives on the vertical thumbnail strip (see above). */}
 
-          {/* Expand affordance — desktop only (mobile/PWA images are already full-screen sized). */}
+          {/* Expand affordance — desktop hover chip + discreet always-on mobile icon. */}
           <div className="absolute bottom-3 left-3 z-20 hidden md:block">
             <button
               type="button"
@@ -385,15 +385,23 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
               <Maximize2 size={14} strokeWidth={1.5} className="text-foreground" />
             </button>
           </div>
-          {/* Fractional gallery counter — bottom-centre on mobile (fully detached
-              from the floating controls), bottom-right on desktop. */}
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); setZoomOpen(true); }}
+            aria-label="Expand image"
+            className="md:hidden absolute bottom-3 right-3 z-30 w-8 h-8 rounded-full bg-background/25 backdrop-blur-md border border-border/25 flex items-center justify-center touch-manipulation"
+          >
+            <Maximize2 size={16} strokeWidth={1.5} className="text-foreground/80" />
+          </button>
+          {/* Fractional gallery counter — bottom-centre on mobile, bottom-right on desktop. */}
           {images.length > 1 && (
             <div className="absolute bottom-4 left-1/2 -translate-x-1/2 md:left-auto md:translate-x-0 md:bottom-3 md:right-3 z-20 pointer-events-none">
-              <span className="inline-block px-2.5 py-1 rounded-luxury-micro bg-background/60 backdrop-blur-md font-body text-[10px] md:text-[11px] font-light uppercase tracking-[0.18em] text-foreground/70 tabular-nums">
+              <span className="inline-block px-1.5 py-0.5 md:px-2.5 md:py-1 rounded-luxury-micro bg-background/40 md:bg-background/60 backdrop-blur-md font-body text-[8px] md:text-[11px] font-light uppercase tracking-[0.12em] md:tracking-[0.18em] text-foreground/60 md:text-foreground/70 tabular-nums">
                 {String(activeIndex + 1).padStart(2, "0")} / {String(images.length).padStart(2, "0")}
               </span>
             </div>
           )}
+
           {overlay && (
             <div className="absolute top-3 right-3 z-20 pointer-events-none">
               <div className="pointer-events-auto">{overlay}</div>
