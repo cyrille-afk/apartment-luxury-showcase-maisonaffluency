@@ -34,7 +34,10 @@ interface ProductImageGalleryProps {
   caption?: string | null;
   /** When true, shrinks the mobile main image height (used while user scrolls past the gallery). */
   compact?: boolean;
+  /** Extra items appended to the mobile "more" menu (e.g. Share). */
+  mobileMenuItems?: React.ReactNode;
 }
+
 
 /**
  * Main-image renderer with a smooth cross-dissolve between sources.
