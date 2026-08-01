@@ -1511,9 +1511,7 @@ const PublicProductPage: React.FC = () => {
                       {specIcon("✦", "mt-0.5")}
                       <div className="font-body text-sm leading-relaxed text-muted-foreground font-normal">
                         <p>{originLine}</p>
-                        {/* Lead times are trade-sensitive — signed-out visitors see the
-                            Trade Exclusive card below instead. */}
-                        {leadLine && user && <p className="mt-0.5">{leadLine}</p>}
+                        {leadLine && <p className="mt-0.5">{leadLine}</p>}
                       </div>
                     </div>
                   );
