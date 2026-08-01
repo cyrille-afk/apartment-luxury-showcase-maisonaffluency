@@ -225,7 +225,54 @@ export default function ExpandableSpec({
       }
     };
 
+    // Shared option rows — rendered inline on desktop, inside the bottom sheet
+    // on mobile/PWA so selection feels like a native picker.
+    const optionNodes = (
+      <>
+        {hasSelection && (
+          <li>
+            <button
+              type="button"
+              onClick={clear}
+              className="w-full text-left font-body text-xs md:text-sm py-3 md:py-2 text-muted-foreground italic hover:text-foreground transition-colors"
+            >
+              Clear selection
+            </button>
+          </li>
+        )}
+        {lines.map((line, i) => {
+          const isDisabled = disabledSet.has(i);
+          const isSelected = i === selectedIdx;
+          return (
+            <li key={i}>
+              <button
+                ref={(el) => (optionRefs.current[i] = el)}
+                type="button"
+                role="option"
+                aria-selected={isSelected}
+                aria-disabled={isDisabled}
+                tabIndex={i === activeIdx ? 0 : -1}
+                onClick={() => pick(i)}
+                className={cn(
+                  "w-full text-left font-body text-xs md:text-sm py-3 md:py-2 leading-relaxed whitespace-normal transition-colors active:opacity-60",
+                  "focus:outline-none focus-visible:bg-muted/40",
+                  "md:border-0 border-b border-border/40 last:border-0",
+                  isDisabled
+                    ? "line-through text-muted-foreground/50 cursor-not-allowed"
+                    : "hover:text-foreground",
+                  isSelected ? "text-foreground font-medium" : "text-muted-foreground"
+                )}
+              >
+                {line}
+              </button>
+            </li>
+          );
+        })}
+      </>
+    );
+
     return (
+
       <div className="border-b border-border/60 first:border-t">
         <button
           ref={triggerRef}
