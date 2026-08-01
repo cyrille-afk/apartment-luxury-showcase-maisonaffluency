@@ -1,6 +1,4 @@
-import { useState } from "react";
 import { Wand2 } from "lucide-react";
-import QuoteRequestDialog from "@/components/QuoteRequestDialog";
 
 interface Props {
   productId: string;
@@ -8,6 +6,7 @@ interface Props {
   designerDisplay: string;
   /** True only for a vetted, approved trade member. Routes the request to Felix. */
   tradeApproved: boolean;
+  onRequestQuote: () => void;
 }
 
 /**
@@ -23,8 +22,8 @@ export default function CustomizationRequest({
   productTitle,
   designerDisplay,
   tradeApproved,
+  onRequestQuote,
 }: Props) {
-  const [open, setOpen] = useState(false);
 
   const askFelix = () => {
     window.dispatchEvent(
@@ -42,7 +41,7 @@ export default function CustomizationRequest({
       askFelix();
       return;
     }
-    setOpen(true);
+    onRequestQuote();
   };
 
   return (
@@ -60,13 +59,6 @@ export default function CustomizationRequest({
         <Wand2 size={13} strokeWidth={1.5} />
         Request Customization
       </button>
-
-      <QuoteRequestDialog
-        open={open}
-        onOpenChange={setOpen}
-        productName={productTitle}
-        designerName={designerDisplay}
-      />
     </div>
   );
 }
