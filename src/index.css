@@ -635,18 +635,18 @@ input, select, textarea {
 .product-image-frame {
   width: 100%;
   aspect-ratio: 1 / 1;
-  max-height: 52vh;
+  max-height: 45vh;
 }
 @media screen and (min-width: 410px) and (min-height: 850px) {
   .product-image-frame {
     aspect-ratio: 3 / 4;
-    max-height: 50vh;
+    max-height: 45vh;
   }
 }
 .product-image-frame--compact {
   aspect-ratio: auto;
-  height: 32vh;
-  max-height: 32vh;
+  height: 20vh;
+  max-height: 20vh;
 }
 @media (min-width: 768px) {
   .product-image-frame,
