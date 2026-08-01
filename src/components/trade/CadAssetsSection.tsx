@@ -74,6 +74,9 @@ export default function CadAssetsSection({ productId, productName }: Props) {
 
   if (!productId || loading) return null;
 
+  // No active files for this product — don't advertise a download surface.
+  if (assets.length === 0) return null;
+
   const supportedFormats = "DWG · DXF · 3DS · SKP · RFA · OBJ · FBX · STEP · IGES";
 
   // Locked state: signed-out visitors get an explicit explanation + sign-in CTA.
@@ -104,34 +107,6 @@ export default function CadAssetsSection({ productId, productName }: Props) {
             className="inline-flex items-center gap-1.5 rounded border border-border px-3 py-1.5 font-body text-[11px] uppercase tracking-[0.14em] text-muted-foreground hover:border-foreground/30 hover:text-foreground transition-colors"
           >
             Apply for trade access
-          </Link>
-        </div>
-      </section>
-    );
-  }
-
-  // Signed in, but no active files exist for this product.
-  if (assets.length === 0) {
-    return (
-      <section className="border border-dashed border-border rounded-md bg-card/30 p-4">
-        <div className="flex items-center gap-2 mb-2">
-          <FileBox className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
-          <h3 className="font-display text-sm text-foreground tracking-wide">CAD &amp; 3D Files</h3>
-          <span className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-            Trade only
-          </span>
-        </div>
-        <p className="font-body text-xs text-muted-foreground leading-relaxed">
-          The maker has not yet supplied technical files for this piece. Contact your concierge to
-          request {supportedFormats} on your behalf.
-        </p>
-        <div className="mt-3">
-          <Link
-            to={`/trade/spatial-fit?product_id=${encodeURIComponent(productId)}${productName ? `&product_name=${encodeURIComponent(productName)}` : ""}`}
-            className="inline-flex items-center gap-1.5 rounded border border-border px-3 py-1.5 font-body text-[11px] uppercase tracking-[0.14em] text-muted-foreground hover:border-foreground/30 hover:text-foreground transition-colors"
-          >
-            <FileBox className="h-3 w-3" aria-hidden="true" />
-            Try Spatial Fit
           </Link>
         </div>
       </section>
