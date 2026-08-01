@@ -80,6 +80,9 @@ export default {
         sm: "calc(var(--radius) - 4px)",
         control: "var(--radius-control)",
         sheet: "var(--radius-sheet)",
+        "luxury-sharp": "0px",
+        "luxury-micro": "2px",
+        "luxury-sheet": "12px",
       },
 
       fontFamily: {
