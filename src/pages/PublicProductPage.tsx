@@ -1182,12 +1182,17 @@ const PublicProductPage: React.FC = () => {
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("touchstart", armExpansion, { passive: true });
+    window.addEventListener("touchmove", armExpansion, { passive: true });
     window.addEventListener("wheel", armExpansion, { passive: true });
+    window.addEventListener("keydown", armExpansion);
     return () => {
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("touchstart", armExpansion);
+      window.removeEventListener("touchmove", armExpansion);
       window.removeEventListener("wheel", armExpansion);
+      window.removeEventListener("keydown", armExpansion);
     };
+
   }, []);
 
   // When the image collapses, the whole page shifts up by the height it lost.
