@@ -46,12 +46,27 @@ const SYMBOLS: Record<string, string> = { USD: "$", EUR: "€", GBP: "£", SGD: 
 /** "From $3,450" — rounded to whole currency units, no decimals. */
 export function formatPublicRrp(row: PublicRrpRow | null | undefined): string | null {
   if (!row?.rrp_price_cents || row.rrp_price_cents <= 0) return null;
-  const currency = (row.currency || "USD").toUpperCase();
+  return formatPublicRrpCents(row.rrp_price_cents, row);
+}
+
+/**
+ * Formats an arbitrary cents amount (e.g. the price of the size/finish the
+ * visitor just selected) using the same currency, unit and prefix rules as the
+ * catalogue "From" price. Pass `prefix: ""` for an exact, non-"From" price.
+ */
+export function formatPublicRrpCents(
+  cents: number,
+  row: PublicRrpRow | null | undefined,
+  prefixOverride?: string,
+): string | null {
+  if (!cents || cents <= 0) return null;
+  const currency = (row?.currency || "USD").toUpperCase();
   const symbol = SYMBOLS[currency] || "";
-  const amount = Math.round(row.rrp_price_cents / 100).toLocaleString("en-US");
-  const prefix = row.price_prefix?.trim() || "From";
-  const rawUnit = (row.price_unit || "").trim().toLowerCase().replace(/_/g, " ");
+  const amount = Math.round(cents / 100).toLocaleString("en-US");
+  const prefix = prefixOverride !== undefined ? prefixOverride : (row?.price_prefix?.trim() || "From");
+  const rawUnit = (row?.price_unit || "").trim().toLowerCase().replace(/_/g, " ");
   const genericUnit = ["", "per piece", "piece", "each", "unit", "per unit", "item"].includes(rawUnit);
   const unit = genericUnit ? "" : ` / ${rawUnit}`;
-  return `${prefix} ${symbol}${amount}${symbol ? "" : ` ${currency}`}${unit}`;
+  return `${prefix ? `${prefix} ` : ""}${symbol}${amount}${symbol ? "" : ` ${currency}`}${unit}`;
 }
+
