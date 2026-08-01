@@ -1139,7 +1139,10 @@ const PublicProductPage: React.FC = () => {
       // expand again only right at the top of the page.
       setGalleryCompact((prev) => {
         const next = prev ? y > 8 : y > 140;
-        if (!prev && next && el) galleryHeightRef.current = el.getBoundingClientRect().height;
+        if (!prev && next) {
+          const frame = document.querySelector(".product-image-frame") as HTMLElement | null;
+          galleryHeightRef.current = frame?.getBoundingClientRect().height ?? 0;
+        }
         return next;
       });
       const navEl = document.querySelector("nav.fixed, header.fixed") as HTMLElement | null;
