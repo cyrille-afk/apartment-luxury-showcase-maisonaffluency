@@ -1095,19 +1095,24 @@ const PublicProductPage: React.FC = () => {
   // appended to the bespoke concierge message so they aren't overlooked.
   const [finishesMissingImages, setFinishesMissingImages] = useState<string[]>([]);
   const galleryScrollRef = React.useRef<HTMLDivElement | null>(null);
-  // On mobile/PWA, when a finish selection updates the gallery image, scroll
-  // the product image back into view so the user can actually see the change
-  // instead of it happening off-screen above the finish dropdown.
+  // On mobile/PWA, when a finish selection updates the gallery image, only
+  // scroll if the product image is genuinely off-screen above the viewport.
+  // Never scroll when it's already (partly) visible — doing so pushed the
+  // brand name, product title and price up out of view.
   useEffect(() => {
     if (galleryJumpNonce === 0) return;
     if (typeof window === "undefined") return;
     if (window.matchMedia("(min-width: 1024px)").matches) return;
     const el = galleryScrollRef.current;
     if (!el) return;
+    const rect = el.getBoundingClientRect();
     const headerOffset = 80;
-    const y = el.getBoundingClientRect().top + window.scrollY - headerOffset;
+    // Visible enough already → leave the scroll position untouched.
+    if (rect.bottom > headerOffset + 80 && rect.top < window.innerHeight) return;
+    const y = rect.top + window.scrollY - headerOffset;
     window.scrollTo({ top: Math.max(0, y), behavior: "smooth" });
   }, [galleryJumpNonce]);
+
 
   // Mobile/PWA: shrink the product image once the user scrolls past a small threshold.
   const [galleryCompact, setGalleryCompact] = useState(false);
