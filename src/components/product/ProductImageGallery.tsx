@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useRef, useEffect } from "react";
-import { ChevronLeft, ChevronRight, ChevronUp, ChevronDown, X, Maximize2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, X, Maximize2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import SliderDots from "@/components/ui/SliderDots";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
@@ -44,8 +44,6 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
 
   const [zoomOpen, setZoomOpen] = useState(false);
   const thumbsRef = useRef<HTMLDivElement>(null);
-  const [canScrollUp, setCanScrollUp] = useState(false);
-  const [canScrollDown, setCanScrollDown] = useState(false);
 
   // Swipe support — wired to both the inline main image and the fullscreen lightbox.
   const inlineSwipeRef = useRef<HTMLDivElement>(null);
@@ -82,26 +80,6 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
     onSwipeRight: () => goTo(activeIndex - 1),
   });
 
-  const updateScrollState = useCallback(() => {
-    const el = thumbsRef.current;
-    if (!el) return;
-    setCanScrollUp(el.scrollTop > 2);
-    setCanScrollDown(el.scrollTop + el.clientHeight < el.scrollHeight - 2);
-  }, []);
-
-  useEffect(() => {
-    updateScrollState();
-    const el = thumbsRef.current;
-    if (!el) return;
-    el.addEventListener("scroll", updateScrollState, { passive: true });
-    const ro = new ResizeObserver(updateScrollState);
-    ro.observe(el);
-    return () => {
-      el.removeEventListener("scroll", updateScrollState);
-      ro.disconnect();
-    };
-  }, [updateScrollState, images.length]);
-
   // Keep active thumbnail in view when navigating with arrows/swipes/dots.
   // Skip when the change originated from clicking/hovering a thumbnail — the
   // user is already looking at that thumb, and scrolling it would create a
@@ -117,13 +95,6 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
     child?.scrollIntoView({ block: "nearest", behavior: "smooth" });
   }, [activeIndex]);
 
-  const scrollThumbs = (dir: "up" | "down") => {
-    const el = thumbsRef.current;
-    if (!el) return;
-    const delta = (el.clientHeight * 0.8) * (dir === "up" ? -1 : 1);
-    el.scrollBy({ top: delta, behavior: "smooth" });
-  };
-
   if (images.length === 0) return null;
 
   return (
@@ -131,20 +102,6 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
       {/* Vertical thumbnails — scrollable carousel (cap at 5 visible) */}
       {images.length > 1 && (
         <div className="hidden md:flex flex-col w-24 shrink-0 relative">
-
-          {/* Up arrow */}
-          <button
-            type="button"
-            onClick={() => scrollThumbs("up")}
-            disabled={!canScrollUp}
-            aria-label="Scroll thumbnails up"
-            className={cn(
-              "h-7 w-full flex items-center justify-center rounded-md bg-background/80 backdrop-blur-sm border border-border/50 mb-1 transition-opacity",
-              canScrollUp ? "opacity-100 hover:bg-background" : "opacity-0 pointer-events-none"
-            )}
-          >
-            <ChevronUp size={16} className="text-foreground" />
-          </button>
 
           <div
             ref={thumbsRef}
@@ -186,19 +143,6 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
             ))}
           </div>
 
-          {/* Down arrow */}
-          <button
-            type="button"
-            onClick={() => scrollThumbs("down")}
-            disabled={!canScrollDown}
-            aria-label="Scroll thumbnails down"
-            className={cn(
-              "h-7 w-full flex items-center justify-center rounded-md bg-background/80 backdrop-blur-sm border border-border/50 mt-1 transition-opacity",
-              canScrollDown ? "opacity-100 hover:bg-background" : "opacity-0 pointer-events-none"
-            )}
-          >
-            <ChevronDown size={16} className="text-foreground" />
-          </button>
         </div>
       )}
 
@@ -230,7 +174,7 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
           {/* Hover-to-navigate now lives on the vertical thumbnail strip (see above). */}
 
           {/* Expand affordance — desktop only (mobile/PWA images are already full-screen sized). */}
-          <div className="absolute bottom-3 right-3 z-20 hidden md:block">
+          <div className="absolute bottom-3 left-3 z-20 hidden md:block">
             <button
               type="button"
               onClick={(e) => { e.stopPropagation(); setZoomOpen(true); }}
@@ -240,6 +184,14 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
               <Maximize2 size={14} className="text-foreground" />
             </button>
           </div>
+          {/* Fractional gallery counter — discreet, bottom-right of the frame */}
+          {images.length > 1 && (
+            <div className="absolute bottom-3 right-3 z-20 pointer-events-none">
+              <span className="inline-block px-2.5 py-1 rounded-full bg-background/70 backdrop-blur-sm font-body text-[10px] md:text-[11px] font-light uppercase tracking-[0.18em] text-foreground/70 tabular-nums">
+                {String(activeIndex + 1).padStart(2, "0")} / {String(images.length).padStart(2, "0")}
+              </span>
+            </div>
+          )}
           {overlay && (
             <div className="absolute top-3 right-3 z-20 pointer-events-none">
               <div className="pointer-events-auto">{overlay}</div>
@@ -309,16 +261,6 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
             </button>
           </>
         )}
-
-        {/* Dot indicators (desktop only) */}
-          <SliderDots
-            count={images.length}
-            activeIndex={activeIndex}
-            onSelect={goTo}
-            variant="light"
-            ariaPrefix="View image"
-            className="hidden md:flex absolute bottom-3 left-1/2 -translate-x-1/2"
-          />
 
         </div>
 
