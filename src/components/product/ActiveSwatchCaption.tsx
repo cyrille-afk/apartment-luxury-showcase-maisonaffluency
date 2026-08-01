@@ -64,14 +64,14 @@ export default function ActiveSwatchCaption({
   const matches = swatches.filter((s) => s.image_indices?.includes(oneBased));
   if (!matches.length) return null;
 
-  return (
-    <div className="mt-3 flex flex-wrap items-center justify-center gap-x-1.5 gap-y-1 px-2 text-center">
-      <span className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
-        Shown in
-      </span>
-      <span className="font-body text-sm text-foreground inline-flex flex-wrap items-center justify-center gap-x-1 gap-y-1">
-        {matches.map((m, i) => (
-          <span key={m.fabric_id} className="inline-flex items-center gap-1">
+  const multi = matches.length > 1;
+
+  if (multi) {
+    // Several finishes → keep them on a single swipeable line, no "Shown in" label.
+    return (
+      <div className="mt-3 flex items-center gap-3 overflow-x-auto whitespace-nowrap px-2 no-scrollbar [scrollbar-width:none] justify-start sm:justify-center">
+        {matches.map((m) => (
+          <span key={m.fabric_id} className="inline-flex shrink-0 items-center gap-1.5">
             {m.image_url ? (
               <img
                 src={m.image_url}
@@ -82,10 +82,30 @@ export default function ActiveSwatchCaption({
             ) : (
               <div className="w-5 h-5 rounded-full bg-muted" />
             )}
-            <span>{m.name}</span>
-            {i < matches.length - 1 && <span className="text-muted-foreground">,</span>}
+            <span className="font-body text-sm text-foreground">{m.name}</span>
           </span>
         ))}
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-3 flex flex-wrap items-center justify-center gap-x-1.5 gap-y-1 px-2 text-center">
+      <span className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
+        Shown in
+      </span>
+      <span className="font-body text-sm text-foreground inline-flex items-center gap-1">
+        {matches[0].image_url ? (
+          <img
+            src={matches[0].image_url}
+            alt={matches[0].name}
+            className="w-5 h-5 rounded-full object-cover border border-border"
+            loading="lazy"
+          />
+        ) : (
+          <div className="w-5 h-5 rounded-full bg-muted" />
+        )}
+        <span>{matches[0].name}</span>
       </span>
     </div>
   );
