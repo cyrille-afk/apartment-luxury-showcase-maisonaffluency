@@ -1535,6 +1535,16 @@ const PublicProductPage: React.FC = () => {
                   );
                 })()}
 
+                {/* Publicly disclosed RRP (currently Apparatus only) */}
+                {publicRrpLabel && (
+                  <div className="border-b border-border/60 pb-3">
+                    <p className="font-display text-lg md:text-xl text-foreground">{publicRrpLabel}</p>
+                    <p className="font-body text-[10px] uppercase tracking-[0.16em] text-muted-foreground mt-1">
+                      Recommended retail price · excl. shipping &amp; duties
+                    </p>
+                  </div>
+                )}
+
                 {/* Public, crawlable specification table (no session required) */}
                 {(() => {
                   const variants = (product.size_variants || []) as any[];
