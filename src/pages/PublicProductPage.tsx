@@ -1202,14 +1202,41 @@ const PublicProductPage: React.FC = () => {
     if (isClear) {
       // Snap the gallery back to the primary product image (index 0) so the
       // hero visibly resets when the user clears their finish/material choice.
+      setSelectedRrp(null);
       setGalleryActiveIndex(0);
       setGalleryJumpNonce((n) => n + 1);
       return;
     }
     const variantsForAxes = product.size_variants || [];
+    // Public RRP follows the selection: match every chosen axis value against
+    // the variant's base/top/label, then show that variant's price (exact when
+    // one variant matches, "From <min>" while the selection is still partial).
+    {
+      const norm = (s: any) => String(s ?? "").trim().toLowerCase();
+      const wanted = [opts?.base, opts?.top, opts?.size]
+        .map((v) => (v ? norm(v) : ""))
+        .filter(Boolean);
+      const keys = wanted.length ? wanted : (label ? [norm(label)] : []);
+      const matches = keys.length
+        ? (variantsForAxes as any[]).filter((v) => {
+            const fields = [v?.base, v?.top, v?.label].map(norm);
+            return keys.every((k) => fields.includes(k));
+          })
+        : [];
+      const priced = matches
+        .map((v) => Number(v?.price_cents))
+        .filter((c) => Number.isFinite(c) && c > 0);
+      const uniquePrices = Array.from(new Set(priced));
+      setSelectedRrp(
+        uniquePrices.length
+          ? { cents: Math.min(...uniquePrices), exact: uniquePrices.length === 1 }
+          : null,
+      );
+    }
     const requiresBaseAndTopSelection =
       variantsForAxes.some((v: any) => v.base && String(v.base).trim()) &&
       variantsForAxes.some((v: any) => v.top && String(v.top).trim());
+
     // If the Base axis only offers one distinct value, treat it as implicitly
     // selected so picking just the Top still resolves the composite key.
     const distinctBases = Array.from(
