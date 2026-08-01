@@ -1236,6 +1236,7 @@ const PublicProductPage: React.FC = () => {
         const desc =
           (product.description?.replace(/\s+/g, " ").trim().slice(0, 155)) ||
           `${product.title} by ${designerDisplay}. ${product.materials || "Collectible design at Maison Affluency."}`.slice(0, 155);
+        const ldDims = parseDimensions(product.dimensions);
         const productLd = {
           "@context": "https://schema.org",
           "@type": "Product",
@@ -1244,8 +1245,15 @@ const PublicProductPage: React.FC = () => {
           image: images.length ? images : [ogImg],
           brand: { "@type": "Brand", name: designerDisplay },
           category: product.subcategory || product.category || undefined,
-          material: product.materials || undefined,
+          material: product.materials || product.materials_description || undefined,
+          sku: product.id,
+          mpn: product.id,
           url: canonical,
+          width: quantitativeValue(ldDims?.width, ldDims?.unit || "CMT"),
+          depth: quantitativeValue(ldDims?.depth, ldDims?.unit || "CMT"),
+          height: quantitativeValue(ldDims?.height, ldDims?.unit || "CMT"),
+          // Never expose pricing to unauthenticated crawlers — the Offer stays
+          // price-free and simply points at the enquiry flow.
           offers: {
             "@type": "Offer",
             availability: "https://schema.org/InStock",
@@ -1253,6 +1261,7 @@ const PublicProductPage: React.FC = () => {
             seller: { "@type": "Organization", name: "Maison Affluency" },
           },
         };
+
         const crumbsLd = {
           "@context": "https://schema.org",
           "@type": "BreadcrumbList",
