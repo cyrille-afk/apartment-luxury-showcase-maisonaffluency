@@ -1896,7 +1896,7 @@ const PublicProductPage: React.FC = () => {
                 productId={product.id}
                 productTitle={product.title}
                 designerDisplay={designerDisplay}
-                tradeApproved={!!user && (isTradeUser || tradeStatus === "approved")}
+                tradeApproved={!!user && tradeStatus === "approved"}
                 onRequestQuote={() => setQuoteRequestOpen(true)}
               />
 
