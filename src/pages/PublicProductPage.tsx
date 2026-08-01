@@ -1129,6 +1129,12 @@ const PublicProductPage: React.FC = () => {
   // Height of the gallery column captured before the collapse, so we can keep
   // the reading position visually stable when the image shrinks.
   const galleryHeightRef = useRef<number>(0);
+  // Guard: after the collapse we programmatically scroll the page up by the
+  // height the image lost. That lands the offset near the top, which would
+  // otherwise trip the "expand again" branch and make the image bounce back to
+  // full size. Lock the collapsed state for a moment so momentum scrolling and
+  // the compensation itself cannot re-expand it.
+  const compactLockUntilRef = useRef(0);
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (window.matchMedia("(min-width: 1024px)").matches) return;
@@ -1136,9 +1142,10 @@ const PublicProductPage: React.FC = () => {
       const y = window.scrollY;
       const el = galleryScrollRef.current;
       // Hysteresis: collapse once the user has genuinely started reading,
-      // expand again only right at the top of the page.
+      // expand again only right at the very top of the page.
       setGalleryCompact((prev) => {
-        const next = prev ? y > 8 : y > 140;
+        if (prev && Date.now() < compactLockUntilRef.current) return true;
+        const next = prev ? y > 2 : y > 140;
         if (!prev && next) {
           const frame = document.querySelector(".product-image-frame") as HTMLElement | null;
           galleryHeightRef.current = frame?.getBoundingClientRect().height ?? 0;
@@ -1162,7 +1169,7 @@ const PublicProductPage: React.FC = () => {
   // When the image collapses, the whole page shifts up by the height it lost.
   // Compensate the scroll offset by that delta so the designer name, product
   // title and price land directly under the collapsed image instead of being
-  // skipped over.
+  // skipped over. Never land back at 0 — that would re-expand the image.
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (!galleryCompact) return;
@@ -1174,9 +1181,12 @@ const PublicProductPage: React.FC = () => {
     const after = frame.getBoundingClientRect().height;
     const delta = after - before; // negative when it shrank
     if (delta < -4) {
-      window.scrollTo({ top: Math.max(0, window.scrollY + delta) });
+      compactLockUntilRef.current = Date.now() + 600;
+      window.scrollTo({ top: Math.max(32, window.scrollY + delta) });
     }
   }, [galleryCompact]);
+
+
 
 
 
@@ -1651,7 +1661,7 @@ const PublicProductPage: React.FC = () => {
           </div>
 
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 md:gap-8 lg:gap-16">
             <div className="relative md:sticky md:top-0 self-start z-30 bg-background" ref={galleryScrollRef}>
               <ProductImageGallery
                 images={images}
