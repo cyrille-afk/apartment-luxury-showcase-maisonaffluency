@@ -1656,31 +1656,29 @@ const PublicProductPage: React.FC = () => {
                     </div>
                   ) : null
                 }
-              />
-
-
-              {/* Mobile-only image overlays: share (top-right) + favorite (bottom-right) */}
-              <div className="md:hidden pointer-events-none absolute inset-x-0 top-0 z-40" style={{ height: galleryCompact ? "34vh" : "60vh" }}>
-                <div className="absolute top-3 right-3 pointer-events-auto">
-                  {(() => {
-                    const shareUrl = buildPieceOgUrl(designerDisplay, product.title, product.subtitle);
-                    return (
+                mobileMenuItems={(() => {
+                  const shareUrl = buildPieceOgUrl(designerDisplay, product.title, product.subtitle);
+                  return (
+                    <div className="px-2 py-1.5">
                       <ShareMenu
                         url={shareUrl}
                         message={`${product.title} by ${designerDisplay} — Maison Affluency: ${shareUrl}`}
-                        className="flex items-center justify-center w-10 h-10 rounded-full bg-background/90 backdrop-blur-sm border border-border shadow-sm text-foreground"
-                        iconSize="w-[18px] h-[18px]"
+                        className="flex items-center gap-2.5 text-foreground"
+                        iconSize="w-4 h-4"
                         iconVariant="ios"
-                        showLabel={false}
+                        labelSize="text-[11px]"
                         imageUrl={images?.[galleryActiveIndex ?? 0] || images?.[0]}
                         imageName={`${product.title}-${designerDisplay}`}
                       />
+                    </div>
+                  );
+                })()}
+              />
 
-                    );
-                  })()}
-                </div>
 
-                <div className="absolute bottom-3 left-3 md:left-auto md:right-3 pointer-events-auto">
+              {/* Mobile-only image overlay: favorite / studio save, top-right */}
+              <div className="md:hidden pointer-events-none absolute inset-x-0 top-0 z-40" style={{ height: galleryCompact ? "32vh" : "48vh" }}>
+                <div className="absolute top-4 right-4 pointer-events-auto">
                   {user && (isTradeUser || tradeStatus === "approved") ? (
                     // Trade members get the studio "drop" anchor instead of the
                     // retail heart: one tap → bottom sheet → project.
@@ -1690,19 +1688,20 @@ const PublicProductPage: React.FC = () => {
                       finishes={selectedFinishes}
                     />
                   ) : (
-                    <FavoriteFolderPicker pickId={product.id} align="end" side="top">
+                    <FavoriteFolderPicker pickId={product.id} align="end" side="bottom">
                       <button
                         onClick={(e) => e.stopPropagation()}
                         aria-label={favorited ? "Saved to favorites" : "Add to favorites"}
-                        className="flex items-center justify-center w-10 h-10 rounded-full bg-background/90 backdrop-blur-sm border border-border shadow-sm"
+                        className="flex items-center justify-center w-9 h-9 rounded-full bg-background/25 backdrop-blur-md border border-border/25"
                       >
-                        <Heart size={16} className={cn(favorited ? "fill-destructive text-destructive" : "text-foreground")} />
+                        <Heart size={20} strokeWidth={1.5} className={cn(favorited ? "fill-destructive text-destructive" : "text-foreground/80")} />
                       </button>
                     </FavoriteFolderPicker>
                   )}
                 </div>
 
               </div>
+
 
               <div className="md:border-0 md:shadow-none border-b border-border/60 shadow-[0_6px_10px_-8px_rgba(0,0,0,0.35)] pb-2">
                 <ActiveSwatchCaption pickId={product.id} activeIndex={galleryActiveIndex ?? 0} />
