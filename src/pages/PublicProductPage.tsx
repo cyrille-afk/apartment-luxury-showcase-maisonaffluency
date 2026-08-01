@@ -60,6 +60,8 @@ import {
   parseDimensions,
   quantitativeValue,
 } from "@/components/product/PublicSpecTable";
+import TradeWorkspace from "@/components/product/TradeWorkspace";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 
 /* ------------------------------------------------------------------ */
@@ -993,6 +995,11 @@ const PublicProductPage: React.FC = () => {
   // Mobile/PWA: shrink the product image once the user scrolls past a small threshold.
   const [galleryCompact, setGalleryCompact] = useState(false);
   const [showStickyBar, setShowStickyBar] = useState(false);
+  // Finish/size selection surfaced in the authenticated Trade Workspace and
+  // injected into Felix's product context.
+  const [selectedFinishes, setSelectedFinishes] = useState<string[]>([]);
+  // Signed-out visitors get an elegant explainer instead of the gated PDF.
+  const [specSheetLocked, setSpecSheetLocked] = useState(false);
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (window.matchMedia("(min-width: 1024px)").matches) return;
@@ -1167,6 +1174,12 @@ const PublicProductPage: React.FC = () => {
     label: string | null,
     opts?: { base?: string | null; top?: string | null; size?: string | null; fromSwatch?: boolean }
   ) => {
+    // Mirror the selection into the trade workspace / Felix context.
+    setSelectedFinishes(
+      [opts?.base, opts?.top, opts?.size, !opts?.base && !opts?.top ? label : null]
+        .map((v) => (v ? String(v).trim() : ""))
+        .filter(Boolean)
+    );
     // Detect a "clear selection" call: no label and no axis values.
     const isClear =
       !label &&
@@ -1556,8 +1569,8 @@ const PublicProductPage: React.FC = () => {
 
 
 
-              {/* Signed-in visitors. Verified trade users get a direct route to
-                  the trade product sheet (net pricing, lead times, CAD);
+              {/* Signed-in visitors. Verified trade members get the full
+                  workspace (net pricing, availability, spec sheet + Felix);
                   everyone else signed in keeps the enquiry CTA. */}
               {user && (() => {
                 const returnTo = typeof window !== "undefined" ? location.pathname + location.search : "";
@@ -1569,24 +1582,32 @@ const PublicProductPage: React.FC = () => {
                   designerName: designerDisplay || "",
                   back: returnTo || "",
                 });
+                const inquireHref = `/contact?${q.toString()}#contact`;
+
+                if (isTradeUser) {
+                  return (
+                    <TradeWorkspace
+                      productId={product.id}
+                      title={product.title}
+                      designerDisplay={designerDisplay}
+                      dimensions={product.dimensions}
+                      materials={product.materials || (product as any).materials_description}
+                      originLine={product.origin}
+                      leadTime={product.lead_time}
+                      selectedFinishes={selectedFinishes}
+                      pdfUrl={product.pdf_url}
+                      pdfUrls={product.pdf_urls}
+                      inquireHref={inquireHref}
+                      felixUrl={typeof window !== "undefined" ? window.location.href : undefined}
+                    />
+                  );
+                }
+
                 return (
                   <div className="mt-2 space-y-2">
-                    {isTradeUser && (
-                      <Link
-                        to={`/trade/products/${product.id}`}
-                        className="flex items-center justify-center gap-2 px-4 py-3.5 rounded-md font-body text-[11px] md:text-xs uppercase tracking-[0.12em] transition-all w-full bg-foreground text-background hover:bg-foreground/90 text-center"
-                      >
-                        View Trade Pricing
-                      </Link>
-                    )}
                     <Link
-                      to={`/contact?${q.toString()}#contact`}
-                      className={cn(
-                        "flex items-center justify-center gap-2 px-4 py-3.5 rounded-md font-body text-[11px] md:text-xs uppercase tracking-[0.12em] transition-all w-full text-center",
-                        isTradeUser
-                          ? "border border-foreground/40 text-foreground hover:bg-foreground/5"
-                          : "bg-foreground text-background hover:bg-foreground/90"
-                      )}
+                      to={inquireHref}
+                      className="flex items-center justify-center gap-2 px-4 py-3.5 rounded-md font-body text-[11px] md:text-xs uppercase tracking-[0.12em] transition-all w-full text-center bg-foreground text-background hover:bg-foreground/90"
                     >
                       Inquire for Pricing
                     </Link>
@@ -1632,7 +1653,8 @@ const PublicProductPage: React.FC = () => {
                 </button>
 
                 {(product.pdf_url || (product.pdf_urls && product.pdf_urls.length > 0)) ? (
-                  <div className="hidden md:block">
+                  // Trade members already have the spec sheet inside the workspace.
+                  <div className={cn("hidden", !isTradeUser && "md:block")}>
                     <SpecSheetButton
                       pdfUrl={product.pdf_url}
                       pdfUrls={product.pdf_urls}
@@ -1640,6 +1662,11 @@ const PublicProductPage: React.FC = () => {
                       productName={product.title}
                       variant="button"
                       onBeforeOpen={() => {
+                        if (!user) {
+                          // Signed out: never load gated data — explain instead.
+                          setSpecSheetLocked(true);
+                          return false;
+                        }
                         let allowed = false;
                         requireAuth(() => { allowed = true; }, "download this spec sheet");
                         return allowed;
@@ -1655,6 +1682,34 @@ const PublicProductPage: React.FC = () => {
                   </Link>
                 )}
               </div>
+
+              {/* Signed-out spec sheet explainer — points back to the trade card. */}
+              <Dialog open={specSheetLocked} onOpenChange={setSpecSheetLocked}>
+                <DialogContent className="max-w-md">
+                  <DialogHeader>
+                    <DialogTitle className="font-display text-xl">Spec sheets are trade access</DialogTitle>
+                    <DialogDescription className="font-body text-sm leading-relaxed">
+                      Technical documentation for the {product.title} is reserved for verified trade
+                      members. Sign in above, or apply for trade access — approval takes a day or two.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="flex flex-wrap gap-2 pt-2">
+                    <Link
+                      to={`/trade/login?redirect=${encodeURIComponent(location.pathname + location.search)}`}
+                      className="inline-flex items-center justify-center px-5 py-3 rounded-md bg-foreground text-background font-body text-[11px] uppercase tracking-[0.12em] hover:bg-foreground/90 transition-colors"
+                    >
+                      Sign in to view
+                    </Link>
+                    <Link
+                      to="/trade/register"
+                      className="inline-flex items-center justify-center px-5 py-3 rounded-md border border-foreground/40 text-foreground font-body text-[11px] uppercase tracking-[0.12em] hover:bg-foreground/5 transition-colors"
+                    >
+                      Apply for trade access
+                    </Link>
+                  </div>
+                </DialogContent>
+              </Dialog>
+
 
 
             </div>
