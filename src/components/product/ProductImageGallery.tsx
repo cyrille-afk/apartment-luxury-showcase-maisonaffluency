@@ -45,10 +45,11 @@ interface ProductImageGalleryProps {
  * iOS/Android transition feel. The incoming image is decoded before the
  * fade starts so the dissolve never flashes an empty frame.
  */
-const CrossfadeImage: React.FC<{ src: string; alt: string; pointerEventsNone?: boolean }> = ({
+const CrossfadeImage: React.FC<{ src: string; alt: string; pointerEventsNone?: boolean; backdropClass?: string }> = ({
   src,
   alt,
   pointerEventsNone,
+  backdropClass = "bg-foreground/95",
 }) => {
   // The outgoing frame stays fully opaque underneath; only the incoming frame
   // fades in on top. Cross-dissolving *both* layers made the dark backdrop
@@ -123,18 +124,17 @@ const CrossfadeImage: React.FC<{ src: string; alt: string; pointerEventsNone?: b
         className={cn(base, "opacity-100")}
       />
       {incoming && (
-        <img
-          src={incoming}
-          alt=""
-          aria-hidden="true"
-          draggable={false}
+        <span
           onTransitionEnd={settle}
           className={cn(
-            base,
-            "absolute transition-opacity duration-300 ease-out",
+            "absolute inset-0 flex items-center justify-center transition-opacity duration-300 ease-out",
+            backdropClass,
             fading ? "opacity-100" : "opacity-0"
           )}
-        />
+          aria-hidden="true"
+        >
+          <img src={incoming} alt="" draggable={false} className={base} />
+        </span>
       )}
     </span>
   );
