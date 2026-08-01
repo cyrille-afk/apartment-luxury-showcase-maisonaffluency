@@ -1349,7 +1349,7 @@ const DesignersHoverHero = () => {
       aria-label="Featured designers"
       onMouseLeave={() => {}}
       className={cn(
-        "relative w-full bg-[#0a0a0a] text-foreground overflow-hidden",
+        "relative w-full bg-black text-foreground overflow-hidden",
         isMobileBrowser ? "touch-none" : "touch-pan-y",
         isStandalone
           ? "h-[calc(var(--designers-landing-vh,100svh)-var(--header-h))] md:h-[calc(100svh-var(--header-h))] md:min-h-[640px]"
@@ -1360,8 +1360,17 @@ const DesignersHoverHero = () => {
             "h-[calc(var(--designers-landing-vh,100lvh)-var(--header-h))] md:h-[calc(100svh-var(--header-h))]"
       )}
     >
-      {/* Cross-fading background images */}
-      <div className="absolute inset-0 z-0">
+      {/* Cross-fading background images — on mobile the photo stops at the
+          visible viewport (svh) / above the home indicator so iOS bottom
+          chrome always sits on solid black instead of the image. */}
+      <div
+        className={cn(
+          "absolute inset-x-0 top-0 z-0 overflow-hidden",
+          isStandalone
+            ? "bottom-[env(safe-area-inset-bottom,0px)] md:bottom-0"
+            : "h-[calc(var(--designers-landing-vh,100svh)-var(--header-h))] md:h-auto md:bottom-0"
+        )}
+      >
         {items.map((d, i) => {
           const src = isMobileOrPwa
             ? mobileHeroBackgroundSrc(d)
