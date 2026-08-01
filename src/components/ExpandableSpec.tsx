@@ -326,10 +326,12 @@ export default function ExpandableSpec({
             }}
           >
             <DrawerContent className="rounded-t-[14px] border-border/60">
+              <DrawerTitle className="sr-only">{placeholder}</DrawerTitle>
               <div className="px-5 pt-2 pb-[max(1.25rem,env(safe-area-inset-bottom))]">
                 <p className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground pb-3">
                   {placeholder}
                 </p>
+
                 <ul
                   role="listbox"
                   tabIndex={-1}
