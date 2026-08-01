@@ -143,6 +143,12 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
             ))}
           </div>
 
+          {/* Luxury fade mask at the bottom of the thumbnail stack */}
+          <div
+            className="absolute bottom-0 left-0 right-0 h-12 pointer-events-none bg-gradient-to-t from-background via-background/60 to-transparent z-10"
+            aria-hidden="true"
+          />
+
         </div>
       )}
 
