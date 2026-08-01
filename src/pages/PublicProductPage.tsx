@@ -1999,47 +1999,46 @@ const PublicProductPage: React.FC = () => {
                     ))}
                   </div>
 
-                  {/* Desktop pagination: centered dots with arrows on the right */}
+                  {/* Desktop pagination: minimalist progress track flanked by
+                      raw hairline chevrons. */}
                   {relatedPicks.length > visibleCount && (
-                    <div className="hidden lg:flex mt-6 relative items-center justify-center">
-                      <div className="flex items-center gap-1.5">
-                        {Array.from({ length: maxIndex + 1 }).map((_, i) => (
-                          <button
-                            key={i}
-                            type="button"
-                            onClick={() => setRelatedIndex(i)}
-                            aria-label={`Go to page ${i + 1}`}
-                            className={cn(
-                              "h-1.5 rounded-full transition-all",
-                              i === safeIndex
-                                ? "w-6 bg-foreground"
-                                : "w-1.5 bg-foreground/30 hover:bg-foreground/60"
-                            )}
-                          />
-                        ))}
+                    <div className="hidden lg:flex mt-6 items-center justify-center gap-6">
+                      <button
+                        type="button"
+                        onClick={() => setRelatedIndex((i) => Math.max(0, i - 1))}
+                        disabled={safeIndex === 0}
+                        aria-label="Previous"
+                        className="text-foreground/70 hover:text-foreground disabled:opacity-20 disabled:cursor-not-allowed transition-opacity"
+                      >
+                        <svg width="14" height="20" viewBox="0 0 14 20" fill="none" aria-hidden="true">
+                          <path d="M11 1 3 10l8 9" stroke="currentColor" strokeWidth="1" strokeLinecap="square" />
+                        </svg>
+                      </button>
+
+                      <div className="relative h-px w-40 bg-foreground/15" role="presentation">
+                        <div
+                          className="absolute inset-y-0 h-px bg-foreground transition-[left,width] duration-500 ease-out"
+                          style={{
+                            width: `${100 / (maxIndex + 1)}%`,
+                            left: `${(safeIndex * 100) / (maxIndex + 1)}%`,
+                          }}
+                        />
                       </div>
-                      <div className="absolute right-0 flex items-center gap-3">
-                        <button
-                          type="button"
-                          onClick={() => setRelatedIndex((i) => Math.max(0, i - 1))}
-                          disabled={safeIndex === 0}
-                          aria-label="Previous"
-                          className="w-10 h-10 rounded-full border border-border flex items-center justify-center text-foreground hover:border-foreground/60 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                        >
-                          <ChevronLeft size={16} />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setRelatedIndex((i) => Math.min(maxIndex, i + 1))}
-                          disabled={safeIndex >= maxIndex}
-                          aria-label="Next"
-                          className="w-10 h-10 rounded-full border border-border flex items-center justify-center text-foreground hover:border-foreground/60 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                        >
-                          <ChevronRight size={16} />
-                        </button>
-                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => setRelatedIndex((i) => Math.min(maxIndex, i + 1))}
+                        disabled={safeIndex >= maxIndex}
+                        aria-label="Next"
+                        className="text-foreground/70 hover:text-foreground disabled:opacity-20 disabled:cursor-not-allowed transition-opacity"
+                      >
+                        <svg width="14" height="20" viewBox="0 0 14 20" fill="none" aria-hidden="true">
+                          <path d="M3 1l8 9-8 9" stroke="currentColor" strokeWidth="1" strokeLinecap="square" />
+                        </svg>
+                      </button>
                     </div>
                   )}
+
                 </div>
 
                 {/* Brand summary — above carousel on desktop, below on mobile */}
