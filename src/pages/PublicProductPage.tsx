@@ -1500,23 +1500,16 @@ const PublicProductPage: React.FC = () => {
           aria-hidden={!showStickyBar}
         >
           <div className="px-3 pt-2 pb-2.5">
-            <div className="flex items-center gap-3">
-              {images[0] && (
-                <img
-                  src={images[0]}
-                  alt=""
-                  className="w-11 h-11 rounded-md object-cover shrink-0 border border-border"
-                />
-              )}
-              <div className="min-w-0 flex-1">
-                <p className="font-display text-[13px] leading-tight text-foreground truncate">
-                  {product.title}
-                </p>
-                <p className="font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground truncate">
-                  {designerDisplay}
-                </p>
-              </div>
+            <div className="flex items-baseline gap-2 min-w-0">
+              <p className="font-display text-[13px] leading-tight text-foreground truncate shrink">
+                {product.title}
+              </p>
+              <span className="text-muted-foreground/50 text-[11px] shrink-0">·</span>
+              <p className="font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground truncate shrink-0 max-w-[45%]">
+                {designerDisplay}
+              </p>
             </div>
+
             <div className="mt-2 grid grid-cols-2 gap-2">
               <Link
                 to={`/contact?${new URLSearchParams({
