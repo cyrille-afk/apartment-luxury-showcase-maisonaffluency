@@ -211,6 +211,24 @@ export default function TradeWorkspace({
         </dl>
 
         <div className="mt-5 flex flex-col gap-2">
+          {/* Mobile → desktop continuity: pushes this piece (with the chosen
+              finishes) to the studio desktop, ready for the next session. */}
+          <button
+            type="button"
+            onClick={sendToDesktop}
+            disabled={sending || sent}
+            className="flex items-center justify-center gap-1.5 px-4 py-3 rounded-md border border-[hsl(var(--gold))]/50 text-[hsl(var(--gold))] font-body text-[11px] uppercase tracking-[0.12em] transition-colors hover:bg-[hsl(var(--gold))]/5 disabled:opacity-70 touch-manipulation"
+          >
+            {sending ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : sent ? (
+              <Check className="h-3.5 w-3.5" />
+            ) : (
+              <Laptop className="h-3.5 w-3.5" />
+            )}
+            {sent ? "Waiting on your desktop" : "Send to Desktop"}
+          </button>
+
           <Link
             to={`/trade/products/${productId}`}
             className="flex items-center justify-center px-4 py-3 rounded-md bg-foreground text-background font-body text-[11px] uppercase tracking-[0.12em] hover:bg-foreground/90 transition-colors"
