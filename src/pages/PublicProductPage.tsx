@@ -1569,6 +1569,7 @@ const PublicProductPage: React.FC = () => {
                 {!user && !authLoading && (
                   <TradeExclusiveCard
                     redirectTo={location.pathname + location.search}
+                    rrpLabel={publicRrpLabel}
                     inquireHref={`/contact?${new URLSearchParams({
                       subject: `Price on Request — ${product.title} by ${designerDisplay}`,
                       productId: product.id,

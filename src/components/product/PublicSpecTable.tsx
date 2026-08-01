@@ -130,9 +130,11 @@ export function PublicSpecTable({
 export function TradeExclusiveCard({
   redirectTo,
   inquireHref,
+  rrpLabel,
 }: {
   redirectTo?: string;
   inquireHref?: string;
+  rrpLabel?: string | null;
 }) {
   const q = new URLSearchParams();
   if (redirectTo) q.set("redirect", redirectTo);
@@ -148,7 +150,14 @@ export function TradeExclusiveCard({
         </span>
       </div>
       <p className="font-body text-xs md:text-sm text-muted-foreground leading-relaxed max-w-sm mx-auto">
-        View pricing, access projects & client management tools, logistical data, and AI curatorial guide.
+        {rrpLabel ? (
+          <>
+            Public retail price <span className="text-foreground">{rrpLabel}</span> is shown above.
+            Unlock trade pricing, projects & client management tools, logistical data, and AI curatorial guide.
+          </>
+        ) : (
+          "View pricing, access projects & client management tools, logistical data, and AI curatorial guide."
+        )}
       </p>
       <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
         <Link
