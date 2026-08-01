@@ -323,6 +323,19 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
             <CrossfadeImage src={images[activeIndex]} alt={alt} />
           </div>
 
+          {/* Presentation Mode — hand the phone to the client and the platform
+              disappears: pure, full-bleed photography, no pricing or controls. */}
+          <div className="md:hidden absolute top-3 left-3 z-30">
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); setPresentOpen(true); }}
+              aria-label="Presentation mode"
+              className="w-10 h-10 rounded-full bg-background/90 backdrop-blur-sm border border-border shadow-sm flex items-center justify-center touch-manipulation"
+            >
+              <Expand size={17} className="text-foreground" />
+            </button>
+          </div>
+
 
           {/* Hover-to-navigate now lives on the vertical thumbnail strip (see above). */}
 
