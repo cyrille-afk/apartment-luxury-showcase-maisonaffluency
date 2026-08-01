@@ -1276,7 +1276,7 @@ const PublicProductPage: React.FC = () => {
       rrpSelectionRef.current = merged;
 
       const rrpVariants = (publicRrpRow?.rrp_size_variants || []) as any[];
-      if (typeof window !== "undefined") (window as any).__rrpDebug = { merged, count: rrpVariants.length };
+      
 
       const keySets = [
         [merged.size, merged.base, merged.top],
