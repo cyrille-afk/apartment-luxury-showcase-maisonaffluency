@@ -186,7 +186,8 @@ export default function AuthGateDialog({ open, onClose, action = "download this 
               </div>
               <h2 className="font-display text-lg text-foreground">Create an Account</h2>
               <p className="font-body text-xs text-muted-foreground mt-1.5 leading-relaxed">
-                Sign in or create a free account to {action}.
+                Sign in or request a trade account to unlock full specification sheets, CAD files,
+                and our AI design workspace.
               </p>
             </div>
 
