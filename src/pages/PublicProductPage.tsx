@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate, Link, useLocation, Navigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { Heart, Scale, ChevronLeft, ChevronRight, ChevronDown, ArrowLeft, Truck, Loader2, ShoppingBag } from "lucide-react";
+import { Heart, Pin, FileText, ChevronLeft, ChevronRight, ChevronDown, ArrowLeft, Truck, Loader2, ShoppingBag } from "lucide-react";
 import ShareMenu from "@/components/ShareMenu";
 import { buildPieceOgUrl } from "@/lib/whatsapp-share";
 import { cloudinaryUrl } from "@/lib/cloudinary";
