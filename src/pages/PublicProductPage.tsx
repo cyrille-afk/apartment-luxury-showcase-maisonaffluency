@@ -1961,11 +1961,11 @@ const PublicProductPage: React.FC = () => {
                 }}
                 onFinishesMissingImagesChange={setFinishesMissingImages}
               >
-                <div className="flex flex-col gap-5 order-1">
+                <div className="flex flex-col gap-5 order-1 md:order-2">
                   <VariantFinishSelectors section="primary" />
                 </div>
 
-                <div className="min-w-0 py-5 order-2">
+                <div className="min-w-0 py-5 order-2 md:order-1">
                       <Link
                         to={`/designers/${designer.slug}`}
                         onClick={() => rememberProductBackRef(designer.slug, location.pathname + location.search)}
