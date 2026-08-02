@@ -61,6 +61,8 @@ import {
   quantitativeValue,
 } from "@/components/product/PublicSpecTable";
 import TradeWorkspace from "@/components/product/TradeWorkspace";
+import StickyPurchaseBar from "@/components/product/StickyPurchaseBar";
+
 import TradePendingReviewCard from "@/components/product/TradePendingReviewCard";
 import CustomizationRequest from "@/components/product/CustomizationRequest";
 import QuoteRequestDialog from "@/components/QuoteRequestDialog";
@@ -1127,6 +1129,33 @@ const PublicProductPage: React.FC = () => {
   // Mobile/PWA: shrink the product image once the user scrolls past a small threshold.
   const [galleryCompact, setGalleryCompact] = useState(false);
   const [showStickyBar, setShowStickyBar] = useState(false);
+  const [showDesktopStickyBar, setShowDesktopStickyBar] = useState(false);
+
+  // Desktop: slide the slim purchase bar in once the user has scrolled past
+  // the main product image. The image column is sticky, so we compare the
+  // scroll offset against the image frame height rather than its visibility.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (!window.matchMedia("(min-width: 1024px)").matches) {
+      setShowDesktopStickyBar(false);
+      return;
+    }
+    const onScroll = () => {
+      const frame = document.querySelector(".product-image-frame") as HTMLElement | null;
+      const threshold = Math.max(280, (frame?.getBoundingClientRect().height ?? 480) * 0.75);
+      setShowDesktopStickyBar(window.scrollY > threshold);
+    };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
+  }, [productId]);
+
+
+
   const [quoteRequestOpen, setQuoteRequestOpen] = useState(false);
   // Finish/size selection surfaced in the authenticated Trade Workspace and
   // injected into Felix's product context.
@@ -1661,6 +1690,18 @@ const PublicProductPage: React.FC = () => {
 
         </div>
 
+        {/* Desktop slim sticky purchase bar */}
+        <StickyPurchaseBar
+          visible={showDesktopStickyBar}
+          image={images[0]}
+          title={product.title}
+          designer={designerDisplay}
+          price={publicRrpLabel}
+          onRequestQuote={() => setQuoteRequestOpen(true)}
+        />
+
+
+
 
         <div className="pt-[calc(env(safe-area-inset-top,0px)+7rem)] md:pt-36 pb-[calc(env(safe-area-inset-bottom,0px)+5rem)] md:pb-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <button
@@ -1848,7 +1889,28 @@ const PublicProductPage: React.FC = () => {
                     </p>
                   </div>
                 )}
+
+                {/* Trade prompt + Trade Exclusive Access, directly under the price */}
+                {!user && !authLoading && (
+                  <>
+                    <p className="mt-3 font-body text-xs text-muted-foreground">
+                      Are you a Trade professional?{" "}
+                      <Link
+                        to={`/trade/login?redirect=${encodeURIComponent(location.pathname + location.search)}`}
+                        className="text-foreground underline underline-offset-4 hover:text-[hsl(var(--gold))] transition-colors"
+                      >
+                        Sign in for exclusive pricing.
+                      </Link>
+                    </p>
+                    <TradeExclusiveCard
+                      redirectTo={location.pathname + location.search}
+                      rrpLabel={publicRrpLabel}
+                      onRequestQuote={() => setQuoteRequestOpen(true)}
+                    />
+                  </>
+                )}
               </div>
+
 
 
 
@@ -2012,23 +2074,16 @@ const PublicProductPage: React.FC = () => {
                 const tradeApprovedFooter = !!user && (isTradeUser || tradeStatus === "approved");
                 const hasSheet = !!(product.pdf_url || (product.pdf_urls && product.pdf_urls.length > 0));
                 const baseBtn =
-                  "w-full flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-luxury-micro font-body text-[11px] uppercase tracking-[0.12em] transition-all border";
-                const idleBtn =
-                  "border-border text-muted-foreground hover:text-foreground hover:border-foreground/30";
+                  "inline-flex items-center gap-1.5 font-body text-[11px] uppercase tracking-[0.12em] transition-colors";
+                const idleBtn = "text-muted-foreground hover:text-foreground";
 
                 return (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-                <div className="hidden md:block">
+              <div className="hidden md:flex flex-wrap items-center gap-x-6 gap-y-2 pt-1">
                 {user ? (
                 <FavoriteFolderPicker pickId={product.id} align="start" side="top">
                   <button
                     onClick={(e) => e.stopPropagation()}
-                    className={cn(
-                      baseBtn,
-                      favorited
-                        ? "border-destructive/30 text-destructive bg-destructive/10"
-                        : idleBtn
-                    )}
+                    className={cn(baseBtn, favorited ? "text-destructive" : idleBtn)}
                   >
                     <Heart size={13} className={cn(favorited && "fill-current")} />
                     {favorited ? "Saved" : "Favorite"}
@@ -2043,7 +2098,6 @@ const PublicProductPage: React.FC = () => {
                     Favorite
                   </button>
                 )}
-                </div>
 
                 <button
                   onClick={() => {
@@ -2054,10 +2108,8 @@ const PublicProductPage: React.FC = () => {
                     togglePin(compareItem);
                   }}
                   className={cn(
-                    "hidden md:flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-luxury-micro font-body text-[11px] uppercase tracking-[0.12em] transition-all border",
-                    pinned
-                      ? "bg-[hsl(var(--gold))]/10 border-[hsl(var(--gold))] text-[hsl(var(--gold))]"
-                      : idleBtn,
+                    baseBtn,
+                    pinned ? "text-[hsl(var(--gold))]" : idleBtn,
                     user && compareItems.length >= 3 && !pinned && "opacity-40 pointer-events-none"
                   )}
                 >
@@ -2066,35 +2118,32 @@ const PublicProductPage: React.FC = () => {
                 </button>
 
                 {hasSheet ? (
-                  <div className="hidden md:block">
-                    <SpecSheetButton
-                      pdfUrl={product.pdf_url}
-                      pdfUrls={product.pdf_urls}
-                      brandName={designerDisplay}
-                      productName={product.title}
-                      variant="button"
-                      onBeforeOpen={() => {
-                        // Verified trade: open immediately, no gate.
-                        if (tradeApprovedFooter) return true;
-                        if (!user) {
-                          requireAuth(() => {}, "open this spec sheet");
-                          return false;
-                        }
-                        let allowed = false;
-                        requireAuth(() => { allowed = true; }, "download this spec sheet");
-                        return allowed;
-                      }}
-                    />
-                  </div>
+                  <SpecSheetButton
+                    pdfUrl={product.pdf_url}
+                    pdfUrls={product.pdf_urls}
+                    brandName={designerDisplay}
+                    productName={product.title}
+                    variant="button"
+                    className={cn(baseBtn, idleBtn, "cursor-pointer")}
+                    onBeforeOpen={() => {
+                      // Verified trade: open immediately, no gate.
+                      if (tradeApprovedFooter) return true;
+                      if (!user) {
+                        requireAuth(() => {}, "open this spec sheet");
+                        return false;
+                      }
+                      let allowed = false;
+                      requireAuth(() => { allowed = true; }, "download this spec sheet");
+                      return allowed;
+                    }}
+                  />
                 ) : (
-                  <Link
-                    to="/contact"
-                    className="hidden md:flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-luxury-micro font-body text-[11px] uppercase tracking-[0.12em] transition-all border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30"
-                  >
+                  <Link to="/contact" className={cn(baseBtn, idleBtn)}>
                     Contact Us
                   </Link>
                 )}
               </div>
+
                 );
               })()}
 
@@ -2130,10 +2179,9 @@ const PublicProductPage: React.FC = () => {
             </div>
           </div>
 
-          {/* The Creation paragraph sits below the product imagery, side by side
-              with the Trade Exclusive Access card for signed-out visitors. */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 md:gap-8 lg:gap-16 mt-6">
-            {product.description && product.description.trim().length > 0 && (
+          {/* The Creation paragraph sits below the product imagery. */}
+          {product.description && product.description.trim().length > 0 && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 md:gap-8 lg:gap-16 mt-6">
               <section aria-label="About this creation">
                 <h2 className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-2">
                   The Creation
@@ -2142,18 +2190,9 @@ const PublicProductPage: React.FC = () => {
                   {product.description}
                 </p>
               </section>
-            )}
+            </div>
+          )}
 
-            {!user && !authLoading && (
-              <div className={cn(!product.description?.trim() && "lg:col-start-2")}>
-                <TradeExclusiveCard
-                  redirectTo={location.pathname + location.search}
-                  rrpLabel={publicRrpLabel}
-                  onRequestQuote={() => setQuoteRequestOpen(true)}
-                />
-              </div>
-            )}
-          </div>
 
 
 

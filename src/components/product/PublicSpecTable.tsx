@@ -159,20 +159,21 @@ export function TradeExclusiveCard({
         )}
       </p>
       <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
-        <Link
-          to={loginHref}
-          className="inline-flex items-center justify-center px-5 py-3 rounded-[2px] bg-foreground text-background font-body text-[11px] uppercase tracking-[0.12em] hover:bg-foreground/90 transition-colors"
-        >
-          Sign in to view
-        </Link>
         <button
           type="button"
           onClick={onRequestQuote}
-          className="inline-flex items-center justify-center px-5 py-3 rounded-[2px] border border-foreground/40 text-foreground font-body text-[11px] uppercase tracking-[0.12em] hover:bg-foreground/5 transition-colors"
+          className="inline-flex items-center justify-center px-5 py-3 rounded-[2px] bg-foreground text-background font-body text-[11px] uppercase tracking-[0.12em] hover:bg-foreground/85 transition-colors"
         >
           Request a Quote
         </button>
+        <Link
+          to={loginHref}
+          className="inline-flex items-center justify-center px-5 py-3 rounded-[2px] border border-foreground text-foreground font-body text-[11px] uppercase tracking-[0.12em] hover:bg-muted/60 transition-colors"
+        >
+          Sign in to view
+        </Link>
       </div>
+
     </section>
   );
 }
