@@ -2002,7 +2002,7 @@ const PublicProductPage: React.FC = () => {
                         </div>
                       )}
                 </div>
-                <div className="order-4 flex flex-col gap-5">
+                <div className="order-5 flex flex-col gap-5">
                   <VariantFinishSelectors section="supplemental" />
                   {finishesMissingImages.length > 0 && (
                     <p className="font-body text-[11px] text-muted-foreground italic mt-1">
@@ -2014,7 +2014,7 @@ const PublicProductPage: React.FC = () => {
                 </div>
 
                 {/* Dimensions/specs stay after product metadata on every viewport. */}
-                <div className="flex flex-col gap-5 order-4">
+                <div className="flex flex-col gap-5 order-5">
                   <VariantDimensionsPanel />
                 </div>
               </VariantSelectorsProvider>
@@ -2059,7 +2059,7 @@ const PublicProductPage: React.FC = () => {
                 )}
               </div>
 
-              <div className="flex flex-col gap-5 order-4 md:order-4">
+              <div className="flex flex-col gap-5 order-6">
                 {(() => {
                   const handcrafted = formatHandcrafted(product.origin, product.lead_time);
                   if (!handcrafted) return null;
