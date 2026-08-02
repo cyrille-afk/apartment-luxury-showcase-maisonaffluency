@@ -248,7 +248,7 @@ const NewIn = () => {
       <main className="min-h-screen bg-background">
       <h1 className="sr-only">New In at Maison Affluency</h1>
 
-      <div className="mt-[96px]">
+      <div className="mt-[96px] md:mt-[212px]">
         {/* Mobile: swipeable carousel with dots */}
         <div className="md:hidden">
           <MobileDesignerCarousel designers={designers} initialIndex={returnIndex} />
