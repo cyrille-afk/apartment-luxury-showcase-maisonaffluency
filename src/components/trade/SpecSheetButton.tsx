@@ -35,6 +35,7 @@ export default function SpecSheetButton({
   variant = "icon",
   onBeforeOpen,
   className,
+  icon,
 }: Props) {
   // Consolidate into a single list
   const entries: PdfEntry[] = pdfUrls && pdfUrls.length > 0
