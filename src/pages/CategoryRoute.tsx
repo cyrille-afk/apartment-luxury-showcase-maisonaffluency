@@ -62,7 +62,7 @@ const CategoryRoute = () => {
       />
       <div className="min-h-screen bg-background text-foreground">
         <Navigation />
-        <main id="main-content" className="min-h-screen overflow-x-hidden pt-24 md:pt-36">
+        <main id="main-content" className="min-h-screen overflow-x-hidden pt-[var(--header-h)]">
           <section id="designers" className="scroll-header-offset">
             <DesignersDirectory mode="products" showTradeCTA={false} />
           </section>

@@ -37,7 +37,7 @@ const ContactPage = () => {
         <Navigation />
         <h1 className="sr-only">Contact Maison Affluency</h1>
 
-        <div className="pt-28">
+        <div className="pt-[var(--header-h)]">
           <ContactInquiry />
         </div>
 

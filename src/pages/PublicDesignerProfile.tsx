@@ -871,7 +871,7 @@ const PublicDesignerProfile = () => {
       <div className="min-h-screen bg-background text-foreground">
         <Navigation />
 
-        <div className="max-w-6xl mx-auto px-4 md:px-12 pt-32 md:pt-36 pb-20 space-y-1 md:space-y-1.5">
+        <div className="max-w-6xl mx-auto px-4 md:px-12 pt-[var(--header-h)] pb-20 space-y-1 md:space-y-1.5">
           <div className="flex items-center justify-between">
             {fromProduct ? (
               <Link
