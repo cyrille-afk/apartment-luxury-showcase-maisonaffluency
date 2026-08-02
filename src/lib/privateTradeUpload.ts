@@ -18,6 +18,11 @@ export function isPrivateTradeFolder(folder: string): boolean {
   return (PRIVATE_TRADE_FOLDERS as readonly string[]).includes(folder);
 }
 
+/** True when a URL points at an object inside the private trade bucket. */
+export function isPrivateTradeUrl(url: string): boolean {
+  return /\/storage\/v1\/object\/(?:sign|public|authenticated)\/trade-private\//.test(url);
+}
+
 /** Long-lived signed URL (5 years) so persisted references keep resolving. */
 const SIGNED_URL_TTL_SECONDS = 60 * 60 * 24 * 365 * 5;
 
