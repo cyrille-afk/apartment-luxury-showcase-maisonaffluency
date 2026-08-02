@@ -1712,17 +1712,8 @@ const PublicProductPage: React.FC = () => {
                     ) : null;
                   })()
                 }
-                overlay={
-                  product.description ? (
-                    <div className="hidden md:flex flex-col items-end gap-2">
-                      <LightboxDescriptionDropdown
-                        description={product.description}
-                        ariaDescribedBy="product-description-hidden"
-                      />
-                    </div>
-                  ) : null
-                }
               />
+
 
 
               {/* Mobile-only image overlay: share + favorite / studio save, top-right */}
