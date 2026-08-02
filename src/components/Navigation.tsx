@@ -6,6 +6,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { trackCTA } from "@/lib/analytics";
 import { deferHashScrollUntilSheetClosed } from "@/lib/mobileHashNavigation";
 import { useScrollDirection } from "@/hooks/useScrollDirection";
+import { useStickyProductBarActive } from "@/lib/stickyProductBar";
 import { scrollToSection } from "@/lib/scrollToSection";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -166,9 +167,9 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
   // Smart scroll: hide the global nav while scrolling down past the hero,
   // reveal it again as soon as the user scrolls up.
   const { direction: scrollDirection, scrollY: navScrollY } = useScrollDirection();
+  const stickyProductBarActive = useStickyProductBarActive();
   const navHidden =
-    scrollDirection === "down" &&
-    navScrollY > 240 &&
+    ((scrollDirection === "down" && navScrollY > 240) || stickyProductBarActive) &&
     !isOpen &&
     !megaMenuOpen;
 
