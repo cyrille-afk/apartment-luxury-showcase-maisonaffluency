@@ -2100,7 +2100,7 @@ const PublicProductPage: React.FC = () => {
                 <h2 className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-2">
                   The Creation
                 </h2>
-                <p className="font-body text-sm leading-relaxed text-muted-foreground whitespace-pre-line">
+                <p className="font-body text-sm leading-relaxed text-muted-foreground whitespace-pre-line text-justify">
                   {product.description}
                 </p>
               </section>
