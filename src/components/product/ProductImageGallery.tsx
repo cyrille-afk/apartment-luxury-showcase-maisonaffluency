@@ -7,6 +7,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { isPwaStandaloneDisplay } from "@/lib/pwaMode";
 import { useLightboxSwipe } from "@/hooks/useLightboxSwipe";
 import PresentationMode from "@/components/product/PresentationMode";
 
