@@ -463,59 +463,6 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
         {/* Mobile thumb strip removed — arrows on the main image + swipe handle navigation. */}
       </div>
 
-      {/* Fullscreen lightbox */}
-      <Dialog open={zoomOpen} onOpenChange={setZoomOpen}>
-        <DialogContent
-          hideClose
-          className="max-w-[100vw] w-screen h-[100dvh] p-0 bg-background/95 backdrop-blur-sm border-0 rounded-luxury-sharp flex items-center justify-center sm:rounded-luxury-sharp touch-pan-y"
-        >
-          <div ref={lightboxSwipeRef} onClick={() => setZoomOpen(false)} className="absolute inset-0 cursor-zoom-out" aria-hidden="true" />
-          <VisuallyHidden>
-            <DialogTitle>{alt}</DialogTitle>
-          </VisuallyHidden>
-          <img
-            src={images[activeIndex]}
-            alt={alt}
-            className="max-w-[95vw] max-h-[86vh] object-contain"
-          />
-          {/* Bottom control rail: progress markers + counter + close */}
-          <div
-            className="absolute left-0 right-0 z-[100] flex items-center gap-4 px-5"
-            style={{ bottom: 'max(1.25rem, env(safe-area-inset-bottom))' }}
-          >
-            {images.length > 1 && (
-              <div className="flex-1 flex items-center gap-2">
-                {images.map((_, i) => (
-                  <button
-                    key={i}
-                    type="button"
-                    onClick={(e) => { e.stopPropagation(); goTo(i); }}
-                    aria-label={`View image ${i + 1} of ${images.length}`}
-                    className={cn(
-                      "flex-1 rounded-full transition-all duration-200",
-                      i === activeIndex ? "h-[3px] bg-foreground" : "h-px bg-foreground/25"
-                    )}
-                  />
-                ))}
-              </div>
-            )}
-            {images.length > 1 && (
-              <span className="font-body text-[10px] font-light uppercase tracking-[0.18em] text-foreground/60 tabular-nums shrink-0">
-                {String(activeIndex + 1).padStart(2, "0")} / {String(images.length).padStart(2, "0")}
-              </span>
-            )}
-            <button
-              type="button"
-              onClick={(e) => { e.stopPropagation(); setZoomOpen(false); }}
-              onTouchEnd={(e) => { e.preventDefault(); e.stopPropagation(); setZoomOpen(false); }}
-              aria-label="Close"
-              className="shrink-0 w-9 h-9 rounded-full bg-background/25 backdrop-blur-md border border-border/25 flex items-center justify-center touch-manipulation ml-auto"
-            >
-              <X size={18} strokeWidth={1.5} className="text-foreground/80" />
-            </button>
-          </div>
-        </DialogContent>
-      </Dialog>
 
       <PresentationMode
         open={presentOpen}
