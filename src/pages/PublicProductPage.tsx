@@ -2033,23 +2033,16 @@ const PublicProductPage: React.FC = () => {
                 const tradeApprovedFooter = !!user && (isTradeUser || tradeStatus === "approved");
                 const hasSheet = !!(product.pdf_url || (product.pdf_urls && product.pdf_urls.length > 0));
                 const baseBtn =
-                  "w-full flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-luxury-micro font-body text-[11px] uppercase tracking-[0.12em] transition-all border";
-                const idleBtn =
-                  "border-border text-muted-foreground hover:text-foreground hover:border-foreground/30";
+                  "inline-flex items-center gap-1.5 font-body text-[11px] uppercase tracking-[0.12em] transition-colors";
+                const idleBtn = "text-muted-foreground hover:text-foreground";
 
                 return (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-                <div className="hidden md:block">
+              <div className="hidden md:flex flex-wrap items-center gap-x-6 gap-y-2 pt-1">
                 {user ? (
                 <FavoriteFolderPicker pickId={product.id} align="start" side="top">
                   <button
                     onClick={(e) => e.stopPropagation()}
-                    className={cn(
-                      baseBtn,
-                      favorited
-                        ? "border-destructive/30 text-destructive bg-destructive/10"
-                        : idleBtn
-                    )}
+                    className={cn(baseBtn, favorited ? "text-destructive" : idleBtn)}
                   >
                     <Heart size={13} className={cn(favorited && "fill-current")} />
                     {favorited ? "Saved" : "Favorite"}
@@ -2064,7 +2057,6 @@ const PublicProductPage: React.FC = () => {
                     Favorite
                   </button>
                 )}
-                </div>
 
                 <button
                   onClick={() => {
@@ -2075,10 +2067,8 @@ const PublicProductPage: React.FC = () => {
                     togglePin(compareItem);
                   }}
                   className={cn(
-                    "hidden md:flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-luxury-micro font-body text-[11px] uppercase tracking-[0.12em] transition-all border",
-                    pinned
-                      ? "bg-[hsl(var(--gold))]/10 border-[hsl(var(--gold))] text-[hsl(var(--gold))]"
-                      : idleBtn,
+                    baseBtn,
+                    pinned ? "text-[hsl(var(--gold))]" : idleBtn,
                     user && compareItems.length >= 3 && !pinned && "opacity-40 pointer-events-none"
                   )}
                 >
@@ -2087,35 +2077,32 @@ const PublicProductPage: React.FC = () => {
                 </button>
 
                 {hasSheet ? (
-                  <div className="hidden md:block">
-                    <SpecSheetButton
-                      pdfUrl={product.pdf_url}
-                      pdfUrls={product.pdf_urls}
-                      brandName={designerDisplay}
-                      productName={product.title}
-                      variant="button"
-                      onBeforeOpen={() => {
-                        // Verified trade: open immediately, no gate.
-                        if (tradeApprovedFooter) return true;
-                        if (!user) {
-                          requireAuth(() => {}, "open this spec sheet");
-                          return false;
-                        }
-                        let allowed = false;
-                        requireAuth(() => { allowed = true; }, "download this spec sheet");
-                        return allowed;
-                      }}
-                    />
-                  </div>
+                  <SpecSheetButton
+                    pdfUrl={product.pdf_url}
+                    pdfUrls={product.pdf_urls}
+                    brandName={designerDisplay}
+                    productName={product.title}
+                    variant="button"
+                    className={cn(baseBtn, idleBtn, "cursor-pointer")}
+                    onBeforeOpen={() => {
+                      // Verified trade: open immediately, no gate.
+                      if (tradeApprovedFooter) return true;
+                      if (!user) {
+                        requireAuth(() => {}, "open this spec sheet");
+                        return false;
+                      }
+                      let allowed = false;
+                      requireAuth(() => { allowed = true; }, "download this spec sheet");
+                      return allowed;
+                    }}
+                  />
                 ) : (
-                  <Link
-                    to="/contact"
-                    className="hidden md:flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-luxury-micro font-body text-[11px] uppercase tracking-[0.12em] transition-all border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30"
-                  >
+                  <Link to="/contact" className={cn(baseBtn, idleBtn)}>
                     Contact Us
                   </Link>
                 )}
               </div>
+
                 );
               })()}
 
