@@ -2,6 +2,9 @@ import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate, Link, useLocation, Navigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { Heart, Pin, FileText, ChevronLeft, ChevronRight, ChevronDown, ArrowLeft, Truck, Loader2, ShoppingBag } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { isPwaStandaloneDisplay } from "@/lib/pwaMode";
+import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
 import ShareMenu from "@/components/ShareMenu";
 import { buildPieceOgUrl } from "@/lib/whatsapp-share";
 import { cloudinaryUrl } from "@/lib/cloudinary";
@@ -1105,6 +1108,10 @@ const PublicProductPage: React.FC = () => {
   // Currently-selected wood/top finish swatches that lack mapped images —
   // appended to the bespoke concierge message so they aren't overlooked.
   const [finishesMissingImages, setFinishesMissingImages] = useState<string[]>([]);
+  const isMobile = useIsMobile();
+  const isPwa = isPwaStandaloneDisplay();
+  const isMobileOrPwa = isMobile || isPwa;
+  const [creationOpen, setCreationOpen] = useState(false);
   const galleryScrollRef = React.useRef<HTMLDivElement | null>(null);
   // On mobile/PWA, when a finish selection updates the gallery image, only
   // scroll if the product image is genuinely off-screen above the viewport.
@@ -1907,12 +1914,30 @@ const PublicProductPage: React.FC = () => {
               {/* "The Creation" lives in the left column, directly below the imagery. */}
               {product.description && product.description.trim().length > 0 && (
                 <section aria-label="About this creation" className="mt-6">
-                  <h2 className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-2">
-                    The Creation
-                  </h2>
-                  <p className="font-body text-sm leading-relaxed text-muted-foreground whitespace-pre-line text-justify">
-                    {product.description}
-                  </p>
+                  {isMobileOrPwa ? (
+                    <Collapsible open={creationOpen} onOpenChange={setCreationOpen}>
+                      <CollapsibleTrigger className="group flex w-full items-center justify-between py-2 text-left">
+                        <h2 className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                          The Creation
+                        </h2>
+                        <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
+                      </CollapsibleTrigger>
+                      <CollapsibleContent>
+                        <p className="font-body text-sm leading-relaxed text-muted-foreground whitespace-pre-line text-justify pt-2">
+                          {product.description}
+                        </p>
+                      </CollapsibleContent>
+                    </Collapsible>
+                  ) : (
+                    <>
+                      <h2 className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-2">
+                        The Creation
+                      </h2>
+                      <p className="font-body text-sm leading-relaxed text-muted-foreground whitespace-pre-line text-justify">
+                        {product.description}
+                      </p>
+                    </>
+                  )}
                 </section>
               )}
             </div>
