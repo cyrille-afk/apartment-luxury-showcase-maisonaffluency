@@ -78,12 +78,12 @@ export function StickyPurchaseBar({
   return (
     <div
       className={cn(
-        "hidden lg:block fixed top-0 left-0 right-0 w-full z-50",
+        "hidden lg:block fixed top-[64px] left-0 right-0 w-full z-40",
         "bg-white/95 backdrop-blur-md border-b border-border shadow-sm",
         "transition-all duration-300 ease-in-out transform",
         isVisible
           ? "opacity-100 translate-y-0 pointer-events-auto"
-          : "opacity-0 -translate-y-4 pointer-events-none"
+          : "opacity-0 -translate-y-2 pointer-events-none"
       )}
       style={topOffset ? { top: topOffset } : undefined}
     >
