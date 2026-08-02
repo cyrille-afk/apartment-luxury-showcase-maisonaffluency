@@ -1719,15 +1719,17 @@ const PublicProductPage: React.FC = () => {
       <div className="min-h-[100dvh] bg-background text-foreground">
         <Navigation borderless />
 
-        {/* Mobile sticky mini bar — shows on scroll (mirrors 1stdibs pattern) */}
+        {/* Mobile sticky mini bar — sits directly below the global header and
+             follows its hide/show rhythm so it never floats detached. */}
         <div
           className={cn(
             "md:hidden fixed left-0 right-0 z-40 bg-background/95 backdrop-blur-md border-b border-border shadow-sm transition-transform duration-300 ease-out",
             showStickyBar ? "translate-y-0" : "-translate-y-full pointer-events-none"
           )}
-          style={{ top: "calc(env(safe-area-inset-top, 0px) + 6rem)" }}
+          style={{ top: "var(--header-h)" }}
           aria-hidden={!showStickyBar}
         >
+
           <div className="px-3 pt-2 pb-2.5">
             <div className="flex items-center justify-center gap-1.5 min-w-0 text-center">
               <p className="font-display text-[13px] leading-tight text-foreground truncate">
