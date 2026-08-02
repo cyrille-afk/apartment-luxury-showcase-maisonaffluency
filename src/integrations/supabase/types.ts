@@ -8150,6 +8150,7 @@ export type Database = {
           width_mm: number
         }[]
       }
+      pick_is_publicly_visible: { Args: { _pick_id: string }; Returns: boolean }
       profile_privileged_fields_unchanged: {
         Args: {
           _id: string
@@ -8204,6 +8205,10 @@ export type Database = {
       tier_discount_pct: {
         Args: { _tier: Database["public"]["Enums"]["trade_tier"] }
         Returns: number
+      }
+      trade_product_is_publicly_visible: {
+        Args: { _product_id: string }
+        Returns: boolean
       }
       update_item_approval_by_token: {
         Args: { _approval_status: string; _item_id: string; _token: string }
