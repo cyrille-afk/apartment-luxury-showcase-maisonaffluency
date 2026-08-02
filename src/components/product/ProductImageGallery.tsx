@@ -470,7 +470,11 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
         alt={alt}
         index={activeIndex}
         onIndexChange={goTo}
-        onClose={() => setPresentOpen(false)}
+        onClose={() => {
+          setPresentOpen(false);
+          // Reset the gallery back to the first image after the modal closes.
+          setTimeout(() => goTo(0, { fromThumbStrip: true }), 100);
+        }}
       />
 
     </div>
