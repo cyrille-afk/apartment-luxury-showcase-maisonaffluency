@@ -1873,7 +1873,20 @@ const PublicProductPage: React.FC = () => {
               <div className="md:border-0 md:shadow-none border-b border-border/60 shadow-[0_6px_10px_-8px_rgba(0,0,0,0.35)] pb-2">
                 <ActiveSwatchCaption pickId={product.id} activeIndex={galleryActiveIndex ?? 0} />
               </div>
+
+              {/* "The Creation" lives in the left column, directly below the imagery. */}
+              {product.description && product.description.trim().length > 0 && (
+                <section aria-label="About this creation" className="mt-6">
+                  <h2 className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-2">
+                    The Creation
+                  </h2>
+                  <p className="font-body text-sm leading-relaxed text-muted-foreground whitespace-pre-line text-justify">
+                    {product.description}
+                  </p>
+                </section>
+              )}
             </div>
+
 
             <div className="relative flex flex-col gap-6">
               <div className="min-w-0">
