@@ -1551,6 +1551,81 @@ const PublicProductPage: React.FC = () => {
     navigate("/cart");
   };
 
+  /**
+   * Direct Stripe checkout (sticky bar "Place Order") — skips the cart page
+   * entirely and sends the current piece + selected finish straight to Stripe.
+   */
+  const buildCheckoutLine = () => {
+    const unit = selectedRrp?.cents || Number(publicRrpRow?.rrp_price_cents) || 0;
+    const variants = (product.size_variants || []) as Array<{ label?: string; base?: string; top?: string }>;
+    const implicitVariant =
+      variants.length === 1
+        ? [variants[0].base, variants[0].top, variants[0].label].filter(Boolean).join(" / ")
+        : "";
+    const finishLabel =
+      (selectedFinishes.length ? selectedFinishes.join(" / ") : "") ||
+      implicitVariant ||
+      (product.materials || "").trim() ||
+      null;
+    return {
+      unit,
+      item: {
+        pickId: product.id,
+        productSlug: productSlug || "",
+        designerSlug: designer.slug,
+        title: product.title,
+        designerName: designerDisplay,
+        finishLabel,
+        imageUrl: images[galleryActiveIndex ?? 0] || images[0] || product.image_url || null,
+        leadTime: product.lead_time || null,
+        quantity: 1,
+      },
+    };
+  };
+
+  const startDirectCheckout = async (email?: string) => {
+    const { unit, item } = buildCheckoutLine();
+    if (!unit) {
+      handlePlaceOrder();
+      return;
+    }
+    setCheckoutLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("create-cart-checkout", {
+        body: {
+          items: [item],
+          method: "card",
+          email: email || user?.email || undefined,
+          cancelPath: location.pathname,
+        },
+      });
+      if (error) throw error;
+      if ((data as any)?.error) throw new Error((data as any).error);
+      const url = (data as any)?.url;
+      if (!url) throw new Error("Checkout could not be opened.");
+      window.location.href = url;
+    } catch (err: any) {
+      toast.error(err?.message || "Unable to open checkout right now.");
+      setCheckoutLoading(false);
+    }
+  };
+
+  const handleDirectCheckout = () => {
+    const { unit } = buildCheckoutLine();
+    if (!unit) {
+      handlePlaceOrder();
+      return;
+    }
+    if (user?.email) {
+      void startDirectCheckout(user.email);
+      return;
+    }
+    setCheckoutEmail("");
+    setCheckoutEmailOpen(true);
+  };
+
+
+
 
 
   return (
