@@ -61,6 +61,8 @@ import {
   quantitativeValue,
 } from "@/components/product/PublicSpecTable";
 import TradeWorkspace from "@/components/product/TradeWorkspace";
+import StickyPurchaseBar from "@/components/product/StickyPurchaseBar";
+
 import TradePendingReviewCard from "@/components/product/TradePendingReviewCard";
 import CustomizationRequest from "@/components/product/CustomizationRequest";
 import QuoteRequestDialog from "@/components/QuoteRequestDialog";
