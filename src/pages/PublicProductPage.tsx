@@ -1734,7 +1734,7 @@ const PublicProductPage: React.FC = () => {
                 variant="button"
                 className="inline-flex items-center gap-1.5 px-3 py-2 font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground hover:text-foreground transition-colors"
                 onBeforeOpen={() => {
-                  if (tradeApprovedFooter) return true;
+                  if (!!user && (isTradeUser || tradeStatus === "approved")) return true;
                   if (!user) {
                     requireAuth(() => {}, "open this spec sheet");
                     return false;
