@@ -725,8 +725,9 @@ const VariantSelectors: React.FC<{
           />
         )}
       </div>
-      {/* Desktop: dimensions first, then finishes. Mobile/PWA: finishes first, then dimensions. */}
-      <div className="order-1 md:order-2 flex flex-col gap-2">
+      {/* Desktop: dimensions first, then finishes. Mobile/PWA: finishes first, then dimensions.
+          Segment Console Table is an exception: finishes stay below dimensions. */}
+      <div className={cn("flex flex-col gap-2", forceDimensionsFirst ? "order-2 md:order-2" : "order-1 md:order-2")}>
         <FinishSelector
           pickId={product.id}
           productTitle={product.title}
