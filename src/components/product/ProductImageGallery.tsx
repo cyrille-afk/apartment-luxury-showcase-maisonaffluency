@@ -319,24 +319,13 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
 
       {/* Main image + (mobile) thumb strip below */}
       <div className="flex-1 flex flex-col gap-3 min-w-0">
-      <div className="relative group" ref={inlineSwipeRef}>
+        <div className="relative group" ref={inlineSwipeRef}>
         <div className={cn("product-image-frame md:aspect-square md:h-auto bg-foreground/95 rounded-luxury-sharp overflow-hidden relative touch-pan-y md:transition-[height,aspect-ratio] md:duration-300 md:ease-out", compact && "product-image-frame--compact")}>
-          {/* Desktop: whole image is a zoom trigger. Mobile: plain image so
-              stray taps near the chevrons don't accidentally open the lightbox. */}
-          <button
-            type="button"
-            onClick={() => setZoomOpen(true)}
-            aria-label="Expand image"
-            className="hidden md:flex absolute inset-0 items-center justify-center overflow-hidden rounded-[inherit] p-0 cursor-zoom-in"
-          >
-            <CrossfadeImage src={images[activeIndex]} alt={alt} />
-          </button>
-          {/* Mobile: no tap-to-zoom handler, but the image itself keeps pointer
-              events so a tap-and-hold offers "Save to Photos" (designers treat
-              their camera roll as an extension of the studio library). */}
-          <div className="md:hidden absolute inset-0 flex items-center justify-center overflow-hidden rounded-[inherit]">
+          {/* Main image — presentation mode is the only fullscreen viewer. */}
+          <div className="absolute inset-0 flex items-center justify-center overflow-hidden rounded-[inherit]">
             <CrossfadeImage src={images[activeIndex]} alt={alt} />
           </div>
+
 
           {/* Secondary actions live behind a single discreet "more" menu:
               presentation mode, expand and share — no competing circular chips. */}
