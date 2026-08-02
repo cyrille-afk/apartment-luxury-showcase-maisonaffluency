@@ -2217,19 +2217,6 @@ const PublicProductPage: React.FC = () => {
             </div>
           </div>
 
-          {/* The Creation paragraph sits below the product imagery. */}
-          {product.description && product.description.trim().length > 0 && (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 md:gap-8 lg:gap-16 mt-6">
-              <section aria-label="About this creation">
-                <h2 className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-2">
-                  The Creation
-                </h2>
-                <p className="font-body text-sm leading-relaxed text-muted-foreground whitespace-pre-line text-justify">
-                  {product.description}
-                </p>
-              </section>
-            </div>
-          )}
 
 
 
