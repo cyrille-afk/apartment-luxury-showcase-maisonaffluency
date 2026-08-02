@@ -158,23 +158,14 @@ export function TradeExclusiveCard({
           "View pricing, access projects & client management tools, logistical data, and AI curatorial guide."
         )}
       </p>
-      <div className="mt-4 flex flex-col sm:flex-row items-stretch justify-center gap-2">
-        <button
-          type="button"
-          onClick={onRequestQuote}
-          className="inline-flex h-12 w-full sm:w-1/2 items-center justify-center px-5 rounded-[2px] bg-foreground text-background font-body text-[11px] leading-none uppercase tracking-[0.12em] hover:bg-foreground/85 transition-colors"
-        >
-          Request a Quote
-        </button>
+      <div className="mt-4 flex justify-center">
         <Link
           to={loginHref}
-          className="inline-flex h-12 w-full sm:w-1/2 items-center justify-center px-5 rounded-[2px] border border-foreground text-foreground font-body text-[11px] leading-none uppercase tracking-[0.12em] hover:bg-muted/60 transition-colors"
+          className="inline-flex h-12 w-full items-center justify-center px-5 rounded-[2px] border border-foreground text-foreground font-body text-[11px] leading-none uppercase tracking-[0.12em] hover:bg-muted/60 transition-colors"
         >
-          Sign in to view
+          Sign in to view trade price
         </Link>
       </div>
-
-
     </section>
   );
 }

@@ -1915,25 +1915,35 @@ const PublicProductPage: React.FC = () => {
                   </div>
                 )}
 
-                {/* Trade prompt + Trade Exclusive Access, directly under the price */}
-                {!user && !authLoading && (
-                  <>
-                    <p className="mt-3 font-body text-xs text-muted-foreground">
-                      Are you a Trade professional?{" "}
-                      <Link
-                        to={`/trade/login?redirect=${encodeURIComponent(location.pathname + location.search)}`}
-                        className="text-foreground underline underline-offset-4 hover:text-[hsl(var(--gold))] transition-colors"
-                      >
-                        Sign in for exclusive pricing.
-                      </Link>
-                    </p>
-                    <TradeExclusiveCard
-                      redirectTo={location.pathname + location.search}
-                      rrpLabel={publicRrpLabel}
-                      onRequestQuote={() => setQuoteRequestOpen(true)}
-                    />
-                  </>
-                )}
+                {/* Primary public CTA — always available to retail visitors */}
+                <div className="mt-6 space-y-6">
+                  <button
+                    type="button"
+                    onClick={() => setQuoteRequestOpen(true)}
+                    className="inline-flex h-12 w-full items-center justify-center px-5 rounded-[2px] bg-foreground text-background font-body text-[11px] leading-none uppercase tracking-[0.12em] hover:bg-foreground/85 transition-colors"
+                  >
+                    Request a Quote
+                  </button>
+
+                  {/* Secondary: trade access invitation */}
+                  {!user && !authLoading && (
+                    <div className="space-y-6">
+                      <p className="font-body text-xs text-muted-foreground">
+                        Are you a Trade professional?{" "}
+                        <Link
+                          to={`/trade/login?redirect=${encodeURIComponent(location.pathname + location.search)}`}
+                          className="text-foreground underline underline-offset-4 hover:text-[hsl(var(--gold))] transition-colors"
+                        >
+                          Sign in for exclusive pricing.
+                        </Link>
+                      </p>
+                      <TradeExclusiveCard
+                        redirectTo={location.pathname + location.search}
+                        rrpLabel={publicRrpLabel}
+                      />
+                    </div>
+                  )}
+                </div>
               </div>
 
 
