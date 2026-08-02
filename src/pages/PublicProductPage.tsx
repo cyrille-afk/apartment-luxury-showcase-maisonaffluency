@@ -2106,21 +2106,9 @@ const PublicProductPage: React.FC = () => {
             </div>
           </div>
 
-          {/* SEO crawlable internal links — description itself lives in the
-              "Creation" pill above (in DOM, indexable). The pill is the single
-              source of truth on desktop, mobile and PWA; we avoid duplicating
-              the paragraph below it. */}
-          {product.description && product.description.trim().length > 0 && (
-            <section aria-label="Related links" className="sr-only">
-              {/* Visually hidden full description for crawlers that don't
-                  expand collapsed regions. Keeps the page free of visible
-                  duplication while preserving SEO coverage. */}
-              <div className="sr-only" id="product-description-hidden">
-                <h2>About the {product.title}</h2>
-                <p>{product.description}</p>
-              </div>
-            </section>
-          )}
+          {/* Description now renders visibly as "The Creation" paragraph in the
+              detail column above — no hidden duplicate needed for crawlers. */}
+
 
           {relatedPicks.length > 0 && (
             <div className="mt-6 pt-6 border-t border-border">
