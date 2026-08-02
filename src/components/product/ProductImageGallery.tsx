@@ -342,11 +342,9 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
                 <DropdownMenuItem onSelect={() => setPresentOpen(true)} className="gap-2.5 font-body text-[11px] uppercase tracking-[0.16em]">
                   <Expand size={16} strokeWidth={1.5} /> Presentation
                 </DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => setZoomOpen(true)} className="gap-2.5 font-body text-[11px] uppercase tracking-[0.16em]">
-                  <Maximize2 size={16} strokeWidth={1.5} /> Expand image
-                </DropdownMenuItem>
                 {mobileMenuItems}
               </DropdownMenuContent>
+
             </DropdownMenu>
           </div>
 
