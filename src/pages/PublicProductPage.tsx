@@ -1724,9 +1724,14 @@ const PublicProductPage: React.FC = () => {
         <div
           className={cn(
             "md:hidden fixed left-0 right-0 z-40 bg-background/95 backdrop-blur-md border-b border-border shadow-sm transition-transform duration-300 ease-out",
-            showStickyBar ? "translate-y-0" : "-translate-y-full pointer-events-none"
+            !showStickyBar && "pointer-events-none"
           )}
-          style={{ top: "var(--header-h)" }}
+          style={{
+            top: "var(--header-h)",
+            transform: showStickyBar
+              ? "translateY(0)"
+              : "translateY(calc(-100% - var(--header-h)))",
+          }}
           aria-hidden={!showStickyBar}
         >
 
