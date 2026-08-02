@@ -158,7 +158,11 @@ function DesktopJumpNav({ designers }: { designers: ReturnType<typeof useNewInDe
   };
 
   return (
-    <div className="sticky top-[196px] z-30 bg-background/90 backdrop-blur-sm border-b border-border/20">
+    <div
+      className="sticky z-30 bg-background/95 backdrop-blur-sm border-b border-border/20 transition-[top] duration-300"
+      style={{ top: navHidden ? 0 : 196 }}
+    >
+
       <div className="max-w-7xl mx-auto px-12 lg:px-20 flex items-center gap-8 py-3">
         <div className="flex items-center gap-3 shrink-0">
           <ShareMenu
