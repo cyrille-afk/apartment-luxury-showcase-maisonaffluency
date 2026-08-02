@@ -1959,7 +1959,7 @@ const PublicProductPage: React.FC = () => {
                 )}
 
                 {/* Primary public CTAs — direct checkout first, quote second */}
-                <div className="mt-6 space-y-6">
+                <div className="mt-6 space-y-4">
                   <div className="space-y-3">
                     <button
                       type="button"
