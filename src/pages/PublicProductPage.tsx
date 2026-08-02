@@ -400,6 +400,13 @@ const VariantSelectors: React.FC<{
   const topAxisIsDim = topAxisLabelRaw
     ? isDimensionAxisLabel(topAxisLabelRaw)
     : (topOptions.length > 0 && topOptions.every(looksLikeDimension));
+
+  // Segment Console Table: keep the dimensions selector above the finish
+  // selectors on mobile/PWA so "Select Your Console Top Finish" sits
+  // directly below the dimensions.
+  const forceDimensionsFirst =
+    typeof product.title === "string" &&
+    product.title.toLowerCase().includes("segment console table");
   const baseOnlySizeOptions = isBaseOnly
     ? Array.from(new Set(
         ((product.size_variants || []) as Array<{ label?: string | null }>)
@@ -459,8 +466,9 @@ const VariantSelectors: React.FC<{
 
   return (
     <div className="flex flex-col">
-      {/* Desktop: dimensions first, then finishes. Mobile/PWA: finishes first, then dimensions. */}
-      <div className="order-2 md:order-1 flex flex-col gap-2">
+      {/* Desktop: dimensions first, then finishes. Mobile/PWA: finishes first, then dimensions.
+          Segment Console Table is an exception: finishes stay below dimensions. */}
+      <div className={cn("flex flex-col gap-2", forceDimensionsFirst ? "order-1 md:order-1" : "order-2 md:order-1")}>
         {/* Size dropdown — shown first */}
         {isBaseOnly && !baseAxisIsDim && baseOnlySizeOptions.length > 1 ? (
           <ExpandableSpec
@@ -717,8 +725,9 @@ const VariantSelectors: React.FC<{
           />
         )}
       </div>
-      {/* Desktop: dimensions first, then finishes. Mobile/PWA: finishes first, then dimensions. */}
-      <div className="order-1 md:order-2 flex flex-col gap-2">
+      {/* Desktop: dimensions first, then finishes. Mobile/PWA: finishes first, then dimensions.
+          Segment Console Table is an exception: finishes stay below dimensions. */}
+      <div className={cn("flex flex-col gap-2", forceDimensionsFirst ? "order-2 md:order-2" : "order-1 md:order-2")}>
         <FinishSelector
           pickId={product.id}
           productTitle={product.title}
