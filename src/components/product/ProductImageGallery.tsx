@@ -477,6 +477,8 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
         alt={alt}
         index={activeIndex}
         onIndexChange={goTo}
+        pickId={pickId}
+        isMobileOrPwa={isMobileOrPwa}
         onClose={() => {
           setPresentOpen(false);
           // Reset the gallery back to the first image after the modal closes.
