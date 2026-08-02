@@ -1841,6 +1841,7 @@ const PublicProductPage: React.FC = () => {
                 onIndexChange={setGalleryActiveIndex}
                 caption={product.gallery_captions?.[String(galleryActiveIndex ?? 0)] || null}
                 compact={galleryCompact}
+                pickId={product.id}
 
                 firstImageBadge={
                   (() => {
