@@ -385,7 +385,7 @@ const NewInSpotlight = ({ designer }: NewInSpotlightProps) => {
                   })()}
                   <div className="mt-auto pt-1">
                     <p className="font-display text-[11px] md:text-xs text-foreground">
-                      Price on request
+                      Price upon request
                     </p>
                   </div>
                 </div>
