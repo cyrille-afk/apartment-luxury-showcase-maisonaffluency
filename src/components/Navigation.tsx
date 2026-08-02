@@ -61,24 +61,24 @@ const rightNavItems = [{
 }];
 
 const contactOptions = [
-  { 
-    label: "Book an Appointment", 
+  {
+    label: "Book an Appointment",
     icon: Calendar,
     action: () => {
       trackCTA.bookAppointment("Navigation");
       scrollToSection("contact");
     }
   },
-  { 
-    label: "WhatsApp", 
+  {
+    label: "WhatsApp",
     icon: MessageCircle,
     action: () => {
       trackCTA.whatsapp("Navigation");
       window.open('https://wa.me/6591393850', '_blank');
     }
   },
-  { 
-    label: "concierge@myaffluency.com", 
+  {
+    label: "concierge@myaffluency.com",
     icon: Mail,
     action: () => {
       trackCTA.email("Navigation");
@@ -219,7 +219,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
       "curating-team": "#overview",
       designers: "/designers",
       collectibles: "/collectibles",
-      
+
       details: "/trade-program",
       contact: "/trade-program",
     };
@@ -410,7 +410,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                 </button>
 
                 {/* All Categories — second */}
-                <div 
+                <div
                   className="animate-fade-in opacity-0 border-t border-border/30 pt-2 mb-2"
                   style={{ animationDelay: `120ms`, animationFillMode: 'forwards' }}
                 >
@@ -427,7 +427,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                 </div>
 
                 {visibleLeftNavItems.map((item, index) => (
-                  <button 
+                  <button
                     key={item.href}
                     onClick={() => handleNavClick(item.href)}
                     className="font-body text-[15px] uppercase tracking-wide text-left transition-colors py-2.5 w-full flex items-center justify-between text-foreground hover:text-primary font-semibold animate-fade-in opacity-0"
@@ -437,7 +437,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                     <ChevronRight className="h-4 w-4" />
                   </button>
                 ))}
-                
+
                 {/* Journal */}
                 <button
                   onClick={() => handleNavClick("/journal")}
@@ -486,13 +486,13 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                 </div>
 
                 {/* Trade Program — separated */}
-                <div 
+                <div
                   className="mt-6 pt-4 border-t border-border/50 animate-fade-in opacity-0"
                   style={{ animationDelay: `${(visibleLeftNavItems.length + 3) * 120}ms`, animationFillMode: 'forwards' }}
                 >
                   {rightNavItems.map((item) => (
-                    <button 
-                      key={item.href} 
+                    <button
+                      key={item.href}
                       onClick={() => handleNavClick(item.href)}
                       className="font-body text-[15px] uppercase tracking-wide text-left transition-colors py-2.5 w-full flex items-center justify-between text-accent-foreground hover:bg-accent/80 font-bold bg-accent px-3 rounded-lg"
                     >
@@ -503,7 +503,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                 </div>
 
                 {/* Contact Us — separate section */}
-                <div 
+                <div
                   className="mt-4 pt-4 border-t border-border/50 animate-fade-in opacity-0"
                   style={{ animationDelay: `${(visibleLeftNavItems.length + 4) * 120}ms`, animationFillMode: 'forwards' }}
                 >
@@ -650,31 +650,76 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
           </Sheet>
         </div>
 
-        {/* Desktop: ultra-minimal two-row layout */}
+        {/* Desktop: single-row ultra-minimal header */}
         <div className="hidden md:flex flex-col items-stretch">
-          {/* Row 1 — thin utility bar */}
-          <div className="w-full flex items-center justify-between h-9 border-b border-border/30">
-            <ShippingDestinationSwitcher className="[&_span]:text-[11px] [&_span]:tracking-[0.15em]" />
+          <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-6 h-[70px] py-4">
+            {/* Logo — far left */}
+            <button onClick={scrollToTop} className="group cursor-pointer whitespace-nowrap shrink-0 justify-self-start">
+              <span className="font-brand text-xl lg:text-2xl tracking-[0.25em] text-foreground transition-opacity duration-300 group-hover:opacity-70">
+                MAISON AFFLUENCY
+              </span>
+            </button>
 
-            <div className="flex items-center gap-6">
-              <DropdownMenu>
-                <DropdownMenuTrigger className="font-body text-[11px] uppercase tracking-[0.15em] font-normal text-muted-foreground hover:opacity-60 transition-opacity flex items-center gap-1 whitespace-nowrap outline-none">
-                  Contact Us
-                  <ChevronDown className="h-3 w-3" />
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" side="bottom" className="bg-background border border-border shadow-lg z-50 min-w-[220px]">
-                  {contactOptions.map((option) => (
-                    <DropdownMenuItem
-                      key={option.label}
-                      onClick={option.action}
-                      className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted transition-colors"
-                    >
-                      <option.icon className="h-4 w-4 text-primary" />
-                      <span className="font-body text-sm">{option.label}</span>
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
+            {/* Primary navigation — perfectly centered */}
+            <div className="flex items-center justify-center gap-6 lg:gap-10">
+              <button
+                onClick={() => { setMegaMenuOpen(false); handleNavClick("/new-in"); }}
+                className="font-body text-[11px] uppercase tracking-[0.2em] font-normal text-foreground hover:opacity-60 transition-opacity whitespace-nowrap"
+              >
+                New In
+              </button>
+
+              <button
+                onClick={() => { setMegaMenuOpen(!megaMenuOpen); setMegaMenuHoverCat(null); }}
+                className={cn(
+                  "font-body text-[11px] uppercase tracking-[0.2em] font-normal text-foreground hover:opacity-60 transition-opacity whitespace-nowrap flex items-center gap-1.5 outline-none",
+                  (megaMenuOpen || isOnCategoryRoute) && "opacity-60"
+                )}
+              >
+                Categories
+                <ChevronDown className={`h-3 w-3 transition-transform duration-200 ${megaMenuOpen ? "rotate-180" : ""}`} />
+              </button>
+
+              {visibleLeftNavItems.map((item) => (
+                <button
+                  key={item.href}
+                  onClick={() => { setMegaMenuOpen(false); handleNavClick(item.href); }}
+                  className={cn(
+                    "font-body text-[11px] uppercase tracking-[0.2em] font-normal text-foreground hover:opacity-60 transition-opacity whitespace-nowrap",
+                    (activeSection === item.href || isRouteActive(item.href)) && "opacity-60"
+                  )}
+                >
+                  {item.label}
+                </button>
+              ))}
+
+              <button
+                onClick={() => { setMegaMenuOpen(false); handleNavClick("/journal"); }}
+                className={cn(
+                  "font-body text-[11px] uppercase tracking-[0.2em] font-normal text-foreground hover:opacity-60 transition-opacity whitespace-nowrap",
+                  (activeSection === "/journal" || isRouteActive("/journal")) && "opacity-60"
+                )}
+              >
+                Journal
+              </button>
+
+              {rightNavItems.map((item) => (
+                <button
+                  key={item.href}
+                  onClick={() => { setMegaMenuOpen(false); handleNavClick(item.href); }}
+                  className={cn(
+                    "font-body text-[11px] uppercase tracking-[0.2em] font-normal text-foreground hover:opacity-60 transition-opacity whitespace-nowrap",
+                    (activeSection === item.href || isRouteActive(item.href)) && "opacity-60"
+                  )}
+                >
+                  {item.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Utility icons — far right */}
+            <div className="flex items-center justify-end gap-5 shrink-0">
+              <ShippingDestinationSwitcher className="[&_span]:text-[11px] [&_span]:tracking-[0.15em]" />
 
               <DropdownMenu>
                 <DropdownMenuTrigger className="relative group p-0.5 outline-none">
@@ -749,177 +794,106 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
             </div>
           </div>
 
-          {/* Row 2 — centered brand + navigation */}
-          <div className="w-full flex flex-col items-center pt-8 pb-6">
-            <button onClick={scrollToTop} className="group cursor-pointer whitespace-nowrap">
-              <span className="font-brand text-3xl lg:text-4xl tracking-[0.3em] text-foreground transition-opacity duration-300 group-hover:opacity-70">
-                MAISON AFFLUENCY
-              </span>
-            </button>
-            <div className="flex items-center gap-3 mt-2 brand-lockup">
-              <span className="h-px w-10 bg-foreground/30" aria-hidden="true" />
-              <span className="font-body text-[9px] uppercase tracking-[0.3em] text-muted-foreground">Est. 2017</span>
-              <span className="h-px w-10 bg-foreground/30" aria-hidden="true" />
-            </div>
-
-            <div className="flex items-center justify-center gap-8 lg:gap-12 mt-8">
-              <button
-                onClick={() => { setMegaMenuOpen(false); handleNavClick("/new-in"); }}
-                className="font-body text-[12px] uppercase tracking-[0.15em] font-normal text-foreground hover:opacity-60 transition-opacity whitespace-nowrap"
-              >
-                New In
-              </button>
-
-              <button
-                onClick={() => { setMegaMenuOpen(!megaMenuOpen); setMegaMenuHoverCat(null); }}
-                className={cn(
-                  "font-body text-[12px] uppercase tracking-[0.15em] font-normal text-foreground hover:opacity-60 transition-opacity whitespace-nowrap flex items-center gap-1.5 outline-none",
-                  (megaMenuOpen || isOnCategoryRoute) && "opacity-60"
-                )}
-              >
-                Categories
-                <ChevronDown className={`h-3 w-3 transition-transform duration-200 ${megaMenuOpen ? "rotate-180" : ""}`} />
-              </button>
-
-              {visibleLeftNavItems.map((item) => (
-                <button
-                  key={item.href}
-                  onClick={() => { setMegaMenuOpen(false); handleNavClick(item.href); }}
-                  className={cn(
-                    "font-body text-[12px] uppercase tracking-[0.15em] font-normal text-foreground hover:opacity-60 transition-opacity whitespace-nowrap",
-                    (activeSection === item.href || isRouteActive(item.href)) && "opacity-60"
-                  )}
-                >
-                  {item.label}
-                </button>
-              ))}
-
-              <button
-                onClick={() => { setMegaMenuOpen(false); handleNavClick("/journal"); }}
-                className={cn(
-                  "font-body text-[12px] uppercase tracking-[0.15em] font-normal text-foreground hover:opacity-60 transition-opacity whitespace-nowrap",
-                  (activeSection === "/journal" || isRouteActive("/journal")) && "opacity-60"
-                )}
-              >
-                Journal
-              </button>
-
-              {rightNavItems.map((item) => (
-                <button
-                  key={item.href}
-                  onClick={() => { setMegaMenuOpen(false); handleNavClick(item.href); }}
-                  className={cn(
-                    "font-body text-[12px] uppercase tracking-[0.15em] font-normal text-foreground hover:opacity-60 transition-opacity whitespace-nowrap",
-                    (activeSection === item.href || isRouteActive(item.href)) && "opacity-60"
-                  )}
-                >
-                  {item.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-
-          {/* Horizontal mega menu */}
-          {megaMenuOpen && (
-            <div
-              ref={megaMenuRef}
-              className="w-full border-t border-border/30 bg-background shadow-[0_8px_30px_rgba(0,0,0,0.08)] py-4 animate-in slide-in-from-top-1 duration-200"
-            >
-              <div className="flex justify-center gap-8 lg:gap-12 relative">
-                {CATEGORY_ORDER.map(cat => (
-                  <div key={cat} className="flex flex-col">
-                    <button
-                      onClick={() => {
-                        setActiveMegaCat(cat);
-                        setActiveMegaSub(null);
-                        setMegaMenuOpen(false);
-                        const target = categoryUrl(cat, null);
-                        // Always re-broadcast — handles the case where user clicks
-                        // the same category again (navigate is a no-op so the
-                        // CategoryRoute effect doesn't re-fire).
-                        if (window.location.pathname === target) {
-                          window.dispatchEvent(new CustomEvent("syncCategoryFilter", {
-                            detail: { category: cat, subcategory: null, source: "designers" },
-                          }));
-                          const el = document.getElementById("designers") || document.getElementById("featured-designers");
-                          if (el instanceof HTMLElement) el.scrollIntoView({ behavior: "smooth", block: "start" });
-                        } else {
-                          navigate(target);
-                        }
-                      }}
-                      className={cn("font-body text-[11px] uppercase tracking-[0.2em] transition-all duration-300 text-left w-full", activeMegaCat === cat && !activeMegaSub ? "text-[hsl(var(--accent))] font-bold" : "text-foreground font-semibold hover:text-primary")}
-                    >
-                      {cat}
-                    </button>
-                    {SUBCATEGORY_MAP[cat] && (
-                      <div className="flex flex-col gap-1 mt-1.5 ml-0">
+        {/* Horizontal mega menu */}
+        {megaMenuOpen && (
+          <div
+            ref={megaMenuRef}
+            className="w-full border-t border-border/30 bg-background shadow-[0_8px_30px_rgba(0,0,0,0.08)] py-4 animate-in slide-in-from-top-1 duration-200"
+          >
+            <div className="flex justify-center gap-8 lg:gap-12 relative">
+              {CATEGORY_ORDER.map(cat => (
+                <div key={cat} className="flex flex-col">
+                  <button
+                    onClick={() => {
+                      setActiveMegaCat(cat);
+                      setActiveMegaSub(null);
+                      setMegaMenuOpen(false);
+                      const target = categoryUrl(cat, null);
+                      // Always re-broadcast — handles the case where user clicks
+                      // the same category again (navigate is a no-op so the
+                      // CategoryRoute effect doesn't re-fire).
+                      if (window.location.pathname === target) {
+                        window.dispatchEvent(new CustomEvent("syncCategoryFilter", {
+                          detail: { category: cat, subcategory: null, source: "designers" },
+                        }));
+                        const el = document.getElementById("designers") || document.getElementById("featured-designers");
+                        if (el instanceof HTMLElement) el.scrollIntoView({ behavior: "smooth", block: "start" });
+                      } else {
+                        navigate(target);
+                      }
+                    }}
+                    className={cn("font-body text-[11px] uppercase tracking-[0.2em] transition-all duration-300 text-left w-full", activeMegaCat === cat && !activeMegaSub ? "text-[hsl(var(--accent))] font-bold" : "text-foreground font-semibold hover:text-primary")}
+                  >
+                    {cat}
+                  </button>
+                  {SUBCATEGORY_MAP[cat] && (
+                    <div className="flex flex-col gap-1 mt-1.5 ml-0">
+                      <button
+                        onClick={() => {
+                          setActiveMegaCat(cat);
+                          setActiveMegaSub(null);
+                          setMegaMenuOpen(false);
+                          const target = categoryUrl(cat, null);
+                          if (window.location.pathname === target) {
+                            window.dispatchEvent(new CustomEvent("syncCategoryFilter", {
+                              detail: { category: cat, subcategory: null, source: "designers" },
+                            }));
+                            const el = document.getElementById("product-grid") || document.getElementById("designers");
+                            if (el instanceof HTMLElement) el.scrollIntoView({ behavior: "smooth", block: "start" });
+                          } else {
+                            navigate(target);
+                          }
+                        }}
+                        className="text-left text-[10px] tracking-[0.15em] font-body italic transition-colors py-1 text-[hsl(var(--gold))] hover:text-primary"
+                      >
+                        View all {cat}
+                      </button>
+                      {SUBCATEGORY_MAP[cat].map(sub => (
                         <button
+                          key={sub}
                           onClick={() => {
                             setActiveMegaCat(cat);
-                            setActiveMegaSub(null);
+                            setActiveMegaSub(sub);
                             setMegaMenuOpen(false);
-                            const target = categoryUrl(cat, null);
+                            const target = categoryUrl(cat, sub);
                             if (window.location.pathname === target) {
                               window.dispatchEvent(new CustomEvent("syncCategoryFilter", {
-                                detail: { category: cat, subcategory: null, source: "designers" },
+                                detail: { category: cat, subcategory: sub, source: "designers" },
                               }));
-                              const el = document.getElementById("product-grid") || document.getElementById("designers");
+                              const el = document.getElementById("product-grid") || document.getElementById("designers") || document.getElementById("featured-designers");
                               if (el instanceof HTMLElement) el.scrollIntoView({ behavior: "smooth", block: "start" });
                             } else {
                               navigate(target);
                             }
                           }}
-                          className="text-left text-[10px] tracking-[0.15em] font-body italic transition-colors py-1 text-[hsl(var(--gold))] hover:text-primary"
+                          className={cn("text-left text-[10px] tracking-[0.15em] font-body transition-colors py-1", activeMegaSub === sub && activeMegaCat === cat ? "text-[hsl(var(--accent))] font-semibold" : "text-foreground hover:text-primary")}
                         >
-                          View all {cat}
+                          {sub}
                         </button>
-                        {SUBCATEGORY_MAP[cat].map(sub => (
-                          <button
-                            key={sub}
-                            onClick={() => {
-                              setActiveMegaCat(cat);
-                              setActiveMegaSub(sub);
-                              setMegaMenuOpen(false);
-                              const target = categoryUrl(cat, sub);
-                              if (window.location.pathname === target) {
-                                window.dispatchEvent(new CustomEvent("syncCategoryFilter", {
-                                  detail: { category: cat, subcategory: sub, source: "designers" },
-                                }));
-                                const el = document.getElementById("product-grid") || document.getElementById("designers") || document.getElementById("featured-designers");
-                                if (el instanceof HTMLElement) el.scrollIntoView({ behavior: "smooth", block: "start" });
-                              } else {
-                                navigate(target);
-                              }
-                            }}
-                            className={cn("text-left text-[10px] tracking-[0.15em] font-body transition-colors py-1", activeMegaSub === sub && activeMegaCat === cat ? "text-[hsl(var(--accent))] font-semibold" : "text-foreground hover:text-primary")}
-                          >
-                            {sub}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ))}
-                <div className="flex flex-col justify-start">
-                  <button
-                    onClick={() => {
-                      window.dispatchEvent(new CustomEvent('setDesignerCategory', { detail: { category: null, subcategory: null } }));
-                      setActiveMegaCat(null);
-                      setActiveMegaSub(null);
-                      setMegaMenuOpen(false);
-                      if (window.location.pathname.startsWith("/products-category/")) {
-                        navigate("/");
-                      }
-                    }}
-                    className="font-body text-[11px] uppercase tracking-[0.2em] transition-all duration-300 px-5 py-1.5 rounded-full bg-white border border-[hsl(var(--gold))] shadow-[0_0_0_1px_hsl(var(--gold)/0.3)] hover:shadow-[0_0_0_2px_hsl(var(--gold)/0.5)] text-foreground"
-                  >
-                    Clear All
-                  </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
+              ))}
+              <div className="flex flex-col justify-start">
+                <button
+                  onClick={() => {
+                    window.dispatchEvent(new CustomEvent('setDesignerCategory', { detail: { category: null, subcategory: null } }));
+                    setActiveMegaCat(null);
+                    setActiveMegaSub(null);
+                    setMegaMenuOpen(false);
+                    if (window.location.pathname.startsWith("/products-category/")) {
+                      navigate("/");
+                    }
+                  }}
+                  className="font-body text-[11px] uppercase tracking-[0.2em] transition-all duration-300 px-5 py-1.5 rounded-full bg-white border border-[hsl(var(--gold))] shadow-[0_0_0_1px_hsl(var(--gold)/0.3)] hover:shadow-[0_0_0_2px_hsl(var(--gold)/0.5)] text-foreground"
+                >
+                  Clear All
+                </button>
               </div>
             </div>
-          )}
+          </div>
+        )}
         </div>
       </div>
     </nav>
