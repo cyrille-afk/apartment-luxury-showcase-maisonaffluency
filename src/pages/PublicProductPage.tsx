@@ -2104,7 +2104,6 @@ const PublicProductPage: React.FC = () => {
 
                 return (
               <div className="hidden md:flex flex-wrap items-center gap-x-6 gap-y-2 pt-1">
-                {user ? (
                 <FavoriteFolderPicker pickId={product.id} align="start" side="top">
                   <button
                     onClick={(e) => e.stopPropagation()}
@@ -2114,15 +2113,6 @@ const PublicProductPage: React.FC = () => {
                     {favorited ? "Saved" : "Favorite"}
                   </button>
                 </FavoriteFolderPicker>
-                ) : (
-                  <button
-                    onClick={() => requireAuth(() => {}, "save this piece to your favourites")}
-                    className={cn(baseBtn, idleBtn)}
-                  >
-                    <Heart size={13} />
-                    Favorite
-                  </button>
-                )}
 
                 <button
                   onClick={() => {
