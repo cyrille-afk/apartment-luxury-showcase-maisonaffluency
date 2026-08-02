@@ -24,7 +24,11 @@ const CATEGORIES: FabricCategory[] = [
 const normalizeAdminFabricCategory = (category: string | null | undefined): FabricCategory => {
   const raw = (category || "").trim().toLowerCase();
   if (["rug finish", "rug finishes", "rug"].includes(raw)) return "Rug Finish";
-  if (["fabric", "fabrics", "upholstery", "leather", "fabric & leather", "fabric/leather"].includes(raw)) return "Fabric & Leather";
+  if ([
+    "fabric", "fabrics", "upholstery", "leather", "fabric & leather", "fabric/leather",
+    "shearling", "sheepskin", "suede", "nubuck", "hide", "textile", "velvet",
+    "boucle", "bouclé", "linen", "wool", "silk", "mohair", "cotton",
+  ].includes(raw)) return "Fabric & Leather";
   if (["wood", "woods", "timber", "rattan", "cane", "wicker"].includes(raw)) return "Wood";
   if (raw === "stone") return "Stone";
   if (raw === "metal") return "Metal";
