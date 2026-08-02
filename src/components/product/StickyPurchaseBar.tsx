@@ -40,7 +40,8 @@ export function StickyPurchaseBar({
   favoriteSlot,
   specSheetSlot,
   triggerId = "main-product-image-container",
-  topOffset = "7.5rem",
+  topOffset = "0px",
+
   visible,
 }: StickyPurchaseBarProps) {
   const [scrolledPast, setScrolledPast] = useState(false);
@@ -84,10 +85,11 @@ export function StickyPurchaseBar({
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: -80, opacity: 0 }}
           transition={{ duration: 0.3, ease: "easeInOut" }}
-          className="hidden lg:block fixed left-0 right-0 z-30 border-b border-border bg-background/95 backdrop-blur-md shadow-sm"
-          style={{ top: topOffset }}
+          className="hidden lg:block fixed top-0 left-0 right-0 w-full z-50 bg-background/95 backdrop-blur-md border-b border-border shadow-sm"
+          style={topOffset ? { top: topOffset } : undefined}
         >
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex items-center justify-between gap-4">
+          <div className="max-w-7xl mx-auto w-full px-6 h-16 flex items-center justify-between gap-4">
+
             {/* Product identity */}
             <div className="flex items-center gap-4 min-w-0">
               {image && (
