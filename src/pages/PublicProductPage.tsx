@@ -1887,28 +1887,6 @@ const PublicProductPage: React.FC = () => {
                   );
                 })()}
 
-                {/* Creation note — replaces the former frosted "Creation" pill.
-                    Set in the same column rhythm as the Trade Exclusive card. */}
-                {product.description && product.description.trim().length > 0 && (
-                  <section aria-label="About this creation" className="pt-1">
-                    <h2 className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-2">
-                      The Creation
-                    </h2>
-                    <p className="font-body text-sm leading-relaxed text-muted-foreground whitespace-pre-line">
-                      {product.description}
-                    </p>
-                  </section>
-                )}
-
-
-
-                {!user && !authLoading && (
-                  <TradeExclusiveCard
-                    redirectTo={location.pathname + location.search}
-                    rrpLabel={publicRrpLabel}
-                    onRequestQuote={() => setQuoteRequestOpen(true)}
-                  />
-                )}
 
               </div>
 
