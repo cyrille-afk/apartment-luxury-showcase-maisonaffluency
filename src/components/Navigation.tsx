@@ -162,6 +162,15 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
   }, [isHomeRoute]);
   const isOverHero = isHomeRoute && !scrolledPastHero && !megaMenuOpen;
 
+  // Smart scroll: hide the global nav while scrolling down past the hero,
+  // reveal it again as soon as the user scrolls up.
+  const { direction: scrollDirection, scrollY: navScrollY } = useScrollDirection();
+  const navHidden =
+    scrollDirection === "down" &&
+    navScrollY > 240 &&
+    !isOpen &&
+    !megaMenuOpen;
+
   const resetMobilePanels = () => {
     setCategoryPanelOpen(false);
     setExpandedCategory(null);
