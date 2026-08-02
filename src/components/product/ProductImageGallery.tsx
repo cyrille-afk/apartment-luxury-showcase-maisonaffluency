@@ -155,15 +155,14 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [controlledIndex, activeIndexNonce]);
 
-  const [zoomOpen, setZoomOpen] = useState(false);
   const [presentOpen, setPresentOpen] = useState(false);
 
   const thumbsRef = useRef<HTMLDivElement>(null);
 
-  // Swipe support — wired to both the inline main image and the fullscreen lightbox.
+  // Swipe support for the inline main image.
   const inlineSwipeRef = useRef<HTMLDivElement>(null);
-  const lightboxSwipeRef = useRef<HTMLDivElement>(null);
   const noZoomRef = useRef(false); // gallery doesn't pinch-zoom; required by hook signature.
+
 
   // When the active index changes because the user clicked/hovered a thumbnail
   // in the vertical strip, we must NOT scrollIntoView — doing so slides a
