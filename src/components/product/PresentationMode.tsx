@@ -145,6 +145,19 @@ const PresentationMode: React.FC<PresentationModeProps> = ({
         )}
       </div>
 
+      {/* Mobile/PWA: active finish caption — moved here from below the inline image */}
+      {isMobileOrPwa && pickId && (
+        <div
+          className={cn(
+            "absolute left-0 right-0 z-10 px-5 transition-opacity duration-300",
+            chromeVisible ? "opacity-100" : "opacity-0 pointer-events-none"
+          )}
+          style={{ bottom: "max(4.5rem, calc(env(safe-area-inset-bottom) + 3.25rem))" }}
+        >
+          <ActiveSwatchCaption pickId={pickId} activeIndex={index} variant="light" />
+        </div>
+      )}
+
       {/* Bottom control rail: progress markers + counter + close (mirrors the expanded image view) */}
       <div
         className={cn(
