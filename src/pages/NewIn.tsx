@@ -3,6 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import ShareMenu from "@/components/ShareMenu";
 import { Helmet } from "react-helmet-async";
 import useEmblaCarousel from "embla-carousel-react";
+import { useScrollDirection } from "@/hooks/useScrollDirection";
 import Navigation from "@/components/Navigation";
 import NewInSpotlight from "@/components/NewInSpotlight";
 import SliderDots from "@/components/ui/SliderDots";
