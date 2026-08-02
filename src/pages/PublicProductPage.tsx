@@ -1129,30 +1129,6 @@ const PublicProductPage: React.FC = () => {
   // Mobile/PWA: shrink the product image once the user scrolls past a small threshold.
   const [galleryCompact, setGalleryCompact] = useState(false);
   const [showStickyBar, setShowStickyBar] = useState(false);
-  const [showDesktopStickyBar, setShowDesktopStickyBar] = useState(false);
-
-  // Desktop: slide the slim purchase bar in once the user has scrolled past
-  // the main product image. The image column is sticky, so we compare the
-  // scroll offset against the image frame height rather than its visibility.
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    if (!window.matchMedia("(min-width: 1024px)").matches) {
-      setShowDesktopStickyBar(false);
-      return;
-    }
-    const onScroll = () => {
-      const frame = document.querySelector(".product-image-frame") as HTMLElement | null;
-      const threshold = Math.max(280, (frame?.getBoundingClientRect().height ?? 480) * 0.75);
-      setShowDesktopStickyBar(window.scrollY > threshold);
-    };
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll);
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
-    };
-  }, [productId]);
 
 
 
@@ -1692,13 +1668,62 @@ const PublicProductPage: React.FC = () => {
 
         {/* Desktop slim sticky purchase bar */}
         <StickyPurchaseBar
-          visible={showDesktopStickyBar}
+          triggerId="main-product-image-container"
           image={images[0]}
           title={product.title}
           designer={designerDisplay}
           price={publicRrpLabel}
           onRequestQuote={() => setQuoteRequestOpen(true)}
+          favoriteSlot={
+            user ? (
+              <FavoriteFolderPicker pickId={product.id} align="end" side="bottom">
+                <button
+                  type="button"
+                  onClick={(e) => e.stopPropagation()}
+                  aria-label={favorited ? "Saved to favorites" : "Add to favorites"}
+                  className={cn(
+                    "p-2.5 rounded-luxury-micro transition-colors",
+                    favorited ? "text-destructive" : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  <Heart size={16} className={cn(favorited && "fill-current")} />
+                </button>
+              </FavoriteFolderPicker>
+            ) : (
+              <button
+                type="button"
+                onClick={() => requireAuth(() => {}, "save this piece to your favourites")}
+                aria-label="Add to favorites"
+                className="p-2.5 rounded-luxury-micro text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <Heart size={16} />
+              </button>
+            )
+          }
+          specSheetSlot={
+            (product.pdf_url || (product.pdf_urls && product.pdf_urls.length > 0)) ? (
+              <SpecSheetButton
+                pdfUrl={product.pdf_url}
+                pdfUrls={product.pdf_urls}
+                brandName={designerDisplay}
+                productName={product.title}
+                variant="button"
+                className="inline-flex items-center gap-1.5 px-3 py-2 font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground hover:text-foreground transition-colors"
+                onBeforeOpen={() => {
+                  if (!!user && (isTradeUser || tradeStatus === "approved")) return true;
+                  if (!user) {
+                    requireAuth(() => {}, "open this spec sheet");
+                    return false;
+                  }
+                  let allowed = false;
+                  requireAuth(() => { allowed = true; }, "download this spec sheet");
+                  return allowed;
+                }}
+              />
+            ) : null
+          }
         />
+
 
 
 
@@ -1740,7 +1765,7 @@ const PublicProductPage: React.FC = () => {
 
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 md:gap-8 lg:gap-16">
-            <div className="relative md:sticky md:top-0 self-start z-30 bg-background" ref={galleryScrollRef}>
+            <div id="main-product-image-container" className="relative md:sticky md:top-0 self-start z-30 bg-background" ref={galleryScrollRef}>
               <ProductImageGallery
                 images={images}
                 alt={product.title}
