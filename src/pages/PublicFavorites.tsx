@@ -212,7 +212,7 @@ const PublicFavorites = () => {
       <div className="min-h-screen bg-background text-foreground">
         <Navigation />
 
-        <div className="max-w-6xl mx-auto px-4 md:px-12 pt-24 md:pt-28 pb-20">
+        <div className="max-w-6xl mx-auto px-4 md:px-12 pt-24 md:pt-20 pb-20">
           <Link
             to="/"
             className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-8"

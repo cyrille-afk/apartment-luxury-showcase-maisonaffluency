@@ -123,7 +123,7 @@ const PublicCollectibles = () => {
         <Navigation />
         <h1 className="sr-only">Collectible Design On View</h1>
 
-        <div className="pt-20">
+        <div className="pt-16">
           <CollectiblesHoverHero />
           <div id="collectibles-directory" className="pb-20 scroll-header-offset">
             <Collectibles />
