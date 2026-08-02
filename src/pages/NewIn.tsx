@@ -103,8 +103,11 @@ function MobileDesignerCarousel({ designers, initialIndex = 0 }: { designers: Re
 /* ── Desktop sticky jump nav ── */
 function DesktopJumpNav({ designers }: { designers: ReturnType<typeof useNewInDesigners>["data"] }) {
   const [activeSlug, setActiveSlug] = useState<string | null>(null);
+  const { direction: scrollDir, scrollY: navScrollY } = useScrollDirection();
+  const navHidden = scrollDir === "down" && navScrollY > 240;
   const isScrollingRef = useRef(false);
   const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
+
 
   useEffect(() => {
     if (!designers || designers.length < 2) return;
