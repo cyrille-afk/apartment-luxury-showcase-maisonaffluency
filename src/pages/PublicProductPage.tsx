@@ -1683,6 +1683,18 @@ const PublicProductPage: React.FC = () => {
 
         </div>
 
+        {/* Desktop slim sticky purchase bar */}
+        <StickyPurchaseBar
+          visible={showDesktopStickyBar}
+          image={images[0]}
+          title={product.title}
+          designer={designerDisplay}
+          price={publicRrpLabel}
+          onRequestQuote={() => setQuoteRequestOpen(true)}
+        />
+
+
+
 
         <div className="pt-[calc(env(safe-area-inset-top,0px)+7rem)] md:pt-36 pb-[calc(env(safe-area-inset-bottom,0px)+5rem)] md:pb-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <button
