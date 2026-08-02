@@ -1987,21 +1987,10 @@ const PublicProductPage: React.FC = () => {
 
                   {/* Secondary: trade access invitation */}
                   {!user && !authLoading && (
-                    <div className="space-y-6">
-                      <p className="font-body text-xs text-muted-foreground">
-                        Are you a Trade professional?{" "}
-                        <Link
-                          to={`/trade/login?redirect=${encodeURIComponent(location.pathname + location.search)}`}
-                          className="text-foreground underline underline-offset-4 hover:text-[hsl(var(--gold))] transition-colors"
-                        >
-                          Sign in for exclusive pricing.
-                        </Link>
-                      </p>
-                      <TradeExclusiveCard
-                        redirectTo={location.pathname + location.search}
-                        rrpLabel={publicRrpLabel}
-                      />
-                    </div>
+                    <TradeExclusiveCard
+                      redirectTo={location.pathname + location.search}
+                      rrpLabel={publicRrpLabel}
+                    />
                   )}
                 </div>
               </div>
