@@ -764,6 +764,7 @@ const VariantDimensionsPanel: React.FC = () => {
     axes: { isDualAxis, isBaseOnly, hasSingleAxisSplit, hasVariants, baseOptions, topOptions, dualSizeOptions, singleSizeOptions, singleAxisParsed },
     selBase, setSelBase, selTop, setSelTop, selDualSize, setSelDualSize, selMat, setSelMat, selSize, setSelSize,
     baseAxisIsDim, topAxisIsDim,
+    baseAxisLabelRaw, topAxisLabelRaw,
     baseOnlySizeOptions,
     variantsList, matchesDual,
     disabledBaseIdx, disabledTopIdx, disabledDualSizeIdx, disabledSizeIdx,
