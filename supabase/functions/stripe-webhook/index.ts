@@ -55,6 +55,47 @@ serve(async (req) => {
       });
     }
 
+    // ===== Direct checkout handler (single product, no cart) =====
+    if (paymentType === "direct_checkout") {
+      if (session.payment_status === "paid") {
+        // Resolve the product name: metadata first, then the Stripe line items.
+        let productName = session.metadata?.product_title || "";
+        if (!productName) {
+          try {
+            const items = await stripe.checkout.sessions.listLineItems(session.id, { limit: 1 });
+            productName = items.data[0]?.description || "Order";
+          } catch (e) {
+            console.error("[STRIPE-WEBHOOK] listLineItems failed:", e);
+            productName = "Order";
+          }
+        }
+
+        const customerEmail =
+          session.customer_details?.email || session.customer_email || null;
+
+        const { error: orderErr } = await supabase.from("orders").insert({
+          user_id: userIdMeta || null,
+          product_name: productName,
+          selected_finish: session.metadata?.selected_finish || null,
+          customer_email: customerEmail,
+          transaction_id: session.id,
+          amount_total: session.amount_total ?? 0,
+          currency: (session.currency || "usd").toLowerCase(),
+          status: "paid",
+        });
+
+        // 23505 = duplicate transaction_id → Stripe retry, safe to ignore.
+        if (orderErr && (orderErr as any).code !== "23505") {
+          console.error("[STRIPE-WEBHOOK] order insert failed:", orderErr);
+        } else if (!orderErr) {
+          console.log(`[STRIPE-WEBHOOK] Order recorded for session ${session.id}`);
+        }
+      }
+      return new Response(JSON.stringify({ received: true }), {
+        headers: { "Content-Type": "application/json" }, status: 200,
+      });
+    }
+
     // ===== FF&E unlock handler =====
     if (paymentType === "ffe_unlock" && session.payment_status === "paid" && userIdMeta) {
       console.log(`[STRIPE-WEBHOOK] FF&E unlock paid for user ${userIdMeta}, session ${session.id}`);

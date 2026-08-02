@@ -3801,6 +3801,48 @@ export type Database = {
           },
         ]
       }
+      orders: {
+        Row: {
+          amount_total: number
+          created_at: string
+          currency: string
+          customer_email: string | null
+          id: string
+          product_name: string
+          selected_finish: string | null
+          status: string
+          transaction_id: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          amount_total?: number
+          created_at?: string
+          currency?: string
+          customer_email?: string | null
+          id?: string
+          product_name: string
+          selected_finish?: string | null
+          status?: string
+          transaction_id: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          amount_total?: number
+          created_at?: string
+          currency?: string
+          customer_email?: string | null
+          id?: string
+          product_name?: string
+          selected_finish?: string | null
+          status?: string
+          transaction_id?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       personal_email_domains: {
         Row: {
           created_at: string
