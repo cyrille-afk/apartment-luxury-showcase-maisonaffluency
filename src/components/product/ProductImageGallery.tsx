@@ -180,19 +180,12 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
 
   useLightboxSwipe({
     containerRef: inlineSwipeRef,
-    enabled: images.length > 1 && !zoomOpen,
+    enabled: images.length > 1,
     imageZoomedRef: noZoomRef,
     onSwipeLeft: () => goTo(activeIndex + 1),
     onSwipeRight: () => goTo(activeIndex - 1),
   });
 
-  useLightboxSwipe({
-    containerRef: lightboxSwipeRef,
-    enabled: images.length > 1 && zoomOpen,
-    imageZoomedRef: noZoomRef,
-    onSwipeLeft: () => goTo(activeIndex + 1),
-    onSwipeRight: () => goTo(activeIndex - 1),
-  });
 
   // Keep active thumbnail in view when navigating with arrows/swipes/dots.
   // Skip when the change originated from clicking/hovering a thumbnail — the
