@@ -56,14 +56,22 @@ export function StickyPurchaseBar({
         setArmed(false);
         return;
       }
+      const y = window.scrollY;
+      // Disarm only when the user is genuinely back near the top.
+      if (y < 200) {
+        setArmed(false);
+        return;
+      }
       const trigger = document.getElementById(triggerId);
       if (!trigger) {
-        setArmed(window.scrollY > 500);
+        if (y > 500) setArmed(true);
         return;
       }
       const rect = trigger.getBoundingClientRect();
-      setArmed(rect.bottom < 0 || window.scrollY > rect.height * 0.75);
+      // Latch on once the hero image has effectively been passed.
+      if (rect.bottom < 0 || y > rect.height * 0.75) setArmed(true);
     };
+
 
     handleScroll();
     window.addEventListener("scroll", handleScroll, { passive: true });
