@@ -345,12 +345,11 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
   return <><nav className={cn(
       "fixed top-0 left-0 right-0 z-50 pt-[env(safe-area-inset-top)] transform transition-all duration-300 ease-in-out will-change-transform",
       navHidden ? "-translate-y-full" : "translate-y-0",
-      isOverHero
-        ? "bg-white backdrop-blur-sm border-b border-border/50"
-        : borderless
-          ? "bg-background border-b border-transparent"
-          : "bg-white backdrop-blur-sm border-b border-border/50"
+      borderless
+        ? "bg-[#FAFAFA] border-b border-transparent"
+        : "bg-[#FAFAFA] border-b border-border/30"
     )}>
+
       <div className="mx-auto max-w-7xl px-5 md:px-14 lg:px-24">
         {/* Mobile: single row */}
           <div className="flex h-24 items-center md:hidden relative justify-between">
