@@ -1965,7 +1965,7 @@ const PublicProductPage: React.FC = () => {
                   <VariantFinishSelectors section="primary" />
                 </div>
 
-                <div className="min-w-0 py-5 order-2 md:order-1">
+                <div className="min-w-0 pt-0 pb-4 md:py-5 order-2 md:order-1">
                       <Link
                         to={`/designers/${designer.slug}`}
                         onClick={() => rememberProductBackRef(designer.slug, location.pathname + location.search)}
