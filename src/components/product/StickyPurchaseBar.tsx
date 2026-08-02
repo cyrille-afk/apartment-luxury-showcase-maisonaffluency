@@ -82,8 +82,8 @@ export function StickyPurchaseBar({
     };
   }, [triggerId, visible]);
 
-  // Reveal on any upward scroll once armed; hide again while scrolling down.
-  const isVisible = visible ?? (armed && direction === "up" && scrollY > 240);
+  // Stay visible once armed after the hero image leaves the viewport; hide again near the top.
+  const isVisible = visible ?? (armed && scrollY > 240);
 
   useEffect(() => {
     setStickyProductBarActive(isVisible);
