@@ -412,7 +412,7 @@ const TradeDemoPage: React.FC = () => {
       </Helmet>
       <div className="min-h-screen bg-background text-foreground">
         <Navigation />
-        <main className="pt-24 pb-40">
+        <main className="pt-16 pb-40">
           {/* Hero band */}
           <section className="max-w-5xl mx-auto px-6 md:px-8 text-center mb-10">
             <p className="font-body text-[10px] uppercase tracking-[0.3em] text-[hsl(var(--gold))] mb-4">
