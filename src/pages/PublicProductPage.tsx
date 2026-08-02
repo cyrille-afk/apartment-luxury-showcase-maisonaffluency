@@ -19,7 +19,6 @@ import AuthGateDialog from "@/components/AuthGateDialog";
 import { cn } from "@/lib/utils";
 import PageLoadingSkeleton from "@/components/PageLoadingSkeleton";
 import ProductDetailSkeleton from "@/components/product/ProductDetailSkeleton";
-import LightboxDescriptionDropdown from "@/components/ui/LightboxDescriptionDropdown";
 import { normalizeCategoryContext } from "@/lib/categoryNormalization";
 import { formatEditionLabel } from "@/lib/editionLabel";
 import { renderParagraph } from "@/components/EditorialBiography";
@@ -1712,17 +1711,8 @@ const PublicProductPage: React.FC = () => {
                     ) : null;
                   })()
                 }
-                overlay={
-                  product.description ? (
-                    <div className="hidden md:flex flex-col items-end gap-2">
-                      <LightboxDescriptionDropdown
-                        description={product.description}
-                        ariaDescribedBy="product-description-hidden"
-                      />
-                    </div>
-                  ) : null
-                }
               />
+
 
 
               {/* Mobile-only image overlay: share + favorite / studio save, top-right */}
@@ -1887,6 +1877,21 @@ const PublicProductPage: React.FC = () => {
                     />
                   );
                 })()}
+
+                {/* Creation note — replaces the former frosted "Creation" pill.
+                    Set in the same column rhythm as the Trade Exclusive card. */}
+                {product.description && product.description.trim().length > 0 && (
+                  <section aria-label="About this creation" className="pt-1">
+                    <h2 className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-2">
+                      The Creation
+                    </h2>
+                    <p className="font-body text-sm leading-relaxed text-muted-foreground whitespace-pre-line">
+                      {product.description}
+                    </p>
+                  </section>
+                )}
+
+
 
                 {!user && !authLoading && (
                   <TradeExclusiveCard
@@ -2100,21 +2105,9 @@ const PublicProductPage: React.FC = () => {
             </div>
           </div>
 
-          {/* SEO crawlable internal links — description itself lives in the
-              "Creation" pill above (in DOM, indexable). The pill is the single
-              source of truth on desktop, mobile and PWA; we avoid duplicating
-              the paragraph below it. */}
-          {product.description && product.description.trim().length > 0 && (
-            <section aria-label="Related links" className="sr-only">
-              {/* Visually hidden full description for crawlers that don't
-                  expand collapsed regions. Keeps the page free of visible
-                  duplication while preserving SEO coverage. */}
-              <div className="sr-only" id="product-description-hidden">
-                <h2>About the {product.title}</h2>
-                <p>{product.description}</p>
-              </div>
-            </section>
-          )}
+          {/* Description now renders visibly as "The Creation" paragraph in the
+              detail column above — no hidden duplicate needed for crawlers. */}
+
 
           {relatedPicks.length > 0 && (
             <div className="mt-6 pt-6 border-t border-border">
