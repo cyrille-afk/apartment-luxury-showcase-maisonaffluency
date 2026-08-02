@@ -11,7 +11,7 @@ export function StickyPurchaseBar({
   designer,
   price,
   onRequestQuote,
-  topOffset = "5rem",
+  topOffset = "7.5rem",
 }: {
   visible: boolean;
   image?: string | null;
@@ -24,7 +24,7 @@ export function StickyPurchaseBar({
   return (
     <div
       className={cn(
-        "hidden lg:block fixed left-0 right-0 z-40 border-b border-border bg-background/95 backdrop-blur-md transition-transform duration-300 ease-out",
+        "hidden lg:block fixed left-0 right-0 z-30 border-b border-border bg-background/95 backdrop-blur-md transition-transform duration-300 ease-out",
         visible ? "translate-y-0" : "-translate-y-[150%] pointer-events-none"
       )}
       style={{ top: topOffset }}
