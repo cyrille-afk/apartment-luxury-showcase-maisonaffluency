@@ -84,7 +84,7 @@ serve(async (req) => {
           },
         },
       ],
-      success_url: `${origin}/order-confirmation?status=paid&session_id={CHECKOUT_SESSION_ID}`,
+      success_url: `${origin}/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/checkout-cancelled`,
       metadata: {
         payment_type: "direct_checkout",
