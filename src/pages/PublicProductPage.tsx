@@ -1672,43 +1672,8 @@ const PublicProductPage: React.FC = () => {
           designer={designerDisplay}
           price={publicRrpLabel}
           onRequestQuote={() => setQuoteRequestOpen(true)}
-          favoriteSlot={
-            <FavoriteFolderPicker pickId={product.id} align="end" side="bottom">
-              <button
-                type="button"
-                onClick={(e) => e.stopPropagation()}
-                aria-label={favorited ? "Saved to favorites" : "Add to favorites"}
-                className={cn(
-                  "p-2.5 rounded-luxury-micro transition-colors",
-                  favorited ? "text-destructive" : "text-muted-foreground hover:text-foreground"
-                )}
-              >
-                <Heart size={16} className={cn(favorited && "fill-current")} />
-              </button>
-            </FavoriteFolderPicker>
-          }
-          specSheetSlot={
-            (product.pdf_url || (product.pdf_urls && product.pdf_urls.length > 0)) ? (
-              <SpecSheetButton
-                pdfUrl={product.pdf_url}
-                pdfUrls={product.pdf_urls}
-                brandName={designerDisplay}
-                productName={product.title}
-                variant="button"
-                className="inline-flex items-center gap-1.5 px-3 py-2 font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground hover:text-foreground transition-colors"
-                onBeforeOpen={() => {
-                  if (!!user && (isTradeUser || tradeStatus === "approved")) return true;
-                  if (!user) {
-                    requireAuth(() => {}, "open this spec sheet");
-                    return false;
-                  }
-                  let allowed = false;
-                  requireAuth(() => { allowed = true; }, "download this spec sheet");
-                  return allowed;
-                }}
-              />
-            ) : null
-          }
+          onPlaceOrder={handleDirectCheckout}
+          placingOrder={checkoutLoading}
         />
 
 
