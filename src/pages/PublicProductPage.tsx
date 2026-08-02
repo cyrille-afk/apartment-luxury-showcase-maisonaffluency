@@ -64,7 +64,7 @@ import TradeWorkspace from "@/components/product/TradeWorkspace";
 import StickyPurchaseBar from "@/components/product/StickyPurchaseBar";
 
 import TradePendingReviewCard from "@/components/product/TradePendingReviewCard";
-import CustomizationRequest from "@/components/product/CustomizationRequest";
+
 import QuoteRequestDialog from "@/components/QuoteRequestDialog";
 import { addToCart } from "@/lib/cart";
 import { usePublicRrp, formatPublicRrp, formatPublicRrpCents } from "@/hooks/usePublicRrp";
@@ -2050,6 +2050,80 @@ const PublicProductPage: React.FC = () => {
                   );
                 })()}
 
+              {/* Secondary actions: Favorite / Pin / Spec Sheet.
+                  Minimalist horizontal icon row, left-aligned under the
+                  product details with muted labels and gentle hover. */}
+              {(() => {
+                const tradeApprovedFooter = !!user && (isTradeUser || tradeStatus === "approved");
+                const hasSheet = !!(product.pdf_url || (product.pdf_urls && product.pdf_urls.length > 0));
+                const utilityItem =
+                  "inline-flex items-center gap-2 font-body text-[11px] uppercase tracking-wider text-muted-foreground transition-colors duration-200 hover:text-foreground";
+                const iconClass = "shrink-0";
+
+                return (
+                  <div className="hidden md:flex flex-wrap items-center gap-x-8 gap-y-2 pt-2">
+                    <FavoriteFolderPicker pickId={product.id} align="start" side="top">
+                      <button
+                        onClick={(e) => e.stopPropagation()}
+                        className={cn(
+                          utilityItem,
+                          favorited && "text-destructive hover:text-destructive"
+                        )}
+                      >
+                        <Heart size={14} strokeWidth={1.25} className={cn(iconClass, favorited && "fill-current")} />
+                        {favorited ? "Saved" : "Favorite"}
+                      </button>
+                    </FavoriteFolderPicker>
+
+                    <button
+                      onClick={() => {
+                        if (!user) {
+                          requireAuth(() => {}, "pin this piece to your selection");
+                          return;
+                        }
+                        togglePin(compareItem);
+                      }}
+                      className={cn(
+                        utilityItem,
+                        pinned && "text-[hsl(var(--gold))] hover:text-[hsl(var(--gold))]",
+                        user && compareItems.length >= 3 && !pinned && "opacity-40 pointer-events-none"
+                      )}
+                    >
+                      <Pin size={14} strokeWidth={1.25} className={cn(iconClass, pinned && "fill-current")} />
+                      {pinned ? "Pinned" : "Pin to Selection"}
+                    </button>
+
+                    {hasSheet ? (
+                      <SpecSheetButton
+                        pdfUrl={product.pdf_url}
+                        pdfUrls={product.pdf_urls}
+                        brandName={designerDisplay}
+                        productName={product.title}
+                        variant="button"
+                        className={cn(utilityItem, "cursor-pointer")}
+                        icon={<FileText size={14} strokeWidth={1.25} className={iconClass} />}
+                        onBeforeOpen={() => {
+                          // Verified trade: open immediately, no gate.
+                          if (tradeApprovedFooter) return true;
+                          if (!user) {
+                            requireAuth(() => {}, "open this spec sheet");
+                            return false;
+                          }
+                          let allowed = false;
+                          requireAuth(() => { allowed = true; }, "download this spec sheet");
+                          return allowed;
+                        }}
+                      />
+                    ) : (
+                      <Link to="/contact" className={utilityItem}>
+                        <FileText size={14} strokeWidth={1.25} className={iconClass} />
+                        Contact Us
+                      </Link>
+                    )}
+                  </div>
+                );
+              })()}
+
                 {/* Public, crawlable specification table (no session required) */}
                 {(() => {
                   const variants = (product.size_variants || []) as any[];
@@ -2134,15 +2208,6 @@ const PublicProductPage: React.FC = () => {
 
 
 
-              {/* Bespoke customization — public guests get the inquiry modal,
-                  approved trade members are routed into Felix instead. */}
-              <CustomizationRequest
-                productId={product.id}
-                productTitle={product.title}
-                designerDisplay={designerDisplay}
-                tradeApproved={!!user && tradeStatus === "approved"}
-                onRequestQuote={() => setQuoteRequestOpen(true)}
-              />
 
               <QuoteRequestDialog
                 open={quoteRequestOpen}
@@ -2151,79 +2216,6 @@ const PublicProductPage: React.FC = () => {
                 designerName={designerDisplay}
               />
 
-              {/* Secondary actions: Favorite / Pin / Spec Sheet.
-                  Minimalist horizontal icon row, left-aligned under the
-                  product details with muted labels and gentle hover. */}
-              {(() => {
-                const tradeApprovedFooter = !!user && (isTradeUser || tradeStatus === "approved");
-                const hasSheet = !!(product.pdf_url || (product.pdf_urls && product.pdf_urls.length > 0));
-                const utilityItem =
-                  "inline-flex items-center gap-2 font-body text-[11px] uppercase tracking-wider text-muted-foreground transition-colors duration-200 hover:text-foreground";
-                const iconClass = "shrink-0";
-
-                return (
-                  <div className="hidden md:flex flex-wrap items-center gap-x-8 gap-y-2 pt-2">
-                    <FavoriteFolderPicker pickId={product.id} align="start" side="top">
-                      <button
-                        onClick={(e) => e.stopPropagation()}
-                        className={cn(
-                          utilityItem,
-                          favorited && "text-destructive hover:text-destructive"
-                        )}
-                      >
-                        <Heart size={14} strokeWidth={1.25} className={cn(iconClass, favorited && "fill-current")} />
-                        {favorited ? "Saved" : "Favorite"}
-                      </button>
-                    </FavoriteFolderPicker>
-
-                    <button
-                      onClick={() => {
-                        if (!user) {
-                          requireAuth(() => {}, "pin this piece to your selection");
-                          return;
-                        }
-                        togglePin(compareItem);
-                      }}
-                      className={cn(
-                        utilityItem,
-                        pinned && "text-[hsl(var(--gold))] hover:text-[hsl(var(--gold))]",
-                        user && compareItems.length >= 3 && !pinned && "opacity-40 pointer-events-none"
-                      )}
-                    >
-                      <Pin size={14} strokeWidth={1.25} className={cn(iconClass, pinned && "fill-current")} />
-                      {pinned ? "Pinned" : "Pin to Selection"}
-                    </button>
-
-                    {hasSheet ? (
-                      <SpecSheetButton
-                        pdfUrl={product.pdf_url}
-                        pdfUrls={product.pdf_urls}
-                        brandName={designerDisplay}
-                        productName={product.title}
-                        variant="button"
-                        className={cn(utilityItem, "cursor-pointer")}
-                        icon={<FileText size={14} strokeWidth={1.25} className={iconClass} />}
-                        onBeforeOpen={() => {
-                          // Verified trade: open immediately, no gate.
-                          if (tradeApprovedFooter) return true;
-                          if (!user) {
-                            requireAuth(() => {}, "open this spec sheet");
-                            return false;
-                          }
-                          let allowed = false;
-                          requireAuth(() => { allowed = true; }, "download this spec sheet");
-                          return allowed;
-                        }}
-                      />
-                    ) : (
-                      <Link to="/contact" className={utilityItem}>
-                        <FileText size={14} strokeWidth={1.25} className={iconClass} />
-                        Contact Us
-                      </Link>
-                    )}
-                  </div>
-                );
-              })()}
 
               {/* Signed-out spec sheet explainer — points back to the trade card. */}
               <Dialog open={specSheetLocked} onOpenChange={setSpecSheetLocked}>
