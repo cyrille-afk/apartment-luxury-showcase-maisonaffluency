@@ -451,7 +451,7 @@ body[data-tour-step="procurement"] [data-tour-target="procurement"] {
 }
 @media (min-width: 768px) {
   :root {
-    --header-h: 4rem; /* desktop: single-row 64px header */
+    --header-h: 9.5rem; /* desktop: two-row header (ribbon + brand/nav) */
   }
 }
 .scroll-header-offset {
