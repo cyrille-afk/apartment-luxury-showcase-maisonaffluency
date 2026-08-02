@@ -468,9 +468,9 @@ const VariantSelectors: React.FC<{
 
   return (
     <div className="flex flex-col">
-      {/* Desktop: dimensions first, then finishes. Mobile/PWA: finishes first, then dimensions.
-          Segment Console Table is an exception: finishes stay below dimensions. */}
-      <div className={cn("flex flex-col gap-2", forceDimensionsFirst ? "order-1 md:order-1" : "order-2 md:order-1")}>
+      {/* Finishes/configuration dropdowns first, raw dimensions directly underneath.
+          Segment Console Table is an exception: dimensions stay above the finishes. */}
+      <div className={cn("flex flex-col gap-2", forceDimensionsFirst ? "order-1 md:order-1" : "order-2 md:order-2")}>
         {/* Size dropdown — shown first */}
         {isBaseOnly && !baseAxisIsDim && baseOnlySizeOptions.length > 1 ? (
           <ExpandableSpec
@@ -727,9 +727,9 @@ const VariantSelectors: React.FC<{
           />
         )}
       </div>
-      {/* Desktop: dimensions first, then finishes. Mobile/PWA: finishes first, then dimensions.
+      {/* Configuration dropdowns sit above the raw dimensions block on all viewports.
           Segment Console Table is an exception: finishes stay below dimensions. */}
-      <div className={cn("flex flex-col gap-2", forceDimensionsFirst ? "order-2 md:order-2" : "order-1 md:order-2")}>
+      <div className={cn("flex flex-col gap-2", forceDimensionsFirst ? "order-2 md:order-2" : "order-1 md:order-1")}>
         <FinishSelector
           pickId={product.id}
           productTitle={product.title}
