@@ -96,7 +96,7 @@ export function StickyPurchaseBar({
       )}
       style={topOffset ? { top: topOffset } : undefined}
     >
-      <div className="max-w-7xl mx-auto w-full px-6 h-16 flex items-center justify-between gap-4">
+      <div className="max-w-7xl mx-auto w-full px-6 min-h-16 py-2 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
         {/* Product identity */}
         <div className="flex items-center gap-4 min-w-0">
           {image && (
@@ -120,20 +120,8 @@ export function StickyPurchaseBar({
           </div>
         </div>
 
-        {/* Actions */}
-        <div className="flex items-center gap-3 shrink-0">
-          <button
-            type="button"
-            onClick={onRequestQuote}
-            className={cn(
-              "inline-flex items-center gap-2 px-5 py-3 rounded-luxury-micro",
-              "border border-foreground/25 text-foreground font-body text-[10px] uppercase tracking-[0.14em]",
-              "hover:border-foreground/60 transition-colors"
-            )}
-          >
-            <MessageSquare className="h-3.5 w-3.5" />
-            <span>Request a Quote</span>
-          </button>
+        {/* Actions — primary checkout first, secondary quote second */}
+        <div className="flex flex-wrap items-center justify-end gap-3 shrink-0">
           {onPlaceOrder && (
             <button
               type="button"
@@ -153,7 +141,20 @@ export function StickyPurchaseBar({
               <span>{placingOrder ? "Opening checkout…" : "Place Order"}</span>
             </button>
           )}
+          <button
+            type="button"
+            onClick={onRequestQuote}
+            className={cn(
+              "inline-flex items-center gap-2 px-5 py-3 rounded-luxury-micro",
+              "border border-foreground/25 text-foreground font-body text-[10px] uppercase tracking-[0.14em]",
+              "hover:border-foreground/60 transition-colors"
+            )}
+          >
+            <MessageSquare className="h-3.5 w-3.5" />
+            <span>Request a Quote</span>
+          </button>
         </div>
+
       </div>
     </div>
   );
