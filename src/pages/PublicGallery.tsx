@@ -45,7 +45,7 @@ const PublicGallery = () => {
         <Navigation />
         <h1 className="sr-only">Maison Affluency Gallery</h1>
 
-        <div className="pt-28 lg:pt-[224px]">
+        <div className="pt-24 lg:pt-[80px]">
           <ApartmentTourInterlude compact />
         </div>
 

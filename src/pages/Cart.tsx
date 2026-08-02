@@ -100,7 +100,7 @@ export default function Cart() {
 
       <Navigation borderless />
 
-      <div className="pt-[calc(env(safe-area-inset-top,0px)+7rem)] md:pt-36 pb-24 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="pt-[calc(env(safe-area-inset-top,0px)+7rem)] md:pt-24 pb-24 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-baseline justify-between border-b border-border pb-4">
           <h1 className="font-display font-normal text-[1.6rem] md:text-[2rem] tracking-[-0.01em]">Your Cart</h1>
           <Link

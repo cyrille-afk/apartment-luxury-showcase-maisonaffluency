@@ -84,7 +84,7 @@ export default function Success() {
 
       <Navigation borderless />
 
-      <main className="pt-[calc(env(safe-area-inset-top,0px)+6rem)] md:pt-32 pb-24 px-4 sm:px-6">
+      <main className="pt-[calc(env(safe-area-inset-top,0px)+6rem)] md:pt-24 pb-24 px-4 sm:px-6">
         <div className="max-w-xl mx-auto">
           <div className="flex flex-col items-center text-center">
             <div className="relative flex items-center justify-center w-16 h-16 rounded-full border border-foreground/10 bg-foreground/5">
