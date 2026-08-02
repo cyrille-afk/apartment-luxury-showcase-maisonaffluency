@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate, Link, useLocation, Navigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { Heart, Pin, FileText, ChevronLeft, ChevronRight, ChevronDown, ArrowLeft, Truck, Loader2, ShoppingBag } from "lucide-react";
+import { useScrollDirection } from "@/hooks/useScrollDirection";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { isPwaStandaloneDisplay } from "@/lib/pwaMode";
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
@@ -1134,7 +1135,15 @@ const PublicProductPage: React.FC = () => {
 
   // Mobile/PWA: shrink the product image once the user scrolls past a small threshold.
   const [galleryCompact, setGalleryCompact] = useState(false);
-  const [showStickyBar, setShowStickyBar] = useState(false);
+  const [stickyBarArmed, setStickyBarArmed] = useState(false);
+  const { direction: scrollDir, scrollY } = useScrollDirection({ threshold: 6, topOffset: 80 });
+  // Coordinate with the global header: hide while scrolling down past the header
+  // threshold so the bar never floats detached from the nav; reveal on scroll up.
+  const headerHiddenOnMobile = scrollDir === "down" && scrollY > 240;
+  const showStickyBar = stickyBarArmed && !headerHiddenOnMobile;
+
+
+
 
 
 
@@ -1194,10 +1203,11 @@ const PublicProductPage: React.FC = () => {
       const headerBottom = navEl?.getBoundingClientRect().bottom ?? 96;
       if (el) {
         const rect = el.getBoundingClientRect();
-        setShowStickyBar(rect.bottom < headerBottom);
+        setStickyBarArmed(rect.bottom < headerBottom);
       } else {
-        setShowStickyBar(false);
+        setStickyBarArmed(false);
       }
+
     };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
@@ -1709,15 +1719,22 @@ const PublicProductPage: React.FC = () => {
       <div className="min-h-[100dvh] bg-background text-foreground">
         <Navigation borderless />
 
-        {/* Mobile sticky mini bar — shows on scroll (mirrors 1stdibs pattern) */}
+        {/* Mobile sticky mini bar — sits directly below the global header and
+             follows its hide/show rhythm so it never floats detached. */}
         <div
           className={cn(
             "md:hidden fixed left-0 right-0 z-40 bg-background/95 backdrop-blur-md border-b border-border shadow-sm transition-transform duration-300 ease-out",
-            showStickyBar ? "translate-y-0" : "-translate-y-full pointer-events-none"
+            !showStickyBar && "pointer-events-none"
           )}
-          style={{ top: "calc(env(safe-area-inset-top, 0px) + 6rem)" }}
+          style={{
+            top: "var(--header-h)",
+            transform: showStickyBar
+              ? "translateY(0)"
+              : "translateY(calc(-100% - var(--header-h)))",
+          }}
           aria-hidden={!showStickyBar}
         >
+
           <div className="px-3 pt-2 pb-2.5">
             <div className="flex items-center justify-center gap-1.5 min-w-0 text-center">
               <p className="font-display text-[13px] leading-tight text-foreground truncate">
