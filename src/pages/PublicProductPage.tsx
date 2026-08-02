@@ -400,6 +400,13 @@ const VariantSelectors: React.FC<{
   const topAxisIsDim = topAxisLabelRaw
     ? isDimensionAxisLabel(topAxisLabelRaw)
     : (topOptions.length > 0 && topOptions.every(looksLikeDimension));
+
+  // Segment Console Table: keep the dimensions selector above the finish
+  // selectors on mobile/PWA so "Select Your Console Top Finish" sits
+  // directly below the dimensions.
+  const forceDimensionsFirst =
+    typeof product.title === "string" &&
+    product.title.toLowerCase().includes("segment console table");
   const baseOnlySizeOptions = isBaseOnly
     ? Array.from(new Set(
         ((product.size_variants || []) as Array<{ label?: string | null }>)
