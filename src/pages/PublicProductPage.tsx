@@ -1135,7 +1135,15 @@ const PublicProductPage: React.FC = () => {
 
   // Mobile/PWA: shrink the product image once the user scrolls past a small threshold.
   const [galleryCompact, setGalleryCompact] = useState(false);
-  const [showStickyBar, setShowStickyBar] = useState(false);
+  const [stickyBarArmed, setStickyBarArmed] = useState(false);
+  const { direction: scrollDir, scrollY } = useScrollDirection({ threshold: 6, topOffset: 80 });
+  // Coordinate with the global header: hide while scrolling down past the header
+  // threshold so the bar never floats detached from the nav; reveal on scroll up.
+  const headerHiddenOnMobile = scrollDir === "down" && scrollY > 240;
+  const showStickyBar = stickyBarArmed && !headerHiddenOnMobile;
+
+
+
 
 
 
