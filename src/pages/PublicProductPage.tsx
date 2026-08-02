@@ -69,6 +69,7 @@ import QuoteRequestDialog from "@/components/QuoteRequestDialog";
 import { addToCart } from "@/lib/cart";
 import { usePublicRrp, formatPublicRrp, formatPublicRrpCents } from "@/hooks/usePublicRrp";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { toast } from "sonner";
 
 
 /* ------------------------------------------------------------------ */
@@ -1131,6 +1132,9 @@ const PublicProductPage: React.FC = () => {
 
 
   const [quoteRequestOpen, setQuoteRequestOpen] = useState(false);
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
+  const [checkoutEmailOpen, setCheckoutEmailOpen] = useState(false);
+  const [checkoutEmail, setCheckoutEmail] = useState("");
   // Finish/size selection surfaced in the authenticated Trade Workspace and
   // injected into Felix's product context.
   const [selectedFinishes, setSelectedFinishes] = useState<string[]>([]);
@@ -2141,6 +2145,48 @@ const PublicProductPage: React.FC = () => {
                 productName={product.title}
                 designerName={designerDisplay}
               />
+
+              {/* Direct checkout — guest email capture */}
+              <Dialog open={checkoutEmailOpen} onOpenChange={setCheckoutEmailOpen}>
+                <DialogContent className="sm:max-w-md rounded-luxury-sheet">
+                  <DialogHeader>
+                    <DialogTitle className="font-display text-lg">Complete your order</DialogTitle>
+                    <DialogDescription className="font-body text-xs">
+                      Enter the email address for your receipt and order updates.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      const email = checkoutEmail.trim();
+                      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+                        toast.error("Please enter a valid email address.");
+                        return;
+                      }
+                      setCheckoutEmailOpen(false);
+                      void startDirectCheckout(email);
+                    }}
+                    className="space-y-4"
+                  >
+                    <input
+                      type="email"
+                      required
+                      autoFocus
+                      value={checkoutEmail}
+                      onChange={(e) => setCheckoutEmail(e.target.value)}
+                      placeholder="you@studio.com"
+                      className="w-full rounded-luxury-micro border border-border bg-background px-3 py-2.5 font-body text-sm outline-none focus:border-foreground"
+                    />
+                    <button
+                      type="submit"
+                      disabled={checkoutLoading}
+                      className="w-full rounded-luxury-micro bg-foreground text-background py-3 font-body text-[10px] uppercase tracking-[0.16em] disabled:opacity-60"
+                    >
+                      {checkoutLoading ? "Opening checkout…" : "Continue to payment"}
+                    </button>
+                  </form>
+                </DialogContent>
+              </Dialog>
 
               {/* Secondary actions: Favorite / Pin / Spec Sheet.
                   Always visible. Guests get the Sign In modal on click;
