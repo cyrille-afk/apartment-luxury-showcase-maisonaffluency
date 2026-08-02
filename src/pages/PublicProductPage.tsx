@@ -479,7 +479,7 @@ const VariantSelectorsProvider: React.FC<{
   );
 };
 
-const VariantFinishSelectors: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
+const VariantFinishSelectors: React.FC<{ section?: "primary" | "supplemental" | "all" }> = ({ section = "all" }) => {
   const ctx = useVariantSelectorsContext();
   const {
     product,
@@ -508,7 +508,7 @@ const VariantFinishSelectors: React.FC<{ children?: React.ReactNode }> = ({ chil
 
   return (
     <div className="flex flex-col gap-2">
-      <FinishSelector
+      {section !== "supplemental" && <FinishSelector
         pickId={product.id}
         productTitle={product.title}
         productCategory={product.category}
@@ -606,11 +606,9 @@ const VariantFinishSelectors: React.FC<{ children?: React.ReactNode }> = ({ chil
           }
           onMaterialChange?.(sized, { base: nextBase, top: sized, size: selDualSize });
         }}
-      />
+      />}
 
-      {children}
-
-      {isDualAxis ? (
+      {section !== "primary" && <>{isDualAxis ? (
         <>
           {!baseAxisIsDim && !suppressBaseAsFinish && !(baseOptions.length > 0 && baseOptions.every(looksLikeDimension)) && (
             <ExpandableSpec
@@ -754,7 +752,7 @@ const VariantFinishSelectors: React.FC<{ children?: React.ReactNode }> = ({ chil
           text={product.materials_description.trim()}
         />
       )}
-      <AlsoContainsFinishes pickId={product.id} className="mt-1 pl-6" />
+      <AlsoContainsFinishes pickId={product.id} className="mt-1 pl-6" /></>}
     </div>
   );
 };
@@ -1858,23 +1856,8 @@ const PublicProductPage: React.FC = () => {
                 }
 
                 overlay={
-                  /* Desktop photo overlay: share + favorite / studio save, top-right */
+                  /* Favorite / studio save stays top-right. */
                   <div className="hidden md:flex items-center gap-3">
-                    {(() => {
-                      const shareUrl = buildPieceOgUrl(designerDisplay, product.title, product.subtitle);
-                      return (
-                        <ShareMenu
-                          url={shareUrl}
-                          message={`${product.title} by ${designerDisplay} — Maison Affluency: ${shareUrl}`}
-                          className="flex items-center justify-center w-9 h-9 rounded-full bg-background/25 backdrop-blur-md border border-border/25 text-foreground/80"
-                          iconSize="w-[18px] h-[18px]"
-                          iconVariant="ios"
-                          showLabel={false}
-                          imageUrl={images?.[galleryActiveIndex ?? 0] || images?.[0]}
-                          imageName={`${product.title}-${designerDisplay}`}
-                        />
-                      );
-                    })()}
                     {user && (isTradeUser || tradeStatus === "approved") ? (
                       <StudioSaveButton
                         pickId={product.id}
@@ -1894,6 +1877,21 @@ const PublicProductPage: React.FC = () => {
                     )}
                   </div>
                 }
+                bottomRightOverlay={(() => {
+                  const shareUrl = buildPieceOgUrl(designerDisplay, product.title, product.subtitle);
+                  return (
+                    <ShareMenu
+                      url={shareUrl}
+                      message={`${product.title} by ${designerDisplay} — Maison Affluency: ${shareUrl}`}
+                      className="flex items-center justify-center w-9 h-9 rounded-full bg-background/25 backdrop-blur-md border border-border/25 text-foreground/80"
+                      iconSize="w-[18px] h-[18px]"
+                      iconVariant="ios"
+                      showLabel={false}
+                      imageUrl={images?.[galleryActiveIndex ?? 0] || images?.[0]}
+                      imageName={`${product.title}-${designerDisplay}`}
+                    />
+                  );
+                })()}
               />
 
 
@@ -1901,21 +1899,6 @@ const PublicProductPage: React.FC = () => {
               {/* Mobile-only image overlay: share + favorite / studio save, top-right */}
               <div className="md:hidden pointer-events-none absolute inset-x-0 top-0 z-40" style={{ height: galleryCompact ? "20vh" : "45vh" }}>
                 <div className="absolute top-4 right-4 flex items-center gap-3 pointer-events-auto">
-                  {(() => {
-                    const shareUrl = buildPieceOgUrl(designerDisplay, product.title, product.subtitle);
-                    return (
-                      <ShareMenu
-                        url={shareUrl}
-                        message={`${product.title} by ${designerDisplay} — Maison Affluency: ${shareUrl}`}
-                        className="flex items-center justify-center w-9 h-9 rounded-full bg-background/25 backdrop-blur-md border border-border/25 text-foreground/80"
-                        iconSize="w-[18px] h-[18px]"
-                        iconVariant="ios"
-                        showLabel={false}
-                        imageUrl={images?.[galleryActiveIndex ?? 0] || images?.[0]}
-                        imageName={`${product.title}-${designerDisplay}`}
-                      />
-                    );
-                  })()}
                   {user && (isTradeUser || tradeStatus === "approved") ? (
                     // Trade members get the studio "drop" anchor instead of the
                     // retail heart: one tap → bottom sheet → project.
@@ -1979,8 +1962,10 @@ const PublicProductPage: React.FC = () => {
                 onFinishesMissingImagesChange={setFinishesMissingImages}
               >
                 <div className="flex flex-col gap-5 order-1">
-                  <VariantFinishSelectors>
-                    <div className="min-w-0 py-5">
+                  <VariantFinishSelectors section="primary" />
+                </div>
+
+                <div className="min-w-0 py-5 order-2">
                       <Link
                         to={`/designers/${designer.slug}`}
                         onClick={() => rememberProductBackRef(designer.slug, location.pathname + location.search)}
@@ -2016,8 +2001,9 @@ const PublicProductPage: React.FC = () => {
                           </p>
                         </div>
                       )}
-                    </div>
-                  </VariantFinishSelectors>
+                </div>
+                <div className="order-4 flex flex-col gap-5">
+                  <VariantFinishSelectors section="supplemental" />
                   {finishesMissingImages.length > 0 && (
                     <p className="font-body text-[11px] text-muted-foreground italic mt-1">
                       No reference image on file for{" "}
@@ -2028,7 +2014,7 @@ const PublicProductPage: React.FC = () => {
                 </div>
 
                 {/* Dimensions/specs stay after product metadata on every viewport. */}
-                <div className="flex flex-col gap-5 order-3">
+                <div className="flex flex-col gap-5 order-4">
                   <VariantDimensionsPanel />
                 </div>
               </VariantSelectorsProvider>
