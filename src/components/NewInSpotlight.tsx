@@ -120,7 +120,7 @@ const NewInSpotlight = ({ designer }: NewInSpotlightProps) => {
             transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
             className="w-full md:w-[38%] flex-shrink-0"
           >
-            <div className="aspect-[3/2] md:aspect-[4/5] overflow-hidden rounded-luxury-sharp bg-muted relative">
+            <div className="aspect-[3/2] md:aspect-[4/5] overflow-hidden rounded-none bg-muted relative">
               <img
                 src={portraitImage}
                 alt={`${displayName} portrait`}
@@ -318,14 +318,14 @@ const NewInSpotlight = ({ designer }: NewInSpotlightProps) => {
                   if (item) setLightboxItem(item);
                 }}
               >
-                <div className="aspect-[4/5] bg-muted/20 rounded-luxury-sharp overflow-hidden mb-2 relative flex items-center justify-center">
+                <div className="aspect-[4/5] bg-muted/20 rounded-none overflow-hidden mb-2 relative flex items-center justify-center">
                   <img
                     src={responsiveCloudinaryUrl(pick.image_url, 600)}
                     srcSet={pickSrcSet(pick.image_url)}
                     sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 25vw"
                     alt={pick.title}
                     className={cn(
-                      "absolute inset-0 w-full h-full transition-all duration-700 rounded-xl object-cover",
+                      "absolute inset-0 w-full h-full transition-all duration-700 object-cover",
                       pick.hover_image_url ? "opacity-100 group-hover:opacity-0 group-hover:scale-105" : "group-hover:scale-105"
                     )}
                     loading="lazy"
@@ -336,7 +336,7 @@ const NewInSpotlight = ({ designer }: NewInSpotlightProps) => {
                       srcSet={pickSrcSet(pick.hover_image_url)}
                       sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 25vw"
                       alt={`${pick.title} alternate finish`}
-                      className="absolute inset-0 w-full h-full object-cover rounded-xl opacity-0 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700"
+                      className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700"
                       loading="lazy"
                     />
                   )}

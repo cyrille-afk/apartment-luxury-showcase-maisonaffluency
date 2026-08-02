@@ -3,6 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import ShareMenu from "@/components/ShareMenu";
 import { Helmet } from "react-helmet-async";
 import useEmblaCarousel from "embla-carousel-react";
+import { useScrollDirection } from "@/hooks/useScrollDirection";
 import Navigation from "@/components/Navigation";
 import NewInSpotlight from "@/components/NewInSpotlight";
 import SliderDots from "@/components/ui/SliderDots";
@@ -103,8 +104,11 @@ function MobileDesignerCarousel({ designers, initialIndex = 0 }: { designers: Re
 /* ── Desktop sticky jump nav ── */
 function DesktopJumpNav({ designers }: { designers: ReturnType<typeof useNewInDesigners>["data"] }) {
   const [activeSlug, setActiveSlug] = useState<string | null>(null);
+  const { direction: scrollDir, scrollY: navScrollY } = useScrollDirection();
+  const navHidden = scrollDir === "down" && navScrollY > 240;
   const isScrollingRef = useRef(false);
   const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
+
 
   useEffect(() => {
     if (!designers || designers.length < 2) return;
@@ -158,7 +162,11 @@ function DesktopJumpNav({ designers }: { designers: ReturnType<typeof useNewInDe
   };
 
   return (
-    <div className="sticky top-[140px] z-30 bg-background/90 backdrop-blur-sm border-b border-border/20">
+    <div
+      className="sticky z-30 bg-background/95 backdrop-blur-sm border-b border-border/20 transition-[top] duration-300"
+      style={{ top: navHidden ? 0 : 196 }}
+    >
+
       <div className="max-w-7xl mx-auto px-12 lg:px-20 flex items-center gap-8 py-3">
         <div className="flex items-center gap-3 shrink-0">
           <ShareMenu
@@ -248,7 +256,7 @@ const NewIn = () => {
       <main className="min-h-screen bg-background">
       <h1 className="sr-only">New In at Maison Affluency</h1>
 
-      <div className="mt-[96px]">
+      <div className="mt-[96px] md:mt-[212px]">
         {/* Mobile: swipeable carousel with dots */}
         <div className="md:hidden">
           <MobileDesignerCarousel designers={designers} initialIndex={returnIndex} />
