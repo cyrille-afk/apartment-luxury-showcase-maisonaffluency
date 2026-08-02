@@ -1692,13 +1692,62 @@ const PublicProductPage: React.FC = () => {
 
         {/* Desktop slim sticky purchase bar */}
         <StickyPurchaseBar
-          visible={showDesktopStickyBar}
+          triggerId="main-product-image-container"
           image={images[0]}
           title={product.title}
           designer={designerDisplay}
           price={publicRrpLabel}
           onRequestQuote={() => setQuoteRequestOpen(true)}
+          favoriteSlot={
+            user ? (
+              <FavoriteFolderPicker pickId={product.id} align="end" side="bottom">
+                <button
+                  type="button"
+                  onClick={(e) => e.stopPropagation()}
+                  aria-label={favorited ? "Saved to favorites" : "Add to favorites"}
+                  className={cn(
+                    "p-2.5 rounded-luxury-micro transition-colors",
+                    favorited ? "text-destructive" : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  <Heart size={16} className={cn(favorited && "fill-current")} />
+                </button>
+              </FavoriteFolderPicker>
+            ) : (
+              <button
+                type="button"
+                onClick={() => requireAuth(() => {}, "save this piece to your favourites")}
+                aria-label="Add to favorites"
+                className="p-2.5 rounded-luxury-micro text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <Heart size={16} />
+              </button>
+            )
+          }
+          specSheetSlot={
+            (product.pdf_url || (product.pdf_urls && product.pdf_urls.length > 0)) ? (
+              <SpecSheetButton
+                pdfUrl={product.pdf_url}
+                pdfUrls={product.pdf_urls}
+                brandName={designerDisplay}
+                productName={product.title}
+                variant="button"
+                className="inline-flex items-center gap-1.5 px-3 py-2 font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground hover:text-foreground transition-colors"
+                onBeforeOpen={() => {
+                  if (tradeApprovedFooter) return true;
+                  if (!user) {
+                    requireAuth(() => {}, "open this spec sheet");
+                    return false;
+                  }
+                  let allowed = false;
+                  requireAuth(() => { allowed = true; }, "download this spec sheet");
+                  return allowed;
+                }}
+              />
+            ) : null
+          }
         />
+
 
 
 
