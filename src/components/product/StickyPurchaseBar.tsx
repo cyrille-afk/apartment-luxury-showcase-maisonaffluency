@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
 import { MessageSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -40,8 +39,7 @@ export function StickyPurchaseBar({
   favoriteSlot,
   specSheetSlot,
   triggerId = "main-product-image-container",
-  topOffset = "0px",
-
+  topOffset,
   visible,
 }: StickyPurchaseBarProps) {
   const [scrolledPast, setScrolledPast] = useState(false);
@@ -78,62 +76,60 @@ export function StickyPurchaseBar({
   const isVisible = visible ?? scrolledPast;
 
   return (
-    <AnimatePresence>
-      {isVisible && (
-        <motion.div
-          initial={{ y: -80, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          exit={{ y: -80, opacity: 0 }}
-          transition={{ duration: 0.3, ease: "easeInOut" }}
-          className="hidden lg:block fixed top-0 left-0 right-0 w-full z-50 bg-background/95 backdrop-blur-md border-b border-border shadow-sm"
-          style={topOffset ? { top: topOffset } : undefined}
-        >
-          <div className="max-w-7xl mx-auto w-full px-6 h-16 flex items-center justify-between gap-4">
-
-            {/* Product identity */}
-            <div className="flex items-center gap-4 min-w-0">
-              {image && (
-                <img
-                  src={image}
-                  alt={title}
-                  loading="lazy"
-                  className="h-12 w-12 object-cover bg-muted rounded-luxury-micro border border-border/60 shrink-0"
-                />
-              )}
-              <div className="min-w-0">
-                <p className="font-display text-sm leading-tight truncate">{title}</p>
-                <p className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground truncate mt-0.5">
-                  {designer}
-                  {designer && price ? " · " : ""}
-                  {price}
-                  {price && currencyCode ? (
-                    <span className="text-muted-foreground/70"> {currencyCode}</span>
-                  ) : null}
-                </p>
-              </div>
-            </div>
-
-            {/* Actions */}
-            <div className="flex items-center gap-3 shrink-0">
-              {favoriteSlot}
-              {specSheetSlot}
-              <button
-                type="button"
-                onClick={onRequestQuote}
-                className={cn(
-                  "inline-flex items-center gap-2 px-6 py-3 rounded-luxury-micro",
-                  "bg-foreground text-background font-body text-[10px] uppercase tracking-[0.14em]",
-                  "hover:bg-foreground/85 transition-colors"
-                )}
-              >
-                <MessageSquare className="h-3.5 w-3.5" />
-                <span>Request a Quote</span>
-              </button>
-            </div>
-          </div>
-        </motion.div>
+    <div
+      className={cn(
+        "hidden lg:block fixed top-0 left-0 right-0 w-full z-50",
+        "bg-white/95 backdrop-blur-md border-b border-border shadow-sm",
+        "transition-all duration-300 ease-in-out transform",
+        isVisible
+          ? "opacity-100 translate-y-0 pointer-events-auto"
+          : "opacity-0 -translate-y-4 pointer-events-none"
       )}
-    </AnimatePresence>
+      style={topOffset ? { top: topOffset } : undefined}
+    >
+      <div className="max-w-7xl mx-auto w-full px-6 h-16 flex items-center justify-between gap-4">
+        {/* Product identity */}
+        <div className="flex items-center gap-4 min-w-0">
+          {image && (
+            <img
+              src={image}
+              alt={title}
+              loading="lazy"
+              className="h-12 w-12 object-cover bg-muted rounded-luxury-micro border border-border/60 shrink-0"
+            />
+          )}
+          <div className="min-w-0">
+            <p className="font-display text-sm leading-tight truncate">{title}</p>
+            <p className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground truncate mt-0.5">
+              {designer}
+              {designer && price ? " · " : ""}
+              {price}
+              {price && currencyCode ? (
+                <span className="text-muted-foreground/70"> {currencyCode}</span>
+              ) : null}
+            </p>
+          </div>
+        </div>
+
+        {/* Actions */}
+        <div className="flex items-center gap-3 shrink-0">
+          {favoriteSlot}
+          {specSheetSlot}
+          <button
+            type="button"
+            onClick={onRequestQuote}
+            className={cn(
+              "inline-flex items-center gap-2 px-6 py-3 rounded-luxury-micro",
+              "bg-foreground text-background font-body text-[10px] uppercase tracking-[0.14em]",
+              "hover:bg-foreground/85 transition-colors"
+            )}
+          >
+            <MessageSquare className="h-3.5 w-3.5" />
+            <span>Request a Quote</span>
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
 
