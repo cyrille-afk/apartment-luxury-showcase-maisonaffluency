@@ -23,6 +23,8 @@ interface Props {
   /** Called before opening — use for auth gates. Return false to cancel. */
   onBeforeOpen?: () => boolean;
   className?: string;
+  /** Optional icon override for button variant */
+  icon?: React.ReactNode;
 }
 
 export default function SpecSheetButton({
