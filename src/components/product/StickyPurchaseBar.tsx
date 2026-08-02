@@ -44,7 +44,10 @@ export function StickyPurchaseBar({
   visible,
 }: StickyPurchaseBarProps) {
   const [scrolledPast, setScrolledPast] = useState(false);
-  const { direction } = useScrollDirection();
+  const { direction, scrollY } = useScrollDirection();
+  // Mirror the global nav's hide condition so the bar only snaps flush to the
+  // top once the nav has actually slid away (otherwise it hides behind it).
+  const navHidden = direction === "down" && scrollY > 240;
 
   useEffect(() => {
     if (visible !== undefined) return;
@@ -83,7 +86,7 @@ export function StickyPurchaseBar({
         "hidden lg:block fixed left-0 right-0 w-full z-40",
         // Smart scroll: flush to the very top while scrolling down (global nav
         // is hidden), tucked under the nav when scrolling back up.
-        direction === "down" ? "top-0" : "top-[64px]",
+        navHidden ? "top-0" : "top-[64px]",
         "bg-white/95 backdrop-blur-md border-b border-border shadow-sm",
         "transition-all duration-300 ease-in-out transform will-change-transform",
         isVisible
