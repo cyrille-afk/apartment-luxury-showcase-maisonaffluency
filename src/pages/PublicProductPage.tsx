@@ -1958,15 +1958,32 @@ const PublicProductPage: React.FC = () => {
                   </div>
                 )}
 
-                {/* Primary public CTA — always available to retail visitors */}
+                {/* Primary public CTAs — direct checkout first, quote second */}
                 <div className="mt-6 space-y-6">
-                  <button
-                    type="button"
-                    onClick={() => setQuoteRequestOpen(true)}
-                    className="inline-flex h-12 w-full items-center justify-center px-5 rounded-[2px] bg-foreground text-background font-body text-[11px] leading-none uppercase tracking-[0.12em] hover:bg-foreground/85 transition-colors"
-                  >
-                    Request a Quote
-                  </button>
+                  <div className="space-y-3">
+                    <button
+                      type="button"
+                      onClick={handleDirectCheckout}
+                      disabled={checkoutLoading}
+                      className="inline-flex h-12 w-full items-center justify-center gap-2 px-5 rounded-[2px] bg-foreground text-background font-body text-[11px] leading-none uppercase tracking-[0.14em] hover:bg-foreground/85 transition-colors disabled:opacity-60"
+                    >
+                      {checkoutLoading ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      ) : (
+                        <ShoppingBag className="h-3.5 w-3.5" />
+                      )}
+                      {checkoutLoading ? "Opening checkout…" : "Place Order"}
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setQuoteRequestOpen(true)}
+                      className="inline-flex h-12 w-full items-center justify-center px-5 rounded-[2px] border border-foreground/25 text-foreground font-body text-[11px] leading-none uppercase tracking-[0.12em] hover:border-foreground/60 transition-colors"
+                    >
+                      Request a Quote
+                    </button>
+                  </div>
+
 
                   {/* Secondary: trade access invitation */}
                   {!user && !authLoading && (
