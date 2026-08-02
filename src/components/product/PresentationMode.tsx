@@ -35,6 +35,8 @@ const PresentationMode: React.FC<PresentationModeProps> = ({
   index,
   onIndexChange,
   onClose,
+  pickId,
+  isMobileOrPwa,
 }) => {
   const [chromeVisible, setChromeVisible] = useState(true);
   const hideTimer = useRef<number | null>(null);
