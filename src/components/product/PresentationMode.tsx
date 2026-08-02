@@ -102,7 +102,13 @@ const PresentationMode: React.FC<PresentationModeProps> = ({
       }}
       onClick={revealChrome}
     >
-      <div className="relative flex-1 flex items-center justify-center overflow-hidden">
+      <div
+        className="relative flex-1 flex items-center justify-center overflow-hidden"
+        style={{
+          paddingTop: "max(1rem, env(safe-area-inset-top))",
+          paddingBottom: "max(5.5rem, calc(env(safe-area-inset-bottom) + 4.5rem))",
+        }}
+      >
         {images.map((src, i) => (
           <img
             key={src + i}
