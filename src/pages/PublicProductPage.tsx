@@ -1203,10 +1203,11 @@ const PublicProductPage: React.FC = () => {
       const headerBottom = navEl?.getBoundingClientRect().bottom ?? 96;
       if (el) {
         const rect = el.getBoundingClientRect();
-        setShowStickyBar(rect.bottom < headerBottom);
+        setStickyBarArmed(rect.bottom < headerBottom);
       } else {
-        setShowStickyBar(false);
+        setStickyBarArmed(false);
       }
+
     };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
