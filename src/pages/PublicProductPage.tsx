@@ -2018,7 +2018,7 @@ const PublicProductPage: React.FC = () => {
                 }}
                 onFinishesMissingImagesChange={setFinishesMissingImages}
               >
-                <div className="flex flex-col gap-5 order-1 md:order-2">
+                <div className="flex flex-col gap-5 order-1 md:order-3">
                   <VariantFinishSelectors />
                   {finishesMissingImages.length > 0 && (
                     <p className="font-body text-[11px] text-muted-foreground italic mt-1">
@@ -2029,8 +2029,9 @@ const PublicProductPage: React.FC = () => {
                   )}
                 </div>
 
-                {/* Dimensions/specs panel — kept in its original block position. */}
-                <div className="flex flex-col gap-5 order-1 md:order-2">
+                {/* Dimensions/specs stay after product metadata on mobile and in
+                    their original desktop position before finish selection. */}
+                <div className="flex flex-col gap-5 order-3 md:order-2">
                   <VariantDimensionsPanel />
                 </div>
               </VariantSelectorsProvider>
@@ -2038,7 +2039,7 @@ const PublicProductPage: React.FC = () => {
               {/* Primary public CTAs — direct checkout first, quote second.
                   Placed after the finish selector on both viewports so configuration
                   happens before purchase. */}
-              <div className="order-3 md:order-3">
+              <div className="order-4 md:order-4">
                 <div className="space-y-3">
                   <button
                     type="button"
