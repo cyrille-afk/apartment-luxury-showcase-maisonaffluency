@@ -220,7 +220,7 @@ const JournalArticlePage = () => {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="max-w-3xl mx-auto px-6 pt-[calc(var(--header-h)+0.5rem)]"
+          className="max-w-3xl mx-auto px-6 pt-10 md:pt-14"
         >
           <div className="flex items-center gap-3 mb-4">
             <span className="font-body text-[10px] uppercase tracking-[0.15em] text-primary">

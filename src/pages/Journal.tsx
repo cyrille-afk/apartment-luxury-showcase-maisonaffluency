@@ -76,7 +76,7 @@ const Journal = () => {
         <FeaturedReadBanner />
 
         {/* Hero */}
-        <div className="max-w-4xl mx-auto px-6 pt-[calc(var(--header-h)+1rem)] pb-8 md:pb-12 text-center">
+        <div className="max-w-4xl mx-auto px-6 pt-14 pb-8 md:pt-16 md:pb-12 text-center">
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
