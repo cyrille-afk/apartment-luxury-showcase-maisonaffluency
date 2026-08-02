@@ -78,7 +78,7 @@ const PresentationMode: React.FC<PresentationModeProps> = ({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[9999] bg-black flex flex-col"
+      className="fixed inset-0 h-[100dvh] z-[9999] bg-black flex flex-col"
       role="dialog"
       aria-modal="true"
       aria-label={`${title || alt} — presentation`}
@@ -102,7 +102,13 @@ const PresentationMode: React.FC<PresentationModeProps> = ({
       }}
       onClick={revealChrome}
     >
-      <div className="relative flex-1 flex items-center justify-center overflow-hidden">
+      <div
+        className="relative flex-1 flex items-center justify-center overflow-hidden"
+        style={{
+          paddingTop: "max(1rem, env(safe-area-inset-top))",
+          paddingBottom: "max(5.5rem, calc(env(safe-area-inset-bottom) + 4.5rem))",
+        }}
+      >
         {images.map((src, i) => (
           <img
             key={src + i}
