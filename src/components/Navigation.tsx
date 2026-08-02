@@ -5,6 +5,7 @@ import { useCompare } from "@/contexts/CompareContext";
 import { useAuth } from "@/hooks/useAuth";
 import { trackCTA } from "@/lib/analytics";
 import { deferHashScrollUntilSheetClosed } from "@/lib/mobileHashNavigation";
+import { useScrollDirection } from "@/hooks/useScrollDirection";
 import { scrollToSection } from "@/lib/scrollToSection";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -161,6 +162,15 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
     return () => window.removeEventListener("scroll", onScroll);
   }, [isHomeRoute]);
   const isOverHero = isHomeRoute && !scrolledPastHero && !megaMenuOpen;
+
+  // Smart scroll: hide the global nav while scrolling down past the hero,
+  // reveal it again as soon as the user scrolls up.
+  const { direction: scrollDirection, scrollY: navScrollY } = useScrollDirection();
+  const navHidden =
+    scrollDirection === "down" &&
+    navScrollY > 240 &&
+    !isOpen &&
+    !megaMenuOpen;
 
   const resetMobilePanels = () => {
     setCategoryPanelOpen(false);
@@ -333,7 +343,8 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
   };
 
   return <><nav className={cn(
-      "fixed top-0 left-0 right-0 z-50 pt-[env(safe-area-inset-top)] transition-colors duration-500",
+      "fixed top-0 left-0 right-0 z-50 pt-[env(safe-area-inset-top)] transform transition-all duration-300 ease-in-out will-change-transform",
+      navHidden ? "-translate-y-full" : "translate-y-0",
       isOverHero
         ? "bg-white backdrop-blur-sm border-b border-border/50"
         : borderless

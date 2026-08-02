@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { MessageSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useScrollDirection } from "@/hooks/useScrollDirection";
 
 export interface StickyPurchaseBarProps {
   /** Product name, e.g. "Segment Console Table" */
@@ -43,6 +44,7 @@ export function StickyPurchaseBar({
   visible,
 }: StickyPurchaseBarProps) {
   const [scrolledPast, setScrolledPast] = useState(false);
+  const { direction } = useScrollDirection();
 
   useEffect(() => {
     if (visible !== undefined) return;
@@ -78,9 +80,12 @@ export function StickyPurchaseBar({
   return (
     <div
       className={cn(
-        "hidden lg:block fixed top-[64px] left-0 right-0 w-full z-40",
+        "hidden lg:block fixed left-0 right-0 w-full z-40",
+        // Smart scroll: flush to the very top while scrolling down (global nav
+        // is hidden), tucked under the nav when scrolling back up.
+        direction === "down" ? "top-0" : "top-[64px]",
         "bg-white/95 backdrop-blur-md border-b border-border shadow-sm",
-        "transition-all duration-300 ease-in-out transform",
+        "transition-all duration-300 ease-in-out transform will-change-transform",
         isVisible
           ? "opacity-100 translate-y-0 pointer-events-auto"
           : "opacity-0 -translate-y-2 pointer-events-none"
