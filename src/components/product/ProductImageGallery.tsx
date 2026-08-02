@@ -145,7 +145,10 @@ const CrossfadeImage: React.FC<{ src: string; alt: string; pointerEventsNone?: b
 
 
 
-const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, overlay, firstImageBadge, activeIndex: controlledIndex, activeIndexNonce, onIndexChange, caption, compact, mobileMenuItems }) => {
+const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, overlay, firstImageBadge, activeIndex: controlledIndex, activeIndexNonce, onIndexChange, caption, compact, mobileMenuItems, pickId }) => {
+  const isMobile = useIsMobile();
+  const isPwa = isPwaStandaloneDisplay();
+  const isMobileOrPwa = isMobile || isPwa;
 
   const [activeIndex, setActiveIndex] = useState(controlledIndex ?? 0);
 
