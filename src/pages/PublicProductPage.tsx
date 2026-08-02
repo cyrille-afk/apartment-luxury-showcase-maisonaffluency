@@ -1841,6 +1841,7 @@ const PublicProductPage: React.FC = () => {
                 onIndexChange={setGalleryActiveIndex}
                 caption={product.gallery_captions?.[String(galleryActiveIndex ?? 0)] || null}
                 compact={galleryCompact}
+                pickId={product.id}
 
                 firstImageBadge={
                   (() => {
@@ -1937,9 +1938,12 @@ const PublicProductPage: React.FC = () => {
               </div>
 
 
-              <div className="md:border-0 md:shadow-none border-b border-border/60 shadow-[0_6px_10px_-8px_rgba(0,0,0,0.35)] pb-2">
-                <ActiveSwatchCaption pickId={product.id} activeIndex={galleryActiveIndex ?? 0} />
-              </div>
+              {/* Inline "Shown in" caption — hidden on mobile/PWA; shown in presentation mode instead. */}
+              {!isMobileOrPwa && (
+                <div className="md:border-0 md:shadow-none border-b border-border/60 shadow-[0_6px_10px_-8px_rgba(0,0,0,0.35)] pb-2">
+                  <ActiveSwatchCaption pickId={product.id} activeIndex={galleryActiveIndex ?? 0} />
+                </div>
+              )}
 
               {/* "The Creation" — desktop only. */}
               {!isMobileOrPwa && product.description && product.description.trim().length > 0 && (

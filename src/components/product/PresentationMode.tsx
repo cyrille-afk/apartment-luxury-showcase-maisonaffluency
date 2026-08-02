@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { X, ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import ActiveSwatchCaption from "./ActiveSwatchCaption";
 
 interface PresentationModeProps {
   open: boolean;
@@ -11,6 +12,8 @@ interface PresentationModeProps {
   index: number;
   onIndexChange: (i: number) => void;
   onClose: () => void;
+  pickId?: string | null;
+  isMobileOrPwa?: boolean;
 }
 
 /**
@@ -32,6 +35,8 @@ const PresentationMode: React.FC<PresentationModeProps> = ({
   index,
   onIndexChange,
   onClose,
+  pickId,
+  isMobileOrPwa,
 }) => {
   const [chromeVisible, setChromeVisible] = useState(true);
   const hideTimer = useRef<number | null>(null);
@@ -139,6 +144,19 @@ const PresentationMode: React.FC<PresentationModeProps> = ({
           </>
         )}
       </div>
+
+      {/* Mobile/PWA: active finish caption — moved here from below the inline image */}
+      {isMobileOrPwa && pickId && (
+        <div
+          className={cn(
+            "absolute left-0 right-0 z-10 px-5 transition-opacity duration-300",
+            chromeVisible ? "opacity-100" : "opacity-0 pointer-events-none"
+          )}
+          style={{ bottom: "max(4.5rem, calc(env(safe-area-inset-bottom) + 3.25rem))" }}
+        >
+          <ActiveSwatchCaption pickId={pickId} activeIndex={index} variant="light" />
+        </div>
+      )}
 
       {/* Bottom control rail: progress markers + counter + close (mirrors the expanded image view) */}
       <div

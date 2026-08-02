@@ -7,6 +7,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { isPwaStandaloneDisplay } from "@/lib/pwaMode";
 import { useLightboxSwipe } from "@/hooks/useLightboxSwipe";
 import PresentationMode from "@/components/product/PresentationMode";
 
@@ -34,6 +36,8 @@ interface ProductImageGalleryProps {
   compact?: boolean;
   /** Extra items appended to the mobile "more" menu (e.g. Share). */
   mobileMenuItems?: React.ReactNode;
+  /** Product pick id used to resolve the active finish caption in presentation mode. */
+  pickId?: string | null;
 }
 
 
@@ -141,7 +145,10 @@ const CrossfadeImage: React.FC<{ src: string; alt: string; pointerEventsNone?: b
 
 
 
-const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, overlay, firstImageBadge, activeIndex: controlledIndex, activeIndexNonce, onIndexChange, caption, compact, mobileMenuItems }) => {
+const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, overlay, firstImageBadge, activeIndex: controlledIndex, activeIndexNonce, onIndexChange, caption, compact, mobileMenuItems, pickId }) => {
+  const isMobile = useIsMobile();
+  const isPwa = isPwaStandaloneDisplay();
+  const isMobileOrPwa = isMobile || isPwa;
 
   const [activeIndex, setActiveIndex] = useState(controlledIndex ?? 0);
 
@@ -470,6 +477,8 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
         alt={alt}
         index={activeIndex}
         onIndexChange={goTo}
+        pickId={pickId}
+        isMobileOrPwa={isMobileOrPwa}
         onClose={() => {
           setPresentOpen(false);
           // Reset the gallery back to the first image after the modal closes.
