@@ -23,7 +23,7 @@ export default function OrderConfirmation() {
 
       <Navigation borderless />
 
-      <div className="pt-[calc(env(safe-area-inset-top,0px)+7rem)] md:pt-16 pb-24 max-w-2xl mx-auto px-4 sm:px-6">
+      <div className="pt-[var(--header-h)] pb-24 max-w-2xl mx-auto px-4 sm:px-6">
         <h1 className="font-display font-normal text-[1.6rem] md:text-[2rem] tracking-[-0.01em]">
           {bank ? "Order Reserved" : "Thank You for Your Order"}
         </h1>

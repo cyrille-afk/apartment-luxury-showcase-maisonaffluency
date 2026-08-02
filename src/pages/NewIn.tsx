@@ -151,7 +151,12 @@ function DesktopJumpNav({ designers }: { designers: ReturnType<typeof useNewInDe
 
     const el = document.getElementById(`new-in-${slug}`);
     if (el) {
-      const y = el.getBoundingClientRect().top + window.scrollY - 90;
+      const probe = document.createElement("div");
+      probe.style.cssText = "position:absolute;visibility:hidden;height:var(--header-h)";
+      document.body.appendChild(probe);
+      const headerH = probe.getBoundingClientRect().height || 150;
+      probe.remove();
+      const y = el.getBoundingClientRect().top + window.scrollY - (headerH + 56);
       window.scrollTo({ top: y, behavior: "smooth" });
     }
 
@@ -164,7 +169,7 @@ function DesktopJumpNav({ designers }: { designers: ReturnType<typeof useNewInDe
   return (
     <div
       className="sticky z-30 bg-background/95 backdrop-blur-sm border-b border-border/20 transition-[top] duration-300"
-      style={{ top: navHidden ? 0 : 70 }}
+      style={{ top: navHidden ? 0 : "var(--header-h)" }}
     >
 
       <div className="max-w-7xl mx-auto px-12 lg:px-20 flex items-center gap-8 py-3">
@@ -256,7 +261,7 @@ const NewIn = () => {
       <main className="min-h-screen bg-background">
       <h1 className="sr-only">New In at Maison Affluency</h1>
 
-      <div className="mt-[96px] md:mt-[64px]">
+      <div className="mt-[var(--header-h)]">
         {/* Mobile: swipeable carousel with dots */}
         <div className="md:hidden">
           <MobileDesignerCarousel designers={designers} initialIndex={returnIndex} />

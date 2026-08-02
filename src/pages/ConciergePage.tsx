@@ -173,7 +173,7 @@ const ConciergePage: React.FC = () => {
       <div className="min-h-screen bg-background text-foreground">
         <Navigation />
 
-        <main className="pt-28 pb-16">
+        <main className="pt-[var(--header-h)] pb-16">
           {/* Editorial hero */}
           <section className="max-w-3xl mx-auto px-6 md:px-8 text-center">
             <p className="font-body text-[10px] md:text-[11px] uppercase tracking-[0.3em] text-[hsl(var(--gold))] mb-6">

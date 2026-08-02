@@ -1284,7 +1284,7 @@ const PublicProductPage: React.FC = () => {
     return (
       <div className="min-h-[100dvh] bg-background">
         <Navigation />
-        <div className="pt-32 md:pt-16">
+        <div className="pt-[var(--header-h)]">
           <ProductDetailSkeleton variant="page" />
         </div>
       </div>
@@ -1758,7 +1758,7 @@ const PublicProductPage: React.FC = () => {
 
 
 
-        <div className="pt-[calc(env(safe-area-inset-top,0px)+7rem)] md:pt-16 pb-[calc(env(safe-area-inset-bottom,0px)+5rem)] md:pb-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="pt-[var(--header-h)] pb-[calc(env(safe-area-inset-bottom,0px)+5rem)] md:pb-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <button
             type="button"
             onClick={() => navigate(fromPath || fallbackGridPath)}
@@ -1795,7 +1795,7 @@ const PublicProductPage: React.FC = () => {
 
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 md:gap-8 lg:gap-16">
-            <div id="main-product-image-container" className="relative md:sticky md:top-24 h-fit self-start z-30 bg-background" ref={galleryScrollRef}>
+            <div id="main-product-image-container" className="relative md:sticky md:top-[calc(var(--header-h)+1rem)] h-fit self-start z-30 bg-background" ref={galleryScrollRef}>
               <ProductImageGallery
                 images={images}
                 alt={product.title}
