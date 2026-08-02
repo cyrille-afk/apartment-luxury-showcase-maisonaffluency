@@ -151,7 +151,12 @@ function DesktopJumpNav({ designers }: { designers: ReturnType<typeof useNewInDe
 
     const el = document.getElementById(`new-in-${slug}`);
     if (el) {
-      const y = el.getBoundingClientRect().top + window.scrollY - 90;
+      const probe = document.createElement("div");
+      probe.style.cssText = "position:absolute;visibility:hidden;height:var(--header-h)";
+      document.body.appendChild(probe);
+      const headerH = probe.getBoundingClientRect().height || 150;
+      probe.remove();
+      const y = el.getBoundingClientRect().top + window.scrollY - (headerH + 56);
       window.scrollTo({ top: y, behavior: "smooth" });
     }
 
