@@ -4,6 +4,7 @@ import { Upload, X, FileUp, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
+import { isPrivateTradeFolder, uploadPrivateTradeAsset } from "@/lib/privateTradeUpload";
 
 interface CloudUploadProps {
   /** Storage folder path, e.g. "documents", "products", "journal" */
@@ -56,11 +57,10 @@ const CloudUpload = ({
 
     setUploading(true);
     const urls: string[] = [];
-    const scopedFolder = folder === "axonometric-sources" || folder === "axonometric-submissions"
-      ? `${folder}/${user?.id}`
-      : folder;
+    const isPrivate = isPrivateTradeFolder(folder);
+    const scopedFolder = isPrivate ? `${folder}/${user?.id}` : folder;
 
-    if ((folder === "axonometric-sources" || folder === "axonometric-submissions") && !user?.id) {
+    if (isPrivate && !user?.id) {
       toast({ title: "Sign in required", description: "Please sign in before uploading files.", variant: "destructive" });
       setUploading(false);
       return;
@@ -69,14 +69,22 @@ const CloudUpload = ({
     for (const file of validFiles) {
       const ext = file.name.split(".").pop() || (isImage ? "jpg" : "pdf");
       const path = `${scopedFolder}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-      const { error } = await supabase.storage.from("assets").upload(path, file, {
-        contentType: file.type,
-      });
-      if (error) {
-        toast({ title: "Upload failed", description: `${file.name}: ${error.message}`, variant: "destructive" });
+      if (isPrivate) {
+        try {
+          urls.push(await uploadPrivateTradeAsset(path, file, file.type));
+        } catch (e: any) {
+          toast({ title: "Upload failed", description: `${file.name}: ${e?.message ?? e}`, variant: "destructive" });
+        }
       } else {
-        const { data: urlData } = supabase.storage.from("assets").getPublicUrl(path);
-        urls.push(urlData.publicUrl);
+        const { error } = await supabase.storage.from("assets").upload(path, file, {
+          contentType: file.type,
+        });
+        if (error) {
+          toast({ title: "Upload failed", description: `${file.name}: ${error.message}`, variant: "destructive" });
+        } else {
+          const { data: urlData } = supabase.storage.from("assets").getPublicUrl(path);
+          urls.push(urlData.publicUrl);
+        }
       }
     }
 

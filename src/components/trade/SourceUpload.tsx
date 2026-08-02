@@ -2,6 +2,7 @@ import { useState, useRef } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { Loader2, Upload, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { isPrivateTradeFolder, uploadPrivateTradeAsset } from "@/lib/privateTradeUpload";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -35,7 +36,7 @@ const SourceUpload = ({ folder = "axonometric-sources", label = "Upload image or
   const { user } = useAuth();
 
   const getScopedFolder = () => {
-    if (folder !== "axonometric-sources" && folder !== "axonometric-submissions") return folder;
+    if (!isPrivateTradeFolder(folder)) return folder;
     if (!user?.id) throw new Error("Please sign in before uploading files.");
     return `${folder}/${user.id}`;
   };
@@ -172,11 +173,14 @@ const SourceUpload = ({ folder = "axonometric-sources", label = "Upload image or
       const { blob } = await renderPageForUpload(pdf, pageToUse);
 
       const path = `${getScopedFolder()}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.jpg`;
-      const { error } = await supabase.storage.from("assets").upload(path, blob, { contentType: "image/jpeg" });
-      if (error) throw error;
-
-      const { data: urlData } = supabase.storage.from("assets").getPublicUrl(path);
-      onSourceReady(urlData.publicUrl);
+      const signedUrl = isPrivateTradeFolder(folder)
+        ? await uploadPrivateTradeAsset(path, blob, "image/jpeg")
+        : await (async () => {
+            const { error } = await supabase.storage.from("assets").upload(path, blob, { contentType: "image/jpeg" });
+            if (error) throw error;
+            return supabase.storage.from("assets").getPublicUrl(path).data.publicUrl;
+          })();
+      onSourceReady(signedUrl);
       setPdfFile(null);
       setPdfPreviews([]);
       setPdfPageCount(0);
@@ -207,11 +211,14 @@ const SourceUpload = ({ folder = "axonometric-sources", label = "Upload image or
     try {
       const ext = file.name.split(".").pop() || "jpg";
       const path = `${getScopedFolder()}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-      const { error } = await supabase.storage.from("assets").upload(path, file, { contentType: file.type || "image/jpeg" });
-      if (error) throw error;
-
-      const { data: urlData } = supabase.storage.from("assets").getPublicUrl(path);
-      onSourceReady(urlData.publicUrl);
+      const signedUrl = isPrivateTradeFolder(folder)
+        ? await uploadPrivateTradeAsset(path, file, file.type || "image/jpeg")
+        : await (async () => {
+            const { error } = await supabase.storage.from("assets").upload(path, file, { contentType: file.type || "image/jpeg" });
+            if (error) throw error;
+            return supabase.storage.from("assets").getPublicUrl(path).data.publicUrl;
+          })();
+      onSourceReady(signedUrl);
     } catch (e: any) {
       toast({ title: "Upload failed", description: e.message, variant: "destructive" });
     } finally {

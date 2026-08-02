@@ -5,6 +5,7 @@ import { CATEGORY_ORDER, SUBCATEGORY_MAP } from "@/lib/productTaxonomy";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
+import { uploadPrivateTradeAsset } from "@/lib/privateTradeUpload";
 import { useToast } from "@/hooks/use-toast";
 import {
   Loader2, Wand2, Search, X, Download, ArrowLeft, RefreshCw, Send, Maximize2, Minimize2, Upload, RotateCw, RotateCcw, ZoomIn, ZoomOut, Move, MousePointer2, Crosshair, Trash2, Link, Save, Image, Layout, FolderOpen, FileText, Lock, Unlock, CheckCircle2, SplitSquareHorizontal, Undo2, Ruler, Eye, EyeOff,
@@ -212,15 +213,12 @@ export default function ProposalBuilder({
     setExternalUploading(true);
     try {
       const ext = file.name.split(".").pop() || "jpg";
-      const path = `proposal-externals/${Date.now()}.${ext}`;
-      const { error: uploadErr } = await supabase.storage.from("assets").upload(path, file, { contentType: file.type });
-      if (uploadErr) throw uploadErr;
-
-      const { data: urlData } = supabase.storage.from("assets").getPublicUrl(path);
+      const path = `proposal-externals/${user?.id ?? "shared"}/${Date.now()}.${ext}`;
+      const signedUrl = await uploadPrivateTradeAsset(path, file, file.type);
       addProduct({
         product_name: externalName.trim(),
         brand_name: externalBrand.trim() || "External",
-        image_url: urlData.publicUrl,
+        image_url: signedUrl,
         dimensions: externalDimensions.trim() || undefined,
         materials: externalMaterials.trim() || undefined,
         isExternal: true,
