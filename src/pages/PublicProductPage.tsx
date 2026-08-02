@@ -64,7 +64,7 @@ import TradeWorkspace from "@/components/product/TradeWorkspace";
 import StickyPurchaseBar from "@/components/product/StickyPurchaseBar";
 
 import TradePendingReviewCard from "@/components/product/TradePendingReviewCard";
-import CustomizationRequest from "@/components/product/CustomizationRequest";
+
 import QuoteRequestDialog from "@/components/QuoteRequestDialog";
 import { addToCart } from "@/lib/cart";
 import { usePublicRrp, formatPublicRrp, formatPublicRrpCents } from "@/hooks/usePublicRrp";
@@ -2134,15 +2134,6 @@ const PublicProductPage: React.FC = () => {
 
 
 
-              {/* Bespoke customization — public guests get the inquiry modal,
-                  approved trade members are routed into Felix instead. */}
-              <CustomizationRequest
-                productId={product.id}
-                productTitle={product.title}
-                designerDisplay={designerDisplay}
-                tradeApproved={!!user && tradeStatus === "approved"}
-                onRequestQuote={() => setQuoteRequestOpen(true)}
-              />
 
               <QuoteRequestDialog
                 open={quoteRequestOpen}
