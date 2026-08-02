@@ -1284,7 +1284,7 @@ const PublicProductPage: React.FC = () => {
     return (
       <div className="min-h-[100dvh] bg-background">
         <Navigation />
-        <div className="pt-32 md:pt-24">
+        <div className="pt-32 md:pt-16">
           <ProductDetailSkeleton variant="page" />
         </div>
       </div>
