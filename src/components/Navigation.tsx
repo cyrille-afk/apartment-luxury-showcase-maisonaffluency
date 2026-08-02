@@ -650,21 +650,17 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
           </Sheet>
         </div>
 
-        {/* Desktop: single-row ultra-minimal header */}
+        {/* Desktop: single-row symmetrical luxury header */}
         <div className="hidden md:flex flex-col items-stretch">
-          <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-6 h-[70px] py-4">
-            {/* Logo — far left */}
-            <button onClick={scrollToTop} className="group cursor-pointer whitespace-nowrap shrink-0 justify-self-start">
-              <span className="font-brand text-xl lg:text-2xl tracking-[0.25em] text-foreground transition-opacity duration-300 group-hover:opacity-70">
-                MAISON AFFLUENCY
-              </span>
-            </button>
-
-            {/* Primary navigation — perfectly centered */}
-            <div className="flex items-center justify-center gap-6 lg:gap-10">
+          <div className="grid grid-cols-[1fr_auto_1fr] items-center h-[64px] py-3">
+            {/* Column 1 — Core catalog links */}
+            <div className="flex items-center justify-start gap-6 lg:gap-8">
               <button
                 onClick={() => { setMegaMenuOpen(false); handleNavClick("/new-in"); }}
-                className="font-body text-[11px] uppercase tracking-[0.2em] font-normal text-foreground hover:opacity-60 transition-opacity whitespace-nowrap"
+                className={cn(
+                  "font-body text-[11px] uppercase tracking-[0.2em] font-normal text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap",
+                  isRouteActive("/new-in") && "text-foreground"
+                )}
               >
                 New In
               </button>
@@ -672,125 +668,151 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
               <button
                 onClick={() => { setMegaMenuOpen(!megaMenuOpen); setMegaMenuHoverCat(null); }}
                 className={cn(
-                  "font-body text-[11px] uppercase tracking-[0.2em] font-normal text-foreground hover:opacity-60 transition-opacity whitespace-nowrap flex items-center gap-1.5 outline-none",
-                  (megaMenuOpen || isOnCategoryRoute) && "opacity-60"
+                  "font-body text-[11px] uppercase tracking-[0.2em] font-normal text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap flex items-center gap-1 outline-none",
+                  (megaMenuOpen || isOnCategoryRoute) && "text-foreground"
                 )}
               >
                 Categories
-                <ChevronDown className={`h-3 w-3 transition-transform duration-200 ${megaMenuOpen ? "rotate-180" : ""}`} />
+                <ChevronDown className={`h-3 w-3 transition-transform duration-200 ${megaMenuOpen ? "rotate-180" : ""}`} strokeWidth={1.5} />
               </button>
 
-              {visibleLeftNavItems.map((item) => (
+              <button
+                onClick={() => { setMegaMenuOpen(false); handleNavClick("/designers"); }}
+                className={cn(
+                  "font-body text-[11px] uppercase tracking-[0.2em] font-normal text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap",
+                  (activeSection === "/designers" || isRouteActive("/designers")) && "text-foreground"
+                )}
+              >
+                Designers
+              </button>
+
+              {isTradeUser && (
                 <button
-                  key={item.href}
-                  onClick={() => { setMegaMenuOpen(false); handleNavClick(item.href); }}
+                  onClick={() => { setMegaMenuOpen(false); handleNavClick("/collectibles"); }}
                   className={cn(
-                    "font-body text-[11px] uppercase tracking-[0.2em] font-normal text-foreground hover:opacity-60 transition-opacity whitespace-nowrap",
-                    (activeSection === item.href || isRouteActive(item.href)) && "opacity-60"
+                    "font-body text-[11px] uppercase tracking-[0.2em] font-normal text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap",
+                    (activeSection === "/collectibles" || isRouteActive("/collectibles")) && "text-foreground"
                   )}
                 >
-                  {item.label}
+                  Collectibles
                 </button>
-              ))}
+              )}
+            </div>
+
+            {/* Column 2 — Centered brand logo */}
+            <button onClick={scrollToTop} className="group cursor-pointer whitespace-nowrap shrink-0 justify-self-center">
+              <span className="font-brand text-lg lg:text-xl tracking-[0.25em] text-foreground transition-opacity duration-300 group-hover:opacity-70">
+                MAISON AFFLUENCY
+              </span>
+            </button>
+
+            {/* Column 3 — Editorial links + utilities */}
+            <div className="flex items-center justify-end gap-6 lg:gap-8">
+              <button
+                onClick={() => { setMegaMenuOpen(false); handleNavClick("/gallery"); }}
+                className={cn(
+                  "font-body text-[11px] uppercase tracking-[0.2em] font-normal text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap",
+                  (activeSection === "/gallery" || isRouteActive("/gallery")) && "text-foreground"
+                )}
+              >
+                Interactive Gallery
+              </button>
 
               <button
                 onClick={() => { setMegaMenuOpen(false); handleNavClick("/journal"); }}
                 className={cn(
-                  "font-body text-[11px] uppercase tracking-[0.2em] font-normal text-foreground hover:opacity-60 transition-opacity whitespace-nowrap",
-                  (activeSection === "/journal" || isRouteActive("/journal")) && "opacity-60"
+                  "font-body text-[11px] uppercase tracking-[0.2em] font-normal text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap",
+                  (activeSection === "/journal" || isRouteActive("/journal")) && "text-foreground"
                 )}
               >
                 Journal
               </button>
 
-              {rightNavItems.map((item) => (
-                <button
-                  key={item.href}
-                  onClick={() => { setMegaMenuOpen(false); handleNavClick(item.href); }}
-                  className={cn(
-                    "font-body text-[11px] uppercase tracking-[0.2em] font-normal text-foreground hover:opacity-60 transition-opacity whitespace-nowrap",
-                    (activeSection === item.href || isRouteActive(item.href)) && "opacity-60"
-                  )}
-                >
-                  {item.label}
-                </button>
-              ))}
-            </div>
+              <button
+                onClick={() => { setMegaMenuOpen(false); handleNavClick("/trade-program"); }}
+                className={cn(
+                  "font-body text-[11px] uppercase tracking-[0.2em] font-normal text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap",
+                  (activeSection === "/trade-program" || isRouteActive("/trade-program")) && "text-foreground"
+                )}
+              >
+                Trade Program
+              </button>
 
-            {/* Utility icons — far right */}
-            <div className="flex items-center justify-end gap-5 shrink-0">
-              <ShippingDestinationSwitcher className="[&_span]:text-[11px] [&_span]:tracking-[0.15em]" />
+              {/* Utility icons */}
+              <div className="flex items-center gap-3 pl-4 border-l border-border/30 shrink-0">
+                <ShippingDestinationSwitcher compact className="min-h-9 min-w-9 justify-center" />
 
-              <DropdownMenu>
-                <DropdownMenuTrigger className="relative group p-0.5 outline-none">
-                  <User className="w-[18px] h-[18px] text-foreground/70 group-hover:opacity-60 transition-opacity" strokeWidth={1.25} />
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="bg-background border border-border shadow-lg z-50 min-w-[200px]">
-                  {user ? (
-                    <>
-                      <div className="px-4 py-2.5 border-b border-border">
-                        <p className="font-body text-xs text-muted-foreground truncate">{user.email}</p>
-                      </div>
-                      <DropdownMenuItem
-                        onClick={() => navigate("/trade")}
-                        className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted transition-colors"
-                      >
-                        <User className="h-4 w-4 text-primary" />
-                        <span className="font-body text-sm">My Account</span>
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem
-                        onClick={async () => { await supabase.auth.signOut(); window.location.reload(); }}
-                        className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted transition-colors text-destructive"
-                      >
-                        <LogOut className="h-4 w-4" />
-                        <span className="font-body text-sm">Sign Out</span>
-                      </DropdownMenuItem>
-                    </>
-                  ) : (
-                    <>
-                      <DropdownMenuItem
-                        onClick={() => { setAuthGateMode("signup"); setAuthGateOpen(true); }}
-                        className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted transition-colors"
-                      >
-                        <UserPlus className="h-4 w-4 text-primary" />
-                        <span className="font-body text-sm">Sign Up</span>
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem
-                        onClick={() => { setAuthGateMode("login"); setAuthGateOpen(true); }}
-                        className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted transition-colors"
-                      >
-                        <LogIn className="h-4 w-4 text-primary" />
-                        <span className="font-body text-sm">Log In</span>
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem
-                        onClick={() => navigate("/trade-program#apply")}
-                        className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted transition-colors"
-                      >
-                        <Briefcase className="h-4 w-4 text-[hsl(var(--gold))]" />
-                        <span className="font-body text-sm">Trade Program</span>
-                      </DropdownMenuItem>
-                    </>
-                  )}
-                </DropdownMenuContent>
-              </DropdownMenu>
+                <DropdownMenu>
+                  <DropdownMenuTrigger className="relative group p-1 outline-none">
+                    <User className="w-[17px] h-[17px] text-muted-foreground group-hover:text-foreground transition-colors" strokeWidth={1.25} />
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="bg-background border border-border shadow-lg z-50 min-w-[200px]">
+                    {user ? (
+                      <>
+                        <div className="px-4 py-2.5 border-b border-border">
+                          <p className="font-body text-xs text-muted-foreground truncate">{user.email}</p>
+                        </div>
+                        <DropdownMenuItem
+                          onClick={() => navigate("/trade")}
+                          className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted transition-colors"
+                        >
+                          <User className="h-4 w-4 text-primary" />
+                          <span className="font-body text-sm">My Account</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                          onClick={async () => { await supabase.auth.signOut(); window.location.reload(); }}
+                          className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted transition-colors text-destructive"
+                        >
+                          <LogOut className="h-4 w-4" />
+                          <span className="font-body text-sm">Sign Out</span>
+                        </DropdownMenuItem>
+                      </>
+                    ) : (
+                      <>
+                        <DropdownMenuItem
+                          onClick={() => { setAuthGateMode("signup"); setAuthGateOpen(true); }}
+                          className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted transition-colors"
+                        >
+                          <UserPlus className="h-4 w-4 text-primary" />
+                          <span className="font-body text-sm">Sign Up</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                          onClick={() => { setAuthGateMode("login"); setAuthGateOpen(true); }}
+                          className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted transition-colors"
+                        >
+                          <LogIn className="h-4 w-4 text-primary" />
+                          <span className="font-body text-sm">Log In</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                          onClick={() => navigate("/trade-program#apply")}
+                          className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted transition-colors"
+                        >
+                          <Briefcase className="h-4 w-4 text-[hsl(var(--gold))]" />
+                          <span className="font-body text-sm">Trade Program</span>
+                        </DropdownMenuItem>
+                      </>
+                    )}
+                  </DropdownMenuContent>
+                </DropdownMenu>
 
-              <FavoritesHoverPreview favCount={favCount}>
-                <button
-                  onClick={() => navigate("/favorites")}
-                  aria-label="Wishlist"
-                  className="relative group p-0.5 transition-opacity hover:opacity-60"
-                >
-                  <Heart className="w-[18px] h-[18px] text-foreground/70" strokeWidth={1.25} />
-                  {favCount > 0 && (
-                    <span className="absolute -top-1 -right-1 min-w-[14px] h-3.5 flex items-center justify-center rounded-full bg-primary text-primary-foreground text-[9px] leading-none px-1">
-                      {favCount}
-                    </span>
-                  )}
-                </button>
-              </FavoritesHoverPreview>
+                <FavoritesHoverPreview favCount={favCount}>
+                  <button
+                    onClick={() => navigate("/favorites")}
+                    aria-label="Wishlist"
+                    className="relative group p-1 transition-colors hover:text-foreground"
+                  >
+                    <Heart className="w-[17px] h-[17px] text-muted-foreground" strokeWidth={1.25} />
+                    {favCount > 0 && (
+                      <span className="absolute -top-1 -right-1 min-w-[14px] h-3.5 flex items-center justify-center rounded-full bg-primary text-primary-foreground text-[9px] leading-none px-1">
+                        {favCount}
+                      </span>
+                    )}
+                  </button>
+                </FavoritesHoverPreview>
+              </div>
             </div>
           </div>
 
