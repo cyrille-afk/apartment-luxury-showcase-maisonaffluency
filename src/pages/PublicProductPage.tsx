@@ -1108,6 +1108,10 @@ const PublicProductPage: React.FC = () => {
   // Currently-selected wood/top finish swatches that lack mapped images —
   // appended to the bespoke concierge message so they aren't overlooked.
   const [finishesMissingImages, setFinishesMissingImages] = useState<string[]>([]);
+  const isMobile = useIsMobile();
+  const isPwa = isPwaStandaloneDisplay();
+  const isMobileOrPwa = isMobile || isPwa;
+  const [creationOpen, setCreationOpen] = useState(false);
   const galleryScrollRef = React.useRef<HTMLDivElement | null>(null);
   // On mobile/PWA, when a finish selection updates the gallery image, only
   // scroll if the product image is genuinely off-screen above the viewport.
