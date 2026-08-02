@@ -1998,32 +1998,37 @@ const PublicProductPage: React.FC = () => {
                 )}
               </div>
 
-              {/* Materials & dimensions with gold icons — shared parsing with TradeProductPage.
-                   On mobile/PWA this block sits directly below the image so finish
-                   selection stays visible while the photo is still on screen.
-                   On desktop it sits between the title/price and the CTAs so the user
-                   configures fabric/structure before placing an order. */}
-              <div className="flex flex-col gap-5 order-1 md:order-2">
-                <VariantSelectors
-                  product={product}
-                  onMaterialChange={handleMaterialChange}
-                  galleryActiveIndex={galleryActiveIndex}
-                  finishMap={productFinishMap}
-                  onSwatchImagesChange={(indices) => {
-                    if (!indices || indices.length === 0) return;
-                    setGalleryActiveIndex(Math.max(0, indices[0] - 1));
-                    setGalleryJumpNonce((n) => n + 1);
-                  }}
-                  onFinishesMissingImagesChange={setFinishesMissingImages}
-                />
-                {finishesMissingImages.length > 0 && (
-                  <p className="font-body text-[11px] text-muted-foreground italic mt-1">
-                    No reference image on file for{" "}
-                    <span className="text-foreground">{finishesMissingImages.join(", ")}</span>.
-                    We'll note this on your enquiry so our concierge can confirm visuals.
-                  </p>
-                )}
-              </div>
+              {/* Finish selection — split from dimensions so it can be placed
+                   directly below the image on mobile/PWA while dimensions remain
+                   in their original position within the details column. */}
+              <VariantSelectorsProvider
+                product={product}
+                onMaterialChange={handleMaterialChange}
+                galleryActiveIndex={galleryActiveIndex}
+                finishMap={productFinishMap}
+                onSwatchImagesChange={(indices) => {
+                  if (!indices || indices.length === 0) return;
+                  setGalleryActiveIndex(Math.max(0, indices[0] - 1));
+                  setGalleryJumpNonce((n) => n + 1);
+                }}
+                onFinishesMissingImagesChange={setFinishesMissingImages}
+              >
+                <div className="flex flex-col gap-5 order-1 md:order-2">
+                  <VariantFinishSelectors />
+                  {finishesMissingImages.length > 0 && (
+                    <p className="font-body text-[11px] text-muted-foreground italic mt-1">
+                      No reference image on file for{" "}
+                      <span className="text-foreground">{finishesMissingImages.join(", ")}</span>.
+                      We'll note this on your enquiry so our concierge can confirm visuals.
+                    </p>
+                  )}
+                </div>
+
+                {/* Dimensions/specs panel — kept in its original block position. */}
+                <div className="flex flex-col gap-5 order-1 md:order-2">
+                  <VariantDimensionsPanel />
+                </div>
+              </VariantSelectorsProvider>
 
               {/* Primary public CTAs — direct checkout first, quote second.
                   Placed after the finish selector on both viewports so configuration
