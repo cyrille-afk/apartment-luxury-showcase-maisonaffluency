@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { MessageSquare } from "lucide-react";
+import { Loader2, MessageSquare, ShoppingBag } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useScrollDirection } from "@/hooks/useScrollDirection";
 
@@ -15,9 +15,10 @@ export interface StickyPurchaseBarProps {
   /** Primary image URL */
   image?: string | null;
   onRequestQuote: () => void;
-  /** Optional utility slots (favorite picker, spec sheet button, …) */
-  favoriteSlot?: React.ReactNode;
-  specSheetSlot?: React.ReactNode;
+  /** Direct Stripe checkout for the current product + selected finish */
+  onPlaceOrder?: () => void;
+  /** Shows a spinner while the checkout session is being created */
+  placingOrder?: boolean;
   /** Element whose bottom edge leaving the viewport reveals the bar */
   triggerId?: string;
   /** Distance from the top of the viewport (clears the fixed site header) */
@@ -37,8 +38,8 @@ export function StickyPurchaseBar({
   currencyCode,
   image,
   onRequestQuote,
-  favoriteSlot,
-  specSheetSlot,
+  onPlaceOrder,
+  placingOrder = false,
   triggerId = "main-product-image-container",
   topOffset,
   visible,
@@ -121,20 +122,37 @@ export function StickyPurchaseBar({
 
         {/* Actions */}
         <div className="flex items-center gap-3 shrink-0">
-          {favoriteSlot}
-          {specSheetSlot}
           <button
             type="button"
             onClick={onRequestQuote}
             className={cn(
-              "inline-flex items-center gap-2 px-6 py-3 rounded-luxury-micro",
-              "bg-foreground text-background font-body text-[10px] uppercase tracking-[0.14em]",
-              "hover:bg-foreground/85 transition-colors"
+              "inline-flex items-center gap-2 px-5 py-3 rounded-luxury-micro",
+              "border border-foreground/25 text-foreground font-body text-[10px] uppercase tracking-[0.14em]",
+              "hover:border-foreground/60 transition-colors"
             )}
           >
             <MessageSquare className="h-3.5 w-3.5" />
             <span>Request a Quote</span>
           </button>
+          {onPlaceOrder && (
+            <button
+              type="button"
+              onClick={onPlaceOrder}
+              disabled={placingOrder}
+              className={cn(
+                "inline-flex items-center gap-2 px-7 py-3 rounded-luxury-micro",
+                "bg-foreground text-background font-body text-[10px] uppercase tracking-[0.16em]",
+                "shadow-sm hover:bg-foreground/85 transition-colors disabled:opacity-60"
+              )}
+            >
+              {placingOrder ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <ShoppingBag className="h-3.5 w-3.5" />
+              )}
+              <span>{placingOrder ? "Opening checkout…" : "Place Order"}</span>
+            </button>
+          )}
         </div>
       </div>
     </div>
