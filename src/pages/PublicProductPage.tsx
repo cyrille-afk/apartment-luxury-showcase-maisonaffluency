@@ -1146,7 +1146,8 @@ const PublicProductPage: React.FC = () => {
     );
     io.observe(el);
     return () => io.disconnect();
-  }, []);
+  }, [productId]);
+
 
   const [quoteRequestOpen, setQuoteRequestOpen] = useState(false);
   // Finish/size selection surfaced in the authenticated Trade Workspace and
