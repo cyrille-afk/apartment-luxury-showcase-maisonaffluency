@@ -1848,7 +1848,28 @@ const PublicProductPage: React.FC = () => {
                     </p>
                   </div>
                 )}
+
+                {/* Trade prompt + Trade Exclusive Access, directly under the price */}
+                {!user && !authLoading && (
+                  <>
+                    <p className="mt-3 font-body text-xs text-muted-foreground">
+                      Are you a Trade professional?{" "}
+                      <Link
+                        to={`/trade/login?redirect=${encodeURIComponent(location.pathname + location.search)}`}
+                        className="text-foreground underline underline-offset-4 hover:text-[hsl(var(--gold))] transition-colors"
+                      >
+                        Sign in for exclusive pricing.
+                      </Link>
+                    </p>
+                    <TradeExclusiveCard
+                      redirectTo={location.pathname + location.search}
+                      rrpLabel={publicRrpLabel}
+                      onRequestQuote={() => setQuoteRequestOpen(true)}
+                    />
+                  </>
+                )}
               </div>
+
 
 
 
