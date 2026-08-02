@@ -1129,30 +1129,6 @@ const PublicProductPage: React.FC = () => {
   // Mobile/PWA: shrink the product image once the user scrolls past a small threshold.
   const [galleryCompact, setGalleryCompact] = useState(false);
   const [showStickyBar, setShowStickyBar] = useState(false);
-  const [showDesktopStickyBar, setShowDesktopStickyBar] = useState(false);
-
-  // Desktop: slide the slim purchase bar in once the user has scrolled past
-  // the main product image. The image column is sticky, so we compare the
-  // scroll offset against the image frame height rather than its visibility.
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    if (!window.matchMedia("(min-width: 1024px)").matches) {
-      setShowDesktopStickyBar(false);
-      return;
-    }
-    const onScroll = () => {
-      const frame = document.querySelector(".product-image-frame") as HTMLElement | null;
-      const threshold = Math.max(280, (frame?.getBoundingClientRect().height ?? 480) * 0.75);
-      setShowDesktopStickyBar(window.scrollY > threshold);
-    };
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll);
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
-    };
-  }, [productId]);
 
 
 
