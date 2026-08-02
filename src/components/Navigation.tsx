@@ -650,209 +650,175 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
           </Sheet>
         </div>
 
-        {/* Desktop: stacked layout */}
-        <div className="hidden md:flex flex-col items-center">
-          {/* Top row: Flag | MAISON AFFLUENCY | Contact Us */}
-          <div className="w-full grid grid-cols-[1fr_auto_1fr] items-start pt-4 pb-1">
-            <div className="flex justify-start pl-4">
-              <ShippingDestinationSwitcher />
-            </div>
-            <div className="flex flex-col items-center">
-              <button onClick={scrollToTop} className="group cursor-pointer whitespace-nowrap">
-                <span className="font-brand text-3xl lg:text-4xl font-bold tracking-[0.25em] text-foreground transition-all duration-300 group-hover:text-primary">
-                  MAISON <span className="group-hover:text-accent transition-colors duration-300">A</span>FFLUENCY
-                </span>
-              </button>
-              <div className="flex items-center gap-3 mt-1 mb-2 brand-lockup">
-                <span className="h-px w-10 bg-foreground" aria-hidden="true" />
-                <span className="font-body text-[10px] uppercase tracking-[0.3em] text-foreground font-bold">Est. 2017</span>
-                <span className="h-px w-10 bg-foreground" aria-hidden="true" />
-              </div>
-            </div>
-            <div className="flex flex-col items-end pr-4">
-              {/* Contact Us — aligned to top-right, level with the flag */}
-              <div>
-                <DropdownMenu>
-                  <DropdownMenuTrigger className="font-body text-sm uppercase tracking-[0.18em] transition-all duration-300 text-foreground data-[state=open]:text-foreground data-[state=open]:[text-shadow:none] flex items-center gap-1.5 whitespace-nowrap outline-none relative group font-semibold">
-                    Contact Us
-                    <ChevronDown className="h-4 w-4" />
-                    <span className="absolute -bottom-1 left-0 h-0.5 bg-[hsl(var(--gold))] transition-all duration-300 w-0 group-hover:w-full" />
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" side="bottom" sideOffset={88} className="bg-background border border-border shadow-lg z-50 min-w-[220px]">
-                    {contactOptions.map((option) => (
-                      <DropdownMenuItem 
-                        key={option.label}
-                        onClick={option.action}
+        {/* Desktop: ultra-minimal two-row layout */}
+        <div className="hidden md:flex flex-col items-stretch">
+          {/* Row 1 — thin utility bar */}
+          <div className="w-full flex items-center justify-between h-9 border-b border-border/30">
+            <ShippingDestinationSwitcher className="[&_span]:text-[11px] [&_span]:tracking-[0.15em]" />
+
+            <div className="flex items-center gap-6">
+              <DropdownMenu>
+                <DropdownMenuTrigger className="font-body text-[11px] uppercase tracking-[0.15em] font-normal text-muted-foreground hover:opacity-60 transition-opacity flex items-center gap-1 whitespace-nowrap outline-none">
+                  Contact Us
+                  <ChevronDown className="h-3 w-3" />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" side="bottom" className="bg-background border border-border shadow-lg z-50 min-w-[220px]">
+                  {contactOptions.map((option) => (
+                    <DropdownMenuItem
+                      key={option.label}
+                      onClick={option.action}
+                      className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted transition-colors"
+                    >
+                      <option.icon className="h-4 w-4 text-primary" />
+                      <span className="font-body text-sm">{option.label}</span>
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              <DropdownMenu>
+                <DropdownMenuTrigger className="relative group p-0.5 outline-none">
+                  <User className="w-[18px] h-[18px] text-foreground/70 group-hover:opacity-60 transition-opacity" strokeWidth={1.25} />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="bg-background border border-border shadow-lg z-50 min-w-[200px]">
+                  {user ? (
+                    <>
+                      <div className="px-4 py-2.5 border-b border-border">
+                        <p className="font-body text-xs text-muted-foreground truncate">{user.email}</p>
+                      </div>
+                      <DropdownMenuItem
+                        onClick={() => navigate("/trade")}
                         className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted transition-colors"
                       >
-                        <option.icon className="h-4 w-4 text-primary" />
-                        <span className="font-body text-sm">{option.label}</span>
+                        <User className="h-4 w-4 text-primary" />
+                        <span className="font-body text-sm">My Account</span>
                       </DropdownMenuItem>
-                    ))}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-              {/* Icons aligned to right edge */}
-              <div className="flex items-center gap-5 mt-3">
-                
-                <DropdownMenu>
-                  <DropdownMenuTrigger className="relative group p-1 transition-colors outline-none">
-                    <User className="w-6 h-6 text-foreground group-hover:text-primary transition-colors" />
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="bg-background border border-border shadow-lg z-50 min-w-[200px]">
-                    {user ? (
-                      <>
-                        <div className="px-4 py-2.5 border-b border-border">
-                          <p className="font-body text-xs text-muted-foreground truncate">{user.email}</p>
-                        </div>
-                        <DropdownMenuItem
-                          onClick={() => navigate("/trade")}
-                          className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted transition-colors"
-                        >
-                          <User className="h-4 w-4 text-primary" />
-                          <span className="font-body text-sm">My Account</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                          onClick={async () => { await supabase.auth.signOut(); window.location.reload(); }}
-                          className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted transition-colors text-destructive"
-                        >
-                          <LogOut className="h-4 w-4" />
-                          <span className="font-body text-sm">Sign Out</span>
-                        </DropdownMenuItem>
-                      </>
-                    ) : (
-                      <>
-                        <DropdownMenuItem
-                          onClick={() => { setAuthGateMode("signup"); setAuthGateOpen(true); }}
-                          className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted transition-colors"
-                        >
-                          <UserPlus className="h-4 w-4 text-primary" />
-                          <span className="font-body text-sm">Sign Up</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                          onClick={() => { setAuthGateMode("login"); setAuthGateOpen(true); }}
-                          className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted transition-colors"
-                        >
-                          <LogIn className="h-4 w-4 text-primary" />
-                          <span className="font-body text-sm">Log In</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                          onClick={() => navigate("/trade-program#apply")}
-                          className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted transition-colors"
-                        >
-                          <Briefcase className="h-4 w-4 text-[hsl(var(--gold))]" />
-                          <span className="font-body text-sm">Trade Program</span>
-                        </DropdownMenuItem>
-                      </>
-                    )}
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        onClick={async () => { await supabase.auth.signOut(); window.location.reload(); }}
+                        className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted transition-colors text-destructive"
+                      >
+                        <LogOut className="h-4 w-4" />
+                        <span className="font-body text-sm">Sign Out</span>
+                      </DropdownMenuItem>
+                    </>
+                  ) : (
+                    <>
+                      <DropdownMenuItem
+                        onClick={() => { setAuthGateMode("signup"); setAuthGateOpen(true); }}
+                        className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted transition-colors"
+                      >
+                        <UserPlus className="h-4 w-4 text-primary" />
+                        <span className="font-body text-sm">Sign Up</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        onClick={() => { setAuthGateMode("login"); setAuthGateOpen(true); }}
+                        className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted transition-colors"
+                      >
+                        <LogIn className="h-4 w-4 text-primary" />
+                        <span className="font-body text-sm">Log In</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        onClick={() => navigate("/trade-program#apply")}
+                        className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted transition-colors"
+                      >
+                        <Briefcase className="h-4 w-4 text-[hsl(var(--gold))]" />
+                        <span className="font-body text-sm">Trade Program</span>
+                      </DropdownMenuItem>
+                    </>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
 
-                <FavoritesHoverPreview favCount={favCount}>
-                  <button
-                    onClick={() => navigate("/favorites")}
-                    aria-label="Wishlist"
-                    className="relative group p-1 transition-colors"
-                  >
-                    <Heart className="w-6 h-6 text-foreground group-hover:text-primary transition-colors" />
-                    {favCount > 0 && (
-                      <span className="absolute -top-1 -right-1 min-w-[16px] h-4 flex items-center justify-center rounded-full bg-primary text-primary-foreground text-[10px] font-bold leading-none px-1">
-                        {favCount}
-                      </span>
-                    )}
-                  </button>
-                </FavoritesHoverPreview>
-              </div>
+              <FavoritesHoverPreview favCount={favCount}>
+                <button
+                  onClick={() => navigate("/favorites")}
+                  aria-label="Wishlist"
+                  className="relative group p-0.5 transition-opacity hover:opacity-60"
+                >
+                  <Heart className="w-[18px] h-[18px] text-foreground/70" strokeWidth={1.25} />
+                  {favCount > 0 && (
+                    <span className="absolute -top-1 -right-1 min-w-[14px] h-3.5 flex items-center justify-center rounded-full bg-primary text-primary-foreground text-[9px] leading-none px-1">
+                      {favCount}
+                    </span>
+                  )}
+                </button>
+              </FavoritesHoverPreview>
             </div>
           </div>
-          <div className="flex items-center justify-between w-full pb-3">
-            <div className="flex items-center gap-8 lg:gap-14">
-              {/* New In — first in the left nav */}
+
+          {/* Row 2 — centered brand + navigation */}
+          <div className="w-full flex flex-col items-center pt-8 pb-6">
+            <button onClick={scrollToTop} className="group cursor-pointer whitespace-nowrap">
+              <span className="font-brand text-3xl lg:text-4xl tracking-[0.3em] text-foreground transition-opacity duration-300 group-hover:opacity-70">
+                MAISON AFFLUENCY
+              </span>
+            </button>
+            <div className="flex items-center gap-3 mt-2 brand-lockup">
+              <span className="h-px w-10 bg-foreground/30" aria-hidden="true" />
+              <span className="font-body text-[9px] uppercase tracking-[0.3em] text-muted-foreground">Est. 2017</span>
+              <span className="h-px w-10 bg-foreground/30" aria-hidden="true" />
+            </div>
+
+            <div className="flex items-center justify-center gap-8 lg:gap-12 mt-8">
               <button
                 onClick={() => { setMegaMenuOpen(false); handleNavClick("/new-in"); }}
-                className="font-body text-sm uppercase tracking-[0.18em] font-bold transition-all duration-300 relative group whitespace-nowrap flex items-center gap-1.5 text-[hsl(var(--gold))] hover:text-foreground after:absolute after:-bottom-1 after:left-0 after:w-full after:h-0.5 after:bg-[hsl(var(--gold))] after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-300 after:origin-left"
+                className="font-body text-[12px] uppercase tracking-[0.15em] font-normal text-foreground hover:opacity-60 transition-opacity whitespace-nowrap"
               >
                 New In
               </button>
 
-              {/* All Categories — second in the left nav */}
               <button
                 onClick={() => { setMegaMenuOpen(!megaMenuOpen); setMegaMenuHoverCat(null); }}
                 className={cn(
-                  "font-body text-sm uppercase tracking-[0.18em] font-semibold transition-all duration-300 flex items-center gap-1.5 whitespace-nowrap outline-none relative group text-foreground",
-                  (megaMenuOpen || isOnCategoryRoute) && "text-[hsl(var(--gold))]"
+                  "font-body text-[12px] uppercase tracking-[0.15em] font-normal text-foreground hover:opacity-60 transition-opacity whitespace-nowrap flex items-center gap-1.5 outline-none",
+                  (megaMenuOpen || isOnCategoryRoute) && "opacity-60"
                 )}
               >
-                <LayoutGrid className="h-3.5 w-3.5 text-[hsl(var(--accent))]" />
-                All Categories
+                Categories
                 <ChevronDown className={`h-3 w-3 transition-transform duration-200 ${megaMenuOpen ? "rotate-180" : ""}`} />
-                <span className={cn(
-                  "absolute -bottom-1 left-0 h-0.5 bg-[hsl(var(--gold))] transition-all duration-300",
-                  (megaMenuOpen || isOnCategoryRoute) ? "w-full" : "w-0 group-hover:w-full"
-                )} />
               </button>
 
               {visibleLeftNavItems.map((item) => (
-                <button 
+                <button
                   key={item.href}
-                  onClick={() => { setMegaMenuOpen(false); handleNavClick(item.href); }} 
+                  onClick={() => { setMegaMenuOpen(false); handleNavClick(item.href); }}
                   className={cn(
-                    "font-body text-sm uppercase tracking-[0.18em] font-semibold transition-all duration-300 relative group whitespace-nowrap flex items-center gap-1.5 text-foreground",
-                    (activeSection === item.href || isRouteActive(item.href)) && "text-[hsl(var(--gold))]"
+                    "font-body text-[12px] uppercase tracking-[0.15em] font-normal text-foreground hover:opacity-60 transition-opacity whitespace-nowrap",
+                    (activeSection === item.href || isRouteActive(item.href)) && "opacity-60"
                   )}
                 >
                   {item.label}
-                  <span className={cn(
-                    "absolute -bottom-1 left-0 h-0.5 bg-[hsl(var(--gold))] transition-all duration-300",
-                    (activeSection === item.href || isRouteActive(item.href)) ? "w-full" : "w-0 group-hover:w-full"
-                  )} />
                 </button>
               ))}
-            </div>
 
-            <span className="w-px h-3 bg-border/60 mx-8 lg:mx-14" aria-hidden="true" />
-
-            <div className="flex items-center gap-8 lg:gap-14">
-              {/* Journal */}
               <button
                 onClick={() => { setMegaMenuOpen(false); handleNavClick("/journal"); }}
                 className={cn(
-                  "font-body text-sm uppercase tracking-[0.18em] font-semibold transition-all duration-300 relative group whitespace-nowrap flex items-center gap-1.5 text-foreground",
-                  (activeSection === "/journal" || isRouteActive("/journal")) && "text-[hsl(var(--gold))]"
+                  "font-body text-[12px] uppercase tracking-[0.15em] font-normal text-foreground hover:opacity-60 transition-opacity whitespace-nowrap",
+                  (activeSection === "/journal" || isRouteActive("/journal")) && "opacity-60"
                 )}
               >
                 Journal
-                <span className={cn(
-                  "absolute -bottom-1 left-0 h-0.5 bg-[hsl(var(--gold))] transition-all duration-300",
-                  (activeSection === "/journal" || isRouteActive("/journal")) ? "w-full" : "w-0 group-hover:w-full"
-                )} />
               </button>
 
-              {/* Trade Program — elegant underline */}
               {rightNavItems.map((item) => (
                 <button
                   key={item.href}
-                  onClick={() => {
-                    setMegaMenuOpen(false);
-                    handleNavClick(item.href);
-                  }}
+                  onClick={() => { setMegaMenuOpen(false); handleNavClick(item.href); }}
                   className={cn(
-                    "font-body text-sm uppercase tracking-[0.18em] font-semibold transition-all duration-300 relative group whitespace-nowrap flex items-center gap-1.5 text-foreground",
-                    (activeSection === item.href || isRouteActive(item.href)) && "text-[hsl(var(--gold))]"
+                    "font-body text-[12px] uppercase tracking-[0.15em] font-normal text-foreground hover:opacity-60 transition-opacity whitespace-nowrap",
+                    (activeSection === item.href || isRouteActive(item.href)) && "opacity-60"
                   )}
                 >
                   {item.label}
-                  <span className={cn(
-                    "absolute -bottom-1 left-0 h-px bg-[hsl(var(--gold))] transition-all duration-300",
-                    (activeSection === item.href || isRouteActive(item.href)) ? "w-full" : "w-full group-hover:w-full"
-                  )} />
                 </button>
               ))}
             </div>
           </div>
+
 
           {/* Horizontal mega menu */}
           {megaMenuOpen && (
