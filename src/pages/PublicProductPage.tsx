@@ -484,7 +484,7 @@ const VariantFinishSelectors: React.FC = () => {
   const {
     product,
     axes: { isDualAxis, isBaseOnly, baseOptions, topOptions, hasSingleAxisSplit, singleMaterialOptions, singleAxisParsed },
-    selBase, setSelBase, selTop, setSelTop, selDualSize, selMat, setSelMat,
+    selBase, setSelBase, selTop, setSelTop, selDualSize, setSelDualSize, selMat, setSelMat, selSize, setSelSize,
     hasLinkedFabrics, setHasLinkedFabrics, linkedWoodFinishes, setLinkedWoodFinishes,
     baseAxisIsDim, topAxisIsDim,
     baseAxisLabelRaw, topAxisLabelRaw,
