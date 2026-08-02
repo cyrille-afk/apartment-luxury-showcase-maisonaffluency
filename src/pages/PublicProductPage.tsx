@@ -466,8 +466,9 @@ const VariantSelectors: React.FC<{
 
   return (
     <div className="flex flex-col">
-      {/* Desktop: dimensions first, then finishes. Mobile/PWA: finishes first, then dimensions. */}
-      <div className="order-2 md:order-1 flex flex-col gap-2">
+      {/* Desktop: dimensions first, then finishes. Mobile/PWA: finishes first, then dimensions.
+          Segment Console Table is an exception: finishes stay below dimensions. */}
+      <div className={cn("flex flex-col gap-2", forceDimensionsFirst ? "order-1 md:order-1" : "order-2 md:order-1")}>
         {/* Size dropdown — shown first */}
         {isBaseOnly && !baseAxisIsDim && baseOnlySizeOptions.length > 1 ? (
           <ExpandableSpec
