@@ -1944,6 +1944,8 @@ const PublicProductPage: React.FC = () => {
 
 
             <div className="relative flex flex-col gap-6">
+              {/* Title / price — kept at the top on desktop; on mobile it follows the
+                  finish selector so the photo and fabric choice stay in view. */}
               <div className="min-w-0 order-2 md:order-1">
                 <Link
                   to={`/designers/${designer.slug}`}
@@ -1982,53 +1984,13 @@ const PublicProductPage: React.FC = () => {
                     </p>
                   </div>
                 )}
-
-                {/* Primary public CTAs — direct checkout first, quote second */}
-                <div className="mt-6 space-y-4">
-                  <div className="space-y-3">
-                    <button
-                      type="button"
-                      onClick={handleDirectCheckout}
-                      disabled={checkoutLoading}
-                      className="inline-flex h-12 w-full items-center justify-center gap-2 px-5 rounded-[2px] bg-foreground text-background font-body text-[11px] leading-none uppercase tracking-[0.14em] hover:bg-foreground/85 transition-colors disabled:opacity-60"
-                    >
-                      {checkoutLoading ? (
-                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                      ) : (
-                        <ShoppingBag className="h-3.5 w-3.5" />
-                      )}
-                      {checkoutLoading ? "Opening checkout…" : "Place Order"}
-                    </button>
-                    <p className="text-center font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground/70">
-                      Secure checkout powered by Stripe
-                    </p>
-
-                    <button
-                      type="button"
-                      onClick={() => setQuoteRequestOpen(true)}
-                      className="inline-flex h-12 w-full items-center justify-center px-5 rounded-[2px] border border-foreground/25 text-foreground font-body text-[11px] leading-none uppercase tracking-[0.12em] hover:border-foreground/60 transition-colors"
-                    >
-                      Request a Quote
-                    </button>
-                  </div>
-
-
-                  {/* Secondary: trade access invitation */}
-                  {!user && !authLoading && (
-                    <TradeExclusiveCard
-                      redirectTo={location.pathname + location.search}
-                      rrpLabel={publicRrpLabel}
-                    />
-                  )}
-                </div>
               </div>
 
-
-
-
               {/* Materials & dimensions with gold icons — shared parsing with TradeProductPage.
-                   On mobile/PWA this block is reordered to sit directly below the image so
-                   finish selection stays visible while the photo is still on screen. */}
+                   On mobile/PWA this block sits directly below the image so finish
+                   selection stays visible while the photo is still on screen.
+                   On desktop it sits between the title/price and the CTAs so the user
+                   configures fabric/structure before placing an order. */}
               <div className="flex flex-col gap-5 order-1 md:order-2">
                 <VariantSelectors
                   product={product}
@@ -2051,7 +2013,47 @@ const PublicProductPage: React.FC = () => {
                 )}
               </div>
 
-              <div className="flex flex-col gap-5 order-3 md:order-3">
+              {/* Primary public CTAs — direct checkout first, quote second.
+                  Placed after the finish selector on both viewports so configuration
+                  happens before purchase. */}
+              <div className="order-3 md:order-3">
+                <div className="space-y-3">
+                  <button
+                    type="button"
+                    onClick={handleDirectCheckout}
+                    disabled={checkoutLoading}
+                    className="inline-flex h-12 w-full items-center justify-center gap-2 px-5 rounded-[2px] bg-foreground text-background font-body text-[11px] leading-none uppercase tracking-[0.14em] hover:bg-foreground/85 transition-colors disabled:opacity-60"
+                  >
+                    {checkoutLoading ? (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    ) : (
+                      <ShoppingBag className="h-3.5 w-3.5" />
+                    )}
+                    {checkoutLoading ? "Opening checkout…" : "Place Order"}
+                  </button>
+                  <p className="text-center font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground/70">
+                    Secure checkout powered by Stripe
+                  </p>
+
+                  <button
+                    type="button"
+                    onClick={() => setQuoteRequestOpen(true)}
+                    className="inline-flex h-12 w-full items-center justify-center px-5 rounded-[2px] border border-foreground/25 text-foreground font-body text-[11px] leading-none uppercase tracking-[0.12em] hover:border-foreground/60 transition-colors"
+                  >
+                    Request a Quote
+                  </button>
+                </div>
+
+                {/* Secondary: trade access invitation */}
+                {!user && !authLoading && (
+                  <TradeExclusiveCard
+                    redirectTo={location.pathname + location.search}
+                    rrpLabel={publicRrpLabel}
+                  />
+                )}
+              </div>
+
+              <div className="flex flex-col gap-5 order-4 md:order-4">
                 {(() => {
                   const handcrafted = formatHandcrafted(product.origin, product.lead_time);
                   if (!handcrafted) return null;
