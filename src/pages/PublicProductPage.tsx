@@ -1127,6 +1127,27 @@ const PublicProductPage: React.FC = () => {
   // Mobile/PWA: shrink the product image once the user scrolls past a small threshold.
   const [galleryCompact, setGalleryCompact] = useState(false);
   const [showStickyBar, setShowStickyBar] = useState(false);
+  const [showDesktopStickyBar, setShowDesktopStickyBar] = useState(false);
+
+  // Desktop: slide the slim purchase bar in once the main product image
+  // has scrolled past the top of the viewport.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mq = window.matchMedia("(min-width: 1024px)");
+    if (!mq.matches) {
+      setShowDesktopStickyBar(false);
+      return;
+    }
+    const el = galleryScrollRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      ([entry]) => setShowDesktopStickyBar(!entry.isIntersecting && entry.boundingClientRect.top < 0),
+      { rootMargin: "-96px 0px 0px 0px", threshold: 0 }
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
   const [quoteRequestOpen, setQuoteRequestOpen] = useState(false);
   // Finish/size selection surfaced in the authenticated Trade Workspace and
   // injected into Felix's product context.
