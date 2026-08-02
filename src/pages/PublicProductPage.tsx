@@ -69,6 +69,7 @@ import QuoteRequestDialog from "@/components/QuoteRequestDialog";
 import { addToCart } from "@/lib/cart";
 import { usePublicRrp, formatPublicRrp, formatPublicRrpCents } from "@/hooks/usePublicRrp";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { toast } from "sonner";
 
 
 /* ------------------------------------------------------------------ */
@@ -1131,6 +1132,9 @@ const PublicProductPage: React.FC = () => {
 
 
   const [quoteRequestOpen, setQuoteRequestOpen] = useState(false);
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
+  const [checkoutEmailOpen, setCheckoutEmailOpen] = useState(false);
+  const [checkoutEmail, setCheckoutEmail] = useState("");
   // Finish/size selection surfaced in the authenticated Trade Workspace and
   // injected into Felix's product context.
   const [selectedFinishes, setSelectedFinishes] = useState<string[]>([]);
@@ -1551,6 +1555,81 @@ const PublicProductPage: React.FC = () => {
     navigate("/cart");
   };
 
+  /**
+   * Direct Stripe checkout (sticky bar "Place Order") — skips the cart page
+   * entirely and sends the current piece + selected finish straight to Stripe.
+   */
+  const buildCheckoutLine = () => {
+    const unit = selectedRrp?.cents || Number(publicRrpRow?.rrp_price_cents) || 0;
+    const variants = (product.size_variants || []) as Array<{ label?: string; base?: string; top?: string }>;
+    const implicitVariant =
+      variants.length === 1
+        ? [variants[0].base, variants[0].top, variants[0].label].filter(Boolean).join(" / ")
+        : "";
+    const finishLabel =
+      (selectedFinishes.length ? selectedFinishes.join(" / ") : "") ||
+      implicitVariant ||
+      (product.materials || "").trim() ||
+      null;
+    return {
+      unit,
+      item: {
+        pickId: product.id,
+        productSlug: productSlug || "",
+        designerSlug: designer.slug,
+        title: product.title,
+        designerName: designerDisplay,
+        finishLabel,
+        imageUrl: images[galleryActiveIndex ?? 0] || images[0] || product.image_url || null,
+        leadTime: product.lead_time || null,
+        quantity: 1,
+      },
+    };
+  };
+
+  const startDirectCheckout = async (email?: string) => {
+    const { unit, item } = buildCheckoutLine();
+    if (!unit) {
+      handlePlaceOrder();
+      return;
+    }
+    setCheckoutLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("create-cart-checkout", {
+        body: {
+          items: [item],
+          method: "card",
+          email: email || user?.email || undefined,
+          cancelPath: location.pathname,
+        },
+      });
+      if (error) throw error;
+      if ((data as any)?.error) throw new Error((data as any).error);
+      const url = (data as any)?.url;
+      if (!url) throw new Error("Checkout could not be opened.");
+      window.location.href = url;
+    } catch (err: any) {
+      toast.error(err?.message || "Unable to open checkout right now.");
+      setCheckoutLoading(false);
+    }
+  };
+
+  const handleDirectCheckout = () => {
+    const { unit } = buildCheckoutLine();
+    if (!unit) {
+      handlePlaceOrder();
+      return;
+    }
+    if (user?.email) {
+      void startDirectCheckout(user.email);
+      return;
+    }
+    setCheckoutEmail("");
+    setCheckoutEmailOpen(true);
+  };
+
+
+
 
 
   return (
@@ -1672,43 +1751,8 @@ const PublicProductPage: React.FC = () => {
           designer={designerDisplay}
           price={publicRrpLabel}
           onRequestQuote={() => setQuoteRequestOpen(true)}
-          favoriteSlot={
-            <FavoriteFolderPicker pickId={product.id} align="end" side="bottom">
-              <button
-                type="button"
-                onClick={(e) => e.stopPropagation()}
-                aria-label={favorited ? "Saved to favorites" : "Add to favorites"}
-                className={cn(
-                  "p-2.5 rounded-luxury-micro transition-colors",
-                  favorited ? "text-destructive" : "text-muted-foreground hover:text-foreground"
-                )}
-              >
-                <Heart size={16} className={cn(favorited && "fill-current")} />
-              </button>
-            </FavoriteFolderPicker>
-          }
-          specSheetSlot={
-            (product.pdf_url || (product.pdf_urls && product.pdf_urls.length > 0)) ? (
-              <SpecSheetButton
-                pdfUrl={product.pdf_url}
-                pdfUrls={product.pdf_urls}
-                brandName={designerDisplay}
-                productName={product.title}
-                variant="button"
-                className="inline-flex items-center gap-1.5 px-3 py-2 font-body text-[10px] uppercase tracking-[0.12em] text-muted-foreground hover:text-foreground transition-colors"
-                onBeforeOpen={() => {
-                  if (!!user && (isTradeUser || tradeStatus === "approved")) return true;
-                  if (!user) {
-                    requireAuth(() => {}, "open this spec sheet");
-                    return false;
-                  }
-                  let allowed = false;
-                  requireAuth(() => { allowed = true; }, "download this spec sheet");
-                  return allowed;
-                }}
-              />
-            ) : null
-          }
+          onPlaceOrder={handleDirectCheckout}
+          placingOrder={checkoutLoading}
         />
 
 
@@ -2101,6 +2145,48 @@ const PublicProductPage: React.FC = () => {
                 productName={product.title}
                 designerName={designerDisplay}
               />
+
+              {/* Direct checkout — guest email capture */}
+              <Dialog open={checkoutEmailOpen} onOpenChange={setCheckoutEmailOpen}>
+                <DialogContent className="sm:max-w-md rounded-luxury-sheet">
+                  <DialogHeader>
+                    <DialogTitle className="font-display text-lg">Complete your order</DialogTitle>
+                    <DialogDescription className="font-body text-xs">
+                      Enter the email address for your receipt and order updates.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      const email = checkoutEmail.trim();
+                      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+                        toast.error("Please enter a valid email address.");
+                        return;
+                      }
+                      setCheckoutEmailOpen(false);
+                      void startDirectCheckout(email);
+                    }}
+                    className="space-y-4"
+                  >
+                    <input
+                      type="email"
+                      required
+                      autoFocus
+                      value={checkoutEmail}
+                      onChange={(e) => setCheckoutEmail(e.target.value)}
+                      placeholder="you@studio.com"
+                      className="w-full rounded-luxury-micro border border-border bg-background px-3 py-2.5 font-body text-sm outline-none focus:border-foreground"
+                    />
+                    <button
+                      type="submit"
+                      disabled={checkoutLoading}
+                      className="w-full rounded-luxury-micro bg-foreground text-background py-3 font-body text-[10px] uppercase tracking-[0.16em] disabled:opacity-60"
+                    >
+                      {checkoutLoading ? "Opening checkout…" : "Continue to payment"}
+                    </button>
+                  </form>
+                </DialogContent>
+              </Dialog>
 
               {/* Secondary actions: Favorite / Pin / Spec Sheet.
                   Always visible. Guests get the Sign In modal on click;

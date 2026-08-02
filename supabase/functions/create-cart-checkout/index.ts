@@ -183,7 +183,10 @@ serve(async (req) => {
         },
       ],
       success_url: `${origin}/order-confirmation?ref=${order.order_ref}&status=paid`,
-      cancel_url: `${origin}/cart?status=cancelled`,
+      cancel_url:
+        typeof body?.cancelPath === "string" && /^\/[A-Za-z0-9\-._~/?&=%]*$/.test(body.cancelPath)
+          ? `${origin}${body.cancelPath}`
+          : `${origin}/cart?status=cancelled`,
       metadata: { payment_type: "cart_order", order_id: order.id, order_ref: order.order_ref },
     });
 
