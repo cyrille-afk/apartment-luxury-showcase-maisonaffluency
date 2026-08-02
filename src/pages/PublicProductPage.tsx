@@ -1944,7 +1944,7 @@ const PublicProductPage: React.FC = () => {
 
 
             <div className="relative flex flex-col gap-6">
-              <div className="min-w-0">
+              <div className="min-w-0 order-2 md:order-1">
                 <Link
                   to={`/designers/${designer.slug}`}
                   onClick={() => rememberProductBackRef(designer.slug, location.pathname + location.search)}
@@ -2026,8 +2026,10 @@ const PublicProductPage: React.FC = () => {
 
 
 
-              {/* Materials & dimensions with gold icons — shared parsing with TradeProductPage */}
-              <div className="flex flex-col gap-5">
+              {/* Materials & dimensions with gold icons — shared parsing with TradeProductPage.
+                   On mobile/PWA this block is reordered to sit directly below the image so
+                   finish selection stays visible while the photo is still on screen. */}
+              <div className="flex flex-col gap-5 order-1 md:order-2">
                 <VariantSelectors
                   product={product}
                   onMaterialChange={handleMaterialChange}
@@ -2047,10 +2049,9 @@ const PublicProductPage: React.FC = () => {
                     We'll note this on your enquiry so our concierge can confirm visuals.
                   </p>
                 )}
+              </div>
 
-
-
-
+              <div className="flex flex-col gap-5 order-3 md:order-3">
                 {(() => {
                   const handcrafted = formatHandcrafted(product.origin, product.lead_time);
                   if (!handcrafted) return null;
