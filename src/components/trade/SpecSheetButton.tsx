@@ -23,6 +23,8 @@ interface Props {
   /** Called before opening — use for auth gates. Return false to cancel. */
   onBeforeOpen?: () => boolean;
   className?: string;
+  /** Optional icon override for button variant */
+  icon?: React.ReactNode;
 }
 
 export default function SpecSheetButton({
@@ -33,6 +35,7 @@ export default function SpecSheetButton({
   variant = "icon",
   onBeforeOpen,
   className,
+  icon,
 }: Props) {
   // Consolidate into a single list
   const entries: PdfEntry[] = pdfUrls && pdfUrls.length > 0
@@ -61,7 +64,7 @@ export default function SpecSheetButton({
           }}
           className={className || "flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-md font-body text-xs uppercase tracking-[0.12em] transition-all border border-[hsl(var(--pdf-red))]/30 text-[hsl(var(--pdf-red))] hover:bg-[hsl(var(--pdf-red))]/10 hover:border-[hsl(var(--pdf-red))] cursor-pointer"}
         >
-          <FileDown size={13} />
+          {icon ?? <FileDown size={13} />}
           Spec Sheet
         </button>
       );
@@ -97,7 +100,7 @@ export default function SpecSheetButton({
             onClick={(e) => e.stopPropagation()}
             className={className || "flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-md font-body text-xs uppercase tracking-[0.12em] transition-all border border-[hsl(var(--pdf-red))]/30 text-[hsl(var(--pdf-red))] hover:bg-[hsl(var(--pdf-red))]/10 hover:border-[hsl(var(--pdf-red))] cursor-pointer"}
           >
-            <FileDown size={13} />
+            {icon ?? <FileDown size={13} />}
             Spec Sheets
           </button>
         </DropdownMenuTrigger>
