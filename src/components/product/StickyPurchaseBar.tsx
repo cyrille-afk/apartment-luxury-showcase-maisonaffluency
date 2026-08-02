@@ -44,7 +44,10 @@ export function StickyPurchaseBar({
   visible,
 }: StickyPurchaseBarProps) {
   const [scrolledPast, setScrolledPast] = useState(false);
-  const { direction } = useScrollDirection();
+  const { direction, scrollY } = useScrollDirection();
+  // Mirror the global nav's hide condition so the bar only snaps flush to the
+  // top once the nav has actually slid away (otherwise it hides behind it).
+  const navHidden = direction === "down" && scrollY > 240;
 
   useEffect(() => {
     if (visible !== undefined) return;
