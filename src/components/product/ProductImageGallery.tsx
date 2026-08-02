@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useRef, useEffect } from "react";
-import { ChevronLeft, ChevronRight, X, Maximize2, Expand, Images } from "lucide-react";
+import { ChevronLeft, ChevronRight, Expand, Images } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   DropdownMenu,
@@ -7,10 +7,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { useLightboxSwipe } from "@/hooks/useLightboxSwipe";
 import PresentationMode from "@/components/product/PresentationMode";
+
 
 
 interface ProductImageGalleryProps {
@@ -156,15 +155,14 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [controlledIndex, activeIndexNonce]);
 
-  const [zoomOpen, setZoomOpen] = useState(false);
   const [presentOpen, setPresentOpen] = useState(false);
 
   const thumbsRef = useRef<HTMLDivElement>(null);
 
-  // Swipe support — wired to both the inline main image and the fullscreen lightbox.
+  // Swipe support for the inline main image.
   const inlineSwipeRef = useRef<HTMLDivElement>(null);
-  const lightboxSwipeRef = useRef<HTMLDivElement>(null);
   const noZoomRef = useRef(false); // gallery doesn't pinch-zoom; required by hook signature.
+
 
   // When the active index changes because the user clicked/hovered a thumbnail
   // in the vertical strip, we must NOT scrollIntoView — doing so slides a
@@ -182,19 +180,12 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
 
   useLightboxSwipe({
     containerRef: inlineSwipeRef,
-    enabled: images.length > 1 && !zoomOpen,
+    enabled: images.length > 1,
     imageZoomedRef: noZoomRef,
     onSwipeLeft: () => goTo(activeIndex + 1),
     onSwipeRight: () => goTo(activeIndex - 1),
   });
 
-  useLightboxSwipe({
-    containerRef: lightboxSwipeRef,
-    enabled: images.length > 1 && zoomOpen,
-    imageZoomedRef: noZoomRef,
-    onSwipeLeft: () => goTo(activeIndex + 1),
-    onSwipeRight: () => goTo(activeIndex - 1),
-  });
 
   // Keep active thumbnail in view when navigating with arrows/swipes/dots.
   // Skip when the change originated from clicking/hovering a thumbnail — the
@@ -328,24 +319,13 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
 
       {/* Main image + (mobile) thumb strip below */}
       <div className="flex-1 flex flex-col gap-3 min-w-0">
-      <div className="relative group" ref={inlineSwipeRef}>
+        <div className="relative group" ref={inlineSwipeRef}>
         <div className={cn("product-image-frame md:aspect-square md:h-auto bg-foreground/95 rounded-luxury-sharp overflow-hidden relative touch-pan-y md:transition-[height,aspect-ratio] md:duration-300 md:ease-out", compact && "product-image-frame--compact")}>
-          {/* Desktop: whole image is a zoom trigger. Mobile: plain image so
-              stray taps near the chevrons don't accidentally open the lightbox. */}
-          <button
-            type="button"
-            onClick={() => setZoomOpen(true)}
-            aria-label="Expand image"
-            className="hidden md:flex absolute inset-0 items-center justify-center overflow-hidden rounded-[inherit] p-0 cursor-zoom-in"
-          >
-            <CrossfadeImage src={images[activeIndex]} alt={alt} />
-          </button>
-          {/* Mobile: no tap-to-zoom handler, but the image itself keeps pointer
-              events so a tap-and-hold offers "Save to Photos" (designers treat
-              their camera roll as an extension of the studio library). */}
-          <div className="md:hidden absolute inset-0 flex items-center justify-center overflow-hidden rounded-[inherit]">
+          {/* Main image — presentation mode is the only fullscreen viewer. */}
+          <div className="absolute inset-0 flex items-center justify-center overflow-hidden rounded-[inherit]">
             <CrossfadeImage src={images[activeIndex]} alt={alt} />
           </div>
+
 
           {/* Secondary actions live behind a single discreet "more" menu:
               presentation mode, expand and share — no competing circular chips. */}
@@ -362,11 +342,9 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
                 <DropdownMenuItem onSelect={() => setPresentOpen(true)} className="gap-2.5 font-body text-[11px] uppercase tracking-[0.16em]">
                   <Expand size={16} strokeWidth={1.5} /> Presentation
                 </DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => setZoomOpen(true)} className="gap-2.5 font-body text-[11px] uppercase tracking-[0.16em]">
-                  <Maximize2 size={16} strokeWidth={1.5} /> Expand image
-                </DropdownMenuItem>
                 {mobileMenuItems}
               </DropdownMenuContent>
+
             </DropdownMenu>
           </div>
 
@@ -485,59 +463,6 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
         {/* Mobile thumb strip removed — arrows on the main image + swipe handle navigation. */}
       </div>
 
-      {/* Fullscreen lightbox */}
-      <Dialog open={zoomOpen} onOpenChange={setZoomOpen}>
-        <DialogContent
-          hideClose
-          className="max-w-[100vw] w-screen h-[100dvh] p-0 bg-background/95 backdrop-blur-sm border-0 rounded-luxury-sharp flex items-center justify-center sm:rounded-luxury-sharp touch-pan-y"
-        >
-          <div ref={lightboxSwipeRef} onClick={() => setZoomOpen(false)} className="absolute inset-0 cursor-zoom-out" aria-hidden="true" />
-          <VisuallyHidden>
-            <DialogTitle>{alt}</DialogTitle>
-          </VisuallyHidden>
-          <img
-            src={images[activeIndex]}
-            alt={alt}
-            className="max-w-[95vw] max-h-[86vh] object-contain"
-          />
-          {/* Bottom control rail: progress markers + counter + close */}
-          <div
-            className="absolute left-0 right-0 z-[100] flex items-center gap-4 px-5"
-            style={{ bottom: 'max(1.25rem, env(safe-area-inset-bottom))' }}
-          >
-            {images.length > 1 && (
-              <div className="flex-1 flex items-center gap-2">
-                {images.map((_, i) => (
-                  <button
-                    key={i}
-                    type="button"
-                    onClick={(e) => { e.stopPropagation(); goTo(i); }}
-                    aria-label={`View image ${i + 1} of ${images.length}`}
-                    className={cn(
-                      "flex-1 rounded-full transition-all duration-200",
-                      i === activeIndex ? "h-[3px] bg-foreground" : "h-px bg-foreground/25"
-                    )}
-                  />
-                ))}
-              </div>
-            )}
-            {images.length > 1 && (
-              <span className="font-body text-[10px] font-light uppercase tracking-[0.18em] text-foreground/60 tabular-nums shrink-0">
-                {String(activeIndex + 1).padStart(2, "0")} / {String(images.length).padStart(2, "0")}
-              </span>
-            )}
-            <button
-              type="button"
-              onClick={(e) => { e.stopPropagation(); setZoomOpen(false); }}
-              onTouchEnd={(e) => { e.preventDefault(); e.stopPropagation(); setZoomOpen(false); }}
-              aria-label="Close"
-              className="shrink-0 w-9 h-9 rounded-full bg-background/25 backdrop-blur-md border border-border/25 flex items-center justify-center touch-manipulation ml-auto"
-            >
-              <X size={18} strokeWidth={1.5} className="text-foreground/80" />
-            </button>
-          </div>
-        </DialogContent>
-      </Dialog>
 
       <PresentationMode
         open={presentOpen}
