@@ -40,7 +40,8 @@ export function StickyPurchaseBar({
   favoriteSlot,
   specSheetSlot,
   triggerId = "main-product-image-container",
-  topOffset = "7.5rem",
+  topOffset = "0px",
+
   visible,
 }: StickyPurchaseBarProps) {
   const [scrolledPast, setScrolledPast] = useState(false);
