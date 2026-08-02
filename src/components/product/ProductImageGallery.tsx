@@ -36,6 +36,8 @@ interface ProductImageGalleryProps {
   compact?: boolean;
   /** Extra items appended to the mobile "more" menu (e.g. Share). */
   mobileMenuItems?: React.ReactNode;
+  /** Product pick id used to resolve the active finish caption in presentation mode. */
+  pickId?: string | null;
 }
 
 
