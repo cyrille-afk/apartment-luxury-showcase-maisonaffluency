@@ -1673,30 +1673,19 @@ const PublicProductPage: React.FC = () => {
           price={publicRrpLabel}
           onRequestQuote={() => setQuoteRequestOpen(true)}
           favoriteSlot={
-            user ? (
-              <FavoriteFolderPicker pickId={product.id} align="end" side="bottom">
-                <button
-                  type="button"
-                  onClick={(e) => e.stopPropagation()}
-                  aria-label={favorited ? "Saved to favorites" : "Add to favorites"}
-                  className={cn(
-                    "p-2.5 rounded-luxury-micro transition-colors",
-                    favorited ? "text-destructive" : "text-muted-foreground hover:text-foreground"
-                  )}
-                >
-                  <Heart size={16} className={cn(favorited && "fill-current")} />
-                </button>
-              </FavoriteFolderPicker>
-            ) : (
+            <FavoriteFolderPicker pickId={product.id} align="end" side="bottom">
               <button
                 type="button"
-                onClick={() => requireAuth(() => {}, "save this piece to your favourites")}
-                aria-label="Add to favorites"
-                className="p-2.5 rounded-luxury-micro text-muted-foreground hover:text-foreground transition-colors"
+                onClick={(e) => e.stopPropagation()}
+                aria-label={favorited ? "Saved to favorites" : "Add to favorites"}
+                className={cn(
+                  "p-2.5 rounded-luxury-micro transition-colors",
+                  favorited ? "text-destructive" : "text-muted-foreground hover:text-foreground"
+                )}
               >
-                <Heart size={16} />
+                <Heart size={16} className={cn(favorited && "fill-current")} />
               </button>
-            )
+            </FavoriteFolderPicker>
           }
           specSheetSlot={
             (product.pdf_url || (product.pdf_urls && product.pdf_urls.length > 0)) ? (
@@ -2115,7 +2104,6 @@ const PublicProductPage: React.FC = () => {
 
                 return (
               <div className="hidden md:flex flex-wrap items-center gap-x-6 gap-y-2 pt-1">
-                {user ? (
                 <FavoriteFolderPicker pickId={product.id} align="start" side="top">
                   <button
                     onClick={(e) => e.stopPropagation()}
@@ -2125,15 +2113,6 @@ const PublicProductPage: React.FC = () => {
                     {favorited ? "Saved" : "Favorite"}
                   </button>
                 </FavoriteFolderPicker>
-                ) : (
-                  <button
-                    onClick={() => requireAuth(() => {}, "save this piece to your favourites")}
-                    className={cn(baseBtn, idleBtn)}
-                  >
-                    <Heart size={13} />
-                    Favorite
-                  </button>
-                )}
 
                 <button
                   onClick={() => {
