@@ -1,7 +1,8 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { X, ChevronLeft, ChevronRight } from "lucide-react";
+import { X, ChevronLeft, ChevronRight } from "luses";
 import { cn } from "@/lib/utils";
+import ActiveSwatchCaption from "./ActiveSwatchCaption";
 
 interface PresentationModeProps {
   open: boolean;
@@ -11,6 +12,8 @@ interface PresentationModeProps {
   index: number;
   onIndexChange: (i: number) => void;
   onClose: () => void;
+  pickId?: string | null;
+  isMobileOrPwa?: boolean;
 }
 
 /**
