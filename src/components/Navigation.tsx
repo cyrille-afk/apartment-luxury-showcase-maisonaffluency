@@ -926,7 +926,6 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
             </div>
           </div>
         )}
-        </div>
       </div>
     </nav>
     <AuthGateDialog open={authGateOpen} onClose={() => setAuthGateOpen(false)} action="access your account" initialMode={authGateMode} />
