@@ -5,6 +5,7 @@ import { useCompare } from "@/contexts/CompareContext";
 import { useAuth } from "@/hooks/useAuth";
 import { trackCTA } from "@/lib/analytics";
 import { deferHashScrollUntilSheetClosed } from "@/lib/mobileHashNavigation";
+import { useScrollDirection } from "@/hooks/useScrollDirection";
 import { scrollToSection } from "@/lib/scrollToSection";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
