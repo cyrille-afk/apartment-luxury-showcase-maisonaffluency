@@ -1587,7 +1587,7 @@ const PublicProductPage: React.FC = () => {
     };
   };
 
-  const startDirectCheckout = async (email?: string) => {
+  const startDirectCheckout = async () => {
     const { unit, item } = buildCheckoutLine();
     if (!unit) {
       handlePlaceOrder();
@@ -1595,19 +1595,20 @@ const PublicProductPage: React.FC = () => {
     }
     setCheckoutLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke("create-cart-checkout", {
+      const { data, error } = await supabase.functions.invoke("create-direct-checkout", {
         body: {
-          items: [item],
-          method: "card",
-          email: email || user?.email || undefined,
-          cancelPath: location.pathname,
+          title: item.title,
+          // major units — the function converts to cents
+          price: unit / 100,
+          selectedFinish: item.finishLabel || "",
+          currency: (publicRrpRow?.currency || "USD").toLowerCase(),
         },
       });
       if (error) throw error;
       if ((data as any)?.error) throw new Error((data as any).error);
       const url = (data as any)?.url;
       if (!url) throw new Error("Checkout could not be opened.");
-      window.location.href = url;
+      window.location.assign(url);
     } catch (err: any) {
       toast.error(err?.message || "Unable to open checkout right now.");
       setCheckoutLoading(false);
@@ -1620,13 +1621,13 @@ const PublicProductPage: React.FC = () => {
       handlePlaceOrder();
       return;
     }
-    if (user?.email) {
-      void startDirectCheckout(user.email);
+    if (!user) {
+      requireAuth(() => {}, "place an order");
       return;
     }
-    setCheckoutEmail("");
-    setCheckoutEmailOpen(true);
+    void startDirectCheckout();
   };
+
 
 
 
