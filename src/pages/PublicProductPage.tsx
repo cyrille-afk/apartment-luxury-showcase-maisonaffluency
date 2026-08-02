@@ -1887,28 +1887,6 @@ const PublicProductPage: React.FC = () => {
                   );
                 })()}
 
-                {/* Creation note — replaces the former frosted "Creation" pill.
-                    Set in the same column rhythm as the Trade Exclusive card. */}
-                {product.description && product.description.trim().length > 0 && (
-                  <section aria-label="About this creation" className="pt-1">
-                    <h2 className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-2">
-                      The Creation
-                    </h2>
-                    <p className="font-body text-sm leading-relaxed text-muted-foreground whitespace-pre-line">
-                      {product.description}
-                    </p>
-                  </section>
-                )}
-
-
-
-                {!user && !authLoading && (
-                  <TradeExclusiveCard
-                    redirectTo={location.pathname + location.search}
-                    rrpLabel={publicRrpLabel}
-                    onRequestQuote={() => setQuoteRequestOpen(true)}
-                  />
-                )}
 
               </div>
 
@@ -2114,8 +2092,32 @@ const PublicProductPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Description now renders visibly as "The Creation" paragraph in the
-              detail column above — no hidden duplicate needed for crawlers. */}
+          {/* The Creation paragraph sits below the product imagery, side by side
+              with the Trade Exclusive Access card for signed-out visitors. */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 md:gap-8 lg:gap-16 mt-6">
+            {product.description && product.description.trim().length > 0 && (
+              <section aria-label="About this creation">
+                <h2 className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-2">
+                  The Creation
+                </h2>
+                <p className="font-body text-sm leading-relaxed text-muted-foreground whitespace-pre-line">
+                  {product.description}
+                </p>
+              </section>
+            )}
+
+            {!user && !authLoading && (
+              <div className={cn(!product.description?.trim() && "lg:col-start-2")}>
+                <TradeExclusiveCard
+                  redirectTo={location.pathname + location.search}
+                  rrpLabel={publicRrpLabel}
+                  onRequestQuote={() => setQuoteRequestOpen(true)}
+                />
+              </div>
+            )}
+          </div>
+
+
 
 
           {relatedPicks.length > 0 && (
