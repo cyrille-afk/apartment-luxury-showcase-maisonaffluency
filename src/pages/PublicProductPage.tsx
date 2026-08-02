@@ -1720,6 +1720,44 @@ const PublicProductPage: React.FC = () => {
                     ) : null;
                   })()
                 }
+
+                overlay={
+                  /* Desktop photo overlay: share + favorite / studio save, top-right */
+                  <div className="hidden md:flex items-center gap-3">
+                    {(() => {
+                      const shareUrl = buildPieceOgUrl(designerDisplay, product.title, product.subtitle);
+                      return (
+                        <ShareMenu
+                          url={shareUrl}
+                          message={`${product.title} by ${designerDisplay} — Maison Affluency: ${shareUrl}`}
+                          className="flex items-center justify-center w-9 h-9 rounded-full bg-background/25 backdrop-blur-md border border-border/25 text-foreground/80"
+                          iconSize="w-[18px] h-[18px]"
+                          iconVariant="ios"
+                          showLabel={false}
+                          imageUrl={images?.[galleryActiveIndex ?? 0] || images?.[0]}
+                          imageName={`${product.title}-${designerDisplay}`}
+                        />
+                      );
+                    })()}
+                    {user && (isTradeUser || tradeStatus === "approved") ? (
+                      <StudioSaveButton
+                        pickId={product.id}
+                        productTitle={product.title}
+                        finishes={selectedFinishes}
+                      />
+                    ) : (
+                      <FavoriteFolderPicker pickId={product.id} align="end" side="bottom">
+                        <button
+                          onClick={(e) => e.stopPropagation()}
+                          aria-label={favorited ? "Saved to favorites" : "Add to favorites"}
+                          className="flex items-center justify-center w-9 h-9 rounded-full bg-background/25 backdrop-blur-md border border-border/25"
+                        >
+                          <Heart size={20} strokeWidth={1.5} className={cn(favorited ? "fill-destructive text-destructive" : "text-foreground/80")} />
+                        </button>
+                      </FavoriteFolderPicker>
+                    )}
+                  </div>
+                }
               />
 
 
