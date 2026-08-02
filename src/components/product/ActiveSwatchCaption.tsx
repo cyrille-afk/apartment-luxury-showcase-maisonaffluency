@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { cn } from "@/lib/utils";
 
 type Swatch = {
   fabric_id: string;
@@ -7,6 +8,8 @@ type Swatch = {
   image_url: string | null;
   image_indices: number[] | null;
 };
+
+type CaptionVariant = "dark" | "light";
 
 /**
  * Small caption rendered directly under the product image gallery.
@@ -22,9 +25,11 @@ type Swatch = {
 export default function ActiveSwatchCaption({
   pickId,
   activeIndex,
+  variant = "dark",
 }: {
   pickId: string | null | undefined;
   activeIndex: number | undefined;
+  variant?: CaptionVariant;
 }) {
   const [swatches, setSwatches] = useState<Swatch[]>([]);
 
@@ -65,24 +70,33 @@ export default function ActiveSwatchCaption({
   if (!matches.length) return null;
 
   const multi = matches.length > 1;
+  const isLight = variant === "light";
 
   if (multi) {
     // Several finishes → keep them on a single swipeable line, no "Shown in" label.
     return (
-      <div className="mt-3 flex items-center gap-3 overflow-x-auto whitespace-nowrap px-2 no-scrollbar [scrollbar-width:none] justify-start sm:justify-center">
+      <div className={cn(
+        "mt-3 flex items-center gap-3 overflow-x-auto whitespace-nowrap px-2 no-scrollbar [scrollbar-width:none] justify-start sm:justify-center",
+        isLight && "text-white/90"
+      )}>
         {matches.map((m) => (
           <span key={m.fabric_id} className="inline-flex shrink-0 items-center gap-1.5">
             {m.image_url ? (
               <img
                 src={m.image_url}
                 alt={m.name}
-                className="w-5 h-5 rounded-full object-cover border border-border"
+                className={cn(
+                  "w-5 h-5 rounded-full object-cover border",
+                  isLight ? "border-white/30" : "border-border"
+                )}
                 loading="lazy"
               />
             ) : (
-              <div className="w-5 h-5 rounded-full bg-muted" />
+              <div className={cn("w-5 h-5 rounded-full", isLight ? "bg-white/20" : "bg-muted")} />
             )}
-            <span className="font-body text-sm text-foreground">{m.name}</span>
+            <span className={cn("font-body text-sm", isLight ? "text-white" : "text-foreground")}>
+              {m.name}
+            </span>
           </span>
         ))}
       </div>
@@ -91,19 +105,28 @@ export default function ActiveSwatchCaption({
 
   return (
     <div className="mt-3 flex flex-wrap items-center justify-center gap-x-1.5 gap-y-1 px-2 text-center">
-      <span className="font-body text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
+      <span className={cn(
+        "font-body text-[10px] uppercase tracking-[0.15em]",
+        isLight ? "text-white/70" : "text-muted-foreground"
+      )}>
         Shown in
       </span>
-      <span className="font-body text-sm text-foreground inline-flex items-center gap-1">
+      <span className={cn(
+        "font-body text-sm inline-flex items-center gap-1",
+        isLight ? "text-white" : "text-foreground"
+      )}>
         {matches[0].image_url ? (
           <img
             src={matches[0].image_url}
             alt={matches[0].name}
-            className="w-5 h-5 rounded-full object-cover border border-border"
+            className={cn(
+              "w-5 h-5 rounded-full object-cover border",
+              isLight ? "border-white/30" : "border-border"
+            )}
             loading="lazy"
           />
         ) : (
-          <div className="w-5 h-5 rounded-full bg-muted" />
+          <div className={cn("w-5 h-5 rounded-full", isLight ? "bg-white/20" : "bg-muted")} />
         )}
         <span>{matches[0].name}</span>
       </span>
