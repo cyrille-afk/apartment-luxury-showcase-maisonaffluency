@@ -1974,6 +1974,9 @@ const PublicProductPage: React.FC = () => {
                       )}
                       {checkoutLoading ? "Opening checkout…" : "Place Order"}
                     </button>
+                    <p className="text-center font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground/70">
+                      Secure checkout powered by Stripe
+                    </p>
 
                     <button
                       type="button"
