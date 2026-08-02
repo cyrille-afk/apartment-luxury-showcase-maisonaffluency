@@ -454,10 +454,10 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
 
         </div>
 
-        {/* Mobile/PWA horizontal progress line — rendered BELOW the image so it
-            doesn't overlap the photo or the favorite/share icons. */}
+        {/* Horizontal progress line — rendered BELOW the image on every
+            breakpoint so it doesn't overlap the photo or the action icons. */}
         {images.length > 1 && (
-          <div className="md:hidden mt-2 flex items-center gap-2 px-2">
+          <div className="mt-2 flex items-center gap-2 px-2">
             {images.map((_, i) => (
               <button
                 key={i}
