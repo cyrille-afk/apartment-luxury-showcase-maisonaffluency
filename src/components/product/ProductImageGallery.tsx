@@ -18,6 +18,8 @@ interface ProductImageGalleryProps {
   images: string[];
   alt: string;
   overlay?: React.ReactNode;
+  /** Action anchored to the bottom-right corner of the photo. */
+  bottomRightOverlay?: React.ReactNode;
   /** Badge rendered top-left of the main image, only when the first photo is active. */
   firstImageBadge?: React.ReactNode;
   /** Optional controlled active index. When provided, the gallery jumps to it whenever it changes. */
@@ -145,7 +147,7 @@ const CrossfadeImage: React.FC<{ src: string; alt: string; pointerEventsNone?: b
 
 
 
-const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, overlay, firstImageBadge, activeIndex: controlledIndex, activeIndexNonce, onIndexChange, caption, compact, mobileMenuItems, pickId }) => {
+const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, overlay, bottomRightOverlay, firstImageBadge, activeIndex: controlledIndex, activeIndexNonce, onIndexChange, caption, compact, mobileMenuItems, pickId }) => {
   const isMobile = useIsMobile();
   const isPwa = isPwaStandaloneDisplay();
   const isMobileOrPwa = isMobile || isPwa;
@@ -370,6 +372,11 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
           {overlay && (
             <div className="absolute top-3 right-3 z-20 pointer-events-none">
               <div className="pointer-events-auto">{overlay}</div>
+            </div>
+          )}
+          {bottomRightOverlay && (
+            <div className="absolute bottom-3 right-3 z-20 pointer-events-none">
+              <div className="pointer-events-auto">{bottomRightOverlay}</div>
             </div>
           )}
           {firstImageBadge && activeIndex === 0 && (
