@@ -72,7 +72,7 @@ export default function ShippingDestinationSwitcher({ className, compact, flagCl
           {isoToFlag(current.iso)}
         </span>
         {!compact && (
-          <span className="font-body text-[11px] uppercase tracking-[0.18em] text-foreground">
+          <span className="font-body text-[11px] uppercase tracking-[0.18em] text-foreground whitespace-nowrap">
             {current.iso} · {current.currency}
           </span>
         )}
