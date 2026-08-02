@@ -21,6 +21,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/hooks/useAuth";
+import PrivateTradeImage from "@/components/trade/PrivateTradeImage";
 
 const toAbsoluteUrl = (url: string | null | undefined): string | null => {
   if (!url) return null;
@@ -1464,7 +1465,7 @@ export default function ProposalBuilder({
                   <div
                     className="w-11 h-11 rounded border border-border overflow-hidden bg-background"
                   >
-                    <img
+                    <PrivateTradeImage
                       src={p.image_url}
                       alt=""
                       className="w-full h-full object-cover transition-transform duration-300"
@@ -1686,7 +1687,7 @@ export default function ProposalBuilder({
                   className="rounded border border-border overflow-hidden text-left transition-all hover:border-foreground/30"
                   title={`${p.product_name} — ${p.brand_name}`}
                 >
-                  <img src={p.image_url!} alt={p.product_name} className="w-full aspect-square object-cover" />
+                  <PrivateTradeImage src={p.image_url!} alt={p.product_name} className="w-full aspect-square object-cover" />
                   <div className="px-1 py-0.5">
                     <p className="font-body text-[9px] text-foreground truncate">{p.product_name}</p>
                     <p className="font-body text-[8px] text-muted-foreground truncate">{p.brand_name}</p>

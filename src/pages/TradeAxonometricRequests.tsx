@@ -21,6 +21,7 @@ import {
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { format } from "date-fns";
 import FavoritesPicker from "@/components/trade/FavoritesPicker";
+import PrivateTradeImage from "@/components/trade/PrivateTradeImage";
 
 /* ── Constants ─────────────────────────────────────────────── */
 
@@ -703,7 +704,7 @@ const TradeAxonometricRequests = () => {
             const status = STATUS_LABELS[req.status] || STATUS_LABELS.pending;
             return (
               <div key={req.id} className="border border-border rounded-lg p-4 flex gap-4">
-                <img
+                <PrivateTradeImage
                   src={req.image_url}
                   alt=""
                   className="w-24 h-24 object-cover rounded-md border border-border shrink-0"
