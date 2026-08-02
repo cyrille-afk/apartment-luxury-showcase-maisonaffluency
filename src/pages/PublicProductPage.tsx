@@ -479,7 +479,7 @@ const VariantSelectorsProvider: React.FC<{
   );
 };
 
-const VariantFinishSelectors: React.FC = () => {
+const VariantFinishSelectors: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   const ctx = useVariantSelectorsContext();
   const {
     product,
@@ -607,6 +607,8 @@ const VariantFinishSelectors: React.FC = () => {
           onMaterialChange?.(sized, { base: nextBase, top: sized, size: selDualSize });
         }}
       />
+
+      {children}
 
       {isDualAxis ? (
         <>
@@ -1961,48 +1963,6 @@ const PublicProductPage: React.FC = () => {
 
 
             <div className="relative flex flex-col gap-6">
-              {/* Title / price — kept at the top on desktop; on mobile it follows the
-                  finish selector so the photo and fabric choice stay in view. */}
-              <div className="min-w-0 order-2">
-                <Link
-                  to={`/designers/${designer.slug}`}
-                  onClick={() => rememberProductBackRef(designer.slug, location.pathname + location.search)}
-                  className="font-body font-light text-[10px] uppercase tracking-[0.28em] text-[hsl(var(--gold))] hover:text-primary transition-colors"
-                >
-                  {designerDisplay}
-                </Link>
-                <h1 className="font-display font-normal text-[1.75rem] md:text-[2.15rem] mt-3 leading-[1.15] tracking-[-0.01em]">
-                  {product.title}
-                  {product.subtitle &&
-                    !product.title.toLowerCase().includes(product.subtitle.toLowerCase()) &&
-                    !product.subtitle.toLowerCase().includes(product.title.toLowerCase()) &&
-                    ` by ${product.subtitle}`}
-                </h1>
-
-                {/* Publicly disclosed RRP (currently Apparatus only) */}
-                {publicRrpLabel && (
-                  <div className="mt-6">
-                    <p className="font-body font-light text-base md:text-lg tabular-nums tracking-[0.01em]">
-                      {(() => {
-                        const spaceIdx = publicRrpLabel.indexOf(" ");
-                        if (spaceIdx === -1) return <span className="text-foreground">{publicRrpLabel}</span>;
-                        const prefix = publicRrpLabel.slice(0, spaceIdx);
-                        const rest = publicRrpLabel.slice(spaceIdx + 1);
-                        return (
-                          <>
-                            <span className="text-muted-foreground text-[11px] uppercase tracking-[0.22em] align-middle mr-2">{prefix}</span>
-                            <span className="text-foreground align-middle">{rest}</span>
-                          </>
-                        );
-                      })()}
-                    </p>
-                    <p className="font-body font-light text-[9px] uppercase tracking-[0.28em] text-muted-foreground/80 mt-2">
-                      excl. shipping &amp; duties
-                    </p>
-                  </div>
-                )}
-              </div>
-
               {/* Finish selection — split from dimensions so it can be placed
                    directly below the image on mobile/PWA while dimensions remain
                    in their original position within the details column. */}
@@ -2019,7 +1979,45 @@ const PublicProductPage: React.FC = () => {
                 onFinishesMissingImagesChange={setFinishesMissingImages}
               >
                 <div className="flex flex-col gap-5 order-1">
-                  <VariantFinishSelectors />
+                  <VariantFinishSelectors>
+                    <div className="min-w-0 py-5">
+                      <Link
+                        to={`/designers/${designer.slug}`}
+                        onClick={() => rememberProductBackRef(designer.slug, location.pathname + location.search)}
+                        className="font-body font-light text-[10px] uppercase tracking-[0.28em] text-[hsl(var(--gold))] hover:text-primary transition-colors"
+                      >
+                        {designerDisplay}
+                      </Link>
+                      <h1 className="font-display font-normal text-[1.75rem] md:text-[2.15rem] mt-3 leading-[1.15] tracking-[-0.01em]">
+                        {product.title}
+                        {product.subtitle &&
+                          !product.title.toLowerCase().includes(product.subtitle.toLowerCase()) &&
+                          !product.subtitle.toLowerCase().includes(product.title.toLowerCase()) &&
+                          ` by ${product.subtitle}`}
+                      </h1>
+                      {publicRrpLabel && (
+                        <div className="mt-6">
+                          <p className="font-body font-light text-base md:text-lg tabular-nums tracking-[0.01em]">
+                            {(() => {
+                              const spaceIdx = publicRrpLabel.indexOf(" ");
+                              if (spaceIdx === -1) return <span className="text-foreground">{publicRrpLabel}</span>;
+                              const prefix = publicRrpLabel.slice(0, spaceIdx);
+                              const rest = publicRrpLabel.slice(spaceIdx + 1);
+                              return (
+                                <>
+                                  <span className="text-muted-foreground text-[11px] uppercase tracking-[0.22em] align-middle mr-2">{prefix}</span>
+                                  <span className="text-foreground align-middle">{rest}</span>
+                                </>
+                              );
+                            })()}
+                          </p>
+                          <p className="font-body font-light text-[9px] uppercase tracking-[0.28em] text-muted-foreground/80 mt-2">
+                            excl. shipping &amp; duties
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </VariantFinishSelectors>
                   {finishesMissingImages.length > 0 && (
                     <p className="font-body text-[11px] text-muted-foreground italic mt-1">
                       No reference image on file for{" "}
