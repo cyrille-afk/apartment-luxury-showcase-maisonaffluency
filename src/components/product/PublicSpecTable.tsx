@@ -140,35 +140,41 @@ export function TradeExclusiveCard({
   if (redirectTo) q.set("redirect", redirectTo);
   const loginHref = `/trade/login${q.toString() ? `?${q.toString()}` : ""}`;
 
+  const applyHref = `/trade/apply${q.toString() ? `?${q.toString()}` : ""}`;
+
   return (
-    <details className="mt-6 group border-t border-border/60 pt-4">
-      <summary className="flex cursor-pointer list-none items-center justify-center gap-1.5 text-center">
+    <div className="rounded-[2px] border border-border/60 bg-muted/30 p-5 md:p-6">
+      <div className="flex items-center justify-center gap-2 mb-3">
         <Lock className="h-3 w-3 text-[hsl(var(--gold))]" aria-hidden="true" />
-        <span className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground group-hover:text-foreground transition-colors">
-          Are you a trade member? <span className="underline underline-offset-4 decoration-border">Sign in</span>
+        <span className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+          Trade Exclusive Access
         </span>
-      </summary>
-      <div className="pt-4 text-center">
-        <p className="font-body text-xs md:text-sm text-muted-foreground leading-relaxed max-w-sm mx-auto">
-          {rrpLabel ? (
-            <>
-              The Public retail price is shown above. Unlock Your Trade pricing, access projects &
-              client management tools, logistical data, and your own AI curatorial guide.
-            </>
-          ) : (
-            "View pricing, access projects & client management tools, logistical data, and AI curatorial guide."
-          )}
-        </p>
-        <div className="mt-4 flex justify-center">
-          <Link
-            to={loginHref}
-            className="inline-flex h-12 w-full items-center justify-center px-5 rounded-[2px] border border-foreground text-foreground font-body text-[11px] leading-none uppercase tracking-[0.12em] hover:bg-muted/60 transition-colors"
-          >
-            Sign in to view trade price
-          </Link>
-        </div>
       </div>
-    </details>
+      <p className="font-body text-xs md:text-sm text-muted-foreground leading-relaxed text-center max-w-sm mx-auto">
+        {rrpLabel ? (
+          <>
+            The Public retail price is shown above. Unlock Your Trade pricing, access projects &
+            client management tools, logistical data, and your own AI curatorial guide.
+          </>
+        ) : (
+          "View pricing, access projects & client management tools, logistical data, and AI curatorial guide."
+        )}
+      </p>
+      <div className="mt-5 grid grid-cols-2 gap-3">
+        <Link
+          to={loginHref}
+          className="inline-flex h-12 w-full items-center justify-center px-3 rounded-[2px] bg-foreground text-background font-body text-[11px] leading-none uppercase tracking-[0.12em] hover:bg-foreground/85 transition-colors"
+        >
+          Sign In
+        </Link>
+        <Link
+          to={applyHref}
+          className="inline-flex h-12 w-full items-center justify-center px-3 rounded-[2px] border border-foreground text-foreground font-body text-[11px] leading-none uppercase tracking-[0.12em] hover:bg-muted/60 transition-colors"
+        >
+          Apply for Trade Account
+        </Link>
+      </div>
+    </div>
   );
 }
 
