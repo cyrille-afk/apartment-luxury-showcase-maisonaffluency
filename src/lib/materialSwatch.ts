@@ -26,7 +26,7 @@ const TONES: Array<{ test: RegExp; tone: Tone }> = [
   // Woods
   { test: /walnut/i, tone: { css: "linear-gradient(135deg,#5b3a24 0%,#7d5334 55%,#432a19 100%)", dark: true } },
   { test: /ebony|wenge|smoked oak|dark oak/i, tone: { css: "linear-gradient(135deg,#2d221b 0%,#463830 55%,#1d1512 100%)", dark: true } },
-  { test: /oak|ash|maple|birch|natural wood/i, tone: { css: "linear-gradient(135deg,#d5b territory)/i", dark: false } },
+  
   { test: /oak|ash|maple|birch|beech/i, tone: { css: "linear-gradient(135deg,#d9bb8c 0%,#c8a271 55%,#e7d2ad 100%)" } },
   { test: /teak|cherry|mahogany|rosewood/i, tone: { css: "linear-gradient(135deg,#8a4a29 0%,#a9663c 55%,#6b361d 100%)", dark: true } },
   // Textiles & leather
