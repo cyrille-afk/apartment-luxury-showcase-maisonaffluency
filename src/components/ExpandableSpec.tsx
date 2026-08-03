@@ -126,6 +126,15 @@ export default function ExpandableSpec({
 
   if (lines.length === 0) return null;
 
+  // Mobile clarity: the Ø glyph is standard in design, but a tiny uppercase
+  // "Diameter" cue above the measurement removes any doubt for retail buyers.
+  const showDiameterHint = isMobile && lines.some((l) => l.includes("Ø"));
+  const diameterHint = showDiameterHint ? (
+    <span className="block font-body text-[9px] uppercase tracking-[0.2em] text-muted-foreground/70 mb-1">
+      Diameter
+    </span>
+  ) : null;
+
   const textClasses = cn(
     "font-body text-sm leading-relaxed",
     emphasized ? "text-foreground font-medium" : "text-muted-foreground"
@@ -142,17 +151,21 @@ export default function ExpandableSpec({
     return (
       <div className={rowClasses}>
         <span className="shrink-0">{icon}</span>
-        <p className={cn(textClasses, "flex-1")}>
-          {display}
-          {secondaryText && (
-            <span className="block text-xs mt-0.5 text-muted-foreground/70">
-              {secondaryText}
-            </span>
-          )}
-        </p>
+        <div className="flex-1 min-w-0">
+          {diameterHint}
+          <p className={textClasses}>
+            {display}
+            {secondaryText && (
+              <span className="block text-xs mt-0.5 text-muted-foreground/70">
+                {secondaryText}
+              </span>
+            )}
+          </p>
+        </div>
       </div>
     );
   }
+
 
   // Multi + swatchMode → horizontal row of circular material swatches.
   if (swatchMode && placeholder) {
@@ -373,8 +386,10 @@ export default function ExpandableSpec({
         >
           <span className="shrink-0">{icon}</span>
           <span className="flex-1 min-w-0 whitespace-normal break-words leading-relaxed">
+            {diameterHint}
             {hasSelection ? lines[selectedIdx ?? 0] : placeholder}
           </span>
+
           <ChevronDown
             className={cn(
               "h-4 w-4 shrink-0 text-muted-foreground/60 transition-transform",
