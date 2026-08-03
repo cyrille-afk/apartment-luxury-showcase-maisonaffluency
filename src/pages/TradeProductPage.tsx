@@ -1813,7 +1813,8 @@ const TradeProductPage: React.FC = () => {
                 </div>
               }
               bottomRightOverlay={(() => {
-                const shareUrl = buildPieceOgUrl(designerDisplay, product.title, product.subtitle);
+                // Bridge filenames use the raw designer name, not the shortened display name.
+                const shareUrl = buildPieceOgUrl(designer.name, product.title, product.subtitle);
                 return (
                   <ShareMenu
                     url={shareUrl}

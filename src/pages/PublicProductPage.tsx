@@ -1884,7 +1884,9 @@ const PublicProductPage: React.FC = () => {
                   </div>
                 }
                 bottomRightOverlay={(() => {
-                  const shareUrl = buildPieceOgUrl(designerDisplay, product.title, product.subtitle);
+                  // Bridge filenames are keyed off the raw designer name (e.g. "Apparatus Studio"),
+                  // not the shortened display name — using designerDisplay produces a 404 link.
+                  const shareUrl = buildPieceOgUrl(designer.name, product.title, product.subtitle);
                   return (
                     <ShareMenu
                       url={shareUrl}
