@@ -377,7 +377,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
             </div>
 
             {/* Flag — right edge, vertically centered with burger */}
-            <ShippingDestinationSwitcher compact flagClassName="text-2xl" className="-mr-1" />
+            <ShippingDestinationSwitcher compact showIso flagClassName="text-2xl" className="-mr-1" />
 
 
 
@@ -655,7 +655,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
           {/* ROW 1 — slim utility ribbon */}
           <div className="flex items-center justify-between h-9 border-b border-neutral-100">
             <div className="flex items-center">
-              <ShippingDestinationSwitcher compact className="min-h-8 justify-center" />
+              <ShippingDestinationSwitcher compact showIso className="min-h-8 justify-center" />
             </div>
 
             <div className="flex items-center gap-5">
