@@ -31,19 +31,26 @@ interface Props {
   felixUrl?: string;
 }
 
+/** Human-readable suffix for a price unit. `per_piece` is the default and is never shown. */
+function unitSuffix(unit?: string | null) {
+  const u = (unit || "").trim().toLowerCase();
+  if (!u || /^(each|unit|item|piece|per_piece|per piece)$/.test(u)) return "";
+  if (/^(per_sqm|per sqm|sqm|m2)$/.test(u)) return " / m²";
+  return ` / ${u.replace(/_/g, " ")}`;
+}
+
 function formatCents(cents: number | null | undefined, currency?: string | null, unit?: string | null) {
   if (cents == null || cents <= 0) return null;
   const ccy = (currency || "EUR").toUpperCase();
-  const showUnit = unit && !/^(each|unit|item|piece)$/i.test(unit.trim());
   try {
     const value = new Intl.NumberFormat("en-US", {
       style: "currency",
       currency: ccy,
       maximumFractionDigits: 0,
     }).format(cents / 100);
-    return showUnit ? `${value} / ${unit}` : value;
+    return `${value}${unitSuffix(unit)}`;
   } catch {
-    return `${ccy} ${(cents / 100).toLocaleString("en-US")}`;
+    return `${ccy} ${(cents / 100).toLocaleString("en-US")}${unitSuffix(unit)}`;
   }
 }
 
@@ -99,13 +106,18 @@ export default function TradeWorkspace({
   };
 
 
+  // `trade_price_cents` holds RRP for most rows (legacy import), so it only counts
+  // as a real negotiated net when it is strictly below RRP. Otherwise the tier
+  // discount is applied on top of RRP.
   const rrpCents = pricing?.rrp_price_cents ?? pricing?.trade_price_cents ?? null;
-  const netCents =
-    pricing?.trade_price_cents && pricing?.rrp_price_cents
+  const explicitNet =
+    pricing?.trade_price_cents && rrpCents && pricing.trade_price_cents < rrpCents
       ? pricing.trade_price_cents
-      : rrpCents
-        ? Math.round(rrpCents * (1 - (discountPct || 0)))
-        : null;
+      : null;
+  const netCents =
+    explicitNet ?? (rrpCents ? Math.round(rrpCents * (1 - (discountPct || 0))) : null);
+  const discountApplied = !explicitNet && !!discountPct && netCents !== rrpCents;
+  const discountLabel = `${(discountPct * 100).toFixed(discountPct * 100 % 1 === 0 ? 0 : 1)}%`;
 
   const rrpLabel = formatCents(rrpCents, pricing?.currency, pricing?.price_unit);
   const netLabel = formatCents(netCents, pricing?.currency, pricing?.price_unit);
@@ -138,8 +150,8 @@ export default function TradeWorkspace({
           <div className="flex items-center gap-2">
             <ClientSafeToggle />
             {tierLabel && !clientSafe && (
-              <span className="font-body text-[9px] uppercase tracking-[0.16em] text-muted-foreground border border-border rounded-full px-2 py-0.5">
-                {tierLabel}
+              <span className="font-body text-[9px] uppercase tracking-[0.16em] text-muted-foreground border border-border rounded-full px-2 py-0.5 whitespace-nowrap">
+                {tierLabel} −{discountLabel}
               </span>
             )}
           </div>
@@ -160,21 +172,24 @@ export default function TradeWorkspace({
             </>
           ) : netLabel ? (
             <>
-              <p className="font-display text-2xl leading-none">{netLabel}</p>
+              <div className="flex flex-wrap items-baseline gap-x-2.5 gap-y-1">
+                <p className="font-display text-2xl leading-none">{netLabel}</p>
+                {rrpLabel && netCents !== rrpCents && (
+                  <span className="font-body text-sm text-muted-foreground line-through">
+                    {rrpLabel}
+                  </span>
+                )}
+              </div>
               <p className="font-body text-[11px] text-muted-foreground mt-1.5">
                 Your trade net
-                {rrpLabel && netCents !== rrpCents && (
-                  <>
-                    {" · RRP "}
-                    <span className="line-through">{rrpLabel}</span>
-                  </>
-                )}
+                {discountApplied && ` · ${tierLabel} ${discountLabel} off RRP`}
               </p>
             </>
           ) : (
             <p className="font-display text-xl leading-none">Price on Request</p>
           )}
         </div>
+
 
 
         <dl className="mt-5 space-y-2.5">
