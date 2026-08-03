@@ -181,7 +181,10 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
   const suppressThumbAutoScrollRef = useRef(false);
 
   const goTo = useCallback((i: number, opts?: { fromThumbStrip?: boolean }) => {
-    const next = Math.max(0, Math.min(i, images.length - 1));
+    const len = images.length;
+    if (len === 0) return;
+    // Wrap around so the last image loops back to the first (and vice versa).
+    const next = ((i % len) + len) % len;
     if (opts?.fromThumbStrip) suppressThumbAutoScrollRef.current = true;
     setActiveIndex(next);
     onIndexChange?.(next);
