@@ -120,6 +120,7 @@ export default function TradeFirstCta({
           <button type="button" onClick={onRequestQuote} className={primaryBtn}>
             Inquire to Purchase
           </button>
+          {secureNote}
         </div>
       )}
     </div>
