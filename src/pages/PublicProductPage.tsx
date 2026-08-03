@@ -38,6 +38,8 @@ import { computeVariantAxes, parseMaterialsFallback } from "@/lib/parseSizeVaria
 import { isRugCategory, parseRugDims, looksLikeDimension } from "@/lib/rugPricing";
 import FinishSelector from "@/components/FinishSelector";
 import ShippingDetailsAccordion from "@/components/product/ShippingDetailsAccordion";
+import OriginStoryDrawer from "@/components/product/OriginStoryDrawer";
+
 
 import ActiveSwatchCaption from "@/components/product/ActiveSwatchCaption";
 import { isProductUpholstered } from "@/lib/upholstery";
