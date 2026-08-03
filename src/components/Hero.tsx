@@ -138,7 +138,7 @@ const Hero = () => {
 
                 {/* Desktop — inline editorial links */}
                 <div className="mt-3 hidden flex-col items-start gap-0.5 hero-fade-in-delayed-5 md:flex">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 [text-shadow:0_1px_3px_rgba(0,0,0,0.15)]">
                     <button
                       type="button"
                       onClick={() => {
@@ -153,10 +153,10 @@ const Hero = () => {
                     <button
                       type="button"
                       onClick={openTour}
-                      className="font-body text-xs font-medium uppercase tracking-[0.18em] text-white transition-colors hover:text-white/80"
+                      className="group font-body text-xs font-medium uppercase tracking-[0.18em] text-white transition-colors hover:text-white/80"
                     >
-                      <span className="underline decoration-white/70 underline-offset-4 decoration-1">Book Private Appointment</span>
-                      <span className="ml-1 font-light italic normal-case text-white/70">(Trade Only)</span>
+                      <span className="underline decoration-white/70 underline-offset-4 decoration-1 transition-colors group-hover:decoration-white">Book Private Appointment</span>
+                      <span className="ml-1 font-light italic normal-case text-white/70 transition-colors group-hover:text-white">(Trade Only)</span>
                     </button>
                   </div>
                 </div>
