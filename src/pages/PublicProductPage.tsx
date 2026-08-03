@@ -2005,7 +2005,7 @@ const PublicProductPage: React.FC = () => {
                         </div>
                       )}
                 </div>
-                <div className="order-5 flex flex-col gap-5">
+                <div className="order-7 md:order-5 flex flex-col gap-5">
                   <VariantFinishSelectors section="supplemental" />
                   {finishesMissingImages.length > 0 && (
                     <p className="font-body text-[11px] text-muted-foreground italic mt-1">
@@ -2016,17 +2016,16 @@ const PublicProductPage: React.FC = () => {
                   )}
                 </div>
 
-                {/* Dimensions/specs stay after product metadata on every viewport. */}
-                <div className="flex flex-col gap-5 order-5">
+                {/* Dimensions/specs sit directly under the primary CTA on mobile. */}
+                <div className="flex flex-col gap-5 order-4 md:order-5">
                   <VariantDimensionsPanel />
                 </div>
               </VariantSelectorsProvider>
 
-              {/* Primary public CTAs — enquiry-led. A made-to-order commission is
-                  discussed with an advisor first (shipping, white-glove install,
-                  customisation); secure checkout stays available as a discreet link. */}
-              <div className="order-4">
-                <div className="space-y-3">
+              {/* Primary public CTA — a single enquiry-led action, with the
+                  advisor route reduced to a quiet text link beneath it. */}
+              <div className="order-3 md:order-4">
+                <div className="space-y-4">
                   <button
                     type="button"
                     onClick={() => setQuoteRequestOpen(true)}
@@ -2034,23 +2033,23 @@ const PublicProductPage: React.FC = () => {
                   >
                     Inquire to Purchase
                   </button>
-                  <p className="text-center font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground/70">
-                    A design advisor confirms finish, freight &amp; installation
-                  </p>
 
                   <button
                     type="button"
                     onClick={() => setQuoteRequestOpen(true)}
-                    className="inline-flex h-12 w-full items-center justify-center px-5 rounded-[2px] border border-foreground/25 text-foreground font-body text-[11px] leading-none uppercase tracking-[0.12em] hover:border-foreground/60 transition-colors"
+                    className="mx-auto block font-body text-[11px] tracking-[0.06em] text-muted-foreground hover:text-foreground transition-colors"
                   >
-                    Speak with a Design Advisor
+                    Need assistance?{" "}
+                    <span className="underline underline-offset-4 decoration-border">
+                      Speak with a Design Advisor
+                    </span>
                   </button>
 
                   <button
                     type="button"
                     onClick={handleDirectCheckout}
                     disabled={checkoutLoading}
-                    className="mx-auto flex items-center justify-center gap-2 pt-1 font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground/80 underline underline-offset-4 decoration-border hover:text-foreground transition-colors disabled:opacity-60"
+                    className="mx-auto flex items-center justify-center gap-2 font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground/80 underline underline-offset-4 decoration-border hover:text-foreground transition-colors disabled:opacity-60"
                   >
                     {checkoutLoading ? (
                       <Loader2 className="h-3 w-3 animate-spin" />
@@ -2060,18 +2059,10 @@ const PublicProductPage: React.FC = () => {
                     {checkoutLoading ? "Opening checkout…" : "Or complete secure checkout"}
                   </button>
                 </div>
-
-
-                {/* Secondary: trade access invitation */}
-                {!user && !authLoading && (
-                  <TradeExclusiveCard
-                    redirectTo={location.pathname + location.search}
-                    rrpLabel={publicRrpLabel}
-                  />
-                )}
               </div>
 
-              <div className="flex flex-col gap-5 order-6">
+              {/* Origin & production lead time — raised above the fold on mobile. */}
+              <div className="order-5 md:order-6">
                 {(() => {
                   const handcrafted = formatHandcrafted(product.origin, product.lead_time);
                   if (!handcrafted) return null;
@@ -2098,6 +2089,20 @@ const PublicProductPage: React.FC = () => {
                     </div>
                   );
                 })()}
+              </div>
+
+              {/* Trade access — collapsed single-line toggle */}
+              {!user && !authLoading && (
+                <div className="order-6 md:order-6">
+                  <TradeExclusiveCard
+                    redirectTo={location.pathname + location.search}
+                    rrpLabel={publicRrpLabel}
+                  />
+                </div>
+              )}
+
+              <div className="flex flex-col gap-5 order-8 md:order-6">
+
 
               {/* Secondary actions: Favorite / Pin / Spec Sheet.
                   Minimalist horizontal icon row, left-aligned under the
