@@ -1630,27 +1630,22 @@ const PublicProductPage: React.FC = () => {
       handlePlaceOrder();
       return;
     }
-    setCheckoutLoading(true);
+    const line = {
+      title: item.title,
+      designer: item.designerName,
+      finishLabel: item.finishLabel,
+      imageUrl: item.imageUrl,
+      unitCents: unit,
+      currency: (publicRrpRow?.currency || "USD").toLowerCase(),
+      leadTime: item.leadTime,
+      productPath: `/designers/${item.designerSlug}/${item.productSlug}`,
+    };
     try {
-      const { data, error } = await supabase.functions.invoke("create-direct-checkout", {
-        body: {
-          title: item.title,
-          // major units — the function converts to cents
-          price: unit / 100,
-          selectedFinish: item.finishLabel || "",
-          currency: (publicRrpRow?.currency || "USD").toLowerCase(),
-        },
-      });
-      if (error) throw error;
-      if ((data as any)?.error) throw new Error((data as any).error);
-      const url = (data as any)?.url;
-      if (!url) throw new Error("Checkout could not be opened.");
-      window.location.assign(url);
-    } catch (err: any) {
-      toast.error(err?.message || "Unable to open checkout right now.");
-      setCheckoutLoading(false);
-    }
+      sessionStorage.setItem("ma_checkout_line", JSON.stringify(line));
+    } catch { /* ignore */ }
+    navigate("/checkout", { state: { line } });
   };
+
 
   const handleDirectCheckout = () => {
     const { unit } = buildCheckoutLine();
