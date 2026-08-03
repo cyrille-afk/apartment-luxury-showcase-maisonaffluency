@@ -168,6 +168,41 @@ serve(async (req) => {
   }
 
   // ---------------------------------------------------------------------
+  // On-site (single page) checkout — PaymentIntent based.
+  // ---------------------------------------------------------------------
+  if (event.type === "payment_intent.succeeded") {
+    const pi = event.data.object as Stripe.PaymentIntent;
+    if (pi.metadata?.payment_type === "onsite_checkout") {
+      const supabase = createClient(
+        Deno.env.get("SUPABASE_URL") ?? "",
+        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+      );
+
+      const { error: orderErr } = await supabase.from("orders").insert({
+        user_id: pi.metadata?.user_id || null,
+        product_name: pi.metadata?.product_title || "Order",
+        selected_finish: pi.metadata?.selected_finish || null,
+        customer_email: pi.receipt_email || null,
+        transaction_id: pi.id,
+        amount_total: pi.amount_received ?? pi.amount ?? 0,
+        currency: (pi.currency || "usd").toLowerCase(),
+        status: "paid",
+      });
+
+      // 23505 = duplicate transaction_id → Stripe retry, safe to ignore.
+      if (orderErr && (orderErr as any).code !== "23505") {
+        console.error("[STRIPE-WEBHOOK] onsite order insert failed:", orderErr);
+      } else if (!orderErr) {
+        console.log(`[STRIPE-WEBHOOK] On-site order recorded for ${pi.id}`);
+      }
+
+      return new Response(JSON.stringify({ received: true }), {
+        headers: { "Content-Type": "application/json" }, status: 200,
+      });
+    }
+  }
+
+  // ---------------------------------------------------------------------
   // Connect transfer & payment failure handling for the dual-billing flow.
   // We notify every admin of the affected studio so they can take action.
   // ---------------------------------------------------------------------
