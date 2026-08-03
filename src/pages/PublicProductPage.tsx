@@ -71,6 +71,7 @@ import TradeWorkspace from "@/components/product/TradeWorkspace";
 import TradeFirstCta from "@/components/product/TradeFirstCta";
 
 import StickyPurchaseBar from "@/components/product/StickyPurchaseBar";
+import { setStickyProductBarActive } from "@/lib/stickyProductBar";
 
 import TradePendingReviewCard from "@/components/product/TradePendingReviewCard";
 
