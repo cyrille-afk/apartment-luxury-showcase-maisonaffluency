@@ -2027,26 +2027,20 @@ const PublicProductPage: React.FC = () => {
                 </div>
               </VariantSelectorsProvider>
 
-              {/* Primary public CTAs — direct checkout first, quote second.
-                  Placed after the finish selector on both viewports so configuration
-                  happens before purchase. */}
+              {/* Primary public CTAs — enquiry-led. A made-to-order commission is
+                  discussed with an advisor first (shipping, white-glove install,
+                  customisation); secure checkout stays available as a discreet link. */}
               <div className="order-4">
                 <div className="space-y-3">
                   <button
                     type="button"
-                    onClick={handleDirectCheckout}
-                    disabled={checkoutLoading}
-                    className="inline-flex h-12 w-full items-center justify-center gap-2 px-5 rounded-[2px] bg-foreground text-background font-body text-[11px] leading-none uppercase tracking-[0.14em] hover:bg-foreground/85 transition-colors disabled:opacity-60"
+                    onClick={() => setQuoteRequestOpen(true)}
+                    className="inline-flex h-12 w-full items-center justify-center gap-2 px-5 rounded-[2px] bg-foreground text-background font-body text-[11px] leading-none uppercase tracking-[0.14em] hover:bg-foreground/85 transition-colors"
                   >
-                    {checkoutLoading ? (
-                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                    ) : (
-                      <ShoppingBag className="h-3.5 w-3.5" />
-                    )}
-                    {checkoutLoading ? "Opening checkout…" : "Place Order"}
+                    Inquire to Purchase
                   </button>
                   <p className="text-center font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground/70">
-                    Secure checkout powered by Stripe
+                    A design advisor confirms finish, freight &amp; installation
                   </p>
 
                   <button
@@ -2054,9 +2048,24 @@ const PublicProductPage: React.FC = () => {
                     onClick={() => setQuoteRequestOpen(true)}
                     className="inline-flex h-12 w-full items-center justify-center px-5 rounded-[2px] border border-foreground/25 text-foreground font-body text-[11px] leading-none uppercase tracking-[0.12em] hover:border-foreground/60 transition-colors"
                   >
-                    Request a Quote
+                    Speak with a Design Advisor
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleDirectCheckout}
+                    disabled={checkoutLoading}
+                    className="mx-auto flex items-center justify-center gap-2 pt-1 font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground/80 underline underline-offset-4 decoration-border hover:text-foreground transition-colors disabled:opacity-60"
+                  >
+                    {checkoutLoading ? (
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                    ) : (
+                      <ShoppingBag className="h-3 w-3" />
+                    )}
+                    {checkoutLoading ? "Opening checkout…" : "Or complete secure checkout"}
                   </button>
                 </div>
+
 
                 {/* Secondary: trade access invitation */}
                 {!user && !authLoading && (
