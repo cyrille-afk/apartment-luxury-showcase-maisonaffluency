@@ -56,8 +56,10 @@ const PresentationMode: React.FC<PresentationModeProps> = ({
     document.body.style.overflow = "hidden";
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
-      if (e.key === "ArrowRight") onIndexChange(Math.min(index + 1, images.length - 1));
-      if (e.key === "ArrowLeft") onIndexChange(Math.max(index - 1, 0));
+      const len = images.length;
+      const wrap = (i: number) => ((i % len) + len) % len;
+      if (e.key === "ArrowRight") onIndexChange(wrap(index + 1));
+      if (e.key === "ArrowLeft") onIndexChange(wrap(index - 1));
     };
     window.addEventListener("keydown", onKey);
     return () => {
