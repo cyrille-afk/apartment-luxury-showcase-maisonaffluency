@@ -214,7 +214,7 @@ const TradeFavoriteFolderPicker = ({ productId, meta, children, align = "end", s
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild onClick={(e) => { e.stopPropagation(); e.preventDefault(); }}>
+      <PopoverTrigger asChild onClick={(e) => e.stopPropagation()}>
         {children}
       </PopoverTrigger>
       <PopoverContent
