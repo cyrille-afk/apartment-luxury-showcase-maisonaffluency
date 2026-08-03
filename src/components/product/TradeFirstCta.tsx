@@ -40,12 +40,19 @@ export default function TradeFirstCta({
   const primaryBtn =
     "inline-flex h-12 w-full items-center justify-center px-5 rounded-[2px] bg-foreground text-background font-body text-[11px] leading-none uppercase tracking-[0.14em] hover:bg-foreground/85 transition-colors";
 
+  const secureNote = (
+    <p className="text-center font-body text-[10px] uppercase tracking-[0.16em] text-muted-foreground/70">
+      Secure checkout powered by Stripe
+    </p>
+  );
+
   if (signedIn) {
     return (
-      <div className={className}>
+      <div className={cn("flex flex-col gap-3", className)}>
         <button type="button" onClick={onRequestQuote} className={primaryBtn}>
           Inquire to Purchase
         </button>
+        {secureNote}
       </div>
     );
   }
@@ -113,6 +120,7 @@ export default function TradeFirstCta({
           <button type="button" onClick={onRequestQuote} className={primaryBtn}>
             Inquire to Purchase
           </button>
+          {secureNote}
         </div>
       )}
     </div>
