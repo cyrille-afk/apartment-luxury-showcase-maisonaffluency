@@ -31,6 +31,7 @@ import { sortCuratorPicks, interleaveBySubcategory } from "@/lib/curatorPickSort
 import GalleryDetailsFloatingNav from "@/components/GalleryDetailsFloatingNav";
 import { useAuth } from "@/hooks/useAuth";
 import { lastNameInitial } from "@/lib/nameFormat";
+import { usePublicRrpMap, formatPublicRrp } from "@/hooks/usePublicRrp";
 // Collectible profiles are public; product-page gating lives in PublicProductPage.
 
 const transition = { duration: 0.6, ease: [0.16, 1, 0.3, 1] as const };
@@ -500,6 +501,8 @@ const PublicDesignerProfile = () => {
 
     return interleaveBySubcategory(sortCuratorPicks(filtered));
   }, [rawPicks, displayBiographyImages, displayBiography, isGrouped]);
+
+  const { data: publicRrpMap = {} } = usePublicRrpMap(picks.map((p: any) => p.id));
 
   useEffect(() => {
     if (scrollToSection !== "picks" || picks.length === 0) return;
@@ -1344,7 +1347,7 @@ const PublicDesignerProfile = () => {
                         {/* Price slot — pushed to bottom so cards align across the row */}
                         <div className="mt-2">
                           <p className="font-body text-[10px] md:text-xs text-muted-foreground md:text-foreground tracking-wide">
-                            Price upon request
+                            {formatPublicRrp(publicRrpMap[pick.id]) || "Price upon request"}
                           </p>
                         </div>
                       </div>
