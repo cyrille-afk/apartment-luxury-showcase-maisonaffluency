@@ -1163,10 +1163,10 @@ const PublicProductPage: React.FC = () => {
   const [galleryCompact, setGalleryCompact] = useState(false);
   const [stickyBarArmed, setStickyBarArmed] = useState(false);
   const { direction: scrollDir, scrollY } = useScrollDirection({ threshold: 6, topOffset: 80 });
-  // Coordinate with the global header: hide while scrolling down past the header
-  // threshold so the bar never floats detached from the nav; reveal on scroll up.
-  const headerHiddenOnMobile = scrollDir === "down" && scrollY > 240;
-  const showStickyBar = stickyBarArmed && !headerHiddenOnMobile;
+  // Once the product image has scrolled past, the mobile action bar takes over
+  // the top of the viewport and the global header steps aside entirely.
+  const showStickyBar = stickyBarArmed;
+
 
 
 
