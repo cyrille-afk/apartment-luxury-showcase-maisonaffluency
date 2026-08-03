@@ -670,7 +670,7 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
                 <DropdownMenuTrigger className="relative group p-1 outline-none">
                   <User className="w-[16px] h-[16px] text-muted-foreground group-hover:text-foreground transition-colors" strokeWidth={1.25} />
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" sideOffset={18} className="bg-background border border-border shadow-lg z-50 min-w-[200px] translate-x-[44px]">
+                <DropdownMenuContent align="end" sideOffset={122} className="bg-background border border-border shadow-lg z-50 min-w-[200px] translate-x-[44px]">
                   {user ? (
                     <>
                       <div className="px-4 py-2.5 border-b border-border">
