@@ -26,6 +26,7 @@ import { rememberProductBackRef } from "@/lib/designerBackRef";
 import { computeVariantAxes } from "@/lib/parseSizeVariants";
 import { supabase } from "@/integrations/supabase/client";
 import SpecGlyph from "@/components/product/SpecGlyph";
+import { usePublicRrp, formatPublicRrp } from "@/hooks/usePublicRrp";
 import { FadeInImage } from "@/components/ui/FadeInImage";
 
 /** Mirrors the slugifier used by FeaturedDesigners + PublicProductPage. */
@@ -252,6 +253,10 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
         : product.brand_name)
     : undefined;
   const { data: linkedDesigner } = useDesignerByName(designerDisplayName);
+
+  // Publicly visible RRP (only for products flagged public_rrp_visible, e.g. Apparatus).
+  const { data: publicRrp } = usePublicRrp(product?.id);
+  const publicPriceLabel = formatPublicRrp(publicRrp);
 
   // Reset per-product state when the product changes (incl. selected finish).
   const [selectedBaseIdx, setSelectedBaseIdx] = useState<number | null>(null);
@@ -643,7 +648,13 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                   ? `${product.title} ${product.subtitle}`
                   : product.title}
               </h2>
+              {publicPriceLabel && (
+                <p className="font-display text-base md:text-lg text-foreground mt-2 leading-none">
+                  {publicPriceLabel}
+                </p>
+              )}
             </div>
+
 
             <div className="flex flex-col">
               {(() => {
@@ -795,7 +806,7 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                   href="/trade-program"
                   className="flex items-center justify-center gap-2 px-5 py-3 rounded-md font-body text-xs uppercase tracking-[0.12em] transition-all w-full bg-foreground text-background hover:bg-foreground/90"
                 >
-                  Price Upon Request
+                  {publicPriceLabel || "Price Upon Request"}
                 </a>
               )}
               {productPageHref && (

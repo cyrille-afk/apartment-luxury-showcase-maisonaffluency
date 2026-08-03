@@ -72,3 +72,32 @@ export function formatPublicRrpCents(
   return `${prefix ? `${prefix} ` : ""}${symbol}${amount}${symbol ? "" : ` ${currency}`}${unit}`;
 }
 
+
+/**
+ * Batch variant of `usePublicRrp` — resolves publicly visible RRPs for a list
+ * of curator pick ids (used by pick grids so publicly priced products show a
+ * real price instead of "Price upon request").
+ */
+export function usePublicRrpMap(pickIds: (string | null | undefined)[]) {
+  const ids = Array.from(new Set(pickIds.filter((v): v is string => !!v))).sort();
+  return useQuery({
+    queryKey: ["public-rrp-map", ids],
+    enabled: ids.length > 0,
+    staleTime: 10 * 60_000,
+    queryFn: async (): Promise<Record<string, PublicRrpRow>> => {
+      const map: Record<string, PublicRrpRow> = {};
+      const select = "id, source_pick_id, rrp_price_cents, currency, price_unit, price_prefix";
+      const [bySource, byId] = await Promise.all([
+        supabase.from("trade_products_public_rrp" as any).select(select).in("source_pick_id", ids),
+        supabase.from("trade_products_public_rrp" as any).select(select).in("id", ids),
+      ]);
+      for (const row of ((byId.data || []) as any[])) {
+        if (row?.id) map[row.id] = row as PublicRrpRow;
+      }
+      for (const row of ((bySource.data || []) as any[])) {
+        if (row?.source_pick_id) map[row.source_pick_id] = row as PublicRrpRow;
+      }
+      return map;
+    },
+  });
+}
