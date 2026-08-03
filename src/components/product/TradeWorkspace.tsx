@@ -106,13 +106,18 @@ export default function TradeWorkspace({
   };
 
 
+  // `trade_price_cents` holds RRP for most rows (legacy import), so it only counts
+  // as a real negotiated net when it is strictly below RRP. Otherwise the tier
+  // discount is applied on top of RRP.
   const rrpCents = pricing?.rrp_price_cents ?? pricing?.trade_price_cents ?? null;
-  const netCents =
-    pricing?.trade_price_cents && pricing?.rrp_price_cents
+  const explicitNet =
+    pricing?.trade_price_cents && rrpCents && pricing.trade_price_cents < rrpCents
       ? pricing.trade_price_cents
-      : rrpCents
-        ? Math.round(rrpCents * (1 - (discountPct || 0)))
-        : null;
+      : null;
+  const netCents =
+    explicitNet ?? (rrpCents ? Math.round(rrpCents * (1 - (discountPct || 0))) : null);
+  const discountApplied = !explicitNet && !!discountPct && netCents !== rrpCents;
+  const discountLabel = `${(discountPct * 100).toFixed(discountPct * 100 % 1 === 0 ? 0 : 1)}%`;
 
   const rrpLabel = formatCents(rrpCents, pricing?.currency, pricing?.price_unit);
   const netLabel = formatCents(netCents, pricing?.currency, pricing?.price_unit);
