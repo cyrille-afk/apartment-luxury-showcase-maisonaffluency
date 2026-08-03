@@ -80,7 +80,9 @@ export default function ExpandableSpec({
   disabledIndices,
   helperText,
   singleValueLabel,
+  swatchMode = false,
 }: ExpandableSpecProps) {
+
   const disabledSet = new Set(disabledIndices ?? []);
   let lines = text.split("\n").map((l) => l.trim()).filter(Boolean);
   let didAutoSplit = false;
