@@ -111,7 +111,7 @@ const Hero = () => {
                 </button>
 
                 {/* Inline editorial links — vertical stack on mobile/PWA, horizontal on desktop */}
-                <div className="hero-mobile-links-inner mt-6 flex flex-col items-center gap-4 hero-fade-in-delayed-5 md:mt-6 md:flex-row md:gap-0">
+                <div className="hero-mobile-links-inner mt-6 flex flex-col items-center gap-4 hero-fade-in-delayed-5 rounded-full bg-black/70 px-5 py-2 backdrop-blur-md md:mt-6 md:flex-row md:gap-0 md:px-6 md:py-2.5">
                   <button
                     type="button"
                     onClick={() => {
