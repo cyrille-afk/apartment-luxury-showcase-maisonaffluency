@@ -71,7 +71,10 @@ const PresentationMode: React.FC<PresentationModeProps> = ({
 
   if (!open || typeof document === "undefined" || images.length === 0) return null;
 
-  const go = (i: number) => onIndexChange(Math.max(0, Math.min(i, images.length - 1)));
+  const go = (i: number) => {
+    const len = images.length;
+    onIndexChange(((i % len) + len) % len);
+  };
 
   const revealChrome = () => {
     setChromeVisible(true);
