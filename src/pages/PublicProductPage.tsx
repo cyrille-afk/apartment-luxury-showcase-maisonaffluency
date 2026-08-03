@@ -1960,7 +1960,7 @@ const PublicProductPage: React.FC = () => {
                 }}
                 onFinishesMissingImagesChange={setFinishesMissingImages}
               >
-                <div className="flex flex-col gap-5 order-1 md:order-2">
+                <div className="flex flex-col gap-5 order-2">
                   <VariantFinishSelectors section="primary" />
                 </div>
 
