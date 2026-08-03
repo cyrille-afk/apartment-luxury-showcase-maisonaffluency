@@ -260,7 +260,29 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
 
   useEffect(() => stopHoverScroll, [stopHoverScroll]);
 
+  // Double-tap on the photo opens the fullscreen viewer so clients can inspect
+  // stone grain / weave. Guarded so a tap that was really a swipe never fires.
+  const lastTapRef = useRef<{ t: number; x: number; y: number } | null>(null);
+  const handleTouchEndForDoubleTap = useCallback((e: React.TouchEvent) => {
+    const touch = e.changedTouches[0];
+    if (!touch) return;
+    const now = Date.now();
+    const prev = lastTapRef.current;
+    if (
+      prev &&
+      now - prev.t < 300 &&
+      Math.abs(touch.clientX - prev.x) < 30 &&
+      Math.abs(touch.clientY - prev.y) < 30
+    ) {
+      lastTapRef.current = null;
+      setPresentOpen(true);
+      return;
+    }
+    lastTapRef.current = { t: now, x: touch.clientX, y: touch.clientY };
+  }, []);
+
   if (images.length === 0) return null;
+
 
   return (
     <div className="flex gap-4 items-stretch">
@@ -329,11 +351,17 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
       {/* Main image + (mobile) thumb strip below */}
       <div className="flex-1 flex flex-col gap-3 min-w-0">
         <div className="relative group" ref={inlineSwipeRef}>
-        <div className={cn("product-image-frame md:aspect-square md:h-auto bg-foreground/95 rounded-luxury-sharp overflow-hidden relative touch-pan-y md:transition-[height,aspect-ratio] md:duration-300 md:ease-out", compact && "product-image-frame--compact")}>
-          {/* Main image — presentation mode is the only fullscreen viewer. */}
+        <div
+          className={cn("product-image-frame md:aspect-square md:h-auto bg-foreground/95 rounded-luxury-sharp overflow-hidden relative touch-pan-y md:transition-[height,aspect-ratio] md:duration-300 md:ease-out", compact && "product-image-frame--compact")}
+          onDoubleClick={() => setPresentOpen(true)}
+          onTouchEnd={handleTouchEndForDoubleTap}
+        >
+          {/* Main image — presentation mode is the only fullscreen viewer.
+              Double-tap / double-click opens it for grain-level inspection. */}
           <div className="absolute inset-0 flex items-center justify-center overflow-hidden rounded-[inherit]">
             <CrossfadeImage src={images[activeIndex]} alt={alt} />
           </div>
+
 
 
           {/* Secondary actions live behind a single discreet "more" menu:
@@ -360,14 +388,15 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
 
           {/* Hover-to-navigate now lives on the vertical thumbnail strip (see above). */}
 
-          {/* Fractional gallery counter — bottom-centre on every breakpoint. */}
+          {/* Fractional gallery counter — clean numerals in the lower-left corner. */}
           {images.length > 1 && (
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 pointer-events-none">
-              <span className="inline-block px-1.5 py-0.5 rounded-luxury-micro bg-background/40 backdrop-blur-md font-body text-[8px] font-light uppercase tracking-[0.12em] text-foreground/60 tabular-nums">
-                {String(activeIndex + 1).padStart(2, "0")} / {String(images.length).padStart(2, "0")}
+            <div className="absolute bottom-4 left-4 z-20 pointer-events-none">
+              <span className="inline-block px-2 py-1 rounded-luxury-micro bg-background/45 backdrop-blur-md font-body text-[11px] font-light tracking-[0.14em] text-foreground/80 tabular-nums">
+                {activeIndex + 1} / {images.length}
               </span>
             </div>
           )}
+
 
           {overlay && (
             <div className="absolute top-3 right-3 z-20 pointer-events-none">
@@ -446,10 +475,11 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
 
         </div>
 
-        {/* Horizontal progress line — rendered BELOW the image on every
-            breakpoint so it doesn't overlap the photo or the action icons. */}
+        {/* Horizontal progress line — desktop only. On touch devices the
+            hairline rail was too small to see or hit, so the corner counter
+            plus swipe carries navigation there. */}
         {images.length > 1 && (
-          <div className="mt-2 flex items-center gap-2 px-2">
+          <div className="mt-2 hidden md:flex items-center gap-2 px-2">
             {images.map((_, i) => (
               <button
                 key={i}
@@ -466,6 +496,7 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
             ))}
           </div>
         )}
+
 
         {/* Caption */}
         {caption && (

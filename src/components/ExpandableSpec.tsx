@@ -3,6 +3,8 @@ import { ChevronDown } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { parseMaterialsFallback } from "@/lib/parseSizeVariants";
+import { materialSwatchTone, shortFinishLabel } from "@/lib/materialSwatch";
+
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Drawer, DrawerContent, DrawerTitle } from "@/components/ui/drawer";
 
@@ -51,7 +53,14 @@ interface ExpandableSpecProps {
    * Ignored when multiple options render as a dropdown.
    */
   singleValueLabel?: string;
+  /**
+   * Renders the options as a horizontal row of circular material swatches
+   * instead of a dropdown (luxury finish pickers: instant, one-tap, no
+   * secondary menu). Only applies when there are multiple options.
+   */
+  swatchMode?: boolean;
 }
+
 
 /**
  * Renders a spec row (materials / dimensions / origin / lead time).
@@ -73,7 +82,9 @@ export default function ExpandableSpec({
   disabledIndices,
   helperText,
   singleValueLabel,
+  swatchMode = false,
 }: ExpandableSpecProps) {
+
   const disabledSet = new Set(disabledIndices ?? []);
   let lines = text.split("\n").map((l) => l.trim()).filter(Boolean);
   let didAutoSplit = false;
@@ -143,8 +154,74 @@ export default function ExpandableSpec({
     );
   }
 
+  // Multi + swatchMode → horizontal row of circular material swatches.
+  if (swatchMode && placeholder) {
+    const pickSwatch = (i: number) => {
+      if (disabledSet.has(i)) return;
+      try {
+        (navigator as any)?.vibrate?.(8);
+      } catch {
+        /* haptics unsupported — silent */
+      }
+      if (i === selectedIdx) {
+        setInternalIdx(null);
+        onChange?.(-1);
+        return;
+      }
+      setInternalIdx(i);
+      onChange?.(i);
+    };
+    const activeLabel = selectedIdx != null && selectedIdx >= 0 ? lines[selectedIdx] : null;
+
+    return (
+      <div className="border-b border-border/60 first:border-t py-4">
+        <div className="flex items-baseline justify-between gap-4">
+          <span className="font-body text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+            {placeholder.replace(/^select your\s+/i, "")}
+          </span>
+          {activeLabel && (
+            <span className="font-body text-[12px] text-foreground text-right min-w-0 truncate">
+              {shortFinishLabel(activeLabel)}
+            </span>
+          )}
+        </div>
+
+        <div className="mt-3 -mx-1 flex gap-3 overflow-x-auto scrollbar-hide px-1 pb-1 [&::-webkit-scrollbar]:hidden">
+          {lines.map((line, i) => {
+            const isDisabled = disabledSet.has(i);
+            const isSelected = i === selectedIdx;
+            const tone = materialSwatchTone(line);
+            return (
+              <button
+                key={i}
+                type="button"
+                onClick={() => pickSwatch(i)}
+                aria-pressed={isSelected}
+                aria-disabled={isDisabled}
+                title={shortFinishLabel(line)}
+                aria-label={shortFinishLabel(line)}
+                className={cn(
+                  "shrink-0 h-11 w-11 rounded-full transition-all duration-200 touch-manipulation",
+                  "ring-offset-2 ring-offset-background",
+                  isSelected ? "ring-1 ring-foreground scale-105" : "ring-1 ring-border/60 hover:ring-foreground/40",
+                  isDisabled && "opacity-30 cursor-not-allowed"
+                )}
+                style={{ backgroundImage: tone.css }}
+              />
+            );
+          })}
+        </div>
+
+        {helperText && (
+          <p className="mt-2 font-body text-[11px] text-muted-foreground/80 leading-snug">{helperText}</p>
+        )}
+      </div>
+    );
+  }
+
   // Multi + placeholder → inline expanding picker that pushes rows below
   // downward (instead of overlaying them like a Radix/Native select).
+
   if (placeholder) {
     const hasSelection = selectedIdx != null && selectedIdx >= 0;
     const firstEnabled = () => {
