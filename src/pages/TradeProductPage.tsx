@@ -2170,7 +2170,10 @@ const TradeProductPage: React.FC = () => {
                   }
                 />
               )}
+            </div>
 
+            {/* Finish selection — mobile: directly under the photography */}
+            <div className="flex flex-col gap-2 order-[-5] md:order-none">
               <FinishSelector
                   pickId={product.id}
                   productTitle={product.title}
