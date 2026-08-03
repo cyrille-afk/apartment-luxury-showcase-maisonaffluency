@@ -2022,43 +2022,14 @@ const PublicProductPage: React.FC = () => {
                 </div>
               </VariantSelectorsProvider>
 
-              {/* Primary public CTA — a single enquiry-led action, with the
-                  advisor route reduced to a quiet text link beneath it. */}
+              {/* Trade-first CTA — segmented Trade / Retail control. */}
               <div className="order-3 md:order-4">
-                <div className="space-y-4">
-                  <button
-                    type="button"
-                    onClick={() => setQuoteRequestOpen(true)}
-                    className="inline-flex h-12 w-full items-center justify-center gap-2 px-5 rounded-[2px] bg-foreground text-background font-body text-[11px] leading-none uppercase tracking-[0.14em] hover:bg-foreground/85 transition-colors"
-                  >
-                    Inquire to Purchase
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setQuoteRequestOpen(true)}
-                    className="mx-auto block font-body text-[11px] tracking-[0.06em] text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    Need assistance?{" "}
-                    <span className="underline underline-offset-4 decoration-border">
-                      Speak with a Design Advisor
-                    </span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={handleDirectCheckout}
-                    disabled={checkoutLoading}
-                    className="mx-auto flex items-center justify-center gap-2 font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground/80 underline underline-offset-4 decoration-border hover:text-foreground transition-colors disabled:opacity-60"
-                  >
-                    {checkoutLoading ? (
-                      <Loader2 className="h-3 w-3 animate-spin" />
-                    ) : (
-                      <ShoppingBag className="h-3 w-3" />
-                    )}
-                    {checkoutLoading ? "Opening checkout…" : "Or complete secure checkout"}
-                  </button>
-                </div>
+                <TradeFirstCta
+                  redirectTo={location.pathname + location.search}
+                  rrpLabel={publicRrpLabel}
+                  onRequestQuote={() => setQuoteRequestOpen(true)}
+                  signedIn={!!user && !authLoading}
+                />
               </div>
 
               {/* Origin & production lead time — raised above the fold on mobile. */}
@@ -2091,15 +2062,34 @@ const PublicProductPage: React.FC = () => {
                 })()}
               </div>
 
-              {/* Trade access — collapsed single-line toggle */}
-              {!user && !authLoading && (
-                <div className="order-6 md:order-6">
-                  <TradeExclusiveCard
-                    redirectTo={location.pathname + location.search}
-                    rrpLabel={publicRrpLabel}
-                  />
-                </div>
-              )}
+              {/* Quiet advisor + checkout routes, at the very bottom of the section. */}
+              <div className="order-6 md:order-6 flex flex-col items-center gap-3 pt-1">
+                <button
+                  type="button"
+                  onClick={() => setQuoteRequestOpen(true)}
+                  className="font-body text-[11px] tracking-[0.06em] text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Need project assistance?{" "}
+                  <span className="underline underline-offset-4 decoration-border">
+                    Speak with an Advisor
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleDirectCheckout}
+                  disabled={checkoutLoading}
+                  className="flex items-center justify-center gap-2 font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground/80 underline underline-offset-4 decoration-border hover:text-foreground transition-colors disabled:opacity-60"
+                >
+                  {checkoutLoading ? (
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                  ) : (
+                    <ShoppingBag className="h-3 w-3" />
+                  )}
+                  {checkoutLoading ? "Opening checkout…" : "Or complete secure checkout"}
+                </button>
+              </div>
+
 
               <div className="flex flex-col gap-5 order-8 md:order-6">
 
