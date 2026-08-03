@@ -39,6 +39,7 @@ import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import LightboxDescriptionDropdown from "@/components/ui/LightboxDescriptionDropdown";
 import { normalizeCategoryContext } from "@/lib/categoryNormalization";
+import { formatDesignerDisplayName } from "@/lib/designerDisplayName";
 import { buildProductBreadcrumbs } from "@/lib/productBreadcrumbs";
 import QuoteDrawer from "@/components/trade/QuoteDrawer";
 import CustomRequestModal from "@/components/trade/CustomRequestModal";
@@ -1327,9 +1328,7 @@ const TradeProductPage: React.FC = () => {
 
   const { product, designer, relatedPicks, pricing, tradeProductId, glbUrl } = data;
 
-  const designerDisplay = designer.name.includes(" - ")
-    ? designer.name.split(" - ")[0].trim()
-    : designer.name;
+  const designerDisplay = formatDesignerDisplayName(designer.name);
 
   const compareItem: CompareItem = {
     pick: {
@@ -1911,11 +1910,11 @@ const TradeProductPage: React.FC = () => {
                   onClick={() => {
                     if (designer.slug) rememberProductBackRef(designer.slug, location.pathname + location.search);
                   }}
-                  className="font-body text-[11px] uppercase tracking-[0.15em] text-[hsl(var(--gold))] hover:text-primary hover:underline underline-offset-2 transition-colors"
+                  className="font-body text-[12px] uppercase tracking-[0.18em] text-[hsl(var(--gold))] hover:text-primary hover:underline underline-offset-2 transition-colors"
                 >
                   {designerDisplay}
                 </Link>
-                <h1 className="font-display text-2xl md:text-3xl mt-1 leading-tight">
+                <h1 className="font-display text-[1.5rem] md:text-[1.85rem] mt-1 leading-tight">
                   {product.title}
                   {product.subtitle && ` by ${product.subtitle}`}
                 </h1>

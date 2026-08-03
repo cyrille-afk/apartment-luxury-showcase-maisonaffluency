@@ -24,6 +24,7 @@ import { cn } from "@/lib/utils";
 import PageLoadingSkeleton from "@/components/PageLoadingSkeleton";
 import ProductDetailSkeleton from "@/components/product/ProductDetailSkeleton";
 import { normalizeCategoryContext } from "@/lib/categoryNormalization";
+import { formatDesignerDisplayName } from "@/lib/designerDisplayName";
 import { formatEditionLabel } from "@/lib/editionLabel";
 import { renderParagraph } from "@/components/EditorialBiography";
 import { formatDimensionsMultiline, formatImperialDimensions, withImperialPerLine } from "@/lib/formatDimensions";
@@ -1339,9 +1340,7 @@ const PublicProductPage: React.FC = () => {
   const { product, designer, relatedPicks } = data;
   const favorited = favIds.has(product.id);
 
-  const designerDisplay = designer.name.includes(" - ")
-    ? designer.name.split(" - ")[0].trim()
-    : designer.name;
+  const designerDisplay = formatDesignerDisplayName(designer.name);
 
   const compareItem: CompareItem = {
     pick: {
@@ -1961,19 +1960,19 @@ const PublicProductPage: React.FC = () => {
                 }}
                 onFinishesMissingImagesChange={setFinishesMissingImages}
               >
-                <div className="flex flex-col gap-5 order-1 md:order-2">
+                <div className="flex flex-col gap-5 order-2">
                   <VariantFinishSelectors section="primary" />
                 </div>
 
-                <div className="min-w-0 pt-0 pb-4 md:py-5 order-2 md:order-1">
+                <div className="min-w-0 pt-0 pb-4 md:py-5 order-1">
                       <Link
                         to={`/designers/${designer.slug}`}
                         onClick={() => rememberProductBackRef(designer.slug, location.pathname + location.search)}
-                        className="font-body font-light text-[10px] uppercase tracking-[0.28em] text-[hsl(var(--gold))] hover:text-primary transition-colors"
+                        className="font-body font-light text-[12px] uppercase tracking-[0.22em] text-[hsl(var(--gold))] hover:text-primary transition-colors"
                       >
                         {designerDisplay}
                       </Link>
-                      <h1 className="font-display font-normal text-[1.75rem] md:text-[2.15rem] mt-3 leading-[1.15] tracking-[-0.01em]">
+                      <h1 className="font-display font-normal text-[1.5rem] md:text-[1.85rem] mt-2 leading-[1.15] tracking-[-0.01em]">
                         {product.title}
                         {product.subtitle &&
                           !product.title.toLowerCase().includes(product.subtitle.toLowerCase()) &&
