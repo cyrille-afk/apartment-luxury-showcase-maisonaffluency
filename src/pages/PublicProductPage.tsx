@@ -1167,6 +1167,15 @@ const PublicProductPage: React.FC = () => {
   // the top of the viewport and the global header steps aside entirely.
   const showStickyBar = stickyBarArmed;
 
+  // Mobile/PWA only: tell the global nav to stay hidden while this bar owns the top.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const isSmall = window.matchMedia("(max-width: 767px)").matches;
+    setStickyProductBarActive(isSmall && showStickyBar);
+    return () => setStickyProductBarActive(false);
+  }, [showStickyBar]);
+
+
 
 
 
