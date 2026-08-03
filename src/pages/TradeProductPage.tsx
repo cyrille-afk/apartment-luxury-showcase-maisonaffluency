@@ -33,7 +33,7 @@ import { useCompare, type CompareItem } from "@/contexts/CompareContext";
 import { useAuth } from "@/hooks/useAuth";
 import { useFavorites } from "@/hooks/useFavorites";
 import { updateConciergeSession } from "@/hooks/useConciergeSession";
-import TradeFavoriteFolderPicker from "@/components/trade/TradeFavoriteFolderPicker";
+import AddToProjectPopover from "@/components/trade/AddToProjectPopover";
 
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -1793,18 +1793,15 @@ const TradeProductPage: React.FC = () => {
                       <LightboxDescriptionDropdown description={product.description} />
                     </div>
                   )}
-                  <TradeFavoriteFolderPicker
+                  <AddToProjectPopover
                     productId={favoriteId}
-                    meta={{
-                      product_name: product.title,
-                      brand_name: designerDisplay,
-                      category: product.category || undefined,
-                      image_url: product.image_url,
-                      dimensions: product.dimensions,
-                      materials: product.materials,
+                    productName={product.title}
+                    onAdded={async () => {
+                      if (!isFavorited(favoriteId)) {
+                        await toggleFavorite(favoriteId);
+                      }
                     }}
                     align="end"
-                    side="bottom"
                   >
                     <button
                       onClick={(e) => e.stopPropagation()}
@@ -1813,7 +1810,7 @@ const TradeProductPage: React.FC = () => {
                     >
                       <Heart size={18} strokeWidth={1.5} className={cn(favorited ? "fill-destructive text-destructive" : "text-foreground/80")} />
                     </button>
-                  </TradeFavoriteFolderPicker>
+                  </AddToProjectPopover>
                 </div>
               }
               bottomRightOverlay={(() => {

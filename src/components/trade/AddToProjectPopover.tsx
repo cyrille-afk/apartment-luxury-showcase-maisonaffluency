@@ -2,8 +2,9 @@ import { useState, useEffect } from "react";
 import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useStudio } from "@/hooks/useStudio";
 import { useToast } from "@/hooks/use-toast";
-import { FolderOpen, Plus, Check, Loader2 } from "lucide-react";
+import { FolderOpen, Plus, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   Popover,
@@ -16,6 +17,8 @@ interface AddToProjectPopoverProps {
   productName: string;
   /** Preferred title for a newly-created project (e.g. concierge project name). */
   defaultProjectName?: string;
+  onAdded?: () => void | Promise<void>;
+  align?: "start" | "center" | "end";
   children: React.ReactNode;
 }
 
@@ -28,8 +31,9 @@ interface Board {
  * Popover that lets the user add a product to one of their project folders (client_boards).
  * Wraps a trigger element (e.g. a button).
  */
-export default function AddToProjectPopover({ productId, productName, defaultProjectName, children }: AddToProjectPopoverProps) {
+export default function AddToProjectPopover({ productId, productName, defaultProjectName, onAdded, align = "start", children }: AddToProjectPopoverProps) {
   const { user } = useAuth();
+  const { currentStudio } = useStudio();
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
   const [boards, setBoards] = useState<Board[]>([]);
@@ -40,16 +44,29 @@ export default function AddToProjectPopover({ productId, productName, defaultPro
   useEffect(() => {
     if (!open || !user) return;
     setLoading(true);
-    supabase
+    let boardsQuery = supabase
       .from("client_boards")
       .select("id, title")
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: false })
-      .then(({ data }) => {
-        setBoards((data as Board[]) || []);
+      .order("created_at", { ascending: false });
+    boardsQuery = currentStudio
+      ? boardsQuery.or(`studio_id.eq.${currentStudio.id},and(studio_id.is.null,user_id.eq.${user.id})`)
+      : boardsQuery.eq("user_id", user.id);
+    boardsQuery.then(async ({ data, error }) => {
+        const nextBoards = error ? [] : ((data as Board[]) || []);
+        setBoards(nextBoards);
+        if (nextBoards.length > 0) {
+          const { data: existingItems } = await supabase
+            .from("client_board_items")
+            .select("board_id")
+            .in("board_id", nextBoards.map((board) => board.id))
+            .eq("product_id", productId);
+          setAddedTo(new Set((existingItems || []).map((item) => item.board_id)));
+        } else {
+          setAddedTo(new Set());
+        }
         setLoading(false);
       });
-  }, [open, user]);
+  }, [open, user, currentStudio?.id, productId]);
 
   const addToBoard = async (boardId: string, boardTitle: string) => {
     if (!user || adding) return;
@@ -93,6 +110,7 @@ export default function AddToProjectPopover({ productId, productName, defaultPro
       toast({ title: "Error", description: error.message, variant: "destructive" });
     } else {
       setAddedTo((prev) => new Set(prev).add(boardId));
+      await onAdded?.();
       toast({ title: "Added to project", description: `${productName} → "${boardTitle}"` });
     }
     setAdding(null);
@@ -104,7 +122,7 @@ export default function AddToProjectPopover({ productId, productName, defaultPro
     const newTitle = (defaultProjectName?.trim() || productName).slice(0, 60);
     const { data, error } = await supabase
       .from("client_boards")
-      .insert({ user_id: user.id, title: newTitle, client_name: "" })
+      .insert({ user_id: user.id, studio_id: currentStudio?.id ?? null, title: newTitle, client_name: "" } as any)
       .select("id, title")
       .single();
 
@@ -116,6 +134,7 @@ export default function AddToProjectPopover({ productId, productName, defaultPro
 
     const board = data as Board;
     setBoards((prev) => [board, ...prev]);
+    setAdding(null);
     await addToBoard(board.id, board.title);
   };
 
@@ -126,9 +145,9 @@ export default function AddToProjectPopover({ productId, productName, defaultPro
       <PopoverTrigger asChild>
         {children}
       </PopoverTrigger>
-      <PopoverContent side="bottom" align="start" className="w-56 p-0 bg-background/95 backdrop-blur-xl border-border z-[110]">
+      <PopoverContent side="bottom" align={align} className="w-64 p-0 bg-background/95 backdrop-blur-xl border-border z-[120]">
         <div className="p-2.5 border-b border-border">
-          <p className="font-body text-[10px] uppercase tracking-wider text-muted-foreground">Add to project</p>
+          <p className="font-body text-[10px] uppercase tracking-wider text-muted-foreground">Save to project folder</p>
         </div>
         <div className="max-h-48 overflow-y-auto py-1">
           {loading ? (
@@ -137,7 +156,7 @@ export default function AddToProjectPopover({ productId, productName, defaultPro
             </div>
           ) : boards.length === 0 ? (
             <p className="font-body text-[10px] text-muted-foreground text-center py-3 px-2">
-              No projects yet
+              No project folders yet
             </p>
           ) : (
             boards.map((board) => {
@@ -176,7 +195,7 @@ export default function AddToProjectPopover({ productId, productName, defaultPro
             ) : (
               <Plus className="w-3.5 h-3.5 text-[hsl(var(--gold))] shrink-0" />
             )}
-            <span className="font-body text-xs text-foreground">New project</span>
+            <span className="font-body text-xs text-foreground">New project folder</span>
           </button>
         </div>
       </PopoverContent>
