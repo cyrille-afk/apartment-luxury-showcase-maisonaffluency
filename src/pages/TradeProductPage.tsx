@@ -1943,6 +1943,14 @@ const TradeProductPage: React.FC = () => {
                   }}
                 />
               )}
+              {/* Base-only (finish) axis with fixed product dimensions: the
+                  size row would otherwise never render, leaving the page
+                  without any dimensions at all. */}
+              {!isRugSqmActive && isBaseOnly && !baseAxisIsDim && baseOnlySizeOptions.length <= 1
+                && !(baseOptions.length > 0 && baseOptions.every(looksLikeDimension))
+                && product.dimensions && looksLikeDimension(product.dimensions) && (
+                <ExpandableSpec icon={specIcon("📐")} text={withImperialPerLine(product.dimensions)} />
+              )}
               {/* Dual-axis with fixed (non-variant) dimensions: render dims at the top */}
               {!isRugSqmActive && isDualAxis && !baseAxisIsDim && !topAxisIsDim && !hasDualSize && product.dimensions && looksLikeDimension(product.dimensions) && (
                 <ExpandableSpec icon={specIcon("📐")} text={withImperialPerLine(product.dimensions)} />
