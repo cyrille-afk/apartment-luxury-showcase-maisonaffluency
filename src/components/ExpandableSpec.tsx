@@ -51,7 +51,14 @@ interface ExpandableSpecProps {
    * Ignored when multiple options render as a dropdown.
    */
   singleValueLabel?: string;
+  /**
+   * Renders the options as a horizontal row of circular material swatches
+   * instead of a dropdown (luxury finish pickers: instant, one-tap, no
+   * secondary menu). Only applies when there are multiple options.
+   */
+  swatchMode?: boolean;
 }
+
 
 /**
  * Renders a spec row (materials / dimensions / origin / lead time).
