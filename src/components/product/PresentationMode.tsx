@@ -136,7 +136,7 @@ const PresentationMode: React.FC<PresentationModeProps> = ({
               aria-label="Previous"
               className={cn(
                 "hidden md:flex absolute left-6 top-1/2 -translate-y-1/2 w-11 h-11 items-center justify-center rounded-full bg-white/10 backdrop-blur-sm text-white/80 transition-opacity duration-300",
-                chromeVisible && index > 0 ? "opacity-100" : "opacity-0 pointer-events-none"
+                chromeVisible ? "opacity-100" : "opacity-0 pointer-events-none"
               )}
             >
               <ChevronLeft size={20} />
