@@ -111,28 +111,27 @@ const Hero = () => {
                 </button>
 
                 {/* Inline editorial links — vertical stack on mobile/PWA, horizontal on desktop */}
-                {/* Mobile / PWA — frosted glass card */}
-                <div className="hero-mobile-links-inner mt-6 flex w-full max-w-sm flex-col items-center gap-4 rounded-none border border-white/20 bg-white/10 p-6 text-center backdrop-blur-md hero-fade-in-delayed-5 md:hidden">
+                {/* Mobile / PWA — borderless editorial links */}
+                <div className="hero-mobile-links-inner mt-6 flex w-full max-w-md flex-col items-center space-y-3 py-4 text-center hero-fade-in-delayed-5 md:hidden">
                   <button
                     type="button"
                     onClick={() => {
                       trackEvent("click_singapore_gallery_preview", { event_category: "CTA", event_label: "HeroSecondary" });
                       scrollToSection("apartment-tour-heading");
                     }}
-                    className="font-body text-[11px] font-medium uppercase tracking-[0.25em] text-stone-800"
+                    className="font-body text-[11px] font-light uppercase tracking-[0.25em] text-stone-500"
                   >
                     Singapore Gallery Preview
                   </button>
 
-                  <div className="h-[1px] w-8 bg-stone-400/50" />
-
                   <button
                     type="button"
                     onClick={openTour}
-                    className="font-body text-[12px] font-light uppercase tracking-[0.2em] text-stone-900 transition-all duration-300"
+                    className="group relative font-body text-[13px] font-light uppercase tracking-[0.2em] text-stone-900 py-1 transition-colors hover:text-stone-500"
                   >
-                    Book Private Appointment
-                    <span className="mt-1 block text-[10px] font-normal italic lowercase text-stone-600">(trade only)</span>
+                    <span>Book Private Appointment</span>
+                    <span className="text-[10px] font-normal italic lowercase text-stone-400 ml-1">(trade only)</span>
+                    <span className="absolute bottom-0 left-1/2 h-[1px] w-0 bg-stone-900 transition-all duration-300 group-hover:left-0 group-hover:w-full" />
                   </button>
                 </div>
 
