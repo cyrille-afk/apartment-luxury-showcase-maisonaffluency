@@ -2509,8 +2509,8 @@ const TradeProductPage: React.FC = () => {
             </div>
 
             {/* Trade price + retail/trade toggle (size driven by selector above) */}
-            {effectiveRrpCents ? (
-              <div className="flex flex-col gap-2 pt-1">
+        {effectiveRrpCents ? (
+              <div className="flex flex-col gap-2 pt-1 order-[-3] md:order-none">
                 {renderPrice()}
                 <button
                   onClick={() => setShowTradePrice(!showTradePrice)}
@@ -2520,8 +2520,9 @@ const TradeProductPage: React.FC = () => {
                 </button>
               </div>
             ) : (
-              <p className="font-body text-sm text-muted-foreground italic">Price on request</p>
+              <p className="font-body text-sm text-muted-foreground italic order-[-3] md:order-none">Price on request</p>
             )}
+
 
             {/* Primary CTA — Add to Quote */}
             <button
