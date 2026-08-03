@@ -33,7 +33,10 @@ interface Props {
   className?: string;
   compact?: boolean;
   flagClassName?: string;
+  /** Show the ISO country code next to the flag (compact mode). */
+  showIso?: boolean;
 }
+
 
 export default function ShippingDestinationSwitcher({ className, compact, flagClassName }: Props) {
   const current = useShippingDestination();
