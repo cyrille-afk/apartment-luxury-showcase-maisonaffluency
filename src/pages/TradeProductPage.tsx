@@ -2719,7 +2719,7 @@ const TradeProductPage: React.FC = () => {
                   }
                 }
                 return (
-                  <div className="mt-2 border-t border-b border-border/60 py-4 flex items-start gap-5">
+                  <div className="-mt-4 border-b border-border/60 py-4 flex items-start gap-5">
                     {specIcon("✦", "mt-0.5")}
                     <div className="font-body text-sm leading-relaxed text-muted-foreground font-normal">
                       <p>{originLine}</p>
