@@ -49,7 +49,7 @@ const TradeFloatingCTA = () => {
           </p>
           <Link
             to="/trade-program"
-            className="shrink-0 px-5 py-2 bg-accent text-foreground font-body text-sm uppercase tracking-[0.15em] rounded-full hover:bg-accent/80 transition-colors whitespace-nowrap"
+            className="shrink-0 px-5 py-2.5 bg-accent text-black font-body text-sm font-semibold uppercase tracking-[0.15em] rounded-full border border-black/15 shadow-sm hover:bg-accent/90 transition-colors whitespace-nowrap"
           >
             Join Our Trade Program
           </Link>
@@ -61,7 +61,7 @@ const TradeFloatingCTA = () => {
           </p>
           <Link
             to="/trade-program"
-            className="px-5 py-2 bg-accent text-foreground font-body text-[12px] uppercase tracking-[0.15em] rounded-full hover:bg-accent/80 transition-colors whitespace-nowrap"
+            className="px-5 py-2 bg-accent text-black font-body text-[12px] font-semibold uppercase tracking-[0.15em] rounded-full border border-black/15 shadow-sm hover:bg-accent/90 transition-colors whitespace-nowrap"
           >
             Join Our Trade Program
           </Link>

@@ -40,7 +40,7 @@ const scrollToMeetDesigners = () => {
 };
 
 const heroPrimaryCtaClass =
-  "inline-flex min-h-12 items-center justify-center rounded-full border-2 border-white bg-white px-8 py-3.5 text-center text-[#1A1A1A] text-sm md:text-base font-body font-bold tracking-[0.14em] uppercase shadow-[0_14px_40px_rgba(0,0,0,0.55),0_2px_8px_rgba(0,0,0,0.4)] md:shadow-[0_12px_36px_rgba(0,0,0,0.4)] transition-[background-color,color,border-color,transform] duration-[400ms] ease-[cubic-bezier(0.25,1,0.5,1)] hover:bg-[#1A1A1A] hover:text-white hover:border-white focus:outline-none focus:ring-2 focus:ring-white/60 focus:ring-offset-2 focus:ring-offset-transparent hero-fade-in-delayed-4";
+  "inline-flex min-h-12 items-center justify-center rounded-full border-2 border-white bg-white px-8 py-3.5 text-center text-[#1A1A1A] text-sm md:text-base font-body font-extrabold tracking-[0.14em] uppercase shadow-[0_14px_40px_rgba(0,0,0,0.55),0_2px_8px_rgba(0,0,0,0.4)] md:shadow-[0_12px_36px_rgba(0,0,0,0.4)] ring-1 ring-black/20 transition-[background-color,color,border-color,transform] duration-[400ms] ease-[cubic-bezier(0.25,1,0.5,1)] hover:bg-[#1A1A1A] hover:text-white hover:border-white focus:outline-none focus:ring-2 focus:ring-white/60 focus:ring-offset-2 focus:ring-offset-transparent hero-fade-in-delayed-4";
 
 
 const Hero = () => {
