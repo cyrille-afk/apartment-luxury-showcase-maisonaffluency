@@ -80,8 +80,8 @@ export default function TradeFirstCta({
               className={cn(
                 tabBase,
                 active
-                  ? "text-foreground border-b border-foreground -mb-px"
-                  : "text-muted-foreground/70 hover:text-foreground",
+                  ? "text-foreground bg-background border-b border-foreground -mb-px"
+                  : "text-muted-foreground/80 bg-muted/50 hover:bg-muted/70 hover:text-foreground",
               )}
             >
               {key === "trade" ? "Trade" : "Retail"}
@@ -89,6 +89,7 @@ export default function TradeFirstCta({
           );
         })}
       </div>
+
 
       {audience === "trade" ? (
         <div className="flex flex-col gap-3">
