@@ -341,15 +341,41 @@ const VariantSelectorsProvider: React.FC<{
     hasVariants,
   } = axes;
 
-  const [selBase, setSelBase] = useState<string | null>(null);
-  const [selTop, setSelTop] = useState<string | null>(null);
+  // Persist the shopper's configuration so switching audience tabs, signing in
+  // to a trade account, or returning to the page keeps the exact variant.
+  const persistKey = `ma_variant_sel_${product?.id ?? "unknown"}`;
+  const stored = (() => {
+    if (typeof window === "undefined") return null;
+    try {
+      const raw = sessionStorage.getItem(persistKey);
+      return raw ? (JSON.parse(raw) as Record<string, string | null>) : null;
+    } catch {
+      return null;
+    }
+  })();
+
+  const [selBase, setSelBase] = useState<string | null>(stored?.base ?? null);
+  const [selTop, setSelTop] = useState<string | null>(stored?.top ?? null);
   const [hasLinkedFabrics, setHasLinkedFabrics] = useState(false);
   const [linkedWoodFinishes, setLinkedWoodFinishes] = useState<string[]>([]);
 
-  const [selDualSize, setSelDualSize] = useState<string | null>(null);
-  const [selMat, setSelMat] = useState<string | null>(null);
-  const [selSize, setSelSize] = useState<string | null>(null);
+  const [selDualSize, setSelDualSize] = useState<string | null>(stored?.dualSize ?? null);
+  const [selMat, setSelMat] = useState<string | null>(stored?.mat ?? null);
+  const [selSize, setSelSize] = useState<string | null>(stored?.size ?? null);
   const [defaultPair, setDefaultPair] = useState<{ base: string; top: string } | null>(null);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      sessionStorage.setItem(
+        persistKey,
+        JSON.stringify({ base: selBase, top: selTop, dualSize: selDualSize, mat: selMat, size: selSize }),
+      );
+    } catch {
+      /* storage unavailable — selection simply isn't persisted */
+    }
+  }, [persistKey, selBase, selTop, selDualSize, selMat, selSize]);
+
 
   useEffect(() => {
     if (galleryActiveIndex === undefined || !finishMap) return;
