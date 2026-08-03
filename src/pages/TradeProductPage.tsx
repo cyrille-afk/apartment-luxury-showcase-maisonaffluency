@@ -2320,7 +2320,18 @@ const TradeProductPage: React.FC = () => {
                   Procurement
                 </Link>
               )}
+
+              <a
+                href={`https://wa.me/6591393850?text=${encodeURIComponent(`Hello Maison Affluency — I'd like more information on the ${product.title} by ${designerDisplay}.`)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1.5 font-body text-[11px] uppercase tracking-[0.12em] text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <MessageCircle size={13} />
+                Contact Us
+              </a>
             </div>
+
 
 
             {/* Bespoke / customisation request */}
