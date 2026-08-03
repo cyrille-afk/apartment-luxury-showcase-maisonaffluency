@@ -2791,17 +2791,17 @@ const TradeProductPage: React.FC = () => {
                   </h2>
                 </div>
 
-                {/* Product grid */}
-                <div className="lg:col-span-8 order-2 lg:order-2">
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
+                {/* Product grid — mobile: horizontal swipe rail */}
+                <div className="lg:col-span-8 order-3 lg:order-2">
+                  <div className="flex gap-3 overflow-x-auto snap-x snap-mandatory -mx-4 px-4 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:grid md:grid-cols-3 md:gap-6 md:overflow-visible md:mx-0 md:px-0">
                     {relatedPicks.slice(0, 6).map((rp) => (
                       <Link
                         key={rp.id}
                         to={designer.slug ? `/trade/products/${designer.slug}/${slugify(rp.title + (rp.subtitle ? `-${rp.subtitle}` : ""))}` : fallbackPath}
                         state={{ from: location.pathname + location.search }}
-                        className="group block"
+                        className="group block shrink-0 w-[62%] snap-start md:w-auto md:shrink"
                       >
-                        <div className="relative aspect-square rounded-lg overflow-hidden bg-muted/30 border border-border group-hover:border-foreground/40 transition-colors">
+                        <div className="relative aspect-square rounded-none overflow-hidden bg-muted/30 border border-border group-hover:border-foreground/40 transition-colors">
                           {rp.image_url ? (
                             <img
                               src={rp.image_url}
@@ -2834,8 +2834,9 @@ const TradeProductPage: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Brand summary — left column on desktop, below grid on mobile */}
-                <div className="lg:col-span-4 lg:pr-4 order-3 lg:order-1">
+                {/* Brand summary — left column on desktop, directly under the name on mobile */}
+                <div className="lg:col-span-4 lg:pr-4 order-2 lg:order-1">
+
                   <div className="hidden lg:block">
                     <p className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-2">
                       {sameMakerLabel}
