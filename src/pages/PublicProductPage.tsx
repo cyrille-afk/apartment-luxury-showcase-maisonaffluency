@@ -1340,9 +1340,7 @@ const PublicProductPage: React.FC = () => {
   const { product, designer, relatedPicks } = data;
   const favorited = favIds.has(product.id);
 
-  const designerDisplay = designer.name.includes(" - ")
-    ? designer.name.split(" - ")[0].trim()
-    : designer.name;
+  const designerDisplay = formatDesignerDisplayName(designer.name);
 
   const compareItem: CompareItem = {
     pick: {
