@@ -1787,14 +1787,50 @@ const TradeProductPage: React.FC = () => {
                 })()
               }
               overlay={
-                product.description ? (
-                  <div className="flex flex-col items-end gap-2">
+                <div className="flex items-center gap-2">
+                  {product.description && (
                     <div className="hidden md:block">
                       <LightboxDescriptionDropdown description={product.description} />
                     </div>
-                  </div>
-                ) : null
+                  )}
+                  <TradeFavoriteFolderPicker
+                    productId={favoriteId}
+                    meta={{
+                      product_name: product.title,
+                      brand_name: designerDisplay,
+                      category: product.category || undefined,
+                      image_url: product.image_url,
+                      dimensions: product.dimensions,
+                      materials: product.materials,
+                    }}
+                    align="end"
+                    side="bottom"
+                  >
+                    <button
+                      onClick={(e) => e.stopPropagation()}
+                      aria-label={favorited ? "Saved to favorites" : "Add to favorites"}
+                      className="flex items-center justify-center w-9 h-9 rounded-full bg-background/25 backdrop-blur-md border border-border/25"
+                    >
+                      <Heart size={18} strokeWidth={1.5} className={cn(favorited ? "fill-destructive text-destructive" : "text-foreground/80")} />
+                    </button>
+                  </TradeFavoriteFolderPicker>
+                </div>
               }
+              bottomRightOverlay={(() => {
+                const shareUrl = buildPieceOgUrl(designerDisplay, product.title, product.subtitle);
+                return (
+                  <ShareMenu
+                    url={shareUrl}
+                    message={`${product.title} by ${designerDisplay} — Maison Affluency: ${shareUrl}`}
+                    className="flex items-center justify-center w-9 h-9 rounded-full bg-background/25 backdrop-blur-md border border-border/25 text-foreground/80"
+                    iconSize="w-[18px] h-[18px]"
+                    iconVariant="ios"
+                    showLabel={false}
+                    imageUrl={images?.[galleryActiveIndex ?? 0] || images?.[0]}
+                    imageName={`${product.title}-${designerDisplay}`}
+                  />
+                );
+              })()}
             />
             {/* Mobile/PWA: the "Shown in" caption lives on the presentation
                 photography instead of stacking under the gallery. */}
