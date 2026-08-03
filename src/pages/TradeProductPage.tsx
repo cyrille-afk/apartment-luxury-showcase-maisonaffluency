@@ -1901,8 +1901,8 @@ const TradeProductPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Materials & dimensions */}
-            <div className="flex flex-col gap-2">
+            {/* Dimensions & size pickers — mobile: after the price */}
+            <div className="flex flex-col gap-2 order-[-2] md:order-none">
               {(() => {
                 const sqm = (product as any)?.price_per_sqm_cents as number | null | undefined;
                 const isRugSqm = isRugCategory(product.category) && !!sqm && sqm > 0 && (sizeVariants?.length || 0) > 0;
