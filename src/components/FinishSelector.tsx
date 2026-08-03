@@ -885,7 +885,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
           />
         </button>
       )}
-      {(isMobile || !args.isOpen) && args.tiles.length > 0 && (
+      {isMobile && args.tiles.length > 0 && (
         <div className="flex gap-3 overflow-x-auto -mx-1 px-1 pt-2 pb-3 border-b border-border/60 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {args.tiles.map((f) => renderTile(f, args.tileKind, undefined, "circle"))}
         </div>
