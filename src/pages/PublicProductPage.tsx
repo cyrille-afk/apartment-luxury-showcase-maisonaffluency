@@ -1235,14 +1235,15 @@ const PublicProductPage: React.FC = () => {
         galleryCompactRef.current = next;
         return next;
       });
-      const navEl = document.querySelector("nav.fixed, header.fixed") as HTMLElement | null;
-      const headerBottom = navEl?.getBoundingClientRect().bottom ?? 96;
       if (el) {
         const rect = el.getBoundingClientRect();
-        setStickyBarArmed(rect.bottom < headerBottom);
+        // Arm as soon as the product image has scrolled past the top edge.
+        // (A header-relative threshold would oscillate, because arming hides the header.)
+        setStickyBarArmed(rect.bottom <= 8);
       } else {
         setStickyBarArmed(false);
       }
+
 
     };
     onScroll();
