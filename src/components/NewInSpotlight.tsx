@@ -15,6 +15,7 @@ import { isParentBrandDesigner } from "@/lib/designerHierarchy";
 import { cn } from "@/lib/utils";
 import { renderParagraph } from "@/components/EditorialBiography";
 import { composeTitle } from "@/lib/curatorPickLegend";
+import { usePublicRrpMap, formatPublicRrp } from "@/hooks/usePublicRrp";
 
 const transition: Transition = { duration: 0.7, ease: [0.16, 1, 0.3, 1] };
 
@@ -44,6 +45,7 @@ const NewInSpotlight = ({ designer }: NewInSpotlightProps) => {
   const picks: DesignerCuratorPick[] = isParentBrand
     ? groupedPicks.map(({ designer_name, designer_slug, ...rest }) => rest)
     : simplePicks;
+  const { data: publicRrpMap = {} } = usePublicRrpMap(picks.map((p) => p.id));
   const { data: instagramPosts = [] } = useDesignerInstagramPosts(designer.id);
   const [gridCols, setGridCols] = useState<3 | 4>(4);
   const [mobileGridCols, setMobileGridCols] = useState<1 | 2>(2);
@@ -385,7 +387,7 @@ const NewInSpotlight = ({ designer }: NewInSpotlightProps) => {
                   })()}
                   <div className="mt-auto pt-1">
                     <p className="font-display text-[11px] md:text-xs text-foreground">
-                      Price upon request
+                      {formatPublicRrp(publicRrpMap[pick.id]) || "Price upon request"}
                     </p>
                   </div>
                 </div>
