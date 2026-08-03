@@ -618,6 +618,29 @@ input, select, textarea {
     overscroll-behavior-y: none;
   }
 }
+
+/* ─────────────────────────────────────────────
+   iOS bottom navigation panel background.
+   Mobile Safari's bottom toolbar is translucent
+   and blurs whatever page content sits behind it.
+   This filler forces a black backdrop behind the
+   toolbar so the page never "bleeds" through with
+   text or imagery. It also covers the PWA home
+   indicator area in standalone mode.
+   ───────────────────────────────────────────── */
+@media (max-width: 767px) {
+  body::after {
+    content: "";
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: calc(env(safe-area-inset-bottom) + 120px);
+    background-color: #000000;
+    z-index: -1;
+    pointer-events: none;
+  }
+}
 /* Respect users who request reduced motion — but never disable zoom. */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
