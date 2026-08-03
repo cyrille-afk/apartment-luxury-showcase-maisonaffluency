@@ -31,19 +31,26 @@ interface Props {
   felixUrl?: string;
 }
 
+/** Human-readable suffix for a price unit. `per_piece` is the default and is never shown. */
+function unitSuffix(unit?: string | null) {
+  const u = (unit || "").trim().toLowerCase();
+  if (!u || /^(each|unit|item|piece|per_piece|per piece)$/.test(u)) return "";
+  if (/^(per_sqm|per sqm|sqm|m2)$/.test(u)) return " / m²";
+  return ` / ${u.replace(/_/g, " ")}`;
+}
+
 function formatCents(cents: number | null | undefined, currency?: string | null, unit?: string | null) {
   if (cents == null || cents <= 0) return null;
   const ccy = (currency || "EUR").toUpperCase();
-  const showUnit = unit && !/^(each|unit|item|piece)$/i.test(unit.trim());
   try {
     const value = new Intl.NumberFormat("en-US", {
       style: "currency",
       currency: ccy,
       maximumFractionDigits: 0,
     }).format(cents / 100);
-    return showUnit ? `${value} / ${unit}` : value;
+    return `${value}${unitSuffix(unit)}`;
   } catch {
-    return `${ccy} ${(cents / 100).toLocaleString("en-US")}`;
+    return `${ccy} ${(cents / 100).toLocaleString("en-US")}${unitSuffix(unit)}`;
   }
 }
 
