@@ -386,8 +386,10 @@ export default function ExpandableSpec({
         >
           <span className="shrink-0">{icon}</span>
           <span className="flex-1 min-w-0 whitespace-normal break-words leading-relaxed">
+            {diameterHint}
             {hasSelection ? lines[selectedIdx ?? 0] : placeholder}
           </span>
+
           <ChevronDown
             className={cn(
               "h-4 w-4 shrink-0 text-muted-foreground/60 transition-transform",
