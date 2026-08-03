@@ -2003,9 +2003,8 @@ const PublicProductPage: React.FC = () => {
                               );
                             })()}
                           </p>
-                          <p className="font-body font-light text-[9px] uppercase tracking-[0.28em] text-muted-foreground/80 mt-2">
-                            excl. shipping &amp; duties
-                          </p>
+                          <ShippingDetailsAccordion />
+
                         </div>
                       )}
                 </div>
