@@ -147,7 +147,7 @@ const PresentationMode: React.FC<PresentationModeProps> = ({
               aria-label="Next"
               className={cn(
                 "hidden md:flex absolute right-6 top-1/2 -translate-y-1/2 w-11 h-11 items-center justify-center rounded-full bg-white/10 backdrop-blur-sm text-white/80 transition-opacity duration-300",
-                chromeVisible && index < images.length - 1 ? "opacity-100" : "opacity-0 pointer-events-none"
+                chromeVisible ? "opacity-100" : "opacity-0 pointer-events-none"
               )}
             >
               <ChevronRight size={20} />
