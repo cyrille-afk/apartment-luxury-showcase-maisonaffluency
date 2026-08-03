@@ -1929,26 +1929,26 @@ const PublicProductPage: React.FC = () => {
 
 
             <div className="relative flex flex-col gap-3 md:gap-6">
-              {/* Finish selection — split from dimensions so it can be placed
-                   directly below the image on mobile/PWA while dimensions remain
-                   in their original position within the details column. */}
-              <VariantSelectorsProvider
-                product={product}
-                onMaterialChange={handleMaterialChange}
-                galleryActiveIndex={galleryActiveIndex}
-                finishMap={productFinishMap}
-                onSwatchImagesChange={(indices) => {
-                  if (!indices || indices.length === 0) return;
-                  setGalleryActiveIndex(Math.max(0, indices[0] - 1));
-                  setGalleryJumpNonce((n) => n + 1);
-                }}
-                onFinishesMissingImagesChange={setFinishesMissingImages}
-              >
-                <div className="flex flex-col gap-5 order-2">
-                  <VariantFinishSelectors section="primary" />
-                </div>
+              {isMobileOrPwa ? (
+                <>
+                  {/* Mobile/PWA: Trade-first flow with finish selector below image. */}
+                  <VariantSelectorsProvider
+                    product={product}
+                    onMaterialChange={handleMaterialChange}
+                    galleryActiveIndex={galleryActiveIndex}
+                    finishMap={productFinishMap}
+                    onSwatchImagesChange={(indices) => {
+                      if (!indices || indices.length === 0) return;
+                      setGalleryActiveIndex(Math.max(0, indices[0] - 1));
+                      setGalleryJumpNonce((n) => n + 1);
+                    }}
+                    onFinishesMissingImagesChange={setFinishesMissingImages}
+                  >
+                    <div className="flex flex-col gap-5 order-2">
+                      <VariantFinishSelectors section="primary" />
+                    </div>
 
-                <div className="min-w-0 pt-0 pb-1 md:py-5 order-1">
+                    <div className="min-w-0 pt-0 pb-1 md:py-5 order-1">
                       <Link
                         to={`/designers/${designer.slug}`}
                         onClick={() => rememberProductBackRef(designer.slug, location.pathname + location.search)}
@@ -1980,198 +1980,400 @@ const PublicProductPage: React.FC = () => {
                             })()}
                           </p>
                           <ShippingDetailsAccordion />
-
                         </div>
                       )}
-                </div>
-                <div className="order-7 md:order-5 flex flex-col gap-5">
-                  <VariantFinishSelectors section="supplemental" />
-                  {finishesMissingImages.length > 0 && (
-                    <p className="font-body text-[11px] text-muted-foreground italic mt-1">
-                      No reference image on file for{" "}
-                      <span className="text-foreground">{finishesMissingImages.join(", ")}</span>.
-                      We'll note this on your enquiry so our concierge can confirm visuals.
-                    </p>
-                  )}
-                </div>
-
-                {/* Dimensions/specs sit directly under the primary CTA on mobile. */}
-                <div className="flex flex-col gap-5 order-4 md:order-5">
-                  <VariantDimensionsPanel />
-                </div>
-              </VariantSelectorsProvider>
-
-              {/* Trade-first CTA — segmented Trade / Retail control. */}
-              <div className="order-3 md:order-4">
-                <TradeFirstCta
-                  redirectTo={location.pathname + location.search}
-                  rrpLabel={publicRrpLabel}
-                  onRequestQuote={() => setQuoteRequestOpen(true)}
-                  signedIn={!!user && !authLoading}
-                />
-              </div>
-
-              {/* Origin & production lead time — raised above the fold on mobile. */}
-              <div className="order-5 md:order-6">
-                {(() => {
-                  const handcrafted = formatHandcrafted(product.origin, product.lead_time);
-                  if (!handcrafted) return null;
-                  let originLine = handcrafted;
-                  let leadLine: string | null = null;
-                  const dotSplit = handcrafted.split(" · ");
-                  if (dotSplit.length === 2) {
-                    originLine = dotSplit[0];
-                    leadLine = dotSplit[1];
-                  } else {
-                    const m = handcrafted.match(/^(Handcrafted in .+?)\s+in\s+(.+)$/i);
-                    if (m) {
-                      originLine = m[1];
-                      leadLine = `Production lead time: ${m[2]}`;
-                    }
-                  }
-                  return (
-                    <div className="border-b border-border/60 pb-3 flex items-start gap-5">
-                      {specIcon("✦", "mt-0.5")}
-                      <div className="font-body text-sm leading-relaxed text-muted-foreground font-normal">
-                        <p>{originLine}</p>
-                        {leadLine && <p className="mt-0.5">{leadLine}</p>}
-                      </div>
                     </div>
-                  );
-                })()}
-              </div>
-
-              {/* Quiet advisor + checkout routes, at the very bottom of the section. */}
-              <div className="order-6 md:order-6 flex flex-col items-center gap-3 pt-1">
-                <button
-                  type="button"
-                  onClick={() => setQuoteRequestOpen(true)}
-                  className="font-body text-[11px] tracking-[0.06em] text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  Need project assistance?{" "}
-                  <span className="underline underline-offset-4 decoration-border">
-                    Speak with an Advisor
-                  </span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={handleDirectCheckout}
-                  disabled={checkoutLoading}
-                  className="flex items-center justify-center gap-2 font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground/80 underline underline-offset-4 decoration-border hover:text-foreground transition-colors disabled:opacity-60"
-                >
-                  {checkoutLoading ? (
-                    <Loader2 className="h-3 w-3 animate-spin" />
-                  ) : (
-                    <ShoppingBag className="h-3 w-3" />
-                  )}
-                  {checkoutLoading ? "Opening checkout…" : "Or complete secure checkout"}
-                </button>
-              </div>
-
-
-              <div className="flex flex-col gap-5 order-8 md:order-6">
-
-
-              {/* Secondary actions: Favorite / Pin / Spec Sheet.
-                  Minimalist horizontal icon row, left-aligned under the
-                  product details with muted labels and gentle hover. */}
-              {(() => {
-                const tradeApprovedFooter = !!user && (isTradeUser || tradeStatus === "approved");
-                const hasSheet = !!(product.pdf_url || (product.pdf_urls && product.pdf_urls.length > 0));
-                const utilityItem =
-                  "inline-flex items-center gap-2 font-body text-[11px] uppercase tracking-wider text-muted-foreground transition-colors duration-200 hover:text-foreground";
-                const iconClass = "shrink-0";
-
-                return (
-                  <div className="hidden md:flex flex-wrap items-center gap-x-8 gap-y-2 pt-2">
-                    <FavoriteFolderPicker pickId={product.id} align="start" side="top">
-                      <button
-                        onClick={(e) => e.stopPropagation()}
-                        className={cn(
-                          utilityItem,
-                          favorited && "text-destructive hover:text-destructive"
-                        )}
-                      >
-                        <Heart size={14} strokeWidth={1.25} className={cn(iconClass, favorited && "fill-current")} />
-                        {favorited ? "Saved" : "Favorite"}
-                      </button>
-                    </FavoriteFolderPicker>
-
-                    <button
-                      onClick={() => {
-                        if (!user) {
-                          requireAuth(() => {}, "pin this piece to your selection");
-                          return;
-                        }
-                        togglePin(compareItem);
-                      }}
-                      className={cn(
-                        utilityItem,
-                        pinned && "text-[hsl(var(--gold))] hover:text-[hsl(var(--gold))]",
-                        user && compareItems.length >= 3 && !pinned && "opacity-40 pointer-events-none"
+                    <div className="order-7 md:order-5 flex flex-col gap-5">
+                      <VariantFinishSelectors section="supplemental" />
+                      {finishesMissingImages.length > 0 && (
+                        <p className="font-body text-[11px] text-muted-foreground italic mt-1">
+                          No reference image on file for{" "}
+                          <span className="text-foreground">{finishesMissingImages.join(", ")}</span>.
+                          We'll note this on your enquiry so our concierge can confirm visuals.
+                        </p>
                       )}
+                    </div>
+
+                    <div className="flex flex-col gap-5 order-4 md:order-5">
+                      <VariantDimensionsPanel />
+                    </div>
+                  </VariantSelectorsProvider>
+
+                  <div className="order-3 md:order-4">
+                    <TradeFirstCta
+                      redirectTo={location.pathname + location.search}
+                      rrpLabel={publicRrpLabel}
+                      onRequestQuote={() => setQuoteRequestOpen(true)}
+                      signedIn={!!user && !authLoading}
+                    />
+                  </div>
+
+                  <div className="order-5 md:order-6">
+                    {(() => {
+                      const handcrafted = formatHandcrafted(product.origin, product.lead_time);
+                      if (!handcrafted) return null;
+                      let originLine = handcrafted;
+                      let leadLine: string | null = null;
+                      const dotSplit = handcrafted.split(" · ");
+                      if (dotSplit.length === 2) {
+                        originLine = dotSplit[0];
+                        leadLine = dotSplit[1];
+                      } else {
+                        const m = handcrafted.match(/^(Handcrafted in .+?)\s+in\s+(.+)$/i);
+                        if (m) {
+                          originLine = m[1];
+                          leadLine = `Production lead time: ${m[2]}`;
+                        }
+                      }
+                      return (
+                        <div className="border-b border-border/60 pb-3 flex items-start gap-5">
+                          {specIcon("✦", "mt-0.5")}
+                          <div className="font-body text-sm leading-relaxed text-muted-foreground font-normal">
+                            <p>{originLine}</p>
+                            {leadLine && <p className="mt-0.5">{leadLine}</p>}
+                          </div>
+                        </div>
+                      );
+                    })()}
+                  </div>
+
+                  <div className="order-6 md:order-6 flex flex-col items-center gap-3 pt-1">
+                    <button
+                      type="button"
+                      onClick={() => setQuoteRequestOpen(true)}
+                      className="font-body text-[11px] tracking-[0.06em] text-muted-foreground hover:text-foreground transition-colors"
                     >
-                      <Pin size={14} strokeWidth={1.25} className={cn(iconClass, pinned && "fill-current")} />
-                      {pinned ? "Pinned" : "Pin to Selection"}
+                      Need project assistance?{" "}
+                      <span className="underline underline-offset-4 decoration-border">
+                        Speak with an Advisor
+                      </span>
                     </button>
 
-                    {hasSheet ? (
-                      <SpecSheetButton
-                        pdfUrl={product.pdf_url}
-                        pdfUrls={product.pdf_urls}
-                        brandName={designerDisplay}
-                        productName={product.title}
-                        variant="button"
-                        className={cn(utilityItem, "cursor-pointer")}
-                        icon={<FileText size={14} strokeWidth={1.25} className={iconClass} />}
-                        onBeforeOpen={() => {
-                          // Verified trade: open immediately, no gate.
-                          if (tradeApprovedFooter) return true;
-                          if (!user) {
-                            requireAuth(() => {}, "open this spec sheet");
-                            return false;
-                          }
-                          let allowed = false;
-                          requireAuth(() => { allowed = true; }, "download this spec sheet");
-                          return allowed;
-                        }}
-                      />
-                    ) : (
-                      <Link to="/contact" className={utilityItem}>
-                        <FileText size={14} strokeWidth={1.25} className={iconClass} />
-                        Contact Us
-                      </Link>
+                    <button
+                      type="button"
+                      onClick={handleDirectCheckout}
+                      disabled={checkoutLoading}
+                      className="flex items-center justify-center gap-2 font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground/80 underline underline-offset-4 decoration-border hover:text-foreground transition-colors disabled:opacity-60"
+                    >
+                      {checkoutLoading ? (
+                        <Loader2 className="h-3 w-3 animate-spin" />
+                      ) : (
+                        <ShoppingBag className="h-3 w-3" />
+                      )}
+                      {checkoutLoading ? "Opening checkout…" : "Or complete secure checkout"}
+                    </button>
+                  </div>
+
+                  <div className="flex flex-col gap-5 order-8 md:order-6">
+                    {(() => {
+                      const tradeApprovedFooter = !!user && (isTradeUser || tradeStatus === "approved");
+                      const hasSheet = !!(product.pdf_url || (product.pdf_urls && product.pdf_urls.length > 0));
+                      const utilityItem =
+                        "inline-flex items-center gap-2 font-body text-[11px] uppercase tracking-wider text-muted-foreground transition-colors duration-200 hover:text-foreground";
+                      const iconClass = "shrink-0";
+
+                      return (
+                        <div className="hidden md:flex flex-wrap items-center gap-x-8 gap-y-2 pt-2">
+                          <FavoriteFolderPicker pickId={product.id} align="start" side="top">
+                            <button
+                              onClick={(e) => e.stopPropagation()}
+                              className={cn(
+                                utilityItem,
+                                favorited && "text-destructive hover:text-destructive"
+                              )}
+                            >
+                              <Heart size={14} strokeWidth={1.25} className={cn(iconClass, favorited && "fill-current")} />
+                              {favorited ? "Saved" : "Favorite"}
+                            </button>
+                          </FavoriteFolderPicker>
+
+                          <button
+                            onClick={() => {
+                              if (!user) {
+                                requireAuth(() => {}, "pin this piece to your selection");
+                                return;
+                              }
+                              togglePin(compareItem);
+                            }}
+                            className={cn(
+                              utilityItem,
+                              pinned && "text-[hsl(var(--gold))] hover:text-[hsl(var(--gold))]",
+                              user && compareItems.length >= 3 && !pinned && "opacity-40 pointer-events-none"
+                            )}
+                          >
+                            <Pin size={14} strokeWidth={1.25} className={cn(iconClass, pinned && "fill-current")} />
+                            {pinned ? "Pinned" : "Pin to Selection"}
+                          </button>
+
+                          {hasSheet ? (
+                            <SpecSheetButton
+                              pdfUrl={product.pdf_url}
+                              pdfUrls={product.pdf_urls}
+                              brandName={designerDisplay}
+                              productName={product.title}
+                              variant="button"
+                              className={cn(utilityItem, "cursor-pointer")}
+                              icon={<FileText size={14} strokeWidth={1.25} className={iconClass} />}
+                              onBeforeOpen={() => {
+                                if (tradeApprovedFooter) return true;
+                                if (!user) {
+                                  requireAuth(() => {}, "open this spec sheet");
+                                  return false;
+                                }
+                                let allowed = false;
+                                requireAuth(() => { allowed = true; }, "download this spec sheet");
+                                return allowed;
+                              }}
+                            />
+                          ) : (
+                            <Link to="/contact" className={utilityItem}>
+                              <FileText size={14} strokeWidth={1.25} className={iconClass} />
+                              Contact Us
+                            </Link>
+                          )}
+                        </div>
+                      );
+                    })()}
+
+                    {(() => {
+                      const variants = (product.size_variants || []) as any[];
+                      const upholstery = Array.from(
+                        new Set(
+                          variants
+                            .map((v) => String(v?.top || v?.label || "").trim())
+                            .filter(Boolean)
+                        )
+                      ).slice(0, 24);
+                      return (
+                        <PublicSpecTable
+                          dimensions={product.dimensions}
+                          materials={product.materials}
+                          materialsDescription={(product as any).materials_description}
+                          upholsteryOptions={product.is_upholstered ? upholstery : []}
+                          sku={product.id}
+                        />
+                      );
+                    })()}
+                  </div>
+                </>
+              ) : (
+                <>
+                  {/* Desktop: restored classic layout. */}
+                  <div className="min-w-0">
+                    <Link
+                      to={`/designers/${designer.slug}`}
+                      onClick={() => rememberProductBackRef(designer.slug, location.pathname + location.search)}
+                      className="font-body font-light text-[10px] uppercase tracking-[0.28em] text-[hsl(var(--gold))] hover:text-primary transition-colors"
+                    >
+                      {designerDisplay}
+                    </Link>
+                    <h1 className="font-display font-normal text-[1.75rem] md:text-[2.15rem] mt-3 leading-[1.15] tracking-[-0.01em]">
+                      {product.title}
+                      {product.subtitle &&
+                        !product.title.toLowerCase().includes(product.subtitle.toLowerCase()) &&
+                        !product.subtitle.toLowerCase().includes(product.title.toLowerCase()) &&
+                        ` by ${product.subtitle}`}
+                    </h1>
+                    {publicRrpLabel && (
+                      <div className="mt-6">
+                        <p className="font-body font-light text-base md:text-lg tabular-nums tracking-[0.01em]">
+                          {(() => {
+                            const spaceIdx = publicRrpLabel.indexOf(" ");
+                            if (spaceIdx === -1) return <span className="text-foreground">{publicRrpLabel}</span>;
+                            const prefix = publicRrpLabel.slice(0, spaceIdx);
+                            const rest = publicRrpLabel.slice(spaceIdx + 1);
+                            return (
+                              <>
+                                <span className="text-muted-foreground text-[11px] uppercase tracking-[0.22em] align-middle mr-2">{prefix}</span>
+                                <span className="text-foreground align-middle">{rest}</span>
+                              </>
+                            );
+                          })()}
+                        </p>
+                        <ShippingDetailsAccordion />
+                      </div>
                     )}
                   </div>
-                );
-              })()}
 
-                {/* Public, crawlable specification table (no session required) */}
-                {(() => {
-                  const variants = (product.size_variants || []) as any[];
-                  const upholstery = Array.from(
-                    new Set(
-                      variants
-                        .map((v) => String(v?.top || v?.label || "").trim())
-                        .filter(Boolean)
-                    )
-                  ).slice(0, 24);
-                  return (
-                    <PublicSpecTable
-                      dimensions={product.dimensions}
-                      materials={product.materials}
-                      materialsDescription={(product as any).materials_description}
-                      upholsteryOptions={product.is_upholstered ? upholstery : []}
-                      sku={product.id}
+                  <VariantSelectorsProvider
+                    product={product}
+                    onMaterialChange={handleMaterialChange}
+                    galleryActiveIndex={galleryActiveIndex}
+                    finishMap={productFinishMap}
+                    onSwatchImagesChange={(indices) => {
+                      if (!indices || indices.length === 0) return;
+                      setGalleryActiveIndex(Math.max(0, indices[0] - 1));
+                      setGalleryJumpNonce((n) => n + 1);
+                    }}
+                    onFinishesMissingImagesChange={setFinishesMissingImages}
+                  >
+                    <div className="flex flex-col gap-5">
+                      <VariantFinishSelectors />
+                      {finishesMissingImages.length > 0 && (
+                        <p className="font-body text-[11px] text-muted-foreground italic mt-1">
+                          No reference image on file for{" "}
+                          <span className="text-foreground">{finishesMissingImages.join(", ")}</span>.
+                          We'll note this on your enquiry so our concierge can confirm visuals.
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="flex flex-col gap-5">
+                      <VariantDimensionsPanel />
+                    </div>
+                  </VariantSelectorsProvider>
+
+                  {(() => {
+                    const handcrafted = formatHandcrafted(product.origin, product.lead_time);
+                    if (!handcrafted) return null;
+                    let originLine = handcrafted;
+                    let leadLine: string | null = null;
+                    const dotSplit = handcrafted.split(" · ");
+                    if (dotSplit.length === 2) {
+                      originLine = dotSplit[0];
+                      leadLine = dotSplit[1];
+                    } else {
+                      const m = handcrafted.match(/^(Handcrafted in .+?)\s+in\s+(.+)$/i);
+                      if (m) {
+                        originLine = m[1];
+                        leadLine = `Production lead time: ${m[2]}`;
+                      }
+                    }
+                    return (
+                      <div className="border-b border-border/60 pb-3 flex items-start gap-5">
+                        {specIcon("✦", "mt-0.5")}
+                        <div className="font-body text-sm leading-relaxed text-muted-foreground font-normal">
+                          <p>{originLine}</p>
+                          {leadLine && <p className="mt-0.5">{leadLine}</p>}
+                        </div>
+                      </div>
+                    );
+                  })()}
+
+                  {!user && !authLoading && (
+                    <TradeExclusiveCard
+                      redirectTo={location.pathname + location.search}
+                      rrpLabel={publicRrpLabel}
                     />
-                  );
-                })()}
+                  )}
 
+                  <div className="flex flex-col gap-5">
+                    {(() => {
+                      const returnTo = typeof window !== "undefined" ? location.pathname + location.search : "";
+                      const q = new URLSearchParams({
+                        subject: `Customization inquiry — ${product.title} by ${designerDisplay}`,
+                        productId: product.id,
+                        productSlug: productSlug || "",
+                        productName: product.title || "",
+                        designerName: designerDisplay || "",
+                        back: returnTo || "",
+                      });
+                      const customizeHref = `/contact?${q.toString()}#contact`;
+                      return (
+                        <div className="border-b border-border/60 pb-3 flex items-start gap-5">
+                          {specIcon("⬗", "mt-0.5")}
+                          <div className="font-body text-sm leading-relaxed text-muted-foreground font-normal">
+                            <p>Bespoke dimensions and finishes available upon request.</p>
+                            <Link to={customizeHref} className="inline-block mt-1 font-body text-[11px] uppercase tracking-[0.14em] text-foreground underline underline-offset-4 decoration-border hover:text-primary transition-colors">
+                              Request Customization
+                            </Link>
+                          </div>
+                        </div>
+                      );
+                    })()}
 
-              </div>
+                    {(() => {
+                      const tradeApprovedFooter = !!user && (isTradeUser || tradeStatus === "approved");
+                      const hasSheet = !!(product.pdf_url || (product.pdf_urls && product.pdf_urls.length > 0));
+                      const utilityItem =
+                        "inline-flex items-center gap-2 font-body text-[11px] uppercase tracking-wider text-muted-foreground transition-colors duration-200 hover:text-foreground";
+                      const iconClass = "shrink-0";
 
+                      return (
+                        <div className="flex flex-wrap items-center gap-x-8 gap-y-2 pt-2">
+                          <FavoriteFolderPicker pickId={product.id} align="start" side="top">
+                            <button
+                              onClick={(e) => e.stopPropagation()}
+                              className={cn(
+                                utilityItem,
+                                favorited && "text-destructive hover:text-destructive"
+                              )}
+                            >
+                              <Heart size={14} strokeWidth={1.25} className={cn(iconClass, favorited && "fill-current")} />
+                              {favorited ? "Saved" : "Favorite"}
+                            </button>
+                          </FavoriteFolderPicker>
 
+                          <button
+                            onClick={() => {
+                              if (!user) {
+                                requireAuth(() => {}, "pin this piece to your selection");
+                                return;
+                              }
+                              togglePin(compareItem);
+                            }}
+                            className={cn(
+                              utilityItem,
+                              pinned && "text-[hsl(var(--gold))] hover:text-[hsl(var(--gold))]",
+                              user && compareItems.length >= 3 && !pinned && "opacity-40 pointer-events-none"
+                            )}
+                          >
+                            <Pin size={14} strokeWidth={1.25} className={cn(iconClass, pinned && "fill-current")} />
+                            {pinned ? "Pinned" : "Pin to Selection"}
+                          </button>
+
+                          {hasSheet ? (
+                            <SpecSheetButton
+                              pdfUrl={product.pdf_url}
+                              pdfUrls={product.pdf_urls}
+                              brandName={designerDisplay}
+                              productName={product.title}
+                              variant="button"
+                              className={cn(utilityItem, "cursor-pointer")}
+                              icon={<FileText size={14} strokeWidth={1.25} className={iconClass} />}
+                              onBeforeOpen={() => {
+                                if (tradeApprovedFooter) return true;
+                                if (!user) {
+                                  requireAuth(() => {}, "open this spec sheet");
+                                  return false;
+                                }
+                                let allowed = false;
+                                requireAuth(() => { allowed = true; }, "download this spec sheet");
+                                return allowed;
+                              }}
+                            />
+                          ) : (
+                            <Link to="/contact" className={utilityItem}>
+                              <FileText size={14} strokeWidth={1.25} className={iconClass} />
+                              Contact Us
+                            </Link>
+                          )}
+                        </div>
+                      );
+                    })()}
+
+                    {(() => {
+                      const variants = (product.size_variants || []) as any[];
+                      const upholstery = Array.from(
+                        new Set(
+                          variants
+                            .map((v) => String(v?.top || v?.label || "").trim())
+                            .filter(Boolean)
+                        )
+                      ).slice(0, 24);
+                      return (
+                        <PublicSpecTable
+                          dimensions={product.dimensions}
+                          materials={product.materials}
+                          materialsDescription={(product as any).materials_description}
+                          upholsteryOptions={product.is_upholstered ? upholstery : []}
+                          sku={product.id}
+                        />
+                      );
+                    })()}
+                  </div>
+                </>
+              )}
 
               {/* Signed-in visitors. Verified trade members get the full
                   workspace (net pricing, availability, spec sheet + Felix);
@@ -2188,8 +2390,6 @@ const PublicProductPage: React.FC = () => {
                 });
                 const inquireHref = `/contact?${q.toString()}#contact`;
 
-                // Vetting gate: an admin-granted trade role always counts as
-                // approved; otherwise profiles.trade_status must be 'approved'.
                 const tradeApproved = isTradeUser || tradeStatus === "approved";
 
                 if (!tradeApproved && tradeStatus === "pending_review") {
@@ -2228,17 +2428,12 @@ const PublicProductPage: React.FC = () => {
                 );
               })()}
 
-
-
-
-
               <QuoteRequestDialog
                 open={quoteRequestOpen}
                 onOpenChange={setQuoteRequestOpen}
                 productName={product.title}
                 designerName={designerDisplay}
               />
-
 
               {/* Signed-out spec sheet explainer — points back to the trade card. */}
               <Dialog open={specSheetLocked} onOpenChange={setSpecSheetLocked}>
@@ -2266,9 +2461,6 @@ const PublicProductPage: React.FC = () => {
                   </div>
                 </DialogContent>
               </Dialog>
-
-
-
             </div>
           </div>
 

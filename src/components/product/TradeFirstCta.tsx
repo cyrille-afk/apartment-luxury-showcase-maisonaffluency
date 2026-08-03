@@ -86,8 +86,8 @@ export default function TradeFirstCta({
       {audience === "trade" ? (
         <div className="flex flex-col gap-3">
           <p className="font-body text-[11px] leading-relaxed text-muted-foreground">
-            Trade pricing and client management tools are for registered design
-            professionals.
+            Trade pricing, client management tools and AI curatorial guide are
+            for registered design professionals.
           </p>
 
           <Link to={loginHref} className={primaryBtn}>
