@@ -31,40 +31,32 @@ const TradeFloatingCTA = () => {
 
   return (
     <div
-      className="fixed right-4 sm:right-6 z-[100] hidden animate-in slide-in-from-bottom-4 fade-in duration-500 sm:block sm:bottom-24"
+      className="fixed inset-x-0 bottom-0 z-[100] hidden animate-in slide-in-from-bottom-4 fade-in duration-500 sm:block pointer-events-none"
       role="banner"
     >
-      <div className="relative bg-foreground/95 backdrop-blur-sm text-background px-7 py-4 rounded-full shadow-lg border border-accent/20 max-w-[92vw]">
-        <button
-          onClick={dismiss}
-          aria-label="Dismiss"
-          className="absolute -top-2.5 -right-2.5 p-2 rounded-full bg-foreground border border-background/20 hover:bg-foreground/80 transition-colors shadow-md z-10"
-        >
-          <X className="w-4 h-4 text-background" />
-        </button>
-        {/* Desktop: single row */}
-        <div className="hidden sm:flex items-center gap-5">
-          <p className="font-body text-sm uppercase tracking-[0.15em] whitespace-nowrap">
-            Architect or Interior Designer?
-          </p>
-          <Link
-            to="/trade-program"
-            className="shrink-0 px-5 py-2.5 bg-accent text-black font-body text-sm font-semibold uppercase tracking-[0.15em] rounded-full border border-black/15 shadow-sm hover:bg-accent/90 transition-colors whitespace-nowrap"
-          >
-            Join Our Trade Program
-          </Link>
-        </div>
-        {/* Mobile: stacked */}
-        <div className="flex sm:hidden flex-col items-center gap-2.5 text-center">
-          <p className="font-body text-[12px] uppercase tracking-[0.15em] text-background/80">
-            Architect or Interior Designer?
-          </p>
-          <Link
-            to="/trade-program"
-            className="px-5 py-2 bg-accent text-black font-body text-[12px] font-semibold uppercase tracking-[0.15em] rounded-full border border-black/15 shadow-sm hover:bg-accent/90 transition-colors whitespace-nowrap"
-          >
-            Join Our Trade Program
-          </Link>
+      <div className="mx-auto max-w-7xl px-5 md:px-14 lg:px-24 relative h-0">
+        <div className="absolute bottom-24 right-5 md:right-14 lg:right-24 pointer-events-auto">
+          <div className="relative bg-foreground/95 backdrop-blur-sm text-background px-7 py-4 rounded-full shadow-lg border border-accent/20 max-w-[92vw]">
+            <button
+              onClick={dismiss}
+              aria-label="Dismiss"
+              className="absolute -top-2.5 -right-2.5 p-2 rounded-full bg-foreground border border-background/20 hover:bg-foreground/80 transition-colors shadow-md z-10"
+            >
+              <X className="w-4 h-4 text-background" />
+            </button>
+            {/* Desktop: single row */}
+            <div className="hidden sm:flex items-center gap-5">
+              <p className="font-body text-sm uppercase tracking-[0.15em] whitespace-nowrap">
+                Architect or Interior Designer?
+              </p>
+              <Link
+                to="/trade-program"
+                className="shrink-0 px-5 py-2.5 bg-accent text-black font-body text-sm font-semibold uppercase tracking-[0.15em] rounded-full border border-black/15 shadow-sm hover:bg-accent/90 hover:-translate-y-0.5 hover:shadow-md transition-all whitespace-nowrap"
+              >
+                Join Our Trade Program
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
     </div>
