@@ -639,11 +639,11 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                   navigate(`/designers/${linkedDesigner.slug}`);
                 }}
                 disabled={!linkedDesigner?.slug}
-                className="font-body text-[10px] uppercase tracking-[0.15em] text-[hsl(var(--gold))] hover:text-primary hover:underline underline-offset-2 transition-colors cursor-pointer text-left"
+                className="font-body text-[11px] uppercase tracking-[0.15em] text-[hsl(var(--gold))] hover:text-primary hover:underline underline-offset-2 transition-colors cursor-pointer text-left"
               >
                 {designerDisplay}
               </button>
-              <h2 className="font-display text-lg md:text-2xl text-foreground mt-1 leading-tight">
+              <h2 className="font-display text-base md:text-xl text-foreground mt-1 leading-tight">
                 {product.subtitle
                   ? `${product.title} ${product.subtitle}`
                   : product.title}

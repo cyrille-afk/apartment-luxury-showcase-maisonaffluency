@@ -1316,19 +1316,19 @@ const PublicDesignerProfile = () => {
                           <Link
                             to={`/designers/${designerSlug}`}
                             onClick={(e) => e.stopPropagation()}
-                            className="block font-body text-[9px] md:text-[10px] uppercase tracking-[0.15em] text-muted-foreground hover:text-foreground transition-colors leading-tight line-clamp-1"
+                            className="block font-body text-[10px] md:text-[11px] uppercase tracking-[0.15em] text-muted-foreground hover:text-foreground transition-colors leading-tight line-clamp-1"
                           >
                             {designerLabel}
                           </Link>
                         ) : designerLabel ? (
-                          <span className="block font-body text-[9px] md:text-[10px] uppercase tracking-[0.15em] text-muted-foreground leading-tight line-clamp-1">
+                          <span className="block font-body text-[10px] md:text-[11px] uppercase tracking-[0.15em] text-muted-foreground leading-tight line-clamp-1">
                             {designerLabel}
                           </span>
                         ) : parentBrandName ? (
                           <Link
                             to={`/designers/${parentBrandSlug}`}
                             onClick={(e) => e.stopPropagation()}
-                            className="block font-body text-[9px] md:text-[10px] uppercase tracking-[0.15em] text-muted-foreground hover:text-foreground transition-colors leading-tight line-clamp-1"
+                            className="block font-body text-[10px] md:text-[11px] uppercase tracking-[0.15em] text-muted-foreground hover:text-foreground transition-colors leading-tight line-clamp-1"
                           >
                             {parentBrandName}
                           </Link>
@@ -1336,7 +1336,7 @@ const PublicDesignerProfile = () => {
 
 
                         {/* Product name — primary (deep link so the URL is shareable/copyable) */}
-                        <h3 className="font-display text-[14px] md:text-sm tracking-wide leading-snug mt-2 line-clamp-2">
+                        <h3 className="font-display text-[13px] md:text-[13px] tracking-wide leading-snug mt-2 line-clamp-2">
                           <Link to={productHref} onClick={handleCardClick} className="hover:text-foreground/70 transition-colors">
                             {displayTitle}
                           </Link>
