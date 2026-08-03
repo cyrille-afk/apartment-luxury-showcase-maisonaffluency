@@ -253,6 +253,10 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
     : undefined;
   const { data: linkedDesigner } = useDesignerByName(designerDisplayName);
 
+  // Publicly visible RRP (only for products flagged public_rrp_visible, e.g. Apparatus).
+  const { data: publicRrp } = usePublicRrp(product?.id);
+  const publicPriceLabel = formatPublicRrp(publicRrp);
+
   // Reset per-product state when the product changes (incl. selected finish).
   const [selectedBaseIdx, setSelectedBaseIdx] = useState<number | null>(null);
   const [selectedTopIdx, setSelectedTopIdx] = useState<number | null>(null);
