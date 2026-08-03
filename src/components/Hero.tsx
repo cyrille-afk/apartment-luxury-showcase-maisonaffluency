@@ -111,27 +111,31 @@ const Hero = () => {
                 </button>
 
                 {/* Inline editorial links — vertical stack on mobile/PWA, horizontal on desktop */}
-                {/* Mobile / PWA — subdued label + solid luxury button */}
-                <div className="hero-mobile-links-inner mt-6 flex w-full max-w-md flex-col items-center gap-4 px-6 hero-fade-in-delayed-5 md:hidden">
+                {/* Mobile / PWA — frosted glass card */}
+                <div className="hero-mobile-links-inner mt-6 flex w-full max-w-sm flex-col items-center gap-4 rounded-none border border-white/20 bg-white/10 p-6 text-center backdrop-blur-md hero-fade-in-delayed-5 md:hidden">
                   <button
                     type="button"
                     onClick={() => {
                       trackEvent("click_singapore_gallery_preview", { event_category: "CTA", event_label: "HeroSecondary" });
                       scrollToSection("apartment-tour-heading");
                     }}
-                    className="font-body text-[11px] font-medium uppercase tracking-[0.25em] text-white/75 [text-shadow:0_1px_3px_rgba(0,0,0,0.6)]"
+                    className="font-body text-[11px] font-medium uppercase tracking-[0.25em] text-stone-800"
                   >
                     Singapore Gallery Preview
                   </button>
+
+                  <div className="h-[1px] w-8 bg-stone-400/50" />
+
                   <button
                     type="button"
                     onClick={openTour}
-                    className="w-full border border-white/80 bg-[#1A1A1A] px-8 py-4 font-body text-[13px] font-light uppercase tracking-[0.2em] text-white transition-all duration-300 active:bg-white active:text-[#1A1A1A]"
+                    className="font-body text-[12px] font-light uppercase tracking-[0.2em] text-stone-900 transition-all duration-300"
                   >
                     Book Private Appointment
-                    <span className="ml-1 text-[10px] font-normal italic lowercase text-white/60">(trade only)</span>
+                    <span className="mt-1 block text-[10px] font-normal italic lowercase text-stone-600">(trade only)</span>
                   </button>
                 </div>
+
 
                 {/* Desktop — inline editorial links */}
                 <div className="mt-6 hidden items-center gap-0 hero-fade-in-delayed-5 rounded-full bg-black/70 px-6 py-2.5 backdrop-blur-md md:flex md:flex-row">
