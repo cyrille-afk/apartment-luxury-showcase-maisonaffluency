@@ -115,7 +115,7 @@ const Hero = () => {
                     type="button"
                     onClick={() => {
                       trackEvent("click_singapore_gallery_preview", { event_category: "CTA", event_label: "HeroSecondary" });
-                      scrollToSection("apartment-tour");
+                      scrollToSection("apartment-tour-heading");
                     }}
                     className="group py-3 text-center font-body text-[15px] font-semibold leading-relaxed tracking-[0.12em] text-[#FFFFFF] antialiased [text-shadow:0_1px_3px_rgba(0,0,0,0.55)] transition-colors md:py-0 md:text-[16px]"
                   >

@@ -76,7 +76,10 @@ const ApartmentTourInterlude = ({ compact = false }: { compact?: boolean }) => {
             className="flex flex-col md:flex-row gap-2 md:gap-8 items-stretch md:items-start"
           >
             {/* Title — above video on mobile, left side on desktop */}
-            <div className="flex flex-col text-center md:text-left order-1 md:order-none md:hidden">
+            <div
+              id={isMobile ? "apartment-tour-heading" : undefined}
+              className="flex flex-col text-center md:text-left order-1 md:order-none md:hidden"
+            >
               <div className="inline-flex items-center justify-center gap-2">
                 <p className="font-serif text-base md:text-lg text-foreground font-light tracking-wide" aria-hidden="true">
                   Tour Our Gallery
@@ -98,7 +101,10 @@ const ApartmentTourInterlude = ({ compact = false }: { compact?: boolean }) => {
             {/* Text — compact, left side (desktop only for title; team section always here) */}
             <div className="flex-1 flex flex-col items-center md:items-start justify-center order-3 md:order-1">
               <div className="hidden md:block">
-                <h2 className="font-serif text-base md:text-lg text-foreground font-light tracking-wide">
+                <h2
+                  id={!isMobile ? "apartment-tour-heading" : undefined}
+                  className="font-serif text-base md:text-lg text-foreground font-light tracking-wide"
+                >
                   Tour Our Gallery
                 </h2>
                 <p className="text-xs md:text-sm font-body text-muted-foreground/60 italic tracking-wide mt-0.5">
@@ -232,7 +238,10 @@ const ApartmentTourInterlude = ({ compact = false }: { compact?: boolean }) => {
           {/* Header */}
           <div className="flex flex-col items-center text-center mb-6 md:mb-10">
             <div className="flex items-center gap-2">
-              <h2 className="font-serif text-xl md:text-3xl lg:text-4xl text-foreground font-light tracking-wide">
+              <h2
+                id="apartment-tour-heading"
+                className="font-serif text-xl md:text-3xl lg:text-4xl text-foreground font-light tracking-wide"
+              >
                 Tour Our Gallery
               </h2>
               <button
