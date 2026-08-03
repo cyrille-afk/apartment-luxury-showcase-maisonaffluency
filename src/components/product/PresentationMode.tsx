@@ -56,8 +56,10 @@ const PresentationMode: React.FC<PresentationModeProps> = ({
     document.body.style.overflow = "hidden";
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
-      if (e.key === "ArrowRight") onIndexChange(Math.min(index + 1, images.length - 1));
-      if (e.key === "ArrowLeft") onIndexChange(Math.max(index - 1, 0));
+      const len = images.length;
+      const wrap = (i: number) => ((i % len) + len) % len;
+      if (e.key === "ArrowRight") onIndexChange(wrap(index + 1));
+      if (e.key === "ArrowLeft") onIndexChange(wrap(index - 1));
     };
     window.addEventListener("keydown", onKey);
     return () => {
@@ -69,7 +71,10 @@ const PresentationMode: React.FC<PresentationModeProps> = ({
 
   if (!open || typeof document === "undefined" || images.length === 0) return null;
 
-  const go = (i: number) => onIndexChange(Math.max(0, Math.min(i, images.length - 1)));
+  const go = (i: number) => {
+    const len = images.length;
+    onIndexChange(((i % len) + len) % len);
+  };
 
   const revealChrome = () => {
     setChromeVisible(true);
@@ -131,7 +136,7 @@ const PresentationMode: React.FC<PresentationModeProps> = ({
               aria-label="Previous"
               className={cn(
                 "hidden md:flex absolute left-6 top-1/2 -translate-y-1/2 w-11 h-11 items-center justify-center rounded-full bg-white/10 backdrop-blur-sm text-white/80 transition-opacity duration-300",
-                chromeVisible && index > 0 ? "opacity-100" : "opacity-0 pointer-events-none"
+                chromeVisible ? "opacity-100" : "opacity-0 pointer-events-none"
               )}
             >
               <ChevronLeft size={20} />
@@ -142,7 +147,7 @@ const PresentationMode: React.FC<PresentationModeProps> = ({
               aria-label="Next"
               className={cn(
                 "hidden md:flex absolute right-6 top-1/2 -translate-y-1/2 w-11 h-11 items-center justify-center rounded-full bg-white/10 backdrop-blur-sm text-white/80 transition-opacity duration-300",
-                chromeVisible && index < images.length - 1 ? "opacity-100" : "opacity-0 pointer-events-none"
+                chromeVisible ? "opacity-100" : "opacity-0 pointer-events-none"
               )}
             >
               <ChevronRight size={20} />

@@ -181,7 +181,10 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
   const suppressThumbAutoScrollRef = useRef(false);
 
   const goTo = useCallback((i: number, opts?: { fromThumbStrip?: boolean }) => {
-    const next = Math.max(0, Math.min(i, images.length - 1));
+    const len = images.length;
+    if (len === 0) return;
+    // Wrap around so the last image loops back to the first (and vice versa).
+    const next = ((i % len) + len) % len;
     if (opts?.fromThumbStrip) suppressThumbAutoScrollRef.current = true;
     setActiveIndex(next);
     onIndexChange?.(next);
@@ -450,23 +453,15 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
           <>
             <button
               onClick={() => goTo(activeIndex - 1)}
-              disabled={activeIndex === 0}
               aria-label="Previous image"
-              className={cn(
-                "hidden md:flex absolute left-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 items-center justify-center transition-opacity",
-                activeIndex === 0 ? "opacity-0 pointer-events-none" : "opacity-100 md:opacity-0 md:group-hover:opacity-100"
-              )}
+              className="hidden md:flex absolute left-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 items-center justify-center transition-opacity opacity-0 group-hover:opacity-100"
             >
               <ChevronLeft size={20} className="text-foreground" />
             </button>
             <button
               onClick={() => goTo(activeIndex + 1)}
-              disabled={activeIndex === images.length - 1}
               aria-label="Next image"
-              className={cn(
-                "hidden md:flex absolute right-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 items-center justify-center transition-opacity",
-                activeIndex === images.length - 1 ? "opacity-0 pointer-events-none" : "opacity-100 md:opacity-0 md:group-hover:opacity-100"
-              )}
+              className="hidden md:flex absolute right-2 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 items-center justify-center transition-opacity opacity-0 group-hover:opacity-100"
             >
               <ChevronRight size={20} className="text-foreground" />
             </button>
