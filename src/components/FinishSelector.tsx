@@ -526,7 +526,12 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     return (m?.[1] || "Rug component").trim();
   };
 
-  const renderTile = (f: Fabric, kindOverride?: "fabric" | "cover" | "base" | "top" | "rug", rugComponent?: string) => {
+  const renderTile = (
+    f: Fabric,
+    kindOverride?: "fabric" | "cover" | "base" | "top" | "rug",
+    rugComponent?: string,
+    shape?: "tile" | "circle",
+  ) => {
     const isCom = f.id === "__com__";
     const isCol = f.id === "__col__";
     const isRugGroup = kindOverride === "rug";
