@@ -617,7 +617,9 @@ const VariantFinishSelectors: React.FC<{ section?: "primary" | "supplemental" | 
               text={withImperialPerLine(baseOptions.join("\n"))}
               placeholder={getBasePlaceholder(product)}
               singleValueLabel={formatVariantAxisLabel(product.base_axis_label) || undefined}
+              swatchMode
               emphasized
+
               value={selBase != null ? Math.max(0, baseOptions.indexOf(selBase)) : null}
               onChange={(idx) => {
                 if (idx < 0) {
@@ -650,7 +652,9 @@ const VariantFinishSelectors: React.FC<{ section?: "primary" | "supplemental" | 
               text={withImperialPerLine(topOptions.join("\n"))}
               placeholder={getTopPlaceholder(product)}
               singleValueLabel={formatVariantAxisLabel(product.top_axis_label) || undefined}
+              swatchMode={!topAxisIsDim}
               emphasized
+
               value={selTop != null ? Math.max(0, topOptions.indexOf(selTop)) : null}
               onChange={(idx) => {
                 if (idx < 0) {
@@ -692,7 +696,9 @@ const VariantFinishSelectors: React.FC<{ section?: "primary" | "supplemental" | 
           text={withImperialPerLine(baseOptions.join("\n"))}
           placeholder={getBasePlaceholder(product)}
           singleValueLabel={formatVariantAxisLabel(product.base_axis_label) || undefined}
+          swatchMode
           emphasized
+
           value={selBase != null ? Math.max(0, baseOptions.indexOf(selBase)) : null}
           onChange={(idx) => {
             if (idx < 0) {
@@ -710,7 +716,9 @@ const VariantFinishSelectors: React.FC<{ section?: "primary" | "supplemental" | 
           icon={specIcon("⬗")}
           text={singleMaterialOptions.join("\n")}
           placeholder={getMaterialPlaceholder(product)}
+          swatchMode
           emphasized
+
           value={selMat != null ? Math.max(0, singleMaterialOptions.indexOf(selMat)) : null}
           onChange={(idx) => {
             const m = singleMaterialOptions[idx] ?? null;
