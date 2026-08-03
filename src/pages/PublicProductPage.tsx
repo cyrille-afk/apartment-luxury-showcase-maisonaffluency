@@ -2031,7 +2031,8 @@ const PublicProductPage: React.FC = () => {
                         <div className="border-b border-border/60 pb-3 flex items-start gap-5">
                           {specIcon("✦", "mt-0.5")}
                           <div className="font-body text-sm leading-relaxed text-muted-foreground font-normal">
-                            <p>{originLine}</p>
+                            <OriginStoryDrawer label={originLine} maker={designerDisplay} />
+
                             {leadLine && <p className="mt-0.5">{leadLine}</p>}
                           </div>
                         </div>
