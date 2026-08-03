@@ -1869,7 +1869,7 @@ const TradeProductPage: React.FC = () => {
           </div>
 
           <div className="relative flex flex-col gap-4">
-            <div className="flex items-start justify-between gap-3">
+            <div className="flex items-start justify-between gap-3 order-[-4] md:order-none">
               <div className="min-w-0">
                 <Link
                   to={designer.slug ? `/trade/designers/${designer.slug}` : fallbackPath}
