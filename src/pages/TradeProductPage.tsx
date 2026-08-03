@@ -1787,14 +1787,50 @@ const TradeProductPage: React.FC = () => {
                 })()
               }
               overlay={
-                product.description ? (
-                  <div className="flex flex-col items-end gap-2">
+                <div className="flex items-center gap-2">
+                  {product.description && (
                     <div className="hidden md:block">
                       <LightboxDescriptionDropdown description={product.description} />
                     </div>
-                  </div>
-                ) : null
+                  )}
+                  <TradeFavoriteFolderPicker
+                    productId={favoriteId}
+                    meta={{
+                      product_name: product.title,
+                      brand_name: designerDisplay,
+                      category: product.category || undefined,
+                      image_url: product.image_url,
+                      dimensions: product.dimensions,
+                      materials: product.materials,
+                    }}
+                    align="end"
+                    side="bottom"
+                  >
+                    <button
+                      onClick={(e) => e.stopPropagation()}
+                      aria-label={favorited ? "Saved to favorites" : "Add to favorites"}
+                      className="flex items-center justify-center w-9 h-9 rounded-full bg-background/25 backdrop-blur-md border border-border/25"
+                    >
+                      <Heart size={18} strokeWidth={1.5} className={cn(favorited ? "fill-destructive text-destructive" : "text-foreground/80")} />
+                    </button>
+                  </TradeFavoriteFolderPicker>
+                </div>
               }
+              bottomRightOverlay={(() => {
+                const shareUrl = buildPieceOgUrl(designerDisplay, product.title, product.subtitle);
+                return (
+                  <ShareMenu
+                    url={shareUrl}
+                    message={`${product.title} by ${designerDisplay} — Maison Affluency: ${shareUrl}`}
+                    className="flex items-center justify-center w-9 h-9 rounded-full bg-background/25 backdrop-blur-md border border-border/25 text-foreground/80"
+                    iconSize="w-[18px] h-[18px]"
+                    iconVariant="ios"
+                    showLabel={false}
+                    imageUrl={images?.[galleryActiveIndex ?? 0] || images?.[0]}
+                    imageName={`${product.title}-${designerDisplay}`}
+                  />
+                );
+              })()}
             />
             {/* Mobile/PWA: the "Shown in" caption lives on the presentation
                 photography instead of stacking under the gallery. */}
@@ -1889,298 +1925,9 @@ const TradeProductPage: React.FC = () => {
               </div>
               <div className="shrink-0 mt-1 flex items-center gap-2">
                 <CurrencyToggle value={displayCurrency} onChange={setDisplayCurrency} compact />
-                {(() => {
-                  const shareUrl = buildPieceOgUrl(designerDisplay, product.title, product.subtitle);
-                  return (
-                    <ShareMenu
-                      url={shareUrl}
-                      message={`${product.title} by ${designerDisplay} — Maison Affluency: ${shareUrl}`}
-                      iconSize="w-4 h-4"
-                      showLabel={false}
-                    />
-                  );
-                })()}
               </div>
             </div>
 
-            {/* Dimensions & size pickers — mobile: after the price */}
-            <div className="flex flex-col gap-2 order-[-2] md:order-none">
-              {(() => {
-                const sqm = (product as any)?.price_per_sqm_cents as number | null | undefined;
-                const isRugSqm = isRugCategory(product.category) && !!sqm && sqm > 0 && (sizeVariants?.length || 0) > 0;
-                if (!isRugSqm) return null;
-                return (
-                  <RugSizeColourPicker
-                    sizeVariants={sizeVariants as any}
-                    pricePerSqmCents={sqm as number}
-                    currency={pricing?.currency || (product as any).currency || "EUR"}
-                    sizeAxisLabel={(product as any).base_axis_label}
-                    colourAxisLabel={(product as any).top_axis_label}
-                    onChange={setRugSelection}
-                  />
-                );
-              })()}
-              {!isRugSqmActive && isBaseOnly && !baseAxisIsDim && baseOnlySizeOptions.length > 1 && (
-                <ExpandableSpec
-                  icon={specIcon("📐")}
-                  text={withImperialPerLine(baseOnlySizeOptions.join("\n"))}
-                  secondaryText={null}
-                  emphasized
-                  placeholder="Select Your Size"
-                  value={selectedDualSize != null ? Math.max(0, baseOnlySizeOptions.indexOf(selectedDualSize)) : null}
-                  onChange={(idx) => {
-                    if (idx < 0) {
-                      setSelectedDualSize(null);
-                      handleMaterialChange(null, { base: selectedBase, top: null, size: null });
-                      return;
-                    }
-                    const s = baseOnlySizeOptions[idx] ?? null;
-                    setSelectedDualSize(s);
-                    let nextBase = selectedBase;
-                    if (s && nextBase && !variantsList.some((x: any) => matchesDual(x, nextBase, null, s))) {
-                      setSelectedBase(null);
-                      nextBase = null;
-                    }
-                    handleMaterialChange(s, { base: nextBase, top: null, size: s });
-                  }}
-                />
-              )}
-              {/* Base-only (finish) axis with fixed product dimensions: the
-                  size row would otherwise never render, leaving the page
-                  without any dimensions at all. */}
-              {!isRugSqmActive && isBaseOnly && !baseAxisIsDim && baseOnlySizeOptions.length <= 1
-                && !(baseOptions.length > 0 && baseOptions.every(looksLikeDimension))
-                && product.dimensions && looksLikeDimension(product.dimensions) && (
-                <ExpandableSpec icon={specIcon("📐")} text={withImperialPerLine(product.dimensions)} />
-              )}
-              {/* Dual-axis with fixed (non-variant) dimensions: render dims at the top */}
-              {!isRugSqmActive && isDualAxis && !baseAxisIsDim && !topAxisIsDim && !hasDualSize && product.dimensions && looksLikeDimension(product.dimensions) && (
-                <ExpandableSpec icon={specIcon("📐")} text={withImperialPerLine(product.dimensions)} />
-              )}
-              {/* Single-axis split: dedicated size dropdown driven by unique sizes — shown FIRST */}
-              {!isRugSqmActive && !isDualAxis && hasSingleAxisSplit && (
-                <ExpandableSpec
-                  icon={specIcon("📐")}
-                  text={withImperialPerLine(singleSizeOptions.join("\n"))}
-                  secondaryText={null}
-                  emphasized
-                  placeholder="Select Your Size"
-                  value={selectedSingleSize != null ? Math.max(0, singleSizeOptions.indexOf(selectedSingleSize)) : null}
-                  onChange={(idx) => {
-                    const newSize = singleSizeOptions[idx] ?? null;
-                    setSelectedSingleSize(newSize);
-                    let nextMat = selectedSingleMaterial;
-                    if (newSize && nextMat && !singleAxisParsed.some((p) => p.size === newSize && p.material === nextMat)) {
-                      setSelectedSingleMaterial(null);
-                      nextMat = null;
-                    }
-                    // Sync the gallery using the matched variant's full raw
-                    // label so size+material combos map to the right image.
-                    const match = newSize
-                      ? singleAxisParsed.find((p) => p.size === newSize && (!nextMat || p.material === nextMat))
-                      : null;
-                    handleMaterialChange((match?.variant.label || nextMat || null) as string | null);
-                  }}
-
-                  disabledIndices={disabledSizeIndices}
-                  helperText={
-                    disabledSizeIndices.length > 0 && selectedSingleMaterial
-                      ? `Some sizes aren't available in ${selectedSingleMaterial} — greyed out.`
-                      : undefined
-                  }
-                />
-              )}
-              {/* Single-axis (no material split): show stripped size labels indexed by variant */}
-              {!isRugSqmActive && product.dimensions && !isDualAxis && !isBaseOnly && !hasSingleAxisSplit && (() => {
-                // Preserve variant-name prefixes ("Concept 1: Ø 244 cm") and
-                // dedupe so repeated metal-finish rows collapse to one entry.
-                const seen = new Set<string>();
-                const variantSizeText = sizeVariants && sizeVariants.length > 0
-                  ? sizeVariants
-                      .map((v) => (v.label || "").trim())
-                      .filter((label) => {
-                        if (!label) return false;
-                        if (seen.has(label)) return false;
-                        seen.add(label);
-                        return true;
-                      })
-                      .join("\n")
-                  : null;
-                // If variants are dimensional, use them as a size picker.
-                // Otherwise (finish/material-only variants), fall back to the
-                // product's raw dimensions so the row is never dropped.
-                const variantsAreDimensional = variantSizeText && looksLikeDimension(variantSizeText);
-                const sizeText = variantsAreDimensional
-                  ? variantSizeText!
-                  : formatDimensionsMultiline(product.dimensions);
-                if (!looksLikeDimension(sizeText)) return null;
-                // Keep the same "<cm> | <in>" format used for single-dim
-                // products so axis labels (W × H × D) show on both sides.
-                const formatted = withImperialPerLine(sizeText);
-                const interactive = variantsAreDimensional && hasVariants;
-                return (
-                  <ExpandableSpec
-                    icon={specIcon("📐")}
-                    text={formatted}
-                    emphasized
-                    placeholder={interactive ? "Select Your Size" : undefined}
-                    value={interactive ? selectedVariantIdx : undefined}
-                    onChange={interactive ? setSelectedVariantIdx : undefined}
-                  />
-                );
-              })()}
-
-              {!isRugSqmActive && isDualAxis && hasDualSize && (
-                <ExpandableSpec
-                  icon={specIcon("📐")}
-                  text={withImperialPerLine(dualSizeOptions.join("\n"))}
-                  secondaryText={null}
-                  emphasized
-                  placeholder="Select Your Size"
-                  value={selectedDualSize != null ? Math.max(0, dualSizeOptions.indexOf(selectedDualSize)) : null}
-                  onChange={(idx) => {
-                    if (idx < 0) {
-                      clearAllDualSelections();
-                      return;
-                    }
-                    const s = dualSizeOptions[idx] ?? null;
-                    setSelectedDualSize(s);
-                    let nextBase = selectedBase;
-                    let nextTop = selectedTop;
-                    if (s && nextBase && !variantsList.some((x: any) => matchesDual(x, nextBase, nextTop, s))) { setSelectedBase(null); nextBase = null; }
-                    if (s && nextTop && !variantsList.some((x: any) => matchesDual(x, nextBase, nextTop, s))) { setSelectedTop(null); nextTop = null; }
-                    // Re-sync the gallery to the canonical key for the
-                    // (base, top, size) triple — same resolver as the
-                    // Base/Top dropdowns, so all three axes stay aligned.
-                    handleMaterialChange(nextTop ?? nextBase ?? s, { base: nextBase, top: nextTop, size: s });
-                  }}
-                  disabledIndices={disabledDualSizeIdx}
-                  helperText={
-                    disabledDualSizeIdx.length > 0 && (selectedBase || selectedTop)
-                      ? `Some sizes aren't available with the current selection — greyed out.`
-                      : undefined
-                  }
-                />
-              )}
-
-              {!isRugSqmActive && isBaseOnly && baseAxisIsDim && (
-                <ExpandableSpec
-                  icon={specIcon("📐")}
-                  text={withImperialPerLine(baseOptions.join("\n"))}
-                  placeholder={getBasePlaceholder(product)}
-                  singleValueLabel={formatVariantAxisLabel(product.base_axis_label) || undefined}
-                  emphasized
-                  value={selectedBase != null ? Math.max(0, baseOptions.indexOf(selectedBase)) : null}
-                  onChange={(idx) => {
-                    if (idx < 0) {
-                      setSelectedBase(null);
-                      handleMaterialChange(null, { base: null, top: null, size: null });
-                      return;
-                    }
-                    const v = baseOptions[idx] ?? null;
-                    setSelectedBase(v);
-                    handleMaterialChange(v, { base: v, top: null, size: null });
-                  }}
-                />
-              )}
-
-              {!isRugSqmActive && isDualAxis && baseAxisIsDim && (
-                <ExpandableSpec
-                  icon={specIcon("📐")}
-                  text={withImperialPerLine(baseOptions.join("\n"))}
-                  placeholder={getBasePlaceholder(product)}
-                  singleValueLabel={formatVariantAxisLabel(product.base_axis_label) || undefined}
-                  emphasized
-                  value={selectedBase != null ? Math.max(0, baseOptions.indexOf(selectedBase)) : null}
-                  onChange={(idx) => {
-                    if (idx < 0) {
-                      clearAllDualSelections();
-                      return;
-                    }
-                    const v = baseOptions[idx] ?? null;
-                    setSelectedBase(v);
-                    let nextTop = selectedTop;
-                    let nextSize = selectedDualSize;
-                    if (v && nextTop && !variantsList.some((x: any) => matchesDual(x, v, nextTop, nextSize))) { setSelectedTop(null); nextTop = null; }
-                    if (v && nextSize && !variantsList.some((x: any) => matchesDual(x, v, nextTop, nextSize))) { setSelectedDualSize(null); nextSize = null; }
-                    if (v && !nextTop) {
-                      const compatTops = topOptions.filter((t) => variantsList.some((x: any) => matchesDual(x, v, t, nextSize)));
-                      if (compatTops.length === 1) { setSelectedTop(compatTops[0]); nextTop = compatTops[0]; }
-                    }
-                    handleMaterialChange(v, { base: v, top: nextTop, size: nextSize });
-                  }}
-                  disabledIndices={disabledBaseIdx}
-                  helperText={
-                    disabledBaseIdx.length > 0 && (selectedTop || selectedDualSize)
-                      ? `Some ${(getBasePlaceholder(product) || "base").toLowerCase().replace(/^select your /, "")} options aren't available with the current selection — greyed out.`
-                      : undefined
-                  }
-                />
-              )}
-
-              {/* Model-style base axis whose options carry dimensions (e.g. Bora Sconce
-                  Uplight / Downlight) — render BEFORE the finish swatches and use
-                  the dimensions icon since the value is fundamentally a size choice. */}
-              {!isRugSqmActive && isBaseOnly && !baseAxisIsDim && !suppressBaseAsFinish
-                && baseOptions.length > 0 && baseOptions.every(looksLikeDimension) && (
-                <ExpandableSpec
-                  icon={specIcon("📐")}
-                  text={withImperialPerLine(baseOptions.join("\n"))}
-                  placeholder={getBasePlaceholder(product)}
-                  singleValueLabel={formatVariantAxisLabel(product.base_axis_label) || undefined}
-                  emphasized
-                  value={selectedBase != null ? Math.max(0, baseOptions.indexOf(selectedBase)) : null}
-                  onChange={(idx) => {
-                    if (idx < 0) {
-                      setSelectedBase(null);
-                      handleMaterialChange(null, { base: null, top: null, size: null });
-                      return;
-                    }
-                    const v = baseOptions[idx] ?? null;
-                    setSelectedBase(v);
-                    handleMaterialChange(v, { base: v, top: null, size: null });
-                  }}
-                />
-              )}
-
-              {/* Dual-axis with a Model/Size base whose options carry dimensions
-                  (e.g. Callisto Pendant x1 / 100 / x4) — render the base ABOVE
-                  the finish swatches and use the dimensions icon. */}
-              {!isRugSqmActive && isDualAxis && !baseAxisIsDim && !suppressBaseAsFinish
-                && baseOptions.length > 0 && baseOptions.every(looksLikeDimension) && (
-                <ExpandableSpec
-                  icon={specIcon("📐")}
-                  text={withImperialPerLine(baseOptions.join("\n"))}
-                  placeholder={getBasePlaceholder(product)}
-                  singleValueLabel={formatVariantAxisLabel(product.base_axis_label) || undefined}
-                  emphasized
-                  value={selectedBase != null ? Math.max(0, baseOptions.indexOf(selectedBase)) : null}
-                  onChange={(idx) => {
-                    if (idx < 0) {
-                      clearAllDualSelections();
-                      return;
-                    }
-                    const v = baseOptions[idx] ?? null;
-                    setSelectedBase(v);
-                    let nextTop = selectedTop;
-                    let nextSize = selectedDualSize;
-                    if (v && nextTop && !variantsList.some((x: any) => matchesDual(x, v, nextTop, nextSize))) { setSelectedTop(null); nextTop = null; }
-                    if (v && nextSize && !variantsList.some((x: any) => matchesDual(x, v, nextTop, nextSize))) { setSelectedDualSize(null); nextSize = null; }
-                    if (v && !nextTop) {
-                      const compatTops = topOptions.filter((t) => variantsList.some((x: any) => matchesDual(x, v, t, nextSize)));
-                      if (compatTops.length === 1) { setSelectedTop(compatTops[0]); nextTop = compatTops[0]; }
-                    }
-                    handleMaterialChange(v, { base: v, top: nextTop, size: nextSize });
-                  }}
-                  disabledIndices={disabledBaseIdx}
-                  helperText={
-                    disabledBaseIdx.length > 0 && (selectedTop || selectedDualSize)
-                      ? `Some ${(getBasePlaceholder(product) || "base").toLowerCase().replace(/^select your /, "")} options aren't available with the current selection — greyed out.`
-                      : undefined
-                  }
-                />
-              )}
-            </div>
 
             {/* Finish selection — mobile: directly under the photography */}
             <div className="flex flex-col gap-2 order-[-5] md:order-none">
@@ -2493,36 +2240,6 @@ const TradeProductPage: React.FC = () => {
               <AlsoContainsFinishes pickId={product.id} className="mt-1 pl-6" />
             </div>
 
-            {/* Origin & lead time — mobile: after the price */}
-            <div className="flex flex-col gap-2 order-[-1] md:order-none">
-              {(() => {
-                const handcrafted = formatHandcrafted(product.origin, product.lead_time);
-                if (!handcrafted) return null;
-                let originLine = handcrafted;
-                let leadLine: string | null = null;
-                const dotSplit = handcrafted.split(" · ");
-                if (dotSplit.length === 2) {
-                  originLine = dotSplit[0];
-                  leadLine = dotSplit[1];
-                } else {
-                  const m = handcrafted.match(/^(Handcrafted in .+?)\s+in\s+(.+)$/i);
-                  if (m) {
-                    originLine = m[1];
-                    leadLine = `Production lead time: ${m[2]}`;
-                  }
-                }
-                return (
-                  <div className="mt-2 border-t border-b border-border/60 py-4 flex items-start gap-5">
-                    {specIcon("✦", "mt-0.5")}
-                    <div className="font-body text-sm leading-relaxed text-muted-foreground font-normal">
-                      <p>{originLine}</p>
-                      {leadLine && <p className="mt-0.5">{leadLine}</p>}
-                    </div>
-                  </div>
-                );
-              })()}
-
-            </div>
 
             {/* Trade price + retail/trade toggle (size driven by selector above) */}
         {effectiveRrpCents ? (
@@ -2570,43 +2287,15 @@ const TradeProductPage: React.FC = () => {
               </p>
             )}
 
-            {/* Secondary actions: Favorite / Pin / Spec Sheet */}
-            <div className="grid grid-cols-3 gap-2">
-              <TradeFavoriteFolderPicker
-                productId={favoriteId}
-                meta={{
-                  product_name: product.title,
-                  brand_name: designerDisplay,
-                  category: product.category || undefined,
-                  image_url: product.image_url,
-                  dimensions: product.dimensions,
-                  materials: product.materials,
-                }}
-                align="start"
-                side="top"
-              >
-                <button
-                  onClick={(e) => e.stopPropagation()}
-                  className={cn(
-                    "w-full flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-md font-body text-[11px] uppercase tracking-[0.12em] transition-all border",
-                    favorited
-                      ? "border-destructive/30 text-destructive bg-destructive/10"
-                      : "border-border text-muted-foreground hover:text-foreground hover:border-foreground/30"
-                  )}
-                >
-                  <Heart size={13} className={cn(favorited && "fill-current")} />
-                  {favorited ? "Saved" : "Favorite"}
-                </button>
-              </TradeFavoriteFolderPicker>
-
-
+            {/* Secondary actions: Pin / Spec Sheet — borderless text links */}
+            <div className="flex items-center justify-start gap-6">
               <button
                 onClick={() => togglePin(compareItem)}
                 className={cn(
-                  "flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-md font-body text-[11px] uppercase tracking-[0.12em] transition-all border",
+                  "flex items-center gap-1.5 font-body text-[11px] uppercase tracking-[0.12em] transition-colors",
                   pinned
-                    ? "bg-[hsl(var(--gold))]/10 border-[hsl(var(--gold))] text-[hsl(var(--gold))]"
-                    : "border-border text-muted-foreground hover:text-foreground hover:border-foreground/30",
+                    ? "text-[hsl(var(--gold))]"
+                    : "text-muted-foreground hover:text-foreground",
                   compareItems.length >= 3 && !pinned && "opacity-40 pointer-events-none"
                 )}
               >
@@ -2621,15 +2310,326 @@ const TradeProductPage: React.FC = () => {
                   brandName={designerDisplay}
                   productName={product.title}
                   variant="button"
+                  className="flex items-center gap-1.5 font-body text-[11px] uppercase tracking-[0.12em] text-[hsl(var(--pdf-red))] hover:opacity-80 transition-opacity cursor-pointer"
                 />
               ) : (
                 <Link
                   to="/trade/samples"
-                  className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-md font-body text-[11px] uppercase tracking-[0.12em] transition-all border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30"
+                  className="flex items-center gap-1.5 font-body text-[11px] uppercase tracking-[0.12em] text-muted-foreground hover:text-foreground transition-colors"
                 >
                   Procurement
                 </Link>
               )}
+            </div>
+
+            {/* Dimensions & size pickers — mobile: after the price */}
+            <div className="flex flex-col gap-2">
+              {(() => {
+                const sqm = (product as any)?.price_per_sqm_cents as number | null | undefined;
+                const isRugSqm = isRugCategory(product.category) && !!sqm && sqm > 0 && (sizeVariants?.length || 0) > 0;
+                if (!isRugSqm) return null;
+                return (
+                  <RugSizeColourPicker
+                    sizeVariants={sizeVariants as any}
+                    pricePerSqmCents={sqm as number}
+                    currency={pricing?.currency || (product as any).currency || "EUR"}
+                    sizeAxisLabel={(product as any).base_axis_label}
+                    colourAxisLabel={(product as any).top_axis_label}
+                    onChange={setRugSelection}
+                  />
+                );
+              })()}
+              {!isRugSqmActive && isBaseOnly && !baseAxisIsDim && baseOnlySizeOptions.length > 1 && (
+                <ExpandableSpec
+                  icon={specIcon("📐")}
+                  text={withImperialPerLine(baseOnlySizeOptions.join("\n"))}
+                  secondaryText={null}
+                  emphasized
+                  placeholder="Select Your Size"
+                  value={selectedDualSize != null ? Math.max(0, baseOnlySizeOptions.indexOf(selectedDualSize)) : null}
+                  onChange={(idx) => {
+                    if (idx < 0) {
+                      setSelectedDualSize(null);
+                      handleMaterialChange(null, { base: selectedBase, top: null, size: null });
+                      return;
+                    }
+                    const s = baseOnlySizeOptions[idx] ?? null;
+                    setSelectedDualSize(s);
+                    let nextBase = selectedBase;
+                    if (s && nextBase && !variantsList.some((x: any) => matchesDual(x, nextBase, null, s))) {
+                      setSelectedBase(null);
+                      nextBase = null;
+                    }
+                    handleMaterialChange(s, { base: nextBase, top: null, size: s });
+                  }}
+                />
+              )}
+              {/* Base-only (finish) axis with fixed product dimensions: the
+                  size row would otherwise never render, leaving the page
+                  without any dimensions at all. */}
+              {!isRugSqmActive && isBaseOnly && !baseAxisIsDim && baseOnlySizeOptions.length <= 1
+                && !(baseOptions.length > 0 && baseOptions.every(looksLikeDimension))
+                && product.dimensions && looksLikeDimension(product.dimensions) && (
+                <ExpandableSpec icon={specIcon("📐")} text={withImperialPerLine(product.dimensions)} />
+              )}
+              {/* Dual-axis with fixed (non-variant) dimensions: render dims at the top */}
+              {!isRugSqmActive && isDualAxis && !baseAxisIsDim && !topAxisIsDim && !hasDualSize && product.dimensions && looksLikeDimension(product.dimensions) && (
+                <ExpandableSpec icon={specIcon("📐")} text={withImperialPerLine(product.dimensions)} />
+              )}
+              {/* Single-axis split: dedicated size dropdown driven by unique sizes — shown FIRST */}
+              {!isRugSqmActive && !isDualAxis && hasSingleAxisSplit && (
+                <ExpandableSpec
+                  icon={specIcon("📐")}
+                  text={withImperialPerLine(singleSizeOptions.join("\n"))}
+                  secondaryText={null}
+                  emphasized
+                  placeholder="Select Your Size"
+                  value={selectedSingleSize != null ? Math.max(0, singleSizeOptions.indexOf(selectedSingleSize)) : null}
+                  onChange={(idx) => {
+                    const newSize = singleSizeOptions[idx] ?? null;
+                    setSelectedSingleSize(newSize);
+                    let nextMat = selectedSingleMaterial;
+                    if (newSize && nextMat && !singleAxisParsed.some((p) => p.size === newSize && p.material === nextMat)) {
+                      setSelectedSingleMaterial(null);
+                      nextMat = null;
+                    }
+                    // Sync the gallery using the matched variant's full raw
+                    // label so size+material combos map to the right image.
+                    const match = newSize
+                      ? singleAxisParsed.find((p) => p.size === newSize && (!nextMat || p.material === nextMat))
+                      : null;
+                    handleMaterialChange((match?.variant.label || nextMat || null) as string | null);
+                  }}
+
+                  disabledIndices={disabledSizeIndices}
+                  helperText={
+                    disabledSizeIndices.length > 0 && selectedSingleMaterial
+                      ? `Some sizes aren't available in ${selectedSingleMaterial} — greyed out.`
+                      : undefined
+                  }
+                />
+              )}
+              {/* Single-axis (no material split): show stripped size labels indexed by variant */}
+              {!isRugSqmActive && product.dimensions && !isDualAxis && !isBaseOnly && !hasSingleAxisSplit && (() => {
+                // Preserve variant-name prefixes ("Concept 1: Ø 244 cm") and
+                // dedupe so repeated metal-finish rows collapse to one entry.
+                const seen = new Set<string>();
+                const variantSizeText = sizeVariants && sizeVariants.length > 0
+                  ? sizeVariants
+                      .map((v) => (v.label || "").trim())
+                      .filter((label) => {
+                        if (!label) return false;
+                        if (seen.has(label)) return false;
+                        seen.add(label);
+                        return true;
+                      })
+                      .join("\n")
+                  : null;
+                // If variants are dimensional, use them as a size picker.
+                // Otherwise (finish/material-only variants), fall back to the
+                // product's raw dimensions so the row is never dropped.
+                const variantsAreDimensional = variantSizeText && looksLikeDimension(variantSizeText);
+                const sizeText = variantsAreDimensional
+                  ? variantSizeText!
+                  : formatDimensionsMultiline(product.dimensions);
+                if (!looksLikeDimension(sizeText)) return null;
+                // Keep the same "<cm> | <in>" format used for single-dim
+                // products so axis labels (W × H × D) show on both sides.
+                const formatted = withImperialPerLine(sizeText);
+                const interactive = variantsAreDimensional && hasVariants;
+                return (
+                  <ExpandableSpec
+                    icon={specIcon("📐")}
+                    text={formatted}
+                    emphasized
+                    placeholder={interactive ? "Select Your Size" : undefined}
+                    value={interactive ? selectedVariantIdx : undefined}
+                    onChange={interactive ? setSelectedVariantIdx : undefined}
+                  />
+                );
+              })()}
+
+              {!isRugSqmActive && isDualAxis && hasDualSize && (
+                <ExpandableSpec
+                  icon={specIcon("📐")}
+                  text={withImperialPerLine(dualSizeOptions.join("\n"))}
+                  secondaryText={null}
+                  emphasized
+                  placeholder="Select Your Size"
+                  value={selectedDualSize != null ? Math.max(0, dualSizeOptions.indexOf(selectedDualSize)) : null}
+                  onChange={(idx) => {
+                    if (idx < 0) {
+                      clearAllDualSelections();
+                      return;
+                    }
+                    const s = dualSizeOptions[idx] ?? null;
+                    setSelectedDualSize(s);
+                    let nextBase = selectedBase;
+                    let nextTop = selectedTop;
+                    if (s && nextBase && !variantsList.some((x: any) => matchesDual(x, nextBase, nextTop, s))) { setSelectedBase(null); nextBase = null; }
+                    if (s && nextTop && !variantsList.some((x: any) => matchesDual(x, nextBase, nextTop, s))) { setSelectedTop(null); nextTop = null; }
+                    // Re-sync the gallery to the canonical key for the
+                    // (base, top, size) triple — same resolver as the
+                    // Base/Top dropdowns, so all three axes stay aligned.
+                    handleMaterialChange(nextTop ?? nextBase ?? s, { base: nextBase, top: nextTop, size: s });
+                  }}
+                  disabledIndices={disabledDualSizeIdx}
+                  helperText={
+                    disabledDualSizeIdx.length > 0 && (selectedBase || selectedTop)
+                      ? `Some sizes aren't available with the current selection — greyed out.`
+                      : undefined
+                  }
+                />
+              )}
+
+              {!isRugSqmActive && isBaseOnly && baseAxisIsDim && (
+                <ExpandableSpec
+                  icon={specIcon("📐")}
+                  text={withImperialPerLine(baseOptions.join("\n"))}
+                  placeholder={getBasePlaceholder(product)}
+                  singleValueLabel={formatVariantAxisLabel(product.base_axis_label) || undefined}
+                  emphasized
+                  value={selectedBase != null ? Math.max(0, baseOptions.indexOf(selectedBase)) : null}
+                  onChange={(idx) => {
+                    if (idx < 0) {
+                      setSelectedBase(null);
+                      handleMaterialChange(null, { base: null, top: null, size: null });
+                      return;
+                    }
+                    const v = baseOptions[idx] ?? null;
+                    setSelectedBase(v);
+                    handleMaterialChange(v, { base: v, top: null, size: null });
+                  }}
+                />
+              )}
+
+              {!isRugSqmActive && isDualAxis && baseAxisIsDim && (
+                <ExpandableSpec
+                  icon={specIcon("📐")}
+                  text={withImperialPerLine(baseOptions.join("\n"))}
+                  placeholder={getBasePlaceholder(product)}
+                  singleValueLabel={formatVariantAxisLabel(product.base_axis_label) || undefined}
+                  emphasized
+                  value={selectedBase != null ? Math.max(0, baseOptions.indexOf(selectedBase)) : null}
+                  onChange={(idx) => {
+                    if (idx < 0) {
+                      clearAllDualSelections();
+                      return;
+                    }
+                    const v = baseOptions[idx] ?? null;
+                    setSelectedBase(v);
+                    let nextTop = selectedTop;
+                    let nextSize = selectedDualSize;
+                    if (v && nextTop && !variantsList.some((x: any) => matchesDual(x, v, nextTop, nextSize))) { setSelectedTop(null); nextTop = null; }
+                    if (v && nextSize && !variantsList.some((x: any) => matchesDual(x, v, nextTop, nextSize))) { setSelectedDualSize(null); nextSize = null; }
+                    if (v && !nextTop) {
+                      const compatTops = topOptions.filter((t) => variantsList.some((x: any) => matchesDual(x, v, t, nextSize)));
+                      if (compatTops.length === 1) { setSelectedTop(compatTops[0]); nextTop = compatTops[0]; }
+                    }
+                    handleMaterialChange(v, { base: v, top: nextTop, size: nextSize });
+                  }}
+                  disabledIndices={disabledBaseIdx}
+                  helperText={
+                    disabledBaseIdx.length > 0 && (selectedTop || selectedDualSize)
+                      ? `Some ${(getBasePlaceholder(product) || "base").toLowerCase().replace(/^select your /, "")} options aren't available with the current selection — greyed out.`
+                      : undefined
+                  }
+                />
+              )}
+
+              {/* Model-style base axis whose options carry dimensions (e.g. Bora Sconce
+                  Uplight / Downlight) — render BEFORE the finish swatches and use
+                  the dimensions icon since the value is fundamentally a size choice. */}
+              {!isRugSqmActive && isBaseOnly && !baseAxisIsDim && !suppressBaseAsFinish
+                && baseOptions.length > 0 && baseOptions.every(looksLikeDimension) && (
+                <ExpandableSpec
+                  icon={specIcon("📐")}
+                  text={withImperialPerLine(baseOptions.join("\n"))}
+                  placeholder={getBasePlaceholder(product)}
+                  singleValueLabel={formatVariantAxisLabel(product.base_axis_label) || undefined}
+                  emphasized
+                  value={selectedBase != null ? Math.max(0, baseOptions.indexOf(selectedBase)) : null}
+                  onChange={(idx) => {
+                    if (idx < 0) {
+                      setSelectedBase(null);
+                      handleMaterialChange(null, { base: null, top: null, size: null });
+                      return;
+                    }
+                    const v = baseOptions[idx] ?? null;
+                    setSelectedBase(v);
+                    handleMaterialChange(v, { base: v, top: null, size: null });
+                  }}
+                />
+              )}
+
+              {/* Dual-axis with a Model/Size base whose options carry dimensions
+                  (e.g. Callisto Pendant x1 / 100 / x4) — render the base ABOVE
+                  the finish swatches and use the dimensions icon. */}
+              {!isRugSqmActive && isDualAxis && !baseAxisIsDim && !suppressBaseAsFinish
+                && baseOptions.length > 0 && baseOptions.every(looksLikeDimension) && (
+                <ExpandableSpec
+                  icon={specIcon("📐")}
+                  text={withImperialPerLine(baseOptions.join("\n"))}
+                  placeholder={getBasePlaceholder(product)}
+                  singleValueLabel={formatVariantAxisLabel(product.base_axis_label) || undefined}
+                  emphasized
+                  value={selectedBase != null ? Math.max(0, baseOptions.indexOf(selectedBase)) : null}
+                  onChange={(idx) => {
+                    if (idx < 0) {
+                      clearAllDualSelections();
+                      return;
+                    }
+                    const v = baseOptions[idx] ?? null;
+                    setSelectedBase(v);
+                    let nextTop = selectedTop;
+                    let nextSize = selectedDualSize;
+                    if (v && nextTop && !variantsList.some((x: any) => matchesDual(x, v, nextTop, nextSize))) { setSelectedTop(null); nextTop = null; }
+                    if (v && nextSize && !variantsList.some((x: any) => matchesDual(x, v, nextTop, nextSize))) { setSelectedDualSize(null); nextSize = null; }
+                    if (v && !nextTop) {
+                      const compatTops = topOptions.filter((t) => variantsList.some((x: any) => matchesDual(x, v, t, nextSize)));
+                      if (compatTops.length === 1) { setSelectedTop(compatTops[0]); nextTop = compatTops[0]; }
+                    }
+                    handleMaterialChange(v, { base: v, top: nextTop, size: nextSize });
+                  }}
+                  disabledIndices={disabledBaseIdx}
+                  helperText={
+                    disabledBaseIdx.length > 0 && (selectedTop || selectedDualSize)
+                      ? `Some ${(getBasePlaceholder(product) || "base").toLowerCase().replace(/^select your /, "")} options aren't available with the current selection — greyed out.`
+                      : undefined
+                  }
+                />
+              )}
+            </div>
+
+            {/* Origin & lead time — mobile: after the price */}
+            <div className="flex flex-col gap-2">
+              {(() => {
+                const handcrafted = formatHandcrafted(product.origin, product.lead_time);
+                if (!handcrafted) return null;
+                let originLine = handcrafted;
+                let leadLine: string | null = null;
+                const dotSplit = handcrafted.split(" · ");
+                if (dotSplit.length === 2) {
+                  originLine = dotSplit[0];
+                  leadLine = dotSplit[1];
+                } else {
+                  const m = handcrafted.match(/^(Handcrafted in .+?)\s+in\s+(.+)$/i);
+                  if (m) {
+                    originLine = m[1];
+                    leadLine = `Production lead time: ${m[2]}`;
+                  }
+                }
+                return (
+                  <div className="mt-2 border-t border-b border-border/60 py-4 flex items-start gap-5">
+                    {specIcon("✦", "mt-0.5")}
+                    <div className="font-body text-sm leading-relaxed text-muted-foreground font-normal">
+                      <p>{originLine}</p>
+                      {leadLine && <p className="mt-0.5">{leadLine}</p>}
+                    </div>
+                  </div>
+                );
+              })()}
+
             </div>
 
             {/* Bespoke / customisation request */}
