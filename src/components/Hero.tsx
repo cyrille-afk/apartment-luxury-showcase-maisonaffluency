@@ -40,7 +40,8 @@ const scrollToMeetDesigners = () => {
 };
 
 const heroPrimaryCtaClass =
-  "inline-flex min-h-11 items-center justify-center rounded-full border border-white/0 bg-white px-6 py-3 text-center text-[#1A1A1A] text-sm md:text-base font-body font-semibold tracking-wide shadow-[0_10px_28px_rgba(0,0,0,0.45),0_2px_6px_rgba(0,0,0,0.35)] md:shadow-[0_8px_30px_rgba(0,0,0,0.22)] backdrop-blur-md transition-[background-color,color,border-color] duration-[400ms] ease-[cubic-bezier(0.25,1,0.5,1)] hover:bg-white/10 hover:text-white hover:border-white focus:outline-none focus:ring-2 focus:ring-white/40 focus:ring-offset-2 focus:ring-offset-transparent hero-fade-in-delayed-4";
+  "inline-flex min-h-12 items-center justify-center rounded-full border-2 border-white bg-white px-8 py-3.5 text-center text-[#1A1A1A] text-sm md:text-base font-body font-bold tracking-[0.14em] uppercase shadow-[0_14px_40px_rgba(0,0,0,0.55),0_2px_8px_rgba(0,0,0,0.4)] md:shadow-[0_12px_36px_rgba(0,0,0,0.4)] transition-[background-color,color,border-color,transform] duration-[400ms] ease-[cubic-bezier(0.25,1,0.5,1)] hover:bg-[#1A1A1A] hover:text-white hover:border-white focus:outline-none focus:ring-2 focus:ring-white/60 focus:ring-offset-2 focus:ring-offset-transparent hero-fade-in-delayed-4";
+
 
 const Hero = () => {
   const navigate = useNavigate();
