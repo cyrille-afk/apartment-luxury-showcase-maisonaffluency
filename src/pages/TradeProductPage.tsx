@@ -16,7 +16,7 @@ import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { useParams, useNavigate, Link, useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import {
-  Heart, Scale, ArrowLeft, Layers, Clock, Globe, ShoppingCart, Check, Loader2, Package, Wand2, ChevronDown, Sparkles, FileText, Box,
+  Heart, Scale, ArrowLeft, Layers, Clock, Globe, ShoppingCart, Check, Loader2, Package, Wand2, ChevronDown, Sparkles, FileText, Box, MessageCircle,
 } from "lucide-react";
 import { renderParagraph } from "@/components/EditorialBiography";
 import { useQuery } from "@tanstack/react-query";
@@ -2320,8 +2320,110 @@ const TradeProductPage: React.FC = () => {
                   Procurement
                 </Link>
               )}
+
+              <a
+                href={`https://wa.me/6591393850?text=${encodeURIComponent(`Hello Maison Affluency — I'd like more information on the ${product.title} by ${designerDisplay}.`)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1.5 font-body text-[11px] uppercase tracking-[0.12em] text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <MessageCircle size={13} />
+                Contact Us
+              </a>
             </div>
 
+
+
+            {/* Bespoke / customisation request */}
+            <button
+              onClick={() => setCustomRequestOpen(true)}
+              className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-md font-body text-[11px] uppercase tracking-[0.12em] transition-all border border-border text-foreground hover:bg-muted w-full"
+            >
+              <Wand2 size={13} />
+              Request Customisation
+            </button>
+
+            {/* 3D model viewer moved beneath the photo (left column) as a
+                collapsed accordion. Finish selectors act as its legend here. */}
+
+            {/* Draft a tearsheet with the currently-selected fabric / wood finishes.
+                Visible whenever the product has linked swatches. Disabled while
+                swatches load and until at least one finish is chosen. */}
+            {(finishesLoading || hasLinkedFabrics || linkedWoodFinishes.length > 0) && (
+              (selectedFabric || selectedWoodPrice) && !finishesLoading ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    const params = new URLSearchParams();
+                    params.set("product", product.id);
+                    if (selectedFabric?.name) params.set("fabric", selectedFabric.name);
+                    if (selectedFabric?.image_url) params.set("fabricImg", selectedFabric.image_url);
+                    if (selectedWoodPrice?.name) params.set("wood", selectedWoodPrice.name);
+                    if (selectedWoodPrice?.image_url) params.set("woodImg", selectedWoodPrice.image_url);
+                    const variantLabelParts = [selectedBase, selectedTop, selectedDualSize, selectedSingleSize]
+                      .filter(Boolean).map(String);
+                    if (variantLabelParts.length) params.set("variant", variantLabelParts.join(" · "));
+                    // Persist product + locked finishes into the concierge session
+                    // so the Tearsheet Builder and Quote flow can carry them forward.
+                    updateConciergeSession({
+                      product: {
+                        id: product.id,
+                        title: product.title,
+                        designer_name: (product as { designer_name?: string | null }).designer_name ?? null,
+                        imageUrl: selectedFabric?.image_url ?? null,
+                        source: "trade",
+                      },
+                      finishes: {
+                        fabric: selectedFabric?.name ?? null,
+                        fabricImg: selectedFabric?.image_url ?? null,
+                        wood: selectedWoodPrice?.name ?? null,
+                        woodImg: selectedWoodPrice?.image_url ?? null,
+                        variant: variantLabelParts.length ? variantLabelParts.join(" · ") : null,
+                      },
+                      locked: true,
+                    });
+                    navigate(`/trade/tearsheets?${params.toString()}`);
+                  }}
+                  className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-md font-body text-[11px] uppercase tracking-[0.12em] transition-all border border-foreground/30 bg-foreground text-background hover:bg-foreground/90 w-full"
+                >
+                  <FileText size={13} />
+                  Draft Tearsheet with These Finishes
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  disabled
+                  className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-md font-body text-[11px] uppercase tracking-[0.12em] transition-all border border-foreground/30 bg-foreground text-background opacity-50 cursor-not-allowed w-full"
+                >
+                  {finishesLoading ? (
+                    <>
+                      <Loader2 size={13} className="animate-spin" />
+                      Loading finishes…
+                    </>
+                  ) : (
+                    <>
+                      <FileText size={13} />
+                      Draft Tearsheet with These Finishes
+                    </>
+                  )}
+                </button>
+              )
+            )}
+
+            {/* CAD / 3D file downloads (trade-gated; only renders when files exist) */}
+            <CadAssetsSection productId={tradeProductId} productName={product.title} />
+
+
+            {/* Inline subtle nudge: Sample Requests live in Procurement */}
+            <p className="font-body text-[11px] text-muted-foreground text-center">
+              Need a material sample?{" "}
+              <Link
+                to={sampleRequestUrl}
+                className="underline underline-offset-2 hover:text-foreground transition-colors"
+              >
+                Request via Procurement →
+              </Link>
+            </p>
             {/* Dimensions & size pickers — mobile: after the price */}
             <div className="flex flex-col gap-2">
               {(() => {
@@ -2631,97 +2733,6 @@ const TradeProductPage: React.FC = () => {
               })()}
 
             </div>
-
-            {/* Bespoke / customisation request */}
-            <button
-              onClick={() => setCustomRequestOpen(true)}
-              className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-md font-body text-[11px] uppercase tracking-[0.12em] transition-all border border-border text-foreground hover:bg-muted w-full"
-            >
-              <Wand2 size={13} />
-              Request Customisation
-            </button>
-
-            {/* 3D model viewer moved beneath the photo (left column) as a
-                collapsed accordion. Finish selectors act as its legend here. */}
-
-            {/* Draft a tearsheet with the currently-selected fabric / wood finishes.
-                Visible whenever the product has linked swatches. Disabled while
-                swatches load and until at least one finish is chosen. */}
-            {(finishesLoading || hasLinkedFabrics || linkedWoodFinishes.length > 0) && (
-              (selectedFabric || selectedWoodPrice) && !finishesLoading ? (
-                <button
-                  type="button"
-                  onClick={() => {
-                    const params = new URLSearchParams();
-                    params.set("product", product.id);
-                    if (selectedFabric?.name) params.set("fabric", selectedFabric.name);
-                    if (selectedFabric?.image_url) params.set("fabricImg", selectedFabric.image_url);
-                    if (selectedWoodPrice?.name) params.set("wood", selectedWoodPrice.name);
-                    if (selectedWoodPrice?.image_url) params.set("woodImg", selectedWoodPrice.image_url);
-                    const variantLabelParts = [selectedBase, selectedTop, selectedDualSize, selectedSingleSize]
-                      .filter(Boolean).map(String);
-                    if (variantLabelParts.length) params.set("variant", variantLabelParts.join(" · "));
-                    // Persist product + locked finishes into the concierge session
-                    // so the Tearsheet Builder and Quote flow can carry them forward.
-                    updateConciergeSession({
-                      product: {
-                        id: product.id,
-                        title: product.title,
-                        designer_name: (product as { designer_name?: string | null }).designer_name ?? null,
-                        imageUrl: selectedFabric?.image_url ?? null,
-                        source: "trade",
-                      },
-                      finishes: {
-                        fabric: selectedFabric?.name ?? null,
-                        fabricImg: selectedFabric?.image_url ?? null,
-                        wood: selectedWoodPrice?.name ?? null,
-                        woodImg: selectedWoodPrice?.image_url ?? null,
-                        variant: variantLabelParts.length ? variantLabelParts.join(" · ") : null,
-                      },
-                      locked: true,
-                    });
-                    navigate(`/trade/tearsheets?${params.toString()}`);
-                  }}
-                  className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-md font-body text-[11px] uppercase tracking-[0.12em] transition-all border border-foreground/30 bg-foreground text-background hover:bg-foreground/90 w-full"
-                >
-                  <FileText size={13} />
-                  Draft Tearsheet with These Finishes
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  disabled
-                  className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-md font-body text-[11px] uppercase tracking-[0.12em] transition-all border border-foreground/30 bg-foreground text-background opacity-50 cursor-not-allowed w-full"
-                >
-                  {finishesLoading ? (
-                    <>
-                      <Loader2 size={13} className="animate-spin" />
-                      Loading finishes…
-                    </>
-                  ) : (
-                    <>
-                      <FileText size={13} />
-                      Draft Tearsheet with These Finishes
-                    </>
-                  )}
-                </button>
-              )
-            )}
-
-            {/* CAD / 3D file downloads (trade-gated; only renders when files exist) */}
-            <CadAssetsSection productId={tradeProductId} productName={product.title} />
-
-
-            {/* Inline subtle nudge: Sample Requests live in Procurement */}
-            <p className="font-body text-[11px] text-muted-foreground text-center">
-              Need a material sample?{" "}
-              <Link
-                to={sampleRequestUrl}
-                className="underline underline-offset-2 hover:text-foreground transition-colors"
-              >
-                Request via Procurement →
-              </Link>
-            </p>
           </div>
         </div>
 
