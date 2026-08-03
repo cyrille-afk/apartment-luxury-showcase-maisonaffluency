@@ -619,19 +619,32 @@ input, select, textarea {
   }
 }
 
-/* Mobile browser only (NOT standalone PWA): black filler behind the iOS Safari
-   bottom toolbar. --ios-bottom-chrome is measured in index.html (visualViewport
-   vs layout viewport) because env(safe-area-inset-bottom) reports 0 while the
-   toolbar is expanded. PWA reports 0 and stays full bleed. */
-@media (max-width: 767px) and (display-mode: browser) {
-  body::after {
+/* Deterministic iOS Safari browser toolbar backing. Safari's visualViewport and
+   safe-area values fluctuate as its toolbar expands, so this deliberately uses
+   a stable browser-chrome zone. The class is never applied to standalone PWA. */
+@media (max-width: 767px) and (orientation: portrait) {
+  html.ios-safari-browser body::after {
     content: "";
     position: fixed;
     left: 0;
     right: 0;
     bottom: 0;
-    height: max(var(--ios-bottom-chrome, 0px), env(safe-area-inset-bottom));
-    background: #000;
+    height: max(92px, env(safe-area-inset-bottom));
+    background: hsl(0 0% 0%);
+    pointer-events: none;
+    z-index: 35;
+  }
+}
+
+@media (max-width: 767px) and (orientation: landscape) {
+  html.ios-safari-browser body::after {
+    content: "";
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: max(50px, env(safe-area-inset-bottom));
+    background: hsl(0 0% 0%);
     pointer-events: none;
     z-index: 35;
   }

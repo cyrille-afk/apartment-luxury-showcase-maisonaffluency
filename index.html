@@ -446,23 +446,16 @@
 
     <script type="module" src="/src/main.tsx"></script>
 
-    <!-- iOS Safari bottom-chrome measurement: the expanded toolbar overlays the
-         layout viewport, so env(safe-area-inset-bottom) is 0 and content bleeds
-         behind it. Expose the real overlap as --ios-bottom-chrome. Standalone
-         PWA has no toolbar, so it resolves to 0 and stays full bleed. -->
+    <!-- Mark real iPhone/iPad Safari browser sessions before first paint.
+         Do not infer toolbar height from visualViewport: Safari reports unstable
+         values while its chrome expands/collapses. Standalone PWA is excluded. -->
     <script>
       (function () {
-        var vv = window.visualViewport;
-        if (!vv) return;
         var standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
-        function update() {
-          var overlap = standalone ? 0 : Math.max(0, Math.round(window.innerHeight - vv.height - vv.offsetTop));
-          document.documentElement.style.setProperty('--ios-bottom-chrome', overlap + 'px');
-        }
-        update();
-        vv.addEventListener('resize', update);
-        vv.addEventListener('scroll', update);
-        window.addEventListener('orientationchange', function () { setTimeout(update, 250); });
+        var ua = window.navigator.userAgent;
+        var ios = /iPad|iPhone|iPod/.test(ua) || (window.navigator.platform === 'MacIntel' && window.navigator.maxTouchPoints > 1);
+        var safari = /Safari/.test(ua) && !/CriOS|FxiOS|EdgiOS|OPiOS/.test(ua);
+        if (ios && safari && !standalone) document.documentElement.classList.add('ios-safari-browser');
       })();
     </script>
 
