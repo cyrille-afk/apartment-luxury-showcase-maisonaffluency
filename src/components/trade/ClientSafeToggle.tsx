@@ -24,13 +24,13 @@ const ClientSafeToggle: React.FC<{ className?: string }> = ({ className }) => {
       className={cn(
         "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 font-body text-[9px] uppercase tracking-[0.16em] transition-colors touch-manipulation",
         clientSafe
-          ? "border-[hsl(var(--gold))] text-[hsl(var(--gold))]"
+          ? "border-[hsl(var(--gold))] bg-[hsl(var(--gold))] text-background"
           : "border-border text-muted-foreground hover:text-foreground",
         className
       )}
     >
       {clientSafe ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
-      Client-safe
+      Client-safe{clientSafe ? " on" : ""}
     </button>
   );
 };
