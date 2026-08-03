@@ -71,6 +71,7 @@ export function scrollToSection(id: string, behavior: ScrollBehavior = "smooth",
   const isMobile = window.innerWidth < 768;
   const extraOffset: Record<string, number> = {
     "sociable-environment": isMobile ? 16 : 40,
+    "apartment-tour-heading": 6,
   };
   const instant = "instant" as ScrollBehavior;
 
