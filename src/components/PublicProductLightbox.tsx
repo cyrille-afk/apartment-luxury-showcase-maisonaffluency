@@ -26,6 +26,7 @@ import { rememberProductBackRef } from "@/lib/designerBackRef";
 import { computeVariantAxes } from "@/lib/parseSizeVariants";
 import { supabase } from "@/integrations/supabase/client";
 import SpecGlyph from "@/components/product/SpecGlyph";
+import { usePublicRrp, formatPublicRrp } from "@/hooks/usePublicRrp";
 import { FadeInImage } from "@/components/ui/FadeInImage";
 
 /** Mirrors the slugifier used by FeaturedDesigners + PublicProductPage. */
