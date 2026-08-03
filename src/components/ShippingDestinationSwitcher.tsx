@@ -38,7 +38,7 @@ interface Props {
 }
 
 
-export default function ShippingDestinationSwitcher({ className, compact, flagClassName }: Props) {
+export default function ShippingDestinationSwitcher({ className, compact, flagClassName, showIso }: Props) {
   const current = useShippingDestination();
   const [open, setOpen] = useState(false);
   const [pendingIso, setPendingIso] = useState(current.iso);
