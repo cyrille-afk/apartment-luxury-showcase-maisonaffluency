@@ -645,6 +645,38 @@ export default function FinishSelector({ pickId, className, productTitle, produc
         onSwatchImagesChange?.(indices, { committed: false, swatchName: f.name });
       }
     };
+
+    // Compact circular swatch used in the always-visible rail beneath a
+    // collapsed accordion header — lets clients scan finishes without
+    // opening a secondary menu.
+    if (shape === "circle") {
+      return (
+        <button
+          key={`c-${f.id}`}
+          type="button"
+          onClick={handlePick}
+          onMouseEnter={hoverPreview}
+          onFocus={hoverPreview}
+          aria-label={`Select ${f.name}`}
+          aria-pressed={isSelected}
+          title={f.supplier ? `${f.supplier} — ${f.name}` : f.name}
+          className={cn(
+            "shrink-0 h-10 w-10 rounded-full overflow-hidden bg-muted/40 transition-all duration-200 touch-manipulation",
+            "ring-offset-2 ring-offset-background",
+            isSelected ? "ring-1 ring-foreground scale-[1.06]" : "ring-1 ring-border/60 hover:ring-foreground/40",
+          )}
+        >
+          {f.image_url ? (
+            <img src={f.image_url} alt={f.name} loading="lazy" className="w-full h-full object-cover" />
+          ) : (
+            <span className="flex h-full w-full items-center justify-center font-body text-[9px] tracking-widest text-foreground/70">
+              {isCom ? "COM" : isCol ? "COL" : "—"}
+            </span>
+          )}
+        </button>
+      );
+    }
+
     const tileButton = (
       <button
         type="button"
