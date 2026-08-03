@@ -870,6 +870,11 @@ export default function FinishSelector({ pickId, className, productTitle, produc
           aria-hidden="true"
         />
       </button>
+      {!args.isOpen && args.tiles.length > 0 && (
+        <div className="flex gap-3 overflow-x-auto -mx-1 px-1 py-3 border-b border-border/60 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {args.tiles.map((f) => renderTile(f, args.tileKind, undefined, "circle"))}
+        </div>
+      )}
       {args.isOpen && (
         <div className="pb-5 pt-4">
           {args.tiles.length > 0 ? (
