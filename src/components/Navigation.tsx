@@ -752,73 +752,73 @@ const Navigation = ({ borderless = false }: NavigationProps) => {
               <button
                 onClick={() => { setMegaMenuOpen(false); handleNavClick("/new-in"); }}
                 className={cn(
-                  "font-body text-[11px] uppercase tracking-[0.2em] font-normal text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap",
+                  "group relative font-body text-[11px] uppercase tracking-[0.2em] font-normal text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap",
                   isRouteActive("/new-in") && "text-foreground"
                 )}
               >
-                New In
+                <span className="link-underline-grow">New In</span>
               </button>
 
               <button
                 onClick={() => { setMegaMenuOpen(!megaMenuOpen); setMegaMenuHoverCat(null); }}
                 className={cn(
-                  "font-body text-[11px] uppercase tracking-[0.2em] font-normal text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap flex items-center gap-1 outline-none",
+                  "group relative font-body text-[11px] uppercase tracking-[0.2em] font-normal text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap flex items-center gap-1 outline-none",
                   (megaMenuOpen || isOnCategoryRoute) && "text-foreground"
                 )}
               >
-                Categories
+                <span className="link-underline-grow">Categories</span>
                 <ChevronDown className={`h-3 w-3 transition-transform duration-200 ${megaMenuOpen ? "rotate-180" : ""}`} strokeWidth={1.5} />
               </button>
 
               <button
                 onClick={() => { setMegaMenuOpen(false); handleNavClick("/designers"); }}
                 className={cn(
-                  "font-body text-[11px] uppercase tracking-[0.2em] font-normal text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap",
+                  "group relative font-body text-[11px] uppercase tracking-[0.2em] font-normal text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap",
                   (activeSection === "/designers" || isRouteActive("/designers")) && "text-foreground"
                 )}
               >
-                Designers
+                <span className="link-underline-grow">Designers</span>
               </button>
 
               <button
                 onClick={() => { setMegaMenuOpen(false); handleNavClick("/gallery"); }}
                 className={cn(
-                  "font-body text-[11px] uppercase tracking-[0.2em] font-normal text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap",
+                  "group relative font-body text-[11px] uppercase tracking-[0.2em] font-normal text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap",
                   (activeSection === "/gallery" || isRouteActive("/gallery")) && "text-foreground"
                 )}
               >
-                Interactive Gallery
+                <span className="link-underline-grow">Interactive Gallery</span>
               </button>
 
               <button
                 onClick={() => { setMegaMenuOpen(false); handleNavClick("/journal"); }}
                 className={cn(
-                  "font-body text-[11px] uppercase tracking-[0.2em] font-normal text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap",
+                  "group relative font-body text-[11px] uppercase tracking-[0.2em] font-normal text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap",
                   (activeSection === "/journal" || isRouteActive("/journal")) && "text-foreground"
                 )}
               >
-                Journal
+                <span className="link-underline-grow">Journal</span>
               </button>
 
               <button
                 onClick={() => { setMegaMenuOpen(false); handleNavClick("/trade-program"); }}
                 className={cn(
-                  "font-body text-[11px] uppercase tracking-[0.2em] font-normal text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap",
+                  "group relative font-body text-[11px] uppercase tracking-[0.2em] font-normal text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap",
                   (activeSection === "/trade-program" || isRouteActive("/trade-program")) && "text-foreground"
                 )}
               >
-                Trade Program
+                <span className="link-underline-grow">Trade Program</span>
               </button>
 
               {isTradeUser && (
                 <button
                   onClick={() => { setMegaMenuOpen(false); handleNavClick("/collectibles"); }}
                   className={cn(
-                    "font-body text-[11px] uppercase tracking-[0.2em] font-normal text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap",
+                    "group relative font-body text-[11px] uppercase tracking-[0.2em] font-normal text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap",
                     (activeSection === "/collectibles" || isRouteActive("/collectibles")) && "text-foreground"
                   )}
                 >
-                  Collectibles
+                  <span className="link-underline-grow">Collectibles</span>
                 </button>
               )}
             </nav>
