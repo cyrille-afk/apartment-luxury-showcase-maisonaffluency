@@ -1796,7 +1796,9 @@ const TradeProductPage: React.FC = () => {
                 ) : null
               }
             />
-            <div className="md:border-0 md:shadow-none border-b border-border/60 shadow-[0_6px_10px_-8px_rgba(0,0,0,0.35)] pb-2">
+            {/* Mobile/PWA: the "Shown in" caption lives on the presentation
+                photography instead of stacking under the gallery. */}
+            <div className="hidden md:block md:border-0 md:shadow-none">
               <ActiveSwatchCaption pickId={product.id} activeIndex={galleryActiveIndex ?? 0} />
             </div>
 
@@ -1869,7 +1871,7 @@ const TradeProductPage: React.FC = () => {
           </div>
 
           <div className="relative flex flex-col gap-4">
-            <div className="flex items-start justify-between gap-3">
+            <div className="flex items-start justify-between gap-3 order-[-4] md:order-none">
               <div className="min-w-0">
                 <Link
                   to={designer.slug ? `/trade/designers/${designer.slug}` : fallbackPath}
@@ -1901,8 +1903,8 @@ const TradeProductPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Materials & dimensions */}
-            <div className="flex flex-col gap-2">
+            {/* Dimensions & size pickers — mobile: after the price */}
+            <div className="flex flex-col gap-2 order-[-2] md:order-none">
               {(() => {
                 const sqm = (product as any)?.price_per_sqm_cents as number | null | undefined;
                 const isRugSqm = isRugCategory(product.category) && !!sqm && sqm > 0 && (sizeVariants?.length || 0) > 0;
@@ -1942,6 +1944,14 @@ const TradeProductPage: React.FC = () => {
                     handleMaterialChange(s, { base: nextBase, top: null, size: s });
                   }}
                 />
+              )}
+              {/* Base-only (finish) axis with fixed product dimensions: the
+                  size row would otherwise never render, leaving the page
+                  without any dimensions at all. */}
+              {!isRugSqmActive && isBaseOnly && !baseAxisIsDim && baseOnlySizeOptions.length <= 1
+                && !(baseOptions.length > 0 && baseOptions.every(looksLikeDimension))
+                && product.dimensions && looksLikeDimension(product.dimensions) && (
+                <ExpandableSpec icon={specIcon("📐")} text={withImperialPerLine(product.dimensions)} />
               )}
               {/* Dual-axis with fixed (non-variant) dimensions: render dims at the top */}
               {!isRugSqmActive && isDualAxis && !baseAxisIsDim && !topAxisIsDim && !hasDualSize && product.dimensions && looksLikeDimension(product.dimensions) && (
@@ -2170,7 +2180,10 @@ const TradeProductPage: React.FC = () => {
                   }
                 />
               )}
+            </div>
 
+            {/* Finish selection — mobile: directly under the photography */}
+            <div className="flex flex-col gap-2 order-[-5] md:order-none">
               <FinishSelector
                   pickId={product.id}
                   productTitle={product.title}
@@ -2478,7 +2491,10 @@ const TradeProductPage: React.FC = () => {
                 />
               )}
               <AlsoContainsFinishes pickId={product.id} className="mt-1 pl-6" />
+            </div>
 
+            {/* Origin & lead time — mobile: after the price */}
+            <div className="flex flex-col gap-2 order-[-1] md:order-none">
               {(() => {
                 const handcrafted = formatHandcrafted(product.origin, product.lead_time);
                 if (!handcrafted) return null;
@@ -2509,8 +2525,8 @@ const TradeProductPage: React.FC = () => {
             </div>
 
             {/* Trade price + retail/trade toggle (size driven by selector above) */}
-            {effectiveRrpCents ? (
-              <div className="flex flex-col gap-2 pt-1">
+        {effectiveRrpCents ? (
+              <div className="flex flex-col gap-2 pt-1 order-[-3] md:order-none">
                 {renderPrice()}
                 <button
                   onClick={() => setShowTradePrice(!showTradePrice)}
@@ -2520,8 +2536,9 @@ const TradeProductPage: React.FC = () => {
                 </button>
               </div>
             ) : (
-              <p className="font-body text-sm text-muted-foreground italic">Price on request</p>
+              <p className="font-body text-sm text-muted-foreground italic order-[-3] md:order-none">Price on request</p>
             )}
+
 
             {/* Primary CTA — Add to Quote */}
             <button
