@@ -7,15 +7,17 @@ const corsHeaders = {
 
 /**
  * Returns the Stripe *publishable* key so the browser can mount Stripe Elements.
- * Publishable keys are safe to expose client-side.
+ * Publishable keys are safe to expose client-side, so a literal fallback is fine.
  */
+const FALLBACK_PUBLISHABLE_KEY =
+  "pk_live_51Rl10BS0Atf7jTffjQ155TVJhioTG62NnP9YB0WOpd3EWVAtXXOxpf2ivL9ATZByI5tYfZfZ7E6tsDgueWDQWHRa00ZmcV781i";
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
-  const key = Deno.env.get("STRIPE_PUBLISHABLE_KEY") || "";
-  // Stripe Managed Payments uses `mk_` publishable keys; standard Stripe
-  // accounts use `pk_test_` / `pk_live_`. Both are valid Stripe.js keys.
-  const valid = /^(?:mk_|pk_(?:live|test)_)/.test(key);
+  const envKey = Deno.env.get("STRIPE_PUBLISHABLE_KEY") || "";
+  const key = /^pk_(live|test)_/.test(envKey) ? envKey : FALLBACK_PUBLISHABLE_KEY;
+  const valid = /^pk_(live|test)_/.test(key);
 
   return new Response(
     JSON.stringify(
