@@ -648,7 +648,13 @@ const PublicProductLightbox = ({ product: propProduct, allPicks = [], onClose, o
                   ? `${product.title} ${product.subtitle}`
                   : product.title}
               </h2>
+              {publicPriceLabel && (
+                <p className="font-display text-base md:text-lg text-foreground mt-2 leading-none">
+                  {publicPriceLabel}
+                </p>
+              )}
             </div>
+
 
             <div className="flex flex-col">
               {(() => {
