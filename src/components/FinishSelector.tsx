@@ -845,37 +845,53 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     tileKind?: "fabric" | "cover" | "base" | "top" | "rug";
   }) => (
     <div className="border-t border-border/60">
-      <button
-        type="button"
-        onClick={args.onToggle}
-        aria-expanded={args.isOpen}
-        className="w-full py-4 flex items-center gap-5 text-left border-b border-border/60"
-      >
-        <span className="shrink-0">
-          <SpecGlyph symbol={args.glyph} />
-        </span>
-        <span className="font-body text-sm tracking-wide text-muted-foreground flex-1">
-          {args.label}
-        </span>
-        {args.selectedName && (
-          <span className="font-body text-sm text-foreground/85 truncate max-w-[55%] text-right">
-            {args.selectedName}
+      {isMobile ? (
+        /* Mobile/PWA: no dropdown — the swatch rail IS the picker. A compact
+           caption keeps context without a second, redundant menu. */
+        <div className="flex items-baseline justify-between gap-4 pt-3">
+          <span className="font-body text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+            {args.label.replace(/^select (your|the)\s+/i, "")}
           </span>
-        )}
-        <ChevronDown
-          className={cn(
-            "w-4 h-4 text-muted-foreground transition-transform shrink-0",
-            args.isOpen && "rotate-180"
+          {args.selectedName && (
+            <span className="font-body text-[12px] text-foreground/85 truncate max-w-[55%] text-right">
+              {args.selectedName}
+            </span>
           )}
-          aria-hidden="true"
-        />
-      </button>
-      {!args.isOpen && args.tiles.length > 0 && (
-        <div className="flex gap-3 overflow-x-auto -mx-1 px-1 py-3 border-b border-border/60 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={args.onToggle}
+          aria-expanded={args.isOpen}
+          className="w-full py-4 flex items-center gap-5 text-left border-b border-border/60"
+        >
+          <span className="shrink-0">
+            <SpecGlyph symbol={args.glyph} />
+          </span>
+          <span className="font-body text-sm tracking-wide text-muted-foreground flex-1">
+            {args.label}
+          </span>
+          {args.selectedName && (
+            <span className="font-body text-sm text-foreground/85 truncate max-w-[55%] text-right">
+              {args.selectedName}
+            </span>
+          )}
+          <ChevronDown
+            className={cn(
+              "w-4 h-4 text-muted-foreground transition-transform shrink-0",
+              args.isOpen && "rotate-180"
+            )}
+            aria-hidden="true"
+          />
+        </button>
+      )}
+      {(isMobile || !args.isOpen) && args.tiles.length > 0 && (
+        <div className="flex gap-3 overflow-x-auto -mx-1 px-1 pt-2 pb-3 border-b border-border/60 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {args.tiles.map((f) => renderTile(f, args.tileKind, undefined, "circle"))}
         </div>
       )}
-      {args.isOpen && (
+      {!isMobile && args.isOpen && (
+
         <div className="pb-5 pt-4">
           {args.tiles.length > 0 ? (
             /* Mobile: a horizontal, snap-scrolling swatch tray — thumb-swiping
