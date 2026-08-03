@@ -1968,11 +1968,11 @@ const PublicProductPage: React.FC = () => {
                       <Link
                         to={`/designers/${designer.slug}`}
                         onClick={() => rememberProductBackRef(designer.slug, location.pathname + location.search)}
-                        className="font-body font-light text-[10px] uppercase tracking-[0.28em] text-[hsl(var(--gold))] hover:text-primary transition-colors"
+                        className="font-body font-light text-[12px] uppercase tracking-[0.22em] text-[hsl(var(--gold))] hover:text-primary transition-colors"
                       >
                         {designerDisplay}
                       </Link>
-                      <h1 className="font-display font-normal text-[1.75rem] md:text-[2.15rem] mt-3 leading-[1.15] tracking-[-0.01em]">
+                      <h1 className="font-display font-normal text-[1.5rem] md:text-[1.85rem] mt-2 leading-[1.15] tracking-[-0.01em]">
                         {product.title}
                         {product.subtitle &&
                           !product.title.toLowerCase().includes(product.subtitle.toLowerCase()) &&
