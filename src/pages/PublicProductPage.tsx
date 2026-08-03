@@ -1748,21 +1748,20 @@ const PublicProductPage: React.FC = () => {
       <div className="min-h-[100dvh] bg-background text-foreground">
         <Navigation borderless />
 
-        {/* Mobile sticky mini bar — sits directly below the global header and
-             follows its hide/show rhythm so it never floats detached. */}
+        {/* Mobile sticky mini bar — replaces the global header once the product
+             image has scrolled out of view. */}
         <div
           className={cn(
-            "md:hidden fixed left-0 right-0 z-40 bg-background/95 backdrop-blur-md border-b border-border shadow-sm transition-transform duration-300 ease-out",
+            "md:hidden fixed left-0 right-0 top-0 z-[60] bg-background/95 backdrop-blur-md border-b border-border shadow-sm transition-transform duration-300 ease-out",
             !showStickyBar && "pointer-events-none"
           )}
           style={{
-            top: "var(--header-h)",
-            transform: showStickyBar
-              ? "translateY(0)"
-              : "translateY(calc(-100% - var(--header-h)))",
+            paddingTop: "env(safe-area-inset-top, 0px)",
+            transform: showStickyBar ? "translateY(0)" : "translateY(-100%)",
           }}
           aria-hidden={!showStickyBar}
         >
+
 
           <div className="px-3 pt-2 pb-2.5">
             <div className="flex items-center justify-center gap-1.5 min-w-0 text-center">
