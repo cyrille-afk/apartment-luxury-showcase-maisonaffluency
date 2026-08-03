@@ -61,7 +61,7 @@ export default function ShippingDestinationSwitcher({ className, compact, flagCl
         aria-label={`Change shipping destination. Currently shipping to ${current.name}`}
         className={cn(
           "flex items-center gap-1.5 transition-opacity hover:opacity-70 outline-none",
-          compact && "min-h-11 min-w-11 justify-center",
+          compact && (showIso ? "min-h-11 px-1 justify-center" : "min-h-11 min-w-11 justify-center"),
           className
         )}
       >
@@ -74,11 +74,17 @@ export default function ShippingDestinationSwitcher({ className, compact, flagCl
         >
           {isoToFlag(current.iso)}
         </span>
+        {compact && showIso && (
+          <span className="font-body text-[11px] uppercase tracking-[0.18em] text-foreground whitespace-nowrap">
+            {current.iso}
+          </span>
+        )}
         {!compact && (
           <span className="font-body text-[11px] uppercase tracking-[0.18em] text-foreground whitespace-nowrap">
             {current.iso} · {current.currency}
           </span>
         )}
+
       </button>
 
       <Dialog open={open} onOpenChange={handleOpenChange}>
