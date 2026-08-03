@@ -150,8 +150,8 @@ export default function TradeWorkspace({
           <div className="flex items-center gap-2">
             <ClientSafeToggle />
             {tierLabel && !clientSafe && (
-              <span className="font-body text-[9px] uppercase tracking-[0.16em] text-muted-foreground border border-border rounded-full px-2 py-0.5">
-                {tierLabel}
+              <span className="font-body text-[9px] uppercase tracking-[0.16em] text-muted-foreground border border-border rounded-full px-2 py-0.5 whitespace-nowrap">
+                {tierLabel} −{discountLabel}
               </span>
             )}
           </div>
@@ -172,21 +172,24 @@ export default function TradeWorkspace({
             </>
           ) : netLabel ? (
             <>
-              <p className="font-display text-2xl leading-none">{netLabel}</p>
+              <div className="flex flex-wrap items-baseline gap-x-2.5 gap-y-1">
+                <p className="font-display text-2xl leading-none">{netLabel}</p>
+                {rrpLabel && netCents !== rrpCents && (
+                  <span className="font-body text-sm text-muted-foreground line-through">
+                    {rrpLabel}
+                  </span>
+                )}
+              </div>
               <p className="font-body text-[11px] text-muted-foreground mt-1.5">
                 Your trade net
-                {rrpLabel && netCents !== rrpCents && (
-                  <>
-                    {" · RRP "}
-                    <span className="line-through">{rrpLabel}</span>
-                  </>
-                )}
+                {discountApplied && ` · ${tierLabel} ${discountLabel} off RRP`}
               </p>
             </>
           ) : (
             <p className="font-display text-xl leading-none">Price on Request</p>
           )}
         </div>
+
 
 
         <dl className="mt-5 space-y-2.5">
