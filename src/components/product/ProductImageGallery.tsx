@@ -260,7 +260,29 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
 
   useEffect(() => stopHoverScroll, [stopHoverScroll]);
 
+  // Double-tap on the photo opens the fullscreen viewer so clients can inspect
+  // stone grain / weave. Guarded so a tap that was really a swipe never fires.
+  const lastTapRef = useRef<{ t: number; x: number; y: number } | null>(null);
+  const handleTouchEndForDoubleTap = useCallback((e: React.TouchEvent) => {
+    const touch = e.changedTouches[0];
+    if (!touch) return;
+    const now = Date.now();
+    const prev = lastTapRef.current;
+    if (
+      prev &&
+      now - prev.t < 300 &&
+      Math.abs(touch.clientX - prev.x) < 30 &&
+      Math.abs(touch.clientY - prev.y) < 30
+    ) {
+      lastTapRef.current = null;
+      setPresentOpen(true);
+      return;
+    }
+    lastTapRef.current = { t: now, x: touch.clientX, y: touch.clientY };
+  }, []);
+
   if (images.length === 0) return null;
+
 
   return (
     <div className="flex gap-4 items-stretch">
