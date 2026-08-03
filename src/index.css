@@ -619,8 +619,10 @@ input, select, textarea {
   }
 }
 
-/* Mobile browser only (NOT standalone PWA): fixed black filler behind the iOS
-   Safari bottom navigation bar. PWA stays full bleed. */
+/* Mobile browser only (NOT standalone PWA): black filler behind the iOS Safari
+   bottom toolbar. --ios-bottom-chrome is measured in index.html (visualViewport
+   vs layout viewport) because env(safe-area-inset-bottom) reports 0 while the
+   toolbar is expanded. PWA reports 0 and stays full bleed. */
 @media (max-width: 767px) and (display-mode: browser) {
   body::after {
     content: "";
@@ -628,7 +630,7 @@ input, select, textarea {
     left: 0;
     right: 0;
     bottom: 0;
-    height: env(safe-area-inset-bottom);
+    height: max(var(--ios-bottom-chrome, 0px), env(safe-area-inset-bottom));
     background: #000;
     pointer-events: none;
     z-index: 35;
