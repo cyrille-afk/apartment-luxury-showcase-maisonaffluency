@@ -111,22 +111,45 @@ const Hero = () => {
                 </button>
 
                 {/* Inline editorial links — vertical stack on mobile/PWA, horizontal on desktop */}
-                <div className="hero-mobile-links-inner mt-6 flex flex-col items-center gap-4 hero-fade-in-delayed-5 rounded-full bg-black/70 px-5 py-2 backdrop-blur-md md:mt-6 md:flex-row md:gap-0 md:px-6 md:py-2.5">
+                {/* Mobile / PWA — subdued label + solid luxury button */}
+                <div className="hero-mobile-links-inner mt-6 flex w-full max-w-md flex-col items-center gap-4 px-6 hero-fade-in-delayed-5 md:hidden">
                   <button
                     type="button"
                     onClick={() => {
                       trackEvent("click_singapore_gallery_preview", { event_category: "CTA", event_label: "HeroSecondary" });
                       scrollToSection("apartment-tour-heading");
                     }}
-                    className="group py-3 text-center font-body text-[15px] font-semibold leading-relaxed tracking-[0.12em] text-[#FFFFFF] antialiased [text-shadow:0_1px_3px_rgba(0,0,0,0.55)] transition-colors md:py-0 md:text-[16px]"
+                    className="font-body text-[11px] font-medium uppercase tracking-[0.25em] text-white/75 [text-shadow:0_1px_3px_rgba(0,0,0,0.6)]"
                   >
-                    <span className="link-underline-grow">Singapore Gallery Preview</span>
+                    Singapore Gallery Preview
                   </button>
-                  <span className="mx-auto h-px w-8 bg-white/50 md:mx-3 md:inline-block md:h-3 md:w-px md:bg-white/50" aria-hidden="true" />
                   <button
                     type="button"
                     onClick={openTour}
-                    className="group py-3 text-center font-body text-[15px] font-semibold leading-relaxed tracking-[0.12em] text-[#FFFFFF] antialiased [text-shadow:0_1px_3px_rgba(0,0,0,0.55)] transition-colors hover:text-[#E5E5E5] md:py-0 md:text-[16px]"
+                    className="w-full border border-white/80 bg-[#1A1A1A] px-8 py-4 font-body text-[13px] font-light uppercase tracking-[0.2em] text-white transition-all duration-300 active:bg-white active:text-[#1A1A1A]"
+                  >
+                    Book Private Appointment
+                    <span className="ml-1 text-[10px] font-normal italic lowercase text-white/60">(trade only)</span>
+                  </button>
+                </div>
+
+                {/* Desktop — inline editorial links */}
+                <div className="mt-6 hidden items-center gap-0 hero-fade-in-delayed-5 rounded-full bg-black/70 px-6 py-2.5 backdrop-blur-md md:flex md:flex-row">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      trackEvent("click_singapore_gallery_preview", { event_category: "CTA", event_label: "HeroSecondary" });
+                      scrollToSection("apartment-tour-heading");
+                    }}
+                    className="group py-0 text-center font-body text-[16px] font-semibold leading-relaxed tracking-[0.12em] text-[#FFFFFF] antialiased [text-shadow:0_1px_3px_rgba(0,0,0,0.55)] transition-colors"
+                  >
+                    <span className="link-underline-grow">Singapore Gallery Preview</span>
+                  </button>
+                  <span className="mx-3 inline-block h-3 w-px bg-white/50" aria-hidden="true" />
+                  <button
+                    type="button"
+                    onClick={openTour}
+                    className="group py-0 text-center font-body text-[16px] font-semibold leading-relaxed tracking-[0.12em] text-[#FFFFFF] antialiased [text-shadow:0_1px_3px_rgba(0,0,0,0.55)] transition-colors hover:text-[#E5E5E5]"
                   >
                     <span className="link-underline-grow">
                       Book Private Appointment
@@ -134,6 +157,7 @@ const Hero = () => {
                     </span>
                   </button>
                 </div>
+
 
               </div>
             </div>
