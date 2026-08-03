@@ -130,6 +130,17 @@ export function StickyPurchaseBar({
         {/* Far right — primary then secondary */}
         <div className="flex flex-col items-end gap-1 shrink-0">
           <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={onRequestQuote}
+              className={cn(
+                "inline-flex items-center px-6 h-9 rounded-luxury-micro",
+                "bg-foreground text-background font-body text-[10px] uppercase tracking-[0.16em]",
+                "hover:bg-foreground/85 transition-colors"
+              )}
+            >
+              Inquire to Purchase
+            </button>
             {onPlaceOrder && (
               <button
                 type="button"
@@ -137,30 +148,20 @@ export function StickyPurchaseBar({
                 disabled={placingOrder}
                 className={cn(
                   "inline-flex items-center gap-2 px-6 h-9 rounded-luxury-micro",
-                  "bg-foreground text-background font-body text-[10px] uppercase tracking-[0.16em]",
-                  "hover:bg-foreground/85 transition-colors disabled:opacity-60"
+                  "border border-foreground/25 text-foreground font-body text-[10px] uppercase tracking-[0.14em]",
+                  "hover:border-foreground/60 transition-colors disabled:opacity-60"
                 )}
               >
                 {placingOrder && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
-                <span>{placingOrder ? "Opening checkout…" : "Place Order"}</span>
+                <span>{placingOrder ? "Opening checkout…" : "Secure Checkout"}</span>
               </button>
             )}
-            <button
-              type="button"
-              onClick={onRequestQuote}
-              className={cn(
-                "inline-flex items-center px-6 h-9 rounded-luxury-micro",
-                "border border-foreground/25 text-foreground font-body text-[10px] uppercase tracking-[0.14em]",
-                "hover:border-foreground/60 transition-colors"
-              )}
-            >
-              Request a Quote
-            </button>
           </div>
           <span className="font-body text-[9px] uppercase tracking-[0.16em] text-muted-foreground/70 pr-1">
-            Secure checkout powered by Stripe
+            White-glove delivery · Secure checkout by Stripe
           </span>
         </div>
+
       </div>
     </div>
   );
