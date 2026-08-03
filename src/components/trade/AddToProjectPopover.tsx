@@ -134,6 +134,7 @@ export default function AddToProjectPopover({ productId, productName, defaultPro
 
     const board = data as Board;
     setBoards((prev) => [board, ...prev]);
+    setAdding(null);
     await addToBoard(board.id, board.title);
   };
 
