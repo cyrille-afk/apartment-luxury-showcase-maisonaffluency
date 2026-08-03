@@ -2478,7 +2478,10 @@ const TradeProductPage: React.FC = () => {
                 />
               )}
               <AlsoContainsFinishes pickId={product.id} className="mt-1 pl-6" />
+            </div>
 
+            {/* Origin & lead time — mobile: after the price */}
+            <div className="flex flex-col gap-2 order-[-1] md:order-none">
               {(() => {
                 const handcrafted = formatHandcrafted(product.origin, product.lead_time);
                 if (!handcrafted) return null;
