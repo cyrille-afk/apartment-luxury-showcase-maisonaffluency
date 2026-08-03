@@ -137,28 +137,28 @@ const Hero = () => {
 
 
                 {/* Desktop — inline editorial links */}
-                <div className="mt-6 hidden items-center gap-0 hero-fade-in-delayed-5 rounded-full bg-black/70 px-6 py-2.5 backdrop-blur-md md:flex md:flex-row">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      trackEvent("click_singapore_gallery_preview", { event_category: "CTA", event_label: "HeroSecondary" });
-                      scrollToSection("apartment-tour-heading");
-                    }}
-                    className="group py-0 text-center font-body text-[16px] font-semibold leading-relaxed tracking-[0.12em] text-[#FFFFFF] antialiased [text-shadow:0_1px_3px_rgba(0,0,0,0.55)] transition-colors"
-                  >
-                    <span className="link-underline-grow">Singapore Gallery Preview</span>
-                  </button>
-                  <span className="mx-3 inline-block h-3 w-px bg-white/50" aria-hidden="true" />
-                  <button
-                    type="button"
-                    onClick={openTour}
-                    className="group py-0 text-center font-body text-[16px] font-semibold leading-relaxed tracking-[0.12em] text-[#FFFFFF] antialiased [text-shadow:0_1px_3px_rgba(0,0,0,0.55)] transition-colors hover:text-[#E5E5E5]"
-                  >
-                    <span className="link-underline-grow">
-                      Book Private Appointment
-                      <span className="font-light italic text-[#FFFFFF] transition-colors group-hover:text-[#E5E5E5]">{" "}(Trade Only)</span>
-                    </span>
-                  </button>
+                <div className="mt-3 hidden flex-col items-start gap-0.5 hero-fade-in-delayed-5 md:flex">
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        trackEvent("click_singapore_gallery_preview", { event_category: "CTA", event_label: "HeroSecondary" });
+                        scrollToSection("apartment-tour-heading");
+                      }}
+                      className="font-body text-xs font-medium uppercase tracking-[0.18em] text-white transition-colors hover:text-white/80"
+                    >
+                      Singapore Gallery Preview
+                    </button>
+                    <span className="font-body text-xs font-medium text-white/50" aria-hidden="true">|</span>
+                    <button
+                      type="button"
+                      onClick={openTour}
+                      className="font-body text-xs font-medium uppercase tracking-[0.18em] text-white transition-colors hover:text-white/80"
+                    >
+                      <span className="underline decoration-white/70 underline-offset-4 decoration-1">Book Private Appointment</span>
+                      <span className="ml-1 font-light italic normal-case text-white/70">(Trade Only)</span>
+                    </button>
+                  </div>
                 </div>
 
 
