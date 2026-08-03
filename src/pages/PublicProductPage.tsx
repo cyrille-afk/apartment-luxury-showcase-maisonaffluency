@@ -2320,6 +2320,40 @@ const PublicProductPage: React.FC = () => {
                       {designerDisplay}
                     </Link>
                   </h2>
+                  {brandSummary && (() => {
+                    const PREVIEW_LEN = 240;
+                    const needsToggle = brandSummary.length > PREVIEW_LEN;
+                    let preview = brandSummary;
+                    if (needsToggle) {
+                      const slice = brandSummary.slice(0, PREVIEW_LEN);
+                      const sentenceMatch = slice.match(/.*[.!?](?=\s|$)/);
+                      const lastSentenceEnd = sentenceMatch ? sentenceMatch[0].length : -1;
+                      const lastSpace = slice.lastIndexOf(" ");
+                      const cutIndex = lastSentenceEnd > 0 ? lastSentenceEnd : lastSpace > 0 ? lastSpace : PREVIEW_LEN;
+                      preview = slice.slice(0, cutIndex).trim() + "…";
+                    }
+                    const shown = bioExpanded || !needsToggle ? brandSummary : preview;
+                    return (
+                      <div className="mt-4">
+                        <p className="font-body text-sm text-foreground/75 leading-relaxed text-justify">
+                          {renderParagraph(shown)}
+                        </p>
+                        {needsToggle && (
+                          <button
+                            type="button"
+                            onClick={() => setBioExpanded((v) => !v)}
+                            className="mt-2 inline-flex items-center gap-1 font-body text-[11px] uppercase tracking-[0.15em] text-foreground hover:text-primary transition-colors"
+                          >
+                            {bioExpanded ? "Read less" : "Read more"}
+                            <ChevronDown
+                              size={12}
+                              className={cn("transition-transform duration-200", bioExpanded && "rotate-180")}
+                            />
+                          </button>
+                        )}
+                      </div>
+                    );
+                  })()}
                 </div>
 
                 {/* Carousel: swipeable on mobile, paginated 3-up on desktop. */}
@@ -2427,9 +2461,9 @@ const PublicProductPage: React.FC = () => {
 
                 </div>
 
-                {/* Brand summary — above carousel on desktop, below on mobile */}
-                <div className="lg:col-span-4 lg:pr-4 order-3 lg:order-1">
-                  <div className="hidden lg:block">
+                {/* Brand summary — desktop column; mobile copy sits directly below the maker name. */}
+                <div className="hidden lg:block lg:col-span-4 lg:pr-4 lg:order-1">
+                  <div>
                     <p className="font-body text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-2">
                       {(product.subtitle || / by /i.test(product.title) || relatedPicks.some((rp) => rp.subtitle || / by /i.test(rp.title))) ? "From the Same Maker" : "From the Same Designer"}
                     </p>

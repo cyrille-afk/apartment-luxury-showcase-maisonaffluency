@@ -637,7 +637,10 @@ input, select, textarea {
     right: 0;
     height: calc(env(safe-area-inset-bottom) + 120px);
     background-color: #000000;
-    z-index: -1;
+    /* Sit above ordinary page content so first-viewport CTAs cannot show
+       through Safari's translucent bottom chrome. Dialogs and sheets use
+       z-50+, so they still render above this mask. */
+    z-index: 35;
     pointer-events: none;
   }
 }
