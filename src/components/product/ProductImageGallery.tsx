@@ -329,11 +329,17 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
       {/* Main image + (mobile) thumb strip below */}
       <div className="flex-1 flex flex-col gap-3 min-w-0">
         <div className="relative group" ref={inlineSwipeRef}>
-        <div className={cn("product-image-frame md:aspect-square md:h-auto bg-foreground/95 rounded-luxury-sharp overflow-hidden relative touch-pan-y md:transition-[height,aspect-ratio] md:duration-300 md:ease-out", compact && "product-image-frame--compact")}>
-          {/* Main image — presentation mode is the only fullscreen viewer. */}
+        <div
+          className={cn("product-image-frame md:aspect-square md:h-auto bg-foreground/95 rounded-luxury-sharp overflow-hidden relative touch-pan-y md:transition-[height,aspect-ratio] md:duration-300 md:ease-out", compact && "product-image-frame--compact")}
+          onDoubleClick={() => setPresentOpen(true)}
+          onTouchEnd={handleTouchEndForDoubleTap}
+        >
+          {/* Main image — presentation mode is the only fullscreen viewer.
+              Double-tap / double-click opens it for grain-level inspection. */}
           <div className="absolute inset-0 flex items-center justify-center overflow-hidden rounded-[inherit]">
             <CrossfadeImage src={images[activeIndex]} alt={alt} />
           </div>
+
 
 
           {/* Secondary actions live behind a single discreet "more" menu:
