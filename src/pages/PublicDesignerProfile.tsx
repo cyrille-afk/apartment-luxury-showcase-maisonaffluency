@@ -391,7 +391,7 @@ const PublicDesignerProfile = () => {
     [searchParams, slug]
   );
   const { data: designer, isLoading } = useDesigner(slug, { includeTradeOnly: isTradeUser });
-  const [pickCols, setPickCols] = useState<"auto" | "two">("auto");
+  const [pickCols, setPickCols] = useState<"auto" | "two">("two");
   const isParentBrand = isParentBrandDesigner(designer);
   const isChildDesigner = isChildBrandDesigner(designer);
   const { data: parentDesigner } = useDesignerByName(isChildDesigner ? designer?.founder : undefined);
