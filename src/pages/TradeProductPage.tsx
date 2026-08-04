@@ -1371,6 +1371,22 @@ const TradeProductPage: React.FC = () => {
     : Array.from(new Set([product.image_url, product.hover_image_url].filter(Boolean)))
   ) as string[];
 
+  // Finish-scoped reel: when the selected swatch owns a range of photos, show
+  // only those (mirrors PublicProductPage).
+  const visibleImageIndices: number[] | null = (() => {
+    if (!selectedSwatchGalleryIndices || selectedSwatchGalleryIndices.length === 0) return null;
+    const abs = Array.from(new Set(selectedSwatchGalleryIndices.map((i) => i - 1)))
+      .filter((i) => i >= 0 && i < images.length)
+      .sort((a, b) => a - b);
+    return abs.length ? abs : null;
+  })();
+  const visibleImages = visibleImageIndices ? visibleImageIndices.map((i) => images[i]) : images;
+  const visibleActiveIndex = visibleImageIndices
+    ? Math.max(0, visibleImageIndices.indexOf(galleryActiveIndex ?? visibleImageIndices[0]))
+    : galleryActiveIndex;
+
+
+
   // Data-driven finish → gallery image index mapping (shared with PublicProductPage).
   const productFinishMap = buildProductFinishMap((product as any)?.variant_image_map);
 
@@ -1768,11 +1784,13 @@ const TradeProductPage: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16">
           <div className="relative md:relative sticky top-[max(1rem,env(safe-area-inset-top))] md:top-0 self-start z-30 bg-background" ref={galleryScrollRef}>
             <ProductImageGallery
-              images={images}
+              images={visibleImages}
               alt={product.title}
-              activeIndex={galleryActiveIndex}
+              activeIndex={visibleActiveIndex}
               activeIndexNonce={galleryJumpNonce}
-              onIndexChange={setGalleryActiveIndex}
+              onIndexChange={(i) =>
+                setGalleryActiveIndex(visibleImageIndices ? (visibleImageIndices[i] ?? visibleImageIndices[0]) : i)
+              }
               caption={product.gallery_captions?.[String(galleryActiveIndex ?? 0)] || null}
               compact={galleryCompact}
 
