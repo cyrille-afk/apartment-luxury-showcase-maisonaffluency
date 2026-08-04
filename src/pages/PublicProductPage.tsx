@@ -27,7 +27,7 @@ import { normalizeCategoryContext } from "@/lib/categoryNormalization";
 import { formatDesignerDisplayName } from "@/lib/designerDisplayName";
 import { formatEditionLabel } from "@/lib/editionLabel";
 import { renderParagraph } from "@/components/EditorialBiography";
-import { formatDimensionsMultiline, formatImperialDimensions, withImperialPerLine } from "@/lib/formatDimensions";
+import { formatDimensionsMultiline, formatImperialDimensions, withImperialPerLine, withImperialStacked } from "@/lib/formatDimensions";
 import ExpandableSpec from "@/components/ExpandableSpec";
 import LegendDisclosure from "@/components/LegendDisclosure";
 import Breadcrumbs, { type Crumb } from "@/components/Breadcrumbs";
