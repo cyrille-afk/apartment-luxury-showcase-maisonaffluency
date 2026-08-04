@@ -51,6 +51,9 @@ const Hero = () => {
   const [showImageFallback, setShowImageFallback] = useState(false);
 
   useEffect(() => {
+    const isAppleWebKit = /AppleWebKit/i.test(navigator.userAgent) && !/(CriOS|FxiOS|EdgiOS)/i.test(navigator.userAgent);
+    if (isAppleWebKit) setShowImageFallback(true);
+
     const copy = document.getElementById("static-hero-copy");
     if (copy) copy.style.display = "none";
     const pic = document.getElementById("static-hero");
