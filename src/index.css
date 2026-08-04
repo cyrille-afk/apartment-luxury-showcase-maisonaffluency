@@ -619,35 +619,13 @@ input, select, textarea {
   }
 }
 
-/* iOS Safari browser-only bottom backdrop.
-   The document canvas and theme-color alone are not enough: Safari still lets
-   the page paint edge-to-edge behind its translucent bottom controls. The
-   pre-paint class from index.html is deliberately absent in standalone mode,
-   so the installed PWA remains full-bleed while browser sessions always retain
-   a solid black control zone across route changes and new app versions. */
+/* iOS Safari browser chrome backing. Keep black on the document canvas, which
+   sits behind Safari's own controls, rather than drawing a fixed element inside
+   the visual viewport. A fixed 92px overlay obscures real page content. The
+   pre-paint class is absent in standalone mode, so PWA remains full-bleed. */
 @media (max-width: 767px) {
   html.ios-safari-browser {
     background-color: hsl(0 0% 0%);
-  }
-
-  html.ios-safari-browser body::after {
-    content: "";
-    position: fixed;
-    z-index: 2147483647;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    height: max(92px, env(safe-area-inset-bottom));
-    background-color: hsl(0 0% 0%);
-    pointer-events: none;
-  }
-}
-
-/* Belt-and-suspenders exclusion: even if a browser restores stale markup or
-   changes display mode without a reload, standalone must never show the bar. */
-@media (display-mode: standalone) and (max-width: 767px) {
-  html.ios-safari-browser body::after {
-    content: none;
   }
 }
 
