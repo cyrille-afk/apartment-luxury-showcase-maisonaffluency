@@ -650,6 +650,10 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     // collapsed accordion header — lets clients scan finishes without
     // opening a secondary menu.
     if (shape === "circle") {
+      // NOTE: do NOT use Tailwind `ring`/`ring-offset` here. On iOS Safari the
+      // box-shadow ring renders ~2px off from the `overflow-hidden` circular
+      // clip, so the outline looks off-centre around the swatch. A padded
+      // container + real border keeps the two circles perfectly concentric.
       return (
         <button
           key={`c-${f.id}`}
@@ -661,22 +665,26 @@ export default function FinishSelector({ pickId, className, productTitle, produc
           aria-pressed={isSelected}
           title={f.supplier ? `${f.supplier} — ${f.name}` : f.name}
           className={cn(
-            "shrink-0 rounded-full overflow-hidden bg-muted/40 transition-all duration-200 touch-manipulation",
-            isMobile || isPwa ? "h-12 w-12" : "h-10 w-10",
-            "ring-offset-2 ring-offset-background",
-            isSelected ? "ring-1 ring-foreground scale-[1.06]" : "ring-1 ring-border/60 hover:ring-foreground/40",
+            "shrink-0 rounded-full bg-background p-[3px] border transition-all duration-200 touch-manipulation",
+            isMobile || isPwa ? "h-[54px] w-[54px]" : "h-[46px] w-[46px]",
+            isSelected
+              ? "border-foreground scale-[1.06]"
+              : "border-border/60 hover:border-foreground/40",
           )}
         >
-          {f.image_url ? (
-            <img src={f.image_url} alt={f.name} loading="lazy" className="w-full h-full object-cover" />
-          ) : (
-            <span className="flex h-full w-full items-center justify-center font-body text-[9px] tracking-widest text-foreground/70">
-              {isCom ? "COM" : isCol ? "COL" : "—"}
-            </span>
-          )}
+          <span className="block h-full w-full overflow-hidden rounded-full bg-muted/40">
+            {f.image_url ? (
+              <img src={f.image_url} alt={f.name} loading="lazy" className="w-full h-full object-cover" />
+            ) : (
+              <span className="flex h-full w-full items-center justify-center font-body text-[9px] tracking-widest text-foreground/70">
+                {isCom ? "COM" : isCol ? "COL" : "—"}
+              </span>
+            )}
+          </span>
         </button>
       );
     }
+
 
     const tileButton = (
       <button
