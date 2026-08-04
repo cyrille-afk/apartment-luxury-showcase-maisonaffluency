@@ -661,7 +661,8 @@ export default function FinishSelector({ pickId, className, productTitle, produc
           aria-pressed={isSelected}
           title={f.supplier ? `${f.supplier} — ${f.name}` : f.name}
           className={cn(
-            "shrink-0 h-10 w-10 rounded-full overflow-hidden bg-muted/40 transition-all duration-200 touch-manipulation",
+            "shrink-0 rounded-full overflow-hidden bg-muted/40 transition-all duration-200 touch-manipulation",
+            isMobile || isPwa ? "h-12 w-12" : "h-10 w-10",
             "ring-offset-2 ring-offset-background",
             isSelected ? "ring-1 ring-foreground scale-[1.06]" : "ring-1 ring-border/60 hover:ring-foreground/40",
           )}
