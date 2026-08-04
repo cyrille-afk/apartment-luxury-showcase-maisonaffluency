@@ -83,6 +83,9 @@ export default function TradeWorkspace({
   originLine,
   leadTime,
   selectedFinishes,
+  selectedVariantCents = null,
+  selectedVariantExact = false,
+  returnPath,
   pdfUrl,
   pdfUrls,
   inquireHref,
@@ -93,6 +96,7 @@ export default function TradeWorkspace({
   const { clientSafe } = useClientSafeMode();
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
+  const [felixOpen, setFelixOpen] = useState(false);
 
   const sendToDesktop = async () => {
     setSending(true);
@@ -115,9 +119,13 @@ export default function TradeWorkspace({
   // `trade_price_cents` holds RRP for most rows (legacy import), so it only counts
   // as a real negotiated net when it is strictly below RRP. Otherwise the tier
   // discount is applied on top of RRP.
-  const rrpCents = pricing?.rrp_price_cents ?? pricing?.trade_price_cents ?? null;
+  // The selected size/finish always wins over the product's base RRP so the
+  // workspace price tracks the configuration on screen.
+  const baseRrpCents = pricing?.rrp_price_cents ?? pricing?.trade_price_cents ?? null;
+  const rrpCents = selectedVariantCents && selectedVariantCents > 0 ? selectedVariantCents : baseRrpCents;
+  const usingVariantPrice = !!(selectedVariantCents && selectedVariantCents > 0);
   const explicitNet =
-    pricing?.trade_price_cents && rrpCents && pricing.trade_price_cents < rrpCents
+    !usingVariantPrice && pricing?.trade_price_cents && baseRrpCents && pricing.trade_price_cents < baseRrpCents
       ? pricing.trade_price_cents
       : null;
   const netCents =
