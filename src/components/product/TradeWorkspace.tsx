@@ -179,15 +179,24 @@ export default function TradeWorkspace({
           ) : clientSafe ? (
             /* Client-safe: retail only, never net or margin. */
             <>
-              <p className="font-display text-2xl leading-none">{rrpLabel || "Price on Request"}</p>
+              <p className="font-display text-2xl leading-none">
+                {rrpLabel ? `${usingVariantPrice && !selectedVariantExact ? "From " : ""}${rrpLabel}` : "Price on Request"}
+              </p>
               <p className="font-body text-[11px] text-muted-foreground mt-1.5">
-                {rrpLabel ? "Recommended retail" : "Available on request"}
+                {rrpLabel
+                  ? usingVariantPrice
+                    ? `Recommended retail · ${selectedFinishes.join(" · ") || "selected configuration"}`
+                    : "Recommended retail"
+                  : "Available on request"}
               </p>
             </>
           ) : netLabel ? (
             <>
               <div className="flex flex-wrap items-baseline gap-x-2.5 gap-y-1">
-                <p className="font-display text-2xl leading-none">{netLabel}</p>
+                <p className="font-display text-2xl leading-none">
+                  {usingVariantPrice && !selectedVariantExact ? "From " : ""}
+                  {netLabel}
+                </p>
                 {rrpLabel && netCents !== rrpCents && (
                   <span className="font-body text-sm text-muted-foreground line-through">
                     {rrpLabel}
@@ -196,8 +205,11 @@ export default function TradeWorkspace({
               </div>
               <p className="font-body text-[11px] text-muted-foreground mt-1.5">
                 Your trade net
+                {usingVariantPrice && selectedFinishes.length ? ` · ${selectedFinishes.join(" · ")}` : ""}
                 {discountApplied && ` · ${tierLabel} ${discountLabel} off RRP`}
               </p>
+            </>
+          ) : (
             </>
           ) : (
             <p className="font-display text-xl leading-none">Price on Request</p>
