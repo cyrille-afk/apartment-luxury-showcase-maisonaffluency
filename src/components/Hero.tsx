@@ -20,7 +20,10 @@ const HERO_MOBILE_SRCSET = [
 ]
   .map(({ w, h }) => `${HERO_BASE}/w_${w},h_${h},c_fill,g_auto,q_auto:good,f_webp/${HERO_ID} ${w}w`)
   .join(", ");
+// Safari/WebKit JPEG recovery. Portrait crop for phones, landscape for
+// desktop — a portrait crop stretched across a wide viewport zooms the hero.
 const HERO_SAFARI_FALLBACK = `${HERO_BASE}/w_780,h_1688,c_fill,g_auto,q_auto:good,f_jpg/${HERO_ID}`;
+const HERO_SAFARI_FALLBACK_DESKTOP = `${HERO_BASE}/w_1920,c_fill,q_auto:good,f_jpg/${HERO_ID}`;
 
 const revealBelowFold = () => {
   window.dispatchEvent(new CustomEvent("ma:reveal-below-fold"));
@@ -102,14 +105,17 @@ const Hero = () => {
           here — a second <picture> creates a duplicate LCP candidate and
           extra decode work that pushes LCP later on throttled CPUs. */}
       {showImageFallback && (
-        <img
-          src={HERO_SAFARI_FALLBACK}
-          alt="Luxury living room with Asian-inspired murals and designer furniture"
-          className="absolute inset-0 h-full w-full object-cover object-[50%_40%]"
-          loading="eager"
-          decoding="sync"
-          fetchPriority="high"
-        />
+        <picture>
+          <source media="(min-width: 768px)" srcSet={HERO_SAFARI_FALLBACK_DESKTOP} />
+          <img
+            src={HERO_SAFARI_FALLBACK}
+            alt="Luxury living room with Asian-inspired murals and designer furniture"
+            className="absolute inset-0 h-full w-full object-cover object-[50%_40%]"
+            loading="eager"
+            decoding="sync"
+            fetchPriority="high"
+          />
+        </picture>
       )}
       <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-black/10 via-transparent to-black/20" />
       {/* Mobile/PWA only: soft dark radial gradient across bottom half for text contrast */}
