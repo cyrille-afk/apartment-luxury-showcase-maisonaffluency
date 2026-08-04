@@ -18,6 +18,15 @@
     "first_pick_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1780460960/stool-with-table-3_822x822_fjngmc.jpg"
   },
   {
+    "id": "e637fe48-0001-4000-8000-000000000001",
+    "slug": "apparatus-studio",
+    "name": "Apparatus",
+    "founder": null,
+    "hero_image_url": "https://hips.hearstapps.com/hmg-prod/images/apparatus-studio-ed-skj-03-1650415302.jpg",
+    "image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/w_800,q_auto,f_auto/gabriel-hendifar-apparatus-studio",
+    "first_pick_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1779698535/Lantern_Cover_tikr2a.png"
+  },
+  {
     "id": "1623338d-5883-48c4-93a9-5f13dcb7a54b",
     "slug": "pierre-chareau",
     "name": "Pierre Chareau",
@@ -151,15 +160,6 @@
     "hero_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1781872797/Hero_dxlcbb.jpg",
     "image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/w_800,q_auto,c_fill,f_auto/Screen_Shot_2025-12-12_at_1.08.35_AM_uzbbxd",
     "first_pick_image_url": "https://dcrauiygaezoduwdjmsm.supabase.co/storage/v1/object/public/assets/curators-picks/kiko-lopez-mirror.jpg"
-  },
-  {
-    "id": "e637fe48-0001-4000-8000-000000000001",
-    "slug": "apparatus-studio",
-    "name": "Apparatus",
-    "founder": null,
-    "hero_image_url": "https://hips.hearstapps.com/hmg-prod/images/apparatus-studio-ed-skj-03-1650415302.jpg",
-    "image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/w_800,q_auto,f_auto/gabriel-hendifar-apparatus-studio",
-    "first_pick_image_url": "https://res.cloudinary.com/dif1oamtj/image/upload/v1779698535/Lantern_Cover_tikr2a.png"
   },
   {
     "id": "f44b5dca-5009-4b87-9b3d-7a1b7eb50604",
