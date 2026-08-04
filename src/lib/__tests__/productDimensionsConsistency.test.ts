@@ -25,28 +25,30 @@ describe("dimensions render consistency", () => {
     expect(src).toMatch(/dimensions:\s*propProduct\.dimensions\s*\?\?\s*variantPayload\.dimensions/);
   });
 
-  it("PublicProductPage renders the no-variant dimensions fallback BEFORE the materials/finish row", () => {
+  it("PublicProductPage renders the no-variant dimensions fallback with stacked cm/in lines", () => {
     const src = read("src/pages/PublicProductPage.tsx");
-    const fallbackMarker = "No-variant fallback: dimensions must always appear BEFORE the materials/finish row";
-    const materialsMarker = "Material / finish dropdown(s)";
-    const fallbackIdx = src.indexOf(fallbackMarker);
-    const materialsIdx = src.indexOf(materialsMarker);
+    const fallbackIdx = src.indexOf(
+      "!hasVariants && product.dimensions && looksLikeDimension(product.dimensions)",
+    );
+    const materialsIdx = src.indexOf(
+      "product.materials && !hasLinkedFabrics && !isProductUpholstered(product)",
+    );
     expect(fallbackIdx).toBeGreaterThan(-1);
     expect(materialsIdx).toBeGreaterThan(-1);
-    expect(fallbackIdx).toBeLessThan(materialsIdx);
-    // Guard against the fallback being silently deleted.
+    expect(fallbackIdx).toBeGreaterThan(materialsIdx);
+    // Guard against the fallback being silently deleted or reverting to inline.
     expect(src).toMatch(
       /!hasVariants && product\.dimensions && looksLikeDimension\(product\.dimensions\)/,
     );
   });
 
-  it("both surfaces render dimensions with the inline metric|imperial helper", () => {
-    // PublicProductPage renders the raw field directly.
+  it("both surfaces render dimensions with the metric/imperial helper", () => {
+    // PublicProductPage now stacks the metric line above the imperial line.
     expect(read("src/pages/PublicProductPage.tsx")).toMatch(
-      /withImperialPerLine\(product\.dimensions\)/,
+      /withImperialStacked\(product\.dimensions\)/,
     );
     // PublicProductLightbox derives a `dimText` (product.dimensions OR variant
-    // fallback) and then runs it through the same helper.
+    // fallback) and keeps the inline pipe format for the lightbox legend.
     const lightbox = read("src/components/PublicProductLightbox.tsx");
     expect(lightbox).toMatch(/let dimText = \(product\.dimensions \|\| ""\)\.trim\(\)/);
     expect(lightbox).toMatch(/withImperialPerLine\(dimText\)/);

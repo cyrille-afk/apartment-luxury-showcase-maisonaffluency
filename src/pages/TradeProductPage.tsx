@@ -55,7 +55,7 @@ import FinishSelector from "@/components/FinishSelector";
 import { isProductUpholstered } from "@/lib/upholstery";
 import Breadcrumbs, { type Crumb } from "@/components/Breadcrumbs";
 import { getBasePlaceholder, getTopPlaceholder, formatVariantAxisLabel, isDimensionAxisLabel, resolveFinishSectionLabels } from "@/lib/variantPlaceholders";
-import { formatDimensionsMultiline, formatImperialDimensions, withImperialPerLine } from "@/lib/formatDimensions";
+import { formatDimensionsMultiline, formatImperialDimensions, withImperialPerLine, withImperialStacked } from "@/lib/formatDimensions";
 import { computeVariantAxes, parseMaterialsFallback } from "@/lib/parseSizeVariants";
 import { makeSwatchAxisFilter } from "@/lib/finishDuplication";
 import { buildProductFinishMap, resolveFinishImageIndex, resolveVariantImageIndex, findVariantForImageIndex } from "@/lib/variantImageMap";
@@ -2488,11 +2488,11 @@ const TradeProductPage: React.FC = () => {
               {!isRugSqmActive && isBaseOnly && !baseAxisIsDim && baseOnlySizeOptions.length <= 1
                 && !(baseOptions.length > 0 && baseOptions.every(looksLikeDimension))
                 && product.dimensions && looksLikeDimension(product.dimensions) && (
-                <ExpandableSpec icon={specIcon("📐")} text={withImperialPerLine(product.dimensions)} />
+                <ExpandableSpec icon={specIcon("📐")} text={withImperialStacked(product.dimensions)} />
               )}
               {/* Dual-axis with fixed (non-variant) dimensions: render dims at the top */}
               {!isRugSqmActive && isDualAxis && !baseAxisIsDim && !topAxisIsDim && !hasDualSize && product.dimensions && looksLikeDimension(product.dimensions) && (
-                <ExpandableSpec icon={specIcon("📐")} text={withImperialPerLine(product.dimensions)} />
+                <ExpandableSpec icon={specIcon("📐")} text={withImperialStacked(product.dimensions)} />
               )}
               {/* Single-axis split: dedicated size dropdown driven by unique sizes — shown FIRST */}
               {!isRugSqmActive && !isDualAxis && hasSingleAxisSplit && (

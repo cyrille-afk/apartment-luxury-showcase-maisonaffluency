@@ -96,7 +96,7 @@ const stripVariantPrefix = (part: string): string => {
   return part;
 };
 
-const toImperialLine = (line: string): string | null => {
+export const toImperialLine = (line: string): string | null => {
   if (!CM_RE.test(line)) return null;
   const converted = line
     .split(/(\s+[·•]\s+|\s*;\s*)/)
@@ -227,6 +227,29 @@ export const withImperialPerLine = (raw: string | null | undefined): string => {
       return `${t} | ${trimmedImp}${suffix}`;
     })
     .join("\n");
+};
+
+/**
+ * Stack metric and imperial dimensions on separate lines:
+ *   W 65 x D 80 x H 82 cm
+ *   W 25.6 x D 31.5 x H 32.3 in
+ *
+ * Each convertible metric line is immediately followed by its imperial
+ * conversion. Used on desktop product pages where the inline pipe format
+ * feels too dense.
+ */
+export const withImperialStacked = (raw: string | null | undefined): string => {
+  const metric = formatDimensionsMultiline(raw);
+  if (!metric) return "";
+  const out: string[] = [];
+  metric.split("\n").forEach((line) => {
+    const rawLine = line.trim();
+    if (!rawLine) return;
+    const imp = toImperialLine(rawLine);
+    out.push(rawLine);
+    if (imp && imp !== rawLine) out.push(imp);
+  });
+  return out.join("\n");
 };
 
 
