@@ -107,7 +107,6 @@ export default function TradeFirstCta({
           >
             Apply for a Trade Account
           </Link>
-          {secureNote}
         </div>
       ) : (
         <div className="flex flex-col gap-3">
