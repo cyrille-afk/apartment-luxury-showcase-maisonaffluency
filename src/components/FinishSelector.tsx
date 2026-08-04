@@ -274,8 +274,10 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     if (!hoverActiveRef.current) return;
     hoverActiveRef.current = false;
     const locked = lockedPreviewRef.current;
-    // No committed finish yet → fall back to the default hero image.
-    onSwatchImagesChange?.(locked?.indices ?? [1], {
+    // No committed finish yet (or the committed finish has no mapped photos)
+    // → restore the FULL reel rather than collapsing to a single image, which
+    // would hide the thumbnail column entirely.
+    onSwatchImagesChange?.(locked?.indices ?? null, {
       committed: false,
       swatchName: locked?.name,
     });
