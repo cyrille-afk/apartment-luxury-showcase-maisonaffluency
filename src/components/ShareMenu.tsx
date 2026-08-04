@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Share2, Copy, MessageCircle, Share as ShareIos, type LucideIcon } from "lucide-react";
+import { Copy, MessageCircle, Share as ShareIos, type LucideIcon } from "lucide-react";
 import { toast } from "sonner";
 
 interface ShareMenuProps {
