@@ -2466,6 +2466,9 @@ const PublicProductPage: React.FC = () => {
                       originLine={product.origin}
                       leadTime={product.lead_time}
                       selectedFinishes={selectedFinishes}
+                      selectedVariantCents={selectedVariantPrice?.cents ?? null}
+                      selectedVariantExact={!!selectedVariantPrice?.exact}
+                      returnPath={returnTo}
                       pdfUrl={product.pdf_url}
                       pdfUrls={product.pdf_urls}
                       inquireHref={inquireHref}
