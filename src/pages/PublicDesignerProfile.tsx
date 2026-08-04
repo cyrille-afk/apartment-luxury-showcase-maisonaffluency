@@ -300,7 +300,7 @@ function ProfileCollapsible({ children, shouldCollapse }: { children: React.Reac
   const panelId = "designer-profile-extra";
   if (!shouldCollapse) return <>{children}</>;
   return (
-    <div className="relative">
+    <div className="relative" ref={wrapRef}>
       <AnimatePresence initial={false}>
         {expanded ? (
           <motion.div
@@ -310,29 +310,48 @@ function ProfileCollapsible({ children, shouldCollapse }: { children: React.Reac
             aria-label="Full designer profile"
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+            className="overflow-hidden"
           >
             {children}
           </motion.div>
         ) : null}
       </AnimatePresence>
-      {!expanded && (
-        <div className="mt-6 flex justify-center">
-          <button
-            type="button"
-            onClick={() => setExpanded(true)}
-            aria-expanded={expanded}
-            aria-controls={panelId}
-            className="inline-flex items-center gap-2 px-6 py-2.5 bg-foreground text-background font-display text-[12px] tracking-[0.18em] uppercase rounded-full hover:bg-foreground/85 transition-colors shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-reduce:transition-none"
-          >
-            <ChevronDown className="w-3.5 h-3.5" aria-hidden="true" />
-            View full profile
-            <ChevronDown className="w-3.5 h-3.5" aria-hidden="true" />
-          </button>
-        </div>
-      )}
+      <div className="mt-6 flex justify-center">
+        <button
+          type="button"
+          onClick={() => {
+            const next = !expanded;
+            setExpanded(next);
+            if (!next) {
+              requestAnimationFrame(() => {
+                wrapRef.current?.scrollIntoView({ block: "center", behavior: "smooth" });
+              });
+            }
+          }}
+          aria-expanded={expanded}
+          aria-controls={panelId}
+          className="inline-flex items-center gap-2 px-6 py-2.5 bg-foreground text-background font-display text-[12px] tracking-[0.18em] uppercase rounded-full hover:bg-foreground/85 transition-colors shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-reduce:transition-none"
+        >
+          {expanded ? (
+            <>
+              <ChevronUp className="w-3.5 h-3.5" aria-hidden="true" />
+              Close full profile
+              <ChevronUp className="w-3.5 h-3.5" aria-hidden="true" />
+            </>
+          ) : (
+            <>
+              <ChevronDown className="w-3.5 h-3.5" aria-hidden="true" />
+              View full profile
+              <ChevronDown className="w-3.5 h-3.5" aria-hidden="true" />
+            </>
+          )}
+        </button>
+      </div>
     </div>
   );
+
 }
 
 // Legacy slug → canonical slug 301-style redirects (in-app)
