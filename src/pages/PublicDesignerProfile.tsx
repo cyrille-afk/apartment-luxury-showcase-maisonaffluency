@@ -3,7 +3,7 @@ import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { useParams, Link, Navigate, useSearchParams, useNavigate, useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, Package, FileText, Maximize2, Share2, Check, ChevronDown, ChevronUp } from "lucide-react";
+import { ArrowLeft, Package, FileText, Maximize2, Share2, Check, ChevronDown, ChevronUp, LayoutGrid, Columns2 } from "lucide-react";
 import ProductCardDescriptionOverlay from "@/components/ui/ProductCardDescriptionOverlay";
 import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 import SpecSheetButton, { type PdfEntry } from "@/components/trade/SpecSheetButton";
@@ -327,7 +327,12 @@ function ProfileCollapsible({ children, shouldCollapse }: { children: React.Reac
             setExpanded(next);
             if (!next) {
               requestAnimationFrame(() => {
-                wrapRef.current?.scrollIntoView({ block: "center", behavior: "smooth" });
+                const picks = document.getElementById("curators-picks");
+                if (picks) {
+                  picks.scrollIntoView({ block: "start", behavior: "smooth" });
+                } else {
+                  wrapRef.current?.scrollIntoView({ block: "start", behavior: "smooth" });
+                }
               });
             }
           }}
@@ -379,6 +384,7 @@ const PublicDesignerProfile = () => {
     [searchParams, slug]
   );
   const { data: designer, isLoading } = useDesigner(slug, { includeTradeOnly: isTradeUser });
+  const [pickCols, setPickCols] = useState<"auto" | "two">("auto");
   const isParentBrand = isParentBrandDesigner(designer);
   const isChildDesigner = isChildBrandDesigner(designer);
   const { data: parentDesigner } = useDesignerByName(isChildDesigner ? designer?.founder : undefined);
@@ -1123,15 +1129,46 @@ const PublicDesignerProfile = () => {
                     <h2 className="font-display text-[11px] md:text-xs tracking-[0.2em] uppercase text-foreground font-semibold">Curators' Picks</h2>
                   </div>
                 </div>
+                <div className="flex items-center gap-1" role="group" aria-label="Grid density">
+                  <button
+                    type="button"
+                    onClick={() => setPickCols("auto")}
+                    aria-pressed={pickCols === "auto"}
+                    aria-label="Default grid"
+                    className={cn(
+                      "p-1.5 rounded-full border transition-colors",
+                      pickCols === "auto"
+                        ? "border-foreground/40 text-foreground bg-foreground/5"
+                        : "border-border/50 text-muted-foreground hover:text-foreground"
+                    )}
+                  >
+                    <LayoutGrid className="w-3.5 h-3.5" aria-hidden="true" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPickCols("two")}
+                    aria-pressed={pickCols === "two"}
+                    aria-label="Two column grid"
+                    className={cn(
+                      "p-1.5 rounded-full border transition-colors",
+                      pickCols === "two"
+                        ? "border-foreground/40 text-foreground bg-foreground/5"
+                        : "border-border/50 text-muted-foreground hover:text-foreground"
+                    )}
+                  >
+                    <Columns2 className="w-3.5 h-3.5" aria-hidden="true" />
+                  </button>
+                </div>
               </div>
 
               {(() => {
-                 const forceTwoCol = designer.slug === "adrien-messie";
+                 const forceTwoCol = designer.slug === "adrien-messie" || pickCols === "two";
                  const gridClass = forceTwoCol
-                   ? "grid-cols-1 sm:grid-cols-2 md:grid-cols-2"
+                   ? "grid-cols-2 sm:grid-cols-2 md:grid-cols-2"
                    : "grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4";
                  return (
               <div className={cn("grid gap-x-3 gap-y-5 md:gap-4", gridClass)}>
+
 
                 {picks.map((pick) => {
                   const ap = pick as AttributedCuratorPick;
