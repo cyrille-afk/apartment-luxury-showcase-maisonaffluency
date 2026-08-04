@@ -35,6 +35,8 @@ interface Props {
   pdfUrls?: any[] | null;
   inquireHref: string;
   felixUrl?: string;
+  /** Mobile/PWA: collapse the workspace into a slim inline price block. */
+  compact?: boolean;
 }
 
 /** Human-readable suffix for a price unit. `per_piece` is the default and is never shown. */
@@ -90,6 +92,7 @@ export default function TradeWorkspace({
   pdfUrls,
   inquireHref,
   felixUrl,
+  compact = false,
 }: Props) {
   const { data: pricing, isLoading } = useTradeProductPricing(productId);
   const { discountPct, tierLabel } = useTradeDiscount();
@@ -150,11 +153,101 @@ export default function TradeWorkspace({
     url: felixUrl,
   };
 
+  if (compact) {
+    const priceNode = isLoading ? (
+      <span className="inline-flex items-center gap-2 text-muted-foreground font-body text-xs">
+        <Loader2 className="h-3.5 w-3.5 animate-spin" /> Loading trade pricing…
+      </span>
+    ) : clientSafe ? (
+      <span className="font-display text-2xl leading-none">
+        {rrpLabel ? `${usingVariantPrice && !selectedVariantExact ? "From " : ""}${rrpLabel}` : "Price on Request"}
+      </span>
+    ) : netLabel ? (
+      <span className="flex flex-wrap items-baseline gap-x-2.5 gap-y-1">
+        <span className="font-display text-2xl leading-none">
+          {usingVariantPrice && !selectedVariantExact ? "From " : ""}
+          {netLabel}
+        </span>
+        {rrpLabel && netCents !== rrpCents && (
+          <span className="font-body text-sm text-muted-foreground line-through">{rrpLabel}</span>
+        )}
+      </span>
+    ) : (
+      <span className="font-display text-xl leading-none">Price on Request</span>
+    );
+
+    return (
+      <section aria-label="Trade pricing" className="mt-3 animate-fade-in">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <p className="font-body text-[10px] uppercase tracking-[0.18em] text-[hsl(var(--gold))]">
+            Trade
+          </p>
+          <div className="flex items-center gap-2">
+            <ClientSafeToggle />
+            {tierLabel && !clientSafe && (
+              <span className="font-body text-[9px] uppercase tracking-[0.16em] text-muted-foreground border border-border rounded-full px-2 py-0.5 whitespace-nowrap">
+                {tierLabel} −{discountLabel}
+              </span>
+            )}
+          </div>
+        </div>
+
+        <div className="mt-2">{priceNode}</div>
+        <p className="font-body text-[11px] text-muted-foreground mt-1.5">
+          {clientSafe
+            ? rrpLabel
+              ? "Recommended retail"
+              : "Available on request"
+            : netLabel
+              ? `Your trade net${
+                  usingVariantPrice && selectedFinishes.length ? ` · ${selectedFinishes.join(" · ")}` : ""
+                }${discountApplied ? ` · ${tierLabel} ${discountLabel} off RRP` : ""}`
+              : "Available on request"}
+        </p>
+
+        <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2">
+          <button
+            type="button"
+            onClick={() => {
+              setFelixOpen(true);
+              window.dispatchEvent(new CustomEvent("concierge:stage", { detail: { openPanel: true } }));
+            }}
+            className="font-body text-[11px] uppercase tracking-[0.12em] text-foreground underline underline-offset-4 decoration-foreground/30 hover:decoration-foreground transition-colors"
+          >
+            Ask Felix
+          </button>
+          <Link
+            to={`/trade/products/${productId}${selectedFinishes.length ? `?finish=${encodeURIComponent(selectedFinishes.join(" / "))}` : ""}`}
+            state={returnPath ? { from: returnPath } : undefined}
+            className="font-body text-[11px] uppercase tracking-[0.12em] text-muted-foreground underline underline-offset-4 decoration-muted-foreground/30 hover:text-foreground transition-colors"
+          >
+            Full trade sheet
+          </Link>
+        </div>
+
+        {felixOpen && (
+          <div className="mt-4">
+            <Suspense
+              fallback={
+                <div className="rounded-lg border border-border bg-card/40 p-5 flex items-center gap-2 text-muted-foreground font-body text-xs">
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" /> Waking the curatorial guide…
+                </div>
+              }
+            >
+              <ProductFelixPanel context={felixContext} />
+            </Suspense>
+          </div>
+        )}
+      </section>
+    );
+  }
+
   return (
     <section
       aria-label="Trade workspace"
       className="mt-4 grid grid-cols-1 lg:grid-cols-2 gap-4 animate-fade-in"
     >
+
       {/* Left — commercial data */}
       <div className="rounded-lg border border-border bg-card/40 p-5 flex flex-col">
         <div className="flex items-center justify-between gap-3">

@@ -2457,6 +2457,7 @@ const PublicProductPage: React.FC = () => {
 
                 if (tradeApproved) {
                   return (
+                    <div className={isMobileOrPwa ? "order-2" : undefined}>
                     <TradeWorkspace
                       productId={product.id}
                       title={product.title}
@@ -2473,7 +2474,9 @@ const PublicProductPage: React.FC = () => {
                       pdfUrls={product.pdf_urls}
                       inquireHref={inquireHref}
                       felixUrl={typeof window !== "undefined" ? window.location.href : undefined}
+                      compact={isMobileOrPwa}
                     />
+                    </div>
                   );
                 }
 
