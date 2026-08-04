@@ -721,7 +721,7 @@ const partnerBrands = [
   },
   {
     id: "apparatus-studio-median",
-    name: "Apparatus Studio",
+    name: "Apparatus",
     category: "Lighting",
     subcategory: "Ceiling Lights",
     origin: "United States",
@@ -732,7 +732,7 @@ const partnerBrands = [
   },
   {
     id: "apparatus-studio-metronome",
-    name: "Apparatus Studio",
+    name: "Apparatus",
     category: "Lighting",
     subcategory: "Floor Lamps",
     origin: "United States",
@@ -743,7 +743,7 @@ const partnerBrands = [
   },
   {
     id: "apparatus-studio-lantern",
-    name: "Apparatus Studio",
+    name: "Apparatus",
     category: "Lighting",
     subcategory: "Table Lamps",
     origin: "United States",
@@ -1694,7 +1694,7 @@ const partnerBrands = [
 const brandBgMap: Record<string, string> = {
   "Alexander Lamont": alexanderLamontBg,
   "Alinea Design Objects": leoAertsBg,
-  "Apparatus Studio": apparatusBg,
+  "Apparatus": apparatusBg,
   "Atelier DeMichelis": atelierDemichelisBg,
   "Atelier Février": atelierFevrierBg,
   "Babled Studio": emmanuelBabledBg,
@@ -1796,7 +1796,7 @@ const brandBgMap: Record<string, string> = {
 const brandToDesignerMap: Record<string, string> = {
   "Alexander Lamont": "alexander-lamont",
   "Alinea Design Objects": "leo-aerts-alinea",
-  "Apparatus Studio": "apparatus-studio",
+  "Apparatus": "apparatus-studio",
   "Atelier Février": "atelier-fevrier",
   "Atelier Pendhapa": "atelier-pendhapa",
   "Babled Studio": "emmanuel-babled",
@@ -1985,8 +1985,8 @@ const PARENT_BRAND_CONFIGS: ParentBrandConfig[] = [
     highlightDesigner: null,
   },
   {
-    brandName: "Apparatus Studio",
-    dbParentName: "Apparatus Studio",
+    brandName: "Apparatus",
+    dbParentName: "Apparatus",
     instagram: "https://instagram.com/apparatusstudio",
     profileSlug: "apparatus-studio",
     pillLabel: "Apparatus",

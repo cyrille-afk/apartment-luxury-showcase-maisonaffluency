@@ -14,7 +14,7 @@ export const ROSTER: readonly RosterEntry[] = [
   {"name": "Andrée Putman", "specialty": "Interior Design & Furniture"},
   {"name": "Angelo Lelii", "specialty": "Lighting design pioneer, founder of Arredoluce"},
   {"name": "Anthony Guerrée", "specialty": "Furniture Design"},
-  {"name": "Apparatus Studio", "specialty": "Contemporary Lighting & Industrial Design"},
+  {"name": "Apparatus", "specialty": "Contemporary Lighting & Industrial Design"},
   {"name": "Arredoluce", "specialty": "Italian Mid-Century Lighting re-edition"},
   {"name": "Arthur Arbesser", "specialty": "Fashion & Product Design"},
   {"name": "Articolo Studios", "specialty": "Lighting"},

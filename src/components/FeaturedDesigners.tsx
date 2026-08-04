@@ -486,8 +486,8 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
   },
   {
     id: "apparatus-studio",
-    name: "Apparatus Studio",
-    founder: "Apparatus Studio",
+    name: "Apparatus",
+    founder: "Apparatus",
     specialty: "Contemporary Lighting & Industrial Design",
     image: apparatusStudioImg,
     cardThumbnails: [
@@ -496,7 +496,7 @@ export const featuredDesigners: (Record<string, any> & { curatorPicks: CuratorPi
     ],
     logoUrl: "https://res.cloudinary.com/dif1oamtj/image/upload/w_200,q_auto,f_auto/Screen_Shot_2026-02-28_at_10.57.35_AM_yilszh.png",
     biography:
-      "Apparatus Studio is a New York-based design studio founded by Gabriel Hendifar and Jeremy Anderson. Known for their sculptural approach to lighting and furniture, their work combines industrial materials with refined aesthetics. The Metronome Reading Floor Lamp showcases their ability to create pieces that are both functional and sculptural.",
+      "Apparatus is a New York-based design studio founded by Gabriel Hendifar and Jeremy Anderson. Known for their sculptural approach to lighting and furniture, their work combines industrial materials with refined aesthetics. The Metronome Reading Floor Lamp showcases their ability to create pieces that are both functional and sculptural.",
     notableWorks: "Lantern Table Lamp, Metronome Reading Floor Lamp, Sculptural Lighting Series",
     notableWorksLinks: [
       { text: "Lantern Table Lamp", galleryIndex: GALLERY.COMPACT_ELEGANCE },
