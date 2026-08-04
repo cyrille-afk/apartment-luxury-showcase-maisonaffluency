@@ -650,9 +650,9 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     // collapsed accordion header — lets clients scan finishes without
     // opening a secondary menu.
     if (shape === "circle") {
-      // Keep the outline and image as two independently positioned circles.
-      // Using absolute insets avoids WebKit's sub-pixel padding/scale rounding,
-      // which can shift a circular child inside its selected border.
+      // Center both circles through the same grid alignment context. Fixed,
+      // even-pixel diameters avoid WebKit positioning each absolute inset on a
+      // different device-pixel boundary.
       return (
         <button
           key={`c-${f.id}`}
@@ -664,20 +664,23 @@ export default function FinishSelector({ pickId, className, productTitle, produc
           aria-pressed={isSelected}
           title={f.supplier ? `${f.supplier} — ${f.name}` : f.name}
           className={cn(
-            "relative shrink-0 appearance-none rounded-full border-0 bg-transparent p-0 touch-manipulation",
+            "grid shrink-0 appearance-none place-items-center rounded-full border-0 bg-transparent p-0 touch-manipulation",
             isMobile || isPwa ? "h-[54px] w-[54px]" : "h-[46px] w-[46px]",
           )}
         >
           <span
             aria-hidden="true"
             className={cn(
-              "pointer-events-none absolute inset-0 rounded-full border transition-colors duration-200",
+              "pointer-events-none col-start-1 row-start-1 h-full w-full box-border rounded-full border transition-colors duration-200",
               isSelected ? "border-foreground" : "border-border/60",
             )}
           />
-          <span className="absolute inset-[4px] block overflow-hidden rounded-full bg-muted/40">
+          <span className={cn(
+            "col-start-1 row-start-1 block overflow-hidden rounded-full bg-muted/40",
+            isMobile || isPwa ? "h-[46px] w-[46px]" : "h-[38px] w-[38px]",
+          )}>
             {f.image_url ? (
-              <img src={f.image_url} alt={f.name} loading="lazy" className="w-full h-full object-cover" />
+              <img src={f.image_url} alt={f.name} loading="lazy" className="block h-full w-full object-cover" />
             ) : (
               <span className="flex h-full w-full items-center justify-center font-body text-[9px] tracking-widest text-foreground/70">
                 {isCom ? "COM" : isCol ? "COL" : "—"}
