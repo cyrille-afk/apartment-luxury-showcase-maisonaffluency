@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
+import BulkUrlPaste from "@/components/admin/BulkUrlPaste";
+
 
 interface GalleryThumbnailsEditorProps {
   value: string[];
