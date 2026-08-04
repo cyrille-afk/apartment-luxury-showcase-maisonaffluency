@@ -1,14 +1,22 @@
 import { useState, useRef, useEffect } from "react";
-import { Share2, Copy, MessageCircle, Share as ShareIos, type LucideIcon } from "lucide-react";
+import { Copy, MessageCircle, Share as ShareIos, type LucideIcon } from "lucide-react";
 import { toast } from "sonner";
 
 interface ShareMenuProps {
   url: string;
   message: string;
+  /**
+   * Layout-only escape hatch (positioning/margins). The share control's own
+   * appearance is fixed platform-wide and cannot be overridden.
+   */
   className?: string;
+  /** @deprecated The share UI is now uniform platform-wide. Ignored. */
   iconSize?: string;
+  /** @deprecated The share UI is now uniform platform-wide. Ignored. */
   showLabel?: boolean;
+  /** @deprecated The share UI is now uniform platform-wide. Ignored. */
   labelSize?: string;
+  /** @deprecated The share UI is now uniform platform-wide. Ignored. */
   iconVariant?: "share2" | "ios";
   /**
    * High-resolution, uncropped image exported through the native share sheet
@@ -19,9 +27,17 @@ interface ShareMenuProps {
   imageName?: string;
 }
 
-const ShareMenu = ({ url, message, className = "", iconSize = "w-3.5 h-3.5", showLabel = true, labelSize = "text-[9px]", iconVariant = "share2", imageUrl, imageName }: ShareMenuProps) => {
+/**
+ * Canonical share control — the glass pill used at the bottom-right of the
+ * product photography. This exact UI is used for every share affordance
+ * across the platform; per-call-site styling is intentionally ignored.
+ */
+const SHARE_BUTTON_CLASS =
+  "flex items-center justify-center w-9 h-9 rounded-full bg-background/25 backdrop-blur-md border border-border/25 text-foreground/80 transition-colors hover:text-foreground";
 
-  const Icon: LucideIcon = iconVariant === "ios" ? ShareIos : Share2;
+const ShareMenu = ({ url, message, imageUrl, imageName }: ShareMenuProps) => {
+
+  const Icon: LucideIcon = ShareIos;
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
@@ -93,11 +109,10 @@ const ShareMenu = ({ url, message, className = "", iconSize = "w-3.5 h-3.5", sho
     <div ref={ref} className="relative">
       <button
         onClick={handleClick}
-        className={className}
+        className={SHARE_BUTTON_CLASS}
         aria-label="Share"
       >
-        <Icon className={iconSize} />
-        {showLabel && <span className={`font-body ${labelSize} uppercase tracking-[0.15em]`}>Share</span>}
+        <Icon className="w-[18px] h-[18px]" strokeWidth={1.5} />
       </button>
       {open && !isMobile && (
         <div
