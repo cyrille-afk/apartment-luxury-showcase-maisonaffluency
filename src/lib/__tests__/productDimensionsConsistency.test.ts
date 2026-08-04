@@ -40,13 +40,13 @@ describe("dimensions render consistency", () => {
     );
   });
 
-  it("both surfaces render dimensions with the inline metric|imperial helper", () => {
-    // PublicProductPage renders the raw field directly.
+  it("both surfaces render dimensions with the metric/imperial helper", () => {
+    // PublicProductPage now stacks the metric line above the imperial line.
     expect(read("src/pages/PublicProductPage.tsx")).toMatch(
-      /withImperialPerLine\(product\.dimensions\)/,
+      /withImperialStacked\(product\.dimensions\)/,
     );
     // PublicProductLightbox derives a `dimText` (product.dimensions OR variant
-    // fallback) and then runs it through the same helper.
+    // fallback) and keeps the inline pipe format for the lightbox legend.
     const lightbox = read("src/components/PublicProductLightbox.tsx");
     expect(lightbox).toMatch(/let dimText = \(product\.dimensions \|\| ""\)\.trim\(\)/);
     expect(lightbox).toMatch(/withImperialPerLine\(dimText\)/);
