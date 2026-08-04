@@ -3,7 +3,7 @@ import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { useParams, Link, Navigate, useSearchParams, useNavigate, useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, Package, FileText, Maximize2, Share2, Check, ChevronDown } from "lucide-react";
+import { ArrowLeft, Package, FileText, Maximize2, Share2, Check, ChevronDown, ChevronUp } from "lucide-react";
 import ProductCardDescriptionOverlay from "@/components/ui/ProductCardDescriptionOverlay";
 import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 import SpecSheetButton, { type PdfEntry } from "@/components/trade/SpecSheetButton";
@@ -297,6 +297,7 @@ function buildThinContentFallback(args: {
 function ProfileCollapsible({ children, shouldCollapse }: { children: React.ReactNode; shouldCollapse: boolean }) {
   const [sp] = useSearchParams();
   const [expanded, setExpanded] = useState(() => sp.get("expanded") === "true");
+  const wrapRef = useRef<HTMLDivElement>(null);
   const panelId = "designer-profile-extra";
   if (!shouldCollapse) return <>{children}</>;
   return (
