@@ -2064,9 +2064,11 @@ const PublicProductPage: React.FC = () => {
                         {product.title}
                         {product.subtitle &&
                           !product.title.toLowerCase().includes(product.subtitle.toLowerCase()) &&
-                          !product.subtitle.toLowerCase().includes(product.title.toLowerCase()) &&
-                          ` by ${product.subtitle}`}
+                          !product.subtitle.toLowerCase().includes(product.title.toLowerCase()) && (
+                            <span className="block mt-1 text-[0.8em] text-muted-foreground">{`by ${product.subtitle}`}</span>
+                          )}
                       </h1>
+
                       {publicRrpLabel && (
                         <div className="mt-6">
                           <p className="font-body font-light text-base md:text-lg tabular-nums tracking-[0.01em]">
@@ -2276,9 +2278,11 @@ const PublicProductPage: React.FC = () => {
                       {product.title}
                       {product.subtitle &&
                         !product.title.toLowerCase().includes(product.subtitle.toLowerCase()) &&
-                        !product.subtitle.toLowerCase().includes(product.title.toLowerCase()) &&
-                        ` by ${product.subtitle}`}
+                        !product.subtitle.toLowerCase().includes(product.title.toLowerCase()) && (
+                          <span className="block mt-1 text-[0.8em] text-muted-foreground">{`by ${product.subtitle}`}</span>
+                        )}
                     </h1>
+
                     {publicRrpLabel && (
                       <div className="mt-6">
                         <p className="font-body font-light text-base md:text-lg tabular-nums tracking-[0.01em]">
