@@ -269,11 +269,17 @@ export default function TradeWorkspace({
           </button>
 
           <Link
-            to={`/trade/products/${productId}`}
+            to={`/trade/products/${productId}${selectedFinishes.length ? `?finish=${encodeURIComponent(selectedFinishes.join(" / "))}` : ""}`}
+            state={returnPath ? { from: returnPath } : undefined}
             className="flex items-center justify-center px-4 py-3 rounded-md bg-foreground text-background font-body text-[11px] uppercase tracking-[0.12em] hover:bg-foreground/90 transition-colors"
           >
             Open Full Trade Sheet
           </Link>
+          {returnPath && (
+            <p className="text-center font-body text-[10px] text-muted-foreground/80">
+              Your finish selection carries over — use Back to return here.
+            </p>
+          )}
 
           {hasSpecSheet ? (
             <SpecSheetButton
