@@ -8,6 +8,8 @@ interface GalleryThumbnailsEditorProps {
   onChange: (next: string[]) => void;
   /** Minimum number of empty slots to always show. Default 5. */
   minSlots?: number;
+  /** Stable id (e.g. pick id) so bulk-paste drafts survive remounts. */
+  storageKey?: string;
 }
 
 /**
@@ -20,7 +22,9 @@ export default function GalleryThumbnailsEditor({
   value,
   onChange,
   minSlots = 5,
+  storageKey,
 }: GalleryThumbnailsEditorProps) {
+
   // Local items can include trailing empty slots that we don't persist.
   const [items, setItems] = useState<string[]>(() => padToMin(value, minSlots));
 
@@ -119,8 +123,10 @@ export default function GalleryThumbnailsEditor({
       </button>
       <BulkUrlPaste
         label="Bulk paste thumbnails"
+        storageKey={`thumbs:${storageKey ?? "default"}`}
         onAdd={(urls) => commit([...trimTrailingEmpty(items), ...urls])}
       />
+
     </div>
   );
 }
