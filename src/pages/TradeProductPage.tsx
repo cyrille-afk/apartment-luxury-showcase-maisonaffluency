@@ -544,6 +544,14 @@ const TradeProductPage: React.FC = () => {
   const [selectedTopDisplay, setSelectedTopDisplay] = useState<string | null>(null);
   const [selectedBaseDisplay, setSelectedBaseDisplay] = useState<string | null>(null);
   const [selectedSwatchGalleryIndices, setSelectedSwatchGalleryIndices] = useState<number[] | null>(null);
+  // Hold the reel back until FinishSelector resolves per-finish photo grouping
+  // so the full mixed set never flashes before narrowing (mirrors public page).
+  const [finishGroupingPending, setFinishGroupingPending] = useState(true);
+  useEffect(() => {
+    if (!finishGroupingPending) return;
+    const t = setTimeout(() => setFinishGroupingPending(false), 2500);
+    return () => clearTimeout(t);
+  }, [finishGroupingPending]);
   const [selectedSwatchGalleryName, setSelectedSwatchGalleryName] = useState<string | null>(null);
   const [selectedDualSize, setSelectedDualSize] = useState<string | null>(null);
   const [rugSelection, setRugSelection] = useState<RugSelection | null>(null);
@@ -1380,7 +1388,11 @@ const TradeProductPage: React.FC = () => {
       .sort((a, b) => a - b);
     return abs.length ? abs : null;
   })();
-  const visibleImages = visibleImageIndices ? visibleImageIndices.map((i) => images[i]) : images;
+  const visibleImages = visibleImageIndices
+    ? visibleImageIndices.map((i) => images[i])
+    : finishGroupingPending && images.length > 1
+    ? images.slice(0, 1)
+    : images;
   const visibleActiveIndex = visibleImageIndices
     ? Math.max(0, visibleImageIndices.indexOf(galleryActiveIndex ?? visibleImageIndices[0]))
     : galleryActiveIndex;
@@ -2022,6 +2034,7 @@ const TradeProductPage: React.FC = () => {
                   onWoodFinishesAvailable={handleWoodFinishesAvailable}
                   onPreviewSwatchesResolved={handlePreviewSwatchesResolved}
                   onFinishesMissingImagesChange={setFinishesMissingImages}
+                  onFinishGroupingResolved={() => setFinishGroupingPending(false)}
                   onFabricChange={setSelectedFabric}
                   onWoodFinishPricingChange={setSelectedWoodPrice}
                   onTopFinishSwatchChange={setSelectedTopSwatch}
