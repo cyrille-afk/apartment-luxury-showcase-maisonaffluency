@@ -210,8 +210,6 @@ export default function TradeWorkspace({
               </p>
             </>
           ) : (
-            </>
-          ) : (
             <p className="font-display text-xl leading-none">Price on Request</p>
           )}
         </div>
