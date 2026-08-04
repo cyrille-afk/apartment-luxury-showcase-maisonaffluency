@@ -225,6 +225,7 @@ const FEATURED_GROUPS = [
     label: "Masters",
     slugs: [
       "alexander-lamont",
+      "dagmar-london",
       "emmanuel-babled",
       "felix-agostini",
       "jean-michel-frank",
