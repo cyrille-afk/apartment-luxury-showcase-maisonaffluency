@@ -20,7 +20,10 @@ const HERO_MOBILE_SRCSET = [
 ]
   .map(({ w, h }) => `${HERO_BASE}/w_${w},h_${h},c_fill,g_auto,q_auto:good,f_webp/${HERO_ID} ${w}w`)
   .join(", ");
+// Safari/WebKit JPEG recovery. Portrait crop for phones, landscape for
+// desktop — a portrait crop stretched across a wide viewport zooms the hero.
 const HERO_SAFARI_FALLBACK = `${HERO_BASE}/w_780,h_1688,c_fill,g_auto,q_auto:good,f_jpg/${HERO_ID}`;
+const HERO_SAFARI_FALLBACK_DESKTOP = `${HERO_BASE}/w_1920,c_fill,q_auto:good,f_jpg/${HERO_ID}`;
 
 const revealBelowFold = () => {
   window.dispatchEvent(new CustomEvent("ma:reveal-below-fold"));
