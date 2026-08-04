@@ -135,19 +135,49 @@ export function scrollToSection(id: string, behavior: ScrollBehavior = "smooth",
         const duration = isMobile ? 900 : 1100;
         animateScroll(originY, nextTop, duration, shouldContinue);
 
+        // Keep correcting while late layout shifts happen (lazy images, iOS
+        // hero fallback decode, font swaps). Runs up to ~6s, and also reacts
+        // to document height changes via ResizeObserver.
         let correctionPasses = 0;
-        const correctAfterLazyLayout = () => {
-          if (!shouldContinue()) return;
+        let stopped = false;
+        let observer: ResizeObserver | null = null;
+        const stop = () => {
+          if (stopped) return;
+          stopped = true;
+          observer?.disconnect();
+          cleanupUserCancel();
+        };
+        const correctNow = () => {
+          if (stopped || !shouldContinue()) {
+            stop();
+            return;
+          }
           const correctedTop = getTargetTop();
           if (correctedTop !== null && Math.abs(window.scrollY - correctedTop) > 4) {
             window.scrollTo({ top: correctedTop, behavior: instant });
           }
+        };
+        const correctAfterLazyLayout = () => {
+          if (stopped) return;
+          if (!shouldContinue()) {
+            stop();
+            return;
+          }
+          correctNow();
           correctionPasses += 1;
-          if (correctionPasses < 20) window.setTimeout(correctAfterLazyLayout, 120);
-          else cleanupUserCancel();
+          if (correctionPasses < 45) window.setTimeout(correctAfterLazyLayout, 130);
+          else stop();
         };
         window.setTimeout(correctAfterLazyLayout, duration + 80);
+        if (typeof ResizeObserver !== "undefined") {
+          observer = new ResizeObserver(() => {
+            if (correctionPasses > 0) correctNow();
+          });
+          observer.observe(document.documentElement);
+        }
+        window.addEventListener("load", correctNow, { once: true });
         return;
+
       }
 
       const totalDistance = Math.abs(nextTop - originY);
