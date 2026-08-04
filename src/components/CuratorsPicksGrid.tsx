@@ -76,7 +76,7 @@ export const curatorsPicksMock: CuratorPickCard[] = [
     price: "From $7,250",
     designer: "Apparatus",
     studioImage:
-      "https://images.unsplash.com/photo-1543198126-a4d9b1e0a1a2?auto=format&fit=crop&w=900&q=80",
+      "https://images.unsplash.com/photo-1517991104123-1d56a6e81ed9?auto=format&fit=crop&w=900&q=80",
     ambientImage:
       "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=900&q=80",
     href: "/designers/apparatus-studio",
