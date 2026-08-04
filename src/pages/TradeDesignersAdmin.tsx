@@ -2617,7 +2617,9 @@ const TradeDesignersAdmin = () => {
                           </Button>
                           <BulkUrlPaste
                             label="Bulk paste media URLs"
+                            storageKey={`designer-media:${d.id}`}
                             onAdd={(urls) => {
+
                               const imgs = [
                                 ...((editBuffer[d.id]?.biography_images ?? d.biography_images) || []).filter(
                                   (u: string) => u.trim() !== "",
