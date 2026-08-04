@@ -1096,6 +1096,10 @@ const PublicProductPage: React.FC = () => {
   // Price of the size/finish combination the visitor has currently selected.
   // `exact` = a single variant matched, so we drop the "From" prefix.
   const [selectedRrp, setSelectedRrp] = useState<{ cents: number; exact: boolean } | null>(null);
+  // Same resolution against the product's own `size_variants` (available for
+  // every product, not just publicly priced ones). Feeds the Trade Workspace so
+  // the net price tracks the finish/size the member has selected.
+  const [selectedVariantPrice, setSelectedVariantPrice] = useState<{ cents: number; exact: boolean } | null>(null);
   const rrpSelectionRef = useRef<{ base: string | null; top: string | null; size: string | null }>({
     base: null,
     top: null,
@@ -1443,6 +1447,7 @@ const PublicProductPage: React.FC = () => {
       // hero visibly resets when the user clears their finish/material choice.
       rrpSelectionRef.current = { base: null, top: null, size: null };
       setSelectedRrp(null);
+      setSelectedVariantPrice(null);
       setGalleryActiveIndex(0);
       setGalleryJumpNonce((n) => n + 1);
       return;
@@ -1497,6 +1502,31 @@ const PublicProductPage: React.FC = () => {
       setSelectedRrp(
         uniquePrices.length
           ? { cents: Math.min(...uniquePrices), exact: uniquePrices.length === 1 }
+          : null,
+      );
+
+      // Trade Workspace price: same matching, but against the product's own
+      // variant list so it resolves for every catalogue, not just public RRPs.
+      const ownVariants = (product.size_variants || []) as any[];
+      let ownPrices: number[] = [];
+      for (const set of keySets) {
+        const keys = set.filter(Boolean) as string[];
+        if (!keys.length) continue;
+        const matches = ownVariants.filter((v) => {
+          const fields = [v?.base, v?.top, v?.label].filter(Boolean);
+          return keys.every((k) =>
+            fields.some((f) => norm(f) === norm(k) || sameFinish(f, k))
+          );
+        });
+        const priced = matches
+          .map((v) => Number(v?.price_cents))
+          .filter((c) => Number.isFinite(c) && c > 0);
+        ownPrices = Array.from(new Set(priced));
+        if (ownPrices.length) break;
+      }
+      setSelectedVariantPrice(
+        ownPrices.length
+          ? { cents: Math.min(...ownPrices), exact: ownPrices.length === 1 }
           : null,
       );
     }
@@ -2436,6 +2466,9 @@ const PublicProductPage: React.FC = () => {
                       originLine={product.origin}
                       leadTime={product.lead_time}
                       selectedFinishes={selectedFinishes}
+                      selectedVariantCents={selectedVariantPrice?.cents ?? null}
+                      selectedVariantExact={!!selectedVariantPrice?.exact}
+                      returnPath={returnTo}
                       pdfUrl={product.pdf_url}
                       pdfUrls={product.pdf_urls}
                       inquireHref={inquireHref}

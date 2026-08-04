@@ -25,6 +25,12 @@ interface Props {
   originLine?: string | null;
   leadTime?: string | null;
   selectedFinishes: string[];
+  /** RRP of the size/finish combination currently selected on the page. */
+  selectedVariantCents?: number | null;
+  /** True when exactly one variant matched (otherwise the price is a "from"). */
+  selectedVariantExact?: boolean;
+  /** Public path to return to from the full trade sheet. */
+  returnPath?: string;
   pdfUrl?: string | null;
   pdfUrls?: any[] | null;
   inquireHref: string;
@@ -77,6 +83,9 @@ export default function TradeWorkspace({
   originLine,
   leadTime,
   selectedFinishes,
+  selectedVariantCents = null,
+  selectedVariantExact = false,
+  returnPath,
   pdfUrl,
   pdfUrls,
   inquireHref,
@@ -87,6 +96,7 @@ export default function TradeWorkspace({
   const { clientSafe } = useClientSafeMode();
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
+  const [felixOpen, setFelixOpen] = useState(false);
 
   const sendToDesktop = async () => {
     setSending(true);
@@ -109,9 +119,13 @@ export default function TradeWorkspace({
   // `trade_price_cents` holds RRP for most rows (legacy import), so it only counts
   // as a real negotiated net when it is strictly below RRP. Otherwise the tier
   // discount is applied on top of RRP.
-  const rrpCents = pricing?.rrp_price_cents ?? pricing?.trade_price_cents ?? null;
+  // The selected size/finish always wins over the product's base RRP so the
+  // workspace price tracks the configuration on screen.
+  const baseRrpCents = pricing?.rrp_price_cents ?? pricing?.trade_price_cents ?? null;
+  const rrpCents = selectedVariantCents && selectedVariantCents > 0 ? selectedVariantCents : baseRrpCents;
+  const usingVariantPrice = !!(selectedVariantCents && selectedVariantCents > 0);
   const explicitNet =
-    pricing?.trade_price_cents && rrpCents && pricing.trade_price_cents < rrpCents
+    !usingVariantPrice && pricing?.trade_price_cents && baseRrpCents && pricing.trade_price_cents < baseRrpCents
       ? pricing.trade_price_cents
       : null;
   const netCents =
@@ -165,15 +179,24 @@ export default function TradeWorkspace({
           ) : clientSafe ? (
             /* Client-safe: retail only, never net or margin. */
             <>
-              <p className="font-display text-2xl leading-none">{rrpLabel || "Price on Request"}</p>
+              <p className="font-display text-2xl leading-none">
+                {rrpLabel ? `${usingVariantPrice && !selectedVariantExact ? "From " : ""}${rrpLabel}` : "Price on Request"}
+              </p>
               <p className="font-body text-[11px] text-muted-foreground mt-1.5">
-                {rrpLabel ? "Recommended retail" : "Available on request"}
+                {rrpLabel
+                  ? usingVariantPrice
+                    ? `Recommended retail · ${selectedFinishes.join(" · ") || "selected configuration"}`
+                    : "Recommended retail"
+                  : "Available on request"}
               </p>
             </>
           ) : netLabel ? (
             <>
               <div className="flex flex-wrap items-baseline gap-x-2.5 gap-y-1">
-                <p className="font-display text-2xl leading-none">{netLabel}</p>
+                <p className="font-display text-2xl leading-none">
+                  {usingVariantPrice && !selectedVariantExact ? "From " : ""}
+                  {netLabel}
+                </p>
                 {rrpLabel && netCents !== rrpCents && (
                   <span className="font-body text-sm text-muted-foreground line-through">
                     {rrpLabel}
@@ -182,6 +205,7 @@ export default function TradeWorkspace({
               </div>
               <p className="font-body text-[11px] text-muted-foreground mt-1.5">
                 Your trade net
+                {usingVariantPrice && selectedFinishes.length ? ` · ${selectedFinishes.join(" · ")}` : ""}
                 {discountApplied && ` · ${tierLabel} ${discountLabel} off RRP`}
               </p>
             </>
@@ -245,11 +269,17 @@ export default function TradeWorkspace({
           </button>
 
           <Link
-            to={`/trade/products/${productId}`}
+            to={`/trade/products/${productId}${selectedFinishes.length ? `?finish=${encodeURIComponent(selectedFinishes.join(" / "))}` : ""}`}
+            state={returnPath ? { from: returnPath } : undefined}
             className="flex items-center justify-center px-4 py-3 rounded-md bg-foreground text-background font-body text-[11px] uppercase tracking-[0.12em] hover:bg-foreground/90 transition-colors"
           >
             Open Full Trade Sheet
           </Link>
+          {returnPath && (
+            <p className="text-center font-body text-[10px] text-muted-foreground/80">
+              Your finish selection carries over — use Back to return here.
+            </p>
+          )}
 
           {hasSpecSheet ? (
             <SpecSheetButton
@@ -274,16 +304,30 @@ export default function TradeWorkspace({
         </div>
       </div>
 
-      {/* Right — Felix */}
-      <Suspense
-        fallback={
-          <div className="rounded-lg border border-border bg-card/40 p-5 flex items-center gap-2 text-muted-foreground font-body text-xs">
-            <Loader2 className="h-3.5 w-3.5 animate-spin" /> Waking the curatorial guide…
-          </div>
-        }
-      >
-        <ProductFelixPanel context={felixContext} />
-      </Suspense>
+      {/* Right — Felix. Collapsed behind a launcher on mobile so the pricing
+          block stays adjacent to the finish selectors. */}
+      <div>
+        {!felixOpen && (
+          <button
+            type="button"
+            onClick={() => setFelixOpen(true)}
+            className="md:hidden w-full flex items-center justify-center px-4 py-3 rounded-md border border-border font-body text-[11px] uppercase tracking-[0.12em] text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Ask Felix about this piece
+          </button>
+        )}
+        <div className={cn(!felixOpen && "hidden md:block")}>
+          <Suspense
+            fallback={
+              <div className="rounded-lg border border-border bg-card/40 p-5 flex items-center gap-2 text-muted-foreground font-body text-xs">
+                <Loader2 className="h-3.5 w-3.5 animate-spin" /> Waking the curatorial guide…
+              </div>
+            }
+          >
+            <ProductFelixPanel context={felixContext} />
+          </Suspense>
+        </div>
+      </div>
     </section>
   );
 }
