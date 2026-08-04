@@ -1221,9 +1221,16 @@ const DesignersHoverHero = () => {
       const mRect = m.getBoundingClientRect();
       const sRect = s.getBoundingClientRect();
       setDirectoryTop(mRect.top - sRect.top);
-      // Baseline-align the right-side active title with the last featured
-      // designer (Victoria Magniant): title.bottom = lastItem.bottom.
-      if (l && t) {
+      // Align the right-side active title block (name + CTA) so its bottom
+      // edge sits at the last featured designer's baseline. Using the full
+      // wrapper height keeps the "Click to view full collection" caption
+      // from being truncated below the hero bounds.
+      const wrap = activeTitleWrapRef.current;
+      if (l && wrap) {
+        const lRect = l.getBoundingClientRect();
+        const wrapH = wrap.getBoundingClientRect().height;
+        setActiveTitleTop(lRect.bottom - sRect.top - wrapH);
+      } else if (l && t) {
         const lRect = l.getBoundingClientRect();
         const tH = t.getBoundingClientRect().height;
         setActiveTitleTop(lRect.bottom - sRect.top - tH);
