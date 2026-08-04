@@ -327,7 +327,12 @@ function ProfileCollapsible({ children, shouldCollapse }: { children: React.Reac
             setExpanded(next);
             if (!next) {
               requestAnimationFrame(() => {
-                wrapRef.current?.scrollIntoView({ block: "center", behavior: "smooth" });
+                const picks = document.getElementById("curators-picks");
+                if (picks) {
+                  picks.scrollIntoView({ block: "start", behavior: "smooth" });
+                } else {
+                  wrapRef.current?.scrollIntoView({ block: "start", behavior: "smooth" });
+                }
               });
             }
           }}
