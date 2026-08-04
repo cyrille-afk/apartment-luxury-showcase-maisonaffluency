@@ -113,7 +113,7 @@ const Hero = () => {
             className="absolute inset-0 h-full w-full object-cover object-[50%_40%]"
             loading="eager"
             decoding="sync"
-            fetchpriority="high"
+            fetchPriority="high"
           />
         </picture>
       )}
