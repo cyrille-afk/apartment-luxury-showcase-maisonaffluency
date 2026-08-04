@@ -326,16 +326,23 @@ function ProfileCollapsible({ children, shouldCollapse }: { children: React.Reac
             const next = !expanded;
             setExpanded(next);
             if (!next) {
-              requestAnimationFrame(() => {
-                const picks = document.getElementById("curators-picks");
-                if (picks) {
-                  picks.scrollIntoView({ block: "start", behavior: "smooth" });
-                } else {
-                  wrapRef.current?.scrollIntoView({ block: "start", behavior: "smooth" });
-                }
-              });
+              // The collapse animation runs 500ms; scrolling before it settles
+              // lands mid-section because the target keeps moving upward.
+              // Scroll once after it finishes, then correct again.
+              const land = () => {
+                const target =
+                  document.getElementById("curators-picks") ?? wrapRef.current;
+                if (!target) return;
+                const headerOffset = 84;
+                const top =
+                  target.getBoundingClientRect().top + window.scrollY - headerOffset;
+                window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+              };
+              window.setTimeout(land, 560);
+              window.setTimeout(land, 900);
             }
           }}
+
           aria-expanded={expanded}
           aria-controls={panelId}
           className="inline-flex items-center gap-2 px-6 py-2.5 bg-foreground text-background font-display text-[12px] tracking-[0.18em] uppercase rounded-full hover:bg-foreground/85 transition-colors shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-reduce:transition-none"
