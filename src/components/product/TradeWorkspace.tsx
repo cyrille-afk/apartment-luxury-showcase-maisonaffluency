@@ -35,6 +35,8 @@ interface Props {
   pdfUrls?: any[] | null;
   inquireHref: string;
   felixUrl?: string;
+  /** Mobile/PWA: collapse the workspace into a slim inline price block. */
+  compact?: boolean;
 }
 
 /** Human-readable suffix for a price unit. `per_piece` is the default and is never shown. */
@@ -90,6 +92,7 @@ export default function TradeWorkspace({
   pdfUrls,
   inquireHref,
   felixUrl,
+  compact = false,
 }: Props) {
   const { data: pricing, isLoading } = useTradeProductPricing(productId);
   const { discountPct, tierLabel } = useTradeDiscount();
