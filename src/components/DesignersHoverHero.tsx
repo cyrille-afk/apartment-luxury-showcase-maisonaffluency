@@ -1712,7 +1712,7 @@ const DesignersHoverHero = () => {
               className="hidden md:block absolute right-20 lg:right-40 z-40 pointer-events-auto cursor-pointer group"
               style={activeTitleTop != null ? { top: activeTitleTop } : { bottom: 96 }}
             >
-              <div className="flex flex-col items-end text-right text-white">
+              <div ref={activeTitleWrapRef} className="flex flex-col items-end text-right text-white">
                 <span
                   ref={activeTitleRef}
                   key={`${active.slug}-title`}
