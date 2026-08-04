@@ -619,13 +619,29 @@ input, select, textarea {
   }
 }
 
-/* iOS Safari browser chrome backing. Keep black on the document canvas, which
-   sits behind Safari's own controls, rather than drawing a fixed element inside
-   the visual viewport. A fixed 92px overlay obscures real page content. The
-   pre-paint class is absent in standalone mode, so PWA remains full-bleed. */
+/* iOS Safari browser chrome backing.
+   Safari may source its toolbar/overscroll canvas from either html or body.
+   Keep both canvases black and move the normal page surface onto #root. This
+   creates no fixed overlay, consumes no viewport space, and cannot cover text.
+   The pre-paint class is absent in standalone mode, so PWA stays full-bleed. */
 @media (max-width: 767px) {
-  html.ios-safari-browser {
+  html.ios-safari-browser,
+  html.ios-safari-browser body {
     background-color: hsl(0 0% 0%);
+  }
+
+  html.ios-safari-browser #root {
+    min-height: 100vh;
+    min-height: 100dvh;
+    background-color: hsl(var(--background));
+  }
+}
+
+@media (max-width: 767px) and (display-mode: standalone) {
+  html,
+  body,
+  #root {
+    background-color: hsl(var(--background));
   }
 }
 
