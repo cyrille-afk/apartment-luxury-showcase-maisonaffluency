@@ -168,6 +168,7 @@ const ConciergePage = lazy(() => import("./pages/ConciergePage"));
 const PublicProductPage = lazy(() => import("./pages/PublicProductPage"));
 const CategoryRoute = lazy(() => import("./pages/CategoryRoute"));
 const ScreenshotGallery = lazy(() => import("./pages/ScreenshotGallery"));
+const CuratorsPicksDemo = lazy(() => import("./pages/CuratorsPicksDemo"));
 
 
 
