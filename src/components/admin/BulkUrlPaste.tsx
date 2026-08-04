@@ -24,27 +24,60 @@ export default function BulkUrlPaste({
   const sk = `bup:${storageKey}`;
   const [open, setOpen] = useState(() => {
     try {
-      return sessionStorage.getItem(`${sk}:open`) === "1";
+      return (
+        localStorage.getItem(`${sk}:open`) ??
+        sessionStorage.getItem(`${sk}:open`)
+      ) === "1";
     } catch {
       return false;
     }
   });
   const [text, setText] = useState(() => {
     try {
-      return sessionStorage.getItem(`${sk}:text`) ?? "";
+      return (
+        localStorage.getItem(`${sk}:text`) ??
+        sessionStorage.getItem(`${sk}:text`) ??
+        ""
+      );
     } catch {
       return "";
     }
   });
   const taRef = useRef<HTMLTextAreaElement | null>(null);
 
-  useEffect(() => {
+  const persist = (nextText: string, nextOpen: boolean) => {
     try {
-      sessionStorage.setItem(`${sk}:text`, text);
-      sessionStorage.setItem(`${sk}:open`, open ? "1" : "0");
+      localStorage.setItem(`${sk}:text`, nextText);
+      localStorage.setItem(`${sk}:open`, nextOpen ? "1" : "0");
+      sessionStorage.setItem(`${sk}:text`, nextText);
+      sessionStorage.setItem(`${sk}:open`, nextOpen ? "1" : "0");
     } catch {
-      /* ignore */
+      /* keep editing if browser storage is unavailable */
     }
+  };
+
+  const updateText = (next: string) => {
+    // Persist inside the input event rather than waiting for an effect. This
+    // prevents a hard refresh/build reload from racing React's effect queue.
+    persist(next, open);
+    setText(next);
+  };
+
+  const updateOpen = (next: boolean) => {
+    persist(text, next);
+    setOpen(next);
+  };
+
+  useEffect(() => {
+    const persistCurrentValue = () => {
+      persist(taRef.current?.value ?? text, open);
+    };
+    window.addEventListener("pagehide", persistCurrentValue);
+    window.addEventListener("beforeunload", persistCurrentValue);
+    return () => {
+      window.removeEventListener("pagehide", persistCurrentValue);
+      window.removeEventListener("beforeunload", persistCurrentValue);
+    };
   }, [sk, text, open]);
 
   const parsed = parseUrls(text);
@@ -52,6 +85,7 @@ export default function BulkUrlPaste({
   const clear = () => {
     setText("");
     try {
+      localStorage.removeItem(`${sk}:text`);
       sessionStorage.removeItem(`${sk}:text`);
     } catch {
       /* ignore */
@@ -63,7 +97,7 @@ export default function BulkUrlPaste({
       {!open ? (
         <button
           type="button"
-          onClick={() => setOpen(true)}
+          onClick={() => updateOpen(true)}
           className="text-[11px] px-2 py-1 border border-dashed border-border rounded hover:bg-muted/40"
         >
           ⇪ {label}
@@ -78,7 +112,7 @@ export default function BulkUrlPaste({
           <textarea
             ref={taRef}
             value={text}
-            onChange={(e) => setText(e.target.value)}
+            onChange={(e) => updateText(e.target.value)}
             rows={5}
             placeholder={placeholder}
             className="w-full text-xs font-mono bg-background border border-border rounded p-2 outline-none focus:ring-1 focus:ring-ring"
@@ -90,7 +124,7 @@ export default function BulkUrlPaste({
               onClick={() => {
                 onAdd(parsed);
                 clear();
-                setOpen(false);
+                updateOpen(false);
               }}
               className="text-[11px] px-2 py-1 border border-border rounded disabled:opacity-40 hover:bg-muted/40"
             >
@@ -111,7 +145,7 @@ export default function BulkUrlPaste({
             </button>
             <button
               type="button"
-              onClick={() => setOpen(false)}
+              onClick={() => updateOpen(false)}
               className="text-[11px] px-2 py-1 border border-border rounded hover:bg-muted/40"
             >
               Hide
