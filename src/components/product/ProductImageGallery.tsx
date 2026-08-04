@@ -233,7 +233,15 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
       hoverScrollRafRef.current = null;
       return;
     }
-    el.scrollTop += dir * 1.6; // slow, fluid drift
+    const max = el.scrollHeight - el.clientHeight;
+    let next = el.scrollTop + dir * 1.6; // slow, fluid drift
+    // Loop the column: drifting past the last thumb wraps back to the first,
+    // and drifting above the first wraps to the last.
+    if (max > 0) {
+      if (next > max + 0.5) next = 0;
+      else if (next < -0.5) next = max;
+    }
+    el.scrollTop = next;
     hoverScrollRafRef.current = requestAnimationFrame(runHoverScroll);
   }, []);
 
@@ -243,11 +251,13 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ images, alt, 
       if (!el) return;
       const rect = el.getBoundingClientRect();
       if (rect.height === 0) return;
+      const scrollable = el.scrollHeight - el.clientHeight > 1;
       const y = e.clientY - rect.top;
       const zone = rect.height * 0.2;
       let dir = 0;
-      if (y <= zone && el.scrollTop > 0) dir = -1;
-      else if (y >= rect.height - zone && el.scrollTop < el.scrollHeight - el.clientHeight) dir = 1;
+      if (scrollable && y <= zone) dir = -1;
+      else if (scrollable && y >= rect.height - zone) dir = 1;
+
 
       if (dir === 0) {
         stopHoverScroll();
