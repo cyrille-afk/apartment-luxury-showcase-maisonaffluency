@@ -109,11 +109,10 @@ const ShareMenu = ({ url, message, imageUrl, imageName }: ShareMenuProps) => {
     <div ref={ref} className="relative">
       <button
         onClick={handleClick}
-        className={className}
+        className={SHARE_BUTTON_CLASS}
         aria-label="Share"
       >
-        <Icon className={iconSize} />
-        {showLabel && <span className={`font-body ${labelSize} uppercase tracking-[0.15em]`}>Share</span>}
+        <Icon className="w-[18px] h-[18px]" strokeWidth={1.5} />
       </button>
       {open && !isMobile && (
         <div
