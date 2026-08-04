@@ -650,10 +650,9 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     // collapsed accordion header — lets clients scan finishes without
     // opening a secondary menu.
     if (shape === "circle") {
-      // NOTE: do NOT use Tailwind `ring`/`ring-offset` here. On iOS Safari the
-      // box-shadow ring renders ~2px off from the `overflow-hidden` circular
-      // clip, so the outline looks off-centre around the swatch. A padded
-      // container + real border keeps the two circles perfectly concentric.
+      // Keep the outline and image as two independently positioned circles.
+      // Using absolute insets avoids WebKit's sub-pixel padding/scale rounding,
+      // which can shift a circular child inside its selected border.
       return (
         <button
           key={`c-${f.id}`}
@@ -665,14 +664,18 @@ export default function FinishSelector({ pickId, className, productTitle, produc
           aria-pressed={isSelected}
           title={f.supplier ? `${f.supplier} — ${f.name}` : f.name}
           className={cn(
-            "shrink-0 rounded-full bg-background p-[3px] border transition-all duration-200 touch-manipulation",
+            "relative shrink-0 appearance-none rounded-full border-0 bg-transparent p-0 touch-manipulation",
             isMobile || isPwa ? "h-[54px] w-[54px]" : "h-[46px] w-[46px]",
-            isSelected
-              ? "border-foreground scale-[1.06]"
-              : "border-border/60 hover:border-foreground/40",
           )}
         >
-          <span className="block h-full w-full overflow-hidden rounded-full bg-muted/40">
+          <span
+            aria-hidden="true"
+            className={cn(
+              "pointer-events-none absolute inset-0 rounded-full border transition-colors duration-200",
+              isSelected ? "border-foreground" : "border-border/60",
+            )}
+          />
+          <span className="absolute inset-[4px] block overflow-hidden rounded-full bg-muted/40">
             {f.image_url ? (
               <img src={f.image_url} alt={f.name} loading="lazy" className="w-full h-full object-cover" />
             ) : (
