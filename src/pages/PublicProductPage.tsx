@@ -1447,6 +1447,7 @@ const PublicProductPage: React.FC = () => {
       // hero visibly resets when the user clears their finish/material choice.
       rrpSelectionRef.current = { base: null, top: null, size: null };
       setSelectedRrp(null);
+      setSelectedVariantPrice(null);
       setGalleryActiveIndex(0);
       setGalleryJumpNonce((n) => n + 1);
       return;
