@@ -3,7 +3,7 @@ import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { useParams, Link, Navigate, useSearchParams, useNavigate, useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, Package, FileText, Maximize2, Share2, Check, ChevronDown } from "lucide-react";
+import { ArrowLeft, Package, FileText, Maximize2, Share2, Check, ChevronDown, ChevronUp } from "lucide-react";
 import ProductCardDescriptionOverlay from "@/components/ui/ProductCardDescriptionOverlay";
 import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 import SpecSheetButton, { type PdfEntry } from "@/components/trade/SpecSheetButton";
@@ -297,10 +297,11 @@ function buildThinContentFallback(args: {
 function ProfileCollapsible({ children, shouldCollapse }: { children: React.ReactNode; shouldCollapse: boolean }) {
   const [sp] = useSearchParams();
   const [expanded, setExpanded] = useState(() => sp.get("expanded") === "true");
+  const wrapRef = useRef<HTMLDivElement>(null);
   const panelId = "designer-profile-extra";
   if (!shouldCollapse) return <>{children}</>;
   return (
-    <div className="relative">
+    <div className="relative" ref={wrapRef}>
       <AnimatePresence initial={false}>
         {expanded ? (
           <motion.div
@@ -310,29 +311,48 @@ function ProfileCollapsible({ children, shouldCollapse }: { children: React.Reac
             aria-label="Full designer profile"
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+            className="overflow-hidden"
           >
             {children}
           </motion.div>
         ) : null}
       </AnimatePresence>
-      {!expanded && (
-        <div className="mt-6 flex justify-center">
-          <button
-            type="button"
-            onClick={() => setExpanded(true)}
-            aria-expanded={expanded}
-            aria-controls={panelId}
-            className="inline-flex items-center gap-2 px-6 py-2.5 bg-foreground text-background font-display text-[12px] tracking-[0.18em] uppercase rounded-full hover:bg-foreground/85 transition-colors shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-reduce:transition-none"
-          >
-            <ChevronDown className="w-3.5 h-3.5" aria-hidden="true" />
-            View full profile
-            <ChevronDown className="w-3.5 h-3.5" aria-hidden="true" />
-          </button>
-        </div>
-      )}
+      <div className="mt-6 flex justify-center">
+        <button
+          type="button"
+          onClick={() => {
+            const next = !expanded;
+            setExpanded(next);
+            if (!next) {
+              requestAnimationFrame(() => {
+                wrapRef.current?.scrollIntoView({ block: "center", behavior: "smooth" });
+              });
+            }
+          }}
+          aria-expanded={expanded}
+          aria-controls={panelId}
+          className="inline-flex items-center gap-2 px-6 py-2.5 bg-foreground text-background font-display text-[12px] tracking-[0.18em] uppercase rounded-full hover:bg-foreground/85 transition-colors shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-reduce:transition-none"
+        >
+          {expanded ? (
+            <>
+              <ChevronUp className="w-3.5 h-3.5" aria-hidden="true" />
+              Close full profile
+              <ChevronUp className="w-3.5 h-3.5" aria-hidden="true" />
+            </>
+          ) : (
+            <>
+              <ChevronDown className="w-3.5 h-3.5" aria-hidden="true" />
+              View full profile
+              <ChevronDown className="w-3.5 h-3.5" aria-hidden="true" />
+            </>
+          )}
+        </button>
+      </div>
     </div>
   );
+
 }
 
 // Legacy slug → canonical slug 301-style redirects (in-app)
@@ -988,12 +1008,41 @@ const PublicDesignerProfile = () => {
           ) : (
             /* Atelier profile: panoramic hero + bio below */
             <div className="flex flex-col gap-0">
+              {/* Mobile / PWA: text-only header — hero photo hidden for a tighter first view */}
+              <div className="md:hidden flex items-start justify-between gap-3 pt-1 pb-1">
+                <div className="min-w-0">
+                  <h1 className="font-display text-2xl tracking-wide text-foreground">{name}</h1>
+                  {designer.specialty && (
+                    <p className="font-body text-xs text-muted-foreground mt-1 tracking-wide">{designer.specialty}</p>
+                  )}
+                  {designer.collab_brands && designer.collab_brands.length > 0 && (
+                    <div className="mt-2 flex flex-wrap gap-1.5">
+                      {designer.collab_brands.map((brand) => (
+                        <span
+                          key={brand}
+                          className="inline-flex items-center px-2 py-0.5 rounded-full bg-foreground/5 text-muted-foreground font-body text-[10px] uppercase tracking-[0.15em]"
+                        >
+                          In collaboration with {brand}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <ShareMenu
+                  url={`https://www.maisonaffluency.com${buildDesignerBridgePath("og")}`}
+                  message={`${designer.name} — Maison Affluency: https://www.maisonaffluency.com${buildDesignerBridgePath("og")}`}
+                  className="shrink-0 flex items-center justify-center w-8 h-8 rounded-full bg-foreground/5 text-foreground/70 hover:bg-foreground/10 transition-colors"
+                  iconSize="w-4 h-4"
+                  showLabel={false}
+                />
+              </div>
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={transition}
-                className="relative rounded-xl overflow-hidden shrink-0"
+                className="relative rounded-xl overflow-hidden shrink-0 hidden md:block"
               >
+
                 <div className="aspect-[3/2] md:aspect-[2/1] max-h-[50vh]">
                   {heroImage && (
                     <img src={heroImage} alt={name} className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: 'center 25%' }} loading="eager" />
