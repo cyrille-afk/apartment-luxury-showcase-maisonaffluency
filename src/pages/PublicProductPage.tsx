@@ -1096,6 +1096,10 @@ const PublicProductPage: React.FC = () => {
   // Price of the size/finish combination the visitor has currently selected.
   // `exact` = a single variant matched, so we drop the "From" prefix.
   const [selectedRrp, setSelectedRrp] = useState<{ cents: number; exact: boolean } | null>(null);
+  // Same resolution against the product's own `size_variants` (available for
+  // every product, not just publicly priced ones). Feeds the Trade Workspace so
+  // the net price tracks the finish/size the member has selected.
+  const [selectedVariantPrice, setSelectedVariantPrice] = useState<{ cents: number; exact: boolean } | null>(null);
   const rrpSelectionRef = useRef<{ base: string | null; top: string | null; size: string | null }>({
     base: null,
     top: null,
