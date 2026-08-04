@@ -759,7 +759,7 @@ const PublicDesignerProfile = () => {
         const match = clean.match(/^(.*?)\s*\(([^)]+)\)\s*(.*)$/s);
         if (match) {
           return (
-            <blockquote className="font-display italic leading-snug mb-6 text-center [text-wrap:pretty]">
+            <blockquote className="hidden md:block font-display italic leading-snug mb-6 text-center [text-wrap:pretty]">
               <span className="text-lg md:text-xl text-foreground whitespace-pre-line font-semibold">"{match[1].trimEnd().replace(/^[\s""\u201C\u201D«»]+|[\s""\u201C\u201D«»]+$/g, '')}"</span>
               {match[3] && <span className="text-lg md:text-xl text-foreground whitespace-pre-line font-semibold"> {match[3]}</span>}
               <br />
@@ -768,7 +768,7 @@ const PublicDesignerProfile = () => {
           );
         }
         return (
-          <blockquote className="font-display text-lg md:text-xl italic leading-snug text-foreground mb-6 text-center whitespace-pre-line font-semibold [text-wrap:pretty]">
+          <blockquote className="hidden md:block font-display text-lg md:text-xl italic leading-snug text-foreground mb-6 text-center whitespace-pre-line font-semibold [text-wrap:pretty]">
             "{clean}"
           </blockquote>
         );
