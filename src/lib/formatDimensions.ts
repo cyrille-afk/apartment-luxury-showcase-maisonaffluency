@@ -96,7 +96,7 @@ const stripVariantPrefix = (part: string): string => {
   return part;
 };
 
-const toImperialLine = (line: string): string | null => {
+export const toImperialLine = (line: string): string | null => {
   if (!CM_RE.test(line)) return null;
   const converted = line
     .split(/(\s+[·•]\s+|\s*;\s*)/)
