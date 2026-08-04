@@ -611,8 +611,10 @@ function CuratorPicksManager({ designerId, designerName }: { designerId: string;
                   <label className="text-[10px] text-muted-foreground">Gallery Thumbnails (shown on the public product page — reorder with ↑/↓, insert between rows with +). Unlimited — add as many as you need.</label>
                   <GalleryThumbnailsEditor
                     value={pick.gallery_images || []}
+                    storageKey={pick.id}
                     onChange={(next) => updateField(pick.id, "gallery_images", next.length ? next : null)}
                   />
+
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   <div>
