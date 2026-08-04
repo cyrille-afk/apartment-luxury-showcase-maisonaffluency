@@ -926,22 +926,22 @@ const VariantDimensionsPanel: React.FC = () => {
             }}
           />
         ) : product.dimensions && looksLikeDimension(product.dimensions) ? (
-          <ExpandableSpec icon={specIcon("📐")} text={withImperialPerLine(product.dimensions)} />
+          <ExpandableSpec icon={specIcon("📐")} text={withImperialStacked(product.dimensions)} />
         ) : null;
       })()}
 
       {!hasVariants && product.dimensions && looksLikeDimension(product.dimensions) && (
-        <ExpandableSpec icon={specIcon("📐")} text={withImperialPerLine(product.dimensions)} />
+        <ExpandableSpec icon={specIcon("📐")} text={withImperialStacked(product.dimensions)} />
       )}
 
       {hasVariants && isDualAxis && !baseAxisIsDim && !topAxisIsDim && (dualSizeOptions?.length ?? 0) === 0 && product.dimensions && looksLikeDimension(product.dimensions) && (
-        <ExpandableSpec icon={specIcon("📐")} text={withImperialPerLine(product.dimensions)} />
+        <ExpandableSpec icon={specIcon("📐")} text={withImperialStacked(product.dimensions)} />
       )}
 
       {hasVariants && isBaseOnly && !baseAxisIsDim
         && !(baseOptions.length > 0 && baseOptions.every(looksLikeDimension))
         && product.dimensions && looksLikeDimension(product.dimensions) && (
-        <ExpandableSpec icon={specIcon("📐")} text={withImperialPerLine(product.dimensions)} />
+        <ExpandableSpec icon={specIcon("📐")} text={withImperialStacked(product.dimensions)} />
       )}
 
       {isBaseOnly && baseAxisIsDim && (
