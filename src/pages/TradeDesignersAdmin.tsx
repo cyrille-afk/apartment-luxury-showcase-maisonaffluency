@@ -2613,6 +2613,19 @@ const TradeDesignersAdmin = () => {
                             <Plus className="w-3.5 h-3.5 mr-1" />
                             Add Media
                           </Button>
+                          <BulkUrlPaste
+                            label="Bulk paste media URLs"
+                            onAdd={(urls) => {
+                              const imgs = [
+                                ...((editBuffer[d.id]?.biography_images ?? d.biography_images) || []).filter(
+                                  (u: string) => u.trim() !== "",
+                                ),
+                                ...urls,
+                              ];
+                              setField(d.id, "biography_images", imgs);
+                            }}
+                          />
+
                         </div>
                       </div>
 
