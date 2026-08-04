@@ -22,6 +22,8 @@ import CsvBulkUpload from "@/components/admin/CsvBulkUpload";
 import BiographyToolbar from "@/components/admin/BiographyToolbar";
 import DesignerCompletenessAudit from "@/components/admin/DesignerCompletenessAudit";
 import GalleryThumbnailsEditor from "@/components/admin/GalleryThumbnailsEditor";
+import BulkUrlPaste from "@/components/admin/BulkUrlPaste";
+
 import SlugHealthBadge, { useSlugHealthMap } from "@/components/admin/SlugHealthBadge";
 import VariantPreviewPanel from "@/components/admin/VariantPreviewPanel";
 import ProductFabricsPanel from "@/components/admin/ProductFabricsPanel";
@@ -2613,6 +2615,19 @@ const TradeDesignersAdmin = () => {
                             <Plus className="w-3.5 h-3.5 mr-1" />
                             Add Media
                           </Button>
+                          <BulkUrlPaste
+                            label="Bulk paste media URLs"
+                            onAdd={(urls) => {
+                              const imgs = [
+                                ...((editBuffer[d.id]?.biography_images ?? d.biography_images) || []).filter(
+                                  (u: string) => u.trim() !== "",
+                                ),
+                                ...urls,
+                              ];
+                              setField(d.id, "biography_images", imgs);
+                            }}
+                          />
+
                         </div>
                       </div>
 
