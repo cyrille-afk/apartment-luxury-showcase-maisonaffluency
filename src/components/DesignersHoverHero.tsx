@@ -431,6 +431,7 @@ const DesignersHoverHero = () => {
   const directoryRef = useRef<HTMLDivElement>(null);
   const mastersRef = useRef<HTMLSpanElement>(null);
   const activeTitleRef = useRef<HTMLSpanElement>(null);
+  const activeTitleWrapRef = useRef<HTMLDivElement>(null);
   const lastItemRef = useRef<HTMLLIElement>(null);
   const [dropdownPos, setDropdownPos] = useState<{ left: number; top: number; height: number } | null>(null);
   const [directoryTop, setDirectoryTop] = useState<number | null>(null);
@@ -1220,9 +1221,16 @@ const DesignersHoverHero = () => {
       const mRect = m.getBoundingClientRect();
       const sRect = s.getBoundingClientRect();
       setDirectoryTop(mRect.top - sRect.top);
-      // Baseline-align the right-side active title with the last featured
-      // designer (Victoria Magniant): title.bottom = lastItem.bottom.
-      if (l && t) {
+      // Align the right-side active title block (name + CTA) so its bottom
+      // edge sits at the last featured designer's baseline. Using the full
+      // wrapper height keeps the "Click to view full collection" caption
+      // from being truncated below the hero bounds.
+      const wrap = activeTitleWrapRef.current;
+      if (l && wrap) {
+        const lRect = l.getBoundingClientRect();
+        const wrapH = wrap.getBoundingClientRect().height;
+        setActiveTitleTop(lRect.bottom - sRect.top - wrapH);
+      } else if (l && t) {
         const lRect = l.getBoundingClientRect();
         const tH = t.getBoundingClientRect().height;
         setActiveTitleTop(lRect.bottom - sRect.top - tH);
@@ -1704,7 +1712,7 @@ const DesignersHoverHero = () => {
               className="hidden md:block absolute right-20 lg:right-40 z-40 pointer-events-auto cursor-pointer group"
               style={activeTitleTop != null ? { top: activeTitleTop } : { bottom: 96 }}
             >
-              <div className="flex flex-col items-end text-right text-white">
+              <div ref={activeTitleWrapRef} className="flex flex-col items-end text-right text-white">
                 <span
                   ref={activeTitleRef}
                   key={`${active.slug}-title`}
