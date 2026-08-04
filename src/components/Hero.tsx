@@ -105,14 +105,17 @@ const Hero = () => {
           here — a second <picture> creates a duplicate LCP candidate and
           extra decode work that pushes LCP later on throttled CPUs. */}
       {showImageFallback && (
-        <img
-          src={HERO_SAFARI_FALLBACK}
-          alt="Luxury living room with Asian-inspired murals and designer furniture"
-          className="absolute inset-0 h-full w-full object-cover object-[50%_40%]"
-          loading="eager"
-          decoding="sync"
-          fetchPriority="high"
-        />
+        <picture>
+          <source media="(min-width: 768px)" srcSet={HERO_SAFARI_FALLBACK_DESKTOP} />
+          <img
+            src={HERO_SAFARI_FALLBACK}
+            alt="Luxury living room with Asian-inspired murals and designer furniture"
+            className="absolute inset-0 h-full w-full object-cover object-[50%_40%]"
+            loading="eager"
+            decoding="sync"
+            fetchpriority="high"
+          />
+        </picture>
       )}
       <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-black/10 via-transparent to-black/20" />
       {/* Mobile/PWA only: soft dark radial gradient across bottom half for text contrast */}
