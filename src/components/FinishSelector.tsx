@@ -488,6 +488,24 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     }
   }, [preselectFabricName, fabrics, selectedFabricId, onUpholsteryTierChange, onFabricChange]);
 
+  // On landing, if the product's photos are split per finish, lock the gallery
+  // onto the default group (the one mapped to image 1) instead of showing the
+  // whole mixed reel. e.g. Clam Chair → Sheepskin Moonlight / Oiled Walnut.
+  const defaultGroupAppliedRef = useRef(false);
+  useEffect(() => {
+    if (defaultGroupAppliedRef.current) return;
+    if (fabrics.length === 0 || selectedFabricId || selectedWoodId || selectedTopId) return;
+    const grouped = fabrics.filter(
+      (f) => Array.isArray(f.image_indices) && f.image_indices.length > 1,
+    );
+    if (grouped.length < 2) return;
+    const first = grouped.find((f) => (f.image_indices || []).includes(1));
+    if (!first) return;
+    defaultGroupAppliedRef.current = true;
+    lockedPreviewRef.current = { indices: first.image_indices!, name: first.name };
+    onSwatchImagesChange?.(first.image_indices!, { committed: true, swatchName: first.name });
+  }, [fabrics, selectedFabricId, selectedWoodId, selectedTopId, onSwatchImagesChange]);
+
   // Notify parent when the user has selected wood/top finishes that lack
   // mapped gallery images, so quote/bespoke messages can flag them.
   useEffect(() => {
