@@ -304,16 +304,30 @@ export default function TradeWorkspace({
         </div>
       </div>
 
-      {/* Right — Felix */}
-      <Suspense
-        fallback={
-          <div className="rounded-lg border border-border bg-card/40 p-5 flex items-center gap-2 text-muted-foreground font-body text-xs">
-            <Loader2 className="h-3.5 w-3.5 animate-spin" /> Waking the curatorial guide…
-          </div>
-        }
-      >
-        <ProductFelixPanel context={felixContext} />
-      </Suspense>
+      {/* Right — Felix. Collapsed behind a launcher on mobile so the pricing
+          block stays adjacent to the finish selectors. */}
+      <div>
+        {!felixOpen && (
+          <button
+            type="button"
+            onClick={() => setFelixOpen(true)}
+            className="md:hidden w-full flex items-center justify-center px-4 py-3 rounded-md border border-border font-body text-[11px] uppercase tracking-[0.12em] text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Ask Felix about this piece
+          </button>
+        )}
+        <div className={cn(!felixOpen && "hidden md:block")}>
+          <Suspense
+            fallback={
+              <div className="rounded-lg border border-border bg-card/40 p-5 flex items-center gap-2 text-muted-foreground font-body text-xs">
+                <Loader2 className="h-3.5 w-3.5 animate-spin" /> Waking the curatorial guide…
+              </div>
+            }
+          >
+            <ProductFelixPanel context={felixContext} />
+          </Suspense>
+        </div>
+      </div>
     </section>
   );
 }
