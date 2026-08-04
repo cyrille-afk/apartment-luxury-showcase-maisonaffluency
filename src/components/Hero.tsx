@@ -20,6 +20,7 @@ const HERO_MOBILE_SRCSET = [
 ]
   .map(({ w, h }) => `${HERO_BASE}/w_${w},h_${h},c_fill,g_auto,q_auto:good,f_webp/${HERO_ID} ${w}w`)
   .join(", ");
+const HERO_SAFARI_FALLBACK = `${HERO_BASE}/w_780,h_1688,c_fill,g_auto,q_auto:good,f_jpg/${HERO_ID}`;
 
 const revealBelowFold = () => {
   window.dispatchEvent(new CustomEvent("ma:reveal-below-fold"));
@@ -47,8 +48,12 @@ const Hero = () => {
   const navigate = useNavigate();
   const [tourOpen, setTourOpen] = useState(false);
   const [isPWA, setIsPWA] = useState(false);
+  const [showImageFallback, setShowImageFallback] = useState(false);
 
   useEffect(() => {
+    const isAppleWebKit = /AppleWebKit/i.test(navigator.userAgent) && !/(CriOS|FxiOS|EdgiOS)/i.test(navigator.userAgent);
+    if (isAppleWebKit) setShowImageFallback(true);
+
     const copy = document.getElementById("static-hero-copy");
     if (copy) copy.style.display = "none";
     const pic = document.getElementById("static-hero");
@@ -56,13 +61,32 @@ const Hero = () => {
     document.getElementById("static-designers-hero")?.style.setProperty("display", "none", "important");
     document.getElementById("static-designers-hero-overlay")?.style.setProperty("display", "none", "important");
 
+    // Some iOS Safari/PWA versions select the AVIF <source> but occasionally
+    // fail to decode or repaint it from cache. A failed selected <source> does
+    // not reliably fall through to the WebP <source>, leaving only the grey
+    // picture background. Recover with a JPEG rendered inside this hero.
+    const staticImage = pic?.querySelector("img");
+    const recoverImage = () => setShowImageFallback(true);
+    const verifyImage = () => {
+      if (!staticImage || (staticImage.complete && staticImage.naturalWidth === 0)) {
+        recoverImage();
+      }
+    };
+    staticImage?.addEventListener("error", recoverImage);
+    if (staticImage?.complete) verifyImage();
+    const verificationTimer = window.setTimeout(verifyImage, 1800);
+
     // Detect PWA standalone mode (installed app)
     const mql = window.matchMedia("(display-mode: standalone)");
     const check = () =>
       setIsPWA(mql.matches || (window.navigator as any).standalone === true);
     check();
     mql.addEventListener?.("change", check);
-    return () => mql.removeEventListener?.("change", check);
+    return () => {
+      window.clearTimeout(verificationTimer);
+      staticImage?.removeEventListener("error", recoverImage);
+      mql.removeEventListener?.("change", check);
+    };
   }, []);
 
   const openTour = () => {
@@ -77,6 +101,16 @@ const Hero = () => {
           before React boots). We intentionally do NOT re-render the image
           here — a second <picture> creates a duplicate LCP candidate and
           extra decode work that pushes LCP later on throttled CPUs. */}
+      {showImageFallback && (
+        <img
+          src={HERO_SAFARI_FALLBACK}
+          alt="Luxury living room with Asian-inspired murals and designer furniture"
+          className="absolute inset-0 h-full w-full object-cover object-[50%_40%]"
+          loading="eager"
+          decoding="sync"
+          fetchPriority="high"
+        />
+      )}
       <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-black/10 via-transparent to-black/20" />
       {/* Mobile/PWA only: soft dark radial gradient across bottom half for text contrast */}
       <div
