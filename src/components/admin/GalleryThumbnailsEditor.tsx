@@ -115,9 +115,14 @@ export default function GalleryThumbnailsEditor({
       >
         + Add another thumbnail
       </button>
+      <BulkUrlPaste
+        label="Bulk paste thumbnails"
+        onAdd={(urls) => commit([...trimTrailingEmpty(items), ...urls])}
+      />
     </div>
   );
 }
+
 
 function trimTrailingEmpty(arr: string[]): string[] {
   const next = [...arr];
