@@ -25,15 +25,15 @@ const TYPOLOGY_TO_CATEGORY: { re: RegExp; category: keyof typeof brandCategories
 ];
 
 // Anchor brand picks per category — always present when the typology maps
-// there. Apparatus Studio is the anchor for lighting so briefs that request
+// there. Apparatus is the anchor for lighting so briefs that request
 // floor/ceiling lights auto-include it. Keep the list short (2 brands per
 // category) so the References field stays legible.
 const CATEGORY_ANCHOR_BRANDS: Record<string, string[]> = {
-  lighting: ["Apparatus Studio", "Serge Mouille"],
+  lighting: ["Apparatus", "Serge Mouille"],
   seating: ["Man of Parts", "De La Espada"],
   tables: ["Collection Particulière", "Alinea Design Objects"],
   storage: ["De La Espada", "Alexander Lamont"],
-  rugs: ["CC-Tapis", "Apparatus Studio"],
+  rugs: ["CC-Tapis", "Apparatus"],
   decor: ["Alexander Lamont", "L'Objet"],
   bedroom: ["Pierre Frey", "Bruno Moinard Editions"],
 };
@@ -735,7 +735,7 @@ export function BriefBuilder({
     // Auto-suggest References from Typology — the moment the user types a
     // real Typology, map its tokens to in-catalogue brands and MERGE them
     // into References. This preserves manually chosen brands while ensuring
-    // lighting requests automatically include Apparatus Studio.
+    // lighting requests automatically include Apparatus.
     if (block === "block2" && field === "typology") {
       const typText = String(nextValue || "").trim();
       const normalizedTemplate = DEFAULT_VALUES.block2.typology.replace(/[\[\]]/g, "").trim().toLowerCase();

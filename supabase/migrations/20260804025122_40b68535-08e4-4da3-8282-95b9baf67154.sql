@@ -1,0 +1,18 @@
+UPDATE public.designers SET name = 'Apparatus', updated_at = now() WHERE name = 'Apparatus Studio';
+UPDATE public.designers SET display_name = 'Apparatus' WHERE display_name = 'Apparatus Studio';
+UPDATE public.gallery_hotspots SET designer_name = 'Apparatus' WHERE designer_name = 'Apparatus Studio';
+UPDATE public.trade_products SET brand_name = 'Apparatus' WHERE brand_name = 'Apparatus Studio';
+UPDATE public.trade_documents SET brand_name = 'Apparatus' WHERE brand_name = 'Apparatus Studio';
+UPDATE public.brand_thumbnails SET brand_name = 'Apparatus' WHERE brand_name = 'Apparatus Studio';
+UPDATE public.brand_lead_times SET brand_name = 'Apparatus' WHERE brand_name = 'Apparatus Studio';
+UPDATE public.material_swatches SET brand_name = 'Apparatus' WHERE brand_name = 'Apparatus Studio';
+UPDATE public.order_duration_templates SET brand_name = 'Apparatus' WHERE brand_name = 'Apparatus Studio';
+UPDATE public.trade_recent_views SET brand_name = 'Apparatus' WHERE brand_name = 'Apparatus Studio';
+UPDATE public.trade_sample_requests SET brand_name = 'Apparatus' WHERE brand_name = 'Apparatus Studio';
+UPDATE public.trade_custom_requests SET brand_name = 'Apparatus' WHERE brand_name = 'Apparatus Studio';
+UPDATE public.cpd_events SET brand_name = 'Apparatus' WHERE brand_name = 'Apparatus Studio';
+UPDATE public.axonometric_cad_qa SET brand_name = 'Apparatus' WHERE brand_name = 'Apparatus Studio';
+UPDATE public.shop_order_items SET designer_name = 'Apparatus' WHERE designer_name = 'Apparatus Studio';
+UPDATE public.custom_inquiries SET designer_name = 'Apparatus' WHERE designer_name = 'Apparatus Studio';
+UPDATE public.inquiries SET designer_name = 'Apparatus' WHERE designer_name = 'Apparatus Studio';
+UPDATE public.auction_benchmarks SET designer_name = 'Apparatus' WHERE designer_name = 'Apparatus Studio';
