@@ -22,6 +22,8 @@ import CsvBulkUpload from "@/components/admin/CsvBulkUpload";
 import BiographyToolbar from "@/components/admin/BiographyToolbar";
 import DesignerCompletenessAudit from "@/components/admin/DesignerCompletenessAudit";
 import GalleryThumbnailsEditor from "@/components/admin/GalleryThumbnailsEditor";
+import BulkUrlPaste from "@/components/admin/BulkUrlPaste";
+
 import SlugHealthBadge, { useSlugHealthMap } from "@/components/admin/SlugHealthBadge";
 import VariantPreviewPanel from "@/components/admin/VariantPreviewPanel";
 import ProductFabricsPanel from "@/components/admin/ProductFabricsPanel";
