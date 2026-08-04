@@ -104,6 +104,13 @@ interface FinishSelectorProps {
    */
   onSwatchImagesChange?: (imageIndices: number[] | null, meta?: { committed?: boolean; swatchName?: string }) => void;
   /**
+   * Fires once the per-finish gallery grouping has been resolved for this
+   * product (either a default finish group was applied, or the product has no
+   * grouping at all). Lets the product page hold the reel back until then so
+   * users never see the full mixed set of finishes flash before it narrows.
+   */
+  onFinishGroupingResolved?: () => void;
+  /**
    * Per-product override for the wood-swatch accordion label.
    * When omitted, falls back to "Select the Wood Finish of the Frame".
    */
@@ -249,7 +256,7 @@ const pickFinishGlyph = (
  * (Trade + Public). Tiles are grouped by category (Upholstery, Wood, …)
  * with a COM ("Customer's Own Material") tile always offered.
  */
-export default function FinishSelector({ pickId, className, productTitle, productCategory, onUpholsteryTierChange, onFabricChange, onHasFabricsChange, onWoodFinishChange, onWoodFinishPricingChange, onWoodFinishesAvailable, onPreviewSwatchesResolved, includePricing = false, onSwatchImagesChange, woodLabel, upholsteryLabel, showUpholsterySection = true, showWoodSection = true, hideBaseAccordion = false, woodFilter, topFilter, topLabel, onTopFinishChange, onTopFinishSwatchChange, onFinishesMissingImagesChange, currentGalleryIndex, preselectFabricName }: FinishSelectorProps) {
+export default function FinishSelector({ pickId, className, productTitle, productCategory, onUpholsteryTierChange, onFabricChange, onHasFabricsChange, onWoodFinishChange, onWoodFinishPricingChange, onWoodFinishesAvailable, onPreviewSwatchesResolved, includePricing = false, onSwatchImagesChange, woodLabel, upholsteryLabel, showUpholsterySection = true, showWoodSection = true, hideBaseAccordion = false, woodFilter, topFilter, topLabel, onTopFinishChange, onTopFinishSwatchChange, onFinishesMissingImagesChange, currentGalleryIndex, preselectFabricName, onFinishGroupingResolved }: FinishSelectorProps) {
 
   const isRugProduct = /\brugs?\b/i.test(`${productTitle || ""} ${productCategory || ""}`);
   const isRugComponentSwatch = (fabric: Pick<Fabric, "name" | "category">) => {
@@ -311,6 +318,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     if (!pickId) {
       setFabrics([]);
       onHasFabricsChange?.(false);
+      onFinishGroupingResolved?.();
       return;
     }
     let cancelled = false;
@@ -327,7 +335,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
             .eq("pick_id", pickId)
             .order("sort_order", { ascending: true });
       const { data, error } = await query;
-      if (cancelled || error) return;
+      if (cancelled || error) { if (!cancelled) onFinishGroupingResolved?.(); return; }
       const list: Fabric[] = (data || [])
         .map((row: any) => includePricing
           ? row.fabric && {
@@ -363,6 +371,13 @@ export default function FinishSelector({ pickId, className, productTitle, produc
           frame_price_currency: f.frame_price_currency ?? "EUR",
         }));
       setFabrics(list);
+      // If this product has no per-finish photo grouping, the reel is final as
+      // soon as the swatches land — unblock the gallery immediately.
+      {
+        const grouped = list.filter((f) => Array.isArray(f.image_indices) && f.image_indices.length > 1);
+        const hasDefaultGroup = grouped.length >= 2 && grouped.some((f) => (f.image_indices || []).includes(1));
+        if (!hasDefaultGroup) onFinishGroupingResolved?.();
+      }
       onHasFabricsChange?.(isRugProduct ? list.some(isRugComponentSwatch) : list.some(isFabricCategory));
       onWoodFinishesAvailable?.(
         list
@@ -506,6 +521,7 @@ export default function FinishSelector({ pickId, className, productTitle, produc
     defaultGroupAppliedRef.current = true;
     lockedPreviewRef.current = { indices: first.image_indices!, name: first.name };
     onSwatchImagesChange?.(first.image_indices!, { committed: true, swatchName: first.name });
+    onFinishGroupingResolved?.();
   }, [fabrics, selectedFabricId, selectedWoodId, selectedTopId, onSwatchImagesChange]);
 
   // Notify parent when the user has selected wood/top finishes that lack

@@ -308,6 +308,7 @@ type VariantSelectorsContextType = {
   galleryActiveIndex?: number;
   onSwatchImagesChange?: (imageIndices: number[] | null) => void;
   onFinishesMissingImagesChange?: (names: string[]) => void;
+  onFinishGroupingResolved?: () => void;
 };
 
 const VariantSelectorsContext = React.createContext<VariantSelectorsContextType | null>(null);
@@ -325,8 +326,9 @@ const VariantSelectorsProvider: React.FC<{
   finishMap?: Record<string, number> | null;
   onSwatchImagesChange?: (imageIndices: number[] | null) => void;
   onFinishesMissingImagesChange?: (names: string[]) => void;
+  onFinishGroupingResolved?: () => void;
   children: React.ReactNode;
-}> = ({ product, onMaterialChange, galleryActiveIndex, finishMap, onSwatchImagesChange, onFinishesMissingImagesChange, children }) => {
+}> = ({ product, onMaterialChange, galleryActiveIndex, finishMap, onSwatchImagesChange, onFinishesMissingImagesChange, onFinishGroupingResolved, children }) => {
   const axes = computeVariantAxes(product.size_variants);
   const {
     isDualAxis,
@@ -504,6 +506,7 @@ const VariantSelectorsProvider: React.FC<{
     galleryActiveIndex,
     onSwatchImagesChange,
     onFinishesMissingImagesChange,
+    onFinishGroupingResolved,
   };
 
   return (
@@ -526,6 +529,7 @@ const VariantFinishSelectors: React.FC<{ section?: "primary" | "supplemental" | 
     disabledBaseIdx, disabledTopIdx, disabledMatIdx,
     clearAllDualSelections,
     onMaterialChange, galleryActiveIndex, onSwatchImagesChange, onFinishesMissingImagesChange,
+    onFinishGroupingResolved,
   } = ctx;
 
   const isFinishAxis = isFinishAxisLabel;
@@ -584,6 +588,7 @@ const VariantFinishSelectors: React.FC<{ section?: "primary" | "supplemental" | 
         onHasFabricsChange={setHasLinkedFabrics}
         onWoodFinishesAvailable={setLinkedWoodFinishes}
         onSwatchImagesChange={onSwatchImagesChange}
+        onFinishGroupingResolved={onFinishGroupingResolved}
         onFinishesMissingImagesChange={onFinishesMissingImagesChange}
         currentGalleryIndex={galleryActiveIndex ?? 0}
         onWoodFinishChange={(woodName) => {
@@ -1134,6 +1139,15 @@ const PublicProductPage: React.FC = () => {
   // set, the gallery shows ONLY those photos (e.g. Clam Chair: Walnut 1–7,
   // Oiled Oak 8–13, Fumed Oak 14–20) instead of the full 20-photo reel.
   const [swatchImageIndices, setSwatchImageIndices] = useState<number[] | null>(null);
+  // True until FinishSelector reports whether this product's photos are split
+  // per finish. While pending we show only the hero photo so the full mixed
+  // reel never flashes before narrowing to the default finish group.
+  const [finishGroupingPending, setFinishGroupingPending] = useState(true);
+  useEffect(() => {
+    if (!finishGroupingPending) return;
+    const t = setTimeout(() => setFinishGroupingPending(false), 2500);
+    return () => clearTimeout(t);
+  }, [finishGroupingPending]);
   // Currently-selected wood/top finish swatches that lack mapped images —
   // appended to the bespoke concierge message so they aren't overlooked.
   const [finishesMissingImages, setFinishesMissingImages] = useState<string[]>([]);
@@ -1410,7 +1424,11 @@ const PublicProductPage: React.FC = () => {
       .sort((a, b) => a - b);
     return abs.length ? abs : null;
   })();
-  const visibleImages = visibleImageIndices ? visibleImageIndices.map((i) => images[i]) : images;
+  const visibleImages = visibleImageIndices
+    ? visibleImageIndices.map((i) => images[i])
+    : finishGroupingPending && images.length > 1
+    ? images.slice(0, 1)
+    : images;
   const visibleActiveIndex = visibleImageIndices
     ? Math.max(0, visibleImageIndices.indexOf(galleryActiveIndex ?? visibleImageIndices[0]))
     : galleryActiveIndex;
@@ -2028,6 +2046,7 @@ const PublicProductPage: React.FC = () => {
                       setGalleryJumpNonce((n) => n + 1);
                     }}
                     onFinishesMissingImagesChange={setFinishesMissingImages}
+                    onFinishGroupingResolved={() => setFinishGroupingPending(false)}
                   >
                     <div className="flex flex-col gap-5 order-2">
                       <VariantFinishSelectors section="primary" />
@@ -2296,6 +2315,7 @@ const PublicProductPage: React.FC = () => {
                       setGalleryJumpNonce((n) => n + 1);
                     }}
                     onFinishesMissingImagesChange={setFinishesMissingImages}
+                    onFinishGroupingResolved={() => setFinishGroupingPending(false)}
                   >
                     <div className="flex flex-col gap-5">
                       <VariantFinishSelectors />
