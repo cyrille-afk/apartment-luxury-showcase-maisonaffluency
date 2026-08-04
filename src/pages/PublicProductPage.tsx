@@ -1130,6 +1130,10 @@ const PublicProductPage: React.FC = () => {
   // Bumped on every parent-initiated jump so the gallery re-syncs even when the
   // numeric index is identical to the previous one (e.g. re-selecting the same finish).
   const [galleryJumpNonce, setGalleryJumpNonce] = useState(0);
+  // 1-based image indices owned by the currently selected finish swatch. When
+  // set, the gallery shows ONLY those photos (e.g. Clam Chair: Walnut 1–7,
+  // Oiled Oak 8–13, Fumed Oak 14–20) instead of the full 20-photo reel.
+  const [swatchImageIndices, setSwatchImageIndices] = useState<number[] | null>(null);
   // Currently-selected wood/top finish swatches that lack mapped images —
   // appended to the bespoke concierge message so they aren't overlooked.
   const [finishesMissingImages, setFinishesMissingImages] = useState<string[]>([]);
@@ -1395,6 +1399,23 @@ const PublicProductPage: React.FC = () => {
     ? galleryFromAdmin
     : Array.from(new Set([product.image_url, product.hover_image_url].filter(Boolean)))
   ) as string[];
+
+  // Finish-scoped view of the reel. `visibleImageIndices` holds the absolute
+  // (0-based) positions currently on show, so we can translate between the
+  // gallery's local index and the product's canonical image index.
+  const visibleImageIndices: number[] | null = (() => {
+    if (!swatchImageIndices || swatchImageIndices.length === 0) return null;
+    const abs = Array.from(new Set(swatchImageIndices.map((i) => i - 1)))
+      .filter((i) => i >= 0 && i < images.length)
+      .sort((a, b) => a - b);
+    return abs.length ? abs : null;
+  })();
+  const visibleImages = visibleImageIndices ? visibleImageIndices.map((i) => images[i]) : images;
+  const visibleActiveIndex = visibleImageIndices
+    ? Math.max(0, visibleImageIndices.indexOf(galleryActiveIndex ?? visibleImageIndices[0]))
+    : galleryActiveIndex;
+
+
 
   const subtitleEchoesTitle =
     !!product.subtitle &&
@@ -1873,11 +1894,13 @@ const PublicProductPage: React.FC = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 md:gap-8 lg:gap-16">
             <div id="main-product-image-container" className="relative md:sticky md:top-[calc(var(--header-h)+1rem)] h-fit self-start z-30 bg-background" ref={galleryScrollRef}>
               <ProductImageGallery
-                images={images}
+                images={visibleImages}
                 alt={product.title}
-                activeIndex={galleryActiveIndex}
+                activeIndex={visibleActiveIndex}
                 activeIndexNonce={galleryJumpNonce}
-                onIndexChange={setGalleryActiveIndex}
+                onIndexChange={(i) =>
+                  setGalleryActiveIndex(visibleImageIndices ? (visibleImageIndices[i] ?? visibleImageIndices[0]) : i)
+                }
                 caption={product.gallery_captions?.[String(galleryActiveIndex ?? 0)] || null}
                 compact={galleryCompact}
                 pickId={product.id}
@@ -1996,7 +2019,11 @@ const PublicProductPage: React.FC = () => {
                     galleryActiveIndex={galleryActiveIndex}
                     finishMap={productFinishMap}
                     onSwatchImagesChange={(indices) => {
-                      if (!indices || indices.length === 0) return;
+                      if (!indices || indices.length === 0) {
+                        setSwatchImageIndices(null);
+                        return;
+                      }
+                      setSwatchImageIndices(indices);
                       setGalleryActiveIndex(Math.max(0, indices[0] - 1));
                       setGalleryJumpNonce((n) => n + 1);
                     }}
@@ -2260,7 +2287,11 @@ const PublicProductPage: React.FC = () => {
                     galleryActiveIndex={galleryActiveIndex}
                     finishMap={productFinishMap}
                     onSwatchImagesChange={(indices) => {
-                      if (!indices || indices.length === 0) return;
+                      if (!indices || indices.length === 0) {
+                        setSwatchImageIndices(null);
+                        return;
+                      }
+                      setSwatchImageIndices(indices);
                       setGalleryActiveIndex(Math.max(0, indices[0] - 1));
                       setGalleryJumpNonce((n) => n + 1);
                     }}
