@@ -1695,6 +1695,8 @@ const brandBgMap: Record<string, string> = {
   "Alexander Lamont": alexanderLamontBg,
   "Alinea Design Objects": leoAertsBg,
   "Apparatus": apparatusBg,
+  "Apparatus Studio": apparatusBg, // legacy alias
+
   "Atelier DeMichelis": atelierDemichelisBg,
   "Atelier Février": atelierFevrierBg,
   "Babled Studio": emmanuelBabledBg,
@@ -1797,6 +1799,8 @@ const brandToDesignerMap: Record<string, string> = {
   "Alexander Lamont": "alexander-lamont",
   "Alinea Design Objects": "leo-aerts-alinea",
   "Apparatus": "apparatus-studio",
+  "Apparatus Studio": "apparatus-studio", // legacy alias
+
   "Atelier Février": "atelier-fevrier",
   "Atelier Pendhapa": "atelier-pendhapa",
   "Babled Studio": "emmanuel-babled",
