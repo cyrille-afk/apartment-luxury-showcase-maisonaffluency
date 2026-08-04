@@ -988,12 +988,41 @@ const PublicDesignerProfile = () => {
           ) : (
             /* Atelier profile: panoramic hero + bio below */
             <div className="flex flex-col gap-0">
+              {/* Mobile / PWA: text-only header — hero photo hidden for a tighter first view */}
+              <div className="md:hidden flex items-start justify-between gap-3 pt-1 pb-1">
+                <div className="min-w-0">
+                  <h1 className="font-display text-2xl tracking-wide text-foreground">{name}</h1>
+                  {designer.specialty && (
+                    <p className="font-body text-xs text-muted-foreground mt-1 tracking-wide">{designer.specialty}</p>
+                  )}
+                  {designer.collab_brands && designer.collab_brands.length > 0 && (
+                    <div className="mt-2 flex flex-wrap gap-1.5">
+                      {designer.collab_brands.map((brand) => (
+                        <span
+                          key={brand}
+                          className="inline-flex items-center px-2 py-0.5 rounded-full bg-foreground/5 text-muted-foreground font-body text-[10px] uppercase tracking-[0.15em]"
+                        >
+                          In collaboration with {brand}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <ShareMenu
+                  url={`https://www.maisonaffluency.com${buildDesignerBridgePath("og")}`}
+                  message={`${designer.name} — Maison Affluency: https://www.maisonaffluency.com${buildDesignerBridgePath("og")}`}
+                  className="shrink-0 flex items-center justify-center w-8 h-8 rounded-full bg-foreground/5 text-foreground/70 hover:bg-foreground/10 transition-colors"
+                  iconSize="w-4 h-4"
+                  showLabel={false}
+                />
+              </div>
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={transition}
-                className="relative rounded-xl overflow-hidden shrink-0"
+                className="relative rounded-xl overflow-hidden shrink-0 hidden md:block"
               >
+
                 <div className="aspect-[3/2] md:aspect-[2/1] max-h-[50vh]">
                   {heroImage && (
                     <img src={heroImage} alt={name} className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: 'center 25%' }} loading="eager" />
