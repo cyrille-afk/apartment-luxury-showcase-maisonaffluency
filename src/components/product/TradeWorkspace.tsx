@@ -25,6 +25,12 @@ interface Props {
   originLine?: string | null;
   leadTime?: string | null;
   selectedFinishes: string[];
+  /** RRP of the size/finish combination currently selected on the page. */
+  selectedVariantCents?: number | null;
+  /** True when exactly one variant matched (otherwise the price is a "from"). */
+  selectedVariantExact?: boolean;
+  /** Public path to return to from the full trade sheet. */
+  returnPath?: string;
   pdfUrl?: string | null;
   pdfUrls?: any[] | null;
   inquireHref: string;
