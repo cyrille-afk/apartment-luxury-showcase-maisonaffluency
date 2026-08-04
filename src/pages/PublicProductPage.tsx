@@ -1504,6 +1504,31 @@ const PublicProductPage: React.FC = () => {
           ? { cents: Math.min(...uniquePrices), exact: uniquePrices.length === 1 }
           : null,
       );
+
+      // Trade Workspace price: same matching, but against the product's own
+      // variant list so it resolves for every catalogue, not just public RRPs.
+      const ownVariants = (product.size_variants || []) as any[];
+      let ownPrices: number[] = [];
+      for (const set of keySets) {
+        const keys = set.filter(Boolean) as string[];
+        if (!keys.length) continue;
+        const matches = ownVariants.filter((v) => {
+          const fields = [v?.base, v?.top, v?.label].filter(Boolean);
+          return keys.every((k) =>
+            fields.some((f) => norm(f) === norm(k) || sameFinish(f, k))
+          );
+        });
+        const priced = matches
+          .map((v) => Number(v?.price_cents))
+          .filter((c) => Number.isFinite(c) && c > 0);
+        ownPrices = Array.from(new Set(priced));
+        if (ownPrices.length) break;
+      }
+      setSelectedVariantPrice(
+        ownPrices.length
+          ? { cents: Math.min(...ownPrices), exact: ownPrices.length === 1 }
+          : null,
+      );
     }
     const requiresBaseAndTopSelection =
       variantsForAxes.some((v: any) => v.base && String(v.base).trim()) &&
