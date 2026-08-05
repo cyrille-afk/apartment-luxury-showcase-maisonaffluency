@@ -15,7 +15,7 @@ import ShareMenu from "@/components/ShareMenu";
 import WhatsAppShareButton from "@/components/WhatsAppShareButton";
 import { shareProfileOnWhatsApp, sharePageOnWhatsApp, buildDesignerOgUrl } from "@/lib/whatsapp-share";
 import EditorialBiography, { renderParagraph } from "@/components/EditorialBiography";
-import BiographyPdfButton from "@/components/BiographyPdfButton";
+
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import PublicProductLightbox, { type PublicLightboxItem } from "@/components/PublicProductLightbox";
@@ -877,18 +877,6 @@ const PublicDesignerProfile = () => {
                   </div>
                 )}
 
-                <div className="mt-6 flex md:justify-start">
-                  <BiographyPdfButton
-                    designerName={designer.name}
-                    specialty={designer.specialty}
-                    philosophy={displayPhilosophy}
-                    biography={displayBiography || ""}
-                    biographyImages={displayBiographyImages}
-                    heroImageUrl={heroImage}
-                    heroImageFallbackUrl={designer.hero_image_url && designer.image_url && designer.hero_image_url !== designer.image_url ? designer.image_url : null}
-                    profileUrl={`https://www.maisonaffluency.com${typeof window !== "undefined" ? window.location.pathname : ""}`}
-                  />
-                </div>
             </div>
 
 
