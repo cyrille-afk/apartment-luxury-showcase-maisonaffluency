@@ -303,12 +303,16 @@ function ProfileCollapsible({
   expandedProp,
   onToggle,
   hideTrigger,
+  highlight,
+  onExpandFlash,
 }: {
   children: React.ReactNode;
   shouldCollapse: boolean;
   expandedProp?: boolean;
   onToggle?: (next: boolean) => void;
   hideTrigger?: boolean;
+  highlight?: boolean;
+  onExpandFlash?: () => void;
 }) {
   const [sp] = useSearchParams();
   const [internalExpanded, setInternalExpanded] = useState(() => sp.get("expanded") === "true");
