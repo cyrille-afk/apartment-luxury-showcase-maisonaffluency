@@ -76,17 +76,19 @@ export async function buildFinishesSelectionPdf(args: FinishesPdfArgs): Promise<
 
   const withImages = args.swatches.map((s, i) => ({ ...s, data: images[i] }));
 
-  const COLS = 4;
-  const GAP = 26;
-  const tile = (contentW - GAP * (COLS - 1)) / COLS;
-  const captionH = 26;
-  const footerH = 78;
+  const COLS = 5;
+  const GAP = 22;
+  const tile = Math.min((contentW - GAP * (COLS - 1)) / COLS, 128);
+  const gridW = tile * COLS + GAP * (COLS - 1);
+  const gridX = (pageW - gridW) / 2;
+  const captionH = 24;
+  const footerH = 74;
 
   const drawFooter = () => {
     if (!logo) return;
-    const w = 44;
+    const w = 40;
     try {
-      doc.addImage(logo, "JPEG", (pageW - w) / 2, pageH - footerH + 12, w, w, undefined, "FAST");
+      doc.addImage(logo, "JPEG", (pageW - w) / 2, pageH - footerH + 14, w, w, undefined, "FAST");
     } catch {
       /* logo is decorative — never block the export */
     }
@@ -95,45 +97,51 @@ export async function buildFinishesSelectionPdf(args: FinishesPdfArgs): Promise<
   const drawHeader = (continued: boolean) => {
     doc.setTextColor(FG[0], FG[1], FG[2]);
     doc.setFont("times", "normal");
-    doc.setFontSize(30);
-    doc.text("Fabric and Finishes Selection", pageW / 2, M + 18, { align: "center" });
+    doc.setFontSize(28);
+    doc.text("Fabric and Finishes Selection", pageW / 2, M + 14, { align: "center" });
 
     const sub = [args.brandName, args.productName].filter(Boolean).join(" — ");
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(11.5);
+    doc.setFontSize(11);
     doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
-    doc.text(continued ? `${sub} (continued)` : sub, pageW / 2, M + 42, { align: "center" });
-    return M + 74;
+    doc.text(continued ? `${sub} (continued)` : sub, pageW / 2, M + 36, { align: "center" });
+    return M + 64;
   };
 
   let y = drawHeader(false);
 
-  const newPage = () => {
+  const drawGroupLabel = (label: string, continued: boolean) => {
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8.5);
+    doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
+    doc.text(`${label.toUpperCase()}${continued ? " (CONT.)" : ""}`, gridX, y + 6, { charSpace: 1.4 });
+    doc.setDrawColor(RULE[0], RULE[1], RULE[2]);
+    doc.setLineWidth(0.5);
+    doc.line(gridX, y + 13, gridX + gridW, y + 13);
+    y += 28;
+  };
+
+  const newPage = (groupLabel: string) => {
     drawFooter();
     doc.addPage();
     y = drawHeader(true);
+    if (groupLabel) drawGroupLabel(groupLabel, true);
   };
 
   for (const group of groupSwatches(withImages as unknown as FinishSwatch[])) {
     const items = group.items as (FinishSwatch & { data?: string | null })[];
+    const rowH = tile + captionH + 16;
 
     if (group.label) {
-      if (y + 40 + tile + captionH > pageH - footerH) newPage();
-      doc.setFont("helvetica", "normal");
-      doc.setFontSize(9);
-      doc.setTextColor(MUTED[0], MUTED[1], MUTED[2]);
-      doc.text(group.label.toUpperCase(), M, y + 6, { charSpace: 1.4 });
-      doc.setDrawColor(RULE[0], RULE[1], RULE[2]);
-      doc.setLineWidth(0.5);
-      doc.line(M, y + 14, pageW - M, y + 14);
-      y += 32;
+      if (y + 28 + rowH > pageH - footerH) newPage("");
+      drawGroupLabel(group.label, false);
     }
 
     for (let i = 0; i < items.length; i += COLS) {
-      if (y + tile + captionH > pageH - footerH) newPage();
+      if (y + rowH > pageH - footerH) newPage(group.label);
       const row = items.slice(i, i + COLS);
       row.forEach((s, c) => {
-        const x = M + c * (tile + GAP);
+        const x = gridX + c * (tile + GAP);
         if (s.data) {
           try {
             doc.addImage(s.data, "JPEG", x, y, tile, tile, undefined, "FAST");
@@ -146,14 +154,17 @@ export async function buildFinishesSelectionPdf(args: FinishesPdfArgs): Promise<
           doc.rect(x, y, tile, tile);
         }
         doc.setFont("helvetica", "normal");
-        doc.setFontSize(10.5);
+        doc.setFontSize(9);
         doc.setTextColor(FG[0], FG[1], FG[2]);
-        const label = doc.splitTextToSize(s.name || "", tile)[0] ?? "";
-        doc.text(label, x + tile / 2, y + tile + 17, { align: "center" });
+        const lines = doc.splitTextToSize(s.name || "", tile).slice(0, 2);
+        lines.forEach((ln: string, li: number) =>
+          doc.text(ln, x + tile / 2, y + tile + 13 + li * 10, { align: "center" }),
+        );
       });
-      y += tile + captionH + 18;
+      y += rowH;
     }
   }
+
 
   drawFooter();
   return doc;
