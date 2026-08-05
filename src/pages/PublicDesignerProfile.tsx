@@ -827,6 +827,8 @@ const PublicDesignerProfile = () => {
               expandedProp={newInFormat ? newInExpanded : undefined}
               onToggle={newInFormat ? setNewInExpanded : undefined}
               hideTrigger={newInFormat}
+              highlight={bioHighlighted}
+              onExpandFlash={flashBioHighlight}
             >
 
               <div className="mt-8 md:mt-10">
