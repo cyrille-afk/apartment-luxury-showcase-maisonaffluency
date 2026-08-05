@@ -972,7 +972,7 @@ const PublicDesignerProfile = () => {
                       loading="eager"
                     />
                   )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/25 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/10 to-transparent" />
                   {/* Mobile share icon inside hero */}
                   <div className="absolute top-3 right-3 z-20 md:hidden">
                     <ShareMenu
@@ -992,21 +992,15 @@ const PublicDesignerProfile = () => {
                       <p className="font-body text-xs md:text-sm text-white/80 mt-1 tracking-wide">{designer.specialty}</p>
                     )}
                   </div>
-                  <button
-                    className="hidden md:inline-flex items-center gap-1.5 font-body text-xs text-white/80 hover:text-white transition-colors uppercase tracking-[0.1em]"
-                    title="Copy shareable link"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      const url = designerOgUrl;
-                      navigator.clipboard.writeText(url).then(() => {
-                        setShareCopied(true);
-                        setTimeout(() => setShareCopied(false), 2000);
-                      });
-                    }}
-                  >
-                    {shareCopied ? <Check className="w-3.5 h-3.5" /> : <Share2 className="w-3.5 h-3.5" />}
-                    {shareCopied ? "Copied!" : "Share"}
-                  </button>
+                  <div className="hidden md:block">
+                    <ShareMenu
+                      url={designerOgUrl}
+                      message={`${designer.name} — Maison Affluency: ${designerOgUrl}`}
+                      imageUrl={heroImage || undefined}
+                      imageName={name}
+                    />
+                  </div>
+
                 </div>
 
                 {designer.hero_photo_credit && (
@@ -1060,7 +1054,7 @@ const PublicDesignerProfile = () => {
                   {heroImage && (
                     <img src={heroImage} alt={name} className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: 'center 25%' }} loading="eager" />
                   )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/10 to-transparent" />
                   {/* Mobile share icon inside hero */}
                   <div className="absolute top-3 right-3 z-20 md:hidden">
                     <ShareMenu
@@ -1092,21 +1086,15 @@ const PublicDesignerProfile = () => {
                       </div>
                     )}
                   </motion.div>
-                  <button
-                    className="hidden md:inline-flex items-center gap-1.5 font-body text-xs text-white/80 hover:text-white transition-colors uppercase tracking-[0.1em]"
-                    title="Copy shareable link"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      const url = `https://www.maisonaffluency.com${buildDesignerBridgePath("og")}`;
-                      navigator.clipboard.writeText(url).then(() => {
-                        setShareCopied(true);
-                        setTimeout(() => setShareCopied(false), 2000);
-                      });
-                    }}
-                  >
-                    {shareCopied ? <Check className="w-3.5 h-3.5" /> : <Share2 className="w-3.5 h-3.5" />}
-                    {shareCopied ? "Copied!" : "Share"}
-                  </button>
+                  <div className="hidden md:block">
+                    <ShareMenu
+                      url={`https://www.maisonaffluency.com${buildDesignerBridgePath("og")}`}
+                      message={`${designer.name} — Maison Affluency: https://www.maisonaffluency.com${buildDesignerBridgePath("og")}`}
+                      imageUrl={heroImage || undefined}
+                      imageName={name}
+                    />
+                  </div>
+
                 </div>
                 {designer.hero_photo_credit && (
                   <p className="absolute bottom-1 right-4 md:right-6 text-[10px] uppercase tracking-[0.15em] text-white/50 z-10">
