@@ -1018,8 +1018,8 @@ const PublicDesignerProfile = () => {
 
           </div>
 
-          {/* From the Studio — nested in the editorial column, as in New In */}
-          {instagramPosts.filter((p) => p.image_url).length > 0 && (
+          {/* From the Studio — hidden while the full portrait is open */}
+          {!newInExpanded && instagramPosts.filter((p) => p.image_url).length > 0 && (
             <div className="mt-10 pt-8 border-t border-border/30">
               <DesignerInstagramSection posts={instagramPosts} designerName={designer.name} compact />
             </div>
@@ -1030,15 +1030,33 @@ const PublicDesignerProfile = () => {
       <div
         ref={newInBioRef}
         className={cn(
-          "mt-2 transition-all duration-700",
+          "mt-1 transition-all duration-700",
           bioHighlighted && "ring-1 ring-inset ring-primary/20 bg-primary/[0.03]"
         )}
       >
         {bioExtras}
       </div>
 
+      {newInExpanded && (
+        <div className="mt-6 md:mt-8 pt-6 border-t border-border/30 flex justify-center">
+          <button
+            type="button"
+            onClick={() => {
+              setNewInExpanded(false);
+              const el = newInBioRef.current;
+              const top = el ? el.getBoundingClientRect().top + window.scrollY - 240 : 0;
+              window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+            }}
+            className="inline-flex items-center gap-2 font-body text-xs uppercase tracking-[0.25em] text-foreground/70 hover:text-foreground transition-colors"
+          >
+            Close The Full Portrait
+          </button>
+        </div>
+      )}
+
     </div>
   );
+
 
 
   return (
