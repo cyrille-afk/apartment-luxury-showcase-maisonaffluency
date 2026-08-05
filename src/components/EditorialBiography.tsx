@@ -703,7 +703,7 @@ function SplitImageBlock({
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-60px" }}
       transition={{ ...transition, delay: 0.1 }}
-      className="flex-1 min-w-0 flex flex-col justify-center"
+      className="flex-1 min-w-0 flex flex-col justify-start"
     >
       {paragraphs.map((p, i) => (
         <p key={i} className={i > 0 ? "mt-4" : ""}>
