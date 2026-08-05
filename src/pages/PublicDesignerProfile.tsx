@@ -992,21 +992,15 @@ const PublicDesignerProfile = () => {
                       <p className="font-body text-xs md:text-sm text-white/80 mt-1 tracking-wide">{designer.specialty}</p>
                     )}
                   </div>
-                  <button
-                    className="hidden md:inline-flex items-center gap-1.5 font-body text-xs text-white/80 hover:text-white transition-colors uppercase tracking-[0.1em]"
-                    title="Copy shareable link"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      const url = designerOgUrl;
-                      navigator.clipboard.writeText(url).then(() => {
-                        setShareCopied(true);
-                        setTimeout(() => setShareCopied(false), 2000);
-                      });
-                    }}
-                  >
-                    {shareCopied ? <Check className="w-3.5 h-3.5" /> : <Share2 className="w-3.5 h-3.5" />}
-                    {shareCopied ? "Copied!" : "Share"}
-                  </button>
+                  <div className="hidden md:block">
+                    <ShareMenu
+                      url={designerOgUrl}
+                      message={`${designer.name} — Maison Affluency: ${designerOgUrl}`}
+                      imageUrl={heroImage || undefined}
+                      imageName={name}
+                    />
+                  </div>
+
                 </div>
 
                 {designer.hero_photo_credit && (
