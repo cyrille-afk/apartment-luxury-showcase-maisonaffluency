@@ -1026,7 +1026,15 @@ const PublicDesignerProfile = () => {
         </motion.div>
       </div>
 
-      <div className="mt-2" ref={newInBioRef}>{bioExtras}</div>
+      <div
+        ref={newInBioRef}
+        className={cn(
+          "mt-2 transition-all duration-700",
+          bioHighlighted && "ring-1 ring-inset ring-primary/20 bg-primary/[0.03]"
+        )}
+      >
+        {bioExtras}
+      </div>
 
     </div>
   );
