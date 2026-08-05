@@ -46,13 +46,29 @@ export default function FinishesPdfButton({
         .order("sort_order", { ascending: true });
       if (error) throw error;
 
+      const CATEGORY_ORDER = ["Fabric & Leather", "Leather", "Wood", "Metal", "Stone", "Glass", "Ceramic"];
+      const catRank = (c?: string | null) => {
+        const i = CATEGORY_ORDER.indexOf((c || "").trim());
+        return i === -1 ? CATEGORY_ORDER.length : i;
+      };
+
       const swatches: FinishSwatch[] = (data || [])
         .filter((r: any) => r?.name && r?.is_active !== false)
+        .slice()
+        .sort(
+          (a: any, b: any) =>
+            (a.supplier || "").localeCompare(b.supplier || "") ||
+            catRank(a.category) - catRank(b.category) ||
+            (a.category || "").localeCompare(b.category || "") ||
+            (a.sort_order ?? 9999) - (b.sort_order ?? 9999) ||
+            (a.name || "").localeCompare(b.name || ""),
+        )
         .map((r: any) => ({
           name: r.name,
           imageUrl: r.image_url,
           group: [r.supplier, r.category].filter(Boolean).join(" - "),
         }));
+
 
       if (swatches.length === 0) {
         toast({
