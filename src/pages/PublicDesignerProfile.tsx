@@ -1047,46 +1047,36 @@ const PublicDesignerProfile = () => {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={transition}
-                className="relative rounded-xl overflow-hidden shrink-0 hidden md:block"
+                className="hidden md:grid grid-cols-12 gap-10 lg:gap-16 items-center py-8 lg:py-12"
               >
-
-                <div className="aspect-[3/2] md:aspect-[2/1] max-h-[50vh]">
-                  {heroImage && (
-                    <img src={heroImage} alt={name} className="absolute inset-0 w-full h-full object-cover" style={{ objectPosition: 'center 25%' }} loading="eager" />
+                {/* Left: editorial title block */}
+                <motion.div
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={reveal}
+                  className="col-span-12 lg:col-span-5"
+                >
+                  <h1 className="font-display text-4xl lg:text-6xl leading-[1.05] tracking-[-0.01em] text-foreground">
+                    {name}
+                  </h1>
+                  {designer.specialty && (
+                    <p className="font-body text-base lg:text-lg text-muted-foreground mt-4 leading-relaxed max-w-[38ch]">
+                      {designer.specialty}
+                    </p>
                   )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/10 to-transparent" />
-                  {/* Mobile share icon inside hero */}
-                  <div className="absolute top-3 right-3 z-20 md:hidden">
-                    <ShareMenu
-                      url={`https://www.maisonaffluency.com${buildDesignerBridgePath("og")}`}
-                      message={`${designer.name} — Maison Affluency: https://www.maisonaffluency.com${buildDesignerBridgePath("og")}`}
-                      className="flex items-center justify-center w-8 h-8 rounded-full bg-black/40 backdrop-blur-sm text-white/90 hover:bg-black/60 transition-colors"
-                      iconSize="w-4 h-4"
-                      showLabel={false}
-                    />
-                  </div>
-                </div>
-
-                <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8 flex items-end justify-between">
-                  <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={reveal}>
-                    <h1 className="font-display text-2xl md:text-4xl tracking-wide text-white drop-shadow-md">{name}</h1>
-                    {designer.specialty && (
-                      <p className="font-body text-sm md:text-base text-white/80 mt-1.5 font-medium tracking-wide">{designer.specialty}</p>
-                    )}
-                    {designer.collab_brands && designer.collab_brands.length > 0 && (
-                      <div className="mt-2 flex flex-wrap gap-1.5">
-                        {designer.collab_brands.map((brand) => (
-                          <span
-                            key={brand}
-                            className="inline-flex items-center px-2 py-0.5 rounded-full bg-white/15 backdrop-blur-sm text-white/90 font-body text-[10px] uppercase tracking-[0.15em]"
-                          >
-                            In collaboration with {brand}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                  </motion.div>
-                  <div className="hidden md:block">
+                  {designer.collab_brands && designer.collab_brands.length > 0 && (
+                    <div className="mt-5 flex flex-wrap gap-1.5">
+                      {designer.collab_brands.map((brand) => (
+                        <span
+                          key={brand}
+                          className="inline-flex items-center px-2 py-0.5 rounded-full bg-foreground/5 text-muted-foreground font-body text-[10px] uppercase tracking-[0.15em]"
+                        >
+                          In collaboration with {brand}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                  <div className="mt-8">
                     <ShareMenu
                       url={`https://www.maisonaffluency.com${buildDesignerBridgePath("og")}`}
                       message={`${designer.name} — Maison Affluency: https://www.maisonaffluency.com${buildDesignerBridgePath("og")}`}
@@ -1094,14 +1084,29 @@ const PublicDesignerProfile = () => {
                       imageName={name}
                     />
                   </div>
+                </motion.div>
 
+                {/* Right: clean hero image, no overlays */}
+                <div className="col-span-12 lg:col-span-7">
+                  <div className="relative aspect-[4/3] overflow-hidden bg-muted">
+                    {heroImage && (
+                      <img
+                        src={heroImage}
+                        alt={name}
+                        className="absolute inset-0 w-full h-full object-cover"
+                        style={{ objectPosition: "center 30%" }}
+                        loading="eager"
+                      />
+                    )}
+                  </div>
+                  {designer.hero_photo_credit && (
+                    <p className="mt-2 text-right text-[10px] uppercase tracking-[0.15em] text-muted-foreground/70">
+                      Photo: {designer.hero_photo_credit}
+                    </p>
+                  )}
                 </div>
-                {designer.hero_photo_credit && (
-                  <p className="absolute bottom-1 right-4 md:right-6 text-[10px] uppercase tracking-[0.15em] text-white/50 z-10">
-                    Photo: {designer.hero_photo_credit}
-                  </p>
-                )}
               </motion.div>
+
 
               {biographySection}
             </div>
