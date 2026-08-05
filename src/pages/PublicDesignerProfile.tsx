@@ -3,7 +3,7 @@ import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { useParams, Link, Navigate, useSearchParams, useNavigate, useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, Package, FileText, Maximize2, Share2, Check, ChevronDown, ChevronUp, LayoutGrid, Columns2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, Package, FileText, Maximize2, Share2, Check, ChevronDown, ChevronUp, LayoutGrid, Columns2 } from "lucide-react";
 import ProductCardDescriptionOverlay from "@/components/ui/ProductCardDescriptionOverlay";
 import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 import SpecSheetButton, { type PdfEntry } from "@/components/trade/SpecSheetButton";
@@ -297,12 +297,31 @@ function buildThinContentFallback(args: {
   return `${leads[i]} ${middles[i]} ${closes[i]}`;
 }
 
-function ProfileCollapsible({ children, shouldCollapse }: { children: React.ReactNode; shouldCollapse: boolean }) {
+function ProfileCollapsible({
+  children,
+  shouldCollapse,
+  expandedProp,
+  onToggle,
+  hideTrigger,
+}: {
+  children: React.ReactNode;
+  shouldCollapse: boolean;
+  expandedProp?: boolean;
+  onToggle?: (next: boolean) => void;
+  hideTrigger?: boolean;
+}) {
   const [sp] = useSearchParams();
-  const [expanded, setExpanded] = useState(() => sp.get("expanded") === "true");
+  const [internalExpanded, setInternalExpanded] = useState(() => sp.get("expanded") === "true");
+  const controlled = typeof expandedProp === "boolean";
+  const expanded = controlled ? (expandedProp as boolean) : internalExpanded;
+  const setExpanded = (next: boolean) => {
+    if (controlled) onToggle?.(next);
+    else setInternalExpanded(next);
+  };
   const wrapRef = useRef<HTMLDivElement>(null);
   const panelId = "designer-profile-extra";
   if (!shouldCollapse) return <>{children}</>;
+
   return (
     <div className="relative" ref={wrapRef}>
       <AnimatePresence initial={false}>
@@ -322,7 +341,7 @@ function ProfileCollapsible({ children, shouldCollapse }: { children: React.Reac
           </motion.div>
         ) : null}
       </AnimatePresence>
-      <div className="mt-8 flex justify-center md:justify-start">
+      <div className={cn("mt-8 flex justify-center md:justify-start", hideTrigger && "hidden")}>
         <button
           type="button"
           onClick={() => {
@@ -395,6 +414,10 @@ const PublicDesignerProfile = () => {
   const [lightboxItem, setLightboxItem] = useState<PublicLightboxItem | null>(null);
   const [mobileRevealedPickId, setMobileRevealedPickId] = useState<string | null>(null);
   const [shareCopied, setShareCopied] = useState(false);
+  const [newInExpanded, setNewInExpanded] = useState(() =>
+    typeof window !== "undefined" && new URLSearchParams(window.location.search).get("expanded") === "true"
+  );
+
   const isMobile = useIsMobile();
   const isMobileProductPickMode = isMobile || (
     typeof window !== "undefined" &&
@@ -757,6 +780,9 @@ const PublicDesignerProfile = () => {
     ? buildThinContentFallback({ name: designer.name, founder: designer.founder, specialty: designer.specialty, isChildDesigner, slug: designer.slug })
     : "";
 
+  /* "New In" editorial format (portrait left, name + bio right) */
+  const newInFormat = NEW_IN_FORMAT_SLUGS.has(designer.slug);
+
   /* Shared tail of the biography: heritage slider + expandable editorial bio */
   const bioExtras = (
     <>
@@ -770,7 +796,13 @@ const PublicDesignerProfile = () => {
         const shouldCollapse = editorialBlocks.length > 3;
         return (
           <div className="md:col-span-12">
-            <ProfileCollapsible shouldCollapse={shouldCollapse}>
+            <ProfileCollapsible
+              shouldCollapse={shouldCollapse}
+              expandedProp={newInFormat ? newInExpanded : undefined}
+              onToggle={newInFormat ? setNewInExpanded : undefined}
+              hideTrigger={newInFormat}
+            >
+
               <div className="mt-8 md:mt-10">
                 <EditorialBiography
                   biography={editorialBio}
@@ -869,7 +901,6 @@ const PublicDesignerProfile = () => {
   ) : null;
 
   /* ── "New In" editorial format (portrait left, name + bio right) ── */
-  const newInFormat = NEW_IN_FORMAT_SLUGS.has(designer.slug);
   const newInSection = (
     <div className="flex flex-col gap-0">
       <div className="flex flex-col md:flex-row gap-8 md:gap-14 items-start pt-4 md:pt-8">
@@ -937,26 +968,24 @@ const PublicDesignerProfile = () => {
             </p>
           )}
 
-          {displayPhilosophy && (() => {
-            const clean = displayPhilosophy.replace(/<[^>]+>/g, '').replace(/^[\s""\u201C\u201D«»]+|[\s""\u201C\u201D«»]+$/g, '').trim();
-            const match = clean.match(/^(.*?)\s*\(([^)]+)\)\s*(.*)$/s);
-            return (
-              <blockquote className="mt-8 border-l border-foreground/15 pl-6 max-w-[600px] font-display font-normal not-italic leading-[1.6] text-left">
-                <span className="text-lg md:text-xl text-foreground/90 whitespace-pre-line">
-                  "{match ? match[1].trimEnd().replace(/^[\s""\u201C\u201D«»]+|[\s""\u201C\u201D«»]+$/g, '') : clean}"
+          {/* Full-portrait CTA — mirrors the New In spotlight text link */}
+          <div className="mt-8 flex flex-wrap items-center gap-x-8 gap-y-3">
+            <button
+              type="button"
+              onClick={() => setNewInExpanded((v) => !v)}
+              aria-expanded={newInExpanded}
+              className="group relative inline-flex items-center font-body text-xs uppercase tracking-[0.25em] text-foreground hover:text-primary transition-colors duration-300"
+            >
+              <span className="relative inline-flex items-center whitespace-nowrap pr-14 transition-[padding] duration-300 group-hover:pl-20 group-hover:pr-0">
+                <span className="pointer-events-none absolute left-0 top-1/2 h-px w-12 -translate-y-1/2 translate-x-2 bg-current opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100" />
+                <span className="relative z-10">
+                  {newInExpanded ? "Close The Full Portrait" : "View The Full Portrait"}
                 </span>
-                {match?.[3] && <span className="text-lg md:text-xl text-foreground/90 whitespace-pre-line"> {match[3]}</span>}
-                {match?.[2] && (
-                  <>
-                    <br />
-                    <span className="text-sm text-muted-foreground/60">{match[2]}</span>
-                  </>
-                )}
-              </blockquote>
-            );
-          })()}
+                <span className="pointer-events-none absolute right-5 top-1/2 h-px w-8 -translate-y-1/2 bg-current opacity-100 transition-all duration-300 group-hover:translate-x-6 group-hover:opacity-0" />
+                <ArrowRight className="pointer-events-none absolute right-0 top-1/2 h-3.5 w-3.5 -translate-y-1/2 transition-all duration-300 group-hover:-translate-x-1 group-hover:opacity-0" />
+              </span>
+            </button>
 
-          <div className="mt-8">
             <BiographyPdfButton
               designerName={designer.name}
               specialty={designer.specialty}
@@ -968,10 +997,18 @@ const PublicDesignerProfile = () => {
               profileUrl={`https://www.maisonaffluency.com${typeof window !== "undefined" ? window.location.pathname : ""}`}
             />
           </div>
+
+          {/* From the Studio — nested in the editorial column, as in New In */}
+          {instagramPosts.filter((p) => p.image_url).length > 0 && (
+            <div className="mt-10 pt-8 border-t border-border/30">
+              <DesignerInstagramSection posts={instagramPosts} designerName={designer.name} compact />
+            </div>
+          )}
         </motion.div>
       </div>
 
       <div className="mt-2">{bioExtras}</div>
+
     </div>
   );
 
@@ -1235,7 +1272,10 @@ const PublicDesignerProfile = () => {
             </div>
           )}
 
-          <DesignerInstagramSection posts={instagramPosts} designerName={designer?.name || ""} />
+          {!newInFormat && (
+            <DesignerInstagramSection posts={instagramPosts} designerName={designer?.name || ""} />
+          )}
+
 
           {picks.length > 0 && (
             <motion.div
