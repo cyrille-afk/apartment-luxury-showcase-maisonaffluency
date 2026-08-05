@@ -1,0 +1,1 @@
+UPDATE public.trade_products SET public_rrp_visible = true WHERE id = 'bee78c3c-2f7f-4936-a20b-9a79c4ad0335';
