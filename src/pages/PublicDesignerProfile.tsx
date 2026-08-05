@@ -1086,21 +1086,15 @@ const PublicDesignerProfile = () => {
                       </div>
                     )}
                   </motion.div>
-                  <button
-                    className="hidden md:inline-flex items-center gap-1.5 font-body text-xs text-white/80 hover:text-white transition-colors uppercase tracking-[0.1em]"
-                    title="Copy shareable link"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      const url = `https://www.maisonaffluency.com${buildDesignerBridgePath("og")}`;
-                      navigator.clipboard.writeText(url).then(() => {
-                        setShareCopied(true);
-                        setTimeout(() => setShareCopied(false), 2000);
-                      });
-                    }}
-                  >
-                    {shareCopied ? <Check className="w-3.5 h-3.5" /> : <Share2 className="w-3.5 h-3.5" />}
-                    {shareCopied ? "Copied!" : "Share"}
-                  </button>
+                  <div className="hidden md:block">
+                    <ShareMenu
+                      url={`https://www.maisonaffluency.com${buildDesignerBridgePath("og")}`}
+                      message={`${designer.name} — Maison Affluency: https://www.maisonaffluency.com${buildDesignerBridgePath("og")}`}
+                      imageUrl={heroImage || undefined}
+                      imageName={name}
+                    />
+                  </div>
+
                 </div>
                 {designer.hero_photo_credit && (
                   <p className="absolute bottom-1 right-4 md:right-6 text-[10px] uppercase tracking-[0.15em] text-white/50 z-10">
