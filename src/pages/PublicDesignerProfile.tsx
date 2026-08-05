@@ -972,7 +972,7 @@ const PublicDesignerProfile = () => {
                       loading="eager"
                     />
                   )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/25 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/10 to-transparent" />
                   {/* Mobile share icon inside hero */}
                   <div className="absolute top-3 right-3 z-20 md:hidden">
                     <ShareMenu
