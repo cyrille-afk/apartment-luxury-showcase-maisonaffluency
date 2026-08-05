@@ -1000,6 +1000,7 @@ const PublicDesignerProfile = () => {
                   };
                   window.setTimeout(land, 120);
                   window.setTimeout(land, 560);
+                  window.setTimeout(() => flashBioHighlight(), 600);
                 }
               }}
               aria-expanded={newInExpanded}
