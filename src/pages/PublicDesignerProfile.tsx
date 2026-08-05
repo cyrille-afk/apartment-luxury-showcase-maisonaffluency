@@ -754,6 +754,38 @@ const PublicDesignerProfile = () => {
     ? buildThinContentFallback({ name: designer.name, founder: designer.founder, specialty: designer.specialty, isChildDesigner, slug: designer.slug })
     : "";
 
+  /* Shared tail of the biography: heritage slider + expandable editorial bio */
+  const bioExtras = (
+    <>
+      {heritageSlides.length > 0 && (
+        <div className="md:col-span-12">
+          <HeritageSlider slides={heritageSlides} />
+        </div>
+      )}
+
+      {editorialBio && (() => {
+        const shouldCollapse = editorialBlocks.length > 3;
+        return (
+          <div className="md:col-span-12">
+            <ProfileCollapsible shouldCollapse={shouldCollapse}>
+              <div className="mt-8 md:mt-10">
+                <EditorialBiography
+                  biography={editorialBio}
+                  biographyImages={[]}
+                  pickImages={[]}
+                  designerName={designer.name}
+                  allowCollapse={false}
+                  startImageIndex={editorialStartImageIndex}
+                />
+              </div>
+            </ProfileCollapsible>
+          </div>
+        );
+      })()}
+    </>
+  );
+
+
   const biographySection = (displayBiography || thinContentFallback) ? (
     <motion.div
       initial={{ opacity: 0, y: 16 }}
