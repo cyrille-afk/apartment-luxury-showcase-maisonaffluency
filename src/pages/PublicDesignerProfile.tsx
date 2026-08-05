@@ -414,6 +414,10 @@ const PublicDesignerProfile = () => {
   const [lightboxItem, setLightboxItem] = useState<PublicLightboxItem | null>(null);
   const [mobileRevealedPickId, setMobileRevealedPickId] = useState<string | null>(null);
   const [shareCopied, setShareCopied] = useState(false);
+  const [newInExpanded, setNewInExpanded] = useState(() =>
+    typeof window !== "undefined" && new URLSearchParams(window.location.search).get("expanded") === "true"
+  );
+
   const isMobile = useIsMobile();
   const isMobileProductPickMode = isMobile || (
     typeof window !== "undefined" &&
