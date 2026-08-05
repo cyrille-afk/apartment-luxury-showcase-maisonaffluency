@@ -780,6 +780,9 @@ const PublicDesignerProfile = () => {
     ? buildThinContentFallback({ name: designer.name, founder: designer.founder, specialty: designer.specialty, isChildDesigner, slug: designer.slug })
     : "";
 
+  /* "New In" editorial format (portrait left, name + bio right) */
+  const newInFormat = NEW_IN_FORMAT_SLUGS.has(designer.slug);
+
   /* Shared tail of the biography: heritage slider + expandable editorial bio */
   const bioExtras = (
     <>
@@ -793,7 +796,13 @@ const PublicDesignerProfile = () => {
         const shouldCollapse = editorialBlocks.length > 3;
         return (
           <div className="md:col-span-12">
-            <ProfileCollapsible shouldCollapse={shouldCollapse}>
+            <ProfileCollapsible
+              shouldCollapse={shouldCollapse}
+              expandedProp={newInFormat ? newInExpanded : undefined}
+              onToggle={newInFormat ? setNewInExpanded : undefined}
+              hideTrigger={newInFormat}
+            >
+
               <div className="mt-8 md:mt-10">
                 <EditorialBiography
                   biography={editorialBio}
