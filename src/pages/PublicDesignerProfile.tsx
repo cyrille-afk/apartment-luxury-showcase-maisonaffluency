@@ -319,7 +319,7 @@ function ProfileCollapsible({ children, shouldCollapse }: { children: React.Reac
           </motion.div>
         ) : null}
       </AnimatePresence>
-      <div className="mt-6 flex justify-center">
+      <div className="mt-8 flex justify-center">
         <button
           type="button"
           onClick={() => {
@@ -345,23 +345,17 @@ function ProfileCollapsible({ children, shouldCollapse }: { children: React.Reac
 
           aria-expanded={expanded}
           aria-controls={panelId}
-          className="inline-flex items-center gap-2 px-6 py-2.5 bg-foreground text-background font-display text-[12px] tracking-[0.18em] uppercase rounded-full hover:bg-foreground/85 transition-colors shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-reduce:transition-none"
+          className="group inline-flex items-center gap-3 px-7 py-3 border border-foreground/25 text-foreground font-body text-[11px] tracking-[0.22em] uppercase hover:border-foreground/60 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-reduce:transition-none"
         >
+          {expanded ? "Close full profile" : "View full profile"}
           {expanded ? (
-            <>
-              <ChevronUp className="w-3.5 h-3.5" aria-hidden="true" />
-              Close full profile
-              <ChevronUp className="w-3.5 h-3.5" aria-hidden="true" />
-            </>
+            <ChevronUp className="w-3.5 h-3.5 transition-transform" aria-hidden="true" />
           ) : (
-            <>
-              <ChevronDown className="w-3.5 h-3.5" aria-hidden="true" />
-              View full profile
-              <ChevronDown className="w-3.5 h-3.5" aria-hidden="true" />
-            </>
+            <ChevronDown className="w-3.5 h-3.5 transition-transform group-hover:translate-y-0.5" aria-hidden="true" />
           )}
         </button>
       </div>
+
     </div>
   );
 
