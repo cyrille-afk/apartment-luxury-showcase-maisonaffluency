@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate, Link, useLocation, Navigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { Heart, Pin, FileText, ChevronLeft, ChevronRight, ChevronDown, ArrowLeft, Truck, Loader2, ShoppingBag } from "lucide-react";
+import { Heart, Pin, FileText, Layers, ChevronLeft, ChevronRight, ChevronDown, ArrowLeft, Truck, Loader2, ShoppingBag } from "lucide-react";
 import { useScrollDirection } from "@/hooks/useScrollDirection";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { isPwaStandaloneDisplay } from "@/lib/pwaMode";
@@ -16,6 +16,7 @@ import { queryKeys } from "@/lib/queryKeys";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import GalleryDetailsFloatingNav from "@/components/GalleryDetailsFloatingNav";
+import FinishesPdfButton from "@/components/product/FinishesPdfButton";
 import SpecSheetButton, { type PdfEntry } from "@/components/trade/SpecSheetButton";
 import { useCompare, type CompareItem } from "@/contexts/CompareContext";
 import { useAuthGate } from "@/hooks/useAuthGate";
@@ -2233,10 +2234,13 @@ const PublicProductPage: React.FC = () => {
                               }}
                             />
                           ) : (
-                            <Link to="/contact" className={utilityItem}>
-                              <FileText size={14} strokeWidth={1.25} className={iconClass} />
-                              Contact Us
-                            </Link>
+                            <FinishesPdfButton
+                              pickId={product.id}
+                              productName={product.title}
+                              brandName={designerDisplay}
+                              className={cn(utilityItem, "cursor-pointer")}
+                              icon={<Layers size={14} strokeWidth={1.25} className={iconClass} />}
+                            />
                           )}
                         </div>
                       );
@@ -2457,10 +2461,13 @@ const PublicProductPage: React.FC = () => {
                               }}
                             />
                           ) : (
-                            <Link to="/contact" className={utilityItem}>
-                              <FileText size={14} strokeWidth={1.25} className={iconClass} />
-                              Contact Us
-                            </Link>
+                            <FinishesPdfButton
+                              pickId={product.id}
+                              productName={product.title}
+                              brandName={designerDisplay}
+                              className={cn(utilityItem, "cursor-pointer")}
+                              icon={<Layers size={14} strokeWidth={1.25} className={iconClass} />}
+                            />
                           )}
                         </div>
                       );
