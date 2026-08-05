@@ -974,16 +974,6 @@ const PublicDesignerProfile = () => {
               </span>
             </button>
 
-            <BiographyPdfButton
-              designerName={designer.name}
-              specialty={designer.specialty}
-              philosophy={displayPhilosophy}
-              biography={displayBiography || ""}
-              biographyImages={displayBiographyImages}
-              heroImageUrl={heroImage}
-              heroImageFallbackUrl={designer.hero_image_url && designer.image_url && designer.hero_image_url !== designer.image_url ? designer.image_url : null}
-              profileUrl={`https://www.maisonaffluency.com${typeof window !== "undefined" ? window.location.pathname : ""}`}
-            />
           </div>
 
           {/* From the Studio — nested in the editorial column, as in New In */}
