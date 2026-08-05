@@ -985,7 +985,7 @@ const PublicDesignerProfile = () => {
         </motion.div>
       </div>
 
-      <div className="mt-2">{bioExtras}</div>
+      <div className="mt-2" ref={newInBioRef}>{bioExtras}</div>
 
     </div>
   );
