@@ -772,16 +772,16 @@ const PublicDesignerProfile = () => {
         const match = clean.match(/^(.*?)\s*\(([^)]+)\)\s*(.*)$/s);
         if (match) {
           return (
-            <blockquote className="hidden md:block font-display italic leading-snug mb-6 text-center [text-wrap:pretty]">
-              <span className="text-lg md:text-xl text-foreground whitespace-pre-line font-semibold">"{match[1].trimEnd().replace(/^[\s""\u201C\u201D«»]+|[\s""\u201C\u201D«»]+$/g, '')}"</span>
-              {match[3] && <span className="text-lg md:text-xl text-foreground whitespace-pre-line font-semibold"> {match[3]}</span>}
+            <blockquote className="hidden md:block font-display font-normal not-italic leading-[1.6] mb-10 mx-auto max-w-[820px] text-center [text-wrap:pretty]">
+              <span className="text-xl md:text-2xl text-foreground/90 whitespace-pre-line">"{match[1].trimEnd().replace(/^[\s""\u201C\u201D«»]+|[\s""\u201C\u201D«»]+$/g, '')}"</span>
+              {match[3] && <span className="text-xl md:text-2xl text-foreground/90 whitespace-pre-line"> {match[3]}</span>}
               <br />
-              <span className="text-sm md:text-base text-muted-foreground/60 font-normal not-italic">{match[2]}</span>
+              <span className="text-sm md:text-base text-muted-foreground/60">{match[2]}</span>
             </blockquote>
           );
         }
         return (
-          <blockquote className="hidden md:block font-display text-lg md:text-xl italic leading-snug text-foreground mb-6 text-center whitespace-pre-line font-semibold [text-wrap:pretty]">
+          <blockquote className="hidden md:block font-display text-xl md:text-2xl font-normal not-italic leading-[1.6] text-foreground/90 mb-10 mx-auto max-w-[820px] text-center whitespace-pre-line [text-wrap:pretty]">
             "{clean}"
           </blockquote>
         );
@@ -790,20 +790,8 @@ const PublicDesignerProfile = () => {
       {(() => {
         return (
           <>
-            <div className="mt-4">
-                <div className="flex items-center justify-between gap-4 mb-3 flex-wrap">
-                  <h2 className="font-display text-xs tracking-[0.2em] uppercase text-muted-foreground">About</h2>
-                  <BiographyPdfButton
-                    designerName={designer.name}
-                    specialty={designer.specialty}
-                    philosophy={displayPhilosophy}
-                    biography={displayBiography || ""}
-                    biographyImages={displayBiographyImages}
-                    heroImageUrl={heroImage}
-                    heroImageFallbackUrl={designer.hero_image_url && designer.image_url && designer.hero_image_url !== designer.image_url ? designer.image_url : null}
-                    profileUrl={`https://www.maisonaffluency.com${typeof window !== "undefined" ? window.location.pathname : ""}`}
-                  />
-                </div>
+            <div className="mt-4 w-full max-w-[650px]">
+                <h2 className="font-display text-[11px] tracking-[0.28em] uppercase text-muted-foreground mb-4">About</h2>
                 {introEditorialBio ? (
                   <EditorialBiography
                     biography={introEditorialBio}
@@ -826,7 +814,21 @@ const PublicDesignerProfile = () => {
                     <p>{thinContentFallback}</p>
                   </div>
                 )}
+
+                <div className="mt-6">
+                  <BiographyPdfButton
+                    designerName={designer.name}
+                    specialty={designer.specialty}
+                    philosophy={displayPhilosophy}
+                    biography={displayBiography || ""}
+                    biographyImages={displayBiographyImages}
+                    heroImageUrl={heroImage}
+                    heroImageFallbackUrl={designer.hero_image_url && designer.image_url && designer.hero_image_url !== designer.image_url ? designer.image_url : null}
+                    profileUrl={`https://www.maisonaffluency.com${typeof window !== "undefined" ? window.location.pathname : ""}`}
+                  />
+                </div>
             </div>
+
 
             {heritageSlides.length > 0 && (
               <HeritageSlider slides={heritageSlides} />
