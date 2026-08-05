@@ -3,7 +3,7 @@ import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { useParams, Link, Navigate, useSearchParams, useNavigate, useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, Package, FileText, Maximize2, Share2, Check, ChevronDown, ChevronUp, LayoutGrid, Columns2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, Package, FileText, Maximize2, Share2, Check, ChevronDown, ChevronUp, LayoutGrid, Columns2 } from "lucide-react";
 import ProductCardDescriptionOverlay from "@/components/ui/ProductCardDescriptionOverlay";
 import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 import SpecSheetButton, { type PdfEntry } from "@/components/trade/SpecSheetButton";
@@ -901,7 +901,6 @@ const PublicDesignerProfile = () => {
   ) : null;
 
   /* ── "New In" editorial format (portrait left, name + bio right) ── */
-  const newInFormat = NEW_IN_FORMAT_SLUGS.has(designer.slug);
   const newInSection = (
     <div className="flex flex-col gap-0">
       <div className="flex flex-col md:flex-row gap-8 md:gap-14 items-start pt-4 md:pt-8">
