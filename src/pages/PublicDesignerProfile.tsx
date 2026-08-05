@@ -36,6 +36,9 @@ import { usePublicRrpMap, formatPublicRrp } from "@/hooks/usePublicRrp";
 
 const transition = { duration: 0.6, ease: [0.16, 1, 0.3, 1] as const };
 const reveal = { ...transition, delay: 0.15 };
+
+/* Designers rendered with the "New In" editorial format (portrait left, bio right) */
+const NEW_IN_FORMAT_SLUGS = new Set<string>(["dagmar", "dagmar-london"]);
 const APPARATUS_SHARE_BRIDGE = "/apparatus-studio-share-v6.html";
 
 function responsiveCloudinaryUrl(url: string, width: number): string {
