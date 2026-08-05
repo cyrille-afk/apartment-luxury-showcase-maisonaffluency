@@ -2386,6 +2386,7 @@ export type Database = {
           sort_order: number
           source: string
           specialty: string
+          subtitle_is_designer: boolean
           trade_only: boolean
           updated_at: string
         }
@@ -2419,6 +2420,7 @@ export type Database = {
           sort_order?: number
           source?: string
           specialty?: string
+          subtitle_is_designer?: boolean
           trade_only?: boolean
           updated_at?: string
         }
@@ -2452,6 +2454,7 @@ export type Database = {
           sort_order?: number
           source?: string
           specialty?: string
+          subtitle_is_designer?: boolean
           trade_only?: boolean
           updated_at?: string
         }

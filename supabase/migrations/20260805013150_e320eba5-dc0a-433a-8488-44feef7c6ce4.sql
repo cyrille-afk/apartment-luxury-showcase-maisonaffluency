@@ -1,0 +1,1 @@
+ALTER TABLE public.designers ADD COLUMN IF NOT EXISTS subtitle_is_designer boolean NOT NULL DEFAULT false;
