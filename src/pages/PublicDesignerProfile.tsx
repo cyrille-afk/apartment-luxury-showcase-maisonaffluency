@@ -825,37 +825,121 @@ const PublicDesignerProfile = () => {
             </div>
 
 
-            {heritageSlides.length > 0 && (
-              <div className="md:col-span-12">
-                <HeritageSlider slides={heritageSlides} />
-              </div>
-            )}
-
-            {editorialBio && (() => {
-              const shouldCollapse = editorialBlocks.length > 3;
-              return (
-                <div className="md:col-span-12">
-                  <ProfileCollapsible shouldCollapse={shouldCollapse}>
-                    <div className="mt-8 md:mt-10">
-                      <EditorialBiography
-                        biography={editorialBio}
-                        biographyImages={[]}
-                        pickImages={[]}
-                        designerName={designer.name}
-                        allowCollapse={false}
-                        startImageIndex={editorialStartImageIndex}
-                      />
-                    </div>
-                  </ProfileCollapsible>
-                </div>
-              );
-            })()}
+            {bioExtras}
           </>
         );
       })()}
 
     </motion.div>
   ) : null;
+
+  /* ── "New In" editorial format (portrait left, name + bio right) ── */
+  const newInFormat = NEW_IN_FORMAT_SLUGS.has(designer.slug);
+  const newInSection = (
+    <div className="flex flex-col gap-0">
+      <div className="flex flex-col md:flex-row gap-8 md:gap-14 items-start pt-4 md:pt-8">
+        {/* Portrait */}
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+          className="w-full md:w-[38%] flex-shrink-0"
+        >
+          <div className="aspect-[3/2] md:aspect-[4/5] overflow-hidden rounded-none bg-muted relative">
+            {heroImage && (
+              <img
+                src={heroImage}
+                alt={`${name} portrait`}
+                className="w-full h-full object-cover"
+                loading="eager"
+              />
+            )}
+          </div>
+          {designer.hero_photo_credit && (
+            <p className="mt-2 text-right text-[10px] uppercase tracking-[0.15em] text-muted-foreground/70">
+              Photo: {designer.hero_photo_credit}
+            </p>
+          )}
+        </motion.div>
+
+        {/* Name + Bio + actions */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ ...transition, delay: 0.2 }}
+          className="flex-1 flex flex-col justify-start w-full"
+        >
+          <div className="flex items-center gap-3 mb-6 md:mb-8">
+            <h1 className="font-display text-2xl md:text-3xl lg:text-[2.1rem] text-foreground tracking-[0.12em] uppercase">
+              {name}
+            </h1>
+            <ShareMenu
+              url={designerOgUrl}
+              message={`${designer.name} — Maison Affluency: ${designerOgUrl}`}
+              className="flex items-center p-1 -m-1 text-foreground/40 hover:text-foreground transition-colors"
+              iconSize="w-4 h-4 md:w-5 md:h-5"
+              showLabel={false}
+            />
+          </div>
+
+          {designer.specialty && (
+            <p className="font-body text-xs md:text-sm text-muted-foreground -mt-4 mb-6 tracking-wide">
+              {designer.specialty}
+            </p>
+          )}
+
+          {heroParagraphs.length > 0 && (
+            <div className="font-body text-sm md:text-base leading-relaxed text-foreground/85 text-left max-w-[650px]">
+              {heroParagraphs.map((p: string, i: number) => (
+                <p key={i} className={i > 0 ? "mt-4" : ""}>{renderParagraph(p)}</p>
+              ))}
+            </div>
+          )}
+
+          {thinContentFallback && (
+            <p className="font-body text-sm md:text-base leading-relaxed text-foreground/85 mt-4 max-w-[650px]">
+              {thinContentFallback}
+            </p>
+          )}
+
+          {displayPhilosophy && (() => {
+            const clean = displayPhilosophy.replace(/<[^>]+>/g, '').replace(/^[\s""\u201C\u201D«»]+|[\s""\u201C\u201D«»]+$/g, '').trim();
+            const match = clean.match(/^(.*?)\s*\(([^)]+)\)\s*(.*)$/s);
+            return (
+              <blockquote className="mt-8 border-l border-foreground/15 pl-6 max-w-[600px] font-display font-normal not-italic leading-[1.6] text-left">
+                <span className="text-lg md:text-xl text-foreground/90 whitespace-pre-line">
+                  "{match ? match[1].trimEnd().replace(/^[\s""\u201C\u201D«»]+|[\s""\u201C\u201D«»]+$/g, '') : clean}"
+                </span>
+                {match?.[3] && <span className="text-lg md:text-xl text-foreground/90 whitespace-pre-line"> {match[3]}</span>}
+                {match?.[2] && (
+                  <>
+                    <br />
+                    <span className="text-sm text-muted-foreground/60">{match[2]}</span>
+                  </>
+                )}
+              </blockquote>
+            );
+          })()}
+
+          <div className="mt-8">
+            <BiographyPdfButton
+              designerName={designer.name}
+              specialty={designer.specialty}
+              philosophy={displayPhilosophy}
+              biography={displayBiography || ""}
+              biographyImages={displayBiographyImages}
+              heroImageUrl={heroImage}
+              heroImageFallbackUrl={designer.hero_image_url && designer.image_url && designer.hero_image_url !== designer.image_url ? designer.image_url : null}
+              profileUrl={`https://www.maisonaffluency.com${typeof window !== "undefined" ? window.location.pathname : ""}`}
+            />
+          </div>
+        </motion.div>
+      </div>
+
+      <div className="mt-2">{bioExtras}</div>
+    </div>
+  );
+
 
   return (
     <>
