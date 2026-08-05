@@ -969,26 +969,24 @@ const PublicDesignerProfile = () => {
             </p>
           )}
 
-          {displayPhilosophy && (() => {
-            const clean = displayPhilosophy.replace(/<[^>]+>/g, '').replace(/^[\s""\u201C\u201D«»]+|[\s""\u201C\u201D«»]+$/g, '').trim();
-            const match = clean.match(/^(.*?)\s*\(([^)]+)\)\s*(.*)$/s);
-            return (
-              <blockquote className="mt-8 border-l border-foreground/15 pl-6 max-w-[600px] font-display font-normal not-italic leading-[1.6] text-left">
-                <span className="text-lg md:text-xl text-foreground/90 whitespace-pre-line">
-                  "{match ? match[1].trimEnd().replace(/^[\s""\u201C\u201D«»]+|[\s""\u201C\u201D«»]+$/g, '') : clean}"
+          {/* Full-portrait CTA — mirrors the New In spotlight text link */}
+          <div className="mt-8 flex flex-wrap items-center gap-x-8 gap-y-3">
+            <button
+              type="button"
+              onClick={() => setNewInExpanded((v) => !v)}
+              aria-expanded={newInExpanded}
+              className="group relative inline-flex items-center font-body text-xs uppercase tracking-[0.25em] text-foreground hover:text-primary transition-colors duration-300"
+            >
+              <span className="relative inline-flex items-center whitespace-nowrap pr-14 transition-[padding] duration-300 group-hover:pl-20 group-hover:pr-0">
+                <span className="pointer-events-none absolute left-0 top-1/2 h-px w-12 -translate-y-1/2 translate-x-2 bg-current opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100" />
+                <span className="relative z-10">
+                  {newInExpanded ? "Close The Full Portrait" : "View The Full Portrait"}
                 </span>
-                {match?.[3] && <span className="text-lg md:text-xl text-foreground/90 whitespace-pre-line"> {match[3]}</span>}
-                {match?.[2] && (
-                  <>
-                    <br />
-                    <span className="text-sm text-muted-foreground/60">{match[2]}</span>
-                  </>
-                )}
-              </blockquote>
-            );
-          })()}
+                <span className="pointer-events-none absolute right-5 top-1/2 h-px w-8 -translate-y-1/2 bg-current opacity-100 transition-all duration-300 group-hover:translate-x-6 group-hover:opacity-0" />
+                <ArrowRight className="pointer-events-none absolute right-0 top-1/2 h-3.5 w-3.5 -translate-y-1/2 transition-all duration-300 group-hover:-translate-x-1 group-hover:opacity-0" />
+              </span>
+            </button>
 
-          <div className="mt-8">
             <BiographyPdfButton
               designerName={designer.name}
               specialty={designer.specialty}
@@ -1000,10 +998,18 @@ const PublicDesignerProfile = () => {
               profileUrl={`https://www.maisonaffluency.com${typeof window !== "undefined" ? window.location.pathname : ""}`}
             />
           </div>
+
+          {/* From the Studio — nested in the editorial column, as in New In */}
+          {instagramPosts.filter((p) => p.image_url).length > 0 && (
+            <div className="mt-10 pt-8 border-t border-border/30">
+              <DesignerInstagramSection posts={instagramPosts} designerName={designer.name} compact />
+            </div>
+          )}
         </motion.div>
       </div>
 
       <div className="mt-2">{bioExtras}</div>
+
     </div>
   );
 
