@@ -86,9 +86,9 @@ export async function buildFinishesSelectionPdf(args: FinishesPdfArgs): Promise<
 
   const drawFooter = () => {
     if (!logo) return;
-    const w = 40;
+    const w = 50;
     try {
-      doc.addImage(logo, "JPEG", (pageW - w) / 2, pageH - footerH + 14, w, w, undefined, "FAST");
+      doc.addImage(logo, "JPEG", (pageW - w) / 2, pageH - footerH + 12, w, w, undefined, "FAST");
     } catch {
       /* logo is decorative — never block the export */
     }
