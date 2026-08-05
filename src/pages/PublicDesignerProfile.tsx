@@ -319,7 +319,7 @@ function ProfileCollapsible({ children, shouldCollapse }: { children: React.Reac
           </motion.div>
         ) : null}
       </AnimatePresence>
-      <div className="mt-8 flex justify-center">
+      <div className="mt-8 flex justify-center md:justify-start">
         <button
           type="button"
           onClick={() => {
