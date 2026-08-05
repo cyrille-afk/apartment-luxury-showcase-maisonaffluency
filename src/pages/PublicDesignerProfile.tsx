@@ -1074,7 +1074,9 @@ const PublicDesignerProfile = () => {
             )}
           </div>
 
-          {useChildHeroLayout ? (
+          {newInFormat ? (
+            newInSection
+          ) : useChildHeroLayout ? (
             /* Designer profile: portrait hero, then the same editorial biography flow as the parent */
             <div className="flex flex-col gap-0">
               <motion.div
