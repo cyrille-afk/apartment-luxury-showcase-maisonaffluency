@@ -341,7 +341,7 @@ function ProfileCollapsible({
           </motion.div>
         ) : null}
       </AnimatePresence>
-      <div className="mt-8 flex justify-center md:justify-start">
+      <div className={cn("mt-8 flex justify-center md:justify-start", hideTrigger && "hidden")}>
         <button
           type="button"
           onClick={() => {
