@@ -303,12 +303,16 @@ function ProfileCollapsible({
   expandedProp,
   onToggle,
   hideTrigger,
+  highlight,
+  onExpandFlash,
 }: {
   children: React.ReactNode;
   shouldCollapse: boolean;
   expandedProp?: boolean;
   onToggle?: (next: boolean) => void;
   hideTrigger?: boolean;
+  highlight?: boolean;
+  onExpandFlash?: () => void;
 }) {
   const [sp] = useSearchParams();
   const [internalExpanded, setInternalExpanded] = useState(() => sp.get("expanded") === "true");
@@ -335,7 +339,10 @@ function ProfileCollapsible({
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-            className="overflow-hidden"
+            className={cn(
+              "overflow-hidden transition-all duration-700",
+              highlight && "ring-1 ring-inset ring-primary/20 bg-primary/[0.03]"
+            )}
           >
             {children}
           </motion.div>
@@ -347,7 +354,19 @@ function ProfileCollapsible({
           onClick={() => {
             const next = !expanded;
             setExpanded(next);
-            if (!next) {
+            if (next) {
+              // Expand animation runs 500ms; scroll as it grows, then correct.
+              const land = () => {
+                const target = document.getElementById(panelId);
+                if (!target) return;
+                const top =
+                  target.getBoundingClientRect().top + window.scrollY - 84;
+                window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+              };
+              window.setTimeout(land, 120);
+              window.setTimeout(land, 560);
+              window.setTimeout(() => onExpandFlash?.(), 600);
+            } else {
               // The collapse animation runs 500ms; scrolling before it settles
               // lands mid-section because the target keeps moving upward.
               // Scroll once after it finishes, then correct again.
@@ -364,6 +383,7 @@ function ProfileCollapsible({
               window.setTimeout(land, 900);
             }
           }}
+
 
           aria-expanded={expanded}
           aria-controls={panelId}
@@ -418,6 +438,11 @@ const PublicDesignerProfile = () => {
   const [newInExpanded, setNewInExpanded] = useState(() =>
     typeof window !== "undefined" && new URLSearchParams(window.location.search).get("expanded") === "true"
   );
+  const [bioHighlighted, setBioHighlighted] = useState(false);
+  const flashBioHighlight = () => {
+    setBioHighlighted(true);
+    window.setTimeout(() => setBioHighlighted(false), 1800);
+  };
 
   const isMobile = useIsMobile();
   const isMobileProductPickMode = isMobile || (
@@ -802,6 +827,8 @@ const PublicDesignerProfile = () => {
               expandedProp={newInFormat ? newInExpanded : undefined}
               onToggle={newInFormat ? setNewInExpanded : undefined}
               hideTrigger={newInFormat}
+              highlight={bioHighlighted}
+              onExpandFlash={flashBioHighlight}
             >
 
               <div className="mt-8 md:mt-10">
@@ -965,12 +992,15 @@ const PublicDesignerProfile = () => {
                 const next = !newInExpanded;
                 setNewInExpanded(next);
                 if (next) {
-                  window.setTimeout(() => {
+                  const land = () => {
                     const el = newInBioRef.current;
                     if (!el) return;
                     const top = el.getBoundingClientRect().top + window.scrollY - 84;
-                    window.scrollTo({ top, behavior: "smooth" });
-                  }, 120);
+                    window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+                  };
+                  window.setTimeout(land, 120);
+                  window.setTimeout(land, 560);
+                  window.setTimeout(() => flashBioHighlight(), 600);
                 }
               }}
               aria-expanded={newInExpanded}
@@ -997,7 +1027,15 @@ const PublicDesignerProfile = () => {
         </motion.div>
       </div>
 
-      <div className="mt-2" ref={newInBioRef}>{bioExtras}</div>
+      <div
+        ref={newInBioRef}
+        className={cn(
+          "mt-2 transition-all duration-700",
+          bioHighlighted && "ring-1 ring-inset ring-primary/20 bg-primary/[0.03]"
+        )}
+      >
+        {bioExtras}
+      </div>
 
     </div>
   );
