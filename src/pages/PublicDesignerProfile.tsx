@@ -759,7 +759,7 @@ const PublicDesignerProfile = () => {
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ ...transition, delay: 0.2 }}
-      className="flex flex-col mt-4"
+      className="mt-4 md:grid md:grid-cols-12 md:gap-10 lg:gap-16 md:items-start flex flex-col"
     >
       {displayPhilosophy && (() => {
         const clean = displayPhilosophy.replace(/<[^>]+>/g, '').replace(/^[\s""\u201C\u201D«»]+|[\s""\u201C\u201D«»]+$/g, '').trim();
