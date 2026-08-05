@@ -365,6 +365,7 @@ function ProfileCollapsible({
               };
               window.setTimeout(land, 120);
               window.setTimeout(land, 560);
+              window.setTimeout(() => onExpandFlash?.(), 600);
             } else {
               // The collapse animation runs 500ms; scrolling before it settles
               // lands mid-section because the target keeps moving upward.
