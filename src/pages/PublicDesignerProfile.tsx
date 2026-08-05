@@ -764,9 +764,10 @@ const PublicDesignerProfile = () => {
       {displayPhilosophy && (() => {
         const clean = displayPhilosophy.replace(/<[^>]+>/g, '').replace(/^[\s""\u201C\u201D«»]+|[\s""\u201C\u201D«»]+$/g, '').trim();
         const match = clean.match(/^(.*?)\s*\(([^)]+)\)\s*(.*)$/s);
+        const quoteWrap = "hidden md:block md:col-start-6 md:col-span-7 md:row-start-1 font-display font-normal not-italic leading-[1.6] mb-10 max-w-[600px] text-left [text-wrap:pretty] border-l border-foreground/15 pl-6";
         if (match) {
           return (
-            <blockquote className="hidden md:block font-display font-normal not-italic leading-[1.6] mb-10 mx-auto max-w-[820px] text-center [text-wrap:pretty]">
+            <blockquote className={quoteWrap}>
               <span className="text-xl md:text-2xl text-foreground/90 whitespace-pre-line">"{match[1].trimEnd().replace(/^[\s""\u201C\u201D«»]+|[\s""\u201C\u201D«»]+$/g, '')}"</span>
               {match[3] && <span className="text-xl md:text-2xl text-foreground/90 whitespace-pre-line"> {match[3]}</span>}
               <br />
@@ -775,7 +776,7 @@ const PublicDesignerProfile = () => {
           );
         }
         return (
-          <blockquote className="hidden md:block font-display text-xl md:text-2xl font-normal not-italic leading-[1.6] text-foreground/90 mb-10 mx-auto max-w-[820px] text-center whitespace-pre-line [text-wrap:pretty]">
+          <blockquote className={`${quoteWrap} text-xl md:text-2xl text-foreground/90 whitespace-pre-line`}>
             "{clean}"
           </blockquote>
         );
@@ -784,7 +785,7 @@ const PublicDesignerProfile = () => {
       {(() => {
         return (
           <>
-            <div className="mt-4 w-full max-w-[650px]">
+            <div className="mt-4 md:mt-0 w-full max-w-[600px] md:col-start-1 md:col-span-5 md:row-start-1">
                 <h2 className="font-display text-[11px] tracking-[0.28em] uppercase text-muted-foreground mb-4">About</h2>
                 {introEditorialBio ? (
                   <EditorialBiography
@@ -809,7 +810,7 @@ const PublicDesignerProfile = () => {
                   </div>
                 )}
 
-                <div className="mt-6">
+                <div className="mt-6 flex md:justify-start">
                   <BiographyPdfButton
                     designerName={designer.name}
                     specialty={designer.specialty}
@@ -825,29 +826,34 @@ const PublicDesignerProfile = () => {
 
 
             {heritageSlides.length > 0 && (
-              <HeritageSlider slides={heritageSlides} />
+              <div className="md:col-span-12">
+                <HeritageSlider slides={heritageSlides} />
+              </div>
             )}
 
             {editorialBio && (() => {
               const shouldCollapse = editorialBlocks.length > 3;
               return (
-                <ProfileCollapsible shouldCollapse={shouldCollapse}>
-                  <div className="mt-8 md:mt-10">
-                    <EditorialBiography
-                      biography={editorialBio}
-                      biographyImages={[]}
-                      pickImages={[]}
-                      designerName={designer.name}
-                      allowCollapse={false}
-                      startImageIndex={editorialStartImageIndex}
-                    />
-                  </div>
-                </ProfileCollapsible>
+                <div className="md:col-span-12">
+                  <ProfileCollapsible shouldCollapse={shouldCollapse}>
+                    <div className="mt-8 md:mt-10">
+                      <EditorialBiography
+                        biography={editorialBio}
+                        biographyImages={[]}
+                        pickImages={[]}
+                        designerName={designer.name}
+                        allowCollapse={false}
+                        startImageIndex={editorialStartImageIndex}
+                      />
+                    </div>
+                  </ProfileCollapsible>
+                </div>
               );
             })()}
           </>
         );
       })()}
+
     </motion.div>
   ) : null;
 
