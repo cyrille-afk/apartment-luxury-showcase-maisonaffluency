@@ -414,6 +414,7 @@ const PublicDesignerProfile = () => {
   const [lightboxItem, setLightboxItem] = useState<PublicLightboxItem | null>(null);
   const [mobileRevealedPickId, setMobileRevealedPickId] = useState<string | null>(null);
   const [shareCopied, setShareCopied] = useState(false);
+  const newInBioRef = useRef<HTMLDivElement>(null);
   const [newInExpanded, setNewInExpanded] = useState(() =>
     typeof window !== "undefined" && new URLSearchParams(window.location.search).get("expanded") === "true"
   );
@@ -960,7 +961,18 @@ const PublicDesignerProfile = () => {
           <div className="mt-8 flex flex-wrap items-center gap-x-8 gap-y-3">
             <button
               type="button"
-              onClick={() => setNewInExpanded((v) => !v)}
+              onClick={() => {
+                const next = !newInExpanded;
+                setNewInExpanded(next);
+                if (next) {
+                  window.setTimeout(() => {
+                    const el = newInBioRef.current;
+                    if (!el) return;
+                    const top = el.getBoundingClientRect().top + window.scrollY - 84;
+                    window.scrollTo({ top, behavior: "smooth" });
+                  }, 120);
+                }
+              }}
               aria-expanded={newInExpanded}
               className="group relative inline-flex items-center font-body text-xs uppercase tracking-[0.25em] text-foreground hover:text-primary transition-colors duration-300"
             >
@@ -985,7 +997,7 @@ const PublicDesignerProfile = () => {
         </motion.div>
       </div>
 
-      <div className="mt-2">{bioExtras}</div>
+      <div className="mt-2" ref={newInBioRef}>{bioExtras}</div>
 
     </div>
   );
