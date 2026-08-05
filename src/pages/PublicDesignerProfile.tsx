@@ -1197,8 +1197,22 @@ const PublicDesignerProfile = () => {
                   const parsedSlug = parsedLabel
                     ? designerSlugByName.get(parsedLabel.toLowerCase().replace(/\s+/g, " ").trim())
                     : undefined;
-                  const designerLabel = rawDesignerLabel || parsedLabel;
-                  const designerSlug = rawDesignerSlug || parsedSlug;
+                  // Houses like Dagmar keep the individual designer's name in the
+                  // pick subtitle ("Arnold Madsen" / "Kai Kristiansen — Oak").
+                  // Surface that name as the attribution row above the product name.
+                  const subtitleDesignerLabel = (() => {
+                    if (rawDesignerLabel || parsedLabel) return undefined;
+                    if (!(designer as any)?.subtitle_is_designer) return undefined;
+                    const head = (pick.subtitle || "").split(/\s+[—–-]\s+/)[0]?.trim();
+                    if (!head) return undefined;
+                    return head.toLowerCase() === (designer.name || "").toLowerCase() ? undefined : head;
+                  })();
+                  const subtitleDesignerSlug = subtitleDesignerLabel
+                    ? designerSlugByName.get(subtitleDesignerLabel.toLowerCase().replace(/\s+/g, " ").trim())
+                    : undefined;
+                  const designerLabel = rawDesignerLabel || parsedLabel || subtitleDesignerLabel;
+                  const designerSlug = rawDesignerSlug || parsedSlug || subtitleDesignerSlug;
+
                   // Only strip the "by X" tail from the displayed title when we
                   // actually used the parsed attribution — never touch titles
                   // that already have a proper attribution row.
