@@ -89,7 +89,14 @@ export default function FinishesPdfButton({
       ) : (
         icon ?? <Layers size={14} strokeWidth={1.25} className="shrink-0" />
       )}
-      Fabric &amp; Finishes
+      <span className="flex items-center gap-1.5">
+        Fabric &amp; Finishes
+        {!loading && (
+          <span className="px-1 py-0.5 border border-current/30 rounded text-[9px] leading-none tracking-wider">
+            PDF
+          </span>
+        )}
+      </span>
     </button>
   );
 }
