@@ -339,7 +339,10 @@ function ProfileCollapsible({
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-            className="overflow-hidden"
+            className={cn(
+              "overflow-hidden transition-all duration-700",
+              highlight && "ring-1 ring-inset ring-primary/20 bg-primary/[0.03]"
+            )}
           >
             {children}
           </motion.div>
