@@ -414,6 +414,7 @@ const PublicDesignerProfile = () => {
   const [lightboxItem, setLightboxItem] = useState<PublicLightboxItem | null>(null);
   const [mobileRevealedPickId, setMobileRevealedPickId] = useState<string | null>(null);
   const [shareCopied, setShareCopied] = useState(false);
+  const newInBioRef = useRef<HTMLDivElement>(null);
   const [newInExpanded, setNewInExpanded] = useState(() =>
     typeof window !== "undefined" && new URLSearchParams(window.location.search).get("expanded") === "true"
   );
