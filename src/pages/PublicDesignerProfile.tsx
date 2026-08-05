@@ -297,12 +297,31 @@ function buildThinContentFallback(args: {
   return `${leads[i]} ${middles[i]} ${closes[i]}`;
 }
 
-function ProfileCollapsible({ children, shouldCollapse }: { children: React.ReactNode; shouldCollapse: boolean }) {
+function ProfileCollapsible({
+  children,
+  shouldCollapse,
+  expandedProp,
+  onToggle,
+  hideTrigger,
+}: {
+  children: React.ReactNode;
+  shouldCollapse: boolean;
+  expandedProp?: boolean;
+  onToggle?: (next: boolean) => void;
+  hideTrigger?: boolean;
+}) {
   const [sp] = useSearchParams();
-  const [expanded, setExpanded] = useState(() => sp.get("expanded") === "true");
+  const [internalExpanded, setInternalExpanded] = useState(() => sp.get("expanded") === "true");
+  const controlled = typeof expandedProp === "boolean";
+  const expanded = controlled ? (expandedProp as boolean) : internalExpanded;
+  const setExpanded = (next: boolean) => {
+    if (controlled) onToggle?.(next);
+    else setInternalExpanded(next);
+  };
   const wrapRef = useRef<HTMLDivElement>(null);
   const panelId = "designer-profile-extra";
   if (!shouldCollapse) return <>{children}</>;
+
   return (
     <div className="relative" ref={wrapRef}>
       <AnimatePresence initial={false}>
