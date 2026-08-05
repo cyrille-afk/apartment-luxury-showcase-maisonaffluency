@@ -114,7 +114,7 @@ export async function buildFinishesSelectionPdf(args: FinishesPdfArgs): Promise<
     y = drawHeader(true);
   };
 
-  for (const group of groupSwatches(withImages as FinishSwatch[] & { data?: string | null }[])) {
+  for (const group of groupSwatches(withImages as unknown as FinishSwatch[])) {
     const items = group.items as (FinishSwatch & { data?: string | null })[];
 
     if (group.label) {
