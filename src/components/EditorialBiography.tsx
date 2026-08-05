@@ -685,7 +685,7 @@ function SplitImageBlock({
         <img
           src={optimizeImageUrl(url)}
           alt={caption || `${designerName} — editorial`}
-          className={`w-full h-auto object-contain ${isSmall ? "max-h-[180px]" : "max-h-[420px]"}`}
+          className={`w-full h-auto object-contain ${isSmall ? "max-h-[180px]" : "max-h-[260px]"}`}
           loading="lazy"
         />
       </div>
@@ -703,7 +703,7 @@ function SplitImageBlock({
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-60px" }}
       transition={{ ...transition, delay: 0.1 }}
-      className="flex-1 min-w-0 flex flex-col justify-center"
+      className="flex-1 min-w-0 flex flex-col justify-start"
     >
       {paragraphs.map((p, i) => (
         <p key={i} className={i > 0 ? "mt-4" : ""}>
@@ -714,10 +714,10 @@ function SplitImageBlock({
   ) : null;
 
   const isMobile = useIsMobile();
-  const imageWidthClass = isSmall ? "md:w-[22%]" : isPercent ? "" : "md:w-[28%]";
+  const imageWidthClass = isSmall ? "md:w-[22%]" : isPercent ? "" : "md:w-[26%]";
 
   return (
-    <div className={`${index === 0 ? "mt-3 md:mt-4 mb-1 md:mb-2" : "mt-3 md:mt-5 mb-1 md:mb-2"} flex flex-col md:flex-row gap-3 md:gap-6 ${isSmall ? "items-start" : "items-center"}`}>
+    <div className={`${index === 0 ? "mt-2 md:mt-3" : "mt-2 md:mt-4"} mb-0 flex flex-col md:flex-row gap-3 md:gap-6 items-start`}>
       {/* Mobile: image always first (order-1); Desktop: controlled by imageOnRight */}
       <div
         className={`shrink-0 w-full ${imageWidthClass} order-1 ${imageOnRight ? 'md:order-2' : 'md:order-1'}`}
