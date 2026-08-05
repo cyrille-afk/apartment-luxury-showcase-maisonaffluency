@@ -347,7 +347,18 @@ function ProfileCollapsible({
           onClick={() => {
             const next = !expanded;
             setExpanded(next);
-            if (!next) {
+            if (next) {
+              // Expand animation runs 500ms; scroll as it grows, then correct.
+              const land = () => {
+                const target = document.getElementById(panelId);
+                if (!target) return;
+                const top =
+                  target.getBoundingClientRect().top + window.scrollY - 84;
+                window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+              };
+              window.setTimeout(land, 120);
+              window.setTimeout(land, 560);
+            } else {
               // The collapse animation runs 500ms; scrolling before it settles
               // lands mid-section because the target keeps moving upward.
               // Scroll once after it finishes, then correct again.
@@ -364,6 +375,7 @@ function ProfileCollapsible({
               window.setTimeout(land, 900);
             }
           }}
+
 
           aria-expanded={expanded}
           aria-controls={panelId}
@@ -965,12 +977,14 @@ const PublicDesignerProfile = () => {
                 const next = !newInExpanded;
                 setNewInExpanded(next);
                 if (next) {
-                  window.setTimeout(() => {
+                  const land = () => {
                     const el = newInBioRef.current;
                     if (!el) return;
                     const top = el.getBoundingClientRect().top + window.scrollY - 84;
-                    window.scrollTo({ top, behavior: "smooth" });
-                  }, 120);
+                    window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+                  };
+                  window.setTimeout(land, 120);
+                  window.setTimeout(land, 560);
                 }
               }}
               aria-expanded={newInExpanded}
