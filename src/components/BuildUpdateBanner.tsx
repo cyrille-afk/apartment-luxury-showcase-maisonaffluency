@@ -108,8 +108,21 @@ async function hardReload() {
 export default function BuildUpdateBanner() {
   const armed = useRef(false);
 
+  // Strip the `?v=<timestamp>` cache-buster left behind by hardReload() so the
+  // visible/shareable URL stays clean after a build refresh.
+  useEffect(() => {
+    try {
+      const url = new URL(window.location.href);
+      if (!url.searchParams.has("v")) return;
+      url.searchParams.delete("v");
+      const clean = url.pathname + (url.searchParams.toString() ? `?${url.searchParams}` : "") + url.hash;
+      window.history.replaceState(window.history.state, "", clean);
+    } catch { /* noop */ }
+  }, []);
+
   useEffect(() => {
     if (shouldSkipUpdateUi()) return;
+
 
     const onAvailable = () => {
       if (armed.current) return;
