@@ -158,6 +158,24 @@ export type Database = {
         }
         Relationships: []
       }
+      analytics_rate_limits: {
+        Row: {
+          bucket_key: string
+          hits: number
+          window_start: string
+        }
+        Insert: {
+          bucket_key: string
+          hits?: number
+          window_start?: string
+        }
+        Update: {
+          bucket_key?: string
+          hits?: number
+          window_start?: string
+        }
+        Relationships: []
+      }
       auction_benchmarks: {
         Row: {
           auction_house: string
