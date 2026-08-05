@@ -438,6 +438,11 @@ const PublicDesignerProfile = () => {
   const [newInExpanded, setNewInExpanded] = useState(() =>
     typeof window !== "undefined" && new URLSearchParams(window.location.search).get("expanded") === "true"
   );
+  const [bioHighlighted, setBioHighlighted] = useState(false);
+  const flashBioHighlight = () => {
+    setBioHighlighted(true);
+    window.setTimeout(() => setBioHighlighted(false), 1800);
+  };
 
   const isMobile = useIsMobile();
   const isMobileProductPickMode = isMobile || (
