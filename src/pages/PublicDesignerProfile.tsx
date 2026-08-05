@@ -1272,7 +1272,10 @@ const PublicDesignerProfile = () => {
             </div>
           )}
 
-          <DesignerInstagramSection posts={instagramPosts} designerName={designer?.name || ""} />
+          {!newInFormat && (
+            <DesignerInstagramSection posts={instagramPosts} designerName={designer?.name || ""} />
+          )}
+
 
           {picks.length > 0 && (
             <motion.div
