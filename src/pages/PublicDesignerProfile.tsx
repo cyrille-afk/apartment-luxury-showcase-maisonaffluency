@@ -977,12 +977,14 @@ const PublicDesignerProfile = () => {
                 const next = !newInExpanded;
                 setNewInExpanded(next);
                 if (next) {
-                  window.setTimeout(() => {
+                  const land = () => {
                     const el = newInBioRef.current;
                     if (!el) return;
                     const top = el.getBoundingClientRect().top + window.scrollY - 84;
-                    window.scrollTo({ top, behavior: "smooth" });
-                  }, 120);
+                    window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+                  };
+                  window.setTimeout(land, 120);
+                  window.setTimeout(land, 560);
                 }
               }}
               aria-expanded={newInExpanded}
