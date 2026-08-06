@@ -80,7 +80,7 @@ import TradePendingReviewCard from "@/components/product/TradePendingReviewCard"
 
 import QuoteRequestDialog from "@/components/QuoteRequestDialog";
 import { addToCart } from "@/lib/cart";
-import { usePublicRrp, formatPublicRrp, formatPublicRrpCents } from "@/hooks/usePublicRrp";
+import { usePublicRrp, usePublicRrpMap, formatPublicRrp, formatPublicRrpCents } from "@/hooks/usePublicRrp";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { toast } from "sonner";
 
@@ -195,7 +195,7 @@ function useProductBySlug(designerSlug: string | undefined, productSlug: string 
         .maybeSingle();
       if (!designer) return null;
 
-      const publicPickFields = "id, slug, title, subtitle, image_url, hover_image_url, gallery_images, materials, materials_description, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, size_variants, variant_placeholder, base_axis_label, top_axis_label, wood_label_override, variant_image_map, edition, edition_number, edition_signing, gallery_captions, is_upholstered";
+      const publicPickFields = "id, slug, title, subtitle, image_url, hover_image_url, gallery_images, materials, materials_description, dimensions, description, category, subcategory, pdf_url, pdf_urls, lead_time, origin, designer_id, size_variants, variant_placeholder, base_axis_label, top_axis_label, wood_label_override, variant_image_map, edition, edition_number, edition_signing, gallery_captions, is_upholstered, subtitle_is_designer";
 
       const { data: picks } = await supabase
         .from("designer_curator_picks_public" as any)
