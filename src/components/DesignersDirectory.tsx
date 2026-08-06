@@ -1377,6 +1377,8 @@ interface DesignersDirectoryProps {
   showHeader?: boolean;
   showTradeCTA?: boolean;
   showAlphabetBar?: boolean;
+  /** Desktop typographic runway row (title + inline A–Z) above the filter row. */
+  showRunway?: boolean;
   /**
    * "designers" → filters narrow the alphabetical designer cards (no product grid).
    * "products"  → filters switch the view to a product grid (PickCard).
