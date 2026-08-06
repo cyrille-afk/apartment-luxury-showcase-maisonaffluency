@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect, useCallback, useLayoutEffect } from "react";
 import { createPortal } from "react-dom";
-import { Copy, MessageCircle, Share as ShareIos, type LucideIcon } from "lucide-react";
-import { toast } from "sonner";
+import { MessageCircle, Share as ShareIos, type LucideIcon } from "lucide-react";
 
 const PinterestIcon = ({ className }: { className?: string }) => (
   <svg className={className} viewBox="0 0 24 24" fill="currentColor">
@@ -108,12 +107,6 @@ const ShareMenu = ({ url, message, imageUrl, imageName }: ShareMenuProps) => {
     .replace(new RegExp(`\\s*[:—-]\\s*${cleanUrl.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*$`), "")
     .trim();
 
-  const copyLink = () => {
-    navigator.clipboard.writeText(url);
-    toast.success("Link copied to clipboard");
-    setOpen(false);
-  };
-
   const openWhatsApp = () => {
     const waUrl = `https://wa.me/?text=${encodeURIComponent(`${bodyText} ${cleanUrl}`)}`;
     window.location.href = waUrl;
@@ -155,8 +148,6 @@ const ShareMenu = ({ url, message, imageUrl, imageName }: ShareMenuProps) => {
       try {
         await navigator.share({ title, text: bodyText, url: cleanUrl });
       } catch {}
-    } else if (isMobile) {
-      copyLink();
     } else {
       setOpen(!open);
     }
@@ -179,9 +170,6 @@ const ShareMenu = ({ url, message, imageUrl, imageName }: ShareMenuProps) => {
           className="fixed flex flex-col gap-1 bg-black/85 backdrop-blur-md rounded-lg p-1.5 shadow-xl border border-white/10 z-[9999] min-w-[150px]"
           onClick={(e) => e.stopPropagation()}
         >
-          <button onClick={copyLink} className="flex items-center gap-2 px-3 py-1.5 text-white/90 hover:text-white hover:bg-white/10 rounded text-[11px] font-body tracking-wide transition-colors">
-            <Copy className="w-3.5 h-3.5" /> Copy Link
-          </button>
           <button onClick={openPinterest} className="flex items-center gap-2 px-3 py-1.5 text-white/90 hover:text-white hover:bg-white/10 rounded text-[11px] font-body tracking-wide transition-colors">
             <PinterestIcon className="w-3.5 h-3.5" /> Pinterest
           </button>
