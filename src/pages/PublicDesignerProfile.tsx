@@ -1046,16 +1046,9 @@ const PublicDesignerProfile = () => {
         </motion.div>
       </div>
 
-      {/* ── MIDDLE 'FROM THE STUDIO' BLOCK — own row, aligned to the right column ── */}
-      {(!newInExpanded || !isMobile) && instagramPosts.filter((p) => p.image_url).length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-12 mt-8 md:mt-12">
-          <div className={cn("md:col-start-5 md:col-span-8 lg:col-start-4 lg:col-span-9", rightColPad)}>
-            <DesignerInstagramSection posts={instagramPosts} designerName={designer.name} compact />
-          </div>
-        </div>
-      )}
     </div>
   );
+
 
 
 
