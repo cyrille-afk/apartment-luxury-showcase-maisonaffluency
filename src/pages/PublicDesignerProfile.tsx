@@ -1721,7 +1721,8 @@ const PublicDesignerProfile = () => {
                     </div>
                   );
                 })}
-              </div>
+                    </div>
+                  </>
                 );
               })()}
             </motion.div>
