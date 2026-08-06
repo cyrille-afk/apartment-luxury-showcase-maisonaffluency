@@ -1345,53 +1345,120 @@ const PublicDesignerProfile = () => {
               transition={{ ...transition, delay: 0.25 }}
               className="mt-8 md:mt-10 pt-6 md:pt-8 border-t border-border/40"
             >
-          <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-3">
-                  <h2 className="font-body text-[10px] md:text-[11px] tracking-[0.28em] uppercase text-foreground leading-none">Curators' Picks</h2>
-                </div>
-
-                <div className="flex items-center gap-5" role="group" aria-label="Grid density">
-                  <button
-                    type="button"
-                    onClick={() => setPickCols("auto")}
-                    aria-pressed={pickCols === "auto"}
-                    aria-label="Default grid"
-                    className={cn(
-                      "p-1 transition-colors duration-300",
-                      pickCols === "auto"
-                        ? "text-foreground"
-                        : "text-muted-foreground hover:text-foreground"
-                    )}
-                  >
-                    <LayoutGrid className="w-4 h-4" strokeWidth={1} aria-hidden="true" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setPickCols("two")}
-                    aria-pressed={pickCols === "two"}
-                    aria-label="Two column grid"
-                    className={cn(
-                      "p-1 transition-colors duration-300",
-                      pickCols === "two"
-                        ? "text-foreground"
-                        : "text-muted-foreground hover:text-foreground"
-                    )}
-                  >
-                    <Columns2 className="w-4 h-4" strokeWidth={1} aria-hidden="true" />
-                  </button>
-                </div>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="font-body text-[10px] md:text-[11px] tracking-[0.28em] uppercase text-foreground leading-none">Curators' Picks</h2>
               </div>
 
               {(() => {
-                 const forceTwoCol = designer.slug === "adrien-messie" || pickCols === "two";
-                 const gridClass = forceTwoCol
-                   ? "grid-cols-2 sm:grid-cols-2 md:grid-cols-2"
-                   : "grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4";
-                 return (
-              <div className={cn("grid gap-x-3 gap-y-5 md:gap-4", gridClass)}>
+                const categories = Array.from(
+                  new Set(picks.map((p) => (p.category || "").trim()).filter(Boolean))
+                ).sort((a, b) => a.localeCompare(b));
 
+                const priceOf = (p: typeof picks[number]) => {
+                  const raw: any = (publicRrpMap as any)[p.id];
+                  const n = typeof raw === "number" ? raw : Number(String(raw ?? "").replace(/[^0-9.]/g, ""));
+                  return Number.isFinite(n) && n > 0 ? n : Number.POSITIVE_INFINITY;
+                };
 
-                {picks.map((pick) => {
+                const filtered = activeCategories.length
+                  ? picks.filter((p) => activeCategories.includes((p.category || "").trim()))
+                  : picks;
+
+                const visiblePicks =
+                  sortMode === "default"
+                    ? filtered
+                    : [...filtered].sort((a, b) => {
+                        if (sortMode === "name") return a.title.localeCompare(b.title);
+                        const d = priceOf(a) - priceOf(b);
+                        return sortMode === "price-asc" ? d : -d;
+                      });
+
+                const forceTwoCol = designer.slug === "adrien-messie" || pickCols === "two";
+                const gridClass = forceTwoCol
+                  ? "grid-cols-2 sm:grid-cols-2 md:grid-cols-2"
+                  : "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5";
+
+                return (
+                  <>
+                    {/* ── CONTROLS BAR ── */}
+                    <div className="flex items-center justify-between gap-4 pb-4 mb-6 border-b border-border/60">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger
+                          disabled={categories.length === 0}
+                          className="inline-flex items-center gap-2.5 font-body text-[11px] uppercase tracking-[0.18em] text-foreground hover:text-foreground/70 transition-colors disabled:opacity-40"
+                        >
+                          Filter
+                          <SlidersHorizontal className="h-3.5 w-3.5" strokeWidth={1} aria-hidden="true" />
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="start" className="rounded-none">
+                          {categories.map((c) => (
+                            <DropdownMenuCheckboxItem
+                              key={c}
+                              checked={activeCategories.includes(c)}
+                              onCheckedChange={(on) =>
+                                setActiveCategories((prev) =>
+                                  on ? [...prev, c] : prev.filter((x) => x !== c)
+                                )
+                              }
+                              className="font-body text-[11px] uppercase tracking-[0.14em]"
+                            >
+                              {c}
+                            </DropdownMenuCheckboxItem>
+                          ))}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+
+                      <div className="flex items-center gap-5">
+                        <div className="flex items-center gap-4" role="group" aria-label="Grid density">
+                          <button
+                            type="button"
+                            onClick={() => setPickCols("auto")}
+                            aria-pressed={pickCols === "auto"}
+                            aria-label="Default grid"
+                            className={cn(
+                              "transition-colors duration-300",
+                              pickCols === "auto" ? "text-foreground" : "text-muted-foreground hover:text-foreground"
+                            )}
+                          >
+                            <LayoutGrid className="w-4 h-4" strokeWidth={1} aria-hidden="true" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setPickCols("two")}
+                            aria-pressed={pickCols === "two"}
+                            aria-label="Two column grid"
+                            className={cn(
+                              "transition-colors duration-300",
+                              pickCols === "two" ? "text-foreground" : "text-muted-foreground hover:text-foreground"
+                            )}
+                          >
+                            <Columns2 className="w-4 h-4" strokeWidth={1} aria-hidden="true" />
+                          </button>
+                        </div>
+
+                        <select
+                          value={sortMode}
+                          onChange={(e) => setSortMode(e.target.value as typeof sortMode)}
+                          aria-label="Sort products"
+                          className="appearance-none bg-transparent border border-border/70 rounded-none px-3 py-2 pr-8 font-body text-[11px] uppercase tracking-[0.14em] text-foreground focus:outline-none focus:border-foreground transition-colors"
+                          style={{
+                            backgroundImage:
+                              "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1'><path d='M6 9l6 6 6-6'/></svg>\")",
+                            backgroundRepeat: "no-repeat",
+                            backgroundPosition: "right 10px center",
+                          }}
+                        >
+                          <option value="default">Default Sorting</option>
+                          <option value="price-asc">Price: Low to High</option>
+                          <option value="price-desc">Price: High to Low</option>
+                          <option value="name">Alphabetical</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className={cn("grid gap-x-4 gap-y-8 md:gap-x-5 md:gap-y-10", gridClass)}>
+                {visiblePicks.map((pick) => {
+
                   const ap = pick as AttributedCuratorPick;
                   // Primary: attribution row on grouped picks (child designer rows).
                   const rawDesignerLabel = isGrouped && ap.designer_name && ap.designer_name !== designer.name ? ap.designer_name : undefined;
