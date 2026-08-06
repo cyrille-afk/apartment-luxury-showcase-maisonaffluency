@@ -3,7 +3,13 @@ import { DotCircleLoader } from "@/components/ui/dot-circle-loader";
 import { useParams, Link, Navigate, useSearchParams, useNavigate, useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, ArrowRight, Package, FileText, Maximize2, Share2, Check, ChevronDown, ChevronUp, LayoutGrid, Columns2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, Package, FileText, Maximize2, Share2, Check, ChevronDown, ChevronUp, LayoutGrid, Columns2, SlidersHorizontal } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuCheckboxItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import ProductCardDescriptionOverlay from "@/components/ui/ProductCardDescriptionOverlay";
 import { buildSpecSheetUrl } from "@/lib/specSheetUrl";
 import SpecSheetButton, { type PdfEntry } from "@/components/trade/SpecSheetButton";
@@ -428,6 +434,8 @@ const PublicDesignerProfile = () => {
   );
   const { data: designer, isLoading } = useDesigner(slug, { includeTradeOnly: isTradeUser });
   const [pickCols, setPickCols] = useState<"auto" | "two">("auto");
+  const [sortMode, setSortMode] = useState<"default" | "price-asc" | "price-desc" | "name">("default");
+  const [activeCategories, setActiveCategories] = useState<string[]>([]);
   const isParentBrand = isParentBrandDesigner(designer);
   const isChildDesigner = isChildBrandDesigner(designer);
   const { data: parentDesigner } = useDesignerByName(isChildDesigner ? designer?.founder : undefined);
@@ -922,21 +930,21 @@ const PublicDesignerProfile = () => {
   const rightColPad = "md:pl-14 lg:pl-20 xl:pl-24";
   const newInSection = (
     <div className="flex flex-col gap-0">
-      {/* ── TOP PROFILE BLOCK — asymmetric 12-col row ── */}
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-0 items-start pt-4 md:pt-8">
-        {/* Hero image — 5 cols */}
+      {/* ── TOP PROFILE ROW — asymmetric header (image left, narrative right) ── */}
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-0 items-start pt-4 md:pt-8">
+        {/* Profile image frame — crisp landscape, 4 cols */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-          className="md:col-span-5"
+          className="md:col-span-4 lg:col-span-3"
         >
-          <div className="aspect-[3/2] md:aspect-auto overflow-hidden rounded-none bg-muted relative">
+          <div className="aspect-[4/3] overflow-hidden rounded-none bg-muted relative">
             {heroImage && (
               <img
                 src={heroImage}
                 alt={`${name} portrait`}
-                className="w-full h-full md:h-auto object-cover md:object-contain md:max-h-[calc(100vh-var(--header-h)-6rem)]"
+                className="absolute inset-0 w-full h-full object-cover"
                 loading="eager"
               />
             )}
@@ -948,15 +956,15 @@ const PublicDesignerProfile = () => {
           )}
         </motion.div>
 
-        {/* Content — 7 cols */}
+        {/* Narrative column */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ ...transition, delay: 0.2 }}
-          className={cn("md:col-span-7 flex flex-col justify-start w-full", rightColPad)}
+          className={cn("md:col-span-8 lg:col-span-9 flex flex-col justify-start w-full", rightColPad)}
         >
-          <div className="flex items-center gap-3 mb-6 md:mb-8">
-            <h1 className="font-display text-2xl md:text-3xl lg:text-[2.1rem] text-foreground tracking-[0.12em] uppercase">
+          <div className="flex items-start justify-between gap-3 mb-4 md:mb-5">
+            <h1 className="font-display text-3xl md:text-4xl lg:text-[2.6rem] leading-[1.1] tracking-[-0.01em] text-foreground">
               {name}
             </h1>
             <ShareMenu
@@ -969,13 +977,13 @@ const PublicDesignerProfile = () => {
           </div>
 
           {designer.specialty && (
-            <p className="font-body text-xs md:text-sm text-muted-foreground -mt-4 mb-6 tracking-wide">
+            <p className="font-body text-xs md:text-sm text-muted-foreground -mt-2 mb-4 tracking-wide">
               {designer.specialty}
             </p>
           )}
 
           {heroParagraphs.length > 0 && (
-            <div className="font-body text-sm md:text-base leading-relaxed text-foreground/85 text-left max-w-[650px]">
+            <div className="font-body text-[15px] md:text-base leading-[1.75] text-foreground/85 text-left">
               {(newInExpanded ? heroParagraphs : heroParagraphs.slice(0, 1)).map((p: string, i: number) => (
                 <p key={i} className={i > 0 ? "mt-4" : ""}>{renderParagraph(p)}</p>
               ))}
@@ -983,12 +991,12 @@ const PublicDesignerProfile = () => {
           )}
 
           {thinContentFallback && (
-            <p className="font-body text-sm md:text-base leading-relaxed text-foreground/85 mt-4 max-w-[650px]">
+            <p className="font-body text-[15px] md:text-base leading-[1.75] text-foreground/85 mt-4">
               {thinContentFallback}
             </p>
           )}
 
-          {/* Full-portrait CTA — inline expand on every viewport */}
+          {/* Full-portrait CTA — minimal text link with a fine horizontal arrow */}
           <div className="mt-5 md:mt-6 flex flex-wrap items-center gap-x-8 gap-y-3">
             <button
               type="button"
@@ -1008,17 +1016,16 @@ const PublicDesignerProfile = () => {
                 }
               }}
               aria-expanded={newInExpanded}
-              className="group inline-flex items-center gap-2 font-body text-[11px] md:text-xs uppercase tracking-[0.25em] text-foreground/80 hover:text-foreground transition-colors duration-300"
+              className="group inline-flex items-center gap-4 font-body text-[11px] md:text-xs uppercase tracking-[0.18em] text-foreground hover:text-foreground/70 transition-colors duration-300"
             >
-              <span>{newInExpanded ? "Show Less" : "Read The Full Portrait"}</span>
-              <ChevronDown
-                className={cn(
-                  "h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-y-0.5",
-                  newInExpanded && "rotate-180 group-hover:-translate-y-0.5"
-                )}
-              />
+              <span>{newInExpanded ? "Close The Full Portrait" : "View The Full Portrait"}</span>
+              <span aria-hidden="true" className="relative inline-flex items-center">
+                <span className="block h-px w-10 bg-current transition-all duration-300 group-hover:w-12" />
+                <ArrowRight className="absolute -right-[3px] h-3 w-3 -translate-y-[0.5px]" strokeWidth={1} />
+              </span>
             </button>
           </div>
+
 
           {/* Full biography */}
           <div
@@ -1054,7 +1061,7 @@ const PublicDesignerProfile = () => {
       {/* ── MIDDLE 'FROM THE STUDIO' BLOCK — own row, aligned to the right column ── */}
       {(!newInExpanded || !isMobile) && instagramPosts.filter((p) => p.image_url).length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-12 mt-8 md:mt-12">
-          <div className={cn("md:col-start-6 md:col-span-7", rightColPad)}>
+          <div className={cn("md:col-start-5 md:col-span-8 lg:col-start-4 lg:col-span-9", rightColPad)}>
             <DesignerInstagramSection posts={instagramPosts} designerName={designer.name} compact />
           </div>
         </div>
@@ -1338,53 +1345,120 @@ const PublicDesignerProfile = () => {
               transition={{ ...transition, delay: 0.25 }}
               className="mt-8 md:mt-10 pt-6 md:pt-8 border-t border-border/40"
             >
-          <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-3">
-                  <h2 className="font-body text-[10px] md:text-[11px] tracking-[0.28em] uppercase text-foreground leading-none">Curators' Picks</h2>
-                </div>
-
-                <div className="flex items-center gap-5" role="group" aria-label="Grid density">
-                  <button
-                    type="button"
-                    onClick={() => setPickCols("auto")}
-                    aria-pressed={pickCols === "auto"}
-                    aria-label="Default grid"
-                    className={cn(
-                      "p-1 transition-colors duration-300",
-                      pickCols === "auto"
-                        ? "text-foreground"
-                        : "text-muted-foreground hover:text-foreground"
-                    )}
-                  >
-                    <LayoutGrid className="w-4 h-4" strokeWidth={1} aria-hidden="true" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setPickCols("two")}
-                    aria-pressed={pickCols === "two"}
-                    aria-label="Two column grid"
-                    className={cn(
-                      "p-1 transition-colors duration-300",
-                      pickCols === "two"
-                        ? "text-foreground"
-                        : "text-muted-foreground hover:text-foreground"
-                    )}
-                  >
-                    <Columns2 className="w-4 h-4" strokeWidth={1} aria-hidden="true" />
-                  </button>
-                </div>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="font-body text-[10px] md:text-[11px] tracking-[0.28em] uppercase text-foreground leading-none">Curators' Picks</h2>
               </div>
 
               {(() => {
-                 const forceTwoCol = designer.slug === "adrien-messie" || pickCols === "two";
-                 const gridClass = forceTwoCol
-                   ? "grid-cols-2 sm:grid-cols-2 md:grid-cols-2"
-                   : "grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4";
-                 return (
-              <div className={cn("grid gap-x-3 gap-y-5 md:gap-4", gridClass)}>
+                const categories = Array.from(
+                  new Set(picks.map((p) => (p.category || "").trim()).filter(Boolean))
+                ).sort((a, b) => a.localeCompare(b));
 
+                const priceOf = (p: typeof picks[number]) => {
+                  const raw: any = (publicRrpMap as any)[p.id];
+                  const n = typeof raw === "number" ? raw : Number(String(raw ?? "").replace(/[^0-9.]/g, ""));
+                  return Number.isFinite(n) && n > 0 ? n : Number.POSITIVE_INFINITY;
+                };
 
-                {picks.map((pick) => {
+                const filtered = activeCategories.length
+                  ? picks.filter((p) => activeCategories.includes((p.category || "").trim()))
+                  : picks;
+
+                const visiblePicks =
+                  sortMode === "default"
+                    ? filtered
+                    : [...filtered].sort((a, b) => {
+                        if (sortMode === "name") return a.title.localeCompare(b.title);
+                        const d = priceOf(a) - priceOf(b);
+                        return sortMode === "price-asc" ? d : -d;
+                      });
+
+                const forceTwoCol = designer.slug === "adrien-messie" || pickCols === "two";
+                const gridClass = forceTwoCol
+                  ? "grid-cols-2 sm:grid-cols-2 md:grid-cols-2"
+                  : "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5";
+
+                return (
+                  <>
+                    {/* ── CONTROLS BAR ── */}
+                    <div className="flex items-center justify-between gap-4 pb-4 mb-6 border-b border-border/60">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger
+                          disabled={categories.length === 0}
+                          className="inline-flex items-center gap-2.5 font-body text-[11px] uppercase tracking-[0.18em] text-foreground hover:text-foreground/70 transition-colors disabled:opacity-40"
+                        >
+                          Filter
+                          <SlidersHorizontal className="h-3.5 w-3.5" strokeWidth={1} aria-hidden="true" />
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="start" className="rounded-none">
+                          {categories.map((c) => (
+                            <DropdownMenuCheckboxItem
+                              key={c}
+                              checked={activeCategories.includes(c)}
+                              onCheckedChange={(on) =>
+                                setActiveCategories((prev) =>
+                                  on ? [...prev, c] : prev.filter((x) => x !== c)
+                                )
+                              }
+                              className="font-body text-[11px] uppercase tracking-[0.14em]"
+                            >
+                              {c}
+                            </DropdownMenuCheckboxItem>
+                          ))}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+
+                      <div className="flex items-center gap-5">
+                        <div className="flex items-center gap-4" role="group" aria-label="Grid density">
+                          <button
+                            type="button"
+                            onClick={() => setPickCols("auto")}
+                            aria-pressed={pickCols === "auto"}
+                            aria-label="Default grid"
+                            className={cn(
+                              "transition-colors duration-300",
+                              pickCols === "auto" ? "text-foreground" : "text-muted-foreground hover:text-foreground"
+                            )}
+                          >
+                            <LayoutGrid className="w-4 h-4" strokeWidth={1} aria-hidden="true" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setPickCols("two")}
+                            aria-pressed={pickCols === "two"}
+                            aria-label="Two column grid"
+                            className={cn(
+                              "transition-colors duration-300",
+                              pickCols === "two" ? "text-foreground" : "text-muted-foreground hover:text-foreground"
+                            )}
+                          >
+                            <Columns2 className="w-4 h-4" strokeWidth={1} aria-hidden="true" />
+                          </button>
+                        </div>
+
+                        <select
+                          value={sortMode}
+                          onChange={(e) => setSortMode(e.target.value as typeof sortMode)}
+                          aria-label="Sort products"
+                          className="appearance-none bg-transparent border border-border/70 rounded-none px-3 py-2 pr-8 font-body text-[11px] uppercase tracking-[0.14em] text-foreground focus:outline-none focus:border-foreground transition-colors"
+                          style={{
+                            backgroundImage:
+                              "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1'><path d='M6 9l6 6 6-6'/></svg>\")",
+                            backgroundRepeat: "no-repeat",
+                            backgroundPosition: "right 10px center",
+                          }}
+                        >
+                          <option value="default">Default Sorting</option>
+                          <option value="price-asc">Price: Low to High</option>
+                          <option value="price-desc">Price: High to Low</option>
+                          <option value="name">Alphabetical</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className={cn("grid gap-x-4 gap-y-8 md:gap-x-5 md:gap-y-10", gridClass)}>
+                {visiblePicks.map((pick) => {
+
                   const ap = pick as AttributedCuratorPick;
                   // Primary: attribution row on grouped picks (child designer rows).
                   const rawDesignerLabel = isGrouped && ap.designer_name && ap.designer_name !== designer.name ? ap.designer_name : undefined;
@@ -1538,7 +1612,7 @@ const PublicDesignerProfile = () => {
                           }
                         }}
                         aria-label={`${displayTitle}${pick.subtitle ? ` — ${pick.subtitle}` : ""}`}
-                        className="aspect-square md:aspect-[4/5] bg-muted/30 rounded-luxury-sharp overflow-hidden mb-2 md:mb-2 relative flex items-center justify-center cursor-pointer"
+                        className="aspect-square md:aspect-[4/5] bg-[hsl(var(--muted))]/40 rounded-none overflow-hidden mb-3 relative flex items-center justify-center cursor-pointer"
                       >
                         <img
                           src={responsiveCloudinaryUrl(pick.image_url, 600)}
@@ -1573,8 +1647,27 @@ const PublicDesignerProfile = () => {
                             />
                           </>
                         )}
-                        {/* Edition / provenance badges removed from the image —
-                            surfaced as a muted note under the price instead. */}
+                        {/* Micro-tags — sharp rectangles, top-left of the frame */}
+                        {(() => {
+                          const tags: string[] = pick.tags || [];
+                          const micro: string[] = [];
+                          if (tags.some((t) => /available[-\s]?now|in[-\s]?stock/i.test(t))) micro.push("Available Now");
+                          if (pick.edition || tags.some((t) => /re-?edition/i.test(t))) micro.push("Reedition");
+                          if (!micro.length) return null;
+                          return (
+                            <div className="absolute top-2 left-2 z-10 flex flex-wrap gap-1.5">
+                              {micro.map((m) => (
+                                <span
+                                  key={m}
+                                  className="inline-flex items-center border border-foreground/80 bg-background/90 px-1.5 py-[3px] font-body text-[9px] uppercase tracking-[0.12em] text-foreground leading-none"
+                                >
+                                  {m}
+                                </span>
+                              ))}
+                            </div>
+                          );
+                        })()}
+
 
                         <div className="hidden md:block absolute bottom-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity">
                           <div className="p-1.5 bg-black/40 rounded-md text-white/90 backdrop-blur-sm">
@@ -1636,7 +1729,7 @@ const PublicDesignerProfile = () => {
                           <p className="font-body text-[10px] md:text-xs text-muted-foreground md:text-foreground tracking-wide">
                             {formatPublicRrp(publicRrpMap[pick.id]) || "Price upon request"}
                           </p>
-                          {editionNote && (
+                          {editionNote && !/^re-?edition$/i.test(editionNote) && (
                             <p className="font-body italic text-[10px] md:text-[11px] text-muted-foreground/70 tracking-wide mt-1">
                               *{editionNote}
                             </p>
@@ -1647,7 +1740,8 @@ const PublicDesignerProfile = () => {
                     </div>
                   );
                 })}
-              </div>
+                    </div>
+                  </>
                 );
               })()}
             </motion.div>
